@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,unused-variable,invalid-name,bare-except
 from __future__ import (absolute_import, division, print_function)
 from mantid.api import *
@@ -14,6 +20,9 @@ class SavePlot1DAsJson(PythonAlgorithm):
         """
         """
         return "DataHandling\\Plots"
+
+    def seeAlso(self):
+        return [ "SavePlot1D","StringToPng" ]
 
     def name(self):
         """
@@ -78,7 +87,7 @@ class SavePlot1DAsJson(PythonAlgorithm):
         return
 
     def _serialize(self, workspace, plotname):
-        pname = plotname or workspace.getName()
+        pname = plotname or workspace.name()
         # init dictionary
         ishist = workspace.isHistogramData()
         plottype = "histogram" if ishist else "point"

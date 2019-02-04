@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef ARRAYPROPERTYTEST_H_
 #define ARRAYPROPERTYTEST_H_
 
@@ -26,7 +32,7 @@ public:
     TS_ASSERT(!iProp->documentation().compare(""))
     TS_ASSERT(typeid(std::vector<int>) == *iProp->type_info())
     TS_ASSERT(iProp->isDefault())
-    TS_ASSERT(iProp->operator()().empty())
+    TS_ASSERT(iProp->operator()().empty());
 
     TS_ASSERT(!dProp->name().compare("doubleProp"))
     TS_ASSERT(!dProp->documentation().compare(""))
@@ -41,17 +47,17 @@ public:
     TS_ASSERT(sProp->operator()().empty())
 
     std::vector<int> i(5, 2);
-    ArrayProperty<int> ip("ip", i);
+    ArrayProperty<int> ip("ip", std::move(i));
     TS_ASSERT_EQUALS(ip.operator()().size(), 5)
     TS_ASSERT_EQUALS(ip.operator()()[3], 2)
 
     std::vector<double> d(4, 6.66);
-    ArrayProperty<double> dp("dp", d);
+    ArrayProperty<double> dp("dp", std::move(d));
     TS_ASSERT_EQUALS(dp.operator()().size(), 4)
     TS_ASSERT_EQUALS(dp.operator()()[1], 6.66)
 
     std::vector<std::string> s(3, "yyy");
-    ArrayProperty<std::string> sp("sp", s);
+    ArrayProperty<std::string> sp("sp", std::move(s));
     TS_ASSERT_EQUALS(sp.operator()().size(), 3)
     TS_ASSERT(!sp.operator()()[2].compare("yyy"))
   }
@@ -71,7 +77,8 @@ public:
     // should only be the size of the
     // parent vector that is counted.
     std::vector<std::vector<int>> input{{10}};
-    Property *b = new ArrayProperty<std::vector<int>>("vec_property", input);
+    Property *b =
+        new ArrayProperty<std::vector<int>>("vec_property", std::move(input));
     TS_ASSERT_EQUALS(1, b->size());
     delete b;
   }
@@ -82,7 +89,7 @@ public:
     TS_ASSERT_EQUALS(i.operator()()[0], 1);
     TS_ASSERT_EQUALS(i.operator()()[1], 2);
     TS_ASSERT_EQUALS(i.operator()()[2], 3);
-    TS_ASSERT_EQUALS(i.getDefault(), i_stringValue);
+    TS_ASSERT_EQUALS(i.getDefault(), "1,2,3");
     TS_ASSERT(i.isDefault());
 
     ArrayProperty<int> i2("i", "-1-1");
@@ -146,6 +153,14 @@ public:
     TS_ASSERT_THROWS(ArrayProperty<double> dd("dd", "aa,bb"), std::bad_cast)
   }
 
+  void testConstructorByString_long() {
+    ArrayProperty<long> prop("long", "0:2,5");
+    TS_ASSERT_EQUALS(prop.operator()()[0], 0);
+    TS_ASSERT_EQUALS(prop.operator()()[1], 1);
+    TS_ASSERT_EQUALS(prop.operator()()[2], 2);
+    TS_ASSERT_EQUALS(prop.operator()()[3], 5);
+  }
+
   void testCopyConstructor() {
     ArrayProperty<int> i = *iProp;
     TS_ASSERT(!i.name().compare("intProp"))
@@ -171,15 +186,15 @@ public:
 
   void testValue() {
     std::vector<int> i(3, 3);
-    ArrayProperty<int> ip("ip", i);
+    ArrayProperty<int> ip("ip", std::move(i));
     TS_ASSERT(!ip.value().compare("3,3,3"))
 
     std::vector<double> d(4, 1.23);
-    ArrayProperty<double> dp("dp", d);
+    ArrayProperty<double> dp("dp", std::move(d));
     TS_ASSERT(!dp.value().compare("1.23,1.23,1.23,1.23"))
 
     std::vector<std::string> s(2, "yyy");
-    ArrayProperty<std::string> sp("sp", s);
+    ArrayProperty<std::string> sp("sp", std::move(s));
     TS_ASSERT(!sp.value().compare("yyy,yyy"))
   }
 
@@ -234,21 +249,24 @@ public:
     ArrayProperty<int> i("i");
     TS_ASSERT(i.isDefault())
     std::vector<int> ii(3, 4);
-    TS_ASSERT_EQUALS(i = ii, ii)
+    i = ii;
+    TS_ASSERT_EQUALS(i.operator()(), ii);
     TS_ASSERT_EQUALS(i.operator()()[1], 4)
     TS_ASSERT(!i.isDefault())
 
     ArrayProperty<double> d("d");
     TS_ASSERT(d.isDefault())
     std::vector<double> dd(5, 9.99);
-    TS_ASSERT_EQUALS(d = dd, dd)
+    d = dd;
+    TS_ASSERT_EQUALS(d.operator()(), dd);
     TS_ASSERT_EQUALS(d.operator()()[3], 9.99)
     TS_ASSERT(!d.isDefault())
 
     ArrayProperty<std::string> s("s");
     TS_ASSERT(s.isDefault())
     std::vector<std::string> ss(2, "zzz");
-    TS_ASSERT_EQUALS(s = ss, ss)
+    s = ss;
+    TS_ASSERT_EQUALS(s.operator()(), ss)
     TS_ASSERT_EQUALS(s.operator()()[0], "zzz")
     TS_ASSERT(!s.isDefault())
   }
@@ -277,20 +295,83 @@ public:
   void testCasting() {
     TS_ASSERT_DIFFERS(
         dynamic_cast<PropertyWithValue<std::vector<int>> *>(iProp),
-        static_cast<PropertyWithValue<std::vector<int>> *>(0))
+        static_cast<PropertyWithValue<std::vector<int>> *>(nullptr))
     TS_ASSERT_DIFFERS(
         dynamic_cast<PropertyWithValue<std::vector<double>> *>(dProp),
-        static_cast<PropertyWithValue<std::vector<double>> *>(0))
+        static_cast<PropertyWithValue<std::vector<double>> *>(nullptr))
     TS_ASSERT_DIFFERS(
         dynamic_cast<PropertyWithValue<std::vector<std::string>> *>(sProp),
-        static_cast<PropertyWithValue<std::vector<std::string>> *>(0))
+        static_cast<PropertyWithValue<std::vector<std::string>> *>(nullptr))
 
     TS_ASSERT_DIFFERS(dynamic_cast<Property *>(iProp),
-                      static_cast<Property *>(0))
+                      static_cast<Property *>(nullptr))
     TS_ASSERT_DIFFERS(dynamic_cast<Property *>(dProp),
-                      static_cast<Property *>(0))
+                      static_cast<Property *>(nullptr))
     TS_ASSERT_DIFFERS(dynamic_cast<Property *>(sProp),
-                      static_cast<Property *>(0))
+                      static_cast<Property *>(nullptr))
+  }
+
+  void testPrettyPrinting() {
+    const std::vector<std::string> inputList{
+        "1,2,3", "-1,0,1", "356,366,367,368,370,371,372,375", "7,6,5,6,7,8,10",
+        "1-9998, 9999, 2000, 20002-29999"};
+    const std::vector<std::string> resultList{
+        "1-3", "-1-1", "356,366-368,370-372,375", "7,6,5-8,10",
+        "1-9999,2000,20002-29999"};
+
+    TSM_ASSERT("Test Failed for vectors of int",
+               listShorteningwithType<int>(inputList, resultList));
+    TSM_ASSERT("Test Failed for vectors of long",
+               listShorteningwithType<long>(inputList, resultList));
+    // explicit test for in32_t with matches det_id_t and spec_id_t
+    TSM_ASSERT("Test Failed for vectors of int32_t",
+               listShorteningwithType<int32_t>(inputList, resultList));
+
+    // unsigned types
+    const std::vector<std::string> inputListUnsigned{
+        "1,2,3", "356,366,367,368,370,371,372,375", "7,6,5,6,7,8,10",
+        "1-9998, 9999, 2000, 20002-29999"};
+    const std::vector<std::string> resultListUnsigned{
+        "1-3", "356,366-368,370-372,375", "7,6,5-8,10",
+        "1-9999,2000,20002-29999"};
+    TSM_ASSERT("Test Failed for vectors of unsigned int",
+               listShorteningwithType<unsigned int>(inputListUnsigned,
+                                                    resultListUnsigned));
+    TSM_ASSERT(
+        "Test Failed for vectors of size_t",
+        listShorteningwithType<size_t>(inputListUnsigned, resultListUnsigned));
+
+    // check shortening does not happen for floating point types
+    const std::vector<std::string> inputListFloat{
+        "1.0,2.0,3.0",
+        "1.0,1.5,2.0,3.0",
+        "-1,0,1",
+    };
+    const std::vector<std::string> resultListFloat{
+        "1,2,3",
+        "1,1.5,2,3",
+        "-1,0,1",
+    };
+    TSM_ASSERT("Test Failed for vectors of float",
+               listShorteningwithType<float>(inputListFloat, resultListFloat));
+    TSM_ASSERT("Test Failed for vectors of double",
+               listShorteningwithType<double>(inputListFloat, resultListFloat));
+  }
+
+  template <typename T>
+  bool listShorteningwithType(const std::vector<std::string> &inputList,
+                              const std::vector<std::string> &resultList) {
+
+    bool success = true;
+    for (size_t i = 0; i < inputList.size(); i++) {
+      ArrayProperty<T> listProperty("i", inputList[i]);
+      std::string response = listProperty.valueAsPrettyStr(0, true);
+      TS_ASSERT_EQUALS(response, resultList[i]);
+      if (response != resultList[i]) {
+        success = false;
+      }
+    }
+    return success;
   }
 
 private:

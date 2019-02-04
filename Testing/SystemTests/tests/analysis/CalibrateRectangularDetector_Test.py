@@ -1,7 +1,15 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name,no-init,attribute-defined-outside-init
-import stresstesting
+from __future__ import (absolute_import, division, print_function)
+import systemtesting
 import os
 from mantid.simpleapi import *
+from six import string_types
 
 
 def _skip_test():
@@ -15,7 +23,7 @@ def _skip_test():
     return "Linux" not in platform.platform()
 
 
-class PG3Calibration(stresstesting.MantidStressTest):
+class PG3Calibration(systemtesting.MantidSystemTest):
     def cleanup(self):
         os.remove(self.saved_cal_file)
 
@@ -36,12 +44,12 @@ class PG3Calibration(stresstesting.MantidStressTest):
 
         # run the actual code
         output = CalibrateRectangularDetectors(OutputDirectory = savedir, SaveAs = 'calibration', FilterBadPulses = True,
-                                               GroupDetectorsBy = 'All', DiffractionFocusWorkspace = False,
+                                               GroupDetectorsBy = 'All', DiffractionFocusWorkspace = True,
                                                Binning = '0.5, -0.0004, 2.5',
                                                MaxOffset=0.01, PeakPositions = '.6866,.7283,.8185,.8920,1.0758,1.2615,2.0599',
                                                CrossCorrelation = False, RunNumber = 'PG3_2538')
 
-        if isinstance(output, basestring):
+        if isinstance(output, string_types):
             self.saved_cal_file = output.replace('.h5','.cal')
         else:
             raise NotImplementedError("Output from CalibrateRectangularDetectors is NOT string for calibration file name!")
@@ -63,7 +71,7 @@ class PG3Calibration(stresstesting.MantidStressTest):
         return ('PG3_2538_offsets','PG3_2538_golden_offsets')
 
 
-class PG3CCCalibration(stresstesting.MantidStressTest):
+class PG3CCCalibration(systemtesting.MantidSystemTest):
     def cleanup(self):
         os.remove(self.saved_cal_file)
 
@@ -89,7 +97,7 @@ class PG3CCCalibration(stresstesting.MantidStressTest):
                                                MaxOffset=0.01, PeakPositions = '0.7282933,1.261441',DetectorsPeaks = '17,6',
                                                CrossCorrelation = True, RunNumber = 'PG3_2538')
 
-        if isinstance(output, basestring):
+        if isinstance(output, string_types):
             self.saved_cal_file = output.replace('.h5','.cal')
         else:
             raise NotImplementedError("Output from CalibrateRectangularDetectors is NOT string for calibration file name!")

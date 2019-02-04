@@ -1,17 +1,24 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidHistogramData/Rebin.h"
 #include "MantidHistogramData/BinEdges.h"
+#include "MantidHistogramData/Exception.h"
 #include "MantidHistogramData/Histogram.h"
 #include <algorithm>
 #include <numeric>
 
-using Mantid::HistogramData::Histogram;
 using Mantid::HistogramData::BinEdges;
-using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::CountStandardDeviations;
 using Mantid::HistogramData::CountVariances;
+using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::Exception::InvalidBinEdgesError;
 using Mantid::HistogramData::Frequencies;
 using Mantid::HistogramData::FrequencyStandardDeviations;
-using Mantid::HistogramData::FrequencyVariances;
+using Mantid::HistogramData::Histogram;
 
 namespace {
 Histogram rebinCounts(const Histogram &input, const BinEdges &binEdges) {
@@ -38,8 +45,17 @@ Histogram rebinCounts(const Histogram &input, const BinEdges &binEdges) {
     auto owidth = xo_high - xo_low;
     auto nwidth = xn_high - xn_low;
 
-    if (owidth <= 0.0 || nwidth <= 0.0)
-      throw std::runtime_error("Negative or zero bin widths not allowed.");
+    if (owidth <= 0.0 || nwidth <= 0.0) {
+      if (xo_high == -DBL_MAX && xo_low == -DBL_MAX) {
+        throw InvalidBinEdgesError(
+            "One or more x-values was unusually low "
+            "(below -1e100). This usually occurs when a "
+            "monitor spectrum has not been masked after "
+            "ConvertUnits has been run on the workspace");
+      } else {
+        throw InvalidBinEdgesError("Negative or zero bin widths not allowed.");
+      }
+    }
 
     if (xn_high <= xo_low)
       inew++; /* old and new bins do not overlap */
@@ -50,9 +66,8 @@ Histogram rebinCounts(const Histogram &input, const BinEdges &binEdges) {
       auto delta = xo_high < xn_high ? xo_high : xn_high;
       delta -= xo_low > xn_low ? xo_low : xn_low;
 
-      auto factor = 1 / owidth;
-      ynew[inew] += yold[iold] * delta * factor;
-      enew[inew] += eold[iold] * eold[iold] * delta * factor;
+      ynew[inew] += yold[iold] * delta / owidth;
+      enew[inew] += eold[iold] * eold[iold] * delta / owidth;
 
       if (xn_high > xo_high) {
         iold++;
@@ -92,7 +107,7 @@ Histogram rebinFrequencies(const Histogram &input, const BinEdges &binEdges) {
     auto nwidth = xn_high - xn_low;
 
     if (owidth <= 0.0 || nwidth <= 0.0)
-      throw std::runtime_error("Negative or zero bin widths not allowed.");
+      throw InvalidBinEdgesError("Negative or zero bin widths not allowed.");
 
     if (xn_high <= xo_low)
       inew++; /* old and new bins do not overlap */
@@ -109,12 +124,16 @@ Histogram rebinFrequencies(const Histogram &input, const BinEdges &binEdges) {
       if (xn_high > xo_high) {
         iold++;
       } else {
-        auto factor = 1 / nwidth;
-        ynew[inew] *= factor;
-        enew[inew] = sqrt(enew[inew]) * factor;
         inew++;
       }
     }
+  }
+
+  for (size_t i = 0; i < size_ynew; ++i) {
+    auto width = xnew[i + 1] - xnew[i];
+    auto factor = 1 / width;
+    ynew[i] *= factor;
+    enew[i] = sqrt(enew[i]) * factor;
   }
 
   return Histogram(binEdges, newFrequencies, newFrequencyStdDev);
@@ -125,12 +144,12 @@ namespace Mantid {
 namespace HistogramData {
 
 /** Rebins data according to a new set of bin edges.
-* @param input :: input histogram data to be rebinned.
-* @param binEdges :: input will be rebinned according to this set of bin edges.
-* @returns The rebinned histogram.
-* @throws std::runtime_error if the input histogram xmode is not BinEdges,
-* the input yMode is undefined, or for non-positive input/output bin widths
-*/
+ * @param input :: input histogram data to be rebinned.
+ * @param binEdges :: input will be rebinned according to this set of bin edges.
+ * @returns The rebinned histogram.
+ * @throws std::runtime_error if the input histogram xmode is not BinEdges,
+ * the input yMode is undefined, or for non-positive input/output bin widths
+ */
 Histogram rebin(const Histogram &input, const BinEdges &binEdges) {
   if (input.xMode() != Histogram::XMode::BinEdges)
     throw std::runtime_error(

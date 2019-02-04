@@ -1,9 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAHANDLING_LOADDETECTORSGROUPINGFILETEST_H_
 #define MANTID_DATAHANDLING_LOADDETECTORSGROUPINGFILETEST_H_
 
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Run.h"
 #include "MantidDataHandling/LoadDetectorsGroupingFile.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
@@ -20,8 +27,8 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
-using ScopedFileHelper::ScopedFile;
 using Mantid::DataObjects::GroupingWorkspace;
+using ScopedFileHelper::ScopedFile;
 
 class LoadDetectorsGroupingFileTest : public CxxTest::TestSuite {
 public:
@@ -76,10 +83,10 @@ public:
     GroupingWorkspace_sptr gws = boost::dynamic_pointer_cast<GroupingWorkspace>(
         API::AnalysisDataService::Instance().retrieve(ws));
 
-    TS_ASSERT_DELTA(gws->dataY(0)[0], 1.0, 1.0E-5);
-    TS_ASSERT_DELTA(gws->dataY(3695)[0], 1.0, 1.0E-5);
-    TS_ASSERT_DELTA(gws->dataY(3696)[0], 2.0, 1.0E-5);
-    TS_ASSERT_DELTA(gws->dataY(7000)[0], 2.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->y(0)[0], 1.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->y(3695)[0], 1.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->y(3696)[0], 2.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->y(7000)[0], 2.0, 1.0E-5);
     // Check if filename is saved
     TS_ASSERT_EQUALS(load.getPropertyValue("InputFile"),
                      gws->run().getProperty("Filename")->value());
@@ -109,10 +116,10 @@ public:
     GroupingWorkspace_sptr gws = boost::dynamic_pointer_cast<GroupingWorkspace>(
         API::AnalysisDataService::Instance().retrieve(ws));
 
-    TS_ASSERT_DELTA(gws->dataY(0)[0], 1.0, 1.0E-5);
-    TS_ASSERT_DELTA(gws->dataY(3695)[0], 1.0, 1.0E-5);
-    TS_ASSERT_DELTA(gws->dataY(3696)[0], 2.0, 1.0E-5);
-    TS_ASSERT_DELTA(gws->dataY(7000)[0], 2.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->y(0)[0], 1.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->y(3695)[0], 1.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->y(3696)[0], 2.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->y(7000)[0], 2.0, 1.0E-5);
 
     // Clean-up
     API::AnalysisDataService::Instance().remove(ws);
@@ -158,10 +165,10 @@ public:
     GroupingWorkspace_sptr gws = boost::dynamic_pointer_cast<GroupingWorkspace>(
         API::AnalysisDataService::Instance().retrieve(ws));
 
-    TS_ASSERT_DELTA(gws->dataY(0)[0], 1.0, 1.0E-5);
-    TS_ASSERT_DELTA(gws->dataY(1)[0], 1.0, 1.0E-5);
-    TS_ASSERT_DELTA(gws->dataY(5)[0], 2.0, 1.0E-5);
-    TS_ASSERT_DELTA(gws->dataY(16)[0], 2.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->y(0)[0], 1.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->y(1)[0], 1.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->y(5)[0], 2.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->y(16)[0], 2.0, 1.0E-5);
 
     // Clean-up
     API::AnalysisDataService::Instance().remove(ws);
@@ -207,10 +214,10 @@ public:
     GroupingWorkspace_sptr gws = boost::dynamic_pointer_cast<GroupingWorkspace>(
         API::AnalysisDataService::Instance().retrieve(ws));
 
-    TS_ASSERT_DELTA(gws->dataY(0)[0], 1.0, 1.0E-5);
-    TS_ASSERT_DELTA(gws->dataY(31)[0], 1.0, 1.0E-5);
-    TS_ASSERT_DELTA(gws->dataY(32)[0], 2.0, 1.0E-5);
-    TS_ASSERT_DELTA(gws->dataY(39)[0], 2.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->y(0)[0], 1.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->y(31)[0], 1.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->y(32)[0], 2.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->y(39)[0], 2.0, 1.0E-5);
 
     // Clean-up
     API::AnalysisDataService::Instance().remove(ws);
@@ -292,12 +299,12 @@ public:
     auto gws = boost::dynamic_pointer_cast<GroupingWorkspace>(
         API::AnalysisDataService::Instance().retrieve(ws));
 
-    TS_ASSERT_DELTA(gws->dataY(0)[0], 1.0, 1.0E-5);
-    TS_ASSERT_DELTA(gws->dataY(1)[0], 1.0, 1.0E-5);
-    TS_ASSERT_DELTA(gws->dataY(2)[0], 2.0, 1.0E-5);
-    TS_ASSERT_DELTA(gws->dataY(3)[0], 3.0, 1.0E-5);
-    TS_ASSERT_DELTA(gws->dataY(4)[0], 3.0, 1.0E-5);
-    TS_ASSERT_DELTA(gws->dataY(5)[0], 3.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->y(0)[0], 1.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->y(1)[0], 1.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->y(2)[0], 2.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->y(3)[0], 3.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->y(4)[0], 3.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->y(5)[0], 3.0, 1.0E-5);
 
     API::AnalysisDataService::Instance().remove(ws);
   }
@@ -335,13 +342,13 @@ public:
     auto gws = boost::dynamic_pointer_cast<GroupingWorkspace>(
         API::AnalysisDataService::Instance().retrieve(ws));
 
-    TS_ASSERT_DELTA(gws->dataY(0)[0], 1.0, 1.0E-5);
-    TS_ASSERT_DELTA(gws->dataY(1)[0], 1.0, 1.0E-5);
-    TS_ASSERT_DELTA(gws->dataY(2)[0], 1.0, 1.0E-5);
-    TS_ASSERT_DELTA(gws->dataY(3)[0], 2.0, 1.0E-5);
-    TS_ASSERT_DELTA(gws->dataY(4)[0], 2.0, 1.0E-5);
-    TS_ASSERT_DELTA(gws->dataY(5)[0], 3.0, 1.0E-5);
-    TS_ASSERT_DELTA(gws->dataY(6)[0], 3.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->y(0)[0], 1.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->y(1)[0], 1.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->y(2)[0], 1.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->y(3)[0], 2.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->y(4)[0], 2.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->y(5)[0], 3.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->y(6)[0], 3.0, 1.0E-5);
 
     API::AnalysisDataService::Instance().remove(ws);
   }
@@ -365,8 +372,8 @@ public:
     TS_ASSERT(load.setProperty("InputFile", file.getFileName()));
     TS_ASSERT(load.setProperty("OutputWorkspace", ws));
 
-    std::string errorMsg =
-        "Bad number of spectra list in " + file.getFileName() + " on line 4";
+    std::string errorMsg = "Bad number of spectra list in \"" +
+                           file.getFileName() + "\" on line 4";
 
     TS_ASSERT_THROWS_EQUALS(load.execute(), const Exception::ParseError &e,
                             e.what(), errorMsg);
@@ -391,8 +398,9 @@ public:
     TS_ASSERT(load.setProperty("InputFile", file.getFileName()));
     TS_ASSERT(load.setProperty("OutputWorkspace", ws));
 
-    std::string errorMsg = "Premature end of file, expecting spectra list in " +
-                           file.getFileName() + " on line 4";
+    std::string errorMsg =
+        "Premature end of file, expecting spectra list in \"" +
+        file.getFileName() + "\" on line 4";
 
     TS_ASSERT_THROWS_EQUALS(load.execute(), const Exception::ParseError &e,
                             e.what(), errorMsg);
@@ -419,8 +427,8 @@ public:
     TS_ASSERT(load.setProperty("OutputWorkspace", ws));
 
     std::string errorMsg =
-        "Expected a single int for the number of group spectra in " +
-        file.getFileName() + " on line 3";
+        "Expected a single int for the number of group spectra in \"" +
+        file.getFileName() + "\" on line 3";
 
     TS_ASSERT_THROWS_EQUALS(load.execute(), const Exception::ParseError &e,
                             e.what(), errorMsg);

@@ -1,12 +1,21 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_API_DATAPROCESSORALGORITHM_H_
 #define MANTID_API_DATAPROCESSORALGORITHM_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidAPI/DistributedAlgorithm.h"
 #include "MantidAPI/IEventWorkspace_fwd.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidAPI/ParallelAlgorithm.h"
+#include "MantidAPI/SerialAlgorithm.h"
 #include "MantidKernel/PropertyManager.h"
+#include "MantidKernel/System.h"
 #include <vector>
 
 namespace Mantid {
@@ -17,33 +26,14 @@ namespace API {
    This algorithm provides utility methods to load and process data.
 
    @date 2012-04-04
-
-   Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-   National Laboratory & European Spallation Source
-
-   This file is part of Mantid.
-
-   Mantid is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 3 of the License, or
-   (at your option) any later version.
-
-   Mantid is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-
-   You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-   File change history is stored at: <https://github.com/mantidproject/mantid>
-   Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport DataProcessorAlgorithm : public Algorithm {
+template <class Base>
+class DLLExport GenericDataProcessorAlgorithm : public Base {
 public:
-  DataProcessorAlgorithm();
+  GenericDataProcessorAlgorithm();
   std::string getPropertyValue(const std::string &name) const override;
-  TypedValue getProperty(const std::string &name) const override;
+  Kernel::PropertyManagerOwner::TypedValue
+  getProperty(const std::string &name) const override;
 
 protected:
   boost::shared_ptr<Algorithm> createChildAlgorithm(
@@ -110,8 +100,8 @@ private:
     auto alg = createChildAlgorithm(algorithmName);
     alg->initialize();
 
-    alg->setProperty<LHSType>("LHSWorkspace", lhs);
-    alg->setProperty<RHSType>("RHSWorkspace", rhs);
+    alg->template setProperty<LHSType>("LHSWorkspace", lhs);
+    alg->template setProperty<RHSType>("RHSWorkspace", rhs);
     alg->execute();
 
     if (alg->isExecuted()) {
@@ -137,7 +127,27 @@ private:
   std::string m_propertyManagerPropertyName;
   /// Map property names to names in supplied properties manager
   std::map<std::string, std::string> m_nameToPMName;
+
+  // This method is a workaround for the C4661 compiler warning in visual
+  // studio. This allows the template declaration and definition to be separated
+  // in different files. See stack overflow article for a more detailed
+  // explanation:
+  // https://stackoverflow.com/questions/44160467/warning-c4661no-suitable-definition-provided-for-explicit-template-instantiatio
+  // https://stackoverflow.com/questions/33517902/how-to-export-a-class-derived-from-an-explicitly-instantiated-template-in-visual
+  void visualStudioC4661Workaround();
 };
+
+template <>
+MANTID_API_DLL void
+GenericDataProcessorAlgorithm<Algorithm>::visualStudioC4661Workaround();
+
+using DataProcessorAlgorithm = GenericDataProcessorAlgorithm<Algorithm>;
+using SerialDataProcessorAlgorithm =
+    GenericDataProcessorAlgorithm<SerialAlgorithm>;
+using ParallelDataProcessorAlgorithm =
+    GenericDataProcessorAlgorithm<ParallelAlgorithm>;
+using DistributedDataProcessorAlgorithm =
+    GenericDataProcessorAlgorithm<DistributedAlgorithm>;
 
 } // namespace API
 } // namespace Mantid

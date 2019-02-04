@@ -3,7 +3,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -45,8 +45,8 @@ Usage
      result = format_str.format(nz(pos.getX()), nz(pos.getY()), nz(pos.getZ()))
      return result
 
-   print "Original position of the sample: {0}".format(pos3D_as_str(samplePos))
-   print "Original position of the source: {0}".format(pos3D_as_str(sourcePos))
+   print("Original position of the sample: {0}".format(pos3D_as_str(samplePos)))
+   print("Original position of the source: {0}".format(pos3D_as_str(sourcePos)))
 
    # Move (rotate) the source around X axis
    RotateSource(ws, -90)
@@ -54,8 +54,8 @@ Usage
    # New positions
    samplePos = ws.getInstrument().getSample().getPos()
    sourcePos = ws.getInstrument().getSource().getPos()
-   print "New position of the sample: {0}".format(pos3D_as_str(samplePos))
-   print "New position of the source: {0}".format(pos3D_as_str(sourcePos))
+   print("New position of the sample: {0}".format(pos3D_as_str(samplePos)))
+   print("New position of the source: {0}".format(pos3D_as_str(sourcePos)))
 
 Output:
 

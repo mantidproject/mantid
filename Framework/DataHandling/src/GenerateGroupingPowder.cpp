@@ -1,31 +1,24 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/GenerateGroupingPowder.h"
-#include "MantidKernel/System.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Crystal/AngleUnits.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/System.h"
 
 #include <Poco/DOM/AutoPtr.h>
-#include <Poco/DOM/Document.h>
 #include <Poco/DOM/DOMWriter.h>
+#include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/Text.h>
-
-#ifdef _MSC_VER
-// Disable a flood of warnings from Poco about inheriting from
-// std::basic_istream
-// See
-// http://connect.microsoft.com/VisualStudio/feedback/details/733720/inheriting-from-std-fstream-produces-c4250-warning
-#pragma warning(push)
-#pragma warning(disable : 4250)
-#endif
-
 #include <Poco/XML/XMLWriter.h>
-
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
 
 #include <fstream>
 
@@ -49,7 +42,7 @@ int GenerateGroupingPowder::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string GenerateGroupingPowder::category() const {
-  return "DataHandling\\Grouping;Transforms\\Grouping;Diffraction\\Utility";
+  return R"(DataHandling\Grouping;Transforms\Grouping;Diffraction\Utility)";
 }
 
 /** Initialize the algorithm's properties.
@@ -57,58 +50,54 @@ const std::string GenerateGroupingPowder::category() const {
 void GenerateGroupingPowder::init() {
   declareProperty(
       make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
-      "An input workspace.");
+      "A workspace from which to generate the grouping.");
   auto positiveDouble = boost::make_shared<BoundedValidator<double>>();
   positiveDouble->setLower(0.0);
   declareProperty("AngleStep", -1.0, positiveDouble,
-                  "The angle step for grouping");
-  declareProperty(
-      make_unique<FileProperty>("GroupingFilename", "", FileProperty::Save,
-                                ".xml"),
-      "A grouping file that will be created. The corresponding .par file will "
-      "be created as well.");
+                  "The angle step for grouping, in degrees.");
+  declareProperty(make_unique<FileProperty>("GroupingFilename", "",
+                                            FileProperty::Save, ".xml"),
+                  "A grouping file that will be created.");
+  declareProperty("GenerateParFile", true,
+                  "If true, a par file with a corresponding name to the "
+                  "grouping file will be generated.");
 }
 
 /** Execute the algorithm.
  */
 void GenerateGroupingPowder::exec() {
   MatrixWorkspace_const_sptr input_ws = getProperty("InputWorkspace");
-  // check if workspace has an instrument. If not, throw an exception
-  Mantid::Geometry::Instrument_const_sptr instrument =
-      input_ws->getInstrument();
-  std::vector<detid_t> dets = instrument->getDetectorIDs(true);
-  if (dets.empty()) {
+  const auto &detectorInfo = input_ws->detectorInfo();
+  const auto &detectorIDs = detectorInfo.detectorIDs();
+  if (detectorIDs.empty())
     throw std::invalid_argument("Workspace contains no detectors.");
-  }
 
-  double step = getProperty("AngleStep");
-  size_t numSteps = static_cast<size_t>(180. / step + 1);
+  const double step = getProperty("AngleStep");
+  const size_t numSteps = static_cast<size_t>(180. / step + 1);
 
   std::vector<std::vector<detid_t>> groups(numSteps);
-  std::vector<double> twoThetaAverage(numSteps, 0.), rAverage(numSteps, 0.);
+  std::vector<double> twoThetaAverage(numSteps, 0.);
+  std::vector<double> rAverage(numSteps, 0.);
 
-  std::vector<detid_t>::iterator it;
-  for (it = dets.begin(); it != dets.end(); ++it) {
-    double tt = instrument->getDetector(*it)->getTwoTheta(
-                    instrument->getSample()->getPos(), Kernel::V3D(0, 0, 1)) *
-                Geometry::rad2deg;
-    double r =
-        instrument->getDetector(*it)->getDistance(*(instrument->getSample()));
-    size_t where = static_cast<size_t>(tt / step);
-    groups.at(where).push_back(*it);
-    twoThetaAverage.at(where) += tt;
-    rAverage.at(where) += r;
+  for (size_t i = 0; i < detectorIDs.size(); ++i) {
+    if (detectorInfo.isMonitor(i))
+      continue;
+
+    const double tt = detectorInfo.twoTheta(i) * Geometry::rad2deg;
+    const double r = detectorInfo.l2(i);
+    const size_t where = static_cast<size_t>(tt / step);
+    groups[where].emplace_back(detectorIDs[i]);
+    twoThetaAverage[where] += tt;
+    rAverage[where] += r;
   }
 
-  std::string XMLfilename = getProperty("GroupingFilename");
-  std::string PARfilename = XMLfilename;
-  PARfilename.replace(PARfilename.end() - 3, PARfilename.end(), "par");
+  const std::string XMLfilename = getProperty("GroupingFilename");
 
   // XML
   AutoPtr<Document> pDoc = new Document;
   AutoPtr<Element> pRoot = pDoc->createElement("detector-grouping");
   pDoc->appendChild(pRoot);
-  pRoot->setAttribute("instrument", instrument->getName());
+  pRoot->setAttribute("instrument", input_ws->getInstrument()->getName());
 
   size_t goodGroups(0);
   for (size_t i = 0; i < numSteps; ++i) {
@@ -124,7 +113,7 @@ void GenerateGroupingPowder::exec() {
       std::copy(groups.at(i).begin(), groups.at(i).end(),
                 std::ostream_iterator<size_t>(textvalue, ","));
       std::string text = textvalue.str();
-      size_t found = text.rfind(',');
+      const size_t found = text.rfind(',');
       if (found != std::string::npos) {
         text.erase(found, 1); // erase the last comma
       }
@@ -157,37 +146,42 @@ void GenerateGroupingPowder::exec() {
   ofs.close();
 
   // PAR file
-  std::ofstream outPAR_file(PARfilename.c_str());
-  if (!outPAR_file) {
-    g_log.error("Unable to create file: " + PARfilename);
-    throw Exception::FileError("Unable to create file: ", PARfilename);
-  }
-  // Write the number of detectors to the file.
-  outPAR_file << " " << goodGroups << '\n';
-
-  for (size_t i = 0; i < numSteps; ++i) {
-    size_t gSize = groups.at(i).size();
-    if (gSize > 0) {
-      outPAR_file << std::fixed << std::setprecision(3);
-      outPAR_file.width(10);
-      outPAR_file << rAverage.at(i) / static_cast<double>(gSize);
-      outPAR_file.width(10);
-      outPAR_file << twoThetaAverage.at(i) / static_cast<double>(gSize);
-      outPAR_file.width(10);
-      outPAR_file << 0.;
-      outPAR_file.width(10);
-      outPAR_file << step *Geometry::deg2rad *rAverage.at(i) /
-                         static_cast<double>(gSize);
-      outPAR_file.width(10);
-      outPAR_file << 0.01;
-      outPAR_file.width(10);
-      outPAR_file << (groups.at(i)).at(0) << '\n';
+  const bool generatePar = getProperty("GenerateParFile");
+  if (generatePar) {
+    std::string PARfilename = XMLfilename;
+    PARfilename.replace(PARfilename.end() - 3, PARfilename.end(), "par");
+    std::ofstream outPAR_file(PARfilename.c_str());
+    if (!outPAR_file) {
+      g_log.error("Unable to create file: " + PARfilename);
+      throw Exception::FileError("Unable to create file: ", PARfilename);
     }
-  }
+    // Write the number of detectors to the file.
+    outPAR_file << " " << goodGroups << '\n';
 
-  // Close the file
-  outPAR_file.close();
+    for (size_t i = 0; i < numSteps; ++i) {
+      const size_t gSize = groups.at(i).size();
+      if (gSize > 0) {
+        outPAR_file << std::fixed << std::setprecision(3);
+        outPAR_file.width(10);
+        outPAR_file << rAverage.at(i) / static_cast<double>(gSize);
+        outPAR_file.width(10);
+        outPAR_file << twoThetaAverage.at(i) / static_cast<double>(gSize);
+        outPAR_file.width(10);
+        outPAR_file << 0.;
+        outPAR_file.width(10);
+        outPAR_file << step * Geometry::deg2rad * rAverage.at(i) /
+                           static_cast<double>(gSize);
+        outPAR_file.width(10);
+        outPAR_file << 0.01;
+        outPAR_file.width(10);
+        outPAR_file << (groups.at(i)).at(0) << '\n';
+      }
+    }
+
+    // Close the file
+    outPAR_file.close();
+  }
 }
 
-} // namespace Mantid
 } // namespace DataHandling
+} // namespace Mantid

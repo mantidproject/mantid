@@ -1,4 +1,11 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Instrument/Component.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include <boost/python/class.hpp>
 #include <boost/python/overloads.hpp>
 
@@ -7,11 +14,11 @@ using Mantid::Geometry::IComponent;
 using namespace boost::python;
 
 namespace {
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunknown-pragmas"
-#pragma clang diagnostic ignored "-Wunused-local-typedef"
-#endif
+GNU_DIAG_OFF("unused-local-typedef")
+// Ignore -Wconversion warnings coming from boost::python
+// Seen with GCC 7.1.1 and Boost 1.63.0
+GNU_DIAG_OFF("conversion")
+
 // Default parameter function overloads
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getParameterNames,
                                        Component::getParameterNames, 0, 1)
@@ -40,11 +47,10 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getParamShortDescription,
                                        2)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getParamDescription,
                                        Component::getParamDescription, 1, 2)
-}
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
 
+GNU_DIAG_ON("conversion")
+GNU_DIAG_ON("unused-local-typedef")
+} // namespace
 void export_Component() {
   class_<Component, bases<IComponent>, boost::noncopyable>("Component", no_init)
       .def("getParameterNames", &Component::getParameterNames,

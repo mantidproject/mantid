@@ -1,17 +1,22 @@
-#pylint: disable=invalid-name,too-many-public-methods,too-many-arguments,non-parent-init-called,R0902,too-many-branches,C0302
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
+#pylint: disable=invalid-name,too-many-public-methods,too-many-arguments,non-parent-init-called,R0901,R0902,too-many-branches,C0302
+from __future__ import (absolute_import, division, print_function)
 import os
 import numpy as np
-
-from PyQt4 import QtGui
-
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar2
+from qtpy.QtWidgets import (QWidget, QVBoxLayout, QSizePolicy)
+from MPLwidgets import FigureCanvasQTAgg as FigureCanvas
+from MPLwidgets import NavigationToolbar2QT as NavigationToolbar2
 from matplotlib.figure import Figure
 import matplotlib.image
 from matplotlib import pyplot as plt
 
 
-class Mpl2dGraphicsView(QtGui.QWidget):
+class Mpl2dGraphicsView(QWidget):
     """ A combined graphics view including matplotlib canvas and
     a navigation tool bar for 2D image specifically
     """
@@ -20,14 +25,14 @@ class Mpl2dGraphicsView(QtGui.QWidget):
         """ Initialization
         """
         # Initialize parent
-        QtGui.QWidget.__init__(self, parent)
+        QWidget.__init__(self, parent)
 
         # set up canvas
         self._myCanvas = Qt4Mpl2dCanvas(self)
         self._myToolBar = MyNavigationToolbar(self, self._myCanvas)
 
         # set up layout
-        self._vBox = QtGui.QVBoxLayout(self)
+        self._vBox = QVBoxLayout(self)
         self._vBox.addWidget(self._myCanvas)
         self._vBox.addWidget(self._myToolBar)
 
@@ -35,7 +40,18 @@ class Mpl2dGraphicsView(QtGui.QWidget):
         self._myImageIndex = 0
         self._myImageDict = dict()
 
+        # current 2D plot
+        self._2dPlot = None
+
         return
+
+    @property
+    def array2d(self):
+        """
+        return the matrix (2d-array) plot on the canvas
+        :return:
+        """
+        return self._myCanvas.array2d
 
     def add_plot_2d(self, array2d, x_min, x_max, y_min, y_max, hold_prev_image=True, y_tick_label=None):
         """
@@ -49,9 +65,9 @@ class Mpl2dGraphicsView(QtGui.QWidget):
         :param y_tick_label:
         :return:
         """
-        self._myCanvas.add_2d_plot(array2d, x_min, x_max, y_min, y_max, hold_prev_image, y_tick_label)
+        self._2dPlot = self._myCanvas.add_2d_plot(array2d, x_min, x_max, y_min, y_max, hold_prev_image, y_tick_label)
 
-        return
+        return self._2dPlot
 
     def add_image(self, imagefilename):
         """ Add an image to canvas from an image file
@@ -89,6 +105,35 @@ class Mpl2dGraphicsView(QtGui.QWidget):
         # There is no operation that is defined now
         return
 
+    def remove_last_plot(self):
+        """
+
+        :return:
+        """
+        if self._2dPlot is not None:
+            self._2dPlot.remove()
+            self._2dPlot = None
+
+        return
+
+    def save_figure(self, file_name):
+        """
+        save the current on-canvas figure to a file
+        :param file_name:
+        :return:
+        """
+        self._myCanvas.fig.savefig(file_name)
+
+        return
+
+    def set_title(self, title):
+        """
+        set title to image
+        :param title:
+        :return:
+        """
+        self._myCanvas.axes.set_title(title)
+
     @property
     def x_min(self):
         """
@@ -122,7 +167,7 @@ class Mpl2dGraphicsView(QtGui.QWidget):
 
 class Qt4Mpl2dCanvas(FigureCanvas):
     """  A customized Qt widget for matplotlib 2D image.
-    It can be used to replace GraphicsView of QtGui
+    It can be used to replace GraphicsView
     """
 
     def __init__(self, parent):
@@ -139,14 +184,14 @@ class Qt4Mpl2dCanvas(FigureCanvas):
         self.setParent(parent)
 
         # Set size policy to be able to expanding and resizable with frame
-        FigureCanvas.setSizePolicy(self, QtGui.QSizePolicy.Expanding,QtGui.QSizePolicy.Expanding)
+        FigureCanvas.setSizePolicy(self, QSizePolicy.Expanding, QSizePolicy.Expanding)
         FigureCanvas.updateGeometry(self)
 
         # legend and color bar
         self._colorBar = None
 
-        # polygon
-        self._myPolygon = None
+        # Buffer of data
+        self._currentArray2D = None
 
         # image management data structure
         self._currIndex = 0
@@ -157,6 +202,14 @@ class Qt4Mpl2dCanvas(FigureCanvas):
         self._yLimit = [0., 1.]
 
         return
+
+    @property
+    def array2d(self):
+        """
+        get the matrix plot now
+        :return:
+        """
+        return self._currentArray2D
 
     def add_2d_plot(self, array2d, x_min, x_max, y_min, y_max, hold_prev, yticklabels=None):
         """ Add a 2D plot
@@ -169,7 +222,7 @@ class Qt4Mpl2dCanvas(FigureCanvas):
         :param x_max:
         :param y_min:
         :param y_max:
-        :param hold_prev: hold previous image
+        :param hold_prev: hold previous image.  If False, all 2D image and polygon patches will be removed
         :param yticklabels: list of string for y ticks
         :return:
         """
@@ -187,14 +240,14 @@ class Qt4Mpl2dCanvas(FigureCanvas):
         img_plot = self.axes.imshow(array2d,
                                     extent=[x_min, x_max, y_min, y_max],
                                     interpolation='none')
+        self._currentArray2D = array2d
 
         # set y ticks as an option:
         if yticklabels is not None:
             # it will always label the first N ticks even image is zoomed in
             # FUTURE-VZ : The way to set up the Y-axis ticks is wrong!"
             # self.axes.set_yticklabels(yticklabels)
-            print '[Warning] The method to set up the Y-axis ticks to 2D image is ' \
-                  'wrong!'
+            print('[Warning] The method to set up the Y-axis ticks to 2D image is wrong!')
 
         # explicitly set aspect ratio of the image
         self.axes.set_aspect('auto')
@@ -216,11 +269,22 @@ class Qt4Mpl2dCanvas(FigureCanvas):
 
         return self._currIndex
 
+    def add_patch(self, patch):
+        """
+        add an artist patch such as polygon
+        :param patch:
+        :return:
+        """
+        self.axes.add_artist(patch)
+
+        # Flush...
+        self._flush()
+
+        return
+
     def addImage(self, imagefilename):
         """ Add an image by file
         """
-        #import matplotlib.image as mpimg
-
         # set aspect to auto mode
         self.axes.set_aspect('auto')
 
@@ -257,10 +321,7 @@ class Qt4Mpl2dCanvas(FigureCanvas):
             self.fig.clear()
             # Re-create subplot
             self.axes = self.fig.add_subplot(111)
-
-        # clear polygon
-        if self._myPolygon is not None:
-            self._myPolygon.remove()
+        # END-FOR
 
         # flush/commit
         self._flush()

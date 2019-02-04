@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -6,9 +12,9 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/Component.h"
+#include "MantidGeometry/Instrument/Detector.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ConfigService.h"
 
@@ -67,7 +73,6 @@ void LoadInstrumentFromRaw::exec() {
 
   // Create a new Instrument with the right name and add it to the workspace
   Geometry::Instrument_sptr instrument(new Instrument(iraw.i_inst));
-  localWorkspace->setInstrument(instrument);
 
   // Add dummy source and samplepos to instrument
   // The L2 and 2-theta values from Raw file assumed to be relative to sample
@@ -85,15 +90,15 @@ void LoadInstrumentFromRaw::exec() {
   instrument->markAsSource(source);
 
   progress(0.5);
-  double l1;
   // If user has provided an L1, use that
-  if (!Kernel::ConfigService::Instance().getValue("instrument.L1", l1)) {
-    // Otherwise try and get it from the raw file
-    l1 = iraw.ivpb.i_l1;
-    // Default to 10 if the raw file doesn't have it set
-    if (l1 == 0)
-      l1 = 10.0;
-  }
+  auto l1ConfigValue =
+      Kernel::ConfigService::Instance().getValue<double>("instrument.L1");
+  // Otherwise try and get it from the raw file
+  double l1 = l1ConfigValue.get_value_or(iraw.ivpb.i_l1);
+  // Default to 10 if the raw file doesn't have it set
+  if (l1 == 0)
+    l1 = 10.0;
+
   source->setPos(0.0, 0.0, -1.0 * l1);
 
   // add detectors
@@ -146,6 +151,7 @@ void LoadInstrumentFromRaw::exec() {
     prog += (0.5 / numDetector);
     progress(prog);
   }
+  localWorkspace->setInstrument(instrument);
 
   std::vector<detid_t> monitorList = instrument->getMonitors();
   setProperty("MonitorList", monitorList);
@@ -160,7 +166,8 @@ void LoadInstrumentFromRaw::exec() {
       << "Source component added with position set to (0,0,-" << l1
       << "). In standard configuration, with \n"
       << "the beam along z-axis pointing from source to sample, this implies "
-         "the source is " << l1 << "m in front \n"
+         "the source is "
+      << l1 << "m in front \n"
       << "of the sample. This value can be changed via the 'instrument.l1' "
          "configuration property.\n";
 }

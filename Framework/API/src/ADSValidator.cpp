@@ -1,8 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/ADSValidator.h"
-#include "MantidKernel/TypedValidator.h"
-#include "MantidKernel/StringTokenizer.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidKernel/StringTokenizer.h"
+#include "MantidKernel/TypedValidator.h"
 #include <boost/make_shared.hpp>
+#include <sstream>
 
 namespace Mantid {
 namespace API {
@@ -34,13 +41,13 @@ void ADSValidator::setOptional(const bool setOptional) {
 }
 
 /** Checks if the string passed is in the ADS, or if all members are in the ADS
-*  @param value :: The value to test
-*  @return "" if the value is on the list, or "The workspace is not in the
-* workspace list"
-*/
+ *  @param value :: The value to test
+ *  @return "" if the value is on the list, or "The workspace is not in the
+ * workspace list"
+ */
 std::string
 ADSValidator::checkValidity(const std::vector<std::string> &value) const {
-  if (!m_isOptional && (value.size() == 0))
+  if (!m_isOptional && value.empty())
     return "Select a value";
   if (!m_AllowMultiSelection && (value.size() > 1)) {
     return "Only one workspace was expected.";
@@ -57,10 +64,10 @@ ADSValidator::checkValidity(const std::vector<std::string> &value) const {
 }
 
 /** Returns the current contents of the AnalysisDataService for input
-* workspaces.
-*  For output workspaces, an empty set is returned
-*  @return set of objects in AnalysisDataService
-*/
+ * workspaces.
+ *  For output workspaces, an empty set is returned
+ *  @return set of objects in AnalysisDataService
+ */
 std::vector<std::string> ADSValidator::allowedValues() const {
   // Get the list of workspaces currently in the ADS
   auto vals = AnalysisDataService::Instance().getObjectNames(

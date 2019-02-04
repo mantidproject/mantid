@@ -1,14 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_MASKDETECTORBINSTEST_H_
 #define MANTID_ALGORITHMS_MASKDETECTORBINSTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include <cxxtest/TestSuite.h>
 
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidAlgorithms/MaskBinsFromTable.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAlgorithms/MaskBinsFromTable.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::Algorithms;
@@ -36,7 +42,7 @@ public:
     const std::string workspaceName("raggedMask");
     int nBins = 10;
     MatrixWorkspace_sptr WS =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(5, nBins, 0.0);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(5, nBins, 0.0);
     AnalysisDataService::Instance().add(workspaceName, WS);
 
     // 2. Generate a TableWorskpace
@@ -84,7 +90,7 @@ public:
     const std::string opWSName("maskedWorkspace");
     int nBins = 10;
     MatrixWorkspace_sptr WS =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(5, nBins, 0.0);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(5, nBins, 0.0);
     AnalysisDataService::Instance().add(workspaceName, WS);
 
     // 2. Generate a TableWorskpace
@@ -134,7 +140,7 @@ public:
     int nBins = 10;
     int nHist = 12;
     MatrixWorkspace_sptr WS =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(nHist, nBins, 0.0);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(nHist, nBins, 0.0);
     AnalysisDataService::Instance().add(workspaceName, WS);
 
     // 2. Generate a TableWorskpace
@@ -183,8 +189,8 @@ public:
     speclist.push_back(6);
     speclist.push_back(7);
     speclist.push_back(8);
-    for (size_t iws = 0; iws < speclist.size(); ++iws) {
-      auto &yvec = WS->y(speclist[iws]);
+    for (int spectrum : speclist) {
+      auto &yvec = WS->y(spectrum);
       for (size_t bin = 0; bin < yvec.size(); ++bin) {
         if (bin >= 4 && bin < 7) {
           TS_ASSERT_EQUALS(yvec[bin], 0.0);
@@ -221,7 +227,7 @@ public:
     const std::string workspaceName("raggedMask");
     int nBins = 10;
     MatrixWorkspace_sptr WS =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(5, nBins, 0.0);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(5, nBins, 0.0);
     AnalysisDataService::Instance().add(workspaceName, WS);
 
     // 2. Generate a TableWorskpace
@@ -262,20 +268,18 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Test to mask detectors by detectors IDs
-    */
+   */
   void test_maskBinWithDetectorIDsList() {
     // Create a workspace to mask: 5 spectra, 10 bins
     const std::string workspaceName("raggedMask5");
     int nBins = 10;
     MatrixWorkspace_sptr dataws =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(5, nBins, 0.0);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(5, nBins, 0.0);
     AnalysisDataService::Instance().add(workspaceName, dataws);
 
-    // Find out mapping between spectra/workspace indexes and detectors IDs
-    for (size_t i = 0; i < 5; ++i) {
-      for (const auto &id : dataws->getSpectrum(i).getDetectorIDs())
-        cout << "WorkspaceIndex = " << i << ":  Detector ID = " << id << ".\n";
-    }
+    // Set up default detector IDs. Note there are no corresponding detectors.
+    for (int i = 0; i < 5; ++i)
+      dataws->getSpectrum(i).setDetectorID(i + 1);
 
     // Generate a TableWorksapce
     auto tablews = boost::make_shared<TableWorkspace>();

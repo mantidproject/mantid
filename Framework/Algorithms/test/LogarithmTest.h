@@ -1,10 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHM_LOGTEST_H_
 #define MANTID_ALGORITHM_LOGTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -30,7 +35,7 @@ public:
 
     // Register the workspace in the data service
     MatrixWorkspace_sptr work_in1 =
-        WorkspaceCreationHelper::Create1DWorkspaceFib(sizex);
+        WorkspaceCreationHelper::create1DWorkspaceFib(sizex, true);
     AnalysisDataService::Instance().add("test_inLn", work_in1);
 
     Logarithm alg;
@@ -59,9 +64,9 @@ public:
     int nHist = 10, nBins = 20;
     // Register the workspace in the data service
     MatrixWorkspace_sptr work_in2 =
-        WorkspaceCreationHelper::Create2DWorkspace154(nHist, nBins);
+        WorkspaceCreationHelper::create2DWorkspace154(nHist, nBins);
     Workspace2D_sptr work_ou2 =
-        WorkspaceCreationHelper::Create2DWorkspace(nHist, nBins);
+        WorkspaceCreationHelper::create2DWorkspace(nHist, nBins);
 
     Logarithm alg;
     AnalysisDataService::Instance().add("test_inLn2", work_in2);
@@ -72,7 +77,7 @@ public:
         alg.setPropertyValue("OutputWorkspace", "test_outLn2");
         alg.setPropertyValue("Natural", "1");
 
-        );
+    );
 
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
@@ -89,7 +94,7 @@ public:
 
   void testEvents() {
     // evin has 0 events per bin in pixel0, 1 in pixel 1, 2 in pixel2, ...
-    EventWorkspace_sptr evin = WorkspaceCreationHelper::CreateEventWorkspace(
+    EventWorkspace_sptr evin = WorkspaceCreationHelper::createEventWorkspace(
                             5, 3, 1000, 0, 1, 4),
                         evout;
     AnalysisDataService::Instance().add("test_ev_log", evin);

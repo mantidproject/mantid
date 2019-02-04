@@ -1,0 +1,77 @@
+digraph isisPowderCreateVanadium{
+    label="ISISPowder - Normalise By Current"
+    $global_style
+
+    // **Labels
+    label_normaliseByCurrentGeneric                     [label="Normalise by Current - Generic"]
+    label_normaliseByCurrentPearl                       [label="Normalise by Current - PEARL"]
+
+    // **Parameters
+    subgraph params {
+        $param_style
+
+        param_advConfigMonitorSpectrum                  [label="Adv config: Monitor spectrum"]
+        param_advConfigMonitorLambdaCropRange           [label="Adv config:\n Monitor lambda crop range"]
+        param_advConfigMonitorSplineCoefficient         [label="Adv config:\n Monitor spline coefficient"]
+        param_inputWorkspace                            [label="Workspace to normalise"]
+    }
+
+    // **Processes (inc. bespoke inst steps)
+    subgraph {
+        $process_style
+
+    }
+
+    // **Algorithms
+    subgraph algorithms{
+        $algorithm_style
+        alg_NormaliseByCurrent                          [label="Normalise by Current"]
+
+        // PEARL specific
+        alg_ConvertUnitsTOF                             [label="Convert Units: TOF"]
+        alg_ConvertUnitsWavelength                      [label="Convert Units: Wavelength"]
+        alg_ConvertUnitsWavelengthInputWs               [label="Convert Units: Wavelength"]
+        alg_CropWorkspace                               [label="Crop Workspace"]
+        alg_ExtractSpectrumPearl                        [label="Extract Spectrum"]
+        alg_MaskBins                                    [label="Mask Bins"]
+        alg_NormaliseToMonitor                          [label="Normalise to monitor"]
+        alg_SplineBackground                            [label="Spline Background"]
+    }
+
+    // **Decisions
+    subgraph decisions{
+        $decision_style
+
+    }
+
+    // Normalise by current on GEM and POLARIS
+    subgraph NormaliseByCurrentGeneric{
+        label_normaliseByCurrentGeneric -> alg_NormaliseByCurrent
+    }
+
+    // Normalise by current on PEARL
+    subgraph NormaliseByCurrentPearl{
+        // Extract the spectrum containing the monitor workspace
+        label_normaliseByCurrentPearl   -> alg_ExtractSpectrumPearl
+        param_inputWorkspace            -> alg_ExtractSpectrumPearl
+        param_advConfigMonitorSpectrum  -> alg_ExtractSpectrumPearl
+
+        // Convert and crop to correct values
+        alg_ExtractSpectrumPearl        -> alg_ConvertUnitsWavelength
+        param_advConfigMonitorLambdaCropRange -> alg_CropWorkspace
+        alg_ConvertUnitsWavelength      -> alg_CropWorkspace
+
+        // Mask and spline
+        alg_CropWorkspace               -> alg_MaskBins
+        alg_MaskBins                    -> alg_SplineBackground
+        param_advConfigMonitorSplineCoefficient -> alg_SplineBackground
+
+        // Convert Input WS to wavelength
+        param_inputWorkspace            -> alg_ConvertUnitsWavelengthInputWs
+
+        // Finally normalise to monitor using splined ws
+        alg_SplineBackground            -> alg_NormaliseToMonitor
+        alg_ConvertUnitsWavelengthInputWs -> alg_NormaliseToMonitor
+        alg_NormaliseToMonitor          -> alg_ConvertUnitsTOF
+    }
+}

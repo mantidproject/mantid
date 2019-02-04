@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name
 from __future__ import (absolute_import, division, print_function)
 import mantid
@@ -9,6 +15,9 @@ class GetEiT0atSNS(mantid.api.PythonAlgorithm):
         """ Return category
         """
         return "Inelastic\\Ei"
+
+    def seeAlso(self):
+        return [ "GetEi" ]
 
     def name(self):
         """ Return name
@@ -83,5 +92,6 @@ class GetEiT0atSNS(mantid.api.PythonAlgorithm):
                 raise RuntimeError("Could not get Ei, and this is not a white beam run\n"+str(e))
         self.setProperty("Ei",Ei)
         self.setProperty("T0",Tzero)
+
 
 mantid.api.AlgorithmFactory.subscribe(GetEiT0atSNS)

@@ -1,20 +1,26 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_API_SPECTRADETECTORMAP_TYPES
 #define MANTID_API_SPECTRADETECTORMAP_TYPES
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
 #include "MantidGeometry/IDTypes.h"
+#include <set>
 #include <unordered_map>
-#include <vector>
 
 namespace Mantid {
 
 /// Map with key = spectrum number, value = workspace index
-typedef std::unordered_map<specnum_t, size_t> spec2index_map;
+using spec2index_map = std::unordered_map<specnum_t, size_t>;
 /// Map with key = detector ID, value = workspace index
-typedef std::unordered_map<detid_t, size_t> detid2index_map;
+using detid2index_map = std::unordered_map<detid_t, size_t>;
 /// Map single det ID of group to its members
-typedef std::unordered_map<detid_t, std::vector<detid_t>> det2group_map;
-}
+using det2group_map = std::unordered_map<detid_t, std::set<detid_t>>;
+} // namespace Mantid
 
 #endif // MANTID_API_SPECTRADETECTORMAP_TYPES

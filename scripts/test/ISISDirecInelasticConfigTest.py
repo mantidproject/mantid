@@ -1,4 +1,11 @@
-﻿import os
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
+from __future__ import (absolute_import, division, print_function)
+import os
 import sys
 import unittest
 import shutil
@@ -23,10 +30,7 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
         self.rbnumber  = "RB" + nrbnumber
         self.start_date= '20150503'
         self.userID = 'tuf666699'
-        self._set_up()
         return super(ISISDirectInelasticConfigTest, self).__init__(methodName)
-    def __del__(self):
-        self._tear_down()
 
     def get_save_dir(self):
         targetDir = config['defaultsave.directory']
@@ -51,7 +55,7 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
         fh.close()
 
 
-    def _set_up(self):
+    def setUp(self):
         # Create user's folder structure in default save directory.
         # the administrative script (not here) builds all this for real in /home
         targetDir = self.get_save_dir()
@@ -98,7 +102,7 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
             return full_file
 
 
-    def _tear_down(self):
+    def tearDown(self):
         # Clean-up user's folder structure
         if os.path.exists(self.rbdir):
             shutil.rmtree(self.rbdir,ignore_errors=True)
@@ -112,19 +116,22 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
     def test_UserProperties(self):
         user = UserProperties(self.userID)
 
+        user.set_user_properties(self.instrument,self.rbdir,'CYCLE20144B',self.start_date)
+        self.assertEqual(user.cycleID,'2014_4B')
+
         #set_user_properties(self,instrument,rb_folder_or_id,cycle,start_date):
         user.set_user_properties(self.instrument,self.rbdir,self.cycle,self.start_date)
 
         id = user._recent_dateID
         self.assertEqual(user._instrument[id],'MERLIN')
         self.assertEqual(user._cycle_IDs[id],('2015','1'))
-        self.assertEqual(user._start_dates[id],datetime.date(2015,05,03))
+        self.assertEqual(user._start_dates[id],datetime.date(2015,5,3))
         self.assertEqual(user._rb_dirs[id],self.rbdir)
         self.assertEqual(user.userID,self.userID)
 
         self.assertEqual(user.instrument,'MERLIN')
         self.assertEqual(user.cycleID,'2015_1')
-        self.assertEqual(user.start_date,datetime.date(2015,05,03))
+        self.assertEqual(user.start_date,datetime.date(2015,5,3))
         self.assertEqual(user.rb_dir,self.rbdir)
 
 
@@ -152,7 +159,7 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
         self.assertEqual(len(user._instrument),2)
 
         self.assertEqual(user._recent_dateID,id)
-        self.assertEqual(user._start_dates['2000-01-12'],datetime.date(2000,01,12))
+        self.assertEqual(user._start_dates['2000-01-12'],datetime.date(2000,1,12))
 
         targetDir = self.get_save_dir()
         rbdir = os.path.join(self.userRootDir,'RB1999666')

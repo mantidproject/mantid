@@ -1,28 +1,36 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef PYSEQUENCETOVECTORCONVERTERTEST_H_
 #define PYSEQUENCETOVECTORCONVERTERTEST_H_
 
 #include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
-#include <boost/python/ssize_t.hpp>
 #include <boost/python/dict.hpp>
 #include <boost/python/list.hpp>
+#include <boost/python/ssize_t.hpp>
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::PythonInterface::Converters;
 
 class PySequenceToVectorTest : public CxxTest::TestSuite {
+public:
+  static PySequenceToVectorTest *createSuite() {
+    return new PySequenceToVectorTest();
+  }
+  static void destroySuite(PySequenceToVectorTest *suite) { delete suite; }
+
 private:
-  typedef PySequenceToVector<double> PySequenceToVectorDouble;
+  using PySequenceToVectorDouble = PySequenceToVector<double>;
 
 public:
+  void tearDown() override { PyErr_Clear(); }
+
   void test_construction_succeeds_with_a_valid_sequence_type() {
     boost::python::list testList;
     TS_ASSERT_THROWS_NOTHING(PySequenceToVectorDouble converter(testList));
-  }
-
-  void test_construction_throws_when_not_given_a_PySequence() {
-    boost::python::dict testDict;
-    TS_ASSERT_THROWS(PySequenceToVectorDouble converter(testDict),
-                     std::invalid_argument);
   }
 
   void test_that_a_python_list_of_all_matching_types_is_converted_correctly() {
@@ -43,7 +51,7 @@ public:
   test_that_trying_to_convert_a_list_of_incompatible_types_throws_error_already_set() {
     // Double->int is not generally safe so should not be allowed
     boost::python::list testlist = createHomogeneousPythonList();
-    typedef PySequenceToVector<int> PySequenceToVectorInt;
+    using PySequenceToVectorInt = PySequenceToVector<int>;
     std::vector<int> cvector;
     TS_ASSERT_THROWS(cvector = PySequenceToVectorInt(testlist)(),
                      boost::python::error_already_set);

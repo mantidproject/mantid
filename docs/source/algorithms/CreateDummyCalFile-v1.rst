@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -14,7 +14,7 @@ Description
 
    Instrument Tree
 
-Create a dummy `calibration file <http://www.mantidproject.org/CalFile>`_ for diffraction focusing
+Create a dummy :ref:`calibration file <CalFile>` for diffraction focusing
 with one group.
 
 Offsets in the file are all sets to zero and all detectors are selected.
@@ -45,7 +45,7 @@ Usage
    CreateDummyCalFile(ws_1,newFile)
 
    # Check the output file
-   print "File Exists:", os.path.exists(newFile)
+   print("File Exists: {}".format(os.path.exists(newFile)))
 
    f = open( newFile, 'r' )
    file = f.read().split('\n')
@@ -54,7 +54,7 @@ Usage
    for line in file[0:6]:
        # print the line truncating before system dependent line break can take effect
        # also stripping off any trailing spaces
-       print line[0:89].rstrip()
+       print(line[0:89].rstrip())
 
 Output:
 

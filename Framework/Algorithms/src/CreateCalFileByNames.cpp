@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -24,8 +30,8 @@ namespace Algorithms {
 DECLARE_ALGORITHM(CreateCalFileByNames)
 
 using namespace Kernel;
-using API::Progress;
 using API::FileProperty;
+using API::Progress;
 using Geometry::Instrument_const_sptr;
 
 /** Initialisation method. Declares properties to be used in algorithm.
@@ -88,9 +94,9 @@ void CreateCalFileByNames::exec() {
   vgroups.clear();
 
   // Find Detectors that belong to groups
-  typedef boost::shared_ptr<const Geometry::ICompAssembly> sptr_ICompAss;
-  typedef boost::shared_ptr<const Geometry::IComponent> sptr_IComp;
-  typedef boost::shared_ptr<const Geometry::IDetector> sptr_IDet;
+  using sptr_ICompAss = boost::shared_ptr<const Geometry::ICompAssembly>;
+  using sptr_IComp = boost::shared_ptr<const Geometry::IComponent>;
+  using sptr_IDet = boost::shared_ptr<const Geometry::IDetector>;
   std::queue<std::pair<sptr_ICompAss, int>> assemblies;
   sptr_ICompAss current =
       boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(inst);
@@ -260,5 +266,5 @@ void CreateCalFileByNames::writeHeaders(std::ostream &os,
      << "\n";
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

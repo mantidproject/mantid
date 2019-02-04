@@ -1,9 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_HISTOGRAMDATA_STANDARDDEVIATIONVECTOROF_H_
 #define MANTID_HISTOGRAMDATA_STANDARDDEVIATIONVECTOROF_H_
 
 #include "MantidHistogramData/DllConfig.h"
-#include "MantidHistogramData/VectorOf.h"
 #include "MantidHistogramData/Iterable.h"
+#include "MantidHistogramData/VectorOf.h"
 
 #include <cmath>
 
@@ -28,27 +34,6 @@ namespace detail {
 
   @author Simon Heybrock
   @date 2016
-
-  Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
-
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>
-  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 template <class T, class CowType, class Variances>
 class StandardDeviationVectorOf : public VectorOf<T, CowType>,
@@ -63,17 +48,18 @@ public:
   StandardDeviationVectorOf(const StandardDeviationVectorOf &) = default;
   StandardDeviationVectorOf(StandardDeviationVectorOf &&) = default;
   StandardDeviationVectorOf &
-  operator=(const StandardDeviationVectorOf &)& = default;
-  StandardDeviationVectorOf &operator=(StandardDeviationVectorOf &&)& = default;
+  operator=(const StandardDeviationVectorOf &) & = default;
+  StandardDeviationVectorOf &
+  operator=(StandardDeviationVectorOf &&) & = default;
 
   /// Copy construct from variances, taking the square-root of each variance.
   StandardDeviationVectorOf(const Variances &variances);
   /// Move construct from variances, taking the square-root of each variance.
   StandardDeviationVectorOf(Variances &&variances);
   /// Copy assignment from variances, taking the square-root of each variance.
-  StandardDeviationVectorOf &operator=(const Variances &variances) & ;
+  StandardDeviationVectorOf &operator=(const Variances &variances) &;
   /// Move assignment from variances, taking the square-root of each variance.
-  StandardDeviationVectorOf &operator=(Variances &&variances) & ;
+  StandardDeviationVectorOf &operator=(Variances &&variances) &;
 
 protected:
   // This is used as base class only, cannot delete polymorphically, so
@@ -110,8 +96,8 @@ StandardDeviationVectorOf<T, CowType, Variances>::StandardDeviationVectorOf(
 
 template <class T, class CowType, class Variances>
 StandardDeviationVectorOf<T, CowType, Variances> &
-    StandardDeviationVectorOf<T, CowType, Variances>::
-    operator=(const Variances &variances) & {
+StandardDeviationVectorOf<T, CowType, Variances>::
+operator=(const Variances &variances) & {
   StandardDeviationVectorOf<T, CowType, Variances> tmp(variances);
   auto &derived = static_cast<T &>(*this);
   derived.operator=(tmp.cowData());
@@ -120,8 +106,8 @@ StandardDeviationVectorOf<T, CowType, Variances> &
 
 template <class T, class CowType, class Variances>
 StandardDeviationVectorOf<T, CowType, Variances> &
-    StandardDeviationVectorOf<T, CowType, Variances>::
-    operator=(Variances &&variances) & {
+StandardDeviationVectorOf<T, CowType, Variances>::
+operator=(Variances &&variances) & {
   StandardDeviationVectorOf<T, CowType, Variances> tmp(std::move(variances));
   auto &derived = static_cast<T &>(*this);
   derived.operator=(tmp.cowData());

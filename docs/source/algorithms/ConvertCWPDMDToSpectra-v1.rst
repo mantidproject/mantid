@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -23,7 +23,7 @@ One stores the detectors' counts;
 and the other stores the monitors' counts. 
 These two MDEventWorkspaces are generated from algorithm ConvertSpiceToRealSpace. 
 
-Futhermore, the unit of the output matrix workspace can be converted to 
+Furthermore, the unit of the output matrix workspace can be converted to 
 d-spacing and momentum transfer (:math:`Q`). 
 
 
@@ -83,7 +83,7 @@ Binning, Normalization and Error
 According to the input binning parameters, the bins in :math:`2\theta` are created as
 :math:`2\theta_{min}, 2\theta_{min}+\Delta, 2\theta_{min}+2\Delta, \cdots`. 
 
-If the unit of ouput workspace is specified as dSpacing or MomentrumTransfer,
+If the unit of output workspace is specified as dSpacing or MomentrumTransfer,
 then the bins should be created as :math:`d_{min}, d_{min}+\Delta, d_{min}+2\Delta, \cdots, d_{max}`
 or :math:`q_{min}, q_{min}+\Delta, \cdots, q_{max}` respectively. 
 
@@ -92,7 +92,7 @@ For each detector, if its position falls between :math:`2\theta_i` and :math:`2\
 then its counts is added to :math:`Y_i` and the corresponding monitor counts is added to 
 :math:`M_i`. 
 
-The singals on these bins are normalized by its monitor counts, such that 
+The signals on these bins are normalized by its monitor counts, such that 
 
 .. math:: y_i = \frac{Y_i}{M_i}
 
@@ -198,7 +198,7 @@ Usage
   vece = ws.readE(0)
 
   for i in [100, 100, 1101, 1228]:
-    print "2theta = %-5f, Y = %-5f, E = %-5f" % (vecx[i], vecy[i], vece[i])
+    print("2theta = {:.6f}, Y = {:.6f}, E = {:.6f}".format(vecx[i], vecy[i], vece[i]))
 
 .. testcleanup::  ExReduceHB2AToFullprof
 

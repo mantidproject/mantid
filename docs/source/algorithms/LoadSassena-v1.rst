@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -15,7 +15,7 @@ This algorithm reads Sassena output and stores all data in workspaces of
 type :ref:`Workspace2D <Workspace2D>`, grouped under a single
 :ref:`WorkspaceGroup <WorkspaceGroup>`.
 
-Sassena ouput files are in HDF5 format
+Sassena output files are in HDF5 format
 `2 <http://www.hdfgroup.org/HDF5>`__, and can be made up of the
 following datasets: *qvectors*, *fq*, *fq0*, *fq2*, and *fqt*
 
@@ -54,8 +54,9 @@ Usage
 
 .. testcode:: Ex
 
+    from __future__ import print_function
     ws = LoadSassena("loadSassenaExample.h5", TimeUnit=1.0)
-    print 'workspaces instantiated: ', ', '.join(ws.getNames())
+    print('workspaces instantiated:  {}'.format(', '.join(ws.getNames())))
     fqtReal = ws[1] # Real part of F(Q,t)
     # Let's fit it to a Gaussian. We start with an initial guess
     intensity = 0.5
@@ -66,16 +67,17 @@ Usage
     myFunc = 'name=Gaussian,Height={0},PeakCentre={1},Sigma={2}'.format(intensity,center,sigma)
 
     # Call the Fit algorithm and perform the fit
-    fitStatus, chiSq, covarianceTable, paramTable, fitWorkspace =\
-    Fit(Function=myFunc, InputWorkspace=fqtReal, WorkspaceIndex=0, StartX = startX, EndX=endX, Output='fit')
+    fit_output = Fit(Function=myFunc, InputWorkspace=fqtReal, WorkspaceIndex=0, StartX = startX, EndX=endX, Output='fit')
+    paramTable = fit_output.OutputParameters  # table containing the optimal fit parameters
+    fitWorkspace = fit_output.OutputWorkspace
 
-    print "The fit was: " + fitStatus
-    print("Fitted Height value is: %.2f" % paramTable.column(1)[0])
-    print("Fitted centre value is: %.2f" % abs(paramTable.column(1)[1]))
-    print("Fitted sigma value is: %.1f" % paramTable.column(1)[2])
+    print("The fit was: {}".format(fit_output.OutputStatus))
+    print("Fitted Height value is: {:.2f}".format(paramTable.column(1)[0]))
+    print("Fitted centre value is: {:.2f}".format(abs(paramTable.column(1)[1])))
+    print("Fitted sigma value is: {:.1f}".format(paramTable.column(1)[2]))
     # fitWorkspace contains the data, the calculated and the difference patterns
-    print "Number of spectra in fitWorkspace is: " +  str(fitWorkspace.getNumberHistograms())
-    print("The 989th y-value of the fitted curve: %.3f" % fitWorkspace.readY(1)[989])
+    print("Number of spectra in fitWorkspace is: {}".format(fitWorkspace.getNumberHistograms()))
+    print("The 989th y-value of the fitted curve: {:.3f}".format(fitWorkspace.readY(1)[989]))
 
 Output:
 

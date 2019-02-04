@@ -1,15 +1,24 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAHANDLING_LOADMASKTEST_H_
 #define MANTID_DATAHANDLING_LOADMASKTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include <cxxtest/TestSuite.h>
 #include <sstream>
 
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidDataHandling/LoadMask.h"
 #include "MantidDataObjects/MaskWorkspace.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidTestHelpers/ScopedFileHelper.h"
-#include "MantidAPI/AlgorithmManager.h"
 
 using namespace Mantid;
 using namespace Mantid::DataHandling;
@@ -94,6 +103,61 @@ public:
       double y = maskws->y(iws)[0];
       if (iws == 34 || iws == 1000 || iws == 2000) {
         // These 3 workspace index are masked
+        TS_ASSERT_DELTA(y, 1.0, 1.0E-5);
+      } else {
+        // Unmasked
+        TS_ASSERT_DELTA(y, 0.0, 1.0E-5);
+      }
+    }
+  }
+
+  void test_DetectorIDs_reuse_LoadMask_instance() {
+    // 1. Generate masking files
+    std::vector<int> banks1;
+    std::vector<int> detids{26284, 27250};
+    auto maskDetFile1 = genMaskingFile("maskingdet1.xml", detids, banks1);
+    detids = {28268};
+    auto maskDetFile2 = genMaskingFile("maskingdet2.xml", detids, banks1);
+
+    // 2. Run
+    LoadMask loadfile;
+    loadfile.initialize();
+
+    loadfile.setProperty("Instrument", "VULCAN");
+    loadfile.setProperty("InputFile", maskDetFile1.getFileName());
+    loadfile.setProperty("OutputWorkspace", "VULCAN_Mask_Detectors");
+
+    TS_ASSERT_EQUALS(loadfile.execute(), true);
+    auto maskws =
+        AnalysisDataService::Instance().retrieveWS<DataObjects::MaskWorkspace>(
+            "VULCAN_Mask_Detectors");
+
+    // 3. Check
+    for (size_t iws = 0; iws < maskws->getNumberHistograms(); iws++) {
+      double y = maskws->y(iws)[0];
+      if (iws == 34 || iws == 1000) {
+        // These 2 workspace index are masked
+        TS_ASSERT_DELTA(y, 1.0, 1.0E-5);
+      } else {
+        // Unmasked
+        TS_ASSERT_DELTA(y, 0.0, 1.0E-5);
+      }
+    }
+
+    loadfile.setProperty("Instrument", "VULCAN");
+    loadfile.setProperty("InputFile", maskDetFile2.getFileName());
+    loadfile.setProperty("OutputWorkspace", "VULCAN_Mask_Detectors");
+
+    TS_ASSERT_EQUALS(loadfile.execute(), true);
+    maskws =
+        AnalysisDataService::Instance().retrieveWS<DataObjects::MaskWorkspace>(
+            "VULCAN_Mask_Detectors");
+
+    // 3. Check
+    for (size_t iws = 0; iws < maskws->getNumberHistograms(); iws++) {
+      double y = maskws->y(iws)[0];
+      if (iws == 2000) {
+        // This 1 workspace index is masked
         TS_ASSERT_DELTA(y, 1.0, 1.0E-5);
       } else {
         // Unmasked
@@ -193,8 +257,7 @@ public:
     // modify spectra-detector map on the sample workspace to check masking
     std::vector<detid_t> detIDs = source->getInstrument()->getDetectorIDs(true);
     size_t index = 0;
-    auto it = --detIDs.end();
-    for (; it > detIDs.begin(); --it) {
+    for (auto it = detIDs.rbegin(); it != detIDs.rend(); ++it) {
       const detid_t detId = *it;
       auto &spec = source->getSpectrum(index);
       Mantid::specnum_t specNo =
@@ -204,7 +267,6 @@ public:
 
       index++;
     }
-    source->buildNearestNeighbours(true);
 
     auto masker = AlgorithmManager::Instance().create("MaskDetectors");
     masker->initialize();
@@ -260,15 +322,21 @@ public:
     // masked
     std::vector<detid_t> maskSourceDet, maskTargDet;
 
+    const auto &spectrumInfoSource = source->spectrumInfo();
+    const auto &spectrumInfoTarget = maskWs->spectrumInfo();
     size_t n_steps = source->getNumberHistograms();
     for (size_t i = 0; i < n_steps; ++i) {
-      bool source_masked = source->getDetector(i)->isMasked();
+      bool source_masked = spectrumInfoSource.isMasked(i);
       if (source_masked) {
-        maskSourceDet.push_back(source->getDetector(i)->getID());
+        const auto &detector = spectrumInfoSource.detector(i);
+        const auto detectorId = detector.getID();
+        maskSourceDet.push_back(detectorId);
       }
       bool targ_masked = (maskWs->getSpectrum(i).y()[0] > 0.5);
       if (targ_masked) {
-        maskTargDet.push_back(maskWs->getDetector(i)->getID());
+        const auto &detector = spectrumInfoTarget.detector(i);
+        const auto detectorId = detector.getID();
+        maskTargDet.push_back(detectorId);
       }
     }
     std::sort(maskSourceDet.begin(), maskSourceDet.end());
@@ -470,8 +538,8 @@ public:
       ss << "</detids>\n";
     }
 
-    for (size_t i = 0; i < banks.size(); i++) {
-      ss << "<component>bank" << banks[i] << "</component>\n";
+    for (int bank : banks) {
+      ss << "<component>bank" << bank << "</component>\n";
     }
 
     // 4. End of file
@@ -490,8 +558,8 @@ public:
     std::stringstream ss;
 
     // 1. Single spectra
-    for (size_t i = 0; i < singlespectra.size(); i++) {
-      ss << singlespectra[i] << " ";
+    for (int i : singlespectra) {
+      ss << i << " ";
     }
     ss << '\n';
 

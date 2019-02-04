@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef PARAMETERREFERENCETEST_H_
 #define PARAMETERREFERENCETEST_H_
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/ParamFunction.h"
-#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/ParameterReference.h"
 
 using namespace Mantid;
@@ -86,37 +92,37 @@ public:
     TS_ASSERT_EQUALS(f1->getContainingFunction(r12), f1_2);
     TS_ASSERT_EQUALS(f1_2->getContainingFunction(r12), f1_2_1);
 
-    TS_ASSERT_EQUALS(r0.getFunction(), f0.get());
-    TS_ASSERT_EQUALS(r1.getFunction(), f0.get());
-    TS_ASSERT_EQUALS(r2.getFunction(), f0.get());
+    TS_ASSERT_EQUALS(r0.getLocalFunction(), f0.get());
+    TS_ASSERT_EQUALS(r1.getLocalFunction(), f0.get());
+    TS_ASSERT_EQUALS(r2.getLocalFunction(), f0.get());
 
-    TS_ASSERT_EQUALS(r0.getIndex(), 0);
-    TS_ASSERT_EQUALS(r1.getIndex(), 1);
-    TS_ASSERT_EQUALS(r2.getIndex(), 2);
+    TS_ASSERT_EQUALS(r0.getLocalIndex(), 0);
+    TS_ASSERT_EQUALS(r1.getLocalIndex(), 1);
+    TS_ASSERT_EQUALS(r2.getLocalIndex(), 2);
 
-    TS_ASSERT_EQUALS(r3.getFunction(), f1_0.get());
-    TS_ASSERT_EQUALS(r4.getFunction(), f1_0.get());
-    TS_ASSERT_EQUALS(r5.getFunction(), f1_0.get());
+    TS_ASSERT_EQUALS(r3.getLocalFunction(), f1_0.get());
+    TS_ASSERT_EQUALS(r4.getLocalFunction(), f1_0.get());
+    TS_ASSERT_EQUALS(r5.getLocalFunction(), f1_0.get());
 
-    TS_ASSERT_EQUALS(r3.getIndex(), 0);
-    TS_ASSERT_EQUALS(r4.getIndex(), 1);
-    TS_ASSERT_EQUALS(r5.getIndex(), 2);
+    TS_ASSERT_EQUALS(r3.getLocalIndex(), 0);
+    TS_ASSERT_EQUALS(r4.getLocalIndex(), 1);
+    TS_ASSERT_EQUALS(r5.getLocalIndex(), 2);
 
-    TS_ASSERT_EQUALS(r6.getFunction(), f1_1.get());
-    TS_ASSERT_EQUALS(r7.getFunction(), f1_1.get());
-    TS_ASSERT_EQUALS(r8.getFunction(), f1_1.get());
+    TS_ASSERT_EQUALS(r6.getLocalFunction(), f1_1.get());
+    TS_ASSERT_EQUALS(r7.getLocalFunction(), f1_1.get());
+    TS_ASSERT_EQUALS(r8.getLocalFunction(), f1_1.get());
 
-    TS_ASSERT_EQUALS(r6.getIndex(), 0);
-    TS_ASSERT_EQUALS(r7.getIndex(), 1);
-    TS_ASSERT_EQUALS(r8.getIndex(), 2);
+    TS_ASSERT_EQUALS(r6.getLocalIndex(), 0);
+    TS_ASSERT_EQUALS(r7.getLocalIndex(), 1);
+    TS_ASSERT_EQUALS(r8.getLocalIndex(), 2);
 
-    TS_ASSERT_EQUALS(r9.getFunction(), f1_2_0.get());
-    TS_ASSERT_EQUALS(r10.getFunction(), f1_2_0.get());
-    TS_ASSERT_EQUALS(r11.getFunction(), f1_2_0.get());
+    TS_ASSERT_EQUALS(r9.getLocalFunction(), f1_2_0.get());
+    TS_ASSERT_EQUALS(r10.getLocalFunction(), f1_2_0.get());
+    TS_ASSERT_EQUALS(r11.getLocalFunction(), f1_2_0.get());
 
-    TS_ASSERT_EQUALS(r9.getIndex(), 0);
-    TS_ASSERT_EQUALS(r10.getIndex(), 1);
-    TS_ASSERT_EQUALS(r11.getIndex(), 2);
+    TS_ASSERT_EQUALS(r9.getLocalIndex(), 0);
+    TS_ASSERT_EQUALS(r10.getLocalIndex(), 1);
+    TS_ASSERT_EQUALS(r11.getLocalIndex(), 2);
 
     delete cf;
   }

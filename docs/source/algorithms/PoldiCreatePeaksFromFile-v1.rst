@@ -3,7 +3,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -71,11 +71,11 @@ The following usage example takes up the file showed above and passes it to the 
     compounds = PoldiCreatePeaksFromFile('PoldiCrystalFileExample.dat', LatticeSpacingMin=0.7)
 
     compound_count = compounds.getNumberOfEntries()
-    print 'Number of loaded compounds:', compound_count
+    print('Number of loaded compounds: {}'.format(compound_count))
 
     for i in range(compound_count):
         ws = compounds.getItem(i)
-        print 'Compound ' + str(i + 1) +':', ws.getName(), 'has', ws.rowCount(), 'reflections in the resolution range.'
+        print('Compound {}: {} has {} reflections in the resolution range.'.format(str(i + 1),  ws.getName(), ws.rowCount()))
 
 
 The script produces a WorkspaceGroup which contains a table with reflections for each compound in the file:

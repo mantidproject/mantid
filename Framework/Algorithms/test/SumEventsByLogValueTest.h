@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_SUMEVENTSBYLOGVALUETEST_H_
 #define MANTID_ALGORITHMS_SUMEVENTSBYLOGVALUETEST_H_
 
@@ -11,6 +17,7 @@ using Mantid::Algorithms::SumEventsByLogValue;
 using Mantid::DataObjects::EventWorkspace_sptr;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
+using Mantid::Types::Core::DateAndTime;
 
 class SumEventsByLogValueTest : public CxxTest::TestSuite {
 public:
@@ -28,10 +35,10 @@ public:
     // InputWorkspace has to be an EventWorkspace
     TS_ASSERT_THROWS(
         alg.setProperty("InputWorkspace",
-                        WorkspaceCreationHelper::Create2DWorkspace(1, 1)),
+                        WorkspaceCreationHelper::create2DWorkspace(1, 1)),
         std::invalid_argument);
     TS_ASSERT_THROWS_NOTHING(alg.setProperty(
-        "InputWorkspace", WorkspaceCreationHelper::CreateEventWorkspace()));
+        "InputWorkspace", WorkspaceCreationHelper::createEventWorkspace()));
 
     // LogName must not be empty
     TS_ASSERT_THROWS(alg.setProperty("LogName", ""), std::invalid_argument);
@@ -39,7 +46,7 @@ public:
 
   void test_validateInputs() {
     // Create and event workspace. We don't care what data is in it.
-    EventWorkspace_sptr ws = WorkspaceCreationHelper::CreateEventWorkspace();
+    EventWorkspace_sptr ws = WorkspaceCreationHelper::createEventWorkspace();
     // Add a single-number log
     ws->mutableRun().addProperty("SingleValue", 5);
     // Add a time-series property
@@ -145,7 +152,7 @@ private:
 
   EventWorkspace_sptr createWorkspace() {
     EventWorkspace_sptr ws =
-        WorkspaceCreationHelper::CreateEventWorkspace(3, 1);
+        WorkspaceCreationHelper::createEventWorkspace(3, 1);
     Run &run = ws->mutableRun();
 
     DateAndTime run_start("2010-01-01T00:00:00");
@@ -186,7 +193,7 @@ public:
   }
 
   SumEventsByLogValueTestPerformance() {
-    ws = WorkspaceCreationHelper::CreateEventWorkspace(100, 100, 1000);
+    ws = WorkspaceCreationHelper::createEventWorkspace(100, 100, 1000);
     // Add a bunch of logs
     std::vector<DateAndTime> times;
     std::vector<int> index;

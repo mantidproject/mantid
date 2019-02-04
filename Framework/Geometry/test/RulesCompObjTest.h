@@ -1,19 +1,25 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_RULESCOMPOBJTEST__
 #define MANTID_RULESCOMPOBJTEST__
-#include <cxxtest/TestSuite.h>
-#include <cmath>
-#include <vector>
+#include "MantidGeometry/Objects/CSGObject.h"
+#include "MantidGeometry/Objects/Rules.h"
+#include "MantidGeometry/Surfaces/Cone.h"
+#include "MantidGeometry/Surfaces/Cylinder.h"
+#include "MantidGeometry/Surfaces/Plane.h"
+#include "MantidGeometry/Surfaces/Quadratic.h"
+#include "MantidGeometry/Surfaces/Sphere.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/System.h"
-#include <cfloat>
 #include "MantidKernel/V3D.h"
-#include "MantidGeometry/Surfaces/Quadratic.h"
-#include "MantidGeometry/Objects/Object.h"
-#include "MantidGeometry/Objects/Rules.h"
-#include "MantidGeometry/Surfaces/Plane.h"
-#include "MantidGeometry/Surfaces/Sphere.h"
-#include "MantidGeometry/Surfaces/Cylinder.h"
-#include "MantidGeometry/Surfaces/Cone.h"
+#include <cfloat>
+#include <cmath>
+#include <cxxtest/TestSuite.h>
+#include <vector>
 
 #include "boost/make_shared.hpp"
 
@@ -25,16 +31,16 @@ class RulesCompObjTest : public CxxTest::TestSuite {
 public:
   void testConstructor() {
     CompObj A;
-    TS_ASSERT_EQUALS(A.leaf(0), (Rule *)0);
-    TS_ASSERT_EQUALS(A.leaf(1), (Rule *)0);
+    TS_ASSERT_EQUALS(A.leaf(0), (Rule *)nullptr);
+    TS_ASSERT_EQUALS(A.leaf(1), (Rule *)nullptr);
     TS_ASSERT_EQUALS(A.display(), "#0");
     TS_ASSERT_EQUALS(A.getObjN(), 0);
-    TS_ASSERT_EQUALS(A.getObj(), (Object *)0);
+    TS_ASSERT_EQUALS(A.getObj(), (CSGObject *)nullptr);
     TS_ASSERT_EQUALS(A.isComplementary(), 1);
   }
 
   void testSetObject() {
-    Object cpCylinder = createCappedCylinder();
+    CSGObject cpCylinder = createCappedCylinder();
     CompObj A;
     A.setObj(&cpCylinder);
     A.setObjN(10);
@@ -44,7 +50,7 @@ public:
   }
 
   void testClone() {
-    Object cpCylinder = createCappedCylinder();
+    CSGObject cpCylinder = createCappedCylinder();
     CompObj A;
     A.setObj(&cpCylinder);
     A.setObjN(10);
@@ -55,7 +61,7 @@ public:
   }
 
   void testSetLeaves() {
-    Object cpCylinder = createCappedCylinder();
+    CSGObject cpCylinder = createCappedCylinder();
     CompObj A;
     A.setObj(&cpCylinder);
     A.setObjN(10);
@@ -67,7 +73,7 @@ public:
   }
 
   void testSetLeaf() {
-    Object cpCylinder = createCappedCylinder();
+    CSGObject cpCylinder = createCappedCylinder();
     CompObj A;
     A.setObj(&cpCylinder);
     A.setObjN(10);
@@ -79,7 +85,7 @@ public:
   }
 
   void testFindLeaf() {
-    Object cpCylinder = createCappedCylinder();
+    CSGObject cpCylinder = createCappedCylinder();
     CompObj A;
     A.setObj(&cpCylinder);
     A.setObjN(10);
@@ -89,17 +95,17 @@ public:
   }
 
   void testFindKey() {
-    Object cpCylinder = createCappedCylinder();
+    CSGObject cpCylinder = createCappedCylinder();
     CompObj A;
     A.setObj(&cpCylinder);
     A.setObjN(10);
     CompObj B;
-    TS_ASSERT_EQUALS(A.findKey(10), (Rule *)0); // Always returns 0
-    TS_ASSERT_EQUALS(A.findKey(11), (Rule *)0);
+    TS_ASSERT_EQUALS(A.findKey(10), (Rule *)nullptr); // Always returns 0
+    TS_ASSERT_EQUALS(A.findKey(11), (Rule *)nullptr);
   }
 
   void testIsValid() {
-    Object cpCylinder = createCappedCylinder();
+    CSGObject cpCylinder = createCappedCylinder();
     CompObj A;
     A.setObj(&cpCylinder);
     A.setObjN(10);
@@ -127,7 +133,7 @@ public:
   }
 
   void testIsValidMap() {
-    Object cpCylinder = createCappedCylinder();
+    CSGObject cpCylinder = createCappedCylinder();
     CompObj A;
     A.setObj(&cpCylinder);
     A.setObjN(10);
@@ -150,7 +156,7 @@ public:
   }
 
   void testSimplyfy() {
-    Object cpCylinder = createCappedCylinder();
+    CSGObject cpCylinder = createCappedCylinder();
     CompObj A;
     A.setObj(&cpCylinder);
     A.setObjN(10);
@@ -159,7 +165,7 @@ public:
   }
 
 private:
-  Object createCappedCylinder() {
+  CSGObject createCappedCylinder() {
     std::string C31 = "cx 3.0"; // cylinder x-axis radius 3
     std::string C32 = "px 1.2";
     std::string C33 = "px -3.2";
@@ -181,7 +187,7 @@ private:
     // using surface ids: 31 (cylinder) 32 (plane (top) ) and 33 (plane (base))
     std::string ObjCapCylinder = "-31 -32 33";
 
-    Object retVal;
+    CSGObject retVal;
     retVal.setObject(21, ObjCapCylinder);
     retVal.populate(CylSurMap);
 

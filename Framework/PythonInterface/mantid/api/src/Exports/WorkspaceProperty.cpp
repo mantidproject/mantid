@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
+#include "MantidAPI/Workspace.h"
 #include "MantidPythonInterface/api/WorkspacePropertyExporter.h"
 #include "MantidPythonInterface/kernel/GetPointer.h"
-#include "MantidAPI/Workspace_fwd.h"
 #include <boost/python/enum.hpp>
 
 using Mantid::API::Workspace;
-using Mantid::API::WorkspaceProperty;
+using Mantid::API::WorkspaceProperty; // NOLINT
 
 GET_POINTER_SPECIALIZATION(WorkspaceProperty<Workspace>)
 

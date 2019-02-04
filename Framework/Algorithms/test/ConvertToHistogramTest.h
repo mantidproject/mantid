@@ -1,8 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef CONVERTTOHISTOGRAMTEST_H_
 #define CONVERTTOHISTOGRAMTEST_H_
 
-#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidAlgorithms/ConvertToHistogram.h"
+#include "MantidHistogramData/LinearGenerator.h"
 #include <cxxtest/TestSuite.h>
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -12,13 +18,19 @@ using Mantid::API::MatrixWorkspace;
 using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::Algorithms::ConvertToHistogram;
 using Mantid::DataObjects::Workspace2D_sptr;
-using Mantid::MantidVecPtr;
+using Mantid::HistogramData::HistogramDx;
 using Mantid::HistogramData::LinearGenerator;
 using Mantid::HistogramData::Points;
+using Mantid::Kernel::make_cow;
+using Mantid::MantidVecPtr;
 
 class ConvertToHistogramTest : public CxxTest::TestSuite {
 
 public:
+  void tearDown() override {
+    Mantid::API::AnalysisDataService::Instance().clear();
+  }
+
   void test_That_The_Algorithm_Has_Two_Properties() {
     ConvertToHistogram alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
@@ -29,7 +41,7 @@ public:
   test_That_Output_Is_The_Same_As_Input_If_Input_Contains_Histogram_Data() {
     // True indicates a non histogram workspace
     Workspace2D_sptr testWS =
-        WorkspaceCreationHelper::Create2DWorkspace123(5, 10, true);
+        WorkspaceCreationHelper::create2DWorkspace123(5, 10, true);
 
     MatrixWorkspace_sptr outputWS = runAlgorithm(testWS);
     TS_ASSERT(outputWS);
@@ -38,14 +50,13 @@ public:
 
     // Check that the algorithm just pointed the output data at the input
     TS_ASSERT_EQUALS(&(*testWS), &(*outputWS));
-    Mantid::API::AnalysisDataService::Instance().remove(outputWS->getName());
   }
 
   void test_A_Point_Data_InputWorkspace_Is_Converted_To_A_Histogram() {
     // Creates a workspace with 10 points
     const int numYPoints(10);
     const int numSpectra(2);
-    Workspace2D_sptr testWS = WorkspaceCreationHelper::Create2DWorkspace123(
+    Workspace2D_sptr testWS = WorkspaceCreationHelper::create2DWorkspace123(
         numSpectra, numYPoints, false);
     // Reset the X data to something reasonable
     Points x(numYPoints, LinearGenerator(0.0, 1.0));
@@ -63,43 +74,40 @@ public:
     TS_ASSERT_EQUALS(outputWS->isHistogramData(), true);
     const int numBoundaries = numYPoints + 1;
 
-    // This makes the new X values more readable rather than using a dynamic
-    // array
-    // so I'll live with the hard coding
     const double expectedX[11] = {-0.5, 0.5, 1.5, 2.5, 3.5, 4.5,
                                   5.5,  6.5, 7.5, 8.5, 9.5};
     for (int j = 0; j < numBoundaries; ++j) {
       TS_ASSERT_EQUALS(outputWS->readX(0)[j], expectedX[j]);
     }
+  }
 
-    // for( int i = 0; i < numSpectra; ++i )
-    // {
-    //   const Mantid::MantidVec & yValues = outputWS->readY(i);
-    //   const Mantid::MantidVec & xValues = outputWS->readX(i);
-    //   const Mantid::MantidVec & eValues = outputWS->readE(i);
-
-    //   TS_ASSERT_EQUALS(xValues.size(), numBins);
-    //   // The y and e values sizes be unchanged
-    //   TS_ASSERT_EQUALS(yValues.size(), numYPoints);
-    //   TS_ASSERT_EQUALS(eValues.size(), numYPoints);
-
-    //   for( int j = 0; j < numYPoints; ++j )
-    //   {
-    // 	// Now the data. Y and E unchanged
-    // 	TS_ASSERT_EQUALS(yValues[j], 2.0);
-    // 	TS_ASSERT_EQUALS(eValues[j], M_SQRT2);
-
-    // 	// X data originally was 0->10 in steps of 1. Now it should be the
-    // centre of each bin which is
-    // 	// 1.0 away from the last centre
-    // 	const double expectedX = 0.5 + j*1.0;
-    // 	TS_ASSERT_EQUALS(xValues[j], expectedX);
-    //   }
-    //   // And the final X points
-    //   TS_ASSERT_EQUALS(xValues.back(), 100.);
-    // }
-
-    Mantid::API::AnalysisDataService::Instance().remove(outputWS->getName());
+  void test_Dx_Data_Is_Handled_Correctly() {
+    // Creates a workspace with 10 points
+    constexpr int numYPoints{10};
+    constexpr int numSpectra{2};
+    Workspace2D_sptr testWS = WorkspaceCreationHelper::create2DWorkspace123(
+        numSpectra, numYPoints, false);
+    double xErrors[numYPoints] = {0.1, 0.2, 0.3, 0.4, 0.5,
+                                  0.6, 0.7, 0.8, 0.9, 1.0};
+    auto dxs = make_cow<HistogramDx>(xErrors, xErrors + numYPoints);
+    // Reset the X data to something reasonable, set Dx.
+    Points x(numYPoints, LinearGenerator(0.0, 1.0));
+    for (int i = 0; i < numSpectra; ++i) {
+      testWS->setPoints(i, x);
+      testWS->setSharedDx(i, dxs);
+    }
+    TS_ASSERT(!testWS->isHistogramData())
+    MatrixWorkspace_sptr outputWS = runAlgorithm(testWS);
+    TS_ASSERT(outputWS);
+    TS_ASSERT(outputWS->isHistogramData())
+    for (size_t i = 0; i < outputWS->getNumberHistograms(); ++i) {
+      TS_ASSERT(outputWS->hasDx(i))
+      const auto &dx = outputWS->dx(i);
+      TS_ASSERT_EQUALS(dx.size(), numYPoints)
+      for (size_t j = 0; j < dx.size(); ++j) {
+        TS_ASSERT_EQUALS(dx[j], xErrors[j])
+      }
+    }
   }
 
 private:
@@ -137,7 +145,7 @@ public:
 
   void setUp() override {
     inputWS =
-        WorkspaceCreationHelper::Create2DWorkspace123(20000, 10000, false);
+        WorkspaceCreationHelper::create2DWorkspace123(20000, 10000, false);
   }
 
   void tearDown() override {

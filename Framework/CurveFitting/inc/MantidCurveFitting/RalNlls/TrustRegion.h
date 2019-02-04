@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef CURVEFITTING_RAL_NLLS_TRUST_REGION_H_
 #define CURVEFITTING_RAL_NLLS_TRUST_REGION_H_
 
@@ -23,13 +29,13 @@ double evaluateModel(const DoubleFortranVector &f, const DoubleFortranMatrix &J,
 double calculateRho(double normf, double normfnew, double md,
                     const nlls_options &options);
 void updateTrustRegionRadius(double &rho, const nlls_options &options,
-                             nlls_inform &inform, NLLS_workspace &w);
+                             NLLS_workspace &w);
 void rankOneUpdate(DoubleFortranMatrix &hf, NLLS_workspace &w);
 void testConvergence(double normF, double normJF, double normF0, double normJF0,
                      const nlls_options &options, nlls_inform &inform);
 void applyScaling(const DoubleFortranMatrix &J, DoubleFortranMatrix &A,
-                  DoubleFortranVector &v, apply_scaling_work &w,
-                  const nlls_options &options, nlls_inform &inform);
+                  DoubleFortranVector &v, DoubleFortranVector &scale,
+                  const nlls_options &options);
 void allEigSymm(const DoubleFortranMatrix &A, DoubleFortranVector &ew,
                 DoubleFortranMatrix &ev);
 // void apply_second_order_info(int n, int m, const DoubleFortranVector& X,
@@ -37,8 +43,8 @@ void allEigSymm(const DoubleFortranMatrix &A, DoubleFortranVector &ew,
 //  const nlls_options& options, nlls_inform& inform, const DoubleFortranVector&
 //  weights);
 
-} // NLLS
-} // CurveFitting
-} // Mantid
+} // namespace NLLS
+} // namespace CurveFitting
+} // namespace Mantid
 
 #endif // CURVEFITTING_RAL_NLLS_TRUST_REGION_H_

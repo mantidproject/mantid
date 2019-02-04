@@ -29,13 +29,13 @@
  ***************************************************************************/
 #include "PlotWizard.h"
 #include "ApplicationWindow.h"
-#include "Table.h"
 #include "Graph3D.h"
+#include "Table.h"
 
 #include <QApplication>
+#include <QComboBox>
 #include <QGroupBox>
 #include <QListWidget>
-#include <QComboBox>
 
 PlotWizard::PlotWizard(QWidget *parent, Qt::WFlags fl) : QDialog(parent, fl) {
   setWindowTitle(tr("MantidPlot - Select Columns to Plot"));
@@ -304,7 +304,7 @@ void PlotWizard::setColumnsList(const QStringList &cols) { columns = cols; }
 
 bool PlotWizard::noCurves() {
   if (plotAssociations->count() == 0) {
-    QMessageBox::warning(0, tr("MantidPlot - Error"),
+    QMessageBox::warning(nullptr, tr("MantidPlot - Error"),
                          tr("You must add a new curve first!"));
     return true;
   } else

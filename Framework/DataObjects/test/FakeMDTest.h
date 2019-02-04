@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAOBJECTS_FAKEMDTEST_H_
 #define MANTID_DATAOBJECTS_FAKEMDTEST_H_
 
@@ -140,8 +146,8 @@ public:
 
     TS_ASSERT_EQUALS(1000, fakeData->getNEvents());
 
-    Mantid::detid_t expectedIDs[10] = {106, 255, 184, 238, 0,
-                                       32,  77,  255, 37,  60};
+    Mantid::detid_t expectedIDs[10] = {37,  235, 140, 72, 255,
+                                       137, 203, 133, 79, 192};
     auto it = fakeData->createIterator();
     size_t counter(0);
     while (counter < 10) {
@@ -150,8 +156,6 @@ public:
       it->next();
       ++counter;
     }
-
-    delete it;
   }
 };
 

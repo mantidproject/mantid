@@ -1,11 +1,18 @@
-﻿#pylint: disable=invalid-name,no-init
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
+#pylint: disable=invalid-name,no-init
 #pylint: disable=too-many-public-methods
 """
 Check that file manipulation works fine
 """
 
+from __future__ import (absolute_import, division, print_function)
 import unittest
-import stresstesting
+import systemtesting
 from mantid.simpleapi import *
 import SANSUtility as su
 import os
@@ -40,7 +47,7 @@ class SANSFileCheckingTest(unittest.TestCase):
             measurement_time = su.get_measurement_time_from_file(full_path)
             self.assertEqual(measurement_time, expected_time)
         else:
-            print "Missing data files. Path to system test data needs to be set."
+            print("Missing data files. Path to system test data needs to be set.")
             self.assertTrue(False)
 
     def test_that_sans2D_nexus_file_with_date_is_evaluated_correctly(self):
@@ -88,7 +95,7 @@ class SANSMatchIDFInReducerAndWorkspaceTest(unittest.TestCase):
             measurement_time = su.get_measurement_time_from_file(full_path)
             idf_path_workspace = ExperimentInfo.getInstrumentFilename(instrument_name, measurement_time)
         else:
-            print "Missing data files. Path to system test data needs to be set."
+            print("Missing data files. Path to system test data needs to be set.")
             self.assertTrue(False)
         return idf_path_workspace
 
@@ -214,9 +221,9 @@ class SANSMatchIDFInReducerAndWorkspaceTest(unittest.TestCase):
         self.assertEqual(os.path.normpath(idf_workspace), os.path.normpath(idf_reducer_after))
 
 
-class SANSSwitchIDFTestRunner(stresstesting.MantidStressTest):
+class SANSSwitchIDFTestRunner(systemtesting.MantidSystemTest):
     def __init__(self):
-        stresstesting.MantidStressTest.__init__(self)
+        systemtesting.MantidSystemTest.__init__(self)
         self._success = False
 
     def runTest(self):

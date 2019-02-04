@@ -1,34 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_PYTHONINTERFACE_DATASERVICEEXPORTER_H_
 #define MANTID_PYTHONINTERFACE_DATASERVICEEXPORTER_H_
 
-/*
-    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-   National Laboratory & European Spallation Source
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
- */
 #include "MantidKernel/Exception.h"
 #include "MantidPythonInterface/kernel/WeakPtr.h"
 
 #include <boost/python/class.hpp>
-#include <boost/python/list.hpp>
 #include <boost/python/extract.hpp>
+#include <boost/python/list.hpp>
+#include <boost/python/str.hpp>
 
 #include <set>
 
@@ -41,8 +26,8 @@ namespace PythonInterface {
  */
 template <typename SvcType, typename SvcPtrType> struct DataServiceExporter {
   // typedef the type created by boost.python
-  typedef boost::python::class_<SvcType, boost::noncopyable> PythonType;
-  typedef boost::weak_ptr<typename SvcPtrType::element_type> WeakPtr;
+  using PythonType = boost::python::class_<SvcType, boost::noncopyable>;
+  using WeakPtr = boost::weak_ptr<typename SvcPtrType::element_type>;
 
   /**
    * Define the necessary boost.python framework to expor the templated
@@ -136,9 +121,9 @@ template <typename SvcType, typename SvcPtrType> struct DataServiceExporter {
     if (extractWeak.check()) {
       return extractWeak().lock();
     }
-    boost::python::extract<SvcPtrType &> extractShared(pyvalue);
-    if (extractShared.check()) {
-      return extractShared();
+    boost::python::extract<SvcPtrType &> extractRefShared(pyvalue);
+    if (extractRefShared.check()) {
+      return extractRefShared();
     } else {
       throw std::invalid_argument(
           "Cannot extract pointer from Python object argument. Incorrect type");
@@ -157,6 +142,7 @@ template <typename SvcType, typename SvcPtrType> struct DataServiceExporter {
    */
   static WeakPtr retrieveOrKeyError(SvcType &self, const std::string &name) {
     using namespace Mantid::Kernel;
+
     SvcPtrType item;
     try {
       item = self.retrieve(name);
@@ -175,7 +161,7 @@ template <typename SvcType, typename SvcPtrType> struct DataServiceExporter {
    * @param self :: A reference to the ADS object that called this method
    * @returns A python list created from the set of strings
    */
-  static boost::python::object getObjectNamesAsList(SvcType &self) {
+  static boost::python::list getObjectNamesAsList(SvcType &self) {
     boost::python::list names;
     const auto keys = self.getObjectNames();
     for (auto itr = keys.begin(); itr != keys.end(); ++itr) {
@@ -185,7 +171,7 @@ template <typename SvcType, typename SvcPtrType> struct DataServiceExporter {
     return names;
   }
 };
-}
-}
+} // namespace PythonInterface
+} // namespace Mantid
 
 #endif /* MANTID_PYTHONINTERFACE_DATASERVICEEXPORTER_H_ */

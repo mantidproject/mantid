@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/ResetNegatives.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -89,11 +95,11 @@ void ResetNegatives::exec() {
   if (eventWS)
     eventWS->sortAll(DataObjects::TOF_SORT, nullptr);
 
-  Progress prog(this, .1, 1., 2 * nHist);
+  Progress prog(this, 0.1, 1.0, 2 * nHist);
 
   // generate output workspace - copy X and dY
   outputWS = API::WorkspaceFactory::Instance().create(inputWS);
-  PARALLEL_FOR2(inputWS, outputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
   for (int64_t i = 0; i < nHist; i++) {
     PARALLEL_START_INTERUPT_REGION
     const auto index = static_cast<size_t>(i);
@@ -124,7 +130,7 @@ inline double fixZero(const double value) {
   else
     return value;
 }
-}
+} // namespace
 
 /**
  * Add -1.*minValue on each spectra.
@@ -138,7 +144,7 @@ inline double fixZero(const double value) {
 void ResetNegatives::pushMinimum(MatrixWorkspace_const_sptr minWS,
                                  MatrixWorkspace_sptr wksp, Progress &prog) {
   int64_t nHist = minWS->getNumberHistograms();
-  PARALLEL_FOR2(wksp, minWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*wksp, *minWS))
   for (int64_t i = 0; i < nHist; i++) {
     PARALLEL_START_INTERUPT_REGION
     double minValue = minWS->y(i)[0];
@@ -170,7 +176,7 @@ void ResetNegatives::changeNegatives(MatrixWorkspace_const_sptr minWS,
                                      MatrixWorkspace_sptr wksp,
                                      Progress &prog) {
   int64_t nHist = wksp->getNumberHistograms();
-  PARALLEL_FOR2(minWS, wksp)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*minWS, *wksp))
   for (int64_t i = 0; i < nHist; i++) {
     PARALLEL_START_INTERUPT_REGION
     if (minWS->y(i)[0] <=
@@ -190,5 +196,5 @@ void ResetNegatives::changeNegatives(MatrixWorkspace_const_sptr minWS,
   PARALLEL_CHECK_INTERUPT_REGION
 }
 
-} // namespace Mantid
 } // namespace Algorithms
+} // namespace Mantid

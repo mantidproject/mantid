@@ -1,13 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CRYSTAL_CONNECTEDCOMPONENTLABELING_H_
 #define MANTID_CRYSTAL_CONNECTEDCOMPONENTLABELING_H_
 
-#include "MantidKernel/System.h"
-#include "MantidKernel/V3D.h"
 #include "MantidAPI/IMDHistoWorkspace_fwd.h"
 #include "MantidCrystal/DisjointElement.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/V3D.h"
+#include <boost/optional.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/tuple/tuple.hpp>
-#include <boost/optional.hpp>
 #include <map>
 #include <unordered_set>
 
@@ -22,43 +28,22 @@ class ICluster;
  * Namespace containing useful typedefs
  */
 namespace ConnectedComponentMappingTypes {
-typedef boost::tuple<double, double> SignalErrorSQPair;
-typedef std::map<size_t, SignalErrorSQPair> LabelIdIntensityMap;
-typedef std::map<Mantid::Kernel::V3D, size_t> PositionToLabelIdMap;
-typedef std::vector<size_t> VecIndexes;
-typedef std::vector<DisjointElement> VecElements;
-typedef std::unordered_set<size_t> SetIds;
-typedef std::map<size_t, boost::shared_ptr<Mantid::Crystal::ICluster>>
-    ClusterMap;
-typedef boost::tuple<Mantid::API::IMDHistoWorkspace_sptr, ClusterMap>
-    ClusterTuple;
-}
+using SignalErrorSQPair = boost::tuple<double, double>;
+using LabelIdIntensityMap = std::map<size_t, SignalErrorSQPair>;
+using PositionToLabelIdMap = std::map<Mantid::Kernel::V3D, size_t>;
+using VecIndexes = std::vector<size_t>;
+using VecElements = std::vector<DisjointElement>;
+using SetIds = std::unordered_set<size_t>;
+using ClusterMap =
+    std::map<size_t, boost::shared_ptr<Mantid::Crystal::ICluster>>;
+using ClusterTuple =
+    boost::tuple<Mantid::API::IMDHistoWorkspace_sptr, ClusterMap>;
+} // namespace ConnectedComponentMappingTypes
 
 class BackgroundStrategy;
 
 /** ConnectedComponentLabelling : Implements connected component labeling on
  MDHistoWorkspaces.
-
- Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
- National Laboratory & European Spallation Source
-
- This file is part of Mantid.
-
- Mantid is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 3 of the License, or
- (at your option) any later version.
-
- Mantid is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License
- along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
- File change history is stored at: <https://github.com/mantidproject/mantid>
- Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 class DLLExport ConnectedComponentLabeling {
 

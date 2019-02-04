@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -31,7 +31,7 @@ Usage
 
    alpha = AlphaCalc(input)
 
-   print 'Alpha value: {0:.3f}'.format(alpha)
+   print('Alpha value: {0:.3f}'.format(alpha))
 
 Output:
 
@@ -51,7 +51,7 @@ Output:
                      ForwardSpectra=[2],
                      BackwardSpectra=[1])
 
-   print 'Alpha value: {0:.3f}'.format(alpha)
+   print('Alpha value: {0:.3f}'.format(alpha))
 
 Output:
 

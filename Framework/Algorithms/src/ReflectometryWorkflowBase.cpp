@@ -1,7 +1,12 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/ReflectometryWorkflowBase.h"
-#include "MantidAlgorithms/BoostOptionalToAlgorithmProperty.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
-#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAlgorithms/BoostOptionalToAlgorithmProperty.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
@@ -9,6 +14,7 @@
 #include "MantidKernel/RebinParamsValidator.h"
 
 using namespace Mantid::API;
+using namespace Mantid::HistogramData;
 using namespace Mantid::Kernel;
 
 namespace Mantid {
@@ -21,7 +27,7 @@ namespace {
  * @return : True if negative.
  */
 bool checkNotPositive(const int value) { return value < 0; }
-}
+} // namespace
 
 //----------------------------------------------------------------------------------------------
 
@@ -439,10 +445,10 @@ ReflectometryWorkflowBase::toLamDetector(const std::string &processingCommands,
 }
 
 MatrixWorkspace_sptr
-ReflectometryWorkflowBase::makeUnityWorkspace(const std::vector<double> &x) {
+ReflectometryWorkflowBase::makeUnityWorkspace(const HistogramX &x) {
   auto createWorkspaceAlg = this->createChildAlgorithm("CreateWorkspace");
   createWorkspaceAlg->initialize();
-  createWorkspaceAlg->setProperty("DataX", x);
+  createWorkspaceAlg->setProperty("DataX", x.rawData());
   createWorkspaceAlg->setProperty("DataY",
                                   std::vector<double>(x.size() - 1, 1.0));
   createWorkspaceAlg->setProperty("NSpec", 1);
@@ -482,7 +488,7 @@ ReflectometryWorkflowBase::toLam(MatrixWorkspace_sptr toConvert,
     monitorWS = toLamMonitor(toConvert, monitorIndex, backgroundMinMax);
   } else {
     // We don't have a monitor index, so we divide through by unity.
-    monitorWS = makeUnityWorkspace(detectorWS->readX(0));
+    monitorWS = makeUnityWorkspace(detectorWS->x(0));
   }
 
   // Rebin the Monitor Workspace to match the Detector Workspace.

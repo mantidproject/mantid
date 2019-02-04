@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -46,7 +46,7 @@ For this to work correctly, the field *_atom_site_aniso_label* has to be present
 the same strings as *_atom_site_label*. This calculation is only performed for atoms where the isotropic parameter is
 missing or invalid. If neither isotropic nor anisotropic parameters are present for an atom, 0 is used.
 
-Optionally, a UB-matrix can be loaded from the CIF-file and applied to the workspace via the SetUB-algorithm. For this,
+Optionally, a :ref:`UB matrix <Lattice>` can be loaded from the CIF-file and applied to the workspace via the SetUB-algorithm. For this,
 the *_diffrn_orient_matrix_UB_xy* fields have to be set.
 
 .. [1] The equivalent isotropic displacement factor, R. X. Fischer & E. Tillmanns, Acta Crystallogr. C, vol. 44, p. 775,
@@ -73,7 +73,7 @@ The following script loads a CIF-file and prints the space group of the crystal 
     # Get the space group from the crystal structure that was loaded
     crystal_structure = sample_ws.sample().getCrystalStructure()
 
-    print 'Space group:', crystal_structure.getSpaceGroup().getHMSymbol()
+    print('Space group: {}'.format(crystal_structure.getSpaceGroup().getHMSymbol()))
 
 The output is:
 

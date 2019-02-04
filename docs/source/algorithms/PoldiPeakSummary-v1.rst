@@ -3,7 +3,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -37,8 +37,8 @@ Usage
                     
     summary_6904 = PoldiPeakSummary(mtd["peaks_refined_6904"])
     
-    print "Number of refined peaks:", summary_6904.rowCount()
-    print "Number of columns that describe a peak:", summary_6904.columnCount()
+    print("Number of refined peaks: {}".format(summary_6904.rowCount()))
+    print("Number of columns that describe a peak: {}".format(summary_6904.columnCount()))
 
 Output:
 

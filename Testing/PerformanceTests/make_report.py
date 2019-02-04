@@ -1,12 +1,19 @@
 #!/usr/bin/env python
 
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 import argparse
 import sys
 import os
 import subprocess
 import sqlite3
 
-#====================================================================================
+
+# ====================================================================================
 def getSourceDir():
     """Returns the location of the source code."""
     import os
@@ -15,7 +22,6 @@ def getSourceDir():
     if os.path.islink(script):
         script = os.path.realpath(script)
     return os.path.dirname(script)
-
 
 
 def join_databases(dbfiles):
@@ -40,15 +46,15 @@ def join_databases(dbfiles):
     return outfile
 
 
-
-#====================================================================================
+# ====================================================================================
 if __name__ == "__main__":
     # Parse the command line
-    parser = argparse.ArgumentParser(description='Generates a HTML report using the Mantid System Tests results database')
+    parser = argparse.ArgumentParser(
+        description='Generates a HTML report using the Mantid System Tests results database')
 
     parser.add_argument('--path', dest='path',
                         default="./Report",
-                        help='Path to the ouput HTML. Default "./Report".' )
+                        help='Path to the output HTML. Default "./Report".')
 
     parser.add_argument('--x_field', dest='x_field',
                         default="revision",
@@ -58,11 +64,19 @@ if __name__ == "__main__":
                         default=["./MantidSystemTests.db"],
                         help='Required: Path to the SQL database file(s).')
 
+    parser.add_argument('--plotting', dest='plotting',
+                        default="plotly",
+                        help='Plotting toolkit to generate the plots. Options=["plotly", "matplotlib"]')
 
     args = parser.parse_args()
 
-    # Import the manager definition
-    import analysis
+    if args.plotting == 'plotly':
+        import analysis
+    elif args.plotting == 'matplotlib':
+        import analysis_mpl as analysis
+    else:
+        raise RuntimeError("Unknown plotting toolkit '{}'".format(args.plotting))
+
     import sqlresults
 
     if len(args.dbfile) > 1:
@@ -71,7 +85,6 @@ if __name__ == "__main__":
     else:
         # Only one file - use it
         dbfile = args.dbfile[0]
-
 
     if not os.path.exists(dbfile):
         print "Error! Could not find", dbfile

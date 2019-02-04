@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
@@ -9,11 +15,11 @@
 namespace Mantid {
 namespace Algorithms {
 
-using API::WorkspaceProperty;
-using API::MatrixWorkspace_sptr;
 using API::MatrixWorkspace_const_sptr;
-using API::WorkspaceFactory;
+using API::MatrixWorkspace_sptr;
 using API::Progress;
+using API::WorkspaceFactory;
+using API::WorkspaceProperty;
 using Mantid::MantidVecPtr;
 
 //------------------------------------------------------------------------------
@@ -49,9 +55,9 @@ void XDataConverter::exec() {
   }
 
   const int numSpectra = static_cast<int>(inputWS->getNumberHistograms());
-  const size_t numYValues = inputWS->blocksize();
-  const size_t numXValues = getNewXSize(inputWS);
-  m_sharedX = API::WorkspaceHelpers::sharedXData(inputWS);
+  const size_t numYValues = getNewYSize(inputWS);
+  const size_t numXValues = getNewXSize(numYValues);
+  m_sharedX = API::WorkspaceHelpers::sharedXData(*inputWS);
   // Create the new workspace
   MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(
       inputWS, numSpectra, numXValues, numYValues);
@@ -61,7 +67,7 @@ void XDataConverter::exec() {
     outputWS->replaceAxis(1, inputWS->getAxis(1)->clone(outputWS.get()));
 
   Progress prog(this, 0.0, 1.0, numSpectra);
-  PARALLEL_FOR2(inputWS, outputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
   for (int i = 0; i < int(numSpectra); ++i) {
     PARALLEL_START_INTERUPT_REGION
 
@@ -69,6 +75,9 @@ void XDataConverter::exec() {
     outputWS->setSharedY(i, inputWS->sharedY(i));
     outputWS->setSharedE(i, inputWS->sharedE(i));
     setXData(outputWS, inputWS, i);
+    if (inputWS->hasDx(i)) {
+      outputWS->setSharedDx(i, inputWS->sharedDx(i));
+    }
     prog.report();
 
     PARALLEL_END_INTERUPT_REGION
@@ -77,6 +86,12 @@ void XDataConverter::exec() {
 
   // Store the output
   setProperty("OutputWorkspace", outputWS);
+}
+
+std::size_t
+XDataConverter::getNewYSize(const API::MatrixWorkspace_sptr inputWS) {
+  // this is the old behavior of MatrixWorkspace::blocksize()
+  return inputWS->y(0).size();
 }
 
 /**
@@ -101,5 +116,5 @@ void XDataConverter::setXData(API::MatrixWorkspace_sptr outputWS,
     outputWS->setSharedX(index, calculateXPoints(inputWS->sharedX(index)));
   }
 }
-}
-}
+} // namespace Algorithms
+} // namespace Mantid

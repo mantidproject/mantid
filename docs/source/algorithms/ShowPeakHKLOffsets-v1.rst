@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -39,10 +39,10 @@ Usage
    table = ShowPeakHKLOffsets('peaks_qLab')
 
    #Print part of first four rows
-   for i in [0,1,2,3]:
+   for i in range(4):
       row = table.row(i)
-      #print row
-      print "{H offset from int: %.3f, K offset from int: %.3f, L offset from int: %.3f }" % ( row["H offset from int"],  row["K offset from int"], row["L offset from int"])
+      print("{{H offset from int: {:.3f}, K offset from int: {:.3f}, L offset from int: {:.3f} }}".
+            format(row["H offset from int"], row["K offset from int"], row["L offset from int"]))
 
 
 Output:

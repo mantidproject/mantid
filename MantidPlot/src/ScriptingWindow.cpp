@@ -1,46 +1,55 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //-------------------------------------------
 // Includes
 //-------------------------------------------
 #include "ScriptingWindow.h"
 #include "ApplicationWindow.h"
+#include "MantidQtWidgets/Common/DropEventHelper.h"
+#include "MantidQtWidgets/Common/TSVSerialiser.h"
 #include "MultiTabScriptInterpreter.h"
-#include "ScriptingEnv.h"
 #include "ScriptFileInterpreter.h"
-#include "MantidQtAPI/TSVSerialiser.h"
-#include "pixmaps.h"
+#include "ScriptingEnv.h"
+#include <MantidQtWidgets/Common/pixmaps.h>
 
 // Mantid
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
-#include "MantidQtAPI/IProjectSerialisable.h"
+#include "MantidQtWidgets/Common/IProjectSerialisable.h"
 
 // MantidQt
-#include "MantidQtAPI/HelpWindow.h"
-#include "MantidQtMantidWidgets/ScriptEditor.h"
+#include "MantidQtWidgets/Common/HelpWindow.h"
+#include "MantidQtWidgets/Common/ScriptEditor.h"
 
 // Qt
-#include <QTextEdit>
-#include <QMenuBar>
-#include <QMenu>
 #include <QAction>
+#include <QApplication>
 #include <QCloseEvent>
-#include <QSettings>
+#include <QDateTime>
+#include <QFileInfo>
+#include <QList>
+#include <QMenu>
+#include <QMenuBar>
+#include <QMessageBox>
 #include <QPrintDialog>
 #include <QPrinter>
-#include <QDateTime>
-#include <QFileDialog>
-#include <QMessageBox>
-#include <QApplication>
+#include <QSettings>
+#include <QTextEdit>
 #include <QTextStream>
-#include <QList>
 #include <QUrl>
 
 using namespace Mantid;
+using namespace MantidQt::API;
+namespace DropEventHelper = MantidQt::MantidWidgets::DropEventHelper;
 
 namespace {
 /// static logger
 Mantid::Kernel::Logger g_log("ScriptingWindow");
-}
+} // namespace
 
 //-------------------------------------------
 // Public member functions
@@ -180,7 +189,7 @@ void ScriptingWindow::showEvent(QShowEvent *event) {
 }
 
 /**
- * Open a script directly. This is here for backwards compatability with the old
+ * Open a script directly. This is here for backwards compatibility with the old
  * ScriptWindow
  * class
  * @param filename :: The file name
@@ -196,7 +205,8 @@ void ScriptingWindow::open(const QString &filename, bool newtab) {
  * @param mode :: The execution type
  * */
 void ScriptingWindow::executeCurrentTab(const Script::ExecutionMode mode) {
-  m_manager->executeAll(mode);
+  // Async will always return true before executing
+  m_failureFlag = !m_manager->executeAll(mode);
 }
 
 //-------------------------------------------
@@ -421,8 +431,8 @@ void ScriptingWindow::clearScriptVariables() {
  * Opens the Qt help windows for the scripting window.
  */
 void ScriptingWindow::showHelp() {
-  MantidQt::API::HelpWindow::showCustomInterface(NULL,
-                                                 QString("ScriptingWindow"));
+  MantidQt::API::HelpWindow::showCustomInterface(nullptr,
+                                                 QString("Scripting Window"));
 }
 
 /**
@@ -430,16 +440,16 @@ void ScriptingWindow::showHelp() {
  */
 void ScriptingWindow::showPythonHelp() {
   MantidQt::API::HelpWindow::showPage(
-      NULL, QString("qthelp://org.mantidproject/doc/api/python/index.html"));
+      nullptr, QString("qthelp://org.mantidproject/doc/api/python/index.html"));
 }
 
 /**
-  * Calls MultiTabScriptInterpreter to save the currently opened
-  * script file names to a string.
-  *
-  * @param app :: the current application window instance
-  * @return script file names in the matid project format
-  */
+ * Calls MultiTabScriptInterpreter to save the currently opened
+ * script file names to a string.
+ *
+ * @param app :: the current application window instance
+ * @return script file names in the matid project format
+ */
 std::string ScriptingWindow::saveToProject(ApplicationWindow *app) {
   (void)app; // suppress unused variable warnings
   return m_manager->saveToString().toStdString();
@@ -515,7 +525,8 @@ void ScriptingWindow::customEvent(QEvent *event) {
 void ScriptingWindow::dragEnterEvent(QDragEnterEvent *de) {
   const QMimeData *mimeData = de->mimeData();
   if (mimeData->hasUrls()) {
-    if (extractPyFiles(mimeData->urls()).size() > 0) {
+    const auto pythonFilenames = DropEventHelper::extractPythonFiles(de);
+    if (!pythonFilenames.empty()) {
       de->acceptProposedAction();
     }
   }
@@ -528,7 +539,8 @@ void ScriptingWindow::dragEnterEvent(QDragEnterEvent *de) {
 void ScriptingWindow::dragMoveEvent(QDragMoveEvent *de) {
   const QMimeData *mimeData = de->mimeData();
   if (mimeData->hasUrls()) {
-    if (extractPyFiles(mimeData->urls()).size() > 0) {
+    const auto pythonFilenames = DropEventHelper::extractPythonFiles(de);
+    if (!pythonFilenames.empty()) {
       de->accept();
     }
   }
@@ -541,11 +553,11 @@ void ScriptingWindow::dragMoveEvent(QDragMoveEvent *de) {
 void ScriptingWindow::dropEvent(QDropEvent *de) {
   const QMimeData *mimeData = de->mimeData();
   if (mimeData->hasUrls()) {
-    QStringList filenames = extractPyFiles(mimeData->urls());
+    const auto filenames = DropEventHelper::extractPythonFiles(de);
     de->acceptProposedAction();
 
-    for (int i = 0; i < filenames.size(); ++i) {
-      m_manager->openInNewTab(filenames[i]);
+    for (const auto &name : filenames) {
+      m_manager->openInNewTab(name);
     }
   }
 }
@@ -894,17 +906,6 @@ Script::ExecutionMode ScriptingWindow::getExecutionMode() const {
     return Script::Serialised;
 }
 
-QStringList ScriptingWindow::extractPyFiles(const QList<QUrl> &urlList) const {
-  QStringList filenames;
-  for (int i = 0; i < urlList.size(); ++i) {
-    QString fName = urlList[i].toLocalFile();
-    if (fName.size() > 0) {
-      QFileInfo fi(fName);
-
-      if (fi.suffix().toUpper() == "PY") {
-        filenames.append(fName);
-      }
-    }
-  }
-  return filenames;
+const Script &ScriptingWindow::getCurrentScriptRunner() {
+  return m_manager->currentInterpreter()->getRunner();
 }

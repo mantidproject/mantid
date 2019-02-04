@@ -1,12 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidWorkflowAlgorithms/EQSANSDarkCurrentSubtraction2.h"
-#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/AlgorithmProperty.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/PropertyManager.h"
+#include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
 #include "Poco/Path.h"
@@ -132,7 +140,7 @@ void EQSANSDarkCurrentSubtraction2::exec() {
 
     std::string darkWSOutputName =
         getPropertyValue("OutputDarkCurrentWorkspace");
-    if (!(darkWSOutputName.size() == 0))
+    if (!darkWSOutputName.empty())
       setProperty("OutputDarkCurrentWorkspace", darkWS);
     AnalysisDataService::Instance().addOrReplace(darkWSName, darkWS);
     reductionManager->declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
@@ -208,11 +216,11 @@ void EQSANSDarkCurrentSubtraction2::exec() {
   }
 
   progress.report("Subtracting dark current");
+  const auto &spectrumInfo = inputWS->spectrumInfo();
   // Loop over all tubes and patch as necessary
   for (int i = 0; i < numberOfSpectra; i++) {
-    IDetector_const_sptr det = inputWS->getDetector(i);
     // If this detector is a monitor, skip to the next one
-    if (det->isMasked())
+    if (spectrumInfo.isMasked(i))
       continue;
 
     const MantidVec &YDarkValues = scaledDarkWS->readY(i);

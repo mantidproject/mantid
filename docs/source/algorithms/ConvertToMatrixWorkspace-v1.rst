@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -25,8 +25,8 @@ Usage
    # Run the conversion algorithm
    histo_ws = ConvertToMatrixWorkspace(event_ws)
    # Check that the original workspace and the converted workspace have the same shape
-   print event_ws.getNumberHistograms(), event_ws.blocksize()
-   print histo_ws.getNumberHistograms(), histo_ws.blocksize()
+   print("{} {}".format(event_ws.getNumberHistograms(), event_ws.blocksize()))
+   print("{} {}".format(histo_ws.getNumberHistograms(), histo_ws.blocksize()))
 
 .. testoutput:: ConvertToMatrixWorkspaceSimpleExample
 
@@ -43,8 +43,8 @@ Usage
    # Run the conversion algorithm
    histo_ws_rebinned = ConvertToMatrixWorkspace(event_ws_rebinned)
    # Check that the original workspace and the converted workspace have the same shape
-   print event_ws_rebinned.getNumberHistograms(), event_ws_rebinned.blocksize()
-   print histo_ws_rebinned.getNumberHistograms(), histo_ws_rebinned.blocksize()
+   print("{} {}".format(event_ws_rebinned.getNumberHistograms(), event_ws_rebinned.blocksize()))
+   print("{} {}".format(histo_ws_rebinned.getNumberHistograms(), histo_ws_rebinned.blocksize()))
 
 Output:
 

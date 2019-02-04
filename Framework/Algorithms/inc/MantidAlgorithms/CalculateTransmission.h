@@ -1,10 +1,13 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_CALCULATETRANSMISSION_H_
 #define MANTID_ALGORITHMS_CALCULATETRANSMISSION_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/ParallelAlgorithm.h"
 #include "MantidKernel/System.h"
 
 namespace Mantid {
@@ -44,29 +47,8 @@ namespace Algorithms {
 
     @author Russell Taylor, Tessella Support Services plc
     @date 22/01/2009
-
-    Copyright &copy; 2009-2010 ISIS Rutherford Appleton Laboratory, NScD Oak
-   Ridge National Laboratory & European Spallation Source
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport CalculateTransmission : public API::Algorithm {
+class DLLExport CalculateTransmission : public API::ParallelAlgorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "CalculateTransmission"; }
@@ -79,6 +61,9 @@ public:
 
   /// Algorithm's version
   int version() const override { return (1); }
+  const std::vector<std::string> seeAlso() const override {
+    return {"CalculateTransmissionBeamSpreader", "ApplyTransmissionCorrection"};
+  }
   /// Algorithm's category for identification
   const std::string category() const override {
     return "SANS;CorrectionFunctions\\TransmissionCorrections";
@@ -87,7 +72,7 @@ public:
 private:
   /// stores an estimate of the progress so far as a proportion (starts at zero
   /// goes to 1.0)
-  mutable double m_done = 0.0;
+  mutable double m_done{0.0};
 
   /// Initialisation code
   void init() override;
@@ -118,7 +103,7 @@ private:
                        API::MatrixWorkspace_sptr directWS, size_t index);
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHMS_CALCULATETRANSMISSION_H_*/

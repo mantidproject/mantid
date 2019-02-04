@@ -1,6 +1,13 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MDALGORITHMS_MULTIPLYMDTEST_H_
 #define MANTID_MDALGORITHMS_MULTIPLYMDTEST_H_
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidMDAlgorithms/MultiplyMD.h"
 #include "MantidTestHelpers/BinaryOperationMDTestHelper.h"
@@ -62,7 +69,7 @@ public:
     TS_ASSERT(ws);
     if (!ws)
       return;
-    IMDIterator *it = ws->createIterator(NULL);
+    auto it = ws->createIterator(nullptr);
     do {
       TS_ASSERT_EQUALS(it->getNumEvents(), 1);
       TS_ASSERT_DELTA(it->getInnerSignal(0), expectedSignal, 1e-5);

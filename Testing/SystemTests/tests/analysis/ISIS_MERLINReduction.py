@@ -1,4 +1,10 @@
-﻿#pylint: disable=invalid-name
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
+#pylint: disable=invalid-name
 """ Sample MERLIN reduction scrip """
 from Direct.ReductionWrapper import *
 try:
@@ -54,6 +60,7 @@ class ReduceMERLIN(ReductionWrapper):
         """ sets properties defaults for the instrument with Name"""
         ReductionWrapper.__init__(self,'MER',web_var)
 #----------------------------------------------------------------------------------------------------------------------
+
 
 if __name__=="__main__":
     #import os

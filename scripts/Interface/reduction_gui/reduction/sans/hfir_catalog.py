@@ -1,10 +1,17 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
 """
     Data catalog for HFIR SANS
 """
-from data_cat import DataCatalog as BaseCatalog
-from data_cat import DataSet
-from data_cat import DataType
+from __future__ import (absolute_import, division, print_function)
+from reduction_gui.reduction.sans.data_cat import DataCatalog as BaseCatalog
+from reduction_gui.reduction.sans.data_cat import DataSet, DataType
+from reduction_gui.reduction.scripter import execute_script
 import os
 import time
 
@@ -17,7 +24,7 @@ except:
     HAS_MANTID = False
 
 try:
-    import mantidplot
+    import mantidplot  # noqa
     IN_MANTIDPLOT = True
 except:
     IN_MANTIDPLOT = False
@@ -40,7 +47,7 @@ class HFIRDataSet(DataSet):
         try:
             if IN_MANTIDPLOT:
                 script = "LoadSpice2D(Filename='%s', OutputWorkspace='%s')" % (file_path, outputWorkspace)
-                mantidplot.runPythonScript(script, True)
+                execute_script(script)
                 if not AnalysisDataService.doesExist(outputWorkspace):
                     return False
             else:
@@ -94,7 +101,7 @@ class HFIRDataSet(DataSet):
 
 
 class DataCatalog(BaseCatalog):
-    extension = "xml"
+    extension = ["xml"]
     data_set_cls = HFIRDataSet
 
     def __init__(self, replace_db=False):

@@ -1,10 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef UNGROUPWORKSPACESTEST_H_
 #define UNGROUPWORKSPACESTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidAlgorithms/UnGroupWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAlgorithms/UnGroupWorkspace.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
 class UnGroupWorkspaceTest : public CxxTest::TestSuite {
 public:
@@ -101,8 +108,8 @@ private:
     auto newGroup = boost::make_shared<Mantid::API::WorkspaceGroup>();
 
     auto &ads = Mantid::API::AnalysisDataService::Instance();
-    for (auto it = inputs.begin(); it != inputs.end(); ++it) {
-      auto ws = addTestMatrixWorkspaceToADS(*it);
+    for (const auto &input : inputs) {
+      auto ws = addTestMatrixWorkspaceToADS(input);
       newGroup->addWorkspace(ws);
     }
     ads.add(name, newGroup);
@@ -111,7 +118,7 @@ private:
   Mantid::API::MatrixWorkspace_sptr
   addTestMatrixWorkspaceToADS(const std::string &name) {
     auto &ads = Mantid::API::AnalysisDataService::Instance();
-    auto ws = WorkspaceCreationHelper::Create2DWorkspace(1, 1);
+    auto ws = WorkspaceCreationHelper::create2DWorkspace(1, 1);
     ads.add(name, ws);
     return ws;
   }
@@ -119,9 +126,9 @@ private:
   void removeFromADS(const std::vector<std::string> &members) {
     auto &ads = Mantid::API::AnalysisDataService::Instance();
 
-    for (auto it = members.begin(); it != members.end(); ++it) {
-      if (ads.doesExist(*it))
-        ads.remove(*it);
+    for (const auto &member : members) {
+      if (ads.doesExist(member))
+        ads.remove(member);
     }
   }
 };

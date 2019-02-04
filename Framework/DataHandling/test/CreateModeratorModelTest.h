@@ -1,14 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAHANDLING_CREATEMODERATORMODELTEST_H_
 #define MANTID_DATAHANDLING_CREATEMODERATORMODELTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidDataHandling/CreateModeratorModel.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/IkedaCarpenterModerator.h"
 
-using Mantid::DataHandling::CreateModeratorModel;
 using Mantid::API::IAlgorithm_sptr;
+using Mantid::DataHandling::CreateModeratorModel;
 
 class CreateModeratorModelTest : public CxxTest::TestSuite {
 public:
@@ -113,7 +119,7 @@ private:
 
   Mantid::API::MatrixWorkspace_sptr createTestWorkspace() {
     using Mantid::API::MatrixWorkspace_sptr;
-    return WorkspaceCreationHelper::Create2DWorkspace(1, 10);
+    return WorkspaceCreationHelper::create2DWorkspace(1, 10);
   }
 
   const std::string m_inputName;

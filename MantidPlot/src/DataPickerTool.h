@@ -46,7 +46,7 @@ public:
   enum Mode { Display, Move, Remove };
   enum MoveMode { Free, Vertical, Horizontal };
   DataPickerTool(Graph *graph, ApplicationWindow *app, Mode mode,
-                 const QObject *status_target = NULL,
+                 const QObject *status_target = nullptr,
                  const char *status_slot = "");
   ~DataPickerTool() override;
   Mode getMode() const { return d_mode; }
@@ -59,8 +59,8 @@ public:
 signals:
   /** Emitted whenever a new message should be presented to the user.
    *
-   * You don't have to connect to this signal if you alreay specified a reciever
-   *during initialization.
+   * You don't have to connect to this signal if you already specified a
+   *receiver during initialization.
    */
   void statusText(const QString &);
   //! Emitted whenever a new data point has been selected.

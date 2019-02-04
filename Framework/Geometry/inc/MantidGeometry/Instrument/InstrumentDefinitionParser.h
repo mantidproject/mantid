@@ -1,20 +1,26 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_GEOMETRY_INSTRUMENTDEFINITIONPARSER_H_
 #define MANTID_GEOMETRY_INSTRUMENTDEFINITIONPARSER_H_
 
-#include <string>
-#include <vector>
-#include <Poco/AutoPtr.h>
-#include <Poco/DOM/Document.h>
-#include "MantidKernel/System.h"
-#include "MantidKernel/V3D.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/IDFObject.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/V3D.h"
+#include <Poco/AutoPtr.h>
+#include <Poco/DOM/Document.h>
+#include <string>
+#include <vector>
 
 namespace Poco {
 namespace XML {
 class Element;
 }
-}
+} // namespace Poco
 
 namespace Mantid {
 namespace Kernel {
@@ -26,7 +32,8 @@ class ICompAssembly;
 class IComponent;
 class Instrument;
 class ObjComponent;
-class Object;
+class IObject;
+class ShapeFactory;
 
 /** Creates an instrument data from a XML instrument description file
 
@@ -34,26 +41,6 @@ class Object;
   @date 19/11/2007
   @author Anders Markvardsen, ISIS, RAL
   @date 7/3/2008
-
-  Copyright &copy; 2007-2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
-
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>
 */
 class DLLExport InstrumentDefinitionParser {
 public:
@@ -77,7 +64,8 @@ public:
   };
 
   /// Parse XML contents
-  boost::shared_ptr<Instrument> parseXML(Kernel::ProgressBase *prog);
+  boost::shared_ptr<Instrument>
+  parseXML(Kernel::ProgressBase *progressReporter);
 
   /// Add/overwrite any parameters specified in instrument with param values
   /// specified in <component-link> XML elements
@@ -180,6 +168,12 @@ private:
                                const std::string &filename, IdList &idList,
                                const std::string &category);
 
+  void createGridDetector(Geometry::ICompAssembly *parent,
+                          const Poco::XML::Element *pLocElem,
+                          const Poco::XML::Element *pCompElem,
+                          const std::string &filename,
+                          const Poco::XML::Element *pType);
+
   void createRectangularDetector(Geometry::ICompAssembly *parent,
                                  const Poco::XML::Element *pLocElem,
                                  const Poco::XML::Element *pCompElem,
@@ -237,6 +231,57 @@ private:
   /// This method return this sequence as a xml string
   Poco::AutoPtr<Poco::XML::Document>
   convertLocationsElement(const Poco::XML::Element *pElem);
+
+  /// return 0 if the attribute doesn't exist. This is to follow the
+  /// behavior of atof which always returns 0 if there is a problem.
+  double attrToDouble(const Poco::XML::Element *pElem, const std::string &name);
+
+  /// Populate vectors of pointers to type and component xml elements
+  void getTypeAndComponentPointers(
+      const Poco::XML::Element *pRootElem,
+      std::vector<Poco::XML::Element *> &typeElems,
+      std::vector<Poco::XML::Element *> &compElems) const;
+
+  /// Throw exception if type name is not unique in the IDF
+  void throwIfTypeNameNotUnique(const std::string &filename,
+                                const std::string &typeName) const;
+
+  /// Record type as an assembly if it contains a component, otherwise create a
+  /// shape for it
+  void
+  createShapeIfTypeIsNotAnAssembly(Mantid::Geometry::ShapeFactory &shapeCreator,
+                                   size_t iType, Poco::XML::Element *pTypeElem,
+                                   const std::string &typeName);
+
+  /// Adjust each type which contains a \<combine-components-into-one-shape\>
+  /// element
+  void adjustTypesContainingCombineComponentsElement(
+      ShapeFactory &shapeCreator, const std::string &filename,
+      const std::vector<Poco::XML::Element *> &typeElems, size_t numberOfTypes);
+
+  /// Create a vector of elements which contain a \<parameter\>
+  void createVectorOfElementsContainingAParameterElement(
+      Poco::XML::Element *pRootElem);
+
+  /// Check IdList
+  void checkIdListExistsAndDefinesEnoughIDs(IdList idList,
+                                            Poco::XML::Element *pElem,
+                                            const std::string &filename) const;
+
+  /// Check component has a \<location\> or \<locations\> element
+  void checkComponentContainsLocationElement(Poco::XML::Element *pElem,
+                                             const std::string &filename) const;
+
+  /// Aggregate locations and IDs for components
+  void parseLocationsForEachTopLevelComponent(
+      Kernel::ProgressBase *progressReporter, const std::string &filename,
+      const std::vector<Poco::XML::Element *> &compElems);
+
+  /// Collect some information about types for later use
+  void
+  collateTypeInformation(const std::string &filename,
+                         const std::vector<Poco::XML::Element *> &typeElems,
+                         ShapeFactory &shapeCreator);
 
 public: // for testing
   /// return absolute position of point which is set relative to the
@@ -306,7 +351,8 @@ private:
    */
   std::map<std::string, bool> isTypeAssembly;
   /// map which maps the type name to a shared pointer to a geometric shape
-  std::map<std::string, boost::shared_ptr<Geometry::Object>> mapTypeNameToShape;
+  std::map<std::string, boost::shared_ptr<Geometry::IObject>>
+      mapTypeNameToShape;
   /// Container to hold all detectors and monitors added to the instrument. Used
   /// for 'facing' these to component specified under \<defaults\>. NOTE: Seems
   /// unused, ever.
@@ -341,9 +387,9 @@ private:
 
   /** Stripped down vector that holds position in terms of spherical
    * coordinates,
-    *  Needed when processing instrument definition files that use the 'Ariel
+   *  Needed when processing instrument definition files that use the 'Ariel
    * format'
-    */
+   */
   struct SphVec {
     ///@cond Exclude from doxygen documentation
     double r, theta, phi;

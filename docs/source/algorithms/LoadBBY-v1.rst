@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -26,7 +26,7 @@ Usage
 
    ws = LoadBBY('BBY0000014.tar');
 
-   print "Number of spectra:", ws.getNumberHistograms()
+   print("Number of spectra: {}".format(ws.getNumberHistograms()))
 
 Output:
 

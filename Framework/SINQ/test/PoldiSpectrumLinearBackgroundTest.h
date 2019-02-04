@@ -1,16 +1,21 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_SINQ_POLDISPECTRUMLINEARBACKGROUNDTEST_H_
 #define MANTID_SINQ_POLDISPECTRUMLINEARBACKGROUNDTEST_H_
 
-#include <cxxtest/TestSuite.h>
-
 #include "MantidSINQ/PoldiUtilities/PoldiSpectrumLinearBackground.h"
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/AlgorithmManager.h"
-
 #include "MantidCurveFitting/Jacobian.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Poldi;
 using namespace Mantid::API;
@@ -66,7 +71,7 @@ public:
 
     // valid workspace with 10 bins
     MatrixWorkspace_sptr ws =
-        WorkspaceCreationHelper::Create2DWorkspace123(1, 10);
+        WorkspaceCreationHelper::create2DWorkspace123(1, 10);
     TS_ASSERT_THROWS_NOTHING(castedFunction->setWorkspace(ws));
     TS_ASSERT_EQUALS(castedFunction->getTimeBinCount(), 10);
   }
@@ -116,7 +121,7 @@ public:
     /* Luckily, these are exactly the data described by this function,
      * using A1 = 1.0, so this is used as a test */
     MatrixWorkspace_sptr ws =
-        WorkspaceCreationHelper::Create2DWorkspaceWhereYIsWorkspaceIndex(20, 2);
+        WorkspaceCreationHelper::create2DWorkspaceWhereYIsWorkspaceIndex(20, 2);
 
     IFunction_sptr function = FunctionFactory::Instance().createFunction(
         "PoldiSpectrumLinearBackground");

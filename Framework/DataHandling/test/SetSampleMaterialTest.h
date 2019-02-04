@@ -1,12 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef SetSampleMaterialTEST_H_
 #define SetSampleMaterialTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/SetSampleMaterial.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Sample.h"
+#include "MantidDataHandling/SetSampleMaterial.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -79,7 +85,7 @@ public:
     TS_ASSERT_DELTA(sampleMaterial.absorbXSection(NeutronAtom::ReferenceLambda),
                     0.0925, 0.0001);
     TS_ASSERT_DELTA(
-        sampleMaterial.cohScatterLength(NeutronAtom::ReferenceLambda), 4.8615,
+        sampleMaterial.cohScatterLength(NeutronAtom::ReferenceLambda), 4.8614,
         0.0001);
     TS_ASSERT_DELTA(
         sampleMaterial.totalScatterLengthSqrd(NeutronAtom::ReferenceLambda),
@@ -128,7 +134,7 @@ public:
     TS_ASSERT_DELTA(sampleMaterial.absorbXSection(NeutronAtom::ReferenceLambda),
                     0.0925, 0.0001);
     TS_ASSERT_DELTA(
-        sampleMaterial.cohScatterLength(NeutronAtom::ReferenceLambda), 4.9965,
+        sampleMaterial.cohScatterLength(NeutronAtom::ReferenceLambda), 4.8614,
         0.0001);
     TS_ASSERT_DELTA(
         sampleMaterial.totalScatterLengthSqrd(NeutronAtom::ReferenceLambda),
@@ -219,7 +225,7 @@ public:
     TS_ASSERT_DELTA(sampleMaterial.absorbXSection(NeutronAtom::ReferenceLambda),
                     0.0925, 0.0001);
     TS_ASSERT_DELTA(
-        sampleMaterial.cohScatterLength(NeutronAtom::ReferenceLambda), 4.8615,
+        sampleMaterial.cohScatterLength(NeutronAtom::ReferenceLambda), 4.8614,
         0.0001);
     TS_ASSERT_DELTA(
         sampleMaterial.totalScatterLengthSqrd(NeutronAtom::ReferenceLambda),
@@ -261,7 +267,7 @@ public:
     TS_ASSERT_DELTA(sampleMaterial.absorbXSection(NeutronAtom::ReferenceLambda),
                     4.49, 0.0001);
     TS_ASSERT_DELTA(
-        sampleMaterial.cohScatterLength(NeutronAtom::ReferenceLambda), 10.2877,
+        sampleMaterial.cohScatterLength(NeutronAtom::ReferenceLambda), 10.3,
         0.0001);
     const double totScattLength =
         sampleMaterial.totalScatterLength(NeutronAtom::ReferenceLambda);

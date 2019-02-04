@@ -1,8 +1,14 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name
 """Testing of the VATES quantification using
 the TobyFitResolutionModel
 """
-from stresstesting import MantidStressTest
+from systemtesting import MantidSystemTest
 from mantid.simpleapi import *
 
 
@@ -18,7 +24,7 @@ def create_cuboid_xml(xlength,ylength,zlength):
     return xml % {"xpt": xlength/2.0,"ypt":ylength/2.0,"zpt":zlength/2.0}
 
 
-class TobyFitResolutionSimulationTest(MantidStressTest):
+class TobyFitResolutionSimulationTest(MantidSystemTest):
 
     _success = False
 
@@ -113,10 +119,10 @@ class TobyFitResolutionSimulationTest(MantidStressTest):
 
         # Check
         ref_file = LoadMD(Filename='TobyFitResolutionSimulationTest.nxs')
-        result = CheckWorkspacesMatch(Workspace1=slice_ws,
-                                      Workspace2=ref_file,
-                                      Tolerance=1e-08)
-        self._success = ('success' in result.lower())
+        result = CompareWorkspaces(Workspace1=slice_ws,
+                                   Workspace2=ref_file,
+                                   Tolerance=1e-08)
+        self._success = result[0]
 
         if not self._success:
             SaveMD(InputWorkspace=slice_ws,

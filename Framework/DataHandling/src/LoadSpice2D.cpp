@@ -1,55 +1,59 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadSpice2D.h"
-#include "MantidDataHandling/XmlHandler.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataHandling/XmlHandler.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/Strings.h"
-#include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/UnitFactory.h"
 
-#include <boost/regex.hpp>
-#include <boost/shared_array.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/regex.hpp>
+#include <boost/shared_array.hpp>
 #include <boost/shared_ptr.hpp>
 
-#include <Poco/Path.h>
 #include <MantidKernel/StringTokenizer.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
-#include <Poco/DOM/NodeList.h>
 #include <Poco/DOM/Node.h>
+#include <Poco/DOM/NodeList.h>
 #include <Poco/DOM/Text.h>
+#include <Poco/Path.h>
 #include <Poco/SAX/InputSource.h>
 
 #include <algorithm>
 #include <iostream>
 #include <sstream>
 #include <string>
-#include <vector>
 #include <utility>
+#include <vector>
 
 using Poco::XML::DOMParser;
 using Poco::XML::Document;
 using Poco::XML::Element;
-using Poco::XML::NodeList;
-using Poco::XML::Node;
-using Poco::XML::Text;
 
 namespace Mantid {
 namespace DataHandling {
 
-using Mantid::Kernel::Direction;
 using Mantid::API::WorkspaceProperty;
+using Mantid::Kernel::Direction;
+using Types::Core::DateAndTime;
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;
@@ -79,9 +83,9 @@ bool from_string(T &t, const std::string &s,
  */
 void store_value(DataObjects::Workspace2D_sptr ws, int specID, double value,
                  double error, double wavelength, double dwavelength) {
-  MantidVec &X = ws->dataX(specID);
-  MantidVec &Y = ws->dataY(specID);
-  MantidVec &E = ws->dataE(specID);
+  auto &X = ws->mutableX(specID);
+  auto &Y = ws->mutableY(specID);
+  auto &E = ws->mutableE(specID);
   // The following is mostly to make Mantid happy by defining a histogram with
   // a single bin around the neutron wavelength
   X[0] = wavelength - dwavelength / 2.0;
@@ -98,7 +102,7 @@ void store_value(DataObjects::Workspace2D_sptr ws, int specID, double value,
  * be used
  */
 int LoadSpice2D::confidence(Kernel::FileDescriptor &descriptor) const {
-  if (descriptor.extension().compare(".xml") != 0)
+  if (descriptor.extension() != ".xml")
     return 0;
 
   std::istream &is = descriptor.data();
@@ -123,7 +127,7 @@ int LoadSpice2D::confidence(Kernel::FileDescriptor &descriptor) const {
     // Get pointer to root element
     Element *pRootElem = pDoc->documentElement();
     if (pRootElem) {
-      if (pRootElem->tagName().compare("SPICErack") == 0) {
+      if (pRootElem->tagName() == "SPICErack") {
         confidence = 80;
       }
     }
@@ -168,6 +172,8 @@ void LoadSpice2D::exec() {
   setTimes();
   std::map<std::string, std::string> metadata =
       m_xmlHandler.get_metadata("Detector");
+
+  setSansSpiceXmlFormatVersion(metadata);
   setWavelength(metadata);
 
   std::vector<int> data = getData("//Data");
@@ -186,7 +192,6 @@ void LoadSpice2D::exec() {
 
   // run load instrument
   std::string instrument = metadata["Header/Instrument"];
-  runLoadInstrument(instrument, m_workspace);
 
   // ugly hack for Biosans wing detector:
   // it tests if there is metadata tagged with the wing detector
@@ -195,15 +200,11 @@ void LoadSpice2D::exec() {
     double angle = boost::lexical_cast<double>(
         metadata["Motor_Positions/det_west_wing_rot"]);
     rotateDetector(-angle);
-    // To make the property is set and the detector rotates!
-    runLoadInstrument(instrument, m_workspace);
   }
-
   // sample_detector_distances
-  double detector_distance = detectorDistance(metadata);
-  double detector_tranlation = detectorTranslation(metadata);
-  moveDetector(detector_distance, detector_tranlation);
-
+  detectorDistance(metadata);
+  detectorTranslation(metadata);
+  runLoadInstrument(instrument, m_workspace);
   setProperty("OutputWorkspace", m_workspace);
 }
 
@@ -218,7 +219,7 @@ LoadSpice2D::parseDetectorDimensions(const std::string &dims_str) {
 
   std::pair<int, int> dims = std::make_pair(0, 0);
 
-  boost::regex b_re_sig("INT\\d+\\[(\\d+),(\\d+)\\]");
+  boost::regex b_re_sig(R"(INT\d+\[(\d+),(\d+)\])");
   if (boost::regex_match(dims_str, b_re_sig)) {
     boost::match_results<std::string::const_iterator> match;
     boost::regex_search(dims_str, match, b_re_sig);
@@ -266,7 +267,7 @@ void LoadSpice2D::setInputPropertiesAsMemberProperties() {
 }
 
 /**
- * Gets the wavelenght and wavelength spread from the  metadata
+ * Gets the wavelength and wavelength spread from the  metadata
  * and sets them as class attributes
  */
 void LoadSpice2D::setWavelength(std::map<std::string, std::string> &metadata) {
@@ -314,7 +315,8 @@ std::vector<int> LoadSpice2D::getData(const std::string &dataXpath = "//Data") {
 
   // iterate every detector in the xml file
   for (const auto &detector : detectors) {
-    std::string detectorXpath = dataXpath + "/" + detector;
+    std::string detectorXpath =
+        std::string(dataXpath).append("/").append(detector);
     // type : INT32[192,256]
     std::map<std::string, std::string> attributes =
         m_xmlHandler.get_attributes_from_tag(detectorXpath);
@@ -322,7 +324,7 @@ std::vector<int> LoadSpice2D::getData(const std::string &dataXpath = "//Data") {
 
     // Horrible hack:
     // Some old files had a: //Data/DetectorWing with dimensions:
-    // 16 x 256 = 4096. This must be igored as it is not in the IDF.
+    // 16 x 256 = 4096. This must be ignored as it is not in the IDF.
     if (detectorXpath.find("DetectorWing") != std::string::npos &&
         dims.first * dims.second <= 4096)
       break;
@@ -465,6 +467,7 @@ void LoadSpice2D::setBeamTrapRunProperty(
 
   // store trap diameters in use
   std::vector<double> trapDiametersInUse;
+  trapDiametersInUse.reserve(trapIndexInUse.size());
   for (auto index : trapIndexInUse) {
     trapDiametersInUse.push_back(trapDiameters[index]);
   }
@@ -503,6 +506,18 @@ void LoadSpice2D::setMetadataAsRunProperties(
   m_workspace->mutableRun().setStartAndEndTime(m_startTime, m_endTime);
 
   // sample thickness
+  // XML 1.03: source distance is now in meters
+  double sample_thickness;
+  from_string<double>(sample_thickness, metadata["Header/Sample_Thickness"],
+                      std::dec);
+  if (m_sansSpiceXmlFormatVersion >= 1.03) {
+    g_log.debug()
+        << "sans_spice_xml_format_version >= 1.03 :: sample_thickness "
+           "in mm. Converting to cm...";
+    sample_thickness *= 0.1;
+  }
+  addRunProperty<double>("sample-thickness", sample_thickness, "cm");
+
   addRunProperty<double>(metadata, "Header/Sample_Thickness",
                          "sample-thickness", "mm");
 
@@ -510,13 +525,25 @@ void LoadSpice2D::setMetadataAsRunProperties(
                          "source-aperture-diameter", "mm");
   addRunProperty<double>(metadata, "Header/sample_aperture_size",
                          "sample-aperture-diameter", "mm");
-  addRunProperty<double>(metadata, "Header/source_distance",
-                         "source-sample-distance", "mm");
+
+  // XML 1.03: source distance is now in meters
+  double source_distance;
+  from_string<double>(source_distance, metadata["Header/source_distance"],
+                      std::dec);
+  if (m_sansSpiceXmlFormatVersion >= 1.03) {
+    g_log.debug() << "sans_spice_xml_format_version >= 1.03 :: source_distance "
+                     "in meters. Converting to mm...";
+    source_distance *= 1000.0;
+  }
+  addRunProperty<double>("source-sample-distance", source_distance, "mm");
+
   addRunProperty<int>(metadata, "Motor_Positions/nguides", "number-of-guides",
                       "");
 
   addRunProperty<double>("wavelength", m_wavelength, "Angstrom");
   addRunProperty<double>("wavelength-spread", m_dwavelength, "Angstrom");
+  addRunProperty<double>("wavelength-spread-ratio",
+                         m_dwavelength / m_wavelength);
 
   addRunProperty<double>(metadata, "Counters/monitor", "monitor", "");
   addRunProperty<double>(metadata, "Counters/time", "timer", "sec");
@@ -540,10 +567,10 @@ void LoadSpice2D::setMetadataAsRunProperties(
  * the file
  * Last Changes:
  * If SDD tag is available in the metadata set that as sample detector distance
- * @return : sample_detector_distance
+ * Puts a numeric series in the log with the value of sample_detector_distance
  */
-double
-LoadSpice2D::detectorDistance(std::map<std::string, std::string> &metadata) {
+void LoadSpice2D::detectorDistance(
+    std::map<std::string, std::string> &metadata) {
 
   double sample_detector_distance = 0, sample_detector_distance_offset = 0,
          sample_si_window_distance = 0;
@@ -551,17 +578,14 @@ LoadSpice2D::detectorDistance(std::map<std::string, std::string> &metadata) {
   // check if it's the new format
   if (metadata.find("Motor_Positions/sample_det_dist") != metadata.end()) {
     // Old Format
-
     from_string<double>(sample_detector_distance,
                         metadata["Motor_Positions/sample_det_dist"], std::dec);
     sample_detector_distance *= 1000.0;
     addRunProperty<double>("sample-detector-distance", sample_detector_distance,
                            "mm");
-
     sample_detector_distance_offset =
         addRunProperty<double>(metadata, "Header/tank_internal_offset",
                                "sample-detector-distance-offset", "mm");
-
     sample_si_window_distance = addRunProperty<double>(
         metadata, "Header/sample_to_flange", "sample-si-window-distance", "mm");
 
@@ -570,12 +594,9 @@ LoadSpice2D::detectorDistance(std::map<std::string, std::string> &metadata) {
     from_string<double>(sample_detector_distance,
                         metadata["Motor_Positions/flange_det_dist"], std::dec);
     sample_detector_distance *= 1000.0;
-
     addRunProperty<double>("sample-detector-distance-offset", 0, "mm");
-
     addRunProperty<double>("sample-detector-distance", sample_detector_distance,
                            "mm");
-
     sample_si_window_distance = addRunProperty<double>(
         metadata, "Header/sample_to_flange", "sample-si-window-distance", "mm");
   }
@@ -605,58 +626,35 @@ LoadSpice2D::detectorDistance(std::map<std::string, std::string> &metadata) {
   addRunProperty<double>("total-sample-detector-distance",
                          total_sample_detector_distance, "mm");
 
+  // Add to the log!
+  API::Run &runDetails = m_workspace->mutableRun();
+  auto *p = new Mantid::Kernel::TimeSeriesProperty<double>("sdd");
+  p->addValue(DateAndTime::getCurrentTime(), total_sample_detector_distance);
+  runDetails.addLogData(p);
+
   // Store sample-detector distance
   declareProperty("SampleDetectorDistance", sample_detector_distance,
                   Kernel::Direction::Output);
-
-  return sample_detector_distance;
 }
-
-double
-LoadSpice2D::detectorTranslation(std::map<std::string, std::string> &metadata) {
+/**
+ * Puts a numeric series in the log with the value of detector translation
+ */
+void LoadSpice2D::detectorTranslation(
+    std::map<std::string, std::string> &metadata) {
 
   // detectorTranslations
   double detectorTranslation = 0;
   from_string<double>(detectorTranslation,
                       metadata["Motor_Positions/detector_trans"], std::dec);
-  detectorTranslation /= 1000.0; // mm to meters conversion
+  // Add to the log!
+  API::Run &runDetails = m_workspace->mutableRun();
+  auto *p =
+      new Mantid::Kernel::TimeSeriesProperty<double>("detector-translation");
+  p->addValue(DateAndTime::getCurrentTime(), detectorTranslation);
+  runDetails.addLogData(p);
 
-  g_log.debug() << "Detector Translation = " << detectorTranslation
-                << " meters." << '\n';
-  return detectorTranslation;
-}
-
-/**
- * Places the detector at the right sample_detector_distance
- */
-void LoadSpice2D::moveDetector(double sample_detector_distance,
-                               double translation_distance) {
-  // Some tests fail if the detector is moved here.
-  // TODO: Move the detector here and not the SANSLoad
-  UNUSED_ARG(translation_distance);
-
-  // Move the detector to the right position
-  API::IAlgorithm_sptr mover = createChildAlgorithm("MoveInstrumentComponent");
-
-  // Finding the name of the detector object.
-  std::string detID =
-      m_workspace->getInstrument()->getStringParameter("detector-name")[0];
-
-  g_log.information("Moving " + detID);
-  try {
-    mover->setProperty<API::MatrixWorkspace_sptr>("Workspace", m_workspace);
-    mover->setProperty("ComponentName", detID);
-    mover->setProperty("Z", sample_detector_distance / 1000.0);
-    // mover->setProperty("X", -translation_distance);
-    mover->execute();
-  } catch (std::invalid_argument &e) {
-    g_log.error("Invalid argument to MoveInstrumentComponent Child Algorithm");
-    g_log.error(e.what());
-  } catch (std::runtime_error &e) {
-    g_log.error(
-        "Unable to successfully run MoveInstrumentComponent Child Algorithm");
-    g_log.error(e.what());
-  }
+  g_log.debug() << "Detector Translation = " << detectorTranslation << " mm."
+                << '\n';
 }
 
 /** Run the Child Algorithm LoadInstrument (as for LoadRaw)
@@ -675,7 +673,7 @@ void LoadSpice2D::runLoadInstrument(
     loadInst->setProperty<API::MatrixWorkspace_sptr>("Workspace",
                                                      localWorkspace);
     loadInst->setProperty("RewriteSpectraMap",
-                          Mantid::Kernel::OptionalBool(false));
+                          Mantid::Kernel::OptionalBool(true));
     loadInst->execute();
   } catch (std::invalid_argument &) {
     g_log.information("Invalid argument to LoadInstrument Child Algorithm");
@@ -718,5 +716,22 @@ void LoadSpice2D::rotateDetector(const double &angle) {
   p->addValue(DateAndTime::getCurrentTime(), angle);
   runDetails.addLogData(p);
 }
+
+/***
+ * 2016/11/09 : There is a new tag sans_spice_xml_format_version in the XML
+ * It identifies changes in the XML format.
+ * Useful to test tags rather than using the date.
+ * @param metadata
+ */
+void LoadSpice2D::setSansSpiceXmlFormatVersion(
+    std::map<std::string, std::string> &metadata) {
+
+  if (metadata.find("Header/sans_spice_xml_format_version") != metadata.end()) {
+    m_sansSpiceXmlFormatVersion = boost::lexical_cast<double>(
+        metadata["Header/sans_spice_xml_format_version"]);
+  }
+  g_log.debug() << "Sans_spice_xml_format_version == "
+                << m_sansSpiceXmlFormatVersion << "\n";
 }
-}
+} // namespace DataHandling
+} // namespace Mantid

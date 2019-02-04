@@ -1,23 +1,27 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_FINDPEAKS_H_
 #define MANTID_ALGORITHMS_FINDPEAKS_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
-#include "MantidKernel/System.h"
-#include "MantidAPI/Algorithm.h"
-// #include "MantidAPI/IFunction.h"
-#include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/IBackgroundFunction.h"
+#include "MantidAPI/IPeakFunction.h"
+#include "MantidAPI/ParallelAlgorithm.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidIndexing/SpectrumIndexSet.h"
+#include "MantidKernel/System.h"
 #include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
 
 namespace HistogramData {
+class Histogram;
 class HistogramX;
 class HistogramY;
-}
+} // namespace HistogramData
 
 namespace Algorithms {
 /** This algorithm searches for peaks in a dataset.
@@ -42,39 +46,14 @@ namespace Algorithms {
 
     @author Russell Taylor, Tessella Support Services plc
     @date 25/11/2008
-
-    Copyright &copy; 2008-9 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-   National Laboratory & European Spallation Source
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class DLLExport FindPeaks : public API::Algorithm {
+class DLLExport FindPeaks : public API::ParallelAlgorithm {
 public:
   /// Constructor
   FindPeaks();
   /// Virtual destructor
-  ~FindPeaks() override {
-    if (m_progress)
-      delete m_progress;
-    m_progress = nullptr;
-  }
+  ~FindPeaks() override {}
   /// Algorithm's name
   const std::string name() const override { return "FindPeaks"; }
   /// Summary of algorithms purpose
@@ -84,6 +63,9 @@ public:
 
   /// Algorithm's version
   int version() const override { return (1); }
+  const std::vector<std::string> seeAlso() const override {
+    return {"MatchPeaks", "FindPeaksMD", "GeneratePeaks"};
+  }
   /// Algorithm's category for identification
   const std::string category() const override {
     return "Optimization\\PeakFinding";
@@ -106,12 +88,14 @@ private:
                                     const std::vector<double> &fitwindows);
 
   /// Methods searving for findPeaksUsingMariscotti()
-  API::MatrixWorkspace_sptr
+  std::vector<HistogramData::Histogram>
   calculateSecondDifference(const API::MatrixWorkspace_const_sptr &input);
-  void smoothData(API::MatrixWorkspace_sptr &WS, const int &w);
-  void calculateStandardDeviation(const API::MatrixWorkspace_const_sptr &input,
-                                  const API::MatrixWorkspace_sptr &smoothed,
-                                  const int &w);
+  void smoothData(std::vector<HistogramData::Histogram> &histograms,
+                  const int w, const int g_z);
+  void
+  calculateStandardDeviation(const API::MatrixWorkspace_const_sptr &input,
+                             std::vector<HistogramData::Histogram> &smoothed,
+                             const int &w);
   long long computePhi(const int &w) const;
 
   /// Fit peak confined in a given window (x-min, x-max)
@@ -205,16 +189,16 @@ private:
   /// Storage of the peak data
   API::ITableWorkspace_sptr m_outPeakTableWS;
   /// Progress reporting
-  API::Progress *m_progress;
+  std::unique_ptr<API::Progress> m_progress = nullptr;
 
   // Properties saved in the algo.
-  API::MatrixWorkspace_sptr m_dataWS; ///<workspace to check for peaks
-  int m_inputPeakFWHM;                ///<holder for the requested peak FWHM
-  int m_wsIndex;                      ///<list of workspace indicies to check
-  bool singleSpectrum;   ///<flag for if only a single spectrum is present
-  bool m_highBackground; ///<flag for find relatively weak peak in high
+  API::MatrixWorkspace_sptr m_dataWS;    ///< workspace to check for peaks
+  int m_inputPeakFWHM;                   ///< holder for the requested peak FWHM
+  Indexing::SpectrumIndexSet m_indexSet; ///< list of workspace indicies to
+                                         ///< check
+  bool m_highBackground; ///< flag for find relatively weak peak in high
   /// background
-  bool m_rawPeaksTable; ///<flag for whether the output is the raw peak
+  bool m_rawPeaksTable; ///< flag for whether the output is the raw peak
   /// parameters or effective (centre, width, height)
   std::size_t
       m_numTableParams; //<Number of parameters in the output table workspace

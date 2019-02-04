@@ -1,15 +1,23 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef ALGORITHMPROXYTEST_H_
 #define ALGORITHMPROXYTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/AlgorithmProxy.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AlgorithmObserver.h"
+#include "MantidAPI/AlgorithmProxy.h"
 
 #include <Poco/ActiveResult.h>
 #include <Poco/Thread.h>
+
+#include <boost/lexical_cast.hpp>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -27,6 +35,9 @@ public:
   const std::string category() const override {
     return "ProxyCat";
   } ///< Algorithm's category for identification
+  const std::vector<std::string> seeAlso() const override {
+    return {"elephant", "seal"};
+  } ///< Algorithm's seeAlso
   const std::string alias() const override {
     return "Dog";
   } ///< Algorithm's alias
@@ -132,6 +143,8 @@ public:
     TS_ASSERT_EQUALS(alg->version(), 1);
     TS_ASSERT_EQUALS(alg->category(), "ProxyCat");
     TS_ASSERT_EQUALS(alg->alias(), "Dog");
+    std::vector<std::string> seeAlsoList{"elephant", "seal"};
+    TS_ASSERT_EQUALS(alg->seeAlso(), seeAlsoList);
     TS_ASSERT(alg->isInitialized());
     TS_ASSERT(alg->existsProperty("prop1"));
     TS_ASSERT(alg->existsProperty("prop2"));

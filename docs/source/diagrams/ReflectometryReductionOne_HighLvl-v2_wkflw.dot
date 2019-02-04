@@ -1,0 +1,43 @@
+digraph ReflectometryReductionOne {
+label = "\n"
+ $global_style
+
+subgraph params {
+ $param_style
+  inputWS       [label="InputWorkspace"]
+  outputWSWL    [label="OutputWorkspaceWavelength"]
+  outputWSFinal [label="OutputWorkspace"]
+}
+
+subgraph decisions {
+ $decision_style
+  checkSumDone  [label="Reduction required?"]
+}
+
+subgraph algorithms {
+ $algorithm_style
+}
+
+subgraph processes {
+ $process_style
+  convertUnits    [label="Convert to &lambda;\nSum in &lambda;\nNormalize by monitors"]
+  applyCorrTrans  [label="Apply transmission\n corrections"]
+  sumInQ          [label="Sum in Q"]
+  convertMom      [label="Convert to momentum\ntransfer"]
+}
+
+subgraph values {
+ $value_style
+}
+
+inputWS         -> checkSumDone
+checkSumDone    -> applyCorrTrans [label="No"]
+checkSumDone    -> convertUnits   [label="Yes"]
+convertUnits    -> applyCorrTrans
+
+applyCorrTrans  -> sumInQ
+sumInQ          -> outputWSWL
+
+outputWSWL      -> convertMom
+convertMom      -> outputWSFinal
+}

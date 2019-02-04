@@ -1,11 +1,15 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidWorkflowAlgorithms/RefRoi.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "Poco/String.h"
 
@@ -49,9 +53,10 @@ void RefRoi::init() {
       "SumPixels", false,
       "If true, all the pixels will be summed,"
       " so that the resulting workspace will be a single histogram");
-  declareProperty("NormalizeSum", false, "If true, and SumPixels is true, the"
-                                         " resulting histogram will be divided "
-                                         "by the number of pixels in the ROI");
+  declareProperty("NormalizeSum", false,
+                  "If true, and SumPixels is true, the"
+                  " resulting histogram will be divided "
+                  "by the number of pixels in the ROI");
   declareProperty("AverageOverIntegratedAxis", false,
                   "If true, and SumPixels and NormalizeSum are true, the"
                   " resulting histogram will also be divided by the number of "
@@ -65,10 +70,12 @@ void RefRoi::init() {
       " If false, the X direction will be integrated over. The result will be"
       " a histogram for each of the pixels in the hi-resolution direction of"
       " the 2D detector");
-  declareProperty("ConvertToQ", true, "If true, the X-axis will be converted"
-                                      " to momentum transfer");
-  declareProperty("ScatteringAngle", 0.0, "Value of the scattering angle to use"
-                                          " when converting to Q");
+  declareProperty("ConvertToQ", true,
+                  "If true, the X-axis will be converted"
+                  " to momentum transfer");
+  declareProperty("ScatteringAngle", 0.0,
+                  "Value of the scattering angle to use"
+                  " when converting to Q");
 }
 
 /// Execute algorithm
@@ -77,7 +84,7 @@ void RefRoi::exec() {
   const MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
   // Bin boundaries need to be the same, so do the full check on whether they
   // actually are
-  if (!API::WorkspaceHelpers::commonBoundaries(inputWS)) {
+  if (!API::WorkspaceHelpers::commonBoundaries(*inputWS)) {
     g_log.error()
         << "Can only group if the histograms have common bin boundaries\n";
     throw std::invalid_argument(
@@ -134,11 +141,11 @@ void RefRoi::extract2D() {
 
   // Create output workspace
   MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(
-      inputWS, nHisto, inputWS->readX(0).size(), inputWS->blocksize());
+      inputWS, nHisto, inputWS->x(0).size(), inputWS->blocksize());
 
   // Process X axis
-  MantidVec &XOut0 = outputWS->dataX(0);
-  const MantidVec &XIn0 = inputWS->readX(0);
+  auto &XOut0 = outputWS->mutableX(0);
+  const auto &XIn0 = inputWS->x(0);
   if (convert_to_q) {
     // Check that the X-axis is in wavelength units
     const std::string unit = inputWS->getAxis(0)->unit()->caption();
@@ -157,7 +164,7 @@ void RefRoi::extract2D() {
     outputWS->setYUnitLabel("Reflectivity");
     outputWS->setDistribution(true);
   } else {
-    XOut0 = inputWS->readX(0);
+    outputWS->setSharedX(0, inputWS->sharedX(0));
   }
 
   // Make sure the inner loop is always the one we integrate over
@@ -167,28 +174,28 @@ void RefRoi::extract2D() {
   int integrated_axis_max = integrate_y ? ymax : xmax;
 
   for (int i = main_axis_min; i <= main_axis_max; i++) {
-    size_t output_index = i;
-    if (sum_pixels)
-      output_index = 0;
+    size_t output_index = (sum_pixels) ? 0 : i;
 
-    MantidVec &YOut = outputWS->dataY(output_index);
-    MantidVec &EOut = outputWS->dataE(output_index);
+    auto &YOut = outputWS->mutableY(output_index);
+    auto &EOut = outputWS->mutableE(output_index);
     MantidVec signal_vector(YOut.size(), 0.0);
     MantidVec error_vector(YOut.size(), 0.0);
 
     for (int j = integrated_axis_min; j <= integrated_axis_max; j++) {
       int index = integrate_y ? m_nYPixel * i + j : m_nYPixel * j + i;
-      const MantidVec &YIn = inputWS->readY(index);
-      const MantidVec &EIn = inputWS->readE(index);
+      const auto &YIn = inputWS->y(index);
+      const auto &EIn = inputWS->e(index);
 
       for (size_t t = 0; t < YOut.size(); t++) {
         size_t t_index = convert_to_q ? YOut.size() - 1 - t : t;
+        const double YInValue = YIn[t_index];
+        const double EInValue = EIn[t_index];
         if (sum_pixels && normalize && error_weighting) {
-          signal_vector[t] += YIn[t_index];
-          error_vector[t] += EIn[t_index] * EIn[t_index];
+          signal_vector[t] += YInValue;
+          error_vector[t] += EInValue * EInValue;
         } else {
-          YOut[t] += YIn[t_index];
-          EOut[t] += EIn[t_index] * EIn[t_index];
+          YOut[t] += YInValue;
+          EOut[t] += EInValue * EInValue;
         }
       }
     }
@@ -213,9 +220,9 @@ void RefRoi::extract2D() {
   }
 
   for (int i = 0; i < nHisto; i++) {
-    outputWS->dataX(i) = XOut0;
-    MantidVec &YOut = outputWS->dataY(i);
-    MantidVec &EOut = outputWS->dataE(i);
+    outputWS->setSharedX(i, outputWS->sharedX(0));
+    auto &YOut = outputWS->mutableY(i);
+    auto &EOut = outputWS->mutableE(i);
     for (size_t t = 0; t < EOut.size(); t++) {
       if (sum_pixels && normalize) {
         if (error_weighting) {
@@ -237,5 +244,5 @@ void RefRoi::extract2D() {
   setProperty("OutputWorkspace", outputWS);
 }
 
-} // namespace Algorithms
+} // namespace WorkflowAlgorithms
 } // namespace Mantid

@@ -1,52 +1,45 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_GEOMETRY_INDEXING_UTILS_TEST_H_
 #define MANTID_GEOMETRY_INDEXING_UTILS_TEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include <MantidKernel/Timer.h>
-#include <MantidKernel/System.h>
-#include <MantidKernel/V3D.h>
-#include <MantidKernel/Matrix.h>
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include <MantidGeometry/Crystal/IndexingUtils.h>
+#include <MantidKernel/Matrix.h>
+#include <MantidKernel/System.h>
+#include <MantidKernel/Timer.h>
+#include <MantidKernel/V3D.h>
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Geometry;
-using Mantid::Kernel::V3D;
 using Mantid::Kernel::Matrix;
+using Mantid::Kernel::V3D;
 
 class IndexingUtilsTest : public CxxTest::TestSuite {
 public:
   static std::vector<V3D> getNatroliteQs() {
-    std::vector<V3D> q_vectors{{-0.57582, -0.35322, -0.19974},
-                               {-1.41754, -0.78704, -0.75974},
-                               {-1.12030, -0.53578, -0.27559},
-                               {-0.68911, -0.59397, -0.12716},
-                               {-1.06863, -0.43255, 0.01688},
-                               {-1.82007, -0.49671, -0.06266},
-                               {-1.10465, -0.73708, -0.01939},
-                               {-0.12747, -0.32380, 0.00821},
-                               {-0.84210, -0.37038, 0.15403},
-                               {-0.54099, -0.46900, 0.11535},
-                               {-0.90478, -0.50667, 0.51072},
-                               {-0.50387, -0.58561, 0.43502}};
+    std::vector<V3D> q_vectors{
+        {-0.57582, -0.35322, -0.19974}, {-1.41754, -0.78704, -0.75974},
+        {-1.12030, -0.53578, -0.27559}, {-0.68911, -0.59397, -0.12716},
+        {-1.06863, -0.43255, 0.01688},  {-1.82007, -0.49671, -0.06266},
+        {-1.10465, -0.73708, -0.01939}, {-0.12747, -0.32380, 0.00821},
+        {-0.84210, -0.37038, 0.15403},  {-0.54099, -0.46900, 0.11535},
+        {-0.90478, -0.50667, 0.51072},  {-0.50387, -0.58561, 0.43502}};
     // Dec 2011: Change convention for Q = 2 pi / wavelength
-    for (size_t i = 0; i < q_vectors.size(); i++)
-      q_vectors[i] *= (2.0 * M_PI);
+    for (auto &q_vector : q_vectors)
+      q_vector *= (2.0 * M_PI);
     return q_vectors;
   }
 
   static std::vector<V3D> getNatroliteIndices() {
-    std::vector<V3D> correct_indices{{1, 9, -9},
-                                     {4, 20, -24},
-                                     {2, 18, -14},
-                                     {0, 12, -12},
-                                     {1, 19, -9},
-                                     {3, 31, -13},
-                                     {0, 20, -14},
-                                     {-1, 3, -5},
-                                     {0, 16, -6},
-                                     {-1, 11, -7},
-                                     {-2, 20, -4},
-                                     {-3, 13, -5}};
+    std::vector<V3D> correct_indices{{1, 9, -9},   {4, 20, -24}, {2, 18, -14},
+                                     {0, 12, -12}, {1, 19, -9},  {3, 31, -13},
+                                     {0, 20, -14}, {-1, 3, -5},  {0, 16, -6},
+                                     {-1, 11, -7}, {-2, 20, -4}, {-3, 13, -5}};
     return correct_indices;
   }
 
@@ -111,12 +104,7 @@ public:
 
     std::vector<V3D> q_vectors = getNatroliteQs();
 
-    double a = 6.6;
-    double b = 9.7;
-    double c = 9.9;
-    double alpha = 84;
-    double beta = 71;
-    double gamma = 70;
+    OrientedLattice lattice(6.6, 9.7, 9.9, 84, 71, 70);
     // test both default case(-1) and
     // case with specified base index(4)
     for (int base_index = -1; base_index < 5; base_index += 5) {
@@ -124,9 +112,9 @@ public:
       size_t num_initial = 3;
       double degrees_per_step = 3;
 
-      double error = IndexingUtils::Find_UB(
-          UB, q_vectors, a, b, c, alpha, beta, gamma, required_tolerance,
-          base_index, num_initial, degrees_per_step);
+      double error =
+          IndexingUtils::Find_UB(UB, q_vectors, lattice, required_tolerance,
+                                 base_index, num_initial, degrees_per_step);
 
       //      std::cout << std::endl << "USING LATTICE PARAMETERS\n";
       //      ShowIndexingStats( UB, q_vectors, required_tolerance );
@@ -237,8 +225,8 @@ public:
   void test_Optimize_Direction() {
     std::vector<int> index_values;
     int correct_indices[] = {1, 4, 2, 0, 1, 3, 0, -1, 0, -1, -2, -3};
-    for (size_t i = 0; i < 12; i++) {
-      index_values.push_back(correct_indices[i]);
+    for (int correct_index : correct_indices) {
+      index_values.push_back(correct_index);
     }
 
     std::vector<V3D> q_vectors = getNatroliteQs();
@@ -260,18 +248,12 @@ public:
     Matrix<double> UB(3, 3, false);
     int degrees_per_step = 3;
     double required_tolerance = 0.2;
-    double a = 6.6f;
-    double b = 9.7f;
-    double c = 9.9f;
-    double alpha = 84;
-    double beta = 71;
-    double gamma = 70;
 
+    UnitCell cell(6.6f, 9.7f, 9.9f, 84, 71, 70);
     std::vector<V3D> q_vectors = getNatroliteQs();
 
-    double error =
-        IndexingUtils::ScanFor_UB(UB, q_vectors, a, b, c, alpha, beta, gamma,
-                                  degrees_per_step, required_tolerance);
+    double error = IndexingUtils::ScanFor_UB(
+        UB, q_vectors, cell, degrees_per_step, required_tolerance);
 
     TS_ASSERT_DELTA(error, 0.147397, 1.e-5);
 
@@ -325,7 +307,7 @@ public:
     IndexingUtils::FFTScanFor_Directions(directions, q_vectors, d_min, d_max,
                                          required_tolerance, degrees_per_step);
 
-    TS_ASSERT_EQUALS(5, directions.size());
+    TS_ASSERT_EQUALS(8, directions.size());
 
     for (size_t i = 0; i < 3; i++) {
       V3D vec = directions[i];
@@ -336,8 +318,8 @@ public:
   }
 
   void test_GetMagFFT() {
-#define N_FFT_STEPS 256
-#define HALF_FFT_STEPS 128
+    constexpr size_t N_FFT_STEPS = 256;
+    constexpr size_t HALF_FFT_STEPS = 128;
 
     double projections[N_FFT_STEPS];
     double magnitude_fft[HALF_FFT_STEPS];
@@ -383,8 +365,8 @@ public:
                             {2.66668320, 5.29605670, 7.9653444}};
 
     std::vector<V3D> directions;
-    for (size_t i = 0; i < 5; i++)
-      directions.emplace_back(vectors[i][0], vectors[i][1], vectors[i][2]);
+    for (auto &vector : vectors)
+      directions.emplace_back(vector[0], vector[1], vector[2]);
 
     double required_tolerance = 0.12;
     size_t a_index = 0;
@@ -421,8 +403,8 @@ public:
                             {2.66668320, 5.29605670, 7.9653444}};
 
     std::vector<V3D> directions;
-    for (size_t i = 0; i < 5; i++)
-      directions.emplace_back(vectors[i][0], vectors[i][1], vectors[i][2]);
+    for (auto &vector : vectors)
+      directions.emplace_back(vector[0], vector[1], vector[2]);
 
     std::vector<V3D> q_vectors = getNatroliteQs();
     double required_tolerance = 0.12;
@@ -444,16 +426,22 @@ public:
     }
   }
 
-  void test_Make_c_dir() {
+  void test_make_c_dir() {
     V3D a_dir(1, 2, 3);
     V3D b_dir(-3, 2, 1);
 
-    double gamma = a_dir.angle(b_dir) * 180.0 / M_PI;
-    double alpha = 123;
-    double beta = 74;
-    double c_length = 10;
-    V3D result =
-        IndexingUtils::Make_c_dir(a_dir, b_dir, c_length, alpha, beta, gamma);
+    const double gamma = a_dir.angle(b_dir) * 180.0 / M_PI;
+    const double alpha = 123;
+    const double beta = 74;
+    const double c_length = 10;
+
+    const double cosAlpha = std::cos(alpha * M_PI / 180);
+    const double cosBeta = std::cos(beta * M_PI / 180);
+    const double cosGamma = std::cos(gamma * M_PI / 180);
+    const double sinGamma = std::sin(gamma * M_PI / 180);
+
+    V3D result = IndexingUtils::makeCDir(a_dir, b_dir, c_length, cosAlpha,
+                                         cosBeta, cosGamma, sinGamma);
 
     double alpha_calc = result.angle(b_dir) * 180 / M_PI;
     double beta_calc = result.angle(a_dir) * 180 / M_PI;
@@ -761,8 +749,8 @@ public:
     TS_ASSERT_DELTA(direction_list[7].Z(), -0.211325, 1e-5);
 
     double dot_prod;
-    for (size_t i = 0; i < direction_list.size(); i++) {
-      dot_prod = axis.scalar_prod(direction_list[i]);
+    for (const auto &direction : direction_list) {
+      dot_prod = axis.scalar_prod(direction);
       TS_ASSERT_DELTA(dot_prod, 0, 1e-10);
     }
   }

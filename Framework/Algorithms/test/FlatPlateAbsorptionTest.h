@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef FLATPLATEABSORPTIONTEST_H_
 #define FLATPLATEABSORPTIONTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/FlatPlateAbsorption.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAlgorithms/FlatPlateAbsorption.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
@@ -57,8 +63,8 @@ public:
             Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)));
     TS_ASSERT_DELTA(result->readY(0).front(), 0.7389, 0.0001);
     TS_ASSERT_DELTA(result->readY(0)[1], 0.7042, 0.0001);
-    TS_ASSERT_DELTA(result->readY(0).back(), 0.4686, 0.0001);
-    TS_ASSERT_DELTA(result->readY(1).front(), 0.7388, 0.0001);
+    TS_ASSERT_DELTA(result->readY(0).back(), 0.4687, 0.0001);
+    TS_ASSERT_DELTA(result->readY(1).front(), 0.7389, 0.0001);
     TS_ASSERT_DELTA(result->readY(1)[5], 0.5752, 0.0001);
     TS_ASSERT_DELTA(result->readY(1).back(), 0.4686, 0.0001);
 

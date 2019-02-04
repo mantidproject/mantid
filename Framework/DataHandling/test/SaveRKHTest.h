@@ -1,14 +1,21 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef SAVERKHTEST_H_
 #define SAVERKHTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidHistogramData/LinearGenerator.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/SaveRKH.h"
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
+#include <Poco/File.h>
 #include <fstream>
 #include <numeric>
-#include <Poco/File.h>
 using namespace Mantid::API;
 using Mantid::HistogramData::BinEdges;
 using Mantid::HistogramData::LinearGenerator;
@@ -45,7 +52,7 @@ public:
     TS_ASSERT_THROWS(testAlgorithm1.execute(), std::runtime_error);
     // Need a test workspace to use as input
     MatrixWorkspace_sptr inputWS1 =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 10, 1.0);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(1, 10, 1.0);
     inputWS1->setDistribution(true);
 
     // Register workspace
@@ -114,7 +121,7 @@ public:
 
     using namespace Mantid::API;
     MatrixWorkspace_sptr inputWS2 =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(10, 1, 0.0);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(10, 1, 0.0);
     inputWS2->setDistribution(true);
     // Register workspace
     AnalysisDataService::Instance().add("testInputTwo", inputWS2);

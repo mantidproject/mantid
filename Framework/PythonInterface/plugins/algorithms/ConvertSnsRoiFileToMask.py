@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name
 from __future__ import (absolute_import, division, print_function)
 
@@ -30,6 +36,9 @@ class ConvertSnsRoiFileToMask(api.PythonAlgorithm):
         Set the category for the algorithm.
         """
         return "Inelastic\\Utility"
+
+    def seeAlso(self):
+        return [ "MaskDetectors" ]
 
     def name(self):
         """
@@ -126,6 +135,7 @@ class ConvertSnsRoiFileToMask(api.PythonAlgorithm):
         parts = idx.split('_')
         bankid = int(parts[0].split('bank')[-1])
         return int(parts[2]) + det_size[1] * (int(parts[1]) + det_size[0] * (bankid-1))
+
 
 # Register algorithm with Mantid.
 api.AlgorithmFactory.subscribe(ConvertSnsRoiFileToMask)

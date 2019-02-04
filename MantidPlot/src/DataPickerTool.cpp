@@ -27,13 +27,13 @@
  *                                                                         *
  ***************************************************************************/
 #include "DataPickerTool.h"
+#include "ApplicationWindow.h"
+#include "FunctionCurve.h"
 #include "Graph.h"
 #include "Plot.h"
-#include "pixmaps.h"
-#include "FunctionCurve.h"
 #include "PlotCurve.h"
 #include "QwtErrorPlotCurve.h"
-#include "ApplicationWindow.h"
+#include <MantidQtWidgets/Common/pixmaps.h>
 
 #include <QApplication>
 #include <QClipboard>
@@ -46,12 +46,14 @@
 #include <qwt_plot_picker.h>
 #include <qwt_symbol.h>
 
+using namespace MantidQt::API;
+
 DataPickerTool::DataPickerTool(Graph *graph, ApplicationWindow *app, Mode mode,
                                const QObject *status_target,
                                const char *status_slot)
     : QwtPlotPicker(graph->plotWidget()->canvas()), PlotToolInterface(graph),
       d_app(app), d_mode(mode), d_move_mode(Free) {
-  d_selected_curve = NULL;
+  d_selected_curve = nullptr;
 
   d_selection_marker.setLineStyle(QwtPlotMarker::Cross);
   d_selection_marker.setLinePen(QPen(Qt::red, 1));
@@ -104,7 +106,7 @@ void DataPickerTool::append(const QPoint &pos) {
   const int curve =
       d_graph->plotWidget()->closestCurve(pos.x(), pos.y(), dist, point_index);
   if (curve <= 0 || dist >= 5) { // 5 pixels tolerance
-    setSelection(NULL, 0);
+    setSelection(nullptr, 0);
     return;
   }
   setSelection(
@@ -139,7 +141,7 @@ void DataPickerTool::setSelection(QwtPlotCurve *curve, int point_index) {
       QPoint(plot()->transform(xAxis(), d_selected_curve->x(d_selected_point)),
              plot()->transform(yAxis(), d_selected_curve->y(d_selected_point)));
 
-  if (plotCurve && plotCurve->type() == Graph::Function) {
+  if (plotCurve && plotCurve->type() == GraphOptions::Function) {
     QLocale locale = d_app->locale();
     emit statusText(
         QString("%1[%2]: x=%3; y=%4")
@@ -166,7 +168,7 @@ void DataPickerTool::setSelection(QwtPlotCurve *curve, int point_index) {
   QwtDoublePoint selected_point_value(d_selected_curve->x(d_selected_point),
                                       d_selected_curve->y(d_selected_point));
   d_selection_marker.setValue(selected_point_value);
-  if (d_selection_marker.plot() == NULL)
+  if (d_selection_marker.plot() == nullptr)
     d_selection_marker.attach(d_graph->plotWidget());
   d_graph->plotWidget()->replot();
 }

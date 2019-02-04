@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty
 from mantid.kernel import Direction, IntBoundedValidator
@@ -10,6 +16,9 @@ class FitGaussian(PythonAlgorithm):
 
     def category(self):
         return "Optimization"
+
+    def seeAlso(self):
+        return [ "Fit" ]
 
     def PyInit(self):
         # input
@@ -44,7 +53,7 @@ class FitGaussian(PythonAlgorithm):
         # index must be in <0,nhist)
         if index >= nhist:
             self._error("Index " + str(index) +
-                        " is out of range for the workspace " + workspace.getName())
+                        " is out of range for the workspace " + workspace.name())
 
         x_values = np.array(workspace.readX(index))
         y_values = np.array(workspace.readY(index))
@@ -55,7 +64,7 @@ class FitGaussian(PythonAlgorithm):
 
         # check for zero or negative signal
         if height <= 0.:
-            self._warning("Workspace %s, detector %d has maximum <= 0" % (workspace.getName(), index))
+            self._warning("Workspace %s, detector %d has maximum <= 0" % (workspace.name(), index))
             return
 
         # guess sigma (assume the signal is sufficiently smooth)
@@ -65,7 +74,7 @@ class FitGaussian(PythonAlgorithm):
         nentries = len(indices)
 
         if nentries < 3:
-            self._warning("Spectrum " + str(index) + " in workspace " + workspace.getName() +
+            self._warning("Spectrum " + str(index) + " in workspace " + workspace.name() +
                           " has a too narrow peak. Cannot guess sigma. Check your data.")
             return
 
@@ -83,17 +92,18 @@ class FitGaussian(PythonAlgorithm):
         endX   = tryCentre + 3.0*fwhm
 
         # pylint: disable = unpacking-non-sequence, assignment-from-none
-        fitStatus, _, _, paramTable = Fit(
+        fit_output = Fit(
             InputWorkspace=workspace, WorkspaceIndex=index,
             Function=fitFun, CreateOutput=True, OutputParametersOnly=True,
             StartX=startX, EndX=endX)
 
-        if not 'success' == fitStatus:
-            self._warning("For detector " + str(index) + " in workspace " + workspace.getName() +
+        if not 'success' == fit_output.OutputStatus:
+            self._warning("For detector " + str(index) + " in workspace " + workspace.name() +
                           "fit was not successful. Input guess parameters were " + str(fitFun))
             return
 
-        fitParams = paramTable.column(1)
+        fitParams = fit_output.OutputParameters.column(1)
         self._setOutput(fitParams[1],fitParams[2]) # [peakCentre,sigma]
+
 
 AlgorithmFactory.subscribe(FitGaussian)

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 /*
  * EventWorkspaceTest.h
  *
@@ -8,20 +14,22 @@
 #ifndef EVENTWORKSPACETEST_H_
 #define EVENTWORKSPACETEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/scoped_ptr.hpp>
+#include <cxxtest/TestSuite.h>
 
 #include <string>
 
-#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/Memory.h"
 #include "MantidKernel/Timer.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "PropertyManagerHelper.h"
 
 using namespace Mantid;
@@ -30,15 +38,17 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Kernel::Exception;
 using namespace Mantid::API;
 
+using std::cout;
 using std::runtime_error;
 using std::size_t;
 using std::vector;
-using std::cout;
 using namespace boost::posix_time;
 using Mantid::HistogramData::BinEdges;
 using Mantid::HistogramData::Histogram;
 using Mantid::HistogramData::HistogramX;
 using Mantid::HistogramData::LinearGenerator;
+using Mantid::Types::Core::DateAndTime;
+using Mantid::Types::Event::TofEvent;
 
 class EventWorkspaceTest : public CxxTest::TestSuite {
 private:
@@ -110,10 +120,10 @@ public:
    * 2 events per bin
    */
   EventWorkspace_sptr createFlatEventWorkspace() {
-    return createEventWorkspace(1, 1, true);
+    return createEventWorkspace(true, true, true);
   }
 
-  void setUp() override { ew = createEventWorkspace(1, 1); }
+  void setUp() override { ew = createEventWorkspace(true, true); }
 
   void test_constructor() {
     TS_ASSERT_EQUALS(ew->getNumberHistograms(), NUMPIXELS);
@@ -138,6 +148,20 @@ public:
     TS_ASSERT_LESS_THAN_EQUALS(min_memory, ew->getMemorySize());
   }
 
+  void testUnequalBins() {
+    ew = createEventWorkspace(true, false);
+    // normal behavior
+    TS_ASSERT_EQUALS(ew->blocksize(), 1);
+    TS_ASSERT(ew->isCommonBins());
+    TS_ASSERT_EQUALS(ew->size(), 500);
+
+    // set the first histogram to have 2 bins
+    ew->getSpectrum(0).setHistogram(BinEdges({0., 10., 20.}));
+    TS_ASSERT_THROWS(ew->blocksize(), std::logic_error);
+    TS_ASSERT(!(ew->isCommonBins()));
+    TS_ASSERT_EQUALS(ew->size(), 501);
+  }
+
   void test_destructor() {
     EventWorkspace *ew2 = new EventWorkspace();
     delete ew2;
@@ -145,7 +169,7 @@ public:
 
   void test_constructor_setting_default_x() {
     // Do the workspace, but don't set x explicity
-    ew = createEventWorkspace(1, 0);
+    ew = createEventWorkspace(true, false);
     TS_ASSERT_EQUALS(ew->getNumberHistograms(), NUMPIXELS);
     TS_ASSERT_EQUALS(ew->blocksize(), 1);
     TS_ASSERT_EQUALS(ew->size(), 500);
@@ -168,7 +192,8 @@ public:
         WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(
             1, 10, false /*dont clear the events*/);
     TS_ASSERT_EQUALS(ws->getSpectrum(2).getNumberEvents(), 200);
-    ws->maskWorkspaceIndex(2);
+    ws->getSpectrum(2).clearData();
+    ws->mutableSpectrumInfo().setMasked(2, true);
     TS_ASSERT_EQUALS(ws->getSpectrum(2).getNumberEvents(), 0);
   }
 
@@ -412,12 +437,10 @@ public:
   }
 
   void test_histogram_pulse_time() {
-    const size_t nHistos = 1;
-    const bool setXAxis = false;
     EventWorkspace_sptr ws =
-        createEventWorkspace(nHistos, setXAxis); // Creates TOF events with
-                                                 // pulse_time intervals of
-                                                 // BIN_DELTA/2
+        createEventWorkspace(true, false); // Creates TOF events with
+                                           // pulse_time intervals of
+                                           // BIN_DELTA/2
 
     // Create bin steps = 4*BIN_DELTA.
     BinEdges axis1(NUMBINS / 4, LinearGenerator(0.0, 4.0 * BIN_DELTA));
@@ -532,10 +555,9 @@ public:
 
   void test_sortAll_TOF() {
     EventWorkspace_sptr test_in =
-        WorkspaceCreationHelper::CreateRandomEventWorkspace(NUMBINS, NUMPIXELS);
-    Progress *prog = NULL;
+        WorkspaceCreationHelper::createRandomEventWorkspace(NUMBINS, NUMPIXELS);
 
-    test_in->sortAll(TOF_SORT, prog);
+    test_in->sortAll(TOF_SORT, nullptr);
 
     EventWorkspace_sptr outWS = test_in;
     for (int wi = 0; wi < NUMPIXELS; wi++) {
@@ -552,10 +574,9 @@ public:
   void test_sortAll_SingleEventList() {
     int numEvents = 30;
     EventWorkspace_sptr test_in =
-        WorkspaceCreationHelper::CreateRandomEventWorkspace(numEvents, 1);
-    Progress *prog = NULL;
+        WorkspaceCreationHelper::createRandomEventWorkspace(numEvents, 1);
 
-    test_in->sortAll(TOF_SORT, prog);
+    test_in->sortAll(TOF_SORT, nullptr);
 
     EventWorkspace_sptr outWS = test_in;
     std::vector<TofEvent> ve = outWS->getSpectrum(0).getEvents();
@@ -570,10 +591,9 @@ public:
   void test_sortAll_byTime_SingleEventList() {
     int numEvents = 30;
     EventWorkspace_sptr test_in =
-        WorkspaceCreationHelper::CreateRandomEventWorkspace(numEvents, 1);
-    Progress *prog = NULL;
+        WorkspaceCreationHelper::createRandomEventWorkspace(numEvents, 1);
 
-    test_in->sortAll(PULSETIME_SORT, prog);
+    test_in->sortAll(PULSETIME_SORT, nullptr);
 
     EventWorkspace_sptr outWS = test_in;
     std::vector<TofEvent> ve = outWS->getSpectrum(0).getEvents();
@@ -584,10 +604,9 @@ public:
 
   void test_sortAll_ByTime() {
     EventWorkspace_sptr test_in =
-        WorkspaceCreationHelper::CreateRandomEventWorkspace(NUMBINS, NUMPIXELS);
-    Progress *prog = NULL;
+        WorkspaceCreationHelper::createRandomEventWorkspace(NUMBINS, NUMPIXELS);
 
-    test_in->sortAll(PULSETIME_SORT, prog);
+    test_in->sortAll(PULSETIME_SORT, nullptr);
 
     EventWorkspace_sptr outWS = test_in;
     for (int wi = 0; wi < NUMPIXELS; wi++) {
@@ -603,11 +622,11 @@ public:
    * Test that parallelization is thread-safe
    *
    */
-  void xtestSegFault() ///<Disabled because ~2.5 seconds.
+  void xtestSegFault() ///< Disabled because ~2.5 seconds.
   {
     int numpix = 100000;
     EventWorkspace_const_sptr ew1 =
-        WorkspaceCreationHelper::CreateRandomEventWorkspace(50, numpix);
+        WorkspaceCreationHelper::createRandomEventWorkspace(50, numpix);
 
     PARALLEL_FOR_NO_WSP_CHECK()
     for (int i = 0; i < numpix; i++) {
@@ -624,7 +643,7 @@ public:
     // 50 pixels, 100 bins, 2 events in each
     int numpixels = 900;
     EventWorkspace_sptr ew1 =
-        WorkspaceCreationHelper::CreateEventWorkspace2(numpixels, 100);
+        WorkspaceCreationHelper::createEventWorkspace2(numpixels, 100);
     PARALLEL_FOR_IF(do_parallel)
     for (int i = 0; i < numpixels; i += 3) {
       const MantidVec &Y = ew1->readY(i);
@@ -665,8 +684,8 @@ public:
   }
 
   /**
-  * Test declaring an input EventWorkspace and retrieving as const_sptr or sptr
-  */
+   * Test declaring an input EventWorkspace and retrieving as const_sptr or sptr
+   */
   void testGetProperty_const_sptr() {
     const std::string wsName = "InputWorkspace";
     EventWorkspace_sptr wsInput(new EventWorkspace());
@@ -678,10 +697,10 @@ public:
     EventWorkspace_sptr wsNonConst;
     TS_ASSERT_THROWS_NOTHING(
         wsConst = manager.getValue<EventWorkspace_const_sptr>(wsName));
-    TS_ASSERT(wsConst != NULL);
+    TS_ASSERT(wsConst != nullptr);
     TS_ASSERT_THROWS_NOTHING(wsNonConst =
                                  manager.getValue<EventWorkspace_sptr>(wsName));
-    TS_ASSERT(wsNonConst != NULL);
+    TS_ASSERT(wsNonConst != nullptr);
     TS_ASSERT_EQUALS(wsConst, wsNonConst);
 
     // Check TypedValue can be cast to const_sptr or to sptr
@@ -689,15 +708,16 @@ public:
     EventWorkspace_const_sptr wsCastConst;
     EventWorkspace_sptr wsCastNonConst;
     TS_ASSERT_THROWS_NOTHING(wsCastConst = (EventWorkspace_const_sptr)val);
-    TS_ASSERT(wsCastConst != NULL);
+    TS_ASSERT(wsCastConst != nullptr);
     TS_ASSERT_THROWS_NOTHING(wsCastNonConst = (EventWorkspace_sptr)val);
-    TS_ASSERT(wsCastNonConst != NULL);
+    TS_ASSERT(wsCastNonConst != nullptr);
     TS_ASSERT_EQUALS(wsCastConst, wsCastNonConst);
   }
 
   /**
-  * Test declaring an input IEventWorkspace and retrieving as const_sptr or sptr
-  */
+   * Test declaring an input IEventWorkspace and retrieving as const_sptr or
+   * sptr
+   */
   void testGetProperty_IEventWS_const_sptr() {
     const std::string wsName = "InputWorkspace";
     IEventWorkspace_sptr wsInput(new EventWorkspace());
@@ -709,10 +729,10 @@ public:
     IEventWorkspace_sptr wsNonConst;
     TS_ASSERT_THROWS_NOTHING(
         wsConst = manager.getValue<IEventWorkspace_const_sptr>(wsName));
-    TS_ASSERT(wsConst != NULL);
+    TS_ASSERT(wsConst != nullptr);
     TS_ASSERT_THROWS_NOTHING(
         wsNonConst = manager.getValue<IEventWorkspace_sptr>(wsName));
-    TS_ASSERT(wsNonConst != NULL);
+    TS_ASSERT(wsNonConst != nullptr);
     TS_ASSERT_EQUALS(wsConst, wsNonConst);
 
     // Check TypedValue can be cast to const_sptr or to sptr
@@ -720,9 +740,9 @@ public:
     IEventWorkspace_const_sptr wsCastConst;
     IEventWorkspace_sptr wsCastNonConst;
     TS_ASSERT_THROWS_NOTHING(wsCastConst = (IEventWorkspace_const_sptr)val);
-    TS_ASSERT(wsCastConst != NULL);
+    TS_ASSERT(wsCastConst != nullptr);
     TS_ASSERT_THROWS_NOTHING(wsCastNonConst = (IEventWorkspace_sptr)val);
-    TS_ASSERT(wsCastNonConst != NULL);
+    TS_ASSERT(wsCastNonConst != nullptr);
     TS_ASSERT_EQUALS(wsCastConst, wsCastNonConst);
   }
 
@@ -730,7 +750,7 @@ public:
     int numEvents = 2;
     int numHistograms = 2;
     EventWorkspace_sptr ws =
-        WorkspaceCreationHelper::CreateRandomEventWorkspace(numEvents,
+        WorkspaceCreationHelper::createRandomEventWorkspace(numEvents,
                                                             numHistograms);
     // Calling isCommonBins() sets the flag m_isCommonBinsFlagSet
     TS_ASSERT(ws->isCommonBins());
@@ -749,7 +769,7 @@ public:
     int numEvents = 2;
     int numHistograms = 2;
     EventWorkspace_const_sptr ws =
-        WorkspaceCreationHelper::CreateRandomEventWorkspace(numEvents,
+        WorkspaceCreationHelper::createRandomEventWorkspace(numEvents,
                                                             numHistograms);
     TS_ASSERT_THROWS_NOTHING(ws->readY(0));
     TS_ASSERT_THROWS_NOTHING(ws->dataY(0));
@@ -761,7 +781,7 @@ public:
     int numEvents = 2;
     int numHistograms = 2;
     EventWorkspace_const_sptr ws =
-        WorkspaceCreationHelper::CreateRandomEventWorkspace(numEvents,
+        WorkspaceCreationHelper::createRandomEventWorkspace(numEvents,
                                                             numHistograms);
     auto hist1 = ws->histogram(0);
     auto hist2 = ws->histogram(0);
@@ -772,7 +792,7 @@ public:
   }
 
   void test_clearing_EventList_clears_MRU() {
-    auto ws = WorkspaceCreationHelper::CreateRandomEventWorkspace(2, 1);
+    auto ws = WorkspaceCreationHelper::createRandomEventWorkspace(2, 1);
     auto y = ws->sharedY(0);
     TS_ASSERT_EQUALS(y.use_count(), 2);
     ws->getSpectrum(0).clear();
@@ -783,7 +803,7 @@ public:
     int numEvents = 2;
     int numHistograms = 2;
     EventWorkspace_sptr ws =
-        WorkspaceCreationHelper::CreateRandomEventWorkspace(numEvents,
+        WorkspaceCreationHelper::createRandomEventWorkspace(numEvents,
                                                             numHistograms);
     // put two items into MRU
     auto &yOld0 = ws->y(0);
@@ -801,7 +821,7 @@ public:
   }
 
   void test_deleting_spectra_removes_them_from_MRU() {
-    auto ws = WorkspaceCreationHelper::CreateRandomEventWorkspace(2, 1);
+    auto ws = WorkspaceCreationHelper::createRandomEventWorkspace(2, 1);
     auto y = ws->sharedY(0);
     TS_ASSERT_EQUALS(y.use_count(), 2);
 

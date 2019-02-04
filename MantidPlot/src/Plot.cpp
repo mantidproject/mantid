@@ -27,26 +27,26 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#include "MantidQtAPI/qwt_compat.h"
 #include "Plot.h"
 #include "Graph.h"
 #include "Grid.h"
+#include "LegendWidget.h"
+#include "MantidQtWidgets/LegacyQwt/ScaleEngine.h"
+#include "MantidQtWidgets/LegacyQwt/qwt_compat.h"
+#include "PlotCurve.h"
 #include "ScaleDraw.h"
 #include "Spectrogram.h"
-#include "PlotCurve.h"
-#include "LegendWidget.h"
-#include "MantidQtAPI/ScaleEngine.h"
 
-#include <qwt_plot.h>
 #include <qwt_painter.h>
+#include <qwt_plot.h>
 #include <qwt_plot_canvas.h>
 #include <qwt_plot_layout.h>
-#include <qwt_scale_widget.h>
 #include <qwt_scale_map.h>
+#include <qwt_scale_widget.h>
 #include <qwt_text_label.h>
 
-#include <QPainter>
 #include <QMessageBox>
+#include <QPainter>
 
 #include <limits>
 
@@ -263,19 +263,19 @@ void Plot::drawInwardTicks(QPainter *painter, const QRect &rect,
   int y2 = rect.bottom();
 
   QPalette pal = axisWidget(axis)->palette();
-  QColor color = pal.color(QPalette::Active, QPalette::Foreground);
+  const QColor &color = pal.color(QPalette::Active, QPalette::Foreground);
 
   painter->save();
   painter->setPen(QPen(color, axesLinewidth(), Qt::SolidLine));
 
   const QwtScaleDiv *scDiv = (const QwtScaleDiv *)axisScaleDiv(axis);
-  const QwtValueList minTickList = scDiv->ticks(QwtScaleDiv::MinorTick);
+  const QwtValueList &minTickList = scDiv->ticks(QwtScaleDiv::MinorTick);
   int minTicks = (int)minTickList.count();
 
-  const QwtValueList medTickList = scDiv->ticks(QwtScaleDiv::MediumTick);
+  const QwtValueList &medTickList = scDiv->ticks(QwtScaleDiv::MediumTick);
   int medTicks = (int)medTickList.count();
 
-  const QwtValueList majTickList = scDiv->ticks(QwtScaleDiv::MajorTick);
+  const QwtValueList &majTickList = scDiv->ticks(QwtScaleDiv::MajorTick);
   int majTicks = (int)majTickList.count();
 
   int j, x, y, low, high;
@@ -474,7 +474,7 @@ QwtPlotCurve *Plot::curve(int index) {
   if (it && it->rtti() != QwtPlotItem::Rtti_PlotSpectrogram)
     return static_cast<QwtPlotCurve *>(it);
   else
-    return 0;
+    return nullptr;
 }
 
 /**
@@ -503,7 +503,7 @@ int Plot::closestCurve(int xpos, int ypos, int &dist, int &point) {
       PlotCurve *c = static_cast<PlotCurve *>(item);
       DataCurve *dc = dynamic_cast<DataCurve *>(item);
       if (dc) {
-        if (c->type() != Graph::Function && dc->hasLabels() &&
+        if (c->type() != GraphOptions::Function && dc->hasLabels() &&
             dc->selectedLabels(QPoint(xpos, ypos))) {
           dist = 0;
           return iter.key();
@@ -515,7 +515,7 @@ int Plot::closestCurve(int xpos, int ypos, int &dist, int &point) {
         double cx = map[c->xAxis()].xTransform(c->x(i)) - double(xpos);
         double cy = map[c->yAxis()].xTransform(c->y(i)) - double(ypos);
         double f = qwtSqr(cx) + qwtSqr(cy);
-        if (f < dmin && c->type() != Graph::ErrorBars) {
+        if (f < dmin && c->type() != GraphOptions::ErrorBars) {
           dmin = f;
           key = iter.key();
           point = i;
@@ -691,7 +691,7 @@ void Plot::updateCurveLabels() {
   foreach (QwtPlotItem *i, curves) {
     DataCurve *dc = dynamic_cast<DataCurve *>(i);
     if (dc && i->rtti() != QwtPlotItem::Rtti_PlotSpectrogram &&
-        dc->type() != Graph::Function && dc->hasLabels())
+        dc->type() != GraphOptions::Function && dc->hasLabels())
       dc->updateLabelsPosition();
   }
 }
@@ -737,7 +737,7 @@ void Plot::print(QPainter *painter, const QRect &plotRect,
                  const QwtPlotPrintFilter &pfilter) const {
   int axisId;
 
-  if (painter == 0 || !painter->isActive() || !plotRect.isValid() ||
+  if (painter == nullptr || !painter->isActive() || !plotRect.isValid() ||
       size().isNull())
     return;
 

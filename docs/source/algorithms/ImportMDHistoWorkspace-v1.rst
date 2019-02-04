@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -53,10 +53,10 @@ Usage
 
     ws = ImportMDHistoWorkspace('demo_mdhw.txt',Dimensionality='3',Extents='-1,1,-1,1,-1,1',
                                 NumberOfBins='2,2,2',Names='A,B,C',Units='A,A,A')
-    print "Number of Dimensions =", ws.getNumDims()
+    print("Number of Dimensions = {:d}".format(ws.getNumDims()))
     index = (1,0,1)
-    print "Signal at "+str(index)+" =", ws.getSignalArray()[index]
-    print "Error Squared at "+str(index)+" =", ws.getErrorSquaredArray()[index]
+    print("Signal at {} = {:.1f}".format(index, ws.getSignalArray()[index]))
+    print("Error Squared at {} = {:.2f}".format(index, ws.getErrorSquaredArray()[index]))
 
 Output:
 
@@ -72,10 +72,10 @@ Output:
 
     ws = ImportMDHistoWorkspace('demo_mdhw.txt',Dimensionality='2',Extents='-1,1,-1,1',
                                 NumberOfBins='4,2',Names='A,B',Units='A,A')
-    print "Number of Dimensions =", ws.getNumDims()
+    print("Number of Dimensions = {:d}".format(ws.getNumDims()))
     index = (2,1)
-    print "Signal at "+str(index)+" =", ws.getSignalArray()[index]
-    print "Error Squared at "+str(index)+" =", ws.getErrorSquaredArray()[index]
+    print("Signal at {} = {:.1f}".format(index, ws.getSignalArray()[index]))
+    print("Error Squared at {} = {:.2f}".format(index, ws.getErrorSquaredArray()[index]))
 
 Output:
 

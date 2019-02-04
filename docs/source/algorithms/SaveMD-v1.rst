@@ -2,14 +2,14 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
 Description
 -----------
 
-Save an `MDEventWorkspace <http://www.mantidproject.org/MDEventWorkspace>`_ or a
+Save an :ref:`MDEventWorkspace <MDWorkspace>` or a
 :ref:`MDHistoWorkspace <MDHistoWorkspace>` to a .nxs file. The
 workspace's current box structure and entire list of events is
 preserved. The resulting file can be loaded via :ref:`LoadMD <algm-LoadMD>`.
@@ -31,7 +31,7 @@ Usage
     import os
     savefile = os.path.join(config["default.savedirectory"], "mdhws.nxs")
     SaveMD(ws, Filename=savefile, Version=1)
-    print "File created:", os.path.exists(savefile)
+    print("File created: {}".format(os.path.exists(savefile)))
 
 Output:
 

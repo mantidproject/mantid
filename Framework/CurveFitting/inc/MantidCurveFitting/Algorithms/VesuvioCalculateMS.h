@@ -1,9 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CURVEFITTING_VESUVIOCALCULATEMS_H_
 #define MANTID_CURVEFITTING_VESUVIOCALCULATEMS_H_
 //-----------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidCurveFitting/MSVesuvioHelpers.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/V3D.h"
 
@@ -14,17 +21,10 @@ class ISpectrum;
 }
 
 namespace Geometry {
-class Object;
+class IObject;
 }
 
 namespace CurveFitting {
-
-namespace MSVesuvioHelper {
-class RandomNumberGenerator;
-struct Simulation;
-struct SimulationWithErrors;
-}
-
 namespace Functions {
 struct ResolutionParams;
 }
@@ -35,27 +35,6 @@ struct DetectorParams;
 /**
   Calculates the multiple scattering & total scattering contributions
   for a flat-plate or cylindrical sample.
-
-  Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory &
-  NScD Oak Ridge National Laboratory
-
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>
-  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport VesuvioCalculateMS : public API::Algorithm {
 private:
@@ -79,8 +58,6 @@ private:
 
 public:
   VesuvioCalculateMS();
-  ~VesuvioCalculateMS() override;
-
   /// @copydoc Algorithm::name
   const std::string name() const override { return "VesuvioCalculateMS"; }
   /// @copydoc Algorithm::version
@@ -93,6 +70,11 @@ public:
   const std::string summary() const override {
     return "Calculates the contributions of multiple scattering "
            "on a flat plate sample for VESUVIO";
+  }
+
+  const std::vector<std::string> seeAlso() const override {
+    return {"MayersSampleCorrection", "MonteCarloAbsorption",
+            "CarpenterSampleCorrection"};
   }
 
 private:
@@ -131,15 +113,16 @@ private:
                     const double e1res) const;
 
   // Member Variables
-  CurveFitting::MSVesuvioHelper::RandomNumberGenerator *
+  std::unique_ptr<CurveFitting::MSVesuvioHelper::RandomVariateGenerator>
       m_randgen; // random number generator
 
   size_t m_acrossIdx, m_upIdx, m_beamIdx; // indices of each direction
   Kernel::V3D m_beamDir;                  // Directional vector for beam
   double m_srcR2;                         // beam penumbra radius (m)
   double m_halfSampleHeight, m_halfSampleWidth, m_halfSampleThick; // (m)
-  Geometry::Object const *m_sampleShape;  // sample shape
-  SampleComptonProperties *m_sampleProps; // description of sample properties
+  Geometry::IObject const *m_sampleShape; // sample shape
+  std::unique_ptr<SampleComptonProperties>
+      m_sampleProps; // description of sample properties
   double m_detHeight, m_detWidth, m_detThick; // (m)
   double m_tmin, m_tmax, m_delt;              // min, max & dt TOF value
   double m_foilRes;                           // resolution in energy of foil
@@ -148,7 +131,7 @@ private:
   size_t m_nruns;     // number of runs per spectrum
   size_t m_nevents;   // number of single events per run
 
-  API::Progress *m_progress;
+  std::unique_ptr<API::Progress> m_progress;
   API::MatrixWorkspace_sptr m_inputWS;
 };
 

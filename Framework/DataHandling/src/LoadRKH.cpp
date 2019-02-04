@@ -1,20 +1,28 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //---------------------------------------------------
 // Includes
 //---------------------------------------------------
 #include "MantidDataHandling/LoadRKH.h"
-#include "MantidDataHandling/SaveRKH.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataHandling/SaveRKH.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidKernel/cow_ptr.h"
 
+// clang-format off
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/date_time/date_parsing.hpp>
+// clang-format on
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
 #include <MantidKernel/StringTokenizer.h>
@@ -34,11 +42,11 @@ bool isUnit(const Mantid::Kernel::StringTokenizer &codes) {
   //  5. Close bracket
   std::string input =
       std::accumulate(codes.begin(), codes.end(), std::string(""));
-  std::string reg("^[06][\\w]+\\([/ \\w\\^-]+\\)$");
+  std::string reg(R"(^[06][\w]+\([/ \w\^-]+\)$)");
   boost::regex baseRegex(reg);
   return boost::regex_match(input, baseRegex);
 }
-}
+} // namespace
 
 namespace Mantid {
 namespace DataHandling {
@@ -47,46 +55,64 @@ using namespace Mantid::Kernel;
 
 DECLARE_FILELOADER_ALGORITHM(LoadRKH)
 
-namespace {
-void readLinesForRKH1D(std::istream &stream, int readStart, int readEnd,
-                       std::vector<double> &columnOne,
-                       std::vector<double> &ydata, std::vector<double> &errdata,
-                       Progress &prog) {
-  std::string fileline;
-  for (int index = 1; index <= readEnd; ++index) {
-    getline(stream, fileline);
-    if (index < readStart)
-      continue;
-    double x(0.), y(0.), yerr(0.);
-    std::istringstream datastr(fileline);
-    datastr >> x >> y >> yerr;
-    columnOne.push_back(x);
-    ydata.push_back(y);
-    errdata.push_back(yerr);
-    prog.report();
-  }
-}
+/**
+ * Read data from a RKH1D file
+ *
+ * @param stream :: the input stream to read from
+ * @param readStart :: the line to start reading from
+ * @param readEnd :: the line to stop reading at
+ * @param x :: histogram data points to fill
+ * @param y :: histogram data counts to fill
+ * @param ye :: histogram data count standard deviations to fill
+ * @param xe :: histogram data point standard deviations to fill
+ * @param prog :: handle to progress bar
+ * @param readXError :: whether to read x errors (optional, default: false)
+ */
+void LoadRKH::readLinesForRKH1D(std::istream &stream, int readStart,
+                                int readEnd, HistogramData::Points &x,
+                                HistogramData::Counts &y,
+                                HistogramData::CountStandardDeviations &ye,
+                                HistogramData::PointStandardDeviations &xe,
+                                Progress &prog, bool readXError) {
 
-void readLinesWithXErrorForRKH1D(std::istream &stream, int readStart,
-                                 int readEnd, std::vector<double> &columnOne,
-                                 std::vector<double> &ydata,
-                                 std::vector<double> &errdata,
-                                 std::vector<double> &xError, Progress &prog) {
+  std::vector<double> xData;
+  std::vector<double> yData;
+  std::vector<double> xError;
+  std::vector<double> yError;
+
+  xData.reserve(readEnd);
+  yData.reserve(readEnd);
+  xError.reserve(readEnd);
+  yError.reserve(readEnd);
+
   std::string fileline;
   for (int index = 1; index <= readEnd; ++index) {
     getline(stream, fileline);
     if (index < readStart)
       continue;
-    double x(0.), y(0.), yerr(0.), xerr(0.);
+
+    double xValue(0.), yValue(0.), yErrorValue(0.);
     std::istringstream datastr(fileline);
-    datastr >> x >> y >> yerr >> xerr;
-    columnOne.push_back(x);
-    ydata.push_back(y);
-    errdata.push_back(yerr);
-    xError.push_back(xerr);
+    datastr >> xValue >> yValue >> yErrorValue;
+
+    xData.push_back(xValue);
+    yData.push_back(yValue);
+    yError.push_back(yErrorValue);
+
+    // check if we need to read in x error values
+    if (readXError) {
+      double xErrorValue(0.);
+      datastr >> xErrorValue;
+      xError.push_back(xErrorValue);
+    }
+
     prog.report();
   }
-}
+
+  x = xData;
+  y = yData;
+  ye = yError;
+  xe = xError;
 }
 
 /**
@@ -213,21 +239,22 @@ void LoadRKH::exec() {
 }
 
 /** Determines if the file is 1D or 2D based on the first after the workspace's
-*  title
-*  @param testLine :: the first line in the file after the title
-*  @return true if the file must contain 1D data
-*/
+ *  title
+ *  @param testLine :: the first line in the file after the title
+ *  @return true if the file must contain 1D data
+ */
 bool LoadRKH::is2D(const std::string &testLine) {
   // split the line into words
   const Mantid::Kernel::StringTokenizer codes(
-      testLine, " ", Mantid::Kernel::StringTokenizer::TOK_TRIM |
-                         Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+      testLine, " ",
+      Mantid::Kernel::StringTokenizer::TOK_TRIM |
+          Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
   return isUnit(codes);
 }
 
 /** Read a data file that contains only one spectrum into a workspace
-*  @return the new workspace
-*/
+ *  @return the new workspace
+ */
 const API::MatrixWorkspace_sptr LoadRKH::read1D() {
   g_log.information()
       << "file appears to contain 1D information, reading in 1D data mode\n";
@@ -286,23 +313,18 @@ const API::MatrixWorkspace_sptr LoadRKH::read1D() {
 
   int pointsToRead = readEnd - readStart + 1;
   // Now stream sits at the first line of data
-  std::vector<double> columnOne, ydata, errdata, xError;
-  columnOne.reserve(readEnd);
-  ydata.reserve(readEnd);
-  errdata.reserve(readEnd);
+  HistogramData::Points columnOne;
+  HistogramData::Counts ydata;
+  HistogramData::PointStandardDeviations xError;
+  HistogramData::CountStandardDeviations errdata;
 
   auto hasXError = hasXerror(m_fileIn);
 
   Progress prog(this, 0.0, 1.0, readEnd);
 
-  if (hasXError) {
-    xError.reserve(readEnd);
-    readLinesWithXErrorForRKH1D(m_fileIn, readStart, readEnd, columnOne, ydata,
-                                errdata, xError, prog);
-  } else {
-    readLinesForRKH1D(m_fileIn, readStart, readEnd, columnOne, ydata, errdata,
-                      prog);
-  }
+  readLinesForRKH1D(m_fileIn, readStart, readEnd, columnOne, ydata, errdata,
+                    xError, prog, hasXError);
+
   m_fileIn.close();
 
   assert(pointsToRead == static_cast<int>(columnOne.size()));
@@ -316,11 +338,12 @@ const API::MatrixWorkspace_sptr LoadRKH::read1D() {
   if (colIsUnit) {
     MatrixWorkspace_sptr localworkspace = WorkspaceFactory::Instance().create(
         "Workspace2D", 1, pointsToRead, pointsToRead);
+    localworkspace->getSpectrum(0).setDetectorID(static_cast<detid_t>(1));
     localworkspace->getAxis(0)->unit() =
         UnitFactory::Instance().create(firstColVal);
-    localworkspace->dataX(0) = columnOne;
-    localworkspace->dataY(0) = ydata;
-    localworkspace->dataE(0) = errdata;
+    localworkspace->setPoints(0, columnOne);
+    localworkspace->setCounts(0, ydata);
+    localworkspace->setCountStandardDeviations(0, errdata);
     if (hasXError) {
       localworkspace->setPointStandardDeviations(0, xError);
     }
@@ -330,8 +353,10 @@ const API::MatrixWorkspace_sptr LoadRKH::read1D() {
         WorkspaceFactory::Instance().create("Workspace2D", pointsToRead, 1, 1);
     // Set the appropriate values
     for (int index = 0; index < pointsToRead; ++index) {
-      localworkspace->getSpectrum(index)
-          .setSpectrumNo(static_cast<int>(columnOne[index]));
+      localworkspace->getSpectrum(index).setSpectrumNo(
+          static_cast<int>(columnOne[index]));
+      localworkspace->getSpectrum(index).setDetectorID(
+          static_cast<detid_t>(index + 1));
       localworkspace->dataY(index)[0] = ydata[index];
       localworkspace->dataE(index)[0] = errdata[index];
     }
@@ -345,13 +370,13 @@ const API::MatrixWorkspace_sptr LoadRKH::read1D() {
   }
 }
 /** Reads from the third line of the input file to the end assuming it contains
-*  2D data
-*  @param firstLine :: the second line in the file
-*  @return a workspace containing the loaded data
-*  @throw NotFoundError if there is compulsulary data is missing from the file
-*  @throw invalid_argument if there is an inconsistency in the header
-* information
-*/
+ *  2D data
+ *  @param firstLine :: the second line in the file
+ *  @return a workspace containing the loaded data
+ *  @throw NotFoundError if there is compulsulary data is missing from the file
+ *  @throw invalid_argument if there is an inconsistency in the header
+ * information
+ */
 const MatrixWorkspace_sptr LoadRKH::read2D(const std::string &firstLine) {
   g_log.information()
       << "file appears to contain 2D information, reading in 2D data mode\n";
@@ -386,14 +411,14 @@ const MatrixWorkspace_sptr LoadRKH::read2D(const std::string &firstLine) {
   return outWrksp;
 }
 /** Reads the header information from a file containing 2D data
-*  @param[in] initalLine the second line in the file
-*  @param[out] outWrksp the workspace that the data will be writen to
-*  @param[out] axis0Data x-values for the workspace
-*  @return a progress bar object
-*  @throw NotFoundError if there is compulsulary data is missing from the file
-*  @throw invalid_argument if there is an inconsistency in the header
-* information
-*/
+ *  @param[in] initalLine the second line in the file
+ *  @param[out] outWrksp the workspace that the data will be writen to
+ *  @param[out] axis0Data x-values for the workspace
+ *  @return a progress bar object
+ *  @throw NotFoundError if there is compulsulary data is missing from the file
+ *  @throw invalid_argument if there is an inconsistency in the header
+ * information
+ */
 Progress LoadRKH::read2DHeader(const std::string &initalLine,
                                MatrixWorkspace_sptr &outWrksp,
                                MantidVec &axis0Data) {
@@ -438,8 +463,9 @@ Progress LoadRKH::read2DHeader(const std::string &initalLine,
     std::getline(m_fileIn, fileLine);
   }
   Mantid::Kernel::StringTokenizer wsDimensions(
-      fileLine, " ", Mantid::Kernel::StringTokenizer::TOK_TRIM |
-                         Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+      fileLine, " ",
+      Mantid::Kernel::StringTokenizer::TOK_TRIM |
+          Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
   if (wsDimensions.count() < 2) {
     throw Exception::NotFoundError("Input file", "dimensions");
   }
@@ -451,6 +477,9 @@ Progress LoadRKH::read2DHeader(const std::string &initalLine,
   // we now have all the data we need to create the output workspace
   outWrksp = WorkspaceFactory::Instance().create(
       "Workspace2D", nAxis1Values, nAxis0Boundaries, nAxis0Values);
+  for (int i = 0; i < nAxis1Values; ++i) {
+    outWrksp->getSpectrum(i).setDetectorID(static_cast<detid_t>(i + 1));
+  }
   outWrksp->getAxis(0)->unit() = UnitFactory::Instance().create(XUnit);
   outWrksp->setYUnitLabel(intensityUnit);
 
@@ -469,11 +498,11 @@ Progress LoadRKH::read2DHeader(const std::string &initalLine,
   return prog;
 }
 /** Read the specified number of entries from input file into the
-*  the array that is passed
-*  @param[in] nEntries the number of numbers to read
-*  @param[out] output the contents of this will be replaced by the data read
-* from the file
-*/
+ *  the array that is passed
+ *  @param[in] nEntries the number of numbers to read
+ *  @param[out] output the contents of this will be replaced by the data read
+ * from the file
+ */
 void LoadRKH::readNumEntrys(const int nEntries, MantidVec &output) {
   output.resize(nEntries);
   for (int i = 0; i < nEntries; ++i) {
@@ -481,15 +510,16 @@ void LoadRKH::readNumEntrys(const int nEntries, MantidVec &output) {
   }
 }
 /** Convert the units specification line from the RKH file into a
-*  Mantid unit name
-*  @param line :: units specification line
-*  @return Mantid unit name
-*/
+ *  Mantid unit name
+ *  @param line :: units specification line
+ *  @return Mantid unit name
+ */
 const std::string LoadRKH::readUnit(const std::string &line) {
   // split the line into words
   const Mantid::Kernel::StringTokenizer codes(
-      line, " ", Mantid::Kernel::StringTokenizer::TOK_TRIM |
-                     Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+      line, " ",
+      Mantid::Kernel::StringTokenizer::TOK_TRIM |
+          Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
 
   if (!isUnit(codes)) {
     return "C++ no unit found";
@@ -550,10 +580,10 @@ void LoadRKH::skipLines(std::istream &strm, int nlines) {
   }
 }
 /** PAss a vector of bin boundaries and get a vector of bin centers
-*  @param[in] oldBoundaries array of bin boundaries
-*  @param[out] toCenter an array that is one shorter than oldBoundaries, the
-* values of the means of pairs of values from the input
-*/
+ *  @param[in] oldBoundaries array of bin boundaries
+ *  @param[out] toCenter an array that is one shorter than oldBoundaries, the
+ * values of the means of pairs of values from the input
+ */
 void LoadRKH::binCenter(const MantidVec oldBoundaries,
                         MantidVec &toCenter) const {
   VectorHelper::convertToBinCentre(oldBoundaries, toCenter);
@@ -579,5 +609,5 @@ bool LoadRKH::hasXerror(std::ifstream &stream) {
   stream.seekg(currentPutLocation, stream.beg);
   return containsXerror;
 }
-}
-}
+} // namespace DataHandling
+} // namespace Mantid

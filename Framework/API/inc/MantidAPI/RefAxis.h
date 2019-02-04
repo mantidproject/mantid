@@ -1,9 +1,12 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_API_REFAXIS_H_
 #define MANTID_API_REFAXIS_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/NumericAxis.h"
 
 namespace Mantid {
@@ -17,37 +20,15 @@ namespace API {
 
     @author Russell Taylor, Tessella Support Services plc
     @date 18/05/2008
-
-    Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-   National Laboratory & European Spallation Source
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>.
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_API_DLL RefAxis : public NumericAxis {
 public:
-  RefAxis(const std::size_t &length,
-          const MatrixWorkspace *const parentWorkspace);
+  RefAxis(const MatrixWorkspace *const parentWorkspace);
 
   Axis *clone(const MatrixWorkspace *const parentWorkspace) override;
   Axis *clone(const std::size_t length,
               const MatrixWorkspace *const parentWorkspace) override;
-  std::size_t length() const override { return m_size; }
+  std::size_t length() const override;
   /// Get a value at the specified index
   double operator()(const std::size_t &index,
                     const std::size_t &verticalIndex) const override;
@@ -72,8 +53,6 @@ private:
 
   /// A pointer to the workspace holding the axis
   const MatrixWorkspace *const m_parentWS;
-  /// Length of the axis
-  std::size_t m_size;
 };
 
 } // namespace API

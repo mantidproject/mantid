@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef TiledWindow_H
 #define TiledWindow_H
 
@@ -25,10 +31,21 @@ class TiledWindow : public MdiSubWindow {
 public:
   TiledWindow(QWidget *parent, const QString &label,
               const QString &name = QString(), int nrows = 1, int ncols = 1,
-              Qt::WFlags f = 0);
+              Qt::WFlags f = nullptr);
 
   /// Populate a menu with actions
   void populateMenu(QMenu *menu);
+
+  static IProjectSerialisable *loadFromProject(const std::string &lines,
+                                               ApplicationWindow *app,
+                                               const int fileVersion);
+
+  /// Serialises to a string that can be saved to a project file.
+  std::string saveToProject(ApplicationWindow *app) override;
+  /// Returns a list of workspace names that are used by this window
+  std::vector<std::string> getWorkspaceNames() override;
+  /// Returns the user friendly name of the window
+  std::string getWindowName() override;
 
 public slots:
 

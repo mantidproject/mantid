@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -39,14 +39,14 @@ Usage:
     to_match = GroupDetectors(InputWorkspace=to_match, PreserveEvents=False,
                               CopyGroupingFromWorkspace='grouping_ws')
 
-    print 'Spectrum 0 detectors before copy: ' + str(to_remap.getSpectrum(0).getDetectorIDs())
+    print('Spectrum 0 detectors before copy: {}'.format(to_remap.getSpectrum(0).getDetectorIDs()))
 
     # Copy the grouping to another workspace
     CopyDetectorMapping(WorkspaceToMatch='to_match',
                         WorkspaceToRemap='to_remap',
                         IndexBySpectrumNumber=True)
 
-    print 'Spectrum 0 detectors after copy: ' + str(to_remap.getSpectrum(0).getDetectorIDs())
+    print('Spectrum 0 detectors after copy: {}'.format(to_remap.getSpectrum(0).getDetectorIDs()))
 
 
 Output:

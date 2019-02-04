@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MULTIFILEVALIDATORTEST_H_
 #define MULTIFILEVALIDATORTEST_H_
 
@@ -5,8 +11,8 @@
 
 #include "MantidKernel/MultiFileValidator.h"
 #include <Poco/File.h>
-#include <vector>
 #include <string>
+#include <vector>
 
 namespace {
 // Convenience function, that wraps a string in a vector and adds it to a vector
@@ -16,7 +22,7 @@ void addSingleFile(std::vector<std::vector<std::string>> &fileNames,
   const std::vector<std::string> fileNameList(1, fileNameToAdd);
   fileNames.push_back(fileNameList);
 }
-}
+} // namespace
 
 using namespace Mantid::Kernel;
 

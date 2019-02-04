@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 
 //----------------------------------------------------------------------
 // Includes
@@ -36,9 +42,9 @@ void SaveTBL::init() {
 }
 
 /**
-* Finds the stitch groups that need to be on the same line
-* @param ws : a pointer to a tableworkspace
-*/
+ * Finds the stitch groups that need to be on the same line
+ * @param ws : a pointer to a tableworkspace
+ */
 void SaveTBL::findGroups(ITableWorkspace_sptr ws) {
   size_t rowCount = ws->rowCount();
   for (size_t i = 0; i < rowCount; ++i) {
@@ -54,8 +60,8 @@ void SaveTBL::findGroups(ITableWorkspace_sptr ws) {
 }
 
 /**
-*   Executes the algorithm.
-*/
+ *   Executes the algorithm.
+ */
 void SaveTBL::exec() {
   // Get the workspace
   ITableWorkspace_sptr ws = getProperty("InputWorkspace");
@@ -68,13 +74,9 @@ void SaveTBL::exec() {
   if (!file) {
     throw Exception::FileError("Unable to create file: ", filename);
   }
+
   std::vector<std::string> columnHeadings = ws->getColumnNames();
-  for (auto &heading : columnHeadings) {
-    if (heading == "Options")
-      writeVal<std::string>(heading, file, false, true);
-    else
-      writeVal<std::string>(heading, file);
-  }
+  writeColumnNames(file, columnHeadings);
   for (size_t rowIndex = 0; rowIndex < ws->rowCount(); ++rowIndex) {
     TableRow row = ws->getRow(rowIndex);
     for (size_t columnIndex = 0; columnIndex < columnHeadings.size();
@@ -102,16 +104,28 @@ void SaveTBL::exec() {
   file.close();
 }
 
+void SaveTBL::writeColumnNames(std::ofstream &file,
+                               std::vector<std::string> const &columnHeadings) {
+  auto it = columnHeadings.begin();
+  for (; it != columnHeadings.end() - 1; ++it) {
+    auto const &heading = *it;
+    writeVal<std::string>(heading, file);
+  }
+  auto const &lastHeading = *it;
+  writeVal<std::string>(lastHeading, file, false, true);
+}
+
 /**
-* Writes the given value to file, checking if it needs to be surrounded in
-* quotes due to a comma being included
-* @param val : the string to be written
-* @param file : the ouput file stream
-* @param endsep : boolean true to include a comma after the data
-* @param endline : boolean true to put an EOL at the end of this data value
-*/
+ * Writes the given value to file, checking if it needs to be surrounded in
+ * quotes due to a comma being included
+ * @param val : the string to be written
+ * @param file : the ouput file stream
+ * @param endsep : boolean true to include a comma after the data
+ * @param endline : boolean true to put an EOL at the end of this data value
+ */
 template <class T>
-void SaveTBL::writeVal(T &val, std::ofstream &file, bool endsep, bool endline) {
+void SaveTBL::writeVal(const T &val, std::ofstream &file, bool endsep,
+                       bool endline) {
   std::string valStr = boost::lexical_cast<std::string>(val);
   size_t comPos = valStr.find(',');
   if (comPos != std::string::npos) {

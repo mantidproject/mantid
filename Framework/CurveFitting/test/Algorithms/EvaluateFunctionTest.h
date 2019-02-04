@@ -1,19 +1,25 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CURVEFITTING_EVALUATEFUNCTIONTEST_H_
 #define MANTID_CURVEFITTING_EVALUATEFUNCTIONTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCurveFitting/Algorithms/EvaluateFunction.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FunctionDomain1D.h"
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidCurveFitting/Algorithms/EvaluateFunction.h"
 #include "MantidKernel/EmptyValues.h"
 
 using Mantid::CurveFitting::Algorithms::EvaluateFunction;
@@ -82,6 +88,15 @@ public:
     tester.checkResult();
   }
 
+  void test_1D_range_outside_workspace_fails() {
+    Tester1D tester;
+    tester.setRange(0, 30);
+    tester.setWorkspaceRange(40, 50);
+    tester.setWorkspaceIndex();
+    tester.runAlgorithm();
+    tester.checkResult(true);
+  }
+
   void test_MD_histo() {
     int nx = 5;
     int ny = 6;
@@ -140,7 +155,6 @@ public:
         TS_ASSERT_DELTA((signal - value) / value, 0.0, 1e-6);
       }
     } while (iter->next());
-    delete iter;
   }
 
   void test_set_workspace_twice() {
@@ -235,6 +249,16 @@ private:
       EndX = 10;
     }
 
+    void setRange(double newStartX, double newEndX) {
+      StartX = newStartX;
+      EndX = newEndX;
+    }
+
+    void setWorkspaceRange(double newXMin, double newXMax) {
+      xMin = newXMin;
+      xMax = newXMax;
+    }
+
     void setWorkspaceIndex() { workspaceIndex = 1; }
 
     void runAlgorithm() {
@@ -255,6 +279,7 @@ private:
       TS_ASSERT_THROWS_NOTHING(
           alg.setProperty("OutputWorkspace", "EvaluateFunction_outWS"));
       TS_ASSERT_THROWS_NOTHING(alg.execute());
+
       isExecuted = alg.isExecuted();
       if (isExecuted) {
         outputWorkspace =
@@ -264,7 +289,13 @@ private:
       AnalysisDataService::Instance().clear();
     }
 
-    void checkResult() {
+    void checkResult(bool shouldFail = false) {
+
+      if (shouldFail) {
+        TS_ASSERT(!isExecuted);
+        return;
+      }
+
       TS_ASSERT(isExecuted);
       if (!isExecuted)
         return;

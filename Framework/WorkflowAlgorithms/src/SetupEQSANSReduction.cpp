@@ -1,17 +1,23 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidWorkflowAlgorithms/SetupEQSANSReduction.h"
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/ListValidator.h"
-#include "MantidKernel/RebinParamsValidator.h"
-#include "MantidKernel/EnabledWhenProperty.h"
-#include "MantidKernel/VisibleWhenProperty.h"
+#include "MantidAPI/AlgorithmProperty.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidAPI/AlgorithmProperty.h"
-#include "MantidKernel/PropertyManagerDataService.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/PropertyManager.h"
+#include "MantidKernel/PropertyManagerDataService.h"
+#include "MantidKernel/RebinParamsValidator.h"
+#include "MantidKernel/VisibleWhenProperty.h"
 #include "Poco/NumberFormatter.h"
 
 namespace Mantid {
@@ -30,16 +36,20 @@ void SetupEQSANSReduction::init() {
   declareProperty("UseConfigTOFCuts", false,
                   "If true, the edges of the TOF distribution will be cut "
                   "according to the configuration file");
-  declareProperty("LowTOFCut", 0.0, "TOF value below which events will not be "
-                                    "loaded into the workspace at load-time");
-  declareProperty("HighTOFCut", 0.0, "TOF value above which events will not be "
-                                     "loaded into the workspace at load-time");
-  declareProperty("WavelengthStep", 0.1, "Wavelength steps to be used when "
-                                         "rebinning the data before performing "
-                                         "the reduction");
-  declareProperty("UseConfigMask", false, "If true, the masking information "
-                                          "found in the configuration file "
-                                          "will be used");
+  declareProperty("LowTOFCut", 0.0,
+                  "TOF value below which events will not be "
+                  "loaded into the workspace at load-time");
+  declareProperty("HighTOFCut", 0.0,
+                  "TOF value above which events will not be "
+                  "loaded into the workspace at load-time");
+  declareProperty("WavelengthStep", 0.1,
+                  "Wavelength steps to be used when "
+                  "rebinning the data before performing "
+                  "the reduction");
+  declareProperty("UseConfigMask", false,
+                  "If true, the masking information "
+                  "found in the configuration file "
+                  "will be used");
   declareProperty("UseConfig", true,
                   "If true, the best configuration file found will be used");
   declareProperty("CorrectForFlightPath", false,
@@ -54,8 +64,15 @@ void SetupEQSANSReduction::init() {
   declareProperty(
       "SampleDetectorDistance", EMPTY_DBL(),
       "Sample to detector distance to use (overrides meta data), in mm");
+
   declareProperty("SampleDetectorDistanceOffset", EMPTY_DBL(),
                   "Offset to the sample to detector distance (use only when "
+                  "using the detector distance found in the meta data), in mm");
+  declareProperty("SampleOffset", EMPTY_DBL(),
+                  "Offset applies to the sample position (use only when "
+                  "using the detector distance found in the meta data), in mm");
+  declareProperty("DetectorOffset", EMPTY_DBL(),
+                  "Offset applies to the detector position (use only when "
                   "using the distance found in the meta data), in mm");
 
   declareProperty(
@@ -81,6 +98,8 @@ void SetupEQSANSReduction::init() {
   setPropertyGroup("SampleDetectorDistance", load_grp);
   setPropertyGroup("SampleDetectorDistanceOffset", load_grp);
 
+  setPropertyGroup("SampleOffset", load_grp);
+  setPropertyGroup("DetectorOffset", load_grp);
   setPropertyGroup("SolidAngleCorrection", load_grp);
   setPropertyGroup("DetectorTubes", load_grp);
 
@@ -194,9 +213,10 @@ void SetupEQSANSReduction::init() {
   declareProperty(
       "MaxEfficiency", EMPTY_DBL(), positiveDouble,
       "Maximum efficiency for a pixel to be considered (default: no maximum).");
-  declareProperty("UseDefaultDC", true, "If true, the dark current subtracted "
-                                        "from the sample data will also be "
-                                        "subtracted from the flood field.");
+  declareProperty("UseDefaultDC", true,
+                  "If true, the dark current subtracted "
+                  "from the sample data will also be "
+                  "subtracted from the flood field.");
   declareProperty(make_unique<API::FileProperty>(
                       "SensitivityDarkCurrentFile", "",
                       API::FileProperty::OptionalLoad, "_event.nxs"),
@@ -542,9 +562,10 @@ void SetupEQSANSReduction::init() {
                   "Number of I(q) bins when binning is not specified");
   declareProperty("IQLogBinning", false,
                   "I(q) log binning when binning is not specified");
-  declareProperty("IQIndependentBinning", true, "If true and frame skipping is "
-                                                "used, each frame will have "
-                                                "its own binning");
+  declareProperty("IQIndependentBinning", true,
+                  "If true and frame skipping is "
+                  "used, each frame will have "
+                  "its own binning");
   declareProperty(
       "IQScaleResults", true,
       "If true and frame skipping is used, frame 1 will be scaled to frame 2");
@@ -580,7 +601,7 @@ void SetupEQSANSReduction::init() {
 void SetupEQSANSReduction::exec() {
   // Reduction property manager
   const std::string reductionManagerName = getProperty("ReductionProperties");
-  if (reductionManagerName.size() == 0) {
+  if (reductionManagerName.empty()) {
     g_log.error() << "ERROR: Reduction Property Manager name is empty\n";
     return;
   }
@@ -618,10 +639,11 @@ void SetupEQSANSReduction::exec() {
   } else if (boost::contains(normalization, "Charge")) {
     normAlg->setProperty("NormaliseToBeam", false);
   } else if (boost::contains(normalization, "Monitor")) {
-    loadMonitors = true;
-    if (monitorRefFile.size() == 0) {
+    if (monitorRefFile.empty()) {
       g_log.error() << "ERROR: normalize-to-monitor was turned ON but no "
                        "reference data was selected\n";
+    } else {
+      loadMonitors = true;
     }
     normAlg->setProperty("NormaliseToMonitor", true);
     normAlg->setProperty("BeamSpectrumFile", monitorRefFile);
@@ -652,12 +674,18 @@ void SetupEQSANSReduction::exec() {
 
   const bool preserveEvents = getProperty("PreserveEvents");
   loadAlg->setProperty("PreserveEvents", preserveEvents);
-  loadAlg->setProperty("LoadMonitors", loadMonitors);
+  // load from nexus if they aren't in the reference file
+  loadAlg->setProperty("LoadMonitors",
+                       (loadMonitors && monitorRefFile.empty()));
 
   const double sdd = getProperty("SampleDetectorDistance");
   loadAlg->setProperty("SampleDetectorDistance", sdd);
   const double sddOffset = getProperty("SampleDetectorDistanceOffset");
   loadAlg->setProperty("SampleDetectorDistanceOffset", sddOffset);
+  const double dOffset = getProperty("DetectorOffset");
+  loadAlg->setProperty("DetectorOffset", dOffset);
+  const double sOffset = getProperty("SampleOffset");
+  loadAlg->setProperty("SampleOffset", sOffset);
   const double wlStep = getProperty("WavelengthStep");
   loadAlg->setProperty("WavelengthStep", wlStep);
 
@@ -671,7 +699,7 @@ void SetupEQSANSReduction::exec() {
 
   // Store dark current algorithm
   const std::string darkCurrentFile = getPropertyValue("DarkCurrentFile");
-  if (darkCurrentFile.size() > 0) {
+  if (!darkCurrentFile.empty()) {
     IAlgorithm_sptr darkAlg =
         createChildAlgorithm("EQSANSDarkCurrentSubtraction");
     darkAlg->setProperty("Filename", darkCurrentFile);
@@ -722,7 +750,7 @@ void SetupEQSANSReduction::exec() {
     if (!boost::iequals(centerMethod, "DirectBeam"))
       useDirectBeamMethod = false;
     const std::string beamCenterFile = getProperty("BeamCenterFile");
-    if (beamCenterFile.size() > 0) {
+    if (!beamCenterFile.empty()) {
       const double beamRadius = getProperty("BeamRadius");
 
       IAlgorithm_sptr ctrAlg = createChildAlgorithm("SANSBeamFinder");
@@ -853,7 +881,7 @@ void SetupEQSANSReduction::setupSensitivity(
   const std::string reductionManagerName = getProperty("ReductionProperties");
 
   const std::string sensitivityFile = getPropertyValue("SensitivityFile");
-  if (sensitivityFile.size() > 0) {
+  if (!sensitivityFile.empty()) {
     const bool useSampleDC = getProperty("UseDefaultDC");
     const std::string sensitivityDarkCurrentFile =
         getPropertyValue("SensitivityDarkCurrentFile");
@@ -887,7 +915,7 @@ void SetupEQSANSReduction::setupSensitivity(
       const double sensitivityBeamRadius =
           getProperty("SensitivityBeamCenterRadius");
       bool useDirectBeam = boost::iequals(centerMethod, "DirectBeam");
-      if (beamCenterFile.size() > 0) {
+      if (!beamCenterFile.empty()) {
         IAlgorithm_sptr ctrAlg = createChildAlgorithm("SANSBeamFinder");
         ctrAlg->setProperty("Filename", beamCenterFile);
         ctrAlg->setProperty("UseDirectBeamMethod", useDirectBeam);
@@ -975,7 +1003,7 @@ void SetupEQSANSReduction::setupTransmission(
     } else if (boost::iequals(centerMethod, "DirectBeam")) {
       const std::string beamCenterFile =
           getProperty("TransmissionBeamCenterFile");
-      if (beamCenterFile.size() > 0) {
+      if (!beamCenterFile.empty()) {
         IAlgorithm_sptr ctrAlg = createChildAlgorithm("SANSBeamFinder");
         ctrAlg->setProperty("Filename", beamCenterFile);
         ctrAlg->setProperty("UseDirectBeamMethod", true);
@@ -1004,7 +1032,7 @@ void SetupEQSANSReduction::setupBackground(
   const std::string reductionManagerName = getProperty("ReductionProperties");
   // Background
   const std::string backgroundFile = getPropertyValue("BackgroundFiles");
-  if (backgroundFile.size() > 0)
+  if (!backgroundFile.empty())
     reductionManager->declareProperty(
         Kernel::make_unique<PropertyWithValue<std::string>>("BackgroundFiles",
                                                             backgroundFile));
@@ -1066,7 +1094,7 @@ void SetupEQSANSReduction::setupBackground(
     } else if (boost::iequals(centerMethod, "DirectBeam")) {
       const std::string beamCenterFile =
           getProperty("BckTransmissionBeamCenterFile");
-      if (beamCenterFile.size() > 0) {
+      if (!beamCenterFile.empty()) {
         IAlgorithm_sptr ctrAlg = createChildAlgorithm("SANSBeamFinder");
         ctrAlg->setProperty("Filename", beamCenterFile);
         ctrAlg->setProperty("UseDirectBeamMethod", true);

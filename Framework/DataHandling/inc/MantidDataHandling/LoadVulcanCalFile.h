@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAHANDLING_LOADVULCANCALFILE_H_
 #define MANTID_DATAHANDLING_LOADVULCANCALFILE_H_
 
@@ -36,6 +42,12 @@ public:
 
   /// Algorithm's version for identification
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"ReadGroupsFromFile",   "CreateDummyCalFile",
+            "CreateCalFileByNames", "AlignDetectors",
+            "DiffractionFocussing", "LoadCalFile",
+            "SaveCalFile",          "MergeCalFiles"};
+  }
   /// Algorithm's category for identification
   const std::string category() const override {
     return "DataHandling\\Text;Diffraction\\DataHandling";
@@ -97,7 +109,7 @@ private:
   std::map<int, std::pair<double, double>> m_effLTheta;
 };
 
-} // namespace Mantid
 } // namespace DataHandling
+} // namespace Mantid
 
 #endif /* MANTID_DATAHANDLING_LOADVULCANCALFILE_H_ */

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/IFunction1DSpectrum.h"
 
 namespace Mantid {
@@ -11,7 +17,7 @@ void IFunction1DSpectrum::function(const FunctionDomain &domain,
     const FunctionDomain1DSpectrum &spectrumDomain =
         dynamic_cast<const FunctionDomain1DSpectrum &>(domain);
     function1DSpectrum(spectrumDomain, values);
-  } catch (std::bad_cast) {
+  } catch (const std::bad_cast &) {
     throw std::invalid_argument(
         "Provided domain is not of type FunctionDomain1DSpectrum.");
   }
@@ -23,7 +29,7 @@ void IFunction1DSpectrum::functionDeriv(const FunctionDomain &domain,
     const FunctionDomain1DSpectrum &spectrumDomain =
         dynamic_cast<const FunctionDomain1DSpectrum &>(domain);
     functionDeriv1DSpectrum(spectrumDomain, jacobian);
-  } catch (std::bad_cast) {
+  } catch (const std::bad_cast &) {
     throw std::invalid_argument(
         "Provided domain is not of type FunctionDomain1DSpectrum.");
   }

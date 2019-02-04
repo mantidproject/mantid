@@ -1,6 +1,9 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/FFTSmooth2.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TextAxis.h"
@@ -79,7 +82,7 @@ void FFTSmooth2::exec() {
   API::MatrixWorkspace_sptr symmWS = API::WorkspaceFactory::Instance().create(
       "Workspace2D", 1, inWS->x(0).size() + dn, inWS->y(0).size() + dn);
 
-  Progress progress(this, 0, 1, 4 * (send - s0));
+  Progress progress(this, 0.0, 1.0, 4 * (send - s0));
 
   for (int spec = s0; spec < send; spec++) {
     // Save the starting x value so it can be restored after all transforms.
@@ -133,7 +136,7 @@ void FFTSmooth2::exec() {
       if (sn.empty())
         n = 2;
       else
-        n = atoi(sn.c_str());
+        n = std::stoi(sn);
       if (n <= 1)
         throw std::invalid_argument(
             "Truncation parameter must be an integer > 1");
@@ -154,8 +157,8 @@ void FFTSmooth2::exec() {
       } else {
         std::string param0 = params.at(0);
         std::string param1 = params.at(1);
-        n = atoi(param0.c_str());
-        order = atoi(param1.c_str());
+        n = std::stoi(param0);
+        order = std::stoi(param1);
       }
       if (n <= 1)
         throw std::invalid_argument(
@@ -189,8 +192,8 @@ void FFTSmooth2::exec() {
 
     if (getProperty("AllSpectra")) {
       outWS->setSharedX(spec, inWS->sharedX(spec));
-      outWS->mutableY(spec)
-          .assign(tmpWS->y(0).cbegin() + dn, tmpWS->y(0).cend());
+      outWS->mutableY(spec).assign(tmpWS->y(0).cbegin() + dn,
+                                   tmpWS->y(0).cend());
     } else {
       outWS->setSharedX(0, inWS->sharedX(spec));
       outWS->mutableY(0).assign(tmpWS->y(0).cbegin() + dn, tmpWS->y(0).cend());
@@ -272,5 +275,5 @@ void FFTSmooth2::Butterworth(int n, int order,
   }
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

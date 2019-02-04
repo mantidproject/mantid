@@ -1,7 +1,15 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
+from __future__ import (absolute_import, division, print_function)
 import re
 import glob
 import os
+from mantid.api import AlgorithmFactory
 
 
 def grep(patt,lines):
@@ -18,6 +26,7 @@ def grep(patt,lines):
         return results
     else:
         return None
+
 
 #get alg names
 algs = AlgorithmFactory.getRegisteredAlgorithms(True)
@@ -38,5 +47,5 @@ for filename in files:
             expr = regexs[alg]
             results = grep(expr, lines)
             if results:
-                print filename
-                print results
+                print(filename)
+                print(results)

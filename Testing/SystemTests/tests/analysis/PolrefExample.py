@@ -1,15 +1,21 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
-import stresstesting
+import systemtesting
 from mantid.simpleapi import *
 
 
-class PolrefExample(stresstesting.MantidStressTest):
+class PolrefExample(systemtesting.MantidSystemTest):
     ''' Sample script from Tim Charlton. Described as Mantid version of quick:lam
 
     Owen Arnold
     29/06/2012
     The analysis performed here is a subset of what is done in ReflectometryISIS.py.
-    We may want to remove this test in the furture to avoid duplication. However,
+    We may want to remove this test in the future to avoid duplication. However,
 
     I'm leaving this in here for now because Tim Charlton suggests making the ReflectometryISIS.py
     test more generic for every reflectometry instrument.

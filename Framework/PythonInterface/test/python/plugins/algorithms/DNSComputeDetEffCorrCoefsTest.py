@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
@@ -31,8 +37,8 @@ class DNSComputeDetEffCorrCoefsTest(unittest.TestCase):
 
     def test_DNSVanadiumCorrection(self):
         outputWorkspaceName = "DNSComputeDetCorrCoefsTest_Test1"
-        vanalist = [self.sfvanaws.getName(), self.nsfvanaws.getName()]
-        bglist = [self.sfbkgrws.getName(), self.nsfbkgrws.getName()]
+        vanalist = [self.sfvanaws.name(), self.nsfvanaws.name()]
+        bglist = [self.sfbkgrws.name(), self.nsfbkgrws.name()]
         alg_test = run_algorithm("DNSComputeDetEffCorrCoefs", VanadiumWorkspaces=vanalist,
                                  BackgroundWorkspaces=bglist, OutputWorkspace=outputWorkspaceName)
 
@@ -52,16 +58,16 @@ class DNSComputeDetEffCorrCoefsTest(unittest.TestCase):
 
     def test_NegativeValues(self):
         outputWorkspaceName = "DNSComputeDetCorrCoefsTest_Test2"
-        vanalist = [self.sfvanaws.getName(), self.nsfvanaws.getName()]
-        bglist = [self.sfbkgrws.getName(), self.nsfbkgrws.getName()]
+        vanalist = [self.sfvanaws.name(), self.nsfvanaws.name()]
+        bglist = [self.sfbkgrws.name(), self.nsfbkgrws.name()]
         self.assertRaises(RuntimeError, DNSComputeDetEffCorrCoefs, VanadiumWorkspaces=bglist,
                           BackgroundWorkspaces=vanalist, OutputWorkspace=outputWorkspaceName)
         return
 
     def test_DNSVanadiumCorrection_Masked(self):
         outputWorkspaceName = "DNSComputeDetCorrCoefsTest_Test3"
-        vanalist = [self.sfvanaws.getName(), self.nsfvanaws.getName()]
-        bglist = [self.sfbkgrws.getName(), self.nsfbkgrws.getName()]
+        vanalist = [self.sfvanaws.name(), self.nsfvanaws.name()]
+        bglist = [self.sfbkgrws.name(), self.nsfbkgrws.name()]
         MaskDetectors(self.sfvanaws, DetectorList=[1])
         MaskDetectors(self.nsfvanaws, DetectorList=[1])
 

@@ -1,16 +1,24 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CreateGroupingWorkspace.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
 #include <boost/algorithm/string/detail/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
-#include <queue>
+#include <boost/algorithm/string/trim.hpp>
 #include <fstream>
-#include "MantidAPI/FileProperty.h"
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/ListValidator.h"
+#include <queue>
 
 namespace {
 Mantid::Kernel::Logger g_log("CreateGroupingWorkspace");
@@ -70,11 +78,11 @@ void CreateGroupingWorkspace::init() {
                   "Use / or , to separate multiple groups. "
                   "If empty, then an empty GroupingWorkspace will be created.");
 
-  std::vector<std::string> grouping{"", "All", "Group", "Column", "bank"};
-  declareProperty(
-      "GroupDetectorsBy", "", boost::make_shared<StringListValidator>(grouping),
-      "Only used if GroupNames is empty: All detectors as one group, Groups "
-      "(East,West for SNAP), Columns for SNAP, detector banks");
+  std::vector<std::string> grouping{"",       "All", "Group", "2_4Grouping",
+                                    "Column", "bank"};
+  declareProperty("GroupDetectorsBy", "",
+                  boost::make_shared<StringListValidator>(grouping),
+                  "Only used if GroupNames is empty");
   declareProperty("MaxRecursionDepth", 5,
                   "Number of levels to search into the instrument (default=5)");
 
@@ -82,8 +90,9 @@ void CreateGroupingWorkspace::init() {
                   boost::make_shared<BoundedValidator<int>>(0, INT_MAX),
                   "Used to distribute the detectors of a given component into "
                   "a fixed number of groups");
-  declareProperty("ComponentName", "", "Specify the instrument component to "
-                                       "group into a fixed number of groups");
+  declareProperty("ComponentName", "",
+                  "Specify the instrument component to "
+                  "group into a fixed number of groups");
 
   declareProperty(make_unique<WorkspaceProperty<GroupingWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
@@ -106,6 +115,54 @@ void CreateGroupingWorkspace::init() {
                   "The number of spectra in groups", Direction::Output);
   declareProperty("NumberGroupsResult", EMPTY_INT(), "The number of groups",
                   Direction::Output);
+}
+
+std::map<std::string, std::string> CreateGroupingWorkspace::validateInputs() {
+  std::map<std::string, std::string> result;
+
+  // only allow specifying the instrument in one way
+  int numInstrument = 0;
+  if (!isDefault("InputWorkspace"))
+    numInstrument += 1;
+  if (!isDefault("InstrumentName"))
+    numInstrument += 1;
+  if (!isDefault("InstrumentFilename"))
+    numInstrument += 1;
+  if (numInstrument == 0) {
+    std::string msg("Must supply an instrument");
+    result["InputWorkspace"] = msg;
+    result["InstrumentName"] = msg;
+    result["InstrumentFilename"] = msg;
+  } else if (numInstrument > 1) {
+    std::string msg("Must supply an instrument only one way");
+
+    if (!isDefault("InputWorkspace"))
+      result["InputWorkspace"] = msg;
+    if (!isDefault("InstrumentName"))
+      result["InstrumentName"] = msg;
+    if (!isDefault("InstrumentFilename"))
+      result["InstrumentFilename"] = msg;
+  }
+
+  // only allow specifying the grouping one way
+  int numGroupings = 0;
+  if (!isDefault("GroupNames"))
+    numGroupings += 1;
+  if (!isDefault("GroupDetectorsBy"))
+    numGroupings += 1;
+  if (!isDefault("ComponentName"))
+    numGroupings += 1;
+  if (numGroupings != 1) {
+    std::string msg("Must supply grouping only one way");
+    if (!isDefault("GroupNames"))
+      result["GroupNames"] = msg;
+    if (!isDefault("GroupDetectorsBy"))
+      result["GroupDetectorsBy"] = msg;
+    if (!isDefault("ComponentName"))
+      result["ComponentName"] = msg;
+  }
+
+  return result;
 }
 
 //------------------------------------------------------------------------------------------------
@@ -245,9 +302,9 @@ std::map<detid_t, int> makeGroupingByNames(std::string GroupNames,
   // Find Detectors that belong to groups
   if (!group_map.empty()) {
     // Find Detectors that belong to groups
-    typedef boost::shared_ptr<const Geometry::ICompAssembly> sptr_ICompAss;
-    typedef boost::shared_ptr<const Geometry::IComponent> sptr_IComp;
-    typedef boost::shared_ptr<const Geometry::IDetector> sptr_IDet;
+    using sptr_ICompAss = boost::shared_ptr<const Geometry::ICompAssembly>;
+    using sptr_IComp = boost::shared_ptr<const Geometry::IComponent>;
+    using sptr_IDet = boost::shared_ptr<const Geometry::IDetector>;
     std::queue<std::pair<sptr_ICompAss, int>> assemblies;
     sptr_ICompAss current =
         boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(inst);
@@ -354,12 +411,22 @@ void CreateGroupingWorkspace::exec() {
     inst = tempWS->getInstrument();
   }
 
+  // Validation for 2_4Grouping input used only for SNAP
+  if (inst->getName() != "SNAP" && grouping == "2_4Grouping") {
+    const std::string message("2_4Grouping only works for SNAP.");
+    g_log.error(message);
+    throw std::invalid_argument(message);
+  }
+
   if (GroupNames.empty() && OldCalFilename.empty()) {
-    if (grouping.compare("All") == 0) {
+    if (grouping == "All") {
       GroupNames = inst->getName();
-    } else if (inst->getName().compare("SNAP") == 0 &&
-               grouping.compare("Group") == 0) {
+    } else if (inst->getName() == "SNAP" && grouping == "Group") {
       GroupNames = "East,West";
+    } else if (inst->getName() == "POWGEN" && grouping == "Group") {
+      GroupNames = "South,North";
+    } else if (inst->getName() == "SNAP" && grouping == "2_4Grouping") {
+      GroupNames = "Column1,Column2,Column3,Column4,Column5,Column6,";
     } else {
       sortnames = true;
       GroupNames = "";
@@ -391,9 +458,20 @@ void CreateGroupingWorkspace::exec() {
 
   Progress prog(this, 0.2, 1.0, outWS->getNumberHistograms());
   // Make the grouping one of three ways:
-  if (!GroupNames.empty())
+  if (!GroupNames.empty()) {
     detIDtoGroup = makeGroupingByNames(GroupNames, inst, prog, sortnames);
-  else if (!OldCalFilename.empty())
+    if (grouping == "2_4Grouping") {
+      std::map<detid_t, int>::const_iterator it_end = detIDtoGroup.end();
+      std::map<detid_t, int>::const_iterator it;
+      for (it = detIDtoGroup.begin(); it != it_end; ++it) {
+        if (it->second < 5)
+          detIDtoGroup[it->first] = 1;
+        else
+          detIDtoGroup[it->first] = 2;
+      }
+    }
+
+  } else if (!OldCalFilename.empty())
     detIDtoGroup = readGroupingFile(OldCalFilename, prog);
   else if ((numGroups > 0) && !componentName.empty())
     detIDtoGroup =
@@ -433,5 +511,5 @@ void CreateGroupingWorkspace::exec() {
   }
 }
 
-} // namespace Mantid
 } // namespace Algorithms
+} // namespace Mantid

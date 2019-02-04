@@ -1,36 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MDALGORITHMS_TOBYFITRESOLUTIONMODEL_H_
 #define MANTID_MDALGORITHMS_TOBYFITRESOLUTIONMODEL_H_
-/**
-  Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
 
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>.
-  Code Documentation is available at: <http://doxygen.mantidproject.org>
-*/
-#include "MantidMDAlgorithms/Quantification/MDResolutionConvolution.h"
 #include "MantidMDAlgorithms/Quantification/CachedExperimentInfo.h"
+#include "MantidMDAlgorithms/Quantification/MDResolutionConvolution.h"
 
-#include "MantidMDAlgorithms/Quantification/Resolution/TobyFitYVector.h"
 #include "MantidMDAlgorithms/Quantification/Resolution/TobyFitBMatrix.h"
+#include "MantidMDAlgorithms/Quantification/Resolution/TobyFitYVector.h"
 
 #include "MantidAPI/ExperimentInfo.h"
 
-#include "MantidKernel/ClassMacros.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/NDRandomNumberGenerator.h"
 
@@ -69,6 +53,12 @@ public:
   /// Destructor
   ~TobyFitResolutionModel() override;
 
+  /// Disable copy operator
+  TobyFitResolutionModel(const TobyFitResolutionModel &) = delete;
+
+  /// Disable assignment operator
+  TobyFitResolutionModel &operator=(const TobyFitResolutionModel &) = delete;
+
   /// Returns the function's name
   std::string name() const override { return "TobyFitResolutionModel"; }
   /// Returns the value of the model convoluted with the resolution
@@ -76,8 +66,6 @@ public:
                 const size_t eventIndex) const override;
 
 private:
-  DISABLE_COPY_AND_ASSIGN(TobyFitResolutionModel)
-
   friend class TobyFitYVector;
 
   /// Declare function attributes
@@ -158,7 +146,7 @@ private:
   /// Cache of experiment info caches
   std::map<std::pair<int, detid_t>, CachedExperimentInfo *> m_exptCache;
 };
-}
-}
+} // namespace MDAlgorithms
+} // namespace Mantid
 
 #endif /* MANTID_MDALGORITHMS_TOBYFITRESOLUTIONMODEL_H_*/

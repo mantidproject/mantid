@@ -1,15 +1,23 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
+#include "MantidCrystal/SaveHKL.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
-#include "MantidCrystal/SaveHKL.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidKernel/Utils.h"
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/Material.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/ListValidator.h"
 #include "MantidCrystal/AnvredCorrection.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/Material.h"
+#include "MantidKernel/Strings.h"
+#include "MantidKernel/Unit.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/Utils.h"
 #include <fstream>
 
 #include <Poco/File.h>
@@ -90,7 +98,7 @@ void SaveHKL::init() {
   declareProperty(Kernel::make_unique<FileProperty>(
                       "UBFilename", "", FileProperty::OptionalLoad, exts),
                   "Path to an ISAW-style UB matrix text file only needed for "
-                  "DirectionCosines.");
+                  "DirectionCosines if workspace does not have lattice.");
 }
 
 /** Execute the algorithm.
@@ -115,27 +123,33 @@ void SaveHKL::exec() {
   int widthBorder = getProperty("WidthBorder");
   int decimalHKL = getProperty("HKLDecimalPlaces");
   bool cosines = getProperty("DirectionCosines");
-  Mantid::Geometry::OrientedLattice lat;
   Kernel::DblMatrix UB(3, 3);
   if (cosines) {
-    // Find OrientedLattice
-    std::string fileUB = getProperty("UBFilename");
-    // Open the file
-    std::ifstream in(fileUB.c_str());
-    std::string s;
-    double val;
+    if (peaksW->sample().hasOrientedLattice()) {
+      UB = peaksW->sample().getOrientedLattice().getUB();
+    } else {
+      // Find OrientedLattice
+      std::string fileUB = getProperty("UBFilename");
+      // Open the file
+      std::ifstream in(fileUB.c_str());
+      if (!in)
+        throw std::runtime_error(
+            "A file containing the UB matrix must be input into UBFilename.");
+      std::string s;
+      double val;
 
-    // Read the ISAW UB matrix
-    for (size_t row = 0; row < 3; row++) {
-      for (size_t col = 0; col < 3; col++) {
-        s = getWord(in, true);
-        if (!convert(s, val))
-          throw std::runtime_error(
-              "The string '" + s +
-              "' in the file was not understood as a number.");
-        UB[row][col] = val;
+      // Read the ISAW UB matrix
+      for (size_t row = 0; row < 3; row++) {
+        for (size_t col = 0; col < 3; col++) {
+          s = getWord(in, true);
+          if (!convert(s, val))
+            throw std::runtime_error(
+                "The string '" + s +
+                "' in the file was not understood as a number.");
+          UB[row][col] = val;
+        }
+        readToEndOfLine(in, true);
       }
-      readToEndOfLine(in, true);
     }
   }
 
@@ -177,8 +191,8 @@ void SaveHKL::exec() {
   std::string bankPart = "?";
   // We must sort the peaks first by run, then bank #, and save the list of
   // workspace indices of it
-  typedef std::map<int, std::vector<size_t>> bankMap_t;
-  typedef std::map<int, bankMap_t> runMap_t;
+  using bankMap_t = std::map<int, std::vector<size_t>>;
+  using runMap_t = std::map<int, bankMap_t>;
   std::set<int> uniqueBanks;
   std::set<int> uniqueRuns;
   runMap_t runMap;
@@ -247,11 +261,10 @@ void SaveHKL::exec() {
                                    // with wrong atomic
                                    // number and name
   {
-    NeutronAtom neutron(static_cast<uint16_t>(EMPTY_DBL()),
-                        static_cast<uint16_t>(0), 0.0, 0.0, m_smu, 0.0, m_smu,
-                        m_amu);
-    Object shape = peaksW->sample().getShape(); // copy
-    shape.setMaterial(Material("SetInSaveHKL", neutron, 1.0));
+    NeutronAtom neutron(0, 0, 0.0, 0.0, m_smu, 0.0, m_smu, m_amu);
+    auto shape = boost::shared_ptr<IObject>(
+        peaksW->sample().getShape().cloneWithMaterial(
+            Material("SetInSaveHKL", neutron, 1.0)));
     peaksW->mutableSample().setShape(shape);
   }
   if (m_smu != EMPTY_DBL() && m_amu != EMPTY_DBL())
@@ -336,6 +349,7 @@ void SaveHKL::exec() {
           continue;
         }
         int run = p.getRunNumber();
+        int seqNum = p.getPeakNumber();
         int bank = 0;
         std::string bankName = p.getBankName();
         int nCols, nRows;
@@ -407,8 +421,8 @@ void SaveHKL::exec() {
           // Distance to center of detector
           boost::shared_ptr<const IComponent> det0 =
               inst->getComponentByName(p.getBankName());
-          if (inst->getName().compare("CORELLI") ==
-              0) // for Corelli with sixteenpack under bank
+          if (inst->getName() ==
+              "CORELLI") // for Corelli with sixteenpack under bank
           {
             std::vector<Geometry::IComponent_const_sptr> children;
             boost::shared_ptr<const Geometry::ICompAssembly> asmb =
@@ -537,7 +551,7 @@ void SaveHKL::exec() {
 
           out << std::setw(6) << run;
 
-          out << std::setw(6) << wi + 1;
+          out << std::setw(6) << seqNum;
 
           out << std::setw(7) << std::fixed << std::setprecision(4)
               << transmission;
@@ -596,9 +610,11 @@ void SaveHKL::exec() {
   out.flush();
   out.close();
   // delete banned peaks
+  std::vector<int> badPeaks;
   for (auto it = banned.crbegin(); it != banned.crend(); ++it) {
-    peaksW->removePeak(static_cast<int>(*it));
+    badPeaks.push_back(static_cast<int>(*it));
   }
+  peaksW->removePeaks(std::move(badPeaks));
   setProperty("OutputWorkspace", peaksW);
 }
 /**
@@ -705,29 +721,29 @@ double SaveHKL::spectrumCalc(double TOF, int iSpec,
     for (i = 1; i < spectra[id].size(); ++i)
       if (TOF < time[id][i])
         break;
-    spect = spectra[id][i - 1] +
-            (TOF - time[id][i - 1]) / (time[id][i] - time[id][i - 1]) *
-                (spectra[id][i] - spectra[id][i - 1]);
+    spect = spectra[id][i - 1] + (TOF - time[id][i - 1]) /
+                                     (time[id][i] - time[id][i - 1]) *
+                                     (spectra[id][i] - spectra[id][i - 1]);
   }
 
   return spect;
 }
 void SaveHKL::sizeBanks(std::string bankName, int &nCols, int &nRows) {
-  if (bankName.compare("None") == 0)
+  if (bankName == "None")
     return;
   boost::shared_ptr<const IComponent> parent =
       ws->getInstrument()->getComponentByName(bankName);
   if (!parent)
     return;
-  if (parent->type().compare("RectangularDetector") == 0) {
+  if (parent->type() == "RectangularDetector") {
     boost::shared_ptr<const RectangularDetector> RDet =
         boost::dynamic_pointer_cast<const RectangularDetector>(parent);
 
     nCols = RDet->xpixels();
     nRows = RDet->ypixels();
   } else {
-    if (ws->getInstrument()->getName().compare("CORELLI") ==
-        0) // for Corelli with sixteenpack under bank
+    if (ws->getInstrument()->getName() ==
+        "CORELLI") // for Corelli with sixteenpack under bank
     {
       std::vector<Geometry::IComponent_const_sptr> children;
       boost::shared_ptr<const Geometry::ICompAssembly> asmb =
@@ -748,5 +764,5 @@ void SaveHKL::sizeBanks(std::string bankName, int &nCols, int &nRows) {
   }
 }
 
-} // namespace Mantid
 } // namespace Crystal
+} // namespace Mantid

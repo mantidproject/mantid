@@ -1,13 +1,22 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/ScaleX.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidTypes/SpectrumDefinition.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -25,11 +34,6 @@ DECLARE_ALGORITHM(ScaleX)
 ScaleX::ScaleX()
     : API::Algorithm(), m_progress(nullptr), m_algFactor(1.0), m_parname(),
       m_combine(false), m_binOp(), m_wi_min(-1), m_wi_max(-1) {}
-
-/**
- * Destructor
- */
-ScaleX::~ScaleX() { delete m_progress; }
 
 /**
  * Initialisation method. Declares properties to be used in algorithm.
@@ -90,7 +94,7 @@ void ScaleX::exec() {
   API::MatrixWorkspace_sptr outputW = createOutputWS(inputW);
   // Get number of histograms
   int histnumber = static_cast<int>(inputW->getNumberHistograms());
-  m_progress = new API::Progress(this, 0.0, 1.0, histnumber + 1);
+  m_progress = std::make_unique<API::Progress>(this, 0.0, 1.0, histnumber + 1);
   m_progress->report("Scaling X");
   m_wi_min = 0;
   m_wi_max = histnumber - 1;
@@ -123,7 +127,7 @@ void ScaleX::exec() {
   }
 
   // do the shift in X
-  PARALLEL_FOR2(inputW, outputW)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inputW, *outputW))
   for (int i = 0; i < histnumber; ++i) {
     PARALLEL_START_INTERUPT_REGION
 
@@ -182,7 +186,7 @@ void ScaleX::execEvent() {
 
   const std::string op = getPropertyValue("Operation");
   int numHistograms = static_cast<int>(outputWS->getNumberHistograms());
-  PARALLEL_FOR1(outputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
   for (int i = 0; i < numHistograms; ++i) {
     PARALLEL_START_INTERUPT_REGION
     // Do the offsetting
@@ -228,24 +232,18 @@ double ScaleX::getScaleFactor(const API::MatrixWorkspace_const_sptr &inputWS,
   if (m_parname.empty())
     return m_algFactor;
 
-  // Try and get factor from component. If we see a DetectorGroup use this will
+  // Try and get factor from component. If we see a DetectorGroup this will
   // use the first component
-  Geometry::IDetector_const_sptr det;
-  auto inst = inputWS->getInstrument();
-
-  const auto &ids = inputWS->getSpectrum(index).getDetectorIDs();
-  const size_t ndets(ids.size());
-  if (ndets > 0) {
-    try {
-      det = inst->getDetector(*ids.begin());
-    } catch (Exception::NotFoundError &) {
-      return 0.0;
-    }
-  } else
+  const auto &spectrumInfo = inputWS->spectrumInfo();
+  if (!spectrumInfo.hasDetectors(index)) {
     return 0.0;
+  }
 
+  const auto &detectorInfo = inputWS->detectorInfo();
+  const auto detIndex = spectrumInfo.spectrumDefinition(index)[0].first;
+  const auto &det = detectorInfo.detector(detIndex);
   const auto &pmap = inputWS->constInstrumentParameters();
-  auto par = pmap.getRecursive(det->getComponentID(), m_parname);
+  auto par = pmap.getRecursive(det.getComponentID(), m_parname);
   if (par) {
     if (!m_combine)
       return par->value<double>();
@@ -259,5 +257,5 @@ double ScaleX::getScaleFactor(const API::MatrixWorkspace_const_sptr &inputWS,
   }
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

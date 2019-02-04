@@ -1,17 +1,29 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_API_MDGEOMETRY_H_
 #define MANTID_API_MDGEOMETRY_H_
 
+#include "MantidGeometry/MDGeometry/MDTypes.h"
+#include "MantidKernel/Matrix.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/VMD.h"
-#include "MantidGeometry/MDGeometry/IMDDimension.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include <Poco/NObserver.h>
 #include <boost/shared_ptr.hpp>
 
+#include <memory>
+
 namespace Mantid {
+namespace Geometry {
+class IMDDimension;
+}
 namespace API {
 class CoordTransform;
 class IMDWorkspace;
+class MDGeometryNotificationHelper;
+class Workspace;
 
 /** Describes the geometry (i.e. dimensions) of an IMDWorkspace.
  * This defines the dimensions contained in the workspace.
@@ -21,35 +33,14 @@ class IMDWorkspace;
 
   @author Janik Zikovsky
   @date 2011-09-06
-
-  Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
- National Laboratory & European Spallation Source
-
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>
-  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport MDGeometry {
 public:
   MDGeometry();
   MDGeometry(const MDGeometry &other);
   virtual ~MDGeometry();
-  void
-  initGeometry(std::vector<Mantid::Geometry::IMDDimension_sptr> &dimensions);
+  void initGeometry(
+      std::vector<boost::shared_ptr<Geometry::IMDDimension>> &dimensions);
 
   // --------------------------------------------------------------------------------------------
   // These are the main methods for dimensions, that CAN be overridden (e.g. by
@@ -61,7 +52,7 @@ public:
   getDimensionWithId(std::string id) const;
   size_t getDimensionIndexByName(const std::string &name) const;
   size_t getDimensionIndexById(const std::string &id) const;
-  Mantid::Geometry::VecIMDDimension_const_sptr
+  std::vector<boost::shared_ptr<const Geometry::IMDDimension>>
   getNonIntegratedDimensions() const;
   virtual std::vector<coord_t> estimateResolution() const;
 
@@ -129,13 +120,15 @@ public:
   /// Clear original workspaces
   void clearOriginalWorkspaces();
 
+  friend class MDGeometryNotificationHelper;
+
 protected:
   /// Function called when observer objects recieves a notification
-  void deleteNotificationReceived(
-      Mantid::API::WorkspacePreDeleteNotification_ptr notice);
+  void
+  deleteNotificationReceived(const boost::shared_ptr<const Workspace> &deleted);
 
   /// Vector of the dimensions used, in the order X Y Z t, etc.
-  std::vector<Mantid::Geometry::IMDDimension_sptr> m_dimensions;
+  std::vector<boost::shared_ptr<Geometry::IMDDimension>> m_dimensions;
 
   /// Pointer to the original workspace(s), if this workspace is a coordinate
   /// transformation from an original workspace.
@@ -155,12 +148,8 @@ protected:
   std::vector<boost::shared_ptr<const Mantid::API::CoordTransform>>
       m_transforms_ToOriginal;
 
-  /// Poco delete notification observer object
-  Poco::NObserver<MDGeometry, Mantid::API::WorkspacePreDeleteNotification>
-      m_delete_observer;
-
-  /// Set to True when the m_delete_observer is observing workspace deletions.
-  bool m_observingDelete;
+  /// Helper that deals with notifications and observing the ADS
+  std::unique_ptr<MDGeometryNotificationHelper> m_notificationHelper;
 
   /** the matrix which transforms momentums from orthogonal Q-system to
      Orthogonal HKL or non-orthogonal HKL system alighned WRT to arbitrary

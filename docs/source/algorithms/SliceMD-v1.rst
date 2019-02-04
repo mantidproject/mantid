@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -10,7 +10,7 @@ Description
 -----------
 
 Algorithm that can take a slice out of an original
-`MDEventWorkspace <http://www.mantidproject.org/MDEventWorkspace>`_ while preserving all the events
+:ref:`MDEventWorkspace <MDWorkspace>` while preserving all the events
 contained therein.
 
 It uses the same parameters as :ref:`algm-BinMD` to determine a
@@ -55,7 +55,7 @@ Slicing a MDHistoWorkspace
 
 It is possible to slice a :ref:`MDHistoWorkspace <MDHistoWorkspace>`. Each
 MDHistoWorkspace holds a reference to the
-`MDEventWorkspace <http://www.mantidproject.org/MDEventWorkspace>`_ that created it, as well as the
+:ref:`MDEventWorkspace <MDWorkspace>` that created it, as well as the
 coordinate transformation that was used.
 
 In this case, the algorithm is executed on the original
@@ -79,14 +79,14 @@ Usage
    # Slice out all C > 0
    sliced = SliceMD(InputWorkspace=mdew, AxisAligned=True, AlignedDim0='A,-10,10,10', AlignedDim1='B, -10, 10, 10', AlignedDim2='C,-10, 0, 10',)
 
-   dim0=sliced.getDimension(0)
-   dim1=sliced.getDimension(1)
-   dim2=sliced.getDimension(2)
+   dim0 = sliced.getDimension(0)
+   dim1 = sliced.getDimension(1)
+   dim2 = sliced.getDimension(2)
 
-   print "A extents", dim0.getMinimum(), dim0.getMaximum()
-   print "B extents", dim1.getMinimum(), dim1.getMaximum()
-   print "C extents", dim2.getMinimum(), dim2.getMaximum()
-   print "Original MDEW should have 2*N events in sliced. We get a factor of : ",  int( mdew.getNEvents() / sliced.getNEvents()  )
+   print("A extents {} {}".format(dim0.getMinimum(), dim0.getMaximum()))
+   print("B extents {} {}".format(dim1.getMinimum(), dim1.getMaximum()))
+   print("C extents {} {}".format(dim2.getMinimum(), dim2.getMaximum()))
+   print("Original MDEW should have 2*N events in sliced. We get a factor of :  {:.0f}".format(mdew.getNEvents() / sliced.getNEvents()))
 
 Output:
 
@@ -119,13 +119,13 @@ Output:
    dim_x = binned.getDimension(0)
    x_axis= numpy.linspace(dim_x.getMinimum(), dim_x.getMaximum(), dim_x.getNBins())
    x_at_max = x_axis[numpy.argmax(signals)]
-   print "Brighest region should be at x  = sqrt( 2*5*5 ) = 7.07. Found to be: ", "{0:.2f}".format(x_at_max)
+   print("Brightest region should be at x  = sqrt( 2*5*5 ) = 7.07. Found to be:  {0:.2f}".format(x_at_max))
 
 Output:
 
 .. testoutput:: SliceMDExampleComplex
 
-   Brighest region should be at x  = sqrt( 2*5*5 ) = 7.07. Found to be:  7.07
+   Brightest region should be at x  = sqrt( 2*5*5 ) = 7.07. Found to be:  7.07
 
 .. categories::
 

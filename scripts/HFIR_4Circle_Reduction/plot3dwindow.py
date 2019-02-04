@@ -1,15 +1,31 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=C0103,W0403
+from __future__ import (absolute_import, division, print_function)
+from six.moves import range
 import sys
 import numpy as np
-from PyQt4 import QtGui, QtCore
+from qtpy.QtWidgets import (QMainWindow)
+from mantid.kernel import Logger
+try:
+    from mantidqt.utils.qt import load_ui
+except ImportError:
+    Logger("HFIR_4Circle_Reduction").information('Using legacy ui importer')
+    from mantidplot import load_ui
+from qtpy.QtWidgets import (QVBoxLayout)
 
-import ui_View3DWidget
-import guiutility
+
+from HFIR_4Circle_Reduction.mplgraphicsview3d import MplPlot3dCanvas
+from HFIR_4Circle_Reduction import guiutility
 
 __author__ = 'wzz'
 
 
-class Plot3DWindow(QtGui.QMainWindow):
+class Plot3DWindow(QMainWindow):
     """
     Main window to view merged data in 3D
     """
@@ -21,10 +37,11 @@ class Plot3DWindow(QtGui.QMainWindow):
         :return:
         """
         # Init
-        QtGui.QMainWindow.__init__(self, parent)
+        QMainWindow.__init__(self, parent)
 
-        self.ui = ui_View3DWidget.Ui_MainWindow()
-        self.ui.setupUi(self)
+        ui_path ="View3DWidget.ui"
+        self.ui = load_ui(__file__, ui_path, baseinstance=self)
+        self._promote_widgets()
 
         # Initialize widgets
         self.ui.lineEdit_baseColorRed.setText('0.5')
@@ -34,17 +51,11 @@ class Plot3DWindow(QtGui.QMainWindow):
         self.ui.comboBox_scans.addItem('unclassified')
 
         # Event handling
-        self.connect(self.ui.pushButton_plot3D, QtCore.SIGNAL('clicked()'),
-                     self.do_plot_3d)
-        self.connect(self.ui.pushButton_checkCounts, QtCore.SIGNAL('clicked()'),
-                     self.do_check_counts)
-        self.connect(self.ui.pushButton_clearPlots, QtCore.SIGNAL('clicked()'),
-                     self.do_clear_plots)
-        self.connect(self.ui.pushButton_quit, QtCore.SIGNAL('clicked()'),
-                     self.do_quit)
-
-        self.connect(self.ui.comboBox_scans, QtCore.SIGNAL('currentIndexChanged(int)'),
-                     self.evt_change_scan)
+        self.ui.pushButton_plot3D.clicked.connect(self.do_plot_3d)
+        self.ui.pushButton_checkCounts.clicked.connect(self.do_check_counts)
+        self.ui.pushButton_clearPlots.clicked.connect(self.do_clear_plots)
+        self.ui.pushButton_quit.clicked.connect(self.do_quit)
+        self.ui.comboBox_scans.currentIndexChanged.connect(self.evt_change_scan)
 
         # Set up
         # list of data keys for management
@@ -57,6 +68,14 @@ class Plot3DWindow(QtGui.QMainWindow):
         self._groupDict = dict()
         self._currSessionName = 'unclassified'
         self._groupDict['unclassified'] = []
+
+        return
+
+    def _promote_widgets(self):
+        graphicsView_layout = QVBoxLayout()
+        self.ui.frame_graphicsView.setLayout(graphicsView_layout)
+        self.ui.graphicsView = MplPlot3dCanvas(self)
+        graphicsView_layout.addWidget(self.ui.graphicsView)
 
         return
 
@@ -110,7 +129,7 @@ class Plot3DWindow(QtGui.QMainWindow):
         if threshold_lower is None:
             threshold_lower = 0
         if threshold_upper is None:
-            threshold_upper = sys.maxint
+            threshold_upper = sys.maxsize
         assert 0 <= threshold_lower < threshold_upper
 
         # get data key
@@ -123,7 +142,7 @@ class Plot3DWindow(QtGui.QMainWindow):
         assert points is not None
         num_within_threshold = 0
         array_size = len(intensity_array)
-        for index in xrange(array_size):
+        for index in range(array_size):
             if threshold_lower <= intensity_array[index] <= threshold_upper:
                 num_within_threshold += 1
         # END-FOR
@@ -199,7 +218,7 @@ class Plot3DWindow(QtGui.QMainWindow):
         if thresholds[0] is None:
             thresholds[0] = 0
         if thresholds[1] is None:
-            thresholds[1] = sys.maxint
+            thresholds[1] = sys.maxsize
         assert 0 <= thresholds[0] < thresholds[1]
 
         # data key
@@ -258,7 +277,7 @@ class Plot3DWindow(QtGui.QMainWindow):
 
         # Format intensity to color map
         color_list = guiutility.map_to_color(intensities, base_color, change_color)
-        # print color_list
+        # print(color_list)
         assert len(color_list) == len(points)
 
         # self.ui.graphicsView.plot_scatter(data_key, base_color)
@@ -306,7 +325,7 @@ def filter_points_by_intensity(points, intensities, lower_boundary, upper_bounda
     # calculate data size
     raw_array_size = len(intensities)
     new_array_size = 0
-    for index in xrange(raw_array_size):
+    for index in range(raw_array_size):
         if lower_boundary <= intensities[index] <= upper_boundary:
             new_array_size += 1
     # END-FOR
@@ -315,7 +334,7 @@ def filter_points_by_intensity(points, intensities, lower_boundary, upper_bounda
     new_points = np.ndarray(shape=(new_array_size, 3), dtype='float')
     new_intensities = np.ndarray(shape=(new_array_size,), dtype='float')
     new_index = 0
-    for raw_index in xrange(raw_array_size):
+    for raw_index in range(raw_array_size):
         if lower_boundary <= intensities[raw_index] <= upper_boundary:
             assert new_index < new_array_size
             new_points[new_index] = points[raw_index]

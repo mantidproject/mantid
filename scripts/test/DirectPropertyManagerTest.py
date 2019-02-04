@@ -1,4 +1,11 @@
-﻿import os
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
+from __future__ import (absolute_import, division, print_function)
+import os
 from mantid.simpleapi import *
 from mantid import api
 import unittest
@@ -119,7 +126,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
 
         propman.spectra_to_monitors_list = 35
         self.assertTrue(isinstance(propman.spectra_to_monitors_list,list))
-        self.assertEquals(35,propman.spectra_to_monitors_list[0])
+        self.assertEqual(35,propman.spectra_to_monitors_list[0])
 
         propman.spectra_to_monitors_list = None
         self.assertTrue(propman.spectra_to_monitors_list is None)
@@ -129,15 +136,15 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertTrue(propman.spectra_to_monitors_list is None)
 
         propman.spectra_to_monitors_list = '467'
-        self.assertEquals(467,propman.spectra_to_monitors_list[0])
+        self.assertEqual(467,propman.spectra_to_monitors_list[0])
 
         propman.spectra_to_monitors_list = '467,444'
-        self.assertEquals(467,propman.spectra_to_monitors_list[0])
-        self.assertEquals(444,propman.spectra_to_monitors_list[1])
+        self.assertEqual(467,propman.spectra_to_monitors_list[0])
+        self.assertEqual(444,propman.spectra_to_monitors_list[1])
 
         propman.spectra_to_monitors_list = ['467','444']
-        self.assertEquals(467,propman.spectra_to_monitors_list[0])
-        self.assertEquals(444,propman.spectra_to_monitors_list[1])
+        self.assertEqual(467,propman.spectra_to_monitors_list[0])
+        self.assertEqual(444,propman.spectra_to_monitors_list[1])
 
         prop_changed = propman.getChangedProperties()
         self.assertEqual(len(prop_changed),1)
@@ -175,7 +182,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
     def test_set_non_default_complex_value_synonims(self):
         propman = PropertyManager("MAP")
         propman.test_ei2_mon_spectra = 10000
-        self.assertEqual(propman.ei_mon_spectra,(41474,10000))
+        self.assertEqual(propman.ei_mon_spectra,(41475,10000))
 
         prop_changed = propman.getChangedProperties()
         self.assertEqual(len(prop_changed),1)
@@ -444,18 +451,18 @@ class DirectPropertyManagerTest(unittest.TestCase):
         propman = PropertyManager(instr)
 
         self.assertAlmostEqual(propman.TestParam1,3.5)
-        self.assertEquals(propman.TestParam2,"initial1")
-        self.assertEquals(propman.TestParam3,"initial2")
+        self.assertEqual(propman.TestParam2,"initial1")
+        self.assertEqual(propman.TestParam3,"initial2")
 
         propman.TestParam2 = "gui_changed1"
-        self.assertEquals(propman.TestParam2,"gui_changed1")
+        self.assertEqual(propman.TestParam2,"gui_changed1")
 
         SetInstrumentParameter(ws,ParameterName="TestParam2",Value="instr_changed1",ParameterType="String")
         SetInstrumentParameter(ws,ParameterName="TestParam3",Value="instr_changed2",ParameterType="String")
 
         self.assertAlmostEqual(propman.TestParam1,3.5)
-        self.assertEquals(propman.TestParam2,"gui_changed1")
-        self.assertEquals(propman.TestParam3,"initial2")
+        self.assertEqual(propman.TestParam2,"gui_changed1")
+        self.assertEqual(propman.TestParam3,"initial2")
         changes = propman.getChangedProperties()
         self.assertTrue('TestParam2' in changes)
         self.assertTrue(not('TestParam3' in changes))
@@ -465,8 +472,8 @@ class DirectPropertyManagerTest(unittest.TestCase):
         changes = propman.update_defaults_from_instrument(ws.getInstrument())
 
         self.assertAlmostEqual(propman.TestParam1,3.5)
-        self.assertEquals(propman.TestParam2,"gui_changed1")
-        self.assertEquals(propman.TestParam3,"instr_changed2")
+        self.assertEqual(propman.TestParam2,"gui_changed1")
+        self.assertEqual(propman.TestParam3,"instr_changed2")
 
         self.assertTrue('TestParam2' in changes)
         self.assertTrue('TestParam3' in changes)
@@ -514,7 +521,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertEqual(propman.ParaPara,'OtherVal2')
         self.assertEqual(propman.BaseParam2,'OtherVal2')
 
-        self.assertEquals(propman.BaseParam1,"OtherVal1")
+        self.assertEqual(propman.BaseParam1,"OtherVal1")
 
     def test_set_all_defaults_from_instrument(self) :
         ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=10)
@@ -796,7 +803,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
 
         changed_prop = propman.update_defaults_from_instrument(ws.getInstrument())
 
-        self.assertEqual(len(changed_prop),1)
+        self.assertEqual(len(changed_prop),3)
         bkgd_range = propman.bkgd_range
         self.assertAlmostEqual(bkgd_range[0],20)
         self.assertAlmostEqual(bkgd_range[1],40)
@@ -1099,7 +1106,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
         ok,fail_list = propman._check_file_properties()
         self.assertTrue(ok)
         if not ok:
-            print "fail prop list: ",fail_list
+            print("fail prop list: ",fail_list)
 
         api.AnalysisDataService.clear()
 

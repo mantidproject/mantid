@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
 from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import *
@@ -29,6 +35,10 @@ class LoadEmptyVesuvio(PythonAlgorithm):
         return 'DataHandling\\Raw'
 #----------------------------------------------------------------------------------------
 
+    def seeAlso(self):
+        return [ "LoadVesuvio" ]
+
+#----------------------------------------------------------------------------------------
     def PyInit(self):
         self.declareProperty(FileProperty(INST_PAR_PROP, "", action=FileAction.OptionalLoad,
                                           extensions=["dat"]),
@@ -113,5 +123,6 @@ class LoadEmptyVesuvio(PythonAlgorithm):
                              "variants. ncols=%d" % (len(columns)))
 
 #----------------------------------------------------------------------------------------
+
 
 AlgorithmFactory.subscribe(LoadEmptyVesuvio)

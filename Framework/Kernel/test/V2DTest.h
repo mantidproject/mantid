@@ -1,14 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_KERNEL_V2DTEST_H_
 #define MANTID_KERNEL_V2DTEST_H_
 
 //-----------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/V2D.h"
 #include "MantidKernel/V3D.h"
-#include "MantidKernel/Exception.h"
-#include <cxxtest/TestSuite.h>
 #include <cfloat>
+#include <cxxtest/TestSuite.h>
 #include <limits>
 
 using Mantid::Kernel::V2D;
@@ -105,6 +111,19 @@ public:
     V2D p1(3, 9);
     p1 *= 3.0;
     TS_ASSERT_EQUALS(p1, V2D(9.0, 27.0));
+  }
+
+  void test_Negate_Gives_Same_Length_But_Opposite_Direction() {
+    const V2D p1(-3, 9);
+    const V2D p2 = -p1;
+    TS_ASSERT_EQUALS(p2, V2D(3, -9))
+  }
+
+  void test_Negate_Works_With_Special_Values() {
+    const V2D p1(INFINITY, std::nan(""));
+    const V2D p2 = -p1;
+    TS_ASSERT_EQUALS(p2.X(), -INFINITY);
+    TS_ASSERT(std::isnan(p2.Y()));
   }
 
   void test_Equality_Gives_True_When_Diff_Less_Than_Tolerance() {

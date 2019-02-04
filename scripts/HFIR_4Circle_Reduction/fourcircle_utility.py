@@ -1,8 +1,24 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=W0633,R0913,too-many-branches
+from __future__ import (absolute_import, division, print_function)
+from six.moves import range
+import csv
 import os
-import urllib2
+try:
+    # python3
+    from urllib.request import urlopen
+    from urllib.error import URLError
+except ImportError:
+    from urllib2 import urlopen
+    from urllib2 import URLError
 import socket
 import numpy
+import math
 
 from mantid.api import AnalysisDataService
 
@@ -21,12 +37,12 @@ def check_url(url, read_lines=False):
     lines = None
     try:
         # Access URL
-        url_stream = urllib2.urlopen(url, timeout=2)
+        url_stream = urlopen(url, timeout=2)
 
         # Read lines
         if read_lines is True:
             lines = url_stream.readlines()
-    except urllib2.URLError as url_error:
+    except URLError as url_error:
         url_stream = url_error
     except socket.timeout:
         return False, 'Time out. Try again!'
@@ -71,7 +87,7 @@ def convert_to_wave_length(m1_position):
     return wave_length
 
 
-def generate_mask_file(file_path, ll_corner, ur_corner, rectangular=True):
+def generate_mask_file(file_path, ll_corner, ur_corner, rectangular=True, num_det_row=None):
     """ Generate a Mantid RIO/Mask XML file
     Requirements:
     1. file_path is writable;
@@ -84,12 +100,17 @@ def generate_mask_file(file_path, ll_corner, ur_corner, rectangular=True):
     """
     # check
     assert isinstance(file_path, str), 'File path must be a string but not a %s.' % str(type(file_path))
-    assert len(ll_corner) == 2 and len(ur_corner) == 2
+    assert len(ll_corner) == 2 and len(ur_corner) == 2,\
+        'Left corner and right corner coordinates must be 2-tuple but not of size {0} or {1}' \
+        ''.format(len(ll_corner), len(ur_corner))
+
+    if num_det_row is None:
+        num_det_row = NUM_DET_ROW
 
     if rectangular is False:
         raise RuntimeError('Non-rectangular detector is not supported yet.')
 
-    print '[INFO] Mask from %s to %s.' % (str(ll_corner), str(ur_corner))
+    print('[INFO] Mask from %s to %s.' % (str(ll_corner), str(ur_corner)))
 
     # part 1
     xml_str = '<?xml version="1.0"?>\n'
@@ -98,20 +119,35 @@ def generate_mask_file(file_path, ll_corner, ur_corner, rectangular=True):
     xml_str += '          <detids>'
 
     # part 2: all the masked detectors
-    start_row = int(ll_corner[0])
-    start_col = int(ll_corner[1])
+    mpl_start_row = int(ll_corner[0])
+    mpl_start_col = int(ll_corner[1])
 
-    end_row = int(ur_corner[0])
-    end_col = int(ur_corner[1])
+    mpl_end_row = int(ur_corner[0])
+    mpl_end_col = int(ur_corner[1])
 
-    assert start_col < end_col
+    # correction:
+    if False:
+        start_row = mpl_start_col
+        start_col = 256 - mpl_end_row
+
+        end_row = mpl_end_col
+        end_col = mpl_start_row
+    else:
+        start_row = mpl_start_row
+        start_col = mpl_start_col
+        end_row = mpl_end_row
+        end_col = mpl_end_col
+
+    assert start_col < end_col, 'Start column {0} cannot be smaller than end column {1}.'.format(start_col, end_col)
 
     det_sub_xml = ''
-    for col_number in xrange(start_col, end_col+1):
-        start_det_id = 1 + col_number * NUM_DET_ROW + start_row
-        end_det_id = 1 + col_number * NUM_DET_ROW + end_row
-        det_sub_xml += '%d-%d,' % (start_det_id, end_det_id)
+    # the plot out data is in row major (while the raw data is in column major, which is rotated 90 later)
+    for row_number in range(start_row, end_row + 1):
+        start_det_id = 1 + row_number * num_det_row + start_col
+        end_det_id = 1 + row_number * num_det_row + end_col
+        det_sub_xml += '{0}-{1},'.format(start_det_id, end_det_id)
     # END-FOR
+
     # remove last ','
     det_sub_xml = det_sub_xml[:-1]
     # add to xml string
@@ -135,7 +171,8 @@ def get_hb3a_wavelength(m1_motor_pos):
     :param m1_motor_pos:
     :return: wavelength.  None for no mapping
     """
-    assert isinstance(m1_motor_pos, float), 'Motor m1\'s position must be float.'
+    assert isinstance(m1_motor_pos, float) or isinstance(m1_motor_pos, int),\
+        'Motor m1\'s position {0} must be a float but not {1}.'.format(m1_motor_pos, type(m1_motor_pos))
 
     # hard-coded HB3A m1 position and wavelength mapping
     m1_pos_list = [(-25.870, 1.003),
@@ -296,7 +333,7 @@ def parse_int_array(int_array_str):
             # Integer range
             two_terms = level0_term.split("-")
             temp_list = []
-            for i in xrange(2):
+            for i in range(2):
                 value_str = two_terms[i]
                 try:
                     int_value = int(value_str)
@@ -405,13 +442,24 @@ def get_spice_file_url(server_url, instrument_name, exp_number, scan_number):
     return file_url
 
 
+def get_spice_group_name(exp_number):
+    """
+    get SPICE TableWorkspaces group name
+    :param exp_number:
+    :param scan_number:
+    :return:
+    """
+    return 'HB3A_Exp{0}_SPICES'.format(exp_number)
+
+
 def get_spice_table_name(exp_number, scan_number):
     """ Form the name of the table workspace for SPICE
     :param exp_number:
     :param scan_number:
     :return:
     """
-    table_name = 'HB3A_Exp%03d_%04d_SpiceTable' % (exp_number, scan_number)
+    # table_name = 'HB3A_Exp%03d_%04d_SpiceTable' % (exp_number, scan_number)
+    table_name = 'HB3A_exp%04d_scan%04d' % (exp_number, scan_number)
 
     return table_name
 
@@ -499,6 +547,8 @@ def get_step_motor_parameters(log_value_vector):
     std_dev = numpy.std(log_value_vector)
 
     step_vector = log_value_vector[1:] - log_value_vector[:-1]
+    assert len(step_vector) > 0, 'Log value vector size = %d. Step vector size = 0 is not allowed.' \
+                                 '' % len(log_value_vector)
     step_dev = numpy.std(step_vector)
     step = sum(step_vector)/len(step_vector)
 
@@ -518,8 +568,11 @@ def get_merged_md_name(instrument_name, exp_no, scan_no, pt_list):
     # check
     assert isinstance(instrument_name, str)
     assert isinstance(exp_no, int) and isinstance(scan_no, int)
-    assert isinstance(pt_list, list)
-    assert len(pt_list) > 0
+    assert isinstance(pt_list, list), 'Pt list {0} must be a list but not a {1}' \
+                                      ''.format(pt_list, type(pt_list))
+
+    if len(pt_list) == 0:
+        raise RuntimeError('Pt number list {0} cannot be empty.', pt_list)
 
     merged_ws_name = '%s_Exp%d_Scan%d_Pt%d_%d_MD' % (instrument_name, exp_no, scan_no,
                                                      pt_list[0], pt_list[-1])
@@ -538,10 +591,14 @@ def get_merged_hkl_md_name(instrument_name, exp_no, scan_no, pt_list):
     :return:
     """
     # check
-    assert isinstance(instrument_name, str)
-    assert isinstance(exp_no, int) and isinstance(scan_no, int)
-    assert isinstance(pt_list, list)
-    assert len(pt_list) > 0
+    assert isinstance(instrument_name, str), 'Instrument name {0} shall be a string but not a {1}' \
+                                             ''.format(instrument_name, type(instrument_name))
+    assert isinstance(exp_no, int) and isinstance(scan_no, int),\
+        'Both experiment number {0} ({1}) and scan number {2} ({3}) shall be integer.' \
+        ''.format(exp_no, type(exp_no), scan_no, type(scan_no))
+    assert isinstance(pt_list, list), 'Pt list {0} shall be a list but not a {1}'.format(pt_list, type(pt_list))
+    if len(pt_list) == 0:
+        raise RuntimeWarning('Pt list cannot be empty.')
 
     merged_ws_name = '%s_Exp%d_Scan%d_Pt%d_%d_HKL_MD' % (instrument_name, exp_no, scan_no,
                                                          pt_list[0], pt_list[-1])
@@ -632,7 +689,7 @@ def load_hb3a_md_data(file_name):
     intensities = numpy.zeros((len(raw_lines), ))
 
     # parse
-    for i in xrange(len(raw_lines)):
+    for i in range(len(raw_lines)):
         line = raw_lines[i].strip()
 
         # skip empty line
@@ -641,7 +698,7 @@ def load_hb3a_md_data(file_name):
 
         # set value
         terms = line.split(',')
-        for j in xrange(3):
+        for j in range(3):
             xyz_points[i][j] = float(terms[j])
         intensities[i] = float(terms[3])
     # END-FOR
@@ -649,16 +706,287 @@ def load_hb3a_md_data(file_name):
     return xyz_points, intensities
 
 
-def round_hkl(hkl):
+def round_hkl_1(hkl):
     """
     Round HKL to nearest integer
     :param hkl:
     :return:
     """
-    print type(hkl)
-
     mi_h = round(hkl[0])
     mi_k = round(hkl[1])
     mi_l = round(hkl[2])
 
     return mi_h, mi_k, mi_l
+
+
+def round_hkl(index_h, index_k, index_l):
+    """
+
+    :param index_h:
+    :param index_k:
+    :param index_l:
+    :return:
+    """
+    index_h = math.copysign(1, index_h) * int(abs(index_h) + 0.5)
+    index_k = math.copysign(1, index_k) * int(abs(index_k) + 0.5)
+    index_l = math.copysign(1, index_l) * int(abs(index_l) + 0.5)
+
+    return index_h, index_k, index_l
+
+
+def round_miller_index(value, tol):
+    """
+    round a peak index (h, k, or l) with some tolerance
+    :param value:
+    :param tol:
+    :return:
+    """
+    round_int = math.copysign(1, value) * int(abs(value) + 0.5)
+    if abs(round_int - value) >= tol:
+        # it is likely a magnetic peak
+        round_int = int(value * 100) * 0.01
+
+    return round_int
+
+
+def convert_hkl_to_integer(index_h, index_k, index_l, magnetic_tolerance=0.2):
+    """
+    Convert index (HKL) to integer by considering magnetic peaks
+    if any index is not close to an integer (default to 0.2), then it is treated as a magnetic peak's HKL
+    :param index_h:
+    :param index_k:
+    :param index_l:
+    :param magnetic_tolerance: tolerance to magnetic peak's indexing
+    :return:
+    """
+    # check inputs' validity
+    assert isinstance(magnetic_tolerance, float) and 0. < magnetic_tolerance <= 0.5
+
+    #
+    index_h_r = round_miller_index(index_h, magnetic_tolerance)
+    index_k_r = round_miller_index(index_k, magnetic_tolerance)
+    index_l_r = round_miller_index(index_l, magnetic_tolerance)
+
+    round_error = math.sqrt((index_h - index_h_r) ** 2 +
+                            (index_k - index_k_r) ** 2 +
+                            (index_l - index_l_r) ** 2)
+
+    return (index_h_r, index_k_r, index_l_r), round_error
+
+
+def check_dictionary(var_name, var_value):
+    """
+    check whether an input variable is a dictionary.
+    :param var_name:
+    :param var_value:
+    :return:
+    """
+    assert isinstance(var_value, dict), \
+        '{0} {1} must be a dictionary but not a {2}'.format(var_name, var_value, type(var_value))
+
+
+def check_integer(var_name, var_value):
+    """
+    check whether an input variable is an integer.
+    :except AssertionError: because of wrong type
+    :param var_name:
+    :param var_value:
+    :return:
+    """
+    assert isinstance(var_value, int), \
+        '{0} {1} must be an integer but not a {2}'.format(var_name, var_value, type(var_value))
+
+
+def check_float(var_name, var_value):
+    """ check whether an input variable is a float (or an integer allowed).
+    :except AssertionError: because of wrong type
+    :param var_name:
+    :param var_value:
+    :return:
+    """
+    assert isinstance(var_value, int) or isinstance(var_value, float), \
+        '{0} {1} must be a float but not a {2}'.format(var_name, var_value, type(var_value))
+
+
+def check_list(var_name, var_value):
+    """
+    check whether an input variable is a list
+    :param var_name:
+    :param var_value:
+    :return:
+    """
+    assert isinstance(var_value, list), \
+        '{0} {1} must be a list but not a {2}'.format(var_name, var_value, type(var_value))
+
+
+def check_string(var_name, var_value):
+    """ check whether an input variable is an integer.
+    :except AssertionError: because of wrong type
+    :param var_name:
+    :param var_value:
+    :return:
+    """
+    assert isinstance(var_value, str), \
+        '{0} {1} must be a string but not a {2}'.format(var_name, var_value, type(var_value))
+
+
+def is_peak_nuclear(index_h, index_k, index_l, magnetic_tolerance=0.2):
+    """
+    Check whether a peak is a nuclear peak by checking its index close enough to integers
+    :param index_h:
+    :param index_k:
+    :param index_l:
+    :param magnetic_tolerance:
+    :return:
+    """
+    round_h = math.copysign(1, index_h) * int(abs(index_h) + 0.5)
+    if abs(round_h - index_h) >= magnetic_tolerance:
+        return False
+
+    round_k = math.copysign(1, index_k) * int(abs(index_k) + 0.5)
+    if abs(round_k - index_k) >= magnetic_tolerance:
+        return False
+
+    round_l = math.copysign(1, index_l) * int(abs(index_l) + 0.5)
+    if abs(round_l - index_l) >= magnetic_tolerance:
+        return False
+
+    return True
+
+
+def write_pre_process_record(file_name, record_dict):
+    """write the pre-processed record file
+    :param file_name:
+    :param record_dict: dictionary related to record
+    :return:
+    """
+    # check input
+    assert isinstance(file_name, str), 'Record file name {0} must be a string but not a {1}.' \
+                                       ''.format(file_name, type(file_name))
+    assert isinstance(record_dict, dict), 'One entry of record {0} must be given in a dictionary but not a {1}.' \
+                                          ''.format(record_dict, type(record_dict))
+
+    # write record
+    is_new_file = not os.path.exists(file_name)
+
+    with open(file_name, 'w') as csv_file:
+        field_names = record_dict.keys()
+        writer = csv.DictWriter(csv_file, fieldnames=field_names)
+
+        # write header
+        if is_new_file:
+            writer.writeheader()
+
+        # write row
+        writer.writerow(record_dict)
+    # END-WITH
+
+    return
+
+
+def pre_processed_file_name(exp_number, scan, output_dir):
+    """
+
+    :param exp_number:
+    :param scan:
+    :param output_dir:
+    :return:
+    """
+    # check inputs
+    assert isinstance(exp_number, int), 'Experiment number must be an integer'
+    assert isinstance(scan, int), 'Scan number must be an integer'
+    assert output_dir is None or isinstance(output_dir, str), 'Output directory must be a None or a string.'
+
+    md_file_name = 'Exp{0}_Scan{1}_MD.nxs'.format(exp_number, scan)
+    if output_dir is not None:
+        md_file_name = os.path.join(output_dir, md_file_name)
+
+    return md_file_name
+
+
+"""
+NOTE
+1. a CSV file in appending mode
+2. file's name is standard and defined in fourcircile_utility
+3. csv file contains:
+    Scan, MD file path, detector-sample distance, peak center pixel (int, int), wave length
+"""
+
+
+def pre_processed_record_file(exp_number, md_dir):
+    """ form the name of the pre-processed scans' record file
+    :param exp_number:
+    :param md_dir:
+    :return:
+    """
+    # check
+    assert isinstance(exp_number, int), 'Experiment number must be an integer'
+    assert isinstance(md_dir, str), 'Target directory must be a string'
+
+    record_file_name = os.path.join(md_dir, 'Exp{0}Record.txt'.format(exp_number))
+
+    return record_file_name
+
+
+def pre_processed_record_header():
+    """ give the header in pre-processed scan's record file in CSV format
+    :return:
+    """
+    return ['Scan', 'MD', 'DetSampleDistance', 'Center', 'WaveLength']
+
+
+def pre_processed_record_make(scan_number, file_name, distance, center_x, center_y, wave_length):
+    """ make a pre-processed scan's entry in record file
+    :param scan_number:
+    :param file_name:
+    :param distance:
+    :param center_x:
+    :param center_y:
+    :param wave_length:
+    :return: a dictionary
+    """
+    record = {'Scan': scan_number,
+              'MD': file_name,
+              'DetSampleDistance': distance,
+              'Center': (center_x, center_y),
+              'WaveLength': wave_length}
+
+    return record
+
+
+def read_pre_process_record(file_name):
+    """ Read a pre-processed scan record file
+    :param file_name:
+    :return: a dictionary
+    """
+    # check input
+    assert isinstance(file_name, str), 'Record file name {0} must be a string but not a {1}.' \
+                                       ''.format(file_name, type(file_name))
+    if os.path.exists(file_name) is False:
+        raise RuntimeError('Pre-processed scan record file {0} does not exist.'.format(file_name))
+
+    # load file
+    scan_record_dict = dict()
+    with open(file_name, 'r') as csv_file:
+        reader = csv.DictReader(csv_file)
+        for row_dict in reader:
+            scan_number = int(row_dict['Scan'])
+
+            if len(row_dict['DetSampleDistance']) > 0:
+                row_dict['DetSampleDistance'] = float(row_dict['DetSampleDistance'])
+            else:
+                row_dict['DetSampleDistance'] = None
+
+            if len(row_dict['WaveLength']) > 0:
+                row_dict['WaveLength'] = float(row_dict['WaveLength'])
+            else:
+                row_dict['WaveLength'] = None
+
+            center_str = row_dict['Center'].replace('(', '').replace(')', '').replace(',', ' ').strip()
+            tup_str = center_str.split()
+            row_dict['Center'] = int(tup_str[0]), int(tup_str[1])
+
+            scan_record_dict[scan_number] = row_dict
+    # END-WITH
+
+    return scan_record_dict

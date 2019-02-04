@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name
 from __future__ import (absolute_import, division, print_function)
 
@@ -60,8 +66,7 @@ class SANSBeamSpreaderTransmission(PythonAlgorithm):
         self.declareProperty("OutputMessage", "",
                              direction=Direction.Output, doc = "Output message")
 
-    #pylint: disable=too-many-locals,too-many-branches
-    def PyExec(self):
+    def PyExec(self):  # noqa: C901
         # Get the reduction property manager
         property_manager_name = self.getProperty("ReductionProperties").value
         property_manager = PropertyManagerDataService.retrieve(property_manager_name)
@@ -175,7 +180,7 @@ class SANSBeamSpreaderTransmission(PythonAlgorithm):
         input_ws_name = self.getPropertyValue("InputWorkspace")
         if not AnalysisDataService.doesExist(input_ws_name):
             Logger("SANSBeamSpreaderTransmission").error("Could not find input workspace")
-        workspace = AnalysisDataService.retrieve(input_ws_name).getName()
+        workspace = AnalysisDataService.retrieve(input_ws_name).name()
 
         # Clone workspace to make boost-python happy
         api.CloneWorkspace(InputWorkspace=workspace,
@@ -255,5 +260,6 @@ class SANSBeamSpreaderTransmission(PythonAlgorithm):
             _dark(workspace_name, "DefaultDarkCurrentAlgorithm")
 
 #############################################################################################
+
 
 AlgorithmFactory.subscribe(SANSBeamSpreaderTransmission)

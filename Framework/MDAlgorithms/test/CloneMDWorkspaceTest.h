@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MDEVENTS_CLONEMDEVENTWORKSPACETEST_H_
 #define MANTID_MDEVENTS_CLONEMDEVENTWORKSPACETEST_H_
 
@@ -189,7 +195,7 @@ public:
 
   void test_MDHistoWorkspace_2D_uneven_bins() {
     // Make the number of bins uneven in both dimensions
-    Mantid::DataObjects::MDHistoWorkspace *ws = NULL;
+    Mantid::DataObjects::MDHistoWorkspace *ws = nullptr;
     Mantid::Geometry::GeneralFrame frame("General Frame", "m");
     ws = new Mantid::DataObjects::MDHistoWorkspace(
         MDHistoDimension_sptr(

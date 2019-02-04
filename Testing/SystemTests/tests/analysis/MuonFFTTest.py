@@ -1,10 +1,16 @@
-﻿#pylint: disable=no-init,attribute-defined-outside-init
-import stresstesting
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
+#pylint: disable=no-init,attribute-defined-outside-init
+import systemtesting
 from mantid.simpleapi import *
 from math import pi
 
 
-class MuonFFTTest(stresstesting.MantidStressTest):
+class MuonFFTTest(systemtesting.MantidSystemTest):
     '''Tests the FFT algorithm on a MUSR workspace, to check it can cope with rounding errors in X'''
 
     def runTest(self):
@@ -14,8 +20,8 @@ class MuonFFTTest(stresstesting.MantidStressTest):
         # create a PhaseTable with detector information
         tab = CreateEmptyTableWorkspace()
         tab.addColumn('int', 'DetID')
-        tab.addColumn('double', 'Phase')
         tab.addColumn('double', 'Asym')
+        tab.addColumn('double', 'Phase')
         for i in range(0,32):
             phi = 2*pi*i/32.
             tab.addRow([i + 1, 0.2, phi])
@@ -36,5 +42,5 @@ class MuonFFTTest(stresstesting.MantidStressTest):
         self.assertEqual(result, False)
 
     def validate(self):
-        self.tolerance = 1E-1
+        self.tolerance = 1E-8
         return ('MuonFFTResults','MuonFFTMUSR00022725.nxs')

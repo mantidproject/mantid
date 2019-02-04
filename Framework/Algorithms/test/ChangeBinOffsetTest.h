@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef CHANGEBINOFFSETTEST_H_
 #define CHANGEBINOFFSETTEST_H_
 
@@ -8,11 +14,11 @@
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidDataHandling/LoadEventPreNexus.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAlgorithms/ChangeBinOffset.h"
+#include "MantidDataHandling/LoadEventPreNexus2.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
 
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
@@ -98,7 +104,7 @@ public:
 
   void setup_Event() {
     this->inputSpace = "eventWS";
-    Mantid::DataHandling::LoadEventPreNexus loader;
+    Mantid::DataHandling::LoadEventPreNexus2 loader;
     loader.initialize();
     std::string eventfile("CNCS_7860_neutron_event.dat");
     std::string pulsefile("CNCS_7860_pulseid.dat");
@@ -179,9 +185,9 @@ public:
   }
 
   ChangeBinOffsetTestPerformance() {
-    input = WorkspaceCreationHelper::Create2DWorkspaceBinned(10000, 1000);
+    input = WorkspaceCreationHelper::create2DWorkspaceBinned(10000, 1000);
     inputEvent =
-        WorkspaceCreationHelper::CreateEventWorkspace(10000, 1000, 5000);
+        WorkspaceCreationHelper::createEventWorkspace(10000, 1000, 5000);
   }
 
   void testExec2D() {

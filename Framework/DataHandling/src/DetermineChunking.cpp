@@ -1,33 +1,30 @@
-#include "MantidAPI/FileProperty.h"
-#include "MantidAPI/TableRow.h"
-#include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/WorkspaceFactory.h"
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/DetermineChunking.h"
-#include "MantidDataHandling/LoadPreNexus.h"
-#include "MantidDataHandling/LoadEventNexus.h"
-#include "MantidDataHandling/LoadTOFRawNexus.h"
 #include "LoadRaw/isisraw.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataHandling/LoadEventNexus.h"
+#include "MantidDataHandling/LoadPreNexus.h"
 #include "MantidDataHandling/LoadRawHelper.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/VisibleWhenProperty.h"
+#include "MantidDataHandling/LoadTOFRawNexus.h"
 #include "MantidKernel/BinaryFile.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/VisibleWhenProperty.h"
 
 #ifdef MPI_BUILD
 #include <boost/mpi.hpp>
 namespace mpi = boost::mpi;
 #endif
-#include <Poco/Path.h>
-#include <Poco/File.h>
-#include <Poco/DOM/DOMParser.h>
-#include <Poco/DOM/Document.h>
-#include <Poco/DOM/Element.h>
-#include <Poco/DOM/NodeIterator.h>
-#include <Poco/DOM/NodeFilter.h>
-#include <Poco/DOM/NodeList.h>
-#include <Poco/DOM/AutoPtr.h>
-#include <Poco/SAX/InputSource.h>
 
+#include <Poco/File.h>
 #include <exception>
 #include <fstream>
 #include <set>
@@ -35,8 +32,8 @@ namespace mpi = boost::mpi;
 using namespace ::NeXus;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using std::size_t;
 using std::map;
+using std::size_t;
 using std::string;
 using std::vector;
 
@@ -58,6 +55,10 @@ const std::string RAW_EXT[NUM_EXT_RAW] = {".raw"};
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(DetermineChunking)
+
+namespace {
+constexpr double BYTES_TO_GiB = 1. / 1024. / 1024. / 1024.;
+}
 
 //----------------------------------------------------------------------------------------------
 /// @copydoc Mantid::API::IAlgorithm::name()
@@ -113,7 +114,6 @@ void DetermineChunking::exec() {
   }
 
   // get the filename and determine the file type
-  double filesize = 0;
   int m_numberOfSpectra = 0;
   string filename = this->getPropertyValue("Filename");
   FileType fileType = getFileType(filename);
@@ -137,7 +137,20 @@ void DetermineChunking::exec() {
   }
 #endif
 
+  Poco::File fileinfo(filename);
+  const double fileSizeGiB =
+      static_cast<double>(fileinfo.getSize()) * BYTES_TO_GiB;
+
+#ifndef MPI_BUILD
+  // don't bother opening the file if its size is "small"
+  // note that prenexus "_runinfo.xml" files don't represent what
+  // is actually loaded
+  if (fileType != PRENEXUS_FILE && 6. * fileSizeGiB < maxChunk)
+    return;
+#endif
+
   // --------------------- DETERMINE NUMBER OF CHUNKS
+  double wkspSizeGiB = 0;
   // PreNexus
   if (fileType == PRENEXUS_FILE) {
     vector<string> eventFilenames;
@@ -147,8 +160,8 @@ void DetermineChunking::exec() {
     for (auto &eventFilename : eventFilenames) {
       BinaryFile<DasEvent> eventfile(dataDir + eventFilename);
       // Factor of 2 for compression
-      filesize += static_cast<double>(eventfile.getNumElements()) * 48.0 /
-                  (1024.0 * 1024.0 * 1024.0);
+      wkspSizeGiB +=
+          static_cast<double>(eventfile.getNumElements()) * 48.0 * BYTES_TO_GiB;
     }
   }
   // Event Nexus
@@ -198,13 +211,11 @@ void DetermineChunking::exec() {
     file.closeGroup();
     file.close();
     // Factor of 2 for compression
-    filesize =
-        static_cast<double>(total_events) * 48.0 / (1024.0 * 1024.0 * 1024.0);
+    wkspSizeGiB = static_cast<double>(total_events) * 48.0 * BYTES_TO_GiB;
   } else if (fileType == RAW_FILE) {
     // Check the size of the file loaded
-    Poco::File info(filename);
-    filesize = double(info.getSize()) * 24.0 / (1024.0 * 1024.0 * 1024.0);
-    g_log.notice() << "Wksp size is " << filesize << " GB\n";
+    wkspSizeGiB = fileSizeGiB * 24.0;
+    g_log.notice() << "Wksp size is " << wkspSizeGiB << " GB\n";
 
     LoadRawHelper helper;
     FILE *file = helper.openRawFile(filename);
@@ -219,9 +230,8 @@ void DetermineChunking::exec() {
   // Histo Nexus
   else if (fileType == HISTO_NEXUS_FILE) {
     // Check the size of the file loaded
-    Poco::File info(filename);
-    filesize = double(info.getSize()) * 144.0 / (1024.0 * 1024.0 * 1024.0);
-    g_log.notice() << "Wksp size is " << filesize << " GB\n";
+    wkspSizeGiB = fileSizeGiB * 144.0;
+    g_log.notice() << "Wksp size is " << wkspSizeGiB << " GB\n";
     LoadTOFRawNexus lp;
     lp.m_signalNo = 1;
     // Find the entry name we want.
@@ -237,7 +247,7 @@ void DetermineChunking::exec() {
   int numChunks = 0;
   if (maxChunk != 0.0) // protect from divide by zero
   {
-    numChunks = static_cast<int>(filesize / maxChunk);
+    numChunks = static_cast<int>(wkspSizeGiB / maxChunk);
   }
 
   numChunks++; // So maxChunkSize is not exceeded
@@ -285,7 +295,7 @@ void DetermineChunking::exec() {
 /// set the name of the top level NXentry m_top_entry_name
 std::string DetermineChunking::setTopEntryName(std::string filename) {
   std::string top_entry_name;
-  typedef std::map<std::string, std::string> string_map_t;
+  using string_map_t = std::map<std::string, std::string>;
   try {
     string_map_t::const_iterator it;
     ::NeXus::File file = ::NeXus::File(filename);
@@ -355,5 +365,5 @@ FileType DetermineChunking::getFileType(const string &filename) {
 
   throw std::invalid_argument("Unsupported file type");
 }
-} // namespace Mantid
 } // namespace DataHandling
+} // namespace Mantid

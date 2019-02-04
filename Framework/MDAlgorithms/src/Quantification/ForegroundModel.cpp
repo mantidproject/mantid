@@ -1,8 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/Quantification/ForegroundModel.h"
-#include "MantidKernel/Exception.h"
-#include "MantidKernel/MagneticFormFactorTable.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
+#include "MantidKernel/Exception.h"
+#include "MantidKernel/MagneticFormFactorTable.h"
+#include "MantidKernel/MagneticIon.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -11,7 +18,7 @@ namespace {
 const int FORM_FACTOR_TABLE_LENGTH = 500;
 /// Name of the form factor attribute
 const char *FORM_FACTOR_ION = "FormFactorIon";
-}
+} // namespace
 
 /**
  * Default constructor only callable by the factory
@@ -37,7 +44,7 @@ ForegroundModel::ForegroundModel(const API::IFunction &fittingFunction)
 
 /**
  */
-ForegroundModel::~ForegroundModel() { delete m_formFactorTable; }
+ForegroundModel::~ForegroundModel() = default;
 
 /**
  * Set a reference to the convolved fitting function. Required as we need a
@@ -128,16 +135,14 @@ const API::IFunction &ForegroundModel::functionUnderMinimization() const {
 void ForegroundModel::setFormFactorIon(const std::string &ionType) {
   // "0" indicates off
   if (ionType == "0") {
-    delete m_formFactorTable;
-    m_formFactorTable = nullptr;
+    m_formFactorTable.reset(nullptr);
   } else {
     using namespace PhysicalConstants;
     if (m_MagIonName != ionType) {
       if (m_formFactorTable) {
-        delete m_formFactorTable;
       }
-      m_formFactorTable = new MagneticFormFactorTable(FORM_FACTOR_TABLE_LENGTH,
-                                                      getMagneticIon(ionType));
+      m_formFactorTable = std::make_unique<MagneticFormFactorTable>(
+          FORM_FACTOR_TABLE_LENGTH, getMagneticIon(ionType));
       m_MagIonName = ionType;
     }
   }
@@ -230,5 +235,5 @@ void ForegroundModel::convertToHKL(const API::ExperimentInfo &exptSetup,
   arlu2 = (TWO_PI / lattice.b()) * (sa2 / factor);
   arlu3 = (TWO_PI / lattice.c()) * (sa3 / factor);
 }
-}
-}
+} // namespace MDAlgorithms
+} // namespace Mantid

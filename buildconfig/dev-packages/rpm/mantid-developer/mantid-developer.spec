@@ -1,5 +1,11 @@
+%if 0%{?fedora} || 0%{?rhel} >= 8
+  %global with_python3 1
+%else
+  %global with_python3 0
+%endif
+
 Name:           mantid-developer
-Version:        1.19
+Version:        1.30
 Release:        1%{?dist}
 Summary:        Meta Package to install dependencies for Mantid Development
 
@@ -9,14 +15,11 @@ License:        GPL
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 %{?fedora:Requires: rpmfusion-nonfree-release}
-Requires: clang
-Requires: cmake-gui >= 2.8.12
 %{?rhel:Requires: epel-release}
-%if 0%{?el6}
-Requires: boost157-devel
-%else
+Requires: clang
+%{?fedora:Requires: cmake-gui}
+%{?rhel:Requires: cmake3-gui}
 Requires: boost-devel
-%endif
 Requires: doxygen
 Requires: gperftools-devel
 Requires: gperftools-libs
@@ -27,75 +30,87 @@ Requires: hdf-devel
 Requires: hdf5-devel
 Requires: h5py >= 2.3.1
 Requires: jsoncpp-devel >= 0.7.0
+Requires: librdkafka-devel
 Requires: muParser-devel
 Requires: mxml-devel
 Requires: nexus >= 4.2
 Requires: nexus-devel >= 4.2
-%if 0%{?el6}
-Requires: ninja
-%else
 Requires: ninja-build
-%endif
 Requires: numpy
 Requires: OCE-devel
 Requires: poco-devel >= 1.4.6
 Requires: PyQt4-devel
+Requires: python-qt5-devel
+Requires: python-QtPy
+Requires: python2-QtAwesome
+Requires: python-requests
 Requires: python-devel
+Requires: python-setuptools
 Requires: python-ipython >= 1.1
-%{?el6:Conflicts: python-ipython >= 2.0}
 Requires: python-matplotlib
 %{?fedora:Requires: python2-matplotlib-qt4}
 %{?el7:Requires: python-matplotlib-qt4}
 Requires: python-pip
+%{?fedora:Requires: python2-qtconsole}
 Requires: python-sphinx
-Requires: python-sphinx-theme-bootstrap
+Requires: python2-sphinx-bootstrap-theme
+Requires: PyYAML
+Requires: python2-mock
+Requires: python2-psutil
 Requires: qscintilla-devel
 Requires: qt-devel >= 4.6
-%if 0%{?el6}
-Requires: qwt-devel
-%else
 Requires: qwt5-qt4-devel
-%endif
 Requires: qwtplot3d-qt4-devel
 Requires: redhat-lsb
 Requires: rpmdevtools
 Requires: scipy
+Requires: python2-scikit-image
 Requires: sip-devel
 Requires: tbb
 Requires: tbb-devel
 Requires: git
 Requires: openssl-devel
 Requires: texlive-latex
-%if 0%{?el6}
-# do nothing
-%else
 Requires: texlive-latex-bin
 Requires: texlive-was
-%endif
 Requires: tex-preview
 Requires: dvipng
-%if 0%{?el6}
-Requires: mantidlibs34-qt-devel
-Requires: mantidlibs34-qtwebkit-devel
-Requires: scl-utils
-%else
 Requires: qt-devel
 Requires: qtwebkit-devel
-%endif
+Requires: qt5-qtbase-devel
+Requires: qt5-qtbase-gui
+Requires: qt5-qtimageformats
+Requires: qt5-qtsvg
+Requires: qt5-qttools-devel
+Requires: qt5-qttools-libs-designer
+Requires: qt5-qtwebkit-devel
+Requires: qt5-qtx11extras
+Requires: qt5-qtx11extras-devel
+Requires: qscintilla-qt5-devel
 Requires: graphviz
-%if 0%{?fedora}
+%if %{with_python3}
+Requires: python3-setuptools
 Requires: python3-sip-devel
 Requires: python3-PyQt4-devel
+Requires: python-qt5-devel
+Requires: python3-QtPy
+%{?fedora:Requires: python3-QtAwesome}
 Requires: python3-numpy
 Requires: python3-scipy
+Requires: python3-scikit-image
 Requires: python3-sphinx
-Requires: python3-sphinx-theme-bootstrap
+Requires: python3-sphinx-bootstrap-theme
 Requires: python3-dateutil
-Requires: python3-matplotlib
+Requires: python3-h5py
 Requires: python3-ipython-gui
+Requires: python3-matplotlib
+%{?fedora:Requires: python3-qtconsole}
+Requires: python3-PyYAML
+Requires: python3-mock
+%{?fedora:Requires: python3-psutil}
+%{?fedora:Requires: python3-requests}
 Requires: boost-python3-devel
 %endif
-
 
 BuildArch: noarch
 
@@ -118,6 +133,41 @@ required for Mantid development.
 %files
 
 %changelog
+
+* Thu Nov 18 2018 Martyn Gigg <martyn.gigg@stfc.ac.uk>
+- Added python-requests
+
+* Wed Jul 18 2018 Martyn Gigg <martyn.gigg@stfc.ac.uk>
+- Added python-psutil
+
+* Wed Apr 25 2018 Steven Hahn <hahnse@ornl.gov>
+- Add qt5-qtx11extras
+- remove RHEL6-specific packages
+
+* Mon Jan 22 2018 Martyn Gigg <martyn.gigg@stfc.ac.uk>
+- Added qtawesome
+
+* Tue Dec 05 2017 Peter Peterson <petersonpf@ornl.gov>
+- Added cmake3-gui for rhel
+
+* Wed Nov 22 2017 Martyn Gigg <martyn.gigg@stfc.ac.uk>
+- Added Qt5, PyQt5 and QtPy dependencies
+
+* Thu Jul 20 2017 Peter Peterson <petersonpf@ornl.gov>
+- Added python-qtconsole for fedora
+
+* Sat Feb 18 2017 Stuart Campbell <scampbell@bnl.gov>
+- Updated to use upstream sphinx-bootstrap-theme
+
+* Mon Jan 09 2017 Lamar Moore <lamar.moore@stfc.ac.uk>
+- Require librdkafka-dev
+
+* Wed Dec 21 2016 Martyn Gigg <martyn.gigg@stfc.ac.uk>
+- Require python-mock & python3-mock on fedora
+
+* Fri Nov 18 2016 Martyn Gigg <martyn.gigg@stfc.ac.uk>
+- Require PyYAML
+
 * Fri Sep 23 2016 Stuart Campbell <campbellsi@ornl.gov>
 - Require poco >= 1.4.6
 

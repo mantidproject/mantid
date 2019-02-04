@@ -1,7 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/IntegrateFlux.h"
-#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/BoundedValidator.h"
 
 #include <boost/make_shared.hpp>
@@ -10,8 +17,10 @@
 namespace Mantid {
 namespace MDAlgorithms {
 
-using Mantid::Kernel::Direction;
 using Mantid::API::WorkspaceProperty;
+using Mantid::Kernel::Direction;
+using namespace Mantid::HistogramData;
+using Mantid::Types::Event::TofEvent;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(IntegrateFlux)
@@ -24,7 +33,7 @@ public:
   /// deleting operator. Does nothing
   void operator()(const API::MatrixWorkspace *) {}
 };
-}
+} // namespace
 
 //----------------------------------------------------------------------------------------------
 
@@ -113,19 +122,11 @@ IntegrateFlux::createOutputWorkspace(const API::MatrixWorkspace &inputWS,
   double xMin = inputWS.getXMin();
   double xMax = inputWS.getXMax();
   double dx = (xMax - xMin) / static_cast<double>(nX - 1);
-  auto &X = ws->dataX(0);
-  auto ix = X.begin();
-  // x-values are equally spaced between the min and max tof in the first flux
-  // spectrum
-  for (double x = xMin; ix != X.end(); ++ix, x += dx) {
-    *ix = x;
-  }
+  const auto &x = ws->x(0);
 
-  // share the xs for all spectra
-  auto xRef = ws->refX(0);
-  for (size_t sp = 1; sp < nSpec; ++sp) {
-    ws->setX(sp, xRef);
-  }
+  ws->setPoints(0, Points(x.size(), LinearGenerator(xMin, dx)));
+  for (size_t sp = 1; sp < nSpec; ++sp)
+    ws->setSharedX(sp, ws->sharedX(0));
 
   return ws;
 }
@@ -152,7 +153,7 @@ void IntegrateFlux::integrateSpectra(const API::MatrixWorkspace &inputWS,
       integrateSpectraEvents<DataObjects::WeightedEvent>(*eventWS, integrWS);
       return;
     case (API::TOF):
-      integrateSpectraEvents<DataObjects::TofEvent>(*eventWS, integrWS);
+      integrateSpectraEvents<TofEvent>(*eventWS, integrWS);
       return;
     }
   } else {
@@ -174,12 +175,13 @@ void IntegrateFlux::integrateSpectraEvents(
   size_t nSpec = inputWS.getNumberHistograms();
   assert(nSpec == integrWS.getNumberHistograms());
 
-  auto &X = integrWS.readX(0);
+  auto &X = integrWS.x(0);
   // loop overr the spectra and integrate
   for (size_t sp = 0; sp < nSpec; ++sp) {
     const std::vector<EventType> *el;
     DataObjects::getEventsFrom(inputWS.getSpectrum(sp), el);
-    auto &outY = integrWS.dataY(sp);
+    auto &outY = integrWS.mutableY(sp);
+
     double sum = 0;
     auto x = X.begin() + 1;
     size_t i = 1;
@@ -195,6 +197,12 @@ void IntegrateFlux::integrateSpectraEvents(
         break;
       sum += evnt->weight();
       outY[i] = sum;
+    }
+
+    while (x != X.end()) {
+      outY[i] = sum;
+      ++x;
+      ++i;
     }
   }
 }
@@ -227,25 +235,15 @@ void IntegrateFlux::integrateSpectraHistograms(
   size_t nSpec = inputWS.getNumberHistograms();
   assert(nSpec == integrWS.getNumberHistograms());
 
-  bool isDistribution = inputWS.isDistribution();
+  auto &X = integrWS.x(0);
 
-  auto &X = integrWS.readX(0);
-
-  // loop overr the spectra and integrate
+  // loop over the spectra and integrate
   for (size_t sp = 0; sp < nSpec; ++sp) {
-    auto &inX = inputWS.dataX(sp);
-    auto inY = inputWS.dataY(sp); // make a copy
-
-    // if it's a distribution y's must be multiplied by the bin widths
-    if (isDistribution) {
-      std::vector<double> xDiff(inX.size());
-      std::adjacent_difference(inX.begin(), inX.end(), xDiff.begin());
-      std::transform(xDiff.begin() + 1, xDiff.end(), inY.begin(), inY.begin(),
-                     std::multiplies<double>());
-    }
+    auto &inX = inputWS.x(sp);
+    auto inY = inputWS.counts(sp); // make a copy
 
     // integral at the first point is always 0
-    auto outY = integrWS.dataY(sp).begin();
+    auto outY = integrWS.mutableY(sp).begin();
     *outY = 0.0;
     ++outY;
     // initialize summation
@@ -354,15 +352,15 @@ void IntegrateFlux::integrateSpectraPointData(
   size_t nSpec = inputWS.getNumberHistograms();
   assert(nSpec == integrWS.getNumberHistograms());
 
-  auto &X = integrWS.dataX(0);
+  auto &X = integrWS.x(0);
 
   // loop overr the spectra and integrate
   for (size_t sp = 0; sp < nSpec; ++sp) {
-    auto &inX = inputWS.readX(sp);
-    auto &inY = inputWS.readY(sp);
+    auto &inX = inputWS.x(sp);
+    auto &inY = inputWS.y(sp);
 
     // integral at the first point is always 0
-    auto outY = integrWS.dataY(sp).begin();
+    auto outY = integrWS.mutableY(sp).begin();
     *outY = 0.0;
     ++outY;
     // initialize summation

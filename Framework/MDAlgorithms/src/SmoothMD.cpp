@@ -1,64 +1,58 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/SmoothMD.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/Progress.h"
-#include "MantidKernel/ArrayProperty.h"
+#include "MantidDataObjects/MDHistoWorkspaceIterator.h"
 #include "MantidKernel/ArrayBoundedValidator.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
-#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/MultiThreaded.h"
-#include "MantidDataObjects/MDHistoWorkspaceIterator.h"
-#include <boost/make_shared.hpp>
-#include <vector>
-#include <stack>
-#include <numeric>
-#include <map>
-#include <string>
-#include <sstream>
-#include <utility>
-#include <limits>
-#include <boost/function.hpp>
+#include "MantidKernel/PropertyWithValue.h"
 #include <boost/bind.hpp>
-#include <boost/scoped_ptr.hpp>
+#include <boost/function.hpp>
+#include <boost/make_shared.hpp>
 #include <boost/tuple/tuple.hpp>
+#include <limits>
+#include <map>
+#include <numeric>
+#include <sstream>
+#include <stack>
+#include <string>
+#include <utility>
+#include <vector>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
 // Typedef for width vector
-typedef std::vector<double> WidthVector;
+using WidthVector = std::vector<double>;
 
 // Typedef for kernel vector
-typedef std::vector<double> KernelVector;
+using KernelVector = std::vector<double>;
 
 // Typedef for an optional md histo workspace
-typedef boost::optional<IMDHistoWorkspace_const_sptr>
-    OptionalIMDHistoWorkspace_const_sptr;
+using OptionalIMDHistoWorkspace_const_sptr =
+    boost::optional<IMDHistoWorkspace_const_sptr>;
 
 // Typedef for a smoothing function
-typedef boost::function<IMDHistoWorkspace_sptr(
+using SmoothFunction = boost::function<IMDHistoWorkspace_sptr(
     IMDHistoWorkspace_const_sptr, const WidthVector &,
-    OptionalIMDHistoWorkspace_const_sptr)> SmoothFunction;
+    OptionalIMDHistoWorkspace_const_sptr)>;
 
 // Typedef for a smoothing function map keyed by name.
-typedef std::map<std::string, SmoothFunction> SmoothFunctionMap;
+using SmoothFunctionMap = std::map<std::string, SmoothFunction>;
 
 namespace {
-
-/**
- * @brief functions
- * @return Allowed smoothing functions
- */
-std::vector<std::string> functions() {
-  std::vector<std::string> propOptions;
-  propOptions.push_back("Hat");
-  propOptions.push_back("Gaussian");
-  return propOptions;
-}
 
 /**
  * Maps a function name to a smoothing function
@@ -71,7 +65,7 @@ SmoothFunctionMap makeFunctionMap(Mantid::MDAlgorithms::SmoothMD *instance) {
       {"Gaussian", boost::bind(&Mantid::MDAlgorithms::SmoothMD::gaussianSmooth,
                                instance, _1, _2, _3)}};
 }
-}
+} // namespace
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -124,10 +118,10 @@ KernelVector gaussianKernel(const double fwhm) {
  * The contributing elements should sum to unity
  */
 KernelVector renormaliseKernel(KernelVector kernel,
-                               std::vector<bool> validity) {
+                               const std::vector<bool> &validity) {
 
-  if (std::accumulate(validity.cbegin(), validity.cend(), 0.0) <
-      kernel.size()) {
+  if (validity.size() == kernel.size() &&
+      std::find(validity.cbegin(), validity.cend(), false) != validity.cend()) {
     // Use validity as a mask
     for (size_t i = 0; i < kernel.size(); ++i) {
       kernel[i] *= validity[i];
@@ -188,7 +182,7 @@ SmoothMD::hatSmooth(IMDHistoWorkspace_const_sptr toSmooth,
 
   const bool useWeights = weightingWS.is_initialized();
   uint64_t nPoints = toSmooth->getNPoints();
-  Progress progress(this, 0, 1, size_t(double(nPoints) * 1.1));
+  Progress progress(this, 0.0, 1.0, size_t(double(nPoints) * 1.1));
   // Create the output workspace.
   IMDHistoWorkspace_sptr outWS(toSmooth->clone());
   progress.reportIncrement(
@@ -203,8 +197,8 @@ SmoothMD::hatSmooth(IMDHistoWorkspace_const_sptr toSmooth,
   for (int it = 0; it < int(iterators.size()); ++it) { // NOLINT
 
     PARALLEL_START_INTERUPT_REGION
-    boost::scoped_ptr<MDHistoWorkspaceIterator> iterator(
-        dynamic_cast<MDHistoWorkspaceIterator *>(iterators[it]));
+    auto iterator =
+        dynamic_cast<MDHistoWorkspaceIterator *>(iterators[it].get());
 
     if (!iterator) {
       throw std::logic_error(
@@ -291,7 +285,7 @@ SmoothMD::gaussianSmooth(IMDHistoWorkspace_const_sptr toSmooth,
 
   const bool useWeights = weightingWS.is_initialized();
   uint64_t nPoints = toSmooth->getNPoints();
-  Progress progress(this, 0, 1, size_t(double(nPoints) * 1.1));
+  Progress progress(this, 0.0, 1.0, size_t(double(nPoints) * 1.1));
   // Create the output workspace
   IMDHistoWorkspace_sptr outWS(toSmooth->clone().release());
   // Create a temporary workspace
@@ -329,9 +323,8 @@ SmoothMD::gaussianSmooth(IMDHistoWorkspace_const_sptr toSmooth,
     for (int it = 0; it < int(iterators.size()); ++it) { // NOLINT
 
       PARALLEL_START_INTERUPT_REGION
-      boost::scoped_ptr<MDHistoWorkspaceIterator> iterator(
-          dynamic_cast<MDHistoWorkspaceIterator *>(iterators[it]));
-
+      auto iterator =
+          dynamic_cast<MDHistoWorkspaceIterator *>(iterators[it].get());
       if (!iterator) {
         throw std::logic_error(
             "Failed to cast IMDIterator to MDHistoWorkspaceIterator");
@@ -414,7 +407,7 @@ void SmoothMD::init() {
       "dimension, or provide a single entry (n-pixels) for all "
       "dimensions. Must be odd integers if Hat function is chosen.");
 
-  const auto allFunctionTypes = functions();
+  const std::array<std::string, 2> allFunctionTypes = {{"Hat", "Gaussian"}};
   const std::string first = allFunctionTypes.front();
 
   std::stringstream docBuffer;
@@ -426,7 +419,7 @@ void SmoothMD::init() {
           Direction::Input),
       docBuffer.str());
 
-  std::vector<std::string> unitOptions = {"pixels"};
+  std::array<std::string, 1> unitOptions = {{"pixels"}};
 
   std::stringstream docUnits;
   docUnits << "The units that WidthVector has been specified in. Allowed "
@@ -516,15 +509,19 @@ std::map<std::string, std::string> SmoothMD::validateInputs() {
       double intpart;
       if (modf(widthEntry, &intpart) != 0.0) {
         std::stringstream message;
-        message << widthVectorPropertyName << " entries must be (odd) integers "
-                                              "when Hat function is chosen. "
-                                              "Bad entry is " << widthEntry;
+        message << widthVectorPropertyName
+                << " entries must be (odd) integers "
+                   "when Hat function is chosen. "
+                   "Bad entry is "
+                << widthEntry;
         product.emplace(widthVectorPropertyName, message.str());
       } else if (static_cast<unsigned long>(widthEntry) % 2 == 0) {
         std::stringstream message;
-        message << widthVectorPropertyName << " entries must be odd integers "
-                                              "when Hat function is chosen. "
-                                              "Bad entry is " << widthEntry;
+        message << widthVectorPropertyName
+                << " entries must be odd integers "
+                   "when Hat function is chosen. "
+                   "Bad entry is "
+                << widthEntry;
       }
     }
   }
@@ -556,8 +553,9 @@ std::map<std::string, std::string> SmoothMD::validateInputs() {
           message << normalisationWorkspacePropertyName
                   << ". Number of bins from dimension with index " << i
                   << " do not match. " << nBinsSmooth << " expected. Got "
-                  << nBinsNorm << ". Shapes of inputs must be the same. Cannot "
-                                  "continue smoothing.";
+                  << nBinsNorm
+                  << ". Shapes of inputs must be the same. Cannot "
+                     "continue smoothing.";
           product.emplace(normalisationWorkspacePropertyName, message.str());
           break;
         }

@@ -70,6 +70,21 @@
    <component type="nickel-holder">
      <location> <facing val="none"/> </location>
    </component>
+
+   <!-- extended detector space definition for SCP projection -->
+   <component type="extended-detector-space">
+       <location /> 
+   </component>
+
+   <type name="extended-detector-space">
+       <properties />
+       <infinite-cylinder id="detector-surface">
+           <centre x="0.0" y="0.0" z="0.0" />
+           <axis x="0.0" y="1.0" z="0.0" /> 
+           <radius val="2.2018" />
+       </infinite-cylinder> 
+       <algebra val="detector-surface" />
+   </type>
  
    <!-- DEFINITION OF TYPES -->
    <!-- Source types -->

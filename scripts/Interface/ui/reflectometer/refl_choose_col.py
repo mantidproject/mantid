@@ -1,9 +1,16 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
 #This is an extension of refl_columns.py as that is a auto-generated script form pyqt and shouldn't be edited
 #so this file provides any extra GUI tweaks not easily doable in the designer
 #for the time being this also includes non-GUI behaviour
-import ui_refl_columns
+from __future__ import (absolute_import, division, print_function)
 from PyQt4 import QtCore, QtGui
+from ui.reflectometer.ui_refl_columns import Ui_chooseColumnsDialog
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -12,7 +19,7 @@ except AttributeError:
         return s
 
 
-class ReflChoose(QtGui.QDialog, ui_refl_columns.Ui_chooseColumnsDialog):
+class ReflChoose(QtGui.QDialog, Ui_chooseColumnsDialog):
 
     visiblestates = {}
 

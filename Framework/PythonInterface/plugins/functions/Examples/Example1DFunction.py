@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name
 """
 This example implements a simple Linear function that could be used as a background.
@@ -56,6 +62,7 @@ class Example1DFunction(IFunction1D):
             jacobian.set(i,0,1)
             jacobian.set(i,1,x)
             i += 1
+
 
 # Required to have Mantid recognise the new function
 FunctionFactory.subscribe(Example1DFunction)

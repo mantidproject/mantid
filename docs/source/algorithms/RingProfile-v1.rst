@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -71,7 +71,7 @@ Usage
     ws = CreateSampleWorkspace("Histogram","Multiple Peaks")
     wsOut = RingProfile(ws,Centre=[0,5,10],MaxRadius=5)
 
-    print ("The RingProfile has been calculated with %i bins" % wsOut.blocksize())
+    print("The RingProfile has been calculated with {} bins".format(wsOut.blocksize()))
 
 Output:
 
@@ -86,7 +86,7 @@ Output:
     ws = CreateSampleWorkspace("Histogram","Multiple Peaks")
     wsOut = RingProfile(ws,Centre=[0,5,10],MinRadius=1,MaxRadius=5,NumBins=200)
 
-    print ("The RingProfile has been calculated with %i bins" % wsOut.blocksize())
+    print("The RingProfile has been calculated with {} bins".format(wsOut.blocksize()))
     
 Output:
 

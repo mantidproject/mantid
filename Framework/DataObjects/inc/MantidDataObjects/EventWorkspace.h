@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAOBJECTS_EVENTWORKSPACE_H_
 #define MANTID_DATAOBJECTS_EVENTWORKSPACE_H_ 1
 
@@ -30,7 +36,8 @@ public:
   const std::string id() const override { return "EventWorkspace"; }
 
   // Constructor
-  EventWorkspace();
+  EventWorkspace(
+      const Parallel::StorageMode storageMode = Parallel::StorageMode::Cloned);
 
   // Destructor
   ~EventWorkspace() override;
@@ -40,9 +47,15 @@ public:
     return std::unique_ptr<EventWorkspace>(doClone());
   }
 
+  /// Returns a default-initialized clone of the workspace
+  std::unique_ptr<EventWorkspace> cloneEmpty() const {
+    return std::unique_ptr<EventWorkspace>(doCloneEmpty());
+  }
+
   // Initialize the pixels
   void init(const std::size_t &, const std::size_t &,
             const std::size_t &) override;
+  void init(const HistogramData::Histogram &histogram) override;
 
   bool threadSafe() const override;
 
@@ -68,15 +81,15 @@ public:
 
   double getTofMax() const override;
 
-  Mantid::Kernel::DateAndTime getPulseTimeMin() const override;
-  Mantid::Kernel::DateAndTime getPulseTimeMax() const override;
-  void getPulseTimeMinMax(Mantid::Kernel::DateAndTime &xmin,
-                          Mantid::Kernel::DateAndTime &xmax) const;
+  Mantid::Types::Core::DateAndTime getPulseTimeMin() const override;
+  Mantid::Types::Core::DateAndTime getPulseTimeMax() const override;
+  void getPulseTimeMinMax(Mantid::Types::Core::DateAndTime &xmin,
+                          Mantid::Types::Core::DateAndTime &xmax) const;
 
-  Mantid::Kernel::DateAndTime
+  Mantid::Types::Core::DateAndTime
   getTimeAtSampleMin(double tofOffset = 0) const override;
 
-  Mantid::Kernel::DateAndTime
+  Mantid::Types::Core::DateAndTime
   getTimeAtSampleMax(double tofOffset = 0) const override;
 
   double getEventXMin() const;
@@ -105,7 +118,10 @@ public:
                                   bool skipError = false) const;
 
   // Set the x-axis data (histogram bins) for all pixels
-  virtual void setAllX(const HistogramData::BinEdges &x);
+  void setAllX(const HistogramData::BinEdges &x) override;
+
+  // Update all X values to fit around all events
+  void resetAllXToSingleBin() override;
 
   // The total number of events across all of the spectra.
   std::size_t getNumberEvents() const override;
@@ -141,6 +157,9 @@ protected:
 
 private:
   EventWorkspace *doClone() const override { return new EventWorkspace(*this); }
+  EventWorkspace *doCloneEmpty() const override {
+    return new EventWorkspace(storageMode());
+  }
 
   /** A vector that holds the event list for each spectrum; the key is
    * the workspace index, which is not necessarily the pixelid.
@@ -152,11 +171,11 @@ private:
 };
 
 /// shared pointer to the EventWorkspace class
-typedef boost::shared_ptr<EventWorkspace> EventWorkspace_sptr;
+using EventWorkspace_sptr = boost::shared_ptr<EventWorkspace>;
 /// shared pointer to a const Workspace2D
-typedef boost::shared_ptr<const EventWorkspace> EventWorkspace_const_sptr;
+using EventWorkspace_const_sptr = boost::shared_ptr<const EventWorkspace>;
 
-} /// namespace DataObjects
-} /// namespace Mantid
+} // namespace DataObjects
+} // namespace Mantid
 
 #endif /* MANTID_DATAOBJECTS_EVENTWORKSPACE_H_ */

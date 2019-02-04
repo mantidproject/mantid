@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -22,11 +22,11 @@ Usage
     investigation_types = CatalogListInvestigations()
 
     # How many different types of investigations are at ISIS?
-    print "The number of investigation types are: " + str(len(investigation_types))
+    print("The number of investigation types are: {}".format(len(investigation_types)))
 
     # Print and view the investigation types
     for investigation in investigation_types:
-        print "Investigation type is: " + investigation
+        print("Investigation type is: {}".format(investigation))
 
 Output:
 

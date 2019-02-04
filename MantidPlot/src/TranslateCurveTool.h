@@ -57,7 +57,7 @@ public:
    * during initialization, before there's any other chance of connecting to it.
    */
   TranslateCurveTool(Graph *graph, ApplicationWindow *app, Direction dir,
-                     const QObject *status_target = NULL,
+                     const QObject *status_target = nullptr,
                      const char *status_slot = "");
 
   int rtti() const override {
@@ -66,8 +66,8 @@ public:
 signals:
   /**\brief Emitted whenever a new message should be presented to the user.
    *
-   * You don't have to connect to this signal if you alreay specified a reciever
-   *during initialization.
+   * You don't have to connect to this signal if you already specified a
+   *receiver during initialization.
    */
   void statusText(const QString &);
 public slots:

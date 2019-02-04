@@ -1,12 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_KERNEL_EXCEPTION_H_
 #define MANTID_KERNEL_EXCEPTION_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidKernel/DllConfig.h"
+#include <exception>
 #include <stdexcept>
 #include <string>
-#include "MantidKernel/DllConfig.h"
 
 namespace Mantid {
 namespace Kernel {
@@ -85,27 +92,6 @@ namespace Kernel {
 
     @author Nick Draper, Tessella Support Services plc
     @date 8/11/2007
-
-    Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>.
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 namespace Exception {
 
@@ -345,6 +331,17 @@ public:
   /// Overloaded reporting method
   const char *what() const noexcept override;
   const int &errorCode() const;
+};
+
+/// Exception thrown when a fitting function changes number of parameters
+/// during fit.
+class MANTID_KERNEL_DLL FitSizeWarning final : public std::exception {
+  std::string m_message;
+
+public:
+  explicit FitSizeWarning(size_t oldSize);
+  FitSizeWarning(size_t oldSize, size_t newSize);
+  const char *what() const noexcept override;
 };
 
 } // namespace Exception

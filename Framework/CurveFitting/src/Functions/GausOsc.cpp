@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -18,7 +24,7 @@ using namespace API;
 DECLARE_FUNCTION(GausOsc)
 
 void GausOsc::init() {
-  declareParameter("A", 10.0, "Amplitude at time 0");
+  declareParameter("A", 0.20, "Amplitude at time 0");
   declareParameter("Sigma", 0.2, "Decay rate");
   declareParameter("Frequency", 0.1, "Frequency of oscillation");
   declareParameter("Phi", 0.0, "Frequency of oscillation");

@@ -1,19 +1,30 @@
-﻿#pylint: disable=invalid-name
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
+#pylint: disable=invalid-name
+from __future__ import (absolute_import, division, print_function)
 import os
 import sys
-import stresstesting
+import systemtesting
 from mantid.simpleapi import *
 from mantid.api import Workspace,IEventWorkspace
 
 from Direct.PropertyManager import PropertyManager
 import ISIS_MariReduction as mr
+try:
+    from importlib import reload
+except ImportError:
+    pass
 
 #----------------------------------------------------------------------
 
 
-class ISIS_ReductionWebLike(stresstesting.MantidStressTest):
+class ISIS_ReductionWebLike(systemtesting.MantidSystemTest):
     def __init__(self):
-        stresstesting.MantidStressTest.__init__(self)
+        systemtesting.MantidSystemTest.__init__(self)
 
        # prepare reduction variable
         self.rd = mr.ReduceMARIFromFile()
@@ -79,9 +90,9 @@ class ISIS_ReductionWebLike(stresstesting.MantidStressTest):
         return result, reference
 
 
-class ISIS_ReductionWrapperValidate(stresstesting.MantidStressTest):
+class ISIS_ReductionWrapperValidate(systemtesting.MantidSystemTest):
     def __init__(self):
-        stresstesting.MantidStressTest.__init__(self)
+        systemtesting.MantidSystemTest.__init__(self)
         self.result = False
 
     def runTest(self):
@@ -112,12 +123,12 @@ class ISIS_ReductionWrapperValidate(stresstesting.MantidStressTest):
             rez,mess = rd.run_reduction()
             self.result=rez
             if not rez:
-                print "*** Validation failed: {0}".format(mess)
+                print("*** Validation failed: {0}".format(mess))
             if mess.find('Created')>-1: # validation still failed due to missing validation file
-                print "*** Validation failed: {0}".format(mess)
+                print("*** Validation failed: {0}".format(mess))
                 self.result=False
         except RuntimeError as err:
-            print "*** Validation failed with error: {0}".format(err.message)
+            print("*** Validation failed with error: {0}".format(err.message))
             self.result=False
         rd.reducer.prop_man.save_file_name = None
 
@@ -127,10 +138,10 @@ class ISIS_ReductionWrapperValidate(stresstesting.MantidStressTest):
 
 
 #----------------------------------------------------------------------
-class ISISLoadFilesRAW(stresstesting.MantidStressTest):
+class ISISLoadFilesRAW(systemtesting.MantidSystemTest):
 
     def __init__(self):
-        stresstesting.MantidStressTest.__init__(self)
+        systemtesting.MantidSystemTest.__init__(self)
         self.valid = False
 
     def runTest(self):
@@ -173,10 +184,10 @@ class ISISLoadFilesRAW(stresstesting.MantidStressTest):
         return self.valid
 
 
-class ISISLoadFilesMER(stresstesting.MantidStressTest):
+class ISISLoadFilesMER(systemtesting.MantidSystemTest):
 
     def __init__(self):
-        stresstesting.MantidStressTest.__init__(self)
+        systemtesting.MantidSystemTest.__init__(self)
         self.valid = False
 
     def runTest(self):
@@ -185,6 +196,9 @@ class ISISLoadFilesMER(stresstesting.MantidStressTest):
         propman.sample_run = 6398 # (raw file)
         propman.det_cal_file = 6399
         propman.load_monitors_with_workspace = False
+        propman.mon1_norm_spec =  69633
+        propman.ei_mon1_spec = [ 69634,69635,69636,69637]
+        propman.ei_mon2_spec = [ 69638,69639,69640,69641]
 
         mon_ws = PropertyManager.sample_run.get_monitors_ws()
         self.assertTrue(mon_ws is not None)
@@ -194,7 +208,6 @@ class ISISLoadFilesMER(stresstesting.MantidStressTest):
         self.assertEqual(ws.getNumberHistograms(),69632)
         self.assertEqual(mon_ws.getNumberHistograms(),9)
 
-        # test load together
         propman.sample_run = None # (clean things up)
         propman.load_monitors_with_workspace = True
         propman.sample_run  = 6398
@@ -243,7 +256,7 @@ class ISISLoadFilesMER(stresstesting.MantidStressTest):
         self.assertTrue(isinstance(ei_ws,Workspace))
 
         en_peaks = ei_ws.readX(0)
-        self.assertAlmostEquals(len(en_peaks),1)
+        self.assertAlmostEqual(len(en_peaks),1)
         self.assertAlmostEqual(en_peaks[0],108.94,2)
 
         self.valid = True
@@ -252,10 +265,10 @@ class ISISLoadFilesMER(stresstesting.MantidStressTest):
         return self.valid
 
 
-class ISISLoadFilesLET(stresstesting.MantidStressTest):
+class ISISLoadFilesLET(systemtesting.MantidSystemTest):
 
     def __init__(self):
-        stresstesting.MantidStressTest.__init__(self)
+        systemtesting.MantidSystemTest.__init__(self)
         self.valid = False
 
     def runTest(self):
@@ -302,6 +315,7 @@ class ISISLoadFilesLET(stresstesting.MantidStressTest):
     def validate(self):
         return self.valid
 
+
 if __name__=="__main__":
-    tester = ISISLoadFilesLET()
+    tester = ISISLoadFilesMER()
     tester.runTest()

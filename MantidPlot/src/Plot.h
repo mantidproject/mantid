@@ -30,9 +30,9 @@
 #ifndef PLOT_H
 #define PLOT_H
 
-#include <QObject>
-#include <QMap>
 #include <QLocale>
+#include <QMap>
+#include <QObject>
 
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
@@ -56,8 +56,8 @@ class Plot : public QwtPlot {
   Q_OBJECT
 
 public:
-  Plot(int width = 500, int height = 400, QWidget *parent = 0,
-       const char *name = 0);
+  Plot(int width = 500, int height = 400, QWidget *parent = nullptr,
+       const char *name = nullptr);
 
   Grid *grid() { return static_cast<Grid *>(d_grid); };
   QList<int> curveKeys() { return d_curves.keys(); };

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/AffineMatrixParameterParser.h"
 #include <boost/algorithm/string.hpp>
 
@@ -17,8 +23,8 @@ AffineMatrixParameter *AffineMatrixParameterParser::createParameter(
         typeName));
   } else {
     // Convenience typedefs
-    typedef std::vector<std::string> VecStrings;
-    typedef std::vector<coord_t> VecDoubles;
+    using VecStrings = std::vector<std::string>;
+    using VecDoubles = std::vector<coord_t>;
 
     std::string sParameterValue =
         parameterElement->getChildElement("Value")->innerText();
@@ -41,7 +47,7 @@ AffineMatrixParameter *AffineMatrixParameterParser::createParameter(
       nCols = vecStrCols.size();
       col_it = vecStrCols.begin();
       while (col_it != vecStrCols.end()) {
-        coord_t val = coord_t(atof(col_it->c_str()));
+        coord_t val = static_cast<coord_t>(std::stof(col_it->c_str()));
         elements.push_back(val);
         ++col_it;
       }
@@ -74,5 +80,5 @@ void AffineMatrixParameterParser::setSuccessorParser(
   throw std::runtime_error(
       "Cannot set a successor parser on a AffineMatrixParameterParser");
 }
-}
-}
+} // namespace DataObjects
+} // namespace Mantid

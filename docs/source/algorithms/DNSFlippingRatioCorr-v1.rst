@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -110,7 +110,7 @@ Usage
     vana_ratio = sf_corrected/nsf_corrected
 
     # ratio must be around 2, print first 5 points of the data array
-    print np.around(vana_ratio.extractY()[:5])
+    print(np.around(vana_ratio.extractY()[:5]))
 
 Output:
 

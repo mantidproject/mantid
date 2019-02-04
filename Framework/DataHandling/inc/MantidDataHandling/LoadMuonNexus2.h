@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAHANDLING_LOADMUONNEXUS2_H_
 #define MANTID_DATAHANDLING_LOADMUONNEXUS2_H_
 
@@ -37,27 +43,6 @@ multiperiod file)
 <LI> auto_group - Determines whether the spectra are automatically grouped
 together based on the groupings in the NeXus file. </LI>
 </UL>
-
-Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>.
-Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport LoadMuonNexus2 : public LoadMuonNexus {
 public:
@@ -75,6 +60,9 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 2; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"LoadNexus"};
+  }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override {
     return "DataHandling\\Nexus;Muon\\DataHandling";
@@ -89,9 +77,9 @@ private:
   /// Execute this version of the algorithm
   void doExec();
 
-  void loadData(const Mantid::NeXus::NXInt &counts,
-                const std::vector<double> &timeBins, int wsIndex, int period,
-                int spec, API::MatrixWorkspace_sptr localWorkspace);
+  HistogramData::Histogram
+  loadData(const Mantid::HistogramData::BinEdges &edges,
+           const Mantid::NeXus::NXInt &counts, int period, int spec);
   void loadLogs(API::MatrixWorkspace_sptr ws, Mantid::NeXus::NXEntry &entry,
                 int period);
   void loadRunDetails(DataObjects::Workspace2D_sptr localWorkspace);

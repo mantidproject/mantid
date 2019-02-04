@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name,no-init
 #--------------------------------------------------------------
 # Algorithm which loads a SINQ file.
@@ -81,6 +87,7 @@ class LoadSINQ(PythonAlgorithm):
 
         self.setProperty("OutputWorkspace",ws)
         mantid.simpleapi.DeleteWorkspace(wname)
+
 
 #---------- register with Mantid
 AlgorithmFactory.subscribe(LoadSINQ)

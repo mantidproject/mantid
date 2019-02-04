@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_KERNEL_IREMOTEJOBMANAGER_H
 #define MANTID_KERNEL_IREMOTEJOBMANAGER_H
 
@@ -41,28 +47,6 @@ queryAllRemoteJobs()).
 - Get list of available files for a transaction on the compute resource
 (queryRemoteFile())
 - Upload / download files ( uploadRemoteFile() and downloadRemoteFile()).
-
-
-Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>.
-Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_API_DLL IRemoteJobManager {
 public:
@@ -91,13 +75,13 @@ public:
     /// Date-time of submission. No particular format can be assumed
     /// from the specific remote job managers, and some of them may
     /// not provide this info
-    Mantid::Kernel::DateAndTime submitDate;
+    Mantid::Types::Core::DateAndTime submitDate;
     /// Date-time the job actually started running.  No particular
     /// format can be assumed
-    Mantid::Kernel::DateAndTime startDate;
+    Mantid::Types::Core::DateAndTime startDate;
     /// Date-time the job finished. No particular format can be
     /// assumed
-    Mantid::Kernel::DateAndTime completionTime;
+    Mantid::Types::Core::DateAndTime completionTime;
     /// Command line for this job (when running a command ideally this
     /// would be provided by the underlying job scheduling
     /// mechanism). As examples, Platform LSF provides this. For the
@@ -290,7 +274,7 @@ public:
 };
 
 // shared pointer type for the IRemoteJobManager
-typedef boost::shared_ptr<IRemoteJobManager> IRemoteJobManager_sptr;
+using IRemoteJobManager_sptr = boost::shared_ptr<IRemoteJobManager>;
 
 } // namespace API
 } // namespace Mantid

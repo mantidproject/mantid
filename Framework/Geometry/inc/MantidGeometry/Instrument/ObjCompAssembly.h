@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef OBJCOMPONENT_ASSEMBLY_
 #define OBJCOMPONENT_ASSEMBLY_
+#include "MantidGeometry/DllConfig.h"
+#include "MantidGeometry/Instrument/CompAssembly.h"
+#include "MantidGeometry/Instrument/ObjComponent.h"
 #include <string>
 #include <vector>
-#include "MantidGeometry/DllConfig.h"
-#include "MantidGeometry/Instrument/ObjComponent.h"
-#include "MantidGeometry/Instrument/CompAssembly.h"
 
 #ifdef _WIN32
 #pragma warning(disable : 4250)
@@ -21,33 +27,12 @@ namespace Geometry {
     ObjCompAssembly allows Components to be positioned
     in a hierarchical structure in the form of a tree.
     ObjCompAssembly inherits from component.
-
-    Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-   National Laboratory & European Spallation Source
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_GEOMETRY_DLL ObjCompAssembly : public virtual ICompAssembly,
                                             public virtual ObjComponent {
-  typedef std::vector<ObjComponent *>::iterator comp_it; ///< Iterator type
-  typedef std::vector<ObjComponent *>::const_iterator
-      const_comp_it; ///< Const iterator type
+  using comp_it = std::vector<ObjComponent *>::iterator; ///< Iterator type
+  using const_comp_it =
+      std::vector<ObjComponent *>::const_iterator; ///< Const iterator type
 public:
   /// String description of the type of component
   std::string type() const override { return "ObjCompAssembly"; }
@@ -89,18 +74,21 @@ public:
   void printChildren(std::ostream &) const override;
   void printTree(std::ostream &) const override;
 
-  const Kernel::Quat getRotation() const override;
+  Kernel::Quat getRotation() const override;
   Kernel::V3D getPos() const override;
 
   //! Set the outline of the assembly
-  boost::shared_ptr<Object> createOutline();
-  void setOutline(boost::shared_ptr<const Object> obj);
+  boost::shared_ptr<IObject> createOutline();
+  void setOutline(boost::shared_ptr<const IObject> obj);
 
   /** Test the intersection of the ray with the children of the component
    * assembly  */
   void testIntersectionWithChildren(
       Track & /*testRay*/,
       std::deque<IComponent_const_sptr> & /*searchQueue*/) const override;
+
+  size_t registerContents(
+      class Mantid::Geometry::ComponentVisitor &visitor) const override;
 
 private:
   /// Private copy assignment operator
@@ -111,9 +99,9 @@ private:
 };
 
 /// Shared pointer to ObjCompAssembly
-typedef boost::shared_ptr<ObjCompAssembly> ObjCompAssembly_sptr;
+using ObjCompAssembly_sptr = boost::shared_ptr<ObjCompAssembly>;
 /// Shared pointer to ObjCompAssembly (const version)
-typedef boost::shared_ptr<const ObjCompAssembly> ObjCompAssembly_const_sptr;
+using ObjCompAssembly_const_sptr = boost::shared_ptr<const ObjCompAssembly>;
 
 MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &,
                                              const ObjCompAssembly &);

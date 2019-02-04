@@ -1,18 +1,24 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef FUNCTIONFACTORYTEST_H_
 #define FUNCTIONFACTORYTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/Expression.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/ParamFunction.h"
+#include "MantidAPI/IBackgroundFunction.h"
+#include "MantidAPI/IConstraint.h"
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/IPeakFunction.h"
-#include "MantidAPI/IBackgroundFunction.h"
-#include "MantidAPI/Expression.h"
-#include "MantidAPI/CompositeFunction.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/IConstraint.h"
 #include "MantidAPI/MultiDomainFunction.h"
+#include "MantidAPI/ParamFunction.h"
 #include "MantidKernel/System.h"
 
 #include <sstream>
@@ -379,21 +385,21 @@ public:
     IFunction_sptr fun1 =
         FunctionFactory::Instance().createInitialized(fun->asString());
 
-    fun1->setParameter(0, 0.);
-    fun1->setParameter(1, 0.);
+    fun1->setParameter(0, 1.);
+    fun1->setParameter(1, 2.);
     fun1->setParameter(2, 0.);
     fun1->setParameter(3, 789);
 
-    TS_ASSERT_EQUALS(fun1->getParameter(0), 0.);
-    TS_ASSERT_EQUALS(fun1->getParameter(1), 0.);
+    TS_ASSERT_EQUALS(fun1->getParameter(0), 1.);
+    TS_ASSERT_EQUALS(fun1->getParameter(1), 2.);
     TS_ASSERT_EQUALS(fun1->getParameter(2), 0.);
     TS_ASSERT_EQUALS(fun1->getParameter(3), 789);
 
     fun1->applyTies();
 
-    TS_ASSERT_EQUALS(fun1->getParameter(0), 14.);
-    TS_ASSERT_EQUALS(fun1->getParameter(1), 14.);
-    TS_ASSERT_EQUALS(fun1->getParameter(2), 28.);
+    TS_ASSERT_EQUALS(fun1->getParameter(0), 1.);
+    TS_ASSERT_EQUALS(fun1->getParameter(1), 2.);
+    TS_ASSERT_EQUALS(fun1->getParameter(2), 3.);
     TS_ASSERT_EQUALS(fun1->getParameter(3), 789);
   }
 
@@ -444,7 +450,15 @@ public:
     const auto mdfunc = boost::dynamic_pointer_cast<MultiDomainFunction>(fun);
     TS_ASSERT(mdfunc);
     if (mdfunc) {
-      TS_ASSERT_EQUALS(mdfunc->asString(), fnString);
+      TS_ASSERT_EQUALS(mdfunc->asString(),
+                       "composite=MultiDomainFunction,NumDeriv=true;(composite="
+                       "CompositeFunction,NumDeriv=false,$domains=i;name="
+                       "FunctionFactoryTest_FunctA,a0=0,a1=0.5;name="
+                       "FunctionFactoryTest_FunctB,b0=0.1,b1=0.2,ties=(b1=0.2))"
+                       ";(composite=CompositeFunction,NumDeriv=false,$domains="
+                       "i;name=FunctionFactoryTest_FunctA,a0=0,a1=0.5;name="
+                       "FunctionFactoryTest_FunctB,b0=0.1,b1=0.2);ties=(f1.f1."
+                       "b1=f0.f1.b1)");
       TS_ASSERT_EQUALS(mdfunc->nFunctions(), 2);
 
       // test the domains for each function

@@ -1,17 +1,23 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_WORKFLOWALGORITHMS_MUONPROCESSTEST_H_
 #define MANTID_WORKFLOWALGORITHMS_MUONPROCESSTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidWorkflowAlgorithms/MuonProcess.h"
 #include "MantidAPI/ScopedWorkspace.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataHandling/LoadMuonNexus2.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/make_unique.h"
+#include "MantidWorkflowAlgorithms/MuonProcess.h"
 
-using Mantid::WorkflowAlgorithms::MuonProcess;
 using Mantid::DataHandling::LoadMuonNexus2;
+using Mantid::WorkflowAlgorithms::MuonProcess;
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -96,6 +102,104 @@ public:
       TS_ASSERT_DELTA(ws->readX(0)[0], -0.254, 0.001);
       TS_ASSERT_DELTA(ws->readX(0)[1000], 15.746, 0.001);
       TS_ASSERT_DELTA(ws->readX(0)[1752], 27.778, 0.001);
+    }
+  }
+
+  void test_Cropping() {
+    ScopedWorkspace output;
+
+    std::vector<int> group1, group2;
+
+    for (int i = 1; i <= 16; ++i)
+      group1.push_back(i);
+
+    for (int i = 17; i <= 32; ++i)
+      group2.push_back(i);
+
+    TableWorkspace_sptr grouping = createGroupingTable(group1, group2);
+
+    auto data = loadEMU();
+
+    MuonProcess alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("InputWorkspace", data->workspace));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("SummedPeriodSet", std::vector<int>{1}));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Mode", "Combined"));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("DetectorGroupingTable", grouping));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("LoadedTimeZero", data->timeZero));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputType", "GroupCounts"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("GroupIndex", 0));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", output.name()));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("CropWorkspace", true));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Xmin", 3.0));
+    TS_ASSERT_THROWS_NOTHING(alg.execute(););
+    TS_ASSERT(alg.isExecuted());
+
+    // Retrieve the workspace from data service.
+    MatrixWorkspace_sptr ws =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(output.retrieve());
+
+    TS_ASSERT(ws);
+    if (ws) {
+      TS_ASSERT_EQUALS(ws->getNumberHistograms(), 1);
+
+      TS_ASSERT_DELTA(ws->readX(0)[0], 3.0100, 0.001);
+      TS_ASSERT_DELTA(ws->readX(0)[1000], 19.0100, 0.001);
+      TS_ASSERT_DELTA(ws->readX(0)[1752], 31.0420, 0.001);
+    }
+  }
+
+  void test_noCropping() {
+    ScopedWorkspace output;
+
+    std::vector<int> group1, group2;
+
+    for (int i = 1; i <= 16; ++i)
+      group1.push_back(i);
+
+    for (int i = 17; i <= 32; ++i)
+      group2.push_back(i);
+
+    TableWorkspace_sptr grouping = createGroupingTable(group1, group2);
+
+    auto data = loadEMU();
+
+    MuonProcess alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("InputWorkspace", data->workspace));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("SummedPeriodSet", std::vector<int>{1}));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Mode", "Combined"));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("DetectorGroupingTable", grouping));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("LoadedTimeZero", data->timeZero));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputType", "GroupCounts"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("GroupIndex", 0));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", output.name()));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("CropWorkspace", false));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Xmin", 3.0));
+    TS_ASSERT_THROWS_NOTHING(alg.execute(););
+    TS_ASSERT(alg.isExecuted());
+
+    // Retrieve the workspace from data service.
+    MatrixWorkspace_sptr ws =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(output.retrieve());
+
+    TS_ASSERT(ws);
+    if (ws) {
+      TS_ASSERT_EQUALS(ws->getNumberHistograms(), 1);
+
+      TS_ASSERT_DELTA(ws->readX(0)[0], 3.010, 0.001);
+      TS_ASSERT_DELTA(ws->readX(0)[1000], 19.010, 0.001);
+      TS_ASSERT_DELTA(ws->readX(0)[1752], 31.042, 0.001);
     }
   }
 
@@ -524,9 +628,9 @@ private:
   std::unique_ptr<LoadedData> loadEMU() { return loadData("emu00006473.nxs"); }
 
   /**
-  * Use LoadMuonNexus to load data from MUSR file
-  * @returns LoadedData struct
-  */
+   * Use LoadMuonNexus to load data from MUSR file
+   * @returns LoadedData struct
+   */
   std::unique_ptr<LoadedData> loadMUSR() {
     return loadData("MUSR00015189.nxs");
   }

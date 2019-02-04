@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_API_USAGESERVICETEST_H_
 #define MANTID_API_USAGESERVICETEST_H_
 
@@ -57,7 +63,7 @@ public:
   void test_startupMessage() {
     TestableUsageService usageService;
     std::string name = "My testing application name";
-    usageService.setApplication(name);
+    usageService.setApplicationName(name);
     std::string message = usageService.generateStartupMessage();
 
     ::Json::Reader reader;
@@ -101,11 +107,11 @@ public:
     }
 
     auto features = root["features"];
-    for (Json::ArrayIndex i = 0; i < features.size(); i++) {
-      std::string name = features[i]["name"].asString();
-      std::string type = features[i]["type"].asString();
-      bool internal = features[i]["internal"].asBool();
-      size_t count = features[i]["count"].asUInt();
+    for (auto &feature : features) {
+      std::string name = feature["name"].asString();
+      std::string type = feature["type"].asString();
+      bool internal = feature["internal"].asBool();
+      size_t count = feature["count"].asUInt();
 
       bool correct = false;
 
@@ -156,11 +162,11 @@ public:
   void test_setApplicationName() {
     TestableUsageService usageService;
     // test default first
-    TS_ASSERT_EQUALS(usageService.getApplication(), "python");
+    TS_ASSERT_EQUALS(usageService.getApplicationName(), "python");
 
     std::string name = "My testing application name";
-    usageService.setApplication(name);
-    TS_ASSERT_EQUALS(usageService.getApplication(), name);
+    usageService.setApplicationName(name);
+    TS_ASSERT_EQUALS(usageService.getApplicationName(), name);
   }
 };
 

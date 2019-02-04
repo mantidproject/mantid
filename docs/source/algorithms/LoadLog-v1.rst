@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -60,18 +60,18 @@ Usage
     #get the log data out of the Workspace's run object
     run = ws.getRun()
     logs= run.getLogData()
-    print "Logs before adding:"
+    print("Logs before adding:")
     for i in range(0,len(logs)):
-        print logs[i].name
+        print(logs[i].name)
     #ExampleForLog.log is taken from a NIMROD run
     LoadLog(ws,"ExampleForLog.log")
-    print ""
+    print("")
 
     run = ws.getRun()
     logs= run.getLogData()
-    print "Logs after adding:"
+    print("Logs after adding:")
     for i in range(0,len(logs)):
-        print logs[i].name
+        print(logs[i].name)
 
 Output:
 

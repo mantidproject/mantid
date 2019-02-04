@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAOBJECTS_PEAKSHAPESPHERICALFACTORYTEST_H_
 #define MANTID_DATAOBJECTS_PEAKSHAPESPHERICALFACTORYTEST_H_
 
@@ -14,10 +20,10 @@
 #include <gmock/gmock.h>
 #include <json/json.h>
 
-#include "MantidDataObjects/PeakShapeSphericalFactory.h"
 #include "MantidDataObjects/PeakShapeSpherical.h"
-#include "MantidKernel/VMD.h"
+#include "MantidDataObjects/PeakShapeSphericalFactory.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
+#include "MantidKernel/VMD.h"
 #include "MockObjects.h"
 
 using namespace Mantid::DataObjects;

@@ -1,24 +1,30 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
+#include "MantidICat/CatalogDownloadDataFiles.h"
 #include "MantidAPI/CatalogManager.h"
 #include "MantidAPI/ICatalogInfoService.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidICat/CatalogAlgorithmHelper.h"
-#include "MantidICat/CatalogDownloadDataFiles.h"
-#include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/CatalogInfo.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ICatalogInfo.h"
-#include "MantidKernel/CatalogInfo.h"
+#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/UserCatalogInfo.h"
-#include "MantidKernel/ArrayProperty.h"
 
 #include <Poco/Net/AcceptCertificateHandler.h>
-#include <Poco/Net/PrivateKeyPassphraseHandler.h>
-#include <Poco/Net/HTTPSClientSession.h>
-#include <Poco/Net/SecureStreamSocket.h>
-#include <Poco/Net/SSLException.h>
-#include <Poco/Net/SSLManager.h>
 #include <Poco/Net/HTTPRequest.h>
 #include <Poco/Net/HTTPResponse.h>
+#include <Poco/Net/HTTPSClientSession.h>
+#include <Poco/Net/PrivateKeyPassphraseHandler.h>
+#include <Poco/Net/SSLException.h>
+#include <Poco/Net/SSLManager.h>
+#include <Poco/Net/SecureStreamSocket.h>
 #include <Poco/Path.h>
 #include <Poco/StreamCopier.h>
 #include <Poco/URI.h>
@@ -123,15 +129,15 @@ void CatalogDownloadDataFiles::exec() {
 }
 
 /**
-* Checks to see if the file to be downloaded is a datafile.
-* @param fileName :: Name of data file to download.
-* @returns True if the file is a data file.
-*/
+ * Checks to see if the file to be downloaded is a datafile.
+ * @param fileName :: Name of data file to download.
+ * @returns True if the file is a data file.
+ */
 bool CatalogDownloadDataFiles::isDataFile(const std::string &fileName) {
   std::string extension = Poco::Path(fileName).getExtension();
   std::transform(extension.begin(), extension.end(), extension.begin(),
                  tolower);
-  return (extension.compare("raw") == 0 || extension.compare("nxs") == 0);
+  return (extension == "raw" || extension == "nxs");
 }
 
 /**
@@ -164,10 +170,8 @@ std::string CatalogDownloadDataFiles::doDownloadandSavetoLocalDrive(
         nullptr, certificateHandler, context);
 
     // Session takes ownership of socket
-    Poco::Net::SecureStreamSocket *socket =
-        new Poco::Net::SecureStreamSocket(context);
-    Poco::Net::HTTPSClientSession session(*socket);
-    socket = nullptr;
+    Poco::Net::SecureStreamSocket socket{context};
+    Poco::Net::HTTPSClientSession session{socket};
     session.setHost(uri.getHost());
     session.setPort(uri.getPort());
 
@@ -215,12 +219,6 @@ std::string CatalogDownloadDataFiles::doDownloadandSavetoLocalDrive(
   // I have opted to catch the exception and do nothing as this allows the
   // load/download functionality to work.
   // However, the port the user used to download the file will be left open.
-  //
-  // In addition, there's a crash when destructing SecureSocketImpl (internal to
-  // SecureSocketStream, which is
-  // created and destroyed by HTTPSClientSession). We avoid that crash by
-  // instantiating SecureSocketStream
-  // ourselves and passing it to the HTTPSClientSession, which takes ownership.
   catch (Poco::Exception &error) {
     throw std::runtime_error(error.displayText());
   }
@@ -269,5 +267,5 @@ CatalogDownloadDataFiles::testDownload(const std::string &URL,
                                        const std::string &fileName) {
   return doDownloadandSavetoLocalDrive(URL, fileName);
 }
-}
-}
+} // namespace ICat
+} // namespace Mantid

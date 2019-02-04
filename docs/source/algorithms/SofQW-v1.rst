@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -10,7 +10,7 @@ Description
 -----------
 
 This algorithm is for use by inelastic instruments and takes as its
-input a workspace where the data's been reduced to be in `units <http://www.mantidproject.org/Units>`_
+input a workspace where the data's been reduced to be in :ref:`units <Unit Factory>`
 of **energy transfer** against spectrum number (which can be seen as equivalent to
 angle, with the angle being taken from the detector(s) to which the
 spectrum pertains).
@@ -47,13 +47,13 @@ Usage
    # convert workspace into MD workspace
    ws=SofQW(InputWorkspace=ws,QAxisBinning='-3,0.1,3',Emode='Direct',EFixed=12)
 
-   print "The converted X values are:"
-   print ws.readX(59)[0:10]
-   print ws.readX(59)[10:21]
+   print("The converted X values are:")
+   print(ws.readX(59)[0:10])
+   print(ws.readX(59)[10:21])
 
-   print "The converted Y values are:"
-   print ws.readY(59)[0:10]
-   print ws.readY(59)[10:21]
+   print("The converted Y values are:")
+   print(ws.readY(59)[0:10])
+   print(ws.readY(59)[10:21])
 
 
 .. testcleanup:: SofQW

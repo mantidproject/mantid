@@ -1,16 +1,22 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------
 // Includes
 //----------------------------------
 #include "MantidSampleLogDialog.h"
 
 // Mantid
-#include <MantidAPI/MultipleExperimentInfos.h>
 #include "MantidUI.h"
+#include <MantidAPI/MultipleExperimentInfos.h>
 
 // Qt
-#include <QRadioButton>
 #include <QFormLayout>
 #include <QGroupBox>
+#include <QRadioButton>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -20,14 +26,14 @@ using namespace Mantid::Kernel;
 // Public methods
 //----------------------------------
 /**
-* Construct an object of this type
-*	@param wsname :: The name of the workspace object from
-*			which to retrieve the log files
-*	@param mui :: The MantidUI area
-*	@param flags :: Window flags that are passed the the QDialog constructor
-*	@param experimentInfoIndex :: optional index in the array of
-*        ExperimentInfo objects. Should only be non-zero for MDWorkspaces.
-*/
+ * Construct an object of this type
+ *	@param wsname :: The name of the workspace object from
+ *			which to retrieve the log files
+ *	@param mui :: The MantidUI area
+ *	@param flags :: Window flags that are passed the the QDialog constructor
+ *	@param experimentInfoIndex :: optional index in the array of
+ *        ExperimentInfo objects. Should only be non-zero for MDWorkspaces.
+ */
 MantidSampleLogDialog::MantidSampleLogDialog(const QString &wsname,
                                              MantidUI *mui, Qt::WFlags flags,
                                              size_t experimentInfoIndex)
@@ -48,24 +54,32 @@ MantidSampleLogDialog::MantidSampleLogDialog(const QString &wsname,
   filterPeriod = new QRadioButton("Period");
   filterStatusPeriod = new QRadioButton("Status + Period");
   filterStatusPeriod->setChecked(true);
+  const std::vector<QRadioButton *> filterRadioButtons{
+      filterNone, filterStatus, filterPeriod, filterStatusPeriod};
 
+  // Add options to layout
   QVBoxLayout *vbox = new QVBoxLayout;
-  vbox->addWidget(filterNone);
-  vbox->addWidget(filterStatus);
-  vbox->addWidget(filterPeriod);
-  vbox->addWidget(filterStatusPeriod);
-  // vbox->addStretch(1);
+  for (auto *radioButton : filterRadioButtons) {
+    vbox->addWidget(radioButton);
+  }
   groupBox->setLayout(vbox);
+
+  // Changing filter option updates stats
+  for (auto *radioButton : filterRadioButtons) {
+    connect(radioButton, SIGNAL(toggled(bool)), this,
+            SLOT(showLogStatistics()));
+  }
 
   // -------------- Statistics on logs ------------------------
   std::string stats[NUM_STATS] = {
-      "Min:", "Max:", "Mean:", "Time Avg:", "Median:", "Std Dev:", "Duration:"};
+      "Min:",     "Max:",      "Mean:",         "Median:",
+      "Std Dev:", "Time Avg:", "Time Std Dev:", "Duration:"};
   QGroupBox *statsBox = new QGroupBox("Log Statistics");
   QFormLayout *statsBoxLayout = new QFormLayout;
   for (size_t i = 0; i < NUM_STATS; i++) {
     statLabels[i] = new QLabel(stats[i].c_str());
     statValues[i] = new QLineEdit("");
-    statValues[i]->setReadOnly(1);
+    statValues[i]->setReadOnly(true);
     statsBoxLayout->addRow(statLabels[i], statValues[i]);
   }
   statsBox->setLayout(statsBoxLayout);
@@ -97,16 +111,16 @@ MantidSampleLogDialog::~MantidSampleLogDialog() {}
 
 //------------------------------------------------------------------------------------------------
 /**
-* Import an item from sample logs
-*
-*	@param item :: The item to be imported
-*	@throw invalid_argument if format identifier for the item is wrong
-*/
+ * Import an item from sample logs
+ *
+ *	@param item :: The item to be imported
+ *	@throw invalid_argument if format identifier for the item is wrong
+ */
 void MantidSampleLogDialog::importItem(QTreeWidgetItem *item) {
   // used in numeric time series below, the default filter value
   int filter = 0;
   int key = item->data(1, Qt::UserRole).toInt();
-  Mantid::Kernel::Property *logData = NULL;
+  Mantid::Kernel::Property *logData = nullptr;
   QString caption = QString::fromStdString(m_wsname) +
                     QString::fromStdString("-") + item->text(0);
   switch (key) {
@@ -142,5 +156,22 @@ void MantidSampleLogDialog::importItem(QTreeWidgetItem *item) {
     break;
   default:
     throw std::invalid_argument("Error importing log entry, wrong data type");
+  }
+}
+
+/**
+ * Return filter type based on which radio button is selected
+ * @returns :: Filter type selected in UI
+ */
+Mantid::API::LogFilterGenerator::FilterType
+MantidSampleLogDialog::getFilterType() const {
+  if (filterStatus->isChecked()) {
+    return Mantid::API::LogFilterGenerator::FilterType::Status;
+  } else if (filterPeriod->isChecked()) {
+    return Mantid::API::LogFilterGenerator::FilterType::Period;
+  } else if (filterStatusPeriod->isChecked()) {
+    return Mantid::API::LogFilterGenerator::FilterType::StatusAndPeriod;
+  } else {
+    return Mantid::API::LogFilterGenerator::FilterType::None;
   }
 }

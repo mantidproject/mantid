@@ -1,14 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_GEOMETRY_DETECTORGROUP_H_
 #define MANTID_GEOMETRY_DETECTORGROUP_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
-#include <vector>
 #include <map>
+#include <vector>
 
 namespace Mantid {
 namespace Geometry {
@@ -22,35 +25,13 @@ a simple average of its constituents.
 
 @author Russell Taylor, Tessella Support Services plc
 @date 08/04/2008
-
-Copyright &copy; 2008-2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>.
-Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_GEOMETRY_DLL DetectorGroup : public virtual IDetector {
 public:
   DetectorGroup();
-  DetectorGroup(const std::vector<IDetector_const_sptr> &dets,
-                bool warnAboutMasked = false);
+  DetectorGroup(const std::vector<IDetector_const_sptr> &dets);
 
-  void addDetector(IDetector_const_sptr det, bool &warn);
+  void addDetector(IDetector_const_sptr det);
 
   // IDetector methods
   IDetector *cloneParameterized(const ParameterMap *) const override {
@@ -68,8 +49,6 @@ public:
   double getPhiOffset(const double &offset) const override;
   double solidAngle(const Kernel::V3D &observer) const override;
   bool isParametrized() const override;
-  bool isMasked() const override;
-  bool isMonitor() const override;
   bool isValid(const Kernel::V3D &point) const override;
   bool isOnSide(const Kernel::V3D &point) const override;
   /// Try to find a point that lies within (or on) the object
@@ -100,63 +79,63 @@ public:
   std::string getParameterType(const std::string &name,
                                bool recursive = true) const override;
   /**
-  * Get a parameter defined as a double
-  * @param pname :: The name of the parameter
-  * @param recursive :: If true the search will walk up through the parent
-  * components
-  * @returns A list of size 0 as this is not a parameterized component
-  */
+   * Get a parameter defined as a double
+   * @param pname :: The name of the parameter
+   * @param recursive :: If true the search will walk up through the parent
+   * components
+   * @returns A list of size 0 as this is not a parameterized component
+   */
   std::vector<double> getNumberParameter(const std::string &pname,
                                          bool recursive = true) const override;
   /**
-  * Get a parameter defined as a Kernel::V3D
-  * @param pname :: The name of the parameter
-  * @param recursive :: If true the search will walk up through the parent
-  * components
-  * @returns A list of size 0 as this is not a parameterized component
-  */
+   * Get a parameter defined as a Kernel::V3D
+   * @param pname :: The name of the parameter
+   * @param recursive :: If true the search will walk up through the parent
+   * components
+   * @returns A list of size 0 as this is not a parameterized component
+   */
   std::vector<Kernel::V3D>
   getPositionParameter(const std::string &pname,
                        bool recursive = true) const override;
   /**
-  * Get a parameter defined as a Kernel::Quaternion
-  * @param pname :: The name of the parameter
-  * @param recursive :: If true the search will walk up through the parent
-  * components
-  * @returns A list of size 0 as this is not a parameterized component
-  */
+   * Get a parameter defined as a Kernel::Quaternion
+   * @param pname :: The name of the parameter
+   * @param recursive :: If true the search will walk up through the parent
+   * components
+   * @returns A list of size 0 as this is not a parameterized component
+   */
   std::vector<Kernel::Quat>
   getRotationParameter(const std::string &pname,
                        bool recursive = true) const override;
 
   /**
-  * Get a parameter defined as a string
-  * @param pname :: The name of the parameter
-  * @param recursive :: If true the search will walk up through the parent
-  * components
-  * @returns A list of size 0 as this is not a parameterized component
-  */
+   * Get a parameter defined as a string
+   * @param pname :: The name of the parameter
+   * @param recursive :: If true the search will walk up through the parent
+   * components
+   * @returns A list of size 0 as this is not a parameterized component
+   */
   std::vector<std::string>
   getStringParameter(const std::string &pname,
                      bool recursive = true) const override;
 
   /**
-  * Get a parameter defined as an integer
-  * @param pname :: The name of the parameter
-  * @param recursive :: If true the search will walk up through the parent
-  * components
-  * @returns A list of size 0 as this is not a parameterized component
-  */
+   * Get a parameter defined as an integer
+   * @param pname :: The name of the parameter
+   * @param recursive :: If true the search will walk up through the parent
+   * components
+   * @returns A list of size 0 as this is not a parameterized component
+   */
   std::vector<int> getIntParameter(const std::string &pname,
                                    bool recursive = true) const override;
 
   /**
-  * Get a parameter defined as an integer
-  * @param pname :: The name of the parameter
-  * @param recursive :: If true the search will walk up through the parent
-  * components
-  * @returns A list of size 0 as this is not a parameterized component
-  */
+   * Get a parameter defined as an integer
+   * @param pname :: The name of the parameter
+   * @param recursive :: If true the search will walk up through the parent
+   * components
+   * @returns A list of size 0 as this is not a parameterized component
+   */
   std::vector<bool> getBoolParameter(const std::string &pname,
                                      bool recursive = true) const override;
 
@@ -185,19 +164,24 @@ public:
     return const_cast<const DetectorGroup *>(this);
   }
 
+  const ParameterMap &parameterMap() const override;
+  size_t index() const override;
+  virtual size_t
+  registerContents(class ComponentVisitor &visitor) const override;
+
 protected:
   /// The ID of this effective detector
   int m_id;
   /// The type of collection used for the detectors
   ///          - a map of detector pointers with the detector ID as the key
   // May want to change this to a hash_map in due course
-  typedef std::map<int, IDetector_const_sptr> DetCollection;
+  using DetCollection = std::map<int, IDetector_const_sptr>;
   /// The collection of grouped detectors
   DetCollection m_detectors;
   /** the parameter describes the topology of the detector's group namely if
-  * detectors form a box or a ring.
-  *  the topology is undefined on construction and calculated on first request
-  */
+   * detectors form a box or a ring.
+   *  the topology is undefined on construction and calculated on first request
+   */
   mutable det_topology group_topology;
   /// group centre is the geometrical centre of the detectors group calculated
   /// when the calculate group topology is invoked
@@ -228,13 +212,13 @@ protected:
   void translate(double, double, double) override {}
   void rotate(const Kernel::Quat &) override {}
   void rotate(double, const Kernel::V3D &) override {}
-  const Kernel::V3D getRelativePos() const override {
+  Kernel::V3D getRelativePos() const override {
     throw std::runtime_error("Cannot call getRelativePos on a DetectorGroup");
   }
-  const Kernel::Quat &getRelativeRot() const override {
+  Kernel::Quat getRelativeRot() const override {
     throw std::runtime_error("Cannot call getRelativeRot on a DetectorGroup");
   }
-  const Kernel::Quat getRotation() const override { return Kernel::Quat(); }
+  Kernel::Quat getRotation() const override { return Kernel::Quat(); }
   void printSelf(std::ostream &) const override {}
 
   // functions inherited from IObjComponent
@@ -247,8 +231,8 @@ protected:
   void initDraw() const override {}
 
   /// Returns the shape of the Object
-  const boost::shared_ptr<const Object> shape() const override {
-    return boost::shared_ptr<const Object>();
+  const boost::shared_ptr<const IObject> shape() const override {
+    return boost::shared_ptr<const IObject>();
   }
   /// Returns the material of the Object
   const Kernel::Material material() const override;
@@ -264,9 +248,9 @@ private:
 };
 
 /// Typedef for shared pointer
-typedef boost::shared_ptr<DetectorGroup> DetectorGroup_sptr;
+using DetectorGroup_sptr = boost::shared_ptr<DetectorGroup>;
 /// Typedef for shared pointer to a const object
-typedef boost::shared_ptr<const DetectorGroup> DetectorGroup_const_sptr;
+using DetectorGroup_const_sptr = boost::shared_ptr<const DetectorGroup>;
 
 } // namespace Geometry
 } // namespace Mantid

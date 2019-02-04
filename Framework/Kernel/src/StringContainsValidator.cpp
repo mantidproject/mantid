@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/StringContainsValidator.h"
 #include <boost/make_shared.hpp>
 
@@ -8,6 +14,13 @@ namespace Kernel {
  */
 StringContainsValidator::StringContainsValidator() {
   m_requiredStrings = std::vector<std::string>();
+}
+
+/** Constructor with required sub strings
+ */
+StringContainsValidator::StringContainsValidator(
+    const std::vector<std::string> &strings) {
+  m_requiredStrings = strings;
 }
 
 /**

@@ -1,11 +1,15 @@
-#pylint: disable=invalid-name,redefined-builtin
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
+# pylint: disable=invalid-name,redefined-builtin
 from __future__ import (absolute_import, division, print_function)
 from six.moves import range
 
 import mantid.simpleapi as s_api
 from mantid import config, logger
-
-from IndirectImport import import_mantidplot
 
 import os.path
 import math
@@ -45,7 +49,13 @@ def get_run_number(ws_name):
         if match:
             run_number = match.group(2)
         else:
-            raise RuntimeError("Could not find run number associated with workspace.")
+            # attempt reading from the logs (ILL)
+            run = workspace.getRun()
+            if run.hasProperty('run_number'):
+                log = run.getLogData('run_number').value
+                run_number = log.split(',')[0]
+            else:
+                raise RuntimeError("Could not find run number associated with workspace.")
 
     return run_number
 
@@ -111,7 +121,10 @@ def getWSprefix(wsname):
 
 
 def getEfixed(workspace):
-    inst = s_api.mtd[workspace].getInstrument()
+    if isinstance(workspace, str):
+        inst = s_api.mtd[workspace].getInstrument()
+    else:
+        inst = workspace.getInstrument()
 
     if inst.hasParameter('Efixed'):
         return inst.getNumberParameter('EFixed')[0]
@@ -178,15 +191,15 @@ def createQaxis(inputWS):
 
 
 def GetWSangles(inWS):
-    num_hist = s_api.mtd[inWS].getNumberHistograms()    					# get no. of histograms/groups
+    num_hist = s_api.mtd[inWS].getNumberHistograms()  # get no. of histograms/groups
     source_pos = s_api.mtd[inWS].getInstrument().getSource().getPos()
     sample_pos = s_api.mtd[inWS].getInstrument().getSample().getPos()
     beam_pos = sample_pos - source_pos
-    angles = []    									# will be list of angles
+    angles = []  # will be list of angles
     for index in range(0, num_hist):
-        detector = s_api.mtd[inWS].getDetector(index)    				# get index
-        two_theta = detector.getTwoTheta(sample_pos, beam_pos) * 180.0 / math.pi    	# calc angle
-        angles.append(two_theta)    					# add angle
+        detector = s_api.mtd[inWS].getDetector(index)  # get index
+        two_theta = detector.getTwoTheta(sample_pos, beam_pos) * 180.0 / math.pi  # calc angle
+        angles.append(two_theta)  # add angle
     return angles
 
 
@@ -194,7 +207,7 @@ def GetThetaQ(ws):
     """
     Returns the theta and elastic Q for each spectrum in a given workspace.
 
-    @param ws Wotkspace to get theta and Q for
+    @param ws Workspace to get theta and Q for
     @returns A tuple containing a list of theta values and a list of Q values
     """
 
@@ -394,7 +407,7 @@ def getInstrumentParameter(ws, param_name):
     inst = s_api.mtd[ws].getInstrument()
 
     # Create a map of type parameters to functions. This is so we avoid writing lots of
-    # if statements becuase there's no way to dynamically get the type.
+    # if statements because there's no way to dynamically get the type.
     func_map = {'double': inst.getNumberParameter, 'string': inst.getStringParameter,
                 'int': inst.getIntParameter, 'bool': inst.getBoolParameter}
 
@@ -408,49 +421,6 @@ def getInstrumentParameter(ws, param_name):
         raise ValueError('Unable to retrieve %s from Instrument Parameter file.' % param_name)
 
     return param
-
-
-def plotSpectra(ws, y_axis_title, indicies=None):
-    """
-    Plot a selection of spectra given a list of indicies
-
-    @param ws - the workspace to plot
-    @param y_axis_title - label for the y axis
-    @param indicies - list of spectrum indicies to plot
-    """
-    if indicies is None:
-        indicies = []
-
-    if len(indicies) == 0:
-        num_spectra = s_api.mtd[ws].getNumberHistograms()
-        indicies = list(range(num_spectra))
-
-    try:
-        mtd_plot = import_mantidplot()
-        plot = mtd_plot.plotSpectrum(ws, indicies, True)
-        layer = plot.activeLayer()
-        layer.setAxisTitle(mtd_plot.Layer.Left, y_axis_title)
-    except RuntimeError:
-        # User clicked cancel on plot so don't do anything
-        return
-
-
-def plotParameters(ws, *param_names):
-    """
-    Plot a number of spectra given a list of parameter names
-    This searchs for relevent spectra using the text axis label.
-
-    @param ws - the workspace to plot from
-    @param param_names - list of names to search for
-    """
-    axis = s_api.mtd[ws].getAxis(1)
-    if axis.isText() and len(param_names) > 0:
-        num_spectra = s_api.mtd[ws].getNumberHistograms()
-
-        for name in param_names:
-            indicies = [i for i in range(num_spectra) if name in axis.label(i)]
-            if len(indicies) > 0:
-                plotSpectra(ws, name, indicies)
 
 
 def convertToElasticQ(input_ws, output_ws=None):
@@ -532,7 +502,7 @@ def transposeFitParametersTable(params_table, output_table=None):
 
 def IndentifyDataBoundaries(sample_ws):
     """
-    Indentifies and returns the first and last no zero data point in a workspace
+    Identifies and returns the first and last no zero data point in a workspace
 
     For multiple workspace spectra, the data points that are closest to the centre
     out of all the spectra in the workspace are returned
@@ -540,7 +510,7 @@ def IndentifyDataBoundaries(sample_ws):
 
     sample_ws = s_api.mtd[sample_ws]
     nhists = sample_ws.getNumberHistograms()
-    start_data_idx, end_data_idx = 0,0
+    start_data_idx, end_data_idx = 0, 0
     # For all spectra in the workspace
     for spectra in range(0, nhists):
         # Obtain first and last non zero values
@@ -566,3 +536,24 @@ def firstNonZero(data):
     for i in range(len(data)):
         if data[i] != 0:
             return i
+
+
+def formatRuns(runs, instrument_name):
+    """
+    :return: A list of runs prefixed with the given instrument name
+    """
+    run_list = []
+    for run in runs:
+        if '-' in run:
+            a, b = run.split('-')
+            run_list.extend(range(int(a), int(b) + 1))
+        else:
+            try:
+                run_list.append(int(run))
+            except:
+                # run already has instrument eg 'osi1000'
+                run_list.append(run)
+    for idx, run in enumerate(run_list):
+        if type(run) == int:
+            run_list[idx] = instrument_name + str(run)
+    return run_list

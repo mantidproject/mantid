@@ -1,14 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/BinaryOperationMD.h"
-#include "MantidKernel/System.h"
-#include "MantidAPI/IMDWorkspace.h"
-#include "MantidDataObjects/WorkspaceSingleValue.h"
-#include "MantidDataObjects/MDHistoWorkspace.h"
-#include "MantidDataObjects/MDEventFactory.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidDataObjects/MDEventFactory.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidKernel/System.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -197,5 +203,5 @@ void BinaryOperationMD::exec() {
   setProperty("OutputWorkspace", m_out);
 }
 
-} // namespace Mantid
 } // namespace MDAlgorithms
+} // namespace Mantid

@@ -30,10 +30,10 @@
  *                                                                         *
  ***************************************************************************/
 #include "LineProfileTool.h"
-#include "ImageMarker.h"
+#include "ApplicationWindow.h"
 #include "ArrowMarker.h"
 #include "Graph.h"
-#include "ApplicationWindow.h"
+#include "ImageMarker.h"
 #include "MultiLayer.h"
 
 #include <QMessageBox>
@@ -209,6 +209,6 @@ void LineProfileTool::mouseMoveEvent(QMouseEvent *e) {
 void LineProfileTool::mouseReleaseEvent(QMouseEvent *e) {
   calculateLineProfile(d_op_start, e->pos());
   addLineMarker(d_op_start, e->pos());
-  d_graph->setActiveTool(NULL);
+  d_graph->setActiveTool(nullptr);
   // attention: I'm now deleted
 }

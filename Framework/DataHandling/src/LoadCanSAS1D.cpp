@@ -1,18 +1,25 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadCanSAS1D.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
-#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/OptionalBool.h"
+#include "MantidKernel/UnitFactory.h"
 
 #include <Poco/AutoPtr.h>
-#include <Poco/DOM/Document.h>
 #include <Poco/DOM/DOMParser.h>
+#include <Poco/DOM/Document.h>
 #include <Poco/DOM/NodeList.h>
 #include <Poco/SAX/InputSource.h>
 
@@ -21,8 +28,8 @@
 using Poco::XML::DOMParser;
 using Poco::XML::Document;
 using Poco::XML::Element;
-using Poco::XML::NodeList;
 using Poco::XML::Node;
+using Poco::XML::NodeList;
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -42,7 +49,7 @@ int getGeometryID(const std::string &selection) {
   }
   return geometryID;
 }
-}
+} // namespace
 
 namespace Mantid {
 namespace DataHandling {
@@ -57,7 +64,7 @@ DECLARE_FILELOADER_ALGORITHM(LoadCanSAS1D)
  */
 int LoadCanSAS1D::confidence(Kernel::FileDescriptor &descriptor) const {
   const std::string &extn = descriptor.extension();
-  if (extn.compare(".xml") != 0)
+  if (extn != ".xml")
     return 0;
 
   std::istream &is = descriptor.data();
@@ -77,7 +84,7 @@ int LoadCanSAS1D::confidence(Kernel::FileDescriptor &descriptor) const {
     // Get pointer to root element
     Element *pRootElem = pDoc->documentElement();
     if (pRootElem) {
-      if (pRootElem->tagName().compare("SASroot") == 0) {
+      if (pRootElem->tagName() == "SASroot") {
         confidence = 80;
       }
     }
@@ -97,10 +104,10 @@ void LoadCanSAS1D::init() {
 }
 
 /** Overwrites Algorithm exec method
-* @throw FileError if the file isn't valid xml
-* @throw NotFoundError if any expected elements couldn't be read
-* @throw NotImplementedError if any SASentry doesn't contain exactly one run
-*/
+ * @throw FileError if the file isn't valid xml
+ * @throw NotFoundError if any expected elements couldn't be read
+ * @throw NotImplementedError if any SASentry doesn't contain exactly one run
+ */
 void LoadCanSAS1D::exec() {
   const std::string fileName = getPropertyValue("Filename");
   // Set up the DOM parser and parse xml file
@@ -149,12 +156,12 @@ void LoadCanSAS1D::exec() {
   setProperty("OutputWorkspace", outputWork);
 }
 /** Load an individual "<SASentry>" element into a new workspace
-* @param[in] workspaceData points to a "<SASentry>" element
-* @param[out] runName the name this workspace should take
-* @return dataWS this workspace will be filled with data
-* @throw NotFoundError if any expected elements couldn't be read
-* @throw NotImplementedError if the entry doesn't contain exactly one run
-*/
+ * @param[in] workspaceData points to a "<SASentry>" element
+ * @param[out] runName the name this workspace should take
+ * @return dataWS this workspace will be filled with data
+ * @throw NotFoundError if any expected elements couldn't be read
+ * @throw NotImplementedError if the entry doesn't contain exactly one run
+ */
 MatrixWorkspace_sptr
 LoadCanSAS1D::loadEntry(Poco::XML::Node *const workspaceData,
                         std::string &runName) {
@@ -188,9 +195,10 @@ LoadCanSAS1D::loadEntry(Poco::XML::Node *const workspaceData,
   dataWS->setYUnit("");
 
   // load workspace data
-  MantidVec &X = dataWS->dataX(0);
-  MantidVec &Y = dataWS->dataY(0);
-  MantidVec &E = dataWS->dataE(0);
+  auto &X = dataWS->mutableX(0);
+  auto &Y = dataWS->mutableY(0);
+  auto &E = dataWS->mutableE(0);
+
   dataWS->setPointStandardDeviations(0, nBins);
   auto &Dx = dataWS->mutableDx(0);
   int vecindex = 0;
@@ -272,7 +280,7 @@ LoadCanSAS1D::loadEntry(Poco::XML::Node *const workspaceData,
 /* This method throws not found error if a element is not found in the xml file
  * @param[in] toCheck pointer to  element
  * @param[in] name element name
-*  @throw NotFoundError if the pointer is NULL
+ *  @throw NotFoundError if the pointer is NULL
  */
 void LoadCanSAS1D::check(const Poco::XML::Element *const toCheck,
                          const std::string &name) const {
@@ -283,14 +291,14 @@ void LoadCanSAS1D::check(const Poco::XML::Element *const toCheck,
   }
 }
 /** Appends the first workspace to the second workspace. The second workspace
-* will became a group unless
-*  it was initially empty, in that situation it becames a copy of the first
-* workspace
-* @param[in] newWork the new data to add
-* @param[in] newWorkName the name that the new workspace will take
-* @param[out] container the data will be added to this group
-* @throw ExistsError if a workspace with this name had already been added
-*/
+ * will became a group unless
+ *  it was initially empty, in that situation it becames a copy of the first
+ * workspace
+ * @param[in] newWork the new data to add
+ * @param[in] newWorkName the name that the new workspace will take
+ * @param[out] container the data will be added to this group
+ * @throw ExistsError if a workspace with this name had already been added
+ */
 void LoadCanSAS1D::appendDataToOutput(API::MatrixWorkspace_sptr newWork,
                                       const std::string &newWorkName,
                                       API::WorkspaceGroup_sptr container) {
@@ -332,9 +340,9 @@ void LoadCanSAS1D::runLoadInstrument(const std::string &inst_name,
   }
 }
 /** Loads data into the run log
-*  @param[in] sasEntry the entry corresponding to the passed workspace
-*  @param[in] wSpace the log will be created in this workspace
-*/
+ *  @param[in] sasEntry the entry corresponding to the passed workspace
+ *  @param[in] wSpace the log will be created in this workspace
+ */
 void LoadCanSAS1D::createLogs(const Poco::XML::Element *const sasEntry,
                               API::MatrixWorkspace_sptr wSpace) const {
   API::Run &run = wSpace->mutableRun();
@@ -381,27 +389,68 @@ void LoadCanSAS1D::createSampleInformation(
       sasInstrumentElement->getChildElement("SAScollimation");
   check(sasCollimationElement, "<SAScollimation>");
 
-  // Get the geometry information
-  auto geometryElement = sasCollimationElement->getChildElement("name");
-  if (geometryElement) {
-    auto geometry = geometryElement->innerText();
-    auto geometryID = getGeometryID(geometry);
-    sample.setGeometryFlag(geometryID);
+  // Since we have shipped a sligthly invalid CanSAS1D format we need to
+  // make sure that we can read those files back in again
+  bool isInValidOldFormat = true;
+  try {
+    auto name = sasCollimationElement->getChildElement("name");
+    check(name, "name");
+  } catch (Kernel::Exception::NotFoundError &) {
+    isInValidOldFormat = false;
   }
 
-  // Get the thickness information
-  auto widthElement = sasCollimationElement->getChildElement("X");
-  if (widthElement) {
-    double width = std::stod(widthElement->innerText());
-    sample.setWidth(width);
-  }
+  if (isInValidOldFormat) {
+    // Get the geometry information
+    auto geometryElement = sasCollimationElement->getChildElement("name");
+    if (geometryElement) {
+      auto geometry = geometryElement->innerText();
+      auto geometryID = getGeometryID(geometry);
+      sample.setGeometryFlag(geometryID);
+    }
 
-  // Get the thickness information
-  auto heightElement = sasCollimationElement->getChildElement("Y");
-  if (heightElement) {
-    double height = std::stod(heightElement->innerText());
-    sample.setHeight(height);
+    // Get the width information
+    auto widthElement = sasCollimationElement->getChildElement("X");
+    if (widthElement) {
+      double width = std::stod(widthElement->innerText());
+      sample.setWidth(width);
+    }
+
+    // Get the height information
+    auto heightElement = sasCollimationElement->getChildElement("Y");
+    if (heightElement) {
+      double height = std::stod(heightElement->innerText());
+      sample.setHeight(height);
+    }
+
+  } else {
+    // Get aperture
+    auto aperture = sasCollimationElement->getChildElement("aperture");
+    if (aperture) {
+      // Get geometry element
+      auto geometry = aperture->getAttribute("name");
+      if (!geometry.empty()) {
+        auto geometryID = getGeometryID(Poco::XML::fromXMLString(geometry));
+        sample.setGeometryFlag(geometryID);
+      }
+
+      // Get size
+      auto size = aperture->getChildElement("size");
+
+      // Get the width information
+      auto widthElement = size->getChildElement("x");
+      if (widthElement) {
+        double width = std::stod(widthElement->innerText());
+        sample.setWidth(width);
+      }
+
+      // Get the height information
+      auto heightElement = size->getChildElement("y");
+      if (heightElement) {
+        double height = std::stod(heightElement->innerText());
+        sample.setHeight(height);
+      }
+    }
   }
 }
-}
-}
+} // namespace DataHandling
+} // namespace Mantid

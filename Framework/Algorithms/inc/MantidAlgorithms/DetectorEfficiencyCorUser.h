@@ -1,15 +1,28 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_DETECTOREFFICIENCYCORUSER_H_
 #define MANTID_ALGORITHMS_DETECTOREFFICIENCYCORUSER_H_
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/cow_ptr.h"
 
+// Forward declarations
+namespace mu {
+class Parser;
+} // namespace mu
+
 namespace Mantid {
 
 namespace HistogramData {
 class Histogram;
+class HistogramE;
+class HistogramY;
 class Points;
-}
+} // namespace HistogramData
 
 namespace Algorithms {
 
@@ -20,28 +33,6 @@ namespace Algorithms {
  data reduction.
 
  Formula_eff must be defined in the instrument parameters file.
-
-
- Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
- National Laboratory & European Spallation Source
-
- This file is part of Mantid.
-
- Mantid is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 3 of the License, or
- (at your option) any later version.
-
- Mantid is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License
- along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
- File change history is stored at: <https://github.com/mantidproject/mantid>
- Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 class DLLExport DetectorEfficiencyCorUser : public API::Algorithm {
 public:
@@ -55,21 +46,23 @@ public:
   }
 
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"DetectorEfficiencyCor"};
+  }
   const std::string category() const override;
 
 private:
   void init() override;
   void exec() override;
   void retrieveProperties();
-  double calculateFormulaValue(const std::string &formula, double energy);
-  MantidVec calculateEfficiency(double eff0, const std::string &formula,
-                                const HistogramData::Points &xIn);
+  void correctHistogram(const size_t index, const double eff0, double &e,
+                        mu::Parser &parser);
 
-  std::string getValFromInstrumentDef(const std::string &parameterName);
+  double evaluate(const mu::Parser &parser) const;
 
-  HistogramData::Histogram
-  applyDetEfficiency(const size_t nChans, const Mantid::MantidVec &effVec,
-                     const HistogramData::Histogram &histogram);
+  mu::Parser generateParser(const std::string &formula, double *e) const;
+
+  std::string retrieveFormula(const size_t workspaceIndex);
 
   /// The user selected (input) workspace
   API::MatrixWorkspace_const_sptr m_inputWS;

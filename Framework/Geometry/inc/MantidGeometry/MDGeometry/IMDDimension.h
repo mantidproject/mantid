@@ -1,9 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef I_MD_DIMENSION_H
 #define I_MD_DIMENSION_H
 
 #include "MantidGeometry/DllConfig.h"
-#include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidGeometry/MDGeometry/MDFrame.h"
+#include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/MDUnit.h"
 #include "MantidKernel/V3D.h"
 #ifndef Q_MOC_RUN
@@ -18,7 +24,7 @@ namespace Kernel {
 // Forward declarations
 //---------------------------------------------------------------------------
 class UnitLabel;
-}
+} // namespace Kernel
 
 namespace Geometry {
 /** The class describes one dimension of multidimensional dataset representing
@@ -29,27 +35,6 @@ the concrete implementation.
 
     @author Owen Arnold, RAL ISIS
     @date 12/11/2010
-
-    Copyright &copy; 2007-10 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>.
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
 
 class MANTID_GEOMETRY_DLL IMDDimension {
@@ -73,7 +58,7 @@ public:
   /// can be usually find by its ID and various
   /// various method exist to manipulate set of dimensions by their names.
   /// @return Dimension ID string.
-  virtual std::string getDimensionId() const = 0;
+  virtual const std::string &getDimensionId() const = 0;
 
   /// @return the minimum extent of this dimension
   virtual coord_t getMinimum() const = 0;
@@ -84,6 +69,9 @@ public:
   /// @return number of bins dimension have (an integrated has one). A axis
   /// directed along dimension would have getNBins+1 axis points.
   virtual size_t getNBins() const = 0;
+
+  /// @return number of bin boundaries (axis points)
+  virtual size_t getNBoundaries() const = 0;
 
   /// @return an XML string representation of the dimension.
   virtual std::string toXMLString() const = 0;
@@ -114,14 +102,14 @@ public:
 };
 
 /// Shared Pointer for IMDDimension. Frequently used type in framework.
-typedef boost::shared_ptr<IMDDimension> IMDDimension_sptr;
+using IMDDimension_sptr = boost::shared_ptr<IMDDimension>;
 /// Shared Pointer to const IMDDimension. Not strictly necessary since
 /// IMDDimension is pure abstract.
-typedef boost::shared_ptr<const IMDDimension> IMDDimension_const_sptr;
+using IMDDimension_const_sptr = boost::shared_ptr<const IMDDimension>;
 /// Vector of constant shared pointers to IMDDimensions.
-typedef std::vector<IMDDimension_const_sptr> VecIMDDimension_const_sptr;
+using VecIMDDimension_const_sptr = std::vector<IMDDimension_const_sptr>;
 /// Vector of shared pointers to IMDDimensions.
-typedef std::vector<IMDDimension_sptr> VecIMDDimension_sptr;
-}
-}
+using VecIMDDimension_sptr = std::vector<IMDDimension_sptr>;
+} // namespace Geometry
+} // namespace Mantid
 #endif

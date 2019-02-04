@@ -1,18 +1,25 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_EXTRACTMASKTOTABLETEST_H_
 #define MANTID_ALGORITHMS_EXTRACTMASKTOTABLETEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/ExtractMaskToTable.h"
-#include "MantidAlgorithms/ExtractMask.h"
-#include "MantidAlgorithms/SumNeighbours.h"
-#include "MantidAlgorithms/MaskDetectorsIf.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataObjects/TableWorkspace.h"
-#include "MantidGeometry/Instrument.h"
+#include "MantidAlgorithms/ExtractMask.h"
+#include "MantidAlgorithms/ExtractMaskToTable.h"
+#include "MantidAlgorithms/MaskDetectorsIf.h"
+#include "MantidAlgorithms/SumNeighbours.h"
 #include "MantidDataHandling/MaskDetectors.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::Algorithms::ExtractMaskToTable;
 
@@ -34,7 +41,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Test method 'subtractVector'
-    */
+   */
   void test_method() {
     ExtractMaskToTable alg;
 
@@ -90,7 +97,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Test initialization of the algorithm
-    */
+   */
   void test_Init() {
     ExtractMaskToTable alg;
     alg.initialize();
@@ -99,12 +106,12 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Test for writing a new line to a new table workspace
-    */
+   */
   void test_writeToNewTable() {
     // Create a workspace with some detectors masked
     const int nvectors(50), nbins(10);
     Workspace2D_sptr inputws =
-        WorkspaceCreationHelper::Create2DWorkspace(nvectors, nbins);
+        WorkspaceCreationHelper::create2DWorkspace(nvectors, nbins);
 
     //   Mask every 10th spectra
     std::set<int64_t> maskedIndices;
@@ -162,12 +169,12 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Test for appending a new line to an existing table workspace
-    */
+   */
   void test_appendToExistingTable() {
     // Create a workspace with some detectors masked
     const int nvectors(50), nbins(10);
     Workspace2D_sptr inputws =
-        WorkspaceCreationHelper::Create2DWorkspace(nvectors, nbins);
+        WorkspaceCreationHelper::create2DWorkspace(nvectors, nbins);
 
     //   Mask every 10th spectra
     std::set<int64_t> maskedIndices;
@@ -262,13 +269,13 @@ public:
   }
 
   /** Test for appending a new line to an existing table workspace
-    * Some masked detectors are in the input table workspace
-    */
+   * Some masked detectors are in the input table workspace
+   */
   void test_appendToPreviousTable() {
     // Create a workspace with some detectors masked
     const int nvectors(50), nbins(10);
     Workspace2D_sptr inputws =
-        WorkspaceCreationHelper::Create2DWorkspace(nvectors, nbins);
+        WorkspaceCreationHelper::create2DWorkspace(nvectors, nbins);
 
     //   Mask every 10th spectra
     std::set<int64_t> maskedIndices;
@@ -354,7 +361,7 @@ public:
   }
 
   /** Test for extracting masks from a MaskWorkspace
-    */
+   */
   void test_extractFromMaskWorkspace() {
     // Create a workspace with Mask
     const int nvectors(50), nbins(10);
@@ -375,12 +382,11 @@ public:
       cout << "Workspace masked."
            << "\n";
 
-    Instrument_const_sptr instrument = inputws->getInstrument();
-    for (size_t i = 0; i < instrument->getDetectorIDs().size(); ++i) {
-      if (instrument->getDetector(instrument->getDetectorIDs()[i])->isMasked())
-        cout << "Detector : " << instrument->getDetectorIDs()[i]
-             << " is masked."
-             << "\n";
+    const auto &detectorInfo = inputws->detectorInfo();
+    for (size_t i = 0; i < detectorInfo.size(); ++i) {
+      if (detectorInfo.isMasked(i))
+        cout << "Detector : " << detectorInfo.detectorIDs()[i]
+             << " is masked.\n";
     }
 
     /*

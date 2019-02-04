@@ -1,8 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/GetDetectorOffsets.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IPeakFunction.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
@@ -107,9 +114,10 @@ void GetDetectorOffsets::exec() {
       maskWS->getDetectorIDToWorkspaceIndexMap(true);
 
   // Fit all the spectra with a gaussian
-  Progress prog(this, 0, 1.0, nspec);
-  PARALLEL_FOR1(inputW)
-  for (int wi = 0; wi < nspec; ++wi) {
+  Progress prog(this, 0.0, 1.0, nspec);
+  auto &spectrumInfo = maskWS->mutableSpectrumInfo();
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inputW))
+  for (int64_t wi = 0; wi < nspec; ++wi) {
     PARALLEL_START_INTERUPT_REGION
     // Fit the peak
     double offset = fitSpectra(wi, isAbsolute);
@@ -134,7 +142,8 @@ void GetDetectorOffsets::exec() {
         const size_t workspaceIndex = mapEntry->second;
         if (mask == 1.) {
           // Being masked
-          maskWS->maskWorkspaceIndex(workspaceIndex);
+          maskWS->getSpectrum(workspaceIndex).clearData();
+          spectrumInfo.setMasked(workspaceIndex, true);
           maskWS->mutableY(workspaceIndex)[0] = mask;
         } else {
           // Using the detector
@@ -206,7 +215,7 @@ double GetDetectorOffsets::fitSpectra(const int64_t s, bool isAbsolbute) {
   fit_alg->executeAsChildAlg();
   std::string fitStatus = fit_alg->getProperty("OutputStatus");
   // Pixel with large offset will be masked
-  if (fitStatus.compare("success"))
+  if (fitStatus != "success")
     return (1000.);
 
   // std::vector<double> params = fit_alg->getProperty("Parameters");
@@ -247,5 +256,5 @@ IFunction_sptr GetDetectorOffsets::createFunction(const double peakHeight,
   return boost::shared_ptr<IFunction>(fitFunc);
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

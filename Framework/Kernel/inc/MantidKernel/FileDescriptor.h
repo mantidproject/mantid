@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_KERNEL_FILEDESCRIPTOR_H_
 #define MANTID_KERNEL_FILEDESCRIPTOR_H_
 
-#include "MantidKernel/ClassMacros.h"
 #include "MantidKernel/DllConfig.h"
 
 #include <fstream>
+#include <stdio.h>
 #include <string>
 
 namespace Mantid {
@@ -17,27 +23,6 @@ The file is closed when the object is destroyed.
 
 The object stores an opened fstream object that can be accessed using the data()
 method.
-
-Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>
-Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 class MANTID_KERNEL_DLL FileDescriptor {
 public:
@@ -53,6 +38,15 @@ public:
   FileDescriptor(const std::string &filename);
   /// Destructor
   ~FileDescriptor();
+
+  /// Disable default constructor
+  FileDescriptor() = delete;
+
+  /// Disable copy operator
+  FileDescriptor(const FileDescriptor &) = delete;
+
+  /// Disable assignment operator
+  FileDescriptor &operator=(const FileDescriptor &) = delete;
 
   /**
    * Access the filename
@@ -70,6 +64,10 @@ public:
    */
   inline bool isAscii() const { return m_ascii; }
   /**
+   * Returns true if the descriptor is looking at an XML file
+   */
+  bool isXML() const;
+  /**
    * Access the open file stream. DO NOT CLOSE IT
    * @returns The current stream
    */
@@ -78,9 +76,6 @@ public:
   void resetStreamToStart();
 
 private:
-  DISABLE_DEFAULT_CONSTRUCT(FileDescriptor)
-  DISABLE_COPY_AND_ASSIGN(FileDescriptor)
-
   /// Open the file and cache description elements
   void initialize(const std::string &filename);
 

@@ -1,6 +1,9 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/RealFFT.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TextAxis.h"
@@ -55,7 +58,7 @@ void RealFFT::init() {
   std::vector<std::string> fft_dir{"Forward", "Backward"};
   declareProperty(
       "Transform", "Forward", boost::make_shared<StringListValidator>(fft_dir),
-      "The direction of the transform: \"Forward\" or \"Backward\".");
+      R"(The direction of the transform: "Forward" or "Backward".)");
   declareProperty(
       "IgnoreXBins", false,
       "Ignores the requirement that X bins be linear and of the same size. "
@@ -194,5 +197,5 @@ void RealFFT::exec() {
   setProperty("OutputWorkspace", outWS);
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

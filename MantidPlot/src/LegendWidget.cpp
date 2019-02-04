@@ -1,24 +1,13 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 /***************************************************************************
     File                 : LegendWidget.cpp
     Project              : QtiPlot
     --------------------------------------------------------------------
-    Copyright            : (C) 2007 by Ion Vasilief
-    Email (use @ for *)  : ion_vasilief*yahoo.fr
-    Description          : A 2D Plot Legend Widget
-
- ***************************************************************************/
-
-/***************************************************************************
- *                                                                         *
- *  This program is free software; you can redistribute it and/or modify   *
- *  it under the terms of the GNU General Public License as published by   *
- *  the Free Software Foundation; either version 2 of the License, or      *
- *  (at your option) any later version.                                    *
- *                                                                         *
- *  This program is distributed in the hope that it will be useful,        *
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
- *  GNU General Public License for more details.                           *
  *                                                                         *
  *   You should have received a copy of the GNU General Public License     *
  *   along with this program; if not, write to the Free Software           *
@@ -27,23 +16,23 @@
  *                                                                         *
  ***************************************************************************/
 #include "LegendWidget.h"
-#include "QwtPieCurve.h"
-#include "VectorCurve.h"
-#include "SelectionMoveResizer.h"
 #include "ApplicationWindow.h"
+#include "QwtPieCurve.h"
+#include "SelectionMoveResizer.h"
+#include "VectorCurve.h"
 
-#include <QPainter>
-#include <QPaintEvent>
-#include <QPolygon>
-#include <QMessageBox>
 #include <QApplication>
+#include <QMessageBox>
+#include <QPaintEvent>
+#include <QPainter>
+#include <QPolygon>
 
-#include <qwt_plot.h>
-#include <qwt_scale_widget.h>
-#include <qwt_painter.h>
-#include <qwt_plot_layout.h>
-#include <qwt_plot_canvas.h>
 #include <qwt_layout_metrics.h>
+#include <qwt_painter.h>
+#include <qwt_plot.h>
+#include <qwt_plot_canvas.h>
+#include <qwt_plot_layout.h>
+#include <qwt_scale_widget.h>
 #include <qwt_symbol.h>
 
 LegendWidget::LegendWidget(Plot *plot)
@@ -68,7 +57,7 @@ LegendWidget::LegendWidget(Plot *plot)
   pos = QPoint(pos.x() + 10, pos.y() + 10);
   move(pos);
 
-  d_selector = NULL;
+  d_selector = nullptr;
 
   connect(this, SIGNAL(showDialog()), plot->parent(), SIGNAL(viewTextDialog()));
   connect(this, SIGNAL(showMenu()), plot->parent(),
@@ -231,12 +220,13 @@ void LegendWidget::drawSymbol(PlotCurve *c, int point, QPainter *p, int x,
   if (!c || c->rtti() == QwtPlotItem::Rtti_PlotSpectrogram)
     return;
 
-  if (c->type() == Graph::VectXYXY || c->type() == Graph::VectXYAM) {
+  if (c->type() == GraphOptions::VectXYXY ||
+      c->type() == GraphOptions::VectXYAM) {
     drawVector(c, p, x, y, l);
     return;
   }
 
-  if (c->type() == Graph::Pie) {
+  if (c->type() == GraphOptions::Pie) {
     QwtPieCurve *pie = dynamic_cast<QwtPieCurve *>(c);
     if (!pie)
       return;
@@ -257,7 +247,7 @@ void LegendWidget::drawSymbol(PlotCurve *c, int point, QPainter *p, int x,
   p->save();
   if (c->style() != 0) {
     p->setPen(pen);
-    if (br.style() != Qt::NoBrush || c->type() == Graph::Box) {
+    if (br.style() != Qt::NoBrush || c->type() == GraphOptions::Box) {
       QRect lr = QRect(x, y - 4, l, 10);
       p->setBrush(br);
       QwtPainter::drawRect(p, lr);
@@ -520,7 +510,7 @@ int LegendWidget::symbolsMaxWidth() {
 
       int point = 0;
       PlotCurve *c = getCurve(s.mid(pos1 + 1, pos2 - pos1 - 1), point);
-      if (c && c->type() == Graph::Pie) {
+      if (c && c->type() == GraphOptions::Pie) {
         maxL = 2 * d_text->font().pointSize(); // 10;
         line_length = 0;
         s = s.right(s.length() - pos2 - 1);
@@ -528,9 +518,11 @@ int LegendWidget::symbolsMaxWidth() {
       }
 
       if (c && c->rtti() != QwtPlotItem::Rtti_PlotSpectrogram) {
-        if (c->type() == Graph::Pie || c->type() == Graph::VerticalBars ||
-            c->type() == Graph::HorizontalBars ||
-            c->type() == Graph::Histogram || c->type() == Graph::Box) {
+        if (c->type() == GraphOptions::Pie ||
+            c->type() == GraphOptions::VerticalBars ||
+            c->type() == GraphOptions::HorizontalBars ||
+            c->type() == GraphOptions::Histogram ||
+            c->type() == GraphOptions::Box) {
           maxL = 2 * d_text->font().pointSize(); // 10;
           line_length = 0;
         } else {
@@ -574,7 +566,7 @@ QString LegendWidget::parse(const QString &str) {
         if (c) {
           if (lst.count() == 1)
             s = s.replace(pos, pos2 - pos + 1, c->title().text());
-          else if (lst.count() == 3 && c->type() == Graph::Pie) {
+          else if (lst.count() == 3 && c->type() == GraphOptions::Pie) {
             if (auto dc = dynamic_cast<DataCurve *>(c)) {
               Table *t = dc->table();
               int col = t->colIndex(c->title().text());
@@ -592,7 +584,7 @@ QString LegendWidget::parse(const QString &str) {
 
 PlotCurve *LegendWidget::getCurve(const QString &s, int &point) {
   point = -1;
-  PlotCurve *curve = 0;
+  PlotCurve *curve = nullptr;
   if (Graph *g = dynamic_cast<Graph *>(d_plot->parent())) {
     QStringList l = s.split(",");
     if (l.count() == 2)
@@ -618,7 +610,7 @@ PlotCurve *LegendWidget::getCurve(const QString &s, int &point) {
 void LegendWidget::mousePressEvent(QMouseEvent * /*e*/) {
   if (d_selector) {
     delete d_selector;
-    d_selector = NULL;
+    d_selector = nullptr;
   }
 
   Graph *g = (dynamic_cast<Graph *>(d_plot->parent()));
@@ -660,11 +652,11 @@ void LegendWidget::setSelected(bool on) {
     }
   } else if (d_selector) {
     d_selector->close();
-    d_selector = NULL;
+    d_selector = nullptr;
     Graph *g = (dynamic_cast<Graph *>(d_plot->parent()));
     if (!g)
       return;
-    g->setSelectedText(NULL);
+    g->setSelectedText(nullptr);
   }
 }
 

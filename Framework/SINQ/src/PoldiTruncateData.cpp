@@ -1,5 +1,11 @@
-#include "MantidAPI/MatrixWorkspace.h"
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidSINQ/PoldiTruncateData.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidSINQ/PoldiUtilities/PoldiInstrumentAdapter.h"
 
 namespace Mantid {
@@ -68,7 +74,7 @@ void PoldiTruncateData::setTimeBinWidthFromWorkspace(
         "Workspace does not contain any data. Aborting.");
   }
 
-  const MantidVec &xData = workspace->readX(0);
+  const auto &xData = workspace->x(0);
 
   if (xData.size() < 2) {
     throw std::invalid_argument(
@@ -160,12 +166,12 @@ void PoldiTruncateData::exec() {
             "ExtraCountsWorkspace", extraCountsWorkspaceName,
             Direction::Output));
         setProperty("ExtraCountsWorkspace", extraCounts);
-      } catch (std::invalid_argument) {
+      } catch (const std::invalid_argument &) {
         m_log.warning() << "Extra count information was requested, but there "
                            "are no extra bins.\n";
       }
     }
-  } catch (std::invalid_argument) {
+  } catch (const std::invalid_argument &) {
     m_log.error()
         << "Cannot crop workspace. Please check the timing information.\n";
     m_log.error() << "  Calculated bin count: " << getCalculatedBinCount()
@@ -352,5 +358,5 @@ PoldiTruncateData::getSummedSpectra(MatrixWorkspace_sptr workspace) {
   return getOutputWorkspace(sumSpectra);
 }
 
-} // namespace SINQ
+} // namespace Poldi
 } // namespace Mantid

@@ -2,30 +2,29 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
 Description
 -----------
 
-Given a PeaksWorkspace with a UB matrix corresponding to a Niggli
+Given a PeaksWorkspace with a :ref:`UB matrix <Lattice>` corresponding to a Niggli
 reduced cell, this algorithm will allow the user to select a
 conventional cell with a specified cell type and centering. If the apply
 flag is not set, the information about the selected cell will just be
-displayed. If the apply flag is set, the UB matrix associated with the
-sample in the PeaksWorkspace will be updated to a UB corresponding to
-the selected cell AND the peaks will be re-indexed using the new UB
-matrix. NOTE: The possible conventional cells, together with the
-corresponding errors in the cell scalars can be seen by running the
-ShowPossibleCells algorithm, provided the stored UB matrix corresponds
-to a Niggli reduced cell.
+displayed. If the apply flag is set, the :ref:`UB matrix <Lattice>` associated with the
+sample in the PeaksWorkspace will be updated to a :ref:`UB matrix <Lattice>` corresponding to
+the selected cell AND the peaks will be re-indexed using the new :ref:`UB matrix <Lattice>`.
+NOTE: The possible conventional cells, together with the corresponding errors in the cell
+scalars can be seen by running the :ref:`ShowPossibleCells <algm-ShowPossibleCells>`
+algorithm, provided the stored :ref:`UB matrix <Lattice>` corresponds to a Niggli reduced cell.
 
-This algorithm is based on the paper: "Lattice Symmetry and
-Identification -- The Fundamental Role of Reduced Cells in Materials
-Characterization", Alan D. Mighell, Vol. 106, Number 6, Nov-Dec 2001,
-Journal of Research of the National Institute of Standards and
-Technology, available from: `nvlpubs <nvlpubs.nist.gov/nistpubs/jres/106/6/j66mig.pdf>`_.
+This algorithm is based on the paper: Alan D. Mighell, *Lattice
+Symmetry and Identification—The Fundamental Role of Reduced Cells in
+Materials Characterization.* Journal of research of the National
+Institute of Standards and Technology **106.6** (2001): 983, available
+from: `nvlpubs <http://nvlpubs.nist.gov/nistpubs/jres/106/6/j66mig.pdf>`_.
 
 Usage
 -----
@@ -36,24 +35,27 @@ Usage
 
    ws=LoadIsawPeaks("TOPAZ_3007.peaks")
    FindUBUsingFFT(ws,MinD=8.0,MaxD=13.0)
-   print "Lattice before SelectCellOfType:"
+   print("Lattice before SelectCellOfType:")
    lattice = ws.sample().getOrientedLattice()
-   print lattice.a(),lattice.b(),lattice.c(),lattice.alpha(),lattice.beta(),lattice.gamma()
+   print(" ".join("{:.9f}".format(x) for x in [lattice.a(), lattice.b(), lattice.c(),
+                   	                        lattice.alpha(), lattice.beta(), lattice.gamma()]))
    SelectCellOfType(PeaksWorkspace=ws, CellType='Monoclinic', Centering='C', Apply=True)
-   print "\nLattice after SelectCellOfType:"
+   print("\nLattice after SelectCellOfType:")
    lattice = ws.sample().getOrientedLattice()
-   print lattice.a(),lattice.b(),lattice.c(),lattice.alpha(),lattice.beta(),lattice.gamma()
+   print(" ".join("{:.9f}".format(x) for x in [lattice.a(), lattice.b(), lattice.c(),
+                   	                        lattice.alpha(), lattice.beta(), lattice.gamma()]))
 
 
 Output:
 
 .. testoutput:: ExSelectCellOfType
 
-   Lattice before SelectCellOfType:
-   8.60581864273 11.935925461 11.9418127661 107.429088323 98.7529124665 98.9511934747
+    Lattice before SelectCellOfType:
+    8.605818643 11.935925461 11.941812766 107.429088323 98.752912466 98.951193475
 
-   Lattice after SelectCellOfType:
-   14.1310511523 19.247332564 8.60581864273 89.8811706749 105.07133377 89.970386662
+    Lattice after SelectCellOfType:
+    14.131051152 19.247332564 8.605818643 89.881170675 105.071333770 89.970386662
+
 
 .. categories::
 

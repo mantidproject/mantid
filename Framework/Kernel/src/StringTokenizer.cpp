@@ -1,7 +1,11 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/StringTokenizer.h"
 #include <algorithm>
-#include <functional>
-#include <cassert>
 #include <iterator> //cbegin,cend
 
 namespace {
@@ -105,7 +109,7 @@ splitIgnoringWhitespaceEmptyTokens(const std::string &str,
                  });
   return output;
 }
-}
+} // namespace
 
 /**
  * Constructor requiring a string to tokenize and a string of separators.

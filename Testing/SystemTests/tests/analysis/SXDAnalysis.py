@@ -1,9 +1,16 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name
-import stresstesting
+from __future__ import (absolute_import, division, print_function)
+import systemtesting
 from mantid.simpleapi import *
 
 
-class SXDAnalysis(stresstesting.MantidStressTest):
+class SXDAnalysis(systemtesting.MantidSystemTest):
     """
     Start of a system test for SXD data analyiss
     """
@@ -19,7 +26,7 @@ class SXDAnalysis(stresstesting.MantidStressTest):
         QLab = ConvertToDiffractionMDWorkspace(InputWorkspace=ws, OutputDimensions='Q (lab frame)',
                                                SplitThreshold=50, LorentzCorrection='1',MaxRecursionDepth='13',
                                                Extents='-15,15,-15,15,-15,15',OneEventPerBin='0')
-        print " ConvertToMD runs for: ",clock()-start,' sec'
+        print(" ConvertToMD runs for: ",clock()-start,' sec')
 
         #  NaCl has a relatively small unit cell, so the distance between peaks is relatively large.  Setting the PeakDistanceThreshold
         #  higher avoids finding high count regions on the sides of strong peaks as separate peaks.
@@ -39,16 +46,16 @@ class SXDAnalysis(stresstesting.MantidStressTest):
         unitcell_angle = 90
         length_tolerance = 0.1
         #
-        angle_tolelerance = 0.25  # Actual tolernce seems is 0.17
+        angle_tolerance = 0.25  # Actual tolerance seems is 0.17
         #
         # Check results.
         latt = peaks_qLab.sample().getOrientedLattice()
         self.assertDelta( latt.a(), unitcell_length, length_tolerance, "a length is different from expected")
         self.assertDelta( latt.b(), unitcell_length, length_tolerance, "b length is different from expected")
         self.assertDelta( latt.c(), unitcell_length, length_tolerance, "c length is different from expected")
-        self.assertDelta( latt.alpha(), unitcell_angle, angle_tolelerance, "alpha angle is different from expected")
-        self.assertDelta( latt.beta(), unitcell_angle, angle_tolelerance, "beta angle is different from expected")
-        self.assertDelta( latt.gamma(), unitcell_angle, angle_tolelerance, "gamma angle length is different from expected")
+        self.assertDelta( latt.alpha(), unitcell_angle, angle_tolerance, "alpha angle is different from expected")
+        self.assertDelta( latt.beta(), unitcell_angle, angle_tolerance, "beta angle is different from expected")
+        self.assertDelta( latt.gamma(), unitcell_angle, angle_tolerance, "gamma angle length is different from expected")
 
     def doValidation(self):
         # If we reach here, no validation failed

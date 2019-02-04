@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGPUAlgorithms/GPUAlgorithm.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/SingletonHolder.h"
+#include "MantidKernel/System.h"
 #include <CL/cl.hpp>
 #include <Poco/File.h>
-#include <sstream>
 #include <fstream>
+#include <sstream>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -90,25 +96,22 @@ void GPUAlgorithm::buildKernelFromCode(const std::string &code,
                                        cl::Kernel &kernel,
                                        cl::CommandQueue &queue,
                                        cl::Context &context) {
-  bool verbose = true;
   cl_int err;
   // Code is loaded in kernelStr
   const std::string &kernelStr = code;
 
   // Platform info
   std::vector<cl::Platform> platforms;
-  if (verbose)
-    std::cout << "Getting Platform Information\n";
+  g_log.debug() << "Getting Platform Information\n";
   err = cl::Platform::get(&platforms);
   checkError("Platform::get() failed");
 
   std::vector<cl::Platform>::iterator i;
   if (!platforms.empty()) {
     for (i = platforms.begin(); i != platforms.end(); ++i) {
-      if (verbose)
-        std::cout << "Platform: "
-                  << (*i).getInfo<CL_PLATFORM_VENDOR>(&err).c_str()
-                  << std::endl;
+      g_log.debug() << "Platform: "
+                    << (*i).getInfo<CL_PLATFORM_VENDOR>(&err).c_str()
+                    << std::endl;
       if (!strcmp((*i).getInfo<CL_PLATFORM_VENDOR>(&err).c_str(),
                   "Advanced Micro Devices, Inc."))
         break;
@@ -123,22 +126,19 @@ void GPUAlgorithm::buildKernelFromCode(const std::string &code,
    */
 
   cl_context_properties cps[3] = {CL_CONTEXT_PLATFORM,
-                                  (cl_context_properties) (*i)(), 0};
+                                  (cl_context_properties)(*i)(), 0};
 
-  if (verbose)
-    std::cout << "Creating a context AMD platform\n";
+  g_log.debug() << "Creating a context AMD platform\n";
   context = cl::Context(CL_DEVICE_TYPE_CPU, cps, NULL, NULL, &err);
   checkError("Context::Context() failed");
 
-  if (verbose)
-    std::cout << "Getting device info\n";
+  g_log.debug() << "Getting device info\n";
   std::vector<cl::Device> devices = context.getInfo<CL_CONTEXT_DEVICES>();
   checkError("Context::getInfo() failed");
   if (devices.empty())
     throw std::runtime_error("OpenCL Error: No device available");
 
-  if (verbose)
-    std::cout << "Found " << devices.size() << " devices\n";
+  g_log.debug() << "Found " << devices.size() << " devices\n";
 
   for (size_t i = 0; i < devices.size(); i++) {
     cl::Device &dev = devices[i];
@@ -204,5 +204,5 @@ void GPUAlgorithm::buildKernelFromCode(const std::string &code,
   checkError("CommandQueue::CommandQueue() failed");
 }
 
-} // namespace Mantid
 } // namespace GPUAlgorithms
+} // namespace Mantid

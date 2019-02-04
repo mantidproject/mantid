@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 """
     Defines a handler for the Sphinx 'build-finished' event.
     If the builder is doctest then it post-processes the
@@ -140,6 +146,11 @@ TEST_FAILURE_TYPE = "UsageFailure"
 # Package name
 PACKAGE_NAME = "docs"
 
+# No Test found error message
+NO_TEST_ERROR = "\n*************************************************\n"\
+                "* No test code has been found in given file(s). * \n"\
+                "*************************************************"
+
 #-------------------------------------------------------------------------------
 # Define parts of lines that denote a document
 DOCTEST_DOCUMENT_BEGIN = "Document:"
@@ -171,12 +182,11 @@ class TestSuiteReport(object):
 
     @property
     def nfailed(self):
-        def sum_failure(fails, case):
+        fails = 0
+        for case in self.testcases:
             if case.failed:
-                return fails + 1
-            else:
-                return fails
-        return reduce(sum_failure, self.testcases, 0)
+                fails += 1
+        return fails
 
     @property
     def npassed(self):
@@ -284,7 +294,10 @@ class DocTestOutputParser(object):
                 continue
             if line.startswith(DOCTEST_SUMMARY_TITLE): # end of tests
                 in_doc = False
-                cases.extend(self.__parse_document(document_txt))
+                if document_txt:
+                    cases.extend(self.__parse_document(document_txt))
+                else:
+                    raise RuntimeError(NO_TEST_ERROR)
                 document_txt = None
             if in_doc and line != "":
                 document_txt.append(line)

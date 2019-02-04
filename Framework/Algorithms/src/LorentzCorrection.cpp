@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/LorentzCorrection.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Progress.h"
@@ -65,16 +71,17 @@ void LorentzCorrection::exec() {
 
   const auto numHistos = inWS->getNumberHistograms();
   const auto &spectrumInfo = inWS->spectrumInfo();
-  Progress prog(this, 0, 1, numHistos);
+  Progress prog(this, 0.0, 1.0, numHistos);
 
-  PARALLEL_FOR1(inWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inWS))
   for (int64_t i = 0; i < int64_t(numHistos); ++i) {
     PARALLEL_START_INTERUPT_REGION
 
     if (!spectrumInfo.hasDetectors(i))
       continue;
 
-    const double twoTheta = spectrumInfo.twoTheta(i);
+    const double twoTheta =
+        spectrumInfo.isMonitor(i) ? 0.0 : spectrumInfo.twoTheta(i);
     const double sinTheta = std::sin(twoTheta / 2);
     double sinThetaSq = sinTheta * sinTheta;
 

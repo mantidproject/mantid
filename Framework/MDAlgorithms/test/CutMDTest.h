@@ -1,22 +1,28 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MDALGORITHMS_CUTMDTEST_H_
 #define MANTID_MDALGORITHMS_CUTMDTEST_H_
 
 #include "MantidMDAlgorithms/CutMD.h"
 
+#include "../../API/inc/MantidAPI/IMDWorkspace.h"
+#include "../../Kernel/inc/MantidKernel/MDUnit.h"
+#include "../inc/MantidMDAlgorithms/CutMD.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
-#include "../../Kernel/inc/MantidKernel/MDUnit.h"
-#include "../inc/MantidMDAlgorithms/CutMD.h"
-#include "MantidGeometry/MDGeometry/QSample.h"
-#include "../../API/inc/MantidAPI/IMDWorkspace.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/MDGeometry/QSample.h"
+#include "MantidTestHelpers/MDEventsTestHelper.h"
 
 #include <cxxtest/TestSuite.h>
 
@@ -31,7 +37,7 @@ const Mantid::API::MDNormalization eventNorm =
     Mantid::API::MDNormalization::VolumeNormalization;
 const Mantid::API::MDNormalization histoNorm =
     Mantid::API::MDNormalization::NumEventsNormalization;
-}
+} // namespace
 
 class CutMDTest : public CxxTest::TestSuite {
 private:

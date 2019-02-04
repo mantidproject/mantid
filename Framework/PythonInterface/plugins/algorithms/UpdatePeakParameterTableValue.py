@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name,redefined-builtin
 from __future__ import (absolute_import, division, print_function)
 from six.moves import range
@@ -169,7 +175,7 @@ class UpdatePeakParameterTableValue(mantid.api.PythonAlgorithm):
         # 2. Take in the case that there is no match
         if len(rownumbers) == 0:
             # No Match
-            logger.warning("Warning! There is no match for parameter %s" % (parnametofit))
+            mantid.logger.warning("Warning! There is no match for parameter %s" % (parnametofit))
             rownumbers.append(-1000)
         # ENDIFELSE
 

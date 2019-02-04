@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CalculateSlits.h"
 
 #include <boost/shared_ptr.hpp>
@@ -14,12 +20,12 @@ DECLARE_ALGORITHM(CalculateSlits)
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
-*/
+ */
 CalculateSlits::CalculateSlits() {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
-*/
+ */
 CalculateSlits::~CalculateSlits() = default;
 
 //----------------------------------------------------------------------------------------------
@@ -44,7 +50,7 @@ const std::string CalculateSlits::summary() const {
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
-*/
+ */
 void CalculateSlits::init() {
   declareProperty("Slit1Slit2", Mantid::EMPTY_DBL(),
                   "Distance between Slit 1 and Slit 2 in mm. Where Slit 1 and "
@@ -67,7 +73,7 @@ void CalculateSlits::init() {
 
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
-*/
+ */
 void CalculateSlits::exec() {
   const double res = getProperty("Resolution");
   const double fp = getProperty("Footprint");

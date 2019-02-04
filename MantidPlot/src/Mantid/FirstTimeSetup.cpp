@@ -1,8 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "FirstTimeSetup.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/MantidVersion.h"
-#include "MantidQtAPI/ManageUserDirectories.h"
-#include "MantidQtAPI/MantidDesktopServices.h"
+#include "MantidQtWidgets/Common/HelpWindow.h"
+#include "MantidQtWidgets/Common/ManageUserDirectories.h"
+#include "MantidQtWidgets/Common/MantidDesktopServices.h"
 
 #include <QMessageBox>
 #include <QPainter>
@@ -85,7 +92,7 @@ void FirstTimeSetup::initLayout() {
 
   QString stlyeName = QApplication::style()->metaObject()->className();
   if ((stlyeName == "QMotifStyle") || (stlyeName == "QCDEStyle")) {
-    // add stylesheet formatting for other environemnts
+    // add stylesheet formatting for other environments
     QString ss = this->styleSheet();
     ss += "\n"
           "QDialog#FirstTimeSetup QCommandLinkButton {"
@@ -137,8 +144,12 @@ void FirstTimeSetup::allowUsageDataStateChanged(int checkedState) {
     msgBox.setWindowTitle("Mantid: Report Usage Data ");
     msgBox.setTextFormat(Qt::RichText); // this is what makes the links
                                         // clickable
-    msgBox.setText("Are you sure you want to disable reporting <a "
-                   "href='http://reports.mantidproject.org'>usage data</a>?");
+    msgBox.setText("Are you sure you want to disable reporting of <a "
+                   "href='http://reports.mantidproject.org'>usage data</a>?"
+                   "\t(full details in our <a "
+                   "href='http://www.mantidproject.org/"
+                   "MantidProject:Privacy_policy#Usage_Data_recorded_in_Mantid'"
+                   ">Privacy Policy</a>)");
     msgBox.setInformativeText(
         "All usage data is anonymous and untraceable.\n"
         "We use the usage data to inform the future development of Mantid.\n"
@@ -174,8 +185,8 @@ void FirstTimeSetup::openManageUserDirectories() {
 }
 
 void FirstTimeSetup::openReleaseNotes() {
-  MantidDesktopServices::openUrl(QUrl(
-      QString::fromStdString(Mantid::Kernel::MantidVersion::releaseNotes())));
+  MantidQt::API::HelpWindow::showPage(
+      this, Mantid::Kernel::MantidVersion::releaseNotes());
 }
 
 void FirstTimeSetup::openSampleDatasets() {

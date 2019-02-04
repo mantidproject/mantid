@@ -1,8 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CURVEFITTING_VESUVIORESOLUTIONTEST_H_
 #define MANTID_CURVEFITTING_VESUVIORESOLUTIONTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidCurveFitting/Functions/VesuvioResolution.h"
+#include <cxxtest/TestSuite.h>
 
 #include "ComptonProfileTestHelpers.h"
 
@@ -34,7 +40,8 @@ public:
     auto func = createFunction();
     double x0(165.0), x1(166.0),
         dx(0.5); // chosen to give put us near the peak for this mass & spectrum
-    auto testWS = ComptonProfileTestHelpers::createTestWorkspace(1, x0, x1, dx);
+    auto testWS = ComptonProfileTestHelpers::createTestWorkspace(
+        1, x0, x1, dx, ComptonProfileTestHelpers::NoiseType::None);
     auto &dataX = testWS->dataX(0);
     std::transform(
         dataX.begin(), dataX.end(), dataX.begin(),

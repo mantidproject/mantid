@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/ConvToMDEventsWS.h"
 
 #include "MantidMDAlgorithms/UnitsConversionHelper.h"
@@ -74,7 +80,7 @@ size_t ConvToMDEventsWS::conversionChunk(size_t workspaceIndex) {
 
   switch (m_EventWS->getSpectrum(workspaceIndex).getEventType()) {
   case Mantid::API::TOF:
-    return this->convertEventList<Mantid::DataObjects::TofEvent>(
+    return this->convertEventList<Mantid::Types::Event::TofEvent>(
         workspaceIndex);
   case Mantid::API::WEIGHTED:
     return this->convertEventList<Mantid::DataObjects::WeightedEvent>(
@@ -155,15 +161,9 @@ void ConvToMDEventsWS::runConversion(API::Progress *pProgress) {
     size_t nConverted = this->conversionChunk(wi);
     eventsAdded += nConverted;
     nEventsInWS += nConverted;
-    // Give this task to the scheduler
-    //%double cost = double(el.getNumberEvents());
-    // ts->push( new FunctionTask( func, cost) );
-
     // Keep a running total of how many events we've added
     if (bc->shouldSplitBoxes(nEventsInWS, eventsAdded, lastNumBoxes)) {
       if (runMultithreaded) {
-        // Do all the adding tasks
-        tp.joinAll();
         // Now do all the splitting tasks
         m_OutWSWrapper->pWorkspace()->splitAllIfNeeded(ts);
         if (ts->size() > 0)
@@ -184,7 +184,6 @@ void ConvToMDEventsWS::runConversion(API::Progress *pProgress) {
   }
   // Do a final splitting of everything
   if (runMultithreaded) {
-    tp.joinAll();
     m_OutWSWrapper->pWorkspace()->splitAllIfNeeded(ts);
     tp.joinAll();
   } else {
@@ -200,5 +199,5 @@ void ConvToMDEventsWS::runConversion(API::Progress *pProgress) {
   m_OutWSWrapper->pWorkspace()->setCoordinateSystem(m_coordinateSystem);
 }
 
-} // endNamespace DataObjects
-} // endNamespace Mantid
+} // namespace MDAlgorithms
+} // namespace Mantid

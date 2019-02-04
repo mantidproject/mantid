@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/ILatticeFunction.h"
 
 namespace Mantid {
@@ -23,7 +29,7 @@ void ILatticeFunction::function(const FunctionDomain &domain,
         dynamic_cast<const LatticeDomain &>(domain);
 
     functionLattice(latticeDomain, values);
-  } catch (std::bad_cast) {
+  } catch (const std::bad_cast &) {
     throw std::invalid_argument(
         "ILatticeFunction expects domain of type LatticeDomain.");
   }
@@ -46,10 +52,10 @@ void ILatticeFunction::functionDeriv(const FunctionDomain &domain,
         dynamic_cast<const LatticeDomain &>(domain);
 
     functionDerivLattice(latticeDomain, jacobian);
-  } catch (std::bad_cast) {
+  } catch (const std::bad_cast &) {
     throw std::invalid_argument(
         "ILatticeFunction expects domain of type LatticeDomain.");
-  } catch (Kernel::Exception::NotImplementedError) {
+  } catch (const Kernel::Exception::NotImplementedError &) {
     calNumericalDeriv(domain, jacobian);
   }
 }

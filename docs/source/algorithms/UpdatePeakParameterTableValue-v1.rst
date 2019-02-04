@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -64,11 +64,11 @@ Usage
     tablews.addRow(["A", 1.34])
     tablews.addRow(["B", 2.34])
 
-    print "Value before %.2f" % tablews.cell(0, 1)
+    print("Value before %.2f" % tablews.cell(0, 1))
 
     UpdatePeakParameterTableValue(tablews, Column="Value", ParameterNames=["A"], NewFloatValue=1.00)
     
-    print "Value after %.2f" % tablews.cell(0, 1)
+    print("Value after %.2f" % tablews.cell(0, 1))
 
 Output:
 

@@ -1,8 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidLiveData/FileEventDataListener.h"
-#include "MantidAPI/LiveListenerFactory.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/FileLoaderRegistry.h"
+#include "MantidAPI/LiveListenerFactory.h"
 #include "MantidKernel/ConfigService.h"
 
 using namespace Mantid::Kernel;
@@ -15,11 +22,11 @@ DECLARE_LISTENER(FileEventDataListener)
 namespace {
 /// static logger
 Kernel::Logger g_log("FileEventDataListener");
-}
+} // namespace
 
 /// Constructor
 FileEventDataListener::FileEventDataListener()
-    : ILiveListener(), m_filename(), m_runNumber(-1),
+    : LiveListener(), m_filename(), m_runNumber(-1),
       m_tempWSname("__filelistenerchunk"), m_nextChunk(1),
       m_filePropName("Filename"), m_loaderName(""), m_canLoadMonitors(true),
       m_chunkload(nullptr) {
@@ -52,11 +59,12 @@ FileEventDataListener::FileEventDataListener()
     }
   }
 
-  if (!ConfigService::Instance().getValue("fileeventdatalistener.chunks",
-                                          m_numChunks)) {
+  auto numChunks =
+      ConfigService::Instance().getValue<int>("fileeventdatalistener.chunks");
+  m_numChunks = numChunks.get_value_or(0);
+  if (!numChunks.is_initialized()) {
     g_log.error("Configuration property fileeventdatalistener.chunks not "
                 "found. The algorithm will fail!");
-    m_numChunks = 0; // Set it to 0 so the algorithm just fails
   }
 
   // Add an integer, incremented for each listener instance, to the temporary
@@ -112,7 +120,7 @@ ILiveListener::RunStatus FileEventDataListener::runStatus() {
 int FileEventDataListener::runNumber() const { return m_runNumber; }
 
 void FileEventDataListener::start(
-    Kernel::DateAndTime /*startTime*/) // Ignore the start time
+    Types::Core::DateAndTime /*startTime*/) // Ignore the start time
 {
   // Kick off loading the first chunk (which will include loading the instrument
   // etc.)

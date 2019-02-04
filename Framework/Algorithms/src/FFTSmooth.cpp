@@ -1,13 +1,21 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/FFTSmooth.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TextAxis.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidKernel/Exception.h"
-
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidHistogramData/Histogram.h"
+#include "MantidHistogramData/HistogramBuilder.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/ListValidator.h"
 
 namespace Mantid {
@@ -18,6 +26,8 @@ DECLARE_ALGORITHM(FFTSmooth)
 
 using namespace Kernel;
 using namespace API;
+using namespace DataObjects;
+using namespace HistogramData;
 
 /// Initialisation method. Declares properties to be used in algorithm.
 void FFTSmooth::init() {
@@ -52,8 +62,12 @@ void FFTSmooth::exec() {
   // Symmetrize the input spectrum
   int dn = static_cast<int>(m_inWS->y(0).size());
 
-  API::MatrixWorkspace_sptr symmWS = API::WorkspaceFactory::Instance().create(
-      "Workspace2D", 1, m_inWS->x(0).size() + dn, m_inWS->y(0).size() + dn);
+  HistogramBuilder builder;
+  builder.setX(m_inWS->x(0).size() + dn);
+  builder.setY(m_inWS->y(0).size() + dn);
+  builder.setDistribution(m_inWS->isDistribution());
+  API::MatrixWorkspace_sptr symmWS =
+      create<Workspace2D>(*m_inWS, 1, builder.build());
 
   double dx = (m_inWS->x(spec).back() - m_inWS->x(spec).front()) /
               static_cast<double>(m_inWS->x(spec).size() - 1);
@@ -95,7 +109,7 @@ void FFTSmooth::exec() {
     if (sn.empty())
       n = 2;
     else
-      n = atoi(sn.c_str());
+      n = std::stoi(sn);
     if (n < 1)
       throw std::invalid_argument(
           "Truncation parameter must be an integer > 1");
@@ -115,8 +129,11 @@ void FFTSmooth::exec() {
   API::MatrixWorkspace_sptr tmpWS = fft->getProperty("OutputWorkspace");
 
   // Create output
-  API::MatrixWorkspace_sptr outWS = API::WorkspaceFactory::Instance().create(
-      m_inWS, 1, m_inWS->x(0).size(), m_inWS->y(0).size());
+  builder.setX(m_inWS->x(0).size());
+  builder.setY(m_inWS->y(0).size());
+  builder.setDistribution(m_inWS->isDistribution());
+  API::MatrixWorkspace_sptr outWS =
+      create<MatrixWorkspace>(*m_inWS, 1, builder.build());
 
   dn = static_cast<int>(tmpWS->blocksize()) / 2;
 
@@ -138,8 +155,11 @@ void FFTSmooth::truncate(int n) {
   if (ny == 0)
     ny = 1;
   int nx = m_unfilteredWS->isHistogramData() ? ny + 1 : ny;
-  m_filteredWS =
-      API::WorkspaceFactory::Instance().create(m_unfilteredWS, 2, nx, ny);
+  HistogramBuilder builder;
+  builder.setX(nx);
+  builder.setY(ny);
+  builder.setDistribution(m_unfilteredWS->isDistribution());
+  m_filteredWS = create<MatrixWorkspace>(*m_unfilteredWS, 2, builder.build());
 
   auto &Yr = m_unfilteredWS->y(0);
   auto &Yi = m_unfilteredWS->y(1);
@@ -172,8 +192,11 @@ void FFTSmooth::zero(int n) {
   if (ny == 0)
     ny = 1;
 
-  m_filteredWS =
-      API::WorkspaceFactory::Instance().create(m_unfilteredWS, 2, mx, my);
+  HistogramBuilder builder;
+  builder.setX(mx);
+  builder.setY(my);
+  builder.setDistribution(m_unfilteredWS->isDistribution());
+  m_filteredWS = create<MatrixWorkspace>(*m_unfilteredWS, 2, builder.build());
 
   m_filteredWS->setSharedX(0, m_unfilteredWS->sharedX(0));
   m_filteredWS->setSharedX(1, m_unfilteredWS->sharedX(0));
@@ -185,5 +208,5 @@ void FFTSmooth::zero(int n) {
             m_filteredWS->mutableY(1).begin());
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

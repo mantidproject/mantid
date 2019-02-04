@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef BOXCONTROLLER_NEXUS_IO_TEST_H
 #define BOXCONTROLLER_NEXUS_IO_TEST_H
 
@@ -39,7 +45,7 @@ public:
   void test_contstructor_setters() {
     using Mantid::DataObjects::BoxControllerNeXusIO;
 
-    BoxControllerNeXusIO *pSaver(NULL);
+    BoxControllerNeXusIO *pSaver(nullptr);
     TS_ASSERT_THROWS_NOTHING(pSaver = createTestBoxController());
 
     size_t CoordSize;
@@ -68,12 +74,12 @@ public:
   }
 
   void test_CreateOrOpenFile() {
-    using Mantid::coord_t;
     using Mantid::API::FileFinder;
     using Mantid::DataObjects::BoxControllerNeXusIO;
     using Mantid::Kernel::Exception::FileError;
+    using Mantid::coord_t;
 
-    BoxControllerNeXusIO *pSaver(NULL);
+    BoxControllerNeXusIO *pSaver(nullptr);
     TS_ASSERT_THROWS_NOTHING(pSaver = createTestBoxController());
     pSaver->setDataType(sizeof(coord_t), "MDLeanEvent");
     std::string FullPathFile;
@@ -112,7 +118,7 @@ public:
   void test_free_space_index_is_written_out_and_read_in() {
     using Mantid::DataObjects::BoxControllerNeXusIO;
 
-    BoxControllerNeXusIO *pSaver(NULL);
+    BoxControllerNeXusIO *pSaver(nullptr);
     TS_ASSERT_THROWS_NOTHING(pSaver = createTestBoxController());
     std::string FullPathFile;
 
@@ -148,7 +154,7 @@ public:
   template <typename FROM, typename TO>
   struct IF // if in/out formats are different we can not read different data
             // format from it
-      {
+  {
   public:
     static void compareReadTheSame(Mantid::API::IBoxControllerIO *pSaver,
                                    const std::vector<FROM> & /*inputData*/,
@@ -161,7 +167,7 @@ public:
   template <typename FROM>
   struct IF<FROM, FROM> // if in/out formats are the same, we can read what was
                         // written earlier
-      {
+  {
   public:
     static void compareReadTheSame(Mantid::API::IBoxControllerIO *pSaver,
                                    const std::vector<FROM> &inputData,
@@ -181,7 +187,7 @@ public:
   template <typename FROM, typename TO> void WriteReadRead() {
     using Mantid::DataObjects::BoxControllerNeXusIO;
 
-    BoxControllerNeXusIO *pSaver(NULL);
+    BoxControllerNeXusIO *pSaver(nullptr);
     TS_ASSERT_THROWS_NOTHING(pSaver = createTestBoxController());
     pSaver->setDataType(sizeof(FROM), "MDEvent");
     std::string FullPathFile;

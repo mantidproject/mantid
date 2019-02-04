@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MDALGORITHMS_CONVERT_TO_MDALGORITHMS_H_
 #define MANTID_MDALGORITHMS_CONVERT_TO_MDALGORITHMS_H_
 
@@ -6,6 +12,8 @@
 #include "MantidMDAlgorithms/MDWSDescription.h"
 
 #include "MantidKernel/DeltaEMode.h"
+
+#include <boost/scoped_ptr.hpp>
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -23,28 +31,6 @@ namespace MDAlgorithms {
    <http://www.mantidproject.org/Writing_custom_ConvertTo_MD_transformation>
 
    * @date 11-10-2011
-
-    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-   National Laboratory & European Spallation Source
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at:
-<https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
 /// Convert to MD Events class itself:
@@ -62,6 +48,11 @@ public:
 
   /// Algorithm's version for identification
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"ConvertToDiffractionMDWorkspace", "ConvertToMDMinMaxGlobal",
+            "ConvertToMDMinMaxLocal", "CreateMDWorkspace",
+            "SetSpecialCoordinates"};
+  }
 
 private:
   std::map<std::string, std::string> validateInputs() override;
@@ -119,7 +110,7 @@ protected: // for testing, otherwise private:
   void setupTopLevelSplitting(Mantid::API::BoxController_sptr bc);
 };
 
-} // namespace Mantid
 } // namespace MDAlgorithms
+} // namespace Mantid
 
 #endif /* MANTID_MDALGORITHMS_MAKEDIFFRACTIONMDEVENTWORKSPACE_H_ */

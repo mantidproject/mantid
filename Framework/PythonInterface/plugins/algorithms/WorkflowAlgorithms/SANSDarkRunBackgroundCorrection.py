@@ -1,4 +1,10 @@
-﻿#pylint: disable=no-init,invalid-name,too-many-locals,too-many-branches
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
+#pylint: disable=no-init,invalid-name,too-many-locals,too-many-branches
 from __future__ import (absolute_import, division, print_function)
 
 from mantid.simpleapi import *
@@ -294,9 +300,10 @@ class DarkRunMonitorAndDetectorRemover(object):
         # pylint: disable=bare-except
         try:
             num_histograms = dark_run.getNumberHistograms()
+            spectrumInfo = dark_run.spectrumInfo()
             for index in range(0, num_histograms):
-                det = dark_run.getDetector(index)
-                if det.isMonitor():
+                if spectrumInfo.isMonitor(index):
+                    det = dark_run.getDetector(index)
                     det_id_list.append(det.getID())
                     monitor_list.append(index)
         except:
@@ -442,5 +449,6 @@ class DarkRunMonitorAndDetectorRemover(object):
             counter +=1
         return dark_run
 #############################################################################################
+
 
 AlgorithmFactory.subscribe(SANSDarkRunBackgroundCorrection)

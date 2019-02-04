@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -61,7 +61,7 @@ The algorithm requires relatively little input and can be run like this:
     cell_a = np.round(cell.cell(0, 1), 5)
     cell_a_error = np.round(cell.cell(0, 2), 5)
 
-    print "Refined lattice parameter a =", cell_a, "+/-", cell_a_error
+    print("Refined lattice parameter a = {:.5f} +/- {}".format(cell_a, cell_a_error))
 
 This will print the following output:
 

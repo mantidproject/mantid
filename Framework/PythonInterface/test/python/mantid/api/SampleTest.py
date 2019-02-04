@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
@@ -5,6 +11,7 @@ from mantid.api import Sample
 from mantid.simpleapi import CreateWorkspace
 from mantid.simpleapi import SetSampleMaterial
 from mantid.geometry import CrystalStructure
+from mantid.geometry import CSGObject
 
 class SampleTest(unittest.TestCase):
 
@@ -52,7 +59,7 @@ class SampleTest(unittest.TestCase):
         SetSampleMaterial(self._ws,"Al2 O3",SampleMassDensity=4)
         material = self._ws.sample().getMaterial()
 
-        self.assertAlmostEqual(material.numberDensity, 0.0236, places=4)
+        self.assertAlmostEqual(material.numberDensity, 0.1181, places=4)
         self.assertAlmostEqual(material.relativeMolecularMass(), 101.961, places=3)
 
         atoms, numatoms = material.chemicalFormula()
@@ -66,6 +73,17 @@ class SampleTest(unittest.TestCase):
         xs1 = atoms[1].neutron()
         xs = ( xs0['coh_scatt_xs']*2 + xs1['coh_scatt_xs']*3 ) / 5
         self.assertAlmostEquals(material.cohScatterXSection(), xs, places=4)
+
+    def test_get_shape(self):
+        sample = self._ws.sample()
+        self.assertEquals(type(sample.getShape()), CSGObject)
+
+    def test_get_shape_xml(self):
+        sample = self._ws.sample()
+        shape = sample.getShape()
+        xml = shape.getShapeXML()
+        self.assertEquals(type(xml), str)
+
 
 
 

@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -26,10 +26,10 @@ Usage
     #to compare we need to match the bins
     wsOut=RebinToWorkspace(wsOut,ws,PreserveEvents=True)
 
-    print "The values for every 10th bin."
-    print "bin\tws\twsOut"
+    print("The values for every 10th bin.")
+    print("bin\tws\twsOut")
     for i in range (0,ws.blocksize(),10):
-        print "%i\t%.2f\t%.2f" % (i,ws.readY(0)[i],wsOut.readY(0)[i])
+        print("{}\t{:.2f}\t{:.2f}".format(i,ws.readY(0)[i],wsOut.readY(0)[i]))
 
 Output:
 

@@ -1,10 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MDEVENTS_MERGEMDEWTEST_H_
 #define MANTID_MDEVENTS_MERGEMDEWTEST_H_
 
-#include "MantidMDAlgorithms/MergeMDFiles.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidDataObjects/MDEventFactory.h"
-#include "MantidTestHelpers/MDAlgorithmsTestHelper.h"
 #include "MantidGeometry/MDGeometry/QSample.h"
+#include "MantidMDAlgorithms/MergeMDFiles.h"
+#include "MantidTestHelpers/MDAlgorithmsTestHelper.h"
 
 #include <cxxtest/TestSuite.h>
 
@@ -101,11 +108,11 @@ public:
     }
 
     // Cleanup generated input files
-    for (size_t i = 0; i < inWorkspaces.size(); i++) {
-      if (inWorkspaces[i]->getBoxController()->isFileBacked()) {
+    for (auto &inWorkspace : inWorkspaces) {
+      if (inWorkspace->getBoxController()->isFileBacked()) {
         std::string fileName =
-            inWorkspaces[i]->getBoxController()->getFileIO()->getFileName();
-        inWorkspaces[i]->clearFileBacked(false);
+            inWorkspace->getBoxController()->getFileIO()->getFileName();
+        inWorkspace->clearFileBacked(false);
         Poco::File(fileName).remove();
       }
     }

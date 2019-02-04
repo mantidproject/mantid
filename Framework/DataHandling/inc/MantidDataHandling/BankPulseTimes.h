@@ -1,8 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_KERNEL_BANKPULSETIMES_H
 #define MANTID_KERNEL_BANKPULSETIMES_H
 
-#include "MantidKernel/Property.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/Property.h"
 
 #include <nexus/NeXusFile.hpp>
 
@@ -21,7 +27,7 @@ public:
   BankPulseTimes(::NeXus::File &file, const std::vector<int> &pNumbers);
 
   /// Constructor with vector of DateAndTime
-  BankPulseTimes(const std::vector<Mantid::Kernel::DateAndTime> &times);
+  BankPulseTimes(const std::vector<Mantid::Types::Core::DateAndTime> &times);
 
   /// Destructor
   ~BankPulseTimes();
@@ -36,7 +42,7 @@ public:
   size_t numPulses;
 
   /// Array of the pulse times
-  Mantid::Kernel::DateAndTime *pulseTimes;
+  Mantid::Types::Core::DateAndTime *pulseTimes;
 
   /// Vector of period numbers corresponding to each pulse
   std::vector<int> periodNumbers;

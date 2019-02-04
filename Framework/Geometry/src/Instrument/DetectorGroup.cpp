@@ -1,9 +1,14 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidGeometry/Instrument/ComponentVisitor.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/Material.h"
 
 namespace Mantid {
@@ -11,10 +16,10 @@ namespace Geometry {
 namespace {
 // static logger
 Kernel::Logger g_log("DetectorGroup");
-}
+} // namespace
 
-using Kernel::V3D;
 using Kernel::Quat;
+using Kernel::V3D;
 
 /**
  * Default constructor
@@ -23,14 +28,11 @@ DetectorGroup::DetectorGroup()
     : IDetector(), m_id(), m_detectors(), group_topology(undef) {}
 
 /** Constructor that takes a list of detectors to add
-*  @param dets :: The vector of IDetector pointers that this virtual detector
-* will hold
-*  @param warnAboutMasked :: If true a log message at warning level will be
-* generated if a one of the detectors in dets is masked.
-*  @throw std::invalid_argument If an empty vector is passed as argument
-*/
-DetectorGroup::DetectorGroup(const std::vector<IDetector_const_sptr> &dets,
-                             bool warnAboutMasked)
+ *  @param dets :: The vector of IDetector pointers that this virtual detector
+ * will hold
+ *  @throw std::invalid_argument If an empty vector is passed as argument
+ */
+DetectorGroup::DetectorGroup(const std::vector<IDetector_const_sptr> &dets)
     : IDetector(), m_id(), m_detectors(), group_topology(undef) {
   if (dets.empty()) {
     g_log.error("Illegal attempt to create an empty DetectorGroup");
@@ -38,36 +40,23 @@ DetectorGroup::DetectorGroup(const std::vector<IDetector_const_sptr> &dets,
   }
   std::vector<IDetector_const_sptr>::const_iterator it;
   for (it = dets.begin(); it != dets.end(); ++it) {
-    addDetector(*it, warnAboutMasked);
+    addDetector(*it);
   }
 }
 
 /** Add a detector to the collection
-*  @param det ::  A pointer to the detector to add
-*  @param warn :: Whether to issue warnings to the log
-*/
-void DetectorGroup::addDetector(IDetector_const_sptr det, bool &warn) {
+ *  @param det ::  A pointer to the detector to add
+ */
+void DetectorGroup::addDetector(IDetector_const_sptr det) {
   // the topology of the group become undefined and needs recalculation if new
   // detector has been added to the group
   group_topology = undef;
-  // Warn if adding a masked detector
-  if (warn && det->isMasked()) {
-    g_log.warning() << "Adding a detector (ID:" << det->getID()
-                    << ") that is flagged as masked.\n";
-    warn = false;
-  }
 
   // For now at least, the ID is the same as the first detector that is added
   if (m_detectors.empty())
     m_id = det->getID();
 
-  if ((!m_detectors.insert(DetCollection::value_type(det->getID(), det))
-            .second) &&
-      warn) {
-    g_log.warning() << "Detector with ID " << det->getID()
-                    << " is already in group.\n";
-    warn = false;
-  }
+  m_detectors.insert(DetCollection::value_type(det->getID(), det));
 }
 
 detid_t DetectorGroup::getID() const { return m_id; }
@@ -75,15 +64,13 @@ detid_t DetectorGroup::getID() const { return m_id; }
 std::size_t DetectorGroup::nDets() const { return m_detectors.size(); }
 
 /** Returns the position of the DetectorGroup.
-*  In the absence of a full surface/solid angle implementation, this is a simple
-*  average of the component detectors (i.e. there's no weighting for size or if
-* one
-*  or more of the detectors is masked). Also, no regard is made to whether a
-*  constituent detector is itself a DetectorGroup - it's just treated as a
-* single,
-*  pointlike object with the same weight as any other detector.
-*  @return a V3D object of the detector group position
-*/
+ *  In the absence of a full surface/solid angle implementation, this is a
+ * simple average of the component detectors (i.e. there's no weighting for size
+ * or if one or more of the detectors is masked). Also, no regard is made to
+ * whether a constituent detector is itself a DetectorGroup - it's just treated
+ * as a single, pointlike object with the same weight as any other detector.
+ *  @return a V3D object of the detector group position
+ */
 V3D DetectorGroup::getPos() const {
   V3D newPos;
   DetCollection::const_iterator it;
@@ -175,9 +162,9 @@ double DetectorGroup::getPhiOffset(const double &offset) const {
 }
 
 /** Return IDs for the detectors grouped
-*
-*  @return vector of detector IDs
-*/
+ *
+ *  @return vector of detector IDs
+ */
 std::vector<detid_t> DetectorGroup::getDetectorIDs() const {
   std::vector<detid_t> result;
   result.reserve(m_detectors.size());
@@ -204,7 +191,6 @@ std::vector<IDetector_const_sptr> DetectorGroup::getDetectors() const {
 
 /** Gives the total solid angle subtended by a group of detectors by summing the
  *  contributions from the individual detectors.
- *  Any masked detector in the group is excluded from the sum.
  *  @param observer :: The point from which the detector is being viewed
  *  @return The solid angle in steradians
  *  @throw NullPointerException If geometrical form of any detector has not been
@@ -215,26 +201,9 @@ double DetectorGroup::solidAngle(const V3D &observer) const {
   DetCollection::const_iterator it;
   for (it = m_detectors.begin(); it != m_detectors.end(); ++it) {
     IDetector_const_sptr det = (*it).second;
-    if (!det->isMasked())
-      result += det->solidAngle(observer);
+    result += det->solidAngle(observer);
   }
   return result;
-}
-
-/** Are ALL the detectors in this group masked?
- *  @return True if every one of the detectors in this group is masked, false
- * otherwise.
- */
-bool DetectorGroup::isMasked() const {
-  bool isMasked = true;
-  DetCollection::const_iterator it;
-  for (it = m_detectors.begin(); it != m_detectors.end(); ++it) {
-    if (!(*it).second->isMasked()) {
-      isMasked = false;
-      break;
-    }
-  }
-  return isMasked;
 }
 
 /** Return true if any detector in the group is parametrized.
@@ -248,28 +217,12 @@ bool DetectorGroup::isParametrized() const {
   return false;
 }
 
-/** Indicates whether this is a monitor.
-*  Will return false if even one member of the group is not flagged as a monitor
-*  @return is detector group a monitor
-*/
-bool DetectorGroup::isMonitor() const {
-  // Would you ever want to group monitors?
-  // For now, treat as NOT a monitor if even one isn't
-  bool isMonitor = true;
-  DetCollection::const_iterator it;
-  for (it = m_detectors.begin(); it != m_detectors.end(); ++it) {
-    if (!(*it).second->isMonitor())
-      isMonitor = false;
-  }
-  return isMonitor;
-}
-
 /** isValid() is true if the point is inside any of the detectors, i.e. one of
-* the
-*  detectors has isValid() == true
-*  @param point :: this point is tested to see if it is one of the detectors
-*  @return if the point is in a detector it returns true else it returns false
-*/
+ * the
+ *  detectors has isValid() == true
+ *  @param point :: this point is tested to see if it is one of the detectors
+ *  @return if the point is in a detector it returns true else it returns false
+ */
 bool DetectorGroup::isValid(const V3D &point) const {
   DetCollection::const_iterator it;
   for (it = m_detectors.begin(); it != m_detectors.end(); ++it) {
@@ -280,9 +233,10 @@ bool DetectorGroup::isValid(const V3D &point) const {
 }
 
 /** Does the point given lie on the surface of one of the detectors
-*  @param point :: the point that is tested to see if it is one of the detectors
-*  @return true if the point is on the side of a detector else it returns false
-*/
+ *  @param point :: the point that is tested to see if it is one of the
+ * detectors
+ *  @return true if the point is on the side of a detector else it returns false
+ */
 bool DetectorGroup::isOnSide(const V3D &point) const {
   DetCollection::const_iterator it;
   for (it = m_detectors.begin(); it != m_detectors.end(); ++it) {
@@ -293,12 +247,12 @@ bool DetectorGroup::isOnSide(const V3D &point) const {
 }
 
 /** tries to find a point that lies on or within the first detector in the
-* storage
-* found in the storage map
-*  @param point :: if a point is found its coordinates will be stored in this
-* varible
-*  @return 1 if point found, 0 otherwise
-*/
+ * storage
+ * found in the storage map
+ *  @param point :: if a point is found its coordinates will be stored in this
+ * varible
+ *  @return 1 if point found, 0 otherwise
+ */
 int DetectorGroup::getPointInObject(V3D &point) const {
   DetCollection::const_iterator it;
   it = m_detectors.begin();
@@ -308,34 +262,34 @@ int DetectorGroup::getPointInObject(V3D &point) const {
 }
 
 /**
-* Get the names of the parameters for this component.
-* @param recursive :: If true, the parameters for all of the parent components
-* are also included
-* @returns A set of strings giving the parameter names for this component
-*/
+ * Get the names of the parameters for this component.
+ * @param recursive :: If true, the parameters for all of the parent components
+ * are also included
+ * @returns A set of strings giving the parameter names for this component
+ */
 std::set<std::string> DetectorGroup::getParameterNames(bool recursive) const {
   (void)recursive; // Avoid compiler warning
   return std::set<std::string>();
 }
 
 /**
-* Get the names of the parameters for this component and it's parents.
-* @returns A map of strings giving the parameter names and the component they
-* are from, warning this contains shared pointers keeping transient objects
-* alive, do not keep longer than needed
-*/
+ * Get the names of the parameters for this component and it's parents.
+ * @returns A map of strings giving the parameter names and the component they
+ * are from, warning this contains shared pointers keeping transient objects
+ * alive, do not keep longer than needed
+ */
 std::map<std::string, ComponentID>
 DetectorGroup::getParameterNamesByComponent() const {
   return std::map<std::string, ComponentID>();
 }
 
 /**
-* Get a string representation of a parameter
-* @param pname :: The name of the parameter
-* @param recursive :: If true the search will walk up through the parent
-* components
-* @returns A empty string as this is not a parameterized component
-*/
+ * Get a string representation of a parameter
+ * @param pname :: The name of the parameter
+ * @param recursive :: If true the search will walk up through the parent
+ * components
+ * @returns A empty string as this is not a parameterized component
+ */
 std::string DetectorGroup::getParameterAsString(const std::string &pname,
                                                 bool recursive) const {
   (void)pname;     // Avoid compiler warning
@@ -344,10 +298,10 @@ std::string DetectorGroup::getParameterAsString(const std::string &pname,
 }
 
 /**
-* Get the bounding box for this group of detectors. It is simply the sum of the
-* bounding boxes of its constituents.
-* @param boundingBox :: [Out] The resulting bounding box is stored here.
-*/
+ * Get the bounding box for this group of detectors. It is simply the sum of the
+ * bounding boxes of its constituents.
+ * @param boundingBox :: [Out] The resulting bounding box is stored here.
+ */
 void DetectorGroup::getBoundingBox(BoundingBox &boundingBox) const {
   // boundingBox = BoundingBox(); // this change may modify a lot of behaviour
   // -> verify
@@ -363,14 +317,13 @@ void DetectorGroup::getBoundingBox(BoundingBox &boundingBox) const {
   }
 }
 /**
-*Returns a boolean indicating if the component has the named parameter
-*@param name :: The name of the parameter
-*@param recursive :: If true the parent components will also be searched
-* (Default: true)
-*@returns A boolean indicating if the search was successful or not. Always false
-* as this is not
-*parameterized
-*/
+ *Returns a boolean indicating if the component has the named parameter
+ *@param name :: The name of the parameter
+ *@param recursive :: If true the parent components will also be searched
+ * (Default: true)
+ *@returns A boolean indicating if the search was successful or not. Always
+ *false as this is not parameterized
+ */
 bool DetectorGroup::hasParameter(const std::string &name,
                                  bool recursive) const {
   (void)recursive; // Avoid compiler warning
@@ -494,6 +447,22 @@ std::string DetectorGroup::getFullName() const {
 
 const Kernel::Material DetectorGroup::material() const {
   return Kernel::Material();
+}
+
+/// Helper for legacy access mode. Always throws for DetectorGroup.
+const ParameterMap &DetectorGroup::parameterMap() const {
+  throw std::runtime_error("A DetectorGroup cannot have a ParameterMap");
+}
+
+/// Helper for legacy access mode. Always throws for DetectorGroup.
+size_t DetectorGroup::index() const {
+  throw std::runtime_error("A DetectorGroup cannot have an index");
+}
+
+size_t DetectorGroup::registerContents(class ComponentVisitor &) const {
+  throw std::runtime_error("DetectorGroup::registerContents. This should not "
+                           "be called. DetectorGroups are not part of the "
+                           "instrument. On-the-fly only.");
 }
 
 } // namespace Geometry

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -50,7 +56,7 @@ void AlgorithmObserver::observeProgress(IAlgorithm_const_sptr alg) {
 }
 
 /**   Connect to AlgorithmManager and observe its starting notifications
-*/
+ */
 void AlgorithmObserver::observeStarting() {
   AlgorithmManager::Instance().notificationCenter.addObserver(
       m_startingObserver);

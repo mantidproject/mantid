@@ -1,17 +1,26 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef SOLIDANGLETEST_H_
 #define SOLIDANGLETEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/SolidAngle.h"
-#include "MantidKernel/PhysicalConstants.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/SpectrumInfo.h"
+#include "MantidAlgorithms/CreateSampleWorkspace.h"
+#include "MantidAlgorithms/SolidAngle.h"
 #include "MantidDataHandling/LoadInstrument.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/OptionalBool.h"
+#include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/Unit.h"
+#include "MantidKernel/UnitFactory.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
@@ -19,8 +28,8 @@ using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 using Mantid::HistogramData::BinEdges;
-using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::CountVariances;
+using Mantid::HistogramData::Counts;
 
 class SolidAngleTest : public CxxTest::TestSuite {
 public:
@@ -28,6 +37,7 @@ public:
   static void destroySuite(SolidAngleTest *suite) { delete suite; }
 
   SolidAngleTest() : inputSpace(""), outputSpace("") {
+    SolidAngle alg;
     // Set up a small workspace for testing
     // Nhist = 144;
     auto space2D = createWorkspace<Workspace2D>(Nhist, 11, 10);
@@ -39,8 +49,6 @@ public:
       space2D->setBinEdges(j, x);
       space2D->setCounts(j, a);
       space2D->setCountVariances(j, e);
-      // Just set the spectrum number to match the index
-      space2D->getSpectrum(j).setSpectrumNo(j + 1);
     }
 
     // Register the workspace in the data service
@@ -60,12 +68,11 @@ public:
     space2D->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
 
     // Mark one detector dead to test that it leads to zero solid angle
-    IDetector_const_sptr det143 = space2D->getDetector(143);
-    ParameterMap &pmap = space2D->instrumentParameters();
-    pmap.addBool(det143.get(), "masked", true);
+    space2D->mutableSpectrumInfo().setMasked(143, true);
   }
 
   void testInit() {
+    SolidAngle alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
 
@@ -76,8 +83,14 @@ public:
   }
 
   void testExec() {
-    if (!alg.isInitialized())
+    SolidAngle alg;
+    if (!alg.isInitialized()) {
       alg.initialize();
+      // Set the properties
+      alg.setPropertyValue("InputWorkspace", inputSpace);
+      outputSpace = "outWorkspace";
+      alg.setPropertyValue("OutputWorkspace", outputSpace);
+    }
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
@@ -117,6 +130,7 @@ public:
   }
 
   void testExecSubset() {
+    SolidAngle alg;
     if (!alg.isInitialized())
       alg.initialize();
     alg.setPropertyValue("InputWorkspace", inputSpace);
@@ -152,8 +166,52 @@ public:
     }
   }
 
+  void testCorrectWithIndex() {
+    SolidAngle alg1;
+    SolidAngle alg2;
+    CreateSampleWorkspace createWS;
+    createWS.initialize();
+
+    if (!alg1.isInitialized())
+      alg1.initialize();
+    std::string outputWorkspace1 = "wholeOutput";
+    std::string outputWorkspace2 = "50OnwardsOutput";
+    std::string inputSpace2 = "IndexTestWS";
+    createWS.setPropertyValue("OutputWorkspace", inputSpace2);
+    createWS.execute();
+    alg1.setPropertyValue("InputWorkspace", inputSpace2);
+    alg1.setPropertyValue("OutputWorkspace", outputWorkspace1);
+    TS_ASSERT_THROWS_NOTHING(alg1.execute());
+    TS_ASSERT(alg1.isExecuted());
+    Workspace_sptr output1;
+    TS_ASSERT_THROWS_NOTHING(
+        output1 = AnalysisDataService::Instance().retrieve(outputWorkspace1));
+
+    if (!alg2.isInitialized())
+      alg2.initialize();
+    alg2.setPropertyValue("InputWorkspace", inputSpace2);
+    alg2.setPropertyValue("OutputWorkspace", outputWorkspace2);
+    alg2.setPropertyValue("StartWorkspaceIndex", "50");
+    TS_ASSERT_THROWS_NOTHING(alg2.execute());
+    TS_ASSERT(alg2.isExecuted());
+    Workspace_sptr output2;
+    TS_ASSERT_THROWS_NOTHING(
+        output2 = AnalysisDataService::Instance().retrieve(outputWorkspace2));
+
+    Workspace2D_sptr output2D_1 =
+        boost::dynamic_pointer_cast<Workspace2D>(output1);
+    Workspace2D_sptr output2D_2 =
+        boost::dynamic_pointer_cast<Workspace2D>(output2);
+    const size_t numberOfSpectra1 = output2D_1->getNumberHistograms();
+    const size_t numberOfSpectra2 = output2D_2->getNumberHistograms();
+    for (size_t i = 50, j = 0; i < numberOfSpectra1 && j < numberOfSpectra2;
+         i++, j++) {
+      // all values after the start point of the second workspace should match
+      TS_ASSERT_EQUALS(output2D_1->y(i)[0], output2D_2->y(j)[0]);
+    }
+  }
+
 private:
-  SolidAngle alg;
   std::string inputSpace;
   std::string outputSpace;
   enum { Nhist = 144 };

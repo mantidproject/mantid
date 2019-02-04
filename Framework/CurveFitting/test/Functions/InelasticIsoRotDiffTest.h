@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef INELASTICISOROTDIFFTEST_H_
 #define INELASTICISOROTDIFFTEST_H_
 
@@ -43,8 +49,8 @@ public:
   }
 
   /**
-  * @brief Test default constraints are implemented
-  */
+   * @brief Test default constraints are implemented
+   */
   void test_constraints() {
     auto func = createTestInelasticIsoRotDiff();
     std::vector<std::string> parameters{"Height", "Radius", "Tau"};

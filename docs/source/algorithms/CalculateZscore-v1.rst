@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -36,7 +36,7 @@ Usage
   # rebin from min to max with size bin = 2
   ws2 = CalculateZscore(InputWorkspace=ws)
 
-  print "The Z-scores are: " + str(ws2.readY(0))
+  print("The Z-scores are: {}".format(ws2.readY(0)))
 
 .. testcleanup:: ExHistSimple
 

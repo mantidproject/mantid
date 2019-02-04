@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAHANDLING_LoadISISNexus22_H_
 #define MANTID_DATAHANDLING_LoadISISNexus22_H_
 
@@ -6,11 +12,11 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IFileLoader.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataHandling/ISISRunLogs.h"
-#include "MantidDataHandling/DataBlockComposite.h"
-#include "MantidNexus/NexusClasses.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
+#include "MantidDataHandling/DataBlockComposite.h"
+#include "MantidDataHandling/ISISRunLogs.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidNexus/NexusClasses.h"
 #include <nexus/NeXusFile.hpp>
 
 #include <boost/scoped_ptr.hpp>
@@ -49,27 +55,6 @@ multi-period file)
 </UL>
 
 @author Roman Tolchenov, Tessella plc
-
-Copyright &copy; 2007-9 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>.
-Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport LoadISISNexus2
     : public API::IFileLoader<Kernel::NexusDescriptor> {
@@ -80,6 +65,9 @@ public:
   const std::string name() const override { return "LoadISISNexus"; }
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 2; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"LoadEventNexus", "SaveISISNexus"};
+  }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "DataHandling\\Nexus"; }
   /// Summary of algorithms purpose
@@ -126,8 +114,7 @@ private:
   void loadSampleData(DataObjects::Workspace2D_sptr &,
                       Mantid::NeXus::NXEntry &entry);
   /// Load log data from the nexus file
-  void loadLogs(DataObjects::Workspace2D_sptr &ws,
-                Mantid::NeXus::NXEntry &entry);
+  void loadLogs(DataObjects::Workspace2D_sptr &ws);
   // Load a given period into the workspace
   void loadPeriodData(int64_t period, Mantid::NeXus::NXEntry &entry,
                       DataObjects::Workspace2D_sptr &local_workspace,
@@ -147,6 +134,9 @@ private:
   // build the list of spectra numbers to load and include in the spectra list
   void buildSpectraInd2SpectraNumMap(bool range_supplied, bool hasSpectraList,
                                      DataBlockComposite &dataBlockComposite);
+
+  /// Check if any of the spectra block ranges overlap
+  void checkOverlappingSpectraRange();
 
   /// The name and path of the input file
   std::string m_filename;
@@ -214,6 +204,9 @@ private:
                                  int64_t ndets, int64_t n_vms_compat_spectra,
                                  std::map<int64_t, std::string> &monitors,
                                  bool excludeMonitors, bool separateMonitors);
+
+  /// Check if is the file is a multiple time regime file
+  bool isMultipleTimeRegimeFile(NeXus::NXEntry &entry) const;
 };
 
 } // namespace DataHandling

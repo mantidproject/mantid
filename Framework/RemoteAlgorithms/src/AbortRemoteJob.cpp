@@ -1,10 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidRemoteAlgorithms/AbortRemoteJob.h"
-#include "MantidKernel/MandatoryValidator.h"
-#include "MantidKernel/NullValidator.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidRemoteAlgorithms/SimpleJSON.h"
+#include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/NullValidator.h"
 #include "MantidKernel/RemoteJobManager.h"
+#include "MantidRemoteAlgorithms/SimpleJSON.h"
 
 #include "boost/make_shared.hpp"
 
@@ -18,6 +25,9 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
 // A reference to the logger is provided by the base class, it is called g_log.
+
+/// Empty constructor
+AbortRemoteJob::AbortRemoteJob() { this->useAlgorithm("AbortRemoteJob", 2); }
 
 void AbortRemoteJob::init() {
   // Unlike most algorithms, this one doesn't deal with workspaces....

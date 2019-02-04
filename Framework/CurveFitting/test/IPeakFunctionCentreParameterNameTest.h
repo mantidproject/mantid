@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef IPEAKFUNCTIONCENTREPARAMETERNAMETEST_H
 #define IPEAKFUNCTIONCENTREPARAMETERNAMETEST_H
 
-#include <cxxtest/TestSuite.h>
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IPeakFunction.h"
+#include <cxxtest/TestSuite.h>
 #include <map>
 
 using namespace Mantid::API;
@@ -33,19 +39,20 @@ public:
   /* Test that all functions give the expected result.
    */
   void testAllFunctions() {
-    for (auto it = m_expectedResults.begin(); it != m_expectedResults.end();
-         ++it) {
-      const std::string &peakFunctionName = it->first;
-      const std::string &centreParameterName = it->second;
+    for (auto &expectedResult : m_expectedResults) {
+      const std::string &peakFunctionName = expectedResult.first;
+      const std::string &centreParameterName = expectedResult.second;
 
       IPeakFunction_sptr fn = boost::dynamic_pointer_cast<IPeakFunction>(
           FunctionFactory::Instance().createFunction(peakFunctionName));
 
       TS_ASSERT(fn);
-      TSM_ASSERT_EQUALS("IPeakFunction " + peakFunctionName + " gave centre"
-                                                              "parameter '" +
-                            fn->getCentreParameterName() + "', "
-                                                           "should give '" +
+      TSM_ASSERT_EQUALS("IPeakFunction " + peakFunctionName +
+                            " gave centre"
+                            "parameter '" +
+                            fn->getCentreParameterName() +
+                            "', "
+                            "should give '" +
                             centreParameterName + "'.",
                         fn->getCentreParameterName(), centreParameterName);
     }

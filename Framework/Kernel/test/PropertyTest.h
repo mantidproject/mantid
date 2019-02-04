@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef PROPERTYTEST_H_
 #define PROPERTYTEST_H_
 
@@ -76,6 +82,8 @@ public:
     TS_ASSERT_EQUALS(p->documentation(), str2);
     TS_ASSERT_EQUALS(p->briefDocumentation(), "Brief");
   }
+
+  void testIsValueSerializable() { TS_ASSERT(p->isValueSerializable()) }
 
   void testAllowedValues() { TS_ASSERT(p->allowedValues().empty()); }
 

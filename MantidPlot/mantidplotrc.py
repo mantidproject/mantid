@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #-------------------------------------------------------------------------------
 # mantidplotrc.py
 #
@@ -22,6 +28,12 @@ if __name__ == '__main__':
     # Import MantidPlot python commands
     import mantidplot
     from mantidplot import *
+    try:
+        # The MantidPlot namespace is not ready for the python3-style range function
+        # so we ensure we revert back to the current built-in version
+        del range
+    except NameError:
+        pass
 
     # Make Mantid available
     import mantid
@@ -32,7 +44,7 @@ if __name__ == '__main__':
     from mantid.api import *
     from mantid.simpleapi import *
 
-    # Common imports (here for backwards compatability)
+    # Common imports (here for backwards compatibility)
     import os
     import sys
 

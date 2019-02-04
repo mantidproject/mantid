@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CURVEFITTING_COSTFUNCFITTING_H_
 #define MANTID_CURVEFITTING_COSTFUNCFITTING_H_
 
@@ -7,8 +13,8 @@
 #include "MantidAPI/ICostFunction.h"
 #include "MantidAPI/IFunction.h"
 //#include "MantidKernel/Matrix.h"
-#include "MantidCurveFitting/GSLVector.h"
 #include "MantidCurveFitting/GSLMatrix.h"
+#include "MantidCurveFitting/GSLVector.h"
 
 namespace Mantid {
 namespace CurveFitting {
@@ -18,31 +24,12 @@ namespace CostFunctions {
 
     @author Roman Tolchenov, Tessella plc
     @date 10/04/2012
-
-    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-   National Laboratory & European Spallation Source
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>.
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport CostFuncFitting : public API::ICostFunction {
 public:
   CostFuncFitting();
+  /// Number of parameters
+  size_t nParams() const override;
   /// Get i-th parameter
   /// @param i :: Index of a parameter
   /// @return :: Value of the parameter
@@ -51,8 +38,8 @@ public:
   /// @param i :: Index of a parameter
   /// @param value :: New value of the parameter
   void setParameter(size_t i, const double &value) override;
-  /// Number of parameters
-  size_t nParams() const override;
+  /// Get name of i-th parameter
+  std::string parameterName(size_t i) const;
 
   /// Set fitting function.
   virtual void setFittingFunction(API::IFunction_sptr function,
@@ -74,6 +61,14 @@ public:
   API::FunctionDomain_sptr getDomain() const { return m_domain; }
   /// Get FunctionValues where function values are stored.
   API::FunctionValues_sptr getValues() const { return m_values; }
+  /// Apply ties in the fitting function
+  void applyTies();
+  /// Reset the fitting function (neccessary if parameters get fixed/unfixed)
+  void reset() const;
+  /// Set all parameters
+  void setParameters(const GSLVector &params);
+  /// Get values of all parameters
+  void getParameters(GSLVector &params) const;
 
 protected:
   /**
@@ -94,7 +89,9 @@ protected:
   /// Shared poinetr to the function values
   API::FunctionValues_sptr m_values;
   /// maps the cost function's parameters to the ones of the fitting function.
-  std::vector<size_t> m_indexMap;
+  mutable std::vector<size_t> m_indexMap;
+  /// Number of all parameters in the fitting function.
+  mutable size_t m_numberFunParams;
 
   mutable bool m_dirtyVal;     /// dirty value flag
   mutable bool m_dirtyDeriv;   /// dirty derivatives flag

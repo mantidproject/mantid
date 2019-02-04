@@ -43,6 +43,7 @@ case "$1" in
 	# Link profiles to /etc/profile.d
 	ln -s @CMAKE_INSTALL_PREFIX@/@ETC_DIR@/mantid.sh /etc/profile.d/mantid.sh
 	ln -s @CMAKE_INSTALL_PREFIX@/@ETC_DIR@/mantid.csh /etc/profile.d/mantid.csh
+	ln -s @CMAKE_INSTALL_PREFIX@/@ETC_DIR@/mantid.pth @PYTHON_SITE@/mantid.pth
     fi
   ;;
 

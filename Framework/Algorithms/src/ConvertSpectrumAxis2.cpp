@@ -1,20 +1,31 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/ConvertSpectrumAxis2.h"
-#include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectraAxisValidator.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidKernel/CompositeValidator.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidHistogramData/Histogram.h"
+#include "MantidHistogramData/HistogramBuilder.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitConversion.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidTypes/SpectrumDefinition.h"
 
 #include <cfloat>
+
+constexpr double rad2deg = 180.0 / M_PI;
 
 namespace Mantid {
 namespace Algorithms {
@@ -23,11 +34,12 @@ DECLARE_ALGORITHM(ConvertSpectrumAxis2)
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;
+using namespace DataObjects;
+using namespace HistogramData;
 
 void ConvertSpectrumAxis2::init() {
   // Validator for Input Workspace
   auto wsVal = boost::make_shared<CompositeValidator>();
-  wsVal->add<HistogramValidator>();
   wsVal->add<SpectraAxisValidator>();
   wsVal->add<InstrumentValidator>();
 
@@ -37,14 +49,9 @@ void ConvertSpectrumAxis2::init() {
   declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                    Direction::Output),
                   "The name to use for the output workspace.");
-  std::vector<std::string> targetOptions(6);
-  targetOptions[0] = "Theta";
-  targetOptions[1] = "SignedTheta";
-  targetOptions[2] = "ElasticQ";
-  targetOptions[3] = "ElasticQSquared";
-  targetOptions[4] = "theta";
-  targetOptions[5] = "signed_theta";
-
+  std::vector<std::string> targetOptions{
+      "Theta", "SignedTheta",  "ElasticQ",       "ElasticQSquared",
+      "theta", "signed_theta", "ElasticDSpacing"};
   declareProperty(
       "Target", "", boost::make_shared<StringListValidator>(targetOptions),
       "The unit to which spectrum axis is converted to - \"theta\" (for the "
@@ -63,47 +70,61 @@ void ConvertSpectrumAxis2::init() {
   declareProperty("EFixed", EMPTY_DBL(), mustBePositive,
                   "Value of fixed energy in meV : EI (EMode=Direct) or EF "
                   "(EMode=Indirect))");
+
+  declareProperty("OrderAxis", true,
+                  "Whether or not to sort the resulting"
+                  " spectrum axis.");
 }
 
 void ConvertSpectrumAxis2::exec() {
   // Get the input workspace.
   API::MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   // Assign value to the member variable storing the number of histograms.
-  size_t nHist = inputWS->getNumberHistograms();
+  const size_t nHist = inputWS->getNumberHistograms();
 
   // The unit to convert to.
   const std::string unitTarget = getProperty("Target");
 
-  Progress progress(this, 0, 1, inputWS->getNumberHistograms());
+  // Whether needs to be ordered
+  m_toOrder = getProperty("OrderAxis");
+
+  size_t nProgress = nHist;
+  if (m_toOrder) {
+    // we will need to loop twice, once to build the indexMap,
+    // once to copy over the spectra and set the output
+    nProgress *= 2;
+  } else {
+    m_axis.reserve(nHist);
+  }
+
+  Progress progress(this, 0.0, 1.0, nProgress);
 
   // Call the functions to convert to the different forms of theta or Q.
   if (unitTarget == "theta" || unitTarget == "Theta" ||
       unitTarget == "signed_theta" || unitTarget == "SignedTheta") {
-    createThetaMap(progress, unitTarget, inputWS, nHist);
-  } else if (unitTarget == "ElasticQ" || unitTarget == "ElasticQSquared") {
-    createElasticQMap(progress, unitTarget, inputWS, nHist);
+    createThetaMap(progress, unitTarget, inputWS);
+  } else if (unitTarget == "ElasticQ" || unitTarget == "ElasticQSquared" ||
+             unitTarget == "ElasticDSpacing") {
+    createElasticQMap(progress, unitTarget, inputWS);
   }
 
   // Create an output workspace and set the property for it.
   MatrixWorkspace_sptr outputWS =
-      createOutputWorkspace(progress, unitTarget, inputWS, nHist);
+      createOutputWorkspace(progress, unitTarget, inputWS);
   setProperty("OutputWorkspace", outputWS);
 }
 
 /** Converts X axis to theta representation
-* @param progress :: Progress indicator
-* @param targetUnit :: Target conversion unit
-* @param inputWS :: Input Workspace
-* @param nHist :: Stores the number of histograms
-*/
+ * @param progress :: Progress indicator
+ * @param targetUnit :: Target conversion unit
+ * @param inputWS :: Input Workspace
+ */
 void ConvertSpectrumAxis2::createThetaMap(API::Progress &progress,
                                           const std::string &targetUnit,
-                                          API::MatrixWorkspace_sptr &inputWS,
-                                          size_t nHist) {
+                                          API::MatrixWorkspace_sptr &inputWS) {
   // Not sure about default, previously there was a call to a null function?
   bool signedTheta = false;
-  if (targetUnit.compare("signed_theta") == 0 ||
-      targetUnit.compare("SignedTheta") == 0) {
+  if (targetUnit == "signed_theta" || targetUnit == "SignedTheta") {
     signedTheta = true;
   } else if (targetUnit == "theta" || targetUnit == "Theta") {
     signedTheta = false;
@@ -112,7 +133,7 @@ void ConvertSpectrumAxis2::createThetaMap(API::Progress &progress,
   bool warningGiven = false;
 
   const auto &spectrumInfo = inputWS->spectrumInfo();
-  for (size_t i = 0; i < nHist; ++i) {
+  for (size_t i = 0; i < spectrumInfo.size(); ++i) {
     if (!spectrumInfo.hasDetectors(i)) {
       if (!warningGiven)
         g_log.warning("The instrument definition is incomplete - spectra "
@@ -120,27 +141,27 @@ void ConvertSpectrumAxis2::createThetaMap(API::Progress &progress,
       warningGiven = true;
       continue;
     }
-    if (signedTheta)
-      m_indexMap.emplace(spectrumInfo.signedTwoTheta(i) * rad2deg, i);
-    else
-      m_indexMap.emplace(spectrumInfo.twoTheta(i) * rad2deg, i);
+    if (!spectrumInfo.isMonitor(i)) {
+      if (signedTheta)
+        emplaceIndexMap(spectrumInfo.signedTwoTheta(i) * rad2deg, i);
+      else
+        emplaceIndexMap(spectrumInfo.twoTheta(i) * rad2deg, i);
+    } else {
+      emplaceIndexMap(0.0, i);
+    }
 
     progress.report("Converting to theta...");
   }
 }
 
 /** Convert X axis to Elastic Q representation
-* @param progress :: Progress indicator
-* @param targetUnit :: Target conversion unit
-* @param inputWS :: Input workspace
-* @param nHist :: Stores the number of histograms
-*/
-void ConvertSpectrumAxis2::createElasticQMap(API::Progress &progress,
-                                             const std::string &targetUnit,
-                                             API::MatrixWorkspace_sptr &inputWS,
-                                             size_t nHist) {
-  IComponent_const_sptr source = inputWS->getInstrument()->getSource();
-  IComponent_const_sptr sample = inputWS->getInstrument()->getSample();
+ * @param progress :: Progress indicator
+ * @param targetUnit :: Target conversion unit
+ * @param inputWS :: Input workspace
+ */
+void ConvertSpectrumAxis2::createElasticQMap(
+    API::Progress &progress, const std::string &targetUnit,
+    API::MatrixWorkspace_sptr &inputWS) {
 
   const std::string emodeStr = getProperty("EMode");
   int emode = 0;
@@ -149,56 +170,83 @@ void ConvertSpectrumAxis2::createElasticQMap(API::Progress &progress,
   else if (emodeStr == "Indirect")
     emode = 2;
 
+  const auto &spectrumInfo = inputWS->spectrumInfo();
+  const auto &detectorInfo = inputWS->detectorInfo();
+  const size_t nHist = spectrumInfo.size();
   for (size_t i = 0; i < nHist; i++) {
-    IDetector_const_sptr detector = inputWS->getDetector(i);
-    double twoTheta(0.0), efixed(0.0);
-    if (!detector->isMonitor()) {
-      twoTheta = 0.5 * inputWS->detectorTwoTheta(*detector);
-      efixed = getEfixed(detector, inputWS, emode); // get efixed
+    double theta(0.0), efixed(0.0);
+    if (!spectrumInfo.isMonitor(i)) {
+      theta = 0.5 * spectrumInfo.twoTheta(i);
+      /*
+       * Two assumptions made in the following code.
+       * 1. Getting the detector index of the first detector in the spectrum
+       * definition is enough (this should be completely safe).
+       * 2. That the time index is not important (first element of pair only
+       * accessed). i.e we are not performing scanning. Step scanning is not
+       * supported at the time of writing.
+       */
+      const auto detectorIndex = spectrumInfo.spectrumDefinition(i)[0].first;
+      efixed = getEfixed(detectorIndex, detectorInfo, *inputWS,
+                         emode); // get efixed
     } else {
-      twoTheta = 0.0;
+      theta = DBL_MIN;
       efixed = DBL_MIN;
     }
 
     // Convert to MomentumTransfer
-    double elasticQInAngstroms = Kernel::UnitConversion::run(twoTheta, efixed);
+    double elasticQInAngstroms =
+        Kernel::UnitConversion::convertToElasticQ(theta, efixed);
 
     if (targetUnit == "ElasticQ") {
-      m_indexMap.emplace(elasticQInAngstroms, i);
+      emplaceIndexMap(elasticQInAngstroms, i);
     } else if (targetUnit == "ElasticQSquared") {
       // The QSquared value.
       double elasticQSquaredInAngstroms =
           elasticQInAngstroms * elasticQInAngstroms;
 
-      m_indexMap.emplace(elasticQSquaredInAngstroms, i);
+      emplaceIndexMap(elasticQSquaredInAngstroms, i);
+    } else if (targetUnit == "ElasticDSpacing") {
+      double elasticDSpacing = 2 * M_PI / elasticQInAngstroms;
+      emplaceIndexMap(elasticDSpacing, i);
     }
 
-    progress.report("Converting to Elastic Q...");
+    progress.report("Converting to " + targetUnit);
   }
 }
 
 /** Create the final output workspace after converting the X axis
-* @returns the final output workspace
-*
-* @param progress :: Progress indicator
-* @param targetUnit :: Target conversion unit
-* @param inputWS :: Input workspace
-* @param nHist :: Stores the number of histograms
-*/
+ * @returns the final output workspace
+ *
+ * @param progress :: Progress indicator
+ * @param targetUnit :: Target conversion unit
+ * @param inputWS :: Input workspace
+ */
 MatrixWorkspace_sptr ConvertSpectrumAxis2::createOutputWorkspace(
     API::Progress &progress, const std::string &targetUnit,
-    API::MatrixWorkspace_sptr &inputWS, size_t nHist) {
-  // Create the output workspace. Can not re-use the input one because the
-  // spectra are re-ordered.
-  MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(
-      inputWS, m_indexMap.size(), inputWS->x(0).size(), inputWS->y(0).size());
+    API::MatrixWorkspace_sptr &inputWS) {
 
-  // Now set up a new numeric axis holding the theta values corresponding to
-  // each spectrum.
-  auto const newAxis = new NumericAxis(m_indexMap.size());
+  MatrixWorkspace_sptr outputWorkspace = nullptr;
+  NumericAxis *newAxis = nullptr;
+  if (m_toOrder) {
+    // Can not re-use the input one because the spectra are re-ordered.
+    HistogramBuilder builder;
+    builder.setX(inputWS->x(0).size());
+    builder.setY(inputWS->y(0).size());
+    builder.setDistribution(inputWS->isDistribution());
+    outputWorkspace =
+        create<MatrixWorkspace>(*inputWS, m_indexMap.size(), builder.build());
+    std::vector<double> axis;
+    axis.reserve(m_indexMap.size());
+    for (const auto &it : m_indexMap) {
+      axis.emplace_back(it.first);
+    }
+    newAxis = new NumericAxis(std::move(axis));
+  } else {
+    // If there is no reordering we can simply clone.
+    outputWorkspace = inputWS->clone();
+    newAxis = new NumericAxis(m_axis);
+  }
   outputWorkspace->replaceAxis(1, newAxis);
-
-  progress.setNumSteps(nHist + m_indexMap.size());
 
   // Set the units of the axis.
   if (targetUnit == "theta" || targetUnit == "Theta" ||
@@ -208,63 +256,80 @@ MatrixWorkspace_sptr ConvertSpectrumAxis2::createOutputWorkspace(
     newAxis->unit() = UnitFactory::Instance().create("MomentumTransfer");
   } else if (targetUnit == "ElasticQSquared") {
     newAxis->unit() = UnitFactory::Instance().create("QSquared");
+  } else if (targetUnit == "ElasticDSpacing") {
+    newAxis->unit() = UnitFactory::Instance().create("dSpacing");
   }
 
-  std::multimap<double, size_t>::const_iterator it;
-  size_t currentIndex = 0;
-  for (it = m_indexMap.begin(); it != m_indexMap.end(); ++it) {
-    // Set the axis value.
-    newAxis->setValue(currentIndex, it->first);
-    // Copy over the data.
-    outputWorkspace->setHistogram(currentIndex, inputWS->histogram(it->second));
-    // We can keep the spectrum numbers etc.
-    outputWorkspace->getSpectrum(currentIndex)
-        .copyInfoFrom(inputWS->getSpectrum(it->second));
-    ++currentIndex;
-
-    progress.report("Creating output workspace...");
+  // Note that this is needed only for ordered case
+  if (m_toOrder) {
+    size_t currentIndex = 0;
+    std::multimap<double, size_t>::const_iterator it;
+    for (it = m_indexMap.begin(); it != m_indexMap.end(); ++it) {
+      // Copy over the data.
+      outputWorkspace->setHistogram(currentIndex,
+                                    inputWS->histogram(it->second));
+      // We can keep the spectrum numbers etc.
+      outputWorkspace->getSpectrum(currentIndex)
+          .copyInfoFrom(inputWS->getSpectrum(it->second));
+      ++currentIndex;
+      progress.report("Setting output spectrum #" +
+                      std::to_string(currentIndex));
+    }
   }
+
   return outputWorkspace;
 }
 
-double ConvertSpectrumAxis2::getEfixed(IDetector_const_sptr detector,
-                                       MatrixWorkspace_const_sptr inputWS,
-                                       int emode) const {
+double ConvertSpectrumAxis2::getEfixed(
+    const size_t detectorIndex, const Geometry::DetectorInfo &detectorInfo,
+    const Mantid::API::MatrixWorkspace &inputWS, const int emode) const {
   double efixed(0);
   double efixedProp = getProperty("Efixed");
+  Mantid::detid_t detectorID = detectorInfo.detectorIDs()[detectorIndex];
   if (efixedProp != EMPTY_DBL()) {
     efixed = efixedProp;
-    g_log.debug() << "Detector: " << detector->getID() << " Efixed: " << efixed
+    g_log.debug() << "Detector: " << detectorID << " Efixed: " << efixed
                   << "\n";
   } else {
     if (emode == 1) {
-      if (inputWS->run().hasProperty("Ei")) {
-        efixed = inputWS->run().getLogAsSingleValue("Ei");
+      if (inputWS.run().hasProperty("Ei")) {
+        efixed = inputWS.run().getLogAsSingleValue("Ei");
       } else {
         throw std::invalid_argument("Could not retrieve Efixed from the "
                                     "workspace. Please provide a value.");
       }
     } else if (emode == 2) {
-      std::vector<double> efixedVec = detector->getNumberParameter("Efixed");
-      if (efixedVec.empty()) {
-        int detid = detector->getID();
-        IDetector_const_sptr detectorSingle =
-            inputWS->getInstrument()->getDetector(detid);
-        efixedVec = detectorSingle->getNumberParameter("Efixed");
-      }
+
+      const auto &detectorSingle = detectorInfo.detector(detectorIndex);
+
+      std::vector<double> efixedVec =
+          detectorSingle.getNumberParameter("Efixed");
+
       if (!efixedVec.empty()) {
         efixed = efixedVec.at(0);
-        g_log.debug() << "Detector: " << detector->getID()
-                      << " EFixed: " << efixed << "\n";
+        g_log.debug() << "Detector: " << detectorID << " EFixed: " << efixed
+                      << "\n";
       } else {
         g_log.warning() << "Efixed could not be found for detector "
-                        << detector->getID() << ", please provide a value\n";
+                        << detectorID << ", please provide a value\n";
         throw std::invalid_argument("Could not retrieve Efixed from the "
                                     "detector. Please provide a value.");
       }
     }
   }
   return efixed;
+}
+
+/** Emplaces inside the ordered or unordered index registry
+ * @param value :: value to insert
+ * @param wsIndex :: workspace index
+ */
+void ConvertSpectrumAxis2::emplaceIndexMap(double value, size_t wsIndex) {
+  if (m_toOrder) {
+    m_indexMap.emplace(value, wsIndex);
+  } else {
+    m_axis.emplace_back(value);
+  }
 }
 
 } // namespace Algorithms

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/FileLoaderRegistry.h"
 #include <boost/python/class.hpp>
 #include <boost/python/reference_existing_object.hpp>
@@ -15,5 +21,7 @@ void export_FileLoaderRegistry() {
       .def("Instance", &FileLoaderRegistry::Instance,
            return_value_policy<reference_existing_object>(),
            "Returns a reference to the FileLoaderRegistry singleton instance")
+      .def("chooseLoader", &FileLoaderRegistryImpl::chooseLoader,
+           (arg("self"), arg("file_path")), "Returns the winning algorithm")
       .staticmethod("Instance");
 }

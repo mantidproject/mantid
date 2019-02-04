@@ -1,8 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_SUPPORTTEST_H_
 #define MANTID_SUPPORTTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include <Poco/Path.h>
+#include <cxxtest/TestSuite.h>
 #include <fstream>
 
 #include "MantidKernel/Strings.h"
@@ -267,6 +273,113 @@ public:
     TS_ASSERT_EQUALS(out, "Help,Me,I'm,Stuck,Inside,A,Test");
   }
 
+  void test_joinSet() {
+    std::set<std::string> v;
+    std::string out;
+
+    out = join(v.begin(), v.end(), ",");
+    TS_ASSERT_EQUALS(out, "");
+
+    v.insert("Help");
+    v.insert("Me");
+    v.insert("I'm");
+    v.insert("Stuck");
+    v.insert("Inside");
+    v.insert("A");
+    v.insert("Test");
+
+    out = join(v.begin(), v.end(), ",");
+    TS_ASSERT_EQUALS(out, "A,Help,I'm,Inside,Me,Stuck,Test");
+  }
+
+  void test_joinLong() {
+    std::vector<std::string> v;
+    std::string out;
+    std::string ans;
+
+    out = join(v.begin(), v.end(), ",");
+    TS_ASSERT_EQUALS(out, "");
+
+    int n = 100000;
+    for (int i = 0; i < n; i++) {
+      v.emplace_back(std::to_string(i));
+      ans += std::to_string(i) + ",";
+    }
+
+    out = join(v.begin(), v.end(), ",");
+    ans.pop_back();
+    TS_ASSERT_EQUALS(out, ans);
+  }
+
+  void test_joinCompress() {
+
+    std::vector<std::vector<int>> inputList{
+        {1, 2, 3},
+        {-1, 0, 1},
+        {356, 366, 367, 368, 370, 371, 372, 375},
+        {7, 6, 5, 6, 7, 8, 10}};
+    std::vector<std::string> resultList{
+        "1-3", "-1-1", "356,366-368,370-372,375", "7,6,5-8,10"};
+
+    for (size_t i = 0; i < inputList.size(); i++) {
+      const auto &inputVector = inputList[i];
+      TS_ASSERT_EQUALS(
+          joinCompress(inputVector.begin(), inputVector.end(), ",", "-"),
+          resultList[i]);
+    }
+  }
+
+  void test_shorten() {
+
+    std::vector<std::string> inputList{
+        "",          // empty
+        "1,2",       // shorter than the ellipsis
+        "1,2,3",     // equal in length than the ellipsis
+        "1,2,35",    // one longer than the ellipsis
+        "1,2,3,4",   // two longer than the ellipsis
+        "1,2,3,45",  // just long enough for the ellipsis
+        "12,3,4,56", // another past the ellipsis
+        "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20"};
+    std::vector<std::string> resultListMaxLength7{
+        "",        // empty
+        "1,2",     // shorter than the ellipsis
+        "1,2,3",   // equal in length than the ellipsis
+        "1,2,35",  // one longer than the ellipsis
+        "1,2,3,4", // two longer than the ellipsis
+        "1 ... 5", // just long enough for the ellipsis
+        "1 ... 6", // another past the ellipsis
+        "1 ... 0"};
+
+    std::vector<std::string> resultListMaxLength20{
+        "",          // empty
+        "1,2",       // shorter than the ellipsis
+        "1,2,3",     // equal in length than the ellipsis
+        "1,2,35",    // one longer than the ellipsis
+        "1,2,3,4",   // two longer than the ellipsis
+        "1,2,3,45",  // just long enough for the ellipsis
+        "12,3,4,56", // another past the ellipsis
+        "1,2,3,4 ... 8,19,20"};
+
+    // test very short max size
+    int maxLength = 7;
+    for (size_t i = 0; i < inputList.size(); i++) {
+      const auto &input = inputList[i];
+      std::string result = shorten(input, maxLength);
+      TS_ASSERT_EQUALS(result, resultListMaxLength7[i]);
+      TS_ASSERT_LESS_THAN_EQUALS(result.size(), maxLength);
+      TS_ASSERT_LESS_THAN_EQUALS(result.size(), input.size());
+    }
+    // test longer max size
+    maxLength = 20;
+    for (size_t i = 0; i < inputList.size(); i++) {
+      const auto &input = inputList[i];
+      std::string result = shorten(input, maxLength);
+      TS_ASSERT_EQUALS(result, resultListMaxLength20[i]);
+      TS_ASSERT_LESS_THAN_EQUALS(result.size(), maxLength);
+      TS_ASSERT_LESS_THAN_EQUALS(result.size(), input.size());
+    }
+  }
+
   void test_endsWithInt() {
     TS_ASSERT_EQUALS(endsWithInt("pixel22"), 22);
     TS_ASSERT_EQUALS(endsWithInt("pixel000123"), 123);
@@ -418,19 +531,123 @@ public:
                             std::string("Range boundaries are reversed: 5-1"));
   }
 
+  void test_parseGroups_emptyString() {
+    std::vector<std::vector<int>> result;
+    TS_ASSERT_THROWS_NOTHING(result = parseGroups<int>(""))
+    TS_ASSERT(result.empty());
+  }
+
+  void test_parseGroups_comma() {
+    std::vector<std::vector<int>> result;
+    TS_ASSERT_THROWS_NOTHING(result = parseGroups<int>("7,13"))
+    std::vector<std::vector<int>> expected{
+        {std::vector<int>(1, 7), std::vector<int>(1, 13)}};
+    TS_ASSERT_EQUALS(result, expected)
+  }
+
+  void test_parseGroups_plus() {
+    std::vector<std::vector<int>> result;
+    TS_ASSERT_THROWS_NOTHING(result = parseGroups<int>("7+13"))
+    std::vector<std::vector<int>> expected{{std::vector<int>()}};
+    expected.front().emplace_back(7);
+    expected.front().emplace_back(13);
+    TS_ASSERT_EQUALS(result, expected)
+  }
+
+  void test_parseGroups_dash() {
+    std::vector<std::vector<int>> result;
+    TS_ASSERT_THROWS_NOTHING(result = parseGroups<int>("7-13"))
+    std::vector<std::vector<int>> expected{{std::vector<int>()}};
+    for (int i = 7; i <= 13; ++i) {
+      expected.front().emplace_back(i);
+    }
+    TS_ASSERT_EQUALS(result, expected)
+  }
+
+  void test_parseGroups_complexExpression() {
+    std::vector<std::vector<int>> result;
+    TS_ASSERT_THROWS_NOTHING(result = parseGroups<int>("1,4+5+8,7-13,1"))
+    std::vector<std::vector<int>> expected;
+    expected.emplace_back(1, 1);
+    expected.emplace_back();
+    expected.back().emplace_back(4);
+    expected.back().emplace_back(5);
+    expected.back().emplace_back(8);
+    expected.emplace_back();
+    for (int i = 7; i <= 13; ++i) {
+      expected.back().emplace_back(i);
+    }
+    expected.emplace_back(1, 1);
+    TS_ASSERT_EQUALS(result, expected)
+  }
+
+  void test_parseGroups_acceptsWhitespace() {
+    std::vector<std::vector<int>> result;
+    TS_ASSERT_THROWS_NOTHING(
+        result = parseGroups<int>(" 1\t, 4 +  5\t+ 8 , 7\t- 13 ,\t1  "))
+    std::vector<std::vector<int>> expected;
+    expected.emplace_back(1, 1);
+    expected.emplace_back();
+    expected.back().emplace_back(4);
+    expected.back().emplace_back(5);
+    expected.back().emplace_back(8);
+    expected.emplace_back();
+    for (int i = 7; i <= 13; ++i) {
+      expected.back().emplace_back(i);
+    }
+    expected.emplace_back(1, 1);
+    TS_ASSERT_EQUALS(result, expected)
+  }
+
+  void test_parseGroups_throwsWhenInputContainsNonnumericCharacters() {
+    TS_ASSERT_THROWS_EQUALS(
+        parseGroups<int>("a"), const std::runtime_error &e, e.what(),
+        std::string("Cannot parse numbers from string: 'a'"))
+  }
+
+  void test_parseGroups_throwsWhenOperationsAreInvalid() {
+    TS_ASSERT_THROWS_EQUALS(parseGroups<int>("-1"), const std::runtime_error &e,
+                            e.what(),
+                            std::string("Malformed range (-) operation."))
+    TS_ASSERT_THROWS_EQUALS(parseGroups<int>(":1"), const std::runtime_error &e,
+                            e.what(),
+                            std::string("Malformed range (:) operation."))
+  }
+
   void test_toString_vector_of_ints() {
-    std::vector<int> sortedInts;
-    sortedInts.push_back(1);
-    sortedInts.push_back(2);
-    sortedInts.push_back(3);
-    sortedInts.push_back(5);
-    sortedInts.push_back(6);
-    sortedInts.push_back(8);
-
+    std::vector<int> sortedInts{1, 2, 3, 5, 6, 8};
     auto result = toString(sortedInts);
-
     TS_ASSERT_EQUALS(std::string("1-3,5-6,8"), result);
   }
+
+  void test_getLine() {
+    std::istringstream text("blah blah\nfoo bar#comment\n");
+    std::string line = getLine(text);
+    TSM_ASSERT_EQUALS("Strings::getLine failed to read the first line.", line,
+                      "blah blah");
+    getLine(text, line);
+    TSM_ASSERT_EQUALS("Strings::getLine failed to remove comment.", line,
+                      "foo bar");
+    getLine(text, line);
+    TSM_ASSERT_EQUALS("Strings::getLine didn't return empty string after eof.",
+                      line, "");
+  }
+};
+
+class StringsTestPerformance : public CxxTest::TestSuite {
+public:
+  static StringsTestPerformance *createSuite() {
+    return new StringsTestPerformance();
+  }
+  static void destroySuite(StringsTestPerformance *suite) { delete suite; }
+  void setUp() override { input = std::vector<double>(50000000, 0.123456); }
+  void test_join_double() {
+    auto result = join(input.begin(), input.end(), separator);
+  }
+
+private:
+  std::vector<double> input;
+  std::string separator{","};
 };
 
 #endif // MANTID_SUPPORTTEST_H_

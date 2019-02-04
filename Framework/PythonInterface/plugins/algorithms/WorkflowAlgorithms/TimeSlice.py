@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name
 from __future__ import (absolute_import, division, print_function)
 
@@ -15,15 +21,13 @@ def _count_monitors(raw_file):
 
     raw_file = mtd[raw_file]
     num_hist = raw_file.getNumberHistograms()
-    detector = raw_file.getDetector(0)
     mon_count = 1
 
-    if detector.isMonitor():
+    spectrumInfo = raw_file.spectrumInfo()
+    if spectrumInfo.isMonitor(0):
         # Monitors are at the start
         for i in range(1, num_hist):
-            detector = raw_file.getDetector(i)
-
-            if detector.isMonitor():
+            if spectrumInfo.isMonitor(i):
                 mon_count += 1
             else:
                 break
@@ -31,16 +35,12 @@ def _count_monitors(raw_file):
         return mon_count, True
     else:
         # Monitors are at the end
-        detector = raw_file.getDetector(num_hist)
-
-        if not detector.isMonitor():
+        if not spectrumInfo.isMonitor(num_hist):
             #if it's not, we don't have any monitors!
             return 0, True
 
         for i in range(num_hist, 0, -1):
-            detector = raw_file.getDetector(i)
-
-            if detector.isMonitor():
+            if spectrumInfo.isMonitor(i):
                 mon_count += 1
             else:
                 break
@@ -65,6 +65,9 @@ class TimeSlice(PythonAlgorithm):
 
     def summary(self):
         return 'Performa an integration on a raw file over a specified time of flight range'
+
+    def seeAlso(self):
+        return [ "Integration" ]
 
     def PyInit(self):
         self.declareProperty(StringArrayProperty(name='InputFiles'),

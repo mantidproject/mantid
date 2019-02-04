@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_KERNEL_TYPEDVALIDATOR_H_
 #define MANTID_KERNEL_TYPEDVALIDATOR_H_
 //----------------------------------------------------------------------
@@ -17,27 +23,6 @@ will probably want to inherit from this rather than IValidator
 directly.
 
 A specialised type exists for boost::shared_ptr types
-
-Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>.
-Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 template <typename HeldType>
 class DLLExport TypedValidator : public IValidator {
@@ -78,7 +63,7 @@ template <typename ElementType>
 class DLLExport TypedValidator<boost::shared_ptr<ElementType>>
     : public IValidator {
   /// Shared ptr type
-  typedef boost::shared_ptr<ElementType> ElementType_sptr;
+  using ElementType_sptr = boost::shared_ptr<ElementType>;
 
 protected:
   /// Override this function to check the validity of the type
@@ -132,7 +117,7 @@ private:
     ElementType_sptr typedValue =
         boost::dynamic_pointer_cast<ElementType>(data);
     if (!typedValue) {
-      throw std::invalid_argument("DataItem \"" + data->name() +
+      throw std::invalid_argument("DataItem \"" + data->getName() +
                                   "\" is not of the expected type.");
     }
     return typedValue;
@@ -161,8 +146,8 @@ private:
 template <typename T>
 const std::type_info &TypedValidator<boost::shared_ptr<T>>::m_dataitemTypeID =
     typeid(boost::shared_ptr<DataItem>);
-}
+} // namespace Kernel
 /// @endcond
-}
+} // namespace Mantid
 
 #endif /* MANTID_KERNEL_TYPEDVALIDATOR_H_ */

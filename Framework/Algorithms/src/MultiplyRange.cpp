@@ -1,9 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/MultiplyRange.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid {
@@ -14,6 +23,8 @@ DECLARE_ALGORITHM(MultiplyRange)
 
 using namespace Kernel;
 using namespace API;
+using namespace DataObjects;
+using namespace HistogramData;
 
 void MultiplyRange::init() {
   // Declare an input workspace property.
@@ -63,7 +74,7 @@ void MultiplyRange::exec() {
   // Only create the output workspace if it's different to the input one
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
   if (outputWS != inputWS) {
-    outputWS = WorkspaceFactory::Instance().create(inputWS);
+    outputWS = create<MatrixWorkspace>(*inputWS);
     setProperty("OutputWorkspace", outputWS);
   }
 
@@ -71,7 +82,7 @@ void MultiplyRange::exec() {
   const int histogramCount = static_cast<int>(inputWS->getNumberHistograms());
   Progress progress(this, 0.0, 1.0, histogramCount);
   // Loop over spectra
-  PARALLEL_FOR2(inputWS, outputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
   for (int i = 0; i < histogramCount; ++i) {
     PARALLEL_START_INTERUPT_REGION
     outputWS->setHistogram(i, inputWS->histogram(i));

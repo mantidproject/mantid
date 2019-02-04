@@ -1,63 +1,71 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
 """
     Main window for reduction UIs
 """
+from __future__ import (absolute_import, division, print_function)
+import six
 import sys
 import os
 import traceback
+from gui_helper import get_qapplication
+from qtpy.QtWidgets import (QAction, QDialog, QFileDialog, QMainWindow, QMessageBox)  # noqa
+from qtpy.QtCore import (QFile, QFileInfo, QSettings)  # noqa
+from mantid.kernel import Logger
 
 # Check whether Mantid is available
-IS_IN_MANTIDPLOT = False
+CAN_REDUCE = False
 try:
-    import mantidplot # noqa
-    IS_IN_MANTIDPLOT = True
+    CAN_REDUCE = True
     from mantid.kernel import ConfigService
-    from mantid.api import AlgorithmFactory
-    CLUSTER_ENABLED = "SubmitRemoteJob" in AlgorithmFactory.getRegisteredAlgorithms(True)
-except:
-    import sip
-    sip.setapi('QString',2)
-    sip.setapi('QVariant',2)
+except ImportError:
+    pass
+try:
+    from mantidqt.utils.qt import load_ui  # noqa
+except ImportError:
+    Logger("ReductionGUI").information('Using legacy ui importer')
+    from mantidplot import load_ui  # noqa
 
-from PyQt4 import QtGui, QtCore # noqa
+if six.PY3:
+    unicode = str
 
-REDUCTION_WARNING = False
-WARNING_MESSAGE = ""
+STARTUP_WARNING = ""
 
-if IS_IN_MANTIDPLOT:
+if CAN_REDUCE:
     try:
-        import reduction
+        import reduction  # noqa
         if os.path.splitext(os.path.basename(reduction.__file__))[0] == "reduction":
-            REDUCTION_WARNING = True
             home_dir = os.path.expanduser('~')
             if os.path.abspath(reduction.__file__).startswith(home_dir):
-                WARNING_MESSAGE = "The following file is in your home area, please delete it and restart Mantid:\n\n"
+                STARTUP_WARNING = "The following file is in your home area, please delete it and restart Mantid:\n\n"
             else:
-                WARNING_MESSAGE = "If the following file is in your home area, please delete it and restart Mantid:\n\n"
-            WARNING_MESSAGE += os.path.abspath(reduction.__file__)
+                STARTUP_WARNING = "If the following file is in your home area, please delete it and restart Mantid:\n\n"
+            STARTUP_WARNING += os.path.abspath(reduction.__file__)
     except:
-        REDUCTION_WARNING = True
-        WARNING_MESSAGE = "Please contact the Mantid team with the following message:\n\n\n"
-        WARNING_MESSAGE += unicode(traceback.format_exc())
+        STARTUP_WARNING = "Please contact the Mantid team with the following message:\n\n\n"
+        STARTUP_WARNING += unicode(traceback.format_exc())
 
-from reduction_gui.instruments.instrument_factory import instrument_factory, INSTRUMENT_DICT # noqa
-from reduction_gui.settings.application_settings import GeneralSettings # noqa
-import ui.ui_reduction_main # noqa
-import ui.ui_instrument_dialog # noqa
-import ui.ui_cluster_details_dialog # noqa
+from reduction_gui.instruments.instrument_factory import instrument_factory, INSTRUMENT_DICT  # noqa
+from reduction_gui.settings.application_settings import GeneralSettings  # noqa
 
 
-class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
+class ReductionGUI(QMainWindow):
     def __init__(self, instrument=None, instrument_list=None):
-        QtGui.QMainWindow.__init__(self)
+        QMainWindow.__init__(self)
+        self.ui = load_ui(__file__, 'ui/reduction_main.ui', baseinstance=self)
 
-        if REDUCTION_WARNING:
+        if STARTUP_WARNING:
             message = "The reduction application has problems starting:\n\n"
-            message += WARNING_MESSAGE
-            QtGui.QMessageBox.warning(self, "WARNING", message)
+            message += STARTUP_WARNING
+            QMessageBox.warning(self, "WARNING", message)
 
         # Application settings
-        settings = QtCore.QSettings()
+        settings = QSettings()
 
         # Name handle for the instrument
         if instrument is None:
@@ -91,8 +99,7 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         self._number_of_nodes = 1
         self._cores_per_node = 16
         self._compute_resources = ['Fermi']
-        if IS_IN_MANTIDPLOT \
-                and hasattr(ConfigService.Instance().getFacility(), "computeResources"):
+        if CAN_REDUCE and hasattr(ConfigService.Instance().getFacility(), "computeResources"):
             self._compute_resources = ConfigService.Instance().getFacility().computeResources()
 
         # Internal flag for clearing all settings and restarting the application
@@ -101,25 +108,15 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         # General settings shared by all widgets
         self.general_settings = GeneralSettings(settings)
 
-        self.setupUi(self)
-
         # Event connections
-        if not IS_IN_MANTIDPLOT:
+        if not CAN_REDUCE:
             self.reduce_button.hide()
-        self.cluster_button.hide()
-        self.connect(self.export_button, QtCore.SIGNAL("clicked()"), self._export)
-        self.connect(self.reduce_button, QtCore.SIGNAL("clicked()"), self.reduce_clicked)
-        self.connect(self.save_button, QtCore.SIGNAL("clicked()"), self._save)
-        self.connect(self.interface_chk, QtCore.SIGNAL("clicked(bool)"), self._interface_choice)
+        self.export_button.clicked.connect(self._export)
+        self.reduce_button.clicked.connect(self.reduce_clicked)
+        self.save_button.clicked.connect(self._save)
+        self.interface_chk.clicked.connect(self._interface_choice)
 
         self.interface_chk.setChecked(self.general_settings.advanced)
-
-        # Of the widgets that are part of the application, one is the ApplicationWindow.
-        # The ApplicationWindow will send a shutting_down() signal when quitting,
-        # after which we should close this window.
-        # Note: there is no way to identify which Widget is the ApplicationWindow.
-        for w in QtCore.QCoreApplication.instance().topLevelWidgets():
-            self.connect(w, QtCore.SIGNAL("shutting_down()"), self.close)
 
         self.general_settings.progress.connect(self._progress_updated)
 
@@ -177,21 +174,10 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
             else:
                 self.interface_chk.hide()
 
-            # Show the parallel reduction button if enabled
-            if self._interface.is_cluster_enabled() and IS_IN_MANTIDPLOT \
-                    and CLUSTER_ENABLED:
-                config = ConfigService.Instance()
-                if config.hasProperty("cluster.submission") \
-                        and config.getString("cluster.submission").lower()=='on':
-                    self.cluster_button.show()
-                    self.connect(self.cluster_button, QtCore.SIGNAL("clicked()"), self.cluster_clicked)
-            else:
-                self.cluster_button.hide()
-
             if load_last:
                 self._interface.load_last_reduction()
         else:
-            print "Could not generate an interface for instrument %s" % self._instrument
+            print("Could not generate an interface for instrument %s" % self._instrument)
             self.close()
 
         return True
@@ -202,33 +188,33 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         """
         self.file_menu.clear()
 
-        newAction = QtGui.QAction("&New Reduction...", self)
+        newAction = QAction("&New Reduction...", self)
         newAction.setShortcut("Ctrl+N")
         newAction.setStatusTip("Start a new reduction")
-        self.connect(newAction, QtCore.SIGNAL("triggered()"), self._new)
+        newAction.triggered.connect(self._new)
 
-        openAction = QtGui.QAction("&Open...", self)
+        openAction = QAction("&Open...", self)
         openAction.setShortcut("Ctrl+O")
         openAction.setStatusTip("Open an XML file containing reduction parameters")
-        self.connect(openAction, QtCore.SIGNAL("triggered()"), self._file_open)
+        openAction.triggered.connect(self._file_open)
 
-        saveAsAction = QtGui.QAction("Save as...", self)
+        saveAsAction = QAction("Save as...", self)
         saveAsAction.setStatusTip("Save the reduction parameters to XML")
-        self.connect(saveAsAction, QtCore.SIGNAL("triggered()"), self._save_as)
+        saveAsAction.triggered.connect(self._save_as)
 
-        saveAction = QtGui.QAction("&Save...", self)
+        saveAction = QAction("&Save...", self)
         saveAction.setShortcut("Ctrl+S")
         saveAction.setStatusTip("Save the reduction parameters to XML")
-        self.connect(saveAction, QtCore.SIGNAL("triggered()"), self._save)
+        saveAction.triggered.connect(self._save)
 
-        exportAction = QtGui.QAction("&Export...", self)
+        exportAction = QAction("&Export...", self)
         exportAction.setShortcut("Ctrl+E")
         exportAction.setStatusTip("Export to python script for Mantid")
-        self.connect(exportAction, QtCore.SIGNAL("triggered()"), self._export)
+        exportAction.triggered.connect(self._export)
 
-        quitAction = QtGui.QAction("&Quit", self)
+        quitAction = QAction("&Quit", self)
         quitAction.setShortcut("Ctrl+Q")
-        self.connect(quitAction, QtCore.SIGNAL("triggered()"), self.close)
+        quitAction.triggered.connect(self.close)
 
         self.file_menu.addAction(newAction)
         self.file_menu.addAction(openAction)
@@ -238,49 +224,41 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         self.file_menu.addSeparator()
 
         if self.general_settings.debug:
-            clearAction = QtGui.QAction("&Clear settings and quit", self)
+            clearAction = QAction("&Clear settings and quit", self)
             clearAction.setStatusTip("Restore initial application settings and close the application")
-            self.connect(clearAction, QtCore.SIGNAL("triggered()"), self._clear_and_close)
+            clearAction.triggered.connect(self._clear_and_close)
             self.file_menu.addAction(clearAction)
 
         self.file_menu.addAction(quitAction)
 
         # TOOLS menu
-        instrAction = QtGui.QAction("Change &instrument...", self)
+        instrAction = QAction("Change &instrument...", self)
         instrAction.setShortcut("Ctrl+I")
         instrAction.setStatusTip("Select a new instrument")
-        self.connect(instrAction, QtCore.SIGNAL("triggered()"), self._change_instrument)
+        instrAction.triggered.connect(self._change_instrument)
 
         debug_menu_item_str = "Turn debug mode ON"
         if self.general_settings.debug:
             debug_menu_item_str = "Turn debug mode OFF"
-        debugAction = QtGui.QAction(debug_menu_item_str, self)
+        debugAction = QAction(debug_menu_item_str, self)
         debugAction.setStatusTip(debug_menu_item_str)
-        self.connect(debugAction, QtCore.SIGNAL("triggered()"), self._debug_mode)
+        debugAction.triggered.connect(self._debug_mode)
 
         self.tools_menu.clear()
         self.tools_menu.addAction(instrAction)
         self.tools_menu.addAction(debugAction)
 
-        # Cluster submission details
-        if IS_IN_MANTIDPLOT and CLUSTER_ENABLED:
-            jobAction = QtGui.QAction("Remote submission details", self)
-            jobAction.setShortcut("Ctrl+R")
-            jobAction.setStatusTip("Set the cluster information for remote job submission")
-            self.connect(jobAction, QtCore.SIGNAL("triggered()"), self._cluster_details_dialog)
-            self.tools_menu.addAction(jobAction)
-
         recent_files = []
         for fname in self._recent_files:
-            if fname != self._filename and QtCore.QFile.exists(fname) and fname not in recent_files:
+            if fname != self._filename and QFile.exists(fname) and fname not in recent_files:
                 recent_files.append(fname)
 
         if len(recent_files)>0:
             self.file_menu.addSeparator()
             for i, fname in enumerate(recent_files):
-                action = QtGui.QAction("&%d %s" % (i+1, QtCore.QFileInfo(fname).fileName()), self)
+                action = QAction("&%d %s" % (i+1, QFileInfo(fname).fileName()), self)
                 action.setData(fname)
-                self.connect(action, QtCore.SIGNAL("triggered()"), self.open_file)
+                action.triggered.connect(self.open_file)
                 self.file_menu.addAction(action)
 
     def _debug_mode(self, mode=None):
@@ -305,27 +283,28 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         """
             Invoke an instrument selection dialog
         """
-        class InstrDialog(QtGui.QDialog, ui.ui_instrument_dialog.Ui_Dialog):
+        class InstrDialog(QDialog):
             def __init__(self, instrument_list=None):
-                QtGui.QDialog.__init__(self)
+                QDialog.__init__(self)
+                self.ui = load_ui(__file__, 'ui/instrument_dialog.ui', baseinstance=self)
                 self.instrument_list = instrument_list
-                self.setupUi(self)
                 self.instr_combo.clear()
                 self.facility_combo.clear()
                 instruments = sorted(INSTRUMENT_DICT.keys())
                 instruments.reverse()
                 for facility in instruments:
-                    self.facility_combo.addItem(QtGui.QApplication.translate("Dialog", facility, None, QtGui.QApplication.UnicodeUTF8))
+                    self.facility_combo.addItem(facility)
 
                 self._facility_changed(instruments[0])
-                self.connect(self.facility_combo, QtCore.SIGNAL("activated(QString)"), self._facility_changed)
+                self.facility_combo.activated.connect(self._facility_changed)
 
             def _facility_changed(self, facility):
+                facility = self.facility_combo.currentText()
                 self.instr_combo.clear()
                 instr_list = sorted(INSTRUMENT_DICT[unicode(facility)].keys())
                 for item in instr_list:
                     if self.instrument_list is None or item in self.instrument_list:
-                        self.instr_combo.addItem(QtGui.QApplication.translate("Dialog", item, None, QtGui.QApplication.UnicodeUTF8))
+                        self.instr_combo.addItem(item)
 
         if self.general_settings.debug:
             dialog = InstrDialog()
@@ -341,40 +320,6 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         else:
             self.close()
             return False
-
-    def _cluster_details_dialog(self):
-        """
-            Show dialog to get cluster submission details
-        """
-        class ClusterDialog(QtGui.QDialog, ui.ui_cluster_details_dialog.Ui_Dialog):
-            def __init__(self, compute_resources=None):
-                QtGui.QDialog.__init__(self)
-                self.setupUi(self)
-                self.resource_combo.clear()
-                for res in compute_resources:
-                    self.resource_combo.addItem(QtGui.QApplication.translate("Dialog", res, None, QtGui.QApplication.UnicodeUTF8))
-
-        # Fill out the defaults
-        dialog = ClusterDialog(self._compute_resources)
-        if self.general_settings.cluster_user is not None:
-            dialog.username_edit.setText(str(self.general_settings.cluster_user))
-            dialog.pass_edit.setText(str(self.general_settings.cluster_pass))
-
-        dialog.nodes_box.setValue(int(self._number_of_nodes))
-        dialog.cores_box.setValue(int(self._cores_per_node))
-        for i in range(dialog.resource_combo.count()):
-            if dialog.resource_combo.itemText(i)==self.general_settings.compute_resource:
-                dialog.resource_combo.setCurrentIndex(i)
-                break
-
-        dialog.exec_()
-        if dialog.result()==1:
-            self.general_settings.cluster_user = str(dialog.username_edit.text())
-            self.general_settings.cluster_pass = str(dialog.pass_edit.text())
-            self._cluster_details_set = True
-            self._number_of_nodes = int(dialog.nodes_box.value())
-            self._cores_per_node = int(dialog.cores_box.value())
-            self.general_settings.compute_resource = dialog.resource_combo.currentText()
 
     def _clear_and_close(self):
         """
@@ -392,11 +337,11 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
             Executed when the application closes
         """
         if False:
-            reply = QtGui.QMessageBox.question(self, 'Message',
+            reply = QMessageBox.question(self, 'Message',
                                                "Are you sure you want to quit this application?",
-                                               QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
+                                               QMessageBox.Yes, QMessageBox.No)
 
-            if reply == QtGui.QMessageBox.Yes:
+            if reply == QMessageBox.Yes:
                 event.accept()
             else:
                 event.ignore()
@@ -404,9 +349,9 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         # Save application settings
         if self._clear_and_restart:
             self._clear_and_restart = False
-            QtCore.QSettings().clear()
+            QSettings().clear()
         else:
-            settings = QtCore.QSettings()
+            settings = QSettings()
 
             settings.setValue("instrument_name", self._instrument)
             settings.setValue("last_file", self._filename)
@@ -467,10 +412,13 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         """
         if file_path is None:
             action = self.sender()
-            if isinstance(action, QtGui.QAction):
-                file_path = unicode(action.data())
+            if isinstance(action, QAction):
+                file_path = action.data()
+        if not file_path:
+            return
 
         # don't try to load if the file doesn't exist
+        file_path = str(file_path)
         if not os.path.exists(file_path):
             return
 
@@ -481,8 +429,8 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
             msg = "The file you attempted to load doesn't have a recognized format:\n" \
                   + file_path+"\n\n" \
                   + "Please make sure it has been produced by this application."
-            QtGui.QMessageBox.warning(self, "Error loading reduction parameter file", msg)
-            print sys.exc_value
+            QMessageBox.warning(self, "Error loading reduction parameter file", msg)
+            print(sys.exc_info()[1])
             return
 
         if not found_instrument == self._instrument:
@@ -522,14 +470,18 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         """
             File chooser for loading UI parameters
         """
-        fname_qstr = QtGui.QFileDialog.getOpenFileName(self, "Reduction settings - Choose a settings file",
-                                                       self._last_directory,
-                                                       "Settings files (*.xml)")
-        fname = str(QtCore.QFileInfo(fname_qstr).filePath())
-        if fname:
-            # Store the location of the loaded file
-            self._last_directory = str(QtCore.QFileInfo(fname_qstr).path())
-            self.open_file(fname)
+        fname = QFileDialog.getOpenFileName(self, "Reduction settings - Choose a settings file",
+                                            self._last_directory,
+                                            "Settings files (*.xml)")
+        if not fname:
+            return
+
+        if isinstance(fname, tuple):
+            fname = fname[0]
+        fname = str(QFileInfo(fname).filePath())
+        # Store the location of the loaded file
+        self._last_directory = str(QFileInfo(fname).path())
+        self.open_file(fname)
 
     def _save(self):
         """
@@ -546,7 +498,7 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
                 self._set_window_title()
             except:
                 #TODO: put this in a log window, and in a file
-                print sys.exc_value
+                print(sys.exc_info()[1])
                 self.statusBar().showMessage("Failed to save %s" % self._filename)
 
     def _save_as(self):
@@ -559,21 +511,25 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         else:
             fname = self._instrument + '_'
 
-        fname_qstr = QtGui.QFileDialog.getSaveFileName(self, "Reduction settings - Save settings",
-                                                       self._last_directory + '/' + fname,
-                                                       "Settings files (*.xml)")
-        fname = str(QtCore.QFileInfo(fname_qstr).filePath())
-        if len(fname)>0:
-            if not fname.endswith('.xml'):
-                fname += ".xml"
-            if fname in self._recent_files:
-                self._recent_files.remove(fname)
-            self._recent_files.insert(0,fname)
-            while len(self._recent_files) > 10:
-                self._recent_files.pop()
-            self._last_directory = str(QtCore.QFileInfo(fname_qstr).path())
-            self._filename = fname
-            self._save()
+        fname = QFileDialog.getSaveFileName(self, "Reduction settings - Save settings",
+                                            self._last_directory + '/' + fname,
+                                            "Settings files (*.xml)")
+        if not fname:
+            return
+
+        if isinstance(fname, tuple):
+            fname = fname[0]
+        fname = str(QFileInfo(fname).filePath())
+        if not fname.endswith('.xml'):
+            fname += ".xml"
+        if fname in self._recent_files:
+            self._recent_files.remove(fname)
+        self._recent_files.insert(0,fname)
+        while len(self._recent_files) > 10:
+            self._recent_files.pop()
+        self._last_directory = QFileInfo(fname).path()
+        self._filename = fname
+        self._save()
 
     def _export(self):
         """
@@ -583,38 +539,37 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         if self._interface is None:
             return
 
-        fname = '.'
-        if self._filename is not None:
-            (root, ext) = os.path.splitext(self._filename)
-            fname = root
+        fname = QFileDialog.getSaveFileName(self, "Mantid Python script - Save script",
+                                            self._last_export_directory,
+                                            "Python script (*.py)")
+        if not fname:
+            return
 
-        fname = unicode(QtGui.QFileDialog.getSaveFileName(self, "Mantid Python script - Save script",
-                                                          self._last_export_directory,
-                                                          "Python script (*.py)"))
-
-        if len(fname)>0:
-            if not fname.endswith('.py'):
-                fname += ".py"
-            (folder, file_name) = os.path.split(fname)
-            self._last_export_directory = folder
-            script = self._interface.export(fname)
-            if script is not None:
-                self.statusBar().showMessage("Saved as %s" % fname)
-            else:
-                self.statusBar().showMessage("Could not save file")
+        if isinstance(fname, tuple):
+            fname = fname[0]
+        fname = str(fname)
+        if not fname.endswith('.py'):
+            fname += ".py"
+        (folder, file_name) = os.path.split(fname)
+        self._last_export_directory = folder
+        script = self._interface.export(fname)
+        if script is not None:
+            self.statusBar().showMessage("Saved as %s" % fname)
+        else:
+            self.statusBar().showMessage("Could not save file")
 
 #--------------------------------------------------------------------------------------------------------
 
 
-def start(argv):
-    app = QtGui.QApplication(argv)
-    app.setOrganizationName("Mantid")
-    app.setOrganizationDomain("mantidproject.org")
+def start():
+    app, within_mantid = get_qapplication()
+
     app.setApplicationName("Mantid Reduction")
     reducer = ReductionGUI()
     reducer.setup_layout(load_last=True)
     reducer.show()
-    app.exec_()
+    if not within_mantid:
+        sys.exit(app.exec_())
 
 if __name__ == '__main__':
-    start(argv=sys.argv)
+    start()

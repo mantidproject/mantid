@@ -1,6 +1,13 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAHANDLING_LOADDSPACEMAPTEST_H_
 #define MANTID_DATAHANDLING_LOADDSPACEMAPTEST_H_
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidDataHandling/LoadDspacemap.h"
 #include "MantidDataHandling/LoadEmptyInstrument.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
@@ -37,7 +44,7 @@ public:
     fout.close();
     testerDSP.setPropertyValue("Filename", dspaceFile);
     testerDSP.setPropertyValue("OutputWorkspace", "ines_offsets");
-    TS_ASSERT_THROWS_NOTHING(testerDSP.execute());
+    testerDSP.execute();
     TS_ASSERT(testerDSP.isExecuted());
 
     // Get the offsets out

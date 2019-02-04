@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
 # Algorithm to start Bayes programs
 from __future__ import (absolute_import, division, print_function)
@@ -80,5 +86,6 @@ class MuscatData(PythonAlgorithm):
         plotOp = self.getPropertyValue('Plot')
         saveOp = self.getProperty('Save').value
         Main.MuscatDataStart(sname,geom,neut,beam,sam,sqw,kr1,verbOp,plotOp,saveOp)
+
 
 AlgorithmFactory.subscribe(MuscatData)                    # Register algorithm with Mantid

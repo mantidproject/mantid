@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 /*********************************************************************************
  *  PLEASE READ THIS!!!!!!!
  *
@@ -8,8 +14,8 @@
 #ifndef MDEVENTSTEST_HELPER_H
 #define MDEVENTSTEST_HELPER_H
 
-#include "MantidAPI/BoxController.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/BoxController.h"
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/MDEventFactory.h"
@@ -113,10 +119,9 @@ void addData(
         // Put an event in the middle of each box
         Mantid::coord_t centers[nd];
         for (size_t d = 0; d < nd; d++)
-          centers[d] = min +
-                       (static_cast<Mantid::coord_t>(index[d]) + 0.5f) *
-                           (max - min) /
-                           static_cast<Mantid::coord_t>(splitInto);
+          centers[d] = min + (static_cast<Mantid::coord_t>(index[d]) + 0.5f) *
+                                 (max - min) /
+                                 static_cast<Mantid::coord_t>(splitInto);
         out->addEvent(MDE(1.0, 1.0, centers));
       }
 
@@ -128,7 +133,7 @@ void addData(
   auto ei = Mantid::API::ExperimentInfo_sptr(new Mantid::API::ExperimentInfo());
   out->addExperimentInfo(ei);
 }
-}
+} // namespace
 
 namespace Mantid {
 namespace DataObjects {
@@ -164,7 +169,7 @@ makeFakeMDEventWorkspace(const std::string &wsName, long numEvents = 10000,
 MDHistoWorkspace_sptr
 makeFakeMDHistoWorkspace(double signal, size_t numDims, size_t numBins = 10,
                          coord_t max = 10.0, double errorSquared = 1.0,
-                         std::string name = "", double numEvents = 1.0);
+                         const std::string &name = "", double numEvents = 1.0);
 
 Mantid::DataObjects::MDHistoWorkspace_sptr makeFakeMDHistoWorkspaceWithMDFrame(
     double signal, size_t numDims, const Mantid::Geometry::MDFrame &frame,
@@ -423,7 +428,7 @@ static void feedMDBox(MDBoxBase<MDLeanEvent<nd>, nd> *box, size_t repeat = 1,
     allDone = Mantid::Kernel::Utils::NestedForLoop::Increment(nd, counters,
                                                               index_max);
   }
-  box->refreshCache(NULL);
+  box->refreshCache(nullptr);
 }
 
 //-------------------------------------------------------------------------------------
@@ -436,7 +441,7 @@ static void feedMDBox(MDBoxBase<MDLeanEvent<nd>, nd> *box, size_t repeat = 1,
 template <size_t nd>
 static void recurseSplit(MDGridBox<MDLeanEvent<nd>, nd> *box,
                          size_t atRecurseLevel, size_t recurseLimit) {
-  typedef std::vector<MDBoxBase<MDLeanEvent<nd>, nd> *> boxVector;
+  using boxVector = std::vector<MDBoxBase<MDLeanEvent<nd>, nd> *>;
   if (atRecurseLevel >= recurseLimit)
     return;
 
@@ -503,8 +508,8 @@ void checkAndDeleteFile(std::string filename);
 //==================================
 //=====================================================================================
 
-} // namespace
-}
-}
+} // namespace MDEventsTestHelper
+} // namespace DataObjects
+} // namespace Mantid
 
 #endif

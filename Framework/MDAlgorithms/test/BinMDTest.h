@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MDEVENTS_BINTOMDHISTOWORKSPACETEST_H_
 #define MANTID_MDEVENTS_BINTOMDHISTOWORKSPACETEST_H_
 
@@ -34,7 +40,7 @@ using namespace Mantid::MDAlgorithms;
 using Mantid::coord_t;
 
 class BinMDTest : public CxxTest::TestSuite {
-  GCC_DIAG_OFF_SUGGEST_OVERRIDE
+  GNU_DIAG_OFF_SUGGEST_OVERRIDE
 private:
   // Helper class. Mock Implicit function.
   class MockImplicitFunction : public Mantid::Geometry::MDImplicitFunction {
@@ -45,7 +51,7 @@ private:
     std::string getName() const override { return "MockImplicitFunction"; }
     MOCK_CONST_METHOD0(toXMLString, std::string());
   };
-  GCC_DIAG_ON_SUGGEST_OVERRIDE
+  GNU_DIAG_ON_SUGGEST_OVERRIDE
   // Helper class. Builds mock implicit functions.
   class MockImplicitFunctionBuilder
       : public Mantid::API::ImplicitFunctionBuilder {
@@ -59,7 +65,8 @@ private:
   class MockImplicitFunctionParser
       : public Mantid::API::ImplicitFunctionParser {
   public:
-    MockImplicitFunctionParser() : Mantid::API::ImplicitFunctionParser(NULL) {}
+    MockImplicitFunctionParser()
+        : Mantid::API::ImplicitFunctionParser(nullptr) {}
     Mantid::API::ImplicitFunctionBuilder *
     createFunctionBuilder(Poco::XML::Element * /*functionElement*/) override {
       return new MockImplicitFunctionBuilder;
@@ -103,10 +110,10 @@ public:
   }
 
   /** Test the algo
-  * @param nameX : name of the axis
-  * @param expected_signal :: how many events in each resulting bin
-  * @param expected_numBins :: how many points/bins in the output
-  */
+   * @param nameX : name of the axis
+   * @param expected_signal :: how many events in each resulting bin
+   * @param expected_numBins :: how many points/bins in the output
+   */
   void do_test_exec(const std::string &functionXML, const std::string &name1,
                     const std::string &name2, const std::string &name3,
                     const std::string &name4, const double expected_signal,
@@ -411,11 +418,11 @@ public:
 
   /** Test the algorithm, with a coordinate transformation.
    *
-  * @param binsX : # of bins in the output
-  * @param expected_signal :: how many events in each resulting bin
-  * @param expected_numBins :: how many points/bins in the output
-  * @param FlipYBasis :: flip the Y basis vector
-  */
+   * @param binsX : # of bins in the output
+   * @param expected_signal :: how many events in each resulting bin
+   * @param expected_numBins :: how many points/bins in the output
+   * @param FlipYBasis :: flip the Y basis vector
+   */
   void do_test_transform(int binsX, int binsY, int binsZ,
                          double expected_signal, size_t expected_numBins,
                          bool IterateEvents, bool ForceOrthogonal,
@@ -643,7 +650,7 @@ public:
 
     // Intermediate workspace (the MDHisto)
     TS_ASSERT_EQUALS(binned1->numOriginalWorkspaces(), 2);
-    TS_ASSERT_EQUALS(binned1->getOriginalWorkspace(1)->name(), "binned0");
+    TS_ASSERT_EQUALS(binned1->getOriginalWorkspace(1)->getName(), "binned0");
     // Transforms to/from the INTERMEDIATE workspace exist
     CoordTransform const *toIntermediate = binned1->getTransformToOriginal(1);
     CoordTransform const *fromIntermediate =
@@ -684,7 +691,7 @@ public:
 
     // Intermediate workspace (the MDHisto) is binned0
     TS_ASSERT_EQUALS(binned1->numOriginalWorkspaces(), 2);
-    TS_ASSERT_EQUALS(binned1->getOriginalWorkspace(1)->name(), "binned0");
+    TS_ASSERT_EQUALS(binned1->getOriginalWorkspace(1)->getName(), "binned0");
     // Transforms to/from the INTERMEDIATE workspace exist
     CoordTransform const *toIntermediate = binned1->getTransformToOriginal(1);
     CoordTransform const *fromIntermediate =
@@ -750,7 +757,7 @@ public:
 
     // Intermediate workspace (the MDHisto) is binned0
     TS_ASSERT_EQUALS(binned1->numOriginalWorkspaces(), 2);
-    TS_ASSERT_EQUALS(binned1->getOriginalWorkspace(1)->name(), "binned0");
+    TS_ASSERT_EQUALS(binned1->getOriginalWorkspace(1)->getName(), "binned0");
     // Transforms to/from the INTERMEDIATE workspace exist
     CoordTransform const *toIntermediate = binned1->getTransformToOriginal(1);
     CoordTransform const *fromIntermediate =
@@ -821,7 +828,7 @@ public:
 
     // Intermediate workspace (the MDHisto)
     TS_ASSERT_EQUALS(binned2->numOriginalWorkspaces(), 2);
-    TS_ASSERT_EQUALS(binned2->getOriginalWorkspace(1)->name(), "binned1");
+    TS_ASSERT_EQUALS(binned2->getOriginalWorkspace(1)->getName(), "binned1");
     // Transforms to/from the INTERMEDIATE workspace exist
     TS_ASSERT(binned2->getTransformToOriginal(1));
     TS_ASSERT(binned2->getTransformFromOriginal(1));
@@ -1110,7 +1117,7 @@ public:
   BinMDTestPerformance() {
     in_ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 0);
     in_ws->getBoxController()->setSplitThreshold(2000);
-    in_ws->splitAllIfNeeded(NULL);
+    in_ws->splitAllIfNeeded(nullptr);
     AnalysisDataService::Instance().addOrReplace("BinMDTest_ws", in_ws);
     FrameworkManager::Instance().exec("FakeMDEventData", 4, "InputWorkspace",
                                       "BinMDTest_ws", "UniformParams",

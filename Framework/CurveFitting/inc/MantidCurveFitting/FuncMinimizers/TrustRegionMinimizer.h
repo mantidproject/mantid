@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CURVEFITTING_TRUSTREGIONMINIMIZER_H_
 #define MANTID_CURVEFITTING_TRUSTREGIONMINIMIZER_H_
 
@@ -14,29 +20,8 @@
 namespace Mantid {
 namespace CurveFitting {
 namespace FuncMinimisers {
-/** A base class for least squares trust region minimizers.
-
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-    National Laboratory & European Spallation Source
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>.
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
-*/
+/** Trust Region minimizer class using the DTRS method of GALAHAD.
+ */
 class DLLExport TrustRegionMinimizer : public API::IFuncMinimizer {
 public:
   /// constructor and destructor
@@ -48,6 +33,8 @@ public:
   bool iterate(size_t) override;
   /// Return current value of the cost function
   double costFunctionVal() override;
+  /// Name of the minimizer.
+  std::string name() const override;
 
 private:
   /// Evaluate the fitting function and calculate the residuals.
@@ -58,12 +45,10 @@ private:
   void evalHF(const DoubleFortranVector &x, const DoubleFortranVector &f,
               DoubleFortranMatrix &h) const;
   /// Find a correction vector to the parameters.
-  virtual void
-  calculateStep(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
-                const DoubleFortranMatrix &hf, const DoubleFortranVector &g,
-                double Delta, DoubleFortranVector &d, double &normd,
-                const NLLS::nlls_options &options, NLLS::nlls_inform &inform,
-                NLLS::calculate_step_work &w) = 0;
+  void calculateStep(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
+                     const DoubleFortranMatrix &hf, double Delta,
+                     DoubleFortranVector &d, double &normd,
+                     const NLLS::nlls_options &options);
 
   /// Stored cost function
   boost::shared_ptr<CostFunctions::CostFuncLeastSquares> m_leastSquares;
@@ -81,6 +66,12 @@ private:
   NLLS::nlls_inform m_inform;
   /// Temporary and helper objects
   NLLS::NLLS_workspace m_workspace;
+
+  // Used for calculating step in DTRS method
+  DoubleFortranMatrix m_A, m_ev;
+  DoubleFortranVector m_ew, m_v, m_v_trans, m_d_trans;
+  NLLS::all_eig_symm_work m_all_eig_symm_ws;
+  DoubleFortranVector m_scale;
 };
 
 } // namespace FuncMinimisers

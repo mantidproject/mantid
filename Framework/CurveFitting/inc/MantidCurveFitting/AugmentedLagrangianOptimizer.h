@@ -1,30 +1,13 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CURVEFITTING_AUGMENTEDLAGRANGIANOPTIMIZER_H_
 #define MANTID_CURVEFITTING_AUGMENTEDLAGRANGIANOPTIMIZER_H_
-/**
-  Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
 
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>
-  Code Documentation is available at: <http://doxygen.mantidproject.org>
- */
 #include "MantidCurveFitting/DllConfig.h"
-
-#include "MantidKernel/ClassMacros.h"
 #include "MantidKernel/Matrix.h"
 
 #include <boost/function.hpp>
@@ -72,34 +55,12 @@ and
 \f[
 A_{eq} x = 0
 \f]
-
-
-Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>
-Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 class MANTID_CURVEFITTING_DLL AugmentedLagrangianOptimizer {
 
 public:
   /// Function type
-  typedef boost::function<double(const size_t, const double *)> ObjFunction;
+  using ObjFunction = boost::function<double(const size_t, const double *)>;
 
 public:
   /**
@@ -137,6 +98,16 @@ public:
     checkConstraints(equality, inequality);
   }
 
+  /// Disable default constructor
+  AugmentedLagrangianOptimizer() = delete;
+
+  /// Disable copy operator
+  AugmentedLagrangianOptimizer(const AugmentedLagrangianOptimizer &) = delete;
+
+  /// Disable assignment operator
+  AugmentedLagrangianOptimizer &
+  operator=(const AugmentedLagrangianOptimizer &) = delete;
+
   /// @returns The number of parameters under minimization
   inline size_t numParameters() const { return m_nparams; }
   /// @returns The number of equality constraints
@@ -154,9 +125,6 @@ public:
   void minimize(std::vector<double> &xv) const;
 
 private:
-  DISABLE_DEFAULT_CONSTRUCT(AugmentedLagrangianOptimizer)
-  DISABLE_COPY_AND_ASSIGN(AugmentedLagrangianOptimizer)
-
   friend class UnconstrainedCostFunction;
   /// Using gradient optimizer to perform limited optimization of current set
   void unconstrainedOptimization(const std::vector<double> &lambda,

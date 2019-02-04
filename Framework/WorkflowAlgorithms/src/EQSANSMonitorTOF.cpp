@@ -1,12 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidWorkflowAlgorithms/EQSANSMonitorTOF.h"
 #include "MantidAPI/Run.h"
-#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/Instrument.h"
-#include "Poco/NumberFormatter.h"
-
-#include <vector>
+#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
@@ -52,22 +56,21 @@ void EQSANSMonitorTOF::exec() {
   // Get the monitor
   const std::vector<detid_t> monitor_list =
       inputWS->getInstrument()->getMonitors();
-  if (monitor_list.size() != 1) {
+  if (monitor_list.size() != 1)
     g_log.error() << "EQSANS workspace does not have exactly ones monitor! "
                      "This should not happen\n";
-  }
-  IDetector_const_sptr mon;
-  try {
-    mon = inputWS->getInstrument()->getDetector(monitor_list[0]);
-  } catch (Exception::NotFoundError &) {
-    g_log.error() << "Spectrum number " << monitor_list[0]
+
+  const auto &detInfo = inputWS->detectorInfo();
+  const size_t monIndex0 = detInfo.indexOf(0);
+  if (!detInfo.isMonitor(monIndex0)) {
+    g_log.error() << "Spectrum number " << monIndex0
                   << " has no detector assigned to it - discarding\n";
     return;
   }
 
   // Get the source to monitor distance in mm
   double source_z = inputWS->getInstrument()->getSource()->getPos().Z();
-  double monitor_z = mon->getPos().Z();
+  double monitor_z = detInfo.position(monIndex0).Z();
   double source_to_monitor = (monitor_z - source_z) * 1000.0;
 
   // Calculate the frame width
@@ -266,10 +269,7 @@ double EQSANSMonitorTOF::getTofOffset(MatrixWorkspace_const_sptr inputWS,
     } else
       chopper_wl_1[i] = chopper_srcpulse_wl_1[i] = 0.;
 
-    if (x2 > 0)
-      chopper_wl_2[i] = 3.9560346 * x2 / CHOPPER_LOCATION[i];
-    else
-      chopper_wl_2[i] = 0.;
+    chopper_wl_2[i] = (x2 > 0) ? 3.9560346 * x2 / CHOPPER_LOCATION[i] : 0.;
 
     if (first) {
       frame_wl_1 = chopper_wl_1[i];
@@ -341,12 +341,12 @@ double EQSANSMonitorTOF::getTofOffset(MatrixWorkspace_const_sptr inputWS,
     bool passed = false;
 
     do {
-      frame_wl_1 = c_wl_1[0] =
-          chopper_wl_1[0] +
-          3.9560346 * n_frame[0] * tof_frame_width / CHOPPER_LOCATION[0];
-      frame_wl_2 = c_wl_2[0] =
-          chopper_wl_2[0] +
-          3.9560346 * n_frame[0] * tof_frame_width / CHOPPER_LOCATION[0];
+      frame_wl_1 = c_wl_1[0] = chopper_wl_1[0] + 3.9560346 * n_frame[0] *
+                                                     tof_frame_width /
+                                                     CHOPPER_LOCATION[0];
+      frame_wl_2 = c_wl_2[0] = chopper_wl_2[0] + 3.9560346 * n_frame[0] *
+                                                     tof_frame_width /
+                                                     CHOPPER_LOCATION[0];
 
       for (int i = 1; i < 4; i++) {
         n_frame[i] = n_frame[i - 1] - 1;
@@ -354,12 +354,12 @@ double EQSANSMonitorTOF::getTofOffset(MatrixWorkspace_const_sptr inputWS,
 
         do {
           n_frame[i] += 1;
-          c_wl_1[i] =
-              chopper_wl_1[i] +
-              3.9560346 * n_frame[i] * tof_frame_width / CHOPPER_LOCATION[i];
-          c_wl_2[i] =
-              chopper_wl_2[i] +
-              3.9560346 * n_frame[i] * tof_frame_width / CHOPPER_LOCATION[i];
+          c_wl_1[i] = chopper_wl_1[i] + 3.9560346 * n_frame[i] *
+                                            tof_frame_width /
+                                            CHOPPER_LOCATION[i];
+          c_wl_2[i] = chopper_wl_2[i] + 3.9560346 * n_frame[i] *
+                                            tof_frame_width /
+                                            CHOPPER_LOCATION[i];
 
           if (frame_wl_1 < c_wl_2[i] && frame_wl_2 > c_wl_1[i]) {
             passed = true;
@@ -393,12 +393,12 @@ double EQSANSMonitorTOF::getTofOffset(MatrixWorkspace_const_sptr inputWS,
         chopper_wl_1[i] = c_wl_1[i];
         chopper_wl_2[i] = c_wl_2[i];
         if (frame_skipping) {
-          chopper_frameskip_wl_1[i] =
-              c_wl_1[i] +
-              3.9560346 * 2. * tof_frame_width / CHOPPER_LOCATION[i];
-          chopper_frameskip_wl_2[i] =
-              c_wl_2[i] +
-              3.9560346 * 2. * tof_frame_width / CHOPPER_LOCATION[i];
+          chopper_frameskip_wl_1[i] = c_wl_1[i] + 3.9560346 * 2. *
+                                                      tof_frame_width /
+                                                      CHOPPER_LOCATION[i];
+          chopper_frameskip_wl_2[i] = c_wl_2[i] + 3.9560346 * 2. *
+                                                      tof_frame_width /
+                                                      CHOPPER_LOCATION[i];
           if (i == 0) {
             frameskip_wl_1 = chopper_frameskip_wl_1[i];
             frameskip_wl_2 = chopper_frameskip_wl_2[i];
@@ -435,5 +435,5 @@ double EQSANSMonitorTOF::getTofOffset(MatrixWorkspace_const_sptr inputWS,
   return frame_tof0;
 }
 
-} // namespace Algorithms
+} // namespace WorkflowAlgorithms
 } // namespace Mantid

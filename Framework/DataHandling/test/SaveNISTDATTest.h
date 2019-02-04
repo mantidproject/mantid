@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef SAVENISTDATTEST_H_
 #define SAVENISTDATTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidDataHandling/Load.h"
 #include "MantidDataHandling/SaveNISTDAT.h"
 #include <Poco/File.h>
+#include <cxxtest/TestSuite.h>
 #include <fstream>
 
 using namespace Mantid::API;

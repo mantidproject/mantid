@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef VTKGEOMETRYCACHEWRITER_H
 #define VTKGEOMETRYCACHEWRITER_H
 
@@ -8,8 +14,8 @@ namespace Poco {
 namespace XML {
 class Document;
 class Element;
-}
-}
+} // namespace XML
+} // namespace Poco
 namespace Mantid {
 
 namespace Geometry {
@@ -22,28 +28,8 @@ namespace Geometry {
 
    This class writes the geometry (triangles) cached from Object to the vtk
    format file.
-
-   Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-   National Laboratory & European Spallation Source
-
-   This file is part of Mantid.
-
-   Mantid is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 3 of the License, or
-   (at your option) any later version.
-
-   Mantid is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-
-   You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-   File change history is stored at: <https://github.com/mantidproject/mantid>
 */
-class Object;
+class CSGObject;
 class MANTID_GEOMETRY_DLL vtkGeometryCacheWriter {
 private:
   Poco::XML::Document *mDoc; ///< The XML document
@@ -56,7 +42,7 @@ private:
 public:
   vtkGeometryCacheWriter(std::string); ///< Constructor
   ~vtkGeometryCacheWriter();           ///< Destructor
-  void addObject(Object *obj);
+  void addObject(CSGObject *obj);
   void write(); ///< Write the XML to a file
 };
 

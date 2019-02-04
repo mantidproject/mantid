@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_HISTOGRAMDATA_HISTOGRAMYTEST_H_
 #define MANTID_HISTOGRAMDATA_HISTOGRAMYTEST_H_
 
@@ -6,8 +12,8 @@
 #include "MantidHistogramData/Addable.h"
 #include "MantidHistogramData/FixedLengthVector.h"
 #include "MantidHistogramData/HistogramY.h"
-#include "MantidHistogramData/Offsetable.h"
 #include "MantidHistogramData/Multipliable.h"
+#include "MantidHistogramData/Offsetable.h"
 #include "MantidHistogramData/Scalable.h"
 
 using namespace Mantid;
@@ -27,21 +33,16 @@ public:
 
   void test_has_correct_mixins() {
     HistogramY y;
-// AppleClang gives warning if the result is unused.
-#if __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-value"
-#endif
     TS_ASSERT_THROWS_NOTHING(
-        dynamic_cast<detail::FixedLengthVector<HistogramY> &>(y));
-    TS_ASSERT_THROWS_NOTHING(dynamic_cast<detail::Addable<HistogramY> &>(y));
-    TS_ASSERT_THROWS_NOTHING(dynamic_cast<detail::Offsetable<HistogramY> &>(y));
+        UNUSED_ARG(dynamic_cast<detail::FixedLengthVector<HistogramY> &>(y)));
     TS_ASSERT_THROWS_NOTHING(
-        dynamic_cast<detail::Multipliable<HistogramY> &>(y));
-    TS_ASSERT_THROWS_NOTHING(dynamic_cast<detail::Scalable<HistogramY> &>(y));
-#if __clang__
-#pragma clang diagnostic pop
-#endif
+        UNUSED_ARG(dynamic_cast<detail::Addable<HistogramY> &>(y)));
+    TS_ASSERT_THROWS_NOTHING(
+        UNUSED_ARG(dynamic_cast<detail::Offsetable<HistogramY> &>(y)));
+    TS_ASSERT_THROWS_NOTHING(
+        UNUSED_ARG(dynamic_cast<detail::Multipliable<HistogramY> &>(y)));
+    TS_ASSERT_THROWS_NOTHING(
+        UNUSED_ARG(dynamic_cast<detail::Scalable<HistogramY> &>(y)));
   }
 };
 

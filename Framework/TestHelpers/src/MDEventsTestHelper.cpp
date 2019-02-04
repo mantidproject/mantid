@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 /*********************************************************************************
  *  PLEASE READ THIS!!!!!!!
  *
@@ -12,20 +18,20 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
-#include "MantidDataObjects/FakeMD.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/FakeMD.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
 
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
+#include "MantidGeometry/MDGeometry/GeneralFrame.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
-#include "MantidGeometry/MDGeometry/GeneralFrame.h"
 
-#include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Utils.h"
+#include "MantidKernel/cow_ptr.h"
 
 #include "MantidTestHelpers/FacilityHelper.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
@@ -39,12 +45,12 @@ namespace Mantid {
 namespace DataObjects {
 
 using namespace Mantid::API;
-using Mantid::DataObjects::EventWorkspace_sptr;
 using Mantid::DataObjects::EventWorkspace;
+using Mantid::DataObjects::EventWorkspace_sptr;
 using Mantid::Geometry::InstrumentDefinitionParser;
-using Mantid::Geometry::MDHistoDimension_sptr;
 using Mantid::Geometry::MDHistoDimension;
-using Mantid::Kernel::DateAndTime;
+using Mantid::Geometry::MDHistoDimension_sptr;
+using Mantid::Types::Core::DateAndTime;
 namespace Strings = Mantid::Kernel::Strings;
 
 /** Set of helper methods for testing MDEventWorkspace things
@@ -70,7 +76,7 @@ createDiffractionEventWorkspace(int numEvents, int numPixels, int numBins) {
 
   // --------- Load the instrument -----------
   const std::string filename = FileFinder::Instance().getFullPath(
-      "IDFs_for_UNIT_TESTING/MINITOPAZ_Definition.xml");
+      "unit_testing/MINITOPAZ_Definition.xml");
   InstrumentDefinitionParser parser(filename, "MINITOPAZ",
                                     Strings::loadFile(filename));
   auto instrument = parser.parseXML(nullptr);
@@ -81,8 +87,8 @@ createDiffractionEventWorkspace(int numEvents, int numPixels, int numBins) {
 
   for (int pix = 0; pix < numPixels; pix++) {
     for (int i = 0; i < numEvents; i++) {
-      retVal->getSpectrum(pix) += Mantid::DataObjects::TofEvent(
-          (i + 0.5) * binDelta, run_start + double(i));
+      retVal->getSpectrum(pix) +=
+          Types::Event::TofEvent((i + 0.5) * binDelta, run_start + double(i));
     }
     retVal->getSpectrum(pix).addDetectorID(pix);
   }
@@ -100,8 +106,8 @@ createDiffractionEventWorkspace(int numEvents, int numPixels, int numBins) {
   retVal->getAxis(0)->setUnit("TOF");
 
   // Give it a crystal and goniometer
-  WorkspaceCreationHelper::SetGoniometer(retVal, 0., 0., 0.);
-  WorkspaceCreationHelper::SetOrientedLattice(retVal, 1., 1., 1.);
+  WorkspaceCreationHelper::setGoniometer(retVal, 0., 0., 0.);
+  WorkspaceCreationHelper::setOrientedLattice(retVal, 1., 1., 1.);
 
   // Some sanity checks
   if (retVal->getInstrument()->getName() != "MINITOPAZ")
@@ -216,8 +222,8 @@ std::vector<MDLeanEvent<1>> makeMDEvents1(size_t num) {
  */
 Mantid::DataObjects::MDHistoWorkspace_sptr
 makeFakeMDHistoWorkspace(double signal, size_t numDims, size_t numBins,
-                         coord_t max, double errorSquared, std::string name,
-                         double numEvents) {
+                         coord_t max, double errorSquared,
+                         const std::string &name, double numEvents) {
   // Create MDFrame of General Frame type
   Mantid::Geometry::GeneralFrame frame(
       Mantid::Geometry::GeneralFrame::GeneralFrameDistance, "m");
@@ -367,6 +373,6 @@ void checkAndDeleteFile(std::string filename) {
   }
 }
 
-} // namespace
-}
-}
+} // namespace MDEventsTestHelper
+} // namespace DataObjects
+} // namespace Mantid

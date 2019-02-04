@@ -16,7 +16,7 @@ the dataset using the algorithm :ref:`algm-RRFMuon`. Both algorithms are fully d
 by T.M. Riseman and J.H. Brewer [Hyp. Int., 65, (1990), 1107].
 
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -25,7 +25,8 @@ Description
 
 Assuming that the *InputWorkspace* contains measured counts as a function of time,
 and *PhaseTable* contains the detector phases and asymmetries, the algorithm returns a workspace
-containing two spectra (squashograms) as a function of the same time binning.
+containing two spectra (squashograms) as a function of the same time binning. If there are zero 
+measured counts for a detector it is ignored in the calculation.
 *PhaseTable* is expected to have three columns, corresponding to the detector id, its asymmetry
 and its phase.
 
@@ -54,7 +55,7 @@ Usage
        phi = 2*pi*i/32.
        tab.addRow([1, 0.2, phi])
    ows = PhaseQuad(InputWorkspace='MUSR00022725', PhaseTable='tab')
-   print "Output workspace has", ows.getNumberHistograms(), "histograms"
+   print("Output workspace has {} histograms".format(ows.getNumberHistograms()))
 
 Output:
 

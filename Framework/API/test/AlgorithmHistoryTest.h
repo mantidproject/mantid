@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef ALGORITHMHISTORYTEST_H_
 #define ALGORITHMHISTORYTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include <cxxtest/TestSuite.h>
 #include <sstream>
 
 using namespace Mantid::API;
@@ -43,7 +49,13 @@ public:
     std::ostringstream output;
     output.exceptions(std::ios::failbit | std::ios::badbit);
     TS_ASSERT_THROWS_NOTHING(output << AH);
-    TS_ASSERT_EQUALS(output.str(), m_correctOutput);
+
+    // Remove UUID line from output
+    std::string outputStr = output.str();
+    // 44 is the expected length of the UUID string
+    outputStr.erase(outputStr.find("UUID: "), 43);
+
+    TS_ASSERT_EQUALS(outputStr, m_correctOutput);
     // Does it equal itself
     TS_ASSERT_EQUALS(AH, AH);
   }
@@ -108,7 +120,13 @@ public:
     std::ostringstream output;
     output.exceptions(std::ios::failbit | std::ios::badbit);
     TS_ASSERT_THROWS_NOTHING(output << algHist);
-    TS_ASSERT_EQUALS(output.str(), m_correctOutput);
+
+    // Remove UUID line from output
+    std::string outputStr = output.str();
+    // 44 is the expected length of the UUID string
+    outputStr.erase(outputStr.find("UUID: "), 43);
+
+    TS_ASSERT_EQUALS(outputStr, m_correctOutput);
 
     auto children = algHist.getChildHistories();
     TS_ASSERT_EQUALS(children.size(), 3);
@@ -177,8 +195,10 @@ private:
   AlgorithmHistory createTestHistory() {
     m_correctOutput = "Algorithm: testalg ";
     m_correctOutput += "v1\n";
-    m_correctOutput += "Execution Date: 2008-Feb-29 09:54:49\n";
+    m_correctOutput += "Execution Date: 2008-02-29 09:54:49\n";
     m_correctOutput += "Execution Duration: 14 seconds\n";
+    // This line is newer than the rest and cannot be predicted
+    // m_correctOutput += "UUID: 207ca8f8-fee0-49ce-86c8-7842a7313c2e\n";
     m_correctOutput += "Parameters:\n";
     m_correctOutput += "  Name: arg1_param, ";
     m_correctOutput += "Value: y, ";
@@ -204,9 +224,9 @@ private:
     timeinfo->tm_sec = 49;
     // Convert to time_t but assuming the tm is specified in UTC time.
     std::time_t execTime_t =
-        Mantid::Kernel::DateAndTimeHelpers::utc_mktime(timeinfo);
+        Mantid::Types::Core::DateAndTime::utc_mktime(timeinfo);
     // Create a UTC datetime from it
-    Mantid::Kernel::DateAndTime execTime;
+    Mantid::Types::Core::DateAndTime execTime;
     execTime.set_from_time_t(execTime_t);
 
     // Not really much to test

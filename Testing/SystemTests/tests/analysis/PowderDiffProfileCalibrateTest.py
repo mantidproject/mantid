@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name,no-init
 ########################################################################
 #
@@ -8,12 +14,13 @@
 # for powder diffractometers.
 #
 ########################################################################
-import stresstesting
+from __future__ import (absolute_import, division, print_function)
+import systemtesting
 import mantid.simpleapi as api
 from mantid.simpleapi import *
 
 
-class VulcanExamineProfile(stresstesting.MantidStressTest):
+class VulcanExamineProfile(systemtesting.MantidSystemTest):
     irf_file = 'arg_powder.irf'
     dat_file = 'arg_si.dat'
     bkgd_file = 'arg_si_bkgd_polynomial.nxs'
@@ -56,7 +63,7 @@ class VulcanExamineProfile(stresstesting.MantidStressTest):
         return ('Arg_Si_Calculated','Arg_Si_golden')
 
 
-class VulcanSeqRefineProfileFromScratch(stresstesting.MantidStressTest):
+class VulcanSeqRefineProfileFromScratch(systemtesting.MantidSystemTest):
     """ System test for sequential refinement
     """
     irf_file = 'VULCAN_SNS_1.irf'
@@ -85,7 +92,7 @@ class VulcanSeqRefineProfileFromScratch(stresstesting.MantidStressTest):
         ws = mtd[bkgdtablewsname]
         ws.addColumn("str", "Name")
         ws.addColumn("double", "Value")
-        for i in xrange(len(paramnames)):
+        for i in range(len(paramnames)):
             ws.addRow([paramnames[i], paramvalues[i]])
 
         # Examine profile
@@ -182,7 +189,7 @@ class VulcanSeqRefineProfileFromScratch(stresstesting.MantidStressTest):
         return ('VULCAN_22946_Calculated', 'VULCAN_22946_Calculated')
 
 
-class VulcanSeqRefineProfileLoadPlus(stresstesting.MantidStressTest):
+class VulcanSeqRefineProfileLoadPlus(systemtesting.MantidSystemTest):
     """ System test for sequential refinement
     """
     seqfile = "VULCAN_Calibrate_Seq.nxs"

@@ -1,7 +1,14 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name, arguments-differ, unused-variable
 """
     Implementation of reduction steps for SANS
 """
+from __future__ import (absolute_import, division, print_function)
 import math
 import pickle
 from reduction import ReductionStep
@@ -94,7 +101,7 @@ class BaseTransmission(ReductionStep):
 
     def set_dark_current(self, dark_current=None):
         """
-            Set the dark current data file to be subtracted from each tranmission data file
+            Set the dark current data file to be subtracted from each transmission data file
             @param dark_current: path to dark current data file
         """
         self._dark_current_data = dark_current
@@ -172,7 +179,7 @@ class Mask(ReductionStep):
 
     def __init__(self):
         """
-            Initalize masking
+            Initialize masking
         """
         super(Mask, self).__init__()
         self._nx_low = 0
@@ -216,7 +223,7 @@ class Mask(ReductionStep):
 
     def _infinite_plane(self, id, plane_pt, normal_pt, complement=False):
         """
-            Generates xml code for an infinte plane
+            Generates xml code for an infinite plane
             @param id: a string to refer to the shape by
             @param plane_pt: a point in the plane
             @param normal_pt: the direction of a normal to the plane
@@ -231,7 +238,7 @@ class Mask(ReductionStep):
     def _infinite_cylinder(self, centre, radius, axis, id='shape'):
         """
             Generates xml code for an infintely long cylinder
-            @param centre: a tupple for a point on the axis
+            @param centre: a tuple for a point on the axis
             @param radius: cylinder radius
             @param axis: cylinder orientation
             @param id: a string to refer to the shape by
@@ -245,7 +252,7 @@ class Mask(ReductionStep):
     def _finite_cylinder(self, centre, radius, height, axis, id='shape'):
         """
             Generates xml code for an infintely long cylinder
-            @param centre: a tupple for a point on the axis
+            @param centre: a tuple for a point on the axis
             @param radius: cylinder radius
             @param height: cylinder height
             @param axis: cylinder orientation
@@ -305,7 +312,7 @@ class Mask(ReductionStep):
             mask_str = run.getProperty("rectangular_masks").value
             try:
                 rectangular_masks = pickle.loads(mask_str)
-            except (StandardError, Warning):
+            except (Exception, Warning):
                 rectangular_masks = []
                 toks = mask_str.split(',')
                 for item in toks:
@@ -316,7 +323,7 @@ class Mask(ReductionStep):
             for rec in rectangular_masks:
                 try:
                     self.add_pixel_rectangle(rec[0], rec[1], rec[2], rec[3])
-                except (StandardError, Warning):
+                except (Exception, Warning):
                     mantid.logger.notice("Badly defined mask from configuration file: %s" % str(rec))
 
         for shape in self._xml:
@@ -388,7 +395,7 @@ class CalculateNorm(object):
         distribution/non-distribution flag set correctly as they maybe converted
 
         ISIS only
-        ORNL doesnt't use that approach
+        ORNL doesn't use that approach
 
     """
     TMP_WORKSPACE_NAME = '__CalculateNorm_loaded_temp'
@@ -553,9 +560,9 @@ class ConvertToQ(ReductionStep):
         if (not self._grav_set) or override:
             self._use_gravity = bool(flag)
         else:
-            msg = "User file can't override previous gravity setting, do gravity correction remains " + str(
-                self._use_gravity)
-            print msg
+            msg = "User file can't override previous gravity setting, do gravity correction remains " \
+                  + str(self._use_gravity)
+            print(msg)
             sanslog.warning(msg)
 
     def execute(self, reducer, workspace):
@@ -609,7 +616,7 @@ class ConvertToQ(ReductionStep):
             try:
                 if AnalysisDataService.doesExist(wk):
                     AnalysisDataService.remove(wk)
-            except (StandardError, Warning):
+            except (Exception, Warning):
                 # if the workspace can't be deleted this function does nothing
                 pass
 

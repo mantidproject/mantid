@@ -1,32 +1,16 @@
-/*
- Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 
- This file is part of Mantid.
-
- Mantid is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 3 of the License, or
- (at your option) any later version.
-
- Mantid is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License
- along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
- File change history is stored at: <https://github.com/mantidproject/mantid>
- */
-
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidDataHandling/SaveCSV.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidDataObjects/Workspace2D.h"
 
 #include <fstream> // used to get ofstream
+#include <iomanip>
 
 /* @class SaveCSV
 
@@ -42,9 +26,9 @@ DECLARE_ALGORITHM(SaveCSV)
 
 using namespace Kernel;
 using namespace API;
-using API::WorkspaceProperty;
 using API::MatrixWorkspace;
 using API::MatrixWorkspace_sptr;
+using API::WorkspaceProperty;
 using DataObjects::Workspace2D;
 using DataObjects::Workspace2D_sptr;
 
@@ -128,7 +112,7 @@ void SaveCSV::exec() {
 
     // Add first x-axis line to output file
     {
-      const MantidVec &xValue = localworkspace->readX(0);
+      auto &xValue = localworkspace->x(0);
 
       outCSV_File << "A";
 
@@ -144,10 +128,10 @@ void SaveCSV::exec() {
       // check if x-axis has changed. If yes print out new x-axis line
 
       if (i > 0) {
-        const MantidVec &xValue = localworkspace->readX(i);
-        const MantidVec &xValuePrevious = localworkspace->readX(i - 1);
+        auto &xValue = localworkspace->x(i);
+        auto &xValuePrevious = localworkspace->x(i - 1);
 
-        if (xValue != xValuePrevious) {
+        if (xValue.rawData() != xValuePrevious.rawData()) {
           outCSV_File << "A";
 
           for (double j : xValue) {
@@ -160,7 +144,7 @@ void SaveCSV::exec() {
 
       // add y-axis line for histogram (detector) i
 
-      const MantidVec &yValue = localworkspace->dataY(i);
+      auto &yValue = localworkspace->y(i);
 
       outCSV_File << i;
 
@@ -176,7 +160,7 @@ void SaveCSV::exec() {
     outCSV_File << "\nERRORS\n";
 
     for (size_t i = 0; i < numberOfHist; i++) {
-      const MantidVec &eValue = localworkspace->dataE(i);
+      auto &eValue = localworkspace->e(i);
 
       outCSV_File << i;
 

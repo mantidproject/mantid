@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -81,7 +87,7 @@ void UserFunction1D::prepare() {
       varName = varName.substr(i0, i1 - i0 + 1);
       if (varName.empty() || varValue.empty())
         throw std::invalid_argument("Property InitialParameters is malformed");
-      double value = atof(varValue.c_str());
+      double value = std::stod(varValue);
       if (!existsProperty(varName))
         throw std::invalid_argument("Fit parameter " + varName +
                                     " does not exist");
@@ -119,10 +125,10 @@ void UserFunction1D::function(const double *in, double *out,
 }
 
 /**
-* @param in :: Input fitting parameter values
-* @param out :: Derivatives
-* @param xValues :: X values for data points
-* @param nData :: Number of data points
+ * @param in :: Input fitting parameter values
+ * @param out :: Derivatives
+ * @param xValues :: X values for data points
+ * @param nData :: Number of data points
  */
 void UserFunction1D::functionDeriv(const double *in, Jacobian *out,
                                    const double *xValues, const size_t nData) {

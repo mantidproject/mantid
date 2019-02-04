@@ -26,32 +26,33 @@
  *                                                                         *
  ***************************************************************************/
 #include "ContourLinesEditor.h"
-#include "MantidQtMantidWidgets/DoubleSpinBox.h"
-#include "Spectrogram.h"
-#include "PenStyleBox.h"
 #include "ColorButton.h"
+#include "MantidQtWidgets/Common/DoubleSpinBox.h"
+#include "PenStyleBox.h"
+#include "Spectrogram.h"
 
+#include <QCheckBox>
+#include <QGroupBox>
+#include <QHeaderView>
+#include <QKeyEvent>
+#include <QLabel>
+#include <QLayout>
+#include <QMessageBox>
+#include <QMouseEvent>
+#include <QPainter>
 #include <QPushButton>
 #include <QTableWidget>
-#include <QHeaderView>
-#include <QCheckBox>
-#include <QLayout>
-#include <QLabel>
-#include <QKeyEvent>
-#include <QMouseEvent>
-#include <QMessageBox>
-#include <QPainter>
-#include <QGroupBox>
 
 #include <stdexcept>
 
 ContourLinesEditor::ContourLinesEditor(const QLocale &locale, int precision,
                                        QWidget *parent)
-    : QWidget(parent), table(NULL), insertBtn(NULL), deleteBtn(NULL),
-      d_spectrogram(NULL), d_locale(locale), d_precision(precision),
-      penDialog(NULL), penColorBox(NULL), penStyleBox(NULL), penWidthBox(NULL),
-      applyAllColorBox(NULL), applyAllWidthBox(NULL), applyAllStyleBox(NULL),
-      d_pen_index(0), d_pen_list() {
+    : QWidget(parent), table(nullptr), insertBtn(nullptr), deleteBtn(nullptr),
+      d_spectrogram(nullptr), d_locale(locale), d_precision(precision),
+      penDialog(nullptr), penColorBox(nullptr), penStyleBox(nullptr),
+      penWidthBox(nullptr), applyAllColorBox(nullptr),
+      applyAllWidthBox(nullptr), applyAllStyleBox(nullptr), d_pen_index(0),
+      d_pen_list() {
   table = new QTableWidget();
   table->setColumnCount(2);
   table->hideColumn(1);
@@ -88,7 +89,7 @@ ContourLinesEditor::ContourLinesEditor(const QLocale &locale, int precision,
   setFocusProxy(table);
   setMaximumWidth(200);
 
-  penDialog = NULL;
+  penDialog = nullptr;
 }
 
 void ContourLinesEditor::updateContourLevels() {
@@ -173,16 +174,23 @@ void ContourLinesEditor::insertLevel() {
     return;
 
   int row = table->currentRow();
-  DoubleSpinBox *sb = table_cellWidget<DoubleSpinBox>(row, 0);
 
+  DoubleSpinBox *sb;
   QwtDoubleInterval range = d_spectrogram->data().range();
-  double current_value = sb->value();
-  double previous_value = range.minValue();
-  sb = dynamic_cast<DoubleSpinBox *>(table->cellWidget(row - 1, 0));
-  if (sb)
-    previous_value = sb->value();
+  double val = (range.maxValue() + range.minValue()) / 2.0;
+  if (row >= 0) {
+    sb = table_cellWidget<DoubleSpinBox>(row, 0);
 
-  double val = 0.5 * (current_value + previous_value);
+    double current_value = sb->value();
+    double previous_value = range.minValue();
+    sb = dynamic_cast<DoubleSpinBox *>(table->cellWidget(row - 1, 0));
+    if (sb)
+      previous_value = sb->value();
+    val = 0.5 * (current_value + previous_value);
+  } else {
+    // no rows at present, set insertion point
+    row = 0;
+  }
 
   table->blockSignals(true);
   table->insertRow(row);
@@ -214,6 +222,7 @@ void ContourLinesEditor::insertLevel() {
   lbl->setPixmap(pix);
 
   table->setCellWidget(row, 1, lbl);
+  table->setCurrentCell(row, 1);
   table->blockSignals(false);
 
   enableButtons(table->currentRow());

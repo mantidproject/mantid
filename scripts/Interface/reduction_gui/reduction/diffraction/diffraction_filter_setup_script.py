@@ -1,3 +1,10 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
+from __future__ import (absolute_import, division, print_function)
 #pylint: disable=invalid-name
 """
     Classes for each reduction step. Those are kept separately
@@ -106,7 +113,7 @@ class FilterSetupScript(BaseScriptElement):
         # 2. Sort out some issue
         filtertype = "NoFilter"
         if self.filterbytime is True and self.filterbylogvalue is True:
-            print "Impossible situation!  Coding must be wrong!"
+            print ("Impossible situation!  Coding must be wrong!")
         elif self.filterbytime is True:
             filtertype = "ByTime"
         elif self.filterbylogvalue is True:
@@ -224,7 +231,7 @@ class FilterSetupScript(BaseScriptElement):
             try:
                 value = float(floatstr)
             except ValueError:
-                print "Warning! XML field %s value %s cannot be converted to float" % (xmlname, floatstr)
+                print ("Warning! XML field %s value %s cannot be converted to float" % (xmlname, floatstr))
                 value = None
         else:
             value = None
@@ -239,7 +246,7 @@ class FilterSetupScript(BaseScriptElement):
             try:
                 value = int(integerstr)
             except ValueError:
-                print "Warning! XML field %s value %s cannot be converted to integer" % (xmlname, integerstr)
+                print ("Warning! XML field %s value %s cannot be converted to integer" % (xmlname, integerstr))
                 value = None
         else:
             value = None

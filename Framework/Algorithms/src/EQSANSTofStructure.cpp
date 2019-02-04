@@ -1,18 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/EQSANSTofStructure.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
-#include "MantidDataObjects/Events.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/Events.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
 #include <vector>
-
-using namespace Mantid::Kernel;
-using namespace Mantid::DataObjects;
-using namespace Mantid::Geometry;
 
 namespace Mantid {
 namespace Algorithms {
@@ -22,7 +24,9 @@ DECLARE_ALGORITHM(EQSANSTofStructure)
 
 using namespace Kernel;
 using namespace API;
+using namespace DataObjects;
 using namespace Geometry;
+using Types::Event::TofEvent;
 
 EQSANSTofStructure::EQSANSTofStructure()
     : API::Algorithm(), frame_tof0(0.), flight_path_correction(false),
@@ -36,13 +40,15 @@ void EQSANSTofStructure::init() {
   declareProperty("FlightPathCorrection", false,
                   "If True, the neutron flight path correction will be applied",
                   Kernel::Direction::Input);
-  declareProperty("LowTOFCut", 0.0, "Width of the TOF margin to cut on the "
-                                    "lower end of the TOF distribution of each "
-                                    "frame",
+  declareProperty("LowTOFCut", 0.0,
+                  "Width of the TOF margin to cut on the "
+                  "lower end of the TOF distribution of each "
+                  "frame",
                   Kernel::Direction::Input);
-  declareProperty("HighTOFCut", 0.0, "Width of the TOF margin to cut on the "
-                                     "upper end of the TOF distribution of "
-                                     "each frame",
+  declareProperty("HighTOFCut", 0.0,
+                  "Width of the TOF margin to cut on the "
+                  "upper end of the TOF distribution of "
+                  "each frame",
                   Kernel::Direction::Input);
 
   // Output parameters
@@ -118,20 +124,21 @@ void EQSANSTofStructure::execEvent(
   const size_t numHists = inputWS->getNumberHistograms();
   Progress progress(this, 0.0, 1.0, numHists);
 
-  // Get the nominal sample-to-detector distance (in mm)
+  // This now points to the correct distance and makes the naming clearer
+  // Get the nominal sample flange-to-detector distance (in mm)
   Mantid::Kernel::Property *prop =
-      inputWS->run().getProperty("sample_detector_distance");
+      inputWS->run().getProperty("sampleflange_detector_distance");
   auto dp = dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(prop);
   if (!dp) {
-    throw std::runtime_error("sample_detector_distance log not found.");
+    throw std::runtime_error("sampleflange_detector_distance log not found.");
   }
-  const double SDD = *dp / 1000.0;
+  const double SFDD = *dp / 1000.0;
 
   const auto &spectrumInfo = inputWS->spectrumInfo();
   const auto l1 = spectrumInfo.l1();
 
   // Loop through the spectra and apply correction
-  PARALLEL_FOR1(inputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS))
   for (int64_t ispec = 0; ispec < int64_t(numHists); ++ispec) {
     PARALLEL_START_INTERUPT_REGION
 
@@ -141,7 +148,7 @@ void EQSANSTofStructure::execEvent(
       continue;
     }
     const auto l2 = spectrumInfo.l2(ispec);
-    double tof_factor = (l1 + l2) / (l1 + SDD);
+    double tof_factor = (l1 + l2) / (l1 + SFDD);
 
     // Get the pointer to the output event list
     std::vector<TofEvent> &events = inputWS->getSpectrum(ispec).getEvents();
@@ -348,12 +355,12 @@ double EQSANSTofStructure::getTofOffset(EventWorkspace_const_sptr inputWS,
     bool passed = false;
 
     do {
-      frame_wl_1 = c_wl_1[0] =
-          chopper_wl_1[0] +
-          3.9560346 * n_frame[0] * tof_frame_width / CHOPPER_LOCATION[0];
-      frame_wl_2 = c_wl_2[0] =
-          chopper_wl_2[0] +
-          3.9560346 * n_frame[0] * tof_frame_width / CHOPPER_LOCATION[0];
+      frame_wl_1 = c_wl_1[0] = chopper_wl_1[0] + 3.9560346 * n_frame[0] *
+                                                     tof_frame_width /
+                                                     CHOPPER_LOCATION[0];
+      frame_wl_2 = c_wl_2[0] = chopper_wl_2[0] + 3.9560346 * n_frame[0] *
+                                                     tof_frame_width /
+                                                     CHOPPER_LOCATION[0];
 
       for (int i = 1; i < 4; i++) {
         n_frame[i] = n_frame[i - 1] - 1;
@@ -361,12 +368,12 @@ double EQSANSTofStructure::getTofOffset(EventWorkspace_const_sptr inputWS,
 
         do {
           n_frame[i] += 1;
-          c_wl_1[i] =
-              chopper_wl_1[i] +
-              3.9560346 * n_frame[i] * tof_frame_width / CHOPPER_LOCATION[i];
-          c_wl_2[i] =
-              chopper_wl_2[i] +
-              3.9560346 * n_frame[i] * tof_frame_width / CHOPPER_LOCATION[i];
+          c_wl_1[i] = chopper_wl_1[i] + 3.9560346 * n_frame[i] *
+                                            tof_frame_width /
+                                            CHOPPER_LOCATION[i];
+          c_wl_2[i] = chopper_wl_2[i] + 3.9560346 * n_frame[i] *
+                                            tof_frame_width /
+                                            CHOPPER_LOCATION[i];
 
           if (frame_wl_1 < c_wl_2[i] && frame_wl_2 > c_wl_1[i]) {
             passed = true;
@@ -400,12 +407,12 @@ double EQSANSTofStructure::getTofOffset(EventWorkspace_const_sptr inputWS,
         chopper_wl_1[i] = c_wl_1[i];
         chopper_wl_2[i] = c_wl_2[i];
         if (frame_skipping) {
-          chopper_frameskip_wl_1[i] =
-              c_wl_1[i] +
-              3.9560346 * 2. * tof_frame_width / CHOPPER_LOCATION[i];
-          chopper_frameskip_wl_2[i] =
-              c_wl_2[i] +
-              3.9560346 * 2. * tof_frame_width / CHOPPER_LOCATION[i];
+          chopper_frameskip_wl_1[i] = c_wl_1[i] + 3.9560346 * 2. *
+                                                      tof_frame_width /
+                                                      CHOPPER_LOCATION[i];
+          chopper_frameskip_wl_2[i] = c_wl_2[i] + 3.9560346 * 2. *
+                                                      tof_frame_width /
+                                                      CHOPPER_LOCATION[i];
           if (i == 0) {
             frameskip_wl_1 = chopper_frameskip_wl_1[i];
             frameskip_wl_2 = chopper_frameskip_wl_2[i];
@@ -431,6 +438,8 @@ double EQSANSTofStructure::getTofOffset(EventWorkspace_const_sptr inputWS,
   else
     det_name = temp[0];
 
+  // Checked 8/11/2017 here detector_z is sfdd which has been updated
+  // in eqsansload.cpp
   double source_z = inputWS->getInstrument()->getSource()->getPos().Z();
   double detector_z =
       inputWS->getInstrument()->getComponentByName(det_name)->getPos().Z();
@@ -452,6 +461,7 @@ double EQSANSTofStructure::getTofOffset(EventWorkspace_const_sptr inputWS,
     g_log.information() << i << "    " << chopper_actual_phase[i] << "  "
                         << chopper_wl_1[i] << "  " << chopper_wl_2[i] << '\n';
 
+  // Checked 8/10/2017
   double low_wl_discard = 3.9560346 * low_tof_cut / source_to_detector;
   double high_wl_discard = 3.9560346 * high_tof_cut / source_to_detector;
 

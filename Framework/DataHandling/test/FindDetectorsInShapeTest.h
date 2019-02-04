@@ -1,8 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef FINDDETECTORSINSHAPETEST_H_
 #define FINDDETECTORSINSHAPETEST_H_
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidDataHandling/FindDetectorsInShape.h"
 #include "MantidDataHandling/LoadEmptyInstrument.h"
 
@@ -21,13 +28,13 @@ public:
 
   void testCuboidMiss() {
     std::string xmlShape = "<cuboid id=\"shape\"> ";
-    xmlShape += "<left-front-bottom-point x=\"0.005\" y=\"-0.1\" z=\"0.0\" /> ";
+    xmlShape += R"(<left-front-bottom-point x="0.005" y="-0.1" z="0.0" /> )";
     xmlShape +=
-        "<left-front-top-point x=\"0.005\" y=\"-0.1\" z=\"0.0001\" />  ";
+        R"(<left-front-top-point x="0.005" y="-0.1" z="0.0001" />  )";
     xmlShape +=
-        "<left-back-bottom-point x=\"-0.005\" y=\"-0.1\" z=\"0.0\" />  ";
+        R"(<left-back-bottom-point x="-0.005" y="-0.1" z="0.0" />  )";
     xmlShape +=
-        "<right-front-bottom-point x=\"0.005\" y=\"0.1\" z=\"0.0\" />  ";
+        R"(<right-front-bottom-point x="0.005" y="0.1" z="0.0" />  )";
     xmlShape += "</cuboid> ";
     xmlShape += "<algebra val=\"shape\" /> ";
 
@@ -54,7 +61,7 @@ public:
   void testSphereMiss() {
     // algebra line is essential
     std::string xmlShape = "<sphere id=\"shape\"> ";
-    xmlShape += "<centre x=\"4.1\"  y=\"2.1\" z=\"8.1\" /> ";
+    xmlShape += R"(<centre x="4.1"  y="2.1" z="8.1" /> )";
     xmlShape += "<radius val=\"3.2\" /> ";
     xmlShape += "</sphere>";
     xmlShape += "<algebra val=\"shape\" /> ";
@@ -65,7 +72,7 @@ public:
   void testSphereHit() {
     // algebra line is essential
     std::string xmlShape = "<sphere id=\"shape\"> ";
-    xmlShape += "<centre x=\"0.67\"  y=\"0.33\" z=\"1.32\" /> ";
+    xmlShape += R"(<centre x="0.67"  y="0.33" z="1.32" /> )";
     xmlShape += "<radius val=\"0.05\" /> ";
     xmlShape += "</sphere>";
     xmlShape += "<algebra val=\"shape\" /> ";
@@ -76,8 +83,8 @@ public:
   void testCylinderHit() {
     // algebra line is essential
     std::string xmlShape = "<cylinder id=\"shape\"> ";
-    xmlShape += "<centre-of-bottom-base x=\"0.0\" y=\"0.0\" z=\"0.0\" /> ";
-    xmlShape += "<axis x=\"0.0\" y=\"0.0\" z=\"1\" /> ";
+    xmlShape += R"(<centre-of-bottom-base x="0.0" y="0.0" z="0.0" /> )";
+    xmlShape += R"(<axis x="0.0" y="0.0" z="1" /> )";
     xmlShape += "<radius val=\"0.1\" /> ";
     xmlShape += "<height val=\"3\" /> ";
     xmlShape += "</cylinder>";
@@ -89,8 +96,8 @@ public:
   void testInfiniteCylinderHit() {
     // algebra line is essential
     std::string xmlShape = "<infinite-cylinder id=\"shape\"> ";
-    xmlShape += "<centre x=\"0.0\" y=\"0.0\" z=\"0.0\" /> ";
-    xmlShape += "<axis x=\"0.0\" y=\"0.0\" z=\"1\" /> ";
+    xmlShape += R"(<centre x="0.0" y="0.0" z="0.0" /> )";
+    xmlShape += R"(<axis x="0.0" y="0.0" z="1" /> )";
     xmlShape += "<radius val=\"0.1\" /> ";
     xmlShape += "</infinite-cylinder>";
     xmlShape += "<algebra val=\"shape\" /> ";
@@ -101,8 +108,8 @@ public:
   void testConeHitNoMonitors() {
     // algebra line is essential
     std::string xmlShape = "<cone id=\"shape\"> ";
-    xmlShape += "<tip-point x=\"0.0\" y=\"0.0\" z=\"0.0\" /> ";
-    xmlShape += "<axis x=\"0.0\" y=\"0.0\" z=\"-1\" /> ";
+    xmlShape += R"(<tip-point x="0.0" y="0.0" z="0.0" /> )";
+    xmlShape += R"(<axis x="0.0" y="0.0" z="-1" /> )";
     xmlShape += "<angle val=\"8.1\" /> ";
     xmlShape += "<height val=\"4\" /> ";
     xmlShape += "</cone>";

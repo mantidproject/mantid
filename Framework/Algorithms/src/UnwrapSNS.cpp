@@ -1,8 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/UnwrapSNS.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
-#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/RawCountValidator.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventList.h"
@@ -21,35 +27,14 @@ DECLARE_ALGORITHM(UnwrapSNS)
 
 using namespace Kernel;
 using namespace API;
-using DataObjects::EventList;
 using DataObjects::EventWorkspace;
-using Kernel::Exception::InstrumentDefinitionError;
-using Kernel::Exception::NotFoundError;
 using std::size_t;
 
 /// Default constructor
 UnwrapSNS::UnwrapSNS()
     : m_conversionConstant(0.), m_inputWS(), m_inputEvWS(), m_LRef(0.),
       m_Tmin(0.), m_Tmax(0.), m_frameWidth(0.), m_numberOfSpectra(0),
-      m_XSize(0), m_progress(nullptr) {}
-
-/// Destructor
-UnwrapSNS::~UnwrapSNS() {
-  if (m_progress)
-    delete m_progress;
-  m_progress = nullptr;
-}
-
-/// Algorithm's name for identification overriding a virtual method
-const std::string UnwrapSNS::name() const { return "UnwrapSNS"; }
-
-/// Algorithm's version for identification overriding a virtual method
-int UnwrapSNS::version() const { return 1; }
-
-/// Algorithm's category for identification overriding a virtual method
-const std::string UnwrapSNS::category() const {
-  return "CorrectionFunctions\\InstrumentCorrections";
-}
+      m_XSize(0) {}
 
 /// Initialisation method
 void UnwrapSNS::init() {
@@ -123,7 +108,7 @@ void UnwrapSNS::exec() {
   this->getTofRangeData(false);
 
   // set up the progress bar
-  m_progress = new Progress(this, 0.0, 1.0, m_numberOfSpectra);
+  m_progress = make_unique<Progress>(this, 0.0, 1.0, m_numberOfSpectra);
 
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
   if (outputWS != m_inputWS) {
@@ -136,7 +121,7 @@ void UnwrapSNS::exec() {
   const auto &spectrumInfo = m_inputWS->spectrumInfo();
   const double L1 = spectrumInfo.l1();
 
-  PARALLEL_FOR2(m_inputWS, outputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS, *outputWS))
   for (int workspaceIndex = 0; workspaceIndex < m_numberOfSpectra;
        workspaceIndex++) {
     PARALLEL_START_INTERUPT_REGION
@@ -150,7 +135,7 @@ void UnwrapSNS::exec() {
     } else {
       const double Ld = L1 + spectrumInfo.l2(workspaceIndex);
       // fix the x-axis
-      MantidVec timeBins;
+      std::vector<double> timeBins;
       size_t pivot = this->unwrapX(m_inputWS->x(workspaceIndex), timeBins, Ld);
       outputWS->setBinEdges(workspaceIndex, std::move(timeBins));
 
@@ -193,10 +178,10 @@ void UnwrapSNS::execEvent() {
   auto outW = boost::dynamic_pointer_cast<EventWorkspace>(matrixOutW);
 
   // set up the progress bar
-  m_progress = new Progress(this, 0.0, 1.0, m_numberOfSpectra * 2);
+  m_progress = make_unique<Progress>(this, 0.0, 1.0, m_numberOfSpectra * 2);
 
   // algorithm assumes the data is sorted so it can jump out early
-  outW->sortAll(Mantid::DataObjects::TOF_SORT, m_progress);
+  outW->sortAll(Mantid::DataObjects::TOF_SORT, m_progress.get());
 
   this->getTofRangeData(true);
 
@@ -205,16 +190,14 @@ void UnwrapSNS::execEvent() {
   const double L1 = spectrumInfo.l1();
 
   // do the actual work
-  //  PARALLEL_FOR2(m_inputWS, outW)
   for (int workspaceIndex = 0; workspaceIndex < m_numberOfSpectra;
        workspaceIndex++) {
-    //    PARALLEL_START_INTERUPT_REGION
     std::size_t numEvents = outW->getSpectrum(workspaceIndex).getNumberEvents();
     double Ld = -1.0;
     if (spectrumInfo.hasDetectors(workspaceIndex))
       Ld = L1 + spectrumInfo.l2(workspaceIndex);
 
-    MantidVec time_bins;
+    std::vector<double> time_bins;
     if (outW->x(0).size() > 2) {
       this->unwrapX(m_inputWS->x(workspaceIndex), time_bins, Ld);
       outW->setBinEdges(workspaceIndex, std::move(time_bins));
@@ -222,7 +205,7 @@ void UnwrapSNS::execEvent() {
       outW->setSharedX(workspaceIndex, m_inputWS->sharedX(workspaceIndex));
     }
     if (numEvents > 0) {
-      MantidVec times(numEvents);
+      std::vector<double> times(numEvents);
       outW->getSpectrum(workspaceIndex).getTofs(times);
       double filterVal = m_Tmin * Ld / m_LRef;
       for (size_t j = 0; j < numEvents; j++) {
@@ -234,20 +217,18 @@ void UnwrapSNS::execEvent() {
       outW->getSpectrum(workspaceIndex).setTofs(times);
     }
     m_progress->report();
-    //    PARALLEL_END_INTERUPT_REGION
   }
-  //  PARALLEL_CHECK_INTERUPT_REGION
 
   outW->clearMRU();
   this->runMaskDetectors();
 }
 
 int UnwrapSNS::unwrapX(const Mantid::HistogramData::HistogramX &datain,
-                       MantidVec &dataout, const double &Ld) {
-  MantidVec tempX_L; // lower half - to be frame wrapped
+                       std::vector<double> &dataout, const double &Ld) {
+  std::vector<double> tempX_L; // lower half - to be frame wrapped
   tempX_L.reserve(m_XSize);
   tempX_L.clear();
-  MantidVec tempX_U; // upper half - to not be frame wrapped
+  std::vector<double> tempX_U; // upper half - to not be frame wrapped
   tempX_U.reserve(m_XSize);
   tempX_U.clear();
 
@@ -333,5 +314,5 @@ void UnwrapSNS::runMaskDetectors() {
         "MaskDetectors Child Algorithm has not executed successfully");
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

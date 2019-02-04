@@ -1,10 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/ModeratorTzeroLinear.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/Run.h"
-#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidHistogramData/Histogram.h"
+#include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include <boost/lexical_cast.hpp>
@@ -19,6 +29,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
+using namespace Mantid::HistogramData;
 
 // A reference to the logger is provided by the base class, it is called g_log.
 // It is used to print out information, warning and error messages
@@ -125,18 +136,19 @@ void ModeratorTzeroLinear::exec() {
   // Check whether input = output to see whether a new workspace is required.
   if (outputWS != inputWS) {
     // Create new workspace for output from old
-    outputWS = WorkspaceFactory::Instance().create(inputWS);
+    outputWS = create<MatrixWorkspace>(*inputWS);
   }
 
   // do the shift in X
+  const auto &spectrumInfo = inputWS->spectrumInfo();
   const size_t numHists = inputWS->getNumberHistograms();
   Progress prog(this, 0.0, 1.0, numHists); // report progress of algorithm
-  PARALLEL_FOR2(inputWS, outputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
   for (int i = 0; i < static_cast<int>(numHists); ++i) {
     PARALLEL_START_INTERUPT_REGION
     double t_f, L_i;
     size_t wsIndex = static_cast<size_t>(i);
-    calculateTfLi(inputWS, wsIndex, t_f, L_i);
+    calculateTfLi(spectrumInfo, wsIndex, t_f, L_i);
 
     outputWS->setHistogram(i, inputWS->histogram(i));
     // shift the time of flights
@@ -184,9 +196,10 @@ void ModeratorTzeroLinear::execEvent() {
   auto outputWS = boost::dynamic_pointer_cast<EventWorkspace>(matrixOutputWS);
 
   // Loop over the spectra
+  const auto &spectrumInfo = matrixOutputWS->spectrumInfo();
   const size_t numHists = outputWS->getNumberHistograms();
   Progress prog(this, 0.0, 1.0, numHists); // report progress of algorithm
-  PARALLEL_FOR1(outputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
   for (int i = 0; i < static_cast<int>(numHists); ++i) {
     size_t wsIndex = static_cast<size_t>(i);
     PARALLEL_START_INTERUPT_REGION
@@ -195,7 +208,7 @@ void ModeratorTzeroLinear::execEvent() {
     {
       // Calculate the time from sample to detector 'i'
       double t_f, L_i;
-      calculateTfLi(matrixOutputWS, wsIndex, t_f, L_i);
+      calculateTfLi(spectrumInfo, wsIndex, t_f, L_i);
       if (t_f >= 0) {
         const double scaling = L_i / (L_i + m_gradient);
         // Calculate new time of flight, TOF'=scaling*(TOF-t_f-intercept)+t_f =
@@ -211,57 +224,35 @@ void ModeratorTzeroLinear::execEvent() {
 } // end of void ModeratorTzeroLinear::execEvent()
 
 // calculate time from sample to detector
-void ModeratorTzeroLinear::calculateTfLi(MatrixWorkspace_const_sptr inputWS,
+void ModeratorTzeroLinear::calculateTfLi(const SpectrumInfo &spectrumInfo,
                                          size_t i, double &t_f, double &L_i) {
   static const double convFact = 1.0e-6 * sqrt(2 * PhysicalConstants::meV /
                                                PhysicalConstants::NeutronMass);
   static const double TfError = -1.0; // signal error when calculating final
                                       // time
-  // Get detector position
-  IDetector_const_sptr det;
-  try {
-    det = inputWS->getDetector(i);
-  } catch (Exception::NotFoundError &) {
+
+  if (!spectrumInfo.hasDetectors(i)) {
     t_f = TfError;
     return;
   }
 
-  if (det->isMonitor()) {
-    L_i = m_instrument->getSource()->getDistance(*det);
+  if (spectrumInfo.isMonitor(i)) {
+    L_i = spectrumInfo.sourcePosition().distance(spectrumInfo.position(i));
     t_f = 0.0; // t_f=0.0 since there is no sample to detector path
   } else {
-    IComponent_const_sptr sample = m_instrument->getSample();
-    try {
-      L_i = m_instrument->getSource()->getDistance(*sample);
-    } catch (Exception::NotFoundError &) {
-      g_log.error("Unable to calculate source-sample distance");
-      throw Exception::InstrumentDefinitionError(
-          "Unable to calculate source-sample distance", inputWS->getTitle());
-    }
+    L_i = spectrumInfo.l1();
     // Get final energy E_f, final velocity v_f
-    std::vector<double> wsProp = det->getNumberParameter("Efixed");
+    auto wsProp = spectrumInfo.detector(i).getNumberParameter("Efixed");
     if (!wsProp.empty()) {
       double E_f = wsProp.at(0);         //[E_f]=meV
       double v_f = convFact * sqrt(E_f); //[v_f]=meter/microsec
-
-      try {
-        // obtain L_f, calculate t_f
-        double L_f = det->getDistance(*sample);
-        t_f = L_f / v_f;
-        // g_log.debug() << "detector: " << i << " L_f=" << L_f << " t_f=" <<
-        // t_f << '\n';
-      } catch (Exception::NotFoundError &) {
-        g_log.error("Unable to calculate detector-sample distance");
-        throw Exception::InstrumentDefinitionError(
-            "Unable to calculate detector-sample distance",
-            inputWS->getTitle());
-      }
+      t_f = spectrumInfo.l2(i) / v_f;
     } else {
       g_log.debug() << "Efixed not found for detector " << i << '\n';
       t_f = TfError;
     }
   }
-} // end of CalculateTf(const MatrixWorkspace_sptr inputWS, size_t i)
+}
 
 } // namespace Algorithms
 } // namespace Mantid

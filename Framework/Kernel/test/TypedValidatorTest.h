@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_KERNEL_TYPEDVALIDATORTEST_H_
 #define MANTID_KERNEL_TYPEDVALIDATORTEST_H_
 
@@ -7,7 +13,6 @@
 #include <boost/make_shared.hpp>
 #include <cxxtest/TestSuite.h>
 
-namespace {
 #define DECLARE_TEST_VALIDATOR(ClassName, HeldType)                            \
   class ClassName : public Mantid::Kernel::TypedValidator<HeldType> {          \
   public:                                                                      \
@@ -24,13 +29,15 @@ DECLARE_TEST_VALIDATOR(PODTypedValidator, double)
 class FakeDataItem : public Mantid::Kernel::DataItem {
 public:
   const std::string id() const override { return "FakeDataItem"; }
-  const std::string name() const override { return "Empty"; }
+  const std::string &getName() const override { return m_name; }
   bool threadSafe() const override { return true; }
   const std::string toString() const override { return "FakeDataItem{}"; }
+
+private:
+  std::string m_name{"Empty"};
 };
 DECLARE_TEST_VALIDATOR(DataItemSptrTypedValidator,
                        boost::shared_ptr<FakeDataItem>)
-}
 
 class TypedValidatorTest : public CxxTest::TestSuite {
 public:

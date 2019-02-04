@@ -1,13 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //---------------------------------------------------
 // Includes
 //---------------------------------------------------
 #include "MantidDataHandling/SaveVTK.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidKernel/BoundedValidator.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/BoundedValidator.h"
 #include <Poco/File.h>
-#include <string>
 #include <fstream>
+#include <string>
 
 namespace Mantid {
 namespace DataHandling {
@@ -23,9 +29,9 @@ using namespace API;
 SaveVTK::SaveVTK() : m_Xmin(0), m_Xmax(0) {}
 
 /**
-* Initilisation method.
-* Simply declares the properties that this algorithm possesses
-*/
+ * Initilisation method.
+ * Simply declares the properties that this algorithm possesses
+ */
 void SaveVTK::init() {
   // Declare mandatory properties
   declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
@@ -47,9 +53,9 @@ void SaveVTK::init() {
 }
 
 /**
-* Executes the algorithm.
-* Saves the workspace specified by the user to the VTK XML format
-*/
+ * Executes the algorithm.
+ * Saves the workspace specified by the user to the VTK XML format
+ */
 void SaveVTK::exec() {
   std::string filename = getProperty("Filename");
   g_log.debug() << "Parameters: Filename='" << filename << "'\n";
@@ -81,36 +87,45 @@ void SaveVTK::exec() {
   if (workspaceID.find("Workspace2D") != std::string::npos) {
     const Workspace2D_sptr localWorkspace =
         boost::dynamic_pointer_cast<Workspace2D>(inputWorkspace);
-    //      const size_t numberOfHist = localWorkspace->getNumberHistograms();
 
     // Write out whole range
     bool xMin(m_Xmin > 0.0), xMax(m_Xmax > 0.0);
     Progress prog(this, 0.0, 1.0, 97);
     if (!xMin && !xMax) {
       for (int hNum = 2; hNum < 100; ++hNum) {
-        writeVTKPiece(outVTP, localWorkspace->dataX(hNum),
-                      localWorkspace->dataY(hNum), localWorkspace->dataE(hNum),
-                      hNum);
+        writeVTKPiece(outVTP, localWorkspace->x(hNum).rawData(),
+                      localWorkspace->y(hNum).rawData(),
+                      localWorkspace->e(hNum).rawData(), hNum);
         prog.report();
       }
     } else {
       for (int hNum = 2; hNum < 100; ++hNum) {
+
+        auto &X = localWorkspace->x(hNum);
+        auto &Y = localWorkspace->y(hNum);
+        auto &E = localWorkspace->e(hNum);
+
         std::vector<double> xValue, yValue, errors;
-        std::vector<double>::size_type nVals(
-            localWorkspace->dataY(hNum).size());
+        std::vector<double>::size_type nVals(Y.size());
+
         for (int i = 0; i < static_cast<int>(nVals); ++i) {
-          if (xMin && localWorkspace->dataX(hNum)[i] < m_Xmin)
+
+          if (xMin && X[i] < m_Xmin) {
             continue;
-          if (xMax && localWorkspace->dataX(hNum)[i + 1] > m_Xmax) {
-            xValue.push_back(localWorkspace->dataX(hNum)[i]);
+          }
+
+          if (xMax && X[i + 1] > m_Xmax) {
+            xValue.push_back(X[i]);
             break;
           }
-          xValue.push_back(localWorkspace->dataX(hNum)[i]);
+
+          xValue.push_back(X[i]);
           if (i == static_cast<int>(nVals) - 1) {
-            xValue.push_back(localWorkspace->dataX(hNum)[i + 1]);
+            xValue.push_back(X[i + 1]);
           }
-          yValue.push_back(localWorkspace->dataY(hNum)[i]);
-          errors.push_back(localWorkspace->dataE(hNum)[i]);
+
+          yValue.push_back(Y[i]);
+          errors.push_back(E[i]);
         }
         // sanity check
         assert((int)xValue.size() == (int)yValue.size() + 1);
@@ -132,8 +147,8 @@ void SaveVTK::exec() {
 }
 
 /**
-* Check the validity of the optional parameters
-*/
+ * Check the validity of the optional parameters
+ */
 void SaveVTK::checkOptionalProperties() {
   m_Xmin = getProperty("Xminimum");
   m_Xmax = getProperty("Xmaximum");
@@ -145,13 +160,13 @@ void SaveVTK::checkOptionalProperties() {
 }
 
 /**
-* Write a histogram as a VTK <Piece .../> block
-* @param outVTP :: The output stream
-* @param xValue :: The x data
-* @param yValue :: The y data
-* @param errors :: The error data
-* @param index :: The histogram number
-*/
+ * Write a histogram as a VTK <Piece .../> block
+ * @param outVTP :: The output stream
+ * @param xValue :: The x data
+ * @param yValue :: The y data
+ * @param errors :: The error data
+ * @param index :: The histogram number
+ */
 void SaveVTK::writeVTKPiece(std::ostream &outVTP,
                             const std::vector<double> &xValue,
                             const std::vector<double> &yValue,
@@ -214,5 +229,5 @@ void SaveVTK::writeVTKPiece(std::ostream &outVTP,
   // End of this piece
   outVTP << "</Piece>\n";
 }
-}
-}
+} // namespace DataHandling
+} // namespace Mantid

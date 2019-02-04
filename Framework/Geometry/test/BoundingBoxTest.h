@@ -1,23 +1,31 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef BOUNDINGBOXTEST_H_
 #define BOUNDINGBOXTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Timer.h"
+#include <cxxtest/TestSuite.h>
+
+#include <float.h>
 
 using namespace Mantid;
 using namespace Mantid::Geometry;
 using Mantid::Kernel::V3D;
 
 /**
-* BoundingBox Unit test
-*/
+ * BoundingBox Unit test
+ */
 class BoundingBoxTest : public CxxTest::TestSuite {
 public:
   void test_That_Construction_With_Six_Valid_Points_Gives_A_BoundingBox() {
-    BoundingBox *bbox = NULL;
+    BoundingBox *bbox = nullptr;
     TS_ASSERT_THROWS_NOTHING(bbox =
                                  new BoundingBox(1.0, 4.0, 5.0, 0.0, 2.0, 3.0));
     if (!bbox) {
@@ -115,6 +123,9 @@ public:
     TS_ASSERT_EQUALS(
         bbox.doesLineIntersect(V3D(10.0, 10.0, 0.0), V3D(-1.0, -0.4, 0.0)),
         false);
+    TS_ASSERT_EQUALS(
+        bbox.doesLineIntersect(V3D(-10.0, -10.0, 0.0), V3D(1.0, 1.0, 0.0)),
+        true); // Hits box at edge
   }
 
   void
@@ -152,6 +163,9 @@ public:
     TS_ASSERT_EQUALS(bbox.doesLineIntersect(
                          Track(V3D(10.0, 10.0, 0.0), V3D(-1.0, -0.4, 0.0))),
                      false);
+    TS_ASSERT_EQUALS(bbox.doesLineIntersect(
+                         Track(V3D(-10.0, -10.0, 0.0), V3D(1.0, 1.0, 0.0))),
+                     true); // Hits box at edge
   }
 
   void test_That_Angular_Width_From_Point_Outside_Bounding_Box_Is_Valid() {
@@ -209,6 +223,18 @@ public:
     TS_ASSERT_EQUALS(box.maxPoint() == V3D(-FLT_MAX, -FLT_MAX, -FLT_MAX), true);
     TS_ASSERT_EQUALS(box.minPoint() == V3D(FLT_MAX, FLT_MAX, FLT_MAX), true);
   }
+
+  void test_generatePointInside_Gives_Point_Inside() {
+    BoundingBox box(3.0, 4.0, 5.0, 1.0, 1.0, 2.5);
+
+    auto pt = box.generatePointInside(0.1, 0.2, 0.3);
+    TS_ASSERT(box.isPointInside(pt));
+    const double tolerance(1e-10);
+    TS_ASSERT_DELTA(1.2, pt.X(), tolerance);
+    TS_ASSERT_DELTA(1.6, pt.Y(), tolerance);
+    TS_ASSERT_DELTA(3.25, pt.Z(), tolerance);
+  }
+
   void testBB_expansion_works_fine() {
     BoundingBox box(3.0, 4.0, 5.5, 1.0, 1.0, 1.5);
     std::vector<V3D> points;
@@ -302,6 +328,23 @@ public:
                       bbox.minPoint() == V3D(0, 0, -0.5 * M_SQRT2), true);
     TSM_ASSERT_EQUALS("max point should be (1,sqrt(2),sqrt(2)/2)",
                       bbox.maxPoint() == V3D(1, M_SQRT2, 0.5 * M_SQRT2), true);
+  }
+
+  void test_grow_by_null() {
+
+    BoundingBox a{};
+    TS_ASSERT(a.isNull());
+    BoundingBox b{};
+    a.grow(b);
+    TSM_ASSERT("Null grown by Null is Null", a.isNull());
+
+    a = BoundingBox(2, 2, 2, 1, 1, 1);
+    TS_ASSERT(!a.isNull());
+    a.grow(b);
+    TSM_ASSERT("Grow by Null (default constructed) is not Null", !a.isNull());
+
+    b.grow(a);
+    TSM_ASSERT("Grow Null by not Null is not Null", !b.isNull());
   }
 
 private:

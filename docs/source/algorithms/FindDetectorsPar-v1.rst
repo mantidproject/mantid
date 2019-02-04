@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -81,9 +81,9 @@ Usage
     # Output workspace is None if OutputParTable is not used)
     pars = FindDetectorsPar(ws, OutputParTable="pars")
     # pars is a TableWorkspace
-    print "Workspace type =", pars.id()
+    print("Workspace type = {}".format(pars.id()))
     # Show width column headers
-    print "Width headers = (", pars.getColumnNames()[3], ",", pars.getColumnNames()[4], ")"
+    print("Width headers = ( {} , {} )".format(pars.getColumnNames()[3], pars.getColumnNames()[4]))
 
 Output:
 
@@ -100,9 +100,9 @@ Output:
     # Output workspace is None if OutputParTable is not used)
     pars = FindDetectorsPar(ws, ReturnLinearRanges=True, OutputParTable="pars")
     # pars is a TableWorkspace
-    print "Workspace type =", pars.id()
+    print("Workspace type = {}".format(pars.id()))
     # Show width column headers
-    print "Width headers = (", pars.getColumnNames()[3], ",", pars.getColumnNames()[4], ")"
+    print("Width headers = ( {} , {} )".format(pars.getColumnNames()[3], pars.getColumnNames()[4]))
 
 Output:
 

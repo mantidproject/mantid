@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/IAlgorithm.h"
@@ -12,8 +18,6 @@
 #include <boost/python/self.hpp>
 
 using Mantid::API::WorkspaceHistory;
-using Mantid::API::AlgorithmHistory;
-using Mantid::API::IAlgorithm;
 using namespace boost::python;
 namespace Policies = Mantid::PythonInterface::Policies;
 
@@ -25,9 +29,9 @@ GET_POINTER_SPECIALIZATION(WorkspaceHistory)
  * @param self :: A reference to the WorkspaceHistory that called this method
  * @returns A python list created from the set of algorithm histories
  */
-boost::python::object getHistoriesAsList(WorkspaceHistory &self) {
+boost::python::list getHistoriesAsList(WorkspaceHistory &self) {
   boost::python::list names;
-  const auto histories = self.getAlgorithmHistories();
+  const auto &histories = self.getAlgorithmHistories();
   for (const auto &historie : histories) {
     names.append(historie);
   }

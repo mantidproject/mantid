@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_HISTOGRAMDATA_HISTOGRAMXTEST_H_
 #define MANTID_HISTOGRAMDATA_HISTOGRAMXTEST_H_
 
@@ -25,18 +31,12 @@ public:
 
   void test_has_correct_mixins() {
     HistogramX x;
-// AppleClang gives warning if the result is unused.
-#if __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-value"
-#endif
     TS_ASSERT_THROWS_NOTHING(
-        dynamic_cast<detail::FixedLengthVector<HistogramX> &>(x));
-    TS_ASSERT_THROWS_NOTHING(dynamic_cast<detail::Offsetable<HistogramX> &>(x));
-    TS_ASSERT_THROWS_NOTHING(dynamic_cast<detail::Scalable<HistogramX> &>(x));
-#if __clang__
-#pragma clang diagnostic pop
-#endif
+        UNUSED_ARG(dynamic_cast<detail::FixedLengthVector<HistogramX> &>(x)));
+    TS_ASSERT_THROWS_NOTHING(
+        UNUSED_ARG(dynamic_cast<detail::Offsetable<HistogramX> &>(x)));
+    TS_ASSERT_THROWS_NOTHING(
+        UNUSED_ARG(dynamic_cast<detail::Scalable<HistogramX> &>(x)));
   }
 };
 

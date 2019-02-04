@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 """
 Utility functions for running python test scripts
 inside MantidPlot.
@@ -7,6 +13,7 @@ Public methods:
     screenshot(): take a screenshot and save to a report
 
 """
+from __future__ import (absolute_import, division, print_function)
 import sys
 import os
 import unittest
@@ -24,7 +31,7 @@ try:
     qtest = True
 except:
     qtest = False
-    print "QTest not available"
+    print("QTest not available")
 
 def moveMouseToCentre(widget):
     """Moves the mouse over the widget

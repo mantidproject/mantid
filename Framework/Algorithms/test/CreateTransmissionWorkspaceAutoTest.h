@@ -1,11 +1,22 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_CREATETRANSMISSIONWORKSPACEAUTOTEST_H_
 #define MANTID_ALGORITHMS_CREATETRANSMISSIONWORKSPACEAUTOTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAlgorithms/CreateTransmissionWorkspaceAuto.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceHistory.h"
+#include "MantidAlgorithms/CreateTransmissionWorkspaceAuto.h"
+#include <cxxtest/TestSuite.h>
+
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/split.hpp>
 #include <boost/lexical_cast.hpp>
 
 using Mantid::Algorithms::CreateTransmissionWorkspaceAuto;
@@ -33,7 +44,7 @@ T findPropertyValue(PropertyHistories &histories,
   auto it = std::find_if(histories.begin(), histories.end(), finder);
   return boost::lexical_cast<T>((*it)->value());
 }
-}
+} // namespace
 
 class CreateTransmissionWorkspaceAutoTest : public CxxTest::TestSuite {
 public:
@@ -70,8 +81,8 @@ public:
   }
 
   void test_exec() {
-    IAlgorithm_sptr alg =
-        AlgorithmManager::Instance().create("CreateTransmissionWorkspaceAuto");
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create(
+        "CreateTransmissionWorkspaceAuto", 1);
     alg->setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg->initialize());
     TS_ASSERT_THROWS_NOTHING(
@@ -125,8 +136,7 @@ public:
                      i0MonitorIndex);
     TS_ASSERT_EQUALS(inst->getNumberParameter("PointDetectorStart").at(0),
                      boost::lexical_cast<double>(pointDetectorStartStop.at(0)));
-    TS_ASSERT_EQUALS(inst->getNumberParameter("PointDetectorStop").at(0),
-                     boost::lexical_cast<double>(pointDetectorStartStop.at(1)));
+    TS_ASSERT_EQUALS(pointDetectorStartStop.size(), 1);
   }
 };
 

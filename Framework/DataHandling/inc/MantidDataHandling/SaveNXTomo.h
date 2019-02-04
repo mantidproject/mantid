@@ -1,13 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAHANDLING_SAVENXTOMO_H_
 #define MANTID_DATAHANDLING_SAVENXTOMO_H_
 
 //---------------------------------------------------
 // Includes
 //---------------------------------------------------
-#include <vector>
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include <vector>
 
 namespace Mantid {
 namespace DataHandling {
@@ -60,6 +66,9 @@ public:
 
   /// Algorithm's version
   int version() const override { return (1); }
+  const std::vector<std::string> seeAlso() const override {
+    return {"SaveNexusProcessed"};
+  }
 
   /// Algorithm's category for identification
   const std::string category() const override {

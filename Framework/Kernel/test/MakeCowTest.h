@@ -1,8 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MAKE_COW_TEST_H_
 #define MAKE_COW_TEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidKernel/make_cow.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Kernel;
 
@@ -15,7 +21,7 @@ public:
   MyType(const T &, const T &) : args(2) {}
   const int args;
 };
-}
+} // namespace
 
 class MakeCowTest : public CxxTest::TestSuite {
 public:

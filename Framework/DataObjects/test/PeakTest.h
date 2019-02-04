@@ -1,15 +1,22 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAOBJECTS_PEAKTEST_H_
 #define MANTID_DATAOBJECTS_PEAKTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MockObjects.h"
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/Unit.h"
-#include "MantidKernel/V3D.h"
-#include "MantidKernel/PhysicalConstants.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include "MantidKernel/Unit.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/V3D.h"
+#include "MantidKernel/make_unique.h"
+#include "MockObjects.h"
+#include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
 #include "MantidDataObjects/Peak.h"
@@ -28,7 +35,7 @@ operator<<(std::basic_ostream<CharType, CharTrait> &out,
     out << maybe;
   return out;
 }
-}
+} // namespace boost
 
 class PeakTest : public CxxTest::TestSuite {
 private:
@@ -229,6 +236,14 @@ public:
     TS_ASSERT_EQUALS(p.getHKL(), V3D(1.0, 2.0, 3.0));
   }
 
+  void test_samplePos() {
+    Peak p(inst, 10000, 2.0);
+    p.setSamplePos(1.0, 1.0, 1.0);
+    TS_ASSERT_EQUALS(p.getSamplePos(), V3D(1.0, 1.0, 1.0));
+    p.setSamplePos(V3D(2.0, 2.0, 2.0));
+    TS_ASSERT_EQUALS(p.getSamplePos(), V3D(2.0, 2.0, 2.0));
+  }
+
   void test_getBank_and_row() {
     Peak p(inst, 10000, 2.0);
     TS_ASSERT_EQUALS(p.getBankName(), "bank1")
@@ -262,6 +277,18 @@ public:
 
     // Did the peak properly invert the rotation matrix?
     TS_ASSERT_EQUALS(qLab, qSampleRotated);
+  }
+
+  void test_getQLabFrame() {
+    Instrument_sptr inst =
+        ComponentCreationHelper::createTestInstrumentRectangular2(1, 10);
+    Peak p(inst, 0, 1.5);
+    p.setQLabFrame(V3D(1, 1, 1));
+    auto q = p.getQLabFrame();
+    // should be the same
+    TS_ASSERT_DELTA(q[0], 1, 1e-5);
+    TS_ASSERT_DELTA(q[1], 1, 1e-5);
+    TS_ASSERT_DELTA(q[2], 1, 1e-5);
   }
 
   //------------------------------------------------------------------------------------
@@ -363,6 +390,124 @@ public:
     TS_ASSERT_EQUALS(p2.getDetectorID(), -1);
   }
 
+  void test_setQSampleFrameVirtualDetectorWithQLab() {
+    constexpr auto radius = 10.;
+    auto sphereInst =
+        ComponentCreationHelper::createTestInstrumentRectangular(5, 100);
+    auto extendedSpaceObj =
+        ComponentCreationHelper::createSphere(10., V3D(0, 0, 0));
+    auto extendedSpace = Mantid::Kernel::make_unique<ObjComponent>(
+        "extended-detector-space", extendedSpaceObj, sphereInst.get());
+    extendedSpace->setPos(V3D(0.0, 0.0, 0.0));
+    sphereInst->add(extendedSpace.release());
+    const auto refFrame = sphereInst->getReferenceFrame();
+    const auto refBeamDir = refFrame->vecPointingAlongBeam();
+
+    // test with & without extended detector space
+    // extended space is a sphere, so all points should fall radius*detector
+    // direction away from the detector direction with extended space
+    auto testQ = [&](const V3D &q) {
+      // Compute expected direction
+      const auto qBeam = q.scalar_prod(refBeamDir);
+      const double norm_q = q.norm();
+      const double one_over_wl = (norm_q * norm_q) / (2.0 * qBeam);
+
+      V3D detectorDir = q * -1.0;
+      detectorDir[refFrame->pointingAlongBeam()] = one_over_wl - qBeam;
+      detectorDir.normalize();
+
+      // test without extended detector space
+      // should be a unit vector in the direction of the virtual detector
+      // position
+      Peak peak1(inst, q);
+
+      // skip tests for which Q actually does intersect with a valid detector
+      if (peak1.getDetectorID() > 0) {
+        return;
+      }
+
+      TS_ASSERT_EQUALS(peak1.getDetectorID(), -1)
+      TS_ASSERT_EQUALS(peak1.getDetPos(), detectorDir)
+
+      // test with extended detector space
+      // should be the full vector to the virtual detector position
+      Peak peak2(sphereInst, q);
+      TS_ASSERT_EQUALS(peak2.getDetectorID(), -1)
+      TS_ASSERT_EQUALS(peak2.getDetPos(), detectorDir * radius)
+    };
+
+    // Make hemisphere of q vectors to test
+    std::vector<double> xDirections(20);
+    std::vector<double> yDirections(20);
+    std::vector<double> zDirections(10);
+
+    // create x values of the range -1 to 1
+    int index = 0;
+    double startValue = -1;
+    std::generate(
+        xDirections.begin(), xDirections.end(),
+        [&index, &startValue]() { return startValue + index++ * 0.1; });
+
+    // create z values of the range 0.1 to 1
+    // ignore negative z values as these are not physical!
+    index = 0;
+    startValue = 0.1;
+    std::generate(
+        zDirections.begin(), zDirections.end(),
+        [&index, &startValue]() { return startValue + index++ * 0.1; });
+
+    yDirections = xDirections;
+
+    for (auto &x : xDirections) {
+      for (auto &y : yDirections) {
+        for (auto &z : zDirections) {
+          testQ(V3D(x, y, z));
+        }
+      }
+    }
+  }
+
+  void test_setQSampleFrameVirtualDetectorWithScatteringAngle() {
+    auto sphereInst =
+        ComponentCreationHelper::createTestInstrumentRectangular(5, 100);
+    auto extendedSpaceObj =
+        ComponentCreationHelper::createSphere(10., V3D(0, 0, 0));
+    auto extendedSpace = Mantid::Kernel::make_unique<ObjComponent>(
+        "extended-detector-space", extendedSpaceObj, sphereInst.get());
+    extendedSpace->setPos(V3D(0.0, 0.0, 0.0));
+    sphereInst->add(extendedSpace.release());
+
+    // test with & without extended detector space
+    // extended space is a sphere, so all points should fall radius*detector
+    // direction away from the detector direction with extended space
+    auto testTheta = [this, &sphereInst](const double theta) {
+      constexpr auto radius = 10.;
+      const auto expectedDir = V3D(sin(theta), 0., cos(theta));
+
+      // test without extended detector space
+      // should be {sin(theta), 0, cos(theta)}
+      Peak p1(this->inst, theta, 2.0);
+      V3D detPos1 = p1.getDetPos();
+      TS_ASSERT_EQUALS(detPos1, expectedDir);
+
+      // test with extended detector space
+      // should be radius*{sin(theta), 0, cos(theta)}
+      Peak p2(sphereInst, theta, 2.0);
+      V3D detPos2 = p2.getDetPos();
+      TS_ASSERT_EQUALS(detPos2, expectedDir * radius);
+    };
+
+    // generate & test a range of angles from 0 - 360
+    int index = 0;
+    std::vector<double> angles(8);
+    std::generate(angles.begin(), angles.end(), [&index, &angles]() {
+      return static_cast<double>(index++) * M_PI /
+             static_cast<double>(angles.size());
+    });
+
+    std::for_each(angles.begin(), angles.end(), testTheta);
+  }
+
   /** Create peaks using Q in the lab frame,
    * then find the corresponding detector ID */
   void test_findDetector() {
@@ -425,12 +570,52 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(replacementShape));
   }
 
+  void test_get_intensity_over_sigma() {
+    const int detectorId = 19999;
+    const double wavelength = 2;
+    const double intensity{100};
+    const double sigma{10};
+    Peak p(inst, detectorId, wavelength);
+
+    p.setIntensity(intensity);
+    p.setSigmaIntensity(sigma);
+
+    TS_ASSERT_EQUALS(p.getIntensityOverSigma(), intensity / sigma);
+  }
+
+  void test_get_intensity_over_sigma_empty_sigma() {
+    const int detectorId = 19999;
+    const double wavelength = 2;
+    const double intensity{10};
+    const double sigma{0};
+    Peak p(inst, detectorId, wavelength);
+
+    p.setIntensity(intensity);
+    p.setSigmaIntensity(sigma);
+
+    const double expectedResult{0.0};
+    const double tolerance{1e-10};
+    TS_ASSERT_DELTA(p.getIntensityOverSigma(), expectedResult, tolerance);
+  }
+
+  void test_get_energy() {
+    const int detectorId = 19999;
+    const double wavelength = 2;
+    const double initialEnergy{100};
+    const double finalEnergy{110};
+    Peak p(inst, detectorId, wavelength);
+
+    p.setInitialEnergy(initialEnergy);
+    p.setFinalEnergy(finalEnergy);
+
+    TS_ASSERT_EQUALS(p.getEnergyTransfer(), initialEnergy - finalEnergy);
+  }
+
 private:
   void check_Contributing_Detectors(const Peak &peak,
                                     const std::vector<int> &expected) {
     auto peakIDs = peak.getContributingDetIDs();
-    for (auto it = expected.begin(); it != expected.end(); ++it) {
-      const int id = *it;
+    for (int id : expected) {
       TSM_ASSERT_EQUALS("Expected " + boost::lexical_cast<std::string>(id) +
                             " in contribution list",
                         1, peakIDs.count(id))

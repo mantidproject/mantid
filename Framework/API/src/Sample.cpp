@@ -1,12 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Sample.h"
-#include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Crystal/CrystalStructure.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
+#include "MantidGeometry/Objects/CSGObject.h"
+#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/Strings.h"
 
@@ -16,7 +23,8 @@ namespace Mantid {
 
 namespace API {
 using namespace Mantid::Kernel;
-using Geometry::Object;
+using Geometry::IObject;
+using Geometry::IObject_sptr;
 using Geometry::OrientedLattice;
 using Geometry::SampleEnvironment;
 using Geometry::ShapeFactory;
@@ -25,9 +33,9 @@ using Geometry::ShapeFactory;
  * Default constructor. Required for cow_ptr.
  */
 Sample::Sample()
-    : m_name(), m_shape(), m_environment(), m_lattice(nullptr),
-      m_crystalStructure(), m_samples(), m_geom_id(0), m_thick(0.0),
-      m_height(0.0), m_width(0.0) {}
+    : m_name(), m_shape(ShapeFactory().createShape("")), m_environment(),
+      m_lattice(nullptr), m_crystalStructure(), m_samples(), m_geom_id(0),
+      m_thick(0.0), m_height(0.0), m_width(0.0) {}
 
 /**
  * Copy constructor
@@ -40,16 +48,16 @@ Sample::Sample(const Sample &copy)
       m_geom_id(copy.m_geom_id), m_thick(copy.m_thick), m_height(copy.m_height),
       m_width(copy.m_width) {
   if (copy.m_lattice)
-    m_lattice = new OrientedLattice(copy.getOrientedLattice());
+    m_lattice = std::make_unique<OrientedLattice>(copy.getOrientedLattice());
 
   if (copy.hasCrystalStructure()) {
-    m_crystalStructure.reset(
-        new Geometry::CrystalStructure(copy.getCrystalStructure()));
+    m_crystalStructure = std::make_unique<Geometry::CrystalStructure>(
+        copy.getCrystalStructure());
   }
 }
 
 /// Destructor
-Sample::~Sample() { delete m_lattice; }
+Sample::~Sample() = default;
 
 /** Assignment operator
  * @param rhs :: const reference to the sample object
@@ -67,12 +75,10 @@ Sample &Sample::operator=(const Sample &rhs) {
   m_thick = rhs.m_thick;
   m_height = rhs.m_height;
   m_width = rhs.m_width;
-  if (m_lattice != nullptr)
-    delete m_lattice;
   if (rhs.m_lattice)
-    m_lattice = new OrientedLattice(rhs.getOrientedLattice());
+    m_lattice = std::make_unique<OrientedLattice>(rhs.getOrientedLattice());
   else
-    m_lattice = nullptr;
+    m_lattice.reset(nullptr);
 
   m_crystalStructure.reset();
   if (rhs.hasCrystalStructure()) {
@@ -101,18 +107,24 @@ void Sample::setName(const std::string &name) { m_name = name; }
  * its own coordinate system with its centre at [0,0,0]
  * @return A reference to the object describing the shape
  */
-const Object &Sample::getShape() const { return m_shape; }
+const IObject &Sample::getShape() const { return *m_shape; }
 
 /** Set the object that describes the sample shape. The object is defined within
  * its own coordinate system
  * @param shape :: The object describing the shape
  */
-void Sample::setShape(const Object &shape) { m_shape = shape; }
+void Sample::setShape(const IObject_sptr &shape) {
+  if (shape) {
+    m_shape = shape;
+  } else {
+    m_shape = ShapeFactory().createShape("");
+  }
+}
 
 /** Return the material.
  * @return A reference to the material the sample is composed of
  */
-const Material Sample::getMaterial() const { return m_shape.material(); }
+const Material Sample::getMaterial() const { return m_shape->material(); }
 
 /**
  * Return a reference to the sample environment that this sample is attached to
@@ -132,8 +144,8 @@ const SampleEnvironment &Sample::getEnvironment() const {
  * @param env :: A pointer to a created sample environment. This takes
  * ownership of the object.
  */
-void Sample::setEnvironment(SampleEnvironment *env) {
-  m_environment = boost::shared_ptr<SampleEnvironment>(env);
+void Sample::setEnvironment(std::unique_ptr<SampleEnvironment> env) {
+  m_environment = boost::shared_ptr<SampleEnvironment>(std::move(env));
 }
 
 /** Return a const reference to the OrientedLattice of this sample
@@ -165,13 +177,10 @@ OrientedLattice &Sample::getOrientedLattice() {
  * @param latt :: A pointer to a OrientedLattice.
  */
 void Sample::setOrientedLattice(OrientedLattice *latt) {
-  if (m_lattice != nullptr) {
-    delete m_lattice;
-  }
   if (latt != nullptr)
-    m_lattice = new OrientedLattice(*latt);
+    m_lattice = std::make_unique<OrientedLattice>(*latt);
   else
-    m_lattice = nullptr;
+    m_lattice.reset(nullptr);
 }
 
 /** @return true if the sample has an OrientedLattice  */
@@ -288,12 +297,17 @@ void Sample::addSample(boost::shared_ptr<Sample> childSample) {
  * @param group :: name of the group to create
  */
 void Sample::saveNexus(::NeXus::File *file, const std::string &group) const {
-  file->makeGroup(group, "NXsample", 1);
+  file->makeGroup(group, "NXsample", true);
   file->putAttr("name", m_name);
   file->putAttr("version", 1);
-  file->putAttr("shape_xml", m_shape.getShapeXML());
+  std::string shapeXML("");
+  if (auto csgObject =
+          boost::dynamic_pointer_cast<Mantid::Geometry::CSGObject>(m_shape)) {
+    shapeXML = csgObject->getShapeXML();
+  }
+  file->putAttr("shape_xml", shapeXML);
 
-  m_shape.material().saveNexus(file, "material");
+  m_shape->material().saveNexus(file, "material");
   // Write out the other (indexes 1+) samples
   file->writeData("num_other_samples", int(m_samples.size()));
   for (size_t i = 0; i < m_samples.size(); i++)
@@ -351,12 +365,16 @@ int Sample::loadNexus(::NeXus::File *file, const std::string &group) {
     shape_xml = Strings::strip(shape_xml);
     if (!shape_xml.empty()) {
       ShapeFactory shapeMaker;
-      m_shape = *shapeMaker.createShape(shape_xml,
-                                        false /*Don't wrap with <type> tag*/);
+      m_shape = shapeMaker.createShape(shape_xml,
+                                       false /*Don't wrap with <type> tag*/);
     }
     Kernel::Material material;
     material.loadNexus(file, "material");
-    m_shape.setMaterial(material);
+    // CSGObject expected, if so, set its material
+    if (auto csgObj =
+            boost::dynamic_pointer_cast<Geometry::CSGObject>(m_shape)) {
+      csgObj->setMaterial(material);
+    }
 
     // Load other samples
     int num_other_samples;
@@ -371,7 +389,7 @@ int Sample::loadNexus(::NeXus::File *file, const std::string &group) {
     int num_oriented_lattice;
     file->readData("num_oriented_lattice", num_oriented_lattice);
     if (num_oriented_lattice > 0) {
-      m_lattice = new OrientedLattice;
+      m_lattice = std::make_unique<OrientedLattice>();
       m_lattice->loadNexus(file, "oriented_lattice");
     }
   }
@@ -395,9 +413,8 @@ int Sample::loadNexus(::NeXus::File *file, const std::string &group) {
  */
 void Sample::clearOrientedLattice() {
   if (m_lattice) {
-    delete m_lattice;
-    m_lattice = nullptr;
+    m_lattice.reset(nullptr);
   }
 }
-}
-}
+} // namespace API
+} // namespace Mantid

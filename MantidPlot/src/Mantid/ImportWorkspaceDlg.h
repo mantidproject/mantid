@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 
 #ifndef IMPORTWORKSPACEDLG_H
 #define IMPORTWORKSPACEDLG_H
@@ -14,7 +20,7 @@ class ImportWorkspaceDlg : public QDialog {
   Q_OBJECT
 
 public:
-  ImportWorkspaceDlg(QWidget *parent = 0, size_t num = 0);
+  ImportWorkspaceDlg(QWidget *parent = nullptr, size_t num = 0);
   ~ImportWorkspaceDlg() override;
 
   int getLowerLimit() { return lowerLimit; }

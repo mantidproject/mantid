@@ -3,7 +3,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -40,7 +40,7 @@ The following usage example illustrates how the algorithm can be used to generat
                         a=4.126,
                         LatticeSpacingMin=0.55, LatticeSpacingMax=4.0)
 
-    print "CsCl has", csClReflections.rowCount(), "unique reflections in the range between 0.55 and 4.0 Angstrom."
+    print("CsCl has {} unique reflections in the range between 0.55 and 4.0 Angstrom.".format(csClReflections.rowCount()))
 
 Output:
 

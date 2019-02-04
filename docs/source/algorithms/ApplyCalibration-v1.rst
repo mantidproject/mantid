@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -15,7 +15,7 @@ updated as absolute positions and so this update can be repeated.
 The PositionTable must have columns *Detector ID* and *Detector
 Position*. The entries of the *Detector ID* column are integer referring
 to the Detector ID and the enties of the *Detector Position* are
-`V3Ds <../api/python/mantid/kernel/V3D.html>`__ referring to the position of the detector whose ID is in same row.
+:py:obj:`V3Ds <mantid.kernel.V3D>` referring to the position of the detector whose ID is in same row.
 
 This algorithm is not appropriate for rectangular detectors and won't move them.
 
@@ -37,8 +37,8 @@ Usage
    # Show positions before calibration
    for i in spectra:
         det = ws.getDetector(i)
-        print "Position of Detector ID=%i before ApplyCalibration: %.0f,%.0f,%.0f" % (det.getID(), 
-                det.getPos().X(), det.getPos().Y(), det.getPos().Z())
+        print("Position of Detector ID=%i before ApplyCalibration: %.0f,%.0f,%.0f" % (det.getID(), 
+                det.getPos().X(), det.getPos().Y(), det.getPos().Z()))
 
 
    # Create PositionTable - This would be done by the calibration functions
@@ -60,8 +60,8 @@ Usage
    # Show positions after calibration
    for i in spectra:
         det = ws.getDetector(i)
-        print "Position of Detector ID=%i after ApplyCalibration: %.0f,%.0f,%.0f" % (det.getID(), 
-                det.getPos().X(), det.getPos().Y(), det.getPos().Z())
+        print("Position of Detector ID=%i after ApplyCalibration: %.0f,%.0f,%.0f" % (det.getID(), 
+                det.getPos().X(), det.getPos().Y(), det.getPos().Z()))
 
 Output:
 

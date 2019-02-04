@@ -1,12 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_ANNULARRINGABSORPTIONTEST_H_
 #define MANTID_ALGORITHMS_ANNULARRINGABSORPTIONTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/AnnularRingAbsorption.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Sample.h"
+#include "MantidAlgorithms/AnnularRingAbsorption.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -43,11 +49,11 @@ public:
     MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
     TS_ASSERT(outWS);
 
-    const double delta(1e-08);
+    const double delta(1e-04);
     const size_t middle_index = 4;
-    TS_ASSERT_DELTA(0.97773712, outWS->readY(0).front(), delta);
-    TS_ASSERT_DELTA(0.83720057, outWS->readY(0)[middle_index], delta);
-    TS_ASSERT_DELTA(0.72020602, outWS->readY(0).back(), delta);
+    TS_ASSERT_DELTA(0.9678, outWS->readY(0).front(), delta);
+    TS_ASSERT_DELTA(0.7950, outWS->readY(0)[middle_index], delta);
+    TS_ASSERT_DELTA(0.6590, outWS->readY(0).back(), delta);
   }
 
   //-------------------- Failure cases --------------------------------
@@ -57,7 +63,7 @@ public:
 
     auto alg = createAlgorithm();
     // Create a simple test workspace that has no instrument
-    auto testWS = WorkspaceCreationHelper::Create2DWorkspace(10, 5);
+    auto testWS = WorkspaceCreationHelper::create2DWorkspace(10, 5);
 
     TS_ASSERT_THROWS(
         alg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", testWS),

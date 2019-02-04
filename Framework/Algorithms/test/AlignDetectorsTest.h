@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef ALIGNDETECTORSTEST_H_
 #define ALIGNDETECTORSTEST_H_
 
@@ -6,9 +12,9 @@
 
 #include "MantidAPI/Axis.h"
 #include "MantidAlgorithms/AlignDetectors.h"
-#include "MantidDataHandling/LoadEventPreNexus.h"
 #include "MantidDataHandling/LoadNexus.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidKernel/Unit.h"
 
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataHandling;

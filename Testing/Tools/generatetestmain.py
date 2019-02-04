@@ -1,4 +1,10 @@
 #!/usr/bin/env python
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 VERSION = "1.0"
 
 import os
@@ -80,7 +86,7 @@ if __name__ == "__main__":
     if len(args) <= 0:
         parser.error("Must specify an output file")
     if len(args) > 1:
-        parser.error("Can only produce a single ouput file")
+        parser.error("Can only produce a single output file")
     filename = args[0]
     if not filename.endswith(".cpp"):
         parser.error("Filename '%s' must end with '.cpp'" % filename)

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
@@ -35,12 +41,11 @@ bool ConvertToHistogram::isProcessingRequired(
 
 /**
  * Returns the size of the new X vector
- * @param inputWS pointer to input workspace
+ * @param ySize pointer to input workspace
  * @returns An integer giving the size of the new X vector
  */
-size_t
-ConvertToHistogram::getNewXSize(const MatrixWorkspace_sptr inputWS) const {
-  return (inputWS->blocksize() + 1);
+size_t ConvertToHistogram::getNewXSize(const std::size_t ySize) const {
+  return ySize + 1;
 }
 
 /**
@@ -56,5 +61,5 @@ Kernel::cow_ptr<HistogramData::HistogramX> ConvertToHistogram::calculateXPoints(
   return HistogramData::BinEdges(HistogramData::Points(std::move(inputX)))
       .cowData();
 }
-}
-}
+} // namespace Algorithms
+} // namespace Mantid

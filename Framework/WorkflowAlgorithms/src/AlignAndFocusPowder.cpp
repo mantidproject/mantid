@@ -1,10 +1,14 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidWorkflowAlgorithms/AlignAndFocusPowder.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/FileFinder.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
@@ -12,13 +16,15 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/DateTimeValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/PropertyManager.h"
+#include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/System.h"
-#include "MantidKernel/ConfigService.h"
-#include "MantidKernel/InstrumentInfo.h"
-#include "MantidAPI/FileFinder.h"
 
 using Mantid::Geometry::Instrument_const_sptr;
 using namespace Mantid::Kernel;
@@ -28,34 +34,13 @@ using namespace Mantid::DataObjects;
 namespace Mantid {
 namespace WorkflowAlgorithms {
 using namespace Kernel;
-using API::WorkspaceProperty;
-using API::MatrixWorkspace_sptr;
-using API::MatrixWorkspace;
 using API::FileProperty;
+using API::MatrixWorkspace;
+using API::MatrixWorkspace_sptr;
+using API::WorkspaceProperty;
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(AlignAndFocusPowder)
-
-AlignAndFocusPowder::AlignAndFocusPowder()
-    : API::DataProcessorAlgorithm(), m_l1(0.0), m_resampleX(0), dspace(false),
-      xmin(0.0), xmax(0.0), LRef(0.0), DIFCref(0.0), minwl(0.0), maxwl(0.),
-      tmin(0.0), tmax(0.0), m_preserveEvents(false), m_processLowResTOF(false),
-      m_lowResSpecOffset(0), m_progress(nullptr) {}
-
-AlignAndFocusPowder::~AlignAndFocusPowder() {
-  if (m_progress)
-    delete m_progress;
-}
-
-const std::string AlignAndFocusPowder::name() const {
-  return "AlignAndFocusPowder";
-}
-
-int AlignAndFocusPowder::version() const { return 1; }
-
-const std::string AlignAndFocusPowder::category() const {
-  return "Workflow\\Diffraction";
-}
 
 //----------------------------------------------------------------------------------------------
 /** Initialisation method. Declares properties to be used in algorithm.
@@ -67,6 +52,11 @@ void AlignAndFocusPowder::init() {
   declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The result of diffraction focussing of InputWorkspace");
+  declareProperty(
+      make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          "UnfocussedWorkspace", "", Direction::Output, PropertyMode::Optional),
+      "Treated data in d-spacing before focussing (optional). This will likely "
+      "need rebinning.");
   // declareProperty(
   //   new WorkspaceProperty<MatrixWorkspace>("LowResTOFWorkspace", "",
   //   Direction::Output, PropertyMode::Optional),
@@ -79,7 +69,7 @@ void AlignAndFocusPowder::init() {
                   "grouping data");
   declareProperty(Kernel::make_unique<FileProperty>(
                       "GroupFilename", "", FileProperty::OptionalLoad,
-                      std::vector<std::string>{".xml"}),
+                      std::vector<std::string>{".xml", ".cal"}),
                   "Overrides grouping from CalFileName");
   declareProperty(
       make_unique<WorkspaceProperty<GroupingWorkspace>>(
@@ -111,9 +101,10 @@ void AlignAndFocusPowder::init() {
       "this can be followed by a comma and more widths and last boundary "
       "pairs.\n"
       "Negative width values indicate logarithmic binning.");
-  declareProperty("ResampleX", 0, "Number of bins in x-axis. Non-zero value "
-                                  "overrides \"Params\" property. Negative "
-                                  "value means logarithmic binning.");
+  declareProperty("ResampleX", 0,
+                  "Number of bins in x-axis. Non-zero value "
+                  "overrides \"Params\" property. Negative "
+                  "value means logarithmic binning.");
   setPropertySettings(
       "Params", make_unique<EnabledWhenProperty>("ResampleX", IS_DEFAULT));
   declareProperty("Dspacing", true,
@@ -129,27 +120,53 @@ void AlignAndFocusPowder::init() {
   declareProperty("TMax", EMPTY_DBL(),
                   "Maximum for TOF or dspace axis. Defaults to 0. ");
   mapPropertyName("TMax", "tof_max");
-  declareProperty("PreserveEvents", true, "If the InputWorkspace is an "
-                                          "EventWorkspace, this will preserve "
-                                          "the full event list (warning: this "
-                                          "will use much more memory!).");
-  declareProperty("RemovePromptPulseWidth", 0., "Width of events (in "
-                                                "microseconds) near the prompt "
-                                                "pulse to remove. 0 disables");
-  declareProperty("CompressTolerance", 0.01, "Compress events (in "
-                                             "microseconds) within this "
-                                             "tolerance. (Default 0.01) ");
-  declareProperty("UnwrapRef", 0., "Reference total flight path for frame "
-                                   "unwrapping. Zero skips the correction");
+  declareProperty("PreserveEvents", true,
+                  "If the InputWorkspace is an "
+                  "EventWorkspace, this will preserve "
+                  "the full event list (warning: this "
+                  "will use much more memory!).");
+  declareProperty("RemovePromptPulseWidth", 0.,
+                  "Width of events (in "
+                  "microseconds) near the prompt "
+                  "pulse to remove. 0 disables");
+  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  mustBePositive->setLower(0.0);
+  declareProperty(make_unique<PropertyWithValue<double>>("CompressTolerance",
+                                                         1e-5, mustBePositive,
+                                                         Direction::Input),
+                  "Compress events (in "
+                  "microseconds) within this "
+                  "tolerance. (Default 1e-5)");
+  declareProperty(
+      make_unique<PropertyWithValue<double>>("CompressWallClockTolerance",
+                                             EMPTY_DBL(), mustBePositive,
+                                             Direction::Input),
+      "The tolerance (in seconds) on the wall-clock time for comparison. Unset "
+      "means compressing all wall-clock times together disabling pulsetime "
+      "resolution.");
+
+  auto dateValidator = boost::make_shared<DateTimeValidator>();
+  dateValidator->allowEmpty(true);
+  declareProperty(
+      "CompressStartTime", "", dateValidator,
+      "An ISO formatted date/time string specifying the timestamp for "
+      "starting filtering. Ignored if WallClockTolerance is not specified. "
+      "Default is start of run",
+      Direction::Input);
+  declareProperty("UnwrapRef", 0.,
+                  "Reference total flight path for frame "
+                  "unwrapping. Zero skips the correction");
   declareProperty(
       "LowResRef", 0.,
       "Reference DIFC for resolution removal. Zero skips the correction");
   declareProperty(
       "CropWavelengthMin", 0.,
       "Crop the data at this minimum wavelength. Overrides LowResRef.");
+  mapPropertyName("CropWavelengthMin", "wavelength_min");
   declareProperty("CropWavelengthMax", EMPTY_DBL(),
                   "Crop the data at this maximum wavelength. Forces use of "
                   "CropWavelengthMin.");
+  mapPropertyName("CropWavelengthMax", "wavelength_max");
   declareProperty("PrimaryFlightPath", -1.0,
                   "If positive, focus positions are changed.  (Default -1) ");
   declareProperty(make_unique<ArrayProperty<int32_t>>("SpectrumIDs"),
@@ -173,6 +190,20 @@ void AlignAndFocusPowder::init() {
                   "Otherwise, the low resolution spectra will have spectrum "
                   "IDs offset from normal ones. ");
   declareProperty("ReductionProperties", "__powdereduction", Direction::Input);
+}
+
+std::map<std::string, std::string> AlignAndFocusPowder::validateInputs() {
+  std::map<std::string, std::string> result;
+
+  if (!isDefault("UnfocussedWorkspace")) {
+    if (getPropertyValue("OutputWorkspace") ==
+        getPropertyValue("UnfocussedWorkspace")) {
+      result["OutputWorkspace"] = "Cannot be the same as UnfocussedWorkspace";
+      result["UnfocussedWorkspace"] = "Cannot be the same as OutputWorkspace";
+    }
+  }
+
+  return result;
 }
 
 template <typename NumT> struct RegLowVectorPair {
@@ -240,8 +271,12 @@ void AlignAndFocusPowder::exec() {
   m_inputW = getProperty("InputWorkspace");
   m_inputEW = boost::dynamic_pointer_cast<EventWorkspace>(m_inputW);
   m_instName = m_inputW->getInstrument()->getName();
-  m_instName =
-      Kernel::ConfigService::Instance().getInstrument(m_instName).shortName();
+  try {
+    m_instName =
+        Kernel::ConfigService::Instance().getInstrument(m_instName).shortName();
+  } catch (Exception::NotFoundError &) {
+    ; // not noteworthy
+  }
   std::string calFilename = getPropertyValue("CalFileName");
   std::string groupFilename = getPropertyValue("GroupFilename");
   m_calibrationWS = getProperty("CalibrationWorkspace");
@@ -277,26 +312,35 @@ void AlignAndFocusPowder::exec() {
       dspace = false;
   }
   if (dspace) {
-    if (m_params.size() == 1 && dmax > 0) {
-      double step = m_params[0];
-      m_params.clear();
-      if (step > 0 || dmin > 0) {
+    if (m_params.size() == 1 && (!isEmpty(dmin)) && (!isEmpty(dmax))) {
+      if (dmin > 0. && dmax > dmin) {
+        double step = m_params[0];
+        m_params.clear();
         m_params.push_back(dmin);
         m_params.push_back(step);
         m_params.push_back(dmax);
-        g_log.information() << "d-Spacing Binning: " << m_params[0] << "  "
-                            << m_params[1] << "  " << m_params[2] << "\n";
+        g_log.information()
+            << "d-Spacing binning updated: " << m_params[0] << "  "
+            << m_params[1] << "  " << m_params[2] << "\n";
+      } else {
+        g_log.warning() << "something is wrong with dmin (" << dmin
+                        << ") and dmax (" << dmax
+                        << "). They are being ignored.\n";
       }
     }
   } else {
-    if (m_params.size() == 1 && tmax > 0) {
-      double step = m_params[0];
-      if (step > 0 || tmin > 0) {
+    if (m_params.size() == 1 && (!isEmpty(tmin)) && (!isEmpty(tmax))) {
+      if (tmin > 0. && tmax > tmin) {
+        double step = m_params[0];
         m_params[0] = tmin;
         m_params.push_back(step);
         m_params.push_back(tmax);
-        g_log.information() << "TOF Binning: " << m_params[0] << "  "
+        g_log.information() << "TOF binning updated: " << m_params[0] << "  "
                             << m_params[1] << "  " << m_params[2] << "\n";
+      } else {
+        g_log.warning() << "something is wrong with tmin (" << tmin
+                        << ") and tmax (" << tmax
+                        << "). They are being ignored.\n";
       }
     }
   }
@@ -327,13 +371,19 @@ void AlignAndFocusPowder::exec() {
   // Now setup the output workspace
   m_outputW = getProperty("OutputWorkspace");
   if (m_inputEW) {
+    // event workspace
     if (m_outputW != m_inputW) {
+      // out-of-place: clone the input EventWorkspace
       m_outputEW = m_inputEW->clone();
+      m_outputW = boost::dynamic_pointer_cast<MatrixWorkspace>(m_outputEW);
+    } else {
+      // in-place
+      m_outputEW = boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
     }
-    m_outputEW = boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
   } else {
+    // workspace2D
     if (m_outputW != m_inputW) {
-      m_outputW = WorkspaceFactory::Instance().create(m_inputW);
+      m_outputW = m_inputW->clone();
     }
   }
 
@@ -354,19 +404,27 @@ void AlignAndFocusPowder::exec() {
   }
 
   // set up a progress bar with the "correct" number of steps
-  m_progress = new Progress(this, 0., 1., 22);
+  m_progress = make_unique<Progress>(this, 0., 1., 21);
 
   if (m_inputEW) {
     double tolerance = getProperty("CompressTolerance");
     if (tolerance > 0.) {
-      g_log.information() << "running CompressEvents(Tolerance=" << tolerance
-                          << ") started at "
-                          << Kernel::DateAndTime::getCurrentTime() << "\n";
+      double wallClockTolerance = getProperty("CompressWallClockTolerance");
+      g_log.information() << "running CompressEvents(Tolerance=" << tolerance;
+      if (!isEmpty(wallClockTolerance))
+        g_log.information() << " and WallClockTolerance=" << wallClockTolerance;
+      g_log.information() << ") started at "
+                          << Types::Core::DateAndTime::getCurrentTime() << "\n";
       API::IAlgorithm_sptr compressAlg = createChildAlgorithm("CompressEvents");
       compressAlg->setProperty("InputWorkspace", m_outputEW);
       compressAlg->setProperty("OutputWorkspace", m_outputEW);
       compressAlg->setProperty("OutputWorkspace", m_outputEW);
       compressAlg->setProperty("Tolerance", tolerance);
+      if (!isEmpty(wallClockTolerance)) {
+        compressAlg->setProperty("WallClockTolerance", wallClockTolerance);
+        compressAlg->setPropertyValue("StartTime",
+                                      getPropertyValue("CompressStartTime"));
+      }
       compressAlg->executeAsChildAlg();
       m_outputEW = compressAlg->getProperty("OutputWorkspace");
       m_outputW = boost::dynamic_pointer_cast<MatrixWorkspace>(m_outputEW);
@@ -384,7 +442,7 @@ void AlignAndFocusPowder::exec() {
 
     g_log.information() << "running CropWorkspace(TOFmin=" << xmin
                         << ", TOFmax=" << xmax << ") started at "
-                        << Kernel::DateAndTime::getCurrentTime() << "\n";
+                        << Types::Core::DateAndTime::getCurrentTime() << "\n";
     API::IAlgorithm_sptr cropAlg = createChildAlgorithm("CropWorkspace");
     cropAlg->setProperty("InputWorkspace", m_outputW);
     cropAlg->setProperty("OutputWorkspace", m_outputW);
@@ -405,7 +463,7 @@ void AlignAndFocusPowder::exec() {
     if (m_outputEW->getNumberEvents() > 0) {
       g_log.information() << "running RemovePromptPulse(Width="
                           << removePromptPulseWidth << ") started at "
-                          << Kernel::DateAndTime::getCurrentTime() << "\n";
+                          << Types::Core::DateAndTime::getCurrentTime() << "\n";
       API::IAlgorithm_sptr filterPAlg =
           createChildAlgorithm("RemovePromptPulse");
       filterPAlg->setProperty("InputWorkspace", m_outputW);
@@ -422,7 +480,7 @@ void AlignAndFocusPowder::exec() {
 
   if (maskBinTableWS) {
     g_log.information() << "running MaskBinsFromTable started at "
-                        << Kernel::DateAndTime::getCurrentTime() << "\n";
+                        << Types::Core::DateAndTime::getCurrentTime() << "\n";
     API::IAlgorithm_sptr alg = createChildAlgorithm("MaskBinsFromTable");
     alg->setProperty("InputWorkspace", m_outputW);
     alg->setProperty("OutputWorkspace", m_outputW);
@@ -435,13 +493,22 @@ void AlignAndFocusPowder::exec() {
 
   if (m_maskWS) {
     g_log.information() << "running MaskDetectors started at "
-                        << Kernel::DateAndTime::getCurrentTime() << "\n";
-    API::IAlgorithm_sptr maskAlg = createChildAlgorithm("MaskDetectors");
-    maskAlg->setProperty("Workspace", m_outputW);
-    maskAlg->setProperty("MaskedWorkspace", m_maskWS);
+                        << Types::Core::DateAndTime::getCurrentTime() << "\n";
+    const auto &maskedDetectors = m_maskWS->getMaskedDetectors();
+    API::IAlgorithm_sptr maskAlg = createChildAlgorithm("MaskInstrument");
+    maskAlg->setProperty("InputWorkspace", m_outputW);
+    maskAlg->setProperty("OutputWorkspace", m_outputW);
+    maskAlg->setProperty(
+        "DetectorIDs",
+        std::vector<detid_t>(maskedDetectors.begin(), maskedDetectors.end()));
     maskAlg->executeAsChildAlg();
-    Workspace_sptr tmpW = maskAlg->getProperty("Workspace");
-    m_outputW = boost::dynamic_pointer_cast<MatrixWorkspace>(tmpW);
+    MatrixWorkspace_sptr tmpW = maskAlg->getProperty("OutputWorkspace");
+
+    API::IAlgorithm_sptr clearAlg = createChildAlgorithm("ClearMaskedSpectra");
+    clearAlg->setProperty("InputWorkspace", tmpW);
+    clearAlg->setProperty("OutputWorkspace", tmpW);
+    clearAlg->executeAsChildAlg();
+    m_outputW = clearAlg->getProperty("OutputWorkspace");
     m_outputEW = boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
   }
   m_progress->report();
@@ -452,7 +519,7 @@ void AlignAndFocusPowder::exec() {
 
   if (m_calibrationWS) {
     g_log.information() << "running AlignDetectors started at "
-                        << Kernel::DateAndTime::getCurrentTime() << "\n";
+                        << Types::Core::DateAndTime::getCurrentTime() << "\n";
     API::IAlgorithm_sptr alignAlg = createChildAlgorithm("AlignDetectors");
     alignAlg->setProperty("InputWorkspace", m_outputW);
     alignAlg->setProperty("OutputWorkspace", m_outputW);
@@ -473,7 +540,7 @@ void AlignAndFocusPowder::exec() {
   if (LRef > 0.) {
     g_log.information() << "running UnwrapSNS(LRef=" << LRef << ",Tmin=" << tmin
                         << ",Tmax=" << tmax << ") started at "
-                        << Kernel::DateAndTime::getCurrentTime() << "\n";
+                        << Types::Core::DateAndTime::getCurrentTime() << "\n";
     API::IAlgorithm_sptr removeAlg = createChildAlgorithm("UnwrapSNS");
     removeAlg->setProperty("InputWorkspace", m_outputW);
     removeAlg->setProperty("OutputWorkspace", m_outputW);
@@ -504,7 +571,7 @@ void AlignAndFocusPowder::exec() {
     if (!isEmpty(maxwl))
       g_log.information() << ", WavelengthMax=" << maxwl;
     g_log.information() << ") started at "
-                        << Kernel::DateAndTime::getCurrentTime() << "\n";
+                        << Types::Core::DateAndTime::getCurrentTime() << "\n";
 
     API::IAlgorithm_sptr removeAlg = createChildAlgorithm("CropWorkspace");
     removeAlg->setProperty("InputWorkspace", m_outputW);
@@ -519,7 +586,7 @@ void AlignAndFocusPowder::exec() {
   } else if (DIFCref > 0.) {
     g_log.information() << "running RemoveLowResTof(RefDIFC=" << DIFCref
                         << ",K=3.22) started at "
-                        << Kernel::DateAndTime::getCurrentTime() << "\n";
+                        << Types::Core::DateAndTime::getCurrentTime() << "\n";
     EventWorkspace_sptr ews =
         boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
     if (ews)
@@ -579,6 +646,13 @@ void AlignAndFocusPowder::exec() {
   if (m_processLowResTOF)
     doSortEvents(m_lowResW);
   m_progress->report();
+
+  // copy the output workspace just before `DiffractionFocusing`
+  // this probably should be binned by callers before inspecting
+  if (!isDefault("UnfocussedWorkspace")) {
+    auto wkspCopy = m_outputW->clone();
+    setProperty("UnfocussedWorkspace", std::move(wkspCopy));
+  }
 
   // Diffraction focus
   m_outputW = diffractionFocus(m_outputW);
@@ -641,30 +715,25 @@ void AlignAndFocusPowder::exec() {
   double tolerance = getProperty("CompressTolerance");
   m_outputEW = boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
   if ((m_outputEW) && (tolerance > 0.)) {
-    g_log.information() << "running CompressEvents(Tolerance=" << tolerance
-                        << ") started at "
-                        << Kernel::DateAndTime::getCurrentTime() << "\n";
+    double wallClockTolerance = getProperty("CompressWallClockTolerance");
+    g_log.information() << "running CompressEvents(Tolerance=" << tolerance;
+    if (!isEmpty(wallClockTolerance))
+      g_log.information() << " and WallClockTolerance=" << wallClockTolerance;
+    g_log.information() << ") started at "
+                        << Types::Core::DateAndTime::getCurrentTime() << "\n";
     API::IAlgorithm_sptr compressAlg = createChildAlgorithm("CompressEvents");
     compressAlg->setProperty("InputWorkspace", m_outputEW);
     compressAlg->setProperty("OutputWorkspace", m_outputEW);
-    compressAlg->setProperty("OutputWorkspace", m_outputEW);
     compressAlg->setProperty("Tolerance", tolerance);
+    if (!isEmpty(wallClockTolerance)) {
+      compressAlg->setProperty("WallClockTolerance", wallClockTolerance);
+      compressAlg->setPropertyValue("StartTime",
+                                    getPropertyValue("CompressStartTime"));
+    }
     compressAlg->executeAsChildAlg();
     m_outputEW = compressAlg->getProperty("OutputWorkspace");
     m_outputW = boost::dynamic_pointer_cast<MatrixWorkspace>(m_outputEW);
   }
-  m_progress->report();
-
-  if ((!m_params.empty()) && (m_params.size() != 1)) {
-    m_params.erase(m_params.begin());
-    m_params.pop_back();
-  }
-  if (!m_dmins.empty())
-    m_dmins.clear();
-  if (!m_dmaxs.empty())
-    m_dmaxs.clear();
-
-  m_outputW = rebin(m_outputW);
   m_progress->report();
 
   // return the output workspace
@@ -673,13 +742,13 @@ void AlignAndFocusPowder::exec() {
 
 //----------------------------------------------------------------------------------------------
 /** Call edit instrument geometry
-  */
+ */
 API::MatrixWorkspace_sptr AlignAndFocusPowder::editInstrument(
     API::MatrixWorkspace_sptr ws, std::vector<double> polars,
     std::vector<specnum_t> specids, std::vector<double> l2s,
     std::vector<double> phis) {
   g_log.information() << "running EditInstrumentGeometry started at "
-                      << Kernel::DateAndTime::getCurrentTime() << "\n";
+                      << Types::Core::DateAndTime::getCurrentTime() << "\n";
 
   API::IAlgorithm_sptr editAlg = createChildAlgorithm("EditInstrumentGeometry");
   editAlg->setProperty("Workspace", ws);
@@ -702,7 +771,7 @@ API::MatrixWorkspace_sptr AlignAndFocusPowder::editInstrument(
 
 //----------------------------------------------------------------------------------------------
 /** Call diffraction focus to a matrix workspace.
-  */
+ */
 API::MatrixWorkspace_sptr
 AlignAndFocusPowder::diffractionFocus(API::MatrixWorkspace_sptr ws) {
   if (!m_groupWS) {
@@ -710,8 +779,15 @@ AlignAndFocusPowder::diffractionFocus(API::MatrixWorkspace_sptr ws) {
     return ws;
   }
 
+  if (m_maskWS) {
+    API::IAlgorithm_sptr maskAlg = createChildAlgorithm("MaskDetectors");
+    maskAlg->setProperty("Workspace", m_groupWS);
+    maskAlg->setProperty("MaskedWorkspace", m_maskWS);
+    maskAlg->executeAsChildAlg();
+  }
+
   g_log.information() << "running DiffractionFocussing started at "
-                      << Kernel::DateAndTime::getCurrentTime() << "\n";
+                      << Types::Core::DateAndTime::getCurrentTime() << "\n";
 
   API::IAlgorithm_sptr focusAlg = createChildAlgorithm("DiffractionFocussing");
   focusAlg->setProperty("InputWorkspace", ws);
@@ -726,13 +802,13 @@ AlignAndFocusPowder::diffractionFocus(API::MatrixWorkspace_sptr ws) {
 
 //----------------------------------------------------------------------------------------------
 /** Convert units
-  */
+ */
 API::MatrixWorkspace_sptr
 AlignAndFocusPowder::convertUnits(API::MatrixWorkspace_sptr matrixws,
                                   std::string target) {
   g_log.information() << "running ConvertUnits(Target=" << target
                       << ") started at "
-                      << Kernel::DateAndTime::getCurrentTime() << "\n";
+                      << Types::Core::DateAndTime::getCurrentTime() << "\n";
 
   API::IAlgorithm_sptr convert2Alg = createChildAlgorithm("ConvertUnits");
   convert2Alg->setProperty("InputWorkspace", matrixws);
@@ -747,7 +823,7 @@ AlignAndFocusPowder::convertUnits(API::MatrixWorkspace_sptr matrixws,
 
 //----------------------------------------------------------------------------------------------
 /** Rebin
-*/
+ */
 API::MatrixWorkspace_sptr
 AlignAndFocusPowder::rebin(API::MatrixWorkspace_sptr matrixws) {
   if (m_resampleX != 0) {
@@ -756,7 +832,7 @@ AlignAndFocusPowder::rebin(API::MatrixWorkspace_sptr matrixws) {
                         << ", LogBinning=" << (m_resampleX < 0) << ", dMin("
                         << m_dmins.size() << "), dmax(" << m_dmaxs.size()
                         << ")) started at "
-                        << Kernel::DateAndTime::getCurrentTime() << "\n";
+                        << Types::Core::DateAndTime::getCurrentTime() << "\n";
     API::IAlgorithm_sptr alg = createChildAlgorithm("ResampleX");
     alg->setProperty("InputWorkspace", matrixws);
     alg->setProperty("OutputWorkspace", matrixws);
@@ -781,7 +857,11 @@ AlignAndFocusPowder::rebin(API::MatrixWorkspace_sptr matrixws) {
     for (double param : m_params)
       g_log.information() << param << " ";
     g_log.information() << ") started at "
-                        << Kernel::DateAndTime::getCurrentTime() << "\n";
+                        << Types::Core::DateAndTime::getCurrentTime() << "\n";
+    for (double param : m_params)
+      if (isEmpty(param))
+        g_log.warning("encountered empty binning parameter");
+
     API::IAlgorithm_sptr rebin3Alg = createChildAlgorithm("Rebin");
     rebin3Alg->setProperty("InputWorkspace", matrixws);
     rebin3Alg->setProperty("OutputWorkspace", matrixws);
@@ -794,7 +874,7 @@ AlignAndFocusPowder::rebin(API::MatrixWorkspace_sptr matrixws) {
 
 //----------------------------------------------------------------------------------------------
 /** Add workspace2 to workspace1 by adding spectrum.
-  */
+ */
 MatrixWorkspace_sptr
 AlignAndFocusPowder::conjoinWorkspaces(API::MatrixWorkspace_sptr ws1,
                                        API::MatrixWorkspace_sptr ws2,
@@ -929,29 +1009,45 @@ void AlignAndFocusPowder::loadCalFile(const std::string &calFilename,
     return;
 
   // load grouping file if it was already specified
-  bool loadMask = !m_maskWS;
-  if (loadMask && !groupFilename.empty()) {
+  if (!groupFilename.empty()) {
     g_log.information() << "Loading Grouping file \"" << groupFilename
                         << "\"\n";
-    IAlgorithm_sptr alg = createChildAlgorithm("LoadDetectorsGroupingFile");
-    alg->setProperty("InputFile", groupFilename);
-    alg->executeAsChildAlg();
+    if (groupFilename.find(".cal") != std::string::npos) {
+      IAlgorithm_sptr alg = createChildAlgorithm("LoadDiffCal");
+      alg->setProperty("InputWorkspace", m_inputW);
+      alg->setPropertyValue("Filename", groupFilename);
+      alg->setProperty<bool>("MakeCalWorkspace", false);
+      alg->setProperty<bool>("MakeGroupingWorkspace", true);
+      alg->setProperty<bool>("MakeMaskWorkspace", false);
+      alg->setPropertyValue("WorkspaceName", m_instName);
+      alg->executeAsChildAlg();
 
-    // get and rename the workspace
-    m_groupWS = alg->getProperty("OutputWorkspace");
+      // get the workspace
+      m_groupWS = alg->getProperty("OutputGroupingWorkspace");
+    } else {
+      IAlgorithm_sptr alg = createChildAlgorithm("LoadDetectorsGroupingFile");
+      alg->setProperty("InputFile", groupFilename);
+      alg->executeAsChildAlg();
+
+      // get the workspace
+      m_groupWS = alg->getProperty("OutputWorkspace");
+    }
+
+    // register the workspace with the ADS
     const std::string name = m_instName + "_group";
     AnalysisDataService::Instance().addOrReplace(name, m_groupWS);
     this->setPropertyValue("GroupingWorkspace", name);
-
-    // don't load again from the calibration file
-    loadMask = false;
   }
+
+  if (calFilename.empty())
+    return;
 
   g_log.information() << "Loading Calibration file \"" << calFilename << "\"\n";
 
   // bunch of booleans to keep track of things
-  bool loadGrouping = !m_groupWS;
-  bool loadCalibration = !m_calibrationWS;
+  const bool loadMask = !m_maskWS;
+  const bool loadGrouping = !m_groupWS;
+  const bool loadCalibration = !m_calibrationWS;
 
   IAlgorithm_sptr alg = createChildAlgorithm("LoadDiffCal");
   alg->setProperty("InputWorkspace", m_inputW);
@@ -1004,5 +1100,5 @@ void AlignAndFocusPowder::doSortEvents(Mantid::API::Workspace_sptr ws) {
   alg->executeAsChildAlg();
 }
 
-} // namespace WorkflowAlgorithm
+} // namespace WorkflowAlgorithms
 } // namespace Mantid

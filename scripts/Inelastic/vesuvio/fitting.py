@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 """Fitting support routines
 
 This is all essentially about parsing the user input and putting it into a form
@@ -40,6 +46,7 @@ def parse_fit_options(mass_values, profile_strs, background_str="", constraints_
 
     return FittingOptions(mass_profiles, background, constraints)
 
+
 # --------------------------------------------------------------------------------
 # FittingOptions - Used internally
 # --------------------------------------------------------------------------------
@@ -59,7 +66,7 @@ class FittingOptions(object):
                 self.intensity_constraints = intensity_constraints
             else:
                 # trailing comma is important or the list gets undone
-                self.intensity_constraints = [intensity_constraints,]
+                self.intensity_constraints = [intensity_constraints, ]
         else:
             self.intensity_constraints = None
         self.background = background

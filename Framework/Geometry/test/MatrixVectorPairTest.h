@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_GEOMETRY_MATRIXVECTORPAIRTEST_H_
 #define MANTID_GEOMETRY_MATRIXVECTORPAIRTEST_H_
 
@@ -10,7 +16,7 @@
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
-typedef MatrixVectorPair<int, V3R> V3RIntPair;
+using V3RIntPair = MatrixVectorPair<int, V3R>;
 
 class MatrixVectorPairTest : public CxxTest::TestSuite {
 public:

@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -152,7 +152,7 @@ The following example shows an example for refinement of lattice parameters usin
     cell_a = np.round(lattice_parameters.cell(0, 1), 5)
     cell_a_error = np.round(lattice_parameters.cell(0, 2), 5)
 
-    print "Refined lattice parameter a =", cell_a, "+/-", cell_a_error
+    print("Refined lattice parameter a = {:.5f} +/- {}".format(cell_a, cell_a_error))
 
 The refined lattice parameter is printed at the end:
 

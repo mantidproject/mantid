@@ -1,6 +1,9 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/Load.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FileProperty.h"
@@ -10,17 +13,18 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidAPI/MultipleFileProperty.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/FacilityInfo.h"
 
 #include <Poco/Path.h>
 
-#include <cctype>
 #include <algorithm>
+#include <cctype>
+#include <cstdio>
 #include <functional>
 #include <numeric>
 #include <set>
-#include <cstdio>
 
 namespace {
 /**
@@ -80,7 +84,7 @@ flattenVecOfVec(std::vector<std::vector<std::string>> vecOfVec) {
 
   return flattenedVec;
 }
-}
+} // namespace
 
 namespace Mantid {
 namespace DataHandling {
@@ -96,9 +100,6 @@ using namespace API;
 //--------------------------------------------------------------------------
 // Public methods
 //--------------------------------------------------------------------------
-
-/// Default constructor
-Load::Load() : Algorithm(), m_baseProps(), m_loader(), m_filenamePropName() {}
 
 /** Override setPropertyValue to catch if filename is being set, as this may
  * mean
@@ -184,10 +185,11 @@ void Load::setPropertyValue(const std::string &name, const std::string &value) {
 //--------------------------------------------------------------------------
 
 /**
-* Get a shared pointer to the load algorithm with highest preference for loading
-* @param filePath :: path of the file
-* @returns A shared pointer to the unmanaged algorithm
-*/
+ * Get a shared pointer to the load algorithm with highest preference for
+ * loading
+ * @param filePath :: path of the file
+ * @returns A shared pointer to the unmanaged algorithm
+ */
 API::IAlgorithm_sptr Load::getFileLoader(const std::string &filePath) {
   API::IAlgorithm_sptr winningLoader;
   try {
@@ -235,9 +237,9 @@ void Load::findFilenameProperty(const API::IAlgorithm_sptr &loader) {
 }
 
 /**
-* Declare any additional properties of the concrete loader here
-* @param loader A pointer to the concrete loader
-*/
+ * Declare any additional properties of the concrete loader here
+ * @param loader A pointer to the concrete loader
+ */
 void Load::declareLoaderProperties(const API::IAlgorithm_sptr &loader) {
   // If we have switch loaders then the concrete loader will have different
   // properties
@@ -245,7 +247,7 @@ void Load::declareLoaderProperties(const API::IAlgorithm_sptr &loader) {
   // THIS IS A COPY as the properties are mutated as we move through them
   const std::vector<Property *> existingProps = this->getProperties();
   for (auto existingProp : existingProps) {
-    const std::string name = existingProp->name();
+    const std::string &name = existingProp->name();
     // Wipe all properties except the Load native ones
     if (m_baseProps.find(name) == m_baseProps.end()) {
       this->removeProperty(name);
@@ -288,6 +290,7 @@ void Load::init() {
   exts.emplace_back(".hd5");
   exts.emplace_back(".sqw");
   exts.emplace_back(".fits");
+  exts.emplace_back(".bin");
 
   declareProperty(
       Kernel::make_unique<MultipleFileProperty>("Filename", exts),
@@ -306,9 +309,10 @@ void Load::init() {
                   "When an algorithm has been found that will load the given "
                   "file, its name is set here.",
                   Direction::Output);
-  declareProperty("LoaderVersion", -1, "When an algorithm has been found that "
-                                       "will load the given file, its version "
-                                       "is set here.",
+  declareProperty("LoaderVersion", -1,
+                  "When an algorithm has been found that "
+                  "will load the given file, its version "
+                  "is set here.",
                   Direction::Output);
   // Save for later what the base Load properties are
   const std::vector<Property *> &props = this->getProperties();
@@ -474,13 +478,13 @@ void Load::loadMultipleFiles() {
 }
 
 /**
-* Create the concrete instance use for the actual loading.
-* @param startProgress :: The percentage progress value of the overall
-* algorithm where this child algorithm starts
-* @param endProgress :: The percentage progress value of the overall
-* algorithm where this child algorithm ends
-* @param logging :: Set to false to disable logging from the child algorithm
-*/
+ * Create the concrete instance use for the actual loading.
+ * @param startProgress :: The percentage progress value of the overall
+ * algorithm where this child algorithm starts
+ * @param endProgress :: The percentage progress value of the overall
+ * algorithm where this child algorithm ends
+ * @param logging :: Set to false to disable logging from the child algorithm
+ */
 API::IAlgorithm_sptr Load::createLoader(const double startProgress,
                                         const double endProgress,
                                         const bool logging) const {
@@ -529,10 +533,10 @@ void Load::setUpLoader(API::IAlgorithm_sptr &loader, const double startProgress,
 }
 
 /**
-* Set the output workspace(s) if the load's return workspace has type
-* API::Workspace
-* @param loader :: Shared pointer to load algorithm
-*/
+ * Set the output workspace(s) if the load's return workspace has type
+ * API::Workspace
+ * @param loader :: Shared pointer to load algorithm
+ */
 void Load::setOutputWorkspace(const API::IAlgorithm_sptr &loader) {
   // Go through each OutputWorkspace property and check whether we need to make
   // a counterpart here
@@ -554,13 +558,13 @@ void Load::setOutputWorkspace(const API::IAlgorithm_sptr &loader) {
 }
 
 /**
-* Return an output workspace property dealing with the lack of connection
-* between of
-* WorkspaceProperty types
-* @param propName :: The name of the property
-* @param loader :: The loader algorithm
-* @returns A pointer to the OutputWorkspace property of the Child Algorithm
-*/
+ * Return an output workspace property dealing with the lack of connection
+ * between of
+ * WorkspaceProperty types
+ * @param propName :: The name of the property
+ * @param loader :: The loader algorithm
+ * @returns A pointer to the OutputWorkspace property of the Child Algorithm
+ */
 API::Workspace_sptr
 Load::getOutputWorkspace(const std::string &propName,
                          const API::IAlgorithm_sptr &loader) const {
@@ -619,8 +623,8 @@ Load::getOutputWorkspace(const std::string &propName,
 }
 
 /*
-* Overrides the default cancel() method. Calls cancel() on the actual loader.
-*/
+ * Overrides the default cancel() method. Calls cancel() on the actual loader.
+ */
 void Load::cancel() {
   if (m_loader) {
     m_loader->cancel();
@@ -751,6 +755,15 @@ Load::groupWsList(const std::vector<API::Workspace_sptr> &wsList) {
   }
 
   return group;
+}
+
+Parallel::ExecutionMode Load::getParallelExecutionMode(
+    const std::map<std::string, Parallel::StorageMode> &storageModes) const {
+  static_cast<void>(storageModes);
+  // The actually relevant execution mode is that of the underlying loader. Here
+  // we simply default to ExecutionMode::Distributed to guarantee that the
+  // normal exec() is being run on all ranks.
+  return Parallel::ExecutionMode::Distributed;
 }
 
 } // namespace DataHandling

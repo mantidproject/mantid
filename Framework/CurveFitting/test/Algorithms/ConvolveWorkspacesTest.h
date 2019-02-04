@@ -1,21 +1,25 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef ConvolveWorkspacesTEST_H_
 #define ConvolveWorkspacesTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidCurveFitting/Algorithms/ConvolveWorkspaces.h"
-#include "MantidCurveFitting/Algorithms/Fit.h"
-#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/FunctionFactory.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidTestHelpers/FakeObjects.h"
+#include "MantidCurveFitting/Algorithms/ConvolveWorkspaces.h"
+#include "MantidCurveFitting/Algorithms/Fit.h"
 #include "MantidCurveFitting/Functions/Gaussian.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidTestHelpers/FakeObjects.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -38,7 +42,7 @@ struct NormGaussianFunc2 {
     return exp(-pow(x, 2) / (2 * pow(sig, 2))) / (sqrt(2 * M_PI) * sig);
   }
 };
-}
+} // namespace
 
 class ConvolveWorkspacesTest : public CxxTest::TestSuite {
 public:
@@ -48,10 +52,10 @@ public:
     // Convolution of normalized Gaussians should have sigma =
     // sqrt(sig1^2+sig2^2)
     Workspace2D_sptr ws1 =
-        WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
+        WorkspaceCreationHelper::create2DWorkspaceFromFunction(
             NormGaussianFunc1(), 1, -2.0, 2.0, 0.01, false);
     Workspace2D_sptr ws2 =
-        WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
+        WorkspaceCreationHelper::create2DWorkspaceFromFunction(
             NormGaussianFunc2(), 1, -2.0, 2.0, 0.01, false);
     TS_ASSERT_THROWS_NOTHING(
         AnalysisDataService::Instance().addOrReplace("wksp1", ws1));
@@ -101,9 +105,9 @@ public:
   ConvolveWorkspacesTestPerformance() { FrameworkManager::Instance(); }
 
   void setUp() override {
-    ws1 = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
+    ws1 = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
         NormGaussianFunc1(), 1000, -5.0, 5.0, 0.005, false);
-    ws2 = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
+    ws2 = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
         NormGaussianFunc2(), 1000, -5.0, 5.0, 0.005, false);
     AnalysisDataService::Instance().addOrReplace("wksp1", ws1);
     AnalysisDataService::Instance().addOrReplace("wksp2", ws2);

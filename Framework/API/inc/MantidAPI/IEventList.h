@@ -1,9 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_API_IEVENTLIST_H_
 #define MANTID_API_IEVENTLIST_H_
 #include "MantidAPI/DllConfig.h"
-#include "MantidKernel/DateAndTime.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/ISpectrum.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidKernel/DateAndTime.h"
 #include <functional>
 
 namespace Mantid {
@@ -71,6 +77,8 @@ public:
   virtual void addPulsetime(const double seconds) = 0;
   /// Mask a given TOF range
   virtual void maskTof(const double tofMin, const double tofMax) = 0;
+  /// Mask the events by the condition vector
+  virtual void maskCondition(const std::vector<bool> &mask) = 0;
   /// Return the list of TOF values
   virtual std::vector<double> getTofs() const = 0;
   /// Return the list of TOF values
@@ -84,21 +92,22 @@ public:
   /// Return the list of event weight error values
   virtual void getWeightErrors(std::vector<double> &weightErrors) const = 0;
   /// Return the list of pulse time values
-  virtual std::vector<Mantid::Kernel::DateAndTime> getPulseTimes() const = 0;
+  virtual std::vector<Mantid::Types::Core::DateAndTime>
+  getPulseTimes() const = 0;
   /// Get the minimum TOF from the list
   virtual double getTofMin() const = 0;
   /// Get the maximum TOF from the list
   virtual double getTofMax() const = 0;
   /// Get the minimum pulse time from the list
-  virtual Mantid::Kernel::DateAndTime getPulseTimeMin() const = 0;
+  virtual Mantid::Types::Core::DateAndTime getPulseTimeMin() const = 0;
   /// Get the maximum pulse time from the list
-  virtual Mantid::Kernel::DateAndTime getPulseTimeMax() const = 0;
+  virtual Mantid::Types::Core::DateAndTime getPulseTimeMax() const = 0;
   /// Get the maximum time at sample.
-  virtual Mantid::Kernel::DateAndTime
+  virtual Mantid::Types::Core::DateAndTime
   getTimeAtSampleMax(const double &tofFactor,
                      const double &tofOffset) const = 0;
   /// Get the minimum time at sample
-  virtual Mantid::Kernel::DateAndTime
+  virtual Mantid::Types::Core::DateAndTime
   getTimeAtSampleMin(const double &tofFactor,
                      const double &tofOffset) const = 0;
   /// Set the TOFs from the given list
@@ -115,7 +124,7 @@ public:
                       const MantidVec &E) = 0;
 };
 
-} // namespace Mantid
 } // namespace API
+} // namespace Mantid
 
 #endif /* MANTID_API_IEVENTLIST_H_ */

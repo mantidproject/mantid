@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //-----------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------
@@ -11,9 +17,9 @@
 
 using Mantid::Kernel::ChebyshevPolyFit;
 using Mantid::Kernel::ChebyshevSeries;
-using Mantid::Kernel::getStatistics;
 using Mantid::Kernel::MersenneTwister;
 using Mantid::Kernel::StatOptions;
+using Mantid::Kernel::getStatistics;
 using std::pow;
 
 namespace {
@@ -25,8 +31,6 @@ size_t N_MUR_PTS = 21;
 size_t N_RAD = 29;
 /// Number of theta points for cylindrical integration
 size_t N_THETA = 29;
-/// Number of second order event points
-size_t N_SECOND = 10000;
 /// Order of polynomial used to fit generated points
 size_t N_POLY_ORDER = 4;
 /// 2pi
@@ -62,7 +66,7 @@ double integrate(const std::vector<double> &y, const double dx) {
   }
   return dx * (y.front() + 4.0 * sumOdd + 2.0 * sumEven + y.back()) / 3.0;
 }
-}
+} // namespace
 
 namespace Mantid {
 namespace Algorithms {
@@ -78,10 +82,11 @@ namespace Algorithms {
  */
 MayersSampleCorrectionStrategy::MayersSampleCorrectionStrategy(
     MayersSampleCorrectionStrategy::Parameters params,
-    const Mantid::HistogramData::Histogram &inputHist)
-    : m_pars(params), m_histogram(inputHist), m_tofVals(inputHist.points()),
-      m_histoYSize(inputHist.y().size()), m_muRrange(calculateMuRange()),
-      m_rng(new MersenneTwister(1)) {
+    HistogramData::Histogram inputHist)
+    : m_pars(params), m_histogram(std::move(inputHist)),
+      m_tofVals(m_histogram.points()), m_histoYSize(m_histogram.size()),
+      m_muRrange(calculateMuRange()),
+      m_rng(std::make_unique<MersenneTwister>(1)) {
 
   const auto &xVals = m_histogram.x();
   if (!(xVals.front() < xVals.back())) {
@@ -159,6 +164,12 @@ MayersSampleCorrectionStrategy::getCorrectedHisto() {
   auto &errOut = outputHistogram.mutableE();
 
   for (size_t i = 0; i < m_histoYSize; ++i) {
+    const double yin(m_histogram.y()[i]), ein(m_histogram.e()[i]);
+    if (yin == 0) {
+      // Detector with 0 signal received - skip this bin
+      continue;
+    }
+
     const double sigt = sigmaTotal(flightPath, m_tofVals[i]);
     const double rmu = muR(sigt);
     // Varies between [-1,+1]
@@ -170,7 +181,7 @@ MayersSampleCorrectionStrategy::getCorrectedHisto() {
       corrfact *= (1.0 - beta) / rns;
     }
     // apply correction
-    const double yin(m_histogram.y()[i]), ein(m_histogram.e()[i]);
+
     sigOut[i] = yin * corrfact;
     errOut[i] = sigOut[i] * ein / yin;
   }
@@ -189,6 +200,7 @@ MayersSampleCorrectionStrategy::calculateSelfAttenuation(const double muR) {
   const double dyr = muR / to<double>(N_RAD - 1);
   const double dyth = TWOPI / to<double>(N_THETA - 1);
   const double muRSq = muR * muR;
+  const double cosaz = cos(m_pars.azimuth);
 
   // Store values at each point
   std::vector<double> yr(N_RAD), yth(N_THETA);
@@ -208,7 +220,7 @@ MayersSampleCorrectionStrategy::calculateSelfAttenuation(const double muR) {
       if (fact2 < 0.0)
         fact2 = 0.0;
       const double mul2 =
-          (sqrt(fact2) - r0 * cos(m_pars.twoTheta - theta)) / cos(m_pars.phi);
+          (sqrt(fact2) - r0 * cos(m_pars.twoTheta - theta)) / cosaz;
       yth[j] = exp(-mul1 - mul2);
     }
 
@@ -231,15 +243,15 @@ MayersSampleCorrectionStrategy::calculateMS(const size_t irp, const double muR,
   // Radial coordinate raised to power 1/3 to ensure uniform density of points
   // across circle following discussion with W.G.Marshall (ISIS)
   const double radDistPower = 1. / 3.;
-  double muH = muR * (m_pars.cylHeight / m_pars.cylRadius);
+  const double muH = muR * (m_pars.cylHeight / m_pars.cylRadius);
+  const double cosaz = cos(m_pars.azimuth);
   seedRNG(irp);
 
   // Take an average over a number of sets of second scatters
-  const size_t nsets(10);
-  std::vector<double> deltas(nsets, 0.0);
-  for (size_t j = 0; j < nsets; ++j) {
+  std::vector<double> deltas(m_pars.msNRuns, 0.0);
+  for (size_t j = 0; j < m_pars.msNRuns; ++j) {
     double sum = 0.0;
-    for (size_t i = 0; i < N_SECOND; ++i) {
+    for (size_t i = 0; i < m_pars.msNEvents; ++i) {
       // Random (r,theta,z)
       const double r1 = pow(m_rng->nextValue(), radDistPower) * muR;
       const double r2 = pow(m_rng->nextValue(), radDistPower) * muR;
@@ -257,7 +269,7 @@ MayersSampleCorrectionStrategy::calculateMS(const size_t irp, const double muR,
         fact2 = 0.0;
       // Path out from final point
       const double mul2 =
-          (sqrt(fact2) - r2 * cos(m_pars.twoTheta - th2)) / cos(m_pars.phi);
+          (sqrt(fact2) - r2 * cos(m_pars.twoTheta - th2)) / cosaz;
       // Path between point 1 & 2
       const double mul12 =
           sqrt(pow(r1 * cos(th1) - r2 * cos(th2), 2) +
@@ -267,7 +279,7 @@ MayersSampleCorrectionStrategy::calculateMS(const size_t irp, const double muR,
       sum += exp(-(mul1 + mul2 + mul12)) / pow(mul12, 2);
     }
     const double beta =
-        pow(M_PI * muR * muR * muH, 2) * sum / to<double>(N_SECOND);
+        pow(M_PI * muR * muR * muH, 2) * sum / to<double>(m_pars.msNEvents);
     const double delta = 0.25 * beta / (M_PI * abs * muH);
     deltas[j] = delta;
   }

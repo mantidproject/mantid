@@ -1,13 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/Strings.h"
-#include "MantidKernel/UnitLabel.h"
 #include "MantidKernel/StringTokenizer.h"
+#include "MantidKernel/UnitLabel.h"
 
 #include <Poco/Path.h>
 
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/shared_ptr.hpp>
 
 #include <fstream>
 
@@ -34,6 +40,32 @@ std::string loadFile(const std::string &filename) {
     getline(in, str);
   }
   in.close();
+  return retVal;
+}
+
+// ------------------------------------------------------------------------------------------------
+/** Return a string shortened with the center replace by " ... "
+ * If the string is already short enough then the original string will be
+ *returned.
+ * If the max length or input string length is smaller than the ellipsis, the
+ *input will be returned.
+ *
+ * @param input :: input string
+ * @param max_length :: The maximum length of the return string (0 = return full
+ *string)
+ * @return the modified string.
+ */
+std::string shorten(const std::string &input, const size_t max_length) {
+  const std::string ellipsis = " ... ";
+  const size_t ellipsisSize = ellipsis.size();
+  // limit too small or input too small, return input string
+  if ((max_length == 0) || (input.size() < ellipsisSize + 2) ||
+      (input.size() <= max_length))
+    return input;
+
+  const size_t end_length = (max_length - ellipsisSize) / 2;
+  std::string retVal = input.substr(0, end_length) + ellipsis +
+                       input.substr(input.size() - end_length, end_length);
   return retVal;
 }
 
@@ -85,6 +117,22 @@ MANTID_KERNEL_DLL std::string replaceAll(const std::string &input,
     }
   }
   return replaced;
+}
+
+/** Convert all characters in string to lowercase
+ */
+MANTID_KERNEL_DLL std::string toLower(const std::string &input) {
+  std::string output(input);
+  std::transform(output.begin(), output.end(), output.begin(), ::tolower);
+  return output;
+}
+
+/** Convert all characters in string to uppercase
+ */
+MANTID_KERNEL_DLL std::string toUpper(const std::string &input) {
+  std::string output(input);
+  std::transform(output.begin(), output.end(), output.begin(), ::toupper);
+  return output;
 }
 
 //------------------------------------------------------------------------------------------------
@@ -155,7 +203,7 @@ int extractWord(std::string &Line, const std::string &Word, const int cnt) {
   // Pos == Start of find
   size_t LinePt = minSize + pos;
   for (; minSize < Word.size() && LinePt < Line.size() &&
-             Word[minSize] == Line[LinePt];
+         Word[minSize] == Line[LinePt];
        LinePt++, minSize++) {
   }
 
@@ -278,23 +326,28 @@ std::string removeSpace(const std::string &CLine) {
  *  Reads a line from the stream of max length spc.
  *  Trailing comments are removed. (with # or ! character)
  *  @param fh :: already open file handle
- *  @param spc :: max number of characters to read
  *  @return String read.
  */
-std::string getLine(std::istream &fh, const int spc) {
-  auto ss = new char[spc + 1];
-  std::string Line;
-  if (fh.good()) {
-    fh.getline(ss, spc, '\n');
-    ss[spc] = 0; // incase line failed to read completely
-    Line = ss;
+std::string getLine(std::istream &fh) {
+  std::string line;
+  getLine(fh, line);
+  return line;
+}
+
+//------------------------------------------------------------------------------------------------
+/**
+ *  Reads a line from the stream of max length spc.
+ *  Trailing comments are removed. (with # or ! character)
+ *  @param fh :: already open file handle
+ *  @param Line :: string read
+ */
+void getLine(std::istream &fh, std::string &Line) {
+  if (std::getline(fh, Line)) {
     // remove trailing comments
-    std::string::size_type pos = Line.find_first_of("#!");
+    auto pos = Line.find_first_of("#!");
     if (pos != std::string::npos)
       Line.erase(pos);
   }
-  delete[] ss;
-  return Line;
 }
 
 /**
@@ -360,10 +413,10 @@ std::string strip(const std::string &A) {
 }
 
 /**
-* Return true if the line is to be skipped (starts with #).
-* @param line :: The line to be checked
-* @return True if the line should be skipped
-*/
+ * Return true if the line is to be skipped (starts with #).
+ * @param line :: The line to be checked
+ * @return True if the line should be skipped
+ */
 bool skipLine(const std::string &line) {
   // Empty or comment
   return (line.empty() || boost::starts_with(line, "#"));
@@ -411,12 +464,12 @@ void writeMCNPX(const std::string &Line, std::ostream &OX) {
  *  @param Ln :: line component to strip
  *  @return vector of components
  */
-std::vector<std::string> StrParts(std::string Ln) {
-  std::vector<std::string> Out;
-  std::string Part;
-  while (section(Ln, Part))
-    Out.push_back(Part);
-  return Out;
+std::vector<std::string> StrParts(const std::string &Ln) {
+  auto tokenizer = Mantid::Kernel::StringTokenizer(
+      Ln, " ",
+      Mantid::Kernel::StringTokenizer::TOK_TRIM |
+          Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+  return tokenizer.asVector();
 }
 
 /**
@@ -710,6 +763,14 @@ template <> MANTID_KERNEL_DLL std::string toString(const UnitLabel &value) {
   return value;
 }
 
+/// Template overload for a vector of strings.
+/// @param value :: A value to convert to a string.
+/// @return :: A string with comma separated items of the value vector.
+template <>
+MANTID_KERNEL_DLL std::string toString(const std::vector<std::string> &value) {
+  return join(value.begin(), value.end(), ",");
+}
+
 //------------------------------------------------------------------------------------------------
 /**
  *  Write out the three vectors into a file of type dc 9
@@ -820,7 +881,7 @@ int setValues(const std::string &Line, const std::vector<int> &Index,
 
   //  mathFunc::crossSort(sIndex,OPt);
 
-  typedef std::vector<int>::const_iterator iVecIter;
+  using iVecIter = std::vector<int>::const_iterator;
   std::vector<int>::const_iterator sc = sIndex.begin();
   std::vector<int>::const_iterator oc = OPt.begin();
   int cnt(0);
@@ -1022,7 +1083,7 @@ int isMember(const std::vector<std::string> &group,
              const std::string &candidate) {
   int num(-1);
   for (size_t i = 0; i < group.size(); i++) {
-    if (candidate.compare(group[i]) == 0) {
+    if (candidate == group[i]) {
       num = int(i);
       return num;
     }
@@ -1042,7 +1103,7 @@ int isMember(const std::vector<std::string> &group,
  */
 std::vector<int> parseRange(const std::string &str, const std::string &elemSep,
                             const std::string &rangeSep) {
-  typedef Mantid::Kernel::StringTokenizer Tokenizer;
+  using Tokenizer = Mantid::Kernel::StringTokenizer;
 
   Tokenizer elements;
 
@@ -1105,16 +1166,14 @@ std::vector<int> parseRange(const std::string &str, const std::string &elemSep,
 }
 
 /**
-* Extract a string until an EOL character is reached. There are 3 scenarios that
-* we need to deal with
-* 1) Windows-style  - CRLF ('\\r\\n');
-* 2) Unix-style     - LF ('\\n');
-* 3) Old MAC style  - CR ('\\r').
-* This function will give the string preceding any of these sequences
-* @param is :: The input stream to read from
-* @param str :: The output string to use to accumulate the line
-* @returns A reference to the input stream
-*/
+ * Extract a string until an EOL character is reached. There are 3 scenarios
+ * that we need to deal with 1) Windows-style  - CRLF ('\\r\\n'); 2) Unix-style
+ * - LF ('\\n'); 3) Old MAC style  - CR ('\\r'). This function will give the
+ * string preceding any of these sequences
+ * @param is :: The input stream to read from
+ * @param str :: The output string to use to accumulate the line
+ * @returns A reference to the input stream
+ */
 std::istream &extractToEOL(std::istream &is, std::string &str) {
   // Empty the string
   str = "";

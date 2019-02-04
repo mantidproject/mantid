@@ -1,11 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MDWS_SLICE_H_
 #define MANTID_MDWS_SLICE_H_
 
+#include "MantidAPI/Sample.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidMDAlgorithms/MDTransfAxisNames.h"
 #include "MantidMDAlgorithms/MDWSDescription.h"
 #include "MantidMDAlgorithms/MDWSTransform.h"
-#include "MantidAPI/Sample.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <cxxtest/TestSuite.h>
@@ -30,7 +37,7 @@ public:
 
 class MDWSTransfTest : public CxxTest::TestSuite {
   Mantid::API::MatrixWorkspace_sptr ws2D;
-  Geometry::OrientedLattice *pLattice;
+  std::unique_ptr<Geometry::OrientedLattice> pLattice;
   // this is permutation matrix which transforms Mantid coordinate system (beam
   // along Z-axis)
   // to Horace coordinate system (beam along X-axis);
@@ -48,7 +55,7 @@ public:
   void testFindTargetFrame() {
     MDWSDescription TargWSDescription;
     Mantid::API::MatrixWorkspace_sptr spws =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(10, 10);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(10, 10);
     // Mantid::API::MatrixWorkspace_sptr spws
     // =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(4,10,true);
     std::vector<double> minVal(4, -3), maxVal(4, 3);
@@ -60,13 +67,13 @@ public:
     TS_ASSERT_EQUALS(CnvrtToMD::LabFrame,
                      Transf.findTargetFrame(TargWSDescription));
 
-    WorkspaceCreationHelper::SetGoniometer(spws, 0, 0, 0);
+    WorkspaceCreationHelper::setGoniometer(spws, 0, 0, 0);
     // spws->mutableRun().mutableGoniometer().setRotationAngle(0,20);
 
     TS_ASSERT_EQUALS(CnvrtToMD::SampleFrame,
                      Transf.findTargetFrame(TargWSDescription));
 
-    spws->mutableSample().setOrientedLattice(pLattice);
+    spws->mutableSample().setOrientedLattice(pLattice.get());
     TS_ASSERT_EQUALS(CnvrtToMD::HKLFrame,
                      Transf.findTargetFrame(TargWSDescription));
   }
@@ -74,10 +81,10 @@ public:
     MDWSDescription TargWSDescription;
 
     Mantid::API::MatrixWorkspace_sptr spws =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(10, 10);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(10, 10);
     std::vector<double> minVal(4, -3), maxVal(4, 3);
     TargWSDescription.setMinMax(minVal, maxVal);
-    spws->mutableSample().setOrientedLattice(NULL);
+    spws->mutableSample().setOrientedLattice(nullptr);
 
     TargWSDescription.buildFromMatrixWS(spws, "Q3D", "Direct");
 
@@ -93,9 +100,9 @@ public:
                                              CnvrtToMD::SampleFrame,
                                              CnvrtToMD::HKLScale),
                       std::invalid_argument);
-    spws->mutableSample().setOrientedLattice(pLattice);
+    spws->mutableSample().setOrientedLattice(pLattice.get());
 
-    WorkspaceCreationHelper::SetGoniometer(spws, 20, 0, 0);
+    WorkspaceCreationHelper::setGoniometer(spws, 20, 0, 0);
 
     // spws->mutableRun().mutableGoniometer().setRotationAngle(0,20);
 
@@ -141,11 +148,9 @@ public:
     std::vector<double> minVal(4, -3), maxVal(4, 3);
     TWS.setMinMax(minVal, maxVal);
 
-    if (pLattice)
-      delete pLattice;
-    pLattice =
-        new Geometry::OrientedLattice(5 * M_PI, M_PI, 2 * M_PI, 90., 90., 90.);
-    ws2D->mutableSample().setOrientedLattice(pLattice);
+    pLattice = std::make_unique<Geometry::OrientedLattice>(
+        5 * M_PI, M_PI, 2 * M_PI, 90., 90., 90.);
+    ws2D->mutableSample().setOrientedLattice(pLattice.get());
     TWS.buildFromMatrixWS(ws2D, "Q3D", "Direct");
 
     std::vector<double> u(3, 0);
@@ -377,7 +382,7 @@ public:
     std::vector<double> rot, sample(9, 0);
 
     Mantid::API::MatrixWorkspace_sptr spws =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(10, 10);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(10, 10);
     // Mantid::API::MatrixWorkspace_sptr spws
     // =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(4,10,true);
     std::vector<double> minVal(2, 0), maxVal(2, 3);
@@ -403,8 +408,8 @@ public:
     // add workspace energy
     ws2D->mutableRun().addProperty("Ei", 13., "meV", true);
 
-    pLattice = new Geometry::OrientedLattice(3, 3, 2, 90, 90, 90);
-    ws2D->mutableSample().setOrientedLattice(pLattice);
+    pLattice = std::make_unique<Geometry::OrientedLattice>(3, 3, 2, 90, 90, 90);
+    ws2D->mutableSample().setOrientedLattice(pLattice.get());
 
     // S_mantid*k_mantid = S_hor*k_hor; -- both Mantid and Horace produce the
     // same kind of crystal frame

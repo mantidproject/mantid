@@ -1,15 +1,22 @@
-#include "MantidHistogramData/LinearGenerator.h"
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/Exception.h"
+#include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/RefAxis.h"
 #include "MantidAPI/SpectraAxis.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/ISpectrum.h"
-#include "MantidKernel/VectorHelper.h"
+#include "MantidHistogramData/LinearGenerator.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/IPropertyManager.h"
+#include "MantidKernel/VectorHelper.h"
 
-using Mantid::API::ISpectrum;
+#include <algorithm>
+#include <sstream>
+
 using Mantid::API::MantidImage;
 
 namespace Mantid {
@@ -19,14 +26,13 @@ using std::size_t;
 DECLARE_WORKSPACE(Workspace2D)
 
 /// Constructor
-Workspace2D::Workspace2D() : m_noVectors(0) {}
+Workspace2D::Workspace2D(const Parallel::StorageMode storageMode)
+    : HistoWorkspace(storageMode) {}
 
 Workspace2D::Workspace2D(const Workspace2D &other)
-    : MatrixWorkspace(other), m_noVectors(other.m_noVectors),
-      m_monitorList(other.m_monitorList) {
-  data.resize(m_noVectors);
-
-  for (size_t i = 0; i < m_noVectors; ++i) {
+    : HistoWorkspace(other), m_monitorList(other.m_monitorList) {
+  data.resize(other.data.size());
+  for (size_t i = 0; i < data.size(); ++i) {
     data[i] = new Histogram1D(*(other.data[i]));
   }
 }
@@ -43,10 +49,10 @@ Workspace2D::~Workspace2D() {
 // http://social.msdn.microsoft.com/Forums/en-US/2fe4cfc7-ca5c-4665-8026-42e0ba634214/visual-studio-$
 
 #ifdef _MSC_VER
-  PARALLEL_FOR1(this)
-  for (int64_t i = 0; i < static_cast<int64_t>(m_noVectors); i++) {
+  PARALLEL_FOR_IF(Kernel::threadSafe(*this))
+  for (int64_t i = 0; i < static_cast<int64_t>(data.size()); i++) {
 #else
-  for (size_t i = 0; i < m_noVectors; ++i) {
+  for (size_t i = 0; i < data.size(); ++i) {
 #endif
     // Clear out the memory
     delete data[i];
@@ -64,35 +70,56 @@ Workspace2D::~Workspace2D() {
  *
  * @param YLength :: The number of data/error points in each vector
  * (must all be the same)
-*/
+ */
 void Workspace2D::init(const std::size_t &NVectors, const std::size_t &XLength,
                        const std::size_t &YLength) {
-  m_noVectors = NVectors;
-  data.resize(m_noVectors);
+  data.resize(NVectors);
 
   auto x = Kernel::make_cow<HistogramData::HistogramX>(
       XLength, HistogramData::LinearGenerator(1.0, 1.0));
   HistogramData::Counts y(YLength);
   HistogramData::CountStandardDeviations e(YLength);
-  for (size_t i = 0; i < m_noVectors; i++) {
-    // Create the spectrum upon init
-    auto spec =
-        new Histogram1D(HistogramData::getHistogramXMode(XLength, YLength),
-                        HistogramData::Histogram::YMode::Counts);
-    data[i] = spec;
-    // Set the data and X
-    spec->setX(x);
-    // Y,E arrays populated
-    spec->setCounts(y);
-    spec->setCountStandardDeviations(e);
+  Histogram1D spec(HistogramData::getHistogramXMode(XLength, YLength),
+                   HistogramData::Histogram::YMode::Counts);
+  spec.setX(x);
+  spec.setCounts(y);
+  spec.setCountStandardDeviations(e);
+  for (size_t i = 0; i < data.size(); i++) {
+    data[i] = new Histogram1D(spec);
     // Default spectrum number = starts at 1, for workspace index 0.
-    spec->setSpectrumNo(specnum_t(i + 1));
-    spec->setDetectorID(detid_t(i + 1));
+    data[i]->setSpectrumNo(specnum_t(i + 1));
   }
 
   // Add axes that reference the data
   m_axes.resize(2);
-  m_axes[0] = new API::RefAxis(XLength, this);
+  m_axes[0] = new API::RefAxis(this);
+  m_axes[1] = new API::SpectraAxis(this);
+}
+
+void Workspace2D::init(const HistogramData::Histogram &histogram) {
+  data.resize(numberOfDetectorGroups());
+
+  HistogramData::Histogram initializedHistogram(histogram);
+  if (!histogram.sharedY()) {
+    if (histogram.yMode() == HistogramData::Histogram::YMode::Frequencies) {
+      initializedHistogram.setFrequencies(histogram.size(), 0.0);
+      initializedHistogram.setFrequencyStandardDeviations(histogram.size(),
+                                                          0.0);
+    } else { // YMode::Counts or YMode::Uninitialized -> default to Counts
+      initializedHistogram.setCounts(histogram.size(), 0.0);
+      initializedHistogram.setCountStandardDeviations(histogram.size(), 0.0);
+    }
+  }
+
+  Histogram1D spec(initializedHistogram.xMode(), initializedHistogram.yMode());
+  spec.setHistogram(initializedHistogram);
+  for (auto &i : data) {
+    i = new Histogram1D(spec);
+  }
+
+  // Add axes that reference the data
+  m_axes.resize(2);
+  m_axes[0] = new API::RefAxis(this);
   m_axes[1] = new API::SpectraAxis(this);
 }
 
@@ -104,21 +131,33 @@ size_t Workspace2D::getNumberHistograms() const {
 }
 
 /// get pseudo size
-size_t Workspace2D::size() const { return data.size() * blocksize(); }
+size_t Workspace2D::size() const {
+  return std::accumulate(data.begin(), data.end(), static_cast<size_t>(0),
+                         [](const size_t value, const Histogram1D *histo) {
+                           return value + histo->size();
+                         });
+}
 
 /// get the size of each vector
 size_t Workspace2D::blocksize() const {
-  return (!data.empty())
-             ? static_cast<ISpectrum const *>(data[0])->dataY().size()
-             : 0;
+  if (data.empty()) {
+    return 0;
+  } else {
+    size_t numBins = data[0]->size();
+    for (const auto *iter : data)
+      if (numBins != iter->size())
+        throw std::length_error(
+            "blocksize undefined because size of histograms is not equal");
+    return numBins;
+  }
 }
 
 /**
-  * Copy the data (Y's) from an image to this workspace.
-  * @param image :: An image to copy the data from.
-  * @param start :: Startinf workspace indx to copy data to.
-  * @param parallelExecution :: Should inner loop run as parallel operation
-  */
+ * Copy the data (Y's) from an image to this workspace.
+ * @param image :: An image to copy the data from.
+ * @param start :: Startinf workspace indx to copy data to.
+ * @param parallelExecution :: Should inner loop run as parallel operation
+ */
 void Workspace2D::setImageY(const MantidImage &image, size_t start,
                             bool parallelExecution) {
   MantidImage m;
@@ -126,11 +165,11 @@ void Workspace2D::setImageY(const MantidImage &image, size_t start,
 }
 
 /**
-  * Copy the data from an image to this workspace's errors.
-  * @param image :: An image to copy the data from.
-  * @param start :: Startinf workspace indx to copy data to.
-  * @param parallelExecution :: Should inner loop run as parallel operation
-  */
+ * Copy the data from an image to this workspace's errors.
+ * @param image :: An image to copy the data from.
+ * @param start :: Startinf workspace indx to copy data to.
+ * @param parallelExecution :: Should inner loop run as parallel operation
+ */
 void Workspace2D::setImageE(const MantidImage &image, size_t start,
                             bool parallelExecution) {
   MantidImage m;
@@ -138,21 +177,21 @@ void Workspace2D::setImageE(const MantidImage &image, size_t start,
 }
 
 /**
-  * Copy the data from an image to the (Y's) and the errors for this
-  * workspace.
-  *
-  * @param imageY :: An image to copy the data from.
-  * @param imageE :: An image to copy the errors from.
-  * @param start :: Startinf workspace indx to copy data to.
-  *
-  * @param loadAsRectImg :: load using one histogram per row and one
-  * bin per column, instead of the default one histogram per pixel
-  *
-  * @param scale_1 :: scale factor for the X axis (norammly
-  * representing the inverse of the pixel width or similar.
-  *
-  * @param parallelExecution :: Should inner loop run as parallel operation
-  */
+ * Copy the data from an image to the (Y's) and the errors for this
+ * workspace.
+ *
+ * @param imageY :: An image to copy the data from.
+ * @param imageE :: An image to copy the errors from.
+ * @param start :: Startinf workspace indx to copy data to.
+ *
+ * @param loadAsRectImg :: load using one histogram per row and one
+ * bin per column, instead of the default one histogram per pixel
+ *
+ * @param scale_1 :: scale factor for the X axis (norammly
+ * representing the inverse of the pixel width or similar.
+ *
+ * @param parallelExecution :: Should inner loop run as parallel operation
+ */
 void Workspace2D::setImageYAndE(const API::MantidImage &imageY,
                                 const API::MantidImage &imageE, size_t start,
                                 bool loadAsRectImg, double scale_1,
@@ -166,7 +205,8 @@ void Workspace2D::setImageYAndE(const API::MantidImage &imageY,
   if (imageE.empty() && imageY[0].empty())
     return;
 
-  if (!loadAsRectImg && blocksize() != 1) {
+  const size_t numBins = blocksize();
+  if (!loadAsRectImg && numBins != 1) {
     throw std::runtime_error(
         "Cannot set image in workspace: a single bin workspace is "
         "required when initializing a workspace from an "
@@ -184,7 +224,7 @@ void Workspace2D::setImageYAndE(const API::MantidImage &imageY,
   }
   size_t dataSize = width * height;
 
-  if (start + dataSize > getNumberHistograms() * blocksize()) {
+  if (start + dataSize > getNumberHistograms() * numBins) {
     throw std::runtime_error(
         "Cannot set image: image is bigger than workspace.");
   }
@@ -214,11 +254,11 @@ void Workspace2D::setImageYAndE(const API::MantidImage &imageY,
           ") needs to be equal to the height (rows) of the image (" +
           std::to_string(height) + ")");
 
-    if (width != blocksize())
+    if (width != numBins)
       throw std::runtime_error(
           std::string("To load an image into a workspace with one spectrum per "
                       "row, then number of bins (") +
-          std::to_string(blocksize()) +
+          std::to_string(numBins) +
           ") needs to be equal to the width (columns) of the image (" +
           std::to_string(width) + ")");
 
@@ -247,16 +287,18 @@ void Workspace2D::setImageYAndE(const API::MantidImage &imageY,
 /// Return reference to Histogram1D at the given workspace index.
 Histogram1D &Workspace2D::getSpectrum(const size_t index) {
   invalidateCommonBinsFlag();
-  return const_cast<Histogram1D &>(
+  auto &spec = const_cast<Histogram1D &>(
       static_cast<const Workspace2D &>(*this).getSpectrum(index));
+  spec.setMatrixWorkspace(this, index);
+  return spec;
 }
 
 /// Return const reference to Histogram1D at the given workspace index.
 const Histogram1D &Workspace2D::getSpectrum(const size_t index) const {
-  if (index >= m_noVectors) {
-    std::stringstream ss;
+  if (index >= data.size()) {
+    std::ostringstream ss;
     ss << "Workspace2D::getSpectrum, histogram number " << index
-       << " out of range " << m_noVectors;
+       << " out of range " << data.size();
     throw std::range_error(ss.str());
   }
   return *data[index];
@@ -286,7 +328,7 @@ void Workspace2D::generateHistogram(const std::size_t index, const MantidVec &X,
                                     MantidVec &Y, MantidVec &E,
                                     bool skipError) const {
   UNUSED_ARG(skipError);
-  if (index >= this->m_noVectors)
+  if (index >= data.size())
     throw std::range_error(
         "Workspace2D::generateHistogram, histogram number out of range");
   // output data arrays are implicitly filled by function
@@ -316,12 +358,12 @@ void Workspace2D::generateHistogram(const std::size_t index, const MantidVec &X,
   }
 }
 
+Workspace2D *Workspace2D::doClone() const { return new Workspace2D(*this); }
+Workspace2D *Workspace2D::doCloneEmpty() const {
+  return new Workspace2D(storageMode());
+}
 } // namespace DataObjects
-} // NamespaceMantid
-
-///\cond TEMPLATE
-template class DLLExport
-    Mantid::API::WorkspaceProperty<Mantid::DataObjects::Workspace2D>;
+} // namespace Mantid
 
 namespace Mantid {
 namespace Kernel {

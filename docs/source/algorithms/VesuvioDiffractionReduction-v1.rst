@@ -2,9 +2,14 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
+
+.. warning::
+
+   This algorithm is deprecated (April-2017). Please, use :ref:`ISISIndirectDiffractionReduction <algm-ISISIndirectDiffractionReduction>` instead.
+
 
 Description
 -----------
@@ -27,15 +32,15 @@ Usage
 
 .. testcode:: ExVesuvioDiffractionReductionSimple
 
-    VesuvioDiffractionReduction(InputFiles='EVS15289.raw',
+    VesuvioDiffractionReduction(InputFiles='15289',
                             OutputWorkspace='DiffractionReductions',
                             InstrumentParFile='IP0005.dat')
 
     ws = mtd['DiffractionReductions'].getItem(0)
 
-    print 'Workspace name: %s' % ws.getName()
-    print 'Number of spectra: %d' % ws.getNumberHistograms()
-    print 'Number of bins: %s' % ws.blocksize()
+    print('Workspace name: %s' % ws.name())
+    print('Number of spectra: %d' % ws.getNumberHistograms())
+    print('Number of bins: %s' % ws.blocksize())
 
 Output:
 

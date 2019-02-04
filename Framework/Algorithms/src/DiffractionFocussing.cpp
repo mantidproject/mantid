@@ -1,11 +1,16 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/DiffractionFocussing.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidHistogramData/Histogram.h"
+#include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/Unit.h"
 
 #include <fstream>
@@ -25,10 +30,12 @@ DiffractionFocussing::DiffractionFocussing()
 }
 
 using namespace Kernel;
-using API::WorkspaceProperty;
-using API::MatrixWorkspace_sptr;
-using API::MatrixWorkspace;
+using namespace HistogramData;
+
 using API::FileProperty;
+using API::MatrixWorkspace;
+using API::MatrixWorkspace_sptr;
+using API::WorkspaceProperty;
 
 /** Initialisation method. Declares properties to be used in algorithm.
  *
@@ -85,12 +92,12 @@ void DiffractionFocussing::exec() {
   if (iprogress_step == 0)
     iprogress_step = 1;
   std::vector<int64_t> resultIndeces;
-  for (auto g = groupNumbers.cbegin(); g != groupNumbers.end(); ++g) {
+  for (auto groupNumber : groupNumbers) {
     if (iprogress++ % iprogress_step == 0) {
       progress(0.68 + double(iprogress) / iprogress_count / 3);
     }
-    auto from = detectorGroups.lower_bound(*g);
-    auto to = detectorGroups.upper_bound(*g);
+    auto from = detectorGroups.lower_bound(groupNumber);
+    auto to = detectorGroups.upper_bound(groupNumber);
     std::vector<detid_t> detectorList;
     for (auto d = from; d != to; ++d)
       detectorList.push_back(static_cast<detid_t>(d->second));
@@ -130,17 +137,20 @@ void DiffractionFocussing::exec() {
   // Create a new workspace that's the right size for the meaningful spectra and
   // copy them in
   int64_t newSize = tmpW->blocksize();
-  API::MatrixWorkspace_sptr outputW = API::WorkspaceFactory::Instance().create(
-      tmpW, resultIndeces.size(), newSize + 1, newSize);
+  API::MatrixWorkspace_sptr outputW = DataObjects::create<API::MatrixWorkspace>(
+      *tmpW, resultIndeces.size(), BinEdges(newSize + 1));
 
+  std::vector<Indexing::SpectrumNumber> specNums;
+  const auto &tmpIndices = tmpW->indexInfo();
   for (int64_t hist = 0; hist < static_cast<int64_t>(resultIndeces.size());
        hist++) {
     int64_t i = resultIndeces[hist];
     outputW->setHistogram(hist, tmpW->histogram(i));
-    auto &inSpec = tmpW->getSpectrum(i);
-    outputW->getSpectrum(hist).setSpectrumNo(inSpec.getSpectrumNo());
-    inSpec.setSpectrumNo(-1);
+    specNums.push_back(tmpIndices.spectrumNumber(i));
   }
+  auto outputIndices = outputW->indexInfo();
+  outputIndices.setSpectrumNumbers(std::move(specNums));
+  outputW->setIndexInfo(outputIndices);
 
   progress(1.);
 
@@ -258,5 +268,5 @@ DiffractionFocussing::readGroupingFile(std::string groupingFileName) {
   return detectorGroups;
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

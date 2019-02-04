@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -21,7 +21,7 @@ You are expected to create the output workspace yourself.
 
 Because of boilerplate code added to the python script being run,
 stack-traces for errors will be five (5) lines greater than where the
-error occured in the supplied python code.
+error occurred in the supplied python code.
 
 Usage
 -----
@@ -41,7 +41,7 @@ Usage
     RunPythonScript(InputWorkspace=ws,Code=script,OutputWorkspace="wsOut")
 
     wsOut = mtd["wsOut"]
-    print "The workspace contained a total of %i counts" % wsOut.readY(0)[0]
+    print("The workspace contained a total of {:d} counts".format(int(wsOut.readY(0)[0])))
 
 Output:
 

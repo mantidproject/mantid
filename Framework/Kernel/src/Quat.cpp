@@ -1,9 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/Matrix.h"
 #include "MantidKernel/Tolerance.h"
 #include "MantidKernel/V3D.h"
 
 #include <boost/algorithm/string.hpp>
+#include <sstream>
 
 namespace Mantid {
 namespace Kernel {
@@ -618,7 +626,7 @@ void Quat::printSelf(std::ostream &os) const {
 /**  Read data from a stream in the format returned by printSelf ("[w,a,b,c]").
  *   @param IX :: Input Stream
  *   @throw std::runtime_error if the input is of wrong format
-*/
+ */
 void Quat::readPrinted(std::istream &IX) {
   std::string in;
   std::getline(IX, in);
@@ -636,10 +644,10 @@ void Quat::readPrinted(std::istream &IX) {
       c3 == std::string::npos)
     throw std::runtime_error("Wrong format for Quat input: [" + in + "]");
 
-  w = atof(in.substr(i + 1, c1 - i - 1).c_str());
-  a = atof(in.substr(c1 + 1, c2 - c1 - 1).c_str());
-  b = atof(in.substr(c2 + 1, c3 - c2 - 1).c_str());
-  c = atof(in.substr(c3 + 1, j - c3 - 1).c_str());
+  w = std::stod(in.substr(i + 1, c1 - i - 1));
+  a = std::stod(in.substr(c1 + 1, c2 - c1 - 1));
+  b = std::stod(in.substr(c2 + 1, c3 - c2 - 1));
+  c = std::stod(in.substr(c3 + 1, j - c3 - 1));
 }
 
 /** Prints a string representation
@@ -807,4 +815,4 @@ Quat::getEulerAngles(const std::string &convention = "XYZ") const {
 
 } // Namespace Kernel
 
-} // Namespce Mantid
+} // namespace Mantid

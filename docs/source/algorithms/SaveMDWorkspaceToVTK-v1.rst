@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -37,7 +37,7 @@ Usage
     savefile = os.path.join(config["defaultsave.directory"], "mdhws.vts")
     SaveMDWorkspaceToVTK(InputWorkspace = ws, Filename = savefile)
 
-    print "File created:", os.path.exists(savefile)
+    print("File created: {}".format(os.path.exists(savefile)))
 
 .. testoutput:: SaveMDWorkspaceToVTK
 

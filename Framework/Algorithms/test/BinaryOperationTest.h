@@ -1,30 +1,35 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef BINARYOPERATIONTEST_H_
 #define BINARYOPERATIONTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include <cmath>
+#include <cxxtest/TestSuite.h>
 
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidAlgorithms/BinaryOperation.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/SpectrumInfo.h"
+#include "MantidAlgorithms/BinaryOperation.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/Timer.h"
+#include "MantidTestHelpers/ParallelAlgorithmCreation.h"
+#include "MantidTestHelpers/ParallelRunner.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
+using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
-using Mantid::DataObjects::Workspace2D_sptr;
 using Mantid::Geometry::IDetector_const_sptr;
 
 class BinaryOpHelper : public Mantid::Algorithms::BinaryOperation {
 public:
-  /// Default constructor
-  BinaryOpHelper() : BinaryOperation(){};
-  /// Destructor
-  ~BinaryOpHelper() override{};
-
   /// function to return a name of the algorithm, must be overridden in all
   /// algorithms
   const std::string name() const override { return "BinaryOpHelper"; }
@@ -42,6 +47,8 @@ public:
                                      const MatrixWorkspace_const_sptr ws2) {
     m_lhs = ws1;
     m_rhs = ws2;
+    m_lhsBlocksize = ws1->blocksize();
+    m_rhsBlocksize = ws2->blocksize();
     BinaryOperation::checkRequirements();
     return BinaryOperation::checkSizeCompatibility(ws1, ws2);
   }
@@ -50,35 +57,133 @@ private:
   // Unhide base class method to avoid Intel compiler warning
   using BinaryOperation::checkSizeCompatibility;
   // Overridden BinaryOperation methods
-  void performBinaryOperation(const Mantid::MantidVec &,
-                              const Mantid::MantidVec &,
-                              const Mantid::MantidVec &,
-                              const Mantid::MantidVec &,
-                              const Mantid::MantidVec &, Mantid::MantidVec &,
-                              Mantid::MantidVec &) override {}
-  void performBinaryOperation(const Mantid::MantidVec &,
-                              const Mantid::MantidVec &,
-                              const Mantid::MantidVec &, const double,
-                              const double, Mantid::MantidVec &,
-                              Mantid::MantidVec &) override {}
+  void performBinaryOperation(const HistogramData::Histogram &,
+                              const HistogramData::Histogram &,
+                              HistogramData::HistogramY &,
+                              HistogramData::HistogramE &) override {}
+  void performBinaryOperation(const HistogramData::Histogram &, const double,
+                              const double, HistogramData::HistogramY &,
+                              HistogramData::HistogramE &) override {}
 };
+
+namespace {
+void run_parallel(const Parallel::Communicator &comm,
+                  const Parallel::StorageMode storageMode) {
+  using namespace Parallel;
+  auto alg = ParallelTestHelpers::create<BinaryOpHelper>(comm);
+  if (comm.rank() == 0 || storageMode != StorageMode::MasterOnly) {
+    Indexing::IndexInfo indexInfo(100, storageMode, comm);
+    alg->setProperty("LHSWorkspace",
+                     create<Workspace2D>(indexInfo, HistogramData::Points(1)));
+    alg->setProperty("RHSWorkspace",
+                     create<Workspace2D>(indexInfo, HistogramData::Points(1)));
+  }
+  TS_ASSERT_THROWS_NOTHING(alg->execute());
+  MatrixWorkspace_const_sptr out = alg->getProperty("OutputWorkspace");
+  if (comm.rank() == 0 || storageMode != StorageMode::MasterOnly) {
+    TS_ASSERT_EQUALS(out->storageMode(), storageMode);
+  } else {
+    TS_ASSERT_EQUALS(out, nullptr);
+  }
+}
+
+void run_parallel_mismatch_fail(const Parallel::Communicator &comm,
+                                const Parallel::StorageMode storageModeA,
+                                const Parallel::StorageMode storageModeB) {
+  using namespace Parallel;
+  auto alg = ParallelTestHelpers::create<BinaryOpHelper>(comm);
+  if (comm.rank() == 0 || storageModeA != StorageMode::MasterOnly) {
+    Indexing::IndexInfo indexInfo(100, storageModeA, comm);
+    alg->setProperty("LHSWorkspace",
+                     create<Workspace2D>(indexInfo, HistogramData::Points(1)));
+  }
+  if (comm.rank() == 0 || storageModeB != StorageMode::MasterOnly) {
+    Indexing::IndexInfo indexInfo(100, storageModeB, comm);
+    alg->setProperty("RHSWorkspace",
+                     create<Workspace2D>(indexInfo, HistogramData::Points(1)));
+  }
+  if (comm.size() > 1) {
+    TS_ASSERT_THROWS_EQUALS(
+        alg->execute(), const std::runtime_error &e, std::string(e.what()),
+        "Algorithm does not support execution with input workspaces of the "
+        "following storage types: \nLHSWorkspace " +
+            toString(storageModeA) + "\nRHSWorkspace " +
+            toString(storageModeB) + "\n.");
+  } else {
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    MatrixWorkspace_const_sptr out = alg->getProperty("OutputWorkspace");
+    TS_ASSERT_EQUALS(out->storageMode(), storageModeA);
+  }
+}
+
+void run_parallel_single_value(const Parallel::Communicator &comm,
+                               const Parallel::StorageMode storageModeA,
+                               const Parallel::StorageMode storageModeB) {
+  using namespace Parallel;
+  auto alg = ParallelTestHelpers::create<BinaryOpHelper>(comm);
+  if (comm.rank() == 0 || storageModeA != StorageMode::MasterOnly) {
+    Indexing::IndexInfo indexInfo(100, storageModeA, comm);
+    alg->setProperty("LHSWorkspace",
+                     create<Workspace2D>(indexInfo, HistogramData::Points(1)));
+  }
+  if (comm.rank() == 0 || storageModeB != StorageMode::MasterOnly) {
+    Indexing::IndexInfo indexInfo(1, storageModeB, comm);
+    alg->setProperty("RHSWorkspace", create<WorkspaceSingleValue>(
+                                         indexInfo, HistogramData::Points(1)));
+  }
+  TS_ASSERT_THROWS_NOTHING(alg->execute());
+  MatrixWorkspace_const_sptr out = alg->getProperty("OutputWorkspace");
+  if (comm.rank() == 0 || storageModeA != StorageMode::MasterOnly) {
+    TS_ASSERT_EQUALS(out->storageMode(), storageModeA);
+  } else {
+    TS_ASSERT_EQUALS(out, nullptr);
+  }
+}
+
+void run_parallel_AllowDifferentNumberSpectra_fail(
+    const Parallel::Communicator &comm,
+    const Parallel::StorageMode storageMode) {
+  using namespace Parallel;
+  auto alg = ParallelTestHelpers::create<BinaryOpHelper>(comm);
+  if (comm.rank() == 0 || storageMode != StorageMode::MasterOnly) {
+    Indexing::IndexInfo indexInfo(100, storageMode, comm);
+    alg->setProperty("LHSWorkspace",
+                     create<Workspace2D>(indexInfo, HistogramData::Points(1)));
+    alg->setProperty("RHSWorkspace",
+                     create<Workspace2D>(indexInfo, HistogramData::Points(1)));
+  } else {
+    alg->setProperty("LHSWorkspace",
+                     Kernel::make_unique<Workspace2D>(StorageMode::MasterOnly));
+    alg->setProperty("RHSWorkspace",
+                     Kernel::make_unique<Workspace2D>(StorageMode::MasterOnly));
+  }
+  alg->setProperty("AllowDifferentNumberSpectra", true);
+  if (comm.size() > 1) {
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
+  } else {
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    MatrixWorkspace_const_sptr out = alg->getProperty("OutputWorkspace");
+    TS_ASSERT_EQUALS(out->storageMode(), storageMode);
+  }
+}
+} // namespace
 
 class BinaryOperationTest : public CxxTest::TestSuite {
 public:
   void testcheckSizeCompatibility1D1D() {
     // Register the workspace in the data service
     Workspace2D_sptr work_in1 =
-        WorkspaceCreationHelper::Create1DWorkspaceFib(10);
+        WorkspaceCreationHelper::create1DWorkspaceFib(10, true);
     Workspace2D_sptr work_in2 =
-        WorkspaceCreationHelper::Create1DWorkspaceFib(20);
+        WorkspaceCreationHelper::create1DWorkspaceFib(20, true);
     Workspace2D_sptr work_in3 =
-        WorkspaceCreationHelper::Create1DWorkspaceFib(10);
+        WorkspaceCreationHelper::create1DWorkspaceFib(10, true);
     Workspace2D_sptr work_in4 =
-        WorkspaceCreationHelper::Create1DWorkspaceFib(5);
+        WorkspaceCreationHelper::create1DWorkspaceFib(5, true);
     Workspace2D_sptr work_in5 =
-        WorkspaceCreationHelper::Create1DWorkspaceFib(3);
+        WorkspaceCreationHelper::create1DWorkspaceFib(3, true);
     Workspace2D_sptr work_in6 =
-        WorkspaceCreationHelper::Create1DWorkspaceFib(1);
+        WorkspaceCreationHelper::create1DWorkspaceFib(1, true);
     BinaryOpHelper helper;
     TS_ASSERT(!helper.checkSizeCompatibility(work_in1, work_in2).empty());
     TS_ASSERT(helper.checkSizeCompatibility(work_in1, work_in3).empty());
@@ -89,23 +194,24 @@ public:
 
   void testcheckSizeCompatibility2D1D() {
     // Register the workspace in the data service
+    const bool isHistogram(true);
     Workspace2D_sptr work_in1 =
-        WorkspaceCreationHelper::Create2DWorkspace123(10, 10);
+        WorkspaceCreationHelper::create2DWorkspace123(10, 10, isHistogram);
     Workspace2D_sptr work_in2 =
-        WorkspaceCreationHelper::Create1DWorkspaceFib(20);
+        WorkspaceCreationHelper::create1DWorkspaceFib(20, true);
     Workspace2D_sptr work_in3 =
-        WorkspaceCreationHelper::Create1DWorkspaceFib(10);
+        WorkspaceCreationHelper::create1DWorkspaceFib(10, true);
     Workspace2D_sptr work_in4 =
-        WorkspaceCreationHelper::Create1DWorkspaceFib(5);
+        WorkspaceCreationHelper::create1DWorkspaceFib(5, true);
     Workspace2D_sptr work_in5 =
-        WorkspaceCreationHelper::Create1DWorkspaceFib(3);
+        WorkspaceCreationHelper::create1DWorkspaceFib(3, true);
     Workspace2D_sptr work_in6 =
-        WorkspaceCreationHelper::Create1DWorkspaceFib(1);
+        WorkspaceCreationHelper::create1DWorkspaceFib(1, true);
     MatrixWorkspace_sptr work_inEvent1 =
-        WorkspaceCreationHelper::CreateEventWorkspace(10, 1);
+        WorkspaceCreationHelper::createEventWorkspace(10, 1);
     // will not pass x array does not match
     MatrixWorkspace_sptr work_inEvent2 =
-        WorkspaceCreationHelper::CreateEventWorkspace(1, 10);
+        WorkspaceCreationHelper::createEventWorkspace(1, 10);
     BinaryOpHelper helper;
     TS_ASSERT(!helper.checkSizeCompatibility(work_in1, work_in2).empty());
     TS_ASSERT(helper.checkSizeCompatibility(work_in1, work_in3).empty());
@@ -120,21 +226,21 @@ public:
 
     // Register the workspace in the data service
     Workspace2D_sptr work_in1 =
-        WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+        WorkspaceCreationHelper::create2DWorkspace(10, 10);
     Workspace2D_sptr work_in2 =
-        WorkspaceCreationHelper::Create2DWorkspace(10, 20);
+        WorkspaceCreationHelper::create2DWorkspace(10, 20);
     Workspace2D_sptr work_in3 =
-        WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+        WorkspaceCreationHelper::create2DWorkspace(10, 10);
     Workspace2D_sptr work_in4 =
-        WorkspaceCreationHelper::Create2DWorkspace(5, 5);
+        WorkspaceCreationHelper::create2DWorkspace(5, 5);
     Workspace2D_sptr work_in5 =
-        WorkspaceCreationHelper::Create2DWorkspace(3, 3);
+        WorkspaceCreationHelper::create2DWorkspace(3, 3);
     Workspace2D_sptr work_in6 =
-        WorkspaceCreationHelper::Create2DWorkspace(100, 1);
+        WorkspaceCreationHelper::create2DWorkspace(100, 1);
     MatrixWorkspace_sptr work_inEvent1 =
-        WorkspaceCreationHelper::CreateEventWorkspace(5, 5);
+        WorkspaceCreationHelper::createEventWorkspace(5, 5);
     MatrixWorkspace_sptr work_inEvent2 =
-        WorkspaceCreationHelper::CreateEventWorkspace(10, 10);
+        WorkspaceCreationHelper::createEventWorkspace(10, 10);
     BinaryOpHelper helper;
     TS_ASSERT(!helper.checkSizeCompatibility(work_in1, work_in2).empty());
     TS_ASSERT(helper.checkSizeCompatibility(work_in1, work_in3).empty());
@@ -153,9 +259,9 @@ public:
     masking.insert(4);
 
     MatrixWorkspace_sptr work_in1 =
-        WorkspaceCreationHelper::Create2DWorkspace123(nHist, nBins, 0, masking);
+        WorkspaceCreationHelper::create2DWorkspace123(nHist, nBins, 0, masking);
     MatrixWorkspace_sptr work_in2 =
-        WorkspaceCreationHelper::Create2DWorkspace154(nHist, nBins);
+        WorkspaceCreationHelper::create2DWorkspace154(nHist, nBins);
 
     BinaryOpHelper helper;
     helper.initialize();
@@ -174,18 +280,14 @@ public:
     TS_ASSERT(output);
 
     for (int i = 0; i < nHist; ++i) {
-      IDetector_const_sptr det;
-      try {
-        det = output->getDetector(i);
-      } catch (Mantid::Kernel::Exception::NotFoundError &) {
-      }
+      auto &spectrumInfo = output->spectrumInfo();
 
-      TSM_ASSERT("Detector was found", det);
-      if (det) {
+      TSM_ASSERT("Detector was not found", spectrumInfo.hasDetectors(i));
+      if (spectrumInfo.hasDetectors(i)) {
         if (masking.count(i) == 0) {
-          TS_ASSERT_EQUALS(det->isMasked(), false);
+          TS_ASSERT_EQUALS(spectrumInfo.isMasked(i), false);
         } else {
-          TS_ASSERT_EQUALS(det->isMasked(), true);
+          TS_ASSERT_EQUALS(spectrumInfo.isMasked(i), true);
         }
       }
     }
@@ -196,9 +298,9 @@ public:
                                     std::vector<std::vector<int>> rhs,
                                     bool expect_throw = false) {
     EventWorkspace_sptr lhsWS =
-        WorkspaceCreationHelper::CreateGroupedEventWorkspace(lhs, 50, 1.0);
+        WorkspaceCreationHelper::createGroupedEventWorkspace(lhs, 50, 1.0);
     EventWorkspace_sptr rhsWS =
-        WorkspaceCreationHelper::CreateGroupedEventWorkspace(rhs, 50, 1.0);
+        WorkspaceCreationHelper::createGroupedEventWorkspace(rhs, 50, 1.0);
     BinaryOperation::BinaryOperationTable_sptr table;
     Mantid::Kernel::Timer timer1;
     if (expect_throw) {
@@ -247,8 +349,8 @@ public:
 
   void test_buildBinaryOperationTable_groupedLHS_by_groupedRHS() {
     // two detectors per pixel in lhs
-    std::vector<std::vector<int>> lhs{
-        {0, 1}, {2, 3}, {4, 5}, {6, 7}, {8, 9}, {10, 11}, {12, 13}, {14, 15}};
+    std::vector<std::vector<int>> lhs{{0, 1}, {2, 3},   {4, 5},   {6, 7},
+                                      {8, 9}, {10, 11}, {12, 13}, {14, 15}};
     // 4 detectors in each on the rhs
     std::vector<std::vector<int>> rhs{
         {0, 1, 2, 3}, {4, 5, 6, 7}, {8, 9, 10, 11}, {12, 13, 14, 15}};
@@ -261,12 +363,9 @@ public:
   void
   test_buildBinaryOperationTable_groupedLHS_by_groupedRHS_bad_overlap_throws() {
     // 4 detectors per pixel in lhs
-    std::vector<std::vector<int>> lhs{{0, 1, 2, 3},
-                                      {4, 5, 6, 7},
-                                      {8, 9, 10, 11},
-                                      {12, 13, 14, 15},
-                                      {16, 17, 18, 19},
-                                      {20, 21, 22, 23}};
+    std::vector<std::vector<int>> lhs{{0, 1, 2, 3},     {4, 5, 6, 7},
+                                      {8, 9, 10, 11},   {12, 13, 14, 15},
+                                      {16, 17, 18, 19}, {20, 21, 22, 23}};
     // 6 detectors in each on the rhs
     std::vector<std::vector<int>> rhs{{0, 1, 2, 3, 4, 5},
                                       {6, 7, 8, 9, 10, 11},
@@ -292,6 +391,62 @@ public:
     for (int i = 0; i < 2000; i++) {
       TS_ASSERT_EQUALS((*table)[i], i / 100);
     }
+  }
+
+  void test_parallel_Distributed() {
+    ParallelTestHelpers::runParallel(run_parallel,
+                                     Parallel::StorageMode::Distributed);
+  }
+
+  void test_parallel_Cloned() {
+    ParallelTestHelpers::runParallel(run_parallel,
+                                     Parallel::StorageMode::Cloned);
+  }
+
+  void test_parallel_MasterOnly() {
+    ParallelTestHelpers::runParallel(run_parallel,
+                                     Parallel::StorageMode::MasterOnly);
+  }
+
+  void test_parallel_mistmatch_fail() {
+    using ParallelTestHelpers::runParallel;
+    auto cloned = Parallel::StorageMode::Cloned;
+    auto distri = Parallel::StorageMode::Distributed;
+    auto master = Parallel::StorageMode::MasterOnly;
+    runParallel(run_parallel_mismatch_fail, cloned, distri);
+    runParallel(run_parallel_mismatch_fail, cloned, master);
+    runParallel(run_parallel_mismatch_fail, distri, cloned);
+    runParallel(run_parallel_mismatch_fail, distri, master);
+    runParallel(run_parallel_mismatch_fail, master, cloned);
+    runParallel(run_parallel_mismatch_fail, master, distri);
+  }
+
+  void test_parallel_Cloned_ClonedSingle() {
+    ParallelTestHelpers::runParallel(run_parallel_single_value,
+                                     Parallel::StorageMode::Cloned,
+                                     Parallel::StorageMode::Cloned);
+  }
+
+  void test_parallel_Distributed_ClonedSingle() {
+    ParallelTestHelpers::runParallel(run_parallel_single_value,
+                                     Parallel::StorageMode::Distributed,
+                                     Parallel::StorageMode::Cloned);
+  }
+
+  void test_parallel_MasterOnly_ClonedSingle() {
+    ParallelTestHelpers::runParallel(run_parallel_single_value,
+                                     Parallel::StorageMode::MasterOnly,
+                                     Parallel::StorageMode::Cloned);
+  }
+
+  void test_parallel_AllowDifferentNumberSpectra_fail() {
+    using ParallelTestHelpers::runParallel;
+    runParallel(run_parallel_AllowDifferentNumberSpectra_fail,
+                Parallel::StorageMode::Cloned);
+    runParallel(run_parallel_AllowDifferentNumberSpectra_fail,
+                Parallel::StorageMode::Distributed);
+    runParallel(run_parallel_AllowDifferentNumberSpectra_fail,
+                Parallel::StorageMode::MasterOnly);
   }
 };
 

@@ -1,14 +1,21 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/ConvertToMD.h"
 
 #include <algorithm>
 
-#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 
-#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ArrayLengthValidator.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/IPropertyManager.h"
 #include "MantidKernel/IPropertySettings.h"
@@ -16,14 +23,15 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 
+#include "MantidDataObjects/BoxControllerNeXusIO.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataObjects/BoxControllerNeXusIO.h"
 
 #include "MantidGeometry/MDGeometry/MDHistoDimensionBuilder.h"
 
 #include "MantidMDAlgorithms/ConvToMDSelector.h"
+#include "MantidMDAlgorithms/MDTransfQ3D.h"
 #include "MantidMDAlgorithms/MDWSTransform.h"
 
 using namespace Mantid::API;
@@ -103,7 +111,7 @@ void ConvertToMD::init() {
       "The name of the Nexus file to write, as a full or relative path.\n"
       "Only used if FileBackEnd is true.");
   setPropertySettings("Filename", make_unique<EnabledWhenProperty>(
-                                      "CreateFileBackEnd", IS_EQUAL_TO, "1"));
+                                      "FileBackEnd", IS_EQUAL_TO, "1"));
 
   declareProperty("FileBackEnd", false,
                   "If true, Filename must also be specified. The algorithm "
@@ -195,6 +203,25 @@ void ConvertToMD::exec() {
   // get the min and max values for the dimensions from the input properties
   std::vector<double> dimMin = getProperty("MinValues");
   std::vector<double> dimMax = getProperty("MaxValues");
+
+  // Sanity check some options
+  if (QModReq != MDTransfQ3D().transfID()) {
+    MDWSTransform transform;
+    const std::string autoSelect =
+        transform.getTargetFrames()[CnvrtToMD::AutoSelect];
+    if (QFrame != autoSelect) {
+      g_log.warning("Q3DFrames value ignored with QDimensions != " +
+                    MDTransfQ3D().transfID());
+      QFrame = autoSelect;
+    }
+    const std::string noScaling =
+        transform.getQScalings()[CnvrtToMD::NoScaling];
+    if (convertTo_ != noScaling) {
+      g_log.warning("QConversionScales value ignored with QDimensions != " +
+                    MDTransfQ3D().transfID());
+      convertTo_ = noScaling;
+    }
+  }
 
   // Build the target ws description as function of the input & output ws and
   // the parameters, supplied to the algorithm
@@ -296,38 +323,38 @@ void ConvertToMD::addExperimentInfo(API::IMDEventWorkspace_sptr &mdEventWS,
 }
 
 /**
-* Copy over the metadata from the input matrix workspace to output
-*MDEventWorkspace
-* @param mdEventWS :: The output MDEventWorkspace where metadata are copied to.
-*The source of the metadata is the input matrix workspace
-*
-*/
+ * Copy over the metadata from the input matrix workspace to output
+ *MDEventWorkspace
+ * @param mdEventWS :: The output MDEventWorkspace where metadata are copied to.
+ *The source of the metadata is the input matrix workspace
+ *
+ */
 void ConvertToMD::copyMetaData(API::IMDEventWorkspace_sptr &mdEventWS) const {
 
   // found detector which is not a monitor to get proper bin boundaries.
   size_t spectra_index(0);
-  bool dector_found(false);
+  bool detector_found(false);
+  const auto &spectrumInfo = m_InWS2D->spectrumInfo();
   for (size_t i = 0; i < m_InWS2D->getNumberHistograms(); ++i) {
-    try {
-      auto det = m_InWS2D->getDetector(i);
-      if (!det->isMonitor()) {
-        spectra_index = i;
-        dector_found = true;
-        g_log.debug() << "Using spectra N " << i << " as the source of the bin "
-                                                    "boundaries for the "
-                                                    "resolution corrections \n";
-        break;
-      }
-    } catch (...) {
+    if (spectrumInfo.hasDetectors(i) && !spectrumInfo.isMonitor(i)) {
+      spectra_index = i;
+      detector_found = true;
+      g_log.debug() << "Using spectra N " << i
+                    << " as the source of the bin "
+                       "boundaries for the resolution corrections \n";
+      break;
     }
   }
-  if (!dector_found)
-    g_log.warning() << "No detectors in the workspace are associated with "
-                       "spectra. Using spectrum 0 trying to retrieve the bin "
-                       "boundaries \n";
+  if (!detector_found) {
+    g_log.information()
+        << "No spectra in the workspace have detectors associated "
+           "with them. Storing bin boundaries from first spectrum for"
+           "resolution calculation\n";
+  }
 
   // retrieve representative bin boundaries
-  MantidVec binBoundaries = m_InWS2D->readX(spectra_index);
+  auto binBoundaries = m_InWS2D->x(spectra_index);
+
   // check if the boundaries transformation is necessary
   if (m_Convertor->getUnitConversionHelper().isUnitConverted()) {
 
@@ -340,8 +367,8 @@ void ConvertToMD::copyMetaData(API::IMDEventWorkspace_sptr &mdEventWS) const {
 
       UnitsConversionHelper &unitConv = m_Convertor->getUnitConversionHelper();
       unitConv.updateConversion(spectra_index);
-      for (double &binBoundarie : binBoundaries) {
-        binBoundarie = unitConv.convertUnits(binBoundarie);
+      for (auto &binBoundary : binBoundaries) {
+        binBoundary = unitConv.convertUnits(binBoundary);
       }
     }
     // sort bin boundaries in case if unit transformation have swapped them.
@@ -357,10 +384,8 @@ void ConvertToMD::copyMetaData(API::IMDEventWorkspace_sptr &mdEventWS) const {
   auto mapping = boost::make_shared<det2group_map>();
   for (size_t i = 0; i < m_InWS2D->getNumberHistograms(); ++i) {
     const auto &dets = m_InWS2D->getSpectrum(i).getDetectorIDs();
-    if (!dets.empty()) {
-      mapping->emplace(*dets.begin(),
-                       std::vector<detid_t>(dets.begin(), dets.end()));
-    }
+    if (!dets.empty())
+      mapping->emplace(*dets.begin(), dets);
   }
 
   // The last experiment info should always be the one that refers
@@ -370,7 +395,7 @@ void ConvertToMD::copyMetaData(API::IMDEventWorkspace_sptr &mdEventWS) const {
   if (nexpts > 0) {
     ExperimentInfo_sptr expt =
         mdEventWS->getExperimentInfo(static_cast<uint16_t>(nexpts - 1));
-    expt->mutableRun().storeHistogramBinBoundaries(binBoundaries);
+    expt->mutableRun().storeHistogramBinBoundaries(binBoundaries.rawData());
     expt->cacheDetectorGroupings(*mapping);
   }
 }
@@ -440,19 +465,29 @@ bool ConvertToMD::buildTargetWSDescription(
   double m_AbsMin = getProperty("AbsMinQ");
   targWSDescr.setAbsMin(m_AbsMin);
 
-  // instantiate class, responsible for defining Mslice-type projection
+  // Set optional projections for Q3D mode
   MDAlgorithms::MDWSTransform MsliceProj;
-  // identify if u,v are present among input parameters and use defaults if not
-  std::vector<double> ut = getProperty("UProj");
-  std::vector<double> vt = getProperty("VProj");
-  std::vector<double> wt = getProperty("WProj");
-  try {
-    // otherwise input uv are ignored -> later it can be modified to set ub
-    // matrix if no given, but this may over-complicate things.
-    MsliceProj.setUVvectors(ut, vt, wt);
-  } catch (std::invalid_argument &) {
-    g_log.error() << "The projections are coplanar. Will use defaults "
-                     "[1,0,0],[0,1,0] and [0,0,1]\n";
+  if (QModReq == MDTransfQ3D().transfID()) {
+    try {
+      // otherwise input uv are ignored -> later it can be modified to set ub
+      // matrix if no given, but this may over-complicate things.
+      MsliceProj.setUVvectors(getProperty("UProj"), getProperty("VProj"),
+                              getProperty("WProj"));
+    } catch (std::invalid_argument &) {
+      g_log.warning() << "The projections are coplanar. Will use defaults "
+                         "[1,0,0],[0,1,0] and [0,0,1]\n";
+    }
+  } else {
+    auto warnIfSet = [this](const std::string &propName) {
+      Property *prop = this->getProperty(propName);
+      if (!prop->isDefault()) {
+        g_log.warning(propName + " value ignored with QDimensions != " +
+                      MDTransfQ3D().transfID());
+      }
+    };
+    for (const auto &name : {"UProj", "VProj", "WProj"}) {
+      warnIfSet(name);
+    }
   }
 
   if (createNewTargetWs) {
@@ -487,13 +522,13 @@ bool ConvertToMD::buildTargetWSDescription(
 }
 
 /**
-* Create new MD workspace and set up its box controller using algorithm's box
-* controllers properties
-* @param targWSDescr :: Description of workspace to create
-* @param filebackend :: true if the workspace will have a file back end
-* @param filename :: file to use for file back end of workspace
-* @return :: Shared pointer for the created workspace
-*/
+ * Create new MD workspace and set up its box controller using algorithm's box
+ * controllers properties
+ * @param targWSDescr :: Description of workspace to create
+ * @param filebackend :: true if the workspace will have a file back end
+ * @param filename :: file to use for file back end of workspace
+ * @return :: Shared pointer for the created workspace
+ */
 API::IMDEventWorkspace_sptr
 ConvertToMD::createNewMDWorkspace(const MDWSDescription &targWSDescr,
                                   const bool filebackend,
@@ -559,12 +594,12 @@ void ConvertToMD::setupTopLevelSplitting(Mantid::API::BoxController_sptr bc) {
 }
 
 /**Check if the target workspace new or exists and we need to create new
-*workspace
-*@param spws -- shared pointer to target MD workspace, which can be undefined if
-*the workspace does not exist
-*
-*@returns true if one needs to create new workspace and false otherwise
-*/
+ *workspace
+ *@param spws -- shared pointer to target MD workspace, which can be undefined
+ *if the workspace does not exist
+ *
+ *@returns true if one needs to create new workspace and false otherwise
+ */
 bool ConvertToMD::doWeNeedNewTargetWorkspace(API::IMDEventWorkspace_sptr spws) {
 
   bool createNewWs(false);
@@ -578,22 +613,22 @@ bool ConvertToMD::doWeNeedNewTargetWorkspace(API::IMDEventWorkspace_sptr spws) {
 }
 
 /** Method takes min-max values from algorithm parameters if they are present or
-*calculates default min-max values if these values
+ *calculates default min-max values if these values
  *  were not supplied to the method or the supplied value is incorrect.
  *
-*@param inWS     -- the shared pointer to the source workspace
-*@param QMode    -- the string which defines algorithms Q-conversion mode
-*@param dEMode   -- the string describes the algorithms energy conversion mode
-*@param QFrame   -- in Q3D case this describes target coordinate system and is
-*ignored in any other caste
-*@param ConvertTo -- The parameter describing Q-scaling transformations
-*@param otherDim -- the vector of other dimension names (if any)
-*  Input-output values:
-*@param minVal   -- the vector with min values for the algorithm
-*@param maxVal   -- the vector with max values for the algorithm
-*
-*
-*/
+ *@param inWS     -- the shared pointer to the source workspace
+ *@param QMode    -- the string which defines algorithms Q-conversion mode
+ *@param dEMode   -- the string describes the algorithms energy conversion mode
+ *@param QFrame   -- in Q3D case this describes target coordinate system and is
+ *ignored in any other caste
+ *@param ConvertTo -- The parameter describing Q-scaling transformations
+ *@param otherDim -- the vector of other dimension names (if any)
+ *  Input-output values:
+ *@param minVal   -- the vector with min values for the algorithm
+ *@param maxVal   -- the vector with max values for the algorithm
+ *
+ *
+ */
 void ConvertToMD::findMinMax(
     const Mantid::API::MatrixWorkspace_sptr &inWS, const std::string &QMode,
     const std::string &dEMode, const std::string &QFrame,
@@ -638,10 +673,10 @@ void ConvertToMD::findMinMax(
     throw(std::runtime_error(
         "Can not create child ChildAlgorithm to found min/max values"));
 
-  childAlg->setPropertyValue("InputWorkspace", inWS->getName());
-  childAlg->setPropertyValue("QDimensions", QMode);
-  childAlg->setPropertyValue("dEAnalysisMode", dEMode);
-  childAlg->setPropertyValue("Q3DFrames", QFrame);
+  childAlg->setProperty("InputWorkspace", inWS);
+  childAlg->setProperty("QDimensions", QMode);
+  childAlg->setProperty("dEAnalysisMode", dEMode);
+  childAlg->setProperty("Q3DFrames", QFrame);
   childAlg->setProperty("OtherDimensions", otherDim);
   childAlg->setProperty("QConversionScales", ConvertTo);
   childAlg->setProperty("PreprocDetectorsWS",
@@ -720,5 +755,5 @@ void ConvertToMD::setupFileBackend(
   boxControllerMem->getFileIO()->setWriteBufferSize(1000000);
 }
 
-} // namespace Mantid
 } // namespace MDAlgorithms
+} // namespace Mantid

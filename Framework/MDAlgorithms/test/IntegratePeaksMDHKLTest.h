@@ -1,27 +1,28 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MDAGORITHMS_INTEGRATEPEAKSMDHKLTEST_H_
 #define MANTID_MDAGORITHMS_INTEGRATEPEAKSMDHKLTEST_H_
 
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidDataObjects/MDEventFactory.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/PeakShapeSpherical.h"
-#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/MDGeometry/HKL.h"
-#include "MantidMDAlgorithms/IntegratePeaksMDHKL.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidKernel/UnitLabelTypes.h"
 #include "MantidMDAlgorithms/CreateMDWorkspace.h"
 #include "MantidMDAlgorithms/FakeMDEventData.h"
+#include "MantidMDAlgorithms/IntegratePeaksMDHKL.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidKernel/UnitLabelTypes.h"
 
 #include <boost/math/distributions/normal.hpp>
 #include <boost/math/special_functions/pow.hpp>
-#include <boost/random/linear_congruential.hpp>
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/uniform_int.hpp>
-#include <boost/random/uniform_real.hpp>
-#include <boost/random/variate_generator.hpp>
 
 #include <cxxtest/TestSuite.h>
 
@@ -36,6 +37,12 @@ using Mantid::Kernel::V3D;
 
 class IntegratePeaksMDHKLTest : public CxxTest::TestSuite {
 public:
+  // This means the constructor isn't called when running other tests
+  static IntegratePeaksMDHKLTest *createSuite() {
+    return new IntegratePeaksMDHKLTest();
+  }
+  static void destroySuite(IntegratePeaksMDHKLTest *suite) { delete suite; }
+
   IntegratePeaksMDHKLTest() { Mantid::API::FrameworkManager::Instance(); }
   ~IntegratePeaksMDHKLTest() override {}
 
@@ -180,7 +187,19 @@ public:
         "IntegratePeaksMDHKLTest_peaks", peakWS);
 
     // Set background from 2.0 to 3.0.
-    doRun("IntegratePeaksMDHKLTest_peaks");
+    IntegratePeaksMDHKL alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(
+        "InputWorkspace", "IntegratePeaksMDHKLTest_MDEWS"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(
+        "PeaksWorkspace", "IntegratePeaksMDHKLTest_peaks"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(
+        "OutputWorkspace", "IntegratePeaksMDHKLTest_peaks"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundOuterRadius", 0.2));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundInnerRadius", 0.16));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
     TS_ASSERT_DELTA(peakWS->getPeak(0).getIntensity(), 29.4275, 0.1);
     // Error is larger, since it is error of peak + error of background
     TSM_ASSERT_DELTA("Error has increased",

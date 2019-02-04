@@ -1,17 +1,23 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef FunctionFactoryConstraintTest_H_
 #define FunctionFactoryConstraintTest_H_
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/Expression.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/ParamFunction.h"
+#include "MantidAPI/IBackgroundFunction.h"
+#include "MantidAPI/IConstraint.h"
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/IPeakFunction.h"
-#include "MantidAPI/IBackgroundFunction.h"
-#include "MantidAPI/Expression.h"
-#include "MantidAPI/CompositeFunction.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/IConstraint.h"
+#include "MantidAPI/ParamFunction.h"
 #include "MantidKernel/System.h"
 
 #include <sstream>
@@ -173,6 +179,14 @@ public:
 
     funa->setParameter("a0", -1);
     TS_ASSERT_EQUALS(c->check(), 1000);
+
+    TS_ASSERT_EQUALS(funa->asString(),
+                     "name=FunctionFactoryConstraintTest_FunctA,a0=-1,"
+                     "a1=1.1,constraints=(0<a0<0.2)");
+    funa->setConstraintPenaltyFactor("a0", 10.2);
+    TS_ASSERT_EQUALS(funa->asString(),
+                     "name=FunctionFactoryConstraintTest_FunctA,a0=-1,"
+                     "a1=1.1,constraints=(0<a0<0.2,penalty=10.2)");
   }
 
   void testCreateWithConstraint2() {
@@ -204,6 +218,79 @@ public:
 
     funa->setParameter("a1", 11);
     TS_ASSERT_EQUALS(c1->check(), 0);
+
+    funa->setConstraintPenaltyFactor("a1", 18.4);
+    TS_ASSERT_EQUALS(funa->asString(),
+                     "name=FunctionFactoryConstraintTest_FunctA,a0=-1,"
+                     "a1=11,constraints=(0<a0<0.2,10<a1,penalty=18.4)");
+  }
+
+  void testSetConstraintPenaltyFactor1() {
+    std::string fnString =
+        "name=FunctionFactoryConstraintTest_FunctA,a0=0.1,a1=15.1,"
+        "constraints=(0<a0<0.2,a1>10,penalty=12.)";
+
+    IFunction_sptr funa =
+        FunctionFactory::Instance().createInitialized(fnString);
+    TS_ASSERT(funa);
+
+    IConstraint *c0 = funa->getConstraint(0);
+    TS_ASSERT(c0);
+    TS_ASSERT_EQUALS(c0->check(), 0);
+    TS_ASSERT_EQUALS(c0->getPenaltyFactor(), c0->getDefaultPenaltyFactor())
+
+    IConstraint *c1 = funa->getConstraint(1);
+    TS_ASSERT(c1);
+    TS_ASSERT_EQUALS(c1->check(), 0);
+    TS_ASSERT_EQUALS(c1->getPenaltyFactor(), 12.);
+
+    TS_ASSERT_EQUALS(funa->asString(),
+                     "name=FunctionFactoryConstraintTest_FunctA,a0=0.1,"
+                     "a1=15.1,constraints=(0<a0<0.2,10<a1,penalty=12)");
+
+    c1->setPenaltyFactor(c1->getDefaultPenaltyFactor());
+    TS_ASSERT_EQUALS(c1->getPenaltyFactor(), c1->getDefaultPenaltyFactor());
+    TS_ASSERT_EQUALS(funa->asString(),
+                     "name=FunctionFactoryConstraintTest_FunctA,a0=0.1,"
+                     "a1=15.1,constraints=(0<a0<0.2,10<a1)");
+
+    c0->setPenaltyFactor(0.5);
+    TS_ASSERT_EQUALS(c0->getPenaltyFactor(), 0.5);
+    TS_ASSERT_EQUALS(funa->asString(),
+                     "name=FunctionFactoryConstraintTest_FunctA,a0=0.1,"
+                     "a1=15.1,constraints=(0<a0<0.2,penalty=0.5,10<a1)");
+
+    funa->setParameter("a0", 0.5);
+    TS_ASSERT_EQUALS(c0->check(), 0.045);
+    TS_ASSERT_EQUALS(c0->getPenaltyFactor(), 0.5);
+    TS_ASSERT_EQUALS(funa->asString(),
+                     "name=FunctionFactoryConstraintTest_FunctA,a0=0.5,"
+                     "a1=15.1,constraints=(0<a0<0.2,penalty=0.5,10<a1)");
+  }
+
+  void testSetConstraintPenaltyFactor2() {
+    std::string fnString =
+        "name=FunctionFactoryConstraintTest_FunctA,a0=0.1,a1=15.1";
+    IFunction_sptr funa =
+        FunctionFactory::Instance().createInitialized(fnString);
+    TS_ASSERT(funa);
+
+    funa->addConstraints("0<a0<0.2,penalty=8,a1>10");
+    IConstraint *c0 = funa->getConstraint(0);
+    TS_ASSERT(c0);
+    IConstraint *c1 = funa->getConstraint(1);
+    TS_ASSERT(c1);
+    TS_ASSERT_EQUALS(c0->getPenaltyFactor(), 8.);
+    TS_ASSERT_EQUALS(c1->getPenaltyFactor(), c1->getDefaultPenaltyFactor());
+
+    funa->clearConstraints();
+    funa->addConstraints("0<a0<0.2,a1>10,penalty=0.");
+    IConstraint *c2 = funa->getConstraint(0);
+    IConstraint *c3 = funa->getConstraint(1);
+    TS_ASSERT(c2);
+    TS_ASSERT(c3);
+    TS_ASSERT_EQUALS(c2->asString(), "0<a0<0.2");
+    TS_ASSERT_EQUALS(c3->asString(), "10<a1,penalty=0");
   }
 
   void testCreateCompositeWithConstraints() {
@@ -330,22 +417,27 @@ public:
     IFunction_sptr fun1 =
         FunctionFactory::Instance().createInitialized(fun->asString());
 
-    fun1->setParameter(0, 0.);
-    fun1->setParameter(1, 0.);
+    fun1->setParameter(0, 1.);
+    fun1->setParameter(1, 2.);
     fun1->setParameter(2, 0.);
     fun1->setParameter(3, 789);
 
-    TS_ASSERT_EQUALS(fun1->getParameter(0), 0.);
-    TS_ASSERT_EQUALS(fun1->getParameter(1), 0.);
+    TS_ASSERT_EQUALS(fun1->getParameter(0), 1.);
+    TS_ASSERT_EQUALS(fun1->getParameter(1), 2.);
     TS_ASSERT_EQUALS(fun1->getParameter(2), 0.);
     TS_ASSERT_EQUALS(fun1->getParameter(3), 789);
 
     fun1->applyTies();
 
-    TS_ASSERT_EQUALS(fun1->getParameter(0), 14.);
-    TS_ASSERT_EQUALS(fun1->getParameter(1), 14.);
-    TS_ASSERT_EQUALS(fun1->getParameter(2), 28.);
+    TS_ASSERT_EQUALS(fun1->getParameter(0), 1.);
+    TS_ASSERT_EQUALS(fun1->getParameter(1), 2.);
+    TS_ASSERT_EQUALS(fun1->getParameter(2), 3.);
     TS_ASSERT_EQUALS(fun1->getParameter(3), 789);
+
+    TS_ASSERT(fun1->isFixed(0));
+    TS_ASSERT(fun1->isFixed(1));
+    TS_ASSERT(!fun1->isActive(2));
+    TS_ASSERT(fun1->isActive(3));
   }
 };
 

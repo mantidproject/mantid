@@ -2,7 +2,7 @@ digraph ElasticWindowMultiple {
   label="ElasticWindowMultiple Flowchart"
   $global_style
 
-  subgraph descision {
+  subgraph decision {
     $decision_style
     HaveTemperatureLogs     [label="Have Temperature Logs?"]
   }

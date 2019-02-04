@@ -1,23 +1,29 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidWorkflowAlgorithms/SANSSensitivityCorrection.h"
-#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AlgorithmProperty.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidDataObjects/TableWorkspace.h"
-#include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FileFinder.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/PropertyManager.h"
+#include "MantidKernel/PropertyManagerDataService.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidNexus/NexusFileIO.h"
 #include "Poco/File.h"
+#include "Poco/NumberFormatter.h"
 #include "Poco/Path.h"
 #include "Poco/String.h"
-#include "Poco/NumberFormatter.h"
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidNexus/NexusFileIO.h"
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidAPI/AlgorithmProperty.h"
-#include "MantidKernel/PropertyManagerDataService.h"
-#include "MantidKernel/PropertyManager.h"
-#include "MantidKernel/ArrayProperty.h"
 namespace Mantid {
 namespace WorkflowAlgorithms {
 
@@ -36,9 +42,10 @@ void SANSSensitivityCorrection::init() {
   declareProperty(Kernel::make_unique<API::FileProperty>(
                       "Filename", "", API::FileProperty::Load, fileExts),
                   "Flood field or sensitivity file.");
-  declareProperty("UseSampleDC", true, "If true, the dark current subtracted "
-                                       "from the sample data will also be "
-                                       "subtracted from the flood field.");
+  declareProperty("UseSampleDC", true,
+                  "If true, the dark current subtracted "
+                  "from the sample data will also be "
+                  "subtracted from the flood field.");
   declareProperty(
       Kernel::make_unique<API::FileProperty>(
           "DarkCurrentFile", "", API::FileProperty::OptionalLoad, fileExts),
@@ -251,7 +258,7 @@ void SANSSensitivityCorrection::exec() {
             darkAlg->execute();
             if (darkAlg->existsProperty("OutputMessage"))
               dark_result = darkAlg->getPropertyValue("OutputMessage");
-          } else if (darkCurrentFile.size() > 0) {
+          } else if (!darkCurrentFile.empty()) {
             darkAlg->setProperty("Filename", darkCurrentFile);
             darkAlg->setProperty("PersistentCorrection", false);
             darkAlg->execute();
@@ -260,7 +267,7 @@ void SANSSensitivityCorrection::exec() {
             else
               dark_result = "   Dark current subtracted\n";
           }
-        } else if (darkCurrentFile.size() > 0) {
+        } else if (!darkCurrentFile.empty()) {
           // We need to subtract the dark current for the flood field but no
           // dark
           // current subtraction was set for the sample! Use the default dark
@@ -356,7 +363,7 @@ void SANSSensitivityCorrection::exec() {
     }
     std::string floodWSOutputName =
         getPropertyValue("OutputSensitivityWorkspace");
-    if (floodWSOutputName.size() == 0) {
+    if (floodWSOutputName.empty()) {
       setPropertyValue("OutputSensitivityWorkspace", floodWSName);
       AnalysisDataService::Instance().addOrReplace(floodWSName, floodWS);
       reductionManager->declareProperty(

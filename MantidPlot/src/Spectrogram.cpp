@@ -25,43 +25,45 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#include "MantidQtAPI/qwt_compat.h"
 #include "Spectrogram.h"
-#include <math.h>
-#include <QPen>
-#include <qwt_scale_widget.h>
+#include "MantidQtWidgets/LegacyQwt/qwt_compat.h"
 #include <QColor>
+#include <QPainter>
+#include <QPen>
+#include <cmath>
 #include <qwt_painter.h>
 #include <qwt_scale_engine.h>
-#include <QPainter>
+#include <qwt_scale_widget.h>
 #include <qwt_symbol.h>
 
 #include "Mantid/MantidMatrix.h"
 #include "Mantid/MantidMatrixFunction.h"
 #include "MantidAPI/IMDIterator.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/make_unique.h"
-#include "MantidQtAPI/PlotAxis.h"
-#include "MantidQtAPI/QwtRasterDataMD.h"
-#include "MantidQtAPI/SignalRange.h"
+#include "MantidQtWidgets/Common/PlotAxis.h"
+#include "MantidQtWidgets/LegacyQwt/QwtRasterDataMD.h"
+#include "MantidQtWidgets/LegacyQwt/SignalRange.h"
 
-#include "MantidQtAPI/TSVSerialiser.h"
+#include "MantidQtWidgets/Common/TSVSerialiser.h"
 
 #include <numeric>
 
 Spectrogram::Spectrogram()
-    : QObject(), QwtPlotSpectrogram(), d_color_map_pen(false), d_matrix(0),
-      d_funct(0), d_wsData(0), d_wsName(), color_axis(QwtPlot::yRight),
-      color_map_policy(Default), color_map(QwtLinearColorMap()),
-      d_show_labels(true), d_white_out_labels(false), d_labels_angle(0.0),
-      d_selected_label(NULL), d_click_pos_x(0.), d_click_pos_y(0.),
-      d_labels_x_offset(0), d_labels_y_offset(0),
-      d_labels_align(Qt::AlignHCenter), m_nRows(0), m_nColumns(0),
-      m_bIntensityChanged(false), d_color_map_autoscale(true) {}
+    : QObject(), QwtPlotSpectrogram(), d_color_map_pen(false),
+      d_matrix(nullptr), d_funct(nullptr), d_wsData(nullptr), d_wsName(),
+      color_axis(QwtPlot::yRight), color_map_policy(Default),
+      color_map(QwtLinearColorMap()), d_show_labels(true),
+      d_white_out_labels(false), d_labels_angle(0.0), d_selected_label(nullptr),
+      d_click_pos_x(0.), d_click_pos_y(0.), d_labels_x_offset(0),
+      d_labels_y_offset(0), d_labels_align(Qt::AlignHCenter), m_nRows(0),
+      m_nColumns(0), m_bIntensityChanged(false), d_color_map_autoscale(true) {}
 
 Spectrogram::Spectrogram(const QString &wsName,
                          const Mantid::API::IMDWorkspace_const_sptr &workspace)
-    : QObject(), QwtPlotSpectrogram(), d_matrix(NULL), d_funct(NULL),
-      d_wsData(NULL), d_wsName(), color_axis(QwtPlot::yRight),
+    : QObject(), QwtPlotSpectrogram(), d_matrix(nullptr), d_funct(nullptr),
+      d_wsData(nullptr), d_wsName(), color_axis(QwtPlot::yRight),
       color_map_policy(Default), d_show_labels(true), d_white_out_labels(true),
       d_labels_x_offset(0), d_labels_y_offset(0),
       d_labels_align(Qt::AlignHCenter), mColorMap(),
@@ -85,8 +87,9 @@ Spectrogram::Spectrogram(const QString &wsName,
 
 Spectrogram::Spectrogram(Matrix *m)
     : QObject(), QwtPlotSpectrogram(QString(m->objectName())), d_matrix(m),
-      d_funct(0), d_wsData(NULL), d_wsName(), color_axis(QwtPlot::yRight),
-      color_map_policy(Default), mColorMap(), d_color_map_autoscale(true) {
+      d_funct(nullptr), d_wsData(nullptr), d_wsName(),
+      color_axis(QwtPlot::yRight), color_map_policy(Default), mColorMap(),
+      d_color_map_autoscale(true) {
   setData(MatrixData(m));
   double step =
       fabs(data().range().maxValue() - data().range().minValue()) / 5.0;
@@ -102,9 +105,10 @@ Spectrogram::Spectrogram(Matrix *m)
 Spectrogram::Spectrogram(Function2D *f, int nrows, int ncols, double left,
                          double top, double width, double height, double minz,
                          double maxz)
-    : QObject(), QwtPlotSpectrogram(), d_matrix(0), d_funct(f), d_wsData(NULL),
-      d_wsName(), color_axis(QwtPlot::yRight), color_map_policy(Default),
-      color_map(QwtLinearColorMap()), d_color_map_autoscale(true) {
+    : QObject(), QwtPlotSpectrogram(), d_matrix(nullptr), d_funct(f),
+      d_wsData(nullptr), d_wsName(), color_axis(QwtPlot::yRight),
+      color_map_policy(Default), color_map(QwtLinearColorMap()),
+      d_color_map_autoscale(true) {
   setData(FunctionData(f, nrows, ncols, left, top, width, height, minz, maxz));
   double step =
       fabs(data().range().maxValue() - data().range().minValue()) / 5.0;
@@ -119,10 +123,11 @@ Spectrogram::Spectrogram(Function2D *f, int nrows, int ncols, double left,
 
 Spectrogram::Spectrogram(Function2D *f, int nrows, int ncols,
                          QwtDoubleRect bRect, double minz, double maxz)
-    : QObject(), QwtPlotSpectrogram(), d_color_map_pen(false), d_matrix(0),
-      d_funct(f), d_wsData(NULL), d_wsName(), color_axis(QwtPlot::yRight),
-      color_map_policy(Default), d_show_labels(true), d_white_out_labels(false),
-      d_labels_angle(0.0), d_selected_label(NULL), d_labels_color(Qt::black),
+    : QObject(), QwtPlotSpectrogram(), d_color_map_pen(false),
+      d_matrix(nullptr), d_funct(f), d_wsData(nullptr), d_wsName(),
+      color_axis(QwtPlot::yRight), color_map_policy(Default),
+      d_show_labels(true), d_white_out_labels(false), d_labels_angle(0.0),
+      d_selected_label(nullptr), d_labels_color(Qt::black),
       d_labels_x_offset(0), d_labels_y_offset(0),
       d_labels_align(Qt::AlignHCenter), d_labels_font(QFont()), mColorMap(),
       m_nRows(nrows), m_nColumns(ncols), mScaledValues(0),
@@ -209,6 +214,34 @@ void Spectrogram::updateData(
 }
 
 /**
+ * Check all histograms in a matrix workspace to make sure that minX and maxX
+ * cover all x -values.
+ * @param workspace :: A workspace being plotted.
+ * @param minX :: The minimum value on the Spectrogram's x axis. Updated if
+ * workspace is ragged.
+ * @param maxX :: The maximum value on the Spectrogram's x axis. Updated if
+ * workspace is ragged.
+ */
+void Spectrogram::checkRaggedMatrixWorkspace(
+    const Mantid::API::Workspace *workspace, Mantid::coord_t &minX,
+    Mantid::coord_t &maxX) {
+  auto matrixWorkspace =
+      dynamic_cast<const Mantid::API::MatrixWorkspace *>(workspace);
+  if (matrixWorkspace) {
+    for (size_t iHisto = 0; iHisto < matrixWorkspace->getNumberHistograms();
+         ++iHisto) {
+      const auto &x = matrixWorkspace->x(iHisto);
+      if (x.front() < minX) {
+        minX = static_cast<Mantid::coord_t>(x.front());
+      }
+      if (x.back() > maxX) {
+        maxX = static_cast<Mantid::coord_t>(x.back());
+      }
+    }
+  }
+}
+
+/**
  * Extracts data from workspace
  * @param workspace :: [input] Pointer to workspace
  * @param range :: [input] (optional) Data range - set null for full range
@@ -226,6 +259,7 @@ MantidQt::API::QwtRasterDataMD *Spectrogram::dataFromWorkspace(
   // colour range
   QwtDoubleInterval fullRange =
       MantidQt::API::SignalRange(*workspace).interval();
+
   if (range) {
     wsData->setRange(*range);
   } else {
@@ -236,6 +270,11 @@ MantidQt::API::QwtRasterDataMD *Spectrogram::dataFromWorkspace(
   auto dim1 = workspace->getDimension(1);
   Mantid::coord_t minX(dim0->getMinimum()), maxX(dim0->getMaximum()),
       minY(dim1->getMinimum()), maxY(dim1->getMaximum());
+
+  // A MatrixWorkspace can be ragged. Make sure the x axis covers all
+  // histograms.
+  checkRaggedMatrixWorkspace(workspace.get(), minX, maxX);
+
   Mantid::coord_t dx(dim0->getBinWidth()), dy(dim1->getBinWidth());
   const Mantid::coord_t width = (maxX - minX) + dx;
   const Mantid::coord_t height = (maxY - minY) + dy;
@@ -433,7 +472,8 @@ MantidColorMap Spectrogram::getDefaultColorMap() {
   settings.endGroup();
 
   // if the file is not valid you will get the default
-  MantidColorMap retColorMap(lastColormapFile, GraphOptions::Linear);
+  MantidColorMap retColorMap(lastColormapFile,
+                             MantidColorMap::ScaleType::Linear);
 
   return retColorMap;
 }
@@ -555,7 +595,7 @@ void Spectrogram::setLabelsFont(const QFont &font) {
   }
 }
 
-bool Spectrogram::hasSelectedLabels() { return d_selected_label != NULL; }
+bool Spectrogram::hasSelectedLabels() { return d_selected_label != nullptr; }
 void Spectrogram::selectLabel(bool on) {
   QwtPlot *d_plot = plot();
   if (!d_plot)
@@ -581,7 +621,7 @@ void Spectrogram::selectLabel(bool on) {
 }
 
 bool Spectrogram::selectedLabels(const QPoint &pos) {
-  d_selected_label = NULL;
+  d_selected_label = nullptr;
   QwtPlot *d_plot = plot();
   if (!d_plot)
     return false;
@@ -627,7 +667,8 @@ void Spectrogram::saveSettings() {
   // settings.setValue("BackgroundColor",
   // mInstrumentDisplay->currentBackgroundColor());
   settings.setValue("ColormapFile", mCurrentColorMap);
-  settings.setValue("ScaleType", getColorMap().getScaleType());
+  settings.setValue("ScaleType",
+                    static_cast<int>(getColorMap().getScaleType()));
   settings.endGroup();
 }
 /**
@@ -643,9 +684,8 @@ void Spectrogram::loadSettings() {
   // Set values from settings
   mutableColorMap().loadMap(mCurrentColorMap);
 
-  GraphOptions::ScaleType type =
-      (GraphOptions::ScaleType)settings.value("ScaleType", GraphOptions::Log10)
-          .toUInt();
+  auto type = static_cast<MantidColorMap::ScaleType>(
+      settings.value("ScaleType", GraphOptions::Log10).toUInt());
 
   mutableColorMap().changeScaleType(type);
 
@@ -844,7 +884,7 @@ void Spectrogram::updateLabels(
   }
 }
 /**
-     for setting the lables color on contour lines
+     for setting the labels color on contour lines
  */
 void Spectrogram::setLabelsColor(const QColor &c) {
   if (c == d_labels_color)
@@ -978,7 +1018,7 @@ QImage Spectrogram::renderImage(const QwtScaleMap &xMap,
         jmin = 0;
 
       unsigned char *line = image.scanLine(static_cast<int>(i)) + jmin;
-      const Mantid::MantidVec &X = mantidFun->getMantidVec(row);
+      const auto &X = mantidFun->getHistogramX(row);
       int col = 0;
       int nX = static_cast<int>(X.size()) - 1;
       for (int j = jmin; j < imageWidth; ++j) {
@@ -1038,7 +1078,7 @@ void Spectrogram::loadFromProject(const std::string &lines) {
       // color map will revert to the default color map if
       // the file path is invalid
       MantidColorMap colorMap(QString::fromStdString(filename),
-                              GraphOptions::Linear);
+                              MantidColorMap::ScaleType::Linear);
       mCurrentColorMap = colorMap.getFilePath();
       mColorMap = colorMap;
       setCustomColorMap(colorMap);

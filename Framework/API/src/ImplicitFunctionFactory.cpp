@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 
 #include "MantidAPI/ImplicitFunctionFactory.h"
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
-#include <Poco/DOM/NodeList.h>
-#include <Poco/DOM/NodeIterator.h>
 #include <Poco/DOM/NodeFilter.h>
+#include <Poco/DOM/NodeIterator.h>
+#include <Poco/DOM/NodeList.h>
 #include <Poco/File.h>
 #include <Poco/Path.h>
 #include <boost/scoped_ptr.hpp>
@@ -49,5 +55,5 @@ ImplicitFunctionFactoryImpl::createUnwrapped(
       funcParser->createFunctionBuilder(pInstructionsXML));
   return functionBuilder->create();
 }
-}
-}
+} // namespace API
+} // namespace Mantid

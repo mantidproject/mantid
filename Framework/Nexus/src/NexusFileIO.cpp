@@ -1,10 +1,13 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 // NexusFileIO
 // @author Ronald Fowler
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
-#include <vector>
 #include <sstream>
+#include <vector>
 
 #ifdef _WIN32
 #include <io.h>
@@ -12,17 +15,18 @@
 // Maximum base file name size on modern windows systems is 260 characters
 #define NAME_MAX 260
 #endif /* _WIN32 */
-#include "MantidGeometry/Instrument.h"
-#include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidNexus/NexusFileIO.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/NumericAxis.h"
-#include "MantidKernel/VectorHelper.h"
-#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/RebinnedOutput.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/Unit.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/VectorHelper.h"
+#include "MantidNexus/NexusFileIO.h"
 
 #include <Poco/File.h>
 #include <Poco/Path.h>
@@ -36,7 +40,7 @@ using namespace DataObjects;
 namespace {
 /// static logger
 Logger g_log("NexusFileIO");
-}
+} // namespace
 
 /// Empty default constructor
 NexusFileIO::NexusFileIO()
@@ -266,7 +270,7 @@ bool NexusFileIO::writeNxNote(const std::string &noteName,
   m_filehandle->makeGroup(noteName, "NXnote", true);
 
   std::vector<std::string> attributes, avalues;
-  if (date != "") {
+  if (!date.empty()) {
     attributes.emplace_back("date");
     avalues.push_back(date);
   }
@@ -306,7 +310,7 @@ int NexusFileIO::writeNexusProcessedData2D(
   const size_t nHist = localworkspace->getNumberHistograms();
   if (nHist < 1)
     return (2);
-  const size_t nSpectBins = localworkspace->readY(0).size();
+  const size_t nSpectBins = localworkspace->y(0).size();
   const size_t nSpect = spec.size();
   int dims_array[2] = {static_cast<int>(nSpect), static_cast<int>(nSpectBins)};
 
@@ -350,7 +354,7 @@ int NexusFileIO::writeNexusProcessedData2D(
     NXopendata(fileID, name.c_str());
     for (size_t i = 0; i < nSpect; i++) {
       int s = spec[i];
-      NXputslab(fileID, localworkspace->readY(s).data(), start, asize);
+      NXputslab(fileID, localworkspace->y(s).rawData().data(), start, asize);
       start[0]++;
     }
     if (m_progress != nullptr)
@@ -377,7 +381,7 @@ int NexusFileIO::writeNexusProcessedData2D(
     start[0] = 0;
     for (size_t i = 0; i < nSpect; i++) {
       int s = spec[i];
-      NXputslab(fileID, localworkspace->readE(s).data(), start, asize);
+      NXputslab(fileID, localworkspace->e(s).rawData().data(), start, asize);
       start[0]++;
     }
 
@@ -424,20 +428,20 @@ int NexusFileIO::writeNexusProcessedData2D(
 
   // write X data, as single array or all values if "ragged"
   if (uniformSpectra) {
-    dims_array[0] = static_cast<int>(localworkspace->readX(0).size());
+    dims_array[0] = static_cast<int>(localworkspace->x(0).size());
     NXmakedata(fileID, "axis1", NX_FLOAT64, 1, dims_array);
     NXopendata(fileID, "axis1");
-    NXputdata(fileID, localworkspace->readX(0).data());
+    NXputdata(fileID, localworkspace->x(0).rawData().data());
 
   } else {
     dims_array[0] = static_cast<int>(nSpect);
-    dims_array[1] = static_cast<int>(localworkspace->readX(0).size());
+    dims_array[1] = static_cast<int>(localworkspace->x(0).size());
     NXmakedata(fileID, "axis1", NX_FLOAT64, 2, dims_array);
     NXopendata(fileID, "axis1");
     start[0] = 0;
     asize[1] = dims_array[1];
     for (size_t i = 0; i < nSpect; i++) {
-      NXputslab(fileID, localworkspace->readX(i).data(), start, asize);
+      NXputslab(fileID, localworkspace->x(i).rawData().data(), start, asize);
       start[0]++;
     }
   }
@@ -512,13 +516,13 @@ int NexusFileIO::writeNexusProcessedData2D(
 
 //-------------------------------------------------------------------------------------
 /**
-  * Save a numeric columns of a TableWorkspace to currently open nexus file.
-  * @param type :: Nexus code for the element data type.
-  * @param interpret_as :: Value of the interpret_as attribute.
-  * @param col :: Reference to the column being svaed.
-  * @param columnName :: Name of the nexus data set in which the column values
+ * Save a numeric columns of a TableWorkspace to currently open nexus file.
+ * @param type :: Nexus code for the element data type.
+ * @param interpret_as :: Value of the interpret_as attribute.
+ * @param col :: Reference to the column being svaed.
+ * @param columnName :: Name of the nexus data set in which the column values
  * are saved.
-  */
+ */
 template <typename ColumnT, typename NexusT>
 void NexusFileIO::writeTableColumn(int type, const std::string &interpret_as,
                                    const API::Column &col,
@@ -552,7 +556,7 @@ template <typename VecType> size_t getSizeOf(const VecType &vec) {
 
 // Special case of V3D
 size_t getSizeOf(const Kernel::V3D &) { return 3; }
-}
+} // namespace
 
 /**
  * Writes given vector column to the currently open Nexus file.
@@ -671,6 +675,11 @@ int NexusFileIO::writeNexusTableWorkspace(
       for (int ii = 0; ii < nRows; ii++) {
         if (col->cell<std::string>(ii).size() > maxStr)
           maxStr = col->cell<std::string>(ii).size();
+      }
+      // If the column is empty fill the data with spaces.
+      // Strings containing spaces only will be read back in as empty strings.
+      if (maxStr == 0) {
+        maxStr = 1;
       }
       int dims_array[2] = {nRows, static_cast<int>(maxStr)};
       int asize[2] = {1, dims_array[1]};
@@ -835,12 +844,9 @@ void NexusFileIO::writeEventListData(std::vector<T> events, bool writeTOF,
   auto errorSquareds = new double[num];
   auto pulsetimes = new int64_t[num];
 
-  typename std::vector<T>::const_iterator it;
-  typename std::vector<T>::const_iterator it_end = events.end();
   size_t i = 0;
-
   // Fill the C-arrays with the fields from all the events, as requested.
-  for (it = events.begin(); it != it_end; it++) {
+  for (auto it = events.cbegin(); it != events.cend(); ++it) {
     if (writeTOF)
       tofs[i] = it->tof();
     if (writePulsetime)
@@ -849,7 +855,7 @@ void NexusFileIO::writeEventListData(std::vector<T> events, bool writeTOF,
       weights[i] = it->weight();
     if (writeError)
       errorSquareds[i] = it->errorSquared();
-    i++;
+    ++i;
   }
 
   // Write out all the required arrays.
@@ -1025,7 +1031,7 @@ bool NexusFileIO::checkAttributeName(const std::string &target) const {
   const std::vector< ::NeXus::AttrInfo> infos = m_filehandle->getAttrInfos();
   // clang-format on
   for (const auto &info : infos) {
-    if (target.compare(info.name) == 0)
+    if (target == info.name)
       return true;
   }
 
@@ -1263,7 +1269,7 @@ int getNexusEntryTypes(const std::string &fileName,
   while ((stat = NXgetnextentry(fileH, nxname, nxclass, &nxdatatype)) ==
          NX_OK) {
     std::string nxc(nxclass);
-    if (nxc.compare("NXentry") == 0)
+    if (nxc == "NXentry")
       entryList.push_back(nxname);
   }
   // for each entry found, look for "analysis" or "definition" text data fields
@@ -1276,9 +1282,9 @@ int getNexusEntryTypes(const std::string &fileName,
            NX_OK) {
       std::string nxc(nxclass), nxn(nxname);
       // if a data field
-      if (nxc.compare("SDS") == 0)
+      if (nxc == "SDS")
         // if one of the two names we are looking for
-        if (nxn.compare("definition") == 0 || nxn.compare("analysis") == 0) {
+        if (nxn == "definition" || nxn == "analysis") {
           NXopendata(fileH, nxname);
           stat = NXgetinfo(fileH, &rank, dims, &type);
           if (stat == NX_ERROR)

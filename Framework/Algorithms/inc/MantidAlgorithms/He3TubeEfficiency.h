@@ -1,18 +1,28 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHM_HE3TUBEEFFICIENCY_H_
 #define MANTID_ALGORITHM_HE3TUBEEFFICIENCY_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/V3D.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/IDTypes.h"
+#include "MantidKernel/V3D.h"
 
 namespace Mantid {
 
 // forward declarations
+namespace HistogramData {
+class Points;
+}
 namespace Geometry {
 class IDetector;
-class Object;
+class IObject;
 class ParameterMap;
-}
+} // namespace Geometry
 
 namespace Algorithms {
 /**
@@ -35,34 +45,12 @@ namespace Algorithms {
 
     @author Michael Reuter
     @date 30/09/2010
-
-    Copyright &copy; 2008-10 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-   National Laboratory & European Spallation Source
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>.
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport He3TubeEfficiency : public API::Algorithm {
 public:
   /// Default constructor
   He3TubeEfficiency();
-  /// Virtual destructor
-  ~He3TubeEfficiency() override;
+
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "He3TubeEfficiency"; }
   /// Summary of algorithms purpose
@@ -72,6 +60,9 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"DetectorEfficiencyCor"};
+  }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override {
     return "CorrectionFunctions\\EfficiencyCorrections";
@@ -83,15 +74,20 @@ private:
   void exec() override;
   void execEvent();
 
+  /// Calculates the efficiency correction from the points
+  void computeEfficiencyCorrection(std::vector<double> &effCorrection,
+                                   const HistogramData::Points &wavelength,
+                                   const double expConstant,
+                                   const double scale) const;
   /// Correct the given spectra index for efficiency
-  void correctForEfficiency(std::size_t spectraIndex);
+  void correctForEfficiency(std::size_t spectraIndex,
+                            const API::SpectrumInfo &spectrumInfo);
   /// Sets the detector geometry cache if necessary
-  void
-  getDetectorGeometry(const boost::shared_ptr<const Geometry::IDetector> &det,
-                      double &detRadius, Kernel::V3D &detAxis);
+  void getDetectorGeometry(const Geometry::IDetector &det, double &detRadius,
+                           Kernel::V3D &detAxis);
   /// Computes the distance to the given shape from a starting point
   double distToSurface(const Kernel::V3D start,
-                       const Geometry::Object *shape) const;
+                       const Geometry::IObject *shape) const;
   /// Calculate the detector efficiency
   double detectorEfficiency(const double alpha,
                             const double scale_factor = 1.0) const;
@@ -99,30 +95,29 @@ private:
   void logErrors() const;
   /// Retrieve the detector parameters from workspace or detector properties
   double getParameter(std::string wsPropName, std::size_t currentIndex,
-                      std::string detPropName,
-                      boost::shared_ptr<const Geometry::IDetector> idet);
+                      std::string detPropName, const Geometry::IDetector &idet);
   /// Helper for event handling
   template <class T> void eventHelper(std::vector<T> &events, double expval);
   /// Function to calculate exponential contribution
-  double
-  calculateExponential(std::size_t spectraIndex,
-                       boost::shared_ptr<const Geometry::IDetector> idet);
+  double calculateExponential(std::size_t spectraIndex,
+                              const Geometry::IDetector &idet);
 
   /// The user selected (input) workspace
-  API::MatrixWorkspace_const_sptr inputWS;
+  API::MatrixWorkspace_const_sptr m_inputWS;
   /// The output workspace, maybe the same as the input one
-  API::MatrixWorkspace_sptr outputWS;
+  API::MatrixWorkspace_sptr m_outputWS;
   /// Map that stores additional properties for detectors
-  const Geometry::ParameterMap *paraMap;
+  const Geometry::ParameterMap *m_paraMap;
   /// A lookup of previously seen shape objects used to save calculation time as
   /// most detectors have the same shape
-  std::map<const Geometry::Object *, std::pair<double, Kernel::V3D>> shapeCache;
+  std::map<const Geometry::IObject *, std::pair<double, Kernel::V3D>>
+      m_shapeCache;
   /// Sample position
-  Kernel::V3D samplePos;
+  Kernel::V3D m_samplePos;
   /// The spectra numbers that were skipped
-  std::vector<specnum_t> spectraSkipped;
+  std::vector<specnum_t> m_spectraSkipped;
   /// Algorithm progress keeper
-  API::Progress *progress;
+  std::unique_ptr<API::Progress> m_progress;
 };
 
 } // namespace Algorithms

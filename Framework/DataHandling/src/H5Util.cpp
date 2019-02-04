@@ -1,6 +1,12 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/H5Util.h"
-#include "MantidKernel/System.h"
 #include "MantidAPI/LogManager.h"
+#include "MantidKernel/System.h"
 
 #include <H5Cpp.h>
 #include <algorithm>
@@ -20,7 +26,7 @@ Mantid::Kernel::Logger g_log("H5Util");
 
 const std::string NX_ATTR_CLASS("NX_class");
 const std::string CAN_SAS_ATTR_CLASS("canSAS_class");
-}
+} // namespace
 
 // -------------------------------------------------------------------
 // convert primitives to HDF5 enum
@@ -88,7 +94,7 @@ H5::DataSet writeScalarDataSet<std::string>(Group &group,
   return data;
 }
 
-} // anonymous
+} // namespace
 
 // -------------------------------------------------------------------
 // write methods
@@ -229,6 +235,37 @@ std::string readString(H5::DataSet &dataset) {
   return value;
 }
 
+/**
+ * Returns 1D vector of variable length strings
+ * @param group :: H5::Group already opened
+ * @param name :: name of the dataset in the group (rank must be 1)
+ * @return :: vector of strings
+ */
+std::vector<std::string> readStringVector(Group &group,
+                                          const std::string &name) {
+  hsize_t dims[1];
+  char **rdata;
+  std::vector<std::string> result;
+
+  DataSet dataset = group.openDataSet(name);
+  DataSpace dataspace = dataset.getSpace();
+  DataType datatype = dataset.getDataType();
+
+  dataspace.getSimpleExtentDims(dims, nullptr);
+
+  rdata = new char *[dims[0]];
+  dataset.read(rdata, datatype);
+
+  for (size_t i = 0; i < dims[0]; ++i)
+    result.emplace_back(std::string(rdata[i]));
+
+  dataset.vlenReclaim(rdata, datatype, dataspace);
+  dataset.close();
+  delete[] rdata;
+
+  return result;
+}
+
 template <typename LocationType>
 std::string readAttributeAsString(LocationType &location,
                                   const std::string &attributeName) {
@@ -304,7 +341,7 @@ OutputNumT convertingRead(Attribute &attribute, const DataType &dataType) {
   return result;
 }
 
-} // anonymous
+} // namespace
 
 template <typename NumT, typename LocationType>
 NumT readNumAttributeCoerce(LocationType &location,

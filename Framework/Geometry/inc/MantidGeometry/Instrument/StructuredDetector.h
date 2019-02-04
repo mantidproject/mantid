@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef STRUCTUREDDETECTOR_H
 #define STRUCTUREDDETECTOR_H
 
@@ -6,12 +12,13 @@
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/Detector.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include <string>
 #include <vector>
 
 namespace Mantid {
 namespace Geometry {
+class ComponentVisitor;
 /**
 *  StructuredDetector is a type of CompAssembly, an assembly of components.
 *  It is designed to be a more efficient way of defining instruments which
@@ -22,27 +29,6 @@ namespace Geometry {
 geometrical irregularity
 * @author Lamar Moore, ISIS
 * @date 07-March-2016
-
-Copyright &copy; 2016-17 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>
-Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_GEOMETRY_DLL StructuredDetector : public CompAssembly,
                                                public IObjComponent {
@@ -63,8 +49,8 @@ public:
   StructuredDetector(const StructuredDetector *base, const ParameterMap *map);
 
   /// Create all the detector pixels of this rectangular detector.
-  void initialize(size_t xPixels, size_t yPixels, const std::vector<double> &x,
-                  const std::vector<double> &y, bool isZBeam, detid_t idStart,
+  void initialize(size_t xPixels, size_t yPixels, std::vector<double> &&x,
+                  std::vector<double> &&y, bool isZBeam, detid_t idStart,
                   bool idFillByFirstY, int idStepByRow, int idStep = 1);
 
   //! Make a clone of the present component
@@ -138,9 +124,13 @@ public:
   void initDraw() const override;
 
   /// Returns the shape of the Object
-  const boost::shared_ptr<const Object> shape() const override;
+  const boost::shared_ptr<const IObject> shape() const override;
   /// Returns the material of the detector
   const Kernel::Material material() const override;
+
+  /// Register the structured detector for Instrument 2.0 usage
+  virtual size_t
+  registerContents(class ComponentVisitor &componentVisitor) const override;
 
   // ------------ End of IObjComponent methods ----------------
 private:
@@ -187,9 +177,9 @@ private:
 MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &,
                                              const StructuredDetector &);
 
-typedef boost::shared_ptr<StructuredDetector> StructuredDetector_sptr;
-typedef boost::shared_ptr<const StructuredDetector>
-    StructuredDetector_const_sptr;
+using StructuredDetector_sptr = boost::shared_ptr<StructuredDetector>;
+using StructuredDetector_const_sptr =
+    boost::shared_ptr<const StructuredDetector>;
 } // namespace Geometry
 } // namespace Mantid
 #endif // STRUCTUREDDETECTOR_H

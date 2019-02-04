@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef SMOOTHDATATEST_H_
 #define SMOOTHDATATEST_H_
 
@@ -164,7 +170,7 @@ public:
     TS_ASSERT_DELTA(E[0], sqrt(Y[0] / 3.0), 0.0001);
     TS_ASSERT_EQUALS(Y[1], 2.5);
     TS_ASSERT_DELTA(E[1], sqrt(Y[1] / 4.0), 0.0001);
-    for (size_t i = 2; i < output->blocksize() - 2; ++i) {
+    for (size_t i = 2; i < Y.size() - 2; ++i) {
       TS_ASSERT_EQUALS(Y[i], static_cast<double>(i) + 1.0);
       TS_ASSERT_DELTA(E[i], sqrt(Y[i] / 5.0), 0.0001);
     }
@@ -182,14 +188,14 @@ public:
 
 class SmoothDataTestPerformance : public CxxTest::TestSuite {
 public:
-  void setUp() {
+  void setUp() override {
 
     // Set up a small workspace for testing
     constexpr size_t numHistograms(1);
     constexpr size_t numBins(1000000);
 
     inputWs =
-        WorkspaceCreationHelper::Create2DWorkspace(numHistograms, numBins);
+        WorkspaceCreationHelper::create2DWorkspace(numHistograms, numBins);
 
     auto &yVals = inputWs->mutableY(0);
     auto &eVals = inputWs->mutableE(0);
@@ -211,7 +217,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(smoothAlg.execute());
   }
 
-  void tearDown() { AnalysisDataService::Instance().remove("outputWS"); }
+  void tearDown() override {
+    AnalysisDataService::Instance().remove("outputWS");
+  }
 
 private:
   Workspace2D_sptr inputWs;

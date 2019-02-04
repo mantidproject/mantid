@@ -1,8 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_RADIUSSUMTEST_H_
 #define MANTID_ALGORITHMS_RADIUSSUMTEST_H_
 
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAlgorithms/RadiusSum.h"
+#include "MantidKernel/Unit.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "RingProfileTest.h"
 #include <boost/shared_ptr.hpp>

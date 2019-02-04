@@ -1,19 +1,25 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_KERNEL_FACILITYINFO_H_
 #define MANTID_KERNEL_FACILITYINFO_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/DllConfig.h"
 #include "MantidKernel/CatalogInfo.h"
 #include "MantidKernel/ComputeResourceInfo.h"
+#include "MantidKernel/DllConfig.h"
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/RemoteJobManager.h"
 #ifndef Q_MOC_RUN
 #include <boost/shared_ptr.hpp>
 #endif
-#include <vector>
 #include <string>
+#include <vector>
 
 //----------------------------------------------------------------------
 // Forward declarations
@@ -22,33 +28,12 @@ namespace Poco {
 namespace XML {
 class Element;
 }
-}
+} // namespace Poco
 
 namespace Mantid {
 namespace Kernel {
 
 /** A class that holds information about a facility.
-
-    Copyright &copy; 2007-2012 ISIS Rutherford Appleton Laboratory, NScD Oak
-   Ridge National Laboratory & European Spallation Source
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>.
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 
 class MANTID_KERNEL_DLL FacilityInfo {
@@ -67,12 +52,13 @@ public:
   /// Returns the preferred file extension
   const std::string &preferredExtension() const { return m_extensions.front(); }
 
+  /// Returns the time zone designation compatible with pytz
+  const std::string &timezone() const { return m_timezone; }
+
   /// Return the archive search interface names
   const std::vector<std::string> &archiveSearch() const {
     return m_archiveSearch;
   }
-  /// Returns the name of the default live listener
-  const std::string &liveListener() const { return m_liveListener; }
   /// Returns a list of instruments of this facility
   const std::vector<InstrumentInfo> &instruments() const {
     return m_instruments;
@@ -98,22 +84,27 @@ public:
   /// Returns a bool indicating whether prefix is required in file names
   bool noFilePrefix() const { return m_noFilePrefix; }
 
+  /// Returns the multiple file limit
+  size_t multiFileLimit() const { return m_multiFileLimit; }
+
 private:
   void fillZeroPadding(const Poco::XML::Element *elem);
   void fillDelimiter(const Poco::XML::Element *elem);
   void fillExtensions(const Poco::XML::Element *elem);
   void fillArchiveNames(const Poco::XML::Element *elem);
+  void fillTimezone(const Poco::XML::Element *elem);
   void fillInstruments(const Poco::XML::Element *elem);
-  void fillLiveListener(const Poco::XML::Element *elem);
   void fillHTTPProxy(const Poco::XML::Element *elem);
   void fillComputeResources(const Poco::XML::Element *elem);
   void fillNoFilePrefix(const Poco::XML::Element *elem);
+  void fillMultiFileLimit(const Poco::XML::Element *elem);
 
   /// Add new extension
   void addExtension(const std::string &ext);
 
   CatalogInfo m_catalogs;   ///< Gain access to the catalogInfo class.
   const std::string m_name; ///< facility name
+  std::string m_timezone;   ///< Timezone designation in pytz
   int m_zeroPadding;        ///< default zero padding for this facility
   std::string
       m_delimiter; ///< default delimiter between instrument name and run number
@@ -122,16 +113,16 @@ private:
   std::vector<std::string>
       m_archiveSearch; ///< names of the archive search interface
   std::vector<InstrumentInfo>
-      m_instruments;          ///< list of instruments of this facility
-  std::string m_liveListener; ///< name of the default live listener
+      m_instruments;   ///< list of instruments of this facility
   bool m_noFilePrefix; ///< flag indicating if prefix is required in file names
+  size_t m_multiFileLimit; ///< the multiple file limit
   std::vector<ComputeResourceInfo> m_computeResInfos; ///< (remote) compute
   /// resources available in
   /// this facility
 
   // TODO: remove RemoteJobManager form here (trac ticket #11373)
-  typedef std::map<std::string, boost::shared_ptr<RemoteJobManager>>
-      ComputeResourcesMap;
+  using ComputeResourcesMap =
+      std::map<std::string, boost::shared_ptr<RemoteJobManager>>;
   ComputeResourcesMap m_computeResources; ///< list of compute resources
                                           ///(clusters, etc...) available at
                                           /// this facility

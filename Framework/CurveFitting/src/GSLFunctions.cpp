@@ -1,32 +1,40 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/GSLFunctions.h"
-#include "MantidAPI/ICostFunction.h"
 #include "MantidAPI/IConstraint.h"
+#include "MantidAPI/ICostFunction.h"
 
 namespace Mantid {
 namespace CurveFitting {
 
-using API::Jacobian;
-
 /** Fit GSL function wrapper
-* @param x :: Input function parameters
-* @param params :: Input data
-* @param f :: Output function values = (y_cal-y_data)/sigma for each data point
-* @return A GSL status information
-*/
+ * @param x :: Input function parameters
+ * @param params :: Input data
+ * @param f :: Output function values = (y_cal-y_data)/sigma for each data point
+ * @return A GSL status information
+ */
 int gsl_f(const gsl_vector *x, void *params, gsl_vector *f) {
-
+  assert(x->data);
   struct GSL_FitData *p = reinterpret_cast<struct GSL_FitData *>(params);
 
   // update function parameters
-  if (x->data) {
-    size_t ia = 0;
-    for (size_t i = 0; i < p->function->nParams(); ++i) {
-      if (p->function->isActive(i)) {
+  size_t ia = 0;
+  for (size_t i = 0; i < p->function->nParams(); ++i) {
+    if (p->function->isActive(i)) {
+      if (ia < x->size) {
         p->function->setActiveParameter(i, x->data[ia]);
         ++ia;
+      } else {
+        // The number of active parameters now exceeds the space
+        // originally allocated
+        throw Kernel::Exception::FitSizeWarning(x->size);
       }
     }
   }
@@ -65,19 +73,16 @@ int gsl_f(const gsl_vector *x, void *params, gsl_vector *f) {
   for (size_t i = 0; i < p->n; i++) {
     f->data[i] = (values->getCalculated(i) - values->getFitData(i)) *
                  values->getFitWeight(i);
-    // std::cerr << values.getCalculated(i) << ' ' << values.getFitData(i) << '
-    // ' << values.getFitWeight(i) << '\n';
   }
-
   return GSL_SUCCESS;
 }
 
 /** Fit GSL derivative function wrapper
-* @param x :: Input function arguments
-* @param params :: Input data
-* @param J :: Output derivatives
-* @return A GSL status information
-*/
+ * @param x :: Input function arguments
+ * @param params :: Input data
+ * @param J :: Output derivatives
+ * @return A GSL status information
+ */
 int gsl_df(const gsl_vector *x, void *params, gsl_matrix *J) {
 
   struct GSL_FitData *p = reinterpret_cast<struct GSL_FitData *>(params);
@@ -135,20 +140,18 @@ int gsl_df(const gsl_vector *x, void *params, gsl_matrix *J) {
   for (size_t iY = 0; iY < p->n; iY++)
     for (size_t iP = 0; iP < p->p; iP++) {
       J->data[iY * p->p + iP] *= values->getFitWeight(iY);
-      // std::cerr << iY << ' ' << iP << ' ' << J->data[iY*p->p + iP] <<
-      // '\n';
     }
 
   return GSL_SUCCESS;
 }
 
 /** Fit derivatives and function GSL wrapper
-* @param x :: Input function arguments
-* @param params :: Input data
-* @param f :: Output function values = (y_cal-y_cal)/sigma for each data point
-* @param J :: Output derivatives
-* @return A GSL status information
-*/
+ * @param x :: Input function arguments
+ * @param params :: Input data
+ * @param f :: Output function values = (y_cal-y_cal)/sigma for each data point
+ * @param J :: Output derivatives
+ * @return A GSL status information
+ */
 int gsl_fdf(const gsl_vector *x, void *params, gsl_vector *f, gsl_matrix *J) {
   gsl_f(x, params, f);
   gsl_df(x, params, J);

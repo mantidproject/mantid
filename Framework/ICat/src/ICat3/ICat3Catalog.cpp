@@ -1,7 +1,13 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidICat/ICat3/ICat3Catalog.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/CatalogFactory.h"
 #include "MantidAPI/Progress.h"
-#include "MantidAPI/AnalysisDataService.h"
 
 namespace Mantid {
 namespace ICat {
@@ -153,5 +159,5 @@ void ICat3Catalog::keepAlive() {}
 API::ITableWorkspace_sptr ICat3Catalog::getPublishInvestigations() {
   throw std::runtime_error("Publishing is not supported in ICat3Catalog.");
 }
-}
-}
+} // namespace ICat
+} // namespace Mantid

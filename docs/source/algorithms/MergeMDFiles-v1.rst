@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -33,8 +33,8 @@ algorithm avoids excessive memory use by only keeping the events from
 ONE box from ALL the files in memory at once to further process and
 refine it. This is why it requires a common box structure.
 
-See also: :ref:`algm-MergeMD`, for merging any MDWorkspaces in system
-memory (faster, but needs more memory).
+.. seealso:: :ref:`algm-MergeMD`, for merging any MDWorkspaces in system
+             memory (faster, but needs more memory).
 
 .. categories::
 

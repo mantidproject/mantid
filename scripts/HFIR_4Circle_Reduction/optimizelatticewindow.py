@@ -1,16 +1,28 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=C0103
-from PyQt4 import QtGui, QtCore
+from __future__ import (absolute_import, division, print_function)
+from qtpy.QtWidgets import (QMainWindow)
+from qtpy.QtCore import Signal as pyqtSignal
+from mantid.kernel import Logger
+try:
+    from mantidqt.utils.qt import load_ui
+except ImportError:
+    Logger("HFIR_4Circle_Reduction").information('Using legacy ui importer')
+    from mantidplot import load_ui
 
-import ui_OptimizeLattice
 
-
-class OptimizeLatticeWindow(QtGui.QMainWindow):
+class OptimizeLatticeWindow(QMainWindow):
     """
     Main window widget to set up parameters to optimize
     """
 
     # establish signal for communicating from App2 to App1 - must be defined before the constructor
-    mySignal = QtCore.pyqtSignal(int)
+    mySignal = pyqtSignal(int)
 
     def __init__(self, parent=None):
         """
@@ -19,10 +31,10 @@ class OptimizeLatticeWindow(QtGui.QMainWindow):
         :return:
         """
         # init
-        QtGui.QMainWindow.__init__(self, parent)
+        QMainWindow.__init__(self, parent)
 
-        self.ui = ui_OptimizeLattice.Ui_MainWindow()
-        self.ui.setupUi(self)
+        ui_path = "OptimizeLattice.ui"
+        self.ui = load_ui(__file__, ui_path, baseinstance=self)
 
         # initialize widgets
         self.ui.comboBox_unitCellTypes.addItems(['Cubic',
@@ -38,14 +50,15 @@ class OptimizeLatticeWindow(QtGui.QMainWindow):
         self.ui.lineEdit_tolerance.setText('0.12')
 
         # define event handling
-        self.connect(self.ui.pushButton_Ok, QtCore.SIGNAL('clicked()'),
-                     self.do_ok)
-
-        self.connect(self.ui.pushButton_cancel, QtCore.SIGNAL('clicked()'),
-                     self.do_quit)
+        self.ui.pushButton_Ok.clicked.connect(self.do_ok)
+        self.ui.pushButton_cancel.clicked.connect(self.do_quit)
 
         if parent is not None:
-            self.mySignal.connect(parent.refine_ub_lattice)  # connect to the updateTextEdit slot defined in app1.py
+            # connect to the method to refine UB matrix by constraining lattice parameters
+            self.mySignal.connect(parent.refine_ub_lattice)
+
+        # flag to trace back its previous step
+        self._prevIndexByFFT = False
 
         return
 
@@ -59,8 +72,9 @@ class OptimizeLatticeWindow(QtGui.QMainWindow):
         if tolerance is None:
             raise RuntimeError('Tolerance cannot be left blank!')
 
-        sigVal = 1000
-        self.mySignal.emit(sigVal)
+        # set up a hand-shaking signal
+        signal_value = 1000
+        self.mySignal.emit(signal_value)
 
         # quit
         self.do_quit()
@@ -113,3 +127,13 @@ class OptimizeLatticeWindow(QtGui.QMainWindow):
             tab_index = 4
 
         return tab_index
+
+    def set_prev_ub_refine_method(self, use_fft=False):
+        """
+
+        :param use_fft:
+        :return:
+        """
+        self._prevIndexByFFT = use_fft
+
+        return

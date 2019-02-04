@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -28,7 +28,7 @@ A typical ISIS dot data file has a format like this::
        ....
 
 Each row corresponds to a detector whose type is indicated in the
-``code`` column. The algorithm will only modify values in colums ``l2``,
+``code`` column. The algorithm will only modify values in columns ``l2``,
 ``theta`` and ``phi`` and only if the value in the ``code`` column is 3,
 which indicates a PSD gas tube. For more details about the detector dot
 data file see
@@ -53,7 +53,7 @@ Usage
    ModifyDetectorDotDatFile(ws_1, "detector_1.dat", newFile)
 
    # Check the output file
-   print "File Exists:", os.path.exists(newFile)
+   print("File Exists: {}".format(os.path.exists(newFile)))
 
    f = open( newFile, 'r' )
    file = f.read().split('\n')
@@ -62,7 +62,7 @@ Usage
    for line in file[0:4]:
         # print the line truncating before system dependent line break can take effect
         # also stripping off any trailing spaces
-        print line[0:89].rstrip()
+        print(line[0:89].rstrip())
         
 Output:
 

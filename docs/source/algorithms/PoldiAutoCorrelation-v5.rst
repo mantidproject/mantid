@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -44,7 +44,7 @@ PoldiAutoCorrelation operates on a MatrixWorkspace with a valid POLDI instrument
     raw_6904 = LoadSINQFile(Filename = "poldi2013n006904.hdf", Instrument = "POLDI")
     
     # Print the number of spectra in the workspace. It should be 400, one for each detector wire
-    print "The workspace contains", raw_6904.getNumberHistograms(), "spectra."
+    print("The workspace contains {} spectra.".format(raw_6904.getNumberHistograms()))
     
     # For most calculations, an instrument definition is needed, so it's loaded as well
     LoadInstrument(raw_6904, InstrumentName = "POLDI", RewriteSpectraMap=True)
@@ -54,7 +54,7 @@ PoldiAutoCorrelation operates on a MatrixWorkspace with a valid POLDI instrument
     
     # The first spectrum contains the correlation data. In this case there should be 5531 bins.
     # On other data or different wavelength limits, this number will be different.
-    print "The correlation spectrum has", len(correlated_6904.readY(0)), "data points."
+    print("The correlation spectrum has {} data points.".format(len(correlated_6904.readY(0))))
 
 Output:    
     

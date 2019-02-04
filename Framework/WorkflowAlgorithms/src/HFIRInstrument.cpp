@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidWorkflowAlgorithms/HFIRInstrument.h"
+#include "MantidAPI/Run.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/PropertyWithValue.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/StringTokenizer.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidAPI/Run.h"
 #include "Poco/NumberParser.h"
 
 namespace Mantid {

@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -35,8 +35,8 @@ Usage
    OutputWorkspace = CrossCorrelate(InputWorkspace='ws', WorkspaceIndexMax=1, XMin=2, XMax=4)
 
    # Show workspaces
-   print "AutoCorrelation",OutputWorkspace.readY(0)
-   print "CrossCorrelation",OutputWorkspace.readY(1)
+   print("AutoCorrelation {}".format(OutputWorkspace.readY(0)))
+   print("CrossCorrelation {}".format(OutputWorkspace.readY(1)))
 
 .. testoutput:: ExCrossCorrelate
 

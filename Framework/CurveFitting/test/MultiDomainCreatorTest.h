@@ -1,27 +1,34 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MULTIDOMAINCREATORTEST_H_
 #define MULTIDOMAINCREATORTEST_H_
 
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionValues.h"
-#include "MantidAPI/JointDomain.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/WorkspaceProperty.h"
-#include "MantidAPI/MultiDomainFunction.h"
-#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/IFunction1D.h"
+#include "MantidAPI/JointDomain.h"
+#include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/ParamFunction.h"
-#include "MantidCurveFitting/MultiDomainCreator.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidCurveFitting/FitMW.h"
 #include "MantidCurveFitting/Functions/UserFunction.h"
+#include "MantidCurveFitting/MultiDomainCreator.h"
 #include "MantidKernel/PropertyManager.h"
 
 #include "MantidTestHelpers/FakeObjects.h"
 
-#include <cxxtest/TestSuite.h>
-#include <boost/make_shared.hpp>
 #include <algorithm>
+#include <boost/make_shared.hpp>
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
+using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
 using namespace Mantid::CurveFitting::Functions;
@@ -61,37 +68,34 @@ public:
     ws1.reset(new WorkspaceTester);
     ws1->initialize(1, 10, 10);
     {
-      Mantid::MantidVec &x = ws1->dataX(0);
-      Mantid::MantidVec &y = ws1->dataY(0);
+      auto &x = ws1->mutableX(0);
       // Mantid::MantidVec& e = ws1->dataE(0);
-      for (size_t i = 0; i < ws1->blocksize(); ++i) {
-        x[i] = 0.1 * double(i);
-        y[i] = 1.0;
+      for (size_t i = 0; i < x.size(); ++i) {
+        x[i] = 0.1 * static_cast<double>(i);
       }
+      ws1->mutableY(0) = 1.;
     }
 
     ws2.reset(new WorkspaceTester);
     ws2->initialize(1, 10, 10);
     {
-      Mantid::MantidVec &x = ws2->dataX(0);
-      Mantid::MantidVec &y = ws2->dataY(0);
+      auto &x = ws2->mutableX(0);
       // Mantid::MantidVec& e = ws2->dataE(0);
-      for (size_t i = 0; i < ws2->blocksize(); ++i) {
-        x[i] = 1 + 0.1 * double(i);
-        y[i] = 2.0;
+      for (size_t i = 0; i < x.size(); ++i) {
+        x[i] = 1. + 0.1 * static_cast<double>(i);
       }
+      ws2->mutableY(0) = 2.;
     }
 
     ws3.reset(new WorkspaceTester);
     ws3->initialize(1, 10, 10);
     {
-      Mantid::MantidVec &x = ws3->dataX(0);
-      Mantid::MantidVec &y = ws3->dataY(0);
+      auto &x = ws3->mutableX(0);
       // Mantid::MantidVec& e = ws3->dataE(0);
-      for (size_t i = 0; i < ws3->blocksize(); ++i) {
-        x[i] = 2 + 0.1 * double(i);
-        y[i] = 3.0;
+      for (size_t i = 0; i < x.size(); ++i) {
+        x[i] = 2. + 0.1 * static_cast<double>(i);
       }
+      ws3->mutableY(0) = 3.;
     }
   }
 
@@ -232,11 +236,11 @@ public:
 
     WorkspaceGroup_sptr outWS = manager.getProperty("OUT_WS");
     TS_ASSERT(outWS);
-    TS_ASSERT_EQUALS(outWS->getItem(0)->name(), "out_Workspace_0");
-    TS_ASSERT_EQUALS(outWS->getItem(1)->name(), "out_Workspace_1");
-    TS_ASSERT_EQUALS(outWS->getItem(2)->name(), "out_Workspace_2");
+    TS_ASSERT_EQUALS(outWS->getItem(0)->getName(), "out_Workspace_0");
+    TS_ASSERT_EQUALS(outWS->getItem(1)->getName(), "out_Workspace_1");
+    TS_ASSERT_EQUALS(outWS->getItem(2)->getName(), "out_Workspace_2");
     manager.store("OUT_WS");
-    TS_ASSERT_EQUALS(outWS->name(), "out_Workspaces");
+    TS_ASSERT_EQUALS(outWS->getName(), "out_Workspaces");
     AnalysisDataService::Instance().clear();
   }
 

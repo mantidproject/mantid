@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidLiveData/ISIS/ISISLiveEventDataListener.h"
 #include "MantidLiveData/Exception.h"
 
@@ -8,8 +14,10 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/WarningSuppressions.h"
@@ -17,9 +25,7 @@
 #ifdef GCC_VERSION
 // Avoid compiler warnings on gcc from unused static constants in
 // isisds_command.h
-// clang-format off
-GCC_DIAG_OFF(unused-variable)
-// clang-format on
+GNU_DIAG_OFF("unused-variable")
 #endif
 #include "DAE/idc.h"
 
@@ -34,15 +40,14 @@ DECLARE_LISTENER(ISISLiveEventDataListener)
 namespace {
 /// static logger
 Kernel::Logger g_log("ISISLiveEventDataListener");
-}
+} // namespace
 
 /**
  * The constructor
  */
 ISISLiveEventDataListener::ISISLiveEventDataListener()
-    : API::ILiveListener(), m_isConnected(false), m_stopThread(false),
-      m_runNumber(0), m_daeHandle(), m_numberOfPeriods(0),
-      m_numberOfSpectra(0) {
+    : LiveListener(), m_isConnected(false), m_stopThread(false), m_runNumber(0),
+      m_daeHandle(), m_numberOfPeriods(0), m_numberOfSpectra(0) {
   m_warnings["period"] = "Period number is outside the range. Changed to 0.";
 }
 
@@ -80,7 +85,7 @@ bool ISISLiveEventDataListener::connect(
   // If we don't have an address, force a connection to the test server running
   // on
   // localhost on the default port
-  if (address.host().toString().compare("0.0.0.0") == 0) {
+  if (address.host().toString() == "0.0.0.0") {
     Poco::Net::SocketAddress tempAddress("127.0.0.1:10000");
     try {
       m_socket.connect(tempAddress); // BLOCKING connect
@@ -149,7 +154,7 @@ bool ISISLiveEventDataListener::connect(
 }
 
 // start event collection
-void ISISLiveEventDataListener::start(Kernel::DateAndTime startTime) {
+void ISISLiveEventDataListener::start(Types::Core::DateAndTime startTime) {
   (void)startTime;
   m_thread.start(*this);
 }
@@ -182,8 +187,8 @@ boost::shared_ptr<API::Workspace> ISISLiveEventDataListener::extractData() {
                 1));
 
     // Copy geometry over.
-    API::WorkspaceFactory::Instance().initializeFromParent(m_eventBuffer[i],
-                                                           temp, false);
+    API::WorkspaceFactory::Instance().initializeFromParent(*m_eventBuffer[i],
+                                                           *temp, false);
 
     // Clear out the old logs
     temp->mutableRun().clearTimeSeriesLogs();
@@ -234,6 +239,8 @@ void ISISLiveEventDataListener::run() {
       // get the header with the type of the packet
       Receive(events.head, "Events header",
               "Corrupt stream - you should reconnect.");
+      if (m_stopThread)
+        break;
       if (!(events.head.type == TCPStreamEventHeader::Neutron)) {
         // don't know what to do with it - stop
         throw std::runtime_error("Unknown packet type.");
@@ -243,10 +250,12 @@ void ISISLiveEventDataListener::run() {
       // get the header with the sream size
       Receive(events.head_n, "Neutrons header",
               "Corrupt stream - you should reconnect.");
+      if (m_stopThread)
+        break;
       CollectJunk(events.head_n);
 
       // absolute pulse (frame) time
-      Mantid::Kernel::DateAndTime pulseTime =
+      Mantid::Types::Core::DateAndTime pulseTime =
           m_startTime + static_cast<double>(events.head_n.frame_time_zero);
       // Save the pulse charge in the logs
       double protons = static_cast<double>(events.head_n.protons);
@@ -281,8 +290,7 @@ void ISISLiveEventDataListener::run() {
       saveEvents(events.data, pulseTime, events.head_n.period);
     }
 
-  } catch (std::runtime_error &
-               e) { // exception handler for generic runtime exceptions
+  } catch (std::runtime_error &e) {
 
     g_log.error() << "Caught a runtime exception.\nException message: "
                   << e.what() << '\n';
@@ -290,8 +298,8 @@ void ISISLiveEventDataListener::run() {
 
     m_backgroundException = boost::make_shared<std::runtime_error>(e);
 
-  } catch (std::invalid_argument &
-               e) { // TimeSeriesProperty (and possibly some other things) can
+  } catch (std::invalid_argument &e) {
+    // TimeSeriesProperty (and possibly some other things) can
     // can throw these errors
     g_log.error()
         << "Caught an invalid argument exception.\nException message: "
@@ -302,7 +310,7 @@ void ISISLiveEventDataListener::run() {
     newMsg += e.what();
     m_backgroundException = boost::make_shared<std::runtime_error>(newMsg);
 
-  } catch (...) { // Default exception handler
+  } catch (...) {
     g_log.error() << "Uncaught exception in ISISLiveEventDataListener network "
                      "read thread.\n";
     m_isConnected = false;
@@ -363,7 +371,7 @@ void ISISLiveEventDataListener::initEventBuffer(
 
       // Copy geometry over.
       API::WorkspaceFactory::Instance().initializeFromParent(
-          m_eventBuffer[0], m_eventBuffer[i], false);
+          *m_eventBuffer[0], *m_eventBuffer[i], false);
     }
   }
 }
@@ -374,7 +382,7 @@ void ISISLiveEventDataListener::initEventBuffer(
  */
 void ISISLiveEventDataListener::saveEvents(
     const std::vector<TCPStreamEventNeutron> &data,
-    const Kernel::DateAndTime &pulseTime, size_t period) {
+    const Types::Core::DateAndTime &pulseTime, size_t period) {
   std::lock_guard<std::mutex> scopedLock(m_mutex);
 
   if (period >= static_cast<size_t>(m_numberOfPeriods)) {
@@ -387,7 +395,7 @@ void ISISLiveEventDataListener::saveEvents(
   }
 
   for (const auto &streamEvent : data) {
-    Mantid::DataObjects::TofEvent event(streamEvent.time_of_flight, pulseTime);
+    Types::Event::TofEvent event(streamEvent.time_of_flight, pulseTime);
     m_eventBuffer[period]
         ->getSpectrum(streamEvent.spectrum)
         .addEventQuickly(event);
@@ -395,8 +403,8 @@ void ISISLiveEventDataListener::saveEvents(
 }
 
 /**
-  * Set the spectra-detector map to the buffer workspace.
-  */
+ * Set the spectra-detector map to the buffer workspace.
+ */
 void ISISLiveEventDataListener::loadSpectraMap() {
   // Read in the number of detectors
   int ndet = getInt("NDET");
@@ -411,9 +419,9 @@ void ISISLiveEventDataListener::loadSpectraMap() {
 }
 
 /**
-  * Load the instrument
-  * @param instrName :: Instrument name
-  */
+ * Load the instrument
+ * @param instrName :: Instrument name
+ */
 void ISISLiveEventDataListener::loadInstrument(const std::string &instrName) {
   // try to load the instrument. if it doesn't load give a warning and carry on
   if (instrName.empty()) {
@@ -463,16 +471,16 @@ void ISISLiveEventDataListener::getIntArray(const std::string &par,
 }
 
 /** Function called by IDC routines to report an error. Passes the error through
-* to the logger
-* @param status ::  The status code of the error (disregarded)
-* @param code ::    The error code (disregarded)
-* @param message :: The error message - passed to the logger at error level
-*/
+ * to the logger
+ * @param status ::  The status code of the error (disregarded)
+ * @param code ::    The error code (disregarded)
+ * @param message :: The error message - passed to the logger at error level
+ */
 void ISISLiveEventDataListener::IDCReporter(int status, int code,
                                             const char *message) {
   (void)status;
   (void)code; // Avoid compiler warning
   g_log.error(message);
 }
-}
-}
+} // namespace LiveData
+} // namespace Mantid

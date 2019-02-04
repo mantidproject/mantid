@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -20,7 +20,7 @@ Input and Output
 ################
 
 The input parameters are a histogram workspace and the index of the histogram.
-The ouput parameters are the fitted peak centre and sigma. If the data could not
+The output parameters are the fitted peak centre and sigma. If the data could not
 be fitted, 0.0 is returned as both the peak centre and sigma values and a warning
 message is logged. Errors in parameters raise RuntimeError.
 
@@ -45,9 +45,9 @@ Usage
    # attempt the fit
    fitResult = FitGaussian(wspace,0)
    if (0.0,0.0) == fitResult:
-      print "the fit was not successful"
+      print("the fit was not successful")
    else:
-      print "the fitted peak: centre=%.2f, sigma=%.2f" % fitResult
+      print("the fitted peak: centre={:.2f}, sigma={:.2f}".format(fitResult[0], fitResult[1]))
 
 .. testcleanup:: ExFitPeak
 

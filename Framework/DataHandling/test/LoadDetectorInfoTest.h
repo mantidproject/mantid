@@ -1,29 +1,30 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef LOADDETECTORINFOTEST_H_
 #define LOADDETECTORINFOTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidHistogramData/LinearGenerator.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/LoadDetectorInfo.h"
 #include "MantidDataHandling/LoadRaw3.h"
-#include "MantidAPI/Axis.h"
-#include "MantidAPI/FileFinder.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
-#include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/UnitFactory.h"
 
+#include <Poco/File.h>
 #include <boost/lexical_cast.hpp>
 #include <nexus/NeXusFile.hpp>
-#include <Poco/Path.h>
-#include <Poco/File.h>
-
-#include <algorithm>
-#include <fstream>
 #include <vector>
 
 using namespace Mantid::DataHandling;
@@ -32,8 +33,8 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
 using Mantid::HistogramData::BinEdges;
-using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::CountStandardDeviations;
+using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::LinearGenerator;
 
 /* choose an instrument to test, we could test all instruments
@@ -74,21 +75,22 @@ void writeSmallDatFile(const std::string &filename) {
           "    w_y         w_z         f_x         f_y         f_z         a_x "
           "        a_y         a_z        det_1       det_2       det_3       "
           "det4\n";
-  for (int i = 0; i < SmallTestDatFile::NDETECTS; ++i) {
-    file << i << "\t" << delta[i] << "\t" << det_l2[i] << "\t" << code[i]
-         << "\t" << det_theta[i] << "\t" << det_phi[i] << "\t" << NOTUSED
-         << "\t" << NOTUSED << "\t" << NOTUSED << "\t" << NOTUSED << "\t"
+  for (int detector = 0; detector < SmallTestDatFile::NDETECTS; ++detector) {
+    file << detector << "\t" << delta[detector] << "\t" << det_l2[detector]
+         << "\t" << code[detector] << "\t" << det_theta[detector] << "\t"
+         << det_phi[detector] << "\t" << NOTUSED << "\t" << NOTUSED << "\t"
          << NOTUSED << "\t" << NOTUSED << "\t" << NOTUSED << "\t" << NOTUSED
-         << "\t" << NOTUSED << "\t" << NOTUSED << "\t" << pressure[i] << "\t"
-         << wallThick[i] << "\t" << NOTUSED << '\n';
+         << "\t" << NOTUSED << "\t" << NOTUSED << "\t" << NOTUSED << "\t"
+         << NOTUSED << "\t" << pressure[detector] << "\t" << wallThick[detector]
+         << "\t" << NOTUSED << '\n';
   }
   file.close();
 }
 
 void writeDetNXSfile(const std::string &filename, const int nDets) {
-  auto fh = new ::NeXus::File(filename, NXACC_CREATE5);
-  fh->makeGroup("detectors.dat", "NXEntry", true);
-  fh->putAttr("version", "1.0");
+  ::NeXus::File nxsfile(filename, NXACC_CREATE5);
+  nxsfile.makeGroup("detectors.dat", "NXEntry", true);
+  nxsfile.putAttr("version", "1.0");
 
   std::vector<int32_t> detID(nDets * 2);
   std::vector<float> timeOffsets(nDets * 2);
@@ -136,51 +138,50 @@ void writeDetNXSfile(const std::string &filename, const int nDets) {
   array_dims[0] = nDets;
   array_dims[1] = 2;
 
-  fh->makeData("detID", ::NeXus::INT32, array_dims, true);
-  fh->putAttr("description", "DetectorID, DetectorType");
-  fh->putData(&detID[0]);
-  fh->closeData();
+  nxsfile.makeData("detID", ::NeXus::INT32, array_dims, true);
+  nxsfile.putAttr("description", "DetectorID, DetectorType");
+  nxsfile.putData(&detID[0]);
+  nxsfile.closeData();
 
-  fh->makeData("timeOffsets", ::NeXus::FLOAT32, array_dims, true);
-  fh->putAttr("description", "DelayTime, DeadTime");
-  fh->putData(&timeOffsets[0]);
-  fh->closeData();
+  nxsfile.makeData("timeOffsets", ::NeXus::FLOAT32, array_dims, true);
+  nxsfile.putAttr("description", "DelayTime, DeadTime");
+  nxsfile.putData(&timeOffsets[0]);
+  nxsfile.closeData();
 
-  fh->makeData("detPressureAndWall", ::NeXus::FLOAT32, array_dims, true);
-  fh->putAttr("description", "He3_pressure_Bar, WallThicknes_m");
-  fh->putData(&detStruct[0]);
-  fh->closeData();
-
-  array_dims[1] = 3;
-  fh->makeData("detSphericalCoord", ::NeXus::FLOAT32, array_dims, true);
-  fh->putAttr("description", "L2, Theta, Psi");
-  fh->putData(&detCoord[0]);
-  fh->closeData();
-
-  fh->makeData("detTrueSize", ::NeXus::FLOAT32, array_dims, true);
-  fh->putAttr("description", "W_x, W_y, W_z");
-  fh->putData(&detTrueSize[0]);
-  fh->closeData();
-
-  fh->makeData("detFalseSize", ::NeXus::FLOAT32, array_dims, true);
-  fh->putAttr("description", "F_x, F_y, F_z");
-  fh->putData(&detFalseSize[0]);
-  fh->closeData();
-
-  fh->makeData("detOrientation", ::NeXus::FLOAT32, array_dims, true);
-  fh->putAttr("description", "a_x, a_y, a_z");
-  fh->putData(&detOrient[0]);
-  fh->closeData();
+  nxsfile.makeData("detPressureAndWall", ::NeXus::FLOAT32, array_dims, true);
+  nxsfile.putAttr("description", "He3_pressure_Bar, WallThicknes_m");
+  nxsfile.putData(&detStruct[0]);
+  nxsfile.closeData();
 
   array_dims[1] = 3;
-  fh->makeData("detTubeIndex", ::NeXus::FLOAT32, array_dims, true);
-  fh->putAttr("description", "detTubeIndex");
-  fh->putData(&detTubeIndex[0]);
-  fh->closeData();
+  nxsfile.makeData("detSphericalCoord", ::NeXus::FLOAT32, array_dims, true);
+  nxsfile.putAttr("description", "L2, Theta, Psi");
+  nxsfile.putData(&detCoord[0]);
+  nxsfile.closeData();
 
-  fh->closeGroup();
-  fh->close();
-  delete fh;
+  nxsfile.makeData("detTrueSize", ::NeXus::FLOAT32, array_dims, true);
+  nxsfile.putAttr("description", "W_x, W_y, W_z");
+  nxsfile.putData(&detTrueSize[0]);
+  nxsfile.closeData();
+
+  nxsfile.makeData("detFalseSize", ::NeXus::FLOAT32, array_dims, true);
+  nxsfile.putAttr("description", "F_x, F_y, F_z");
+  nxsfile.putData(&detFalseSize[0]);
+  nxsfile.closeData();
+
+  nxsfile.makeData("detOrientation", ::NeXus::FLOAT32, array_dims, true);
+  nxsfile.putAttr("description", "a_x, a_y, a_z");
+  nxsfile.putData(&detOrient[0]);
+  nxsfile.closeData();
+
+  array_dims[1] = 1;
+  nxsfile.makeData("detTubeIndex", ::NeXus::FLOAT32, array_dims, true);
+  nxsfile.putAttr("description", "detTubeIndex");
+  nxsfile.putData(&detTubeIndex[0]);
+  nxsfile.closeData();
+
+  nxsfile.closeGroup();
+  nxsfile.close();
 }
 void writeLargeTestDatFile(const std::string &filename, const int ndets) {
   // The array is the same value across all spectra as this is meant as a
@@ -219,26 +220,27 @@ void makeTestWorkspace(const int ndets, const int nbins,
     space2D->setCounts(j, nbins, j + 1);
     space2D->setCountStandardDeviations(j, errors);
     auto &spec = space2D->getSpectrum(j);
-    spec.setSpectrumNo(j + 1);
     spec.setDetectorID(j);
   }
 
   Instrument_sptr instr(new Instrument);
-  space2D->setInstrument(instr);
   ObjComponent *samplePos = new ObjComponent("sample-pos", instr.get());
+  instr->add(samplePos);
   instr->markAsSamplePos(samplePos);
 
   for (int i = 0; i < ndets; ++i) {
     std::ostringstream os;
     os << "det-" << i;
-    Detector *d = new Detector(os.str(), i, 0);
+    Detector *d = new Detector(os.str(), i, nullptr);
+    instr->add(d);
     instr->markAsDetector(d);
   }
+  space2D->setInstrument(instr);
 
   // Register the workspace in the data service
   AnalysisDataService::Instance().add(ads_name, space2D);
 }
-}
+} // namespace
 
 class LoadDetectorInfoTest : public CxxTest::TestSuite {
 public:
@@ -300,27 +302,28 @@ public:
     TS_ASSERT_THROWS_NOTHING(grouper.execute());
     TS_ASSERT(grouper.isExecuted());
 
-    const ParameterMap &pmap = WS->constInstrumentParameters();
+    const auto &pmap = WS->constInstrumentParameters();
+    const auto &detInfo = WS->detectorInfo();
 
     // read the parameters from some random detectors, they're parameters are
     // all set to the same thing
-    for (int i = 0; i < NUMRANDOM; ++i) {
-      int detID = DETECTS[i];
-      IDetector_const_sptr detector = WS->getInstrument()->getDetector(detID);
+    for (int detector : DETECTS) {
+      const size_t detIndex = detInfo.indexOf(detector);
 
-      Parameter_sptr par = pmap.getRecursive(detector.get(), "TubePressure");
+      const auto &det = detInfo.detector(detIndex);
+      Parameter_sptr par = pmap.getRecursive(&det, "TubePressure");
 
       TS_ASSERT(par);
-      TS_ASSERT_EQUALS(par->asString(), castaround("10.0"));
-      par = pmap.getRecursive(detector.get(), "TubeThickness");
+      TS_ASSERT_DELTA(par->value<double>(), 10.0, 1.e-6);
+      par = pmap.getRecursive(&det, "TubeThickness");
       TS_ASSERT(par);
 
-      TS_ASSERT_EQUALS(par->asString(), castaround("0.0008").substr(0, 6));
+      TS_ASSERT_DELTA(par->value<double>(), 0.0008, 1.e-6);
     }
 
     // Test that a random detector has been moved
-    IDetector_const_sptr det = WS->getInstrument()->getDetector(DETECTS[0]);
-    TS_ASSERT_EQUALS(V3D(0, 0.2406324, 4.014795), det->getPos());
+    const V3D pos = detInfo.position(detInfo.indexOf(DETECTS[0]));
+    TS_ASSERT_EQUALS(V3D(0, 0.2406324, 4.014795), pos);
 
     AnalysisDataService::Instance().remove(m_MariWS);
   }
@@ -359,14 +362,13 @@ public:
         boost::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(m_InoutWS));
 
-    const ParameterMap &pmap = WS->instrumentParameters();
+    const auto &pmap = WS->constInstrumentParameters();
+    const auto &detInfo = WS->detectorInfo();
 
     for (int j = 0; j < SmallTestDatFile::NDETECTS; ++j) {
 
-      boost::shared_ptr<const IDetector> detector =
-          WS->getInstrument()->getDetector(j);
-
-      const IComponent *baseComp = detector->getComponentID();
+      const size_t detIndex = detInfo.indexOf(j);
+      const IComponent *baseComp = detInfo.detector(detIndex).getComponentID();
 
       Parameter_sptr par = pmap.get(baseComp, "TubePressure");
       // this is only for PSD detectors, code 3
@@ -374,42 +376,32 @@ public:
         TS_ASSERT(par);
         if (!par)
           return;
-        if (singleWallPressure) {
-          TS_ASSERT_DELTA(par->value<double>(),
-                          boost::lexical_cast<double>(pressure[j]), 1.e-3);
-        } else {
-          TS_ASSERT_EQUALS(par->asString(), castaround(pressure[j]));
-        }
+        TS_ASSERT_DELTA(par->value<double>(),
+                        boost::lexical_cast<double>(pressure[j]), 1.e-3);
 
         par = pmap.get(baseComp, "TubeThickness");
         TS_ASSERT(par);
         if (!par)
           return;
-        if (singleWallPressure) {
-          if (j < 3)
-            TS_ASSERT_DELTA(par->value<double>(),
-                            boost::lexical_cast<double>(wallThick[j]), 1.e-3);
+        if (!singleWallPressure || j < 3)
+          TS_ASSERT_DELTA(par->value<double>(),
+                          boost::lexical_cast<double>(wallThick[j]), 1.e-3);
+        const V3D pos = detInfo.position(detIndex);
+        V3D expected;
+        if (j == 1) // Monitors are fixed and unaffected
+        {
+          expected = V3D(0, 0, 0);
         } else {
-          TS_ASSERT_EQUALS(
-              par->asString(),
-              castaround(wallThick[j]).substr(0, par->asString().length()));
+          expected.spherical(boost::lexical_cast<double>(det_l2[j]),
+                             boost::lexical_cast<double>(det_theta[j]),
+                             boost::lexical_cast<double>(det_phi[j]));
         }
-      } else
-        TS_ASSERT(!par);
-
-      const V3D pos = detector->getPos();
-      V3D expected;
-      if (j == 1) // Monitors are fixed and unaffected
-      {
-        expected = V3D(0, 0, 0);
+        TS_ASSERT_EQUALS(expected.X(), pos.X());
+        TS_ASSERT_EQUALS(expected.Y(), pos.Y());
+        TS_ASSERT_EQUALS(expected.Z(), pos.Z());
       } else {
-        expected.spherical(boost::lexical_cast<double>(det_l2[j]),
-                           boost::lexical_cast<double>(det_theta[j]),
-                           boost::lexical_cast<double>(det_phi[j]));
+        TS_ASSERT(!par);
       }
-      TS_ASSERT_EQUALS(expected.X(), pos.X());
-      TS_ASSERT_EQUALS(expected.Y(), pos.Y());
-      TS_ASSERT_EQUALS(expected.Z(), pos.Z());
     }
 
     AnalysisDataService::Instance().remove(m_InoutWS);
@@ -420,11 +412,6 @@ private:
   std::string m_rawFile;
 
   enum constants { NBINS = 4, DAT_MONTOR_IND = 1 };
-
-  std::string castaround(std::string floatNum) {
-    return boost::lexical_cast<std::string>(
-        boost::lexical_cast<double>(floatNum));
-  }
 };
 
 //-------------------------------------------------------------------------------------------------------------------------

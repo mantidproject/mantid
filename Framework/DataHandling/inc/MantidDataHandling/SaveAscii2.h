@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAHANDLING_SaveAscii2_H_
 #define MANTID_DATAHANDLING_SaveAscii2_H_
 
@@ -6,7 +12,6 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidAPI/SpectraDetectorTypes.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -17,27 +22,6 @@ are saved in columns.
 
 @author Keith Brown, ISIS, Placement student from the University of Derby
 @date 10/10/13
-
-Copyright &copy; 2007-9 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>.
-Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport SaveAscii2 : public API::Algorithm {
 public:
@@ -51,6 +35,15 @@ public:
   }
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 2; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"LoadAscii",
+            "SaveCSV",
+            "SaveDiffFittingAscii",
+            "SaveReflCustomAscii",
+            "SaveOpenGenieAscii",
+            "SaveGSS",
+            "SaveFocusedXYE"};
+  }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "DataHandling\\Text"; }
 
@@ -59,18 +52,8 @@ private:
   void init() override;
   /// Overwrites Algorithm method
   void exec() override;
-  /**writes a spectra to the file using a workspace ID
-  @param spectraIndex :: an integer relating to a workspace ID
-  @param file :: the file writer object
-  */
-  void writeSpectra(const int &spectraIndex, std::ofstream &file);
-  /**writes a spectra to the file using an iterator
-  @param spectraItr :: a set<int> iterator pointing to a set of workspace IDs to
-  be saved
-  @param file :: the file writer object
-  */
-  void writeSpectra(const std::set<int>::const_iterator &spectraItr,
-                    std::ofstream &file);
+  /// Writes a spectrum to the file using a workspace index
+  void writeSpectrum(const int &wsIndex, std::ofstream &file);
   std::vector<std::string> stringListToVector(std::string &inputString);
   void populateQMetaData();
   void populateSpectrumNumberMetaData();
@@ -87,12 +70,10 @@ private:
   std::string m_sep;
   bool m_writeDX;
   bool m_writeID;
-  bool m_isHistogram;
   bool m_isCommonBins;
   API::MatrixWorkspace_const_sptr m_ws;
   std::vector<std::string> m_metaData;
   std::map<std::string, std::vector<std::string>> m_metaDataMap;
-  spec2index_map m_specToIndexMap;
 };
 } // namespace DataHandling
 } // namespace Mantid

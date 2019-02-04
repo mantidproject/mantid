@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init
 from __future__ import (absolute_import, division, print_function)
 
@@ -179,6 +185,7 @@ class VesuvioTOFFit(VesuvioBase):
                                           Operation='Multiply', Factor=1e06)
 
         return reduced_chi_squared, params, fitted_data
+
 
 # -----------------------------------------------------------------------------------------
 AlgorithmFactory.subscribe(VesuvioTOFFit)

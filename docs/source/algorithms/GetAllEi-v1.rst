@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -74,9 +74,9 @@ to convert units from TOF to energy.
     for ei_guess in allEi:
        nop,t_peak,monIndex,tZero=GetEi(InputWorkspace=ws, Monitor1Spec=1, Monitor2Spec=2, EnergyEstimate=ei_guess)
        resEi.append((nop,t_peak));
-    print "! Guess Ei ! peak TOF ! peak height ! peak width !"
+    print("! Guess Ei ! peak TOF ! peak height ! peak width !")
     for ind,val in enumerate(resEi):
-       print "!  {0: >6.1f}  !  {1: >6.2f} !   {2: >6.2f}    ! {3: >6.2f}     !".format(allEi[ind],val[1],peakHeight[ind],peakWidth[ind])
+       print("!  {0: >6.1f}  !  {1: >6.2f} !   {2: >6.2f}    ! {3: >6.2f}     !".format(allEi[ind],val[1],peakHeight[ind],peakWidth[ind]))
     #
     # NOTE: incident energy of GetEi is calculated from distance between monitor 1 and 2, and this distance is not correct in 
     # the test workspace. The tested point is that getEi can find energies from guess values and TOF for peaks is correct.

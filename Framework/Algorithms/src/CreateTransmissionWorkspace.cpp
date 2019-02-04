@@ -1,6 +1,13 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CreateTransmissionWorkspace.h"
 #include "MantidAlgorithms/BoostOptionalToAlgorithmProperty.h"
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 
@@ -56,17 +63,16 @@ void CreateTransmissionWorkspace::init() {
                       "OutputWorkspace", "", Direction::Output),
                   "Output Workspace IvsQ.");
 
-  setPropertySettings("Params",
-                      make_unique<Kernel::EnabledWhenProperty>(
-                          "SecondTransmissionWorkspace", IS_NOT_DEFAULT));
+  setPropertySettings("Params", make_unique<Kernel::EnabledWhenProperty>(
+                                    "SecondTransmissionRun", IS_NOT_DEFAULT));
 
   setPropertySettings("StartOverlap",
                       make_unique<Kernel::EnabledWhenProperty>(
-                          "SecondTransmissionWorkspace", IS_NOT_DEFAULT));
+                          "SecondTransmissionRun", IS_NOT_DEFAULT));
 
   setPropertySettings("EndOverlap",
                       make_unique<Kernel::EnabledWhenProperty>(
-                          "SecondTransmissionWorkspace", IS_NOT_DEFAULT));
+                          "SecondTransmissionRun", IS_NOT_DEFAULT));
 }
 
 //----------------------------------------------------------------------------------------------

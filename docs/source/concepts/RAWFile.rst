@@ -56,12 +56,12 @@ least for RAW files.
 ::
 
     notepad2.exe SANS2D00000799.raw:checksum
-    more < SANS2D00000799.raw:checksum 
+    more < SANS2D00000799.raw:checksum
 
 If a file with an alternate data stream is copied to an FAT file system
 the alternate data stream is lost. It has been reported that if a file
 with an ADS is copied using SAMBA to a unix file system the streams are
-extracted into seperate files with automatically generates suffixes.
+extracted into separate files with automatically generates suffixes.
 
 More information about Alternate Data Streams
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -75,11 +75,6 @@ More information about Alternate Data Streams
 -  `Practical Guide to Alternative Data Streams in
    NTFS <http://www.irongeek.com/i.php?page=security/altds>`__
 
-See also
-~~~~~~~~
-
-:ref:`Nexus file <Nexus file>` a newer type of data file
-
-
+.. seealso:: :ref:`Nexus file <Nexus file>` a newer type of data file
 
 .. categories:: Concepts

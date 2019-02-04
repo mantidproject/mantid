@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_CROSSCORRELATE_H_
 #define MANTID_ALGORITHMS_CROSSCORRELATE_H_
 
@@ -34,38 +40,13 @@ namespace Algorithms {
 
     @author Laurent C Chapon, ISIS Facility Rutherford Appleton Laboratory
     @date 15/12/2008
-
-    Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
- National Laboratory & European Spallation Source
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport CrossCorrelate : public API::Algorithm {
 public:
   /// (Empty) Constructor
-  CrossCorrelate() : API::Algorithm(), m_progress(nullptr) {}
+  CrossCorrelate() : API::Algorithm() {}
   /// Virtual destructor
-  ~CrossCorrelate() override {
-    if (m_progress)
-      delete m_progress;
-    m_progress = nullptr;
-  }
+  ~CrossCorrelate() override {}
   /// Algorithm's name
   const std::string name() const override { return "CrossCorrelate"; }
   /// Summary of algorithms purpose
@@ -76,6 +57,9 @@ public:
 
   /// Algorithm's version
   int version() const override { return (1); }
+  const std::vector<std::string> seeAlso() const override {
+    return {"GetDetectorOffsets"};
+  }
   /// Algorithm's category for identification
   const std::string category() const override { return "Arithmetic"; }
 
@@ -90,7 +74,7 @@ private:
   spec2index_map::iterator index_map_it;
 
   /// Progress reporting
-  API::Progress *m_progress;
+  std::unique_ptr<API::Progress> m_progress = nullptr;
 };
 
 // Functor for vector sum

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_GEOMETRY_SAMPLEENVIRONMENTSPEC_H_
 #define MANTID_GEOMETRY_SAMPLEENVIRONMENTSPEC_H_
 
@@ -17,33 +23,12 @@ namespace Geometry {
   in conjunction with the SampleEnvionmentBuilder to construct given
   configuration of SampleEnvironment. It can be read from XML by a
   SampleEnvironmentParser.
-
-  Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
-
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>
-  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_GEOMETRY_DLL SampleEnvironmentSpec {
 public:
   // Convenience typedefs
   using ContainerIndex = std::unordered_map<std::string, Container_const_sptr>;
-  using ComponentList = std::vector<Object_const_sptr>;
+  using ComponentList = std::vector<IObject_const_sptr>;
 
   SampleEnvironmentSpec(std::string name);
 
@@ -58,7 +43,7 @@ public:
   SampleEnvironment_uptr buildEnvironment(const std::string &canID) const;
 
   void addContainer(const Container_const_sptr &can);
-  void addComponent(const Object_const_sptr &component);
+  void addComponent(const IObject_const_sptr &component);
 
 private:
   std::string m_name;

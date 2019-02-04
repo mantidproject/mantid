@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name
 from __future__ import (absolute_import, division, print_function)
 from mantid.api import *
@@ -13,6 +19,9 @@ class LoadMultipleGSS(PythonAlgorithm):
 
     def category(self):
         return "DataHandling\\Text"
+
+    def seeAlso(self):
+        return [ "LoadGSS" ]
 
     def name(self):
         return "LoadMultipleGSS"
@@ -57,5 +66,6 @@ class LoadMultipleGSS(PythonAlgorithm):
             wksp = "%s_%d" % (prefix,run)
             self.__load(directory, wksp)
             ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="dSpacing")
+
 
 AlgorithmFactory.subscribe(LoadMultipleGSS)

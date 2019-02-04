@@ -1,13 +1,21 @@
-﻿#pylint: disable=no-init
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
+#pylint: disable=no-init
 #pylint: disable=invalid-name
 #pylint: disable=too-many-arguments
 #pylint: disable=too-many-public-methods
+from __future__ import (absolute_import, division, print_function)
 import unittest
-import stresstesting
+import systemtesting
 from mantid.simpleapi import *
 from isis_reduction_steps import DarkRunSubtraction
 from SANSUserFileParser import DarkRunSettings
 from SANSUtility import getFileAndName
+import numpy as np
 
 
 class DarkRunSubtractionTest(unittest.TestCase):
@@ -85,7 +93,8 @@ class DarkRunSubtractionTest(unittest.TestCase):
 
         # Since in this test we use the same file for the scatterer and the dark run, we expect
         # that the detectors are 0. This is because we subtract bin by bin when using UAMP
-        self.assertFalse(scatter_workspace.extractY().any(), "Detector entries should all be 0")
+        y = scatter_workspace.extractY()
+        self.assertFalse(np.greater(y, 1e-14).any(), "Detector entries should all be 0")
 
         # The monitors should not be affected, but we only have data in ws_index 0-3
         self.assertTrue(monitor_workspace.extractY()[:,0:3].any(), "Monitor entries should not all be 0")
@@ -121,13 +130,15 @@ class DarkRunSubtractionTest(unittest.TestCase):
         # Expect all entries to be 0 except for monitor 0. We selected monitor 1 and all detectors
         # for the subtraction. Hence only moniotr 0 would have been spared.
 
-        self.assertFalse(scatter_workspace.extractY().any(), "Detector entries should all be 0")
+        y = scatter_workspace.extractY()
+        self.assertFalse(np.greater(y, 1e-14).any(), "Detector entries should all be 0")
 
         for i in [0,2,3]:
             self.assertTrue(monitor_workspace.dataY(i).any(), "Monitor entries should not all be 0")
 
         for i in ws_index2:
-            self.assertFalse(monitor_workspace.dataY(i).any(), "Entries should all be 0")
+            y = monitor_workspace.dataY(i)
+            self.assertFalse(np.greater(y, 1e-14).any(), "Entries should all be 0")
 
     def test_that_subtracts_correct_added_file_type(self):
         # Arrange
@@ -154,9 +165,8 @@ class DarkRunSubtractionTest(unittest.TestCase):
 
         # Since in this test we use the same file for the scatterer and the dark run, we expect
         # that the detectors are 0. This is because we subtract bin by bin when using UAMP
-
-        self.assertFalse(scatter_workspace.extractY().any(), "Detector entries should all be 0")
-
+        y = scatter_workspace.extractY()
+        self.assertFalse(np.greater(y, 1e-14).any(), "Detector entries should all be 0")
         # The monitors should not be affected, but we only have data in ws_index 0-3
         for i in [0,3]:
             self.assertTrue(monitor_workspace.dataY(i).any(), "Monitor entries should not all be 0")
@@ -200,7 +210,8 @@ class DarkRunSubtractionTest(unittest.TestCase):
 
         # Monitor 2 (workspace index 1 should be 0
         for i in ws_index:
-            self.assertFalse(monitor_workspace.dataY(i).any(), "Monitor2 entries should  all be 0")
+            y = monitor_workspace.dataY(i)
+            self.assertFalse(np.greater(y, 1e-14).any(), "Monitor2 entries should  all be 0")
 
         os.remove(os.path.join(config['defaultsave.directory'],run_number))
 
@@ -236,7 +247,8 @@ class DarkRunSubtractionTest(unittest.TestCase):
 
         # Monitor 1 should be 0
         for i in ws_index:
-            self.assertFalse(monitor_workspace.dataY(i).any(), "Monitor2 entries should  all be 0")
+            y = monitor_workspace.dataY(i)
+            self.assertFalse(np.greater(y, 1e-14).any(), "Monitor2 entries should  all be 0")
 
     def test_that_subtracts_correct_for_transmission_workspace_with_only_monitors(self):
         # Arrange
@@ -268,7 +280,8 @@ class DarkRunSubtractionTest(unittest.TestCase):
 
         # Monitor2 should be 0
         for i in ws_index:
-            self.assertFalse(transmission_workspace.dataY(i).any(), "Monitor2 entries should  all be 0")
+            y = transmission_workspace.dataY(i)
+            self.assertFalse(np.greater(y, 1e-14).any(), "Monitor2 entries should  all be 0")
 
     def test_that_subtracts_nothing_when_selecting_detector_subtraction_for_transmission_workspace_with_only_monitors(self):
         # Arrange
@@ -322,7 +335,7 @@ class DarkRunSubtractionTest(unittest.TestCase):
 
         monitor_ids = [1,2,3,4]
         trans_ids = monitor_ids
-        detector_ids = range(1100000, 1100010)
+        detector_ids = list(range(1100000, 1100010))
         trans_ids.extend(detector_ids)
 
         # Act + Assert
@@ -340,12 +353,14 @@ class DarkRunSubtractionTest(unittest.TestCase):
 
         # Monitor 2 should be set to 0
         for i in ws_index2:
-            self.assertFalse(transmission_workspace.dataY(i).any(), "Monitor2 entries should be 0")
+            y = transmission_workspace.dataY(i)
+            self.assertFalse(np.greater(y, 1e-14).any(), "Monitor2 entries should be 0")
 
         # Detectors should be set to 0
-        detector_indices = range(4,14)
+        detector_indices = list(range(4,14))
         for i in detector_indices:
-            self.assertFalse(transmission_workspace.dataY(i).any(), "All detectors entries should be 0")
+            y = transmission_workspace.dataY(i)
+            self.assertFalse(np.greater(y, 1e-14).any(), "All detectors entries should be 0")
 
     def test_that_subtracts_monitors_only_for_transmission_workspace_with_monitors_and_detectors(self):
         # Arrange
@@ -362,7 +377,7 @@ class DarkRunSubtractionTest(unittest.TestCase):
 
         monitor_ids = [1,2,3,4]
         trans_ids = monitor_ids
-        detector_ids = range(1100000, 1100010)
+        detector_ids = list(range(1100000, 1100010))
         trans_ids.extend(detector_ids)
 
         # Act + Assert
@@ -380,7 +395,8 @@ class DarkRunSubtractionTest(unittest.TestCase):
 
         # Monitor 2 should be set to 0
         for i in ws_index:
-            self.assertFalse(transmission_workspace.dataY(i).any(), "Monitor2 entries should be 0")
+            y = transmission_workspace.dataY(i)
+            self.assertFalse(np.greater(y, 1e-14).any(), "Monitor2 entries should be 0")
 
         # Detectors should NOT all be set to 0
         self.assertTrue(transmission_workspace.extractY().any(), "There should be some detectors which are not zero")
@@ -400,15 +416,12 @@ class DarkRunSubtractionTest(unittest.TestCase):
         else:
             scatter_workspace, monitor_workspace = self._get_sample_workspace_histo()
 
-        # Execute the dark_run_subtractor
-        try:
-            start_spec = 9
-            end_spec = 20 # Full specturm length
-            scatter_workspace, monitor_workspace = dark_run_subtractor.execute(scatter_workspace, monitor_workspace,
-                                                                               start_spec, end_spec, is_input_event)
-        # pylint: disable=bare-except
-        except:
-            self.assertFalse(True, "The DarkRunSubtraction executed with an error")
+        # Execute the dark_run_subtractor - let exceptions flow to help track down errors
+        start_spec = 9
+        end_spec = 20 # Full spectrum length
+        scatter_workspace, monitor_workspace = dark_run_subtractor.execute(scatter_workspace, monitor_workspace,
+                                                                           start_spec, end_spec, is_input_event)
+
         return scatter_workspace, monitor_workspace
 
     def _do_test_valid_transmission(self, settings, trans_ids):
@@ -420,12 +433,9 @@ class DarkRunSubtractionTest(unittest.TestCase):
         # Create an actual scatter workspace
         transmission_workspace = self._get_transmission_workspace(trans_ids)
 
-        # Execute the dark_run_subtractor
-        try:
-            transmission_workspace = dark_run_subtractor.execute_transmission(transmission_workspace, trans_ids)
-        # pylint: disable=bare-except
-        except:
-            self.assertFalse(True, "The DarkRunSubtraction executed with an error")
+        # Execute the dark_run_subtractor - let exceptions flow to help track down errors
+        transmission_workspace = dark_run_subtractor.execute_transmission(transmission_workspace, trans_ids)
+
         return transmission_workspace
 
     def _get_dark_file(self):
@@ -476,7 +486,6 @@ class DarkRunSubtractionTest(unittest.TestCase):
             alg_load_monitors.initialize()
             alg_load_monitors.setChild(True)
             alg_load_monitors.setProperty("Filename", file_path)
-            alg_load_monitors.setProperty("MonitorsAsEvents", False)
             alg_load_monitors.setProperty("OutputWorkspace", monitors_name)
             alg_load_monitors.execute()
             monitor_ws = alg_load_monitors.getProperty("OutputWorkspace").value
@@ -512,7 +521,6 @@ class DarkRunSubtractionTest(unittest.TestCase):
         alg_load2.initialize()
         alg_load2.setChild(True)
         alg_load2.setProperty("Filename", file_path)
-        alg_load2.setProperty("MonitorsAsEvents", False)
         alg_load2.setProperty("OutputWorkspace", monitor_name)
         alg_load2.execute()
         monitor_ws = alg_load2.getProperty("OutputWorkspace").value
@@ -568,7 +576,6 @@ class DarkRunSubtractionTest(unittest.TestCase):
         alg_load_monitors.initialize()
         alg_load_monitors.setChild(True)
         alg_load_monitors.setProperty("Filename", file_path)
-        alg_load_monitors.setProperty("MonitorsAsEvents", False)
         alg_load_monitors.setProperty("OutputWorkspace", trans_name)
         alg_load_monitors.execute()
         monitor = alg_load_monitors.getProperty("OutputWorkspace").value
@@ -614,9 +621,9 @@ class DarkRunSubtractionTest(unittest.TestCase):
                                mon_number = mon_number)
 
 
-class DarkRunSubtractionTestStressTest(stresstesting.MantidStressTest):
+class DarkRunSubtractionTestSystemTest(systemtesting.MantidSystemTest):
     def __init__(self):
-        stresstesting.MantidStressTest.__init__(self)
+        systemtesting.MantidSystemTest.__init__(self)
         self._success = False
 
     def runTest(self):

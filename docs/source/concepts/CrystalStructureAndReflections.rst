@@ -19,10 +19,10 @@ A crystal is modelled as an infinitely repeating three-dimensional arrangement o
 the periodic nature of crystals, the entire object can be described by specifying the repeated unit and how
 it is repeated. These information are called "crystal structure" and comprise three components:
 
-    1. Lattice (describes the periodicity of the structure)
-    2. Basis (distribution of scatterers in the unit cell)
-    3. Space group (describes the symmetry of the arrangement of scatterers)
-  
+1. Lattice (describes the periodicity of the structure)
+2. Basis (distribution of scatterers in the unit cell)
+3. Space group (describes the symmetry of the arrangement of scatterers)
+
 The description of the basis depends on the model's level of detail. In the simplest case it could be a list of
 point scatterers that are fully characterized by three coordinates (x, y and z in terms of the lattice vectors) and
 a scattering length. In reality however, the scatterers are usually atoms that fluctuate about their average position
@@ -38,13 +38,13 @@ atoms in a randomly distributed manner.
 To summarize, a very basic model of the basis comprises a list of scatterers that are in turn characterized by
 six parameters:
 
-    1. Scattering length (known for each element)
-    2. Fractional coordinate x
-    3. Fractional coordinate y
-    4. Fractional coordinate z
-    5. Occupancy of the site
-    6. Isotropic thermal displacement parameter
-  
+1. Scattering length (known for each element)
+2. Fractional coordinate x
+3. Fractional coordinate y
+4. Fractional coordinate z
+5. Occupancy of the site
+6. Isotropic thermal displacement parameter
+
 Knowledge of the space group makes it possible to derive all scatterers in the entire unit cell. The symmetry operations
 of the space group map each scatterer-position onto a set of equivalent positions that are consequently occupied by the
 same type of scatterer as well. Since the unit cell is repeated infinitely in all three directions of space, it is
@@ -61,7 +61,7 @@ neutrons, of an appropriate wavelength (on the same scale of interatomic distanc
 
 .. math::
     2d\sin\theta = \lambda
-  
+
 In this equation :math: `d` is the spacing between the lattice planes, :math:`\theta` is the angle of the incoming beam
 and the lattice plane normal and lambda is the wavelength of the radiation. In an experiment theta and lambda are
 usually limited, thus they are limiting the range of interplanar spacings that can be probed. In Bragg's law the lattice
@@ -73,7 +73,7 @@ be computed like this:
 
 .. math::
     d = \frac{1}{\left|\mathbf{B}\cdot\mathbf{h}\right|}
-  
+
 The parameters taken into account so far determine the geometric characteristics of Bragg-reflections, i.e. their
 position on a detector and their time of flight. But besides these, each reflection also has an intensity. The
 intensity is proportional to the squared structure factor, which depends on the kind and arrangement of scatterers in
@@ -109,18 +109,18 @@ string representations of those three arguments.
     silicon = CrystalStructure("5.431 5.431 5.431", "F d -3 m", "Si 0 0 0 1.0 0.05")
 
     unitCell = silicon.getUnitCell()
-    print 'Crystal structure of silicon:'
-    print '  Unit cell:', unitCell.a(), unitCell.b(), unitCell.c(), unitCell.alpha(), unitCell.beta(), unitCell.gamma()
+    print('Crystal structure of silicon:')
+    print('  Unit cell: {0} {1} {2} {3} {4} {5}'.format(unitCell.a(), unitCell.b(), unitCell.c(), unitCell.alpha(), unitCell.beta(), unitCell.gamma()))
 
     spaceGroup = silicon.getSpaceGroup()
-    print '  Space group:', spaceGroup.getHMSymbol()
-    print '  Point group:', spaceGroup.getPointGroup().getHMSymbol()
+    print('  Space group: {0}'.format(spaceGroup.getHMSymbol()))
+    print('  Point group: {0}'.format(spaceGroup.getPointGroup().getHMSymbol()))
 
     scatterers = silicon.getScatterers()
-    print '  Total number of scatterers:', len(scatterers)
+    print('  Total number of scatterers: {0}'.format(len(scatterers)))
 
     for i, scatterer in enumerate(scatterers):
-        print '    ' + str(i) + ':', scatterer
+        print('    {0}: {1}'.format(i,scatterer))
 
 The above script produces the following output:
 
@@ -155,8 +155,8 @@ from a CrystalStructure-object:
     # Create list of unique reflections between 0.7 and 3.0 Angstrom
     hkls = generator.getUniqueHKLs(0.7, 3.0)
 
-    print 'There are', len(hkls), 'unique reflections for Si in the specified resolution range.'
-    print 'The reflection [222] is' + (' not' if not V3D(2, 2, 2) in hkls else '') + ' contained in the list.'
+    print('There are {} unique reflections for Si in the specified resolution range.'.format(len(hkls)))
+    print('The reflection [222] is' + (' not' if not V3D(2, 2, 2) in hkls else '') + ' contained in the list.')
 
 .. testoutput:: ExReflectionGeneratorConstruction
 
@@ -186,9 +186,9 @@ there are very small values present.
     # Find HKLs with very small structure factors:
     zeroFSquared = [(hkl, sf) for hkl, sf in zip(hkls, fSquared) if sf < 1e-9]
 
-    print 'HKL        F^2'
+    print('HKL        F^2')
     for hkl, sf in zeroFSquared:
-        print hkl, '  ', np.round(sf, 2)
+        print ('{0}    {1}'.format(hkl, np.round(sf, 2)))
 
 The output of the above script should show three reflections with very small values for :math:`F^2`. Their indices
 violate the special conditions mentioned in the previous paragraph, so the reflections are actually extinct:
@@ -217,8 +217,8 @@ to the constructor of ReflectionGenerator or by passing it to the actual generat
     # Create list of unique reflections between 0.7 and 3.0 Angstrom, use structure factors for filtering
     hkls = generator.getUniqueHKLsUsingFilter(0.7, 3.0, ReflectionConditionFilter.StructureFactor)
 
-    print 'There are', len(hkls), 'unique reflections for Si in the specified resolution range.'
-    print 'The reflection [222] is' + (' not' if not V3D(2, 2, 2) in hkls else '') + ' contained in the list.'
+    print('There are {} unique reflections for Si in the specified resolution range.'.format(len(hkls)))
+    print('The reflection [222] is' + (' not' if not V3D(2, 2, 2) in hkls else '') + ' contained in the list.')
 
 With this option, the three reflections from the example above are missing and as an indicator, the [222] reflection
 is actually checked:
@@ -253,11 +253,11 @@ to the process for :math:`F^2`:
 
     # Make list of tuples and sort by d-values, descending, include point group for multiplicity.
     reflections = sorted([(hkl, d, fsq, len(pg.getEquivalents(hkl))) for hkl, d, fsq in zip(hkls, dValues, fSquared)],
-                                    key=lambda x: x[1], reverse=True)
+                                    key=lambda x: x[1] - x[0][0]*1e-6, reverse=True)
 
-    print '{0:<8}{1:>8}{2:>8}{3:>4}'.format('HKL', 'd', 'F^2', 'M')
+    print('{0:<8}{1:>8}{2:>8}{3:>4}'.format('HKL', 'd', 'F^2', 'M'))
     for reflection in reflections:
-        print '{0!s:<8}{1:>8.5f}{2:>8.2f}{3:>4}'.format(*reflection)
+        print('{0!s:<8}{1:>8.5f}{2:>8.2f}{3:>4}'.format(*reflection))
 
 This script will print a table with the reflections including their :math:`d`-value, :math:`F^2` and multiplicity due to point group
 symmetry:

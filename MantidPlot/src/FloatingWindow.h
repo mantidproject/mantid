@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef FloatingWindow_H
 #define FloatingWindow_H
 
@@ -14,7 +20,7 @@ class QSize;
 class FloatingWindow : public QMainWindow {
   Q_OBJECT
 public:
-  FloatingWindow(ApplicationWindow *appWindow, Qt::WindowFlags f = 0);
+  FloatingWindow(ApplicationWindow *appWindow, Qt::WindowFlags f = nullptr);
   ~FloatingWindow() override;
   void setStaysOnTopFlag();
   void removeStaysOnTopFlag();

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidSINQ/PoldiFitPeaks2D.h"
 
 #include "MantidAPI/Axis.h"
@@ -9,20 +15,21 @@
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Crystal/UnitCell.h"
 #include "MantidKernel/ListValidator.h"
 
 #include "MantidSINQ/PoldiUtilities/IPoldiFunction1D.h"
 #include "MantidSINQ/PoldiUtilities/Poldi2DFunction.h"
-#include "MantidSINQ/PoldiUtilities/PoldiInstrumentAdapter.h"
-#include "MantidSINQ/PoldiUtilities/PoldiDeadWireDecorator.h"
 #include "MantidSINQ/PoldiUtilities/PoldiDGrid.h"
+#include "MantidSINQ/PoldiUtilities/PoldiDeadWireDecorator.h"
+#include "MantidSINQ/PoldiUtilities/PoldiInstrumentAdapter.h"
+#include "MantidSINQ/PoldiUtilities/PoldiPeakCollection.h"
 #include "MantidSINQ/PoldiUtilities/PoldiSpectrumDomainFunction.h"
 #include "MantidSINQ/PoldiUtilities/PoldiSpectrumLinearBackground.h"
 #include "MantidSINQ/PoldiUtilities/PoldiSpectrumPawleyFunction.h"
-#include "MantidSINQ/PoldiUtilities/PoldiPeakCollection.h"
 
 #include "boost/make_shared.hpp"
 
@@ -95,7 +102,7 @@ PoldiFitPeaks2D::getPeakCollectionsFromInput() const {
   if (peakTable) {
     try {
       peakCollections.push_back(getPeakCollection(peakTable));
-    } catch (std::runtime_error) {
+    } catch (const std::runtime_error &) {
       // do nothing
     }
 
@@ -115,7 +122,7 @@ PoldiFitPeaks2D::getPeakCollectionsFromInput() const {
       if (peakTable) {
         try {
           peakCollections.push_back(getPeakCollection(peakTable));
-        } catch (std::runtime_error) {
+        } catch (const std::runtime_error &) {
           // do nothing
         }
       }
@@ -320,7 +327,7 @@ std::vector<PoldiPeakCollection_sptr> PoldiFitPeaks2D::getCountPeakCollections(
           getPeakCollectionFromFunction(localFunction);
 
       countPeakCollections.push_back(getCountPeakCollection(normalizedPeaks));
-    } catch (std::invalid_argument) {
+    } catch (const std::invalid_argument &) {
       // not a Poldi2DFunction - skip (the background functions)
     }
 
@@ -857,7 +864,7 @@ MatrixWorkspace_sptr PoldiFitPeaks2D::get1DSpectrum(
   }
 
   PoldiAbstractDetector_sptr detector(new PoldiDeadWireDecorator(
-      workspace->getInstrument(), m_poldiInstrument->detector()));
+      workspace->detectorInfo(), m_poldiInstrument->detector()));
   std::vector<int> indices = detector->availableElements();
 
   // Create the grid for the diffractogram and corresponding domain/values
@@ -885,8 +892,8 @@ PoldiFitPeaks2D::getQSpectrum(const FunctionDomain1D &domain,
   MatrixWorkspace_sptr ws1D = WorkspaceFactory::Instance().create(
       "Workspace2D", 1, domain.size(), values.size());
 
-  MantidVec &xData = ws1D->dataX(0);
-  MantidVec &yData = ws1D->dataY(0);
+  auto &xData = ws1D->mutableX(0);
+  auto &yData = ws1D->mutableY(0);
   size_t offset = values.size() - 1;
   for (size_t i = 0; i < values.size(); ++i) {
     xData[offset - i] = Conversions::dToQ(domain[i]);
@@ -1136,7 +1143,7 @@ void PoldiFitPeaks2D::setDeltaTFromWorkspace(
     throw std::invalid_argument("MatrixWorkspace does not contain any data.");
   }
 
-  MantidVec xData = matrixWorkspace->readX(0);
+  auto &xData = matrixWorkspace->x(0);
 
   if (xData.size() < 2) {
     throw std::invalid_argument(
@@ -1145,7 +1152,7 @@ void PoldiFitPeaks2D::setDeltaTFromWorkspace(
 
   // difference between first and second x-value is assumed to be the bin
   // width.
-  setDeltaT(matrixWorkspace->readX(0)[1] - matrixWorkspace->readX(0)[0]);
+  setDeltaT(matrixWorkspace->x(0)[1] - matrixWorkspace->x(0)[0]);
 }
 
 /**
@@ -1207,9 +1214,10 @@ void PoldiFitPeaks2D::init() {
   declareProperty("LinearBackgroundParameter", 0.0,
                   "Initial value of linear background.");
 
-  declareProperty("MaximumIterations", 0, "Maximum number of iterations for "
-                                          "the fit. Use 0 to calculate "
-                                          "2D-spectrum without fitting.");
+  declareProperty("MaximumIterations", 0,
+                  "Maximum number of iterations for "
+                  "the fit. Use 0 to calculate "
+                  "2D-spectrum without fitting.");
 
   declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
@@ -1313,7 +1321,7 @@ void PoldiFitPeaks2D::exec() {
           ITableWorkspace_sptr cell =
               getRefinedCellParameters(poldi2DFunction->getFunction(i));
           cells.push_back(cell);
-        } catch (std::invalid_argument) {
+        } catch (const std::invalid_argument &) {
           // do nothing
         }
       }

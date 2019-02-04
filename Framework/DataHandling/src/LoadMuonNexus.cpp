@@ -1,28 +1,37 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadMuonNexus.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/ConfigService.h"
-#include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/Detector.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/Detector.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/OptionalBool.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/UnitFactory.h"
 
-#include <Poco/Path.h>
-#include <limits>
-#include <cmath>
-#include <boost/shared_ptr.hpp>
 #include "MantidNexus/MuonNexusReader.h"
 #include "MantidNexus/NexusClasses.h"
+#include <Poco/Path.h>
+#include <boost/shared_ptr.hpp>
+#include <cmath>
+#include <limits>
+// clang-format off
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
+// clang-format on
 
 namespace Mantid {
 namespace DataHandling {
@@ -54,11 +63,13 @@ void LoadMuonNexus::init() {
   auto mustBePositive = boost::make_shared<BoundedValidator<int64_t>>();
   mustBePositive->setLower(1);
   declareProperty("SpectrumMin", static_cast<int64_t>(EMPTY_INT()),
-                  mustBePositive, "Index number of the first spectrum to read\n"
-                                  "(default 1)");
+                  mustBePositive,
+                  "Index number of the first spectrum to read\n"
+                  "(default 1)");
   declareProperty("SpectrumMax", static_cast<int64_t>(EMPTY_INT()),
-                  mustBePositive, "Index of last spectrum to read\n"
-                                  "(default the last spectrum)");
+                  mustBePositive,
+                  "Index of last spectrum to read\n"
+                  "(default the last spectrum)");
 
   declareProperty(make_unique<ArrayProperty<specnum_t>>("SpectrumList"),
                   "Array, or comma separated list, of indexes of spectra to\n"

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -21,7 +27,14 @@ namespace FuncMinimisers {
 namespace {
 // Get a reference to the logger
 Kernel::Logger g_log("LevenbergMarquardtMinimizer");
+
+bool cannotReachSpecifiedToleranceInF(int errorCode) {
+  return errorCode == GSL_ETOLF;
 }
+bool cannotReachSpecifiedToleranceInX(int errorCode) {
+  return errorCode == GSL_ETOLX;
+}
+} // namespace
 
 // clang-format off
 DECLARE_FUNCMINIMIZER(LevenbergMarquardtMinimizer, Levenberg-Marquardt)
@@ -30,12 +43,14 @@ DECLARE_FUNCMINIMIZER(LevenbergMarquardtMinimizer, Levenberg-Marquardt)
 LevenbergMarquardtMinimizer::LevenbergMarquardtMinimizer()
     : m_data(nullptr), gslContainer(), m_gslSolver(nullptr), m_function(),
       m_absError(1e-4), m_relError(1e-4) {
-  declareProperty("AbsError", m_absError, "Absolute error allowed for "
-                                          "parameters - a stopping parameter "
-                                          "in success.");
-  declareProperty("RelError", m_relError, "Relative error allowed for "
-                                          "parameters - a stopping parameter "
-                                          "in success.");
+  declareProperty("AbsError", m_absError,
+                  "Absolute error allowed for "
+                  "parameters - a stopping parameter "
+                  "in success.");
+  declareProperty("RelError", m_relError,
+                  "Relative error allowed for "
+                  "parameters - a stopping parameter "
+                  "in success.");
 }
 
 void LevenbergMarquardtMinimizer::initialize(
@@ -45,7 +60,7 @@ void LevenbergMarquardtMinimizer::initialize(
       boost::dynamic_pointer_cast<CostFunctions::CostFuncLeastSquares>(
           costFunction);
   if (leastSquares) {
-    m_data = new GSL_FitData(leastSquares);
+    m_data = std::make_unique<GSL_FitData>(leastSquares);
   } else {
     throw std::runtime_error("LevenbergMarquardt can only be used with Least "
                              "squares cost function.");
@@ -58,9 +73,10 @@ void LevenbergMarquardtMinimizer::initialize(
   gslContainer.f = &gsl_f;
   gslContainer.df = &gsl_df;
   gslContainer.fdf = &gsl_fdf;
+
   gslContainer.n = m_data->n;
   gslContainer.p = m_data->p;
-  gslContainer.params = m_data;
+  gslContainer.params = m_data.get();
 
   // setup GSL solver
   m_gslSolver = gsl_multifit_fdfsolver_alloc(T, m_data->n, m_data->p);
@@ -77,9 +93,6 @@ void LevenbergMarquardtMinimizer::initialize(
 }
 
 LevenbergMarquardtMinimizer::~LevenbergMarquardtMinimizer() {
-  if (m_data) {
-    delete m_data;
-  }
   if (m_gslSolver) {
     gsl_multifit_fdfsolver_free(m_gslSolver);
   }
@@ -114,12 +127,15 @@ bool LevenbergMarquardtMinimizer::iterate(size_t) {
 
   if (retVal && retVal != GSL_CONTINUE) {
     m_errorString = gsl_strerror(retVal);
+    if (cannotReachSpecifiedToleranceInF(retVal)) {
+      m_errorString = "Changes in function value are too small";
+    } else if (cannotReachSpecifiedToleranceInX(retVal)) {
+      m_errorString = "Changes in parameter value are too small";
+    }
     return false;
   }
 
   retVal = hasConverged();
-  m_errorString = gsl_strerror(retVal);
-
   return retVal != GSL_SUCCESS;
 }
 

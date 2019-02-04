@@ -1,13 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_GEOMETRY_XMLLOGFILETEST_H_
 #define MANTID_GEOMETRY_XMLLOGFILETEST_H_
 
-#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidGeometry/Instrument/XMLInstrumentParameter.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Timer.h"
-#include <cxxtest/TestSuite.h>
-#include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/shared_ptr.hpp>
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Mantid::Geometry;
@@ -15,7 +22,7 @@ using namespace Mantid::Kernel;
 
 class XMLInstrumentParameterTest : public CxxTest::TestSuite {
 private:
-  typedef boost::shared_ptr<XMLInstrumentParameter> XMLInstrumentParameter_sptr;
+  using XMLInstrumentParameter_sptr = boost::shared_ptr<XMLInstrumentParameter>;
 
   /**
   Construction logic for the XMLInstrumentParameter type isn't great, so this
@@ -36,7 +43,7 @@ private:
     std::string penaltyFactor;
     const std::string fitFunc;
     const std::string eq;
-    const Geometry::IComponent *comp = NULL;
+    const Geometry::IComponent *comp = nullptr;
     double angleConvertConst = 0.0;
 
     return boost::shared_ptr<XMLInstrumentParameter>(new XMLInstrumentParameter(
@@ -171,7 +178,7 @@ public:
     XMLInstrumentParameter testPar(
         "logfileID", "value", boost::make_shared<Interpolation>(), "formula",
         "sourceFU", "resultFU", "testPar", "aType", "noTie", constr,
-        penaltyFactor, "aFitFunc", "FilterBy", "eqTo", NULL, 0.0,
+        penaltyFactor, "aFitFunc", "FilterBy", "eqTo", nullptr, 0.0,
         "test string.     Long test string.");
 
     TS_ASSERT_EQUALS(testPar.m_description, "test string. Long test string.");

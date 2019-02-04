@@ -1,19 +1,26 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef CLONEWORKSPACETEST_H_
 #define CLONEWORKSPACETEST_H_
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/CloneWorkspace.h"
+#include "MantidAlgorithms/CompareWorkspaces.h"
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidAlgorithms/CheckWorkspacesMatch.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidDataObjects/MDEventFactory.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidTestHelpers/MDEventsTestHelper.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::Geometry;
@@ -70,21 +77,20 @@ public:
         "Dx vectors should remain shared between spectra after CloneWorkspace",
         out->sharedDx(0), out->sharedDx(1));
 
-    // Best way to test this is to use the CheckWorkspacesMatch algorithm
-    Mantid::Algorithms::CheckWorkspacesMatch checker;
+    // Best way to test this is to use the CompareWorkspaces algorithm
+    Mantid::Algorithms::CompareWorkspaces checker;
     checker.initialize();
     checker.setPropertyValue("Workspace1", "in");
     checker.setPropertyValue("Workspace2", "out");
     checker.execute();
 
-    TS_ASSERT_EQUALS(checker.getPropertyValue("Result"),
-                     checker.successString());
+    TS_ASSERT(checker.getProperty("Result"));
   }
 
   void testExecEvent() {
     // First make the algorithm
     EventWorkspace_sptr ew =
-        WorkspaceCreationHelper::CreateEventWorkspace(100, 60, 50);
+        WorkspaceCreationHelper::createEventWorkspace(100, 60, 50);
     AnalysisDataService::Instance().addOrReplace("in_event", ew);
 
     Mantid::Algorithms::CloneWorkspace alg;
@@ -94,15 +100,14 @@ public:
     TS_ASSERT(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    // Best way to test this is to use the CheckWorkspacesMatch algorithm
-    Mantid::Algorithms::CheckWorkspacesMatch checker;
+    // Best way to test this is to use the CompareWorkspaces algorithm
+    Mantid::Algorithms::CompareWorkspaces checker;
     checker.initialize();
     checker.setPropertyValue("Workspace1", "in_event");
     checker.setPropertyValue("Workspace2", "out_event");
     checker.execute();
 
-    TS_ASSERT_EQUALS(checker.getPropertyValue("Result"),
-                     checker.successString());
+    TS_ASSERT(checker.getProperty("Result"));
   }
 
   /** Test is not full, see CloneMDWorkspaceTest */
@@ -147,7 +152,7 @@ public:
 
   void test_group() {
     WorkspaceGroup_const_sptr ingroup =
-        WorkspaceCreationHelper::CreateWorkspaceGroup(3, 1, 1, "grouptoclone");
+        WorkspaceCreationHelper::createWorkspaceGroup(3, 1, 1, "grouptoclone");
     Mantid::Algorithms::CloneWorkspace alg;
     alg.initialize();
     alg.setPropertyValue("InputWorkspace", "grouptoclone");
@@ -165,19 +170,19 @@ public:
     // Try to get the first member
     TS_ASSERT_THROWS_NOTHING(out1 = outgroup->getItem(0))
     // Check its name
-    TS_ASSERT_EQUALS(out1->name(), "clonedgroup_1")
+    TS_ASSERT_EQUALS(out1->getName(), "clonedgroup_1")
     // Check it is indeed a different workspace
     TS_ASSERT_DIFFERS(out1, ingroup->getItem(0))
     // Try to get the second member
     TS_ASSERT_THROWS_NOTHING(out2 = outgroup->getItem(1))
     // Check its name
-    TS_ASSERT_EQUALS(out2->name(), "clonedgroup_2")
+    TS_ASSERT_EQUALS(out2->getName(), "clonedgroup_2")
     // Check it is indeed a different workspace
     TS_ASSERT_DIFFERS(out2, ingroup->getItem(1))
     // Try to get the third member
     TS_ASSERT_THROWS_NOTHING(out3 = outgroup->getItem(2))
     // Check its name
-    TS_ASSERT_EQUALS(out3->name(), "clonedgroup_3")
+    TS_ASSERT_EQUALS(out3->getName(), "clonedgroup_3")
     // Check it is indeed a different workspace
     TS_ASSERT_DIFFERS(out3, ingroup->getItem(2))
 
@@ -185,7 +190,7 @@ public:
   }
 
   /** Test cloning a TableWorkspace
-  */
+   */
   void test_exec_TableWorkspace() {
     // 1. Create input table workspace
     auto inpWS = boost::make_shared<TableWorkspace>();

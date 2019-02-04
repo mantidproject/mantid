@@ -1,13 +1,24 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef STARTREMOTETRANSACTION_H_
 #define STARTREMOTETRANSACTION_H_
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 
 namespace Mantid {
 namespace RemoteAlgorithms {
 
-class DLLExport StartRemoteTransaction : public Mantid::API::Algorithm {
+class DLLExport StartRemoteTransaction : public Mantid::API::Algorithm,
+                                         public API::DeprecatedAlgorithm {
 public:
+  /// Constructor
+  StartRemoteTransaction() { this->useAlgorithm("StartRemoteTransaction", 2); }
+
   /// Algorithm's name
   const std::string name() const override { return "StartRemoteTransaction"; }
   /// Summary of algorithms purpose

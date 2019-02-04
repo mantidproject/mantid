@@ -1,8 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/CalculatePeaksHKL.h"
-#include "MantidGeometry/Crystal/IndexingUtils.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidAPI/Sample.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidGeometry/Crystal/IndexingUtils.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
@@ -52,7 +58,7 @@ void CalculatePeaksHKL::exec() {
   const int n_peaks = ws->getNumberPeaks();
 
   OrientedLattice o_lattice = ws->mutableSample().getOrientedLattice();
-  Matrix<double> UB = o_lattice.getUB();
+  const Matrix<double> &UB = o_lattice.getUB();
 
   DblMatrix UB_inverse(UB);
 

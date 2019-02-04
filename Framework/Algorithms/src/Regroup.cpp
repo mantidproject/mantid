@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -16,16 +22,19 @@
 #include <numeric>
 
 namespace Mantid {
+using HistogramData::HistogramE;
+using HistogramData::HistogramX;
+using HistogramData::HistogramY;
 namespace Algorithms {
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(Regroup)
 
 using namespace Kernel;
-using API::WorkspaceProperty;
-using API::MatrixWorkspace_sptr;
-using API::MatrixWorkspace_const_sptr;
 using API::MatrixWorkspace;
+using API::MatrixWorkspace_const_sptr;
+using API::MatrixWorkspace_sptr;
+using API::WorkspaceProperty;
 
 /// Initialisation method. Declares properties to be used in algorithm.
 void Regroup::init() {
@@ -57,7 +66,7 @@ void Regroup::exec() {
   MatrixWorkspace_const_sptr inputW = getProperty("InputWorkspace");
 
   // can work only if all histograms have the same boundaries
-  if (!API::WorkspaceHelpers::commonBoundaries(inputW)) {
+  if (!API::WorkspaceHelpers::commonBoundaries(*inputW)) {
     g_log.error("Histograms with different boundaries");
     throw std::runtime_error("Histograms with different boundaries");
   }
@@ -66,11 +75,11 @@ void Regroup::exec() {
 
   int histnumber = static_cast<int>(inputW->getNumberHistograms());
   HistogramData::BinEdges XValues_new(0);
-  const MantidVec &XValues_old = inputW->readX(0);
+  auto &XValues_old = inputW->x(0);
   std::vector<int> xoldIndex; // indeces of new x in XValues_old
   // create new output X axis
-  int ntcnew =
-      newAxis(rb_params, XValues_old, XValues_new.mutableRawData(), xoldIndex);
+  int ntcnew = newAxis(rb_params, XValues_old.rawData(),
+                       XValues_new.mutableRawData(), xoldIndex);
 
   // make output Workspace the same type is the input, but with new length of
   // signal array
@@ -82,13 +91,13 @@ void Regroup::exec() {
     progress_step = 1;
   for (int hist = 0; hist < histnumber; hist++) {
     // get const references to input Workspace arrays (no copying)
-    const MantidVec &XValues = inputW->readX(hist);
-    const MantidVec &YValues = inputW->readY(hist);
-    const MantidVec &YErrors = inputW->readE(hist);
+    auto &XValues = inputW->x(hist);
+    auto &YValues = inputW->y(hist);
+    auto &YErrors = inputW->e(hist);
 
     // get references to output workspace data (no copying)
-    MantidVec &YValues_new = outputW->dataY(hist);
-    MantidVec &YErrors_new = outputW->dataE(hist);
+    auto &YValues_new = outputW->mutableY(hist);
+    auto &YErrors_new = outputW->mutableE(hist);
 
     // output data arrays are implicitly filled by function
     rebin(XValues, YValues, YErrors, xoldIndex, YValues_new, YErrors_new, dist);
@@ -120,21 +129,18 @@ void Regroup::exec() {
 /** Regroup the data according to new output X array
  *
  * @param xold :: old x array of data
- * @param xoldIndex :: indeces of new x in XValues_old
  * @param yold :: old y array of data
- * @param ynew :: new y array of data
  * @param eold :: old error array of data
+ * @param xoldIndex :: indeces of new x in XValues_old
+ * @param ynew :: new y array of data
  * @param enew :: new error array of data
  * @param distribution :: flag defining if distribution data (1) or not (0)
  * @throw runtime_error Thrown if algorithm cannot execute
  * @throw invalid_argument Thrown if input to function is incorrect
  **/
-void Regroup::rebin(const std::vector<double> &xold,
-                    const std::vector<double> &yold,
-                    const std::vector<double> &eold,
-                    const std::vector<int> &xoldIndex,
-                    std::vector<double> &ynew, std::vector<double> &enew,
-                    bool distribution) {
+void Regroup::rebin(const HistogramX &xold, const HistogramY &yold,
+                    const HistogramE &eold, std::vector<int> &xoldIndex,
+                    HistogramY &ynew, HistogramE &enew, bool distribution) {
 
   for (int i = 0; i < int(xoldIndex.size() - 1); i++) {
 
@@ -232,5 +238,5 @@ int Regroup::newAxis(const std::vector<double> &params,
   // return( (ibound == ibounds) && (istep == isteps) ? inew : -1 );
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

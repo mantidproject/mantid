@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -7,11 +13,11 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/RawCountValidator.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/Diffraction.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/V3D.h"
@@ -32,53 +38,6 @@ namespace Algorithms {
 DECLARE_ALGORITHM(AlignDetectors)
 
 namespace { // anonymous namespace
-
-/// Applies the equation d=(TOF-tzero)/difc
-struct func_difc_only {
-  explicit func_difc_only(const double difc) : factor(1. / difc) {}
-
-  double operator()(const double tof) const { return factor * tof; }
-
-  /// 1./difc
-  double factor;
-};
-
-/// Applies the equation d=(TOF-tzero)/difc
-struct func_difc_and_tzero {
-  func_difc_and_tzero(const double difc, const double tzero)
-      : factor(1. / difc), offset(-1. * tzero / difc) {}
-
-  double operator()(const double tof) const { return factor * tof + offset; }
-
-  /// 1./difc
-  double factor;
-  /// -tzero/difc
-  double offset;
-};
-
-struct func_difa {
-  func_difa(const double difc, const double difa, const double tzero) {
-    factor1 = -0.5 * difc / difa;
-    factor2 = 1. / difa;
-    factor3 = (factor1 * factor1) - (tzero / difa);
-  }
-
-  double operator()(const double tof) const {
-    double second = std::sqrt((tof * factor2) + factor3);
-    if (second < factor1)
-      return factor1 - second;
-    else {
-      return factor1 + second;
-    }
-  }
-
-  /// -0.5*difc/difa
-  double factor1;
-  /// 1/difa
-  double factor2;
-  /// (0.5*difc/difa)^2 - (tzero/difa)
-  double factor3;
-};
 
 class ConversionFactors {
 public:
@@ -108,15 +67,7 @@ public:
       tzero = norm * tzero;
     }
 
-    if (difa == 0.) {
-      if (tzero == 0.) {
-        return func_difc_only(difc);
-      } else {
-        return func_difc_and_tzero(difc, tzero);
-      }
-    } else { // difa != 0.
-      return func_difa(difc, difa, tzero);
-    }
+    return Kernel::Diffraction::getTofToDConversionFunc(difc, difa, tzero);
   }
 
 private:
@@ -160,12 +111,7 @@ const std::string AlignDetectors::summary() const {
 }
 
 /// (Empty) Constructor
-AlignDetectors::AlignDetectors() : m_numberOfSpectra(0) {
-  this->tofToDmap = nullptr;
-}
-
-/// Destructor
-AlignDetectors::~AlignDetectors() { delete this->tofToDmap; }
+AlignDetectors::AlignDetectors() : m_numberOfSpectra(0) {}
 
 void AlignDetectors::init() {
   auto wsValidator = boost::make_shared<CompositeValidator>();
@@ -365,11 +311,22 @@ void AlignDetectors::align(const ConversionFactors &converter,
   if (outputWS.getTofMin() < 0.) {
     std::stringstream msg;
     msg << "Something wrong with the calibration. Negative minimum d-spacing "
-           "created. d_min = " << outputWS.getTofMin() << " d_max "
-        << outputWS.getTofMax();
+           "created. d_min = "
+        << outputWS.getTofMin() << " d_max " << outputWS.getTofMax();
     g_log.warning(msg.str());
   }
   outputWS.clearMRU();
+}
+
+Parallel::ExecutionMode AlignDetectors::getParallelExecutionMode(
+    const std::map<std::string, Parallel::StorageMode> &storageModes) const {
+  using namespace Parallel;
+  const auto inputMode = storageModes.at("InputWorkspace");
+  const auto &calibrationMode = storageModes.find("CalibrationWorkspace");
+  if (calibrationMode != storageModes.end())
+    if (calibrationMode->second != StorageMode::Cloned)
+      return ExecutionMode::Invalid;
+  return getCorrespondingExecutionMode(inputMode);
 }
 
 } // namespace Algorithms

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_KERNEL_THREADSAFELOGSTREAM
 #define MANTID_KERNEL_THREADSAFELOGSTREAM
 
@@ -5,25 +11,22 @@
 // Includes
 //--------------------------------------------
 #include "MantidKernel/DllConfig.h"
-#include <Poco/Logger.h>
-
-#ifdef _MSC_VER
-// Disable a flood of warnings about inheriting from std streams
-// See
-// http://connect.microsoft.com/VisualStudio/feedback/details/733720/inheriting-from-std-fstream-produces-c4250-warning
-#pragma warning(push)
-#pragma warning(disable : 4250)
-#endif
 
 #include <Poco/LogStream.h>
-#include <Poco/UnbufferedStreamBuf.h>
-
-#include <istream>
+#include <Poco/Message.h>
 #include <Poco/Thread.h>
+
+#include <iosfwd>
+#include <map>
 #include <mutex>
+#include <string>
+
+// Forward Declare
+namespace Poco {
+class Logger;
+}
 
 namespace Mantid {
-
 namespace Kernel {
 /**
 
@@ -35,27 +38,6 @@ namespace Kernel {
 
    @author Martyn Gigg, Tessella Support Services plc
    @date 13/04/2010
-
-   Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-   National Laboratory & European Spallation Source
-
-   This file is part of Mantid.
-
-   Mantid is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 3 of the License, or
-   (at your option) any later version.
-
-   Mantid is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-
-   You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-   File change history is stored at: <https://github.com/mantidproject/mantid>.
-   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_KERNEL_DLL ThreadSafeLogStreamBuf : public Poco::LogStreamBuf {
 public:
@@ -163,11 +145,7 @@ public:
   /// Sets the priority for log messages.
   ThreadSafeLogStream &priority(Poco::Message::Priority priority);
 };
-}
-}
-
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
+} // namespace Kernel
+} // namespace Mantid
 
 #endif // MANTID_KERNEL_THREADSAFELOGSTREAM

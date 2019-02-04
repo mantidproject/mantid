@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAOBJECTS_REBINNEDOUTPUT_H_
 #define MANTID_DATAOBJECTS_REBINNEDOUTPUT_H_
 
@@ -16,34 +22,18 @@ namespace DataObjects {
   algorithms.
 
   @date 2012-04-05
-
-  Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
-
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>
-  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport RebinnedOutput : public Workspace2D {
 public:
-  RebinnedOutput() = default;
+  RebinnedOutput() : m_finalized(false) {}
+  RebinnedOutput(bool finalized) : m_finalized(finalized) {}
   /// Returns a clone of the workspace
   std::unique_ptr<RebinnedOutput> clone() const {
     return std::unique_ptr<RebinnedOutput>(doClone());
+  }
+  /// Returns a default-initialized clone of the workspace
+  std::unique_ptr<RebinnedOutput> cloneEmpty() const {
+    return std::unique_ptr<RebinnedOutput>(doCloneEmpty());
   }
   RebinnedOutput &operator=(const RebinnedOutput &) = delete;
 
@@ -57,7 +47,11 @@ public:
   virtual const MantidVec &dataF(const std::size_t index) const;
 
   /// Create final representation
-  void finalize(bool hasSqrdErrs = true);
+  void finalize(bool hasSqrdErrs = true, bool force = false);
+  void unfinalize(bool hasSqrdErrs = false, bool force = false);
+
+  /// Returns if finalize has been called
+  bool isFinalized() const { return m_finalized; }
 
   /// Returns a read-only (i.e. const) reference to the specified F array
   const MantidVec &readF(std::size_t const index) const;
@@ -72,18 +66,25 @@ protected:
   /// Called by initialize() in MatrixWorkspace
   void init(const std::size_t &NVectors, const std::size_t &XLength,
             const std::size_t &YLength) override;
+  void init(const HistogramData::Histogram &histogram) override;
 
   /// A vector that holds the 1D vectors for the fractional area.
   std::vector<MantidVec> fracArea;
 
+  /// Flag to indicate if finalize has been called, and if errors/variance used
+  bool m_finalized;
+
 private:
   RebinnedOutput *doClone() const override { return new RebinnedOutput(*this); }
+  RebinnedOutput *doCloneEmpty() const override {
+    return new RebinnedOutput(m_finalized);
+  }
 };
 
 /// shared pointer to the RebinnedOutput class
-typedef boost::shared_ptr<RebinnedOutput> RebinnedOutput_sptr;
+using RebinnedOutput_sptr = boost::shared_ptr<RebinnedOutput>;
 /// shared pointer to a const RebinnedOutput
-typedef boost::shared_ptr<const RebinnedOutput> RebinnedOutput_const_sptr;
+using RebinnedOutput_const_sptr = boost::shared_ptr<const RebinnedOutput>;
 
 } // namespace DataObjects
 } // namespace Mantid

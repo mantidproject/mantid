@@ -1,8 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CRYSTAL_AnvredCorrectionTEST_H_
 #define MANTID_CRYSTAL_AnvredCorrectionTEST_H_
 
-#include "MantidCrystal/AnvredCorrection.h"
 #include "MantidAPI/Axis.h"
+#include "MantidCrystal/AnvredCorrection.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataHandling/MoveInstrumentComponent.h"
 #include "MantidDataHandling/RotateInstrumentComponent.h"
@@ -12,13 +18,8 @@
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/FacilityHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include <boost/random/linear_congruential.hpp>
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/uniform_int.hpp>
-#include <boost/random/uniform_real.hpp>
-#include <boost/random/variate_generator.hpp>
-#include <math.h>
 #include <cxxtest/TestSuite.h>
+#include <math.h>
 
 using namespace Mantid;
 using namespace Mantid::Crystal;
@@ -103,7 +104,7 @@ void do_test_events(MatrixWorkspace_sptr workspace, bool ev,
     TS_ASSERT_DELTA(y_actual[2], 0.0656, 0.0001);
   }
 }
-}
+} // namespace
 
 class AnvredCorrectionTest : public CxxTest::TestSuite {
 public:

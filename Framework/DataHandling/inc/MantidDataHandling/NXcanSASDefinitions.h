@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAHANDLING_NXCANSASDEFINITIONS_H_
 #define MANTID_DATAHANDLING_NXCANSASDEFINITIONS_H_
 
@@ -94,6 +100,7 @@ const std::string sasProcessName = "name";
 const std::string sasProcessNameValue = "Mantid_generated_NXcanSAS";
 const std::string sasProcessDate = "date";
 const std::string sasProcessTermSvn = "svn";
+const std::string sasProcessTermCan = "can_trans_run";
 const std::string sasProcessTermUserFile = "user_file";
 const std::string sasProcessUserFileInLogs = "UserFile";
 
@@ -110,7 +117,7 @@ const std::string sasTransmissionSpectrumTimeStampAttr = "timestamp";
 const std::string sasTransmissionSpectrumLambda = "lambda";
 const std::string sasTransmissionSpectrumT = "T";
 const std::string sasTransmissionSpectrumTdev = "Tdev";
-}
-}
-}
+} // namespace NXcanSAS
+} // namespace DataHandling
+} // namespace Mantid
 #endif

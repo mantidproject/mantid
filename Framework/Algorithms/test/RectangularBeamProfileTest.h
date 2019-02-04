@@ -1,11 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_RECTANGULARBEAMPROFILETEST_H_
 #define MANTID_ALGORITHMS_RECTANGULARBEAMPROFILETEST_H_
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/Sample.h"
 #include "MantidAlgorithms/SampleCorrections/RectangularBeamProfile.h"
-#include "MonteCarloTesting.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
+
+#include "MonteCarloTesting.h"
 
 using Mantid::Algorithms::RectangularBeamProfile;
 
@@ -79,12 +88,42 @@ public:
     TS_ASSERT_EQUALS(V3D(1.0, 0, 0), ray.unitDir);
   }
 
+  void test_DefineActiveRegion_beam_larger_than_sample() {
+    using Mantid::API::Sample;
+    using Mantid::Kernel::V3D;
+    const double width(3.3), height(6.9);
+    const V3D center;
+    RectangularBeamProfile profile(createTestFrame(), center, width, height);
+    Sample testSample;
+    testSample.setShape(ComponentCreationHelper::createSphere(0.5));
+
+    auto region = profile.defineActiveRegion(testSample);
+    TS_ASSERT(region.isNonNull());
+    TS_ASSERT_EQUALS(V3D(-0.5, -0.5, -0.5), region.minPoint());
+    TS_ASSERT_EQUALS(V3D(0.5, 0.5, 0.5), region.maxPoint());
+  }
+
+  void test_DefineActiveRegion_beam_smaller_than_sample() {
+    using Mantid::API::Sample;
+    using Mantid::Kernel::V3D;
+    const double width(0.1), height(0.2);
+    const V3D center;
+    RectangularBeamProfile profile(createTestFrame(), center, width, height);
+    Sample testSample;
+    testSample.setShape(ComponentCreationHelper::createSphere(0.5));
+
+    auto region = profile.defineActiveRegion(testSample);
+    TS_ASSERT(region.isNonNull());
+    TS_ASSERT_EQUALS(V3D(-0.5, -0.05, -0.1), region.minPoint());
+    TS_ASSERT_EQUALS(V3D(0.5, 0.05, 0.1), region.maxPoint());
+  }
+
 private:
   Mantid::Geometry::ReferenceFrame createTestFrame() {
-    using Mantid::Geometry::ReferenceFrame;
-    using Mantid::Geometry::PointingAlong;
     using Mantid::Geometry::Handedness;
-
+    using Mantid::Geometry::PointingAlong;
+    using Mantid::Geometry::ReferenceFrame;
+    // up = Z, beam = X
     return ReferenceFrame(PointingAlong::Z, PointingAlong::X, Handedness::Right,
                           "source");
   }

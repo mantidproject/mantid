@@ -1,10 +1,13 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidWorkflowAlgorithms/EQSANSPatchSensitivity.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
@@ -24,9 +27,10 @@ void EQSANSPatchSensitivity::init() {
   declareProperty(
       make_unique<WorkspaceProperty<>>("PatchWorkspace", "", Direction::Input),
       "Workspace defining the patch. Masked detectors will be patched.");
-  declareProperty("UseLinearRegression", true, "If true, a linear regression "
-                                               "will be used instead of "
-                                               "computing the average");
+  declareProperty("UseLinearRegression", true,
+                  "If true, a linear regression "
+                  "will be used instead of "
+                  "computing the average");
   declareProperty("OutputMessage", "", Direction::Output);
 }
 
@@ -40,9 +44,9 @@ void EQSANSPatchSensitivity::exec() {
       inputWS->getInstrument()->getNumberParameter("number-of-y-pixels")[0]);
 
   const int numberOfSpectra = static_cast<int>(inputWS->getNumberHistograms());
-  // Need to get hold of the parameter map
-  Geometry::ParameterMap &pmap = inputWS->instrumentParameters();
 
+  auto &inSpectrumInfo = inputWS->mutableSpectrumInfo();
+  const auto &spectrumInfo = patchWS->spectrumInfo();
   // Loop over all tubes and patch as necessary
   for (int i = 0; i < nx_pixels; i++) {
     std::vector<int> patched_ids;
@@ -60,26 +64,24 @@ void EQSANSPatchSensitivity::exec() {
     for (int j = 0; j < ny_pixels; j++) {
       // EQSANS-specific: get detector ID from pixel coordinates
       int iDet = ny_pixels * i + j;
-      if (iDet > numberOfSpectra) {
+      if (iDet >= numberOfSpectra) {
         g_log.notice() << "Got an invalid detector ID " << iDet << '\n';
         continue;
       }
 
-      IDetector_const_sptr det = patchWS->getDetector(iDet);
       // If this detector is a monitor, skip to the next one
-      if (det->isMonitor())
+      if (spectrumInfo.isMonitor(iDet))
         continue;
 
       const MantidVec &YValues = inputWS->readY(iDet);
       const MantidVec &YErrors = inputWS->readE(iDet);
 
       // If this detector is masked, skip to the next one
-      if (det->isMasked())
+      if (spectrumInfo.isMasked(iDet))
         patched_ids.push_back(iDet);
       else {
-        IDetector_const_sptr sensitivityDet = inputWS->getDetector(iDet);
-        if (!sensitivityDet->isMasked()) {
-          double yPosition = det->getPos().Y();
+        if (!inSpectrumInfo.isMasked(iDet)) {
+          double yPosition = spectrumInfo.position(iDet).Y();
           totalUnmasked += YErrors[0] * YErrors[0] * YValues[0];
           errorUnmasked += YErrors[0] * YErrors[0];
           nUnmasked++;
@@ -105,34 +107,24 @@ void EQSANSPatchSensitivity::exec() {
       // Apply patch
       progress(0.91, "Applying patch");
       for (auto patched_id : patched_ids) {
-        const Geometry::ComponentID det =
-            inputWS->getDetector(patched_id)->getComponentID();
-        try {
-          if (det) {
-            MantidVec &YValues = inputWS->dataY(patched_id);
-            MantidVec &YErrors = inputWS->dataE(patched_id);
-            if (useRegression) {
-              YValues[0] = alpha + beta * det->getPos().Y();
-              YErrors[0] = error;
-            } else {
-              YValues[0] = average;
-              YErrors[0] = error;
-            }
-
-            pmap.addBool(det, "masked", false);
-          }
-        } catch (Kernel::Exception::NotFoundError &e) {
-          g_log.warning() << e.what() << " Found while setting mask bit\n";
+        if (!inSpectrumInfo.hasDetectors(patched_id)) {
+          g_log.warning() << "Spectrum " << patched_id
+                          << " has no detector, skipping (not clearing mask)\n";
+          continue;
         }
+        MantidVec &YValues = inputWS->dataY(patched_id);
+        MantidVec &YErrors = inputWS->dataE(patched_id);
+        if (useRegression) {
+          YValues[0] = alpha + beta * inSpectrumInfo.position(patched_id).Y();
+          YErrors[0] = error;
+        } else {
+          YValues[0] = average;
+          YErrors[0] = error;
+        }
+        inSpectrumInfo.setMasked(patched_id, false);
       }
     }
   }
-  /*
-  This rebuild request call, gives the workspace the opportunity to rebuild the
-  nearest neighbours map
-  and therefore pick up any detectors newly masked with this algorithm.
-  */
-  inputWS->rebuildNearestNeighbours();
 
   // Call Calculate efficiency to renormalize
   progress(0.91, "Renormalizing");

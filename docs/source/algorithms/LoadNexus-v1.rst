@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -53,7 +53,7 @@ Usage
    # Load LOQ histogram dataset
    ws = LoadNexus('LOQ49886.nxs')
 
-   print "The 1st x-value of the first spectrum is: " + str(ws.readX(0)[0])
+   print("The 1st x-value of the first spectrum is: {}".format(ws.readX(0)[0]))
 
 Output:
 
@@ -69,7 +69,7 @@ Output:
    # Load ISIS multiperiod muon MUSR dataset
    ws = LoadNexus('MUSR00015189.nxs')
 
-   print "The number of periods (entries) is: " + str(ws[0].getNumberOfEntries())
+   print("The number of periods (entries) is: {}".format(ws[0].getNumberOfEntries()))
 
 Output:
 
@@ -85,7 +85,7 @@ Output:
    # Load Mantid processed GEM data file
    ws = LoadNexus('focussed.nxs')
 
-   print "The number of histograms (spectra) is: " + str(ws.getNumberHistograms())
+   print("The number of histograms (spectra) is: {}".format(ws.getNumberHistograms()))
 
 Output:
 

@@ -1,5 +1,12 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/MedianDetectorTest.h"
 #include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidKernel/BoundedValidator.h"
 
 #include <cmath>
@@ -246,28 +253,33 @@ int MedianDetectorTest::maskOutliers(
     checkForMask = ((instrument->getSource() != nullptr) &&
                     (instrument->getSample() != nullptr));
   }
+  auto &spectrumInfo = countsWS->mutableSpectrumInfo();
 
   for (size_t i = 0; i < indexmap.size(); ++i) {
     std::vector<size_t> &hists = indexmap[i];
     double median = medianvec[i];
 
-    PARALLEL_FOR1(countsWS)
+    PARALLEL_FOR_IF(Kernel::threadSafe(*countsWS))
     for (int j = 0; j < static_cast<int>(hists.size()); ++j) { // NOLINT
       const double value = countsWS->y(hists[j])[0];
       if ((value == 0.) && checkForMask) {
-        const auto &detids = countsWS->getSpectrum(hists[j]).getDetectorIDs();
-        if (instrument->isDetectorMasked(detids)) {
+        if (spectrumInfo.hasDetectors(hists[j]) &&
+            spectrumInfo.isMasked(hists[j])) {
           numFailed -= 1; // it was already masked
         }
       }
       if ((value < out_lo * median) && (value > 0.0)) {
-        countsWS->maskWorkspaceIndex(hists[j]);
-        PARALLEL_ATOMIC
-        ++numFailed;
+        countsWS->getSpectrum(hists[j]).clearData();
+        PARALLEL_CRITICAL(setMasked) {
+          spectrumInfo.setMasked(hists[j], true);
+          ++numFailed;
+        }
       } else if (value > out_hi * median) {
-        countsWS->maskWorkspaceIndex(hists[j]);
-        PARALLEL_ATOMIC
-        ++numFailed;
+        countsWS->getSpectrum(hists[j]).clearData();
+        PARALLEL_CRITICAL(setMasked) {
+          spectrumInfo.setMasked(hists[j], true);
+          ++numFailed;
+        }
       }
     }
     PARALLEL_CHECK_INTERUPT_REGION
@@ -313,8 +325,9 @@ int MedianDetectorTest::doDetectorTests(
     checkForMask = ((instrument->getSource() != nullptr) &&
                     (instrument->getSample() != nullptr));
   }
+  const auto &spectrumInfo = countsWS->spectrumInfo();
 
-  PARALLEL_FOR2(countsWS, maskWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*countsWS, *maskWS))
   for (int j = 0; j < static_cast<int>(indexmap.size()); ++j) {
     std::vector<size_t> hists = indexmap.at(j);
     double median = medianvec.at(j);
@@ -331,14 +344,12 @@ int MedianDetectorTest::doDetectorTests(
                                  numSpec));
       }
 
-      if (checkForMask) {
-        const auto &detids =
-            countsWS->getSpectrum(hists.at(i)).getDetectorIDs();
-        if (instrument->isDetectorMasked(detids)) {
+      if (checkForMask && spectrumInfo.hasDetectors(hists.at(i))) {
+        if (spectrumInfo.isMasked(hists.at(i))) {
           maskWS->mutableY(hists.at(i))[0] = deadValue;
           continue;
         }
-        if (instrument->isMonitor(detids)) {
+        if (spectrumInfo.isMonitor(hists.at(i))) {
           // Don't include in calculation but don't mask it
           continue;
         }
@@ -373,5 +384,5 @@ int MedianDetectorTest::doDetectorTests(
   return numFailed;
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

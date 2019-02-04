@@ -1,8 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_GEOMETRY_PEAKTRANSFORMSELECTOR_H_
 #define MANTID_GEOMETRY_PEAKTRANSFORMSELECTOR_H_
 
-#include "MantidKernel/System.h"
 #include "MantidGeometry/Crystal/PeakTransformFactory.h"
+#include "MantidKernel/System.h"
 #include <set>
 
 namespace Mantid {
@@ -34,10 +40,10 @@ private:
   /// Disabled assigment operator
   PeakTransformSelector &operator=(const PeakTransformSelector &);
   /// Collection of candidate factories.
-  typedef std::set<PeakTransformFactory_sptr> Factories;
+  using Factories = std::set<PeakTransformFactory_sptr>;
   Factories m_candidateFactories;
 };
-}
-}
+} // namespace Geometry
+} // namespace Mantid
 
 #endif

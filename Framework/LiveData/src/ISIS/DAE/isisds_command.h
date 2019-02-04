@@ -20,8 +20,7 @@
 #ifndef ISISDS_COMMAND_H
 #define ISISDS_COMMAND_H
 
-typedef void (*isisds_error_report_t)(int status, int code,
-                                      const char *messsage);
+using isisds_error_report_t = void (*)(int, int, const char *);
 
 #define ISISDS_PORT 6789
 

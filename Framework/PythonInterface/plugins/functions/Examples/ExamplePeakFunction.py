@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name
 """
 This example reimplements a Gaussian fitting function. It is not meant to
@@ -175,6 +181,7 @@ class ExamplePeakFunction(IPeakFunction):
         """
         sigma = new_fwhm/(2.0*math.sqrt(2.0*math.log(2.0)))
         self.setParameter("Sigma",sigma)
+
 
 # Required to have Mantid recognise the new function
 FunctionFactory.subscribe(ExamplePeakFunction)

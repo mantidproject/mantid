@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MDALGORITHMS_MDPLANETEST_H_
 #define MANTID_MDALGORITHMS_MDPLANETEST_H_
 
 #include "MantidGeometry/MDGeometry/MDPlane.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
-#include <cxxtest/TestSuite.h>
 #include "MantidKernel/VMD.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Mantid::Geometry;

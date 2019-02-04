@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -40,9 +40,9 @@ Usage
     w = ws[0]
     # Check the conversion
     xaxis = w.getAxis(0).getUnit()
-    print "X axis =", xaxis.caption(), "/", xaxis.symbol()
-    print "Energy mode =", w.getEMode()
-    print "Workspace type =", w.id()
+    print("X axis = {} / {}".format(xaxis.caption(), xaxis.symbol()))
+    print("Energy mode = {}".format(w.getEMode()))
+    print("Workspace type = {}".format(w.id()))
 
 Output:
 
@@ -66,9 +66,9 @@ Output:
     w = ws[0]
     # Check the conversion
     xaxis = w.getAxis(0).getUnit()
-    print "X axis =", xaxis.caption(), "/", xaxis.symbol()
-    print "Energy mode =", w.getEMode()
-    print "Workspace type =", w.id()
+    print("X axis = {} / {}".format(xaxis.caption(), xaxis.symbol()))
+    print("Energy mode = {}".format(w.getEMode()))
+    print("Workspace type = {}".format(w.id()))
 
 Output:
 
@@ -90,8 +90,8 @@ histogram data.
                       IncidentBeamNormalisation="ByCurrent",
                       SofPhiEIsDistribution=False)
     w = ws[0]
-    print "Workspace type =", w.id()
-    print "Number of events =", w.getNumberEvents()
+    print("Workspace type = {}".format(w.id()))
+    print("Number of events = {}".format(w.getNumberEvents()))
 
 Output:
 
@@ -120,8 +120,8 @@ properties being used.
     ws = DgsReduction(SampleInputWorkspace=ws, SampleInputMonitorWorkspace=monitor,
                       IncidentBeamNormalisation="ByCurrent", SofPhiEIsDistribution=False)
     w = ws[0]
-    print "Workspace type =", w.id()
-    print "Number of events =", w.getNumberEvents()
+    print("Workspace type = {}".format(w.id()))
+    print("Number of events = {}".format(w.getNumberEvents()))
 
 Output:
 

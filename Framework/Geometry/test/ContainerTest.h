@@ -1,9 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_GEOMETRY_CANTEST_H_
 #define MANTID_GEOMETRY_CANTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
 #include "MantidGeometry/Instrument/Container.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/Rules.h"
 #include "MantidGeometry/Surfaces/Sphere.h"
 
@@ -37,46 +44,57 @@ public:
                       "</cylinder>";
     Container can(xml);
     TS_ASSERT_EQUALS(false, can.hasSampleShape());
-    TS_ASSERT_EQUALS(xml, can.getShapeXML());
   }
 
   void test_SetSampleShape_Allows_Creating_Sample_Shape_Object() {
-    using Mantid::Geometry::Object_sptr;
+    using Mantid::Geometry::IObject_sptr;
     auto can = createTestCan();
     can->setSampleShape("<samplegeometry><sphere id=\"shape\"> "
                         "<radius val=\"1.0\" /> "
                         "</sphere></samplegeometry>");
-    Object_sptr sampleShape;
+    IObject_sptr sampleShape;
     TS_ASSERT_THROWS_NOTHING(
         sampleShape = can->createSampleShape(Container::ShapeArgs()));
     TS_ASSERT(sampleShape->hasValidShape());
-    TS_ASSERT_DELTA(1.0, getSphereRadius(*sampleShape), 1e-10);
+    TS_ASSERT_DELTA(
+        1.0,
+        getSphereRadius(
+            dynamic_cast<const Mantid::Geometry::CSGObject &>(*sampleShape)),
+        1e-10);
   }
 
   void test_CreateSampleShape_Args_Override_Defaults() {
-    using Mantid::Geometry::Object_sptr;
+    using Mantid::Geometry::IObject_sptr;
     auto can = createTestCan();
     can->setSampleShape("<samplegeometry><sphere id=\"shape\"> "
                         "<radius val=\"1.0\" /> "
                         "</sphere></samplegeometry>");
-    Object_sptr sampleShape;
+    IObject_sptr sampleShape;
     Container::ShapeArgs args = {{"radius", 0.5}};
     TS_ASSERT_THROWS_NOTHING(sampleShape = can->createSampleShape(args));
     TS_ASSERT(sampleShape->hasValidShape());
-    TS_ASSERT_DELTA(0.5, getSphereRadius(*sampleShape), 1e-10);
+    TS_ASSERT_DELTA(
+        0.5,
+        getSphereRadius(
+            dynamic_cast<const Mantid::Geometry::CSGObject &>(*sampleShape)),
+        1e-10);
   }
 
   void test_CreateSampleShape_Args_Not_Matching_Do_Nothing() {
-    using Mantid::Geometry::Object_sptr;
+    using Mantid::Geometry::IObject_sptr;
     auto can = createTestCan();
     can->setSampleShape("<samplegeometry><sphere id=\"shape\"> "
                         "<radius val=\"1.0\" /> "
                         "</sphere></samplegeometry>");
-    Object_sptr sampleShape;
+    IObject_sptr sampleShape;
     Container::ShapeArgs args = {{"height", 0.5}};
     TS_ASSERT_THROWS_NOTHING(sampleShape = can->createSampleShape(args));
     TS_ASSERT(sampleShape->hasValidShape());
-    TS_ASSERT_DELTA(1.0, getSphereRadius(*sampleShape), 1e-10);
+    TS_ASSERT_DELTA(
+        1.0,
+        getSphereRadius(
+            dynamic_cast<const Mantid::Geometry::CSGObject &>(*sampleShape)),
+        1e-10);
   }
 
   // ---------------------------------------------------------------------------
@@ -100,9 +118,9 @@ private:
         "<height val =\"0.05\" />"
         "</cylinder></type>");
   }
-  double getSphereRadius(const Mantid::Geometry::Object &shape) {
-    using Mantid::Geometry::SurfPoint;
+  double getSphereRadius(const Mantid::Geometry::CSGObject &shape) {
     using Mantid::Geometry::Sphere;
+    using Mantid::Geometry::SurfPoint;
     auto topRule = shape.topRule();
     if (auto surfpoint = dynamic_cast<const SurfPoint *>(topRule)) {
       if (auto sphere = dynamic_cast<Sphere *>(surfpoint->getKey())) {

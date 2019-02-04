@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/IFunctionGeneral.h"
 
 namespace Mantid {
@@ -17,7 +23,7 @@ void IFunctionGeneral::function(const FunctionDomain &domain,
   try {
     auto &generalDomain = dynamic_cast<const FunctionDomainGeneral &>(domain);
     functionGeneral(generalDomain, values);
-  } catch (std::bad_cast) {
+  } catch (const std::bad_cast &) {
     throw std::invalid_argument(
         "Provided domain is not of type FunctionDomainGeneral.");
   }

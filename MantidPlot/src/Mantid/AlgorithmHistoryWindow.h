@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef ALGORITHMHISTORYWINDOW_H
 #define ALGORITHMHISTORYWINDOW_H
 
@@ -7,15 +13,15 @@
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/EnvironmentHistory.h"
-#include "MantidQtAPI/MantidDialog.h"
+#include "MantidQtWidgets/Common/MantidDialog.h"
 
-#include <QTreeView>
-#include <QTreeWidget>
-#include <QStandardItemModel>
 #include <QAbstractListModel>
 #include <QComboBox>
 #include <QGroupBox>
 #include <QPushButton>
+#include <QStandardItemModel>
+#include <QTreeView>
+#include <QTreeWidget>
 
 //------------------------------------------------------------------------------
 // Forward declarations
@@ -33,15 +39,15 @@ namespace Mantid {
 namespace API {
 class Workspace;
 }
-}
+} // namespace Mantid
 
 class AlgHistoryItem : public QTreeWidgetItem, public Mantid::API::HistoryItem {
 public:
   AlgHistoryItem(const QStringList &names,
                  Mantid::API::AlgorithmHistory_const_sptr algHistory,
-                 AlgHistoryItem *parent = 0)
-      : QTreeWidgetItem(parent, names, UserType),
-        Mantid::API::HistoryItem(algHistory) {}
+                 AlgHistoryItem *parent = nullptr)
+      : QTreeWidgetItem(parent, names, UserType), Mantid::API::HistoryItem(
+                                                      algHistory) {}
 };
 
 class AlgHistoryTreeWidget : public QTreeWidget {
@@ -91,7 +97,7 @@ public:
   AlgExecSummaryGrpBox(QString, QWidget *w);
   ~AlgExecSummaryGrpBox() override;
   void setData(const double execDuration,
-               const Mantid::Kernel::DateAndTime execDate);
+               const Mantid::Types::Core::DateAndTime execDate);
 
 private:
   QLineEdit *getAlgExecDurationCtrl() const { return m_execDurationEdit; }

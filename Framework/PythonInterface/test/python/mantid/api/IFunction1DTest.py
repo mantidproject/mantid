@@ -1,13 +1,24 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
 from mantid.api import IFunction1D, IFunction, FunctionFactory
 import numpy as np
 
+
 class NoCatgeoryFunction(IFunction1D):
 
     def init(self):
         pass
+
+    def function1D(self, xvals):
+        return xvals
+
 
 class Times2(IFunction1D):
 
@@ -19,6 +30,7 @@ class Times2(IFunction1D):
         self.declareAttribute("DoubleAtt", 3.4)
         self.declareAttribute("StringAtt", "filename")
         self.declareAttribute("BoolAtt", True)
+        self.declareAttribute("ListAtt", [1, 2, 3])
 
         self.declareParameter("ParamZeroInitNoDescr")
         self.declareParameter("ParamNoDescr", 1.5)
@@ -26,6 +38,7 @@ class Times2(IFunction1D):
 
     def function1D(self, xvals):
         return 2*xvals
+
 
 class IFunction1DTest(unittest.TestCase):
 
@@ -55,8 +68,8 @@ class IFunction1DTest(unittest.TestCase):
     def test_declareAttribute_only_accepts_known_types(self):
         func = Times2()
         func.initialize() # Contains known types
-        self.assertEquals(4, func.nAttributes()) # Make sure initialize ran
-        self.assertRaises(ValueError, func.declareAttribute, "ListAtt", [1,2,3])
+        self.assertEquals(5, func.nAttributes()) # Make sure initialize ran
+        self.assertRaises(ValueError, func.declareAttribute, "DictAtt", {1,2,3})
 
     def test_correct_attribute_values_are_returned_when_asked(self):
         func = Times2()

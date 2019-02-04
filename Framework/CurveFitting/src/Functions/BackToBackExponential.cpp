@@ -1,12 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Functions/BackToBackExponential.h"
 #include "MantidAPI/FunctionFactory.h"
 
-#include <gsl/gsl_sf_erf.h>
-#include <gsl/gsl_multifit_nlin.h>
 #include <cmath>
+#include <gsl/gsl_multifit_nlin.h>
+#include <gsl/gsl_sf_erf.h>
 #include <limits>
 
 namespace Mantid {

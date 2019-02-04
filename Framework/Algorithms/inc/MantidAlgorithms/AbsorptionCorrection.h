@@ -1,13 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_ABSORPTIONCORRECTION_H_
 #define MANTID_ALGORITHMS_ABSORPTIONCORRECTION_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidGeometry/IDTypes.h"
-#include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Objects/IObject.h"
+#include "MantidKernel/V3D.h"
 
 namespace Mantid {
 
@@ -15,8 +19,9 @@ namespace API {
 class Sample;
 }
 namespace Geometry {
-class Object;
-}
+class IDetector;
+class IObject;
+} // namespace Geometry
 
 namespace Algorithms {
 /** A base class for absorption correction algorithms.
@@ -56,27 +61,6 @@ namespace Algorithms {
 
     @author Russell Taylor, Tessella plc
     @date 04/02/2010
-
-    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-   National Laboratory & European Spallation Source
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport AbsorptionCorrection : public API::Algorithm {
 public:
@@ -115,11 +99,11 @@ protected:
    */
   virtual void initialiseCachedDistances() = 0;
 
-  API::MatrixWorkspace_sptr m_inputWS;    ///< A pointer to the input workspace
-  const Geometry::Object *m_sampleObject; ///< Local cache of sample object.
-  Kernel::V3D m_beamDirection;            ///< The direction of the beam.
-  std::vector<double> m_L1s,              ///< Cached L1 distances
-      m_elementVolumes;                   ///< Cached element volumes
+  API::MatrixWorkspace_sptr m_inputWS;     ///< A pointer to the input workspace
+  const Geometry::IObject *m_sampleObject; ///< Local cache of sample object.
+  Kernel::V3D m_beamDirection;             ///< The direction of the beam.
+  std::vector<double> m_L1s,               ///< Cached L1 distances
+      m_elementVolumes;                    ///< Cached element volumes
   std::vector<Kernel::V3D> m_elementPositions; ///< Cached element positions
   size_t m_numVolumeElements; ///< The number of volume elements
   double m_sampleVolume;      ///< The total volume of the sample
@@ -132,7 +116,7 @@ private:
 
   void retrieveBaseProperties();
   void constructSample(API::Sample &sample);
-  void calculateDistances(const Geometry::IDetector_const_sptr &detector,
+  void calculateDistances(const Geometry::IDetector &detector,
                           std::vector<double> &L2s) const;
   inline double doIntegration(const double &lambda,
                               const std::vector<double> &L2s) const;
@@ -148,8 +132,8 @@ private:
   double m_lambdaFixed; ///< The wavelength corresponding to the fixed energy,
   /// if provided
 
-  typedef double (*expfunction)(
-      double);             ///< Typedef pointer to exponential function
+  using expfunction =
+      double (*)(double);  ///< Typedef pointer to exponential function
   expfunction EXPONENTIAL; ///< Pointer to exponential function
 };
 

@@ -1,0 +1,60 @@
+digraph DirectILLReduction {
+  label = "DirectILLReduction workflow diagram"
+  $global_style
+
+  subgraph params {
+    $param_style
+    inputDiagnostics [label="DiagnosticsWorkspace"]
+    inputVana [label="IntegratedVanadiumWorkspace"]
+    inputWS [label="InputWorkspace"]
+    outputWS [label="OutputWorkspace"]
+    outputOptionalWS [label="OutputSofThetaEnergyWorkspace"]
+    qBinParams [label="q rebinning settings"]
+    wRebinParams [label="Energy rebinning settings"]
+  }
+
+  subgraph decisions {
+    $decision_style
+    absoluteUnitsEnabled [label="Normalise to absolute units?"]
+    inputDiagnosticsGiven [label="DiagnosticsWorkspace given?"]
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    AbsoluteUnits [label="Scale to absolute units"]
+    ApplyDiagnostics [label="Mask spectra"]
+    ConvertToDistribution [label="ConvertToDistribution"]
+    ConvertToEnergy [label="Convert TOF to energy transfer"]
+    CorrectKiKf [label="CorrectKiKf"]
+    DetectorEfficiency [label="DetectorEfficiencyCorUser"]
+    GroupDetectors [label="GroupDetectors"]
+    Normalize [label="Divide"]
+    Rebin [label="Rebin in energy"]
+    SofQW [label="SofQWNormalisedPolygon"]
+  }
+
+  subgraph values {
+  $value_style
+  }
+
+  inputWS -> inputDiagnosticsGiven
+  inputDiagnosticsGiven -> Normalize [label="no"]
+  inputDiagnosticsGiven -> ApplyDiagnostics [label="yes"]
+  inputDiagnostics -> ApplyDiagnostics
+  ApplyDiagnostics -> Normalize
+  inputVana -> Normalize
+  Normalize -> absoluteUnitsEnabled
+  absoluteUnitsEnabled -> ConvertToEnergy [label="no"]
+  absoluteUnitsEnabled -> AbsoluteUnits [label="yes"]
+  AbsoluteUnits -> ConvertToEnergy
+  ConvertToEnergy -> CorrectKiKf
+  CorrectKiKf -> Rebin
+  wRebinParams -> Rebin
+  Rebin -> ConvertToDistribution
+  ConvertToDistribution -> DetectorEfficiency
+  DetectorEfficiency -> GroupDetectors
+  GroupDetectors -> outputOptionalWS
+  GroupDetectors -> SofQW
+  qBinParams -> SofQW
+  SofQW -> outputWS
+}

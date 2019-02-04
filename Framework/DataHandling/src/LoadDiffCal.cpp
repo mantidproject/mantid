@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadDiffCal.h"
 
 #include "MantidAPI/FileProperty.h"
@@ -11,24 +17,27 @@
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/Diffraction.h"
+#include "MantidKernel/Exception.h"
+#include "MantidKernel/OptionalBool.h"
 
-#include <cmath>
 #include <H5Cpp.h>
+#include <cmath>
 
 namespace Mantid {
 namespace DataHandling {
 
 using Mantid::API::FileProperty;
-using Mantid::API::MatrixWorkspace;
-using Mantid::API::MatrixWorkspace_sptr;
-using Mantid::API::Progress;
 using Mantid::API::ITableWorkspace;
 using Mantid::API::ITableWorkspace_sptr;
+using Mantid::API::MatrixWorkspace_sptr;
+using Mantid::API::Progress;
 using Mantid::API::WorkspaceProperty;
 using Mantid::DataObjects::GroupingWorkspace_sptr;
 using Mantid::DataObjects::MaskWorkspace_sptr;
 using Mantid::DataObjects::Workspace2D;
 using Mantid::Kernel::Direction;
+using Mantid::Kernel::Exception::FileError;
 using Mantid::Kernel::PropertyWithValue;
 
 using namespace H5;
@@ -230,37 +239,6 @@ void LoadDiffCal::makeMaskWorkspace(const std::vector<int32_t> &detids,
   setMaskWSProperty(this, m_workspaceName, wksp);
 }
 
-namespace { // anonymous namespace
-
-double calcTofMin(const double difc, const double difa, const double tzero,
-                  const double tofmin) {
-  if (difa == 0.) {
-    if (tzero != 0.) {
-      // check for negative d-spacing
-      return std::max<double>(-1. * tzero, tofmin);
-    }
-  } else if (difa > 0) {
-    // check for imaginary part in quadratic equation
-    return std::max<double>(tzero - .25 * difc * difc / difa, tofmin);
-  }
-
-  // everything else is fine so just return supplied tofmin
-  return tofmin;
-}
-
-double calcTofMax(const double difc, const double difa, const double tzero,
-                  const double tofmax) {
-  if (difa < 0.) {
-    // check for imaginary part in quadratic equation
-    return std::min<double>(tzero - .25 * difc * difc / difa, tofmax);
-  }
-
-  // everything else is fine so just return supplied tofmax
-  return tofmax;
-}
-
-} // end of anonymous namespace
-
 void LoadDiffCal::makeCalWorkspace(const std::vector<int32_t> &detids,
                                    const std::vector<double> &difc,
                                    const std::vector<double> &difa,
@@ -315,14 +293,16 @@ void LoadDiffCal::makeCalWorkspace(const std::vector<int32_t> &detids,
       newrow << offsets[i];
 
     // calculate tof range for information
-    const double tofMinRow = calcTofMin(difc[i], difa[i], tzero[i], tofMin);
+    const double tofMinRow =
+        Kernel::Diffraction::calcTofMin(difc[i], difa[i], tzero[i], tofMin);
     std::stringstream msg;
     if (tofMinRow != tofMin) {
       msg << "TofMin shifted from " << tofMin << " to " << tofMinRow << " ";
     }
     newrow << tofMinRow;
     if (useTofMax) {
-      const double tofMaxRow = calcTofMax(difc[i], difa[i], tzero[i], tofMax);
+      const double tofMaxRow =
+          Kernel::Diffraction::calcTofMax(difc[i], difa[i], tzero[i], tofMax);
       newrow << tofMaxRow;
 
       if (tofMaxRow != tofMax) {
@@ -374,10 +354,11 @@ void LoadDiffCal::runLoadCalFile() {
   bool makeCalWS = getProperty("MakeCalWorkspace");
   bool makeMaskWS = getProperty("MakeMaskWorkspace");
   bool makeGroupWS = getProperty("MakeGroupingWorkspace");
+  API::MatrixWorkspace_sptr inputWs = getProperty("InputWorkspace");
 
   auto alg = createChildAlgorithm("LoadCalFile", 0., 1.);
   alg->setPropertyValue("CalFilename", m_filename);
-  alg->setPropertyValue("InputWorkspace", getPropertyValue("InputWorkspace"));
+  alg->setProperty("InputWorkspace", inputWs);
   alg->setPropertyValue("InstrumentName", getPropertyValue("InstrumentName"));
   alg->setPropertyValue("InstrumentFilename",
                         getPropertyValue("InstrumentFilename"));
@@ -418,8 +399,13 @@ void LoadDiffCal::exec() {
   }
 
   // read in everything from the file
-  H5File file(m_filename, H5F_ACC_RDONLY);
   H5::Exception::dontPrint();
+  H5File file;
+  try {
+    file = H5File(m_filename, H5F_ACC_RDONLY);
+  } catch (FileIException &) {
+    throw FileError("Failed to open file using HDF5", m_filename);
+  }
   getInstrument(file);
 
   Progress progress(this, 0.1, 0.4, 8);
@@ -427,8 +413,14 @@ void LoadDiffCal::exec() {
   try {
     calibrationGroup = file.openGroup("calibration");
   } catch (FileIException &e) {
-    e.printError();
-    throw std::runtime_error("Did not find group \"/calibration\"");
+#if H5_VERSION_GE(1, 8, 13)
+    UNUSED_ARG(e);
+    H5::Exception::printErrorStack();
+#else
+    e.printError(stderr);
+#endif
+    file.close();
+    throw FileError("Did not find group \"/calibration\"", m_filename);
   }
 
   progress.report("Reading detid");
@@ -483,6 +475,16 @@ void LoadDiffCal::exec() {
   makeGroupingWorkspace(detids, groups);
   makeMaskWorkspace(detids, use);
   makeCalWorkspace(detids, difc, difa, tzero, dasids, offset, use);
+}
+
+Parallel::ExecutionMode LoadDiffCal::getParallelExecutionMode(
+    const std::map<std::string, Parallel::StorageMode> &storageModes) const {
+  // There is an optional input workspace which may have
+  // StorageMode::Distributed but it is merely used for passing an instrument.
+  // Output should always have StorageMode::Cloned, so we run with
+  // ExecutionMode::Identical.
+  static_cast<void>(storageModes);
+  return Parallel::ExecutionMode::Identical;
 }
 
 } // namespace DataHandling

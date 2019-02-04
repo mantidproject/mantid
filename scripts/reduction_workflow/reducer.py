@@ -1,7 +1,14 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
 """
     Base reduction class. Uses version 2 python API.
 """
+from __future__ import (absolute_import, division, print_function)
 import os
 import sys
 import time
@@ -120,13 +127,13 @@ class Reducer(object):
             alg = AlgorithmManager.create(self.setup_algorithm)
             alg.initialize()
             props = [p.name for p in alg.getProperties()]
-            for key in self.reduction_properties.keys():
+            for key in list(self.reduction_properties.keys()):
                 if key in props:
                     try:
                         alg.setProperty(key, self.reduction_properties[key])
                     except:
                         msg = "Error setting %s=%s" % (key, str(self.reduction_properties[key]))
-                        msg += "\n  %s" % sys.exc_value
+                        msg += "\n  %s" % sys.exc_info()[1]
                         Logger("Reducer").error(msg)
                 else:
                     Logger("Reducer").warning("Setup algorithm has no %s property" % key)
@@ -162,7 +169,7 @@ class Reducer(object):
             return
 
         _first_ws_name = None
-        for ws in self._data_files.keys():
+        for ws in list(self._data_files.keys()):
             if _first_ws_name is None:
                 _first_ws_name = ws
             alg = AlgorithmManager.create(self.reduction_algorithm)

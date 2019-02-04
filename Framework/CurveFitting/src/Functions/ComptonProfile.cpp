@@ -1,10 +1,14 @@
-//-----------------------------------------------------------------------------
-// Includes
-//-----------------------------------------------------------------------------
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/Functions/ComptonProfile.h"
-#include "MantidCurveFitting/Algorithms/ConvertToYSpace.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
+#include "MantidCurveFitting/Algorithms/ConvertToYSpace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/PhysicalConstants.h"
 
@@ -22,7 +26,7 @@ namespace {
 // const char * WSINDEX_NAME = "WorkspaceIndex";
 const char *MASS_NAME = "Mass";
 ///@endcond
-}
+} // namespace
 
 /**
  */
@@ -92,10 +96,8 @@ void ComptonProfile::setMatrixWorkspace(
 }
 
 void ComptonProfile::buildCaches() {
-  Geometry::IDetector_const_sptr det;
-  try {
-    det = m_workspace->getDetector(m_wsIndex);
-  } catch (Kernel::Exception::NotFoundError &) {
+  const auto &spectrumInfo = m_workspace->spectrumInfo();
+  if (!spectrumInfo.hasDetectors(m_wsIndex)) {
     throw std::invalid_argument("ComptonProfile - Workspace has no detector "
                                 "attached to histogram at index " +
                                 std::to_string(m_wsIndex));

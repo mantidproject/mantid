@@ -1,31 +1,40 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MDALGORITHMS_CONVERTSPICEDATATOREALSPACETEST_H_
 #define MANTID_MDALGORITHMS_CONVERTSPICEDATATOREALSPACETEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidMDAlgorithms/ConvertSpiceDataToRealSpace.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataHandling/LoadSpiceAscii.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidDataObjects/TableWorkspace.h"
-#include "MantidAPI/TableRow.h"
+#include "MantidMDAlgorithms/ConvertSpiceDataToRealSpace.h"
 
-using Mantid::MDAlgorithms::ConvertSpiceDataToRealSpace;
 using Mantid::DataHandling::LoadInstrument;
 using Mantid::DataHandling::LoadSpiceAscii;
+using Mantid::MDAlgorithms::ConvertSpiceDataToRealSpace;
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
+using Mantid::Types::Core::DateAndTime;
 
 class ConvertSpiceDataToRealSpaceTest : public CxxTest::TestSuite {
 public:
@@ -140,7 +149,7 @@ public:
     size_t numevents = mdws->getNEvents();
     TS_ASSERT_EQUALS(numevents, 44 * 61);
 
-    IMDIterator *mditer = mdws->createIterator();
+    auto mditer = mdws->createIterator();
     TS_ASSERT_EQUALS(mditer->getNumEvents(), 44 * 61);
 
     double y0 = mditer->getInnerSignal(0);
@@ -330,7 +339,7 @@ public:
     size_t numevents = mdws->getNEvents();
     TS_ASSERT_EQUALS(numevents, 44 * 61);
 
-    IMDIterator *mditer = mdws->createIterator();
+    auto mditer = mdws->createIterator();
     TS_ASSERT_EQUALS(mditer->getNumEvents(), 44 * 61);
 
     double y0 = mditer->getInnerSignal(0);
@@ -439,6 +448,61 @@ public:
     AnalysisDataService::Instance().remove("HB2A_MD");
     AnalysisDataService::Instance().remove("MonitorMDW");
   }
+};
+
+class ConvertSpiceDataToRealSpaceTestPerformance : public CxxTest::TestSuite {
+public:
+  static ConvertSpiceDataToRealSpaceTestPerformance *createSuite() {
+    return new ConvertSpiceDataToRealSpaceTestPerformance();
+  }
+  static void destroySuite(ConvertSpiceDataToRealSpaceTestPerformance *suite) {
+    delete suite;
+  }
+
+  void setUp() override {
+    spcloader.initialize();
+    spcloader.setProperty("Filename", "HB2A_exp0231_scan0001.dat");
+    spcloader.setProperty("OutputWorkspace", "DataTable");
+    spcloader.setProperty("RunInfoWorkspace", "LogParentWS");
+    spcloader.setPropertyValue("DateAndTimeLog",
+                               "date,MM/DD/YYYY,time,HH:MM:SS AM");
+    spcloader.setProperty("IgnoreUnlistedLogs", false);
+    spcloader.execute();
+
+    datatablews = boost::dynamic_pointer_cast<ITableWorkspace>(
+        AnalysisDataService::Instance().retrieve("DataTable"));
+    parentlogws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve("LogParentWS"));
+
+    deteffws = boost::make_shared<TableWorkspace>();
+    deteffws->addColumn("int", "DetectorID");
+    deteffws->addColumn("double", "Efficiency");
+    for (int i = 1; i <= 44; ++i) {
+      TableRow newrow = deteffws->appendRow();
+      newrow << i << (1 + (static_cast<double>(i) - 22) * 0.01);
+    }
+
+    loader.initialize();
+    loader.setProperty("InputWorkspace", datatablews);
+    loader.setProperty("RunInfoWorkspace", parentlogws);
+    loader.setProperty("DetectorEfficiencyTableWorkspace", deteffws);
+    loader.setProperty("Instrument", "HB2A");
+    loader.setPropertyValue("OutputWorkspace", "HB2A_MD");
+    loader.setPropertyValue("OutputMonitorWorkspace", "MonitorMDW");
+  }
+
+  void tearDown() override { AnalysisDataService::Instance().clear(); }
+
+  void testConvertSpiceDataToRealSpaceTestPerformance() {
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+  }
+
+private:
+  LoadSpiceAscii spcloader;
+  ConvertSpiceDataToRealSpace loader;
+  ITableWorkspace_sptr datatablews;
+  MatrixWorkspace_sptr parentlogws;
+  TableWorkspace_sptr deteffws;
 };
 
 #endif /* MANTID_MDALGORITHMS_CONVERTSPICEDATATOREALSPACETEST_H_ */

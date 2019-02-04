@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef LOADPRENEXUSMONITORSTEST_H_
 #define LOADPRENEXUSMONITORSTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/LoadPreNexusMonitors.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidDataHandling/LoadPreNexusMonitors.h"
 
 #include <Poco/Path.h>
 
@@ -52,11 +58,11 @@ public:
     TS_ASSERT_EQUALS(ws->blocksize(), 200001);
 
     // Check all the X axes are the same
-    TS_ASSERT((ws->dataX(0)) == (ws->dataX(1)));
+    TS_ASSERT((ws->x(0)) == (ws->x(1)));
 
     // Check a particular value
-    TS_ASSERT_EQUALS(ws->dataX(1)[3424], 3424.0);
-    TS_ASSERT_EQUALS(ws->dataY(1)[3424], 858);
+    TS_ASSERT_EQUALS(ws->x(1)[3424], 3424.0);
+    TS_ASSERT_EQUALS(ws->y(1)[3424], 858);
 
     for (int i = 0; i < 3; ++i) {
       TS_ASSERT_EQUALS(*ws->getSpectrum(i).getDetectorIDs().begin(),

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_MONITOREFFICIENCYCORUSER_H_
 #define MANTID_ALGORITHMS_MONITOREFFICIENCYCORUSER_H_
 
@@ -10,7 +16,7 @@ namespace HistogramData {
 class HistogramX;
 class HistogramY;
 class HistogramE;
-}
+} // namespace HistogramData
 namespace Algorithms {
 
 class DLLExport MonitorEfficiencyCorUser : public API::Algorithm {
@@ -26,6 +32,9 @@ public:
 
   /// Algorithm's version
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"NormaliseToMonitor"};
+  }
   /// Algorithm's category for identification
   const std::string category() const override {
     return "CorrectionFunctions\\NormalisationCorrections";
@@ -47,7 +56,7 @@ private:
   /// stores the incident energy of the neutrons
   double m_Ei = 0.0;
   /// stores the total count of neutrons from the monitor
-  int m_monitorCounts = 0;
+  double m_monitorCounts = 0;
 };
 
 } // namespace Algorithms

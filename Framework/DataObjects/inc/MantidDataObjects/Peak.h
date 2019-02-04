@@ -1,18 +1,29 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAOBJECTS_PEAK_H_
 #define MANTID_DATAOBJECTS_PEAK_H_
 
 #include "MantidGeometry/Crystal/IPeak.h"
+#include "MantidGeometry/Crystal/PeakShape.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Matrix.h"
-#include "MantidKernel/V3D.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/System.h"
-#include "MantidGeometry/Crystal/PeakShape.h"
-#include <boost/shared_ptr.hpp>
+#include "MantidKernel/V3D.h"
 #include <boost/optional.hpp>
+#include <boost/shared_ptr.hpp>
 
 namespace Mantid {
+
+namespace Geometry {
+class InstrumentRayTracer;
+}
+
 namespace DataObjects {
 
 /** Structure describing a single-crystal peak
@@ -45,18 +56,25 @@ public:
 
   /// Copy constructor
   Peak(const Peak &other);
-// MSVC 2015 won't build with noexcept.
-// error C2610: 'Mantid::DataObjects::Peak::Peak(Mantid::DataObjects::Peak &&)
-// noexcept': is not a special member function which can be defaulted
-#if defined(_MSC_VER) && _MSC_VER <= 1900
-  Peak(Peak &&);
-  Peak &operator=(Peak &&);
-#elif defined(__GNUC__) && (__GNUC__ == 5)
+
+  // MSVC 2015/17 can build with noexcept = default however
+  // intellisense still incorrectly reports this as an error despite compiling.
+  // https://connect.microsoft.com/VisualStudio/feedback/details/1795240/visual-c-2015-default-move-constructor-and-noexcept-keyword-bug
+  // For that reason we still use the supplied default which should be noexcept
+  // once the above is fixed we can remove this workaround
+
+#if defined(_MSC_VER) && _MSC_VER <= 1910
+  Peak(Peak &&) = default;
+  Peak &operator=(Peak &&) = default;
+#elif ((__GNUC__ < 4) || (__GNUC__ == 4 && __GNUC_MINOR__ <= 8))
+  // The noexcept default declaration was fixed in GCC 4.9.0
+  // so for versions 4.8.x and below use default only
+  // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=53903
+  Peak(Peak &&) = default;
+  Peak &operator=(Peak &&) = default;
+#else
   Peak(Peak &&) noexcept = default;
   Peak &operator=(Peak &&) noexcept = default;
-#else
-  Peak(Peak &&) noexcept;
-  Peak &operator=(Peak &&) noexcept;
 #endif
 
   // Construct a peak from a reference to the interface
@@ -74,6 +92,7 @@ public:
   Geometry::Instrument_const_sptr getInstrument() const override;
 
   bool findDetector() override;
+  bool findDetector(const Geometry::InstrumentRayTracer &tracer) override;
 
   int getRunNumber() const override;
   void setRunNumber(int m_runNumber) override;
@@ -91,6 +110,8 @@ public:
   void setBankName(std::string m_bankName);
   void setHKL(double H, double K, double L) override;
   void setHKL(const Mantid::Kernel::V3D &HKL) override;
+  void setSamplePos(double samX, double samY, double samZ) override;
+  void setSamplePos(const Mantid::Kernel::V3D &XYZ) override;
   void resetHKL();
 
   Mantid::Kernel::V3D getQLabFrame() const override;
@@ -108,16 +129,19 @@ public:
   void setWavelength(double wavelength) override;
   double getWavelength() const override;
   double getScattering() const override;
+  double getAzimuthal() const override;
   double getDSpacing() const override;
   double getTOF() const override;
 
   double getInitialEnergy() const override;
   double getFinalEnergy() const override;
+  double getEnergyTransfer() const override;
   void setInitialEnergy(double m_initialEnergy) override;
   void setFinalEnergy(double m_finalEnergy) override;
 
   double getIntensity() const override;
   double getSigmaIntensity() const override;
+  double getIntensityOverSigma() const override;
 
   void setIntensity(double m_intensity) override;
   void setSigmaIntensity(double m_sigmaIntensity) override;
@@ -134,8 +158,11 @@ public:
   int getCol() const override;
   void setRow(int m_row);
   void setCol(int m_col);
+  void setPeakNumber(int m_peakNumber) override;
+  int getPeakNumber() const override;
 
-  Mantid::Kernel::V3D getDetPos() const override;
+  virtual Mantid::Kernel::V3D getDetPos() const override;
+  virtual Mantid::Kernel::V3D getSamplePos() const override;
   double getL1() const override;
   double getL2() const override;
 
@@ -153,8 +180,12 @@ public:
   /// Assignment
   Peak &operator=(const Peak &other);
 
+  /// Get the approximate position of a peak that falls off the detectors
+  Kernel::V3D getVirtualDetectorPosition(const Kernel::V3D &detectorDir) const;
+
 private:
-  bool findDetector(const Mantid::Kernel::V3D &beam);
+  bool findDetector(const Mantid::Kernel::V3D &beam,
+                    const Geometry::InstrumentRayTracer &tracer);
 
   /// Shared pointer to the instrument (for calculating some values )
   Geometry::Instrument_const_sptr m_inst;
@@ -223,6 +254,9 @@ private:
   double m_orig_K;
   double m_orig_L;
 
+  // keep peak number
+  int m_peakNumber;
+
   /// List of contributing detectors IDs
   std::set<int> m_detIDs;
 
@@ -236,7 +270,7 @@ private:
   std::string convention;
 };
 
-} // namespace Mantid
 } // namespace DataObjects
+} // namespace Mantid
 
 #endif /* MANTID_DATAOBJECTS_PEAK_H_ */

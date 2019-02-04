@@ -1,7 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/Functions/VesuvioResolution.h"
-#include "MantidCurveFitting/Algorithms/ConvertToYSpace.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
+#include "MantidCurveFitting/Algorithms/ConvertToYSpace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/PhysicalConstants.h"
 
@@ -20,41 +27,36 @@ const char *MASS_NAME = "Mass";
 
 const double STDDEV_TO_HWHM = std::sqrt(std::log(4.0));
 ///@endcond
-}
+} // namespace
 
 // Register into factory
 DECLARE_FUNCTION(VesuvioResolution)
 
 /**
-* @param ws The workspace with attached instrument
-* @param index Index of the spectrum
-* @return DetectorParams structure containing the relevant parameters
-*/
+ * @param ws The workspace with attached instrument
+ * @param index Index of the spectrum
+ * @return DetectorParams structure containing the relevant parameters
+ */
 ResolutionParams VesuvioResolution::getResolutionParameters(
     const API::MatrixWorkspace_const_sptr &ws, const size_t index) {
-  Geometry::IDetector_const_sptr detector;
-  try {
-    detector = ws->getDetector(index);
-  } catch (Kernel::Exception::NotFoundError &) {
+  const auto &spectrumInfo = ws->spectrumInfo();
+  if (!spectrumInfo.hasDetectors(index))
     throw std::invalid_argument("VesuvioResolution - Workspace has no detector "
                                 "attached to histogram at index " +
                                 std::to_string(index));
-  }
 
   ResolutionParams respar;
   const auto &pmap = ws->constInstrumentParameters();
-  respar.dl1 =
-      ConvertToYSpace::getComponentParameter(detector, pmap, "sigma_l1");
-  respar.dl2 =
-      ConvertToYSpace::getComponentParameter(detector, pmap, "sigma_l2");
-  respar.dtof =
-      ConvertToYSpace::getComponentParameter(detector, pmap, "sigma_tof");
+  const auto &det = spectrumInfo.detector(index);
+  respar.dl1 = ConvertToYSpace::getComponentParameter(det, pmap, "sigma_l1");
+  respar.dl2 = ConvertToYSpace::getComponentParameter(det, pmap, "sigma_l2");
+  respar.dtof = ConvertToYSpace::getComponentParameter(det, pmap, "sigma_tof");
   respar.dthe = ConvertToYSpace::getComponentParameter(
-      detector, pmap, "sigma_theta"); // radians
+      det, pmap, "sigma_theta"); // radians
   respar.dEnLorentz =
-      ConvertToYSpace::getComponentParameter(detector, pmap, "hwhm_lorentz");
+      ConvertToYSpace::getComponentParameter(det, pmap, "hwhm_lorentz");
   respar.dEnGauss =
-      ConvertToYSpace::getComponentParameter(detector, pmap, "sigma_gauss");
+      ConvertToYSpace::getComponentParameter(det, pmap, "sigma_gauss");
   return respar;
 }
 

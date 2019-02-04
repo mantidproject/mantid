@@ -1,13 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_GEOMETRY_SPACEGROUPTEST_H_
 #define MANTID_GEOMETRY_SPACEGROUPTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidGeometry/Crystal/SpaceGroup.h"
-#include "MantidGeometry/Crystal/SymmetryOperationFactory.h"
+#include "MantidGeometry/Crystal/CenteringGroup.h"
 #include "MantidGeometry/Crystal/CyclicGroup.h"
 #include "MantidGeometry/Crystal/ProductOfCyclicGroups.h"
-#include "MantidGeometry/Crystal/CenteringGroup.h"
+#include "MantidGeometry/Crystal/SpaceGroup.h"
+#include "MantidGeometry/Crystal/SymmetryOperationFactory.h"
 
 #include "MantidKernel/V3D.h"
 
@@ -66,8 +72,8 @@ public:
     SpaceGroup spaceGroup(167, "R-3c", *(group * centering));
 
     std::vector<V3D> byOperator = spaceGroup * V3D(0.3, 0.0, 0.25);
-    for (size_t i = 0; i < byOperator.size(); ++i) {
-      byOperator[i] = getWrappedVector(byOperator[i]);
+    for (auto &i : byOperator) {
+      i = getWrappedVector(i);
     }
     std::sort(byOperator.begin(), byOperator.end());
 
@@ -86,8 +92,8 @@ public:
     SpaceGroup spaceGroup = getSpaceGroupR3m();
 
     std::vector<V3D> byOperator = spaceGroup * V3D(0.5, 0.0, 0.0);
-    for (size_t i = 0; i < byOperator.size(); ++i) {
-      byOperator[i] = getWrappedVector(byOperator[i]);
+    for (auto &i : byOperator) {
+      i = getWrappedVector(i);
     }
     std::sort(byOperator.begin(), byOperator.end());
 

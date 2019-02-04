@@ -30,11 +30,11 @@
 #ifndef FOLDER_H
 #define FOLDER_H
 
-#include <QObject>
 #include <QEvent>
+#include <QObject>
 #include <QTreeWidget>
 
-#include "MantidQtAPI/IProjectSerialisable.h"
+#include "MantidQtWidgets/Common/IProjectSerialisable.h"
 #include "MdiSubWindow.h"
 
 class FolderListItem;
@@ -134,7 +134,7 @@ private:
   /// Recursively save subwindows and subfolders
   QString saveFolderSubWindows(ApplicationWindow *app, Folder *,
                                int &windowCount);
-  /// Save footer infromation about the folder
+  /// Save footer information about the folder
   QString saveFolderFooter();
 
 public slots:
@@ -208,7 +208,7 @@ class FolderListView : public QTreeWidget {
   Q_OBJECT
 
 public:
-  FolderListView(QWidget *parent = 0, const char *name = 0);
+  FolderListView(QWidget *parent = nullptr, const char *name = nullptr);
   QTreeWidgetItem *firstChild();
 
 public slots:

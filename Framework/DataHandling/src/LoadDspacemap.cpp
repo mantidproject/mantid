@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadDspacemap.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidDataHandling/LoadCalFile.h"
@@ -5,6 +11,7 @@
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/BinaryFile.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -91,16 +98,9 @@ void LoadDspacemap::CalculateOffsetsFromDSpacemapFile(
     const std::string DFileName,
     Mantid::DataObjects::OffsetsWorkspace_sptr offsetsWS) {
   // Get a pointer to the instrument contained in the workspace
-  Instrument_const_sptr instrument = offsetsWS->getInstrument();
-  double l1;
-  Kernel::V3D beamline, samplePos;
-  double beamline_norm;
-  instrument->getInstrumentParameters(l1, beamline, beamline_norm, samplePos);
 
-  // To get all the detector ID's
-  detid2det_map allDetectors;
-  instrument->getDetectors(allDetectors);
-
+  const auto &detectorInfo = offsetsWS->detectorInfo();
+  const double l1 = detectorInfo.l1();
   // Read in the POWGEN-style Dspace mapping file
   const char *filename = DFileName.c_str();
   std::ifstream fin(filename, std::ios_base::in | std::ios_base::binary);
@@ -114,19 +114,23 @@ void LoadDspacemap::CalculateOffsetsFromDSpacemapFile(
     dspace.push_back(read);
   }
 
-  detid2det_map::const_iterator it;
-  for (it = allDetectors.begin(); it != allDetectors.end(); ++it) {
-    detid_t detectorID = it->first;
-    Geometry::IDetector_const_sptr det = it->second;
+  const auto &detectorIds = detectorInfo.detectorIDs();
+
+  for (size_t detectorIndex = 0; detectorIndex < detectorInfo.size();
+       ++detectorIndex) {
+    const auto detectorId = detectorIds[detectorIndex];
 
     // Compute the factor
     double offset = 0.0;
-    double factor = Instrument::calcConversion(l1, beamline, beamline_norm,
-                                               samplePos, det, offset);
-    offset = dspace[detectorID] / factor - 1.0;
+    if (!detectorInfo.isMonitor(detectorIndex)) {
+      double factor = Geometry::Conversion::tofToDSpacingFactor(
+          l1, detectorInfo.l2(detectorIndex),
+          detectorInfo.twoTheta(detectorIndex), offset);
+      offset = dspace[detectorId] / factor - 1.0;
+    }
     // Save in the map
     try {
-      offsetsWS->setValue(detectorID, offset);
+      offsetsWS->setValue(detectorId, offset);
     } catch (std::invalid_argument &) {
     }
   }
@@ -276,10 +280,10 @@ void LoadDspacemap::CalculateOffsetsFromVulcanFactors(
     offset = difc_pixel/difc_parent*(pow(10.0, -vulcan_factor))-1.0;
     ***/
 
-    offset =
-        difc_pixel / difcRef * (pow(10.0, -(vulcan_factor + intermoduleoffset +
-                                            interstackoffset))) -
-        1.0;
+    offset = difc_pixel / difcRef *
+                 (pow(10.0, -(vulcan_factor + intermoduleoffset +
+                              interstackoffset))) -
+             1.0;
 
     // Save in the map
     try {
@@ -364,5 +368,5 @@ void LoadDspacemap::readVulcanBinaryFile(const std::string &fileName,
   }
 }
 
-} // namespace Mantid
 } // namespace DataHandling
+} // namespace Mantid

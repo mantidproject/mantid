@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/CreateSimulationWorkspace.h"
-#include "MantidDataHandling/StartAndEndTimeFromNexusFileExtractor.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataHandling/StartAndEndTimeFromNexusFileExtractor.h"
 
 #include "MantidDataHandling/LoadRawHelper.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -16,16 +22,20 @@
 #include "MantidKernel/VectorHelper.h"
 
 #include "LoadRaw/isisraw2.h"
+// clang-format off
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
+// clang-format on
 
 #include <Poco/File.h>
+
+#include <boost/algorithm/string/predicate.hpp>
 
 namespace {
 
 struct StartAndEndTime {
-  Mantid::Kernel::DateAndTime startTime;
-  Mantid::Kernel::DateAndTime endTime;
+  Mantid::Types::Core::DateAndTime startTime;
+  Mantid::Types::Core::DateAndTime endTime;
 };
 
 StartAndEndTime getStartAndEndTimesFromRawFile(std::string filename) {
@@ -39,17 +49,18 @@ StartAndEndTime getStartAndEndTimesFromRawFile(std::string filename) {
 
   StartAndEndTime startAndEndTime;
   startAndEndTime.startTime =
-      Mantid::DataHandling::LoadRawHelper::extractStartTime(&isisRaw);
+      Mantid::DataHandling::LoadRawHelper::extractStartTime(isisRaw);
   startAndEndTime.endTime =
-      Mantid::DataHandling::LoadRawHelper::extractEndTime(&isisRaw);
+      Mantid::DataHandling::LoadRawHelper::extractEndTime(isisRaw);
 
   fclose(rawFile);
   return startAndEndTime;
 }
 
 StartAndEndTime getStartAndEndTimesFromNexusFile(
-    std::string filename, const Mantid::Kernel::DateAndTime &startTimeDefault,
-    const Mantid::Kernel::DateAndTime &endTimeDefault) {
+    std::string filename,
+    const Mantid::Types::Core::DateAndTime &startTimeDefault,
+    const Mantid::Types::Core::DateAndTime &endTimeDefault) {
   StartAndEndTime startAndEndTime;
   try {
     startAndEndTime.startTime =
@@ -62,7 +73,7 @@ StartAndEndTime getStartAndEndTimesFromNexusFile(
 
   return startAndEndTime;
 }
-}
+} // namespace
 
 namespace Mantid {
 namespace DataHandling {
@@ -184,7 +195,7 @@ void CreateSimulationWorkspace::createOutputWorkspace() {
 
   m_progress = boost::make_shared<Progress>(this, 0.5, 0.75, nhistograms);
 
-  PARALLEL_FOR1(m_outputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*m_outputWS))
   for (int64_t i = 0; i < static_cast<int64_t>(nhistograms); ++i) {
     m_outputWS->setBinEdges(i, binBoundaries);
     m_outputWS->mutableY(i) = 1.0;
@@ -285,7 +296,7 @@ void CreateSimulationWorkspace::loadMappingFromISISNXS(
     throw std::runtime_error(
         "Cannot find path to isis_vms_compat. Is the file an ISIS NeXus file?");
   }
-  typedef boost::scoped_ptr<std::vector<int32_t>> NXIntArray;
+  using NXIntArray = std::unique_ptr<std::vector<int32_t>>;
 
   nxsFile.openData("NDET");
   NXIntArray ndets(nxsFile.getData<int32_t>());
@@ -367,7 +378,7 @@ void CreateSimulationWorkspace::applyDetectorMapping() {
  */
 void CreateSimulationWorkspace::adjustInstrument(const std::string &filename) {
   // If requested update the instrument to positions in the raw file
-  const Geometry::ParameterMap &pmap = m_outputWS->instrumentParameters();
+  const auto &pmap = m_outputWS->constInstrumentParameters();
   Geometry::Instrument_const_sptr instrument = m_outputWS->getInstrument();
   boost::shared_ptr<Geometry::Parameter> updateDets =
       pmap.get(instrument->getComponentID(), "det-pos-source");
@@ -405,15 +416,15 @@ void CreateSimulationWorkspace::setStartDate(
   auto hasDetTableFile = !detTableFile.empty();
   auto &run = workspace->mutableRun();
 
-  Kernel::DateAndTime startTime;
-  Kernel::DateAndTime endTime;
+  Types::Core::DateAndTime startTime;
+  Types::Core::DateAndTime endTime;
   try {
     // The start and end times might not be valid, and hence can throw
     startTime = run.startTime();
     endTime = run.endTime();
   } catch (std::runtime_error &) {
-    startTime = Kernel::DateAndTime::getCurrentTime();
-    endTime = Kernel::DateAndTime::getCurrentTime();
+    startTime = Types::Core::DateAndTime::getCurrentTime();
+    endTime = Types::Core::DateAndTime::getCurrentTime();
   }
 
   if (hasDetTableFile) {

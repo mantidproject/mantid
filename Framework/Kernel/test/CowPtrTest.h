@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef COW_PTR_TEST_H_
 #define COW_PTR_TEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidKernel/cow_ptr.h"
-#include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/shared_ptr.hpp>
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Kernel;
 
@@ -16,7 +22,7 @@ public:
   MyType(int val) : value(val) {}
   int value;
 };
-}
+} // namespace
 
 class CowPtrTest : public CxxTest::TestSuite {
 public:
@@ -151,6 +157,19 @@ public:
 
     TSM_ASSERT_DIFFERS("Value should now have changed", original->value,
                        copyResource.value);
+  }
+
+  void test_equals_not_equals() {
+    cow_ptr<MyType> cow{nullptr};
+    TS_ASSERT(cow == cow);
+    const auto cow2 = boost::make_shared<MyType>(42);
+    TS_ASSERT(cow2 == cow2);
+    TS_ASSERT(cow != cow2);
+    cow = boost::make_shared<MyType>(42);
+    TS_ASSERT(cow == cow);
+    TS_ASSERT(cow != cow2);
+    cow = cow2;
+    TS_ASSERT(cow == cow2);
   }
 };
 

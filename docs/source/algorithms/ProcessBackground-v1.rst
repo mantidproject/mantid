@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -194,13 +194,13 @@ Usage
 
   tbws = outputs[2]
 
-  print "Number of output workspace = %d, Number of selected background points = %d" %( len(outputs),  len(outputs[0].readX(0)))
-  print "Fitted background function: A0 = %.5e, A1 = %.5e, A2 = %.5e ..." % (tbws.cell(1, 1), tbws.cell(2, 1), tbws.cell(3,1))
+  print("Number of output workspace = {}, Number of selected background points = {}".format(len(outputs), len(outputs[0].readX(0))))
+  print("Fitted background function: A0 = {:.5e}, A1 = {:.5e}, A2 = {:.5e} ...".format(tbws.cell(1, 1), tbws.cell(2, 1), tbws.cell(3,1)))
 
 .. testcleanup:: testSelectBkgd
 
   DeleteWorkspace(Workspace='PG3_15035-3')
-  for i in xrange(3):
+  for i in range(3):
     DeleteWorkspace(Workspace=outputs[i])
 
 Output:
@@ -226,7 +226,7 @@ Output:
   dx = 0.01
 
   random.seed(1)
-  for i in xrange(1000):
+  for i in range(1000):
     x = x0 + float(i) * dx
     vecx.append(x)
     y = (random.random() - 0.5) * 2.0 + 2.0 + math.exp(-(x-4.0)**2/0.1)
@@ -242,13 +242,14 @@ Output:
         LowerBound = 3.0, UpperBound = 5.0, ReferenceWorkspace = ws2)
 
   for i in [200, 400, 450, 500, 700]:
-    print "X = %.5f, Input Y[%d] = %.5f, Reference Y[%d] = %.5f, Output Y[%d] = %.5f" % (vecx[i], i, ws1.readY(0)[i], i, ws2.readY(0)[i], i, outputs[0].readY(0)[i])
+      print("X = {0:.5f}, Input Y[{1}] = {2:.5f}, Reference Y[{1}] = {3:.5f}, Output Y[{1}] = {4:.5f}".format(
+             vecx[i], i, ws1.readY(0)[i], ws2.readY(0)[i], outputs[0].readY(0)[i]))
 
 .. testcleanup:: testAddRegion
 
   DeleteWorkspace(Workspace=ws1)
   DeleteWorkspace(Workspace=ws2)
-  for i in xrange(3):
+  for i in range(3):
     DeleteWorkspace(Workspace=outputs[i])
 
 Output:
@@ -276,7 +277,7 @@ Output:
   dx = 0.01
 
   random.seed(1)
-  for i in xrange(1000):
+  for i in range(1000):
     x = x0 + float(i) * dx
     vecx.append(x)
     y = (random.random() - 0.5) * 2.0 + 2.0 + math.exp(-(x-4.0)**2/0.1)
@@ -289,12 +290,12 @@ Output:
   outputs = ProcessBackground(InputWorkspace=ws1, WorkspaceIndex=0, OutputWorkspace="ws2", Options="DeleteRegion",
         LowerBound = 3.0, UpperBound = 5.0)
 
-  print "Input has %d data points; Output has %d data points." % ( len(ws1.readX(0)), len(outputs[0].readX(0)) )
+  print("Input has {} data points; Output has {} data points.".format(len(ws1.readX(0)), len(outputs[0].readX(0))))
 
 .. testcleanup:: testDelRegion
 
   DeleteWorkspace(Workspace=ws1)
-  for i in xrange(3):
+  for i in range(3):
     DeleteWorkspace(Workspace=outputs[i])
 
 Output:
@@ -318,7 +319,7 @@ Output:
   dx = 0.01
 
   random.seed(1)
-  for i in xrange(1000):
+  for i in range(1000):
     x = float(i)*dx
     y = 5 + (random.random() - 1)*2. + 10*math.exp( -(x-2.0)**2/0.1**2 ) + 20*math.exp( -(x-7.5)**2/0.05**2 )
     e = math.sqrt(y)
@@ -340,13 +341,13 @@ Output:
       OutputNormalisedCovarianceMatrix='background_NormalisedCovarianceMatrix', OutputParameters='background_Parameters', OutputWorkspace='background_Workspace')
 
   outparws = mtd["background_Parameters"]
-  print "Input workspace has %d data points; Output workspace has %d data points." % (len(ws.readX(0)), len(outputs[0].readX(0)))
-  print "Fitted background parameters: A0 = %.5e, A1 = %.5e, Chi-square = %.5f" % (outparws.cell(0, 1), outparws.cell(1,1), outparws.cell(2,1))
+  print("Input workspace has {} data points; Output workspace has {} data points.".format(len(ws.readX(0)), len(outputs[0].readX(0))))
+  print("Fitted background parameters: A0 = {:.5e}, A1 = {:.5e}, Chi-square = {:.5f}".format(outparws.cell(0, 1), outparws.cell(1,1), outparws.cell(2,1)))
 
 .. testcleanup:: testRmPeaks
 
   DeleteWorkspace(Workspace=ws)
-  for i in xrange(3):
+  for i in range(3):
       DeleteWorkspace(Workspace=outputs[i])
   DeleteWorkspace(Workspace="background_NormalisedCovarianceMatrix")
   DeleteWorkspace(Workspace="background_Parameters")

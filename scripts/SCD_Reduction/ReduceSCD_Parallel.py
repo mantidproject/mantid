@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
 
 # File: ReduceSCD_Parallel.py
@@ -22,18 +28,19 @@
 
 #
 # _v1: December 3rd 2013. Mads Joergensen
-# This version now includes the posibility to use the 1D cylindrical integration method
-# and the posibility to load a UB matrix which will be used for integration of the individual
+# This version now includes the possibility to use the 1D cylindrical integration method
+# and the possibility to load a UB matrix which will be used for integration of the individual
 # runs and to index the combined file (Code from Xiapoing).
 #
 
 #
 # _v2: December 3rd 2013. Mads Joergensen
-# Adds the posibility to optimize the loaded UB for each run for a better peak prediction
+# Adds the possibility to optimize the loaded UB for each run for a better peak prediction
 # It is also possible to find the common UB by using lattice parameters of the first
 # run or the loaded matirix instead of the default FFT method
 #
 
+from __future__ import (absolute_import, division, print_function)
 import os
 import sys
 import threading
@@ -45,8 +52,8 @@ sys.path.append("/opt/mantidnightly/bin") # noqa
 
 from mantid.simpleapi import *
 
-print "API Version"
-print apiVersion()
+print("API Version")
+print(apiVersion())
 
 start_time = time.time()
 
@@ -63,16 +70,17 @@ class ProcessThread ( threading.Thread ):
         self.command = command
 
     def run ( self ):
-        print 'STARTING PROCESS: ' + self.command
+        print('STARTING PROCESS: ' + self.command)
         os.system( self.command )
 
 # -------------------------------------------------------------------------
+
 
 #
 # Get the config file name from the command line
 #
 if len(sys.argv) < 2:
-    print "You MUST give the config file name on the command line"
+    print("You MUST give the config file name on the command line")
     exit(0)
 
 config_files = sys.argv[1:]
@@ -148,9 +156,9 @@ while not all_done:
     if len(procList) == 0 and len(active_list) == 0 :
         all_done = True
 
-print "\n**************************************************************************************"
-print   "************** Completed Individual Runs, Starting to Combine Results ****************"
-print   "**************************************************************************************\n"
+print("\n**************************************************************************************")
+print("************** Completed Individual Runs, Starting to Combine Results ****************")
+print("**************************************************************************************\n")
 
 #
 # First combine all of the integrated files, by reading the separate files and
@@ -167,9 +175,11 @@ first_time = True
 
 if output_nexus:
     #Only need this for instrument for peaks_total
-    short_filename = "%s_%s_event.nxs" % (instrument_name, str(run_nums[0]))
+    short_filename = "%s_%s" % (instrument_name, str(run_nums[0]))
     if data_directory is not None:
-        full_name = data_directory + "/" + short_filename
+        full_name = data_directory + "/" + short_filename + ".nxs.h5"
+        if not os.path.exists(full_name):
+            full_name = data_directory + "/" + short_filename + "_event.nxs"
     else:
         candidates = FileFinder.findRuns(short_filename)
         full_name = ""
@@ -177,10 +187,11 @@ if output_nexus:
             if os.path.exists(item):
                 full_name = str(item)
 
-        if not full_name.endswith('nxs'):
-            print "Exiting since the data_directory was not specified and"
-            print "findnexus failed for event NeXus file: " + instrument_name + " " + str(run)
+        if not full_name.endswith('nxs') and not full_name.endswith('h5'):
+            print("Exiting since the data_directory was not specified and")
+            print("findnexus failed for event NeXus file: " + instrument_name + " " + str(run_nums[0]))
             exit(0)
+
     #
     # Load the first data file to find instrument
     #
@@ -220,7 +231,7 @@ if not use_cylindrical_integration:
 
 #
 # Load the combined file and re-index all of the peaks together.
-# Save them back to the combined Niggli file (Or selcted UB file if in use...)
+# Save them back to the combined Niggli file (Or selected UB file if in use...)
 #
     if output_nexus:
         peaks_ws = Load( Filename=niggli_integrate_file )
@@ -282,7 +293,7 @@ if not use_cylindrical_integration:
 
 if use_cylindrical_integration:
     if (cell_type is not None) or (centering is not None):
-        print "WARNING: Cylindrical profiles are NOT transformed!!!"
+        print("WARNING: Cylindrical profiles are NOT transformed!!!")
   # Combine *.profiles files
     filename = output_directory + '/' + exp_name + '.profiles'
     outputFile = open( filename, 'w' )
@@ -316,11 +327,11 @@ if use_cylindrical_integration:
 
 end_time = time.time()
 
-print "\n**************************************************************************************"
-print   "****************************** DONE PROCESSING ALL RUNS ******************************"
-print   "**************************************************************************************\n"
+print("\n**************************************************************************************")
+print("****************************** DONE PROCESSING ALL RUNS ******************************")
+print("**************************************************************************************\n")
 
-print 'Total time:   ' + str(end_time - start_time) + ' sec'
-print 'Config file: ' + ", ".join(config_files)
-print 'Script file:  ' + reduce_one_run_script + '\n'
-print
+print('Total time:   ' + str(end_time - start_time) + ' sec')
+print('Config file: ' + ", ".join(config_files))
+print('Script file:  ' + reduce_one_run_script + '\n')
+print()

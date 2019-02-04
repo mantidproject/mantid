@@ -1,9 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHM_DETECTEFFICIENCYCOR_H_
 #define MANTID_ALGORITHM_DETECTEFFICIENCYCOR_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/V3D.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Objects/IObject.h"
+#include "MantidKernel/V3D.h"
+
+#include <list>
 
 namespace Mantid {
 namespace Algorithms {
@@ -56,27 +66,6 @@ namespace Algorithms {
 
     @author Steve Williams based on code by T.G.Perring
     @date 6/10/2009
-
-    Copyright &copy; 2008-9 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
- National Laboratory & European Spallation Source
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>.
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport DetectorEfficiencyCor : public API::Algorithm {
 public:
@@ -93,6 +82,9 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"He3TubeEfficiency", "DetectorEfficiencyCorUser"};
+  }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override {
     return "CorrectionFunctions\\EfficiencyCorrections;Inelastic\\Corrections";
@@ -102,15 +94,16 @@ private:
   /// Retrieve algorithm properties
   void retrieveProperties();
   /// Correct the given spectra index for efficiency
-  void correctForEfficiency(int64_t spectraIn);
+  void correctForEfficiency(int64_t spectraIn,
+                            const API::SpectrumInfo &spectrumInfo);
   /// Calculate one over the wave vector for 2 bin bounds
   double calculateOneOverK(double loBinBound, double uppBinBound) const;
   /// Sets the detector geometry cache if necessary
-  void getDetectorGeometry(const Geometry::IDetector_const_sptr &det,
-                           double &detRadius, Kernel::V3D &detAxis);
+  void getDetectorGeometry(const Geometry::IDetector &det, double &detRadius,
+                           Kernel::V3D &detAxis);
   /// Computes the distance to the given shape from a starting point
   double distToSurface(const Kernel::V3D &start,
-                       const Geometry::Object *shape) const;
+                       const Geometry::IObject *shape) const;
   /// Computes the detector efficiency for a given paramater
   double detectorEfficiency(const double alpha) const;
   /// Computes an approximate expansion of a Chebysev polynomial
@@ -134,7 +127,7 @@ private:
 
   /// A lookup of previously seen shape objects used to save calculation time as
   /// most detectors have the same shape
-  std::map<const Geometry::Object *, std::pair<double, Kernel::V3D>>
+  std::map<const Geometry::IObject *, std::pair<double, Kernel::V3D>>
       m_shapeCache;
   /// Sample position
   Kernel::V3D m_samplePos;

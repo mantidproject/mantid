@@ -1,9 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CURVEFITTING_COSTFUNCUNWEIGHTEDLEASTSQUARESTEST_H_
 #define MANTID_CURVEFITTING_COSTFUNCUNWEIGHTEDLEASTSQUARESTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionFactory.h"
+#include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/CostFunctions/CostFuncUnweightedLeastSquares.h"
 
@@ -24,7 +30,9 @@ public:
   }
 
   void testGetFitWeights() {
-    /* The test makes sure that the returned weights are always 1.0 */
+    /* The test makes sure that the returned weights are always 1.0,
+     * except when the original weight was 0.
+     */
     FunctionDomain1DVector d1d(std::vector<double>(20, 1.0));
     FunctionValues_sptr values = boost::make_shared<FunctionValues>(d1d);
 
@@ -37,7 +45,8 @@ public:
     std::vector<double> weights = uwls.getFitWeights(values);
 
     TS_ASSERT_EQUALS(weights.size(), values->size());
-    for (size_t i = 0; i < weights.size(); ++i) {
+    TS_ASSERT_EQUALS(weights.front(), 0)
+    for (size_t i = 1; i < weights.size(); ++i) {
       TS_ASSERT_EQUALS(weights[i], 1.0);
     }
   }

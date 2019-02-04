@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -93,20 +93,21 @@ Usage
 
 .. testcode:: UnwrapMonitor
 
-    # Create a raw data workspace.
-    ws = CreateSampleWorkspace()
+   # Create a raw data workspace.
+   ws = CreateSampleWorkspace()
 
-    # The result variable will contain a tuple: (OutputWorkspace, JoinWaveLength)
-    # To access individual outputs use result[i] where i is the index of the required output.
-    result = UnwrapMonitor(InputWorkspace=ws,LRef=11)
+   # The result variable will contain a tuple: (OutputWorkspace, JoinWaveLength)
+   # To access individual outputs use result[i] where i is the index of the required output.
+   result = UnwrapMonitor(InputWorkspace=ws,LRef=11)
 
-    print "JoinWaveLength is: " + str(result[1])
+   print("JoinWaveLength is: " + str(result[1]))
 
 Output:
 
 .. testoutput:: UnwrapMonitor
+   :options: +ELLIPSIS
 
-    JoinWaveLength is: 1.42417223264
+   JoinWaveLength is: 1.4241722...
 
 .. categories::
 

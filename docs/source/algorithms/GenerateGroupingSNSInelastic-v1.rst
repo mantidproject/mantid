@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -32,11 +32,11 @@ Usage
     #check that it works
     import os.path
     if(os.path.isfile(outputFilename)):
-        print "Found file cncs.xml"
+        print("Found file cncs.xml")
     
     ws=Load("CNCS_7860")
     wsg=GroupDetectors(ws,outputFilename)
-    print "The grouped workspace has ",wsg.getNumberHistograms(), " histograms"
+    print("The grouped workspace has {} histograms".format(wsg.getNumberHistograms()))
 
 .. testcleanup:: GenerateGroupingSNSInelastic
 
@@ -51,7 +51,7 @@ Output:
 .. testoutput:: GenerateGroupingSNSInelastic
 
     Found file cncs.xml
-    The grouped workspace has  800  histograms
+    The grouped workspace has 800 histograms
 
 If one would use LoadDetectorsGroupingFile on cncs.xml one would get a workspace that looks like
 

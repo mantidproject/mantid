@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MDALGORITHMS_MASKMDTEST_H_
 #define MANTID_MDALGORITHMS_MASKMDTEST_H_
 
@@ -37,7 +43,7 @@ private:
     if (!ws)
       return;
 
-    IMDIterator *it = ws->createIterator();
+    auto it = ws->createIterator();
     size_t nMasked = 0;
     for (size_t i = 0; i < it->getDataSize(); ++i) {
       if (it->getIsMasked()) {

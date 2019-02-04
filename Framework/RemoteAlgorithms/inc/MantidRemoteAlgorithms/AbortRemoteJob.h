@@ -1,13 +1,24 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef ABORTREMOTEJOB_H_
 #define ABORTREMOTEJOB_H_
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 
 namespace Mantid {
 namespace RemoteAlgorithms {
 
-class DLLExport AbortRemoteJob : public Mantid::API::Algorithm {
+class DLLExport AbortRemoteJob : public Mantid::API::Algorithm,
+                                 public API::DeprecatedAlgorithm {
 public:
+  /// Default constructor
+  AbortRemoteJob();
+
   /// Algorithm's name
   const std::string name() const override { return "AbortRemoteJob"; }
   /// Summary of algorithms purpose

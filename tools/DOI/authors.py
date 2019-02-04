@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
 from itertools import ifilterfalse
 import os
@@ -88,6 +94,7 @@ _translations = {
     'Federico M Pouzols'      : 'Pouzols, Federico M',
     'FedeMPouzols'            : 'Pouzols, Federico M',
     'Federico Montesino Pouzols': 'Pouzols, Federico M',
+    'Fede'                    : 'Pouzols, Federico M',
     'Anton Piccardo-Selg'     : 'Piccardo-Selg, Anton',
     'Lottie Greenwood'        : 'Greenwood, Lottie',
     'Dan Nixon'               : 'Nixon, Dan',
@@ -95,6 +102,7 @@ _translations = {
     'John Hill'               : 'Hill, John',
     'Ian Bush'                : 'Bush, Ian',
     'Steven Hahn'             : 'Hahn, Steven',
+    'Steven E. Hahn'          : 'Hahn, Steven',
     'Joachim Wuttke (o)'      : 'Wuttke, Joachim',
     'DiegoMonserrat'          : 'Monserrat, Diego',
     'Diego Monserrat'         : 'Monserrat, Diego',
@@ -111,6 +119,7 @@ _translations = {
     'Matthew D Jones'         : 'Jones, Matthew D.',
     'Matt King'               : 'King, Matt',
     'Jiao Lin'                : 'Lin, Jiao',
+    'Jiao'                    : 'Lin, Jiao',
     'Simon Heybrock'          : 'Heybrock, Simon',
     'Elliot Oram'             : 'Oram, Elliot',
     'Dominic Oram'            : 'Oram, Dominic',
@@ -128,11 +137,53 @@ _translations = {
     'DavidFair'               : 'Fairbrother, David',
     'Eltayeb Ahmed'           : 'Ahmed, Eltayeb',
     'Dimitar Tasev'           : 'Tasev, Dimitar',
+    'Dimitar Borislavov Tasev': 'Tasev, Dimitar',
     'Antti Soininen'          : 'Soininen, Antti',
+    'Antti Soininnen'         : 'Soininen, Antti',
     'Pranav Bahuguna'         : 'Bahuguna, Pranav',
     'Louise McCann'           : 'McCann, Louise',
     'louisemccann'            : 'McCann, Louise',
-    'Gagik Vardanyan'         : 'Vardanyan, Gagik'
+    'Gagik Vardanyan'         : 'Vardanyan, Gagik',
+    'Verena Reimund'          : 'Reimund, Verena',
+    'reimundILL'              : 'Reimund, Verena',
+    'Krzysztof Dymkowski'     : 'Dymkowski, Krzysztof',
+    'dymkowsk'                : 'Dymkowski, Krzysztof',
+    'krzych'                  : 'Dymkowski, Krzysztof',
+    'Gemma Guest'             : 'Guest, Gemma',
+    'Anthony Lim'             : 'Lim, Anthony',
+    'Anthony Lim'             : 'Lim, Anthony',
+    'AnthonyLim23'            : 'Lim, Anthony',
+    'Anthony'                 : 'Lim, Anthony',
+    'CipPruteanu'             : 'Ciprian Pruteanu',
+    'Tasev'                   : 'Tasev, Dimitar',
+    'Mayer Alexandra'         : 'Mayer, Alexandra',
+    'simonfernandes'          : 'Fernandes, Simon',
+    'Simon Fernandes'         : 'Fernandes, Simon',
+    'brandonhewer'            : 'Hewer, Brandon',
+    'Brandon Hewer'            : 'Hewer, Brandon',
+    'Thomas Lohnert'          : 'Lohnert, Thomas',
+    'James Tricker'           : 'Tricker, James',
+    'Matthew Bowles'          : 'Bowles, Matthew',
+    'MatthewBowles'           : 'Bowles, Matthew',
+    'josephframsay'           : 'Ramsay, Joseph F.',
+    'Joseph Ramsay'           : 'Ramsay, Joseph F.',
+    '='                       : 'Ramsay, Joseph F.',
+    'Joe Ramsay'              : 'Ramsay, Joseph F.',
+    'Adam Washington'         : 'Wahington, Adam',
+    'Edward Brown'            : 'Brown, Edward',
+    'Matthew Andrew'          : 'Andrew, Matthew',
+    'Mantid-Matthew'          : 'Andrew, Matthew',
+    'Keith Butler'            : 'Butler, Keith T.',
+    'fodblog'                 : 'Butler, Keith T.',
+    'Marshall McDonnell'      : 'McDonnell, Marshall',
+    'McDonnell, Marshall T'      : 'McDonnell, Marshall',
+    'Neil Vaytet'             : 'Vaytet, Neil',
+    'Sam'                     : 'Sam Jones',
+    'Tom Jubb'                : 'Jubb, Tom',
+    'T Jubb'                  : 'Jubb, Tom',
+    'TWJubb'                  : 'Jubb, Tom',
+    'Brendan Sullivan'        : 'Sullivan, Brendan',
+    'Joachim Coenen'          : 'Coenen, Joachim'
 }
 
 # Used to ensure a Git author does not appear in any of the DOIs.  This is NOT
@@ -146,6 +197,11 @@ _blacklist = [
     'Chris Kerr',
     'Thomas Brooks',
     'mantid-builder',
+    'Erik B Knudsen',
+    'Bartomeu Llopis',
+    'dpaj',
+    'Daniel Pajerowski',
+    'thomueller'
 ]
 
 # The whitelist is used for sponsors / contributors who should be included,
@@ -189,7 +245,7 @@ def run_from_script_dir(func):
 def _get_all_git_tags():
     '''Returns a list of all the tags in the tree.
     '''
-    return subprocess.check_output(['git', 'tag']).replace('"', '').split('\n')
+    return subprocess.check_output(['git', 'tag', '--sort=version:refname']).replace('"', '').split('\n')
 
 
 def _clean_up_author_list(author_list):
@@ -253,7 +309,6 @@ def get_previous_tag(tag):
     all_tags = _get_all_git_tags()
     if tag not in all_tags:
         return None
-
     return all_tags[all_tags.index(tag) - 1]
 
 

@@ -30,21 +30,21 @@
  *                                                                         *
  ***************************************************************************/
 #include "SetColValuesDialog.h"
+#include "MantidQtWidgets/Common/ScriptEditor.h"
 #include "Table.h"
-#include "MantidQtMantidWidgets/ScriptEditor.h"
 
+#include <QComboBox>
+#include <QGroupBox>
+#include <QLabel>
+#include <QLayout>
+#include <QList>
+#include <QMessageBox>
+#include <QPushButton>
+#include <QSpinBox>
 #include <QTableWidget>
 #include <QTableWidgetSelectionRange>
-#include <QList>
-#include <QLayout>
-#include <QSpinBox>
-#include <QGroupBox>
-#include <QPushButton>
-#include <QLabel>
-#include <QComboBox>
-#include <QTextEdit>
 #include <QTextCursor>
-#include <QMessageBox>
+#include <QTextEdit>
 #ifdef SCRIPTING_PYTHON
 #include <QCheckBox>
 #endif
@@ -68,6 +68,8 @@ SetColValuesDialog::SetColValuesDialog(ScriptingEnv *env, Table *t,
   end->setMinimum(1);
   hbox1->addWidget(end);
 
+  // Ideally this would be checked at compile time. Until we have 'constexpr if`
+  // on all platforms, the added complexity and minimal cost isn't worthwhile.
   if (sizeof(int) == 2) { // 16 bit signed integer
     start->setMaximum(0x7fff);
     end->setMaximum(0x7fff);

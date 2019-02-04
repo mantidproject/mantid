@@ -1,10 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/Algorithms/SplineSmoothing.h"
-#include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/BoundedValidator.h"
 
 #include <algorithm>
@@ -208,9 +215,9 @@ SplineSmoothing::convertBinnedData(MatrixWorkspace_sptr workspace) {
 }
 
 /**
-* Converts the output workspace back to histogram data if it was
-* converted to point data previously
-*/
+ * Converts the output workspace back to histogram data if it was
+ * converted to point data previously
+ */
 void SplineSmoothing::convertToHistogram() {
   auto alg = createChildAlgorithm("ConvertToHistogram");
   alg->setProperty("InputWorkspace", m_outputWorkspace);

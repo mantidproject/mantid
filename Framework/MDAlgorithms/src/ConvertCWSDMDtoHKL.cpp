@@ -1,26 +1,32 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/ConvertCWSDMDtoHKL.h"
 
-#include "MantidAPI/WorkspaceProperty.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
+#include "MantidAPI/WorkspaceProperty.h"
 
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/MDGeometry/HKL.h"
-#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/UnitLabelTypes.h"
 
-#include "MantidDataObjects/MDEventFactory.h"
 #include "MantidAPI/ExperimentInfo.h"
-#include "MantidGeometry/Instrument/ComponentHelper.h"
-#include "MantidMDAlgorithms/MDWSDescription.h"
-#include "MantidMDAlgorithms/MDWSTransform.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidDataObjects/MDBoxBase.h"
+#include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDEventInserter.h"
+#include "MantidMDAlgorithms/MDWSDescription.h"
+#include "MantidMDAlgorithms/MDWSTransform.h"
 
 #include <fstream>
 
@@ -105,7 +111,7 @@ void ConvertCWSDMDtoHKL::exec() {
 
   std::string qsamplefilename = getPropertyValue("QSampleFileName");
   // Abort with an empty string
-  if (qsamplefilename.size() > 0)
+  if (!qsamplefilename.empty())
     saveEventsToFile(qsamplefilename, vec_event_qsample, vec_event_signal,
                      vec_event_det);
 
@@ -116,7 +122,7 @@ void ConvertCWSDMDtoHKL::exec() {
   // Get file name
   std::string hklfilename = getPropertyValue("HKLFileName");
   // Abort mission if no file name is given
-  if (hklfilename.size() > 0)
+  if (!hklfilename.empty())
     saveEventsToFile(hklfilename, vec_event_hkl, vec_event_signal,
                      vec_event_det);
 
@@ -136,7 +142,7 @@ void ConvertCWSDMDtoHKL::exec() {
 
 void ConvertCWSDMDtoHKL::getUBMatrix() {
   std::string peakwsname = getPropertyValue("PeaksWorkspace");
-  if (peakwsname.size() > 0 &&
+  if (!peakwsname.empty() &&
       AnalysisDataService::Instance().doesExist(peakwsname)) {
     // Get from peak works
     DataObjects::PeaksWorkspace_sptr peakws = getProperty("PeaksWorkspace");
@@ -175,7 +181,7 @@ void ConvertCWSDMDtoHKL::exportEvents(
   vec_event_det.resize(numevents);
 
   // Go through to get value
-  IMDIterator *mditer = mdws->createIterator();
+  auto mditer = mdws->createIterator();
   size_t nextindex = 1;
   bool scancell = true;
   size_t currindex = 0;
@@ -221,7 +227,7 @@ void ConvertCWSDMDtoHKL::saveMDToFile(
   std::string filename = getPropertyValue("QSampleFileName");
 
   // Abort with an empty string
-  if (filename.size() == 0)
+  if (filename.empty())
     return;
   if (vec_event_qsample.size() != vec_event_signal.size())
     throw std::runtime_error(

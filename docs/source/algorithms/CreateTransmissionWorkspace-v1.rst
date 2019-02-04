@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -50,11 +50,12 @@ Usage
       MonitorBackgroundWavelengthMin = 15,
       MonitorBackgroundWavelengthMax = 17,
       MonitorIntegrationWavelengthMin = 4,
-      MonitorIntegrationWavelengthMax = 10)
+      MonitorIntegrationWavelengthMax = 10,
+      Version=1)
 
-    print "The first four transWS Y values are:"
+    print("The first four transWS Y values are:")
     for i in range (4):
-        print "%.4f" % transWS.readY(0)[i]
+        print("{:.4f}".format(transWS.readY(0)[i]))
 
 Output:
 
@@ -85,11 +86,12 @@ Output:
       MonitorBackgroundWavelengthMin = 15,
       MonitorBackgroundWavelengthMax = 17,
       MonitorIntegrationWavelengthMin = 4,
-      MonitorIntegrationWavelengthMax = 10)
+      MonitorIntegrationWavelengthMax = 10,
+      Version=1)
 
-    print "The first four transWS Y values are:"
+    print("The first four transWS Y values are:")
     for i in range (4):
-        print "%.4f" % transWS.readY(0)[i]
+        print("{:.4f}".format(transWS.readY(0)[i]))
 
 Output:
 

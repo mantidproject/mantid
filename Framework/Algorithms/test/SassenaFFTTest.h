@@ -1,14 +1,21 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_SASSENAFFTTEST_H_
 #define MANTID_ALGORITHMS_SASSENAFFTTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include <cmath>
-#include "MantidAlgorithms/SassenaFFT.h"
 #include "MantidAPI/Axis.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidDataHandling/SaveAscii.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAlgorithms/SassenaFFT.h"
+#include "MantidDataHandling/SaveAscii.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/UnitFactory.h"
+#include <cmath>
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 
@@ -59,8 +66,8 @@ public:
   }
 
   /* FFT of a real symmetric Gaussian with detailed balance condition
-  *
-  */
+   *
+   */
   void test_DetailedBalanceCondition() {
     const double T(100);
     // params defines (height,stdev) values for fqt.Re, fqt.Im, and fqt0,
@@ -143,10 +150,10 @@ private:
       double sum = 0.0;
       double average = 0.0;
       MantidVec::iterator itx = xv.begin();
-      for (MantidVec::iterator it = yv.begin(); it != yv.end(); ++it) {
+      for (double &y : yv) {
         factor = exp(exponentFactor * (*itx));
-        sum += (*it) * factor;
-        average += (*it) * (*itx) * factor;
+        sum += y * factor;
+        average += y * (*itx) * factor;
         ++itx;
       }
       average /= sum;
@@ -185,9 +192,9 @@ private:
       xv = ws->readX(i);
       MantidVec::iterator itx = xv.begin();
       double sum = 0.0;
-      for (MantidVec::iterator it = yv.begin(); it != yv.end(); ++it) {
+      for (double &y : yv) {
         factor = exp(exponentFactor * (*itx));
-        sum += (*it) * factor;
+        sum += y * factor;
         ++itx;
       }
       sum *= dx / static_cast<double>(nbins);
@@ -238,19 +245,20 @@ private:
 
     const double dt = 0.01; // time unit, in picoseconds
     MantidVec xv;
+    xv.reserve(nbins);
     for (size_t i = 0; i < nbins; i++) {
       int j = -static_cast<int>(nbins / 2) + static_cast<int>(i);
-      xv.push_back(dt * static_cast<double>(j));
+      xv.emplace_back(dt * static_cast<double>(j));
     }
 
     double sigma;
     MantidVec yv(nbins);
     // each spectra is a gaussian of same Height but different stdev
     for (size_t i = 0; i < nspectra; i++) {
-      ws->dataX(i) = xv;
+      ws->mutableX(i) = xv;
       sigma = sigma0 / (1 + static_cast<double>(i));
       this->Gaussian(xv, yv, Heigth, sigma);
-      ws->dataY(i) = yv;
+      ws->mutableY(i) = yv;
     }
 
     API::AnalysisDataService::Instance().add(wsName, ws);

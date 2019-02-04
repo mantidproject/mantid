@@ -1,7 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_KERNEL_PROGRESSBASE_H_
 #define MANTID_KERNEL_PROGRESSBASE_H_
 
 #include "MantidKernel/DllConfig.h"
+
+#include <atomic>
 #include <string>
 
 namespace Mantid {
@@ -39,12 +47,12 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Increments the loop counter by 1, then
    * sends the progress notification on behalf of its algorithm.
-  */
+   */
   void report() {
     // This function was put inline for highest speed.
     if (++m_i - m_last_reported < m_notifyStep)
       return;
-    m_last_reported = m_i;
+    m_last_reported.store(m_i.load());
     this->doReport("");
   }
 
@@ -75,16 +83,16 @@ protected:
   /// Progress increment at each loop
   double m_step;
   /// Loop counter
-  int64_t m_i;
+  std::atomic<int64_t> m_i;
   /// Last loop counter value the was a peport
-  int64_t m_last_reported;
+  std::atomic<int64_t> m_last_reported;
   /// Timer that is started when the progress bar is constructed.
   Kernel::Timer *m_timeElapsed;
   /// Digits of precision in the reporting
   int m_notifyStepPrecision;
 };
 
-} // namespace Mantid
 } // namespace Kernel
+} // namespace Mantid
 
 #endif /* MANTID_KERNEL_PROGRESSBASE_H_ */

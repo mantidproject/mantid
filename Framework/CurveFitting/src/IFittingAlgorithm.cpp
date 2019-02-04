@@ -1,5 +1,12 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/IFittingAlgorithm.h"
 
+#include "MantidCurveFitting/CostFunctions/CostFuncFitting.h"
 #include "MantidCurveFitting/FitMW.h"
 #include "MantidCurveFitting/GeneralDomainCreator.h"
 #include "MantidCurveFitting/HistogramDomainCreator.h"
@@ -7,6 +14,7 @@
 #include "MantidCurveFitting/MultiDomainCreator.h"
 #include "MantidCurveFitting/SeqDomainSpectrumCreator.h"
 
+#include "MantidAPI/CostFunctionFactory.h"
 #include "MantidAPI/FunctionProperty.h"
 #include "MantidAPI/IFunction1DSpectrum.h"
 #include "MantidAPI/IFunctionGeneral.h"
@@ -53,7 +61,7 @@ IDomainCreator *createDomainCreator(const IFunction *fun,
   }
   return creator;
 }
-}
+} // namespace
 
 //----------------------------------------------------------------------------------------------
 
@@ -65,7 +73,7 @@ const std::string IFittingAlgorithm::category() const { return "Optimization"; }
  */
 void IFittingAlgorithm::init() {
   declareProperty(
-      make_unique<API::FunctionProperty>("Function"),
+      make_unique<API::FunctionProperty>("Function", Direction::InOut),
       "Parameters defining the fitting function and its initial values");
 
   declareProperty(make_unique<API::WorkspaceProperty<API::Workspace>>(
@@ -74,7 +82,8 @@ void IFittingAlgorithm::init() {
   declareProperty("IgnoreInvalidData", false,
                   "Flag to ignore infinities, NaNs and data with zero errors.");
 
-  std::vector<std::string> domainTypes{"Simple", "Sequential", "Parallel"};
+  std::array<std::string, 3> domainTypes = {
+      {"Simple", "Sequential", "Parallel"}};
   declareProperty(
       "DomainType", "Simple",
       Kernel::IValidator_sptr(
@@ -82,7 +91,7 @@ void IFittingAlgorithm::init() {
       "The type of function domain to use: Simple, Sequential, or Parallel.",
       Kernel::Direction::Input);
 
-  std::vector<std::string> evaluationTypes{"CentrePoint", "Histogram"};
+  std::array<std::string, 2> evaluationTypes = {{"CentrePoint", "Histogram"}};
   declareProperty("EvaluationType", "CentrePoint",
                   Kernel::IValidator_sptr(
                       new Kernel::ListValidator<std::string>(evaluationTypes)),
@@ -91,6 +100,14 @@ void IFittingAlgorithm::init() {
                   "centre of each bin. If it is \"Histogram\" then function is "
                   "integrated within the bin and the integrals returned.",
                   Kernel::Direction::Input);
+  declareProperty("PeakRadius", 0,
+                  "A value of the peak radius the peak functions should use. A "
+                  "peak radius defines an interval on the x axis around the "
+                  "centre of the peak where its values are calculated. Values "
+                  "outside the interval are not calculated and assumed zeros."
+                  "Numerically the radius is a whole number of peak widths "
+                  "(FWHM) that fit into the interval on each side from the "
+                  "centre. The default value of 0 means the whole x axis.");
 
   initConcrete();
 }
@@ -238,7 +255,6 @@ void IFittingAlgorithm::addWorkspaces() {
       const size_t index =
           suffix.empty() ? 0 : boost::lexical_cast<size_t>(suffix.substr(1));
       creator->declareDatasetProperties(suffix, false);
-      m_workspacePropertyNames.push_back(workspacePropertyName);
       if (!m_domainCreator) {
         m_domainCreator.reset(creator);
       }
@@ -260,6 +276,69 @@ void IFittingAlgorithm::addWorkspaces() {
     m_workspacePropertyNames.clear();
   }
 }
+
+/// Return names of registered cost function for CostFuncFitting
+/// dynamic type.
+std::vector<std::string> IFittingAlgorithm::getCostFunctionNames() const {
+  std::vector<std::string> out;
+  auto &factory = CostFunctionFactory::Instance();
+  auto names = factory.getKeys();
+  out.reserve(names.size());
+  for (auto &name : names) {
+    if (boost::dynamic_pointer_cast<CostFunctions::CostFuncFitting>(
+            factory.create(name))) {
+      out.push_back(name);
+    }
+  }
+  return out;
+}
+
+/// Declare a "CostFunction" property.
+void IFittingAlgorithm::declareCostFunctionProperty() {
+  Kernel::IValidator_sptr costFuncValidator =
+      boost::make_shared<Kernel::ListValidator<std::string>>(
+          getCostFunctionNames());
+  declareProperty(
+      "CostFunction", "Least squares", costFuncValidator,
+      "The cost function to be used for the fit, default is Least squares",
+      Kernel::Direction::InOut);
+}
+
+/// Create a cost function from the "CostFunction" property
+/// and make it ready for evaluation.
+boost::shared_ptr<CostFunctions::CostFuncFitting>
+IFittingAlgorithm::getCostFunctionInitialized() const {
+  // Function may need some preparation.
+  m_function->sortTies();
+  m_function->setUpForFit();
+
+  API::FunctionDomain_sptr domain;
+  API::FunctionValues_sptr values;
+  m_domainCreator->createDomain(domain, values);
+
+  // Set peak radius to the values which will be passed to
+  // all IPeakFunctions
+  int peakRadius = getProperty("PeakRadius");
+  if (auto d1d = dynamic_cast<API::FunctionDomain1D *>(domain.get())) {
+    if (peakRadius != 0) {
+      d1d->setPeakRadius(peakRadius);
+    }
+  }
+
+  // Do something with the function which may depend on workspace.
+  m_domainCreator->initFunction(m_function);
+
+  // get the cost function which must be a CostFuncFitting
+  auto costFunction =
+      boost::dynamic_pointer_cast<CostFunctions::CostFuncFitting>(
+          API::CostFunctionFactory::Instance().create(
+              getPropertyValue("CostFunction")));
+
+  costFunction->setFittingFunction(m_function, domain, values);
+
+  return costFunction;
+}
+
 //----------------------------------------------------------------------------------------------
 /// Execute the algorithm.
 void IFittingAlgorithm::exec() {

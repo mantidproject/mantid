@@ -1,13 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAHANDLING_SAVEDETECTORSGROUPINGTEST_H_
 #define MANTID_DATAHANDLING_SAVEDETECTORSGROUPINGTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/System.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Run.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/SaveDetectorsGrouping.h"
 #include "MantidDataHandling/LoadDetectorsGroupingFile.h"
+#include "MantidDataHandling/SaveDetectorsGrouping.h"
 #include "Poco/File.h"
 
 using namespace Mantid;
@@ -73,10 +80,10 @@ public:
         boost::dynamic_pointer_cast<DataObjects::GroupingWorkspace>(
             API::AnalysisDataService::Instance().retrieve("Vulcan_Group2"));
 
-    TS_ASSERT_DELTA(gws2->dataY(0)[0], 1.0, 1.0E-5);
-    TS_ASSERT_DELTA(gws2->dataY(3695)[0], 1.0, 1.0E-5);
-    TS_ASSERT_DELTA(gws2->dataY(3696)[0], 2.0, 1.0E-5);
-    TS_ASSERT_DELTA(gws2->dataY(7000)[0], 2.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws2->y(0)[0], 1.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws2->y(3695)[0], 1.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws2->y(3696)[0], 2.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws2->y(7000)[0], 2.0, 1.0E-5);
 
     // 5. Clear
     Poco::File file(file1);

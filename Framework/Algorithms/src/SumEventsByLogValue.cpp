@@ -1,9 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/SumEventsByLogValue.h"
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/Column.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -82,7 +89,7 @@ std::map<std::string, std::string> SumEventsByLogValue::validateInputs() {
   } catch (Exception::NotFoundError &) {
     errors["LogName"] = "The log '" + m_logName +
                         "' does not exist in the workspace '" +
-                        m_inputWorkspace->name() + "'.";
+                        m_inputWorkspace->getName() + "'.";
     return errors;
   }
 
@@ -148,7 +155,7 @@ void SumEventsByLogValue::createTableOutput(
   std::vector<int> Y(xLength);
   const int numSpec = static_cast<int>(m_inputWorkspace->getNumberHistograms());
   Progress prog(this, 0.0, 1.0, numSpec + xLength);
-  PARALLEL_FOR1(m_inputWorkspace)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWorkspace))
   for (int spec = 0; spec < numSpec; ++spec) {
     PARALLEL_START_INTERUPT_REGION
     const IEventList &eventList = m_inputWorkspace->getSpectrum(spec);
@@ -305,14 +312,15 @@ void SumEventsByLogValue::addMonitorCounts(ITableWorkspace_sptr outputWorkspace,
   if (!monitorWorkspace)
     return;
 
+  const auto &spectrumInfo = monitorWorkspace->spectrumInfo();
+
   const int xLength = maxVal - minVal + 1;
   // Loop over the spectra - there will be one per monitor
   for (std::size_t spec = 0; spec < monitorWorkspace->getNumberHistograms();
        ++spec) {
     try {
       // Create a column for this monitor
-      const std::string monitorName =
-          monitorWorkspace->getDetector(spec)->getName();
+      const std::string monitorName = spectrumInfo.detector(spec).getName();
       auto monitorCounts = outputWorkspace->addColumn("int", monitorName);
       const IEventList &eventList = monitorWorkspace->getSpectrum(spec);
       // Accumulate things in a local vector before transferring to the table
@@ -378,8 +386,7 @@ double SumEventsByLogValue::sumProtonCharge(
     const Kernel::TimeSeriesProperty<double> *protonChargeLog,
     const Kernel::TimeSplitterType &filter) {
   // Clone the proton charge log and filter the clone on this log value
-  boost::scoped_ptr<TimeSeriesProperty<double>> protonChargeLogClone(
-      protonChargeLog->clone());
+  auto protonChargeLogClone(protonChargeLog->clone());
   protonChargeLogClone->filterByTimes(filter);
   // Seems like the only way to sum this is to yank out the values
   const std::vector<double> pcValues = protonChargeLogClone->valuesAsVector();
@@ -419,7 +426,7 @@ void SumEventsByLogValue::createBinnedOutput(
   auto &Y = outputWorkspace->mutableY(0);
   const int numSpec = static_cast<int>(m_inputWorkspace->getNumberHistograms());
   Progress prog(this, 0.0, 1.0, numSpec);
-  PARALLEL_FOR1(m_inputWorkspace)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWorkspace))
   for (int spec = 0; spec < numSpec; ++spec) {
     PARALLEL_START_INTERUPT_REGION
     const IEventList &eventList = m_inputWorkspace->getSpectrum(spec);

@@ -1,20 +1,24 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidMDAlgorithms/ConvertMDHistoToMatrixWorkspace.h"
+#include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/CoordTransform.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NullCoordTransform.h"
-#include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidHistogramData/LinearGenerator.h"
+
 #include "MantidKernel/ListValidator.h"
-#include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
-
-#include <boost/mpl/if.hpp>
-#include <boost/type_traits.hpp>
 
 #include <sstream>
 
@@ -83,7 +87,7 @@ size_t findXAxis(const VMD &start, const VMD &end,
   xAxisLabel = originalWS->getDimension(dimIndex)->getName();
   return dimIndex;
 }
-}
+} // namespace
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -100,10 +104,8 @@ void ConvertMDHistoToMatrixWorkspace::init() {
                                                    Direction::Output),
                   "An output Workspace2D.");
 
-  std::vector<std::string> normalizations(3);
-  normalizations[0] = "NoNormalization";
-  normalizations[1] = "VolumeNormalization";
-  normalizations[2] = "NumEventsNormalization";
+  std::array<std::string, 3> normalizations = {
+      {"NoNormalization", "VolumeNormalization", "NumEventsNormalization"}};
 
   declareProperty("Normalization", normalizations[0],
                   Kernel::IValidator_sptr(
@@ -134,8 +136,8 @@ void ConvertMDHistoToMatrixWorkspace::exec() {
 }
 
 /**
-  * Make 1D MatrixWorkspace
-  */
+ * Make 1D MatrixWorkspace
+ */
 void ConvertMDHistoToMatrixWorkspace::make1DWorkspace() {
   IMDHistoWorkspace_sptr inputWorkspace = getProperty("InputWorkspace");
 
@@ -191,8 +193,8 @@ void ConvertMDHistoToMatrixWorkspace::make1DWorkspace() {
 
   MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(
       "Workspace2D", 1, line.x.size(), line.y.size());
-  outputWorkspace->dataY(0).assign(line.y.begin(), line.y.end());
-  outputWorkspace->dataE(0).assign(line.e.begin(), line.e.end());
+  outputWorkspace->mutableY(0) = line.y;
+  outputWorkspace->mutableE(0) = line.e;
 
   const size_t numberTransformsToOriginal =
       inputWorkspace->getNumberTransformsToOriginal();
@@ -206,7 +208,7 @@ void ConvertMDHistoToMatrixWorkspace::make1DWorkspace() {
         NullDeleter());
   }
 
-  assert(line.x.size() == outputWorkspace->dataX(0).size());
+  assert(line.x.size() == outputWorkspace->x(0).size());
 
   std::string xAxisLabel = inputWorkspace->getDimension(id)->getName();
   const bool autoFind = this->getProperty("FindXAxis");
@@ -217,13 +219,16 @@ void ConvertMDHistoToMatrixWorkspace::make1DWorkspace() {
                    xAxisLabel);
   }
 
+  auto &mutableXValues = outputWorkspace->mutableX(0);
+  // VMD inTargetCoord;
   for (size_t i = 0; i < line.x.size(); ++i) {
     // Coordinates in the workspace being plotted
     VMD wsCoord = start + dir * line.x[i];
 
     VMD inTargetCoord = transform->applyVMD(wsCoord);
-    outputWorkspace->dataX(0)[i] = inTargetCoord[id];
+    mutableXValues[i] = inTargetCoord[id];
   }
+  // outputWorkspace->mutableX(0) = inTargetCoord;
 
   boost::shared_ptr<Kernel::Units::Label> labelX =
       boost::dynamic_pointer_cast<Kernel::Units::Label>(
@@ -237,8 +242,8 @@ void ConvertMDHistoToMatrixWorkspace::make1DWorkspace() {
 }
 
 /**
-  * Make 2D MatrixWorkspace
-  */
+ * Make 2D MatrixWorkspace
+ */
 void ConvertMDHistoToMatrixWorkspace::make2DWorkspace() {
   // get the input workspace
   IMDHistoWorkspace_sptr inputWorkspace = getProperty("InputWorkspace");
@@ -281,20 +286,15 @@ void ConvertMDHistoToMatrixWorkspace::make2DWorkspace() {
       WorkspaceFactory::Instance().create("Workspace2D", ny, nx + 1, nx);
 
   // set the x-values
-  Mantid::MantidVec &X = outputWorkspace->dataX(0);
-  double dx = xDim->getBinWidth();
-  double x = xDim->getMinimum();
-  for (auto ix = X.begin(); ix != X.end(); ++ix, x += dx) {
-    *ix = x;
-  }
-
-  auto ptrX = outputWorkspace->refX(0);
+  const size_t xValsSize = outputWorkspace->x(0).size();
+  const double dx = xDim->getBinWidth();
+  const double minX = xDim->getMinimum();
+  outputWorkspace->setBinEdges(0, xValsSize,
+                               HistogramData::LinearGenerator(minX, dx));
   // set the y-values and errors
   for (size_t i = 0; i < ny; ++i) {
     if (i > 0)
-      outputWorkspace->setX(i, ptrX);
-    auto &Y = outputWorkspace->dataY(i);
-    auto &E = outputWorkspace->dataE(i);
+      outputWorkspace->setSharedX(i, outputWorkspace->sharedX(0));
 
     size_t yOffset = i * yStride;
     for (size_t j = 0; j < nx; ++j) {
@@ -314,8 +314,8 @@ void ConvertMDHistoToMatrixWorkspace::make2DWorkspace() {
           error *= factor;
         }
       }
-      Y[j] = signal;
-      E[j] = sqrt(error);
+      outputWorkspace->mutableY(i)[j] = signal;
+      outputWorkspace->mutableE(i)[j] = sqrt(error);
     }
   }
 
@@ -326,8 +326,8 @@ void ConvertMDHistoToMatrixWorkspace::make2DWorkspace() {
   outputWorkspace->getAxis(0)->unit() = labelX;
 
   // set the second axis
-  auto yAxis = new NumericAxis(ny);
-  for (size_t i = 0; i < ny; ++i) {
+  auto yAxis = new BinEdgeAxis(ny + 1);
+  for (size_t i = 0; i <= ny; ++i) {
     yAxis->setValue(i, yDim->getX(i));
   }
   auto labelY = boost::dynamic_pointer_cast<Kernel::Units::Label>(
@@ -344,10 +344,10 @@ void ConvertMDHistoToMatrixWorkspace::make2DWorkspace() {
 }
 
 /**
-  * Calculate the stride for a dimension.
-  * @param workspace :: An MD workspace.
-  * @param dim :: A dimension index to calculate the stride for.
-  */
+ * Calculate the stride for a dimension.
+ * @param workspace :: An MD workspace.
+ * @param dim :: A dimension index to calculate the stride for.
+ */
 size_t ConvertMDHistoToMatrixWorkspace::calcStride(
     const API::IMDHistoWorkspace &workspace, size_t dim) const {
   size_t stride = 1;

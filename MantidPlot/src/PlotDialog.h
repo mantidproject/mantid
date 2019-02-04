@@ -30,9 +30,9 @@
 #ifndef PLOTDIALOG_H
 #define PLOTDIALOG_H
 
+#include "MultiLayer.h"
 #include <QDialog>
 #include <QTreeWidgetItem>
-#include "MultiLayer.h"
 //#include "MantidKernel/Logger.h"
 
 class QCheckBox;
@@ -70,7 +70,7 @@ class PlotDialog : public QDialog {
 
 public:
   PlotDialog(bool showExtended, ApplicationWindow *app, MultiLayer *ml,
-             Qt::WFlags fl = 0);
+             Qt::WFlags fl = nullptr);
   void initFonts(const QFont &titlefont, const QFont &axesfont,
                  const QFont &numbersfont, const QFont &legendfont);
   void insertColumnsList(const QStringList &names) { columnNames = names; };
@@ -258,7 +258,7 @@ private:
 
   SymbolBox *boxMaxStyle, *boxMinStyle, *boxMeanStyle, *box99Style, *box1Style;
   QDoubleSpinBox *whiskerCnt, *boxCnt;
-  //!Labels page
+  //! Labels page
   QGroupBox *labelsGroupBox;
   DoubleSpinBox *boxLabelsAngle;
   QSpinBox *boxLabelsXOffset, *boxLabelsYOffset;

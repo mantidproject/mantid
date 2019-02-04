@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
 # File: ReduceOneSCD_Run.py
 #
@@ -21,12 +27,12 @@
 
 #
 # _v1: December 3rd 2013. Mads Joergensen
-# This version now includes the posibility to use the 1D cylindrical integration method
-# and the posibility to load a UB matrix which will be used for integration of the individual
+# This version now includes the possibility to use the 1D cylindrical integration method
+# and the possibility to load a UB matrix which will be used for integration of the individual
 # runs and to index the combined file (Code from Xiapoing).
 #
 # _v2: December 3rd 2013. Mads Joergensen
-# Adds the posibility to optimize the loaded UB for each run for a better peak prediction
+# Adds the possibility to optimize the loaded UB for each run for a better peak prediction
 # It is also possible to find the common UB by using lattice parameters of the first
 # run or the loaded matirix instead of the default FFT method
 #
@@ -35,6 +41,7 @@
 # the use of either monitor counts (True) or proton charge (False) for
 # scaling.
 
+from __future__ import (absolute_import, division, print_function)
 import os
 import sys
 import time
@@ -45,8 +52,8 @@ sys.path.append("/opt/mantidnightly/bin") # noqa
 from mantid.simpleapi import *
 from mantid.api import *
 
-print "API Version"
-print apiVersion()
+print("API Version")
+print(apiVersion())
 
 start_time = time.time()
 
@@ -54,7 +61,7 @@ start_time = time.time()
 # Get the config file name and the run number to process from the command line
 #
 if len(sys.argv) < 3:
-    print "You MUST give the config file name(s) and run number on the command line"
+    print("You MUST give the config file name(s) and run number on the command line")
     exit(0)
 
 config_files = sys.argv[1:-1]
@@ -124,9 +131,11 @@ optimize_UB               = params_dictionary[ "optimize_UB" ]
 # Get the fully qualified input run file name, either from a specified data
 # directory or from findnexus
 #
-short_filename = "%s_%s_event.nxs" % (instrument_name, str(run))
+short_filename = "%s_%s" % (instrument_name, str(run))
 if data_directory is not None:
-    full_name = data_directory + "/" + short_filename
+    full_name = data_directory + "/" + short_filename + ".nxs.h5"
+    if not os.path.exists(full_name):
+        full_name = data_directory + "/" + short_filename + "_event.nxs"
 else:
     candidates = FileFinder.findRuns(short_filename)
     full_name = ""
@@ -134,12 +143,12 @@ else:
         if os.path.exists(item):
             full_name = str(item)
 
-    if not full_name.endswith('nxs'):
-        print "Exiting since the data_directory was not specified and"
-        print "findnexus failed for event NeXus file: " + instrument_name + " " + str(run)
+    if not full_name.endswith('nxs') and not full_name.endswith('h5'):
+        print("Exiting since the data_directory was not specified and")
+        print("findnexus failed for event NeXus file: " + instrument_name + " " + str(run))
         exit(0)
 
-print "\nProcessing File: " + full_name + " ......\n"
+print("\nProcessing File: " + full_name + " ......\n")
 
 #
 # Name the files to write for this run
@@ -170,14 +179,14 @@ if (calibration_file_1 is not None ) or (calibration_file_2 is not None):
 
 monitor_ws = LoadNexusMonitors( Filename=full_name )
 proton_charge = monitor_ws.getRun().getProtonCharge() * 1000.0  # get proton charge
-print "\n", run, " has integrated proton charge x 1000 of", proton_charge, "\n"
+print("\n", run, " has integrated proton charge x 1000 of", proton_charge, "\n")
 
 integrated_monitor_ws = Integration( InputWorkspace=monitor_ws,
                                      RangeLower=min_monitor_tof, RangeUpper=max_monitor_tof,
                                      StartWorkspaceIndex=monitor_index, EndWorkspaceIndex=monitor_index )
 
 monitor_count = integrated_monitor_ws.dataY(0)[0]
-print "\n", run, " has integrated monitor count", monitor_count, "\n"
+print("\n", run, " has integrated monitor count", monitor_count, "\n")
 
 minVals= "-"+max_Q +",-"+max_Q +",-"+max_Q
 maxVals = max_Q +","+max_Q +","+ max_Q
@@ -235,13 +244,13 @@ else:
 # PeakIntegration algorithm.
 #
 if integrate_predicted_peaks:
-    print "PREDICTING peaks to integrate...."
+    print("PREDICTING peaks to integrate....")
     peaks_ws = PredictPeaks( InputWorkspace=peaks_ws,
                              WavelengthMin=min_pred_wl, WavelengthMax=max_pred_wl,
                              MinDSpacing=min_pred_dspacing, MaxDSpacing=max_pred_dspacing,
                              ReflectionCondition='Primitive' )
 else:
-    print "Only integrating FOUND peaks ...."
+    print("Only integrating FOUND peaks ....")
 #
 # Set the monitor counts for all the peaks that will be integrated
 #
@@ -253,9 +262,9 @@ for i in range(num_peaks):
     else:
         peak.setMonitorCount( proton_charge )
 if use_monitor_counts:
-    print '\n*** Beam monitor counts used for scaling.'
+    print('\n*** Beam monitor counts used for scaling.')
 else:
-    print '\n*** Proton charge x 1000 used for scaling.\n'
+    print('\n*** Proton charge x 1000 used for scaling.\n')
 
 if use_sphere_integration:
 #
@@ -339,10 +348,10 @@ else:
     SaveIsawPeaks(InputWorkspace=peaks_ws, AppendFile=False,
                   Filename=run_niggli_integrate_file )
 
-# Print warning if user is trying to integrate using the cylindrical method and transorm the cell
+# Print warning if user is trying to integrate using the cylindrical method and transform the cell
 if use_cylindrical_integration:
     if (cell_type is not None) or (centering is not None):
-        print "WARNING: Cylindrical profiles are NOT transformed!!!"
+        print("WARNING: Cylindrical profiles are NOT transformed!!!")
 #
 # If requested, also switch to the specified conventional cell and save the
 # corresponding matrix and integrate file
@@ -361,16 +370,16 @@ else:
                           CellType=cell_type, Centering=centering,
                           AllowPermutations=allow_perm,
                           Apply=True, Tolerance=tolerance )
-    if output_nexus:
-        SaveNexus(InputWorkspace=peaks_ws, Filename=run_conventional_integrate_file )
-    else:
-        SaveIsawPeaks(InputWorkspace=peaks_ws, AppendFile=False,
-                      Filename=run_conventional_integrate_file )
-        SaveIsawUB(InputWorkspace=peaks_ws, Filename=run_conventional_matrix_file )
+        if output_nexus:
+            SaveNexus(InputWorkspace=peaks_ws, Filename=run_conventional_integrate_file )
+        else:
+            SaveIsawPeaks(InputWorkspace=peaks_ws, AppendFile=False,
+                          Filename=run_conventional_integrate_file )
+            SaveIsawUB(InputWorkspace=peaks_ws, Filename=run_conventional_matrix_file )
 
 end_time = time.time()
-print '\nReduced run ' + str(run) + ' in ' + str(end_time - start_time) + ' sec'
-print 'using config file(s) ' + ", ".join(config_files)
+print('\nReduced run ' + str(run) + ' in ' + str(end_time - start_time) + ' sec')
+print('using config file(s) ' + ", ".join(config_files))
 
 #
 # Try to get this to terminate when run by ReduceSCD_Parallel.py, from NX session

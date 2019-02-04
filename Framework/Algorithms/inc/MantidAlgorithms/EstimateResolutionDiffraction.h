@@ -1,36 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_ESTIMATERESOLUTIONDIFFRACTION_H_
 #define MANTID_ALGORITHMS_ESTIMATERESOLUTIONDIFFRACTION_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidGeometry/Instrument.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Algorithms {
 /** EstimateResolutionDiffraction : TODO: DESCRIPTION
-
-  Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
-
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>
-  Code Documentation is available at: <http://doxygen.mantidproject.org>
-*/
+ */
 class DLLExport EstimateResolutionDiffraction : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
@@ -44,6 +28,9 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"EstimateDivergence"};
+  }
 
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override;
@@ -63,25 +50,29 @@ private:
   ///
   void retrieveInstrumentParameters();
 
-  /// Create output workspace
-  void createOutputWorkspace();
-
   /// Calculate detector resolution
   void estimateDetectorResolution();
 
-  //------------------------------------------------------
-
   /// Input workspace
   API::MatrixWorkspace_sptr m_inputWS;
+  /// Workspace with custom divergence term
+  API::MatrixWorkspace_sptr m_divergenceWS;
+
+  /// workspace holding the term for just the time-of-flight portion of the
+  /// resolution
+  API::MatrixWorkspace_sptr m_resTof;
+  /// workspace holding the term for just the flight path portion of the
+  /// resolution
+  API::MatrixWorkspace_sptr m_resPathLength;
+  /// workspace holding the term for just the angular/solid angle portion of the
+  /// resolution
+  API::MatrixWorkspace_sptr m_resAngle;
 
   /// Output workspace
   API::MatrixWorkspace_sptr m_outputWS;
 
   /// Centre neutron velocity
   double m_centreVelocity = 0.0;
-
-  /// L1, source to sample
-  double m_L1 = 0.0;
 
   /// Delta T
   double m_deltaT = 0.0;

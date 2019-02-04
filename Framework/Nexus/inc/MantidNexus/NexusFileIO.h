@@ -1,14 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef NEXUSFILEIO_H
 #define NEXUSFILEIO_H
-#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/Progress.h"
-#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/VectorColumn.h"
-#include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/date_time/local_time_adjustor.hpp>
+#include "MantidKernel/TimeSeriesProperty.h"
 #include <boost/date_time/c_local_time_adjustor.hpp>
+#include <boost/date_time/local_time_adjustor.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/scoped_array.hpp>
 
 #include <boost/optional.hpp>
@@ -29,33 +35,12 @@ This class interfaces to the C Nexus API. This is written for use by
 Save and Load NexusProcessed classes, though it could be extended to
 other Nexus formats. It might be replaced in future by methods using
 the new Nexus C++ API.
-
-Copyright &copy; 2007-9 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>.
-Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport NexusFileIO {
 
 public:
   // Helper typedef
-  typedef boost::optional<size_t> optional_size_t;
+  using optional_size_t = boost::optional<size_t>;
 
   /// Default constructor
   NexusFileIO();
@@ -387,22 +372,22 @@ void NexusFileIO::writeNumericTimeLog(
   if (ipos != std::string::npos)
     logName = logName.substr(ipos + 1);
   // extract values from timeseries
-  std::map<Kernel::DateAndTime, T> dV = timeSeries->valueAsMap();
+  std::map<Types::Core::DateAndTime, T> dV = timeSeries->valueAsMap();
   std::vector<double> values;
   std::vector<double> times;
-  Kernel::DateAndTime t0;
+  Types::Core::DateAndTime t0;
   bool first = true;
-  for (typename std::map<Kernel::DateAndTime, T>::const_iterator dv =
+  for (typename std::map<Types::Core::DateAndTime, T>::const_iterator dv =
            dV.begin();
        dv != dV.end(); dv++) {
     T val = dv->second;
-    Kernel::DateAndTime time = dv->first;
+    Types::Core::DateAndTime time = dv->first;
     values.push_back(val);
     if (first) {
       t0 = time; // start time of log
       first = false;
     }
-    times.push_back(Kernel::DateAndTime::secondsFromDuration(time - t0));
+    times.push_back(Types::Core::DateAndTime::secondsFromDuration(time - t0));
   }
   // create log
   status = NXmakegroup(fileID, logName.c_str(), "NXlog");
@@ -426,7 +411,7 @@ void NexusFileIO::writeNumericTimeLog(
 }
 
 /// Helper typedef for a shared pointer of a NexusFileIO.
-typedef boost::shared_ptr<NexusFileIO> NexusFileIO_sptr;
+using NexusFileIO_sptr = boost::shared_ptr<NexusFileIO>;
 
 } // namespace NeXus
 } // namespace Mantid

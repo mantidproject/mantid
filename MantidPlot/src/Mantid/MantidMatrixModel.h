@@ -1,12 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDPLOT_MANTIDMATRIXMODEL_H
 #define MANTIDPLOT_MANTIDMATRIXMODEL_H
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
-#include <QColor>
-#include <QObject>
 #include <QAbstractTableModel>
+#include <QColor>
 #include <QLocale>
+#include <QObject>
+#include <QSet>
+
 /**
 MantidMatrixModel is an implementation of QAbstractTableModel which is an
 interface between the data (workspace) and the widget displaying it
@@ -39,13 +47,10 @@ public:
   /// If type is Y or E it is the number of data values.
   int columnCount(const QModelIndex &parent = QModelIndex()) const override {
     (void)parent; // To avoid compiler warning
-    int columnCount = 0;
-    if (m_type == X || m_type == DX) {
-      columnCount = m_cols + m_colNumCorr;
-    } else {
-      columnCount = m_cols;
-    }
-    return columnCount;
+    if (m_type == X)
+      return m_cols + m_colNumCorr;
+    else
+      return m_cols;
   }
 
   double data(int row, int col) const;
@@ -69,10 +74,12 @@ public slots:
 
 private:
   bool checkMonitorCache(
-      int row) const; // check the monitor cache and add to it if neccessary
+      int row) const; // check the monitor cache and add to it if necessary
 
   bool checkMaskedCache(
-      int row) const; // check the masked cache and add to it if neccessary
+      int row) const; // check the masked cache and add to it if necessary
+
+  bool checkMaskedBinCache(int row, int bin) const;
 
   const Mantid::API::MatrixWorkspace *m_workspace;
   int m_startRow;     ///< starting workspace index to display
@@ -85,10 +92,11 @@ private:
   char m_format; //  Format of numbers returned by data(): 'f' - fixed, 'e' -
                  //  scientific.
   int m_prec;    //  Number precision
-  QColor m_mon_color;                  // Monitor Specific background color
-  mutable QHash<int, bool> m_monCache; // monitor flag cache
-  QColor m_mask_color; // Masked Detector Specific background color
-  mutable QHash<int, bool> m_maskCache; // masked flag cache
+  QColor m_mon_color;            // Monitor Specific background color
+  mutable QSet<int> m_monCache;  // monitor flag cache
+  QColor m_mask_color;           // Masked Detector Specific background color
+  mutable QSet<int> m_maskCache; // masked flag cache
+  mutable QHash<int, QSet<int>> m_maskBinCache; // cache for masked bins
 };
 
 #endif

@@ -1,18 +1,24 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 /* File: ConventionalCell.cpp */
 
-#include <stdexcept>
 #include <algorithm>
 #include <cstdio>
+#include <stdexcept>
 
-#include "MantidKernel/V3D.h"
 #include "MantidGeometry/Crystal/ConventionalCell.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidKernel/V3D.h"
 
 namespace Mantid {
 namespace Geometry {
-using Mantid::Kernel::V3D;
 using Mantid::Kernel::DblMatrix;
+using Mantid::Kernel::V3D;
 
 /**
  *  Construct a ConventionalCell for the specified orientation matrix
@@ -162,9 +168,7 @@ void ConventionalCell::init(const Kernel::DblMatrix &UB, ReducedCell &form_0,
   UB_tran.Invert();
   adjusted_UB = UB * UB_tran;
   if (allowPermutations) {
-    if (cell_type == ReducedCell::ORTHORHOMBIC()) {
-      SetSidesIncreasing(adjusted_UB);
-    } else if (cell_type == ReducedCell::TETRAGONAL()) {
+    if (cell_type == ReducedCell::TETRAGONAL()) {
       StandardizeTetragonal(adjusted_UB);
     } else if (cell_type == ReducedCell::HEXAGONAL() ||
                cell_type == ReducedCell::RHOMBOHEDRAL()) {
@@ -267,5 +271,5 @@ void ConventionalCell::StandardizeHexagonal(Kernel::DblMatrix &UB) {
   }
 }
 
-} // namespace Mantid
 } // namespace Geometry
+} // namespace Mantid

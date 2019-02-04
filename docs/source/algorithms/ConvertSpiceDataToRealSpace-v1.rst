@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -43,7 +43,7 @@ The corrected counts is equal to :math:`counts^{raw}/f`.
 Outputs
 #######
 
-Two MDEventWorkspaces will be output from this algorith. 
+Two MDEventWorkspaces will be output from this algorithm. 
 
 One MDWorkspaces stores the experimental data. 
 Each MDEvent is a data point measured on one detector. 
@@ -191,7 +191,7 @@ Usage
 
   # output
   datamdws = mtd["Exp0231DataMD"]
-  print "Number of events = %d" % (datamdws.getNEvents())
+  print("Number of events = {}".format(datamdws.getNEvents()))
 
 .. testcleanup:: ExLoadHB2ADataToMD
 

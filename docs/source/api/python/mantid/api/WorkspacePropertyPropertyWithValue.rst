@@ -2,7 +2,7 @@
  WorkspacePropertyPropertyWithValue
 ====================================
 
-This a python binding to the C++ class Mantid::API::WorkspacePropertyPropertyWithValue.
+This is a Python binding to the C++ class Mantid::API::WorkspacePropertyPropertyWithValue.
 
 *bases:* :py:obj:`mantid.kernel.Property`
 

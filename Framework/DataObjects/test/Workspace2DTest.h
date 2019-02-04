@@ -1,27 +1,35 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef WORKSPACE2DTEST_H_
 #define WORKSPACE2DTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidHistogramData/LinearGenerator.h"
+#include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectraAxis.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/IDetector.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidAPI/ISpectrum.h"
-#include "MantidAPI/SpectraAxis.h"
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/CPUTimer.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "PropertyManagerHelper.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace std;
 using namespace Mantid;
 using namespace Mantid::DataObjects;
-using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
+using namespace Mantid::HistogramData;
+using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using HistogramData::Counts;
 using HistogramData::CountStandardDeviations;
+using HistogramData::Counts;
 using HistogramData::LinearGenerator;
-using WorkspaceCreationHelper::Create2DWorkspaceBinned;
+using WorkspaceCreationHelper::create2DWorkspaceBinned;
 
 class Workspace2DTest : public CxxTest::TestSuite {
 public:
@@ -36,7 +44,7 @@ public:
   Workspace2DTest() {
     nbins = 5;
     nhist = 10;
-    ws = Create2DWorkspaceBinned(nhist, nbins);
+    ws = create2DWorkspaceBinned(nhist, nbins);
   }
 
   void testClone() {
@@ -71,6 +79,20 @@ public:
       TS_ASSERT_EQUALS(ws->dataE(i).size(), nbins);
       ;
     }
+  }
+
+  void testUnequalBins() {
+    // try normal kind first
+    TS_ASSERT_EQUALS(ws->blocksize(), 5);
+    TS_ASSERT(ws->isCommonBins());
+    TS_ASSERT_EQUALS(ws->size(), 50);
+
+    // mess with the binning and the results change
+    Workspace2D_sptr cloned(ws->clone());
+    cloned->setHistogram(0, Points(0), Counts(0));
+    TS_ASSERT_THROWS(cloned->blocksize(), std::logic_error);
+    TS_ASSERT(!(cloned->isCommonBins()));
+    TS_ASSERT_EQUALS(cloned->size(), 45);
   }
 
   void testId() { TS_ASSERT_EQUALS(ws->id(), "Workspace2D"); }
@@ -128,7 +150,7 @@ public:
   }
 
   void testIntegrateSpectra_entire_range() {
-    ws = Create2DWorkspaceBinned(nhist, nbins);
+    ws = create2DWorkspaceBinned(nhist, nbins);
     MantidVec sums;
     ws->getIntegratedSpectra(sums, 10, 5, true);
     for (int i = 0; i < nhist; ++i) {
@@ -137,7 +159,7 @@ public:
     }
   }
   void testIntegrateSpectra_empty_range() {
-    ws = Create2DWorkspaceBinned(nhist, nbins);
+    ws = create2DWorkspaceBinned(nhist, nbins);
     MantidVec sums;
     ws->getIntegratedSpectra(sums, 10, 5, false);
     for (int i = 0; i < nhist; ++i) {
@@ -147,7 +169,7 @@ public:
   }
 
   void testIntegrateSpectra_partial_range() {
-    ws = Create2DWorkspaceBinned(nhist, nbins);
+    ws = create2DWorkspaceBinned(nhist, nbins);
     MantidVec sums;
     ws->getIntegratedSpectra(sums, 1.9, 3.2, false);
     for (int i = 0; i < nhist; ++i) {
@@ -157,7 +179,7 @@ public:
   }
 
   void test_generateHistogram() {
-    Workspace2D_sptr ws = Create2DWorkspaceBinned(2, 5);
+    Workspace2D_sptr ws = create2DWorkspaceBinned(2, 5);
     MantidVec X, Y, E;
     X.push_back(0.0);
     X.push_back(0.5);
@@ -181,7 +203,7 @@ public:
   }
 
   void test_getMemorySizeForXAxes() {
-    ws = Create2DWorkspaceBinned(nhist, nbins);
+    ws = create2DWorkspaceBinned(nhist, nbins);
     // Here they are shared, so only 1 X axis
     TS_ASSERT_EQUALS(ws->getMemorySizeForXAxes(),
                      1 * (nbins + 1) * sizeof(double));
@@ -202,10 +224,10 @@ public:
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(numpixels,
                                                                      200);
 
+    const auto &spectrumInfo = ws->spectrumInfo();
     PARALLEL_FOR_NO_WSP_CHECK()
     for (int i = 0; i < numpixels; i++) {
-      IDetector_const_sptr det = ws->getDetector(i);
-      TS_ASSERT(det);
+      TS_ASSERT(spectrumInfo.hasDetectors(i));
     }
   }
 
@@ -234,10 +256,10 @@ public:
     Workspace2D_sptr wsNonConst;
     TS_ASSERT_THROWS_NOTHING(
         wsConst = manager.getValue<Workspace2D_const_sptr>(wsName));
-    TS_ASSERT(wsConst != NULL);
+    TS_ASSERT(wsConst != nullptr);
     TS_ASSERT_THROWS_NOTHING(wsNonConst =
                                  manager.getValue<Workspace2D_sptr>(wsName));
-    TS_ASSERT(wsNonConst != NULL);
+    TS_ASSERT(wsNonConst != nullptr);
     TS_ASSERT_EQUALS(wsConst, wsNonConst);
 
     // Check TypedValue can be cast to const_sptr or to sptr
@@ -245,9 +267,9 @@ public:
     Workspace2D_const_sptr wsCastConst;
     Workspace2D_sptr wsCastNonConst;
     TS_ASSERT_THROWS_NOTHING(wsCastConst = (Workspace2D_const_sptr)val);
-    TS_ASSERT(wsCastConst != NULL);
+    TS_ASSERT(wsCastConst != nullptr);
     TS_ASSERT_THROWS_NOTHING(wsCastNonConst = (Workspace2D_sptr)val);
-    TS_ASSERT(wsCastNonConst != NULL);
+    TS_ASSERT(wsCastNonConst != nullptr);
     TS_ASSERT_EQUALS(wsCastConst, wsCastNonConst);
   }
 };
@@ -267,8 +289,8 @@ public:
 
   Workspace2DTestPerformance() {
     nhist = 1000000; // 1 million
-    ws1 = WorkspaceCreationHelper::Create2DWorkspaceBinned(nhist, 5);
-    ws2 = WorkspaceCreationHelper::Create2DWorkspaceBinned(10, 5);
+    ws1 = WorkspaceCreationHelper::create2DWorkspaceBinned(nhist, 5);
+    ws2 = WorkspaceCreationHelper::create2DWorkspaceBinned(10, 5);
     for (size_t i = 0; i < 10; i++) {
       auto &spec = ws2->getSpectrum(i);
       for (detid_t j = detid_t(i) * 100000; j < detid_t(i + 1) * 100000; j++) {

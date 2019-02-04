@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CURVEFITTING_ComptonPeakProfileTEST_H_
 #define MANTID_CURVEFITTING_ComptonPeakProfileTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCurveFitting/Functions/ComptonPeakProfile.h"
 #include "ComptonProfileTestHelpers.h"
+#include "MantidCurveFitting/Functions/ComptonPeakProfile.h"
 
 using Mantid::CurveFitting::Functions::ComptonPeakProfile;
 
@@ -72,7 +78,8 @@ private:
         boost::make_shared<ComptonPeakProfile>();
     profile->initialize();
     auto paramWS = ComptonProfileTestHelpers::createTestWorkspace(
-        1, 300, 351, 0.5, true, true); // Only using for parameters
+        1, 300, 351, 0.5, ComptonProfileTestHelpers::NoiseType::None, true,
+        true); // Only using for parameters
     profile->setAttributeValue("Mass", 1.0079);
     TS_ASSERT_THROWS_NOTHING(profile->setWorkspace(paramWS));
     profile->setUpForFit();

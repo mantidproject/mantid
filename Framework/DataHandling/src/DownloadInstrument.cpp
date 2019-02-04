@@ -1,14 +1,23 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/DownloadInstrument.h"
 #include "MantidKernel/ChecksumHelper.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/GitHubApiHelper.h"
 
+// boost
+#include <boost/algorithm/string/predicate.hpp>
+
 // Poco
 #include <Poco/DateTimeFormat.h>
 #include <Poco/DateTimeFormatter.h>
 #include <Poco/DirectoryIterator.h>
-#include <Poco/Path.h>
 #include <Poco/File.h>
+#include <Poco/Path.h>
 // Visual Studio complains with the inclusion of Poco/FileStream
 // disabling this warning.
 #if defined(_WIN32) || defined(_WIN64)
@@ -40,7 +49,7 @@ DECLARE_ALGORITHM(DownloadInstrument)
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
-*/
+ */
 DownloadInstrument::DownloadInstrument() : m_proxyInfo() {}
 
 //----------------------------------------------------------------------------------------------
@@ -66,7 +75,7 @@ const std::string DownloadInstrument::summary() const {
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
-*/
+ */
 void DownloadInstrument::init() {
   using Kernel::Direction;
 
@@ -78,10 +87,16 @@ void DownloadInstrument::init() {
 
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
-*/
+ */
 void DownloadInstrument::exec() {
   StringToStringMap fileMap;
   setProperty("FileDownloadCount", 0);
+
+  // to aid in general debugging, always ask github for what the rate limit
+  // status is. This doesn't count against rate limit.
+  GitHubApiHelper inetHelper;
+  g_log.information(inetHelper.getRateLimitDescription());
+
   try {
     fileMap = processRepository();
   } catch (Mantid::Kernel::Exception::InternetError &ex) {
@@ -108,11 +123,33 @@ void DownloadInstrument::exec() {
 
   for (auto &itMap : fileMap) {
     // download a file
+    if (boost::algorithm::ends_with(itMap.second, "Facilities.xml")) {
+      g_log.notice("A new Facilities.xml file has been downloaded, this will "
+                   "take effect next time Mantid is started.");
+    } else {
+      g_log.information() << "Downloading \"" << itMap.second << "\" from \""
+                          << itMap.first << "\"\n";
+    }
     doDownloadFile(itMap.first, itMap.second);
   }
 
   setProperty("FileDownloadCount", static_cast<int>(fileMap.size()));
 }
+
+namespace {
+// Converts a json chunk to a url for the raw file contents.
+std::string getDownloadUrl(Json::Value &contents) {
+  std::string url = contents.get("download_url", "").asString();
+  if (url.empty()) { // guess it from html url
+    url = contents.get("html_url", "").asString();
+    if (url.empty())
+      throw std::runtime_error("Failed to find download link");
+    url = url + "?raw=1";
+  }
+
+  return url;
+}
+} // namespace
 
 DownloadInstrument::StringToStringMap DownloadInstrument::processRepository() {
   // get the instrument directories
@@ -185,8 +222,7 @@ DownloadInstrument::StringToStringMap DownloadInstrument::processRepository() {
     if (filePath.getExtension() != "xml")
       continue;
     std::string sha = serverElement.get("sha", "").asString();
-    std::string htmlUrl =
-        getDownloadableRepoUrl(serverElement.get("html_url", "").asString());
+    std::string downloadUrl = getDownloadUrl(serverElement);
 
     // Find shas
     std::string localSha = getValueOrDefault(localShas, name, "");
@@ -195,14 +231,14 @@ DownloadInstrument::StringToStringMap DownloadInstrument::processRepository() {
     // this will also catch when file is only present on github (as local sha
     // will be "")
     if ((sha != installSha) && (sha != localSha)) {
-      fileMap.emplace(htmlUrl,
+      fileMap.emplace(downloadUrl,
                       filePath.toString()); // ACTION - DOWNLOAD to localPath
-    } else if ((localSha != "") && (sha == installSha) &&
+    } else if ((!localSha.empty()) && (sha == installSha) &&
                (sha != localSha)) // matches install, but different local
     {
-      fileMap.emplace(
-          htmlUrl,
-          filePath.toString()); // ACTION - DOWNLOAD to localPath and overwrite
+      fileMap.emplace(downloadUrl, filePath.toString()); // ACTION - DOWNLOAD to
+                                                         // localPath and
+                                                         // overwrite
     }
   }
 
@@ -228,9 +264,9 @@ std::string DownloadInstrument::getValueOrDefault(
 }
 
 /** Creates or updates the json file of a directories contents
-* @param directoryPath The path to the directory to catalog
-* @return A map of file names to sha1 values
-**/
+ * @param directoryPath The path to the directory to catalog
+ * @return A map of file names to sha1 values
+ **/
 DownloadInstrument::StringToStringMap
 DownloadInstrument::getFileShas(const std::string &directoryPath) {
   StringToStringMap filesToSha;
@@ -261,10 +297,10 @@ DownloadInstrument::getFileShas(const std::string &directoryPath) {
 }
 
 /** removes any .xml files in a directory that are not in filenamesToKeep
-* @param directoryPath the directory to work in
-* @param filenamesToKeep a set of filenames to keep
-* @returns the number of files removed
-**/
+ * @param directoryPath the directory to work in
+ * @param filenamesToKeep a set of filenames to keep
+ * @returns the number of files removed
+ **/
 size_t DownloadInstrument::removeOrphanedFiles(
     const std::string &directoryPath,
     const std::unordered_set<std::string> &filenamesToKeep) const {
@@ -282,7 +318,8 @@ size_t DownloadInstrument::removeOrphanedFiles(
       if (filenamesToKeep.find(entryPath.getFileName()) ==
           filenamesToKeep.end()) {
         g_log.debug() << "File not found in remote instrument repository, will "
-                         "be deleted: " << entryPath.getFileName() << '\n';
+                         "be deleted: "
+                      << entryPath.getFileName() << '\n';
         filesToDelete.push_back(it->path());
       }
     }
@@ -317,15 +354,6 @@ size_t DownloadInstrument::removeOrphanedFiles(
   g_log.debug() << filesToDelete.size() << " Files deleted.\n";
 
   return filesToDelete.size();
-}
-
-/** Converts a github file page to a downloadable url for the file.
-* @param filename a github file page url
-* @returns a downloadable url for the file
-**/
-const std::string
-DownloadInstrument::getDownloadableRepoUrl(const std::string &filename) const {
-  return filename + "?raw=1";
 }
 
 /** Download a url and fetch it inside the local path given.

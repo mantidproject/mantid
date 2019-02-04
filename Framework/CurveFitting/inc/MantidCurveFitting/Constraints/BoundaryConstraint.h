@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CURVEFITTING_BOUNDARYCONSTRAINT_H_
 #define MANTID_CURVEFITTING_BOUNDARYCONSTRAINT_H_
 
@@ -19,40 +25,14 @@ upper or lower (or both) boundaries on a single parameter.
 
 @author Anders Markvardsen, ISIS, RAL
 @date 13/11/2009
-
-Copyright &copy; 2007-9 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>
-Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport BoundaryConstraint : public API::IConstraint {
 public:
   /// Default constructor
-  BoundaryConstraint()
-      : API::IConstraint(), m_penaltyFactor(1000.0), m_parameterName(""),
-        m_hasLowerBound(false), m_hasUpperBound(false), m_lowerBound(DBL_MAX),
-        m_upperBound(-DBL_MAX) {}
+  BoundaryConstraint();
 
   /// Constructor with no boundary arguments
-  BoundaryConstraint(const std::string &paramName)
-      : API::IConstraint(), m_penaltyFactor(1000.0), m_parameterName(paramName),
-        m_hasLowerBound(false), m_hasUpperBound(false) {}
+  BoundaryConstraint(const std::string &paramName);
 
   /// Constructor with boundary arguments
   BoundaryConstraint(API::IFunction *fun, const std::string paramName,
@@ -114,7 +94,7 @@ public:
   }
 
   /// Get parameter name
-  std::string getParameterName() const { return m_parameterName; }
+  //  std::string getParameterName() const { return m_parameterName; }
 
   /// overwrite IConstraint base class methods
   double check() override;
@@ -128,7 +108,7 @@ private:
   double m_penaltyFactor;
 
   /// name of parameter you want to constraint
-  std::string m_parameterName;
+  // std::string m_parameterName;
 
   /// has a lower bound set true/false
   bool m_hasLowerBound;

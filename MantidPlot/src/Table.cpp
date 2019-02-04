@@ -30,35 +30,35 @@
  *                                                                         *
  ***************************************************************************/
 #include "Table.h"
-#include "SortDialog.h"
-#include "ImportASCIIDialog.h"
-#include "muParserScript.h"
 #include "ApplicationWindow.h"
-#include "pixmaps.h"
-#include "MantidQtAPI/TSVSerialiser.h"
+#include "ImportASCIIDialog.h"
+#include "MantidQtWidgets/Common/TSVSerialiser.h"
+#include "SortDialog.h"
+#include "muParserScript.h"
+#include <MantidQtWidgets/Common/pixmaps.h>
 
-#include <QContextMenuEvent>
-#include <QMessageBox>
-#include <QDateTime>
-#include <QTextStream>
-#include <QClipboard>
 #include <QApplication>
-#include <QPainter>
+#include <QClipboard>
+#include <QContextMenuEvent>
+#include <QDateTime>
 #include <QEvent>
-#include <QLayout>
-#include <QPrintDialog>
-#include <QLocale>
-#include <QShortcut>
-#include <QProgressDialog>
 #include <QFile>
 #include <QHeaderView>
+#include <QLayout>
+#include <QLocale>
+#include <QMessageBox>
 #include <QModelIndex>
+#include <QPainter>
+#include <QPrintDialog>
+#include <QProgressDialog>
+#include <QShortcut>
+#include <QTextStream>
 
 #include <QVector>
 
-#include <gsl/gsl_vector.h>
 #include <gsl/gsl_sort.h>
 #include <gsl/gsl_sort_vector.h>
+#include <gsl/gsl_vector.h>
 
 #include <boost/algorithm/string.hpp>
 
@@ -70,6 +70,7 @@
 DECLARE_WINDOW(Table)
 
 using namespace Mantid;
+using namespace MantidQt::API;
 
 Table::Table(ScriptingEnv *env, int rows, int cols, const QString &label,
              QWidget *parent, const QString &name, Qt::WFlags f)
@@ -127,9 +128,13 @@ Table::Table(ScriptingEnv *env, int rows, int cols, const QString &label,
           SLOT(cellEdited(int, int)));
   connect(d_table, SIGNAL(itemSelectionChanged()), this,
           SLOT(recordSelection()));
+  connect(d_table->horizontalHeader(), SIGNAL(sectionDoubleClicked(int)), this,
+          SLOT(onColumnHeaderDoubleClick()));
 
   setAutoUpdateValues(applicationWindow()->autoUpdateTableValues());
 }
+
+void Table::onColumnHeaderDoubleClick() { emit optionsDialog(); }
 
 void Table::setAutoUpdateValues(bool on) {
   if (on) {
@@ -753,11 +758,11 @@ void Table::setColName(int col, const QString &text, bool enumerateRight) {
     if (enumerateRight)
       newLabel += QString::number(n);
 
-    if (col_label.contains(newLabel) > 0) {
+    if (col_label.contains(newLabel)) {
       auto msg = "There is already a column called : <b>" + newLabel +
                  "</b> in table <b>" + caption +
                  "</b>!<p>Please choose another name!";
-      QMessageBox::critical(0, tr("MantidPlot - Error"),
+      QMessageBox::critical(nullptr, tr("MantidPlot - Error"),
                             tr(msg.toAscii().constData()));
       return;
     }
@@ -1073,7 +1078,7 @@ void Table::clearSelection() {
     }
     if (lstReadOnly.count() > 0) {
       QMessageBox::warning(this, tr("MantidPlot - Error"),
-                           tr("The folowing columns") + ":\n" +
+                           tr("The following columns") + ":\n" +
                                lstReadOnly.join("\n") + "\n" +
                                tr("are read only!"));
     }
@@ -1110,7 +1115,7 @@ void Table::clearSelection() {
       }
       if (lstReadOnly.count() > 0) {
         QMessageBox::warning(this, tr("MantidPlot - Error"),
-                             tr("The folowing columns") + ":\n" +
+                             tr("The following columns") + ":\n" +
                                  lstReadOnly.join("\n") + "\n" +
                                  tr("are read only!"));
       }
@@ -1229,7 +1234,7 @@ void Table::pasteSelection() {
   }
   if (lstReadOnly.count() > 0) {
     QMessageBox::warning(this, tr("MantidPlot - Error"),
-                         tr("The folowing columns") + ":\n" +
+                         tr("The following columns") + ":\n" +
                              lstReadOnly.join("\n") + "\n" +
                              tr("are read only!"));
   }
@@ -1284,7 +1289,7 @@ void Table::removeCol(const QStringList &list) {
 
   if (lstReadOnly.count() > 0) {
     QMessageBox::warning(this, tr("MantidPlot - Error"),
-                         tr("The folowing columns") + ":\n" +
+                         tr("The following columns") + ":\n" +
                              lstReadOnly.join("\n") + "\n" +
                              tr("are read only!"));
   }
@@ -1334,7 +1339,7 @@ void Table::normalizeSelection() {
 
   if (lstReadOnly.count() > 0) {
     QMessageBox::warning(this, tr("MantidPlot - Error"),
-                         tr("The folowing columns") + ":\n" +
+                         tr("The following columns") + ":\n" +
                              lstReadOnly.join("\n") + "\n" +
                              tr("are read only!"));
   }
@@ -1354,7 +1359,7 @@ void Table::normalize() {
 
   if (lstReadOnly.count() > 0) {
     QMessageBox::warning(this, tr("MantidPlot - Error"),
-                         tr("The folowing columns") + ":\n" +
+                         tr("The following columns") + ":\n" +
                              lstReadOnly.join("\n") + "\n" +
                              tr("are read only!"));
   }
@@ -1931,7 +1936,7 @@ void Table::setRandomValues() {
 
   if (lstReadOnly.count() > 0) {
     QMessageBox::warning(this, tr("MantidPlot - Error"),
-                         tr("The folowing columns") + ":\n" +
+                         tr("The following columns") + ":\n" +
                              lstReadOnly.join("\n") + "\n" +
                              tr("are read only!"));
   }
@@ -2086,7 +2091,7 @@ void Table::setAscValues() {
 
   if (lstReadOnly.count() > 0) {
     QMessageBox::warning(this, tr("MantidPlot - Error"),
-                         tr("The folowing columns") + ":\n" +
+                         tr("The following columns") + ":\n" +
                              lstReadOnly.join("\n") + "\n" +
                              tr("are read only!"));
   }
@@ -2322,7 +2327,7 @@ bool Table::exportASCII(const QString &fname, const QString &separator,
     auto msg = "Could not write to file: <br><h4>" + fname +
                "</h4><p>Please verify that you have the right to "
                "write to this location!";
-    QMessageBox::critical(0, tr("MantidPlot - ASCII Export Error"),
+    QMessageBox::critical(nullptr, tr("MantidPlot - ASCII Export Error"),
                           tr(msg.toAscii().constData()).arg(fname));
     return false;
   }
@@ -2333,7 +2338,7 @@ bool Table::exportASCII(const QString &fname, const QString &separator,
   int cols = d_table->columnCount();
   int selectedCols = 0;
   int topRow = 0, bottomRow = 0;
-  int *sCols = 0;
+  int *sCols = nullptr;
   if (exportSelection) {
     for (int i = 0; i < cols; i++) {
       if (d_table->isColumnSelected(i))
@@ -2393,7 +2398,7 @@ bool Table::exportASCII(const QString &fname, const QString &separator,
         text += "C" + header[cols - 1] + eol;
       }
     }
-  } // finished writting labels
+  } // finished writing labels
 
   if (exportComments) {
     if (exportSelection) {
@@ -2687,7 +2692,7 @@ void Table::resizeRows(int newNumRows) {
     QString text = tr("Rows will be deleted from the table!") + "<p>" +
                    tr("Do you really want to continue?");
     int answer = QMessageBox::information(this, tr("MantidPlot"), text,
-                                          tr("Yes"), tr("Cancel"), 0, 1);
+                                          tr("Yes"), tr("Cancel"), nullptr, 1);
 
     if (answer == 1)
       return;
@@ -2706,7 +2711,7 @@ void Table::resizeCols(int newNumCols) {
     QString text = tr("Columns will be deleted from the table!") + "<p>" +
                    tr("Do you really want to continue?");
     int answer = QMessageBox::information(this, tr("MantidPlot"), text,
-                                          tr("Yes"), tr("Cancel"), 0, 1);
+                                          tr("Yes"), tr("Cancel"), nullptr, 1);
 
     if (answer == 1)
       return;
@@ -3175,6 +3180,8 @@ Table::loadFromProject(const std::string &lines, ApplicationWindow *app,
   return table;
 }
 
+std::vector<std::string> Table::getWorkspaceNames() { return {}; }
+
 std::string Table::saveTableMetadata() {
   MantidQt::API::TSVSerialiser tsv;
   tsv.writeLine("header");
@@ -3252,6 +3259,25 @@ void Table::recordSelection() {
     setSelectedCol(-1);
   }
 }
+
+/**
+ * Set the text alignment of the given cell
+ * @param row :: [input] Row of the cell
+ * @param col :: [input] Column of the cell
+ * @param alignment :: [input] Alignment flags to give the cell
+ */
+void Table::setTextAlignment(int row, int col,
+                             QFlags<Qt::AlignmentFlag> alignment) {
+  auto *cell = d_table->item(row, col);
+  if (cell) {
+    cell->setTextAlignment(alignment);
+  }
+}
+
+/**
+ * Resizes column widths to their contents
+ */
+void Table::resizeColumnsToContents() { d_table->resizeColumnsToContents(); }
 
 /*****************************************************************************
  *

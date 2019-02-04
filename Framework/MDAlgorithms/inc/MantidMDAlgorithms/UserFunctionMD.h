@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MDALGORITHMS_USERFUNCTIONMD_H_
 #define MANTID_MDALGORITHMS_USERFUNCTIONMD_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/IFunctionMD.h"
+#include "MantidAPI/ParamFunction.h"
 #include "MantidGeometry/muParser_Silent.h"
 
 namespace Mantid {
@@ -15,27 +21,6 @@ A user defined function.
 
 @author Roman Tolchenov, Tessella plc
 @date 15/01/2010
-
-Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>
-Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
 class DLLExport UserFunctionMD : virtual public API::IFunctionMD,
@@ -49,16 +34,16 @@ public:
   Attribute getAttribute(const std::string &attName) const override;
   void setAttribute(const std::string &attName, const Attribute &attr) override;
   /**
-    * Defining function's parameters here, ie after the workspace is set and
-    * the dimensions are known.
-    */
+   * Defining function's parameters here, ie after the workspace is set and
+   * the dimensions are known.
+   */
   void initDimensions() override;
 
 protected:
   /**
-    * Calculate the function value at a point r in the MD workspace
-    * @param r :: MD workspace iterator with a reference to the current point
-    */
+   * Calculate the function value at a point r in the MD workspace
+   * @param r :: MD workspace iterator with a reference to the current point
+   */
   double functionMD(const API::IMDIterator &r) const override;
   /** Static callback function used by MuParser to initialize variables
   implicitly
@@ -68,8 +53,8 @@ protected:
   static double *AddVariable(const char *varName, void *pufun);
 
   /**
-    * Initializes the mu::Parser.
-    */
+   * Initializes the mu::Parser.
+   */
   void setFormula();
 
 private:

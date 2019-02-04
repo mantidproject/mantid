@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name,too-many-public-methods
 from __future__ import (absolute_import, division, print_function)
 
@@ -52,6 +58,21 @@ class PointGroupTest(unittest.TestCase):
 
         self.assertEquals(pg_rhombohedral.getLatticeSystem(), PointGroup.LatticeSystem.Rhombohedral)
         self.assertEquals(pg_hexagonal.getLatticeSystem(), PointGroup.LatticeSystem.Hexagonal)
+
+    def test_to_string(self):
+        pg = PointGroupFactory.createPointGroup("m-3m")
+
+        expected_str = "Point group with:\nLattice system: Cubic"\
+                       "\nCrystal system: Cubic\nSymbol: m-3m"
+
+        expected_repr = "PointGroupFactory.createPointGroup(\"m-3m\")"
+
+        self.assertEqual(expected_str, str(pg))
+        self.assertEqual(expected_repr, pg.__repr__())
+
+        newPg = eval(pg.__repr__())
+        self.assertEqual(pg.getHMSymbol(), newPg.getHMSymbol())
+
 
 
 if __name__ == '__main__':

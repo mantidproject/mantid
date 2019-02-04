@@ -1,5 +1,11 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,too-few-public-methods
-import stresstesting
+import systemtesting
 from mantid.simpleapi import *
 from mantid.geometry import CrystalStructure
 
@@ -9,8 +15,8 @@ from mantid.geometry import CrystalStructure
 
 # The WISH test has a data mismatch which might be caused by the 'old' code having a bug (issue #14105).
 # The difference is that peaks may have different d-values because they are assigned to a different detector.
-# Instead of using the CheckWorkspacesMatch, only H, K and L are compared.
-class PredictPeaksTestWISH(stresstesting.MantidStressTest):
+# Instead of using the CompareWorkspaces, only H, K and L are compared.
+class PredictPeaksTestWISH(systemtesting.MantidSystemTest):
     def runTest(self):
         simulationWorkspace = CreateSimulationWorkspace(Instrument='WISH',
                                                         BinParams='0,1,2',
@@ -51,7 +57,7 @@ class PredictPeaksTestWISH(stresstesting.MantidStressTest):
         return True, None
 
 
-class PredictPeaksTestTOPAZ(stresstesting.MantidStressTest):
+class PredictPeaksTestTOPAZ(systemtesting.MantidSystemTest):
     def runTest(self):
         direc = config['instrumentDefinition.directory']
         xmlFile =  os.path.join(direc,'TOPAZ_Definition_2015-01-01.xml')
@@ -66,12 +72,14 @@ class PredictPeaksTestTOPAZ(stresstesting.MantidStressTest):
 
         reference = LoadNexus('predict_peaks_test_random_ub_topaz.nxs')
 
-        simulationWorkspaceMatch = CheckWorkspacesMatch(peaks, reference)
+        simulationWorkspaceMatch = CompareWorkspaces(peaks, reference)
 
-        self.assertEquals(simulationWorkspaceMatch, 'Success!')
+        self.assertTrue(simulationWorkspaceMatch[0])
 
 
-class PredictPeaksCalculateStructureFactorsTest(stresstesting.MantidStressTest):
+class PredictPeaksCalculateStructureFactorsTest(systemtesting.MantidSystemTest):
+    expected_num_peaks = 546
+
     def runTest(self):
         simulationWorkspace = CreateSimulationWorkspace(Instrument='WISH',
                                                         BinParams='0,1,2',
@@ -89,9 +97,9 @@ class PredictPeaksCalculateStructureFactorsTest(stresstesting.MantidStressTest):
                              MinDSpacing=0.5, MaxDSpacing=10,
                              CalculateStructureFactors=True)
 
-        self.assertEquals(peaks.getNumberPeaks(), 540)
+        self.assertEquals(peaks.getNumberPeaks(), self.expected_num_peaks)
 
-        for i in range(540):
+        for i in range(self.expected_num_peaks):
             peak = peaks.getPeak(i)
             self.assertLessThan(0.0, peak.getIntensity())
 
@@ -100,6 +108,6 @@ class PredictPeaksCalculateStructureFactorsTest(stresstesting.MantidStressTest):
                                    MinDSpacing=0.5, MaxDSpacing=10,
                                    CalculateStructureFactors=False)
 
-        for i in range(540):
+        for i in range(self.expected_num_peaks):
             peak = peaks_no_sf.getPeak(i)
             self.assertEquals(0.0, peak.getIntensity())

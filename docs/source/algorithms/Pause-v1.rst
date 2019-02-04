@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -28,7 +28,7 @@ Usage
    start_time = time.clock()
    Pause(0.05)
    end_time = time.clock()
-   print ("The algorithm paused for %.2f seconds." % (end_time-start_time))
+   print("The algorithm paused for {:.2f} seconds.".format(end_time-start_time))
 	
 Output:
 

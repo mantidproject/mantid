@@ -1,13 +1,21 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Instrument/Container.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 
 #include "Poco/DOM/AutoPtr.h"
 #include "Poco/DOM/DOMParser.h"
 #include "Poco/DOM/Document.h"
-#include "Poco/DOM/NodeIterator.h"
 #include "Poco/DOM/NodeFilter.h"
+#include "Poco/DOM/NodeIterator.h"
 #include "Poco/SAX/InputSource.h"
 #include "Poco/SAX/SAXException.h"
+#include <boost/make_shared.hpp>
 
 namespace Mantid {
 namespace Geometry {
@@ -40,16 +48,25 @@ void updateTreeValues(Poco::XML::Element *root,
     node = nodeIter.nextNode();
   }
 }
-}
+} // namespace
 
 //------------------------------------------------------------------------------
 // Public methods
 //------------------------------------------------------------------------------
+Container::Container() : m_shape(boost::make_shared<CSGObject>()) {}
+
+Container::Container(IObject_sptr shape) : m_shape(shape) {}
+
+Container::Container(const Container &container)
+    : m_shape(IObject_sptr(container.m_shape->clone())),
+      m_sampleShapeXML(container.m_sampleShapeXML) {}
+
 /**
  * Construct a container providing an XML definition shape
  * @param xml Definition of the shape in xml
  */
-Container::Container(std::string xml) : Object(xml) {}
+Container::Container(std::string xml)
+    : m_shape(boost::make_shared<CSGObject>(xml)) {}
 
 /**
  * @return True if the can contains a defintion of the sample shape
@@ -63,7 +80,7 @@ bool Container::hasSampleShape() const { return !m_sampleShapeXML.empty(); }
  * @param args A hash of tag values to use in place of the default
  * @return A pointer to a object modeling the sample shape
  */
-Object_sptr
+IObject_sptr
 Container::createSampleShape(const Container::ShapeArgs &args) const {
   using namespace Poco::XML;
   if (!hasSampleShape()) {
@@ -87,7 +104,7 @@ Container::createSampleShape(const Container::ShapeArgs &args) const {
     updateTreeValues(root, args);
 
   ShapeFactory factory;
-  return factory.createShape<Object>(root);
+  return factory.createShape(root);
 }
 
 /**
@@ -103,16 +120,24 @@ void Container::setSampleShape(const std::string &sampleShapeXML) {
   if (doc->documentElement()->nodeName() != SAMPLEGEOMETRY_TAG) {
     std::ostringstream msg;
     msg << "Can::setSampleShape() - XML definition "
-           "expected to be contained within a <" << SAMPLEGEOMETRY_TAG
-        << "> tag. Found " << doc->documentElement()->nodeName() << "instead.";
+           "expected to be contained within a <"
+        << SAMPLEGEOMETRY_TAG << "> tag. Found "
+        << doc->documentElement()->nodeName() << "instead.";
     throw std::invalid_argument(msg.str());
   }
   m_sampleShapeXML = sampleShapeXML;
 }
 
-//------------------------------------------------------------------------------
-// Private methods
-//------------------------------------------------------------------------------
+/**
+ * Set the ID of the shape, if it is a CSG Object
+ * @param id ID a string identifying to object
+ */
+void Container::setID(const std::string &id) {
+  // We only do anything if the contained shape is a CSGObject
+  if (auto csgObj = boost::dynamic_pointer_cast<CSGObject>(m_shape)) {
+    csgObj->setID(id);
+  }
+}
 
 } // namespace Geometry
 } // namespace Mantid

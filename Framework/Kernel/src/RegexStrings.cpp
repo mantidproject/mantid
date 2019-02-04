@@ -1,13 +1,15 @@
-#include <iostream>
-#include <iomanip>
-#include <fstream>
-#include <sstream>
-#include <vector>
-#include <list>
-#include <algorithm>
-
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/RegexStrings.h"
 #include "MantidKernel/Strings.h"
+
+#include <algorithm>
+#include <iostream>
+#include <vector>
 
 namespace Mantid {
 namespace Kernel {

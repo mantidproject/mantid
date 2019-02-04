@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name
 from __future__ import (absolute_import, division, print_function)
 
@@ -82,10 +88,11 @@ class DakotaChiSquared(PythonAlgorithm):
         self.setProperty("ChiSquared",chisquared)
 
             #cleanup
-        mantid.simpleapi.DeleteWorkspace(__w1.getName())
-        mantid.simpleapi.DeleteWorkspace(__w2.getName())
-        mantid.simpleapi.DeleteWorkspace(__soe2.getName())
+        mantid.simpleapi.DeleteWorkspace(__w1.name())
+        mantid.simpleapi.DeleteWorkspace(__w2.name())
+        mantid.simpleapi.DeleteWorkspace(__soe2.name())
         if len(soeName)==0:
-            mantid.simpleapi.DeleteWorkspace(__soe.getName())
+            mantid.simpleapi.DeleteWorkspace(__soe.name())
+
 
 AlgorithmFactory.subscribe(DakotaChiSquared)

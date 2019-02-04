@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init, invalid-name, no-self-use, attribute-defined-outside-init
 """
     Top-level auto-reduction algorithm for the SNS Liquids Reflectometer
@@ -38,8 +44,11 @@ class LRAutoReduction(PythonAlgorithm):
 
     def PyInit(self):
         """ Property declarations """
-        self.declareProperty(FileProperty("Filename", "", FileAction.Load, ['.nxs']),
+        self.declareProperty(FileProperty("Filename", "", FileAction.OptionalLoad, ['.nxs']),
                              "Data file to reduce")
+        self.declareProperty(WorkspaceProperty("InputWorkspace", "",
+                                               Direction.Input, PropertyMode.Optional),
+                             "Optionally, we can provide a workspace directly")
         self.declareProperty(FileProperty("TemplateFile", "", FileAction.OptionalLoad, ['.xml']),
                              "Template reduction file")
 
@@ -68,7 +77,8 @@ class LRAutoReduction(PythonAlgorithm):
                              "Read the run sequence information from the file, not the title")
         self.declareProperty("ForceSequenceNumber", 0,
                              "Force the sequence number value if it's not available")
-
+        self.declareProperty("OrderDirectBeamsByRunNumber", False,
+                             "Force the sequence of direct beam files to be ordered by run number")
         self.declareProperty(FileProperty('OutputFilename', '', action=FileAction.OptionalSave, extensions=["txt"]),
                              doc='Name of the reflectivity file output')
         self.declareProperty(FileProperty("OutputDirectory", "", FileAction.Directory))
@@ -77,7 +87,21 @@ class LRAutoReduction(PythonAlgorithm):
                              "Run sequence information (run number, sequence ID, sequence number).")
         self.declareProperty("SlitTolerance", 0.02, doc="Tolerance for matching slit positions")
 
-    def _get_series_info(self, filename):
+    def load_data(self):
+        """
+            Load the data. We can either load it from the specified
+            run numbers, or use the input workspace if no runs are specified.
+        """
+        filename = self.getProperty("Filename").value
+        ws_event_data = self.getProperty("InputWorkspace").value
+
+        if len(filename) > 0:
+            ws_event_data = LoadEventNexus(Filename=filename, MetaDataOnly=False)
+        elif ws_event_data is None:
+            raise RuntimeError("No input data was specified")
+        return ws_event_data
+
+    def _get_series_info(self):
         """
             Retrieve the information about the scan series so
             that we know how to put all the pieces together.
@@ -86,7 +110,7 @@ class LRAutoReduction(PythonAlgorithm):
             We can also pull some of the information from the title.
         """
         # Load meta data to decide what to do
-        self.event_data = LoadEventNexus(Filename=filename, MetaDataOnly=False)
+        self.event_data = self.load_data()
         meta_data_run = self.event_data.getRun()
         run_number = self.event_data.getRunNumber()
 
@@ -585,11 +609,10 @@ class LRAutoReduction(PythonAlgorithm):
             return default
 
     def PyExec(self):
-        filename = self.getProperty("Filename").value
         slit_tolerance = self.getProperty("SlitTolerance").value
 
         # Determine where we are in the scan
-        run_number, first_run_of_set, sequence_number, do_reduction, is_direct_beam = self._get_series_info(filename)
+        run_number, first_run_of_set, sequence_number, do_reduction, is_direct_beam = self._get_series_info()
         logger.information("Run %s - Sequence %s [%s/%s]" % (run_number, first_run_of_set,
                                                              sequence_number,
                                                              self._get_sequence_total(default=-1)))
@@ -603,6 +626,7 @@ class LRAutoReduction(PythonAlgorithm):
             logger.notice("Using automated scaling factor calculator")
             output_dir = self.getProperty("OutputDirectory").value
             sf_tof_step = self.getProperty("ScalingFactorTOFStep").value
+            order_by_runs = self.getProperty("OrderDirectBeamsByRunNumber").value
 
             # The medium for these direct beam runs may not be what was set in the template,
             # so either use the medium in the data file or a default name
@@ -615,6 +639,7 @@ class LRAutoReduction(PythonAlgorithm):
                              UseLowResCut=True, ComputeScalingFactors=True, TOFSteps=sf_tof_step,
                              IncidentMedium=incident_medium,
                              SlitTolerance=slit_tolerance,
+                             OrderDirectBeamsByRunNumber=order_by_runs,
                              ScalingFactorFile=os.path.join(output_dir, "sf_%s_%s_auto.cfg" % (first_run_of_set, file_id)))
             return
         elif not do_reduction:
@@ -628,7 +653,8 @@ class LRAutoReduction(PythonAlgorithm):
         self._write_template(data_set, run_number, first_run_of_set, sequence_number)
 
         # Execute the reduction
-        LiquidsReflectometryReduction(RunNumbers=[int(run_number)],
+        LiquidsReflectometryReduction(#RunNumbers=[int(run_number)],
+                                      InputWorkspace=self.event_data,
                                       NormalizationRunNumber=str(data_set.norm_file),
                                       SignalPeakPixelRange=data_set.DataPeakPixels,
                                       SubtractSignalBackground=data_set.DataBackgroundFlag,

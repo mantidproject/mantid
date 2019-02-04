@@ -1,13 +1,21 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/Qxy.h"
 #include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAlgorithms/GravitySANSHelper.h"
 #include "MantidAlgorithms/Qhelper.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
@@ -48,6 +56,9 @@ void Qxy::init() {
       "The upper limit of the Qx-Qy grid (goes from -MaxQxy to +MaxQxy).");
   declareProperty("DeltaQ", -1.0, mustBePositive,
                   "The dimension of a Qx-Qy cell.");
+  declareProperty("IQxQyLogBinning", false,
+                  "I(qx,qy) log binning when binning is not specified.",
+                  Kernel::Direction::Input);
   declareProperty(make_unique<WorkspaceProperty<>>(
                       "PixelAdj", "", Direction::Input, PropertyMode::Optional),
                   "The scaling to apply to each spectrum e.g. for detector "
@@ -117,53 +128,45 @@ void Qxy::exec() {
   const size_t numSpec = inputWorkspace->getNumberHistograms();
   const size_t numBins = inputWorkspace->blocksize();
 
-  // the samplePos is often not (0, 0, 0) because the instruments components are
-  // moved to account for the beam centre
-  const V3D samplePos = inputWorkspace->getInstrument()->getSample()->getPos();
-
   // Set the progress bar (1 update for every one percent increase in progress)
   Progress prog(this, 0.05, 1.0, numSpec);
 
   const auto &spectrumInfo = inputWorkspace->spectrumInfo();
+  const auto &detectorInfo = inputWorkspace->detectorInfo();
 
-  //  PARALLEL_FOR2(inputWorkspace,outputWorkspace)
+  // the samplePos is often not (0, 0, 0) because the instruments components are
+  // moved to account for the beam centre
+  const V3D samplePos = spectrumInfo.samplePosition();
+
   for (int64_t i = 0; i < int64_t(numSpec); ++i) {
-    //    PARALLEL_START_INTERUPT_REGION
-    // Get the pixel relating to this spectrum
-    IDetector_const_sptr det;
-    try {
-      det = inputWorkspace->getDetector(i);
-    } catch (Exception::NotFoundError &) {
+    if (!spectrumInfo.hasDetectors(i)) {
       g_log.warning() << "Workspace index " << i
                       << " has no detector assigned to it - discarding\n";
-      // Catch if no detector. Next line tests whether this happened - test
-      // placed
-      // outside here because Mac Intel compiler doesn't like 'continue' in a
-      // catch
-      // in an openmp block.
+      continue;
     }
     // If no detector found or if it's masked or a monitor, skip onto the next
     // spectrum
-    if (!det || det->isMonitor() || det->isMasked())
+    if (spectrumInfo.isMonitor(i) || spectrumInfo.isMasked(i))
       continue;
 
     // get the bins that are included inside the RadiusCut/WaveCutcut off, those
     // to calculate for
     const size_t wavStart = helper.waveLengthCutOff(
-        inputWorkspace, getProperty("RadiusCut"), getProperty("WaveCut"), i);
+        inputWorkspace, spectrumInfo, getProperty("RadiusCut"),
+        getProperty("WaveCut"), i);
     if (wavStart >= inputWorkspace->y(i).size()) {
       // all the spectra in this detector are out of range
       continue;
     }
 
-    V3D detPos = det->getPos() - samplePos;
+    V3D detPos = spectrumInfo.position(i) - samplePos;
 
     // these will be re-calculated if gravity is on but without gravity there is
     // no need
     double phi = atan2(detPos.Y(), detPos.X());
     double a = cos(phi);
     double b = sin(phi);
-    double sinTheta = sin(inputWorkspace->detectorTwoTheta(*det) * 0.5);
+    double sinTheta = sin(spectrumInfo.twoTheta(i) * 0.5);
 
     // Get references to the data for this spectrum
     const auto &X = inputWorkspace->x(i);
@@ -174,7 +177,12 @@ void Qxy::exec() {
 
     // the solid angle of the detector as seen by the sample is used for
     // normalisation later on
-    double angle = det->solidAngle(samplePos);
+    double angle = 0.0;
+    for (const auto detID : inputWorkspace->getSpectrum(i).getDetectorIDs()) {
+      const auto index = detectorInfo.indexOf(detID);
+      if (!detectorInfo.isMasked(index))
+        angle += detectorInfo.detector(index).solidAngle(samplePos);
+    }
 
     // some bins are masked completely or partially, the following vector will
     // contain the fractions
@@ -254,8 +262,7 @@ void Qxy::exec() {
         // in an equivalent bin to where the data was stored
 
         // first take into account the product of contributions to the weight
-        // which have
-        // no errors
+        // which have no errors
         double weight = 0.0;
         if (doSolidAngle)
           weight = maskFraction * angle;
@@ -306,9 +313,7 @@ void Qxy::exec() {
 
     prog.report("Calculating Q");
 
-    //    PARALLEL_END_INTERUPT_REGION
   } // loop over all spectra
-  //  PARALLEL_CHECK_INTERUPT_REGION
 
   // take sqrt of error weight values
   // left to be executed here for computational efficiency
@@ -353,6 +358,47 @@ void Qxy::exec() {
                  << "%) empty Q bins.\n";
 }
 
+/**
+ * This function calculates a logarithm binning
+ * It gives the same result as scipy:
+ * # Example: Qmin = 0.1 ; Qmax=1; 10 bins
+   In [4]: np.logspace(np.log10(0.1), np.log10(1), 10, base=10)
+   Out[4]:
+   array([ 0.1       ,  0.12915497,  0.16681005,  0.21544347,  0.27825594,
+        0.35938137,  0.46415888,  0.59948425,  0.77426368,  1.        ])
+
+ * Same input in this function here returns:
+   0.1 0.129155 0.16681 0.215443 0.278256 0.359381 0.464159 0.599484 0.774264 1
+*/
+std::vector<double> Qxy::logBinning(double min, double max, int num) {
+  if (min < 0 || max < 0)
+    std::cerr << "Only positive numbers allowed\n";
+  if (min == 0)
+    min = 1e-3; // This is Qmin default! Might have to change this
+  std::vector<double> outBins(num);
+  min = log10(min);
+  max = log10(max);
+  double binWidth = fabs((max - min) / (num - 1));
+  for (int i = 0; i < num; ++i) {
+    outBins[i] = pow(10, min + i * binWidth);
+  }
+  return outBins;
+}
+
+double Qxy::getQminFromWs(const API::MatrixWorkspace &inputWorkspace) {
+  // get qmin from the run properties
+  double qmin = 0;
+  const API::Run &run = inputWorkspace.run();
+  if (run.hasProperty("qmin")) {
+    Kernel::Property *prop = run.getProperty("Qmin");
+    qmin = boost::lexical_cast<double, std::string>(prop->value());
+  } else {
+    g_log.warning() << "Could not retrieve Qmin from run object.\n";
+  }
+  g_log.notice() << "QxQy: Using logarithm binning with qmin=" << qmin << ".\n";
+  return qmin;
+}
+
 /** Creates the output workspace, setting the X vector to the bins boundaries in
  * Qx.
  *  @return A pointer to the newly-created workspace
@@ -361,44 +407,67 @@ API::MatrixWorkspace_sptr
 Qxy::setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace) {
   const double max = getProperty("MaxQxy");
   const double delta = getProperty("DeltaQ");
+  const bool log_binning = getProperty("IQxQyLogBinning");
 
-  int bins = static_cast<int>(max / delta);
-  if (bins * delta != max)
-    ++bins; // Stop at first boundary past MaxQxy if max is not a multiple of
-            // delta
-  const double startVal = -1.0 * delta * bins;
-  bins *= 2; // go from -max to +max
-  bins += 1; // Add 1 - this is a histogram
+  // number of bins
+  int nBins = static_cast<int>(max / delta);
+
+  HistogramData::BinEdges axis;
+  if (log_binning) {
+    // get qmin from the run properties
+    double qmin = getQminFromWs(*inputWorkspace);
+    std::vector<double> positiveBinning = logBinning(qmin, max, nBins);
+    std::reverse(std::begin(positiveBinning), std::end(positiveBinning));
+    std::vector<double> totalBinning = positiveBinning;
+    std::for_each(std::begin(totalBinning), std::end(totalBinning),
+                  [](double &n) { n = -1 * n; });
+    totalBinning.push_back(0.0);
+    std::reverse(std::begin(positiveBinning), std::end(positiveBinning));
+    totalBinning.insert(std::end(totalBinning), std::begin(positiveBinning),
+                        std::end(positiveBinning));
+    nBins = nBins * 2 + 1;
+    axis = totalBinning;
+
+  } else {
+    if (nBins * delta != max)
+      ++nBins; // Stop at first boundary past MaxQxy if max is not a multiple of
+               // delta
+    double startVal = -1.0 * delta * nBins;
+    nBins *= 2; // go from -max to +max
+    nBins += 1; // Add 1 - this is a histogram
+
+    // Build up the X values
+    HistogramData::BinEdges linearAxis(
+        nBins, HistogramData::LinearGenerator(startVal, delta));
+    axis = linearAxis;
+  }
 
   // Create an output workspace with the same meta-data as the input
   MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(
-      inputWorkspace, bins - 1, bins, bins - 1);
+      inputWorkspace, nBins - 1, nBins, nBins - 1);
+  // Legacy compatibility. Setting detector IDs not actually meaningful.
+  for (size_t i = 0; i < outputWorkspace->getNumberHistograms(); ++i)
+    outputWorkspace->getSpectrum(i).setDetectorID(static_cast<detid_t>(i + 1));
   // ... but clear the masking from the parameter map as we don't want to carry
-  // that over since this is essentially
-  // a 2D rebin
-  ParameterMap &pmap = outputWorkspace->instrumentParameters();
-  pmap.clearParametersByName("masked");
+  // that over since this is essentially a 2D rebin
+  outputWorkspace->mutableDetectorInfo().clearMaskFlags();
 
   // Create a numeric axis to replace the vertical one
-  Axis *verticalAxis = new BinEdgeAxis(bins);
+  Axis *verticalAxis = new BinEdgeAxis(nBins);
   outputWorkspace->replaceAxis(1, verticalAxis);
-
-  // Build up the X values
-  HistogramData::BinEdges axis(bins,
-                               HistogramData::LinearGenerator(startVal, delta));
-  for (int i = 0; i < bins; ++i) {
-    const double currentVal = startVal + i * delta;
+  for (int i = 0; i < nBins; ++i) {
+    const double currentVal = axis[i];
     // Set the Y value on the axis
     verticalAxis->setValue(i, currentVal);
   }
 
   // Fill the X vectors in the output workspace
-  for (int i = 0; i < bins - 1; ++i) {
+  for (int i = 0; i < nBins - 1; ++i) {
     outputWorkspace->setBinEdges(i, axis);
     auto &y = outputWorkspace->mutableY(i);
     auto &e = outputWorkspace->mutableE(i);
 
-    for (int j = 0; j < bins - j; ++j) {
+    for (int j = 0; j < nBins - j; ++j) {
       y[j] = std::numeric_limits<double>::quiet_NaN();
       e[j] = std::numeric_limits<double>::quiet_NaN();
     }

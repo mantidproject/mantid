@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -28,9 +28,9 @@ Usage
   #Now we are ready to run the correction
   wsCorrected = PowerLawCorrection(ws,C0=3,C1=2)
 
-  print ("The correction counts and errors are multiplied by function 3*x^2")
+  print("The correction counts and errors are multiplied by function 3*x^2")
   for i in range(0,wsCorrected.blocksize(),10):
-    print ("The correct value in bin %i is %.2f compared to %.2f" % (i,wsCorrected.readY(0)[i],ws.readY(0)[i]))
+    print ("The correct value in bin {} is {:.2f} compared to {:.2f}".format(i, wsCorrected.readY(0)[i], ws.readY(0)[i]))
 
 Output:
 

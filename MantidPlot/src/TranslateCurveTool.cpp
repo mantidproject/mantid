@@ -29,24 +29,24 @@
  *                                                                         *
  ***************************************************************************/
 #include "TranslateCurveTool.h"
+#include "ApplicationWindow.h"
+#include "DataPickerTool.h"
+#include "FunctionCurve.h"
 #include "Graph.h"
 #include "PlotCurve.h"
-#include "FunctionCurve.h"
-#include "ApplicationWindow.h"
-#include "cursors.h"
-#include "DataPickerTool.h"
 #include "ScreenPickerTool.h"
-#include <limits>
-#include <QMessageBox>
+#include "cursors.h"
 #include <QLocale>
+#include <QMessageBox>
+#include <limits>
 #include <qwt_plot_curve.h>
 
 TranslateCurveTool::TranslateCurveTool(Graph *graph, ApplicationWindow *app,
                                        Direction dir,
                                        const QObject *status_target,
                                        const char *status_slot)
-    : PlotToolInterface(graph), d_dir(dir), d_sub_tool(NULL),
-      d_selected_curve(NULL), d_curve_point(), d_app(app) {
+    : PlotToolInterface(graph), d_dir(dir), d_sub_tool(nullptr),
+      d_selected_curve(nullptr), d_curve_point(), d_app(app) {
   if (status_target)
     connect(this, SIGNAL(statusText(const QString &)), status_target,
             status_slot);
@@ -68,7 +68,7 @@ void TranslateCurveTool::selectCurvePoint(QwtPlotCurve *curve,
   if (!d_sub_tool)
     return;
   DataCurve *c = dynamic_cast<DataCurve *>(curve);
-  if (c && c->type() != Graph::Function) {
+  if (c && c->type() != GraphOptions::Function) {
 
     Table *t = c->table();
     if (!t)
@@ -81,7 +81,7 @@ void TranslateCurveTool::selectCurvePoint(QwtPlotCurve *curve,
           tr("The column '%1' is read-only! Operation aborted!")
               .arg(c->xColumnName()));
       delete d_sub_tool;
-      d_graph->setActiveTool(NULL);
+      d_graph->setActiveTool(nullptr);
       return;
     } else if (d_dir == Vertical &&
                t->isReadOnlyColumn(t->colIndex(c->title().text()))) {
@@ -90,7 +90,7 @@ void TranslateCurveTool::selectCurvePoint(QwtPlotCurve *curve,
           tr("The column '%1' is read-only! Operation aborted!")
               .arg(c->title().text()));
       delete d_sub_tool;
-      d_graph->setActiveTool(NULL);
+      d_graph->setActiveTool(nullptr);
       return;
     }
   }
@@ -119,7 +119,7 @@ void TranslateCurveTool::selectDestination(const QwtDoublePoint &point) {
   // Phase 3: execute the translation
 
   if (auto c = dynamic_cast<PlotCurve *>(d_selected_curve)) {
-    if (c->type() == Graph::Function) {
+    if (c->type() == GraphOptions::Function) {
       if (d_dir == Horizontal) {
         QMessageBox::warning(
             d_app, tr("MantidPlot - Warning"),
@@ -136,7 +136,7 @@ void TranslateCurveTool::selectDestination(const QwtDoublePoint &point) {
           func->loadData();
         }
       }
-      d_graph->setActiveTool(NULL);
+      d_graph->setActiveTool(nullptr);
       return;
     }
   } else if (DataCurve *c = dynamic_cast<DataCurve *>(d_selected_curve)) {
@@ -179,15 +179,16 @@ void TranslateCurveTool::selectDestination(const QwtDoublePoint &point) {
     QLocale locale = d_app->locale();
     for (int i = row_start; i < row_end; i++) {
       if (!tab->text(i, col).isEmpty())
-        tab->setText(i, col, locale.toString((d_dir == Horizontal
-                                                  ? d_selected_curve->x(i)
-                                                  : d_selected_curve->y(i)) +
-                                                 d,
-                                             f, prec));
+        tab->setText(
+            i, col,
+            locale.toString((d_dir == Horizontal ? d_selected_curve->x(i)
+                                                 : d_selected_curve->y(i)) +
+                                d,
+                            f, prec));
     }
     d_app->updateCurves(tab, col_name);
     d_app->modifiedProject();
-    d_graph->setActiveTool(NULL);
+    d_graph->setActiveTool(nullptr);
     // attention: I'm now deleted. Maybe there is a cleaner solution...*/
   }
 }

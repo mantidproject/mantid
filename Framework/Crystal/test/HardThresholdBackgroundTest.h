@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CRYSTAL_HARDTHRESHOLDBACKGROUNDTEST_H_
 #define MANTID_CRYSTAL_HARDTHRESHOLDBACKGROUNDTEST_H_
 
@@ -23,11 +29,11 @@ public:
   void test_isBackground() {
     const double threshold = 1;
     MDHistoWorkspace_sptr ws = makeFakeMDHistoWorkspace(threshold, 1, 1);
-    auto iterator = ws->createIterator(NULL);
+    auto iterator = ws->createIterator(nullptr);
 
     HardThresholdBackground strategy(threshold, Mantid::API::NoNormalization);
 
-    TS_ASSERT(strategy.isBackground(iterator));
+    TS_ASSERT(strategy.isBackground(iterator.get()));
   }
 };
 

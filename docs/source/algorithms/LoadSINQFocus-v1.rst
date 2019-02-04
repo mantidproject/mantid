@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -28,8 +28,8 @@ The following example script loads a data file obtained at the FOCUS instrument 
     focus_2906 = LoadSINQFocus('focus2014n002906.hdf')
     
     # Print out some information
-    print "Sample title:", focus_2906.getTitle()
-    print "Number of spectra:", focus_2906.getNumberHistograms()
+    print("Sample title: {}".format(focus_2906.getTitle()))
+    print("Number of spectra: {}".format(focus_2906.getNumberHistograms()))
     
 Output:
 

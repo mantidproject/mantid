@@ -1,13 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef FUNCTIONPARAMETERDECORATORFITTEST_H
 #define FUNCTIONPARAMETERDECORATORFITTEST_H
 
-#include <cxxtest/TestSuite.h>
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/FunctionParameterDecorator.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/Algorithms/Fit.h"
 
@@ -75,7 +81,7 @@ public:
 
   void testFit() {
     Workspace2D_sptr ws =
-        WorkspaceCreationHelper::Create1DWorkspaceConstant(20, 1.5, 0.5);
+        WorkspaceCreationHelper::create1DWorkspaceConstant(20, 1.5, 0.5, true);
 
     FunctionParameterDecorator_sptr fn =
         boost::make_shared<SimpleFunctionParameterDecorator>();

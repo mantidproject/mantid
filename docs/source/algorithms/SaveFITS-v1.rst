@@ -3,7 +3,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -34,7 +34,7 @@ files include the following basic standard headers: SIMPLE, BITPIX,
 NAXIS, (NAXIS1 and NAXIS2), EXTEND, and a COMMENT header with the
 format description.
 
-See also :ref:`algm-LoadFITS`.
+.. seealso:: :ref:`algm-LoadFITS`.
 
 
 Usage
@@ -60,32 +60,32 @@ Usage
     bpp_log = 'BITPIX'
     try:
         log = ws.getRun().getLogData(bpp_log).value
-        print "Bits per pixel in first image: {0}".format(int(log))
+        print("Bits per pixel in first image: {0}".format(int(log)))
         log_reload = ws.getRun().getLogData(bpp_log).value
-        print "Bits per pixel in second image: {0}".format(int(log_reload))
+        print("Bits per pixel in second image: {0}".format(int(log_reload)))
     except RuntimeError:
-        print "Could not find the keyword '{0}' in the FITS file" % bpp_log
+        print("Could not find the keyword '{0}' in the FITS file".format(bpp_log))
 
     axis1_log = 'NAXIS1'
     axis2_log = 'NAXIS2'
     try:
         log1 = ws.getRun().getLogData(axis1_log).value
         log2 = ws.getRun().getLogData(axis2_log).value
-        print "Image size in first image: {0} x {1} pixels".format(int(log1), int(log2))
+        print("Image size in first image: {0} x {1} pixels".format(int(log1), int(log2)))
         log1_reload = ws_reload.getRun().getLogData(axis1_log).value
         log2_reload = ws_reload.getRun().getLogData(axis2_log).value
-        print "Image size in second image: {0} x {1} pixels".format(int(log1_reload), int(log2_reload))
+        print("Image size in second image: {0} x {1} pixels".format(int(log1_reload), int(log2_reload)))
     except RuntimeError:
-        print "Could not find the keywords '%s' and '%s' in this FITS file" % (axis1_log, axis2_log)
+        print("Could not find the keywords '{}' and '{}' in this FITS file".format(axis1_log, axis2_log))
 
     pos_x, pos_y = 22, 33
-    print ("Pixel value at coordinates ({0},{1}), first image: {2}, second image: {3}".
+    print("Pixel value at coordinates ({0},{1}), first image: {2:.1f}, second image: {3:.1f}".
            format(pos_x, pos_y, ws.readY(pos_y)[pos_x], ws_reload.readY(pos_y)[pos_x]))
-                
+
 .. testcleanup:: LoadSaveLoadFITS
 
     import os
-                 
+
     DeleteWorkspace(wsg_name)
     DeleteWorkspace(wsg_reload_name)
     os.remove(save_name)

@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 """
     Provides directives for dealing with category pages.
 
@@ -6,9 +12,12 @@
     creates "index" pages that lists the contents of each category. The display of each
     "index" page is controlled by a jinja2 template.
 """
+from __future__ import (absolute_import, division, print_function)
 from mantiddoc.directives.base import AlgorithmBaseDirective, algorithm_name_and_version #pylint: disable=unused-import
 from sphinx.util.osutil import relative_uri
 import os
+import posixpath
+from six import iteritems, itervalues
 
 CATEGORY_PAGE_TEMPLATE = "category.html"
 # relative to the directory containing the source file
@@ -17,7 +26,7 @@ CATEGORIES_DIR = "categories"
 # List of category names that are considered the index for everything in that type
 # When this category is encountered an additional index.html is written to both the
 # directory of the document and the category directory
-INDEX_CATEGORIES = ["Algorithms", "FitFunctions", "Concepts", "Interfaces"]
+INDEX_CATEGORIES = ["Algorithms", "FitFunctions", "Concepts", "Techniques", "Interfaces"]
 
 class LinkItem(object):
     """
@@ -34,9 +43,7 @@ class LinkItem(object):
           name (str): Display name of document
           location (str): Location of item relative to source directory
         """
-        name = str(name)
-        name = name.replace("\\\\","\\")
-        self.name = name
+        self.name = str(name).replace("\\\\","/")
         self.location = location
 
     def __eq__(self, other):
@@ -68,7 +75,7 @@ class LinkItem(object):
         Returns:
           str: A string containing the link to reach this item
         """
-        link = relative_uri(base=base, to=self.location)
+        link = relative_uri(base=to_unix_style_path(base), to=self.location)
         if not link.endswith(ext):
             link += ext
         return link
@@ -104,12 +111,11 @@ class Category(LinkItem):
           name (str): The name of the category
           docname (str): Relative path to document from root directory
         """
+        docname = to_unix_style_path(docname)
 
-        if "\\" in docname:
-            docname = docname.replace("\\", "/")
-        dirpath, filename = os.path.split(docname)
+        dirpath, filename = posixpath.split(docname)
         html_dir = dirpath + "/" + CATEGORIES_DIR
-        self.html_path = html_dir + "/" + name.replace("\\\\", "/") + ".html"
+        self.html_path = html_dir + "/" + to_unix_style_path(name) + ".html"
         super(Category, self).__init__(name, self.html_path)
         self.pages = set([])
         self.subcategories = set([])
@@ -126,7 +132,7 @@ class CategoriesDirective(AlgorithmBaseDirective):
     Subcategories can be given using the "\\" separator, e.g. Algorithms\\Transforms
 
     If the argument list is empty then the the file is assumed to be an algorithm file
-    and the lists is pulled from the algoritm object
+    and the lists is pulled from the algorithm object
     """
 
     required_arguments = 0
@@ -146,7 +152,7 @@ class CategoriesDirective(AlgorithmBaseDirective):
 
     def skip(self):
         """
-        Return error mesage if the directive should be skipped.
+        Return error message if the directive should be skipped.
         If there are no arguments, it calls the base class skip() method
         else it returns and empty string.
 
@@ -289,6 +295,18 @@ class CategoriesDirective(AlgorithmBaseDirective):
 
 #---------------------------------------------------------------------------------
 
+def to_unix_style_path(path):
+    """
+    Replaces any backslashes in the given string with forward slashes
+    and replace consecutive forward slashes with a single forward slash.
+
+    Arguments:
+      path: A string possibly containing backslashes
+    """
+    return path.replace("\\", "/").replace("//", "/")
+
+#---------------------------------------------------------------------------------
+
 def html_collect_pages(app):
     """
     Callback for the 'html-collect-pages' Sphinx event. Adds category
@@ -319,7 +337,7 @@ def create_category_pages(app):
     template = CATEGORY_PAGE_TEMPLATE
 
     categories = env.categories
-    for name, category in categories.iteritems():
+    for name, category in iteritems(categories):
         context = {}
         # First write out the named page
         context["title"] = category.name
@@ -340,20 +358,20 @@ def create_category_pages(app):
         context["outpath"] = category.html_path
 
         #jinja appends .html to output name
-        category_html_path_noext = os.path.splitext(category.html_path)[0]
+        category_html_path_noext = posixpath.splitext(category.html_path)[0]
         yield (category_html_path_noext, context, template)
 
         # Now any additional index pages if required
         if category.name in INDEX_CATEGORIES:
             # index in categories directory
-            category_html_dir = os.path.dirname(category.html_path)
-            category_html_path_noext = category_html_dir + "/index"
+            category_html_dir = posixpath.join(category.name.lower(), 'categories')
+            category_html_path_noext = posixpath.join(category_html_dir, 'index')
             yield (category_html_path_noext, context, template)
 
             # index in document directory
-            document_dir = os.path.dirname(category_html_dir)
-            category_html_path_noext = document_dir + "/index"
-            context["outpath"] = category_html_path_noext + ".html"
+            document_dir = posixpath.dirname(category_html_dir)
+            category_html_path_noext = posixpath.join(document_dir, 'index')
+            context['outpath'] = category_html_path_noext + '.html'
             yield (category_html_path_noext, context, template)
 # enddef
 
@@ -378,7 +396,7 @@ def purge_categories(app, env, docname):
         return
 
     deadref = PageRef(name, docname)
-    for category in categories.itervalues():
+    for category in itervalues(categories):
         pages = category.pages
         if deadref in pages:
             pages.remove(deadref)

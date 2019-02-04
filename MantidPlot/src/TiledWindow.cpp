@@ -1,18 +1,24 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "TiledWindow.h"
 #include "ApplicationWindow.h"
 #include "Mantid/MantidUI.h"
 
-#include <QScrollArea>
+#include <QAction>
+#include <QActionGroup>
+#include <QApplication>
 #include <QGridLayout>
-#include <QVBoxLayout>
+#include <QMenu>
 #include <QMessageBox>
 #include <QMouseEvent>
 #include <QPainter>
-#include <QMenu>
-#include <QAction>
+#include <QScrollArea>
 #include <QSignalMapper>
-#include <QActionGroup>
-#include <QApplication>
+#include <QVBoxLayout>
 
 #include <algorithm>
 
@@ -30,8 +36,8 @@ const int acceptDropWidth(5);
  * Constructor.
  */
 Tile::Tile(QWidget *parent)
-    : QFrame(parent), m_tiledWindow(parent), m_widget(NULL), m_selected(false),
-      m_acceptDrop(false) {
+    : QFrame(parent), m_tiledWindow(parent), m_widget(nullptr),
+      m_selected(false), m_acceptDrop(false) {
   m_layout = new QVBoxLayout(this);
   m_layout->setContentsMargins(5, 5, 5, 5);
 }
@@ -46,7 +52,7 @@ Tile::~Tile() {}
  * @param w :: A widget to set.
  */
 void Tile::setWidget(MdiSubWindow *w) {
-  if (w == NULL) {
+  if (w == nullptr) {
     removeWidget();
     return;
   }
@@ -67,7 +73,7 @@ void Tile::removeWidget() {
   m_layout->takeAt(0);
   // m_widget needs it's parent set or bad things happen
   m_widget->setParent(m_tiledWindow);
-  m_widget = NULL;
+  m_widget = nullptr;
 }
 
 /**
@@ -75,7 +81,7 @@ void Tile::removeWidget() {
 void Tile::paintEvent(QPaintEvent *ev) {
   QPainter painter(this);
   QRect bkGround = this->rect().adjusted(0, 0, -1, -1);
-  if (widget() == NULL) {
+  if (widget() == nullptr) {
     painter.fillRect(bkGround, QColor("lightGray"));
   }
   if (m_acceptDrop) {
@@ -200,7 +206,7 @@ InnerWidget *getInnerWidget(QWidget *w) {
         "Inner widget of TiledWindow is supposed to be an InnerWidget");
   return innerWidget;
 }
-}
+} // namespace
 
 /**
  * Constructor.
@@ -212,8 +218,8 @@ InnerWidget *getInnerWidget(QWidget *w) {
 TiledWindow::TiledWindow(QWidget *parent, const QString &label,
                          const QString &name, int nrows, int ncols,
                          Qt::WFlags f)
-    : MdiSubWindow(parent, label, name, f), m_scrollArea(NULL), m_layout(NULL),
-      m_buttonPressed(false) {
+    : MdiSubWindow(parent, label, name, f), m_scrollArea(nullptr),
+      m_layout(nullptr), m_buttonPressed(false) {
   connect(this, SIGNAL(dropAtPositionQueued(MdiSubWindow *, QPoint, bool)),
           this, SLOT(dropAtPosition(MdiSubWindow *, QPoint, bool)),
           Qt::QueuedConnection);
@@ -258,7 +264,7 @@ void TiledWindow::init(int nrows, int ncols) {
   }
 
   m_scrollArea->setWidget(innerWidget);
-  this->setWidget(NULL);
+  this->setWidget(nullptr);
   this->setWidget(m_scrollArea);
 
   tileEmptyCells();
@@ -309,7 +315,7 @@ void TiledWindow::clear() {
     for (int col = 0; col < ncols; ++col) {
       Tile *tile = getTile(row, col);
       MdiSubWindow *widget = tile->widget();
-      if (widget != NULL) {
+      if (widget != nullptr) {
         tile->removeWidget();
         widget->close();
         widget->deleteLater();
@@ -341,7 +347,7 @@ void TiledWindow::reshape(int newColumnCount) {
     for (int col = 0; col < ncols; ++col) {
       Tile *tile = getTile(row, col);
       MdiSubWindow *widget = tile->widget();
-      if (widget != NULL) {
+      if (widget != nullptr) {
         tile->removeWidget();
         widgets.append(widget);
       }
@@ -383,16 +389,16 @@ void TiledWindow::reshape(int newColumnCount) {
  */
 Tile *TiledWindow::getOrAddTile(int row, int col) {
   auto item = m_layout->itemAtPosition(row, col);
-  if (item == NULL) {
+  if (item == nullptr) {
     m_layout->addWidget(new Tile(this), row, col);
     tileEmptyCells();
     item = m_layout->itemAtPosition(row, col);
-    if (item == NULL) {
+    if (item == nullptr) {
       throw std::logic_error("TiledWindow cannot be properly initialized.");
     }
   }
   Tile *widget = dynamic_cast<Tile *>(item->widget());
-  if (widget != NULL)
+  if (widget != nullptr)
     return widget;
 
   throw std::logic_error("TiledWindow wasn't properly initialized.");
@@ -407,11 +413,11 @@ Tile *TiledWindow::getOrAddTile(int row, int col) {
  */
 Tile *TiledWindow::getTile(int row, int col) const {
   auto item = m_layout->itemAtPosition(row, col);
-  if (item == NULL) {
+  if (item == nullptr) {
     throw std::runtime_error("Tile indices are out of range.");
   }
   Tile *widget = dynamic_cast<Tile *>(item->widget());
-  if (widget != NULL)
+  if (widget != nullptr)
     return widget;
 
   throw std::logic_error("TiledWindow wasn't properly initialized.");
@@ -424,7 +430,7 @@ Tile *TiledWindow::getTile(int row, int col) const {
  */
 bool TiledWindow::hasWidget(int row, int col) const {
   Tile *tile = getTile(row, col);
-  return tile->widget() != NULL;
+  return tile->widget() != nullptr;
 }
 
 /**
@@ -436,7 +442,7 @@ void TiledWindow::tileEmptyCells() {
   for (int row = 0; row < nrows; ++row) {
     for (int col = 0; col < ncols; ++col) {
       QLayoutItem *item = m_layout->itemAtPosition(row, col);
-      if (item == NULL) {
+      if (item == nullptr) {
         m_layout->addWidget(new Tile(this), row, col);
       }
     }
@@ -491,7 +497,7 @@ void TiledWindow::insertWidget(MdiSubWindow *widget, int row, int col) {
   int lastRow = rowCount() - 1;
   int lastCol = columnCount() - 1;
   // if the last tile has a widget append a row
-  if (getWidget(lastRow, lastCol) != NULL) {
+  if (getWidget(lastRow, lastCol) != nullptr) {
     ++lastRow;
     Tile *tile = getOrAddTile(lastRow, lastCol);
     (void)tile;
@@ -594,7 +600,7 @@ void TiledWindow::removeWidgetToFloating(int row, int col) {
 MdiSubWindow *TiledWindow::removeTile(int row, int col) {
   Tile *tile = getTile(row, col);
   MdiSubWindow *widget = removeTile(tile);
-  if (widget == NULL) {
+  if (widget == nullptr) {
     QString msg = QString("Cell (%1,%2) is empty.").arg(row).arg(col);
     throw std::runtime_error(msg.toStdString());
   }
@@ -608,7 +614,7 @@ MdiSubWindow *TiledWindow::removeTile(int row, int col) {
  */
 MdiSubWindow *TiledWindow::removeTile(Tile *tile) {
   MdiSubWindow *widget = tile->widget();
-  if (widget != NULL) {
+  if (widget != nullptr) {
     tile->removeWidget();
     widget->setAttribute(Qt::WA_TransparentForMouseEvents, false);
     widget->disconnect(this);
@@ -642,7 +648,7 @@ Tile *TiledWindow::getTileAtMousePos(const QPoint &pos) {
   auto *tile = dynamic_cast<Tile *>(w);
   if (tile)
     return tile;
-  return NULL;
+  return nullptr;
 }
 
 /**
@@ -666,7 +672,7 @@ QList<Tile *> TiledWindow::getAllTiles() {
 void TiledWindow::mousePressEvent(QMouseEvent *ev) {
   clearDrops();
   auto tile = getTileAtMousePos(ev->pos());
-  if (tile == NULL)
+  if (tile == nullptr)
     return;
   if ((ev->modifiers() & Qt::ShiftModifier) != 0) {
     addRangeToSelection(tile);
@@ -712,9 +718,9 @@ void TiledWindow::mouseMoveEvent(QMouseEvent *ev) {
  *   any previous selection will be deselected and replaced with tile.
  */
 void TiledWindow::addToSelection(Tile *tile, bool append) {
-  if (tile == NULL)
+  if (tile == nullptr)
     return;
-  if (tile->widget() == NULL)
+  if (tile->widget() == nullptr)
     return;
   if (append) {
     if (deselectTile(tile)) {
@@ -728,7 +734,7 @@ void TiledWindow::addToSelection(Tile *tile, bool append) {
 }
 
 /**
- * Add a range of tiles to the selection. One of the ends of tha range
+ * Add a range of tiles to the selection. One of the ends of the range
  * is given by an already selected tile with the lowest flat index (see
  * calcFlatIndex).
  * The other end is the tile in the argument.
@@ -911,8 +917,8 @@ void TiledWindow::selectRange(int row1, int col1, int row2, int col2) {
 void TiledWindow::removeSelectionTo(TiledWindow::RemoveDestination to) {
   foreach (Tile *tile, m_selection) {
     MdiSubWindow *widget = removeTile(tile);
-    if (widget == NULL) {
-      throw std::logic_error("TiledWindow: Empty tile is found in slection.");
+    if (widget == nullptr) {
+      throw std::logic_error("TiledWindow: Empty tile is found in selection.");
     }
     sendWidgetTo(widget, to);
   }
@@ -979,12 +985,41 @@ void TiledWindow::populateMenu(QMenu *menu) {
   menu->addAction(actionClear);
 }
 
+MantidQt::API::IProjectSerialisable *
+TiledWindow::loadFromProject(const std::string &lines, ApplicationWindow *app,
+                             const int fileVersion) {
+  UNUSED_ARG(lines);
+  UNUSED_ARG(app);
+  UNUSED_ARG(fileVersion);
+  throw std::runtime_error("Not implemented");
+}
+
+std::vector<std::string> TiledWindow::getWorkspaceNames() {
+  std::vector<std::string> wsNames;
+  auto tiles = getAllTiles();
+
+  for (auto tile : tiles) {
+    auto widget = tile->widget();
+    auto names = widget->getWorkspaceNames();
+    std::copy(names.begin(), names.end(), std::back_inserter(wsNames));
+  }
+
+  return wsNames;
+}
+
+std::string TiledWindow::getWindowName() { return objectName().toStdString(); }
+
+std::string TiledWindow::saveToProject(ApplicationWindow *app) {
+  UNUSED_ARG(app);
+  return "";
+}
+
 /**
  * Check if a Tile can accept drops.
  * @param tile :: A tile to check.
  */
 bool TiledWindow::canAcceptDrops(Tile *tile) const {
-  return tile->widget() == NULL;
+  return tile->widget() == nullptr;
 }
 
 /**

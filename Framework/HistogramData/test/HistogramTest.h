@@ -1,26 +1,33 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_HISTOGRAMDATA_HISTOGRAMTEST_H_
 #define MANTID_HISTOGRAMDATA_HISTOGRAMTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
 #include "MantidHistogramData/Histogram.h"
+#include "MantidHistogramData/HistogramIterator.h"
 #include "MantidHistogramData/LinearGenerator.h"
 
+using Mantid::HistogramData::BinEdges;
+using Mantid::HistogramData::CountStandardDeviations;
+using Mantid::HistogramData::CountVariances;
+using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::Frequencies;
+using Mantid::HistogramData::FrequencyStandardDeviations;
+using Mantid::HistogramData::FrequencyVariances;
 using Mantid::HistogramData::Histogram;
+using Mantid::HistogramData::HistogramE;
 using Mantid::HistogramData::HistogramX;
 using Mantid::HistogramData::HistogramY;
-using Mantid::HistogramData::HistogramE;
-using Mantid::HistogramData::getHistogramXMode;
-using Mantid::HistogramData::Points;
-using Mantid::HistogramData::PointStandardDeviations;
-using Mantid::HistogramData::BinEdges;
-using Mantid::HistogramData::Counts;
-using Mantid::HistogramData::CountVariances;
-using Mantid::HistogramData::CountStandardDeviations;
-using Mantid::HistogramData::Frequencies;
-using Mantid::HistogramData::FrequencyVariances;
-using Mantid::HistogramData::FrequencyStandardDeviations;
 using Mantid::HistogramData::LinearGenerator;
+using Mantid::HistogramData::PointStandardDeviations;
+using Mantid::HistogramData::Points;
+using Mantid::HistogramData::getHistogramXMode;
 
 class HistogramTest : public CxxTest::TestSuite {
 public:
@@ -150,6 +157,47 @@ public:
     TS_ASSERT(!src.points());
     TS_ASSERT(dest.points());
     TS_ASSERT_EQUALS(dest.xMode(), Histogram::XMode::Points);
+  }
+
+  void test_size() {
+    TS_ASSERT_EQUALS(Histogram(BinEdges(0)).size(), 0);
+    TS_ASSERT_EQUALS(Histogram(BinEdges(2)).size(), 1);
+    TS_ASSERT_EQUALS(Histogram(BinEdges(3)).size(), 2);
+    TS_ASSERT_EQUALS(Histogram(Points(0)).size(), 0);
+    TS_ASSERT_EQUALS(Histogram(Points(1)).size(), 1);
+    TS_ASSERT_EQUALS(Histogram(Points(2)).size(), 2);
+  }
+
+  void test_resize_point_data() {
+    Histogram histogram(Points(3), Counts(3));
+    histogram.resize(2);
+    TS_ASSERT_EQUALS(histogram.size(), 2);
+    TS_ASSERT_EQUALS(histogram.x().size(), 2);
+    TS_ASSERT_EQUALS(histogram.y().size(), 2);
+    histogram.resize(1);
+    TS_ASSERT_EQUALS(histogram.size(), 1);
+    TS_ASSERT_EQUALS(histogram.x().size(), 1);
+    TS_ASSERT_EQUALS(histogram.y().size(), 1);
+    histogram.resize(0);
+    TS_ASSERT_EQUALS(histogram.size(), 0);
+    TS_ASSERT_EQUALS(histogram.x().size(), 0);
+    TS_ASSERT_EQUALS(histogram.y().size(), 0);
+  }
+
+  void test_resize_histogram() {
+    Histogram histogram(BinEdges(4), Counts(3));
+    histogram.resize(2);
+    TS_ASSERT_EQUALS(histogram.size(), 2);
+    TS_ASSERT_EQUALS(histogram.x().size(), 3);
+    TS_ASSERT_EQUALS(histogram.y().size(), 2);
+    histogram.resize(1);
+    TS_ASSERT_EQUALS(histogram.size(), 1);
+    TS_ASSERT_EQUALS(histogram.x().size(), 2);
+    TS_ASSERT_EQUALS(histogram.y().size(), 1);
+    histogram.resize(0);
+    TS_ASSERT_EQUALS(histogram.size(), 0);
+    TS_ASSERT_EQUALS(histogram.x().size(), 0);
+    TS_ASSERT_EQUALS(histogram.y().size(), 0);
   }
 
   void test_xMode() {
@@ -1081,8 +1129,9 @@ public:
 
   void test_that_can_change_histogram_size_when_only_x_is_present() {
     Histogram h(BinEdges{1, 2, 3});
-    auto isSizeAsSpecified =
-        [](const Histogram &h, size_t n) { return (h.x().size() == (n + 1)); };
+    auto isSizeAsSpecified = [](const Histogram &h, size_t n) {
+      return (h.x().size() == (n + 1));
+    };
     TS_ASSERT(isSizeAsSpecified(h, 2));
 
     // Increase the size
@@ -1107,6 +1156,15 @@ public:
     TS_ASSERT(!h.sharedY());
     TS_ASSERT(!h.sharedE());
     TS_ASSERT(!h.sharedDx());
+  }
+
+  void test_that_can_iterate_histogram() {
+    Histogram hist(Points{0.1, 0.2, 0.4}, Counts{1, 2, 4});
+    double total = 0;
+    for (const auto &item : hist) {
+      total += item.counts();
+    }
+    TS_ASSERT_EQUALS(total, 7)
   }
 };
 

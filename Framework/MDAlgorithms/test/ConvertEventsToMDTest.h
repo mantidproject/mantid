@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MD_CONVEVENTS2_Q_NDANY_TEST_H_
 #define MANTID_MD_CONVEVENTS2_Q_NDANY_TEST_H_
 
@@ -74,7 +80,7 @@ public:
     int numHist = 10;
     Mantid::API::MatrixWorkspace_sptr wsEv =
         boost::dynamic_pointer_cast<MatrixWorkspace>(
-            WorkspaceCreationHelper::CreateRandomEventWorkspace(100, numHist,
+            WorkspaceCreationHelper::createRandomEventWorkspace(100, numHist,
                                                                 0.1));
     wsEv->setInstrument(
         ComponentCreationHelper::createTestInstrumentCylindrical(numHist));

@@ -1,9 +1,17 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,attribute-defined-outside-init, too-few-public-methods
-import stresstesting
+from __future__ import (absolute_import, division, print_function)
+import systemtesting
 import os
 from abc import ABCMeta, abstractmethod
 from mantid.simpleapi import *
 import platform
+from six import with_metaclass
 
 #==============================================================================
 
@@ -23,7 +31,7 @@ def _cleanup_files(dirname, filenames):
 #==============================================================================
 
 
-class QLresTest(stresstesting.MantidStressTest):
+class QLresTest(systemtesting.MantidSystemTest):
 
     def skipTests(self):
         return not platform.system() == "Windows"
@@ -67,7 +75,7 @@ class QLresTest(stresstesting.MantidStressTest):
 #==============================================================================
 
 
-class ResNormTest(stresstesting.MantidStressTest):
+class ResNormTest(systemtesting.MantidSystemTest):
 
     def skipTests(self):
         return not platform.system() == "Windows"
@@ -99,7 +107,7 @@ class ResNormTest(stresstesting.MantidStressTest):
 #==============================================================================
 
 
-class QuestTest(stresstesting.MantidStressTest):
+class QuestTest(systemtesting.MantidSystemTest):
 
     def skipTests(self):
         return not platform.system() == "Windows"
@@ -138,7 +146,7 @@ class QuestTest(stresstesting.MantidStressTest):
 #==============================================================================
 
 
-class QSeTest(stresstesting.MantidStressTest):
+class QSeTest(systemtesting.MantidSystemTest):
 
     def skipTests(self):
         return not platform.system() == "Windows"
@@ -180,7 +188,7 @@ class QSeTest(stresstesting.MantidStressTest):
 #==============================================================================
 
 
-class QLDataTest(stresstesting.MantidStressTest):
+class QLDataTest(systemtesting.MantidSystemTest):
 
     def skipTests(self):
         return not platform.system() == "Windows"
@@ -224,7 +232,7 @@ class QLDataTest(stresstesting.MantidStressTest):
 #==============================================================================
 
 
-class QLResNormTest(stresstesting.MantidStressTest):
+class QLResNormTest(systemtesting.MantidSystemTest):
 
     def skipTests(self):
         return not platform.system() == "Windows"
@@ -272,7 +280,7 @@ class QLResNormTest(stresstesting.MantidStressTest):
 #==============================================================================
 
 
-class QLWidthTest(stresstesting.MantidStressTest):
+class QLWidthTest(systemtesting.MantidSystemTest):
 
     def skipTests(self):
         return not platform.system() == "Windows"
@@ -316,12 +324,10 @@ class QLWidthTest(stresstesting.MantidStressTest):
 #==============================================================================
 
 
-class JumpFitFunctionTestBase(stresstesting.MantidStressTest):
-
-    __metaclass__ = ABCMeta
+class JumpFitFunctionTestBase(with_metaclass(ABCMeta, systemtesting.MantidSystemTest)):
 
     def __init__(self):
-        stresstesting.MantidStressTest.__init__(self)
+        systemtesting.MantidSystemTest.__init__(self)
 
         self._sample_name = 'irs26176_graphite002_QLr_Workspace'
         self._q_range = [0.6, 1.705600]
@@ -369,7 +375,7 @@ class JumpCETest(JumpFitFunctionTestBase):
     def __init__(self):
         JumpFitFunctionTestBase.__init__(self)
 
-        self._function = 'name=ChudleyElliot,Tau=3.31,L=1.42'
+        self._function = 'name=ChudleyElliot,Tau=1.42,L=2.42'
         self.tolerance = 5e-3
 
     def get_reference_files(self):
@@ -411,7 +417,7 @@ class JumpTeixeiraTest(JumpFitFunctionTestBase):
     def __init__(self):
         JumpFitFunctionTestBase.__init__(self)
 
-        self._function = 'name=TeixeiraWater,Tau=1.6,L=0.4'
+        self._function = 'name=TeixeiraWater,Tau=1.6,L=0.9'
         self.tolerance = 1e-3
 
     def get_reference_files(self):

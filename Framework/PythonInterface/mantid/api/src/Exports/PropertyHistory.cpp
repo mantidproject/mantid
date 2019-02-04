@@ -1,13 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/PropertyHistory.h"
 #include "MantidAPI/IAlgorithm.h"
 
 #include <boost/python/class.hpp>
-#include <boost/python/self.hpp>
 #include <boost/python/operators.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
+#include <boost/python/self.hpp>
 
-using Mantid::Kernel::PropertyHistory;
 using Mantid::API::IAlgorithm;
+using Mantid::Kernel::PropertyHistory;
 using namespace boost::python;
 
 void export_PropertyHistory() {

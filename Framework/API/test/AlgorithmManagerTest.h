@@ -1,16 +1,23 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef AlgorithmManagerTest_H_
 #define AlgorithmManagerTest_H_
 
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/AlgorithmProxy.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AlgorithmProxy.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/ConfigService.h"
-#include <stdexcept>
-#include <vector>
 #include <Poco/ActiveResult.h>
 #include <Poco/Thread.h>
+#include <stdexcept>
+#include <vector>
 
 using namespace Mantid::API;
 
@@ -138,13 +145,13 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         alg = AlgorithmManager::Instance().create("AlgTest", 1));
     TS_ASSERT_DIFFERS(dynamic_cast<AlgorithmProxy *>(alg.get()),
-                      static_cast<AlgorithmProxy *>(0));
+                      static_cast<AlgorithmProxy *>(nullptr));
     TS_ASSERT_THROWS_NOTHING(
         alg = AlgorithmManager::Instance().create("AlgTestSecond", 1));
     TS_ASSERT_DIFFERS(dynamic_cast<AlgorithmProxy *>(alg.get()),
-                      static_cast<AlgorithmProxy *>(0));
+                      static_cast<AlgorithmProxy *>(nullptr));
     TS_ASSERT_DIFFERS(dynamic_cast<IAlgorithm *>(alg.get()),
-                      static_cast<IAlgorithm *>(0));
+                      static_cast<IAlgorithm *>(nullptr));
     TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(),
                      2); // To check that crea is called on local objects
   }
@@ -156,8 +163,8 @@ public:
     Bptr = AlgorithmManager::Instance().createUnmanaged("AlgTest");
     TS_ASSERT_DIFFERS(Aptr, Bptr);
     TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(), 1);
-    TS_ASSERT_DIFFERS(Aptr.get(), static_cast<Algorithm *>(0));
-    TS_ASSERT_DIFFERS(Bptr.get(), static_cast<Algorithm *>(0));
+    TS_ASSERT_DIFFERS(Aptr.get(), static_cast<Algorithm *>(nullptr));
+    TS_ASSERT_DIFFERS(Bptr.get(), static_cast<Algorithm *>(nullptr));
   }
 
   void testCreateNoProxy() {
@@ -168,7 +175,7 @@ public:
     TSM_ASSERT("Was created as a AlgorithmProxy",
                dynamic_cast<AlgorithmProxy *>(Aptr.get()));
     TSM_ASSERT("Was NOT created as a AlgorithmProxy",
-               dynamic_cast<AlgorithmProxy *>(Bptr.get()) == NULL);
+               dynamic_cast<AlgorithmProxy *>(Bptr.get()) == nullptr);
   }
 
   // This will be called back when an algo starts

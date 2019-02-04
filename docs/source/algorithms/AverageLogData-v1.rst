@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -32,7 +32,7 @@ Usage
     value,error=AverageLogData(ws,LogName="ChopperStatus5")
 
     #print the values
-    print "ChopperStatus5 : %1.3f +/- %1.3f"%(value,error)
+    print("ChopperStatus5 : %1.3f +/- %1.3f"%(value,error))
      
 
 .. testcleanup:: AverageLogData

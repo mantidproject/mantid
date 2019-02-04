@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAOBJECTS_MDBINTEST_H_
 #define MANTID_DATAOBJECTS_MDBINTEST_H_
 
-#include "MantidKernel/System.h"
-#include "MantidKernel/Timer.h"
 #include "MantidDataObjects/MDBin.h"
 #include "MantidDataObjects/MDEventFactory.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
@@ -13,7 +19,7 @@ using namespace Mantid::DataObjects;
 class MDBinTest : public CxxTest::TestSuite {
 public:
   void test_constructor() {
-    typedef MDLeanEvent<3> MDE;
+    using MDE = MDLeanEvent<3>;
     MDBin<MDE, 3> bin;
     for (size_t d = 0; d < 3; d++) {
       TS_ASSERT_EQUALS(bin.m_min[d], -std::numeric_limits<coord_t>::max());

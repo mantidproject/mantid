@@ -33,10 +33,10 @@
 
 #include "Script.h"
 
-#include <QVariant>
-#include <QStringList>
-#include <QObject>
 #include <QEvent>
+#include <QObject>
+#include <QStringList>
+#include <QVariant>
 
 #include "customevents.h"
 
@@ -71,7 +71,8 @@ public:
   virtual Script *newScript(const QString &name, QObject *context,
                             const Script::InteractionType interact) const = 0;
 
-  //! If an exception / error occured, return a nicely formated stack backtrace.
+  //! If an exception / error occurred, return a nicely formatted stack
+  //! backtrace.
   virtual QString stackTraceString() { return QString::null; }
   /// Return a list of supported mathematical functions. These should be
   /// imported into the global namespace.
@@ -97,7 +98,7 @@ public:
   /// Create a code lexer for this environment, can be NULL. Ownership of a
   /// created object
   /// is transferred to the caller.
-  virtual QsciLexer *createCodeLexer() const { return NULL; }
+  virtual QsciLexer *createCodeLexer() const { return nullptr; }
 
   virtual void redirectStdOut(bool) {}
 
@@ -169,7 +170,7 @@ public:
   static int numLanguages();
 
 private:
-  typedef ScriptingEnv *(*ScriptingEnvConstructor)(ApplicationWindow *);
+  using ScriptingEnvConstructor = ScriptingEnv *(*)(ApplicationWindow *);
   typedef struct {
     const char *name;
     ScriptingEnvConstructor constructor;

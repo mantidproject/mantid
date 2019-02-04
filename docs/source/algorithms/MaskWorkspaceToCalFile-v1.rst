@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -12,7 +12,7 @@ Description
 This algorithms writes a cal file with the selection column set to the
 masking status of the workspaces provided. The offsets and grouping
 details of the cal file are not completed, so you would normally use
-MargeCalFiles afterwards to import these values from another file.
+:ref:`MergeCalFiles <algm-MergeCalFiles>` afterwards to import these values from another file.
 
 Usage
 -----
@@ -40,7 +40,7 @@ Usage
 
   # Print out first 10 lines of the file
   for line in calFile[:10]:
-    print line
+    print(line)
 
 Output
 ######

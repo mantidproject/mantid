@@ -1,11 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/MDWSTransform.h"
 
-#include "MantidKernel/Strings.h"
-#include "MantidMDAlgorithms/MDTransfAxisNames.h"
 #include "MantidGeometry/MDGeometry/HKL.h"
 #include "MantidGeometry/MDGeometry/QLab.h"
 #include "MantidGeometry/MDGeometry/QSample.h"
 #include "MantidKernel/MDUnit.h"
+#include "MantidKernel/Strings.h"
+#include "MantidKernel/Tolerance.h"
+#include "MantidMDAlgorithms/MDTransfAxisNames.h"
 
 #include <cfloat>
 
@@ -14,7 +21,7 @@ namespace MDAlgorithms {
 namespace {
 // logger for the algorithm workspaces
 Kernel::Logger g_Log("MDWSTransform");
-}
+} // namespace
 using namespace CnvrtToMD;
 
 /** method to build the Q-coordinates transformation.
@@ -58,13 +65,13 @@ MDWSTransform::getTransfMatrix(MDWSDescription &TargWSDescription,
   return transf;
 }
 /** Method analyzes the state of UB matrix and goniometer attached to the
-  *workspace and decides, which target
-  * coordinate system these variables identify.
-  *Crystal Frame decided in case if there is UB matrix is present and is not
-  *unit matrix
-  *Lab frame -- if goniometer is Unit and UB is unit matrix or not present
-  *Sample frame -- otherwise
-  */
+ *workspace and decides, which target
+ * coordinate system these variables identify.
+ *Crystal Frame decided in case if there is UB matrix is present and is not
+ *unit matrix
+ *Lab frame -- if goniometer is Unit and UB is unit matrix or not present
+ *Sample frame -- otherwise
+ */
 CnvrtToMD::TargetFrame
 MDWSTransform::findTargetFrame(MDWSDescription &TargWSDescription) const {
 
@@ -88,7 +95,7 @@ MDWSTransform::findTargetFrame(MDWSDescription &TargWSDescription) const {
  *
  * method throws invalid argument if the information on the workspace is
  *insufficient to define the frame requested
-*/
+ */
 void MDWSTransform::checkTargetFrame(
     const MDWSDescription &TargWSDescription,
     const CnvrtToMD::TargetFrame CoordFrameID) const {
@@ -119,35 +126,29 @@ std::vector<double>
 MDWSTransform::getTransfMatrix(MDWSDescription &TargWSDescription,
                                CnvrtToMD::TargetFrame FrameID,
                                CoordScaling &ScaleID) const {
-
   Kernel::Matrix<double> mat(3, 3, true);
 
   bool powderMode = TargWSDescription.isPowder();
-
   bool has_lattice(true);
   if (!TargWSDescription.hasLattice())
     has_lattice = false;
 
   if (!(powderMode || has_lattice)) {
-    std::string inWsName = TargWSDescription.getWSName();
+    const std::string &inWsName = TargWSDescription.getWSName();
     // notice about 3D case without lattice
-    g_Log.notice()
+    g_Log.information()
         << "Can not obtain transformation matrix from the input workspace: "
-        << inWsName << " as no oriented lattice has been defined. \n"
-                       "Will use unit transformation matrix.\n";
+        << inWsName
+        << " as no oriented lattice has been defined. \n"
+           "Will use unit transformation matrix.\n";
   }
   // set the frame ID to the values, requested by properties
   CnvrtToMD::TargetFrame CoordFrameID(FrameID);
-  if (FrameID == AutoSelect || powderMode) // if this value is auto-select, find
-                                           // appropriate frame from workspace
-                                           // properties
+  if (FrameID == AutoSelect || powderMode) {
     CoordFrameID = findTargetFrame(TargWSDescription);
-  else // if not, and specific target frame requested, verify if everything is
-       // available on the workspace for this frame
-    checkTargetFrame(
-        TargWSDescription,
-        CoordFrameID); // throw, if the information is not available
-
+  } else {
+    checkTargetFrame(TargWSDescription, CoordFrameID);
+  }
   switch (CoordFrameID) {
   case (CnvrtToMD::LabFrame): {
     ScaleID = NoScaling;
@@ -530,5 +531,5 @@ MDWSTransform::MDWSTransform()
   m_TargFramesID[SampleFrame] = "Q_sample";
   m_TargFramesID[HKLFrame] = "HKL";
 }
-}
-}
+} // namespace MDAlgorithms
+} // namespace Mantid

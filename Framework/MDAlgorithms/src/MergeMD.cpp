@@ -1,9 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/MergeMD.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidDataObjects/MDBoxIterator.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidDataObjects/MDBoxIterator.h"
 #include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/Strings.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -16,7 +24,6 @@ namespace MDAlgorithms {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(MergeMD)
 
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string MergeMD::name() const { return "MergeMD"; }
 
@@ -26,9 +33,6 @@ int MergeMD::version() const { return 1; }
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string MergeMD::category() const { return "MDAlgorithms\\Creation"; }
 
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void MergeMD::init() {
@@ -48,7 +52,6 @@ void MergeMD::init() {
   this->initBoxControllerProps("2", 500, 16);
 }
 
-//----------------------------------------------------------------------------------------------
 /** Create the output MDWorkspace from a list of input
  *
  * @param inputs :: list of names of input MDWorkspaces
@@ -83,14 +86,14 @@ void MergeMD::createOutputWorkspace(std::vector<std::string> &inputs) {
   for (auto &ws : m_workspaces) {
     if (ws->getNumDims() != numDims)
       throw std::invalid_argument(
-          "Workspace " + ws->name() +
+          "Workspace " + ws->getName() +
           " does not match the number of dimensions of the others (" +
           Strings::toString(ws->getNumDims()) + ", expected " +
           Strings::toString(numDims) + ")");
 
     if (ws->getEventTypeName() != ws0->getEventTypeName())
       throw std::invalid_argument(
-          "Workspace " + ws->name() +
+          "Workspace " + ws->getName() +
           " does not match the MDEvent type of the others (" +
           ws->getEventTypeName() + ", expected " + ws0->getEventTypeName() +
           ")");
@@ -99,10 +102,11 @@ void MergeMD::createOutputWorkspace(std::vector<std::string> &inputs) {
       IMDDimension_const_sptr dim = ws->getDimension(d);
       IMDDimension_const_sptr dim0 = ws0->getDimension(d);
       if (dim->getName() != dim0->getName())
-        throw std::invalid_argument(
-            "Workspace " + ws->name() + " does not have the same dimension " +
-            Strings::toString(d) + " as the others (" + dim->getName() +
-            ", expected " + dim0->getName() + ")");
+        throw std::invalid_argument("Workspace " + ws->getName() +
+                                    " does not have the same dimension " +
+                                    Strings::toString(d) + " as the others (" +
+                                    dim->getName() + ", expected " +
+                                    dim0->getName() + ")");
 
       // Find the extents
       if (dim->getMaximum() > dimMax[d])
@@ -147,12 +151,52 @@ void MergeMD::createOutputWorkspace(std::vector<std::string> &inputs) {
 
   for (uint16_t i = 0; i < nExperiments; i++) {
     uint16_t nWSexperiments = m_workspaces[i]->getNumExperimentInfo();
+    experimentInfoNo.push_back(nWSexperiments);
     for (uint16_t j = 0; j < nWSexperiments; j++) {
       API::ExperimentInfo_sptr ei = API::ExperimentInfo_sptr(
           m_workspaces[i]->getExperimentInfo(j)->cloneExperimentInfo());
       out->addExperimentInfo(ei);
     }
   }
+
+  // Cumulative sum of number of experimentInfo and reverse order
+  std::partial_sum(experimentInfoNo.begin(), experimentInfoNo.end(),
+                   experimentInfoNo.begin());
+  std::reverse(std::begin(experimentInfoNo), std::end(experimentInfoNo));
+}
+
+//----------------------------------------------------------------------------------------------
+/** Copy the extra data (not signal, error or coordinates) from one event to
+ * another with different numbers of dimensions
+ *
+ * @param srcEvent :: the source event, being copied
+ * @param newEvent :: the destination event
+ * @param runIndexOffset :: offset to be added to the runIndex
+ */
+template <size_t nd, size_t ond>
+inline void copyEvent(const MDLeanEvent<nd> &srcEvent,
+                      MDLeanEvent<ond> &newEvent,
+                      const uint16_t runIndexOffset) {
+  // Nothing extra copy - this is no-op
+  UNUSED_ARG(srcEvent);
+  UNUSED_ARG(newEvent);
+  UNUSED_ARG(runIndexOffset);
+}
+
+//----------------------------------------------------------------------------------------------
+/** Copy the extra data (not signal, error or coordinates) from one event to
+ * another with different numbers of dimensions
+ *
+ * @param srcEvent :: the source event, being copied
+ * @param newEvent :: the destination event
+ * @param runIndexOffset :: offset to be added to the runIndex
+ */
+template <size_t nd, size_t ond>
+inline void copyEvent(const MDEvent<nd> &srcEvent, MDEvent<ond> &newEvent,
+                      const uint16_t runIndexOffset) {
+  newEvent.setDetectorId(srcEvent.getDetectorID());
+  newEvent.setRunIndex(
+      static_cast<uint16_t>(srcEvent.getRunIndex() + runIndexOffset));
 }
 
 //----------------------------------------------------------------------------------------------
@@ -162,16 +206,18 @@ void MergeMD::createOutputWorkspace(std::vector<std::string> &inputs) {
  * @param ws ::  MDEventWorkspace to clone
  */
 template <typename MDE, size_t nd>
-void MergeMD::doPlus(typename MDEventWorkspace<MDE, nd>::sptr ws) {
+void MergeMD::doPlus(typename MDEventWorkspace<MDE, nd>::sptr ws2) {
   // CPUTimer tim;
   typename MDEventWorkspace<MDE, nd>::sptr ws1 =
       boost::dynamic_pointer_cast<MDEventWorkspace<MDE, nd>>(out);
-  typename MDEventWorkspace<MDE, nd>::sptr ws2 = ws;
   if (!ws1 || !ws2)
     throw std::runtime_error("Incompatible workspace types passed to MergeMD.");
 
   MDBoxBase<MDE, nd> *box1 = ws1->getBox();
   MDBoxBase<MDE, nd> *box2 = ws2->getBox();
+
+  uint16_t runIndexOffset = experimentInfoNo.back();
+  experimentInfoNo.pop_back();
 
   // How many events you started with
   size_t initial_numEvents = ws1->getNPoints();
@@ -197,7 +243,15 @@ void MergeMD::doPlus(typename MDEventWorkspace<MDE, nd>::sptr ws) {
         // Copy the events from WS2 and add them into WS1
         const std::vector<MDE> &events = box->getConstEvents();
         // Add events, with bounds checking
-        box1->addEvents(events);
+
+        for (auto it = events.cbegin(); it != events.cend(); ++it) {
+          // Create the event
+          MDE newEvent(it->getSignal(), it->getErrorSquared(), it->getCenter());
+          // Copy extra data, if any
+          copyEvent(*it, newEvent, runIndexOffset);
+          // Add it to the workspace
+          box1->addEvent(newEvent);
+        }
         if (fileBasedSource)
           box->clear();
         else
@@ -256,9 +310,9 @@ void MergeMD::exec() {
   // Run PlusMD on each of the input workspaces, in order.
   double progStep = 1.0 / double(m_workspaces.size());
   for (size_t i = 0; i < m_workspaces.size(); i++) {
-    g_log.information() << "Adding workspace " << m_workspaces[i]->name()
+    g_log.information() << "Adding workspace " << m_workspaces[i]->getName()
                         << '\n';
-    progress(double(i) * progStep, m_workspaces[i]->name());
+    progress(double(i) * progStep, m_workspaces[i]->getName());
     CALL_MDEVENT_FUNCTION(doPlus, m_workspaces[i]);
   }
 
@@ -270,5 +324,5 @@ void MergeMD::exec() {
   g_log.debug() << tim << " to merge all workspaces.\n";
 }
 
-} // namespace Mantid
 } // namespace MDAlgorithms
+} // namespace Mantid

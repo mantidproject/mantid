@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDKERNEL_COW_PTR_H
 #define MANTIDKERNEL_COW_PTR_H
 
 #include "MultiThreaded.h"
 
 #ifndef Q_MOC_RUN
-#include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/shared_ptr.hpp>
 #endif
 
 #include <mutex>
@@ -33,31 +39,11 @@ namespace Kernel {
   semantics but call the access function if the data is required
   to be modified.
 
-  Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
-
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>
-
 */
 template <typename DataType> class cow_ptr {
 public:
-  typedef boost::shared_ptr<DataType> ptr_type; ///< typedef for the storage
-  typedef DataType value_type;                  ///< typedef for the data type
+  using ptr_type = boost::shared_ptr<DataType>; ///< typedef for the storage
+  using value_type = DataType;                  ///< typedef for the data type
 
 private:
   ptr_type Data; ///< Real object Ptr
@@ -100,10 +86,13 @@ public:
   } ///< Pointer dereference access
   const DataType *operator->() const {
     return Data.get();
-  } ///<indirectrion dereference access
-  bool operator==(const cow_ptr<DataType> &A) noexcept {
+  } ///< indirectrion dereference access
+  bool operator==(const cow_ptr<DataType> &A) const noexcept {
     return Data == A.Data;
   } ///< Based on ptr equality
+  bool operator!=(const cow_ptr<DataType> &A) const noexcept {
+    return Data != A.Data;
+  } ///< Based on ptr inequality
   DataType &access();
 };
 
@@ -112,15 +101,13 @@ public:
  resource is a sink.
  */
 template <typename DataType>
-cow_ptr<DataType>::cow_ptr(DataType *resourcePtr)
-    : Data(resourcePtr) {}
+cow_ptr<DataType>::cow_ptr(DataType *resourcePtr) : Data(resourcePtr) {}
 
 /**
   Constructor : creates new data() object
 */
 template <typename DataType>
-cow_ptr<DataType>::cow_ptr()
-    : Data(boost::make_shared<DataType>()) {}
+cow_ptr<DataType>::cow_ptr() : Data(boost::make_shared<DataType>()) {}
 
 /**
   Copy constructor : double references the data object
@@ -128,8 +115,8 @@ cow_ptr<DataType>::cow_ptr()
 */
 // Note: Need custom implementation, since std::mutex is not copyable.
 template <typename DataType>
-cow_ptr<DataType>::cow_ptr(const cow_ptr<DataType> &A) noexcept : Data(A.Data) {
-}
+cow_ptr<DataType>::cow_ptr(const cow_ptr<DataType> &A) noexcept
+    : Data(boost::atomic_load(&A.Data)) {}
 
 /**
   Assignment operator : double references the data object
@@ -142,7 +129,7 @@ template <typename DataType>
 cow_ptr<DataType> &cow_ptr<DataType>::
 operator=(const cow_ptr<DataType> &A) noexcept {
   if (this != &A) {
-    Data = A.Data;
+    boost::atomic_store(&Data, boost::atomic_load(&A.Data));
   }
   return *this;
 }
@@ -156,7 +143,7 @@ operator=(const cow_ptr<DataType> &A) noexcept {
 template <typename DataType>
 cow_ptr<DataType> &cow_ptr<DataType>::operator=(const ptr_type &A) noexcept {
   if (this->Data != A) {
-    Data = A;
+    boost::atomic_store(&Data, boost::atomic_load(&A));
   }
   return *this;
 }
@@ -180,30 +167,30 @@ template <typename DataType> DataType &cow_ptr<DataType>::access() {
     std::lock_guard<std::mutex> lock{copyMutex};
     // Check again because another thread may have taken copy and dropped
     // reference count since previous check
-    if (!Data.unique())
-      Data = boost::make_shared<DataType>(*Data);
+    if (!Data.unique()) {
+      boost::atomic_store(&Data, boost::make_shared<DataType>(*Data));
+    }
   }
-
   return *Data;
 }
 
 template <typename DataType>
 cow_ptr<DataType>::cow_ptr(ptr_type &&resourceSptr) noexcept {
-  this->Data = std::move(resourceSptr);
+  boost::atomic_store(&this->Data, std::move(resourceSptr));
 }
 
 template <typename DataType>
 cow_ptr<DataType>::cow_ptr(const ptr_type &resourceSptr) noexcept {
-  this->Data = resourceSptr;
+  boost::atomic_store(&this->Data, boost::atomic_load(&resourceSptr));
 }
 
 } // NAMESPACE Kernel
 
 /// typedef for the data storage used in Mantid matrix workspaces
-typedef std::vector<double> MantidVec;
+using MantidVec = std::vector<double>;
 
 /// typedef for the pointer to data storage used in Mantid matrix workspaces
-typedef Kernel::cow_ptr<MantidVec> MantidVecPtr;
+using MantidVecPtr = Kernel::cow_ptr<MantidVec>;
 
 } // NAMESPACE Mantid
 

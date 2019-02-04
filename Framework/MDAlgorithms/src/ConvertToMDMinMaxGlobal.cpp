@@ -1,20 +1,26 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/ConvertToMDMinMaxGlobal.h"
 
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/VisibleWhenProperty.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidMDAlgorithms/ConvToMDSelector.h"
-#include "MantidMDAlgorithms/MDWSTransform.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -44,7 +50,6 @@ const std::string ConvertToMDMinMaxGlobal::category() const {
  */
 void ConvertToMDMinMaxGlobal::init() {
   auto ws_valid = boost::make_shared<CompositeValidator>();
-  //
   ws_valid->add<InstrumentValidator>();
   // the validator which checks if the workspace has axis and any units
   ws_valid->add<WorkspaceUnitValidator>("");
@@ -151,14 +156,13 @@ void ConvertToMDMinMaxGlobal::exec() {
       wstemp = conv->getProperty("OutputWorkspace");
       evWS = boost::dynamic_pointer_cast<Mantid::DataObjects::EventWorkspace>(
           wstemp);
-      if (evWS) {
+      if (evWS)
         qmax = evWS->getTofMax() *
                2; // assumes maximum scattering angle 180 degrees
-      } else {
+      else
         qmax = wstemp->getXMax() *
                2.; // assumes maximum scattering angle 180 degrees
-      }
-    } else // inelastic
+    } else         // inelastic
     {
       conv->setProperty("Target", "DeltaE");
       conv->setProperty("Emode", GeometryMode);
@@ -192,24 +196,18 @@ void ConvertToMDMinMaxGlobal::exec() {
       } else // indirect
       {
         double Ef = -DBL_MAX, Eftemp = Ef;
-        const Geometry::ParameterMap &pmap = ws->constInstrumentParameters();
+        const auto &pmap = ws->constInstrumentParameters();
+        const auto &specInfo = ws->spectrumInfo();
         for (size_t i = 0; i < ws->getNumberHistograms(); i++) {
-          Geometry::IDetector_const_sptr spDet;
-          try {
-            spDet = ws->getDetector(i);
-            Geometry::Parameter_sptr par =
-                pmap.getRecursive(spDet.get(), "eFixed");
-            if (par)
-              Eftemp = par->value<double>();
-            if (Eftemp > Ef)
-              Ef = Eftemp;
-          } catch (...) {
+          if (!specInfo.hasDetectors(i))
             continue;
-          }
-          if (Ef <= 0) {
+          const auto &det = specInfo.detector(i);
+          const auto &par = pmap.getRecursive(det.getComponentID(), "eFixed");
+          Eftemp = (par) ? par->value<double>() : Eftemp;
+          Ef = (Eftemp > Ef) ? Eftemp : Ef;
+          if (Ef <= 0)
             throw std::runtime_error("Could not find a fixed final energy for "
                                      "indirect geometry instrument.");
-          }
         }
         qmax =
             std::sqrt(energyToK * Ef) + std::sqrt(energyToK * (Ef + deltaEmax));
@@ -274,8 +272,9 @@ void ConvertToMDMinMaxGlobal::exec() {
       if (!p) {
         std::string ERR =
             " Can not interpret property, used as dimension.\n Property: " +
-            OtherDimension + " is neither a time series (run) property nor "
-                             "a property with value<double>";
+            OtherDimension +
+            " is neither a time series (run) property nor "
+            "a property with value<double>";
         throw(std::invalid_argument(ERR));
       }
       double val = *p;

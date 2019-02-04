@@ -30,12 +30,12 @@
 #include "Matrix.h"
 #include "MatrixCommand.h"
 
-#include <QPushButton>
 #include <QLayout>
+#include <QPushButton>
 
 ColorMapDialog::ColorMapDialog(QWidget *parent, Qt::WFlags fl)
-    : QDialog(parent, fl), applyBtn(NULL), closeBtn(NULL), editor(NULL),
-      d_matrix(NULL) {
+    : QDialog(parent, fl), applyBtn(nullptr), closeBtn(nullptr),
+      editor(nullptr), d_matrix(nullptr) {
   setObjectName("ColorMapDialog");
   setWindowTitle(tr("MantidPlot") + " - " + tr("Custom Color Map"));
   editor = new ColorMapEditor();

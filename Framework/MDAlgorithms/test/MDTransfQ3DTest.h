@@ -1,6 +1,13 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MDALGORITHMS_MDTRANSFQ3D_H_
 #define MANTID_MDALGORITHMS_MDTRANSFQ3D_H_
 
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/DeltaEMode.h"
 #include "MantidMDAlgorithms/MDTransfQ3D.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -115,8 +122,8 @@ public:
     // testing purposes here
     auto &TwoTheta = const_cast<std::vector<double> &>(
         WSDescr.m_PreprDetTable->getColVector<double>("TwoTheta"));
-    for (size_t i = 0; i < TwoTheta.size(); i++) {
-      TwoTheta[i] = 0;
+    for (double &i : TwoTheta) {
+      i = 0;
     }
 
     TSM_ASSERT_THROWS_NOTHING("should initialize properly: ",

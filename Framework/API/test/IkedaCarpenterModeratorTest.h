@@ -1,15 +1,21 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef IKEDACARPENTERMODERATORTEST_H_
 #define IKEDACARPENTERMODERATORTEST_H_
 
 #include "MantidAPI/IkedaCarpenterModerator.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
-#include <cxxtest/TestSuite.h>
 #include <boost/make_shared.hpp>
+#include <cxxtest/TestSuite.h>
 
 class IkedaCarpenterModeratorTest : public CxxTest::TestSuite {
 public:
-  typedef boost::shared_ptr<Mantid::API::IkedaCarpenterModerator>
-      IkedaCarpenterModerator_sptr;
+  using IkedaCarpenterModerator_sptr =
+      boost::shared_ptr<Mantid::API::IkedaCarpenterModerator>;
 
   void test_Default_Object_Returns_Zero_Mean_Time() {
     Mantid::API::IkedaCarpenterModerator ikmod;

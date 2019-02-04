@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef BINFINDER_H
 #define BINFINDER_H
 
@@ -5,11 +11,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
-#include <cmath>
-#include <cmath>
-#include <cstdio>
-#include <functional>
-#include <numeric>
 #include <vector>
 
 namespace Mantid {

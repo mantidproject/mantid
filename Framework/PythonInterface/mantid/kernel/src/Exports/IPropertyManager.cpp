@@ -1,19 +1,30 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/IPropertyManager.h"
+#include "MantidKernel/IPropertySettings.h"
 #include "MantidPythonInterface/kernel/GetPointer.h"
-#include "MantidPythonInterface/kernel/Registry/TypeRegistry.h"
 #include "MantidPythonInterface/kernel/Registry/PropertyValueHandler.h"
 #include "MantidPythonInterface/kernel/Registry/PropertyWithValueFactory.h"
+#include "MantidPythonInterface/kernel/Registry/TypeRegistry.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>
+#include <boost/python/dict.hpp>
 #include <boost/python/iterator.hpp>
 #include <boost/python/list.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 #include <boost/python/return_internal_reference.hpp>
+#include <boost/python/stl_iterator.hpp>
+#include <boost/python/str.hpp>
 
 using namespace Mantid::Kernel;
 namespace Registry = Mantid::PythonInterface::Registry;
 using namespace boost::python;
+using ExtractStdString = extract<std::string>;
 
 GET_POINTER_SPECIALIZATION(IPropertyManager)
 
@@ -28,11 +39,9 @@ namespace {
  */
 void setProperty(IPropertyManager &self, const std::string &name,
                  const boost::python::object &value) {
-  typedef extract<std::string> from_pystr;
-  // String values can be set directly
-  from_pystr cppstr(value);
-  if (cppstr.check()) {
-    self.setPropertyValue(name, cppstr());
+  ExtractStdString valuecpp(value);
+  if (valuecpp.check()) {
+    self.setPropertyValue(name, valuecpp());
   } else {
     try {
       Property *p = self.getProperty(name);
@@ -42,6 +51,20 @@ void setProperty(IPropertyManager &self, const std::string &name,
       throw std::invalid_argument("When converting parameter \"" + name +
                                   "\": " + e.what());
     }
+  }
+}
+
+void setProperties(IPropertyManager &self, const boost::python::dict &kwargs) {
+#if PY_MAJOR_VERSION >= 3
+  const object view = kwargs.attr("items")();
+  const object objectItems(handle<>(PyObject_GetIter(view.ptr())));
+#else
+  const object objectItems = kwargs.iteritems();
+#endif
+  auto begin = stl_input_iterator<object>(objectItems);
+  auto end = stl_input_iterator<object>();
+  for (auto it = begin; it != end; ++it) {
+    setProperty(self, ExtractStdString((*it)[0])(), (*it)[1]);
   }
 }
 
@@ -111,7 +134,28 @@ boost::python::list getKeys(IPropertyManager &self) {
 
   return result;
 }
+
+/**
+ * Retrieve the property with the specified name (key) in the
+ * IPropertyManager. If no property exists with the specified
+ * name, return the specified default value.
+ *
+ * @param self  The calling IPropertyManager object
+ * @param name  The name (key) of the property to retrieve
+ * @param value The default value to return if no property
+ *              exists with the specified key.
+ * @return      The property with the specified key. If no
+ *              such property exists, return the default value.
+ */
+Property *get(IPropertyManager &self, const std::string &name,
+              const boost::python::object &value) {
+  try {
+    return self.getPointerToProperty(name);
+  } catch (Exception::NotFoundError &) {
+    return Registry::PropertyWithValueFactory::create(name, value, 0).release();
+  }
 }
+} // namespace
 
 void export_IPropertyManager() {
   register_ptr_to_python<IPropertyManager *>();
@@ -144,6 +188,8 @@ void export_IPropertyManager() {
       .def("setProperty", &setProperty,
            (arg("self"), arg("name"), arg("value")),
            "Set the value of the named property")
+      .def("setProperties", &setProperties, (arg("self"), arg("kwargs")),
+           "Set a collection of properties from a dict")
 
       .def("setPropertySettings", &setPropertySettings,
            (arg("self"), arg("name"), arg("settingsManager")),
@@ -181,5 +227,10 @@ void export_IPropertyManager() {
       .def("keys", &getKeys, arg("self"))
       .def("values", &IPropertyManager::getProperties, arg("self"),
            return_value_policy<copy_const_reference>(),
-           "Returns the list of properties managed by this object");
+           "Returns the list of properties managed by this object")
+      .def("get", &get, (arg("self"), arg("name"), arg("value")),
+           return_value_policy<return_by_value>(),
+           "Returns the property of the given name. Use .value to give the "
+           "value. If property with given name does not exist, returns given "
+           "default value.");
 }

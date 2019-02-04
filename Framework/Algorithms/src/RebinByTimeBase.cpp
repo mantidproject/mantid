@@ -1,12 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/RebinByTimeBase.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/Run.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/RebinParamsValidator.h"
-#include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/Unit.h"
+#include "MantidKernel/VectorHelper.h"
 
 #include <boost/make_shared.hpp>
 
@@ -15,6 +22,7 @@ namespace Algorithms {
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using Types::Core::DateAndTime;
 
 /**
  Helper method to transform a MantidVector containing absolute times in
@@ -112,8 +120,8 @@ void RebinByTimeBase::exec() {
 
   MantidVecPtr XValues_new;
   // create new X axis, with absolute times in seconds.
-  const int ntcnew = VectorHelper::createAxisFromRebinParams(
-      rebinningParams, XValues_new.access());
+  static_cast<void>(VectorHelper::createAxisFromRebinParams(
+      rebinningParams, XValues_new.access()));
 
   ConvertToRelativeTime transformToRelativeT(runStartTime);
 
@@ -122,9 +130,8 @@ void RebinByTimeBase::exec() {
   std::transform(XValues_new->begin(), XValues_new->end(),
                  OutXValues_scaled.begin(), transformToRelativeT);
 
-  outputWS = WorkspaceFactory::Instance().create("Workspace2D", histnumber,
-                                                 ntcnew, ntcnew - 1);
-  WorkspaceFactory::Instance().initializeFromParent(inWS, outputWS, true);
+  outputWS = DataObjects::create<DataObjects::Workspace2D>(
+      *inWS, histnumber, HistogramData::BinEdges(*XValues_new));
 
   // Copy all the axes
   for (int i = 1; i < inWS->axes(); i++) {

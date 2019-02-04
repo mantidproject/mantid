@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_API_ALGORITHMPROXY_H_
 #define MANTID_API_ALGORITHMPROXY_H_
 
@@ -21,12 +27,12 @@ namespace Poco {
 template <class R, class A, class O, class S> class ActiveMethod;
 template <class O> class ActiveStarter;
 class Void;
-}
+} // namespace Poco
 
 namespace Mantid {
 namespace API {
 class Algorithm;
-typedef boost::shared_ptr<Algorithm> Algorithm_sptr;
+using Algorithm_sptr = boost::shared_ptr<Algorithm>;
 
 /**
 
@@ -41,27 +47,6 @@ http://proj-gaudi.web.cern.ch/proj-gaudi/)
 @date 12/09/2007
 @author Roman Tolchenov, Tessella plc
 @date 03/03/2009
-
-Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>.
-Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_API_DLL AlgorithmProxy : public IAlgorithm,
                                       public Kernel::PropertyManagerOwner {
@@ -79,13 +64,17 @@ public:
   const std::string category() const override { return m_category; }
   /// Function to return all of the categories that contain this algorithm
   const std::vector<std::string> categories() const override;
-  /// Function to return the sperator token for the category string. A default
+  /// Function to return the seperator token for the category string. A default
   /// implementation ',' is provided
   const std::string categorySeparator() const override {
     return m_categorySeparator;
   }
+  /// Function to return all of the seeAlso algorithms related to this algorithm
+  const std::vector<std::string> seeAlso() const override { return m_seeAlso; };
   /// Aliases to the algorithm
   const std::string alias() const override { return m_alias; }
+  /// Optional documentation URL for the real algorithm
+  const std::string helpURL() const override { return m_helpURL; }
   /// function returns a summary message that will be displayed in the default
   /// GUI, and in the help.
   const std::string summary() const override { return m_summary; }
@@ -106,8 +95,15 @@ public:
   /// To query whether algorithm is a child. A proxy is always at top level,
   /// returns false
   bool isChild() const override { return m_isChild; }
-  void setAlwaysStoreInADS(const bool) override {}
-  void setChild(const bool val) override { m_isChild = val; }
+  void setChild(const bool val) override {
+    m_isChild = val;
+    setAlwaysStoreInADS(!val);
+  }
+  void setAlwaysStoreInADS(const bool val) override {
+    m_setAlwaysStoreInADS = val;
+  }
+  bool getAlwaysStoreInADS() const override { return m_setAlwaysStoreInADS; }
+
   /// Proxies only manage parent algorithms
   void enableHistoryRecordingForChild(const bool) override{};
   void setRethrows(const bool rethrow) override;
@@ -174,9 +170,11 @@ private:
   const std::string m_name;     ///< name of the real algorithm
   const std::string m_category; ///< category of the real algorithm
   const std::string
-      m_categorySeparator;     ///< category seperator of the real algorithm
-  const std::string m_alias;   ///< alias to the algorithm
-  const std::string m_summary; ///<Message to display in GUI and help.
+      m_categorySeparator; ///< category seperator of the real algorithm
+  const std::vector<std::string> m_seeAlso; ///< seeAlso of the real algorithm
+  const std::string m_alias;                ///< alias to the algorithm
+  const std::string m_helpURL;              ///< Optional documentation URL
+  const std::string m_summary; ///< Message to display in GUI and help.
   const int m_version;         ///< version of the real algorithm
 
   mutable boost::shared_ptr<Algorithm>
@@ -190,6 +188,7 @@ private:
                                      /// (default = true)
   bool m_rethrow;                    ///< Whether or not to rethrow exceptions.
   bool m_isChild;                    ///< Is this a child algo
+  bool m_setAlwaysStoreInADS;        ///< If this will save in ADS
 
   /// Temporary holder of external observers wishing to subscribe
   mutable std::vector<const Poco::AbstractObserver *> m_externalObservers;

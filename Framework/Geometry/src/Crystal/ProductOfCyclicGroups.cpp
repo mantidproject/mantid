@@ -1,7 +1,13 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Crystal/ProductOfCyclicGroups.h"
 
-#include "MantidGeometry/Crystal/SymmetryOperationFactory.h"
 #include "MantidGeometry/Crystal/CyclicGroup.h"
+#include "MantidGeometry/Crystal/SymmetryOperationFactory.h"
 
 namespace Mantid {
 namespace Geometry {
@@ -31,7 +37,7 @@ ProductOfCyclicGroups::getGeneratedGroup(const std::string &generators) const {
 std::vector<Group_const_sptr> ProductOfCyclicGroups::getFactorGroups(
     const std::vector<SymmetryOperation> &symmetryOperations) const {
   std::vector<Group_const_sptr> groups;
-
+  groups.reserve(symmetryOperations.size());
   for (const auto &symmetryOperation : symmetryOperations) {
     groups.push_back(
         GroupFactory::create<CyclicGroup>(symmetryOperation.identifier()));

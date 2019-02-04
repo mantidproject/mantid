@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_GEOMETRY_STRUCTUREFACTORCALCULATORSUMMATIONTEST_H_
 #define MANTID_GEOMETRY_STRUCTUREFACTORCALCULATORSUMMATIONTEST_H_
 
@@ -63,7 +69,7 @@ private:
     CompositeBraggScatterer_sptr scatterers = CompositeBraggScatterer::create();
     scatterers->addScatterer(BraggScattererFactory::Instance().createScatterer(
         "IsotropicAtomBraggScatterer",
-        "{\"Element\":\"Si\",\"Position\":\"0,0,0\",\"U\":\"0.05\"}"));
+        R"({"Element":"Si","Position":"0,0,0","U":"0.05"})"));
 
     CrystalStructure si(
         UnitCell(5.43, 5.43, 5.43),

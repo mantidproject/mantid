@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name
 from __future__ import (absolute_import, division, print_function)
 
@@ -39,6 +45,9 @@ class RefinePowderDiffProfileSeq(PythonAlgorithm):
         """ Category
         """
         return "Diffraction\\Fitting"
+
+    def seeAlso(self):
+        return [ "RefinePowderInstrumentParameters" ]
 
     def name(self):
         """ Algorithm name
@@ -921,7 +930,7 @@ class RefineProfileParameters(object):
                 UseInputPeakHeights             = False,
                 PeakRadius                      ='8',
                 Minimizer                       = 'Levenberg-Marquardt',
-                MCSetupWorkspace                = str(wsname),
+                MCSetupWorkspace                = tablews,
                 Damping                         = '5.0',
                 RandomSeed                      = 0,
                 AnnealingTemperature            = 100.0,
@@ -929,6 +938,7 @@ class RefineProfileParameters(object):
         # ENDIF (step)
 
         return
+
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(RefinePowderDiffProfileSeq)

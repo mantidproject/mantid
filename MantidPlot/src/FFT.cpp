@@ -1,24 +1,13 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 /***************************************************************************
     File                 : FFT.cpp
     Project              : QtiPlot
     --------------------------------------------------------------------
-    Copyright            : (C) 2007 by Ion Vasilief
-    Email (use @ for *)  : ion_vasilief*yahoo.fr
-    Description          : Numerical FFT of data sets
-
- ***************************************************************************/
-
-/***************************************************************************
- *                                                                         *
- *  This program is free software; you can redistribute it and/or modify   *
- *  it under the terms of the GNU General Public License as published by   *
- *  the Free Software Foundation; either version 2 of the License, or      *
- *  (at your option) any later version.                                    *
- *                                                                         *
- *  This program is distributed in the hope that it will be useful,        *
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
- *  GNU General Public License for more details.                           *
  *                                                                         *
  *   You should have received a copy of the GNU General Public License     *
  *   along with this program; if not, write to the Free Software           *
@@ -27,12 +16,12 @@
  *                                                                         *
  ***************************************************************************/
 #include "FFT.h"
+#include "ColorBox.h"
 #include "MultiLayer.h"
 #include "Plot.h"
-#include "ColorBox.h"
 
-#include <QMessageBox>
 #include <QLocale>
+#include <QMessageBox>
 
 #include <gsl/gsl_fft_complex.h>
 #include <gsl/gsl_fft_halfcomplex.h>
@@ -65,7 +54,7 @@ void FFT::init() {
   d_real_col = -1;
   d_imag_col = -1;
   d_sampling = 1.0;
-  d_output_graph = 0;
+  d_output_graph = nullptr;
 }
 
 QString FFT::fftCurve() {
@@ -285,7 +274,7 @@ void FFT::output(const QString &text) {
   d_result_table = app->newHiddenTable(tableName, d_explanation, d_n, 5, text);
 
   if (d_graphics_display) {
-    MultiLayer *ml = 0;
+    MultiLayer *ml = nullptr;
     if (!d_output_graph) {
       ml = createOutputGraph();
       d_output_graph = ml->activeGraph();
@@ -341,8 +330,8 @@ bool FFT::setDataFromTable(Table *t, const QString &realColName,
     delete[] d_y;
   }
 
-  d_graph = 0;
-  d_curve = 0;
+  d_graph = nullptr;
+  d_curve = nullptr;
   d_init_err = false;
 
   d_n = abs(to - from) + 1;

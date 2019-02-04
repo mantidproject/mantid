@@ -1,5 +1,11 @@
-#include "MantidAPI/FileProperty.h"
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/MultipleFileProperty.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
 #include "MantidPythonInterface/kernel/IsNone.h"
 #include "MantidPythonInterface/kernel/PropertyWithValueExporter.h"
@@ -17,7 +23,7 @@ using namespace boost::python;
 
 namespace {
 /// The PropertyWithValue type
-typedef std::vector<std::vector<std::string>> HeldType;
+using HeldType = std::vector<std::vector<std::string>>;
 
 /**
  * Converts the value from a MultipleFileProperty to a python object rather than
@@ -26,7 +32,7 @@ typedef std::vector<std::vector<std::string>> HeldType;
  * @returns A string is there is only a single string in the Property's value,
  * and a list if there are multiple ones
  */
-boost::python::object valueAsPyObject(MultipleFileProperty &self) {
+boost::python::list valueAsPyObject(MultipleFileProperty &self) {
   const HeldType &propValue = self();
 
   // Build a list of lists to mimic the behaviour of MultipleFileProperty
@@ -68,10 +74,10 @@ createMultipleFileProperty(const std::string &name,
   return createMultipleFilePropertyWithAction(
       name, FileProperty::FileAction::Load, extensions);
 }
-}
+} // namespace
 
 void export_MultipleFileProperty() {
-  typedef PropertyWithValue<HeldType> BaseClass;
+  using BaseClass = PropertyWithValue<HeldType>;
   PropertyWithValueExporter<HeldType>::define(
       "VectorVectorStringPropertyWithValue");
 

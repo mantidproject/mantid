@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -38,9 +38,9 @@ The integrated value will be normalized by the monitor counts.
 The **assumption** is to load an experiment point (*Pt*) and convert to MDEventWorkspace in Q-space.
 This *Pt*, i.e., workspace, contains at most one peak.
 Algorithm *FindPeaksMD* is able to find a peak in the MDEventWorkspace and output to a PeaksWorkspace.
-A UB matrix is set to this PeaksWorkspace as an option.
+A :ref:`UB matrix <Lattice>` is set to this PeaksWorkspace as an option.
 
-The **pseduo-code** of this algorith is:
+The **pseduo-code** of this algorithm is:
  1. Go over all the MDEvents;
  2. For Pt. (aka, run number) i, its integrated intensity :math:`I_{i}` is calculated as
     :math:`I_{i} = \sum_{d=0}^{256\times 256}\frac{s_d}{m}`, where :math:`s_i` is the signal of detector i,

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidICat/CatalogPublish.h"
 #include "MantidICat/CatalogAlgorithmHelper.h"
 
@@ -9,19 +15,19 @@
 #include "MantidKernel/MandatoryValidator.h"
 
 #include <Poco/Net/AcceptCertificateHandler.h>
-#include <Poco/Net/PrivateKeyPassphraseHandler.h>
-#include <Poco/Net/HTTPSClientSession.h>
-#include <Poco/Net/SSLException.h>
-#include <Poco/Net/SSLManager.h>
 #include <Poco/Net/HTTPRequest.h>
 #include <Poco/Net/HTTPResponse.h>
+#include <Poco/Net/HTTPSClientSession.h>
+#include <Poco/Net/PrivateKeyPassphraseHandler.h>
+#include <Poco/Net/SSLException.h>
+#include <Poco/Net/SSLManager.h>
 #include <Poco/Path.h>
 #include <Poco/SharedPtr.h>
 #include <Poco/StreamCopier.h>
 #include <Poco/URI.h>
 
-#include <fstream>
 #include <boost/regex.hpp>
+#include <fstream>
 
 namespace Mantid {
 namespace ICat {
@@ -96,10 +102,10 @@ void CatalogPublish::exec() {
   } else // The user wants to upload a workspace.
   {
     if (nameInCatalog.empty()) {
-      setProperty("NameInCatalog", workspace->name());
+      setProperty("NameInCatalog", workspace->getName());
       g_log.notice(
           "NameInCatalog has not been set. Using workspace name instead: " +
-          workspace->name() + ".");
+          workspace->getName() + ".");
     }
 
     // Save workspace to a .nxs file in the user's default directory.
@@ -108,7 +114,7 @@ void CatalogPublish::exec() {
     // workspace was saved to).
     filePath = Mantid::Kernel::ConfigService::Instance().getString(
                    "defaultsave.directory") +
-               workspace->name() + ".nxs";
+               workspace->getName() + ".nxs";
   }
 
   // Obtain the mode to used base on file extension.
@@ -199,15 +205,15 @@ void CatalogPublish::publish(std::istream &fileContents,
 }
 
 /**
-* Checks to see if the file to be downloaded is a datafile.
-* @param filePath :: Path of data file to use.
-* @returns True if the file in the path is a data file.
-*/
+ * Checks to see if the file to be downloaded is a datafile.
+ * @param filePath :: Path of data file to use.
+ * @returns True if the file in the path is a data file.
+ */
 bool CatalogPublish::isDataFile(const std::string &filePath) {
   std::string extension = Poco::Path(filePath).getExtension();
   std::transform(extension.begin(), extension.end(), extension.begin(),
                  tolower);
-  return extension.compare("raw") == 0 || extension.compare("nxs") == 0;
+  return extension == "raw" || extension == "nxs";
 }
 
 /**
@@ -223,11 +229,11 @@ void CatalogPublish::saveWorkspaceToNexus(
       Mantid::API::AlgorithmManager::Instance().create("SaveNexus");
   saveNexus->initialize();
   // Set the required properties & execute.
-  saveNexus->setProperty("InputWorkspace", workspace->name());
+  saveNexus->setProperty("InputWorkspace", workspace->getName());
   saveNexus->setProperty("FileName",
                          Mantid::Kernel::ConfigService::Instance().getString(
                              "defaultsave.directory") +
-                             workspace->name() + ".nxs");
+                             workspace->getName() + ".nxs");
   saveNexus->execute();
 }
 
@@ -263,9 +269,9 @@ const std::string CatalogPublish::generateWorkspaceHistory(
   auto wsHistory = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
       "GeneratePythonScript");
   wsHistory->initialize();
-  wsHistory->setProperty("InputWorkspace", workspace->name());
+  wsHistory->setProperty("InputWorkspace", workspace->getName());
   wsHistory->execute();
   return wsHistory->getPropertyValue("ScriptText");
 }
-}
-}
+} // namespace ICat
+} // namespace Mantid

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAHANDLING_SETSCALINGPSD_H_
 #define MANTID_DATAHANDLING_SETSCALINGPSD_H_
 
@@ -37,27 +43,6 @@ to use either .raw or .sca</LI>
     </UL>
 
 @author Ronald Fowler
-
-Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>.
-Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport SetScalingPSD : public API::Algorithm {
 public:
@@ -97,10 +82,6 @@ private:
   API::MatrixWorkspace_sptr m_workspace; ///< Pointer to the workspace
   // void runMoveInstrumentComp(const int& detIndex, const Kernel::V3D& shift);
 
-  /// get a vector of shared pointers to each detector in the comp
-  void findAll(boost::shared_ptr<const Geometry::IComponent> comp);
-  /// the vector of shared pointers
-  std::vector<boost::shared_ptr<const Geometry::IComponent>> m_vectDet;
   /// apply the shifts in posMap to the detectors in WS
   void movePos(API::MatrixWorkspace_sptr &WS,
                std::map<int, Kernel::V3D> &posMap,

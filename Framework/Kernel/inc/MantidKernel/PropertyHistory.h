@@ -1,16 +1,23 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_KERNEL_PROPERTYHISTORY_H_
 #define MANTID_KERNEL_PROPERTYHISTORY_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/EmptyValues.h"
+#include "MantidKernel/DllConfig.h"
+
+#include <boost/shared_ptr.hpp>
+
+#include <iosfwd>
 #include <string>
 #include <vector>
-#ifndef Q_MOC_RUN
-#include <boost/shared_ptr.hpp>
-#include <boost/lexical_cast.hpp>
-#endif
+
 namespace Mantid {
 namespace Kernel {
 //----------------------------------------------------------------------
@@ -24,27 +31,6 @@ class Property;
 
     @author Dickon Champion, ISIS, RAL
     @date 21/01/2008
-
-    Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-   National Laboratory & European Spallation Source
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>.
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_KERNEL_DLL PropertyHistory {
 public:
@@ -69,7 +55,8 @@ public:
   /// get direction flag of algorithm parameter const
   unsigned int direction() const { return m_direction; };
   /// print contents of object
-  void printSelf(std::ostream &, const int indent = 0) const;
+  void printSelf(std::ostream &, const int indent = 0,
+                 const size_t maxPropertyLength = 0) const;
   /// get whether algorithm parameter was left as default EMPTY_INT,LONG,DBL
   /// const
   bool isEmptyDefault() const;
@@ -94,9 +81,9 @@ private:
 };
 
 // typedefs for property history pointers
-typedef boost::shared_ptr<PropertyHistory> PropertyHistory_sptr;
-typedef boost::shared_ptr<const PropertyHistory> PropertyHistory_const_sptr;
-typedef std::vector<PropertyHistory_sptr> PropertyHistories;
+using PropertyHistory_sptr = boost::shared_ptr<PropertyHistory>;
+using PropertyHistory_const_sptr = boost::shared_ptr<const PropertyHistory>;
+using PropertyHistories = std::vector<PropertyHistory_sptr>;
 
 MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &,
                                            const PropertyHistory &);

@@ -1,16 +1,21 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidGeometry/IObjComponent.h"
-#include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Objects/Track.h"
+#include "MantidKernel/PseudoRandomNumberGenerator.h"
 
 namespace Mantid {
 namespace Geometry {
 using Geometry::BoundingBox;
 using Geometry::Track;
-using Kernel::Material;
 using Kernel::V3D;
 
 //------------------------------------------------------------------------------
@@ -36,6 +41,41 @@ Geometry::BoundingBox SampleEnvironment::boundingBox() const {
     box.grow(component->getBoundingBox());
   }
   return box;
+}
+
+/**
+ * Generate a random point within one of the environment's components. The
+ * method first selects a random component and then selects a random point
+ * within that component using Object::generatePointObject
+ * @param rng A reference to a PseudoRandomNumberGenerator where
+ * nextValue should return a flat random number between 0.0 & 1.0
+ * @param maxAttempts The maximum number of attempts at generating a point
+ * @return The generated point
+ */
+Kernel::V3D
+SampleEnvironment::generatePoint(Kernel::PseudoRandomNumberGenerator &rng,
+                                 const size_t maxAttempts) const {
+  auto componentIndex = rng.nextInt(1, static_cast<int>(nelements())) - 1;
+  return m_components[componentIndex]->generatePointInObject(rng, maxAttempts);
+}
+
+/**
+ * Generate a random point within one of the environment's components. The
+ * method first selects a random component and then selects a random point
+ * within that component using Object::generatePointObject
+ * @param rng A reference to a PseudoRandomNumberGenerator where
+ * nextValue should return a flat random number between 0.0 & 1.0
+ * @param activeRegion Restrict the generated point to be defined by this box
+ * @param maxAttempts The maximum number of attempts at generating a point
+ * @return The generated point
+ */
+Kernel::V3D
+SampleEnvironment::generatePoint(Kernel::PseudoRandomNumberGenerator &rng,
+                                 const Geometry::BoundingBox &activeRegion,
+                                 const size_t maxAttempts) const {
+  auto componentIndex = rng.nextInt(1, static_cast<int>(nelements())) - 1;
+  return m_components[componentIndex]->generatePointInObject(rng, activeRegion,
+                                                             maxAttempts);
 }
 
 /**
@@ -68,8 +108,8 @@ int SampleEnvironment::interceptSurfaces(Track &track) const {
 /**
  * @param component An object defining some component of the environment
  */
-void SampleEnvironment::add(const Object_const_sptr &component) {
+void SampleEnvironment::add(const IObject_const_sptr &component) {
   m_components.emplace_back(component);
 }
-}
-}
+} // namespace Geometry
+} // namespace Mantid

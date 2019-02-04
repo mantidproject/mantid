@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 import mantid.simpleapi as api
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty,  WorkspaceGroup
@@ -29,6 +35,9 @@ class DNSMergeRuns(PythonAlgorithm):
         Returns category
         """
         return 'Workflow\\MLZ\\DNS'
+
+    def seeAlso(self):
+        return [ "LoadDNSLegacy" ]
 
     def name(self):
         """
@@ -187,6 +196,7 @@ class DNSMergeRuns(PythonAlgorithm):
 
         self.setProperty("OutputWorkspace", outws)
         return
+
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(DNSMergeRuns)

@@ -10,7 +10,7 @@ Reduction for ORNL SANS
 This document explains how to use Mantid to perform reduction of ORNL SANS data.
 Information about the underlying Mantid algorithms involved can be found in the 
 :ref:`SANSReduction <algm-SANSReduction>` algorithm documentation.
-For HFIR reduction specefically, you can also see the :ref:`HFIRSANSReduction <algm-HFIRSANSReduction>` algorithm documentation.
+For HFIR reduction specifically, you can also see the :ref:`HFIRSANSReduction <algm-HFIRSANSReduction>` algorithm documentation.
 
 
 Contents
@@ -380,8 +380,8 @@ I(Q) calculation
 
     The resolution in Q is computed using Mildner-Carpenter.
 
-``IQxQy(nbins=100)``
-    Option to produce the reduced I(Qx, Qy).
+``IQxQy(nbins=100, log_binning=False)``
+    Option to produce the reduced `I(Qx, Qy)`. If `log_binning` is `True` the output `QxQy` will be logarithmic of base 10. By default the output `QxQy` is linear.
 
 ``NoIQxQy()``
     Turns off the option to produce the reduced I(Qx, Qy).

@@ -1,13 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadTOFRawNexus.h"
-#include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/cow_ptr.h"
 #include <nexus/NeXusFile.hpp>
 
@@ -22,6 +29,9 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadTOFRawNexus)
 using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
+using HistogramData::BinEdges;
+using HistogramData::CountStandardDeviations;
+using HistogramData::Counts;
 
 LoadTOFRawNexus::LoadTOFRawNexus()
     : m_numPixels(0), m_signalNo(0), pulseTimes(0), m_numBins(0), m_spec_min(0),
@@ -161,9 +171,9 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename,
                         " dimension. Expected 3 dimensions.");
 
                   m_axisField = allAxes.back();
-                  g_log.information() << "Loading signal " << m_signalNo << ", "
-                                      << m_dataField << " with axis "
-                                      << m_axisField << '\n';
+                  g_log.information()
+                      << "Loading signal " << m_signalNo << ", " << m_dataField
+                      << " with axis " << m_axisField << '\n';
                   file->closeData();
                   break;
                 } // Data has a 'signal' attribute
@@ -271,7 +281,7 @@ private:
   specnum_t m_max;
   detid2index_map m_id_to_wi;
 };
-}
+} // namespace
 
 /** Load a single bank into the workspace
  *
@@ -378,7 +388,7 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename,
     return;
   }
 
-  HistogramData::BinEdges X(tof.begin(), tof.end());
+  BinEdges X(tof.begin(), tof.end());
 
   // Load the data. Coerce ints into double.
   std::string errorsField;
@@ -405,13 +415,6 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename,
     }
   }
 
-  /*if (data.size() != m_numBins * m_numPixels)
-  { file->close(); m_fileMutex.unlock(); g_log.warning() << "Invalid size of '"
-  << m_dataField << "' data in " << bankName << '\n'; return; }
-  if (hasErrors && (errors.size() != m_numBins * m_numPixels))
-  { file->close(); m_fileMutex.unlock(); g_log.warning() << "Invalid size of '"
-  << errorsField << "' errors in " << bankName << '\n'; return; }
-*/
   // Have all the data I need
   m_fileMutex.unlock();
   file->close();
@@ -425,24 +428,16 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename,
     auto &spec = WS->getSpectrum(wi);
     spec.setSpectrumNo(specnum_t(wi + 1));
     spec.setDetectorID(pixel_id[i - iPart]);
-    // Set the shared X pointer
-    spec.setBinEdges(X);
-
-    // Extract the Y
-    MantidVec &Y = spec.dataY();
-    Y.assign(data.begin() + i * m_numBins, data.begin() + (i + 1) * m_numBins);
-
-    MantidVec &E = spec.dataE();
+    auto from = data.begin() + i * m_numBins;
+    auto to = from + m_numBins;
 
     if (hasErrors) {
-      // Copy the errors from the loaded document
-      E.assign(errors.begin() + i * m_numBins,
-               errors.begin() + (i + 1) * m_numBins);
+      auto eFrom = errors.begin() + i * m_numBins;
+      auto eTo = eFrom + m_numBins;
+      spec.setHistogram(X, Counts(from, to),
+                        CountStandardDeviations(eFrom, eTo));
     } else {
-      // Now take the sqrt(Y) to give E
-      E = MantidVec();
-      std::transform(Y.begin(), Y.end(), std::back_inserter(E),
-                     static_cast<double (*)(double)>(sqrt));
+      spec.setHistogram(X, Counts(from, to));
     }
   }
 
@@ -493,7 +488,7 @@ void LoadTOFRawNexus::exec() {
   std::string entry_name = LoadTOFRawNexus::getEntryName(filename);
 
   // Count pixels and other setup
-  auto prog = new Progress(this, 0.0, 1.0, 10);
+  auto prog = make_unique<Progress>(this, 0.0, 1.0, 10);
   prog->doReport("Counting pixels");
   std::vector<std::string> bankNames;
   countPixels(filename, entry_name, bankNames);
@@ -542,15 +537,11 @@ void LoadTOFRawNexus::exec() {
   const auto id_to_wi = WS->getDetectorIDToWorkspaceIndexMap();
 
   // Load each bank sequentially
-  // PARALLEL_FOR1(WS)
   for (const auto &bankName : bankNames) {
-    //    PARALLEL_START_INTERUPT_REGION
     prog->report("Loading bank " + bankName);
     g_log.debug() << "Loading bank " << bankName << '\n';
     loadBank(filename, entry_name, bankName, WS, id_to_wi);
-    //    PARALLEL_END_INTERUPT_REGION
   }
-  //  PARALLEL_CHECK_INTERUPT_REGION
 
   // Set some units
   if (m_xUnits == "Ang")
@@ -564,8 +555,6 @@ void LoadTOFRawNexus::exec() {
 
   // Set to the output
   setProperty("OutputWorkspace", WS);
-
-  delete prog;
 }
 
 } // namespace DataHandling

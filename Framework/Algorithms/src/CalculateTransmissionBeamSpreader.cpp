@@ -1,13 +1,22 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/CalculateTransmissionBeamSpreader.h"
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/HistogramValidator.h"
-#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
@@ -20,6 +29,8 @@ DECLARE_ALGORITHM(CalculateTransmissionBeamSpreader)
 
 using namespace Kernel;
 using namespace API;
+using namespace DataObjects;
+using namespace HistogramData;
 using std::size_t;
 
 void CalculateTransmissionBeamSpreader::init() {
@@ -101,9 +112,9 @@ void CalculateTransmissionBeamSpreader::exec() {
         "The input workspaces do not come from the same instrument");
   }
   // Check that the two inputs have matching binning
-  if (!WorkspaceHelpers::matchingBins(sample_spreaderWS, direct_spreaderWS) ||
-      !WorkspaceHelpers::matchingBins(sample_spreaderWS, sample_scatterWS) ||
-      !WorkspaceHelpers::matchingBins(sample_spreaderWS, direct_scatterWS)) {
+  if (!WorkspaceHelpers::matchingBins(*sample_spreaderWS, *direct_spreaderWS) ||
+      !WorkspaceHelpers::matchingBins(*sample_spreaderWS, *sample_scatterWS) ||
+      !WorkspaceHelpers::matchingBins(*sample_spreaderWS, *direct_scatterWS)) {
     g_log.error("Input workspaces do not have matching binning");
     throw std::invalid_argument(
         "Input workspaces do not have matching binning");
@@ -156,7 +167,7 @@ void CalculateTransmissionBeamSpreader::exec() {
 
   // Beam spreader transmission
   MatrixWorkspace_sptr spreader_trans =
-      WorkspaceFactory::Instance().create("WorkspaceSingleValue", 1, 1, 1);
+      create<WorkspaceSingleValue>(1, Points(1));
   spreader_trans->setYUnit("");
   spreader_trans->setDistribution(true);
   spreader_trans->mutableX(0)[0] = 0.0;
@@ -244,7 +255,7 @@ API::MatrixWorkspace_sptr
 CalculateTransmissionBeamSpreader::extractSpectrum(API::MatrixWorkspace_sptr WS,
                                                    const size_t index) {
   // Check that given spectra are monitors
-  if (!WS->getDetector(index)->isMonitor()) {
+  if (!WS->spectrumInfo().isMonitor(index)) {
     g_log.information(
         "The Incident Beam Monitor UDET provided is not marked as a monitor");
   }
@@ -301,5 +312,5 @@ CalculateTransmissionBeamSpreader::fitToData(API::MatrixWorkspace_sptr WS) {
   return result;
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

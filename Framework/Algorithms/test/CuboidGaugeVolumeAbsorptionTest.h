@@ -1,18 +1,23 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef CuboidGaugeVolumeAbsorptionTEST_H_
 #define CuboidGaugeVolumeAbsorptionTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/CuboidGaugeVolumeAbsorption.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/Sample.h"
+#include "MantidAlgorithms/CuboidGaugeVolumeAbsorption.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::DataObjects::Workspace2D_sptr;
-using Mantid::Geometry::Object_sptr;
 
 class CuboidGaugeVolumeAbsorptionTest : public CxxTest::TestSuite {
 public:
@@ -28,7 +33,7 @@ public:
 
   void testFailsIfNoInstrument() {
     // Create a simple test workspace that has no instrument
-    Workspace2D_sptr testWS = WorkspaceCreationHelper::Create2DWorkspace(10, 5);
+    Workspace2D_sptr testWS = WorkspaceCreationHelper::create2DWorkspace(10, 5);
     // Needs to have units of wavelength
     testWS->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
@@ -67,9 +72,9 @@ public:
     testWS->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
     // Define a sample shape
-    Object_sptr sampleShape =
+    auto sampleShape =
         ComponentCreationHelper::createCuboid(0.005, 0.003, 0.002);
-    testWS->mutableSample().setShape(*sampleShape);
+    testWS->mutableSample().setShape(sampleShape);
 
     Mantid::Algorithms::CuboidGaugeVolumeAbsorption abs;
     abs.initialize();
@@ -96,9 +101,8 @@ public:
     testWS->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
     // Define a sample shape
-    Object_sptr sampleShape =
-        ComponentCreationHelper::createCuboid(0.025, 0.03, 0.02);
-    testWS->mutableSample().setShape(*sampleShape);
+    auto sampleShape = ComponentCreationHelper::createCuboid(0.025, 0.03, 0.02);
+    testWS->mutableSample().setShape(sampleShape);
 
     TS_ASSERT_THROWS_NOTHING(
         atten.setProperty<MatrixWorkspace_sptr>("InputWorkspace", testWS));

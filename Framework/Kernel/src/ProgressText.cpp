@@ -1,7 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/ProgressText.h"
-#include <iostream>
-#include <fstream>
+
+#include <atomic>
 #include <iomanip>
+#include <iostream>
 
 namespace Mantid {
 namespace Kernel {
@@ -68,8 +75,8 @@ void ProgressText::doReport(const std::string &msg) {
   m_lastMsgLength = msg.size();
 
   // Save where we last reported to avoid notifying too often.
-  this->m_last_reported = m_i;
+  this->m_last_reported.store(m_i.load());
 }
 
+} // namespace Kernel
 } // namespace Mantid
-} // namespace API

@@ -1,8 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/PreprocessDetectorsToMD.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/PropertyWithValue.h"
@@ -131,38 +139,28 @@ PreprocessDetectorsToMD::createTableWorkspace(
   // set the target workspace
   auto targWS = boost::make_shared<TableWorkspace>(nHist);
   // detectors positions
-  if (!targWS->addColumn("V3D", "DetDirections"))
-    throw(std::runtime_error("Can not add column DetDirectrions"));
+  targWS->addColumn("V3D", "DetDirections");
   // sample-detector distance;
-  if (!targWS->addColumn("double", "L2"))
-    throw(std::runtime_error("Can not add column L2"));
+  targWS->addColumn("double", "L2");
   // Diffraction angle
-  if (!targWS->addColumn("double", "TwoTheta"))
-    throw(std::runtime_error("Can not add column TwoTheta"));
-  if (!targWS->addColumn("double", "Azimuthal"))
-    throw(std::runtime_error("Can not add column Azimuthal"));
+  targWS->addColumn("double", "TwoTheta");
+  targWS->addColumn("double", "Azimuthal");
   // the detector ID;
-  if (!targWS->addColumn("int", "DetectorID"))
-    throw(std::runtime_error("Can not add column DetectorID"));
+  targWS->addColumn("int", "DetectorID");
   // stores spectra index which corresponds to a valid detector index;
-  if (!targWS->addColumn("size_t", "detIDMap"))
-    throw(std::runtime_error("Can not add column detIDMap"));
+  targWS->addColumn("size_t", "detIDMap");
   // stores detector index which corresponds to the workspace index;
-  if (!targWS->addColumn("size_t", "spec2detMap"))
-    throw(std::runtime_error("Can not add column spec2detMap"));
+  targWS->addColumn("size_t", "spec2detMap");
 
   m_getIsMasked = this->getProperty("GetMaskState");
   if (m_getIsMasked) // as bool is presented in vectors as a class, we are using
                      // int instead of bool
-    if (!targWS->addColumn("int", "detMask"))
-      throw(std::runtime_error(
-          "Can not add column containing for detector masks"));
+    targWS->addColumn("int", "detMask");
 
   // check if one wants to obtain detector's efixed"
   m_getEFixed = this->getProperty("GetEFixed");
   if (m_getEFixed)
-    if (!targWS->addColumn("float", "eFixed"))
-      throw(std::runtime_error("Can not add column containing efixed"));
+    targWS->addColumn("float", "eFixed");
 
   // will see about that
   // sin^2(Theta)
@@ -238,9 +236,10 @@ void PreprocessDetectorsToMD::processDetectorsPositions(
   //// progress message appearance
   size_t div = 100;
   size_t nHist = targWS->rowCount();
-  Mantid::API::Progress theProgress(this, 0, 1, nHist);
+  Mantid::API::Progress theProgress(this, 0.0, 1.0, nHist);
   //// Loop over the spectra
   uint32_t liveDetectorsCount(0);
+  const auto &spectrumInfo = inputWS->spectrumInfo();
   for (size_t i = 0; i < nHist; i++) {
     sp2detMap[i] = std::numeric_limits<uint64_t>::quiet_NaN();
     detId[i] = std::numeric_limits<int32_t>::quiet_NaN();
@@ -250,33 +249,26 @@ void PreprocessDetectorsToMD::processDetectorsPositions(
     Azimuthal[i] = std::numeric_limits<double>::quiet_NaN();
     //     detMask[i]  = true;
 
-    // get detector or detector group which corresponds to the spectra i
-    Geometry::IDetector_const_sptr spDet;
-    try {
-      spDet = inputWS->getDetector(i);
-    } catch (Kernel::Exception::NotFoundError &) {
-      continue;
-    }
-
-    // Check that we aren't dealing with monitor...
-    if (spDet->isMonitor())
+    if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i))
       continue;
 
     // if masked detectors state is not used, masked detectors just ignored;
-    bool maskDetector = spDet->isMasked();
+    bool maskDetector = spectrumInfo.isMasked(i);
     if (m_getIsMasked)
       *(pMasksArray + liveDetectorsCount) = maskDetector ? 1 : 0;
     else if (maskDetector)
       continue;
 
+    const auto &spDet = spectrumInfo.detector(i);
+
     // calculate the requested values;
     sp2detMap[i] = liveDetectorsCount;
-    detId[liveDetectorsCount] = int32_t(spDet->getID());
+    detId[liveDetectorsCount] = int32_t(spDet.getID());
     detIDMap[liveDetectorsCount] = i;
-    L2[liveDetectorsCount] = spDet->getDistance(*sample);
+    L2[liveDetectorsCount] = spectrumInfo.l2(i);
 
-    double polar = inputWS->detectorTwoTheta(*spDet);
-    double azim = spDet->getPhi();
+    double polar = spectrumInfo.twoTheta(i);
+    double azim = spDet.getPhi();
     TwoTheta[liveDetectorsCount] = polar;
     Azimuthal[liveDetectorsCount] = azim;
 
@@ -297,7 +289,7 @@ void PreprocessDetectorsToMD::processDetectorsPositions(
     // defined;
     if (pEfixedArray) {
       try {
-        Geometry::Parameter_sptr par = pmap.getRecursive(spDet.get(), "eFixed");
+        Geometry::Parameter_sptr par = pmap.getRecursive(&spDet, "eFixed");
         if (par)
           Efi = par->value<double>();
       } catch (std::runtime_error &) {
@@ -340,21 +332,13 @@ void PreprocessDetectorsToMD::updateMasksState(
         " are inconsistent as have different numner of detectors");
 
   uint32_t liveDetectorsCount(0);
+  const auto &spectrumInfo = inputWS->spectrumInfo();
   for (size_t i = 0; i < nHist; i++) {
-    // get detector or detector group which corresponds to the spectra i
-    Geometry::IDetector_const_sptr spDet;
-    try {
-      spDet = inputWS->getDetector(i);
-    } catch (Kernel::Exception::NotFoundError &) {
-      continue;
-    }
-
-    // Check that we aren't dealing with monitor...
-    if (spDet->isMonitor())
+    if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i))
       continue;
 
     // if masked detectors state is not used, masked detectors just ignored;
-    bool maskDetector = spDet->isMasked();
+    bool maskDetector = spectrumInfo.isMasked(i);
     *(pMasksArray + liveDetectorsCount) = maskDetector ? 1 : 0;
 
     liveDetectorsCount++;
@@ -461,5 +445,5 @@ double PreprocessDetectorsToMD::getEi(
 
   return Efi;
 }
-}
-}
+} // namespace MDAlgorithms
+} // namespace Mantid

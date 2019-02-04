@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/ParameterEstimator.h"
 #include "MantidCurveFitting/Functions/SimpleChebfun.h"
 
@@ -22,10 +28,10 @@ Kernel::Logger g_log("ParameterEstimator");
 namespace {
 /// Mutex to prevent simultaneous access to functionMap
 std::recursive_mutex FUNCTION_MAP_MUTEX;
-}
+} // namespace
 
 enum Function { None, Gaussian, Lorentzian, BackToBackExponential };
-typedef std::map<std::string, std::pair<size_t, Function>> FunctionMapType;
+using FunctionMapType = std::map<std::string, std::pair<size_t, Function>>;
 
 //----------------------------------------------------------------------------------------------
 

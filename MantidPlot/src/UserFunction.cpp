@@ -1,9 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifdef _WIN32
 #pragma warning(disable : 4251)
 #endif
 
-#include "MyParser.h"
 #include "UserFunction.h"
+#include "MyParser.h"
 #include <QMessageBox>
 
 Function2D::Function2D() : Qwt3D::Function(), d_rows(0), d_columns(0) {}
@@ -30,7 +36,7 @@ double UserFunction2D::operator()(double x, double y) {
     parser.SetExpr((const std::string)d_formula.toAscii().constData());
     result = parser.Eval();
   } catch (mu::ParserError &e) {
-    QMessageBox::critical(0, "MantidPlot - Input function error",
+    QMessageBox::critical(nullptr, "MantidPlot - Input function error",
                           QString::fromStdString(e.GetMsg()));
   }
   return result;

@@ -1,12 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_SPECTRUMALGORITHM_H_
 #define MANTID_ALGORITHMS_SPECTRUMALGORITHM_H_
 
 #include <tuple>
 
-#include "MantidKernel/IndexSet.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAlgorithms/DllConfig.h"
+#include "MantidKernel/IndexSet.h"
 
 namespace Mantid {
 
@@ -28,27 +34,6 @@ namespace Algorithms {
      ranges and list.
 
   @author Simon Heybrock, ESS
-
-  Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
-
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>
-  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_ALGORITHMS_DLL SpectrumAlgorithm : public API::Algorithm {
 private:
@@ -56,14 +41,14 @@ private:
    *
    * Used for generating a sequence 0,1,2,.... for extracting arguments from
    * tuple. */
-  template <int...> struct seq {};
+  template <std::size_t...> struct seq {};
   // Doxygen does not like recursive types.
-  template <int N, int... S>
-  struct gens                                     /** @cond */
-      : gens<N - 1, N - 1, S...> /** @endcond */ {/** @cond */
+  template <std::size_t N, std::size_t... S>
+  struct gens                                      /** @cond */
+      : gens<N - 1, N - 1, S...> /** @endcond */ { /** @cond */
   };
-  template <int... S> struct gens<0, S...> {/** @endcond */
-    typedef seq<S...> type;
+  template <std::size_t... S> struct gens<0, S...> { /** @endcond */
+    using type = seq<S...>;
   };
 
   /** Helpers for for_each(), struct contains and 2 specializations.
@@ -78,7 +63,7 @@ private:
   template <typename Tp> struct contains<Tp> : std::false_type {};
 
   /// Internal implementation of for_each().
-  template <class... Flags, class WS, class T, int... S, class OP>
+  template <class... Flags, class WS, class T, std::size_t... S, class OP>
   void for_each(WS &workspace, T getters, seq<S...>, const OP &operation) {
     // If we get the flag Indices::FromProperty we use a potential user-defined
     // range property, otherwise default to the full range of all histograms.
@@ -169,7 +154,7 @@ void SpectrumAlgorithm::ifEventWorkspaceClearMRU(
     const DataObjects::EventWorkspace &workspace);
 
 /// Typedef for a shared pointer to a SpectrumAlgorithm
-typedef boost::shared_ptr<SpectrumAlgorithm> SpectrumAlgorithm_sptr;
+using SpectrumAlgorithm_sptr = boost::shared_ptr<SpectrumAlgorithm>;
 
 } // namespace Algorithms
 } // namespace Mantid

@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -11,7 +11,7 @@ Description
 
 Normalises a workspace according to the good proton charge figure taken
 from the Input Workspace log data, which is stored in the workspace's
-`sample objects <../api/python/mantid/api/Sample.html>`__). Every data point
+:py:obj:`run object <mantid.api.Run>`. Every data point
 (and its error) is divided by that number.
 The good proton charge value is added to the normalized workspace
 as the value of *NormalizationFactor* log. 
@@ -55,16 +55,16 @@ Usage
    log_p = run1.getLogData('gd_prtn_chrg')
 
    # Print the log value
-   print "Good Proton Charge =",log_p.value
+   print("Good Proton Charge = {}".format(log_p.value))
 
    #Run the Algorithm
    wsN = NormaliseByCurrent(ws)
    norm_factor = wsN.getRun().getLogData('NormalizationFactor').value
 
    #Print results
-   print "Before normalisation", ws.readY(0);
-   print "After normalisation ", wsN.readY(0);
-   print "Normalisation factor", norm_factor;
+   print("Before normalisation {}".format(ws.readY(0)))
+   print("After normalisation  {}".format(wsN.readY(0)))
+   print("Normalisation factor {}".format(norm_factor))
 
 
 Output:

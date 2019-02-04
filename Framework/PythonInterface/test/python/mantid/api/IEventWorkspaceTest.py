@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
@@ -16,7 +22,7 @@ class IEventWorkspaceTest(unittest.TestCase):
     def setUp(self):
         if self._test_ws is None:
             self.__class__._test_ws = \
-              WorkspaceCreationHelper.CreateEventWorkspace2(self._npixels, self._nbins)
+              WorkspaceCreationHelper.createEventWorkspace2(self._npixels, self._nbins)
 
     def test_that_it_cannot_be_directly_instantiated(self):
         self.assertFalse(can_be_instantiated(IEventWorkspace))

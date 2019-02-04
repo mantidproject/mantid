@@ -1,9 +1,16 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
 """
     Classes for each reduction step. Those are kept separately
     from the the interface class so that the DgsReduction class could
     be used independently of the interface implementation
 """
+from __future__ import (absolute_import, division, print_function)
 import xml.dom.minidom
 
 from reduction_gui.reduction.scripter import BaseScriptElement
@@ -198,7 +205,7 @@ class AdvancedSetupScript(BaseScriptElement):
                                                    AdvancedSetupScript.filterbadpulses)
 
             self.bkgdsmoothpars = BaseScriptElement.getStringElement(instrument_dom,
-                                                                     "bkgdsmoothpars", default=AdvancedSetupScript.bkgdsmoothpars)
+                                                                     "backgroundsmoothparams", default=AdvancedSetupScript.bkgdsmoothpars)
 
             self.pushdatapositive = BaseScriptElement.getStringElement(instrument_dom,
                                                                        "pushdatapositive", default=AdvancedSetupScript.pushdatapositive)

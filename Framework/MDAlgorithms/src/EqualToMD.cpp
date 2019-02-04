@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/EqualToMD.h"
 #include "MantidKernel/System.h"
 
@@ -40,8 +46,8 @@ void EqualToMD::execHistoScalar(
     Mantid::DataObjects::MDHistoWorkspace_sptr out,
     Mantid::DataObjects::WorkspaceSingleValue_const_sptr scalar) {
   double tolerance = getProperty("Tolerance");
-  out->equalTo(scalar->dataY(0)[0], tolerance);
+  out->equalTo(scalar->y(0)[0], tolerance);
 }
 
-} // namespace Mantid
 } // namespace MDAlgorithms
+} // namespace Mantid

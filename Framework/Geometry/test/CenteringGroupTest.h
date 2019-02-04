@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_GEOMETRY_CENTERINGGROUPTEST_H_
 #define MANTID_GEOMETRY_CENTERINGGROUPTEST_H_
 
@@ -65,10 +71,10 @@ private:
     TSM_ASSERT_EQUALS("Unexpected number of operations for " + symbol,
                       ops.size(), expectedOperations.size());
 
-    for (auto it = expectedOperations.begin(); it != expectedOperations.end();
-         ++it) {
-      TSM_ASSERT("Operation " + (*it).identifier() + " not found in " + symbol,
-                 symOpExistsInCollection(*it, ops));
+    for (const auto &expectedOperation : expectedOperations) {
+      TSM_ASSERT("Operation " + expectedOperation.identifier() +
+                     " not found in " + symbol,
+                 symOpExistsInCollection(expectedOperation, ops));
     }
 
     CenteringGroup_const_sptr centeringGroup =

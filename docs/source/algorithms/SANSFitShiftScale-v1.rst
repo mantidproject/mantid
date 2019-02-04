@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -35,8 +35,8 @@ Usage
 
 	scale, shift = SANSFitShiftScale(HABWorkspace = hab_ws, LABWorkspace =lab_ws, Mode='ShiftOnly', ScaleFactor=1.0)
 
-	print scale
-	print shift
+	print("{:.1f}".format(scale))
+	print("{:.1f}".format(shift))
 
 Output:
    

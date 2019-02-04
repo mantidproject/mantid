@@ -1,37 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAHANDLING_LOADDETECTORINFO_H_
 #define MANTID_DATAHANDLING_LOADDETECTORINFO_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 
 namespace Mantid {
 namespace DataHandling {
-/**
 
-Copyright &copy; 2008-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>.
-Code Documentation is available at: <http://doxygen.mantidproject.org>
- */
 class DLLExport LoadDetectorInfo : public API::Algorithm {
 public:
   LoadDetectorInfo();
@@ -47,6 +29,9 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"LoadRaw", "LoadNexus"};
+  }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "DataHandling\\Raw"; }
 
@@ -78,8 +63,8 @@ private:
   void readNXSDotDat(::NeXus::File &nxsFile, DetectorInfo &detInfo) const;
 
   /// Update the parameter map with the new values for the given detector
-  void updateParameterMap(Geometry::ParameterMap &pmap,
-                          const Geometry::IDetector_const_sptr &det,
+  void updateParameterMap(Geometry::DetectorInfo &detectorInfo,
+                          const size_t detIndex, Geometry::ParameterMap &pmap,
                           const double l2, const double theta, const double phi,
                           const double delay, const double pressure,
                           const double thickness) const;

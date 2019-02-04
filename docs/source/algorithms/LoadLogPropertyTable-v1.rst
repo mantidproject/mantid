@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -41,23 +41,21 @@ Usage
 .. testcode:: Exlogtable
     
         def print_table_workspace(wsOut):
-            for i in range(wsOut.columnCount()):
-                print wsOut.getColumnNames()[i],
-            print
+	    print(" ".join(wsOut.getColumnNames()[i]
+	          for i in range(wsOut.columnCount())))
 
             for rowIndex in range(wsOut.columnCount()):
-                for i in range(wsOut.columnCount()):
-                    print wsOut.column(i)[rowIndex],
-                print
+  	        print(" ".join(str(wsOut.column(i)[rowIndex])
+	              for i in range(wsOut.columnCount())))
 
         wsComment = LoadLogPropertyTable(FirstFile = "MUSR00015189.nxs", 
                     LastFile = "MUSR00015193.nxs", LogNames="comment")
-        print "The comments of all the files"
+        print("The comments of all the files")
         print_table_workspace(wsComment)
 
         wsMultiple = LoadLogPropertyTable(FirstFile = "MUSR00015189.nxs", 
                     LastFile = "MUSR00015193.nxs", LogNames="Temp_Sample,dur")
-        print "\nThe Temp_Sample and dur logs"
+        print("\nThe Temp_Sample and dur logs")
         print_table_workspace(wsMultiple)
 
 

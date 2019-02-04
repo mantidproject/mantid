@@ -1,8 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_CREATEPEAKSWORKSPACE_H_
 #define MANTID_ALGORITHMS_CREATEPEAKSWORKSPACE_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -23,6 +29,9 @@ public:
 
   /// Algorithm's version for identification
   int version() const override { return 1; };
+  const std::vector<std::string> seeAlso() const override {
+    return {"SortPeaksWorkspace"};
+  }
   /// Algorithm's category for identification
   const std::string category() const override {
     return "Crystal\\Peaks;Utility\\Workspaces";
@@ -35,7 +44,7 @@ private:
   void exec() override;
 };
 
-} // namespace Mantid
 } // namespace Algorithms
+} // namespace Mantid
 
 #endif /* MANTID_ALGORITHMS_CREATEPEAKSWORKSPACE_H_ */

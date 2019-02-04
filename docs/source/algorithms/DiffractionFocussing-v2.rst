@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -15,14 +15,15 @@ following:
 
 #. The calibration file is read and a map of corresponding udet-group is
    created.
-#. The algorithm determine the X boundaries for each group as the upper
-   and lower limits of all contributing detectors to this group and
-   determine a logarithmic step that will ensure preserving the number
-   of bins in the initial workspace.
+#. The algorithm determines the X boundaries for each group as the upper
+   and lower limits of all contributing detectors. It then calculates
+   a logarithmic step that preserves the number of bins in the initial workspace. 
+   It assumes that the entire data set uses logarithmic binning in the process 
+   (i.e. it does not check for constant width binning).
 #. All histograms are read and rebinned to the new grid for their group.
 #. A new workspace with N histograms is created.
 
-Within the `CalFile <http://www.mantidproject.org/CalFile>`_ any detectors with the 'select' flag
+Within the :ref:`CalFile <CalFile>` any detectors with the 'select' flag
 can be set to zero or with a group number of 0 or -ve groups are not
 included in the analysis.
 
@@ -34,12 +35,12 @@ Some 2D and 3D plots will not display the data correctly.
 
 The DiffractionFocussing algorithm uses GroupDetectors algorithm to
 combine data from several spectra according to GroupingFileName file
-which is a `CalFile <http://www.mantidproject.org/CalFile>`_.
+which is a :ref:`CalFile <CalFile>`.
 
 For EventWorkspaces
 ###################
 
-The algorithm can be used with an `EventWorkspace <http://www.mantidproject.org/EventWorkspace>`_
+The algorithm can be used with an :ref:`EventWorkspace <EventWorkspace>`
 input, and will create an EventWorkspace output if a different workspace
 is specified.
 
@@ -64,7 +65,7 @@ Usage
    # specify groupping file, here using CalFile format
    cal_file = "hrpd_new_072_01_corr.cal"
 
-   # For HRPD data, perform a unit convertion TOF->d-spacing, taking into account detector position offsets
+   # For HRPD data, perform a unit conversion TOF->d-spacing, taking into account detector position offsets
    ws = AlignDetectors(InputWorkspace='ws',CalibrationFile=cal_file)
    # Focus the data
    ws = DiffractionFocussing(InputWorkspace='ws',GroupingFileName=cal_file)
@@ -88,8 +89,8 @@ Output:
    ws = DiffractionFocussing(InputWorkspace='ws', GroupingFileName="4detector_cal_example_file.cal" \
         , PreserveEvents=False)
 
-   print "Number of focussed spectra: " + str(ws.getNumberHistograms())
-   print "What type is the workspace after focussing: " + ws.id()
+   print("Number of focussed spectra: " + str(ws.getNumberHistograms()))
+   print("What type is the workspace after focussing: " + ws.id())
 
 Output:
 

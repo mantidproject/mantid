@@ -1,16 +1,21 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef POWERTEST_H_
 #define POWERTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include <cmath>
+#include <cxxtest/TestSuite.h>
 
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidAlgorithms/Power.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
+#include "MantidAPI/WorkspaceProperty.h"
+#include "MantidAlgorithms/Power.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -54,7 +59,7 @@ public:
 
   void testSetProperties() {
     WorkspaceSingleValue_sptr baseWs =
-        WorkspaceCreationHelper::CreateWorkspaceSingleValue(2);
+        WorkspaceCreationHelper::createWorkspaceSingleValue(2);
     AnalysisDataService::Instance().add("InputWS", baseWs);
 
     Power power;
@@ -98,7 +103,7 @@ public:
 
   void testPowerCalculation() {
     WorkspaceSingleValue_sptr baseWs =
-        WorkspaceCreationHelper::CreateWorkspaceSingleValue(2);
+        WorkspaceCreationHelper::createWorkspaceSingleValue(2);
     AnalysisDataService::Instance().add("InputWS", baseWs);
 
     Power power;
@@ -126,7 +131,7 @@ public:
 
   void testPowerCalculationWithNegativeExponent() {
     WorkspaceSingleValue_sptr baseWs =
-        WorkspaceCreationHelper::CreateWorkspaceSingleValue(2);
+        WorkspaceCreationHelper::createWorkspaceSingleValue(2);
     AnalysisDataService::Instance().add("InputWS", baseWs);
 
     Power power;
@@ -162,7 +167,7 @@ public:
     // if x = p ^ y, then err_x = y * x * err_p / p
 
     WorkspaceSingleValue_sptr baseWs =
-        WorkspaceCreationHelper::CreateWorkspaceSingleValue(4);
+        WorkspaceCreationHelper::createWorkspaceSingleValue(4);
     AnalysisDataService::Instance().add("InputWS", baseWs);
 
     Power power;
@@ -188,7 +193,7 @@ public:
 
   void testEvents() {
     // evin has 0 events per bin in pixel0, 1 in pixel 1, 2 in pixel2, ...
-    EventWorkspace_sptr evin = WorkspaceCreationHelper::CreateEventWorkspace(
+    EventWorkspace_sptr evin = WorkspaceCreationHelper::createEventWorkspace(
                             5, 3, 1000, 0, 1, 4),
                         evout;
     AnalysisDataService::Instance().add("test_ev_pow", evin);

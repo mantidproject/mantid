@@ -1,14 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef GENERALISEDSECONDDIFFERENCETEST_H_
 #define GENERALISEDSECONDDIFFERENCETEST_H_
 
 #include <cxxtest/TestSuite.h>
 
+#include "../../DataObjects/test/EventWorkspaceTest.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include <MantidDataObjects/EventWorkspace.h>
-#include "../../DataObjects/test/EventWorkspaceTest.h"
 #include <MantidAlgorithms/GeneralisedSecondDifference.h>
+#include <MantidDataObjects/EventWorkspace.h>
 
 using namespace Mantid::API;
 using namespace Mantid::HistogramData;
@@ -54,11 +60,11 @@ public:
     TS_ASSERT_EQUALS(outWs->getNumberHistograms(), 1);
     TS_ASSERT_EQUALS(outWs->blocksize(), 4);
 
-    auto x1 = outWs->x(0);
+    const auto &x1 = outWs->x(0);
     TS_ASSERT_EQUALS(x1[0], 3);
     TS_ASSERT_EQUALS(x1[3], 6);
 
-    auto y1 = outWs->y(0);
+    const auto &y1 = outWs->y(0);
     TS_ASSERT_DELTA(y1[1], -7.0300, 0.0001);
     TS_ASSERT_DELTA(y1[2], -20.0000, 0.0001);
 
@@ -79,9 +85,9 @@ public:
   }
 
   void setUp() override {
-    inputMatrix = WorkspaceCreationHelper::Create2DWorkspaceBinned(10000, 1000);
+    inputMatrix = WorkspaceCreationHelper::create2DWorkspaceBinned(10000, 1000);
     inputEvent =
-        WorkspaceCreationHelper::CreateEventWorkspace(10000, 1000, 5000);
+        WorkspaceCreationHelper::createEventWorkspace(10000, 1000, 5000);
   }
 
   void tearDown() override {

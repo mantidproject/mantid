@@ -1,8 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MDALGORITHMS_FITRESOLUTIONCONVOLVEDMODELTEST_H_
 #define MANTID_MDALGORITHMS_FITRESOLUTIONCONVOLVEDMODELTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidMDAlgorithms/Quantification/FitResolutionConvolvedModel.h"
+#include <cxxtest/TestSuite.h>
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
@@ -32,7 +38,7 @@ public:
     using namespace Mantid::API;
     IAlgorithm_sptr alg = createAlgorithm();
     MatrixWorkspace_sptr testMatrixWS =
-        WorkspaceCreationHelper::Create2DWorkspace(1, 10);
+        WorkspaceCreationHelper::create2DWorkspace(1, 10);
     Mantid::API::AnalysisDataService::Instance().addOrReplace(m_inputName,
                                                               testMatrixWS);
 

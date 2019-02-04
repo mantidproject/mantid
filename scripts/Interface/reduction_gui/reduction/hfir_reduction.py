@@ -1,15 +1,22 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
 """
     This class holds all the necessary information to create a reduction script.
     This is a fake version of the Reducer for testing purposes.
 """
+from __future__ import (absolute_import, division, print_function)
 import time
 import os
-from scripter import BaseReductionScripter
+from reduction_gui.reduction.scripter import BaseReductionScripter
 
 HAS_MANTID = False
 try:
-    import mantidplot
+    import mantidplot  # noqa
     HAS_MANTID = True
 except:
     pass
@@ -72,7 +79,7 @@ class HFIRReductionScripter(BaseReductionScripter):
                         script += item.state().options()
 
             script += "ReductionProperties='%s')" % table_ws
-            mantidplot.runPythonScript(script, True)
+            self.excute_script(script)
             return table_ws
         else:
             raise RuntimeError("Reduction could not be executed: Mantid could not be imported")

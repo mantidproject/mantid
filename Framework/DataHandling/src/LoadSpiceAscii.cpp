@@ -1,26 +1,32 @@
-#include <fstream>
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include <boost/algorithm/string.hpp>
+#include <fstream>
 
-#include "MantidDataHandling/LoadSpiceAscii.h"
-#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FileLoaderRegistry.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidDataHandling/LoadSpiceAscii.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/ArrayProperty.h"
 
-#include <boost/algorithm/string/iter_find.hpp>
 #include <boost/algorithm/string/finder.hpp>
+#include <boost/algorithm/string/iter_find.hpp>
 
 using namespace boost::algorithm;
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
+using Mantid::Types::Core::DateAndTime;
 
 namespace Mantid {
 namespace DataHandling {
@@ -36,7 +42,7 @@ static bool endswith(const std::string &s, const std::string &subs) {
   // get a substring
   std::string tail = s.substr(s.size() - subs.size());
 
-  return tail.compare(subs) == 0;
+  return tail == subs;
 }
 
 static bool checkIntersection(std::vector<std::string> v1,
@@ -122,7 +128,7 @@ void LoadSpiceAscii::init() {
   defaultlogformat[2] = "time";
   defaultlogformat[3] = "HH:MM:SS AM";
   declareProperty(Kernel::make_unique<ArrayProperty<std::string>>(
-                      "DateAndTimeLog", defaultlogformat),
+                      "DateAndTimeLog", std::move(defaultlogformat)),
                   "Name and format for date and time");
 
   // Output
@@ -138,7 +144,7 @@ void LoadSpiceAscii::init() {
 
 //----------------------------------------------------------------------------------------------
 /** Exec
-  */
+ */
 void LoadSpiceAscii::exec() {
   // Input properties and validate
   std::string filename = getPropertyValue("Filename");
@@ -236,7 +242,7 @@ void LoadSpiceAscii::parseSPICEAscii(
     // Strip
     boost::trim(line);
     // skip for empyt line
-    if (line.size() == 0)
+    if (line.empty())
       continue;
 
     // Comment line for run information
@@ -285,7 +291,8 @@ void LoadSpiceAscii::parseSPICEAscii(
       } else {
         // Not supported
         std::stringstream wss;
-        wss << "Line " << line << " cannot be parsed. It is ignored then.";
+        wss << "File " << filename << ": line \"" << line
+            << "\" cannot be parsed. It is ignored then.";
         g_log.warning(wss.str());
       }
     } // If for run info
@@ -319,7 +326,7 @@ API::ITableWorkspace_sptr LoadSpiceAscii::createDataWS(
       boost::make_shared<DataObjects::TableWorkspace>();
   size_t ipt = -1;
   for (size_t i = 0; i < titles.size(); ++i) {
-    if (titles[i].compare("Pt.") == 0) {
+    if (titles[i] == "Pt.") {
       outws->addColumn("int", titles[i]);
       ipt = i;
     } else {
@@ -335,9 +342,9 @@ API::ITableWorkspace_sptr LoadSpiceAscii::createDataWS(
     for (size_t icol = 0; icol < numcols; ++icol) {
       std::string item = datalist[irow][icol];
       if (icol == ipt)
-        newrow << atoi(item.c_str());
+        newrow << std::stoi(item);
       else
-        newrow << atof(item.c_str());
+        newrow << std::stod(item);
     }
   }
 
@@ -393,10 +400,10 @@ LoadSpiceAscii::createRunInfoWS(std::map<std::string, std::string> runinfodict,
         std::vector<std::string> terms;
         boost::iter_split(terms, strvalue,
                           boost::algorithm::first_finder("+/-"));
-        value = atof(terms[0].c_str());
-        error = atof(terms[1].c_str());
+        value = std::stod(terms[0]);
+        error = std::stod(terms[1]);
       } else {
-        value = atof(strvalue.c_str());
+        value = std::stod(strvalue);
         error = 0;
       }
 
@@ -410,7 +417,7 @@ LoadSpiceAscii::createRunInfoWS(std::map<std::string, std::string> runinfodict,
     } else if (std::binary_search(intlognamelist.begin(), intlognamelist.end(),
                                   title)) {
       // It is an integer log
-      addProperty<int>(infows, title, atoi(strvalue.c_str()));
+      addProperty<int>(infows, title, std::stoi(strvalue));
     } else if (!ignoreunlisted ||
                std::binary_search(strlognamelist.begin(), strlognamelist.end(),
                                   title)) {
@@ -440,8 +447,8 @@ void LoadSpiceAscii::setupRunStartTime(
   // Parse property vector
   if (datetimeprop.size() != 4) {
     g_log.warning() << "Run start date and time property must contain 4 "
-                       "strings.  User only specifies " << datetimeprop.size()
-                    << ".  Set up failed."
+                       "strings.  User only specifies "
+                    << datetimeprop.size() << ".  Set up failed."
                     << "\n";
     return;
   }
@@ -514,11 +521,11 @@ std::string LoadSpiceAscii::processDateString(const std::string &rawdate,
     else if (formatterms[i].find('M') != std::string::npos) {
       month = dateterms[i];
       if (month.size() == 1)
-        month = "0" + month;
+        month.insert(0, 1, '0');
     } else {
       day = dateterms[i];
       if (day.size() == 1)
-        day = "0" + day;
+        day.insert(0, 1, '0');
     }
   }
 
@@ -554,12 +561,12 @@ std::string LoadSpiceAscii::processTimeString(const std::string &rawtime,
     std::vector<std::string> terms;
     boost::split(terms, rawtime, boost::is_any_of(" "));
     bool pm = false;
-    if (terms[1].compare("PM") == 0)
+    if (terms[1] == "PM")
       pm = true;
 
     std::vector<std::string> terms2;
     boost::split(terms2, terms[0], boost::is_any_of(":"));
-    int hour = atoi(terms[0].c_str());
+    int hour = std::stoi(terms[0]);
     if (hour < 12 && pm)
       hour += 12;
 

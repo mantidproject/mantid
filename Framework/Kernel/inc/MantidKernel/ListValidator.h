@@ -1,16 +1,22 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_KERNEL_LISTVALIDATOR_H_
 #define MANTID_KERNEL_LISTVALIDATOR_H_
 
-#include "MantidKernel/TypedValidator.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/TypedValidator.h"
 #ifndef Q_MOC_RUN
 #include <boost/lexical_cast.hpp>
 #include <boost/make_shared.hpp>
 #endif
-#include <vector>
-#include <set>
 #include <map>
+#include <set>
 #include <unordered_set>
+#include <vector>
 
 namespace Mantid {
 namespace Kernel {
@@ -20,27 +26,6 @@ namespace Kernel {
 
     @author Russell Taylor, Tessella Support Services plc
     @date 18/06/2008
-
-    Copyright &copy; 2008-9 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-   National Laboratory & European Spallation Source
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>.
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 template <typename TYPE> class ListValidator : public TypedValidator<TYPE> {
 public:
@@ -48,39 +33,12 @@ public:
   ListValidator() : TypedValidator<TYPE>(), m_allowMultiSelection(false) {}
 
   /** Constructor
-   *  @param values :: A set of values consisting of the valid values
-   *  @param allowMultiSelection :: True if the list allows multi selection
-   */
-  explicit ListValidator(const std::set<TYPE> &values,
-                         const bool allowMultiSelection = false)
-      : TypedValidator<TYPE>(), m_allowedValues(values.begin(), values.end()),
-        m_allowMultiSelection(allowMultiSelection) {
-    if (m_allowMultiSelection) {
-      throw Kernel::Exception::NotImplementedError(
-          "The List Validator does not support Multi selection yet");
-    }
-  }
-
-  /** Constructor
-   *  @param values :: An unordered set of values consisting of the valid values
-   *  @param allowMultiSelection :: True if the list allows multi selection
-   */
-  explicit ListValidator(const std::unordered_set<TYPE> &values,
-                         const bool allowMultiSelection = false)
-      : TypedValidator<TYPE>(), m_allowedValues(values.begin(), values.end()),
-        m_allowMultiSelection(allowMultiSelection) {
-    if (m_allowMultiSelection) {
-      throw Kernel::Exception::NotImplementedError(
-          "The List Validator does not support Multi selection yet");
-    }
-  }
-
-  /** Constructor
-   *  @param values :: A vector of the valid values
+   *  @param values :: An iterable type of the valid values
    *  @param aliases :: Optional aliases for the valid values.
    *  @param allowMultiSelection :: True if the list allows multi selection
    */
-  explicit ListValidator(const std::vector<TYPE> &values,
+  template <typename T>
+  explicit ListValidator(const T &values,
                          const std::map<std::string, std::string> &aliases =
                              std::map<std::string, std::string>(),
                          const bool allowMultiSelection = false)
@@ -97,11 +55,12 @@ public:
                                     aliasIt->second);
         if (m_allowMultiSelection) {
           throw Kernel::Exception::NotImplementedError(
-              "The List Validator does not support Multi selection yet");
+              "The List Validator does not support multi selection yet");
         }
       }
     }
   }
+
   /// Clone the validator
   IValidator_sptr clone() const override {
     return boost::make_shared<ListValidator<TYPE>>(*this);
@@ -222,7 +181,7 @@ protected:
 };
 
 /// ListValidator<std::string> is used heavily
-typedef ListValidator<std::string> StringListValidator;
+using StringListValidator = ListValidator<std::string>;
 
 } // namespace Kernel
 } // namespace Mantid

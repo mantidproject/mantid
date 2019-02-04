@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -14,7 +14,8 @@ defined math formula. It will adjust the data values
 (other than in one case the X values) of a workspace, although it will 
 reverse the spectra if needed to keep the X values increasing across the workspace.
 This only works for MatrixWorkspaces, so will not work on
-Multi Dimensional Workspaces or Table Workspaces. If you specify one of the known Units from the `Unit Factory <http://www.mantidproject.org/Units>`__ then that will be the resulting unit,
+Multi Dimensional Workspaces or Table Workspaces. If you specify one of the
+known :ref:`Units <Unit Factory>` then that will be the resulting unit,
 otherwise like the
 :ref:`algm-ConvertSpectrumAxis` algorithm the result of
 this algorithm will have custom units defined for the axis you have
@@ -86,9 +87,9 @@ Usage
                                  AxisTitle="Squared X",
                                  AxisUnits="x^2")
 
-   print "New X values:", output.getAxis(0).extractValues()
-   print "New X units:", output.getAxis(0).getUnit().symbol()
-   print "New X title:", output.getAxis(0).getUnit().caption()
+   print("New X values: {}".format(output.getAxis(0).extractValues()))
+   print("New X units: {}".format(output.getAxis(0).getUnit().symbol()))
+   print("New X title: {}".format(output.getAxis(0).getUnit().caption()))
 
 Output:
 
@@ -124,9 +125,9 @@ Output:
                                  AxisTitle="Doubled Y",
                                  AxisUnits="y*2")
 
-   print "New Y values:", output.getAxis(1).extractValues()
-   print "New Y units:", output.getAxis(1).getUnit().symbol()
-   print "New Y title:", output.getAxis(1).getUnit().caption()
+   print("New Y values: {}".format(output.getAxis(1).extractValues()))
+   print("New Y units: {}".format(output.getAxis(1).getUnit().symbol()))
+   print("New Y title: {}".format(output.getAxis(1).getUnit().caption()))
 
 Output:
 
@@ -150,7 +151,7 @@ Output:
    #check they are the same
    isMatched, messageTable = CompareWorkspaces(wsMTbyFormula,wsMTbyConvertUnits,0.00001,checkAxes=True, CheckType=True)
    if isMatched:
-       print "Both methods create matching workspaces."
+       print("Both methods create matching workspaces.")
 
 Output:
 

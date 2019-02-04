@@ -32,7 +32,6 @@ if ( PYLINT_FOUND )
         docs/sphinxext/mantiddoc
   )
   set ( PYLINT_EXCLUDES
-        scripts/lib1to2
         scripts/test
         Testing/SystemTests/tests/analysis/reference
   )

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CURVEFITTING_HISTOGRAMDOMAINCREATORTEST_H_
 #define MANTID_CURVEFITTING_HISTOGRAMDOMAINCREATORTEST_H_
 
@@ -24,9 +30,9 @@
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::CurveFitting::Functions;
-using Mantid::CurveFitting::HistogramDomainCreator;
 using Mantid::CurveFitting::Algorithms::Fit;
 using Mantid::CurveFitting::GSLJacobian;
+using Mantid::CurveFitting::HistogramDomainCreator;
 
 class HistogramDomainCreatorTest : public CxxTest::TestSuite {
 public:
@@ -446,9 +452,10 @@ private:
     for (size_t is = 0; is < ws2->getNumberHistograms(); ++is) {
       auto &x = ws2->mutableX(is);
       auto &y = ws2->mutableY(is);
-      for (size_t i = 0; i < ws2->blocksize(); ++i) {
-        x[i] = 0.1 * double(i) + 0.01 * double(is);
-        y[i] = (10.0 + double(is)) * exp(-(x[i]) / (0.5 * (1 + double(is))));
+      const double is_d = static_cast<double>(is);
+      for (size_t i = 0; i < y.size(); ++i) {
+        x[i] = 0.1 * static_cast<double>(i) + 0.01 * is_d;
+        y[i] = (10.0 + is_d) * exp(-(x[i]) / (0.5 * (1. + is_d)));
       }
       if (histogram)
         x.back() = x[x.size() - 2] + 0.1;
@@ -486,8 +493,9 @@ private:
 
   MatrixWorkspace_sptr createGaussWorkspace(const size_t ny = 10) {
     double sigma = 0.2;
-    auto cumulFun =
-        [sigma](double x) { return 0.5 * erf(x / sigma / sqrt(2.0)); };
+    auto cumulFun = [sigma](double x) {
+      return 0.5 * erf(x / sigma / sqrt(2.0));
+    };
     return createFitWorkspace(ny, cumulFun);
   }
 

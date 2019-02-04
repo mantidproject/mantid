@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -18,13 +18,19 @@ Description
 
 Fits a series of single peaks to a spectrum with an expected
 diffraction pattern.  The pattern is specified by providing a list of
-dSpacing values where Bragg peaks are expected. These expected values
+peak centres where Bragg peaks are expected. These expected values
 are used as initial peak positions when fitting the peaks. The
 expected dSpacing values can be given as an input string or in a file
-with values separated by commas.
+with values separated by commas. These values can be in units of either
+TOF or dSpacing, but **not** a mixture of the two. At least one of the
+peaks in the list must lie inside the x limits of the input workspace.
 
-The peaks are fitted one at a time. The dSpacing values given in the
-property ExpectedPeaks are then converted to time-of-flight (TOF).
+The peaks are fitted one at a time. The peak centres given in the
+property ExpectedPeaks are initially assumed to be in units of TOF.
+If none lie inside the x limits of the input workspace, EnggFitPeaks
+tries converting them to dSpacing, and if they still don't fit the data
+then the algorithm fails.
+
 After the conversion of units, the algorithm tries to fit (in
 time-of-flight) a peak in the neighborhood of every expected peak
 using a peak shape or function. The conversion is done as in the
@@ -32,8 +38,9 @@ Mantid algorithm :ref:`AlignDetectors <algm-AlignDetectors>`
 (following GSAS equations) if the workspace is focused (single
 spectrum) and has a log entry named "difc", where the GSAS DIFC
 parameter is expected. Otherwise the conversion of units is done as in
-the Mantid :ref:`ConvertUnits <algm-ConvertUnits>`. See also
-:ref:`EnggFitDIFCFromPeaks <algm-EnggFitDIFCFromPeaks>`.
+the Mantid :ref:`ConvertUnits <algm-ConvertUnits>`.
+
+.. seealso:: :ref:`EnggFitDIFCFromPeaks <algm-EnggFitDIFCFromPeaks>`.
 
 This algorithm currently fits (single) peaks of type
 :ref:`Back2BackExponential <func-BackToBackExponential>`. Other
@@ -80,11 +87,11 @@ Usage
 
 
    # Print the results
-   print "Number of peaks fitted: {0}".format(peaks_tbl.rowCount())
-   print "First peak expected (dSpacing): {0}".format(peaks_tbl.column('dSpacing')[0])
-   print "First fitted peak center (ToF): {0:.1f}".format(peaks_tbl.column('X0')[0])
-   print "Second peak expected (dSpacing): {0}".format(peaks_tbl.column('dSpacing')[1])
-   print "Second fitted peak center (ToF): {0:.0f}".format(round(peaks_tbl.column('X0')[1],-1))
+   print("Number of peaks fitted: {0}".format(peaks_tbl.rowCount()))
+   print("First peak expected (dSpacing): {0}".format(peaks_tbl.column('dSpacing')[0]))
+   print("First fitted peak center (ToF): {0:.1f}".format(peaks_tbl.column('X0')[0]))
+   print("Second peak expected (dSpacing): {0}".format(peaks_tbl.column('dSpacing')[1]))
+   print("Second fitted peak center (ToF): {0:.0f}".format(round(peaks_tbl.column('X0')[1],-1)))
 
 Output:
 

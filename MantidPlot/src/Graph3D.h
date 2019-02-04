@@ -1,24 +1,13 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2004 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 /***************************************************************************
     File                 : Graph3D.h
     Project              : QtiPlot
     --------------------------------------------------------------------
-    Copyright            : (C) 2004-2007 by Ion Vasilief
-    Email (use @ for *)  : ion_vasilief*yahoo.fr
-    Description          : 3D graph widget
-
- ***************************************************************************/
-
-/***************************************************************************
- *                                                                         *
- *  This program is free software; you can redistribute it and/or modify   *
- *  it under the terms of the GNU General Public License as published by   *
- *  the Free Software Foundation; either version 2 of the License, or      *
- *  (at your option) any later version.                                    *
- *                                                                         *
- *  This program is distributed in the hope that it will be useful,        *
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
- *  GNU General Public License for more details.                           *
  *                                                                         *
  *   You should have received a copy of the GNU General Public License     *
  *   along with this program; if not, write to the Free Software           *
@@ -30,19 +19,19 @@
 #define GRAPH3D_H
 
 #include "MantidGeometry/Rendering/OpenGL_Headers.h"
-#include "MantidQtAPI/IProjectSerialisable.h"
+#include "MantidQtWidgets/Common/IProjectSerialisable.h"
 
-#include <qwt3d_surfaceplot.h>
 #include <qwt3d_function.h>
 #include <qwt3d_parametricsurface.h>
+#include <qwt3d_surfaceplot.h>
 
+#include <QEvent>
 #include <QTimer>
 #include <QVector>
-#include <QEvent>
 
-#include "Table.h"
+#include "MantidQtWidgets/Common/TSVSerialiser.h"
 #include "Matrix.h"
-#include "MantidQtAPI/TSVSerialiser.h"
+#include "Table.h"
 
 class MantidMatrix;
 class UserFunction2D;
@@ -66,8 +55,8 @@ class Graph3D : public MdiSubWindow {
   Q_OBJECT
 
 public:
-  Graph3D(const QString &label, QWidget *parent, const char *name = 0,
-          Qt::WFlags f = 0);
+  Graph3D(const QString &label, QWidget *parent, const char *name = nullptr,
+          Qt::WFlags f = nullptr);
   ~Graph3D() override;
 
   void initPlot();
@@ -303,6 +292,7 @@ public slots:
   loadFromProject(const std::string &lines, ApplicationWindow *app,
                   const int fileVersion);
   std::string saveToProject(ApplicationWindow *app) override;
+  std::vector<std::string> getWorkspaceNames() override;
 
   void zoomChanged(double);
   void rotationChanged(double, double, double);
@@ -311,7 +301,7 @@ public slots:
 
   //! \name Colors
   //@{
-  void setDataColors(const QColor &cMax, const QColor &cMin);
+  void setDataColors(const QColor &cMin, const QColor &cMax);
 
   void changeTransparency(double t);
   void setTransparency(double t);

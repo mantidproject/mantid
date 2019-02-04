@@ -70,15 +70,9 @@ public:
 //		for building the tree.
 //----------------------------------------------------------------------
 
-typedef void (*ANNkd_splitter)( // splitting routine for kd-trees
-    ANNpointArray pa,           // point array (unaltered)
-    ANNidxArray pidx,           // point indices (permuted on return)
-    const ANNorthRect &bnds,    // bounding rectangle for cell
-    int n,                      // number of points
-    int dim,                    // dimension of space
-    int &cut_dim,               // cutting dimension (returned)
-    ANNcoord &cut_val,          // cutting value (returned)
-    int &n_lo);                 // num of points on low side (returned)
+using ANNkd_splitter = void (*)(ANNpointArray, ANNidxArray, const ANNorthRect &,
+                                int, int, int &, ANNcoord &,
+                                int &); // num of points on low side (returned)
 
 //----------------------------------------------------------------------
 //	Leaf kd-tree node
@@ -90,7 +84,7 @@ typedef void (*ANNkd_splitter)( // splitting routine for kd-trees
 //----------------------------------------------------------------------
 
 class ANNkd_leaf : public ANNkd_node // leaf node for kd-tree
-                   {
+{
   int n_pts;       // no. points in bucket
   ANNidxArray bkt; // bucket of points
 public:
@@ -140,7 +134,7 @@ extern ANNkd_leaf *KD_TRIVIAL; // trivial (empty) leaf node
 //----------------------------------------------------------------------
 
 class ANNkd_split : public ANNkd_node // splitting node of a kd-tree
-                    {
+{
   int cut_dim;         // dim orthogonal to cutting plane
   ANNcoord cut_val;    // location of cutting plane
   ANNcoord cd_bnds[2]; // lower and upper bounds of

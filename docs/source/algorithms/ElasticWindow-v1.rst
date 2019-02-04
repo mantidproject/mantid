@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -47,8 +47,8 @@ Usage
   # Run the algorithm
   q, q2 = ElasticWindow(ws, -0.1, 0.1)
 
-  print q.getAxis(0).getUnit().caption()
-  print q2.getAxis(0).getUnit().caption()
+  print(q.getAxis(0).getUnit().caption())
+  print(q2.getAxis(0).getUnit().caption())
 
 .. testoutput:: exElasticWindowSimple
 

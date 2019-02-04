@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_NOTEBOOKWRITERTEST_H_
 #define MANTID_NOTEBOOKWRITERTEST_H_
 
@@ -5,6 +11,9 @@
 
 #include "MantidAPI/NotebookBuilder.h"
 #include "MantidTestHelpers/FakeObjects.h"
+
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/split.hpp>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

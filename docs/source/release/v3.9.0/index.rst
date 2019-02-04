@@ -1,22 +1,22 @@
+.. _v3.9.0:
+
 ==========================
 Mantid 3.9.0 Release Notes
 ==========================
 
-.. figure:: ../../images/ReleaseUnderConstruction.jpg
+.. figure:: ../../images/release39.png
    :class: screenshot
    :width: 550px
    :align: right
 
-   Release image
+   The Slice Viewer now is able to display data with non orthogonal axes
 
 .. contents:: Table of Contents
    :local:
 
-.. warning:: This release is still under construction. The changes can be found in the nightly builds on the `download page`_.
+We are proud to announce version 3.9 of Mantid. This release contains the long awaited ability to visualise non orthogonal crystal systems correctly in the slice viewer, as well as partial project saving in the Mantidplot interface.
 
-**TODO: Add paragraph summarizing big changes**
-
-This is just one of many improvements in this release, so please take a
+These are just two of many improvements in this release, so please take a
 look at the release notes, which are filled with details of the
 important changes and improvements in many areas. The development team
 has put a great effort into making all of these improvements within
@@ -32,12 +32,19 @@ Installation packages can be found on our `download page`_
 which now links to sourceforge to mirror our download files around the world, you can also
 access the source code on `GitHub release page`_.
 
+This is the last version to support RedHat Enterprise Linux 6 (RHEL6).
+
 Citation
 --------
 
 Please cite any usage of Mantid as follows:
 
+- *O. Arnold, et al., Mantid—Data analysis and visualization package for neutron scattering and μSR experiments, Nuclear Instruments and Methods in Physics Research Section A, Volume 764, 11 November 2014, Pages 156-166*, doi: `10.1016/j.nima.2014.07.029 <http://dx.doi.org/10.1016/j.nima.2014.07.029>`_
+
+If you want to cite this specific release please use:
+
 - *Mantid 3.9: Manipulation and Analysis Toolkit for Instrument Data.; Mantid Project*. doi: http://dx.doi.org/10.5286/SOFTWARE/MANTID3.9
+  `Full author list <http://data.datacite.org/10.5286/SOFTWARE/MANTID3.9>`_
 
 Changes
 -------
@@ -51,6 +58,7 @@ Changes
    Indirect Inelastic <indirect_inelastic>
    SANS <sans>
    Diffraction <diffraction>
+   Imaging <imaging>
    Muon Analysis <muon>
    Reflectometry <reflectometry>
 

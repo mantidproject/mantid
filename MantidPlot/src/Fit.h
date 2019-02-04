@@ -1,24 +1,13 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2006 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 /***************************************************************************
     File                 : Fit.h
     Project              : QtiPlot
     --------------------------------------------------------------------
-    Copyright            : (C) 2006 by Ion Vasilief
-    Email (use @ for *)  : ion_vasilief*yahoo.fr
-    Description          : Fit base class
-
- ***************************************************************************/
-
-/***************************************************************************
- *                                                                         *
- *  This program is free software; you can redistribute it and/or modify   *
- *  it under the terms of the GNU General Public License as published by   *
- *  the Free Software Foundation; either version 2 of the License, or      *
- *  (at your option) any later version.                                    *
- *                                                                         *
- *  This program is distributed in the hope that it will be useful,        *
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
- *  GNU General Public License for more details.                           *
  *                                                                         *
  *   You should have received a copy of the GNU General Public License     *
  *   along with this program; if not, write to the Free Software           *
@@ -45,11 +34,11 @@ class Fit : public Filter {
   Q_OBJECT
 
 public:
-  typedef double (*fit_function_simplex)(const gsl_vector *, void *);
-  typedef int (*fit_function)(const gsl_vector *, void *, gsl_vector *);
-  typedef int (*fit_function_df)(const gsl_vector *, void *, gsl_matrix *);
-  typedef int (*fit_function_fdf)(const gsl_vector *, void *, gsl_vector *,
-                                  gsl_matrix *);
+  using fit_function_simplex = double (*)(const gsl_vector *, void *);
+  using fit_function = int (*)(const gsl_vector *, void *, gsl_vector *);
+  using fit_function_df = int (*)(const gsl_vector *, void *, gsl_matrix *);
+  using fit_function_fdf = int (*)(const gsl_vector *, void *, gsl_vector *,
+                                   gsl_matrix *);
 
   enum Algorithm {
     ScaledLevenbergMarquardt,
@@ -59,7 +48,8 @@ public:
   enum WeightingMethod { NoWeighting, Instrumental, Statistical, Dataset };
   enum FitType { BuiltIn = 0, Plugin = 1, User = 2 };
 
-  Fit(ApplicationWindow *parent, Graph *g = 0, const QString &name = QString());
+  Fit(ApplicationWindow *parent, Graph *g = nullptr,
+      const QString &name = QString());
   Fit(ApplicationWindow *parent, Table *t, const QString &name = QString());
   ~Fit() override;
 
@@ -121,7 +111,7 @@ public:
   //! Returns R^2
   double rSquare();
 
-  //! Specifies wheather the errors must be scaled with sqrt(chi_2/dof)
+  //! Specifies whether the errors must be scaled with sqrt(chi_2/dof)
   void scaleErrors(bool yes = true) { d_scale_errors = yes; };
 
   Table *parametersTable(const QString &tableName);
@@ -238,7 +228,7 @@ protected:
   //! The sum of squares of the residuals from the best-fit line
   double chi_2;
 
-  //! Specifies wheather the errors must be scaled with sqrt(chi_2/dof)
+  //! Specifies whether the errors must be scaled with sqrt(chi_2/dof)
   bool d_scale_errors;
 
   //! Table window used for the output of fit parameters

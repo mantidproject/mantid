@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 /*
  * IntegratePeakTimeSlicesTest.h
  *
@@ -8,12 +14,11 @@
 #ifndef INTEGRATEPEAKTIMESLICESTEST_H_
 #define INTEGRATEPEAKTIMESLICESTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidCrystal/IntegratePeakTimeSlices.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
-#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
@@ -21,22 +26,24 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectraDetectorTypes.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidGeometry/Objects/Object.h"
-#include "MantidKernel/cow_ptr.h"
+#include "MantidGeometry/Objects/CSGObject.h"
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/V3D.h"
-#include "MantidGeometry/Crystal/IPeak.h"
+#include "MantidKernel/cow_ptr.h"
 
 #include <math.h>
 
@@ -96,22 +103,16 @@ public:
 
     boost::shared_ptr<Geometry::Detector> pixelp =
         bankR->getAtXY(PeakCol, PeakRow);
-
-    Geometry::IDetector_const_sptr pix = wsPtr->getDetector(522);
+    const auto &detectorInfo = wsPtr->detectorInfo();
+    const auto detInfoIndex = detectorInfo.indexOf(pixelp->getID());
 
     // Now get Peak.
     double PeakTime = 18000 + (PeakChan + .5) * 100;
 
     Mantid::Kernel::Units::Wavelength wl;
-    Kernel::V3D pos = Kernel::V3D(instP->getSource()->getPos());
-    pos -= instP->getSample()->getPos();
-    double L1 = pos.norm();
-    Kernel::V3D pos1 = pixelp->getPos();
-    pos1 -= instP->getSample()->getPos();
-    double L2 = pos1.norm();
-    double dummy, phi;
-    pos1.getSpherical(dummy, phi, dummy);
-    double ScatAng = phi / 180 * M_PI;
+    const auto L1 = detectorInfo.l1();
+    const auto L2 = detectorInfo.l2(detInfoIndex);
+    const auto ScatAng = detectorInfo.twoTheta(detInfoIndex) / 180 * M_PI;
     std::vector<double> x;
     x.push_back(PeakTime);
 
@@ -122,7 +123,8 @@ public:
 
     // Now set up data in workspace2D
     double dQ = 0;
-    double Q0 = calcQ(bankR, instP, PeakRow, PeakCol, 1000.0 + 30.0 * 50);
+    double Q0 =
+        calcQ(bankR, detectorInfo, PeakRow, PeakCol, 1000.0 + 30.0 * 50);
 
     double TotIntensity = 0;
 
@@ -153,13 +155,13 @@ public:
           dataY.push_back(val);
           dataE.push_back(sqrt(val));
           if ((val - 1.4) > MaxPeakIntensity * .1) {
-            double Q = calcQ(bankR, instP, row, col, 1000.0 + chan * 50);
+            double Q = calcQ(bankR, detectorInfo, row, col, 1000.0 + chan * 50);
             dQ = max<double>(dQ, fabs(Q - Q0));
           }
         }
 
-        wsPtr->mutableY(wsIndex) = dataY;
-        wsPtr->mutableE(wsIndex) = dataE;
+        wsPtr->mutableY(wsIndex) = std::move(dataY);
+        wsPtr->mutableE(wsIndex) = std::move(dataE);
       }
 
     PeaksWorkspace_sptr pks(new PeaksWorkspace());
@@ -238,18 +240,17 @@ private:
    *   Calculates Q
    */
   double calcQ(RectangularDetector_const_sptr bankP,
-               boost::shared_ptr<const Instrument> instPtr, int row, int col,
+               const DetectorInfo &detectorInfo, int row, int col,
                double time) {
     boost::shared_ptr<Detector> detP = bankP->getAtXY(col, row);
-
-    double L2 = detP->getDistance(*(instPtr->getSample()));
+    const auto detInfoIndex = detectorInfo.indexOf(detP->getID());
+    const auto L1 = detectorInfo.l1();
+    const auto L2 = detectorInfo.l2(detInfoIndex);
 
     Kernel::Units::MomentumTransfer Q;
     std::vector<double> x;
     x.push_back(time);
-    double L1 = instPtr->getSample()->getDistance(*(instPtr->getSource()));
-    Kernel::V3D pos = detP->getPos();
-    double ScatAng = fabs(asin(pos.Z() / pos.norm()));
+    const auto ScatAng = detectorInfo.twoTheta(detInfoIndex) / 180 * M_PI;
 
     Q.fromTOF(x, x, L1, L2, ScatAng, 0, 0, 0.0);
 

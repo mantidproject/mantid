@@ -1,12 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_API_LOGMANAGER_H_
 #define MANTID_API_LOGMANAGER_H_
 
 #include "MantidAPI/DllConfig.h"
-#include "MantidKernel/Cache.h"
-#include "MantidKernel/make_unique.h"
-#include "MantidKernel/PropertyManager.h"
+#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/Statistics.h"
-#include "MantidKernel/TimeSplitter.h"
+#include "MantidKernel/make_unique.h"
+#include <memory>
 #include <vector>
 
 namespace NeXus {
@@ -14,9 +19,18 @@ class File;
 }
 
 namespace Mantid {
-namespace Kernel {
-template <typename TYPE> class TimeSeriesProperty;
+namespace Types {
+namespace Core {
+class DateAndTime;
 }
+} // namespace Types
+namespace Kernel {
+template <class KEYTYPE, class VALUETYPE> class Cache;
+template <typename TYPE> class TimeSeriesProperty;
+class SplittingInterval;
+using TimeSplitterType = std::vector<SplittingInterval>;
+class PropertyManager;
+} // namespace Kernel
 
 namespace API {
 
@@ -26,47 +40,29 @@ namespace API {
 
    @author Martyn Gigg, Tessella plc
    @date 02/10/201
-
-   Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-   National Laboratory & European Spallation Source
-
-   This file is part of Mantid.
-
-   Mantid is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 3 of the License, or
-   (at your option) any later version.
-
-   Mantid is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-
-   You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-   File change history is stored at: <https://github.com/mantidproject/mantid>.
-   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_API_DLL LogManager {
 public:
+  LogManager();
+  LogManager(const LogManager &other);
   /// Destructor. Doesn't need to be virtual as long as nothing inherits from
   /// this class.
-  virtual ~LogManager() = default;
+  virtual ~LogManager();
+  LogManager &operator=(const LogManager &other);
 
   //-------------------------------------------------------------
   /// Set the run start and end
-  void setStartAndEndTime(const Kernel::DateAndTime &start,
-                          const Kernel::DateAndTime &end);
+  void setStartAndEndTime(const Types::Core::DateAndTime &start,
+                          const Types::Core::DateAndTime &end);
   /// Return the run start time
-  const Kernel::DateAndTime startTime() const;
+  const Types::Core::DateAndTime startTime() const;
   /// Return the run end time
-  const Kernel::DateAndTime endTime() const;
+  const Types::Core::DateAndTime endTime() const;
   //-------------------------------------------------------------
 
   /// Filter the logs by time
-  virtual void filterByTime(const Kernel::DateAndTime start,
-                            const Kernel::DateAndTime stop);
+  virtual void filterByTime(const Types::Core::DateAndTime start,
+                            const Types::Core::DateAndTime stop);
   /// Split the logs based on the given intervals
   virtual void splitByTime(Kernel::TimeSplitterType &splitter,
                            std::vector<LogManager *> outputs) const;
@@ -97,13 +93,8 @@ public:
   bool hasProperty(const std::string &name) const;
   /// Remove a named property
   void removeProperty(const std::string &name, bool delProperty = true);
-  /**
-   * Return all of the current properties
-   * @returns A vector of the current list of properties
-   */
-  inline const std::vector<Kernel::Property *> &getProperties() const {
-    return m_manager.getProperties();
-  }
+  const std::vector<Kernel::Property *> &getProperties() const;
+
   /// Returns a property as a time series property. It will throw if it is not
   /// valid
   template <typename T>
@@ -187,23 +178,25 @@ public:
   void clearLogs();
 
 protected:
+  /// Load the run from a NeXus file with a given group name
+  void loadNexus(::NeXus::File *file,
+                 const std::map<std::string, std::string> &entries);
   /// A pointer to a property manager
-  Kernel::PropertyManager m_manager;
+  std::unique_ptr<Kernel::PropertyManager> m_manager;
   /// Name of the log entry containing the proton charge when retrieved using
   /// getProtonCharge
   static const char *PROTON_CHARGE_LOG_NAME;
 
 private:
-  /// Cache type for single value logs
-  typedef Kernel::Cache<std::pair<std::string, Kernel::Math::StatisticType>,
-                        double> SingleValueCache;
   /// Cache for the retrieved single values
-  mutable SingleValueCache m_singleValueCache;
+  std::unique_ptr<Kernel::Cache<
+      std::pair<std::string, Kernel::Math::StatisticType>, double>>
+      m_singleValueCache;
 };
 /// shared pointer to the logManager base class
-typedef boost::shared_ptr<LogManager> LogManager_sptr;
+using LogManager_sptr = boost::shared_ptr<LogManager>;
 /// shared pointer to the logManager base class (const version)
-typedef boost::shared_ptr<const LogManager> LogManager_const_sptr;
+using LogManager_const_sptr = boost::shared_ptr<const LogManager>;
 
 /**
  * Add a property of a specified type (Simply creates a Kernel::Property of that
@@ -237,7 +230,7 @@ void LogManager::addProperty(const std::string &name, const TYPE &value,
   newProp->setUnits(units);
   addProperty(std::move(newProp), overwrite);
 }
-}
-}
+} // namespace API
+} // namespace Mantid
 
 #endif // MANTID_API_LOGMANAGER_H_

@@ -9,6 +9,7 @@ set ( SRC_FILES
 	src/AlgorithmProperty.cpp
 	src/AlgorithmProxy.cpp
 	src/AnalysisDataService.cpp
+	src/AnalysisDataServiceObserver.cpp
 	src/ArchiveSearchFactory.cpp
 	src/Axis.cpp
 	src/BinEdgeAxis.cpp
@@ -27,6 +28,8 @@ set ( SRC_FILES
 	src/CostFunctionFactory.cpp
 	src/DataProcessorAlgorithm.cpp
 	src/DeprecatedAlgorithm.cpp
+	src/DetectorSearcher.cpp
+	src/DistributedAlgorithm.cpp
 	src/DomainCreatorFactory.cpp
 	src/EnabledWhenWorkspaceIsType.cpp
 	src/EqualBinSizesValidator.cpp
@@ -43,12 +46,14 @@ set ( SRC_FILES
 	src/FunctionDomainGeneral.cpp
 	src/FunctionDomainMD.cpp
 	src/FunctionFactory.cpp
+	src/FunctionGenerator.cpp
 	src/FunctionParameterDecorator.cpp
 	src/FunctionProperty.cpp
 	src/FunctionValues.cpp
 	src/GridDomain.cpp
 	src/GridDomain1D.cpp
 	src/GroupingLoader.cpp
+	src/HistoWorkspace.cpp
 	src/HistogramValidator.cpp
 	src/HistoryItem.cpp
 	src/HistoryView.cpp
@@ -63,7 +68,6 @@ set ( SRC_FILES
 	src/IFunctionMD.cpp
 	src/IFunctionMW.cpp
 	src/ILatticeFunction.cpp
-	src/ILiveListener.cpp
 	src/IMDEventWorkspace.cpp
 	src/IMDHistoWorkspace.cpp
 	src/IMDIterator.cpp
@@ -80,14 +84,19 @@ set ( SRC_FILES
 	src/ImplicitFunctionParameterParserFactory.cpp
 	src/ImplicitFunctionParserFactory.cpp
 	src/IncreasingAxisValidator.cpp
+	src/IndexProperty.cpp
+	src/IndexTypeProperty.cpp
 	src/InstrumentDataService.cpp
 	src/InstrumentValidator.cpp
 	src/JointDomain.cpp
 	src/LatticeDomain.cpp
 	src/LinearScale.cpp
+	src/LiveListener.cpp
 	src/LiveListenerFactory.cpp
+	src/LogFilterGenerator.cpp
 	src/LogManager.cpp
 	src/LogarithmScale.cpp
+	src/MDFrameValidator.cpp
 	src/MDGeometry.cpp
 	src/MatrixWorkspace.cpp
 	src/MatrixWorkspaceMDIterator.cpp
@@ -103,15 +112,19 @@ set ( SRC_FILES
 	src/NullCoordTransform.cpp
 	src/NumericAxis.cpp
 	src/NumericAxisValidator.cpp
+	src/OrientedLatticeValidator.cpp
+	src/ParallelAlgorithm.cpp
 	src/ParamFunction.cpp
 	src/ParameterReference.cpp
 	src/ParameterTie.cpp
 	src/PeakFunctionIntegrator.cpp
 	src/Progress.cpp
 	src/Projection.cpp
+	src/PropertyWithValue.cpp
 	src/RawCountValidator.cpp
 	src/RefAxis.cpp
 	src/RemoteJobManagerFactory.cpp
+	src/ResizeRectangularDetectorHelper.cpp
 	src/Run.cpp
 	src/Sample.cpp
 	src/SampleShapeValidator.cpp
@@ -120,6 +133,8 @@ set ( SRC_FILES
 	src/ScriptBuilder.cpp
 	src/ScriptRepository.cpp
 	src/ScriptRepositoryFactory.cpp
+	src/SerialAlgorithm.cpp
+	src/SingleCountValidator.cpp
 	src/SpectraAxis.cpp
 	src/SpectraAxisValidator.cpp
 	src/SpectrumDetectorMapping.cpp
@@ -130,7 +145,10 @@ set ( SRC_FILES
 	src/Workspace.cpp
 	src/WorkspaceFactory.cpp
 	src/WorkspaceGroup.cpp
+	src/WorkspaceHasDxValidator.cpp
 	src/WorkspaceHistory.cpp
+	src/WorkspaceNearestNeighbourInfo.cpp
+	src/WorkspaceNearestNeighbours.cpp
 	src/WorkspaceOpOverloads.cpp
 	src/WorkspaceProperty.cpp
 	src/WorkspaceUnitValidator.cpp
@@ -149,6 +167,7 @@ set ( INC_FILES
 	#	inc/MantidAPI/BoxCtrlChangesInterface.h
 	inc/MantidAPI/ADSValidator.h
 	inc/MantidAPI/Algorithm.h
+	inc/MantidAPI/Algorithm.tcc
 	inc/MantidAPI/AlgorithmFactory.h
 	inc/MantidAPI/AlgorithmHasProperty.h
 	inc/MantidAPI/AlgorithmHistory.h
@@ -157,6 +176,7 @@ set ( INC_FILES
 	inc/MantidAPI/AlgorithmProperty.h
 	inc/MantidAPI/AlgorithmProxy.h
 	inc/MantidAPI/AnalysisDataService.h
+	inc/MantidAPI/AnalysisDataServiceObserver.h
 	inc/MantidAPI/ArchiveSearchFactory.h
 	inc/MantidAPI/Axis.h
 	inc/MantidAPI/BinEdgeAxis.h
@@ -178,6 +198,8 @@ set ( INC_FILES
 	inc/MantidAPI/DataProcessorAlgorithm.h
 	inc/MantidAPI/DeclareUserAlg.h
 	inc/MantidAPI/DeprecatedAlgorithm.h
+	inc/MantidAPI/DetectorSearcher.h
+	inc/MantidAPI/DistributedAlgorithm.h
 	inc/MantidAPI/DllConfig.h
 	inc/MantidAPI/DomainCreatorFactory.h
 	inc/MantidAPI/EnabledWhenWorkspaceIsType.h
@@ -196,12 +218,14 @@ set ( INC_FILES
 	inc/MantidAPI/FunctionDomainGeneral.h
 	inc/MantidAPI/FunctionDomainMD.h
 	inc/MantidAPI/FunctionFactory.h
+	inc/MantidAPI/FunctionGenerator.h
 	inc/MantidAPI/FunctionParameterDecorator.h
 	inc/MantidAPI/FunctionProperty.h
 	inc/MantidAPI/FunctionValues.h
 	inc/MantidAPI/GridDomain.h
 	inc/MantidAPI/GridDomain1D.h
 	inc/MantidAPI/GroupingLoader.h
+	inc/MantidAPI/HistoWorkspace.h
 	inc/MantidAPI/HistogramValidator.h
 	inc/MantidAPI/HistoryItem.h
 	inc/MantidAPI/HistoryView.h
@@ -259,15 +283,20 @@ set ( INC_FILES
 	inc/MantidAPI/ImplicitFunctionParser.h
 	inc/MantidAPI/ImplicitFunctionParserFactory.h
 	inc/MantidAPI/IncreasingAxisValidator.h
+	inc/MantidAPI/IndexProperty.h
+	inc/MantidAPI/IndexTypeProperty.h
 	inc/MantidAPI/InstrumentDataService.h
 	inc/MantidAPI/InstrumentValidator.h
 	inc/MantidAPI/Jacobian.h
 	inc/MantidAPI/JointDomain.h
 	inc/MantidAPI/LatticeDomain.h
 	inc/MantidAPI/LinearScale.h
+	inc/MantidAPI/LiveListener.h
 	inc/MantidAPI/LiveListenerFactory.h
+	inc/MantidAPI/LogFilterGenerator.h
 	inc/MantidAPI/LogManager.h
 	inc/MantidAPI/LogarithmScale.h
+	inc/MantidAPI/MDFrameValidator.h
 	inc/MantidAPI/MDGeometry.h
 	inc/MantidAPI/MatrixWorkspace.h
 	inc/MantidAPI/MatrixWorkspaceMDIterator.h
@@ -285,6 +314,8 @@ set ( INC_FILES
 	inc/MantidAPI/NullCoordTransform.h
 	inc/MantidAPI/NumericAxis.h
 	inc/MantidAPI/NumericAxisValidator.h
+	inc/MantidAPI/OrientedLatticeValidator.h
+	inc/MantidAPI/ParallelAlgorithm.h
 	inc/MantidAPI/ParamFunction.h
 	inc/MantidAPI/ParameterReference.h
 	inc/MantidAPI/ParameterTie.h
@@ -294,6 +325,7 @@ set ( INC_FILES
 	inc/MantidAPI/RawCountValidator.h
 	inc/MantidAPI/RefAxis.h
 	inc/MantidAPI/RemoteJobManagerFactory.h
+	inc/MantidAPI/ResizeRectangularDetectorHelper.h
 	inc/MantidAPI/Run.h
 	inc/MantidAPI/Sample.h
 	inc/MantidAPI/SampleShapeValidator.h
@@ -302,12 +334,16 @@ set ( INC_FILES
 	inc/MantidAPI/ScriptBuilder.h
 	inc/MantidAPI/ScriptRepository.h
 	inc/MantidAPI/ScriptRepositoryFactory.h
+	inc/MantidAPI/SerialAlgorithm.h
+	inc/MantidAPI/SingleCountValidator.h
 	inc/MantidAPI/SingleValueParameter.h
 	inc/MantidAPI/SingleValueParameterParser.h
 	inc/MantidAPI/SpectraAxis.h
 	inc/MantidAPI/SpectraAxisValidator.h
 	inc/MantidAPI/SpectrumDetectorMapping.h
 	inc/MantidAPI/SpectrumInfo.h
+	inc/MantidAPI/SpectrumInfoItem.h
+	inc/MantidAPI/SpectrumInfoIterator.h
 	inc/MantidAPI/TableRow.h
 	inc/MantidAPI/TextAxis.h
 	inc/MantidAPI/TransformScaleFactory.h
@@ -317,9 +353,13 @@ set ( INC_FILES
 	inc/MantidAPI/WorkspaceFactory.h
 	inc/MantidAPI/WorkspaceGroup.h
 	inc/MantidAPI/WorkspaceGroup_fwd.h
+	inc/MantidAPI/WorkspaceHasDxValidator.h
 	inc/MantidAPI/WorkspaceHistory.h
+	inc/MantidAPI/WorkspaceNearestNeighbourInfo.h
+	inc/MantidAPI/WorkspaceNearestNeighbours.h
 	inc/MantidAPI/WorkspaceOpOverloads.h
 	inc/MantidAPI/WorkspaceProperty.h
+	inc/MantidAPI/WorkspaceProperty.tcc
 	inc/MantidAPI/WorkspaceUnitValidator.h
 	inc/MantidAPI/Workspace_fwd.h
 )
@@ -330,11 +370,13 @@ set ( TEST_FILES
 	AlgorithmFactoryTest.h
 	AlgorithmHasPropertyTest.h
 	AlgorithmHistoryTest.h
+	AlgorithmMPITest.h
 	AlgorithmManagerTest.h
 	AlgorithmPropertyTest.h
 	AlgorithmProxyTest.h
 	AlgorithmTest.h
 	AnalysisDataServiceTest.h
+	AnalysisDataServiceObserverTest.h
 	AsynchronousTest.h
 	BinEdgeAxisTest.h
 	BoxControllerTest.h
@@ -343,6 +385,8 @@ set ( TEST_FILES
 	CoordTransformTest.h
 	CostFunctionFactoryTest.h
 	DataProcessorAlgorithmTest.h
+	DetectorInfoTest.h
+	DetectorSearcherTest.h
 	EnabledWhenWorkspaceIsTypeTest.h
 	EqualBinSizesValidatorTest.h
 	ExperimentInfoTest.h
@@ -369,19 +413,24 @@ set ( TEST_FILES
 	IFunction1DSpectrumTest.h
 	IFunction1DTest.h
 	IFunctionMDTest.h
+	IFunctionTest.h
 	ILatticeFunctionTest.h
-	ILiveListenerTest.h
 	IMDWorkspaceTest.h
 	ISpectrumTest.h
 	IkedaCarpenterModeratorTest.h
 	ImmutableCompositeFunctionTest.h
 	ImplicitFunctionParserFactoryTest.h
 	IncreasingAxisValidatorTest.h
+	IndexPropertyTest.h
+	IndexTypePropertyTest.h
 	InstrumentDataServiceTest.h
 	InstrumentValidatorTest.h
 	LatticeDomainTest.h
 	LiveListenerFactoryTest.h
+	LiveListenerTest.h
+	LogFilterGeneratorTest.h
 	LogManagerTest.h
+	MDFrameValidatorTest.h
 	MDGeometryTest.h
 	MatrixWorkspaceMDIteratorTest.h
 	ModeratorModelTest.h
@@ -395,19 +444,23 @@ set ( TEST_FILES
 	NotebookWriterTest.h
 	NumericAxisTest.h
 	NumericAxisValidatorTest.h
+	OrientedLatticeValidatorTest.h
 	ParamFunctionAttributeHolderTest.h
 	ParameterReferenceTest.h
 	ParameterTieTest.h
 	PeakFunctionIntegratorTest.h
+	ProgressTest.h
 	ProjectionTest.h
 	RawCountValidatorTest.h
 	RemoteJobManagerFactoryTest.h
+	ResizeRectangularDetectorHelperTest.h
 	RunTest.h
 	SampleShapeValidatorTest.h
 	SampleTest.h
 	SampleValidatorTest.h
 	ScopedWorkspaceTest.h
 	ScriptBuilderTest.h
+	SingleCountValidatorTest.h
 	SpectraAxisTest.h
 	SpectraAxisValidatorTest.h
 	SpectrumDetectorMappingTest.h
@@ -417,8 +470,11 @@ set ( TEST_FILES
 	VectorParameterTest.h
 	WorkspaceFactoryTest.h
 	WorkspaceGroupTest.h
+	WorkspaceHasDxValidatorTest.h
 	WorkspaceHistoryIOTest.h
 	WorkspaceHistoryTest.h
+	WorkspaceNearestNeighbourInfoTest.h
+	WorkspaceNearestNeighboursTest.h
 	WorkspaceOpOverloadsTest.h
 	WorkspacePropertyTest.h
 	WorkspaceUnitValidatorTest.h
@@ -441,9 +497,10 @@ if(UNITY_BUILD)
   enable_unity_build(API SRC_FILES SRC_UNITY_IGNORE_FILES 10)
 endif(UNITY_BUILD)
 
-# Have to link to winsock library on Windows
+# Have to link to winsock and bcrypt library on Windows
 if ( WIN32 )
   set ( WINSOCK ws2_32 )
+  set ( BCRYPT bcrypt )
 endif ()
 
 # Add a precompiled header where they are supported
@@ -455,13 +512,15 @@ set_target_properties ( API PROPERTIES OUTPUT_NAME MantidAPI
                                        COMPILE_DEFINITIONS IN_MANTID_API )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties ( API PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+  set_target_properties(API PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+elseif ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
+  set_target_properties(API PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
 endif ()
 
 # Add to the 'Framework' group in VS
 set_property ( TARGET API PROPERTY FOLDER "MantidFramework" )
 
-target_link_libraries ( API LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${JSONCPP_LIBRARIES} ${MANTIDLIBS} ${GSL_LIBRARIES} ${NEXUS_LIBRARIES} ${WINSOCK} )
+target_link_libraries ( API LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${JSONCPP_LIBRARIES} ${MANTIDLIBS} ${GSL_LIBRARIES} ${NEXUS_LIBRARIES} ${WINSOCK} ${BCRYPT})
 
 # Add the unit tests directory
 add_subdirectory ( test )
@@ -470,4 +529,4 @@ add_subdirectory ( test )
 # Installation settings
 ###########################################################################
 
-install ( TARGETS API ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )
+mtd_install_targets( TARGETS API INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})

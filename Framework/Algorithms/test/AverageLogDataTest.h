@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_AverageLogDATATEST_H_
 #define MANTID_ALGORITHMS_AverageLogDATATEST_H_
 
@@ -113,8 +119,8 @@ private:
   void makeWS(double shift) {
     inputWS = "AverageLogDataTestWS";
     Mantid::DataObjects::Workspace2D_sptr w =
-        WorkspaceCreationHelper::Create2DWorkspace(1, 1);
-    Mantid::Kernel::DateAndTime run_start("2010-01-01T00:00:00");
+        WorkspaceCreationHelper::create2DWorkspace(1, 1);
+    Mantid::Types::Core::DateAndTime run_start("2010-01-01T00:00:00");
     Mantid::Kernel::TimeSeriesProperty<double> *pc, *p1;
     pc = new Mantid::Kernel::TimeSeriesProperty<double>("proton_charge");
     pc->setUnits("picoCoulomb");

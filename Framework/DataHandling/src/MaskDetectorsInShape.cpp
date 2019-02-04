@@ -1,9 +1,14 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/MaskDetectorsInShape.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/MandatoryValidator.h"
 
@@ -22,9 +27,10 @@ void MaskDetectorsInShape::init() {
   declareProperty("ShapeXML", "",
                   boost::make_shared<MandatoryValidator<std::string>>(),
                   "The XML definition of the user defined shape.");
-  declareProperty("IncludeMonitors", false, "Whether to include monitors if "
-                                            "they are contained in the shape "
-                                            "(default false)");
+  declareProperty("IncludeMonitors", false,
+                  "Whether to include monitors if "
+                  "they are contained in the shape "
+                  "(default false)");
 }
 
 void MaskDetectorsInShape::exec() {
@@ -70,19 +76,14 @@ std::vector<int> MaskDetectorsInShape::runFindDetectorsInShape(
 }
 
 void MaskDetectorsInShape::runMaskDetectors(
-    API::MatrixWorkspace_sptr workspace, const std::vector<int> detectorIds) {
-  IAlgorithm_sptr alg = createChildAlgorithm("MaskDetectors", 0.85, 1.0);
-  alg->setProperty<std::vector<int>>("DetectorList", detectorIds);
-  alg->setProperty<MatrixWorkspace_sptr>("Workspace", workspace);
-  try {
-    if (!alg->execute()) {
-      throw std::runtime_error(
-          "MaskDetectors Child Algorithm has not executed successfully\n");
-    }
-  } catch (std::runtime_error &) {
-    g_log.error("Unable to successfully execute MaskDetectors Child Algorithm");
-    throw;
-  }
+    API::MatrixWorkspace_sptr workspace, const std::vector<int> &detectorIds) {
+  auto &detectorInfo = workspace->mutableDetectorInfo();
+  for (const auto &id : detectorIds)
+    detectorInfo.setMasked(detectorInfo.indexOf(id), true);
+  const auto &spectrumInfo = workspace->spectrumInfo();
+  for (size_t i = 0; i < spectrumInfo.size(); ++i)
+    if (spectrumInfo.hasDetectors(i) && spectrumInfo.isMasked(i))
+      workspace->getSpectrum(i).clearData();
   progress(1);
 }
 

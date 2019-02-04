@@ -27,15 +27,15 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#include <iostream>
 #include <QApplication>
 #include <QBitmap>
-#include <QFontDatabase>
-#include <QSplashScreen>
-#include <QMessageBox>
 #include <QDir>
+#include <QFontDatabase>
+#include <QMessageBox>
+#include <QSplashScreen>
 #include <QThread>
 #include <QTimer>
+#include <iostream>
 
 #include "ApplicationWindow.h"
 #include "MantidKernel/Logger.h"
@@ -114,7 +114,7 @@ scripts.
   %Note about modularization: this is mainly about internal reorganizations.
   Most of the current features should remain part of the main executable, but
 use interfaces similar or
-  identical to those used by plug-ins. This should ease maintanance and make
+  identical to those used by plug-ins. This should ease maintenance and make
 adding new features
   to the core application a no-brainer once they're available as plug-ins.
   Support for Python, liborigin and zlib could be real, external plug-ins since
@@ -153,23 +153,12 @@ only one class per file, with the exception of
 the indentation depth for him/herself.
 */
 
-#if defined(_MSC_VER)
-// MantidPlot embeds a Python interpreter which depends on MSVCRT90.dll.
-// Extension modules
-// can also depend on the same runtime but it exists in the SxS system folder.
-// Even though
-// Python27.dll loads the runtime correctly there is an issue that extension
-// modules
-// using ctypes.cdll.LoadLibrary don't consult the SxS registry and fail to load
-// the correct
-// runtime library. See for example zmq.
-// For more information see https://bugs.python.org/issue24429
-#pragma comment(                                                               \
-    linker,                                                                    \
-    "\"/manifestdependency:type='win32' name='Microsoft.VC90.CRT' version='9.0.21022.8' processorArchitecture='amd64' publicKeyToken='1fc8b3b9a1e18e3b'\"")
-#endif
-
 int main(int argc, char **argv) {
+  // Force the qtpy package to use the PyQt4 bindings. QtPy < v1.4 does not
+  // check whether a particular binding is imported and selects PyQt5 by default
+  // causing MantidPlot to segfault.
+  qputenv("QT_API", "pyqt");
+
   // First, look for command-line arguments that we want to deal with before
   // launching anything
   if (argc == 2) {
@@ -189,7 +178,7 @@ int main(int argc, char **argv) {
       ApplicationWindow::about();
       exit(0);
     } else if (str == "-h" || str == "--help") {
-      QString s = "\nUsage: ";
+      std::string s = "\nUsage: ";
       s += "MantidPlot [options] [filename]\n\n";
       s += "Valid options are:\n";
       s += "-a or --about: show about dialog and exit\n";
@@ -204,7 +193,7 @@ int main(int argc, char **argv) {
            "and then exit MantidPlot\n\n";
       s += "'filename' can be any of .qti, qti.gz, .opj, .ogm, .ogw, .ogg, .py "
            "or ASCII file\n\n";
-      std::wcout << s.toStdWString();
+      std::cout << s;
 
       exit(0);
     }
@@ -240,6 +229,9 @@ int main(int argc, char **argv) {
     ApplicationWindow *mw = new ApplicationWindow(factorySettings, args);
     mw->restoreApplicationGeometry();
     mw->parseCommandLineArguments(args);
+    QObject::connect(&app, SIGNAL(runAsPythonScript(const QString &)), mw,
+                     SLOT(runPythonScript(const QString &)),
+                     Qt::DirectConnection);
     app.processEvents();
 
     // register a couple of fonts
@@ -255,13 +247,14 @@ int main(int argc, char **argv) {
     return app.exec();
   } catch (std::exception &e) {
     QMessageBox::critical(
-        0, "Mantid - Error",
+        nullptr, "Mantid - Error",
         QString("An unhandled exception has been caught. MantidPlot will have "
                 "to close. Details:\n\n") +
             e.what());
   } catch (...) {
-    QMessageBox::critical(0, "Mantid - Error", "An unhandled exception has "
-                                               "been caught. MantidPlot will "
-                                               "have to close.");
+    QMessageBox::critical(nullptr, "Mantid - Error",
+                          "An unhandled exception has "
+                          "been caught. MantidPlot will "
+                          "have to close.");
   }
 }

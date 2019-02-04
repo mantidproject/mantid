@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MONTECARLOABSORPTIONTEST_H_
 #define MONTECARLOABSORPTIONTEST_H_
 
@@ -28,12 +34,51 @@ struct TestWorkspaceDescriptor {
   double beamHeight;
 };
 
-Mantid::API::MatrixWorkspace_sptr
-setUpWS(const TestWorkspaceDescriptor &wsProps) {
+void addSample(Mantid::API::MatrixWorkspace_sptr ws,
+               const Environment environment, double beamWidth = 0.,
+               double beamHeight = 0.) {
   using namespace Mantid::API;
   using namespace Mantid::Geometry;
   using namespace Mantid::Kernel;
   namespace PhysicalConstants = Mantid::PhysicalConstants;
+
+  // Define a sample shape
+  auto sampleShape =
+      ComponentCreationHelper::createSphere(0.1, V3D(), "sample-sphere");
+  // And a material assuming it's a CSG Object
+  sampleShape->setMaterial(
+      Material("Vanadium", PhysicalConstants::getNeutronAtom(23, 0), 0.072));
+  ws->mutableSample().setShape(sampleShape);
+
+  if (environment == Environment::SamplePlusContainer) {
+    const std::string id("container");
+    const double radius(0.11);
+    const double height(0.03);
+    const V3D baseCentre(0.0, -height / 2.0, 0.0);
+    const V3D axis(0.0, 1.0, 0.0);
+
+    ShapeFactory shapeMaker;
+    auto canShape =
+        shapeMaker.createShape(ComponentCreationHelper::cappedCylinderXML(
+            radius, height, baseCentre, axis, id));
+    // Set material assuming it's a CSG Object
+    canShape->setMaterial(Material(
+        "CanMaterial", PhysicalConstants::getNeutronAtom(26, 0), 0.01));
+    auto can = boost::make_shared<Container>(canShape);
+    ws->mutableSample().setEnvironment(
+        std::make_unique<SampleEnvironment>("can", can));
+  } else if (environment == Environment::UserBeamSize) {
+    auto inst = ws->getInstrument();
+    auto &pmap = ws->instrumentParameters();
+    auto source = inst->getSource();
+    pmap.addDouble(source->getComponentID(), "beam-width", beamWidth);
+    pmap.addDouble(source->getComponentID(), "beam-height", beamHeight);
+  }
+}
+
+Mantid::API::MatrixWorkspace_sptr
+setUpWS(const TestWorkspaceDescriptor &wsProps) {
+  using namespace Mantid::Kernel;
 
   auto space = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
       wsProps.nspectra, wsProps.nbins);
@@ -51,37 +96,12 @@ setUpWS(const TestWorkspaceDescriptor &wsProps) {
     pmap.addString(inst.get(), "deltaE-mode", "Indirect");
     pmap.addDouble(inst.get(), "Efixed", efixed);
   }
-  // Define a sample shape
-  Object_sptr sampleShape =
-      ComponentCreationHelper::createSphere(0.1, V3D(), "sample-sphere");
-  // And a material
-  sampleShape->setMaterial(
-      Material("Vanadium", PhysicalConstants::getNeutronAtom(23, 0), 0.072));
-  space->mutableSample().setShape(*sampleShape);
 
-  if (wsProps.sampleEnviron == Environment::SamplePlusContainer) {
-    const std::string id("container");
-    const double radius(0.11);
-    const double height(0.03);
-    const V3D baseCentre(0.0, -height / 2.0, 0.0);
-    const V3D axis(0.0, 1.0, 0.0);
-
-    ShapeFactory shapeMaker;
-    auto can = shapeMaker.createShape<Container>(
-        ComponentCreationHelper::cappedCylinderXML(radius, height, baseCentre,
-                                                   axis, id));
-    can->setMaterial(Material("CanMaterial",
-                              PhysicalConstants::getNeutronAtom(26, 0), 0.01));
-    SampleEnvironment *env = new SampleEnvironment("can", can);
-    space->mutableSample().setEnvironment(env);
-  } else if (wsProps.sampleEnviron == Environment::UserBeamSize) {
-    auto source = inst->getSource();
-    pmap.addDouble(source->getComponentID(), "beam-width", wsProps.beamWidth);
-    pmap.addDouble(source->getComponentID(), "beam-height", wsProps.beamHeight);
-  }
+  addSample(space, wsProps.sampleEnviron, wsProps.beamWidth,
+            wsProps.beamHeight);
   return space;
 }
-}
+} // namespace
 
 class MonteCarloAbsorptionTest : public CxxTest::TestSuite {
 public:
@@ -90,83 +110,116 @@ public:
   //---------------------------------------------------------------------------
   void test_Workspace_With_Just_Sample_For_Elastic() {
     using Mantid::Kernel::DeltaEMode;
-    TestWorkspaceDescriptor wsProps = {5, 10, Environment::SampleOnly,
-                                       DeltaEMode::Elastic, -1, -1};
+    TestWorkspaceDescriptor wsProps = {
+        5, 10, Environment::SampleOnly, DeltaEMode::Elastic, -1, -1};
     auto outputWS = runAlgorithm(wsProps);
 
     verifyDimensions(wsProps, outputWS);
     const double delta(1e-05);
     const size_t middle_index(4);
 
-    TS_ASSERT_DELTA(0.019012, outputWS->y(0).front(), delta);
-    TS_ASSERT_DELTA(0.0021002, outputWS->y(0)[middle_index], delta);
-    TS_ASSERT_DELTA(0.00010066, outputWS->y(0).back(), delta);
-    TS_ASSERT_DELTA(0.019074, outputWS->y(2).front(), delta);
-    TS_ASSERT_DELTA(0.001629, outputWS->y(2)[middle_index], delta);
-    TS_ASSERT_DELTA(9.4268e-05, outputWS->y(2).back(), delta);
-    TS_ASSERT_DELTA(0.019256, outputWS->y(4).front(), delta);
-    TS_ASSERT_DELTA(0.0014369, outputWS->y(4)[middle_index], delta);
-    TS_ASSERT_DELTA(9.8238e-05, outputWS->y(4).back(), delta);
+    TS_ASSERT_DELTA(0.006335, outputWS->y(0).front(), delta);
+    TS_ASSERT_DELTA(0.000092, outputWS->y(0)[middle_index], delta);
+    TS_ASSERT_DELTA(0.000029, outputWS->y(0).back(), delta);
+    TS_ASSERT_DELTA(0.006265, outputWS->y(2).front(), delta);
+    TS_ASSERT_DELTA(0.000137, outputWS->y(2)[middle_index], delta);
+    TS_ASSERT_DELTA(0.000031, outputWS->y(2).back(), delta);
+    TS_ASSERT_DELTA(0.006294, outputWS->y(4).front(), delta);
+    TS_ASSERT_DELTA(0.000230, outputWS->y(4)[middle_index], delta);
+    TS_ASSERT_DELTA(0.000035, outputWS->y(4).back(), delta);
   }
 
   void test_Workspace_With_Just_Sample_For_Direct() {
     using Mantid::Kernel::DeltaEMode;
-    TestWorkspaceDescriptor wsProps = {1, 10, Environment::SampleOnly,
-                                       DeltaEMode::Direct, -1, -1};
+    TestWorkspaceDescriptor wsProps = {
+        1, 10, Environment::SampleOnly, DeltaEMode::Direct, -1, -1};
     auto outputWS = runAlgorithm(wsProps);
 
     verifyDimensions(wsProps, outputWS);
     const double delta(1e-05);
     const size_t middle_index(4);
 
-    TS_ASSERT_DELTA(0.0087756, outputWS->y(0).front(), delta);
-    TS_ASSERT_DELTA(0.0031353, outputWS->y(0)[middle_index], delta);
-    TS_ASSERT_DELTA(0.00087368, outputWS->y(0).back(), delta);
+    TS_ASSERT_DELTA(0.002188, outputWS->y(0).front(), delta);
+    TS_ASSERT_DELTA(0.000131, outputWS->y(0)[middle_index], delta);
+    TS_ASSERT_DELTA(0.000276, outputWS->y(0).back(), delta);
   }
 
   void test_Workspace_With_Just_Sample_For_Indirect() {
     using Mantid::Kernel::DeltaEMode;
-    TestWorkspaceDescriptor wsProps = {1, 10, Environment::SampleOnly,
-                                       DeltaEMode::Indirect, -1, -1};
+    TestWorkspaceDescriptor wsProps = {
+        1, 10, Environment::SampleOnly, DeltaEMode::Indirect, -1, -1};
     auto outputWS = runAlgorithm(wsProps);
 
     verifyDimensions(wsProps, outputWS);
     const double delta(1e-05);
     const size_t middle_index(4);
 
-    TS_ASSERT_DELTA(0.0038337, outputWS->y(0).front(), delta);
-    TS_ASSERT_DELTA(0.0013434, outputWS->y(0)[middle_index], delta);
-    TS_ASSERT_DELTA(0.00019552, outputWS->y(0).back(), delta);
+    TS_ASSERT_DELTA(0.001107, outputWS->y(0).front(), delta);
+    TS_ASSERT_DELTA(0.000023, outputWS->y(0)[middle_index], delta);
+    TS_ASSERT_DELTA(0.000051, outputWS->y(0).back(), delta);
   }
 
   void test_Workspace_With_Sample_And_Container() {
     using Mantid::Kernel::DeltaEMode;
-    TestWorkspaceDescriptor wsProps = {1, 10, Environment::SamplePlusContainer,
-                                       DeltaEMode::Elastic, -1, -1};
+    TestWorkspaceDescriptor wsProps = {
+        1, 10, Environment::SamplePlusContainer, DeltaEMode::Elastic, -1, -1};
     auto outputWS = runAlgorithm(wsProps);
 
     verifyDimensions(wsProps, outputWS);
     const double delta(1e-05);
     const size_t middle_index(4);
 
-    TS_ASSERT_DELTA(0.016547, outputWS->y(0).front(), delta);
-    TS_ASSERT_DELTA(0.0022329, outputWS->y(0)[middle_index], delta);
-    TS_ASSERT_DELTA(0.00024214, outputWS->y(0).back(), delta);
+    TS_ASSERT_DELTA(0.003521, outputWS->y(0).front(), delta);
+    TS_ASSERT_DELTA(0.000225, outputWS->y(0)[middle_index], delta);
+    TS_ASSERT_DELTA(0.000018, outputWS->y(0).back(), delta);
   }
 
   void test_Workspace_Beam_Size_Set() {
     using Mantid::Kernel::DeltaEMode;
-    TestWorkspaceDescriptor wsProps = {1, 10, Environment::UserBeamSize,
-                                       DeltaEMode::Elastic, 0.18, 0.15};
+    TestWorkspaceDescriptor wsProps = {
+        1, 10, Environment::UserBeamSize, DeltaEMode::Elastic, 0.18, 0.15};
     auto outputWS = runAlgorithm(wsProps);
 
     verifyDimensions(wsProps, outputWS);
     const double delta(1e-05);
     const size_t middle_index(4);
+    TS_ASSERT_DELTA(0.002546, outputWS->y(0).front(), delta);
+    const double delta2(1e-08);
+    TS_ASSERT_DELTA(0.0000005359, outputWS->y(0)[middle_index], delta2);
+    TS_ASSERT_DELTA(0.0000046103, outputWS->y(0).back(), delta2);
+  }
 
-    TS_ASSERT_DELTA(0.0045478, outputWS->y(0).front(), delta);
-    TS_ASSERT_DELTA(0.00036224, outputWS->y(0)[middle_index], delta);
-    TS_ASSERT_DELTA(6.5735e-05, outputWS->y(0).back(), delta);
+  void test_Linear_Interpolation() {
+    using Mantid::Kernel::DeltaEMode;
+    TestWorkspaceDescriptor wsProps = {
+        1, 10, Environment::SampleOnly, DeltaEMode::Elastic, -1, -1};
+    const int nlambda(5);
+    const std::string interpolation("Linear");
+    auto outputWS = runAlgorithm(wsProps, nlambda, interpolation);
+
+    verifyDimensions(wsProps, outputWS);
+    const double delta(1e-05);
+    TS_ASSERT_DELTA(0.006335, outputWS->y(0).front(), delta);
+    TS_ASSERT_DELTA(0.000432, outputWS->y(0)[3], delta);
+    TS_ASSERT_DELTA(0.000321, outputWS->y(0)[4], delta);
+    TS_ASSERT_DELTA(0.000438, outputWS->y(0).back(), delta);
+  }
+
+  void test_CSpline_Interpolation() {
+    using Mantid::Kernel::DeltaEMode;
+    TestWorkspaceDescriptor wsProps = {
+        1, 10, Environment::SampleOnly, DeltaEMode::Elastic, -1, -1};
+    const int nlambda(5);
+    const std::string interpolation("CSpline");
+    auto outputWS = runAlgorithm(wsProps, nlambda, interpolation);
+
+    verifyDimensions(wsProps, outputWS);
+    const double delta(1e-05);
+    TS_ASSERT_DELTA(0.006335, outputWS->y(0).front(), delta);
+    // Interpolation gives some negative value due to test setup
+    TS_ASSERT_DELTA(0.000016, outputWS->y(0)[3], delta);
+    TS_ASSERT_DELTA(0.000321, outputWS->y(0)[4], delta);
+    TS_ASSERT_DELTA(0.000438, outputWS->y(0).back(), delta);
   }
 
   //---------------------------------------------------------------------------
@@ -177,7 +230,7 @@ public:
 
     auto mcAbsorb = createAlgorithm();
     // Create a simple test workspace that has no instrument
-    auto testWS = WorkspaceCreationHelper::Create2DWorkspace(1, 1);
+    auto testWS = WorkspaceCreationHelper::create2DWorkspace(1, 1);
 
     TS_ASSERT_THROWS(mcAbsorb->setProperty("InputWorkspace", testWS),
                      std::invalid_argument);
@@ -196,12 +249,105 @@ public:
     TS_ASSERT_THROWS(mcabs->execute(), std::invalid_argument);
   }
 
+  void test_Lower_Limit_for_Number_of_Wavelengths() {
+    using Mantid::Kernel::DeltaEMode;
+    TestWorkspaceDescriptor wsProps = {
+        1, 10, Environment::SampleOnly, DeltaEMode::Direct, -1, -1};
+    int nlambda{1};
+    TS_ASSERT_THROWS(runAlgorithm(wsProps, nlambda, "Linear"),
+                     std::runtime_error)
+    nlambda = 2;
+    TS_ASSERT_THROWS(runAlgorithm(wsProps, nlambda, "CSpline"),
+                     std::runtime_error)
+  }
+
+  void test_event_workspace() {
+    auto inputWS =
+        WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(5, 2,
+                                                                        true);
+    inputWS->getAxis(0)->unit() =
+        Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
+    addSample(inputWS, Environment::SampleOnly);
+
+    auto mcabs = createAlgorithm();
+    TS_ASSERT_THROWS_NOTHING(mcabs->setProperty("InputWorkspace", inputWS));
+    TS_ASSERT(mcabs->execute());
+    // only checking that it can successfully execute
+  }
+
+  void test_Sparse_Instrument_For_Elastic() {
+    using Mantid::Kernel::DeltaEMode;
+    TestWorkspaceDescriptor wsProps = {
+        5, 10, Environment::SampleOnly, DeltaEMode::Elastic, -1, -1};
+    auto outputWS = runAlgorithm(wsProps, 5, "Linear", true, 3, 3);
+
+    verifyDimensions(wsProps, outputWS);
+    const double delta{1e-04};
+    const size_t middle_index{4};
+    TS_ASSERT_DELTA(0.003861, outputWS->y(0).front(), delta);
+    TS_ASSERT_DELTA(0.000062, outputWS->y(0)[middle_index], delta);
+    TS_ASSERT_DELTA(3.8547e-07, outputWS->y(0).back(), delta);
+    TS_ASSERT_DELTA(0.003804, outputWS->y(2).front(), delta);
+    TS_ASSERT_DELTA(3.30326e-05, outputWS->y(2)[middle_index], delta);
+    TS_ASSERT_DELTA(3.84174e-07, outputWS->y(2).back(), delta);
+    TS_ASSERT_DELTA(0.003797, outputWS->y(4).front(), delta);
+    TS_ASSERT_DELTA(0.000174, outputWS->y(4)[middle_index], delta);
+    TS_ASSERT_DELTA(4.21291e-07, outputWS->y(4).back(), delta);
+  }
+
+  void test_Sparse_Instrument_For_Direct() {
+    using Mantid::Kernel::DeltaEMode;
+    TestWorkspaceDescriptor wsProps = {
+        1, 10, Environment::SampleOnly, DeltaEMode::Direct, -1, -1};
+    auto outputWS = runAlgorithm(wsProps, 5, "Linear", true, 3, 3);
+
+    verifyDimensions(wsProps, outputWS);
+    const double delta(1e-05);
+    const size_t middle_index(4);
+
+    TS_ASSERT_DELTA(0.001065, outputWS->y(0).front(), delta);
+    TS_ASSERT_DELTA(0.000137, outputWS->y(0)[middle_index], delta);
+    const double delta2(1e-08);
+    TS_ASSERT_DELTA(0.00000167, outputWS->y(0).back(), delta2);
+  }
+
+  void test_Sparse_Instrument_For_Indirect() {
+    using Mantid::Kernel::DeltaEMode;
+    TestWorkspaceDescriptor wsProps = {
+        1, 10, Environment::SampleOnly, DeltaEMode::Indirect, -1, -1};
+    auto outputWS = runAlgorithm(wsProps, 5, "Linear", true, 3, 3);
+
+    verifyDimensions(wsProps, outputWS);
+    const double delta(1e-05);
+    const size_t middle_index(4);
+
+    TS_ASSERT_DELTA(0.000606, outputWS->y(0).front(), delta);
+    TS_ASSERT_DELTA(0.000022, outputWS->y(0)[middle_index], delta);
+    TS_ASSERT_DELTA(9.16794e-07, outputWS->y(0).back(), delta);
+  }
+
 private:
   Mantid::API::MatrixWorkspace_const_sptr
-  runAlgorithm(const TestWorkspaceDescriptor &wsProps) {
+  runAlgorithm(const TestWorkspaceDescriptor &wsProps, int nlambda = -1,
+               const std::string &interpolate = "",
+               const bool sparseInstrument = false, const int sparseRows = 2,
+               const int sparseColumns = 2) {
     auto inputWS = setUpWS(wsProps);
     auto mcabs = createAlgorithm();
     TS_ASSERT_THROWS_NOTHING(mcabs->setProperty("InputWorkspace", inputWS));
+    if (nlambda > 0) {
+      TS_ASSERT_THROWS_NOTHING(
+          mcabs->setProperty("NumberOfWavelengthPoints", nlambda));
+    }
+    if (!interpolate.empty()) {
+      TS_ASSERT_THROWS_NOTHING(
+          mcabs->setProperty("Interpolation", interpolate));
+    }
+    if (sparseInstrument) {
+      mcabs->setProperty("SparseInstrument", true);
+      mcabs->setProperty("NumberOfDetectorRows", sparseRows);
+      mcabs->setProperty("NumberOfDetectorColumns", sparseColumns);
+    }
     mcabs->execute();
     return getOutputWorkspace(mcabs);
   }
@@ -245,9 +391,9 @@ public:
   }
 
   MonteCarloAbsorptionTestPerformance() {
-    TestWorkspaceDescriptor wsProps = {10, 700, Environment::SampleOnly,
-                                       Mantid::Kernel::DeltaEMode::Elastic, -1,
-                                       -1};
+    TestWorkspaceDescriptor wsProps = {
+        10, 700, Environment::SampleOnly, Mantid::Kernel::DeltaEMode::Elastic,
+        -1, -1};
 
     inputElastic = setUpWS(wsProps);
 

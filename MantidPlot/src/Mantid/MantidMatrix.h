@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDMATRIX_H
 #define MANTIDMATRIX_H
 
@@ -9,29 +15,29 @@
 #include "MantidMatrixModel.h"
 #include "MantidMatrixTabExtension.h"
 
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidQtAPI/WorkspaceObserver.h"
 #include "../ContourLinesEditor.h"
 #include "../Graph.h"
 #include "../MdiSubWindow.h"
 #include "../UserFunction.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidQtWidgets/Common/WorkspaceObserver.h"
 
 #include <Poco/NObserver.h>
 
-#include <QHeaderView>
-#include <QTableView>
-#include <QPrinter>
-#include <QMessageBox>
 #include <QAction>
-#include <QVector>
-#include <QThread>
+#include <QHeaderView>
 #include <QMap>
+#include <QMessageBox>
 #include <QPointer>
+#include <QPrinter>
+#include <QTableView>
+#include <QThread>
+#include <QVector>
 
-#include <qwt_double_rect.h>
 #include <qwt_color_map.h>
+#include <qwt_double_rect.h>
 
 class QLabel;
 class QStackedWidget;
@@ -45,12 +51,12 @@ class UpdateDAEThread;
 class ProjectData;
 
 /**
-* Find the minimum and maximum Y values in a matrix workspace.
-*
-* @param ws :: A matrix workspace.
-* @param miny :: Variable to receive the minimum value.
-* @param maxy :: Variable to receive the maximum value.
-*/
+ * Find the minimum and maximum Y values in a matrix workspace.
+ *
+ * @param ws :: A matrix workspace.
+ * @param miny :: Variable to receive the minimum value.
+ * @param maxy :: Variable to receive the maximum value.
+ */
 void findYRange(Mantid::API::MatrixWorkspace_const_sptr ws, double &miny,
                 double &maxy);
 
@@ -59,27 +65,6 @@ workspaces.
 It has separate tabs for displaying spectrum values, bin boundaries, and errors.
 
 @author Roman Tolchenov, Tessella Support Services plc
-
-Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>.
-Code Documentation is available at: <http://doxygen.mantidproject.org>
 
 */
 class MantidMatrix : public MdiSubWindow, MantidQt::API::WorkspaceObserver {
@@ -108,6 +93,9 @@ public:
     return m_table_viewE->selectionModel();
   }
 
+  /// Get the window type as a string
+  std::string getWindowType() override { return "Workspace"; }
+
   int numRows() const { return m_rows; }
   int numCols() const { return m_cols; }
   double dataX(int row, int col) const;
@@ -126,9 +114,9 @@ public:
   Graph3D *plotGraph3D(int style);
 
   // Creates a MultiLayer graph and plots this MantidMatrix as a Spectrogram
-  MultiLayer *plotGraph2D(Graph::CurveType type);
+  MultiLayer *plotGraph2D(GraphOptions::CurveType type);
 
-  void setBinGraph(MultiLayer *ml, Table *t = 0);
+  void setBinGraph(MultiLayer *ml, Table *t = nullptr);
 
   bool setSelectedRows();
   bool setSelectedColumns();
@@ -157,12 +145,14 @@ public:
   loadFromProject(const std::string &lines, ApplicationWindow *app,
                   const int fileVersion);
   std::string saveToProject(ApplicationWindow *app) override;
+  /// Returns a list of workspace names that are used by this window
+  std::vector<std::string> getWorkspaceNames() override;
 
   /// returns the workspace name
   const std::string &getWorkspaceName();
 
   Spectrogram *plotSpectrogram(Graph *plot, ApplicationWindow *app,
-                               Graph::CurveType type, bool project,
+                               GraphOptions::CurveType type, bool project,
                                const ProjectData *const prjdata);
   /// Add a multilayer as a dependent mdi sub-window. This method is addeed to
   /// fix a crash (ticket #5732).
@@ -321,21 +311,21 @@ private:
   /// Update the existing extensions
   void updateExtensions(Mantid::API::MatrixWorkspace_sptr ws);
 
-  /// ExtensioRequest handleer
+  /// ExtensioRequest handler
   MantidMatrixExtensionRequest m_extensionRequest;
 
   friend class MantidMatrixFunction;
 };
 
 /// Typedef for a shared pointer to a MantidMatrix
-typedef QSharedPointer<MantidMatrix> MantidMatrix_sptr;
+using MantidMatrix_sptr = QSharedPointer<MantidMatrix>;
 
 class ProjectData {
 public:
   ProjectData()
       : m_grayScale(0), m_intensityChanged(0), m_contourMode(0),
         m_contourLevels(0), m_customPen(0), m_contourLabels(0),
-        m_colormapPen(0), m_ContourLinesEditor(0) {}
+        m_colormapPen(0), m_ContourLinesEditor(nullptr) {}
   ~ProjectData() {}
   bool getGrayScale() const { return m_grayScale; }
   bool getIntensity() const { return m_intensityChanged; }

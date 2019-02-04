@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/SaveFITS.h"
 
 #include "MantidAPI/FileProperty.h"
@@ -7,6 +13,7 @@
 #include "MantidKernel/make_unique.h"
 
 #include <fstream>
+#include <iomanip>
 
 #include <boost/pointer_cast.hpp>
 
@@ -43,12 +50,12 @@ const std::string SaveFITS::g_FITSHdrRefComment2 =
 // extend this if we ever want to support 64 bits pixels
 const size_t SaveFITS::g_maxBitDepth = 32;
 // this has to have int type for the validator and getProperty
-const std::vector<int> SaveFITS::g_bitDepths{8, 16,
-                                             static_cast<int>(g_maxBitDepth)};
+const std::array<int, 3> SaveFITS::g_bitDepths = {
+    {8, 16, static_cast<int>(g_maxBitDepth)}};
 const size_t SaveFITS::g_maxBytesPP = g_maxBitDepth / 8;
 
-using Mantid::Kernel::Direction;
 using Mantid::API::WorkspaceProperty;
+using Mantid::Kernel::Direction;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SaveFITS)
@@ -74,7 +81,7 @@ namespace {
 const std::string PROP_INPUT_WS = "InputWorkspace";
 const std::string PROP_FILENAME = "Filename";
 const std::string PROP_BIT_DEPTH = "BitDepth";
-}
+} // namespace
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
@@ -172,15 +179,15 @@ void SaveFITS::writeFITSImageMatrix(const API::MatrixWorkspace_sptr img,
   const size_t bytespp = static_cast<size_t>(bitDepth) / 8;
 
   for (size_t row = 0; row < sizeY; ++row) {
-    const auto &dataY = img->readY(row);
+    const auto &yData = img->y(row);
     for (size_t col = 0; col < sizeX; ++col) {
       int32_t pixelVal;
       if (8 == bitDepth) {
-        pixelVal = static_cast<uint8_t>(dataY[col]);
+        pixelVal = static_cast<uint8_t>(yData[col]);
       } else if (16 == bitDepth) {
-        pixelVal = static_cast<uint16_t>(dataY[col]);
+        pixelVal = static_cast<uint16_t>(yData[col]);
       } else if (32 == bitDepth) {
-        pixelVal = static_cast<uint32_t>(dataY[col]);
+        pixelVal = static_cast<uint32_t>(yData[col]);
       }
 
       // change endianness: to sequence of bytes in big-endian

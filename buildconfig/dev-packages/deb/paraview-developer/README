@@ -1,6 +1,0 @@
-This directory contains the structure required to build the simple paraview-developer debian file.
-
-To build the package:
-   * Switch to the directory containing this file
-   * Run "dpkg --build paraview-developer-1.0"
-   * A file called paraview-developer-1.0.deb will appear in the current directory.

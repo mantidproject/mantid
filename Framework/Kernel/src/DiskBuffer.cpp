@@ -1,5 +1,13 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/DiskBuffer.h"
+#include "MantidKernel/ISaveable.h"
 #include <sstream>
+#include <utility>
 
 using namespace Mantid::Kernel;
 
@@ -365,7 +373,7 @@ void DiskBuffer::setFreeSpaceVector(std::vector<uint64_t> &free) {
     throw std::length_error("Free vector size is not a factor of 2.");
 
   for (auto it = free.begin(); it != free.end(); it += 2) {
-    auto it_next = boost::next(it);
+    auto it_next = std::next(it);
 
     if (*it == 0 && *it_next == 0) {
       continue; // Not really a free space block!
@@ -384,5 +392,5 @@ std::string DiskBuffer::getMemoryStr() const {
   return mess.str();
 }
 
-} // namespace Mantid
 } // namespace Kernel
+} // namespace Mantid

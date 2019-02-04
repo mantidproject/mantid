@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -17,10 +17,11 @@ is then searched for patterns consistent with the presence of a peak.
 The list of candidate peaks found is passed to a fitting routine and
 those that are successfully fitted are kept and returned in the output
 workspace (and logged at information level). The output
-`TableWorkspace <http://www.mantidproject.org/TableWorkspace>`_ contains the following columns,
-which reflect the fact that the peak has been fitted to a Gaussian atop
-a linear background: spectrum, centre, width, height,
-backgroundintercept & backgroundslope.
+:ref:`TableWorkspace <Table Workspaces>` contains columns,
+which reflect the fact that the peak has been fitted to a peak function atop
+a background: spectrum, centre, width, height, backgroundintercept and
+backgroundslope. Setting ``RawPeakParameters=True`` will give the actual
+peak fit parameters rather than this abstraction.
 
 Subalgorithms used
 ##################
@@ -45,7 +46,7 @@ recorded best background and peak parameters as the starting values.
 Criteria To Validate Peaks Found
 ################################
 
-FindPeaks finds peaks by fitting a Guassian with background to a certain
+FindPeaks finds peaks by fitting a Gaussian with background to a certain
 range in the input histogram. :ref:`algm-Fit` may not give a correct
 result even if chi^2 is used as criteria alone. Thus some other criteria
 are provided as options to validate the result
@@ -71,15 +72,17 @@ If FindPeaksBackground fails, then it is necessary to estimate a rough peak rang
 observed data.
 
 #. Assume the local background (within the given fitting window) is close to linear;
-#. Take the first 3 and last 3 data points to calcualte the linear background;
-#. Remove background (rougly) and calcualte peak's height, width, and centre;
+#. Take the first 3 and last 3 data points to calculate the linear background;
+#. Remove background (roughly) and calculate peak's height, width, and centre;
 #. If the peak centre (starting value) uses observed value, then set peakcentre to that value.  Otherwise, set it to given value;
 #. Get the bin indexes of xmin, xmax and peakcentre;
-#. Calcualte peak range, i.e., left and right boundary;
+#. Calculate peak range, i.e., left and right boundary;
 #. If any peak boundary exceeds or too close to the boundary, there will be 2 methods to solve this issue;
 
    #. If peak centre is restricted to given value, then the peak range will be from 1/6 to 5/6 of the given data points;
    #. If peak centre is set to observed value, then the 3 leftmost data points will be used for background.
+
+.. seealso:: The :ref:`list of available functions <Fit Functions List>` for details on the various functions and the :ref:`documentation for minimizers <fitminimizers>`.
 
 References
 ----------
@@ -100,8 +103,7 @@ Usage
 
    row = table.row(0)
 
-   #print row
-   print "Peak 1 {Centre: %.3f, width: %.3f, height: %.3f }" % ( row["centre"],  row["width"], row["height"])
+   print("Peak 1 {Centre: %.3f, width: %.3f, height: %.3f }" % ( row["centre"],  row["width"], row["height"]))
 
 
 Output:

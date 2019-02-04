@@ -1,9 +1,17 @@
-﻿#pylint: disable=too-many-lines
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
+#pylint: disable=too-many-lines
 #pylint: disable=invalid-name
 #pylint: disable=attribute-defined-outside-init
 """ File contains Descriptors used describe run for direct inelastic reduction """
 
+from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
+from mantid.kernel import funcinspect
 from Direct.PropertiesDescriptors import *
 import re
 import collections
@@ -455,7 +463,8 @@ class RunDescriptor(PropDescriptor):
                     self._set_run_list(instance,run_num,file_path,fext)
                 else:
                     self._set_single_run(instance,run_num,file_path,fext)
-        elif isinstance(value,list):
+        elif isinstance(value, collections.Iterable): # xrange provided
+            value = list(value)
             self._set_run_list(instance,value,"",None)
         else:
             self._set_single_run(instance,value,"",None)
@@ -891,22 +900,13 @@ class RunDescriptor(PropDescriptor):
            workspace which contains monitors.
         """
         if otherWS:
-            data_ws  = otherWS
+            data_ws = otherWS
         else:
             data_ws = self.get_workspace()
         if not data_ws:
             return None
 
-        try:
-            mon_ws = data_ws.getMonitorWorkspace()
-        except RuntimeError: # May be old code or some problem connecting workspace with monitor workspace
-            ws_name = data_ws.name()
-            mon_ws_name = ws_name+'_monitors'
-            if mon_ws_name in mtd:
-                mon_ws = mtd[mon_ws_name]
-                data_ws.setMonitorWorkspace(mon_ws) # connect workspace and monitors together
-            else:
-                mon_ws = None
+        mon_ws = self.get_monitor_workspace(data_ws)
 
         if mon_ws is None:
             monitors_separate = False
@@ -917,7 +917,6 @@ class RunDescriptor(PropDescriptor):
         spec_to_mon = RunDescriptor._holder.spectra_to_monitors_list
         combined_spec_list = prop_helpers.process_prop_list(mon_ws,"CombinedSpectraIDList")
         if monitors_separate and spec_to_mon:
-            mon_ws_name = mon_ws.name()
 
             for specID in spec_to_mon:
                 if specID not in combined_spec_list:
@@ -941,7 +940,7 @@ class RunDescriptor(PropDescriptor):
                 mon_list = [monitors_ID]
         else:
             mon_list = self._holder.get_used_monitors_list()
-        # Check if all requested spectra are indeed availible
+        # Check if all requested spectra are indeed available
         for monID in mon_list:
             if monID in combined_spec_list:
                 continue
@@ -961,6 +960,20 @@ class RunDescriptor(PropDescriptor):
         return mon_ws
 #--------------------------------------------------------------------------------------------------------------------
 
+    def get_monitor_workspace(self, data_ws):
+        mon_ws = None
+        try:
+            mon_ws = data_ws.getMonitorWorkspace()
+        except RuntimeError: # May be old code or some problem connecting workspace with monitor workspace
+            ws_name = data_ws.name()
+            mon_ws_name = ws_name+'_monitors'
+            if mon_ws_name in mtd:
+                mon_ws = mtd[mon_ws_name]
+                data_ws.setMonitorWorkspace(mon_ws) # connect workspace and monitors together
+        return mon_ws
+
+#--------------------------------------------------------------------------------------------------------------------
+
     def is_existing_ws(self):
         """Method verifies if property value relates to workspace, present in ADS"""
         if self._ws_name:
@@ -970,7 +983,7 @@ class RunDescriptor(PropDescriptor):
                 return False
         else:
             return False
-#--------------------------------------------------------------------------------------------------------------------
+
 #--------------------------------------------------------------------------------------------------------------------
 
     def set_file_ext(self,val):
@@ -1078,7 +1091,7 @@ class RunDescriptor(PropDescriptor):
             # call appropritate load command
             Load(Filename=data_file, OutputWorkspace=ws_name,LoadMonitors = mon_load_option)
         except ValueError: # if loader thrown, its probably event file rejected "separate" options
-            Load(Filename=data_file, OutputWorkspace=ws_name,LoadMonitors = '1',MonitorsAsEvents='0')
+            Load(Filename=data_file, OutputWorkspace=ws_name,LoadMonitors = True, MonitorsLoadOnly='Histogram')
         RunDescriptor._logger("Loaded {0}".format(data_file),'information')
 
         loaded_ws = mtd[ws_name]
@@ -1227,7 +1240,7 @@ class RunDescriptor(PropDescriptor):
         bins = [x_param[0],dx_min,x_param[-1]]
         ExtractSingleSpectrum(InputWorkspace=data_ws,OutputWorkspace='tmp_mon',WorkspaceIndex=ws_index)
         Rebin(InputWorkspace='tmp_mon',OutputWorkspace='tmp_mon',Params=bins,PreserveEvents='0')
-        mon_ws_name = mon_ws.getName()
+        mon_ws_name = mon_ws.name()
         if not homo_binning:
             Rebin(InputWorkspace=mon_ws_name,OutputWorkspace=mon_ws_name,Params=bins,PreserveEvents='0')
         ConjoinWorkspaces(InputWorkspace1=mon_ws_name,InputWorkspace2='tmp_mon')
@@ -1339,7 +1352,7 @@ class RunDescriptor(PropDescriptor):
 # Hell knows how to redefine these warnings or if they are valid or not
 #pylint: disable=W0141
 #pylint: disable=W0110
-            self._ws_cname = part_ind + filter(lambda c: not c.isdigit(), name)
+            self._ws_cname = part_ind + ''.join(re.findall('\D+', name))
         else:
 #pylint: disable=attribute-defined-outside-init
             self._ws_cname = part_ind + name

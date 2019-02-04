@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -53,9 +53,9 @@ Usage
    log_z = run.getLogData('z')
 
    # Print the log values
-   print log_x.value
-   print log_y.value
-   print log_z.value
+   print(log_x.value)
+   print(log_y.value)
+   print(log_z.value)
 
 Output:
 

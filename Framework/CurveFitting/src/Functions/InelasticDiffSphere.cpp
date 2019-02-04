@@ -1,17 +1,23 @@
-// Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
-// Main Module Header
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/Functions/InelasticDiffSphere.h"
-// Mantid Headers from the same project (N/A)
-// Mantid headers from other projects
+
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/UnitConversion.h"
-// third party library headers
+#include "MantidTypes/SpectrumDefinition.h"
+
 #include <boost/math/special_functions/bessel.hpp>
-// standard library headers
+
 #include <cmath>
 #include <limits>
 
@@ -38,8 +44,7 @@ InelasticDiffSphere::InelasticDiffSphere()
                          "if energy in ueV");
   this->declareParameter("Shift", 0.0, "Shift in domain");
 
-  this->declareAttribute("Q", API::IFunction::Attribute(EMPTY_DBL()));
-  this->declareAttribute("WorkspaceIndex", API::IFunction::Attribute(0));
+  declareAttributes();
 }
 
 /**
@@ -259,27 +264,30 @@ void InelasticDiffSphere::setWorkspace(
   if (!workspace)
     return;
 
-  size_t numHist = workspace->getNumberHistograms();
-  for (size_t idx = 0; idx < numHist; idx++) {
-    Mantid::Geometry::IDetector_const_sptr det;
-    try {
-      det = workspace->getDetector(idx);
-    } catch (Kernel::Exception::NotFoundError &) {
+  const auto &spectrumInfo = workspace->spectrumInfo();
+  const auto &detectorIDs = workspace->detectorInfo().detectorIDs();
+  for (size_t idx = 0; idx < spectrumInfo.size(); idx++) {
+    if (!spectrumInfo.hasDetectors(idx)) {
       m_qValueCache.clear();
-      g_log.information("Cannot populate Q values from workspace");
+      g_log.information(
+          "Cannot populate Q values from workspace - no detectors set.");
       break;
     }
 
-    try {
-      double efixed = workspace->getEFixed(det);
-      double usignTheta = 0.5 * workspace->detectorTwoTheta(*det);
+    const auto detectorIndex = spectrumInfo.spectrumDefinition(idx)[0].first;
 
-      double q = Mantid::Kernel::UnitConversion::run(usignTheta, efixed);
+    try {
+      double efixed = workspace->getEFixed(detectorIDs[detectorIndex]);
+      double usingTheta = 0.5 * spectrumInfo.twoTheta(idx);
+
+      double q =
+          Mantid::Kernel::UnitConversion::convertToElasticQ(usingTheta, efixed);
 
       m_qValueCache.push_back(q);
     } catch (std::runtime_error &) {
       m_qValueCache.clear();
-      g_log.information("Cannot populate Q values from workspace");
+      g_log.information("Cannot populate Q values from workspace - could not "
+                        "find EFixed value.");
       return;
     }
   }

@@ -1,4 +1,10 @@
-﻿#pylint: disable=invalid-name
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
+#pylint: disable=invalid-name
 #
 # SANSBatchMode.py
 #
@@ -30,6 +36,7 @@
 # The save directory must currently be specified in the Mantid.user.properties file
 
 #Make the reduction module available
+from __future__ import (absolute_import, division, print_function)
 from ISISCommandInterface import *
 import SANSUtility as su
 from mantid.simpleapi import *
@@ -48,7 +55,7 @@ if sys.version_info[0] == 2 and sys.version_info[1] == 6:
     import types
 
     def _deepcopy_method(x, memo):
-        return type(x)(x.im_func, copy.deepcopy(x.im_self, memo), x.im_class)
+        return type(x)(x.__func__, copy.deepcopy(x.__self__, memo), x.__self__.__class__)
     copy._deepcopy_dispatch[types.MethodType] = _deepcopy_method
 ################################################################################
 
@@ -118,7 +125,7 @@ def addRunToStore(parts, run_store):
     #move through the file like sample_sans,99630,output_as,99630, ...
     for i in range(0, nparts, 2):
         role = parts[i]
-        if role in inputdata.keys():
+        if role in list(inputdata.keys()):
             inputdata[parts[i]] = parts[i+1]
         else:
             issueWarning('You seem to have specified an invalid key in the SANSBatch file. The key was ' + str(role))
@@ -129,7 +136,55 @@ def addRunToStore(parts, run_store):
     return 0
 
 
-def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},verbose=False,
+def get_transmission_properties(workspace):
+    transmission_properties = dict()
+    for prop in ['Transmission','TransmissionCan']:
+        if workspace.getRun().hasProperty(prop):
+            ws_name = workspace.getRun().getLogData(prop).value
+            if mtd.doesExist(ws_name): # ensure the workspace has not been deleted
+                transmission_properties[prop] = workspace.getRun().getLogData(prop).value
+    return transmission_properties
+
+
+def get_geometry_properties(reducer):
+    """
+    This extracts geometry properties from the ReductionSingleton. They are saved in the CanSAS1D format.
+
+    @param reducer: a handle to the redcution singleton
+    @return: a dict with geometry properties
+    """
+    def _add_property(key, element, props):
+        if element is None:
+            raise RuntimeError("Could not extract value for {0}.".format(key))
+        props.update({key: element})
+
+    geometry_properties = {}
+    geometry = reducer.get_sample().geometry
+
+    # Get the shape
+    shape = geometry.shape
+    if shape == 'cylinder-axis-up':
+        shape_to_save = "Cylinder"
+    elif shape == 'cuboid':
+        shape_to_save = "Flat plate"
+    elif shape == 'cylinder-axis-along':
+        shape_to_save = 'Disc'
+    else:
+        raise RuntimeError("Unknown shape {0}. Cannot extract property".format(shape))
+    geometry_properties.update({"Geometry": shape_to_save})
+
+    # Get the Height
+    _add_property("SampleHeight", geometry.height, geometry_properties)
+
+    # Get the Width
+    _add_property("SampleWidth", geometry.width, geometry_properties)
+
+    # Get the thickness
+    _add_property("SampleThickness", geometry.thickness, geometry_properties)
+    return geometry_properties
+
+
+def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},verbose=False, # noqa: C901
                 centreit=False, reducer=None, combineDet=None, save_as_zero_error_free=False):
     """
         @param filename: the CSV file with the list of runs to analyse
@@ -152,7 +207,7 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
     runinfo = []
     for line in file_handle:
         # See how many pieces of information have been provided;
-        # brackets delineate the field seperator (nothing for space-delimited, ',' for comma-seperated)
+        # brackets delineate the field separator (nothing for space-delimited, ',' for comma-seperated)
         parts = line.rstrip().split(',')
         if addRunToStore(parts, runinfo) > 0:
             issueWarning('Incorrect structure detected in input file "' + filename + '" at line \n"' + line + '"\nEntry skipped\n')
@@ -177,6 +232,10 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
     original_user_file = ReductionSingleton().user_settings.filename
     current_user_file = original_user_file
 
+    # Store the original combineDet which was set either by the input. this should be used whenever we are using the
+    # original user file
+    original_combine_det = combineDet
+
     # Now loop over all the lines and do a reduction (hopefully) for each
     for run in runinfo:
         # Set the user file, if it is required
@@ -186,14 +245,25 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
                                                        original_user_file=original_user_file,
                                                        original_settings = settings,
                                                        original_prop_man_settings = prop_man_settings)
-        except (RunTimeError, ValueError) as e:
-            sanslog.warning("Error in Batchmode user files: Could not reset the specified user file %s. More info: %s" %(
-                str(run['user_file']),str(e)))
+
+            if current_user_file == original_user_file:
+                combineDet = original_combine_det
+            else:
+                # When we set a new user file, that means that the combineDet feature could be invalid,
+                # ie if the detector under investigation changed in the user file. We need to change this
+                # here too. But only if it is not None.
+                if combineDet is not None:
+                    new_combineDet = ReductionSingleton().instrument.get_detector_selection()
+                    combineDet = su.get_correct_combinDet_setting(ins_name, new_combineDet)
+        except (RuntimeError, ValueError) as e:
+            raise RuntimeError("Error in Batchmode user files: Could not reset the specified user file {0}. More info: {1}"
+                               .format(str(run['user_file']), str(e)))
 
         local_settings = copy.deepcopy(ReductionSingleton().reference())
         local_prop_man_settings = ReductionSingleton().settings.clone("TEMP_SETTINGS")
 
         raw_workspaces = []
+        geometry_properties = {}
         try:
             # Load in the sample runs specified in the csv file
             raw_workspaces.append(read_run(run, 'sample_sans', format))
@@ -211,20 +281,26 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
                 if verbose == 1:
                     FindBeamCentre(50.,170.,12)
 
+            try:
+                geometry_properties = get_geometry_properties(ReductionSingleton())
+            except RuntimeError as e:
+                message = "Could not extract geometry properties from the reducer: {0}".format(str(e))
+                sanslog.warning(message)
+
             # WavRangeReduction runs the reduction for the specified
             # wavelength range where the final argument can either be
             # DefaultTrans or CalcTrans:
             reduced = WavRangeReduction(combineDet=combineDet, out_fit_settings=scale_shift)
 
-        except SkipEntry, reason:
+        except SkipEntry as reason:
             #this means that a load step failed, the warning and the fact that the results aren't there is enough for the user
             issueWarning(str(reason)+ ', skipping entry')
             continue
-        except SkipReduction, reason:
+        except SkipReduction as reason:
             #this means that a load step failed, the warning and the fact that the results aren't there is enough for the user
             issueWarning(str(reason)+ ', skipping reduction')
             continue
-        except ValueError, reason:
+        except ValueError as reason:
             issueWarning('Cannot load file :'+str(reason))
             #when we are all up to Python 2.5 replace the duplicated code below with one finally:
             delete_workspaces(raw_workspaces)
@@ -243,34 +319,41 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
         final_name = sanitize_name(final_name)
 
         #convert the names from the default one, to the agreement
+        # This caused a renaming with the following logic
+        # | combinDet      |    Name HAB    |   Name LAB   | Name Merged  |
+        # | rear           |    +_rear      |     -        |     -        |
+        # | front          |      -         |    +_front   |     -        |
+        # | both           |    +_rear      |    +_front   |     -        |
+        # | merged         |    +_rear      |    +_front   |     +_merged |
+        # This is not great since it uses SANS2D terminology for all instruments
         names = [final_name]
         if combineDet == 'rear':
-            names = [final_name+'_rear']
-            RenameWorkspace(InputWorkspace=reduced,OutputWorkspace= final_name+'_rear')
+            new_name = su.rename_workspace_correctly(ins_name, su.ReducedType.LAB, final_name, reduced)
+            names = [new_name]
         elif combineDet == 'front':
-            names = [final_name+'_front']
-            RenameWorkspace(InputWorkspace=reduced,OutputWorkspace= final_name+'_front')
+            new_name = su.rename_workspace_correctly(ins_name, su.ReducedType.HAB, final_name, reduced)
+            names = [new_name]
         elif combineDet == 'both':
-            names = [final_name+'_front', final_name+'_rear']
             if ins_name == 'SANS2D':
-                rear_reduced = reduced.replace('front','rear')
+                rear_reduced = reduced.replace('front', 'rear')
             else: #if ins_name == 'lOQ':
-                rear_reduced = reduced.replace('HAB','main')
-            RenameWorkspace(InputWorkspace=reduced,OutputWorkspace=final_name+'_front')
-            RenameWorkspace(InputWorkspace=rear_reduced,OutputWorkspace=final_name+'_rear')
+                rear_reduced = reduced.replace('HAB', 'main')
+            new_name_HAB = su.rename_workspace_correctly(ins_name, su.ReducedType.HAB, final_name, reduced)
+            new_name_LAB = su.rename_workspace_correctly(ins_name, su.ReducedType.LAB, final_name, rear_reduced)
+            names = [new_name_HAB, new_name_LAB]
         elif combineDet == 'merged':
-            names = [final_name + '_merged', final_name + '_rear',  final_name+'_front']
             if ins_name == 'SANS2D':
-                rear_reduced = reduced.replace('merged','rear')
-                front_reduced = reduced.replace('merged','front')
+                rear_reduced = reduced.replace('merged', 'rear')
+                front_reduced = reduced.replace('merged', 'front')
             else:
-                rear_reduced = reduced.replace('_merged','')
-                front_reduced = rear_reduced.replace('main','HAB')
-            RenameWorkspace(InputWorkspace=reduced,OutputWorkspace= final_name + '_merged')
-            RenameWorkspace(InputWorkspace=rear_reduced,OutputWorkspace= final_name + '_rear')
-            RenameWorkspace(InputWorkspace=front_reduced,OutputWorkspace= final_name+'_front')
+                rear_reduced = reduced.replace('merged', 'main')
+                front_reduced = rear_reduced.replace('main', 'HAB')
+            new_name_Merged = su.rename_workspace_correctly(ins_name, su.ReducedType.Merged, final_name, reduced)
+            new_name_LAB = su.rename_workspace_correctly(ins_name, su.ReducedType.LAB, final_name, rear_reduced)
+            new_name_HAB = su.rename_workspace_correctly(ins_name, su.ReducedType.HAB, final_name, front_reduced)
+            names = [new_name_Merged, new_name_LAB, new_name_HAB]
         else:
-            RenameWorkspace(InputWorkspace=reduced,OutputWorkspace=final_name)
+            RenameWorkspace(InputWorkspace=reduced, OutputWorkspace=final_name)
 
         file = run['output_as']
         #saving if optional and doesn't happen if the result workspace is left blank. Is this feature used?
@@ -287,7 +370,7 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
             # else we map it to itself.
             save_names_dict = get_mapped_workspaces(save_names, save_as_zero_error_free)
 
-            for algor in saveAlgs.keys():
+            for algor in list(saveAlgs.keys()):
                 for workspace_name in save_names:
                     #add the file extension, important when saving different types of file so they don't over-write each other
                     ext = saveAlgs[algor]
@@ -297,17 +380,24 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
                         # From v2, SaveCanSAS1D is able to save the Transmission workspaces related to the
                         # reduced data. The name of workspaces of the Transmission are available at the
                         # sample logs.
-                        extra_param = dict()
                         _ws = mtd[workspace_name]
-                        for prop in ['Transmission','TransmissionCan']:
-                            if _ws.getRun().hasProperty(prop):
-                                ws_name = _ws.getRun().getLogData(prop).value
-                                if mtd.doesExist(ws_name): # ensure the workspace has not been deleted
-                                    extra_param[prop] = _ws.getRun().getLogData(prop).value
+                        transmission_properties = get_transmission_properties(_ws)
+
+                        # Add the geometry properties if they exist
+                        if geometry_properties:
+                            transmission_properties.update(geometry_properties)
+
                         # Call the SaveCanSAS1D with the Transmission and TransmissionCan if they are
                         # available
                         SaveCanSAS1D(save_names_dict[workspace_name], workspace_name+ext, DetectorNames=detnames,
-                                     **extra_param)
+                                     **transmission_properties)
+                    elif algor == "SaveNXcanSAS":
+                        _ws = mtd[workspace_name]
+                        transmission_properties = get_transmission_properties(_ws)
+                        # Call the SaveNXcanSAS with the Transmission and TransmissionCan if they are
+                        # available
+                        SaveNXcanSAS(save_names_dict[workspace_name], workspace_name+ext, DetectorNames=detnames,
+                                     **transmission_properties)
                     elif algor == "SaveRKH":
                         SaveRKH(save_names_dict[workspace_name], workspace_name+ext, Append=False)
                     else:
@@ -481,18 +571,29 @@ def setUserFileInBatchMode(new_user_file, current_user_file, original_user_file,
     """
     user_file_to_set = ""
 
-    # Try to find the user file in the default paths
-    if not os.path.isfile(new_user_file):
-        user_file = FileFinder.getFullPath(new_user_file)
-        if not os.path.isfile(user_file):
-            user_file_to_set = original_user_file
-        else:
-            user_file_to_set = user_file
+    if new_user_file == '':
+        user_file_to_set = original_user_file
     else:
-        user_file_to_set = new_user_file
+        # Try to find the user file in the default paths
+        if not os.path.isfile(new_user_file):
+            # Find the user file in the Mantid path. we make sure that the user file has a txt extension.
+            user_file_names_with_extension = su.get_user_file_name_options_with_txt_extension(new_user_file)
+            for user_file_name_with_extension in user_file_names_with_extension:
+                user_file = FileFinder.getFullPath(user_file_name_with_extension)
+                if user_file:
+                    break
+
+            if not os.path.isfile(user_file):
+                message = "Error could not find specified user file {0}"\
+                    .format(new_user_file)
+                raise RuntimeError(message)
+            else:
+                user_file_to_set = user_file
+        else:
+            user_file_to_set = new_user_file
 
     # Set the user file in the reducer and load the user file
-    if user_file_to_set != current_user_file:
+    if os.path.normpath(user_file_to_set) != os.path.normpath(current_user_file):
         # Need to setup a clean reducer. If we are dealing with the original user file,
         # then we should take gui changes into account, ie reset to the original reducer
         if user_file_to_set == original_user_file:
@@ -500,9 +601,11 @@ def setUserFileInBatchMode(new_user_file, current_user_file, original_user_file,
             ReductionSingleton().settings = original_prop_man_settings.clone(REDUCTION_SETTINGS_OBJ_NAME)
         else:
             instrument = copy.deepcopy(ReductionSingleton().get_instrument())
+            output_type = ReductionSingleton().to_Q.output_type
             ReductionSingleton().clean(isis_reducer.ISISReducer)
             ReductionSingleton().set_instrument(instrument)
             ReductionSingleton().user_settings = UserFile(user_file_to_set)
+            ReductionSingleton().to_Q.output_type = output_type
             ReductionSingleton().user_settings.execute(ReductionSingleton())
         current_user_file = user_file_to_set
     return current_user_file

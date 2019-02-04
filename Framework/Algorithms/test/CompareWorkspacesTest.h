@@ -1,14 +1,21 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_COMPAREWORKSPACESTEST_H_
 #define MANTID_ALGORITHMS_COMPAREWORKSPACESTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/CompareWorkspaces.h"
-#include "MantidAlgorithms/CreatePeaksWorkspace.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Sample.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAlgorithms/CompareWorkspaces.h"
+#include "MantidAlgorithms/CreatePeaksWorkspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/MDBoxBase.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
@@ -17,8 +24,8 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/V3D.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
@@ -35,7 +42,7 @@ public:
   static void destroySuite(CompareWorkspacesTest *suite) { delete suite; }
 
   CompareWorkspacesTest()
-      : ws1(WorkspaceCreationHelper::Create2DWorkspace123(2, 2)),
+      : ws1(WorkspaceCreationHelper::create2DWorkspace123(2, 2)),
         PROPERTY_VALUE_TRUE("1") {
     FrameworkManager::Instance();
   }
@@ -54,7 +61,7 @@ public:
       checker.initialize();
 
     Workspace2D_sptr ws =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(10, 100);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(10, 100);
     // A workspace had better match itself!
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", ws));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", ws));
@@ -170,9 +177,9 @@ public:
       checker.initialize();
 
     EventWorkspace_sptr ews1 =
-        WorkspaceCreationHelper::CreateEventWorkspace(10, 20, 30);
+        WorkspaceCreationHelper::createEventWorkspace(10, 20, 30);
     EventWorkspace_sptr ews2 =
-        WorkspaceCreationHelper::CreateEventWorkspace(10, 20, 30);
+        WorkspaceCreationHelper::createEventWorkspace(10, 20, 30);
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
         "Workspace1", boost::dynamic_pointer_cast<MatrixWorkspace>(ews1)));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
@@ -189,7 +196,7 @@ public:
       checker.initialize();
 
     EventWorkspace_sptr ews2 =
-        WorkspaceCreationHelper::CreateEventWorkspace(10, 20, 30);
+        WorkspaceCreationHelper::createEventWorkspace(10, 20, 30);
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", ws1));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
         "Workspace2", boost::dynamic_pointer_cast<MatrixWorkspace>(ews2)));
@@ -205,9 +212,9 @@ public:
       checker.initialize();
 
     EventWorkspace_sptr ews1 =
-        WorkspaceCreationHelper::CreateEventWorkspace(10, 20, 30);
+        WorkspaceCreationHelper::createEventWorkspace(10, 20, 30);
     EventWorkspace_sptr ews2 =
-        WorkspaceCreationHelper::CreateEventWorkspace(15, 20, 30);
+        WorkspaceCreationHelper::createEventWorkspace(15, 20, 30);
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
         "Workspace1", boost::dynamic_pointer_cast<MatrixWorkspace>(ews1)));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
@@ -222,9 +229,9 @@ public:
     if (!checker.isInitialized())
       checker.initialize();
     EventWorkspace_sptr ews1 =
-        WorkspaceCreationHelper::CreateEventWorkspace(10, 20, 30);
+        WorkspaceCreationHelper::createEventWorkspace(10, 20, 30);
     EventWorkspace_sptr ews2 =
-        WorkspaceCreationHelper::CreateEventWorkspace(10, 20, 30, 0.0, 1.0, 2);
+        WorkspaceCreationHelper::createEventWorkspace(10, 20, 30, 0.0, 1.0, 2);
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
         "Workspace1", boost::dynamic_pointer_cast<MatrixWorkspace>(ews1)));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
@@ -235,13 +242,73 @@ public:
     TS_ASSERT((!Mantid::API::equals(ews1, ews2)));
   }
 
+  void testEvent_differentEventWeights() {
+    Mantid::Algorithms::CompareWorkspaces alg;
+    alg.initialize();
+    EventWorkspace_sptr ews1 =
+        WorkspaceCreationHelper::createEventWorkspace(10, 20, 30);
+    ews1 *= 1.1;
+    EventWorkspace_sptr ews2 =
+        WorkspaceCreationHelper::createEventWorkspace(10, 20, 30);
+    ews2 *= 1.2;
+    alg.setProperty("Workspace1",
+                    boost::dynamic_pointer_cast<MatrixWorkspace>(ews1));
+    alg.setProperty("Workspace2",
+                    boost::dynamic_pointer_cast<MatrixWorkspace>(ews2));
+    alg.setProperty("CheckAllData", true);
+    TS_ASSERT(alg.execute());
+    TS_ASSERT_DIFFERS(alg.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
+    // Same, using the !Mantid::API::equals() function
+    TS_ASSERT((!Mantid::API::equals(ews1, ews2)));
+    auto result = AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
+        "compare_msgs");
+    auto message = result->String(0, 0);
+    TS_ASSERT_EQUALS(
+        message, "Total 300 (in 300) events are differrent. 0 have different "
+                 "TOF; 0 have different pulse time; 0 have different in both "
+                 "TOF and pulse time; 300 have different weights.\nMismatched "
+                 "event lists include 10 of total 10 spectra. \n0, ");
+  }
+
+  void testEvent_differentEventWeightsNoTime() {
+    Mantid::Algorithms::CompareWorkspaces alg;
+    alg.initialize();
+    EventWorkspace_sptr ews1 =
+        WorkspaceCreationHelper::createEventWorkspace(10, 20, 30);
+    ews1 *= 1.1;
+    EventWorkspace_sptr ews2 =
+        WorkspaceCreationHelper::createEventWorkspace(10, 20, 30);
+    ews2 *= 1.2;
+    for (size_t i = 0; i < ews1->getNumberHistograms(); ++i) {
+      ews1->getSpectrum(i).switchTo(Mantid::API::EventType::WEIGHTED_NOTIME);
+      ews2->getSpectrum(i).switchTo(Mantid::API::EventType::WEIGHTED_NOTIME);
+    }
+    alg.setProperty("Workspace1",
+                    boost::dynamic_pointer_cast<MatrixWorkspace>(ews1));
+    alg.setProperty("Workspace2",
+                    boost::dynamic_pointer_cast<MatrixWorkspace>(ews2));
+    alg.setProperty("CheckAllData", true);
+    TS_ASSERT(alg.execute());
+    TS_ASSERT_DIFFERS(alg.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
+    // Same, using the !Mantid::API::equals() function
+    TS_ASSERT((!Mantid::API::equals(ews1, ews2)));
+    auto result = AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
+        "compare_msgs");
+    auto message = result->String(0, 0);
+    TS_ASSERT_EQUALS(
+        message, "Total 300 (in 300) events are differrent. 0 have different "
+                 "TOF; 0 have different pulse time; 0 have different in both "
+                 "TOF and pulse time; 300 have different weights.\nMismatched "
+                 "event lists include 10 of total 10 spectra. \n0, ");
+  }
+
   void testEvent_differentBinBoundaries() {
     if (!checker.isInitialized())
       checker.initialize();
     EventWorkspace_sptr ews1 =
-        WorkspaceCreationHelper::CreateEventWorkspace(10, 20, 30, 15.0, 10.0);
+        WorkspaceCreationHelper::createEventWorkspace(10, 20, 30, 15.0, 10.0);
     EventWorkspace_sptr ews2 =
-        WorkspaceCreationHelper::CreateEventWorkspace(10, 20, 30, 5.0, 10.0);
+        WorkspaceCreationHelper::createEventWorkspace(10, 20, 30, 5.0, 10.0);
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
         "Workspace1", boost::dynamic_pointer_cast<MatrixWorkspace>(ews1)));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
@@ -520,7 +587,7 @@ public:
       checker.initialize();
 
     Mantid::API::MatrixWorkspace_sptr ws2 =
-        WorkspaceCreationHelper::Create1DWorkspaceFib(2);
+        WorkspaceCreationHelper::create1DWorkspaceFib(2, true);
 
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", ws1));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", ws2));
@@ -542,7 +609,7 @@ public:
       checker.initialize();
 
     Mantid::API::MatrixWorkspace_sptr ws2 =
-        WorkspaceCreationHelper::Create2DWorkspace123(2, 2, true);
+        WorkspaceCreationHelper::create2DWorkspace123(2, 2, true);
 
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", ws1));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", ws2));
@@ -565,7 +632,7 @@ public:
       checker.initialize();
 
     Mantid::API::MatrixWorkspace_sptr ws2 =
-        WorkspaceCreationHelper::Create2DWorkspace123(2, 2);
+        WorkspaceCreationHelper::create2DWorkspace123(2, 2);
     ws2->setDistribution(true);
 
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", ws1));
@@ -589,7 +656,7 @@ public:
       checker.initialize();
 
     Mantid::API::MatrixWorkspace_sptr ws2 =
-        WorkspaceCreationHelper::Create2DWorkspace123(2, 2);
+        WorkspaceCreationHelper::create2DWorkspace123(2, 2);
     Mantid::API::Axis *const newAxis = new Mantid::API::NumericAxis(2);
     ws2->replaceAxis(1, newAxis);
 
@@ -613,7 +680,7 @@ public:
       checker.initialize();
 
     Mantid::API::MatrixWorkspace_sptr ws2 =
-        WorkspaceCreationHelper::Create2DWorkspace123(2, 2);
+        WorkspaceCreationHelper::create2DWorkspace123(2, 2);
     ws2->getAxis(0)->title() = "blah";
 
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", ws1));
@@ -636,7 +703,7 @@ public:
       checker.initialize();
 
     Mantid::API::MatrixWorkspace_sptr ws2 =
-        WorkspaceCreationHelper::Create2DWorkspace123(2, 2);
+        WorkspaceCreationHelper::create2DWorkspace123(2, 2);
     ws2->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
 
@@ -660,9 +727,9 @@ public:
       checker.initialize();
 
     Mantid::API::MatrixWorkspace_sptr ws1local =
-        WorkspaceCreationHelper::Create2DWorkspace123(2, 2);
+        WorkspaceCreationHelper::create2DWorkspace123(2, 2);
     Mantid::API::MatrixWorkspace_sptr ws2 =
-        WorkspaceCreationHelper::Create2DWorkspace123(2, 2);
+        WorkspaceCreationHelper::create2DWorkspace123(2, 2);
     // Put numeric axes on these workspaces as checkAxes won't test values on
     // spectra axes
     Axis *newAxisWS1 = new NumericAxis(ws1local->getAxis(1)->length());
@@ -700,7 +767,7 @@ public:
       checker.initialize();
 
     Mantid::API::MatrixWorkspace_sptr ws2 =
-        WorkspaceCreationHelper::Create2DWorkspace123(2, 2);
+        WorkspaceCreationHelper::create2DWorkspace123(2, 2);
     ws2->setYUnit("blah");
 
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", ws1));
@@ -723,7 +790,7 @@ public:
       checker.initialize();
 
     Mantid::API::MatrixWorkspace_sptr ws2 =
-        WorkspaceCreationHelper::Create2DWorkspace123(2, 2);
+        WorkspaceCreationHelper::create2DWorkspace123(2, 2);
     ws2->getSpectrum(0).setSpectrumNo(1234);
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", ws1));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", ws2));
@@ -737,7 +804,7 @@ public:
     TS_ASSERT_EQUALS(table->cell<std::string>(0, 0),
                      "Spectrum number mismatch");
 
-    ws2 = WorkspaceCreationHelper::Create2DWorkspace123(2, 2);
+    ws2 = WorkspaceCreationHelper::create2DWorkspace123(2, 2);
     ws2->getSpectrum(0).setDetectorID(99);
     ws2->getSpectrum(1).setDetectorID(98);
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", ws1));
@@ -759,7 +826,7 @@ public:
       checker.initialize();
 
     Mantid::API::MatrixWorkspace_sptr ws2 =
-        WorkspaceCreationHelper::Create2DWorkspace123(2, 2);
+        WorkspaceCreationHelper::create2DWorkspace123(2, 2);
     Mantid::Geometry::Instrument_sptr instrument(
         new Mantid::Geometry::Instrument("different"));
     ws2->setInstrument(instrument);
@@ -785,7 +852,7 @@ public:
       checker.initialize();
 
     Mantid::API::MatrixWorkspace_sptr ws2 =
-        WorkspaceCreationHelper::Create2DWorkspace123(2, 2);
+        WorkspaceCreationHelper::create2DWorkspace123(2, 2);
     ws2->instrumentParameters().addBool(new Mantid::Geometry::Component,
                                         "myParam", true);
 
@@ -811,7 +878,7 @@ public:
       checker.initialize();
 
     Mantid::API::MatrixWorkspace_sptr ws2 =
-        WorkspaceCreationHelper::Create2DWorkspace123(2, 2);
+        WorkspaceCreationHelper::create2DWorkspace123(2, 2);
     ws2->maskBin(0, 0);
     ws2->dataY(0)[0] = 2;
     ws2->dataE(0)[0] = 3;
@@ -828,7 +895,7 @@ public:
     TS_ASSERT_EQUALS(table->cell<std::string>(0, 0), "Masking mismatch");
 
     Mantid::API::MatrixWorkspace_sptr ws3 =
-        WorkspaceCreationHelper::Create2DWorkspace123(2, 2);
+        WorkspaceCreationHelper::create2DWorkspace123(2, 2);
     ws3->maskBin(0, 1);
     ws3->dataY(0)[1] = 2;
     ws3->dataE(0)[1] = 3;
@@ -853,7 +920,7 @@ public:
     checker.setProperty("CheckSample", true);
 
     Mantid::API::MatrixWorkspace_sptr ws2 =
-        WorkspaceCreationHelper::Create2DWorkspace123(2, 2);
+        WorkspaceCreationHelper::create2DWorkspace123(2, 2);
     ws2->mutableSample().setName("different");
 
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", ws1));
@@ -874,7 +941,7 @@ public:
     checker.setProperty("CheckSample", true);
 
     Mantid::API::MatrixWorkspace_sptr ws2 =
-        WorkspaceCreationHelper::Create2DWorkspace123(2, 2);
+        WorkspaceCreationHelper::create2DWorkspace123(2, 2);
     ws2->mutableRun().setProtonCharge(99.99);
 
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", ws1));
@@ -895,7 +962,7 @@ public:
     checker.setProperty("CheckSample", true);
 
     Mantid::API::MatrixWorkspace_sptr ws2 =
-        WorkspaceCreationHelper::Create2DWorkspace123(2, 2);
+        WorkspaceCreationHelper::create2DWorkspace123(2, 2);
     ws2->mutableRun().addLogData(
         new Mantid::Kernel::PropertyWithValue<int>("Prop1", 99));
 
@@ -912,7 +979,7 @@ public:
                      "Different numbers of logs");
 
     Mantid::API::MatrixWorkspace_sptr ws3 =
-        WorkspaceCreationHelper::Create2DWorkspace123(2, 2);
+        WorkspaceCreationHelper::create2DWorkspace123(2, 2);
     ws3->mutableRun().addLogData(
         new Mantid::Kernel::PropertyWithValue<int>("Prop2", 99));
 
@@ -927,7 +994,7 @@ public:
     TS_ASSERT_EQUALS(table->cell<std::string>(0, 0), "Log mismatch");
 
     Mantid::API::MatrixWorkspace_sptr ws4 =
-        WorkspaceCreationHelper::Create2DWorkspace123(2, 2);
+        WorkspaceCreationHelper::create2DWorkspace123(2, 2);
     ws4->mutableRun().addLogData(
         new Mantid::Kernel::PropertyWithValue<int>("Prop1", 100));
 
@@ -946,7 +1013,7 @@ public:
     // Create a group
     const std::string groupName("TestGroup");
     WorkspaceGroup_sptr group =
-        WorkspaceCreationHelper::CreateWorkspaceGroup(2, 2, 2, groupName);
+        WorkspaceCreationHelper::createWorkspaceGroup(2, 2, 2, groupName);
 
     doGroupTest(groupName, groupName, PROPERTY_VALUE_TRUE);
 
@@ -957,10 +1024,10 @@ public:
     // Create a group
     const std::string groupOneName("TestGroupOne");
     WorkspaceGroup_sptr groupOne =
-        WorkspaceCreationHelper::CreateWorkspaceGroup(2, 2, 2, groupOneName);
+        WorkspaceCreationHelper::createWorkspaceGroup(2, 2, 2, groupOneName);
     const std::string groupTwoName("TestGroupTwo");
     WorkspaceGroup_sptr groupTwo =
-        WorkspaceCreationHelper::CreateWorkspaceGroup(3, 2, 2, groupTwoName);
+        WorkspaceCreationHelper::createWorkspaceGroup(3, 2, 2, groupTwoName);
 
     doGroupTest(groupOneName, groupTwoName, "GroupWorkspaces size mismatch.",
                 std::map<std::string, std::string>(), true);
@@ -972,9 +1039,9 @@ public:
   void test_Input_With_A_Group_And_A_Single_Workspace_Gives_Type_Mismatch() {
     const std::string groupName("CheckWorkspacesMatch_TestGroup");
     WorkspaceGroup_sptr group =
-        WorkspaceCreationHelper::CreateWorkspaceGroup(2, 2, 2, groupName);
+        WorkspaceCreationHelper::createWorkspaceGroup(2, 2, 2, groupName);
     Mantid::API::MatrixWorkspace_sptr ws2 =
-        WorkspaceCreationHelper::Create2DWorkspace123(2, 2);
+        WorkspaceCreationHelper::create2DWorkspace123(2, 2);
     const std::string wsName("CheckWorkspacesMatch_TestWS");
     Mantid::API::AnalysisDataService::Instance().add(wsName, ws2);
 
@@ -991,10 +1058,10 @@ public:
     // Create a group
     const std::string groupOneName("TestGroupOne");
     WorkspaceGroup_sptr groupOne =
-        WorkspaceCreationHelper::CreateWorkspaceGroup(2, 2, 2, groupOneName);
+        WorkspaceCreationHelper::createWorkspaceGroup(2, 2, 2, groupOneName);
     const std::string groupTwoName("TestGroupTwo");
     WorkspaceGroup_sptr groupTwo =
-        WorkspaceCreationHelper::CreateWorkspaceGroup(2, 2, 2, groupTwoName);
+        WorkspaceCreationHelper::createWorkspaceGroup(2, 2, 2, groupTwoName);
     Mantid::API::AnalysisDataServiceImpl &dataStore =
         Mantid::API::AnalysisDataService::Instance();
     // Extract the zeroth element of groupTwo and add a spurious log

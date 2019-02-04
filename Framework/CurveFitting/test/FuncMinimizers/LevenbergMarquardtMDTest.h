@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef CURVEFITTING_LEVENBERGMARQUARDMDTTEST_H_
 #define CURVEFITTING_LEVENBERGMARQUARDMDTTEST_H_
 
@@ -210,10 +216,8 @@ public:
     fun->setParameter("a", 1.);
     fun->setParameter("b", 2.);
 
-    BoundaryConstraint *constraint =
-        new BoundaryConstraint(fun.get(), "a", 0, 0.5);
-
-    fun->addConstraint(constraint);
+    fun->addConstraint(
+        Kernel::make_unique<BoundaryConstraint>(fun.get(), "a", 0, 0.5));
 
     boost::shared_ptr<CostFuncLeastSquares> costFun =
         boost::make_shared<CostFuncLeastSquares>();
@@ -229,7 +233,7 @@ public:
     TS_ASSERT_EQUALS(s.getError(), "success");
   }
 
-  void xtest_Linear_constrained1() {
+  void test_Linear_constrained1() {
     API::FunctionDomain1D_sptr domain(
         new API::FunctionDomain1DVector(0.0, 10.0, 20));
     API::FunctionValues mockData(*domain);
@@ -250,9 +254,9 @@ public:
 
     // lower bound is made > 0 because function's derivative over "a" at a=0 is
     // 0
-    BoundaryConstraint *constraint =
-        new BoundaryConstraint(fun.get(), "a", 0.001, 2.0);
-    fun->addConstraint(constraint);
+    fun->addConstraint(
+        Kernel::make_unique<BoundaryConstraint>(fun.get(), "a", 0.001, 2.0));
+    fun->setConstraintPenaltyFactor("a", 1.e20);
 
     boost::shared_ptr<CostFuncLeastSquares> costFun =
         boost::make_shared<CostFuncLeastSquares>();

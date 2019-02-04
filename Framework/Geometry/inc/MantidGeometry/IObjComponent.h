@@ -1,12 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef IMANTID_GEOMETRY_OBJCOMPONENT_H_
 #define IMANTID_GEOMETRY_OBJCOMPONENT_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/IComponent.h"
-#include "MantidGeometry/Objects/Track.h"
+#include "MantidGeometry/Objects/IObject.h"
 
 namespace Mantid {
 
@@ -15,10 +18,8 @@ class Material;
 }
 
 namespace Geometry {
-//----------------------------------------------------------------------
-// Forward Declaration
-//----------------------------------------------------------------------
-class Object;
+class Track;
+class IObject;
 class GeometryHandler;
 
 /** Object Component class, this class brings together the physical attributes
@@ -33,27 +34,6 @@ class GeometryHandler;
     @date 26/09/2007
     @author Russell Taylor, Tessella Support Services plc
     @date 26/06/2008
-
-    Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-   National Laboratory & European Spallation Source
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-          MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-          GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-          along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>.
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_GEOMETRY_DLL IObjComponent : public virtual IComponent {
 public:
@@ -63,6 +43,10 @@ public:
   IObjComponent();
 
   IObjComponent(GeometryHandler *the_handler);
+
+  IObjComponent(const IObjComponent &);
+
+  IObjComponent &operator=(const IObjComponent &rhs);
 
   // Looking to get rid of the first of these constructors in due course (and
   // probably add others)
@@ -101,33 +85,28 @@ public:
   virtual void initDraw() const = 0;
 
   /// Returns the shape of the Object
-  virtual const boost::shared_ptr<const Object> shape() const = 0;
+  virtual const boost::shared_ptr<const IObject> shape() const = 0;
   /// Returns the material of the Object
   virtual const Kernel::Material material() const = 0;
 
   /// Gets the GeometryHandler
-  GeometryHandler *Handle() const { return handle; }
+  GeometryHandler *Handle() const { return handle.get(); }
 
 protected:
-  /// Protected copy constructor
-  IObjComponent(const IObjComponent &);
-  /// Assignment operator
-  IObjComponent &operator=(const IObjComponent &);
-
   /// Reset the current geometry handler
   void setGeometryHandler(GeometryHandler *h);
 
 private:
   /// Geometry Handle for rendering
-  GeometryHandler *handle;
+  std::unique_ptr<GeometryHandler> handle;
 
   friend class GeometryHandler;
 };
 
 /// Shared pointer to IObjComponent
-typedef boost::shared_ptr<IObjComponent> IObjComponent_sptr;
+using IObjComponent_sptr = boost::shared_ptr<IObjComponent>;
 /// Shared pointer to IObjComponent (const version)
-typedef boost::shared_ptr<const IObjComponent> IObjComponent_const_sptr;
+using IObjComponent_const_sptr = boost::shared_ptr<const IObjComponent>;
 
 } // namespace Geometry
 } // namespace Mantid

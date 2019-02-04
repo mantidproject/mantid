@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef CubicSplineTEST_H_
 #define CubicSplineTEST_H_
 
@@ -138,6 +144,9 @@ public:
     boost::scoped_array<double> refSet(new double[testDataSize]);
 
     generateTestData(testDataSize, refSet, x, 1);
+
+    // swap ref values
+    std::swap(refSet[1], refSet[3]);
 
     FunctionDomain1DView view(x.get(), testDataSize);
     FunctionValues testDataValues(view);

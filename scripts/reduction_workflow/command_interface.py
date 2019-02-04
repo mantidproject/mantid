@@ -1,15 +1,20 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
 """
     List of user commands.
 """
-
+from __future__ import (absolute_import, division, print_function)
 from reduction_workflow.reducer import Reducer
 
 
 class ReductionSingleton(object):
     """ Singleton reduction class """
-
-    ## storage for the instance reference
+    # storage for the instance reference
     __instance = None
 
     def __init__(self):
@@ -66,7 +71,8 @@ class ReductionSingleton(object):
 
 
 def get_property_manager(name):
-    prop_mng = PropertyManagerDataService.retrieve(name)
+    # prop_mng = mantid.PropertyManagerDataService.retrieve(name)
+    pass
 
 ## List of user commands ######################################################
 

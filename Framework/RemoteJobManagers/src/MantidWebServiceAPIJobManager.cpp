@@ -1,7 +1,13 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
+#include "MantidRemoteJobManagers/MantidWebServiceAPIJobManager.h"
 #include "MantidAPI/RemoteJobManagerFactory.h"
 #include "MantidKernel/Logger.h"
 #include "MantidRemoteJobManagers/MantidWebServiceAPIHelper.h"
-#include "MantidRemoteJobManagers/MantidWebServiceAPIJobManager.h"
 #include "MantidRemoteJobManagers/SimpleJSON.h"
 
 #include <fstream>
@@ -15,9 +21,10 @@ DECLARE_REMOTEJOBMANAGER(MantidWebServiceAPIJobManager)
 namespace {
 // static logger object
 Mantid::Kernel::Logger g_log("MantidWebServiceAPIJobManager");
-}
+} // namespace
 
 using namespace Mantid::Kernel;
+using Mantid::Types::Core::DateAndTime;
 
 /**
  * Abort a previously submitted job
@@ -100,8 +107,8 @@ void MantidWebServiceAPIJobManager::downloadRemoteFile(
     const std::string &localFileName) {
 
   std::istream &respStream =
-      httpGet("/download", std::string("TransID=") + transactionID + "&File=" +
-                               remoteFileName);
+      httpGet("/download", std::string("TransID=") + transactionID +
+                               "&File=" + remoteFileName);
 
   if (lastStatus() == Poco::Net::HTTPResponse::HTTP_OK) {
 
@@ -369,8 +376,7 @@ std::string MantidWebServiceAPIJobManager::startRemoteTransaction() {
  * (remote) compute resource.
  */
 void MantidWebServiceAPIJobManager::stopRemoteTransaction(
-    const std::string &transactionID) {
-  std::string transId = transactionID;
+    const std::string &transId) {
   std::istream &respStream =
       httpGet("/transaction", std::string("Action=Stop&TransID=") + transId);
 
@@ -420,9 +426,8 @@ std::string MantidWebServiceAPIJobManager::submitRemoteJob(
   postData[runnable] = param;
 
   // Job name is optional
-  std::string jobName = taskName;
-  if (jobName.length() > 0) {
-    postData["JobName"] = jobName;
+  if (taskName.length() > 0) {
+    postData["JobName"] = taskName;
   }
 
   std::istream &respStream = httpPost("/submit", postData);

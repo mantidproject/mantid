@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -20,12 +20,16 @@ Usage
     
     #Find minima
     minim=Min(InputWorkspace='w2')
-    print "Minima for spectrum 0 is Y = ",minim.dataY(0)[0]," and it occurs at X between ", minim.dataX(0)[0], " and ", minim.dataX(0)[1]
-    print "Minima for spectrum 1 is Y = ",minim.dataY(1)[0]," and it occurs at X between ", minim.dataX(1)[0], " and ", minim.dataX(1)[1]
+    print("Minima for spectrum 0 is Y =  {}  and it occurs at X between  {}  and  {}".
+           format(minim.dataY(0)[0], minim.dataX(0)[0], minim.dataX(0)[1]))
+    print("Minima for spectrum 1 is Y =  {}  and it occurs at X between  {}  and  {}".
+          format(minim.dataY(1)[0], minim.dataX(1)[0], minim.dataX(1)[1]))
     
     #Find minima with extra parameters
     minim=Min(InputWorkspace='w2',RangeLower=0,RangeUpper=3,StartWorkspaceIndex =1,EndWorkspaceIndex=1)
-    print "The new output workspace has ",minim.getNumberHistograms()," histogram, with the minimum Y = ",minim.dataY(0)[0]," and it occurs at X between ", minim.dataX(0)[0], " and ", minim.dataX(0)[1]
+    print("The new output workspace has  {}  histogram, with the minimum Y =  {}  " \
+          "and it occurs at X between  {}  and  {}".
+          format(minim.getNumberHistograms(), minim.dataY(0)[0], minim.dataX(0)[0], minim.dataX(0)[1]))
     
 .. testcleanup:: Min
 

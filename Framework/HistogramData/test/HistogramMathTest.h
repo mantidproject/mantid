@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_HISTOGRAMDATA_HISTOGRAMMATHTEST_H_
 #define MANTID_HISTOGRAMDATA_HISTOGRAMMATHTEST_H_
 
@@ -5,6 +11,7 @@
 
 #include "MantidHistogramData/Histogram.h"
 #include "MantidHistogramData/HistogramMath.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 using namespace Mantid::HistogramData;
 
@@ -148,7 +155,9 @@ public:
   void test_minus_histogram_self() {
     BinEdges edges{1, 2, 3};
     Histogram hist(edges, Counts{4, 9});
+    GNU_DIAG_OFF("self-assign-overloaded")
     hist -= hist;
+    GNU_DIAG_ON("self-assign-overloaded")
     TS_ASSERT_EQUALS(hist.sharedX(), edges.cowData());
     TS_ASSERT_EQUALS(hist.y()[0], 0.0);
     TS_ASSERT_EQUALS(hist.y()[1], 0.0);
@@ -281,7 +290,9 @@ public:
   void test_divide_histogram_self() {
     BinEdges edges{1, 2, 3};
     Histogram hist(edges, Frequencies{4, 9});
+    GNU_DIAG_OFF("self-assign-overloaded")
     hist /= hist;
+    GNU_DIAG_ON("self-assign-overloaded")
     TS_ASSERT_EQUALS(hist.sharedX(), edges.cowData());
     TS_ASSERT_EQUALS(hist.y()[0], 1.0);
     TS_ASSERT_EQUALS(hist.y()[1], 1.0);

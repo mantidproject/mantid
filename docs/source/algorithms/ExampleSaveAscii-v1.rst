@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -40,9 +40,9 @@ Usage
     
     # Read and print first 3 lines from file
     with open(filepath, 'r') as f:
-        print f.readline()[:-1]
-        print f.readline()[:-1]
-        print f.readline()[:-1]
+        print(f.readline()[:-1])
+        print(f.readline()[:-1])
+        print(f.readline()[:-1])
     
     # Delete the test file
     os.remove(filepath)

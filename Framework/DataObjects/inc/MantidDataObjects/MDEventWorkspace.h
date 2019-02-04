@@ -1,18 +1,24 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MDEVENTWORKSPACE_H_
 #define MDEVENTWORKSPACE_H_
 
+#include "MantidAPI/BoxController.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/System.h"
-#include "MantidAPI/BoxController.h"
 //#include "MantidDataObjects/BoxCtrlChangesList.h"
 #include "MantidAPI/CoordTransform.h"
+#include "MantidAPI/IMDIterator.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidDataObjects/MDBoxBase.h"
-#include "MantidDataObjects/MDLeanEvent.h"
 #include "MantidDataObjects/MDGridBox.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
-#include "MantidAPI/ITableWorkspace_fwd.h"
-#include "MantidAPI/IMDIterator.h"
+#include "MantidDataObjects/MDLeanEvent.h"
 
 namespace Mantid {
 namespace DataObjects {
@@ -35,9 +41,9 @@ class DLLExport MDEventWorkspace : public API::IMDEventWorkspace {
 
 public:
   /// Typedef for a shared pointer of this kind of event workspace
-  typedef boost::shared_ptr<MDEventWorkspace<MDE, nd>> sptr;
+  using sptr = boost::shared_ptr<MDEventWorkspace<MDE, nd>>;
   /// Typedef to access the MDEventType.
-  typedef MDE MDEventType;
+  using MDEventType = MDE;
 
   MDEventWorkspace(Mantid::API::MDNormalization preferredNormalization =
                        Mantid::API::MDNormalization::VolumeNormalization,
@@ -50,6 +56,11 @@ public:
   /// Returns a clone of the workspace
   std::unique_ptr<MDEventWorkspace> clone() const {
     return std::unique_ptr<MDEventWorkspace>(doClone());
+  }
+
+  /// Returns a default-initialized clone of the workspace
+  std::unique_ptr<MDEventWorkspace> cloneEmpty() const {
+    return std::unique_ptr<MDEventWorkspace>(doCloneEmpty());
   }
 
   /// Perform initialization after dimensions (and others) have been set.
@@ -68,7 +79,7 @@ public:
   uint64_t getNEvents() const override { return getNPoints(); }
 
   /// Creates a new iterator pointing to the first cell (box) in the workspace
-  std::vector<Mantid::API::IMDIterator *> createIterators(
+  std::vector<std::unique_ptr<Mantid::API::IMDIterator>> createIterators(
       size_t suggestedNumCores = 1,
       Mantid::Geometry::MDImplicitFunction *function = nullptr) const override;
 
@@ -236,6 +247,10 @@ protected:
 private:
   MDEventWorkspace *doClone() const override {
     return new MDEventWorkspace(*this);
+  }
+
+  MDEventWorkspace *doCloneEmpty() const override {
+    return new MDEventWorkspace();
   }
 
   Kernel::SpecialCoordinateSystem m_coordSystem;

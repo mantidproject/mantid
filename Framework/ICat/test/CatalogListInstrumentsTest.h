@@ -1,17 +1,29 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef LISTINSTRUMENTS_H_
 #define LISTINSTRUMENTS_H_
 
-#include <cxxtest/TestSuite.h>
+#include "ICatTestHelper.h"
+#include "MantidDataObjects/WorkspaceSingleValue.h" // why this is required to register table workspace.
 #include "MantidICat/CatalogListInstruments.h"
 #include "MantidICat/CatalogLogin.h"
-#include "MantidDataObjects/WorkspaceSingleValue.h" // why this is required to register table workspace.
-#include "ICatTestHelper.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Mantid::ICat;
 
 class CatalogListInstrumentsTest : public CxxTest::TestSuite {
 public:
+  // This means the constructor isn't called when running other tests
+  static CatalogListInstrumentsTest *createSuite() {
+    return new CatalogListInstrumentsTest();
+  }
+  static void destroySuite(CatalogListInstrumentsTest *suite) { delete suite; }
+
   /// Skip all unit tests if ICat server is down
   bool skipTests() override { return ICatTestHelper::skipTests(); }
 

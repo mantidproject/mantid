@@ -1,11 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef PROPERTYHISTORYTEST_H_
 #define PROPERTYHISTORYTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/PropertyHistory.h"
+#include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/Property.h"
-#include <sstream>
+#include "MantidKernel/PropertyHistory.h"
+
 #include <boost/lexical_cast.hpp>
+#include <cxxtest/TestSuite.h>
+#include <sstream>
 
 using namespace Mantid::Kernel;
 
@@ -13,9 +21,9 @@ class PropertyHistoryTest : public CxxTest::TestSuite {
 public:
   void testPopulate() {
     std::string correctOutput = "Name: arg1_param, ";
-    correctOutput = correctOutput + "Value: 20, ";
-    correctOutput = correctOutput + "Default?: Yes, ";
-    correctOutput = correctOutput + "Direction: Input\n";
+    correctOutput += "Value: 20, ";
+    correctOutput += "Default?: Yes, ";
+    correctOutput += "Direction: Input\n";
 
     // Not really much to test
     PropertyHistory AP("arg1_param", "20", "argument", true, Direction::Input);
@@ -23,6 +31,22 @@ public:
     // dump output to sting
     std::ostringstream output;
     TS_ASSERT_THROWS_NOTHING(output << AP);
+    TS_ASSERT_EQUALS(output.str(), correctOutput);
+  }
+
+  void testOutputWithShortenedValue() {
+    std::string correctOutput = "Name: arg1_param, ";
+    correctOutput += "Value: 1234567 ... 4567890, ";
+    correctOutput += "Default?: Yes, ";
+    correctOutput += "Direction: Input\n";
+
+    // a long property that should get shortened
+    PropertyHistory propHistory("arg1_param", "123456798012345678901234567890",
+                                "argument", true, Direction::Input);
+
+    // dump output to sting
+    std::ostringstream output;
+    TS_ASSERT_THROWS_NOTHING(propHistory.printSelf(output, 0, 20));
     TS_ASSERT_EQUALS(output.str(), correctOutput);
   }
 
@@ -57,9 +81,9 @@ public:
   }
 
   /**
-    * Test the isEmptyDefault method returns false if the value of EMPTY_INT is
-    * not the default
-    */
+   * Test the isEmptyDefault method returns false if the value of EMPTY_INT is
+   * not the default
+   */
   void testIsEmptyDefault_NotDefault() {
     PropertyHistory prop("arg",
                          boost::lexical_cast<std::string>(Mantid::EMPTY_INT()),
@@ -68,9 +92,9 @@ public:
   }
 
   /**
-    * Test the isEmptyDefault method returns false if the parameter type is not
-    * "number"
-    */
+   * Test the isEmptyDefault method returns false if the parameter type is not
+   * "number"
+   */
   void testIsEmptyDefault_WrongType() {
     PropertyHistory prop("arg",
                          boost::lexical_cast<std::string>(Mantid::EMPTY_INT()),
@@ -79,8 +103,8 @@ public:
   }
 
   /**
-    * Test the isEmptyDefault method returns false if the value is not EMPTY_XXX
-    */
+   * Test the isEmptyDefault method returns false if the value is not EMPTY_XXX
+   */
   void testIsEmptyDefault_NotEmpty() {
     PropertyHistory prop(
         "arg", boost::lexical_cast<std::string>(Mantid::EMPTY_INT() - 1),

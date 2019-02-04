@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -55,8 +55,8 @@ Usage
                                 TimeMin = 0.55,
                                 TimeMax = 12.0);
 
-   print "Y values (asymmetry):", ws.readY(0)
-   print "X values (sample magn. field):", ws.readX(0)
+   print("Y values (asymmetry): {}".format(ws.readY(0)))
+   print("X values (sample magn. field): {}".format(ws.readX(0)))
 
 Output:
 
@@ -77,11 +77,11 @@ Output:
                                 Red = 1,
                                 Green = 2);
 
-   print "Y values (difference):", ws.readY(0)
-   print "Y values (red):", ws.readY(1)
-   print "Y values (green):", ws.readY(2)
-   print "Y values (sum):", ws.readY(3)
-   print "X values (sample magn. field):", ws.readX(0)
+   print("Y values (difference): {}".format(ws.readY(0)))
+   print("Y values (red): {}".format(ws.readY(1)))
+   print("Y values (green): {}".format(ws.readY(2)))
+   print("Y values (sum): {}".format(ws.readY(3)))
+   print("X values (sample magn. field): {}".format(ws.readX(0)))
 
 Output:
 
@@ -98,8 +98,8 @@ Output:
 .. testcode:: ExCustomGrouping
 
    # Skip spectra 35
-   fwd_spectra = range(33,35) + range(36,65)
-
+   fwd_spectra = [x for x in range(33, 65) if x != 35]
+   
    # Skip spectra 1 and 2
    bwd_spectra = range(3, 33)
 
@@ -111,10 +111,10 @@ Output:
                                 ForwardSpectra = fwd_spectra,
                                 BackwardSpectra = bwd_spectra)
 
-   print "No of forward spectra used:", len(fwd_spectra)
-   print "No of backward spectra used:", len(bwd_spectra)
-   print "Y values (asymmetry):", ws.readY(0)
-   print "X values (sample magn. field):", ws.readX(0)
+   print("No of forward spectra used: {}".format(len(fwd_spectra)))
+   print("No of backward spectra used: {}".format(len(bwd_spectra)))
+   print("Y values (asymmetry): {}".format(ws.readY(0)))
+   print("X values (sample magn. field): {}".format(ws.readX(0)))
 
 Output:
 
@@ -136,8 +136,8 @@ Output:
                                 TimeMax = 12.0,
                                 DeadTimeCorrType = 'FromRunData');
 
-   print "Y values (asymmetry):", ws.readY(0)
-   print "X values (sample magn. field):", ws.readX(0)
+   print("Y values (asymmetry): {}".format(ws.readY(0)))
+   print("X values (sample magn. field): {}".format(ws.readX(0)))
 
 Output:
 
@@ -154,8 +154,8 @@ Output:
                                 LastRun="MUSR00015191",
                                 LogValue="sample_temp",
                                 Function="Mean")
-   print "Y values (asymmetry):", ws.readY(0)
-   print "X values (sample magn. field):", ws.readX(0)
+   print("Y values (asymmetry): {}".format(ws.readY(0)))
+   print("X values (sample magn. field): {}".format(ws.readX(0)))
 
 Output:
 

@@ -1,9 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/MDGeometry/MDPlane.h"
+#include "MantidKernel/Matrix.h"
 #include "MantidKernel/System.h"
-#include <stdexcept>
 #include "MantidKernel/VMD.h"
 #include <gsl/gsl_linalg.h>
-#include "MantidKernel/Matrix.h"
+#include <stdexcept>
 
 using namespace Mantid::Kernel;
 
@@ -260,5 +266,5 @@ MDPlane &MDPlane::operator=(const MDPlane &other) {
  */
 MDPlane::~MDPlane() { delete[] m_normal; }
 
-} // namespace Mantid
 } // namespace Geometry
+} // namespace Mantid

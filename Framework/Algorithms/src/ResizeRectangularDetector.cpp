@@ -1,11 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/ResizeRectangularDetector.h"
-#include "MantidKernel/System.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/IComponent.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidAPI/ResizeRectangularDetectorHelper.h"
+#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidKernel/System.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -100,22 +108,30 @@ void ResizeRectangularDetector::exec() {
   if (!det)
     throw std::runtime_error("Component with name " + ComponentName +
                              " is not a RectangularDetector.");
-  if (inputW) {
-    Geometry::ParameterMap &pmap = inputW->instrumentParameters();
-    // Add a parameter for the new scale factors
-    pmap.addDouble(det->getComponentID(), "scalex", ScaleX);
-    pmap.addDouble(det->getComponentID(), "scaley", ScaleY);
 
-    pmap.clearPositionSensitiveCaches();
-  } else if (inputP) {
-    Geometry::ParameterMap &pmap = inputP->instrumentParameters();
-    // Add a parameter for the new scale factors
-    pmap.addDouble(det->getComponentID(), "scalex", ScaleX);
-    pmap.addDouble(det->getComponentID(), "scaley", ScaleY);
+  auto input = boost::dynamic_pointer_cast<ExperimentInfo>(ws);
+  Geometry::ParameterMap &pmap = input->instrumentParameters();
+  auto oldscalex = pmap.getDouble(det->getName(), std::string("scalex"));
+  auto oldscaley = pmap.getDouble(det->getName(), std::string("scaley"));
+  // Add a parameter for the new scale factors
+  pmap.addDouble(det->getComponentID(), "scalex", ScaleX);
+  pmap.addDouble(det->getComponentID(), "scaley", ScaleY);
+  pmap.clearPositionSensitiveCaches();
 
-    pmap.clearPositionSensitiveCaches();
-  }
+  // Positions of detectors are now stored in DetectorInfo, so we must update
+  // positions there.
+  // This algorithm is setting the absolute scale factor. Since there may be a
+  // previous scaling we have to factor that out.
+  double relscalex = ScaleX;
+  double relscaley = ScaleY;
+  if (!oldscalex.empty())
+    relscalex /= oldscalex[0];
+  if (!oldscaley.empty())
+    relscaley /= oldscaley[0];
+  applyRectangularDetectorScaleToComponentInfo(input->mutableComponentInfo(),
+                                               comp->getComponentID(),
+                                               relscalex, relscaley);
 }
 
-} // namespace Mantid
 } // namespace Algorithms
+} // namespace Mantid

@@ -1,19 +1,27 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MDALGORITHMS_LOADMDEWTEST_H_
 #define MANTID_MDALGORITHMS_LOADMDEWTEST_H_
 
-#include "SaveMDTest.h"
 #include "SaveMD2Test.h"
+#include "SaveMDTest.h"
 
-#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/ExperimentInfo.h"
+#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/WorkspaceHistory.h"
+#include "MantidDataObjects/BoxControllerNeXusIO.h"
 #include "MantidDataObjects/MDBox.h"
-#include "MantidDataObjects/MDGridBox.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
-#include "MantidDataObjects/BoxControllerNeXusIO.h"
-#include "MantidGeometry/MDGeometry/QSample.h"
+#include "MantidDataObjects/MDGridBox.h"
 #include "MantidGeometry/MDGeometry/GeneralFrame.h"
 #include "MantidGeometry/MDGeometry/HKL.h"
+#include "MantidGeometry/MDGeometry/QSample.h"
+#include "MantidKernel/Strings.h"
 #include "MantidMDAlgorithms/LoadMD.h"
 
 #include <cxxtest/TestSuite.h>
@@ -169,7 +177,7 @@ public:
   template <size_t nd>
   void do_test_exec(bool FileBackEnd, bool deleteWorkspace = true,
                     double memory = 0, bool BoxStructureOnly = false) {
-    typedef MDLeanEvent<nd> MDE;
+    using MDE = MDLeanEvent<nd>;
 
     //------ Start by creating the file
     //----------------------------------------------
@@ -251,8 +259,8 @@ public:
 
       typename std::vector<API::IMDNode *> boxes;
       ws->getBox()->getBoxes(boxes, 1000, false);
-      for (size_t i = 0; i < boxes.size(); i++) {
-        MDBox<MDE, nd> *box = dynamic_cast<MDBox<MDE, nd> *>(boxes[i]);
+      for (auto &boxIt : boxes) {
+        MDBox<MDE, nd> *box = dynamic_cast<MDBox<MDE, nd> *>(boxIt);
         if (box) {
           TSM_ASSERT("Large box should not be in memory",
                      box->getISaveable()->getDataMemorySize() == 0);
@@ -305,7 +313,7 @@ public:
       ev.setCenter(d, 0.5);
     box->addEvent(ev);
     // CHANGE from AB: 20/01/2013: you have to split to identify changes!
-    box->splitAllIfNeeded(NULL);
+    box->splitAllIfNeeded(nullptr);
 
     // Modify a different box by accessing the events
     MDBox<MDLeanEvent<nd>, nd> *box8 =

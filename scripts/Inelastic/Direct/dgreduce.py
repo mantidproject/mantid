@@ -1,5 +1,12 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
 """ Empty class temporary left for compatibility with previous interfaces """
+from __future__ import (absolute_import, division, print_function)
 import Direct.DirectEnergyConversion as DRC
 from mantid.simpleapi import *
 from mantid.kernel import funcinspect
@@ -75,7 +82,7 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
                ,diag_remove_zero=False,norm_method='current')
 
 
-    type help() for the list of all available keywords. All availible keywords are provided in InstName_Parameters.xml file
+    type help() for the list of all available keywords. All available keywords are provided in InstName_Parameters.xml file
 
 
     Some samples are:
@@ -288,7 +295,7 @@ def abs_units(wb_for_run,sample_run,monovan_run,wb_for_monovanadium,samp_rmm,sam
 
     wksp_out = arb_units(wb_for_run,sample_run,ei_guess,rebin,map_file,monovan_run,wb_for_monovanadium,**kwargs)
 
-    if  results_name != wksp_out.getName():
+    if  results_name != wksp_out.name():
         RenameWorkspace(InputWorkspace=wksp_out,OutputWorkspace=results_name)
 
     return wksp_out

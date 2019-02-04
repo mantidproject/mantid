@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef SAVEPHXTEST_H_
 #define SAVEPHXTEST_H_
 
@@ -7,15 +13,16 @@
 #include "MantidDataHandling/SavePHX.h"
 // to generate test workspaces
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
 
-#include "MantidKernel/UnitFactory.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/OptionalBool.h"
+#include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -138,8 +145,8 @@ public:
         sample_value[0] = (float)spTW->rowCount();
       } else {
         size_t ii = 0;
-        for (size_t i = 0; i < column_name.size(); i++) {
-          sample_value[ii] = (spTW->cell_cast<float>(ic - 1, column_name[i]));
+        for (const auto &i : column_name) {
+          sample_value[ii] = (spTW->cell_cast<float>(ic - 1, i));
           ii++;
           if (ii == 1)
             ii = 2; // scip second column in the file, which contains 0;
@@ -170,7 +177,7 @@ private:
     // all the Y values in this new workspace are set to DEFAU_Y, which
     // currently = 2
     MatrixWorkspace_sptr inputWS =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(NHIST, 10, 1.0);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(NHIST, 10, 1.0);
     return setUpWorkspace(input, inputWS);
   }
 
@@ -179,11 +186,6 @@ private:
     inputWS->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("DeltaE");
 
-    // the following is largely about associating detectors with the workspace
-    for (int j = 0; j < NHIST; ++j) {
-      // Just set the spectrum number to match the index
-      inputWS->getSpectrum(j).setSpectrumNo(j + 1);
-    }
     // we do not need to deal with analysisi data service here in test to avoid
     // holding the workspace there after the test
     AnalysisDataService::Instance().add(input, inputWS);
@@ -197,13 +199,6 @@ private:
     loader.setPropertyValue("Workspace", input);
     loader.setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(true));
     loader.execute();
-
-    // mask the detector
-    Geometry::ParameterMap *m_Pmap = &(inputWS->instrumentParameters());
-    boost::shared_ptr<const Instrument> instru = inputWS->getInstrument();
-    Geometry::IDetector_const_sptr toMask = instru->getDetector(THEMASKED);
-    TS_ASSERT(toMask)
-    m_Pmap->addBool(toMask.get(), "masked", true);
 
     // required to get it passed the algorthms validator
     inputWS->setDistribution(true);

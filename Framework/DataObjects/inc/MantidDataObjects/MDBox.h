@@ -1,15 +1,21 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MDBOX_H_
 #define MDBOX_H_
 
-#include "MantidKernel/ThreadScheduler.h"
-#include "MantidKernel/MultiThreaded.h"
-#include "MantidKernel/System.h"
-#include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
-#include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidDataObjects/MDBoxBase.h"
 #include "MantidDataObjects/MDDimensionStats.h"
 #include "MantidDataObjects/MDLeanEvent.h"
+#include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
+#include "MantidGeometry/MDGeometry/MDTypes.h"
+#include "MantidKernel/MultiThreaded.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/ThreadScheduler.h"
 
 namespace Mantid {
 namespace DataObjects {
@@ -48,13 +54,13 @@ public:
         const size_t boxID = UNDEF_SIZET);
 
   MDBox(Mantid::API::BoxController_sptr &splitter, const uint32_t depth,
-        const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> &
-            extentsVector,
+        const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>>
+            &extentsVector,
         const size_t nBoxEvents = UNDEF_SIZET,
         const size_t boxID = UNDEF_SIZET);
   MDBox(Mantid::API::BoxController *const splitter, const uint32_t depth,
-        const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> &
-            extentsVector,
+        const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>>
+            &extentsVector,
         const size_t nBoxEvents = UNDEF_SIZET,
         const size_t boxID = UNDEF_SIZET);
 
@@ -172,9 +178,11 @@ public:
   void calculateCentroid(coord_t *centroid, const int runindex) const override;
   coord_t *getCentroid() const override;
   void calculateDimensionStats(MDDimensionStats *stats) const;
-  void integrateSphere(Mantid::API::CoordTransform &radiusTransform,
-                       const coord_t radiusSquared, signal_t &signal,
-                       signal_t &errorSquared) const override;
+  void integrateSphere(
+      Mantid::API::CoordTransform &radiusTransform, const coord_t radiusSquared,
+      signal_t &signal, signal_t &errorSquared,
+      const coord_t innerRadiusSquared = 0.0,
+      const bool useOnePercentBackgroundCorrection = true) const override;
   void centroidSphere(Mantid::API::CoordTransform &radiusTransform,
                       const coord_t radiusSquared, coord_t *centroid,
                       signal_t &signal) const override;
@@ -225,10 +233,10 @@ private:
 
 public:
   /// Typedef for a shared pointer to a MDBox
-  typedef boost::shared_ptr<MDBox<MDE, nd>> sptr;
+  using sptr = boost::shared_ptr<MDBox<MDE, nd>>;
 
   /// Typedef for a vector of the conatined events
-  typedef std::vector<MDE> vec_t;
+  using vec_t = std::vector<MDE>;
 };
 
 #ifndef __INTEL_COMPILER
@@ -279,7 +287,6 @@ public:
     return MDLeanEvent<nd>(Signal, Error, Coord);
   }
 };
-
 } // namespace DataObjects
 
 } // namespace Mantid

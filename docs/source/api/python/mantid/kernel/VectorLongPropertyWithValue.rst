@@ -2,7 +2,7 @@
  VectorLongPropertyWithValue
 =============================
 
-This a python binding to the C++ class Mantid::Kernel::VectorLongPropertyWithValue.
+This is a Python binding to the C++ class Mantid::Kernel::VectorLongPropertyWithValue.
 
 *bases:* :py:obj:`mantid.kernel.Property`
 

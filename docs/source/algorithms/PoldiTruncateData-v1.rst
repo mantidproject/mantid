@@ -3,7 +3,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -33,12 +33,12 @@ In the first example, POLDI data is cropped to the correct workspace size:
     raw_6903 = LoadSINQFile(Filename = "poldi2013n006903.hdf", Instrument = "POLDI")
     LoadInstrument(raw_6903, InstrumentName = "POLDI", RewriteSpectraMap=True)
 
-    print "The raw data workspace contains", len(raw_6903.readX(0)), "time bins."
+    print("The raw data workspace contains {} time bins.".format(len(raw_6903.readX(0))))
     
     # Truncate the data
     truncated_6903 = PoldiTruncateData(raw_6903)
     
-    print "The truncated data workspace contains", len(truncated_6903.readX(0)), "time bins."
+    print("The truncated data workspace contains {} time bins.".format(len(truncated_6903.readX(0))))
 
 Output:
 
@@ -62,8 +62,8 @@ The second example also examines the extra time bins:
     extra_6903 = mtd['extra_6903']
     
     # Examine the workspace a bit
-    print "The extra data workspace contains", extra_6903.getNumberHistograms(), "spectrum."
-    print "The bins contain the following data:", [int(x) for x in extra_6903.readY(0)]
+    print("The extra data workspace contains {} spectrum.".format(extra_6903.getNumberHistograms()))
+    print("The bins contain the following data: {}".format([int(x) for x in extra_6903.readY(0)]))
     
 Output:
 

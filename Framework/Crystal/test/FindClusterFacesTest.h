@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CRYSTAL_FINDCLUSTERFACESTEST_H_
 #define MANTID_CRYSTAL_FINDCLUSTERFACESTEST_H_
 
@@ -10,9 +16,9 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/MDGeometry/HKL.h"
+#include "MantidKernel/UnitLabelTypes.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
-#include "MantidKernel/UnitLabelTypes.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
@@ -104,7 +110,7 @@ ITableWorkspace_sptr doExecuteWithFilter(IMDHistoWorkspace_sptr &inWS,
   ITableWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
   return outWS;
 }
-}
+} // namespace
 
 //=====================================================================================
 // Functional Tests
@@ -113,7 +119,7 @@ class FindClusterFacesTest : public CxxTest::TestSuite {
 
 private:
   void verify_table_row(ITableWorkspace_sptr &outWS, int expectedClusterId,
-                        size_t expectedWorkspaceIndex,
+                        double expectedWorkspaceIndex,
                         int expectedNormalDimensionIndex,
                         bool expectedMaxExtent, double expectedRadius = -1) {
     for (size_t rowIndex = 0; rowIndex < outWS->rowCount(); ++rowIndex) {
@@ -185,7 +191,7 @@ public:
     TSM_ASSERT_EQUALS("Two faces should be identified", outWS->rowCount(), 2);
 
     int clusterId = 1;
-    size_t expectedWorkspaceIndex = 1;
+    double expectedWorkspaceIndex = 1.;
     int expectedNormalDimensionIndex = 0;
     bool maxExtent = true;
     verify_table_row(outWS, clusterId, expectedWorkspaceIndex,

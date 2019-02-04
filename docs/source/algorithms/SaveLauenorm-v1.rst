@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -37,7 +37,7 @@ Usage
     SaveLauenorm(InputWorkspace=peaks, Filename=prefix)
 
     firstfile = prefix + "001"
-    print "File was saved:", os.path.isfile(firstfile)
+    print("File was saved: {}".format(os.path.isfile(firstfile)))
 
 Output:
 
@@ -66,7 +66,7 @@ Output:
 
     #load a peaks workspace from file
     peaks = LoadIsawPeaks(Filename=r'Peaks5637.integrate')
-    print "Number of peaks in table %d" % peaks.rowCount()
+    print("Number of peaks in table {}".format(peaks.rowCount()))
 
     prefix = os.path.expanduser("~/MyPeaks")
     SaveLauenorm(InputWorkspace=peaks, Filename=prefix, MinWavelength=0.5, MaxWavelength=2,MinDSpacing=0.2, SortFilesBy='Bank')
@@ -75,7 +75,7 @@ Output:
     ifile = open(finalfile, 'r')
     lines = ifile.readlines()
     ifile.close()
-    print "Number of peaks in table %d" % len(lines)
+    print("Number of peaks in table {}".format(len(lines)))
 
 Output:
 

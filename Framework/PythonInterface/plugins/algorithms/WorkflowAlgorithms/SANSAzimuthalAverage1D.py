@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name,too-many-locals,too-many-branches
 from __future__ import (absolute_import, division, print_function)
 
@@ -200,6 +206,7 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
             qmin = workspace.getRun().getProperty("qmin").value
             qmax = workspace.getRun().getProperty("qmax").value
         else:
+            #  Checked 8/10/2017 -  this is using the right distance for calculating q
             sample_detector_distance = workspace.getRun().getProperty("sample_detector_distance").value
             nx_pixels = int(workspace.getInstrument().getNumberParameter("number-of-x-pixels")[0])
             ny_pixels = int(workspace.getInstrument().getNumberParameter("number-of-y-pixels")[0])

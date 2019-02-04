@@ -1,10 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAHANDLING_LOADCALFILETEST_H_
 #define MANTID_DATAHANDLING_LOADCALFILETEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/System.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Run.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include <cxxtest/TestSuite.h>
 
 #include "MantidDataHandling/LoadCalFile.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
@@ -89,10 +97,11 @@ public:
     TS_ASSERT_EQUALS(int(maskWS->getValue(101003)), 1);
     TS_ASSERT_EQUALS(int(maskWS->getValue(101008)), 1);
     TS_ASSERT_EQUALS(int(maskWS->getValue(715079)), 0);
-    TS_ASSERT(!maskWS->getInstrument()->getDetector(101001)->isMasked());
-    TS_ASSERT(maskWS->getInstrument()->getDetector(101003)->isMasked());
-    TS_ASSERT(maskWS->getInstrument()->getDetector(101008)->isMasked());
-    TS_ASSERT(!maskWS->getInstrument()->getDetector(715079)->isMasked());
+    const auto &detectorInfo = maskWS->detectorInfo();
+    TS_ASSERT(!detectorInfo.isMasked(detectorInfo.indexOf(101001)));
+    TS_ASSERT(detectorInfo.isMasked(detectorInfo.indexOf(101003)));
+    TS_ASSERT(detectorInfo.isMasked(detectorInfo.indexOf(101008)));
+    TS_ASSERT(!detectorInfo.isMasked(detectorInfo.indexOf(715079)));
     // Check if filename is saved
     TS_ASSERT_EQUALS(alg.getPropertyValue("CalFilename"),
                      maskWS->run().getProperty("Filename")->value());
@@ -122,8 +131,8 @@ public:
   }
 
   void tearDown() override {
-    for (size_t i = 0; i < loadAlgPtrArray.size(); i++) {
-      delete loadAlgPtrArray[i];
+    for (auto &i : loadAlgPtrArray) {
+      delete i;
     }
     loadAlgPtrArray.clear();
 

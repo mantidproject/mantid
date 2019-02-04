@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAOBJECTS_MASKWORKSPACE_H
 #define MANTID_DATAOBJECTS_MASKWORKSPACE_H
 
@@ -22,6 +28,10 @@ public:
   /// Returns a clone of the workspace
   std::unique_ptr<MaskWorkspace> clone() const {
     return std::unique_ptr<MaskWorkspace>(doClone());
+  }
+  /// Returns a default-initialized clone of the workspace
+  std::unique_ptr<MaskWorkspace> cloneEmpty() const {
+    return std::unique_ptr<MaskWorkspace>(doCloneEmpty());
   }
   MaskWorkspace &operator=(const MaskWorkspace &other) = delete;
   bool isMasked(const detid_t detectorID) const override;
@@ -49,8 +59,9 @@ protected:
 
 private:
   MaskWorkspace *doClone() const override { return new MaskWorkspace(*this); }
+  MaskWorkspace *doCloneEmpty() const override { return new MaskWorkspace(); }
 
-  IMaskWorkspace *doInterfaceClone() const override { return doClone(); };
+  IMaskWorkspace *doInterfaceClone() const override { return doClone(); }
   /// Clear original incorrect mask
   void clearMask();
 
@@ -59,10 +70,10 @@ private:
 };
 
 /// shared pointer to the MaskWorkspace class
-typedef boost::shared_ptr<MaskWorkspace> MaskWorkspace_sptr;
+using MaskWorkspace_sptr = boost::shared_ptr<MaskWorkspace>;
 
 /// shared pointer to a const MaskWorkspace
-typedef boost::shared_ptr<const MaskWorkspace> MaskWorkspace_const_sptr;
+using MaskWorkspace_const_sptr = boost::shared_ptr<const MaskWorkspace>;
 
 } // namespace DataObjects
 } // namespace Mantid

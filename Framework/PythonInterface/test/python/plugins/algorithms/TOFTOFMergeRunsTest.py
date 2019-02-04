@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
@@ -86,6 +92,14 @@ class TOFTOFMergeRunsTest(unittest.TestCase):
 
         if "output_ws" is not None:
             AnalysisDataService.remove("output_ws")
+
+    def test_single_ws(self):
+        OutputWorkspaceName = "output_ws"
+        Inputws = self._input_ws_base.name()
+        alg_test = run_algorithm("TOFTOFMergeRuns",
+                                 InputWorkspaces=Inputws,
+                                 OutputWorkspace=OutputWorkspaceName)
+        self.assertTrue(alg_test.isExecuted())
 
     def cleanUp(self):
         if self._input_ws_base is not None:

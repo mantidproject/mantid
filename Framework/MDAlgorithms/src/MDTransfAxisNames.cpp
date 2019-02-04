@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/MDTransfAxisNames.h"
 #include <boost/format.hpp>
 
@@ -83,10 +89,10 @@ std::string makeAxisName(const Kernel::V3D &Dir,
       name += "-";
     }
     if (std::fabs(absDir[i] - 1) < eps) {
-      name += mainName + separator;
+      name.append(mainName).append(separator);
       continue;
     }
-    name += sprintfd(absDir[i], eps) + mainName + separator;
+    name.append(sprintfd(absDir[i], eps)).append(mainName).append(separator);
   }
 
   return name;
@@ -97,5 +103,5 @@ std::string DLLExport sprintfd(const double data, const double eps) {
   return boost::str(boost::format("%d") % dist);
 }
 
-} // endnamespace MDAlgorithms
-} // endnamespace Mantid
+} // namespace MDAlgorithms
+} // namespace Mantid

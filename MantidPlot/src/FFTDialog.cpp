@@ -28,36 +28,37 @@
  *                                                                         *
  ***************************************************************************/
 #include "FFTDialog.h"
-#include "Graph.h"
-#include "MyParser.h"
 #include "ApplicationWindow.h"
-#include "MultiLayer.h"
-#include "Table.h"
-#include "Plot.h"
 #include "FFT.h"
+#include "Graph.h"
 #include "Matrix.h"
+#include "MultiLayer.h"
+#include "MyParser.h"
+#include "Plot.h"
+#include "Table.h"
 #include "analysis/fft2D.h"
 
-#include <QRadioButton>
-#include <QGroupBox>
+#include <QApplication>
 #include <QCheckBox>
+#include <QComboBox>
+#include <QGroupBox>
+#include <QLabel>
+#include <QLayout>
+#include <QLineEdit>
 #include <QMessageBox>
 #include <QPushButton>
-#include <QLabel>
-#include <QLineEdit>
-#include <QComboBox>
-#include <QLayout>
-#include <QApplication>
+#include <QRadioButton>
 
 FFTDialog::FFTDialog(int type, QWidget *parent, Qt::WFlags fl)
-    : QDialog(parent, fl), buttonOK(NULL), buttonCancel(NULL), forwardBtn(NULL),
-      backwardBtn(NULL), boxName(NULL), boxReal(NULL), boxImaginary(NULL),
-      boxSampling(NULL), boxNormalize(NULL), boxOrder(NULL) {
+    : QDialog(parent, fl), buttonOK(nullptr), buttonCancel(nullptr),
+      forwardBtn(nullptr), backwardBtn(nullptr), boxName(nullptr),
+      boxReal(nullptr), boxImaginary(nullptr), boxSampling(nullptr),
+      boxNormalize(nullptr), boxOrder(nullptr) {
   setWindowTitle(tr("MantidPlot - FFT Options"));
 
-  d_matrix = 0;
-  d_table = 0;
-  graph = 0;
+  d_matrix = nullptr;
+  d_table = nullptr;
+  graph = nullptr;
   d_type = type;
 
   forwardBtn = new QRadioButton(tr("&Forward"));
@@ -165,7 +166,7 @@ void FFTDialog::accept() {
     throw std::logic_error(
         "Parent of FFTDialog is not ApplicationWindow as expected.");
   }
-  FFT *fft = NULL;
+  FFT *fft = nullptr;
   if (graph)
     fft = new FFT(app, graph, boxName->currentText());
   else if (d_table) {
@@ -306,7 +307,7 @@ void FFTDialog::fftMatrix() {
     }
   }
 
-  double **x_fin_re = NULL, **x_fin_im = NULL;
+  double **x_fin_re = nullptr, **x_fin_im = nullptr;
   if (inverse) {
     x_fin_re =
         Matrix::allocateMatrixData(height, width); // coeff of the initial image

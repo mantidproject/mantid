@@ -10,15 +10,18 @@ set ( MODULE_TEMPLATE src/dataobjects.cpp.in )
 set ( EXPORT_FILES
   src/Exports/EventList.cpp
   src/Exports/EventWorkspace.cpp
+  src/Exports/EventWorkspaceProperty.cpp
   src/Exports/Workspace2D.cpp
   src/Exports/RebinnedOutput.cpp
   src/Exports/SpecialWorkspace2D.cpp
   src/Exports/GroupingWorkspace.cpp
   src/Exports/MaskWorkspace.cpp
+  src/Exports/MaskWorkspaceProperty.cpp
   src/Exports/OffsetsWorkspace.cpp
   src/Exports/MDEventWorkspace.cpp
   src/Exports/MDHistoWorkspace.cpp
   src/Exports/PeaksWorkspace.cpp
+  src/Exports/PeaksWorkspaceProperty.cpp
   src/Exports/TableWorkspace.cpp
   src/Exports/SplittersWorkspace.cpp
   src/Exports/WorkspaceSingleValue.cpp
@@ -64,14 +67,17 @@ set_target_output_directory ( PythonDataObjectsModule ${OUTPUT_DIR} .pyd )
 
 # Add the required dependencies
 target_link_libraries ( PythonDataObjectsModule LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
+            PythonInterfaceCore
             PythonAPIModule
             PythonGeometryModule
             PythonKernelModule
             API
             DataObjects
+	    Types
             Kernel
             HistogramData
             Geometry
+            Indexing
             ${PYTHON_LIBRARIES}
             ${POCO_LIBRARIES}
             ${Boost_LIBRARIES} )
@@ -80,11 +86,14 @@ target_link_libraries ( PythonDataObjectsModule LINK_PRIVATE ${TCMALLOC_LIBRARIE
 if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties( PythonDataObjectsModule PROPERTIES
                          INSTALL_RPATH "@loader_path/../../../MacOS;@loader_path/../kernel/;@loader_path/../geometry/;@loader_path/../api/")
+elseif ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
+  set_target_properties( PythonDataObjectsModule PROPERTIES
+                         INSTALL_RPATH "\$ORIGIN/../../../${LIB_DIR};\$ORIGIN/../kernel/;\$ORIGIN/../geometry/;\$ORIGIN/../api/")
 endif ()
 ###########################################################################
 # Installation settings
 ###########################################################################
-install ( TARGETS PythonDataObjectsModule ${SYSTEM_PACKAGE_TARGET} DESTINATION ${BIN_DIR}/mantid/dataobjects )
+mtd_install_targets( TARGETS PythonDataObjectsModule INSTALL_DIRS ${BIN_DIR}/mantid/dataobjects ${WORKBENCH_BIN_DIR}/mantid/dataobjects )
 
 # Pure Python files
-install ( FILES ${PY_FILES} DESTINATION ${BIN_DIR}/mantid/dataobjects )
+mtd_install_files( FILES ${PY_FILES} INSTALL_DIRS ${BIN_DIR}/mantid/dataobjects ${WORKBENCH_BIN_DIR}/mantid/dataobjects)

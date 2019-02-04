@@ -24,7 +24,7 @@ set(gitlfs_names git-lfs )
 
 find_program(GITLFS_EXECUTABLE
   NAMES ${gitlfs_names}
-  PATH_SUFFIXES Git/bin
+  PATH_SUFFIXES Git/bin Git/mingw64/bin
   DOC "git-lfs command line client"
   )
 mark_as_advanced(GITLFS_EXECUTABLE)

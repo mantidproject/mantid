@@ -1,7 +1,13 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/WienerSmooth.h"
 
-#include "MantidAPI/IFunction.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -12,8 +18,8 @@
 namespace Mantid {
 namespace Algorithms {
 
-using Mantid::Kernel::Direction;
 using Mantid::API::WorkspaceProperty;
+using Mantid::Kernel::Direction;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(WienerSmooth)
@@ -26,7 +32,7 @@ struct PowerSpectrum {
 
 // To be used when actual noise level cannot be estimated
 const double guessSignalToNoiseRatio = 1e15;
-}
+} // namespace
 
 //----------------------------------------------------------------------------------------------
 
@@ -371,9 +377,10 @@ WienerSmooth::smoothSingleSpectrum(API::MatrixWorkspace_sptr inputWS,
     auto histogram = out->histogram(0);
     histogram.setSharedX(inputWS->sharedX(wsIndex));
     histogram.setSharedE(inputWS->sharedE(wsIndex));
-    auto newSize = histogram.y().size() - 1;
 
+    auto newSize = histogram.y().size() - 1;
     histogram.resize(newSize);
+
     out->setHistogram(0, histogram);
   } else {
     out->setSharedX(0, inputWS->sharedX(wsIndex));
@@ -386,9 +393,8 @@ WienerSmooth::smoothSingleSpectrum(API::MatrixWorkspace_sptr inputWS,
 /**
  * Get the start and end of the x-interval.
  * @param X :: The x-vector of a spectrum.
- * @param isHistogram :: Is the x-vector comming form a histogram? If it's true
- * the bin
- *   centres are used.
+ * @param isHistogram :: Is the x-vector coming form a histogram? If it's true
+ * the bin centers are used.
  * @return :: A pair of start x and end x.
  */
 std::pair<double, double>

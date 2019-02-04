@@ -34,6 +34,30 @@ def addPythonLibrariesInDirectory(input, output)
   end
 end
 
+# Find the qscintilla2 library. This is different depending
+# on what library you have installed from homebrew.
+def findQScintilla2(lib_dir)
+    if File.file?(lib_dir+"libqscintilla2_qt4.dylib")
+        return "libqscintilla2_qt4.dylib"
+    elsif File.file?(lib_dir+"libqscintilla2.dylib")
+        return "libqscintilla2.dylib"
+    else
+        p 'Could not file the libqscintilla2 library'
+        exit 1
+    end
+end
+
+
+def findBoostPythonMT(lib_dir)
+    [lib_dir, "usr/local/opt"].each do |dir|
+        if File.file?(dir+"libboost_python-mt.dylib")
+            return "libboost_python-mt.dylib"
+        elsif File.file?(dir+"libboost_python27-mt.dylib")
+            return "libboost_python27-mt.dylib"
+        end
+    end
+end
+
 lib_dir = Pathname.new("/usr/local/lib")
 openssl_dir = Pathname.new("/usr/local/opt/openssl/lib")
 ParaView_dir = Pathname.new("@ParaView_DIR@")
@@ -41,7 +65,9 @@ ParaView_dir = Pathname.new("@ParaView_DIR@")
 #filenames with path for all shared libraries used by MantidPlot and its dependencies.
 library_filenames = ["libboost_regex-mt.dylib",
                      "libboost_date_time-mt.dylib",
-                     "libboost_python-mt.dylib",
+                     "libboost_serialization-mt.dylib",
+                     "libboost_filesystem-mt.dylib",
+                     "libboost_system-mt.dylib",
                      "libgsl.dylib",
                      "libgslcblas.dylib",
                      "libjsoncpp.dylib",
@@ -69,7 +95,6 @@ library_filenames = ["libboost_regex-mt.dylib",
                      "libTKGeomBase.dylib",
                      "libqwt.dylib",
                      "libqwtplot3d.dylib",
-                     "libqscintilla2.dylib",
                      "libmxml.dylib",
                      "libhdf5.dylib",
                      "libhdf5_hl.dylib",
@@ -83,7 +108,9 @@ library_filenames = ["libboost_regex-mt.dylib",
                      "libcrypto.dylib",
                      "libtbb.dylib",
                      "libtbbmalloc.dylib",
-                     "libtbbmalloc_proxy.dylib"]
+                     "libtbbmalloc_proxy.dylib",
+                     "librdkafka.dylib",
+                     "librdkafka++.dylib"]
 
 poco_version = "@POCO_VERSION@".split(".").map(&:to_i)
 if(poco_version[0] > 1 || (poco_version[0] == 1 && poco_version[1] >= 6))
@@ -91,8 +118,15 @@ if(poco_version[0] > 1 || (poco_version[0] == 1 && poco_version[1] >= 6))
 end
 
 if("@OPENMP_FOUND@" == "TRUE")
+  if not File.file?("/usr/lib/libomp.dylib")
+      # assume we're using system llvm
+      library_filenames << "libc++.dylib"
+  end
   library_filenames << "libomp.dylib"
 end
+
+library_filenames << findQScintilla2(lib_dir)
+library_filenames << findBoostPythonMT(lib_dir)
 
 #This copies the libraries over, then changes permissions and the id from /usr/local/lib to @rpath
 library_filenames.each do |filename|
@@ -100,6 +134,14 @@ library_filenames.each do |filename|
     copyFile(openssl_dir+filename)
   elsif  filename.include? "libcrypto.dylib"
     copyFile(openssl_dir+filename)
+  elsif filename.include? "libomp.dylib" or filename.include? "libc++.dylib"
+      if File.file?(lib_dir+"libomp.dylib")
+        # using system llvm
+        copyFile(lib_dir+filename)
+      elsif
+        # using homebrew llvm
+        copyFile("/usr/local/opt/llvm/lib/"+filename)
+      end
   else
     copyFile(lib_dir+filename)
   end
@@ -127,13 +169,13 @@ if( "@MAKE_VATES@" == "ON" )
 
   `mkdir Contents/Libraries`
   `cp #{ParaView_dir}/lib/*Python.so Contents/Libraries`
+  `cp #{ParaView_dir}/lib/libNonOrthogonalSource.dylib plugins/paraview/qt4/`
   vatesfiles = ["Contents/MacOS/MantidPlot",
-                "Contents/MacOS/libMantidQtAPI.dylib",
-                "Contents/MacOS/VatesSimpleGui",
-                "Contents/MacOS/libMantidParaViewQtWidgets.dylib",
+                "Contents/MacOS/libMantidQtWidgetsCommonQt4.dylib",
                 "Contents/MacOS/libMantidVatesAPI.dylib",
-                "pvplugins/libMantidVatesSimpleGuiViewWidgets.dylib"]
-  vatesfiles += Dir["Contents/Libraries/*Python.so"] + Dir["pvplugins/pvplugins/*.dylib"]
+                "plugins/libMantidVatesAlgorithms.dylib",
+                "plugins/qt4/libMantidVatesSimpleGuiViewWidgetsQt4.dylib"]
+  vatesfiles += Dir["Contents/Libraries/*Python.so"] + Dir["plugins/paraview/qt4/*.dylib"]
   vatesfiles.each do |file|
     add_ParaView_Libraries(file)
   end
@@ -146,7 +188,7 @@ if( "@MAKE_VATES@" == "ON" )
         currentname = dependency.strip.split(" ")
         filename = currentname[0]
         if filename.include? "#{ParaView_dir}"
-          #p "fixing #{library} #{filename}" 
+          #p "fixing #{library} #{filename}"
           issues_found = issues_found + 1
           name_split_on_slash = filename.strip.split("/")
           filename_no_dir = name_split_on_slash[-1]
@@ -165,11 +207,18 @@ if( "@MAKE_VATES@" == "ON" )
     break if issues_found == 0
   end
   #fix libNonOrthogonalSource.dylib
-  `install_name_tool -id @rpath/libNonOrthogonalSource.dylib pvplugins/pvplugins/libNonOrthogonalSource.dylib`
+  `install_name_tool -id @rpath/libNonOrthogonalSource.dylib plugins/paraview/qt4/libNonOrthogonalSource.dylib`
+end
+
+# use install_tool_name to add an @rpath for the libraries
+Dir["Contents/MacOS/*.so"].each do |library|
+  dependencies = `otool -L #{library}`
+  print library, "\n"
+  `install_name_tool -add_rpath @loader_path/../MacOS #{library} > /dev/null 2>&1`
 end
 
 #use install_name_tool to change dependencies from /usr/local to libraries in the package.
-search_patterns = ["**/*.dylib","**/*.so","**/MantidPlot","**/VatesSimpleGui"]
+search_patterns = ["**/*.dylib","**/*.so","**/MantidPlot"]
 search_patterns.each do |pattern|
   Dir[pattern].each do |library|
     dependencies = `otool -L #{library}`
@@ -189,12 +238,14 @@ search_patterns.each do |pattern|
 end
 
 #We'll use macdeployqt to fix qt dependencies.
-Qt_Executables = "-executable=Contents/MacOS/mantidqtpython.so -executable=Contents/MacOS/libqwtplot3d.dylib -executable=Contents/MacOS/libqwt.dylib -executable=Contents/MacOS/libqscintilla2.dylib"
+Qt_Executables = "-executable=Contents/MacOS/mantidqtpython.so -executable=Contents/MacOS/libqwtplot3d.dylib -executable=Contents/MacOS/libqwt.dylib "
+Qt_Executables << "-executable=Contents/MacOS/#{findQScintilla2(lib_dir)}"
+
 if( "@MAKE_VATES@" == "ON" )
-  list = ["Contents/MacOS/VatesSimpleGui",
-          "Contents/Libraries/vtkParaViewWebCorePython.so",
+  list = ["Contents/Libraries/vtkParaViewWebCorePython.so",
           "Contents/Libraries/vtkPVAnimationPython.so",
           "Contents/Libraries/vtkPVCatalystPython.so",
+          "Contents/Libraries/vtkPVCinemaReaderPython.so",
           "Contents/Libraries/vtkPVClientServerCoreDefaultPython.so",
           "Contents/Libraries/vtkPVClientServerCoreRenderingPython.so",
           "Contents/Libraries/vtkPVPythonCatalystPython.so",
@@ -208,6 +259,7 @@ if( "@MAKE_VATES@" == "ON" )
     Qt_Executables << " -executable=#{filename}"
    end
 end
+
 `macdeployqt ../MantidPlot.app #{Qt_Executables}`
 
 if Dir.exist?("Contents/PlugIns")
@@ -263,7 +315,7 @@ end
 pyqt4_patterns = ["**/PyQt4/*.so"]
 change_id(pyqt4_patterns, "Contents/MacOS/PyQt4/")
 
-QtLinkingDir = find_linking_directories(pyqt4_patterns, 'Qt.*.framework/Versions/\d/Qt.*', '/usr/local/opt/qt/lib')
+QtLinkingDir = find_linking_directories(pyqt4_patterns, 'Qt.*.framework/Versions/\d/Qt.*',"/usr/local/opt/qt@4/lib")
 
 if QtLinkingDir.uniq != [QtLinkingDir[0]]
   p "Error updating PyQt4 dynamic linking!"
@@ -292,13 +344,33 @@ end
 `install_name_tool -change #{QtLinkingDir[0]}/QtCore.framework/Versions/4/QtCore @loader_path/../../Frameworks/QtCore.framework/Versions/4/QtCore Contents/MacOS/PyQt4/QtXml.so`
 
 
-#Copy over python libraries not included with OSX. 
+#Copy over python libraries not included with OSX.
 #currently missing epics
-path = "/Library/Python/2.7/site-packages"
-directories = ["sphinx","sphinx_bootstrap_theme","IPython","zmq","pygments","backports","certifi","tornado","markupsafe","jinja2","psutil","jsonschema","functools32","ptyprocess","CifFile"]
+system_python_extras = "/System/Library/Frameworks/Python.framework/Versions/2.7/Extras/lib/python"
+pip_site_packages = "/Library/Python/2.7/site-packages"
+directories = ["sphinx","sphinx_bootstrap_theme","IPython","zmq","pygments","backports", "qtawesome", "qtpy",
+               "certifi","tornado","markupsafe","matplotlib","mpl_toolkits", "jinja2","jsonschema","functools32",
+               "ptyprocess","CifFile","yaml","requests","networkx","PIL","dateutil","pytz",
+               "pywt","skimage"]
 directories.each do |directory|
-  addPythonLibrary("#{path}/#{directory}","Contents/MacOS/")
+  module_dir = "#{pip_site_packages}/#{directory}"
+  if !File.exist?(module_dir)
+    module_dir = "#{system_python_extras}/#{directory}"
+    if !File.exist?(module_dir)
+      p "Cannot find python module #{directory} to copy into bundle"
+      exit 1
+    end
+  end
+  addPythonLibrary(module_dir,"Contents/MacOS/")
 end
+
+# Some versions of mpltool_kits are missing their __init__ file
+mpltoolkit_init = "Contents/MacOS/mpl_toolkits/__init__.py"
+if !File.exist?(mpltoolkit_init)
+  p "Creating missing #{mpltoolkit_init}"
+  `touch #{mpltoolkit_init}`
+end
+
 
 if( "@MAKE_VATES@" == "ON" )
   addPythonLibrariesInDirectory("#{ParaView_dir}/lib/site-packages","Contents/Python/")
@@ -337,17 +409,16 @@ h5py_patterns.each do |pattern|
   end
 end
 
-
-files = ["gnureadline.so","readline.py","pyparsing.py","mistune.py"]
+files = ["gnureadline.so","cycler.py","readline.py","pyparsing.py","mistune.py","decorator.py","kiwisolver.so","subprocess32.py"]
 files.each do |file|
-  copyFile("#{path}/#{file}")
+  copyFile("#{pip_site_packages}/#{file}")
 end
 
-#mistune.so isn't present in v0.7
-copyOptionalFile("#{path}/mistune.so")
+# mistune.so isn't present in v0.7
+copyOptionalFile("#{pip_site_packages}/mistune.so")
 
 `mkdir Contents/MacOS/bin`
-`cp /usr/local/bin/ipython Contents/MacOS/bin/`
+`cp /usr/local/bin/ipython@PYTHON_VERSION_MAJOR@ Contents/MacOS/bin/`
 
 #Lastly check for any libraries in the package linking against homebrew libraries.
 search_patterns.each do |pattern|

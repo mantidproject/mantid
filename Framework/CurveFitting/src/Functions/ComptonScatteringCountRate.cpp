@@ -1,7 +1,13 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/Functions/ComptonScatteringCountRate.h"
-#include "MantidCurveFitting/AugmentedLagrangianOptimizer.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidCurveFitting/AugmentedLagrangianOptimizer.h"
 #include "MantidKernel/Math/Optimization/SLSQPMinimizer.h"
 
 #include <boost/bind.hpp>
@@ -22,7 +28,7 @@ const char *CONSTRAINT_MATRIX_NAME = "IntensityConstraints";
 const char *BKGD_ORDER_ATTR_NAME = "BackgroundOrderAttr";
 /// static logger
 Logger g_log("ComptonScatteringCountRate");
-}
+} // namespace
 
 DECLARE_FUNCTION(ComptonScatteringCountRate)
 
@@ -127,7 +133,7 @@ struct BkgdNorm2 {
   size_t ncols;
   const std::vector<double> &rhs;
 };
-}
+} // namespace
 
 /**
  * Calculates the new values for the intensity coefficents
@@ -312,7 +318,7 @@ void ComptonScatteringCountRate::cacheComptonProfile(
   auto fixedParams = profile->intensityParameterIndices();
   for (auto fixedParam : fixedParams) {
     const size_t indexOfFixed = paramsOffset + fixedParam;
-    this->fix(indexOfFixed);
+    this->setParameterStatus(indexOfFixed, Tied);
     m_fixedParamIndices.push_back(indexOfFixed);
   }
 }
@@ -330,19 +336,19 @@ void ComptonScatteringCountRate::cacheBackground(
     const size_t npars =
         static_cast<size_t>(m_bkgdPolyN + 1); // + constant term
     // we assume the parameters are at index 0->N on the background so we need
-    // to
-    // reverse them
+    // to reverse them
     for (size_t i = npars; i > 0; --i) // i = from npars->1
     {
       const size_t indexOfFixed = paramsOffset + (i - 1);
-      this->fix(indexOfFixed);
+      this->setParameterStatus(indexOfFixed, Tied);
       m_fixedParamIndices.push_back(indexOfFixed);
     }
   } else {
     std::ostringstream os;
     os << "ComptonScatteringCountRate - Background function does not have "
-          "attribute named '" << m_bkgdOrderAttr
-       << "' that specifies its order. Use the '" << BKGD_ORDER_ATTR_NAME
+          "attribute named '"
+       << m_bkgdOrderAttr << "' that specifies its order. Use the '"
+       << BKGD_ORDER_ATTR_NAME
        << "' attribute to specify the name of the order attribute.";
     throw std::runtime_error(os.str());
   }
@@ -362,7 +368,8 @@ void ComptonScatteringCountRate::createConstraintMatrices() {
   if (m_eqMatrix.numCols() > 0 && m_eqMatrix.numCols() != nmasses) {
     std::ostringstream os;
     os << "ComptonScatteringCountRate - Equality constraint matrix (Aeq) has "
-          "incorrect number of columns (" << m_eqMatrix.numCols()
+          "incorrect number of columns ("
+       << m_eqMatrix.numCols()
        << "). The number of columns should match the number of masses ("
        << nmasses << ")";
     throw std::invalid_argument(os.str());

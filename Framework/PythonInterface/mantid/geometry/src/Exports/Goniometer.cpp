@@ -1,7 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Instrument/Goniometer.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/kernel/Converters/MatrixToNDArray.h"
-#include "MantidPythonInterface/kernel/Converters/PyObjectToV3D.h"
 #include "MantidPythonInterface/kernel/Converters/PyObjectToMatrix.h"
+#include "MantidPythonInterface/kernel/Converters/PyObjectToV3D.h"
 
 #include "MantidPythonInterface/kernel/Policies/MatrixToNumpy.h"
 #include <boost/python/class.hpp>
@@ -13,32 +20,30 @@ using namespace Mantid::PythonInterface;
 using namespace boost::python;
 
 namespace //<unnamed>
-    {
+{
 ///@cond
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunknown-pragmas"
-#pragma clang diagnostic ignored "-Wunused-local-typedef"
-#endif
+GNU_DIAG_OFF("unused-local-typedef")
+// Ignore -Wconversion warnings coming from boost::python
+// Seen with GCC 7.1.1 and Boost 1.63.0
+GNU_DIAG_OFF("conversion")
 // define overloaded functions
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(getEulerAngles_overloads,
                                        Goniometer::getEulerAngles, 0, 1)
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
+GNU_DIAG_ON("conversion")
+GNU_DIAG_ON("unused-local-typedef")
 ///@endcond
 
 /// Set the U vector via a numpy array
 void setR(Goniometer &self, const object &data) {
   self.setR(Converters::PyObjectToMatrix(data)());
 }
-}
+} // namespace
 
 void export_Goniometer() {
 
   // return_value_policy for read-only numpy array
-  typedef return_value_policy<Policies::MatrixToNumpy<Converters::WrapReadOnly>>
-      return_readonly_numpy;
+  using return_readonly_numpy =
+      return_value_policy<Policies::MatrixRefToNumpy<Converters::WrapReadOnly>>;
 
   class_<Goniometer>("Goniometer", init<>(arg("self")))
       .def(init<Goniometer const &>((arg("self"), arg("other"))))

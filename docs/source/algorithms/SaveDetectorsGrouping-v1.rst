@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -40,7 +40,7 @@ Usage
    SaveDetectorsGrouping(grouping, save_path)
 
    with open(save_path, 'r') as f:
-     print f.read().replace('\t', '  ').strip()
+     print(f.read().replace('\t', '  ').strip())
 
 Output:
 

@@ -1,15 +1,22 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "ScriptOutputDisplay.h"
 #include "TextFileIO.h"
 
-#include "pixmaps.h"
+#include <MantidQtWidgets/Common/pixmaps.h>
 
 #include <QDateTime>
-#include <QMenu>
-#include <QFileDialog>
 #include <QKeyEvent>
-#include <QPrinter>
+#include <QMenu>
 #include <QPrintDialog>
+#include <QPrinter>
 #include <QWheelEvent>
+
+using namespace MantidQt::API;
 
 /**
  * Constructor
@@ -18,7 +25,7 @@
  * @param flags :: Window flags
  */
 ScriptOutputDisplay::ScriptOutputDisplay(QWidget *parent)
-    : QTextEdit(parent), m_copy(NULL), m_clear(NULL), m_save(NULL),
+    : QTextEdit(parent), m_copy(nullptr), m_clear(nullptr), m_save(nullptr),
       m_origFontSize(8), m_zoomLevel(0) {
 #ifdef __APPLE__
   // Make all fonts 4 points bigger on the Mac because otherwise they're tiny!
@@ -61,9 +68,9 @@ void ScriptOutputDisplay::mouseMoveEvent(QMouseEvent *e) {
 }
 
 /** Mouse move release handler - overridden to prevent middle mouse button
-* clicks from pasting on linux
-* @param e the mouse move event
-*/
+ * clicks from pasting on linux
+ * @param e the mouse move event
+ */
 void ScriptOutputDisplay::mouseReleaseEvent(QMouseEvent *e) {
   this->setReadOnly(true);
   QTextEdit::mousePressEvent(e);

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/ImplicitFunctionParserFactory.h"
 
 #include <Poco/DOM/DOMParser.h>
@@ -18,7 +24,7 @@ ImplicitFunctionParserFactoryImpl::create(const std::string &xmlString) const {
 ImplicitFunctionParser *
 ImplicitFunctionParserFactoryImpl::createImplicitFunctionParserFromXML(
     Poco::XML::Element *functionElement) const {
-  std::string name = functionElement->localName();
+  const std::string &name = functionElement->localName();
   if (name != "Function") {
     throw std::runtime_error(
         "Root node must be a Funtion element. Unable to determine parsers.");
@@ -71,5 +77,5 @@ ImplicitFunctionParserFactoryImpl::createImplicitFunctionParserFromXML(
 
   return createImplicitFunctionParserFromXML(pRootElem);
 }
-}
-}
+} // namespace API
+} // namespace Mantid

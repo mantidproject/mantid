@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
 # This python script is run after running extractAlgorithmNames.py, where
 # the output of that script is saved to a *.txt
@@ -6,6 +12,7 @@
 # was original used in connection with creating usage examples for algorithms
 # and creating an algorithm list for each developer to have a go at
 
+from __future__ import (absolute_import, division, print_function)
 import os
 
 import subprocess
@@ -36,7 +43,7 @@ for line in allAlgs:
         #print author
         fullline = fullline + ", " + author
 
-    print fullline
+    print(fullline)
 
 #line = 'GroupWorkspaces.cpp'
 #fullline = line

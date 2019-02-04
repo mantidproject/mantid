@@ -1,0 +1,12 @@
+# This is an example configuration file
+# It is not set up for any specific machine and is to give the user an idea of the layout
+user_name : "Polly"
+
+# By using the ' character instead of the " character we don't need to escape the path
+calibration_directory : 'C:\ISIS_Powder\calibration'
+output_directory : 'C:\ISIS_Powder\output'
+calibration_mapping_file : 'C:\ISIS_Powder\calibration\cal_map.yaml'
+
+# We can also use this configuration to set default options - e.g. always do absorption corrections
+do_absorb_corrections : True
+

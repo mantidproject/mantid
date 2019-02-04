@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "WorkspaceAlgorithm.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
@@ -14,7 +20,7 @@ using namespace API;
 /**  Initialization code
  *
  *   Properties have to be declared here before they can be used
-*/
+ */
 void WorkspaceAlgorithm::init() {
 
   // Declare a 1D workspace property.
@@ -39,16 +45,17 @@ void WorkspaceAlgorithm::exec() {
   int count = 0;
   size_t histogramCount = workspace->getNumberHistograms();
   for (size_t i = 0; i < histogramCount; ++i) {
-    const MantidVec &XValues = workspace->readX(i);
-    const MantidVec &YValues = workspace->readY(i);
-    const MantidVec &EValues = workspace->readE(i);
+    auto &XValues = workspace->x(i);
+    auto &YValues = workspace->y(i);
+    auto &EValues = workspace->e(i);
 
-    for (size_t j = 0; j < workspace->blocksize(); ++j) {
+    const auto numBins = YValues.size();
+    for (size_t j = 0; numBins; ++j) {
       g_log.information() << "Point number " << count++
                           << " values: " << XValues[j] << ' ' << YValues[j]
                           << ' ' << EValues[j] << std::endl;
     }
   }
 }
-}
-}
+} // namespace Algorithms
+} // namespace Mantid

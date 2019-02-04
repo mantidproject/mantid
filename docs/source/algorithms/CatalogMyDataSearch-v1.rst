@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -22,11 +22,11 @@ Usage
     my_data = CatalogMyDataSearch()
 
     # Verify that we have any investigations in 'My Data'
-    print "The number of investigations in 'My data' is: " + str(len(my_data))
+    print("The number of investigations in 'My data' is: {}".format(len(my_data)))
 
     # Output the title of each investigation in 'My data'
     for row in my_data:
-        print "The title of the investigation is: " + row['Title']
+        print("The title of the investigation is: {}".format(row['Title']))
 
 Output:
 

@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name
 from __future__ import (absolute_import, division, print_function)
 from mantid.api import PythonAlgorithm, AlgorithmFactory
@@ -15,6 +21,9 @@ class SortDetectors(PythonAlgorithm):
         """ Return category
         """
         return "Utility\\Sorting"
+
+    def seeAlso(self):
+        return [ "SortByQVectors","SortXAxis" ]
 
     def name(self):
         """ Return name
@@ -76,5 +85,6 @@ class SortDetectors(PythonAlgorithm):
         self.setProperty("UpstreamDetectorDistances", numpy.array(updist))
         self.setProperty("DownstreamSpectra", numpy.array(downinds))
         self.setProperty("DownstreamDetectorDistances", numpy.array(downdist))
+
 
 AlgorithmFactory.subscribe(SortDetectors)

@@ -49,14 +49,14 @@ class QEvent;
  * active in parallel and possibly depending on each other should be generalized
  *somehow.
  *
- * In any case, gathering the code specific to range selection in a seperate
+ * In any case, gathering the code specific to range selection in a separate
  *class makes Graph/CanvasPicker
  * more manageable; maybe something similar can be done for zooming.
  */
 class RangeSelectorTool : public QwtPlotPicker, public PlotToolInterface {
   Q_OBJECT
 public:
-  RangeSelectorTool(Graph *graph, const QObject *status_target = NULL,
+  RangeSelectorTool(Graph *graph, const QObject *status_target = nullptr,
                     const char *status_slot = "");
   ~RangeSelectorTool() override;
   double minXValue() const {
@@ -88,8 +88,8 @@ public slots:
 signals:
   /** Emitted whenever a new message should be presented to the user.
    *
-   * You don't have to connect to this signal if you alreay specified a reciever
-   *during initialization.
+   * You don't have to connect to this signal if you already specified a
+   *receiver during initialization.
    */
   void statusText(const QString &);
   //! Emitted whenever the selected curve and/or range have changed.

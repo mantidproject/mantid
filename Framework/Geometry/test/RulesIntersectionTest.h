@@ -1,20 +1,26 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_RULESINTERSECTIONTEST__
 #define MANTID_RULESINTERSECTIONTEST__
-#include <cxxtest/TestSuite.h>
-#include <cmath>
-#include <vector>
-#include "MantidKernel/Logger.h"
-#include "MantidKernel/make_unique.h"
-#include "MantidKernel/System.h"
-#include <cfloat>
-#include "MantidKernel/V3D.h"
-#include "MantidGeometry/Surfaces/Quadratic.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/Rules.h"
-#include "MantidGeometry/Surfaces/Plane.h"
-#include "MantidGeometry/Surfaces/Sphere.h"
-#include "MantidGeometry/Surfaces/Cylinder.h"
 #include "MantidGeometry/Surfaces/Cone.h"
+#include "MantidGeometry/Surfaces/Cylinder.h"
+#include "MantidGeometry/Surfaces/Plane.h"
+#include "MantidGeometry/Surfaces/Quadratic.h"
+#include "MantidGeometry/Surfaces/Sphere.h"
+#include "MantidKernel/Logger.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/V3D.h"
+#include "MantidKernel/make_unique.h"
+#include <cfloat>
+#include <cmath>
+#include <cxxtest/TestSuite.h>
+#include <vector>
 
 #include "boost/make_shared.hpp"
 
@@ -26,8 +32,8 @@ class RulesIntersectionTest : public CxxTest::TestSuite {
 public:
   void testDefaultConstructor() {
     Intersection A;
-    TS_ASSERT_EQUALS(A.leaf(0), (Rule *)0);
-    TS_ASSERT_EQUALS(A.leaf(1), (Rule *)0);
+    TS_ASSERT_EQUALS(A.leaf(0), (Rule *)nullptr);
+    TS_ASSERT_EQUALS(A.leaf(1), (Rule *)nullptr);
 
     // Intersection A;
     // SurfPoint S1,S2;
@@ -201,7 +207,7 @@ public:
     TS_ASSERT_EQUALS(A.display(), "10 11");
     TS_ASSERT_EQUALS(A.findKey(10), ptrS1);
     TS_ASSERT_EQUALS(A.findKey(11), ptrS2);
-    TS_ASSERT_EQUALS(A.findKey(12), (Rule *)0);
+    TS_ASSERT_EQUALS(A.findKey(12), (Rule *)nullptr);
   }
 
   void testIsComplementary() {

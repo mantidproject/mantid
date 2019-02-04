@@ -1,7 +1,13 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/Functions/ComptonPeakProfile.h"
-#include "MantidCurveFitting/Algorithms/ConvertToYSpace.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidCurveFitting/Algorithms/ConvertToYSpace.h"
 #include "MantidKernel/PhysicalConstants.h"
 
 #include <cmath>
@@ -29,7 +35,7 @@ const double MASS_TO_MEV =
     0.5 * PhysicalConstants::NeutronMass / PhysicalConstants::meV;
 const double STDDEV_TO_FWHM = 0.5 * std::sqrt(std::log(4.0));
 ///@endcond
-}
+} // namespace
 
 /**
  */
@@ -119,9 +125,10 @@ void ComptonPeakProfile::setWorkspace(
   const double trec = detpar.l1 / v1 + detpar.l2 / v2;
 
   // Compute lorentz width due to in Y due to spread in energy hwhm_lorentz
-  const double dELorentz = ConvertToYSpace::getComponentParameter(
-      workspace->getDetector(m_wsIndex), workspace->constInstrumentParameters(),
-      "hwhm_lorentz");
+  const auto &det = workspace->spectrumInfo().detector(m_wsIndex);
+  const auto &pmap = workspace->constInstrumentParameters();
+  const double dELorentz =
+      ConvertToYSpace::getComponentParameter(det, pmap, "hwhm_lorentz");
   double yplus(0.0), yminus(0.0), dummy(0.0);
   detpar.efixed += dELorentz;
   ConvertToYSpace::calculateY(yplus, dummy, dummy, m_mass, trec, k1, v1,

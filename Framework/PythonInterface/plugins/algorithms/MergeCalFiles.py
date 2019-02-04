@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
 from __future__ import (absolute_import, division, print_function)
 from mantid.api import *
@@ -8,6 +14,10 @@ class MergeCalFiles(PythonAlgorithm):
 
     def category(self):
         return "DataHandling\\Text;Diffraction\\DataHandling\\CalFiles"
+
+    def seeAlso(self):
+        return [ "ReadGroupsFromFile","CreateDummyCalFile","CreateCalFileByNames",
+                 "AlignDetectors","DiffractionFocussing","LoadCalFile","SaveCalFile" ]
 
     def name(self):
         return "MergeCalFiles"
@@ -96,7 +106,7 @@ class MergeCalFiles(PythonAlgorithm):
 
     #add any lines at the end
         for UDET in updateDict.keys():
-            (offset,select,group)=updateDict.pop(UDET)
+            (offset,select,group)=updateDict[UDET]
             lastNumber += 1
             outputFile.write(self.FormatLine(lastNumber,UDET,offset,select,group))
             linesAdded += 1
@@ -140,6 +150,7 @@ class MergeCalFiles(PythonAlgorithm):
     def FormatLine(self,number,UDET,offset,select,group):
         line = "{0:9d}{1:16d}{2:16.7f}{3:9d}{4:9d}\n".format(number,UDET,offset,select,group)
         return line
+
 
 #############################################################################################
 AlgorithmFactory.subscribe(MergeCalFiles())

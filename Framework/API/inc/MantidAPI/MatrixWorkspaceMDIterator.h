@@ -1,10 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_API_MATRIXWORKSPACEMDITERATOR_H_
 #define MANTID_API_MATRIXWORKSPACEMDITERATOR_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
+#include "MantidKernel/System.h"
 #include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
@@ -14,27 +21,6 @@ namespace API {
  * through a MatrixWorkspace
 
   @date 2012-02-08
-
-  Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
- National Laboratory & European Spallation Source
-
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>
-  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport MatrixWorkspaceMDIterator : public IMDIterator {
 public:
@@ -59,10 +45,12 @@ public:
 
   signal_t getError() const override;
 
-  coord_t *getVertexesArray(size_t &numVertices) const override;
+  std::unique_ptr<coord_t[]>
+  getVertexesArray(size_t &numVertices) const override;
 
-  coord_t *getVertexesArray(size_t &numVertices, const size_t outDimensions,
-                            const bool *maskDim) const override;
+  std::unique_ptr<coord_t[]>
+  getVertexesArray(size_t &numVertices, const size_t outDimensions,
+                   const bool *maskDim) const override;
 
   Mantid::Kernel::VMD getCenter() const override;
 
@@ -126,8 +114,8 @@ private:
   /// The Y (vertical, e.g. spectra) dimension
   Mantid::Geometry::IMDDimension_const_sptr m_dimY;
 
-  /// Blocksize of workspace
-  size_t m_blockSize;
+  /// vector of starting index of the unraveled data array
+  std::vector<size_t> m_startIndices;
 
   /// Workspace index at which the iterator begins
   size_t m_beginWI;
@@ -138,6 +126,9 @@ private:
   /// For numeric axes, this is the size of the bin in the vertical direction.
   /// It is 1.0 for spectrum axes
   double m_verticalBinSize;
+
+  /// SpectrumInfo object, used for masking information
+  const SpectrumInfo &m_spectrumInfo;
 };
 
 } // namespace API

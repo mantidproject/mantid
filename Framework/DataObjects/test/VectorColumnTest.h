@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAOBJECTS_VECTORCOLUMNTEST_H_
 #define MANTID_DATAOBJECTS_VECTORCOLUMNTEST_H_
 
@@ -107,6 +113,11 @@ public:
     col.read(2, "7,8,9,10");
 
     TS_ASSERT_EQUALS(col.sizeOfData(), 10 * sizeof(int));
+  }
+
+  void test_cannotBeConvertedToDouble() {
+    VectorColumnTestHelper<int> col;
+    TS_ASSERT(!col.isNumber());
   }
 };
 

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 // Only compile on windows.
 #if defined(_WIN32) || defined(_WIN64)
 
@@ -5,8 +11,8 @@
 // std
 #include <sstream>
 // windows
-#include <windows.h>
 #include <Winhttp.h>
+#include <windows.h>
 
 namespace Mantid {
 namespace Kernel {

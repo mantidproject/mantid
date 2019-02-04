@@ -28,23 +28,23 @@
  *                                                                         *
  ***************************************************************************/
 #include "SmoothCurveDialog.h"
+#include "ColorBox.h"
 #include "Graph.h"
 #include "MyParser.h"
-#include "ColorBox.h"
 #include "SmoothFilter.h"
 
+#include <QComboBox>
 #include <QGroupBox>
-#include <QSpinBox>
+#include <QLabel>
+#include <QLayout>
+#include <QLineEdit>
 #include <QMessageBox>
 #include <QPushButton>
-#include <QLabel>
-#include <QLineEdit>
-#include <QComboBox>
-#include <QLayout>
+#include <QSpinBox>
 
 SmoothCurveDialog::SmoothCurveDialog(int method, QWidget *parent, Qt::WFlags fl)
-    : QDialog(parent, fl), graph(NULL), boxPointsLeft(NULL),
-      boxPointsRight(NULL), boxOrder(NULL) {
+    : QDialog(parent, fl), graph(nullptr), boxPointsLeft(nullptr),
+      boxPointsRight(nullptr), boxOrder(nullptr) {
   smooth_method = method;
 
   setObjectName("SmoothCurveDialog");

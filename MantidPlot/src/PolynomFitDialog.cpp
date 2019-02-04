@@ -28,18 +28,18 @@
  *                                                                         *
  ***************************************************************************/
 #include "PolynomFitDialog.h"
-#include "Graph.h"
-#include "ColorBox.h"
 #include "ApplicationWindow.h"
+#include "ColorBox.h"
+#include "Graph.h"
 #include "PolynomialFit.h"
 
-#include <QSpinBox>
-#include <QMessageBox>
 #include <QGroupBox>
 #include <QLineEdit>
+#include <QMessageBox>
+#include <QSpinBox>
 
 PolynomFitDialog::PolynomFitDialog(QWidget *parent, Qt::WFlags fl)
-    : QDialog(parent, fl), graph(NULL) {
+    : QDialog(parent, fl), graph(nullptr) {
   setObjectName("PolynomFitDialog");
   setWindowTitle(tr("MantidPlot - Polynomial Fit Options"));
   setSizeGripEnabled(true);

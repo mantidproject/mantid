@@ -9,6 +9,7 @@ set ( MODULE_TEMPLATE src/api.cpp.in )
 #    definitions occur and some depend on their base classes being exported first --
 set ( EXPORT_FILES
   src/Exports/IAlgorithm.cpp
+  src/Exports/AlgorithmObserver.cpp
   src/Exports/AlgorithmProxy.cpp
   src/Exports/AlgorithmHistory.cpp
   src/Exports/CatalogManager.cpp
@@ -53,6 +54,7 @@ set ( EXPORT_FILES
   src/Exports/WorkspaceValidators.cpp
   src/Exports/ADSValidator.cpp
   src/Exports/InstrumentValidator.cpp
+  src/Exports/OrientedLatticeValidator.cpp
   src/Exports/Axis.cpp
   src/Exports/IPeak.cpp
   src/Exports/BoxController.cpp
@@ -61,6 +63,7 @@ set ( EXPORT_FILES
   src/Exports/Sample.cpp
   src/Exports/ScriptRepository.cpp
   src/Exports/ScriptRepositoryFactory.cpp
+  src/Exports/SpectrumInfo.cpp
   src/Exports/Run.cpp
   src/Exports/WorkspaceFactory.cpp
   src/Exports/IFunction.cpp
@@ -73,6 +76,12 @@ set ( EXPORT_FILES
   src/Exports/Projection.cpp
   src/Exports/FunctionProperty.cpp
   src/Exports/AlgorithmProperty.cpp
+  src/Exports/MultiDomainFunction.cpp
+  src/Exports/SpectrumDefinition.cpp
+  src/Exports/SpectrumInfoItem.cpp
+  src/Exports/SpectrumInfoIterator.cpp
+  src/Exports/SpectrumInfoPythonIterator.cpp
+  src/Exports/AnalysisDataServiceObserver.cpp
 )
 
 set ( MODULE_DEFINITION ${CMAKE_CURRENT_BINARY_DIR}/api.cpp )
@@ -82,6 +91,7 @@ create_module ( ${MODULE_TEMPLATE} ${MODULE_DEFINITION} ${EXPORT_FILES} )
 # Helper code
 #############################################################################################
 set ( SRC_FILES
+  src/Algorithms/AlgorithmObserverAdapter.cpp
   src/Algorithms/RunPythonScript.cpp
   src/FitFunctions/IFunctionAdapter.cpp
   src/FitFunctions/IFunction1DAdapter.cpp
@@ -90,19 +100,25 @@ set ( SRC_FILES
   src/PythonAlgorithm/DataProcessorAdapter.cpp
   src/CloneMatrixWorkspace.cpp
   src/ExtractWorkspace.cpp
+  src/Exports/AnalysisDataServiceObserverAdapter.cpp
 )
 
 set ( INC_FILES
+  ${HEADER_DIR}/api/Algorithms/AlgorithmObserverAdapter.h
   ${HEADER_DIR}/api/Algorithms/RunPythonScript.h
   ${HEADER_DIR}/api/FitFunctions/IFunctionAdapter.h
   ${HEADER_DIR}/api/FitFunctions/IFunction1DAdapter.h
   ${HEADER_DIR}/api/FitFunctions/IPeakFunctionAdapter.h
   ${HEADER_DIR}/api/PythonAlgorithm/AlgorithmAdapter.h
   ${HEADER_DIR}/api/PythonAlgorithm/DataProcessorAdapter.h
+  ${HEADER_DIR}/api/AnalysisDataServiceObserverAdapter.h
   ${HEADER_DIR}/api/BinaryOperations.h
   ${HEADER_DIR}/api/CloneMatrixWorkspace.h
   ${HEADER_DIR}/api/ExtractWorkspace.h
   ${HEADER_DIR}/api/WorkspacePropertyExporter.h
+  ${HEADER_DIR}/api/SpectrumInfoPythonIterator.h
+  ${HEADER_DIR}/api/DetectorInfoPythonIterator.h
+  ${HEADER_DIR}/api/ComponentInfoPythonIterator.h
 )
 
 set ( PY_FILES
@@ -137,10 +153,12 @@ set_python_properties( PythonAPIModule _api )
 set_target_output_directory ( PythonAPIModule ${OUTPUT_DIR} .pyd )
 
 # Add the required dependencies
-target_link_libraries ( PythonAPIModule LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
+target_link_libraries ( PythonAPIModule PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
+            PythonInterfaceCore
             PythonGeometryModule
             PythonKernelModule
             API
+	    Types
             Kernel
             HistogramData
             Geometry
@@ -149,12 +167,16 @@ target_link_libraries ( PythonAPIModule LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTI
             ${Boost_LIBRARIES} )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties( PythonAPIModule PROPERTIES INSTALL_RPATH "@loader_path/../../../MacOS;@loader_path/../kernel/;@loader_path/../geometry/")
+  set_target_properties( PythonAPIModule PROPERTIES
+                         INSTALL_RPATH "@loader_path/../../../MacOS;@loader_path/../kernel/;@loader_path/../geometry/")
+elseif ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
+  set_target_properties( PythonAPIModule PROPERTIES
+                         INSTALL_RPATH "\$ORIGIN/../../../${LIB_DIR};\$ORIGIN/../kernel/;\$ORIGIN/../geometry/")
 endif ()
 ###########################################################################
 # Installation settings
 ###########################################################################
-install ( TARGETS PythonAPIModule ${SYSTEM_PACKAGE_TARGET} DESTINATION ${BIN_DIR}/mantid/api )
+mtd_install_targets( TARGETS PythonAPIModule INSTALL_DIRS ${BIN_DIR}/mantid/api ${WORKBENCH_BIN_DIR}/mantid/api )
 
 # Pure Python files
-install ( FILES ${PY_FILES} DESTINATION ${BIN_DIR}/mantid/api )
+mtd_install_files( FILES ${PY_FILES} INSTALL_DIRS ${BIN_DIR}/mantid/api ${WORKBENCH_BIN_DIR}/mantid/api)

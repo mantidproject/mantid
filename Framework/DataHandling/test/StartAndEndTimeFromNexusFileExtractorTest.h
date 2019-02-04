@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAHANDLING_STARTANDENDTIMEFROMNEXUSFILEEXTRACTORTEST_H_
 #define MANTID_DATAHANDLING_STARTANDENDTIMEFROMNEXUSFILEEXTRACTORTEST_H_
 
@@ -74,8 +80,8 @@ private:
     auto endTimeExtracted = extractEndTime(fullFilePath);
 
     // Assert
-    Mantid::Kernel::DateAndTime expectedStartTimeString(startTime.c_str());
-    Mantid::Kernel::DateAndTime expectedEndTimeString(endTime.c_str());
+    Mantid::Types::Core::DateAndTime expectedStartTimeString(startTime.c_str());
+    Mantid::Types::Core::DateAndTime expectedEndTimeString(endTime.c_str());
 
     TSM_ASSERT("Should have the same start time",
                startTimeExtracted == expectedStartTimeString);

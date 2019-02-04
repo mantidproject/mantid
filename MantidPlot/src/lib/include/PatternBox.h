@@ -43,7 +43,7 @@ public:
   /**
    * \param parent parent widget (only affects placement of the widget)
    */
-  PatternBox(QWidget *parent = 0);
+  PatternBox(QWidget *parent = nullptr);
   void setPattern(const Qt::BrushStyle &c);
   Qt::BrushStyle getSelectedPattern() const;
 

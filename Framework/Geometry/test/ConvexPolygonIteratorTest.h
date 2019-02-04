@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_GEOMETRY_POLYGONPOINTITERATORTEST_H_
 #define MANTID_GEOMETRY_POLYGONPOINTITERATORTEST_H_
 
@@ -69,7 +75,7 @@ public:
     ConvexPolygon invalid;
     // TS_ASSERT_THROWS cannot be used if there is no default constructor
     // so use a pointer instead
-    ConvexPolygon::Iterator *iter(NULL);
+    ConvexPolygon::Iterator *iter(nullptr);
     TS_ASSERT_THROWS(iter = new ConvexPolygon::Iterator(invalid),
                      std::invalid_argument);
     delete iter;

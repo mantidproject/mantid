@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
 from __future__ import (absolute_import, division, print_function)
 
@@ -13,6 +19,9 @@ class ReactorSANSResolution(PythonAlgorithm):
 
     def category(self):
         return "SANS"
+
+    def seeAlso(self):
+        return [ "EQSANSResolution" ]
 
     def name(self):
         return "ReactorSANSResolution"
@@ -42,7 +51,9 @@ class ReactorSANSResolution(PythonAlgorithm):
             wvl = input_ws.getRun().getProperty("wavelength").value
 
         d_wvl = None
-        if input_ws.getRun().hasProperty("wavelength-spread"):
+        if input_ws.getRun().hasProperty("wavelength-spread-ratio"):
+            d_wvl = input_ws.getRun().getProperty("wavelength-spread-ratio").value
+        elif input_ws.getRun().hasProperty("wavelength-spread"):
             d_wvl = input_ws.getRun().getProperty("wavelength-spread").value
 
         source_apert_radius = None
@@ -67,7 +78,7 @@ class ReactorSANSResolution(PythonAlgorithm):
                 and source_apert_radius is not None and sample_apert_radius is not None \
                 and source_sample_distance is not None and sample_detector_distance is not None:
             k = 2.0*math.pi/wvl
-            res_factor = math.pow(k*source_apert_radius/source_sample_distance, 2)
+            res_factor = math.pow(k*source_apert_radius/source_sample_distance, 2)/4.0
             res_factor += (math.pow(k*sample_apert_radius*(source_sample_distance+sample_detector_distance)/
                                     (source_sample_distance*sample_detector_distance), 2)/4.0)
             res_factor += math.pow(k*pixel_size_x/sample_detector_distance, 2)/12.0

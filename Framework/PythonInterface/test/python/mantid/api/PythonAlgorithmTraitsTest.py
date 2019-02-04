@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 """Defines tests for the traits within Python algorithms
 such as name, version etc.
 """
@@ -5,9 +11,7 @@ from __future__ import (absolute_import, division, print_function)
 
 import unittest
 import testhelpers
-import types
 
-from mantid.kernel import Direction
 from mantid.api import (PythonAlgorithm, AlgorithmProxy, Algorithm, IAlgorithm,
                         AlgorithmManager, AlgorithmFactory)
 
@@ -27,6 +31,9 @@ class TestPyAlgOverriddenAttrs(PythonAlgorithm):
 
     def category(self):
         return "BestAlgorithms"
+
+    def helpURL(self):
+        return "Optional documentation URL"
 
     def isRunning(self):
         return True
@@ -106,6 +113,7 @@ class PythonAlgorithmTest(unittest.TestCase):
         self.assertEquals(alg.name(), "TestPyAlgOverriddenAttrs")
         self.assertEquals(alg.version(), 2)
         self.assertEquals(alg.category(), "BestAlgorithms")
+        self.assertEquals(alg.helpURL(), "Optional documentation URL")
 
     def test_alg_can_be_cancelled(self):
         alg = AlgorithmManager.createUnmanaged("CancellableAlg")
@@ -122,6 +130,7 @@ class PythonAlgorithmTest(unittest.TestCase):
         # Here we simulate how it would be called on C++ framework side
         base_running_attr = getattr(IAlgorithm, "isRunning")
         self.assertRaises(RuntimeError, base_running_attr, alg)
+
 
 if __name__ == '__main__':
     unittest.main()

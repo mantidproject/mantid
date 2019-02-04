@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef POINTBYPOINTVCORRECTIONTEST_H_
 #define POINTBYPOINTVCORRECTIONTEST_H_
 
@@ -26,9 +32,9 @@ public:
       pbpv.initialize();
 
     MatrixWorkspace_sptr testSample =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(2, 5, 0.5, 1.5);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(2, 5, 0.5, 1.5);
     MatrixWorkspace_sptr testVanadium =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(2, 5, 0.5, 1.5);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(2, 5, 0.5, 1.5);
     // Make the instruments match
     Mantid::Geometry::Instrument_sptr inst(new Mantid::Geometry::Instrument);
     testSample->setInstrument(inst);
@@ -81,9 +87,9 @@ public:
 
   void setUp() override {
     MatrixWorkspace_sptr testSample =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(20000, 5, 0.5, 1.5);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(20000, 5, 0.5, 1.5);
     MatrixWorkspace_sptr testVanadium =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(20000, 5, 0.5, 1.5);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(20000, 5, 0.5, 1.5);
     // Make the instruments match
     Mantid::Geometry::Instrument_sptr inst(new Mantid::Geometry::Instrument);
     testSample->setInstrument(inst);

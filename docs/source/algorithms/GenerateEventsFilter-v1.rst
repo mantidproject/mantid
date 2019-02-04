@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -41,7 +41,7 @@ serve as an event splitter. There are two types of output workspaces for storing
 event splitters that are supported by this algorithm.
 
 -  :ref:`SplittersWorkspace`: It is a
-   `TableWorkspace <http://www.mantidproject.org/TableWorkspace>`_ that has 3 columns for start
+   :ref:`TableWorkspace <Table Workspaces>` that has 3 columns for start
    time, stop time and target workspace for events within start time and
    stop time. This type of workspace is appropriate for the case that
    the amount of generated event splitters are not huge;
@@ -54,7 +54,7 @@ event splitters that are supported by this algorithm.
    workspace is appropriate for the case that the amount of generated
    event splitters are huge, because processing a
    :ref:`MatrixWorkspace <MatrixWorkspace>` is way faster than a
-   `TableWorkspace <http://www.mantidproject.org/TableWorkspace>`_ in Mantid.
+   :ref:`TableWorkspace <Table Workspaces>` in Mantid.
 
 .. _functionalities-GenerateEventFilter-ref:
 
@@ -95,17 +95,17 @@ Generate event filters by time
 ##############################
 
 Event filters can be created by defining start time, stop time and time intervals. 
-The three input properties for them are *StartTime*, *StopTime* and *TimeInterval*, 
+The three input properties for them are ``StartTime``, ``StopTime`` and ``TimeInterval``, 
 respectively. 
 
-*TimeInterval* accepts an array of doubles.  
+``TimeInterval`` accepts an array of doubles.  
 If the array size is zero, then there will be one and only splitter will be 
-created from *StartTime* and *StopTime*.  
+created from ``StartTime`` and ``StopTime``.  
 If the size of the array is one, then all event splitters will have the same duration
 of time. 
 In general if the array is composed as :math:`t_1, t_2, \cdots, t_n`, 
 and :math:`T_0` is the run start time, 
-then the event splitters will have the time boudaries as 
+then the event splitters will have the time boundaries as 
 
 .. math:: (T_0, T_0+t_1), (T_0+t_1, T_0+t_1+t_2), \cdots, (T_0+\sum_{i=1}^{n-1}t_i, T_0+\sum_{i=1}^nt_i), (T_0+\sum_{i=1}^nt_i, T_0+\sum_{i=1}^nt_i+t_1), \cdots
 
@@ -115,7 +115,7 @@ Unit of time
 ============
 
 There are three types of units that are supported for time. 
-They are second, nanosecond and percentage of duration from *StartTime* to *StopTime*. 
+They are second, nanosecond and percentage of duration from ``StartTime`` to ``StopTime``. 
 
 .. _filterbylogv-GenerateEventFilter-ref:
 
@@ -158,19 +158,25 @@ Algorithm Parameters and Examples
 Here are the introductions to some important parameters (i.e., algorithm's properties). 
 
 
-Parameter: *Centre*
-###################
+Parameter: ``Centre``
+#####################
 
-The input Boolean parameter *centre* is for filtering by log value(s).
-If option *centre* is taken, then for each interval,
+The input Boolean parameter ``centre`` is for filtering by log value(s).
+If option ``centre`` is taken, then for each interval,
 
 -  starting time = log\_time - tolerance\_time;
 -  stopping time = log\_time - tolerance\_time;
 
 It is a shift to left.
 
-Parameter: *MinimumLogValue*, *MaximumLogValue*, *LogValueTolerance* and *LogValueInterval*
-###########################################################################################
+Parameter: ``FastLog``
+######################
+
+When ``FastLog`` is set to True, a :ref:`MatrixWorkspace <MatrixWorkspace>` will be used to store the event
+splitters, which is more appropriate for fast changing logs. (see above for details).
+
+Parameter: ``MinimumLogValue``, ``MaximumLogValue``, ``LogValueTolerance`` and ``LogValueInterval``
+###################################################################################################
 
 These four parameters are used to determine the log value intervals for
 filtering events.
@@ -191,11 +197,11 @@ Integer value log
 
 It is a little bit different for sample log recorded with integer. 
 
-- *MinimumLogValue* and *MaximumLogValue* can be same such that only entries with exacly the same log value 
+- ``MinimumLogValue`` and ``MaximumLogValue`` can be same such that only entries with exactly the same log value 
   will be considered;
-- If *LogValueInterval* is not give (i.e., default value is used), then any log enetry with log value
-  larger and equal to *MinimumLogValue* and smaller and equal to *MaximumLogValue* will be considered. 
-  Be noticed that in the same case for double value log, log entry with value equal to *MaximumLogValue*
+- If ``LogValueInterval`` is not give (i.e., default value is used), then any log enetry with log value
+  larger and equal to ``MinimumLogValue`` and smaller and equal to ``MaximumLogValue`` will be considered. 
+  Be noticed that in the same case for double value log, log entry with value equal to ``MaximumLogValue``
   will be excluded. 
 
 
@@ -240,13 +246,13 @@ for further processing.
                                Logname="SampleTemp", MinimumLogValue=279.9, MaximumLogValue=279.98,
                                LogValueInterval=0.01)
     # The first workspace is the SplittersWorkspace and the second is the InformationWorkspace
-    print "Number of workspaces =", len(ws2)
-    print "First workspace type =", ws2[0].id()
-    print "Second workspace type =", ws2[1].id()
-    print "Number of columns in first TableWorkspace =", ws2[0].columnCount()
-    print "Number of rows in first TableWorkspace =", ws2[0].rowCount()
-    print "Number of columns in second TableWorkspace =", ws2[1].columnCount()
-    print "Number of rows in second TableWorkspace =", ws2[1].rowCount()
+    print("Number of workspaces = {}".format(len(ws2)))
+    print("First workspace type = {}".format(ws2[0].id()))
+    print("Second workspace type = {}".format(ws2[1].id()))
+    print("Number of columns in first TableWorkspace = {}".format(ws2[0].columnCount()))
+    print("Number of rows in first TableWorkspace = {}".format(ws2[0].rowCount()))
+    print("Number of columns in second TableWorkspace = {}".format(ws2[1].columnCount()))
+    print("Number of rows in second TableWorkspace = {}".format(ws2[1].rowCount()))
 
 Output:
 

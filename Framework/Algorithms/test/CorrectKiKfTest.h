@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef CORRECTKIKFTEST_H_
 #define CORRECTKIKFTEST_H_
 
@@ -48,7 +54,8 @@ public:
     Workspace2D_sptr result =
         AnalysisDataService::Instance().retrieveWS<Workspace2D>(outputWSname);
     double ei, ef, factor, deltaE, stdval;
-    for (size_t i = 0; i < result->blocksize(); ++i) {
+    size_t numBins = result->blocksize();
+    for (size_t i = 0; i < numBins; ++i) {
       ei = 7.5;
       deltaE = (static_cast<double>(i) - 2.) * 5.;
       ef = ei - deltaE;
@@ -75,7 +82,8 @@ public:
     TS_ASSERT(alg.isExecuted());
     result =
         AnalysisDataService::Instance().retrieveWS<Workspace2D>(outputWSname);
-    for (size_t i = 0; i < result->blocksize(); ++i) {
+    numBins = result->blocksize();
+    for (size_t i = 0; i < numBins; ++i) {
       ei = 7.5;
       deltaE = (static_cast<double>(i) - 2.) * 5.;
       ef = ei - deltaE;
@@ -102,7 +110,8 @@ public:
     TS_ASSERT(alg.isExecuted());
     result =
         AnalysisDataService::Instance().retrieveWS<Workspace2D>(outputWSname);
-    for (size_t i = 0; i < result->blocksize(); ++i) {
+    numBins = result->blocksize();
+    for (size_t i = 0; i < numBins; ++i) {
       ef = 7.5;
       deltaE = (static_cast<double>(i) - 2.) * 5.;
       ei = ef + deltaE;
@@ -129,7 +138,8 @@ public:
     TS_ASSERT(alg.isExecuted());
     result =
         AnalysisDataService::Instance().retrieveWS<Workspace2D>(outputWSname);
-    for (size_t i = 0; i < result->blocksize(); ++i) {
+    numBins = result->blocksize();
+    for (size_t i = 0; i < numBins; ++i) {
       ef = 7.5;
       deltaE = (static_cast<double>(i) - 2.) * 5.;
       ei = ef + deltaE;
@@ -273,7 +283,6 @@ private:
       ws2D->setSharedX(i, cow_xv);
       ws2D->mutableY(i) = {1, 2, 3, 4, 5};
       ws2D->mutableE(i) = {sqrt(1), sqrt(2), sqrt(3), sqrt(4), sqrt(5)};
-      ws2D->getSpectrum(i).setSpectrumNo(i);
     }
 
     AnalysisDataService::Instance().add(inputWSname, ws2D);
@@ -281,7 +290,7 @@ private:
 
   void createEventWorkspace() {
     EventWorkspace_sptr event =
-        WorkspaceCreationHelper::CreateEventWorkspace(1, 5, 5, 0, 0.9, 2, 0);
+        WorkspaceCreationHelper::createEventWorkspace(1, 5, 5, 0, 0.9, 2, 0);
     event->getAxis(0)->unit() = UnitFactory::Instance().create("DeltaE");
     AnalysisDataService::Instance().add(inputEvWSname, event);
   }

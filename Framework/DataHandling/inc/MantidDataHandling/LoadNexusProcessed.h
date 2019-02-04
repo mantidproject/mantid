@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAHANDLING_LOADNEXUSPROCESSED_H_
 #define MANTID_DATAHANDLING_LOADNEXUSPROCESSED_H_
 
@@ -7,8 +13,8 @@
 #include "MantidAPI/IFileLoader.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidKernel/cow_ptr.h"
 #include "MantidHistogramData/BinEdges.h"
+#include "MantidKernel/cow_ptr.h"
 
 #include "MantidNexus/NexusClasses.h"
 
@@ -34,27 +40,6 @@ Required Properties:
 <LI> Filename - The name of the input NeXus file (must exist) </LI>
 <LI> InputWorkspace - The name of the workspace to put the data </LI>
 </UL>
-
-Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>.
-Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport LoadNexusProcessed
     : public API::IFileLoader<Kernel::NexusDescriptor> {
@@ -76,6 +61,9 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; };
+  const std::vector<std::string> seeAlso() const override {
+    return {"LoadNexus"};
+  }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "DataHandling\\Nexus"; }
 
@@ -92,15 +80,14 @@ private:
 
   /// Create the workspace name if it's part of a group workspace
   std::string buildWorkspaceName(const std::string &name,
-                                 const std::string &baseName, size_t wsIndex,
-                                 bool commonStem);
+                                 const std::string &baseName, size_t wsIndex);
 
   /// Add an index to the name if it already exists in the workspace
   void correctForWorkspaceNameClash(std::string &wsName);
 
-  /// Check if group workspace share a common name stem
-  bool checkForCommonNameStem(Mantid::NeXus::NXRoot &root,
-                              std::vector<std::string> &names);
+  /// Extract the workspace name
+  std::vector<std::string> extractWorkspaceNames(Mantid::NeXus::NXRoot &root,
+                                                 size_t nWorkspaceEntries);
 
   /// Load the workspace name attribute if it exists
   std::string loadWorkspaceName(Mantid::NeXus::NXRoot &root,

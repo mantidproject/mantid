@@ -1,7 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidSINQ/PoldiUtilities/PoldiDeadWireDecorator.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 
-#include <algorithm>
 #include "boost/bind.hpp"
+#include <algorithm>
 
 namespace Mantid {
 namespace Poldi {
@@ -17,18 +24,19 @@ PoldiDeadWireDecorator::PoldiDeadWireDecorator(
 }
 
 PoldiDeadWireDecorator::PoldiDeadWireDecorator(
-    Instrument_const_sptr poldiInstrument,
+    const Geometry::DetectorInfo &poldiDetectorInfo,
     boost::shared_ptr<PoldiAbstractDetector> detector)
     : PoldiDetectorDecorator(detector), m_deadWireSet(), m_goodElements() {
   setDecoratedDetector(detector);
 
-  std::vector<detid_t> allDetectorIds = poldiInstrument->getDetectorIDs();
+  std::vector<detid_t> allDetectorIds = poldiDetectorInfo.detectorIDs();
   std::vector<detid_t> deadDetectorIds(allDetectorIds.size());
 
   auto endIterator = std::remove_copy_if(
       allDetectorIds.begin(), allDetectorIds.end(), deadDetectorIds.begin(),
-      boost::bind<bool>(&PoldiDeadWireDecorator::detectorIsNotMasked,
-                        poldiInstrument, _1));
+      [&](const detid_t detID) -> bool {
+        return !poldiDetectorInfo.isMasked(poldiDetectorInfo.indexOf(detID));
+      });
   deadDetectorIds.resize(std::distance(deadDetectorIds.begin(), endIterator));
 
   setDeadWires(std::set<int>(deadDetectorIds.begin(), deadDetectorIds.end()));
@@ -74,11 +82,6 @@ PoldiDeadWireDecorator::getGoodElements(std::vector<int> rawElements) {
   }
 
   return rawElements;
-}
-
-bool PoldiDeadWireDecorator::detectorIsNotMasked(
-    Instrument_const_sptr instrument, detid_t detectorId) {
-  return !instrument->isDetectorMasked(detectorId);
 }
 
 bool PoldiDeadWireDecorator::isDeadElement(int index) {

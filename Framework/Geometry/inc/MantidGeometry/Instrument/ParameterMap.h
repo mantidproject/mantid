@@ -1,28 +1,32 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef PARAMETERMAP_H_
 #define PARAMETERMAP_H_
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/IComponent.h"
-#include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/IDTypes.h" //For specnum_t
+#include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/Parameter.h"
-#include "MantidGeometry/Instrument/ParameterFactory.h"
-#include "MantidGeometry/Objects/BoundingBox.h"
-#include "MantidKernel/Cache.h"
 
 #include "tbb/concurrent_unordered_map.h"
 
-#include <vector>
+#include <memory>
 #include <typeinfo>
+#include <vector>
 
 namespace Mantid {
+namespace Kernel {
+template <class KEYTYPE, class VALUETYPE> class Cache;
+}
 namespace Geometry {
-
-//---------------------------------------------------------------------------
-// Forward declarations
-//---------------------------------------------------------------------------
-class BoundingBox;
-class NearestNeighbours;
+class ComponentInfo;
+class DetectorInfo;
+class Instrument;
 
 /** @class ParameterMap ParameterMap.h
 
@@ -33,48 +37,30 @@ class NearestNeighbours;
 
   @author Roman Tolchenov, Tessella Support Services plc
   @date 2/12/2008
-
-  Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
-
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>.
-  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 /// Parameter map iterator typedef
-typedef tbb::concurrent_unordered_multimap<
-    ComponentID, boost::shared_ptr<Parameter>>::iterator component_map_it;
-typedef tbb::concurrent_unordered_multimap<
-    ComponentID, boost::shared_ptr<Parameter>>::const_iterator
-    component_map_cit;
+using component_map_it =
+    tbb::concurrent_unordered_multimap<ComponentID,
+                                       boost::shared_ptr<Parameter>>::iterator;
+using component_map_cit = tbb::concurrent_unordered_multimap<
+    ComponentID, boost::shared_ptr<Parameter>>::const_iterator;
 
 class MANTID_GEOMETRY_DLL ParameterMap {
 public:
   /// Parameter map typedef
-  typedef tbb::concurrent_unordered_multimap<ComponentID,
-                                             boost::shared_ptr<Parameter>> pmap;
+  using pmap = tbb::concurrent_unordered_multimap<ComponentID,
+                                                  boost::shared_ptr<Parameter>>;
   /// Parameter map iterator typedef
-  typedef tbb::concurrent_unordered_multimap<
-      ComponentID, boost::shared_ptr<Parameter>>::iterator pmap_it;
+  using pmap_it = tbb::concurrent_unordered_multimap<
+      ComponentID, boost::shared_ptr<Parameter>>::iterator;
   /// Parameter map iterator typedef
-  typedef tbb::concurrent_unordered_multimap<
-      ComponentID, boost::shared_ptr<Parameter>>::const_iterator pmap_cit;
+  using pmap_cit = tbb::concurrent_unordered_multimap<
+      ComponentID, boost::shared_ptr<Parameter>>::const_iterator;
   /// Default constructor
   ParameterMap();
+  /// Const constructor
+  ParameterMap(const ParameterMap &other);
+  ~ParameterMap();
   /// Returns true if the map is empty, false otherwise
   inline bool empty() const { return m_map.empty(); }
   /// Return the size of the map
@@ -94,6 +80,7 @@ public:
   static const std::string &pString();
   static const std::string &pV3D();
   static const std::string &pQuat();
+  static const std::string &scale();
 
   const std::string diff(const ParameterMap &rhs,
                          const bool &firstDiffOnly = false) const;
@@ -142,7 +129,7 @@ public:
   void add(const std::string &type, const IComponent *comp,
            const std::string &name, const T &value,
            const std::string *const pDescription = nullptr) {
-    auto param = ParameterFactory::create(type, name);
+    auto param = create(type, name);
     auto typedParam = boost::dynamic_pointer_cast<ParameterType<T>>(param);
     assert(typedParam); // If not true the factory has created the wrong type
     typedParam->setValue(value);
@@ -200,6 +187,7 @@ public:
   void addQuat(const IComponent *comp, const std::string &name,
                const Kernel::Quat &value,
                const std::string *const pDescription = nullptr);
+  void forceUnsafeSetMasked(const IComponent *comp, bool value);
   //@}
 
   /// Does the named parameter exist for the given component and type
@@ -250,9 +238,8 @@ public:
 
     pmap_cit it;
     for (it = m_map.begin(); it != m_map.end(); ++it) {
-      if (compName.compare(((const IComponent *)(*it).first)->getName()) == 0) {
-        boost::shared_ptr<Parameter> param =
-            get((const IComponent *)(*it).first, name);
+      if (compName == it->first->getName()) {
+        boost::shared_ptr<Parameter> param = get(it->first, name);
         if (param)
           retval.push_back(param->value<T>());
       }
@@ -315,11 +302,6 @@ public:
                          const Kernel::Quat &rotation) const;
   /// Attempts to retrieve a rotation from the rotation cache
   bool getCachedRotation(const IComponent *comp, Kernel::Quat &rotation) const;
-  /// Sets a cached bounding box
-  void setCachedBoundingBox(const IComponent *comp,
-                            const BoundingBox &box) const;
-  /// Attempts to retrieve a bounding box from the cache
-  bool getCachedBoundingBox(const IComponent *comp, BoundingBox &box) const;
   /// Persist a representation of the Parameter map to the open Nexus file
   void saveNexus(::NeXus::File *file, const std::string &group) const;
   /// Copy pairs (oldComp->id,Parameter) to the m_map assigning the new
@@ -340,7 +322,21 @@ public:
   pmap_it end() { return m_map.end(); }
   pmap_cit end() const { return m_map.end(); }
 
+  bool hasDetectorInfo(const Instrument *instrument) const;
+  bool hasComponentInfo(const Instrument *instrument) const;
+  const Geometry::DetectorInfo &detectorInfo() const;
+  Geometry::DetectorInfo &mutableDetectorInfo();
+  const Geometry::ComponentInfo &componentInfo() const;
+  Geometry::ComponentInfo &mutableComponentInfo();
+  size_t detectorIndex(const detid_t detID) const;
+  size_t componentIndex(const Geometry::ComponentID componentId) const;
+  const std::vector<Geometry::ComponentID> &componentIds() const;
+  void setInstrument(const Instrument *instrument);
+
 private:
+  boost::shared_ptr<Parameter> create(const std::string &className,
+                                      const std::string &name) const;
+
   /// Assignment operator
   ParameterMap &operator=(ParameterMap *rhs);
   /// internal function to get position of the parameter in the parameter map
@@ -357,17 +353,29 @@ private:
   /// internal parameter map instance
   pmap m_map;
   /// internal cache map instance for cached position values
-  mutable Kernel::Cache<const ComponentID, Kernel::V3D> m_cacheLocMap;
+  std::unique_ptr<Kernel::Cache<const ComponentID, Kernel::V3D>> m_cacheLocMap;
   /// internal cache map instance for cached rotation values
-  mutable Kernel::Cache<const ComponentID, Kernel::Quat> m_cacheRotMap;
-  /// internal cache map for cached bounding boxes
-  mutable Kernel::Cache<const ComponentID, BoundingBox> m_boundingBoxMap;
+  std::unique_ptr<Kernel::Cache<const ComponentID, Kernel::Quat>> m_cacheRotMap;
+
+  /// Pointer to the DetectorInfo wrapper. NULL unless the instrument is
+  /// associated with an ExperimentInfo object.
+  std::unique_ptr<Geometry::DetectorInfo> m_detectorInfo;
+
+  /// Pointer to the ComponentInfo wrapper. NULL unless the instrument is
+  /// associated with an ExperimentInfo object.
+  std::unique_ptr<Geometry::ComponentInfo> m_componentInfo;
+
+  /// Pointer to the owning instrument for translating detector IDs into
+  /// detector indices when accessing the DetectorInfo object. If the workspace
+  /// distinguishes between a neutronic instrument and a physical instrument
+  /// the owning instrument is the neutronic one.
+  const Instrument *m_instrument{nullptr};
 };
 
 /// ParameterMap shared pointer typedef
-typedef boost::shared_ptr<ParameterMap> ParameterMap_sptr;
+using ParameterMap_sptr = boost::shared_ptr<ParameterMap>;
 /// ParameterMap constant shared pointer typedef
-typedef boost::shared_ptr<const ParameterMap> ParameterMap_const_sptr;
+using ParameterMap_const_sptr = boost::shared_ptr<const ParameterMap>;
 
 } // Namespace Geometry
 

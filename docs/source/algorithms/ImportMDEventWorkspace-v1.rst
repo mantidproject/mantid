@@ -2,14 +2,14 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
 Description
 -----------
 
-Creates an `MDEventWorkspace <http://www.mantidproject.org/MDEventWorkspace>`_
+Creates an :ref:`MDEventWorkspace <MDWorkspace>`
 from a plain ASCII file. Uses a simple
 format for the file described below. This algorithm is suitable for
 importing small volumes of data only. This algorithm does not scale well
@@ -72,8 +72,8 @@ Usage
 .. testcode:: ExMdLeanEvents
 
     ws = ImportMDEventWorkspace("demo_mdew_mdleanevents.txt")
-    print "Number of Events =", ws.getNEvents()
-    print "Workspace type =", ws.id()
+    print("Number of Events = {}".format(ws.getNEvents()))
+    print("Workspace type = {}".format(ws.id()))
 
 Output:
 
@@ -87,8 +87,8 @@ Output:
 .. testcode:: ExMdEvents
 
     ws = ImportMDEventWorkspace("demo_mdew_mdevents.txt")
-    print "Number of Events =", ws.getNEvents()
-    print "Workspace type =", ws.id()
+    print("Number of Events = {}".format(ws.getNEvents()))
+    print("Workspace type = {}".format(ws.id()))
 
 Output:
 

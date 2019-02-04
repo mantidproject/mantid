@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef SCALETEST_H_
 #define SCALETEST_H_
 
-#include <cxxtest/TestSuite.h>
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAlgorithms/Scale.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidAPI/FrameworkManager.h"
+#include <cxxtest/TestSuite.h>
 
 using Mantid::MantidVec;
 
@@ -27,7 +33,7 @@ public:
       scale.initialize();
 
     AnalysisDataService::Instance().add(
-        "tomultiply", WorkspaceCreationHelper::Create2DWorkspace123(10, 10));
+        "tomultiply", WorkspaceCreationHelper::create2DWorkspace123(10, 10));
     TS_ASSERT_THROWS_NOTHING(
         scale.setPropertyValue("InputWorkspace", "tomultiply"));
     TS_ASSERT_THROWS_NOTHING(
@@ -59,7 +65,7 @@ public:
     scale2.initialize();
 
     AnalysisDataService::Instance().add(
-        "toadd", WorkspaceCreationHelper::Create2DWorkspace123(10, 10));
+        "toadd", WorkspaceCreationHelper::create2DWorkspace123(10, 10));
     TS_ASSERT_THROWS_NOTHING(
         scale2.setPropertyValue("InputWorkspace", "toadd"));
     TS_ASSERT_THROWS_NOTHING(
@@ -133,7 +139,7 @@ private:
     bool isHist = true;
     std::string wsName = "input_scaling";
     Mantid::API::AnalysisDataService::Instance().add(
-        wsName, WorkspaceCreationHelper::Create2DWorkspaceWithValuesAndXerror(
+        wsName, WorkspaceCreationHelper::create2DWorkspaceWithValuesAndXerror(
                     nHist, nBins, isHist, xValue, value, error, xError));
     std::string outWorkspaceName;
     if (outIsIn) {

@@ -1,7 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/DefineGaugeVolume.h"
-#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
+#include "MantidGeometry/Objects/CSGObject.h"
+#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/MandatoryValidator.h"
 
 namespace Mantid {
@@ -32,8 +39,7 @@ void DefineGaugeVolume::exec() {
   // Get the XML definition
   const std::string shapeXML = getProperty("ShapeXML");
   // Try creating the shape to make sure the input's valid
-  boost::shared_ptr<Geometry::Object> shape_sptr =
-      Geometry::ShapeFactory().createShape(shapeXML);
+  auto shape_sptr = Geometry::ShapeFactory().createShape(shapeXML);
   if (!shape_sptr->hasValidShape()) {
     g_log.error("Invalid shape definition provided. Gauge Volume NOT added to "
                 "workspace.");

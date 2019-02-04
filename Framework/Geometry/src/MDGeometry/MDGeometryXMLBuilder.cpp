@@ -1,39 +1,26 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include <sstream>
 
-#include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
 
-#include <boost/functional/hash.hpp>
-#include <boost/algorithm/string.hpp>
-#include <boost/format.hpp>
 #include <Poco/DOM/AutoPtr.h>
-#include <Poco/DOM/Document.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/DOMWriter.h>
+#include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/Text.h>
+#include <boost/algorithm/string.hpp>
+#include <boost/format.hpp>
+#include <boost/functional/hash.hpp>
 
 namespace Mantid {
 namespace Geometry {
-
-/*
- @class CompareIMDDimension_const_sptr
- @brief Helper comparitor. Compares IMDDimensions constant shared pointers on
- the basis of their id.
- @author Owen Arnold
- @date May 2011
-*/
-struct CompareIMDDimension_const_sptr
-    : public std::unary_function<IMDDimension_const_sptr, bool> {
-private:
-  IMDDimension_const_sptr _a;
-
-public:
-  explicit CompareIMDDimension_const_sptr(IMDDimension_const_sptr a) : _a(a) {}
-  bool operator()(IMDDimension_const_sptr b) {
-    return _a->getDimensionId() == b->getDimensionId();
-  }
-};
 
 /**
  Add an ordinary dimension.
@@ -44,12 +31,15 @@ template <typename CheckDimensionPolicy>
 bool MDGeometryBuilderXML<CheckDimensionPolicy>::addOrdinaryDimension(
     IMDDimension_const_sptr dimensionToAdd) const {
   bool bAdded = false; // Addition fails by default.
-  if (dimensionToAdd.get() != nullptr) {
-    CompareIMDDimension_const_sptr comparitor(dimensionToAdd);
-    auto location = std::find_if(m_vecDimensions.begin(), m_vecDimensions.end(),
-                                 comparitor);
-    if (location == m_vecDimensions.end()) {
-      m_vecDimensions.push_back(dimensionToAdd);
+  if (dimensionToAdd) {
+    const std::string dimensionId = dimensionToAdd->getDimensionId();
+    auto location =
+        std::find_if(m_vecDimensions.cbegin(), m_vecDimensions.cend(),
+                     [&dimensionId](const IMDDimension_const_sptr &b) {
+                       return dimensionId == b->getDimensionId();
+                     });
+    if (location == m_vecDimensions.cend()) {
+      m_vecDimensions.push_back(std::move(dimensionToAdd));
       bAdded = true;
       m_changed = true;
     }
@@ -83,8 +73,8 @@ MDGeometryBuilderXML<CheckDimensionPolicy>::MDGeometryBuilderXML(
 
 template <typename CheckDimensionPolicy>
 MDGeometryBuilderXML<CheckDimensionPolicy> &
-    MDGeometryBuilderXML<CheckDimensionPolicy>::
-    operator=(const MDGeometryBuilderXML<CheckDimensionPolicy> &other) {
+MDGeometryBuilderXML<CheckDimensionPolicy>::
+operator=(const MDGeometryBuilderXML<CheckDimensionPolicy> &other) {
   if (this != &other) {
     m_vecDimensions = other.m_vecDimensions;
     m_spXDimension = other.m_spXDimension;
@@ -104,7 +94,7 @@ MDGeometryBuilderXML<CheckDimensionPolicy> &
  */
 template <typename CheckDimensionPolicy>
 void MDGeometryBuilderXML<CheckDimensionPolicy>::applyPolicyChecking(
-    IMDDimension_const_sptr dimensionToAdd) const {
+    const IMDDimension &dimensionToAdd) const {
   CheckDimensionPolicy policy;
   policy(dimensionToAdd);
 }
@@ -119,10 +109,10 @@ bool MDGeometryBuilderXML<CheckDimensionPolicy>::addXDimension(
     IMDDimension_const_sptr dimension) const {
 
   bool bAdded = false;
-  if (dimension.get() != nullptr) {
-    applyPolicyChecking(dimension);
+  if (dimension) {
+    applyPolicyChecking(*dimension);
     addOrdinaryDimension(dimension);
-    m_spXDimension = dimension;
+    m_spXDimension = std::move(dimension);
     m_changed = true;
     bAdded = true;
   }
@@ -139,10 +129,10 @@ bool MDGeometryBuilderXML<CheckDimensionPolicy>::addYDimension(
     IMDDimension_const_sptr dimension) const {
 
   bool bAdded = false;
-  if (dimension.get() != nullptr) {
-    applyPolicyChecking(dimension);
+  if (dimension) {
+    applyPolicyChecking(*dimension);
     addOrdinaryDimension(dimension);
-    m_spYDimension = dimension;
+    m_spYDimension = std::move(dimension);
     m_changed = true;
     bAdded = true;
   }
@@ -158,10 +148,10 @@ template <typename CheckDimensionPolicy>
 bool MDGeometryBuilderXML<CheckDimensionPolicy>::addZDimension(
     IMDDimension_const_sptr dimension) const {
   bool bAdded = false;
-  if (dimension.get() != nullptr) {
-    applyPolicyChecking(dimension);
+  if (dimension) {
+    applyPolicyChecking(*dimension);
     addOrdinaryDimension(dimension);
-    m_spZDimension = dimension;
+    m_spZDimension = std::move(dimension);
     m_changed = true;
     bAdded = true;
   }
@@ -178,10 +168,10 @@ bool MDGeometryBuilderXML<CheckDimensionPolicy>::addTDimension(
     IMDDimension_const_sptr dimension) const {
 
   bool bAdded = false;
-  if (dimension.get() != nullptr) {
-    applyPolicyChecking(dimension);
+  if (dimension) {
+    applyPolicyChecking(*dimension);
     addOrdinaryDimension(dimension);
-    m_spTDimension = dimension;
+    m_spTDimension = std::move(dimension);
     m_changed = true;
     bAdded = true;
   }
@@ -315,5 +305,5 @@ MDGeometryBuilderXML<CheckDimensionPolicy>::~MDGeometryBuilderXML() {}
 template class MDGeometryBuilderXML<StrictDimensionPolicy>;
 // Create a builder that applies no blocking/checking.
 template class MDGeometryBuilderXML<NoDimensionPolicy>;
-}
-}
+} // namespace Geometry
+} // namespace Mantid

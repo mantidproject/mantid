@@ -1,10 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/Pause.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/DateAndTime.h"
 
 #include <Poco/Thread.h>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using Mantid::Types::Core::DateAndTime;
 
 namespace Mantid {
 namespace Algorithms {
@@ -12,7 +20,6 @@ namespace Algorithms {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(Pause)
 
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string Pause::name() const { return "Pause"; }
 
@@ -22,9 +29,6 @@ int Pause::version() const { return 1; }
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string Pause::category() const { return "Utility\\Development"; }
 
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void Pause::init() {
@@ -33,7 +37,6 @@ void Pause::init() {
                   "Enter a negative number to pause forever until cancelled.");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void Pause::exec() {
@@ -70,5 +73,5 @@ void Pause::exec() {
   }
 }
 
-} // namespace Mantid
 } // namespace Algorithms
+} // namespace Mantid

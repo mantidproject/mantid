@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidSINQ/LoadFlexiNexus.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
@@ -6,7 +12,6 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
-#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Utils.h"
 
@@ -24,6 +29,9 @@ using namespace Mantid::Geometry;
 using namespace Mantid;
 using namespace Mantid::DataObjects;
 using namespace ::NeXus;
+using Mantid::HistogramData::BinEdges;
+using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::Points;
 
 // A reference to the logger is provided by the base class, it is called g_log.
 // It is used to print out information, warning and error messages
@@ -165,19 +173,17 @@ void LoadFlexiNexus::load2DWorkspace(NeXus::File *fin) {
   // x can be bin edges or points, depending on branching above
   auto x = Kernel::make_cow<HistogramData::HistogramX>(xData);
   for (int wsIndex = 0; wsIndex < nSpectra; wsIndex++) {
-    Mantid::MantidVec &Y = ws->dataY(wsIndex);
-    for (int j = 0; j < spectraLength; j++) {
-      Y[j] = data[spectraLength * wsIndex + j];
-    }
-    // Create and fill another vector for the errors, containing sqrt(count)
-    Mantid::MantidVec &E = ws->dataE(wsIndex);
-    std::transform(Y.begin(), Y.end(), E.begin(), dblSqrt);
-    ws->setX(wsIndex, x);
-    // Xtof		ws->getAxis(1)->spectraNo(i)= i;
-    ws->getSpectrum(wsIndex)
-        .setSpectrumNo(static_cast<specnum_t>(yData[wsIndex]));
-    ws->getSpectrum(wsIndex)
-        .setDetectorID(static_cast<detid_t>(yData[wsIndex]));
+    auto beg = data.begin() + spectraLength * wsIndex;
+    auto end = beg + spectraLength;
+    if (static_cast<size_t>(spectraLength) == xData.size())
+      ws->setHistogram(wsIndex, Points(x), Counts(beg, end));
+    else
+      ws->setHistogram(wsIndex, BinEdges(x), Counts(beg, end));
+
+    ws->getSpectrum(wsIndex).setSpectrumNo(
+        static_cast<specnum_t>(yData[wsIndex]));
+    ws->getSpectrum(wsIndex).setDetectorID(
+        static_cast<detid_t>(yData[wsIndex]));
   }
 
   ws->setYUnit("Counts");
@@ -189,7 +195,7 @@ void LoadFlexiNexus::load2DWorkspace(NeXus::File *fin) {
   } else {
     const std::string xname(it->second);
     ws->getAxis(0)->title() = xname;
-    if (xname.compare("TOF") == 0) {
+    if (xname == "TOF") {
       g_log.debug() << "Setting X-unit to be TOF\n";
       ws->getAxis(0)->setUnit("TOF");
     }
@@ -334,17 +340,25 @@ void LoadFlexiNexus::addMetaData(NeXus::File *fin, Workspace_sptr ws,
       sample = it->second;
     } else {
       if (safeOpenpath(fin, it->second)) {
-        sample = fin->getStrData();
+        Info inf = fin->getInfo();
+        if (inf.dims.size() == 1) {
+          sample = fin->getStrData();
+        } else { // something special for 2-d array
+          std::vector<char> val_array;
+          fin->getData(val_array);
+          fin->closeData();
+          sample = std::string(val_array.begin(), val_array.end());
+        }
       } else {
-        sample = "Sampe plath not found";
+        sample = "Sample path not found";
       }
     }
   }
   info->mutableSample().setName(sample);
 
   /**
-  * load all the extras into the Run information
-  */
+   * load all the extras into the Run information
+   */
   Run &r = info->mutableRun();
   auto specialMap = populateSpecialMap();
   for (it = dictionary.begin(); it != dictionary.end(); ++it) {

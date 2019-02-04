@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidHistogramData/Points.h"
 #include "MantidHistogramData/BinEdges.h"
 
@@ -10,7 +16,7 @@ Points::Points(const BinEdges &edges) {
     return;
   if (edges.size() == 1)
     throw std::logic_error("Points: Cannot construct from BinEdges of size 1");
-  if (edges.size() == 0) {
+  if (edges.empty()) {
     m_data = Kernel::make_cow<HistogramX>(0);
     return;
   }

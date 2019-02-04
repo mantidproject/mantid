@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -12,7 +12,7 @@ Description
 Calculates phonon densities of states, Raman and IR spectrum from the
 output of CASTEP code obtained in the form of *.phonon* and *.castep* files.
 
-The PeakWidth property may be passed a function containg the variable "energy"
+The PeakWidth property may be passed a function containing the variable "energy"
 (e.g. *0.1*energy*) to set the FWHM of the peak as a function of the energy
 (centre point of the peak). This can be useful for comparison with experimental
 data by allowing the peak width to change according to the resolution of the
@@ -42,14 +42,15 @@ Usage
     # Loading the same data from a castep and phonon file
     phonon_ws = SimulatedDensityOfStates(PHONONFile='squaricn.phonon')
     castep_ws = SimulatedDensityOfStates(CASTEPFile='squaricn.castep')
+    result = CompareWorkspaces(phonon_ws, castep_ws)
 
-    print CheckWorkspacesMatch(phonon_ws, castep_ws)
+    print(result[0])
 
 Output:
 
 .. testoutput:: ExSimulatedDensityOfStatesSimple
 
-    Success!
+    True
 
 **Example - loading partial contributions of ions:**
 
@@ -59,7 +60,7 @@ Output:
                                         Ions=['H', 'C', 'O'])
 
     for name in squaricn.getNames():
-      print name
+      print(name)
 
 Output:
 
@@ -78,13 +79,13 @@ Output:
                                       SumContributions=True)
     total_ws = SimulatedDensityOfStates(PHONONFile='squaricn.phonon')
 
-    print CheckWorkspacesMatch(total_ws, sum_ws, Tolerance=1e-12)
+    print(CompareWorkspaces(total_ws, sum_ws, Tolerance=1e-12)[0])
 
 Output:
 
 .. testoutput:: ExSimulatedDensityOfStatesPartialSummed
 
-    Success!
+    True
 
 **Example - Getting the list of ions in a phonon file:**
 
@@ -92,7 +93,7 @@ Output:
 
     ion_ws = SimulatedDensityOfStates(PHONONFile='squaricn.phonon',
                                       SpectrumType='IonTable')
-    print ', '.join(ion_ws.column('Species'))
+    print(', '.join(ion_ws.column('Species')))
 
 Output:
 

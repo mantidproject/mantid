@@ -1,10 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/GetEi2.h"
 
-#include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidGeometry/IDetector_fwd.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/muParser_Silent.h"
@@ -13,9 +20,9 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/VectorHelper.h"
 
+#include <algorithm>
 #include <boost/lexical_cast.hpp>
 #include <cmath>
-#include <algorithm>
 #include <sstream>
 
 using namespace Mantid::Kernel;
@@ -29,8 +36,8 @@ namespace Algorithms {
 DECLARE_ALGORITHM(GetEi2)
 
 /**
-* Default contructor
-*/
+ * Default contructor
+ */
 GetEi2::GetEi2()
     : Algorithm(), m_input_ws(), m_peak1_pos(0, 0.0), m_fixedei(false),
       m_tof_window(0.1), m_peak_signif(2.0), m_peak_deriv(1.0),
@@ -108,14 +115,14 @@ void GetEi2::init()
 }
 
 /** Executes the algorithm
-*  @throw out_of_range if the peak runs off the edge of the histogram
-*  @throw NotFoundError if one of the requested spectrum numbers was not found
-* in the workspace
-*  @throw IndexError if there is a problem converting spectra indexes to spectra
-* numbers, which would imply there is a problem with the workspace
-*  @throw invalid_argument if a good peak fit wasn't made or the input workspace
-* does not have common binning
-*/
+ *  @throw out_of_range if the peak runs off the edge of the histogram
+ *  @throw NotFoundError if one of the requested spectrum numbers was not found
+ * in the workspace
+ *  @throw IndexError if there is a problem converting spectra indexes to
+ * spectra numbers, which would imply there is a problem with the workspace
+ *  @throw invalid_argument if a good peak fit wasn't made or the input
+ * workspace does not have common binning
+ */
 void GetEi2::exec() {
   m_input_ws = getProperty("InputWorkspace");
   m_fixedei = getProperty("FixEi");
@@ -216,9 +223,10 @@ double GetEi2::calculateEi(const double initial_guess) {
   // Calculate actual peak postion for each monitor peak
   double peak_times[2] = {0.0, 0.0};
   double det_distances[2] = {0.0, 0.0};
+  auto &spectrumInfo = m_input_ws->spectrumInfo();
   for (unsigned int i = 0; i < 2; ++i) {
     size_t ws_index = mon_indices[i];
-    det_distances[i] = getDistanceFromSource(ws_index);
+    det_distances[i] = getDistanceFromSource(ws_index, spectrumInfo);
     const double peak_guess =
         det_distances[i] * std::sqrt(m_t_to_mev / initial_guess);
     const double t_min = (1.0 - m_tof_window) * peak_guess;
@@ -276,31 +284,33 @@ double GetEi2::calculateEi(const double initial_guess) {
   }
 }
 
-/** Gets the distance between the source and detectors whose workspace index is
+/**
+ * Gets the distance between the source and detectors whose workspace index is
  * passed
  *  @param ws_index :: The workspace index of the detector
+ *  @param spectrumInfo :: A spectrum info object for the input workspace
  *  @return The distance between the source and the given detector(or
  * DetectorGroup)
  *  @throw runtime_error if there is a problem
  */
-double GetEi2::getDistanceFromSource(size_t ws_index) const {
+double GetEi2::getDistanceFromSource(size_t ws_index,
+                                     const SpectrumInfo &spectrumInfo) const {
   g_log.debug() << "Computing distance between spectrum at index '" << ws_index
                 << "' and the source\n";
 
+  const auto &detector = spectrumInfo.detector(ws_index);
   const IComponent_const_sptr source = m_input_ws->getInstrument()->getSource();
-  // Retrieve a pointer detector
-  IDetector_const_sptr det = m_input_ws->getDetector(ws_index);
-  if (!det) {
+  if (!spectrumInfo.hasDetectors(ws_index)) {
     std::ostringstream msg;
     msg << "A detector for monitor at workspace index " << ws_index
         << " cannot be found. ";
     throw std::runtime_error(msg.str());
   }
   if (g_log.is(Logger::Priority::PRIO_DEBUG)) {
-    g_log.debug() << "Detector position = " << det->getPos()
+    g_log.debug() << "Detector position = " << spectrumInfo.position(ws_index)
                   << ", Source position = " << source->getPos() << "\n";
   }
-  const double dist = det->getDistance(*source);
+  const double dist = detector.getDistance(*source);
   g_log.debug() << "Distance = " << dist << " metres\n";
   return dist;
 }
@@ -383,7 +393,7 @@ GetEi2::extractSpectrum(size_t ws_index, const double start, const double end) {
  * @param peak_e :: An output vector containing just the E values of the peak
  * data
  * @returns The width of the peak at half height
-*/
+ */
 double GetEi2::calculatePeakWidthAtHalfHeight(
     API::MatrixWorkspace_sptr data_ws, const double prominence,
     std::vector<double> &peak_x, std::vector<double> &peak_y,
@@ -561,9 +571,9 @@ double GetEi2::calculatePeakWidthAtHalfHeight(
                       << "half-height point will not be as accurate.\n";
       ip1--;
     }
-    xp_hh = peak_x[ip2] +
-            (peak_x[ip1] - peak_x[ip2]) *
-                ((hby2 - peak_y[ip2]) / (peak_y[ip1] - peak_y[ip2]));
+    xp_hh =
+        peak_x[ip2] + (peak_x[ip1] - peak_x[ip2]) *
+                          ((hby2 - peak_y[ip2]) / (peak_y[ip1] - peak_y[ip2]));
   } else {
     xp_hh = peak_x[nyvals - 1];
   }
@@ -596,9 +606,9 @@ double GetEi2::calculatePeakWidthAtHalfHeight(
                       << "half-height point will not be as accurate.\n";
       im1++;
     }
-    xm_hh = peak_x[im2] +
-            (peak_x[im1] - peak_x[im2]) *
-                ((hby2 - peak_y[im2]) / (peak_y[im1] - peak_y[im2]));
+    xm_hh =
+        peak_x[im2] + (peak_x[im1] - peak_x[im2]) *
+                          ((hby2 - peak_y[im2]) / (peak_y[im1] - peak_y[im2]));
   } else {
     xm_hh = peak_x.front();
   }
@@ -646,6 +656,7 @@ API::MatrixWorkspace_sptr GetEi2::rebin(API::MatrixWorkspace_sptr monitor_ws,
   std::ostringstream binParams;
   binParams << first << "," << width << "," << end;
   childAlg->setPropertyValue("Params", binParams.str());
+  childAlg->setProperty("IgnoreBinErrors", true);
   childAlg->executeAsChildAlg();
   return childAlg->getProperty("OutputWorkspace");
 }
@@ -683,9 +694,9 @@ void GetEi2::integrate(double &integral_val, double &integral_err,
     unsigned int ihi = std::min<unsigned int>(static_cast<unsigned int>(mu) + 1,
                                               static_cast<unsigned int>(nx));
     double fraction = (xmax - xmin) / (x[ihi] - x[ilo]);
-    integral_val =
-        0.5 * fraction * (s[ihi] * ((xmax - x[ilo]) + (xmin - x[ilo])) +
-                          s[ilo] * ((x[ihi] - xmax) + (x[ihi] - xmin)));
+    integral_val = 0.5 * fraction *
+                   (s[ihi] * ((xmax - x[ilo]) + (xmin - x[ilo])) +
+                    s[ilo] * ((x[ihi] - xmax) + (x[ihi] - xmin)));
     double err_hi = e[ihi] * ((xmax - x[ilo]) + (xmin - x[ilo]));
     double err_lo = e[ilo] * ((x[ihi] - xmax) + (x[ihi] - xmin));
     integral_err =
@@ -761,5 +772,5 @@ void GetEi2::storeEi(const double ei) const {
       new PropertyWithValue<double>("Ei", ei, Direction::Input);
   m_input_ws->mutableRun().addProperty(incident_energy, true);
 }
-}
-}
+} // namespace Algorithms
+} // namespace Mantid

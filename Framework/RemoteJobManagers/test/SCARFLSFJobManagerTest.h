@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_REMOTEJOBMANAGERS_SCARFLSFJOBMANAGERTEST_H_
 #define MANTID_REMOTEJOBMANAGERS_SCARFLSFJOBMANAGERTEST_H_
 
@@ -9,8 +15,8 @@
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidRemoteJobManagers/SCARFLSFJobManager.h"
 
-#include <boost/make_shared.hpp>
 #include <Poco/File.h>
+#include <boost/make_shared.hpp>
 
 using namespace Mantid::API;
 using namespace Mantid::RemoteJobManagers;
@@ -130,7 +136,8 @@ protected:
              "<Jobs><Job><cmd>python /work/imat/webservice_test/test.py.py "
              "/work/imat/webservice_test/test_out/</cmd><extStatus>-</"
              "extStatus>"
-             "<id>" << jobID << "</id><name>" << jobName
+             "<id>"
+          << jobID << "</id><name>" << jobName
           << "</name><status>Running</status>"
              "</Job></Jobs>";
     }

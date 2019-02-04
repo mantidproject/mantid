@@ -1,12 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_HISTOGRAMDATA_HISTOGRAM_H_
 #define MANTID_HISTOGRAMDATA_HISTOGRAM_H_
 
-#include "MantidHistogramData/DllConfig.h"
-#include "MantidKernel/cow_ptr.h"
 #include "MantidHistogramData/BinEdges.h"
-#include "MantidHistogramData/Counts.h"
 #include "MantidHistogramData/CountStandardDeviations.h"
 #include "MantidHistogramData/CountVariances.h"
+#include "MantidHistogramData/Counts.h"
+#include "MantidHistogramData/DllConfig.h"
 #include "MantidHistogramData/Frequencies.h"
 #include "MantidHistogramData/FrequencyStandardDeviations.h"
 #include "MantidHistogramData/FrequencyVariances.h"
@@ -14,14 +19,17 @@
 #include "MantidHistogramData/HistogramE.h"
 #include "MantidHistogramData/HistogramX.h"
 #include "MantidHistogramData/HistogramY.h"
-#include "MantidHistogramData/Points.h"
 #include "MantidHistogramData/PointStandardDeviations.h"
 #include "MantidHistogramData/PointVariances.h"
+#include "MantidHistogramData/Points.h"
+#include "MantidKernel/cow_ptr.h"
 
 #include <vector>
 
 namespace Mantid {
 namespace HistogramData {
+
+class HistogramIterator;
 
 /** Histogram
 
@@ -42,27 +50,6 @@ namespace HistogramData {
 
   @author Simon Heybrock
   @date 2016
-
-  Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
-
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>
-  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_HISTOGRAMDATA_DLL Histogram {
 private:
@@ -88,8 +75,8 @@ public:
   // lvalue reference qualifier on the assignment operators.
   Histogram(const Histogram &) = default;
   Histogram(Histogram &&) = default;
-  Histogram &operator=(const Histogram &)& = default;
-  Histogram &operator=(Histogram &&)& = default;
+  Histogram &operator=(const Histogram &) & = default;
+  Histogram &operator=(Histogram &&) & = default;
 
   /// Returns the storage mode of the X data (BinEdges or Points).
   XMode xMode() const noexcept { return m_xMode; }
@@ -101,10 +88,10 @@ public:
   Points points() const;
   PointVariances pointVariances() const;
   PointStandardDeviations pointStandardDeviations() const;
-  template <typename... T> void setBinEdges(T &&... data) & ;
-  template <typename... T> void setPoints(T &&... data) & ;
-  template <typename... T> void setPointVariances(T &&... data) & ;
-  template <typename... T> void setPointStandardDeviations(T &&... data) & ;
+  template <typename... T> void setBinEdges(T &&... data) &;
+  template <typename... T> void setPoints(T &&... data) &;
+  template <typename... T> void setPointVariances(T &&... data) &;
+  template <typename... T> void setPointStandardDeviations(T &&... data) &;
 
   Counts counts() const;
   CountVariances countVariances() const;
@@ -112,12 +99,12 @@ public:
   Frequencies frequencies() const;
   FrequencyVariances frequencyVariances() const;
   FrequencyStandardDeviations frequencyStandardDeviations() const;
-  template <typename... T> void setCounts(T &&... data) & ;
-  template <typename... T> void setCountVariances(T &&... data) & ;
-  template <typename... T> void setCountStandardDeviations(T &&... data) & ;
-  template <typename... T> void setFrequencies(T &&... data) & ;
-  template <typename... T> void setFrequencyVariances(T &&... data) & ;
-  template <typename... T> void setFrequencyStandardDeviations(T &&... data) & ;
+  template <typename... T> void setCounts(T &&... data) &;
+  template <typename... T> void setCountVariances(T &&... data) &;
+  template <typename... T> void setCountStandardDeviations(T &&... data) &;
+  template <typename... T> void setFrequencies(T &&... data) &;
+  template <typename... T> void setFrequencyVariances(T &&... data) &;
+  template <typename... T> void setFrequencyStandardDeviations(T &&... data) &;
 
   const HistogramX &x() const { return *m_x; }
   const HistogramY &y() const { return *m_y; }
@@ -132,14 +119,14 @@ public:
   Kernel::cow_ptr<HistogramY> sharedY() const { return m_y; }
   Kernel::cow_ptr<HistogramE> sharedE() const { return m_e; }
   Kernel::cow_ptr<HistogramDx> sharedDx() const { return m_dx; }
-  void setSharedX(const Kernel::cow_ptr<HistogramX> &x) & ;
-  void setSharedY(const Kernel::cow_ptr<HistogramY> &y) & ;
-  void setSharedE(const Kernel::cow_ptr<HistogramE> &e) & ;
-  void setSharedDx(const Kernel::cow_ptr<HistogramDx> &Dx) & ;
+  void setSharedX(const Kernel::cow_ptr<HistogramX> &x) &;
+  void setSharedY(const Kernel::cow_ptr<HistogramY> &y) &;
+  void setSharedE(const Kernel::cow_ptr<HistogramE> &e) &;
+  void setSharedDx(const Kernel::cow_ptr<HistogramDx> &Dx) &;
 
   /// Returns the size of the histogram, i.e., the number of Y data points.
   size_t size() const {
-    if (xMode() == XMode::BinEdges)
+    if (!m_x->empty() && xMode() == XMode::BinEdges)
       return m_x->size() - 1;
     return m_x->size();
   }
@@ -190,6 +177,13 @@ public:
   void convertToCounts();
   void convertToFrequencies();
 
+  HistogramIterator begin() const &;
+  HistogramIterator end() const &;
+  // Calling begin/end on a temporary is not allowed as the iterator
+  // reference will be immediately invalidated.
+  HistogramIterator begin() const && = delete;
+  HistogramIterator end() const && = delete;
+
 private:
   template <class TX> void initX(const TX &x);
   template <class TY> void initY(const TY &y);
@@ -203,8 +197,6 @@ private:
   template <class... T> bool selfAssignmentDx(const T &...) { return false; }
   template <class... T> bool selfAssignmentY(const T &...) { return false; }
   template <class... T> bool selfAssignmentE(const T &...) { return false; }
-  void switchDxToBinEdges();
-  void switchDxToPoints();
 
   XMode m_xMode;
   YMode m_yMode{YMode::Uninitialized};
@@ -234,7 +226,7 @@ Histogram::setUncertainties(const FrequencyStandardDeviations &e);
   @param y Optional Y data for the Histogram. Can be Counts or Frequencies.
   @param e Optional E data for the Histogram. Can be Variances or
   StandardDeviations for Counts or Frequencies. If not specified or null, the
-  standard deviations will be set as the suare root of the Y data.
+  standard deviations will be set as the square root of the Y data.
   */
 template <class TX, class TY, class TE>
 Histogram::Histogram(const TX &x, const TY &y, const TE &e) {

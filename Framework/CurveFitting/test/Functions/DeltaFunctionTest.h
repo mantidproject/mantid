@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef DELTAFUNCTIONTEST_H
 #define DELTAFUNCTIONTEST_H
 
@@ -127,7 +133,6 @@ public:
   }
 
   void test_delta_with_shift() {
-    IPeakFunction::setPeakRadius(1000);
     auto res = IPeakFunction_sptr(new DeltaFunctionTest_Gauss());
     double a = 0.13;
     double ha = 1.0 / sqrt(M_PI * a);
@@ -169,7 +174,6 @@ public:
   }
 
   void test_two_deltas_with_shifts() {
-    IPeakFunction::setPeakRadius(1000);
     auto res = IPeakFunction_sptr(new DeltaFunctionTest_Gauss());
     double a = 0.13;
     double ha = 1.0 / sqrt(M_PI * a);

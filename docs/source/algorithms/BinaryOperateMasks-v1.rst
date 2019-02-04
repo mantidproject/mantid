@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -48,9 +48,9 @@ Usage
    # Run using XOR
    _xor = BinaryOperateMasks(a, b, OperationType='XOR')
    
-   print _and.readY(0)
-   print _or.readY(0)
-   print _xor.readY(0)
+   print(_and.readY(0))
+   print(_or.readY(0))
+   print(_xor.readY(0))
    
 Output:
 

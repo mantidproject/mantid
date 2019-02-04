@@ -1,15 +1,21 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAOBJECTS_COORDTRANSFORMAFFINETEST_H_
 #define MANTID_DATAOBJECTS_COORDTRANSFORMAFFINETEST_H_
 
 #include "MantidAPI/CoordTransform.h"
-#include "MantidKernel/Quat.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/VMD.h"
 #include "MantidDataObjects/CoordTransformAffine.h"
 #include "MantidDataObjects/CoordTransformAligned.h"
 #include "MantidDataObjects/CoordTransformDistance.h"
 #include "MantidDataObjects/MDEventFactory.h"
+#include "MantidKernel/Quat.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include "MantidKernel/VMD.h"
 #include <cxxtest/TestSuite.h>
 
 #include <boost/scoped_ptr.hpp>
@@ -255,17 +261,17 @@ public:
     CoordTransformAffine ct42(4, 2);
     TSM_ASSERT_THROWS_ANYTHING(
         "Null input fails.",
-        CoordTransformAffine::combineTransformations(NULL, NULL));
+        CoordTransformAffine::combineTransformations(nullptr, nullptr));
     TSM_ASSERT_THROWS_ANYTHING(
         "Null input fails.",
-        CoordTransformAffine::combineTransformations(NULL, &ct43));
+        CoordTransformAffine::combineTransformations(nullptr, &ct43));
     TSM_ASSERT_THROWS_ANYTHING(
         "Incompatible # of dimensions",
         CoordTransformAffine::combineTransformations(&ct42, &ct32));
     TSM_ASSERT_THROWS_ANYTHING(
         "Incompatible # of dimensions",
         CoordTransformAffine::combineTransformations(&ct32, &ct43));
-    CoordTransformAffine *ct(NULL);
+    CoordTransformAffine *ct(nullptr);
     TSM_ASSERT_THROWS_NOTHING(
         "Compatible # of dimensions",
         ct = CoordTransformAffine::combineTransformations(&ct43, &ct32));

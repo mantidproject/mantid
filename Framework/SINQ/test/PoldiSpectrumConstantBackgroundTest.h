@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_SINQ_POLDISPECTRUMCONSTANTBACKGROUNDTEST_H_
 #define MANTID_SINQ_POLDISPECTRUMCONSTANTBACKGROUNDTEST_H_
 
@@ -37,12 +43,12 @@ public:
         "PoldiSpectrumConstantBackground");
     TS_ASSERT(function);
     MatrixWorkspace_sptr ws =
-        WorkspaceCreationHelper::Create2DWorkspaceWhereYIsWorkspaceIndex(20, 2);
+        WorkspaceCreationHelper::create2DWorkspaceWhereYIsWorkspaceIndex(20, 2);
 
     TS_ASSERT_THROWS_NOTHING(function->setWorkspace(ws));
     function->setParameter(0, 10.0);
 
-    FunctionDomain1DVector domain(ws->readX(0));
+    FunctionDomain1DVector domain(ws->x(0).rawData());
     FunctionValues values(domain);
 
     function->function(domain, values);
@@ -56,7 +62,7 @@ public:
         "PoldiSpectrumConstantBackground");
     TS_ASSERT(function);
     MatrixWorkspace_sptr ws =
-        WorkspaceCreationHelper::Create2DWorkspace123(20, 2);
+        WorkspaceCreationHelper::create2DWorkspace123(20, 2);
 
     TS_ASSERT_THROWS_NOTHING(function->setWorkspace(ws));
     function->setParameter(0, 10.0);

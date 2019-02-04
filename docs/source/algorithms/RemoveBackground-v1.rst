@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -60,13 +60,13 @@ Proof of concept background removal algorithm::
     wsParent = mtd[groupedFilename];
     
     nHist = wsParent.getNumberHistograms();
-    print "Parent workspace contains {0:10} histograms".format(nHist)
+    print("Parent workspace contains {0:10} histograms".format(nHist))
     # Get the energy binning correspondent to the binning produced by rebin function (not to re-implement the same function)
     ws1s = ExtractSingleSpectrum(wsParent,0);
     ws1s = ConvertUnits(ws1s,'DeltaE','Direct',Ei);
     ws1s = Rebin(ws1s,Params=[e_min,dE,e_max]);
     e_bins = ws1s.dataX(0);
-    nBins =e_bins.size;
+    nBins = e_bins.size;
 
     x=[e_bins[i] for i in xrange(0,nBins)]
     y=[0 for xx in xrange(0,len(x)-1)]*nHist
@@ -102,7 +102,7 @@ Proof of concept background removal algorithm::
        eGrid.setE(nspec, error)
     else:  # signal and error for background is 0 anyway.
         pass
-    #print " bg at spectra {0} equal to : {1}".format(nspec,bg[0])
+    #print(" bg at spectra {0} equal to : {1}".format(nspec,bg[0]))
 
         
   background = eGrid;
@@ -206,34 +206,34 @@ Usage
    ER = Result .dataE(0);
    
    # print first spectra, Note invalid error calculations
-   print "| x sampl  | x result | S sample | S no bg  | Err samp | Err no_bg|"
-   for i in xrange(0,20):
-      print "|{0:10}|{1:10}|{2:10.4f}|{3:10.3f}|{4:10.3f}|{5:10.3f}|".format(XS[i],XR[i],YS[i],YR[i],ES[i],ER[i]);
+   print("| x sampl  | x result | S sample | S no bg  | Err samp | Err no_bg|")
+   for i in range(0,20):
+      print("|{0:10}|{1:10}|{2:10.4f}|{3:10.3f}|{4:10.3f}|{5:10.3f}|".format(XS[i],XR[i],YS[i],YR[i],ES[i],ER[i]))
    
 .. testoutput:: ExFlatBkgRemoval
 
     | x sampl  | x result | S sample | S no bg  | Err samp | Err no_bg|
     |     -20.0|     -20.0|    1.0000|    -0.959|     1.000|     1.008|
     |     -18.0|     -18.0|    2.0000|    -0.101|     1.414|     1.420|
-    |     -16.0|     -16.0|    3.0000|     0.740|     1.732|     1.738|
+    |     -16.0|     -16.0|    4.0000|     1.740|     2.000|     2.005|
     |     -14.0|     -14.0|    1.0000|    -1.441|     1.000|     1.012|
-    |     -12.0|     -12.0|    5.0000|     2.353|     2.236|     2.242|
-    |     -10.0|     -10.0|    2.0000|    -0.885|     1.414|     1.426|
+    |     -12.0|     -12.0|    3.0000|     0.353|     1.732|     1.740|
+    |     -10.0|     -10.0|    3.0000|     0.115|     1.732|     1.742|
     |      -8.0|      -8.0|    5.0000|     1.841|     2.236|     2.245|
-    |      -6.0|      -6.0|    2.0000|    -1.481|     1.414|     1.431|
+    |      -6.0|      -6.0|    4.0000|     0.519|     2.000|     2.012|
     |      -4.0|      -4.0|    4.0000|     0.139|     2.000|     2.015|
     |      -2.0|      -2.0|    3.0000|    -1.315|     1.732|     1.753|
-    |       0.0|       0.0|    6.0000|     1.133|     2.449|     2.469|
+    |       0.0|       0.0|    4.0000|    -0.867|     2.000|     2.024|
     |       2.0|       2.0|    7.0000|     1.454|     2.646|     2.669|
-    |       4.0|       4.0|    5.0000|    -1.400|     2.236|     2.272|
-    |       6.0|       6.0|    7.0000|    -0.499|     2.646|     2.688|
-    |       8.0|       8.0|    9.0000|     0.047|     3.000|     3.053|
+    |       4.0|       4.0|    6.0000|    -0.400|     2.449|     2.483|
+    |       6.0|       6.0|    8.0000|     0.501|     2.828|     2.868|
+    |       8.0|       8.0|    8.0000|    -0.953|     2.828|     2.885|
     |      10.0|      10.0|   11.0000|     0.054|     3.317|     3.388|
-    |      12.0|      12.0|   16.0000|     2.190|     4.000|     4.094|
-    |      14.0|      14.0|   16.0000|    -2.188|     4.000|     4.162|
-    |      16.0|      16.0|   26.0000|     0.490|     5.099|     5.348|
-    |      18.0|      18.0|   39.0000|    -0.581|     6.245|     6.728|
- 
+    |      12.0|      12.0|   13.0000|    -0.810|     3.606|     3.710|
+    |      14.0|      14.0|   20.0000|     1.812|     4.472|     4.618|
+    |      16.0|      16.0|   25.0000|    -0.510|     5.000|     5.254|
+    |      18.0|      18.0|   37.0000|    -2.581|     6.083|     6.578|
+
 .. categories::
 
 .. sourcelink::

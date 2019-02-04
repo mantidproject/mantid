@@ -1,7 +1,10 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/TransposeMD.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/ArrayBoundedValidator.h"
-#include "MantidKernel/MultiThreaded.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
@@ -10,13 +13,16 @@
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidKernel/ArrayBoundedValidator.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/MultiThreaded.h"
 
-#include <vector>
 #include <algorithm>
-#include <numeric>
-#include <memory>
-#include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/shared_ptr.hpp>
+#include <memory>
+#include <numeric>
+#include <vector>
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -118,7 +124,7 @@ void TransposeMD::exec() {
                                        scaling);
 
   uint64_t nPoints = inWS->getNPoints();
-  Progress progress(this, 0, 1, size_t(nPoints));
+  Progress progress(this, 0.0, 1.0, size_t(nPoints));
 
   progress.reportIncrement(
       size_t(double(nPoints) * 0.1)); // Report ~10% progress
@@ -132,7 +138,7 @@ void TransposeMD::exec() {
   for (int it = 0; it < int(iterators.size()); ++it) { // NOLINT
 
     PARALLEL_START_INTERUPT_REGION
-    auto inIterator = std::unique_ptr<IMDIterator>(iterators[it]);
+    auto inIterator = iterators[it].get();
     do {
       auto center = inIterator->getCenter();
       const coord_t *incoords = center.getBareArray();

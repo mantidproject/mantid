@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidKernel/System.h"
 
@@ -27,5 +33,5 @@ void MDImplicitFunction::addPlane(const MDPlane &plane) {
   m_numPlanes = m_planes.size();
 }
 
-} // namespace Mantid
 } // namespace Geometry
+} // namespace Mantid

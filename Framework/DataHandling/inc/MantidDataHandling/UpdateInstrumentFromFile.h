@@ -1,20 +1,24 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAHANDLING_UPDATEINSTRUMENTFROMFILE_H_
 #define MANTID_DATAHANDLING_UPDATEINSTRUMENTFROMFILE_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidGeometry/IDetector.h"
-#include <nexus/NeXusFile.hpp>
+
+namespace NeXus {
+class File;
+}
 
 namespace Mantid {
-//----------------------------------------------------------------------
-// Forward declarations
-//----------------------------------------------------------------------
 namespace Geometry {
+class DetectorInfo;
 class Instrument;
-}
+} // namespace Geometry
 
 namespace DataHandling {
 /**
@@ -36,26 +40,6 @@ Required Properties:
 </UL>
 
 @author Martyn Gigg, Tessella plc
-
-Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>
 */
 class DLLExport UpdateInstrumentFromFile : public API::Algorithm {
 public:
@@ -74,6 +58,9 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; };
+  const std::vector<std::string> seeAlso() const override {
+    return {"LoadInstrument"};
+  }
 
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override {
@@ -109,17 +96,15 @@ private:
 
   /// Parse the header and fill the headerInfo struct
   bool parseAsciiHeader(AsciiFileHeader &headerInfo);
-  /// Set a new detector parameter
-  void setDetectorParameter(const Geometry::IDetector_const_sptr &det,
-                            const std::string &name, double value);
   /// Set the new detector positions
   void setDetectorPositions(const std::vector<int32_t> &detID,
                             const std::vector<float> &l2,
                             const std::vector<float> &theta,
                             const std::vector<float> &phi);
   /// Set the new detector position for a single det ID
-  void setDetectorPosition(const Geometry::IDetector_const_sptr &det,
-                           const float l2, const float theta, const float phi);
+  void setDetectorPosition(Geometry::DetectorInfo &detectorInfo,
+                           const size_t index, const float l2,
+                           const float theta, const float phi);
 
   /// The input workspace to modify
   API::MatrixWorkspace_sptr m_workspace;

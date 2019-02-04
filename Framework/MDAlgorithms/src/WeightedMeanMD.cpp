@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/WeightedMeanMD.h"
 #include "MantidDataObjects/MDHistoWorkspaceIterator.h"
 #include "MantidKernel/System.h"
@@ -28,10 +34,10 @@ void WeightedMeanMD::execHistoHisto(
     Mantid::DataObjects::MDHistoWorkspace_sptr out,
     Mantid::DataObjects::MDHistoWorkspace_const_sptr operand) {
   using DataObjects::MDHistoWorkspaceIterator;
-  MDHistoWorkspaceIterator *lhs_it =
-      dynamic_cast<MDHistoWorkspaceIterator *>(out->createIterator());
-  MDHistoWorkspaceIterator *rhs_it =
-      dynamic_cast<MDHistoWorkspaceIterator *>(operand->createIterator());
+  auto lhs = out->createIterator();
+  auto lhs_it = dynamic_cast<MDHistoWorkspaceIterator *>(lhs.get());
+  auto rhs = operand->createIterator();
+  auto rhs_it = dynamic_cast<MDHistoWorkspaceIterator *>(rhs.get());
 
   if (!lhs_it || !rhs_it) {
     throw std::logic_error("Histo iterators have wrong type.");
@@ -63,9 +69,6 @@ void WeightedMeanMD::execHistoHisto(
     out->setSignalAt(pos, signal);
     out->setErrorSquaredAt(pos, error_sq);
   } while (lhs_it->next() && rhs_it->next());
-
-  delete lhs_it;
-  delete rhs_it;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -84,5 +87,5 @@ void WeightedMeanMD::execEvent() {
                            " can only be run on a MDHistoWorkspace.");
 }
 
-} // namespace Mantid
 } // namespace MDAlgorithms
+} // namespace Mantid

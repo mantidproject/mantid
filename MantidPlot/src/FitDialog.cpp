@@ -1,24 +1,13 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2004 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 /***************************************************************************
     File                 : FitDialog.cpp
     Project              : QtiPlot
     --------------------------------------------------------------------
-    Copyright            : (C) 2004-2007 by Ion Vasilief
-    Email (use @ for *)  : ion_vasilief*yahoo.fr
-    Description          : Fit Wizard
-
- ***************************************************************************/
-
-/***************************************************************************
- *                                                                         *
- *  This program is free software; you can redistribute it and/or modify   *
- *  it under the terms of the GNU General Public License as published by   *
- *  the Free Software Foundation; either version 2 of the License, or      *
- *  (at your option) any later version.                                    *
- *                                                                         *
- *  This program is distributed in the hope that it will be useful,        *
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
- *  GNU General Public License for more details.                           *
  *                                                                         *
  *   You should have received a copy of the GNU General Public License     *
  *   along with this program; if not, write to the Free Software           *
@@ -27,45 +16,45 @@
  *                                                                         *
  ***************************************************************************/
 #include "FitDialog.h"
-#include "pixmaps.h"
-#include "MyParser.h"
 #include "ApplicationWindow.h"
 #include "ColorBox.h"
-#include "Fit.h"
-#include "MultiPeakFit.h"
 #include "ExponentialFit.h"
-#include "PolynomialFit.h"
-#include "PluginFit.h"
-#include "NonLinearFit.h"
-#include "SigmoidalFit.h"
+#include "Fit.h"
 #include "LogisticFit.h"
+#include "MantidQtWidgets/Common/DoubleSpinBox.h"
 #include "Matrix.h"
-#include "MantidQtMantidWidgets/DoubleSpinBox.h"
+#include "MultiPeakFit.h"
+#include "MyParser.h"
+#include "NonLinearFit.h"
+#include "PluginFit.h"
+#include "PolynomialFit.h"
+#include "SigmoidalFit.h"
+#include <MantidQtWidgets/Common/pixmaps.h>
 
-#include <QListWidget>
 #include <QCloseEvent>
-#include <QTableWidget>
-#include <QHeaderView>
-#include <QLineEdit>
-#include <QLayout>
-#include <QSpinBox>
-#include <QPushButton>
-#include <QLabel>
-#include <QStackedWidget>
-#include <QWidget>
-#include <QMessageBox>
 #include <QComboBox>
-#include <QWidgetList>
-#include <QRadioButton>
 #include <QFileDialog>
 #include <QGroupBox>
+#include <QHeaderView>
+#include <QLabel>
+#include <QLayout>
 #include <QLibrary>
+#include <QLineEdit>
+#include <QListWidget>
 #include <QLocale>
-#include <stdio.h>
+#include <QMessageBox>
+#include <QPushButton>
+#include <QRadioButton>
+#include <QSpinBox>
+#include <QStackedWidget>
+#include <QTableWidget>
+#include <QWidget>
+#include <QWidgetList>
+#include <cstdio>
 
 #include <qwt_plot_curve.h>
 
-#include "MantidQtAPI/FileDialogHandler.h"
+using namespace MantidQt::API;
 
 FitDialog::FitDialog(Graph *g, QWidget *parent, Qt::WFlags fl)
     : QDialog(parent, fl) {
@@ -73,9 +62,9 @@ FitDialog::FitDialog(Graph *g, QWidget *parent, Qt::WFlags fl)
   setWindowTitle(tr("MantidPlot - Fit Wizard"));
   setSizeGripEnabled(true);
 
-  d_param_table = 0;
-  d_current_fit = 0;
-  d_preview_curve = 0;
+  d_param_table = nullptr;
+  d_current_fit = nullptr;
+  d_preview_curve = nullptr;
 
   tw = new QStackedWidget();
 
@@ -660,7 +649,7 @@ void FitDialog::saveUserFunction() {
     }
     QString filter = tr("MantidPlot fit model") + " (*.fit);;";
     filter += tr("All files") + " (*)";
-    QString fn = MantidQt::API::FileDialogHandler::getSaveFileName(
+    QString fn = QFileDialog::getSaveFileName(
         app, tr("MantidPlot") + " - " + tr("Save Fit Model As"),
         app->fitModelsPath + "/" + name, filter);
     if (!fn.isEmpty()) {
@@ -775,8 +764,8 @@ void FitDialog::showFitPage() {
   int aux = parameters;
   if (aux > 7)
     aux = 7;
-  boxParams->setMinimumHeight(
-      4 + (aux + 1) * boxParams->horizontalHeader()->height());
+  boxParams->setMinimumHeight(4 + (aux + 1) *
+                                      boxParams->horizontalHeader()->height());
 
   // QLocale locale = app->locale();
   int prec = boxPrecision->value();
@@ -1421,7 +1410,7 @@ void FitDialog::saveInitialGuesses() {
     }
     QString filter = tr("MantidPlot fit model") + " (*.fit);;";
     filter += tr("All files") + " (*)";
-    QString fn = MantidQt::API::FileDialogHandler::getSaveFileName(
+    QString fn = QFileDialog::getSaveFileName(
         app, tr("MantidPlot") + " - " + tr("Save Fit Model As"),
         app->fitModelsPath + "/" + d_current_fit->objectName(), filter);
     if (!fn.isEmpty()) {
@@ -1453,7 +1442,7 @@ void FitDialog::updatePreview() {
     d_preview_curve->detach();
     d_graph->replot();
     delete d_preview_curve;
-    d_preview_curve = 0;
+    d_preview_curve = nullptr;
     return;
   }
 

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -48,8 +54,9 @@ void Gaussian::functionDerivLocal(Jacobian *out, const double *xValues,
     double e = exp(-0.5 * diff * diff * weight);
     out->set(i, 0, e);
     out->set(i, 1, diff * height * e * weight);
-    out->set(i, 2, -0.5 * diff * diff * height *
-                       e); // derivative with respect to weight not sigma
+    out->set(i, 2,
+             -0.5 * diff * diff * height *
+                 e); // derivative with respect to weight not sigma
   }
 }
 
@@ -107,14 +114,16 @@ void Gaussian::setIntensity(const double i) {
   }
 }
 
-void Gaussian::fixCentre() { fixParameter("PeakCentre"); }
+void Gaussian::fixCentre(bool isDefault) {
+  fixParameter("PeakCentre", isDefault);
+}
 
 void Gaussian::unfixCentre() { unfixParameter("PeakCentre"); }
 
-void Gaussian::fixIntensity() {
+void Gaussian::fixIntensity(bool isDefault) {
   std::string formula =
       std::to_string(intensity() / sqrt(2.0 * M_PI)) + "/Sigma";
-  tie("Height", formula);
+  tie("Height", formula, isDefault);
 }
 
 void Gaussian::unfixIntensity() { removeTie("Height"); }
@@ -174,8 +183,9 @@ void Gaussian::histogramDerivative1D(Jacobian *jacobian, double left,
     double cRight = cumulFun(xr);
     jacobian->set(i, 0, cRight - cLeft);        // height
     jacobian->set(i, 1, -h * (fRight - fLeft)); // centre
-    jacobian->set(i, 2, h_over_2w * ((xr - c) * fRight - (xl - c) * fLeft +
-                                     cLeft - cRight)); // weight
+    jacobian->set(i, 2,
+                  h_over_2w * ((xr - c) * fRight - (xl - c) * fLeft + cLeft -
+                               cRight)); // weight
     fLeft = fRight;
     cLeft = cRight;
     xl = xr;

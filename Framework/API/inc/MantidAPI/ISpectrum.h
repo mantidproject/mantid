@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_API_ISPECTRUM_H_
 #define MANTID_API_ISPECTRUM_H_
 
@@ -8,8 +14,14 @@
 
 #include <set>
 
+class SpectrumTester;
 namespace Mantid {
+namespace DataObjects {
+class Histogram1D;
+class EventList;
+} // namespace DataObjects
 namespace API {
+class MatrixWorkspace;
 
 /** A "spectrum" is an object that holds the data for a particular spectrum,
  * in particular:
@@ -23,27 +35,6 @@ namespace API {
 
   @author Janik Zikovsky
   @date 2011-07-01
-
-  Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
- National Laboratory & European Spallation Source
-
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>
-  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport ISpectrum {
 public:
@@ -52,6 +43,9 @@ public:
   virtual ~ISpectrum() = default;
 
   void copyInfoFrom(const ISpectrum &other);
+
+  /// Copy data from another ISpectrum with double-dynamic dispatch.
+  virtual void copyDataFrom(const ISpectrum &source) = 0;
 
   virtual void setX(const Kernel::cow_ptr<HistogramData::HistogramX> &X) = 0;
   virtual MantidVec &dataX() = 0;
@@ -85,7 +79,6 @@ public:
   void setDetectorIDs(std::set<detid_t> &&detIDs);
 
   bool hasDetectorID(const detid_t detID) const;
-  std::set<detid_t> &getDetectorIDs();
   const std::set<detid_t> &getDetectorIDs() const;
 
   void clearDetectorIDs();
@@ -240,21 +233,33 @@ public:
     mutableHistogramRef().setSharedE(e);
   }
 
+  void setMatrixWorkspace(MatrixWorkspace *matrixWorkspace, const size_t index);
+
+  virtual void copyDataInto(DataObjects::EventList &) const;
+  virtual void copyDataInto(DataObjects::Histogram1D &) const;
+  virtual void copyDataInto(SpectrumTester &) const;
+
 protected:
-  virtual void checkAndSanitizeHistogram(HistogramData::Histogram &) {}
+  virtual void checkAndSanitizeHistogram(HistogramData::Histogram &){};
   virtual void checkWorksWithPoints() const {}
   virtual void checkIsYAndEWritable() const {}
 
   // Copy and move are not public since this is an abstract class, but protected
   // such that derived classes can implement copy and move.
-  ISpectrum(const ISpectrum &) = default;
-  ISpectrum(ISpectrum &&) = default;
-  ISpectrum &operator=(const ISpectrum &) = default;
-  ISpectrum &operator=(ISpectrum &&) = default;
+  ISpectrum(const ISpectrum &other);
+  ISpectrum(ISpectrum &&other);
+  ISpectrum &operator=(const ISpectrum &other);
+  ISpectrum &operator=(ISpectrum &&other);
 
 private:
   virtual const HistogramData::Histogram &histogramRef() const = 0;
   virtual HistogramData::Histogram &mutableHistogramRef() = 0;
+
+  void invalidateCachedSpectrumNumbers() const;
+  void invalidateSpectrumDefinition() const;
+  MatrixWorkspace *m_matrixWorkspace{nullptr};
+  // The default value is meaningless. This will always be set before use.
+  size_t m_index{0};
 
   /// The spectrum number of this spectrum
   specnum_t m_specNo{0};

@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name
 from __future__ import (absolute_import, division, print_function)
 
@@ -20,6 +26,9 @@ class LoadFullprofFile(PythonAlgorithm):
         """
         """
         return "Diffraction\\DataHandling"
+
+    def seeAlso(self):
+        return [ "LoadFullprofResolution" ]
 
     def name(self):
         """
@@ -415,6 +424,7 @@ class LoadFullprofFile(PythonAlgorithm):
             dataws.dataE(0)[i] = vece[i]
 
         return (tablews, dataws)
+
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(LoadFullprofFile)

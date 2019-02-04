@@ -1,4 +1,11 @@
-﻿import unittest
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
+from __future__ import (absolute_import, division, print_function)
+import unittest
 import mantid
 import os
 import isis_instrument as instruments
@@ -388,7 +395,7 @@ class TestLARMORCommand(unittest.TestCase):
         selected_idf = "LARMOR_Definition_NONEXIST.xml"
         # Act + Assert
         self.assertFalse(command_iface.LARMOR(selected_idf),
-                         "A non existant idf path should return false")
+                         "A non existent idf path should return false")
 
 class TestMaskFile(unittest.TestCase):
     def test_throws_for_user_file_with_invalid_extension(self):
@@ -404,11 +411,11 @@ class SANSCommandInterfaceGetAndSetBackgroundCorrectionSettings(unittest.TestCas
     def _do_test_correct_setting(self, run_number, is_time, is_mon, is_mean, mon_numbers):
         # Assert that settings were set
         setting = ReductionSingleton().get_dark_run_setting(is_time, is_mon)
-        self.assertEquals(setting.run_number, run_number)
-        self.assertEquals(setting.time, is_time)
-        self.assertEquals(setting.mean, is_mean)
-        self.assertEquals(setting.mon, is_mon)
-        self.assertEquals(setting.mon_numbers, mon_numbers)
+        self.assertEqual(setting.run_number, run_number)
+        self.assertEqual(setting.time, is_time)
+        self.assertEqual(setting.mean, is_mean)
+        self.assertEqual(setting.mon, is_mon)
+        self.assertEqual(setting.mon_numbers, mon_numbers)
 
         # Assert that other settings are None. Hence set up all combinations and remove the one which
         # has been set up earlier

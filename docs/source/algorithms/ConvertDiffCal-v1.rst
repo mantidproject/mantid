@@ -3,15 +3,19 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
 Description
 -----------
 
-This algorithm converts old diffraction OffsetsWorkspaces to
-:ref:`calibration table <DiffractionCalibrationWorkspace>`. It uses the geometry of the OffsetsWorkspace to based the values of ``DIFC`` on.
+This algorithm converts diffraction OffsetsWorkspaces to
+:ref:`calibration table <DiffractionCalibrationWorkspace>`. It uses
+the geometry of the OffsetsWorkspace to based the values of
+:math:`DIFC` on. The effective :math:`DIFC` is calculated as
+
+.. math:: DIFC = \frac{1}{1+offset}\frac{2m_N}{h} L_{tot} sin \theta
 
 Usage
 -----

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/AnnularRingAbsorption.h"
 
 #include "MantidAPI/InstrumentValidator.h"
@@ -7,14 +13,14 @@
 #include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 
 #include "MantidKernel/Atom.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
-#include "MantidKernel/Material.h"
 #include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/Material.h"
 #include "MantidKernel/NeutronAtom.h"
 #include "MantidKernel/V3D.h"
 
@@ -24,8 +30,6 @@
 namespace Mantid {
 namespace Algorithms {
 using namespace Mantid::API;
-using Mantid::Geometry::ObjComponent;
-using Mantid::Geometry::SampleEnvironment;
 using namespace Mantid::Kernel;
 
 // Register the algorithm into the AlgorithmFactory
@@ -178,13 +182,15 @@ AnnularRingAbsorption::createSampleShapeXML(const V3D &upAxis) const {
   const double lowRadiusMtr = (wallMidPtCM - 0.5 * sampleThickCM) / 100.;
   const double uppRadiusMtr = (wallMidPtCM + 0.5 * sampleThickCM) / 100.;
 
-  // Cylinders oriented along Y, with origin at centre of bottom base
+  // Cylinders oriented along Y, with origin at the centre as expected by
+  // the MonteCarloAbsorption algorithm.
+  const V3D bottomCentre{0.0, -sampleHeightCM / 2.0 / 100.0, 0.0}; // in metres.
   const std::string innerCylID = std::string("inner-cyl");
-  const std::string innerCyl = cylinderXML(innerCylID, V3D(), lowRadiusMtr,
-                                           upAxis, sampleHeightCM / 100.0);
+  const std::string innerCyl = cylinderXML(
+      innerCylID, bottomCentre, lowRadiusMtr, upAxis, sampleHeightCM / 100.0);
   const std::string outerCylID = std::string("outer-cyl");
-  const std::string outerCyl = cylinderXML(outerCylID, V3D(), uppRadiusMtr,
-                                           upAxis, sampleHeightCM / 100.0);
+  const std::string outerCyl = cylinderXML(
+      outerCylID, bottomCentre, uppRadiusMtr, upAxis, sampleHeightCM / 100.0);
 
   // Combine shapes
   boost::format algebra("<algebra val=\"(%1% (# %2%))\" />");

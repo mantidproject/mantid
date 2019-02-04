@@ -1,16 +1,24 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
+#include "MantidDataHandling/LoadCalFile.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
-#include "MantidDataHandling/LoadCalFile.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/System.h"
-#include <fstream>
 #include <Poco/Path.h>
+#include <fstream>
 
 using Mantid::Geometry::Instrument_const_sptr;
 using namespace Mantid::Kernel;
@@ -259,6 +267,9 @@ void LoadCalFile::readCalFile(const std::string &calFileName,
   int n, udet, select, group;
   double n_d, udet_d, offset, select_d, group_d;
 
+  SpectrumInfo *maskSpectrumInfo{nullptr};
+  if (maskWS)
+    maskSpectrumInfo = &maskWS->mutableSpectrumInfo();
   std::string str;
   while (getline(grFile, str)) {
     if (str.empty() || str[0] == '#')
@@ -309,7 +320,8 @@ void LoadCalFile::readCalFile(const std::string &calFileName,
 
         if (select <= 0) {
           // Not selected, then mask this detector
-          maskWS->maskWorkspaceIndex(wi);
+          maskWS->getSpectrum(wi).clearData();
+          maskSpectrumInfo->setMasked(wi, true);
           maskWS->mutableY(wi)[0] = 1.0;
         } else {
           // Selected, set the value to be 0
@@ -333,11 +345,11 @@ void LoadCalFile::readCalFile(const std::string &calFileName,
         << " errors (invalid Detector ID's) found when reading .cal file '"
         << calFileName << "'.\n";
   if (doGroup && (!hasGrouped))
-    Logger("LoadCalFile").warning() << "'" << calFileName
-                                    << "' has no spectra grouped\n";
+    Logger("LoadCalFile").warning()
+        << "'" << calFileName << "' has no spectra grouped\n";
   if (doMask && (!hasUnmasked))
-    Logger("LoadCalFile").warning() << "'" << calFileName
-                                    << "' masks all spectra\n";
+    Logger("LoadCalFile").warning()
+        << "'" << calFileName << "' masks all spectra\n";
 }
 
 /**
@@ -353,5 +365,15 @@ bool LoadCalFile::idIsMonitor(Instrument_const_sptr inst, int detID) {
   return (it != monitorList.end());
 }
 
-} // namespace Mantid
+Parallel::ExecutionMode LoadCalFile::getParallelExecutionMode(
+    const std::map<std::string, Parallel::StorageMode> &storageModes) const {
+  // There is an optional input workspace which may have
+  // StorageMode::Distributed but it is merely used for passing an instrument.
+  // Output should always have StorageMode::Cloned, so we run with
+  // ExecutionMode::Identical.
+  static_cast<void>(storageModes);
+  return Parallel::ExecutionMode::Identical;
+}
+
 } // namespace DataHandling
+} // namespace Mantid

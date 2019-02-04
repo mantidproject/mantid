@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -5,7 +11,6 @@
 #include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/NumericAxis.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/RebinnedOutput.h"
 
 namespace Mantid {
@@ -53,8 +58,7 @@ void Transpose::exec() {
 
   Progress progress(this, 0.0, 1.0, newNhist * newYsize);
   progress.report("Swapping data values");
-
-  PARALLEL_FOR2(inputWorkspace, outputWorkspace)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inputWorkspace, *outputWorkspace))
   for (int64_t i = 0; i < static_cast<int64_t>(newNhist); ++i) {
     PARALLEL_START_INTERUPT_REGION
 
@@ -104,8 +108,14 @@ API::MatrixWorkspace_sptr Transpose::createOutputWorkspace(
   // The input Y axis may be binned so the new X data should be too
   size_t newNhist(oldYlength), newXsize(oldVerticalAxislength),
       newYsize(oldNhist);
-  MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(
-      inputWorkspace, newNhist, newXsize, newYsize);
+  MatrixWorkspace_sptr outputWorkspace = inputWorkspace->cloneEmpty();
+  outputWorkspace->initialize(newNhist, newXsize, newYsize);
+  outputWorkspace->setTitle(inputWorkspace->getTitle());
+  outputWorkspace->setComment(inputWorkspace->getComment());
+  outputWorkspace->copyExperimentInfoFrom(inputWorkspace.get());
+  outputWorkspace->setYUnit(inputWorkspace->YUnit());
+  outputWorkspace->setYUnitLabel(inputWorkspace->YUnitLabel());
+  outputWorkspace->setDistribution(inputWorkspace->isDistribution());
 
   // Create a new numeric axis for Y the same length as the old X array
   // Values come from input X

@@ -49,7 +49,7 @@
   </parameter>
 
   <parameter name="resolution">
-    <value val="0.0035" />
+    <value val="0.015" />
   </parameter>
 
 </component-link>

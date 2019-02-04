@@ -1,7 +1,13 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name
 from __future__ import (absolute_import, division, print_function)
-from mantid.kernel import *
 from mantid.api import *
+from mantid.kernel import *
 import mantid.simpleapi as ms
 import numpy as np
 
@@ -14,6 +20,9 @@ class SortByQVectors(PythonAlgorithm):
 
     def category(self):
         return "Transforms\\Merging;Utility\\Sorting"
+
+    def seeAlso(self):
+        return [ "SortDetectors" ]
 
     def name(self):
         return "SortByQVectors"
@@ -85,5 +94,6 @@ class SortByQVectors(PythonAlgorithm):
 
     def GetXValue(self, xs):
         return np.linalg.norm(xs)
+
 
 AlgorithmFactory.subscribe(SortByQVectors)

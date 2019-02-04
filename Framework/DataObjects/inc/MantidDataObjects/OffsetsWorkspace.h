@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAOBJECTS_OFFSETSWORKSPACE_H_
 #define MANTID_DATAOBJECTS_OFFSETSWORKSPACE_H_
 
@@ -25,6 +31,10 @@ public:
   std::unique_ptr<OffsetsWorkspace> clone() const {
     return std::unique_ptr<OffsetsWorkspace>(doClone());
   }
+  /// Returns a default-initialized clone of the workspace
+  std::unique_ptr<OffsetsWorkspace> cloneEmpty() const {
+    return std::unique_ptr<OffsetsWorkspace>(doCloneEmpty());
+  }
   OffsetsWorkspace &operator=(const OffsetsWorkspace &) = delete;
   /** Gets the name of the workspace type
   @return Standard string name  */
@@ -38,15 +48,18 @@ private:
   OffsetsWorkspace *doClone() const override {
     return new OffsetsWorkspace(*this);
   }
+  OffsetsWorkspace *doCloneEmpty() const override {
+    return new OffsetsWorkspace();
+  }
 };
 
 /// shared pointer to the OffsetsWorkspace class
-typedef boost::shared_ptr<OffsetsWorkspace> OffsetsWorkspace_sptr;
+using OffsetsWorkspace_sptr = boost::shared_ptr<OffsetsWorkspace>;
 
 /// shared pointer to a const OffsetsWorkspace
-typedef boost::shared_ptr<const OffsetsWorkspace> OffsetsWorkspace_const_sptr;
+using OffsetsWorkspace_const_sptr = boost::shared_ptr<const OffsetsWorkspace>;
 
-} // namespace Mantid
 } // namespace DataObjects
+} // namespace Mantid
 
 #endif /* MANTID_DATAOBJECTS_OFFSETSWORKSPACE_H_ */

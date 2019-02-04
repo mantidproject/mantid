@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,invalid-name,attribute-defined-outside-init,too-many-instance-attributes
 from __future__ import (absolute_import, division, print_function)
 
@@ -121,7 +127,7 @@ class PoldiDataAnalysis(PythonAlgorithm):
         outputWs = GroupWorkspaces(self.outputWorkspaces[0])
 
         for ws in self.outputWorkspaces[1:]:
-            outputWs.add(ws.getName())
+            outputWs.add(ws.name())
 
         RenameWorkspace(outputWs, self.getProperty("OutputWorkspace").valueAsStr)
 
@@ -225,7 +231,7 @@ class PoldiDataAnalysis(PythonAlgorithm):
         pawleyFit = self.getProperty('PawleyFit').value
         removeUnindexed = self.getProperty('RemoveUnindexedPeaksFor2DFit').value
         if removeUnindexed or pawleyFit:
-            indexedPeaks.remove(unindexedPeaks.getName())
+            indexedPeaks.remove(unindexedPeaks.name())
 
         self._removeEmptyTablesFromGroup(indexedPeaks)
 
@@ -283,7 +289,7 @@ class PoldiDataAnalysis(PythonAlgorithm):
         for i in range(groupWorkspace.getNumberOfEntries()):
             ws = groupWorkspace.getItem(i)
             if ws.rowCount() == 0:
-                deleteNames.append(ws.getName())
+                deleteNames.append(ws.name())
         for name in deleteNames:
             DeleteWorkspace(name)
 

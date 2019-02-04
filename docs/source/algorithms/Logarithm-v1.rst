@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -33,19 +33,20 @@ Usage
 
 .. testcode:: ExLogarithm
 
-    dataX = range(0,10)*10 # define 10 x-spectra
+    dataX = list(range(0,10))*10 # define 10 x-spectra
     dataY =([1]*10)*10     # with values 1
     dataY[0]=-10           # make first value not suitable for logarithm
     dataY[1]=10            # make second value different
     dataE =([1]*10)*10     # define 10 error spectra with value 1
     # create test workspace
-    ws = CreateWorkspace(dataX, dataY,dataE,NSpec=10)
-    # caluclate log10
+    ws = CreateWorkspace(dataX, dataY, dataE, NSpec=10)
+    # Calculate log10
     ws = Logarithm(ws,Filler=-1,Natural='0')
     #
     # check results:
-    print 'Log10 for spectra 0: ',ws.readY(0)
-    print 'Log10 for Err spectra 0: ',ws.readE(0)[0:4]    
+
+    print('Log10 for spectra 0:  {}'.format(ws.readY(0)))
+    print('Log10 for Err spectra 0:  {}'.format(ws.readE(0)[0:4]))
     
 .. testcleanup:: ExLogarithm
 

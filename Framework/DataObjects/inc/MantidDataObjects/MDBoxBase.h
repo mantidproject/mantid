@@ -1,18 +1,24 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MDBOXBASE_H_
 #define MDBOXBASE_H_
 
+#include "MantidAPI/BoxController.h"
+#include "MantidAPI/CoordTransform.h"
 #include "MantidAPI/IMDNode.h"
-#include <iosfwd>
+#include "MantidAPI/IMDWorkspace.h"
 #include "MantidDataObjects/MDBin.h"
 #include "MantidDataObjects/MDLeanEvent.h"
-#include "MantidAPI/BoxController.h"
-#include "MantidAPI/IMDWorkspace.h"
-#include "MantidAPI/CoordTransform.h"
 #include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidKernel/ISaveable.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/VMD.h"
+#include <iosfwd>
 #include <mutex>
 
 /// Define to keep the centroid around as a field on each MDBoxBase.
@@ -51,8 +57,8 @@ public:
 
   MDBoxBase(Mantid::API::BoxController *const boxController,
             const uint32_t depth, const size_t boxID,
-            const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> &
-                extentsVector);
+            const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>>
+                &extentsVector);
 
   MDBoxBase(const MDBoxBase<MDE, nd> &box,
             Mantid::API::BoxController *const otherBC);
@@ -127,9 +133,11 @@ public:
              Mantid::Geometry::MDImplicitFunction &function) const = 0;
 
   /** Sphere (peak) integration */
-  void integrateSphere(Mantid::API::CoordTransform &radiusTransform,
-                       const coord_t radiusSquared, signal_t &signal,
-                       signal_t &errorSquared) const override = 0;
+  void integrateSphere(
+      Mantid::API::CoordTransform &radiusTransform, const coord_t radiusSquared,
+      signal_t &signal, signal_t &errorSquared,
+      const coord_t innerRadiusSquared = 0.0,
+      const bool useOnePercentBackgroundCorrection = true) const override = 0;
 
   /** Find the centroid around a sphere */
   void centroidSphere(Mantid::API::CoordTransform &radiusTransform,
@@ -156,9 +164,11 @@ public:
   // -------------------------------------------
 
   std::vector<Mantid::Kernel::VMD> getVertexes() const override;
-  coord_t *getVertexesArray(size_t &numVertices) const override;
-  coord_t *getVertexesArray(size_t &numVertices, const size_t outDimensions,
-                            const bool *maskDim) const override;
+  std::unique_ptr<coord_t[]>
+  getVertexesArray(size_t &numVertices) const override;
+  std::unique_ptr<coord_t[]>
+  getVertexesArray(size_t &numVertices, const size_t outDimensions,
+                   const bool *maskDim) const override;
   void transformDimensions(std::vector<double> &scaling,
                            std::vector<double> &offset) override;
 
@@ -182,7 +192,7 @@ public:
     this->calcVolume();
   }
   /** Set the extents of this box.
-     * @param min :: min edge of the dimension
+   * @param min :: min edge of the dimension
    * @param max :: max edge of the dimension
    */
   void setExtents(double min[nd], double max[nd]) {
@@ -340,7 +350,7 @@ protected:
   mutable signal_t m_signal;
 
   /** Cached total error (squared) from all points within.
-  * Set when refreshCache() is called. */
+   * Set when refreshCache() is called. */
   mutable signal_t m_errorSquared;
 
   /** Cached total weight of all events
@@ -370,7 +380,7 @@ private:
 
 public:
   /// Convenience typedef for a shared pointer to a this type of class
-  typedef boost::shared_ptr<MDBoxBase<MDE, nd>> sptr;
+  using sptr = boost::shared_ptr<MDBoxBase<MDE, nd>>;
 
 }; //(end class MDBoxBase)
 

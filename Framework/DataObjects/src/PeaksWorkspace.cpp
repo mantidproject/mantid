@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/Column.h"
@@ -6,7 +12,6 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/TableColumn.h"
 #include "MantidDataObjects/TableWorkspace.h"
@@ -17,7 +22,9 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/Unit.h"
+#include "MantidKernel/UnitConversion.h"
 #include "MantidKernel/V3D.h"
+
 #include <algorithm>
 #include <boost/shared_ptr.hpp>
 #include <cmath>
@@ -25,8 +32,10 @@
 #include <cstdlib>
 #include <exception>
 #include <fstream>
-#include <nexus/NeXusException.hpp>
+// clang-format off
 #include <nexus/NeXusFile.hpp>
+#include <nexus/NeXusException.hpp>
+// clang-format on
 #include <ostream>
 #include <string>
 
@@ -39,6 +48,8 @@ namespace DataObjects {
 /// Register the workspace as a type
 DECLARE_WORKSPACE(PeaksWorkspace)
 
+Mantid::Kernel::Logger g_log("PeaksWorkspace");
+
 //---------------------------------------------------------------------------------------------
 /** Constructor. Create a table with all the required columns.
  *
@@ -48,6 +59,8 @@ PeaksWorkspace::PeaksWorkspace()
     : IPeaksWorkspace(), peaks(), columns(), columnNames(),
       m_coordSystem(None) {
   initColumns();
+  // PeaksWorkspace does not use the grouping mechanism of ExperimentInfo.
+  setNumberOfDetectorGroups(0);
 }
 
 //---------------------------------------------------------------------------------------------
@@ -60,6 +73,8 @@ PeaksWorkspace::PeaksWorkspace(const PeaksWorkspace &other)
     : IPeaksWorkspace(other), peaks(other.peaks), columns(), columnNames(),
       m_coordSystem(other.m_coordSystem) {
   initColumns();
+  // PeaksWorkspace does not use the grouping mechanism of ExperimentInfo.
+  setNumberOfDetectorGroups(0);
 }
 
 //=====================================================================================
@@ -146,6 +161,27 @@ void PeaksWorkspace::removePeak(const int peakNum) {
   peaks.erase(peaks.begin() + peakNum);
 }
 
+/** Removes multiple peaks
+ * @param badPeaks peaks to be removed
+ */
+void PeaksWorkspace::removePeaks(std::vector<int> badPeaks) {
+  if (badPeaks.empty())
+    return;
+  // if index of peak is in badPeaks remove
+  int ip = -1;
+  auto it =
+      std::remove_if(peaks.begin(), peaks.end(), [&ip, badPeaks](Peak &pk) {
+        (void)pk;
+        ip++;
+        for (int badPeak : badPeaks) {
+          if (badPeak == ip)
+            return true;
+        }
+        return false;
+      });
+  peaks.erase(it, peaks.end());
+}
+
 //---------------------------------------------------------------------------------------------
 /** Add a peak to the list
  * @param ipeak :: Peak object to add (copy) into this.
@@ -157,6 +193,23 @@ void PeaksWorkspace::addPeak(const Geometry::IPeak &ipeak) {
     peaks.push_back(Peak(ipeak));
   }
 }
+
+//---------------------------------------------------------------------------------------------
+/** Add a peak to the list
+ * @param position :: position on the peak in the specified coordinate frame
+ * @param frame :: the coordinate frame that the position is specified in
+ */
+void PeaksWorkspace::addPeak(const V3D &position,
+                             const SpecialCoordinateSystem &frame) {
+  auto peak = createPeak(position, frame);
+  addPeak(*peak);
+}
+
+//---------------------------------------------------------------------------------------------
+/** Add a peak to the list
+ * @param peak :: Peak object to add (move) into this.
+ */
+void PeaksWorkspace::addPeak(Peak &&peak) { peaks.push_back(peak); }
 
 //---------------------------------------------------------------------------------------------
 /** Return a reference to the Peak
@@ -205,6 +258,66 @@ PeaksWorkspace::createPeak(const Kernel::V3D &QLabFrame,
   // Take the run number from this
   peak->setRunNumber(this->getRunNumber());
 
+  return peak;
+}
+
+//---------------------------------------------------------------------------------------------
+/** Creates an instance of a Peak BUT DOES NOT ADD IT TO THE WORKSPACE
+ * @param position :: position of the center of the peak, in reciprocal space
+ * @param frame :: the coordinate system that the position is specified in
+ * detector. You do NOT need to explicitly provide this distance.
+ * @return a pointer to a new Peak object.
+ */
+std::unique_ptr<Geometry::IPeak>
+PeaksWorkspace::createPeak(const Kernel::V3D &position,
+                           const Kernel::SpecialCoordinateSystem &frame) const {
+  if (frame == Mantid::Kernel::HKL) {
+    return std::unique_ptr<Geometry::IPeak>(createPeakHKL(position));
+  } else if (frame == Mantid::Kernel::QLab) {
+    return std::unique_ptr<Geometry::IPeak>(createPeak(position));
+  } else {
+    return std::unique_ptr<Geometry::IPeak>(createPeakQSample(position));
+  }
+}
+
+//---------------------------------------------------------------------------------------------
+/** Creates an instance of a Peak BUT DOES NOT ADD IT TO THE WORKSPACE
+ * @param position :: QSample position of the center of the peak, in reciprocal
+ * space
+ * detector. You do NOT need to explicitly provide this distance.
+ * @return a pointer to a new Peak object.
+ */
+Peak *PeaksWorkspace::createPeakQSample(const V3D &position) const {
+  // Create a peak from QSampleFrame
+
+  Geometry::Goniometer goniometer;
+
+  LogManager_const_sptr props = getLogs();
+  // See if we can get a wavelength/energy
+  // Then assume constant wavelenth
+  double wavelength(0);
+  if (props->hasProperty("wavelength")) {
+    wavelength = props->getPropertyValueAsType<double>("wavelength");
+  } else if (props->hasProperty("energy")) {
+    wavelength = Kernel::UnitConversion::run(
+        "Energy", "Wavelength", props->getPropertyValueAsType<double>("energy"),
+        0, 0, 0, Kernel::DeltaEMode::Elastic, 0);
+  } else if (getInstrument()->hasParameter("wavelength")) {
+    wavelength = getInstrument()->getNumberParameter("wavelength").at(0);
+  }
+
+  if (wavelength > 0) {
+    goniometer.calcFromQSampleAndWavelength(position, wavelength);
+    g_log.information() << "Found goniometer rotation to be "
+                        << goniometer.getEulerAngles()[0]
+                        << " degrees for Q sample = " << position << "\n";
+  } else {
+    goniometer = run().getGoniometer();
+  }
+  // create a peak using the qLab frame
+  auto peak = new Peak(getInstrument(), position, goniometer.getR());
+  // Take the run number from this
+  peak->setRunNumber(getRunNumber());
   return peak;
 }
 
@@ -552,6 +665,7 @@ void PeaksWorkspace::initColumns() {
   addPeakColumn("Col");
   addPeakColumn("QLab");
   addPeakColumn("QSample");
+  addPeakColumn("PeakNumber");
 }
 
 //---------------------------------------------------------------------------------------------
@@ -616,6 +730,7 @@ void PeaksWorkspace::saveNexus(::NeXus::File *file) const {
   std::vector<double> dSpacing(np);
   std::vector<double> TOF(np);
   std::vector<int> runNumber(np);
+  std::vector<int> peakNumber(np);
   std::vector<double> goniometerMatrix(9 * np);
   std::vector<std::string> shapes(np);
 
@@ -637,6 +752,7 @@ void PeaksWorkspace::saveNexus(::NeXus::File *file) const {
     dSpacing[i] = p.getDSpacing();
     TOF[i] = p.getTOF();
     runNumber[i] = p.getRunNumber();
+    peakNumber[i] = p.getPeakNumber();
     {
       Matrix<double> gm = p.getGoniometerMatrix();
       goniometerMatrix[9 * i] = gm[0][0];
@@ -783,6 +899,14 @@ void PeaksWorkspace::saveNexus(::NeXus::File *file) const {
   file->putAttr("units", "Not known"); // Units may need changing when known
   file->closeData();
 
+  // Peak Number column
+  file->writeData("column_17", peakNumber);
+  file->openData("column_17");
+  file->putAttr("name", "Peak Number");
+  file->putAttr("interpret_as", specifyInteger);
+  file->putAttr("units", "Not known"); // Units may need changing when known
+  file->closeData();
+
   // Goniometer Matrix Column
   std::vector<int> array_dims;
   array_dims.push_back(static_cast<int>(peaks.size()));
@@ -846,15 +970,9 @@ PeaksWorkspace::getSpecialCoordinateSystem() const {
 struct NullDeleter {
   template <typename T> void operator()(T *) {}
 };
-/**Get access to shared pointer containing workspace porperties, cashes the
- shared pointer
- into internal class variable to not allow shared pointer being deleted */
+/**Get access to shared pointer containing workspace porperties */
 API::LogManager_sptr PeaksWorkspace::logs() {
-  if (m_logCash)
-    return m_logCash;
-
-  m_logCash = API::LogManager_sptr(&(this->mutableRun()), NullDeleter());
-  return m_logCash;
+  return API::LogManager_sptr(&(this->mutableRun()), NullDeleter());
 }
 
 /** Get constant access to shared pointer containing workspace porperties;
@@ -869,8 +987,8 @@ PeaksWorkspace::doCloneColumns(const std::vector<std::string> &) const {
   throw Kernel::Exception::NotImplementedError(
       "PeaksWorkspace cannot clone columns.");
 }
-}
-}
+} // namespace DataObjects
+} // namespace Mantid
 
 ///\cond TEMPLATE
 

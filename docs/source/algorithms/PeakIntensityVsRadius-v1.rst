@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -45,6 +45,12 @@ with the following parameters filled in:
 
 Usage
 -----
+
+**Example - PeakIntensityVsRadius:**
+
+The code itself works but disabled from doc tests as takes too long to complete. User should provide its own 
+event nexus file instead of **TOPAZ_3132_event.nxs** used within this example. The original **TOPAZ_3132_event.nxs**
+file is available in `Mantid system tests repository <https://github.com/mantidproject/systemtests/tree/master/Data/TOPAZ_3132_event.nxs>`_.
 
 .. code-block:: python
 

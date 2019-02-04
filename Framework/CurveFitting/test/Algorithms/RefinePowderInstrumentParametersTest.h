@@ -1,14 +1,22 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CURVEFITTING_REFINEPOWDERINSTRUMENTPARAMETERSTEST_H_
 #define MANTID_CURVEFITTING_REFINEPOWDERINSTRUMENTPARAMETERSTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCurveFitting/Algorithms/RefinePowderInstrumentParameters.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidCurveFitting/Algorithms/RefinePowderInstrumentParameters.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include <fstream>
+#include <iomanip>
 
 using Mantid::CurveFitting::Algorithms::RefinePowderInstrumentParameters;
 using namespace Mantid;
@@ -29,7 +37,7 @@ public:
   }
 
   /** Test algorithm initialization
-    */
+   */
   void test_init() {
     RefinePowderInstrumentParameters alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
@@ -122,7 +130,7 @@ public:
   }
 
   /** Test fit by Monte Carlo random walk
-    * Using the data from calibration of PG3 in August 2012 for bank 1
+   * Using the data from calibration of PG3 in August 2012 for bank 1
    */
   void Passed_test_MonteCarloRandomWalk() {
     // 0. Init
@@ -205,7 +213,7 @@ public:
   }
 
   /** Test fit by Simplex
-    * Using the data from calibration of PG3 in August 2012 for bank 1
+   * Using the data from calibration of PG3 in August 2012 for bank 1
    */
   void Passed_test_FitSimplex() {
     // 0. Init
@@ -306,9 +314,9 @@ public:
         hkl << hkls[ipk][i];
         cout << hkls[ipk][i] << ", ";
       }
-      for (size_t ipm = 0; ipm < peakparams[ipk].size(); ++ipm) {
-        hkl << peakparams[ipk][ipm];
-        cout << peakparams[ipk][ipm];
+      for (double ipm : peakparams[ipk]) {
+        hkl << ipm;
+        cout << ipm;
       }
       cout << '\n';
     }
@@ -414,10 +422,10 @@ public:
 
     // 2. Add peak parameters' name and values
     map<string, vector<double>>::iterator finditer;
-    for (size_t ipn = 0; ipn < paramnames.size(); ++ipn) {
+    for (const auto &paramname : paramnames) {
       API::TableRow newrow = geomws->appendRow();
-      std::string parname = paramnames[ipn];
-      double parvalue = parameters[paramnames[ipn]];
+      std::string parname = paramname;
+      double parvalue = parameters[paramname];
       newrow << parname << parvalue;
       double parmin = -DBL_MAX;
       double parmax = DBL_MAX;
@@ -435,10 +443,10 @@ public:
   }
 
   /** Import text file containing the instrument parameters
-    * Format: name, value, min, max, step-size
-    * Input:  a text based file
-    * Output: a map for (parameter name, parameter value)
-    */
+   * Format: name, value, min, max, step-size
+   * Input:  a text based file
+   * Output: a map for (parameter name, parameter value)
+   */
   void importInstrumentTxtFile(std::string filename,
                                std::map<std::string, double> &parameters,
                                std::map<string, vector<double>> &parametermcs) {

@@ -1,7 +1,13 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidSINQ/PoldiUtilities/MillerIndices.h"
 
-#include <stdexcept>
 #include "boost/format.hpp"
+#include <stdexcept>
 
 namespace Mantid {
 namespace Poldi {
@@ -64,5 +70,5 @@ void MillerIndices::populateVector() {
   m_asVector[1] = m_k;
   m_asVector[2] = m_l;
 }
-}
-}
+} // namespace Poldi
+} // namespace Mantid

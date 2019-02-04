@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name,no-init
 from __future__ import (absolute_import, division, print_function)
 from mantid.api import PythonAlgorithm, AlgorithmFactory, ITableWorkspaceProperty
@@ -92,7 +98,7 @@ class Intervals(object):
 def sumWsList(wsList, summedWsName = None):
     if len(wsList) == 1:
         if summedWsName is not None:
-            CloneWorkspace(InputWorkspace=wsList[0].getName(), OutputWorkspace=summedWsName)
+            CloneWorkspace(InputWorkspace=wsList[0].name(), OutputWorkspace=summedWsName)
             return mtd[summedWsName]
         return wsList[0]
 
@@ -103,9 +109,9 @@ def sumWsList(wsList, summedWsName = None):
             sumws += wsList[i]
 
     if summedWsName is None:
-        summedWsName = "_PLUS_".join([ws.getName() for ws in wsList])
+        summedWsName = "_PLUS_".join([ws.name() for ws in wsList])
 
-    RenameWorkspace(InputWorkspace=sumws.getName(), OutputWorkspace=summedWsName)
+    RenameWorkspace(InputWorkspace=sumws.name(), OutputWorkspace=summedWsName)
 
     return mtd[summedWsName]
 
@@ -191,6 +197,9 @@ class RetrieveRunInfo(PythonAlgorithm):
         return "Given a range of run numbers and an output workspace name, will compile a table of info for "+\
                "each run of the instrument you have set as default."
 
+    def seeAlso(self):
+        return [ "CreateLogPropertyTable" ]
+
     def PyInit(self):
         # Declare algorithm properties.
         self.declareProperty(
@@ -199,7 +208,8 @@ class RetrieveRunInfo(PythonAlgorithm):
             StringMandatoryValidator(),
             doc='The range of runs to retrieve the run info for. E.g. "100-105".')
         self.declareProperty(ITableWorkspaceProperty("OutputWorkspace", "", Direction.Output),
-                             doc= """The name of the TableWorkspace that will be created. '''You must specify a name that does not already exist.''' """)
+                             doc= """The name of the TableWorkspace that will be created.
+                                     '''You must specify a name that does not already exist.''' """)
 
     def PyExec(self):
         PROP_NAMES = ["inst_abrv", "run_number", "user_name", "run_title",
@@ -235,9 +245,9 @@ class RetrieveRunInfo(PythonAlgorithm):
         ws_iter = FileBackedWsIterator(filenames)
         for ws in ws_iter:
             # Create a single row table for each file.
-            temp_table_name = ws.getName() + "_INFO"
+            temp_table_name = ws.name() + "_INFO"
             CreateLogPropertyTable(
-                InputWorkspaces=ws.getName(),
+                InputWorkspaces=ws.name(),
                 LogPropertyNames=', '.join(PROP_NAMES),
                 GroupPolicy="First", # Include only the 1st child of any groups.
                 OutputWorkspace=temp_table_name)
@@ -247,6 +257,7 @@ class RetrieveRunInfo(PythonAlgorithm):
             DeleteWorkspace(Workspace=temp_table_name)
 
         self.setPropertyValue('OutputWorkspace', output_ws_name)
+
 
 # Register algorthm with Mantid.
 AlgorithmFactory.subscribe(RetrieveRunInfo)

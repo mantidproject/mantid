@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -64,9 +64,9 @@ Input workspace has raw events
    # Perform the rebin
    pulse_t_ws = RebinByPulseTimes(InputWorkspace=event_ws, Params=[start_time_in_seconds, time_step_in_seconds, end_time_in_seconds])
 
-   print "Events are rebinned into: ",  pulse_t_ws.blocksize(), "bins per histogram"
-   print "X-axis relative start time in seconds: ", pulse_t_ws.readX(0)[0] 
-   print "X-axis relative end time in seconds: ", pulse_t_ws.readX(0)[-1] 
+   print("Events are rebinned into:  {} bins per histogram".format(pulse_t_ws.blocksize()))
+   print("X-axis relative start time in seconds:  {}".format(pulse_t_ws.readX(0)[0] ))
+   print("X-axis relative end time in seconds:  {}".format(pulse_t_ws.readX(0)[-1] ))
 
 Output:
    

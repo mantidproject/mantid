@@ -29,23 +29,23 @@
 
 #include "ImportASCIIDialog.h"
 #include "ApplicationWindow.h"
-#include "Table.h"
 #include "Matrix.h"
 #include "MatrixModel.h"
+#include "Table.h"
 
+#include <QApplication>
 #include <QCloseEvent>
 #include <QColorGroup>
-#include <QLayout>
 #include <QGroupBox>
+#include <QHeaderView>
+#include <QLayout>
+#include <QMessageBox>
+#include <QProgressDialog>
 #include <QPushButton>
 #include <QRegExp>
-#include <QMessageBox>
-#include <QTextStream>
-#include <QApplication>
-#include <QProgressDialog>
-#include <QStackedWidget>
-#include <QHeaderView>
 #include <QSplitter>
+#include <QStackedWidget>
+#include <QTextStream>
 
 #include <gsl/gsl_math.h>
 
@@ -299,8 +299,8 @@ void ImportASCIIDialog::initAdvancedOptions() {
   connect(d_help_button, SIGNAL(clicked()), this, SLOT(displayHelp()));
   advanced_layout->addWidget(d_help_button, 6, 2);
 
-  d_preview_table = NULL;
-  d_preview_matrix = NULL;
+  d_preview_table = nullptr;
+  d_preview_matrix = nullptr;
   d_preview_stack = new QStackedWidget();
   splitter->addWidget(d_preview_stack);
 }
@@ -315,12 +315,12 @@ void ImportASCIIDialog::initPreview(int previewMode) {
 
   if (d_preview_table) {
     delete d_preview_table;
-    d_preview_table = NULL;
+    d_preview_table = nullptr;
   }
 
   if (d_preview_matrix) {
     delete d_preview_matrix;
-    d_preview_matrix = NULL;
+    d_preview_matrix = nullptr;
   }
 
   switch (previewMode) {
@@ -431,9 +431,10 @@ void ImportASCIIDialog::displayHelp() {
           "whitespaces (including the TAB character) will be replaced with a "
           "single space.");
 
-  s += "\n\n" +
-       tr("Warning: using these two last options leads to column overlaping if "
-          "the columns in the ASCII file don't have the same number of rows.");
+  s +=
+      "\n\n" +
+      tr("Warning: using these two last options leads to column overlapping if "
+         "the columns in the ASCII file don't have the same number of rows.");
   s += "\n" + tr("To avoid this problem you should precisely define the column "
                  "separator using TAB and SPACE characters.");
 
@@ -577,7 +578,7 @@ void ImportASCIIDialog::changePreviewFile(const QString &path) {
 
   if (!fi.isReadable()) {
     QMessageBox::critical(
-        this, tr("MantidPlot - File openning error"),
+        this, tr("MantidPlot - File opening error"),
         tr("You don't have the permission to open this file: <b>%1</b>")
             .arg(path));
     return;

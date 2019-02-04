@@ -1,18 +1,23 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_API_MULTIPERIODGROUPWORKERTEST_H_
 #define MANTID_API_MULTIPERIODGROUPWORKERTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/MultiPeriodGroupWorker.h"
-#include "MultiPeriodGroupTestBase.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidTestHelpers/FakeObjects.h"
+#include "MultiPeriodGroupTestBase.h"
 
 using Mantid::API::MultiPeriodGroupWorker;
 using namespace Mantid::API;
 
-namespace {
 class TestAlgorithm : public Algorithm {
 public:
   TestAlgorithm() {}
@@ -32,7 +37,6 @@ public:
   ~TestAlgorithm() override {}
 };
 DECLARE_ALGORITHM(TestAlgorithm)
-}
 
 class MultiPeriodGroupWorkerTest : public CxxTest::TestSuite,
                                    public MultiPeriodGroupTestBase {

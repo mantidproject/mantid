@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -34,14 +34,13 @@ Usage
 
    # Run Algorithm 
    result = GoniometerAnglesFromPhiRotation(ws1,ws2,Tolerance=0.5,MIND=0,MAXD=2)
-
-   print "Chi: %.1f, Omega: %.1f, Indexed: %i, AvErrIndex: %.4f AvErrAll: %.4f" % (  result[0], result[1], result[2], result[3], result[4] )
+   print("Chi: {:.1f}, Omega: {:.1f}, Indexed: {}, AvErrIndex: {:.2f} AvErrAll: {:.2f}".format(*result))
 
 Output:
 
 .. testoutput:: exGoniometerAnglesFromPhiRotation
 
-   Chi: 90.0, Omega: 90.0, Indexed: 300, AvErrIndex: 0.2114 AvErrAll: 0.2114
+   Chi: 90.0, Omega: 90.0, Indexed: 300, AvErrIndex: 0.21 AvErrAll: 0.21
 
 .. categories::
 

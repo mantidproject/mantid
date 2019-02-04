@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
 from __future__ import (absolute_import, division, print_function)
 
@@ -101,6 +107,7 @@ class SwapWidths(DataProcessorAlgorithm):
                 return idx
     # If we reach here we didn't find it
         raise LookupError("Label '%s' not found on text axis" % label)
+
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(SwapWidths)

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CURVEFITTING_CRYSTALFIELDPEAKSTEST_H_
 #define MANTID_CURVEFITTING_CRYSTALFIELDPEAKSTEST_H_
 
@@ -10,6 +16,7 @@
 #include "MantidAPI/ParameterTie.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidCurveFitting/Algorithms/EvaluateFunction.h"
+#include "MantidCurveFitting/FortranDefs.h"
 #include "MantidCurveFitting/Functions/CrystalFieldPeaks.h"
 #include "MantidDataObjects/TableWorkspace.h"
 
@@ -94,6 +101,35 @@ public:
     TS_ASSERT_EQUALS(fun->getAttribute("Temperature").asDouble(), 25.0);
     TS_ASSERT_EQUALS(fun->getAttribute("ToleranceEnergy").asDouble(), 1e-10);
     TS_ASSERT_EQUALS(fun->getAttribute("ToleranceIntensity").asDouble(), 1e-1);
+  }
+
+  void test_arbitrary_J() {
+    IFunction_sptr fun(new CrystalFieldPeaks);
+    Mantid::CurveFitting::DoubleFortranVector en;
+    Mantid::CurveFitting::ComplexFortranMatrix wf;
+    int nre = 1;
+    auto &peaks = dynamic_cast<CrystalFieldPeaks &>(*fun);
+    peaks.setParameter("B20", 0.37737);
+    peaks.setAttributeValue("Temperature", 44.0);
+    peaks.setAttributeValue("ToleranceIntensity", 0.001 * c_mbsr);
+    peaks.setAttributeValue("Ion", "something");
+    TS_ASSERT_THROWS(peaks.calculateEigenSystem(en, wf, nre),
+                     std::runtime_error);
+    peaks.setAttributeValue("Ion", "S2.4");
+    TS_ASSERT_THROWS(peaks.calculateEigenSystem(en, wf, nre),
+                     std::runtime_error);
+    peaks.setAttributeValue("Ion", "S2.5");
+    TS_ASSERT_THROWS_NOTHING(peaks.calculateEigenSystem(en, wf, nre));
+    TS_ASSERT_EQUALS(nre, -5);
+    peaks.setAttributeValue("Ion", "s1");
+    TS_ASSERT_THROWS_NOTHING(peaks.calculateEigenSystem(en, wf, nre));
+    TS_ASSERT_EQUALS(nre, -2);
+    peaks.setAttributeValue("Ion", "j1.5");
+    TS_ASSERT_THROWS_NOTHING(peaks.calculateEigenSystem(en, wf, nre));
+    TS_ASSERT_EQUALS(nre, -3);
+    peaks.setAttributeValue("Ion", "J2");
+    TS_ASSERT_THROWS_NOTHING(peaks.calculateEigenSystem(en, wf, nre));
+    TS_ASSERT_EQUALS(nre, -4);
   }
 
   void test_evaluate_alg_no_input_workspace() {
@@ -462,7 +498,7 @@ public:
     TS_ASSERT(isFixed(fun, "B43"));
     TS_ASSERT(isFixed(fun, "IB43"));
     auto i = fun.parameterIndex("B44");
-    TS_ASSERT(fun.isFixed(i));
+    TS_ASSERT(!fun.isActive(i));
     TS_ASSERT(isFixed(fun, "IB44"));
 
     TS_ASSERT(!isFixed(fun, "B60"));
@@ -473,7 +509,7 @@ public:
     TS_ASSERT(isFixed(fun, "B63"));
     TS_ASSERT(isFixed(fun, "IB63"));
     i = fun.parameterIndex("B64");
-    TS_ASSERT(fun.isFixed(i));
+    TS_ASSERT(!fun.isActive(i));
     TS_ASSERT(isFixed(fun, "IB64"));
     TS_ASSERT(isFixed(fun, "B65"));
     TS_ASSERT(isFixed(fun, "IB65"));
@@ -487,6 +523,10 @@ public:
     i = fun.parameterIndex("B64");
     tie = fun.getTie(i);
     TS_ASSERT_EQUALS(tie->asString(), "B64=-21*B60");
+  }
+
+  void test_CrystalFieldPeaksBaseImpl() {
+    Mantid::CurveFitting::Functions::CrystalFieldPeaksBaseImpl fun;
   }
 
 private:

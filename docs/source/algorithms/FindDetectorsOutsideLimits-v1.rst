@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -41,15 +41,15 @@ Usage
         ws.setY(i,np.array(deadDetArray))
         ws.setY(i+1,np.array(noisyDetArray))
 
-    print "With just the default LowThreshold of 0"
+    print("With just the default LowThreshold of 0")
     (wsOut,NumberOfFailures)=FindDetectorsOutsideLimits(ws)
-    print "%i spectra were outside the limits." % NumberOfFailures
-    print
+    print("{} spectra were outside the limits.".format(NumberOfFailures))
+    print("")
 
-    print "With a High and LowThreshold, as well as restricting the XRange to consider"
+    print("With a High and LowThreshold, as well as restricting the range to consider")
     (wsOut2,NumberOfFailures)=FindDetectorsOutsideLimits(ws, HighThreshold=1000, 
         LowThreshold=0, RangeLower=200, RangeUpper=10000)
-    print "%i spectra were outside the limits." % NumberOfFailures
+    print("{} spectra were outside the limits.".format(NumberOfFailures))
 
     mtd.clear()
 
@@ -61,7 +61,7 @@ Output:
     With just the default LowThreshold of 0
     20 spectra were outside the limits.
 
-    With a High and LowThreshold, as well as restricting the XRange to consider
+    With a High and LowThreshold, as well as restricting the range to consider
     40 spectra were outside the limits.
 
 **Example:**
@@ -70,7 +70,7 @@ Output:
 
     ws = CreateSimulationWorkspace('MARI','0,1,10')
     nh = ws.getNumberHistograms()
-    for ind in xrange(nh):
+    for ind in range(nh):
         y = ws.dataY(ind)    
         if ind>=100 and ind < 300:
             y.fill(100)
@@ -80,15 +80,15 @@ Output:
     mws1,nMasked1 = FindDetectorsOutsideLimits(ws,100)
     mws2,nMasked2 = FindDetectorsOutsideLimits(ws,100,startWorkspaceIndex = 200)
 
-    print "****************************************"
-    print "full mask ws has {0} masked detectors".format(nMasked1)
-    print "part mask ws  has {0} masked detectors".format(nMasked2)
-    print "****************************************"
+    print("****************************************")
+    print("full mask ws has {0} masked detectors".format(nMasked1))
+    print("part mask ws  has {0} masked detectors".format(nMasked2))
+    print("****************************************")
     selected_spec = [99,100,199,200,299,300]
     for spec in selected_spec:
-        print "full mask ws Spec N{0} is masked: {1}".format(spec,mws1.readY(spec)[0]>0.5)
-        print "part mask ws Spec N{0} is masked: {1}".format(spec,mws2.readY(spec)[0]>0.5) 
-    print "****************************************"
+        print("full mask ws Spec N{0} is masked: {1}".format(spec,mws1.readY(spec)[0]>0.5))
+        print("part mask ws Spec N{0} is masked: {1}".format(spec,mws2.readY(spec)[0]>0.5) )
+    print("****************************************")
 
 Output:
 

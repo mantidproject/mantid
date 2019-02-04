@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 """ Test script for running python commands within MantidPlot.
 This will test the interface to SliceViewer widgets.
 
@@ -136,7 +142,10 @@ class MantidPlotSliceViewerTest(unittest.TestCase):
         # Length of 10 with 200 bins = 0.05 width
         self.assertAlmostEqual(liner.getBinWidth(), 0.05, 3)
         # Width was set
-        self.assertAlmostEqual(liner.getPlanarWidth(), 0.88, 3)
+        # TODO: The new behavior for constructor is center+/-(width/2)
+        # but setPlanarWidth and getPlanarWidth still have old behavior.
+        # This will be fixed in a later mantid release.
+        self.assertAlmostEqual(liner.getPlanarWidth(), 0.44, 3)
         # Now turn it off
         svw.toggleLineMode(False)
         self.assertFalse( liner.isVisible(), "LineViewer was hidden")

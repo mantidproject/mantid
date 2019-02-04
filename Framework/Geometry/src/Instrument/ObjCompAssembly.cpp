@@ -1,10 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"
+#include "MantidGeometry/Instrument/ComponentVisitor.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/Matrix.h"
 #include <algorithm>
 #include <iostream>
 #include <ostream>
@@ -16,9 +24,9 @@ Mantid::Kernel::Logger g_log("ObjCompAssembly");
 
 namespace Mantid {
 namespace Geometry {
-using Kernel::V3D;
-using Kernel::Quat;
 using Kernel::DblMatrix;
+using Kernel::Quat;
+using Kernel::V3D;
 
 /// Void deleter for shared pointers
 class NoDeleting {
@@ -236,12 +244,12 @@ void ObjCompAssembly::getChildren(std::vector<IComponent_const_sptr> &outVector,
 }
 
 /**
-* Find a component by name.
-* @param cname :: The name of the component. If there are multiple matches, the
-* first one found is returned.
-* @param nlevels :: Optional argument to limit number of levels searched.
-* @returns A shared pointer to the component
-*/
+ * Find a component by name.
+ * @param cname :: The name of the component. If there are multiple matches, the
+ * first one found is returned.
+ * @param nlevels :: Optional argument to limit number of levels searched.
+ * @returns A shared pointer to the component
+ */
 boost::shared_ptr<const IComponent>
 ObjCompAssembly::getComponentByName(const std::string &cname,
                                     int nlevels) const {
@@ -299,7 +307,7 @@ void ObjCompAssembly::printTree(std::ostream &os) const {
  * @returns A vector of the absolute position
  */
 V3D ObjCompAssembly::getPos() const {
-  if (m_map) {
+  if (m_map && !hasComponentInfo()) {
     V3D pos;
     if (!m_map->getCachedLocation(m_base, pos)) {
       pos = Component::getPos();
@@ -315,8 +323,8 @@ V3D ObjCompAssembly::getPos() const {
  * creates it if it is not available.
  * @returns A vector of the absolute position
  */
-const Quat ObjCompAssembly::getRotation() const {
-  if (m_map) {
+Quat ObjCompAssembly::getRotation() const {
+  if (m_map && !hasComponentInfo()) {
     Quat rot;
     if (!m_map->getCachedRotation(m_base, rot)) {
       rot = Component::getRotation();
@@ -353,6 +361,12 @@ void ObjCompAssembly::testIntersectionWithChildren(
   }
 }
 
+size_t ObjCompAssembly::registerContents(
+    Mantid::Geometry::ComponentVisitor &visitor) const {
+  // Generic Assembly registration call.
+  return visitor.registerObjComponentAssembly(*this);
+}
+
 /** Set the outline of the assembly. Creates an Object and sets m_shape point to
  * it.
  *  All child components must be detectors and positioned along a straight line
@@ -360,7 +374,7 @@ void ObjCompAssembly::testIntersectionWithChildren(
  *  The shape can be either a box or a cylinder.
  *  @return The shape of the outline: "cylinder", "box", ...
  */
-boost::shared_ptr<Object> ObjCompAssembly::createOutline() {
+boost::shared_ptr<IObject> ObjCompAssembly::createOutline() {
   if (group.empty()) {
     throw Kernel::Exception::InstrumentDefinitionError("Empty ObjCompAssembly");
   }
@@ -372,18 +386,18 @@ boost::shared_ptr<Object> ObjCompAssembly::createOutline() {
 
   // Get information about the shape and size of a detector
   std::string type;
-  int otype;
+  detail::ShapeInfo::GeometryShape otype;
   std::vector<Kernel::V3D> vectors;
   double radius, height;
-  boost::shared_ptr<const Object> obj = group.front()->shape();
+  boost::shared_ptr<const IObject> obj = group.front()->shape();
   if (!obj) {
     throw Kernel::Exception::InstrumentDefinitionError(
         "Found ObjComponent without shape");
   }
   obj->GetObjectGeom(otype, vectors, radius, height);
-  if (otype == 1) {
+  if (otype == detail::ShapeInfo::GeometryShape::CUBOID) {
     type = "box";
-  } else if (otype == 4) {
+  } else if (otype == detail::ShapeInfo::GeometryShape::CYLINDER) {
     type = "cylinder";
   } else {
     throw std::runtime_error(
@@ -575,7 +589,7 @@ boost::shared_ptr<Object> ObjCompAssembly::createOutline() {
       // inverse the vz axis
       vz = vz * (-1);
     }
-    obj_str << "<segmented-cylinder id=\"stick\">";
+    obj_str << "<cylinder id=\"stick\">";
     obj_str << "<centre-of-bottom-base ";
     obj_str << "x=\"" << Cmass.X();
     obj_str << "\" y=\"" << Cmass.Y();
@@ -585,22 +599,22 @@ boost::shared_ptr<Object> ObjCompAssembly::createOutline() {
             << vz.Z() << "\" /> ";
     obj_str << "<radius val=\"" << radius << "\" />";
     obj_str << "<height val=\"" << hz << "\" />";
-    obj_str << "</segmented-cylinder>";
+    obj_str << "</cylinder>";
   }
 
   if (!obj_str.str().empty()) {
-    boost::shared_ptr<Object> s = ShapeFactory().createShape(obj_str.str());
+    boost::shared_ptr<IObject> s = ShapeFactory().createShape(obj_str.str());
     setOutline(s);
     return s;
   }
-  return boost::shared_ptr<Object>();
+  return boost::shared_ptr<IObject>();
 }
 
 /**
  * Sets the outline shape for this assembly
  * @param obj :: The outline shape created previously fith createOutline()
  */
-void ObjCompAssembly::setOutline(boost::shared_ptr<const Object> obj) {
+void ObjCompAssembly::setOutline(boost::shared_ptr<const IObject> obj) {
   m_shape = obj;
 }
 

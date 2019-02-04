@@ -1,9 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MD_CONVERT2_Q_NDANY_TEST_H_
 #define MANTID_MD_CONVERT2_Q_NDANY_TEST_H_
 
 #include "MantidAPI/BoxController.h"
-#include "MantidMDAlgorithms/ConvertToMD.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidMDAlgorithms/ConvToMDSelector.h"
+#include "MantidMDAlgorithms/ConvertToMD.h"
 #include "MantidMDAlgorithms/PreprocessDetectorsToMD.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
@@ -46,7 +53,7 @@ Mantid::API::MatrixWorkspace_sptr createTestWorkspaces() {
 
   return ws;
 }
-}
+} // namespace
 
 class Convert2AnyTestHelper : public ConvertToMD {
 public:
@@ -75,7 +82,7 @@ public:
   static ConvertToMDTest *createSuite() { return new ConvertToMDTest(); }
   static void destroySuite(ConvertToMDTest *suite) { delete suite; }
 
-  typedef std::vector<std::string> PropertyAllowedValues;
+  using PropertyAllowedValues = std::vector<std::string>;
 
   void testInit() {
 
@@ -124,6 +131,13 @@ public:
     pAlg->setPropertyValue("OutputWorkspace", "WS3DNoQ");
     pAlg->setPropertyValue("PreprocDetectorsWS", "");
     pAlg->setPropertyValue("QDimensions", "CopyToMD");
+    // Following 5 arguments should be ignored
+    pAlg->setPropertyValue("Q3DFrames", "HKL");
+    pAlg->setPropertyValue("QConversionScales", "HKL");
+    pAlg->setPropertyValue("UProj", "0,0,1");
+    pAlg->setPropertyValue("VProj", "1,0,0");
+    pAlg->setPropertyValue("WProj", "0,1,0");
+
     pAlg->setPropertyValue("OtherDimensions", "phi,chi");
     //    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("dEAnalysisMode",
     //    "NoDE"));
@@ -730,7 +744,7 @@ public:
     numHist = 100 * 100;
     size_t nEvents = 1000;
     inWsEv = boost::dynamic_pointer_cast<MatrixWorkspace>(
-        WorkspaceCreationHelper::CreateRandomEventWorkspace(nEvents, numHist,
+        WorkspaceCreationHelper::createRandomEventWorkspace(nEvents, numHist,
                                                             0.1));
     inWsEv->setInstrument(
         ComponentCreationHelper::createTestInstrumentCylindrical(int(numHist)));

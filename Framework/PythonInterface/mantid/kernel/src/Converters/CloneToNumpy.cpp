@@ -1,11 +1,23 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //-----------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidPythonInterface/kernel/Converters/CloneToNumpy.h"
-#include "MantidPythonInterface/kernel/Converters/NDArrayTypeIndex.h"
+#include "MantidPythonInterface/core/Converters/NDArrayTypeIndex.h"
+#include "MantidPythonInterface/kernel/Converters/DateAndTime.h"
 #include "MantidPythonInterface/kernel/Converters/NumpyFunctions.h"
-
+#include "MantidTypes/Core/DateAndTime.h"
+#include <boost/python/list.hpp>
 #include <string>
+
+#define PY_ARRAY_UNIQUE_SYMBOL KERNEL_ARRAY_API
+#define NO_IMPORT_ARRAY
+#include <numpy/arrayobject.h>
 
 namespace Mantid {
 namespace PythonInterface {
@@ -20,6 +32,7 @@ extern template int NDArrayTypeIndex<unsigned long>::typenum;
 extern template int NDArrayTypeIndex<unsigned long long>::typenum;
 extern template int NDArrayTypeIndex<float>::typenum;
 extern template int NDArrayTypeIndex<double>::typenum;
+extern template int NDArrayTypeIndex<Mantid::Types::Core::DateAndTime>::typenum;
 
 namespace Impl {
 /**
@@ -35,6 +48,31 @@ PyObject *clone1D(const std::vector<ElementType> &cvector) {
 }
 
 /**
+ * Specialisation for vector<DateAndTime> that stores the underlying data
+ * differently
+ * Returns a new numpy array with the a copy of the data vector of np.datetime64
+ */
+template <>
+PyObject *clone1D(const std::vector<Types::Core::DateAndTime> &cvector) {
+  // create an empty array
+  PyArray_Descr *descr = Converters::descr_ns();
+  Py_intptr_t dims[1] = {static_cast<int>(cvector.size())};
+  PyArrayObject *nparray =
+      reinterpret_cast<PyArrayObject *>(PyArray_NewFromDescr(
+          &PyArray_Type, descr, 1, dims, nullptr, nullptr, 0, nullptr));
+
+  for (Py_intptr_t i = 0; i < dims[0]; ++i) {
+    void *itemPtr = PyArray_GETPTR1(nparray, i);
+    npy_datetime abstime = Converters::to_npy_datetime(cvector[i]);
+    auto scalar =
+        PyArray_Scalar(reinterpret_cast<char *>(&abstime), descr, nullptr);
+    PyArray_SETITEM(nparray, reinterpret_cast<char *>(itemPtr), scalar);
+    Py_DECREF(scalar);
+  }
+  return reinterpret_cast<PyObject *>(nparray);
+}
+
+/**
  * Specialisation for vector<bool> that stores the underlying data differently
  * Returns a new numpy array with the a copy of the data vector of booleans
  * @param cvector :: A reference to the cvector to clone
@@ -47,8 +85,9 @@ template <> PyObject *clone1D(const std::vector<bool> &cvector) {
 
   for (Py_intptr_t i = 0; i < dims[0]; ++i) {
     void *itemPtr = PyArray_GETPTR1(nparray, i);
-    PyArray_SETITEM(nparray, reinterpret_cast<char *>(itemPtr),
-                    PyBool_FromLong(static_cast<long int>(cvector[i])));
+    auto py_bool = PyBool_FromLong(static_cast<long int>(cvector[i]));
+    PyArray_SETITEM(nparray, reinterpret_cast<char *>(itemPtr), py_bool);
+    Py_DECREF(py_bool);
   }
   return reinterpret_cast<PyObject *>(nparray);
 }
@@ -133,10 +172,12 @@ INSTANTIATE_CLONE(double)
 INSTANTIATE_CLONE(float)
 // Need further 1D specialisation for string
 INSTANTIATE_CLONE1D(std::string)
+// Need further ND specialisation for DateAndTime
+INSTANTIATE_CLONEND(Types::Core::DateAndTime)
 // Need further ND specialisation for bool
 INSTANTIATE_CLONEND(bool)
 ///@endcond
-}
-}
-}
-}
+} // namespace Impl
+} // namespace Converters
+} // namespace PythonInterface
+} // namespace Mantid

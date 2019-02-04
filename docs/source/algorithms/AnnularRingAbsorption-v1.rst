@@ -3,7 +3,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -38,8 +38,8 @@ Usage
        SampleChemicalFormula="Li2-Ir-O3",SampleNumberDensity=0.004813,
        EventsPerPoint=300)
 
-   print "The created workspace has one entry for each spectra: %i" % factors.getNumberHistograms()
-   print "Just divide your data by the correction to correct for absorption."
+   print("The created workspace has one entry for each spectra: {}".format(factors.getNumberHistograms()))
+   print("Just divide your data by the correction to correct for absorption.")
 
 Output:
 

@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MDGEOMETRYXMLBUILDER_H_
 #define MDGEOMETRYXMLBUILDER_H_
 
-#include <vector>
-#include <string>
-#include <algorithm>
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include <algorithm>
+#include <string>
+#include <vector>
 
 namespace Mantid {
 namespace Geometry {
@@ -20,26 +26,6 @@ namespace Geometry {
  Handles the generation of well formed description of a geometry based on input
  IMDDimensions.
  Outputs xml.
-
- Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
- National Laboratory & European Spallation Source
-
- This file is part of Mantid.
-
- Mantid is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 3 of the License, or
- (at your option) any later version.
-
- Mantid is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License
- along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
- File change history is stored at: <https://github.com/mantidproject/mantid>
 
  */
 template <typename CheckDimensionPolicy>
@@ -95,7 +81,7 @@ public:
   bool hasIntegratedTDimension() const;
 
 private:
-  typedef std::vector<IMDDimension_const_sptr> DimensionContainerType;
+  using DimensionContainerType = std::vector<IMDDimension_const_sptr>;
 
   mutable DimensionContainerType m_vecDimensions;
 
@@ -108,7 +94,7 @@ private:
   mutable IMDDimension_const_sptr m_spTDimension;
 
   /// Instantiate and apply the checking policy.
-  void applyPolicyChecking(IMDDimension_const_sptr dimensionToAdd) const;
+  void applyPolicyChecking(const IMDDimension &dimensionToAdd) const;
 
   /// Flag indicating that some change in the inputs has occured. Triggers full
   /// recreation.
@@ -125,17 +111,16 @@ private:
  @date May 2011
  @version 1.0
 */
-struct MANTID_GEOMETRY_DLL StrictDimensionPolicy
-    : public std::unary_function<IMDDimension_const_sptr, void> {
+struct MANTID_GEOMETRY_DLL StrictDimensionPolicy {
 public:
   StrictDimensionPolicy() {}
-  void operator()(IMDDimension_const_sptr item) {
-    if (true == item->getIsIntegrated()) {
+  void operator()(const IMDDimension &item) {
+    if (true == item.getIsIntegrated()) {
       std::string message = "StrictDimensionPolicy bans the use of integrated "
                             "IMDDimensions mapped to x, y, z or t in a "
-                            "IMDWorkspace.";
-      message +=
-          "Attempted to do so with IMDDimension: " + item->getDimensionId();
+                            "IMDWorkspace."
+                            "Attempted to do so with IMDDimension: " +
+                            item.getDimensionId();
       throw std::invalid_argument(message);
     }
   }
@@ -147,13 +132,12 @@ public:
  @author Owen Arnold
  @date May 2011
 */
-struct MANTID_GEOMETRY_DLL NoDimensionPolicy
-    : public std::unary_function<IMDDimension_const_sptr, void> {
-  void operator()(IMDDimension_const_sptr) {
+struct MANTID_GEOMETRY_DLL NoDimensionPolicy {
+  void operator()(const IMDDimension &) {
     // Do nothing.
   }
 };
-}
-}
+} // namespace Geometry
+} // namespace Mantid
 
 #endif /* GEOMETRYXMLBUILDER_H_ */

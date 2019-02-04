@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/HardThresholdBackground.h"
 #include "MantidAPI/IMDIterator.h"
 
@@ -23,7 +29,8 @@ void HardThresholdBackground::configureIterator(
 
 bool HardThresholdBackground::isBackground(
     Mantid::API::IMDIterator *iterator) const {
-  return iterator->getNormalizedSignal() <= m_thresholdSignal;
+  auto signal = iterator->getNormalizedSignal();
+  return signal <= m_thresholdSignal || std::isnan(signal);
 }
 
 } // namespace Crystal

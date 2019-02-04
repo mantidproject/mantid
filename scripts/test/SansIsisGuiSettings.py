@@ -1,3 +1,10 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
+from __future__ import (absolute_import, division, print_function)
 import unittest
 from mantid.simpleapi import *
 import ISISCommandInterface as i
@@ -132,7 +139,7 @@ class Sans2DIsisGuiSettings(unittest.TestCase):
                    ('Linear',2.5,13.,'CAN')]
 
         for option in options:
-            print 'Applying option ', str(option)
+            print('Applying option ', str(option))
             i.TransFit(mode=option[0], lambdamin=option[1],
                        lambdamax=option[2], selector=option[3])
             checkFitOption(option)

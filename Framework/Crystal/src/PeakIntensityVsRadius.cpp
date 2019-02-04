@@ -1,12 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/PeakIntensityVsRadius.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 
-#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/BoundedValidator.h"
+
+#include "MantidKernel/Strings.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -48,8 +56,10 @@ void PeakIntensityVsRadius::init() {
 
   declareProperty("RadiusStart", 0.0, "Radius at which to start integrating.");
   declareProperty("RadiusEnd", 1.0, "Radius at which to stop integrating.");
+  auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
+  mustBePositive->setLower(0);
   declareProperty(
-      "NumSteps", 10,
+      "NumSteps", 10, mustBePositive,
       "Number of steps, between start and end, to calculate radius.");
 
   declareProperty(
@@ -155,9 +165,8 @@ void PeakIntensityVsRadius::exec() {
   double progStep = 1.0 / double(NumSteps);
   for (int step = 0; step < NumSteps; step++) {
     // Step from RadiusStart to RadiusEnd, inclusively
-    double radius =
-        RadiusStart +
-        double(step) * (RadiusEnd - RadiusStart) / (double(NumSteps - 1));
+    double radius = RadiusStart + double(step) * (RadiusEnd - RadiusStart) /
+                                      (double(NumSteps - 1));
     g_log.debug() << "Integrating radius " << radius << '\n';
     prog.report("Radius " + Kernel::Strings::toString(radius));
 
@@ -175,7 +184,7 @@ void PeakIntensityVsRadius::exec() {
     // Run the integrate algo with this background
     IAlgorithm_sptr alg =
         this->createChildAlgorithm("IntegratePeaksMD", progStep * double(step),
-                                   progStep * double(step + 1), false);
+                                   progStep *double(step + 1), false);
     alg->setProperty("InputWorkspace", inWS);
     alg->setProperty("PeaksWorkspace", peaksWS);
     alg->setProperty("PeakRadius", radius);
@@ -235,5 +244,5 @@ void PeakIntensityVsRadius::exec() {
   setProperty("OutputWorkspace2", outWS2);
 }
 
-} // namespace Mantid
 } // namespace Crystal
+} // namespace Mantid

@@ -1,14 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef SPLINEBACKGROUNDTEST_H_
 #define SPLINEBACKGROUNDTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidCurveFitting/Algorithms/SplineBackground.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidCurveFitting/Algorithms/SplineBackground.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/UnitFactory.h"
+#include <cxxtest/TestSuite.h>
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
@@ -23,7 +29,7 @@ private:
 
 public:
   void testIt() {
-    auto ws = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
         SinFunction(), 1, 0.1, 10.1, 0.1, true);
     WorkspaceCreationHelper::addNoise(ws, 0.1);
     // Mask some bins out to test that functionality
@@ -50,7 +56,7 @@ public:
     const auto &X = outWS->x(0);
     const auto &Y = outWS->y(0);
 
-    for (size_t i = 0; i < outWS->blocksize(); i++) {
+    for (size_t i = 0; i < Y.size(); i++) {
       TS_ASSERT_DELTA(Y[i], std::sin(X[i]), 0.2);
     }
     TS_ASSERT(outWS->getAxis(0)->unit() == ws->getAxis(0)->unit());
@@ -66,7 +72,7 @@ public:
     constexpr double xRangeEnd = 2500.1;
     constexpr double xRangeStep = 0.1;
 
-    ws = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
+    ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
         SinFunction(), nspec, xRangeStart, xRangeEnd, xRangeStep, true);
     WorkspaceCreationHelper::addNoise(ws, 0.1);
     // Mask some bins out to test that functionality

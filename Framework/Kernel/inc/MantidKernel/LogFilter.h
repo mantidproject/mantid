@@ -1,16 +1,22 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_KERNEL_LOGFILTER_H_
 #define MANTID_KERNEL_LOGFILTER_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/ClassMacros.h"
 #include "MantidKernel/DllConfig.h"
-#include "MantidKernel/Exception.h"
 
 #ifndef Q_MOC_RUN
 #include <boost/scoped_ptr.hpp>
 #endif
+
+#include <vector>
 
 namespace Mantid {
 namespace Kernel {
@@ -23,30 +29,16 @@ template <class TYPE> class TimeSeriesProperty;
 
 /**
 This class is for filtering TimeSeriesProperty data
-
-Copyright &copy; 2007-12 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>.
-Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 class MANTID_KERNEL_DLL LogFilter {
 public:
+  /// Disable default constructor
+  LogFilter() = delete;
+
+  /// Disable copy and assignment operator
+  LogFilter(const LogFilter &) = delete;
+  LogFilter &operator=(const LogFilter &) = delete;
+
   /// Constructor taking a filter. Allows filters to be combined without being
   /// applied to a property
   LogFilter(const TimeSeriesProperty<bool> &filter);
@@ -68,9 +60,6 @@ public:
   void clear();
 
 private:
-  DISABLE_DEFAULT_CONSTRUCT(LogFilter)
-  DISABLE_COPY_AND_ASSIGN(LogFilter)
-
   /// Converts the given property to a TimeSeriesProperty<double>, throws if
   /// invalid.
   TimeSeriesProperty<double> *convertToTimeSeriesOfDouble(const Property *prop);

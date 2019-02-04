@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -29,13 +29,13 @@ Usage
     #restrict the number of wavelength points to speed up the example
     wsOut = SphericalAbsorption(ws,SphericalSampleRadius=0.2)
     
-    print "The created workspace has spectra: ", wsOut.readY(0)
+    print("The created workspace has spectra: {}".format(wsOut.readY(0)))
 
 Output:
 
 .. testoutput:: ExSphericalAbsorption
 
-    The created workspace has spectra:  [ 0.8451289   0.79101809  0.74254761  0.69867599  0.65861079  0.63477521]
+    The created workspace has spectra: [ 0.8451289   0.79101809  0.74254761  0.69867599  0.65861079  0.63477521]
 
 .. categories::
 

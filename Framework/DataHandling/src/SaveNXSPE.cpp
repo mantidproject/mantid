@@ -1,23 +1,30 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/SaveNXSPE.h"
 
-#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/CommonBinsValidator.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/Run.h"
-#include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
 
 #include "MantidDataHandling/FindDetectorsPar.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/Detector.h"
 
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/MantidVersion.h"
 
-#include <boost/scoped_array.hpp>
 #include <Poco/File.h>
 #include <Poco/Path.h>
+#include <boost/scoped_array.hpp>
 #include <limits>
+#include <nexus/NeXusFile.hpp>
 
 namespace Mantid {
 namespace DataHandling {
@@ -82,7 +89,7 @@ void SaveNXSPE::exec() {
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
 
   // Do the full check for common binning
-  if (!WorkspaceHelpers::commonBoundaries(inputWS)) {
+  if (!WorkspaceHelpers::commonBoundaries(*inputWS)) {
     g_log.error("The input workspace must have common bins");
     throw std::invalid_argument("The input workspace must have common bins");
   }
@@ -186,14 +193,14 @@ void SaveNXSPE::exec() {
   // Energy bins
   // Get the Energy Axis (X) of the first spectra (they are all the same -
   // checked above)
-  const MantidVec &X = inputWS->readX(0);
-  nxFile.writeData("energy", X);
+  const auto &X = inputWS->x(0);
+  nxFile.writeData("energy", X.rawData());
   nxFile.openData("energy");
   nxFile.putAttr("units", "meV");
   nxFile.closeData();
 
   // let's create some blank arrays in the nexus file
-  typedef std::vector<int64_t> Dimensions;
+  using Dimensions = std::vector<int64_t>;
   Dimensions arrayDims(2);
   arrayDims[0] = nHist;
   arrayDims[1] = nBins;
@@ -220,32 +227,27 @@ void SaveNXSPE::exec() {
   slabSize[1] = nBins;
 
   // Allocate the temporary buffers for the signal and errors
-  typedef boost::scoped_array<double> Buffer;
+  using Buffer = boost::scoped_array<double>;
   const size_t bufferSize(slabSize[0] * slabSize[1]);
   Buffer signalBuffer(new double[bufferSize]);
   Buffer errorBuffer(new double[bufferSize]);
 
   // Write the data
-  Progress progress(this, 0, 1, nHist);
+  Progress progress(this, 0.0, 1.0, nHist);
   int64_t bufferCounter(0);
+  const auto &spectrumInfo = inputWS->spectrumInfo();
   for (int64_t i = 0; i < nHist; ++i) {
     progress.report();
 
-    Geometry::IDetector_const_sptr det;
-    try { // detector exist
-      det = inputWS->getDetector(i);
-    } catch (Exception::NotFoundError &) {
-    }
-
     double *signalBufferStart = signalBuffer.get() + bufferCounter * nBins;
     double *errorBufferStart = errorBuffer.get() + bufferCounter * nBins;
-    if (det && !det->isMonitor()) {
+    if (spectrumInfo.hasDetectors(i) && !spectrumInfo.isMonitor(i)) {
       // a detector but not a monitor
-      if (!det->isMasked()) {
-        const auto &inY = inputWS->readY(i);
-        std::copy(inY.begin(), inY.end(), signalBufferStart);
-        const auto &inE = inputWS->readE(i);
-        std::copy(inE.begin(), inE.end(), errorBufferStart);
+      if (!spectrumInfo.isMasked(i)) {
+        std::copy(inputWS->y(i).cbegin(), inputWS->y(i).cend(),
+                  signalBufferStart);
+        std::copy(inputWS->e(i).cbegin(), inputWS->e(i).cend(),
+                  errorBufferStart);
       } else {
         std::fill_n(signalBufferStart, nBins, MASK_FLAG);
         std::fill_n(errorBufferStart, nBins, MASK_ERROR);

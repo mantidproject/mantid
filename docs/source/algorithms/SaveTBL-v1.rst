@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -80,7 +80,7 @@ Usage
     # 13470,2.3,13463+13464,0.035,0.3,0.04,,0,
     # 13462,2.3,13463+13464,0.035,0.3,0.04,,1,ProcessingInstruction="1:2"
     # 13469,0.7,13463+13464,0.01,0.06,0.04,,1,
-    print "File Exists:", os.path.exists(savefile)
+    print("File Exists: {}".format(os.path.exists(savefile)))
 
 .. testcleanup:: ExTBLSimple
 

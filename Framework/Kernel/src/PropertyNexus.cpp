@@ -1,25 +1,32 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/PropertyNexus.h"
 
+// clang-format off
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
+// clang-format on
 
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/Property.h"
 #include "MantidKernel/PropertyWithValue.h"
-#include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/make_unique.h"
 
+// PropertyWithValue implementation
+#include "MantidKernel/PropertyWithValue.tcc"
+
 #include <boost/algorithm/string/split.hpp>
-#include <boost/algorithm/string/trim.hpp>
-#include <boost/scoped_array.hpp>
 
 #include <memory>
 
 using namespace Mantid::Kernel;
 using namespace ::NeXus;
-using boost::algorithm::is_any_of;
-using boost::algorithm::split;
 
 #ifdef _WIN32
 #pragma warning(push)
@@ -42,7 +49,7 @@ namespace PropertyNexus {
 template <typename NumT>
 std::unique_ptr<Property>
 makeProperty(::NeXus::File *file, const std::string &name,
-             const std::vector<Kernel::DateAndTime> &times) {
+             const std::vector<Types::Core::DateAndTime> &times) {
   std::vector<NumT> values;
   file->getData(values);
   if (times.empty()) {
@@ -50,7 +57,8 @@ makeProperty(::NeXus::File *file, const std::string &name,
       return Mantid::Kernel::make_unique<PropertyWithValue<NumT>>(name,
                                                                   values[0]);
     } else {
-      return Mantid::Kernel::make_unique<ArrayProperty<NumT>>(name, values);
+      return Mantid::Kernel::make_unique<ArrayProperty<NumT>>(
+          name, std::move(values));
     }
   } else {
     auto prop = Mantid::Kernel::make_unique<TimeSeriesProperty<NumT>>(name);
@@ -60,15 +68,15 @@ makeProperty(::NeXus::File *file, const std::string &name,
 }
 
 /** Helper method to create a time series property from a boolean
-*
-* @param file :: nexus file handle
-* @param name :: name of the property being created
-* @param times :: vector of times, empty = single property with value
-* @return Property *
-*/
+ *
+ * @param file :: nexus file handle
+ * @param name :: name of the property being created
+ * @param times :: vector of times, empty = single property with value
+ * @return Property *
+ */
 std::unique_ptr<Property>
 makeTimeSeriesBoolProperty(::NeXus::File *file, const std::string &name,
-                           const std::vector<Kernel::DateAndTime> &times) {
+                           const std::vector<Types::Core::DateAndTime> &times) {
   std::vector<uint8_t> savedValues;
   file->getData(savedValues);
   const size_t nvals = savedValues.size();
@@ -84,7 +92,7 @@ makeTimeSeriesBoolProperty(::NeXus::File *file, const std::string &name,
 /** Make a string/vector\<string\> property */
 std::unique_ptr<Property>
 makeStringProperty(::NeXus::File *file, const std::string &name,
-                   const std::vector<Kernel::DateAndTime> &times) {
+                   const std::vector<Types::Core::DateAndTime> &times) {
   std::vector<std::string> values;
   if (times.empty()) {
     std::string bigString = file->getStrData();
@@ -146,13 +154,13 @@ std::unique_ptr<Property> loadProperty(::NeXus::File *file,
     typeIsBool = true;
   }
 
-  std::vector<Kernel::DateAndTime> times;
+  std::vector<Types::Core::DateAndTime> times;
   if (!timeSec.empty()) {
     // Use a default start time
     if (startStr.empty())
       startStr = "2000-01-01T00:00:00";
     // Convert time in seconds to DateAndTime
-    DateAndTime start(startStr);
+    Types::Core::DateAndTime start(startStr);
     times.reserve(timeSec.size());
     for (double time : timeSec) {
       times.push_back(start + time);
@@ -215,5 +223,5 @@ std::unique_ptr<Property> loadProperty(::NeXus::File *file,
 
 } // namespace PropertyNexus
 
+} // namespace Kernel
 } // namespace Mantid
-} // namespace API

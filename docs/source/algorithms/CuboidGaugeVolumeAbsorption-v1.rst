@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -46,7 +46,7 @@ fully within the sample.
 Usage
 -----
 
-**Example: A simple spherical sample with a cuboid guage volume**
+**Example: A simple spherical sample with a cuboid gauge volume**
 
 .. testcode:: ExCuboidGuageSimpleSpere
     
@@ -65,7 +65,7 @@ Usage
     wsOut = CuboidGaugeVolumeAbsorption(ws, NumberOfWavelengthPoints=5, ElementSize=3,
         SampleHeight=1,SampleWidth=2,SampleThickness=3)
 
-    print "The created workspace has one entry for each spectra: %i" % wsOut.getNumberHistograms()
+    print("The created workspace has one entry for each spectra: {}".format(wsOut.getNumberHistograms()))
 
 Output:
 

@@ -1,17 +1,28 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/CalculateCoverageDGS.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/ArrayLengthValidator.h"
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/Strings.h"
-#include "MantidKernel/ListValidator.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidKernel/ArrayLengthValidator.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/VectorHelper.h"
+
+#include <boost/lexical_cast.hpp>
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -27,7 +38,7 @@ bool compareMomentum(const Mantid::Kernel::VMD &v1,
                      const Mantid::Kernel::VMD &v2) {
   return (v1[3] < v2[3]);
 }
-}
+} // namespace
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CalculateCoverageDGS)
 
@@ -61,8 +72,8 @@ const std::string CalculateCoverageDGS::summary() const {
 }
 
 /**
-*Stores the X values from each H,K,L dimension as member variables
-*/
+ *Stores the X values from each H,K,L dimension as member variables
+ */
 void CalculateCoverageDGS::cacheDimensionXValues() {
   const double energyToK = 8.0 * M_PI * M_PI * PhysicalConstants::NeutronMass *
                            PhysicalConstants::meV * 1e-20 /
@@ -109,21 +120,21 @@ void CalculateCoverageDGS::init() {
   Q1[0] = 1.;
   Q2[1] = 1.;
   Q3[2] = 1.;
-  declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("Q1Basis", Q1, mustBe3D),
-      "Q1 projection direction in the x,y,z format. Q1, Q2, Q3 "
-      "must not be coplanar");
-  declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("Q2Basis", Q2, mustBe3D),
-      "Q2 projection direction in the x,y,z format. Q1, Q2, Q3 "
-      "must not be coplanar");
-  declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("Q3Basis", Q3, mustBe3D),
-      "Q3 projection direction in the x,y,z format. Q1, Q2, Q3 "
-      "must not be coplanar");
+  declareProperty(Kernel::make_unique<ArrayProperty<double>>(
+                      "Q1Basis", std::move(Q1), mustBe3D->clone()),
+                  "Q1 projection direction in the x,y,z format. Q1, Q2, Q3 "
+                  "must not be coplanar");
+  declareProperty(Kernel::make_unique<ArrayProperty<double>>(
+                      "Q2Basis", std::move(Q2), mustBe3D->clone()),
+                  "Q2 projection direction in the x,y,z format. Q1, Q2, Q3 "
+                  "must not be coplanar");
+  declareProperty(Kernel::make_unique<ArrayProperty<double>>(
+                      "Q3Basis", std::move(Q3), std::move(mustBe3D)),
+                  "Q3 projection direction in the x,y,z format. Q1, Q2, Q3 "
+                  "must not be coplanar");
   declareProperty(
       make_unique<PropertyWithValue<double>>("IncidentEnergy", EMPTY_DBL(),
-                                             mustBePositive,
+                                             std::move(mustBePositive),
                                              Mantid::Kernel::Direction::Input),
       "Incident energy. If set, will override Ei in the input workspace");
 
@@ -131,7 +142,7 @@ void CalculateCoverageDGS::init() {
 
   for (int i = 1; i <= 4; i++) {
     std::string dim("Dimension");
-    dim += Kernel::toString(i);
+    dim += boost::lexical_cast<std::string>(i);
     declareProperty(dim, options[i - 1],
                     boost::make_shared<StringListValidator>(options),
                     "Dimension to bin or integrate");
@@ -161,14 +172,13 @@ void CalculateCoverageDGS::exec() {
       getProperty("InputWorkspace");
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
   // cache two theta and phi
-  auto instrument = inputWS->getInstrument();
-  std::vector<detid_t> detIDS = instrument->getDetectorIDs(true);
+  const auto &detectorInfo = inputWS->detectorInfo();
   std::vector<double> tt, phi;
-  for (auto &id : detIDS) {
-    auto detector = instrument->getDetector(id);
-    if (!detector->isMasked()) {
-      tt.push_back(detector->getTwoTheta(V3D(0, 0, 0), V3D(0, 0, 1)));
-      phi.push_back(detector->getPhi());
+  for (size_t i = 0; i < detectorInfo.size(); ++i) {
+    if (!detectorInfo.isMasked(i) && !detectorInfo.isMonitor(i)) {
+      const auto &detector = detectorInfo.detector(i);
+      tt.push_back(detector.getTwoTheta(V3D(0, 0, 0), V3D(0, 0, 1)));
+      phi.push_back(detector.getPhi());
     }
   }
 
@@ -196,7 +206,7 @@ void CalculateCoverageDGS::exec() {
   size_t q1NumBins = 1, q2NumBins = 1, q3NumBins = 1, dENumBins = 1;
   for (int i = 1; i <= 4; i++) {
     std::string dim("Dimension");
-    dim += Kernel::toString(i);
+    dim += boost::lexical_cast<std::string>(i);
     std::string dimensioni = getProperty(dim);
     if (dimensioni == "Q1") {
       affineMat[i - 1][0] = 1.;
@@ -257,8 +267,17 @@ void CalculateCoverageDGS::exec() {
 
   // Qmax is at  kf=kfmin or kf=kfmax
   m_ki = std::sqrt(energyToK * m_Ei);
-  m_kfmin = std::sqrt(energyToK * (m_Ei - m_dEmin));
-  m_kfmax = std::sqrt(energyToK * (m_Ei - m_dEmax));
+  if (m_Ei > m_dEmin) {
+    m_kfmin = std::sqrt(energyToK * (m_Ei - m_dEmin));
+  } else {
+    m_kfmin = 0.;
+  }
+  if (m_Ei > m_dEmax) {
+    m_kfmax = std::sqrt(energyToK * (m_Ei - m_dEmax));
+  } else {
+    m_kfmax = 0;
+  }
+
   double QmaxTemp =
       sqrt(m_ki * m_ki + m_kfmin * m_kfmin - 2 * m_ki * m_kfmin * cos(ttmax));
   double Qmax = QmaxTemp;
@@ -366,18 +385,18 @@ void CalculateCoverageDGS::exec() {
   Mantid::Geometry::GeneralFrame frame2("Q2", "");
   Mantid::Geometry::GeneralFrame frame3("Q3", "");
   Mantid::Geometry::GeneralFrame frame4("meV", "");
-  MDHistoDimension_sptr out1(
-      new MDHistoDimension("Q1", "Q1", frame1, static_cast<coord_t>(q1min),
-                           static_cast<coord_t>(q1max), q1NumBins));
-  MDHistoDimension_sptr out2(
-      new MDHistoDimension("Q2", "Q2", frame2, static_cast<coord_t>(q2min),
-                           static_cast<coord_t>(q2max), q2NumBins));
-  MDHistoDimension_sptr out3(
-      new MDHistoDimension("Q3", "Q3", frame3, static_cast<coord_t>(q3min),
-                           static_cast<coord_t>(q3max), q3NumBins));
-  MDHistoDimension_sptr out4(new MDHistoDimension(
+  auto out1 = boost::make_shared<MDHistoDimension>(
+      "Q1", "Q1", frame1, static_cast<coord_t>(q1min),
+      static_cast<coord_t>(q1max), q1NumBins);
+  auto out2 = boost::make_shared<MDHistoDimension>(
+      "Q2", "Q2", frame2, static_cast<coord_t>(q2min),
+      static_cast<coord_t>(q2max), q2NumBins);
+  auto out3 = boost::make_shared<MDHistoDimension>(
+      "Q3", "Q3", frame3, static_cast<coord_t>(q3min),
+      static_cast<coord_t>(q3max), q3NumBins);
+  auto out4 = boost::make_shared<MDHistoDimension>(
       "DeltaE", "DeltaE", frame4, static_cast<coord_t>(m_dEmin),
-      static_cast<coord_t>(m_dEmax), dENumBins));
+      static_cast<coord_t>(m_dEmax), dENumBins);
 
   for (size_t row = 0; row <= 3; row++) {
     if (affineMat[row][0] == 1.) {
@@ -394,7 +413,7 @@ void CalculateCoverageDGS::exec() {
     }
   }
 
-  m_normWS = MDHistoWorkspace_sptr(new MDHistoWorkspace(binDimensions));
+  m_normWS = boost::make_shared<MDHistoWorkspace>(binDimensions);
   m_normWS->setTo(0., 0., 0.);
   setProperty("OutputWorkspace",
               boost::dynamic_pointer_cast<Workspace>(m_normWS));
@@ -403,7 +422,7 @@ void CalculateCoverageDGS::exec() {
 
   const int64_t ndets = static_cast<int64_t>(tt.size());
 
-  PARALLEL_FOR1(inputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS))
   for (int64_t i = 0; i < ndets; i++) {
     PARALLEL_START_INTERUPT_REGION
     auto intersections = calculateIntersections(tt[i], phi[i]);
@@ -421,7 +440,9 @@ void CalculateCoverageDGS::exec() {
       std::vector<coord_t> pos(4);
       std::transform(curIntSec.getBareArray(), curIntSec.getBareArray() + 4,
                      prevIntSec.getBareArray(), pos.begin(),
-                     VectorHelper::SimpleAverage<double>());
+                     [](const double lhs, const double rhs) {
+                       return static_cast<coord_t>(0.5 * (lhs + rhs));
+                     });
       // transform kf to energy transfer
       pos[3] = static_cast<coord_t>(m_Ei - pos[3] * pos[3] / energyToK);
 
@@ -437,13 +458,13 @@ void CalculateCoverageDGS::exec() {
 }
 
 /**
-*Calculate the points of intersection for the given detector with cuboid
-* surrounding the
-*detector position in HKL
-*@param theta Polar angle withd detector
-*@param phi Azimuthal angle with detector
-*@return A list of intersections in HKL+kf space
-*/
+ *Calculate the points of intersection for the given detector with cuboid
+ * surrounding the
+ *detector position in HKL
+ *@param theta Polar angle withd detector
+ *@param phi Azimuthal angle with detector
+ *@return A list of intersections in HKL+kf space
+ */
 std::vector<Kernel::VMD>
 CalculateCoverageDGS::calculateIntersections(const double theta,
                                              const double phi) {
@@ -630,7 +651,7 @@ CalculateCoverageDGS::calculateIntersections(const double theta,
   }
 
   // sort intersections by final momentum
-  typedef std::vector<Mantid::Kernel::VMD>::iterator IterType;
+  using IterType = std::vector<Mantid::Kernel::VMD>::iterator;
   std::stable_sort<IterType, bool (*)(const Mantid::Kernel::VMD &,
                                       const Mantid::Kernel::VMD &)>(
       intersections.begin(), intersections.end(), compareMomentum);

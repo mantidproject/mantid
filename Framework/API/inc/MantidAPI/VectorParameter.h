@@ -1,8 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MDALGORITHMS_VectorParameter_H_
 #define MANTID_MDALGORITHMS_VectorParameter_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/ImplicitFunctionParameter.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace API {
@@ -13,33 +19,12 @@ pattern to implement common code associated with vector storage.
 
 @author Owen Arnold, Tessella plc
 @date 21/07/2011
-
-Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>
-Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
 template <typename Derived, typename ElemType>
 class DLLExport VectorParameter : public ImplicitFunctionParameter {
 public:
-  typedef ElemType ValueType;
+  using ValueType = ElemType;
   VectorParameter();
   VectorParameter(size_t size);
   VectorParameter(const VectorParameter<Derived, ElemType> &other);
@@ -245,14 +230,14 @@ ElemType &VectorParameter<Derived, ElemType>::at(size_t index) {
 #define DECLARE_VECTOR_PARAMETER(classname, type_)                             \
   class classname : public Mantid::API::VectorParameter<classname, type_> {    \
   public:                                                                      \
-    typedef Mantid::API::VectorParameter<classname, type_> SuperType;          \
+    using SuperType = Mantid::API::VectorParameter<classname, type_>;          \
     static std::string parameterName() { return #classname; }                  \
     classname() : SuperType() {}                                               \
     classname(size_t index) : SuperType(index) {}                              \
     std::string getName() const override { return #classname; }                \
     classname *clone() const override { return new classname(*this); }         \
   };
-}
-}
+} // namespace API
+} // namespace Mantid
 
 #endif

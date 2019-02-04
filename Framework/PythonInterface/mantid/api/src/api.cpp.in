@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 /*****************************************************************************************/
 /********** PLEASE NOTE! THIS FILE WAS AUTO-GENERATED FROM CMAKE.  ***********************/
 /********** Source = api.cpp.in **********************************************************/
@@ -5,28 +11,27 @@
 #include <boost/python/def.hpp>
 #include <boost/python/module.hpp>
 #include <boost/python/docstring_options.hpp>
+#include <boost/python/args.hpp>
+
 
 // See http://docs.scipy.org/doc/numpy/reference/c-api.array.html#PY_ARRAY_UNIQUE_SYMBOL
 #define PY_ARRAY_UNIQUE_SYMBOL API_ARRAY_API
 #include <numpy/arrayobject.h>
 
 #include "MantidAPI/AlgorithmFactory.h"
-#include "MantidPythonInterface/api/Algorithms/RunPythonScript.h"
+#include "MantidAPI/Workspace.h"
 
 namespace
 {
+
   /**
-   * We don't want to register the C++ algorithms on loading the python module
-   * since we want then be able to control when the various singletons are started if
-   * we are being imported from vanilla Python.
-   * Here we export a single function that can be called after the FrameworkManager
-   * has been started to registered any hard-coded C++ algorithms that are
-   * contained within this module.
+   * Checks if two workspace shared pointers point to the same workspace
    */
-  void _declareCPPAlgorithms()
-  {
-    Mantid::API::AlgorithmFactory::Instance().subscribe<Mantid::PythonInterface::RunPythonScript>();
+  bool isSameWorkspaceObject(Mantid::API::Workspace_sptr workspace1, 
+		             Mantid::API::Workspace_sptr workspace2) {
+    return workspace1 == workspace2;
   }
+
 }
 
 // Forward declare
@@ -38,9 +43,11 @@ BOOST_PYTHON_MODULE(_api)
   boost::python::docstring_options docstrings(true, true, false);
   // Import numpy
   _import_array();
-  
-  // Internal function to declare C++ algorithms that are a part of this module
-  boost::python::def("_declareCPPAlgorithms", &_declareCPPAlgorithms);
+
+  // Workspace address comparison
+  boost::python::def("isSameWorkspaceObject",
+		     &isSameWorkspaceObject, 
+		     boost::python::args("workspace1", "workspace2"));
 
   try {
 @EXPORT_FUNCTIONS@

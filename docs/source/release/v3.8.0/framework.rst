@@ -51,7 +51,7 @@ New
 
 - :ref:`UnwrapMonitorsInTOF <algm-UnwrapMonitorsInTOF>` handles the data which was collected beyond the end of a frame.
 
-- :ref:`ExtractMonitors <algm-ExtractMonitors>` an algorithm to extract the monitor spectra into a new workspace. Can also be 
+- :ref:`ExtractMonitors <algm-ExtractMonitors>` an algorithm to extract the monitor spectra into a new workspace. Can also be
   used to create a workspace with just the detectors, or two workspaces, one with the monitors and one with the detectors.
 
 Improved
@@ -75,7 +75,7 @@ Improved
   had a bug where the table columns were in a reversed order in the dialogue's combo boxes.
   This is now fixed and the order is correct.
 
-- :ref:`ConvertUnits <algm-ConvertUnits>` and `ConvertUnitsUsingDetectorTable <algm-ConvertUnitsUsingDetectorTable>` will no longer corrupt a workspace used as input and output if the algorithm fails.
+- :ref:`ConvertUnits <algm-ConvertUnits>` and :ref:`ConvertUnitsUsingDetectorTable <algm-ConvertUnitsUsingDetectorTable>` will no longer corrupt a workspace used as input and output if the algorithm fails.
 
 - :ref:`SetSample <algm-SetSample>`: Fixed a bug with interpreting the `Center` attribute for cylinders/annuli
 
@@ -89,9 +89,9 @@ Improved
   now check if a Workspace with that name already exists in the ADS and gives
   the option to override it.
 
-- :ref:`FindSXPeaks <algm-FindSXPeaks>`: Fixed a bug where peaks with an incorrect TOF would stored for some intrument geometries.
+- :ref:`FindSXPeaks <algm-FindSXPeaks>`: Fixed a bug where peaks with an incorrect TOF would stored for some instrument geometries.
 
-- :ref:`LoadILL <algm-LoadILL>` was renamed to `LoadILLTOF <algm-LoadILLTOF>` to better reflect what it does. The new algorithm can also handle cases where the monitor IDs are greater than the detector IDs.
+- :ref:`LoadILL <algm-LoadILLTOF>` was renamed to :ref:`LoadILLTOF <algm-LoadILLTOF>` to better reflect what it does. The new algorithm can also handle cases where the monitor IDs are greater than the detector IDs.
 
 - :ref:`FFT <algm-FFT>` deals correctly with histogram input data. Internally, it converts to point data, and the output is always a point data workspace. (It can be converted to histogram data using :ref:`ConvertToHistogram <algm-ConvertToHistogram>` if required).
 
@@ -125,7 +125,7 @@ Performance
   - :ref:`ConvertSpectrumAxis <algm-ConvertSpectrumAxis>`: 25% speedup
   - :ref:`ConvertToHistogram <algm-ConvertToHistogram>`: 3x to 4x speedup
   - :ref:`ConvertToPointData <algm-ConvertToPointData>`: 3x to 4x speedup
-  - :ref:`CorrectFlightPaths <algm-CorrectFlightPaths>`: 10% speedup
+  - :ref:`CorrectFlightPaths <algm-ConvertToConstantL2>`: 10% speedup
   - :ref:`ExtractSpectra <algm-ExtractSpectra>`: no change when X-range changes, otherwise 50x to 100x speedup for Workspace2D and up to 3x speedup for EventWorkspace
   - :ref:`GetAllEi <algm-GetAllEi>`: 5-10% speedup
   - :ref:`GetDetOffsetsMultiPeaks <algm-GetDetOffsetsMultiPeaks>`: 5-10% speedup
@@ -155,13 +155,15 @@ Performance
 CurveFitting
 ------------
 
-- Added a new minimizer belonging to the trust region family of algorithms developped for Mantid by the SCD
+- Added a new minimizer belonging to the trust region family of algorithms developed for Mantid by the SCD
   Numerical Analysis Group at RAL. It has better performance characteristics compared to the existing
   minimizers especially when applied to the most difficult fitting problems.
-- Added new property `EvaluationType` to Fit algorithm. If set to "Histogram" and the input dataset 
+- Added new property `EvaluationType` to Fit algorithm. If set to "Histogram" and the input dataset
   is a histogram with large bins it can improve accuracy of the fit.
 - The concept page for :ref:`Comparing fit minimizers <FittingMinimizers>` has been updated to include the new
   minimizer and a comparison against neutron data examples.
+  
+The work on benchmarking fitting has received funding from the Horizon 2020 Framework Programme of the European Union under the SINE2020 project Grant No 654000.  
 
 Others
 ------
@@ -173,7 +175,7 @@ Others
 - The case search in ``DataService`` has been replaced with a case-insensitive comparison function. Behavior
   is almost identical, but a small number of cases (such as adding the workspaces ``Z`` and ``z``) will work
   in a more predictable manner.
-  
+
 
 Python
 ------

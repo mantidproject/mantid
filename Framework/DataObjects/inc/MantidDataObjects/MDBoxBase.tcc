@@ -1,11 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/MDBoxBase.h"
 #include "MantidDataObjects/MDEvent.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/VMD.h"
 #include <boost/make_shared.hpp>
 #include <limits>
-
-//using NeXus::File;
 
 namespace Mantid {
 namespace DataObjects {
@@ -135,13 +140,13 @@ TMDE(std::vector<Mantid::Kernel::VMD> MDBoxBase)::getVertexes() const {
  * @param[out] numVertices :: returns the number of vertices in the array.
  * @return the bare array. This should be deleted by the caller!
  * */
-TMDE(coord_t *MDBoxBase)::getVertexesArray(size_t &numVertices) const {
+TMDE(std::unique_ptr<coord_t[]> MDBoxBase)::getVertexesArray(size_t &numVertices) const {
   // How many vertices does one box have? 2^nd, or bitwise shift left 1 by nd
   // bits
   numVertices = 1 << nd;
 
   // Allocate the array of the right size
-  auto out = new coord_t[nd * numVertices];
+  auto out = Kernel::make_unique<coord_t[]>(nd * numVertices);
 
   // For each vertex, increase an integeer
   for (size_t i = 0; i < numVertices; ++i) {
@@ -184,7 +189,7 @@ TMDE(coord_t *MDBoxBase)::getVertexesArray(size_t &numVertices) const {
  *caller!
  * @throw if outDimensions == 0
  * */
-TMDE(coord_t *MDBoxBase)::getVertexesArray(size_t &numVertices,
+TMDE(std::unique_ptr<coord_t[]> MDBoxBase)::getVertexesArray(size_t &numVertices,
                                            const size_t outDimensions,
                                            const bool *maskDim) const {
   if (outDimensions == 0)
@@ -195,7 +200,7 @@ TMDE(coord_t *MDBoxBase)::getVertexesArray(size_t &numVertices,
   numVertices = (size_t)1 << outDimensions;
 
   // Allocate the array of the right size
-  auto out = new coord_t[outDimensions * numVertices];
+  auto out = Kernel::make_unique<coord_t[]>(outDimensions * numVertices);
 
   // For each vertex, increase an integeer
   for (size_t i = 0; i < numVertices; ++i) {

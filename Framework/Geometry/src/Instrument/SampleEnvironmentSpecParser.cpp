@@ -1,4 +1,11 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Instrument/SampleEnvironmentSpecParser.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 
 #include "MantidKernel/MaterialXMLParser.h"
@@ -9,10 +16,13 @@
 #include "Poco/DOM/DOMWriter.h"
 #include "Poco/DOM/Document.h"
 #include "Poco/DOM/NamedNodeMap.h"
-#include "Poco/DOM/NodeIterator.h"
 #include "Poco/DOM/NodeFilter.h"
+#include "Poco/DOM/NodeIterator.h"
 #include "Poco/SAX/InputSource.h"
 #include "Poco/SAX/SAXException.h"
+
+#include <boost/make_shared.hpp>
+#include <sstream>
 
 using namespace Poco::XML;
 
@@ -27,7 +37,7 @@ std::string CONTAINERS_TAG = "containers";
 std::string CONTAINER_TAG = "container";
 std::string COMPONENTGEOMETRY_TAG = "geometry";
 std::string SAMPLEGEOMETRY_TAG = "samplegeometry";
-}
+} // namespace
 
 namespace Mantid {
 namespace Geometry {
@@ -46,7 +56,7 @@ namespace Geometry {
 SampleEnvironmentSpec_uptr
 SampleEnvironmentSpecParser::parse(const std::string &name,
                                    std::istream &istr) {
-  typedef AutoPtr<Document> DocumentPtr;
+  using DocumentPtr = AutoPtr<Document>;
 
   InputSource src(istr);
   DOMParser parser;
@@ -58,7 +68,8 @@ SampleEnvironmentSpecParser::parse(const std::string &name,
   } catch (SAXParseException &exc) {
     std::ostringstream msg;
     msg << "SampleEnvironmentSpecParser::parse() - Error parsing content "
-           "as valid XML: " << exc.what();
+           "as valid XML: "
+        << exc.what();
     throw std::runtime_error(msg.str());
   }
   return parse(name, doc->documentElement());
@@ -105,8 +116,8 @@ void SampleEnvironmentSpecParser::validateRootElement(
   if (element->nodeName() != ROOT_TAG) {
     std::ostringstream msg;
     msg << "SampleEnvironmentSpecParser::validateRootElement() - Element tag "
-           "does not match '" << ROOT_TAG << "'. Found " << element->nodeName()
-        << "\n";
+           "does not match '"
+        << ROOT_TAG << "'. Found " << element->nodeName() << "\n";
     throw std::invalid_argument(msg.str());
   }
 }
@@ -157,7 +168,7 @@ void SampleEnvironmentSpecParser::parseAndAddComponents(
     if (nodeName == CONTAINERS_TAG) {
       parseAndAddContainers(spec, childElement);
     } else if (nodeName == COMPONENT_TAG) {
-      spec->addComponent(parseComponent<Object>(childElement));
+      spec->addComponent(parseComponent(childElement));
     }
     node = nodeIter.nextNode();
   }
@@ -191,7 +202,7 @@ void SampleEnvironmentSpecParser::parseAndAddContainers(
 Container_const_sptr
 SampleEnvironmentSpecParser::parseContainer(Element *element) const {
   using Mantid::Geometry::Container;
-  auto can = parseComponent<Container>(element);
+  auto can = boost::make_shared<Container>(parseComponent(element));
   auto sampleGeometry = element->getChildElement(SAMPLEGEOMETRY_TAG);
   if (sampleGeometry) {
     DOMWriter writer;
@@ -208,8 +219,7 @@ SampleEnvironmentSpecParser::parseContainer(Element *element) const {
  * @param element A pointer to an XML \<container\> element
  * @return A new Object instance of the given type
  */
-template <typename ObjectType>
-boost::shared_ptr<ObjectType>
+boost::shared_ptr<IObject>
 Mantid::Geometry::SampleEnvironmentSpecParser::parseComponent(
     Element *element) const {
   Element *geometry = element->getChildElement(COMPONENTGEOMETRY_TAG);
@@ -219,29 +229,21 @@ Mantid::Geometry::SampleEnvironmentSpecParser::parseComponent(
         COMPONENTGEOMETRY_TAG + " child tag. None found.");
   }
   ShapeFactory factory;
-  auto comp = factory.createShape<ObjectType>(geometry);
-  comp->setID(element->getAttribute("id"));
+  auto comp = factory.createShape(geometry);
   auto materialID = element->getAttribute("material");
   auto iter = m_materials.find(materialID);
+  Kernel::Material mat;
   if (iter != m_materials.end()) {
-    comp->setMaterial(iter->second);
+    mat = iter->second;
   } else {
     throw std::runtime_error("SampleEnvironmentSpecParser::parseComponent() - "
                              "Unable to find material with id=" +
                              materialID);
   }
+  comp->setID(element->getAttribute("id"));
+  comp->setMaterial(mat);
   return comp;
 }
-
-//------------------------------------------------------------------------------
-// Concrete instantions
-//------------------------------------------------------------------------------
-///@cond
-template boost::shared_ptr<Object>
-Mantid::Geometry::SampleEnvironmentSpecParser::parseComponent(Element *) const;
-template boost::shared_ptr<Container>
-Mantid::Geometry::SampleEnvironmentSpecParser::parseComponent(Element *) const;
-///@endcond
 
 } // namespace Geometry
 } // namespace Mantid

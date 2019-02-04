@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -301,8 +307,6 @@ void ComplexMatrix::eigenSystemHermitian(GSLVector &eigenValues,
   eigenValues.resize(n);
   eigenVectors.resize(n, n);
   auto workspace = gsl_eigen_hermv_alloc(n);
-  // RT: I think there is a bug in this function. It returns garbage in
-  // eigenvectors in a repeated call.
   gsl_eigen_hermv(gsl(), eigenValues.gsl(), eigenVectors.gsl(), workspace);
   gsl_eigen_hermv_free(workspace);
 }

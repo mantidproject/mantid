@@ -1,6 +1,6 @@
 # Include useful utils
 include ( MantidUtils )
-
+include ( GenerateMantidExportHeader )
 # Make the default build type Release
 if ( NOT CMAKE_CONFIGURATION_TYPES )
   if ( NOT CMAKE_BUILD_TYPE )
@@ -17,9 +17,11 @@ endif()
 # We want shared libraries everywhere
 set ( BUILD_SHARED_LIBS On )
 
-# Send libraries to common place
-set ( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin )
-set ( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin )
+if ( CMAKE_GENERATOR MATCHES "Visual Studio" OR CMAKE_GENERATOR MATCHES "Xcode" )
+  set ( PVPLUGINS_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/$<CONFIG>/plugins/paraview )
+else ()
+  set ( PVPLUGINS_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/plugins/paraview )
+endif()
 
 # This allows us to group targets logically in Visual Studio
 set_property ( GLOBAL PROPERTY USE_FOLDERS ON )
@@ -37,25 +39,20 @@ set ( TESTING_TIMEOUT 300 CACHE INTEGER
 
 ###########################################################################
 # Look for dependencies
+# Do NOT add include_directories commands here. They will affect every
+# target.
 ###########################################################################
 
 set ( Boost_NO_BOOST_CMAKE TRUE )
-find_package ( Boost 1.53.0 REQUIRED date_time regex )
-include_directories( SYSTEM ${Boost_INCLUDE_DIRS} )
+find_package ( Boost 1.53.0 REQUIRED date_time regex serialization filesystem system)
 add_definitions ( -DBOOST_ALL_DYN_LINK -DBOOST_ALL_NO_LIB )
 # Need this defined globally for our log time values
 add_definitions ( -DBOOST_DATE_TIME_POSIX_TIME_STD_CONFIG )
 
 find_package ( Poco 1.4.6 REQUIRED )
-include_directories( SYSTEM ${POCO_INCLUDE_DIRS} )
-
 find_package ( Nexus 4.3.1 REQUIRED )
-include_directories ( SYSTEM ${NEXUS_INCLUDE_DIR} )
-
 find_package ( MuParser REQUIRED )
-
 find_package ( JsonCPP 0.7.0 REQUIRED )
-include_directories ( SYSTEM ${JSONCPP_INCLUDE_DIR} )
 
 set ( ENABLE_OPENCASCADE ON CACHE BOOL "Enable OpenCascade-based 3D visualisation" )
 if (ENABLE_OPENCASCADE)
@@ -95,22 +92,21 @@ find_package ( OpenSSL REQUIRED )
 
 set ( MtdVersion_WC_LAST_CHANGED_DATE Unknown )
 set ( MtdVersion_WC_LAST_CHANGED_DATETIME 0 )
+set ( MtdVersion_WC_LAST_CHANGED_SHA Unknown )
 set ( NOT_GIT_REPO "Not" )
 
 if ( GIT_FOUND )
   # Get the last revision
-  execute_process ( COMMAND ${GIT_EXECUTABLE} describe --long
-                    OUTPUT_VARIABLE GIT_DESCRIBE
+  execute_process ( COMMAND ${GIT_EXECUTABLE} rev-parse --short HEAD
+                    OUTPUT_VARIABLE GIT_SHA_HEAD
                     ERROR_VARIABLE NOT_GIT_REPO
                     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+                    OUTPUT_STRIP_TRAILING_WHITESPACE
   )
   if ( NOT NOT_GIT_REPO ) # i.e This is a git repository!
-    # Remove the tag name part
-    string ( REGEX MATCH "[-](.*)" MtdVersion_WC_LAST_CHANGED_REV ${GIT_DESCRIBE} )
-    # Extract the SHA1 part (with a 'g' prefix which stands for 'git')
-    # N.B. The variable comes back from 'git describe' with a line feed on the end, so we need to lose that
-    string ( REGEX MATCH "(g.*)[^\n]" MtdVersion_WC_LAST_CHANGED_SHA ${MtdVersion_WC_LAST_CHANGED_REV} )
-
+    # "git describe" was originally used to produce this variable and this prefixes the short
+    # SHA1 with a 'g'. We keep the same format here now that we use rev-parse
+    set ( MtdVersion_WC_LAST_CHANGED_SHA "g${GIT_SHA_HEAD}" )
     # Get the date of the last commit
     execute_process ( COMMAND ${GIT_EXECUTABLE} log -1 --format=format:%cD OUTPUT_VARIABLE MtdVersion_WC_LAST_CHANGED_DATE
                       WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
@@ -215,8 +211,8 @@ endif()
 
 ###########################################################################
 # Include the file that contains the version number
-# This must come after the git describe business above because it can be
-# used to override the patch version number (MtdVersion_WC_LAST_CHANGED_REV)
+# This must come after the git business above because it can be
+# used to override the patch version number
 ###########################################################################
 include ( VersionNumber )
 
@@ -243,6 +239,12 @@ if ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
 endif ()
 
 ###########################################################################
+# Set the c++ standard to 14 - cmake should do the right thing with msvc
+###########################################################################
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+###########################################################################
 # Add compiler options if using gcc
 ###########################################################################
 if ( CMAKE_COMPILER_IS_GNUCXX )
@@ -250,6 +252,28 @@ if ( CMAKE_COMPILER_IS_GNUCXX )
 elseif ( ${CMAKE_CXX_COMPILER_ID} MATCHES "Clang" )
   include ( GNUSetup )
 endif ()
+
+###########################################################################
+# Configure clang-tidy if the tool is found
+###########################################################################
+
+if ( CMAKE_VERSION VERSION_GREATER "3.5" )
+  set(ENABLE_CLANG_TIDY OFF CACHE BOOL "Add clang-tidy automatically to builds")
+  if (ENABLE_CLANG_TIDY)
+    find_program (CLANG_TIDY_EXE NAMES "clang-tidy" PATHS /usr/local/opt/llvm/bin )
+    if (CLANG_TIDY_EXE)
+      message(STATUS "clang-tidy found: ${CLANG_TIDY_EXE}")
+      set(CLANG_TIDY_CHECKS "-*,performance-for-range-copy,performance-unnecessary-copy-initialization,modernize-use-override,modernize-use-nullptr,modernize-loop-convert,modernize-use-bool-literals,modernize-deprecated-headers,misc-*,-misc-unused-parameters")
+      set(CMAKE_CXX_CLANG_TIDY "${CLANG_TIDY_EXE};-checks=${CLANG_TIDY_CHECKS};-header-filter='${CMAKE_SOURCE_DIR}/*'"
+        CACHE STRING "" FORCE)
+    else()
+      message(AUTHOR_WARNING "clang-tidy not found!")
+      set(CMAKE_CXX_CLANG_TIDY "" CACHE STRING "" FORCE) # delete it
+    endif()
+  else()
+    set(CMAKE_CXX_CLANG_TIDY "" CACHE STRING "" FORCE) # delete it
+  endif()
+endif()
 
 ###########################################################################
 # Setup cppcheck
@@ -276,17 +300,12 @@ else ()
 endif ()
 
 # Some unit tests need GMock/GTest
-find_package ( GMock )
-
-if ( GMOCK_FOUND AND GTEST_FOUND )
-  message ( STATUS "GMock/GTest (${GMOCK_VERSION}) is available for unit tests." )
-else ()
-  message ( STATUS "GMock/GTest is not available. Some unit tests will not run." )
-endif()
+include ( GoogleTest )
 
 find_package ( PyUnitTest )
 if ( PYUNITTEST_FOUND )
   enable_testing ()
+  include ( Python-xmlrunner )
   message (STATUS "Found pyunittest generator")
 else()
   message (STATUS "Could NOT find PyUnitTest - unit testing of python not available" )

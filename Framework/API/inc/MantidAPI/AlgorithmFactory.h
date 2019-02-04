@@ -1,26 +1,32 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_API_ALGORITHMFACTORY_H_
 #define MANTID_API_ALGORITHMFACTORY_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include <vector>
-#include <unordered_set>
-#include <sstream>
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
+#include <sstream>
+#include <unordered_set>
+#include <vector>
 
 namespace Mantid {
 namespace API {
 
 /// Structure uniquely describing an algorithm with its name, category and
 /// version.
-struct Algorithm_descriptor {
-  std::string name;     ///< name
-  std::string alias;    ///< alias
-  std::string category; ///< category
+struct AlgorithmDescriptor {
+  std::string name;     ///< Algorithm Name
   int version;          ///< version
+  std::string category; ///< category
+  std::string alias;    ///< alias
 };
 
 //----------------------------------------------------------------------
@@ -36,26 +42,6 @@ class Algorithm;
 
     @author Russell Taylor, Tessella Support Services plc
     @date 21/09/2007
-
-    Copyright &copy; 2007-2011 ISIS Rutherford Appleton Laboratory, NScD Oak
-   Ridge National Laboratory & European Spallation Source
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>
 */
 class MANTID_API_DLL AlgorithmFactoryImpl final
     : public Kernel::DynamicFactory<Algorithm> {
@@ -134,7 +120,7 @@ public:
   const std::map<std::string, bool> getCategoriesWithState() const;
 
   /// Returns algorithm descriptors.
-  std::vector<Algorithm_descriptor>
+  std::vector<AlgorithmDescriptor>
   getDescriptors(bool includeHidden = false) const;
 
   /// unmangles the names used as keys into the name and version
@@ -163,18 +149,18 @@ private:
   void fillHiddenCategories(std::unordered_set<std::string> *categorySet) const;
 
   /// A typedef for the map of algorithm versions
-  typedef std::map<std::string, int> VersionMap;
+  using VersionMap = std::map<std::string, int>;
   /// The map holding the registered class names and their highest versions
   VersionMap m_vmap;
 };
 
-typedef Mantid::Kernel::SingletonHolder<AlgorithmFactoryImpl> AlgorithmFactory;
+using AlgorithmFactory = Mantid::Kernel::SingletonHolder<AlgorithmFactoryImpl>;
 
 /// Convenient typedef for an UpdateNotification
-typedef Mantid::Kernel::DynamicFactory<Algorithm>::UpdateNotification
-    AlgorithmFactoryUpdateNotification;
-typedef const Poco::AutoPtr<Mantid::Kernel::DynamicFactory<
-    Algorithm>::UpdateNotification> &AlgorithmFactoryUpdateNotification_ptr;
+using AlgorithmFactoryUpdateNotification =
+    Mantid::Kernel::DynamicFactory<Algorithm>::UpdateNotification;
+using AlgorithmFactoryUpdateNotification_ptr = const Poco::AutoPtr<
+    Mantid::Kernel::DynamicFactory<Algorithm>::UpdateNotification> &;
 
 } // namespace API
 } // namespace Mantid
@@ -184,6 +170,6 @@ namespace Kernel {
 EXTERN_MANTID_API template class MANTID_API_DLL
     Mantid::Kernel::SingletonHolder<Mantid::API::AlgorithmFactoryImpl>;
 }
-}
+} // namespace Mantid
 
 #endif /*MANTID_API_ALGORITHMFACTORY_H_*/

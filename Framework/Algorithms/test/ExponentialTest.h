@@ -1,12 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef EXPONENTIALTEST_H_
 #define EXPONENTIALTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include <cmath>
+#include <cxxtest/TestSuite.h>
 
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidAlgorithms/Exponential.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAlgorithms/Exponential.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -30,7 +36,7 @@ public:
     int sizex = 10;
     // Register the workspace in the data service
     MatrixWorkspace_sptr work_in1 =
-        WorkspaceCreationHelper::Create1DWorkspaceFib(sizex);
+        WorkspaceCreationHelper::create1DWorkspaceFib(sizex, true);
 
     AnalysisDataService::Instance().add("test_in11", work_in1);
     setError(work_in1);
@@ -56,7 +62,7 @@ public:
 
   void testEvents() {
     // evin has 0 events per bin in pixel0, 1 in pixel 1, 2 in pixel2, ...
-    EventWorkspace_sptr evin = WorkspaceCreationHelper::CreateEventWorkspace(
+    EventWorkspace_sptr evin = WorkspaceCreationHelper::createEventWorkspace(
                             5, 3, 1000, 0, 1, 4),
                         evout;
     AnalysisDataService::Instance().add("test_ev_exp", evin);

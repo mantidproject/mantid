@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MDALGORITHMS_CONVERTTODIFFRACTIONMDWORKSPACE_H_
 #define MANTID_MDALGORITHMS_CONVERTTODIFFRACTIONMDWORKSPACE_H_
 
@@ -46,9 +52,10 @@ private:
   void exec() override;
 
   template <class T>
-  void convertEventList(int workspaceIndex, DataObjects::EventList &el);
+  void convertEventList(int workspaceIndex, const API::SpectrumInfo &specInfo,
+                        DataObjects::EventList &el);
 
-  void convertSpectrum(int workspaceIndex);
+  void convertSpectrum(const API::SpectrumInfo &specInfo, int workspaceIndex);
 
   /// The input MatrixWorkspace
   API::MatrixWorkspace_sptr m_inWS;
@@ -92,7 +99,7 @@ private:
   coord_t *m_extentsMax;
 };
 
+} // namespace MDAlgorithms
 } // namespace Mantid
-} // namespace DataObjects
 
 #endif /* MANTID_MDALGORITHMS_CONVERTTODIFFRACTIONMDWORKSPACE_H_ */

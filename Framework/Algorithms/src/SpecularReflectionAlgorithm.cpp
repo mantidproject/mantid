@@ -1,13 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/SpecularReflectionAlgorithm.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
+#include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/ArrayBoundedValidator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidGeometry/Instrument/DetectorGroup.h"
-#include "MantidGeometry/Instrument/ReferenceFrame.h"
-#include "MantidGeometry/Instrument/ComponentHelper.h"
 
 #include <boost/make_shared.hpp>
 
@@ -52,7 +58,7 @@ void checkSpectrumNumbers(const std::vector<int> &spectrumNumbers,
     }
   }
 }
-}
+} // namespace
 
 namespace Mantid {
 namespace Algorithms {
@@ -101,9 +107,6 @@ void SpecularReflectionAlgorithm::initCommonProperties() {
                   "checking protects against non-sequential integers in which "
                   "spectrum numbers are not in {min, min+1, ..., max}");
 
-  setPropertySettings("SampleComponentName",
-                      make_unique<Kernel::EnabledWhenProperty>(
-                          "SpectrumNumbersOfGrouped", IS_NOT_DEFAULT));
   setPropertySettings("SpectrumNumbersOfDetectors",
                       make_unique<Kernel::EnabledWhenProperty>(
                           "SampleComponentName", IS_NOT_DEFAULT));
@@ -119,7 +122,7 @@ void SpecularReflectionAlgorithm::initCommonProperties() {
  */
 Mantid::Geometry::IComponent_const_sptr
 SpecularReflectionAlgorithm::getSurfaceSampleComponent(
-    Mantid::Geometry::Instrument_const_sptr inst) {
+    Mantid::Geometry::Instrument_const_sptr inst) const {
   std::string sampleComponent = "some-surface-holder";
   if (!isPropertyDefault("SampleComponentName")) {
     sampleComponent = this->getPropertyValue("SampleComponentName");
@@ -144,7 +147,7 @@ SpecularReflectionAlgorithm::getSurfaceSampleComponent(
  */
 boost::shared_ptr<const Mantid::Geometry::IComponent>
 SpecularReflectionAlgorithm::getDetectorComponent(
-    MatrixWorkspace_sptr workspace, const bool isPointDetector) {
+    MatrixWorkspace_sptr workspace, const bool isPointDetector) const {
   boost::shared_ptr<const IComponent> searchResult;
   if (!isPropertyDefault("SpectrumNumbersOfDetectors")) {
     const std::vector<int> spectrumNumbers =
@@ -154,7 +157,7 @@ SpecularReflectionAlgorithm::getDetectorComponent(
     checkSpectrumNumbers(spectrumNumbers, strictSpectrumChecking, g_log);
     auto specToWorkspaceIndex = workspace->getSpectrumToWorkspaceIndexMap();
     DetectorGroup_sptr allDetectors = boost::make_shared<DetectorGroup>();
-    bool warnIfMasked = true;
+    const auto &spectrumInfo = workspace->spectrumInfo();
     for (auto index : spectrumNumbers) {
       const size_t spectrumNumber{static_cast<size_t>(index)};
       auto it = specToWorkspaceIndex.find(index);
@@ -166,7 +169,10 @@ SpecularReflectionAlgorithm::getDetectorComponent(
       }
       const size_t workspaceIndex = it->second;
       auto detector = workspace->getDetector(workspaceIndex);
-      allDetectors->addDetector(detector, warnIfMasked);
+      if (spectrumInfo.isMasked(workspaceIndex))
+        g_log.warning() << "Adding a detector (ID:" << detector->getID()
+                        << ") that is flagged as masked.\n";
+      allDetectors->addDetector(detector);
     }
     searchResult = allDetectors;
   } else {
@@ -197,6 +203,36 @@ bool SpecularReflectionAlgorithm::isPropertyDefault(
     const std::string &propertyName) const {
   Property *property = this->getProperty(propertyName);
   return property->isDefault();
+}
+
+/**
+ * Calculate the twoTheta angle from the detector and sample locations.
+ * @return: twoTheta
+ */
+double SpecularReflectionAlgorithm::calculateTwoTheta() const {
+  MatrixWorkspace_sptr inWS = this->getProperty("InputWorkspace");
+
+  const std::string analysisMode = this->getProperty("AnalysisMode");
+
+  Instrument_const_sptr instrument = inWS->getInstrument();
+
+  IComponent_const_sptr detector =
+      this->getDetectorComponent(inWS, analysisMode == pointDetectorAnalysis);
+
+  IComponent_const_sptr sample = this->getSurfaceSampleComponent(instrument);
+
+  const V3D detSample = detector->getPos() - sample->getPos();
+
+  boost::shared_ptr<const ReferenceFrame> refFrame =
+      instrument->getReferenceFrame();
+
+  const double upoffset = refFrame->vecPointingUp().scalar_prod(detSample);
+  const double beamoffset =
+      refFrame->vecPointingAlongBeam().scalar_prod(detSample);
+
+  const double twoTheta = std::atan2(upoffset, beamoffset) * 180 / M_PI;
+
+  return twoTheta;
 }
 
 } // namespace Algorithms

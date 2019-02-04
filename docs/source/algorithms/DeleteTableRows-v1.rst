@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -38,8 +38,8 @@ Usage
     #delete a range of rows, you can also refer to the workspace using the name in the Workspace List
     DeleteTableRows("myTable",Rows=range(7,14)) 
 
-    print "The remaining values in the first column"
-    print t.column(0)
+    print("The remaining values in the first column")
+    print(t.column(0))
 
 Output:
 

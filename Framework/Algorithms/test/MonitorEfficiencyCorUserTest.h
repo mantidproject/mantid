@@ -1,13 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_MONITOREFFICIENCYCORUSERTEST_H_
 #define MANTID_ALGORITHMS_MONITOREFFICIENCYCORUSERTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/MonitorEfficiencyCorUser.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAlgorithms/MonitorEfficiencyCorUser.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::Algorithms::MonitorEfficiencyCorUser;
 
@@ -94,7 +100,7 @@ public:
 
 private:
   double m_Ei;
-  int m_monitor_counts;
+  double m_monitor_counts;
   const std::string m_inWSName, m_outWSName;
   MonitorEfficiencyCorUser alg;
 
@@ -115,10 +121,8 @@ private:
     }
 
     dataws->getAxis(0)->setUnit("TOF");
-    dataws->mutableRun().addProperty("Ei",
-                                     boost::lexical_cast<std::string>(m_Ei));
-    dataws->mutableRun().addProperty(
-        "monitor_counts", boost::lexical_cast<std::string>(m_monitor_counts));
+    dataws->mutableRun().addProperty("Ei", m_Ei);
+    dataws->mutableRun().addProperty("monitor_counts", m_monitor_counts);
 
     dataws->instrumentParameters().addString(
         dataws->getInstrument()->getChild(0).get(), "formula_mon_eff",
@@ -143,10 +147,8 @@ public:
         100000, 2000, false, false, true, "TOFTOF");
 
     input->getAxis(0)->setUnit("TOF");
-    input->mutableRun().addProperty("Ei",
-                                    boost::lexical_cast<std::string>(3.27));
-    input->mutableRun().addProperty("monitor_counts",
-                                    boost::lexical_cast<std::string>(1000));
+    input->mutableRun().addProperty("Ei", 3.27);
+    input->mutableRun().addProperty("monitor_counts", 1000.0);
 
     input->instrumentParameters().addString(
         input->getInstrument()->getChild(0).get(), "formula_mon_eff",

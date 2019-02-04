@@ -1,11 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadLLB.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/Progress.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Progress.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include <algorithm>
@@ -102,7 +110,7 @@ void LoadLLB::setInstrumentName(NeXus::NXEntry &entry) {
   m_instrumentName =
       m_loader.getStringFromNexusPath(entry, m_instrumentPath + "/name");
 
-  if (m_instrumentName == "") {
+  if (m_instrumentName.empty()) {
     throw std::runtime_error(
         "Cannot read the instrument name from the Nexus file!");
   }
@@ -171,7 +179,7 @@ void LoadLLB::loadDataIntoTheWorkSpace(NeXus::NXEntry &entry) {
   setTimeBinning(m_localWorkspace->mutableX(0),
                  calculatedDetectorElasticPeakPosition, m_channelWidth);
 
-  Progress progress(this, 0, 1, m_numberOfTubes * m_numberOfPixelsPerTube);
+  Progress progress(this, 0.0, 1.0, m_numberOfTubes * m_numberOfPixelsPerTube);
   size_t spec = 0;
   for (size_t i = 0; i < m_numberOfTubes; ++i) {
     for (size_t j = 0; j < m_numberOfPixelsPerTube; ++j) {
@@ -229,8 +237,8 @@ int LoadLLB::getDetectorElasticPeakPosition(const NeXus::NXFloat &data) {
 void LoadLLB::setTimeBinning(HistogramX &histX, int elasticPeakPosition,
                              double channelWidth) {
 
-  double l1 = m_loader.getL1(m_localWorkspace);
-  double l2 = m_loader.getL2(m_localWorkspace);
+  double l1 = m_localWorkspace->spectrumInfo().l1();
+  double l2 = m_localWorkspace->spectrumInfo().l2(1);
 
   double theoreticalElasticTOF = (m_loader.calculateTOF(l1, m_wavelength) +
                                   m_loader.calculateTOF(l2, m_wavelength)) *

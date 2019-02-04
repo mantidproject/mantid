@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<testconfig version="1.0">
-<information>
-<summary>Tests for the VatesSimpleGui</summary>
-<description>These are a collection of tests that excercise the standalone version of the Vates Simple User Interface.</description>
-</information>
-</testconfig>

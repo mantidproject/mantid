@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name, no-init
 from __future__ import (absolute_import, division, print_function)
 import os
@@ -28,11 +34,12 @@ def export_masks(ws,fileName='',returnMasksOnly=False):
     else:
         pws = ws
 
-    ws_name=pws.getName()
+    ws_name=pws.name()
     nhist = pws.getNumberHistograms()
 
     no_detectors = 0
     masks = []
+    specInfo = pws.spectrumInfo()
     for i in range(nhist):
         # set provisional spectra ID
         ms = i+1
@@ -46,14 +53,13 @@ def export_masks(ws,fileName='',returnMasksOnly=False):
             masks.append(ms)
             continue
         try:
-            det = pws.getDetector(i)
+            if specInfo.isMasked(i):
+                masks.append(ms)
 #pylint: disable=W0703
         except Exception:
             no_detectors = no_detectors +1
             masks.append(ms)
             continue
-        if det.isMasked():
-            masks.append(ms)
 
     filename=''
     if len(fileName)==0 :
@@ -164,6 +170,9 @@ class ExportSpectraMask(PythonAlgorithm):
         """ Return category
         """
         return "DataHandling\\Masking"
+
+    def seeAlso(self):
+        return [ "SaveMask","ExportSpectraMask" ]
 
     def name(self):
         """ Return name

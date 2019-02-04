@@ -9,81 +9,85 @@ Description          : Preferences dialog
 ***************************************************************************/
 
 /***************************************************************************
-*                                                                         *
-*  This program is free software; you can redistribute it and/or modify   *
-*  it under the terms of the GNU General Public License as published by   *
-*  the Free Software Foundation; either version 2 of the License, or      *
-*  (at your option) any later version.                                    *
-*                                                                         *
-*  This program is distributed in the hope that it will be useful,        *
-*  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
-*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
-*  GNU General Public License for more details.                           *
-*                                                                         *
-*   You should have received a copy of the GNU General Public License     *
-*   along with this program; if not, write to the Free Software           *
-*   Foundation, Inc., 51 Franklin Street, Fifth Floor,                    *
-*   Boston, MA  02110-1301  USA                                           *
-*                                                                         *
-***************************************************************************/
+ *                                                                         *
+ *  This program is free software; you can redistribute it and/or modify   *
+ *  it under the terms of the GNU General Public License as published by   *
+ *  the Free Software Foundation; either version 2 of the License, or      *
+ *  (at your option) any later version.                                    *
+ *                                                                         *
+ *  This program is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *  GNU General Public License for more details.                           *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the Free Software           *
+ *   Foundation, Inc., 51 Franklin Street, Fifth Floor,                    *
+ *   Boston, MA  02110-1301  USA                                           *
+ *                                                                         *
+ ***************************************************************************/
 #include "ConfigDialog.h"
 #include "ApplicationWindow.h"
-#include "MultiLayer.h"
-#include "Graph.h"
-#include "Matrix.h"
-#include "ColorButton.h"
 #include "ColorBox.h"
-#include "pixmaps.h"
-#include "MantidQtMantidWidgets/DoubleSpinBox.h"
-#include "SendToProgramDialog.h"
+#include "ColorButton.h"
+#include "Graph.h"
 #include "Mantid/MantidUI.h"
-#include "MantidQtMantidWidgets/FitPropertyBrowser.h"
+#include "MantidQtWidgets/Common/DoubleSpinBox.h"
+#include "MantidQtWidgets/Common/FitPropertyBrowser.h"
+#include "Matrix.h"
+#include "MultiLayer.h"
+#include "SendToProgramDialog.h"
+#include <MantidQtWidgets/Common/pixmaps.h>
 
-#include <QLocale>
-#include <QPushButton>
-#include <QLabel>
-#include <QLineEdit>
-#include <QGridLayout>
-#include <QGroupBox>
+#include <QApplication>
+#include <QComboBox>
+#include <QDir>
+#include <QFileDialog>
 #include <QFont>
 #include <QFontDialog>
-#include <QTabWidget>
-#include <QTreeWidget>
-#include <QStackedWidget>
-#include <QWidget>
-#include <QComboBox>
-#include <QSpinBox>
-#include <QRadioButton>
-#include <QStyleFactory>
-#include <QRegExp>
-#include <QMessageBox>
-#include <QTranslator>
-#include <QApplication>
-#include <QDir>
-#include <QPixmap>
-#include <QHBoxLayout>
-#include <QVBoxLayout>
-#include <QListWidget>
 #include <QFontMetrics>
-#include <QFileDialog>
-#include <QRegExp>
+#include <QGridLayout>
+#include <QGroupBox>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QLineEdit>
+#include <QListWidget>
+#include <QLocale>
+#include <QMessageBox>
 #include <QMouseEvent>
+#include <QPixmap>
+#include <QPushButton>
+#include <QRadioButton>
+#include <QRegExp>
+#include <QSpinBox>
+#include <QStackedWidget>
 #include <QStringList>
+#include <QStyleFactory>
+#include <QTabWidget>
+#include <QTranslator>
+#include <QTreeWidget>
+#include <QVBoxLayout>
+#include <QWidget>
 
-#include "MantidKernel/ConfigService.h"
-#include "MantidKernel/FacilityInfo.h"
+#include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IBackgroundFunction.h"
-#include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/IPeakFunction.h"
-#include "MantidQtMantidWidgets/InstrumentSelector.h"
-#include "MantidQtAPI/MdConstants.h"
-#include "MantidQtAPI/MdSettings.h"
-#include "MantidQtAPI/MdPlottingCmapsProvider.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/FacilityInfo.h"
+#include "MantidQtWidgets/Common/InstrumentSelector.h"
+#include "MantidQtWidgets/Common/MdConstants.h"
+#include "MantidQtWidgets/Common/MdSettings.h"
+#include "MdPlottingCmapsProvider.h"
 
 #include <limits>
 
+using namespace MantidQt::API;
 using Mantid::Kernel::ConfigService;
+
+namespace {
+Mantid::Kernel::Logger g_log("ConfigDialog");
+}
 
 ConfigDialog::ConfigDialog(QWidget *parent, Qt::WFlags fl)
     : QDialog(parent, fl) {
@@ -665,8 +669,8 @@ void ConfigDialog::initAppPage() {
 }
 
 /**
-* Configure a Mantid page on the config dialog
-*/
+ * Configure a Mantid page on the config dialog
+ */
 void ConfigDialog::initMantidPage() {
   mtdTabWidget = new QTabWidget(generalDialog);
   mtdTabWidget->setUsesScrollButtons(false);
@@ -699,7 +703,7 @@ void ConfigDialog::initMantidPage() {
   const std::string ignoreParaViewProperty = "paraview.ignore";
   bool ignoreParaView =
       cfgSvc.hasProperty(ignoreParaViewProperty) &&
-      bool(atoi(cfgSvc.getString(ignoreParaViewProperty).c_str()));
+      (std::stoi(cfgSvc.getString(ignoreParaViewProperty)) != 0);
   ckIgnoreParaView->setChecked(ignoreParaView);
   grid->addWidget(ckIgnoreParaView, 3, 0);
 
@@ -715,7 +719,7 @@ void ConfigDialog::initMantidPage() {
 
   // Populate boxes
   auto faclist = cfgSvc.getFacilityNames();
-  for (auto it : faclist) {
+  for (const auto &it : faclist) {
     facility->addItem(QString::fromStdString(it));
   }
 
@@ -734,6 +738,61 @@ void ConfigDialog::initMantidPage() {
   initCurveFittingTab();
   initSendToProgramTab();
   initMantidOptionsTab();
+  initProjectRecoveryTab();
+}
+
+void ConfigDialog::initProjectRecoveryTab() {
+  projectRecovery = new QWidget();
+  QVBoxLayout *projRecLayout = new QVBoxLayout(projectRecovery);
+  QGroupBox *frame = new QGroupBox();
+  projRecLayout->addWidget(frame);
+  QGridLayout *grid = new QGridLayout(frame);
+  mtdTabWidget->addTab(projectRecovery, "Project Recovery");
+
+  ckEnableProjectRecovery = new QCheckBox("Enable Project Recovery");
+  ckEnableProjectRecovery->setChecked(
+      ConfigService::Instance().getString("projectRecovery.enabled") == "true");
+  ckEnableProjectRecovery->setToolTip(
+      "Requires a restart of mantid to take effect");
+  grid->addWidget(ckEnableProjectRecovery, 0, 0);
+
+  lblTimeBetweenCheckpoints = new QLabel("Time between recovery checkpoints");
+  lblTimeBetweenCheckpoints->setToolTip(
+      "Requires a restart of mantid to take effect");
+  grid->addWidget(lblTimeBetweenCheckpoints, 1, 0);
+  boxTimeBetweenCheckpoints = new QSpinBox();
+  boxTimeBetweenCheckpoints->setRange(1, 1000);
+  boxTimeBetweenCheckpoints->setSingleStep(1);
+  auto secondsBetween = 60;
+  try {
+    secondsBetween = std::stoi(
+        ConfigService::Instance().getString("projectRecovery.secondsBetween"));
+  } catch (...) {
+    g_log.warning("projectRecovery.secondsBetween is set to a none number "
+                  "value in the properties file");
+  }
+  boxTimeBetweenCheckpoints->setValue(secondsBetween);
+  boxTimeBetweenCheckpoints->setToolTip(
+      "Requires a restart of mantid to take effect");
+  grid->addWidget(boxTimeBetweenCheckpoints, 1, 1);
+
+  lblNumCheckpoints = new QLabel("Total number of checkpoints to be made");
+  lblNumCheckpoints->setToolTip("Requires a restart of mantid to take effect");
+  grid->addWidget(lblNumCheckpoints, 2, 0);
+  boxNumCheckpoint = new QSpinBox();
+  boxNumCheckpoint->setRange(1, 10);
+  boxNumCheckpoint->setSingleStep(1);
+  auto numCheckpoint = 5;
+  try {
+    numCheckpoint = std::stoi(ConfigService::Instance().getString(
+        "projectRecovery.numberOfCheckpoints"));
+  } catch (...) {
+    g_log.warning("projectRecovery.numberOfCheckpoints is set to a none number "
+                  "value in the properties file");
+  }
+  boxNumCheckpoint->setValue(numCheckpoint);
+  boxNumCheckpoint->setToolTip("Requires a restart of mantid to take effect");
+  grid->addWidget(boxNumCheckpoint, 2, 1);
 }
 
 /**
@@ -795,7 +854,7 @@ void ConfigDialog::initMdPlottingGeneralTab() {
   generalTabLayout->addWidget(label);
 
   // Set the color maps
-  MantidQt::API::MdPlottingCmapsProvider mdPlottingCmapsProvider;
+  MdPlottingCmapsProvider mdPlottingCmapsProvider;
   QStringList colorMapNames;
   QStringList colorMapFiles;
   mdPlottingCmapsProvider.getColorMapsForMdPlotting(colorMapNames,
@@ -853,6 +912,15 @@ void ConfigDialog::initMdPlottingVsiTab() {
   grid->addWidget(lblVsiDefaultBackground, 1, 0);
   grid->addWidget(vsiDefaultBackground, 1, 1);
 
+  // Axes Color
+  vsiAxesColor = new QGroupBox();
+  vsiAxesColor->setCheckable(true);
+  vsiAxesColor->setChecked(m_mdSettings.getUserSettingAutoColorAxes());
+  vsiAxesColor->setTitle(tr("Automatic axes color selection"));
+  vsiAxesColor->setToolTip(
+      tr("Automatically select a contrasting color for all axes"));
+  vsiTabLayout->addWidget(vsiAxesColor);
+
   const QColor backgroundColor = m_mdSettings.getUserSettingBackgroundColor();
   vsiDefaultBackground->setColor(backgroundColor);
 
@@ -869,7 +937,7 @@ void ConfigDialog::initMdPlottingVsiTab() {
 
   // Set the color map selection for the VSI
   QStringList maps;
-  MantidQt::API::MdPlottingCmapsProvider mdPlottingCmapsProvider;
+  MdPlottingCmapsProvider mdPlottingCmapsProvider;
   mdPlottingCmapsProvider.getColorMapsForVSI(maps);
 
   MantidQt::API::MdConstants mdConstants;
@@ -924,7 +992,7 @@ void ConfigDialog::changeUsageGeneralMdColorMap() {
 
 /**
  * Handle a change of the Last Session selection.
-  * @param isDefaultColorMapVsiChecked The state of the vsi default checkbox.
+ * @param isDefaultColorMapVsiChecked The state of the vsi default checkbox.
  */
 void ConfigDialog::changeUsageLastSession() {
   // Set the color map of the VSI default
@@ -936,8 +1004,8 @@ void ConfigDialog::changeUsageLastSession() {
 }
 
 /**
-* Configure a Mantid Options page on the config dialog
-*/
+ * Configure a Mantid Options page on the config dialog
+ */
 void ConfigDialog::initMantidOptionsTab() {
   mantidOptionsPage = new QWidget();
   mtdTabWidget->addTab(mantidOptionsPage, "Options");
@@ -951,14 +1019,12 @@ void ConfigDialog::initMantidOptionsTab() {
       new QCheckBox("Re-use plot instances for different types of plots");
   m_reusePlotInstances->setChecked(false);
   grid->addWidget(m_reusePlotInstances, 0, 0);
-  QString setting = QString::fromStdString(
-      Mantid::Kernel::ConfigService::Instance().getString(
-          "MantidOptions.ReusePlotInstances"));
-  if (!setting.compare("On")) {
-    m_reusePlotInstances->setChecked(true);
-  } else if (!setting.compare("Off")) {
-    m_reusePlotInstances->setChecked(false);
-  }
+
+  bool setting = Mantid::Kernel::ConfigService::Instance()
+                     .getValue<bool>("MantidOptions.ReusePlotInstances")
+                     .get_value_or(false);
+
+  m_reusePlotInstances->setChecked(setting);
   m_reusePlotInstances->setToolTip("If on, the same plot instance will be "
                                    "re-used for every of the different plots "
                                    "available in the workspaces window "
@@ -969,14 +1035,12 @@ void ConfigDialog::initMantidOptionsTab() {
   m_invisibleWorkspaces->setChecked(false);
   grid->addWidget(m_invisibleWorkspaces, 1, 0);
 
-  setting = QString::fromStdString(
-      Mantid::Kernel::ConfigService::Instance().getString(
-          "MantidOptions.InvisibleWorkspaces"));
-  if (!setting.compare("1")) {
-    m_invisibleWorkspaces->setChecked(true);
-  } else if (!setting.compare("0")) {
-    m_invisibleWorkspaces->setChecked(false);
-  }
+  bool invisibleWsSetting =
+      Mantid::Kernel::ConfigService::Instance()
+          .getValue<bool>("MantidOptions.InvisibleWorkspaces")
+          .get_value_or(false);
+
+  m_invisibleWorkspaces->setChecked(invisibleWsSetting);
 
   // categories tree widget
   treeCategories = new QTreeWidget(frame);
@@ -994,14 +1058,12 @@ void ConfigDialog::initMantidOptionsTab() {
   m_useOpenGL->setChecked(true);
   grid->addWidget(m_useOpenGL, 4, 0);
 
-  setting = QString::fromStdString(
-                Mantid::Kernel::ConfigService::Instance().getString(
-                    "MantidOptions.InstrumentView.UseOpenGL")).toUpper();
-  if (setting == "ON") {
-    m_useOpenGL->setChecked(true);
-  } else {
-    m_useOpenGL->setChecked(false);
-  }
+  bool openglSetting =
+      Mantid::Kernel::ConfigService::Instance()
+          .getValue<bool>("MantidOptions.InstrumentView.UseOpenGL")
+          .get_value_or(false);
+
+  m_useOpenGL->setChecked(openglSetting);
 }
 
 void ConfigDialog::initSendToProgramTab() {
@@ -1140,7 +1202,8 @@ void ConfigDialog::deleteDialog() {
     int status = QMessageBox::question(
         this, tr("Delete save options?"),
         tr("Are you sure you want to delete \nthe (%1) selected save "
-           "option(s)?").arg(selectedItems.size()),
+           "option(s)?")
+            .arg(selectedItems.size()),
         QMessageBox::Yes | QMessageBox::Default,
         QMessageBox::No | QMessageBox::Escape, QMessageBox::NoButton);
 
@@ -1187,8 +1250,8 @@ void ConfigDialog::populateProgramTree() {
 
 void ConfigDialog::updateProgramTree() {
   // Store into a map ready to go into config service when apply is clicked
-  for (const auto itr : m_sendToSettings) {
-    // creating the map of kvps needs to happen first as createing the item
+  for (const auto &itr : m_sendToSettings) {
+    // creating the map of kvps needs to happen first as creating the item
     // requires them.
     std::map<std::string, std::string> programKeysAndDetails = itr.second;
 
@@ -1213,7 +1276,7 @@ void ConfigDialog::updateChildren(
     QTreeWidgetItem *program) {
   program->takeChildren();
   // get the current program's (itr) keys and values (pItr)
-  for (const auto pItr : programKeysAndDetails) {
+  for (const auto &pItr : programKeysAndDetails) {
     QTreeWidgetItem *item = new QTreeWidgetItem(program);
     QString itemText = QString("   ")
                            .append(QString::fromStdString(pItr.first))
@@ -1232,7 +1295,7 @@ void ConfigDialog::updateSendToTab() {
   std::vector<std::string> programNames =
       cfgSvc.getKeys("workspace.sendto.name");
 
-  for (const auto itr : m_sendToSettings) {
+  for (const auto &itr : m_sendToSettings) {
     for (size_t i = 0; i < programNames.size(); ++i) {
       if (programNames[i] == itr.first) {
         // The selected program hasn't been deleted so set to blank string (all
@@ -1245,7 +1308,7 @@ void ConfigDialog::updateSendToTab() {
 
     std::map<std::string, std::string> programKeysAndDetails = itr.second;
 
-    for (const auto pItr : programKeysAndDetails) {
+    for (const auto &pItr : programKeysAndDetails) {
       if (pItr.second != "")
         cfgSvc.setString("workspace.sendto." + itr.first + "." + pItr.first,
                          pItr.second);
@@ -1267,8 +1330,8 @@ void ConfigDialog::updateSendToTab() {
   }
 }
 
-typedef std::map<std::string, bool> categoriesType;
-typedef QMap<QString, QTreeWidgetItem *> widgetMap;
+using categoriesType = std::map<std::string, bool>;
+using widgetMap = QMap<QString, QTreeWidgetItem *>;
 
 void ConfigDialog::refreshTreeCategories() {
   treeCategories->clear();
@@ -1279,7 +1342,7 @@ void ConfigDialog::refreshTreeCategories() {
   widgetMap categories; // Keeps track of categories added to the tree
 
   // Loop over all categories loaded into Mantid
-  for (const auto i : categoryMap) {
+  for (const auto &i : categoryMap) {
 
     QString catNames = QString::fromStdString(i.first);
     // Start recursion down building tree from names
@@ -1585,11 +1648,6 @@ void ConfigDialog::initCurveFittingTab() {
   findPeaksTolerance->setMaximum(1000000);
   grid->addWidget(findPeaksTolerance, 4, 1);
 
-  grid->addWidget(new QLabel(tr("Peak Radius (in FWHM)")), 5, 0);
-  peakRadius = new QSpinBox();
-  peakRadius->setMaximum(std::numeric_limits<int>::max());
-  grid->addWidget(peakRadius, 5, 1);
-
   grid->addWidget(new QLabel(tr("Double property decimals")), 6, 0);
   decimals = new QSpinBox();
   grid->addWidget(decimals, 6, 1);
@@ -1672,15 +1730,6 @@ void ConfigDialog::initCurveFittingTab() {
     findPeaksTolerance->setValue(setting.toInt());
   } else {
     findPeaksTolerance->setValue(4);
-  }
-
-  setting = QString::fromStdString(
-      Mantid::Kernel::ConfigService::Instance().getString(
-          "curvefitting.peakRadius"));
-  if (!setting.isEmpty()) {
-    peakRadius->setValue(setting.toInt());
-  } else {
-    peakRadius->setValue(5);
   }
 
   decimals->setValue(app->mantidUI->fitFunctionBrowser()->getDecimals());
@@ -1972,7 +2021,7 @@ void ConfigDialog::initFittingPage() {
 
   lblPeaksColor = new QLabel();
   multiPeakLayout->addWidget(lblPeaksColor);
-  boxPeaksColor = new ColorBox(0);
+  boxPeaksColor = new ColorBox(nullptr);
   boxPeaksColor->setCurrentIndex(app->peakCurvesColor);
   multiPeakLayout->addWidget(boxPeaksColor);
 
@@ -2338,25 +2387,25 @@ void ConfigDialog::languageChange() {
   boxCurveStyle->addItem(getQPixmap("hBars_xpm"), tr(" Horizontal Bars"));
 
   int style = app->defaultCurveStyle;
-  if (style == Graph::Line)
+  if (style == GraphOptions::Line)
     boxCurveStyle->setCurrentIndex(0);
-  else if (style == Graph::Scatter)
+  else if (style == GraphOptions::Scatter)
     boxCurveStyle->setCurrentIndex(1);
-  else if (style == Graph::LineSymbols)
+  else if (style == GraphOptions::LineSymbols)
     boxCurveStyle->setCurrentIndex(2);
-  else if (style == Graph::VerticalDropLines)
+  else if (style == GraphOptions::VerticalDropLines)
     boxCurveStyle->setCurrentIndex(3);
-  else if (style == Graph::Spline)
+  else if (style == GraphOptions::Spline)
     boxCurveStyle->setCurrentIndex(4);
-  else if (style == Graph::VerticalSteps)
+  else if (style == GraphOptions::VerticalSteps)
     boxCurveStyle->setCurrentIndex(5);
-  else if (style == Graph::HorizontalSteps)
+  else if (style == GraphOptions::HorizontalSteps)
     boxCurveStyle->setCurrentIndex(6);
-  else if (style == Graph::Area)
+  else if (style == GraphOptions::Area)
     boxCurveStyle->setCurrentIndex(7);
-  else if (style == Graph::VerticalBars)
+  else if (style == GraphOptions::VerticalBars)
     boxCurveStyle->setCurrentIndex(8);
-  else if (style == Graph::HorizontalBars)
+  else if (style == GraphOptions::HorizontalBars)
     boxCurveStyle->setCurrentIndex(9);
 
   // plots 3D
@@ -2446,9 +2495,10 @@ void ConfigDialog::languageChange() {
 
   mdPlottingGeneralFrame->setTitle(
       "Use same default color map for Slice Viewer and VSI");
-  mdPlottingGeneralFrame->setToolTip("The specifed color map will be available "
-                                     "for the Slice Viewer and the VSI when a "
-                                     "new instance of either is started.");
+  mdPlottingGeneralFrame->setToolTip(
+      "The specified color map will be available "
+      "for the Slice Viewer and the VSI when a "
+      "new instance of either is started.");
 }
 
 void ConfigDialog::accept() {
@@ -2469,8 +2519,8 @@ void ConfigDialog::apply() {
   sep.replace(tr("SPACE"), " ");
   sep.replace("\\s", " ");
 
-  if (sep.contains(QRegExp("[0-9.eE+-]")) != 0) {
-    QMessageBox::warning(0, tr("MantidPlot - Import options error"),
+  if (sep.contains(QRegExp("[0-9.eE+-]"))) {
+    QMessageBox::warning(nullptr, tr("MantidPlot - Import options error"),
                          tr("The separator must not contain the following "
                             "characters: 0-9eE.+-"));
     return;
@@ -2595,9 +2645,10 @@ void ConfigDialog::apply() {
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
     QList<MdiSubWindow *> windows = app->windowsList();
     foreach (MdiSubWindow *w, windows) {
+      auto oldLocale = w->locale();
       w->setLocale(locale);
       if (auto table = dynamic_cast<Table *>(w))
-        table->updateDecimalSeparators();
+        table->updateDecimalSeparators(oldLocale);
       else if (auto matrix = dynamic_cast<Matrix *>(w))
         matrix->resetView();
     }
@@ -2691,6 +2742,7 @@ void ConfigDialog::apply() {
   updateDirSearchSettings();
   updateCurveFitSettings();
   updateMantidOptionsTab();
+  updateProjectRecovery();
   updateSendToTab();
 
   try {
@@ -2703,6 +2755,20 @@ void ConfigDialog::apply() {
 
   // MD Plotting
   updateMdPlottingSettings();
+  emit app->configModified();
+}
+
+void ConfigDialog::updateProjectRecovery() {
+  auto &cfgSvc = Mantid::Kernel::ConfigService::Instance();
+  if (ckEnableProjectRecovery->isChecked()) {
+    cfgSvc.setString("projectRecovery.enabled", "true");
+  } else {
+    cfgSvc.setString("projectRecovery.enabled", "false");
+  }
+  cfgSvc.setString("projectRecovery.secondsBetween",
+                   std::to_string(boxTimeBetweenCheckpoints->value()));
+  cfgSvc.setString("projectRecovery.numberOfCheckpoints",
+                   std::to_string(boxNumCheckpoint->value()));
 }
 
 /**
@@ -2721,8 +2787,9 @@ void ConfigDialog::updateMdPlottingSettings() {
   if (mdPlottingGeneralColorMap) {
     QString generalTabColorMapName = mdPlottingGeneralColorMap->currentText();
     QString generalTabColorMapFile =
-        mdPlottingGeneralColorMap->itemData(mdPlottingGeneralColorMap
-                                                ->currentIndex()).toString();
+        mdPlottingGeneralColorMap
+            ->itemData(mdPlottingGeneralColorMap->currentIndex())
+            .toString();
 
     m_mdSettings.setGeneralMdColorMap(generalTabColorMapName,
                                       generalTabColorMapFile);
@@ -2733,6 +2800,10 @@ void ConfigDialog::updateMdPlottingSettings() {
   // Read the Vsi color map
   if (vsiDefaultColorMap) {
     m_mdSettings.setUserSettingColorMap(vsiDefaultColorMap->currentText());
+  }
+
+  if (vsiAxesColor) {
+    m_mdSettings.setUserSettingAutoColorAxes(vsiAxesColor->isChecked());
   }
 
   // Read if the usage of the last color map and background color should be
@@ -2805,9 +2876,6 @@ void ConfigDialog::updateCurveFitSettings() {
   setting = QString::number(findPeaksTolerance->value()).toStdString();
   cfgSvc.setString("curvefitting.findPeaksTolerance", setting);
 
-  setting = QString::number(peakRadius->value()).toStdString();
-  cfgSvc.setString("curvefitting.peakRadius", setting);
-
   app->mantidUI->fitFunctionBrowser()->setDecimals(decimals->value());
 }
 
@@ -2873,7 +2941,7 @@ QStringList ConfigDialog::buildHiddenCategoryString(QTreeWidgetItem *parent) {
     }
 
     QStringList childResults = buildHiddenCategoryString(item);
-    for (const auto it : childResults) {
+    for (const auto &it : childResults) {
       results.append(item->text(0) + "\\" + it);
     }
   }
@@ -2884,34 +2952,34 @@ int ConfigDialog::curveStyle() {
   int style = 0;
   switch (boxCurveStyle->currentIndex()) {
   case 0:
-    style = Graph::Line;
+    style = GraphOptions::Line;
     break;
   case 1:
-    style = Graph::Scatter;
+    style = GraphOptions::Scatter;
     break;
   case 2:
-    style = Graph::LineSymbols;
+    style = GraphOptions::LineSymbols;
     break;
   case 3:
-    style = Graph::VerticalDropLines;
+    style = GraphOptions::VerticalDropLines;
     break;
   case 4:
-    style = Graph::Spline;
+    style = GraphOptions::Spline;
     break;
   case 5:
-    style = Graph::VerticalSteps;
+    style = GraphOptions::VerticalSteps;
     break;
   case 6:
-    style = Graph::HorizontalSteps;
+    style = GraphOptions::HorizontalSteps;
     break;
   case 7:
-    style = Graph::Area;
+    style = GraphOptions::Area;
     break;
   case 8:
-    style = Graph::VerticalBars;
+    style = GraphOptions::VerticalBars;
     break;
   case 9:
-    style = Graph::HorizontalBars;
+    style = GraphOptions::HorizontalBars;
     break;
   }
   return style;
@@ -3106,7 +3174,7 @@ void ConfigDialog::chooseTranslationsFolder() {
   QFileInfo tfi(app->d_translations_folder);
   QString dir = QFileDialog::getExistingDirectory(
       this, tr("Choose the location of the MantidPlot translations folder!"),
-      tfi.dir().absolutePath(), 0 /**QFileDialog::ShowDirsOnly*/);
+      tfi.dir().absolutePath(), nullptr /**QFileDialog::ShowDirsOnly*/);
 
   if (!dir.isEmpty()) {
     app->d_translations_folder = dir;
@@ -3131,7 +3199,7 @@ void ConfigDialog::chooseHelpFolder() {
 void ConfigDialog::addPythonScriptsDirs() {
   QString dir = QFileDialog::getExistingDirectory(
       this, tr("Add a python scripts directory"), "",
-      0 /**QFileDialog::ShowDirsOnly*/);
+      nullptr /**QFileDialog::ShowDirsOnly*/);
   if (!dir.isEmpty()) {
     QString dirs = lePythonScriptsDirs->text();
     if (!dirs.isEmpty()) {
@@ -3145,7 +3213,7 @@ void ConfigDialog::addPythonScriptsDirs() {
 void ConfigDialog::addPythonPluginDirs() {
   QString dir = QFileDialog::getExistingDirectory(
       this, tr("Add a python extension directory"), "",
-      0 /**QFileDialog::ShowDirsOnly*/);
+      nullptr /**QFileDialog::ShowDirsOnly*/);
   if (!dir.isEmpty()) {
     QString dirs = lePythonPluginsDirs->text();
     if (!dirs.isEmpty()) {
@@ -3158,7 +3226,7 @@ void ConfigDialog::addPythonPluginDirs() {
 
 void ConfigDialog::addInstrumentDir() {
   QString dir = QFileDialog::getExistingDirectory(
-      this, tr("Select new instrument definition directory"), "", 0);
+      this, tr("Select new instrument definition directory"), "", nullptr);
   if (!dir.isEmpty()) {
     leInstrumentDir->setText(dir);
   }

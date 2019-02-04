@@ -1,10 +1,16 @@
-#include "MantidAPI/FileProperty.h"
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/PatchBBY.h"
-#include "MantidKernel/PropertyWithValue.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/PropertyWithValue.h"
 
-#include <Poco/TemporaryFile.h>
 #include <Poco/String.h>
+#include <Poco/TemporaryFile.h>
 
 namespace Mantid {
 namespace DataHandling {
@@ -115,10 +121,7 @@ void PatchBBY::init() {
 
     case TYPE_STR:
       if (std::strcmp(itr->Name, "FrameSource") == 0) {
-        std::vector<std::string> keys;
-        keys.emplace_back("");
-        keys.emplace_back(EXTERNAL);
-        keys.emplace_back(INTERNAL);
+        std::array<std::string, 3> keys = {{"", EXTERNAL, INTERNAL}};
         declareProperty(
             Kernel::make_unique<Kernel::PropertyWithValue<std::string>>(
                 itr->Name, "",
@@ -161,7 +164,7 @@ void PatchBBY::exec() {
         hdfFiles++;
       else if (itr->rfind(".bin") == len - 4)
         binFiles++;
-      else if (itr->compare(HistoryStr) == 0) {
+      else if (*itr == HistoryStr) {
         if (std::distance(itr, files.end()) != 1)
           throw std::invalid_argument(
               "invalid BBY file (history has to be at the end)");
@@ -301,7 +304,7 @@ void PatchBBY::exec() {
   }
 
   std::string logContentNew = logContentNewBuffer.str();
-  if (logContentNew.size() == 0)
+  if (logContentNew.empty())
     throw std::invalid_argument("nothing to patch");
 
   // merge log content
@@ -314,5 +317,5 @@ void PatchBBY::exec() {
     throw std::runtime_error("unable to patch");
 }
 
-} // DataHandling
-} // Mantid
+} // namespace DataHandling
+} // namespace Mantid

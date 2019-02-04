@@ -1,8 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/Algorithms/CalculateChiSquared.h"
-#include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/Column.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidCurveFitting/Functions/ChebfunBase.h"
 #include "MantidCurveFitting/GSLJacobian.h"
 
@@ -53,7 +59,7 @@ void calcChiSquared(const API::IFunction &fun, size_t nParams,
     dof = 1.0;
   }
 }
-}
+} // namespace
 
 //----------------------------------------------------------------------------------------------
 
@@ -96,8 +102,9 @@ void CalculateChiSquared::initConcrete() {
                   "number of  data points).",
                   Direction::Output);
   declareProperty("Output", "", "A base name for output workspaces.");
-  declareProperty("Weighted", false, "Option to use the weighted chi squared "
-                                     "in error estimation. Default is false.");
+  declareProperty("Weighted", false,
+                  "Option to use the weighted chi squared "
+                  "in error estimation. Default is false.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -117,7 +124,7 @@ void CalculateChiSquared::execConcrete() {
   // Get the number of free fitting parameters
   size_t nParams = 0;
   for (size_t i = 0; i < m_function->nParams(); ++i) {
-    if (!m_function->isFixed(i))
+    if (m_function->isActive(i))
       nParams += 1;
   }
 
@@ -306,7 +313,7 @@ private:
   /// The data variance.
   double m_sigma2;
 };
-}
+} // namespace
 
 //----------------------------------------------------------------------------------------------
 /// Examine the chi squared as a function of fitting parameters and estimate
@@ -658,7 +665,7 @@ void CalculateChiSquared::estimateErrors() {
 /// Temporary unfix any fixed parameters.
 void CalculateChiSquared::unfixParameters() {
   for (size_t i = 0; i < m_function->nParams(); ++i) {
-    if (m_function->isFixed(i)) {
+    if (!m_function->isActive(i)) {
       m_function->unfix(i);
       m_fixedParameters.push_back(i);
     }

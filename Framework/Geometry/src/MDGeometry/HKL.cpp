@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/MDGeometry/HKL.h"
 #include <stdexcept>
 
@@ -8,7 +14,7 @@ void checkUnitCompatibility(Mantid::Kernel::MDUnit const *const unit) {
     throw std::invalid_argument("HKL unit must be a QUnit");
   }
 }
-}
+} // namespace
 
 namespace Mantid {
 namespace Geometry {

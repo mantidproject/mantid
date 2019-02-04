@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -58,10 +58,11 @@ Usage
   infotablews = mtd["LaB6_InfoTable"]
   dataws = mtd["PG3_LaB6_Bank3"]
 
-  print "LaB6: A = B = C = %.5f, Alpha = Beta = Gamma = %.5f" % (infotablews.cell(0, 1), infotablews.cell(5, 1))
+  print("LaB6: A = B = C = {:.5f}, Alpha = Beta = Gamma = {:.5f}".format(infotablews.column('Value')[infotablews.column('Name').index('A')],
+                                                                         infotablews.column('Value')[infotablews.column('Name').index('Alpha')]))
 
   maxy = max(dataws.readY(1))
-  print "Maximum peak value (calculated) = %.5f" % (maxy)
+  print("Maximum peak value (calculated) = {:.5f}".format(maxy))
 
 
 .. testcleanup:: ExLoadPrf
@@ -89,15 +90,15 @@ Output:
   fakedataws = mtd["Fake"]
   reftablews = mtd["LaB6_Ref_Table"]
   
-  print "Reflection table imported %d peaks.  Faked data workspace contains %d data points." % (
-      reftablews.rowCount(), len(fakedataws.readX(0)))
+  print("Reflection table imported {} peaks.  Faked data workspace contains {} data points.".format(
+      reftablews.rowCount(), len(fakedataws.readX(0))))
   
   index = 0
-  print "Peak %d of (%d, %d, %d): Alpha = %.5f, Beta = %.5f, FWHM = %.5f" % (index, reftablews.cell(index, 0), 
-      reftablews.cell(index, 1), reftablews.cell(index, 2), reftablews.cell(index, 3), reftablews.cell(index, 4), reftablews.cell(index, 7))
+  print("Peak {} of ({}, {}, {}): Alpha = {:.5f}, Beta = {:.5f}, FWHM = {:.5f}".format(index, reftablews.cell(index, 0), 
+      reftablews.cell(index, 1), reftablews.cell(index, 2), reftablews.cell(index, 3), reftablews.cell(index, 4), reftablews.cell(index, 7)))
   index = 75
-  print "Peak %d of (%d, %d, %d): Alpha = %.5f, Beta = %.5f, FWHM = %.5f" % (index, reftablews.cell(index, 0), 
-      reftablews.cell(index, 1), reftablews.cell(index, 2), reftablews.cell(index, 3), reftablews.cell(index, 4), reftablews.cell(index, 7))
+  print("Peak {} of ({}, {}, {}): Alpha = {:.5f}, Beta = {:.5f}, FWHM = {:.5f}".format(index, reftablews.cell(index, 0), 
+      reftablews.cell(index, 1), reftablews.cell(index, 2), reftablews.cell(index, 3), reftablews.cell(index, 4), reftablews.cell(index, 7)))
 
 
 .. testcleanup:: ExLoadIrf

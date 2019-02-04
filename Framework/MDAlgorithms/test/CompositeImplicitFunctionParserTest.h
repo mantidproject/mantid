@@ -1,13 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef TEST_COMPOSITE_FUNCTION_PARSER_H_
 #define TEST_COMPOSITE_FUNCTION_PARSER_H_
 
 #include "FunctionParserTest.h"
-#include <vector>
-#include <memory>
 #include <boost/scoped_ptr.hpp>
+#include <memory>
+#include <vector>
 
-#include "MantidMDAlgorithms/InvalidParameterParser.h"
 #include "MantidMDAlgorithms/CompositeImplicitFunctionParser.h"
+#include "MantidMDAlgorithms/InvalidParameterParser.h"
 //#include "MantidMDAlgorithms/PlaneImplicitFunctionParser.h"
 #include "MantidMDAlgorithms/CompositeImplicitFunction.h"
 

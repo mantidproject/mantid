@@ -1,11 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MAGNETICION_H_
 #define MAGNETICION_H_
 
+#include "MantidKernel/DllConfig.h"
 #include <string>
 #include <vector>
-#include <map>
-#include "MantidKernel/DllConfig.h"
-#include "MantidKernel/PhysicalConstants.h"
 
 namespace Mantid {
 namespace PhysicalConstants {

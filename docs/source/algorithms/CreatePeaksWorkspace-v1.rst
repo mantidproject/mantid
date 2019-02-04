@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -17,6 +17,9 @@ This workspace can serve as a starting point for modifying the
 :ref:`PeaksWorkspace <PeaksWorkspace>`, using the GUI or python scripting,
 for example.
 
+If the input workspace is a MDWorkspace then the instrument from the
+first experiment info is used.
+
 Usage
 -----
 
@@ -25,7 +28,7 @@ Usage
 .. testcode:: ExEmptyTable
 
     ws = CreatePeaksWorkspace()
-    print "Created a %s with %i rows" % (ws.id(), ws.rowCount())
+    print("Created a {} with {} rows".format(ws.id(), ws.rowCount()))
 
 Output:
 
@@ -39,7 +42,7 @@ Output:
 
     sampleWs = CreateSampleWorkspace()
     ws = CreatePeaksWorkspace(InstrumentWorkspace=sampleWs,NumberOfPeaks=3)
-    print "Created a %s with %i rows" % (ws.id(), ws.rowCount())
+    print("Created a {} with {} rows".format(ws.id(), ws.rowCount()))
 
 Output:
 

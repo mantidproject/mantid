@@ -1,21 +1,29 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CRYSTAL_INDEX_PEAKS_TEST_H_
 #define MANTID_CRYSTAL_INDEX_PEAKS_TEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/System.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Sample.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include <cxxtest/TestSuite.h>
 
 #include "MantidCrystal/IndexPeaks.h"
-#include "MantidCrystal/LoadIsawPeaks.h"
+#include "MantidCrystal/LoadIsawUB.h"
+#include "MantidDataHandling/LoadNexusProcessed.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidCrystal/LoadIsawUB.h"
 
-using namespace Mantid;
 using namespace Mantid::Crystal;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
+using Mantid::DataHandling::LoadNexusProcessed;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 
@@ -30,10 +38,10 @@ public:
   void test_exec() {
     // Name of the output workspace.
     std::string WSName("peaks");
-    LoadIsawPeaks loader;
+    LoadNexusProcessed loader;
     TS_ASSERT_THROWS_NOTHING(loader.initialize());
     TS_ASSERT(loader.isInitialized());
-    loader.setPropertyValue("Filename", "TOPAZ_3007.peaks");
+    loader.setPropertyValue("Filename", "TOPAZ_3007.peaks.nxs");
     loader.setPropertyValue("OutputWorkspace", WSName);
 
     TS_ASSERT(loader.execute());
@@ -98,7 +106,7 @@ public:
     V3D peak_42_hkl_d(-1.97065, 4.0283600, -6.97828); // last peak
 
     V3D error = peak_0_hkl_d - peaks[0].getHKL();
-    TS_ASSERT_DELTA(error.norm(), 0.0, 1e-4);
+    TS_ASSERT_DELTA(error.norm(), 0.0, 2e-4);
 
     error = peak_1_hkl_d - peaks[1].getHKL();
     TS_ASSERT_DELTA(error.norm(), 0.0, 1e-4);
@@ -110,7 +118,7 @@ public:
     TS_ASSERT_DELTA(error.norm(), 0.0, 1e-4);
 
     error = peak_42_hkl_d - peaks[42].getHKL();
-    TS_ASSERT_DELTA(error.norm(), 0.0, 1e-4);
+    TS_ASSERT_DELTA(error.norm(), 0.0, 2e-4);
 
     // clear all the peak indexes then
     // re-run the algorithm, rounding the HKLs

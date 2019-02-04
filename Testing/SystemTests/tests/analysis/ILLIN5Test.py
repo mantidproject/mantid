@@ -1,5 +1,11 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name,no-init
-import stresstesting
+import systemtesting
 
 from mantid.api import MatrixWorkspace, mtd
 from mantid.simpleapi import *
@@ -61,7 +67,7 @@ class ILLIN5Tests(unittest.TestCase):
         """
         ILL Loader
         """
-        LoadILL(Filename=dataFile,FilenameVanadium=None,WorkspaceVanadium=None,OutputWorkspace=outWSName)
+        LoadILLTOF(Filename=dataFile,FilenameVanadium=None,WorkspaceVanadium=None,OutputWorkspace=outWSName)
         self._do_ads_check(outWSName)
 
     def _do_ads_check(self, name):
@@ -71,7 +77,7 @@ class ILLIN5Tests(unittest.TestCase):
 #====================================================================================
 
 
-class LoadILLIN5Test(stresstesting.MantidStressTest):
+class LoadILLIN5Test(systemtesting.MantidSystemTest):
     _success=False
 
     def runTest(self):

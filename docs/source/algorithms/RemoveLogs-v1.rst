@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -17,15 +17,15 @@ Usage
 
    # create some workspace with an instrument
    ws = CreateSampleWorkspace()
-   print "Original logs: ", ws.run().keys()
+   print("Original logs:  {}".format(ws.run().keys()))
    
    # remove logs, but keep some
    RemoveLogs(ws,KeepLogs="run_start, run_title")
-   print "Logs left: ", ws.run().keys()
+   print("Logs left:  {}".format(ws.run().keys()))
    
    # delete all logs
    RemoveLogs(ws)
-   print "Logs left (should be empty): ", ws.run().keys()
+   print("Logs left (should be empty):  {}".format(ws.run().keys()))
 
 .. testcleanup:: RemoveLogs
 

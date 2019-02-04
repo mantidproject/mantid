@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/CostFunctions/CostFuncUnweightedLeastSquares.h"
 
 #include "MantidKernel/Logger.h"
@@ -10,7 +16,7 @@ namespace CostFunctions {
 namespace {
 /// static logger
 Kernel::Logger g_log("CostFuncUnweightedLeastSquares");
-}
+} // namespace
 
 DECLARE_COSTFUNCTION(CostFuncUnweightedLeastSquares, Unweighted least squares)
 
@@ -44,7 +50,12 @@ void CostFuncUnweightedLeastSquares::calActiveCovarianceMatrix(GSLMatrix &covar,
 /// Return unit weights for all data points.
 std::vector<double> CostFuncUnweightedLeastSquares::getFitWeights(
     API::FunctionValues_sptr values) const {
-  return std::vector<double>(values->size(), 1.0);
+  std::vector<double> weights(values->size());
+  for (size_t i = 0; i < weights.size(); ++i) {
+    weights[i] = values->getFitWeight(i) != 0 ? 1 : 0;
+  }
+
+  return weights;
 }
 
 /// Calculates the residual variance from the internally stored FunctionValues.

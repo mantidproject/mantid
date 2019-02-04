@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 from mantid.api import AlgorithmFactory, FileFinder, PythonAlgorithm
 from mantid.kernel import ConfigService, Direction, IntBoundedValidator, \
@@ -83,5 +89,6 @@ class GetIPTS(PythonAlgorithm):
         direc = self.getIPTSLocal(instrument, runnumber)
         self.setPropertyValue('Directory', direc)
         self.log().notice('IPTS directory is: %s' % direc)
+
 
 AlgorithmFactory.subscribe(GetIPTS)

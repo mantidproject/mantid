@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -55,8 +55,8 @@ Usage
     acc_ws = AccumulateMD(md_ws, 'sample_data_1,sample_data_2,sample_data_3', Alatt=[1.4165, 1.4165, 1.4165], Angdeg=[90, 90, 90], u=[1, 0, 0,], v=[0,1,0])
 
     # acc_ws should have double the number of events that md_ws has
-    print "There are {kwarg} events in each of the two data workspaces.".format(kwarg=md_ws.getNEvents()) 
-    print "The accumulated data workspace contains {kwarg} events.".format(kwarg=acc_ws.getNEvents())
+    print("There are {} events in each of the two data workspaces.".format(md_ws.getNEvents()))
+    print("The accumulated data workspace contains {} events.".format(acc_ws.getNEvents()))
   
 Output:
 

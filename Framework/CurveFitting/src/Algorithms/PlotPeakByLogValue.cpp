@@ -1,32 +1,39 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
+#include <MantidKernel/StringTokenizer.h>
+#include <algorithm>
+#include <boost/algorithm/string/replace.hpp>
+#include <boost/lexical_cast.hpp>
 #include <cmath>
-#include <vector>
 #include <fstream>
 #include <sstream>
-#include <algorithm>
-#include <MantidKernel/StringTokenizer.h>
-#include <boost/lexical_cast.hpp>
-#include <boost/algorithm/string/replace.hpp>
+#include <vector>
 
-#include "MantidCurveFitting/Algorithms/PlotPeakByLogValue.h"
-#include "MantidAPI/IFuncMinimizer.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/FuncMinimizerFactory.h"
-#include "MantidAPI/CostFunctionFactory.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidAPI/WorkspaceGroup.h"
-#include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidAPI/Progress.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/IFunction.h"
-#include "MantidAPI/CompositeFunction.h"
-#include "MantidAPI/TableRow.h"
-#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/BinEdgeAxis.h"
+#include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/CostFunctionFactory.h"
+#include "MantidAPI/FuncMinimizerFactory.h"
+#include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/IFuncMinimizer.h"
+#include "MantidAPI/IFunction.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/Progress.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidCurveFitting/Algorithms/PlotPeakByLogValue.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 namespace {
 Mantid::Kernel::Logger g_log("PlotPeakByLogValue");
@@ -43,8 +50,8 @@ using namespace API;
 DECLARE_ALGORITHM(PlotPeakByLogValue)
 
 /** Initialisation method. Declares properties to be used in algorithm.
-*
-*/
+ *
+ */
 void PlotPeakByLogValue::init() {
   declareProperty(
       "Input", "", boost::make_shared<MandatoryValidator<std::string>>(),
@@ -72,16 +79,19 @@ void PlotPeakByLogValue::init() {
                   boost::make_shared<MandatoryValidator<std::string>>(),
                   "The fitting function, common for all workspaces in the "
                   "input WorkspaceGroup");
-  declareProperty("LogValue", "", "Name of the log value to plot the "
-                                  "parameters against. Default: use spectra "
-                                  "numbers.");
-  declareProperty("StartX", EMPTY_DBL(), "A value of x in, or on the low x "
-                                         "boundary of, the first bin to "
-                                         "include in\n"
-                                         "the fit (default lowest value of x)");
-  declareProperty("EndX", EMPTY_DBL(), "A value in, or on the high x boundary "
-                                       "of, the last bin the fitting range\n"
-                                       "(default the highest value of x)");
+  declareProperty("LogValue", "",
+                  "Name of the log value to plot the "
+                  "parameters against. Default: use spectra "
+                  "numbers.");
+  declareProperty("StartX", EMPTY_DBL(),
+                  "A value of x in, or on the low x "
+                  "boundary of, the first bin to "
+                  "include in\n"
+                  "the fit (default lowest value of x)");
+  declareProperty("EndX", EMPTY_DBL(),
+                  "A value in, or on the high x boundary "
+                  "of, the last bin the fitting range\n"
+                  "(default the highest value of x)");
 
   std::vector<std::string> fitOptions{"Sequential", "Individual"};
   declareProperty("FitType", "Sequential",
@@ -114,10 +124,19 @@ void PlotPeakByLogValue::init() {
   declareProperty("MaxIterations", 500,
                   "Stop after this number of iterations if a good fit is not "
                   "found");
+  declareProperty("PeakRadius", 0,
+                  "A value of the peak radius the peak functions should use. A "
+                  "peak radius defines an interval on the x axis around the "
+                  "centre of the peak where its values are calculated. Values "
+                  "outside the interval are not calculated and assumed zeros."
+                  "Numerically the radius is a whole number of peak widths "
+                  "(FWHM) that fit into the interval on each side from the "
+                  "centre. The default value of 0 means the whole x axis.");
 
-  declareProperty("CreateOutput", false, "Set to true to create output "
-                                         "workspaces with the results of the "
-                                         "fit(default is false).");
+  declareProperty("CreateOutput", false,
+                  "Set to true to create output "
+                  "workspaces with the results of the "
+                  "fit(default is false).");
 
   declareProperty("OutputCompositeMembers", false,
                   "If true and CreateOutput is true then the value of each "
@@ -129,23 +148,31 @@ void PlotPeakByLogValue::init() {
       "Convolution are output convolved\n"
       "with corresponding resolution");
 
-  std::vector<std::string> evaluationTypes{"CentrePoint", "Histogram"};
+  std::array<std::string, 2> evaluationTypes = {{"CentrePoint", "Histogram"}};
   declareProperty(
       "EvaluationType", "CentrePoint",
       Kernel::IValidator_sptr(
           new Kernel::ListValidator<std::string>(evaluationTypes)),
       "The way the function is evaluated: CentrePoint or Histogram.",
       Kernel::Direction::Input);
+
+  declareProperty(make_unique<ArrayProperty<double>>("Exclude", ""),
+                  "A list of pairs of real numbers, defining the regions to "
+                  "exclude from the fit.");
+
+  declareProperty("IgnoreInvalidData", false,
+                  "Flag to ignore infinities, NaNs and data with zero errors.");
 }
 
 /**
-*   Executes the algorithm
-*/
+ *   Executes the algorithm
+ */
 void PlotPeakByLogValue::exec() {
 
   // Create a list of the input workspace
   const std::vector<InputData> wsNames = makeNames();
 
+  const std::vector<double> exclude = getProperty("Exclude");
   std::string fun = getPropertyValue("Function");
   // int wi = getProperty("WorkspaceIndex");
   std::string logName = getProperty("LogValue");
@@ -193,9 +220,9 @@ void PlotPeakByLogValue::exec() {
 
   setProperty("OutputWorkspace", result);
 
-  std::vector<std::string> covariance_workspaces;
-  std::vector<std::string> fit_workspaces;
-  std::vector<std::string> parameter_workspaces;
+  std::vector<MatrixWorkspace_sptr> fitWorkspaces;
+  std::vector<ITableWorkspace_sptr> parameterWorkspaces;
+  std::vector<ITableWorkspace_sptr> covarianceWorkspaces;
 
   double dProg = 1. / static_cast<double>(wsNames.size());
   double Prog = 0.;
@@ -223,9 +250,9 @@ void PlotPeakByLogValue::exec() {
     }
 
     if (createFitOutput) {
-      covariance_workspaces.reserve(covariance_workspaces.size() + jend);
-      fit_workspaces.reserve(fit_workspaces.size() + jend);
-      parameter_workspaces.reserve(parameter_workspaces.size() + jend);
+      covarianceWorkspaces.reserve(covarianceWorkspaces.size() + jend);
+      fitWorkspaces.reserve(fitWorkspaces.size() + jend);
+      parameterWorkspaces.reserve(parameterWorkspaces.size() + jend);
     }
 
     dProg /= abs(jend - j);
@@ -264,7 +291,7 @@ void PlotPeakByLogValue::exec() {
           setWorkspaceIndexAttribute(ifun, j);
         }
 
-        g_log.debug() << "Fitting " << data.ws->name() << " index " << j
+        g_log.debug() << "Fitting " << data.ws->getName() << " index " << j
                       << " with \n";
         g_log.debug() << ifun->asString() << '\n';
 
@@ -275,10 +302,10 @@ void PlotPeakByLogValue::exec() {
           wsBaseName = wsNames[i].name + "_" + spectrum_index;
 
         bool histogramFit = getPropertyValue("EvaluationType") == "Histogram";
+        bool ignoreInvalidData = getProperty("IgnoreInvalidData");
 
         // Fit the function
-        API::IAlgorithm_sptr fit =
-            AlgorithmManager::Instance().createUnmanaged("Fit");
+        auto fit = this->createChildAlgorithm("Fit");
         fit->initialize();
         fit->setPropertyValue("EvaluationType",
                               getPropertyValue("EvaluationType"));
@@ -287,38 +314,44 @@ void PlotPeakByLogValue::exec() {
         fit->setProperty("WorkspaceIndex", j);
         fit->setPropertyValue("StartX", getPropertyValue("StartX"));
         fit->setPropertyValue("EndX", getPropertyValue("EndX"));
+        fit->setProperty("IgnoreInvalidData", ignoreInvalidData);
         fit->setPropertyValue(
             "Minimizer", getMinimizerString(wsNames[i].name, spectrum_index));
         fit->setPropertyValue("CostFunction", getPropertyValue("CostFunction"));
         fit->setPropertyValue("MaxIterations",
                               getPropertyValue("MaxIterations"));
+        fit->setPropertyValue("PeakRadius", getPropertyValue("PeakRadius"));
         fit->setProperty("CalcErrors", true);
         fit->setProperty("CreateOutput", createFitOutput);
         if (!histogramFit) {
           fit->setProperty("OutputCompositeMembers", outputCompositeMembers);
           fit->setProperty("ConvolveMembers", outputConvolvedMembers);
+          fit->setProperty("Exclude", exclude);
         }
         fit->setProperty("Output", wsBaseName);
         fit->execute();
 
         if (!fit->isExecuted()) {
           throw std::runtime_error("Fit child algorithm failed: " +
-                                   data.ws->name());
+                                   data.ws->getName());
         }
 
         ifun = fit->getProperty("Function");
         chi2 = fit->getProperty("OutputChi2overDoF");
 
         if (createFitOutput) {
-          covariance_workspaces.push_back(wsBaseName +
-                                          "_NormalisedCovarianceMatrix");
-          parameter_workspaces.push_back(wsBaseName + "_Parameters");
-          fit_workspaces.push_back(wsBaseName + "_Workspace");
+          MatrixWorkspace_sptr outputFitWorkspace =
+              fit->getProperty("OutputWorkspace");
+          ITableWorkspace_sptr outputParamWorkspace =
+              fit->getProperty("OutputParameters");
+          ITableWorkspace_sptr outputCovarianceWorkspace =
+              fit->getProperty("OutputNormalisedCovarianceMatrix");
+          fitWorkspaces.emplace_back(outputFitWorkspace);
+          parameterWorkspaces.emplace_back(outputParamWorkspace);
+          covarianceWorkspaces.emplace_back(outputCovarianceWorkspace);
         }
-
         g_log.debug() << "Fit result " << fit->getPropertyValue("OutputStatus")
                       << ' ' << chi2 << '\n';
-
       } catch (...) {
         g_log.error("Error in Fit ChildAlgorithm");
         throw;
@@ -347,37 +380,33 @@ void PlotPeakByLogValue::exec() {
           ifun->setParameter(i, initialParams[i]);
         }
       }
-
     } // for(;j < jend;++j)
   }
 
   if (createFitOutput) {
     // collect output of fit for each spectrum into workspace groups
-    API::IAlgorithm_sptr groupAlg =
-        AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
-    groupAlg->initialize();
-    groupAlg->setProperty("InputWorkspaces", covariance_workspaces);
-    groupAlg->setProperty("OutputWorkspace",
-                          m_baseName + "_NormalisedCovarianceMatrices");
-    groupAlg->execute();
+    WorkspaceGroup_sptr covarianceGroup = boost::make_shared<WorkspaceGroup>();
+    for (auto const &workspace : covarianceWorkspaces)
+      covarianceGroup->addWorkspace(workspace);
+    AnalysisDataService::Instance().addOrReplace(
+        m_baseName + "_NormalisedCovarianceMatrices", covarianceGroup);
 
-    groupAlg = AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
-    groupAlg->initialize();
-    groupAlg->setProperty("InputWorkspaces", parameter_workspaces);
-    groupAlg->setProperty("OutputWorkspace", m_baseName + "_Parameters");
-    groupAlg->execute();
+    WorkspaceGroup_sptr parameterGroup = boost::make_shared<WorkspaceGroup>();
+    for (auto const &workspace : parameterWorkspaces)
+      parameterGroup->addWorkspace(workspace);
+    AnalysisDataService::Instance().addOrReplace(m_baseName + "_Parameters",
+                                                 parameterGroup);
 
-    groupAlg = AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
-    groupAlg->initialize();
-    groupAlg->setProperty("InputWorkspaces", fit_workspaces);
-    groupAlg->setProperty("OutputWorkspace", m_baseName + "_Workspaces");
-    groupAlg->execute();
+    WorkspaceGroup_sptr fitGroup = boost::make_shared<WorkspaceGroup>();
+    for (auto const &workspace : fitWorkspaces)
+      fitGroup->addWorkspace(workspace);
+    AnalysisDataService::Instance().addOrReplace(m_baseName + "_Workspaces",
+                                                 fitGroup);
   }
 
   for (auto &minimizerWorkspace : m_minimizerWorkspaces) {
     const std::string paramName = minimizerWorkspace.first;
-    API::IAlgorithm_sptr groupAlg =
-        AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
+    auto groupAlg = this->createChildAlgorithm("GroupWorkspaces");
     groupAlg->initialize();
     groupAlg->setProperty("InputWorkspaces", minimizerWorkspace.second);
     groupAlg->setProperty("OutputWorkspace", m_baseName + "_" + paramName);
@@ -386,9 +415,9 @@ void PlotPeakByLogValue::exec() {
 }
 
 /** Get a workspace identified by an InputData structure.
-  * @param data :: InputData with name and either spec or i fields defined.
-  * @return InputData structure with the ws field set if everything was OK.
-  */
+ * @param data :: InputData with name and either spec or i fields defined.
+ * @return InputData structure with the ws field set if everything was OK.
+ */
 PlotPeakByLogValue::InputData
 PlotPeakByLogValue::getWorkspace(const InputData &data) {
   InputData out(data);
@@ -496,12 +525,12 @@ PlotPeakByLogValue::getWorkspace(const InputData &data) {
 }
 
 /**
-  * Set any WorkspaceIndex attributes in the fitting function. If the function
+ * Set any WorkspaceIndex attributes in the fitting function. If the function
  * is composite
-  * try all its members.
-  * @param fun :: The fitting function
-  * @param wsIndex :: Value for WorkspaceIndex attributes to set.
-  */
+ * try all its members.
+ * @param fun :: The fitting function
+ * @param wsIndex :: Value for WorkspaceIndex attributes to set.
+ */
 void PlotPeakByLogValue::setWorkspaceIndexAttribute(IFunction_sptr fun,
                                                     int wsIndex) const {
   const std::string attName = "WorkspaceIndex";
@@ -528,7 +557,7 @@ PlotPeakByLogValue::makeNames() const {
   double start = 0;
   double end = 0;
 
-  typedef Mantid::Kernel::StringTokenizer tokenizer;
+  using tokenizer = Mantid::Kernel::StringTokenizer;
   tokenizer names(inputList, ";",
                   tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
   for (const auto &input : names) {
@@ -545,7 +574,7 @@ PlotPeakByLogValue::makeNames() const {
       } else if (index.size() > 1 && index[0] == 'i') { // workspace index
         wi = boost::lexical_cast<int>(index.substr(1));
         spec = -1; // undefined yet
-      } else if (index.size() > 0 && index[0] == 'v') {
+      } else if (!index.empty() && index[0] == 'v') {
         if (index.size() > 1) { // there is some text after 'v'
           tokenizer range(index.substr(1), ":",
                           tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
@@ -636,9 +665,9 @@ std::string PlotPeakByLogValue::getMinimizerString(const std::string &wsName,
     Mantid::API::WorkspaceProperty<> *wsProp =
         dynamic_cast<Mantid::API::WorkspaceProperty<> *>(minimizerProp);
     if (wsProp) {
-      std::string wsPropValue = minimizerProp->value();
-      if (wsPropValue != "") {
-        std::string wsPropName = minimizerProp->name();
+      const std::string &wsPropValue = minimizerProp->value();
+      if (!wsPropValue.empty()) {
+        const std::string &wsPropName = minimizerProp->name();
         m_minimizerWorkspaces[wsPropName].push_back(wsPropValue);
       }
     }

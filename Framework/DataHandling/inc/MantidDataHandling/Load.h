@@ -1,10 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAHANDLING_LOAD_H_
 #define MANTID_DATAHANDLING_LOAD_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/WorkspaceGroup_fwd.h"
 #include <mutex>
 
 namespace Mantid {
@@ -15,32 +19,9 @@ Loads a workspace from a data file. The algorithm tries to determine the actual
 type
 of the file (raw, nxs, ...) and use the specialized loading algorithm to load
 it.
-
-Copyright &copy; 2007-2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>.
-Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 class DLLExport Load : public API::Algorithm {
 public:
-  /// Default constructor
-  Load();
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "Load"; }
   /// Summary of algorithms purpose
@@ -51,6 +32,10 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"LoadNexus", "LoadRaw", "LoadBBY"};
+  }
+
   /// Category
   const std::string category() const override { return "DataHandling"; }
   /// Aliases
@@ -58,6 +43,11 @@ public:
   /// Override setPropertyValue
   void setPropertyValue(const std::string &name,
                         const std::string &value) override;
+
+protected:
+  Parallel::ExecutionMode getParallelExecutionMode(
+      const std::map<std::string, Parallel::StorageMode> &storageModes)
+      const override;
 
 private:
   /// This method returns shared pointer to a load algorithm which got

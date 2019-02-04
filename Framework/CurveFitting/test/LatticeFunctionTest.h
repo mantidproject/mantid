@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CURVEFITTING_LATTICEFUNCTIONTEST_H_
 #define MANTID_CURVEFITTING_LATTICEFUNCTIONTEST_H_
 
@@ -7,9 +13,9 @@
 #include "MantidGeometry/Crystal/UnitCell.h"
 
 using Mantid::CurveFitting::LatticeFunction;
-using Mantid::Kernel::V3D;
 using Mantid::Geometry::UnitCell;
 using Mantid::Geometry::unitCellToStr;
+using Mantid::Kernel::V3D;
 
 using namespace Mantid::API;
 
@@ -42,8 +48,8 @@ public:
     TS_ASSERT_EQUALS(fn.nParams(), 3);
 
     /* The basic functionality is covered by the tests for
-    * PawleyParameterFunction.
-    */
+     * PawleyParameterFunction.
+     */
   }
 
   void testSetUnitCellString() {

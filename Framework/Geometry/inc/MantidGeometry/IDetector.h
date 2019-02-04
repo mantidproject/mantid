@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_GEOMETRY_IDETECTOR_H_
 #define MANTID_GEOMETRY_IDETECTOR_H_
 
@@ -6,8 +12,8 @@
 //----------------------------------------------------------------------
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/IComponent.h"
-#include "MantidGeometry/IObjComponent.h"
 #include "MantidGeometry/IDTypes.h"
+#include "MantidGeometry/IObjComponent.h"
 
 namespace Mantid {
 namespace Kernel {
@@ -15,7 +21,7 @@ namespace Kernel {
 // Forward declaration
 //----------------------------------------------------------------------
 class V3D;
-}
+} // namespace Kernel
 
 namespace Geometry {
 /** Describes the topology of a detectors group used to calculate angular
@@ -34,27 +40,6 @@ enum det_topology {
 
     @author Russell Taylor, Tessella Support Services plc
     @date 08/04/2008
-
-    Copyright &copy; 2008-2011 ISIS Rutherford Appleton Laboratory, NScD Oak
-   Ridge National Laboratory & European Spallation Source
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>.
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_GEOMETRY_DLL IDetector : public virtual IObjComponent {
 public:
@@ -100,14 +85,14 @@ public:
   /// Gives the phi of this detector offset from y=0 by offset.
   virtual double getPhiOffset(const double &offset) const = 0;
 
-  /// Indicates whether the detector has been masked
-  virtual bool isMasked() const = 0;
-  /// Indicates whether this is a monitor detector
-  virtual bool isMonitor() const = 0;
-
   /// returns the geometry of detectors, meaningful for groups, rectangular for
   /// single; returns the centre of a detector
   virtual det_topology getTopology(Kernel::V3D &center) const = 0;
+
+  /// Helper for legacy access mode. Returns a reference to the ParameterMap.
+  virtual const ParameterMap &parameterMap() const = 0;
+  /// Helper for legacy access mode. Returns the index of the detector.
+  virtual size_t index() const = 0;
 
   /// (Empty) Constructor.
   /// prevent Warning C4436 and many failing unit tests on MSVC 2015.
@@ -115,10 +100,10 @@ public:
 };
 
 /// Shared pointer to IDetector
-typedef boost::shared_ptr<Mantid::Geometry::IDetector> IDetector_sptr;
+using IDetector_sptr = boost::shared_ptr<Mantid::Geometry::IDetector>;
 /// Shared pointer to IDetector (const version)
-typedef boost::shared_ptr<const Mantid::Geometry::IDetector>
-    IDetector_const_sptr;
+using IDetector_const_sptr =
+    boost::shared_ptr<const Mantid::Geometry::IDetector>;
 
 } // namespace Geometry
 } // namespace Mantid

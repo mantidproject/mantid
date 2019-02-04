@@ -3,7 +3,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -27,10 +27,10 @@ Usage
    resolution, l1_dist, theta_dist = VesuvioL1ThetaResolution(NumEvents=1000)
 
    resolution_spec_names = resolution.getAxis(1).extractValues()
-   print "Resolution spectra: %s" % (', '.join(resolution_spec_names))
+   print("Resolution spectra: %s" % (', '.join(resolution_spec_names)))
 
-   print "L1 distribution spectra count: %d" % (l1_dist.getNumberHistograms())
-   print "Theta distribution spectra count: %d" % (theta_dist.getNumberHistograms())
+   print("L1 distribution spectra count: %d" % (l1_dist.getNumberHistograms()))
+   print("Theta distribution spectra count: %d" % (theta_dist.getNumberHistograms()))
 
 Output:
 

@@ -1,16 +1,21 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef POISSONERRORSTEST_H_
 #define POISSONERRORSTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include <cmath>
+#include <cxxtest/TestSuite.h>
 
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidAlgorithms/PoissonErrors.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
+#include "MantidAPI/WorkspaceProperty.h"
+#include "MantidAlgorithms/PoissonErrors.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -27,9 +32,7 @@ public:
   PoissonErrorsTest() {
     inputProp1 = "InputWorkspace";
     inputProp2 = "CountsWorkspace";
-    ;
     outputProp = "OutputWorkspace";
-    ;
   }
 
   void testInit() {
@@ -48,9 +51,9 @@ public:
     int nBins = 10;
     // Register the workspace in the data service
     MatrixWorkspace_sptr work_in1 =
-        WorkspaceCreationHelper::Create1DWorkspaceFib(nBins);
+        WorkspaceCreationHelper::create1DWorkspaceFib(nBins, true);
     MatrixWorkspace_sptr work_in2 =
-        WorkspaceCreationHelper::Create1DWorkspaceFib(nBins);
+        WorkspaceCreationHelper::create1DWorkspaceFib(nBins, true);
     AnalysisDataService::Instance().add("test_in11", work_in1);
     AnalysisDataService::Instance().add("test_in12", work_in2);
 
@@ -78,9 +81,9 @@ public:
     int nBins = 10;
     // Register the workspace in the data service
     MatrixWorkspace_sptr work_in1 =
-        WorkspaceCreationHelper::Create1DWorkspaceFib(nBins);
+        WorkspaceCreationHelper::create1DWorkspaceFib(nBins, true);
     MatrixWorkspace_sptr work_in2 =
-        WorkspaceCreationHelper::Create1DWorkspaceRand(nBins);
+        WorkspaceCreationHelper::create1DWorkspaceRand(nBins, true);
     AnalysisDataService::Instance().add("test_in11", work_in1);
     AnalysisDataService::Instance().add("test_in12", work_in2);
 
@@ -108,9 +111,9 @@ public:
     int nHist = 10, nBins = 20;
     // Register the workspace in the data service
     MatrixWorkspace_sptr work_in1 =
-        WorkspaceCreationHelper::Create2DWorkspace154(nHist, nBins);
+        WorkspaceCreationHelper::create2DWorkspace154(nHist, nBins);
     MatrixWorkspace_sptr work_in2 =
-        WorkspaceCreationHelper::Create2DWorkspace123(nHist, nBins);
+        WorkspaceCreationHelper::create2DWorkspace123(nHist, nBins);
 
     PoissonErrors alg;
 
@@ -138,9 +141,9 @@ public:
     int nHist = 10, nBins = 20;
     // Register the workspace in the data service
     MatrixWorkspace_sptr work_in1 =
-        WorkspaceCreationHelper::Create2DWorkspace154(nHist, nBins);
+        WorkspaceCreationHelper::create2DWorkspace154(nHist, nBins, true);
     MatrixWorkspace_sptr work_in2 =
-        WorkspaceCreationHelper::Create1DWorkspaceFib(nBins);
+        WorkspaceCreationHelper::create1DWorkspaceFib(nBins, true);
 
     PoissonErrors alg;
 
@@ -162,9 +165,9 @@ public:
     int nHist = 10, nBins = 20;
     // Register the workspace in the data service
     MatrixWorkspace_sptr work_in2 =
-        WorkspaceCreationHelper::Create1DWorkspaceRand(nBins);
+        WorkspaceCreationHelper::create1DWorkspaceRand(nBins, true);
     MatrixWorkspace_sptr work_in1 =
-        WorkspaceCreationHelper::Create2DWorkspace154(nHist, nBins);
+        WorkspaceCreationHelper::create2DWorkspace154(nHist, nBins, true);
 
     PoissonErrors alg;
 
@@ -187,9 +190,9 @@ public:
     // Register the workspace in the data service
 
     MatrixWorkspace_sptr work_in1 =
-        WorkspaceCreationHelper::Create1DWorkspaceFib(nBins);
+        WorkspaceCreationHelper::create1DWorkspaceFib(nBins, true);
     MatrixWorkspace_sptr work_in2 =
-        WorkspaceCreationHelper::CreateWorkspaceSingleValue(2.2);
+        WorkspaceCreationHelper::createWorkspaceSingleValue(2.2);
     AnalysisDataService::Instance().add("test_in11", work_in1);
     AnalysisDataService::Instance().add("test_in12", work_in2);
 
@@ -211,9 +214,9 @@ public:
     int nBins = 300;
     // Register the workspace in the data service
     MatrixWorkspace_sptr work_in1 =
-        WorkspaceCreationHelper::Create1DWorkspaceFib(nBins);
+        WorkspaceCreationHelper::create1DWorkspaceFib(nBins, true);
     MatrixWorkspace_sptr work_in2 =
-        WorkspaceCreationHelper::CreateWorkspaceSingleValue(4.455);
+        WorkspaceCreationHelper::createWorkspaceSingleValue(4.455);
 
     PoissonErrors alg;
 
@@ -271,26 +274,26 @@ private:
                      size_t ws2Index) {
     // printf("I=%d\tws2Index=%d\n",i,ws2Index);
     double sig1 =
-        work_in1->dataY(i / work_in1->blocksize())[i % work_in1->blocksize()];
-    double sig2 = work_in2->dataY(
+        work_in1->y(i / work_in1->blocksize())[i % work_in1->blocksize()];
+    double sig2 = work_in2->y(
         ws2Index / work_in2->blocksize())[ws2Index % work_in2->blocksize()];
-    double sig2e = work_in2->dataE(
+    double sig2e = work_in2->e(
         ws2Index / work_in2->blocksize())[ws2Index % work_in2->blocksize()];
     double sig3 =
-        work_out1->dataY(i / work_in1->blocksize())[i % work_in1->blocksize()];
+        work_out1->y(i / work_in1->blocksize())[i % work_in1->blocksize()];
     TS_ASSERT_DELTA(
-        work_in1->dataX(i / work_in1->blocksize())[i % work_in1->blocksize()],
-        work_out1->dataX(i / work_in1->blocksize())[i % work_in1->blocksize()],
+        work_in1->x(i / work_in1->blocksize())[i % work_in1->blocksize()],
+        work_out1->x(i / work_in1->blocksize())[i % work_in1->blocksize()],
         0.0001);
     TS_ASSERT_DELTA(sig1, sig3, 0.0001);
     // double err1 =
-    // work_in1->dataE(i/work_in1->blocksize())[i%work_in1->blocksize()];
+    // work_in1->e(i/work_in1->blocksize())[i%work_in1->blocksize()];
     // double err2 =
-    // work_in2->dataE(ws2Index/work_in2->blocksize())[ws2Index%work_in2->blocksize()];
+    // work_in2->e(ws2Index/work_in2->blocksize())[ws2Index%work_in2->blocksize()];
     double err3((sig2e / sig2) * sig3);
     TS_ASSERT_DELTA(
         err3,
-        work_out1->dataE(i / work_in1->blocksize())[i % work_in1->blocksize()],
+        work_out1->e(i / work_in1->blocksize())[i % work_in1->blocksize()],
         0.0001);
   }
 

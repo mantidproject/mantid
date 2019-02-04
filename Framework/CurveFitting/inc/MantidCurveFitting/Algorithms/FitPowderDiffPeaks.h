@@ -1,17 +1,23 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CURVEFITTING_FITPOWDERDIFFPEAKS_H_
 #define MANTID_CURVEFITTING_FITPOWDERDIFFPEAKS_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
-#include "MantidDataObjects/TableWorkspace.h"
-#include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidCurveFitting/Functions/BackToBackExponential.h"
 #include "MantidCurveFitting/Functions/BackgroundFunction.h"
 #include "MantidCurveFitting/Functions/Polynomial.h"
-#include "MantidCurveFitting/Functions/BackToBackExponential.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Crystal/UnitCell.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace CurveFitting {
@@ -36,27 +42,6 @@ namespace Algorithms {
   Its application is to serve as the first step for refining powder diffractomer
   instrument
   parameters. Its output will be used by RefinePowderInstrumentParameters().
-
-  Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
-
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>
-  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport FitPowderDiffPeaks : public API::Algorithm {
 public:
@@ -71,6 +56,9 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"LeBailFit"};
+  }
 
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Diffraction\\Fitting"; }
@@ -408,7 +396,7 @@ private:
 };
 
 /** Formular for linear iterpolation: X = [(xf-x0)*Y - (xf*y0-x0*yf)]/(yf-y0)
-  */
+ */
 inline double linearInterpolateX(double x0, double xf, double y0, double yf,
                                  double y) {
   double x = ((xf - x0) * y - (xf * y0 - x0 * yf)) / (yf - y0);
@@ -416,7 +404,7 @@ inline double linearInterpolateX(double x0, double xf, double y0, double yf,
 }
 
 /** Formula for linear interpolation: Y = ( (xf*y0-x0*yf) + x*(yf-y0) )/(xf-x0)
-  */
+ */
 inline double linearInterpolateY(double x0, double xf, double y0, double yf,
                                  double x) {
   double y = ((xf * y0 - x0 * yf) + x * (yf - y0)) / (xf - x0);
@@ -435,7 +423,7 @@ bool observePeakParameters(DataObjects::Workspace2D_sptr dataws, size_t wsindex,
                            std::string &errmsg);
 
 /// Find maximum value
-size_t findMaxValue(const Mantid::MantidVec Y);
+size_t findMaxValue(const std::vector<double> &Y);
 
 /// Find maximum value
 size_t findMaxValue(API::MatrixWorkspace_sptr dataws, size_t wsindex,

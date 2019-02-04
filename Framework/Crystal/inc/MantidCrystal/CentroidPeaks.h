@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CRYSTAL_CENTROIDPEAKS_H_
 #define MANTID_CRYSTAL_CENTROIDPEAKS_H_
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/System.h"
-#include "MantidDataObjects/EventWorkspace.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -27,6 +33,9 @@ public:
 
   /// Algorithm's version for identification
   int version() const override { return 1; };
+  const std::vector<std::string> seeAlso() const override {
+    return {"CentroidPeaksMD", "PeakIntegration"};
+  }
   /// Algorithm's category for identification
   const std::string category() const override { return "Crystal\\Peaks"; }
 
@@ -38,7 +47,9 @@ private:
   void integrate();
   void integrateEvent();
   int findPixelID(std::string bankName, int col, int row);
-  bool edgePixel(std::string bankName, int col, int row, int Edge);
+  void removeEdgePeaks(Mantid::DataObjects::PeaksWorkspace &peakWS);
+  void sizeBanks(const std::string &bankName, int &nCols, int &nRows);
+  Geometry::Instrument_const_sptr inst;
 
   /// Input 2D Workspace
   API::MatrixWorkspace_sptr inWS;
@@ -46,7 +57,7 @@ private:
   Mantid::detid2index_map wi_to_detid_map;
 };
 
-} // namespace Mantid
 } // namespace Crystal
+} // namespace Mantid
 
 #endif /* MANTID_CRYSTAL_CENTROIDPEAKS_H_ */

@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MD_CURVE_H
 #define MANTID_MD_CURVE_H
 
-#include "MantidCurve.h"
-#include <boost/shared_ptr.hpp>
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidQtAPI/MantidQwtIMDWorkspaceData.h"
+#include "MantidCurve.h"
+#include "MantidQtWidgets/LegacyQwt/MantidQwtIMDWorkspaceData.h"
+#include <boost/shared_ptr.hpp>
 
 // Forward definitions
 class MantidUI;
@@ -13,27 +19,6 @@ class MantidUI;
     This class is for plotting IMDWorkspaces
 
     @date 17/11/2011
-
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-   National Laboratory & European Spallation Source
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
 class MantidMDCurve : public MantidCurve {
@@ -42,12 +27,14 @@ public:
   /// More complex constructor setting some defaults for the curve
   MantidMDCurve(const QString &wsName, Graph *g, bool err = false,
                 bool distr = false,
-                Graph::CurveType style = Graph::HorizontalSteps);
+                GraphOptions::CurveType style = GraphOptions::HorizontalSteps);
 
   /// Copy constructor
   MantidMDCurve(const MantidMDCurve &c);
 
   ~MantidMDCurve() override;
+
+  MantidMDCurve &operator=(const MantidMDCurve &rhs) = delete;
 
   MantidMDCurve *clone(const Graph *) const override;
 
@@ -90,7 +77,8 @@ private:
   using PlotCurve::draw; // Avoid Intel compiler warning
 
   /// Init the curve
-  void init(Graph *g, bool distr, Graph::CurveType style) override;
+  void init(Graph *g, bool distr, GraphOptions::CurveType style,
+            bool multipleSpectra = false) override;
 
   /// Handles delete notification
   void postDeleteHandle(const std::string &wsName) override {
@@ -104,7 +92,7 @@ private:
       const std::string &wsName,
       const boost::shared_ptr<Mantid::API::Workspace> ws) override;
 
-  /// Handle an ADS clear notificiation
+  /// Handle an ADS clear notification
   void clearADSHandle() override { emit removeMe(this); }
 
 signals:

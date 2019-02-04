@@ -18,7 +18,7 @@
     <item row="0" column="0">
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
-       <widget class="MplPlot3dCanvas" name="graphicsView"/>
+       <widget class="QFrame" name="frame_graphicsView"/>
       </item>
       <item>
        <layout class="QGridLayout" name="gridLayout_2">
@@ -401,7 +401,7 @@
   <customwidget>
    <class>MplPlot3dCanvas</class>
    <extends>QGraphicsView</extends>
-   <header>mplgraphicsview3d.h</header>
+   <header>HFIR_4Circle_Reduction/mplgraphicsview3d.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

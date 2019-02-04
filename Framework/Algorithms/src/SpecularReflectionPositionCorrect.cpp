@@ -1,7 +1,12 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/SpecularReflectionPositionCorrect.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -40,19 +45,19 @@ getParentComponent(IComponent_const_sptr &currentComponent) {
  * @return True only if all detectors have the same immediate parent.
  */
 bool hasCommonParent(const std::vector<IDetector_const_sptr> &detectors) {
-  bool sameParentComponent = true;
-  IComponent const *lastParentComponent = detectors[0]->getParent().get();
+  auto firstParent = detectors[0]->getParent();
+  if (!firstParent)
+    return false;
   for (size_t i = 1; i < detectors.size(); ++i) {
-    IComponent const *currentParentComponent = detectors[i]->getParent().get();
-    if (lastParentComponent != currentParentComponent) {
-      sameParentComponent = false; // Parent components are different.
-      break;
-    }
-    lastParentComponent = currentParentComponent;
+    auto parent = detectors[i]->getParent();
+    if (!parent)
+      return false;
+    if (firstParent->getComponentID() != parent->getComponentID())
+      return false;
   }
-  return sameParentComponent;
+  return true;
 }
-}
+} // namespace
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SpecularReflectionPositionCorrect)
 

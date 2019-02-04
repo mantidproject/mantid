@@ -1,8 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/Exception.h"
 #include "MantidAPI/ImmutableCompositeFunction.h"
+#include "MantidKernel/Exception.h"
 
 #include <algorithm>
 
@@ -16,8 +22,9 @@ using std::size_t;
  * Overridden method creates an initialization string which makes it look like a
  * siple function.
  */
-std::string ImmutableCompositeFunction::asString() const {
-  return IFunction::asString();
+std::string ImmutableCompositeFunction::writeToString(
+    const std::string &parentLocalAttributesStr) const {
+  return IFunction::writeToString(parentLocalAttributesStr);
 }
 
 /**

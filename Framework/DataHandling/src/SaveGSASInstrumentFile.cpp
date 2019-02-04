@@ -1,12 +1,22 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/SaveGSASInstrumentFile.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidKernel/ListValidator.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/TableRow.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidAPI/TableRow.h"
+#include "MantidKernel/ListValidator.h"
+
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/split.hpp>
 
 #include <cstdio>
+#include <iomanip>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -63,11 +73,11 @@ private:
   std::vector<int> m_vruns;
 };
 
-typedef boost::shared_ptr<ChopperConfiguration> ChopperConfiguration_sptr;
+using ChopperConfiguration_sptr = boost::shared_ptr<ChopperConfiguration>;
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
-  */
+ */
 ChopperConfiguration::ChopperConfiguration(vector<int> bankids)
     : m_frequency(0) {
   const size_t numbanks = bankids.size();
@@ -89,8 +99,8 @@ ChopperConfiguration::ChopperConfiguration(vector<int> bankids)
 
 //----------------------------------------------------------------------------------------------
 /** Constructor of chopper configuration
-    * Removed arguments: std::string splitdstr, std::string vrunstr
-    */
+ * Removed arguments: std::string splitdstr, std::string vrunstr
+ */
 ChopperConfiguration::ChopperConfiguration(const int freq,
                                            const std::string &bankidstr,
                                            const std::string &cwlstr,
@@ -126,7 +136,7 @@ ChopperConfiguration::ChopperConfiguration(const int freq,
 
 //----------------------------------------------------------------------------------------------
 /** Get bank IDs in the chopper configuration
-  */
+ */
 vector<unsigned int> ChopperConfiguration::getBankIDs() const {
   return m_bankIDs;
 }
@@ -141,7 +151,7 @@ bool ChopperConfiguration::hasBank(unsigned int bankid) const {
 
 //----------------------------------------------------------------------------------------------
 /** Get chopper configuration parameters value
-  */
+ */
 double ChopperConfiguration::getParameter(unsigned int bankid,
                                           const string &paramname) const {
   // Obtain index for the bank
@@ -183,7 +193,7 @@ double ChopperConfiguration::getParameter(unsigned int bankid,
 
 //----------------------------------------------------------------------------------------------
 /** Set a parameter to a bank
-  */
+ */
 void ChopperConfiguration::setParameter(unsigned int bankid,
                                         const string &paramname, double value) {
   auto biter = m_bankIDIndexMap.find(bankid);
@@ -222,7 +232,7 @@ void ChopperConfiguration::setParameter(unsigned int bankid,
 
 //----------------------------------------------------------------------------------------------
 /** Parse string to double vector
-  */
+ */
 vector<double>
 ChopperConfiguration::parseStringDbl(const string &instring) const {
   vector<string> strs;
@@ -230,8 +240,8 @@ ChopperConfiguration::parseStringDbl(const string &instring) const {
 
   vector<double> vecdouble;
   for (auto &str : strs) {
-    if (str.size() > 0) {
-      double item = atof(str.c_str());
+    if (!str.empty()) {
+      double item = std::stod(str.c_str());
       vecdouble.push_back(item);
       // cout << "[C] |" << strs[i] << "|" << item << "\n";
     }
@@ -245,7 +255,7 @@ ChopperConfiguration::parseStringDbl(const string &instring) const {
 
 //----------------------------------------------------------------------------------------------
 /** Parse string to double vector
-  */
+ */
 vector<unsigned int>
 ChopperConfiguration::parseStringUnsignedInt(const string &instring) const {
   vector<string> strs;
@@ -253,8 +263,8 @@ ChopperConfiguration::parseStringUnsignedInt(const string &instring) const {
 
   vector<unsigned int> vecinteger;
   for (auto &str : strs) {
-    if (str.size() > 0) {
-      int item = atoi(str.c_str());
+    if (!str.empty()) {
+      int item = std::stoi(str);
       if (item < 0) {
         throw runtime_error(
             "Found negative number in a string for unsigned integers.");
@@ -280,7 +290,7 @@ SaveGSASInstrumentFile::SaveGSASInstrumentFile()
 
 //----------------------------------------------------------------------------------------------
 /** Declare properties
-  */
+ */
 void SaveGSASInstrumentFile::init() {
   declareProperty(
       Kernel::make_unique<WorkspaceProperty<ITableWorkspace>>(
@@ -335,7 +345,7 @@ void SaveGSASInstrumentFile::init() {
 
 //----------------------------------------------------------------------------------------------
 /** Main execution body
-  */
+ */
 void SaveGSASInstrumentFile::exec() {
   // Process user specified properties
   processProperties();
@@ -422,7 +432,7 @@ void SaveGSASInstrumentFile::processProperties() {
   m_2theta = getProperty("TwoTheta");
   m_L2 = getProperty("L2");
   string freqtempstr = getProperty("ChopperFrequency");
-  m_frequency = atoi(freqtempstr.c_str());
+  m_frequency = std::stoi(freqtempstr);
 
   /* Set default value for L1
   if (m_L1 == EMPTY_DBL())
@@ -467,19 +477,19 @@ void SaveGSASInstrumentFile::processProperties() {
 
 //----------------------------------------------------------------------------------------------
 /** Set up some constant by default
-  * Output--> m_configuration
-  * @param profmap :: map of parameters
-  */
+ * Output--> m_configuration
+ * @param profmap :: map of parameters
+ */
 void SaveGSASInstrumentFile::initConstants(
     const map<unsigned int, map<string, double>> &profmap) {
   m_configuration = setupInstrumentConstants(profmap);
 
   /*
-  if (m_instrument.compare("PG3") == 0)
+  if (m_instrument == "PG3")
   {
     m_configuration = setupPG3Constants(chopperfrequency);
   }
-  else if (m_instrument.compare("NOM") == 0)
+  else if (m_instrument == "NOM")
   {
     m_configuration = setupNOMConstants(chopperfrequency);
   }
@@ -494,7 +504,7 @@ void SaveGSASInstrumentFile::initConstants(
 
 //----------------------------------------------------------------------------------------------
 /** Parse profile table workspace to a map (the new ...
-  */
+ */
 void SaveGSASInstrumentFile::parseProfileTableWorkspace(
     ITableWorkspace_sptr ws,
     map<unsigned int, map<string, double>> &profilemap) {
@@ -505,7 +515,7 @@ void SaveGSASInstrumentFile::parseProfileTableWorkspace(
 
   // Check
   vector<string> colnames = ws->getColumnNames();
-  if (colnames[0].compare("Name"))
+  if (colnames[0] != "Name")
     throw runtime_error("The first column must be Name");
 
   // Parse
@@ -513,7 +523,7 @@ void SaveGSASInstrumentFile::parseProfileTableWorkspace(
     TableRow tmprow = ws->getRow(irow);
     string parname;
     tmprow >> parname;
-    if (parname.compare("BANK")) {
+    if (parname != "BANK") {
       for (size_t icol = 0; icol < numbanks; ++icol) {
         double tmpdbl;
         tmprow >> tmpdbl;
@@ -547,7 +557,7 @@ void SaveGSASInstrumentFile::parseProfileTableWorkspace(
 
 //----------------------------------------------------------------------------------------------
 /** Set up chopper/instrument constant parameters from profile map
-  */
+ */
 ChopperConfiguration_sptr SaveGSASInstrumentFile::setupInstrumentConstants(
     const map<unsigned int, map<string, double>> &profmap) {
   // Collect bank ids
@@ -590,7 +600,7 @@ ChopperConfiguration_sptr SaveGSASInstrumentFile::setupInstrumentConstants(
 
 //----------------------------------------------------------------------------------------------
 /** Set up the chopper/instrument constant parameters for PG3
-  */
+ */
 ChopperConfiguration_sptr
 SaveGSASInstrumentFile::setupPG3Constants(int intfrequency) {
   string bankidstr, cwlstr, mndspstr, mxdspstr, maxtofstr;
@@ -636,8 +646,8 @@ SaveGSASInstrumentFile::setupPG3Constants(int intfrequency) {
 
 //----------------------------------------------------------------------------------------------
 /** Set up the converting constants for NOMAD
-  * @param intfrequency :: frequency in integer
-  */
+ * @param intfrequency :: frequency in integer
+ */
 ChopperConfiguration_sptr
 SaveGSASInstrumentFile::setupNOMConstants(int intfrequency) {
   // Set up string
@@ -667,16 +677,16 @@ SaveGSASInstrumentFile::setupNOMConstants(int intfrequency) {
 
 //----------------------------------------------------------------------------------------------
 /** Convert to GSAS instrument file
-  * @param outputbankids : list of banks (sorted) to .iparm or prm file
-  * @param gsasinstrfilename: string
-  * @param bankprofilemap :: map containing each bank's profile parameter stored
+ * @param outputbankids : list of banks (sorted) to .iparm or prm file
+ * @param gsasinstrfilename: string
+ * @param bankprofilemap :: map containing each bank's profile parameter stored
  * in map.
-  */
+ */
 void SaveGSASInstrumentFile::convertToGSAS(
     const std::vector<unsigned int> &outputbankids,
     const std::string &gsasinstrfilename,
-    const std::map<unsigned int, std::map<std::string, double>> &
-        bankprofilemap) {
+    const std::map<unsigned int, std::map<std::string, double>>
+        &bankprofilemap) {
   // Check
   if (!m_configuration)
     throw runtime_error("Not set up yet!");
@@ -725,11 +735,11 @@ void SaveGSASInstrumentFile::convertToGSAS(
 
 //----------------------------------------------------------------------------------------------
 /** Build a data structure for GSAS"s tabulated peak profile
-  * from Fullprof"s TOF peak profile
-  * @param bankprofilemap :: map of all banks' peak profile that is stored in
+ * from Fullprof"s TOF peak profile
+ * @param bankprofilemap :: map of all banks' peak profile that is stored in
  * map;
-  * @param bankid :: the ID of the bank to be converted
-  */
+ * @param bankid :: the ID of the bank to be converted
+ */
 void SaveGSASInstrumentFile::buildGSASTabulatedProfile(
     const std::map<unsigned int, std::map<std::string, double>> &bankprofilemap,
     unsigned int bankid) {
@@ -801,7 +811,7 @@ void SaveGSASInstrumentFile::buildGSASTabulatedProfile(
 
 //----------------------------------------------------------------------------------------------
 /** Write the header of the file
-  */
+ */
 void SaveGSASInstrumentFile::writePRMHeader(const vector<unsigned int> &banks,
                                             const string &prmfilename) {
   int numbanks = static_cast<int>(banks.size());
@@ -825,10 +835,10 @@ void SaveGSASInstrumentFile::writePRMHeader(const vector<unsigned int> &banks,
 
 //----------------------------------------------------------------------------------------------
 /** Write out .prm/.iparm file
-  * @param bankid : integer as the ID of the bank to be written to file
-  * @param bankprofilemap: map of all banks' profile parameters stored in map
-  * @param prmfilename: output file name
-  */
+ * @param bankid : integer as the ID of the bank to be written to file
+ * @param bankprofilemap: map of all banks' profile parameters stored in map
+ * @param prmfilename: output file name
+ */
 void SaveGSASInstrumentFile::writePRMSingleBank(
     const std::map<unsigned int, std::map<std::string, double>> &bankprofilemap,
     unsigned int bankid, const std::string &prmfilename) {
@@ -964,8 +974,8 @@ void SaveGSASInstrumentFile::writePRMSingleBank(
 
 //----------------------------------------------------------------------------------------------
 /** Calculate L2 from DIFFC and L1
-  * DIFC = 252.816*2sin(theta)sqrt(L1+L2)
-  */
+ * DIFC = 252.816*2sin(theta)sqrt(L1+L2)
+ */
 double SaveGSASInstrumentFile::calL2FromDtt1(double difc, double L1,
                                              double twotheta) {
   double l2 = difc / (252.816 * 2.0 * sin(0.5 * twotheta * M_PI / 180.0)) - L1;
@@ -978,18 +988,18 @@ double SaveGSASInstrumentFile::calL2FromDtt1(double difc, double L1,
 //----------------------------------------------------------------------------------------------
 /** Calculate TOF from d-space value of thermal neutron back-to-back exponential
  * conv. pseudo-voigt
-  * Epithermal: te = zero  + d*dtt1  + 0.5*dtt2*erfc( (1/d-1.05)*10 );
-  * Thermal:    tt = zerot + d*dtt1t + dtt2t/d;
-  * Total TOF:  t  = n*te + (1-n) tt
-  * @param n :: ratio between thermal neutron and epithermal neutron
-  * @param ep :: zero
-  * @param eq :: dtt1
-  * @param er :: dtt2
-  * @param tp :: zerot
-  * @param tq :: dtt1t
-  * @param tr :: dtt2t
-  * @param dsp :: d-space value
-*/
+ * Epithermal: te = zero  + d*dtt1  + 0.5*dtt2*erfc( (1/d-1.05)*10 );
+ * Thermal:    tt = zerot + d*dtt1t + dtt2t/d;
+ * Total TOF:  t  = n*te + (1-n) tt
+ * @param n :: ratio between thermal neutron and epithermal neutron
+ * @param ep :: zero
+ * @param eq :: dtt1
+ * @param er :: dtt2
+ * @param tp :: zerot
+ * @param tq :: dtt1t
+ * @param tr :: dtt2t
+ * @param dsp :: d-space value
+ */
 double SaveGSASInstrumentFile::calTOF(double n, double ep, double eq, double er,
                                       double tp, double tq, double tr,
                                       double dsp) {
@@ -1002,8 +1012,8 @@ double SaveGSASInstrumentFile::calTOF(double n, double ep, double eq, double er,
 
 //----------------------------------------------------------------------------------------------
 /** Calculate a value related to alph0, alph1, alph0t, alph1t or
-  * beta0, beta1, beta0t, beta1t
-  */
+ * beta0, beta1, beta0t, beta1t
+ */
 double SaveGSASInstrumentFile::aaba(double n, double ea1, double ea2,
                                     double ta1, double ta2, double dsp) {
   double ea = ea1 + (ea2 * dsp);
@@ -1016,7 +1026,7 @@ double SaveGSASInstrumentFile::aaba(double n, double ea1, double ea2,
 
 //----------------------------------------------------------------------------------------------
 /** Get parameter value from a map
-  */
+ */
 double
 SaveGSASInstrumentFile::getValueFromMap(const map<string, double> &profilemap,
                                         const string &parname) {
@@ -1037,7 +1047,7 @@ SaveGSASInstrumentFile::getValueFromMap(const map<string, double> &profilemap,
 
 //----------------------------------------------------------------------------------------------
 /** Get parameter value from m_configuration/m_profile
-  */
+ */
 double SaveGSASInstrumentFile::getProfileParameterValue(
     const map<string, double> &profilemap, const string &paramname) {
   auto piter = profilemap.find(paramname);
@@ -1059,10 +1069,10 @@ double SaveGSASInstrumentFile::getProfileParameterValue(
 
 //----------------------------------------------------------------------------------------------
 /** Calcualte range of data on d-spacing from TOF.
-  * Algorithm: use the approximation from Dtt1.  The part with thermal neutron
+ * Algorithm: use the approximation from Dtt1.  The part with thermal neutron
  * has complex operation
-  * on d ralated.
-  * @return :: d-space value
+ * on d ralated.
+ * @return :: d-space value
  */
 double SaveGSASInstrumentFile::calDspRange(double dtt1, double zero,
                                            double tof) {
@@ -1072,10 +1082,10 @@ double SaveGSASInstrumentFile::calDspRange(double dtt1, double zero,
 
 //----------------------------------------------------------------------------------------------
 /** Load fullprof resolution file.
-  * - call LoadFullprofResolution
-  * - set output table workspace to m_inpWS
-  * @param irffilename
-  */
+ * - call LoadFullprofResolution
+ * - set output table workspace to m_inpWS
+ * @param irffilename
+ */
 void SaveGSASInstrumentFile::loadFullprofResolutionFile(
     std::string irffilename) {
   IAlgorithm_sptr loadfpirf;
@@ -1089,6 +1099,7 @@ void SaveGSASInstrumentFile::loadFullprofResolutionFile(
   }
 
   loadfpirf->setProperty("Filename", irffilename);
+  loadfpirf->setProperty("OutputTableWorkspace", "outputTableWorkspace");
 
   loadfpirf->execute();
   if (!loadfpirf->isExecuted())
@@ -1102,7 +1113,7 @@ void SaveGSASInstrumentFile::loadFullprofResolutionFile(
 
 //----------------------------------------------------------------------------------------------
 /** Complementary error function
-*/
+ */
 double SaveGSASInstrumentFile::erfc(double xx) {
   double x = fabs(xx);
   double t = 1.0 / (1.0 + (0.5 * x));

@@ -1,17 +1,22 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_TESTPARDETECTOR__
 #define MANTID_TESTPARDETECTOR__
 
-#include <cxxtest/TestSuite.h>
-#include "MantidGeometry/Instrument/Detector.h"
-#include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/Component.h"
+#include "MantidGeometry/Instrument/Detector.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Geometry;
 
 class ParDetectorTest : public CxxTest::TestSuite {
 public:
   void testNameConstructor() {
-    Detector det("det1", 0, 0);
+    Detector det("det1", 0, nullptr);
 
     ParameterMap_sptr pmap(new ParameterMap());
     boost::shared_ptr<Detector> pdet(det.cloneParameterized(pmap.get()));
@@ -19,8 +24,6 @@ public:
     TS_ASSERT_EQUALS(pdet->getName(), "det1");
     TS_ASSERT(!pdet->getParent());
     TS_ASSERT_EQUALS(pdet->getID(), 0);
-    TS_ASSERT(!pdet->isMasked());
-    TS_ASSERT(!pdet->isMonitor());
   }
 
   void testNameParentConstructor() {
@@ -33,13 +36,11 @@ public:
     TS_ASSERT_EQUALS(pdet->getName(), "det1");
     TS_ASSERT(pdet->getParent());
     TS_ASSERT_EQUALS(pdet->getID(), 0);
-    TS_ASSERT(!pdet->isMasked());
-    TS_ASSERT(!pdet->isMonitor());
   }
 
   void testId() {
     int id1 = 41;
-    Detector det("det1", id1, 0);
+    Detector det("det1", id1, nullptr);
 
     ParameterMap_sptr pmap(new ParameterMap());
     boost::shared_ptr<Detector> pdet(det.cloneParameterized(pmap.get()));
@@ -48,7 +49,7 @@ public:
   }
 
   void testType() {
-    Detector det("det", 0, 0);
+    Detector det("det", 0, nullptr);
 
     ParameterMap_sptr pmap(new ParameterMap());
     boost::shared_ptr<Detector> pdet(det.cloneParameterized(pmap.get()));
@@ -57,31 +58,19 @@ public:
   }
 
   void testMasked() {
-    Detector det("det", 0, 0);
+    Detector det("det", 0, nullptr);
 
     ParameterMap_sptr pmap(new ParameterMap());
     boost::shared_ptr<Detector> pdet(det.cloneParameterized(pmap.get()));
 
-    TS_ASSERT(!pdet->isMasked());
-    pmap->addBool(&det, "masked", true);
-    TS_ASSERT(pdet->isMasked());
-  }
-
-  void testMonitor() {
-    Detector det("det", 0, 0);
-
-    ParameterMap_sptr pmap(new ParameterMap());
-    boost::shared_ptr<Detector> pdet(det.cloneParameterized(pmap.get()));
-
-    TS_ASSERT(!pdet->isMonitor());
-    TS_ASSERT_THROWS_NOTHING(det.markAsMonitor());
-    TS_ASSERT(pdet->isMonitor());
-    TS_ASSERT_THROWS_NOTHING(det.markAsMonitor(false));
-    TS_ASSERT(!pdet->isMonitor());
+    // Reading and writing masking should throw: Masking is now stored in
+    // DetectorInfo and ParameterMap should reject it.
+    TS_ASSERT_THROWS(pmap->get(&det, "masked"), std::runtime_error);
+    TS_ASSERT_THROWS(pmap->addBool(&det, "masked", true), std::runtime_error);
   }
 
   void testGetNumberParameter() {
-    Detector det("det", 0, 0);
+    Detector det("det", 0, nullptr);
 
     ParameterMap_sptr pmap(new ParameterMap());
     pmap->add("double", &det, "testparam", 5.0);
@@ -93,7 +82,7 @@ public:
   }
 
   void testGetPositionParameter() {
-    Detector det("det", 0, 0);
+    Detector det("det", 0, nullptr);
 
     ParameterMap_sptr pmap(new ParameterMap());
     pmap->add("V3D", &det, "testparam", Mantid::Kernel::V3D(0.5, 1.0, 1.5));
@@ -110,7 +99,7 @@ public:
   }
 
   void testGetRotationParameter() {
-    Detector det("det", 0, 0);
+    Detector det("det", 0, nullptr);
 
     ParameterMap_sptr pmap(new ParameterMap());
     pmap->add("Quat", &det, "testparam",

@@ -1,11 +1,22 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef INTEGRATE_3D_EVENTS_H
 #define INTEGRATE_3D_EVENTS_H
 
-#include <vector>
-#include <boost/shared_ptr.hpp>
-#include <unordered_map>
-#include "MantidKernel/V3D.h"
+#include "MantidDataObjects/Peak.h"
+#include "MantidDataObjects/PeakShapeEllipsoid.h"
 #include "MantidKernel/Matrix.h"
+#include "MantidKernel/V3D.h"
+
+#include <boost/shared_ptr.hpp>
+
+#include <tuple>
+#include <unordered_map>
+#include <vector>
 
 namespace Mantid {
 namespace Geometry {
@@ -15,6 +26,15 @@ namespace DataObjects {
 class PeakShapeEllipsoid;
 }
 namespace MDAlgorithms {
+
+struct IntegrationParameters {
+  std::vector<Kernel::V3D> E1Vectors;
+  double backgroundInnerRadius;
+  double backgroundOuterRadius;
+  double regionRadius;
+  double peakRadius;
+  bool specifySize;
+};
 
 /**
     @class Integrate3DEvents
@@ -28,41 +48,20 @@ namespace MDAlgorithms {
 
     @author Dennis Mikkelson
     @date   2012-12-19
-
-    Copyright © 2012 ORNL, STFC Rutherford Appleton Laboratories
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at:
-                 <https://github.com/mantidproject/mantid>
-
-    Code Documentation is available at
-                 <http://doxygen.mantidproject.org>
  */
 
-typedef std::unordered_map<
-    int64_t, std::vector<std::pair<double, Mantid::Kernel::V3D>>> EventListMap;
-typedef std::unordered_map<int64_t, Mantid::Kernel::V3D> PeakQMap;
+using EventListMap =
+    std::unordered_map<int64_t,
+                       std::vector<std::pair<double, Mantid::Kernel::V3D>>>;
+using PeakQMap = std::unordered_map<int64_t, Mantid::Kernel::V3D>;
 
 class DLLExport Integrate3DEvents {
 public:
   /// Construct object to store events around peaks and integrate peaks
   Integrate3DEvents(
       std::vector<std::pair<double, Mantid::Kernel::V3D>> const &peak_q_list,
-      Kernel::DblMatrix const &UBinv, double radius);
+      Kernel::DblMatrix const &UBinv, double radius,
+      const bool useOnePercentBackgroundCorrection = true);
 
   /// Add event Q's to lists of events near peaks
   void
@@ -76,7 +75,34 @@ public:
       double back_outer_radius, std::vector<double> &axes_radii, double &inti,
       double &sigi);
 
+  /// Find the net integrated intensity of a peak, using ellipsoidal volumes
+  std::pair<boost::shared_ptr<const Mantid::Geometry::PeakShape>,
+            std::tuple<double, double, double>>
+  integrateStrongPeak(const IntegrationParameters &params,
+                      const Kernel::V3D &peak_q, double &inti, double &sigi);
+
+  boost::shared_ptr<const Geometry::PeakShape>
+  integrateWeakPeak(const IntegrationParameters &params,
+                    Mantid::DataObjects::PeakShapeEllipsoid_const_sptr shape,
+                    const std::tuple<double, double, double> &libPeak,
+                    const Mantid::Kernel::V3D &peak_q, double &inti,
+                    double &sigi);
+
+  double estimateSignalToNoiseRatio(const IntegrationParameters &params,
+                                    const Mantid::Kernel::V3D &center);
+
 private:
+  /// Get a list of events for a given Q
+  const std::vector<std::pair<double, Mantid::Kernel::V3D>> *
+  getEvents(const Mantid::Kernel::V3D &peak_q);
+
+  bool correctForDetectorEdges(std::tuple<double, double, double> &radii,
+                               const std::vector<Mantid::Kernel::V3D> &E1Vecs,
+                               const Mantid::Kernel::V3D &peak_q,
+                               const std::vector<double> &axesRadii,
+                               const std::vector<double> &bkgInnerRadii,
+                               const std::vector<double> &bkgOuterRadii);
+
   /// Calculate the number of events in an ellipsoid centered at 0,0,0
   static double numInEllipsoid(
       std::vector<std::pair<double, Mantid::Kernel::V3D>> const &events,
@@ -87,7 +113,8 @@ private:
   static double numInEllipsoidBkg(
       std::vector<std::pair<double, Mantid::Kernel::V3D>> const &events,
       std::vector<Mantid::Kernel::V3D> const &directions,
-      std::vector<double> const &sizes, std::vector<double> const &sizesIn);
+      std::vector<double> const &sizes, std::vector<double> const &sizesIn,
+      const bool useOnePercentBackgroundCorrection);
 
   /// Calculate the 3x3 covariance matrix of a list of Q-vectors at 0,0,0
   static void makeCovarianceMatrix(
@@ -122,13 +149,24 @@ private:
       std::vector<double> const &sigmas, bool specify_size, double peak_radius,
       double back_inner_radius, double back_outer_radius,
       std::vector<double> &axes_radii, double &inti, double &sigi);
+
+  /// Compute if a particular Q falls on the edge of a detector
   double detectorQ(std::vector<Kernel::V3D> E1Vec,
-                   const Mantid::Kernel::V3D QLabFrame, std::vector<double> &r);
+                   const Mantid::Kernel::V3D QLabFrame,
+                   const std::vector<double> &r);
+
+  std::tuple<double, double, double>
+  calculateRadiusFactors(const IntegrationParameters &params,
+                         double max_sigma) const;
+
   // Private data members
+
   PeakQMap m_peak_qs;         // hashtable with peak Q-vectors
   EventListMap m_event_lists; // hashtable with lists of events for each peak
   Kernel::DblMatrix m_UBinv;  // matrix mapping from Q to h,k,l
   double m_radius;            // size of sphere to use for events around a peak
+  const bool m_useOnePercentBackgroundCorrection =
+      true; // if one perecent culling of the background should be performed.
 };
 
 } // namespace MDAlgorithms

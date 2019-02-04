@@ -1,9 +1,15 @@
-#include <iostream>
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
+#include <algorithm>
 #include <cmath>
 #include <complex>
-#include <vector>
+#include <iostream>
 #include <iterator>
-#include <algorithm>
+#include <vector>
 
 #include "MantidGeometry/Math/mathSupport.h"
 
@@ -65,7 +71,7 @@ int solveCubic(const CInputIter Coef, std::complex<double> &AnsA,
 */
 
 {
-  typedef std::complex<double> Cpair;
+  using Cpair = std::complex<double>;
   double q, r; /* solution parameters */
   double termR, discrim;
   double r13;
@@ -166,4 +172,4 @@ solveCubic(const std::vector<double>::const_iterator, std::complex<double> &,
            std::complex<double> &, std::complex<double> &);
 
 /// \endcond TEMPLATE
-}
+} // namespace Mantid

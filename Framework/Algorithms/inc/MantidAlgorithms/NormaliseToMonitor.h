@@ -1,20 +1,24 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_NORMALISETOMONITOR_H_
 #define MANTID_ALGORITHMS_NORMALISETOMONITOR_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/IPropertyManager.h"
+#include "MantidKernel/IPropertySettings.h"
+#include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
 namespace HistogramData {
 class BinEdges;
 class CountStandardDeviations;
 class Counts;
-}
-}
+} // namespace HistogramData
+} // namespace Mantid
 
 namespace Mantid {
 namespace Algorithms {
@@ -55,27 +59,6 @@ namespace Algorithms {
     <LI> IncludePartialBins  - Scales counts in end bins if min/max not on bin
    boundary. </LI>
     </UL>
-
-    Copyright &copy; 2008-2013 ISIS Rutherford Appleton Laboratory, NScD Oak
-   Ridge National Laboratory & European Spallation Source
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport NormaliseToMonitor : public API::Algorithm {
 public:
@@ -90,6 +73,7 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override { return {"Divide"}; }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override {
     return "CorrectionFunctions\\NormalisationCorrections";
@@ -99,23 +83,27 @@ private:
   // Overridden Algorithm methods
   void init() override;
   void exec() override;
+  std::map<std::string, std::string> validateInputs() override;
 
 protected: // for testing
   void checkProperties(const API::MatrixWorkspace_sptr &inputWorkspace);
   API::MatrixWorkspace_sptr
-  getInWSMonitorSpectrum(const API::MatrixWorkspace_sptr &inputWorkspace,
-                         int &spectra_num);
+  getInWSMonitorSpectrum(const API::MatrixWorkspace_sptr &inputWorkspace);
+  size_t getInWSMonitorIndex(const API::MatrixWorkspace_sptr &inputWorkspace);
   API::MatrixWorkspace_sptr
-  getMonitorWorkspace(const API::MatrixWorkspace_sptr &inputWorkspace,
-                      int &wsID);
+  getMonitorWorkspace(const API::MatrixWorkspace_sptr &inputWorkspace);
   API::MatrixWorkspace_sptr
-  extractMonitorSpectrum(const API::MatrixWorkspace_sptr &WS,
-                         std::size_t index);
-  bool setIntegrationProps();
+  extractMonitorSpectra(const API::MatrixWorkspace_sptr &ws,
+                        const std::vector<size_t> &workspaceIndexes);
+  bool setIntegrationProps(const bool isSingleCountWorkspace);
 
   void
   normaliseByIntegratedCount(const API::MatrixWorkspace_sptr &inputWorkspace,
-                             API::MatrixWorkspace_sptr &outputWorkspace);
+                             API::MatrixWorkspace_sptr &outputWorkspace,
+                             const bool isSingleCountWorkspace);
+
+  void performHistogramDivision(const API::MatrixWorkspace_sptr &inputWorkspace,
+                                API::MatrixWorkspace_sptr &outputWorkspace);
 
   void normaliseBinByBin(const API::MatrixWorkspace_sptr &inputWorkspace,
                          API::MatrixWorkspace_sptr &outputWorkspace);
@@ -132,6 +120,8 @@ private:
   double m_integrationMin = EMPTY_DBL();
   /// The upper bound of the integration range
   double m_integrationMax = EMPTY_DBL();
+  bool m_scanInput;
+  std::vector<size_t> m_workspaceIndexes;
 };
 
 // the internal class to verify and modify interconnected properties affecting
@@ -154,7 +144,7 @@ public:
                     Kernel::Property *const pProp) override;
 
   // interface needs it but if indeed proper clone used -- do not know.
-  IPropertySettings *clone() override {
+  IPropertySettings *clone() const override {
     return new MonIDPropChanger(hostWSname, SpectraNum, MonitorWorkspaceProp);
   }
 
@@ -178,7 +168,7 @@ private:
   bool monitorIdReader(API::MatrixWorkspace_const_sptr inputWS) const;
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /* MANTID_ALGORITHMS_NORMALISETOMONITOR_H_ */

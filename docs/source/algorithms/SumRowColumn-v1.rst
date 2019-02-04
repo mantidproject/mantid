@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -34,8 +34,8 @@ Usage
    # Run algorithm with Horizontal orientation
    OutputWorkspace = SumRowColumn( ws, "D_H")
 
-   print  "Input workspace has",ws.getNPoints(),"points."
-   print  "Output workspace has",OutputWorkspace.getNPoints(),"points."
+   print("Input workspace has {} points.".format(ws.getNPoints()))
+   print("Output workspace has {} points.".format(OutputWorkspace.getNPoints()))
    
 Output:
 

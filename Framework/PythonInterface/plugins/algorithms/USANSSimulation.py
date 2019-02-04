@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name
 from __future__ import (absolute_import, division, print_function)
 
@@ -12,6 +18,9 @@ class USANSSimulation(PythonAlgorithm):
 
     def category(self):
         return "SANS"
+
+    def seeAlso(self):
+        return [ "USANSReduction" ]
 
     def name(self):
         return "USANSSimulation"
@@ -146,6 +155,7 @@ class USANSSimulation(PythonAlgorithm):
         vol = 4.0*math.pi/3.0*radius*radius*radius
         f2 = vol*bes*bes*1.0e-6
         return scale*f2+bck
+
 
 #############################################################################################
 AlgorithmFactory.subscribe(USANSSimulation())

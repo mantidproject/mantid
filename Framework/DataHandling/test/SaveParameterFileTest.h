@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef SAVEPARAMETERFILETEST_H_
 #define SAVEPARAMETERFILETEST_H_
 
@@ -15,7 +21,11 @@
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Component.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidGeometry/Instrument/ParameterFactory.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/OptionalBool.h"
+#include "MantidKernel/StringTokenizer.h"
 #include "MantidTestHelpers/ScopedFileHelper.h"
 
 using namespace Mantid::API;
@@ -29,17 +39,17 @@ public:
   void testSavingParameters() {
     // First we want to load a workspace to work with.
     prepareWorkspace();
-
     // Now let's set some parameters
     setParam("nickel-holder", "testDouble1", 1.23);
     setParam("nickel-holder", "testDouble2", 1.00);
     setParam("nickel-holder", "testString1", "hello world");
     setParam("nickel-holder", "testString2", "unchanged");
     setParamByDetID(1301, "testDouble", 2.17);
-    setFitParam("nickel-holder", "A", ", BackToBackExponential , S ,  ,  ,  ,  "
-                                      ", "
-                                      "sqrt(188.149*centre^4+6520.945*centre^2)"
-                                      " , dSpacing , TOF , linear ; TOF ; TOF");
+    setFitParam("nickel-holder", "A",
+                ", BackToBackExponential , S ,  ,  ,  ,  "
+                ", "
+                "sqrt(188.149*centre^4+6520.945*centre^2)"
+                " , dSpacing , TOF , linear ; TOF ; TOF");
 
     // Create a temporary blank file for us to test with
     ScopedFileHelper::ScopedFile paramFile("", "__params.xml");
@@ -83,12 +93,11 @@ public:
   }
 
   void setParamByDetID(int id, std::string pName, double value) {
-    Instrument_const_sptr inst = m_ws->getInstrument();
     ParameterMap &paramMap = m_ws->instrumentParameters();
-    IDetector_const_sptr det = inst->getDetector(id);
-    IComponent_const_sptr comp =
-        boost::dynamic_pointer_cast<const IComponent>(det);
-    paramMap.addDouble(comp->getComponentID(), pName, value);
+    const auto &detectorInfo = m_ws->detectorInfo();
+    const auto detectorIndex = detectorInfo.indexOf(id);
+    const auto &detector = detectorInfo.detector(detectorIndex);
+    paramMap.addDouble(detector.getComponentID(), pName, value);
   }
 
   void setFitParam(std::string cName, std::string pName, std::string value) {
@@ -117,12 +126,10 @@ public:
   }
 
   void checkParamByDetID(int id, std::string pName, double value) {
-    Instrument_const_sptr inst = m_ws->getInstrument();
     ParameterMap &paramMap = m_ws->instrumentParameters();
-    IDetector_const_sptr det = inst->getDetector(id);
-    IComponent_const_sptr comp =
-        boost::dynamic_pointer_cast<const IComponent>(det);
-    Parameter_sptr param = paramMap.get(comp.get(), pName);
+    const auto &detectorInfo = m_ws->detectorInfo();
+    const auto &detector = detectorInfo.detector(detectorInfo.indexOf(id));
+    Parameter_sptr param = paramMap.get(&detector, pName);
     double pValue = param->value<double>();
     TS_ASSERT_DELTA(value, pValue, 0.0001);
   }
@@ -136,7 +143,7 @@ public:
         param->value<FitParameter>();
 
     // Info about fitting parameter is in string value, see FitParameter class
-    typedef Mantid::Kernel::StringTokenizer tokenizer;
+    using tokenizer = Mantid::Kernel::StringTokenizer;
     tokenizer values(value, ",", tokenizer::TOK_TRIM);
     TS_ASSERT_EQUALS(fitParam.getFormula(), values[7]);
     TS_ASSERT_EQUALS(fitParam.getFunction(), values[1]);
@@ -148,7 +155,7 @@ public:
     LoadParameterFile loaderPF;
     TS_ASSERT_THROWS_NOTHING(loaderPF.initialize());
     loaderPF.setPropertyValue("Filename", filename);
-    loaderPF.setPropertyValue("Workspace", m_ws->name());
+    loaderPF.setPropertyValue("Workspace", m_ws->getName());
     TS_ASSERT_THROWS_NOTHING(loaderPF.execute());
     TS_ASSERT(loaderPF.isExecuted());
   }
@@ -157,7 +164,7 @@ public:
     SaveParameterFile saverPF;
     TS_ASSERT_THROWS_NOTHING(saverPF.initialize());
     saverPF.setPropertyValue("Filename", filename);
-    saverPF.setPropertyValue("Workspace", m_ws->name());
+    saverPF.setPropertyValue("Workspace", m_ws->getName());
     TS_ASSERT_THROWS_NOTHING(saverPF.execute());
     TS_ASSERT(saverPF.isExecuted());
   }
@@ -174,8 +181,8 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
 
-    loaderIDF2.setPropertyValue(
-        "Filename", "IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING2.xml");
+    loaderIDF2.setPropertyValue("Filename",
+                                "unit_testing/IDF_for_UNIT_TESTING2.xml");
     loaderIDF2.setPropertyValue("Workspace", wsName);
     loaderIDF2.setProperty("RewriteSpectraMap",
                            Mantid::Kernel::OptionalBool(true));

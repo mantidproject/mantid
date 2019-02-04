@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name,attribute-defined-outside-init
 """
 These tests ensure that all the steps that the SANS Interface GUI performs to reduce SANS data
@@ -13,7 +19,8 @@ The first 2 Tests ensures that the result provided by the GUI are the same for t
 Test was first created to apply to Mantid Release 3.0.
 """
 
-import stresstesting
+from __future__ import (absolute_import, division, print_function)
+import systemtesting
 from mantid.simpleapi import *
 import isis_reducer
 import ISISCommandInterface as i
@@ -26,10 +33,10 @@ BATCHFILE = FileFinder.getFullPath('sans2d_reduction_gui_batch.csv')
 
 
 def s(obj):
-    print '!'+str(obj)+'!',type(obj)
+    print('!'+str(obj)+'!',type(obj))
 
 
-class SANS2DMinimalBatchReduction(stresstesting.MantidStressTest):
+class SANS2DMinimalBatchReduction(systemtesting.MantidSystemTest):
     """Minimal script to perform full reduction in batch mode
   """
 
@@ -47,7 +54,7 @@ class SANS2DMinimalBatchReduction(stresstesting.MantidStressTest):
 
     def validate(self):
         self.disableChecking.append('Instrument')
-        return "trans_test_rear","SANSReductionGUI.nxs"
+        return "trans_test_rear_1D_1.5_12.5","SANSReductionGUI.nxs"
 
 
 class SANS2DMinimalSingleReduction(SANS2DMinimalBatchReduction):
@@ -61,7 +68,7 @@ class SANS2DMinimalSingleReduction(SANS2DMinimalBatchReduction):
         i.TransmissionSample('22041','22024')
         i.TransmissionCan('22024', '22024')
         reduced = i.WavRangeReduction()
-        RenameWorkspace(reduced, OutputWorkspace='trans_test_rear')
+        RenameWorkspace(reduced, OutputWorkspace='trans_test_rear_1D_1.5_12.5')
 
 
 class SANS2DGUIBatchReduction(SANS2DMinimalBatchReduction):
@@ -198,7 +205,7 @@ class SANS2DGUIBatchReduction(SANS2DMinimalBatchReduction):
         self.tolerance_is_reller = True
         self.tolerance = 1.0e-2
         self.disableChecking.append('Instrument')
-        return "trans_test_rear","SANSReductionGUI.nxs"
+        return "trans_test_rear_1D_1.5_12.5","SANSReductionGUI.nxs"
 
 
 class SANS2DGUIReduction(SANS2DGUIBatchReduction):
@@ -265,7 +272,7 @@ class SANS2DGUIReduction(SANS2DGUIBatchReduction):
 
         self.checkFittingSettings()
 
-        RenameWorkspace(reduced, OutputWorkspace='trans_test_rear')
+        RenameWorkspace(reduced, OutputWorkspace='trans_test_rear_1D_1.5_12.5')
 
         self.cleanReduction(_user_settings_copy)
 

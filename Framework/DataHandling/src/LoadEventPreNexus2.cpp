@@ -1,30 +1,37 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadEventPreNexus2.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileFinder.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/FileValidator.h"
-#include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/Glob.h"
-#include "MantidAPI/FileProperty.h"
 #include "MantidKernel/BinaryFile.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/CPUTimer.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/FileValidator.h"
+#include "MantidKernel/Glob.h"
+#include "MantidKernel/InstrumentInfo.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/DateAndTime.h"
-#include "MantidGeometry/IDetector.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/VisibleWhenProperty.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/ListValidator.h"
-#include "MantidKernel/ConfigService.h"
-#include "MantidKernel/InstrumentInfo.h"
 
 #include <algorithm>
 #include <functional>
@@ -48,17 +55,15 @@ using namespace API;
 using namespace Geometry;
 using namespace DataObjects;
 
-using boost::posix_time::ptime;
-using boost::posix_time::time_duration;
 using DataObjects::EventList;
 using DataObjects::EventWorkspace;
 using DataObjects::EventWorkspace_sptr;
-using DataObjects::TofEvent;
-using std::cout;
+using Types::Core::DateAndTime;
+using Types::Event::TofEvent;
 using std::ifstream;
 using std::runtime_error;
-using std::stringstream;
 using std::string;
+using std::stringstream;
 using std::vector;
 
 //------------------------------------------------------------------------------------------------
@@ -98,7 +103,7 @@ static const int NUM_EXT = 7;
 
 //----------------------------------------------------------------------------------------------
 /** Parse preNexus file name to get run number
-  */
+ */
 static string getRunnumber(const string &filename) {
   // start by trimming the filename
   string runnumber(Poco::Path(filename).getBaseName());
@@ -114,7 +119,7 @@ static string getRunnumber(const string &filename) {
 
 //----------------------------------------------------------------------------------------------
 /** Generate Pulse ID file name from preNexus event file's name
-  */
+ */
 static string generatePulseidName(string eventfile) {
   // initialize vector of endings and put live at the beginning
   vector<string> eventExts(EVENT_EXTS, EVENT_EXTS + NUM_EXT);
@@ -135,7 +140,7 @@ static string generatePulseidName(string eventfile) {
 
 //----------------------------------------------------------------------------------------------
 /** Generate mapping file name from Event workspace's instrument
-  */
+ */
 static string generateMappingfileName(EventWorkspace_sptr &wksp) {
   // get the name of the mapping file as set in the parameter files
   std::vector<string> temp =
@@ -174,9 +179,13 @@ static string generateMappingfileName(EventWorkspace_sptr &wksp) {
   for (auto &dir : dirs) {
     if ((dir.length() > CAL_LEN) &&
         (dir.compare(dir.length() - CAL.length(), CAL.length(), CAL) == 0)) {
-      if (Poco::File(base.path() + "/" + dir + "/calibrations/" + mapping)
-              .exists())
-        files.push_back(base.path() + "/" + dir + "/calibrations/" + mapping);
+      std::string path = std::string(base.path())
+                             .append("/")
+                             .append(dir)
+                             .append("/calibrations/")
+                             .append(mapping);
+      if (Poco::File(path).exists())
+        files.push_back(path);
     }
   }
 
@@ -192,14 +201,16 @@ static string generateMappingfileName(EventWorkspace_sptr &wksp) {
 //----------------------------------------------------------------------------------------------
 /** Return the confidence with with this algorithm can load the file
  *  @param descriptor A descriptor for the file
- *  @returns An integer specifying the confidence level. 0 indicates it will not
+ *  @returns An integer specifying the confidence level. 0 indicates it will
+ * not
  * be used
  */
 int LoadEventPreNexus2::confidence(Kernel::FileDescriptor &descriptor) const {
   if (descriptor.extension().rfind("dat") == std::string::npos)
     return 0;
 
-  // If this looks like a binary file where the exact file length is a multiple
+  // If this looks like a binary file where the exact file length is a
+  // multiple
   // of the DasEvent struct then we're probably okay.
   if (descriptor.isAscii())
     return 0;
@@ -240,7 +251,7 @@ LoadEventPreNexus2::~LoadEventPreNexus2() { delete this->eventfile; }
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm, i.e, declare properties
-*/
+ */
 void LoadEventPreNexus2::init() {
   // which files to use
   vector<string> eventExts(EVENT_EXTS, EVENT_EXTS + NUM_EXT);
@@ -291,11 +302,11 @@ void LoadEventPreNexus2::init() {
                   "  Parallel: Use all available cores.");
 
   // the output workspace name
-  declareProperty(
-      Kernel::make_unique<WorkspaceProperty<IEventWorkspace>>(
-          OUT_PARAM, "", Direction::Output),
-      "The name of the workspace that will be created, filled with the read-in "
-      "data and stored in the [[Analysis Data Service]].");
+  declareProperty(Kernel::make_unique<WorkspaceProperty<IEventWorkspace>>(
+                      OUT_PARAM, "", Direction::Output),
+                  "The name of the workspace that will be created, filled "
+                  "with the read-in "
+                  "data and stored in the [[Analysis Data Service]].");
 
   declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "EventNumberWorkspace", "", Direction::Output,
@@ -324,12 +335,12 @@ void LoadEventPreNexus2::init() {
 
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm
-  * Procedure:
-  * 1. check all the inputs
-  * 2. create an EventWorkspace object
-  * 3. process events
-  * 4. set out output
-  */
+ * Procedure:
+ * 1. check all the inputs
+ * 2. create an EventWorkspace object
+ * 3. process events
+ * 4. set out output
+ */
 void LoadEventPreNexus2::exec() {
   g_log.information("Executing LoadEventPreNexus Ver 2.0");
 
@@ -340,7 +351,7 @@ void LoadEventPreNexus2::exec() {
     throw std::out_of_range("ChunkNumber cannot be larger than TotalChunks");
   }
 
-  prog = new Progress(this, 0.0, 1.0, 100);
+  prog = make_unique<Progress>(this, 0.0, 1.0, 100);
 
   // b. what spectra (pixel ID's) to load
   this->spectra_list = this->getProperty(PID_PARAM);
@@ -353,8 +364,8 @@ void LoadEventPreNexus2::exec() {
     pulseid_filename = generatePulseidName(event_filename);
     if (!pulseid_filename.empty()) {
       if (Poco::File(pulseid_filename).exists()) {
-        this->g_log.information() << "Found pulseid file " << pulseid_filename
-                                  << '\n';
+        this->g_log.information()
+            << "Found pulseid file " << pulseid_filename << '\n';
         throwError = false;
       } else {
         pulseid_filename = "";
@@ -393,19 +404,18 @@ void LoadEventPreNexus2::exec() {
   // Fast frequency sample environment data
   this->processImbedLogs();
 
-  // Cleanup
-  delete prog;
 } // exec()
 
 //------------------------------------------------------------------------------------------------
 /** Create and set up output Event Workspace
-  */
+ */
 void LoadEventPreNexus2::createOutputWorkspace(
     const std::string event_filename) {
   // Create the output workspace
   localWorkspace = EventWorkspace_sptr(new EventWorkspace());
 
-  // Make sure to initialize. We can use dummy numbers for arguments, for event
+  // Make sure to initialize. We can use dummy numbers for arguments, for
+  // event
   // workspace it doesn't matter
   localWorkspace->initialize(1, 1, 1);
 
@@ -440,8 +450,8 @@ void LoadEventPreNexus2::createOutputWorkspace(
   if (mapping_filename.empty()) {
     mapping_filename = generateMappingfileName(localWorkspace);
     if (!mapping_filename.empty())
-      this->g_log.information() << "Found mapping file \"" << mapping_filename
-                                << "\"\n";
+      this->g_log.information()
+          << "Found mapping file \"" << mapping_filename << "\"\n";
   }
   this->loadPixelMap(mapping_filename);
 
@@ -451,13 +461,14 @@ void LoadEventPreNexus2::createOutputWorkspace(
   if (!this->spectra_list.empty())
     nSpec = this->spectra_list.size();
   auto tmp = createWorkspace<EventWorkspace>(nSpec, 2, 1);
-  WorkspaceFactory::Instance().initializeFromParent(localWorkspace, tmp, true);
+  WorkspaceFactory::Instance().initializeFromParent(*localWorkspace, *tmp,
+                                                    true);
   localWorkspace = std::move(tmp);
 }
 
 //------------------------------------------------------------------------------------------------
 /** Some Pulse ID and event indexes might be wrong.  Remove them.
-  */
+ */
 void LoadEventPreNexus2::unmaskVetoEventIndex() {
   // Unmask veto bit from vetoed events
 
@@ -486,9 +497,10 @@ void LoadEventPreNexus2::unmaskVetoEventIndex() {
 
 //------------------------------------------------------------------------------------------------
 /** Generate a workspace with distribution of events with pulse
-  * Workspace has 2 spectrum.  spectrum 0 is the number of events in one pulse.
-  * specrum 1 is the accumulated number of events
-  */
+ * Workspace has 2 spectrum.  spectrum 0 is the number of events in one
+ * pulse.
+ * specrum 1 is the accumulated number of events
+ */
 API::MatrixWorkspace_sptr
 LoadEventPreNexus2::generateEventDistribtionWorkspace() {
   // Generate workspace of 2 spectrum
@@ -503,19 +515,18 @@ LoadEventPreNexus2::generateEventDistribtionWorkspace() {
 
   // Put x-values
   for (size_t i = 0; i < 2; ++i) {
-    MantidVec &dataX = disws->dataX(i);
+    auto &dataX = disws->mutableX(i);
     dataX[0] = 0;
     for (size_t j = 0; j < sizex; ++j) {
       int64_t time =
           pulsetimes[j].totalNanoseconds() - pulsetimes[0].totalNanoseconds();
       dataX[j] = static_cast<double>(time) * 1.0E-9;
-      // dataX[j] = static_cast<double>(j);
     }
   }
 
   // Put y-values
-  MantidVec &dataY0 = disws->dataY(0);
-  MantidVec &dataY1 = disws->dataY(1);
+  auto &dataY0 = disws->mutableY(0);
+  auto &dataY1 = disws->mutableY(1);
 
   dataY0[0] = 0;
   dataY1[1] = static_cast<double>(event_indices[0]);
@@ -560,10 +571,10 @@ void LoadEventPreNexus2::processImbedLogs() {
 //----------------------------------------------------------------------------------------------
 /** Add absolute time series to log. Use TOF as log value for this type of
  * events
-  * @param logtitle :: name of the log
-  * @param mindex :: index of the log in pulse time ...
-  * - mindex:  index of the the series in the list
-  */
+ * @param logtitle :: name of the log
+ * @param mindex :: index of the log in pulse time ...
+ * - mindex:  index of the the series in the list
+ */
 void LoadEventPreNexus2::addToWorkspaceLog(std::string logtitle,
                                            size_t mindex) {
   // Create TimeSeriesProperty
@@ -625,15 +636,16 @@ void LoadEventPreNexus2::runLoadInstrument(
                         Mantid::Kernel::OptionalBool(false));
   loadInst->executeAsChildAlg();
 
-  // Populate the instrument parameters in this workspace - this works around a
+  // Populate the instrument parameters in this workspace - this works around
+  // a
   // bug
   localWorkspace->populateInstrumentParameters();
 }
 
 //----------------------------------------------------------------------------------------------
 /** Turn a pixel id into a "corrected" pixelid and period.
-  *
-  */
+ *
+ */
 inline void LoadEventPreNexus2::fixPixelId(PixelType &pixel,
                                            uint32_t &period) const {
   if (!this->using_mapping_file) { // nothing to do here
@@ -648,8 +660,8 @@ inline void LoadEventPreNexus2::fixPixelId(PixelType &pixel,
 
 //----------------------------------------------------------------------------------------------
 /** Process the event file properly in parallel
-  * @param workspace :: EventWorkspace to write to.
-  */
+ * @param workspace :: EventWorkspace to write to.
+ */
 void LoadEventPreNexus2::procEvents(
     DataObjects::EventWorkspace_sptr &workspace) {
   //-------------------------------------------------------------------------
@@ -669,8 +681,8 @@ void LoadEventPreNexus2::procEvents(
   size_t numBlocks = (max_events + loadBlockSize - 1) / loadBlockSize;
 
   // We want to pad out empty pixels.
-  detid2det_map detector_map;
-  workspace->getInstrument()->getDetectors(detector_map);
+  const auto &detectorInfo = workspace->detectorInfo();
+  const auto &detIDs = detectorInfo.detectorIDs();
 
   // Determine processing mode
   std::string procMode = getProperty("UseParallelProcessing");
@@ -685,18 +697,17 @@ void LoadEventPreNexus2::procEvents(
     // second, e.g. 7 million events more per seconds).
     // compared to a setup time/merging time of about 10 seconds per million
     // detectors.
-    double setUpTime = double(detector_map.size()) * 10e-6;
+    double setUpTime = double(detectorInfo.size()) * 10e-6;
     parallelProcessing = ((double(max_events) / 7e6) > setUpTime);
     g_log.debug() << (parallelProcessing ? "Using" : "Not using")
                   << " parallel processing.\n";
   }
 
   // determine maximum pixel id
-  detid2det_map::iterator it;
   detid_max = 0; // seems like a safe lower bound
-  for (it = detector_map.begin(); it != detector_map.end(); it++)
-    if (it->first > detid_max)
-      detid_max = it->first;
+  for (const auto detID : detIDs)
+    if (detID > detid_max)
+      detid_max = detID;
 
   // For slight speed up
   loadOnlySomeSpectra = (!this->spectra_list.empty());
@@ -713,17 +724,17 @@ void LoadEventPreNexus2::procEvents(
   this->pixel_to_wkspindex.assign(detid_max + 1, 0);
   size_t workspaceIndex = 0;
   specnum_t spectrumNumber = 1;
-  for (it = detector_map.begin(); it != detector_map.end(); it++) {
-    if (!it->second->isMonitor()) {
+  for (size_t i = 0; i < detectorInfo.size(); ++i) {
+    if (!detectorInfo.isMonitor(i)) {
       if (!loadOnlySomeSpectra ||
-          (spectraLoadMap.find(it->first) != spectraLoadMap.end())) {
-        this->pixel_to_wkspindex[it->first] = workspaceIndex;
+          (spectraLoadMap.find(detIDs[i]) != spectraLoadMap.end())) {
+        this->pixel_to_wkspindex[detIDs[i]] = workspaceIndex;
         EventList &spec = workspace->getSpectrum(workspaceIndex);
-        spec.setDetectorID(it->first);
+        spec.setDetectorID(detIDs[i]);
         spec.setSpectrumNo(spectrumNumber);
         ++workspaceIndex;
       } else {
-        this->pixel_to_wkspindex[it->first] = -1;
+        this->pixel_to_wkspindex[detIDs[i]] = -1;
       }
       ++spectrumNumber;
     }
@@ -739,7 +750,7 @@ void LoadEventPreNexus2::procEvents(
   std::vector<DasEvent *> buffers;
 
   /// Pointer to the vector of events
-  typedef std::vector<TofEvent> *EventVector_pt;
+  using EventVector_pt = std::vector<TofEvent> *;
   /// Bare array of arrays of pointers to the EventVectors
   EventVector_pt **eventVectors;
 
@@ -948,16 +959,16 @@ void LoadEventPreNexus2::procEvents(
 
 //----------------------------------------------------------------------------------------------
 /** Linear-version of the procedure to process the event file properly.
-  * @param workspace :: EventWorkspace to write to.
-  * @param arrayOfVectors :: For speed up: this is an array, of size
+ * @param workspace :: EventWorkspace to write to.
+ * @param arrayOfVectors :: For speed up: this is an array, of size
  * detid_max+1, where the
-  *        index is a pixel ID, and the value is a pointer to the
+ *        index is a pixel ID, and the value is a pointer to the
  * vector<tofEvent> in the given EventList.
-  * @param event_buffer :: The buffer containing the DAS events
-  * @param current_event_buffer_size :: The length of the given DAS buffer
-  * @param fileOffset :: Value for an offset into the binary file
-  * @param dbprint :: flag to print out events information
-  */
+ * @param event_buffer :: The buffer containing the DAS events
+ * @param current_event_buffer_size :: The length of the given DAS buffer
+ * @param fileOffset :: Value for an offset into the binary file
+ * @param dbprint :: flag to print out events information
+ */
 void LoadEventPreNexus2::procEventsLinear(
     DataObjects::EventWorkspace_sptr & /*workspace*/,
     std::vector<TofEvent> **arrayOfVectors, DasEvent *event_buffer,
@@ -984,7 +995,7 @@ void LoadEventPreNexus2::procEventsLinear(
 
   // Storages
   std::map<PixelType, size_t> local_pidindexmap;
-  std::vector<std::vector<Kernel::DateAndTime>> local_pulsetimes;
+  std::vector<std::vector<Types::Core::DateAndTime>> local_pulsetimes;
   std::vector<std::vector<double>> local_tofs;
   std::set<PixelType> local_wrongdetids;
 
@@ -1082,7 +1093,7 @@ void LoadEventPreNexus2::procEventsLinear(
         size_t newindex = local_pulsetimes.size();
         local_pidindexmap[pid] = newindex;
 
-        std::vector<Kernel::DateAndTime> tempvectime;
+        std::vector<Types::Core::DateAndTime> tempvectime;
         std::vector<double> temptofs;
         local_pulsetimes.push_back(tempvectime);
         local_tofs.push_back(temptofs);
@@ -1131,7 +1142,7 @@ void LoadEventPreNexus2::procEventsLinear(
         size_t newindex = this->wrongdetid_pulsetimes.size();
         this->wrongdetidmap[tmpid] = newindex;
 
-        std::vector<Kernel::DateAndTime> temppulsetimes;
+        std::vector<Types::Core::DateAndTime> temppulsetimes;
         std::vector<double> temptofs;
         this->wrongdetid_pulsetimes.push_back(temppulsetimes);
         this->wrongdetid_tofs.push_back(temptofs);
@@ -1163,20 +1174,20 @@ void LoadEventPreNexus2::procEventsLinear(
 
 //----------------------------------------------------------------------------------------------
 /** Comparator for sorting dasevent lists
-  */
+ */
 bool vzintermediatePixelIDComp(IntermediateEvent x, IntermediateEvent y) {
   return (x.pid < y.pid);
 }
 
 //-----------------------------------------------------------------------------
 /**
-  * Add a sample environment log for the proton chage (charge of the pulse in
-  *picoCoulombs)
-  * and set the scalar value (total proton charge, microAmps*hours, on the
-  *sample)
-  *
-  * @param workspace :: Event workspace to set the proton charge on
-  */
+ * Add a sample environment log for the proton chage (charge of the pulse in
+ *picoCoulombs)
+ * and set the scalar value (total proton charge, microAmps*hours, on the
+ *sample)
+ *
+ * @param workspace :: Event workspace to set the proton charge on
+ */
 void LoadEventPreNexus2::setProtonCharge(
     DataObjects::EventWorkspace_sptr &workspace) {
   if (this->proton_charge.empty()) // nothing to do
@@ -1204,8 +1215,8 @@ void LoadEventPreNexus2::setProtonCharge(
 
 //-----------------------------------------------------------------------------
 /** Load a pixel mapping file
-  * @param filename :: Path to file.
-  */
+ * @param filename :: Path to file.
+ */
 void LoadEventPreNexus2::loadPixelMap(const std::string &filename) {
   this->using_mapping_file = false;
 
@@ -1245,8 +1256,8 @@ void LoadEventPreNexus2::loadPixelMap(const std::string &filename) {
 
 //-----------------------------------------------------------------------------
 /** Open an event file
-  * @param filename :: file to open.
-  */
+ * @param filename :: file to open.
+ */
 void LoadEventPreNexus2::openEventFile(const std::string &filename) {
   // Open the file
   eventfile = new BinaryFile<DasEvent>(filename);
@@ -1351,7 +1362,7 @@ void LoadEventPreNexus2::readPulseidFile(const std::string &filename,
 
 //----------------------------------------------------------------------------------------------
 /** Process input properties for purpose of investigation
-  */
+ */
 void LoadEventPreNexus2::processInvestigationInputs() {
   m_dbOpBlockNumber = getProperty("DBOutputBlockNumber");
   if (isEmpty(m_dbOpBlockNumber)) {

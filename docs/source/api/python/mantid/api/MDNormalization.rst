@@ -2,7 +2,7 @@
  MDNormalization
 =================
 
-This a python binding to the C++ class Mantid::API::MDNormalization.
+This is a Python binding to the C++ class Mantid::API::MDNormalization.
 
 
 .. module:`mantid.api`

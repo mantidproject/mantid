@@ -1,12 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //--------------------------------
 // Includes
 //--------------------------------
 #include "MantidDataHandling/CreateSampleShape.h"
-#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidKernel/Material.h"
 #include "MantidAPI/Sample.h"
+#include "MantidGeometry/Objects/CSGObject.h"
+#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/Material.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -46,15 +53,19 @@ void CreateSampleShape::exec() {
   if (shape->hasValidShape()) {
     const auto mat = workspace->sample().getMaterial();
     shape->setMaterial(mat);
-    workspace->mutableSample().setShape(*shape);
+    workspace->mutableSample().setShape(shape);
   } else {
     std::ostringstream msg;
-    msg << "Object has invalid shape. TopRule = " << shape->topRule()
-        << ", number of surfaces = " << shape->getSurfacePtr().size() << "\n";
+    msg << "Object has invalid shape.";
+    if (auto csgShape = dynamic_cast<Geometry::CSGObject *>(shape.get())) {
+      msg << " TopRule = " << csgShape->topRule()
+          << ", number of surfaces = " << csgShape->getSurfacePtr().size()
+          << "\n";
+    }
     throw std::runtime_error(msg.str());
   }
   // Done!
   progress(1);
 }
-}
-}
+} // namespace DataHandling
+} // namespace Mantid

@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_CALCCOUNTRATE_H_
 #define MANTID_ALGORITHMS_CALCCOUNTRATE_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -20,33 +26,14 @@ namespace Algorithms {
   experiment's time and adds appropriate logs to the event workspace
   for further event filtering on the basis of these logs, if the log values in
   some parts differ strongly from the average values.
-
-
-  Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
-
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>
-  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport CalculateCountRate : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"ChangePulsetime"};
+  }
   const std::string category() const override;
   const std::string summary() const override;
   /// Helper function: true if count rate should be normalized and false
@@ -79,7 +66,7 @@ protected: // for testing, actually private
   /// spurion search ranges (TOF or other units requested)
   double m_XRangeMin{0}, m_XRangeMax{0};
   /// experiment time ranges:
-  Kernel::DateAndTime m_TRangeMin{0}, m_TRangeMax{0};
+  Types::Core::DateAndTime m_TRangeMin{0}, m_TRangeMax{0};
   /// temporary workspace used to keep intermediate results
   DataObjects::EventWorkspace_sptr m_workingWS;
 

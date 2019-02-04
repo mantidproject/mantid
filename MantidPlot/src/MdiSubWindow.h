@@ -30,7 +30,7 @@
 #define MdiSubWindow_H
 
 #include "MantidKernel/RegistrationHelper.h"
-#include "MantidQtAPI/IProjectSerialisable.h"
+#include "MantidQtWidgets/Common/IProjectSerialisable.h"
 #include "WindowFactory.h"
 #include <QDockWidget>
 #include <QFrame>
@@ -50,14 +50,14 @@ class Folder;
 class MdiSubWindowParent_t : public QFrame {
   Q_OBJECT
 public:
-  MdiSubWindowParent_t(QWidget *parent, Qt::WFlags f = 0)
-      : QFrame(parent, f), m_widget(NULL) {}
+  MdiSubWindowParent_t(QWidget *parent, Qt::WFlags f = nullptr)
+      : QFrame(parent, f), m_widget(nullptr) {}
   void setWidget(QWidget *w) {
-    if (w == NULL) { // removing widget
+    if (w == nullptr) { // removing widget
       if (m_widget) {
         layout()->takeAt(0);
       }
-      m_widget = NULL;
+      m_widget = nullptr;
       return;
     }
 
@@ -67,7 +67,7 @@ public:
     }
 
     // setting the internal widget
-    if (this->layout() == NULL) {
+    if (this->layout() == nullptr) {
       QVBoxLayout *layout = new QVBoxLayout(this);
       layout->setContentsMargins(0, 0, 0, 0);
       layout->addWidget(w);
@@ -125,7 +125,7 @@ public:
    * \sa setCaptionPolicy(), captionPolicy()
    */
   MdiSubWindow(QWidget *parent, const QString &label = QString(),
-               const QString &name = QString(), Qt::WFlags f = 0);
+               const QString &name = QString(), Qt::WFlags f = nullptr);
 
   MdiSubWindow();
 
@@ -136,7 +136,7 @@ public:
   //! Possible window captions.
   enum CaptionPolicy {
     Name = 0,  //!< caption determined by the window name
-    Label = 1, //!< caption detemined by the window label
+    Label = 1, //!< caption determined by the window label
     Both = 2   //!< caption = "name - label"
   };
   enum Status { Hidden = -1, Normal = 0, Minimized = 1, Maximized = 2 };
@@ -145,6 +145,7 @@ public:
   ApplicationWindow *applicationWindow() { return d_app; }
   /// Get the pointer to Folder
   Folder *folder() { return d_folder; }
+
 public slots:
 
   //! Return the window label
@@ -197,7 +198,7 @@ public slots:
   //! Size of the widget as a string
   virtual QString sizeToString();
 
-  //!Notifies that a window was hidden by a direct user action
+  //! Notifies that a window was hidden by a direct user action
   virtual void setHidden();
 
   // event handlers
@@ -233,7 +234,7 @@ public slots:
    * lines to be ignored.
    * It creates a temporary file with '\n' terminated lines which can be
    * correctly read by QTextStream
-   * and returnes a path to this file.
+   * and returns a path to this file.
    */
   static QString parseAsciiFile(const QString &fname,
                                 const QString &commentString, int endLine,
@@ -282,6 +283,13 @@ public: // non-slot methods
                   const int fileVersion);
   /// Serialises to a string that can be saved to a project file.
   std::string saveToProject(ApplicationWindow *app) override;
+  /// Returns a list of workspace names that are used by this window
+  std::vector<std::string> getWorkspaceNames() override;
+  /// Returns the user friendly name of the window
+  std::string getWindowName() override;
+  /// Get the window type as a string
+  std::string getWindowType() override;
+
 signals:
   //! Emitted when the window was closed
   void closedWindow(MdiSubWindow *);
@@ -299,7 +307,7 @@ signals:
   void dockToMDIArea(MdiSubWindow *);
   //! Emitted when the window wants to undock
   void undockFromMDIArea(MdiSubWindow *);
-  /// Emited to detach this window from any parent - docked or floating
+  /// Emitted to detach this window from any parent - docked or floating
   void detachFromParent(MdiSubWindow *);
 
   void dragMousePress(QPoint);
@@ -345,7 +353,7 @@ private:
   friend class FloatingWindow;
 };
 
-typedef QList<MdiSubWindow *> MDIWindowList;
+using MDIWindowList = QList<MdiSubWindow *>;
 
 /* Used to register classes into the factory. creates a global object in an
  * anonymous namespace. The object itself does nothing, but the comma operator

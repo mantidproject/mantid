@@ -1,5 +1,12 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CreatePSDBleedMask.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -19,8 +26,8 @@ DECLARE_ALGORITHM(CreatePSDBleedMask)
 
 const std::string CreatePSDBleedMask::category() const { return "Diagnostics"; }
 
-using API::MatrixWorkspace_sptr;
 using API::MatrixWorkspace_const_sptr;
+using API::MatrixWorkspace_sptr;
 using DataObjects::MaskWorkspace_sptr;
 
 /// Default constructor
@@ -29,8 +36,8 @@ CreatePSDBleedMask::CreatePSDBleedMask() {}
 /// Initialize the algorithm properties
 void CreatePSDBleedMask::init() {
   using API::WorkspaceProperty;
-  using Kernel::Direction;
   using Kernel::BoundedValidator;
+  using Kernel::Direction;
 
   declareProperty(Kernel::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
                                                            Direction::Input),
@@ -93,10 +100,12 @@ void CreatePSDBleedMask::exec() {
   const int numSpectra =
       static_cast<int>(inputWorkspace->getNumberHistograms());
   // Keep track of a map of tubes to lists of indices
-  typedef std::map<Geometry::ComponentID, std::vector<int>> TubeIndex;
+  using TubeIndex = std::map<Geometry::ComponentID, std::vector<int>>;
   TubeIndex tubeMap;
 
-  API::Progress progress(this, 0, 1, numSpectra);
+  API::Progress progress(this, 0.0, 1.0, numSpectra);
+
+  const auto &spectrumInfo = inputWorkspace->spectrumInfo();
 
   // NOTE: This loop is intentionally left unparallelized as the majority of the
   // work requires a lock around it which actually slows down the loop.
@@ -106,24 +115,23 @@ void CreatePSDBleedMask::exec() {
   // correct
   // order
   for (int i = 0; i < numSpectra; ++i) {
-    IDetector_const_sptr det;
-    try {
-      det = inputWorkspace->getDetector(i);
-    } catch (Kernel::Exception::NotFoundError &) {
-      continue;
-    }
-    if (det->isMonitor())
+    if (!spectrumInfo.hasDetectors(i))
       continue;
 
-    boost::shared_ptr<const Geometry::DetectorGroup> group =
-        boost::dynamic_pointer_cast<const Geometry::DetectorGroup>(det);
+    if (spectrumInfo.isMonitor(i))
+      continue;
 
-    if (group) {
-      det = group->getDetectors().front();
-      if (!det)
-        continue;
+    auto &det = spectrumInfo.detector(i);
+    boost::shared_ptr<const Geometry::IComponent> parent;
+
+    if (!spectrumInfo.hasUniqueDetector(i)) {
+      const Geometry::DetectorGroup &group =
+          dynamic_cast<const Geometry::DetectorGroup &>(det);
+      parent = group.getDetectors().front()->getParent();
+    } else {
+      parent = det.getParent();
     }
-    boost::shared_ptr<const Geometry::IComponent> parent = det->getParent();
+
     if (!parent)
       continue;
 
@@ -149,11 +157,10 @@ void CreatePSDBleedMask::exec() {
 
   progress.resetNumSteps(numTubes, 0, 1);
 
-  PARALLEL_FOR2(inputWorkspace, outputWorkspace)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inputWorkspace, *outputWorkspace))
   for (int i = 0; i < numTubes; ++i) {
     PARALLEL_START_INTERUPT_REGION
-    auto current = tubeMap.begin();
-    std::advance(current, i);
+    auto current = std::next(tubeMap.begin(), i);
     const TubeIndex::mapped_type tubeIndices = current->second;
     bool mask = performBleedTest(tubeIndices, inputWorkspace, maxRate,
                                  numIgnoredPixels);
@@ -263,5 +270,5 @@ void CreatePSDBleedMask::maskTube(const std::vector<int> &tubeIndices,
     workspace->mutableY(tubeIndice)[0] = deadValue;
   }
 }
-}
-}
+} // namespace Algorithms
+} // namespace Mantid

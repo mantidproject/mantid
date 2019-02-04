@@ -1,12 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_BINARYOPERATION_H_
 #define MANTID_ALGORITHMS_BINARYOPERATION_H_
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/Run.h"
-#include "MantidAPI/Workspace_fwd.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
+#include "MantidAPI/Workspace_fwd.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/System.h"
 
 namespace Mantid {
@@ -31,34 +39,9 @@ operand</LI>
 
 @author Nick Draper
 @date 14/12/2007
-
-Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>
 */
 class DLLExport BinaryOperation : public API::Algorithm {
 public:
-  /// Default constructor
-  BinaryOperation();
-  /// Destructor
-  ~BinaryOperation() override;
-
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Arithmetic"; }
 
@@ -67,14 +50,18 @@ public:
    * Value at that index: workspace index of the rhs to apply to the WI in the
    * lhs. -1 if not found.
    */
-  typedef std::vector<int64_t> BinaryOperationTable;
-  typedef boost::shared_ptr<BinaryOperationTable> BinaryOperationTable_sptr;
+  using BinaryOperationTable = std::vector<int64_t>;
+  using BinaryOperationTable_sptr = boost::shared_ptr<BinaryOperationTable>;
 
   static BinaryOperationTable_sptr
   buildBinaryOperationTable(const API::MatrixWorkspace_const_sptr &lhs,
                             const API::MatrixWorkspace_const_sptr &rhs);
 
 protected:
+  Parallel::ExecutionMode getParallelExecutionMode(
+      const std::map<std::string, Parallel::StorageMode> &storageModes)
+      const override;
+
   // Overridden Algorithm methods
   void exec() override;
   void init() override;
@@ -107,53 +94,38 @@ protected:
   checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,
                          const API::MatrixWorkspace_const_sptr rhs) const;
 
-  /// Checks if the spectra at the given index of either input workspace is
-  /// masked. If so then the output spectra has zeroed data
-  /// and is also masked. The function returns true if further processing is not
-  /// required on the spectra.
-  virtual bool propagateSpectraMask(const API::MatrixWorkspace_const_sptr lhs,
-                                    const API::MatrixWorkspace_const_sptr rhs,
+  virtual bool propagateSpectraMask(const API::SpectrumInfo &lhsSpectrumInfo,
+                                    const API::SpectrumInfo &rhsSpectrumInfo,
                                     const int64_t index,
-                                    API::MatrixWorkspace_sptr out);
+                                    API::MatrixWorkspace &out,
+                                    API::SpectrumInfo &outSpectrumInfo);
 
   /** Carries out the binary operation on a single spectrum, with another
    *spectrum as the right-hand operand.
    *
-   *  @param lhsX :: The X values, made available if required.
-   *  @param lhsY :: The vector of lhs data values
-   *  @param lhsE :: The vector of lhs error values
-   *  @param rhsY :: The vector of rhs data values
-   *  @param rhsE :: The vector of rhs error values
-   *  @param YOut :: The vector to hold the data values resulting from the
-   *operation
-   *  @param EOut :: The vector to hold the error values resulting from the
-   *operation
+   *  @param lhs :: Lhs histogram data
+   *  @param rhs :: Rhs histogram data
+   *  @param YOut :: Data values resulting from the operation
+   *  @param EOut :: Drror values resulting from the operation
    */
-  virtual void performBinaryOperation(const MantidVec &lhsX,
-                                      const MantidVec &lhsY,
-                                      const MantidVec &lhsE,
-                                      const MantidVec &rhsY,
-                                      const MantidVec &rhsE, MantidVec &YOut,
-                                      MantidVec &EOut) = 0;
+  virtual void performBinaryOperation(const HistogramData::Histogram &lhs,
+                                      const HistogramData::Histogram &rhs,
+                                      HistogramData::HistogramY &YOut,
+                                      HistogramData::HistogramE &EOut) = 0;
 
   /** Carries out the binary operation when the right hand operand is a single
    *number.
    *
-   *  @param lhsX :: The X values, made available if required.
-   *  @param lhsY :: The vector of lhs data values
-   *  @param lhsE :: The vector of lhs error values
+   *  @param lhs :: Lhs histogram data
    *  @param rhsY :: The rhs data value
-   *  @param rhsE :: The rhs error value
-   *  @param YOut :: The vector to hold the data values resulting from the
-   *operation
-   *  @param EOut :: The vector to hold the error values resulting from the
-   *operation
+   *  @param rhsE :: The lhs data value
+   *  @param YOut :: Data values resulting from the operation
+   *  @param EOut :: Error values resulting from the operation
    */
-  virtual void performBinaryOperation(const MantidVec &lhsX,
-                                      const MantidVec &lhsY,
-                                      const MantidVec &lhsE, const double rhsY,
-                                      const double rhsE, MantidVec &YOut,
-                                      MantidVec &EOut) = 0;
+  virtual void performBinaryOperation(const HistogramData::Histogram &lhs,
+                                      const double rhsY, const double rhsE,
+                                      HistogramData::HistogramY &YOut,
+                                      HistogramData::HistogramE &EOut) = 0;
 
   // ===================================== EVENT LIST BINARY OPERATIONS
   // ==========================================
@@ -172,9 +144,9 @@ protected:
    * with another (histogrammed) spectrum as the right-hand operand.
    *
    *  @param lhs :: Reference to the EventList that will be modified in place.
-   *  @param rhsX :: The vector of rhs X bin boundaries
-   *  @param rhsY :: The vector of rhs data values
-   *  @param rhsE :: The vector of rhs error values
+   *  @param rhsX :: Rhs X bin boundaries
+   *  @param rhsY :: Rhs data values
+   *  @param rhsE :: Rhs error values
    */
   virtual void performEventBinaryOperation(DataObjects::EventList &lhs,
                                            const MantidVec &rhsX,
@@ -210,9 +182,9 @@ protected:
   /** Only overridden by operations that affect the properties of the run (e.g.
    * Plus
    *  where the proton currents (charges) are added). Otherwise it does nothing.
-   *  @param lhs :: one of the workspaces to operate on
-   *  @param rhs :: the other workspace
-   *  @param ans :: the output workspace
+   *  @param lhs :: One of the workspaces to operate on
+   *  @param rhs :: The other workspace
+   *  @param ans :: The output workspace
    */
 
   virtual void operateOnRun(const API::Run &lhs, const API::Run &rhs,
@@ -243,36 +215,40 @@ protected:
   DataObjects::EventWorkspace_sptr m_eout;
 
   /// The property value
-  bool m_AllowDifferentNumberSpectra;
+  bool m_AllowDifferentNumberSpectra{false};
   /// Flag to clear RHS workspace in binary operation
-  bool m_ClearRHSWorkspace;
+  bool m_ClearRHSWorkspace{false};
+  /// Cache for LHS workspace's blocksize
+  size_t m_lhsBlocksize;
+  /// Cache for RHS workspace's blocksize
+  size_t m_rhsBlocksize;
 
   //------ Requirements -----------
 
   /// matchXSize set to true if the X sizes of histograms must match.
-  bool m_matchXSize;
+  bool m_matchXSize{false};
 
   /// flipSides set to true if the rhs and lhs operands should be flipped - for
   /// commutative binary operations, normally.
-  bool m_flipSides;
+  bool m_flipSides{false};
 
   /// Variable set to true if the operation allows the output to stay as an
   /// EventWorkspace. If this returns false, any EventWorkspace will be
   /// converted to Workspace2D. This is ignored if the lhs operand is not an
   /// EventWorkspace.
-  bool m_keepEventWorkspace;
+  bool m_keepEventWorkspace{false};
 
   /** Are we going to use the histogram representation of the RHS event list
    * when performing the operation?
    * e.g. divide and multiply? Plus and Minus will set this to false (default).
    */
-  bool m_useHistogramForRhsEventWorkspace;
+  bool m_useHistogramForRhsEventWorkspace{false};
 
   /** Special case for plus/minus: if there is only one bin on the RHS, use the
    * 2D method (appending event lists)
    * so that the single bin is not treated as a scalar
    */
-  bool m_do2D_even_for_SingleColumn_on_rhs;
+  bool m_do2D_even_for_SingleColumn_on_rhs{false};
 
 private:
   void doSingleValue();
@@ -283,7 +259,7 @@ private:
   void propagateBinMasks(const API::MatrixWorkspace_const_sptr rhs,
                          API::MatrixWorkspace_sptr out);
   /// Progress reporting
-  API::Progress *m_progress;
+  std::unique_ptr<API::Progress> m_progress = nullptr;
 };
 
 } // namespace Algorithms

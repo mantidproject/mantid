@@ -1,8 +1,16 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 """
 Test one can import paraview.simple in MantidPlot
 """
 import mantidplottests
 from mantidplottests import *
+from paraview.simple import *
+
 
 class MantidPlotPVPythonTest(unittest.TestCase):
 
@@ -13,9 +21,7 @@ class MantidPlotPVPythonTest(unittest.TestCase):
         pass
 
     def test_PVPython(self):
-        from paraview.simple import *
-        self.assertEquals(str(GetParaViewVersion()),'5.1')
+        self.assertEqual(GetParaViewVersion().major, 5)
 
 # Run the unit tests
 mantidplottests.runTests(MantidPlotPVPythonTest)
-

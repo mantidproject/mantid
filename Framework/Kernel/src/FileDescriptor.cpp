@@ -1,8 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/FileDescriptor.h"
-#include "MantidKernel/Exception.h"
+#include "MantidKernel/Strings.h"
 
 #include <Poco/File.h>
 #include <Poco/Path.h>
+
+#include <stdexcept>
 
 namespace Mantid {
 namespace Kernel {
@@ -68,11 +76,11 @@ bool FileDescriptor::isAscii(std::istream &data, const size_t nbytes) {
 }
 
 /**
-* Check if a file is a text file
-* @param file :: The file pointer
-* @param nbytes The number of bytes of the file to check (Default=256)
-* @returns true if the file an ascii text file, false otherwise
-*/
+ * Check if a file is a text file
+ * @param file :: The file pointer
+ * @param nbytes The number of bytes of the file to check (Default=256)
+ * @returns true if the file an ascii text file, false otherwise
+ */
 bool FileDescriptor::isAscii(FILE *file, const size_t nbytes) {
   // read the data and reset the seek index back to the beginning
   auto data = new char[nbytes];
@@ -139,6 +147,18 @@ void FileDescriptor::resetStreamToStart() {
   }
 }
 
+/**
+ * Check if a file is an XML file. For now, a file is considered to be an XML
+ * file if it is of Ascii type and has a ".xml" extension. Future improvements
+ * could include checking inside the file if there are indeed XML tags.
+ *
+ * @returns true if the file is of Ascii type and has a ".xml" extension, false
+ * otherwise
+ */
+bool FileDescriptor::isXML() const {
+  return (this->isAscii() && this->extension() == ".xml");
+}
+
 //----------------------------------------------------------------------------------------------
 // Private methods
 //----------------------------------------------------------------------------------------------
@@ -149,7 +169,8 @@ void FileDescriptor::resetStreamToStart() {
  */
 void FileDescriptor::initialize(const std::string &filename) {
   m_filename = filename;
-  m_extension = "." + Poco::Path(filename).getExtension();
+  m_extension = Mantid::Kernel::Strings::toLower(
+      "." + Poco::Path(filename).getExtension());
 
   m_file.open(m_filename.c_str(), std::ios::in | std::ios::binary);
   if (!m_file)

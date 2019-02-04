@@ -1,13 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CURVEFITTING_FIT_H_
 #define MANTID_CURVEFITTING_FIT_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-//#include "MantidAPI/Algorithm.h"
-//#include "MantidAPI/IFunction.h"
-//#include "MantidAPI/Workspace_fwd.h"
-//#include "MantidAPI/IDomainCreator.h"
 #include "MantidCurveFitting/IFittingAlgorithm.h"
 
 namespace Mantid {
@@ -17,7 +19,7 @@ class FunctionDomain;
 class FunctionValues;
 class Workspace;
 class IFuncMinimizer;
-}
+} // namespace API
 
 namespace CurveFitting {
 namespace Algorithms {
@@ -73,46 +75,39 @@ to create a workspace
 
 @author Roman Tolchenov, Tessella plc
 @date 06/12/2011
-
-Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>
-Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport Fit : public IFittingAlgorithm {
 public:
   /// Default constructor
-  Fit() : IFittingAlgorithm() {}
+  Fit();
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "Fit"; }
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "Fits a function to data in a Workspace";
   }
-
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return (1); }
+  const std::vector<std::string> seeAlso() const override {
+    return {"FitGaussian", "UserFunction1D", "PlotPeakByLogValue",
+            "SplineBackground", "EvaluateFunction"};
+  }
 
-protected:
+private:
   void initConcrete() override;
   void execConcrete() override;
+  void readProperties();
+  void initializeMinimizer(size_t maxIterations);
+  size_t runMinimizer();
+  void finalizeMinimizer(size_t nIterations);
   void copyMinimizerOutput(const API::IFuncMinimizer &minimizer);
+  void createOutput();
+  /// The cost function
+  boost::shared_ptr<CostFunctions::CostFuncFitting> m_costFunction;
+  /// The minimizer
+  boost::shared_ptr<API::IFuncMinimizer> m_minimizer;
+  /// Max number of iterations
+  size_t m_maxIterations;
 };
 
 } // namespace Algorithms

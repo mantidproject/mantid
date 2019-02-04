@@ -1,8 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/IntegrateByComponent.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidTypes/SpectrumDefinition.h"
 
 #include <gsl/gsl_statistics.h>
 #include <unordered_map>
@@ -78,7 +86,7 @@ void IntegrateByComponent::exec() {
       prog.report();
       std::vector<double> averageYInput, averageEInput;
 
-      PARALLEL_FOR1(integratedWS)
+      PARALLEL_FOR_IF(Kernel::threadSafe(*integratedWS))
       for (int i = 0; i < static_cast<int>(hists.size()); ++i) { // NOLINT
         PARALLEL_START_INTERUPT_REGION
 
@@ -87,8 +95,8 @@ void IntegrateByComponent::exec() {
         if (spectrumInfo.isMasked(hists[i]))
           continue;
 
-        const double yValue = integratedWS->readY(hists[i])[0];
-        const double eValue = integratedWS->readE(hists[i])[0];
+        const double yValue = integratedWS->y(hists[i])[0];
+        const double eValue = integratedWS->e(hists[i])[0];
 
         if (!std::isfinite(yValue) || !std::isfinite(eValue)) // NaNs/Infs
           continue;
@@ -115,7 +123,7 @@ void IntegrateByComponent::exec() {
             gsl_stats_mean(&averageEInput[0], 1, averageYInput.size()));
       }
 
-      PARALLEL_FOR1(integratedWS)
+      PARALLEL_FOR_IF(Kernel::threadSafe(*integratedWS))
       for (int i = 0; i < static_cast<int>(hists.size()); ++i) { // NOLINT
         PARALLEL_START_INTERUPT_REGION
         if (spectrumInfo.isMonitor(hists[i]))
@@ -123,8 +131,8 @@ void IntegrateByComponent::exec() {
         if (spectrumInfo.isMasked(hists[i]))
           continue;
 
-        const double yValue = integratedWS->readY(hists[i])[0];
-        const double eValue = integratedWS->readE(hists[i])[0];
+        const double yValue = integratedWS->y(hists[i])[0];
+        const double eValue = integratedWS->e(hists[i])[0];
         if (!std::isfinite(yValue) || !std::isfinite(eValue)) // NaNs/Infs
           continue;
 
@@ -173,7 +181,6 @@ std::vector<std::vector<size_t>>
 IntegrateByComponent::makeMap(API::MatrixWorkspace_sptr countsWS, int parents) {
   std::unordered_multimap<Mantid::Geometry::ComponentID, size_t> mymap;
 
-  Geometry::Instrument_const_sptr instrument = countsWS->getInstrument();
   if (parents == 0) // this should not happen in this file, but if one reuses
                     // the function and parents==0, the program has a sudden end
                     // without this check.
@@ -181,42 +188,33 @@ IntegrateByComponent::makeMap(API::MatrixWorkspace_sptr countsWS, int parents) {
     return makeInstrumentMap(countsWS);
   }
 
-  if (!instrument) {
-    g_log.warning("Workspace has no instrument. LevelsUP is ignored");
-    return makeInstrumentMap(countsWS);
-  }
-
+  const auto spectrumInfo = countsWS->spectrumInfo();
+  const auto &detectorInfo = countsWS->detectorInfo();
   for (size_t i = 0; i < countsWS->getNumberHistograms(); i++) {
-    detid_t d = (*(countsWS->getSpectrum(i).getDetectorIDs().begin()));
-    try {
-      std::vector<boost::shared_ptr<const Mantid::Geometry::IComponent>> anc =
-          instrument->getDetector(d)->getAncestors();
-
-      if (anc.size() < static_cast<size_t>(parents)) {
-        g_log.warning("Too many levels up. Will ignore LevelsUp");
-        parents = 0;
-        return makeInstrumentMap(countsWS);
-      }
-      mymap.emplace(anc[parents - 1]->getComponentID(), i);
-    } catch (Mantid::Kernel::Exception::NotFoundError &e) {
-      // do nothing
-      g_log.debug(e.what());
+    if (!spectrumInfo.hasDetectors(i)) {
+      g_log.debug("Spectrum has no detector, skipping");
+      continue;
     }
+
+    const auto detIdx = spectrumInfo.spectrumDefinition(i)[0].first;
+    std::vector<boost::shared_ptr<const Mantid::Geometry::IComponent>> anc =
+        detectorInfo.detector(detIdx).getAncestors();
+
+    if (anc.size() < static_cast<size_t>(parents)) {
+      g_log.warning("Too many levels up. Will ignore LevelsUp");
+      parents = 0;
+      return makeInstrumentMap(countsWS);
+    }
+    mymap.emplace(anc[parents - 1]->getComponentID(), i);
   }
 
   std::vector<std::vector<size_t>> speclist;
   std::vector<size_t> speclistsingle;
 
-  std::unordered_multimap<Mantid::Geometry::ComponentID, size_t>::iterator m_it,
-      s_it;
-
-  for (m_it = mymap.begin(); m_it != mymap.end(); m_it = s_it) {
+  auto s_it = mymap.begin();
+  for (auto m_it = mymap.begin(); m_it != mymap.end(); m_it = s_it) {
     Mantid::Geometry::ComponentID theKey = (*m_it).first;
-    std::pair<std::unordered_multimap<Mantid::Geometry::ComponentID,
-                                      size_t>::iterator,
-              std::unordered_multimap<Mantid::Geometry::ComponentID,
-                                      size_t>::iterator> keyRange =
-        mymap.equal_range(theKey);
+    auto keyRange = mymap.equal_range(theKey);
 
     // Iterate over all map elements with key == theKey
     speclistsingle.clear();

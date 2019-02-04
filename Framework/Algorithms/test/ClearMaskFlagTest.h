@@ -1,24 +1,32 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_CLEARMASKFLAGTEST_H_
 #define MANTID_ALGORITHMS_CLEARMASKFLAGTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidHistogramData/LinearGenerator.h"
-#include "MantidAlgorithms/ClearMaskFlag.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAlgorithms/ClearMaskFlag.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using Mantid::Algorithms::ClearMaskFlag;
-using Mantid::MantidVecPtr;
 using Mantid::HistogramData::BinEdges;
-using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::CountStandardDeviations;
+using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::LinearGenerator;
+using Mantid::MantidVecPtr;
 
 class ClearMaskFlagTest : public CxxTest::TestSuite {
 public:
@@ -39,7 +47,8 @@ public:
     const int nummask = 5;
     Instrument_sptr instr = boost::dynamic_pointer_cast<Instrument>(
         ComponentCreationHelper::createTestInstrumentCylindrical(1));
-    Detector *d = new Detector("det", 0, 0);
+    Detector *d = new Detector("det", 0, nullptr);
+    instr->add(d);
     instr->markAsDetector(d);
 
     // create the workspace
@@ -57,9 +66,9 @@ public:
     space2D->setInstrument(instr);
 
     // set the mask on a bunch of spectra
-    Mantid::Geometry::ParameterMap &pmap = space2D->instrumentParameters();
+    auto &detectorInfo = space2D->mutableDetectorInfo();
     for (int j = 0; j < nummask; ++j) {
-      pmap.addBool(instr->getDetector(j)->getComponentID(), "masked", true);
+      detectorInfo.setMasked(j, true);
     }
 
     // register the workspace in the data service
@@ -84,9 +93,9 @@ public:
       return;
 
     // check the results
-    Instrument_const_sptr out_instr = ws->getInstrument();
+    const auto &resultDetInfo = ws->detectorInfo();
     for (int j = 0; j < numspec; ++j) {
-      TS_ASSERT(!out_instr->isDetectorMasked(j));
+      TS_ASSERT(!resultDetInfo.isMasked(j));
     }
 
     // remove workspace from the data service.

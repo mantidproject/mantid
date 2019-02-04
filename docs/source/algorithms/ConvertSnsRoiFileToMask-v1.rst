@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -38,9 +38,9 @@ Usage
     MaskDetectors(ws, MaskedWorkspace=mask)
 
     # Check to see that only first 2 pixels are not masked
-    print "Is detector 0 masked:", ws.getDetector(0).isMasked()
-    print "Is detector 1 masked:", ws.getDetector(1).isMasked()
-    print "Is detector 2 masked:", ws.getDetector(2).isMasked()
+    print("Is detector 0 masked: {}".format(ws.getDetector(0).isMasked()))
+    print("Is detector 1 masked: {}".format(ws.getDetector(1).isMasked()))
+    print("Is detector 2 masked: {}".format(ws.getDetector(2).isMasked()))
 
 Output:
 

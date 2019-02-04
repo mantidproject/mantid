@@ -1,31 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_KERNEL_NDPSEUDORANDOMNUMBERGENERATOR_H_
 #define MANTID_KERNEL_NDPSEUDORANDOMNUMBERGENERATOR_H_
-/**
-  Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
 
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>.
-  Code Documentation is available at: <http://doxygen.mantidproject.org>
-*/
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
-#include "MantidKernel/ClassMacros.h"
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/NDRandomNumberGenerator.h"
 #ifndef Q_MOC_RUN
@@ -52,6 +36,17 @@ public:
   NDPseudoRandomNumberGenerator(const unsigned int ndims,
                                 const size_t seedValue, const double start,
                                 const double end);
+
+  /// Disable default constructor
+  NDPseudoRandomNumberGenerator() = delete;
+
+  /// Disable copy operator
+  NDPseudoRandomNumberGenerator(const NDPseudoRandomNumberGenerator &) = delete;
+
+  /// Disable assignment operator
+  NDPseudoRandomNumberGenerator &
+  operator=(const NDPseudoRandomNumberGenerator &) = delete;
+
   /// Set the random number seed
   void setSeed(const size_t seedValue);
   /// Generates the next ND point
@@ -65,9 +60,6 @@ public:
   void restore() override;
 
 private:
-  DISABLE_DEFAULT_CONSTRUCT(NDPseudoRandomNumberGenerator)
-  DISABLE_COPY_AND_ASSIGN(NDPseudoRandomNumberGenerator)
-
   /// The single value generator
   SingleValueGenerator m_singleValueGen;
 };
@@ -146,7 +138,7 @@ template <typename SingleValueGenerator>
 void NDPseudoRandomNumberGenerator<SingleValueGenerator>::restore() {
   m_singleValueGen.restore();
 }
-}
-}
+} // namespace Kernel
+} // namespace Mantid
 
 #endif /* MANTID_KERNEL_NDPSEUDORANDOMNUMBERGENERATOR_H_ */

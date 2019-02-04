@@ -1,9 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //-----------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidKernel/FloatingPointComparison.h"
-#include <limits>
+#include "MantidKernel/System.h"
+
 #include <cmath>
+#include <limits>
 
 namespace Mantid {
 namespace Kernel {
@@ -53,5 +61,5 @@ template DLLExport bool ltEquals<float>(const float, const float);
 template DLLExport bool gtEquals<double>(const double, const double);
 template DLLExport bool gtEquals<float>(const float, const float);
 ///@endcond
-}
-}
+} // namespace Kernel
+} // namespace Mantid

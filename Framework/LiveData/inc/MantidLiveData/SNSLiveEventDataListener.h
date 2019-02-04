@@ -1,16 +1,22 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_LIVEDATA_SNSLIVEEVENTDATALISTENER_H_
 #define MANTID_LIVEDATA_SNSLIVEEVENTDATALISTENER_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidLiveData/ADARA/ADARAParser.h"
-#include "MantidAPI/ILiveListener.h"
+#include "MantidAPI/LiveListener.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidLiveData/ADARA/ADARAParser.h"
 
-#include <Poco/Timer.h>
 #include <Poco/Net/StreamSocket.h>
 #include <Poco/Runnable.h>
+#include <Poco/Timer.h>
 
 namespace Mantid {
 namespace LiveData {
@@ -18,26 +24,8 @@ namespace LiveData {
 /** An implementation of ILiveListener for use at SNS.  Connects to the Stream
    Management
     Service and receives events from it.
-
-    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge
-    National Laboratory
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-class SNSLiveEventDataListener : public API::ILiveListener,
+class SNSLiveEventDataListener : public API::LiveListener,
                                  public Poco::Runnable,
                                  public ADARA::Parser {
 public:
@@ -49,7 +37,8 @@ public:
   bool buffersEvents() const override { return true; }
 
   bool connect(const Poco::Net::SocketAddress &address) override;
-  void start(Kernel::DateAndTime startTime = Kernel::DateAndTime()) override;
+  void start(const Types::Core::DateAndTime startTime =
+                 Types::Core::DateAndTime()) override;
   boost::shared_ptr<API::Workspace> extractData() override;
 
   ILiveListener::RunStatus runStatus() override;
@@ -78,7 +67,7 @@ protected:
   bool rxPacket(const ADARA::VariableStringPkt &pkt) override;
   bool rxPacket(const ADARA::DeviceDescriptorPkt &pkt) override;
   bool rxPacket(const ADARA::AnnotationPkt &pkt) override;
-  // virtual bool rxPacket( const ADARA::RunInfoPkt &pkt);
+  bool rxPacket(const ADARA::RunInfoPkt &pkt) override;
 
 private:
   // Workspace initialization needs to happen in 2 steps.  Part 1 must happen
@@ -99,11 +88,11 @@ private:
   // complicated and I didn't want to be repeating the same tests in several
   // places...
   bool readyForInitPart2() {
-    if (m_instrumentXML.size() == 0)
+    if (m_instrumentXML.empty())
       return false;
-    if (m_instrumentName.size() == 0)
+    if (m_instrumentName.empty())
       return false;
-    if (m_dataStartTime == Kernel::DateAndTime())
+    if (m_dataStartTime == Types::Core::DateAndTime())
       return false;
 
     return haveRequiredLogs();
@@ -112,8 +101,8 @@ private:
   // Returns true if we've got a value for every log listed in m_requiredLogs
   bool haveRequiredLogs();
 
-  void appendEvent(uint32_t pixelId, double tof,
-                   const Mantid::Kernel::DateAndTime pulseTime);
+  void appendEvent(const uint32_t pixelId, const double tof,
+                   const Mantid::Types::Core::DateAndTime pulseTime);
   // tof is "Time Of Flight" and is in units of microsecondss relative to the
   // start of the pulse
   // (There's some documentation that says nanoseconds, but Russell Taylor
@@ -122,12 +111,12 @@ private:
   // Both values are designed to be passed straight into the TofEvent
   // constructor.
 
-  ILiveListener::RunStatus m_status;
-  int m_runNumber;
+  ILiveListener::RunStatus m_status{RunStatus::NoRun};
+  int m_runNumber{0};
   DataObjects::EventWorkspace_sptr m_eventBuffer;
   ///< Used to buffer events between calls to extractData()
 
-  bool m_workspaceInitialized;
+  bool m_workspaceInitialized{false};
   std::string m_wsName;
   detid2index_map m_indexMap;        // maps pixel id's to workspace indexes
   detid2index_map m_monitorIndexMap; // Same as above for the monitor workspace
@@ -145,31 +134,30 @@ private:
   std::vector<std::string> m_monitorLogs;
 
   Poco::Net::StreamSocket m_socket;
-  bool m_isConnected;
+  bool m_isConnected{false};
 
   Poco::Thread m_thread;
   std::mutex m_mutex; // protects m_buffer & m_status
-  bool m_pauseNetRead;
-  bool m_stopThread; // background thread checks this periodically.
-                     // If true, the thread exits
+  bool m_pauseNetRead{false};
+  bool m_stopThread{false}; // background thread checks this periodically.
+                            // If true, the thread exits
 
-  Kernel::DateAndTime m_startTime; // The requested start time for the data
-                                   // stream (needed by the run() function)
+  Types::Core::DateAndTime m_startTime; // The requested start time for the data
+                                        // stream (needed by the run() function)
 
   // Used to initialize the scan_index property if we haven't received a packet
   // with the 'real' value by the time we call initWorkspacePart2.  (We can't
   // delay the call to initWorkspacePart2 because we might never receive a
   // 'real' value for that property.
-  Kernel::DateAndTime m_dataStartTime;
+  Types::Core::DateAndTime m_dataStartTime;
 
   // These 2 determine whether or not we filter out events that arrive when
   // the run is paused.
-  bool m_runPaused;       // Set to true or false when we receive a pause/resume
-                          // marker in an annotation packet. (See
-                          // rxPacket( const ADARA::AnnotationPkt &pkt))
-  int m_keepPausedEvents; // Set from a configuration property. (Should be a
-                          // bool, but appearantly, we can't read bools from
-                          // the config file?!?)
+  bool m_runPaused{
+      false}; // Set to true or false when we receive a pause/resume
+              // marker in an annotation packet. (See
+              // rxPacket( const ADARA::AnnotationPkt &pkt))
+  bool m_keepPausedEvents{false}; // Set from a configuration property
 
   // Holds on to any exceptions that were thrown in the background thread so
   // that we can re-throw them in the forground thread
@@ -180,7 +168,8 @@ private:
 
   // maps <device id, variable id> to variable name
   // (variable names are unique, so we don't need to worry about device names.)
-  typedef std::map<std::pair<unsigned, unsigned>, std::string> NameMapType;
+  using NameMapType =
+      std::map<std::pair<unsigned int, unsigned int>, std::string>;
   NameMapType m_nameMap;
 
   // ---------------------------------------------------------------------------
@@ -195,16 +184,16 @@ private:
 
   // Maps the device ID / variable ID pair to the actual packet.  Using a map
   // means we will only keep one packet (the most recent one) for each variable
-  typedef std::map<std::pair<unsigned, unsigned>,
-                   boost::shared_ptr<ADARA::Packet>> VariableMapType;
+  using VariableMapType = std::map<std::pair<unsigned int, unsigned int>,
+                                   boost::shared_ptr<ADARA::Packet>>;
   VariableMapType m_variableMap;
 
   // Process all the variable value packets stored in m_variableMap
   void replayVariableCache();
 
   // ---------------------------------------------------------------------------
-  bool m_ignorePackets; // used by filterPacket() below...
-  bool m_filterUntilRunStart;
+  bool m_ignorePackets{false}; // used by filterPacket() below...
+  bool m_filterUntilRunStart{false};
 
   // Called by the rxPacket() functions to determine if the packet should be
   // processed. (Depending on when it last indexed its data, SMS might send us

@@ -1,11 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef FINDDEADDETECTORSTEST_H_
 #define FINDDEADDETECTORSTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/FindDeadDetectors.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAlgorithms/FindDeadDetectors.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -19,8 +24,8 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
-using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::CountStandardDeviations;
+using Mantid::HistogramData::Counts;
 
 class FindDeadDetectorsTest : public CxxTest::TestSuite {
 public:
@@ -38,10 +43,9 @@ public:
     // data
     Workspace2D_sptr work_in =
         // the x values look like this -1, 2, 5, 8, 11, 14, 17, 20, 23, 26
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(sizey, sizex, -1, 3.0);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(sizey, sizex, -1, 3.0);
 
     Instrument_sptr instr(new Instrument);
-    work_in->setInstrument(instr);
 
     // yVeryDead is a detector that never responds and produces no counts
     Counts yVeryDead(sizex, 0);
@@ -73,11 +77,12 @@ public:
       work_in->getSpectrum(i).setSpectrumNo(i);
 
       Mantid::Geometry::Detector *det =
-          new Mantid::Geometry::Detector("", i, NULL);
+          new Mantid::Geometry::Detector("", i, nullptr);
       instr->add(det);
       instr->markAsDetector(det);
       work_in->getSpectrum(i).setDetectorID(i);
     }
+    work_in->setInstrument(instr);
 
     FindDeadDetectors alg;
 

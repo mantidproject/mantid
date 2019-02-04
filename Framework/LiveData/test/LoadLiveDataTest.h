@@ -1,18 +1,25 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_LIVEDATA_LOADLIVEDATATEST_H_
 #define MANTID_LIVEDATA_LOADLIVEDATATEST_H_
 
-#include "MantidLiveData/LoadLiveData.h"
-#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/LiveListenerFactory.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
-#include <cxxtest/TestSuite.h>
-#include <numeric>
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/ConfigService.h"
-#include "MantidAPI/LiveListenerFactory.h"
+#include "MantidLiveData/LoadLiveData.h"
 #include "MantidTestHelpers/FacilityHelper.h"
 #include "TestGroupDataListener.h"
+#include <cxxtest/TestSuite.h>
+#include <numeric>
 
 using namespace Mantid;
 using namespace Mantid::LiveData;
@@ -54,7 +61,7 @@ public:
          ILiveListener_sptr listener = ILiveListener_sptr(),
          bool makeThrow = false) {
     FacilityHelper::ScopedFacilities loadTESTFacility(
-        "IDFs_for_UNIT_TESTING/UnitTestFacilities.xml", "TEST");
+        "unit_testing/UnitTestFacilities.xml", "TEST");
 
     LoadLiveData alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
@@ -112,7 +119,43 @@ public:
     TS_ASSERT_EQUALS(ws2->getNumberEvents(), 200);
     TSM_ASSERT("Workspace changed when replaced", ws1 != ws2);
     TS_ASSERT_EQUALS(AnalysisDataService::Instance().size(), 1);
-    TSM_ASSERT("Events are sorted", ws2->getSpectrum(0).isSortedByTof());
+  }
+
+  //--------------------------------------------------------------------------------------------
+  void test_replace_keeps_original_instrument() {
+    auto ws1 = doExec<EventWorkspace>("Replace");
+    auto &ws1CompInfo = ws1->mutableComponentInfo();
+    // Put the sample somewhere else prior to the next replace
+    const Kernel::V3D newSamplePosition =
+        ws1CompInfo.position(ws1CompInfo.sample()) + V3D(1, 1, 1);
+    ws1CompInfo.setPosition(ws1CompInfo.sample(), newSamplePosition);
+
+    // Second Run of replace
+    auto ws2 = doExec<EventWorkspace>("Replace");
+    const auto &ws2CompInfo = ws2->componentInfo();
+    // Check the sample is where I put it. i.e. Instrument should NOT be
+    // overwritten.
+    TSM_ASSERT_EQUALS("Instrument should NOT have been overwritten",
+                      newSamplePosition,
+                      ws2CompInfo.position(ws2CompInfo.sample()));
+  }
+
+  //--------------------------------------------------------------------------------------------
+  void test_replace_workspace_with_group() {
+    auto ws1 = doExec<EventWorkspace>("Replace");
+
+    TS_ASSERT_THROWS_NOTHING(
+        doExec<WorkspaceGroup>("Replace", "", "", "", "", false,
+                               ILiveListener_sptr(new TestGroupDataListener)));
+  }
+
+  //--------------------------------------------------------------------------------------------
+  void test_replace_group_with_workspace() {
+    auto ws1 =
+        doExec<WorkspaceGroup>("Replace", "", "", "", "", false,
+                               ILiveListener_sptr(new TestGroupDataListener));
+
+    TS_ASSERT_THROWS_NOTHING(doExec<EventWorkspace>("Replace"));
   }
 
   //--------------------------------------------------------------------------------------------
@@ -127,7 +170,6 @@ public:
     ws2 = doExec<EventWorkspace>("Append");
     TS_ASSERT_EQUALS(ws2->getNumberHistograms(), 4);
     TS_ASSERT_EQUALS(AnalysisDataService::Instance().size(), 1);
-    TSM_ASSERT("Events are sorted", ws2->getSpectrum(0).isSortedByTof());
   }
 
   //--------------------------------------------------------------------------------------------
@@ -146,38 +188,10 @@ public:
     TS_ASSERT_EQUALS(ws2->getNumberEvents(), 400);
 
     TSM_ASSERT("Workspace being added stayed the same pointer", ws1 == ws2);
-    TSM_ASSERT("Events are sorted", ws2->getSpectrum(0).isSortedByTof());
     TS_ASSERT_EQUALS(AnalysisDataService::Instance().size(), 1);
 
     // Test monitor workspace is present
     TS_ASSERT(ws2->monitorWorkspace());
-  }
-
-  //--------------------------------------------------------------------------------------------
-  /** Make the test listener send out a "reset" signal. */
-  void test_dataReset() {
-    // Will reset after the 2nd call to extract data
-    ConfigService::Instance().setString("testdatalistener.reset_after", "2");
-    EventWorkspace_sptr ws1, ws2, ws3;
-
-    // Manually make the listener so I can pass the same one to the algo
-    ILiveListener_sptr listener =
-        LiveListenerFactory::Instance().create("TestDataListener", true);
-    listener->start();
-
-    // First go creates the fake ws
-    ws1 = doExec<EventWorkspace>("Add", "", "", "", "", true, listener);
-    TS_ASSERT_EQUALS(ws1->getNumberEvents(), 200);
-    ws2 = doExec<EventWorkspace>("Add", "", "", "", "", true, listener);
-    TS_ASSERT_EQUALS(ws2->getNumberEvents(), 400);
-    TSM_ASSERT("Workspace being added stayed the same pointer", ws1 == ws2);
-
-    // This next time, it should reset
-    ws3 = doExec<EventWorkspace>("Add", "", "", "", "", true, listener);
-    TS_ASSERT_EQUALS(ws3->getNumberEvents(), 200);
-    TSM_ASSERT("Accumulation workspace changed!", ws3 != ws1);
-
-    TS_ASSERT_EQUALS(AnalysisDataService::Instance().size(), 1);
   }
 
   //--------------------------------------------------------------------------------------------
@@ -190,8 +204,8 @@ public:
     TS_ASSERT_EQUALS(ws1->getNumberHistograms(), 2);
     double total;
     total = 0;
-    for (auto it = ws1->readY(0).begin(); it != ws1->readY(0).end(); it++)
-      total += *it;
+    for (double yValue : ws1->readY(0))
+      total += yValue;
     TS_ASSERT_DELTA(total, 100.0, 1e-4);
 
     // Next one adds the histograms together
@@ -201,8 +215,8 @@ public:
 
     // The new total signal is 200.0
     total = 0;
-    for (auto it = ws1->readY(0).begin(); it != ws1->readY(0).end(); it++)
-      total += *it;
+    for (double yValue : ws1->readY(0))
+      total += yValue;
     TS_ASSERT_DELTA(total, 200.0, 1e-4);
 
     TSM_ASSERT("Workspace being added stayed the same pointer", ws1 == ws2);
@@ -216,15 +230,14 @@ public:
   /** Simple processing of a chunk */
   void test_ProcessChunk_DoPreserveEvents() {
     EventWorkspace_sptr ws;
-    ws = doExec<EventWorkspace>("Replace", "Rebin", "Params=40e3, 1e3, 60e3",
-                                "", "", true);
+    ws = doExec<EventWorkspace>("Replace", "", "", "Rebin",
+                                "Params=40e3, 1e3, 60e3", true);
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(ws->getNumberEvents(), 200);
     // Check that rebin was called
     TS_ASSERT_EQUALS(ws->blocksize(), 20);
     TS_ASSERT_DELTA(ws->dataX(0)[0], 40e3, 1e-4);
-    TS_ASSERT_EQUALS(AnalysisDataService::Instance().size(), 1);
-    TS_ASSERT(ws->monitorWorkspace());
+    TS_ASSERT_EQUALS(AnalysisDataService::Instance().size(), 2);
   }
 
   //--------------------------------------------------------------------------------------------
@@ -264,9 +277,6 @@ public:
     TS_ASSERT_EQUALS(ws->blocksize(), 20);
     TS_ASSERT_DELTA(ws->dataX(0)[0], 40e3, 1e-4);
     TS_ASSERT_EQUALS(AnalysisDataService::Instance().size(), 2);
-
-    TSM_ASSERT("Events are sorted", ws_accum->getSpectrum(0).isSortedByTof());
-    TSM_ASSERT("Events are sorted", ws->getSpectrum(0).isSortedByTof());
   }
 
   //--------------------------------------------------------------------------------------------
@@ -282,11 +292,10 @@ public:
     TS_ASSERT(ws)
     TS_ASSERT(ws_accum)
 
-    // The accumulated workspace: it was rebinned starting at 20e3
+    // Accumulated workspace: it was rebinned, but rebinning should be reset
     TS_ASSERT_EQUALS(ws_accum->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(ws_accum->getNumberEvents(), 200);
     TS_ASSERT_EQUALS(ws_accum->blocksize(), 40);
-    TS_ASSERT_DELTA(ws_accum->dataX(0)[0], 20e3, 1e-4);
 
     // The post-processed workspace was rebinned starting at 40e3
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 2);
@@ -294,9 +303,6 @@ public:
     TS_ASSERT_EQUALS(ws->blocksize(), 20);
     TS_ASSERT_DELTA(ws->dataX(0)[0], 40e3, 1e-4);
     TS_ASSERT_EQUALS(AnalysisDataService::Instance().size(), 2);
-
-    TSM_ASSERT("Events are sorted", ws_accum->getSpectrum(0).isSortedByTof());
-    TSM_ASSERT("Events are sorted", ws->getSpectrum(0).isSortedByTof());
   }
 
   //--------------------------------------------------------------------------------------------
@@ -322,7 +328,7 @@ public:
                                ILiveListener_sptr(new TestGroupDataListener));
     TS_ASSERT(ws);
     TS_ASSERT_EQUALS(ws->getNumberOfEntries(), 3);
-    TS_ASSERT_EQUALS(ws->name(), "fake");
+    TS_ASSERT_EQUALS(ws->getName(), "fake");
     MatrixWorkspace_sptr mws =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("fake_2");
     TS_ASSERT(mws);
@@ -342,7 +348,7 @@ public:
         ILiveListener_sptr(new TestGroupDataListener));
     TS_ASSERT(ws);
     TS_ASSERT_EQUALS(ws->getNumberOfEntries(), 3);
-    TS_ASSERT_EQUALS(ws->name(), "fake");
+    TS_ASSERT_EQUALS(ws->getName(), "fake");
     MatrixWorkspace_sptr mws =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("fake_2");
     TS_ASSERT(mws);
@@ -362,7 +368,7 @@ public:
         ILiveListener_sptr(new TestGroupDataListener));
     TS_ASSERT(ws);
     TS_ASSERT_EQUALS(ws->getNumberOfEntries(), 3);
-    TS_ASSERT_EQUALS(ws->name(), "fake");
+    TS_ASSERT_EQUALS(ws->getName(), "fake");
     MatrixWorkspace_sptr mws =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("fake_2");
     TS_ASSERT(mws);
@@ -385,7 +391,7 @@ public:
                                ILiveListener_sptr(new TestGroupDataListener));
     TS_ASSERT(ws);
     TS_ASSERT_EQUALS(ws->getNumberOfEntries(), 3);
-    TS_ASSERT_EQUALS(ws->name(), "fake");
+    TS_ASSERT_EQUALS(ws->getName(), "fake");
     MatrixWorkspace_sptr mws =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("fake_2");
     TS_ASSERT(mws);
@@ -407,7 +413,7 @@ public:
                                ILiveListener_sptr(new TestGroupDataListener));
     TS_ASSERT(ws);
     TS_ASSERT_EQUALS(ws->getNumberOfEntries(), 3);
-    TS_ASSERT_EQUALS(ws->name(), "fake");
+    TS_ASSERT_EQUALS(ws->getName(), "fake");
     MatrixWorkspace_sptr mws =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("fake_2");
     TS_ASSERT(mws);
@@ -429,7 +435,7 @@ public:
                                ILiveListener_sptr(new TestGroupDataListener));
     TS_ASSERT(ws);
     TS_ASSERT_EQUALS(ws->getNumberOfEntries(), 3);
-    TS_ASSERT_EQUALS(ws->name(), "fake");
+    TS_ASSERT_EQUALS(ws->getName(), "fake");
     MatrixWorkspace_sptr mws =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("fake_2");
     TS_ASSERT(mws);
@@ -452,7 +458,7 @@ public:
                                ILiveListener_sptr(new TestGroupDataListener));
     TS_ASSERT(ws);
     TS_ASSERT_EQUALS(ws->getNumberOfEntries(), 3);
-    TS_ASSERT_EQUALS(ws->name(), "fake");
+    TS_ASSERT_EQUALS(ws->getName(), "fake");
     MatrixWorkspace_sptr mws =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("fake_2");
     TS_ASSERT(mws);
@@ -474,7 +480,7 @@ public:
                                ILiveListener_sptr(new TestGroupDataListener));
     TS_ASSERT(ws);
     TS_ASSERT_EQUALS(ws->getNumberOfEntries(), 3);
-    TS_ASSERT_EQUALS(ws->name(), "fake");
+    TS_ASSERT_EQUALS(ws->getName(), "fake");
     MatrixWorkspace_sptr mws =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("fake_2");
     TS_ASSERT(mws);
@@ -496,7 +502,7 @@ public:
                                ILiveListener_sptr(new TestGroupDataListener));
     TS_ASSERT(ws);
     TS_ASSERT_EQUALS(ws->getNumberOfEntries(), 3);
-    TS_ASSERT_EQUALS(ws->name(), "fake");
+    TS_ASSERT_EQUALS(ws->getName(), "fake");
     MatrixWorkspace_sptr mws =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("fake_2");
     TS_ASSERT(mws);

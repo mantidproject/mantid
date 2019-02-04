@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 // Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
 // Main Module Header
 #include "MantidCurveFitting/Functions/ElasticDiffSphere.h"
@@ -6,6 +12,7 @@
 // Mantid headers from other projects
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidKernel/make_unique.h"
 // third party library headers
 #include <boost/math/special_functions/bessel.hpp>
 // standard library headers
@@ -31,7 +38,7 @@ ElasticDiffSphere::ElasticDiffSphere() {
   // parameter "Height" declared in parent DeltaFunction constructor
   // declareParameter("Height", 1.0);
   declareParameter("Radius", 2.0, "Sphere radius");
-  declareAttribute("Q", API::IFunction::Attribute(1.0));
+  FunctionQDepends::declareAttributes();
 }
 
 /**
@@ -39,13 +46,13 @@ ElasticDiffSphere::ElasticDiffSphere() {
  */
 void ElasticDiffSphere::init() {
   // Ensure positive values for Height and Radius
-  auto HeightConstraint = new BConstraint(
+  auto HeightConstraint = Kernel::make_unique<BConstraint>(
       this, "Height", std::numeric_limits<double>::epsilon(), true);
-  this->addConstraint(HeightConstraint);
+  this->addConstraint(std::move(HeightConstraint));
 
-  auto RadiusConstraint = new BConstraint(
+  auto RadiusConstraint = Kernel::make_unique<BConstraint>(
       this, "Radius", std::numeric_limits<double>::epsilon(), true);
-  this->addConstraint(RadiusConstraint);
+  this->addConstraint(std::move(RadiusConstraint));
 }
 
 /**

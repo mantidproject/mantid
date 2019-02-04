@@ -1,8 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/BinEdgeAxis.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/TextAxis.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/kernel/GetPointer.h"
 
 #include <boost/python/class.hpp>
@@ -25,22 +33,18 @@ using namespace boost::python;
 GET_POINTER_SPECIALIZATION(Axis)
 
 namespace {
-namespace bpl = boost::python;
 
 //------------------------------- Overload macros ---------------------------
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunknown-pragmas"
-#pragma clang diagnostic ignored "-Wunused-local-typedef"
-#endif
+GNU_DIAG_OFF("unused-local-typedef")
+// Ignore -Wconversion warnings coming from boost::python
+// Seen with GCC 7.1.1 and Boost 1.63.0
+GNU_DIAG_OFF("conversion")
 
 // Overloads for operator() function which has 1 optional argument
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Axis_getValue, Axis::getValue, 1, 2)
 
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
-
+GNU_DIAG_ON("conversion")
+GNU_DIAG_ON("unused-local-typedef")
 /**
  * Extract the axis values as a sequence. A numpy array is used if the
  * data is numerical or a simple python list is used if the data is a string
@@ -80,7 +84,7 @@ PyObject *extractAxisValues(Axis &self) {
   }
   return array;
 }
-}
+} // namespace
 
 void export_Axis() {
   register_ptr_to_python<Axis *>();
@@ -125,16 +129,36 @@ void export_Axis() {
 }
 
 // --------------------------------------------------------------------------------------------
+// SpectraAxis
+// --------------------------------------------------------------------------------------------
+/**
+ * Creates a SpectraAxis referencing a given workspace
+ * @param ws A pointer to the parent workspace
+ * @return pointer to the axis object
+ */
+Axis *createSpectraAxis(const MatrixWorkspace *const ws) {
+  return new SpectraAxis(ws);
+}
+
+void export_SpectraAxis() {
+  /// Exported so that Boost.Python can give back a SpectraAxis class when an
+  /// Axis* is returned
+  class_<SpectraAxis, bases<Axis>, boost::noncopyable>("SpectraAxis", no_init)
+      .def("create", &createSpectraAxis, arg("workspace"),
+           return_internal_reference<>(),
+           "Creates a new SpectraAxis referencing the given workspace")
+      .staticmethod("create");
+}
+
+// --------------------------------------------------------------------------------------------
 // NumericAxis
 // --------------------------------------------------------------------------------------------
 /**
-* Creates a NumericAxis
-* @param length The length of the new axis
-* @return pointer to the axis object
-*/
-Axis *createNumericAxis(int length) {
-  return new Mantid::API::NumericAxis(length);
-}
+ * Creates a NumericAxis
+ * @param length The length of the new axis
+ * @return pointer to the axis object
+ */
+Axis *createNumericAxis(int length) { return new NumericAxis(length); }
 
 void export_NumericAxis() {
   /// Exported so that Boost.Python can give back a NumericAxis class when an
@@ -151,13 +175,11 @@ void export_NumericAxis() {
 // --------------------------------------------------------------------------------------------
 
 /**
-* Creates a BinEdgeAxis
-* @param length The length of the new axis
-* @return pointer to the axis object
-*/
-Axis *createBinEdgeAxis(int length) {
-  return new Mantid::API::BinEdgeAxis(length);
-}
+ * Creates a BinEdgeAxis
+ * @param length The length of the new axis
+ * @return pointer to the axis object
+ */
+Axis *createBinEdgeAxis(int length) { return new BinEdgeAxis(length); }
 
 void export_BinEdgeAxis() {
   /// Exported so that Boost.Python can give back a BinEdgeAxis class when an
@@ -175,11 +197,11 @@ void export_BinEdgeAxis() {
 // --------------------------------------------------------------------------------------------
 
 /**
-* Creates a TextAxis
-* @param length The length of the new axis
-* @return pointer to the axis object
-*/
-Axis *createTextAxis(int length) { return new Mantid::API::TextAxis(length); }
+ * Creates a TextAxis
+ * @param length The length of the new axis
+ * @return pointer to the axis object
+ */
+Axis *createTextAxis(int length) { return new TextAxis(length); }
 
 void export_TextAxis() {
   class_<TextAxis, bases<Axis>, boost::noncopyable>("TextAxis", no_init)

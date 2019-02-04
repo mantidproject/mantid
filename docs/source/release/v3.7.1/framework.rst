@@ -31,6 +31,8 @@ CurveFitting
 - Concept page for :ref:`Comparing fit minimizers <FittingMinimizers>` has been added to provide information on the minimizers supported, and compare how well different minimizers do against different benchmark fitting problems
 - In order to guarantee a complete overlap between resolution and signal in the region of interest, Function :ref:`Convolution <func-Convolution>` can switch between a fast FFT mode for data defined over a symmetric domain, and slower direct calculations for data defined over an asymmetric domain.
 
+The work on benchmarking fitting has received funding from the Horizon 2020 Framework Programme of the European Union under the SINE2020 project Grant No 654000.
+
 Script Repository
 -----------------
 
@@ -61,10 +63,10 @@ New
 - :ref:`GetIPTS <algm-GetIPTS>` Returns the IPTS directory of the specified ORNL run.
 - :ref:`GSASIIRefineFitPeaks <algm-GSASIIRefineFitPeaks>` uses the GSAS-II
   software to refine lattice parameters (whole pattern refinement) and fit
-- :ref:`ImggAggregateWavelengths <algm-ImggAggregateWavelengths>` aggregates stacks of images from wavelength dependent imaging into one or more output bands.
-- :ref:`ImggTomographicReconstruction
-  <algm-ImggTomographicReconstruction>` implements a method for 3D
-  tomographic reconstruction from projection images.
+- `ImggAggregateWavelengths <http://docs.mantidproject.org/v3.7.1/algorithms/ImggAggregateWavelengths-v1.html>`_ 
+  aggregates stacks of images from wavelength dependent imaging into one or more output bands.
+- `ImggTomographicReconstruction <http://docs.mantidproject.org/v3.7.1/algorithms/ImggTomographicReconstruction-v1.html>`_
+  implements a method for 3D tomographic reconstruction from projection images.
 - :ref:`SaveFITS <algm-SaveFITS>` saves images in FITS format.
 
 Renamed

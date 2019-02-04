@@ -30,14 +30,14 @@
 #include "DataSetDialog.h"
 #include "Graph.h"
 
-#include <QPushButton>
 #include <QCheckBox>
-#include <QLabel>
 #include <QComboBox>
 #include <QGroupBox>
-#include <QLineEdit>
-#include <QVBoxLayout>
 #include <QHBoxLayout>
+#include <QLabel>
+#include <QLineEdit>
+#include <QPushButton>
+#include <QVBoxLayout>
 
 DataSetDialog::DataSetDialog(const QString &text, ApplicationWindow *app,
                              Graph *g, Qt::WFlags fl)
@@ -46,7 +46,7 @@ DataSetDialog::DataSetDialog(const QString &text, ApplicationWindow *app,
   setWindowTitle(tr("MantidPlot - Select data set"));
 
   d_operation = ApplicationWindow::NoAnalysis;
-  d_graph = 0;
+  d_graph = nullptr;
 
   QVBoxLayout *mainLayout = new QVBoxLayout(this);
   QHBoxLayout *bottomLayout = new QHBoxLayout();

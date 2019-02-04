@@ -1,30 +1,31 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MDAGORITHMS_MDEWPEAKINTEGRATIONTEST_H_
 #define MANTID_MDAGORITHMS_MDEWPEAKINTEGRATIONTEST_H_
 
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidDataObjects/MDEventFactory.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/PeakShapeSpherical.h"
-#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/MDGeometry/HKL.h"
-#include "MantidMDAlgorithms/IntegratePeaksMD.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidKernel/UnitLabelTypes.h"
 #include "MantidMDAlgorithms/CreateMDWorkspace.h"
 #include "MantidMDAlgorithms/FakeMDEventData.h"
+#include "MantidMDAlgorithms/IntegratePeaksMD.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidKernel/UnitLabelTypes.h"
 
 #include <boost/math/distributions/normal.hpp>
 #include <boost/math/special_functions/pow.hpp>
-#include <boost/random/linear_congruential.hpp>
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/uniform_int.hpp>
-#include <boost/random/uniform_real.hpp>
-#include <boost/random/variate_generator.hpp>
-
 #include <cxxtest/TestSuite.h>
+#include <random>
 
 #include <Poco/File.h>
 
@@ -167,7 +168,8 @@ public:
     TS_ASSERT_DELTA(peakWS0->getPeak(0).getSigmaIntensity(), M_SQRT2, 1e-2);
     Poco::File(Mantid::Kernel::ConfigService::Instance().getString(
                    "defaultsave.directory") +
-               "IntegratePeaksMDTest_MDEWSGaussian.dat").remove();
+               "IntegratePeaksMDTest_MDEWSGaussian.dat")
+        .remove();
 
     // Test profile back to back exponential
     fnct = "BackToBackExponential";
@@ -179,7 +181,8 @@ public:
     // 0.2);
     Poco::File(Mantid::Kernel::ConfigService::Instance().getString(
                    "defaultsave.directory") +
-               "IntegratePeaksMDTest_MDEWSBackToBackExponential.dat").remove();
+               "IntegratePeaksMDTest_MDEWSBackToBackExponential.dat")
+        .remove();
     /*fnct = "ConvolutionExpGaussian";
     doRun(0.1,0.0,"IntegratePeaksMDTest_peaks",0.0,true,true,fnct);
 
@@ -365,17 +368,11 @@ public:
         AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>("OutWS");
 
     double actualPeakRadius =
-        atof(outWS->mutableRun().getProperty("PeakRadius")->value().c_str());
-    double actualBackgroundOutterRadius =
-        atof(outWS->mutableRun()
-                 .getProperty("BackgroundOuterRadius")
-                 ->value()
-                 .c_str());
-    double actualBackgroundInnerRadius =
-        atof(outWS->mutableRun()
-                 .getProperty("BackgroundInnerRadius")
-                 ->value()
-                 .c_str());
+        std::stod(outWS->mutableRun().getProperty("PeakRadius")->value());
+    double actualBackgroundOutterRadius = std::stod(
+        outWS->mutableRun().getProperty("BackgroundOuterRadius")->value());
+    double actualBackgroundInnerRadius = std::stod(
+        outWS->mutableRun().getProperty("BackgroundInnerRadius")->value());
 
     TS_ASSERT_EQUALS(peakRadius, actualPeakRadius);
     TS_ASSERT_EQUALS(backgroundOutterRadius, actualBackgroundOutterRadius);
@@ -453,17 +450,16 @@ public:
     Instrument_sptr inst =
         ComponentCreationHelper::createTestInstrumentCylindrical(5);
 
-    boost::mt19937 rng;
-    boost::uniform_real<double> u(-9.0, 9.0); // Random from -9 to 9.0
-    boost::variate_generator<boost::mt19937 &, boost::uniform_real<double>> gen(
-        rng, u);
+    std::mt19937 rng;
+    std::uniform_real_distribution<double> flat(-9.0,
+                                                9.0); // Random from -9 to 9.0
 
     peakWS = PeaksWorkspace_sptr(new PeaksWorkspace());
     for (size_t i = 0; i < numPeaks; ++i) {
       // Random peak center
-      double x = gen();
-      double y = gen();
-      double z = gen();
+      double x = flat(rng);
+      double y = flat(rng);
+      double z = flat(rng);
 
       // Make the peak
       IntegratePeaksMDTest::addPeak(1000, x, y, z, 0.02);
@@ -476,9 +472,6 @@ public:
 
       // Add to peaks workspace
       peakWS->addPeak(Peak(inst, 1, 1.0, V3D(x, y, z)));
-
-      if (i % 100 == 0)
-        std::cout << "Peak " << i << " added\n";
     }
     AnalysisDataService::Instance().add("IntegratePeaksMDTest_peaks", peakWS);
   }

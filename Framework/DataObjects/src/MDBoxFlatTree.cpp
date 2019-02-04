@@ -1,19 +1,27 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/MDBoxFlatTree.h"
-#include "MantidDataObjects/MDEventFactory.h"
 #include "MantidAPI/BoxController.h"
 #include "MantidAPI/FileBackedExperimentInfo.h"
+#include "MantidAPI/WorkspaceHistory.h"
+#include "MantidDataObjects/MDEventFactory.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
 #include <Poco/File.h>
 
-typedef std::unique_ptr<::NeXus::File> file_holder_type;
+using file_holder_type = std::unique_ptr<::NeXus::File>;
 
 namespace Mantid {
 namespace DataObjects {
 namespace {
 /// static logger
 Kernel::Logger g_log("MDBoxFlatTree");
-}
+} // namespace
 
 MDBoxFlatTree::MDBoxFlatTree() : m_nDim(-1) {}
 
@@ -344,7 +352,7 @@ void MDBoxFlatTree::loadBoxStructure(::NeXus::File *hFile, bool onlyEventInfo) {
  *where one going to place experiment infos
  *@param ws   -- the shared pointer to the workspace with experiment infos to
  *write.
-*/
+ */
 void MDBoxFlatTree::saveExperimentInfos(::NeXus::File *const file,
                                         API::IMDEventWorkspace_const_sptr ws) {
 
@@ -386,16 +394,16 @@ void MDBoxFlatTree::saveExperimentInfos(::NeXus::File *const file,
 
 //----------------------------------------------------------------------------------------------
 /** Load the ExperimentInfo blocks, if any, in the NXS file
-*
-* @param file :: the pointer to the properly opened nexus data file where the
-*experiment info groups can be found.
-* @param filename :: the filename of the opened NeXus file. Use for the
-*file-backed case
-* @param mei :: MDEventWorkspace/MDHisto to load experiment infos to or rather
-*pointer to the base class of this workspaces (which is an experimentInfo)
-* @param lazy :: If true, use the FileBackedExperimentInfo class to only load
-* the data from the file when it is requested
-*/
+ *
+ * @param file :: the pointer to the properly opened nexus data file where the
+ *experiment info groups can be found.
+ * @param filename :: the filename of the opened NeXus file. Use for the
+ *file-backed case
+ * @param mei :: MDEventWorkspace/MDHisto to load experiment infos to or rather
+ *pointer to the base class of this workspaces (which is an experimentInfo)
+ * @param lazy :: If true, use the FileBackedExperimentInfo class to only load
+ * the data from the file when it is requested
+ */
 void MDBoxFlatTree::loadExperimentInfos(
     ::NeXus::File *const file, const std::string &filename,
     boost::shared_ptr<Mantid::API::MultipleExperimentInfos> mei, bool lazy) {
@@ -839,5 +847,5 @@ void saveMatrix(::NeXus::File *const file, std::string name,
   }
   file->closeData();
 }
-}
-}
+} // namespace DataObjects
+} // namespace Mantid

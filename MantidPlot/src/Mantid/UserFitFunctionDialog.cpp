@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //---------------------------------------
 // Includes
 //---------------------------------------
@@ -5,8 +11,8 @@
 #include "UserFitFunctionDialog.h"
 #include "MantidGeometry/muParser_Silent.h"
 #include <qcheckbox.h>
-#include <qmessagebox.h>
 #include <qheaderview.h>
+#include <qmessagebox.h>
 
 //---------------------------------------
 // Public member functions
@@ -42,10 +48,10 @@ void UserFitFunctionDialog::addFunction(const QString &op, bool brackets) {
   QTreeWidgetItem *item = selection.first();
   QTreeWidgetItem *parentItem = item->parent();
 
-  if (parentItem == NULL)
-    return; // this sould never happen, just in case
+  if (parentItem == nullptr)
+    return; // this should never happen, just in case
 
-  if (parentItem->parent() != NULL)
+  if (parentItem->parent() != nullptr)
     item = parentItem;
 
   // QTextCursor cursor = ui.teExpression->textCursor();

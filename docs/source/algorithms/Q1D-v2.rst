@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -51,7 +51,7 @@ This section describes the normalisation/scaling/correction of the input
 workspace using PixelAdj, WavelengthAdj and WavePixelAdj.
 
 This :ref:`algorithm <Algorithm>` takes as input a workspace of neutron
-counts against `wavelength <http://www.mantidproject.org/Units>`_ and creates a workspace of cross
+counts against :ref:`wavelength <Unit Factory>` and creates a workspace of cross
 section against Q. The output Q bins boundaries are defined by setting
 the property OutputBinning.
 
@@ -70,7 +70,7 @@ of many, one, or no wavelength bins.)
 
 In the equation the number of counts in the input spectrum number is
 denoted by :math:`S(n)`, :math:`N(n)` is the wavelength dependent
-correction and :math:`\Omega` is the `solid angle <http://www.mantidproject.org/SolidAngle>`_ of the
+correction and :math:`\Omega` is the :ref:`solid angle <algm-SolidAngle>` of the
 detector
 
 .. math:: P_I(Q) = \frac{ \sum_{n \supset I} S(n)}{\Omega\sum_{n \supset I}N(n)}
@@ -101,7 +101,7 @@ where :math:`F` is the detector dependent (e.g. flood) scaling specified
 by the PixelAdj property, and where a :math:`\lambda` bin :math:`n`
 spans more than one :math:`Q` bin :math:`I`, it is split assuming a
 uniform distribution of the counts in :math:`\lambda`. The normalization
-takes any `bin masking <http://www.mantidproject.org/MaskBins>`_ into account.
+takes any :ref:`bin masking <algm-MaskBins>` into account.
 
 Some corrections will be both pixel and wavelength dependent, for example an
 angle transmission correction. Such corrections can be taken into account by
@@ -139,7 +139,7 @@ From the equation it is possible to see that for pixels in
 substituting :math:`WaveCut = W_{low}` we have that :math:`R = 0` and
 hence all detectors contribute at wavelengths above :math:`WaveCut`.
 
-*Practically, it is more likely to be necessary to implement
+Practically, it is more likely to be necessary to implement
 :math:`RadiusCut` and :math:`WaveCut` in situations where the scattering
 near to the beamstop is weak and 'contaminated' by short wavelength
 scatter. This might arise, for example, when running at long
@@ -147,7 +147,7 @@ sample-detector distances, or at short sample-detector distances with
 large diameter beams, or where the sample generates Bragg peaks at
 low-Q. The best recourse is to check the wavelength overlap. If it is
 not too bad it may be possible to improve the data presentation simply
-by altering :math:`Q{min}` and the binning scheme.*
+by altering :math:`Q{min}` and the binning scheme.
 
 Examples
 ######################

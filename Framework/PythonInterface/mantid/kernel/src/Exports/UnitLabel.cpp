@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/UnitLabel.h"
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>
@@ -16,7 +22,7 @@ using namespace boost::python;
 namespace {
 boost::shared_ptr<UnitLabel>
 createLabel(const object &ascii, const object &utf8, const object &latex) {
-  typedef UnitLabel::Utf8String::value_type Utf8Char;
+  using Utf8Char = UnitLabel::Utf8String::value_type;
   if (PyUnicode_Check(utf8.ptr())) {
     auto length = PyUnicode_GetSize(utf8.ptr());
     boost::scoped_array<Utf8Char> buffer(new Utf8Char[length]);
@@ -42,10 +48,10 @@ createLabel(const object &ascii, const object &utf8, const object &latex) {
  * @return A new Python unicode string with the contents of the utf8 label
  */
 PyObject *utf8ToUnicode(UnitLabel &self) {
-  const auto label = self.utf8();
+  const auto &label = self.utf8();
   return PyUnicode_FromWideChar(label.c_str(), label.size());
 }
-}
+} // namespace
 
 void export_UnitLabel() {
   class_<UnitLabel>("UnitLabel", no_init)

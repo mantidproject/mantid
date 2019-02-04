@@ -1,16 +1,23 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_KERNEL_USAGESERVICE_H_
 #define MANTID_KERNEL_USAGESERVICE_H_
 
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/SingletonHolder.h"
+#include <MantidTypes/Core/DateAndTime.h>
 
 #include <json/value.h>
 
 #include <Poco/ActiveMethod.h>
 #include <Poco/Timer.h>
 
-#include <queue>
 #include <mutex>
+#include <queue>
 
 namespace Mantid {
 namespace Kernel {
@@ -24,27 +31,6 @@ namespace Kernel {
     - Registering feature usage, and storing in a feature usage buffer
     - Sending Feature usage reports on application exit, and when the feature
   usage buffer is above a size threshold.
-
-  Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
-
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>
-  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
 class FeatureUsage {
@@ -64,9 +50,9 @@ public:
 class MANTID_KERNEL_DLL UsageServiceImpl {
 public:
   /// Sets the application name that has invoked Mantid
-  void setApplication(const std::string &name);
+  void setApplicationName(const std::string &name);
   /// Returns the application name that has invoked Mantid
-  std::string getApplication() const;
+  std::string getApplicationName() const;
   /// Sets the interval that the timer checks for tasks
   void setInterval(const uint32_t seconds = 60);
   /// Registers the Startup of Mantid
@@ -84,6 +70,10 @@ public:
   /// flushes any buffers and sends any outstanding usage reports
   void flush();
   void shutdown();
+  /// gets the uptime of this mantid instance
+  Types::Core::time_duration getUpTime();
+  /// Gets the start time of this mantid instance
+  Types::Core::DateAndTime getStartTime() { return m_startTime; }
 
 protected:
   /// Constructor
@@ -131,16 +121,20 @@ private:
   bool m_isEnabled;
   mutable std::mutex m_mutex;
   std::string m_application;
+  Types::Core::DateAndTime m_startTime;
 
   /// Async method for sending startup notifications
   Poco::ActiveMethod<int, std::string, UsageServiceImpl> m_startupActiveMethod;
   /// Async method for sending feature notifications
   Poco::ActiveMethod<int, std::string, UsageServiceImpl> m_featureActiveMethod;
+
+  /// Stores the base url of the usage system
+  std::string m_url;
 };
 
 EXTERN_MANTID_KERNEL template class MANTID_KERNEL_DLL
     Mantid::Kernel::SingletonHolder<UsageServiceImpl>;
-typedef Mantid::Kernel::SingletonHolder<UsageServiceImpl> UsageService;
+using UsageService = Mantid::Kernel::SingletonHolder<UsageServiceImpl>;
 
 } // namespace Kernel
 } // namespace Mantid

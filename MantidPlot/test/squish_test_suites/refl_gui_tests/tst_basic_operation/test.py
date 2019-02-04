@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 import re
 
 
@@ -18,18 +24,18 @@ class ReflTestHarness:
     def __setup(self):
         activateItem(waitForObjectItem(":_QMenuBar", "Interfaces"))
         activateItem(waitForObjectItem(":MantidPlot - untitled.Interfaces_QMenu", "Reflectometry"))
-        refl_gui = waitForObjectItem(":Interfaces.Reflectometry_QMenu", "ISIS Reflectometry")
+        refl_gui = waitForObjectItem(":Interfaces.Reflectometry_QMenu", "ISIS Reflectometry Old")
         activateItem(refl_gui)
 
     def process_everything(self):
         # Hit process
-        clickButton(waitForObject(":splitterList.Process_QPushButton"))
+        clickButton(waitForObject(":splitterList.buttonProcess_QPushButton"))
         # Agree to process everything
         setWindowState(waitForObject(":_QMessageBox"), WindowState.Normal)
         clickButton(waitForObject(":tableMain.Yes_QPushButton"))
         
     def __teardown(self):
-        sendEvent("QCloseEvent", waitForObject(":ISIS Reflectometry_ReflGui"))
+        sendEvent("QCloseEvent", waitForObject(":ISIS Reflectometry (Old) - DEPRECATED_ReflGui"))
         dont_save_name = ":Don't Save_QPushButton"
         if(object.exists(dont_save_name)):
             clickButton(waitForObject(dont_save_name))
@@ -43,7 +49,7 @@ class ReflTestHarness:
         
     def list_from_workspace_list(self):
         item_names = list()
-        workspace_tree = waitForObject(":Workspaces.WorkspaceTree_MantidTreeWidget")
+        workspace_tree = waitForObject(":Workspaces.WorkspaceTreeWidget_MantidTreeWidget")
         
         topItem = workspace_tree.topLevelItem(0)
         item = topItem
@@ -215,7 +221,7 @@ def do_test_three_runs(test_harness):
     # Set the second run number
     tbl.item(row_index, 5).setText(str(run_number2))
     
-    # Set the thrid run number
+    # Set the third run number
     tbl.item(row_index, 10).setText(str(run_number3))
     # Give the third run a theta value
     tbl.item(row_index, 11).setText(str(1.0))

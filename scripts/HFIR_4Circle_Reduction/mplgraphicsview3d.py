@@ -1,10 +1,17 @@
-#pylint: disable=R0902,R0904
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
+#pylint: disable=R0901,R0902,R0904
+from __future__ import (absolute_import, division, print_function)
+from six.moves import range
 import numpy as np
 import os
 
-from PyQt4.QtGui import QSizePolicy
-
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+from qtpy.QtWidgets import QSizePolicy
+from MPLwidgets import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from mpl_toolkits.mplot3d import Axes3D
 
@@ -53,7 +60,6 @@ class MplPlot3dCanvas(FigureCanvas):
         Clear all the figures from canvas
         :return:
         """
-        print '[DB-INFO] There are %d plots in current plot list.' % len(self._currPlotList)
         for plt in self._currPlotList:
             # del plt
             self._myAxes.collections.remove(plt)
@@ -109,7 +115,7 @@ class MplPlot3dCanvas(FigureCanvas):
         intensities = np.zeros((len(raw_lines), ))
 
         # parse
-        for i in xrange(len(raw_lines)):
+        for i in range(len(raw_lines)):
             line = raw_lines[i].strip()
 
             # skip empty line
@@ -118,7 +124,7 @@ class MplPlot3dCanvas(FigureCanvas):
 
             # set value
             terms = line.split(',')
-            for j in xrange(3):
+            for j in range(3):
                 xyz_points[i][j] = float(terms[j])
             intensities[i] = float(terms[3])
         # END-FOR
@@ -176,15 +182,15 @@ class MplPlot3dCanvas(FigureCanvas):
             x_min = min(points[:, 0])
             x_max = max(points[:, 0])
             d_x = x_max - x_min
-            # print x_min, x_max
+            # print(x_min, x_max)
             y_min = min(points[:, 1])
             y_max = max(points[:, 1])
             d_y = y_max - y_min
-            # print y_min, y_max
+            # print(y_min, y_max)
             z_min = min(points[:, 2])
             z_max = max(points[:, 2])
             d_z = z_max - z_min
-            print z_min, z_max
+            print(z_min, z_max)
 
             # use default setup
             self._myAxes.set_xlim(x_min-d_x, x_max+d_x)
@@ -209,7 +215,7 @@ class MplPlot3dCanvas(FigureCanvas):
             b_list = b_list/diff
 
             num_points = len(points[:, 2])
-            for index in xrange(num_points):
+            for index in range(num_points):
                 color_tup = (color_r, color_g, b_list[index])
                 color_list.append(color_tup)
         else:
@@ -225,7 +231,7 @@ class MplPlot3dCanvas(FigureCanvas):
         Plot surface
         :return:
         """
-        print 'Number of surf = ', len(self._currSurfaceList)
+        print('Number of surf = ', len(self._currSurfaceList))
         for surf in self._currSurfaceList:
             plt = self._myAxes.plot_surface(surf["xx"], surf["yy"], surf["val"],
                                             rstride=5, cstride=5,  # color map??? cmap=cm.jet,
@@ -318,16 +324,16 @@ def get_auto_xyz_limit(points):
     x_max = max(points[:, 0])
     d_x = x_max - x_min
 
-    # print x_min, x_max
+    # print(x_min, x_max)
     y_min = min(points[:, 1])
     y_max = max(points[:, 1])
     d_y = y_max - y_min
 
-    # print y_min, y_max
+    # print(y_min, y_max)
     z_min = min(points[:, 2])
     z_max = max(points[:, 2])
     d_z = z_max - z_min
-    print z_min, z_max
+    print(z_min, z_max)
 
     # use default setup
     x_lim = (x_min-d_x, x_max+d_x)

@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_GEOMETRY_MDFRAME_H_
 #define MANTID_GEOMETRY_MDFRAME_H_
 
 #include "MantidKernel/System.h"
 
 #include "MantidKernel/MDUnit.h"
-#include "MantidKernel/UnitLabel.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
+#include "MantidKernel/UnitLabel.h"
 #include <memory>
 
 namespace Mantid {
@@ -13,27 +19,6 @@ namespace Geometry {
 
 /** MDFrame : The coordinate frame for a dimension, or set of dimensions in a
   multidimensional workspace.
-
-  Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
-
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>
-  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport MDFrame {
 public:
@@ -50,10 +35,10 @@ public:
   virtual ~MDFrame() = default;
 };
 
-typedef std::unique_ptr<MDFrame> MDFrame_uptr;
-typedef std::unique_ptr<const MDFrame> MDFrame_const_uptr;
-typedef std::shared_ptr<MDFrame> MDFrame_sptr;
-typedef std::shared_ptr<const MDFrame> MDFrame_const_sptr;
+using MDFrame_uptr = std::unique_ptr<MDFrame>;
+using MDFrame_const_uptr = std::unique_ptr<const MDFrame>;
+using MDFrame_sptr = std::shared_ptr<MDFrame>;
+using MDFrame_const_sptr = std::shared_ptr<const MDFrame>;
 
 } // namespace Geometry
 } // namespace Mantid

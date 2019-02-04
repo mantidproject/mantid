@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -53,8 +53,8 @@ Usage
    no_detectors = FindDetectorsInShape(musr_inst_ws, narrow_cylinder)
    all_detectors = FindDetectorsInShape(musr_inst_ws, wide_cylinder)
 
-   print "The narrow cylinder contains %i of the detectors." % len(no_detectors)
-   print "The wide cylinder contains %i of the detectors." % len(all_detectors)
+   print("The narrow cylinder contains %i of the detectors." % len(no_detectors))
+   print("The wide cylinder contains %i of the detectors." % len(all_detectors))
 
 Output:
 

@@ -1,8 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Instrument/CompAssembly.h"
+#include "MantidGeometry/IObjComponent.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/ComponentVisitor.h"
+#include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/StructuredDetector.h"
-#include "MantidGeometry/Instrument/ParComponentFactory.h"
-#include "MantidGeometry/IObjComponent.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include <algorithm>
 #include <ostream>
@@ -11,8 +19,8 @@
 namespace Mantid {
 namespace Geometry {
 
-using Kernel::V3D;
 using Kernel::Quat;
+using Kernel::V3D;
 
 /** Empty constructor
  */
@@ -240,23 +248,23 @@ void CompAssembly::getChildren(std::vector<IComponent_const_sptr> &outVector,
 }
 
 /**
-* Find a component by name.
-* @param cname :: The name of the component. If there are multiple matches, the
-* first one found is returned.
-* If the name contains '/', it will search for the component whose name occurs
-* before the '/'
-* then within that component's assembly,
-* search the component whose name occurs after the '/' and so on with any
-* subsequent '/'.
-* For example to find 'tube020' in 'panel07', one could use the cname
-* 'panel07/tube020',
-* given that tube020 is unique within panel07.
-* @param nlevels :: Optional argument to limit number of levels searched.
-* If cname has a '/', then nlevels will apply to each step delimited by the
-* '/'s, rather than the whole search.
-* In particular, nlevels=1, would force cname to be a full path name.
-* @returns A shared pointer to the component
-*/
+ * Find a component by name.
+ * @param cname :: The name of the component. If there are multiple matches, the
+ * first one found is returned.
+ * If the name contains '/', it will search for the component whose name occurs
+ * before the '/'
+ * then within that component's assembly,
+ * search the component whose name occurs after the '/' and so on with any
+ * subsequent '/'.
+ * For example to find 'tube020' in 'panel07', one could use the cname
+ * 'panel07/tube020',
+ * given that tube020 is unique within panel07.
+ * @param nlevels :: Optional argument to limit number of levels searched.
+ * If cname has a '/', then nlevels will apply to each step delimited by the
+ * '/'s, rather than the whole search.
+ * In particular, nlevels=1, would force cname to be a full path name.
+ * @returns A shared pointer to the component
+ */
 boost::shared_ptr<const IComponent>
 CompAssembly::getComponentByName(const std::string &cname, int nlevels) const {
   boost::shared_ptr<const ICompAssembly> thisNode =
@@ -349,14 +357,15 @@ CompAssembly::getComponentByName(const std::string &cname, int nlevels) const {
 
 //------------------------------------------------------------------------------------------------
 /**
-* Get the bounding box for this assembly. It is simply the sum of the bounding
-* boxes of its children
+ * Get the bounding box for this assembly. It is simply the sum of the bounding
+ * boxes of its children
  * @param assemblyBox :: [Out] The resulting bounding box is stored here.
  */
 void CompAssembly::getBoundingBox(BoundingBox &assemblyBox) const {
   if (m_map) {
-    // Check cache for assembly, inside the ParameterMap
-    if (m_map->getCachedBoundingBox(this, assemblyBox)) {
+
+    if (hasComponentInfo()) {
+      assemblyBox = m_map->componentInfo().boundingBox(index(), &assemblyBox);
       return;
     }
 
@@ -369,8 +378,6 @@ void CompAssembly::getBoundingBox(BoundingBox &assemblyBox) const {
       comp->getBoundingBox(compBox);
       assemblyBox.grow(compBox);
     }
-    // Set the cache
-    m_map->setCachedBoundingBox(this, assemblyBox);
   }
 
   else {
@@ -458,7 +465,7 @@ void CompAssembly::printTree(std::ostream &os) const {
  * @returns A vector of the absolute position
  */
 V3D CompAssembly::getPos() const {
-  if (!m_map)
+  if (!m_map || hasComponentInfo())
     return Component::getPos();
   else {
     V3D pos;
@@ -475,8 +482,8 @@ V3D CompAssembly::getPos() const {
  * creates it if it is not available.
  * @returns A vector of the absolute position
  */
-const Quat CompAssembly::getRotation() const {
-  if (!m_map)
+Quat CompAssembly::getRotation() const {
+  if (!m_map || hasComponentInfo())
     return Component::getRotation();
   else {
     Quat rot;
@@ -486,6 +493,11 @@ const Quat CompAssembly::getRotation() const {
     }
     return rot;
   }
+}
+
+size_t CompAssembly::registerContents(ComponentVisitor &visitor) const {
+  // Generic Assembly registration call.
+  return visitor.registerComponentAssembly(*this);
 }
 
 /** Print information about elements in the assembly to a stream

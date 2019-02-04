@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/ConvToMDHistoWS.h"
 
 namespace Mantid {
@@ -40,11 +46,11 @@ ConvToMDHistoWS::initialize(const MDWSDescription &WSD,
 }
 
 /** convert range of spectra starting from initial spectra  startSpectra into MD
-*events
-*@param startSpectra -- initial spectra number to begin conversion from
-*
-* @returns -- number of events added to the workspace.
-*/
+ *events
+ *@param startSpectra -- initial spectra number to begin conversion from
+ *
+ * @returns -- number of events added to the workspace.
+ */
 size_t ConvToMDHistoWS::conversionChunk(size_t startSpectra) {
   size_t nAddedEvents(0), nBufEvents(0);
   // cache global variable locally
@@ -80,9 +86,9 @@ size_t ConvToMDHistoWS::conversionChunk(size_t startSpectra) {
     size_t iSpctr = m_detIDMap[i];
     int32_t det_id = m_detID[i];
 
-    const MantidVec &X = m_InWS2D->readX(iSpctr);
-    const MantidVec &Signal = m_InWS2D->readY(iSpctr);
-    const MantidVec &Error = m_InWS2D->readE(iSpctr);
+    const auto &X = m_InWS2D->x(iSpctr);
+    const auto &Signal = m_InWS2D->y(iSpctr);
+    const auto &Error = m_InWS2D->e(iSpctr);
 
     // calculate the coordinates which depend on detector posision
     if (!m_QConverter->calcYDepCoordinates(locCoord, i))
@@ -261,11 +267,11 @@ void ConvToMDHistoWS::runConversion(API::Progress *pProgress) {
   m_OutWSWrapper->pWorkspace()->setCoordinateSystem(m_coordinateSystem);
 }
 /**function calculates the size of temporary memory used to keep convertTo MD
-* data before these data should be added to DataObjects
-* @param nThreads        -- number of threads used to process data
-* @param specSize        -- the size of single spectra in matrix workspace;
-* @param nPointsToProcess -- total number of data points in the workspace
-*/
+ * data before these data should be added to DataObjects
+ * @param nThreads        -- number of threads used to process data
+ * @param specSize        -- the size of single spectra in matrix workspace;
+ * @param nPointsToProcess -- total number of data points in the workspace
+ */
 void ConvToMDHistoWS::estimateThreadWork(size_t nThreads, size_t specSize,
                                          size_t nPointsToProcess) {
   if (nThreads == 0)
@@ -282,4 +288,4 @@ void ConvToMDHistoWS::estimateThreadWork(size_t nThreads, size_t specSize,
 }
 
 } // endNamespace DataObjects
-} // endNamespace Mantid
+} // namespace Mantid

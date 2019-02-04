@@ -1,19 +1,29 @@
-#include "MantidAPI/FileProperty.h"
-#include "MantidAPI/Run.h"
-#include "MantidAPI/MatrixWorkspace.h"
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/SaveIsawDetCal.h"
+#include "MantidAPI/ExperimentInfo.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Workspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
-#include <fstream>
-#include "MantidAPI/Workspace.h"
-#include "MantidAPI/ExperimentInfo.h"
+
 #include <Poco/File.h>
+#include <boost/algorithm/string/trim.hpp>
+#include <fstream>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
+using Mantid::Types::Core::DateAndTime;
 using std::string;
 
 namespace Mantid {
@@ -37,8 +47,9 @@ void SaveIsawDetCal::init() {
   declareProperty(
       make_unique<ArrayProperty<string>>("BankNames", Direction::Input),
       "Optional: Only select the specified banks");
-  declareProperty("AppendFile", false, "Append to file if true.\n"
-                                       "If false, new file (default).");
+  declareProperty("AppendFile", false,
+                  "Append to file if true.\n"
+                  "If false, new file (default).");
 }
 
 /** Execute the algorithm.
@@ -70,7 +81,7 @@ void SaveIsawDetCal::exec() {
   // We cannot assume the peaks have bank type detector modules, so we have a
   // string to check this
   std::string bankPart = "bank";
-  if (inst->getName().compare("WISH") == 0)
+  if (inst->getName() == "WISH")
     bankPart = "WISHpanel";
 
   std::set<int> uniqueBanks;
@@ -155,8 +166,7 @@ void SaveIsawDetCal::exec() {
     // Retrieve it
     boost::shared_ptr<const IComponent> det =
         inst->getComponentByName(bankName);
-    if (inst->getName().compare("CORELLI") ==
-        0) // for Corelli with sixteenpack under bank
+    if (inst->getName() == "CORELLI") // for Corelli with sixteenpack under bank
     {
       std::vector<Geometry::IComponent_const_sptr> children;
       boost::shared_ptr<const Geometry::ICompAssembly> asmb =
@@ -221,7 +231,7 @@ void SaveIsawDetCal::exec() {
 V3D SaveIsawDetCal::findPixelPos(std::string bankName, int col, int row) {
   boost::shared_ptr<const IComponent> parent =
       inst->getComponentByName(bankName);
-  if (parent->type().compare("RectangularDetector") == 0) {
+  if (parent->type() == "RectangularDetector") {
     boost::shared_ptr<const RectangularDetector> RDet =
         boost::dynamic_pointer_cast<const RectangularDetector>(parent);
 
@@ -232,7 +242,7 @@ V3D SaveIsawDetCal::findPixelPos(std::string bankName, int col, int row) {
     boost::shared_ptr<const Geometry::ICompAssembly> asmb =
         boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
     asmb->getChildren(children, false);
-    if (children[0]->getName().compare("sixteenpack") == 0) {
+    if (children[0]->getName() == "sixteenpack") {
       asmb = boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(
           children[0]);
       children.clear();
@@ -254,11 +264,11 @@ V3D SaveIsawDetCal::findPixelPos(std::string bankName, int col, int row) {
 
 void SaveIsawDetCal::sizeBanks(std::string bankName, int &NCOLS, int &NROWS,
                                double &xsize, double &ysize) {
-  if (bankName.compare("None") == 0)
+  if (bankName == "None")
     return;
   boost::shared_ptr<const IComponent> parent =
       inst->getComponentByName(bankName);
-  if (parent->type().compare("RectangularDetector") == 0) {
+  if (parent->type() == "RectangularDetector") {
     boost::shared_ptr<const RectangularDetector> RDet =
         boost::dynamic_pointer_cast<const RectangularDetector>(parent);
 
@@ -271,7 +281,7 @@ void SaveIsawDetCal::sizeBanks(std::string bankName, int &NCOLS, int &NROWS,
     boost::shared_ptr<const Geometry::ICompAssembly> asmb =
         boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
     asmb->getChildren(children, false);
-    if (children[0]->getName().compare("sixteenpack") == 0) {
+    if (children[0]->getName() == "sixteenpack") {
       asmb = boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(
           children[0]);
       children.clear();
@@ -291,5 +301,5 @@ void SaveIsawDetCal::sizeBanks(std::string bankName, int &NCOLS, int &NROWS,
     ysize = first->getDistance(*last);
   }
 }
-} // namespace Mantid
 } // namespace DataHandling
+} // namespace Mantid

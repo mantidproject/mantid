@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAOBJECTS_VECTORCOLUMN_H_
 #define MANTID_DATAOBJECTS_VECTORCOLUMN_H_
 
@@ -5,8 +11,8 @@
 #include "MantidKernel/StringTokenizer.h"
 
 #include <boost/algorithm/string/join.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string/trim.hpp>
+#include <boost/lexical_cast.hpp>
 
 namespace Mantid {
 namespace DataObjects {
@@ -17,27 +23,6 @@ namespace DataObjects {
   Plese add more specializations to VectorColumn.cpp as you need them. I don't
   guarantee
   it will work correctly with complex or user types, but it might.
-
-  Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
-
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>
-  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
 template <class Type> class DLLExport VectorColumn : public API::Column {
@@ -80,8 +65,7 @@ public:
     Mantid::Kernel::StringTokenizer elements(
         text, ",", Mantid::Kernel::StringTokenizer::TOK_TRIM);
 
-    for (const auto &it : elements) {
-      std::string element(it);
+    for (const auto &element : elements) {
       try {
         newValues.push_back(boost::lexical_cast<Type>(element));
       } catch (boost::bad_lexical_cast &) {
@@ -93,8 +77,17 @@ public:
     m_data.at(index) = newValues;
   }
 
+  /// Set item from a stream
+  void read(const size_t index, std::istringstream &in) override {
+    std::string s;
+    in >> s;
+    read(index, s);
+  }
+
   /// Specialized type check
   bool isBool() const override { return false; }
+
+  bool isNumber() const override { return false; }
 
   /// Overall memory size taken by the column (bytes)
   long int sizeOfData() const override {

@@ -1,55 +1,54 @@
-#include "MantidKernel/DllOpen.h"
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/LibraryWrapper.h"
+#include "MantidKernel/DllOpen.h"
 
 namespace Mantid {
 namespace Kernel {
 
-/// Constructor
-LibraryWrapper::LibraryWrapper() : module(nullptr) {}
+/**
+ * Move constructor
+ * @param src Constructor from this temporary
+ */
+LibraryWrapper::LibraryWrapper(LibraryWrapper &&src) noexcept {
+  *this = std::move(src);
+}
+
+/**
+ * Move assignment
+ * @param rhs Temporary object as source of assignment
+ */
+LibraryWrapper &LibraryWrapper::operator=(LibraryWrapper &&rhs) noexcept {
+  using std::swap;
+  swap(m_module, rhs.m_module);
+  return *this;
+}
 
 /// Destructor
 LibraryWrapper::~LibraryWrapper() {
   // Close lib
-  if (module) {
-    DllOpen::CloseDll(module);
-    module = nullptr;
+  if (m_module) {
+    DllOpen::closeDll(m_module);
+    m_module = nullptr;
   }
 }
 
 /** Opens a DLL.
- *  @param libName :: The name of the file to open (not including the
- * lib/so/dll).
- *  @return True if DLL is opened or already open.
- */
-bool LibraryWrapper::OpenLibrary(const std::string &libName) {
-  if (!module) {
-    // Load dynamically loaded library
-    module = DllOpen::OpenDll(libName);
-
-    if (!module) {
-      return false;
-    }
-  }
-
-  return true;
-}
-
-/** Opens a DLL.
- *  @param libName :: The name of the file to open (not including the
- * lib/so/dll).
- *  @param filePath :: The filepath to the directory where the library is.
+ *  @param filepath :: The filepath to the directory where the library is.
  *  @return True if DLL is opened or already open
  */
-bool LibraryWrapper::OpenLibrary(const std::string &libName,
-                                 const std::string &filePath) {
-  if (!module) {
+bool LibraryWrapper::openLibrary(const std::string &filepath) {
+  if (!m_module) {
     // Load dynamically loaded library
-    module = DllOpen::OpenDll(libName, filePath);
-    if (!module) {
+    m_module = DllOpen::openDll(filepath);
+    if (!m_module) {
       return false;
     }
   }
-
   return true;
 }
 

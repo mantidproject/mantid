@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -27,7 +27,7 @@ The following usage example loads a POLDI data file using the instrument name, y
 
     poldi_data = LoadSINQ(Instrument = "POLDI", Year = 2013, Numor = 6904)
     
-    print "Poldi sample 6904 has", poldi_data.getNumberHistograms(), "histograms."
+    print("Poldi sample 6904 has {} histograms.".format(poldi_data.getNumberHistograms()))
 
 Output:
     

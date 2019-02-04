@@ -278,7 +278,7 @@ Success rate: 50%
 @end smallexample
 
 
-Fixing the bug is left as an excercise to the reader.
+Fixing the bug is left as an exercise to the reader.
 
 
 @section Graphical user interface
@@ -705,7 +705,7 @@ CxxTest comes with some samples in the @file{sample/} subdirectory of
 the distribution.  If you look in that directory, you will see three
 Makefiles: @file{Makefile.unix}, @file{Makefile.msvc} and
 @file{Makefile.bcc32} which are for Linux/Unix, MS Visual C++ and
-Borland C++, repectively.  These files are provided as a starting point,
+Borland C++, respectively.  These files are provided as a starting point,
 and some options may need to be tweaked in them for your system.
 
 If you are running under Windows, a good guess would be to run
@@ -1436,7 +1436,7 @@ Sometimes your code needs to call functions which are not available when
 testing. This happens for example when you test driver code using a
 user-mode test runner, and you need to call kernel functions.  You can
 use CxxTest's mock framework to provide testable implementations for the
-test code, while maintaing the original functions for the real code.
+test code, while maintaining the original functions for the real code.
 This you do with @code{CXXTEST_SUPPLY_GLOBAL} (and
 @code{CXXTEST_SUPPLY_VOID_GLOBAL}).  For example, say you want to supply
 your code with the Win32 kernel function @code{IoCallDriver}:
@@ -1541,7 +1541,7 @@ test listener of your fancy.
 
 @subsubsection The @code{stdio} printer
 If the @code{ErrorPrinter}'s usage of @code{std::cout} clashes
-with your environment or is unsupported by your compiler, don't dispair!
+with your environment or is unsupported by your compiler, don't despair!
 You may still be able to use the @code{StdioPrinter}, which does the
 exact same thing but uses good old @code{printf()}.
 
@@ -1637,7 +1637,7 @@ The currently available runners are:
 This is the standard error printer, which formats its output to @code{std::cout}.
 
 @item --runner=ParenPrinter
-Identical to @code{ErrorPrinter} except that it prints line numbers in parantheses.
+Identical to @code{ErrorPrinter} except that it prints line numbers in parentheses.
 This is the way Visual Studio expects it.
 
 @item --runner=StdioPrinter

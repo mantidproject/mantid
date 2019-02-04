@@ -1,9 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CRYSTAL_SAVEISAWPEAKS_H_
 #define MANTID_CRYSTAL_SAVEISAWPEAKS_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 
@@ -29,6 +36,9 @@ public:
 
   /// Algorithm's version for identification
   int version() const override { return 1; };
+  const std::vector<std::string> seeAlso() const override {
+    return {"LoadIsawPeaks"};
+  }
   /// Algorithm's category for identification
   const std::string category() const override {
     return "Crystal\\DataHandling;DataHandling\\Isaw";
@@ -43,10 +53,12 @@ private:
   Kernel::V3D findPixelPos(std::string bankName, int col, int row);
   void sizeBanks(std::string bankName, int &NCOLS, int &NROWS, double &xsize,
                  double &ysize);
+  bool bankMasked(Geometry::IComponent_const_sptr parent,
+                  const Geometry::DetectorInfo &detectorInfo);
   Geometry::Instrument_const_sptr inst;
 };
 
-} // namespace Mantid
 } // namespace Crystal
+} // namespace Mantid
 
 #endif /* MANTID_CRYSTAL_SAVEISAWPEAKS_H_ */

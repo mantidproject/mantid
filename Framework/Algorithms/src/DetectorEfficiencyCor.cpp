@@ -1,16 +1,26 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/DetectorEfficiencyCor.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Run.h"
-#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidGeometry/Objects/Track.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidTypes/SpectrumDefinition.h"
 
 #include <algorithm>
 #include <cmath>
@@ -24,6 +34,7 @@ DECLARE_ALGORITHM(DetectorEfficiencyCor)
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;
+using namespace DataObjects;
 
 namespace {
 
@@ -65,7 +76,7 @@ const double DIST_TO_UNIVERSE_EDGE = 1e3;
 const std::string PRESSURE_PARAM = "TubePressure";
 // Name of wall thickness parameter
 const std::string THICKNESS_PARAM = "TubeThickness";
-}
+} // namespace
 
 // this default constructor calls default constructors and sets other member
 // data to impossible (flag) values
@@ -102,11 +113,11 @@ void DetectorEfficiencyCor::init() {
 }
 
 /** Executes the algorithm
-*  @throw NullPointerException if a getDetector() returns NULL or pressure or
-* wall thickness is not set
-*  @throw invalid_argument if the shape of a detector is isn't a cylinder
-* aligned on axis or there is no baseInstrument
-*/
+ *  @throw NullPointerException if a getDetector() returns NULL or pressure or
+ * wall thickness is not set
+ *  @throw invalid_argument if the shape of a detector is isn't a cylinder
+ * aligned on axis or there is no baseInstrument
+ */
 void DetectorEfficiencyCor::exec() {
   // gets and checks the values passed to the algorithm
   retrieveProperties();
@@ -120,14 +131,15 @@ void DetectorEfficiencyCor::exec() {
   int64_t numHists = m_inputWS->getNumberHistograms();
   double numHists_d = static_cast<double>(numHists);
   const int64_t progStep = static_cast<int64_t>(ceil(numHists_d / 100.0));
+  auto &spectrumInfo = m_inputWS->spectrumInfo();
 
-  PARALLEL_FOR2(m_inputWS, m_outputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS, *m_outputWS))
   for (int64_t i = 0; i < numHists; ++i) {
     PARALLEL_START_INTERUPT_REGION
 
     m_outputWS->setSharedX(i, m_inputWS->sharedX(i));
     try {
-      correctForEfficiency(i);
+      correctForEfficiency(i, spectrumInfo);
     } catch (Exception::NotFoundError &) {
       // zero the Y data that can't be corrected
       m_outputWS->mutableY(i) *= 0.0;
@@ -150,14 +162,14 @@ void DetectorEfficiencyCor::exec() {
   setProperty("OutputWorkspace", m_outputWS);
 }
 /** Loads and checks the values passed to the algorithm
-*
-*  @throw invalid_argument if there is an incompatible property value so the
-*algorithm can't continue
-*/
+ *
+ *  @throw invalid_argument if there is an incompatible property value so the
+ *algorithm can't continue
+ */
 void DetectorEfficiencyCor::retrieveProperties() {
   // these first three properties are fully checked by validators
   m_inputWS = getProperty("InputWorkspace");
-  m_paraMap = &(m_inputWS->instrumentParameters());
+  m_paraMap = &(m_inputWS->constInstrumentParameters());
 
   m_Ei = getProperty("IncidentEnergy");
   // If we're not given an Ei, see if one has been set.
@@ -176,58 +188,52 @@ void DetectorEfficiencyCor::retrieveProperties() {
   // If input and output workspaces are not the same, create a new workspace for
   // the output
   if (m_outputWS != m_inputWS) {
-    m_outputWS = WorkspaceFactory::Instance().create(m_inputWS);
+    m_outputWS = create<MatrixWorkspace>(*m_inputWS);
   }
 }
 
-/** Corrects a spectra for the detector efficiency calculated from detector
-information
-Gets the detector information and uses this to calculate its efficiency
-*  @param spectraIn :: index of the spectrum to get the efficiency for
-*  @throw invalid_argument if the shape of a detector is isn't a cylinder
-aligned along one axis
-*  @throw NotFoundError if the detector or its gas pressure or wall thickness
-were not found
-*/
-void DetectorEfficiencyCor::correctForEfficiency(int64_t spectraIn) {
-  IDetector_const_sptr det = m_inputWS->getDetector(spectraIn);
-  if (det->isMonitor() || det->isMasked()) {
+/**
+ * Corrects a spectra for the detector efficiency calculated from detector
+ * information
+ * Gets the detector information and uses this to calculate its efficiency
+ *  @param spectraIn :: index of the spectrum to get the efficiency for
+ *  @param spectrumInfo :: The SpectrumInfo object for the input workspace
+ *  @throw invalid_argument if the shape of a detector is not a cylinder aligned
+ * along one axis
+ *  @throw NotFoundError if the detector or its gas pressure or wall thickness
+ * were not found
+ */
+void DetectorEfficiencyCor::correctForEfficiency(
+    int64_t spectraIn, const SpectrumInfo &spectrumInfo) {
+  if (!spectrumInfo.hasDetectors(spectraIn))
+    throw Exception::NotFoundError("No detectors found", spectraIn);
+
+  if (spectrumInfo.isMonitor(spectraIn) || spectrumInfo.isMasked(spectraIn)) {
     return;
   }
 
   auto &yout = m_outputWS->mutableY(spectraIn);
   auto &eout = m_outputWS->mutableE(spectraIn);
   // Need the original values so this is not a reference
-  auto yValues = m_inputWS->y(spectraIn);
-  auto eValues = m_inputWS->e(spectraIn);
-
-  // get a pointer to the detectors that created the spectrum
-  const std::set<detid_t> &dets =
-      m_inputWS->getSpectrum(spectraIn).getDetectorIDs();
-  const double ndets(static_cast<double>(dets.size())); // We correct each pixel
-                                                        // so make sure we
-                                                        // average the
-                                                        // correction computing
-                                                        // it for the spectrum
-  if (ndets == 0) {
-    throw Exception::NotFoundError("No detectors found", spectraIn);
-  }
+  const auto yValues = m_inputWS->y(spectraIn);
+  const auto eValues = m_inputWS->e(spectraIn);
 
   // Storage for the reciprocal wave vectors that are calculated as the
   // correction proceeds
   std::vector<double> oneOverWaveVectors(yValues.size());
-  for (auto it = dets.cbegin(); it != dets.cend(); ++it) {
-    IDetector_const_sptr det_member =
-        m_inputWS->getInstrument()->getDetector(*it);
+  const auto &detectorInfo = m_inputWS->detectorInfo();
+  const auto &spectrumDefinition = spectrumInfo.spectrumDefinition(spectraIn);
 
+  for (const auto index : spectrumDefinition) {
+    const auto detIndex = index.first;
+    const auto &det_member = detectorInfo.detector(detIndex);
     Parameter_sptr par =
-        m_paraMap->getRecursive(det_member->getComponentID(), PRESSURE_PARAM);
+        m_paraMap->getRecursive(det_member.getComponentID(), PRESSURE_PARAM);
     if (!par) {
       throw Exception::NotFoundError(PRESSURE_PARAM, spectraIn);
     }
     const double atms = par->value<double>();
-    par =
-        m_paraMap->getRecursive(det_member->getComponentID(), THICKNESS_PARAM);
+    par = m_paraMap->getRecursive(det_member.getComponentID(), THICKNESS_PARAM);
     if (!par) {
       throw Exception::NotFoundError(THICKNESS_PARAM, spectraIn);
     }
@@ -239,9 +245,9 @@ void DetectorEfficiencyCor::correctForEfficiency(int64_t spectraIn) {
     // now get the sin of the angle, it's the magnitude of the cross product of
     // unit vector along the detector tube axis and a unit vector directed from
     // the sample to the detector centre
-    V3D vectorFromSample = det_member->getPos() - m_samplePos;
+    V3D vectorFromSample = det_member.getPos() - m_samplePos;
     vectorFromSample.normalize();
-    Quat rot = det_member->getRotation();
+    Quat rot = det_member.getRotation();
     // rotate the original cylinder object axis to get the detector axis in the
     // actual instrument
     rot.rotate(detAxis);
@@ -261,14 +267,15 @@ void DetectorEfficiencyCor::correctForEfficiency(int64_t spectraIn) {
     auto wavItr = oneOverWaveVectors.begin();
 
     for (; youtItr != yout.end(); ++youtItr, ++eoutItr) {
-      if (it == dets.begin()) {
+      if (index == spectrumDefinition[0]) {
         *youtItr = 0.0;
         *eoutItr = 0.0;
         *wavItr = calculateOneOverK(*xItr, *(xItr + 1));
       }
       const double oneOverWave = *wavItr;
+      const double nDets(static_cast<double>(spectrumDefinition.size()));
       const double factor =
-          1.0 / ndets / detectorEfficiency(det_const * oneOverWave);
+          1.0 / nDets / detectorEfficiency(det_const * oneOverWave);
       *youtItr += (*yinItr) * factor;
       *eoutItr += (*einItr) * factor;
       ++yinItr;
@@ -296,19 +303,19 @@ double DetectorEfficiencyCor::calculateOneOverK(double loBinBound,
 }
 
 /** Update the shape cache if necessary
-* @param det :: a pointer to the detector to query
-* @param detRadius :: An output parameter that contains the detector radius
-* @param detAxis :: An output parameter that contains the detector axis vector
-*/
-void DetectorEfficiencyCor::getDetectorGeometry(
-    const Geometry::IDetector_const_sptr &det, double &detRadius,
-    V3D &detAxis) {
-  boost::shared_ptr<const Object> shape_sptr = det->shape();
+ * @param det :: a pointer to the detector to query
+ * @param detRadius :: An output parameter that contains the detector radius
+ * @param detAxis :: An output parameter that contains the detector axis vector
+ */
+void DetectorEfficiencyCor::getDetectorGeometry(const Geometry::IDetector &det,
+                                                double &detRadius,
+                                                V3D &detAxis) {
+  boost::shared_ptr<const IObject> shape_sptr = det.shape();
   if (!shape_sptr->hasValidShape()) {
     throw Exception::NotFoundError("Shape", "Detector has no shape");
   }
 
-  std::map<const Geometry::Object *,
+  std::map<const Geometry::IObject *,
            std::pair<double, Kernel::V3D>>::const_iterator it =
       m_shapeCache.find(shape_sptr.get());
   if (it == m_shapeCache.end()) {
@@ -368,7 +375,7 @@ void DetectorEfficiencyCor::getDetectorGeometry(
  * @returns The distance to the surface in meters
  */
 double DetectorEfficiencyCor::distToSurface(const V3D &start,
-                                            const Object *shape) const {
+                                            const IObject *shape) const {
   // get a vector from the point that was passed to the origin
   V3D direction = V3D(0.0, 0.0, 0.0) - start;
   // it needs to be a unit vector
@@ -411,16 +418,16 @@ double DetectorEfficiencyCor::detectorEfficiency(const double alpha) const {
 }
 
 /** Calculates an expansion similar to that in CHEBEV of "Numerical Recipes"
-*  copied from the fortran code in effic_3he_cylinder.for
-* @param a :: a fit parameter, only the difference between a and b enters this
-* equation
-* @param b :: a fit parameter, only the difference between a and b enters this
-* equation
-* @param exspansionCoefs :: one of the 25 element constant arrays declared in
-* this file
-* @param x :: a fit parameter
-* @return a numerical approximation provided by the expansion
-*/
+ *  copied from the fortran code in effic_3he_cylinder.for
+ * @param a :: a fit parameter, only the difference between a and b enters this
+ * equation
+ * @param b :: a fit parameter, only the difference between a and b enters this
+ * equation
+ * @param exspansionCoefs :: one of the 25 element constant arrays declared in
+ * this file
+ * @param x :: a fit parameter
+ * @return a numerical approximation provided by the expansion
+ */
 double DetectorEfficiencyCor::chebevApprox(double a, double b,
                                            const double exspansionCoefs[],
                                            double x) const {
@@ -440,7 +447,7 @@ double DetectorEfficiencyCor::chebevApprox(double a, double b,
  * Logs if there were any problems locating spectra.
  * @param totalNDetectors -- number of all detectors in the workspace
  *
-*/
+ */
 void DetectorEfficiencyCor::logErrors(size_t totalNDetectors) const {
   std::vector<int>::size_type nspecs = m_spectraSkipped.size();
   if (!m_spectraSkipped.empty()) {
@@ -457,5 +464,5 @@ void DetectorEfficiencyCor::logErrors(size_t totalNDetectors) const {
   }
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

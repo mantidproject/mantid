@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/ArrayBoundedValidator.h"
 
 #include <boost/make_shared.hpp>
@@ -137,8 +143,11 @@ template <typename TYPE> void ArrayBoundedValidator<TYPE>::clearUpper() {
 
 // Required explicit instantiations
 template class ArrayBoundedValidator<double>;
-template class ArrayBoundedValidator<int>;
+template class ArrayBoundedValidator<int32_t>;
+template class ArrayBoundedValidator<int64_t>;
+#if defined(_WIN32) || defined(__clang__) && defined(__APPLE__)
 template class ArrayBoundedValidator<long>;
+#endif
 
-} // Kernel
-} // Mantid
+} // namespace Kernel
+} // namespace Mantid

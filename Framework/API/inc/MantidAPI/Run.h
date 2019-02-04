@@ -1,10 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_API_RUN_H_
 #define MANTID_API_RUN_H_
 
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/LogManager.h"
 #include "MantidKernel/TimeSplitter.h"
-#include "MantidGeometry/Instrument/Goniometer.h"
 
 #include <vector>
 
@@ -14,6 +19,14 @@ class File;
 
 namespace Mantid {
 
+namespace Kernel {
+template <class T> class Matrix;
+}
+
+namespace Geometry {
+class Goniometer;
+}
+
 namespace API {
 
 /**
@@ -22,30 +35,14 @@ namespace API {
 
    @author Martyn Gigg, Tessella plc
    @date 22/07/2010
-
-   Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-   National Laboratory & European Spallation Source
-
-   This file is part of Mantid.
-
-   Mantid is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 3 of the License, or
-   (at your option) any later version.
-
-   Mantid is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-
-   You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-   File change history is stored at: <https://github.com/mantidproject/mantid>.
-   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_API_DLL Run : public LogManager {
 public:
+  Run();
+  Run(const Run &other);
+  ~Run();
+  Run &operator=(const Run &other);
+
   /// Clone
   boost::shared_ptr<Run> clone();
 
@@ -53,8 +50,8 @@ public:
   Run &operator+=(const Run &rhs);
 
   /// Filter the logs by time
-  void filterByTime(const Kernel::DateAndTime start,
-                    const Kernel::DateAndTime stop) override;
+  void filterByTime(const Types::Core::DateAndTime start,
+                    const Types::Core::DateAndTime stop) override;
   /// Split the logs based on the given intervals
   void splitByTime(Kernel::TimeSplitterType &splitter,
                    std::vector<LogManager *> outputs) const override;
@@ -83,13 +80,13 @@ public:
                      const bool useLogValues);
   /** @return A reference to the const Goniometer object for this run */
   inline const Geometry::Goniometer &getGoniometer() const {
-    return m_goniometer;
+    return *m_goniometer;
   }
   /** @return A reference to the non-const Goniometer object for this run */
-  inline Geometry::Goniometer &mutableGoniometer() { return m_goniometer; }
+  inline Geometry::Goniometer &mutableGoniometer() { return *m_goniometer; }
 
   // Retrieve the goniometer rotation matrix
-  const Kernel::DblMatrix &getGoniometerMatrix() const;
+  const Kernel::Matrix<double> &getGoniometerMatrix() const;
 
   /// Save the run to a NeXus file with a given group name
   void saveNexus(::NeXus::File *file, const std::string &group,
@@ -103,7 +100,7 @@ private:
   void calculateGoniometerMatrix();
 
   /// Goniometer for this run
-  Mantid::Geometry::Goniometer m_goniometer;
+  std::unique_ptr<Geometry::Goniometer> m_goniometer;
   /// A set of histograms that can be stored here for future reference
   std::vector<double> m_histoBins;
 
@@ -111,7 +108,7 @@ private:
   void mergeMergables(Mantid::Kernel::PropertyManager &sum,
                       const Mantid::Kernel::PropertyManager &toAdd);
 };
-}
-}
+} // namespace API
+} // namespace Mantid
 
 #endif // MANTIDAPI_RUN_H_

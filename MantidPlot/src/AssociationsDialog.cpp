@@ -28,23 +28,23 @@
  *                                                                         *
  ***************************************************************************/
 #include "AssociationsDialog.h"
-#include "Table.h"
+#include "BoxCurve.h"
 #include "FunctionCurve.h"
 #include "PlotCurve.h"
-#include "BoxCurve.h"
 #include "QwtErrorPlotCurve.h"
 #include "QwtPieCurve.h"
+#include "Table.h"
 #include "VectorCurve.h"
 
+#include <QApplication>
+#include <QEvent>
+#include <QHeaderView>
 #include <QLabel>
+#include <QLayout>
 #include <QListWidget>
+#include <QMessageBox>
 #include <QPushButton>
 #include <QTableWidget>
-#include <QHeaderView>
-#include <QEvent>
-#include <QLayout>
-#include <QApplication>
-#include <QMessageBox>
 
 AssociationsDialog::AssociationsDialog(Graph *g, Qt::WFlags fl)
     : QDialog(g, fl) {
@@ -94,7 +94,7 @@ AssociationsDialog::AssociationsDialog(Graph *g, Qt::WFlags fl)
   vl->addLayout(hbox2);
   setLayout(vl);
 
-  active_table = 0;
+  active_table = nullptr;
 
   connect(associations, SIGNAL(currentRowChanged(int)), this,
           SLOT(updateTable(int)));
@@ -193,7 +193,7 @@ QString AssociationsDialog::plotAssociation(const QString &text) {
 
 void AssociationsDialog::initTablesList(QList<MdiSubWindow *> lst, int curve) {
   tables = lst;
-  active_table = 0;
+  active_table = nullptr;
 
   if (curve < 0 || curve >= static_cast<int>(associations->count()))
     curve = 0;
@@ -208,7 +208,7 @@ Table *AssociationsDialog::findTable(int index) {
     if (w->objectName() == lst[0])
       return dynamic_cast<Table *>(w);
   }
-  return 0;
+  return nullptr;
 }
 
 void AssociationsDialog::updateTable(int index) {
@@ -334,8 +334,8 @@ void AssociationsDialog::updateColumnTypes() {
       xEndColName = cols[2].remove("(A)");
       yEndColName = cols[3].remove("(M)");
       table->horizontalHeaderItem(3)->setText(tr("Angle"));
-      table->horizontalHeaderItem(4)
-          ->setText(tr("Magn.", "Magnitude, vector length"));
+      table->horizontalHeaderItem(4)->setText(
+          tr("Magn.", "Magnitude, vector length"));
     }
   }
 
@@ -382,7 +382,7 @@ void AssociationsDialog::setGraph(Graph *g) {
       continue;
 
     auto dataCurve = dynamic_cast<const DataCurve *>(it);
-    if (dataCurve && dataCurve->type() != Graph::Function) {
+    if (dataCurve && dataCurve->type() != GraphOptions::Function) {
       QString s = dataCurve->plotAssociation();
       if (auto table = dataCurve->table()) {
         QString tableName = table->objectName();

@@ -1,9 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Crystal/SymmetryOperationFactory.h"
-#include "MantidKernel/LibraryManager.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/LibraryManager.h"
 
-#include <boost/make_shared.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/make_shared.hpp>
 
 namespace Mantid {
 namespace Geometry {
@@ -32,6 +38,7 @@ SymmetryOperationFactoryImpl::createSymOps(const std::string &identifiers) {
 std::vector<SymmetryOperation> SymmetryOperationFactoryImpl::createSymOps(
     const std::vector<std::string> &identifiers) {
   std::vector<SymmetryOperation> symOps;
+  symOps.reserve(identifiers.size());
   for (const auto &identifier : identifiers) {
     symOps.push_back(createSymOp(boost::trim_copy(identifier)));
   }

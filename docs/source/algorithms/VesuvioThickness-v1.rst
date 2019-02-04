@@ -3,7 +3,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -30,8 +30,8 @@ Usage
    dens_tbl, trans_tbl = VesuvioThickness(masses, amplitudes, trans_guess, thickness, number_density)
 
    # Test output
-   print "The final density is: %.4f" % dens_tbl.cell(9,1)
-   print "The final transmission is: %.4f" % trans_tbl.cell(9,1)
+   print("The final density is: %.4f" % dens_tbl.cell(9,1))
+   print("The final transmission is: %.4f" % trans_tbl.cell(9,1))
 
 Output:
 

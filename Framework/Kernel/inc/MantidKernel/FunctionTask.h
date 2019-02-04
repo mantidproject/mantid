@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_KERNEL_FUNCTIONTASK_H_
 #define MANTID_KERNEL_FUNCTIONTASK_H_
 
@@ -25,7 +31,7 @@ namespace Kernel {
 class DLLExport FunctionTask final : public Task {
 public:
   /// Typedef for a function with no arguments and no return
-  typedef void (*voidFunction)();
+  using voidFunction = void (*)();
   //---------------------------------------------------------------------------------------------
   /** Constructor for a simple void function.
    *

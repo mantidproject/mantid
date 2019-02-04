@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -34,9 +34,9 @@ Usage
 
    # Print the log values
    run = demo_ws.getRun()
-   print run.getLogData('x').value
-   print run.getLogData('y').value
-   print run.getLogData('z').value
+   print(run.getLogData('x').value)
+   print(run.getLogData('y').value)
+   print(run.getLogData('z').value)
 
 Output:
 

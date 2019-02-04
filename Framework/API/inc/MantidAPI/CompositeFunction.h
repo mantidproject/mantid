@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_API_COMPOSITEFUNCTION_H_
 #define MANTID_API_COMPOSITEFUNCTION_H_
 
@@ -35,27 +41,6 @@ namespace API {
 
     @author Roman Tolchenov, Tessella Support Services plc
     @date 20/10/2009
-
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-   National Laboratory & European Spallation Source
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>.
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_API_DLL CompositeFunction : public virtual IFunction {
 public:
@@ -66,8 +51,6 @@ public:
 
   /// Returns the function's name
   std::string name() const override { return "CompositeFunction"; }
-  /// Writes itself into a string
-  std::string asString() const override;
   /// Sets the workspace for each member function
   void setWorkspace(boost::shared_ptr<const Workspace> ws) override;
   /// Set matrix workspace
@@ -96,6 +79,8 @@ public:
                                const std::string &description) override;
   /// Get parameter by name.
   double getParameter(const std::string &name) const override;
+  /// Check if function has a parameter with this name.
+  bool hasParameter(const std::string &name) const override;
   /// Total number of parameters
   size_t nParams() const override;
   /// Returns the index of parameter name
@@ -111,13 +96,6 @@ public:
   /// Set the fitting error for a parameter
   void setError(size_t i, double err) override;
 
-  /// Check if a parameter is active
-  bool isFixed(size_t i) const override;
-  /// Removes a parameter from the list of active
-  void fix(size_t i) override;
-  /// Restores a declared parameter i to the active status
-  void unfix(size_t i) override;
-
   /// Value of i-th active parameter. Override this method to make fitted
   /// parameters different from the declared
   double activeParameter(size_t i) const override;
@@ -130,8 +108,6 @@ public:
   std::string nameOfActive(size_t i) const override;
   /// Returns the name of active parameter i
   std::string descriptionOfActive(size_t i) const override;
-  /// Check if an active parameter i is actually active
-  bool isActive(size_t i) const override;
 
   /// Return parameter index from a parameter reference.
   size_t getParameterIndex(const ParameterReference &ref) const override;
@@ -149,11 +125,7 @@ public:
   bool removeTie(size_t i) override;
   /// Get the tie of i-th parameter
   ParameterTie *getTie(size_t i) const override;
-  /// Add a new tie
-  void addTie(ParameterTie *tie) override;
 
-  /// Overwrite IFunction methods
-  void addConstraint(IConstraint *ic) override;
   /// Get constraint of i-th parameter
   IConstraint *getConstraint(size_t i) const override;
   /// Prepare function for a fit
@@ -183,9 +155,9 @@ public:
   /// Get the function index
   std::size_t functionIndex(std::size_t i) const;
   /// Returns the index of parameter i as it declared in its function
-  size_t parameterLocalIndex(size_t i) const;
+  size_t parameterLocalIndex(size_t i, bool recursive = false) const;
   /// Returns the name of parameter i as it declared in its function
-  std::string parameterLocalName(size_t i) const;
+  std::string parameterLocalName(size_t i, bool recursive = false) const;
   /// Check the function.
   void checkFunction();
   /// Remove all member functions
@@ -222,6 +194,10 @@ public:
                               const char *value) {
     setLocalAttribute(i, attName, Attribute(std::string(value)));
   }
+  /// Change status of parameter
+  void setParameterStatus(size_t i, ParameterStatus status) override;
+  /// Get status of parameter
+  ParameterStatus getParameterStatus(size_t i) const override;
 
 protected:
   /// Function initialization. Declare function parameters in this method.
@@ -229,6 +205,9 @@ protected:
   /// Declare a new parameter
   void declareParameter(const std::string &name, double initValue = 0,
                         const std::string &description = "") override;
+  /// Writes itself into a string
+  std::string writeToString(
+      const std::string &parentLocalAttributesStr = "") const override;
 
   size_t paramOffset(size_t i) const { return m_paramOffsets[i]; }
 
@@ -253,9 +232,9 @@ private:
 };
 
 /// shared pointer to the composite function base class
-typedef boost::shared_ptr<CompositeFunction> CompositeFunction_sptr;
+using CompositeFunction_sptr = boost::shared_ptr<CompositeFunction>;
 /// shared pointer to the composite function base class (const version)
-typedef boost::shared_ptr<const CompositeFunction> CompositeFunction_const_sptr;
+using CompositeFunction_const_sptr = boost::shared_ptr<const CompositeFunction>;
 
 /** A Jacobian for individual functions
  */
@@ -299,7 +278,7 @@ public:
     return m_J->get(m_iY0 + iY, m_iP0 + iP);
   }
   /** Zero all matrix elements.
-  */
+   */
   void zero() override {
     throw Kernel::Exception::NotImplementedError(
         "zero() is not implemented for PartialJacobian");

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadMuonNexus1.h"
 
 #include "MantidAPI/Axis.h"
@@ -8,6 +14,7 @@
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/ISISRunLogs.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -22,8 +29,10 @@
 #include "MantidKernel/UnitLabelTypes.h"
 #include "MantidNexus/MuonNexusReader.h"
 #include "MantidNexus/NexusClasses.h"
+// clang-format off
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
+// clang-format on
 
 #include <boost/iterator/counting_iterator.hpp>
 #include <boost/shared_ptr.hpp>
@@ -43,19 +52,20 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMuonNexus1)
 
 using namespace Kernel;
 using namespace API;
-using Geometry::Instrument;
 using namespace Mantid::NeXus;
+using HistogramData::BinEdges;
+using HistogramData::Counts;
 
 /// Empty default constructor
 LoadMuonNexus1::LoadMuonNexus1() : LoadMuonNexus() {}
 
 /** Executes the algorithm. Reading in the file and creating and populating
-*  the output workspace
-*
-*  @throw Exception::FileError If the Nexus file cannot be found/opened
-*  @throw std::invalid_argument If the optional properties are set to invalid
-*values
-*/
+ *  the output workspace
+ *
+ *  @throw Exception::FileError If the Nexus file cannot be found/opened
+ *  @throw std::invalid_argument If the optional properties are set to invalid
+ *values
+ */
 void LoadMuonNexus1::exec() {
   // Retrieve the filename from the properties
   m_filename = getPropertyValue("Filename");
@@ -200,7 +210,7 @@ void LoadMuonNexus1::exec() {
 
   WorkspaceGroup_sptr wsGrpSptr = WorkspaceGroup_sptr(new WorkspaceGroup);
 
-  API::Progress progress(this, 0., 1., m_numberOfPeriods * total_specs);
+  API::Progress progress(this, 0.0, 1.0, m_numberOfPeriods * total_specs);
   // Loop over the number of periods in the Nexus file, putting each period in a
   // separate workspace
   for (int64_t period = 0; period < m_numberOfPeriods; ++period) {
@@ -496,8 +506,9 @@ LoadMuonNexus1::loadDetectorGrouping(NXRoot &root,
         } else {
           // User selected an entry number
           for (auto &spec : specToLoad) {
-            int index = spec - 1 + static_cast<int>((m_entrynumber - 1) *
-                                                    m_numberOfSpectra);
+            int index =
+                spec - 1 +
+                static_cast<int>((m_entrynumber - 1) * m_numberOfSpectra);
             grouping.emplace_back(groupingData[index]);
           }
         }
@@ -639,14 +650,14 @@ LoadMuonNexus1::createDetectorGroupingTable(std::vector<int> specToLoad,
 }
 
 /** Load in a single spectrum taken from a NeXus file
-*  @param hist ::     The workspace index
-*  @param i ::        The spectrum number
-*  @param specNo ::   The spectrum number
-*  @param nxload ::   A reference to the MuonNeXusReader object
-*  @param lengthIn :: The number of elements in a spectrum
-*  @param localWorkspace :: A pointer to the workspace in which the data will be
-* stored
-*/
+ *  @param hist ::     The workspace index
+ *  @param i ::        The spectrum number
+ *  @param specNo ::   The spectrum number
+ *  @param nxload ::   A reference to the MuonNeXusReader object
+ *  @param lengthIn :: The number of elements in a spectrum
+ *  @param localWorkspace :: A pointer to the workspace in which the data will
+ * be stored
+ */
 void LoadMuonNexus1::loadData(size_t hist, specnum_t &i, specnum_t specNo,
                               MuonNexusReader &nxload, const int64_t lengthIn,
                               DataObjects::Workspace2D_sptr localWorkspace) {
@@ -654,25 +665,17 @@ void LoadMuonNexus1::loadData(size_t hist, specnum_t &i, specnum_t specNo,
   // Put it into a vector, discarding the 1st entry, which is rubbish
   // But note that the last (overflow) bin is kept
   // For Nexus, not sure if above is the case, hence give all data for now
-  MantidVec &Y = localWorkspace->dataY(hist);
-  Y.assign(nxload.counts + i * lengthIn,
-           nxload.counts + i * lengthIn + lengthIn);
-
-  // Create and fill another vector for the errors, containing sqrt(count)
-  MantidVec &E = localWorkspace->dataE(hist);
-  typedef double (*uf)(double);
-  uf dblSqrt = std::sqrt;
-  std::transform(Y.begin(), Y.end(), E.begin(), dblSqrt);
-  // Populate the workspace. Loop starts from 1, hence i-1
 
   // Create and fill another vector for the X axis
   auto timeChannels = new float[lengthIn + 1]();
   nxload.getTimeChannels(timeChannels, static_cast<const int>(lengthIn + 1));
   // Put the read in array into a vector (inside a shared pointer)
-  auto timeChannelsVec = boost::make_shared<HistogramData::HistogramX>(
-      timeChannels, timeChannels + lengthIn + 1);
 
-  localWorkspace->setX(hist, timeChannelsVec);
+  localWorkspace->setHistogram(
+      hist, BinEdges(timeChannels, timeChannels + lengthIn + 1),
+      Counts(nxload.counts + i * lengthIn,
+             nxload.counts + i * lengthIn + lengthIn));
+
   localWorkspace->getSpectrum(hist).setSpectrumNo(specNo);
   // Muon v1 files: always a one-to-one mapping between spectra and detectors
   localWorkspace->getSpectrum(hist).setDetectorID(static_cast<detid_t>(specNo));
@@ -681,8 +684,8 @@ void LoadMuonNexus1::loadData(size_t hist, specnum_t &i, specnum_t specNo,
 }
 
 /**  Log the run details from the file
-* @param localWorkspace :: The workspace details to use
-*/
+ * @param localWorkspace :: The workspace details to use
+ */
 void LoadMuonNexus1::loadRunDetails(
     DataObjects::Workspace2D_sptr localWorkspace) {
   API::Run &runDetails = localWorkspace->mutableRun();

@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
 from mantid.kernel import *
@@ -10,6 +16,9 @@ class ExtractMonitors(DataProcessorAlgorithm):
 
     def summary(self):
         return 'Separates the monitors and/or detectors into separate workspaces.'
+
+    def seeAlso(self):
+        return [ "ExtractMonitorWorkspace" ]
 
     def PyInit(self):
         self.declareProperty(MatrixWorkspaceProperty('InputWorkspace', '',
@@ -56,31 +65,29 @@ class ExtractMonitors(DataProcessorAlgorithm):
 
         monitors = []
         detectors = []
+        spectrumInfo = in_ws.spectrumInfo()
         for i in range(in_ws.getNumberHistograms()):
             try:
-                monitors.append(i) if in_ws.getDetector(i).isMonitor() else detectors.append(i)
+                monitors.append(i) if spectrumInfo.isMonitor(i) else detectors.append(i)
             except RuntimeError:
                 self.log().warning("Missing detector at " + str(i))
 
         if detector_ws_name:
             if detectors:
-                detector_ws = ExtractSpectra(InputWorkspace=in_ws,
-                                             OutputWorkspace=detector_ws_name,
-                                             WorkspaceIndexList=detectors)
+                detector_ws = ExtractSpectra(InputWorkspace=in_ws, WorkspaceIndexList=detectors, StoreInADS=False)
                 self.setProperty("DetectorWorkspace", detector_ws)
             else:
                 self.log().error("No detectors found in input workspace. No detector output workspace created.")
 
         if monitor_ws_name:
             if monitors:
-                monitor_ws = ExtractSpectra(InputWorkspace=in_ws,
-                                            OutputWorkspace=monitor_ws_name,
-                                            WorkspaceIndexList=monitors)
+                monitor_ws = ExtractSpectra(InputWorkspace=in_ws, WorkspaceIndexList=monitors, StoreInADS=False)
                 self.setProperty("MonitorWorkspace", monitor_ws)
             else:
                 self.log().error("No monitors found in input workspace. No monitor output workspace created.")
 
         if detector_ws_name and detectors and monitor_ws_name and monitors:
             detector_ws.setMonitorWorkspace(monitor_ws)
+
 
 AlgorithmFactory.subscribe(ExtractMonitors)

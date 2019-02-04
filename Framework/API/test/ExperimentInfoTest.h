@@ -1,26 +1,37 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_API_EXPERIMENTINFOTEST_H_
 #define MANTID_API_EXPERIMENTINFOTEST_H_
 
-#include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/ChopperModel.h"
+#include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/ModeratorModel.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/SingletonHolder.h"
 #include "MantidKernel/Matrix.h"
+#include "MantidKernel/SingletonHolder.h"
 
 #include "MantidAPI/FileFinder.h"
-
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/NexusTestHelper.h"
 #include "PropertyManagerHelper.h"
 
+// clang-format off
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
+// clang-format on
 
 #include <cxxtest/TestSuite.h>
 #include <boost/regex.hpp>
@@ -33,6 +44,7 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace NeXus;
+using Mantid::Types::Core::DateAndTime;
 
 class FakeChopper : public Mantid::API::ChopperModel {
 public:
@@ -74,7 +86,11 @@ public:
     ExperimentInfo ws;
     boost::shared_ptr<const Instrument> i = ws.getInstrument();
     TSM_ASSERT("ExperimentInfo gets a default, empty Instrument.", i);
+    TS_ASSERT(i->isEmptyInstrument());
     TS_ASSERT_EQUALS(ws.getInstrument()->type(), "Instrument");
+
+    // Should be set even though we have just an empty instrument.
+    TS_ASSERT(i->getParameterMap()->hasDetectorInfo(i->baseInstrument().get()));
   }
 
   void test_GetSetInstrument_default() {
@@ -97,7 +113,7 @@ public:
   void test_Setting_A_New_Source_With_NULL_Ptr_Throws() {
     ExperimentInfo ws;
 
-    TS_ASSERT_THROWS(ws.setModeratorModel(NULL), std::invalid_argument);
+    TS_ASSERT_THROWS(ws.setModeratorModel(nullptr), std::invalid_argument);
   }
 
   void test_Retrieving_Source_Properties_Before_Set_Throws() {
@@ -121,7 +137,7 @@ public:
   void test_Setting_A_New_Chopper_With_NULL_Ptr_Throws() {
     ExperimentInfo_sptr ws = createTestInfoWithChopperPoints(1);
 
-    TS_ASSERT_THROWS(ws->setChopperModel(NULL), std::invalid_argument);
+    TS_ASSERT_THROWS(ws->setChopperModel(nullptr), std::invalid_argument);
   }
 
   void test_Setting_A_New_Chopper_To_Point_Lower_Point_Succeeds() {
@@ -146,14 +162,12 @@ public:
 
   void test_GetSetSample() {
     ExperimentInfo ws;
-    TS_ASSERT(&ws.sample());
     ws.mutableSample().setName("test");
     TS_ASSERT_EQUALS(ws.sample().getName(), "test");
   }
 
   void test_GetSetRun() {
     ExperimentInfo ws;
-    TS_ASSERT(&ws.run());
     ws.mutableRun().setProtonCharge(1.234);
     TS_ASSERT_DELTA(ws.run().getProtonCharge(), 1.234, 0.001);
   }
@@ -184,9 +198,10 @@ public:
     addRunWithLog(expt, actualLogName, logValue);
     addInstrumentWithParameter(expt, instPar, actualLogName);
 
-    Property *log(NULL);
+    Property *log = nullptr;
     TS_ASSERT_THROWS_NOTHING(log = expt.getLog(instPar));
-    TS_ASSERT_EQUALS(log->name(), actualLogName);
+    if (log)
+      TS_ASSERT_EQUALS(log->name(), actualLogName);
   }
 
   void test_GetLog_Picks_Run_Log_Over_Instrument_Parameter_Of_Same_Name() {
@@ -196,9 +211,10 @@ public:
     addRunWithLog(expt, actualLogName, logValue);
     addInstrumentWithParameter(expt, actualLogName, "some  value");
 
-    Property *log(NULL);
+    Property *log = nullptr;
     TS_ASSERT_THROWS_NOTHING(log = expt.getLog(actualLogName));
-    TS_ASSERT_EQUALS(log->name(), actualLogName);
+    if (log)
+      TS_ASSERT_EQUALS(log->name(), actualLogName);
   }
 
   void
@@ -411,22 +427,33 @@ public:
     TS_ASSERT_EQUALS(exptInfo->getEFixed(test_id), test_ef);
   }
 
-  void test_getDetectorByID() {
+  void test_accessing_SpectrumInfo_creates_default_grouping() {
+    using namespace Mantid;
     ExperimentInfo_sptr exptInfo(new ExperimentInfo);
     addInstrumentWithParameter(*exptInfo, "a", "b");
 
-    IDetector_const_sptr det;
-    TS_ASSERT_THROWS_NOTHING(det = exptInfo->getDetectorByID(1));
-    TS_ASSERT(det);
+    const auto &spectrumInfo = exptInfo->spectrumInfo();
+    const auto *detGroup = dynamic_cast<const Geometry::DetectorGroup *>(
+        &spectrumInfo.detector(0));
+    TS_ASSERT(!detGroup);
+    TS_ASSERT_EQUALS(spectrumInfo.detector(0).getID(), 1);
+  }
+
+  void test_cacheDetectorGroupings_creates_correct_SpectrumInfo() {
+    using namespace Mantid;
+    ExperimentInfo_sptr exptInfo(new ExperimentInfo);
+    addInstrumentWithParameter(*exptInfo, "a", "b");
 
     // Set a mapping
-    std::vector<Mantid::detid_t> group{1, 2};
+    std::set<detid_t> group{1, 2};
     Mantid::det2group_map mapping{{1, group}};
     exptInfo->cacheDetectorGroupings(mapping);
 
-    TS_ASSERT_THROWS_NOTHING(det = exptInfo->getDetectorByID(1));
-    TS_ASSERT(det);
-    TS_ASSERT(boost::dynamic_pointer_cast<const DetectorGroup>(det));
+    const auto &spectrumInfo = exptInfo->spectrumInfo();
+    const auto *detGroup = dynamic_cast<const Geometry::DetectorGroup *>(
+        &spectrumInfo.detector(0));
+    TS_ASSERT(detGroup);
+    TS_ASSERT_EQUALS(detGroup->getDetectorIDs(), (std::vector<detid_t>{1, 2}));
   }
 
   void test_Setting_Group_Lookup_To_Empty_Map_Does_Not_Throw() {
@@ -436,21 +463,22 @@ public:
     TS_ASSERT_THROWS_NOTHING(expt.cacheDetectorGroupings(mappings));
   }
 
-  void test_Getting_Group_Members_For_Unknown_ID_Throws() {
+  void test_Getting_Group_For_Unknown_ID_Throws() {
     ExperimentInfo expt;
 
-    TS_ASSERT_THROWS(expt.getGroupMembers(1), std::runtime_error);
+    TS_ASSERT_THROWS(expt.groupOfDetectorID(1), std::out_of_range);
   }
 
   void
-  test_Setting_Group_Lookup_To_Non_Empty_Map_Allows_Retrieval_Of_Correct_IDs() {
+  test_Setting_Group_Lookup_To_Non_Empty_Map_Allows_Retrieval_Of_Correct_Group() {
     ExperimentInfo expt;
     Mantid::det2group_map mappings;
-    mappings.emplace(1, std::vector<Mantid::detid_t>(1, 2));
+    mappings.emplace(1, std::set<Mantid::detid_t>{2});
     expt.cacheDetectorGroupings(mappings);
 
-    std::vector<Mantid::detid_t> ids;
-    TS_ASSERT_THROWS_NOTHING(ids = expt.getGroupMembers(1));
+    size_t index{0};
+    TS_ASSERT_THROWS_NOTHING(index = expt.groupOfDetectorID(1));
+    TS_ASSERT_EQUALS(index, 0);
   }
 
   struct fromToEntry {
@@ -502,11 +530,11 @@ public:
     // iterator to browse through the multimap: paramInfoFromIDF
     std::unordered_multimap<std::string, fromToEntry>::const_iterator it1, it2;
     std::pair<std::unordered_multimap<std::string, fromToEntry>::iterator,
-              std::unordered_multimap<std::string, fromToEntry>::iterator> ret;
+              std::unordered_multimap<std::string, fromToEntry>::iterator>
+        ret;
 
-    for (auto setIt = idfIdentifiers.begin(); setIt != idfIdentifiers.end();
-         setIt++) {
-      ret = idfFiles.equal_range(*setIt);
+    for (const auto &idfIdentifier : idfIdentifiers) {
+      ret = idfFiles.equal_range(idfIdentifier);
       for (it1 = ret.first; it1 != ret.second; ++it1) {
         for (it2 = ret.first; it2 != ret.second; ++it2) {
           if (it1 != it2) {
@@ -545,7 +573,7 @@ public:
   void testHelper_ValidDateOverlap() {
     const std::string instDir =
         ConfigService::Instance().getInstrumentDirectory();
-    const std::string testDir = instDir + "IDFs_for_UNIT_TESTING";
+    const std::string testDir = instDir + "unit_testing";
     ConfigService::Instance().setString("instrumentDefinition.directory",
                                         testDir);
     ExperimentInfo helper;
@@ -558,6 +586,15 @@ public:
     TS_ASSERT_DIFFERS(boevs.find("TEST1_ValidDateOverlap"), std::string::npos);
     ConfigService::Instance().setString("instrumentDefinition.directory",
                                         instDir);
+  }
+
+  void test_nexus_geometry_getInstrumentFilename() {
+    const std::string instrumentName = "LOKI";
+    ExperimentInfo info;
+    const auto path = info.getInstrumentFilename(instrumentName, "");
+    TS_ASSERT(!path.empty());
+    TS_ASSERT(
+        boost::regex_match(path, boost::regex(".*LOKI_Definition\\.hdf5$")));
   }
 
   void test_nexus() {
@@ -647,7 +684,7 @@ public:
     }
   }
 
-  void test_nexus_intrument_info() {
+  void test_nexus_instrument_info() {
     ExperimentInfo ei;
 
     // We get an instrument group from a test file in the form that would occur
@@ -693,9 +730,9 @@ public:
   }
 
   /**
-  * Test declaring an ExperimentInfo property and retrieving as const or
-  * non-const
-  */
+   * Test declaring an ExperimentInfo property and retrieving as const or
+   * non-const
+   */
   void testGetProperty_const_sptr() {
     const std::string eiName = "InputEi";
     ExperimentInfo_sptr eiInput(new ExperimentInfo());
@@ -707,10 +744,10 @@ public:
     ExperimentInfo_sptr eiNonConst;
     TS_ASSERT_THROWS_NOTHING(
         eiConst = manager.getValue<ExperimentInfo_const_sptr>(eiName));
-    TS_ASSERT(eiConst != NULL);
+    TS_ASSERT(eiConst != nullptr);
     TS_ASSERT_THROWS_NOTHING(eiNonConst =
                                  manager.getValue<ExperimentInfo_sptr>(eiName));
-    TS_ASSERT(eiNonConst != NULL);
+    TS_ASSERT(eiNonConst != nullptr);
     TS_ASSERT_EQUALS(eiConst, eiNonConst);
 
     // Check TypedValue can be cast to const_sptr or to sptr
@@ -718,10 +755,217 @@ public:
     ExperimentInfo_const_sptr eiCastConst;
     ExperimentInfo_sptr eiCastNonConst;
     TS_ASSERT_THROWS_NOTHING(eiCastConst = (ExperimentInfo_const_sptr)val);
-    TS_ASSERT(eiCastConst != NULL);
+    TS_ASSERT(eiCastConst != nullptr);
     TS_ASSERT_THROWS_NOTHING(eiCastNonConst = (ExperimentInfo_sptr)val);
-    TS_ASSERT(eiCastNonConst != NULL);
+    TS_ASSERT(eiCastNonConst != nullptr);
     TS_ASSERT_EQUALS(eiCastConst, eiCastNonConst);
+  }
+
+  void test_getInstrument_setInstrument_copies_masking() {
+    auto inst = ComponentCreationHelper::createTestInstrumentCylindrical(1);
+    ExperimentInfo source;
+    ExperimentInfo target;
+    source.setInstrument(inst);
+    target.setInstrument(inst);
+
+    source.mutableDetectorInfo().setMasked(0, true);
+    TS_ASSERT(!target.detectorInfo().isMasked(0));
+    target.setInstrument(source.getInstrument());
+    TS_ASSERT(target.detectorInfo().isMasked(0));
+  }
+
+  void test_getInstrument_setInstrument_copy_on_write_not_broken() {
+    auto inst = ComponentCreationHelper::createTestInstrumentCylindrical(1);
+    ExperimentInfo source;
+    ExperimentInfo target;
+    source.setInstrument(inst);
+    target.setInstrument(inst);
+
+    TS_ASSERT(!target.detectorInfo().isMasked(0));
+    target.setInstrument(source.getInstrument());
+    source.mutableDetectorInfo().setMasked(0, true);
+    TS_ASSERT(!target.detectorInfo().isMasked(0));
+  }
+
+  void test_create_componentInfo() {
+
+    const int nPixels = 10;
+    auto inst = ComponentCreationHelper::createTestInstrumentRectangular(
+        1 /*n banks*/, nPixels /*10 by 10 dets in bank*/,
+        1 /*sample-bank distance*/);
+
+    ExperimentInfo expInfo;
+    expInfo.setInstrument(inst);
+    const Mantid::Geometry::ComponentInfo &compInfo = expInfo.componentInfo();
+
+    size_t nComponents = nPixels * nPixels;
+    nComponents += nPixels; // One additional CompAssembly per row.
+    nComponents += 1;       // Rectangular Detector (bank)
+    nComponents += 1;       // source
+    nComponents += 1;       // sample
+    nComponents += 1;       // Instrument itself
+    TS_ASSERT_EQUALS(compInfo.size(), nComponents);
+  }
+
+  void test_component_info_detector_indices_for_assembly_component_types() {
+
+    const int nPixels = 10;
+    auto inst = ComponentCreationHelper::createTestInstrumentRectangular(
+        1 /*n banks*/, nPixels /*10 by 10 dets in bank*/,
+        1 /*sample-bank distance*/);
+
+    ExperimentInfo expInfo;
+    expInfo.setInstrument(inst);
+    const auto &compInfo = expInfo.componentInfo();
+    const auto &detInfo = expInfo.detectorInfo();
+    // Test the single bank
+    auto bank = inst->getComponentByName("bank1");
+    auto bankID = bank->getComponentID();
+    auto allBankDetectorIndexes =
+        compInfo.detectorsInSubtree(compInfo.indexOf(bankID));
+
+    TSM_ASSERT_EQUALS("Should have all detectors under this bank",
+                      allBankDetectorIndexes.size(),
+                      detInfo.size()); //
+
+    // Test one of the bank rows
+    auto bankRowID =
+        boost::dynamic_pointer_cast<const Mantid::Geometry::ICompAssembly>(bank)
+            ->getChild(0)
+            ->getComponentID();
+    auto allRowDetectorIndexes =
+        compInfo.detectorsInSubtree(compInfo.indexOf(bankRowID));
+
+    TSM_ASSERT_EQUALS("Should have all detectors under this row",
+                      allRowDetectorIndexes.size(),
+                      10); //
+  }
+  void test_component_info_detector_indices_for_detector_component_types() {
+
+    const int nPixels = 10;
+    auto inst = ComponentCreationHelper::createTestInstrumentRectangular(
+        1 /*n banks*/, nPixels /*10 by 10 dets in bank*/,
+        1 /*sample-bank distance*/);
+
+    ExperimentInfo expInfo;
+    expInfo.setInstrument(inst);
+    const auto &compInfo = expInfo.componentInfo();
+    const auto &detInfo = expInfo.detectorInfo();
+    // Test one of the detectors
+    const auto targetDetectorIndex = 0;
+    const auto detCompId =
+        detInfo.detector(targetDetectorIndex).getComponentID();
+    TSM_ASSERT_EQUALS(
+        "Detector should report the detector index of itself",
+        compInfo.detectorsInSubtree(compInfo.indexOf(detCompId)).size(), 1);
+    TS_ASSERT_EQUALS(
+        compInfo.detectorsInSubtree(compInfo.indexOf(detCompId))[0],
+        targetDetectorIndex);
+
+    size_t detectorIndex =
+        0; // interchangeable as either component or detector index
+    TSM_ASSERT_EQUALS("Gurantee violated of detectorindex == componentIndex",
+                      compInfo.detectorsInSubtree(detectorIndex),
+                      std::vector<size_t>{detectorIndex});
+
+    detectorIndex = 99; // interchangeable as either component or detector index
+    TSM_ASSERT_EQUALS("Gurantee violated of detectorindex == componentIndex",
+                      compInfo.detectorsInSubtree(detectorIndex),
+                      std::vector<size_t>{detectorIndex});
+  }
+
+  void test_component_info_detector_indices_for_generic_component_types() {
+    const int nPixels = 10;
+    auto inst = ComponentCreationHelper::createTestInstrumentRectangular(
+        1 /*n banks*/, nPixels /*10 by 10 dets in bank*/,
+        1 /*sample-bank distance*/);
+
+    ExperimentInfo expInfo;
+    expInfo.setInstrument(inst);
+    const Mantid::Geometry::ComponentInfo &compInfo = expInfo.componentInfo();
+
+    // Test non-detector, non-assembly components
+    auto sampleId = inst->getComponentByName("sample")->getComponentID();
+    TSM_ASSERT_EQUALS(
+        "Sample should not report any nested detector indexes",
+        compInfo.detectorsInSubtree(compInfo.indexOf(sampleId)).size(), 0);
+
+    auto sourceId = inst->getComponentByName("source")->getComponentID();
+    TSM_ASSERT_EQUALS(
+        "Source should not report any nested detector indexes",
+        compInfo.detectorsInSubtree(compInfo.indexOf(sourceId)).size(), 0);
+  }
+
+  void test_component_info_source_sample_l1() {
+
+    auto inst = ComponentCreationHelper::createMinimalInstrument(
+        V3D{-2, 0, 0} /*source*/, V3D{10, 0, 0} /*sample*/,
+        V3D{12, 0, 0} /*detector*/);
+
+    ExperimentInfo expInfo;
+    expInfo.setInstrument(inst);
+    const Mantid::Geometry::ComponentInfo &compInfo = expInfo.componentInfo();
+
+    TS_ASSERT_EQUALS((V3D{-2, 0, 0}), compInfo.sourcePosition());
+
+    TS_ASSERT_EQUALS((V3D{10, 0, 0}), compInfo.samplePosition());
+
+    TS_ASSERT_DELTA(12, compInfo.l1(), 1e-12);
+  }
+
+  void test_component_info_component_index_tree() {
+
+    const int nPixels = 10;
+    auto inst = ComponentCreationHelper::createTestInstrumentRectangular(
+        1 /*n banks*/, nPixels /*10 by 10 dets in bank*/,
+        1 /*sample-bank distance*/);
+
+    ExperimentInfo expInfo;
+    expInfo.setInstrument(inst);
+    const Mantid::Geometry::ComponentInfo &compInfo = expInfo.componentInfo();
+
+    // Test non-detector, non-assembly components
+    auto sampleId = inst->getComponentByName("sample")->getComponentID();
+    TS_ASSERT_EQUALS(
+        compInfo.componentsInSubtree(compInfo.indexOf(sampleId)).size(), 1);
+
+    auto sourceId = inst->getComponentByName("source")->getComponentID();
+    TS_ASSERT_EQUALS(
+        compInfo.componentsInSubtree(compInfo.indexOf(sourceId)).size(), 1);
+
+    auto bankId = inst->getComponentByName("bank1")->getComponentID();
+    TSM_ASSERT_EQUALS(
+        "Bank should yield entire sub-tree of component indices",
+        compInfo.componentsInSubtree(compInfo.indexOf(bankId)).size(),
+        (nPixels * nPixels) + nPixels + 1);
+
+    auto instrumentId = inst->getComponentID();
+    size_t nComponents = nPixels * nPixels;
+    nComponents += nPixels; // One additional CompAssembly per row.
+    nComponents += 1;       // Rectangular Detector (bank)
+    nComponents += 1;       // source
+    nComponents += 1;       // sample
+    nComponents += 1;       // self
+    TSM_ASSERT_EQUALS(
+        "Instrument should yield entire tree of component indices",
+        compInfo.componentsInSubtree(compInfo.indexOf(instrumentId)).size(),
+        nComponents);
+
+    TS_ASSERT_EQUALS(compInfo.indexOf(inst->getComponentID()),
+                     compInfo.parent(compInfo.indexOf(bankId)));
+  }
+
+  void test_readParameterMap_semicolons_in_value() {
+    auto inst = ComponentCreationHelper::createMinimalInstrument(
+        V3D{-2, 0, 0} /*source*/, V3D{10, 0, 0} /*sample*/,
+        V3D{12, 0, 0} /*detector*/);
+    ExperimentInfo expInfo;
+    expInfo.setInstrument(inst);
+    expInfo.readParameterMap("detID:1;string;par;11;22;33;44");
+    auto &pmap = expInfo.instrumentParameters();
+    auto det = expInfo.getInstrument()->getDetector(1);
+    auto value = pmap.getString(det.get(), "par");
+    TS_ASSERT_EQUALS(value, "11;22;33;44");
   }
 
 private:
@@ -777,4 +1021,58 @@ private:
   }
 };
 
+class ExperimentInfoTestPerformance : public CxxTest::TestSuite {
+private:
+  boost::shared_ptr<Mantid::Geometry::Instrument> m_bareInstrument;
+  boost::shared_ptr<const Mantid::Geometry::Instrument> m_provisionedInstrument;
+
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static ExperimentInfoTestPerformance *createSuite() {
+    return new ExperimentInfoTestPerformance();
+  }
+  static void destroySuite(ExperimentInfoTestPerformance *suite) {
+    delete suite;
+  }
+
+  ExperimentInfoTestPerformance() {
+
+    const int nPixels = 1000;
+    m_bareInstrument = ComponentCreationHelper::createTestInstrumentRectangular(
+        1 /*n banks*/, nPixels, 1 /*sample-bank distance*/);
+
+    ExperimentInfo tmp;
+    tmp.setInstrument(m_bareInstrument);
+    m_provisionedInstrument = tmp.getInstrument();
+  }
+
+  void
+  test_setInstrument_when_instrument_lacks_detectorInfo_and_componentInfo() {
+    /*
+     * This is similar to what will happen during LoadEmptyInstrument
+     */
+    ExperimentInfo expInfo;
+    expInfo.setInstrument(m_bareInstrument);
+  }
+  void test_setInstrument_when_new_instrument_is_fully_provisioned() {
+    /*
+     * This should be the case for any workspaces after they have initially had
+     * an instrument
+     * set upon them via setInstrument.
+     */
+    ExperimentInfo expInfo;
+    expInfo.setInstrument(m_provisionedInstrument);
+  }
+
+  void test_getBoundingBox_once() {
+    BoundingBox box;
+    m_provisionedInstrument->getBoundingBox(box);
+  }
+
+  void test_getBoundingBox_twice() {
+    BoundingBox box;
+    m_provisionedInstrument->getBoundingBox(box);
+  }
+};
 #endif /* MANTID_API_EXPERIMENTINFOTEST_H_ */

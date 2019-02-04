@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 """
 mantid.geometry
 ===============
@@ -11,7 +17,10 @@ from __future__ import (absolute_import, division,
 ###############################################################################
 # Load the C++ library
 ###############################################################################
-from ._geometry import *
+from ..kernel import _shared_cextension
+
+with _shared_cextension():
+    from ._geometry import *
 
 ###############################################################################
 # Make aliases accessible in this namespace

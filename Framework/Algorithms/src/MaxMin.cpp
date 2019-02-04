@@ -1,9 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/MaxMin.h"
 #include "MantidAPI/HistogramValidator.h"
-#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid {
@@ -14,6 +23,8 @@ DECLARE_ALGORITHM(MaxMin)
 
 using namespace Kernel;
 using namespace API;
+using namespace Mantid::DataObjects;
+using namespace Mantid::HistogramData;
 
 /** Initialisation method.
  *
@@ -83,19 +94,20 @@ void MaxMin::exec() {
   }
 
   // Create the 1D workspace for the output
-  MatrixWorkspace_sptr outputWorkspace =
-      API::WorkspaceFactory::Instance().create(localworkspace,
-                                               MaxSpec - MinSpec + 1, 2, 1);
+  MatrixWorkspace_sptr outputWorkspace;
 
-  Progress progress(this, 0, 1, (MaxSpec - MinSpec + 1));
-  PARALLEL_FOR2(localworkspace, outputWorkspace)
+  outputWorkspace = create<HistoWorkspace>(*localworkspace,
+                                           MaxSpec - MinSpec + 1, BinEdges(2));
+
+  Progress progress(this, 0.0, 1.0, (MaxSpec - MinSpec + 1));
+  PARALLEL_FOR_IF(Kernel::threadSafe(*localworkspace, *outputWorkspace))
   // Loop over spectra
   for (int i = MinSpec; i <= MaxSpec; ++i) {
     PARALLEL_START_INTERUPT_REGION
     int newindex = i - MinSpec;
     // Copy over spectrum and detector number info
-    outputWorkspace->getSpectrum(newindex)
-        .copyInfoFrom(localworkspace->getSpectrum(i));
+    outputWorkspace->getSpectrum(newindex).copyInfoFrom(
+        localworkspace->getSpectrum(i));
 
     // Retrieve the spectrum into a vector
     auto &X = localworkspace->x(i);

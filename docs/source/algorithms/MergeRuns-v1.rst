@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -15,7 +15,7 @@ output workspace will cover the entire range of all the input
 workspaces, with the largest bin widths used in regions of overlap.
 
 The combination of each workspace is performed using the :ref:`algm-Plus` algorithm,
-this does not preform any weighting based on the duration of collection, or proton charge.
+this does not perform any weighting based on the duration of collection, or proton charge.
 If you wish to perform Merge runs that should not be equally weighted then they should be
 corrected individually prior to merging.
 
@@ -57,7 +57,7 @@ Group Workspaces that are not multiperiod
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If group workspaces are provided that are not multi-period, this
-algorithm will merge across all nested workspaces, to give a singe
+algorithm will merge across all nested workspaces, to give a single
 output matrix workspace.
 
 Merging Sample Logs
@@ -73,11 +73,18 @@ When performing the tolerance check for the warn or fail options it is always
 with respect to the first workspace in the merge. When choosing via the GUI
 this will be the first workspace that was selected.
 
-**Note:** this currently only works when the underying workspaces being merged are
+**Note:** this currently only works when the underlying workspaces being merged are
 Matrix Workspaces.
+
+**Note:** The sample log in the merged workspace is replaced in the case of Sum,
+Time Series and List merges. This means these merge types can not be used together
+for a given sample log.
 
 .. code-block:: xml
 
+    <parameter name="sample_logs_sum" type="string">
+        <value val="duration, monitor1.monsum" />
+    </parameter>
     <parameter name="sample_logs_time_series" type="string">
         <value val="sample.temperature, sample.pressure" />
     </parameter>
@@ -97,11 +104,29 @@ Matrix Workspaces.
         <value val="0, 0.1, 2" />
     </parameter>
 
+Merging Workspaces with Detector Scans
+######################################
+
+If the workspaces being merged contain detector scans then there are currently two options:
+
+1. The workspaces have identical scan intervals
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In this case the workspaces will be merged as they normally would be by MergeRuns,
+that is the counts in the two workspaces are summed. The detectors must have the same
+positions, rotations etc. for all time intervals, else the algorithm will throw.
+
+2. The workspaces have different scan intervals
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+For this case the scan intervals must not overlap. The merged workspace histograms are
+appended to the end of the first workspace.
+
 
 ChildAlgorithms used
 ####################
 
-The :ref:`algm-Rebin` algorithm is used, if neccessary, to put all the
+The :ref:`algm-Rebin` algorithm is used, if necessary, to put all the
 input workspaces onto a common binning.
 
 The :ref:`algm-Plus` algorithm is used to combine each of the workspaces
@@ -122,9 +147,9 @@ Usage
 
    merged = MergeRuns(InputWorkspaces="a, b")
 
-   print "a      = " + str(a.readY(0))
-   print "b      = " + str(b.readY(0))
-   print "merged = " + str(merged.readY(0))
+   print("a      = {}".format(a.readY(0)))
+   print("b      = {}".format(b.readY(0)))
+   print("merged = {}".format(merged.readY(0)))
 
 Output:
 
@@ -151,13 +176,13 @@ Output:
 
    merged = MergeRuns(InputWorkspaces="group_1, group_2")
 
-   print "group_1 = [" + str(group_1[0].readY(0)) + ","
-   print "           " + str(group_1[1].readY(0)) + "]"
+   print("group_1 = [{},".format(group_1[0].readY(0)))
+   print("           {}]".format(group_1[1].readY(0)))
+	      
+   print("group_2 = [{},".format(group_2[0].readY(0)))
+   print("           {}]".format(group_2[1].readY(0)))
 
-   print "group_2 = [" + str(group_2[0].readY(0)) + ","
-   print "           " + str(group_2[1].readY(0)) + "]"
-
-   print "merged   = " + str(merged.readY(0))
+   print("merged   = {}".format(merged.readY(0)))
 
 Output:
 
@@ -171,6 +196,23 @@ Output:
 
 .. include:: ../usagedata-note.txt
 
+**Example: Merge Workspace Summing Sample Logs**
+
+.. testcode:: MergeSampleLogs
+
+  Load(Filename='MUSR00015189.nxs, MUSR00015190.nxs', OutputWorkspace='gws')
+
+  merged = MergeRuns(InputWorkspaces='MUSR00015189_1, MUSR00015190_1',
+                     SampleLogsSum='dur')
+
+  print(merged.run().getLogData('dur').value)
+
+Output:
+
+.. testoutput:: MergeSampleLogs
+
+  200.0
+
 **Example: Merge Workspace Combining Sample Logs as a TimeSeries**
 
 .. testcode:: MergeSampleLogs
@@ -180,7 +222,7 @@ Output:
   merged = MergeRuns(InputWorkspaces='MUSR00015189_1, MUSR00015190_1',
                      SampleLogsTimeSeries='sample_magn_field')
 
-  print merged.run().getLogData('sample_magn_field_time_series').valueAsString().rstrip()
+  print(merged.run().getLogData('sample_magn_field').valueAsString().rstrip())
 
 Output:
 
@@ -198,7 +240,7 @@ Output:
   merged = MergeRuns(InputWorkspaces='MUSR00015189_1, MUSR00015190_1',
                      SampleLogsList='sample_magn_field')
 
-  print merged.run().getLogData('sample_magn_field_list').value
+  print(merged.run().getLogData('sample_magn_field').value)
 
 Output:
 
@@ -216,7 +258,7 @@ Output:
                      SampleLogsTimeSeries='sample_temp',
                      SampleLogsWarn='sample_magn_field')
 
-  print merged.run().getLogData('sample_temp_time_series').size()
+  print(merged.run().getLogData('sample_temp').size())
 
 Output:
 
@@ -231,17 +273,22 @@ Output:
   Load(Filename='MUSR00015189.nxs, MUSR00015190.nxs', OutputWorkspace='gws')
 
   merged = MergeRuns(InputWorkspaces='MUSR00015189_1, MUSR00015190_1',
-                     SampleLogsTimeSeries='sample_magn_field',
+                     SampleLogsTimeSeries='sample_temp',
                      SampleLogsFail='sample_magn_field, nspectra',
                      SampleLogsFailTolerances='5, 0')
 
-  print merged.run().getLogData('sample_magn_field_time_series').size()
+  print(merged.run().getLogData('sample_temp').size())
 
 Output:
 
 .. testoutput:: MergeSampleLogs
 
   1
+
+Related Algorithms
+------------------
+:ref:`ConjoinXRuns <algm-ConjoinXRuns>` concatenates the workspaces in the x dimension by handling the merging of the Sample Logs.
+:ref:`ConjoinWorkspaces <algm-ConjoinWorkspaces>` combines workspaces by appending their spectra.
 
 .. categories::
 

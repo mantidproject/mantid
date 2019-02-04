@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 """
     Specifically tests the RenameWorkspace algorithm in the simple API
 """
@@ -112,9 +118,28 @@ class SimpleAPIRenameWorkspaceTest(unittest.TestCase):
         #monWs1 = ws.getMonitorWorkspace()
         #self.assertEqual(monWs1.name(),'name8_monitors')
 
+        # test with the logging keyword
+        try:
+            name9 = RenameWorkspace('name8', EnableLogging=False)
+            self.assertTrue('name9' in mtd)
+            self.assertTrue(name9)
+            self.assertFalse('name8' in mtd)
+        except RuntimeError as e:
+            self.fail('Magic keyword not recognised '+e.what())
 
+        # test trying to disable ADS
+        try:
+            name10 = RenameWorkspace('name9', StoreInADS=False)
+            self.fail('Disabling on ADS did not throw for RenameWorkspace')
+        except KeyError:
+            pass
 
-
+        # test text value for disabling
+        try:
+            name10 = RenameWorkspace('name9', StoreInADS='disable')
+            self.fail('Disabling on ADS did not throw for RenameWorkspace')
+        except KeyError:
+            pass
 
 if __name__ == '__main__':
     unittest.main()

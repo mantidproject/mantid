@@ -1,13 +1,24 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef DOWNLOADREMOTEFILE_H_
 #define DOWNLOADREMOTEFILE_H_
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 
 namespace Mantid {
 namespace RemoteAlgorithms {
 
-class DLLExport DownloadRemoteFile : public Mantid::API::Algorithm {
+class DLLExport DownloadRemoteFile : public Mantid::API::Algorithm,
+                                     public API::DeprecatedAlgorithm {
 public:
+  /// constructor
+  DownloadRemoteFile();
+
   /// Algorithm's name
   const std::string name() const override { return "DownloadRemoteFile"; }
   /// Summary of algorithms purpose

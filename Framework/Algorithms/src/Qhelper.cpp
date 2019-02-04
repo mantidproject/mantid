@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/Qhelper.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
@@ -136,16 +142,18 @@ void Qhelper::examineInput(API::MatrixWorkspace_const_sptr dataWS,
 }
 
 /** Finds the first index number of the first wavelength bin that should
-* included based on the
-*  the calculation: W = Wcut (Rcut-R)/Rcut
-*  @param dataWS data workspace
-*  @param RCut the radius cut off, should be value of the property RadiusCut
-* (unit is mm)
-*  @param WCut this wavelength cut off, should be equal to the value WaveCut
-*  @param wsInd spectrum that is being analysed
-*  @return index number of the first bin to include in the calculation
-*/
+ * included based on the
+ *  the calculation: W = Wcut (Rcut-R)/Rcut
+ *  @param dataWS data workspace
+ * @param spectrumInfo the spectrumInfo associated with the data workspace
+ *  @param RCut the radius cut off, should be value of the property RadiusCut
+ * (unit is mm)
+ *  @param WCut this wavelength cut off, should be equal to the value WaveCut
+ *  @param wsInd spectrum that is being analysed
+ *  @return index number of the first bin to include in the calculation
+ */
 size_t Qhelper::waveLengthCutOff(API::MatrixWorkspace_const_sptr dataWS,
+                                 const SpectrumInfo &spectrumInfo,
                                  const double RCut, const double WCut,
                                  const size_t wsInd) const {
   double l_WCutOver = 0.0;
@@ -161,12 +169,12 @@ size_t Qhelper::waveLengthCutOff(API::MatrixWorkspace_const_sptr dataWS,
   }
   // get the distance of between this detector and the origin, which should be
   // the along the beam center
-  const V3D posOnBank = dataWS->getDetector(wsInd)->getPos();
+  const V3D posOnBank = spectrumInfo.position(wsInd);
   double R = (posOnBank.X() * posOnBank.X()) + (posOnBank.Y() * posOnBank.Y());
   R = std::sqrt(R);
 
   const double WMin = l_WCutOver * (l_RCut - R);
-  auto Xs = dataWS->x(wsInd);
+  const auto &Xs = dataWS->x(wsInd);
   return std::lower_bound(Xs.begin(), Xs.end(), WMin) - Xs.begin();
 }
 

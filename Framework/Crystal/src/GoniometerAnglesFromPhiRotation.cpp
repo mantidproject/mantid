@@ -1,17 +1,21 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
+#include "MantidCrystal/GoniometerAnglesFromPhiRotation.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidCrystal/GoniometerAnglesFromPhiRotation.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 
 using Mantid::Kernel::Direction;
-using Mantid::Kernel::Logger;
-using Mantid::API::IFunction;
 
 namespace Mantid {
 namespace Crystal {
@@ -162,9 +166,9 @@ void GoniometerAnglesFromPhiRotation::exec() {
 
     if (!PeaksRun1->sample().hasOrientedLattice()) {
       g_log.notice(std::string("Could not find UB for ") +
-                   std::string(PeaksRun1->name()));
+                   std::string(PeaksRun1->getName()));
       throw std::invalid_argument(std::string("Could not find UB for ") +
-                                  std::string(PeaksRun1->name()));
+                                  std::string(PeaksRun1->getName()));
     }
   }
   //-------------get UB raw :No goniometer----------------
@@ -179,9 +183,9 @@ void GoniometerAnglesFromPhiRotation::exec() {
 
   if (N1 < .6 * PeaksRun1->getNumberPeaks()) {
     g_log.notice(std::string("UB did not index well for ") +
-                 std::string(PeaksRun1->name()));
+                 std::string(PeaksRun1->getName()));
     throw std::invalid_argument(std::string("UB did not index well for ") +
-                                std::string(PeaksRun1->name()));
+                                std::string(PeaksRun1->getName()));
   }
 
   //----------------------------------------------
@@ -271,7 +275,7 @@ void GoniometerAnglesFromPhiRotation::exec() {
   MinData[4] = omchiphi[0];
 
   std::string FunctionArgs =
-      "name=PeakHKLErrors, PeakWorkspaceName=" + PeaksRun2->name() +
+      "name=PeakHKLErrors, PeakWorkspaceName=" + PeaksRun2->getName() +
       ",OptRuns=" + RunNumStr + ",phi" + RunNumStr + "=" +
       boost::lexical_cast<std::string>(MinData[2]) + ",chi" + RunNumStr + "=" +
       boost::lexical_cast<std::string>(MinData[3]) + ",omega" + RunNumStr +
@@ -426,5 +430,5 @@ Kernel::Matrix<double> GoniometerAnglesFromPhiRotation::getUBRaw(
   return GoniometerMatrix * UB;
 }
 
-} // Crystal
-} // Mantid
+} // namespace Crystal
+} // namespace Mantid

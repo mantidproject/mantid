@@ -1,9 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/HistoryView.h"
-#include <iterator>
 #include <algorithm>
+#include <iterator>
 
 namespace Mantid {
 namespace API {
@@ -193,12 +199,12 @@ void HistoryView::roll(std::vector<HistoryItem>::iterator &it) {
  * @param start Start of time range
  * @param end End of time range
  */
-void HistoryView::filterBetweenExecDate(Mantid::Kernel::DateAndTime start,
-                                        Mantid::Kernel::DateAndTime end) {
+void HistoryView::filterBetweenExecDate(Mantid::Types::Core::DateAndTime start,
+                                        Mantid::Types::Core::DateAndTime end) {
   auto lastItem = std::remove_if(
       m_historyItems.begin(), m_historyItems.end(),
       [&start, &end](const HistoryItem &item) {
-        Mantid::Kernel::DateAndTime algExecutionDate =
+        Mantid::Types::Core::DateAndTime algExecutionDate =
             item.getAlgorithmHistory()->executionDate();
         return algExecutionDate < start || algExecutionDate > end;
       });

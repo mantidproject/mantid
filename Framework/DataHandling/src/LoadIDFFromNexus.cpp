@@ -1,25 +1,29 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadIDFFromNexus.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/Strings.h"
 
-#include <Poco/DOM/Document.h>
 #include <Poco/DOM/DOMParser.h>
+#include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
-#include <Poco/DOM/NodeList.h>
 #include <Poco/DOM/NodeIterator.h>
+#include <Poco/DOM/NodeList.h>
 #include <Poco/File.h>
 #include <Poco/Path.h>
+#include <nexus/NeXusFile.hpp>
 
 using Poco::XML::DOMParser;
 using Poco::XML::Document;
 using Poco::XML::Element;
 using Poco::XML::NodeList;
-using Poco::XML::NodeIterator;
 
 namespace Mantid {
 namespace DataHandling {
@@ -28,7 +32,7 @@ DECLARE_ALGORITHM(LoadIDFFromNexus)
 
 using namespace Kernel;
 using namespace API;
-using Geometry::Instrument;
+using Types::Core::DateAndTime;
 
 /// Empty default constructor
 LoadIDFFromNexus::LoadIDFFromNexus() {}
@@ -89,7 +93,7 @@ void LoadIDFFromNexus::exec() {
   // Look for parameter correction file
   std::string parameterCorrectionFile =
       getPropertyValue("ParameterCorrectionFilePath");
-  if (parameterCorrectionFile == "") {
+  if (parameterCorrectionFile.empty()) {
     parameterCorrectionFile =
         getParameterCorrectionFile(localWorkspace->getInstrument()->getName());
   }
@@ -99,7 +103,7 @@ void LoadIDFFromNexus::exec() {
   // Read parameter correction file, if found
   std::string correctionParameterFile;
   bool append = false;
-  if (parameterCorrectionFile != "") {
+  if (!parameterCorrectionFile.empty()) {
     // Read parameter correction file
     // to find out which parameter file to use
     // and whether it is appended to default parameters.
@@ -113,7 +117,7 @@ void LoadIDFFromNexus::exec() {
 
   // Load default parameters if either there is no correction parameter file or
   // it is to be appended.
-  if (correctionParameterFile == "" || append) {
+  if (correctionParameterFile.empty() || append) {
     LoadParameters(&nxfile, localWorkspace);
   } else { // Else clear the parameters
     g_log.notice() << "Parameters to be replaced are cleared.\n";
@@ -121,7 +125,7 @@ void LoadIDFFromNexus::exec() {
   }
 
   // Load parameters from correction parameter file, if it exists
-  if (correctionParameterFile != "") {
+  if (!correctionParameterFile.empty()) {
     Poco::Path corrFilePath(parameterCorrectionFile);
     g_log.debug() << "Correction file path: " << corrFilePath.toString()
                   << "\n";
@@ -152,7 +156,7 @@ void LoadIDFFromNexus::exec() {
  * @param instName :: short name of instrument as it appears in IDF filename
  * etc.
  * @returns  full path name of correction file if found else ""
-*/
+ */
 std::string
 LoadIDFFromNexus::getParameterCorrectionFile(const std::string &instName) {
 
@@ -180,18 +184,18 @@ LoadIDFFromNexus::getParameterCorrectionFile(const std::string &instName) {
 }
 
 /* Reads the parameter correction file and if a correction is needed output the
-*parameterfile needed
-*  and whether it is to be appended.
-* @param correction_file :: path nsame of correction file as returned by
-*getParameterCorrectionFile()
-* @param date :: IS8601 date string applicable: Must be full timestamp (timezone
-*optional)
-* @param parameter_file :: output parameter file to use or "" if none
-* @param append :: output whether the parameters from parameter_file should be
-*appended.
-*
-*  @throw FileError Thrown if unable to parse XML file
-*/
+ *parameterfile needed
+ *  and whether it is to be appended.
+ * @param correction_file :: path nsame of correction file as returned by
+ *getParameterCorrectionFile()
+ * @param date :: IS8601 date string applicable: Must be full timestamp
+ *(timezone optional)
+ * @param parameter_file :: output parameter file to use or "" if none
+ * @param append :: output whether the parameters from parameter_file should be
+ *appended.
+ *
+ *  @throw FileError Thrown if unable to parse XML file
+ */
 void LoadIDFFromNexus::readParameterCorrectionFile(
     const std::string &correction_file, const std::string &date,
     std::string &parameter_file, bool &append) {
@@ -201,7 +205,7 @@ void LoadIDFFromNexus::readParameterCorrectionFile(
   append = false;
 
   // Check the date.
-  if (date == "") {
+  if (date.empty()) {
     g_log.notice() << "No date is supplied for parameter correction file "
                    << correction_file << ". Correction file is ignored.\n";
     return;

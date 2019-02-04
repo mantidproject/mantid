@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_GEOMETRY_REFLECTIONCONDITIONTEST_H_
 #define MANTID_GEOMETRY_REFLECTIONCONDITIONTEST_H_
 
@@ -58,15 +64,63 @@ public:
     centeringSymbols.insert("H");
 
     std::vector<ReflectionCondition_sptr> refs = getAllReflectionConditions();
-    for (auto it = refs.begin(); it != refs.end(); ++it) {
-      TSM_ASSERT_DIFFERS((*it)->getSymbol(),
-                         centeringSymbols.find((*it)->getSymbol()),
+    for (auto &ref : refs) {
+      TSM_ASSERT_DIFFERS(ref->getSymbol(),
+                         centeringSymbols.find(ref->getSymbol()),
                          centeringSymbols.end());
-      centeringSymbols.erase((*it)->getSymbol());
+      centeringSymbols.erase(ref->getSymbol());
     }
 
     // All centering symbols are present if the set is empty.
     TS_ASSERT_EQUALS(centeringSymbols.size(), 0);
+  }
+
+  void test_getReflectionConditionNames() {
+    auto conditions = getAllReflectionConditions();
+    auto names = getAllReflectionConditionNames();
+
+    TS_ASSERT_EQUALS(conditions.size(), names.size());
+
+    // there should not be any duplicates in the names
+    std::unordered_set<std::string> nameSet(names.begin(), names.end());
+
+    TS_ASSERT_EQUALS(nameSet.size(), names.size())
+  }
+
+  void test_getReflectionConditionSymbols() {
+    auto conditions = getAllReflectionConditions();
+    auto symbols = getAllReflectionConditionSymbols();
+
+    TS_ASSERT_EQUALS(conditions.size(), symbols.size());
+
+    // there should not be any duplicates in the names
+    std::unordered_set<std::string> symbolSet(symbols.begin(), symbols.end());
+
+    TS_ASSERT_EQUALS(symbolSet.size(), symbols.size())
+  }
+
+  void test_getReflectionConditionByName() {
+    auto names = getAllReflectionConditionNames();
+
+    for (auto name : names) {
+      TSM_ASSERT_THROWS_NOTHING("Problem with ReflectionCondition: " + name,
+                                getReflectionConditionByName(name));
+    }
+
+    TS_ASSERT_THROWS(getReflectionConditionByName("invalid"),
+                     std::invalid_argument);
+  }
+
+  void test_getReflectionConditionBySymbol() {
+    auto symbols = getAllReflectionConditionSymbols();
+
+    for (auto symbol : symbols) {
+      TSM_ASSERT_THROWS_NOTHING("Problem with ReflectionCondition: " + symbol,
+                                getReflectionConditionBySymbol(symbol));
+    }
+
+    TS_ASSERT_THROWS(getReflectionConditionBySymbol("Q"),
+                     std::invalid_argument);
   }
 };
 

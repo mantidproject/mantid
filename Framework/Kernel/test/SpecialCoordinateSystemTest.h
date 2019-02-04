@@ -1,8 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_KERNEL_SPECIALCOORDINATESYSTEMTEST
 #define MANTID_KERNEL_SPECIALCOORDINATESYSTEMTEST
 
-#include <cxxtest/TestSuite.h>
 #include "MantidKernel/SpecialCoordinateSystem.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Kernel;
 
@@ -13,7 +19,7 @@ using namespace Mantid::Kernel;
  * be a type replacment enum->object, but while that has not been done,
  * a santiy check (these tests) on the enum ordering will prevent unintentional
  * reordering.
-*/
+ */
 class SpecialCoordinateSystemTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically

@@ -1,4 +1,12 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/UnGroupWorkspace.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/ListValidator.h"
 
 namespace Mantid {
@@ -58,5 +66,5 @@ void UnGroupWorkspace::exec() {
   // Now remove the WorkspaceGroup from the ADS
   data_store.remove(inputws);
 }
-}
-}
+} // namespace Algorithms
+} // namespace Mantid

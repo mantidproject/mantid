@@ -1,13 +1,21 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_KERNEL_QUAT_H_
 #define MANTID_KERNEL_QUAT_H_
 
 #include "MantidKernel/DllConfig.h"
-#include "MantidKernel/Matrix.h"
+#include <string>
+#include <vector>
 
 namespace Mantid {
 namespace Kernel {
 // Forward declarations
 class V3D;
+template <class T> class Matrix;
 
 /** @class Quat Quat.h Geometry/Quat.h
 @brief Class for quaternions
@@ -28,26 +36,6 @@ k*i=-i*k=j<br>
 Rotation of an angle theta around a normalized axis (u,v,w) can be simply
 written W=cos(theta/2), a=u*sin(theta/2), b=v*sin(theta/2), c=w*sin(theta/2)
 This class support all arithmetic operations for quaternions
-
-Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your ption) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>
 */
 class MANTID_KERNEL_DLL Quat {
 
@@ -63,7 +51,7 @@ public:
   //! Set quaternion form an angle in degrees and an axis
   Quat(const double _deg, const V3D &_axis);
   // set a quaternion from a rotational matrix;
-  Quat(const DblMatrix &RotMat);
+  Quat(const Matrix<double> &RotMat);
   void operator()(const Quat &);
   void operator()(const double ww, const double aa, const double bb,
                   const double cc);
@@ -105,7 +93,7 @@ public:
   void setQuat(double mat[16]);
   //! Convert usual 3D rotation matrix into quat; Will throw if matirix is not
   // rotational;
-  void setQuat(const DblMatrix &rMat);
+  void setQuat(const Matrix<double> &rMat);
   //! Rotate a vector
   void rotate(V3D &) const;
 
@@ -121,7 +109,7 @@ public:
   Quat &operator+=(const Quat &);
   Quat operator-(const Quat &) const;
   Quat &operator-=(const Quat &);
-  Quat operator*(const Quat &) const;
+  Quat operator*(const Quat &)const;
   Quat &operator*=(const Quat &);
   bool operator==(const Quat &) const;
   bool operator!=(const Quat &) const;
@@ -159,8 +147,8 @@ private:
 MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &, const Quat &);
 MANTID_KERNEL_DLL std::istream &operator>>(std::istream &, Quat &q);
 
-} // Namespace Mantid
+} // namespace Kernel
 
-} // Namespace Kernel
+} // namespace Mantid
 
 #endif /*MANTID_KERNEL_QUAT_H_*/

@@ -1,15 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "InputHistory.h"
 #include <MantidAPI/Algorithm.h>
 
 #include <QSettings>
 #include <QStringList>
+#include <iostream>
 #include <vector>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
-
-extern bool Algorithm_descriptor_name_less(const Algorithm_descriptor &d1,
-                                           const Algorithm_descriptor &d2);
 
 /// Constructor
 InputHistoryImpl::InputHistoryImpl() {
@@ -131,7 +135,7 @@ QString InputHistoryImpl::getDirectoryFromFilePath(const QString &filePath) {
 }
 
 QString InputHistoryImpl::getNameOnlyFromFilePath(const QString &filePath) {
-  QString s = filePath;
+  const QString &s = filePath;
   int i = s.lastIndexOf('\\');
   if (i < 0)
     i = s.lastIndexOf('/');

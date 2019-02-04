@@ -1,7 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_NORMALISEBYDETECTORTEST_H_
 #define MANTID_ALGORITHMS_NORMALISEBYDETECTORTEST_H_
 
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/Timer.h"
 #include <boost/format.hpp>
@@ -50,7 +57,7 @@ do_test_doesnt_throw_on_execution(MatrixWorkspace_sptr inputWS,
   TS_ASSERT_THROWS_NOTHING(alg.execute());
   MatrixWorkspace_sptr outWS =
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out");
-  TS_ASSERT(outWS != NULL);
+  TS_ASSERT(outWS != nullptr);
   return outWS;
 }
 
@@ -85,6 +92,8 @@ private:
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSName);
     ws->setInstrument(
         ComponentCreationHelper::createTestInstrumentRectangular(6, 1, 0));
+    ws->getSpectrum(0).setDetectorID(1);
+    ws->getSpectrum(1).setDetectorID(2);
     return ws;
   }
 
@@ -175,9 +184,10 @@ private:
 
     const double A1 = 1;
     std::string componentLinks = "";
-    for (size_t wsIndex = 0; wsIndex < ws->getNumberHistograms(); ++wsIndex) {
-      Geometry::IDetector_const_sptr det = ws->getDetector(wsIndex);
 
+    const auto &spectrumInfo = ws->spectrumInfo();
+    for (size_t wsIndex = 0; wsIndex < ws->getNumberHistograms(); ++wsIndex) {
+      const auto &detector = spectrumInfo.detector(wsIndex);
       // A0, will vary with workspace index, from detector to detector, A1 is
       // constant = 1.
       componentLinks +=
@@ -191,7 +201,7 @@ private:
                <fixed />\n\
            </parameter>\n\
            </component-link>\n") %
-                     det->getName() % wsIndex % A1);
+                     detector.getName() % wsIndex % A1);
     }
 
     // Create a parameter file, with a root equation that will apply to all
@@ -221,15 +231,17 @@ private:
   create_workspace_with_incomplete_detector_level_only_fit_functions(
       MatrixWorkspace_sptr original = boost::shared_ptr<MatrixWorkspace>()) {
     MatrixWorkspace_sptr ws = original;
-    if (original == NULL) {
+    if (original == nullptr) {
       // Create a default workspace with no-fitting functions.
       ws = create_workspace_with_no_fitting_functions();
     }
     const std::string instrumentName = ws->getInstrument()->getName();
 
     std::string componentLinks = "";
+    const auto &spectrumInfo = ws->spectrumInfo();
+
     for (size_t wsIndex = 0; wsIndex < ws->getNumberHistograms(); ++wsIndex) {
-      Geometry::IDetector_const_sptr det = ws->getDetector(wsIndex);
+      const auto &detector = spectrumInfo.detector(wsIndex);
 
       // A1, will vary with workspace index. NOTE THAT A0 IS MISSING entirely.
       componentLinks +=
@@ -239,7 +251,7 @@ private:
                <fixed />\n\
            </parameter>\n\
            </component-link>\n") %
-                     det->getName() % wsIndex);
+                     detector.getName() % wsIndex);
     }
 
     // Create a parameter file, with a root equation that will apply to all
@@ -643,7 +655,7 @@ public:
 private:
   /// Helper method to run common sanity checks.
   void do_basic_checks(MatrixWorkspace_sptr normalisedWS) {
-    TS_ASSERT(normalisedWS != NULL);
+    TS_ASSERT(normalisedWS != nullptr);
     TS_ASSERT(ws->getNumberHistograms() == normalisedWS->getNumberHistograms());
     TS_ASSERT(ws->x(0).size() == normalisedWS->x(0).size());
     TS_ASSERT(ws->y(0).size() == normalisedWS->y(0).size());

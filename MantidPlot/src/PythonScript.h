@@ -1,24 +1,13 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2006 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 /***************************************************************************
   File                 : PythonScript.h
   Project              : QtiPlot
 --------------------------------------------------------------------
-  Copyright            : (C) 2006 by Knut Franke
-  Email (use @ for *)  : knut.franke*gmx.de
-  Description          : Execute Python code from within QtiPlot
-
- ***************************************************************************/
-
-/***************************************************************************
- *                                                                         *
- *  This program is free software; you can redistribute it and/or modify   *
- *  it under the terms of the GNU General Public License as published by   *
- *  the Free Software Foundation; either version 2 of the License, or      *
- *  (at your option) any later version.                                    *
- *                                                                         *
- *  This program is distributed in the hope that it will be useful,        *
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
- *  GNU General Public License for more details.                           *
  *                                                                         *
  *   You should have received a copy of the GNU General Public License     *
  *   along with this program; if not, write to the Free Software           *
@@ -29,15 +18,12 @@
 #ifndef PYTHON_SCRIPT_H
 #define PYTHON_SCRIPT_H
 
-// Python headers have to go first!
-#include "MantidQtAPI/PythonSystemHeader.h"
-#include "MantidQtAPI/PythonThreading.h"
-
+#include "MantidPythonInterface/core/GlobalInterpreterLock.h"
+#include "MantidQtWidgets/Common/WorkspaceObserver.h"
 #include "Script.h"
-#include "MantidQtAPI/WorkspaceObserver.h"
 
-#include <QFileInfo>
 #include <QDir>
+#include <QFileInfo>
 
 class ScriptingEnv;
 class PythonScripting;
@@ -125,14 +111,14 @@ private:
     }
 
     void appendPath(const QString &path) {
-      ScopedPythonGIL pythonLock;
+      Mantid::PythonInterface::GlobalInterpreterLock lock;
       QString code = "if r'%1' not in sys.path:\n"
                      "    sys.path.append(r'%1')";
       code = code.arg(path);
       PyRun_SimpleString(code.toAscii().constData());
     }
     void removePath(const QString &path) {
-      ScopedPythonGIL pythonLock;
+      Mantid::PythonInterface::GlobalInterpreterLock lock;
       QString code = "if r'%1' in sys.path:\n"
                      "    sys.path.remove(r'%1')";
       code = code.arg(path);
@@ -143,13 +129,35 @@ private:
     QString m_path;
   };
 
-  inline PythonScripting *pythonEnv() const { return m_pythonEnv; }
+  inline PythonScripting *interp() const { return m_interp; }
   void initialize(const QString &name, QObject *context);
   void beginStdoutRedirect();
   void endStdoutRedirect();
 
-  // --------------------------- Script compilation/execution
-  // -----------------------------------
+  // Pre and post-processing options for recursive calls.
+  // The Python GILState api is supposed to be able to ensure
+  // that the current thread is ready to execute Python code
+  // regardless of the current interpreter thread state.
+  // However, we have a case with the ApplicationWindow::runPythonScript
+  // method where a script can be sent to that method to be run with
+  // async=false yet the script itself contains a runPythonScript(async=True)
+  // call. This causes recursion into the PythonGIL object where
+  // the initial GIL has not been released and a deadlock ensues.
+  // An example script sent to runPythonScript(async=False) would be
+  //
+  //    import mantidplot
+  //    for i in range(10):
+  //        mantidplot.runPythonScript('test=CreateSampleWorkspace()', True)
+  //
+  // To circumvent this we must release the GIL on the main thread
+  // before starting the async thread and then reacquire it when that thread
+  // has finished and the main thread must keep executing. These methods
+  // are used for this purpose and are NOT used by the general executeAsync
+  // methods where the GILState API functions can cope and there is no
+  // recursion.
+  virtual bool recursiveAsyncSetup() override;
+  virtual void recursiveAsyncTeardown(bool relock) override;
+
   /// Compile the code, returning true if it was successful, false otherwise
   bool compileImpl() override;
   /// Evaluate the current code and return a result as a QVariant
@@ -170,28 +178,10 @@ private:
   /// Compile to bytecode
   PyObject *compileToByteCode(bool for_eval = true);
 
-  // ---------------------------- Variable reference
-  // ---------------------------------------------
-  /// Listen to add notifications from the ADS
-  void addHandle(const std::string &wsName,
-                 const Mantid::API::Workspace_sptr ws) override;
-  /// Listen to add/replace notifications from the ADS
-  void afterReplaceHandle(const std::string &wsName,
-                          const Mantid::API::Workspace_sptr ws) override;
-  /// Listen to delete notifications
-  void postDeleteHandle(const std::string &wsName) override;
-  /// Listen to ADS clear notifications
-  void clearADSHandle() override;
-  /// Add/update a Python reference to the given workspace
-  void addPythonReference(const std::string &wsName,
-                          const Mantid::API::Workspace_sptr ws);
-  /// Delete a Python reference to the given workspace name
-  void deletePythonReference(const std::string &wsName);
-
   /// Send out an error and clear it from python.
   void emit_error();
 
-  PythonScripting *m_pythonEnv;
+  PythonScripting *m_interp;
   PyObject *localDict, *stdoutSave, *stderrSave;
   PyObject *m_codeFileObject;
   long m_threadID; ///< Python thread id
@@ -201,8 +191,9 @@ private:
   QString fileName;
   bool m_isInitialized;
   PythonPathHolder m_pathHolder;
-  /// Set of current python variables that point to workspace handles
-  std::set<std::string> m_workspaceHandles;
+  /// This must only be used by the recursiveAsync* methods
+  /// as they need to store state between calls.
+  PyGILState_STATE m_recursiveAsyncGIL;
 };
 
 #endif

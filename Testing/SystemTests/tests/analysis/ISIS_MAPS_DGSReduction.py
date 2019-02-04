@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
 """ Sample MAPS reduction scrip """
 from Direct.ReductionWrapper import *
@@ -94,6 +100,7 @@ class ReduceMAPS(ReductionWrapper):
         #return lambda : custom_name(self.reducer.prop_man)
         # use this method to use standard file name generating function
         return None
+
 
 #----------------------------------------------------------------------------------------------------------------------
 if __name__ == "__main__":

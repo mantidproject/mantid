@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -12,11 +12,7 @@ Description
 This algorithm clears all the parameters associated with a workspace's instrument.
 
 Parameters are used by Mantid to tweak an instrument's values without having to change
-the `instrument definition file <http://mantidproject.org/InstrumentDefinitionFile>`__ itself.
-
-The LocationParameters property specifies whether or not to clear any calibration parameters
-used to adjust the location of any components. Specifically, it will clear the "x", "y", "z",
-"r-position", "t-position", "p-position", "rotx", "roty", and "rotz" parameters.
+the :ref:`instrument definition file <InstrumentDefinitionFile>` itself.
 
 Usage
 -----
@@ -47,7 +43,11 @@ Usage
   print("Clearing all parameters")
   ClearInstrumentParameters(ws)
 
-  #Check the parmaeters have been cleared correctly
+  #Check the parameters have been cleared correctly
+  #Obtain instrument and banks again, to make sure they contain the updated parameters
+  instrument = ws.getInstrument()
+  bank1 = instrument.getComponentByName("bank1")
+  bank2 = instrument.getComponentByName("bank2")
   if len(instrument.getStringParameter("TestParam")) == 0:
     print("Instrument was cleared successfully.")
   if len(bank1.getStringParameter("TestParam")) == 0:

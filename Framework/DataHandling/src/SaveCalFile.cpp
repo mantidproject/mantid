@@ -1,7 +1,13 @@
-#include "MantidAPI/FileProperty.h"
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/SaveCalFile.h"
-#include "MantidKernel/System.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/System.h"
 #include <cmath>
 #include <fstream>
 
@@ -9,6 +15,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
+using Mantid::Types::Core::DateAndTime;
 
 namespace Mantid {
 namespace DataHandling {
@@ -95,7 +102,7 @@ void SaveCalFile::saveCalFile(const std::string &calFileName,
     doMask = true;
     inst = maskWS->getInstrument();
     if (!inst)
-      g_log.warning() << "Mask workspace " << maskWS->name()
+      g_log.warning() << "Mask workspace " << maskWS->getName()
                       << " has no instrument associated with."
                       << "\n";
   }
@@ -150,5 +157,5 @@ void SaveCalFile::saveCalFile(const std::string &calFileName,
   }
 }
 
-} // namespace Mantid
 } // namespace DataHandling
+} // namespace Mantid

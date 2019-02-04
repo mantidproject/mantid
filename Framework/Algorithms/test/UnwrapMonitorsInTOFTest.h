@@ -1,12 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_UNWRAPMONITORSINTOFTEST_H_
 #define MANTID_ALGORITHMS_UNWRAPMONITORSINTOFTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/UnwrapMonitorsInTOF.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/SpectrumInfo.h"
+#include "MantidAlgorithms/UnwrapMonitorsInTOF.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::Algorithms::UnwrapMonitorsInTOF;
 
@@ -66,7 +73,7 @@ public:
       auto expectedBinEdgeIt = expectedBinEdges.cbegin();
       for (auto it = binEdges.cbegin();
            it != binEdges.cend() ||
-               expectedBinEdgeIt != expectedBinEdges.cend();
+           expectedBinEdgeIt != expectedBinEdges.cend();
            ++it, ++expectedBinEdgeIt) {
         TS_ASSERT(std::abs(*it - *expectedBinEdgeIt) < tolerance);
       }
@@ -99,7 +106,7 @@ public:
       auto expectedBinEdgeDetectorIt = expectedBinEdgesDetector.cbegin();
       for (auto it = binEdgesDetector.cbegin();
            it != binEdgesDetector.cend() ||
-               expectedBinEdgeDetectorIt != expectedBinEdgesDetector.cend();
+           expectedBinEdgeDetectorIt != expectedBinEdgesDetector.cend();
            ++it, ++expectedBinEdgeDetectorIt) {
         TS_ASSERT(std::abs(*it - *expectedBinEdgeDetectorIt) < tolerance);
       }
@@ -107,7 +114,7 @@ public:
       auto expectedCountDetectorIt = expectedCountsDetector.cbegin();
       for (auto it = expectedCountsDetector.cbegin();
            it != expectedCountsDetector.cend() ||
-               expectedCountDetectorIt != expectedCountsDetector.cend();
+           expectedCountDetectorIt != expectedCountsDetector.cend();
            ++it, ++expectedCountDetectorIt) {
         TS_ASSERT(std::abs(*it - *expectedCountDetectorIt) < tolerance);
       }
@@ -220,7 +227,7 @@ private:
    * The monitor at workspace index 4 is at 11m
    * The monitor are worksapce index 5 is at 18m
    *
-  */
+   */
   Mantid::API::MatrixWorkspace_sptr provideTestWorkspace(bool includeMonitors) {
     const int numberOfBins = 10;
     const int numberOfHistograms = 5;
@@ -232,9 +239,9 @@ private:
         intialWorkspace);
 
     // Set the monitor bins to the expected values
+    const auto &spectrumInfo = workspace->spectrumInfo();
     for (size_t index = 0; index < numberOfHistograms; ++index) {
-      auto detector = workspace->getDetector(index);
-      if (detector->isMonitor()) {
+      if (spectrumInfo.isMonitor(index)) {
         auto histogram = workspace->histogram(index);
         Mantid::HistogramData::Counts counts{2, 2, 2, 2, 2, 1, 1, 1, 1, 1};
         auto binEdges = histogram.binEdges();

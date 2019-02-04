@@ -1,8 +1,10 @@
-// Includes
-//----------------------------------------------------------------------
-//----------------------------------------------------------------------
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/Multiply.h"
-#include "MantidDataObjects/WorkspaceSingleValue.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -14,25 +16,22 @@ namespace Algorithms {
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(Multiply)
 
-void Multiply::performBinaryOperation(const MantidVec &lhsX,
-                                      const MantidVec &lhsY,
-                                      const MantidVec &lhsE,
-                                      const MantidVec &rhsY,
-                                      const MantidVec &rhsE, MantidVec &YOut,
-                                      MantidVec &EOut) {
-  UNUSED_ARG(lhsX);
-  const size_t bins = lhsE.size();
+void Multiply::performBinaryOperation(const HistogramData::Histogram &lhs,
+                                      const HistogramData::Histogram &rhs,
+                                      HistogramData::HistogramY &YOut,
+                                      HistogramData::HistogramE &EOut) {
+  const size_t bins = lhs.e().size();
   for (size_t j = 0; j < bins; ++j) {
     // Get references to the input Y's
-    const double leftY = lhsY[j];
-    const double rightY = rhsY[j];
+    const double leftY = lhs.y()[j];
+    const double rightY = rhs.y()[j];
 
     // error multiplying two uncorrelated numbers, re-arrange so that you don't
     // get infinity if leftY or rightY == 0
     // (Sa/a)2 + (Sb/b)2 = (Sc/c)2
     // (Sc)2 = (Sa c/a)2 + (Sb c/b)2
     //       = (Sa b)2 + (Sb a)2
-    EOut[j] = sqrt(pow(lhsE[j] * rightY, 2) + pow(rhsE[j] * leftY, 2));
+    EOut[j] = sqrt(pow(lhs.e()[j] * rightY, 2) + pow(rhs.e()[j] * leftY, 2));
 
     // Copy the result last in case one of the input workspaces is also any
     // output
@@ -40,19 +39,17 @@ void Multiply::performBinaryOperation(const MantidVec &lhsX,
   }
 }
 
-void Multiply::performBinaryOperation(const MantidVec &lhsX,
-                                      const MantidVec &lhsY,
-                                      const MantidVec &lhsE, const double rhsY,
-                                      const double rhsE, MantidVec &YOut,
-                                      MantidVec &EOut) {
-  UNUSED_ARG(lhsX);
-  const size_t bins = lhsE.size();
+void Multiply::performBinaryOperation(const HistogramData::Histogram &lhs,
+                                      const double rhsY, const double rhsE,
+                                      HistogramData::HistogramY &YOut,
+                                      HistogramData::HistogramE &EOut) {
+  const size_t bins = lhs.e().size();
   for (size_t j = 0; j < bins; ++j) {
     // Get reference to input Y
-    const double leftY = lhsY[j];
+    const double leftY = lhs.y()[j];
 
     // see comment in the function above for the error formula
-    EOut[j] = sqrt(pow(lhsE[j] * rhsY, 2) + pow(rhsE * leftY, 2));
+    EOut[j] = sqrt(pow(lhs.e()[j] * rhsY, 2) + pow(rhsE * leftY, 2));
 
     // Copy the result last in case one of the input workspaces is also any
     // output
@@ -126,7 +123,7 @@ void Multiply::checkRequirements() {
   m_flipSides = (m_rhs->size() > m_lhs->size());
 
   // Both are vertical columns with one bin?
-  if ((m_rhs->blocksize() == 1) && (m_lhs->blocksize() == 1)) {
+  if ((m_rhsBlocksize == 1) && (m_lhsBlocksize == 1)) {
     // Flip it if the RHS is event and you could keep events
     if (m_erhs && !m_elhs)
       m_flipSides = true;
@@ -180,14 +177,14 @@ std::string Multiply::checkSizeCompatibility(
     // RHS only has one value (1D vertical), so the number of histograms needs
     // to match.
     // Each lhs spectrum will be divided by that scalar
-    if (rhs->blocksize() == 1 &&
+    if (m_rhsBlocksize == 1 &&
         lhs->getNumberHistograms() == rhs->getNumberHistograms())
       return "";
 
     if (m_matchXSize) {
       // Past this point, for a 2D WS operation, we require the X arrays to
       // match. Note this only checks the first spectrum
-      if (!WorkspaceHelpers::matchingBins(lhs, rhs, true)) {
+      if (!WorkspaceHelpers::matchingBins(*lhs, *rhs, true)) {
         return "X arrays must match when multiplying 2D workspaces.";
       }
     }

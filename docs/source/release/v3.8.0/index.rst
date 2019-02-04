@@ -1,8 +1,10 @@
+.. _v3.8.0:
+
 ==========================
 Mantid 3.8.0 Release Notes
 ==========================
 
-.. figure:: ../../images/release38.png
+.. figure:: /images/release38.png
    :class: screenshot
    :width: 500px
    :align: right

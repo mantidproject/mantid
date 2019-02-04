@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_API_FUNCTIONDOMAIN1D_H_
 #define MANTID_API_FUNCTIONDOMAIN1D_H_
 
@@ -5,7 +11,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/FunctionDomain.h"
-#include "MantidKernel/ClassMacros.h"
 
 #include <vector>
 
@@ -22,27 +27,6 @@ namespace API {
 
     @author Roman Tolchenov, Tessella plc
     @date 15/11/2011
-
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-   National Laboratory & European Spallation Source
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>.
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_API_DLL FunctionDomain1D : public FunctionDomain {
 public:
@@ -59,11 +43,15 @@ public:
   const double *getPointerAt(size_t i) const { return m_data + i; }
   /// Convert to a vector
   std::vector<double> toVector() const;
+  /// Set a peak redius to pass to peak functions.
+  void setPeakRadius(int radius);
+  /// Get the peak radius.
+  int getPeakRadius() const;
 
 protected:
   /// Protected constructor, shouldn't be created directly. Use
   /// FunctionDomain1DView instead.
-  FunctionDomain1D(const double *x, size_t n) : m_data(x), m_n(n) {}
+  FunctionDomain1D(const double *x, size_t n);
   /// Reset the pointer and size of the domain
   void resetData(const double *x, size_t n) {
     m_data = x;
@@ -71,8 +59,12 @@ protected:
   }
 
 private:
-  const double *m_data; ///< pointer to the start of the domain data
-  size_t m_n;           ///< size of the data
+  /// pointer to the start of the domain data
+  const double *m_data;
+  /// size of the data
+  size_t m_n;
+  /// A peak radius that IPeakFunctions should use
+  int m_peakRadius;
 };
 
 /**
@@ -150,18 +142,25 @@ public:
   /// Constructor.
   FunctionDomain1DHistogram(std::vector<double>::const_iterator from,
                             std::vector<double>::const_iterator to);
+
+  /// Disable copy operator
+  FunctionDomain1DHistogram(const FunctionDomain1DHistogram &) = delete;
+
+  /// Disable assignment operator
+  FunctionDomain1DHistogram &
+  operator=(const FunctionDomain1DHistogram &) = delete;
+
   /// Get the leftmost boundary
   double leftBoundary() const;
 
 protected:
-  DISABLE_COPY_AND_ASSIGN(FunctionDomain1DHistogram)
   std::vector<double> m_bins; ///< vector of bin boundaries
 };
 
 /// typedef for a shared pointer to a FunctionDomain1D
-typedef boost::shared_ptr<FunctionDomain1D> FunctionDomain1D_sptr;
+using FunctionDomain1D_sptr = boost::shared_ptr<FunctionDomain1D>;
 /// typedef for a shared pointer to a const FunctionDomain1D
-typedef boost::shared_ptr<const FunctionDomain1D> FunctionDomain1D_const_sptr;
+using FunctionDomain1D_const_sptr = boost::shared_ptr<const FunctionDomain1D>;
 
 } // namespace API
 } // namespace Mantid

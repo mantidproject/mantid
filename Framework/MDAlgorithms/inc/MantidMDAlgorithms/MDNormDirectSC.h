@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MDALGORITHMS_MDNORMDIRECTSC_H_
 #define MANTID_MDALGORITHMS_MDNORMDIRECTSC_H_
 
@@ -11,34 +17,16 @@ class EventWorkspace;
 namespace MDAlgorithms {
 
 /** MDNormSCD : Generate MD normalization for single crystal diffraction
-
-   Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-   National Laboratory & European Spallation Source
-
-   This file is part of Mantid.
-
-   Mantid is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 3 of the License, or
-   (at your option) any later version.
-
-   Mantid is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-
-   You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-   File change history is stored at: <https://github.com/mantidproject/mantid>
-   Code Documentation is available at: <http://doxygen.mantidproject.org>
-  */
+ */
 class DLLExport MDNormDirectSC : public SlicingAlgorithm {
 public:
   MDNormDirectSC();
 
   const std::string name() const override;
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"MDNormSCD", "MDNormSCDPreprocessIncoherent"};
+  }
   const std::string category() const override;
   const std::string summary() const override;
 
@@ -52,21 +40,18 @@ private:
   DataObjects::MDHistoWorkspace_sptr binInputWS();
   void createNormalizationWS(const DataObjects::MDHistoWorkspace &dataWS);
   std::vector<coord_t>
-  getValuesFromOtherDimensions(bool &skipNormalization) const;
+  getValuesFromOtherDimensions(bool &skipNormalization,
+                               uint16_t expInfoIndex = 0) const;
   Kernel::Matrix<coord_t>
   findIntergratedDimensions(const std::vector<coord_t> &otherDimValues,
                             bool &skipNormalization);
   void cacheDimensionXValues();
   void calculateNormalization(const std::vector<coord_t> &otherValues,
-                              const Kernel::Matrix<coord_t> &affineTrans);
+                              const Kernel::Matrix<coord_t> &affineTrans,
+                              uint16_t expInfoIndex);
 
-  std::vector<detid_t> removeGroupedIDs(const API::ExperimentInfo &exptInfo,
-                                        const std::vector<detid_t> &detIDs);
-  Geometry::IDetector_const_sptr
-  getThetaPhi(const detid_t detID, const API::ExperimentInfo &exptInfo,
-              double &theta, double &phi);
-  std::vector<Kernel::VMD> calculateIntersections(const double theta,
-                                                  const double phi);
+  void calculateIntersections(std::vector<std::array<double, 4>> &intersections,
+                              const double theta, const double phi);
 
   /// Normalization workspace
   DataObjects::MDHistoWorkspace_sptr m_normWS;
@@ -90,6 +75,10 @@ private:
   Kernel::V3D m_beamDir;
   /// ki-kf for Inelastic convention; kf-ki for Crystallography convention
   std::string convention;
+  /// internal flag to accumulate to an existing workspace
+  bool m_accumulate{false};
+  /// number of experiment infos
+  uint16_t m_numExptInfos;
 };
 
 } // namespace MDAlgorithms

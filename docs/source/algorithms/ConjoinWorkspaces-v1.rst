@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -22,6 +22,16 @@ of the first input workspace. Workspace data members other than the data
 (e.g. instrument etc.) will be copied from the first input workspace
 (but if they're not identical anyway, then you probably shouldn't be
 using this algorithm!). Both input workspaces will be deleted.
+
+ConjoinWorkspaces operation
+---------------------------
+
++------------------------------------------+---------------------------------------------+
+|Example case with input workspaces having | .. image:: ../images/ConjoinWorkspaces.png  |
+|2 and 3 spectra respectively.             |    :height: 150                             |
+|                                          |    :width: 400                              |
+|                                          |    :alt: ConjoinWorkspaces operation        |
++------------------------------------------+---------------------------------------------+
 
 Conflict Spectrum Numbers
 #########################
@@ -48,6 +58,14 @@ The input workspaces must come from the same instrument, have common
 units and bins and no detectors that contribute to spectra should
 overlap.
 
+Y axis units and labels
+#######################
+
+The optional parameters YAxisUnit and YAxisLabel can be used to change the
+y axis unit and label when conjoining workspaces. Changing YAxisUnit updates
+YAxisLabel automatically with the value of YAxisUnit, unless a separate value 
+is supplied.
+
 Exception
 #########
 
@@ -63,19 +81,24 @@ Usage
 .. testcode:: ConjoinWorkspacesEx
 
     ws1 = CreateSampleWorkspace(WorkspaceType="Histogram", NumBanks=2, BankPixelWidth=1, BinWidth=10, Xmax=50)
-    print "Number of spectra in first workspace", ws1.getNumberHistograms()
+    print("Number of spectra in first workspace = {}".format(ws1.getNumberHistograms()))
     ws2 = CreateSampleWorkspace(WorkspaceType="Histogram", NumBanks=3, BankPixelWidth=1, BinWidth=10, Xmax=50)
-    print "Number of spectra in second workspace", ws2.getNumberHistograms()
-    ConjoinWorkspaces(InputWorkspace1=ws1, InputWorkspace2=ws2, CheckOverlapping=False)
-    print "Number of spectra after ConjoinWorkspaces", mtd['ws1'].getNumberHistograms()
+    print("Number of spectra in second workspace = {}".format(ws2.getNumberHistograms()))
+    ConjoinWorkspaces(InputWorkspace1=ws1, InputWorkspace2=ws2, CheckOverlapping=False, YAxisUnit="New unit", YAxisLabel="New label")
+    ws = mtd['ws1'] # Have to update workspace from ADS, as it is an in-out parameter
+    print("Number of spectra after ConjoinWorkspaces = {}".format(ws.getNumberHistograms()))
+    print("Y unit is {}".format(ws.YUnit()))
+    print("Y label {}".format(ws.YUnitLabel()))
 
 Output:
 
 .. testoutput:: ConjoinWorkspacesEx
 
-    Number of spectra in first workspace 2
-    Number of spectra in second workspace 3
-    Number of spectra after ConjoinWorkspaces 5
+    Number of spectra in first workspace = 2
+    Number of spectra in second workspace = 3
+    Number of spectra after ConjoinWorkspaces = 5
+    Y unit is New unit
+    Y label New label
 
 .. categories::
 

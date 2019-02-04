@@ -1,16 +1,22 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CRYSTAL_SETUBTEST_H_
 #define MANTID_CRYSTAL_SETUBTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/Sample.h"
 #include "MantidCrystal/SetUB.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/Matrix.h"
-#include "MantidAPI/Sample.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::Crystal;
@@ -39,7 +45,7 @@ public:
     std::string wsName("SetUBTest_WS");
     // Fake output WS
     MatrixWorkspace_sptr ws =
-        WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+        WorkspaceCreationHelper::create2DWorkspace(10, 10);
     AnalysisDataService::Instance().addOrReplace(wsName, ws);
 
     SetUB alg;
@@ -79,7 +85,7 @@ public:
     std::string wsName("SetUBTest_WS");
     // Fake output WS
     MatrixWorkspace_sptr ws =
-        WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+        WorkspaceCreationHelper::create2DWorkspace(10, 10);
     AnalysisDataService::Instance().addOrReplace(wsName, ws);
 
     SetUB alg;
@@ -126,7 +132,7 @@ public:
     std::string wsName("SetUBTest_WS");
     // Fake output WS
     MatrixWorkspace_sptr ws =
-        WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+        WorkspaceCreationHelper::create2DWorkspace(10, 10);
     AnalysisDataService::Instance().addOrReplace(wsName, ws);
 
     SetUB alg;
@@ -151,7 +157,7 @@ public:
     std::string wsName("SetUBTest_WS");
     // Fake output WS
     MatrixWorkspace_sptr ws =
-        WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+        WorkspaceCreationHelper::create2DWorkspace(10, 10);
     AnalysisDataService::Instance().addOrReplace(wsName, ws);
 
     SetUB alg;
@@ -173,7 +179,7 @@ public:
     std::string wsName("SetUBTest_WS");
     // Fake output WS
     MatrixWorkspace_sptr ws =
-        WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+        WorkspaceCreationHelper::create2DWorkspace(10, 10);
     AnalysisDataService::Instance().addOrReplace(wsName, ws);
 
     SetUB alg;
@@ -196,7 +202,7 @@ public:
     std::string wsName("SetUBTest_WS");
     // Fake output WS
     MatrixWorkspace_sptr ws =
-        WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+        WorkspaceCreationHelper::create2DWorkspace(10, 10);
     AnalysisDataService::Instance().addOrReplace(wsName, ws);
 
     SetUB alg;

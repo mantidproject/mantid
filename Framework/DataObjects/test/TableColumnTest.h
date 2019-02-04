@@ -1,9 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAOBJECTS_TABLECOLUMNTEST_H_
 #define MANTID_DATAOBJECTS_TABLECOLUMNTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidDataObjects/TableColumn.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include <cxxtest/TestSuite.h>
 
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 
@@ -298,6 +304,18 @@ public:
     TS_ASSERT_EQUALS(data2[7], "seven");
     TS_ASSERT_EQUALS(data2[8], "twelve (1)");
     TS_ASSERT_EQUALS(data2[9], "twelve (2)");
+  }
+  void test_strCannotBeConvertedToDouble() {
+    TableWorkspace ws;
+    ws.addColumn("str", "col");
+    const auto col = ws.getColumn("col");
+    TS_ASSERT(!col->isNumber());
+  }
+  void test_intCanBeConvertedToDouble() {
+    TableWorkspace ws;
+    ws.addColumn("int", "col");
+    const auto col = ws.getColumn("col");
+    TS_ASSERT(col->isNumber());
   }
 
 private:

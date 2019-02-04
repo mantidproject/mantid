@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=eval-used
 from __future__ import (absolute_import, division, print_function)
 
@@ -122,6 +128,7 @@ class SelectNexusFilesByMetadata(PythonAlgorithm):
             # the nexus entry value itself can be spurious for a given file
             self.log().warning('Invalid value for the nexus entry %s in file %s. Skipping the file.' % (item, run))
             return False
+
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(SelectNexusFilesByMetadata)

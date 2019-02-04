@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -5,9 +11,9 @@
 #include "MantidAPI/AlgorithmProperty.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/PropertyManager.h"
+#include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidWorkflowAlgorithms/EQSANSInstrument.h"
 
 namespace Mantid {
@@ -66,7 +72,7 @@ void ComputeSensitivity::exec() {
   // Set patch information so that the SANS sensitivity algorithm can
   // patch the sensitivity workspace
   const std::string patchWSName = getPropertyValue("PatchWorkspace");
-  if (patchWSName.size() > 0) {
+  if (!patchWSName.empty()) {
     IAlgorithm_sptr patchAlg = createChildAlgorithm("EQSANSPatchSensitivity");
     patchAlg->setPropertyValue("PatchWorkspace", patchWSName);
     if (!reductionManager->existsProperty("SensitivityPatchAlgorithm")) {

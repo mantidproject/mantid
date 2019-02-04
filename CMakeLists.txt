@@ -7,16 +7,36 @@ cmake_minimum_required ( VERSION 3.5 )
 # Define the project name.
 project ( Mantid )
 
+# Policy settings
+if (POLICY CMP0022)
+  cmake_policy (SET CMP0022 NEW)
+endif ()
+
+if (POLICY CMP0072)
+  cmake_policy (SET CMP0072 OLD)
+endif ()
+
+if (POLICY CMP0074)
+  cmake_policy (SET CMP0074 NEW)
+endif ()
+
 # System package target is important for the windows builds as it allows us to package only the dlls and exes and exclude libs. Defaults to empty for other platforms.
-set ( SYSTEM_PACKAGE_TARGET "")
+set ( SYSTEM_PACKAGE_TARGET "" )
 
 # Add the path to our custom 'find' modules
 set ( CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/buildconfig/CMake")
+# Send libraries to common place, reference in several places so must be at top level
+set ( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin )
+set ( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin )
 
-set ( ENABLE_MANTIDPLOT ON CACHE BOOL "Switch for compiling the gui components")
+set ( ENABLE_MANTIDPLOT ON CACHE BOOL "Enable Qt4-based gui & components" )
+set ( ENABLE_WORKBENCH OFF CACHE BOOL "Enable Qt5-based gui & components" )
+set ( PACKAGE_WORKBENCH OFF CACHE BOOL "If packaging is enabled then include the Qt-5 workbench in the package" )
+if ( PACKAGE_WORKBENCH AND NOT ENABLE_WORKBENCH )
+  message ( FATAL_ERROR "Packaging workbench requested but workbench build is disabled!" )
+endif ()
 
-SET (CPACK_INSTALL_CMAKE_PROJECTS
-     "${CMAKE_BINARY_DIR}" "Mantid" "ALL" "/")
+set ( CPACK_INSTALL_CMAKE_PROJECTS "${CMAKE_BINARY_DIR}" "Mantid" "ALL" "/" )
 
 ###########################################################################
 # Quick exit if we only want data targets
@@ -28,11 +48,24 @@ if( DATA_TARGETS_ONLY )
   return()
 endif()
 
-set ( CPACK_PACKAGE_SUFFIX "" CACHE STRING "suffix used to determine the deployment type")
+###########################################################################
+# Packaging configuration
+###########################################################################
+set ( CPACK_PACKAGE_SUFFIX "unstable" CACHE STRING "suffix used to determine the deployment type")
 set_property(CACHE CPACK_PACKAGE_SUFFIX PROPERTY STRINGS nightly unstable "") #empty string and release are treated as the same thing
 
 #Set package name here
 set ( CPACK_PACKAGE_NAME "mantid${CPACK_PACKAGE_SUFFIX}" )
+
+###########################################################################
+# Bootstrap any dependencies
+###########################################################################
+include ( Bootstrap )
+
+###########################################################################
+# Configure Eigen early
+###########################################################################
+include ( Eigen )
 
 ###########################################################################
 # Set ParaView information since later items depend on it
@@ -52,11 +85,6 @@ if ( ENABLE_MANTIDPLOT )
 endif ()
 
 ###########################################################################
-# Bootstrap any dependencies
-###########################################################################
-include ( Bootstrap )
-
-###########################################################################
 # Set expected variables for OS X
 ###########################################################################
 if ( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin" )
@@ -67,13 +95,6 @@ endif ()
 # Cross-platform setup
 ###########################################################################
 include ( CommonSetup )
-
-###########################################################################
-# Check for Qt (DarwinSetup below needs a variable from this)
-###########################################################################
-if (ENABLE_MANTIDPLOT)
-  find_package ( Qt4 COMPONENTS QtCore QtGui QtOpenGL QtXml QtSvg REQUIRED )
-endif ()
 
 ###########################################################################
 # Find OpenGL
@@ -95,36 +116,37 @@ if (COVERALLS)
 endif()
 
 ###########################################################################
-# Find qwt. Needs to be version 5
+# Qt/Qwt/PyQt/sip
 ###########################################################################
 if (ENABLE_MANTIDPLOT)
-  find_package ( Qwt REQUIRED )
-  if( QWT_VERSION VERSION_LESS 5.0 OR QWT_VERSION VERSION_EQUAL 6.0 OR
-      QWT_VERSION VERSION_GREATER 6.0 )
-    message ( FATAL_ERROR "Qwt version 5 is required, found: ${QWT_VERSION}" )
-  endif()
-endif()
+  set ( QT_USE_IMPORTED_TARGETS ON )
+  find_package ( Qt4 COMPONENTS QtCore QtGui QtOpenGL QtXml QtSvg REQUIRED )
 
-###########################################################################
-# Find PyQt & sip
-###########################################################################
-if (ENABLE_MANTIDPLOT)
+  find_package ( Qwt5 REQUIRED )
+  if( QWT5_VERSION VERSION_LESS 5.0 OR QWT5_VERSION VERSION_EQUAL 6.0 OR
+      QWT5_VERSION VERSION_GREATER 6.0 )
+    message ( FATAL_ERROR "Qwt version 5 is required, found: ${QWT5_VERSION}" )
+  endif()
+
   find_package ( PyQt4 REQUIRED )
   find_package ( SIP REQUIRED )
   separate_arguments ( PYQT4_SIP_FLAGS )
+endif()
+
+if ( ENABLE_WORKBENCH )
+  find_package ( Qt5 COMPONENTS Core Gui Widgets OpenGL REQUIRED )
+  if ( Qt5_FOUND )
+    message ( STATUS "Found Qt ${Qt5_VERSION}: ${Qt5_DIR}" )
+  endif()
+  find_package ( PyQt5 REQUIRED )
+  find_package ( SIP REQUIRED )
+  separate_arguments ( PYQT5_SIP_FLAGS )
 endif()
 
 ###########################################################################
 # gsl is currently needed by Geometry, Algorithms, Curvefitting, & MantidPlot
 ###########################################################################
 find_package ( GSL REQUIRED )
-
-###########################################################################
-# Add QtPropertyBrowser to build
-###########################################################################
-if (ENABLE_MANTIDPLOT)
-  add_subdirectory ( QtPropertyBrowser )
-endif(ENABLE_MANTIDPLOT)
 
 ###########################################################################
 # Now add in all the components
@@ -143,28 +165,18 @@ add_subdirectory ( Framework )
 
 include_directories ( Framework/Kernel/inc )
 include_directories ( Framework/HistogramData/inc )
+include_directories ( Framework/Indexing/inc )
+include_directories ( Framework/Parallel/inc )
+include_directories ( Framework/Beamline/inc )
 include_directories ( Framework/Geometry/inc )
 include_directories ( Framework/API/inc )
+include_directories ( Framework/Types/inc )
+include_directories ( Framework/NexusGeometry/inc )
 
-set ( CORE_MANTIDLIBS Kernel HistogramData Geometry API )
+set ( CORE_MANTIDLIBS Kernel HistogramData Indexing Beamline Geometry API Types )
 
-if (ENABLE_MANTIDPLOT)
-  # Add a target for all GUI tests
-  add_custom_target ( GUITests )
-  add_dependencies ( GUITests MantidWidgetsTest)
-  add_dependencies ( check GUITests )
-  # Collect all tests together
-  add_custom_target ( AllTests )
-  add_dependencies ( AllTests FrameworkTests GUITests )
-endif()
+if ( ENABLE_MANTIDPLOT AND MAKE_VATES )
 
-if ( UNIX )
-  #Experimental feature. Unix only at this point.
-  set ( UNITY_BUILD OFF CACHE BOOL "Switch for utilising unity builds. Faster builds for selected components.")
-endif ( UNIX )
-
-if (ENABLE_MANTIDPLOT AND MAKE_VATES )
-  add_subdirectory ( Vates )
   if (NOT APPLE)
     LIST( APPEND CPACK_INSTALL_CMAKE_PROJECTS
           "${ParaView_DIR}" "ParaView Runtime Libs" "Runtime" "${INBUNDLE}/"
@@ -182,21 +194,52 @@ if (ENABLE_MANTIDPLOT AND MAKE_VATES )
 
 endif ( ENABLE_MANTIDPLOT AND MAKE_VATES )
 
+if ( UNIX )
+  #Experimental feature. Unix only at this point.
+  set ( UNITY_BUILD OFF CACHE BOOL "Switch for utilising unity builds. Faster builds for selected components.")
+endif ( UNIX )
+
 if ( MSVC )
   add_definitions ( -DQWT_DLL )
 endif ()
 
-if (ENABLE_MANTIDPLOT)
-  add_subdirectory ( MantidQt )
+add_custom_target ( AllTests )
+add_dependencies( AllTests FrameworkTests )
+if ( ENABLE_MANTIDPLOT OR ENABLE_WORKBENCH )
+  add_custom_target ( GUITests )
+  add_dependencies ( check GUITests )
+  # Collect all tests together
+  add_dependencies ( AllTests GUITests )
+  add_subdirectory ( qt )
+endif()
 
+if ( ENABLE_MANTIDPLOT )
   add_subdirectory ( MantidPlot )
 endif()
 
 add_subdirectory ( scripts )
 
-if (ENABLE_MANTIDPLOT)
-  add_subdirectory ( docs )
-endif()
+# Docs requirements
+find_package ( Sphinx 1.2 )
+if ( SPHINX_FOUND )
+  # run python to see if the theme is installed
+  execute_process ( COMMAND ${PYTHON_EXECUTABLE} -c "import sphinx_bootstrap_theme"
+                    OUTPUT_VARIABLE SPHINX_BOOTSTRAP_THEME_OUT
+                    ERROR_VARIABLE SPHINX_BOOTSTRAP_THEME_ERR
+                    OUTPUT_STRIP_TRAILING_WHITESPACE
+                    ERROR_STRIP_TRAILING_WHITESPACE )
+  if (SPHINX_BOOTSTRAP_THEME_ERR)
+    message (ERROR " Did not find sphinx_bootstrap_theme")
+    message (STATUS "${PYTHON_EXECUTABLE} -c \"import sphinx_bootstrap_theme\"")
+    message (STATUS "${SPHINX_BOOTSTRAP_THEME_ERR}")
+    message (FATAL_ERROR " Install instructions at https://pypi.python.org/pypi/sphinx-bootstrap-theme/")
+  endif ()
+
+  add_subdirectory ( dev-docs )
+  if ( ENABLE_MANTIDPLOT )
+    add_subdirectory ( docs )
+  endif()
+endif ()
 
 # System test data target
 add_subdirectory ( Testing/SystemTests/scripts )
@@ -261,81 +304,144 @@ if ( ENABLE_CPACK )
       include ( WindowsNSIS )
     elseif ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
       include ( CPackLinuxSetup )
-      # let people know what is coming out the other end
-      message ( STATUS " CPACK_PACKAGE_FILE_NAME = ${CPACK_PACKAGE_FILE_NAME}" )
 
-      # rhel requirements
-      set ( CPACK_RPM_PACKAGE_REQUIRES "qt4 >= 4.2,nexus >= 4.3.1,nexus-python >= 4.3.1,gsl,glibc,qwtplot3d-qt4,muParser,numpy,h5py >= 2.3.1,PyCifRW >= 4.2.1,tbb" )
-      # OCE
-      set( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},OCE-draw,OCE-foundation,OCE-modeling,OCE-ocaf,OCE-visualization")
-      set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},poco-crypto,poco-data,poco-mysql,poco-sqlite,poco-odbc,poco-util,poco-xml,poco-zip,poco-net,poco-netssl,poco-foundation,PyQt4,sip" )
-      set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},python-six,python-ipython >= 1.1.0,python-ipython-notebook" )
-      # scipy & matplotlib
-      set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},scipy,python-matplotlib" )
-      set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},mxml,hdf,hdf5,jsoncpp >= 0.7.0" )
+      ########## rhel requirements - only used if package requested is rpm
+      set ( CPACK_RPM_PACKAGE_REQUIRES "nexus >= 4.3.1,gsl,glibc,muParser,numpy,h5py >= 2.3.1,PyCifRW >= 4.2.1,tbb,librdkafka,"
+                                       "${CPACK_RPM_PACKAGE_REQUIRES},OCE-draw,OCE-foundation,OCE-modeling,OCE-ocaf,OCE-visualization,"
+                                       "poco-crypto,poco-data,poco-mysql,poco-sqlite,poco-odbc,poco-util,poco-xml,poco-zip,poco-net,poco-netssl,poco-foundation,"
+                                       "sip >= 4.18,"
+                                       "python-six,python-ipython >= 1.1.0,python-ipython-notebook,PyYAML,"
+                                       "python-requests,"
+                                       "scipy,python2-scikit-image,"
+                                       "hdf,hdf5,jsoncpp >= 0.7.0" )
+      if (ENABLE_MANTIDPLOT)
+        set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},qt4 >= 4.2,PyQt4,qwtplot3d-qt4" )
+      endif()
+      if (ENABLE_WORKBENCH)
+        set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},qt5-qtbase,python-qt5" )
+      endif()
 
-      if( "${UNIX_CODENAME}" MATCHES "Santiago" )
+      if( "${UNIX_CODENAME}" MATCHES "Santiago" ) # RHEL6
+        if ( ENABLE_WORKBENCH )
+          message ( FATAL_ERROR "mantidworkbench is not supported on RHEL6" )
+        endif ()
         # On RHEL6 we have to use an updated qscintilla to fix an auto complete bug
-        set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES} qscintilla >= 2.4.6, boost157" )
-        # On RHEL6 we are using SCL packages for Qt
-        set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},scl-utils,mantidlibs34,mantidlibs34-runtime,mantidlibs34-qt,mantidlibs34-qt-x11,mantidlibs34-qt-webkit,mantidlibs34-qwt5-qt4" )
-      else()
-        set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES} qscintilla,qwt5-qt4,python-matplotlib-qt4,boost >= 1.53.0" )
+        set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},qscintilla >= 2.4.6,boost157,python-matplotlib,"
+                                         # On RHEL6 we are using SCL packages for Qt
+                                         "scl-utils,mantidlibs34,mantidlibs34-runtime,mantidlibs34-qt,mantidlibs34-qt-x11,mantidlibs34-qt-webkit,mantidlibs34-qwt5-qt4" )
+      else() # assumes RHEL7
+        # Require matplotlib >= 1.5 to fix bug in latex rendering - oddly matplotlib-qt4 contains qt5 backend as well
+        set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},python2-QtAwesome,boost >= 1.53.0,python2-matplotlib-qt4 >= 1.5.2" )
+        if (ENABLE_MANTIDPLOT)
+          set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},qscintilla,qwt5-qt4" )
+        endif()
+        if (ENABLE_WORKBENCH)
+          set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},qscintilla-qt5" )
+        endif()
       endif()
+      string ( REPLACE ";" "," CPACK_RPM_PACKAGE_REQUIRES ${CPACK_RPM_PACKAGE_REQUIRES} ) # fix up the fact that it was made as an array
+      string ( REPLACE ",," "," CPACK_RPM_PACKAGE_REQUIRES ${CPACK_RPM_PACKAGE_REQUIRES} )
 
-      # Add software collections for RHEL
-      if ( "${UNIX_CODENAME}" MATCHES "Santiago" )
-        set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES} scl-utils" )
-      endif()
-
-      if( "${UNIX_DIST}" MATCHES "Ubuntu" )
-        # common packages
-        set ( DEPENDS_LIST "libboost-date-time${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION},"
+      ########## ubuntu requirements - only used if package requested is deb
+      set ( CPACK_DEBIAN_PACKAGE_DEPENDS "libboost-date-time${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION},"
                            "libboost-regex${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION},"
                            "libboost-python${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION},"
-                           "libnexus0 (>= 4.3),"
-                           "libgsl0ldbl,"
-                           "libqtcore4 (>= 4.2),"
-                           "libqtgui4 (>= 4.2),"
-                           "libqt4-opengl (>= 4.2),"
-                           "libqt4-xml (>= 4.2),"
-                           "libqt4-svg (>= 4.2),"
-                           "libqt4-qt3support (>= 4.2),"
-                           "qt4-dev-tools,"
-                           "libqwt5-qt4,"
-                           "libqwtplot3d-qt4-0,"
-                           "python-h5py,"
-                           "python-numpy,"
-                           "python-sip,"
-                           "python-qt4,"
-                           "python-nxs (>= 4.3),"
-                           "python-six,"
-                           "libjsoncpp0 (>=0.7.0),"
-                           "libqscintilla2-11,"
-                           "liboce-foundation8,liboce-modeling8,"
-                           "libmuparser2,"
-                           "ipython-qtconsole (>= 1.1),"
-                           "ipython-notebook,"
-                           "python-matplotlib,"
-                           "python-scipy,"
+                           "libboost-serialization${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION},"
+                           "libboost-filesystem${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION},"
+                           "libnexus0v5 (>= 4.3),"
+                           "libjsoncpp1 (>=0.7.0),"
+                           "libmuparser2v5,"
                            "libtbb2,"
-                           "libpocofoundation${POCO_SOLIB_VERSION},libpocoutil${POCO_SOLIB_VERSION},libpoconet${POCO_SOLIB_VERSION},libpoconetssl${POCO_SOLIB_VERSION},libpococrypto${POCO_SOLIB_VERSION},libpocoxml${POCO_SOLIB_VERSION},"
-                           "python-pycifrw (>= 4.2.1)" )
-        set ( PERFTOOLS_DEB_PACKAGE "libgoogle-perftools4 (>= 1.7)" )
-        if( "${UNIX_CODENAME}" STREQUAL "xenial")
-            list ( APPEND DEPENDS_LIST ", libhdf5-cpp-11,libnexus0v5 (>= 4.3),libjsoncpp1,libqscintilla2-12v5, libmuparser2v5,libqwtplot3d-qt4-0v5,libgsl2,liboce-foundation10,liboce-modeling10")
-            list (REMOVE_ITEM DEPENDS_LIST "libjsoncpp0 (>=0.7.0)," "libqscintilla2-11," "libmuparser2," "libnexus0 (>= 4.3)," "libqwtplot3d-qt4-0," "libgsl0ldbl," "liboce-foundation8,liboce-modeling8,")
-        endif()
-        # parse list to string required for deb package
-        string ( REPLACE ";" "" CPACK_DEBIAN_PACKAGE_DEPENDS ${DEPENDS_LIST} )
+                           "librdkafka1,librdkafka++1,"
+                           "libpocofoundation${POCO_SOLIB_VERSION},libpocoutil${POCO_SOLIB_VERSION},libpoconet${POCO_SOLIB_VERSION},libpoconetssl${POCO_SOLIB_VERSION},libpococrypto${POCO_SOLIB_VERSION},libpocoxml${POCO_SOLIB_VERSION}")
+      if (ENABLE_MANTIDPLOT)
+        set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},libqtcore4 (>= 4.2),"
+                                           "libqtgui4 (>= 4.2),"
+                                           "libqt4-opengl (>= 4.2),"
+                                           "libqt4-xml (>= 4.2),"
+                                           "libqt4-svg (>= 4.2),"
+                                           "libqt4-qt3support (>= 4.2),"
+                                           "qt4-dev-tools,"
+                                           "libqwt5-qt4,"
+                                           "libqwtplot3d-qt4-0v5,"
+                                           "libqtwebkit4" )
       endif()
-      # soft requirement of tcmalloc if selected
-      IF ( USE_TCMALLOC )
-        message ( STATUS " Adding gperftools to the package requirements" )
-        set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},gperftools-libs >= 2.0" )
-        set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},${PERFTOOLS_DEB_PACKAGE}" )
-      ENDIF ( )
-    ENDIF ()
+
+      if( "${UNIX_CODENAME}" STREQUAL "xenial")
+        set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},libgsl2,"
+                                           "liboce-foundation10,liboce-modeling10,"
+                                           "libqscintilla2-12v5,"
+                                           "ipython-notebook,"
+                                           "libhdf5-cpp-11" )
+        if (ENABLE_WORKBENCH)
+          set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},libqt5scintilla2-12v5" )
+        endif()
+      else()  # bionic and newer
+        set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},libgsl23,"
+                                           "liboce-foundation11,liboce-modeling11,"
+                                           "libqscintilla2-qt4-13,"
+                                           "jupyter-notebook,"
+                                           "libhdf5-cpp-100" )
+        if (ENABLE_WORKBENCH)
+          set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},libqscintilla2-qt5-13" )
+        endif()
+      endif()
+
+      if ( PYTHON_VERSION_MAJOR EQUAL 3 )
+        set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},python3-h5py,"
+                                           "python3-numpy,"
+                                           "python3-requests,"
+                                           "python3-sip,"
+                                           "python3-six,"
+                                           "python3-matplotlib,"
+                                           "python3-scipy,"
+                                           "python3-skimage,"
+                                           "python3-pycifrw (>= 4.2.1),"
+                                           "python3-yaml,"
+                                           "python3-qtawesome,"
+                                           "ipython3-qtconsole" )  # transitional package for bionic
+
+        if (ENABLE_MANTIDPLOT)
+          set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},python3-pyqt4" )
+        endif()
+        if (ENABLE_WORKBENCH)
+          set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},python3-pyqt5" )
+        endif()
+      else() # python 2
+        set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},python-h5py,"
+                                           "python-numpy,"
+                                           "python-requests,"
+                                           "python-sip,"
+                                           "python-six,"
+                                           "python-matplotlib,"
+                                           "python-scipy,"
+                                           "python-skimage,"
+                                           "python-pycifrw (>= 4.2.1),"
+                                           "python-yaml,"
+                                           "python-qtawesome,"
+                                           "ipython-qtconsole" )
+
+        if (ENABLE_MANTIDPLOT)
+          set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},python-qt4" )
+        endif()
+        if (ENABLE_WORKBENCH)
+          set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},python-pyqt5" )
+        endif()
+      endif ()
+      # parse list to string required for deb package
+      string ( REPLACE ";" "," CPACK_DEBIAN_PACKAGE_DEPENDS ${CPACK_DEBIAN_PACKAGE_DEPENDS} ) # fix up the fact that it was made as an array
+      string ( REPLACE ",," "," CPACK_DEBIAN_PACKAGE_DEPENDS ${CPACK_DEBIAN_PACKAGE_DEPENDS} )
+    endif()
+
+    # soft requirement of tcmalloc if selected
+    IF ( USE_TCMALLOC )
+      message ( STATUS "Adding gperftools to the package requirements" )
+      set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},gperftools-libs >= 2.0" )
+      set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},libgoogle-perftools4 (>= 1.7)" )
+    ENDIF ( )
+
     # run cpack configuration
     include ( CPack )
+    # let people know what is coming out the other end - must be after cpack generates value for rpm
+    message ( STATUS "CPACK_PACKAGE_FILE_NAME = ${CPACK_PACKAGE_FILE_NAME}" )
 endif ()

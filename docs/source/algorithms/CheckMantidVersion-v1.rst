@@ -3,7 +3,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -29,9 +29,9 @@ Usage
 .. code::
 
     (current_version, most_recent_version, is_new_version_available)=CheckMantidVersion()
-    print "Current Version: " + current_version
-    print "Most Recent Version: " + most_recent_version
-    print "Is a newer version available? " + str(is_new_version_available)
+    print("Current Version: {}".format(current_version))
+    print("Most Recent Version: {}".format(most_recent_version))
+    print("Is a newer version available? {}".format(is_new_version_available))
 
 Output:
 

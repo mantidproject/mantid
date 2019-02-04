@@ -1,12 +1,19 @@
-﻿#pylint: disable=invalid-name,no-init
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
+#pylint: disable=invalid-name,no-init
 """
 Check the loaders of ISIS SANS reduction. It is created as systemtest because it does
 take considerable time because it involves loading data. Besides, it uses data that is
 currently available inside the systemtests.
 """
 
+from __future__ import (absolute_import, division, print_function)
 import unittest
-import stresstesting
+import systemtesting
 from mantid.simpleapi import *
 import isis_reduction_steps as steps
 import ISISCommandInterface as ici
@@ -131,7 +138,7 @@ class LoadSampleTest(unittest.TestCase):
         loadSample = steps.LoadSample('5512')
         loadSample.execute(ici.ReductionSingleton(), True)
         self.assertEqual(loadSample.wksp_name, '5512_sans_nxs_1')
-        self.assertEqual(loadSample.entries, range(0,13))
+        self.assertEqual(loadSample.entries, list(range(0,13)))
         for index in [0,5,12]:
             loadSample.move2ws(index)
             self.assertEqual(loadSample.wksp_name, '5512_sans_nxs_'+str(index+1))
@@ -140,7 +147,7 @@ class LoadSampleTest(unittest.TestCase):
             self.assertAlmostEqual(cur_pos[1], -0.002)
 
 
-class LoadSampleTestStressTest(stresstesting.MantidStressTest):
+class LoadSampleTestSystemTest(systemtesting.MantidSystemTest):
     def runTest(self):
         self._success = False
         suite = unittest.TestSuite()
@@ -158,9 +165,9 @@ class LoadSampleTestStressTest(stresstesting.MantidStressTest):
         return self._success
 
 
-class LoadAddedEventDataSampleTestStressTest(stresstesting.MantidStressTest):
+class LoadAddedEventDataSampleTestSystemTest(systemtesting.MantidSystemTest):
     def __init__(self):
-        stresstesting.MantidStressTest.__init__(self)
+        systemtesting.MantidSystemTest.__init__(self)
         self._success = False
 
     def runTest(self):
@@ -219,7 +226,7 @@ class LoadAddedEventDataSampleTestStressTest(stresstesting.MantidStressTest):
 
                 if not self.validateWorkspaces(valPair,mismatchName):
                     validationResult[index/2] = False
-                    print 'Workspace {0} not equal to its reference file'.format(valNames[ik])
+                    print('Workspace {0} not equal to its reference file'.format(valNames[ik]))
             #end check All results
 
         # Check if a comparison went wrong

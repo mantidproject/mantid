@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_GEOMETRY_SPACEGROUPFACTORY_H_
 #define MANTID_GEOMETRY_SPACEGROUPFACTORY_H_
 
-#include "MantidGeometry/DllConfig.h"
-#include "MantidKernel/SingletonHolder.h"
 #include "MantidGeometry/Crystal/SpaceGroup.h"
+#include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/RegistrationHelper.h"
+#include "MantidKernel/SingletonHolder.h"
 
 #include <map>
 
@@ -14,9 +20,9 @@ namespace Geometry {
 bool MANTID_GEOMETRY_DLL
 isValidGeneratorString(const std::string &generatorString);
 
-std::vector<std::string> MANTID_GEOMETRY_DLL
-operator*(const SymmetryOperation &symOp,
-          const std::vector<std::string> &strings);
+std::vector<std::string>
+    MANTID_GEOMETRY_DLL operator*(const SymmetryOperation &symOp,
+                                  const std::vector<std::string> &strings);
 
 /**
  * @class AbstractSpaceGroupGenerator
@@ -61,8 +67,8 @@ private:
   SpaceGroup_const_sptr m_prototype;
 };
 
-typedef boost::shared_ptr<AbstractSpaceGroupGenerator>
-    AbstractSpaceGroupGenerator_sptr;
+using AbstractSpaceGroupGenerator_sptr =
+    boost::shared_ptr<AbstractSpaceGroupGenerator>;
 
 /// Concrete space group generator that uses space group generators as given in
 /// ITA.
@@ -132,26 +138,6 @@ protected:
 
     @author Michael Wedel, Paul Scherrer Institut - SINQ
     @date 08/10/2014
-
-    Copyright © 2014 PSI-MSS
-
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>
-  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_GEOMETRY_DLL SpaceGroupFactoryImpl {
 public:
@@ -236,8 +222,8 @@ public:
 
       if (transformedSymbol != hmSymbol && !symbolExists) {
         subscribeUsingGenerator<TransformationSpaceGroupGenerator>(
-            number, transformedSymbol, hmSymbol + "|" + transformation);
-
+            number, transformedSymbol,
+            std::string(hmSymbol).append("|").append(transformation));
         transformedSpaceGroupSymbols.push_back(transformedSymbol);
       }
     }
@@ -265,8 +251,8 @@ private:
   friend struct Mantid::Kernel::CreateUsingNew<SpaceGroupFactoryImpl>;
 };
 
-typedef Mantid::Kernel::SingletonHolder<SpaceGroupFactoryImpl>
-    SpaceGroupFactory;
+using SpaceGroupFactory =
+    Mantid::Kernel::SingletonHolder<SpaceGroupFactoryImpl>;
 
 } // namespace Geometry
 } // namespace Mantid
@@ -276,7 +262,7 @@ namespace Kernel {
 EXTERN_MANTID_GEOMETRY template class MANTID_GEOMETRY_DLL
     Mantid::Kernel::SingletonHolder<Mantid::Geometry::SpaceGroupFactoryImpl>;
 }
-}
+} // namespace Mantid
 
 /* Macros for compile time space group registration
  *

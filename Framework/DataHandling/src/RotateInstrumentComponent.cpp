@@ -1,11 +1,14 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/RotateInstrumentComponent.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/Exception.h"
-#include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidKernel/Exception.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -29,12 +32,14 @@ void RotateInstrumentComponent::init() {
                   "The name of the workspace for which the new instrument "
                   "configuration will have an effect. Any other workspaces "
                   "stored in the analysis data service will be unaffected.");
-  declareProperty("ComponentName", "", "The name of the component to rotate. "
-                                       "Component names are defined in the "
-                                       "instrument definition files.");
-  declareProperty("DetectorID", -1, "The ID of the detector to rotate. If both "
-                                    "the component name and the detector ID "
-                                    "are set the latter will be used.");
+  declareProperty("ComponentName", "",
+                  "The name of the component to rotate. "
+                  "Component names are defined in the "
+                  "instrument definition files.");
+  declareProperty("DetectorID", -1,
+                  "The ID of the detector to rotate. If both "
+                  "the component name and the detector ID "
+                  "are set the latter will be used.");
   declareProperty("X", 0.0, "The x-part of the rotation axis.");
   declareProperty("Y", 0.0, "The y-part of the rotation axis.");
   declareProperty("Z", 0.0, "The z-part of the rotation axis.");
@@ -113,18 +118,18 @@ void RotateInstrumentComponent::exec() {
   }
 
   // Do the rotation
-  using namespace Geometry::ComponentHelper;
-  TransformType rotType = Absolute;
+  Quat rotation(angle, V3D(X, Y, Z));
   if (relativeRotation)
-    rotType = Relative;
+    // Note the unusual order. This is as in Component::getRotation().
+    rotation = comp->getRotation() * rotation;
+
+  const auto componentId = comp->getComponentID();
   if (inputW) {
-    Geometry::ParameterMap &pmap = inputW->instrumentParameters();
-    Geometry::ComponentHelper::rotateComponent(
-        *comp, pmap, Quat(angle, V3D(X, Y, Z)), rotType);
+    auto &componentInfo = inputW->mutableComponentInfo();
+    componentInfo.setRotation(componentInfo.indexOf(componentId), rotation);
   } else if (inputP) {
-    Geometry::ParameterMap &pmap = inputP->instrumentParameters();
-    Geometry::ComponentHelper::rotateComponent(
-        *comp, pmap, Quat(angle, V3D(X, Y, Z)), rotType);
+    auto &componentInfo = inputP->mutableComponentInfo();
+    componentInfo.setRotation(componentInfo.indexOf(componentId), rotation);
   }
 }
 

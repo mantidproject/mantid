@@ -1,12 +1,17 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
+import mantid
 from mantid.simpleapi import DeleteWorkspace, CreateSampleWorkspace, CloneWorkspace, GroupWorkspaces
-from testhelpers import run_algorithm
-from mantid.api import AnalysisDataService, WorkspaceGroup
+from mantid.api import AnalysisDataService, WorkspaceGroup, mtd
 import numpy as np
-
-
+from testhelpers import run_algorithm
 
 
 class FindEPPTest(unittest.TestCase):
@@ -25,7 +30,7 @@ class FindEPPTest(unittest.TestCase):
     def testTable(self):
         # tests that correct table is created
         OutputWorkspaceName = "outputws1"
-        alg_test = run_algorithm("FindEPP", InputWorkspace=self._input_ws, OutputWorkspace=OutputWorkspaceName)
+        alg_test = run_algorithm("FindEPP", InputWorkspace=self._input_ws, OutputWorkspace=OutputWorkspaceName, Version=1)
         self.assertTrue(alg_test.isExecuted())
         wsoutput = AnalysisDataService.retrieve(OutputWorkspaceName)
         self.assertEqual(2, wsoutput.rowCount())
@@ -39,7 +44,7 @@ class FindEPPTest(unittest.TestCase):
         ws2 = CloneWorkspace(self._input_ws)
         group = GroupWorkspaces([self._input_ws, ws2])
         OutputWorkspaceName = "output_wsgroup"
-        alg_test = run_algorithm("FindEPP", InputWorkspace='group', OutputWorkspace=OutputWorkspaceName)
+        alg_test = run_algorithm("FindEPP", InputWorkspace='group', OutputWorkspace=OutputWorkspaceName, Version=1)
         self.assertTrue(alg_test.isExecuted())
         wsoutput = AnalysisDataService.retrieve(OutputWorkspaceName)
         self.assertTrue(isinstance(wsoutput, WorkspaceGroup))
@@ -51,7 +56,7 @@ class FindEPPTest(unittest.TestCase):
     def testFitSuccess(self):
         # tests successful fit
         OutputWorkspaceName = "outputws2"
-        alg_test = run_algorithm("FindEPP", InputWorkspace=self._input_ws, OutputWorkspace=OutputWorkspaceName)
+        alg_test = run_algorithm("FindEPP", InputWorkspace=self._input_ws, OutputWorkspace=OutputWorkspaceName, Version=1)
         self.assertTrue(alg_test.isExecuted())
         wsoutput = AnalysisDataService.retrieve(OutputWorkspaceName)
         self.assertEqual(['success', 'success'], wsoutput.column(8))
@@ -72,7 +77,7 @@ class FindEPPTest(unittest.TestCase):
                                           NumBanks=2, BankPixelWidth=1, XMin=0, XMax=10, BinWidth=0.1)
 
         OutputWorkspaceName = "outputws3"
-        alg_test = run_algorithm("FindEPP", InputWorkspace=ws_linear, OutputWorkspace=OutputWorkspaceName)
+        alg_test = run_algorithm("FindEPP", InputWorkspace=ws_linear, OutputWorkspace=OutputWorkspaceName, Version=1)
         self.assertTrue(alg_test.isExecuted())
         wsoutput = AnalysisDataService.retrieve(OutputWorkspaceName)
         self.assertEqual(['failed', 'failed'], wsoutput.column(8))
@@ -90,7 +95,7 @@ class FindEPPTest(unittest.TestCase):
                                           NumBanks=2, BankPixelWidth=1, XMin=0, XMax=10, BinWidth=0.1)
 
         OutputWorkspaceName = "outputws4"
-        alg_test = run_algorithm("FindEPP", InputWorkspace=ws_narrow, OutputWorkspace=OutputWorkspaceName)
+        alg_test = run_algorithm("FindEPP", InputWorkspace=ws_narrow, OutputWorkspace=OutputWorkspaceName, Version=1)
         self.assertTrue(alg_test.isExecuted())
         wsoutput = AnalysisDataService.retrieve(OutputWorkspaceName)
         self.assertEqual(['failed', 'failed'], wsoutput.column(8))
@@ -101,6 +106,16 @@ class FindEPPTest(unittest.TestCase):
 
         run_algorithm("DeleteWorkspace", Workspace=wsoutput)
         run_algorithm("DeleteWorkspace", Workspace=ws_narrow)
+
+    def testFitOutputWorkspacesAreDeleted(self):
+        OutputWorkspaceName = "outputws1"
+        alg_test = run_algorithm("FindEPP", InputWorkspace=self._input_ws, OutputWorkspace=OutputWorkspaceName, Version=1)
+        wsoutput = AnalysisDataService.retrieve(OutputWorkspaceName)
+        DeleteWorkspace(wsoutput)
+        oldOption = mantid.config['MantidOptions.InvisibleWorkspaces']
+        mantid.config['MantidOptions.InvisibleWorkspaces'] = '1'
+        self.assertEqual(mtd.size(), 1) # Only self._input_ws exists.
+        mantid.config['MantidOptions.InvisibleWorkspaces'] = oldOption
 
 if __name__ == "__main__":
     unittest.main()

@@ -3,7 +3,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -60,7 +60,7 @@ Create a python driver script called test_mpi.py
         mpiSize = 1 # simplify if clauses
 
     wksp = LoadEventAndCompress(Filename="PG3_2538_event.nxs")
-    print "Rank = ", mpiRank, "Number of Events = ", wksp.getNumberEvents()
+    print("Rank =  {} Number of Events =  {}".format(mpiRank, wksp.getNumberEvents()))
     if mpiRank == 0:
         reduce = AlignAndFocusPowder(InputWorkspace=wksp, CalFileName='PG3_calibrate_d2538_2014_05_13.cal', Params='0.5,0.01,2')
         SaveNexus(reduce,Filename=str(mpiSize)+"tasks.nxs")

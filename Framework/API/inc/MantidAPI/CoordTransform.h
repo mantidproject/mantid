@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MDEVENTS_COORDTRANSFORM_H_
 #define MANTID_MDEVENTS_COORDTRANSFORM_H_
 
@@ -59,12 +65,12 @@ protected:
 };
 
 // Helper typedef for a shared pointer of this type.
-typedef boost::shared_ptr<CoordTransform> CoordTransform_sptr;
+using CoordTransform_sptr = boost::shared_ptr<CoordTransform>;
 
 // Helper typdef for a const shared pointer of this type.
-typedef boost::shared_ptr<const CoordTransform> CoordTransform_const_sptr;
+using CoordTransform_const_sptr = boost::shared_ptr<const CoordTransform>;
 
-} // namespace Mantid
 } // namespace API
+} // namespace Mantid
 
 #endif /* MANTID_MDEVENTS_COORDTRANSFORM_H_ */

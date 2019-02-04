@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -53,16 +53,16 @@ Usage
 
 .. testcode:: exSavePHX
 
-   # import os funcions to work with folders
+   # import os functions to work with folders
    import os
    # create sample workspace
-   ws=CreateSampleWorkspace();
+   ws=CreateSampleWorkspace()
    # test file name
    file_name = os.path.join(config["defaultsave.directory"], "TestSavePhx.phx")
     # save the file
    SavePHX(ws,Filename=file_name);
 
-   print "target file exists? {0}".format(os.path.exists(file_name));
+   print("target file exists? {0}".format(os.path.exists(file_name)))
 
 .. testcleanup:: exSavePHX
 

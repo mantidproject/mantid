@@ -14,11 +14,6 @@ A project consists of a .mantid file and a collection of :ref:`Nexus
 files <Nexus file>` it refers to. For this reason, a project is put
 into its own folder when saved.
 
-See Also
---------
-
-MantidPlot:_The_File_Menu for how to save or load a project
-
-
+.. seealso:: MantidPlot:_The_File_Menu for how to save or load a project
 
 .. categories:: Concepts

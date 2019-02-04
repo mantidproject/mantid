@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -38,8 +38,8 @@ Usage
   rgws = Regroup(ws, [0,300,20000])
 
   # Check the result
-  print 'Bin width in ws   is',ws.readX(0)[1]-ws.readX(0)[0]
-  print 'Bin width in rgws is',rgws.readX(0)[1]-rgws.readX(0)[0]
+  print('Bin width in ws   is {}'.format(ws.readX(0)[1] - ws.readX(0)[0]))
+  print('Bin width in rgws is {}'.format(rgws.readX(0)[1] - rgws.readX(0)[0]))
 
   # Using numpy array calculations check that all  bins in the regrouped workspace
   # are wider than 300
@@ -53,7 +53,7 @@ Usage
   widths = x[1:] - x[:-1]
 
   # Check that all elements in widths are greater than 300
-  print np.all( widths >= 300 )
+  print(np.all(widths >= 300))
 
 Output
 ######

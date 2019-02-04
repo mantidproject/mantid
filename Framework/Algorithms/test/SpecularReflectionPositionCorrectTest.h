@@ -1,14 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_SPECULARREFLECTIONPOSITIONCORRECTTEST_H_
 #define MANTID_ALGORITHMS_SPECULARREFLECTIONPOSITIONCORRECTTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "SpecularReflectionAlgorithmTest.h"
+#include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/SpecularReflectionPositionCorrect.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/V3D.h"
-#include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cmath>
 
 using Mantid::Algorithms::SpecularReflectionPositionCorrect;
@@ -19,8 +25,8 @@ using namespace Mantid::Geometry;
 // clang-format off
 class SpecularReflectionPositionCorrectTest: public CxxTest::TestSuite,
     public SpecularReflectionAlgorithmTest
-      // clang-format on
-      {
+// clang-format on
+{
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -46,7 +52,7 @@ public:
     alg.initialize();
     alg.setProperty(
         "InputWorkspace",
-        WorkspaceCreationHelper::Create1DWorkspaceConstant(1, 1, 1));
+        WorkspaceCreationHelper::create1DWorkspaceConstant(1, 1, 1, true));
     alg.setPropertyValue("OutputWorkspace", "test_out");
     TS_ASSERT_THROWS(alg.execute(), std::runtime_error &);
   }
@@ -57,7 +63,7 @@ public:
     alg.initialize();
     alg.setProperty(
         "InputWorkspace",
-        WorkspaceCreationHelper::Create1DWorkspaceConstant(1, 1, 1));
+        WorkspaceCreationHelper::create1DWorkspaceConstant(1, 1, 1, true));
     alg.setPropertyValue("OutputWorkspace", "test_out");
     TS_ASSERT_THROWS(alg.setProperty("TwoThetaIn", 0.0),
                      std::invalid_argument &);
@@ -69,7 +75,7 @@ public:
     alg.initialize();
     alg.setProperty(
         "InputWorkspace",
-        WorkspaceCreationHelper::Create1DWorkspaceConstant(1, 1, 1));
+        WorkspaceCreationHelper::create1DWorkspaceConstant(1, 1, 1, true));
     alg.setPropertyValue("OutputWorkspace", "test_out");
     TS_ASSERT_THROWS(alg.setProperty("TwoThetaIn", 90.0),
                      std::invalid_argument &);
@@ -82,7 +88,7 @@ public:
     alg->initialize();
     alg->setProperty(
         "InputWorkspace",
-        WorkspaceCreationHelper::Create1DWorkspaceConstant(1, 1, 1));
+        WorkspaceCreationHelper::create1DWorkspaceConstant(1, 1, 1, true));
     alg->setPropertyValue("OutputWorkspace", "test_out");
     alg->setProperty("TwoThetaIn", 10.0);
 

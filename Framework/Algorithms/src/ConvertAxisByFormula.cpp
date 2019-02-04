@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/ConvertAxisByFormula.h"
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/RefAxis.h"
@@ -8,10 +14,10 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitFactory.h"
 
-#include <boost/shared_ptr.hpp>
-#include <boost/make_shared.hpp>
-#include <sstream>
 #include <algorithm>
+#include <boost/make_shared.hpp>
+#include <boost/shared_ptr.hpp>
+#include <sstream>
 
 namespace Mantid {
 namespace Algorithms {
@@ -33,8 +39,8 @@ const std::string ConvertAxisByFormula::category() const {
 }
 
 /** Initialisation method. Declares properties to be used in algorithm.
-*
-*/
+ *
+ */
 void ConvertAxisByFormula::init() {
   declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
@@ -50,11 +56,12 @@ void ConvertAxisByFormula::init() {
                   boost::make_shared<StringListValidator>(axisOptions),
                   "The axis to modify");
 
-  declareProperty("Formula", "", "The formula to use to convert the values, x "
-                                 "or y may be used to refer to the axis "
-                                 "values.  l1, l2, twotheta and signedtwotheta"
-                                 "may be used to provide values from the "
-                                 "instrument geometry.");
+  declareProperty("Formula", "",
+                  "The formula to use to convert the values, x "
+                  "or y may be used to refer to the axis "
+                  "values.  l1, l2, twotheta and signedtwotheta"
+                  "may be used to provide values from the "
+                  "instrument geometry.");
   declareProperty(
       "AxisTitle", "",
       "The label of he new axis. If not set then the title will not change.");
@@ -64,8 +71,8 @@ void ConvertAxisByFormula::init() {
 }
 
 /** Execution of the algorithm
-*
-*/
+ *
+ */
 void ConvertAxisByFormula::exec() {
   // get the property values
   MatrixWorkspace_sptr inputWs = getProperty("InputWorkspace");
@@ -105,7 +112,7 @@ void ConvertAxisByFormula::exec() {
   RefAxis *refAxisPtr = dynamic_cast<RefAxis *>(axisPtr);
   if (refAxisPtr != nullptr) {
     CommonBinsValidator sameBins;
-    if (sameBins.isValid(outputWs) != "") {
+    if (!sameBins.isValid(outputWs).empty()) {
       isRaggedBins = true;
     }
     isRefAxis = true;
@@ -150,7 +157,7 @@ void ConvertAxisByFormula::exec() {
   mu::Parser p;
   try {
     // set parameter lookups for the axis value
-    for (auto variable : variables) {
+    for (const auto &variable : variables) {
       p.DefineVar(variable->name, &(variable->value));
     }
     // set some constants
@@ -178,7 +185,7 @@ void ConvertAxisByFormula::exec() {
     if ((isRaggedBins) || (isGeometryRequired)) {
       // ragged bins or geometry used - we have to calculate for every spectra
       size_t numberOfSpectra_i = outputWs->getNumberHistograms();
-      const auto &spectrumInfo = outputWs->spectrumInfo();
+      auto &spectrumInfo = outputWs->mutableSpectrumInfo();
 
       size_t failedDetectorCount = 0;
       Progress prog(this, 0.6, 1.0, numberOfSpectra_i);
@@ -192,7 +199,8 @@ void ConvertAxisByFormula::exec() {
         // both handled the same way
         {
           // could not find the geometry info for this spectra
-          outputWs->maskWorkspaceIndex(i);
+          outputWs->getSpectrum(i).clearData();
+          spectrumInfo.setMasked(i, true);
           failedDetectorCount++;
         }
         prog.report();
@@ -214,7 +222,7 @@ void ConvertAxisByFormula::exec() {
           outputWs->getNumberHistograms()); // cast to make openmp happy
       auto xVals = outputWs->refX(0);
       Progress prog(this, 0.6, 1.0, numberOfSpectra_i);
-      PARALLEL_FOR1(outputWs)
+      PARALLEL_FOR_IF(Kernel::threadSafe(*outputWs))
       for (int64_t j = 1; j < numberOfSpectra_i; ++j) {
         PARALLEL_START_INTERUPT_REGION
         outputWs->setX(j, xVals);
@@ -244,14 +252,14 @@ void ConvertAxisByFormula::exec() {
   }
 
   // Set the Unit of the Axis
-  if ((axisUnits != "") || (axisTitle != "")) {
+  if ((!axisUnits.empty()) || (!axisTitle.empty())) {
     try {
       axisPtr->unit() = UnitFactory::Instance().create(axisUnits);
     } catch (Exception::NotFoundError &) {
-      if (axisTitle == "") {
+      if (axisTitle.empty()) {
         axisTitle = axisPtr->unit()->caption();
       }
-      if (axisUnits == "") {
+      if (axisUnits.empty()) {
         axisUnits = axisPtr->unit()->label();
       }
       axisPtr->unit() = boost::make_shared<Units::Label>(axisTitle, axisUnits);
@@ -261,7 +269,7 @@ void ConvertAxisByFormula::exec() {
 
 void ConvertAxisByFormula::setAxisValue(const double &value,
                                         std::vector<Variable_ptr> &variables) {
-  for (auto variable : variables) {
+  for (const auto &variable : variables) {
     if (!variable->isGeometric) {
       variable->value = value;
     }
@@ -280,7 +288,7 @@ void ConvertAxisByFormula::calculateValues(
 void ConvertAxisByFormula::setGeometryValues(
     const API::SpectrumInfo &specInfo, const size_t index,
     std::vector<Variable_ptr> &variables) {
-  for (auto variable : variables) {
+  for (const auto &variable : variables) {
     if (variable->isGeometric) {
       if (variable->name == "twotheta") {
         variable->value = specInfo.twoTheta(index);

@@ -1,11 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //-------------------------------------------------------------
 // Includes
 //-------------------------------------------------------------
 #include "MantidGeometry/Objects/InstrumentRayTracer.h"
-#include "MantidGeometry/Objects/BoundingBox.h"
+#include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/Instrument/InstrumentVisitor.h"
 #include "MantidGeometry/Objects/Track.h"
-#include "MantidKernel/V3D.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/V3D.h"
 #include <deque>
 #include <iterator>
 
@@ -30,7 +37,8 @@ InstrumentRayTracer::InstrumentRayTracer(Instrument_const_sptr instrument)
   if (!m_instrument) {
     std::ostringstream lexer;
     lexer << "Cannot create a InstrumentRayTracer, invalid instrument given. "
-             "Input = " << m_instrument.get() << "\n";
+             "Input = "
+          << m_instrument.get() << "\n";
     throw std::invalid_argument(lexer.str());
   }
   if (!m_instrument->getSource()) {
@@ -98,7 +106,7 @@ IDetector_const_sptr InstrumentRayTracer::getDetectorResult() const {
     IDetector_const_sptr det =
         boost::dynamic_pointer_cast<const IDetector>(component);
     if (det) {
-      if (!det->isMonitor()) {
+      if (!m_instrument->isMonitor(det->getID())) {
         return det;
       }
     } // (is a detector)
@@ -130,7 +138,15 @@ void InstrumentRayTracer::fireRay(Track &testRay) const {
     node = nodeQueue.front();
     nodeQueue.pop_front();
     BoundingBox bbox;
-    node->getBoundingBox(bbox);
+    auto it = m_boxCache.find(node->getComponentID());
+    if (it != m_boxCache.end()) {
+      bbox = it->second;
+    } else {
+      node->getBoundingBox(bbox);
+      std::lock_guard<std::mutex> lock(m_mutex);
+      m_boxCache[node->getComponentID()] = bbox;
+    }
+
     // Quick test. If this suceeds moved on to test the children
     if (bbox.doesLineIntersect(testRay)) {
       if (ICompAssembly_const_sptr assembly =
@@ -163,5 +179,5 @@ void InstrumentRayTracer::fireRay(Track &testRay) const {
 //  */
 // void slowIntersectCheck(boost::shared_ptr<IComponent> component, Track &
 // testRay) const;
-}
-}
+} // namespace Geometry
+} // namespace Mantid

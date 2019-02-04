@@ -1,5 +1,11 @@
-#include "MantidHistogramData/BinEdges.h"
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidHistogramData/Counts.h"
+#include "MantidHistogramData/BinEdges.h"
 #include "MantidHistogramData/Frequencies.h"
 
 namespace Mantid {
@@ -17,7 +23,7 @@ Counts::Counts(Frequencies &&frequencies, const BinEdges &edges) {
     throw std::logic_error(
         "Counts: Cannot construct from Frequencies -- BinEdges are NULL.");
   if ((frequencies.size() + 1) != edges.size())
-    if (frequencies.size() != 0 || edges.size() != 0)
+    if (!frequencies.empty() || !edges.empty())
       throw std::logic_error("Counts: Cannot construct from Frequencies -- "
                              "BinEdges size does not match.");
   // Cannot move frequencies private data since it is of different type.

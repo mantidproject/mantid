@@ -1,9 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_SORTEVENTSTEST_H_
 #define MANTID_ALGORITHMS_SORTEVENTSTEST_H_
 
-#include "MantidAlgorithms/SortEvents.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidAlgorithms/SortEvents.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -15,6 +21,7 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataHandling;
+using Mantid::Types::Event::TofEvent;
 
 class SortEventsTest : public CxxTest::TestSuite {
 public:
@@ -35,11 +42,11 @@ public:
   void testSortByTof() {
     std::string wsName("test_inEvent3");
     EventWorkspace_sptr test_in =
-        WorkspaceCreationHelper::CreateRandomEventWorkspace(NUMBINS, NUMPIXELS);
+        WorkspaceCreationHelper::createRandomEventWorkspace(NUMBINS, NUMPIXELS);
     AnalysisDataService::Instance().add(wsName, test_in);
 
     Workspace2D_sptr test_in_ws2d =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(NUMBINS, NUMPIXELS);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(NUMBINS, NUMPIXELS);
     AnalysisDataService::Instance().add("workspace2d", test_in_ws2d);
 
     SortEvents sort;
@@ -70,7 +77,7 @@ public:
   void testSortByPulseTime() {
     std::string wsName("test_inEvent4");
     EventWorkspace_sptr test_in =
-        WorkspaceCreationHelper::CreateRandomEventWorkspace(NUMBINS, NUMPIXELS);
+        WorkspaceCreationHelper::createRandomEventWorkspace(NUMBINS, NUMPIXELS);
     AnalysisDataService::Instance().add(wsName, test_in);
 
     SortEvents sort;
@@ -94,7 +101,7 @@ public:
   void testSortByPulseTimeTOF() {
     std::string wsName("test_inEvent4");
     EventWorkspace_sptr test_in =
-        WorkspaceCreationHelper::CreateRandomEventWorkspace(NUMBINS, NUMPIXELS);
+        WorkspaceCreationHelper::createRandomEventWorkspace(NUMBINS, NUMPIXELS);
     AnalysisDataService::Instance().add(wsName, test_in);
 
     SortEvents sort;

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/SaveParameterFile.h"
 
 #include "MantidAPI/FileProperty.h"
@@ -70,7 +76,9 @@ void SaveParameterFile::exec() {
   const std::string filename = getProperty("Filename");
 
   const Instrument_const_sptr instrument = ws->getInstrument();
-  const ParameterMap_sptr params = instrument->getParameterMap();
+  // Create legacy parameter map with positions and other parameters extracted
+  // from DetectorInfo.
+  const ParameterMap_sptr params = instrument->makeLegacyParameterMap();
 
   // maps components to a tuple of parameters' name, type, and value
   std::map<ComponentID,
@@ -198,5 +206,5 @@ void SaveParameterFile::exec() {
   file.close();
 }
 
-} // namespace Algorithms
+} // namespace DataHandling
 } // namespace Mantid

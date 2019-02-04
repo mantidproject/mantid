@@ -1,17 +1,23 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_KERNEL_INTERNETSERVICETEST_H_
 #define MANTID_KERNEL_INTERNETSERVICETEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidKernel/InternetHelper.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/InternetHelper.h"
 #include "MantidKernel/NetworkProxy.h"
 #include "MantidKernel/ProxyInfo.h"
 
-#include <Poco/TemporaryFile.h>
-#include <Poco/Net/HTMLForm.h>
 #include "Poco/Net/PartSource.h"
 #include "Poco/Net/StringPartSource.h"
+#include <Poco/Net/HTMLForm.h>
+#include <Poco/TemporaryFile.h>
 
 #include <fstream>
 #include <sstream>
@@ -39,7 +45,7 @@ protected:
     return 200;
   }
 };
-}
+} // namespace
 
 class InternetHelperTest : public CxxTest::TestSuite {
 public:

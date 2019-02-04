@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -43,19 +43,19 @@ Usage
    tws = LoadFullprofResolution("MUSR_01.irf",Banks="3,5", Workspace="ws")
 
    #Print first four rows of output table workspace
-   print "First 4 rows of OutputTableWorkspace"
+   print("First 4 rows of OutputTableWorkspace")
    for i in [0,1,2,3]:
       row = tws.row(i)
-      print "{'Name': '%s', 'Value_3': %.2f, 'Value_5': %.2f}" % (  row["Name"], row["Value_3"], row["Value_5"] )
+      print("{{'Name': '{}', 'Value_3': {:.2f}, 'Value_5': {:.2f}}}".format(row["Name"], row["Value_3"], row["Value_5"]))
 
    # Get the instrument with the parameters
    inst = ws[0][0].getInstrument()
 
    # demonstrate that the type of parameters saved are fitting parameters
-   print "Type of 3 parameters got from instrument in workspace"
-   print "Alpha0 type =", inst.getParameterType('Alpha0')
-   print "Beta0 type =", inst.getParameterType('Beta0')
-   print "SigmaSquared type =", inst.getParameterType('SigmaSquared')
+   print("Type of 3 parameters got from instrument in workspace")
+   print("Alpha0 type = {}".format(inst.getParameterType('Alpha0')))
+   print("Beta0 type = {}".format(inst.getParameterType('Beta0')))
+   print("SigmaSquared type = {}".format(inst.getParameterType('SigmaSquared')))
 
    # As of the time of writing, 
    # fitting instrument parameters cannot be 

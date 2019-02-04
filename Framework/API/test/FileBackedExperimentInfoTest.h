@@ -1,12 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_API_FILEBACKEDEXPERIMENTINFOTEST_H_
 #define MANTID_API_FILEBACKEDEXPERIMENTINFOTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "ExperimentInfoTest.h"
 #include "MantidAPI/FileBackedExperimentInfo.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
+#include <cxxtest/TestSuite.h>
 
 #include <nexus/NeXusFile.hpp>
 
@@ -92,54 +98,13 @@ public:
     TS_ASSERT(pmap.size() > 0);
   }
 
-  void test_replaceInstrumentParameters_method_populate_object() {
-    using Mantid::Geometry::ParameterMap;
-
-    auto fileBacked = createTestObject();
-    ParameterMap emptyMap;
-    fileBacked->replaceInstrumentParameters(emptyMap);
-
-    const auto &pmap = fileBacked->constInstrumentParameters();
-    TS_ASSERT_EQUALS(0, pmap.size());
-  }
-
-  void test_swapInstrumentParameters_method_populate_object() {
-    using Mantid::Geometry::ParameterMap;
-
-    auto fileBacked = createTestObject();
-    ParameterMap emptyMap;
-    fileBacked->swapInstrumentParameters(emptyMap);
-
-    const auto &pmap = fileBacked->constInstrumentParameters();
-    TS_ASSERT_EQUALS(0, pmap.size());
-  }
-
   void test_cacheDetectorGroupings() {
     auto fileBacked = createTestObject();
 
-    std::vector<Mantid::detid_t> group(2, 1);
-    group[1] = 2;
+    std::set<Mantid::detid_t> group{1, 2};
     Mantid::det2group_map mapping;
     mapping.emplace(1, group);
     fileBacked->cacheDetectorGroupings(mapping);
-  }
-
-  void test_getGroupMembers() {
-    auto fileBacked = createTestObject();
-
-    std::vector<Mantid::detid_t> group(2, 1);
-    group[1] = 2;
-    Mantid::det2group_map mapping;
-    mapping.emplace(1, group);
-    fileBacked->cacheDetectorGroupings(mapping);
-
-    TS_ASSERT_EQUALS(group, fileBacked->getGroupMembers(1));
-  }
-
-  void test_getDetectorByID() {
-    auto fileBacked = createTestObject();
-
-    TS_ASSERT(fileBacked->getDetectorByID(10100));
   }
 
   void test_ModeratorModelMethods() {

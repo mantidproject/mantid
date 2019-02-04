@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_API_ADSVALIDATORTEST_H_
 #define MANTID_API_ADSVALIDATORTEST_H_
 
@@ -22,10 +28,13 @@ private:
   MockWorkspace *doClone() const override {
     throw std::runtime_error("Cloning of MockWorkspace is not implemented.");
   }
+  MockWorkspace *doCloneEmpty() const override {
+    throw std::runtime_error("Cloning of MockWorkspace is not implemented.");
+  }
 };
-}
+} // namespace
 
-typedef std::vector<std::string> StringVector;
+using StringVector = std::vector<std::string>;
 
 class ADSValidatorTest : public CxxTest::TestSuite {
 public:

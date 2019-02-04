@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -5,7 +11,9 @@
 
 #include <Poco/AutoPtr.h>
 #include <Poco/DOM/Element.h>
+#include <Poco/DOM/Node.h>
 #include <Poco/DOM/NodeList.h>
+#include <Poco/XML/XMLString.h>
 
 namespace Mantid {
 namespace Kernel {

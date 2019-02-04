@@ -1,12 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_GEOMETRY_GROUPTRANSFORMATIONTEST_H_
 #define MANTID_GEOMETRY_GROUPTRANSFORMATIONTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
 #include "MantidGeometry/Crystal/GroupTransformation.h"
-#include "MantidGeometry/Crystal/SymmetryElementFactory.h"
-#include "MantidGeometry/Crystal/SpaceGroupFactory.h"
 #include "MantidGeometry/Crystal/ProductOfCyclicGroups.h"
+#include "MantidGeometry/Crystal/SpaceGroupFactory.h"
+#include "MantidGeometry/Crystal/SymmetryElementFactory.h"
 
 #include <unordered_set>
 
@@ -51,9 +57,9 @@ public:
      */
     std::unordered_set<std::string> elements;
     std::vector<SymmetryOperation> ops = transformed.getSymmetryOperations();
-    for (auto op = ops.begin(); op != ops.end(); ++op) {
+    for (auto &op : ops) {
       SymmetryElement_sptr el =
-          SymmetryElementFactory::Instance().createSymElement(*op);
+          SymmetryElementFactory::Instance().createSymElement(op);
 
       // Check for identity
       SymmetryElementIdentity_sptr identity =

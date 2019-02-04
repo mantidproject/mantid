@@ -1,8 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/SetGoniometer.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/split.hpp>
 
 using Mantid::Geometry::Goniometer;
 using namespace Mantid::Geometry;
@@ -53,7 +64,7 @@ void SetGoniometer::exec() {
   // Create the goniometer
   Goniometer gon;
 
-  if (gonioDefined.compare("Universal") == 0)
+  if (gonioDefined == "Universal")
     gon.makeUniversalGoniometer();
   else
     for (size_t i = 0; i < NUM_AXES; i++) {
@@ -78,12 +89,13 @@ void SetGoniometer::exec() {
         // If axisName is a number, add a new log value
         double angle = 0;
         if (Strings::convert(axisName, angle)) {
-          g_log.information() << "Axis " << i
-                              << " - create a new log value GoniometerAxis" << i
-                              << "_FixedValue\n";
+          g_log.information()
+              << "Axis " << i << " - create a new log value GoniometerAxis" << i
+              << "_FixedValue\n";
           axisName = "GoniometerAxis" + Strings::toString(i) + "_FixedValue";
           try {
-            Kernel::DateAndTime now = Kernel::DateAndTime::getCurrentTime();
+            Types::Core::DateAndTime now =
+                Types::Core::DateAndTime::getCurrentTime();
             auto tsp = new Kernel::TimeSeriesProperty<double>(axisName);
             tsp->addValue(now, angle);
             tsp->setUnits("degree");
@@ -134,5 +146,5 @@ void SetGoniometer::exec() {
   }
 }
 
-} // namespace Mantid
 } // namespace Crystal
+} // namespace Mantid

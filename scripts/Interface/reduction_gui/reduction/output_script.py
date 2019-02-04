@@ -1,5 +1,13 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
-from scripter import BaseScriptElement
+from __future__ import (absolute_import, division, print_function)
+import sys
+from reduction_gui.reduction.scripter import BaseScriptElement
 
 # Check whether we are running in MantidPlot
 IS_IN_MANTIDPLOT = False
@@ -36,4 +44,4 @@ class Output(BaseScriptElement):
                     if len(iq_plots)>0:
                         mantidplot.plotSpectrum(iq_plots, 0, True)
             except:
-                raise RuntimeError("Could not plot resulting output\n  %s" % sys.exc_value)
+                raise RuntimeError("Could not plot resulting output\n  %s" % sys.exc_info()[1])

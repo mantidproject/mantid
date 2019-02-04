@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -41,8 +41,8 @@ Usage
    wsMasked = MaskBinsFromTable(ws,MaskingInformation=mask_info)
 
    # Show Y values in workspaces
-   print "Before masking:", ws.readY(0)
-   print "After masking:",wsMasked.readY(0)
+   print("Before masking: {}".format(ws.readY(0)))
+   print("After masking: {}".format(wsMasked.readY(0)))
 
 
 Output:

@@ -1,32 +1,22 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAOBJECTS_TABLECOLUMN_H_
 #define MANTID_DATAOBJECTS_TABLECOLUMN_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
-
-#include "MantidAPI/Column.h"
-#include "MantidKernel/Logger.h"
-
-#include <vector>
-#include <typeinfo>
-#include <stdexcept>
+#include <boost/numeric/conversion/cast.hpp>
 #include <boost/shared_ptr.hpp>
 #include <limits>
-#include <boost/lexical_cast.hpp>
-#include <boost/mpl/if.hpp>
-#include <boost/type_traits.hpp>
-#include <boost/numeric/conversion/cast.hpp>
+#include <sstream>
+#include <vector>
+
+#include "MantidAPI/Column.h"
 
 namespace Mantid {
-
-//----------------------------------------------------------------------
-// Forward declarations
-//----------------------------------------------------------------------
-
 namespace DataObjects {
-
-template <class T> class TableVector;
 
 /** \class TableColumn
 
@@ -50,27 +40,6 @@ template <class T> class TableVector;
 
     \author Roman Tolchenov
     \date 31/10/2008
-
-    Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-   National Laboratory & European Spallation Source
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>.
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 template <class Type> class TableColumn : public API::Column {
   /// Helper struct helping to write a generic casting to double
@@ -138,8 +107,13 @@ public:
   }
   /// Read in a string and set the value at the given index
   void read(size_t index, const std::string &text) override;
+  /// Read in from stream and set the value at the given index
+  void read(const size_t index, std::istringstream &in) override;
   /// Type check
   bool isBool() const override { return typeid(Type) == typeid(API::Boolean); }
+  bool isNumber() const override {
+    return std::is_convertible<Type, double>::value;
+  }
   /// Memory used by the column
   long int sizeOfData() const override {
     return static_cast<long int>(m_data.size() * sizeof(Type));
@@ -153,14 +127,30 @@ public:
    * is throw. In case of an overflow boost::numeric::positive_overflow or
    * boost::numeric::negative_overflow
    * is throw.
-   * @param i :: The index to an element.
+   * @param value :: The value of the element.
    */
+  template <typename T> double convertToDouble(const T &value) const {
+    using DoubleType =
+        typename std::conditional<std::is_convertible<double, T>::value, T,
+                                  InconvertibleToDoubleType>::type;
+    return boost::numeric_cast<double, DoubleType>(value);
+  }
+
+  /**
+   * Cast an string to double if possible. If it's impossible
+   * std::invalid_argument
+   * is throw. In case of an overflow boost::numeric::positive_overflow or
+   * boost::numeric::negative_overflow
+   * is throw.
+   * @param value :: The value of the element.
+   */
+
+  double convertToDouble(const std::string &value) const {
+    return std::stod(value);
+  }
+
   double toDouble(size_t i) const override {
-    typedef
-        typename boost::mpl::if_c<boost::is_convertible<double, Type>::value,
-                                  Type, InconvertibleToDoubleType>::type
-            DoubleType;
-    return boost::numeric_cast<double, DoubleType>(m_data[i]);
+    return convertToDouble(m_data[i]);
   }
 
   /**
@@ -173,10 +163,9 @@ public:
    * @param value: cast this value
    */
   void fromDouble(size_t i, double value) override {
-    typedef
-        typename boost::mpl::if_c<boost::is_convertible<double, Type>::value,
-                                  Type, InconvertibleToDoubleType>::type
-            DoubleType;
+    using DoubleType =
+        typename std::conditional<std::is_convertible<double, Type>::value,
+                                  Type, InconvertibleToDoubleType>::type;
     m_data[i] =
         static_cast<Type>(boost::numeric_cast<DoubleType, double>(value));
   }
@@ -192,7 +181,7 @@ public:
   /// that the casting is possible
   double operator[](size_t i) const override {
     try {
-      return boost::lexical_cast<double>(m_data[i]);
+      return convertToDouble(m_data[i]);
     } catch (...) {
       return std::numeric_limits<double>::quiet_NaN();
     }
@@ -244,11 +233,30 @@ inline void TableColumn<std::string>::read(size_t index,
   m_data[index] = text;
 }
 
+/// Template specialization for strings so they can contain spaces
+template <>
+inline void TableColumn<std::string>::read(size_t index,
+                                           std::istringstream &text) {
+  /* As opposed to other types, assigning strings via a stream does not work if
+   * it contains a whitespace character, so instead the assignment operator is
+   * used.
+   */
+  m_data[index] = text.str();
+}
+
 /// Read in a string and set the value at the given index
 template <typename Type>
 void TableColumn<Type>::read(size_t index, const std::string &text) {
   std::istringstream istr(text);
   istr >> m_data[index];
+}
+
+/// Read in from stream and set the value at the given index
+template <typename Type>
+void TableColumn<Type>::read(size_t index, std::istringstream &in) {
+  Type t;
+  in >> t;
+  m_data[index] = t;
 }
 
 namespace {
@@ -265,7 +273,7 @@ public:
                        : !(m_data[i] < m_data[j] || m_data[i] == m_data[j]);
   }
 };
-}
+} // namespace
 
 /// Sort a vector of indices according to values in corresponding cells of this
 /// column. @see Column::sortIndex

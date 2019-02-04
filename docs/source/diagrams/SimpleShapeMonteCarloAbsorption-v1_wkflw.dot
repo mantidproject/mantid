@@ -1,0 +1,81 @@
+digraph SimpleShapeMonteCarloAbsorption {
+    label="SimpleShapeMonteCarloAbsorption Flowchart"
+    $global_style
+
+  subgraph params {
+    $param_style
+    InputWorkspace
+    OutputWorkspace
+    BeamHeight
+    BeamWidth
+    ChemicalFormula
+    Density             [label="Mass/Number Density"]
+    Height1             [label="Height"]
+    Height2             [label="Height"]
+    Height3             [label="Height"]
+    Width
+    Thickness
+    Center
+    Angle
+    Radius
+    InnerRadius
+    OuterRadius
+    EventsPerPoint
+    NumberOfWavelengthPoints
+    Interpolation
+  }
+
+  subgraph decisions {
+    $decision_style
+    material_already_defined            [label="Material already defined?"]
+    Shape
+  }
+
+    subgraph algorithms {
+    $algorithm_style
+    SetBeam
+    SetSample
+    MonteCarloAbsorption
+    AddSampleLogMultiple
+  }
+
+  subgraph values {
+    $value_style
+    Material
+    FlatPlate
+    Cylinder
+    Annulus
+  }
+
+  InputWorkspace -> SetBeam
+  BeamHeight -> SetBeam
+  BeamWidth -> SetBeam
+  SetBeam -> material_already_defined
+  material_already_defined -> Shape             [label="Yes"]
+  material_already_defined -> Material          [label="No"]
+  ChemicalFormula -> Material
+  Density -> Material
+  Material -> Shape
+  Shape -> FlatPlate
+  Shape -> Cylinder
+  Shape -> Annulus
+  Width -> FlatPlate
+  Height1 -> FlatPlate
+  Thickness -> FlatPlate
+  Center -> FlatPlate
+  Angle -> FlatPlate
+  Radius -> Cylinder
+  Height2 -> Cylinder
+  Height3 -> Annulus
+  InnerRadius -> Annulus
+  OuterRadius -> Annulus
+  FlatPlate -> SetSample
+  Cylinder -> SetSample
+  Annulus -> SetSample
+  SetSample -> MonteCarloAbsorption
+  EventsPerPoint -> MonteCarloAbsorption
+  NumberOfWavelengthPoints -> MonteCarloAbsorption
+  Interpolation -> MonteCarloAbsorption
+  MonteCarloAbsorption -> AddSampleLogMultiple
+  AddSampleLogMultiple -> OutputWorkspace
+}

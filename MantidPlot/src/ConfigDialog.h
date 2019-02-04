@@ -9,30 +9,30 @@ Description          : Preferences dialog
 ***************************************************************************/
 
 /***************************************************************************
-*                                                                         *
-*  This program is free software; you can redistribute it and/or modify   *
-*  it under the terms of the GNU General Public License as published by   *
-*  the Free Software Foundation; either version 2 of the License, or      *
-*  (at your option) any later version.                                    *
-*                                                                         *
-*  This program is distributed in the hope that it will be useful,        *
-*  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
-*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
-*  GNU General Public License for more details.                           *
-*                                                                         *
-*   You should have received a copy of the GNU General Public License     *
-*   along with this program; if not, write to the Free Software           *
-*   Foundation, Inc., 51 Franklin Street, Fifth Floor,                    *
-*   Boston, MA  02110-1301  USA                                           *
-*                                                                         *
-***************************************************************************/
+ *                                                                         *
+ *  This program is free software; you can redistribute it and/or modify   *
+ *  it under the terms of the GNU General Public License as published by   *
+ *  the Free Software Foundation; either version 2 of the License, or      *
+ *  (at your option) any later version.                                    *
+ *                                                                         *
+ *  This program is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *  GNU General Public License for more details.                           *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the Free Software           *
+ *   Foundation, Inc., 51 Franklin Street, Fifth Floor,                    *
+ *   Boston, MA  02110-1301  USA                                           *
+ *                                                                         *
+ ***************************************************************************/
 #ifndef ConfigDialog_H
 #define ConfigDialog_H
 
-#include <QDialog>
+#include "MantidQtWidgets/Common/MdSettings.h"
 #include <QCheckBox>
+#include <QDialog>
 #include <map>
-#include "MantidQtAPI/MdSettings.h"
 
 class QLineEdit;
 class QGroupBox;
@@ -58,7 +58,7 @@ namespace MantidQt {
 namespace MantidWidgets {
 class InstrumentSelector;
 }
-}
+} // namespace MantidQt
 
 //! Preferences dialog
 class ConfigDialog : public QDialog {
@@ -67,10 +67,10 @@ class ConfigDialog : public QDialog {
 public:
   //! Constructor
   /**
-  * @param parent :: parent widget (must be the application window!=
-  * @param fl :: window flags
-  */
-  ConfigDialog(QWidget *parent, Qt::WFlags fl = 0);
+   * @param parent :: parent widget (must be the application window!=
+   * @param fl :: window flags
+   */
+  ConfigDialog(QWidget *parent, Qt::WFlags fl = nullptr);
   void setColumnSeparator(const QString &sep);
   void gotoMantidDirectories();
 
@@ -138,6 +138,8 @@ private:
   void initMantidPage();
   void initDirSearchTab();
   void initCurveFittingTab();
+  void initProjectRecoveryTab();
+  void updateProjectRecovery();
 
   void initCurvesPage();
   void initPlots3DPage();
@@ -178,7 +180,7 @@ private:
 
   QTreeWidgetItem *createCheckedTreeItem(QString name,
                                          Qt::CheckState checkBoxState);
-  QStringList buildHiddenCategoryString(QTreeWidgetItem *parent = 0);
+  QStringList buildHiddenCategoryString(QTreeWidgetItem *parent = nullptr);
 
   std::map<std::string, std::map<std::string, std::string>> m_sendToSettings;
 
@@ -219,7 +221,6 @@ private:
   QLineEdit *functionArguments;
   QComboBox *defaultPeakShape;
   QSpinBox *findPeaksFWHM, *findPeaksTolerance;
-  QSpinBox *peakRadius;
   QSpinBox *decimals;
   /// mantid options page
   QWidget *mantidOptionsPage;
@@ -230,6 +231,14 @@ private:
   QCheckBox *m_sendToPrograms;
   QTreeWidget *treeCategories;
   QTreeWidget *treePrograms;
+  /// mantid project recovery pahe
+  QWidget *projectRecovery;
+  QLabel *lblWarningToRestartProjRec;
+  QCheckBox *ckEnableProjectRecovery;
+  QLabel *lblTimeBetweenCheckpoints;
+  QSpinBox *boxTimeBetweenCheckpoints;
+  QLabel *lblNumCheckpoints;
+  QSpinBox *boxNumCheckpoint;
 
   // MDPlotting
   QTabWidget *mdPlottingTabWidget;
@@ -239,7 +248,7 @@ private:
       *lblGeneralDefaultColorMap, *lblBoxGeneralDefaultColorMap,
       *lblVsiLastSession, *lblVsiInitialView;
   ColorButton *vsiDefaultBackground;
-  QGroupBox *mdPlottingGeneralFrame, *mdPlottingVsiFrameBottom;
+  QGroupBox *mdPlottingGeneralFrame, *mdPlottingVsiFrameBottom, *vsiAxesColor;
   QCheckBox *vsiLastSession;
   MantidQt::API::MdSettings m_mdSettings;
 

@@ -1,5 +1,10 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/FilterByXValue.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
 namespace Mantid {
@@ -27,15 +32,17 @@ void FilterByXValue::init() {
   declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The output workspace.");
-  declareProperty("XMin", EMPTY_DBL(), "The minimum X value (in the units of "
-                                       "the input workspace) for which events "
-                                       "will be retained\n"
-                                       "(default: event list min)");
-  declareProperty("XMax", EMPTY_DBL(), "The maximum X value (in the units of "
-                                       "the input workspace) for which events "
-                                       "will be retained. Must be greater than "
-                                       "XMin.\n"
-                                       "(default: event list max)");
+  declareProperty("XMin", EMPTY_DBL(),
+                  "The minimum X value (in the units of "
+                  "the input workspace) for which events "
+                  "will be retained\n"
+                  "(default: event list min)");
+  declareProperty("XMax", EMPTY_DBL(),
+                  "The maximum X value (in the units of "
+                  "the input workspace) for which events "
+                  "will be retained. Must be greater than "
+                  "XMin.\n"
+                  "(default: event list max)");
 }
 
 std::map<std::string, std::string> FilterByXValue::validateInputs() {
@@ -85,7 +92,7 @@ void FilterByXValue::exec() {
 
   Progress prog(this, 0.0, 1.0, numSpec);
   // Loop over the workspace, removing the events that don't pass the filter
-  PARALLEL_FOR1(outputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
   for (int spec = 0; spec < numSpec; ++spec) {
     PARALLEL_START_INTERUPT_REGION
 

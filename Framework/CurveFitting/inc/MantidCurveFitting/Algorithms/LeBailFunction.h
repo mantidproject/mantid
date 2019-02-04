@@ -1,46 +1,35 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CURVEFITTING_LEBAILFUNCTION_H_
 #define MANTID_CURVEFITTING_LEBAILFUNCTION_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/CompositeFunction.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/IPowderDiffPeakFunction.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidCurveFitting/Functions/BackgroundFunction.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
+namespace HistogramData {
+class HistogramX;
+class HistogramY;
+} // namespace HistogramData
 namespace CurveFitting {
 namespace Algorithms {
 
 /** LeBailFunction : LeBailFunction is to calculate peak intensities in a
- composite
- *                   function including neutron peak and background functions.
- *                   Note: This is not a Mantid Fit Function, just a helper
- *                   class to the algorithm
+composite
+*                   function including neutron peak and background functions.
+*                   Note: This is not a Mantid Fit Function, just a helper
+*                   class to the algorithm
 
-  @date 2013-04-26 : original LeBailFunction is not used by any other functions.
- And thus
-                     it is rewritten.
-
-  Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
- National Laboratory & European Spallation Source
-
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>
-  Code Documentation is available at: <http://doxygen.mantidproject.org>
+@date 2013-04-26 : original LeBailFunction is not used by any other functions.
+And thus
+it is rewritten.
 */
 class DLLExport LeBailFunction {
 public:
@@ -84,12 +73,13 @@ public:
   size_t getNumberOfPeaks() const { return m_numPeaks; }
 
   /// Calculate
-  void function(std::vector<double> &out, const std::vector<double> &xvalues,
-                bool calpeaks, bool calbkgd) const;
+  Mantid::HistogramData::HistogramY
+  function(const Mantid::HistogramData::HistogramX &xvalues, bool calpeaks,
+           bool calbkgd) const;
 
   ///  Calculate a single peak's value
-  void calPeak(size_t ipk, std::vector<double> &out,
-               const std::vector<double> &xvalues) const;
+  Mantid::HistogramData::HistogramY
+  calPeak(size_t ipk, const std::vector<double> &xvalues, size_t ySize) const;
 
   /// Return the composite function
   API::IFunction_sptr getFunction();
@@ -149,8 +139,9 @@ private:
 
   /// Group close peaks together
   void groupPeaks(
-      std::vector<std::vector<
-          std::pair<double, API::IPowderDiffPeakFunction_sptr>>> &peakgroupvec,
+      std::vector<
+          std::vector<std::pair<double, API::IPowderDiffPeakFunction_sptr>>>
+          &peakgroupvec,
       std::vector<API::IPowderDiffPeakFunction_sptr> &outboundpeakvec,
       double xmin, double xmax);
 
@@ -207,13 +198,13 @@ private:
   void adPeakPositionD(double dh);
   double calCubicDSpace(double a, int h, int k, int l) const;
   void addPeak(double d, double height);
-      mutable std::vector<double> dvalues;
+  mutable std::vector<double> dvalues;
   /// vector of peak's parameters (It is in strict order with dvalues)
   mutable std::vector<std::map<std::string, double> > mPeakParameters;
   */
 };
 
-typedef boost::shared_ptr<LeBailFunction> LeBailFunction_sptr;
+using LeBailFunction_sptr = boost::shared_ptr<LeBailFunction>;
 
 } // namespace Algorithms
 } // namespace CurveFitting

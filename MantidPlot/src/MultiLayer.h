@@ -33,7 +33,7 @@
 #define MULTILAYER_H
 
 #include "Graph.h"
-#include "MantidQtAPI/IProjectSerialisable.h"
+#include "MantidQtWidgets/Common/IProjectSerialisable.h"
 #include "MdiSubWindow.h"
 #include <QLayout>
 #include <QPointer>
@@ -43,11 +43,16 @@ class QLabel;
 class LayerButton;
 class SelectionMoveResizer;
 class LegendWidget;
-class MantidTreeWidget;
 class MantidMDCurve;
 class MantidMatrixCurve;
 class QSize;
 class WaterfallFillDialog;
+
+namespace MantidQt {
+namespace MantidWidgets {
+class MantidTreeWidget;
+}
+} // namespace MantidQt
 
 /**
  * \brief An MDI window (MdiSubWindow) managing one or more Graph objects.
@@ -77,8 +82,12 @@ class MultiLayer : public MdiSubWindow {
 
 public:
   MultiLayer(QWidget *parent, int layers = 1, int rows = 1, int cols = 1,
-             const QString &label = "", const char *name = 0, Qt::WFlags f = 0);
+             const QString &label = "", const char *name = nullptr,
+             Qt::WFlags f = nullptr);
   ~MultiLayer() override;
+
+  /// Get the window type as a string
+  std::string getWindowType() override { return "Graph"; }
 
   QSize minimumSizeHint() const override;
 
@@ -108,6 +117,7 @@ public:
   loadFromProject(const std::string &lines, ApplicationWindow *app,
                   const int fileVersion);
   std::string saveToProject(ApplicationWindow *app) override;
+  std::vector<std::string> getWorkspaceNames() override;
 
   void setCommonAxisScales();
 
@@ -194,7 +204,7 @@ public slots:
   bool isWaterfallPlot() { return d_is_waterfall_plot; }
   QColor waterfallFillColor() { return d_waterfall_fill_color; }
   void setWaterfallFillColor(const QColor &c);
-//@}
+  //@}
 
 signals:
   void showTextDialog();
@@ -222,10 +232,10 @@ signals:
 private:
   /// Handle dropping of additional curves onto a MantidMDCurve.
   void dropOntoMDCurve(Graph *g, MantidMDCurve *originalCurve,
-                       MantidTreeWidget *tree);
+                       MantidQt::MantidWidgets::MantidTreeWidget *tree);
   /// Handle dropping of additional curves onto a MantidMatrixCurve
   void dropOntoMatrixCurve(Graph *g, MantidMatrixCurve *originalCurve,
-                           MantidTreeWidget *tree);
+                           MantidQt::MantidWidgets::MantidTreeWidget *tree);
 
   //! \name Event Handlers
   //@{
@@ -274,7 +284,7 @@ class LayerButton : public QPushButton {
   Q_OBJECT
 
 public:
-  LayerButton(const QString &text = QString::null, QWidget *parent = 0);
+  LayerButton(const QString &text = QString::null, QWidget *parent = nullptr);
   static int btnSize() { return 20; };
 
 protected:

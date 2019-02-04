@@ -1,13 +1,20 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name
+from __future__ import (absolute_import, division, print_function)
 from mantid import config
 import os
-import stresstesting
+import systemtesting
 
 
 EXPECTED_EXT = '.expected'
 
 
-class ValidateFacilitiesFile(stresstesting.MantidStressTest):
+class ValidateFacilitiesFile(systemtesting.MantidSystemTest):
 
     def skipTests(self):
         try:
@@ -26,18 +33,18 @@ class ValidateFacilitiesFile(stresstesting.MantidStressTest):
         # run the tests
         failed = []
         try:
-            print "----------------------------------------"
-            print "Validating Facilities.xml"
+            print("----------------------------------------")
+            print("Validating Facilities.xml")
             pyxsval.parseAndValidateXmlInput(filename, xsdFile=xsdFile, validateSchema=0)
-        except Exception, e:
-            print "VALIDATION OF Facilities.xml FAILED WITH ERROR:"
-            print e
+        except Exception as e:
+            print("VALIDATION OF Facilities.xml FAILED WITH ERROR:")
+            print(e)
             failed.append(filename)
 
         # final say on whether or not it 'worked'
-        print "----------------------------------------"
+        print("----------------------------------------")
         if len(failed) != 0:
-            print "SUMMARY OF FAILED FILES"
+            print("SUMMARY OF FAILED FILES")
             raise RuntimeError("Failed Validation of Facilities.xml")
         else:
-            print "Succesfully Validated Facilities.xml"
+            print("Successfully Validated Facilities.xml")

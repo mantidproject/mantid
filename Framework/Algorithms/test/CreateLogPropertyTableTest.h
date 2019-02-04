@@ -1,17 +1,23 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_CREATELOGPROPERTYTABLETEST_H_
 #define MANTID_ALGORITHMS_CREATELOGPROPERTYTABLETEST_H_
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidAPI/Workspace.h"
 #include "MantidAlgorithms/CreateLogPropertyTable.h"
 #include "MantidDataHandling/Load.h"
-#include "MantidAPI/Workspace.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/TableRow.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <string>
 #include <vector>
@@ -21,6 +27,7 @@ using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
+using Mantid::Types::Core::DateAndTime;
 
 class CreateLogPropertyTableTest : public CxxTest::TestSuite {
 public:
@@ -109,7 +116,7 @@ private:
     using namespace WorkspaceCreationHelper;
 
     MatrixWorkspace_sptr eventws =
-        WorkspaceCreationHelper::Create2DWorkspace(1, 1);
+        WorkspaceCreationHelper::create2DWorkspace(1, 1);
 
     int64_t runstoptime_ns = runStart + 1000000;
     int64_t pulsetime_ns(100000);

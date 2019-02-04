@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -40,7 +40,7 @@ Usage
 
    workspace = HFIRLoad('BioSANS_empty_cell.xml')
    r= mtd['workspace'].run()
-   print "SDD = %g" % r.getProperty('sample-detector-distance').value
+   print('SDD = {:4.0f}'.format(r.getProperty('sample-detector-distance').value))
    
 
 Output:

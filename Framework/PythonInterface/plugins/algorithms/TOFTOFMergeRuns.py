@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 from mantid.kernel import Direction, StringArrayProperty, StringArrayLengthValidator
@@ -5,6 +11,7 @@ from mantid.api import PythonAlgorithm, AlgorithmFactory, WorkspaceProperty, Wor
 import mantid.simpleapi as api
 import numpy as np
 from dateutil.parser import parse
+import warnings
 
 
 class TOFTOFMergeRuns(PythonAlgorithm):
@@ -27,13 +34,16 @@ class TOFTOFMergeRuns(PythonAlgorithm):
         """
         return "Workflow\\MLZ\\TOFTOF;Transforms\\Splitting"
 
+    def seeAlso(self):
+        return [ "TOFTOFCropWorkspace","CorrectTOF" ]
+
     def name(self):
         """ Return summary
         """
         return "TOFTOFMergeRuns"
 
     def summary(self):
-        return "Merge runs and the sample logs."
+        return "Merge runs and the sample logs. This algorithm is deprecated (June-2018)."
 
     def PyInit(self):
         """ Declare properties
@@ -113,6 +123,9 @@ class TOFTOFMergeRuns(PythonAlgorithm):
     def PyExec(self):
         """ Main execution body
         """
+
+        warnings.warn("This algorithm is deprecated (June-2018). Please use MergeRuns instead")
+
         # get list of input workspaces
         input_workspace_list = self._expand_groups()
         workspaceCount = len(input_workspace_list)
@@ -122,6 +135,7 @@ class TOFTOFMergeRuns(PythonAlgorithm):
         if workspaceCount < 2:
             api.CloneWorkspace(InputWorkspace=input_workspace_list[0], OutputWorkspace=wsOutput)
             self.log().warning("Cannot merge one workspace. Clone is produced.")
+            self.setProperty("OutputWorkspace", wsOutput)
             return
 
         # check whether given workspaces can be merged
@@ -199,6 +213,7 @@ class TOFTOFMergeRuns(PythonAlgorithm):
                 raise RuntimeError("Timings don't match")
             else:
                 return True
+
 
 # Register algorithm with Mantid.
 AlgorithmFactory.subscribe(TOFTOFMergeRuns)

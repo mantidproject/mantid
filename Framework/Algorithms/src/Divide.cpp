@@ -1,8 +1,10 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/Divide.h"
-#include "MantidDataObjects/WorkspaceSingleValue.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -15,10 +17,11 @@ DECLARE_ALGORITHM(Divide)
 
 void Divide::init() {
   BinaryOperation::init();
-  declareProperty("WarnOnZeroDivide", true, "Algorithm usually warns if "
-                                            "division by 0 occurs. Set this "
-                                            "value to false if one does not "
-                                            "want this message appearing ");
+  declareProperty("WarnOnZeroDivide", true,
+                  "Algorithm usually warns if "
+                  "division by 0 occurs. Set this "
+                  "value to false if one does not "
+                  "want this message appearing ");
 }
 
 void Divide::exec() {
@@ -26,20 +29,16 @@ void Divide::exec() {
   BinaryOperation::exec();
 }
 
-void Divide::performBinaryOperation(const MantidVec &lhsX,
-                                    const MantidVec &lhsY,
-                                    const MantidVec &lhsE,
-                                    const MantidVec &rhsY,
-                                    const MantidVec &rhsE, MantidVec &YOut,
-                                    MantidVec &EOut) {
-  (void)lhsX; // Avoid compiler warning
-
-  const int bins = static_cast<int>(lhsE.size());
+void Divide::performBinaryOperation(const HistogramData::Histogram &lhs,
+                                    const HistogramData::Histogram &rhs,
+                                    HistogramData::HistogramY &YOut,
+                                    HistogramData::HistogramE &EOut) {
+  const int bins = static_cast<int>(lhs.e().size());
 
   for (int j = 0; j < bins; ++j) {
     // Get references to the input Y's
-    const double leftY = lhsY[j];
-    const double rightY = rhsY[j];
+    const double leftY = lhs.y()[j];
+    const double rightY = rhs.y()[j];
 
     //  error dividing two uncorrelated numbers, re-arrange so that you don't
     //  get infinity if leftY==0 (when rightY=0 the Y value and the result will
@@ -48,23 +47,19 @@ void Divide::performBinaryOperation(const MantidVec &lhsX,
     // (Sa c/a)2 + (Sb c/b)2 = (Sc)2
     // = (Sa 1/b)2 + (Sb (a/b2))2
     // (Sc)2 = (1/b)2( (Sa)2 + (Sb a/b)2 )
-    EOut[j] =
-        sqrt(pow(lhsE[j], 2) + pow(leftY * rhsE[j] / rightY, 2)) / fabs(rightY);
+    EOut[j] = sqrt(pow(lhs.e()[j], 2) + pow(leftY * rhs.e()[j] / rightY, 2)) /
+              fabs(rightY);
 
     // Copy the result last in case one of the input workspaces is also any
     // output
     YOut[j] = leftY / rightY;
-    ;
   }
 }
 
-void Divide::performBinaryOperation(const MantidVec &lhsX,
-                                    const MantidVec &lhsY,
-                                    const MantidVec &lhsE, const double rhsY,
-                                    const double rhsE, MantidVec &YOut,
-                                    MantidVec &EOut) {
-  (void)lhsX; // Avoid compiler warning
-
+void Divide::performBinaryOperation(const HistogramData::Histogram &lhs,
+                                    const double rhsY, const double rhsE,
+                                    HistogramData::HistogramY &YOut,
+                                    HistogramData::HistogramE &EOut) {
   if (rhsY == 0 && m_warnOnZeroDivide)
     g_log.warning() << "Division by zero: the RHS is a single-valued vector "
                        "with value zero."
@@ -72,13 +67,13 @@ void Divide::performBinaryOperation(const MantidVec &lhsX,
 
   // Do the right-hand part of the error calculation just once
   const double rhsFactor = pow(rhsE / rhsY, 2);
-  const int bins = static_cast<int>(lhsE.size());
+  const int bins = static_cast<int>(lhs.e().size());
   for (int j = 0; j < bins; ++j) {
     // Get reference to input Y
-    const double leftY = lhsY[j];
+    const double leftY = lhs.y()[j];
 
     // see comment in the function above for the error formula
-    EOut[j] = sqrt(pow(lhsE[j], 2) + pow(leftY, 2) * rhsFactor) / fabs(rhsY);
+    EOut[j] = sqrt(pow(lhs.e()[j], 2) + pow(leftY, 2) * rhsFactor) / fabs(rhsY);
     // Copy the result last in case one of the input workspaces is also any
     // output
     YOut[j] = leftY / rhsY;
@@ -88,12 +83,13 @@ void Divide::performBinaryOperation(const MantidVec &lhsX,
 void Divide::setOutputUnits(const API::MatrixWorkspace_const_sptr lhs,
                             const API::MatrixWorkspace_const_sptr rhs,
                             API::MatrixWorkspace_sptr out) {
-  if (rhs->YUnit().empty() || !WorkspaceHelpers::matchingBins(lhs, rhs, true)) {
+  if (rhs->YUnit().empty() ||
+      !WorkspaceHelpers::matchingBins(*lhs, *rhs, true)) {
     // Do nothing
   }
   // If the Y units match, then the output will be a distribution and will be
   // dimensionless
-  else if (lhs->YUnit() == rhs->YUnit() && rhs->blocksize() > 1) {
+  else if (lhs->YUnit() == rhs->YUnit() && m_rhsBlocksize > 1) {
     out->setYUnit("");
     out->setDistribution(true);
   }
@@ -209,11 +205,10 @@ std::string Divide::checkSizeCompatibility(
   // If RHS only has one value (1D vertical), the number of histograms needs to
   // match.
   // Each lhs spectrum will be divided by that scalar
-  // std::cout << "rhs->blocksize() " << rhs->blocksize() << '\n';
   // Are we allowing the division by different # of spectra, using detector IDs
   // to match up?
   if (m_AllowDifferentNumberSpectra ||
-      (rhs->blocksize() == 1 &&
+      (m_rhsBlocksize == 1 &&
        lhs->getNumberHistograms() == rhs->getNumberHistograms())) {
     return "";
   }
@@ -221,7 +216,7 @@ std::string Divide::checkSizeCompatibility(
   if (m_matchXSize) {
     // Past this point, for a 2D WS operation, we require the X arrays to match.
     // Note this only checks the first spectrum
-    if (!WorkspaceHelpers::matchingBins(lhs, rhs, true)) {
+    if (!WorkspaceHelpers::matchingBins(*lhs, *rhs, true)) {
       return "X arrays must match when dividing 2D workspaces.";
     }
   }

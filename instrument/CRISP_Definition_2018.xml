@@ -1,0 +1,518 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<instrument xmlns="http://www.mantidproject.org/IDF/1.0" 
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
+            name="CSP"
+            valid-from   ="2017-05-04 15:15:00"
+            valid-to     ="2100-01-31 23:59:59"
+            last-modified="2018-08-07 11:00:00">
+
+  <defaults>
+    <length unit="meter" />
+    <angle unit="degree" />
+    <reference-frame>
+      <along-beam axis="z" />
+      <pointing-up axis="y" />
+      <handedness val="right" />
+    </reference-frame>
+  </defaults>
+
+
+ <!-- Definition of instrument specific parameters for data reduction (e.g. wavelength cutoffs etc.) , could go into paramter file
+	MonitorBackground= [7.4,7.9]
+	MonitorsToCorrect=[1]
+	PointDetectorStart=[0]   # Note: Since we are removing the monitors in the load raw command they are not counted here.
+	PointDetectorStop=[0]
+	MultiDetectorStart=[1]
+	I0MonitorIndex=1
+ -->
+ 
+  <!-- BRIEF DESCRIPTION OF CRISP INSTRUMENT: 
+  
+      Here Z=0 is defined by the neutron beam which slopes down at 1.5 deg. 
+      from the horizon. This description is based on data provided by Tim
+      Charlton and Rob Dalgliesh.
+      
+      Note from Tim spreedsheet
+      theta is a rotation about the y axis
+      phi is a rotation about the x axis
+      chi is a rotation about the z axis
+
+      Noticed the face of the monitors/detector shapes that faces the
+      beam/sample path is in this IDF defined to be the y-z plane.
+      
+      Note the status of the instrument during a run is stored in the 
+      logfile RunNo_status.txt
+  -->
+  
+  
+  <!-- LIST OF PHYSICAL COMPONENTS (which the instrument consists of) -->
+  
+  <!-- detector components (including monitors) -->
+  
+  <component type="monitor1" idlist="monitor1">
+    <location z="7.2055" />
+  </component>
+  
+  <type name="monitor1" is="monitor">
+    <!-- Shape specified at least big enough to cover the beam which
+         is 10mm high and 40mm wide. Note it is described as tube, hence
+	 the choice of a cylinder shape.
+    -->    
+    <percent-transparency val="95" />
+    <cylinder id="shape">
+      <centre-of-bottom-base z="0.0" x="-0.02" y="0.0" />
+      <axis z="0.0" x="1.0" y="0.0" /> 
+      <radius val="0.01" />
+      <height val="0.04" />
+    </cylinder> 
+    <algebra val="shape" />
+  </type>  
+  
+  <component type="monitor2" idlist="monitor2">
+    <location z="9.92" />
+  </component>
+
+  <!-- Putting in monitors, which are defined in raw/neuxs
+         files, and have detector IDs, but currently not physically present
+         on the instrument. Defined with no geometric shape, as they do not
+         physically exist, and with a dummy position -->
+  <type>
+  <component type="no shape monitor">
+    <location z="12.12" name="placeholder monitor"/>
+  </component>  
+  </type>
+  
+  <type name="monitor2" is="monitor">
+    <!-- Shape specified as a minimum needs to cover the beam which
+         is 10mm high and 40mm wide. The 'top' shape is included to
+	 more easily recognise this monitor when visualised in MantidPlot.
+	 This monitor is suppose to look a bit like a German hand grenade.
+    -->    
+    <percent-transparency val="95" />
+    <cuboid id="base">
+      <left-front-bottom-point z="0.04" x="-0.02" y="-0.01"  />
+      <left-front-top-point  z="0.04" x="-0.02" y="0.01"  />
+      <left-back-bottom-point  z="-0.04" x="-0.02" y="-0.01"  />
+      <right-front-bottom-point  z="0.04" x="0.02" y="-0.01"  />
+    </cuboid>
+    
+    <cylinder id="top">
+      <centre-of-bottom-base z="0.0" x="0.0" y="0.01" />
+      <axis z="0.0" x="0.0" y="1.0" /> 
+      <radius val="0.02" />
+      <height val="0.04" />
+    </cylinder> 
+    
+    <algebra val="base : top" />
+  </type>  
+  
+  <type name="no shape monitor" is="monitor" />
+
+  <component type="point-detector" idlist="point-detector">
+  
+    <location z="12.113" />
+    
+    <!-- Link to log file that stores the z position. This angle can be used to
+    calculate the z position since the distance along the x-axis between
+    the sample and this detector is known (12.113-10.25=1.863). Also theta in the logfile is
+    assumed to in degrees, hence the reason for the pi/180=0.0174533 transformation
+    to radians factor in the eq attribute. -->
+    <parameter name="y">
+      <logfile id="theta" eq="1.8545*sin(2*value*0.0174533)" />
+    </parameter>
+    
+  </component>   
+
+  <type name="point-detector" is="detector">
+    <!-- Not exactly sure about the dimensions of this one. But pretty sure
+    it at least covers the beam. Also, just in front of it is a slit which
+    at the end of day will determine which neutrons get through to this 
+    detector I believe.
+    -->    
+    <cuboid id="shape">
+      <left-front-bottom-point z="0.01" x="-0.02" y="-0.005"  />
+      <left-front-top-point  z="0.01" x="-0.02" y="0.005"  />
+      <left-back-bottom-point  z="-0.01" x="-0.02" y="-0.005"  />
+      <right-front-bottom-point  z="0.01" x="0.02" y="-0.005"  />
+    </cuboid>
+    <algebra val="shape" />
+  </type>    
+  
+  
+  <component type="linear-detector" idlist="linear-detector">
+  
+    <!-- Link to log file that stores the z position -->
+     <parameter name="z">
+      <logfile id="linear_det_height" eq="0.001*value" extract-single-value-as="position 1" />
+    </parameter>
+  
+    <properties> 
+      Thin slabs 50mm wide, one for each spectrum 1.2 mm pixel pitch growing upward    
+    </properties>
+    
+    <location z="12.403" />
+  </component>    
+
+  <type name="linear-detector">
+    <component type="linear-detector-pixel" >
+      <location y="0" />
+      <location y="0.0012" />
+      <location y="0.0024" />
+      <location y="0.0036" />
+      <location y="0.0048" />
+      <location y="0.006" />
+      <location y="0.0072" />
+      <location y="0.0084" />
+      <location y="0.0096" />
+      <location y="0.0108" />
+      <location y="0.012" />
+      <location y="0.0132" />
+      <location y="0.0144" />
+      <location y="0.0156" />
+      <location y="0.0168" />
+      <location y="0.018" />
+      <location y="0.0192" />
+      <location y="0.0204" />
+      <location y="0.0216" />
+      <location y="0.0228" />
+      <location y="0.024" />
+      <location y="0.0252" />
+      <location y="0.0264" />
+      <location y="0.0276" />
+      <location y="0.0288" />
+      <location y="0.03" />
+      <location y="0.0312" />
+      <location y="0.0324" />
+      <location y="0.0336" />
+      <location y="0.0348" />
+      <location y="0.036" />
+      <location y="0.0372" />
+      <location y="0.0384" />
+      <location y="0.0396" />
+      <location y="0.0408" />
+      <location y="0.042" />
+      <location y="0.0432" />
+      <location y="0.0444" />
+      <location y="0.0456" />
+      <location y="0.0468" />
+      <location y="0.048" />
+      <location y="0.0492" />
+      <location y="0.0504" />
+      <location y="0.0516" />
+      <location y="0.0528" />
+      <location y="0.054" />
+      <location y="0.0552" />
+      <location y="0.0564" />
+      <location y="0.0576" />
+      <location y="0.0588" />
+      <location y="0.06" />
+      <location y="0.0612" />
+      <location y="0.0624" />
+      <location y="0.0636" />
+      <location y="0.0648" />
+      <location y="0.066" />
+      <location y="0.0672" />
+      <location y="0.0684" />
+      <location y="0.0696" />
+      <location y="0.0708" />
+      <location y="0.072" />
+      <location y="0.0732" />
+      <location y="0.0744" />
+      <location y="0.0756000000000001" />
+      <location y="0.0768000000000001" />
+      <location y="0.0780000000000001" />
+      <location y="0.0792000000000001" />
+      <location y="0.0804000000000001" />
+      <location y="0.0816000000000001" />
+      <location y="0.0828000000000001" />
+      <location y="0.0840000000000001" />
+      <location y="0.0852000000000001" />
+      <location y="0.0864000000000001" />
+      <location y="0.0876000000000001" />
+      <location y="0.0888000000000001" />
+      <location y="0.0900000000000001" />
+      <location y="0.0912000000000001" />
+      <location y="0.0924000000000001" />
+      <location y="0.0936000000000002" />
+      <location y="0.0948000000000002" />
+      <location y="0.0960000000000002" />
+      <location y="0.0972000000000002" />
+      <location y="0.0984000000000002" />
+      <location y="0.0996000000000002" />
+      <location y="0.1008" />
+      <location y="0.102" />
+      <location y="0.1032" />
+      <location y="0.1044" />
+      <location y="0.1056" />
+      <location y="0.1068" />
+      <location y="0.108" />
+      <location y="0.1092" />
+      <location y="0.1104" />
+      <location y="0.1116" />
+      <location y="0.1128" />
+      <location y="0.114" />
+      <location y="0.1152" />
+      <location y="0.1164" />
+      <location y="0.1176" />
+      <location y="0.1188" />
+      <location y="0.12" />
+      <location y="0.1212" />
+      <location y="0.1224" />
+      <location y="0.1236" />
+      <location y="0.1248" />
+      <location y="0.126" />
+      <location y="0.1272" />
+      <location y="0.1284" />
+      <location y="0.1296" />
+      <location y="0.1308" />
+      <location y="0.132" />
+      <location y="0.1332" />
+      <location y="0.1344" />
+      <location y="0.1356" />
+      <location y="0.1368" />
+      <location y="0.138" />
+      <location y="0.1392" />
+      <location y="0.1404" />
+      <location y="0.1416" />
+      <location y="0.1428" />
+      <location y="0.144" />
+      <location y="0.1452" />
+      <location y="0.1464" />
+      <location y="0.1476" />
+      <location y="0.1488" />
+      <location y="0.15" />
+      <location y="0.1512" />
+      <location y="0.1524" />
+      <location y="0.1536" />
+      <location y="0.1548" />
+      <location y="0.156" />
+      <location y="0.157200000000001" />
+      <location y="0.158400000000001" />
+      <location y="0.159600000000001" />
+      <location y="0.160800000000001" />
+      <location y="0.162000000000001" />
+      <location y="0.163200000000001" />
+      <location y="0.164400000000001" />
+      <location y="0.165600000000001" />
+      <location y="0.166800000000001" />
+      <location y="0.168000000000001" />
+      <location y="0.169200000000001" />
+      <location y="0.170400000000001" />
+      <location y="0.171600000000001" />
+      <location y="0.172800000000001" />
+      <location y="0.174000000000001" />
+      <location y="0.175200000000001" />
+      <location y="0.176400000000001" />
+      <location y="0.177600000000001" />
+      <location y="0.178800000000001" />
+      <location y="0.180000000000001" />
+      <location y="0.181200000000001" />
+      <location y="0.182400000000001" />
+      <location y="0.183600000000001" />
+      <location y="0.184800000000001" />
+      <location y="0.186000000000001" />
+      <location y="0.187200000000001" />
+      <location y="0.188400000000001" />
+      <location y="0.189600000000001" />
+      <location y="0.190800000000001" />
+      <location y="0.192000000000001" />
+      <location y="0.193200000000001" />
+      <location y="0.194400000000001" />
+      <location y="0.195600000000001" />
+      <location y="0.196800000000001" />
+      <location y="0.198000000000001" />
+      <location y="0.199200000000001" />
+      <location y="0.200400000000001" />
+      <location y="0.201600000000001" />
+      <location y="0.202800000000001" />
+      <location y="0.204000000000001" />
+      <location y="0.205200000000001" />
+      <location y="0.206400000000001" />
+      <location y="0.207600000000001" />
+      <location y="0.208800000000001" />
+      <location y="0.210000000000001" />
+      <location y="0.211200000000001" />
+      <location y="0.212400000000001" />
+      <location y="0.213600000000001" />
+      <location y="0.214800000000001" />
+      <location y="0.216000000000001" />
+      <location y="0.217200000000001" />
+      <location y="0.218400000000001" />
+      <location y="0.219600000000001" />
+      <location y="0.220800000000001" />
+      <location y="0.222000000000001" />
+      <location y="0.223200000000001" />
+      <location y="0.224400000000001" />
+      <location y="0.225600000000001" />
+      <location y="0.226800000000001" />
+      <location y="0.228000000000001" />
+      <location y="0.229200000000001" />
+      <location y="0.230400000000001" />
+      <location y="0.231600000000001" />
+      <location y="0.232800000000001" />
+      <location y="0.234000000000001" />
+      <location y="0.235200000000001" />
+      <location y="0.236400000000001" />
+      <location y="0.237600000000001" />
+      <location y="0.238800000000001" />
+      <location y="0.240000000000001" />
+      <location y="0.241200000000001" />
+      <location y="0.242400000000001" />
+      <location y="0.243600000000001" />
+      <location y="0.244800000000001" />
+      <location y="0.246000000000001" />
+      <location y="0.247200000000001" />
+      <location y="0.248400000000001" />
+      <location y="0.249600000000001" />
+      <location y="0.250800000000001" />
+      <location y="0.252000000000001" />
+      <location y="0.253200000000001" />
+      <location y="0.254400000000001" />
+      <location y="0.255600000000001" />
+      <location y="0.256800000000001" />
+      <location y="0.258000000000001" />
+      <location y="0.259200000000001" />
+      <location y="0.260400000000001" />
+      <location y="0.261600000000001" />
+      <location y="0.262800000000001" />
+      <location y="0.264000000000001" />
+      <location y="0.265200000000001" />
+      <location y="0.266400000000001" />
+      <location y="0.267600000000001" />
+      <location y="0.268800000000001" />
+      <location y="0.270000000000001" />
+      <location y="0.271200000000001" />
+      <location y="0.272400000000001" />
+      <location y="0.273600000000001" />
+      <location y="0.274800000000001" />
+      <location y="0.276000000000001" />
+      <location y="0.277200000000001" />
+      <location y="0.278400000000001" />
+      <location y="0.279600000000001" />
+      <location y="0.2808" />
+      <location y="0.282" />
+      <location y="0.2832" />
+      <location y="0.2844" />
+      <location y="0.2856" />
+      <location y="0.2868" />    
+    </component>
+  </type>
+  
+  <type name="linear-detector-pixel" is="detector">
+    <cuboid id="shape">
+      <left-front-bottom-point z="0.01" x="-0.025" y="-0.0006"  />
+      <left-front-top-point  z="0.01" x="-0.025" y="0.0006"  />
+      <left-back-bottom-point  z="-0.01" x="-0.025" y="-0.0006"  />
+      <right-front-bottom-point  z="0.01" x="0.025" y="-0.0006"  />
+    </cuboid>
+    <algebra val="shape" />
+  </type>    
+
+  
+  <!-- source and sample-position components -->
+
+  <component type="source">
+    <location />
+  </component>
+
+  <type name="source" is="Source">
+    <properties>
+      10mm(H) x 40mm(W)
+    </properties>
+  </type> 
+  
+  
+  <component type="some-surface-holder">
+    <!-- worry about linking relevant logfiles for y,z,theta,phi up later. Change from 10.25 -->
+    <location z="10.2585"/>
+  </component>
+
+  <type name="some-surface-holder" is="SamplePos">
+  </type>
+  
+  
+  <!-- other components -->  
+  
+  <component type="slit" name="slit1">
+    <location z="7.3025"/>
+     <!-- This log file stores the vertical opening of slit -->
+    <parameter name="vertical gap"> 
+      <logfile id="s1vg" extract-single-value-as="last_value" />
+    </parameter>
+  </component>
+  
+  <component type="slit" name="slit2">
+    <location z="9.6885"/> 
+    <!-- This log file stores the vertical opening of this. Note this
+     slit can also be translated in the z. However this info not stored
+     in log file since it is not used in the data analysis process. -->
+    <parameter name="vertical gap"> 
+      <logfile id="s2vg" extract-single-value-as="last_value" />
+    </parameter>
+  </component>    
+  
+  <component type="slit" name="slit3">
+    <location z="10.651"/>
+    <!-- This log file stores the vertical opening of slit -->  
+    <parameter name="vertical gap">
+      <logfile id="s3vg" extract-single-value-as="last_value" />
+    </parameter>
+  </component>    
+  
+  <component type="slit" name="slit4">
+    <location z="11.983"/>     
+    <!-- This log file stores the vertical opening of slit. Note this slit
+     is fixed to the point detector. -->
+    <parameter name="vertical gap"> 
+      <logfile id="s4vg" extract-single-value-as="last_value" />
+    </parameter>
+  </component>
+
+<type name="slit">
+    <percent-transparency val="50" />
+    <cuboid id="bottom">
+      <left-front-bottom-point z="0.0005" x="-0.025" y="-0.03"  />
+      <left-front-top-point  z="0.0005" x="-0.025" y="0.0"  />
+      <left-back-bottom-point  z="-0.0005" x="-0.025" y="-0.03"  />
+      <right-front-bottom-point  z="0.0005" x="0.025" y="-0.03"  />
+    </cuboid>
+  </type>
+
+
+  
+  
+  <component type="supermirror">
+    <!-- Worry about linking relevant logfiles for z,theta up later -->
+    <location z="7.7685"/>  
+  </component>  
+
+  <type name="supermirror" /> 
+
+
+
+  
+  <!-- DETECTOR and MONITOR ID LISTS -->
+
+  <idlist idname="monitor1">
+    <id val="1" />  
+  </idlist>
+  
+  <idlist idname="monitor2">
+    <id val="2" />  
+  </idlist>
+
+  <idlist idname="point-detector">
+    <id val="3" />  
+  </idlist>
+  
+  <idlist idname="monitor3">
+    <id val="4" />
+  </idlist>
+
+  <idlist idname="linear-detector">
+    <id start="6" end="125" />
+    <id start="134" end="253" />
+  </idlist>  
+  
+</instrument>

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAHANDLING_LOADCALFILE_H_
 #define MANTID_DATAHANDLING_LOADCALFILE_H_
 
@@ -31,9 +37,15 @@ public:
 
   /// Algorithm's version for identification
   int version() const override { return 1; };
+  const std::vector<std::string> seeAlso() const override {
+    return {"LoadDiffCal",        "ReadGroupsFromFile",
+            "CreateDummyCalFile", "CreateCalFileByNames",
+            "AlignDetectors",     "DiffractionFocussing",
+            "SaveCalFile",        "MergeCalFiles"};
+  }
   /// Algorithm's category for identification
   const std::string category() const override {
-    return "DataHandling\\Text;Diffraction\\DataHandling\\CalFiles";
+    return R"(DataHandling\Text;Diffraction\DataHandling\CalFiles)";
   }
 
   static void getInstrument3WaysInit(Mantid::API::Algorithm *alg);
@@ -47,6 +59,11 @@ public:
                           Mantid::DataObjects::OffsetsWorkspace_sptr offsetsWS,
                           Mantid::DataObjects::MaskWorkspace_sptr maskWS);
 
+protected:
+  Parallel::ExecutionMode getParallelExecutionMode(
+      const std::map<std::string, Parallel::StorageMode> &storageModes)
+      const override;
+
 private:
   /// Initialise the properties
   void init() override;
@@ -58,7 +75,7 @@ private:
                           int detID);
 };
 
-} // namespace Mantid
 } // namespace DataHandling
+} // namespace Mantid
 
 #endif /* MANTID_DATAHANDLING_LOADCALFILE_H_ */

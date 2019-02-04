@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef TIMESPLITTER_H
 #define TIMESPLITTER_H
 
@@ -20,11 +26,11 @@ public:
   /// Default constructor
   SplittingInterval();
 
-  SplittingInterval(const DateAndTime &start, const DateAndTime &stop,
-                    const int index = 0);
+  SplittingInterval(const Types::Core::DateAndTime &start,
+                    const Types::Core::DateAndTime &stop, const int index = 0);
 
-  DateAndTime start() const;
-  DateAndTime stop() const;
+  Types::Core::DateAndTime start() const;
+  Types::Core::DateAndTime stop() const;
 
   double duration() const;
 
@@ -41,9 +47,9 @@ public:
 
 private:
   /// begin
-  DateAndTime m_start;
+  Types::Core::DateAndTime m_start;
   /// end
-  DateAndTime m_stop;
+  Types::Core::DateAndTime m_stop;
   /// Index of the destination
   int m_index;
 };
@@ -53,15 +59,15 @@ private:
  * It is a vector of SplittingInterval classes.
  *
  */
-typedef std::vector<SplittingInterval> TimeSplitterType;
+using TimeSplitterType = std::vector<SplittingInterval>;
 
 // -------------- Operators ---------------------
-MANTID_KERNEL_DLL TimeSplitterType
-operator+(const TimeSplitterType &a, const TimeSplitterType &b);
-MANTID_KERNEL_DLL TimeSplitterType
-operator&(const TimeSplitterType &a, const TimeSplitterType &b);
-MANTID_KERNEL_DLL TimeSplitterType
-operator|(const TimeSplitterType &a, const TimeSplitterType &b);
+MANTID_KERNEL_DLL TimeSplitterType operator+(const TimeSplitterType &a,
+                                             const TimeSplitterType &b);
+MANTID_KERNEL_DLL TimeSplitterType operator&(const TimeSplitterType &a,
+                                             const TimeSplitterType &b);
+MANTID_KERNEL_DLL TimeSplitterType operator|(const TimeSplitterType &a,
+                                             const TimeSplitterType &b);
 MANTID_KERNEL_DLL TimeSplitterType operator~(const TimeSplitterType &a);
 
 } // Namespace Kernel

@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name
 #--------------------------------------------------------------
 # Algorithm which loads a SINQ file. It matches the instrument
@@ -107,6 +113,7 @@ class LoadSINQFile(PythonAlgorithm):
         matches = re.match(pattern, pureFileName)
 
         return int(matches.group(1))
+
 
 #---------- register with Mantid
 AlgorithmFactory.subscribe(LoadSINQFile)

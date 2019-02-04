@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_MAYERSSAMPLECORRECTIONSTRATEGYTEST_H_
 #define MANTID_ALGORITHMS_MAYERSSAMPLECORRECTIONSTRATEGYTEST_H_
 
@@ -7,6 +13,8 @@
 #include "MantidHistogramData/LinearGenerator.h"
 #include <algorithm>
 #include <cmath>
+
+#include <iomanip>
 
 using Mantid::Algorithms::MayersSampleCorrectionStrategy;
 using namespace Mantid::HistogramData;
@@ -31,6 +39,19 @@ public:
     TS_ASSERT_DELTA(0.00030887, absFactor, delta);
   }
 
+  void test_Correction_Skips_Zero_Counts() {
+    Histogram histo(Points{2, LinearGenerator(0, 1)},
+                    Counts{2, LinearGenerator(0, 1)});
+    MayersSampleCorrectionStrategy mscat(createTestParameters(), histo);
+    const auto outHisto = mscat.getCorrectedHisto();
+
+    const auto &yVals = outHisto.y();
+    const auto &eVals = outHisto.e();
+
+    TSM_ASSERT_EQUALS("Bin with 0 count was modified", yVals[0], 0);
+    TSM_ASSERT_EQUALS("Err val for 0 count was modified", eVals[0], 0);
+  }
+
   void
   test_Multiple_Scattering_With_Fixed_Mur_And_Absorption_Correction_Factor() {
     Histogram histo(Points{0, 1}, Counts{0, 1});
@@ -39,9 +60,9 @@ public:
     const double muR(0.01), abs(0.0003);
     auto absFactor = mscat.calculateMS(irp, muR, abs);
 
-    const double delta = 1e-8;
-    TS_ASSERT_DELTA(0.00461391, absFactor.first, delta);
-    TS_ASSERT_DELTA(67.25351289, absFactor.second, delta);
+    const double delta = 1e-6;
+    TS_ASSERT_DELTA(0.004671, absFactor.first, delta);
+    TS_ASSERT_DELTA(29.258163, absFactor.second, delta);
   }
 
   void test_Corrects_Both_Absorption_And_Multiple_Scattering_For_Point_Data() {
@@ -50,8 +71,7 @@ public:
                     Counts(nypts, 2.0));
     MayersSampleCorrectionStrategy mscat(createTestParameters(), histo);
 
-    auto outHisto = mscat.getCorrectedHisto();
-
+    const auto outHisto = mscat.getCorrectedHisto();
     const auto &tof = outHisto.x();
     const auto &signal = outHisto.y();
     const auto &error = outHisto.e();
@@ -61,11 +81,11 @@ public:
     TS_ASSERT_DELTA(100.0, tof.front(), delta);
     TS_ASSERT_DELTA(199.0, tof.back(), delta);
 
-    TS_ASSERT_DELTA(0.37497317, signal.front(), delta);
-    TS_ASSERT_DELTA(0.37629282, signal.back(), delta);
+    TS_ASSERT_DELTA(0.375086, signal.front(), delta);
+    TS_ASSERT_DELTA(0.377762, signal.back(), delta);
 
-    TS_ASSERT_DELTA(0.26514607, error.front(), delta);
-    TS_ASSERT_DELTA(0.2660792, error.back(), delta);
+    TS_ASSERT_DELTA(0.265226, error.front(), delta);
+    TS_ASSERT_DELTA(0.267118, error.back(), delta);
   }
 
   void
@@ -75,8 +95,7 @@ public:
                     Counts(nypts, 2.0));
     MayersSampleCorrectionStrategy mscat(createTestParameters(), histo);
 
-    auto outHisto = mscat.getCorrectedHisto();
-
+    const auto outHisto = mscat.getCorrectedHisto();
     const auto &tof = outHisto.x();
     const auto &signal = outHisto.y();
     const auto &error = outHisto.e();
@@ -86,25 +105,25 @@ public:
     TS_ASSERT_DELTA(99.5, tof.front(), delta);
     TS_ASSERT_DELTA(199.5, tof.back(), delta);
 
-    TS_ASSERT_DELTA(0.37497317, signal.front(), delta);
-    TS_ASSERT_DELTA(0.37629282, signal.back(), delta);
+    TS_ASSERT_DELTA(0.375086, signal.front(), delta);
+    TS_ASSERT_DELTA(0.377762, signal.back(), delta);
 
-    TS_ASSERT_DELTA(0.26514607, error.front(), delta);
-    TS_ASSERT_DELTA(0.2660792, error.back(), delta);
+    TS_ASSERT_DELTA(0.265226, error.front(), delta);
+    TS_ASSERT_DELTA(0.267118, error.back(), delta);
   }
 
   void test_Corrects_For_Absorption_For_Histogram_Data() {
     const size_t nypts(100);
-    bool mscatOn(false);
+    const bool mscatOn(false);
     Histogram histo(BinEdges(nypts + 1, LinearGenerator(99.5, 1.0)),
                     Counts(nypts, 2.0));
     MayersSampleCorrectionStrategy mscat(createTestParameters(mscatOn), histo);
 
     auto outHisto = mscat.getCorrectedHisto();
 
-    auto tof = outHisto.x();
-    auto signal = outHisto.y();
-    auto error = outHisto.e();
+    const auto &tof = outHisto.x();
+    const auto &signal = outHisto.y();
+    const auto &error = outHisto.e();
 
     // Check some values
     const double delta(1e-06);
@@ -116,6 +135,60 @@ public:
 
     TS_ASSERT_DELTA(1.6574851, error.front(), delta);
     TS_ASSERT_DELTA(1.6609527, error.back(), delta);
+  }
+
+  void test_MutlipleScattering_NEvents_Parameter() {
+    const size_t nypts(100);
+    Histogram histo(BinEdges(nypts + 1, LinearGenerator(99.5, 1.0)),
+                    Counts(nypts, 2.0));
+    const bool mscatOn(true);
+    auto corrPars = createTestParameters(mscatOn);
+    corrPars.msNEvents = 1000;
+    MayersSampleCorrectionStrategy mscat(corrPars, histo);
+
+    const auto outHisto = mscat.getCorrectedHisto();
+    const auto &tof = outHisto.x();
+    const auto &signal = outHisto.y();
+    const auto &error = outHisto.e();
+
+    // Check some values
+    // Check some values
+    const double delta(1e-06);
+    TS_ASSERT_DELTA(99.5, tof.front(), delta);
+    TS_ASSERT_DELTA(199.5, tof.back(), delta);
+
+    TS_ASSERT_DELTA(0.374857, signal.front(), delta);
+    TS_ASSERT_DELTA(0.377747, signal.back(), delta);
+
+    TS_ASSERT_DELTA(0.265064, error.front(), delta);
+    TS_ASSERT_DELTA(0.267107, error.back(), delta);
+  }
+
+  void test_MutlipleScattering_NRuns_Parameter() {
+    const size_t nypts(100);
+    Histogram histo(BinEdges(nypts + 1, LinearGenerator(99.5, 1.0)),
+                    Counts(nypts, 2.0));
+    const bool mscatOn(true);
+    auto corrPars = createTestParameters(mscatOn);
+    corrPars.msNRuns = 2;
+    MayersSampleCorrectionStrategy mscat(corrPars, histo);
+
+    const auto outHisto = mscat.getCorrectedHisto();
+    const auto &tof = outHisto.x();
+    const auto &signal = outHisto.y();
+    const auto &error = outHisto.e();
+
+    // Check some values
+    // Check some values
+    const double delta(1e-06);
+    TS_ASSERT_DELTA(99.5, tof.front(), delta);
+    TS_ASSERT_DELTA(199.5, tof.back(), delta);
+
+    TS_ASSERT_DELTA(0.375848, signal.front(), delta);
+    TS_ASSERT_DELTA(0.386508, signal.back(), delta);
+
+    TS_ASSERT_DELTA(0.265765, error.front(), delta);
+    TS_ASSERT_DELTA(0.273302, error.back(), delta);
   }
 
   // ---------------------- Failure tests -----------------------------
@@ -138,12 +211,14 @@ private:
     pars.l1 = 14.0;
     pars.l2 = 2.2;
     pars.twoTheta = 0.10821;
-    pars.phi = 0.0;
+    pars.azimuth = 0.0;
     pars.rho = 0.07261;
     pars.sigmaSc = 5.1;
     pars.sigmaAbs = 5.08;
     pars.cylRadius = 0.0025;
     pars.cylHeight = 0.04;
+    pars.msNEvents = 500;
+    pars.msNRuns = 10;
     return pars;
   }
 };

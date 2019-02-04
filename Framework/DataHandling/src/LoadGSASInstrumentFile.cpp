@@ -1,24 +1,31 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadGSASInstrumentFile.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidDataHandling/LoadFullprofResolution.h"
+#include "MantidDataHandling/LoadParameterFile.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
-#include "MantidDataHandling/LoadParameterFile.h"
-#include "MantidDataHandling/LoadFullprofResolution.h"
 #include "MantidKernel/ArrayProperty.h"
 
-#include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string.hpp>
-#include <boost/algorithm/string/iter_find.hpp>
 #include <boost/algorithm/string/finder.hpp>
+#include <boost/algorithm/string/iter_find.hpp>
 #include <boost/algorithm/string/predicate.hpp>
+#include <boost/algorithm/string/trim.hpp>
 
+#include <Poco/DOM/AutoPtr.h>
 #include <Poco/DOM/DOMWriter.h>
 #include <Poco/DOM/Element.h>
-#include <Poco/DOM/AutoPtr.h>
 
 #include <fstream>
 
@@ -29,10 +36,8 @@ using namespace Mantid::Kernel;
 using namespace std;
 using namespace Poco::XML;
 
-using Geometry::Instrument;
-using Geometry::Instrument_sptr;
 using Geometry::Instrument_const_sptr;
-using Mantid::Geometry::InstrumentDefinitionParser;
+using Geometry::Instrument_sptr;
 
 namespace Mantid {
 namespace DataHandling {
@@ -92,7 +97,7 @@ void LoadGSASInstrumentFile::init() {
 
 //----------------------------------------------------------------------------------------------
 /** Implement abstract Algorithm methods
-  */
+ */
 void LoadGSASInstrumentFile::exec() {
   // Get input
   string datafile = getProperty("Filename");
@@ -150,7 +155,7 @@ void LoadGSASInstrumentFile::exec() {
   WorkspaceGroup_sptr wsg = getProperty("Workspace");
   // Generate output table workspace
   API::ITableWorkspace_sptr outTabWs = genTableWorkspace(bankparammap);
-  if (getPropertyValue("OutputTableWorkspace") != "") {
+  if (!getPropertyValue("OutputTableWorkspace").empty()) {
     // Output the output table workspace
     setProperty("OutputTableWorkspace", outTabWs);
   }
@@ -205,9 +210,9 @@ void LoadGSASInstrumentFile::exec() {
 
 //----------------------------------------------------------------------------------------------
 /** Load file to a vector of strings.  Each string is a non-empty line.
-  * @param filename :: string for name of the .prm file
-  * @param lines :: vector of strings for each non-empty line in .prm file
-  */
+ * @param filename :: string for name of the .prm file
+ * @param lines :: vector of strings for each non-empty line in .prm file
+ */
 void LoadGSASInstrumentFile::loadFile(string filename, vector<string> &lines) {
   string line;
 
@@ -225,7 +230,7 @@ void LoadGSASInstrumentFile::loadFile(string filename, vector<string> &lines) {
 
       // display the line we gathered:
       boost::algorithm::trim(line);
-      if (line.size() > 0)
+      if (!line.empty())
         lines.push_back(line);
     }
 
@@ -240,9 +245,9 @@ void LoadGSASInstrumentFile::loadFile(string filename, vector<string> &lines) {
 }
 
 /* Get the histogram type
-* @param lines :: vector of strings for each non-empty line in .irf file
-* @return Histogram type code
-*/
+ * @param lines :: vector of strings for each non-empty line in .irf file
+ * @return Histogram type code
+ */
 std::string
 LoadGSASInstrumentFile::getHistogramType(const vector<string> &lines) {
   // We assume there is just one HTYPE line, look for it from beginning and
@@ -282,10 +287,10 @@ size_t LoadGSASInstrumentFile::getNumberOfBanks(const vector<string> &lines) {
 }
 
 /** Scan lines to determine which line each bank begins
-* @param lines :: vector of string of all non-empty lines in input file;
-* @param bankStartIndex :: [output] vector of start indices of banks in the
-* order they occur in file
-*/
+ * @param lines :: vector of string of all non-empty lines in input file;
+ * @param bankStartIndex :: [output] vector of start indices of banks in the
+ * order they occur in file
+ */
 void LoadGSASInstrumentFile::scanBanks(const std::vector<std::string> &lines,
                                        std::vector<size_t> &bankStartIndex) {
   // We look for each line that contains 'BNKPAR' and take it to be the first
@@ -306,12 +311,12 @@ void LoadGSASInstrumentFile::scanBanks(const std::vector<std::string> &lines,
 
 //----------------------------------------------------------------------------------------------
 /** Parse one bank in a .prm file to a map of parameter name and value
-* @param parammap :: [output] parameter name and value map
-* @param lines :: [input] vector of lines from .irf file;
-* @param bankid :: [input] ID of the bank to get parsed
-* @param startlineindex :: [input] index of the first line of the bank in vector
-* of lines
-*/
+ * @param parammap :: [output] parameter name and value map
+ * @param lines :: [input] vector of lines from .irf file;
+ * @param bankid :: [input] ID of the bank to get parsed
+ * @param startlineindex :: [input] index of the first line of the bank in
+ * vector of lines
+ */
 void LoadGSASInstrumentFile::parseBank(std::map<std::string, double> &parammap,
                                        const std::vector<std::string> &lines,
                                        size_t bankid, size_t startlineindex) {
@@ -355,15 +360,15 @@ void LoadGSASInstrumentFile::parseBank(std::map<std::string, double> &parammap,
 
 //----------------------------------------------------------------------------------------------
 /** Get next INS line of .prm file at or after given line index
-* @param lines :: [input] vector of lines from .irf file;
-* @param lineIndex :: [input] index of line to search from
-* @param param1 :: [output] first parameter in line
-* @param param2 :: [output] second parameter in line
-* @param param3 :: [output] third parameter in line
-* @param param4 :: [output] fourth parameter in line
-* @return line index for INS file
-* @throw end of file error
-*/
+ * @param lines :: [input] vector of lines from .irf file;
+ * @param lineIndex :: [input] index of line to search from
+ * @param param1 :: [output] first parameter in line
+ * @param param2 :: [output] second parameter in line
+ * @param param3 :: [output] third parameter in line
+ * @param param4 :: [output] fourth parameter in line
+ * @return line index for INS file
+ * @throw end of file error
+ */
 size_t LoadGSASInstrumentFile::findINSPRCFLine(
     const std::vector<std::string> &lines, size_t lineIndex, double &param1,
     double &param2, double &param3, double &param4) {
@@ -382,10 +387,10 @@ size_t LoadGSASInstrumentFile::findINSPRCFLine(
 
 //----------------------------------------------------------------------------------------------
 /** Generate output workspace
-*
-* TODO Resolve duplication of this code with
-* LoadFullprofResolution::genetableWorkspace(...)
-*/
+ *
+ * TODO Resolve duplication of this code with
+ * LoadFullprofResolution::genetableWorkspace(...)
+ */
 TableWorkspace_sptr LoadGSASInstrumentFile::genTableWorkspace(
     map<size_t, map<string, double>> bankparammap) {
   g_log.notice() << "Start to generate table workspace ...."

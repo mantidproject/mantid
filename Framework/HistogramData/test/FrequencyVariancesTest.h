@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_HISTOGRAMDATA_FREQUENCYVARIANCESTEST_H_
 #define MANTID_HISTOGRAMDATA_FREQUENCYVARIANCESTEST_H_
 
@@ -23,16 +29,10 @@ public:
 
   void test_has_correct_mixins() {
     FrequencyVariances data;
-// AppleClang gives warning if the result is unused.
-#if __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-value"
-#endif
-    TS_ASSERT_THROWS_NOTHING((dynamic_cast<detail::VarianceVectorOf<
-        FrequencyVariances, HistogramE, FrequencyStandardDeviations> &>(data)));
-#if __clang__
-#pragma clang diagnostic pop
-#endif
+    TS_ASSERT_THROWS_NOTHING(UNUSED_ARG(
+        (dynamic_cast<detail::VarianceVectorOf<FrequencyVariances, HistogramE,
+                                               FrequencyStandardDeviations> &>(
+            data))));
   }
 
   void test_construct_default() {

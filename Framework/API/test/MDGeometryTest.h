@@ -1,16 +1,23 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_API_MDGEOMETRYTEST_H_
 #define MANTID_API_MDGEOMETRYTEST_H_
 
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/MDGeometry.h"
+#include "MantidAPI/NullCoordTransform.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidGeometry/MDGeometry/QSample.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
-#include <cxxtest/TestSuite.h>
 #include "MantidKernel/VMD.h"
-#include "MantidAPI/IMDWorkspace.h"
 #include "MantidTestHelpers/FakeObjects.h"
-#include "MantidAPI/NullCoordTransform.h"
-#include "MantidGeometry/MDGeometry/QSample.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -132,10 +139,10 @@ public:
                       g.getTransformToOriginal(0));
     TS_ASSERT_DIFFERS(g2.getTransformToOriginal(1),
                       g.getTransformToOriginal(1));
-    TS_ASSERT(g2.getTransformFromOriginal(0) != NULL);
-    TS_ASSERT(g2.getTransformFromOriginal(1) != NULL);
-    TS_ASSERT(g2.getTransformToOriginal(0) != NULL);
-    TS_ASSERT(g2.getTransformToOriginal(1) != NULL);
+    TS_ASSERT(g2.getTransformFromOriginal(0) != nullptr);
+    TS_ASSERT(g2.getTransformFromOriginal(1) != nullptr);
+    TS_ASSERT(g2.getTransformToOriginal(0) != nullptr);
+    TS_ASSERT(g2.getTransformToOriginal(1) != nullptr);
   }
 
   /** Adding dimension info and searching for it back */

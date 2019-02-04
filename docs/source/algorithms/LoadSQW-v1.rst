@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -19,7 +19,7 @@ recalculated to the Crystal? frame, without HKL transformation).
 
 U matrix is set to unity but the B-matrix is read from the SQW and
 attached to the workspace which may confuse the algorithms which work
-with `MDEventWorkspace <http://www.mantidproject.org/MDEventWorkspace>`_ produced by Mantid
+with :ref:`MDEventWorkspace <MDWorkspace>` produced by Mantid
 algorithms.
 
 Notes on Horace SQW files
@@ -180,8 +180,8 @@ Usage
    mdws = LoadSQW('test_horace_reader.sqw');
    
    # Check results
-   print "Workspace type is: ",mdws.id()
-   print "Workspace has:{0:2} dimensions and contains: {1:4} MD events".format(mdws.getNumDims(),mdws.getNEvents())
+   print("Workspace type is:  {}".format(mdws.id()))
+   print("Workspace has:{0:2} dimensions and contains: {1:4} MD events".format(mdws.getNumDims(),mdws.getNEvents()))
    
 Output:
 

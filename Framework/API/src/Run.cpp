@@ -1,14 +1,22 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/Run.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/Matrix.h"
+#include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidKernel/make_unique.h"
 
 #include <nexus/NeXusFile.hpp>
 
 #include <boost/lexical_cast.hpp>
+#include <boost/make_shared.hpp>
 
 #include <algorithm>
 #include <numeric>
@@ -23,9 +31,9 @@ namespace {
 const int ADDABLES = 12;
 /// The names of the log entries summed when adding two runs together
 const std::string ADDABLE[ADDABLES] = {
-    "tot_prtn_chrg", "rawfrm", "goodfrm", "dur", "gd_prtn_chrg", "uA.hour",
-    "monitor0_counts", "monitor1_counts", "monitor2_counts", "monitor3_counts",
-    "monitor4_counts", "monitor5_counts"};
+    "tot_prtn_chrg",   "rawfrm",          "goodfrm",         "dur",
+    "gd_prtn_chrg",    "uA.hour",         "monitor0_counts", "monitor1_counts",
+    "monitor2_counts", "monitor3_counts", "monitor4_counts", "monitor5_counts"};
 /// Name of the goniometer log when saved to a NeXus file
 const char *GONIOMETER_LOG_NAME = "goniometer";
 /// Name of the stored histogram bins log when saved to NeXus
@@ -36,18 +44,32 @@ const char *OUTER_BKG_RADIUS_GROUP = "outer_bkg_radius";
 
 /// static logger object
 Kernel::Logger g_log("Run");
-}
+} // namespace
 
-//----------------------------------------------------------------------
-// Public member functions
-//----------------------------------------------------------------------
+Run::Run() : m_goniometer(Kernel::make_unique<Geometry::Goniometer>()) {}
+
+Run::Run(const Run &other)
+    : LogManager(other), m_goniometer(Kernel::make_unique<Geometry::Goniometer>(
+                             *other.m_goniometer)),
+      m_histoBins(other.m_histoBins) {}
+
+// Defined as default in source for forward declaration with std::unique_ptr.
+Run::~Run() = default;
+
+Run &Run::operator=(const Run &other) {
+  LogManager::operator=(other);
+  m_goniometer = Kernel::make_unique<Geometry::Goniometer>(*other.m_goniometer);
+  m_histoBins = other.m_histoBins;
+  return *this;
+}
 
 boost::shared_ptr<Run> Run::clone() {
   auto clone = boost::make_shared<Run>();
-  for (auto property : this->m_manager.getProperties()) {
+  for (auto property : this->m_manager->getProperties()) {
     clone->addProperty(property->clone());
   }
-  clone->m_goniometer = this->m_goniometer;
+  clone->m_goniometer =
+      Kernel::make_unique<Geometry::Goniometer>(*this->m_goniometer);
   clone->m_histoBins = this->m_histoBins;
   return clone;
 }
@@ -65,8 +87,8 @@ boost::shared_ptr<Run> Run::clone() {
  * @param stop :: Absolute stop time. Any log entries at times < than this time
  *are kept.
  */
-void Run::filterByTime(const Kernel::DateAndTime start,
-                       const Kernel::DateAndTime stop) {
+void Run::filterByTime(const Types::Core::DateAndTime start,
+                       const Types::Core::DateAndTime stop) {
   LogManager::filterByTime(start, stop);
   // Re-integrate proton charge
   this->integrateProtonCharge();
@@ -80,23 +102,23 @@ void Run::filterByTime(const Kernel::DateAndTime start,
  */
 Run &Run::operator+=(const Run &rhs) {
   // merge and copy properties where there is no risk of corrupting data
-  mergeMergables(m_manager, rhs.m_manager);
+  mergeMergables(*m_manager, *rhs.m_manager);
 
   // Other properties are added together if they are on the approved list
   for (const auto &name : ADDABLE) {
-    if (rhs.m_manager.existsProperty(name)) {
+    if (rhs.m_manager->existsProperty(name)) {
       // get a pointer to the property on the right-hand side workspace
-      Property *right = rhs.m_manager.getProperty(name);
+      Property *right = rhs.m_manager->getProperty(name);
 
       // now deal with the left-hand side
-      if (m_manager.existsProperty(name)) {
-        Property *left = m_manager.getProperty(name);
+      if (m_manager->existsProperty(name)) {
+        Property *left = m_manager->getProperty(name);
         left->operator+=(right);
       } else
         // no property on the left-hand side, create one and copy the
         // right-hand side across verbatim
-        m_manager.declareProperty(std::unique_ptr<Property>(right->clone()),
-                                  "");
+        m_manager->declareProperty(std::unique_ptr<Property>(right->clone()),
+                                   "");
     }
   }
   return *this;
@@ -151,11 +173,11 @@ void Run::setProtonCharge(const double charge) {
  */
 double Run::getProtonCharge() const {
   double charge = 0.0;
-  if (!m_manager.existsProperty(PROTON_CHARGE_LOG_NAME)) {
+  if (!m_manager->existsProperty(PROTON_CHARGE_LOG_NAME)) {
     integrateProtonCharge();
   }
-  if (m_manager.existsProperty(PROTON_CHARGE_LOG_NAME)) {
-    charge = m_manager.getProperty(PROTON_CHARGE_LOG_NAME);
+  if (m_manager->existsProperty(PROTON_CHARGE_LOG_NAME)) {
+    charge = m_manager->getProperty(PROTON_CHARGE_LOG_NAME);
   } else {
     g_log.warning() << PROTON_CHARGE_LOG_NAME
                     << " log was not found. Proton Charge set to 0.0\n";
@@ -171,20 +193,24 @@ double Run::getProtonCharge() const {
  * If "proton_charge" is not found, the value is not stored
  */
 void Run::integrateProtonCharge(const std::string &logname) const {
-  Kernel::TimeSeriesProperty<double> *log;
-  try {
-    log = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
-        this->getProperty(logname));
-  } catch (Exception::NotFoundError &) {
-    g_log.warning(logname + " log was not found. The value of the total proton "
-                            "charge has not been set");
-    return;
+  Kernel::TimeSeriesProperty<double> *log = nullptr;
+
+  if (this->hasProperty(logname)) {
+    try {
+      log = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
+          this->getProperty(logname));
+    } catch (Exception::NotFoundError &) {
+      g_log.warning(logname +
+                    " log was not found. The value of the total proton "
+                    "charge has not been set");
+      return;
+    }
   }
 
   if (log) {
     const std::vector<double> logValues = log->valuesAsVector();
     double total = std::accumulate(logValues.begin(), logValues.end(), 0.0);
-    std::string unit = log->units();
+    const std::string &unit = log->units();
     // Do we need to take account of a unit
     if (unit.find("picoCoulomb") != std::string::npos) {
       /// Conversion factor between picoColumbs and microAmp*hours
@@ -224,8 +250,8 @@ void Run::storeHistogramBinBoundaries(const std::vector<double> &histoBins) {
   if (histoBins.front() >= histoBins.back()) {
     std::ostringstream os;
     os << "Run::storeEnergyBinBoundaries - Inconsistent start & end values "
-          "given, size=" << histoBins.size()
-       << ". Cannot interpret values as bin boundaries.";
+          "given, size="
+       << histoBins.size() << ". Cannot interpret values as bin boundaries.";
     throw std::out_of_range(os.str());
   }
   m_histoBins = histoBins;
@@ -248,13 +274,15 @@ Run::histogramBinBoundaries(const double value) const {
   if (value < m_histoBins.front()) {
     std::ostringstream os;
     os << "Run::histogramBinBoundaries- Value lower than first bin boundary. "
-          "Value= " << value << ", first boundary=" << m_histoBins.front();
+          "Value= "
+       << value << ", first boundary=" << m_histoBins.front();
     throw std::out_of_range(os.str());
   }
   if (value > m_histoBins.back()) {
     std::ostringstream os;
     os << "Run::histogramBinBoundaries- Value greater than last bin boundary. "
-          "Value= " << value << ", last boundary=" << m_histoBins.back();
+          "Value= "
+       << value << ", last boundary=" << m_histoBins.back();
     throw std::out_of_range(os.str());
   }
   const int index = VectorHelper::getBinIndex(m_histoBins, value);
@@ -280,7 +308,7 @@ std::vector<double> Run::getBinBoundaries() const {
  */
 size_t Run::getMemorySize() const {
   size_t total = LogManager::getMemorySize();
-  total += sizeof(m_goniometer);
+  total += sizeof(*m_goniometer);
   total += m_histoBins.size() * sizeof(double);
   return total;
 }
@@ -294,13 +322,13 @@ size_t Run::getMemorySize() const {
  */
 void Run::setGoniometer(const Geometry::Goniometer &goniometer,
                         const bool useLogValues) {
-  Geometry::Goniometer old = m_goniometer;
+  auto old = std::move(m_goniometer);
   try {
-    m_goniometer = goniometer; // copy it in
+    m_goniometer = Kernel::make_unique<Geometry::Goniometer>(goniometer);
     if (useLogValues)
       calculateGoniometerMatrix();
   } catch (std::runtime_error &) {
-    m_goniometer = old;
+    m_goniometer = std::move(old);
     throw;
   }
 }
@@ -314,7 +342,7 @@ void Run::setGoniometer(const Geometry::Goniometer &goniometer,
  * @return 3x3 double rotation matrix
  */
 const Mantid::Kernel::DblMatrix &Run::getGoniometerMatrix() const {
-  return m_goniometer.getR();
+  return m_goniometer->getR();
 }
 
 //--------------------------------------------------------------------------------------------
@@ -328,11 +356,11 @@ void Run::saveNexus(::NeXus::File *file, const std::string &group,
   LogManager::saveNexus(file, group, true);
 
   // write the goniometer
-  m_goniometer.saveNexus(file, GONIOMETER_LOG_NAME);
+  m_goniometer->saveNexus(file, GONIOMETER_LOG_NAME);
 
   // write the histogram bins, if there are any
   if (!m_histoBins.empty()) {
-    file->makeGroup(HISTO_BINS_LOG_NAME, "NXdata", 1);
+    file->makeGroup(HISTO_BINS_LOG_NAME, "NXdata", true);
     file->writeData("value", m_histoBins);
     file->closeGroup();
   }
@@ -340,12 +368,12 @@ void Run::saveNexus(::NeXus::File *file, const std::string &group,
     const std::vector<double> &values =
         this->getPropertyValueAsType<std::vector<double>>("PeakRadius");
 
-    file->makeGroup(PEAK_RADIUS_GROUP, "NXdata", 1);
+    file->makeGroup(PEAK_RADIUS_GROUP, "NXdata", true);
     file->writeData("value", values);
     file->closeGroup();
   }
   if (this->hasProperty("BackgroundInnerRadius")) {
-    file->makeGroup(INNER_BKG_RADIUS_GROUP, "NXdata", 1);
+    file->makeGroup(INNER_BKG_RADIUS_GROUP, "NXdata", true);
     const std::vector<double> &values =
         this->getPropertyValueAsType<std::vector<double>>(
             "BackgroundInnerRadius");
@@ -353,7 +381,7 @@ void Run::saveNexus(::NeXus::File *file, const std::string &group,
     file->closeGroup();
   }
   if (this->hasProperty("BackgroundOuterRadius")) {
-    file->makeGroup(OUTER_BKG_RADIUS_GROUP, "NXdata", 1);
+    file->makeGroup(OUTER_BKG_RADIUS_GROUP, "NXdata", true);
     const std::vector<double> &values =
         this->getPropertyValueAsType<std::vector<double>>(
             "BackgroundOuterRadius");
@@ -374,14 +402,17 @@ void Run::saveNexus(::NeXus::File *file, const std::string &group,
  */
 void Run::loadNexus(::NeXus::File *file, const std::string &group,
                     bool keepOpen) {
-  LogManager::loadNexus(file, group, true);
 
+  if (!group.empty()) {
+    file->openGroup(group, "NXgroup");
+  }
   std::map<std::string, std::string> entries;
   file->getEntries(entries);
+  LogManager::loadNexus(file, entries);
   for (const auto &name_class : entries) {
     if (name_class.second == "NXpositioner") {
       // Goniometer class
-      m_goniometer.loadNexus(file, name_class.first);
+      m_goniometer->loadNexus(file, name_class.first);
     } else if (name_class.first == HISTO_BINS_LOG_NAME) {
       file->openGroup(name_class.first, "NXdata");
       file->readData("value", m_histoBins);
@@ -435,13 +466,15 @@ void Run::loadNexus(::NeXus::File *file, const std::string &group,
  * Calculate the goniometer matrix
  */
 void Run::calculateGoniometerMatrix() {
-  for (size_t i = 0; i < m_goniometer.getNumberAxes(); ++i) {
-    const std::string axisName = m_goniometer.getAxis(i).name;
+  for (size_t i = 0; i < m_goniometer->getNumberAxes(); ++i) {
+    const std::string axisName = m_goniometer->getAxis(i).name;
     const double minAngle =
         getLogAsSingleValue(axisName, Kernel::Math::Minimum);
     const double maxAngle =
         getLogAsSingleValue(axisName, Kernel::Math::Maximum);
-    const double angle = getLogAsSingleValue(axisName, Kernel::Math::Mean);
+    const double angle =
+        getLogAsSingleValue(axisName, Kernel::Math::TimeAveragedMean);
+
     if (minAngle != maxAngle &&
         !(std::isnan(minAngle) && std::isnan(maxAngle))) {
       const double lastAngle =
@@ -449,21 +482,21 @@ void Run::calculateGoniometerMatrix() {
       g_log.warning("Goniometer angle changed in " + axisName + " log from " +
                     boost::lexical_cast<std::string>(minAngle) + " to " +
                     boost::lexical_cast<std::string>(maxAngle) +
-                    ".  Used mean = " +
+                    ".  Used time averaged value = " +
                     boost::lexical_cast<std::string>(angle) + ".");
-      if (axisName.compare("omega") == 0) {
+      if (axisName == "omega") {
         g_log.warning("To set to last angle, replace omega with " +
                       boost::lexical_cast<std::string>(lastAngle) +
                       ": "
                       "SetGoniometer(Workspace=\'workspace\',Axis0=omega,0,1,0,"
                       "1\',Axis1='chi,0,0,1,1',Axis2='phi,0,1,0,1')");
-      } else if (axisName.compare("chi") == 0) {
+      } else if (axisName == "chi") {
         g_log.warning("To set to last angle, replace chi with " +
                       boost::lexical_cast<std::string>(lastAngle) +
                       ": "
                       "SetGoniometer(Workspace=\'workspace\',Axis0=omega,0,1,0,"
                       "1\',Axis1='chi,0,0,1,1',Axis2='phi,0,1,0,1')");
-      } else if (axisName.compare("phi") == 0) {
+      } else if (axisName == "phi") {
         g_log.warning("To set to last angle, replace phi with " +
                       boost::lexical_cast<std::string>(lastAngle) +
                       ": "
@@ -471,7 +504,7 @@ void Run::calculateGoniometerMatrix() {
                       "1\',Axis1='chi,0,0,1,1',Axis2='phi,0,1,0,1')");
       }
     }
-    m_goniometer.setRotationAngle(i, angle);
+    m_goniometer->setRotationAngle(i, angle);
   }
 }
 
@@ -500,5 +533,5 @@ void Run::mergeMergables(Mantid::Kernel::PropertyManager &sum,
   }
 }
 
-} // API namespace
-}
+} // namespace API
+} // namespace Mantid

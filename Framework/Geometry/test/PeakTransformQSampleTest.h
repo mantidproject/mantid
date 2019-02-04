@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDGEOMETRY_PEAKTRANSFORMQSAMPLE_TEST_H_
 #define MANTIDGEOMETRY_PEAKTRANSFORMQSAMPLE_TEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidGeometry/Crystal/PeakTransformQSample.h"
 #include "MockObjects.h"
 #include <boost/make_shared.hpp>
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Geometry;
 using namespace Mantid;
@@ -20,7 +26,7 @@ operator<<(std::basic_ostream<CharType, CharTrait> &out,
     out << maybe;
   return out;
 }
-}
+} // namespace boost
 
 class PeakTransformQSampleTest : public CxxTest::TestSuite {
 
@@ -176,7 +182,7 @@ public:
 
     TSM_ASSERT("Clone product is the wrong type.",
                boost::dynamic_pointer_cast<PeakTransformQSample>(clone) !=
-                   NULL);
+                   nullptr);
 
     // Test indirectly via what the transformations produce.
     V3D productA = A.transform(V3D(0, 1, 2));
@@ -201,7 +207,7 @@ public:
     // Check the type of the output product object.
     TSM_ASSERT("Factory product is the wrong type.",
                boost::dynamic_pointer_cast<PeakTransformQSample>(product) !=
-                   NULL);
+                   nullptr);
 
     // Now test that the benchmark and the factory product are equivalent.
     // Test indirectly via what the transformations produce.

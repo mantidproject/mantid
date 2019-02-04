@@ -1,11 +1,17 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
 import os
-from stresstesting import MantidStressTest
+from systemtesting import MantidSystemTest
 import mantid.simpleapi as ms
 import Direct.DirectEnergyConversion as reduction
 
 
-class DirectInelasticDiagnostic(MantidStressTest):
+class DirectInelasticDiagnostic(MantidSystemTest):
     saved_diag_file=""
 
     def requiredMemoryMB(self):
@@ -48,12 +54,12 @@ class DirectInelasticDiagnostic(MantidStressTest):
 
         # Save the masked spectra nmubers to a simple ASCII file for comparison
         self.saved_diag_file = os.path.join(ms.config['defaultsave.directory'], 'CurrentDirectInelasticDiag.txt')
-        handle = file(self.saved_diag_file, 'w')
-        for index in range(sample_ws.getNumberHistograms()):
-            if sample_ws.getDetector(index).isMasked():
-                spec_no = sample_ws.getSpectrum(index).getSpectrumNo()
-                handle.write(str(spec_no) + '\n')
-        handle.close()
+        with open(self.saved_diag_file, 'w') as handle:
+            spectrumInfo = sample_ws.spectrumInfo()
+            for index in range(sample_ws.getNumberHistograms()):
+                if spectrumInfo.isMasked(index):
+                    spec_no = sample_ws.getSpectrum(index).getSpectrumNo()
+                    handle.write(str(spec_no) + '\n')
 
     def cleanup(self):
         if os.path.exists(self.saved_diag_file):

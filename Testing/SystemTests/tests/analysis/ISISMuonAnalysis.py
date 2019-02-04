@@ -1,14 +1,22 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name,attribute-defined-outside-init,too-many-instance-attributes,too-few-public-methods
+from __future__ import (absolute_import, division, print_function)
 import math
-import stresstesting
+import systemtesting
 from mantid.simpleapi import *
 
 from abc import ABCMeta, abstractmethod
+from six import with_metaclass
 
 #----------------------------------------------------------------------
 
 
-class ISISMuonAnalysis(stresstesting.MantidStressTest):
+class ISISMuonAnalysis(with_metaclass(ABCMeta, systemtesting.MantidSystemTest)):
     """A base class for the ISIS Muon Analysis tests
 
     The workflow is defined in the runTest() method, simply
@@ -26,7 +34,6 @@ class ISISMuonAnalysis(stresstesting.MantidStressTest):
         - rebin_fixed: Optional boolean to tell if the rebinning is in fixed steps.
         - rebin_params: A string containing the rebin parameters. See wiki rebin for more info.
     """
-    __metaclass__ = ABCMeta # Mark as an abstract class
 
     @abstractmethod
     def get_reference_file(self):

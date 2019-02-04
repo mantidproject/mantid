@@ -1,7 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Surfaces/Cylinder.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Tolerance.h"
 #include <iostream>
+#include <limits>
 
 #ifdef ENABLE_OPENCASCADE
 // Opencascade defines _USE_MATH_DEFINES without checking whether it is already
@@ -15,15 +22,11 @@
 #endif
 
 #include "MantidKernel/WarningSuppressions.h"
-GCC_DIAG_OFF(conversion)
-// clang-format off
-GCC_DIAG_OFF(cast-qual)
-// clang-format on
+GNU_DIAG_OFF("conversion")
+GNU_DIAG_OFF("cast-qual")
 #include <BRepPrimAPI_MakeCylinder.hxx>
-GCC_DIAG_ON(conversion)
-// clang-format off
-GCC_DIAG_ON(cast-qual)
-// clang-format on
+GNU_DIAG_ON("conversion")
+GNU_DIAG_ON("cast-qual")
 #endif
 
 namespace Mantid {
@@ -397,8 +400,8 @@ void Cylinder::getBoundingBox(double &xmax, double &ymax, double &zmax,
     listOfPoints.push_back(zmaxPoint);
   }
   if (!listOfPoints.empty()) {
-    xmin = ymin = zmin = DBL_MAX;
-    xmax = ymax = zmax = DBL_MIN;
+    xmin = ymin = zmin = std::numeric_limits<double>::max();
+    xmax = ymax = zmax = std::numeric_limits<double>::min();
     for (std::vector<V3D>::const_iterator it = listOfPoints.begin();
          it != listOfPoints.end(); ++it) {
       //			std::cout<<(*it)<<'\n';
@@ -446,6 +449,6 @@ TopoDS_Shape Cylinder::createShape() {
   return BRepPrimAPI_MakeCylinder(gpA, Radius, 1000.0, 2.0 * M_PI).Solid();
 }
 #endif
-} // NAMESPACE MonteCarlo
+} // namespace Geometry
 
 } // NAMESPACE Mantid

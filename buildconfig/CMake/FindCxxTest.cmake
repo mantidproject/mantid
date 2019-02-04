@@ -31,6 +31,12 @@
 #
 #    The variable TESTHELPER_SRCS can be used to pass in extra (non-test) source files
 #    that should be included in the test executable.
+#
+#    The variable CXXTEST_EXTRA_HEADER_INCLUDE can be used to pass an additional header
+#    to the --include optional of the cxxtestgen command.
+#
+#    The variable CXXTEST_OUTPUT_DIR can be used to specify the directory for the
+#    generated files. The default is CMAKE_CURRENT_BINARY_DIR.
 #           
 #       #==============
 #       Example Usage:
@@ -100,13 +106,26 @@ include ( PrecompiledHeaderCommands )
 # CXXTEST_ADD_TEST (public macro to add unit tests)
 #=============================================================
 macro(CXXTEST_ADD_TEST _cxxtest_testname)
+  # output directory
+    set (_cxxtest_output_dir ${CMAKE_CURRENT_BINARY_DIR})
+    if (CXXTEST_OUTPUT_DIR)
+      set (_cxxtest_output_dir ${CXXTEST_OUTPUT_DIR})
+      if ( NOT IS_DIRECTORY "${_cxxtest_output_dir}")
+        file ( MAKE_DIRECTORY "${_cxxtest_output_dir}" )
+      endif()
+    endif()
     # determine the cpp filename
-    set(_cxxtest_real_outfname ${CMAKE_CURRENT_BINARY_DIR}/${_cxxtest_testname}_runner.cpp)
+    set(_cxxtest_real_outfname ${_cxxtest_output_dir}/${_cxxtest_testname}_runner.cpp)
+    # add additional include if requested
+    if(CXXTEST_EXTRA_HEADER_INCLUDE)
+      set(_cxxtest_include  --include ${CXXTEST_EXTRA_HEADER_INCLUDE})
+    endif()
+
     add_custom_command(
         OUTPUT  ${_cxxtest_real_outfname}
         DEPENDS ${PATH_FILES}
         COMMAND ${PYTHON_EXECUTABLE} ${CXXTEST_TESTGEN_EXECUTABLE} --root
-        --xunit-printer --world ${_cxxtest_testname} -o ${_cxxtest_real_outfname}
+        --xunit-printer --world ${_cxxtest_testname} ${_cxxtest_include} -o ${_cxxtest_real_outfname}
     )
     set_source_files_properties(${_cxxtest_real_outfname} PROPERTIES GENERATED true)
 
@@ -116,7 +135,7 @@ macro(CXXTEST_ADD_TEST _cxxtest_testname)
     foreach (part ${ARGN})
       get_filename_component(_cxxtest_cpp ${part} NAME)
       string ( REPLACE ".h" ".cpp" _cxxtest_cpp ${_cxxtest_cpp} )
-      set ( _cxxtest_cpp "${CMAKE_CURRENT_BINARY_DIR}/${_cxxtest_cpp}" )
+      set ( _cxxtest_cpp "${_cxxtest_output_dir}/${_cxxtest_cpp}" )
       set ( _cxxtest_h "${CMAKE_CURRENT_SOURCE_DIR}/${part}" )
 
       add_custom_command(
@@ -195,7 +214,8 @@ endmacro(CXXTEST_ADD_TEST)
 
 find_path(CXXTEST_INCLUDE_DIR cxxtest/TestSuite.h
           PATHS ${PROJECT_SOURCE_DIR}/Testing/Tools/cxxtest
-	        ${PROJECT_SOURCE_DIR}/../Testing/Tools/cxxtest )
+	        ${PROJECT_SOURCE_DIR}/../Testing/Tools/cxxtest 
+                NO_DEFAULT_PATH )
 
 find_program(CXXTEST_TESTGEN_EXECUTABLE python/scripts/cxxtestgen
              PATHS ${CXXTEST_INCLUDE_DIR})

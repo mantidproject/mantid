@@ -1,18 +1,25 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_CHANGEPULSETIMETEST_H_
 #define MANTID_ALGORITHMS_CHANGEPULSETIMETEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/ChangePulsetime.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
+using Mantid::Types::Core::DateAndTime;
 
 namespace {
 EventWorkspace_sptr
@@ -33,7 +40,7 @@ execute_change_of_pulse_times(EventWorkspace_sptr in_ws, std::string timeOffset,
   EventWorkspace_sptr out_ws = alg.getProperty("OutputWorkspace");
   return out_ws;
 }
-}
+} // namespace
 
 //---------------------------------------------------------------------------------
 // Unit Tests
@@ -53,7 +60,7 @@ public:
     TS_ASSERT(alg.isInitialized())
 
     EventWorkspace_sptr in_ws, out_ws;
-    in_ws = WorkspaceCreationHelper::CreateEventWorkspace2(100, 100);
+    in_ws = WorkspaceCreationHelper::createEventWorkspace2(100, 100);
     AnalysisDataService::Instance().addOrReplace(in_ws_name, in_ws);
 
     alg.setPropertyValue("InputWorkspace", in_ws_name);
@@ -136,7 +143,7 @@ private:
 public:
   void setUp() override {
     EventWorkspace_sptr in_ws =
-        WorkspaceCreationHelper::CreateEventWorkspace2(30000, 30000);
+        WorkspaceCreationHelper::createEventWorkspace2(30000, 30000);
     m_workspace = in_ws;
   }
 

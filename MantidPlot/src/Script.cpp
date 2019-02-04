@@ -29,7 +29,6 @@
 #include "Script.h"
 #include "ScriptingEnv.h"
 
-#include <QRegExp>
 #include <stdexcept>
 
 //--------------------------------------------------------------------------------------------------
@@ -70,9 +69,9 @@ Script::ScriptThreadPool::ScriptThreadPool() : QThreadPool() {
   this->setExpiryTimeout(-1);
 }
 
-//--------------------------------------------------------------------------------------------------
-// Script
-//--------------------------------------------------------------------------------------------------
+  //--------------------------------------------------------------------------------------------------
+  // Script
+  //--------------------------------------------------------------------------------------------------
 
 #include <QtConcurrentRun>
 
@@ -158,14 +157,3 @@ void Script::setIsRunning() { m_execMode = Running; }
  * Sets the offset & code string
  */
 void Script::setupCode(const ScriptCode &code) { m_code = code; }
-
-/**
- * Ensure that any line endings are converted to single '\n' so that the Python
- * C API is happy
- * @param text :: The text to check and convert
- */
-QString Script::normaliseLineEndings(QString text) const {
-  text = text.replace(QRegExp("\\r\\n"), QString("\n"));
-  text = text.replace(QRegExp("\\r"), QString("\n"));
-  return text;
-}

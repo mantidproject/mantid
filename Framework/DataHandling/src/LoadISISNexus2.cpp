@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadISISNexus2.h"
+#include "MantidDataHandling/DataBlockGenerator.h"
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataHandling/LoadRawHelper.h"
-#include "MantidDataHandling/DataBlockGenerator.h"
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
@@ -23,8 +29,10 @@
 
 #include <boost/lexical_cast.hpp>
 
+// clang-format off
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
+// clang-format on
 
 #include <Poco/Path.h>
 #include <Poco/DateTimeFormatter.h>
@@ -60,7 +68,7 @@ getMonitorsFromComposite(Mantid::DataHandling::DataBlockComposite &composite,
 
   return newComposite;
 }
-}
+} // namespace
 
 namespace Mantid {
 namespace DataHandling {
@@ -83,11 +91,11 @@ LoadISISNexus2::LoadISISNexus2()
       m_cppFile() {}
 
 /**
-* Return the confidence criteria for this algorithm can load the file
-* @param descriptor A descriptor for the file
-* @returns An integer specifying the confidence level. 0 indicates it will not
-* be used
-*/
+ * Return the confidence criteria for this algorithm can load the file
+ * @param descriptor A descriptor for the file
+ * @returns An integer specifying the confidence level. 0 indicates it will not
+ * be used
+ */
 int LoadISISNexus2::confidence(Kernel::NexusDescriptor &descriptor) const {
   if (descriptor.pathOfTypeExists("/raw_data_1", "NXentry")) {
     // It also could be an Event Nexus file or a TOFRaw file,
@@ -143,12 +151,12 @@ void LoadISISNexus2::init() {
 }
 
 /** Executes the algorithm. Reading in the file and creating and populating
-*  the output workspace
-*
-*  @throw Exception::FileError If the Nexus file cannot be found/opened
-*  @throw std::invalid_argument If the optional properties are set to invalid
-*values
-*/
+ *  the output workspace
+ *
+ *  @throw Exception::FileError If the Nexus file cannot be found/opened
+ *  @throw std::invalid_argument If the optional properties are set to invalid
+ *values
+ */
 void LoadISISNexus2::exec() {
 
   //**********************************************************************
@@ -283,7 +291,7 @@ void LoadISISNexus2::exec() {
   // ticket #8697
   loadSampleData(local_workspace, entry);
   m_progress->report("Loading logs");
-  loadLogs(local_workspace, entry);
+  loadLogs(local_workspace);
 
   // Load first period outside loop
   m_progress->report("Loading data");
@@ -446,7 +454,7 @@ private:
   int64_t m_min;
   int64_t m_max;
 };
-}
+} // namespace
 
 /**
 Check for a set of synthetic logs associated with multi-period log data. Raise
@@ -467,12 +475,12 @@ void LoadISISNexus2::validateMultiPeriodLogs(
 }
 
 /**
-* Check the validity of the optional properties of the algorithm and identify if
-* partial data should be loaded.
-* @param bseparateMonitors: flag indicating if the monitors are to be loaded
-* separately
-* @param bexcludeMonitor: flag indicating if the monitors are to be excluded
-*/
+ * Check the validity of the optional properties of the algorithm and identify
+ * if partial data should be loaded.
+ * @param bseparateMonitors: flag indicating if the monitors are to be loaded
+ * separately
+ * @param bexcludeMonitor: flag indicating if the monitors are to be excluded
+ */
 bool LoadISISNexus2::checkOptionalProperties(bool bseparateMonitors,
                                              bool bexcludeMonitor) {
   // optional properties specify that only some spectra have to be loaded
@@ -696,24 +704,12 @@ void LoadISISNexus2::buildSpectraInd2SpectraNumMap(
   }
 }
 
-namespace {
-/// Compare two spectra blocks for ordering
-bool compareSpectraBlocks(const LoadISISNexus2::SpectraBlock &block1,
-                          const LoadISISNexus2::SpectraBlock &block2) {
-  bool res = block1.last < block2.first;
-  if (!res) {
-    assert(block2.last < block1.first);
-  }
-  return res;
-}
-}
-
 /**
-* Analyze the spectra ranges and prepare a list contiguous blocks. Each monitor
-* must be
-* in a separate block.
-* @return :: Number of spectra to load.
-*/
+ * Analyze the spectra ranges and prepare a list contiguous blocks. Each monitor
+ * must be
+ * in a separate block.
+ * @return :: Number of spectra to load.
+ */
 size_t
 LoadISISNexus2::prepareSpectraBlocks(std::map<int64_t, std::string> &monitors,
                                      DataBlockComposite &LoadBlock) {
@@ -738,7 +734,11 @@ LoadISISNexus2::prepareSpectraBlocks(std::map<int64_t, std::string> &monitors,
   // sort and check for overlapping
   if (m_spectraBlocks.size() > 1) {
     std::sort(m_spectraBlocks.begin(), m_spectraBlocks.end(),
-              compareSpectraBlocks);
+              [](const LoadISISNexus2::SpectraBlock &block1,
+                 const LoadISISNexus2::SpectraBlock &block2) {
+                return block1.last < block2.first;
+              });
+    checkOverlappingSpectraRange();
   }
 
   // Remove monitors that have been used.
@@ -765,14 +765,34 @@ LoadISISNexus2::prepareSpectraBlocks(std::map<int64_t, std::string> &monitors,
 }
 
 /**
-* Load a given period into the workspace
-* @param period :: The period number to load (starting from 1)
-* @param entry :: The opened root entry node for accessing the monitor and data
-* nodes
-* @param local_workspace :: The workspace to place the data in
-* @param update_spectra2det_mapping :: reset spectra-detector map to the one
-* calculated earlier. (Warning! -- this map has to be calculated correctly!)
-*/
+ * Check if any spectra block ranges overlap.
+ *
+ * Iterate over the sorted list of spectra blocks and check
+ * if the last element of the preceeding block is less than
+ * the first element of the next block.
+ */
+void LoadISISNexus2::checkOverlappingSpectraRange() {
+  for (size_t i = 1; i < m_spectraBlocks.size(); ++i) {
+    const auto &block1 = m_spectraBlocks[i - 1];
+    const auto &block2 = m_spectraBlocks[i];
+    if (block1.first > block1.last && block2.first > block2.last)
+      throw std::runtime_error("LoadISISNexus2: inconsistent spectra ranges");
+    if (block1.last >= block2.first) {
+      throw std::runtime_error(
+          "LoadISISNexus2: the range of SpectraBlocks must not overlap");
+    }
+  }
+}
+
+/**
+ * Load a given period into the workspace
+ * @param period :: The period number to load (starting from 1)
+ * @param entry :: The opened root entry node for accessing the monitor and data
+ * nodes
+ * @param local_workspace :: The workspace to place the data in
+ * @param update_spectra2det_mapping :: reset spectra-detector map to the one
+ * calculated earlier. (Warning! -- this map has to be calculated correctly!)
+ */
 void LoadISISNexus2::loadPeriodData(
     int64_t period, NXEntry &entry,
     DataObjects::Workspace2D_sptr &local_workspace,
@@ -848,10 +868,10 @@ void LoadISISNexus2::loadPeriodData(
 }
 
 /**
-* Creates period log data in the workspace
-* @param period :: period number
-* @param local_workspace :: workspace to add period log data to.
-*/
+ * Creates period log data in the workspace
+ * @param period :: period number
+ * @param local_workspace :: workspace to add period log data to.
+ */
 void LoadISISNexus2::createPeriodLogs(
     int64_t period, DataObjects::Workspace2D_sptr &local_workspace) {
   m_logCreator->addPeriodLogs(static_cast<int>(period),
@@ -859,16 +879,16 @@ void LoadISISNexus2::createPeriodLogs(
 }
 
 /**
-* Perform a call to nxgetslab, via the NexusClasses wrapped methods for a given
-* block-size
-* @param data :: The NXDataSet object
-* @param blocksize :: The block-size to use
-* @param period :: The period number
-* @param start :: The index within the file to start reading from (zero based)
-* @param hist :: The workspace index to start reading into
-* @param spec_num :: The spectrum number that matches the hist variable
-* @param local_workspace :: The workspace to fill the data with
-*/
+ * Perform a call to nxgetslab, via the NexusClasses wrapped methods for a given
+ * block-size
+ * @param data :: The NXDataSet object
+ * @param blocksize :: The block-size to use
+ * @param period :: The period number
+ * @param start :: The index within the file to start reading from (zero based)
+ * @param hist :: The workspace index to start reading into
+ * @param spec_num :: The spectrum number that matches the hist variable
+ * @param local_workspace :: The workspace to fill the data with
+ */
 void LoadISISNexus2::loadBlock(NXDataSetTyped<int> &data, int64_t blocksize,
                                int64_t period, int64_t start, int64_t &hist,
                                int64_t &spec_num,
@@ -924,7 +944,7 @@ void LoadISISNexus2::runLoadInstrument(
   }
   if (executionSuccessful) {
     // If requested update the instrument to positions in the data file
-    const Geometry::ParameterMap &pmap = localWorkspace->instrumentParameters();
+    const auto &pmap = localWorkspace->constInstrumentParameters();
     if (pmap.contains(localWorkspace->getInstrument()->getComponentID(),
                       "det-pos-source")) {
       boost::shared_ptr<Geometry::Parameter> updateDets = pmap.get(
@@ -953,10 +973,10 @@ void LoadISISNexus2::runLoadInstrument(
 }
 
 /**
-* Load data about the run
-*   @param local_workspace :: The workspace to load the run information in to
-*   @param entry :: The Nexus entry
-*/
+ * Load data about the run
+ *   @param local_workspace :: The workspace to load the run information in to
+ *   @param entry :: The Nexus entry
+ */
 void LoadISISNexus2::loadRunDetails(
     DataObjects::Workspace2D_sptr &local_workspace, NXEntry &entry) {
   API::Run &runDetails = local_workspace->mutableRun();
@@ -1058,13 +1078,13 @@ void LoadISISNexus2::loadRunDetails(
 }
 
 /**
-* Parse an ISO formatted date-time string into separate date and time strings
-* @param datetime_iso :: The string containing the ISO formatted date-time
-* @param date :: An output parameter containing the date from the original
-* string or ??-??-???? if the format is unknown
-* @param time :: An output parameter containing the time from the original
-* string or ??-??-?? if the format is unknown
-*/
+ * Parse an ISO formatted date-time string into separate date and time strings
+ * @param datetime_iso :: The string containing the ISO formatted date-time
+ * @param date :: An output parameter containing the date from the original
+ * string or ??-??-???? if the format is unknown
+ * @param time :: An output parameter containing the time from the original
+ * string or ??-??-?? if the format is unknown
+ */
 void LoadISISNexus2::parseISODateTime(const std::string &datetime_iso,
                                       std::string &date,
                                       std::string &time) const {
@@ -1078,17 +1098,17 @@ void LoadISISNexus2::parseISODateTime(const std::string &datetime_iso,
     time = Poco::DateTimeFormatter::format(datetime_output, "%H:%M:%S",
                                            timezone_diff);
   } catch (Poco::SyntaxException &) {
-    date = "\?\?-\?\?-\?\?\?\?";
-    time = "\?\?:\?\?:\?\?";
+    date = R"(??-??-????)";
+    time = R"(??:??:??)";
     g_log.warning() << "Cannot parse end time from entry in Nexus file.\n";
   }
 }
 
 /**
-* Load data about the sample
-*   @param local_workspace :: The workspace to load the logs to.
-*   @param entry :: The Nexus entry
-*/
+ * Load data about the sample
+ *   @param local_workspace :: The workspace to load the logs to.
+ *   @param entry :: The Nexus entry
+ */
 void LoadISISNexus2::loadSampleData(
     DataObjects::Workspace2D_sptr &local_workspace, NXEntry &entry) {
   /// Sample geometry
@@ -1114,13 +1134,11 @@ void LoadISISNexus2::loadSampleData(
 }
 
 /**  Load logs from Nexus file. Logs are expected to be in
-*   /raw_data_1/runlog group of the file. Call to this method must be done
-*   within /raw_data_1 group.
-*   @param ws :: The workspace to load the logs to.
-*   @param entry :: Nexus entry
-*/
-void LoadISISNexus2::loadLogs(DataObjects::Workspace2D_sptr &ws,
-                              NXEntry &entry) {
+ *   /raw_data_1/runlog group of the file. Call to this method must be done
+ *   within /raw_data_1 group.
+ *   @param ws :: The workspace to load the logs to.
+ */
+void LoadISISNexus2::loadLogs(DataObjects::Workspace2D_sptr &ws) {
   IAlgorithm_sptr alg = createChildAlgorithm("LoadNexusLogs", 0.0, 0.5);
   alg->setPropertyValue("Filename", this->getProperty("Filename"));
   alg->setProperty<MatrixWorkspace_sptr>("Workspace", ws);
@@ -1131,23 +1149,7 @@ void LoadISISNexus2::loadLogs(DataObjects::Workspace2D_sptr &ws,
                     << "data associated with this workspace\n";
     return;
   }
-  // For ISIS Nexus only, fabricate an additional log containing an array of
-  // proton charge information from the periods group.
-  try {
-    NXClass protonChargeClass = entry.openNXGroup("periods");
-    NXFloat periodsCharge = protonChargeClass.openNXFloat("proton_charge");
-    periodsCharge.load();
-    size_t nperiods = periodsCharge.dim0();
-    std::vector<double> chargesVector(nperiods);
-    std::copy(periodsCharge(), periodsCharge() + nperiods,
-              chargesVector.begin());
-    ArrayProperty<double> *protonLogData =
-        new ArrayProperty<double>("proton_charge_by_period", chargesVector);
-    ws->mutableRun().addProperty(protonLogData);
-  } catch (std::runtime_error &) {
-    this->g_log.debug("Cannot read periods information from the nexus file. "
-                      "This group may be absent.");
-  }
+
   // Populate the instrument parameters.
   ws->populateInstrumentParameters();
 
@@ -1158,29 +1160,30 @@ void LoadISISNexus2::loadLogs(DataObjects::Workspace2D_sptr &ws,
 
 double LoadISISNexus2::dblSqrt(double in) { return sqrt(in); }
 /**Method takes input parameters which describe  monitor loading and analyze
-*them against spectra/monitor block information in the file.
-* The result is the option if monitors can  be loaded together with spectra or
-*mast be treated separately
-* and additional information on how to treat monitor spectra.
-*
-*@param entry                :: entry to the NeXus file, opened at root folder
-*@param spectrum_index       :: array of spectra indexes of the data present in
-*the file
-*@param ndets                :: size of the spectrum index array
-*@param n_vms_compat_spectra :: number of data entries containing common time
-*bins (e.g. all spectra, or all spectra and monitors or some spectra (this is
-*not fully supported)
-*@param monitors             :: map connecting monitor spectra ID against
-*monitor group name in the file.
-*@param excludeMonitors      :: input property indicating if it is requested to
-*exclude monitors from the target workspace
-*@param separateMonitors     :: input property indicating if it is requested to
-*load monitors separately (and exclude them from target data workspace this way)
-*@return excludeMonitors     :: indicator if monitors should or must be excluded
-*from the main data workspace if they can not be loaded with the data
-*                               (contain different number of time channels)
-*
-*/
+ *them against spectra/monitor block information in the file.
+ * The result is the option if monitors can  be loaded together with spectra or
+ *mast be treated separately
+ * and additional information on how to treat monitor spectra.
+ *
+ *@param entry                :: entry to the NeXus file, opened at root folder
+ *@param spectrum_index       :: array of spectra indexes of the data present in
+ *the file
+ *@param ndets                :: size of the spectrum index array
+ *@param n_vms_compat_spectra :: number of data entries containing common time
+ *bins (e.g. all spectra, or all spectra and monitors or some spectra (this is
+ *not fully supported)
+ *@param monitors             :: map connecting monitor spectra ID against
+ *monitor group name in the file.
+ *@param excludeMonitors      :: input property indicating if it is requested to
+ *exclude monitors from the target workspace
+ *@param separateMonitors     :: input property indicating if it is requested to
+ *load monitors separately (and exclude them from target data workspace this
+ *way)
+ *@return excludeMonitors     :: indicator if monitors should or must be
+ *excluded from the main data workspace if they can not be loaded with the data
+ *                               (contain different number of time channels)
+ *
+ */
 bool LoadISISNexus2::findSpectraDetRangeInFile(
     NXEntry &entry, boost::shared_array<int> &spectrum_index, int64_t ndets,
     int64_t n_vms_compat_spectra, std::map<int64_t, std::string> &monitors,
@@ -1286,11 +1289,37 @@ bool LoadISISNexus2::findSpectraDetRangeInFile(
   if ((totNumOfSpectra != static_cast<size_t>(n_vms_compat_spectra)) ||
       (spectraID_max - spectraID_min + 1 !=
        static_cast<int64_t>(n_vms_compat_spectra))) {
-    throw std::runtime_error("LoadISISNexus: There seems to be an "
-                             "inconsistency in the spectrum numbers.");
+    // At this point we normally throw since there is a mismatch between the
+    // number
+    // spectra of the detectors+monitors and the entry in NSP1, but in the
+    // case of multiple time regimes this comparison is not any longer valid.
+    // Hence we only throw if the file does not correspond to a multiple time
+    // regime file.
+    if (!isMultipleTimeRegimeFile(entry)) {
+      throw std::runtime_error("LoadISISNexus: There seems to be an "
+                               "inconsistency in the spectrum numbers.");
+    }
   }
 
   return separateMonitors;
+}
+
+/**
+ * Determine if a file is a multiple time regime file. Note that for a true
+ * multi-time regime file we need at least three time regime entries, since
+ * two time regimes are handled by vms_compat.
+ * @param entry a handle to the Nexus file
+ * @return if the file has multiple time regimes or not
+ */
+bool LoadISISNexus2::isMultipleTimeRegimeFile(NeXus::NXEntry &entry) const {
+  auto hasMultipleTimeRegimes(false);
+  try {
+    NXClass instrument = entry.openNXGroup("instrument");
+    NXClass dae = instrument.openNXGroup("dae");
+    hasMultipleTimeRegimes = dae.containsGroup("time_channels_3");
+  } catch (...) {
+  }
+  return hasMultipleTimeRegimes;
 }
 
 } // namespace DataHandling

@@ -2,7 +2,7 @@
  RawCountValidator
 ===================
 
-This a python binding to the C++ class Mantid::API::RawCountValidator.
+This is a Python binding to the C++ class Mantid::API::RawCountValidator.
 
 *bases:* :py:obj:`mantid.api.MatrixWorkspaceValidator`
 

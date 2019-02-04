@@ -1,33 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MDALGORITHMS_MDRESOLUTIONCONVOLUTION_H_
 #define MANTID_MDALGORITHMS_MDRESOLUTIONCONVOLUTION_H_
-/**
-  Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
 
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>.
-  Code Documentation is available at: <http://doxygen.mantidproject.org>
-*/
-#include "MantidKernel/System.h"
-#include "MantidKernel/ClassMacros.h"
-#include "MantidAPI/ParamFunction.h"
+#include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
 #include "MantidAPI/IMDIterator.h"
-#include "MantidAPI/ExperimentInfo.h"
+#include "MantidAPI/ParamFunction.h"
+#include "MantidKernel/System.h"
 #include "MantidMDAlgorithms/Quantification/ForegroundModel.h"
 #include "MantidMDAlgorithms/Quantification/MDResolutionConvolutionFactory.h"
 
@@ -61,6 +45,13 @@ public:
   /// a fit
   MDResolutionConvolution(const API::IFunctionMD &fittingFunction,
                           const std::string &fgModelName);
+
+  /// Disable copy operator
+  MDResolutionConvolution(const MDResolutionConvolution &) = delete;
+
+  /// Disable assignment operator
+  MDResolutionConvolution &operator=(const MDResolutionConvolution &) = delete;
+
   /// Function category
   const std::string category() const override { return "Quantification"; }
 
@@ -114,8 +105,6 @@ protected:
   const API::IFunctionMD &getFittingFunction() const;
 
 private:
-  DISABLE_COPY_AND_ASSIGN(MDResolutionConvolution)
-
   /// Required for function interface
   void function(const Mantid::API::FunctionDomain &,
                 Mantid::API::FunctionValues &) const override{};
@@ -125,8 +114,8 @@ private:
   /// A pointer to the foreground model
   ForegroundModel *m_foreground;
 };
-}
-}
+} // namespace MDAlgorithms
+} // namespace Mantid
 
 /*
  * Register a class into the factory using a global RegistrationHelper

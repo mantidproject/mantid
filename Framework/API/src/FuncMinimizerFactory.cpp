@@ -1,6 +1,12 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/FuncMinimizerFactory.h"
-#include "MantidAPI/IFuncMinimizer.h"
 #include "MantidAPI/Expression.h"
+#include "MantidAPI/IFuncMinimizer.h"
 #include "MantidKernel/LibraryManager.h"
 
 #include <stdexcept>
@@ -17,11 +23,11 @@ FuncMinimizerFactoryImpl::FuncMinimizerFactoryImpl()
 }
 
 /**
-* Creates an instance of a minimizer
-* @param str :: The minimizer initialization string which includes its type
-*   and optionally properties: "type,prop1=value1,prop2=value2"
-* @return A pointer to the created minimizer
-*/
+ * Creates an instance of a minimizer
+ * @param str :: The minimizer initialization string which includes its type
+ *   and optionally properties: "type,prop1=value1,prop2=value2"
+ * @return A pointer to the created minimizer
+ */
 boost::shared_ptr<IFuncMinimizer>
 FuncMinimizerFactoryImpl::createMinimizer(const std::string &str) const {
   // check if there are any properties defined - look for a comma

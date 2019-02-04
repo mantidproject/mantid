@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_API_MULTIPLEFILEPROPERTY_H_
 #define MANTID_API_MULTIPLEFILEPROPERTY_H_
 
-#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/MultiFileNameParser.h"
-#include <vector>
+#include "MantidKernel/PropertyWithValue.h"
 #include <set>
+#include <vector>
 
 namespace Mantid {
 namespace API {
@@ -104,27 +110,6 @@ namespace API {
   results should be two workspaces, a1+a2 and b1+b2.
 
   ------------------------------------------------------------------------------------------------------
-
-  Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
-
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>
-  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport MultipleFileProperty
     : public Kernel::PropertyWithValue<std::vector<std::vector<std::string>>> {
@@ -173,7 +158,15 @@ private:
   std::string m_defaultExt;
   /// The action type of this property
   /// Load (dafault) or OptionalLoad are supported
-  unsigned int m_action;
+  unsigned int m_action{2};
+  /// Last value of propValue used in
+  /// MultipleFileProperty::setValueAsMultipleFiles
+  /// and MultipleFileProperty::setValueAsSingleFile
+  std::string m_oldPropValue;
+  /// Last value of the found files used in
+  /// MultipleFileProperty::setValueAsMultipleFiles
+  /// and MultipleFileProperty::setValueAsSingleFile
+  std::vector<std::vector<std::string>> m_oldFoundValue;
 };
 
 } // namespace API

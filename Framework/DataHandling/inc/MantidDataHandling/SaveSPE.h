@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAHANDLING_SAVESPE_H_
 #define MANTID_DATAHANDLING_SAVESPE_H_
 
@@ -6,8 +12,13 @@
 //---------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/cow_ptr.h"
+#include <vector>
 
 namespace Mantid {
+namespace HistogramData {
+class HistogramY;
+class HistogramE;
+} // namespace HistogramData
 namespace DataHandling {
 /**
      Saves a workspace into an ASCII SPE file.
@@ -52,6 +63,9 @@ public:
 
   /// Algorithm's version
   int version() const override { return (1); }
+  const std::vector<std::string> seeAlso() const override {
+    return {"LoadSPE", "SavePAR", "SavePHX"};
+  }
   /// Algorithm's category for identification
   const std::string category() const override {
     return "DataHandling\\SPE;Inelastic\\DataHandling";
@@ -74,7 +88,7 @@ private:
   void writeHist(const API::MatrixWorkspace_const_sptr WS, FILE *const outFile,
                  const int wsIn) const;
   void writeMaskFlags(FILE *const outFile) const;
-  void writeBins(const MantidVec &Vs, FILE *const outFile) const;
+  void writeBins(const std::vector<double> &Vs, FILE *const outFile) const;
   void writeValue(const double value, FILE *const outFile) const;
   void logMissingMasked(const std::vector<int> &inds, const size_t nonMasked,
                         const int masked) const;
@@ -93,14 +107,16 @@ private:
   static const double MASK_ERROR;
 
   // temporary variable to keep verified signal values for current spectra
-  mutable MantidVec m_tSignal;
+  mutable std::vector<double> m_tSignal;
   // temporary variable to keep verified error values for current spectra
-  mutable MantidVec m_tError;
+  mutable std::vector<double> m_tError;
 
   // method verifies if a spectra contains any NaN or Inf values and replaces
   // these values with SPE-specified constants
-  void check_and_copy_spectra(const MantidVec &inSignal, const MantidVec &inErr,
-                              MantidVec &Signal, MantidVec &Error) const;
+  void check_and_copy_spectra(const HistogramData::HistogramY &inSignal,
+                              const HistogramData::HistogramE &inErr,
+                              std::vector<double> &Signal,
+                              std::vector<double> &Error) const;
 };
 
 } // namespace DataHandling

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/IntegrateMDHistoWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/MultiThreaded.h"
@@ -7,18 +13,17 @@
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/Progress.h"
 
-#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
-#include "MantidGeometry/MDGeometry/MDBoxImplicitFunction.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidDataObjects/MDHistoWorkspaceIterator.h"
+#include "MantidGeometry/MDGeometry/MDBoxImplicitFunction.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 
 #include <algorithm>
+#include <cmath>
 #include <map>
 #include <utility>
-#include <cmath>
 
 #include <boost/make_shared.hpp>
-#include <boost/scoped_ptr.hpp>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -172,7 +177,7 @@ void setMinMaxBins(Mantid::coord_t &pMin, Mantid::coord_t &pMax,
   numberOfBins =
       std::lround((pMax - pMin) / width); // round up to a whole number of bins.
 }
-}
+} // namespace
 
 /**
  * Create the output workspace in the right shape.
@@ -240,8 +245,8 @@ void performWeightedSum(MDHistoWorkspaceIterator const *const iterator,
 namespace Mantid {
 namespace MDAlgorithms {
 
-using Mantid::Kernel::Direction;
 using Mantid::API::WorkspaceProperty;
+using Mantid::Kernel::Direction;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(IntegrateMDHistoWorkspace)
@@ -324,7 +329,7 @@ void IntegrateMDHistoWorkspace::exec() {
      */
     MDHistoWorkspace_sptr outWS = createShapedOutput(inWS.get(), pbins, g_log);
 
-    Progress progress(this, 0, 1, size_t(outWS->getNPoints()));
+    Progress progress(this, 0.0, 1.0, size_t(outWS->getNPoints()));
 
     // Store in each dimension
     std::vector<Mantid::coord_t> binWidthsOut(nDims);
@@ -359,9 +364,8 @@ void IntegrateMDHistoWorkspace::exec() {
     PARALLEL_FOR_NO_WSP_CHECK()
     for (int i = 0; i < int(outIterators.size()); ++i) { // NOLINT
       PARALLEL_START_INTERUPT_REGION
-      boost::scoped_ptr<MDHistoWorkspaceIterator> outIterator(
-          dynamic_cast<MDHistoWorkspaceIterator *>(outIterators[i]));
-
+      auto outIterator =
+          dynamic_cast<MDHistoWorkspaceIterator *>(outIterators[i].get());
       if (!outIterator) {
         throw std::logic_error(
             "Failed to cast iterator to MDHistoWorkspaceIterator");
@@ -386,8 +390,10 @@ void IntegrateMDHistoWorkspace::exec() {
         double sumNEvents = 0;
 
         // Create a thread-local input iterator.
-        boost::scoped_ptr<MDHistoWorkspaceIterator> inIterator(
-            dynamic_cast<MDHistoWorkspaceIterator *>(inWS->createIterator()));
+
+        auto iterator = inWS->createIterator();
+        auto inIterator =
+            dynamic_cast<MDHistoWorkspaceIterator *>(iterator.get());
         if (!inIterator) {
           throw std::runtime_error(
               "Could not convert IMDIterator to a MDHistoWorkspaceIterator");
@@ -401,7 +407,7 @@ void IntegrateMDHistoWorkspace::exec() {
         rather than iterating over the full set of boxes of the input workspace.
         */
         inIterator->jumpToNearest(outIteratorCenter);
-        performWeightedSum(inIterator.get(), box, sumSignal, sumSQErrors,
+        performWeightedSum(inIterator, box, sumSignal, sumSQErrors,
                            sumNEvents); // Use the present position. neighbours
                                         // below exclude the current position.
         // Look at all of the neighbours of our position. We previously
@@ -410,7 +416,7 @@ void IntegrateMDHistoWorkspace::exec() {
             inIterator->findNeighbourIndexesByWidth(widthVector);
         for (auto neighbourIndex : neighbourIndexes) {
           inIterator->jumpTo(neighbourIndex); // Go to that neighbour
-          performWeightedSum(inIterator.get(), box, sumSignal, sumSQErrors,
+          performWeightedSum(inIterator, box, sumSignal, sumSQErrors,
                              sumNEvents);
         }
 

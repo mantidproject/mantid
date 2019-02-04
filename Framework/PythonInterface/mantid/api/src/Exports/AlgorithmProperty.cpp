@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/AlgorithmProperty.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidPythonInterface/kernel/PropertyWithValueExporter.h"
@@ -38,12 +44,12 @@ AlgorithmProperty *createPropertyWithValidator(const std::string &name,
   return createPropertyWithValidatorAndDirection(
       name, validator, Mantid::Kernel::Direction::Input);
 }
-}
+} // namespace
 
 void export_AlgorithmProperty() {
   // AlgorithmProperty has base PropertyWithValue<boost::shared_ptr<IAlgorithm>>
   // which must be exported
-  typedef boost::shared_ptr<IAlgorithm> HeldType;
+  using HeldType = boost::shared_ptr<IAlgorithm>;
   PropertyWithValueExporter<HeldType>::define("AlgorithmPropertyWithValue");
 
   class_<AlgorithmProperty, bases<PropertyWithValue<HeldType>>,

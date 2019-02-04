@@ -1,15 +1,23 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/GenerateIPythonNotebook.h"
+#include "MantidAPI/AlgorithmHistory.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/NotebookBuilder.h"
+#include "MantidAPI/Workspace.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/System.h"
-#include "MantidAPI/FileProperty.h"
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/AlgorithmHistory.h"
-#include "MantidAPI/NotebookBuilder.h"
 
 #include <fstream>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using Mantid::Types::Core::DateAndTime;
 
 namespace {
 Mantid::Kernel::Logger g_log("GenerateIPythonNotebook");
@@ -21,11 +29,8 @@ namespace Algorithms {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(GenerateIPythonNotebook)
 
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
-*/
+ */
 void GenerateIPythonNotebook::init() {
   declareProperty(make_unique<WorkspaceProperty<Workspace>>(
                       "InputWorkspace", "", Direction::Input),
@@ -61,9 +66,8 @@ void GenerateIPythonNotebook::init() {
       "When to specify which algorithm version was used by Mantid.");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
-*/
+ */
 void GenerateIPythonNotebook::exec() {
   const Workspace_const_sptr ws = getProperty("InputWorkspace");
   const bool unrollAll = getProperty("UnrollAll");
@@ -83,8 +87,8 @@ void GenerateIPythonNotebook::exec() {
   }
 
   // Need at least a start time to do time filter
-  if (startTime != "") {
-    if (endTime == "") {
+  if (!startTime.empty()) {
+    if (endTime.empty()) {
       // If no end time was given then filter up to now
       view->filterBetweenExecDate(DateAndTime(startTime));
     } else {

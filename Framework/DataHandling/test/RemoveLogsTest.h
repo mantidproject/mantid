@@ -1,19 +1,24 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef REMOVELOGSTEST_H_
 #define REMOVELOGSTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/RemoveLogs.h"
-#include "MantidDataHandling/LoadLog.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidKernel/Exception.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Workspace.h"
-#include "MantidAPI/Algorithm.h"
+#include "MantidDataHandling/LoadLog.h"
+#include "MantidDataHandling/RemoveLogs.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Component.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
@@ -23,6 +28,7 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
+using Mantid::Types::Core::DateAndTime;
 
 class RemoveLogsTest : public CxxTest::TestSuite {
 public:
@@ -118,7 +124,7 @@ private:
   void createSampleWorkspace() {
     // Create the workspace
     MatrixWorkspace_sptr ws =
-        WorkspaceCreationHelper::Create2DWorkspace(10, 100);
+        WorkspaceCreationHelper::create2DWorkspace(10, 100);
 
     // Add some log entries to it
     std::vector<DateAndTime> times;

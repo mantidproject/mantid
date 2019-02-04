@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 /*
  * SpecularReflectionAlgorithmTest.h
  *
@@ -12,19 +18,28 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidKernel/ConfigService.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidKernel/ConfigService.h"
 
-#include <boost/tuple/tuple.hpp>
 #include <Poco/Path.h>
+#include <boost/tuple/tuple.hpp>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
-typedef boost::tuple<double, double> VerticalHorizontalOffsetType;
+using VerticalHorizontalOffsetType = boost::tuple<double, double>;
 
 class SpecularReflectionAlgorithmTest {
+public:
+  // This means the constructor isn't called when running other tests
+  static SpecularReflectionAlgorithmTest *createSuite() {
+    return new SpecularReflectionAlgorithmTest();
+  }
+  static void destroySuite(SpecularReflectionAlgorithmTest *suite) {
+    delete suite;
+  }
+
 protected:
   MatrixWorkspace_sptr pointDetectorWS;
 

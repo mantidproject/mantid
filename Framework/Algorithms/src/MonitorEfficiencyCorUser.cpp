@@ -1,16 +1,23 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
+
 #include "MantidAlgorithms/MonitorEfficiencyCorUser.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidHistogramData/HistogramMath.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/muParser_Silent.h"
+#include "MantidHistogramData/Histogram.h"
+#include "MantidHistogramData/HistogramMath.h"
 #include "MantidKernel/MultiThreaded.h"
-
-using Mantid::HistogramData::HistogramX;
-using Mantid::HistogramData::HistogramY;
-using Mantid::HistogramData::HistogramE;
+#include "MantidKernel/Strings.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -18,6 +25,8 @@ namespace Algorithms {
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;
+using namespace DataObjects;
+using namespace HistogramData;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(MonitorEfficiencyCorUser)
@@ -40,22 +49,26 @@ void MonitorEfficiencyCorUser::exec() {
 
   m_outputWS = this->getProperty("OutputWorkspace");
 
-  if (m_inputWS->getInstrument()->getName() != "TOFTOF") {
-    std::string message("The input workspace does not come from TOFTOF");
-    g_log.error(message);
-    throw std::invalid_argument(message);
-  }
-
   // If input and output workspaces are not the same, create a new workspace for
   // the output
   if (m_outputWS != this->m_inputWS) {
-    m_outputWS = API::WorkspaceFactory::Instance().create(m_inputWS);
+    m_outputWS = create<MatrixWorkspace>(*m_inputWS);
   }
-  double val;
-  Strings::convert(m_inputWS->run().getProperty("Ei")->value(), val);
-  m_Ei = val;
-  Strings::convert(m_inputWS->run().getProperty("monitor_counts")->value(),
-                   m_monitorCounts);
+  m_Ei = m_inputWS->run().getPropertyValueAsType<double>("Ei");
+
+  std::string mon_counts_log;
+
+  // get name of the monitor counts sample log from the instrument parameter
+  // file
+  try {
+    mon_counts_log = getValFromInstrumentDef("monitor_counts_log");
+  } catch (Kernel::Exception::InstrumentDefinitionError &) {
+    // the default value is monitor_counts
+    mon_counts_log = "monitor_counts";
+  }
+
+  m_monitorCounts =
+      m_inputWS->run().getPropertyValueAsType<double>(mon_counts_log);
 
   // get Efficiency formula from the IDF - Parameters file
   const std::string effFormula = getValFromInstrumentDef("formula_mon_eff");
@@ -72,7 +85,7 @@ void MonitorEfficiencyCorUser::exec() {
 
   // Loop over the histograms (detector spectra)
   double factor = 1 / eff0;
-  PARALLEL_FOR2(m_outputWS, m_inputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*m_outputWS, *m_inputWS))
   for (int64_t i = 0; i < numberOfSpectra_i; ++i) {
     PARALLEL_START_INTERUPT_REGION
     m_outputWS->setHistogram(i, m_inputWS->histogram(i) * factor);

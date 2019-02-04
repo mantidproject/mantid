@@ -1,8 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/CreateMD.h"
-#include "MantidKernel/ArrayProperty.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
@@ -15,8 +22,8 @@ using namespace Mantid::DataObjects;
 namespace Mantid {
 namespace MDAlgorithms {
 
-using Mantid::Kernel::Direction;
 using Mantid::API::WorkspaceProperty;
+using Mantid::Kernel::Direction;
 
 // Box manager parameters for child algorithms
 static const std::string SPLITINTO("2");
@@ -165,7 +172,7 @@ void CreateMD::init() {
       "The name of the Nexus file to write, as a full or relative path.\n"
       "Only used if FileBackEnd is true.");
   setPropertySettings("Filename", make_unique<EnabledWhenProperty>(
-                                      "CreateFileBackEnd", IS_EQUAL_TO, "1"));
+                                      "FileBackEnd", IS_EQUAL_TO, "1"));
 
   declareProperty("FileBackEnd", false,
                   "If true, Filename must also be specified. The algorithm "

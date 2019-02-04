@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadPreNexusMonitors.h"
 
 #include "MantidAPI/Axis.h"
@@ -15,8 +21,8 @@
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
-#include <Poco/DOM/NodeIterator.h>
 #include <Poco/DOM/NodeFilter.h>
+#include <Poco/DOM/NodeIterator.h>
 #include <Poco/DOM/NodeList.h>
 #include <Poco/Path.h>
 #include <Poco/SAX/InputSource.h>
@@ -25,6 +31,9 @@
 #include <cstdlib>
 #include <fstream>
 #include <iterator>
+
+using Mantid::HistogramData::BinEdges;
+using Mantid::HistogramData::Counts;
 
 namespace Mantid {
 namespace DataHandling {
@@ -176,6 +185,7 @@ void LoadPreNexusMonitors::exec() {
   MatrixWorkspace_sptr localWorkspace = WorkspaceFactory::Instance().create(
       "Workspace2D", nMonitors, numberTimeBins, tchannels);
 
+  BinEdges edges(time_bins);
   for (int i = 0; i < nMonitors; i++) {
     // Now lets actually read the monitor files..
     Poco::Path pMonitorFilename(dirPath, monitorFilenames[i]);
@@ -187,16 +197,9 @@ void LoadPreNexusMonitors::exec() {
     // temp buffer for file reading
     std::vector<uint32_t> buffer = monitorFile.loadAllIntoVector();
 
-    MantidVec intensity(buffer.begin(), buffer.end());
-    // Copy the same data into the error array
-    MantidVec error(buffer.begin(), buffer.end());
-    // Now take the sqrt()
-    std::transform(error.begin(), error.end(), error.begin(),
-                   static_cast<double (*)(double)>(sqrt));
+    localWorkspace->setHistogram(i, edges,
+                                 Counts(buffer.begin(), buffer.end()));
 
-    localWorkspace->dataX(i) = time_bins;
-    localWorkspace->dataY(i) = intensity;
-    localWorkspace->dataE(i) = error;
     // Just have spectrum number be the same as the monitor number but -ve.
     auto &spectrum = localWorkspace->getSpectrum(i);
     spectrum.setSpectrumNo(monitorIDs[i]);

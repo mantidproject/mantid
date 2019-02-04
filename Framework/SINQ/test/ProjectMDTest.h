@@ -1,15 +1,21 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef __PROJECTMDTEST
 #define __PROJECTMDTEST
 
-#include <cxxtest/TestSuite.h>
-#include "MantidSINQ/ProjectMD.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/Run.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/cow_ptr.h"
-#include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidSINQ/ProjectMD.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;

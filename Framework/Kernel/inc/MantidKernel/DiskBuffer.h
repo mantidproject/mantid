@@ -1,26 +1,33 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_KERNEL_DISKBUFFER_H_
 #define MANTID_KERNEL_DISKBUFFER_H_
 
-#include "MantidKernel/DllConfig.h"
 #include "MantidKernel/FreeBlock.h"
-#include "MantidKernel/ISaveable.h"
 #include "MantidKernel/System.h"
 #ifndef Q_MOC_RUN
-#include <boost/multi_index_container.hpp>
 #include <boost/multi_index/hashed_index.hpp>
 #include <boost/multi_index/mem_fun.hpp>
 #include <boost/multi_index/ordered_index.hpp>
 #include <boost/multi_index/sequenced_index.hpp>
+#include <boost/multi_index_container.hpp>
 #endif
 #include <cstdint>
 #include <limits>
 #include <list>
-#include <map>
 #include <mutex>
+#include <string>
 #include <vector>
 
 namespace Mantid {
 namespace Kernel {
+
+// Forward declare
+class ISaveable;
 
 /** Buffer objects that need to be written out to disk
   so as to optimize writing operations.
@@ -32,27 +39,6 @@ namespace Kernel {
   to allow new blocks to fill them later.
 
   @date 2011-12-30
-
-  Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
-
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>
-  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport DiskBuffer {
 public:
@@ -60,18 +46,17 @@ public:
    * Index 1: Position in the file.
    * Index 2: Size of the free block
    */
-  typedef boost::multi_index::multi_index_container<
-      FreeBlock,
-      boost::multi_index::indexed_by<
-          boost::multi_index::ordered_non_unique<
-              BOOST_MULTI_INDEX_CONST_MEM_FUN(FreeBlock, uint64_t,
-                                              getFilePosition)>,
-          boost::multi_index::ordered_non_unique<
-              BOOST_MULTI_INDEX_CONST_MEM_FUN(FreeBlock, uint64_t, getSize)>>>
-      freeSpace_t;
+  using freeSpace_t = boost::multi_index::multi_index_container<
+      FreeBlock, boost::multi_index::indexed_by<
+                     boost::multi_index::ordered_non_unique<
+                         ::boost::multi_index::const_mem_fun<
+                             FreeBlock, uint64_t, &FreeBlock::getFilePosition>>,
+                     boost::multi_index::ordered_non_unique<
+                         ::boost::multi_index::const_mem_fun<
+                             FreeBlock, uint64_t, &FreeBlock::getSize>>>>;
 
   /// A way to index the free space by their size
-  typedef freeSpace_t::nth_index<1>::type freeSpace_bySize_t;
+  using freeSpace_bySize_t = freeSpace_t::nth_index<1>::type;
 
   DiskBuffer();
   DiskBuffer(uint64_t m_writeBufferSize);

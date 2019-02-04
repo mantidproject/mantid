@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,invalid-name,too-many-public-methods
 from __future__ import (absolute_import, division, print_function)
 
@@ -140,6 +146,19 @@ class SpaceGroupTest(unittest.TestCase):
 
         spaceGroup = SpaceGroupFactory.createSpaceGroup("F -4 3 c")
         self.checkWyckoffPositions(spaceGroup, wyckoffs)
+
+    def test_to_string(self):
+        spaceGroup = SpaceGroupFactory.createSpaceGroup("F -4 3 c")
+
+        expected_str = "Space group with Hermann-Mauguin symbol: "\
+                       "F -4 3 c"
+        expected_repr = "SpaceGroupFactory.createSpaceGroup(\"F -4 3 c\")"
+
+        self.assertEqual(expected_str, str(spaceGroup))
+        self.assertEqual(expected_repr, spaceGroup.__repr__())
+
+        newSpaceGroup = eval(spaceGroup.__repr__())
+        self.assertEqual(spaceGroup.getHMSymbol(), newSpaceGroup.getHMSymbol())
 
     def checkWyckoffPositions(self, spaceGroup, wyckoffs):
         for wp in wyckoffs:

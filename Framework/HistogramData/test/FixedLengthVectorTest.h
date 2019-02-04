@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_HISTOGRAMDATA_FIXEDLENGTHVECTORTEST_H_
 #define MANTID_HISTOGRAMDATA_FIXEDLENGTHVECTORTEST_H_
 
@@ -285,6 +291,14 @@ public:
     const FixedLengthVectorTester data{0.1, 0.2, 0.4};
     TS_ASSERT_EQUALS(data.front(), 0.1);
     TS_ASSERT_EQUALS(data.back(), 0.4);
+  }
+
+  void test_sum_vector() {
+    const FixedLengthVectorTester data{0.1, 0.2, 0.4};
+    TS_ASSERT_DELTA(data.sum(), 0.7, 1e-6);
+    TS_ASSERT_DELTA(data.sum(1), 0.6, 1e-6);
+    TS_ASSERT_DELTA(data.sum(0, 2), 0.3, 1e-6);
+    TS_ASSERT_DELTA(data.sum(0, 2, 10.0), 10.3, 1e-6);
   }
 };
 

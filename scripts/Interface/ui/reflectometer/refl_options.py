@@ -1,6 +1,13 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
-import ui_refl_options_window
+from __future__ import (absolute_import, division, print_function)
 from PyQt4 import QtCore, QtGui
+from ui.reflectometer.ui_refl_options_window import Ui_OptionsDialog
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -9,7 +16,7 @@ except AttributeError:
         return s
 
 
-class ReflOptions(QtGui.QDialog, ui_refl_options_window.Ui_OptionsDialog):
+class ReflOptions(QtGui.QDialog, Ui_OptionsDialog):
     """
     Member variables
     """

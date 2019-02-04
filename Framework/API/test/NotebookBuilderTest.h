@@ -1,8 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_NOTEBOOKBUILDERTEST_H_
 #define MANTID_NOTEBOOKBUILDERTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include <algorithm>
+#include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/DataProcessorAlgorithm.h"
@@ -211,7 +217,7 @@ public:
 
   void test_Build_Unrolled() {
     std::string result_markdown =
-        "               \"source\" : \"Child algorithms of TopLevelAlgorithm\"";
+        R"(               "source" : "Child algorithms of TopLevelAlgorithm")";
     std::string result_code =
         "               \"input\" : \"BasicAlgorithm(PropertyA='FirstOne')\",";
 
@@ -234,7 +240,7 @@ public:
     view->unrollAll();
     NotebookBuilder builder(view);
     std::string notebookText =
-        builder.build(ws->name(), ws->getTitle(), ws->getComment());
+        builder.build(ws->getName(), ws->getTitle(), ws->getComment());
 
     std::vector<std::string> notebookLines;
     std::string line;
@@ -254,7 +260,7 @@ public:
 
   void test_Partially_Unrolled() {
     std::string result_markdown =
-        "               \"source\" : \"Child algorithms of TopLevelAlgorithm\"";
+        R"(               "source" : "Child algorithms of TopLevelAlgorithm")";
     std::string result_code =
         "               \"input\" : \"BasicAlgorithm(PropertyA='FirstOne')\",";
 
@@ -286,7 +292,7 @@ public:
 
     NotebookBuilder builder(view);
     std::string notebookText =
-        builder.build(ws->name(), ws->getTitle(), ws->getComment());
+        builder.build(ws->getName(), ws->getTitle(), ws->getComment());
 
     std::vector<std::string> notebookLines;
     std::string line;
@@ -329,7 +335,7 @@ public:
 
     NotebookBuilder builder(wsHist.createView());
     std::string notebookText =
-        builder.build(ws->name(), ws->getTitle(), ws->getComment());
+        builder.build(ws->getName(), ws->getTitle(), ws->getComment());
 
     std::vector<std::string> notebookLines;
     std::string line;

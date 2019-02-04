@@ -1,16 +1,22 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_SINQ_POLDIINSTRUMENTADAPTER_H_
 #define MANTID_SINQ_POLDIINSTRUMENTADAPTER_H_
 
-#include "MantidKernel/System.h"
-#include "MantidSINQ/DllConfig.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/Run.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidKernel/System.h"
+#include "MantidSINQ/DllConfig.h"
 
 #include <map>
 
-#include "MantidSINQ/PoldiUtilities/PoldiAbstractDetector.h"
 #include "MantidSINQ/PoldiUtilities/PoldiAbstractChopper.h"
+#include "MantidSINQ/PoldiUtilities/PoldiAbstractDetector.h"
 #include "MantidSINQ/PoldiUtilities/PoldiSourceSpectrum.h"
 
 namespace Mantid {
@@ -45,8 +51,8 @@ public:
                             const std::string &propertyName) const = 0;
 };
 
-typedef boost::shared_ptr<AbstractDoubleValueExtractor>
-    AbstractDoubleValueExtractor_sptr;
+using AbstractDoubleValueExtractor_sptr =
+    boost::shared_ptr<AbstractDoubleValueExtractor>;
 
 class NumberDoubleValueExtractor : public AbstractDoubleValueExtractor {
 public:
@@ -64,8 +70,9 @@ public:
 
   double operator()(const API::Run &runInformation,
                     const std::string &propertyName) const override {
-    return runInformation.getPropertyValueAsType<std::vector<double>>(
-                              propertyName).front();
+    return runInformation
+        .getPropertyValueAsType<std::vector<double>>(propertyName)
+        .front();
   }
 };
 
@@ -128,7 +135,7 @@ protected:
   static std::map<std::string, AbstractDoubleValueExtractor_sptr> m_extractors;
 };
 
-typedef boost::shared_ptr<PoldiInstrumentAdapter> PoldiInstrumentAdapter_sptr;
+using PoldiInstrumentAdapter_sptr = boost::shared_ptr<PoldiInstrumentAdapter>;
 
 } // namespace Poldi
 } // namespace Mantid

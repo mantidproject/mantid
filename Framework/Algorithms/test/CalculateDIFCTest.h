@@ -1,9 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_CALCULATEDIFCTEST_H_
 #define MANTID_ALGORITHMS_CALCULATEDIFCTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/SpectrumInfo.h"
+#include "MantidAPI/TableRow.h"
 #include "MantidAlgorithms/CalculateDIFC.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::Algorithms::CalculateDIFC;
@@ -16,7 +25,7 @@ using namespace Mantid::Geometry;
 namespace {
 const double OFFSET = .1;
 const int NUM_SPEC = 3;
-}
+} // namespace
 
 class CalculateDIFCTest : public CxxTest::TestSuite {
 public:
@@ -44,8 +53,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
-    // Retrieve the workspace from data service. TODO: Change to your desired
-    // type
+    // Retrieve the workspace from data service.
     MatrixWorkspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING(
         ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
@@ -81,12 +89,56 @@ public:
 
     auto offsetsWS =
         OffsetsWorkspace_sptr(new OffsetsWorkspace(inputWS->getInstrument()));
+    const auto &spectrumInfo = offsetsWS->spectrumInfo();
     for (int i = 0; i < NUM_SPEC; ++i) {
-      IDetector_const_sptr det = inputWS->getDetector(i);
-      offsetsWS->setValue(det->getID(), OFFSET);
+      const auto &det = spectrumInfo.detector(i);
+      offsetsWS->setValue(det.getID(), OFFSET);
     }
 
     runTest(inputWS, offsetsWS, outWSName);
+  }
+
+  void test_withDiffCal() {
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
+        NUM_SPEC, 1);
+    std::string outWSName("CalculateDIFCTest_withCalib_OutputWS");
+
+    ITableWorkspace_sptr calibWksp =
+        boost::make_shared<Mantid::DataObjects::TableWorkspace>();
+    calibWksp->addColumn("int", "detid");
+    calibWksp->addColumn("double", "difc");
+    for (size_t i = 0; i < NUM_SPEC; ++i) {
+      Mantid::API::TableRow newrow = calibWksp->appendRow();
+      newrow << static_cast<int>(i + 1);
+      newrow << 12345.;
+    }
+
+    CalculateDIFC alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("CalibrationWorkspace", calibWksp));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.execute(););
+    TS_ASSERT(alg.isExecuted());
+
+    MatrixWorkspace_sptr ws;
+    TS_ASSERT_THROWS_NOTHING(
+        ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+            AnalysisDataService::Instance().retrieve(outWSName)));
+    TS_ASSERT(ws);
+    if (!ws)
+      return;
+
+    // should only be NUM_SPEC
+    for (size_t i = 0; i < NUM_SPEC; ++i) {
+      TS_ASSERT_DELTA(ws->readY(i)[0], 12345., 1.);
+    }
+
+    // Remove workspace from the data service.
+    AnalysisDataService::Instance().remove(outWSName);
   }
 };
 

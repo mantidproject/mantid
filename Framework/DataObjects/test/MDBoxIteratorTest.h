@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAOBJECTS_MDBOXITERATORTEST_H_
 #define MANTID_DATAOBJECTS_MDBOXITERATORTEST_H_
 
@@ -19,15 +25,15 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 using namespace Mantid;
 using namespace Mantid::Kernel;
+using Mantid::Geometry::MDBoxImplicitFunction;
 using Mantid::Geometry::MDImplicitFunction;
 using Mantid::Geometry::MDImplicitFunction;
 using Mantid::Geometry::MDPlane;
-using Mantid::Geometry::MDBoxImplicitFunction;
 
 class MDBoxIteratorTest : public CxxTest::TestSuite {
 public:
-  typedef MDGridBox<MDLeanEvent<1>, 1> gbox_t;
-  typedef MDBoxBase<MDLeanEvent<1>, 1> ibox_t;
+  using gbox_t = MDGridBox<MDLeanEvent<1>, 1>;
+  using ibox_t = MDBoxBase<MDLeanEvent<1>, 1>;
 
   //--------------------------------------------------------------------------------------
   /** Make a gridded box with this structure:
@@ -82,8 +88,8 @@ public:
 
   //--------------------------------------------------------------------------------------
   void test_ctor_with_null_box_fails() {
-    typedef MDBoxIterator<MDLeanEvent<1>, 1> boxit_t;
-    TS_ASSERT_THROWS_ANYTHING(new boxit_t(NULL, 10, false););
+    using boxit_t = MDBoxIterator<MDLeanEvent<1>, 1>;
+    TS_ASSERT_THROWS_ANYTHING(new boxit_t(nullptr, 10, false););
   }
 
   //--------------------------------------------------------------------------------------
@@ -492,9 +498,9 @@ public:
             pBC(MDBox<MDLeanEvent<2>, 2>::getBoxController())
 
       {}
-      GCC_DIAG_OFF_SUGGEST_OVERRIDE
+      GNU_DIAG_OFF_SUGGEST_OVERRIDE
       MOCK_CONST_METHOD0(getIsMasked, bool());
-      GCC_DIAG_ON_SUGGEST_OVERRIDE
+      GNU_DIAG_ON_SUGGEST_OVERRIDE
       ~MockMDBox() override { delete pBC; }
     };
 
@@ -570,10 +576,10 @@ public:
     /// Mock Skipping Policy Type to inject.
     class MockSkippingPolicy : public SkippingPolicy {
     public:
-      GCC_DIAG_OFF_SUGGEST_OVERRIDE
+      GNU_DIAG_OFF_SUGGEST_OVERRIDE
       MOCK_CONST_METHOD0(keepGoing, bool());
       MOCK_METHOD0(Die, void());
-      GCC_DIAG_ON_SUGGEST_OVERRIDE
+      GNU_DIAG_ON_SUGGEST_OVERRIDE
       ~MockSkippingPolicy() override { Die(); }
     };
 
@@ -645,9 +651,9 @@ public:
   void do_test_iterator(bool leafOnly, bool ImplicitFunction, size_t expected) {
     // Count the top level box.
     size_t counter = 1;
-    MDBoxBase<MDLeanEvent<3>, 3> *box = NULL;
+    MDBoxBase<MDLeanEvent<3>, 3> *box = nullptr;
 
-    MDBoxImplicitFunction *function = NULL;
+    MDBoxImplicitFunction *function = nullptr;
     if (ImplicitFunction) {
       std::vector<coord_t> min(3, 2.001f);
       std::vector<coord_t> max(3, 2.999f);
@@ -720,7 +726,7 @@ public:
   void do_test_getBoxes(bool leafOnly, int ImplicitFunction, size_t expected) {
     std::vector<API::IMDNode *> boxes;
 
-    MDImplicitFunction *function = NULL;
+    MDImplicitFunction *function = nullptr;
     if (ImplicitFunction == 1) {
       // Box in 3D where 2 < (x,y,z) < 3
       std::vector<coord_t> min(3, 2.001f);

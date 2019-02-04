@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_API_IFMDITERATOR_H_
 #define MANTID_API_IFMDITERATOR_H_
 
@@ -5,7 +11,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/DllConfig.h"
-#include "MantidAPI/IMDWorkspace.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/VMD.h"
@@ -14,36 +19,23 @@
 namespace Mantid {
 
 namespace API {
-//----------------------------------------------------------------------
-// Forward declaration
-//----------------------------------------------------------------------
-class IMDWorkspace;
+
+/** Enum describing different ways to normalize the signal
+ * in a MDWorkspace.
+ */
+enum MDNormalization {
+  /// Don't normalize = return raw counts
+  NoNormalization = 0,
+  /// Divide the signal by the volume of the box/bin
+  VolumeNormalization = 1,
+  /// Divide the signal by the number of events that contributed to it.
+  NumEventsNormalization = 2
+};
 
 /** This is an interface to an iterator of an IMDWorkspace
 
     @author Roman Tolchenov, Tessella Support Services plc
     @date 15/03/2011
-
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-   National Laboratory & European Spallation Source
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>.
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_API_DLL IMDIterator {
 public:
@@ -83,13 +75,14 @@ public:
   virtual signal_t getError() const = 0;
 
   /// Return a list of vertexes defining the volume pointed to
-  virtual coord_t *getVertexesArray(size_t &numVertices) const = 0;
+  virtual std::unique_ptr<coord_t[]>
+  getVertexesArray(size_t &numVertices) const = 0;
 
   /// Return a list of vertexes defining the volume pointed to, enable masking
   /// of dimensions.
-  virtual coord_t *getVertexesArray(size_t &numVertices,
-                                    const size_t outDimensions,
-                                    const bool *maskDim) const = 0;
+  virtual std::unique_ptr<coord_t[]>
+  getVertexesArray(size_t &numVertices, const size_t outDimensions,
+                   const bool *maskDim) const = 0;
 
   /// Returns the position of the center of the box pointed to.
   virtual Mantid::Kernel::VMD getCenter() const = 0;

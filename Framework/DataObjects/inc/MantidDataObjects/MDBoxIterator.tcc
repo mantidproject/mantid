@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidKernel/System.h"
 #include "MantidDataObjects/MDBoxBase.h"
@@ -258,11 +264,11 @@ TMDE(signal_t MDBoxIterator)::getSignal() const {
 TMDE(signal_t MDBoxIterator)::getError() const { return m_current->getError(); }
 
 /// Return a list of vertexes defining the volume pointed to
-TMDE(coord_t *MDBoxIterator)::getVertexesArray(size_t &numVertices) const {
+TMDE(std::unique_ptr<coord_t[]> MDBoxIterator)::getVertexesArray(size_t &numVertices) const {
   return m_current->getVertexesArray(numVertices);
 }
 
-TMDE(coord_t *MDBoxIterator)::getVertexesArray(size_t &numVertices,
+TMDE(std::unique_ptr<coord_t[]> MDBoxIterator)::getVertexesArray(size_t &numVertices,
                                                const size_t outDimensions,
                                                const bool *maskDim) const {
   return m_current->getVertexesArray(numVertices, outDimensions, maskDim);

@@ -29,16 +29,18 @@
  *                                                                         *
  ***************************************************************************/
 #include "MultiPeakFitTool.h"
-#include "RangeSelectorTool.h"
 #include "ApplicationWindow.h"
 #include "DataPickerTool.h"
 #include "Plot.h"
+#include "RangeSelectorTool.h"
 #include "cursors.h"
 
-#include <qwt_plot_curve.h>
 #include <QApplication>
+#include <qwt_plot_curve.h>
 
 #include <gsl/gsl_statistics.h>
+
+using namespace MantidQt::API;
 
 MultiPeakFitTool::MultiPeakFitTool(Graph *graph, ApplicationWindow *app,
                                    MultiPeakFit::PeakProfile profile,
@@ -46,7 +48,7 @@ MultiPeakFitTool::MultiPeakFitTool(Graph *graph, ApplicationWindow *app,
                                    const char *status_slot)
     : PlotToolInterface(graph), d_profile(profile), d_num_peaks(num_peaks) {
   d_selected_peaks = 0;
-  d_curve = 0;
+  d_curve = nullptr;
 
   d_fit = new MultiPeakFit(app, d_graph, d_profile, d_num_peaks);
   d_fit->enablePeakCurves(app->generatePeakCurves);
@@ -99,12 +101,13 @@ void MultiPeakFitTool::selectPeak(QwtPlotCurve *curve, int point_index) {
   else
     emit statusText(tr("Peak %1 selected! Click to select a point and "
                        "double-click/press 'Enter' to set the position of the "
-                       "next peak!").arg(QString::number(d_selected_peaks)));
+                       "next peak!")
+                        .arg(QString::number(d_selected_peaks)));
 }
 
 void MultiPeakFitTool::finalize() {
   delete d_picker_tool;
-  d_picker_tool = NULL;
+  d_picker_tool = nullptr;
   d_graph->plotWidget()->canvas()->releaseMouse();
 
   if (d_fit->setDataFromCurve(d_curve->title().text())) {
@@ -141,7 +144,7 @@ void MultiPeakFitTool::finalize() {
 
     d_fit->fit();
     delete d_fit;
-    d_fit = NULL;
+    d_fit = nullptr;
     QApplication::restoreOverrideCursor();
   }
 

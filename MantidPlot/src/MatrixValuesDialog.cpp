@@ -30,25 +30,25 @@
  *                                                                         *
  ***************************************************************************/
 #include "MatrixValuesDialog.h"
+#include "MantidQtWidgets/Common/ScriptEditor.h"
 #include "MatrixCommand.h"
-#include "MantidQtMantidWidgets/ScriptEditor.h"
 
-#include <QLayout>
-#include <QSpinBox>
-#include <QGroupBox>
-#include <QPushButton>
-#include <QLabel>
 #include <QComboBox>
-#include <QTextEdit>
+#include <QGroupBox>
+#include <QLabel>
+#include <QLayout>
+#include <QPushButton>
+#include <QSpinBox>
 #include <QTableWidget>
 #include <QTableWidgetSelectionRange>
+#include <QTextEdit>
 #ifdef SCRIPTING_PYTHON
 #include <QCheckBox>
 #endif
 
 MatrixValuesDialog::MatrixValuesDialog(ScriptingEnv *env, QWidget *parent,
                                        Qt::WFlags fl)
-    : QDialog(parent, fl), Scripted(env), matrix(NULL) {
+    : QDialog(parent, fl), Scripted(env), matrix(nullptr) {
   setObjectName("MatrixValuesDialog");
   setWindowTitle(tr("MantidPlot - Set Matrix Values"));
   setSizeGripEnabled(true);

@@ -1,4 +1,11 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
+from __future__ import (absolute_import, division, print_function)
 import mantid.simpleapi as msi
 import mantid.api
 from mantid.kernel import logger
@@ -165,5 +172,5 @@ class ConvertToWavelength(object):
         if correct_monitor and all((bg_min, bg_max)):
             _monitor_ws = msi.CalculateFlatBackground(InputWorkspace=_monitor_ws,WorkspaceIndexList=0,StartX=bg_min, EndX=bg_max)
 
-        msi.DeleteWorkspace(Workspace=sum_wavelength.getName())
+        msi.DeleteWorkspace(Workspace=sum_wavelength.name())
         return (_monitor_ws, _detector_ws)

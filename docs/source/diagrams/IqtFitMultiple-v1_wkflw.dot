@@ -19,7 +19,7 @@ digraph IqtFitMultiple {
     FitGroup2                [label="FitGroup"]
     SampleLogs
     ResultWorkspace
-    ResultWorkspace2        [label="ResultWorkspace"]
+    ResultWorkspace2         [label="ResultWorkspace"]
   }
 
   subgraph algorithms {
@@ -30,7 +30,8 @@ digraph IqtFitMultiple {
     AddSampleLogMultiple
     AddSampleLogMultiple2   [label="AddSampleLogMultiple"]
     CopyLogs
-    CopyLogs2           [label="Copy logs"]
+    CopyLogs2               [label="Copy logs"]
+    ExtractQENSMembers
   }
   
   subgraph decisions {
@@ -71,4 +72,7 @@ digraph IqtFitMultiple {
   SampleLogs                    -> AddSampleLogMultiple         [label="Additional SampleLogs based on Fit data"]
   AddSampleLogMultiple          -> ResultWorkspace2             [label="Outputworkspace"]
   AddSampleLogMultiple2         -> FitGroup2                    [label="OutputWorkspace"]
+  ExtractMembers                -> ExtractQENSMembers           [label="Extract members?"]
+  InputWorkspace                -> ExtractQENSMembers
+  FitGroup2                     -> ExtractQENSMembers
 }

@@ -1,4 +1,11 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name,too-many-branches
+from __future__ import (absolute_import, division, print_function)
 import math
 # Used by converter GUI to do unit conversions
 
@@ -77,7 +84,7 @@ def energy2output(Energy, outOption, theta, flightpath):
     if outOption == 'Wavelength (Angstroms)':
         OutputVal =  (e2lam/ Energy)**0.5
 
-    elif outOption == 'Nu (THz)':
+    elif outOption == 'Nu (Thz)':
         OutputVal = Energy / e2nu
 
     elif outOption == 'Velocity (m/s)':

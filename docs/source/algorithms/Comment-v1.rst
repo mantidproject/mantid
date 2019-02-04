@@ -3,7 +3,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -14,7 +14,7 @@ This simple algorithm just adds a comment record to the history of a workspace a
 
 It does not change the data within a workspace in any way.
 
-When outputing the histroy to Python this comment will be rendered as a python comment.
+When outputting the history to Python this comment will be rendered as a python comment.
 
 
 Usage
@@ -29,7 +29,7 @@ Usage
    Comment(ws,"The next algorithm is doing 1/ws")
 
    # Print the result
-   print ws.getHistory().lastAlgorithm().getPropertyValue("Text")
+   print(ws.getHistory().lastAlgorithm().getPropertyValue("Text"))
 
 Output:
 

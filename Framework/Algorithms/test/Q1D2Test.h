@@ -1,15 +1,21 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef Q1D2Test_H_
 #define Q1D2Test_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidAlgorithms/Q1D2.h"
-#include "MantidAlgorithms/Rebin.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAlgorithms/ConvertUnits.h"
 #include "MantidAlgorithms/CropWorkspace.h"
-#include "MantidAPI/Axis.h"
-#include "MantidDataHandling/LoadRaw3.h"
+#include "MantidAlgorithms/Q1D2.h"
+#include "MantidAlgorithms/Rebin.h"
 #include "MantidDataHandling/LoadRKH.h"
+#include "MantidDataHandling/LoadRaw3.h"
 #include "MantidDataHandling/MaskDetectors.h"
+#include <cxxtest/TestSuite.h>
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
@@ -590,7 +596,7 @@ void createInputWorkspaces(int start, int end,
       Mantid::API::AnalysisDataService::Instance().retrieve(wsName));
   wave = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
       Mantid::API::AnalysisDataService::Instance().retrieve(wavNorm));
-  pixels = WorkspaceCreationHelper::Create2DWorkspaceBinned(29, 1);
+  pixels = WorkspaceCreationHelper::create2DWorkspaceBinned(29, 1);
   for (int i = 0; i < 29; ++i) {
     pixels->mutableY(i)[0] = flat_cell061Ys[i];
     pixels->mutableE(i)[0] = flat_cell061Es[i];

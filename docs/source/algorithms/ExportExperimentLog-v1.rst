@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -70,7 +70,7 @@ File format
 -----------
 
 There are two types of output file formats that are supported. They are
-csv (comma seperated) file and tsv (tab separated) file. The csv file
+csv (comma separated) file and tsv (tab separated) file. The csv file
 must have an extension as ".csv". If a user gives the name of a log
 file, which is in csv format, does not have an extension as .csv, the
 algorithm will correct it automatically.
@@ -114,14 +114,14 @@ Usage
       FileFormat = "tab",
       TimeZone = "America/New_York")
 
-  print "File is created = ", os.path.exists(savefile)
+  print("File is created =  {}".format(os.path.exists(savefile)))
   
   # Get lines of file
   sfile = open(savefile, 'r')
   slines = sfile.readlines()
   sfile.close()
 
-  print "Number of lines in File =", len(slines)
+  print("Number of lines in File = {}".format(len(slines)))
 
 .. testcleanup:: ExExportExpLogs
 

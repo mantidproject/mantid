@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAHANDLING_SAVENXCANSASTEST_H_
 #define MANTID_DATAHANDLING_SAVENXCANSASTEST_H_
 
@@ -6,24 +12,24 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidDataHandling/SaveNXcanSAS.h"
-#include "MantidDataHandling/NXcanSASDefinitions.h"
 #include "MantidDataHandling/H5Util.h"
+#include "MantidDataHandling/NXcanSASDefinitions.h"
+#include "MantidDataHandling/SaveNXcanSAS.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include "NXcanSASTestHelper.h"
 
-#include <Poco/File.h>
 #include <H5Cpp.h>
+#include <Poco/File.h>
 #include <sstream>
 
 namespace {
 const std::string sasclass = "canSAS_class";
 const std::string nxclass = "NX_class";
 const std::string suffix = "01";
-}
+} // namespace
 
 using Mantid::DataHandling::SaveNXcanSAS;
 using namespace Mantid::DataHandling::NXcanSAS;
@@ -39,7 +45,7 @@ public:
 
   void test_that_workspace_without_momentum_transfer_units_is_invalid() {
     // Arrange
-    auto ws = WorkspaceCreationHelper::Create1DWorkspaceConstantWithXerror(
+    auto ws = WorkspaceCreationHelper::create1DWorkspaceConstantWithXerror(
         10 /*size*/, 1.23 /*value&*/, 2.3 /*error*/, 23.4 /*xerror*/);
     const std::string filename = "SaveNXcanSASTestFile.h5";
 

@@ -1,6 +1,9 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/ReadGroupsFromFile.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/InstrumentDataService.h"
@@ -10,6 +13,7 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/StringTokenizer.h"
 
 // Poco XML Headers for Grouping File
 #include <Poco/DOM/DOMParser.h>
@@ -31,10 +35,10 @@ namespace Algorithms {
 DECLARE_ALGORITHM(ReadGroupsFromFile)
 
 using namespace Kernel;
-using API::WorkspaceProperty;
-using API::MatrixWorkspace_sptr;
-using API::MatrixWorkspace;
 using API::FileProperty;
+using API::MatrixWorkspace;
+using API::MatrixWorkspace_sptr;
+using API::WorkspaceProperty;
 
 ReadGroupsFromFile::ReadGroupsFromFile() : API::Algorithm(), calibration() {}
 
@@ -108,7 +112,7 @@ void ReadGroupsFromFile::exec() {
 
   // Determine whether the user wants to see unselected detectors or not
   const std::string su = getProperty("ShowUnselected");
-  bool showunselected = (!su.compare("True"));
+  bool showunselected = bool(su == "True");
   bool success = false;
 
   for (int64_t i = 0; i < nHist; i++) {
@@ -245,5 +249,5 @@ void ReadGroupsFromFile::readXMLGroupingFile(const std::string &filename) {
   progress(0.7);
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

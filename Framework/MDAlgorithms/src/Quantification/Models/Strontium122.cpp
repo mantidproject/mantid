@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 // Includes
 #include "MantidMDAlgorithms/Quantification/Models/Strontium122.h"
 
@@ -10,7 +16,7 @@ DECLARE_FOREGROUNDMODEL(Strontium122)
 using Kernel::Math::BoseEinsteinDistribution;
 
 namespace // anonymous
-    {
+{
 /// Enumerate parameter positions
 enum { Seff = 0, J1a = 1, J1b = 2, J2 = 3, SJc = 4, GammaSlope = 5 };
 
@@ -23,7 +29,7 @@ const char *PAR_NAMES[NPARAMS] = {"Seff", "J1a", "J1b",
 const unsigned int NATTS = 2;
 /// Attribute names
 const char *ATTR_NAMES[NATTS] = {"MultEps", "TwinType"};
-}
+} // namespace
 Strontium122::Strontium122() : m_twinType(1), m_multEps(true) {}
 
 /**
@@ -165,5 +171,5 @@ Strontium122::scatteringIntensity(const API::ExperimentInfo &exptSetup,
   }
   return weight;
 }
-}
-}
+} // namespace MDAlgorithms
+} // namespace Mantid

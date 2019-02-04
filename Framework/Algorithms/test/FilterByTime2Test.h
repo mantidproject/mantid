@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 /*
  * FilterByTimeTest.h
  *
@@ -11,11 +17,10 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/FilterByTime2.h"
-#include "MantidDataHandling/LoadEventPreNexus.h"
-#include "MantidKernel/DateAndTime.h"
+#include "MantidDataHandling/LoadEventPreNexus2.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataHandling;
@@ -28,7 +33,7 @@ public:
   /** Setup for loading raw data */
   void setUp_Event() {
     inputWS = "eventWS";
-    LoadEventPreNexus loader;
+    LoadEventPreNexus2 loader;
     loader.initialize();
     std::string eventfile("CNCS_7860_neutron_event.dat");
     std::string pulsefile("CNCS_7860_pulseid.dat");
@@ -44,7 +49,7 @@ public:
    */
   void NtestTooManyParams() {
     EventWorkspace_sptr ws =
-        WorkspaceCreationHelper::CreateEventWorkspace(1, 1);
+        WorkspaceCreationHelper::createEventWorkspace(1, 1);
     AnalysisDataService::Instance().addOrReplace("eventWS", ws);
 
     // Do the filtering now.
@@ -81,7 +86,7 @@ public:
   }
 
   /** Test Filter by relative time and absolute time
-    */
+   */
   void testExecEventWorkspace_relativeTime_and_absolute_time() {
     std::string outputWS;
     this->setUp_Event();

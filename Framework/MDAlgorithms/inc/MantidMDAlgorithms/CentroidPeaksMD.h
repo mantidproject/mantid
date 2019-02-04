@@ -1,11 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MDALGORITHMS_CENTROIDPEAKSMD_H_
 #define MANTID_MDALGORITHMS_CENTROIDPEAKSMD_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -16,8 +23,12 @@ namespace MDAlgorithms {
  * @author Janik Zikovsky
  * @date 2011-06-01
  */
-class DLLExport CentroidPeaksMD : public API::Algorithm {
+class DLLExport CentroidPeaksMD : public API::Algorithm,
+                                  public API::DeprecatedAlgorithm {
 public:
+  /// Constructor
+  CentroidPeaksMD();
+
   /// Algorithm's name for identification
   const std::string name() const override { return "CentroidPeaksMD"; };
   /// Summary of algorithms purpose
@@ -44,7 +55,7 @@ private:
   Mantid::API::IMDEventWorkspace_sptr inWS;
 };
 
+} // namespace MDAlgorithms
 } // namespace Mantid
-} // namespace DataObjects
 
 #endif /* MANTID_MDALGORITHMS_CENTROIDPEAKSMD_H_ */

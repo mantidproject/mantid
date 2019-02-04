@@ -1,0 +1,32 @@
+digraph ReflectometryReductionOne {
+label = "\n"
+ $global_style
+
+subgraph params {
+ $param_style
+  inputWorkspace     [label="OutputWorkspaceWavelength", group=g1]
+  outputWorkspace    [label="OutputWorkspace"]
+}
+
+subgraph decisions {
+ $decision_style
+}
+
+subgraph algorithms {
+ $algorithm_style
+  convertUnits  [label="ConvertUnits\n(AlignBins=False)", group=g1]
+}
+
+subgraph processes {
+ $process_style
+}
+
+subgraph values {
+ $value_style
+}
+
+inputWorkspace     -> convertUnits
+convertUnits       ->  outputWorkspace
+
+}
+

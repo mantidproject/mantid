@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -94,7 +94,7 @@ Usage
     
   # output
   for i in [3, 9, 44, 60]:
-      print "X[%d] = %.5f, Y[%d] = %.5f" % (i, ws.readX(0)[i], i, ws.readY(0)[i])
+      print("X[{}] = {:.5f}, Y[{}] = {:.5f}".format(i, ws.readX(0)[i], i, ws.readY(0)[i]))
 
 
 .. testcleanup:: ExLoadHB2ADataToMD

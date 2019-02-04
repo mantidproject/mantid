@@ -1,10 +1,14 @@
-//--------------------------------------------------------------------------
-// Includes
-//--------------------------------------------------------------------------
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/DetectorDiagnostic.h"
-#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidDataObjects/EventWorkspaceHelpers.h"
 #include "MantidDataObjects/MaskWorkspace.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/Exception.h"
@@ -23,8 +27,8 @@ namespace Algorithms {
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(DetectorDiagnostic)
 
-using API::MatrixWorkspace_sptr;
 using API::IAlgorithm_sptr;
+using API::MatrixWorkspace_sptr;
 using Geometry::IDetector_const_sptr;
 using std::string;
 using namespace Mantid::DataObjects;
@@ -524,12 +528,11 @@ DataObjects::MaskWorkspace_sptr
 DetectorDiagnostic::generateEmptyMask(API::MatrixWorkspace_const_sptr inputWS) {
   // Create a new workspace for the results, copy from the input to ensure that
   // we copy over the instrument and current masking
-  auto maskWS = boost::make_shared<DataObjects::MaskWorkspace>();
-  maskWS->initialize(inputWS->getNumberHistograms(), 1, 1);
-  WorkspaceFactory::Instance().initializeFromParent(inputWS, maskWS, false);
+  auto maskWS =
+      create<DataObjects::MaskWorkspace>(*inputWS, HistogramData::Points(1));
   maskWS->setTitle(inputWS->getTitle());
 
-  return maskWS;
+  return std::move(maskWS);
 }
 
 std::vector<std::vector<size_t>>
@@ -561,9 +564,11 @@ DetectorDiagnostic::makeMap(API::MatrixWorkspace_sptr countsWS) {
                              "detector to spectra map. Try with LevelUp=0.");
   }
 
-  for (size_t i = 0; i < countsWS->getNumberHistograms(); i++) {
-    detid_t d = (*(countsWS->getSpectrum(i).getDetectorIDs().begin()));
-    auto anc = instrument->getDetector(d)->getAncestors();
+  const SpectrumInfo &spectrumInfo = countsWS->spectrumInfo();
+
+  for (size_t i = 0; i < countsWS->getNumberHistograms(); ++i) {
+
+    auto anc = spectrumInfo.detector(i).getAncestors();
     if (anc.size() < static_cast<size_t>(m_parents)) {
       g_log.warning("Too many levels up. Will ignore LevelsUp");
       m_parents = 0;
@@ -608,29 +613,26 @@ std::vector<double> DetectorDiagnostic::calculateMedian(
   std::vector<double> medianvec;
   g_log.debug("Calculating the median count rate of the spectra");
 
+  bool checkForMask = false;
+  Geometry::Instrument_const_sptr instrument = input.getInstrument();
+  if (instrument != nullptr) {
+    checkForMask = ((instrument->getSource() != nullptr) &&
+                    (instrument->getSample() != nullptr));
+  }
+  const auto &spectrumInfo = input.spectrumInfo();
+
   for (const auto &hists : indexmap) {
     std::vector<double> medianInput;
     const int nhists = static_cast<int>(hists.size());
     // The maximum possible length is that of workspace length
     medianInput.reserve(nhists);
 
-    bool checkForMask = false;
-    Geometry::Instrument_const_sptr instrument = input.getInstrument();
-    if (instrument != nullptr) {
-      checkForMask = ((instrument->getSource() != nullptr) &&
-                      (instrument->getSample() != nullptr));
-    }
-
     PARALLEL_FOR_IF(Kernel::threadSafe(input))
     for (int i = 0; i < nhists; ++i) { // NOLINT
       PARALLEL_START_INTERUPT_REGION
 
-      if (checkForMask) {
-        const std::set<detid_t> &detids =
-            input.getSpectrum(hists[i]).getDetectorIDs();
-        if (instrument->isDetectorMasked(detids))
-          continue;
-        if (instrument->isMonitor(detids))
+      if (checkForMask && spectrumInfo.hasDetectors(hists[i])) {
+        if (spectrumInfo.isMasked(hists[i]) || spectrumInfo.isMonitor(hists[i]))
           continue;
       }
 
@@ -724,5 +726,5 @@ void DetectorDiagnostic::failProgress(RunTime aborted) {
   advanceProgress(-aborted);
   m_TotalTime -= aborted;
 }
-}
-}
+} // namespace Algorithms
+} // namespace Mantid

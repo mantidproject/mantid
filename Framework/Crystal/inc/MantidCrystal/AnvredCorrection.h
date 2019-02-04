@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CRYSTAL_ANVREDCORRECTION_H_
 #define MANTID_CRYSTAL_ANVREDCORRECTION_H_
 
@@ -51,27 +57,6 @@ const double radtodeg_half = 180.0 / M_PI / 2.;
 
     @author Vickie Lynch, Dennis Mikkelson SNS
     @date 06/14/2011
-
-    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-   National Laboratory & European Spallation Source
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport AnvredCorrection : public API::Algorithm {
 public:
@@ -87,6 +72,9 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"LorentzCorrection"};
+  }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override {
     return "Crystal\\Corrections;CorrectionFunctions\\AbsorptionCorrections";
@@ -123,7 +111,7 @@ private:
   double getEventWeight(double lamda, double two_theta);
   void BuildLamdaWeights();
   double absor_sphere(double &twoth, double &wl);
-  void scale_init(Geometry::IDetector_const_sptr det,
+  void scale_init(const Geometry::IDetector &det,
                   Geometry::Instrument_const_sptr inst, double &L2,
                   double &depth, double &pathlength, std::string &bankName);
   void scale_exec(std::string &bankName, double &lambda, double &depth,

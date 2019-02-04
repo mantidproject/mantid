@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_LIVEDATA_TESTGROUPDATALISTENER_H_
 #define MANTID_LIVEDATA_TESTGROUPDATALISTENER_H_
 
@@ -22,12 +28,18 @@ public:
   bool buffersEvents() const override { return true; }
 
   bool connect(const Poco::Net::SocketAddress &address) override;
-  void start(Kernel::DateAndTime startTime = Kernel::DateAndTime()) override;
+  void start(
+      Types::Core::DateAndTime startTime = Types::Core::DateAndTime()) override;
   boost::shared_ptr<API::Workspace> extractData() override;
 
   bool isConnected() override;
+  bool dataReset() override;
   ILiveListener::RunStatus runStatus() override;
   int runNumber() const override;
+
+  void setSpectra(const std::vector<specnum_t> &) override;
+  void
+  setAlgorithm(const class Mantid::API::IAlgorithm &callingAlgorithm) override;
 
 private:
   API::WorkspaceGroup_sptr m_buffer;

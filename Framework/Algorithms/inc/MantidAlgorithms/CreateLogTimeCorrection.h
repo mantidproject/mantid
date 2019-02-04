@@ -1,13 +1,23 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_CREATELOGTIMECORRECTION_H_
 #define MANTID_ALGORITHMS_CREATELOGTIMECORRECTION_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/System.h"
+#include <vector>
 
 namespace Mantid {
+namespace Geometry {
+class DetectorInfo;
+}
 namespace Algorithms {
 
 /** CreateLogTimeCorrection : Create correction file and workspace to correct
@@ -18,27 +28,6 @@ namespace Algorithms {
   sample,
   and the input event workspace contains the neutron with time recorded at the
   detector.
-
-  Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
-
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>
-  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport CreateLogTimeCorrection : public API::Algorithm {
 public:
@@ -50,6 +39,9 @@ public:
   }
 
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"ChangePulsetime", "ShiftLogTime"};
+  }
   const std::string category() const override {
     return "Events\\EventFiltering";
   }
@@ -60,24 +52,23 @@ private:
   /// Implement abstract Algorithm methods
   void exec() override;
 
-  /// Get instrument geometry setup including L2 for each detector and L1
-  void getInstrumentSetup();
+  /// Log geometry information
+  void logGeometryInformation(const Geometry::DetectorInfo &detectorInfo) const;
 
   /// Calculate the log time correction for each pixel, i.e., correcton from
   /// event time at detector to time at sample
-  void calculateCorrection();
+  std::vector<double>
+  calculateCorrections(const Geometry::DetectorInfo &detectorInfo) const;
 
   /// Write L2 map and correction map to a TableWorkspace
-  DataObjects::TableWorkspace_sptr generateCorrectionTable();
+  DataObjects::TableWorkspace_sptr
+  generateCorrectionTable(const Geometry::DetectorInfo &detectorInfo,
+                          const std::vector<double> &corrections) const;
 
   /// Write correction map to a text file
-  void writeCorrectionToFile(std::string filename);
-
-  API::MatrixWorkspace_sptr m_dataWS;
-  Geometry::Instrument_const_sptr m_instrument;
-  std::map<int, double> m_l2map;
-  std::map<int, double> m_correctionMap;
-  double m_L1 = 0.0;
+  void writeCorrectionToFile(const std::string filename,
+                             const Geometry::DetectorInfo &detectorInfo,
+                             const std::vector<double> &corrections) const;
 };
 
 } // namespace Algorithms

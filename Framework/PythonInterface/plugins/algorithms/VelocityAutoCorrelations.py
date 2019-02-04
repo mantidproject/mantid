@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-many-branches,too-many-locals, invalid-name
 from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
@@ -308,7 +314,7 @@ class VelocityAutoCorrelations(PythonAlgorithm):
 
     def fold_correlation(self,w):
         # Folds an array with symmetrical values into half by averaging values around the centre
-        right_half=w[len(w)/2:]
+        right_half=w[len(w)//2:]
         left_half=w[:int(np.ceil(len(w)/2.0))][::-1]
 
         return (left_half+right_half)/2.0

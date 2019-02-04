@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_DELETELOGTEST_H_
 #define MANTID_ALGORITHMS_DELETELOGTEST_H_
 
@@ -28,7 +34,7 @@ public:
     alg.setChild(true); // no ADS storage
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Name", "NotALog"));
-    auto ws = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+    auto ws = WorkspaceCreationHelper::create2DWorkspace(10, 10);
     alg.setProperty("Workspace", ws);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
   }
@@ -38,7 +44,7 @@ public:
     alg.initialize();
     alg.setChild(true); // no ADS storage
     alg.setRethrows(true);
-    auto ws = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+    auto ws = WorkspaceCreationHelper::create2DWorkspace(10, 10);
     std::string logName("SingleValue");
     ws->mutableRun().addProperty<double>(logName, 1.0);
     alg.setProperty("Workspace", ws);
@@ -54,7 +60,7 @@ public:
     alg.initialize();
     alg.setChild(true); // no ADS storage
     alg.setRethrows(true);
-    auto ws = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+    auto ws = WorkspaceCreationHelper::create2DWorkspace(10, 10);
     std::string logName("TimeSeries");
 
     auto *tsp = new Mantid::Kernel::TimeSeriesProperty<double>(logName);

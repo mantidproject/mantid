@@ -97,7 +97,10 @@ build/
 *.tmp
 *.vspscc
 .builds
-
+*.egg-info/
+qt/python/mantidqt/utils/qt/plugins.py
+qt/python/mantidqt/resources.py
+qt/applications/workbench/workbench/app/resources.py
 
 # Visual C++ cache files
 ipch/
@@ -141,6 +144,7 @@ stylecop.*
 *.dbmdl
 Generated_Code #added for RIA/Silverlight projects
 *.autosave
+*.stackdump # Crash stacktraces
 
 # Backup & report files from converting an old project file to a newer
 # Visual Studio version. Backup files are not needed, because we have git ;-)
@@ -160,6 +164,9 @@ Desktop.ini
 # PyCharm IDE
 .idea/
 
+# VSCode cache
+.vscode/
+
 # Mac OS X Finder
 .DS_Store
 
@@ -170,7 +177,8 @@ Desktop.ini
 #Dynamically created files
 Framework/Kernel/inc/MantidKernel/GitHubApiHelper.h
 Vates/VatesSimpleGui/ViewWidgets/inc/MantidVatesSimpleGuiViewWidgets/LibHelper.h
-
+qt/applications/workbench/setup.py
+qt/python/setup.py
 
 # Make sure Third_Party doesn't get checked into the main repository
 Third_Party/
@@ -178,4 +186,3 @@ Third_Party/
 win64/
 dbg/
 rel/
-

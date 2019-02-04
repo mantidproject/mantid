@@ -1,8 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAHANDLING_LOADPDFGETNFILETEST_H_
 #define MANTID_DATAHANDLING_LOADPDFGETNFILETEST_H_
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidDataHandling/LoadPDFgetNFile.h"
 #include "MantidDataObjects/Workspace2D.h"
 
@@ -21,7 +28,7 @@ public:
   static void destroySuite(LoadPDFgetNFileTest *suite) { delete suite; }
 
   /** Test to load .sq file
-    */
+   */
   void test_LoadSqFile() {
     // 1. Init
     LoadPDFgetNFile loader;
@@ -47,11 +54,11 @@ public:
 
     TS_ASSERT_EQUALS(outws->getNumberHistograms(), 2);
 
-    TS_ASSERT_DELTA(outws->readX(0)[2], 0.17986950, 1.0E-8);
+    TS_ASSERT_DELTA(outws->x(0)[2], 0.17986950, 1.0E-8);
   }
 
   /** Test to load .sq file
-    */
+   */
   void test_LoadGrFile() {
     // 1. Init
     LoadPDFgetNFile loader;
@@ -79,8 +86,8 @@ public:
   }
 
   /** Test to load .bsmo file.
-    * .bsmo and .braw file record Q in descending order.
-    */
+   * .bsmo and .braw file record Q in descending order.
+   */
   void test_LoadBackgroundFile() {
     // 1. Init
     LoadPDFgetNFile loader;

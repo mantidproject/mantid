@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidTestHelpers/MultiDomainFunctionHelper.h"
 #include "MantidTestHelpers/FakeObjects.h"
 
@@ -101,16 +107,14 @@ const double dX = 0.2;
 Mantid::API::MatrixWorkspace_sptr makeMultiDomainWorkspace1() {
   Mantid::API::MatrixWorkspace_sptr ws1 = boost::make_shared<WorkspaceTester>();
   ws1->initialize(1, nbins, nbins);
-  {
-    Mantid::MantidVec &x = ws1->dataX(0);
-    Mantid::MantidVec &y = ws1->dataY(0);
-    // Mantid::MantidVec& e = ws1->dataE(0);
-    for (size_t i = 0; i < ws1->blocksize(); ++i) {
-      x[i] = -1.0 + dX * double(i);
-      const double t = x[i];
-      y[i] =
-          A0 + B0 * t + (A1 + B1 * t) * pow(t, 2) + (A2 + B2 * t) * pow(t, 4);
-    }
+  auto &x = ws1->mutableX(0);
+  auto &y = ws1->mutableY(0);
+  const size_t numBins = y.size();
+  for (size_t i = 0; i < numBins; ++i) {
+    x[i] = -1.0 + dX * double(i);
+    const double t = x[i];
+    const double t2 = t * t;
+    y[i] = A0 + B0 * t + (A1 + B1 * t) * t2 + (A2 + B2 * t) * t2 * t2;
   }
 
   return ws1;
@@ -119,15 +123,14 @@ Mantid::API::MatrixWorkspace_sptr makeMultiDomainWorkspace1() {
 Mantid::API::MatrixWorkspace_sptr makeMultiDomainWorkspace2() {
   Mantid::API::MatrixWorkspace_sptr ws2 = boost::make_shared<WorkspaceTester>();
   ws2->initialize(1, nbins, nbins);
-  {
-    Mantid::MantidVec &x = ws2->dataX(0);
-    Mantid::MantidVec &y = ws2->dataY(0);
-    // Mantid::MantidVec& e = ws2->dataE(0);
-    for (size_t i = 0; i < ws2->blocksize(); ++i) {
-      x[i] = -1.0 + dX * double(i);
-      const double t = x[i];
-      y[i] = A0 + B0 * t + (A1 + B1 * t) * pow(t, 2);
-    }
+
+  auto &x = ws2->mutableX(0);
+  auto &y = ws2->mutableY(0);
+  const size_t numBins = y.size();
+  for (size_t i = 0; i < numBins; ++i) {
+    x[i] = -1.0 + dX * double(i);
+    const double t = x[i];
+    y[i] = A0 + B0 * t + (A1 + B1 * t) * t * t;
   }
 
   return ws2;
@@ -136,15 +139,13 @@ Mantid::API::MatrixWorkspace_sptr makeMultiDomainWorkspace2() {
 Mantid::API::MatrixWorkspace_sptr makeMultiDomainWorkspace3() {
   Mantid::API::MatrixWorkspace_sptr ws3 = boost::make_shared<WorkspaceTester>();
   ws3->initialize(1, nbins, nbins);
-  {
-    Mantid::MantidVec &x = ws3->dataX(0);
-    Mantid::MantidVec &y = ws3->dataY(0);
-    // Mantid::MantidVec& e = ws3->dataE(0);
-    for (size_t i = 0; i < ws3->blocksize(); ++i) {
-      x[i] = -1.0 + dX * double(i);
-      const double t = x[i];
-      y[i] = A0 + B0 * t + (A2 + B2 * t) * pow(t, 4);
-    }
+  auto &x = ws3->mutableX(0);
+  auto &y = ws3->mutableY(0);
+  const size_t numBins = y.size();
+  for (size_t i = 0; i < numBins; ++i) {
+    x[i] = -1.0 + dX * double(i);
+    const double t = x[i];
+    y[i] = A0 + B0 * t + (A2 + B2 * t) * t * t * t * t;
   }
 
   return ws3;

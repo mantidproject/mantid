@@ -1,54 +1,86 @@
-# Copyright (c) 2007, Simon Edwards <simon@simonzone.com>
-# Copyright (c) 2014, Raphael Kubo da Costa <rakuco@FreeBSD.org>
-# Redistribution and use is allowed according to the terms of the BSD license.
-# For details see the accompanying COPYING-CMAKE-SCRIPTS file.
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""Inspect and extract the PyQt configuration.
 
-import PyQt4.QtCore
+There is a commandline argument to select the version of PyQt.
+"""
+from __future__ import print_function
+
+import argparse
 import os
+import re
 import sys
 
-def get_default_sip_dir():
-    # This is based on QScintilla's configure.py, and only works for the
-    # default case where installation paths have not been changed in PyQt's
-    # configuration process.
-    if sys.platform == 'win32':
-        pyqt_sip_dir = os.path.join(sys.prefix, 'sip', 'PyQt4')
-    else:
-        pyqt_sip_dir = os.path.join(sys.prefix, 'share', 'sip', 'PyQt4')
-    return pyqt_sip_dir
+QT_TAG_RE = re.compile(r'Qt_\d+_\d+_\d+')
 
-def get_qt4_tag(sip_flags):
-    in_t = False
-    for item in sip_flags.split(' '):
-        if item == '-t':
-            in_t = True
-        elif in_t:
-            if item.startswith('Qt_4'):
-                return item
+class PyQtConfig(object):
+
+    version_hex = None
+    version_str = None
+    qt_tag = None
+    sip_dir = None
+    sip_flags = None
+    pyuic_path = None
+
+    def __init__(self, name):
+      qtcore = __import__(name + '.QtCore', globals(), locals(), ['QtCore'], 0)
+      self.version_hex = qtcore.PYQT_VERSION
+      self.version_str = qtcore.PYQT_VERSION_STR
+      self.sip_flags = qtcore.PYQT_CONFIGURATION['sip_flags']
+      self.qt_tag = self._get_qt_tag(self.sip_flags)
+      # This is based on QScintilla's configure.py, and only works for the
+      # default case where installation paths have not been changed in PyQt's
+      # configuration process.
+      if sys.platform == 'win32':
+          self.sip_dir = os.path.join(sys.prefix, 'sip', name)
+      elif sys.platform == 'darwin':
+          # hardcoded to homebrew Cellar
+          cellar_prefix = '/usr/local/opt'
+          qt_maj_version = self.version_str[0]
+          if qt_maj_version == '4':
+              self.sip_dir = os.path.join(cellar_prefix, 'pyqt@4', 'share', 'sip')
+          elif qt_maj_version == '5':
+              self.sip_dir = os.path.join(cellar_prefix, 'pyqt', 'share', 'sip', 'Qt5')
+          else:
+              raise RuntimeError("Unknown Qt version ({}) found. Unable to determine location of PyQt sip files."
+                                 "Please update FindPyQt accordingly.".format(self.version_str[0]))
+      else:
+          self.sip_dir = os.path.join(sys.prefix, 'share', 'sip', name)
+      # Assume uic script is in uic submodule
+      uic = __import__(name + '.uic', globals(), locals(), ['uic'], 0)
+      self.pyuic_path = os.path.join(os.path.dirname(uic.__file__), 'pyuic.py')
+
+    def _get_qt_tag(self, sip_flags):
+        match = QT_TAG_RE.search(sip_flags)
+        if match:
+            return match.group(0)
         else:
-            in_t = False
-    raise ValueError('Cannot find Qt\'s tag in PyQt4\'s SIP flags.')
-    
-def get_pyuic():
-    pyqt4_dir = os.path.dirname(PyQt4.__file__)
-    return os.path.join(pyqt4_dir, 'uic', 'pyuic.py')
+            return None
 
-if __name__ == '__main__':
-    try:
-        import PyQt4.pyqtconfig
-        pyqtcfg = PyQt4.pyqtconfig.Configuration()
-        sip_dir = pyqtcfg.pyqt_sip_dir
-        sip_flags = pyqtcfg.pyqt_sip_flags
-    except ImportError:
-        # PyQt4 >= 4.10.0 was built with configure-ng.py instead of
-        # configure.py, so pyqtconfig.py is not installed.
-        sip_dir = get_default_sip_dir()
-        sip_flags = PyQt4.QtCore.PYQT_CONFIGURATION['sip_flags']
-    pyqt_pyuic = get_pyuic()
+    def __str__(self):
+        lines = [
+            'pyqt_version:%06.x' % self.version_hex,
+            'pyqt_version_str:%s' % self.version_str,
+            'pyqt_version_tag:%s' % self.qt_tag,
+            'pyqt_sip_dir:%s' % self.sip_dir,
+            'pyqt_sip_flags:%s' % self.sip_flags,
+            'pyqt_pyuic:%s' % self.pyuic_path
+        ]
+        return '\n'.join(lines)
 
-    print('pyqt_version:%06.x' % PyQt4.QtCore.PYQT_VERSION)
-    print('pyqt_version_str:%s' % PyQt4.QtCore.PYQT_VERSION_STR)
-    print('pyqt_version_tag:%s' % get_qt4_tag(sip_flags))
-    print('pyqt_sip_dir:%s' % sip_dir)
-    print('pyqt_sip_flags:%s' % sip_flags)
-    print('pyqt_pyuic:%s' % pyqt_pyuic)
+
+def main():
+    # parse command line
+    args = get_options()
+
+    print(PyQtConfig('PyQt%d' % args.version))
+    return 0
+
+def get_options():
+    parser = argparse.ArgumentParser(description='Extract PyQt config information')
+    parser.add_argument('version', type=int, help="PyQt major version")
+    return parser.parse_args()
+
+
+if __name__ == "__main__":
+  sys.exit(main())

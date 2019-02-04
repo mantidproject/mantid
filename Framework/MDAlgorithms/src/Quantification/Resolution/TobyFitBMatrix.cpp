@@ -1,7 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/Quantification/Resolution/TobyFitBMatrix.h"
+
+#include "MantidMDAlgorithms/Quantification/CachedExperimentInfo.h"
 #include "MantidMDAlgorithms/Quantification/Resolution/TobyFitResolutionModel.h"
 #include "MantidMDAlgorithms/Quantification/Resolution/TobyFitYVector.h"
-#include "MantidMDAlgorithms/Quantification/CachedExperimentInfo.h"
 
 #include "MantidAPI/ChopperModel.h"
 #include "MantidAPI/ModeratorModel.h"
@@ -167,5 +174,6 @@ void TobyFitBMatrix::recalculate(const CachedExperimentInfo &observation,
   upOutVec[TobyFitYVector::DetectorHeightCoord] = 0.0;
   upOutVec[TobyFitYVector::DetectionTime] = 0.0;
 }
-}
-}
+
+} // namespace MDAlgorithms
+} // namespace Mantid

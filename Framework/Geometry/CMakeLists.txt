@@ -9,6 +9,7 @@ set ( SRC_FILES
 	src/Crystal/ConventionalCell.cpp
 	src/Crystal/CrystalStructure.cpp
 	src/Crystal/CyclicGroup.cpp
+	src/Crystal/EdgePixel.cpp
 	src/Crystal/Group.cpp
 	src/Crystal/GroupTransformation.cpp
 	src/Crystal/HKLFilter.cpp
@@ -43,25 +44,29 @@ set ( SRC_FILES
 	src/Crystal/V3R.cpp
 	src/IObjComponent.cpp
 	src/Instrument.cpp
-	src/Instrument/Container.cpp
 	src/Instrument/CompAssembly.cpp
 	src/Instrument/Component.cpp
 	src/Instrument/ComponentHelper.cpp
+	src/Instrument/ComponentInfo.cpp
+	src/Instrument/ComponentInfoBankHelpers.cpp
+	src/Instrument/ComponentInfoIterator.cpp
+	src/Instrument/Container.cpp
 	src/Instrument/Detector.cpp
 	src/Instrument/DetectorGroup.cpp
+	src/Instrument/DetectorInfo.cpp
 	src/Instrument/FitParameter.cpp
 	src/Instrument/Goniometer.cpp
+	src/Instrument/GridDetector.cpp
+	src/Instrument/GridDetectorPixel.cpp
 	src/Instrument/IDFObject.cpp
 	src/Instrument/InstrumentDefinitionParser.cpp
-	src/Instrument/NearestNeighbours.cpp
-	src/Instrument/NearestNeighboursFactory.cpp
+	src/Instrument/InstrumentVisitor.cpp
 	src/Instrument/ObjCompAssembly.cpp
 	src/Instrument/ObjComponent.cpp
 	src/Instrument/ParComponentFactory.cpp
 	src/Instrument/Parameter.cpp
 	src/Instrument/ParameterMap.cpp
 	src/Instrument/RectangularDetector.cpp
-	src/Instrument/RectangularDetectorPixel.cpp
 	src/Instrument/ReferenceFrame.cpp
 	src/Instrument/SampleEnvironment.cpp
 	src/Instrument/SampleEnvironmentFactory.cpp
@@ -100,20 +105,19 @@ set ( SRC_FILES
 	src/Math/Triple.cpp
 	src/Math/mathSupport.cpp
 	src/Objects/BoundingBox.cpp
+	src/Objects/CSGObject.cpp
 	src/Objects/InstrumentRayTracer.cpp
-	src/Objects/Object.cpp
+	src/Objects/MeshObject.cpp
+	src/Objects/MeshObject2D.cpp
+	src/Objects/MeshObjectCommon.cpp
 	src/Objects/RuleItems.cpp
 	src/Objects/Rules.cpp
 	src/Objects/ShapeFactory.cpp
 	src/Objects/Track.cpp
-	src/Rendering/BitmapGeometryHandler.cpp
-	src/Rendering/CacheGeometryGenerator.cpp
-	src/Rendering/CacheGeometryHandler.cpp
-	src/Rendering/CacheGeometryRenderer.cpp
 	src/Rendering/GeometryHandler.cpp
-	src/Rendering/GluGeometryHandler.cpp
-	src/Rendering/GluGeometryRenderer.cpp
-	src/Rendering/StructuredGeometryHandler.cpp
+	src/Rendering/GeometryTriangulator.cpp
+	src/Rendering/RenderingHelpers.cpp
+	src/Rendering/ShapeInfo.cpp
 	src/Rendering/vtkGeometryCacheReader.cpp
 	src/Rendering/vtkGeometryCacheWriter.cpp
 	src/Surfaces/Cone.cpp
@@ -129,16 +133,8 @@ set ( SRC_FILES
 	src/Surfaces/Torus.cpp
 )
 
-set ( OPENCASCADE_SRC
-  src/Rendering/OCGeometryGenerator.cpp
-  src/Rendering/OCGeometryHandler.cpp
-  src/Rendering/OCGeometryRenderer.cpp
-)
-
 set ( SRC_UNITY_IGNORE_FILES src/Instrument/CompAssembly.cpp
   src/Instrument/ObjCompAssembly.cpp
-  src/Rendering/OCGeometryHandler.cpp
-  src/Rendering/OCGeometryRenderer.cpp
 )
 
 set ( INC_FILES
@@ -153,6 +149,7 @@ set ( INC_FILES
 	inc/MantidGeometry/Crystal/ConventionalCell.h
 	inc/MantidGeometry/Crystal/CrystalStructure.h
 	inc/MantidGeometry/Crystal/CyclicGroup.h
+	inc/MantidGeometry/Crystal/EdgePixel.h
 	inc/MantidGeometry/Crystal/Group.h
 	inc/MantidGeometry/Crystal/GroupTransformation.h
 	inc/MantidGeometry/Crystal/HKLFilter.h
@@ -197,20 +194,28 @@ set ( INC_FILES
 	inc/MantidGeometry/IDetector_fwd.h
 	inc/MantidGeometry/IObjComponent.h
 	inc/MantidGeometry/Instrument.h
-	inc/MantidGeometry/Instrument/Container.h
 	inc/MantidGeometry/Instrument/CompAssembly.h
 	inc/MantidGeometry/Instrument/Component.h
 	inc/MantidGeometry/Instrument/ComponentHelper.h
+	inc/MantidGeometry/Instrument/ComponentInfo.h
+	inc/MantidGeometry/Instrument/ComponentInfoBankHelpers.h
+	inc/MantidGeometry/Instrument/ComponentInfoItem.h
+	inc/MantidGeometry/Instrument/ComponentInfoIterator.h
+	inc/MantidGeometry/Instrument/ComponentVisitor.h
+	inc/MantidGeometry/Instrument/Container.h
 	inc/MantidGeometry/Instrument/Detector.h
 	inc/MantidGeometry/Instrument/DetectorGroup.h
+	inc/MantidGeometry/Instrument/DetectorInfo.h
+	inc/MantidGeometry/Instrument/DetectorInfoItem.h
+	inc/MantidGeometry/Instrument/DetectorInfoIterator.h
 	inc/MantidGeometry/Instrument/FitParameter.h
 	inc/MantidGeometry/Instrument/Goniometer.h
+	inc/MantidGeometry/Instrument/GridDetector.h
+	inc/MantidGeometry/Instrument/GridDetectorPixel.h
 	inc/MantidGeometry/Instrument/IDFObject.h
-	inc/MantidGeometry/Instrument/INearestNeighbours.h
-	inc/MantidGeometry/Instrument/INearestNeighboursFactory.h
+	inc/MantidGeometry/Instrument/InfoIteratorBase.h
 	inc/MantidGeometry/Instrument/InstrumentDefinitionParser.h
-	inc/MantidGeometry/Instrument/NearestNeighbours.h
-	inc/MantidGeometry/Instrument/NearestNeighboursFactory.h
+	inc/MantidGeometry/Instrument/InstrumentVisitor.h
 	inc/MantidGeometry/Instrument/ObjCompAssembly.h
 	inc/MantidGeometry/Instrument/ObjComponent.h
 	inc/MantidGeometry/Instrument/ParComponentFactory.h
@@ -218,7 +223,6 @@ set ( INC_FILES
 	inc/MantidGeometry/Instrument/ParameterFactory.h
 	inc/MantidGeometry/Instrument/ParameterMap.h
 	inc/MantidGeometry/Instrument/RectangularDetector.h
-	inc/MantidGeometry/Instrument/RectangularDetectorPixel.h
 	inc/MantidGeometry/Instrument/ReferenceFrame.h
 	inc/MantidGeometry/Instrument/SampleEnvironment.h
 	inc/MantidGeometry/Instrument/SampleEnvironmentFactory.h
@@ -263,23 +267,21 @@ set ( INC_FILES
 	inc/MantidGeometry/Math/Triple.h
 	inc/MantidGeometry/Math/mathSupport.h
 	inc/MantidGeometry/Objects/BoundingBox.h
+	inc/MantidGeometry/Objects/CSGObject.h
+	inc/MantidGeometry/Objects/IObject.h
 	inc/MantidGeometry/Objects/InstrumentRayTracer.h
-	inc/MantidGeometry/Objects/Object.h
+	inc/MantidGeometry/Objects/MeshObject.h
+	inc/MantidGeometry/Objects/MeshObject2D.h
+	inc/MantidGeometry/Objects/MeshObjectCommon.h
 	inc/MantidGeometry/Objects/Rules.h
 	inc/MantidGeometry/Objects/ShapeFactory.h
 	inc/MantidGeometry/Objects/Track.h
-	inc/MantidGeometry/Rendering/BitmapGeometryHandler.h
-	inc/MantidGeometry/Rendering/CacheGeometryGenerator.h
-	inc/MantidGeometry/Rendering/CacheGeometryHandler.h
-	inc/MantidGeometry/Rendering/CacheGeometryRenderer.h
 	inc/MantidGeometry/Rendering/GeometryHandler.h
-	inc/MantidGeometry/Rendering/GluGeometryHandler.h
-	inc/MantidGeometry/Rendering/GluGeometryRenderer.h
-	inc/MantidGeometry/Rendering/OCGeometryGenerator.h
-	inc/MantidGeometry/Rendering/OCGeometryHandler.h
-	inc/MantidGeometry/Rendering/OCGeometryRenderer.h
+	inc/MantidGeometry/Rendering/GeometryTriangulator.h
 	inc/MantidGeometry/Rendering/OpenGL_Headers.h
-	inc/MantidGeometry/Rendering/StructuredGeometryHandler.h
+	inc/MantidGeometry/Rendering/RenderingHelpers.h
+	inc/MantidGeometry/Rendering/RenderingMesh.h
+	inc/MantidGeometry/Rendering/ShapeInfo.h
 	inc/MantidGeometry/Rendering/vtkGeometryCacheReader.h
 	inc/MantidGeometry/Rendering/vtkGeometryCacheWriter.h
 	inc/MantidGeometry/Surfaces/BaseVisit.h
@@ -305,15 +307,18 @@ set ( TEST_FILES
 	BraggScattererFactoryTest.h
 	BraggScattererInCrystalStructureTest.h
 	BraggScattererTest.h
-	ContainerTest.h
+	CSGObjectTest.h
 	CenteringGroupTest.h
 	CompAssemblyTest.h
-	ComponentHelperTest.h
+	ComponentInfoBankHelpersTest.h
+	ComponentInfoIteratorTest.h
+	ComponentInfoTest.h
 	ComponentParserTest.h
 	ComponentTest.h
 	CompositeBraggScattererTest.h
 	CompositeImplicitFunctionTest.h
 	ConeTest.h
+	ContainerTest.h
 	ConventionalCellTest.h
 	ConvexPolygonIteratorTest.h
 	ConvexPolygonTest.h
@@ -321,11 +326,14 @@ set ( TEST_FILES
 	CyclicGroupTest.h
 	CylinderTest.h
 	DetectorGroupTest.h
+	DetectorInfoIteratorTest.h
 	DetectorTest.h
 	FitParameterTest.h
 	GeneralFrameTest.h
 	GeneralTest.h
 	GoniometerTest.h
+	GridDetectorPixelTest.h
+	GridDetectorTest.h
 	GroupTest.h
 	GroupTransformationTest.h
 	HKLFilterTest.h
@@ -339,6 +347,7 @@ set ( TEST_FILES
 	InstrumentDefinitionParserTest.h
 	InstrumentRayTracerTest.h
 	InstrumentTest.h
+	InstrumentVisitorTest.h
 	IsotropicAtomBraggScattererTest.h
 	LineIntersectVisitTest.h
 	LineTest.h
@@ -354,13 +363,13 @@ set ( TEST_FILES
 	MathSupportTest.h
 	MatrixVectorPairParserTest.h
 	MatrixVectorPairTest.h
-	NearestNeighboursFactoryTest.h
-	NearestNeighboursTest.h
+	MeshObject2DTest.h
+	MeshObjectCommonTest.h
+	MeshObjectTest.h
 	NiggliCellTest.h
 	NullImplicitFunctionTest.h
 	ObjCompAssemblyTest.h
 	ObjComponentTest.h
-	ObjectTest.h
 	OrientedLatticeTest.h
 	ParCompAssemblyTest.h
 	ParComponentFactoryTest.h
@@ -383,7 +392,6 @@ set ( TEST_FILES
 	QLabTest.h
 	QSampleTest.h
 	QuadrilateralTest.h
-	RectangularDetectorPixelTest.h
 	RectangularDetectorTest.h
 	ReducedCellTest.h
 	ReferenceFrameTest.h
@@ -404,6 +412,7 @@ set ( TEST_FILES
 	SampleEnvironmentTest.h
 	ScalarUtilsTest.h
 	ShapeFactoryTest.h
+	ShapeInfoTest.h
 	SpaceGroupFactoryTest.h
 	SpaceGroupTest.h
 	SphereTest.h
@@ -440,11 +449,6 @@ if(UNITY_BUILD)
   enable_unity_build(Geometry SRC_FILES SRC_UNITY_IGNORE_FILES 10)
 endif(UNITY_BUILD)
 
-# ===================== Open Cascade ===================
-if (ENABLE_OPENCASCADE)
-  LIST (APPEND SRC_FILES ${OPENCASCADE_SRC} )
-endif ()
-
 # A few defines needed for OpenCascade on the Mac
 if ( APPLE )
   add_definitions ( -DHAVE_IOSTREAM -DHAVE_LIMITS -DHAVE_IOMANIP )
@@ -463,7 +467,9 @@ set_target_properties ( Geometry PROPERTIES OUTPUT_NAME MantidGeometry
                                             COMPILE_DEFINITIONS IN_MANTID_GEOMETRY )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties ( Geometry PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+  set_target_properties(Geometry PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+elseif ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
+  set_target_properties(Geometry PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
 endif ()
 
 if (ENABLE_OPENCASCADE)
@@ -474,7 +480,7 @@ endif ()
 # Add to the 'Framework' group in VS
 set_property ( TARGET Geometry PROPERTY FOLDER "MantidFramework" )
 
-target_link_libraries ( Geometry LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS}  ${OPENGL_LIBRARIES} ${GSL_LIBRARIES} ${NEXUS_LIBRARIES} ${JSONCPP_LIBRARIES} )
+target_link_libraries ( Geometry LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS} ${OPENGL_gl_LIBRARY} ${OPENGL_glu_LIBRARY} ${GSL_LIBRARIES} ${NEXUS_LIBRARIES} ${JSONCPP_LIBRARIES} )
 
 target_link_libraries ( Geometry LINK_PUBLIC ${TBB_LIBRARIES} ${TBB_MALLOC_LIBRARIES} )
 
@@ -489,4 +495,4 @@ add_subdirectory ( test )
 # Installation settings
 ###########################################################################
 
-install ( TARGETS Geometry  ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )
+mtd_install_targets( TARGETS Geometry INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})

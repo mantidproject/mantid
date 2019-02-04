@@ -1,0 +1,58 @@
+digraph isisPowderGenericAlgs{
+    label="ISISPowder - Generic Processes"
+    $global_style
+
+    // **Labels
+    label_LoadCurrentNormWs                 [label="Load Current Normalised WS"]
+
+    // **Parameters
+    subgraph params {
+        $param_style
+
+        // General
+        param_runNumbers                    [label="Param: Run number(s)"]
+
+        // User input
+        param_inputMode                     [label="User param: input mode"]
+    }
+
+    // **Processes (inc. bespoke inst steps)
+    subgraph {
+        $process_style
+
+        // Bespoke
+        proc_instNormaliseWorkspaces        [label="Inst specific: Normalise Workspace(s)"]
+    }
+
+    // **Algorithms
+    subgraph algorithms{
+        $algorithm_style
+
+        alg_Load                            [label="Load Workspace(s)"]
+        alg_MergeWorkspaces                   [label="Merge Runs"]
+    }
+
+    // **Decisions
+    subgraph decisions{
+        $decision_style
+
+        if_inputMode                        [label="If: input mode"]
+    }
+
+    // **Graph layout for Load Current Normalised WS
+    subgraph LoadCurrentNormalisedWs{
+        // Load the list / single workspace to process
+        label_LoadCurrentNormWs             ->      alg_Load
+        param_runNumbers                    ->      alg_Load
+
+        // Sum if input batching set
+        alg_Load                            ->      if_inputMode
+        param_inputMode                     ->      if_inputMode
+        if_inputMode                        ->      alg_MergeWorkspaces     [label="'Summed' or not set"]
+
+        // Normalise workspaces
+        alg_MergeWorkspaces                 ->      proc_instNormaliseWorkspaces
+        if_inputMode                        ->      proc_instNormaliseWorkspaces    [label="'Individual'"]
+
+    }
+}

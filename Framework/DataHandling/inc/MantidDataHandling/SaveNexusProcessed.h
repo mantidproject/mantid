@@ -1,16 +1,23 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAHANDLING_SAVENEXUSPROCESSED_H_
 #define MANTID_DATAHANDLING_SAVENEXUSPROCESSED_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/Progress.h"
+#include "MantidAPI/SerialAlgorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidNexus/NexusFileIO.h"
+#include <boost/optional.hpp>
 #include <climits>
+#include <nexus/NeXusFile.hpp>
 
 namespace Mantid {
+namespace NeXus {
+class NexusFileIO;
+}
 namespace DataHandling {
 /** @class SaveNexusProcessed SaveNexusProcessed.h
 DataHandling/SaveNexusProcessed.h
@@ -26,32 +33,9 @@ Required Properties:
 <LI> InputWorkspace - The name of the workspace to store the file </LI>
 <LI> Title - the title to describe the saved processed data
 </UL>
-
-Copyright &copy; 2007-2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>.
-Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport SaveNexusProcessed : public API::Algorithm {
+class DLLExport SaveNexusProcessed : public API::SerialAlgorithm {
 public:
-  /// Default constructor
-  SaveNexusProcessed();
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "SaveNexusProcessed"; };
   /// Summary of algorithms purpose
@@ -63,8 +47,16 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; };
+  const std::vector<std::string> seeAlso() const override {
+    return {"SaveISISNexus", "SaveNexus", "LoadNexusProcessed"};
+  }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "DataHandling\\Nexus"; }
+
+  void saveSpectraMapNexus(
+      const API::MatrixWorkspace &ws, ::NeXus::File *file,
+      const std::vector<int> &spec,
+      const ::NeXus::NXcompression compression = ::NeXus::LZW) const;
 
 protected:
   /// Override process groups
@@ -80,22 +72,21 @@ private:
                        Mantid::API::MatrixWorkspace_const_sptr matrixWorkspace);
 
   template <class T>
-  static void appendEventListData(std::vector<T> events, size_t offset,
+  static void appendEventListData(const std::vector<T> &events, size_t offset,
                                   double *tofs, float *weights,
                                   float *errorSquareds, int64_t *pulsetimes);
 
   void execEvent(Mantid::NeXus::NexusFileIO *nexusFile,
-                 const bool uniformSpectra, const std::vector<int> spec);
+                 const bool uniformSpectra, const std::vector<int> &spec);
   /// sets non workspace properties for the algorithm
   void setOtherProperties(IAlgorithm *alg, const std::string &propertyName,
                           const std::string &propertyValue,
                           int perioidNum) override;
   /// execute the algorithm.
   void doExec(Mantid::API::Workspace_sptr inputWorkspace,
-              Mantid::NeXus::NexusFileIO_sptr &nexusFile,
+              boost::shared_ptr<Mantid::NeXus::NexusFileIO> &nexusFile,
               const bool keepFile = false,
-              NeXus::NexusFileIO::optional_size_t entryNumber =
-                  NeXus::NexusFileIO::optional_size_t());
+              boost::optional<size_t> entryNumber = boost::optional<size_t>());
 
   /// The name and path of the input file
   std::string m_filename;
@@ -108,9 +99,9 @@ private:
   /// Pointer to the local workspace, cast to EventWorkspace
   DataObjects::EventWorkspace_const_sptr m_eventWorkspace;
   /// Proportion of progress time expected to write initial part
-  double m_timeProgInit;
+  double m_timeProgInit{0.0};
   /// Progress bar
-  API::Progress *prog;
+  std::unique_ptr<API::Progress> m_progress;
 };
 
 } // namespace DataHandling

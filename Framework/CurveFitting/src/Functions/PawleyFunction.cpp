@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/Functions/PawleyFunction.h"
 
 #include "MantidAPI/Axis.h"
@@ -6,8 +12,10 @@
 
 #include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
 
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/UnitConversion.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/make_unique.h"
 
 #include <boost/algorithm/string.hpp>
 #include <boost/make_shared.hpp>
@@ -121,29 +129,29 @@ void PawleyParameterFunction::setParametersFromUnitCell(const UnitCell &cell) {
 
   try {
     setParameter("b", cell.b());
-  } catch (std::invalid_argument) {
+  } catch (const std::invalid_argument &) {
     // do nothing.
   }
 
   try {
     setParameter("c", cell.c());
-  } catch (std::invalid_argument) {
+  } catch (const std::invalid_argument &) {
     // do nothing
   }
 
   try {
     setParameter("Alpha", cell.alpha());
-  } catch (std::invalid_argument) {
+  } catch (const std::invalid_argument &) {
     // do nothing.
   }
   try {
     setParameter("Beta", cell.beta());
-  } catch (std::invalid_argument) {
+  } catch (const std::invalid_argument &) {
     // do nothing.
   }
   try {
     setParameter("Gamma", cell.gamma());
-  } catch (std::invalid_argument) {
+  } catch (const std::invalid_argument &) {
     // do nothing.
   }
 }
@@ -283,19 +291,19 @@ void PawleyParameterFunction::createLatticeSystemParameters(
 /// Adds a default constraint so that cell edge lengths can not be less than 0.
 void PawleyParameterFunction::addLengthConstraint(
     const std::string &parameterName) {
-  BoundaryConstraint *cellEdgeConstraint =
-      new BoundaryConstraint(this, parameterName, 0.0, true);
+  auto cellEdgeConstraint =
+      Kernel::make_unique<BoundaryConstraint>(this, parameterName, 0.0, true);
   cellEdgeConstraint->setPenaltyFactor(1e12);
-  addConstraint(cellEdgeConstraint);
+  addConstraint(std::move(cellEdgeConstraint));
 }
 
 /// Adds a default constraint so cell angles are in the range 0 to 180.
 void PawleyParameterFunction::addAngleConstraint(
     const std::string &parameterName) {
-  BoundaryConstraint *cellAngleConstraint =
-      new BoundaryConstraint(this, parameterName, 0.0, 180.0, true);
+  auto cellAngleConstraint = Kernel::make_unique<BoundaryConstraint>(
+      this, parameterName, 0.0, 180.0, true);
   cellAngleConstraint->setPenaltyFactor(1e12);
-  addConstraint(cellAngleConstraint);
+  addConstraint(std::move(cellAngleConstraint));
 }
 
 /// Tries to extract and store the center parameter name from the function.
@@ -315,11 +323,9 @@ PawleyFunction::PawleyFunction()
     : IPawleyFunction(), m_compositeFunction(), m_pawleyParameterFunction(),
       m_peakProfileComposite(), m_hkls(), m_dUnit(), m_wsUnit(),
       m_peakRadius(5) {
-  int peakRadius;
-  if (Kernel::ConfigService::Instance().getValue("curvefitting.peakRadius",
-                                                 peakRadius)) {
-    m_peakRadius = peakRadius;
-  }
+  auto peakRadius = Kernel::ConfigService::Instance().getValue<int>(
+      "curvefitting.peakRadius");
+  m_peakRadius = peakRadius.get_value_or(5);
 }
 
 void PawleyFunction::setMatrixWorkspace(
@@ -405,8 +411,8 @@ void PawleyFunction::setPeakPositions(std::string centreName, double zeroShift,
   for (size_t i = 0; i < m_hkls.size(); ++i) {
     double centre = getTransformedCenter(cell.d(m_hkls[i]));
 
-    m_peakProfileComposite->getFunction(i)
-        ->setParameter(centreName, centre + zeroShift);
+    m_peakProfileComposite->getFunction(i)->setParameter(centreName,
+                                                         centre + zeroShift);
   }
 }
 
@@ -473,13 +479,13 @@ void PawleyFunction::function(const FunctionDomain &domain,
       try {
         size_t offset = calculateFunctionValues(peak, domain1D, localValues);
         values.addToCalculated(offset, localValues);
-      } catch (std::invalid_argument) {
+      } catch (const std::invalid_argument &) {
         // do nothing
       }
     }
 
     setPeakPositions(centreName, 0.0, cell);
-  } catch (std::bad_cast) {
+  } catch (const std::bad_cast &) {
     // do nothing
   }
 }

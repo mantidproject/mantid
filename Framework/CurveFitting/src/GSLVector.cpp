@@ -1,15 +1,21 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/GSLVector.h"
 
-#include <gsl/gsl_blas.h>
 #include <algorithm>
 #include <cmath>
+#include <gsl/gsl_blas.h>
 #include <iomanip>
-#include <stdexcept>
-#include <sstream>
 #include <iostream>
+#include <sstream>
+#include <stdexcept>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -27,6 +33,16 @@ GSLVector::GSLVector(const size_t n)
 /// @param v :: A std vector.
 GSLVector::GSLVector(const std::vector<double> &v)
     : m_data(v), m_view(gsl_vector_view_array(m_data.data(), m_data.size())) {}
+
+/// Construct from an initialisation list
+/// @param ilist :: A list of doubles: {V0, V1, V2, ...}
+GSLVector::GSLVector(std::initializer_list<double> ilist)
+    : GSLVector(ilist.size()) {
+  for (auto cell = ilist.begin(); cell != ilist.end(); ++cell) {
+    auto i = static_cast<size_t>(std::distance(ilist.begin(), cell));
+    set(i, *cell);
+  }
+}
 
 /// Copy constructor.
 /// @param v :: The other vector
@@ -262,6 +278,7 @@ void GSLVector::sort(const std::vector<size_t> &indices) {
     data[i] = m_data[indices[i]];
   }
   std::swap(m_data, data);
+  m_view = gsl_vector_view_array(m_data.data(), m_data.size());
 }
 
 /// Create a new GSLVector and move all data to it. Destroys this vector.

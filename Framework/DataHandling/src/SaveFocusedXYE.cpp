@@ -1,23 +1,28 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/SaveFocusedXYE.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidKernel/ListValidator.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Unit.h"
 #include <Poco/File.h>
 #include <Poco/Path.h>
-#include <fstream>
 #include <cmath>
 #include <exception>
+#include <fstream>
 
 using namespace Mantid::DataHandling;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SaveFocusedXYE)
-
-SaveFocusedXYE::SaveFocusedXYE() : API::Algorithm(), m_headerType(XYE) {}
 
 /**
  * Initialise the algorithm
@@ -82,20 +87,19 @@ void SaveFocusedXYE::exec() {
   const bool append = getProperty("Append");
   const bool headers = getProperty("IncludeHeader");
 
-  int startingbank = getProperty("StartAtBankNumber");
+  const int startingbank = getProperty("StartAtBankNumber");
   if (startingbank < 0) {
     g_log.error() << "Starting bank number cannot be less than 0. \n";
     throw std::invalid_argument("Incorrect starting bank number");
   }
-  bool split = getProperty("SplitFiles");
+  const bool split = getProperty("SplitFiles");
   std::ostringstream number;
   std::fstream out;
-  using std::ios_base;
-  ios_base::openmode mode =
-      (append ? (ios_base::out | ios_base::app) : ios_base::out);
+  std::ios_base::openmode mode =
+      (append ? (std::ios_base::out | std::ios_base::app) : std::ios_base::out);
 
   m_comment = "#";
-  std::string headerType = getProperty("Format");
+  const std::string headerType = getProperty("Format");
   if (headerType == "XYE") {
     m_headerType = XYE;
   } else if (headerType == "MAUD") {
@@ -109,11 +113,13 @@ void SaveFocusedXYE::exec() {
     throw std::runtime_error(msg.str());
   }
 
+  const auto &detectorInfo = inputWS->detectorInfo();
+
   Progress progress(this, 0.0, 1.0, nHist);
   for (size_t i = 0; i < nHist; i++) {
-    const MantidVec &X = inputWS->readX(i);
-    const MantidVec &Y = inputWS->readY(i);
-    const MantidVec &E = inputWS->readE(i);
+    const auto &X = inputWS->x(i);
+    const auto &Y = inputWS->y(i);
+    const auto &E = inputWS->e(i);
 
     double l1 = 0;
     double l2 = 0;
@@ -121,17 +127,21 @@ void SaveFocusedXYE::exec() {
     if (headers) {
       // try to get detector information
       try {
-        getFocusedPos(inputWS, i, l1, l2, tth);
-      } catch (Kernel::Exception::NotFoundError &) {
-        // if detector not found or there was an error skip this spectrum
-        g_log.warning() << "Skipped spectrum " << i << '\n';
-        continue;
+        l1 = detectorInfo.l1();
+        l2 = detectorInfo.l2(i);
+        tth = detectorInfo.twoTheta(i) * 180. / M_PI;
+      } catch (std::logic_error &ex) {
+        // DetectorInfo::twoTheta throws for monitors. Ignore and continue with
+        // default value.
+        g_log.warning() << ex.what() << '\n';
+      } catch (std::runtime_error &ex) {
+        g_log.warning() << ex.what() << '\n';
       }
     }
 
     if ((!split) && out) // Assign only one file
     {
-      const std::string file(filename + '.' + ext);
+      const std::string file(std::string(filename).append(".").append(ext));
       Poco::File fileObj(file);
       const bool exists = fileObj.exists();
       out.open(file.c_str(), mode);
@@ -141,7 +151,8 @@ void SaveFocusedXYE::exec() {
                       // filename-i.ext
     {
       number << "-" << i + startingbank;
-      const std::string file(filename + number.str() + "." + ext);
+      const std::string file(
+          std::string(filename).append(number.str()).append(".").append(ext));
       Poco::File fileObj(file);
       const bool exists = fileObj.exists();
       out.open(file.c_str(), mode);
@@ -158,11 +169,10 @@ void SaveFocusedXYE::exec() {
     if (headers) {
       writeSpectraHeader(out, i + startingbank,
                          inputWS->getSpectrum(i).getSpectrumNo(), l1 + l2, tth,
-                         inputWS->getAxis(0)->unit()->caption());
-      // out << "# Data for spectra :" << i + startingbank << '\n';
-      // out << "# " << inputWS->getAxis(0)->unit()->caption() << "
-      // Y                 E"
-      //    << '\n';
+                         inputWS->getAxis(0)->unit()->caption(),
+                         inputWS->getAxis(1)->unit()->caption(),
+                         inputWS->getAxis(1)->unit()->label(),
+                         inputWS->getAxis(1)->getValue(i));
     }
     const size_t datasize = Y.size();
     for (size_t j = 0; j < datasize; j++) {
@@ -199,7 +209,7 @@ void SaveFocusedXYE::setOtherProperties(IAlgorithm *alg,
                                         const std::string &propertyName,
                                         const std::string &propertyValue,
                                         int perioidNum) {
-  if (!propertyName.compare("Append")) {
+  if (propertyName == "Append") {
     if (perioidNum != 1) {
       alg->setPropertyValue(propertyName, "1");
     } else
@@ -232,13 +242,13 @@ void SaveFocusedXYE::writeHeaders(
 void SaveFocusedXYE::writeXYEHeaders(
     std::ostream &os,
     Mantid::API::MatrixWorkspace_const_sptr &workspace) const {
-  os << m_comment << " File generated by Mantid:\n";
-  os << m_comment << " Instrument: " << workspace->getInstrument()->getName()
-     << '\n';
+  if (m_headerType != TOPAS)
+    os << "XYDATA\n";
+  os << m_comment << " File generated by Mantid, "
+     << "Instrument " << workspace->getInstrument()->getName() << '\n';
   os << m_comment
      << " The X-axis unit is: " << workspace->getAxis(0)->unit()->caption()
-     << '\n';
-  os << m_comment << " The Y-axis unit is: " << workspace->YUnitLabel() << '\n';
+     << ", The Y-axis unit is: " << workspace->YUnitLabel() << '\n';
 }
 
 /**
@@ -261,10 +271,13 @@ void SaveFocusedXYE::writeMAUDHeaders(
 /// Write spectra header
 void SaveFocusedXYE::writeSpectraHeader(std::ostream &os, size_t index1,
                                         size_t index2, double flightPath,
-                                        double tth,
-                                        const std::string &caption) {
+                                        double tth, const std::string &caption,
+                                        const std::string &spectrumAxisCaption,
+                                        const std::string &spectraAxisLabel,
+                                        double observable) {
   if (m_headerType == XYE || m_headerType == TOPAS) {
-    writeXYESpectraHeader(os, index1, index2, flightPath, tth, caption);
+    writeXYESpectraHeader(os, index1, caption, spectrumAxisCaption,
+                          spectraAxisLabel, observable);
   } else // MAUD
   {
     writeMAUDSpectraHeader(os, index1, index2, flightPath, tth, caption);
@@ -272,14 +285,17 @@ void SaveFocusedXYE::writeSpectraHeader(std::ostream &os, size_t index1,
 }
 
 /// Write spectra XYE header
-void SaveFocusedXYE::writeXYESpectraHeader(std::ostream &os, size_t index1,
-                                           size_t index2, double flightPath,
-                                           double tth,
-                                           const std::string &caption) {
-  UNUSED_ARG(index2);
-  UNUSED_ARG(flightPath);
-  UNUSED_ARG(tth);
+void SaveFocusedXYE::writeXYESpectraHeader(
+    std::ostream &os, size_t index1, const std::string &caption,
+    const std::string &spectrumAxisCaption, const std::string &spectraAxisLabel,
+    double observable) {
   os << m_comment << " Data for spectra :" << index1 << '\n';
+  if (spectrumAxisCaption == "Temperature") {
+    os << "TEMP " << observable << ' ' << spectraAxisLabel << '\n';
+  } else {
+    os << m_comment << " " << spectrumAxisCaption << " " << observable << ' '
+       << spectraAxisLabel << '\n';
+  }
   os << m_comment << " " << caption << "              Y                 E\n";
 }
 
@@ -292,33 +308,4 @@ void SaveFocusedXYE::writeMAUDSpectraHeader(std::ostream &os, size_t index1,
      << index2 << '\n';
   os << "#P0 0 0 " << tth << ' ' << flightPath << '\n';
   os << "#L " << caption << " Data Error\n";
-}
-
-/**
-* Determine the focused position for the supplied spectrum. The position
-* (l1, l2, tth) is returned via the references passed in.
-*/
-void SaveFocusedXYE::getFocusedPos(Mantid::API::MatrixWorkspace_const_sptr wksp,
-                                   const size_t spectrum, double &l1,
-                                   double &l2, double &tth) {
-  Geometry::Instrument_const_sptr instrument = wksp->getInstrument();
-  if (instrument == nullptr) {
-    l1 = 0.;
-    l2 = 0.;
-    tth = 0.;
-    return;
-  }
-  Geometry::IComponent_const_sptr source = instrument->getSource();
-  Geometry::IComponent_const_sptr sample = instrument->getSample();
-  if (source == nullptr || sample == nullptr) {
-    l1 = 0.;
-    l2 = 0.;
-    tth = 0.;
-    return;
-  }
-  l1 = source->getDistance(*sample);
-  Geometry::IDetector_const_sptr det = wksp->getDetector(spectrum);
-  l2 = det->getDistance(*sample);
-  constexpr double rad2deg = 180. / M_PI;
-  tth = wksp->detectorTwoTheta(*det) * rad2deg;
 }

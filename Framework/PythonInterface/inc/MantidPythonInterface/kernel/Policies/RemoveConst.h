@@ -1,27 +1,12 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_PYTHONINTERFACE_REMOVECONST_H_
 #define MANTID_PYTHONINTERFACE_REMOVECONST_H_
-/**
-    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-   National Laboratory & European Spallation Source
 
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
- */
 #include <boost/python/detail/prefix.hpp>
 #include <boost/python/to_python_value.hpp>
 
@@ -29,10 +14,7 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include <boost/type_traits/is_const.hpp>
-#include <boost/type_traits/is_convertible.hpp>
-#include <boost/type_traits/is_pointer.hpp>
-#include <boost/type_traits/remove_const.hpp>
+#include <type_traits>
 
 /**
  * A bug in earlier boost versions, <= boost 1.41, means that
@@ -58,13 +40,13 @@ namespace {
 // MPL helper structs
 //-----------------------------------------------------------------------
 /// MPL struct to figure out if a type is a boost::shared_ptr<const T>
-/// The general one inherits from boost::false_type
-template <typename T> struct IsConstSharedPtr : boost::false_type {};
+/// The general one inherits from std::false_type
+template <typename T> struct IsConstSharedPtr : std::false_type {};
 
 /// Specialization for boost::shared_ptr<const T> types to inherit from
-/// boost::true_type
+/// std::true_type
 template <typename T>
-struct IsConstSharedPtr<boost::shared_ptr<const T>> : boost::true_type {};
+struct IsConstSharedPtr<boost::shared_ptr<const T>> : std::true_type {};
 
 //-----------------------------------------------------------------------
 // Polciy implementations
@@ -75,9 +57,9 @@ struct IsConstSharedPtr<boost::shared_ptr<const T>> : boost::true_type {};
 // call to this struct
 template <typename ConstPtrType> struct RemoveConstImpl {
   // Remove the pointer type to leave value type
-  typedef typename boost::remove_pointer<ConstPtrType>::type ValueType;
+  using ValueType = typename std::remove_pointer<ConstPtrType>::type;
   // Remove constness
-  typedef typename boost::remove_const<ValueType>::type NonConstValueType;
+  using NonConstValueType = typename std::remove_const<ValueType>::type;
 
   inline PyObject *operator()(const ConstPtrType &p) const {
     using namespace boost::python;
@@ -102,10 +84,10 @@ template <typename T> struct RemoveConst_Requires_Pointer_Return_Value {};
 // a check as to whether the return type is valid, if so it forwards the
 // call to this struct
 template <typename ConstSharedPtr> struct RemoveConstSharedPtrImpl {
-  typedef typename ConstSharedPtr::element_type ConstElementType;
-  typedef
-      typename boost::remove_const<ConstElementType>::type NonConstElementType;
-  typedef typename boost::shared_ptr<NonConstElementType> NonConstSharedPtr;
+  using ConstElementType = typename ConstSharedPtr::element_type;
+  using NonConstElementType =
+      typename std::remove_const<ConstElementType>::type;
+  using NonConstSharedPtr = typename boost::shared_ptr<NonConstElementType>;
 
   inline PyObject *operator()(const ConstSharedPtr &p) const {
     using namespace boost::python;
@@ -125,7 +107,7 @@ template <typename ConstSharedPtr> struct RemoveConstSharedPtrImpl {
 template <typename T>
 struct RemoveConstSharedPtr_Requires_SharedPtr_Const_T_Pointer_Return_Value {};
 
-} // ends anonymous namespace
+} // namespace
 
 /**
  * Implements the RemoveConst policy.
@@ -133,9 +115,9 @@ struct RemoveConstSharedPtr_Requires_SharedPtr_Const_T_Pointer_Return_Value {};
 struct RemoveConst {
   template <class T> struct apply {
     // Deduce if type is correct for policy, needs to be a "T*"
-    typedef typename boost::mpl::if_c<
-        boost::is_pointer<T>::value, RemoveConstImpl<T>,
-        RemoveConst_Requires_Pointer_Return_Value<T>>::type type;
+    using type = typename boost::mpl::if_c<
+        std::is_pointer<T>::value, RemoveConstImpl<T>,
+        RemoveConst_Requires_Pointer_Return_Value<T>>::type;
   };
 };
 
@@ -146,15 +128,15 @@ struct RemoveConstSharedPtr {
   template <class T> struct apply {
     // Deduce if type is correct for policy, needs to be a
     // "boost::shared_ptr<T>"
-    typedef typename boost::mpl::if_c<
+    using type = typename boost::mpl::if_c<
         IsConstSharedPtr<T>::value, RemoveConstSharedPtrImpl<T>,
         RemoveConstSharedPtr_Requires_SharedPtr_Const_T_Pointer_Return_Value<
-            T>>::type type;
+            T>>::type;
   };
 };
 
-} // ends Policies namespace
-}
-} // ends Mantid::PythonInterface namespaces
+} // namespace Policies
+} // namespace PythonInterface
+} // namespace Mantid
 
 #endif /* MANTID_PYTHONINTERFACE_REMOVECONST_H_REMOVECONST_H_ */

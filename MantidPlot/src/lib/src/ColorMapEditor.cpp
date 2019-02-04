@@ -26,17 +26,17 @@
  *                                                                         *
  ***************************************************************************/
 #include "ColorMapEditor.h"
-#include "MantidQtMantidWidgets/DoubleSpinBox.h"
+#include "MantidQtWidgets/Common/DoubleSpinBox.h"
 
-#include <QPushButton>
-#include <QTableWidget>
-#include <QHeaderView>
 #include <QCheckBox>
 #include <QColorDialog>
-#include <QLayout>
+#include <QHeaderView>
 #include <QKeyEvent>
-#include <QMouseEvent>
+#include <QLayout>
 #include <QMessageBox>
+#include <QMouseEvent>
+#include <QPushButton>
+#include <QTableWidget>
 
 ColorMapEditor::ColorMapEditor(const QLocale &locale, int precision,
                                QWidget *parent)

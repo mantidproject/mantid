@@ -1,17 +1,23 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/IntegratePeaksUsingClusters.h"
-#include "MantidCrystal/ICluster.h"
-#include "MantidCrystal/ConnectedComponentLabeling.h"
-#include "MantidCrystal/HardThresholdBackground.h"
-#include "MantidCrystal/PeakClusterProjection.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidKernel/CompositeValidator.h"
-#include "MantidKernel/MandatoryValidator.h"
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/ListValidator.h"
-#include "MantidKernel/Utils.h"
+#include "MantidCrystal/ConnectedComponentLabeling.h"
+#include "MantidCrystal/HardThresholdBackground.h"
+#include "MantidCrystal/ICluster.h"
+#include "MantidCrystal/PeakClusterProjection.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/Utils.h"
 
 #include <cmath>
 
@@ -49,7 +55,7 @@ void IntegratePeaksUsingClusters::init() {
   declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "Input md workspace.");
-  declareProperty(make_unique<WorkspaceProperty<IPeaksWorkspace>>(
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "PeaksWorkspace", "", Direction::Input),
                   "A PeaksWorkspace containing the peaks to integrate.");
 
@@ -65,10 +71,8 @@ void IntegratePeaksUsingClusters::init() {
                       "Threshold", 0, compositeValidator, Direction::Input),
                   "Threshold signal above which to consider peaks");
 
-  std::vector<std::string> normalizations(3);
-  normalizations[0] = "NoNormalization";
-  normalizations[1] = "VolumeNormalization";
-  normalizations[2] = "NumEventsNormalization";
+  std::array<std::string, 3> normalizations = {
+      {"NoNormalization", "VolumeNormalization", "NumEventsNormalization"}};
 
   declareProperty("Normalization", normalizations[1],
                   Kernel::IValidator_sptr(
@@ -76,7 +80,7 @@ void IntegratePeaksUsingClusters::init() {
                   "Normalization to use with Threshold. Defaults to "
                   "VolumeNormalization to account for different binning.");
 
-  declareProperty(make_unique<WorkspaceProperty<IPeaksWorkspace>>(
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output integrated peaks workspace.");
   declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
@@ -107,8 +111,8 @@ MDNormalization IntegratePeaksUsingClusters::getNormalization() {
  */
 void IntegratePeaksUsingClusters::exec() {
   IMDHistoWorkspace_sptr mdWS = getProperty("InputWorkspace");
-  IPeaksWorkspace_sptr inPeakWS = getProperty("PeaksWorkspace");
-  IPeaksWorkspace_sptr peakWS = getProperty("OutputWorkspace");
+  PeaksWorkspace_sptr inPeakWS = getProperty("PeaksWorkspace");
+  PeaksWorkspace_sptr peakWS = getProperty("OutputWorkspace");
   if (peakWS != inPeakWS) {
     peakWS = inPeakWS->clone();
   }
@@ -131,7 +135,7 @@ void IntegratePeaksUsingClusters::exec() {
   // CCL. Multi-processor version.
   ConnectedComponentLabeling analysis;
 
-  Progress progress(this, 0, 1, 1);
+  Progress progress(this, 0.0, 1.0, 1);
   // Perform CCL.
   ClusterTuple clusters =
       analysis.executeAndFetchClusters(mdWS, &backgroundStrategy, progress);
@@ -150,7 +154,7 @@ void IntegratePeaksUsingClusters::exec() {
   progress.doReport("Performing Peak Integration");
   g_log.information("Starting Integration");
   progress.resetNumSteps(peakWS->getNumberPeaks(), 0.9, 1);
-  PARALLEL_FOR1(peakWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*peakWS))
   for (int i = 0; i < peakWS->getNumberPeaks(); ++i) {
     PARALLEL_START_INTERUPT_REGION
     Geometry::IPeak &peak = peakWS->getPeak(i);

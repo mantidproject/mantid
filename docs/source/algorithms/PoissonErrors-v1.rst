@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -32,9 +32,9 @@ Usage
     ws = PoissonErrors(ws1, ws2)
 
     #X-values aren't touched at all, Y-Values are used but not altered, E-Values are 0 if rhsY is 0 or (rhsE/rhsY)*lshY if they are non-zero
-    print "The X values are: " + str(ws.readX(0))
-    print "The Y values are: " + str(ws.readY(0))
-    print "The updated Error values are: " + str(ws.readE(0))
+    print("The X values are: " + str(ws.readX(0)))
+    print("The Y values are: " + str(ws.readY(0)))
+    print("The updated Error values are: " + str(ws.readE(0)))
 
 Output:
 

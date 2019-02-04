@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -46,9 +46,9 @@ Usage
 
     wsSmooth = FFTSmooth(ws, Params='2', Version=1)
 
-    print "bin Orig  Smoothed"
+    print("bin Orig  Smoothed")
     for i in range (0,100,10):
-        print "%i  %.2f  %.2f" % (i, ws.readY(0)[i], wsSmooth.readY(0)[i])
+        print("{}  {:.2f}  {:.2f}".format(i, ws.readY(0)[i], wsSmooth.readY(0)[i]))
 
 
 .. figure:: /images/FFTSmoothZeroing.png

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Crystal/CompositeBraggScatterer.h"
 #include "MantidGeometry/Crystal/BraggScattererFactory.h"
 #include <stdexcept>
@@ -142,7 +148,7 @@ void CompositeBraggScatterer::propagatePropertyToScatterer(
     const std::string &propertyValue) {
   try {
     scatterer->setPropertyValue(propertyName, propertyValue);
-  } catch (Kernel::Exception::NotFoundError) {
+  } catch (const Kernel::Exception::NotFoundError &) {
     // do nothing.
   }
 }
@@ -186,7 +192,7 @@ void CompositeBraggScatterer::redeclareProperties() {
     std::vector<Property *> properties =
         scatterer->getPropertiesInGroup(getPropagatingGroupName());
     for (auto &property : properties) {
-      std::string propertyName = property->name();
+      const std::string &propertyName = property->name();
       if (!existsProperty(propertyName)) {
         declareProperty(std::unique_ptr<Property>(property->clone()));
       }

@@ -1,3 +1,10 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
+from __future__ import (absolute_import, division, print_function)
 #pylint: disable=invalid-name
 """
     Classes for each reduction step. Those are kept separately
@@ -34,7 +41,7 @@ class AbsoluteUnitsScript(BaseScriptElement):
         self.reset()
 
     def set_default_pars(self, inst_name):
-        import dgs_utils
+        from . import dgs_utils
         ip = dgs_utils.InstrumentParameters(inst_name)
         AbsoluteUnitsScript.emin = ip.get_parameter("monovan-integr-min")
         AbsoluteUnitsScript.emax = ip.get_parameter("monovan-integr-max")
@@ -145,7 +152,7 @@ class AbsoluteUnitsScript(BaseScriptElement):
                                                                                   default=AbsoluteUnitsScript.absunits_median_test_out_low)
             self.absunits_median_test_out_high = BaseScriptElement.getFloatElement(instrument_dom,
                                                                                    "median_test_out_high",
-                                                                                   default=AbsoluteUnitsScript.absunits_median_test_out_high)
+                                                                                   default=AbsoluteUnitsScript.absunits_median_test_out_high)# noqa
             self.absunits_median_test_low = BaseScriptElement.getFloatElement(instrument_dom,
                                                                               "median_test_low",
                                                                               default=AbsoluteUnitsScript.absunits_median_test_low)

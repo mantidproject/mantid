@@ -1,10 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MDEVENTS_MDTRANSF_MODQTEST_H_
 #define MANTID_MDEVENTS_MDTRANSF_MODQTEST_H_
 
-#include "MantidMDAlgorithms/MDTransfQ3D.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/DeltaEMode.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidMDAlgorithms/MDTransfQ3D.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <cxxtest/TestSuite.h>
 
@@ -107,8 +114,8 @@ public:
       // the detectors parameters
       MDTransf.calcYDepCoordinates(locCoord, i);
 
-      for (size_t k = 0; k < range.size(); k++) {
-        MDTransf.calcMatrixCoord(range[k], locCoord, signal, errorSq);
+      for (double k : range) {
+        MDTransf.calcMatrixCoord(k, locCoord, signal, errorSq);
         for (size_t j = 0; j < nDims; j++) {
           if (locCoord[j] < minCoord[j])
             minCoord[j] = locCoord[j];
@@ -123,15 +130,15 @@ public:
         for (size_t j = 0; j < nDims; j++) {
           if (locCoord[j] < minCoord[j]) {
             result = "Local transformed coordinate in direction " +
-                     boost::lexical_cast<std::string>(j) + " at bin N: " +
-                     boost::lexical_cast<std::string>(i) +
+                     boost::lexical_cast<std::string>(j) +
+                     " at bin N: " + boost::lexical_cast<std::string>(i) +
                      " is smaller then identified conversion range";
             return result;
           }
           if (locCoord[j] > maxCoord[j]) {
             result = "Local transformed coordinate in direction " +
-                     boost::lexical_cast<std::string>(j) + " at bin N: " +
-                     boost::lexical_cast<std::string>(i) +
+                     boost::lexical_cast<std::string>(j) +
+                     " at bin N: " + boost::lexical_cast<std::string>(i) +
                      " is bigger then identified conversion range";
             return result;
           }

@@ -1,8 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAOBJECTS_MDEVENTINSERTER_H_
 #define MANTID_DATAOBJECTS_MDEVENTINSERTER_H_
 
-#include "MantidKernel/System.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace DataObjects {
@@ -19,27 +25,6 @@ namespace DataObjects {
   not the underlying type of MDEvent being used.
 
   @date 2012-07-16
-
-  Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
-
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>
-  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 template <typename MDEW_SPTR> class DLLExport MDEventInserter {
 private:
@@ -50,7 +35,7 @@ private:
 
 public:
   /// Type of MDEvent used by the MDEventWorkspace.
-  typedef typename MDEW_SPTR::element_type::MDEventType MDEventType;
+  using MDEventType = typename MDEW_SPTR::element_type::MDEventType;
 
   /**
   Constructor
@@ -63,15 +48,15 @@ public:
   determined internally using type information on the MDEventType.
   @param signal : intensity
   @param errorSQ : squared value of the error
-  @param runno : run number
+  @param runindex : run index (index into the vector of ExperimentInfo)
   @param detectno : detector number
   @param coords : pointer to coordinates array
   */
-  void insertMDEvent(float signal, float errorSQ, uint16_t runno,
+  void insertMDEvent(float signal, float errorSQ, uint16_t runindex,
                      int32_t detectno, Mantid::coord_t *coords) {
     // compile-time overload selection based on nested type information on the
     // MDEventType.
-    insertMDEvent(signal, errorSQ, runno, detectno, coords,
+    insertMDEvent(signal, errorSQ, runindex, detectno, coords,
                   IntToType<MDEventType::is_full_mdevent>());
   }
 
@@ -94,14 +79,14 @@ private:
   Creates a FULL MDEvent and adds it to the MDEW.
   @param signal : intensity
   @param errorSQ : squared value of the error
-  @param runno : run number
+  @param runindex : run index
   @param detectno : detector number
   @param coords : pointer to coordinates array
   */
-  void insertMDEvent(float signal, float errorSQ, uint16_t runno,
+  void insertMDEvent(float signal, float errorSQ, uint16_t runindex,
                      int32_t detectno, Mantid::coord_t *coords,
                      IntToType<true>) {
-    m_ws->addEvent(MDEventType(signal, errorSQ, runno, detectno, coords));
+    m_ws->addEvent(MDEventType(signal, errorSQ, runindex, detectno, coords));
   }
 };
 

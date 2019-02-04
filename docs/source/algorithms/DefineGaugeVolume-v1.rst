@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -26,7 +26,7 @@ object.
 Usage
 -----
 
-**Example: A simple spherical sample with a cuboid guage volume**
+**Example: A simple spherical sample with a cuboid gauge volume**
 
 .. testcode:: ExSimpleSpereWithCuboidGuage
     
@@ -41,7 +41,7 @@ Usage
     CreateSampleShape(ws,sphere)
     SetSampleMaterial(ws,ChemicalFormula="V")
 
-    #setup the guage volume
+    #setup the gauge volume
     cuboid = '''<cuboid id="shape">
         <left-front-bottom-point x="0.01" y="-0.1" z="0.0"  />
         <left-front-top-point  x="0.01" y="-0.1" z="0.02"  />
@@ -53,7 +53,7 @@ Usage
     #restrict the number of wavelength points to speed up the example
     wsOut = AbsorptionCorrection(ws, NumberOfWavelengthPoints=5, ElementSize=2)
 
-    print "The created workspace has one entry for each spectra: %i" % wsOut.getNumberHistograms()
+    print("The created workspace has one entry for each spectra: {}".format(wsOut.getNumberHistograms()))
 
 Output:
 

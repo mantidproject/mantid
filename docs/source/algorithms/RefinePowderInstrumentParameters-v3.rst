@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -19,7 +19,7 @@ FitPowderDiffPeaks().
 
 
 Introduction
-============
+############
 
 In order to do Rietveld refinement to experimental data, the diffractometer’s profile should be calibrated by the standards, such as LaB6 or Ni, 
 with known crystal structure and lattice parameters.  
@@ -45,8 +45,8 @@ Final Time-of-flight is calculated as:
 
 .. math:: TOF = n_{cross} TOF_e + (1-n_{cross}) TOF_t
 
-Formular for calculating :math:`A(d)`, :math:`B(d)`, :math:`\sigma(d)` and :math:`\gamma(d)`
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Formula for calculating :math:`A(d)`, :math:`B(d)`, :math:`\sigma(d)` and :math:`\gamma(d)`
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 :math:`\alpha(d)`:
 
@@ -104,7 +104,7 @@ where
 
 
 Break down the problem
-======================
+######################
 
 If we can do the single peak fitting on each single diffraction peak in a certain range, 
 then we can divide the optimization problem into 4 sub problems for :math:`X_0`, :math:`A`,
@@ -136,13 +136,13 @@ with constraint:
 The coefficients in this function are strongly correlated to each other.
 
 Current Implementation
-======================
+######################
 
 Only the parameters of the function for :math:`X_0` are fitted in 
 present implementation. 
 
 Refinement Algorithm
-====================
+####################
 
 Two refinement algorithms, DirectFit and MonteCarlo, are provided.
 
@@ -171,7 +171,7 @@ In future, constaint will be considered.
 
 
 How to use algorithm with other algorithms
-==========================================
+##########################################
 
 This algorithm is designed to work with other algorithms to do Le Bail
 fit. The introduction can be found in the wiki page of

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef FILEPROPERTYTEST_H_
 #define FILEPROPERTYTEST_H_
 
@@ -7,10 +13,11 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ConfigService.h"
 #include <Poco/File.h>
+#include <cstdlib>
 #include <fstream>
 
-using Mantid::API::FileProperty;
 using Mantid::API::FileFinder;
+using Mantid::API::FileProperty;
 using Mantid::Kernel::ConfigService;
 
 class FilePropertyTest : public CxxTest::TestSuite {
@@ -165,7 +172,11 @@ public:
     std::string TestDir("my_nonexistent_folder");
     std::string msg = fp.setValue(TestDir);
     // It gives an error message starting "Directory "X" not found".
-    TS_ASSERT_EQUALS(msg.substr(0, 3), "Dir");
+    auto pos = msg.find("Directory");
+    TS_ASSERT(pos != std::string::npos);
+    // "not found" comes after "Directory"
+    TS_ASSERT(msg.find("not found", pos) !=
+              std::string::npos); //.substr(0, 3), "Dir");
   }
 
   void testDirectoryPasses() {
@@ -182,6 +193,25 @@ public:
     TS_ASSERT_EQUALS(msg, "");
 
     dir.remove(); // clean up your folder
+  }
+
+  void testExpandUserVariables() {
+    FileProperty fp("Dir", "", FileProperty::Directory);
+    std::string msg = fp.setValue("~");
+
+    char *homepath = std::getenv("HOME");
+    if (!homepath) {
+      homepath = std::getenv("USERPROFILE");
+    }
+
+    if (homepath && Poco::File(homepath).exists()) {
+      // User home variable is set and points to a valid directory
+      // We should have no errors
+      TS_ASSERT(msg.empty());
+    } else {
+      // No user variables were set, so we should have an error
+      TS_ASSERT(!msg.empty());
+    }
   }
 
 private:

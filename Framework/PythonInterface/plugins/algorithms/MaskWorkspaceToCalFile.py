@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name, no-init
 from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import *
@@ -8,14 +14,14 @@ from mantid.simpleapi import *
 
 
 class QueryFlag(object):
-    def isMasked(self, detector, dummy_yValue):
-        return detector.isMasked()
+    def isMasked(self, specInfo, index, dummy_yValue):
+        return specInfo.isMasked(index)
 
 #pylint: disable=too-few-public-methods
 
 
 class QueryValue(object):
-    def isMasked(self, dummy_detector, yValue):
+    def isMasked(self, dummy_specInfo, dummy_index, yValue):
         return yValue == 1
 
 
@@ -23,6 +29,10 @@ class MaskWorkspaceToCalFile(PythonAlgorithm):
 
     def category(self):
         return "DataHandling\\Text;Diffraction\\DataHandling;Diffraction\\Masking"
+
+    def seeAlso(self):
+        return [ "ReadGroupsFromFile","CreateDummyCalFile","CreateCalFileByNames",
+                 "AlignDetectors","DiffractionFocussing","LoadCalFile","SaveCalFile","MergeCalFiles" ]
 
     def name(self):
         return "MaskWorkspaceToCalFile"
@@ -64,11 +74,12 @@ class MaskWorkspaceToCalFile(PythonAlgorithm):
         calFile.write('# '+instrumentName+' detector file\n')
         calFile.write('# Format: number      UDET       offset       select    group\n')
         #save the grouping
+        specInfo = inputWorkspace.spectrumInfo()
         for i in range(inputWorkspace.getNumberHistograms()):
             try:
                 det = inputWorkspace.getDetector(i)
                 y_value = inputWorkspace.readY(i)[0]
-                if mask_query.isMasked(det, y_value): #check if masked
+                if mask_query.isMasked(specInfo, i, y_value): #check if masked
                     group = masking_flag
                 else:
                     group = not_masking_flag
@@ -90,5 +101,6 @@ class MaskWorkspaceToCalFile(PythonAlgorithm):
         return line
 
 #############################################################################################
+
 
 AlgorithmFactory.subscribe(MaskWorkspaceToCalFile())

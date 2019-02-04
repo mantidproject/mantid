@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -41,7 +41,7 @@ Usage
     SaveOpenGenieAscii(ws, path)
 
     path = os.path.join(os.path.expanduser("~"), "myworkspace.ascii")
-    print os.path.isfile(path)
+    print(os.path.isfile(path))
 
 
 Output:

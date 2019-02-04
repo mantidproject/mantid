@@ -2,7 +2,7 @@ digraph TimeSlice {
   label="TimeSlice Flowchart"
   $global_style
 
-  subgraph descision {
+  subgraph decision {
     $decision_style
     HaveCalibration [label="Have calibration workspace?"]
     HaveBackgroundRange [label="Have background range?"]

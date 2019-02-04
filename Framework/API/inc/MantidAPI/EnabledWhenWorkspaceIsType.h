@@ -1,14 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_API_ENABLEDWHENWORKSPACEISTYPE_H_
 #define MANTID_API_ENABLEDWHENWORKSPACEISTYPE_H_
 
-#include "MantidKernel/System.h"
-#include "MantidKernel/IPropertySettings.h"
-#include "MantidKernel/DataService.h"
-#include "MantidKernel/SingletonHolder.h"
-#include "MantidKernel/Exception.h"
-#include "MantidAPI/Workspace_fwd.h"
-#include "MantidKernel/IPropertyManager.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Workspace_fwd.h"
+#include "MantidKernel/DataService.h"
+#include "MantidKernel/Exception.h"
+#include "MantidKernel/IPropertyManager.h"
+#include "MantidKernel/IPropertySettings.h"
+#include "MantidKernel/SingletonHolder.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace API {
@@ -18,27 +24,6 @@ namespace API {
 
   @author Janik Zikovsky
   @date 2011-09-21
-
-  Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
- National Laboratory & European Spallation Source
-
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>
-  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 template <typename T>
 class DLLExport EnabledWhenWorkspaceIsType : public Kernel::IPropertySettings {
@@ -60,7 +45,7 @@ public:
    * @return true if fulfilled or if any problem was found (missing property,
    * e.g.).
    */
-  virtual bool fulfillsCriterion(const Kernel::IPropertyManager *algo) const {
+  virtual bool checkCriterion(const Kernel::IPropertyManager *algo) const {
     // Find the property
     if (!algo)
       return true;
@@ -96,7 +81,7 @@ public:
   /// Return true/false based on whether the other property satisfies the
   /// criterion
   bool isEnabled(const Kernel::IPropertyManager *algo) const override {
-    return fulfillsCriterion(algo);
+    return checkCriterion(algo);
   }
 
   //--------------------------------------------------------------------------------------------
@@ -107,10 +92,8 @@ public:
 
   //--------------------------------------------------------------------------------------------
   /// Make a copy of the present type of validator
-  IPropertySettings *clone() override {
-    auto out =
-        new EnabledWhenWorkspaceIsType<T>(m_otherPropName, m_enabledSetting);
-    return out;
+  IPropertySettings *clone() const override {
+    return new EnabledWhenWorkspaceIsType<T>(m_otherPropName, m_enabledSetting);
   }
 
 protected:

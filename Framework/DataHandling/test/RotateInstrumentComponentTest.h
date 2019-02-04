@@ -1,8 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAHANDLING_ROTATEINSTRUMENTCOMPONENTTEST_H_
 #define MANTID_DATAHANDLING_ROTATEINSTRUMENTCOMPONENTTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidDataHandling/RotateInstrumentComponent.h"
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -38,9 +45,10 @@ public:
     testWS = runRotateInstrument(testWS, "pixel-0)", angle, axis,
                                  false); // Detector 1
 
-    auto detId1 = testWS->getDetector(0);
+    const auto &spectrumInfo = testWS->spectrumInfo();
+    const auto &detId1 = spectrumInfo.detector(0);
     auto expectedRot = Mantid::Kernel::Quat(angle, axis);
-    auto newRot = detId1->getRotation();
+    auto newRot = detId1.getRotation();
     TS_ASSERT_DELTA(newRot.real(), expectedRot.real(), 1e-12);
     TS_ASSERT_DELTA(newRot.imagI(), expectedRot.imagI(), 1e-12);
     TS_ASSERT_DELTA(newRot.imagJ(), expectedRot.imagJ(), 1e-12);
@@ -66,8 +74,9 @@ public:
 
     auto expectedRot = Mantid::Kernel::Quat(angle, axis);
     expectedRot *= expectedRot;
-    auto detId1 = testWS->getDetector(0);
-    auto newRot = detId1->getRotation();
+    const auto &spectrumInfo = testWS->spectrumInfo();
+    const auto &detId1 = spectrumInfo.detector(0);
+    const auto &newRot = detId1.getRotation();
 
     TS_ASSERT_DELTA(newRot.real(), expectedRot.real(), 1e-12);
     TS_ASSERT_DELTA(newRot.imagI(), expectedRot.imagI(), 1e-12);

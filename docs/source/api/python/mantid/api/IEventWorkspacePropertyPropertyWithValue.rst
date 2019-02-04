@@ -2,7 +2,7 @@
  IEventWorkspacePropertyPropertyWithValue
 ==========================================
 
-This a python binding to the C++ class Mantid::API::IEventWorkspacePropertyPropertyWithValue.
+This is a Python binding to the C++ class Mantid::API::IEventWorkspacePropertyPropertyWithValue.
 
 *bases:* :py:obj:`mantid.kernel.Property`
 

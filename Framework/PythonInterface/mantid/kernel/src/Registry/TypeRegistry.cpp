@@ -1,22 +1,28 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //-----------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidPythonInterface/kernel/Registry/TypeRegistry.h"
-#include "MantidPythonInterface/kernel/Registry/TypedPropertyValueHandler.h"
 #include "MantidPythonInterface/kernel/Registry/SequenceTypeHandler.h"
-#include <map>
+#include "MantidPythonInterface/kernel/Registry/TypedPropertyValueHandler.h"
 #include <boost/python/type_id.hpp>
+#include <map>
 
 namespace Mantid {
 namespace PythonInterface {
 namespace Registry {
 namespace // <anonymous>
-    {
+{
 /// Typedef the map of type_info -> handler objects. We store
 /// boost::python::type_info objects so that they work across DLL boundaries
 /// unlike std::type_info objects
-typedef std::map<const boost::python::type_info,
-                 boost::shared_ptr<PropertyValueHandler>> TypeIDMap;
+using TypeIDMap = std::map<const boost::python::type_info,
+                           boost::shared_ptr<PropertyValueHandler>>;
 
 /**
  * Returns a reference to the static type map
@@ -26,7 +32,7 @@ TypeIDMap &typeRegistry() {
   static TypeIDMap typeHandlers;
   return typeHandlers;
 }
-} // end <anonymous>
+} // namespace
 
 //-------------------------------------------------------------------------------------------
 // Public methods
@@ -101,6 +107,6 @@ TypeRegistry::retrieve(const std::type_info &typeObject) {
         boost::python::type_info(typeObject).name() + "'");
   }
 }
-}
-}
-}
+} // namespace Registry
+} // namespace PythonInterface
+} // namespace Mantid

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/ConvertAxesToRealSpace.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/SpectrumInfo.h"
@@ -114,7 +120,7 @@ void ConvertAxesToRealSpace::exec() {
 
   const auto &spectrumInfo = summedWs->spectrumInfo();
   // for each spectra
-  PARALLEL_FOR2(summedWs, outputWs)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*summedWs, *outputWs))
   for (int i = 0; i < nHist; ++i) {
     try {
       V3D pos = spectrumInfo.position(i);
@@ -157,7 +163,7 @@ void ConvertAxesToRealSpace::exec() {
         if (axisValue < axisVector[axisIndex].min)
           axisVector[axisIndex].min = axisValue;
       }
-    } catch (Exception::NotFoundError) {
+    } catch (const Exception::NotFoundError &) {
       g_log.debug() << "Could not find detector for workspace index " << i
                     << '\n';
       failedCount++;
@@ -228,7 +234,7 @@ void ConvertAxesToRealSpace::exec() {
 
   // set all the X arrays - share the same vector
   int nOutputHist = static_cast<int>(outputWs->getNumberHistograms());
-  PARALLEL_FOR1(outputWs)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*outputWs))
   for (int i = 0; i < nOutputHist; ++i) {
     outputWs->setPoints(i, x);
   }
@@ -255,7 +261,7 @@ void ConvertAxesToRealSpace::exec() {
   }
 
   // loop over the data and sqrt the errors to complete the error calculation
-  PARALLEL_FOR1(outputWs)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*outputWs))
   for (int i = 0; i < nOutputHist; ++i) {
     auto &errorVec = outputWs->mutableE(i);
     std::transform(errorVec.begin(), errorVec.end(), errorVec.begin(),
@@ -269,11 +275,11 @@ void ConvertAxesToRealSpace::exec() {
 
 /** Fills the values in an axis linearly from min to max for a given number of
  * steps
-  * @param vector the vector to fill
-  * @param axisData the data about the axis
-  * @param isHistogram true if the data should be a histogram rather than point
+ * @param vector the vector to fill
+ * @param axisData the data about the axis
+ * @param isHistogram true if the data should be a histogram rather than point
  * data
-  */
+ */
 void ConvertAxesToRealSpace::fillAxisValues(MantidVec &vector,
                                             const AxisData &axisData,
                                             bool isHistogram) {
@@ -290,11 +296,11 @@ void ConvertAxesToRealSpace::fillAxisValues(MantidVec &vector,
 }
 
 /** Fills the unit map and ordered vector with the same data
-  * @param orderedVector the vector to fill
-  * @param unitMap the map to fill
-  * @param caption the caption of the unit
-  * @param unit the unit of measure of the unit
-  */
+ * @param orderedVector the vector to fill
+ * @param unitMap the map to fill
+ * @param caption the caption of the unit
+ * @param unit the unit of measure of the unit
+ */
 void ConvertAxesToRealSpace::fillUnitMap(
     std::vector<std::string> &orderedVector,
     std::map<std::string, std::string> &unitMap, const std::string &caption,

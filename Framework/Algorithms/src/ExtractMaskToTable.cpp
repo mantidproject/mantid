@@ -1,8 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/ExtractMaskToTable.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/ArrayProperty.h"
 
 namespace Mantid {
@@ -19,7 +26,7 @@ DECLARE_ALGORITHM(ExtractMaskToTable)
 
 //----------------------------------------------------------------------------------------------
 /** Declare properties
-  */
+ */
 void ExtractMaskToTable::init() {
   declareProperty(
       make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "",
@@ -44,7 +51,7 @@ void ExtractMaskToTable::init() {
 
 //----------------------------------------------------------------------------------------------
 /** Main execution body
-  */
+ */
 void ExtractMaskToTable::exec() {
   // Get input properties
   m_dataWS = getProperty("InputWorkspace");
@@ -55,7 +62,7 @@ void ExtractMaskToTable::exec() {
 
   bool m_inputIsMask = false;
   if (maskws) {
-    g_log.notice() << "InputWorkspace " << m_dataWS->name()
+    g_log.notice() << "InputWorkspace " << m_dataWS->getName()
                    << " is a MaskWorkspace.\n";
     m_inputIsMask = true;
   } else {
@@ -113,9 +120,9 @@ void ExtractMaskToTable::exec() {
 //----------------------------------------------------------------------------------------------
 /** Parse input TableWorkspace to get a list of detectors IDs of which detector
  * are already masked
-  * @param masktablews :: TableWorkspace containing masking information
-  * @returns :: vector of detector IDs that are masked
-  */
+ * @param masktablews :: TableWorkspace containing masking information
+ * @returns :: vector of detector IDs that are masked
+ */
 std::vector<detid_t> ExtractMaskToTable::parseMaskTable(
     DataObjects::TableWorkspace_sptr masktablews) {
   // Output vector
@@ -134,8 +141,8 @@ std::vector<detid_t> ExtractMaskToTable::parseMaskTable(
     chkcolumans[2] = "DetectorIDsList";
     for (int i = 0; i < 3; ++i) {
       if (colnames[i] != chkcolumans[i]) {
-        g_log.error() << "Mask table workspace " << masktablews->name() << "'s "
-                      << i << "-th column name is " << colnames[i]
+        g_log.error() << "Mask table workspace " << masktablews->getName()
+                      << "'s " << i << "-th column name is " << colnames[i]
                       << ", while it should be " << chkcolumans[i]
                       << ". MaskWorkspace is invalid"
                       << " and thus not used.\n";
@@ -163,16 +170,16 @@ std::vector<detid_t> ExtractMaskToTable::parseMaskTable(
 //----------------------------------------------------------------------------------------------
 /** Parse a string containing list in format (x, xx-yy, x, x, ...) to a vector
  * of detid_t
-  * @param liststr :: string containing list to parse
-  * @returns :: vector genrated from input string containing the list
-  */
+ * @param liststr :: string containing list to parse
+ * @returns :: vector genrated from input string containing the list
+ */
 std::vector<detid_t>
 ExtractMaskToTable::parseStringToVector(std::string liststr) {
   std::vector<detid_t> detidvec;
 
   // Use ArrayProperty to parse the list
   ArrayProperty<int> detlist("i", liststr);
-  if (detlist.isValid().compare("")) {
+  if (!detlist.isValid().empty()) {
     stringstream errss;
     errss << "String '" << liststr
           << "' is unable to be converted to a list of detectors IDs. "
@@ -195,29 +202,26 @@ ExtractMaskToTable::parseStringToVector(std::string liststr) {
 
 //----------------------------------------------------------------------------------------------
 /** Extract mask information from a workspace containing instrument
-  * @return vector of detector IDs of detectors that are masked
-  */
+ * @return vector of detector IDs of detectors that are masked
+ */
 std::vector<detid_t> ExtractMaskToTable::extractMaskFromMatrixWorkspace() {
   // Clear input
   std::vector<detid_t> maskeddetids;
 
   // Get on hold of instrument
-  Instrument_const_sptr instrument = m_dataWS->getInstrument();
-  if (!instrument)
+  const auto &detectorInfo = m_dataWS->detectorInfo();
+  if (detectorInfo.size() == 0)
     throw runtime_error("There is no instrument in input workspace.");
 
   // Extract
-  size_t numdets = instrument->getNumberDetectors();
-  vector<detid_t> detids = instrument->getDetectorIDs();
+  const vector<detid_t> &detids = detectorInfo.detectorIDs();
 
-  for (size_t i = 0; i < numdets; ++i) {
-    detid_t tmpdetid = detids[i];
-    IDetector_const_sptr tmpdetector = instrument->getDetector(tmpdetid);
-    bool masked = tmpdetector->isMasked();
+  for (size_t i = 0; i < detectorInfo.size(); ++i) {
+    bool masked = detectorInfo.isMasked(i);
     if (masked) {
-      maskeddetids.push_back(tmpdetid);
+      maskeddetids.push_back(detids[i]);
     }
-    g_log.debug() << "[DB] Detector No. " << i << ":  ID = " << tmpdetid
+    g_log.debug() << "[DB] Detector No. " << i << ":  ID = " << detids[i]
                   << ", Masked = " << masked << ".\n";
   }
 
@@ -231,9 +235,9 @@ std::vector<detid_t> ExtractMaskToTable::extractMaskFromMatrixWorkspace() {
 
 //----------------------------------------------------------------------------------------------
 /** Extract masked detectors from a MaskWorkspace
-  * @return vector of detector IDs of the detectors that are
-  * masked
-  */
+ * @return vector of detector IDs of the detectors that are
+ * masked
+ */
 std::vector<detid_t> ExtractMaskToTable::extractMaskFromMaskWorkspace() {
   // output vector
   std::vector<detid_t> maskeddetids;
@@ -256,9 +260,9 @@ std::vector<detid_t> ExtractMaskToTable::extractMaskFromMaskWorkspace() {
 
 //----------------------------------------------------------------------------------------------
 /** Copy table workspace content from one workspace to another
-  * @param sourceWS :: table workspace from which the content is copied;
-  * @param targetWS :: table workspace to which the content is copied;
-  */
+ * @param sourceWS :: table workspace from which the content is copied;
+ * @param targetWS :: table workspace to which the content is copied;
+ */
 void ExtractMaskToTable::copyTableWorkspaceContent(
     TableWorkspace_sptr sourceWS, TableWorkspace_sptr targetWS) {
   // Compare the column names.  They must be exactly the same
@@ -266,14 +270,14 @@ void ExtractMaskToTable::copyTableWorkspaceContent(
   vector<string> targetcolnames = targetWS->getColumnNames();
   if (sourcecolnames.size() != targetcolnames.size()) {
     stringstream errmsg;
-    errmsg << "Soruce table workspace " << sourceWS->name()
+    errmsg << "Soruce table workspace " << sourceWS->getName()
            << " has different number of columns (" << sourcecolnames.size()
            << ") than target table workspace's (" << targetcolnames.size()
            << ")";
     throw runtime_error(errmsg.str());
   }
   for (size_t i = 0; i < sourcecolnames.size(); ++i) {
-    if (sourcecolnames[i].compare(targetcolnames[i])) {
+    if (sourcecolnames[i] != targetcolnames[i]) {
       stringstream errss;
       errss << "Source and target have incompatible column name at column " << i
             << ". "
@@ -298,14 +302,14 @@ void ExtractMaskToTable::copyTableWorkspaceContent(
 
 //----------------------------------------------------------------------------------------------
 /** Add a list of spectra (detector IDs) to the output table workspace.
-  * If a detector is masked in input MaskTableWorkspace, then it will not be
+ * If a detector is masked in input MaskTableWorkspace, then it will not be
  * added to a new row
-  * @param outws :: table workspace to write
-  * @param maskeddetids :: vector of detector IDs of which detectors masked
-  * @param xmin :: minumim x
-  * @param xmax :: maximum x
-  * @param prevmaskedids :: vector of previous masked detector IDs
-  */
+ * @param outws :: table workspace to write
+ * @param maskeddetids :: vector of detector IDs of which detectors masked
+ * @param xmin :: minumim x
+ * @param xmax :: maximum x
+ * @param prevmaskedids :: vector of previous masked detector IDs
+ */
 void ExtractMaskToTable::addToTableWorkspace(TableWorkspace_sptr outws,
                                              vector<detid_t> maskeddetids,
                                              double xmin, double xmax,
@@ -380,9 +384,9 @@ void ExtractMaskToTable::addToTableWorkspace(TableWorkspace_sptr outws,
 
 //----------------------------------------------------------------------------------------------
 /** Remove the detector IDs of one vector that appear in another vector
-  * @param minuend :: vector with items to be removed from
-  * @param subtrahend :: vector containing the items to be removed from minuend
-  */
+ * @param minuend :: vector with items to be removed from
+ * @param subtrahend :: vector containing the items to be removed from minuend
+ */
 std::vector<detid_t>
 ExtractMaskToTable::subtractVector(std::vector<detid_t> minuend,
                                    std::vector<detid_t> subtrahend) {

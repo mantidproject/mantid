@@ -1,6 +1,12 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/FilterByLogValue.h"
 #include "MantidAPI/Run.h"
-#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ITimeSeriesProperty.h"
 #include "MantidKernel/ListValidator.h"
@@ -16,8 +22,9 @@ using namespace DataObjects;
 using namespace API;
 using DataObjects::EventList;
 using DataObjects::EventWorkspace;
-using DataObjects::EventWorkspace_sptr;
 using DataObjects::EventWorkspace_const_sptr;
+using DataObjects::EventWorkspace_sptr;
+using Types::Core::DateAndTime;
 
 std::string CENTRE("Centre");
 std::string LEFT("Left");
@@ -90,7 +97,7 @@ std::map<std::string, std::string> FilterByLogValue::validateInputs() {
   } catch (Exception::NotFoundError &) {
     errors["LogName"] = "The log '" + logname +
                         "' does not exist in the workspace '" +
-                        inputWS->name() + "'.";
+                        inputWS->getName() + "'.";
     return errors;
   }
 
@@ -206,14 +213,7 @@ void FilterByLogValue::exec() {
     this->setProperty("OutputWorkspace", inputWS);
   } else {
     // Make a brand new EventWorkspace for the output
-    // ------------------------------------------------------
-    outputWS = boost::dynamic_pointer_cast<EventWorkspace>(
-        API::WorkspaceFactory::Instance().create(
-            "EventWorkspace", inputWS->getNumberHistograms(), 2, 1));
-    // Copy geometry over.
-    API::WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS,
-                                                           false);
-    // But we don't copy the data.
+    outputWS = create<EventWorkspace>(*inputWS);
 
     // Loop over the histograms (detector spectra)
     PARALLEL_FOR_NO_WSP_CHECK()

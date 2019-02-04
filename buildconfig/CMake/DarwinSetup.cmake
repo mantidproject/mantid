@@ -36,6 +36,9 @@ message (STATUS "Operating System: Mac OS X ${OSX_VERSION} (${OSX_CODENAME})")
 # Enable the use of the -isystem flag to mark headers in Third_Party as system headers
 set(CMAKE_INCLUDE_SYSTEM_FLAG_CXX "-isystem ")
 
+# Set Qt5 dir according to homebrew location
+set ( Qt5_DIR /usr/local/opt/qt/lib/cmake/Qt5 )
+
 ###########################################################################
 # Use python libraries associated with PYTHON_EXECUTABLE
 # If unspecified, use first python executable in the PATH.
@@ -69,7 +72,6 @@ if ( PYTHON_DEBUG_LIBRARIES )
   set ( PYTHON_LIBRARIES optimized ${PYTHON_LIBRARIES} debug ${PYTHON_DEBUG_LIBRARIES} )
 endif ()
 
-
 # Generate a target to put a mantidpython wrapper in the appropriate directory
 if ( NOT TARGET mantidpython )
   if(MAKE_VATES)
@@ -77,11 +79,11 @@ if ( NOT TARGET mantidpython )
   else ()
     set ( PARAVIEW_PYTHON_PATHS "" )
   endif ()
-  configure_file ( ${CMAKE_MODULE_PATH}/Packaging/osx/mantidpython_osx ${CMAKE_CURRENT_BINARY_DIR}/mantidpython_osx @ONLY )
+  configure_file ( ${CMAKE_MODULE_PATH}/Packaging/osx/mantidpython.in ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/mantidpython @ONLY )
 
   add_custom_target ( mantidpython ALL
       COMMAND ${CMAKE_COMMAND} -E copy_if_different
-      ${CMAKE_CURRENT_BINARY_DIR}/mantidpython_osx
+      ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/mantidpython
       ${PROJECT_BINARY_DIR}/bin/${CMAKE_CFG_INTDIR}/mantidpython
       COMMENT "Generating mantidpython" )
   #Configure install script at the same time. Doing it later causes a warning from ninja.
@@ -91,16 +93,36 @@ if ( NOT TARGET mantidpython )
     set ( PARAVIEW_PYTHON_PATHS "" )
   endif ()
 
-  configure_file ( ${CMAKE_MODULE_PATH}/Packaging/osx/mantidpython_osx ${CMAKE_BINARY_DIR}/mantidpython_osx_install @ONLY )
+  configure_file ( ${CMAKE_MODULE_PATH}/Packaging/osx/mantidpython.in ${CMAKE_BINARY_DIR}/mantidpython_osx_install @ONLY )
 endif ()
+
+
+# directives similar to linux for conda framework-only build
+set ( BIN_DIR bin )
+set ( ETC_DIR etc )
+set ( LIB_DIR lib )
+set ( PLUGINS_DIR plugins )
 
 ###########################################################################
 # Mac-specific installation setup
 ###########################################################################
+# use homebrew OpenSSL package
+if (NOT OPENSSL_ROOT_DIR)
+  set ( OPENSSL_ROOT_DIR /usr/local/opt/openssl )
+endif(NOT OPENSSL_ROOT_DIR)
 
+if (NOT HDF5_ROOT)
+  set ( HDF5_ROOT /usr/local/opt/hdf5 )
+endif()
+
+if ( ENABLE_MANTIDPLOT )
 set ( CMAKE_INSTALL_PREFIX "" )
 set ( CPACK_PACKAGE_EXECUTABLES MantidPlot )
 set ( INBUNDLE MantidPlot.app/ )
+
+# Copy the launcher script to the correct location
+configure_file ( ${CMAKE_MODULE_PATH}/Packaging/osx/Mantid_osx_launcher.in
+                 ${CMAKE_BINARY_DIR}/bin/MantidPlot.app/Contents/MacOS/Mantid_osx_launcher COPYONLY )
 
 # We know exactly where this has to be on Darwin, but separate whether we have
 # kit build or a regular build.
@@ -115,9 +137,17 @@ endif ()
 
 set ( BIN_DIR MantidPlot.app/Contents/MacOS )
 set ( LIB_DIR MantidPlot.app/Contents/MacOS )
+# This is the root of the plugins directory
 set ( PLUGINS_DIR MantidPlot.app/plugins )
-set ( PVPLUGINS_DIR MantidPlot.app/pvplugins )
-set ( PVPLUGINS_SUBDIR pvplugins ) # Need to tidy these things up!
+
+set ( WORKBENCH_BIN_DIR MantidWorkbench.app/Contents/MacOS )
+set ( WORKBENCH_LIB_DIR MantidWorkbench.app/Contents/MacOS )
+set ( WORKBENCH_PLUGINS_DIR MantidWorkbench.app/plugins )
+
+# Separate directory of plugins to be discovered by the ParaView framework
+# These cannot be mixed with our other plugins. Further sub-directories
+# based on the Qt version will also be created by the installation targets
+set ( PVPLUGINS_SUBDIR paraview )
 
 set(CMAKE_MACOSX_RPATH 1)
 # Assume we are using homebrew for now
@@ -133,6 +163,15 @@ string(SUBSTRING "${PYQT4_SYMLINK_Qtso}" 0 ${STOPPOS} PYQT4_SYMLINK)
 set( PYQT4_PYTHONPATH ${PYQT4_PATH}/${PYQT4_SYMLINK} )
 string(REGEX REPLACE "/$" "" PYQT4_PYTHONPATH "${PYQT4_PYTHONPATH}")
 
+if (NOT PYQT5_PATH)
+  set ( PYQT5_PATH /usr/local/lib/python${PY_VER}/site-packages/PyQt5 )
+endif(NOT PYQT5_PATH)
+execute_process(COMMAND readlink ${PYQT5_PATH}/Qt.so OUTPUT_VARIABLE PYQT5_SYMLINK_Qtso)
+string(FIND "${PYQT5_SYMLINK_Qtso}" "Qt.so" STOPPOS)
+string(SUBSTRING "${PYQT5_SYMLINK_Qtso}" 0 ${STOPPOS} PYQT5_SYMLINK)
+set( PYQT5_PYTHONPATH ${PYQT5_PATH}/${PYQT5_SYMLINK} )
+string(REGEX REPLACE "/$" "" PYQT5_PYTHONPATH "${PYQT5_PYTHONPATH}")
+
 if (NOT SITEPACKAGES_PATH)
   set ( SITEPACKAGES_PATH /usr/local/lib/python${PY_VER}/site-packages )
 endif(NOT SITEPACKAGES_PATH)
@@ -142,18 +181,10 @@ string(SUBSTRING "${SITEPACKAGES_SYMLINK_sipso}" 0 ${STOPPOS} SITEPACKAGES_SYMLI
 set  ( SITEPACKAGES ${SITEPACKAGES_PATH}/${SITEPACKAGES_SYMLINK} )
 string(REGEX REPLACE "/$" "" SITEPACKAGES "${SITEPACKAGES}")
 
-# use homebrew OpenSSL package
-if (NOT OPENSSL_ROOT_DIR)
-  set ( OPENSSL_ROOT_DIR /usr/local/opt/openssl )
-endif(NOT OPENSSL_ROOT_DIR)
-
-if (NOT HDF5_ROOT)
-  set ( HDF5_ROOT /usr/local/opt/hdf5 )
-endif()
-
 # Python packages
 
 install ( PROGRAMS ${SITEPACKAGES}/sip.so DESTINATION ${BIN_DIR} )
+install ( PROGRAMS ${SITEPACKAGES}/sip.so DESTINATION ${WORKBENCH_BIN_DIR} )
 
 # Explicitly specify which PyQt libraries we want because just taking the whole
 #directory will swell the install kit unnecessarily.
@@ -174,33 +205,72 @@ endif ()
 
 install ( DIRECTORY ${PYQT4_PYTHONPATH}/uic DESTINATION ${BIN_DIR}/PyQt4 )
 
+# Explicitly specify which PyQt libraries we want because just taking the whole
+#directory will swell the install kit unnecessarily.
+install ( FILES ${PYQT5_PYTHONPATH}/Qt.so
+                ${PYQT5_PYTHONPATH}/QtCore.so
+                ${PYQT5_PYTHONPATH}/QtGui.so
+                ${PYQT5_PYTHONPATH}/QtOpenGL.so
+                ${PYQT5_PYTHONPATH}/QtSql.so
+                ${PYQT5_PYTHONPATH}/QtSvg.so
+                ${PYQT5_PYTHONPATH}/QtXml.so
+                ${PYQT5_PYTHONPATH}/QtWidgets.so
+                ${PYQT5_PYTHONPATH}/QtPrintSupport.so
+                ${PYQT5_PYTHONPATH}/__init__.py
+                DESTINATION ${WORKBENCH_BIN_DIR}/PyQt5 )
+# Newer PyQt versions have a new internal library that we need to take
+if ( EXISTS ${PYQT5_PYTHONPATH}/_qt.so )
+  install ( FILES ${PYQT5_PYTHONPATH}/_qt.so
+      DESTINATION ${WORKBENCH_BIN_DIR}/PyQt5 )
+endif ()
+
+install ( DIRECTORY ${PYQT5_PYTHONPATH}/uic DESTINATION ${WORKBENCH_BIN_DIR}/PyQt5 )
+
+
+install ( FILES ${CMAKE_SOURCE_DIR}/images/MantidPlot.icns
+          DESTINATION MantidPlot.app/Contents/Resources/ )
 # Add launcher script for mantid python
 install ( PROGRAMS ${CMAKE_BINARY_DIR}/mantidpython_osx_install
           DESTINATION MantidPlot.app/Contents/MacOS/
           RENAME mantidpython )
+
 # Add launcher application for a Mantid IPython console
 install ( PROGRAMS ${CMAKE_MODULE_PATH}/Packaging/osx/MantidPython_osx_launcher
-          DESTINATION MantidPython\ \(optional\).app/Contents/MacOS/ 
+          DESTINATION MantidPython\ \(optional\).app/Contents/MacOS/
           RENAME MantidPython )
 install ( FILES ${CMAKE_MODULE_PATH}/Packaging/osx/mantidpython_Info.plist
-          DESTINATION MantidPython\ \(optional\).app/Contents/ 
+          DESTINATION MantidPython\ \(optional\).app/Contents/
           RENAME Info.plist )
 install ( FILES ${CMAKE_SOURCE_DIR}/images/MantidPython.icns
           DESTINATION MantidPython\ \(optional\).app/Contents/Resources/ )
+
+# Add launcher application for a Mantid Workbench
+install ( PROGRAMS ${CMAKE_MODULE_PATH}/Packaging/osx/MantidWorkbench_osx_launcher
+          DESTINATION MantidWorkbench.app/Contents/MacOS/
+          RENAME MantidWorkbench )
+install ( FILES ${CMAKE_MODULE_PATH}/Packaging/osx/mantidworkbench_Info.plist
+          DESTINATION MantidWorkbench.app/Contents/
+          RENAME Info.plist )
+      install ( FILES ${CMAKE_SOURCE_DIR}/images/MantidWorkbench.icns
+          DESTINATION MantidWorkbench.app/Contents/Resources/ 
+          RENAME MantidWorkbench.icns )
+
 # Add launcher application for Mantid IPython notebooks
 install ( PROGRAMS ${CMAKE_MODULE_PATH}/Packaging/osx/MantidNotebook_osx_launcher
-          DESTINATION MantidNotebook\ \(optional\).app/Contents/MacOS/ 
+          DESTINATION MantidNotebook\ \(optional\).app/Contents/MacOS/
           RENAME MantidNotebook )
 install ( FILES ${CMAKE_MODULE_PATH}/Packaging/osx/mantidnotebook_Info.plist
-          DESTINATION MantidNotebook\ \(optional\).app/Contents/ 
+          DESTINATION MantidNotebook\ \(optional\).app/Contents/
           RENAME Info.plist )
 install ( FILES ${CMAKE_SOURCE_DIR}/images/MantidNotebook.icns
           DESTINATION MantidNotebook\ \(optional\).app/Contents/Resources/ )
 
+
 set ( CPACK_DMG_BACKGROUND_IMAGE ${CMAKE_SOURCE_DIR}/images/osx-bundle-background.png )
-set ( CPACK_DMG_DS_STORE ${CMAKE_SOURCE_DIR}/installers/MacInstaller/osx_DS_Store)
+set ( CPACK_DMG_DS_STORE_SETUP_SCRIPT ${CMAKE_SOURCE_DIR}/installers/MacInstaller/CMakeDMGSetup.scpt )
 set ( MACOSX_BUNDLE_ICON_FILE MantidPlot.icns )
 
 string (REPLACE " " "" CPACK_SYSTEM_NAME ${OSX_CODENAME})
 
 set ( CPACK_GENERATOR DragNDrop )
+endif ()

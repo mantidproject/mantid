@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -17,6 +17,16 @@ workspace name, but you can specify the name of a log value to use as
 the label, e.g. Temp\_Sample. the LabelValue property allows control of
 how a single value is extracted from time series logs.
 
+ConjoinSpectra operation
+------------------------
+
++-----------------------------------------+------------------------------------------+
+|Example case with 3 input workspaces.    | .. image:: ../images/ConjoinSpectra.png  |
+|                                         |    :height: 150                          |
+|                                         |    :width: 400                           |
+|                                         |    :alt: ConjoinSpectra operation        |
++-----------------------------------------+------------------------------------------+
+
 Usage
 -----
 
@@ -29,8 +39,8 @@ Usage
     ws3 = CreateSampleWorkspace("Histogram",BankPixelWidth=1)
 
     wsOut = ConjoinSpectra("ws,ws2,ws3",WorkspaceIndex=1)
-    print ("Creates a workspace with %i spectra labelled as" % wsOut.getNumberHistograms())
-    print wsOut.getAxis(1).extractValues()
+    print("Creates a workspace with {} spectra labelled as".format(wsOut.getNumberHistograms()))
+    print(wsOut.getAxis(1).extractValues())
 
 Output:
 
@@ -56,14 +66,14 @@ Output:
             AddTimeSeriesLog(w, Name="myLog", Time=time_string, Value=(wsIndex*100)+minute) 
 
     wsOut = ConjoinSpectra("ws,ws2,ws3",WorkspaceIndex=0,LabelUsing="myLog",LabelValue="Mean")
-    print ("Creates a workspace with %i spectra labelled using the Mean of myLog." % wsOut.getNumberHistograms())
-    print wsOut.getAxis(1).extractValues()
+    print("Creates a workspace with {} spectra labelled using the Mean of myLog.".format(wsOut.getNumberHistograms()))
+    print(wsOut.getAxis(1).extractValues())
 
     otherLabelValueOptions = ["First Value","Median", "Maximum", "Minimum"]
     for labelValueOption in otherLabelValueOptions:
         wsOut = ConjoinSpectra("ws,ws2,ws3",WorkspaceIndex=0,LabelUsing="myLog", LabelValue=labelValueOption)
-        print ("Creates a workspace with %i spectra labelled using the %s of myLog." % (wsOut.getNumberHistograms(), labelValueOption))
-        print wsOut.getAxis(1).extractValues()
+        print("Creates a workspace with {} spectra labelled using the {} of myLog.".format(wsOut.getNumberHistograms(), labelValueOption))
+        print(wsOut.getAxis(1).extractValues())
 
 Output:
 

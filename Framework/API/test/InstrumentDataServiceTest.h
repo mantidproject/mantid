@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef INSTRUMENTDATASERVICETEST_H_
 #define INSTRUMENTDATASERVICETEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Exception.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;

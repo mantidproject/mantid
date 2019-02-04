@@ -1,13 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_SINQ_POLDIINDEXKNOWNCOMPOUNDSTEST_H_
 #define MANTID_SINQ_POLDIINDEXKNOWNCOMPOUNDSTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidSINQ/PoldiIndexKnownCompounds.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidKernel/V3D.h"
+#include "MantidSINQ/PoldiIndexKnownCompounds.h"
 #include "MantidSINQ/PoldiUtilities/PoldiMockInstrumentHelpers.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidKernel/V3D.h"
 #include <boost/algorithm/string/split.hpp>
 
 using namespace Mantid::Poldi;
@@ -36,13 +43,13 @@ public:
     /* In this test, peaks from PoldiMockInstrumentHelpers (Silicon)
      * are indexed using theoretical Si-peaks.
      */
-    WorkspaceCreationHelper::storeWS(
-        "measured_SI",
-        PoldiPeakCollectionHelpers::createPoldiPeakTableWorkspace());
-    WorkspaceCreationHelper::storeWS(
-        "Si",
+    auto wsMeasuredSi =
+        PoldiPeakCollectionHelpers::createPoldiPeakTableWorkspace();
+    WorkspaceCreationHelper::storeWS("measured_SI", wsMeasuredSi);
+    auto wsSi =
         PoldiPeakCollectionHelpers::createTheoreticalPeakCollectionSilicon()
-            ->asTableWorkspace());
+            ->asTableWorkspace();
+    WorkspaceCreationHelper::storeWS("Si", wsSi);
 
     std::string outWSName("PoldiIndexKnownCompoundsTest_OutputWS");
 
@@ -238,7 +245,8 @@ public:
     std::vector<Workspace_sptr> badWorkspaces;
     badWorkspaces.push_back(
         PoldiPeakCollectionHelpers::createPoldiPeakTableWorkspace());
-    badWorkspaces.push_back(WorkspaceCreationHelper::Create1DWorkspaceRand(10));
+    badWorkspaces.push_back(
+        WorkspaceCreationHelper::create1DWorkspaceRand(10, true));
 
     TS_ASSERT_THROWS(alg.getPeakCollections(badWorkspaces),
                      std::invalid_argument);
@@ -667,9 +675,9 @@ private:
   }
 
   void storeRandomWorkspaces(const std::vector<std::string> &wsNames) {
-    for (auto it = wsNames.begin(); it != wsNames.end(); ++it) {
-      WorkspaceCreationHelper::storeWS(
-          *it, WorkspaceCreationHelper::Create1DWorkspaceRand(10));
+    for (const auto &wsName : wsNames) {
+      auto ws = WorkspaceCreationHelper::create1DWorkspaceRand(10, true);
+      WorkspaceCreationHelper::storeWS(wsName, ws);
     }
   }
 
@@ -682,8 +690,8 @@ private:
   }
 
   void removeRandomWorkspaces(const std::vector<std::string> &wsNames) {
-    for (auto it = wsNames.begin(); it != wsNames.end(); ++it) {
-      WorkspaceCreationHelper::removeWS(*it);
+    for (const auto &wsName : wsNames) {
+      WorkspaceCreationHelper::removeWS(wsName);
     }
   }
 

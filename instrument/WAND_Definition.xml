@@ -1,0 +1,1242 @@
+<?xml version='1.0' encoding='ASCII'?>
+<instrument xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.mantidproject.org/IDF/1.0" last-modified="2018-02-06 14:40:00.479056" name="WAND" valid-from="2017-12-01 00:00:00" valid-to="2100-01-31 23:59:59" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd">
+  <!--Created by Ross Whitfield-->
+  <defaults>
+    <length unit="metre"/>
+    <angle unit="degree"/>
+    <reference-frame>
+      <along-beam axis="z"/>
+      <pointing-up axis="y"/>
+      <handedness val="right"/>
+    </reference-frame>
+    <default-view view="cylindrical_y"/>
+  </defaults>
+  <!--SOURCE AND SAMPLE POSITION-->
+  <component type="monochromator">
+    <location z="-3.289"/>
+  </component>
+  <type is="Source" name="monochromator"/>
+  <component type="sample-position">
+    <location x="0.0" y="0.0" z="0.0"/>
+  </component>
+  <type is="SamplePos" name="sample-position"/>
+  <component idlist="bank1" type="bank1">
+    <location>
+      <parameter name="y">
+        <logfile eq="rint(value*1000)/100000" extract-single-value-as="mean" id="HB2C:Mot:detz.RBV"/>
+      </parameter>
+    </location>
+  </component>
+  <type name="bank1">
+    <component type="panel">
+      <location>
+        <parameter name="r-position">
+          <value val="0.728"/>
+        </parameter>
+        <parameter name="t-position">
+          <logfile eq="7.5+rint(value*1000)/1000" extract-single-value-as="mean" id="HB2C:Mot:s2.RBV"/>
+        </parameter>
+        <parameter name="roty">
+          <logfile eq="7.5+value" extract-single-value-as="mean" id="HB2C:Mot:s2.RBV"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+  <component idlist="bank2" type="bank2">
+    <location>
+      <parameter name="y">
+        <logfile eq="rint(value*1000)/100000" extract-single-value-as="mean" id="HB2C:Mot:detz.RBV"/>
+      </parameter>
+    </location>
+  </component>
+  <type name="bank2">
+    <component type="panel">
+      <location>
+        <parameter name="r-position">
+          <value val="0.728"/>
+        </parameter>
+        <parameter name="t-position">
+          <logfile eq="22.5+rint(value*1000)/1000" extract-single-value-as="mean" id="HB2C:Mot:s2.RBV"/>
+        </parameter>
+        <parameter name="roty">
+          <logfile eq="22.5+value" extract-single-value-as="mean" id="HB2C:Mot:s2.RBV"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+  <component idlist="bank3" type="bank3">
+    <location>
+      <parameter name="y">
+        <logfile eq="rint(value*1000)/100000" extract-single-value-as="mean" id="HB2C:Mot:detz.RBV"/>
+      </parameter>
+    </location>
+  </component>
+  <type name="bank3">
+    <component type="panel">
+      <location>
+        <parameter name="r-position">
+          <value val="0.728"/>
+        </parameter>
+        <parameter name="t-position">
+          <logfile eq="37.5+rint(value*1000)/1000" extract-single-value-as="mean" id="HB2C:Mot:s2.RBV"/>
+        </parameter>
+        <parameter name="roty">
+          <logfile eq="37.5+value" extract-single-value-as="mean" id="HB2C:Mot:s2.RBV"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+  <component idlist="bank4" type="bank4">
+    <location>
+      <parameter name="y">
+        <logfile eq="rint(value*1000)/100000" extract-single-value-as="mean" id="HB2C:Mot:detz.RBV"/>
+      </parameter>
+    </location>
+  </component>
+  <type name="bank4">
+    <component type="panel">
+      <location>
+        <parameter name="r-position">
+          <value val="0.728"/>
+        </parameter>
+        <parameter name="t-position">
+          <logfile eq="52.5+rint(value*1000)/1000" extract-single-value-as="mean" id="HB2C:Mot:s2.RBV"/>
+        </parameter>
+        <parameter name="roty">
+          <logfile eq="52.5+value" extract-single-value-as="mean" id="HB2C:Mot:s2.RBV"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+  <component idlist="bank5" type="bank5">
+    <location>
+      <parameter name="y">
+        <logfile eq="rint(value*1000)/100000" extract-single-value-as="mean" id="HB2C:Mot:detz.RBV"/>
+      </parameter>
+    </location>
+  </component>
+  <type name="bank5">
+    <component type="panel">
+      <location>
+        <parameter name="r-position">
+          <value val="0.728"/>
+        </parameter>
+        <parameter name="t-position">
+          <logfile eq="67.5+rint(value*1000)/1000" extract-single-value-as="mean" id="HB2C:Mot:s2.RBV"/>
+        </parameter>
+        <parameter name="roty">
+          <logfile eq="67.5+value" extract-single-value-as="mean" id="HB2C:Mot:s2.RBV"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+  <component idlist="bank6" type="bank6">
+    <location>
+      <parameter name="y">
+        <logfile eq="rint(value*1000)/100000" extract-single-value-as="mean" id="HB2C:Mot:detz.RBV"/>
+      </parameter>
+    </location>
+  </component>
+  <type name="bank6">
+    <component type="panel">
+      <location>
+        <parameter name="r-position">
+          <value val="0.728"/>
+        </parameter>
+        <parameter name="t-position">
+          <logfile eq="82.5+rint(value*1000)/1000" extract-single-value-as="mean" id="HB2C:Mot:s2.RBV"/>
+        </parameter>
+        <parameter name="roty">
+          <logfile eq="82.5+value" extract-single-value-as="mean" id="HB2C:Mot:s2.RBV"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+  <component idlist="bank7" type="bank7">
+    <location>
+      <parameter name="y">
+        <logfile eq="rint(value*1000)/100000" extract-single-value-as="mean" id="HB2C:Mot:detz.RBV"/>
+      </parameter>
+    </location>
+  </component>
+  <type name="bank7">
+    <component type="panel">
+      <location>
+        <parameter name="r-position">
+          <value val="0.728"/>
+        </parameter>
+        <parameter name="t-position">
+          <logfile eq="97.5+rint(value*1000)/1000" extract-single-value-as="mean" id="HB2C:Mot:s2.RBV"/>
+        </parameter>
+        <parameter name="roty">
+          <logfile eq="97.5+value" extract-single-value-as="mean" id="HB2C:Mot:s2.RBV"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+  <component idlist="bank8" type="bank8">
+    <location>
+      <parameter name="y">
+        <logfile eq="rint(value*1000)/100000" extract-single-value-as="mean" id="HB2C:Mot:detz.RBV"/>
+      </parameter>
+    </location>
+  </component>
+  <type name="bank8">
+    <component type="panel">
+      <location>
+        <parameter name="r-position">
+          <value val="0.728"/>
+        </parameter>
+        <parameter name="t-position">
+          <logfile eq="112.5+rint(value*1000)/1000" extract-single-value-as="mean" id="HB2C:Mot:s2.RBV"/>
+        </parameter>
+        <parameter name="roty">
+          <logfile eq="112.5+value" extract-single-value-as="mean" id="HB2C:Mot:s2.RBV"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+  <!--DET PACK-->
+  <type name="panel">
+    <properties/>
+    <component type="wire">
+      <location name="wire1" x="-0.0948788339586" z="-0.00620471666573"/>
+      <location name="wire2" x="-0.0944843613953" z="-0.00615304737301"/>
+      <location name="wire3" x="-0.0940898677385" z="-0.0061015936611"/>
+      <location name="wire4" x="-0.0936953530764" z="-0.00605035553765"/>
+      <location name="wire5" x="-0.0933008174974" z="-0.00599933301027"/>
+      <location name="wire6" x="-0.0929062610896" z="-0.00594852608657"/>
+      <location name="wire7" x="-0.0925116839413" z="-0.00589793477409"/>
+      <location name="wire8" x="-0.0921170861407" z="-0.00584755908036"/>
+      <location name="wire9" x="-0.0917224677761" z="-0.00579739901288"/>
+      <location name="wire10" x="-0.0913278289357" z="-0.0057474545791"/>
+      <location name="wire11" x="-0.0909331697078" z="-0.00569772578645"/>
+      <location name="wire12" x="-0.0905384901807" z="-0.00564821264234"/>
+      <location name="wire13" x="-0.0901437904425" z="-0.00559891515412"/>
+      <location name="wire14" x="-0.0897490705816" z="-0.00554983332913"/>
+      <location name="wire15" x="-0.0893543306863" z="-0.00550096717467"/>
+      <location name="wire16" x="-0.0889595708447" z="-0.005452316698"/>
+      <location name="wire17" x="-0.0885647911452" z="-0.00540388190637"/>
+      <location name="wire18" x="-0.088169991676" z="-0.00535566280697"/>
+      <location name="wire19" x="-0.0877751725254" z="-0.00530765940698"/>
+      <location name="wire20" x="-0.0873803337817" z="-0.00525987171354"/>
+      <location name="wire21" x="-0.0869854755332" z="-0.00521229973376"/>
+      <location name="wire22" x="-0.0865905978681" z="-0.00516494347471"/>
+      <location name="wire23" x="-0.0861957008747" z="-0.00511780294344"/>
+      <location name="wire24" x="-0.0858007846413" z="-0.00507087814695"/>
+      <location name="wire25" x="-0.0854058492563" z="-0.00502416909223"/>
+      <location name="wire26" x="-0.0850108948078" z="-0.00497767578622"/>
+      <location name="wire27" x="-0.0846159213842" z="-0.00493139823585"/>
+      <location name="wire28" x="-0.0842209290737" z="-0.00488533644798"/>
+      <location name="wire29" x="-0.0838259179647" z="-0.00483949042948"/>
+      <location name="wire30" x="-0.0834308881456" z="-0.00479386018716"/>
+      <location name="wire31" x="-0.0830358397044" z="-0.00474844572781"/>
+      <location name="wire32" x="-0.0826407727297" z="-0.00470324705819"/>
+      <location name="wire33" x="-0.0822456873096" z="-0.004658264185"/>
+      <location name="wire34" x="-0.0818505835326" z="-0.00461349711496"/>
+      <location name="wire35" x="-0.0814554614868" z="-0.00456894585471"/>
+      <location name="wire36" x="-0.0810603212606" z="-0.00452461041088"/>
+      <location name="wire37" x="-0.0806651629424" z="-0.00448049079007"/>
+      <location name="wire38" x="-0.0802699866205" z="-0.00443658699883"/>
+      <location name="wire39" x="-0.0798747923831" z="-0.0043928990437"/>
+      <location name="wire40" x="-0.0794795803186" z="-0.00434942693117"/>
+      <location name="wire41" x="-0.0790843505153" z="-0.00430617066772"/>
+      <location name="wire42" x="-0.0786891030616" z="-0.00426313025976"/>
+      <location name="wire43" x="-0.0782938380457" z="-0.00422030571371"/>
+      <location name="wire44" x="-0.0778985555561" z="-0.00417769703594"/>
+      <location name="wire45" x="-0.077503255681" z="-0.00413530423278"/>
+      <location name="wire46" x="-0.0771079385088" z="-0.00409312731053"/>
+      <location name="wire47" x="-0.0767126041277" z="-0.00405116627547"/>
+      <location name="wire48" x="-0.0763172526263" z="-0.00400942113384"/>
+      <location name="wire49" x="-0.0759218840927" z="-0.00396789189185"/>
+      <location name="wire50" x="-0.0755264986154" z="-0.00392657855568"/>
+      <location name="wire51" x="-0.0751310962826" z="-0.00388548113146"/>
+      <location name="wire52" x="-0.0747356771828" z="-0.00384459962531"/>
+      <location name="wire53" x="-0.0743402414043" z="-0.00380393404332"/>
+      <location name="wire54" x="-0.0739447890354" z="-0.00376348439152"/>
+      <location name="wire55" x="-0.0735493201645" z="-0.00372325067595"/>
+      <location name="wire56" x="-0.0731538348799" z="-0.00368323290256"/>
+      <location name="wire57" x="-0.07275833327" z="-0.00364343107734"/>
+      <location name="wire58" x="-0.0723628154233" z="-0.00360384520618"/>
+      <location name="wire59" x="-0.0719672814279" z="-0.00356447529497"/>
+      <location name="wire60" x="-0.0715717313723" z="-0.00352532134958"/>
+      <location name="wire61" x="-0.0711761653449" z="-0.00348638337583"/>
+      <location name="wire62" x="-0.070780583434" z="-0.0034476613795"/>
+      <location name="wire63" x="-0.0703849857281" z="-0.00340915536636"/>
+      <location name="wire64" x="-0.0699893723153" z="-0.00337086534213"/>
+      <location name="wire65" x="-0.0695937432843" z="-0.00333279131251"/>
+      <location name="wire66" x="-0.0691980987232" z="-0.00329493328315"/>
+      <location name="wire67" x="-0.0688024387206" z="-0.0032572912597"/>
+      <location name="wire68" x="-0.0684067633647" z="-0.00321986524774"/>
+      <location name="wire69" x="-0.068011072744" z="-0.00318265525284"/>
+      <location name="wire70" x="-0.0676153669469" z="-0.00314566128055"/>
+      <location name="wire71" x="-0.0672196460616" z="-0.00310888333635"/>
+      <location name="wire72" x="-0.0668239101767" z="-0.00307232142572"/>
+      <location name="wire73" x="-0.0664281593805" z="-0.00303597555409"/>
+      <location name="wire74" x="-0.0660323937614" z="-0.00299984572688"/>
+      <location name="wire75" x="-0.0656366134078" z="-0.00296393194945"/>
+      <location name="wire76" x="-0.0652408184081" z="-0.00292823422715"/>
+      <location name="wire77" x="-0.0648450088507" z="-0.00289275256528"/>
+      <location name="wire78" x="-0.0644491848239" z="-0.00285748696913"/>
+      <location name="wire79" x="-0.0640533464163" z="-0.00282243744392"/>
+      <location name="wire80" x="-0.0636574937161" z="-0.00278760399489"/>
+      <location name="wire81" x="-0.0632616268118" z="-0.0027529866272"/>
+      <location name="wire82" x="-0.0628657457919" z="-0.00271858534601"/>
+      <location name="wire83" x="-0.0624698507446" z="-0.00268440015644"/>
+      <location name="wire84" x="-0.0620739417584" z="-0.00265043106356"/>
+      <location name="wire85" x="-0.0616780189218" z="-0.00261667807243"/>
+      <location name="wire86" x="-0.0612820823231" z="-0.00258314118806"/>
+      <location name="wire87" x="-0.0608861320507" z="-0.00254982041545"/>
+      <location name="wire88" x="-0.0604901681932" z="-0.00251671575955"/>
+      <location name="wire89" x="-0.0600941908388" z="-0.00248382722529"/>
+      <location name="wire90" x="-0.059698200076" z="-0.00245115481754"/>
+      <location name="wire91" x="-0.0593021959932" z="-0.00241869854119"/>
+      <location name="wire92" x="-0.0589061786789" z="-0.00238645840104"/>
+      <location name="wire93" x="-0.0585101482215" z="-0.00235443440189"/>
+      <location name="wire94" x="-0.0581141047093" z="-0.00232262654852"/>
+      <location name="wire95" x="-0.0577180482309" z="-0.00229103484564"/>
+      <location name="wire96" x="-0.0573219788747" z="-0.00225965929795"/>
+      <location name="wire97" x="-0.056925896729" z="-0.00222849991013"/>
+      <location name="wire98" x="-0.0565298018824" z="-0.0021975566868"/>
+      <location name="wire99" x="-0.0561336944232" z="-0.00216682963256"/>
+      <location name="wire100" x="-0.0557375744399" z="-0.002136318752"/>
+      <location name="wire101" x="-0.0553414420209" z="-0.00210602404963"/>
+      <location name="wire102" x="-0.0549452972547" z="-0.00207594552997"/>
+      <location name="wire103" x="-0.0545491402297" z="-0.0020460831975"/>
+      <location name="wire104" x="-0.0541529710343" z="-0.00201643705665"/>
+      <location name="wire105" x="-0.0537567897571" z="-0.00198700711182"/>
+      <location name="wire106" x="-0.0533605964864" z="-0.00195779336741"/>
+      <location name="wire107" x="-0.0529643913106" z="-0.00192879582774"/>
+      <location name="wire108" x="-0.0525681743183" z="-0.00190001449714"/>
+      <location name="wire109" x="-0.0521719455979" z="-0.00187144937989"/>
+      <location name="wire110" x="-0.0517757052378" z="-0.00184310048022"/>
+      <location name="wire111" x="-0.0513794533265" z="-0.00181496780236"/>
+      <location name="wire112" x="-0.0509831899524" z="-0.00178705135049"/>
+      <location name="wire113" x="-0.050586915204" z="-0.00175935112877"/>
+      <location name="wire114" x="-0.0501906291697" z="-0.00173186714131"/>
+      <location name="wire115" x="-0.0497943319381" z="-0.00170459939219"/>
+      <location name="wire116" x="-0.0493980235975" z="-0.00167754788548"/>
+      <location name="wire117" x="-0.0490017042365" z="-0.00165071262519"/>
+      <location name="wire118" x="-0.0486053739434" z="-0.00162409361533"/>
+      <location name="wire119" x="-0.0482090328068" z="-0.00159769085983"/>
+      <location name="wire120" x="-0.0478126809151" z="-0.00157150436264"/>
+      <location name="wire121" x="-0.0474163183568" z="-0.00154553412764"/>
+      <location name="wire122" x="-0.0470199452203" z="-0.0015197801587"/>
+      <location name="wire123" x="-0.0466235615941" z="-0.00149424245965"/>
+      <location name="wire124" x="-0.0462271675668" z="-0.00146892103428"/>
+      <location name="wire125" x="-0.0458307632266" z="-0.00144381588637"/>
+      <location name="wire126" x="-0.0454343486623" z="-0.00141892701963"/>
+      <location name="wire127" x="-0.0450379239621" z="-0.00139425443778"/>
+      <location name="wire128" x="-0.0446414892146" z="-0.00136979814449"/>
+      <location name="wire129" x="-0.0442450445082" z="-0.00134555814338"/>
+      <location name="wire130" x="-0.0438485899315" z="-0.00132153443807"/>
+      <location name="wire131" x="-0.0434521255729" z="-0.00129772703212"/>
+      <location name="wire132" x="-0.0430556515208" z="-0.00127413592909"/>
+      <location name="wire133" x="-0.0426591678639" z="-0.00125076113246"/>
+      <location name="wire134" x="-0.0422626746905" z="-0.00122760264573"/>
+      <location name="wire135" x="-0.0418661720891" z="-0.00120466047234"/>
+      <location name="wire136" x="-0.0414696601483" z="-0.00118193461569"/>
+      <location name="wire137" x="-0.0410731389564" z="-0.00115942507917"/>
+      <location name="wire138" x="-0.0406766086021" z="-0.00113713186612"/>
+      <location name="wire139" x="-0.0402800691737" z="-0.00111505497986"/>
+      <location name="wire140" x="-0.0398835207599" z="-0.00109319442367"/>
+      <location name="wire141" x="-0.0394869634489" z="-0.0010715502008"/>
+      <location name="wire142" x="-0.0390903973295" z="-0.00105012231447"/>
+      <location name="wire143" x="-0.0386938224899" z="-0.00102891076787"/>
+      <location name="wire144" x="-0.0382972390188" z="-0.00100791556415"/>
+      <location name="wire145" x="-0.0379006470047" z="-0.000987136706433"/>
+      <location name="wire146" x="-0.0375040465359" z="-0.000966574197808"/>
+      <location name="wire147" x="-0.0371074377011" z="-0.000946228041334"/>
+      <location name="wire148" x="-0.0367108205888" z="-0.000926098240036"/>
+      <location name="wire149" x="-0.0363141952873" z="-0.000906184796907"/>
+      <location name="wire150" x="-0.0359175618853" z="-0.000886487714908"/>
+      <location name="wire151" x="-0.0355209204711" z="-0.000867006996968"/>
+      <location name="wire152" x="-0.0351242711335" z="-0.000847742645985"/>
+      <location name="wire153" x="-0.0347276139607" z="-0.000828694664822"/>
+      <location name="wire154" x="-0.0343309490414" z="-0.000809863056312"/>
+      <location name="wire155" x="-0.033934276464" z="-0.000791247823256"/>
+      <location name="wire156" x="-0.033537596317" z="-0.000772848968421"/>
+      <location name="wire157" x="-0.033140908689" z="-0.000754666494543"/>
+      <location name="wire158" x="-0.0327442136684" z="-0.000736700404326"/>
+      <location name="wire159" x="-0.0323475113438" z="-0.000718950700442"/>
+      <location name="wire160" x="-0.0319508018037" z="-0.00070141738553"/>
+      <location name="wire161" x="-0.0315540851366" z="-0.000684100462196"/>
+      <location name="wire162" x="-0.031157361431" z="-0.000666999933017"/>
+      <location name="wire163" x="-0.0307606307753" z="-0.000650115800534"/>
+      <location name="wire164" x="-0.0303638932582" z="-0.000633448067259"/>
+      <location name="wire165" x="-0.0299671489681" z="-0.00061699673567"/>
+      <location name="wire166" x="-0.0295703979936" z="-0.000600761808213"/>
+      <location name="wire167" x="-0.0291736404231" z="-0.000584743287303"/>
+      <location name="wire168" x="-0.0287768763452" z="-0.00056894117532"/>
+      <location name="wire169" x="-0.0283801058484" z="-0.000553355474616"/>
+      <location name="wire170" x="-0.0279833290213" z="-0.000537986187507"/>
+      <location name="wire171" x="-0.0275865459522" z="-0.000522833316278"/>
+      <location name="wire172" x="-0.0271897567298" z="-0.000507896863184"/>
+      <location name="wire173" x="-0.0267929614426" z="-0.000493176830445"/>
+      <location name="wire174" x="-0.0263961601791" z="-0.00047867322025"/>
+      <location name="wire175" x="-0.0259993530277" z="-0.000464386034755"/>
+      <location name="wire176" x="-0.0256025400772" z="-0.000450315276085"/>
+      <location name="wire177" x="-0.0252057214158" z="-0.000436460946333"/>
+      <location name="wire178" x="-0.0248088971323" z="-0.000422823047557"/>
+      <location name="wire179" x="-0.0244120673151" z="-0.000409401581787"/>
+      <location name="wire180" x="-0.0240152320527" z="-0.000396196551018"/>
+      <location name="wire181" x="-0.0236183914336" z="-0.000383207957213"/>
+      <location name="wire182" x="-0.0232215455465" z="-0.000370435802304"/>
+      <location name="wire183" x="-0.0228246944797" z="-0.000357880088189"/>
+      <location name="wire184" x="-0.0224278383219" z="-0.000345540816737"/>
+      <location name="wire185" x="-0.0220309771616" z="-0.000333417989781"/>
+      <location name="wire186" x="-0.0216341110872" z="-0.000321511609125"/>
+      <location name="wire187" x="-0.0212372401874" z="-0.000309821676539"/>
+      <location name="wire188" x="-0.0208403645507" z="-0.00029834819376"/>
+      <location name="wire189" x="-0.0204434842655" z="-0.000287091162495"/>
+      <location name="wire190" x="-0.0200465994205" z="-0.000276050584419"/>
+      <location name="wire191" x="-0.0196497101041" z="-0.000265226461171"/>
+      <location name="wire192" x="-0.0192528164049" z="-0.000254618794363"/>
+      <location name="wire193" x="-0.0188559184114" z="-0.000244227585571"/>
+      <location name="wire194" x="-0.0184590162121" z="-0.000234052836341"/>
+      <location name="wire195" x="-0.0180621098957" z="-0.000224094548185"/>
+      <location name="wire196" x="-0.0176651995505" z="-0.000214352722584"/>
+      <location name="wire197" x="-0.0172682852653" z="-0.000204827360987"/>
+      <location name="wire198" x="-0.0168713671284" z="-0.000195518464809"/>
+      <location name="wire199" x="-0.0164744452284" z="-0.000186426035436"/>
+      <location name="wire200" x="-0.0160775196539" z="-0.00017755007422"/>
+      <location name="wire201" x="-0.0156805904934" z="-0.000168890582479"/>
+      <location name="wire202" x="-0.0152836578354" z="-0.000160447561501"/>
+      <location name="wire203" x="-0.0148867217685" z="-0.000152221012543"/>
+      <location name="wire204" x="-0.0144897823812" z="-0.000144210936827"/>
+      <location name="wire205" x="-0.0140928397621" z="-0.000136417335544"/>
+      <location name="wire206" x="-0.0136958939997" z="-0.000128840209854"/>
+      <location name="wire207" x="-0.0132989451825" z="-0.000121479560882"/>
+      <location name="wire208" x="-0.012901993399" z="-0.000114335389724"/>
+      <location name="wire209" x="-0.0125050387379" z="-0.000107407697441"/>
+      <location name="wire210" x="-0.0121080812876" z="-0.000100696485064"/>
+      <location name="wire211" x="-0.0117111211367" z="-9.42017535905e-05"/>
+      <location name="wire212" x="-0.0113141583738" z="-8.79235039864e-05"/>
+      <location name="wire213" x="-0.0109171930873" z="-8.18617371851e-05"/>
+      <location name="wire214" x="-0.0105202253659" z="-7.60164540881e-05"/>
+      <location name="wire215" x="-0.010123255298" z="-7.03876555643e-05"/>
+      <location name="wire216" x="-0.00972628297218" z="-6.49753424509e-05"/>
+      <location name="wire217" x="-0.00932930847703" z="-5.97795155526e-05"/>
+      <location name="wire218" x="-0.00893233190106" z="-5.4800175642e-05"/>
+      <location name="wire219" x="-0.00853535333283" z="-5.00373234595e-05"/>
+      <location name="wire220" x="-0.00813837286087" z="-4.54909597132e-05"/>
+      <location name="wire221" x="-0.00774139057373" z="-4.11610850792e-05"/>
+      <location name="wire222" x="-0.00734440655995" z="-3.70477002012e-05"/>
+      <location name="wire223" x="-0.00694742090808" z="-3.3150805691e-05"/>
+      <location name="wire224" x="-0.00655043370666" z="-2.9470402128e-05"/>
+      <location name="wire225" x="-0.00615344504424" z="-2.60064900594e-05"/>
+      <location name="wire226" x="-0.00575645500936" z="-2.27590700003e-05"/>
+      <location name="wire227" x="-0.00535946369056" z="-1.97281424335e-05"/>
+      <location name="wire228" x="-0.00496247117639" z="-1.69137078097e-05"/>
+      <location name="wire229" x="-0.0045654775554" z="-1.43157665474e-05"/>
+      <location name="wire230" x="-0.00416848291613" z="-1.19343190329e-05"/>
+      <location name="wire231" x="-0.00377148734712" z="-9.76936562034e-06"/>
+      <location name="wire232" x="-0.00337449093693" z="-7.82090663156e-06"/>
+      <location name="wire233" x="-0.0029774937741" z="-6.08894235631e-06"/>
+      <location name="wire234" x="-0.00258049594717" z="-4.57347305212e-06"/>
+      <location name="wire235" x="-0.00218349754469" z="-3.27449894433e-06"/>
+      <location name="wire236" x="-0.0017864986552" z="-2.19202022608e-06"/>
+      <location name="wire237" x="-0.00138949936726" z="-1.32603705834e-06"/>
+      <location name="wire238" x="-0.000992499769411" z="-6.76549569858e-07"/>
+      <location name="wire239" x="-0.000595499950193" z="-2.43557857221e-07"/>
+      <location name="wire240" x="-0.000198499998155" z="-2.70619848063e-08"/>
+      <location name="wire241" x="0.000198499998155" z="-2.70619848063e-08"/>
+      <location name="wire242" x="0.000595499950193" z="-2.43557857221e-07"/>
+      <location name="wire243" x="0.000992499769411" z="-6.76549569858e-07"/>
+      <location name="wire244" x="0.00138949936726" z="-1.32603705834e-06"/>
+      <location name="wire245" x="0.0017864986552" z="-2.19202022608e-06"/>
+      <location name="wire246" x="0.00218349754469" z="-3.27449894433e-06"/>
+      <location name="wire247" x="0.00258049594717" z="-4.57347305212e-06"/>
+      <location name="wire248" x="0.0029774937741" z="-6.08894235631e-06"/>
+      <location name="wire249" x="0.00337449093693" z="-7.82090663156e-06"/>
+      <location name="wire250" x="0.00377148734712" z="-9.76936562034e-06"/>
+      <location name="wire251" x="0.00416848291613" z="-1.19343190329e-05"/>
+      <location name="wire252" x="0.0045654775554" z="-1.43157665474e-05"/>
+      <location name="wire253" x="0.00496247117639" z="-1.69137078097e-05"/>
+      <location name="wire254" x="0.00535946369056" z="-1.97281424335e-05"/>
+      <location name="wire255" x="0.00575645500936" z="-2.27590700003e-05"/>
+      <location name="wire256" x="0.00615344504424" z="-2.60064900594e-05"/>
+      <location name="wire257" x="0.00655043370666" z="-2.9470402128e-05"/>
+      <location name="wire258" x="0.00694742090808" z="-3.3150805691e-05"/>
+      <location name="wire259" x="0.00734440655995" z="-3.70477002012e-05"/>
+      <location name="wire260" x="0.00774139057373" z="-4.11610850792e-05"/>
+      <location name="wire261" x="0.00813837286087" z="-4.54909597132e-05"/>
+      <location name="wire262" x="0.00853535333283" z="-5.00373234595e-05"/>
+      <location name="wire263" x="0.00893233190106" z="-5.4800175642e-05"/>
+      <location name="wire264" x="0.00932930847703" z="-5.97795155526e-05"/>
+      <location name="wire265" x="0.00972628297218" z="-6.49753424509e-05"/>
+      <location name="wire266" x="0.010123255298" z="-7.03876555643e-05"/>
+      <location name="wire267" x="0.0105202253659" z="-7.60164540881e-05"/>
+      <location name="wire268" x="0.0109171930873" z="-8.18617371851e-05"/>
+      <location name="wire269" x="0.0113141583738" z="-8.79235039864e-05"/>
+      <location name="wire270" x="0.0117111211367" z="-9.42017535905e-05"/>
+      <location name="wire271" x="0.0121080812876" z="-0.000100696485064"/>
+      <location name="wire272" x="0.0125050387379" z="-0.000107407697441"/>
+      <location name="wire273" x="0.012901993399" z="-0.000114335389724"/>
+      <location name="wire274" x="0.0132989451825" z="-0.000121479560882"/>
+      <location name="wire275" x="0.0136958939997" z="-0.000128840209854"/>
+      <location name="wire276" x="0.0140928397621" z="-0.000136417335544"/>
+      <location name="wire277" x="0.0144897823812" z="-0.000144210936827"/>
+      <location name="wire278" x="0.0148867217685" z="-0.000152221012543"/>
+      <location name="wire279" x="0.0152836578354" z="-0.000160447561501"/>
+      <location name="wire280" x="0.0156805904934" z="-0.000168890582479"/>
+      <location name="wire281" x="0.0160775196539" z="-0.00017755007422"/>
+      <location name="wire282" x="0.0164744452284" z="-0.000186426035436"/>
+      <location name="wire283" x="0.0168713671284" z="-0.000195518464809"/>
+      <location name="wire284" x="0.0172682852653" z="-0.000204827360987"/>
+      <location name="wire285" x="0.0176651995505" z="-0.000214352722584"/>
+      <location name="wire286" x="0.0180621098957" z="-0.000224094548185"/>
+      <location name="wire287" x="0.0184590162121" z="-0.000234052836341"/>
+      <location name="wire288" x="0.0188559184114" z="-0.000244227585571"/>
+      <location name="wire289" x="0.0192528164049" z="-0.000254618794363"/>
+      <location name="wire290" x="0.0196497101041" z="-0.000265226461171"/>
+      <location name="wire291" x="0.0200465994205" z="-0.000276050584419"/>
+      <location name="wire292" x="0.0204434842655" z="-0.000287091162495"/>
+      <location name="wire293" x="0.0208403645507" z="-0.00029834819376"/>
+      <location name="wire294" x="0.0212372401874" z="-0.000309821676539"/>
+      <location name="wire295" x="0.0216341110872" z="-0.000321511609125"/>
+      <location name="wire296" x="0.0220309771616" z="-0.000333417989781"/>
+      <location name="wire297" x="0.0224278383219" z="-0.000345540816737"/>
+      <location name="wire298" x="0.0228246944797" z="-0.000357880088189"/>
+      <location name="wire299" x="0.0232215455465" z="-0.000370435802304"/>
+      <location name="wire300" x="0.0236183914336" z="-0.000383207957213"/>
+      <location name="wire301" x="0.0240152320527" z="-0.000396196551018"/>
+      <location name="wire302" x="0.0244120673151" z="-0.000409401581787"/>
+      <location name="wire303" x="0.0248088971323" z="-0.000422823047557"/>
+      <location name="wire304" x="0.0252057214158" z="-0.000436460946333"/>
+      <location name="wire305" x="0.0256025400772" z="-0.000450315276085"/>
+      <location name="wire306" x="0.0259993530277" z="-0.000464386034755"/>
+      <location name="wire307" x="0.0263961601791" z="-0.00047867322025"/>
+      <location name="wire308" x="0.0267929614426" z="-0.000493176830445"/>
+      <location name="wire309" x="0.0271897567298" z="-0.000507896863184"/>
+      <location name="wire310" x="0.0275865459522" z="-0.000522833316278"/>
+      <location name="wire311" x="0.0279833290213" z="-0.000537986187507"/>
+      <location name="wire312" x="0.0283801058484" z="-0.000553355474616"/>
+      <location name="wire313" x="0.0287768763452" z="-0.00056894117532"/>
+      <location name="wire314" x="0.0291736404231" z="-0.000584743287303"/>
+      <location name="wire315" x="0.0295703979936" z="-0.000600761808213"/>
+      <location name="wire316" x="0.0299671489681" z="-0.00061699673567"/>
+      <location name="wire317" x="0.0303638932582" z="-0.000633448067259"/>
+      <location name="wire318" x="0.0307606307753" z="-0.000650115800534"/>
+      <location name="wire319" x="0.031157361431" z="-0.000666999933017"/>
+      <location name="wire320" x="0.0315540851366" z="-0.000684100462196"/>
+      <location name="wire321" x="0.0319508018037" z="-0.00070141738553"/>
+      <location name="wire322" x="0.0323475113438" z="-0.000718950700442"/>
+      <location name="wire323" x="0.0327442136684" z="-0.000736700404326"/>
+      <location name="wire324" x="0.033140908689" z="-0.000754666494543"/>
+      <location name="wire325" x="0.033537596317" z="-0.000772848968421"/>
+      <location name="wire326" x="0.033934276464" z="-0.000791247823256"/>
+      <location name="wire327" x="0.0343309490414" z="-0.000809863056312"/>
+      <location name="wire328" x="0.0347276139607" z="-0.000828694664822"/>
+      <location name="wire329" x="0.0351242711335" z="-0.000847742645985"/>
+      <location name="wire330" x="0.0355209204711" z="-0.000867006996968"/>
+      <location name="wire331" x="0.0359175618853" z="-0.000886487714908"/>
+      <location name="wire332" x="0.0363141952873" z="-0.000906184796907"/>
+      <location name="wire333" x="0.0367108205888" z="-0.000926098240036"/>
+      <location name="wire334" x="0.0371074377011" z="-0.000946228041334"/>
+      <location name="wire335" x="0.0375040465359" z="-0.000966574197808"/>
+      <location name="wire336" x="0.0379006470047" z="-0.000987136706433"/>
+      <location name="wire337" x="0.0382972390188" z="-0.00100791556415"/>
+      <location name="wire338" x="0.0386938224899" z="-0.00102891076787"/>
+      <location name="wire339" x="0.0390903973295" z="-0.00105012231447"/>
+      <location name="wire340" x="0.0394869634489" z="-0.0010715502008"/>
+      <location name="wire341" x="0.0398835207599" z="-0.00109319442367"/>
+      <location name="wire342" x="0.0402800691737" z="-0.00111505497986"/>
+      <location name="wire343" x="0.0406766086021" z="-0.00113713186612"/>
+      <location name="wire344" x="0.0410731389564" z="-0.00115942507917"/>
+      <location name="wire345" x="0.0414696601483" z="-0.00118193461569"/>
+      <location name="wire346" x="0.0418661720891" z="-0.00120466047234"/>
+      <location name="wire347" x="0.0422626746905" z="-0.00122760264573"/>
+      <location name="wire348" x="0.0426591678639" z="-0.00125076113246"/>
+      <location name="wire349" x="0.0430556515208" z="-0.00127413592909"/>
+      <location name="wire350" x="0.0434521255729" z="-0.00129772703212"/>
+      <location name="wire351" x="0.0438485899315" z="-0.00132153443807"/>
+      <location name="wire352" x="0.0442450445082" z="-0.00134555814338"/>
+      <location name="wire353" x="0.0446414892146" z="-0.00136979814449"/>
+      <location name="wire354" x="0.0450379239621" z="-0.00139425443778"/>
+      <location name="wire355" x="0.0454343486623" z="-0.00141892701963"/>
+      <location name="wire356" x="0.0458307632266" z="-0.00144381588637"/>
+      <location name="wire357" x="0.0462271675668" z="-0.00146892103428"/>
+      <location name="wire358" x="0.0466235615941" z="-0.00149424245965"/>
+      <location name="wire359" x="0.0470199452203" z="-0.0015197801587"/>
+      <location name="wire360" x="0.0474163183568" z="-0.00154553412764"/>
+      <location name="wire361" x="0.0478126809151" z="-0.00157150436264"/>
+      <location name="wire362" x="0.0482090328068" z="-0.00159769085983"/>
+      <location name="wire363" x="0.0486053739434" z="-0.00162409361533"/>
+      <location name="wire364" x="0.0490017042365" z="-0.00165071262519"/>
+      <location name="wire365" x="0.0493980235975" z="-0.00167754788548"/>
+      <location name="wire366" x="0.0497943319381" z="-0.00170459939219"/>
+      <location name="wire367" x="0.0501906291697" z="-0.00173186714131"/>
+      <location name="wire368" x="0.050586915204" z="-0.00175935112877"/>
+      <location name="wire369" x="0.0509831899524" z="-0.00178705135049"/>
+      <location name="wire370" x="0.0513794533265" z="-0.00181496780236"/>
+      <location name="wire371" x="0.0517757052378" z="-0.00184310048022"/>
+      <location name="wire372" x="0.0521719455979" z="-0.00187144937989"/>
+      <location name="wire373" x="0.0525681743183" z="-0.00190001449714"/>
+      <location name="wire374" x="0.0529643913106" z="-0.00192879582774"/>
+      <location name="wire375" x="0.0533605964864" z="-0.00195779336741"/>
+      <location name="wire376" x="0.0537567897571" z="-0.00198700711182"/>
+      <location name="wire377" x="0.0541529710343" z="-0.00201643705665"/>
+      <location name="wire378" x="0.0545491402297" z="-0.0020460831975"/>
+      <location name="wire379" x="0.0549452972547" z="-0.00207594552997"/>
+      <location name="wire380" x="0.0553414420209" z="-0.00210602404963"/>
+      <location name="wire381" x="0.0557375744399" z="-0.002136318752"/>
+      <location name="wire382" x="0.0561336944232" z="-0.00216682963256"/>
+      <location name="wire383" x="0.0565298018824" z="-0.0021975566868"/>
+      <location name="wire384" x="0.056925896729" z="-0.00222849991013"/>
+      <location name="wire385" x="0.0573219788747" z="-0.00225965929795"/>
+      <location name="wire386" x="0.0577180482309" z="-0.00229103484564"/>
+      <location name="wire387" x="0.0581141047093" z="-0.00232262654852"/>
+      <location name="wire388" x="0.0585101482215" z="-0.00235443440189"/>
+      <location name="wire389" x="0.0589061786789" z="-0.00238645840104"/>
+      <location name="wire390" x="0.0593021959932" z="-0.00241869854119"/>
+      <location name="wire391" x="0.059698200076" z="-0.00245115481754"/>
+      <location name="wire392" x="0.0600941908388" z="-0.00248382722529"/>
+      <location name="wire393" x="0.0604901681932" z="-0.00251671575955"/>
+      <location name="wire394" x="0.0608861320507" z="-0.00254982041545"/>
+      <location name="wire395" x="0.0612820823231" z="-0.00258314118806"/>
+      <location name="wire396" x="0.0616780189218" z="-0.00261667807243"/>
+      <location name="wire397" x="0.0620739417584" z="-0.00265043106356"/>
+      <location name="wire398" x="0.0624698507446" z="-0.00268440015644"/>
+      <location name="wire399" x="0.0628657457919" z="-0.00271858534601"/>
+      <location name="wire400" x="0.0632616268118" z="-0.0027529866272"/>
+      <location name="wire401" x="0.0636574937161" z="-0.00278760399489"/>
+      <location name="wire402" x="0.0640533464163" z="-0.00282243744392"/>
+      <location name="wire403" x="0.0644491848239" z="-0.00285748696913"/>
+      <location name="wire404" x="0.0648450088507" z="-0.00289275256528"/>
+      <location name="wire405" x="0.0652408184081" z="-0.00292823422715"/>
+      <location name="wire406" x="0.0656366134078" z="-0.00296393194945"/>
+      <location name="wire407" x="0.0660323937614" z="-0.00299984572688"/>
+      <location name="wire408" x="0.0664281593805" z="-0.00303597555409"/>
+      <location name="wire409" x="0.0668239101767" z="-0.00307232142572"/>
+      <location name="wire410" x="0.0672196460616" z="-0.00310888333635"/>
+      <location name="wire411" x="0.0676153669469" z="-0.00314566128055"/>
+      <location name="wire412" x="0.068011072744" z="-0.00318265525284"/>
+      <location name="wire413" x="0.0684067633647" z="-0.00321986524774"/>
+      <location name="wire414" x="0.0688024387206" z="-0.0032572912597"/>
+      <location name="wire415" x="0.0691980987232" z="-0.00329493328315"/>
+      <location name="wire416" x="0.0695937432843" z="-0.00333279131251"/>
+      <location name="wire417" x="0.0699893723153" z="-0.00337086534213"/>
+      <location name="wire418" x="0.0703849857281" z="-0.00340915536636"/>
+      <location name="wire419" x="0.070780583434" z="-0.0034476613795"/>
+      <location name="wire420" x="0.0711761653449" z="-0.00348638337583"/>
+      <location name="wire421" x="0.0715717313723" z="-0.00352532134958"/>
+      <location name="wire422" x="0.0719672814279" z="-0.00356447529497"/>
+      <location name="wire423" x="0.0723628154233" z="-0.00360384520618"/>
+      <location name="wire424" x="0.07275833327" z="-0.00364343107734"/>
+      <location name="wire425" x="0.0731538348799" z="-0.00368323290256"/>
+      <location name="wire426" x="0.0735493201645" z="-0.00372325067595"/>
+      <location name="wire427" x="0.0739447890354" z="-0.00376348439152"/>
+      <location name="wire428" x="0.0743402414043" z="-0.00380393404332"/>
+      <location name="wire429" x="0.0747356771828" z="-0.00384459962531"/>
+      <location name="wire430" x="0.0751310962826" z="-0.00388548113146"/>
+      <location name="wire431" x="0.0755264986154" z="-0.00392657855568"/>
+      <location name="wire432" x="0.0759218840927" z="-0.00396789189185"/>
+      <location name="wire433" x="0.0763172526263" z="-0.00400942113384"/>
+      <location name="wire434" x="0.0767126041277" z="-0.00405116627547"/>
+      <location name="wire435" x="0.0771079385088" z="-0.00409312731053"/>
+      <location name="wire436" x="0.077503255681" z="-0.00413530423278"/>
+      <location name="wire437" x="0.0778985555561" z="-0.00417769703594"/>
+      <location name="wire438" x="0.0782938380457" z="-0.00422030571371"/>
+      <location name="wire439" x="0.0786891030616" z="-0.00426313025976"/>
+      <location name="wire440" x="0.0790843505153" z="-0.00430617066772"/>
+      <location name="wire441" x="0.0794795803186" z="-0.00434942693117"/>
+      <location name="wire442" x="0.0798747923831" z="-0.0043928990437"/>
+      <location name="wire443" x="0.0802699866205" z="-0.00443658699883"/>
+      <location name="wire444" x="0.0806651629424" z="-0.00448049079007"/>
+      <location name="wire445" x="0.0810603212606" z="-0.00452461041088"/>
+      <location name="wire446" x="0.0814554614868" z="-0.00456894585471"/>
+      <location name="wire447" x="0.0818505835326" z="-0.00461349711496"/>
+      <location name="wire448" x="0.0822456873096" z="-0.004658264185"/>
+      <location name="wire449" x="0.0826407727297" z="-0.00470324705819"/>
+      <location name="wire450" x="0.0830358397044" z="-0.00474844572781"/>
+      <location name="wire451" x="0.0834308881456" z="-0.00479386018716"/>
+      <location name="wire452" x="0.0838259179647" z="-0.00483949042948"/>
+      <location name="wire453" x="0.0842209290737" z="-0.00488533644798"/>
+      <location name="wire454" x="0.0846159213842" z="-0.00493139823585"/>
+      <location name="wire455" x="0.0850108948078" z="-0.00497767578622"/>
+      <location name="wire456" x="0.0854058492563" z="-0.00502416909223"/>
+      <location name="wire457" x="0.0858007846413" z="-0.00507087814695"/>
+      <location name="wire458" x="0.0861957008747" z="-0.00511780294344"/>
+      <location name="wire459" x="0.0865905978681" z="-0.00516494347471"/>
+      <location name="wire460" x="0.0869854755332" z="-0.00521229973376"/>
+      <location name="wire461" x="0.0873803337817" z="-0.00525987171354"/>
+      <location name="wire462" x="0.0877751725254" z="-0.00530765940698"/>
+      <location name="wire463" x="0.088169991676" z="-0.00535566280697"/>
+      <location name="wire464" x="0.0885647911452" z="-0.00540388190637"/>
+      <location name="wire465" x="0.0889595708447" z="-0.005452316698"/>
+      <location name="wire466" x="0.0893543306863" z="-0.00550096717467"/>
+      <location name="wire467" x="0.0897490705816" z="-0.00554983332913"/>
+      <location name="wire468" x="0.0901437904425" z="-0.00559891515412"/>
+      <location name="wire469" x="0.0905384901807" z="-0.00564821264234"/>
+      <location name="wire470" x="0.0909331697078" z="-0.00569772578645"/>
+      <location name="wire471" x="0.0913278289357" z="-0.0057474545791"/>
+      <location name="wire472" x="0.0917224677761" z="-0.00579739901288"/>
+      <location name="wire473" x="0.0921170861407" z="-0.00584755908036"/>
+      <location name="wire474" x="0.0925116839413" z="-0.00589793477409"/>
+      <location name="wire475" x="0.0929062610896" z="-0.00594852608657"/>
+      <location name="wire476" x="0.0933008174974" z="-0.00599933301027"/>
+      <location name="wire477" x="0.0936953530764" z="-0.00605035553765"/>
+      <location name="wire478" x="0.0940898677385" z="-0.0061015936611"/>
+      <location name="wire479" x="0.0944843613953" z="-0.00615304737301"/>
+      <location name="wire480" x="0.0948788339586" z="-0.00620471666573"/>
+    </component>
+  </type>
+  <!--20CM WIRE 512 PIXELS-->
+  <type name="wire" outline="yes">
+    <properties/>
+    <component type="pixel">
+      <location name="pixel1" y="-0.0998046875"/>
+      <location name="pixel2" y="-0.0994140625"/>
+      <location name="pixel3" y="-0.0990234375"/>
+      <location name="pixel4" y="-0.0986328125"/>
+      <location name="pixel5" y="-0.0982421875"/>
+      <location name="pixel6" y="-0.0978515625"/>
+      <location name="pixel7" y="-0.0974609375"/>
+      <location name="pixel8" y="-0.0970703125"/>
+      <location name="pixel9" y="-0.0966796875"/>
+      <location name="pixel10" y="-0.0962890625"/>
+      <location name="pixel11" y="-0.0958984375"/>
+      <location name="pixel12" y="-0.0955078125"/>
+      <location name="pixel13" y="-0.0951171875"/>
+      <location name="pixel14" y="-0.0947265625"/>
+      <location name="pixel15" y="-0.0943359375"/>
+      <location name="pixel16" y="-0.0939453125"/>
+      <location name="pixel17" y="-0.0935546875"/>
+      <location name="pixel18" y="-0.0931640625"/>
+      <location name="pixel19" y="-0.0927734375"/>
+      <location name="pixel20" y="-0.0923828125"/>
+      <location name="pixel21" y="-0.0919921875"/>
+      <location name="pixel22" y="-0.0916015625"/>
+      <location name="pixel23" y="-0.0912109375"/>
+      <location name="pixel24" y="-0.0908203125"/>
+      <location name="pixel25" y="-0.0904296875"/>
+      <location name="pixel26" y="-0.0900390625"/>
+      <location name="pixel27" y="-0.0896484375"/>
+      <location name="pixel28" y="-0.0892578125"/>
+      <location name="pixel29" y="-0.0888671875"/>
+      <location name="pixel30" y="-0.0884765625"/>
+      <location name="pixel31" y="-0.0880859375"/>
+      <location name="pixel32" y="-0.0876953125"/>
+      <location name="pixel33" y="-0.0873046875"/>
+      <location name="pixel34" y="-0.0869140625"/>
+      <location name="pixel35" y="-0.0865234375"/>
+      <location name="pixel36" y="-0.0861328125"/>
+      <location name="pixel37" y="-0.0857421875"/>
+      <location name="pixel38" y="-0.0853515625"/>
+      <location name="pixel39" y="-0.0849609375"/>
+      <location name="pixel40" y="-0.0845703125"/>
+      <location name="pixel41" y="-0.0841796875"/>
+      <location name="pixel42" y="-0.0837890625"/>
+      <location name="pixel43" y="-0.0833984375"/>
+      <location name="pixel44" y="-0.0830078125"/>
+      <location name="pixel45" y="-0.0826171875"/>
+      <location name="pixel46" y="-0.0822265625"/>
+      <location name="pixel47" y="-0.0818359375"/>
+      <location name="pixel48" y="-0.0814453125"/>
+      <location name="pixel49" y="-0.0810546875"/>
+      <location name="pixel50" y="-0.0806640625"/>
+      <location name="pixel51" y="-0.0802734375"/>
+      <location name="pixel52" y="-0.0798828125"/>
+      <location name="pixel53" y="-0.0794921875"/>
+      <location name="pixel54" y="-0.0791015625"/>
+      <location name="pixel55" y="-0.0787109375"/>
+      <location name="pixel56" y="-0.0783203125"/>
+      <location name="pixel57" y="-0.0779296875"/>
+      <location name="pixel58" y="-0.0775390625"/>
+      <location name="pixel59" y="-0.0771484375"/>
+      <location name="pixel60" y="-0.0767578125"/>
+      <location name="pixel61" y="-0.0763671875"/>
+      <location name="pixel62" y="-0.0759765625"/>
+      <location name="pixel63" y="-0.0755859375"/>
+      <location name="pixel64" y="-0.0751953125"/>
+      <location name="pixel65" y="-0.0748046875"/>
+      <location name="pixel66" y="-0.0744140625"/>
+      <location name="pixel67" y="-0.0740234375"/>
+      <location name="pixel68" y="-0.0736328125"/>
+      <location name="pixel69" y="-0.0732421875"/>
+      <location name="pixel70" y="-0.0728515625"/>
+      <location name="pixel71" y="-0.0724609375"/>
+      <location name="pixel72" y="-0.0720703125"/>
+      <location name="pixel73" y="-0.0716796875"/>
+      <location name="pixel74" y="-0.0712890625"/>
+      <location name="pixel75" y="-0.0708984375"/>
+      <location name="pixel76" y="-0.0705078125"/>
+      <location name="pixel77" y="-0.0701171875"/>
+      <location name="pixel78" y="-0.0697265625"/>
+      <location name="pixel79" y="-0.0693359375"/>
+      <location name="pixel80" y="-0.0689453125"/>
+      <location name="pixel81" y="-0.0685546875"/>
+      <location name="pixel82" y="-0.0681640625"/>
+      <location name="pixel83" y="-0.0677734375"/>
+      <location name="pixel84" y="-0.0673828125"/>
+      <location name="pixel85" y="-0.0669921875"/>
+      <location name="pixel86" y="-0.0666015625"/>
+      <location name="pixel87" y="-0.0662109375"/>
+      <location name="pixel88" y="-0.0658203125"/>
+      <location name="pixel89" y="-0.0654296875"/>
+      <location name="pixel90" y="-0.0650390625"/>
+      <location name="pixel91" y="-0.0646484375"/>
+      <location name="pixel92" y="-0.0642578125"/>
+      <location name="pixel93" y="-0.0638671875"/>
+      <location name="pixel94" y="-0.0634765625"/>
+      <location name="pixel95" y="-0.0630859375"/>
+      <location name="pixel96" y="-0.0626953125"/>
+      <location name="pixel97" y="-0.0623046875"/>
+      <location name="pixel98" y="-0.0619140625"/>
+      <location name="pixel99" y="-0.0615234375"/>
+      <location name="pixel100" y="-0.0611328125"/>
+      <location name="pixel101" y="-0.0607421875"/>
+      <location name="pixel102" y="-0.0603515625"/>
+      <location name="pixel103" y="-0.0599609375"/>
+      <location name="pixel104" y="-0.0595703125"/>
+      <location name="pixel105" y="-0.0591796875"/>
+      <location name="pixel106" y="-0.0587890625"/>
+      <location name="pixel107" y="-0.0583984375"/>
+      <location name="pixel108" y="-0.0580078125"/>
+      <location name="pixel109" y="-0.0576171875"/>
+      <location name="pixel110" y="-0.0572265625"/>
+      <location name="pixel111" y="-0.0568359375"/>
+      <location name="pixel112" y="-0.0564453125"/>
+      <location name="pixel113" y="-0.0560546875"/>
+      <location name="pixel114" y="-0.0556640625"/>
+      <location name="pixel115" y="-0.0552734375"/>
+      <location name="pixel116" y="-0.0548828125"/>
+      <location name="pixel117" y="-0.0544921875"/>
+      <location name="pixel118" y="-0.0541015625"/>
+      <location name="pixel119" y="-0.0537109375"/>
+      <location name="pixel120" y="-0.0533203125"/>
+      <location name="pixel121" y="-0.0529296875"/>
+      <location name="pixel122" y="-0.0525390625"/>
+      <location name="pixel123" y="-0.0521484375"/>
+      <location name="pixel124" y="-0.0517578125"/>
+      <location name="pixel125" y="-0.0513671875"/>
+      <location name="pixel126" y="-0.0509765625"/>
+      <location name="pixel127" y="-0.0505859375"/>
+      <location name="pixel128" y="-0.0501953125"/>
+      <location name="pixel129" y="-0.0498046875"/>
+      <location name="pixel130" y="-0.0494140625"/>
+      <location name="pixel131" y="-0.0490234375"/>
+      <location name="pixel132" y="-0.0486328125"/>
+      <location name="pixel133" y="-0.0482421875"/>
+      <location name="pixel134" y="-0.0478515625"/>
+      <location name="pixel135" y="-0.0474609375"/>
+      <location name="pixel136" y="-0.0470703125"/>
+      <location name="pixel137" y="-0.0466796875"/>
+      <location name="pixel138" y="-0.0462890625"/>
+      <location name="pixel139" y="-0.0458984375"/>
+      <location name="pixel140" y="-0.0455078125"/>
+      <location name="pixel141" y="-0.0451171875"/>
+      <location name="pixel142" y="-0.0447265625"/>
+      <location name="pixel143" y="-0.0443359375"/>
+      <location name="pixel144" y="-0.0439453125"/>
+      <location name="pixel145" y="-0.0435546875"/>
+      <location name="pixel146" y="-0.0431640625"/>
+      <location name="pixel147" y="-0.0427734375"/>
+      <location name="pixel148" y="-0.0423828125"/>
+      <location name="pixel149" y="-0.0419921875"/>
+      <location name="pixel150" y="-0.0416015625"/>
+      <location name="pixel151" y="-0.0412109375"/>
+      <location name="pixel152" y="-0.0408203125"/>
+      <location name="pixel153" y="-0.0404296875"/>
+      <location name="pixel154" y="-0.0400390625"/>
+      <location name="pixel155" y="-0.0396484375"/>
+      <location name="pixel156" y="-0.0392578125"/>
+      <location name="pixel157" y="-0.0388671875"/>
+      <location name="pixel158" y="-0.0384765625"/>
+      <location name="pixel159" y="-0.0380859375"/>
+      <location name="pixel160" y="-0.0376953125"/>
+      <location name="pixel161" y="-0.0373046875"/>
+      <location name="pixel162" y="-0.0369140625"/>
+      <location name="pixel163" y="-0.0365234375"/>
+      <location name="pixel164" y="-0.0361328125"/>
+      <location name="pixel165" y="-0.0357421875"/>
+      <location name="pixel166" y="-0.0353515625"/>
+      <location name="pixel167" y="-0.0349609375"/>
+      <location name="pixel168" y="-0.0345703125"/>
+      <location name="pixel169" y="-0.0341796875"/>
+      <location name="pixel170" y="-0.0337890625"/>
+      <location name="pixel171" y="-0.0333984375"/>
+      <location name="pixel172" y="-0.0330078125"/>
+      <location name="pixel173" y="-0.0326171875"/>
+      <location name="pixel174" y="-0.0322265625"/>
+      <location name="pixel175" y="-0.0318359375"/>
+      <location name="pixel176" y="-0.0314453125"/>
+      <location name="pixel177" y="-0.0310546875"/>
+      <location name="pixel178" y="-0.0306640625"/>
+      <location name="pixel179" y="-0.0302734375"/>
+      <location name="pixel180" y="-0.0298828125"/>
+      <location name="pixel181" y="-0.0294921875"/>
+      <location name="pixel182" y="-0.0291015625"/>
+      <location name="pixel183" y="-0.0287109375"/>
+      <location name="pixel184" y="-0.0283203125"/>
+      <location name="pixel185" y="-0.0279296875"/>
+      <location name="pixel186" y="-0.0275390625"/>
+      <location name="pixel187" y="-0.0271484375"/>
+      <location name="pixel188" y="-0.0267578125"/>
+      <location name="pixel189" y="-0.0263671875"/>
+      <location name="pixel190" y="-0.0259765625"/>
+      <location name="pixel191" y="-0.0255859375"/>
+      <location name="pixel192" y="-0.0251953125"/>
+      <location name="pixel193" y="-0.0248046875"/>
+      <location name="pixel194" y="-0.0244140625"/>
+      <location name="pixel195" y="-0.0240234375"/>
+      <location name="pixel196" y="-0.0236328125"/>
+      <location name="pixel197" y="-0.0232421875"/>
+      <location name="pixel198" y="-0.0228515625"/>
+      <location name="pixel199" y="-0.0224609375"/>
+      <location name="pixel200" y="-0.0220703125"/>
+      <location name="pixel201" y="-0.0216796875"/>
+      <location name="pixel202" y="-0.0212890625"/>
+      <location name="pixel203" y="-0.0208984375"/>
+      <location name="pixel204" y="-0.0205078125"/>
+      <location name="pixel205" y="-0.0201171875"/>
+      <location name="pixel206" y="-0.0197265625"/>
+      <location name="pixel207" y="-0.0193359375"/>
+      <location name="pixel208" y="-0.0189453125"/>
+      <location name="pixel209" y="-0.0185546875"/>
+      <location name="pixel210" y="-0.0181640625"/>
+      <location name="pixel211" y="-0.0177734375"/>
+      <location name="pixel212" y="-0.0173828125"/>
+      <location name="pixel213" y="-0.0169921875"/>
+      <location name="pixel214" y="-0.0166015625"/>
+      <location name="pixel215" y="-0.0162109375"/>
+      <location name="pixel216" y="-0.0158203125"/>
+      <location name="pixel217" y="-0.0154296875"/>
+      <location name="pixel218" y="-0.0150390625"/>
+      <location name="pixel219" y="-0.0146484375"/>
+      <location name="pixel220" y="-0.0142578125"/>
+      <location name="pixel221" y="-0.0138671875"/>
+      <location name="pixel222" y="-0.0134765625"/>
+      <location name="pixel223" y="-0.0130859375"/>
+      <location name="pixel224" y="-0.0126953125"/>
+      <location name="pixel225" y="-0.0123046875"/>
+      <location name="pixel226" y="-0.0119140625"/>
+      <location name="pixel227" y="-0.0115234375"/>
+      <location name="pixel228" y="-0.0111328125"/>
+      <location name="pixel229" y="-0.0107421875"/>
+      <location name="pixel230" y="-0.0103515625"/>
+      <location name="pixel231" y="-0.0099609375"/>
+      <location name="pixel232" y="-0.0095703125"/>
+      <location name="pixel233" y="-0.0091796875"/>
+      <location name="pixel234" y="-0.0087890625"/>
+      <location name="pixel235" y="-0.0083984375"/>
+      <location name="pixel236" y="-0.0080078125"/>
+      <location name="pixel237" y="-0.0076171875"/>
+      <location name="pixel238" y="-0.0072265625"/>
+      <location name="pixel239" y="-0.0068359375"/>
+      <location name="pixel240" y="-0.0064453125"/>
+      <location name="pixel241" y="-0.0060546875"/>
+      <location name="pixel242" y="-0.0056640625"/>
+      <location name="pixel243" y="-0.0052734375"/>
+      <location name="pixel244" y="-0.0048828125"/>
+      <location name="pixel245" y="-0.0044921875"/>
+      <location name="pixel246" y="-0.0041015625"/>
+      <location name="pixel247" y="-0.0037109375"/>
+      <location name="pixel248" y="-0.0033203125"/>
+      <location name="pixel249" y="-0.0029296875"/>
+      <location name="pixel250" y="-0.0025390625"/>
+      <location name="pixel251" y="-0.0021484375"/>
+      <location name="pixel252" y="-0.0017578125"/>
+      <location name="pixel253" y="-0.0013671875"/>
+      <location name="pixel254" y="-0.0009765625"/>
+      <location name="pixel255" y="-0.0005859375"/>
+      <location name="pixel256" y="-0.0001953125"/>
+      <location name="pixel257" y="0.0001953125"/>
+      <location name="pixel258" y="0.0005859375"/>
+      <location name="pixel259" y="0.0009765625"/>
+      <location name="pixel260" y="0.0013671875"/>
+      <location name="pixel261" y="0.0017578125"/>
+      <location name="pixel262" y="0.0021484375"/>
+      <location name="pixel263" y="0.0025390625"/>
+      <location name="pixel264" y="0.0029296875"/>
+      <location name="pixel265" y="0.0033203125"/>
+      <location name="pixel266" y="0.0037109375"/>
+      <location name="pixel267" y="0.0041015625"/>
+      <location name="pixel268" y="0.0044921875"/>
+      <location name="pixel269" y="0.0048828125"/>
+      <location name="pixel270" y="0.0052734375"/>
+      <location name="pixel271" y="0.0056640625"/>
+      <location name="pixel272" y="0.0060546875"/>
+      <location name="pixel273" y="0.0064453125"/>
+      <location name="pixel274" y="0.0068359375"/>
+      <location name="pixel275" y="0.0072265625"/>
+      <location name="pixel276" y="0.0076171875"/>
+      <location name="pixel277" y="0.0080078125"/>
+      <location name="pixel278" y="0.0083984375"/>
+      <location name="pixel279" y="0.0087890625"/>
+      <location name="pixel280" y="0.0091796875"/>
+      <location name="pixel281" y="0.0095703125"/>
+      <location name="pixel282" y="0.0099609375"/>
+      <location name="pixel283" y="0.0103515625"/>
+      <location name="pixel284" y="0.0107421875"/>
+      <location name="pixel285" y="0.0111328125"/>
+      <location name="pixel286" y="0.0115234375"/>
+      <location name="pixel287" y="0.0119140625"/>
+      <location name="pixel288" y="0.0123046875"/>
+      <location name="pixel289" y="0.0126953125"/>
+      <location name="pixel290" y="0.0130859375"/>
+      <location name="pixel291" y="0.0134765625"/>
+      <location name="pixel292" y="0.0138671875"/>
+      <location name="pixel293" y="0.0142578125"/>
+      <location name="pixel294" y="0.0146484375"/>
+      <location name="pixel295" y="0.0150390625"/>
+      <location name="pixel296" y="0.0154296875"/>
+      <location name="pixel297" y="0.0158203125"/>
+      <location name="pixel298" y="0.0162109375"/>
+      <location name="pixel299" y="0.0166015625"/>
+      <location name="pixel300" y="0.0169921875"/>
+      <location name="pixel301" y="0.0173828125"/>
+      <location name="pixel302" y="0.0177734375"/>
+      <location name="pixel303" y="0.0181640625"/>
+      <location name="pixel304" y="0.0185546875"/>
+      <location name="pixel305" y="0.0189453125"/>
+      <location name="pixel306" y="0.0193359375"/>
+      <location name="pixel307" y="0.0197265625"/>
+      <location name="pixel308" y="0.0201171875"/>
+      <location name="pixel309" y="0.0205078125"/>
+      <location name="pixel310" y="0.0208984375"/>
+      <location name="pixel311" y="0.0212890625"/>
+      <location name="pixel312" y="0.0216796875"/>
+      <location name="pixel313" y="0.0220703125"/>
+      <location name="pixel314" y="0.0224609375"/>
+      <location name="pixel315" y="0.0228515625"/>
+      <location name="pixel316" y="0.0232421875"/>
+      <location name="pixel317" y="0.0236328125"/>
+      <location name="pixel318" y="0.0240234375"/>
+      <location name="pixel319" y="0.0244140625"/>
+      <location name="pixel320" y="0.0248046875"/>
+      <location name="pixel321" y="0.0251953125"/>
+      <location name="pixel322" y="0.0255859375"/>
+      <location name="pixel323" y="0.0259765625"/>
+      <location name="pixel324" y="0.0263671875"/>
+      <location name="pixel325" y="0.0267578125"/>
+      <location name="pixel326" y="0.0271484375"/>
+      <location name="pixel327" y="0.0275390625"/>
+      <location name="pixel328" y="0.0279296875"/>
+      <location name="pixel329" y="0.0283203125"/>
+      <location name="pixel330" y="0.0287109375"/>
+      <location name="pixel331" y="0.0291015625"/>
+      <location name="pixel332" y="0.0294921875"/>
+      <location name="pixel333" y="0.0298828125"/>
+      <location name="pixel334" y="0.0302734375"/>
+      <location name="pixel335" y="0.0306640625"/>
+      <location name="pixel336" y="0.0310546875"/>
+      <location name="pixel337" y="0.0314453125"/>
+      <location name="pixel338" y="0.0318359375"/>
+      <location name="pixel339" y="0.0322265625"/>
+      <location name="pixel340" y="0.0326171875"/>
+      <location name="pixel341" y="0.0330078125"/>
+      <location name="pixel342" y="0.0333984375"/>
+      <location name="pixel343" y="0.0337890625"/>
+      <location name="pixel344" y="0.0341796875"/>
+      <location name="pixel345" y="0.0345703125"/>
+      <location name="pixel346" y="0.0349609375"/>
+      <location name="pixel347" y="0.0353515625"/>
+      <location name="pixel348" y="0.0357421875"/>
+      <location name="pixel349" y="0.0361328125"/>
+      <location name="pixel350" y="0.0365234375"/>
+      <location name="pixel351" y="0.0369140625"/>
+      <location name="pixel352" y="0.0373046875"/>
+      <location name="pixel353" y="0.0376953125"/>
+      <location name="pixel354" y="0.0380859375"/>
+      <location name="pixel355" y="0.0384765625"/>
+      <location name="pixel356" y="0.0388671875"/>
+      <location name="pixel357" y="0.0392578125"/>
+      <location name="pixel358" y="0.0396484375"/>
+      <location name="pixel359" y="0.0400390625"/>
+      <location name="pixel360" y="0.0404296875"/>
+      <location name="pixel361" y="0.0408203125"/>
+      <location name="pixel362" y="0.0412109375"/>
+      <location name="pixel363" y="0.0416015625"/>
+      <location name="pixel364" y="0.0419921875"/>
+      <location name="pixel365" y="0.0423828125"/>
+      <location name="pixel366" y="0.0427734375"/>
+      <location name="pixel367" y="0.0431640625"/>
+      <location name="pixel368" y="0.0435546875"/>
+      <location name="pixel369" y="0.0439453125"/>
+      <location name="pixel370" y="0.0443359375"/>
+      <location name="pixel371" y="0.0447265625"/>
+      <location name="pixel372" y="0.0451171875"/>
+      <location name="pixel373" y="0.0455078125"/>
+      <location name="pixel374" y="0.0458984375"/>
+      <location name="pixel375" y="0.0462890625"/>
+      <location name="pixel376" y="0.0466796875"/>
+      <location name="pixel377" y="0.0470703125"/>
+      <location name="pixel378" y="0.0474609375"/>
+      <location name="pixel379" y="0.0478515625"/>
+      <location name="pixel380" y="0.0482421875"/>
+      <location name="pixel381" y="0.0486328125"/>
+      <location name="pixel382" y="0.0490234375"/>
+      <location name="pixel383" y="0.0494140625"/>
+      <location name="pixel384" y="0.0498046875"/>
+      <location name="pixel385" y="0.0501953125"/>
+      <location name="pixel386" y="0.0505859375"/>
+      <location name="pixel387" y="0.0509765625"/>
+      <location name="pixel388" y="0.0513671875"/>
+      <location name="pixel389" y="0.0517578125"/>
+      <location name="pixel390" y="0.0521484375"/>
+      <location name="pixel391" y="0.0525390625"/>
+      <location name="pixel392" y="0.0529296875"/>
+      <location name="pixel393" y="0.0533203125"/>
+      <location name="pixel394" y="0.0537109375"/>
+      <location name="pixel395" y="0.0541015625"/>
+      <location name="pixel396" y="0.0544921875"/>
+      <location name="pixel397" y="0.0548828125"/>
+      <location name="pixel398" y="0.0552734375"/>
+      <location name="pixel399" y="0.0556640625"/>
+      <location name="pixel400" y="0.0560546875"/>
+      <location name="pixel401" y="0.0564453125"/>
+      <location name="pixel402" y="0.0568359375"/>
+      <location name="pixel403" y="0.0572265625"/>
+      <location name="pixel404" y="0.0576171875"/>
+      <location name="pixel405" y="0.0580078125"/>
+      <location name="pixel406" y="0.0583984375"/>
+      <location name="pixel407" y="0.0587890625"/>
+      <location name="pixel408" y="0.0591796875"/>
+      <location name="pixel409" y="0.0595703125"/>
+      <location name="pixel410" y="0.0599609375"/>
+      <location name="pixel411" y="0.0603515625"/>
+      <location name="pixel412" y="0.0607421875"/>
+      <location name="pixel413" y="0.0611328125"/>
+      <location name="pixel414" y="0.0615234375"/>
+      <location name="pixel415" y="0.0619140625"/>
+      <location name="pixel416" y="0.0623046875"/>
+      <location name="pixel417" y="0.0626953125"/>
+      <location name="pixel418" y="0.0630859375"/>
+      <location name="pixel419" y="0.0634765625"/>
+      <location name="pixel420" y="0.0638671875"/>
+      <location name="pixel421" y="0.0642578125"/>
+      <location name="pixel422" y="0.0646484375"/>
+      <location name="pixel423" y="0.0650390625"/>
+      <location name="pixel424" y="0.0654296875"/>
+      <location name="pixel425" y="0.0658203125"/>
+      <location name="pixel426" y="0.0662109375"/>
+      <location name="pixel427" y="0.0666015625"/>
+      <location name="pixel428" y="0.0669921875"/>
+      <location name="pixel429" y="0.0673828125"/>
+      <location name="pixel430" y="0.0677734375"/>
+      <location name="pixel431" y="0.0681640625"/>
+      <location name="pixel432" y="0.0685546875"/>
+      <location name="pixel433" y="0.0689453125"/>
+      <location name="pixel434" y="0.0693359375"/>
+      <location name="pixel435" y="0.0697265625"/>
+      <location name="pixel436" y="0.0701171875"/>
+      <location name="pixel437" y="0.0705078125"/>
+      <location name="pixel438" y="0.0708984375"/>
+      <location name="pixel439" y="0.0712890625"/>
+      <location name="pixel440" y="0.0716796875"/>
+      <location name="pixel441" y="0.0720703125"/>
+      <location name="pixel442" y="0.0724609375"/>
+      <location name="pixel443" y="0.0728515625"/>
+      <location name="pixel444" y="0.0732421875"/>
+      <location name="pixel445" y="0.0736328125"/>
+      <location name="pixel446" y="0.0740234375"/>
+      <location name="pixel447" y="0.0744140625"/>
+      <location name="pixel448" y="0.0748046875"/>
+      <location name="pixel449" y="0.0751953125"/>
+      <location name="pixel450" y="0.0755859375"/>
+      <location name="pixel451" y="0.0759765625"/>
+      <location name="pixel452" y="0.0763671875"/>
+      <location name="pixel453" y="0.0767578125"/>
+      <location name="pixel454" y="0.0771484375"/>
+      <location name="pixel455" y="0.0775390625"/>
+      <location name="pixel456" y="0.0779296875"/>
+      <location name="pixel457" y="0.0783203125"/>
+      <location name="pixel458" y="0.0787109375"/>
+      <location name="pixel459" y="0.0791015625"/>
+      <location name="pixel460" y="0.0794921875"/>
+      <location name="pixel461" y="0.0798828125"/>
+      <location name="pixel462" y="0.0802734375"/>
+      <location name="pixel463" y="0.0806640625"/>
+      <location name="pixel464" y="0.0810546875"/>
+      <location name="pixel465" y="0.0814453125"/>
+      <location name="pixel466" y="0.0818359375"/>
+      <location name="pixel467" y="0.0822265625"/>
+      <location name="pixel468" y="0.0826171875"/>
+      <location name="pixel469" y="0.0830078125"/>
+      <location name="pixel470" y="0.0833984375"/>
+      <location name="pixel471" y="0.0837890625"/>
+      <location name="pixel472" y="0.0841796875"/>
+      <location name="pixel473" y="0.0845703125"/>
+      <location name="pixel474" y="0.0849609375"/>
+      <location name="pixel475" y="0.0853515625"/>
+      <location name="pixel476" y="0.0857421875"/>
+      <location name="pixel477" y="0.0861328125"/>
+      <location name="pixel478" y="0.0865234375"/>
+      <location name="pixel479" y="0.0869140625"/>
+      <location name="pixel480" y="0.0873046875"/>
+      <location name="pixel481" y="0.0876953125"/>
+      <location name="pixel482" y="0.0880859375"/>
+      <location name="pixel483" y="0.0884765625"/>
+      <location name="pixel484" y="0.0888671875"/>
+      <location name="pixel485" y="0.0892578125"/>
+      <location name="pixel486" y="0.0896484375"/>
+      <location name="pixel487" y="0.0900390625"/>
+      <location name="pixel488" y="0.0904296875"/>
+      <location name="pixel489" y="0.0908203125"/>
+      <location name="pixel490" y="0.0912109375"/>
+      <location name="pixel491" y="0.0916015625"/>
+      <location name="pixel492" y="0.0919921875"/>
+      <location name="pixel493" y="0.0923828125"/>
+      <location name="pixel494" y="0.0927734375"/>
+      <location name="pixel495" y="0.0931640625"/>
+      <location name="pixel496" y="0.0935546875"/>
+      <location name="pixel497" y="0.0939453125"/>
+      <location name="pixel498" y="0.0943359375"/>
+      <location name="pixel499" y="0.0947265625"/>
+      <location name="pixel500" y="0.0951171875"/>
+      <location name="pixel501" y="0.0955078125"/>
+      <location name="pixel502" y="0.0958984375"/>
+      <location name="pixel503" y="0.0962890625"/>
+      <location name="pixel504" y="0.0966796875"/>
+      <location name="pixel505" y="0.0970703125"/>
+      <location name="pixel506" y="0.0974609375"/>
+      <location name="pixel507" y="0.0978515625"/>
+      <location name="pixel508" y="0.0982421875"/>
+      <location name="pixel509" y="0.0986328125"/>
+      <location name="pixel510" y="0.0990234375"/>
+      <location name="pixel511" y="0.0994140625"/>
+      <location name="pixel512" y="0.0998046875"/>
+    </component>
+  </type>
+  <!--PIXEL FOR WIRE-->
+  <type is="detector" name="pixel">
+    <cylinder id="cyl-approx">
+      <centre-of-bottom-base p="0.0" r="0.0" t="0.0"/>
+      <axis x="0.0" y="1.0" z="0.0"/>
+      <radius val="0.0001985"/>
+      <height val="0.000390625"/>
+    </cylinder>
+    <algebra val="cyl-approx"/>
+  </type>
+  <!--DETECTOR IDs-->
+  <idlist idname="bank1">
+    <id end="245759" start="0"/>
+  </idlist>
+  <idlist idname="bank2">
+    <id end="491519" start="245760"/>
+  </idlist>
+  <idlist idname="bank3">
+    <id end="737279" start="491520"/>
+  </idlist>
+  <idlist idname="bank4">
+    <id end="983039" start="737280"/>
+  </idlist>
+  <idlist idname="bank5">
+    <id end="1228799" start="983040"/>
+  </idlist>
+  <idlist idname="bank6">
+    <id end="1474559" start="1228800"/>
+  </idlist>
+  <idlist idname="bank7">
+    <id end="1720319" start="1474560"/>
+  </idlist>
+  <idlist idname="bank8">
+    <id end="1966079" start="1720320"/>
+  </idlist>
+  <!--MONITOR IDs-->
+  <idlist idname="monitors">
+    <id val="-1"/>
+  </idlist>
+</instrument>

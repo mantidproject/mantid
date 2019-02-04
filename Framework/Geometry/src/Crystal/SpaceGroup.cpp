@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Crystal/SpaceGroup.h"
 #include "MantidGeometry/Crystal/PointGroupFactory.h"
 #include <algorithm>
@@ -106,6 +112,11 @@ Group_const_sptr SpaceGroup::getSiteSymmetryGroup(const V3D &position) const {
                });
 
   return GroupFactory::create<Group>(siteSymmetryOps);
+}
+
+std::ostream &operator<<(std::ostream &stream, const SpaceGroup &self) {
+  stream << "Space group with Hermann-Mauguin symbol: " << self.hmSymbol();
+  return stream;
 }
 
 } // namespace Geometry

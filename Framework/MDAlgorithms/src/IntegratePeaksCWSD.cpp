@@ -1,7 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/IntegratePeaksCWSD.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
@@ -27,8 +34,7 @@ const signal_t THRESHOLD_SIGNAL = 0;
 IntegratePeaksCWSD::IntegratePeaksCWSD()
     : m_haveMultipleRun(false), m_useSinglePeakCenterFmUser(false),
       m_peakRadius(), m_doMergePeak(false), m_normalizeByMonitor(false),
-      m_normalizeByTime(false), m_scaleFactor(0), m_maskDets(false),
-      m_haveInputPeakWS(false) {}
+      m_normalizeByTime(false), m_scaleFactor(0), m_haveInputPeakWS(false) {}
 
 /** Initialize the algorithm's properties.
  */
@@ -105,14 +111,15 @@ void IntegratePeaksCWSD::exec() {
   // Merge peak if necessary
   if (m_doMergePeak)
     mergePeaks();
+  else
+    normalizePeaksIntensities(); // normalize the intensity of each Pt.
 
   // Output
-  DataObjects::PeaksWorkspace_sptr outws;
-  if (m_useSinglePeakCenterFmUser) {
-    outws = createPeakworkspace(m_peakCenter, m_inputWS);
-  } else {
-    outws = createOutputs();
-  }
+  DataObjects::PeaksWorkspace_sptr outws =
+      (m_useSinglePeakCenterFmUser)
+          ? createPeakworkspace(m_peakCenter, m_inputWS)
+          : createOutputs();
+
   setProperty("OutputWorkspace", outws);
 }
 
@@ -125,7 +132,7 @@ void IntegratePeaksCWSD::processInputs() {
 
   // Input peaks
   std::vector<double> peak_center = getProperty("PeakCentre");
-  if (peak_center.size() > 0) {
+  if (!peak_center.empty()) {
     // assigned peak center
     if (peak_center.size() != 3)
       throw std::invalid_argument("PeakCentre must have 3 elements.");
@@ -146,11 +153,10 @@ void IntegratePeaksCWSD::processInputs() {
     m_useSinglePeakCenterFmUser = false;
   }
   m_doMergePeak = getProperty("MergePeaks");
-  if (m_haveInputPeakWS && m_peaksWS->getNumberPeaks() > 1 && m_doMergePeak) {
+  if (m_haveInputPeakWS && m_peaksWS->getNumberPeaks() > 1 && m_doMergePeak)
     throw std::invalid_argument(
         "It is not allowed to merge peaks when there are "
         "multiple peaks present in PeaksWorkspace.");
-  }
 
   m_normalizeByMonitor = getProperty("NormalizeByMonitor");
   m_normalizeByTime = getProperty("NormalizeByTime");
@@ -158,12 +164,12 @@ void IntegratePeaksCWSD::processInputs() {
     throw std::invalid_argument(
         "It is not allowed to select to be normalized both  "
         "by time and by monitor counts.");
-  if (m_doMergePeak && !(m_normalizeByMonitor || m_normalizeByTime)) {
+  if (m_doMergePeak && !(m_normalizeByMonitor || m_normalizeByTime))
     throw std::invalid_argument(
         "Either being normalized by time or being normalized "
         "by monitor must be selected if merge-peak is selected.");
-  }
   m_scaleFactor = getProperty("ScaleFactor");
+  g_log.warning() << "[DB...BAT] Scale factor = " << m_scaleFactor << "\n";
 
   // monitor counts
   if (m_normalizeByMonitor)
@@ -174,26 +180,19 @@ void IntegratePeaksCWSD::processInputs() {
   // go through peak
   if (m_haveInputPeakWS)
     getPeakInformation();
-  if (m_runPeakCenterMap.size() > 1)
-    m_haveMultipleRun = true;
-  else
-    m_haveMultipleRun = false;
+  m_haveMultipleRun = (m_runPeakCenterMap.size() > 1);
 
   // peak related
   m_peakRadius = getProperty("PeakRadius");
-  if (m_peakRadius == EMPTY_DBL()) {
+  if (m_peakRadius == EMPTY_DBL())
     throw std::invalid_argument("Peak radius cannot be left empty.");
-  }
 
   // optional mask workspace
   std::string maskwsname = getPropertyValue("MaskWorkspace");
-  if (maskwsname.size() > 0) {
+  if (!maskwsname.empty()) {
     // process mask workspace
-    m_maskDets = true;
     m_maskWS = getProperty("MaskWorkspace");
     vecMaskedDetID = processMaskWorkspace(m_maskWS);
-  } else {
-    m_maskDets = false;
   }
 }
 
@@ -217,7 +216,7 @@ void IntegratePeaksCWSD::simplePeakIntegration(
     throw std::runtime_error("MDEventWorkspace is not defined.");
 
   // Go through to get value
-  API::IMDIterator *mditer = m_inputWS->createIterator();
+  auto mditer = m_inputWS->createIterator();
   size_t nextindex = 1;
   bool scancell = true;
   // size_t currindex = 0;
@@ -254,7 +253,7 @@ void IntegratePeaksCWSD::simplePeakIntegration(
       // ... debug */
 
       // Check whether this detector is masked
-      if (vecMaskedDetID.size() > 0) {
+      if (!vecMaskedDetID.empty()) {
         detid_t detid = mditer->getInnerDetectorID(iev);
         std::vector<detid_t>::const_iterator it;
 
@@ -375,12 +374,12 @@ std::vector<detid_t> IntegratePeaksCWSD::processMaskWorkspace(
 
   // Add the detector IDs of all masked detector to a vector
   size_t numspec = maskws->getNumberHistograms();
+  const auto &specInfo = maskws->spectrumInfo();
   for (size_t iws = 0; iws < numspec; ++iws) {
-    Geometry::IDetector_const_sptr detector = maskws->getDetector(iws);
-    const MantidVec &vecY = maskws->readY(iws);
+    const auto &vecY = maskws->y(iws);
     if (vecY[0] > 0.1) {
       // vecY[] > 0 is masked.  det->isMasked() may not be reliable.
-      detid_t detid = detector->getID();
+      const detid_t detid = specInfo.detector(iws).getID();
       vecMaskedDetID.push_back(detid);
     }
   }
@@ -489,7 +488,7 @@ IntegratePeaksCWSD::createPeakworkspace(Kernel::V3D peakCenter,
       Geometry::Instrument_const_sptr instrument = expinfo->getInstrument();
       newpeak.setInstrument(instrument);
       newpeak.setGoniometerMatrix(expinfo->run().getGoniometerMatrix());
-    } catch (std::exception) {
+    } catch (const std::exception &) {
       throw std::runtime_error(
           "Unable to set instrument and goniometer matrix.");
     }
@@ -520,11 +519,11 @@ std::map<int, signal_t> IntegratePeaksCWSD::getMonitorCounts() {
     std::string run_str = expinfo->run().getProperty("run_number")->value();
     g_log.information() << "run number of exp " << iexpinfo << " is " << run_str
                         << "\n";
-    int run_number = atoi(run_str.c_str());
+    int run_number = std::stoi(run_str);
     // FIXME - HACK FOE HB3A
     run_number = run_number % 1000;
     std::string mon_str = expinfo->run().getProperty("monitor")->value();
-    signal_t monitor = static_cast<signal_t>(atoi(mon_str.c_str()));
+    signal_t monitor = static_cast<signal_t>(std::stod(mon_str));
     run_monitor_map.insert(std::make_pair(run_number, monitor));
     g_log.information() << "From MD workspace add run " << run_number
                         << ", monitor = " << monitor << "\n";
@@ -547,16 +546,15 @@ std::map<int, double> IntegratePeaksCWSD::getMeasureTime() {
     ExperimentInfo_const_sptr expinfo =
         m_inputWS->getExperimentInfo(static_cast<uint16_t>(iexpinfo));
     std::string run_str = expinfo->run().getProperty("run_number")->value();
-    int run_number = atoi(run_str.c_str());
+    int run_number = std::stoi(run_str);
 
     // FIXME - HACK FOE HB3A
     run_number = run_number % 1000;
     std::string duration_str = expinfo->run().getProperty("duration")->value();
-    double duration = static_cast<double>(atof(duration_str.c_str()));
+    double duration = std::stod(duration_str);
     run_time_map.insert(std::make_pair(run_number, duration));
-    g_log.information() << "MD workspace exp info " << iexpinfo << ": run "
-                        << run_number << ", measuring time = " << duration
-                        << "\n";
+    g_log.warning() << "MD workspace exp info " << iexpinfo << ": run "
+                    << run_number << ", measuring time = " << duration << "\n";
   }
 
   return run_time_map;
@@ -583,5 +581,28 @@ void IntegratePeaksCWSD::getPeakInformation() {
   }
 }
 
-} // namespace Mantid
+//----------------------------------------------------------------------------------------------
+/** Normalize the peak's intensities per Pt. to either time or monitor counts
+ * @brief IntegratePeaksCSWD::normalizePeaksIntensities
+ */
+void IntegratePeaksCWSD::normalizePeaksIntensities() {
+  // go over each peak (of run)
+  std::map<int, double>::iterator count_iter;
+  for (count_iter = m_runPeakCountsMap.begin();
+       count_iter != m_runPeakCountsMap.end(); ++count_iter) {
+    int run_number_i = count_iter->first;
+    // get monitor value
+    std::map<int, signal_t>::iterator mon_iter =
+        m_runNormMap.find(run_number_i);
+    // normalize peak intensities stored in m_runNormMap
+    if (mon_iter != m_runNormMap.end()) {
+      signal_t monitor_i = mon_iter->second;
+      count_iter->second /= monitor_i;
+    }
+  } // END-FOR
+
+  return;
+}
+
 } // namespace MDAlgorithms
+} // namespace Mantid

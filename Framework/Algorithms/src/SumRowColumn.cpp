@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -93,7 +99,7 @@ void SumRowColumn::exec() {
   const std::string orientation = getProperty("Orientation");
   const bool horizontal = (orientation == "D_H" ? 1 : 0);
 
-  Progress progress(this, 0, 1, dim);
+  Progress progress(this, 0.0, 1.0, dim);
   for (int i = 0; i < dim; ++i) {
     // Copy X values
     X[i] = i;

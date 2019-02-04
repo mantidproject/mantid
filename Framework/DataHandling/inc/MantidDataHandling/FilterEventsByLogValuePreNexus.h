@@ -1,50 +1,36 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef FILTEREVENTSBYLOGVALUEPRENEXUS_H_
 #define FILTEREVENTSBYLOGVALUEPRENEXUS_H_
 
+#include "MantidAPI/DeprecatedAlgorithm.h"
+#include "MantidAPI/IFileLoader.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/Events.h"
+#include "MantidKernel/BinaryFile.h"
 #include <fstream>
 #include <string>
 #include <vector>
-#include "MantidAPI/IFileLoader.h"
-#include "MantidKernel/BinaryFile.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidDataObjects/Events.h"
-#include "MantidAPI/DeprecatedAlgorithm.h"
 
 namespace Mantid {
 namespace DataHandling {
 /** @class Mantid::DataHandling::FilterEventsByLogValuePreNexus
 
     A data loading and splitting routine for SNS pre-nexus event files
-
-    Copyright &copy; 2010-11 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-   National Laboratory & European Spallation Source
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>
 */
 
 /// This define is used to quickly turn parallel code on or off.
 #undef LOADEVENTPRENEXUS_ALLOW_PARALLEL
 
 /// Make the code clearer by having this an explicit type
-typedef int PixelType;
+using PixelType = int;
 
 /// Type for the DAS time of flight (data file)
-typedef int DasTofType;
+using DasTofType = int;
 
 /// Structure that matches the form in the binary event list.
 #pragma pack(push, 4) // Make sure the structure is 8 bytes.
@@ -141,7 +127,7 @@ private:
   void procEvents(DataObjects::EventWorkspace_sptr &workspace);
 
   void procEventsLinear(DataObjects::EventWorkspace_sptr &workspace,
-                        std::vector<DataObjects::TofEvent> **arrayOfVectors,
+                        std::vector<Types::Event::TofEvent> **arrayOfVectors,
                         DasEvent *event_buffer,
                         size_t current_event_buffer_size, size_t fileOffset);
 
@@ -161,7 +147,7 @@ private:
   void filterEvents();
   ///
   void filterEventsLinear(DataObjects::EventWorkspace_sptr &workspace,
-                          std::vector<DataObjects::TofEvent> **arrayOfVectors,
+                          std::vector<Types::Event::TofEvent> **arrayOfVectors,
                           DasEvent *event_buffer,
                           size_t current_event_buffer_size, size_t fileOffset);
 
@@ -177,13 +163,13 @@ private:
   /// Perform statistics to event (wrong pixel ID) logs
   void doStatToEventLog(size_t mindex);
 
-  Mantid::API::Progress *m_prog;
+  std::unique_ptr<Mantid::API::Progress> m_progress = nullptr;
 
   DataObjects::EventWorkspace_sptr m_localWorkspace; //< Output EventWorkspace
-  std::vector<int64_t> m_spectraList;                ///<the list of Spectra
+  std::vector<int64_t> m_spectraList;                ///< the list of Spectra
 
   /// The times for each pulse.
-  std::vector<Kernel::DateAndTime> pulsetimes;
+  std::vector<Types::Core::DateAndTime> pulsetimes;
   /// The index of the first event in each pulse.
   std::vector<uint64_t> m_vecEventIndex;
   /// The proton charge on a pulse by pulse basis.
@@ -202,17 +188,18 @@ private:
   /// Handles loading from the event file
   Mantid::Kernel::BinaryFile<DasEvent> *m_eventFile;
   std::size_t m_numEvents; ///< The number of events in the file
-  std::size_t m_numPulses; ///<the number of pulses
-  uint32_t m_numPixel;     ///<the number of pixels
+  std::size_t m_numPulses; ///< the number of pulses
+  uint32_t m_numPixel;     ///< the number of pixels
 
   std::size_t m_numGoodEvents;  ///< The number of good events loaded
   std::size_t m_numErrorEvents; ///< The number of error events encountered
-  std::size_t m_numBadEvents; ///<The number of bad events. Part of error events
-  std::size_t m_numWrongdetidEvents; ///<The number of events with wrong
+  std::size_t m_numBadEvents;   ///< The number of bad events. Part of error
+                                ///< events
+  std::size_t m_numWrongdetidEvents; ///< The number of events with wrong
   /// detector IDs. Part of error events.
-  std::set<PixelType> wrongdetids; ///<set of all wrong detector IDs
+  std::set<PixelType> wrongdetids; ///< set of all wrong detector IDs
   std::map<PixelType, size_t> wrongdetidmap;
-  std::vector<std::vector<Kernel::DateAndTime>> wrongdetid_pulsetimes;
+  std::vector<std::vector<Types::Core::DateAndTime>> wrongdetid_pulsetimes;
   std::vector<std::vector<double>> wrongdetid_tofs;
 
   /// the number of events that were ignored (not loaded) because, e.g. of only
@@ -285,5 +272,5 @@ private:
   bool m_corretctTOF;
 };
 }
-}
+} // namespace Mantid
 #endif /*FILTEREVENTSBYLOGVALUEPRENEXUS_H_*/

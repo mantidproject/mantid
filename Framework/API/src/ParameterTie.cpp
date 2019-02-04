@@ -1,5 +1,11 @@
-#include "MantidAPI/CompositeFunction.h"
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/ParameterTie.h"
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidGeometry/muParser_Silent.h"
 
 #include <boost/lexical_cast.hpp>
@@ -81,7 +87,8 @@ void ParameterTie::set(const std::string &expr) {
   }
 
   // Create the template m_expression
-  boost::regex rx("\\b(([[:alpha:]]|_)([[:alnum:]]|_|\\.)*)\\b(?!(\\s*\\())");
+  static const boost::regex rx(
+      R"(\b(([[:alpha:]]|_)([[:alnum:]]|_|\.)*)\b(?!(\s*\()))");
   std::string input = expr;
   boost::smatch res;
   std::string::const_iterator start = input.begin();
@@ -115,8 +122,8 @@ double ParameterTie::eval() {
       *(it->first) = it->second.getParameter();
     }
     res = m_parser->Eval();
-  } catch (...) {
-    throw std::runtime_error("Error in expresseion");
+  } catch (mu::ParserError &e) {
+    throw std::runtime_error("Error in expression: " + e.GetMsg());
   }
 
   setParameter(res);
@@ -142,7 +149,7 @@ std::string ParameterTie::asString(const IFunction *fun) const {
       ;
     }
 
-    boost::regex rx(std::string("#(\\d+)"));
+    static const boost::regex rx(std::string("#(\\d+)"));
     boost::smatch res;
     std::string::const_iterator start = m_expression.begin();
     std::string::const_iterator end = m_expression.end();
@@ -165,23 +172,27 @@ std::string ParameterTie::asString(const IFunction *fun) const {
     }
     res_expression.append(start, end);
   } catch (...) { // parameters are not from function fun
-    res_expression = "";
+    throw std::logic_error("Corrupted tie " + m_expression + " in function " +
+                           getLocalFunction()->name());
   }
   return res_expression;
 }
 
-/** This method takes a list of double pointers and checks if any of them match
- * to the variables defined in the internal mu::Parser
+/** This method checks if any of the parameters of a function is used in the
+ * tie.
  * @param fun :: A function
  * @return True if any of the parameters is used as a variable in the mu::Parser
+ * or it is the tied parameter.
  */
 bool ParameterTie::findParametersOf(const IFunction *fun) const {
+  if (getLocalFunction() == fun) {
+    return true;
+  }
   for (const auto &varPair : m_varMap) {
-    if (varPair.second.getFunction() == fun) {
+    if (varPair.second.isParameterOf(fun)) {
       return true;
     }
   }
-
   return false;
 }
 
@@ -190,5 +201,16 @@ bool ParameterTie::findParametersOf(const IFunction *fun) const {
  */
 bool ParameterTie::isConstant() const { return m_varMap.empty(); }
 
-} // namespace CurveFitting
+/** Get a list of parameters on the right-hand side of the equation
+ */
+std::vector<ParameterReference> ParameterTie::getRHSParameters() const {
+  std::vector<ParameterReference> out;
+  out.reserve(m_varMap.size());
+  for (auto &&varPair : m_varMap) {
+    out.emplace_back(varPair.second);
+  }
+  return out;
+}
+
+} // namespace API
 } // namespace Mantid

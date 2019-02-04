@@ -1,9 +1,15 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,invalid-name,too-many-arguments,too-few-public-methods
 
 from __future__ import (absolute_import, division, print_function)
 
 from mantid.simpleapi import *
-from mantid.api import DataProcessorAlgorithm, MatrixWorkspaceProperty, PropertyMode, AnalysisDataService
+from mantid.api import ParallelDataProcessorAlgorithm, MatrixWorkspaceProperty, PropertyMode, AnalysisDataService
 from mantid.kernel import Direction, Property, StringListValidator, UnitFactory
 import numpy as np
 
@@ -22,7 +28,7 @@ class Mode(object):
         pass
 
 
-class SANSFitShiftScale(DataProcessorAlgorithm):
+class SANSFitShiftScale(ParallelDataProcessorAlgorithm):
     def _make_mode_map(self):
         return {'ShiftOnly': Mode.ShiftOnly, 'ScaleOnly': Mode.ScaleOnly,
                 'Both': Mode.BothFit, 'None': Mode.NoneFit}
@@ -53,6 +59,12 @@ class SANSFitShiftScale(DataProcessorAlgorithm):
         self.declareProperty('ShiftFactor', defaultValue=Property.EMPTY_DBL, direction=Direction.Input,
                              doc='Optional shift factor')
 
+        self.declareProperty('FitMin', defaultValue=0.0, direction=Direction.Input,
+                             doc='Optional minimum q for fit')
+
+        self.declareProperty('FitMax', defaultValue=1000.0, direction=Direction.Input,
+                             doc='Optional maximum q for fit')
+
         self.declareProperty('OutScaleFactor', defaultValue=Property.EMPTY_DBL, direction=Direction.Output,
                              doc='Applied scale factor')
         self.declareProperty('OutShiftFactor', defaultValue=Property.EMPTY_DBL, direction=Direction.Output,
@@ -60,17 +72,22 @@ class SANSFitShiftScale(DataProcessorAlgorithm):
 
     def PyExec(self):
         enum_map = self._make_mode_map()
-
         mode = enum_map[self.getProperty('Mode').value]
-
         hab = self.getProperty('HABWorkspace').value
         lab = self.getProperty('LABWorkspace').value
         shift_factor = self.getProperty('ShiftFactor').value
         scale_factor = self.getProperty('ScaleFactor').value
+        fit_min = self.getProperty('FitMin').value
+        fit_max = self.getProperty('FitMax').value
+
+        if fit_min < min(hab.dataX(0)):
+            fit_min = min(hab.dataX(0))
+        if fit_max > max(lab.dataX(0)):
+            fit_max = max(lab.dataX(0))
 
         if not mode == Mode.NoneFit:
-            shift_factor, scale_factor = self._determine_factors(hab, lab, mode, scale=scale_factor,
-                                                                 shift=shift_factor)
+            shift_factor, scale_factor = self._determine_factors(hab, lab, mode, scale=scale_factor, shift=shift_factor,
+                                                                 fit_min = fit_min, fit_max = fit_max)
 
         self.setProperty('OutScaleFactor', scale_factor)
         self.setProperty('OutShiftFactor', shift_factor)
@@ -129,13 +146,14 @@ class SANSFitShiftScale(DataProcessorAlgorithm):
             return True  # Mandatory validators to take care of this. Early exit.
         return ws.getNumberHistograms() == 1
 
-    def _determine_factors(self, q_high_angle, q_low_angle, mode, scale, shift):
+    def _determine_factors(self, q_high_angle, q_low_angle, mode, scale, shift, fit_min, fit_max):
 
         # We need to make suret that the fitting only occurs in the y direction
         constant_x_shift_and_scale = ', f0.Shift=0.0, f0.XScaling=1.0'
 
         # Determine the StartQ and EndQ values
-        q_min, q_max = self._get_start_q_and_end_q_values(rear_data=q_low_angle, front_data=q_high_angle)
+        q_min, q_max = self._get_start_q_and_end_q_values(rear_data=q_low_angle, front_data=q_high_angle,
+                                                          fit_min = fit_min, fit_max = fit_max)
 
         # We need to transfer the errors from the front data to the rear data, as we are using the the front data as a model, but
         # we want to take into account the errors of both workspaces.
@@ -144,7 +162,15 @@ class SANSFitShiftScale(DataProcessorAlgorithm):
                                                                                          front_data=q_high_angle,
                                                                                          q_min=q_min, q_max=q_max)
 
-        fit = self.createChildAlgorithm('Fit')
+        # The front_data_corrected data set is used as the fit model. Setting the IgnoreInvalidData on the Fit algorithm
+        # will not have any ignore Nans in the model, but only in the data. Hence this will lead to unreadable
+        # error messages of the fit algorithm. We need to catch this before the algorithm starts
+        y_model = front_data_corrected.dataY(0)
+        y_data = rear_data_corrected.dataY(0)
+        if any([np.isnan(element) for element in y_model]) or any([np.isnan(element) for element in y_data]):
+            raise RuntimeError("Trying to merge the two reduced data sets for HAB and LAB failed. "
+                               "You seem to have Nan values in your reduced HAB or LAB data set. This is most likely "
+                               "caused by a too small Q binning. Try to increase the Q bin width.")
 
         # We currently have to put the front_data into the ADS so that the TabulatedFunction has access to it
         front_data_corrected = AnalysisDataService.addOrReplace('front_data_corrected', front_data_corrected)
@@ -153,6 +179,7 @@ class SANSFitShiftScale(DataProcessorAlgorithm):
         function = 'name=TabulatedFunction, Workspace="' + str(
             front_in_ads.name()) + '"' + ";name=FlatBackground"
 
+        fit = self.createChildAlgorithm('Fit')
         fit.setProperty('Function', function)
         fit.setProperty('InputWorkspace', rear_data_corrected)
 
@@ -189,7 +216,7 @@ class SANSFitShiftScale(DataProcessorAlgorithm):
 
         return (shift, scale)
 
-    def _get_start_q_and_end_q_values(self, rear_data, front_data):
+    def _get_start_q_and_end_q_values(self, rear_data, front_data, fit_min, fit_max):
 
         min_q = None
         max_q = None
@@ -221,8 +248,8 @@ class SANSFitShiftScale(DataProcessorAlgorithm):
                                "than the max value of the REAR detector data set")
 
         # Get the min and max range
-        min_q = max(rear_q_min, front_q_min)
-        max_q = min(rear_q_max, front_q_max)
+        min_q = max(rear_q_min, front_q_min, fit_min)
+        max_q = min(rear_q_max, front_q_max, fit_max)
 
         return min_q, max_q
 
@@ -278,5 +305,6 @@ class ErrorTransferFromModelToData(object):
         comment.setProperty('Workspace', ws)
         comment.setProperty('Text', message)
         comment.execute()
+
 
 AlgorithmFactory.subscribe(SANSFitShiftScale)

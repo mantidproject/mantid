@@ -1,11 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_CONVERTUNITS_H_
 #define MANTID_ALGORITHMS_CONVERTUNITS_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DistributedAlgorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidKernel/Unit.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -24,8 +28,8 @@ namespace Algorithms {
    </LI>
     </UL>
 
-    Optional properties required for certain units (DeltaE &
-   DeltaE_inWavenumber):
+    Optional properties required for certain units (DeltaE,
+   DeltaE_inWavenumber, DeltaE_inFrequency):
     <UL>
     <LI> Emode  - The energy mode (0=elastic, 1=direct geometry, 2=indirect
    geometry) </LI>
@@ -44,32 +48,9 @@ namespace Algorithms {
 
     @author Russell Taylor, Tessella Support Services plc
     @date 06/03/2008
-
-    Copyright &copy; 2008-2011 ISIS Rutherford Appleton Laboratory, NScD Oak
-   Ridge National Laboratory & European Spallation Source
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport ConvertUnits : public API::Algorithm {
+class DLLExport ConvertUnits : public API::DistributedAlgorithm {
 public:
-  /// Default constructor
-  ConvertUnits();
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "ConvertUnits"; }
   /// Summary of algorithms purpose
@@ -79,6 +60,10 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"ConvertAxisByFormula", "ConvertAxesToRealSpace",
+            "ConvertSpectrumAxis", "ConvertToYSpace"};
+  }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Transforms\\Units"; }
 
@@ -119,12 +104,11 @@ protected:
                  const double &power);
 
   /// Internal function to gather detector specific L2, theta and efixed values
-  bool getDetectorValues(
-      const Kernel::Unit &outputUnit, const Geometry::IComponent &source,
-      const Geometry::IComponent &sample, double l1, int emode,
-      const API::MatrixWorkspace &ws,
-      boost::function<double(const Geometry::IDetector &)> thetaFunction,
-      int64_t wsIndex, double &efixed, double &l2, double &twoTheta);
+  bool getDetectorValues(const API::SpectrumInfo &spectrumInfo,
+                         const Kernel::Unit &outputUnit, int emode,
+                         const API::MatrixWorkspace &ws, const bool signedTheta,
+                         int64_t wsIndex, double &efixed, double &l2,
+                         double &twoTheta);
 
   /// Convert the workspace units using TOF as an intermediate step in the
   /// conversion
@@ -140,17 +124,17 @@ protected:
 
   void putBackBinWidth(const API::MatrixWorkspace_sptr outputWS);
 
-  std::size_t
-      m_numberOfSpectra; ///< The number of spectra in the input workspace
-  bool m_distribution;   ///< Whether input is a distribution. Only applies to
-  /// histogram workspaces.
-  bool m_inputEvents; ///< Flag indicating whether input workspace is an
-  /// EventWorkspace
+  std::size_t m_numberOfSpectra{
+      0};                     ///< The number of spectra in the input workspace
+  bool m_distribution{false}; ///< Whether input is a distribution. Only applies
+  /// to histogram workspaces.
+  bool m_inputEvents{
+      false}; ///< Flag indicating whether input workspace is an EventWorkspace
   Kernel::Unit_const_sptr m_inputUnit; ///< The unit of the input workspace
   Kernel::Unit_sptr m_outputUnit;      ///< The unit we're going to
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHMS_CONVERTUNITS_H_*/

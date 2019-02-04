@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -42,11 +42,10 @@ when :math:`DIFA < 0`.
 This algorithm always uses a :ref:`calibration table
 <DiffractionCalibrationWorkspace>` which it either reads from the
 `CalibrationWorkspace` property, or uses :ref:`ConvertDiffCal
-<algm-ConvertDiffCal>` or :ref:`LoadCalFile <algm-LoadCalFile>` to
-produce.
+<algm-ConvertDiffCal>` to produce from the ``OffsetsWorkspace``.
 
-**Note:** the workspace that this algorithms outputs is a 
-:ref:`ragged workspace <Ragged_Workspace>`.
+.. note:: The workspace that this algorithms outputs is a
+          :ref:`ragged workspace <Ragged_Workspace>`.
 
 Restrictions on the input workspace
 ###################################
@@ -71,8 +70,8 @@ Usage
     offset = GetDetectorOffsets(InputWorkspace='wsD', DReference=2.5, XMin=2, XMax=3)
     wsA = AlignDetectors(InputWorkspace='ws', OutputWorkspace='wsA', OffsetsWorkspace='offset')
     maxA = Max(wsA)
-    print "Peak in dSpace", maxD.readX(0)[0]
-    print "Peak from calibration", maxA.readX(0)[0]
+    print("Peak in dSpace {:.11f}".format(maxD.readX(0)[0]))
+    print("Peak from calibration {:.10f}".format(maxA.readX(0)[0]))
 
 Output:
 

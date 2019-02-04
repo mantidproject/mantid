@@ -1,5 +1,11 @@
-#include <sstream>
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/Exception.h"
+#include <sstream>
 
 namespace Mantid {
 namespace Kernel {
@@ -13,7 +19,8 @@ namespace Exception {
 */
 FileError::FileError(const std::string &Desc, const std::string &FName)
     : std::runtime_error(Desc), fileName(FName) {
-  outMessage = std::string(std::runtime_error::what()) + " in " + fileName;
+  outMessage =
+      std::string(std::runtime_error::what()) + " in \"" + fileName + "\"";
 }
 
 /// Copy constructor
@@ -352,6 +359,29 @@ const char *InternetError::what() const noexcept { return outMessage.c_str(); }
   @return the error string
 */
 const int &InternetError::errorCode() const { return m_errorCode; }
+
+//-------------------------
+// FitSizeError Error class
+//-------------------------
+
+/// Constructor.
+/// @param oldSize :: Old number of free fitting parameters
+FitSizeWarning::FitSizeWarning(size_t oldSize)
+    : std::exception(),
+      m_message(
+          "Number of fitting parameters is different from original value of " +
+          std::to_string(oldSize)) {}
+
+/// Constructor.
+/// @param oldSize :: Old number of free fitting parameters
+/// @param newSize :: New number of free fitting parameters
+FitSizeWarning::FitSizeWarning(size_t oldSize, size_t newSize)
+    : std::exception(),
+      m_message("Number of fitting parameters changed from " +
+                std::to_string(oldSize) + " to " + std::to_string(newSize)) {}
+
+/// Get the warning message.
+const char *FitSizeWarning::what() const noexcept { return m_message.c_str(); }
 
 } // namespace Exception
 } // namespace Kernel

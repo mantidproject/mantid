@@ -1,11 +1,17 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,invalid-name,bare-except
-import stresstesting
+import systemtesting
 from mantid.simpleapi import *
 from mantid.api import *
 import numpy as np
 
 
-class POLDILoadRunsTest(stresstesting.MantidStressTest):
+class POLDILoadRunsTest(systemtesting.MantidSystemTest):
     """This assembly of test cases checks that the behavior of PoldiLoadRuns is correct."""
 
     def runTest(self):
@@ -139,8 +145,8 @@ class POLDILoadRunsTest(stresstesting.MantidStressTest):
                       OutputWorkspace='twoWorkspacesMerged')
 
         wsMerged = AnalysisDataService.retrieve("twoWorkspacesMerged_data_6904")
-        self.assertEquals(len([True for x in range(wsMerged.getNumberHistograms()) if wsMerged.getDetector(
-            x).isMasked()]), 36)
+        specInfoMerged = wsMerged.spectrumInfo()
+        self.assertEquals(len([True for x in range(wsMerged.getNumberHistograms()) if specInfoMerged.isMasked(x)]), 36)
 
         self.clearAnalysisDataService()
 
@@ -150,8 +156,8 @@ class POLDILoadRunsTest(stresstesting.MantidStressTest):
                       OutputWorkspace='twoWorkspacesMerged')
 
         wsMerged = AnalysisDataService.retrieve("twoWorkspacesMerged_data_6904")
-        self.assertEquals(len([True for x in range(wsMerged.getNumberHistograms()) if wsMerged.getDetector(
-            x).isMasked()]), 49)
+        specInfoMerged = wsMerged.spectrumInfo()
+        self.assertEquals(len([True for x in range(wsMerged.getNumberHistograms()) if specInfoMerged.isMasked(x)]), 49)
 
         self.clearAnalysisDataService()
 
@@ -160,8 +166,8 @@ class POLDILoadRunsTest(stresstesting.MantidStressTest):
                       OutputWorkspace='twoWorkspacesMerged')
 
         wsMerged = AnalysisDataService.retrieve("twoWorkspacesMerged_data_6904")
-        self.assertEquals(len([True for x in range(wsMerged.getNumberHistograms()) if wsMerged.getDetector(
-            x).isMasked()]), 12)
+        specInfoMerged = wsMerged.spectrumInfo()
+        self.assertEquals( len([True for x in range(wsMerged.getNumberHistograms()) if specInfoMerged.isMasked(x)]), 12)
 
         self.clearAnalysisDataService()
 

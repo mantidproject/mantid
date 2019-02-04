@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -103,7 +103,7 @@ Usage
 
    tof = LoadVesuvio("14188",SpectrumList=135)
 
-   print "Number of spectra:", tof.getNumberHistograms()
+   print("Number of spectra: {}".format(tof.getNumberHistograms()))
 
 Output::
 
@@ -115,7 +115,7 @@ Output::
 
    tof = LoadVesuvio("14188-14193",SpectrumList=135)
 
-   print "Number of spectra:", tof.getNumberHistograms()
+   print("Number of spectra: {}".format(tof.getNumberHistograms()))
 
 Output::
 
@@ -127,7 +127,7 @@ Output::
 
    tof = LoadVesuvio("14188-14193",SpectrumList="135-142")
 
-   print "Number of spectra:", tof.getNumberHistograms()
+   print("Number of spectra: {}".format(tof.getNumberHistograms()))
 
 Output::
 
@@ -139,7 +139,7 @@ Output::
 
    tof = LoadVesuvio("14188-14193",SpectrumList="135-142", SumSpectra=True)
 
-   print "Number of spectra:", tof.getNumberHistograms()
+   print("Number of spectra: {}".format(tof.getNumberHistograms()))
 
 Output::
 
@@ -152,7 +152,7 @@ Output::
    tof = LoadVesuvio("14188-14193",SpectrumList="135-142", SumSpectra=True,
                      Mode="SingleDifference")
 
-   print "Number of spectra:", tof.getNumberHistograms()
+   print("Number of spectra: {}".format(tof.getNumberHistograms()))
 
 Output::
 

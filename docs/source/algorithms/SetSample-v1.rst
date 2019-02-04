@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -17,14 +17,19 @@ Description
 
 Set properties of the sample & its environment on a workspace.
 
-The 3 arguments to this algorithm ``Environment``, ``Geometry`` & ``Material``
-are all expected to be dictionaries specifying multiple parameters that
-relate to the respective argument.
+The 3 arguments to this algorithm ``Environment``, ``Geometry`` and
+:py:obj:`Material <mantid.kernel.Material>` are all expected to be
+dictionaries specifying multiple parameters that relate to the
+respective argument.
+
+.. note:: Contrary to the :ref:`xml forms of defining the geometry
+          <HowToDefineGeometricShape>` which are in metres,
+          :py:obj:`dict` versions are in centimetres.
 
 Environment
 ###########
 
-Specifies the sample enviorment kit to be used. There are two required keywords:
+Specifies the sample environment kit to be used. There are two required keywords:
 
 - ``Name``: The name of the predefined kit
 - ``Container``: The id of the container within the predefined kit
@@ -71,14 +76,20 @@ For defining the full shape a key called ``Shape`` specifying the desired shape 
 expected along with additional keys specifying the values (all values are assumed to
 be in centimeters):
 
-- ``FlatPlate``: Width, Height, Thick, Center
-- ``Cylinder``: Height, Radius, Center, Axis (X=0, Y=1, Z=2)
-- ``HollowCylinder``: Height, InnerRadius, OuterRadius, Center, Axis(X=0, Y=1, Z=2)
+- ``FlatPlate``: Width, Height, Thick, Center, Angle
+- ``Cylinder``: Height, Radius, Center
+- ``HollowCylinder``: Height, InnerRadius, OuterRadius, Center
 - ``CSG``: Value is a string containing any generic shape as detailed in
   :ref:`HowToDefineGeometricShape`
 
 The ``Center`` key is expected to be a list of three values indicating the :python:`[X,Y,Z]`
-position of the center.
+position of the center. The reference frame of the defined instrument is used to
+set the coordinate system for the shape.
+
+The ``Angle`` argument for a flat plate shape is expected to be in degrees and is defined as
+the angle between the positive beam axis and the normal to the face perpendicular to the
+beam axis when it is not rotated, increasing in an anti-clockwise sense. The rotation is
+performed about the vertical axis of the instrument's reference frame.
 
 Material
 ########
@@ -111,9 +122,10 @@ The following example uses a test file called ``CRYO-01.xml`` in the
    # A fake host workspace, replace this with your real one.
    ws = CreateSampleWorkspace()
 
-   # Use geometry as is from environment defintion
+   # Use geometry as is from environment definition
    SetSample(ws, Environment={'Name': 'CRYO-01', 'Container': '8mm'},
-             Material={'ChemicalFormula': '(Li7)2-C-H4-N-Cl6'})
+             Material={'ChemicalFormula': '(Li7)2-C-H4-N-Cl6',
+                       'SampleNumberDensity': 0.1})
 
 **Example - Override height of preset cylinder sample**
 
@@ -121,10 +133,11 @@ The following example uses a test file called ``CRYO-01.xml`` in the
 
    # A fake host workspace, replace this with your real one.
    ws = CreateSampleWorkspace()
-   # Use geometry from environment but set differnet height for sample
+   # Use geometry from environment but set different height for sample
    SetSample(ws, Environment={'Name': 'CRYO-01', 'Container': '8mm'},
              Geometry={'Height': 4.0},
-             Material={'ChemicalFormula': '(Li7)2-C-H4-N-Cl6'})
+             Material={'ChemicalFormula': '(Li7)2-C-H4-N-Cl6',
+                       'SampleNumberDensity': 0.1})
 
 **Example - Override complete sample geometry**
 
@@ -132,12 +145,13 @@ The following example uses a test file called ``CRYO-01.xml`` in the
 
    # A fake host workspace, replace this with your real one.
    ws = CreateSampleWorkspace()
-   # Use geometry from environment but set differnet height for sample
+   # Use geometry from environment but set different height for sample
    SetSample(ws, Environment={'Name': 'CRYO-01', 'Container': '8mm'},
              Geometry={'Shape': 'HollowCylinder', 'Height': 4.0,
                        'InnerRadius': 0.8, 'OuterRadius': 1.0,
-                       'Center': [0.,0.,0.], 'Axis':1},
-             Material={'ChemicalFormula': '(Li7)2-C-H4-N-Cl6'})
+                       'Center': [0.,0.,0.]},
+             Material={'ChemicalFormula': '(Li7)2-C-H4-N-Cl6',
+                       'SampleNumberDensity': 0.1})
 
 .. categories::
 

@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -29,8 +29,8 @@ Usage
 
    ws = LoadMLZ(Filename='TOFTOFTestdata.nxs')
 
-   print "Name of the instrument: ", ws.getInstrument().getName()
-   print "Number of spectra: ", ws.getNumberHistograms()
+   print("Name of the instrument:  {}".format(ws.getInstrument().getName()))
+   print("Number of spectra:  {}".format(ws.getNumberHistograms()))
    
 
 Output:

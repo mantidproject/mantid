@@ -1,18 +1,27 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAHANDLING_LOADMASK_H_
 #define MANTID_DATAHANDLING_LOADMASK_H_
 
-#include "MantidKernel/System.h"
-#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/ParallelAlgorithm.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidGeometry/IDTypes.h"
+#include "MantidKernel/System.h"
+
+#include <Poco/AutoPtr.h>
+#include <Poco/DOM/Document.h>
 
 namespace Poco {
 namespace XML {
 class Document;
 class Element;
-}
-}
+} // namespace XML
+} // namespace Poco
 
 namespace Mantid {
 namespace DataHandling {
@@ -22,33 +31,9 @@ namespace DataHandling {
 
   @author
   @date 2011-11-02
-
-  Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
-
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>
-  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport LoadMask : public API::Algorithm {
+class DLLExport LoadMask : public API::ParallelAlgorithm {
 public:
-  LoadMask();
-  ~LoadMask() override;
-
   /// Algorithm's name for identification
   const std::string name() const override { return "LoadMask"; };
   /// Summary of algorithms purpose
@@ -59,6 +44,9 @@ public:
 
   /// Algorithm's version for identification
   int version() const override { return 1; };
+  const std::vector<std::string> seeAlso() const override {
+    return {"ExportSpectraMask", "LoadMask"};
+  }
   /// Algorithm's category for identification
   const std::string category() const override {
     return "DataHandling\\Masking;Transforms\\Masking";
@@ -97,6 +85,8 @@ private:
                               const std::vector<specnum_t> &maskedSpecID,
                               std::vector<detid_t> &singleDetIds);
 
+  void reset();
+
   /// Mask Workspace
   DataObjects::MaskWorkspace_sptr m_maskWS;
   /// Instrument name
@@ -104,15 +94,12 @@ private:
   /// optional source workspace, containing spectra-detector mapping
   API::MatrixWorkspace_sptr m_sourceMapWS;
   /// XML document loaded
-  Poco::XML::Document *m_pDoc;
+  Poco::AutoPtr<Poco::XML::Document> m_pDoc;
   /// Root element of the parsed XML
-  Poco::XML::Element *m_pRootElem;
+  Poco::XML::Element *m_pRootElem{nullptr};
 
   /// Default setup.  If true, not masking, but use the pixel
-  bool m_defaultToUse;
-  /// input property contains name of instrument definition file rather than
-  /// instrument name itself
-  bool m_IDF_provided;
+  bool m_defaultToUse{true};
 
   // detector id-s to mask
   std::vector<detid_t> m_maskDetID;

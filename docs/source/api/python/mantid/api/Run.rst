@@ -4,7 +4,7 @@
  Run
 =====
 
-This a python binding to the C++ class Mantid::API::Run.
+This is a Python binding to the C++ class Mantid::API::Run.
 
 
 .. module:`mantid.api`

@@ -1,20 +1,27 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef GROUPDETECTORSTEST_H_
 #define GROUPDETECTORSTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidHistogramData/LinearGenerator.h"
-#include "MantidDataHandling/GroupDetectors.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidKernel/ArrayProperty.h"
+#include "MantidDataHandling/GroupDetectors.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidTestHelpers/HistogramDataTestHelper.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidHistogramData/LinearGenerator.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/UnitFactory.h"
 
 using Mantid::DataHandling::GroupDetectors;
 using Mantid::MantidVecPtr;
@@ -47,7 +54,8 @@ public:
     }
     Instrument_sptr instr(new Instrument);
     for (detid_t i = 0; i < 5; i++) {
-      Detector *d = new Detector("det", i, 0);
+      Detector *d = new Detector("det", i, nullptr);
+      instr->add(d);
       instr->markAsDetector(d);
     }
     space2D->setInstrument(instr);
@@ -140,15 +148,23 @@ public:
     TS_ASSERT_EQUALS(outputWS->e(4), eOnes);
     TS_ASSERT_EQUALS(outputWS->getSpectrum(4).getSpectrumNo(), 4);
 
-    boost::shared_ptr<const IDetector> det;
-    TS_ASSERT_THROWS_NOTHING(det = outputWS->getDetector(0));
-    TS_ASSERT(boost::dynamic_pointer_cast<const DetectorGroup>(det));
-    TS_ASSERT_THROWS_NOTHING(det = outputWS->getDetector(1));
-    TS_ASSERT(boost::dynamic_pointer_cast<const Detector>(det));
-    TS_ASSERT_THROWS(outputWS->getDetector(2), Exception::NotFoundError);
-    TS_ASSERT_THROWS(outputWS->getDetector(3), Exception::NotFoundError);
-    TS_ASSERT_THROWS_NOTHING(det = outputWS->getDetector(4));
-    TS_ASSERT(boost::dynamic_pointer_cast<const Detector>(det));
+    const auto &spectrumInfo = outputWS->spectrumInfo();
+    TS_ASSERT(spectrumInfo.hasDetectors(0));
+    const auto &det0 = spectrumInfo.detector(0);
+    // (void) avoids a compiler warning for unused variable
+    TS_ASSERT_THROWS_NOTHING((void)dynamic_cast<const DetectorGroup &>(det0));
+
+    TS_ASSERT(spectrumInfo.hasDetectors(1));
+    const auto &det1 = spectrumInfo.detector(1);
+    TS_ASSERT_THROWS_NOTHING((void)dynamic_cast<const Detector &>(det1));
+
+    TS_ASSERT(!spectrumInfo.hasDetectors(2));
+    TS_ASSERT(!spectrumInfo.hasDetectors(3));
+
+    TS_ASSERT(spectrumInfo.hasDetectors(4));
+    const auto &det4 = spectrumInfo.detector(4);
+    TS_ASSERT_THROWS_NOTHING((void)dynamic_cast<const Detector &>(det4));
+
     AnalysisDataService::Instance().remove("GroupTestWS");
   }
 

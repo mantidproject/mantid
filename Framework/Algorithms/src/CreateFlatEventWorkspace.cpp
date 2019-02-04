@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CreateFlatEventWorkspace.h"
 
 #include "MantidDataObjects/EventWorkspace.h"
@@ -101,7 +107,7 @@ void CreateFlatEventWorkspace::exec() {
   MatrixWorkspace_sptr tmpChunkWs =
       boost::dynamic_pointer_cast<MatrixWorkspace>(tmp);
 
-  Progress progress(this, 0, 1, nRegions);
+  Progress progress(this, 0.0, 1.0, nRegions);
 
   for (int i = 0; i < nRegions; ++i) {
 

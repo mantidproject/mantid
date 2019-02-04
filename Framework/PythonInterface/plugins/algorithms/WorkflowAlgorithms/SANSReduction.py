@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name
 from __future__ import (absolute_import, division, print_function)
 
@@ -85,8 +91,7 @@ class SANSReduction(PythonAlgorithm):
             output_str += self._load_data(data_file, workspace, property_manager, property_manager_name)
         return output_str
 
-    #pylint: disable=too-many-locals,too-many-branches
-    def _py_exec(self):
+    def _py_exec(self):  # noqa: C901
         filename = self.getProperty("Filename").value
         output_ws = self.getPropertyValue("OutputWorkspace")
         property_manager_name = self.getProperty("ReductionProperties").value
@@ -472,5 +477,7 @@ class SANSReduction(PythonAlgorithm):
                 Logger("SANSReduction").error("No I(Qx,Qy) output found")
 
         return output_msg
+
+
 #############################################################################################
 AlgorithmFactory.subscribe(SANSReduction)

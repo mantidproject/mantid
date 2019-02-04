@@ -1,12 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/HRPDSlabCanAbsorption.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Sample.h"
-#include "MantidGeometry/IDetector.h"
-#include "MantidGeometry/IComponent.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/Material.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/Material.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -95,28 +100,20 @@ void HRPDSlabCanAbsorption::exec() {
 
   const size_t numHists = workspace->getNumberHistograms();
   const size_t specSize = workspace->blocksize();
-  //
+
+  const auto &spectrumInfo = workspace->spectrumInfo();
   Progress progress(this, 0.91, 1.0, numHists);
   for (size_t i = 0; i < numHists; ++i) {
-    MantidVec &Y = workspace->dataY(i);
 
-    // Get detector position
-    IDetector_const_sptr det;
-    try {
-      det = workspace->getDetector(i);
-    } catch (Exception::NotFoundError &) {
-      // Catch when a spectrum doesn't have an attached detector and go to next
-      // one
+    if (!spectrumInfo.hasDetectors(i)) {
+      // If a spectrum doesn't have an attached detector go to next one instead
       continue;
     }
 
-    V3D detectorPos;
-    detectorPos.spherical(
-        det->getDistance(Component("dummy", V3D(0.0, 0.0, 0.0))),
-        det->getTwoTheta(V3D(0.0, 0.0, 0.0), V3D(0.0, 0.0, 1.0)) * 180.0 / M_PI,
-        det->getPhi() * 180.0 / M_PI);
+    // Get detector position
+    V3D detectorPos = spectrumInfo.position(i);
 
-    const int detID = det->getID();
+    const int detID = spectrumInfo.detector(i).getID();
     double angleFactor;
     // If the low angle or backscattering bank, want angle wrt beamline
     if (detID < 900000) {
@@ -129,6 +126,7 @@ void HRPDSlabCanAbsorption::exec() {
       angleFactor = 1.0 / std::abs(cos(theta));
     }
 
+    auto &Y = workspace->mutableY(i);
     const auto lambdas = workspace->points(i);
     for (size_t j = 0; j < specSize; ++j) {
       const double lambda = lambdas[j];
@@ -171,11 +169,10 @@ API::MatrixWorkspace_sptr HRPDSlabCanAbsorption::runFlatPlateAbsorption() {
       sigma_atten = sampleMaterial.absorbXSection(NeutronAtom::ReferenceLambda);
   } else // Save input in Sample with wrong atomic number and name
   {
-    NeutronAtom neutron(static_cast<uint16_t>(EMPTY_DBL()),
-                        static_cast<uint16_t>(0), 0.0, 0.0, sigma_s, 0.0,
-                        sigma_s, sigma_atten);
-    Object shape = m_inputWS->sample().getShape(); // copy
-    shape.setMaterial(Material("SetInSphericalAbsorption", neutron, rho));
+    NeutronAtom neutron(0, 0, 0.0, 0.0, sigma_s, 0.0, sigma_s, sigma_atten);
+    auto shape = boost::shared_ptr<IObject>(
+        m_inputWS->sample().getShape().cloneWithMaterial(
+            Material("SetInSphericalAbsorption", neutron, rho)));
     m_inputWS->mutableSample().setShape(shape);
   }
 

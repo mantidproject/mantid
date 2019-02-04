@@ -1,9 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/RebinByPulseTimes.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/Unit.h"
-#include <boost/make_shared.hpp>
+#include "MantidKernel/VectorHelper.h"
 #include <algorithm>
+#include <boost/make_shared.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -50,7 +56,7 @@ void RebinByPulseTimes::doHistogramming(IEventWorkspace_sptr inWS,
 
   auto x = Kernel::make_cow<HistogramData::HistogramX>(OutXValues_scaled);
 
-  PARALLEL_FOR2(inWS, outputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inWS, *outputWS))
   for (int i = 0; i < histnumber; ++i) {
     PARALLEL_START_INTERUPT_REGION
 
@@ -60,11 +66,11 @@ void RebinByPulseTimes::doHistogramming(IEventWorkspace_sptr inWS,
     el.generateHistogramPulseTime(*XValues_new, y_data, e_data);
 
     // Set the X axis for each output histogram
-    outputWS->setX(i, x);
+    outputWS->setSharedX(i, x);
 
     // Copy the data over.
-    outputWS->dataY(i).assign(y_data.begin(), y_data.end());
-    outputWS->dataE(i).assign(e_data.begin(), e_data.end());
+    outputWS->mutableY(i) = std::move(y_data);
+    outputWS->mutableE(i) = std::move(e_data);
 
     // Report progress
     prog.report(name());

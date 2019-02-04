@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/MultiPeriodGroupAlgorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -31,15 +37,13 @@ bool MultiPeriodGroupAlgorithm::checkGroups() {
   }
   m_multiPeriodGroups = m_worker->findMultiPeriodGroups(this);
   bool useDefaultGroupingBehaviour = m_multiPeriodGroups.empty();
-  /*
-   * Give the opportunity to treat this as a regular group workspace.
-   */
+  // Give the opportunity to treat this as a regular group workspace.
   if (useDefaultGroupingBehaviour) {
     return Algorithm::checkGroups(); // Delegate to algorithm base class.
   } else {
-    return !useDefaultGroupingBehaviour; // Evaluates to True if if multiperiod,
-                                         // that way algorithm will call the
-                                         // overrriden processGroups.
+    // Evaluates to True if multiperiod, that way algorithm will call the
+    // overrriden processGroups.
+    return !useDefaultGroupingBehaviour;
   }
 }
 

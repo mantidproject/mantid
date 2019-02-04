@@ -1,24 +1,13 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 /***************************************************************************
         File                 : MatrixModel.cpp
         Project              : QtiPlot
 --------------------------------------------------------------------
-        Copyright            : (C) 2007 by Ion Vasilief
-        Email (use @ for *)  : ion_vasilief*yahoo.fr
-        Description          : QtiPlot's matrix model
-
- ***************************************************************************/
-
-/***************************************************************************
- *                                                                         *
- *  This program is free software; you can redistribute it and/or modify   *
- *  it under the terms of the GNU General Public License as published by   *
- *  the Free Software Foundation; either version 2 of the License, or      *
- *  (at your option) any later version.                                    *
- *                                                                         *
- *  This program is distributed in the hope that it will be useful,        *
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
- *  GNU General Public License for more details.                           *
  *                                                                         *
  *   You should have received a copy of the GNU General Public License     *
  *   along with this program; if not, write to the Free Software           *
@@ -26,26 +15,26 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#include <QtGui>
 #include <QFile>
 #include <QTextStream>
+#include <QtGui>
 
+#include "MantidQtWidgets/Common/TSVSerialiser.h"
 #include "Matrix.h"
-#include "MatrixModel.h"
 #include "MatrixCommand.h"
-#include "muParserScript.h"
+#include "MatrixModel.h"
 #include "ScriptingEnv.h"
 #include "analysis/fft2D.h"
-#include "MantidQtAPI/TSVSerialiser.h"
+#include "muParserScript.h"
 
 #include "MantidKernel/Strings.h"
 
-#include <gsl/gsl_math.h>
-#include <gsl/gsl_linalg.h>
 #include <gsl/gsl_errno.h>
+#include <gsl/gsl_linalg.h>
+#include <gsl/gsl_math.h>
 
+#include <cstdlib>
 #include <qwt_color_map.h>
-#include <stdlib.h>
 
 MatrixModel::MatrixModel(QObject *parent)
     : QAbstractTableModel(parent), d_matrix(dynamic_cast<Matrix *>(parent)) {
@@ -91,9 +80,9 @@ void MatrixModel::init() {
   d_txt_format = 'g';
   d_num_precision = 6;
   d_locale = QLocale();
-  d_direct_matrix = NULL;
-  d_inv_matrix = NULL;
-  d_inv_perm = NULL;
+  d_direct_matrix = nullptr;
+  d_inv_matrix = nullptr;
+  d_inv_perm = nullptr;
 
   d_rows = 1;
   d_cols = 1;
@@ -356,9 +345,9 @@ bool MatrixModel::canResize(int rows, int cols) {
   }
 
   QApplication::restoreOverrideCursor();
-  QMessageBox::critical(d_matrix, tr("MantidPlot") + " - " +
-                                      tr("Memory Allocation Error"),
-                        tr("Not enough memory, operation aborted!"));
+  QMessageBox::critical(
+      d_matrix, tr("MantidPlot") + " - " + tr("Memory Allocation Error"),
+      tr("Not enough memory, operation aborted!"));
   return false;
 }
 
@@ -376,11 +365,11 @@ bool MatrixModel::removeColumns(int column, int count,
   }
 
   double *new_data = (double *)realloc(d_data, size * sizeof(double));
-  if (new_data == NULL) {
+  if (new_data == nullptr) {
     // could not realloc, but orig still valid
-    QMessageBox::critical(d_matrix, tr("MantidPlot") + " - " +
-                                        tr("Memory Allocation Error"),
-                          tr("Not enough memory, operation aborted!"));
+    QMessageBox::critical(
+        d_matrix, tr("MantidPlot") + " - " + tr("Memory Allocation Error"),
+        tr("Not enough memory, operation aborted!"));
   } else {
     d_data = new_data;
   }
@@ -447,11 +436,11 @@ bool MatrixModel::removeRows(int row, int count, const QModelIndex &parent) {
     d_data[i] = d_data[i + removedCells];
 
   double *new_data = (double *)realloc(d_data, size * sizeof(double));
-  if (new_data == NULL) {
+  if (new_data == nullptr) {
     // could not realloc, but orig still valid
-    QMessageBox::critical(d_matrix, tr("MantidPlot") + " - " +
-                                        tr("Memory Allocation Error"),
-                          tr("Not enough memory, operation aborted!"));
+    QMessageBox::critical(
+        d_matrix, tr("MantidPlot") + " - " + tr("Memory Allocation Error"),
+        tr("Not enough memory, operation aborted!"));
   } else {
     d_data = new_data;
   }
@@ -691,9 +680,9 @@ bool MatrixModel::initWorkspace() {
     d_inv_perm = gsl_permutation_alloc(d_cols);
   if (!d_direct_matrix || !d_inv_matrix || !d_inv_perm) {
     QApplication::restoreOverrideCursor();
-    QMessageBox::critical(d_matrix, tr("MantidPlot") + " - " +
-                                        tr("Memory Allocation Error"),
-                          tr("Not enough memory, operation aborted!"));
+    QMessageBox::critical(
+        d_matrix, tr("MantidPlot") + " - " + tr("Memory Allocation Error"),
+        tr("Not enough memory, operation aborted!"));
     return false;
   }
   return true;
@@ -716,9 +705,9 @@ void MatrixModel::invert() {
   gsl_linalg_LU_invert(d_direct_matrix, d_inv_perm, d_inv_matrix);
 
   gsl_matrix_free(d_direct_matrix);
-  d_direct_matrix = NULL;
+  d_direct_matrix = nullptr;
   gsl_permutation_free(d_inv_perm);
-  d_inv_perm = NULL;
+  d_inv_perm = nullptr;
 
   aux = 0;
   for (int i = 0; i < d_rows; i++) {
@@ -726,7 +715,7 @@ void MatrixModel::invert() {
       d_data[aux++] = gsl_matrix_get(d_inv_matrix, i, j);
   }
   gsl_matrix_free(d_inv_matrix);
-  d_inv_matrix = NULL;
+  d_inv_matrix = nullptr;
   QApplication::restoreOverrideCursor();
 }
 
@@ -756,7 +745,7 @@ double *MatrixModel::dataCopy(int startRow, int endRow, int startCol,
   double *buffer = (double *)malloc((endRow - startRow + 1) *
                                     (endCol - startCol + 1) * sizeof(double));
   if (!buffer)
-    return NULL;
+    return nullptr;
 
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
@@ -818,13 +807,13 @@ bool MatrixModel::muParserCalculate(int startRow, int endRow, int startCol,
       double r = row + 1.0;
       *ri = r;
       *rr = r;
-      *y = y_start + row *dy;
+      *y = y_start + row * dy;
       int aux = row * d_cols + startCol;
       for (int col = startCol; col <= endCol; col++) {
         double c = col + 1.0;
         *cj = c;
         *cc = c;
-        *x = x_start + col *dx;
+        *x = x_start + col * dx;
         d_data[aux++] = mup->evalSingleLine();
       }
     }
@@ -834,13 +823,13 @@ bool MatrixModel::muParserCalculate(int startRow, int endRow, int startCol,
       double r = row + 1.0;
       *ri = r;
       *rr = r;
-      *y = y_start + row *dy;
+      *y = y_start + row * dy;
       int aux = row * d_cols + startCol;
       for (int col = startCol; col <= endCol; col++) {
         double c = col + 1.0;
         *cj = c;
         *cc = c;
-        *x = x_start + col *dx;
+        *x = x_start + col * dx;
         res = mup->evaluate(ScriptCode(d_matrix->formula()));
         if (res.canConvert(QVariant::Double))
           d_data[aux++] = res.toDouble();

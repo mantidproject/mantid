@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -47,7 +47,7 @@ The following small usage example performs a peak fit on the sample data already
                     FitPlotsWorkspace = "fit_plots_6904",
                     Version=1)
                     
-    print "There are", mtd['fit_plots_6904'].getNumberOfEntries(), "plots available for inspection."
+    print("There are {} plots available for inspection.".format(mtd['fit_plots_6904'].getNumberOfEntries()))
     
 Output:
 

@@ -1,8 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef VECTOR_IMPLICIT_FUNCTION_PARAMETER_PARSER_TEST_H_
 #define VECTOR_IMPLICIT_FUNCTION_PARAMETER_PARSER_TEST_H_
 
-#include "MantidAPI/VectorParameterParser.h"
 #include "MantidAPI/VectorParameter.h"
+#include "MantidAPI/VectorParameterParser.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
@@ -15,15 +21,15 @@ private:
   DECLARE_VECTOR_PARAMETER(ConcreteVectorDblParam, double)
 
   // Declare a concrete vector parameter parser for testing.
-  typedef VectorParameterParser<ConcreteVectorDblParam>
-      ConcreteVectorDblParamParser;
+  using ConcreteVectorDblParamParser =
+      VectorParameterParser<ConcreteVectorDblParam>;
 
   // Declare a concrete type with elements of type bool for testing.
   DECLARE_VECTOR_PARAMETER(ConcreteVectorBoolParam, bool)
 
   // Declare a concrete vector parameter parser for testing.
-  typedef VectorParameterParser<ConcreteVectorBoolParam>
-      ConcreteVectorBoolParamParser;
+  using ConcreteVectorBoolParamParser =
+      VectorParameterParser<ConcreteVectorBoolParam>;
 
 public:
   void testParsesParmeterValue1D() {
@@ -70,7 +76,7 @@ public:
         dynamic_cast<ConcreteVectorDblParam *>(product);
 
     TSM_ASSERT("The wrong product parameter has been produced",
-               (actualProduct != NULL));
+               (actualProduct != nullptr));
     double v1 = (*actualProduct)[0];
     double v2 = (*actualProduct)[1];
     double v3 = (*actualProduct)[2];
@@ -97,8 +103,8 @@ public:
 
   void testChainOfResponsibility() {
     // Local declare of a successor parser with a successor parameter.
-    typedef VectorParameterParser<SucessorVectorParameter>
-        ConcreteSuccessorVectorParameterParser;
+    using ConcreteSuccessorVectorParameterParser =
+        VectorParameterParser<SucessorVectorParameter>;
 
     DOMParser pParser;
     std::string xmlToParse = "<Parameter><Type>SucessorVectorParameter</"
@@ -131,7 +137,7 @@ public:
         dynamic_cast<ConcreteVectorBoolParam *>(product);
 
     TSM_ASSERT("The wrong product parameter has been produced",
-               (actualProduct != NULL));
+               (actualProduct != nullptr));
 
     bool v1 = (*actualProduct)[0];
     bool v2 = (*actualProduct)[1];
@@ -167,7 +173,7 @@ public:
 
     ConcreteVectorDblParamParser parser;
     ConcreteVectorDblParam *product = parser.createWithoutDelegation(pRootElem);
-    TS_ASSERT(product != NULL);
+    TS_ASSERT(product != nullptr);
     delete product;
   }
 };

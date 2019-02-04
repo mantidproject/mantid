@@ -1,18 +1,22 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 // SaveNeXus
 // @author Freddie Akeroyd, STFC ISIS Faility
 // @author Ronald Fowler, STFC eScience. Modified to fit with SaveNexusProcessed
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidDataHandling/SaveNexus.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/WorkspaceHistory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidAPI/FileProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 
-#include <cmath>
-#include <boost/shared_ptr.hpp>
 #include <Poco/File.h>
+#include <boost/shared_ptr.hpp>
+#include <cmath>
 
 namespace Mantid {
 namespace DataHandling {
@@ -23,9 +27,6 @@ DECLARE_ALGORITHM(SaveNexus)
 using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
-
-/// Empty default constructor
-SaveNexus::SaveNexus() : Algorithm() {}
 
 /** Initialisation method.
  *
@@ -76,8 +77,9 @@ void SaveNexus::init() {
       make_unique<ArrayProperty<int>>("WorkspaceIndexList"),
       "List of WorkspaceIndex numbers to read, only for single period data.\n"
       "Not yet implemented");
-  declareProperty("Append", false, "Determines whether .nxs file needs to be\n"
-                                   "over written or appended");
+  declareProperty("Append", false,
+                  "Determines whether .nxs file needs to be\n"
+                  "over written or appended");
   // option which might be required in future - should be a choice e.g.
   // MantidProcessed/Muon1
   // declareProperty("Filetype","",new NullValidator<std::string>);
@@ -105,7 +107,7 @@ void SaveNexus::setOtherProperties(IAlgorithm *alg,
                                    const std::string &propertyName,
                                    const std::string &propertyValue,
                                    int perioidNum) {
-  if (!propertyName.compare("Append")) {
+  if (propertyName == "Append") {
     if (perioidNum != 1) {
       alg->setPropertyValue(propertyName, "1");
     } else
@@ -144,7 +146,7 @@ void SaveNexus::runSaveNexusProcessed() {
   // If we're tracking history, add the entry before we save it to file
   if (trackingHistory()) {
     m_history->fillAlgorithmHistory(
-        this, Mantid::Kernel::DateAndTime::getCurrentTime(), 0,
+        this, Mantid::Types::Core::DateAndTime::getCurrentTime(), 0,
         Algorithm::g_execCount);
     if (!isChild()) {
       m_inputWorkspace->history().addHistory(m_history);

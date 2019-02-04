@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -66,11 +66,11 @@ Usage
       inside_dets.append( det.getID() )
 
   # Print out the IDs
-  print masked_dets
-  print inside_dets
+  print(masked_dets)
+  print(inside_dets)
 
   # Check that the two arrays are equal
-  print masked_dets == inside_dets
+  print(masked_dets == inside_dets)
 
 Output
 ######

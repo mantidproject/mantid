@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -26,19 +26,19 @@ Usage
 
    # Add  a sample log
    AddSampleLog(Workspace=demo_ws, LogName='my_log', LogText='1', LogType='Number')
-   print 'Log is present before deletion: ', demo_ws.getRun().hasProperty('my_log')
+   print('Log is present before deletion: {}'.format(demo_ws.getRun().hasProperty('my_log')))
 
    # Now delete it
    DeleteLog(demo_ws,'my_log')
-   print 'Log is present after deletion: ', demo_ws.getRun().hasProperty('my_log')
+   print('Log is present after deletion: {}'.format(demo_ws.getRun().hasProperty('my_log')))
 
 
 Output:
 
 .. testoutput:: DeleteLogExample 
 
-    Log is present before deletion:  True
-    Log is present after deletion:  False
+    Log is present before deletion: True
+    Log is present after deletion: False
 
 
 .. categories::

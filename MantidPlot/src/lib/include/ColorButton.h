@@ -44,7 +44,7 @@ public:
   /**
    * \param parent parent widget (only affects placement of the widget)
    */
-  ColorButton(QWidget *parent = 0);
+  ColorButton(QWidget *parent = nullptr);
   //! Set the current color to be displayed
   void setColor(const QColor &c) { setCurrentColor(c); };
   //! Get the current color

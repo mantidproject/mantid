@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -86,12 +86,12 @@ Usage
   gfile.close()
 
   # Print out some result
-  print "Number of lines in GSAS instrument file: ", len(lines)
-  print "Line 0: ", lines[0].strip()
-  print "Line 1: ", lines[1].strip()
-  print "Line 2: ", lines[2].strip()
-  print "Line 3: ", lines[3].strip()
-  print "Line 305: ", lines[305].strip()
+  print("Number of lines in GSAS instrument file:  {}".format(len(lines)))
+  print("Line 0:  {}".format(lines[0].strip()))
+  print("Line 1:  {}".format(lines[1].strip()))
+  print("Line 2:  {}".format(lines[2].strip()))
+  print("Line 3:  {}".format(lines[3].strip()))
+  print("Line 305:  {}".format(lines[305].strip()))
 
 .. testcleanup:: ExHistSimple
 

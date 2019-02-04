@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_API_IPEAKSWORKSPACE_H_
 #define MANTID_API_IPEAKSWORKSPACE_H_
 
@@ -7,8 +13,8 @@
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/IPeaksWorkspace_fwd.h"
 #include "MantidAPI/ITableWorkspace.h"
-#include "MantidKernel/SpecialCoordinateSystem.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/SpecialCoordinateSystem.h"
 #include <boost/optional.hpp>
 
 namespace Mantid {
@@ -24,26 +30,6 @@ namespace API {
 
     @author Ruth Mikkelson, SNS ORNL
     @date 3/10/2010
-
-    Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-   National Laboratory & European Spallation Source
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>
  */
 class MANTID_API_DLL IPeaksWorkspace : public ITableWorkspace,
                                        public Mantid::API::ExperimentInfo {
@@ -72,11 +58,21 @@ public:
    */
   virtual void removePeak(int peakNum) = 0;
 
+  virtual void removePeaks(std::vector<int> badPeaks) = 0;
+
   //---------------------------------------------------------------------------------------------
   /** Add a peak to the list
    * @param ipeak :: Peak object to add (copy) into this.
    */
   virtual void addPeak(const Mantid::Geometry::IPeak &ipeak) = 0;
+
+  //---------------------------------------------------------------------------------------------
+  /** Add a peak to the list
+   * @param position :: V3D positon of the peak.
+   * @param frame :: Coordinate system frame of the peak position.
+   */
+  virtual void addPeak(const Kernel::V3D &position,
+                       const Kernel::SpecialCoordinateSystem &frame) = 0;
 
   //---------------------------------------------------------------------------------------------
   /** Return a reference to the Peak
@@ -111,7 +107,17 @@ public:
    */
   virtual Mantid::Geometry::IPeak *
   createPeak(const Mantid::Kernel::V3D &QLabFrame,
-             boost::optional<double> detectorDistance) const = 0;
+             boost::optional<double> detectorDistance = boost::none) const = 0;
+
+  //---------------------------------------------------------------------------------------------
+  /** Create an instance of a Peak
+   * @param position :: enter of the peak in the specified frame
+   * @param frame :: the coordinate frame that the position is specified in.
+   * @return a pointer to a new Peak object.
+   */
+  virtual std::unique_ptr<Mantid::Geometry::IPeak>
+  createPeak(const Mantid::Kernel::V3D &position,
+             const Mantid::Kernel::SpecialCoordinateSystem &frame) const = 0;
 
   /**
    * Create an instance of a peak using a V3D
@@ -169,6 +175,6 @@ protected:
 private:
   IPeaksWorkspace *doClone() const override = 0;
 };
-}
-}
+} // namespace API
+} // namespace Mantid
 #endif

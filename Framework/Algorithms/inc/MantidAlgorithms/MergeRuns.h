@@ -1,19 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_MERGERUNS_H_
 #define MANTID_ALGORITHMS_MERGERUNS_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
-#include <list>
-#include <vector>
-#include <boost/shared_ptr.hpp>
-#include <MantidAPI/MatrixWorkspace.h>
 #include "MantidAPI/MultiPeriodGroupAlgorithm.h"
+#include "MantidAPI/WorkspaceHistory.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/System.h"
-#include <boost/shared_ptr.hpp>
-#include <list>
-#include <vector>
+#include <MantidAPI/MatrixWorkspace.h>
+
+#include <boost/optional.hpp>
 
 namespace Mantid {
 namespace API {
@@ -46,28 +47,19 @@ namespace Algorithms {
 
     @author Russell Taylor, Tessella Support Services plc
     @date 22/09/2008
-
-    Copyright &copy; 2008-9 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-   National Laboratory & European Spallation Source
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
+
+namespace MergeRunsParameter {
+/// MergeRuns parameter names of the paramter file for sample log merging
+static const std::string SUM_MERGE = "sample_logs_sum";
+static const std::string TIME_SERIES_MERGE = "sample_logs_time_series";
+static const std::string LIST_MERGE = "sample_logs_list";
+static const std::string WARN_MERGE = "sample_logs_warn";
+static const std::string WARN_MERGE_TOLERANCES = "sample_logs_warn_tolerances";
+static const std::string FAIL_MERGE = "sample_logs_fail";
+static const std::string FAIL_MERGE_TOLERANCES = "sample_logs_fail_tolerances";
+} // namespace MergeRunsParameter
+
 class DLLExport MergeRuns : public API::MultiPeriodGroupAlgorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
@@ -80,6 +72,9 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"ConjoinWorkspaces"};
+  }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Transforms\\Merging"; }
   // Overriden MultiPeriodGroupAlgorithm method.
@@ -95,17 +90,15 @@ private:
   void init() override;
   void exec() override;
   void execEvent();
+  void execHistogram(const std::vector<std::string> &inputs);
   void buildAdditionTables();
   // Overriden MultiPeriodGroupAlgorithm method.
   std::string fetchInputPropertyName() const override;
-  /// test the compatibility of the given workspace with others
-  void testCompatibility(API::MatrixWorkspace_const_sptr ws,
-                         const std::string &xUnitID, const std::string &YUnit,
-                         const bool dist, const std::string instrument) const;
+
   /// An addition table is a list of pairs: First int = workspace index in the
   /// EW being added, Second int = workspace index to which it will be added in
   /// the OUTPUT EW. -1 if it should add a new entry at the end.
-  typedef std::vector<std::pair<int, int>> AdditionTable;
+  using AdditionTable = std::vector<std::pair<int, int>>;
   /// Copy the history from the input workspaces to the output workspaces
   template <typename Container>
   void copyHistoryFromInputWorkspaces(const Container &workspaces) {
@@ -132,25 +125,27 @@ private:
 
   // Methods called by exec()
   using Mantid::API::Algorithm::validateInputs;
-  std::list<API::MatrixWorkspace_sptr>
-  validateInputs(const std::vector<std::string> &inputWorkspaces);
   bool validateInputsForEventWorkspaces(
       const std::vector<std::string> &inputWorkspaces);
-  void calculateRebinParams(const API::MatrixWorkspace_const_sptr &ws1,
-                            const API::MatrixWorkspace_const_sptr &ws2,
-                            std::vector<double> &params) const;
-  void noOverlapParams(const HistogramData::HistogramX &X1,
-                       const HistogramData::HistogramX &X2,
-                       std::vector<double> &params) const;
-  void intersectionParams(const HistogramData::HistogramX &X1, int64_t &i,
-                          const HistogramData::HistogramX &X2,
-                          std::vector<double> &params) const;
-  void inclusionParams(const HistogramData::HistogramX &X1, int64_t &i,
-                       const HistogramData::HistogramX &X2,
-                       std::vector<double> &params) const;
+  boost::optional<std::vector<double>> checkRebinning();
+  static std::vector<double>
+  calculateRebinParams(const std::vector<double> &bins1,
+                       const std::vector<double> &bins2);
+  static void noOverlapParams(const HistogramData::HistogramX &X1,
+                              const HistogramData::HistogramX &X2,
+                              std::vector<double> &params);
+  static void intersectionParams(const HistogramData::HistogramX &X1, size_t &i,
+                                 const HistogramData::HistogramX &X2,
+                                 std::vector<double> &params);
+  static void inclusionParams(const HistogramData::HistogramX &X1, size_t &i,
+                              const HistogramData::HistogramX &X2,
+                              std::vector<double> &params);
   API::MatrixWorkspace_sptr
   rebinInput(const API::MatrixWorkspace_sptr &workspace,
              const std::vector<double> &params);
+  API::MatrixWorkspace_sptr
+  buildScanningOutputWorkspace(const API::MatrixWorkspace_sptr &outWS,
+                               const API::MatrixWorkspace_sptr &addee);
   /// Progress reporting
   std::unique_ptr<API::Progress> m_progress;
 
@@ -162,9 +157,14 @@ private:
   std::vector<AdditionTable> m_tables;
   /// Total number of histograms in the output workspace
   size_t m_outputSize = 0;
+
+  std::vector<SpectrumDefinition>
+  buildScanIntervals(const std::vector<SpectrumDefinition> &addeeSpecDefs,
+                     const Geometry::DetectorInfo &addeeDetInfo,
+                     const Geometry::DetectorInfo &newOutDetInfo);
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /* MANTID_ALGORITHMS_MERGERUNS_H_ */

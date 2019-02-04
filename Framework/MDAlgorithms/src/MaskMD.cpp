@@ -1,6 +1,12 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/MaskMD.h"
-#include "MantidGeometry/MDGeometry/MDBoxImplicitFunction.h"
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidGeometry/MDGeometry/MDBoxImplicitFunction.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include <algorithm>
@@ -28,7 +34,7 @@ std::vector<std::string> parseDimensionNames(const std::string &names_string) {
   // unless they contain square brackets (so that it only matches inner pairs)
   // The second part matches anything that doesn't contain a comma
   // NB, the order of the two parts matters
-  regex expression("\\[([^\\[]*)\\]|[^,]+");
+  regex expression(R"(\[([^\[]*)\]|[^,]+)");
 
   boost::sregex_token_iterator iter(names_string.begin(), names_string.end(),
                                     expression, 0);
@@ -116,7 +122,7 @@ size_t tryFetchDimensionIndex(Mantid::API::IMDWorkspace_sptr ws,
   size_t dimWorkspaceIndex;
   try {
     dimWorkspaceIndex = ws->getDimensionIndexById(candidateNameOrId);
-  } catch (std::runtime_error) {
+  } catch (const std::runtime_error &) {
     // this will throw if the name is unknown.
     dimWorkspaceIndex = ws->getDimensionIndexByName(candidateNameOrId);
   }
@@ -213,7 +219,7 @@ std::map<std::string, std::string> MaskMD::validateInputs() {
   for (const auto &dimension_name : dimensions) {
     try {
       tryFetchDimensionIndex(ws, dimension_name);
-    } catch (std::runtime_error) {
+    } catch (const std::runtime_error &) {
       messageStream << "Dimension '" << dimension_name << "' not found. ";
     }
   }
@@ -258,5 +264,5 @@ std::map<std::string, std::string> MaskMD::validateInputs() {
   return validation_output;
 }
 
-} // namespace Mantid
 } // namespace MDAlgorithms
+} // namespace Mantid

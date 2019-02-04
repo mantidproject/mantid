@@ -1,23 +1,29 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadMask.h"
-#include "MantidKernel/System.h"
-#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FileFinder.h"
-#include "MantidKernel/MandatoryValidator.h"
-#include "MantidKernel/ListValidator.h"
-#include "MantidKernel/Exception.h"
-#include "MantidKernel/EnabledWhenProperty.h"
-#include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidDataObjects/MaskWorkspace.h"
-#include "MantidKernel/Strings.h"
-#include "MantidGeometry/Instrument.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/IDTypes.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/Exception.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/OptionalBool.h"
+#include "MantidKernel/Strings.h"
+#include "MantidKernel/System.h"
 
 #include <fstream>
-#include <sstream>
 #include <map>
+#include <sstream>
 
-#include <Poco/DOM/Document.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/NodeFilter.h>
@@ -28,12 +34,10 @@
 #include <boost/algorithm/string.hpp>
 
 using Poco::XML::DOMParser;
-using Poco::XML::Document;
-using Poco::XML::Element;
 using Poco::XML::Node;
-using Poco::XML::NodeList;
-using Poco::XML::NodeIterator;
 using Poco::XML::NodeFilter;
+using Poco::XML::NodeIterator;
+using Poco::XML::NodeList;
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -43,16 +47,16 @@ namespace {
 // service routines
 //-------------------------------------------------------------------------------------------
 /** Convert ranged vectors to single-valued vector
-* @param singles -- input vector of single numbers to copy to result without
-*                   changes.
-* @param ranges  -- input vector of data ranges -- pairs of min-max values,
-*                   expanded to result as numbers from min to max
-*                   inclusively, with step 1
-* @param tot_singles -- on input contains range of single values already
-*                   copied into the result by previous call to the routine,
-*                   on output, all singles and expanded pairs
-*                   from the input are added to it.
-*/
+ * @param singles -- input vector of single numbers to copy to result without
+ *                   changes.
+ * @param ranges  -- input vector of data ranges -- pairs of min-max values,
+ *                   expanded to result as numbers from min to max
+ *                   inclusively, with step 1
+ * @param tot_singles -- on input contains range of single values already
+ *                   copied into the result by previous call to the routine,
+ *                   on output, all singles and expanded pairs
+ *                   from the input are added to it.
+ */
 template <typename T>
 void convertToVector(const std::vector<T> &singles,
                      const std::vector<T> &ranges,
@@ -77,13 +81,13 @@ void convertToVector(const std::vector<T> &singles,
 }
 
 /** Parse index range text to singles and pairs
-* Example: 3,4,9-10,33
-*
-* @param inputstr -- input string to process in the format as above
-* @param singles -- vector of objects, defined as singles
-* @param pairs   -- vector of objects, defined as pairs, in the form min,max
-*                   value
-*/
+ * Example: 3,4,9-10,33
+ *
+ * @param inputstr -- input string to process in the format as above
+ * @param singles -- vector of objects, defined as singles
+ * @param pairs   -- vector of objects, defined as pairs, in the form min,max
+ *                   value
+ */
 template <typename T>
 void parseRangeText(const std::string &inputstr, std::vector<T> &singles,
                     std::vector<T> &pairs) {
@@ -96,7 +100,7 @@ void parseRangeText(const std::string &inputstr, std::vector<T> &singles,
     // a) Find '-':
     boost::trim(rawstring);
     bool containDash(true);
-    if (rawstring.find_first_of("-") == std::string::npos) {
+    if (rawstring.find_first_of('-') == std::string::npos) {
       containDash = false;
     }
 
@@ -129,13 +133,13 @@ void parseRangeText(const std::string &inputstr, std::vector<T> &singles,
 }
 
 /*
-* Parse a line in an ISIS mask file string to vector
-* Combination of 5 types of format for unit
-* (1) a (2) a-b (3) a - b (4) a- b (5) a -b
-* separated by space(s)
-* @param  ins    -- input string in ISIS ASCII format
-* @return ranges -- vector of a,b pairs converted from input
-*/
+ * Parse a line in an ISIS mask file string to vector
+ * Combination of 5 types of format for unit
+ * (1) a (2) a-b (3) a - b (4) a- b (5) a -b
+ * separated by space(s)
+ * @param  ins    -- input string in ISIS ASCII format
+ * @return ranges -- vector of a,b pairs converted from input
+ */
 void parseISISStringToVector(const std::string &ins,
                              std::vector<Mantid::specnum_t> &ranges) {
   // 1. Split by space
@@ -156,7 +160,7 @@ void parseISISStringToVector(const std::string &ins,
     vector<string> temps;
     boost::split(temps, splitstrings[index], boost::is_any_of("-"),
                  boost::token_compress_on);
-    if (splitstrings[index].compare("-") == 0 || temps.size() == 1) {
+    if (splitstrings[index] == "-" || temps.size() == 1) {
       // Nothing to split
       index++;
     } else if (temps.size() == 2) {
@@ -164,7 +168,7 @@ void parseISISStringToVector(const std::string &ins,
       temps.insert(temps.begin() + 1, "-");
       splitstrings.erase(splitstrings.begin() + index);
       for (size_t ic = 0; ic < 3; ic++) {
-        if (temps[ic].size() > 0) {
+        if (!temps[ic].empty()) {
           splitstrings.insert(splitstrings.begin() + index, temps[ic]);
           index++;
         }
@@ -189,8 +193,7 @@ void parseISISStringToVector(const std::string &ins,
         boost::lexical_cast<Mantid::specnum_t>(splitstrings[index]));
 
     // ii)  push the ending vector
-    if (index == splitstrings.size() - 1 ||
-        splitstrings[index + 1].compare("-") != 0) {
+    if (index == splitstrings.size() - 1 || splitstrings[index + 1] != "-") {
       // the next one is not '-'
       ranges.push_back(
           boost::lexical_cast<Mantid::specnum_t>(splitstrings[index]));
@@ -244,12 +247,12 @@ void loadISISMaskFile(const std::string &isisfilename,
 }
 
 /** Parse bank IDs (string name)
-* Sample:            bank2
-* @param valuetext:  must be bank name
-* @param tomask:     if true, mask, if not unmask
-* @param toMask:     vector of string containing component names for masking
-* @param toUnmask    vector of strings containing component names for unmasking
-*/
+ * Sample:            bank2
+ * @param valuetext:  must be bank name
+ * @param tomask:     if true, mask, if not unmask
+ * @param toMask:     vector of string containing component names for masking
+ * @param toUnmask    vector of strings containing component names for unmasking
+ */
 void parseComponent(const std::string &valuetext, bool tomask,
                     std::vector<std::string> &toMask,
                     std::vector<std::string> &toUnmask) {
@@ -261,35 +264,12 @@ void parseComponent(const std::string &valuetext, bool tomask,
     toUnmask.push_back(valuetext);
   }
 }
-}
+} // namespace
 
 namespace Mantid {
 namespace DataHandling {
 
 DECLARE_ALGORITHM(LoadMask)
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-LoadMask::LoadMask()
-    : m_maskWS(), m_instrumentPropValue(""), m_sourceMapWS(), m_pDoc(nullptr),
-      m_pRootElem(nullptr), m_defaultToUse(true), m_IDF_provided(false) {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-LoadMask::~LoadMask() {
-  // note Poco::XML::Document and Poco::XML::Element declare their constructors
-  // as protected
-  if (m_pDoc)
-    m_pDoc->release();
-  // note that m_pRootElem does not need a release(), and that can
-  // actually cause a double free corruption, as
-  // Poco::DOM::Document::documentElement() does not require a
-  // release(). So just to be explicit that they're gone:
-  m_pDoc = nullptr;
-  m_pRootElem = nullptr;
-}
 
 /// Initialise the properties
 void LoadMask::init() {
@@ -320,8 +300,10 @@ void LoadMask::init() {
 
 //----------------------------------------------------------------------------------------------
 /** Main execution body of this algorithm
-  */
+ */
 void LoadMask::exec() {
+  reset();
+
   // 1. Load Instrument and create output Mask workspace
   const std::string instrumentname = getProperty("Instrument");
   m_sourceMapWS = getProperty("RefWorkspace");
@@ -334,7 +316,7 @@ void LoadMask::exec() {
   if (m_sourceMapWS) { // check if the instruments are compatible
     auto t_inst_name = m_maskWS->getInstrument()->getName();
     auto r_inst_name = m_sourceMapWS->getInstrument()->getName();
-    if (t_inst_name.compare(r_inst_name) != 0) {
+    if (t_inst_name != r_inst_name) {
       throw std::invalid_argument("If reference workspace is provided, it has "
                                   "to have instrument with the same name as "
                                   "specified by 'Instrument' property");
@@ -485,9 +467,9 @@ void LoadMask::componentToDetectors(
 
 //----------------------------------------------------------------------------------------------
 /** Convert bank to detectors
-* This routine has never been used. Dead code.
-* @param   singlebanks -- vector of string containing bank names
-* @param  detectors   -- vector of detector-id-s belonging to these banks
+ * This routine has never been used. Dead code.
+ * @param   singlebanks -- vector of string containing bank names
+ * @param  detectors   -- vector of detector-id-s belonging to these banks
  */
 void LoadMask::bankToDetectors(const std::vector<std::string> &singlebanks,
                                std::vector<detid_t> &detectors) {
@@ -555,9 +537,7 @@ void LoadMask::processMaskOnWorkspaceIndex(bool mask,
   // 3. Set mask
   auto spec0 = maskedSpecID[0];
   auto prev_masks = spec0;
-  for (size_t i = 0; i < maskedSpecID.size(); i++) {
-
-    auto spec2mask = maskedSpecID[i];
+  for (int spec2mask : maskedSpecID) {
 
     s2iter = s2imap.find(spec2mask);
     if (s2iter == s2imap.end()) {
@@ -591,13 +571,13 @@ void LoadMask::processMaskOnWorkspaceIndex(bool mask,
 
 //----------------------------------------------------------------------------------------------
 /** Initalize Poco XML Parser
-* @param filename  -- name of the xml file to process.
+ * @param filename  -- name of the xml file to process.
  */
 void LoadMask::initializeXMLParser(const std::string &filename) {
   // const std::string instName
-  std::cout << "Load File " << filename << '\n';
+  g_log.information() << "Load File " << filename << '\n';
   const std::string xmlText = Kernel::Strings::loadFile(filename);
-  std::cout << "Successfully Load XML File \n";
+  g_log.information("Successfully Load XML File");
 
   // Set up the DOM parser and parse xml file
   DOMParser pParser;
@@ -661,12 +641,12 @@ void LoadMask::parseXML() {
   while (pNode) {
     const Poco::XML::XMLString value = pNode->innerText();
 
-    if (pNode->nodeName().compare("group") == 0) {
+    if (pNode->nodeName() == "group") {
       // Node "group"
       ingroup = true;
       tomask = true;
 
-    } else if (pNode->nodeName().compare("component") == 0) {
+    } else if (pNode->nodeName() == "component") {
       // Node "component"
       if (ingroup) {
         parseComponent(value, tomask, m_maskCompIdSingle, m_uMaskCompIdSingle);
@@ -674,7 +654,7 @@ void LoadMask::parseXML() {
         g_log.error() << "XML File hierarchical (component) error!\n";
       }
 
-    } else if (pNode->nodeName().compare("ids") == 0) {
+    } else if (pNode->nodeName() == "ids") {
       // Node "ids"
       if (ingroup) {
         parseRangeText(value, singleSp, pairSp);
@@ -683,7 +663,7 @@ void LoadMask::parseXML() {
                       << "  Inner Text = " << pNode->innerText() << '\n';
       }
 
-    } else if (pNode->nodeName().compare("detids") == 0) {
+    } else if (pNode->nodeName() == "detids") {
       // Node "detids"
       if (ingroup) {
         if (tomask) {
@@ -695,7 +675,7 @@ void LoadMask::parseXML() {
         g_log.error() << "XML File (detids) hierarchical error!\n";
       }
 
-    } else if (pNode->nodeName().compare("detector-masking") == 0) {
+    } else if (pNode->nodeName() == "detector-masking") {
       // Node "detector-masking".  Check default value
       m_defaultToUse = true;
     } // END-IF-ELSE: pNode->nodeName()
@@ -711,13 +691,13 @@ void LoadMask::parseXML() {
 }
 
 /* Convert spectra mask into det-id mask using workspace as source of
-*spectra-detector maps
-*
-* @param sourceWS       -- the workspace containing source spectra-detector map
-*                          to use on masks
-* @param maskedSpecID   -- vector of spectra id to mask
-* @param singleDetIds   -- output vector of detector ids to mask
-*/
+ *spectra-detector maps
+ *
+ * @param sourceWS       -- the workspace containing source spectra-detector map
+ *                          to use on masks
+ * @param maskedSpecID   -- vector of spectra id to mask
+ * @param singleDetIds   -- output vector of detector ids to mask
+ */
 void LoadMask::convertSpMasksToDetIDs(const API::MatrixWorkspace &sourceWS,
                                       const std::vector<int32_t> &maskedSpecID,
                                       std::vector<int32_t> &singleDetIds) {
@@ -727,28 +707,27 @@ void LoadMask::convertSpMasksToDetIDs(const API::MatrixWorkspace &sourceWS,
       sourceWS.getDetectorIDToWorkspaceIndexMap(false);
 
   std::multimap<size_t, Mantid::detid_t> spectr2index_map;
-  for (auto it = sourceDetMap.begin(); it != sourceDetMap.end(); it++) {
+  for (auto &it : sourceDetMap) {
     spectr2index_map.insert(
-        std::pair<size_t, Mantid::detid_t>(it->second, it->first));
+        std::pair<size_t, Mantid::detid_t>(it.second, it.first));
   }
   spec2index_map new_map;
-  for (size_t i = 0; i < maskedSpecID.size(); i++) {
+  for (int i : maskedSpecID) {
     // find spectra number from spectra ID for the source workspace
-    const auto itSpec = s2imap.find(maskedSpecID[i]);
+    const auto itSpec = s2imap.find(i);
     if (itSpec == s2imap.end()) {
-      throw std::runtime_error(
-          "Can not find spectra with ID: " +
-          boost::lexical_cast<std::string>(maskedSpecID[i]) +
-          " in the workspace" + sourceWS.getName());
+      throw std::runtime_error("Can not find spectra with ID: " +
+                               boost::lexical_cast<std::string>(i) +
+                               " in the workspace" + sourceWS.getName());
     }
     size_t specN = itSpec->second;
 
     // find detector range related to this spectra id in the source workspace
     const auto source_range = spectr2index_map.equal_range(specN);
     if (source_range.first == spectr2index_map.end()) {
-      throw std::runtime_error("Can not find spectra N: " +
-                               boost::lexical_cast<std::string>(specN) +
-                               " in the workspace" + sourceWS.getName());
+      throw std::runtime_error(
+          "Can not find spectra N: " + boost::lexical_cast<std::string>(specN) +
+          " in the workspace" + sourceWS.getName());
     }
     // add detectors to the masked det-id list
     for (auto it = source_range.first; it != source_range.second; ++it) {
@@ -810,22 +789,25 @@ std::map<std::string, std::string> LoadMask::validateInputs() {
     boost::trim(InstrName);
     boost::algorithm::to_lower(InstrName);
     size_t len = InstrName.size();
+    /// input property contains name of instrument definition file rather than
+    /// instrument name itself
+    bool IDF_provided{false};
     // Check if the name ends up with .xml which means that idf file name
     // is provided rather then an instrument name.
     if (len > 4) {
       if (InstrName.compare(len - 4, len, ".xml") == 0) {
-        m_IDF_provided = true;
+        IDF_provided = true;
       } else {
-        m_IDF_provided = false;
+        IDF_provided = false;
       }
     } else {
-      m_IDF_provided = false;
+      IDF_provided = false;
     }
     try {
       auto inst = inputWS->getInstrument();
       std::string Name = inst->getName();
       boost::algorithm::to_lower(Name);
-      if (Name != InstrName && !m_IDF_provided) {
+      if (Name != InstrName && !IDF_provided) {
         result["RefWorkspace"] =
             "If both reference workspace and instrument name are defined, "
             "workspace has to have the instrument with the same name\n"
@@ -841,5 +823,14 @@ std::map<std::string, std::string> LoadMask::validateInputs() {
   return result;
 }
 
-} // namespace Mantid
+void LoadMask::reset() {
+  // LoadMask instance may be reused, need to clear buffers.
+  m_maskDetID.clear();
+  m_unMaskDetID.clear();
+  m_maskSpecID.clear();
+  m_maskCompIdSingle.clear();
+  m_uMaskCompIdSingle.clear();
+}
+
 } // namespace DataHandling
+} // namespace Mantid

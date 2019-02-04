@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_PHYSICALCONSTANTS_H_
 #define MANTID_PHYSICALCONSTANTS_H_
 
@@ -13,27 +19,6 @@ namespace Mantid {
 
 /** A namespace containing physical constants that are required by algorithms
    and unit routines.
-
-    Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory, NScD Oak
-   Ridge National Laboratory & European Spallation Source
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>.
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 namespace PhysicalConstants {
 /** Avagodro constant in mol<SUP>-1</SUP>. Taken from
@@ -69,6 +54,10 @@ static constexpr double meV = 1.602176487e-22;
 /** 1 meV in wavenumber (cm<SUP>-1</SUP>). Taken from
  * <http://physics.nist.gov/cuu/Constants> on 02/04/2008. */
 static constexpr double meVtoWavenumber = 8.06554465;
+
+/** 1 meV in frequency (GHz). Division of energy by Plank's constant. Taken from
+ * <http://physics.nist.gov/cuu/Constants> on 03/11/2017. */
+static constexpr double meVtoFrequency = 0.2417989262;
 
 /** 1 meV in Kelvin. Taken from <http://physics.nist.gov/cuu/Constants> on
  * 09/09/2011. */

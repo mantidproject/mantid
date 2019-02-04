@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -22,11 +22,11 @@ Usage
     # Find the peaks in a 2D workspace.
     peaks_ws = FindSXPeaks(ws)
 
-    print "The number of peaks before adding a peak is: " + str(peaks_ws.getNumberPeaks())
+    print("The number of peaks before adding a peak is: {}".format(peaks_ws.getNumberPeaks()))
     # Add a peak to the peaks workspace.
     AddPeak(PeaksWorkspace=peaks_ws,RunWorkspace=ws,DetectorID=101,TOF=3819,Height=10.3,BinCount=2)
 
-    print "The number of peaks after adding a peak is: " + str(peaks_ws.getNumberPeaks())
+    print("The number of peaks after adding a peak is: {}".format(peaks_ws.getNumberPeaks()))
 
 Output:
 

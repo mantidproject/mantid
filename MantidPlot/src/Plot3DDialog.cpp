@@ -1,24 +1,13 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2004 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 /***************************************************************************
     File                 : Plot3DDialog.cpp
     Project              : QtiPlot
     --------------------------------------------------------------------
-    Copyright            : (C) 2004-2007 by Ion Vasilief
-    Email (use @ for *)  : ion_vasilief*yahoo.fr
-    Description          : Surface plot options dialog
-
- ***************************************************************************/
-
-/***************************************************************************
- *                                                                         *
- *  This program is free software; you can redistribute it and/or modify   *
- *  it under the terms of the GNU General Public License as published by   *
- *  the Free Software Foundation; either version 2 of the License, or      *
- *  (at your option) any later version.                                    *
- *                                                                         *
- *  This program is distributed in the hope that it will be useful,        *
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
- *  GNU General Public License for more details.                           *
  *                                                                         *
  *   You should have received a copy of the GNU General Public License     *
  *   along with this program; if not, write to the Free Software           *
@@ -27,34 +16,33 @@
  *                                                                         *
  ***************************************************************************/
 #include "Plot3DDialog.h"
-#include "TextDialog.h"
-#include "MyParser.h"
-#include "SymbolDialog.h"
 #include "ApplicationWindow.h"
 #include "ColorButton.h"
+#include "MyParser.h"
+#include "SymbolDialog.h"
+#include "TextDialog.h"
 #include "TextFormatButtons.h"
 
-#include <QListWidget>
-#include <QLineEdit>
-#include <QTextEdit>
-#include <QLayout>
-#include <QSpinBox>
-#include <QDoubleSpinBox>
-#include <QPushButton>
-#include <QLabel>
-#include <QStackedWidget>
-#include <QWidget>
-#include <QMessageBox>
-#include <QComboBox>
-#include <QWidgetList>
-#include <QFileDialog>
-#include <QGroupBox>
-#include <QFontDialog>
 #include <QApplication>
+#include <QComboBox>
+#include <QDoubleSpinBox>
+#include <QFontDialog>
+#include <QGroupBox>
+#include <QLabel>
+#include <QLayout>
+#include <QLineEdit>
+#include <QListWidget>
+#include <QMessageBox>
+#include <QPushButton>
+#include <QSpinBox>
+#include <QStackedWidget>
+#include <QTextEdit>
+#include <QWidget>
+#include <QWidgetList>
 
-#include <qwt3d_color.h>
 #include "MantidKernel/ConfigService.h"
-#include "MantidQtAPI/MantidColorMap.h"
+#include "MantidQtWidgets/LegacyQwt/MantidColorMap.h"
+#include <qwt3d_color.h>
 
 using Mantid::Kernel::ConfigService;
 
@@ -63,8 +51,8 @@ Plot3DDialog::Plot3DDialog(QWidget *parent, Qt::WFlags fl)
   setObjectName("Plot3DDialog");
   setWindowTitle(tr("MantidPlot - Surface Plot Options"));
 
-  bars = 0;
-  points = 0;
+  bars = nullptr;
+  points = nullptr;
 
   QHBoxLayout *hbox = new QHBoxLayout();
   hbox->addStretch();
@@ -644,7 +632,7 @@ void Plot3DDialog::disableMeshOptions() {
 }
 
 void Plot3DDialog::pickDataColorMap() {
-  QString fileselection = MantidColorMap::loadMapDialog("", this);
+  QString fileselection = MantidColorMap::chooseColorMap("", this);
   if (!fileselection.isEmpty())
     d_plot->setDataColorMap(fileselection);
 }
@@ -770,7 +758,7 @@ bool Plot3DDialog::updatePlot() {
       parser.SetExpr(from.toAscii().constData());
       start = parser.Eval();
     } catch (mu::ParserError &e) {
-      QMessageBox::critical(0, tr("MantidPlot - Start limit error"),
+      QMessageBox::critical(nullptr, tr("MantidPlot - Start limit error"),
                             QString::fromStdString(e.GetMsg()));
       boxFrom->setFocus();
       return false;
@@ -781,7 +769,7 @@ bool Plot3DDialog::updatePlot() {
       parser.SetExpr(to.toAscii().constData());
       end = parser.Eval();
     } catch (mu::ParserError &e) {
-      QMessageBox::critical(0, tr("MantidPlot - End limit error"),
+      QMessageBox::critical(nullptr, tr("MantidPlot - End limit error"),
                             QString::fromStdString(e.GetMsg()));
       boxTo->setFocus();
       return false;

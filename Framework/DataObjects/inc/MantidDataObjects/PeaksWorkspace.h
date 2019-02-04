@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAOBJECTS_PEAKSPACE_H_
 #define MANTID_DATAOBJECTS_PEAKSPACE_H_ 1
 
@@ -15,10 +21,10 @@
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
+#include <boost/optional.hpp>
 #include <string>
 #include <utility>
 #include <vector>
-#include <boost/optional.hpp>
 
 // IsamplePosition should be IsampleOrientation
 namespace Mantid {
@@ -37,26 +43,6 @@ namespace DataObjects {
 
     @author Ruth Mikkelson, SNS ORNL
     @date 3/10/2010
-
-    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-   National Laboratory & European Spallation Source
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>
  */
 class DLLExport PeaksWorkspace : public Mantid::API::IPeaksWorkspace {
 public:
@@ -82,6 +68,11 @@ public:
     return std::unique_ptr<PeaksWorkspace>(doClone());
   }
 
+  /// Returns a default-initialized clone of the workspace
+  std::unique_ptr<PeaksWorkspace> cloneEmpty() const {
+    return std::unique_ptr<PeaksWorkspace>(doCloneEmpty());
+  }
+
   void appendFile(std::string filename, Geometry::Instrument_sptr inst);
 
   /** @return true because this type of the workspace needs custom sorting calls
@@ -93,13 +84,23 @@ public:
   int getNumberPeaks() const override;
   std::string getConvention() const override;
   void removePeak(int peakNum) override;
-  void addPeak(const Geometry::IPeak &ipeak) override;
+  void removePeaks(std::vector<int> badPeaks) override;
+  void addPeak(const Geometry::IPeak &peak) override;
+  /// Move a peak object into this peaks workspace
+  void addPeak(Peak &&peak);
+  void addPeak(const Kernel::V3D &position,
+               const Kernel::SpecialCoordinateSystem &frame) override;
   Peak &getPeak(int peakNum) override;
   const Peak &getPeak(int peakNum) const override;
 
   Geometry::IPeak *createPeak(
       const Kernel::V3D &QLabFrame,
       boost::optional<double> detectorDistance = boost::none) const override;
+
+  std::unique_ptr<Geometry::IPeak>
+  createPeak(const Kernel::V3D &Position,
+             const Kernel::SpecialCoordinateSystem &frame) const override;
+
   std::vector<std::pair<std::string, std::string>>
   peakInfo(const Kernel::V3D &qFrame, bool labCoords) const override;
 
@@ -176,6 +177,7 @@ protected:
 
 private:
   PeaksWorkspace *doClone() const override { return new PeaksWorkspace(*this); }
+  PeaksWorkspace *doCloneEmpty() const override { return new PeaksWorkspace(); }
   ITableWorkspace *
   doCloneColumns(const std::vector<std::string> &colNames) const override;
 
@@ -183,6 +185,8 @@ private:
   void initColumns();
   /// Adds a new PeakColumn of the given type
   void addPeakColumn(const std::string &name);
+  /// Create a peak from a QSample position
+  Peak *createPeakQSample(const Kernel::V3D &position) const;
 
   // ====================================== ITableWorkspace Methods
   // ==================================
@@ -274,18 +278,13 @@ private:
 
   /// Coordinates
   Kernel::SpecialCoordinateSystem m_coordSystem;
-
-  // adapter for logs() function, which create reference to this class itself
-  // and does not allow to delete the shared pointers,
-  // returned by logs() function when they go out of scope
-  API::LogManager_sptr m_logCash;
 };
 
 /// Typedef for a shared pointer to a peaks workspace.
-typedef boost::shared_ptr<PeaksWorkspace> PeaksWorkspace_sptr;
+using PeaksWorkspace_sptr = boost::shared_ptr<PeaksWorkspace>;
 
 /// Typedef for a shared pointer to a const peaks workspace.
-typedef boost::shared_ptr<const PeaksWorkspace> PeaksWorkspace_const_sptr;
-}
-}
+using PeaksWorkspace_const_sptr = boost::shared_ptr<const PeaksWorkspace>;
+} // namespace DataObjects
+} // namespace Mantid
 #endif

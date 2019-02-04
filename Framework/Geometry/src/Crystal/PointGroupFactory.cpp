@@ -1,9 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Crystal/PointGroupFactory.h"
 #include "MantidGeometry/Crystal/SpaceGroup.h"
 
+#include "MantidGeometry/Crystal/ProductOfCyclicGroups.h"
 #include "MantidKernel/LibraryManager.h"
 #include <boost/algorithm/string.hpp>
-#include "MantidGeometry/Crystal/ProductOfCyclicGroups.h"
 
 namespace Mantid {
 namespace Geometry {
@@ -39,7 +45,7 @@ PointGroup_sptr PointGroupFactoryImpl::createPointGroupFromSpaceGroup(
     }
 
     return pointGroup;
-  } catch (std::invalid_argument) {
+  } catch (const std::invalid_argument &) {
     if (spaceGroup.getCoordinateSystem() !=
         Group::CoordinateSystem::Hexagonal) {
       pointGroupSymbol.append(" r");
@@ -202,11 +208,11 @@ DECLARE_POINTGROUP("m", "x,-y,z", "Monoclinic, unique axis b")
 DECLARE_POINTGROUP("11m", "x,y,-z", "Monoclinic, unique axis c")
 DECLARE_POINTGROUP("2/m", "-x,y,-z; -x,-y,-z", "Monoclinic, unique axis b")
 DECLARE_POINTGROUP("112/m", "-x,-y,z; x,y,-z", "Monoclinic, unique axis c")
-DECLARE_POINTGROUP("222", "-x,-y,z; x,-y,-z", "Orthorombic")
-DECLARE_POINTGROUP("mm2", "-x,-y,z; -x,y,z", "Orthorombic")
-DECLARE_POINTGROUP("2mm", "x,-y,-z; x,-y,z", "Orthorombic")
-DECLARE_POINTGROUP("m2m", "-x,y,-z; x,y,-z", "Orthorombic")
-DECLARE_POINTGROUP("mmm", "-x,-y,-z; -x,-y,z; x,-y,-z", "Orthorombic")
+DECLARE_POINTGROUP("222", "-x,-y,z; x,-y,-z", "Orthorhombic")
+DECLARE_POINTGROUP("mm2", "-x,-y,z; -x,y,z", "Orthorhombic")
+DECLARE_POINTGROUP("2mm", "x,-y,-z; x,-y,z", "Orthorhombic")
+DECLARE_POINTGROUP("m2m", "-x,y,-z; x,y,-z", "Orthorhombic")
+DECLARE_POINTGROUP("mmm", "-x,-y,-z; -x,-y,z; x,-y,-z", "Orthorhombic")
 DECLARE_POINTGROUP("4", "-y,x,z", "Tetragonal")
 DECLARE_POINTGROUP("-4", "y,-x,-z", "Tetragonal")
 DECLARE_POINTGROUP("4/m", "-y,x,z; -x,-y,-z", "Tetragonal")

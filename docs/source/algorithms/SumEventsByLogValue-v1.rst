@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -70,19 +70,19 @@ Usage
 
   #all of the events should be included
   integral = Integration(wsOut)
-  print ("Events were split into %i sections based on the log 'Log2FilterBy'." % wsOut.blocksize())
+  print("Events were split into %i sections based on the log 'Log2FilterBy'." % wsOut.blocksize())
   for i in range(0,wsOut.blocksize()):
-    print (" section %i: %.2f" % (i+1,wsOut.readY(0)[i]))
-  print ("Totalling %.0f events, matching the %i events in the input workspace" % (integral.readY(0)[0],ws.getNumberEvents()))
+    print(" section %i: %.2f" % (i+1,wsOut.readY(0)[i]))
+  print("Totalling %.0f events, matching the %i events in the input workspace" % (integral.readY(0)[0],ws.getNumberEvents()))
 
 Output:
 
 .. testoutput:: Single-Spectrum
 
     Events were split into 3 sections based on the log 'Log2FilterBy'.
-     section 1: 615.00
-     section 2: 629.00
-     section 3: 656.00
+     section 1: 6...
+     section 2: 6...
+     section 3: 6...
     Totalling 1900 events, matching the 1900 events in the input workspace
 
 

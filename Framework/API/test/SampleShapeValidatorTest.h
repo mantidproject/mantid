@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_API_SAMPLESHAPEVALIDATORTEST_H_
 #define MANTID_API_SAMPLESHAPEVALIDATORTEST_H_
 
@@ -10,6 +16,7 @@
 
 #include "boost/make_shared.hpp"
 
+using namespace Mantid::Kernel;
 using Mantid::API::SampleShapeValidator;
 
 class SampleShapeValidatorTest : public CxxTest::TestSuite {
@@ -25,7 +32,7 @@ public:
     auto fakeWS = boost::make_shared<WorkspaceTester>();
     // Add a sample shape
     auto sphere = ComponentCreationHelper::createSphere(1.0, V3D(), "sphere");
-    fakeWS->mutableSample().setShape(*sphere);
+    fakeWS->mutableSample().setShape(sphere);
 
     auto sampleValidator = boost::make_shared<SampleShapeValidator>();
     TS_ASSERT_EQUALS(sampleValidator->isValid(fakeWS), "");

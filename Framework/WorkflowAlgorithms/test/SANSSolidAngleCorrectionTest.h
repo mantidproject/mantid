@@ -1,12 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef SANSSOLIDANGLECORRECTIONTEST_H_
 #define SANSSOLIDANGLECORRECTIONTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidWorkflowAlgorithms/SANSSolidAngleCorrection.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
-#include "MantidKernel/Unit.h"
 #include "MantidDataHandling/LoadSpice2D.h"
 #include "MantidDataHandling/MoveInstrumentComponent.h"
+#include "MantidKernel/Unit.h"
+#include "MantidWorkflowAlgorithms/SANSSolidAngleCorrection.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -38,8 +45,13 @@ public:
     mover.setPropertyValue("ComponentName", "detector1");
     // X = (16-192.0/2.0)*5.15/1000.0 = -0.412
     // Y = (95-192.0/2.0)*5.15/1000.0 = -0.00515
-    mover.setPropertyValue("X", "0.412");
-    mover.setPropertyValue("Y", "0.00515");
+    // mover.setPropertyValue("X", "0.412");
+    // mover.setPropertyValue("Y", "0.00515");
+
+    mover.setPropertyValue("X", "0.009425");
+    mover.setPropertyValue("Y", "0.002575");
+    mover.setPropertyValue("Z", "-0.8114");
+
     mover.execute();
 
     if (!correction.isInitialized())
@@ -83,9 +95,9 @@ public:
     // Get the coordinate of the detector pixel
     double iy = (i - nmon) % 192;
     double ix = (int)((i - nmon) / 192);
-    double r = sqrt(1.0 +
-                    5.15 * 5.15 / 6000 / 6000 * ((ix - 16.0) * (ix - 16.0) +
-                                                 (iy - 95.0) * (iy - 95.0)));
+    double r =
+        sqrt(1.0 + 5.15 * 5.15 / 6000 / 6000 *
+                       ((ix - 16.0) * (ix - 16.0) + (iy - 95.0) * (iy - 95.0)));
     double corr = r * r * r;
     double ratio =
         ws2d_out->dataY(130 + nmon)[0] / ws2d_in->dataY(130 + nmon)[0];

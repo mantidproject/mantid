@@ -1,19 +1,26 @@
-// Mantid Coding standards <http://www.mantidproject.org/Coding_Standards>
-// Main Module Header
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/Functions/InelasticDiffRotDiscreteCircle.h"
-// Mantid Headers from the same project
 #include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
-// Mantid headers from other projects
+
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/UnitConversion.h"
-// 3rd party library headers (N/A)
-// standard library headers
+#include "MantidKernel/make_unique.h"
+#include "MantidTypes/SpectrumDefinition.h"
+
 #include <cmath>
 #include <limits>
+#include <sstream>
 
 using BConstraint = Mantid::CurveFitting::Constraints::BoundaryConstraint;
 
@@ -40,9 +47,8 @@ InelasticDiffRotDiscreteCircle::InelasticDiffRotDiscreteCircle()
                          "energy in mili-eV");
   this->declareParameter("Shift", 0.0, "Shift in the centre of the peak");
 
-  this->declareAttribute("Q", API::IFunction::Attribute(EMPTY_DBL()));
-  this->declareAttribute("WorkspaceIndex", API::IFunction::Attribute(0));
   this->declareAttribute("N", API::IFunction::Attribute(3));
+  declareAttributes();
 }
 
 /**
@@ -50,17 +56,17 @@ InelasticDiffRotDiscreteCircle::InelasticDiffRotDiscreteCircle()
  */
 void InelasticDiffRotDiscreteCircle::init() {
   // Ensure positive values for Intensity, Radius, and decay
-  auto IntensityConstraint = new BConstraint(
+  auto IntensityConstraint = Kernel::make_unique<BConstraint>(
       this, "Intensity", std::numeric_limits<double>::epsilon(), true);
-  this->addConstraint(IntensityConstraint);
+  this->addConstraint(std::move(IntensityConstraint));
 
-  auto RadiusConstraint = new BConstraint(
+  auto RadiusConstraint = Kernel::make_unique<BConstraint>(
       this, "Radius", std::numeric_limits<double>::epsilon(), true);
-  this->addConstraint(RadiusConstraint);
+  this->addConstraint(std::move(RadiusConstraint));
 
-  auto DecayConstraint = new BConstraint(
+  auto DecayConstraint = Kernel::make_unique<BConstraint>(
       this, "Decay", std::numeric_limits<double>::epsilon(), true);
-  this->addConstraint(DecayConstraint);
+  this->addConstraint(std::move(DecayConstraint));
 }
 
 /**
@@ -142,27 +148,30 @@ void InelasticDiffRotDiscreteCircle::setWorkspace(
   if (!workspace)
     return;
 
-  size_t numHist = workspace->getNumberHistograms();
-  for (size_t idx = 0; idx < numHist; idx++) {
-    Mantid::Geometry::IDetector_const_sptr det;
-    try {
-      det = workspace->getDetector(idx);
-    } catch (Kernel::Exception::NotFoundError &) {
+  const auto &spectrumInfo = workspace->spectrumInfo();
+  const auto &detectorIDs = workspace->detectorInfo().detectorIDs();
+  for (size_t idx = 0; idx < spectrumInfo.size(); idx++) {
+    if (!spectrumInfo.hasDetectors(idx)) {
       m_qValueCache.clear();
-      g_log.information("Cannot populate Q values from workspace");
+      g_log.information(
+          "Cannot populate Q values from workspace - no detectors set.");
       break;
     }
 
-    try {
-      double efixed = workspace->getEFixed(det);
-      double usignTheta = 0.5 * workspace->detectorTwoTheta(*det);
+    const auto detectorIndex = spectrumInfo.spectrumDefinition(idx)[0].first;
 
-      double q = Mantid::Kernel::UnitConversion::run(usignTheta, efixed);
+    try {
+      double efixed = workspace->getEFixed(detectorIDs[detectorIndex]);
+      double usingTheta = 0.5 * spectrumInfo.twoTheta(idx);
+
+      double q =
+          Mantid::Kernel::UnitConversion::convertToElasticQ(usingTheta, efixed);
 
       m_qValueCache.push_back(q);
     } catch (std::runtime_error &) {
       m_qValueCache.clear();
-      g_log.information("Cannot populate Q values from workspace");
+      g_log.information("Cannot populate Q values from workspace - could not "
+                        "find EFixed value.");
       return;
     }
   }

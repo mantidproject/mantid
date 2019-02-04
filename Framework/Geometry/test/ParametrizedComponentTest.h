@@ -1,20 +1,26 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_TESTPARCOMPONENT__
 #define MANTID_TESTPARCOMPONENT__
 
-#include <cxxtest/TestSuite.h>
-#include <cmath>
-#include <string>
-#include <boost/make_shared.hpp>
-#include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/IComponent.h"
-#include "MantidKernel/V3D.h"
-#include "MantidKernel/Quat.h"
+#include "MantidGeometry/Instrument/Component.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Quat.h"
+#include "MantidKernel/V3D.h"
+#include <boost/make_shared.hpp>
+#include <cmath>
+#include <cxxtest/TestSuite.h>
+#include <string>
 
 using namespace Mantid;
 using namespace Mantid::Geometry;
-using Mantid::Kernel::V3D;
 using Mantid::Kernel::Quat;
+using Mantid::Kernel::V3D;
 
 /** This test used to refer to ParametrizedComponent, a
  * class that has (as of Nov 2010) been folded back into
@@ -30,7 +36,7 @@ public:
   static void destroySuite(ParametrizedComponentTest *suite) { delete suite; }
 
   ParametrizedComponentTest()
-      : m_parentComp(NULL), m_childOneComp(NULL), m_childTwoComp(NULL),
+      : m_parentComp(nullptr), m_childOneComp(nullptr), m_childTwoComp(nullptr),
         m_paramMap(), m_strName("StringParam"), m_strValue("test-string"),
         m_dblName("DblParam"), m_dblValue(10.0), m_posName("PosParam"),
         m_posValue(1, 1, 1), m_quatName("QuatParam"), m_quatValue(2, 3, 4, 5) {}
@@ -238,11 +244,11 @@ private:
 
   void cleanUpComponent() {
     delete m_parentComp;
-    m_parentComp = NULL;
+    m_parentComp = nullptr;
     delete m_childOneComp;
-    m_childOneComp = NULL;
+    m_childOneComp = nullptr;
     delete m_childTwoComp;
-    m_childTwoComp = NULL;
+    m_childTwoComp = nullptr;
     // delete m_paramMap;    m_paramMap = NULL;
   }
 

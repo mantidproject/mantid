@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -42,35 +42,35 @@ Usage
    myWs=CreateSampleWorkspace()
    mon_ws = CreateSampleWorkspace() 
    myWs.setMonitorWorkspace(mon_ws)  
-   print "*********************************************************************"   
-   print "{0:20}|{1:>20}|{2:>20}|".format("Existing WS names: ",myWs.name(),mon_ws.name())
+   print("*********************************************************************")
+   print("{0:20}|{1:>20}|{2:>20}|".format("Existing WS names: ",myWs.name(),mon_ws.name()))
    obj_inADS = AnalysisDataService.getObjectNames()
    obj_inADS.sort()
-   print "{0:20}|{1:>6}| With Names: |{2:>20}|{3:>20}|".format("Exist in ADS: ",len(obj_inADS),obj_inADS[0],obj_inADS[1])
-   #
+   print("{0:20}|{1:>6}| With Names: |{2:>20}|{3:>20}|".format("Exist in ADS: ",len(obj_inADS),obj_inADS[0],obj_inADS[1]))
+   
    NameA = RenameWorkspace(myWs)
-   #
-   print "***** After simple rename:"
-   print "{0:20}|{1:>20}|{2:>20}|".format("Existing WS names: ",NameA.name(),mon_ws.name())
+   
+   print("***** After simple rename:")
+   print("{0:20}|{1:>20}|{2:>20}|".format("Existing WS names: ",NameA.name(),mon_ws.name()))
    obj_inADS = AnalysisDataService.getObjectNames()
    obj_inADS.sort()
-   print "{0:20}|{1:>6}| With Names: |{2:>20}|{3:>20}|".format("Exist in ADS: ",len(obj_inADS),obj_inADS[0],obj_inADS[1])  
+   print("{0:20}|{1:>6}| With Names: |{2:>20}|{3:>20}|".format("Exist in ADS: ",len(obj_inADS),obj_inADS[0],obj_inADS[1]))
 
-   print "Old pointer to myWs refers to workspace with new name: ",myWs.name()
-   print "*********************************************************************"
-   print "***** After renaming workspace and monitors workspace together:"
-   #
+   print("Old pointer to myWs refers to workspace with new name:  {}".format(myWs.name()))
+   print("*********************************************************************")
+   print("***** After renaming workspace and monitors workspace together:")
+   
    NameB = RenameWorkspace(myWs,RenameMonitors=True)
-   #
-   print "{0:20}|{1:>20}|{2:>20}|".format("Existing WS names: ",NameB.name(),mon_ws.name())   
+   
+   print("{0:20}|{1:>20}|{2:>20}|".format("Existing WS names: ",NameB.name(),mon_ws.name()))
    obj_inADS = AnalysisDataService.getObjectNames()
    obj_inADS.sort()
-   print "{0:20}|{1:>6}| With Names: |{2:>20}|{3:>20}|".format("Exist in ADS: ",len(obj_inADS),obj_inADS[0],obj_inADS[1])
-   # 
+   print("{0:20}|{1:>6}| With Names: |{2:>20}|{3:>20}|".format("Exist in ADS: ",len(obj_inADS),obj_inADS[0],obj_inADS[1]))
+    
    mon_ws1 = NameB.getMonitorWorkspace()
-   print "The name of the monitor workspace attached to workspace:{0:>6}| Is:  {1:>10}|".\
-            format(NameB.name(),mon_ws1.name())
-   print "*********************************************************************"  
+   print("The name of the monitor workspace attached to workspace:{0:>6}| Is:  {1:>10}|".
+            format(NameB.name(),mon_ws1.name()))
+   print("*********************************************************************")
              
 Output:
 
@@ -104,16 +104,16 @@ Output:
    CreateWorkspace([0], [0], OutputWorkspace="wsNew")
        
    #This will fail telling us that 'wsOld' already exists
-   print 'Trying to rename with OverwriteExisting set to false.'
+   print('Trying to rename with OverwriteExisting set to false.')
    try:
        RenameWorkspace(InputWorkspace="wsNew", OutputWorkspace="wsOld", OverwriteExisting=False)
    except RuntimeError:
-       print 'RuntimeError: The workspace wsOld already exists'
+       print('RuntimeError: The workspace wsOld already exists')
        
    #This will succeed in renaming and 'wsOld' will be replaced with 'wsNew'
-   print 'Trying to rename with OverwriteExisting set to true.'
+   print('Trying to rename with OverwriteExisting set to true.')
    RenameWorkspace(InputWorkspace="wsNew", OutputWorkspace="wsOld", OverwriteExisting=True) 
-   print 'Succeeded'
+   print('Succeeded')
    
 Output:
 

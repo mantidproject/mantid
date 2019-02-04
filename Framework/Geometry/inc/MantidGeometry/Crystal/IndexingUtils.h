@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 /* File: Indexing_Utils.h */
 
 #ifndef MANTID_GEOMETRY_INDEXING_UTILS_H_
@@ -6,10 +12,11 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/DllConfig.h"
-#include "MantidKernel/V3D.h"
-#include "MantidKernel/Matrix.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/Matrix.h"
+#include "MantidKernel/V3D.h"
 
 namespace Mantid {
 namespace Geometry {
@@ -21,29 +28,6 @@ namespace Geometry {
 
     @author Dennis Mikkelson
     @date   2011-06-14
-
-    Copyright © 2011 ORNL, STFC Rutherford Appleton Laboratories
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at:
-                 <https://github.com/mantidproject/mantid>
-
-    Code Documentation is available at
-                 <http://doxygen.mantidproject.org>
  */
 
 class MANTID_GEOMETRY_DLL IndexingUtils {
@@ -51,10 +35,11 @@ public:
   /// Find the UB matrix that most nearly indexes the specified qxyz values
   /// given the lattice parameters
   static double Find_UB(Kernel::DblMatrix &UB,
-                        const std::vector<Kernel::V3D> &q_vectors, double a,
-                        double b, double c, double alpha, double beta,
-                        double gamma, double required_tolerance, int base_index,
-                        size_t num_initial, double degrees_per_step);
+                        const std::vector<Kernel::V3D> &q_vectors,
+                        OrientedLattice &lattice, double required_tolerance,
+                        int base_index, size_t num_initial,
+                        double degrees_per_step, bool fixAll = false,
+                        int iterations = 1);
 
   /// Find the UB matrix that most nearly indexes the specified qxyz values
   /// given the range of possible real space unit cell edge lengths.
@@ -68,7 +53,7 @@ public:
   static double Find_UB(Kernel::DblMatrix &UB,
                         const std::vector<Kernel::V3D> &q_vectors, double min_d,
                         double max_d, double required_tolerance,
-                        double degrees_per_step);
+                        double degrees_per_step, int iterations = 4);
 
   /// Find the UB matrix that most nearly maps hkl to qxyz for 3 or more peaks
   static double Optimize_UB(Kernel::DblMatrix &UB,
@@ -88,9 +73,8 @@ public:
 
   /// Scan rotations to find UB that indexes peaks given lattice parameters
   static double ScanFor_UB(Kernel::DblMatrix &UB,
-                           const std::vector<Kernel::V3D> &q_vectors, double a,
-                           double b, double c, double alpha, double beta,
-                           double gamma, double degrees_per_step,
+                           const std::vector<Kernel::V3D> &q_vectors,
+                           const UnitCell &lattice, double degrees_per_step,
                            double required_tolerance);
 
   /// Get list of possible directions and lengths for real space unit cell
@@ -136,9 +120,10 @@ public:
                           double req_tolerance, double min_vol);
 
   /// Get the vector in the direction of "c" given other unit cell information
-  static Kernel::V3D Make_c_dir(const Kernel::V3D &a_dir,
-                                const Kernel::V3D &b_dir, double c,
-                                double alpha, double beta, double gamma);
+  static Kernel::V3D makeCDir(const Kernel::V3D &a_dir,
+                              const Kernel::V3D &b_dir, const double c,
+                              const double cosAlpha, const double cosBeta,
+                              const double cosGamma, const double sinGamma);
 
   /// Construct a sublist of the specified list of a,b,c directions, by
   /// removing all directions that seem to be duplicates.

@@ -1,38 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_PYTHONINTERFACE_VECTORTONUMPY_H_
 #define MANTID_PYTHONINTERFACE_VECTORTONUMPY_H_
-/**
-    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-   National Laboratory & European Spallation Source
 
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
- */
 #include "MantidKernel/System.h"
+#include "MantidPythonInterface/core/Converters/VectorToNDArray.h"
+#include "MantidPythonInterface/core/NDArray.h"
 #include "MantidPythonInterface/kernel/Converters/CloneToNumpy.h"
-#include "MantidPythonInterface/kernel/Converters/VectorToNDArray.h"
-#include "MantidPythonInterface/kernel/Converters/PyArrayType.h"
 
-#include <boost/type_traits/integral_constant.hpp>
-#include <boost/type_traits/is_reference.hpp>
-#include <boost/type_traits/remove_reference.hpp>
-#include <boost/type_traits/remove_const.hpp>
 #include <boost/mpl/and.hpp>
 #include <boost/mpl/if.hpp>
+#include <type_traits>
 #include <vector>
 
 namespace Mantid {
@@ -40,18 +22,17 @@ namespace PythonInterface {
 namespace Policies {
 
 namespace // anonymous
-    {
+{
 //-----------------------------------------------------------------------
 // MPL helper structs
 //-----------------------------------------------------------------------
 /// MPL struct to figure out if a type is a std::vector
-/// The general one inherits from boost::false_type
-template <typename T> struct is_std_vector : boost::false_type {};
+/// The general one inherits from std::false_type
+template <typename T> struct is_std_vector : std::false_type {};
 
 /// Specialization for std::vector types to inherit from
-/// boost::true_type
-template <typename T>
-struct is_std_vector<std::vector<T>> : boost::true_type {};
+/// std::true_type
+template <typename T> struct is_std_vector<std::vector<T>> : std::true_type {};
 
 //-----------------------------------------------------------------------
 // VectorRefToNumpyImpl - Policy for reference returns
@@ -66,14 +47,12 @@ struct VectorRefToNumpyImpl {
                                        ConversionPolicy>()(cvector);
   }
 
-  inline PyTypeObject const *get_pytype() const {
-    return Converters::getNDArrayType();
-  }
+  inline PyTypeObject const *get_pytype() const { return ndarrayType(); }
 };
 
 template <typename T>
 struct VectorRefToNumpy_Requires_Reference_To_StdVector_Return_Type {};
-}
+} // namespace
 
 /**
  * Implements a return value policy that
@@ -89,15 +68,13 @@ template <typename ConversionPolicy> struct VectorRefToNumpy {
   // The boost::python framework calls return_value_policy::apply<T>::type
   template <class T> struct apply {
     // Typedef that removes and const or reference qualifiers from the type
-    typedef typename boost::remove_const<
-        typename boost::remove_reference<T>::type>::type non_const_type;
+    using non_const_type = typename std::remove_const<
+        typename std::remove_reference<T>::type>::type;
     // MPL compile-time check that T is a reference to a std::vector
-    typedef typename boost::mpl::if_c<
-        boost::mpl::and_<boost::is_reference<T>,
-                         is_std_vector<non_const_type>>::value,
+    using type = typename boost::mpl::if_c<
+        is_std_vector<non_const_type>::value,
         VectorRefToNumpyImpl<non_const_type, ConversionPolicy>,
-        VectorRefToNumpy_Requires_Reference_To_StdVector_Return_Type<T>>::type
-        type;
+        VectorRefToNumpy_Requires_Reference_To_StdVector_Return_Type<T>>::type;
   };
 };
 
@@ -115,18 +92,15 @@ template <typename VectorType> struct VectorToNumpyImpl {
                                        Converters::Clone>()(cvector);
   }
 
-  inline PyTypeObject const *get_pytype() const {
-    return Converters::getNDArrayType();
-  }
+  inline PyTypeObject const *get_pytype() const { return ndarrayType(); }
 };
 
-template <typename T>
-struct VectorToNumpy_Requires_StdVector_Return_By_Value {};
-}
+template <typename T> struct VectorToNumpy_Requires_StdVector_Return {};
+} // namespace
 
 /**
  * Implements a return value policy that
- * returns a numpy array from a function returning a std::vector by value
+ * returns a numpy array from a function returning a std::vector by ref or value
  *
  * It is only possible to clone these types since a wrapper would wrap temporary
  */
@@ -134,16 +108,17 @@ struct VectorToNumpy {
   // The boost::python framework calls return_value_policy::apply<T>::type
   template <class T> struct apply {
     // Typedef that removes any const from the type
-    typedef typename boost::remove_const<T>::type non_const_type;
+    using non_const_type = typename std::remove_const<
+        typename std::remove_reference<T>::type>::type;
     // MPL compile-time check that T is a std::vector
-    typedef typename boost::mpl::if_c<
+    using type = typename boost::mpl::if_c<
         is_std_vector<non_const_type>::value,
         VectorRefToNumpyImpl<non_const_type, Converters::Clone>,
-        VectorToNumpy_Requires_StdVector_Return_By_Value<T>>::type type;
+        VectorToNumpy_Requires_StdVector_Return<T>>::type;
   };
 };
-}
-}
-}
+} // namespace Policies
+} // namespace PythonInterface
+} // namespace Mantid
 
 #endif // MANTID_PYTHONINTERFACE_VECTORTONUMPY_H_

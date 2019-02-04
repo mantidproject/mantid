@@ -1,14 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_ADDLOGDERIVATIVETEST_H_
 #define MANTID_ALGORITHMS_ADDLOGDERIVATIVETEST_H_
 
+#include "MantidAPI/Run.h"
 #include "MantidAlgorithms/AddLogDerivative.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/System.h"
-#include "MantidKernel/Timer.h"
-#include <cxxtest/TestSuite.h>
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidAPI/Run.h"
+#include "MantidKernel/Timer.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Mantid::Algorithms;
@@ -34,7 +40,7 @@ public:
   /** Perform test, return result */
   TimeSeriesProperty<double> *do_test(int Derivative, bool willFail = false,
                                       bool addRepeatedTimes = false) {
-    Workspace2D_sptr ws = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+    Workspace2D_sptr ws = WorkspaceCreationHelper::create2DWorkspace(10, 10);
     AnalysisDataService::Instance().addOrReplace("Dummy", ws);
 
     TimeSeriesProperty<double> *p =
@@ -62,14 +68,14 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     if (willFail) {
       TS_ASSERT(!alg.isExecuted());
-      return NULL;
+      return nullptr;
     } else
       TS_ASSERT(alg.isExecuted());
 
     Run &run = ws->mutableRun();
     TS_ASSERT(run.hasProperty(NewLogName));
     if (!run.hasProperty(NewLogName))
-      return NULL;
+      return nullptr;
     p = dynamic_cast<TimeSeriesProperty<double> *>(run.getProperty(NewLogName));
     TS_ASSERT(p);
     return p;

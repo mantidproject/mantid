@@ -1,9 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/SpecularReflectionCalculateTheta.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidKernel/PropertyWithValue.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidKernel/PropertyWithValue.h"
 
 #include <cmath>
 
@@ -15,7 +21,7 @@ namespace {
 const std::string multiDetectorAnalysis = "MultiDetectorAnalysis";
 const std::string lineDetectorAnalysis = "LineDetectorAnalysis";
 const std::string pointDetectorAnalysis = "PointDetectorAnalysis";
-}
+} // namespace
 
 namespace Mantid {
 namespace Algorithms {
@@ -57,27 +63,11 @@ void SpecularReflectionCalculateTheta::init() {
 /** Execute the algorithm.
  */
 void SpecularReflectionCalculateTheta::exec() {
-  MatrixWorkspace_sptr inWS = this->getProperty("InputWorkspace");
 
-  const std::string analysisMode = this->getProperty("AnalysisMode");
-
-  Instrument_const_sptr instrument = inWS->getInstrument();
-
-  IComponent_const_sptr detector =
-      this->getDetectorComponent(inWS, analysisMode == pointDetectorAnalysis);
-
-  IComponent_const_sptr sample = this->getSurfaceSampleComponent(instrument);
-
-  const V3D detSample = detector->getPos() - sample->getPos();
-
-  boost::shared_ptr<const ReferenceFrame> refFrame =
-      instrument->getReferenceFrame();
-
-  const double upoffset = refFrame->vecPointingUp().scalar_prod(detSample);
-  const double beamoffset =
-      refFrame->vecPointingAlongBeam().scalar_prod(detSample);
-
-  const double twoTheta = 2 * std::atan(upoffset / beamoffset) * 180 / M_PI;
+  // This algorithm expects detectors to actually be at theta rather than
+  // twoTheta (for historical reasons), so we need to multiply by 2 to get the
+  // real twoTheta. v2 of this algorithm works with detectors at twoTheta.
+  const double twoTheta = 2 * calculateTwoTheta();
 
   std::stringstream strstream;
   strstream << "Recalculated two theta as: " << twoTheta;

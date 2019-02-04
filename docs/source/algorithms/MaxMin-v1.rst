@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -30,9 +30,9 @@ Usage
    # Run algorithm
    wsMax = MaxMin (ws)
 
-   print "Maximum of each spectrum"
+   print("Maximum of each spectrum")
    for i in range(9):
-      print wsMax.readY(i)
+      print(wsMax.readY(i))
 
 Output:
 
@@ -60,9 +60,9 @@ Output:
    # Run algorithm
    wsMax = MaxMin (ws, ShowMin=True)
 
-   print "Minimum of each spectrum"
+   print("Minimum of each spectrum")
    for i in range(9):
-      print wsMax.readY(i)
+      print(wsMax.readY(i))
 
 Output:
 

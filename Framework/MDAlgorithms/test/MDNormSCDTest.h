@@ -1,13 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MDALGORITHMS_MDNORMSCDTEST_H_
 #define MANTID_MDALGORITHMS_MDNORMSCDTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidMDAlgorithms/MDNormSCD.h"
-#include "MantidMDAlgorithms/CreateMDWorkspace.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
-#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidMDAlgorithms/CreateMDWorkspace.h"
+#include "MantidMDAlgorithms/MDNormSCD.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::MDAlgorithms::MDNormSCD;
@@ -77,13 +82,13 @@ private:
   void createGoodFluxWorkspace(const std::string &wsName) {
     auto flux =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 10);
-    auto &x = flux->readX(0);
-    auto &y1 = flux->dataY(1);
+    const auto &x = flux->x(0);
+    auto &y1 = flux->mutableY(1);
 
     for (size_t i = 0; i < y1.size(); ++i) {
       y1[i] = 2 * x[i];
     }
-    flux->setX(1, flux->refX(0));
+    flux->setSharedX(1, flux->sharedX(0));
     flux->getAxis(0)->setUnit("Momentum");
 
     AnalysisDataService::Instance().addOrReplace(wsName, flux);
@@ -92,13 +97,13 @@ private:
   void createBadFluxWorkspace(const std::string &wsName) {
     auto flux =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 10);
-    auto &x = flux->readX(0);
-    auto &y1 = flux->dataY(1);
+    const auto &x = flux->x(0);
+    auto &y1 = flux->mutableY(1);
 
     for (size_t i = 0; i < y1.size(); ++i) {
       y1[i] = -2 * x[i];
     }
-    flux->setX(1, flux->refX(0));
+    flux->setSharedX(1, flux->sharedX(0));
     flux->getAxis(0)->setUnit("Momentum");
 
     AnalysisDataService::Instance().addOrReplace(wsName, flux);

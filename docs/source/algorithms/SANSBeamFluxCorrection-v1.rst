@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -41,8 +41,9 @@ Usage
    # Do the correction, dragging in the file which contains the reference flux spectrum.
    corrected = SANSBeamFluxCorrection(ws, InputMonitorWorkspace=monitor, ReferenceFluxFilename="SANSBeamFluxCorrectionMonitor.nxs")
 
-   print "The expected value of each bin should be %s." % (0.1/(49152*0.1)/(49152*0.1))
-   print "The actual value of the first bin is %s." % corrected[0].readY(0)[0]
+   print("The expected value of each bin should be {:.11e}.".format(0.1/(49152*0.1)/(49152*0.1)))
+   print("The actual value of the first bin is {:.11e}.".format(corrected[0].readY(0)[0]))
+   
 
 Output:
 

@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/RebinParamsValidator.h"
 #include <boost/make_shared.hpp>
 
 namespace Mantid {
 namespace Kernel {
-RebinParamsValidator::RebinParamsValidator(bool allowEmpty)
-    : m_allowEmpty(allowEmpty) {}
+RebinParamsValidator::RebinParamsValidator(bool allowEmpty, bool allowRange)
+    : m_allowEmpty(allowEmpty), m_allowRange(allowRange) {}
 
 IValidator_sptr RebinParamsValidator::clone() const {
   return boost::make_shared<RebinParamsValidator>(*this);
@@ -22,6 +28,14 @@ RebinParamsValidator::checkValidity(const std::vector<double> &value) const {
       return "";
     else
       return "Enter values for this property";
+  }
+
+  if (m_allowRange && value.size() == 2) {
+    if (value[0] < value[1])
+      return "";
+    else
+      return "When giving a range the second value must be larger than the "
+             "first";
   }
 
   // it must have an odd number of values (and be at least 3 elements long)

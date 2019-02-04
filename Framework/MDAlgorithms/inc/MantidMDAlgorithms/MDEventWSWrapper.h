@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MDALGORITHMS_MDEVENT_WS_WRAPPER_H
 #define MANTID_MDALGORITHMS_MDEVENT_WS_WRAPPER_H
 
@@ -16,30 +22,9 @@ algorithms, which use DataObjects write interface and run-time defined number of
 dimensions
 
 @date 2011-28-12
-
-Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>
-Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 /// vectors of strings are often used here
-typedef std::vector<std::string> Strings;
+using Strings = std::vector<std::string>;
 
 /// predefenition of the class name
 class MDEventWSWrapper;
@@ -47,13 +32,13 @@ class MDEventWSWrapper;
 // Boost function pointers with multiple arguments
 //        appear not portable to all architectures supported (Fail on MAC)
 /// signature to void templated function
-typedef void (MDEventWSWrapper::*fpVoidMethod)();
+using fpVoidMethod = void (MDEventWSWrapper::*)();
 /// signature for the internal templated function pointer to add data to an
 /// existing workspace
-typedef void (MDEventWSWrapper::*fpAddData)(float *, uint16_t *, uint32_t *,
-                                            coord_t *, size_t) const;
+using fpAddData = void (MDEventWSWrapper::*)(float *, uint16_t *, uint32_t *,
+                                             coord_t *, size_t) const;
 /// signature for the internal templated function pointer to create workspace
-typedef void (MDEventWSWrapper::*fpCreateWS)(const MDWSDescription &mwsd);
+using fpCreateWS = void (MDEventWSWrapper::*)(const MDWSDescription &);
 
 class DLLExport MDEventWSWrapper {
 public:
@@ -141,7 +126,7 @@ private:
   mutable bool m_needSplitting;
 };
 
-} // endnamespace MDAlgorithms
-} // endnamespace Mantid
+} // namespace MDAlgorithms
+} // namespace Mantid
 
 #endif

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_API_BINEDGEAXISTEST_H_
 #define MANTID_API_BINEDGEAXISTEST_H_
 
@@ -16,7 +22,7 @@ public:
 
   void test_Clone_With_Only_Workspace_Returns_BinEdgeAxis_() {
     BinEdgeAxis ax1(10);
-    Mantid::API::Axis *copy = ax1.clone(NULL);
+    Mantid::API::Axis *copy = ax1.clone(nullptr);
     auto *typedCopy = dynamic_cast<BinEdgeAxis *>(copy);
 
     TS_ASSERT(typedCopy);
@@ -27,7 +33,7 @@ public:
   void
   test_Clone_With_Only_Length_And_Workspace_Returns_BinEdgeAxis_With_New_Length() {
     BinEdgeAxis ax1(10);
-    Mantid::API::Axis *copy = ax1.clone(20, NULL);
+    Mantid::API::Axis *copy = ax1.clone(20, nullptr);
     auto *typedCopy = dynamic_cast<BinEdgeAxis *>(copy);
 
     TS_ASSERT(typedCopy);

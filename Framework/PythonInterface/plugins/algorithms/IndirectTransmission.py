@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
 from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
@@ -35,7 +41,7 @@ class IndirectTransmission(PythonAlgorithm):
 
     def PyInit(self):
         self.declareProperty(name='Instrument', defaultValue='IRIS',
-                             validator=StringListValidator(['IRIS', 'OSIRIS', 'TOSCA', 'BASIS', 'VISION']),
+                             validator=StringListValidator(['IRIS', 'OSIRIS', 'TOSCA', 'BASIS', 'VISION', 'IN16B']),
                              doc='Instrument')
 
         self.declareProperty(name='Analyser', defaultValue='graphite',
@@ -43,7 +49,7 @@ class IndirectTransmission(PythonAlgorithm):
                              doc='Analyser')
 
         self.declareProperty(name='Reflection', defaultValue='002',
-                             validator=StringListValidator(['002', '004', '006', '111']),
+                             validator=StringListValidator(['002', '004', '006', '111', '311']),
                              doc='Reflection')
 
         self.declareProperty(name='ChemicalFormula', defaultValue='', validator=StringMandatoryValidator(),
@@ -70,9 +76,6 @@ class IndirectTransmission(PythonAlgorithm):
         formula = self.getPropertyValue('ChemicalFormula')
         densityType = self.getPropertyValue('DensityType')
         density = self.getProperty('Density').value
-        if densityType == 'Mass Density':
-            mat = MaterialBuilder().setFormula(formula).setMassDensity(density).build()
-            density = mat.numberDensity
         thickness = self.getPropertyValue('Thickness')
 
         # Create an empty instrument workspace
@@ -114,24 +117,27 @@ class IndirectTransmission(PythonAlgorithm):
 
         logger.notice('Analyser : ' + analyser + reflection + ' with energy = ' + str(efixed))
 
-        SetSampleMaterial(InputWorkspace=workspace, ChemicalFormula=formula)
+        if densityType == 'Mass Density':
+            SetSampleMaterial(InputWorkspace=workspace, ChemicalFormula=formula, SampleMassDensity=density)
+        else:
+            SetSampleMaterial(InputWorkspace=workspace, ChemicalFormula=formula, SampleNumberDensity=density)
 
         # Elastic wavelength
         wave = 1.8 * math.sqrt(25.2429 / efixed)
 
         material = mtd[str(workspace)].sample().getMaterial()
+        number_density = material.numberDensity
         absorption_x_section = material.absorbXSection(wave)
         coherent_x_section = material.cohScatterXSection()
         incoherent_x_section = material.incohScatterXSection()
         scattering_s_section = incoherent_x_section + coherent_x_section
 
         thickness = float(thickness)
-        density = float(density)
 
         total_x_section = absorption_x_section + scattering_s_section
 
-        transmission = math.exp(-density * total_x_section * thickness)
-        scattering = 1.0 - math.exp(-density * scattering_s_section * thickness)
+        transmission = math.exp(-number_density * total_x_section * thickness)
+        scattering = 1.0 - math.exp(-number_density * scattering_s_section * thickness)
 
         # Create table workspace to store calculations
         table_ws = self.getPropertyValue('OutputWorkspace')
@@ -145,7 +151,7 @@ class IndirectTransmission(PythonAlgorithm):
 
         # List of the calculated values
         output_values = [wave, absorption_x_section, coherent_x_section, incoherent_x_section,
-                         scattering_s_section, density, thickness, transmission, scattering]
+                         scattering_s_section, number_density, thickness, transmission, scattering]
 
         # Build table of values
         for data in zip(output_names, output_values):

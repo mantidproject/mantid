@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -25,7 +25,7 @@ Usage
     wsOut = LoadRawSpectrum0('HRP39180.RAW')
 
     wsIntegral = Integration(wsOut)
-    print ("Spectrum0 contained %i counts" % wsIntegral.readY(0)[0])
+    print("Spectrum0 contained {:.0f} counts".format(wsIntegral.readY(0)[0]))
 
 Output:
 

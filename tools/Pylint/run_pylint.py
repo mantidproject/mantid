@@ -1,11 +1,18 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 """
     runpylint
     ~~~~~~~~~
 
     Run pylint on selected Python files/directories.
 """
-from __future__ import print_function
 
+
+from __future__ import (absolute_import, division, print_function)
 import logging
 from optparse import OptionParser
 import os.path
@@ -146,7 +153,7 @@ def parse_arguments(argv):
                       help="If provided, use the given format type "
                            "[default=%s]." % DEFAULT_PYLINT_FORMAT)
     parser.add_option("-m", "--mantidpath", dest="mantidpath", metavar="MANTIDPATH",
-                      help="If provided, use this as the MANTIDPATH, overriding"
+                      help="If provided, add this to the PYTHONPATH, overriding"
                            "anything that is currently set.")
     parser.add_option("-n", "--nofail", action="store_true",dest="nofail",
                       help="If specified, then script will always return an exit status of 0.")
@@ -202,8 +209,7 @@ def setup_environment(mantidpath):
 def setup_mantidpath(mantidpath):
     """
     Setup the environment ready for the subprocess call.
-    Inserts the given path at the front of the PYTHONPATH and
-    sets the MANTIDPATH variable
+    Inserts the given path at the front of the PYTHONPATH
 
     Args:
       mantidpath (str): A string that points to a directory containing
@@ -214,7 +220,6 @@ def setup_mantidpath(mantidpath):
         raise ValueError("Unable to find mantid python module in '%s'"
                          % mantidpath)
 
-    os.environ["MANTIDPATH"] = mantidpath
     cur_pypath = os.environ.get("PYTHONPATH", "")
     # for subprocesses
     os.environ["PYTHONPATH"] = mantidpath + os.pathsep + cur_pypath
@@ -249,7 +254,7 @@ def check_module_imports():
     #pylint: disable=unused-variable
     try:
         import mantid # noqa
-    except ImportError, exc:
+    except ImportError as exc:
         msg = "Unable to import mantid module: '%s'\n"\
               "Try passing the -m option along with the path to the module"\
                 % str(exc)
@@ -299,8 +304,7 @@ def run_checks(relpaths, options):
       bool: Success/failure
     """
     # convert to excludes absolute paths
-    excludes = map(lambda path: os.path.join(options.basedir, path),
-                   options.exclude)
+    excludes = [os.path.join(options.basedir, path) for path in options.exclude]
     # Gather targets first
     target_paths = gather_targets(options.basedir, relpaths, excludes)
     logging.debug("Found {} targets".format(len(target_paths)))
@@ -405,7 +409,7 @@ def gather_targets(basedir, relpaths, excludes=[]):
             if path.startswith(exclude_path):
                 return False
         return True
-    return filter(include_target, targets)
+    return list(filter(include_target, targets))
 
 #------------------------------------------------------------------------------
 
@@ -496,6 +500,7 @@ def build_pylint_cmd(srcpath, options):
     return cmd
 
 #------------------------------------------------------------------------------
+
 
 if __name__ == '__main__':
     sys.exit(main(sys.argv))

@@ -1,10 +1,17 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,invalid-name,too-many-locals,too-few-public-methods
-import stresstesting
+from __future__ import (absolute_import, division, print_function)
+import systemtesting
 from mantid.simpleapi import *
 import numpy as np
 
 
-class POLDIFitPeaks2DTest(stresstesting.MantidStressTest):
+class POLDIFitPeaks2DTest(systemtesting.MantidSystemTest):
     """The system test currently checks that the calculation of 2D spectra
     works correctly."""
 
@@ -57,7 +64,7 @@ class POLDIFitPeaks2DTest(stresstesting.MantidStressTest):
 
             columns = ["d", "Intensity"]
 
-            print fittedPeaks.rowCount(), referencePeaks.rowCount()
+            print(fittedPeaks.rowCount(), referencePeaks.rowCount())
 
             for i in range(referencePeaks.rowCount()):
                 referenceRow = referencePeaks.row(i)
@@ -88,7 +95,7 @@ class POLDIFitPeaks2DTest(stresstesting.MantidStressTest):
                 self.assertLessThan(maxDifference, 0.07)
 
 
-class POLDIFitPeaks2DPawleyTest(stresstesting.MantidStressTest):
+class POLDIFitPeaks2DPawleyTest(systemtesting.MantidSystemTest):
     def runTest(self):
         si = PoldiLoadRuns(2013, 6903, 6904, 2)
         corr = PoldiAutoCorrelation('si_data_6904')
@@ -104,7 +111,7 @@ class POLDIFitPeaks2DPawleyTest(stresstesting.MantidStressTest):
                                                            MaximumIterations=100)
 
         # parameters a and ZeroShift
-        self.assertEquals(cell.rowCount(), 2)
+        self.assertEqual(cell.rowCount(), 2)
 
         cell_a = cell.cell(0, 1)
         cell_a_err = cell.cell(0, 2)
@@ -122,7 +129,7 @@ class POLDIFitPeaks2DPawleyTest(stresstesting.MantidStressTest):
         DeleteWorkspace(peaks_ref_2d)
 
 
-class POLDIFitPeaks2DIntegratedIntensities(stresstesting.MantidStressTest):
+class POLDIFitPeaks2DIntegratedIntensities(systemtesting.MantidSystemTest):
     def runTest(self):
         si = PoldiLoadRuns(2013, 6903, 6904, 2)
         corr = PoldiAutoCorrelation('si_data_6904')
@@ -139,7 +146,7 @@ class POLDIFitPeaks2DIntegratedIntensities(stresstesting.MantidStressTest):
                                                                 OutputIntegratedIntensities=True,
                                                                 MaximumIterations=100)
 
-        self.assertEquals(peaks_ref_2d.rowCount(), peaks_ref_2d_integrated.rowCount())
+        self.assertEqual(peaks_ref_2d.rowCount(), peaks_ref_2d_integrated.rowCount())
 
         for i in range(peaks_ref_2d.rowCount()):
             rowHeight = peaks_ref_2d.row(i)

@@ -1,12 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/SetInstrumentParameter.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/Strings.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
+
+#include <boost/algorithm/string.hpp>
 
 namespace Mantid {
 namespace Algorithms {
@@ -42,9 +50,10 @@ void SetInstrumentParameter::init() {
                       "Workspace", "", Direction::InOut,
                       boost::make_shared<InstrumentValidator>()),
                   "Workspace to add the log entry to");
-  declareProperty("ComponentName", "", "The name of the component to attach "
-                                       "the parameter to. Default: the whole "
-                                       "instrument");
+  declareProperty("ComponentName", "",
+                  "The name of the component to attach "
+                  "the parameter to. Default: the whole "
+                  "instrument");
   declareProperty(make_unique<ArrayProperty<detid_t>>("DetectorList"),
                   "The detector ID list to attach the parameter to. If set "
                   "this will override any ComponentName");
@@ -52,12 +61,35 @@ void SetInstrumentParameter::init() {
                   boost::make_shared<MandatoryValidator<std::string>>(),
                   "The name that will identify the parameter");
 
-  std::vector<std::string> propOptions{"String", "Number"};
+  std::vector<std::string> propOptions{"String", "Number", "Bool"};
   declareProperty("ParameterType", "String",
                   boost::make_shared<StringListValidator>(propOptions),
                   "The type that the parameter value will be.");
 
   declareProperty("Value", "", "The content of the Parameter");
+}
+
+/// @copydoc Algorithm::validateInputs()
+std::map<std::string, std::string> SetInstrumentParameter::validateInputs() {
+  std::map<std::string, std::string> errors;
+  const std::set<std::string> allowedBoolValues{"1", "0", "true", "false"};
+  const std::string type = getPropertyValue("ParameterType");
+  std::string val = getPropertyValue("Value");
+
+  if (type == "Bool") {
+    boost::algorithm::to_lower(val);
+    if (allowedBoolValues.find(val) == allowedBoolValues.end()) {
+      errors["Value"] = "Invalid value for Bool type.";
+    }
+  } else if (type == "Number") {
+    int intVal;
+    double dblVal;
+    if (!Strings::convert(val, intVal) && !Strings::convert(val, dblVal)) {
+      errors["Value"] = "Invalid value for Number type.";
+    }
+  }
+
+  return errors;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -164,22 +196,19 @@ void SetInstrumentParameter::addParameter(
   if (paramType == "String") {
     pmap.addString(cmptId, paramName, paramValue);
   } else if (paramType == "Number") {
-    bool valueIsInt(false);
     int intVal;
-    double dblVal;
     if (Strings::convert(paramValue, intVal)) {
-      valueIsInt = true;
-    } else if (!Strings::convert(paramValue, dblVal)) {
-      throw std::invalid_argument("Error interpreting string '" + paramValue +
-                                  "' as a number.");
-    }
-
-    if (valueIsInt)
       pmap.addInt(cmptId, paramName, intVal);
-    else
+    } else {
+      double dblVal;
+      Strings::convert(paramValue, dblVal);
       pmap.addDouble(cmptId, paramName, dblVal);
-  } else {
-    throw std::invalid_argument("Unknown Parameter Type " + paramType);
+    }
+  } else if (paramType == "Bool") {
+    std::string paramValueLower(paramValue);
+    boost::algorithm::to_lower(paramValueLower);
+    bool paramBoolValue = (paramValueLower == "true" || paramValue == "1");
+    pmap.addBool(cmptId, paramName, paramBoolValue);
   }
 }
 

@@ -1,12 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_DIFFRACTIONFOCUSSING2_H_
 #define MANTID_ALGORITHMS_DIFFRACTIONFOCUSSING2_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
+#include "MantidIndexing/SpectrumNumber.h"
 #include "MantidKernel/System.h"
 
 namespace Mantid {
@@ -58,27 +62,6 @@ namespace Algorithms {
 
  @author Laurent Chapon, ISIS Facility, Rutherford Appleton Laboratory
  @date 08/03/2009
-
- Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
- National Laboratory & European Spallation Source
-
- This file is part of Mantid.
-
- Mantid is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 3 of the License, or
- (at your option) any later version.
-
- Mantid is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License
- along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
- File change history is stored at: <https://github.com/mantidproject/mantid>
- Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 class DLLExport DiffractionFocussing2 : public API::Algorithm {
 public:
@@ -92,6 +75,9 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 2; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"AlignDetectors", "AlignAndFocusPowder", "LoadCalFile"};
+  }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override {
     return "Diffraction\\Focussing";
@@ -123,13 +109,9 @@ private:
   /// Shared pointer to the event workspace
   DataObjects::EventWorkspace_const_sptr m_eventW;
 
-  // This map does not need to be ordered, just a lookup for udet
-  /// typedef for the storage of the UDET-group mapping
-  typedef std::map<detid_t, int> udet2groupmap;
-
   // This map needs to be ordered to process the groups in order.
   /// typedef for the storage of each group's X vector
-  typedef std::map<int, boost::shared_ptr<MantidVec>> group2vectormap;
+  using group2vectormap = std::map<int, boost::shared_ptr<MantidVec>>;
   /// Map from udet to group
   std::vector<int> udet2group;
   /// The list of group numbers
@@ -147,10 +129,10 @@ private:
   /// Mapping of group number to vector of inputworkspace indices.
   std::vector<std::vector<std::size_t>> m_wsIndices;
   /// List of valid group numbers
-  std::vector<int> m_validGroups;
+  std::vector<Indexing::SpectrumNumber> m_validGroups;
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHM_DIFFRACTIONFOCUSSING2_H_*/

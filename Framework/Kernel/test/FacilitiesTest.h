@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_FACILITIESTEST_H_
 #define MANTID_FACILITIESTEST_H_
 
@@ -5,9 +11,9 @@
 #include <fstream>
 #include <string>
 
-#include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/FacilityInfo.h"
 
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
@@ -61,7 +67,7 @@ public:
         "  </facility>"
         "</facilities>";
 
-    FacilityInfo *fac = NULL;
+    FacilityInfo *fac = nullptr;
     TS_ASSERT_THROWS_NOTHING(fac = getFacility(xmlStr));
 
     // Check that the few required things are set and that everything else has
@@ -74,7 +80,6 @@ public:
     TS_ASSERT_EQUALS(fac->extensions()[0], ".xyz");
     TS_ASSERT_EQUALS(fac->preferredExtension(), ".xyz");
     TS_ASSERT(fac->archiveSearch().empty());
-    TS_ASSERT(fac->liveListener().empty());
     TS_ASSERT_EQUALS(fac->instruments().size(), 1);
     TS_ASSERT_EQUALS(fac->instruments().front().name(), "AnInst");
     TS_ASSERT_EQUALS(fac->instruments("Measuring Stuff").front().name(),
@@ -155,9 +160,6 @@ public:
     TS_ASSERT_EQUALS(crysInstr.size(), 1);
     TS_ASSERT_EQUALS(fac->instruments("rubbish category").size(), 0);
 
-    // Test default live listener is empty
-    TS_ASSERT(fac->liveListener().empty())
-
     delete fac;
   }
 
@@ -194,25 +196,6 @@ public:
     TS_ASSERT_EQUALS(fac->name(), "ISIS");
     TS_ASSERT_EQUALS(fac->archiveSearch().size(), 0);
 
-    delete fac;
-  }
-
-  void testListener() {
-    const std::string xmlStr =
-        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-        "<facilities>"
-        "  <facility name=\"TESTER\" FileExtensions=\"*.*\" >"
-        "    <livedata listener=\"Listener1\" />"
-        "    <instrument name=\"ABCD\" >"
-        "      <livedata listener=\"Listener2\" />"
-        "      <technique>None</technique>"
-        "    </instrument>"
-        "  </facility>"
-        "</facilities>";
-
-    FacilityInfo *fac = getFacility(xmlStr);
-    TS_ASSERT(fac);
-    TS_ASSERT_EQUALS(fac->liveListener(), "Listener1");
     delete fac;
   }
 

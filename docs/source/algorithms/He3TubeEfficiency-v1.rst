@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -28,7 +28,7 @@ following manner. If no input value is given, the detector parameter is
 pulled from the detector itself. If a single value is used as input,
 that value is applied to all detectors. If an array of values is used,
 that array *must* be the same size as the number of spectra in the
-workspace. If it is not, the spectra indicies that do not have values
+workspace. If it is not, the spectra indices that do not have values
 will be zeroed in the output workspace.
 
 Restrictions on Input Workspace
@@ -53,8 +53,8 @@ for a histogram workspace will be given.
     ws1 = He3TubeEfficiency(ws, TubePressure='10',TubeThickness='0.0008',TubeTemperature='290')
 
     # show the before and after for the first detector for the first 5 bins
-    print "Original counts:", str(ws.readY(0)[:5])
-    print "Corrected counts:", str(ws1.readY(0)[:5])
+    print('Original counts: {}'.format(ws.readY(0)[:5]))
+    print('Corrected counts: {}'.format(ws1.readY(0)[:5]))
 
 Output:
 

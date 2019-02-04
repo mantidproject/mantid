@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CopySample.h"
-#include "MantidKernel/System.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/Material.h"
+#include "MantidKernel/System.h"
 namespace Mantid {
 namespace Algorithms {
 
@@ -13,6 +19,7 @@ DECLARE_ALGORITHM(CopySample)
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
+using Geometry::IObject;
 using Geometry::SampleEnvironment;
 
 //----------------------------------------------------------------------------------------------
@@ -79,8 +86,8 @@ void CopySample::exec() {
 
   Sample sample;
   // get input sample
-  IMDEventWorkspace_const_sptr inMDWS =
-      boost::dynamic_pointer_cast<const IMDEventWorkspace>(inWS);
+  MultipleExperimentInfos_sptr inMDWS =
+      boost::dynamic_pointer_cast<MultipleExperimentInfos>(inWS);
   if (inMDWS != nullptr) // it is an MD workspace
   {
     int inputSampleNumber = getProperty("MDInputSampleNumber");
@@ -115,9 +122,8 @@ void CopySample::exec() {
   bool copyOrientation = getProperty("CopyOrientationOnly");
 
   // Sample copy;
-
-  IMDEventWorkspace_sptr outMDWS =
-      boost::dynamic_pointer_cast<IMDEventWorkspace>(outWS);
+  MultipleExperimentInfos_sptr outMDWS =
+      boost::dynamic_pointer_cast<MultipleExperimentInfos>(outWS);
   if (outMDWS != nullptr) {
     int outputSampleNumber = getProperty("MDOutputSampleNumber");
     if ((outputSampleNumber == EMPTY_INT()) ||
@@ -137,11 +143,12 @@ void CopySample::exec() {
                         << "). Will use sample number 0 instead\n";
         outputSampleNumber = 0;
       }
-      copyParameters(sample, outMDWS->getExperimentInfo(static_cast<uint16_t>(
-                                                            outputSampleNumber))
-                                 ->mutableSample(),
-                     copyName, copyMaterial, copyEnvironment, copyShape,
-                     copyLattice, copyOrientation);
+      copyParameters(
+          sample,
+          outMDWS->getExperimentInfo(static_cast<uint16_t>(outputSampleNumber))
+              ->mutableSample(),
+          copyName, copyMaterial, copyEnvironment, copyShape, copyLattice,
+          copyOrientation);
     }
   } else // peaks workspace or matrix workspace
   {
@@ -160,23 +167,28 @@ void CopySample::copyParameters(Sample &from, Sample &to, bool nameFlag,
                                 bool orientationOnlyFlag) {
   if (nameFlag)
     to.setName(from.getName());
-  if (environmentFlag)
-    to.setEnvironment(new SampleEnvironment(from.getEnvironment()));
+  if (environmentFlag) {
+    to.setEnvironment(
+        std::make_unique<SampleEnvironment>(from.getEnvironment()));
+  }
   if (shapeFlag) {
-    auto rhsObject = from.getShape(); // copy
-    const auto lhsMaterial = to.getMaterial();
-    // reset to original lhs material
-    if (!materialFlag) {
-      rhsObject.setMaterial(lhsMaterial);
+    Material rhsMaterial;
+    if (materialFlag) {
+      rhsMaterial = from.getMaterial();
+    } else {
+      // Reset to lhs material
+      rhsMaterial = to.getMaterial();
     }
+    auto rhsObject = boost::shared_ptr<IObject>(
+        from.getShape().cloneWithMaterial(rhsMaterial));
     to.setShape(rhsObject);
     to.setGeometryFlag(from.getGeometryFlag());
     to.setHeight(from.getHeight());
     to.setThickness(from.getThickness());
     to.setWidth(from.getWidth());
   } else if (materialFlag) {
-    auto lhsObject = to.getShape(); // copy
-    lhsObject.setMaterial(from.getMaterial());
+    auto lhsObject = boost::shared_ptr<IObject>(
+        to.getShape().cloneWithMaterial(from.getMaterial()));
     to.setShape(lhsObject);
   }
 
@@ -189,5 +201,5 @@ void CopySample::copyParameters(Sample &from, Sample &to, bool nameFlag,
   }
 }
 
-} // namespace Mantid
 } // namespace Algorithms
+} // namespace Mantid

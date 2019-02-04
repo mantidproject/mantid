@@ -49,15 +49,15 @@ class DataCurve;
 class ScreenPickerTool : public QwtPlotPicker, public PlotToolInterface {
   Q_OBJECT
 public:
-  ScreenPickerTool(Graph *graph, const QObject *status_target = NULL,
+  ScreenPickerTool(Graph *graph, const QObject *status_target = nullptr,
                    const char *status_slot = "");
   ~ScreenPickerTool() override;
 
 signals:
   /** Emitted whenever a new message should be presented to the user.
    *
-   * You don't have to connect to this signal if you alreay specified a reciever
-   *during initialization.
+   * You don't have to connect to this signal if you already specified a
+   *receiver during initialization.
    */
   void statusText(const QString &);
 
@@ -76,7 +76,7 @@ class DrawPointTool : public ScreenPickerTool {
   Q_OBJECT
 public:
   DrawPointTool(ApplicationWindow *app, Graph *graph,
-                const QObject *status_target = NULL,
+                const QObject *status_target = nullptr,
                 const char *status_slot = "");
 
 protected:

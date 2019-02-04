@@ -1,12 +1,21 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/NexusDescriptor.h"
 
+// clang-format off
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
+// clang-format on
 
 #include <Poco/File.h>
 #include <Poco/Path.h>
 
 #include <cstring>
+#include <string>
 
 namespace Mantid {
 namespace Kernel {
@@ -74,7 +83,7 @@ bool isHDFHandle(FILE *fileHandle, NexusDescriptor::Version version) {
   std::rewind(fileHandle);
   return result;
 }
-}
+} // namespace
 
 //---------------------------------------------------------------------------------------------------------------------------
 // static NexusDescriptor methods
@@ -124,9 +133,10 @@ NexusDescriptor::NexusDescriptor(const std::string &filename)
   }
   try {
     initialize(filename);
-  } catch (::NeXus::Exception &) {
-    throw std::invalid_argument("NexusDescriptor::initialize - File '" +
-                                filename + "' does not look like a HDF file.");
+  } catch (::NeXus::Exception &e) {
+    throw std::invalid_argument(
+        "NexusDescriptor::initialize - File '" + filename +
+        "' does not look like a HDF file.\n Error was: " + e.what());
   }
 }
 
@@ -245,8 +255,9 @@ void NexusDescriptor::walkFile(::NeXus::File &file, const std::string &rootPath,
   for (auto it = dirents.begin(); it != itend; ++it) {
     const std::string &entryName = it->first;
     const std::string &entryClass = it->second;
-    const std::string entryPath = rootPath + "/" + entryName;
-    if (entryClass == "SDS") {
+    const std::string entryPath =
+        std::string(rootPath).append("/").append(entryName);
+    if (entryClass == "SDS" || entryClass == "ILL_data_scan_vars") {
       pmap.emplace(entryPath, entryClass);
     } else if (entryClass == "CDF0.0") {
       // Do nothing with this

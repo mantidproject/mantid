@@ -2,12 +2,21 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
 Description
 -----------
+
+This algorithm transforms an input workspace in wavelength to :math:`Q_{x}, Q_{z}`
+or momentum space for reflectometry workspaces. Prior to the transformation, the
+algorithm corrects the detector position to an angle :math:`\theta_f`, where
+:math:`\theta_f` is extracted from the log value :literal:`stheta`.
+
+For conversion of single histogram workspaces to :math:`Q_{z}`, see
+:ref:`ConvertUnits <algm-ConvertUnits>` or
+:ref:`ReflectometryMomentumTransfer <algm-ReflectometryMomentumTransfer>`.
 
 Prerequisites
 #############
@@ -17,11 +26,11 @@ The workspace spectrum axis should be converted to signed\_theta using
 converted to Wavelength using :ref:`algm-ConvertUnits` before
 running this algorithm. Histogram input workspaces are expected.
 
-The algorithm will looks for a specific log value called *stheta*, which
-contains the incident theta angle :math:`theta_i`. If the input
+The algorithm will look for a specific log value called :literal:`stheta`, which
+contains the incident theta angle :math:`\theta_i`. If the input
 workspace does not contain this value, or if you wish to override this
-value you can do so by providing your own *IncidentTheta* property and
-enabling *OverrideIncidentTheta*.
+value you can do so by providing your own :literal:`IncidentTheta` property and
+enabling :literal:`OverrideIncidentTheta`.
 
 The algorithm also has the ability to produce additional debugging information from the Tableworkspace
 that can be used to create a patch plot of results before any 2D fractional rebinning has happened.
@@ -97,7 +106,7 @@ Normalised Polygon Transformation
     Io=mtd['Io']
     D=mtd['D']
 
-    # Peform the normalisation step
+    # Perform the normalisation step
     Divide(LHSWorkspace=D,RHSWorkspace=Io,OutputWorkspace='I',AllowDifferentNumberSpectra='1',ClearRHSWorkspace='1')
     I=mtd['I'][0]
 
@@ -117,9 +126,9 @@ Normalised Polygon Transformation
     
     pipf, vertexes_pipf = ConvertToReflectometryQ(InputWorkspace='SignedTheta_vs_Wavelength', OutputDimensions='P (lab frame)', Extents='0,0.1,-0.02,0.15', OutputAsMDWorkspace=False,Method='NormalisedPolygon')
 
-    print qxqy.getDimension(0).getName(), qxqy.getDimension(1).getName()
-    print kikf.getDimension(0).getName(), kikf.getDimension(1).getName()
-    print pipf.getDimension(0).getName(), pipf.getDimension(1).getName()
+    print("{} {}".format(qxqy.getDimension(0).name, qxqy.getDimension(1).name))
+    print("{} {}".format(kikf.getDimension(0).name, kikf.getDimension(1).name))
+    print("{} {}".format(pipf.getDimension(0).name, pipf.getDimension(1).name))
 
 
 Output:
@@ -174,7 +183,7 @@ achieved by running the algorithm below.
         polygon_vertexes = list()   
 
         for vertex in vertex_table:
-            #Column of vertex i.e 'Qx' in this case, is dependant on the type of transform.
+            #Column of vertex i.e 'Qx' in this case, is dependent on the type of transform.
             #'Ki' and 'Kf' are used for the K transformation.
             #'Pi+Pf' and 'Pi-Pf' are used for the P transformation.
             polygon_vertexes.append((vertex['Qx'], vertex['Qy'] ))

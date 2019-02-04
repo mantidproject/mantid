@@ -1,16 +1,22 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CRYSTAL_SETGONIOMETERTEST_H_
 #define MANTID_CRYSTAL_SETGONIOMETERTEST_H_
 
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidCrystal/SetGoniometer.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
+#include "MantidKernel/Matrix.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidAPI/FrameworkManager.h"
-#include <cxxtest/TestSuite.h>
 #include "MantidKernel/V3D.h"
-#include "MantidKernel/Matrix.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Crystal;
 using namespace Mantid::API;
@@ -30,7 +36,7 @@ public:
   }
 
   void test_exec_fail() {
-    Workspace2D_sptr ws = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+    Workspace2D_sptr ws = WorkspaceCreationHelper::create2DWorkspace(10, 10);
     AnalysisDataService::Instance().addOrReplace("SetGoniometerTest_ws", ws);
 
     SetGoniometer alg;
@@ -48,7 +54,7 @@ public:
 
   /** Create an "empty" goniometer by NOT giving any axes. */
   void test_exec_emptyGoniometer() {
-    Workspace2D_sptr ws = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+    Workspace2D_sptr ws = WorkspaceCreationHelper::create2DWorkspace(10, 10);
     AnalysisDataService::Instance().addOrReplace("SetGoniometerTest_ws", ws);
 
     SetGoniometer alg;
@@ -69,7 +75,7 @@ public:
   }
 
   void test_exec() {
-    Workspace2D_sptr ws = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+    Workspace2D_sptr ws = WorkspaceCreationHelper::create2DWorkspace(10, 10);
     AnalysisDataService::Instance().addOrReplace("SetGoniometerTest_ws", ws);
     FrameworkManager::Instance().exec(
         "AddSampleLog", 8, "Workspace", "SetGoniometerTest_ws", "LogName",
@@ -112,7 +118,7 @@ public:
     AnalysisDataService::Instance().remove("SetGoniometerTest_ws");
   }
   void test_universal() {
-    Workspace2D_sptr ws = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+    Workspace2D_sptr ws = WorkspaceCreationHelper::create2DWorkspace(10, 10);
     AnalysisDataService::Instance().addOrReplace("SetUnivGoniometerTest_ws",
                                                  ws);
     FrameworkManager::Instance().exec(
@@ -152,7 +158,7 @@ public:
    * @param numExpected :: how many axes should be created (0 or 1)
    */
   void do_test_param(std::string axis0, size_t numExpected = 0) {
-    Workspace2D_sptr ws = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+    Workspace2D_sptr ws = WorkspaceCreationHelper::create2DWorkspace(10, 10);
     AnalysisDataService::Instance().addOrReplace("SetGoniometerTest_ws", ws);
     FrameworkManager::Instance().exec(
         "AddSampleLog", 8, "Workspace", "SetGoniometerTest_ws", "LogName",

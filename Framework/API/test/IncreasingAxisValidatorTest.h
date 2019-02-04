@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_API_INCREASINGAXISVALIDATORTEST_H_
 #define MANTID_API_INCREASINGAXISVALIDATORTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/IncreasingAxisValidator.h"
-#include "MantidTestHelpers/FakeObjects.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidTestHelpers/FakeObjects.h"
 
 #include <boost/shared_ptr.hpp>
 
@@ -40,6 +46,14 @@ public:
   void testRight() { TS_ASSERT_EQUALS(validator.isValid(m_right_ws), ""); }
 
   void testWrong() { TS_ASSERT_DIFFERS(validator.isValid(m_wrong_ws), ""); }
+
+  void testSingleValuedWorkspace() {
+    auto testWS = boost::make_shared<AxeslessWorkspaceTester>();
+    testWS->initialize(1, 3, 3);
+    std::string s;
+    TS_ASSERT_THROWS_NOTHING(s = validator.isValid(testWS))
+    TS_ASSERT_DIFFERS(s, "")
+  }
 
 private:
   Mantid::API::MatrixWorkspace_sptr m_wrong_ws; // Workspace with the wrong axis

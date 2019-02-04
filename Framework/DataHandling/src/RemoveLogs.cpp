@@ -1,25 +1,31 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/FileProperty.h"
 #include "MantidDataHandling/RemoveLogs.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Glob.h"
-#include "MantidKernel/Strings.h"
 #include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
-#include <boost/algorithm/string.hpp>
+#include <Poco/DateTimeFormat.h>
+#include <Poco/DateTimeParser.h>
+#include <Poco/DirectoryIterator.h>
 #include <Poco/File.h>
 #include <Poco/Path.h>
-#include <Poco/DirectoryIterator.h>
-#include <Poco/DateTimeParser.h>
-#include <Poco/DateTimeFormat.h>
+#include <boost/algorithm/string.hpp>
 
+#include <algorithm>
 #include <fstream> // used to get ifstream
 #include <sstream>
-#include <algorithm>
 
 namespace Mantid {
 namespace DataHandling {
@@ -29,7 +35,6 @@ DECLARE_ALGORITHM(RemoveLogs)
 
 using namespace Kernel;
 using namespace API;
-using DataObjects::Workspace2D;
 using DataObjects::Workspace2D_sptr;
 
 /// Empty default constructor
@@ -62,6 +67,7 @@ void RemoveLogs::exec() {
       localWorkspace->run().getLogData();
   std::vector<std::string> keepLogs = getProperty("KeepLogs");
   std::vector<std::string> logNames;
+  logNames.reserve(logData.size());
   for (const auto property : logData) {
     logNames.push_back(property->name());
   }

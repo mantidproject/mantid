@@ -1,6 +1,9 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/Scale.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/ListValidator.h"
@@ -39,7 +42,7 @@ void Scale::exec() {
 
   auto hasDx = inputWS->hasDx(0);
 
-  Progress progress(this, 0, 1, 2);
+  Progress progress(this, 0.0, 1.0, 2);
 
   // We require a copy of the workspace if the
   auto inPlace = outputWS == inputWS;

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef DETECTOREFFICIENCYVARIATION_H_
 #define DETECTOREFFICIENCYVARIATION_H_
 
@@ -11,6 +17,7 @@
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidHistogramData/LinearGenerator.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/UnitFactory.h"
 #include <Poco/Path.h>
 #include <boost/lexical_cast.hpp>
@@ -27,8 +34,8 @@ using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 using Mantid::HistogramData::BinEdges;
-using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::CountStandardDeviations;
+using Mantid::HistogramData::Counts;
 
 class DetectorEfficiencyVariationTest : public CxxTest::TestSuite {
 public:
@@ -112,12 +119,13 @@ public:
     BinEdges x(NXs, HistogramData::LinearGenerator(0.0, 1000.0));
     // random numbers that will be copied into the workspace spectra
     const short ySize = NXs - 1;
-    double yArray[ySize] = {
-        0.2, 4,  50,  14,    0.001, 0,        0,    0,     1,  0, 1e-3, 15,
-        4,   0,  9,   0.001, 2e-10, 1,        0,    8,     0,  7, 1e-4, 1,
-        7,   11, 101, 6,     53,    0.345324, 3444, 13958, 0.8}; // NXs = 34 so
-                                                                 // we need that
-                                                                 // many numbers
+    double yArray[ySize] = {0.2, 4,        50,    14,    0.001, 0,   0,
+                            0,   1,        0,     1e-3,  15,    4,   0,
+                            9,   0.001,    2e-10, 1,     0,     8,   0,
+                            7,   1e-4,     1,     7,     11,    101, 6,
+                            53,  0.345324, 3444,  13958, 0.8}; // NXs = 34 so
+                                                               // we need that
+                                                               // many numbers
 
     // the error values aren't used and aren't tested so we'll use some basic
     // data
@@ -129,8 +137,8 @@ public:
       inputB->setBinEdges(j, x);
       std::vector<double> forInputA, forInputB;
       // the spectravalues will be multiples of the random numbers above
-      for (int l = 0; l < ySize; ++l) {
-        forInputA.push_back(yArray[l]);
+      for (double y : yArray) {
+        forInputA.push_back(y);
         // there is going to be a small difference between the workspaces that
         // will vary with histogram number
         forInputB.push_back(forInputA.back() *
@@ -146,10 +154,6 @@ public:
       inputB->setCounts(j, std::move(forInputB));
       inputA->setCountStandardDeviations(j, errors);
       inputB->setCountStandardDeviations(j, errors);
-      // Just set the spectrum number to match the index, spectra numbers and
-      // detector maps must be indentical for both
-      inputA->getSpectrum(j).setSpectrumNo(j + 1);
-      inputB->getSpectrum(j).setSpectrumNo(j + 1);
     }
 
     // Register the input workspaces to the ADS where they can be accessed by

@@ -1,7 +1,15 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
+from __future__ import (absolute_import, division, print_function)
 import os
 import re
 import urllib2
+from mantid.api import AlgorithmFactory
 
 
 def readWebPage(url):
@@ -25,7 +33,8 @@ def ticketExists(alg, ticketHash):
 
 
 def outputError(alg, algVersion, description, notes=""):
-    print "%s, %i, %s, %s" % (alg, algVersion, description, notes)
+    print("%s, %i, %s, %s" % (alg, algVersion, description, notes))
+
 
 rstdir = r"C:\Mantid\Code\Mantid\docs\source\algorithms"
 ticketList = [9582,9586,9607,9610,9704,9804,9726]

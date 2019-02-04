@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_SOFQWCENTRE_H_
 #define MANTID_ALGORITHMS_SOFQWCENTRE_H_
 
@@ -26,27 +32,6 @@ common bins. </LI>
 
 @author Russell Taylor, Tessella plc
 @date 24/02/2010
-
-Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>
-Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport SofQWCentre : public API::Algorithm {
 public:
@@ -62,22 +47,16 @@ public:
 
   /// Algorithm's version
   int version() const override { return (1); }
+  const std::vector<std::string> seeAlso() const override {
+    return {"SofQW", "Rebin2D"};
+  }
   /// Algorithm's category for identification
   const std::string category() const override { return "Inelastic\\SofQW"; }
-  /// Create the output workspace
-  static API::MatrixWorkspace_sptr
-  setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace,
-                       const std::vector<double> &binParams,
-                       std::vector<double> &newAxis);
-  /// Convert the workspace to a distribution
-  void makeDistribution(API::MatrixWorkspace_sptr outputWS,
-                        const std::vector<double> qAxis);
-  /// Create the input properties on the given algorithm object
-  static void createInputProperties(API::Algorithm &alg);
-  /// Energy to K constant
-  static double energyToK();
 
 private:
+  /// Convert the workspace to a distribution
+  static void makeDistribution(API::MatrixWorkspace &outputWS,
+                               const std::vector<double> &qAxis);
   /// Initialization code
   void init() override;
   /// Execution code

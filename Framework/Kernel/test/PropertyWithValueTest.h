@@ -1,14 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef PROPERTYWITHVALUETEST_H_
 #define PROPERTYWITHVALUETEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidKernel/PropertyWithValue.h"
-#include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/DataItem.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/OptionalBool.h"
+#include "MantidKernel/PropertyWithValue.h"
 
 using namespace Mantid::Kernel;
 
@@ -23,7 +29,7 @@ public:
     iProp = new PropertyWithValue<int>("intProp", 1);
     dProp = new PropertyWithValue<double>("doubleProp", 9.99);
     sProp = new PropertyWithValue<std::string>("stringProp", "theValue");
-    lProp = new PropertyWithValue<long long>("int64Prop", -9876543210987654LL);
+    lProp = new PropertyWithValue<int64_t>("int64Prop", -9876543210987654LL);
     bProp = new PropertyWithValue<OptionalBool>("boolProp", bool(true));
   }
 
@@ -38,26 +44,31 @@ public:
   void testConstructor() {
     // Test that all the base class member variables are correctly assigned to
     TS_ASSERT(!iProp->name().compare("intProp"));
+    TS_ASSERT(!iProp->type().compare("number"));
     TS_ASSERT(!iProp->documentation().compare(""));
     TS_ASSERT(typeid(int) == *iProp->type_info());
     TS_ASSERT(iProp->isDefault());
 
     TS_ASSERT(!dProp->name().compare("doubleProp"));
+    TS_ASSERT(!dProp->type().compare("number"));
     TS_ASSERT(!dProp->documentation().compare(""));
     TS_ASSERT(typeid(double) == *dProp->type_info());
     TS_ASSERT(dProp->isDefault());
 
     TS_ASSERT(!sProp->name().compare("stringProp"));
+    TS_ASSERT(!sProp->type().compare("string"));
     TS_ASSERT(!sProp->documentation().compare(""));
     TS_ASSERT(typeid(std::string) == *sProp->type_info());
     TS_ASSERT(sProp->isDefault());
 
     TS_ASSERT(!lProp->name().compare("int64Prop"));
+    TS_ASSERT(!lProp->type().compare("number"));
     TS_ASSERT(!lProp->documentation().compare(""));
-    TS_ASSERT(typeid(long long) == *lProp->type_info());
+    TS_ASSERT(typeid(int64_t) == *lProp->type_info());
     TS_ASSERT(lProp->isDefault());
 
     TS_ASSERT(!bProp->name().compare("boolProp"));
+    TS_ASSERT(!bProp->type().compare("optional boolean"));
     TS_ASSERT(!bProp->documentation().compare(""));
     TS_ASSERT(typeid(OptionalBool) == *bProp->type_info());
     TS_ASSERT(bProp->isDefault());
@@ -102,8 +113,8 @@ public:
   the size of the property is 2.
   */
   void testSizeOfVectorOfVectorProperty() {
-    typedef std::vector<int> VecInt;
-    typedef std::vector<VecInt> VecVecInt;
+    using VecInt = std::vector<int>;
+    using VecVecInt = std::vector<VecInt>;
     // Test vector value property.
     VecVecInt v;
     v.push_back(VecInt(1, 0));
@@ -148,7 +159,7 @@ public:
     TS_ASSERT_EQUALS(s.setValue("it works"), "");
     TS_ASSERT_EQUALS(s.operator()(), "it works");
 
-    PropertyWithValue<long long> l("test", 1);
+    PropertyWithValue<int64_t> l("test", 1);
     TS_ASSERT_EQUALS(l.setValue("10"), "");
     TS_ASSERT_EQUALS(l, 10);
     TS_ASSERT_EQUALS(l.setValue("1234567890123456"), "");
@@ -164,17 +175,23 @@ public:
 
 private:
   class DataObjectOne : public DataItem {
-    const std::string name() const override { return "MyName1"; };
+    const std::string &getName() const override { return m_name; };
     const std::string id() const override { return "DataObjectOne"; }
     bool threadSafe() const override { return true; }
-    const std::string toString() const override { return name(); }
+    const std::string toString() const override { return m_name; }
+
+  private:
+    std::string m_name{"MyName1"};
   };
 
   class DataObjectTwo : public DataItem {
-    const std::string name() const override { return "MyName2"; };
+    const std::string &getName() const override { return m_name; };
     const std::string id() const override { return "DataObjectTwo"; }
     bool threadSafe() const override { return true; }
-    const std::string toString() const override { return name(); }
+    const std::string toString() const override { return m_name; }
+
+  private:
+    std::string m_name{"MyName2"};
   };
 
 public:
@@ -194,7 +211,7 @@ public:
             i.type());
     TS_ASSERT_EQUALS(i.getDefault(), "3");
 
-    PropertyWithValue<long long> l("defau1", 987987987987LL);
+    PropertyWithValue<int64_t> l("defau1", 987987987987LL);
     TS_ASSERT_EQUALS(l.getDefault(), "987987987987");
     TS_ASSERT_EQUALS(l.setValue("5"), "");
     TS_ASSERT_EQUALS(l.getDefault(), "987987987987");
@@ -242,10 +259,10 @@ public:
     TS_ASSERT(s.isDefault());
     TS_ASSERT_EQUALS(sProp->operator()(), "theValue");
 
-    PropertyWithValue<long long> l = *lProp;
+    PropertyWithValue<int64_t> l = *lProp;
     TS_ASSERT(!lProp->name().compare("int64Prop"));
     TS_ASSERT(!lProp->documentation().compare(""));
-    TS_ASSERT(typeid(long long) == *lProp->type_info());
+    TS_ASSERT(typeid(int64_t) == *lProp->type_info());
     TS_ASSERT(lProp->isDefault());
     TS_ASSERT_EQUALS(l, -9876543210987654LL);
   }
@@ -272,7 +289,7 @@ public:
     TS_ASSERT(!s.isDefault());
     TS_ASSERT_EQUALS(sProp->operator()(), "theValue");
 
-    PropertyWithValue<long long> l("Prop4", 5);
+    PropertyWithValue<int64_t> l("Prop4", 5);
     l = *lProp;
     TS_ASSERT(!l.name().compare("Prop4"));
     TS_ASSERT(!l.documentation().compare(""));
@@ -300,7 +317,7 @@ public:
     s = "testing";
     TS_ASSERT(i.isDefault());
 
-    PropertyWithValue<long long> l("Prop4", 987987987987LL);
+    PropertyWithValue<int64_t> l("Prop4", 987987987987LL);
     TS_ASSERT_EQUALS(l = 2, 2);
     TS_ASSERT(!l.isDefault());
     l = 987987987987LL;
@@ -321,7 +338,7 @@ public:
     TS_ASSERT_EQUALS(ss.operator()(), "tested");
     TS_ASSERT_EQUALS(s.operator()(), "tested");
 
-    PropertyWithValue<long long> ll("Prop4.4", 6);
+    PropertyWithValue<int64_t> ll("Prop4.4", 6);
     l = ll = 789789789789LL;
     TS_ASSERT_EQUALS(ll, 789789789789LL);
     TS_ASSERT_EQUALS(l, 789789789789LL);
@@ -368,7 +385,7 @@ public:
     TS_ASSERT_EQUALS(d, 9.99);
     std::string str = *sProp;
     TS_ASSERT(!str.compare("theValue"));
-    long long l = *lProp;
+    int64_t l = *lProp;
     TS_ASSERT_EQUALS(l, -9876543210987654LL);
   }
 
@@ -383,7 +400,7 @@ public:
 
   void testCasting() {
     TS_ASSERT_DIFFERS(dynamic_cast<Property *>(iProp),
-                      static_cast<Property *>(0));
+                      static_cast<Property *>(nullptr));
     PropertyWithValue<int> i("Prop1", 5);
     Property *p = dynamic_cast<Property *>(&i);
     TS_ASSERT(!p->name().compare("Prop1"));
@@ -393,7 +410,7 @@ public:
     TS_ASSERT_EQUALS(i, 10);
 
     TS_ASSERT_DIFFERS(dynamic_cast<Property *>(dProp),
-                      static_cast<Property *>(0));
+                      static_cast<Property *>(nullptr));
     PropertyWithValue<double> d("Prop2", 5.5);
     Property *pp = dynamic_cast<Property *>(&d);
     TS_ASSERT(!pp->name().compare("Prop2"));
@@ -408,7 +425,7 @@ public:
     TS_ASSERT_EQUALS(d, 7.777);
 
     TS_ASSERT_DIFFERS(dynamic_cast<Property *>(sProp),
-                      static_cast<Property *>(0));
+                      static_cast<Property *>(nullptr));
     PropertyWithValue<std::string> s("Prop3", "testing");
     Property *ppp = dynamic_cast<Property *>(&s);
     TS_ASSERT(!ppp->name().compare("Prop3"));
@@ -418,8 +435,8 @@ public:
     TS_ASSERT_EQUALS(s.operator()(), "newValue");
 
     TS_ASSERT_DIFFERS(dynamic_cast<Property *>(lProp),
-                      static_cast<Property *>(0));
-    PropertyWithValue<long long> l("Prop4", 789789789789LL);
+                      static_cast<Property *>(nullptr));
+    PropertyWithValue<int64_t> l("Prop4", 789789789789LL);
     Property *pppp = dynamic_cast<Property *>(&l);
     TS_ASSERT(!pppp->name().compare("Prop4"));
     TS_ASSERT(!pppp->value().compare("789789789789"));
@@ -434,8 +451,9 @@ public:
     TS_ASSERT_EQUALS(p.isValid(), "A value must be entered for this parameter");
     TS_ASSERT_EQUALS(p.setValue("I'm here"), "");
     TS_ASSERT_EQUALS(p.isValid(), "");
-    TS_ASSERT_EQUALS(p.setValue(""),
-                     "A value must be entered for this parameter");
+    TS_ASSERT(
+        p.setValue("").find("A value must be entered for this parameter") !=
+        std::string::npos);
     TS_ASSERT_EQUALS(p.value(), "I'm here");
   }
 
@@ -448,15 +466,16 @@ public:
     PropertyWithValue<int> pi("test", 11,
                               boost::make_shared<BoundedValidator<int>>(1, 10));
     TS_ASSERT_EQUALS(pi.isValid(), start + "11" + greaterThan + "10" + end);
-    TS_ASSERT_EQUALS(pi.setValue("0"), start + "0" + lessThan + "1" + end);
+    TS_ASSERT(pi.setValue("0").find(start + "0" + lessThan + "1" + end) !=
+              std::string::npos);
     TS_ASSERT_EQUALS(pi.value(), "11");
     TS_ASSERT_EQUALS(pi.isValid(), start + "11" + greaterThan + "10" + end);
     TS_ASSERT_EQUALS(pi.setValue("1"), "");
     TS_ASSERT_EQUALS(pi.isValid(), "");
     TS_ASSERT_EQUALS(pi.setValue("10"), "");
     TS_ASSERT_EQUALS(pi.isValid(), "");
-    TS_ASSERT_EQUALS(pi.setValue("11"),
-                     start + "11" + greaterThan + "10" + end);
+    TS_ASSERT(pi.setValue("11").find(start + "11" + greaterThan + "10" + end) !=
+              std::string::npos);
     TS_ASSERT_EQUALS(pi.value(), "10");
     TS_ASSERT_EQUALS(pi.isValid(), "");
     std::string errorMsg = pi.setValue("");
@@ -471,15 +490,16 @@ public:
     PropertyWithValue<double> pd(
         "test", 11.0, boost::make_shared<BoundedValidator<double>>(1.0, 10.0));
     TS_ASSERT_EQUALS(pd.isValid(), start + "11" + greaterThan + "10" + end);
-    TS_ASSERT_EQUALS(pd.setValue("0.9"), start + "0.9" + lessThan + "1" + end);
+    TS_ASSERT(pd.setValue("0.9").find(start + "0.9" + lessThan + "1" + end) !=
+              std::string::npos);
     TS_ASSERT_EQUALS(pd.value(), "11");
     TS_ASSERT_EQUALS(pd.isValid(), start + "11" + greaterThan + "10" + end);
     TS_ASSERT_EQUALS(pd.setValue("1"), "");
     TS_ASSERT_EQUALS(pd.isValid(), "");
     TS_ASSERT_EQUALS(pd.setValue("10"), "");
     TS_ASSERT_EQUALS(pd.isValid(), "");
-    TS_ASSERT_EQUALS(pd.setValue("10.1"),
-                     start + "10.1" + greaterThan + "10" + end);
+    TS_ASSERT(pd.setValue("10.1").find(start + "10.1" + greaterThan + "10" +
+                                       end) != std::string::npos);
     TS_ASSERT_EQUALS(pd.value(), "10");
     TS_ASSERT_EQUALS(pd.isValid(), "");
 
@@ -488,32 +508,35 @@ public:
         "test", "",
         boost::make_shared<BoundedValidator<std::string>>("B", "T"));
     TS_ASSERT_EQUALS(ps.isValid(), start + "" + lessThan + "B" + end);
-    TS_ASSERT_EQUALS(ps.setValue("AZ"), start + "AZ" + lessThan + "B" + end);
+    TS_ASSERT(ps.setValue("AZ").find(start + "AZ" + lessThan + "B" + end) !=
+              std::string::npos);
     TS_ASSERT_EQUALS(ps.value(), "");
     TS_ASSERT_EQUALS(ps.isValid(), start + "" + lessThan + "B" + end);
     TS_ASSERT_EQUALS(ps.setValue("B"), "");
     TS_ASSERT_EQUALS(ps.isValid(), "");
     TS_ASSERT_EQUALS(ps.setValue("T"), "");
     TS_ASSERT_EQUALS(ps.isValid(), "");
-    TS_ASSERT_EQUALS(ps.setValue("TA"), start + "TA" + greaterThan + "T" + end);
+    TS_ASSERT(ps.setValue("TA").find(start + "TA" + greaterThan + "T" + end) !=
+              std::string::npos);
     TS_ASSERT_EQUALS(ps.value(), "T");
     TS_ASSERT_EQUALS(ps.isValid(), "");
 
     // int64 tests
-    PropertyWithValue<long long> pl(
+    PropertyWithValue<int64_t> pl(
         "test", 987987987987LL,
-        boost::make_shared<BoundedValidator<long long>>(0, 789789789789LL));
+        boost::make_shared<BoundedValidator<int64_t>>(0, 789789789789LL));
     TS_ASSERT_EQUALS(pl.isValid(), start + "987987987987" + greaterThan +
                                        "789789789789" + end);
-    TS_ASSERT_EQUALS(pl.setValue("-1"), start + "-1" + lessThan + "0" + end);
+    TS_ASSERT(pl.setValue("-1").find(start + "-1" + lessThan + "0" + end) !=
+              std::string::npos);
     TS_ASSERT_EQUALS(pl.value(), "987987987987");
     TS_ASSERT_EQUALS(pl.setValue("0"), "");
     TS_ASSERT_EQUALS(pl.isValid(), "");
     TS_ASSERT_EQUALS(pl.setValue("789789789789"), "");
     TS_ASSERT_EQUALS(pl.isValid(), "");
-    TS_ASSERT_EQUALS(pl.setValue("789789789790"), start + "789789789790" +
-                                                      greaterThan +
-                                                      "789789789789" + end);
+    TS_ASSERT(pl.setValue("789789789790")
+                  .find(start + "789789789790" + greaterThan + "789789789789" +
+                        end) != std::string::npos);
     TS_ASSERT_EQUALS(pl.value(), "789789789789");
   }
 
@@ -534,9 +557,9 @@ public:
     TS_ASSERT_EQUALS(p.isValid(), "");
     TS_ASSERT_EQUALS(p.setValue("two"), "");
     TS_ASSERT_EQUALS(p.isValid(), "");
-    TS_ASSERT_EQUALS(
-        p.setValue("three"),
-        "The value \"three\" is not in the list of allowed values");
+    TS_ASSERT(p.setValue("three").find(
+                  "The value \"three\" is not in the list of allowed values") !=
+              std::string::npos);
     TS_ASSERT_EQUALS(p.value(), "two");
     TS_ASSERT_EQUALS(p.isValid(), "");
     std::vector<std::string> s;
@@ -637,7 +660,7 @@ public:
 
   void test_string_property_alias() {
     // system("pause");
-    std::vector<std::string> allowedValues{"Hello", "World"};
+    std::array<std::string, 2> allowedValues = {{"Hello", "World"}};
     std::map<std::string, std::string> alias{{"1", "Hello"}, {"0", "World"}};
     auto validator =
         boost::make_shared<ListValidator<std::string>>(allowedValues, alias);
@@ -679,9 +702,9 @@ public:
     auto values = property.allowedValues();
     auto possibilities = OptionalBool::strToEmumMap();
     TSM_ASSERT_EQUALS("3 states allowed", possibilities.size(), values.size());
-    for (auto it = values.begin(); it != values.end(); ++it) {
+    for (auto &value : values) {
       TSM_ASSERT("value not a known state",
-                 possibilities.find(*it) != possibilities.end());
+                 possibilities.find(value) != possibilities.end());
     }
   }
 
@@ -739,7 +762,7 @@ private:
   PropertyWithValue<int> *iProp;
   PropertyWithValue<double> *dProp;
   PropertyWithValue<std::string> *sProp;
-  PropertyWithValue<long long> *lProp;
+  PropertyWithValue<int64_t> *lProp;
   PropertyWithValue<OptionalBool> *bProp;
 };
 

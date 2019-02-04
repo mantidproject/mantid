@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/ProgressBase.h"
 #include <boost/python/class.hpp>
 
@@ -16,8 +22,9 @@ void export_ProgressBase() {
            "Increment the progress by 1 and report along with "
            "the given message")
 
-      .def("report", (void (ProgressBase::*)(int64_t, const std::string &)) &
-                         ProgressBase::report,
+      .def("report",
+           (void (ProgressBase::*)(int64_t, const std::string &)) &
+               ProgressBase::report,
            (arg("self"), arg("i"), arg("msg")),
            "Set the progress to given amount and "
            "report along with the given message")

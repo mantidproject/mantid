@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_SmoothNeighbours_H_
 #define MANTID_ALGORITHMS_SmoothNeighbours_H_
 
@@ -12,7 +18,7 @@
 
 namespace Mantid {
 namespace Algorithms {
-typedef std::map<specnum_t, Mantid::Kernel::V3D> SpectraDistanceMap;
+using SpectraDistanceMap = std::map<specnum_t, Mantid::Kernel::V3D>;
 
 /*
 Filters spectra detector list by radius.
@@ -56,27 +62,6 @@ private:
 
   @authors Janik Zikovsky, Vickie Lynch, SNS
   @date Oct 2010
-
-  Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
-
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>
-  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport SmoothNeighbours : public API::Algorithm {
 public:
@@ -92,6 +77,9 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return (1); }
+  const std::vector<std::string> seeAlso() const override {
+    return {"SmoothData"};
+  }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override {
     return "Transforms\\Smoothing";
@@ -149,16 +137,16 @@ private:
   Mantid::API::MatrixWorkspace_sptr inWS;
 
   /// Each neighbours is specified as a pair with workspace index, weight.
-  typedef std::pair<size_t, double> weightedNeighbour;
+  using weightedNeighbour = std::pair<size_t, double>;
 
   /// Vector of list of neighbours (with weight) for each workspace index.
   std::vector<std::vector<weightedNeighbour>> m_neighbours;
 
   /// Progress reporter
-  Mantid::API::Progress *m_prog;
+  std::unique_ptr<Mantid::API::Progress> m_progress = nullptr;
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHMS_SmoothNeighbours_H_*/

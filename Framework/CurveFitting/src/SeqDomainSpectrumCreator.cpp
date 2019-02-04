@@ -1,14 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/SeqDomainSpectrumCreator.h"
-#include "MantidCurveFitting/FunctionDomain1DSpectrumCreator.h"
-#include "MantidCurveFitting/Jacobian.h"
-#include "MantidCurveFitting/SeqDomain.h"
 #include "MantidAPI/IEventWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidKernel/Matrix.h"
+#include "MantidCurveFitting/FunctionDomain1DSpectrumCreator.h"
+#include "MantidCurveFitting/SeqDomain.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidKernel/Matrix.h"
 
 namespace Mantid {
 namespace CurveFitting {
@@ -218,17 +224,12 @@ bool SeqDomainSpectrumCreator::histogramIsUsable(size_t i) const {
     throw std::invalid_argument("No matrix workspace assigned.");
   }
 
-  try {
-    Geometry::IDetector_const_sptr detector = m_matrixWorkspace->getDetector(i);
+  const auto &spectrumInfo = m_matrixWorkspace->spectrumInfo();
 
-    if (!detector) {
-      return true;
-    }
-
-    return !detector->isMasked();
-  } catch (Kernel::Exception::NotFoundError) {
+  if (!spectrumInfo.hasDetectors(i)) {
     return true;
   }
+  return !spectrumInfo.isMasked(i);
 }
 
 } // namespace CurveFitting

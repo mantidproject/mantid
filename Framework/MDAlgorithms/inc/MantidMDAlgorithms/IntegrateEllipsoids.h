@@ -1,17 +1,26 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MDALGORITHMS_INTEGRATE_ELLIPSOIDS_H_
 #define MANTID_MDALGORITHMS_INTEGRATE_ELLIPSOIDS_H_
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidMDAlgorithms/MDWSDescription.h"
-#include "MantidMDAlgorithms/Integrate3DEvents.h"
-#include "MantidMDAlgorithms/UnitsConversionHelper.h"
-#include "MantidMDAlgorithms/MDTransfInterface.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidMDAlgorithms/Integrate3DEvents.h"
+#include "MantidMDAlgorithms/MDTransfInterface.h"
+#include "MantidMDAlgorithms/MDWSDescription.h"
+#include "MantidMDAlgorithms/UnitsConversionHelper.h"
 
 namespace Mantid {
+namespace Geometry {
+class DetectorInfo;
+}
 namespace MDAlgorithms {
 
 class DLLExport IntegrateEllipsoids : public API::Algorithm {
@@ -24,9 +33,14 @@ public:
   }
 
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"IntegrateEllipsoidsTwoStep"};
+  }
   const std::string category() const override;
 
 private:
+  using PrincipleAxes = std::array<std::vector<double>, 3>;
+
   void init() override;
   void exec() override;
   void qListFromEventWS(Integrate3DEvents &integrator, API::Progress &prog,
@@ -37,7 +51,7 @@ private:
                         Kernel::DblMatrix const &UBinv, bool hkl_integ);
 
   /// Calculate if this Q is on a detector
-  void calculateE1(Geometry::Instrument_const_sptr inst);
+  void calculateE1(const Geometry::DetectorInfo &detectorInfo);
 
   void runMaskDetectors(Mantid::DataObjects::PeaksWorkspace_sptr peakWS,
                         std::string property, std::string values);

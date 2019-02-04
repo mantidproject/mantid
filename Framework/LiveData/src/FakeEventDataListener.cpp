@@ -1,15 +1,22 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidLiveData/FakeEventDataListener.h"
-#include "MantidLiveData/Exception.h"
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidKernel/MersenneTwister.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/WriteLock.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/MersenneTwister.h"
+#include "MantidKernel/WriteLock.h"
+#include "MantidLiveData/Exception.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using Mantid::Types::Core::DateAndTime;
 
 namespace Mantid {
 namespace LiveData {
@@ -17,19 +24,22 @@ DECLARE_LISTENER(FakeEventDataListener)
 
 /// Constructor
 FakeEventDataListener::FakeEventDataListener()
-    : ILiveListener(), m_buffer(), m_rand(new Kernel::MersenneTwister(5489)),
+    : LiveListener(), m_buffer(), m_rand(new Kernel::MersenneTwister(5489)),
       m_timer(), m_callbackloop(1), m_numExtractDataCalls(0), m_runNumber(1) {
-  if (!ConfigService::Instance().getValue("fakeeventdatalistener.datarate",
-                                          m_datarate))
-    m_datarate = 200; // Default data rate. Low so that our lowest-powered
-                      // buildserver can cope.
-  // For auto-ending and restarting runs
-  if (!ConfigService::Instance().getValue("fakeeventdatalistener.endrunevery",
-                                          m_endRunEvery))
-    m_endRunEvery = 0;
-  if (!ConfigService::Instance().getValue("fakeeventdatalistener.notyettimes",
-                                          m_notyettimes))
-    m_notyettimes = 0;
+
+  auto datarateConfigVal =
+      ConfigService::Instance().getValue<int>("fakeeventdatalistener.datarate");
+  m_datarate = datarateConfigVal.get_value_or(
+      200); // Default data rate. Low so that our lowest-powered
+            // buildserver can cope.
+            // For auto-ending and restarting runs
+  auto endRunEveryConfigVal = ConfigService::Instance().getValue<int>(
+      "fakeeventdatalistener.endrunevery");
+  m_endRunEvery = endRunEveryConfigVal.get_value_or(0);
+
+  auto notyettimesConfigVal = ConfigService::Instance().getValue<int>(
+      "fakeeventdatalistener.notyettimes");
+  m_notyettimes = notyettimesConfigVal.get_value_or(0);
 }
 
 /// Destructor
@@ -61,7 +71,8 @@ ILiveListener::RunStatus FakeEventDataListener::runStatus() {
 int FakeEventDataListener::runNumber() const { return m_runNumber; }
 
 void FakeEventDataListener::start(
-    Kernel::DateAndTime /*startTime*/) // Ignore the start time for now at least
+    Types::Core::DateAndTime /*startTime*/) // Ignore the start time for now at
+                                            // least
 {
   // Set up the workspace buffer (probably won't know its dimensions before this
   // point)
@@ -72,7 +83,8 @@ void FakeEventDataListener::start(
       WorkspaceFactory::Instance().create("EventWorkspace", 2, 2, 1));
   // Set a sample tof range
   m_rand->setRange(40000, 60000);
-  m_rand->setSeed(Kernel::DateAndTime::getCurrentTime().totalNanoseconds());
+  m_rand->setSeed(
+      Types::Core::DateAndTime::getCurrentTime().totalNanoseconds());
 
   // If necessary, calculate the number of events we need to generate on each
   // call of generateEvents
@@ -135,10 +147,10 @@ boost::shared_ptr<Workspace> FakeEventDataListener::extractData() {
 void FakeEventDataListener::generateEvents(Poco::Timer &) {
   std::lock_guard<std::mutex> _lock(m_mutex);
   for (long i = 0; i < m_callbackloop; ++i) {
-    m_buffer->getSpectrum(0)
-        .addEventQuickly(DataObjects::TofEvent(m_rand->nextValue()));
-    m_buffer->getSpectrum(1)
-        .addEventQuickly(DataObjects::TofEvent(m_rand->nextValue()));
+    m_buffer->getSpectrum(0).addEventQuickly(
+        Types::Event::TofEvent(m_rand->nextValue()));
+    m_buffer->getSpectrum(1).addEventQuickly(
+        Types::Event::TofEvent(m_rand->nextValue()));
   }
 }
 } // namespace LiveData

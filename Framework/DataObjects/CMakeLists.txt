@@ -36,18 +36,22 @@ set ( SRC_FILES
 	src/PeakShapeSpherical.cpp
 	src/PeakShapeSphericalFactory.cpp
 	src/PeaksWorkspace.cpp
+	src/PropertyWithValue.cpp
 	src/RebinnedOutput.cpp
 	src/ReflectometryTransform.cpp
+	src/ScanningWorkspaceBuilder.cpp
 	src/SpecialWorkspace2D.cpp
 	src/SplittersWorkspace.cpp
 	src/TableColumn.cpp
 	src/TableWorkspace.cpp
 	src/VectorColumn.cpp
 	src/Workspace2D.cpp
+	src/WorkspaceCreation.cpp
+	src/WorkspaceProperty.cpp
 	src/WorkspaceSingleValue.cpp
 )
 
-set ( SRC_UNITY_IGNORE_FILES 
+set ( SRC_UNITY_IGNORE_FILES
 	src/Workspace2D.cpp
 	src/WorkspaceSingleValue.cpp
 	src/EventWorkspace.cpp
@@ -58,9 +62,9 @@ set ( INC_FILES
 	inc/MantidDataObjects/AffineMatrixParameterParser.h
 	inc/MantidDataObjects/BoxControllerNeXusIO.h
 	inc/MantidDataObjects/CalculateReflectometry.h
-    inc/MantidDataObjects/CalculateReflectometryKiKf.h
+	inc/MantidDataObjects/CalculateReflectometryKiKf.h
+	inc/MantidDataObjects/CalculateReflectometryP.h
 	inc/MantidDataObjects/CalculateReflectometryQxQz.h
-    inc/MantidDataObjects/CalculateReflectometryP.h
 	inc/MantidDataObjects/CoordTransformAffine.h
 	inc/MantidDataObjects/CoordTransformAffineParser.h
 	inc/MantidDataObjects/CoordTransformAligned.h
@@ -114,6 +118,7 @@ set ( INC_FILES
 	inc/MantidDataObjects/PeaksWorkspace.h
 	inc/MantidDataObjects/RebinnedOutput.h
 	inc/MantidDataObjects/ReflectometryTransform.h
+	inc/MantidDataObjects/ScanningWorkspaceBuilder.h
 	inc/MantidDataObjects/SkippingPolicy.h
 	inc/MantidDataObjects/SpecialWorkspace2D.h
 	inc/MantidDataObjects/SplittersWorkspace.h
@@ -121,8 +126,8 @@ set ( INC_FILES
 	inc/MantidDataObjects/TableWorkspace.h
 	inc/MantidDataObjects/VectorColumn.h
 	inc/MantidDataObjects/Workspace2D.h
+	inc/MantidDataObjects/WorkspaceCreation.h
 	inc/MantidDataObjects/WorkspaceSingleValue.h
-
 )
 
 set ( TEST_FILES
@@ -171,18 +176,19 @@ set ( TEST_FILES
 	PeaksWorkspaceTest.h
 	RebinnedOutputTest.h
 	RefAxisTest.h
-        ReflectometryTransformTest.h
+	ReflectometryTransformTest.h
+	ScanningWorkspaceBuilderTest.h
 	SkippingPolicyTest.h
 	SpecialWorkspace2DTest.h
 	SplittersWorkspaceTest.h
 	TableColumnTest.h
 	TableWorkspacePropertyTest.h
 	TableWorkspaceTest.h
-	TofEventTest.h
 	VectorColumnTest.h
 	WeightedEventNoTimeTest.h
 	WeightedEventTest.h
 	Workspace2DTest.h
+	WorkspaceCreationTest.h
 	WorkspaceSingleValueTest.h
 	WorkspaceValidatorsTest.h
 )
@@ -203,11 +209,13 @@ enable_precompiled_headers( inc/MantidDataObjects/PrecompiledHeader.h SRC_FILES 
 # Add the target for this directory
 add_library ( DataObjects ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
-set_target_properties ( DataObjects PROPERTIES OUTPUT_NAME MantidDataObjects 
+set_target_properties ( DataObjects PROPERTIES OUTPUT_NAME MantidDataObjects
                                                COMPILE_DEFINITIONS IN_MANTID_DATAOBJECTS )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties ( DataObjects PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+  set_target_properties(DataObjects PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+elseif ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
+  set_target_properties(DataObjects PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
 endif ()
 
 # Intensive use of templated libaries can cause large objects to be generated. These require
@@ -228,5 +236,4 @@ add_subdirectory ( test )
 # Installation settings
 ###########################################################################
 
-install ( TARGETS DataObjects ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )
-
+mtd_install_targets( TARGETS DataObjects INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})

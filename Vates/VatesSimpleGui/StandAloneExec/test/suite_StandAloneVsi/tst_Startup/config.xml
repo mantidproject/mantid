@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<testconfig version="1.0">
-<information>
-<summary>Startup/Shutdown program</summary>
-<description>This test looks to see if you can startup and then shutdown the program cleanly without loading 
-any data or looking at any view.</description>
-</information>
-</testconfig>

@@ -1,17 +1,23 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef CORRECTTOFILE_H_
 #define CORRECTTOFILE_H_
 
 //-------------------
 // Includes
 //--------------------
-#include <cxxtest/TestSuite.h>
-#include "MantidAlgorithms/CorrectToFile.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAlgorithms/CorrectToFile.h"
 #include "MantidDataHandling/LoadRKH.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <Poco/Path.h>
+#include <cxxtest/TestSuite.h>
 
 using Mantid::API::AnalysisDataService;
 using Mantid::API::MatrixWorkspace_sptr;
@@ -36,7 +42,7 @@ public:
   void testExec2D() {
     // Need a workspace to correct
     MatrixWorkspace_sptr testInput =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(10, 102, 1.5);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(10, 102, 1.5);
     testInput->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
 
@@ -63,7 +69,7 @@ public:
   void testExecEvent() {
     // Need a workspace to correct
     MatrixWorkspace_sptr testInput =
-        WorkspaceCreationHelper::CreateEventWorkspace(10, 102, 100, 1.5);
+        WorkspaceCreationHelper::createEventWorkspace(10, 102, 100, 1.5);
     testInput->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
 
@@ -89,7 +95,7 @@ public:
 
   void testSpectraDivide() { // Need a workspace to correct
     MatrixWorkspace_sptr testInput =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(102, 32, 1.5);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(102, 32, 1.5);
 
     MatrixWorkspace_sptr data =
         executeAlgorithm(testInput, "SpectrumNumber", "Divide");
@@ -114,7 +120,7 @@ public:
 
   void testSpectraMultip() { // Need a workspace to correct
     MatrixWorkspace_sptr testInput =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(102, 32, 1.5);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(102, 32, 1.5);
 
     MatrixWorkspace_sptr data =
         executeAlgorithm(testInput, "SpectrumNumber", "Multiply", false);

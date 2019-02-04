@@ -1,7 +1,13 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/TOFSANSResolution.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -131,7 +137,7 @@ void TOFSANSResolution::exec() {
   const auto &spectrumInfo = reducedWS->spectrumInfo();
   const double L1 = spectrumInfo.l1();
 
-  PARALLEL_FOR2(reducedWS, iqWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*reducedWS, *iqWS))
   for (int i = 0; i < numberOfSpectra; i++) {
     PARALLEL_START_INTERUPT_REGION
     if (!spectrumInfo.hasDetectors(i)) {

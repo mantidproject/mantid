@@ -34,20 +34,20 @@
 #define MATRIX_H
 
 #include <QHeaderView>
-#include <QTableView>
-#include <QPrinter>
-#include <qpixmap.h>
 #include <QMessageBox>
+#include <QPrinter>
+#include <QTableView>
+#include <qpixmap.h>
 
 #include "MatrixModel.h"
 #include "MdiSubWindow.h"
-#include "ScriptingEnv.h"
 #include "Scripted.h"
+#include "ScriptingEnv.h"
 
-#include "MantidQtAPI/IProjectSerialisable.h"
+#include "MantidQtWidgets/Common/IProjectSerialisable.h"
 
-#include <qwt_double_rect.h>
 #include <qwt_color_map.h>
+#include <qwt_double_rect.h>
 
 #include <math.h>
 
@@ -66,7 +66,7 @@ class Matrix : public MdiSubWindow, public Scripted {
 
 protected:
   Matrix(ScriptingEnv *env, const QString &label, QWidget *parent,
-         const QString &name = QString(), Qt::WFlags f = 0);
+         const QString &name = QString(), Qt::WFlags f = nullptr);
 
 public:
   /**
@@ -82,9 +82,10 @@ public:
    * @param f :: window flags
    */
   Matrix(ScriptingEnv *env, int r, int c, const QString &label, QWidget *parent,
-         const QString &name = QString(), Qt::WFlags f = 0);
+         const QString &name = QString(), Qt::WFlags f = nullptr);
   Matrix(ScriptingEnv *env, const QImage &image, const QString &label,
-         QWidget *parent, const QString &name = QString(), Qt::WFlags f = 0);
+         QWidget *parent, const QString &name = QString(),
+         Qt::WFlags f = nullptr);
   ~Matrix() override;
 
   enum Operation {
@@ -251,7 +252,7 @@ public slots:
 
   //! Return the matrix formula
   QString formula() { return formula_str; };
-  //! Set the matrix forumla
+  //! Set the matrix formula
   void setFormula(const QString &s) { formula_str = s; };
 
   //! Load the matrix from a string list (i.e. lines from a project file)
@@ -262,6 +263,7 @@ public slots:
   loadFromProject(const std::string &lines, ApplicationWindow *app,
                   const int fileVersion);
   std::string saveToProject(ApplicationWindow *app) override;
+  std::vector<std::string> getWorkspaceNames() override;
 
   // selection operations
   //! Standard cut operation
@@ -282,7 +284,7 @@ public slots:
 
   //! Insert a column before the current cell
   void insertColumn();
-  //! Delte the selected columns
+  //! Delete the selected columns
   void deleteSelectedColumns();
   //! Return the number of selected columns
   int numSelectedColumns();
@@ -327,7 +329,7 @@ public slots:
   double *initWorkspace(int size);
   void freeWorkspace() {
     free(d_workspace);
-    d_workspace = NULL;
+    d_workspace = nullptr;
   };
 
   bool canCalculate(bool useMuParser = true);

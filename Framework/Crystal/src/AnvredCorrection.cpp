@@ -1,16 +1,22 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/AnvredCorrection.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidGeometry/Objects/ShapeFactory.h"
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/Material.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/Fast_Exponential.h"
-#include "MantidKernel/VectorHelper.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/Fast_Exponential.h"
+#include "MantidKernel/Material.h"
+#include "MantidKernel/Unit.h"
 
 /*  Following A.J.Schultz's anvred, the weight factors should be:
  *
@@ -162,38 +168,25 @@ void AnvredCorrection::exec() {
     throw std::runtime_error("Problem in AnvredCorrection::events not binned");
 
   // If sample not at origin, shift cached positions.
-  const V3D samplePos = m_inputWS->getInstrument()->getSample()->getPos();
-  const V3D pos = m_inputWS->getInstrument()->getSource()->getPos() - samplePos;
-  double L1 = pos.norm();
+  const auto &spectrumInfo = m_inputWS->spectrumInfo();
+  double L1 = spectrumInfo.l1();
 
   Progress prog(this, 0.0, 1.0, numHists);
   // Loop over the spectra
-  PARALLEL_FOR2(m_inputWS, correctionFactors)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS, *correctionFactors))
   for (int64_t i = 0; i < int64_t(numHists); ++i) {
     PARALLEL_START_INTERUPT_REGION
 
-    // Get detector position
-    IDetector_const_sptr det;
-    try {
-      det = m_inputWS->getDetector(i);
-    } catch (Exception::NotFoundError &) {
-      // Catch if no detector. Next line tests whether this happened - test
-      // placed
-      // outside here because Mac Intel compiler doesn't like 'continue' in a
-      // catch
-      // in an openmp block.
-    }
-    // If no detector found, skip onto the next spectrum
-    if (!det)
+    // If no detector is found, skip onto the next spectrum
+    if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i))
       continue;
 
     // This is the scattered beam direction
     Instrument_const_sptr inst = m_inputWS->getInstrument();
-    V3D dir = det->getPos() - samplePos;
-    double L2 = dir.norm();
+    double L2 = spectrumInfo.l2(i);
     // Two-theta = polar angle = scattering angle = between +Z vector and the
     // scattered beam
-    double scattering = dir.angle(V3D(0.0, 0.0, 1.0));
+    double scattering = spectrumInfo.twoTheta(i);
 
     double depth = 0.2;
 
@@ -201,9 +194,9 @@ void AnvredCorrection::exec() {
 
     std::string bankName;
 
-    if (m_useScaleFactors) {
+    const auto &det = spectrumInfo.detector(i);
+    if (m_useScaleFactors)
       scale_init(det, inst, L2, depth, pathlength, bankName);
-    }
 
     Mantid::Kernel::Units::Wavelength wl;
     auto points = m_inputWS->points(i);
@@ -232,9 +225,9 @@ void AnvredCorrection::exec() {
       } else {
         double value = this->getEventWeight(lambda, scattering);
 
-        if (m_useScaleFactors) {
+        if (m_useScaleFactors)
           scale_exec(bankName, lambda, depth, inst, pathlength, value);
-        }
+
         Y[j] = Yin[j] * value;
         E[j] = Ein[j] * value;
       }
@@ -250,7 +243,7 @@ void AnvredCorrection::exec() {
   API::Run &run = correctionFactors->mutableRun();
   run.addProperty<double>("Radius", m_radius, true);
   if (!m_onlySphericalAbsorption && !m_returnTransmissionOnly)
-    run.addProperty<bool>("LorentzCorrection", 1, true);
+    run.addProperty<bool>("LorentzCorrection", true, true);
   setProperty("OutputWorkspace", correctionFactors);
 }
 
@@ -263,17 +256,9 @@ void AnvredCorrection::execEvent() {
 
   const int64_t numHists =
       static_cast<int64_t>(m_inputWS->getNumberHistograms());
-
-  const std::string unitStr = m_inputWS->getAxis(0)->unit()->unitID();
-  // Create a new outputworkspace with not much in it
-  auto correctionFactors = boost::dynamic_pointer_cast<EventWorkspace>(
-      API::WorkspaceFactory::Instance().create("EventWorkspace", numHists, 2,
-                                               1));
-
+  std::string unitStr = m_inputWS->getAxis(0)->unit()->unitID();
+  auto correctionFactors = create<EventWorkspace>(*m_inputWS);
   correctionFactors->sortAll(TOF_SORT, nullptr);
-  // Copy required stuff from it
-  API::WorkspaceFactory::Instance().initializeFromParent(
-      m_inputWS, correctionFactors, true);
   bool inPlace = (this->getPropertyValue("InputWorkspace") ==
                   this->getPropertyValue("OutputWorkspace"));
   if (inPlace)
@@ -282,40 +267,27 @@ void AnvredCorrection::execEvent() {
   // If sample not at origin, shift cached positions.
   Instrument_const_sptr inst = m_inputWS->getInstrument();
 
-  const V3D samplePos = inst->getSample()->getPos();
-  const V3D pos = inst->getSource()->getPos() - samplePos;
-  double L1 = pos.norm();
+  const auto &spectrumInfo = eventW->spectrumInfo();
+  double L1 = spectrumInfo.l1();
 
   Progress prog(this, 0.0, 1.0, numHists);
   // Loop over the spectra
-  PARALLEL_FOR2(eventW, correctionFactors)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*eventW, *correctionFactors))
   for (int64_t i = 0; i < int64_t(numHists); ++i) {
     PARALLEL_START_INTERUPT_REGION
 
     // share bin boundaries, and leave Y and E nullptr
     correctionFactors->setHistogram(i, eventW->binEdges(i));
 
-    // Get detector position
-    IDetector_const_sptr det;
-    try {
-      det = eventW->getDetector(i);
-    } catch (Exception::NotFoundError &) {
-      // Catch if no detector. Next line tests whether this happened - test
-      // placed
-      // outside here because Mac Intel compiler doesn't like 'continue' in a
-      // catch
-      // in an openmp block.
-    }
-    // If no detector found, skip onto the next spectrum
-    if (!det)
+    // If no detector is found, skip onto the next spectrum
+    if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i))
       continue;
 
     // This is the scattered beam direction
-    V3D dir = det->getPos() - samplePos;
-    double L2 = dir.norm();
+    double L2 = spectrumInfo.l2(i);
     // Two-theta = polar angle = scattering angle = between +Z vector and the
     // scattered beam
-    double scattering = dir.angle(V3D(0.0, 0.0, 1.0));
+    double scattering = spectrumInfo.twoTheta(i);
 
     EventList el = eventW->getSpectrum(i);
     el.switchTo(WEIGHTED_NOTIME);
@@ -326,6 +298,7 @@ void AnvredCorrection::execEvent() {
     double depth = 0.2;
     double pathlength = 0.0;
     std::string bankName;
+    const auto &det = spectrumInfo.detector(i);
     if (m_useScaleFactors)
       scale_init(det, inst, L2, depth, pathlength, bankName);
 
@@ -335,15 +308,13 @@ void AnvredCorrection::execEvent() {
       // get the event's TOF
       double lambda = ev.tof();
 
-      if ("TOF" == unitStr) {
+      if ("TOF" == unitStr)
         lambda = wl.convertSingleFromTOF(lambda, L1, L2, scattering, 0, 0, 0);
-      }
 
       double value = this->getEventWeight(lambda, scattering);
 
-      if (m_useScaleFactors) {
+      if (m_useScaleFactors)
         scale_exec(bankName, lambda, depth, inst, pathlength, value);
-      }
 
       ev.m_errorSquared = static_cast<float>(ev.m_errorSquared * value * value);
       ev.m_weight *= static_cast<float>(value);
@@ -351,12 +322,9 @@ void AnvredCorrection::execEvent() {
 
     correctionFactors->getSpectrum(i) += events;
 
-    auto &dets = eventW->getSpectrum(i).getDetectorIDs();
-    correctionFactors->getSpectrum(i).addDetectorIDs(dets);
     // When focussing in place, you can clear out old memory from the input one!
-    if (inPlace) {
+    if (inPlace)
       eventW->getSpectrum(i).clear();
-    }
 
     prog.report();
 
@@ -368,9 +336,8 @@ void AnvredCorrection::execEvent() {
   API::Run &run = correctionFactors->mutableRun();
   run.addProperty<double>("Radius", m_radius, true);
   if (!m_onlySphericalAbsorption && !m_returnTransmissionOnly)
-    run.addProperty<bool>("LorentzCorrection", 1, true);
-  setProperty("OutputWorkspace",
-              boost::dynamic_pointer_cast<MatrixWorkspace>(correctionFactors));
+    run.addProperty<bool>("LorentzCorrection", true, true);
+  setProperty("OutputWorkspace", std::move(correctionFactors));
 
   // Now do some cleaning-up since destructor may not be called immediately
   this->cleanup();
@@ -395,11 +362,10 @@ void AnvredCorrection::retrieveBaseProperties() {
       m_amu = sampleMaterial.absorbXSection(NeutronAtom::ReferenceLambda) * rho;
   } else // Save input in Sample with wrong atomic number and name
   {
-    NeutronAtom neutron(static_cast<uint16_t>(EMPTY_DBL()),
-                        static_cast<uint16_t>(0), 0.0, 0.0, m_smu, 0.0, m_smu,
-                        m_amu);
-    Object shape = m_inputWS->sample().getShape(); // copy
-    shape.setMaterial(Material("SetInAnvredCorrection", neutron, 1.0));
+    NeutronAtom neutron(0, 0, 0.0, 0.0, m_smu, 0.0, m_smu, m_amu);
+    auto shape = boost::shared_ptr<IObject>(
+        m_inputWS->sample().getShape().cloneWithMaterial(
+            Material("SetInAnvredCorrection", neutron, 1.0)));
     m_inputWS->mutableSample().setShape(shape);
   }
   if (m_smu != EMPTY_DBL() && m_amu != EMPTY_DBL())
@@ -559,11 +525,11 @@ void AnvredCorrection::BuildLamdaWeights() {
   }
 }
 
-void AnvredCorrection::scale_init(IDetector_const_sptr det,
+void AnvredCorrection::scale_init(const IDetector &det,
                                   Instrument_const_sptr inst, double &L2,
                                   double &depth, double &pathlength,
                                   std::string &bankName) {
-  bankName = det->getParent()->getParent()->getName();
+  bankName = det.getParent()->getParent()->getName();
   // Distance to center of detector
   boost::shared_ptr<const IComponent> det0 = inst->getComponentByName(bankName);
   if ("CORELLI" == inst->getName()) // for Corelli with sixteenpack under bank

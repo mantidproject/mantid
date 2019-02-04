@@ -1,16 +1,22 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Objects/Track.h"
-#include "MantidKernel/Tolerance.h"
-#include "MantidKernel/Matrix.h"
-#include "MantidKernel/V3D.h"
 #include "MantidGeometry/Surfaces/Surface.h"
+#include "MantidKernel/Matrix.h"
+#include "MantidKernel/Tolerance.h"
+#include "MantidKernel/V3D.h"
 
-#include <cmath>
 #include <algorithm>
+#include <cmath>
 
 namespace Mantid {
 namespace Geometry {
-using Kernel::V3D;
 using Kernel::Tolerance;
+using Kernel::V3D;
 
 /**
  * Default constructor
@@ -18,10 +24,10 @@ using Kernel::Tolerance;
 Track::Track() : m_startPoint(), m_unitVector() {}
 
 /**
-* Constructor
-* @param startPt :: Initial point
-* @param unitVector :: Directional vector. It must be unit vector.
-*/
+ * Constructor
+ * @param startPt :: Initial point
+ * @param unitVector :: Directional vector. It must be unit vector.
+ */
 Track::Track(const V3D &startPt, const V3D &unitVector)
     : m_startPoint(startPt), m_unitVector(unitVector) {}
 
@@ -109,7 +115,7 @@ void Track::removeCojoins() {
  * @param compID :: ID of the component that this link is about (Default=NULL)
  */
 void Track::addPoint(const int directionFlag, const V3D &endPoint,
-                     const Object &obj, const ComponentID compID) {
+                     const IObject &obj, const ComponentID compID) {
   IntersectionPoint newPoint(directionFlag, endPoint,
                              endPoint.distance(m_startPoint), obj, compID);
   auto lowestPtr =
@@ -118,17 +124,17 @@ void Track::addPoint(const int directionFlag, const V3D &endPoint,
 }
 
 /**
-* This adds a whole segment to the track : This currently assumes that links are
-* added in order
-* @param firstPoint :: first Point
-* @param secondPoint :: second Point
-* @param distanceAlongTrack :: Distance along track
-* @param obj :: A reference to the object that was intersected
-* @param compID :: ID of the component that this link is about (Default=NULL)
-* @retval Index of link within the track
-*/
+ * This adds a whole segment to the track : This currently assumes that links
+ * are added in order
+ * @param firstPoint :: first Point
+ * @param secondPoint :: second Point
+ * @param distanceAlongTrack :: Distance along track
+ * @param obj :: A reference to the object that was intersected
+ * @param compID :: ID of the component that this link is about (Default=NULL)
+ * @retval Index of link within the track
+ */
 int Track::addLink(const V3D &firstPoint, const V3D &secondPoint,
-                   const double distanceAlongTrack, const Object &obj,
+                   const double distanceAlongTrack, const IObject &obj,
                    const ComponentID compID) {
   // Process First Point
   Link newLink(firstPoint, secondPoint, distanceAlongTrack, obj, compID);
@@ -202,14 +208,14 @@ void Track::buildLink() {
       }
       workPt = bc->endPoint;
 
-      // ADDING to ac twice: since processing pairs
+      // incrementing ac twice: since processing pairs
       ++ac;
       ++ac;
       ++bc; // can I do this past the end ?
       if (bc != m_surfPoints.end()) {
         ++bc;
       }
-    } else // Test for glacing point / or void edges
+    } else // Test for glancing point / or void edges
     {      // These all can be skipped
       ++ac;
       ++bc;

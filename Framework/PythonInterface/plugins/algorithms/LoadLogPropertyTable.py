@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name
 from __future__ import (absolute_import, division, print_function)
 import time
@@ -17,6 +23,9 @@ class LoadLogPropertyTable(PythonAlgorithm):
         """
         return "Creates a table of Run number against the log values for that run for a range of files.\
          It can use a single log value or a list of log values."
+
+    def seeAlso(self):
+        return [ "LoadLog", "LoadMuonLog" ]
 
     # same concept as built in "CreateLogPropertyTable" but loads its own workspaces and needn't hold all in memory at once
     # select log values to put in table (list)

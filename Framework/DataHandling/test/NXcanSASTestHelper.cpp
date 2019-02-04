@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "NXcanSASTestHelper.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/NumericAxis.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/NumericAxis.h"
 #include "MantidDataHandling/NXcanSASDefinitions.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <Poco/File.h>
@@ -79,11 +85,12 @@ Mantid::API::MatrixWorkspace_sptr
 provide1DWorkspace(NXcanSASTestParameters &parameters) {
   Mantid::API::MatrixWorkspace_sptr ws;
   if (parameters.hasDx) {
-    ws = WorkspaceCreationHelper::Create1DWorkspaceConstantWithXerror(
-        parameters.size, parameters.value, parameters.error, parameters.xerror);
+    ws = WorkspaceCreationHelper::create1DWorkspaceConstantWithXerror(
+        parameters.size, parameters.value, parameters.error, parameters.xerror,
+        false);
   } else {
-    ws = WorkspaceCreationHelper::Create1DWorkspaceConstant(
-        parameters.size, parameters.value, parameters.error);
+    ws = WorkspaceCreationHelper::create1DWorkspaceConstant(
+        parameters.size, parameters.value, parameters.error, false);
   }
 
   ws->setTitle(parameters.workspaceTitle);
@@ -95,6 +102,7 @@ provide1DWorkspace(NXcanSASTestParameters &parameters) {
 
   // Set instrument
   set_instrument(ws, parameters.instrumentName);
+  ws->getSpectrum(0).setDetectorID(1);
 
   // Set to point data or histogram data
   if (parameters.isHistogram) {
@@ -114,8 +122,8 @@ provide1DWorkspace(NXcanSASTestParameters &parameters) {
 
 Mantid::API::MatrixWorkspace_sptr
 getTransmissionWorkspace(NXcanSASTestTransmissionParameters &parameters) {
-  auto ws = WorkspaceCreationHelper::Create1DWorkspaceConstant(
-      parameters.size, parameters.value, parameters.error);
+  auto ws = WorkspaceCreationHelper::create1DWorkspaceConstant(
+      parameters.size, parameters.value, parameters.error, false);
   ws->setTitle(parameters.name);
   ws->getAxis(0)->unit() =
       Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
@@ -210,4 +218,4 @@ void removeFile(std::string filename) {
   if (Poco::File(filename).exists())
     Poco::File(filename).remove();
 }
-}
+} // namespace NXcanSASTestHelper

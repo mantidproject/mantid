@@ -1,12 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef POLYNOMIALCORRECTIONTEST_H_
 #define POLYNOMIALCORRECTIONTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidAlgorithms/PolynomialCorrection.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAlgorithms/PolynomialCorrection.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -50,7 +56,7 @@ public:
     const std::string wsName = "PolynomialCorrectionTest_inputWS";
     const std::string wsNameOut = "PolynomialCorrectionTest_outputWS";
     MatrixWorkspace_sptr inputWS =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(2, 3, 0.5);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(2, 3, 0.5);
     AnalysisDataService::Instance().add(wsName, inputWS);
 
     Mantid::Algorithms::PolynomialCorrection poly3;
@@ -89,7 +95,7 @@ public:
     const std::string wsName = "PolynomialCorrectionTest_inputWS";
     const std::string wsNameOut = "PolynomialCorrectionTest_outputWS";
     MatrixWorkspace_sptr inputWS =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(2, 3, 0.5);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(2, 3, 0.5);
     AnalysisDataService::Instance().add(wsName, inputWS);
 
     Mantid::Algorithms::PolynomialCorrection poly3;
@@ -126,7 +132,7 @@ public:
   }
 
   void testEvents() {
-    EventWorkspace_sptr evin = WorkspaceCreationHelper::CreateEventWorkspace(
+    EventWorkspace_sptr evin = WorkspaceCreationHelper::createEventWorkspace(
                             1, 5, 10, 0, 1, 3),
                         evout;
     AnalysisDataService::Instance().add("test_ev_polyc", evin);

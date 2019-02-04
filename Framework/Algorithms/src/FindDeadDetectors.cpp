@@ -1,6 +1,9 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/FindDeadDetectors.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -91,24 +94,21 @@ void FindDeadDetectors::exec() {
     iprogress_step = 1;
   for (int64_t i = 0; i < int64_t(numSpec); ++i) {
     // Spectrum in the integratedWorkspace
-    auto &spec = integratedWorkspace->getSpectrum(i);
-    double &y = spec.mutableY()[0];
+    double &y = integratedWorkspace->mutableY(i)[0];
     if (y > deadThreshold) {
       y = liveValue;
     } else {
       ++countSpec;
       y = deadValue;
-      const specnum_t specNo = spec.getSpectrumNo();
+      const auto &spec = integratedWorkspace->getSpectrum(i);
       // Write the spectrum number to file
-      file << i << " " << specNo;
-      // Get the list of detectors for this spectrum and iterate over
-      const auto &dets = spec.getDetectorIDs();
-      for (const auto &det : dets) {
+      file << i << " " << spec.getSpectrumNo();
+      for (const auto &id : spec.getDetectorIDs()) {
         // Write the detector ID to file, log & the FoundDead output property
-        file << " " << det;
+        file << " " << id;
         // we could write dead detectors to the log but if they are viewing the
         // log in the MantidPlot viewer it will crash MantidPlot
-        deadDets.push_back(det);
+        deadDets.push_back(id);
         ++countDets;
       }
       file << '\n';
@@ -149,5 +149,5 @@ MatrixWorkspace_sptr FindDeadDetectors::integrateWorkspace() {
   return childAlg->getProperty("OutputWorkspace");
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

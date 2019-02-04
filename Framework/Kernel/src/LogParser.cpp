@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/LogParser.h"
-#include "MantidKernel/Strings.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
 #include <fstream>
@@ -16,11 +22,13 @@ const char *STOP_COLLECTION = "STOP_COLLECTION";
 using std::size_t;
 
 namespace Mantid {
+
+using Types::Core::DateAndTime;
 namespace Kernel {
 namespace {
 /// static logger
 Logger g_log("LogParser");
-}
+} // namespace
 
 /// @returns the name of the log created that defines the status during a run
 const std::string LogParser::statusLogName() { return std::string("running"); }
@@ -62,8 +70,10 @@ Kernel::Property *LogParser::createLogProperty(const std::string &logFName,
       // if the line doesn't start with a time treat it as a continuation of the
       // previous data
       if (change_times.empty() || isNumeric) { // if there are no previous data
-        std::string mess =
-            "Cannot parse log file " + logFName + ". Line:" + str;
+        std::string mess = std::string("Cannot parse log file ")
+                               .append(logFName)
+                               .append(". Line:")
+                               .append(str);
         g_log.error(mess);
         throw std::logic_error(mess);
       }
@@ -128,21 +138,22 @@ LogParser::CommandMap LogParser::createCommandMap(bool newStyle) const {
   CommandMap command_map;
 
   if (newStyle) {
-    command_map["START_COLLECTION"] = BEGIN;
-    command_map["STOP_COLLECTION"] = END;
-    command_map["CHANGE"] = CHANGE_PERIOD;
-    command_map["CHANGE_PERIOD"] = CHANGE_PERIOD;
+    command_map["START_COLLECTION"] = commands::BEGIN;
+    command_map["STOP_COLLECTION"] = commands::END;
+    command_map["CHANGE"] = commands::CHANGE_PERIOD;
+    command_map["CHANGE_PERIOD"] = commands::CHANGE_PERIOD;
+    command_map["ABORT"] = commands::ABORT;
   } else {
-    command_map["BEGIN"] = BEGIN;
-    command_map["RESUME"] = BEGIN;
-    command_map["END_SE_WAIT"] = BEGIN;
-    command_map["PAUSE"] = END;
-    command_map["END"] = END;
-    command_map["ABORT"] = END;
-    command_map["UPDATE"] = END;
-    command_map["START_SE_WAIT"] = END;
-    command_map["CHANGE"] = CHANGE_PERIOD;
-    command_map["CHANGE_PERIOD"] = CHANGE_PERIOD;
+    command_map["BEGIN"] = commands::BEGIN;
+    command_map["RESUME"] = commands::BEGIN;
+    command_map["END_SE_WAIT"] = commands::BEGIN;
+    command_map["PAUSE"] = commands::END;
+    command_map["END"] = commands::END;
+    command_map["ABORT"] = commands::ABORT;
+    command_map["UPDATE"] = commands::END;
+    command_map["START_SE_WAIT"] = commands::END;
+    command_map["CHANGE"] = commands::CHANGE_PERIOD;
+    command_map["CHANGE_PERIOD"] = commands::CHANGE_PERIOD;
   }
   return command_map;
 }
@@ -184,8 +195,8 @@ void LogParser::tryParsePeriod(const std::string &scom, const DateAndTime &time,
 }
 
 /** Create given the icpevent log property.
-*  @param log :: A pointer to the property
-*/
+ *  @param log :: A pointer to the property
+ */
 LogParser::LogParser(const Kernel::Property *log) : m_nOfPeriods(1) {
   Kernel::TimeSeriesProperty<int> *periods =
       new Kernel::TimeSeriesProperty<int>(periodsLogName());
@@ -197,14 +208,14 @@ LogParser::LogParser(const Kernel::Property *log) : m_nOfPeriods(1) {
   const Kernel::TimeSeriesProperty<std::string> *icpLog =
       dynamic_cast<const Kernel::TimeSeriesProperty<std::string> *>(log);
   if (!icpLog || icpLog->size() == 0) {
-    periods->addValue(Kernel::DateAndTime(), 1);
-    status->addValue(Kernel::DateAndTime(), true);
+    periods->addValue(Types::Core::DateAndTime(), 1);
+    status->addValue(Types::Core::DateAndTime(), true);
     g_log.warning()
         << "Cannot process ICPevent log. Period 1 assumed for all data.\n";
     return;
   }
 
-  std::multimap<Kernel::DateAndTime, std::string> logm =
+  std::multimap<Types::Core::DateAndTime, std::string> logm =
       icpLog->valueAsMultiMap();
   CommandMap command_map =
       createCommandMap(LogParser::isICPEventLogNewStyle(logm));
@@ -218,11 +229,18 @@ LogParser::LogParser(const Kernel::Property *log) : m_nOfPeriods(1) {
     std::istringstream idata(it->second);
     idata >> scom;
     commands com = command_map[scom];
-    if (com == CHANGE_PERIOD) {
+    if (com == commands::CHANGE_PERIOD) {
       tryParsePeriod(scom, it->first, idata, periods);
-    } else if (com == BEGIN) {
+    } else if (com == commands::BEGIN) {
       status->addValue(it->first, true);
-    } else if (com == END) {
+    } else if (com == commands::END) {
+      status->addValue(it->first, false);
+    } else if (com == commands::ABORT) {
+      // Set all previous values to false
+      const auto &times = status->timesAsVector();
+      const std::vector<bool> values(times.size(), false);
+      status->replaceValues(times, values);
+      // Add a new value at the present time
       status->addValue(it->first, false);
     }
   };
@@ -248,7 +266,7 @@ Kernel::TimeSeriesProperty<bool> *LogParser::createPeriodLog(int period) const {
   ostr << period;
   Kernel::TimeSeriesProperty<bool> *p =
       new Kernel::TimeSeriesProperty<bool>("period " + ostr.str());
-  std::map<Kernel::DateAndTime, int> pMap = periods->valueAsMap();
+  std::map<Types::Core::DateAndTime, int> pMap = periods->valueAsMap();
   auto it = pMap.begin();
   if (it->second != period)
     p->addValue(it->first, false);
@@ -261,7 +279,7 @@ Kernel::TimeSeriesProperty<bool> *LogParser::createPeriodLog(int period) const {
 /**
  * Create a log vale for the current period.
  * @param period: The period number to create the log entry for.
-*/
+ */
 Kernel::Property *LogParser::createCurrentPeriodLog(const int &period) const {
   Kernel::PropertyWithValue<int> *currentPeriodProperty =
       new Kernel::PropertyWithValue<int>("current_period", period);
@@ -281,13 +299,13 @@ Kernel::TimeSeriesProperty<bool> *LogParser::createRunningLog() const {
 namespace {
 /// Define operator for checking for new-style icp events
 struct hasNewStyleCommands {
-  bool
-  operator()(const std::pair<Mantid::Kernel::DateAndTime, std::string> &p) {
+  bool operator()(
+      const std::pair<Mantid::Types::Core::DateAndTime, std::string> &p) {
     return p.second.find(START_COLLECTION) != std::string::npos ||
            p.second.find(STOP_COLLECTION) != std::string::npos;
   }
 };
-}
+} // namespace
 
 /**
  * Check if the icp log commands are in the new style. The new style is the one
@@ -296,7 +314,7 @@ struct hasNewStyleCommands {
  * @param logm :: A log map created from a icp-event log.
  */
 bool LogParser::isICPEventLogNewStyle(
-    const std::multimap<Kernel::DateAndTime, std::string> &logm) {
+    const std::multimap<Types::Core::DateAndTime, std::string> &logm) {
   hasNewStyleCommands checker;
 
   return std::find_if(logm.begin(), logm.end(), checker) != logm.end();
@@ -312,7 +330,7 @@ bool LogParser::isICPEventLogNewStyle(
  *             TimeSeriesProperty<double>.
  * @return The mean value over time.
  * @throw runtime_error if the property is not TimeSeriesProperty<double>
-*/
+ */
 double timeMean(const Kernel::Property *p) {
   const Kernel::TimeSeriesProperty<double> *dp =
       dynamic_cast<const Kernel::TimeSeriesProperty<double> *>(p);
@@ -326,17 +344,17 @@ double timeMean(const Kernel::Property *p) {
     return dp->nthValue(1);
   }
   double res = 0.;
-  Kernel::time_duration total(0, 0, 0, 0);
+  Types::Core::time_duration total(0, 0, 0, 0);
   size_t dp_size = dp->size();
   for (size_t i = 0; i < dp_size; i++) {
     Kernel::TimeInterval t = dp->nthInterval(static_cast<int>(i));
-    Kernel::time_duration dt = t.length();
+    Types::Core::time_duration dt = t.length();
     total += dt;
     res += dp->nthValue(static_cast<int>(i)) *
-           Kernel::DateAndTime::secondsFromDuration(dt);
+           Types::Core::DateAndTime::secondsFromDuration(dt);
   }
 
-  double total_seconds = Kernel::DateAndTime::secondsFromDuration(total);
+  double total_seconds = Types::Core::DateAndTime::secondsFromDuration(total);
 
   // If all the time stamps were the same, just return the first value.
   if (total_seconds == 0.0)
@@ -348,5 +366,5 @@ double timeMean(const Kernel::Property *p) {
   return res;
 }
 
-} // namespace Geometry
+} // namespace Kernel
 } // namespace Mantid

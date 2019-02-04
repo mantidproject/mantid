@@ -1,10 +1,13 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef DATAHANDING_SAVEFOCUSEDXYE_H_
 #define DATAHANDING_SAVEFOCUSEDXYE_H_
 
-//---------------------------------------------------
-// Includes
-//---------------------------------------------------
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/SerialAlgorithm.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -36,33 +39,10 @@ namespace DataHandling {
 
      @author Laurent Chapon, ISIS Facility, Rutherford Appleton Laboratory
      @date 04/03/2009
-
-     Copyright &copy; 2009-2010 ISIS Rutherford Appleton Laboratory, NScD Oak
-   Ridge National Laboratory & European Spallation Source
-
-     This file is part of Mantid.
-
-     Mantid is free software; you can redistribute it and/or modify
-     it under the terms of the GNU General Public License as published by
-     the Free Software Foundation; either version 3 of the License, or
-     (at your option) any later version.
-
-     Mantid is distributed in the hope that it will be useful,
-     but WITHOUT ANY WARRANTY; without even the implied warranty of
-     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-     GNU General Public License for more details.
-
-     You should have received a copy of the GNU General Public License
-     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-     File change history is stored at: <https://github.com/mantidproject/mantid>
-     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-class DLLExport SaveFocusedXYE : public API::Algorithm {
+class DLLExport SaveFocusedXYE : public API::SerialAlgorithm {
 public:
   enum HeaderType { XYE, MAUD, TOPAS };
-  /// Constructor
-  SaveFocusedXYE();
   /// Algorithm's name
   const std::string name() const override { return "SaveFocusedXYE"; }
   /// Summary of algorithms purpose
@@ -74,6 +54,9 @@ public:
 
   /// Algorithm's version
   int version() const override { return (1); }
+  const std::vector<std::string> seeAlso() const override {
+    return {"SaveFullprofResolution", "SaveAscii"};
+  }
   /// Algorithm's category for identification
   const std::string category() const override {
     return "Diffraction\\DataHandling;DataHandling\\Text";
@@ -96,30 +79,30 @@ private:
   /// Write spectra header
   void writeSpectraHeader(std::ostream &os, size_t index1, size_t index2,
                           double flightPath, double tth,
-                          const std::string &caption);
+                          const std::string &caption,
+                          const std::string &spectraAxisCaption,
+                          const std::string &spectraAxisLabel,
+                          double observable);
   /// Write spectra XYE header
-  void writeXYESpectraHeader(std::ostream &os, size_t index1, size_t index2,
-                             double flightPath, double tth,
-                             const std::string &caption);
+  void writeXYESpectraHeader(std::ostream &os, size_t index1,
+                             const std::string &caption,
+                             const std::string &spectrumAxisCaption,
+                             const std::string &spectraAxisLabel,
+                             double observable);
   /// Write spectra MAUD header
   void writeMAUDSpectraHeader(std::ostream &os, size_t index1, size_t index2,
                               double flightPath, double tth,
                               const std::string &caption);
-  /// Determine the focused position for the supplied spectrum.
-  void getFocusedPos(API::MatrixWorkspace_const_sptr wksp,
-                     const size_t spectrum, double &l1, double &l2,
-                     double &tth);
-
   /// sets non workspace properties for the algorithm
   void setOtherProperties(IAlgorithm *alg, const std::string &propertyName,
                           const std::string &propertyValue,
                           int perioidNum) override;
 
   /// Header type
-  HeaderType m_headerType;
+  HeaderType m_headerType{XYE};
   /// Comment character
   std::string m_comment;
 };
-}
-}
+} // namespace DataHandling
+} // namespace Mantid
 #endif // DATAHANDING_SAVEFOCUSEDXYE_H_

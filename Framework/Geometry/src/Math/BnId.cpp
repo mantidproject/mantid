@@ -1,13 +1,19 @@
-#include <fstream>
-#include <cmath>
-#include <vector>
-#include <set>
-#include <map>
-#include <stack>
-#include <sstream>
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include <algorithm>
-#include <iterator>
+#include <cmath>
+#include <fstream>
 #include <functional>
+#include <iterator>
+#include <map>
+#include <set>
+#include <sstream>
+#include <stack>
+#include <vector>
 
 #include "MantidGeometry/Math/BnId.h"
 
@@ -110,8 +116,6 @@ int BnId::operator<(const BnId &A) const
 {
   if (A.size != size)
     return size < A.size;
-  std::pair<int, int> cntA(0, 0); // count for A
-  std::pair<int, int> cntT(0, 0); // count for this
   if (Znum != A.Znum)
     return (Znum < A.Znum) ? 1 : 0;
 
@@ -281,9 +285,7 @@ std::pair<int, BnId> BnId::makeCombination(const BnId &A) const
   if (Tnum == A.Tnum)
     return std::pair<int, BnId>(0, BnId());
 
-  int flag(0);                    // numb of diff
-  std::pair<int, int> Tcnt(0, 0); // this counter
-  std::pair<int, int> Acnt(0, 0); // A counter
+  int flag(0); // numb of diff
   auto avc = A.Tval.cbegin();
   std::vector<int>::const_iterator chpt; // change point
   for (auto tvc = Tval.cbegin(); tvc != Tval.cend(); ++tvc, ++avc) {

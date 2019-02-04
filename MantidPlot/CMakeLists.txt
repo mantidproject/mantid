@@ -72,6 +72,8 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/MatrixSizeDialog.cpp
                    src/MatrixValuesDialog.cpp
                    src/MdiSubWindow.cpp
+                   src/MdPlottingCmapsProvider.cpp
+                   src/MenuWithToolTips.cpp
                    src/MultiLayer.cpp
                    src/MultiPeakFit.cpp
                    src/MultiPeakFitTool.cpp
@@ -82,7 +84,6 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/Note.cpp
                    src/nrutil.cpp
                    src/OpenProjectDialog.cpp
-                   src/pixmaps.cpp
                    src/Plot3DDialog.cpp
                    src/Plot.cpp
                    src/PlotCurve.cpp
@@ -91,6 +92,9 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/PluginFit.cpp
                    src/PolynomFitDialog.cpp
                    src/PolynomialFit.cpp
+                   src/Process.cpp
+                   src/ProjectRecovery.cpp
+                   src/ProjectSaveView.cpp
                    src/ProjectSerialiser.cpp
                    src/PythonScript.cpp
                    src/PythonScripting.cpp
@@ -149,6 +153,11 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/lib/src/SymbolDialog.cpp
                    src/lib/src/TextFormatButtons.cpp
                    src/lib/3rdparty/qtcolorpicker/src/qtcolorpicker.cpp
+                   src/ProjectRecoveryGUIs/ProjectRecoveryModel.cpp
+                   src/ProjectRecoveryGUIs/ProjectRecoveryPresenter.cpp
+                   src/ProjectRecoveryGUIs/ProjectRecoveryView.cpp
+                   src/ProjectRecoveryGUIs/RecoveryFailureView.cpp
+                   src/ProjectRecoveryGUIs/RecoveryThread.cpp
 )
 
 set ( QTIPLOT_C_SRC src/zlib123/minigzip.c )
@@ -159,12 +168,12 @@ if ( CMAKE_COMPILER_IS_GNUCXX )
                                 PROPERTIES COMPILE_FLAGS -Wno-cast-qual )
 endif ()
 
-set ( MANTID_SRCS  src/Mantid/AlgorithmMonitor.cpp
+set ( MANTID_SRCS  src/Mantid/AlgorithmDockWidget.cpp
+				   src/Mantid/AlgorithmMonitor.cpp
                    src/Mantid/AlgorithmHistoryWindow.cpp
                    src/Mantid/ErrorBarSettings.cpp
                    src/Mantid/FirstTimeSetup.cpp
                    src/Mantid/FitParameterTie.cpp
-                   src/Mantid/FlowLayout.cpp
                    src/Mantid/IFunctionWrapper.cpp
                    src/Mantid/ImportWorkspaceDlg.cpp
                    src/Mantid/InputHistory.cpp
@@ -174,7 +183,6 @@ set ( MANTID_SRCS  src/Mantid/AlgorithmMonitor.cpp
                    src/Mantid/MantidAbout.cpp
                    src/Mantid/MantidApplication.cpp
                    src/Mantid/MantidCurve.cpp
-                   src/Mantid/MantidDock.cpp
                    src/Mantid/MantidMatrix.cpp
                    src/Mantid/MantidMatrixCurve.cpp
 		   src/Mantid/MantidMatrixDxExtensionHandler.cpp
@@ -184,19 +192,17 @@ set ( MANTID_SRCS  src/Mantid/AlgorithmMonitor.cpp
                    src/Mantid/MantidMDCurve.cpp
                    src/Mantid/MantidMDCurveDialog.cpp
                    src/Mantid/MantidMatrixDialog.cpp
+                   src/Mantid/MantidPlotUtilities.cpp
                    src/Mantid/MantidSampleLogDialog.cpp
                    src/Mantid/MantidSampleMaterialDialog.cpp
-				   src/Mantid/MantidSurfacePlotDialog.cpp
-				   src/Mantid/MantidGroupPlotGenerator.cpp
+                   src/Mantid/MantidSurfaceContourPlotGenerator.cpp
                    src/Mantid/MantidUI.cpp
                    src/Mantid/MantidTable.cpp
-                   src/Mantid/MantidWSIndexDialog.cpp
                    src/Mantid/PeakPickerTool.cpp
                    src/Mantid/Preferences.cpp
                    src/Mantid/RemoveErrorsDialog.cpp
 				   src/Mantid/SampleLogDialogBase.cpp
                    src/Mantid/UserFitFunctionDialog.cpp
-                   src/Mantid/WorkspaceIcons.cpp
                    src/Mantid/InstrumentWidget/InstrumentWindow.cpp
 )
 
@@ -272,6 +278,7 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/MatrixSizeDialog.h
                    src/MatrixValuesDialog.h
                    src/MdiSubWindow.h
+                   src/MdPlottingCmapsProvider.h
                    src/MultiLayer.h
                    src/MultiPeakFit.h
                    src/MultiPeakFitTool.h
@@ -282,7 +289,6 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/Note.h
                    src/nrutil.h
                    src/OpenProjectDialog.h
-                   src/pixmaps.h
                    src/Plot3DDialog.h
                    src/PlotCurve.h
                    src/PlotDialog.h
@@ -292,7 +298,10 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/PluginFit.h
                    src/PolynomFitDialog.h
                    src/PolynomialFit.h
-		    src/ProjectSerialiser.h
+                   src/Process.h
+                   src/ProjectRecovery.h
+                   src/ProjectSerialiser.h
+                   src/ProjectSaveView.h
                    src/PythonScript.h
                    src/PythonScripting.h
                    src/QwtBarCurve.h
@@ -351,6 +360,11 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/lib/include/SymbolDialog.h
                    src/lib/include/TextFormatButtons.h
                    src/lib/3rdparty/qtcolorpicker/src/qtcolorpicker.h
+                   src/ProjectRecoveryGUIs/ProjectRecoveryModel.h
+                   src/ProjectRecoveryGUIs/ProjectRecoveryPresenter.h
+                   src/ProjectRecoveryGUIs/ProjectRecoveryView.h
+                   src/ProjectRecoveryGUIs/RecoveryFailureView.h
+                   src/ProjectRecoveryGUIs/RecoveryThread.h
 )
 
 set ( MANTID_HDRS  src/Mantid/AlgorithmMonitor.h
@@ -358,7 +372,6 @@ set ( MANTID_HDRS  src/Mantid/AlgorithmMonitor.h
                    src/Mantid/ErrorBarSettings.h
                    src/Mantid/FirstTimeSetup.h
                    src/Mantid/FitParameterTie.h
-                   src/Mantid/FlowLayout.h
                    src/Mantid/IFunctionWrapper.h
                    src/Mantid/ImportWorkspaceDlg.h
 		   src/Mantid/IMantidMatrixExtensionHandler.h
@@ -369,7 +382,6 @@ set ( MANTID_HDRS  src/Mantid/AlgorithmMonitor.h
                    src/Mantid/MantidAbout.h
                    src/Mantid/MantidApplication.h
                    src/Mantid/MantidCurve.h
-                   src/Mantid/MantidDock.h
                    src/Mantid/MantidMatrixCurve.h
 		   src/Mantid/MantidMatrixDxExtensionHandler.h
 		   src/Mantid/MantidMatrixExtensionRequest.h
@@ -381,19 +393,17 @@ set ( MANTID_HDRS  src/Mantid/AlgorithmMonitor.h
                    src/Mantid/MantidMatrixDialog.h
                    src/Mantid/MantidMatrix.h
                    src/Mantid/MantidMatrixFunction.h
+                   src/Mantid/MantidPlotUtilities.h
                    src/Mantid/MantidSampleLogDialog.h
                    src/Mantid/MantidSampleMaterialDialog.h
-				   src/Mantid/MantidSurfacePlotDialog.h
-				   src/Mantid/MantidGroupPlotGenerator.h
+		   src/Mantid/MantidSurfaceContourPlotGenerator.h
                    src/Mantid/MantidUI.h
-                   src/Mantid/MantidWSIndexDialog.h
                    src/Mantid/MantidTable.h
                    src/Mantid/PeakPickerTool.h
                    src/Mantid/Preferences.h
                    src/Mantid/RemoveErrorsDialog.h
 				   src/Mantid/SampleLogDialogBase.h
                    src/Mantid/UserFitFunctionDialog.h
-                   src/Mantid/WorkspaceIcons.h
                    src/Mantid/InstrumentWidget/InstrumentWindow.h
 )
 
@@ -409,15 +419,9 @@ include ( UseQt4 )
 
 include_directories ( ${PYTHON_INCLUDE_PATH} )
 
-set ( SIP_SPEC ${CMAKE_CURRENT_SOURCE_DIR}/src/qti.sip )
-set ( SIP_SRC_IN ${CMAKE_CURRENT_SOURCE_DIR}/src/sipqti.cpp.in )
-set ( SIP_SRC ${CMAKE_CURRENT_BINARY_DIR}/sipqti.cpp )
-set ( SIP_SRC_AUTO sip_qtipart0.cpp )
-
-
 # We need to manually add all the headers that are in qti.sip
 # so that the dependencies are known to CMake
-set ( SIP_HDRS src/MdiSubWindow.h
+set ( QTI_SIP_HDRS src/MdiSubWindow.h
                src/Table.h
                src/Matrix.h
                src/ArrowMarker.h
@@ -444,25 +448,17 @@ set( SRC_UNITY_IGNORE_FILES )
 ###########################################################################
 # Sip generated files
 ###########################################################################
+set ( SIP_SPEC ${CMAKE_CURRENT_SOURCE_DIR}/src/qti.sip )
+set ( SIP_SRC_AUTO sip_qtipart0.cpp )
 
-# The code generated by sip causes compiler warnings therefore the
-# generated file is wrapped by ${SIP_SRC} and these warnings are
-# disabled. In order for VS2010 to to this correctly the second
-# custom command below is required along with the committed
-# src/sipqti.cpp.rule file.
-add_custom_command ( OUTPUT ${SIP_SRC_AUTO}
+set ( MANTIDQTPYTHON_SIP_INCLUDES -I ${CMAKE_CURRENT_BINARY_DIR}/../qt/python/mantidqtpython -I ${CMAKE_CURRENT_SOURCE_DIR}/../qt/python/mantidqtpython )
+add_custom_command ( OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${SIP_SRC_AUTO}
                      COMMAND ${SIP_EXECUTABLE}
-                          -I ${PYQT4_SIP_DIR} -I ${CMAKE_CURRENT_SOURCE_DIR}/../MantidQt/Python ${PYQT4_SIP_FLAGS}
+                          -I ${PYQT4_SIP_DIR} ${MANTIDQTPYTHON_SIP_INCLUDES}  ${PYQT4_SIP_FLAGS}
                           -c ${CMAKE_CURRENT_BINARY_DIR} -j1 -w -o
                           ${SIP_SPEC}
-                     DEPENDS src/qti.sip ${SIP_HDRS}
+                     DEPENDS ${SIP_INCLUDE_DIR}/sip.h src/qti.sip ${QTI_SIP_HDRS} ../qt/python/mantidqtpython/mantidqtpython_def.sip
                      COMMENT "Generating python bindings using sip"
-)
-
-add_custom_command ( OUTPUT ${SIP_SRC}
-                     COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different ${SIP_SRC_IN} ${SIP_SRC}
-                     DEPENDS ${SIP_SRC_AUTO}
-                     COMMENT ""
 )
 
 # Needed for sip.h header that can end up in a different place to to the main Python include directory
@@ -529,6 +525,7 @@ set ( QTIPLOT_MOC_FILES src/ApplicationWindow.h
                         src/MatrixSizeDialog.h
                         src/MatrixValuesDialog.h
                         src/MdiSubWindow.h
+                        src/MenuWithToolTips.h
                         src/MultiLayer.h
                         src/MultiPeakFit.h
                         src/MultiPeakFitTool.h
@@ -545,6 +542,8 @@ set ( QTIPLOT_MOC_FILES src/ApplicationWindow.h
                         src/PluginFit.h
                         src/PolynomFitDialog.h
                         src/PolynomialFit.h
+                        src/ProjectSaveView.h
+                        src/ProjectSerialiser.h
                         src/PythonScript.h
                         src/PythonScripting.h
                         src/QwtPieCurve.h
@@ -591,7 +590,8 @@ set ( QTIPLOT_MOC_FILES src/ApplicationWindow.h
                         src/lib/3rdparty/qtcolorpicker/src/qtcolorpicker.h
 )
 
-set ( MANTID_MOC_FILES src/Mantid/AlgorithmMonitor.h
+set ( MANTID_MOC_FILES src/Mantid/AlgorithmDockWidget.h
+					   src/Mantid/AlgorithmMonitor.h
                        src/Mantid/AlgorithmHistoryWindow.h
                        src/Mantid/ErrorBarSettings.h
                        src/Mantid/FirstTimeSetup.h
@@ -603,7 +603,6 @@ set ( MANTID_MOC_FILES src/Mantid/AlgorithmMonitor.h
                        src/Mantid/MantidAbout.h
                        src/Mantid/MantidApplication.h
                        src/Mantid/MantidCurve.h
-                       src/Mantid/MantidDock.h
                        src/Mantid/MantidMatrixCurve.h
                        src/Mantid/MantidMDCurve.h
                        src/Mantid/MantidMDCurveDialog.h
@@ -613,18 +612,20 @@ set ( MANTID_MOC_FILES src/Mantid/AlgorithmMonitor.h
 		               src/Mantid/MantidMatrixModel.h
                        src/Mantid/MantidSampleLogDialog.h
                        src/Mantid/MantidSampleMaterialDialog.h
-					   src/Mantid/MantidSurfacePlotDialog.h
                        src/Mantid/MantidUI.h
-                       src/Mantid/MantidWSIndexDialog.h
                        src/Mantid/MantidTable.h
                        src/Mantid/PeakPickerTool.h
                        src/Mantid/RemoveErrorsDialog.h
 					   src/Mantid/SampleLogDialogBase.h
                        src/Mantid/UserFitFunctionDialog.h
                        src/Mantid/InstrumentWidget/InstrumentWindow.h
+                       src/ProjectRecoveryGUIs/ProjectRecoveryView.h
+                       src/ProjectRecoveryGUIs/RecoveryFailureView.h
+                       src/ProjectRecoveryGUIs/RecoveryThread.h
 )
 
 set ( UI_FILES src/SendToProgramDialog.ui
+               src/ProjectSave.ui
                src/Mantid/FirstTimeSetup.ui
                src/Mantid/UserFitFunctionDialog.ui
                src/Mantid/MantidAbout.ui
@@ -633,6 +634,8 @@ set ( UI_FILES src/SendToProgramDialog.ui
                src/Mantid/ManageInterfaceCategories.ui
                src/Mantid/MantidMDCurveDialog.ui
                src/Mantid/MantidSampleMaterialDialog.ui
+               src/ProjectRecoveryGUIs/ProjectRecoveryWidget.ui
+               src/ProjectRecoveryGUIs/RecoveryFailure.ui
 )
 
 qt4_wrap_cpp ( MOCCED_FILES ${QTIPLOT_MOC_FILES} ${MANTID_MOC_FILES} )
@@ -643,9 +646,13 @@ set_source_files_properties ( ${CMAKE_CURRENT_BINARY_DIR}/qtcolorpicker.moc
                              PROPERTIES HEADER_FILE_ONLY true )
 set ( MOCCED_FILES ${MOCCED_FILES} ${CMAKE_CURRENT_BINARY_DIR}/qtcolorpicker.moc )
 
-set ( SRC_FILES ${QTIPLOT_SRCS} ${MANTID_SRCS} ${SIP_SRC} )
+set ( SRC_FILES ${QTIPLOT_SRCS} ${MANTID_SRCS} ${SIP_SRC_AUTO} )
 set ( INC_FILES ${QTIPLOT_HDRS} ${MANTID_HDRS} )
-set ( ALL_SRC ${SRC_FILES} ${MOCCED_FILES} )
+if ( WIN32 )
+  set ( MANIFEST_FILES MantidPlot.manifest )
+endif ()
+
+set ( ALL_SRC ${SRC_FILES} ${MOCCED_FILES} ${MANIFEST_FILES} )
 
 # Use a precompiled header where they are supported
 enable_precompiled_headers( src/PrecompiledHeader.h ALL_SRC )
@@ -660,12 +667,9 @@ include_directories ( ${CMAKE_CURRENT_BINARY_DIR} )
 ###########################################################################
 
 qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/images/images.qrc )
-qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/images/MantidWidgets.qrc )
 qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/images//fonts/fonts.qrc )
 qt4_add_resources ( RES_FILES ${CMAKE_CURRENT_SOURCE_DIR}/icons/icons.qrc )
-qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/MantidQt/SliceViewer/icons/SliceViewerIcons.qrc )
-qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/MantidQt/CustomInterfaces/icons/CustomInterfacesIcons.qrc )
-qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/Vates/VatesSimpleGui/ViewWidgets/icons/ViewWidgetsIcons.qrc )
+qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/scripts/ErrorReporter/errorreporter.qrc )
 
 ###########################################################################
 # Add the dependencies
@@ -678,13 +682,12 @@ endif()
 include_directories ( SYSTEM ${MUPARSER_INCLUDE_DIR} )
 include_directories ( ${ZLIB_INCLUDE_DIRS} )
 
-include_directories ( SYSTEM ${QWT_INCLUDE_DIR} )
+include_directories ( SYSTEM ${QWT5_INCLUDE_DIR} )
 
 find_package ( QwtPlot3d REQUIRED )
 include_directories ( SYSTEM ${QWTPLOT3D_INCLUDE_DIR} )
 
-find_package ( QScintilla REQUIRED )
-include_directories ( ${QSCINTILLA_INCLUDE_DIR} )
+find_package ( QScintillaQt4 REQUIRED )
 
 ###########################################################################
 # Now create the target and add its dependencies and flags
@@ -693,22 +696,9 @@ include_directories ( ${QSCINTILLA_INCLUDE_DIR} )
 add_definitions ( -DSCRIPTING_MUPARSER )
 add_definitions ( -DSCRIPTING_PYTHON )
 add_definitions ( -DQSCINTILLA_DLL )     # Will only have an effect on Windows (as is desired)
-
-include_directories ( src )
-include_directories ( src/lib/include )
-include_directories ( src/lib/3rdparty/qtcolorpicker/src )
-
-include_directories ( ../QtPropertyBrowser/src )
-include_directories ( ../MantidQt/API/inc )
-include_directories ( ../MantidQt/MantidWidgets/inc )
-include_directories ( ../MantidQt/SliceViewer/inc )
-include_directories ( ../MantidQt/SpectrumViewer/inc )
-include_directories ( ../MantidQt/Factory/inc )
-# ui_ files end up in these places
-include_directories ( ${CMAKE_BINARY_DIR}/MantidQt/API )
-include_directories ( ${CMAKE_BINARY_DIR}/MantidQt/MantidWidgets )
-include_directories ( ${CMAKE_BINARY_DIR}/MantidQt/SliceViewer )
-
+if ( MSVC )
+  add_definitions ( -DQ_COMPILER_INITIALIZER_LISTS )
+endif ()
 
 ###########################################################################
 # Application icon files
@@ -756,7 +746,6 @@ copy_files_to_dir ( "${PY_FILES}"
 set( MTDPLOTPY_FILES
   __init__.py
   proxies.py
-  pyplot.py
   qtiplot.py
 )
 copy_files_to_dir ( "${MTDPLOTPY_FILES}"
@@ -793,32 +782,50 @@ add_executable ( MantidPlot ${WIN_CONSOLE} MACOSX_BUNDLE ${ALL_SRC} src/main.cpp
                                                         ${CONFIG_RESET_SCRIPT_FILE} ${IPYTHON_INSTALL_FILES}
 )
 
-# Library dependencies
-target_link_libraries ( MantidPlot LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
-            ${CORE_MANTIDLIBS}
-            API
-            MantidQtAPI
-            MantidWidgets
-            MantidQtSliceViewer
-            MantidQtFactory
-            MantidQtSpectrumViewer
-            QtPropertyBrowser
-            ${Boost_LIBRARIES}
-            ${POCO_LIBRARIES}
-            ${GSL_LIBRARIES}
-            ${MUPARSER_LIBRARIES}
-            ${QT_LIBRARIES}
-            ${QWT_LIBRARIES}
-            ${QWTPLOT3D_LIBRARIES}
-            ${QSCINTILLA_LIBRARIES}
-            ${PYTHON_LIBRARIES}
-            ${ZLIB_LIBRARIES}
-            ${OPENGL_LIBRARIES}
+target_include_directories ( MantidPlot PRIVATE
+  src
+  src/lib/include
+  src/lib/3rdparty/qtcolorpicker/src
+  ../qt/widgets/common/inc
+  ../qt/widgets/instrumentview/inc
+  ../qt/widgets/sliceviewer/inc
+  ../qt/widgets/spectrumviewer/inc
+  ../qt/widgets/factory/inc
+  ../Framework/PythonInterface/inc
 )
+
+# Library dependencies
+target_link_libraries ( MantidPlot LINK_PRIVATE
+  ${TCMALLOC_LIBRARIES_LINKTIME}
+  ${CORE_MANTIDLIBS}
+  PythonInterfaceCore
+  MantidQtWidgetsCommonQt4
+  MantidQtWidgetsLegacyQwtQt4
+  MantidQtWidgetsFactoryQt4
+  MantidQtWidgetsInstrumentViewQt4
+  MantidQtWidgetsSliceViewerQt4
+  MantidQtWidgetsSpectrumViewerQt4
+  ${Boost_LIBRARIES}
+  ${POCO_LIBRARIES}
+  ${GSL_LIBRARIES}
+  ${MUPARSER_LIBRARIES}
+  ${QT_LIBRARIES}
+  Qwt5
+  ${QWTPLOT3D_LIBRARIES}
+  Qt4::Qscintilla
+  ${PYTHON_LIBRARIES}
+  ${ZLIB_LIBRARIES}
+  ${OPENGL_glu_LIBRARY}
+  ${OPENGL_gl_LIBRARY}
+)
+if (WIN32)
+  set_target_properties ( MantidPlot PROPERTIES COMPILE_DEFINITIONS "PSAPI_VERSION=1" )
+  target_link_libraries ( MantidPlot PRIVATE Psapi.lib )
+endif ()
 
 if(MAKE_VATES)
   target_include_directories( MantidPlot SYSTEM PRIVATE ${PARAVIEW_INCLUDE_DIRS} )
-  target_link_libraries ( MantidPlot LINK_PRIVATE vtkPVClientServerCoreRendering )
+  target_link_libraries ( MantidPlot LINK_PRIVATE vtkPVClientServerCoreRendering vtkPVServerManagerRendering ${vtkjsoncpp_LIBRARIES})
 endif()
 
 if (WITH_ASAN)
@@ -830,7 +837,16 @@ add_dependencies( MantidPlot mantidqtpython CompilePyUI )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties(MantidPlot PROPERTIES INSTALL_RPATH "@executable_path;@executable_path/../Libraries")
+elseif ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
+  if(MAKE_VATES)
+    set_target_properties(MantidPlot PROPERTIES
+                          INSTALL_RPATH "\$ORIGIN/../${LIB_DIR};\$ORIGIN/../${LIB_DIR}/paraview-${ParaView_VERSION_MAJOR}.${ParaView_VERSION_MINOR}")
+  else()
+    set_target_properties(MantidPlot PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
+  endif()
 endif ()
+
+set_target_properties ( MantidPlot PROPERTIES FOLDER "Qt4" )
 
 ###########################################################################
 # Custom Info.plist file for OS X
@@ -889,62 +905,45 @@ set ( MANTIDPLOT_TEST_PY_FILES
     MantidPlotMdiSubWindowTest.py
     MantidPlotTiledWindowTest.py
     MantidPlotInputArgsCheck.py
-    MantidPlotPyplotGeneralTest.py
+    MantidPlotProjectRecovery.py
+    TSVSerialiserTest.py
 )
 
 if ( MAKE_VATES )
  list  ( APPEND MANTIDPLOT_TEST_PY_FILES MantidPlotPVPythonTest.py )
 endif ()
 
-if ( 0 )
-	message (STATUS "Your CMAKE_SYSTEM string is '${CMAKE_SYSTEM}'")
-	message (STATUS "Your CMAKE_SYSTEM_NAME string is '${CMAKE_SYSTEM_NAME}'")
-	message (STATUS "Your CMAKE_BINARY_DIR string is '${CMAKE_BINARY_DIR}'")
-	message (STATUS "Your BIN_DIR string is '${BIN_DIR}'")
-	message (STATUS "Your CMAKE_LIBRARY_OUTPUT_DIRECTORY string is '${CMAKE_LIBRARY_OUTPUT_DIRECTORY}'")
-	message (STATUS "Your CMAKE_CFG_INTDIR string is '${CMAKE_CFG_INTDIR}'")
-	message (STATUS "Your CMAKE_CURRENT_BINARY_DIR string is '${CMAKE_CURRENT_BINARY_DIR}'")
+
+# Screenshots destination
+if ("$ENV{WORKSPACE}" STREQUAL "")
+  set (SCREENSHOTS_DIR "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/screenshots" )
+else ()
+  set (SCREENSHOTS_DIR "$ENV{WORKSPACE}/screenshots" )
 endif ()
 
+# Add an environment property MANTID_SOURCE so that the script can find the source of xmlrunner
+if ( ${CMAKE_SYSTEM_NAME} STREQUAL "Windows" )
+  set ( _python_path $ENV{PYTHONPATH};${PYTHON_XMLRUNNER_DIR} )
+  # cmake list separator and Windows environment separator are the same so escape the cmake one
+  string ( REPLACE ";" "\\;" _python_path "${_python_path}" )
+else()
+  set ( _python_path $ENV{PYTHONPATH}:${PYTHON_XMLRUNNER_DIR} )
+endif ()
+list ( APPEND _test_environment "PYTHONPATH=${_python_path}" )
+list ( APPEND _test_environment "MANTID_SOURCE=${CMAKE_SOURCE_DIR}" )
+list ( APPEND _test_environment "MANTID_SCREENSHOT_REPORT=${SCREENSHOTS_DIR}" )
+# Make a ctest target for each file
+foreach  ( PYFILE ${MANTIDPLOT_TEST_PY_FILES} )
+  # Add the test. Name of test = name of the file
+  add_test ( NAME ${PYFILE} COMMAND $<TARGET_FILE:MantidPlot> -xq ${CMAKE_CURRENT_SOURCE_DIR}/test/${PYFILE} )
+  # Set the previously-built environment
+  set_tests_properties ( ${PYFILE} PROPERTIES
+    RUN_SERIAL 1
+    ENVIRONMENT "${_test_environment}"
+    TIMEOUT ${TESTING_TIMEOUT} )
+endforeach ()
 
-# Check system version
-if ( ${CMAKE_SYSTEM} MATCHES ".*\\.el5" )
-  	# This is RHEL5. GUI tests hang on this platform for some reason
-  	message ( "RHEL5 hangs on GUI tests. Disabling MantidPlot python tests." )
-else ()
-	# Find the path to the built MantidPlot app. Need different paths for MAC for some reason.
-	set (MANTIDPLOT_PATH  "${CMAKE_BINARY_DIR}/${BIN_DIR}/MantidPlot" )
-
-	# Screenshots destination
-	if ("$ENV{WORKSPACE}" STREQUAL "")
-		set (SCREENSHOTS_DIR "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/screenshots" )
-	else ()
-		set (SCREENSHOTS_DIR "$ENV{WORKSPACE}/screenshots" )
-	endif ()
-
-	# Add an environment property MANTID_SOURCE so that the script can find the source of xmlrunner
-	set (TEST_ENVIRONMENT "MANTID_SOURCE=${CMAKE_SOURCE_DIR};PYTHONPATH=${CMAKE_CURRENT_SOURCE_DIR}/test;MANTID_SCREENSHOT_REPORT=${SCREENSHOTS_DIR}" )
-
-	# Fixes for Darwin (MacOS)
-	if ( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-		set (MANTIDPLOT_PATH  "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${BIN_DIR}/MantidPlot" )
-		# Append to the path and set MANTIDPATH for MacOS' MantidPlot to run
-		set (TEST_ENVIRONMENT "PATH=$ENV{PATH}:${CMAKE_LIBRARY_OUTPUT_DIRECTORY};MANTIDPATH=${CMAKE_LIBRARY_OUTPUT_DIRECTORY};MANTID_SOURCE=${CMAKE_SOURCE_DIR};MANTID_SCREENSHOT_REPORT=${SCREENSHOTS_DIR}" )
-	endif ()
-
-	# Make a ctest target for each file
-	foreach  ( PYFILE ${MANTIDPLOT_TEST_PY_FILES} )
-	 	# Add the test. Name of test = name of the file
-		add_test ( ${PYFILE} ${MANTIDPLOT_PATH} -xq ${CMAKE_CURRENT_SOURCE_DIR}/test/${PYFILE} )
-		# Set the previously-built environment
-		set_tests_properties ( ${PYFILE} PROPERTIES
-                           RUN_SERIAL 1
-                           ENVIRONMENT "${TEST_ENVIRONMENT}"
-                           TIMEOUT ${TESTING_TIMEOUT} )
-	endforeach ()
-
-    add_dependencies( GUITests MantidPlot )
-endif()
+add_dependencies( GUITests MantidPlot )
 
 ###########################################################################
 # Installation settings

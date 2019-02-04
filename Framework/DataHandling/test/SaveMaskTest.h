@@ -1,15 +1,23 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAHANDLING_SAVEMASKINGTOFILETEST_H_
 #define MANTID_DATAHANDLING_SAVEMASKINGTOFILETEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/System.h"
-
 #include "MantidDataHandling/SaveMask.h"
+
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidDataHandling/LoadMask.h"
 #include "MantidDataObjects/SpecialWorkspace2D.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
 
 #include "Poco/File.h"
+
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Mantid::DataHandling;
@@ -34,9 +42,11 @@ public:
    * (1) Load an existing masking file.  It is in 1x1
    * (2) Save masking workspace to file.
    * (3) Load the newly saved file, and compare with original masking workspace
-   * Notice: the prerequisit is that LoadMask() is correct.
+   * Notice: the prerequisite is that LoadMask() is correct.
    */
   void test_SaveFile() {
+    const std::string INSTRUMENT{"POWGEN_Definition_2017-05-01.xml"};
+
     // 1. Init SaveDetectorMasking
     SaveMask savealg;
     savealg.initialize();
@@ -45,7 +55,7 @@ public:
     LoadMask loadfile;
     loadfile.initialize();
 
-    loadfile.setProperty("Instrument", "POWGEN");
+    loadfile.setProperty("Instrument", INSTRUMENT);
     loadfile.setProperty("InputFile", "testmasking.xml");
     loadfile.setProperty("OutputWorkspace", "PG3Mask");
 
@@ -68,7 +78,7 @@ public:
     LoadMask loadfile2;
     loadfile2.initialize();
 
-    loadfile2.setProperty("Instrument", "POWGEN");
+    loadfile2.setProperty("Instrument", INSTRUMENT);
     loadfile2.setProperty("InputFile", file1);
     loadfile2.setProperty("OutputWorkspace", "PG3MaskCopy");
 
@@ -81,7 +91,7 @@ public:
     TS_ASSERT_EQUALS(maskws->getNumberHistograms(),
                      maskws2->getNumberHistograms());
     for (size_t i = 0; i < maskws->getNumberHistograms(); i++) {
-      TS_ASSERT_EQUALS(maskws->dataY(i)[0], maskws2->dataY(i)[0]);
+      TS_ASSERT_EQUALS(maskws->y(i)[0], maskws2->y(i)[0]);
     }
 
     // 6. Clean the file

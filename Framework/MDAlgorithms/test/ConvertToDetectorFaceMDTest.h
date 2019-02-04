@@ -1,12 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MDALGORITHMS_CONVERTTODETECTORFACEMDTEST_H_
 #define MANTID_MDALGORITHMS_CONVERTTODETECTORFACEMDTEST_H_
 
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidDataObjects/Events.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/Events.h"
+#include "MantidDataObjects/MDEventFactory.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidMDAlgorithms/ConvertToDetectorFaceMD.h"
-#include "MantidDataObjects/MDEventFactory.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 

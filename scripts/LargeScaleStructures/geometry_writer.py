@@ -1,4 +1,11 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
+from __future__ import (absolute_import, division, print_function)
 from xml.dom.minidom import getDOMImplementation
 from datetime import datetime
 import re
@@ -38,7 +45,7 @@ class MantidGeom(object):
         """
             Print the XML geometry to the screen
         """
-        print self
+        print(self)
 
     def addSnsDefaults(self):
         """
@@ -82,8 +89,8 @@ class MantidGeom(object):
             if distance > 0:
                 distance *= -1.0
             self._append_child("location", source, z=distance)
-        except (StandardError, StopIteration, Warning):
-            print "PROBLEM with addModerator"
+        except (Exception, StopIteration, Warning):
+            print("PROBLEM with addModerator")
 
         child = self._append_child("type", self._root, name="moderator")
         child.setAttribute("is", "Source")
@@ -389,7 +396,7 @@ class MantidGeom(object):
         step2, ...]. If no step is required, use None.
         """
         if len(idlist) % 3 != 0:
-            raise IndexError("Please specifiy list as [start1, end1, step1, "
+            raise IndexError("Please specify list as [start1, end1, step1, "
                              + "start2, end2, step2, ...]. If no step is"
                              + "required, use None.")
         num_ids = len(idlist) / 3

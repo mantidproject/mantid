@@ -1,7 +1,13 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/CoordTransformDistanceParser.h"
-#include "MantidDataObjects/CoordTransformDistance.h"
-#include "MantidAPI/VectorParameterParser.h"
 #include "MantidAPI/SingleValueParameterParser.h"
+#include "MantidAPI/VectorParameterParser.h"
+#include "MantidDataObjects/CoordTransformDistance.h"
 
 namespace Mantid {
 namespace DataObjects {
@@ -17,14 +23,14 @@ Create the transform object.
 Mantid::API::CoordTransform *CoordTransformDistanceParser::createTransform(
     Poco::XML::Element *coordTransElement) const {
   // Typdef the parameter parsers required.
-  typedef Mantid::API::SingleValueParameterParser<Mantid::API::InDimParameter>
-      InDimParameterParser;
-  typedef Mantid::API::SingleValueParameterParser<Mantid::API::OutDimParameter>
-      OutDimParameterParser;
-  typedef Mantid::API::VectorParameterParser<CoordCenterVectorParam>
-      CoordCenterParser;
-  typedef Mantid::API::VectorParameterParser<DimensionsUsedVectorParam>
-      DimsUsedParser;
+  using InDimParameterParser =
+      Mantid::API::SingleValueParameterParser<Mantid::API::InDimParameter>;
+  using OutDimParameterParser =
+      Mantid::API::SingleValueParameterParser<Mantid::API::OutDimParameter>;
+  using CoordCenterParser =
+      Mantid::API::VectorParameterParser<CoordCenterVectorParam>;
+  using DimsUsedParser =
+      Mantid::API::VectorParameterParser<DimensionsUsedVectorParam>;
 
   using namespace Poco::XML;
   if ("CoordTransform" != coordTransElement->localName()) {
@@ -80,5 +86,5 @@ Mantid::API::CoordTransform *CoordTransformDistanceParser::createTransform(
 
   return transform;
 }
-}
-}
+} // namespace DataObjects
+} // namespace Mantid

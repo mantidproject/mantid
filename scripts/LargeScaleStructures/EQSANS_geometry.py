@@ -1,5 +1,12 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
-from geometry_writer import MantidGeom
+from __future__ import (absolute_import, division, print_function)
+from .geometry_writer import MantidGeom
 import math
 
 RADIUS = 5.0
@@ -93,6 +100,7 @@ def create_geometry(file_name=None, tube_width=TUBE_WIDTH, tube_length=TUBE_SIZE
     det.addMonitorIds(["-1"])
 
     det.writeGeom(xml_outfile)
+
 
 if __name__ == "__main__":
     create_geometry()

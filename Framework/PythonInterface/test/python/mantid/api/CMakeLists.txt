@@ -9,6 +9,7 @@ set ( TEST_PY_FILES
   AlgorithmManagerTest.py
   AlgorithmPropertyTest.py
   AnalysisDataServiceTest.py
+  AnalysisDataServiceObserverTest.py
   AxisTest.py
   CatalogManagerTest.py
   CompositeFunctionTest.py
@@ -42,15 +43,18 @@ set ( TEST_PY_FILES
   RunPythonScriptTest.py
   RunTest.py
   SampleTest.py
+  SpectrumInfoTest.py
+  WorkspaceBinaryOpsTest.py
   WorkspaceFactoryTest.py
   WorkspaceTest.py
   WorkspaceGroupTest.py
   WorkspaceHistoryTest.py
   WorkspacePropertiesTest.py
+  WorkspaceUnaryOpsTest.py
   WorkspaceValidatorsTest.py
 )
 
 check_tests_valid ( ${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES} )
 
 # Prefix for test=PythonInterfaceAPI
-pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR} PythonInterfaceAPI ${TEST_PY_FILES} )
+pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR} python.api ${TEST_PY_FILES} )

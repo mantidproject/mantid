@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CURVEFITTING_PAWLEYFUNCTIONTEST_H_
 #define MANTID_CURVEFITTING_PAWLEYFUNCTIONTEST_H_
 
@@ -11,9 +17,9 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
+using Mantid::CurveFitting::Functions::PawleyFunction;
 using Mantid::CurveFitting::Functions::PawleyParameterFunction;
 using Mantid::CurveFitting::Functions::PawleyParameterFunction_sptr;
-using Mantid::CurveFitting::Functions::PawleyFunction;
 
 class PawleyFunctionTest : public CxxTest::TestSuite {
 public:

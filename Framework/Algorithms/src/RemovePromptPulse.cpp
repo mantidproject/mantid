@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/RemovePromptPulse.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -65,15 +71,13 @@ double getMedian(const API::Run &run, const std::string &name) {
 void getTofRange(MatrixWorkspace_const_sptr wksp, double &tmin, double &tmax) {
   DataObjects::EventWorkspace_const_sptr eventWksp =
       boost::dynamic_pointer_cast<const DataObjects::EventWorkspace>(wksp);
-
-  const bool isEvent = false;
-  if (isEvent) {
-    eventWksp->getEventXMinMax(tmin, tmax);
-  } else {
+  if (eventWksp == nullptr) {
     wksp->getXMinMax(tmin, tmax);
+  } else {
+    eventWksp->getEventXMinMax(tmin, tmax);
   }
 }
-} // anonymous namespace end
+} // namespace
 
 /** Execute the algorithm.
  */
@@ -111,7 +115,8 @@ void RemovePromptPulse::exec() {
       this->calculatePulseTimes(tmin, tmax, period);
   if (pulseTimes.empty()) {
     g_log.notice() << "Not applying filter since prompt pulse is not in data "
-                      "range (period = " << period << ")\n";
+                      "range (period = "
+                   << period << ")\n";
     setProperty("OutputWorkspace",
                 boost::const_pointer_cast<MatrixWorkspace>(inputWS));
     return;
@@ -198,5 +203,5 @@ RemovePromptPulse::calculatePulseTimes(const double tmin, const double tmax,
 
   return times;
 }
-} // namespace Mantid
 } // namespace Algorithms
+} // namespace Mantid

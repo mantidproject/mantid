@@ -1,15 +1,21 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MDALGORITHMS_CONVERTCWSDMDTOHKLTEST_H_
 #define MANTID_MDALGORITHMS_CONVERTCWSDMDTOHKLTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/MDGeometry/HKL.h"
 #include "MantidMDAlgorithms/ConvertCWSDMDtoHKL.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/MDGeometry/HKL.h"
 
 using Mantid::MDAlgorithms::ConvertCWSDMDtoHKL;
 
@@ -43,7 +49,7 @@ public:
     alg.initialize();
 
     TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputWorkspace", m_qsampleWS->name()));
+        alg.setPropertyValue("InputWorkspace", m_qsampleWS->getName()));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(
         "UBMatrix", "1.0, 0.5, 0., -0.2, 2.0, 0.4, 0., 1.11, 3.9"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "HKLMD"));

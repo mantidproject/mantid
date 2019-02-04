@@ -1,7 +1,14 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name,no-init,too-many-public-methods,too-many-arguments
-import stresstesting
+from __future__ import (absolute_import, division, print_function)
+import systemtesting
 
-from mantid.api import MatrixWorkspace, mtd
+from mantid.api import FileFinder, MatrixWorkspace, mtd
 import mantid.simpleapi as ms
 
 import math
@@ -45,6 +52,25 @@ class VesuvioTests(unittest.TestCase):
         self.assertTrue(mtd.doesExist(self.ws_name))
 
     #================== Success cases ================================
+
+    def test_filename_accepts_full_filepath(self):
+        diff_mode = "FoilOut"
+        rawfile = FileFinder.getFullPath("EVS14188.raw")
+        self._run_load(rawfile, "3", diff_mode)
+        self.assertTrue(mtd.doesExist('evs_raw'))
+        self.assertEqual(mtd['evs_raw'].getNumberHistograms(), 1)
+
+    def test_filename_accepts_filename_no_path(self):
+        diff_mode = "FoilOut"
+        self._run_load("EVS14188.raw", "3", diff_mode)
+        self.assertTrue(mtd.doesExist('evs_raw'))
+        self.assertEqual(mtd['evs_raw'].getNumberHistograms(), 1)
+
+    def test_filename_accepts_run_and_ext(self):
+        diff_mode = "FoilOut"
+        self._run_load("14188.raw", "3", diff_mode)
+        self.assertTrue(mtd.doesExist('evs_raw'))
+        self.assertEqual(mtd['evs_raw'].getNumberHistograms(), 1)
 
     def test_load_with_back_scattering_spectra_produces_correct_workspace_using_double_difference(self):
         diff_mode = "DoubleDifference"
@@ -107,7 +133,7 @@ class VesuvioTests(unittest.TestCase):
         diff_mode = "FoilOut"
         self._run_load("14188", "1-198", diff_mode, load_mon=True)
         self.assertTrue(mtd.doesExist('evs_raw'))
-        self.assertEquals(mtd['evs_raw'].getNumberHistograms(), 198)
+        self.assertEqual(mtd['evs_raw'].getNumberHistograms(), 198)
         self.assertFalse(mtd.doesExist('evs_raw_monitors'))
 
     def test_load_with_back_scattering_spectra_produces_correct_workspace_using_single_difference(self):
@@ -207,7 +233,7 @@ class VesuvioTests(unittest.TestCase):
         evs_raw = mtd[self.ws_name]
 
         # Verify
-        self.assertEquals(1, evs_raw.getNumberHistograms())
+        self.assertEqual(1, evs_raw.getNumberHistograms())
         self.assertAlmostEqual(5.0, evs_raw.readX(0)[0], places=DIFF_PLACES)
         self.assertAlmostEqual(599.5, evs_raw.readX(0)[-1], places=DIFF_PLACES)
         self.assertAlmostEqual(-1.5288171762918328, evs_raw.readY(0)[0], places=DIFF_PLACES)
@@ -220,7 +246,7 @@ class VesuvioTests(unittest.TestCase):
         evs_raw = mtd[self.ws_name]
 
         # Verify
-        self.assertEquals(2, evs_raw.getNumberHistograms())
+        self.assertEqual(2, evs_raw.getNumberHistograms())
         self.assertAlmostEqual(5.0, evs_raw.readX(0)[0], places=DIFF_PLACES)
         self.assertAlmostEqual(5.0, evs_raw.readX(1)[0], places=DIFF_PLACES)
         self.assertAlmostEqual(599.5, evs_raw.readX(0)[-1], places=DIFF_PLACES)
@@ -241,7 +267,7 @@ class VesuvioTests(unittest.TestCase):
         evs_raw = mtd[self.ws_name]
 
         # Verify
-        self.assertEquals(1, evs_raw.getNumberHistograms())
+        self.assertEqual(1, evs_raw.getNumberHistograms())
         self.assertAlmostEqual(5.0, evs_raw.readX(0)[0], places=DIFF_PLACES)
         self.assertAlmostEqual(19990.0, evs_raw.readX(0)[-1], places=DIFF_PLACES)
         self.assertAlmostEqual(497722.0, evs_raw.readY(0)[0], places=DIFF_PLACES)
@@ -257,7 +283,7 @@ class VesuvioTests(unittest.TestCase):
         evs_raw = mtd[self.ws_name]
 
         # Verify
-        self.assertEquals(2, evs_raw.getNumberHistograms())
+        self.assertEqual(2, evs_raw.getNumberHistograms())
         self.assertAlmostEqual(5.0, evs_raw.readX(0)[0], places=DIFF_PLACES)
         self.assertAlmostEqual(5.0, evs_raw.readX(1)[0], places=DIFF_PLACES)
         self.assertAlmostEqual(19990.0, evs_raw.readX(0)[-1], places=DIFF_PLACES)
@@ -270,10 +296,10 @@ class VesuvioTests(unittest.TestCase):
         self._verify_spectra_numbering(evs_raw.getSpectrum(0), 3,
                                        range(2101,2114))
         self._verify_spectra_numbering(evs_raw.getSpectrum(1), 30,
-                                       range(2128,2145) + range(2201,2205))
+                                       list(range(2128,2145)) + list(range(2201,2205)))
 
     def _verify_spectra_numbering(self, spectrum, expected_no, expected_ids):
-        self.assertEquals(expected_no, spectrum.getSpectrumNo())
+        self.assertEqual(expected_no, spectrum.getSpectrumNo())
         det_ids = spectrum.getDetectorIDs()
         for expected_id, det_id in zip(expected_ids, det_ids):
             self.assertEqual(expected_id, det_id)
@@ -351,7 +377,7 @@ class VesuvioTests(unittest.TestCase):
 
     def _do_size_check(self,name, expected_nhist):
         loaded_data = mtd[name]
-        self.assertEquals(expected_nhist, loaded_data.getNumberHistograms())
+        self.assertEqual(expected_nhist, loaded_data.getNumberHistograms())
 
     #================== Failure cases ================================
 
@@ -410,7 +436,7 @@ class VesuvioTests(unittest.TestCase):
 
 #====================================================================================
 
-class LoadVesuvioTest(stresstesting.MantidStressTest):
+class LoadVesuvioTest(systemtesting.MantidSystemTest):
 
     _success = False
 

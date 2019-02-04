@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -30,19 +30,19 @@ Usage
     stats = StatisticsOfTableWorkspace(ws)
 
     for idx in range(stats.rowCount()):
-        stat_name = stats.column('statistic')[idx]
+        stat_name = stats.column('Statistic')[idx]
         stat_value = stats.column('a')[idx]
-        print '%s of column \'a\' is %.3f' % (stat_name, stat_value)
+        print('%s of column \'a\' is %.3f' % (stat_name, stat_value))
 
 Output:
 
 .. testoutput:: ExStatisticsOfTableWorkspace
 
-    standard_deviation of column 'a' is 1.118
-    minimum of column 'a' is 1.000
-    median of column 'a' is 2.500
-    maximum of column 'a' is 4.000
-    mean of column 'a' is 2.500
+    StandardDev of column 'a' is 1.118
+    Minimum of column 'a' is 1.000
+    Median of column 'a' is 2.500
+    Maximum of column 'a' is 4.000
+    Mean of column 'a' is 2.500
 
 .. categories::
 

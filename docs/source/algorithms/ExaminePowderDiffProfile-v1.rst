@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -18,7 +18,7 @@ processing background and calculating peaks by Le Bail algorithm.
 Usage
 -----
 
-**Example - Calcualte peaks from input table workspaces**
+**Example - Calculate peaks from input table workspaces**
 
 .. testcode:: ExExaminePG3Profile
 
@@ -48,7 +48,7 @@ Usage
 
   # Output result
   ws = mtd['PG3_15035B3_Cal']
-  print 'Output workspace has %d spectra' % (ws.getNumberHistograms())
+  print('Output workspace has %d spectra' % (ws.getNumberHistograms()))
 
 .. testcleanup:: ExExaminePG3Profile
 

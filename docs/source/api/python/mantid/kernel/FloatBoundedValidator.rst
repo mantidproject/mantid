@@ -2,7 +2,7 @@
  FloatBoundedValidator
 =======================
 
-This a python binding to the C++ class Mantid::Kernel::FloatBoundedValidator.
+This is a Python binding to the C++ class Mantid::Kernel::FloatBoundedValidator.
 
 *bases:* :py:obj:`mantid.kernel.IValidator`
 

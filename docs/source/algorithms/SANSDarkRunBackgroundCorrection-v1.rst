@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -11,7 +11,7 @@ Description
 
 This algorithm subtracts a dark run from a workspace. *InputWorkspace* and *DarkRun* have to
 be of type Workspace2D and need to contain the same spectra.
-The user can choose to either subtract spectra which are assoicated with detecors 
+The user can choose to either subtract spectra which are associated with detecors 
 (*ApplyToDetectors*) and/or monitors (*ApplyToMonitors*). In the case of monitors, the user can 
 select specific monitors (*SelectedMonitors*) according to their detecotor IDs.
 
@@ -48,8 +48,8 @@ Usage
     in_y = ws_sample.dataY(0)
     out_y = out_ws.dataY(0)
 
-    print "The first bin of the first spectrum of the input was " + str(in_y[0])
-    print "After the dark run correction it is " + str(out_y[0])
+    print("The first bin of the first spectrum of the input was {:.1f}".format(in_y[0]))
+    print("After the dark run correction it is {:.2f}".format(out_y[0]))
 
 Output:
 

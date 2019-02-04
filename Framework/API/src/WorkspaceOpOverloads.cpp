@@ -1,18 +1,19 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidKernel/Property.h"
-//#include "MantidKernel/Exception.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/IWorkspaceProperty.h"
-#include "MantidAPI/WorkspaceFactory.h"
-//#include "MantidAPI/SpectraAxis.h"
-#include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
-#include "MantidAPI/WorkspaceGroup_fwd.h"
+#include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/IWorkspaceProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidKernel/Property.h"
 
 #include <numeric>
 
@@ -43,23 +44,28 @@ ResultType executeBinaryOperation(const std::string &algorithmName,
   alg->setRethrows(rethrow);
   alg->initialize();
 
-  if (child) {
+  if (lhs->getName().empty()) {
     alg->setProperty<LHSType>("LHSWorkspace", lhs);
+  } else {
+    alg->setPropertyValue("LHSWorkspace", lhs->getName());
+  }
+  if (rhs->getName().empty()) {
     alg->setProperty<RHSType>("RHSWorkspace", rhs);
-    // Have to set a text name for the output workspace if the algorithm is a
-    // child even
-    // though it will not be used.
-    alg->setPropertyValue("OutputWorkspace", "��NotApplicable");
-    if (lhsAsOutput) {
+  } else {
+    alg->setPropertyValue("RHSWorkspace", rhs->getName());
+  }
+  if (lhsAsOutput) {
+    if (!lhs->getName().empty()) {
+      alg->setPropertyValue("OutputWorkspace", lhs->getName());
+    } else {
+      alg->setAlwaysStoreInADS(false);
+      alg->setPropertyValue("OutputWorkspace", "dummy-output-name");
       alg->setProperty<LHSType>("OutputWorkspace", lhs);
     }
-  }
-  // If this is not a child algorithm then we need names for the properties
-  else {
-    alg->setPropertyValue("LHSWorkspace", lhs->getName());
-    alg->setPropertyValue("RHSWorkspace", rhs->getName());
-    if (lhsAsOutput) {
-      alg->setPropertyValue("OutputWorkspace", lhs->getName());
+  } else {
+    if (name.empty()) {
+      alg->setAlwaysStoreInADS(false);
+      alg->setPropertyValue("OutputWorkspace", "dummy-output-name");
     } else {
       alg->setPropertyValue("OutputWorkspace", name);
     }
@@ -73,8 +79,10 @@ ResultType executeBinaryOperation(const std::string &algorithmName,
   }
 
   // Get the output workspace property
-  if (child) {
-    return alg->getProperty("OutputWorkspace");
+  if (!alg->getAlwaysStoreInADS()) {
+    API::MatrixWorkspace_sptr result = alg->getProperty("OutputWorkspace");
+    return boost::dynamic_pointer_cast<typename ResultType::element_type>(
+        result);
   } else {
     API::Workspace_sptr result = API::AnalysisDataService::Instance().retrieve(
         alg->getPropertyValue("OutputWorkspace"));
@@ -83,57 +91,45 @@ ResultType executeBinaryOperation(const std::string &algorithmName,
   }
 }
 
-template DLLExport MatrixWorkspace_sptr
-executeBinaryOperation(const std::string &, const MatrixWorkspace_sptr,
-                       const MatrixWorkspace_sptr, bool, bool,
-                       const std::string &, bool);
-template DLLExport WorkspaceGroup_sptr
-executeBinaryOperation(const std::string &, const WorkspaceGroup_sptr,
-                       const WorkspaceGroup_sptr, bool, bool,
-                       const std::string &, bool);
-template DLLExport WorkspaceGroup_sptr
-executeBinaryOperation(const std::string &, const WorkspaceGroup_sptr,
-                       const MatrixWorkspace_sptr, bool, bool,
-                       const std::string &, bool);
-template DLLExport WorkspaceGroup_sptr
-executeBinaryOperation(const std::string &, const MatrixWorkspace_sptr,
-                       const WorkspaceGroup_sptr, bool, bool,
-                       const std::string &, bool);
+template DLLExport MatrixWorkspace_sptr executeBinaryOperation(
+    const std::string &, const MatrixWorkspace_sptr, const MatrixWorkspace_sptr,
+    bool, bool, const std::string &, bool);
+template DLLExport WorkspaceGroup_sptr executeBinaryOperation(
+    const std::string &, const WorkspaceGroup_sptr, const WorkspaceGroup_sptr,
+    bool, bool, const std::string &, bool);
+template DLLExport WorkspaceGroup_sptr executeBinaryOperation(
+    const std::string &, const WorkspaceGroup_sptr, const MatrixWorkspace_sptr,
+    bool, bool, const std::string &, bool);
+template DLLExport WorkspaceGroup_sptr executeBinaryOperation(
+    const std::string &, const MatrixWorkspace_sptr, const WorkspaceGroup_sptr,
+    bool, bool, const std::string &, bool);
 
-template DLLExport IMDWorkspace_sptr
-executeBinaryOperation(const std::string &, const IMDWorkspace_sptr,
-                       const IMDWorkspace_sptr, bool, bool, const std::string &,
-                       bool);
-template DLLExport WorkspaceGroup_sptr
-executeBinaryOperation(const std::string &, const WorkspaceGroup_sptr,
-                       const IMDWorkspace_sptr, bool, bool, const std::string &,
-                       bool);
-template DLLExport WorkspaceGroup_sptr
-executeBinaryOperation(const std::string &, const IMDWorkspace_sptr,
-                       const WorkspaceGroup_sptr, bool, bool,
-                       const std::string &, bool);
+template DLLExport IMDWorkspace_sptr executeBinaryOperation(
+    const std::string &, const IMDWorkspace_sptr, const IMDWorkspace_sptr, bool,
+    bool, const std::string &, bool);
+template DLLExport WorkspaceGroup_sptr executeBinaryOperation(
+    const std::string &, const WorkspaceGroup_sptr, const IMDWorkspace_sptr,
+    bool, bool, const std::string &, bool);
+template DLLExport WorkspaceGroup_sptr executeBinaryOperation(
+    const std::string &, const IMDWorkspace_sptr, const WorkspaceGroup_sptr,
+    bool, bool, const std::string &, bool);
 
-template DLLExport IMDWorkspace_sptr
-executeBinaryOperation(const std::string &, const IMDWorkspace_sptr,
-                       const MatrixWorkspace_sptr, bool, bool,
-                       const std::string &, bool);
-template DLLExport IMDWorkspace_sptr
-executeBinaryOperation(const std::string &, const MatrixWorkspace_sptr,
-                       const IMDWorkspace_sptr, bool, bool, const std::string &,
-                       bool);
+template DLLExport IMDWorkspace_sptr executeBinaryOperation(
+    const std::string &, const IMDWorkspace_sptr, const MatrixWorkspace_sptr,
+    bool, bool, const std::string &, bool);
+template DLLExport IMDWorkspace_sptr executeBinaryOperation(
+    const std::string &, const MatrixWorkspace_sptr, const IMDWorkspace_sptr,
+    bool, bool, const std::string &, bool);
 
-template DLLExport IMDHistoWorkspace_sptr
-executeBinaryOperation(const std::string &, const IMDHistoWorkspace_sptr,
-                       const IMDHistoWorkspace_sptr, bool, bool,
-                       const std::string &, bool);
-template DLLExport IMDHistoWorkspace_sptr
-executeBinaryOperation(const std::string &, const IMDHistoWorkspace_sptr,
-                       const MatrixWorkspace_sptr, bool, bool,
-                       const std::string &, bool);
-template DLLExport IMDHistoWorkspace_sptr
-executeBinaryOperation(const std::string &, const MatrixWorkspace_sptr,
-                       const IMDHistoWorkspace_sptr, bool, bool,
-                       const std::string &, bool);
+template DLLExport IMDHistoWorkspace_sptr executeBinaryOperation(
+    const std::string &, const IMDHistoWorkspace_sptr,
+    const IMDHistoWorkspace_sptr, bool, bool, const std::string &, bool);
+template DLLExport IMDHistoWorkspace_sptr executeBinaryOperation(
+    const std::string &, const IMDHistoWorkspace_sptr,
+    const MatrixWorkspace_sptr, bool, bool, const std::string &, bool);
+template DLLExport IMDHistoWorkspace_sptr executeBinaryOperation(
+    const std::string &, const MatrixWorkspace_sptr,
+    const IMDHistoWorkspace_sptr, bool, bool, const std::string &, bool);
 
 } // namespace OperatorOverloads
 
@@ -409,30 +405,35 @@ MatrixWorkspace_sptr operator/=(const MatrixWorkspace_sptr lhs,
  *  @param WS :: The workspace to check
  *  @return True if the bins match
  */
-bool WorkspaceHelpers::commonBoundaries(const MatrixWorkspace_const_sptr WS) {
-  if (!WS->blocksize() || WS->getNumberHistograms() < 2)
+bool WorkspaceHelpers::commonBoundaries(const MatrixWorkspace &WS) {
+  if (WS.getNumberHistograms() < 2 || WS.size() == 0)
     return true;
+
   // Quickest check is to see if they are actually all the same vector
   if (sharedXData(WS))
     return true;
 
   // But even if they're not they could still match...
-  const double commonSum =
-      std::accumulate(WS->readX(0).begin(), WS->readX(0).end(), 0.);
+  const auto &x_0 = WS.x(0);
+  const double commonSum = std::accumulate(x_0.begin(), x_0.end(), 0.);
   // If this results in infinity or NaN, then we can't tell - return false
   if (!std::isfinite(commonSum))
     return false;
-  const size_t numHist = WS->getNumberHistograms();
+  const size_t numHist = WS.getNumberHistograms();
   for (size_t j = 1; j < numHist; ++j) {
-    const double sum =
-        std::accumulate(WS->readX(j).begin(), WS->readX(j).end(), 0.);
+    const auto &x_j = WS.x(j);
+    // they should all have the same number of x-values
+    if (x_0.size() != x_j.size())
+      return false;
+
+    const double sum = std::accumulate(x_j.begin(), x_j.end(), 0.);
     // If this results in infinity or NaN, then we can't tell - return false
     if (!std::isfinite(sum))
       return false;
 
     if (std::abs(commonSum) < 1.0E-7 && std::abs(sum) < 1.0E-7) {
-      for (size_t i = 0; i < WS->blocksize(); i++) {
-        if (std::abs(WS->readX(0)[i] - WS->readX(j)[i]) > 1.0E-7)
+      for (size_t i = 0; i < x_0.size(); i++) {
+        if (std::abs(x_0[i] - x_j[i]) > 1.0E-7)
           return false;
       }
     } else if (std::abs(commonSum - sum) /
@@ -452,21 +453,19 @@ bool WorkspaceHelpers::commonBoundaries(const MatrixWorkspace_const_sptr WS) {
  * number of spectra
  *  @return True if the test passes
  */
-bool WorkspaceHelpers::matchingBins(const MatrixWorkspace_const_sptr ws1,
-                                    const MatrixWorkspace_const_sptr ws2,
+bool WorkspaceHelpers::matchingBins(const MatrixWorkspace &ws1,
+                                    const MatrixWorkspace &ws2,
                                     const bool firstOnly) {
   // First of all, the first vector must be the same size
-  if (ws1->readX(0).size() != ws2->readX(0).size())
+  if (ws1.x(0).size() != ws2.x(0).size())
     return false;
 
   // Now check the first spectrum
-  const double firstWS =
-      std::accumulate(ws1->readX(0).begin(), ws1->readX(0).end(), 0.);
-  const double secondWS =
-      std::accumulate(ws2->readX(0).begin(), ws2->readX(0).end(), 0.);
+  const double firstWS = std::accumulate(ws1.x(0).begin(), ws1.x(0).end(), 0.);
+  const double secondWS = std::accumulate(ws2.x(0).begin(), ws2.x(0).end(), 0.);
   if (std::abs(firstWS) < 1.0E-7 && std::abs(secondWS) < 1.0E-7) {
-    for (size_t i = 0; i < ws1->readX(0).size(); i++) {
-      if (std::abs(ws1->readX(0)[i] - ws2->readX(0)[i]) > 1.0E-7)
+    for (size_t i = 0; i < ws1.x(0).size(); i++) {
+      if (std::abs(ws1.x(0)[i] - ws2.x(0)[i]) > 1.0E-7)
         return false;
     }
   } else if (std::abs(firstWS - secondWS) /
@@ -479,7 +478,7 @@ bool WorkspaceHelpers::matchingBins(const MatrixWorkspace_const_sptr ws1,
     return true;
 
   // Check that total size of workspace is the same
-  if (ws1->size() != ws2->size())
+  if (ws1.size() != ws2.size())
     return false;
   // If that passes then check whether all the X vectors are shared
   if (sharedXData(ws1) && sharedXData(ws2))
@@ -487,7 +486,7 @@ bool WorkspaceHelpers::matchingBins(const MatrixWorkspace_const_sptr ws1,
 
   // If that didn't pass then explicitly check 1 in 10 of the vectors (min 10,
   // max 100)
-  const size_t numHist = ws1->getNumberHistograms();
+  const size_t numHist = ws1.getNumberHistograms();
   size_t numberToCheck = numHist / 10;
   if (numberToCheck < 10)
     numberToCheck = 10;
@@ -498,12 +497,12 @@ bool WorkspaceHelpers::matchingBins(const MatrixWorkspace_const_sptr ws1,
     step = 1;
   for (size_t i = step; i < numHist; i += step) {
     const double firstWSLoop =
-        std::accumulate(ws1->readX(i).begin(), ws1->readX(i).end(), 0.);
+        std::accumulate(ws1.x(i).begin(), ws1.x(i).end(), 0.);
     const double secondWSLoop =
-        std::accumulate(ws2->readX(i).begin(), ws2->readX(i).end(), 0.);
+        std::accumulate(ws2.x(i).begin(), ws2.x(i).end(), 0.);
     if (std::abs(firstWSLoop) < 1.0E-7 && std::abs(secondWSLoop) < 1.0E-7) {
-      for (size_t j = 0; j < ws1->readX(i).size(); j++) {
-        if (std::abs(ws1->readX(i)[j] - ws2->readX(i)[j]) > 1.0E-7)
+      for (size_t j = 0; j < ws1.x(i).size(); j++) {
+        if (std::abs(ws1.x(i)[j] - ws2.x(i)[j]) > 1.0E-7)
           return false;
       }
     } else if (std::abs(firstWSLoop - secondWSLoop) /
@@ -517,11 +516,11 @@ bool WorkspaceHelpers::matchingBins(const MatrixWorkspace_const_sptr ws1,
 }
 
 /// Checks whether all the X vectors in a workspace are the same one underneath
-bool WorkspaceHelpers::sharedXData(const MatrixWorkspace_const_sptr WS) {
-  const double &first = WS->readX(0)[0];
-  const size_t numHist = WS->getNumberHistograms();
+bool WorkspaceHelpers::sharedXData(const MatrixWorkspace &WS) {
+  const double &first = WS.x(0)[0];
+  const size_t numHist = WS.getNumberHistograms();
   for (size_t i = 1; i < numHist; ++i) {
-    if (&first != &(WS->readX(i)[0]))
+    if (&first != &(WS.x(i)[0]))
       return false;
   }
   return true;
@@ -543,6 +542,11 @@ void WorkspaceHelpers::makeDistribution(MatrixWorkspace_sptr workspace,
                              "into distributions.");
 
   const size_t numberOfSpectra = workspace->getNumberHistograms();
+  if (workspace->histogram(0).xMode() ==
+      HistogramData::Histogram::XMode::Points) {
+    throw std::runtime_error(
+        "Workspace is using point data for x (should be bin edges).");
+  }
   for (size_t i = 0; i < numberOfSpectra; ++i) {
     if (forwards) {
       workspace->convertToFrequencies(i);

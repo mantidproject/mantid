@@ -12,7 +12,6 @@ set( SRC_FILES
   src/QueryRemoteFile2.cpp
   src/QueryRemoteJob.cpp
   src/QueryRemoteJob2.cpp
-  src/SCARFTomoReconstruction.cpp
   src/SimpleJSON.cpp
   src/StartRemoteTransaction.cpp
   src/StartRemoteTransaction2.cpp
@@ -38,7 +37,6 @@ set( INC_FILES
   inc/MantidRemoteAlgorithms/QueryRemoteFile2.h
   inc/MantidRemoteAlgorithms/QueryRemoteJob.h
   inc/MantidRemoteAlgorithms/QueryRemoteJob2.h
-  inc/MantidRemoteAlgorithms/SCARFTomoReconstruction.h
   inc/MantidRemoteAlgorithms/SimpleJSON.h
   inc/MantidRemoteAlgorithms/StartRemoteTransaction.h
   inc/MantidRemoteAlgorithms/StartRemoteTransaction2.h
@@ -64,7 +62,6 @@ set ( TEST_FILES
   QueryRemoteFile2Test.h
   QueryRemoteJobTest.h
   QueryRemoteJob2Test.h
-  SCARFTomoReconstructionTest.h
   SimpleJSONTest.h
   StartRemoteTransactionTest.h
   StartRemoteTransaction2Test.h
@@ -94,11 +91,14 @@ endif()
 add_library ( RemoteAlgorithms ${SRC_FILES} ${INC_FILES})
 
 # Set the name of the generated library
-set_target_properties ( RemoteAlgorithms PROPERTIES OUTPUT_NAME MantidRemoteAlgorithms )
+set_target_properties ( RemoteAlgorithms PROPERTIES OUTPUT_NAME MantidRemoteAlgorithms
+)
 
 if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties ( RemoteAlgorithms PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")
-endif () 
+  set_target_properties(RemoteAlgorithms PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")
+elseif ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
+  set_target_properties(RemoteAlgorithms PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
+endif ()
 
 # Add to the 'Framework' group in VS
 set_property ( TARGET RemoteAlgorithms PROPERTY FOLDER "MantidFramework" )
@@ -114,4 +114,4 @@ add_subdirectory ( test )  # Note: No tests yet for many remote algorithms...
 # Installation settings
 ###########################################################################
 
-install ( TARGETS RemoteAlgorithms ${SYSTEM_PACKAGE_TARGET} DESTINATION ${PLUGINS_DIR} )
+mtd_install_targets( TARGETS RemoteAlgorithms INSTALL_DIRS ${PLUGINS_DIR} ${WORKBENCH_PLUGINS_DIR})

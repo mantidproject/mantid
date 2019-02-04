@@ -1,20 +1,28 @@
-#pylint: disable=too-many-arguments,invalid-name,too-many-locals,too-many-branches
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
+# pylint: disable=too-many-arguments,invalid-name,too-many-locals,too-many-branches
 """
 Defines functions and classes to start the processing of Vesuvio data.
 The main entry point that most users should care about is fit_tof().
 """
 from __future__ import (absolute_import, division, print_function)
-from six import iteritems
 
-import copy
 import re
 import numpy as np
+from functools import reduce
 
 from mantid import mtd
-from mantid.api import (AnalysisDataService, WorkspaceFactory, TextAxis)
-from vesuvio.instrument import VESUVIO
+from mantid.api import WorkspaceFactory, SpectraAxis, TextAxis
+from mantid.kernel import MaterialBuilder
+from mantid.simpleapi import (AppendSpectra, ConjoinWorkspaces, DeleteWorkspace, Divide, ExtractSingleSpectrum,
+                              ExtractSpectra, GroupWorkspaces, Integration, SumSpectra, UnGroupWorkspace,
+                              VesuvioCorrections, VesuvioTOFFit)
 
-import mantid.simpleapi as ms
+from vesuvio.loading import VesuvioLoadHelper, VesuvioTOFFitInput
 
 
 # --------------------------------------------------------------------------------
@@ -22,387 +30,742 @@ import mantid.simpleapi as ms
 # --------------------------------------------------------------------------------
 
 def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
-    """
-    The main entry point for user scripts fitting in TOF.
+    # Retrieve vesuvio input data
+    vesuvio_loader = VesuvioLoadHelper(flags['diff_mode'], flags['fit_mode'],
+                                       flags['ip_file'], flags.get('bin_parameters', None),
+                                       _extract_bool_from_flags('load_log_files', flags))
+    vesuvio_input = VesuvioTOFFitInput(runs, flags.get('container_runs', None),
+                                       flags.get('spectra', None), vesuvio_loader)
 
-    :param runs: A string specifying the runs to process
-    :param flags: A dictionary of flags to control the processing
-    :param iterations: Maximum number of iterations to perform
-    :param convergence_threshold: Maximum difference in the cost
-                                  function at which the parameters are accepted
-                                  to have converged
-    :return: Tuple of (fitted workspace, fitted params, number of iterations
-             performed)
-    """
-    if iterations < 1:
-        raise ValueError('Must perform at least one iteration')
+    if flags.get('ms_enabled', True):
+        hydrogen_constraints = flags['ms_flags'].pop("HydrogenConstraints", None)
+        ms_helper = VesuvioMSHelper(**flags['ms_flags'])
 
-    # Load
-    spectra = flags['spectra']
-    fit_mode = flags['fit_mode']
-    sample_data = load_and_crop_data(runs, spectra, flags['ip_file'],
-                                     flags['diff_mode'], fit_mode,
-                                     flags.get('bin_parameters', None))
-
-    # Load container runs if provided
-    container_data = None
-    if flags.get('container_runs', None) is not None:
-        container_data = load_and_crop_data(flags['container_runs'], spectra,
-                                            flags['ip_file'],
-                                            flags['diff_mode'], fit_mode,
-                                            flags.get('bin_parameters', None))
-
-    last_results = None
-
-    exit_iteration = 0
-
-    for iteration in range(1, iterations+1):
-        iteration_flags = copy.deepcopy(flags)
-        iteration_flags['iteration'] = iteration
-
-        if last_results is not None:
-            iteration_flags['masses'] = _update_masses_from_params(copy.deepcopy(flags['masses']),
-                                                                   last_results[2])
-
-        print("=== Iteration {0} out of a possible {1}".format(iteration, iterations))
-        results = fit_tof_iteration(sample_data, container_data, runs, iteration_flags)
-        exit_iteration += 1
-
-        if last_results is not None and convergence_threshold is not None:
-            last_chi2 = np.array(last_results[3])
-            chi2 = np.array(results[3])
-            chi2_delta = last_chi2 - chi2
-            max_chi2_delta = np.abs(np.max(chi2_delta))
-            print("Cost function change: {0}".format(max_chi2_delta))
-
-            if max_chi2_delta <= convergence_threshold:
-                print("Stopped at iteration {0} due to minimal change in cost function".format(exit_iteration))
-                last_results = results
-                break
-
-        last_results = results
-
-    return (last_results[0], last_results[2], last_results[3], exit_iteration)
-
-
-def fit_tof_iteration(sample_data, container_data, runs, flags):
-    """
-    Performs a single iterations of the time of flight corrections and fitting
-    workflow.
-
-    :param sample_data: Loaded sample data workspaces
-    :param container_data: Loaded container data workspaces
-    :param runs: A string specifying the runs to process
-    :param flags: A dictionary of flags to control the processing
-    :return: Tuple of (workspace group name, pre correction fit parameters,
-             final fit parameters, chi^2 values)
-    """
-    # Transform inputs into something the algorithm can understand
-    if isinstance(flags['masses'][0], list):
-        mass_values = _create_profile_strs_and_mass_list(copy.deepcopy(flags['masses'][0]))[0]
-        profiles_strs = []
-        for mass_spec in flags['masses']:
-            profiles_strs.append(_create_profile_strs_and_mass_list(mass_spec)[1])
+        if hydrogen_constraints is not None:
+            ms_helper.add_hydrogen_constraints(hydrogen_constraints)
     else:
-        mass_values, profiles_strs = _create_profile_strs_and_mass_list(flags['masses'])
-    background_str = _create_background_str(flags.get('background', None))
-    intensity_constraints = _create_intensity_constraint_str(flags['intensity_constraints'])
-    ties = _create_user_defined_ties_str(flags['masses'])
+        ms_helper = VesuvioMSHelper()
 
-    num_spec = sample_data.getNumberHistograms()
-    pre_correct_pars_workspace = None
-    pars_workspace = None
-    max_fit_iterations = flags.get('max_fit_iterations', 5000)
+    intensity_string = _create_intensity_constraint_str(flags['intensity_constraints'])
 
-    output_groups = []
-    chi2_values = []
-    for index in range(num_spec):
-        if isinstance(profiles_strs, list):
-            profiles = profiles_strs[index]
+    fit_helper = VesuvioTOFFitHelper(_create_background_str(flags.get('background', None)),
+                                     intensity_string, _create_user_defined_ties_str(flags['masses']),
+                                     flags.get('max_fit_iterations', 5000), flags['fit_minimizer'])
+
+    corrections_helper = VesuvioCorrectionsHelper(_extract_bool_from_flags('gamma_correct', flags, False),
+                                                  _extract_bool_from_flags('ms_enabled', flags),
+                                                  flags.get('fixed_gamma_scaling', 0.0),
+                                                  flags.get('fixed_container_scaling', 0.0),
+                                                  intensity_string)
+
+    create_mass_profile = _mass_profile_generator(MaterialBuilder())
+    profiles = [create_mass_profile(profile) for profile in flags['masses']]
+    mass_profile_collection = MassProfileCollection2D.from_collection(MassProfileCollection(profiles),
+                                                                      vesuvio_input.spectra_number)
+
+    fit_namer = VesuvioFitNamer.from_vesuvio_input(vesuvio_input, flags['fit_mode'])
+
+    vesuvio_fit_routine = VesuvioTOFFitRoutine(ms_helper, fit_helper, corrections_helper,
+                                               mass_profile_collection, fit_namer)
+    vesuvio_output, result, exit_iteration = vesuvio_fit_routine(vesuvio_input, iterations, convergence_threshold,
+                                                                 _extract_bool_from_flags('output_verbose_corrections',
+                                                                                          flags, False),
+                                                                 _extract_bool_from_flags('calculate_caad', flags,
+                                                                                          False)
+                                                                 )
+    result = result if len(result) > 1 else result[0]
+    return result, vesuvio_output.fit_parameters_workspace, vesuvio_output.chi2_values, exit_iteration
+
+
+# -----------------------------------------------------------------------------------------
+
+class VesuvioTOFFitRoutine(object):
+    """
+    A class for executing the the Vesuvio TOF Fit Routine from a Vesuvio Driver Script.
+
+    Attributes:
+        _ms_helper                   A helper object for multiple scattering parameters.
+        _fit_helper                  A helper object for computing a VesuvioTOFFit.
+        _corrections_helper          A helper object for computing VesuvioCorrections.
+        _mass_profile_collection     An object for storing and manipulating mass values
+                                     and profiles.
+        _fit_mode                    The fit mode to use in the fitting routine.
+    """
+
+    def __init__(self, ms_helper, fit_helper, corrections_helper, mass_profile_collection, fit_namer):
+        self._ms_helper = ms_helper
+        self._fit_helper = fit_helper
+        self._corrections_helper = corrections_helper
+        self._mass_profile_collection = mass_profile_collection
+        self._fit_namer = fit_namer
+
+    def __call__(self, vesuvio_input, iterations, convergence_threshold, verbose_output=False, compute_caad=False):
+        if iterations < 1:
+            raise ValueError('Must perform at least one iteration')
+
+        # Creation of a fit routine iteration
+        tof_iteration = VesuvioTOFFitRoutineIteration(self._ms_helper, self._fit_helper,
+                                                      self._corrections_helper, self._fit_namer,
+                                                      self._mass_profile_collection)
+
+        update_filter = ignore_hydrogen_filter if vesuvio_input.using_back_scattering_spectra else None
+        exit_iteration = 0
+        previous_output = None
+        vesuvio_output = None
+        fit_output = None
+        corrections_output = None
+
+        for iteration in range(1, iterations + 1):
+            self._fit_namer.set_iteration(iteration)
+
+            # Update the mass profiles using the previous result if it exists
+            if previous_output is not None:
+                parameters = _extract_parameters_from_workspace(vesuvio_output.fit_parameters_workspace)
+                self._mass_profile_collection.update_profiles(parameters, update_filter)
+
+            print("=== Iteration {0} out of a possible {1}".format(iteration, iterations))
+            vesuvio_output = tof_iteration(vesuvio_input, iteration, verbose_output)
+            exit_iteration += 1
+            # Check whether the change in the cost function between the result and
+            # previous results is smaller than the convergence threshold.
+            if previous_output is not None and convergence_threshold is not None:
+                cost_function_change = _change_in_cost_function(previous_output, vesuvio_output)
+                print("Cost function change: {0}".format(cost_function_change))
+
+                if cost_function_change <= convergence_threshold:
+                    print("Stopped at iteration {0} due to minimal change in cost function"
+                          .format(exit_iteration))
+                    break
+
+            _add_parameters_to_ads(vesuvio_output, self._fit_namer)
+            fit_output = _add_fit_output_to_ads(vesuvio_output, self._fit_namer)
+
+            if verbose_output:
+                corrections_output = _group_corrections(vesuvio_output, vesuvio_input.sample_runs, iteration)
+
+            if fit_output is not None and compute_caad:
+                _add_and_group_caad(self._fit_namer, vesuvio_input, fit_output[0].getAxis(1).extractValues(),
+                                    *_compute_caad(fit_output))
+
+            previous_output = vesuvio_output
+        return vesuvio_output, [x for x in (fit_output, corrections_output) if x is not None], exit_iteration
+
+
+# ------------------------------------------------------------------------------------------------------
+
+class VesuvioTOFFitRoutineIteration(object):
+    """
+    A class for executing a single iteration of the Vesuvio TOF Fit Routine, from a
+    Vesuvio Driver Script.
+
+    Attributes:
+        _ms_helper                   A helper object for multiple scattering parameters.
+        _fit_helper                  A helper object for computing a VesuvioTOFFit.
+        _fit_helper                  A helper object for computing a VesuvioTOFFit.
+        _corrections_helper          A helper object for computing VesuvioCorrections.
+        _mass_profile_collection     An object for storing and manipulating mass values
+                                     and profiles.
+        _fit_mode                    The fit mode to use in the fitting routine.
+    """
+
+    def __init__(self, ms_helper, fit_helper, corrections_helper, fit_namer, mass_profile_collection):
+        self._ms_corrections_args = ms_helper.to_dict()
+        self._fit_helper = fit_helper
+        self._fit_namer = fit_namer
+        self._corrections_helper = corrections_helper
+        self._mass_profile_collection = mass_profile_collection
+
+    def __call__(self, vesuvio_input, iteration, verbose_output=False):
+        vesuvio_output = VesuvioTOFFitOutput(lambda index:
+                                             vesuvio_input.sample_data.getSpectrum(index).getSpectrumNo())
+
+        if vesuvio_input.using_back_scattering_spectra:
+            fit_profile_collection = self._mass_profile_collection.filter(ignore_hydrogen_filter)
         else:
-            profiles = profiles_strs
+            fit_profile_collection = self._mass_profile_collection
 
-        suffix = _create_fit_workspace_suffix(index,
-                                              sample_data,
-                                              flags['fit_mode'],
-                                              flags['spectra'],
-                                              flags.get('iteration', None))
+        all_mass_values = self._mass_profile_collection.masses
+        fit_mass_values = fit_profile_collection.masses
 
-        # Corrections
-        corrections_args = dict()
+        for index in range(vesuvio_input.spectra_number):
+            self._fit_namer.set_index(index)
+            all_profiles = ";".join(self._mass_profile_collection.functions(index))
+            fit_profiles = ";".join(fit_profile_collection.functions(index))
 
-        # Need to do a fit first to obtain the parameter table
-        pre_correction_pars_name = runs + "_params_pre_correction" + suffix
-        corrections_fit_name = "__vesuvio_corrections_fit"
-        ms.VesuvioTOFFit(InputWorkspace=sample_data,
-                         WorkspaceIndex=index,
-                         Masses=mass_values,
-                         MassProfiles=profiles,
-                         Background=background_str,
-                         IntensityConstraints=intensity_constraints,
-                         Ties=ties,
-                         OutputWorkspace=corrections_fit_name,
-                         FitParameters=pre_correction_pars_name,
-                         MaxIterations=max_fit_iterations,
-                         Minimizer=flags['fit_minimizer'])
-        ms.DeleteWorkspace(corrections_fit_name)
-        corrections_args['FitParameters'] = pre_correction_pars_name
+            # Calculate pre-fit to retrieve parameter approximations for corrections
+            prefit_result = self._prefit(vesuvio_input.sample_data, index, fit_mass_values, fit_profiles)
 
-        # Add the mutiple scattering arguments
-        corrections_args.update(flags['ms_flags'])
+            # Calculate corrections
+            corrections_result = self._corrections(vesuvio_input.sample_data, vesuvio_input.container_data, index,
+                                                   all_mass_values, all_profiles, prefit_result[1], verbose_output)
 
-        corrected_data_name = runs + "_tof_corrected" + suffix
-        linear_correction_fit_params_name = runs + "_correction_fit_scale" + suffix
+            # Calculate final fit
+            fit_result = self._final_fit(corrections_result[-1], fit_mass_values, fit_profiles)
 
-        if flags.get('output_verbose_corrections', False):
-            corrections_args["CorrectionWorkspaces"] = runs + "_correction" + suffix
-            corrections_args["CorrectedWorkspaces"] = runs + "_corrected" + suffix
+            # Update output with results from fit
+            _update_output(vesuvio_output, prefit_result, corrections_result, fit_result)
+
+            # Clear ADS of intermediate workspaces and workspace group
+            if verbose_output:
+                UnGroupWorkspace(corrections_result[0])
+                UnGroupWorkspace(corrections_result[1])
+            mtd.remove(prefit_result[1].getName())
+            mtd.remove(corrections_result[-1].getName())
+            mtd.remove(fit_result[1].getName())
+
+        return vesuvio_output
+
+    def _prefit(self, sample_data, index, masses, profiles):
+        return self._fit_helper(InputWorkspace=sample_data,
+                                WorkspaceIndex=index,
+                                Masses=masses,
+                                MassProfiles=profiles,
+                                OutputWorkspace="__prefit",
+                                FitParameters=self._fit_namer.prefit_parameters_name,
+                                StoreInADS=False)
+
+    def _corrections(self, sample_data, container_data, index, masses, profiles, prefit_parameters, verbose_output):
+        correction_args = self._corrections_arguments(container_data, prefit_parameters, verbose_output)
+        return self._corrections_helper(InputWorkspace=sample_data,
+                                        WorkspaceIndex=index,
+                                        Masses=masses,
+                                        MassProfiles=profiles,
+                                        MassIndexToSymbolMap=self._mass_profile_collection.index_to_symbol_map,
+                                        OutputWorkspace=self._fit_namer.corrected_data_name,
+                                        LinearFitResult=self._fit_namer.corrections_parameters_name,
+                                        **correction_args)
+
+    def _corrections_arguments(self, container_data, prefit_parameters, verbose_output):
+        correction_args = {'FitParameters': prefit_parameters}
 
         if container_data is not None:
-            corrections_args["ContainerWorkspace"] = container_data
+            correction_args['ContainerWorkspace'] = container_data
+        if verbose_output:
+            correction_args['CorrectionWorkspaces'] = self._fit_namer.corrections_group_name
+            correction_args['CorrectedWorkspaces'] = self._fit_namer.corrected_group_name
 
-        ms.VesuvioCorrections(InputWorkspace=sample_data,
-                              OutputWorkspace=corrected_data_name,
-                              LinearFitResult=linear_correction_fit_params_name,
-                              WorkspaceIndex=index,
-                              GammaBackground=flags.get('gamma_correct', False),
-                              Masses=mass_values,
-                              MassProfiles=profiles,
-                              IntensityConstraints=intensity_constraints,
-                              MultipleScattering=True,
-                              GammaBackgroundScale=flags.get('fixed_gamma_scaling', 0.0),
-                              ContainerScale=flags.get('fixed_container_scaling', 0.0),
-                              **corrections_args)
+        correction_args.update(self._ms_corrections_args)
+        return correction_args
 
-        # Final fit
-        fit_ws_name = runs + "_data" + suffix
-        pars_name = runs + "_params" + suffix
-        fit_result = ms.VesuvioTOFFit(InputWorkspace=corrected_data_name,
+    def _final_fit(self, corrected_data, masses, profiles):
+        fit_result = self._fit_helper(InputWorkspace=corrected_data,
                                       WorkspaceIndex=0,
-                                      Masses=mass_values,
+                                      Masses=masses,
                                       MassProfiles=profiles,
-                                      Background=background_str,
-                                      IntensityConstraints=intensity_constraints,
-                                      Ties=ties,
-                                      OutputWorkspace=fit_ws_name,
-                                      FitParameters=pars_name,
-                                      MaxIterations=max_fit_iterations,
-                                      Minimizer=flags['fit_minimizer'])
-        chi2_values.append(fit_result[-1])
-        ms.DeleteWorkspace(corrected_data_name)
-
-        # Process parameter tables
-        if pre_correct_pars_workspace is None:
-            pre_correct_pars_workspace = _create_param_workspace(num_spec,
-                                                                 mtd[pre_correction_pars_name])
-
-        if pars_workspace is None:
-            pars_workspace = _create_param_workspace(num_spec, mtd[pars_name])
-
-        spec_num_str = str(sample_data.getSpectrum(index).getSpectrumNo())
-        current_spec = 'spectrum_' + spec_num_str
-
-        _update_fit_params(pre_correct_pars_workspace,
-                           index, mtd[pre_correction_pars_name],
-                           current_spec)
-        _update_fit_params(pars_workspace, index,
-                           mtd[pars_name], current_spec)
-
-        ms.DeleteWorkspace(pre_correction_pars_name)
-        ms.DeleteWorkspace(pars_name)
-
-        # Process spectrum group
-        # Note the ordering of operations here gives the order in the WorkspaceGroup
-        group_name = runs + suffix
-        output_workspaces = [fit_ws_name, linear_correction_fit_params_name]
-        if flags.get('output_verbose_corrections', False):
-            output_workspaces += mtd[corrections_args["CorrectionWorkspaces"]].getNames()
-            output_workspaces += mtd[corrections_args["CorrectedWorkspaces"]].getNames()
-            ms.UnGroupWorkspace(corrections_args["CorrectionWorkspaces"])
-            ms.UnGroupWorkspace(corrections_args["CorrectedWorkspaces"])
-
-        output_groups.append(ms.GroupWorkspaces(InputWorkspaces=output_workspaces,
-                                                OutputWorkspace=group_name))
-
-        # Output the parameter workspaces
-        params_pre_corr = runs + "_params_pre_correction_iteration_" + str(flags['iteration'])
-        params_name = runs + "_params_iteration_" + str(flags['iteration'])
-        AnalysisDataService.Instance().addOrReplace(params_pre_corr, pre_correct_pars_workspace)
-        AnalysisDataService.Instance().addOrReplace(params_name, pars_workspace)
-
-    if len(output_groups) > 1:
-        result_ws = output_groups
-    else:
-        result_ws = output_groups[0]
-
-    return (result_ws, pre_correct_pars_workspace, pars_workspace, chi2_values)
+                                      OutputWorkspace="__fit_output",
+                                      FitParameters=self._fit_namer.fit_parameters_name,
+                                      StoreInADS=False)
+        DeleteWorkspace(corrected_data)
+        mtd.addOrReplace(self._fit_namer.fit_output_name, fit_result[0])
+        return fit_result
 
 
-def load_and_crop_data(runs, spectra, ip_file, diff_mode='single',
-                       fit_mode='spectra', rebin_params=None):
+# ------------------------------------------------------------------------------------------------------
+
+class VesuvioMSHelper(object):
     """
-    @param runs The string giving the runs to load
-    @param spectra A list of spectra to load
-    @param ip_file A string denoting the IP file
-    @param diff_mode Either 'double' or 'single'
-    @param fit_mode If bank then the loading is changed to summing each bank to a separate spectrum
-    @param rebin_params Rebin parameter string to rebin data by (no rebin if None)
-    """
-    instrument = VESUVIO()
-    load_banks = (fit_mode == 'bank')
-    output_name = _create_tof_workspace_suffix(runs, spectra)
+    A helper class for storing and manipulating the multiple scattering parameters of
+    the Vesuvio TOF Fit Routine.
 
-    if load_banks:
-        sum_spectra = True
-        if spectra == "forward":
-            bank_ranges = instrument.forward_banks
-        elif spectra == "backward":
-            bank_ranges = instrument.backward_banks
+    Attributes:
+        _beam_radius        The radius of the neutron beam
+        _sample_height      The height of the sample
+        _sample_width       The width of the sample
+        _sample_depth       The depth of the sample
+        _sample_density     The density of the sample
+        _seed               The seed to use in generating random
+                            scattering events
+        _num_scatters       The number of times a neutron will be scattered
+        _num_runs           The number of runs
+        _num_events         The number of scattering events to simulate
+        _smooth_neighbours
+    """
+
+    def __init__(self, BeamRadius=2.5, SampleHeight=5.0, SampleWidth=5.0, SampleDepth=5.0,
+                 SampleDensity=1.0, Seed=123456789, NumScatters=3, NumRuns=10, NumEvents=50000,
+                 SmoothNeighbours=3):
+        self._beam_radius = BeamRadius
+        self._sample_height = SampleHeight
+        self._sample_width = SampleWidth
+        self._sample_depth = SampleDepth
+        self._sample_density = SampleDensity
+        self._seed = Seed
+        self._num_scatters = NumScatters
+        self._num_runs = NumRuns
+        self._num_events = NumEvents
+        self._smooth_neighbours = SmoothNeighbours
+
+        # Setup hydrogen constraints
+        def parser(constraint):
+            return _parse_hydrogen_constraint(constraint)
+
+        self._hydrogen_constraints = VesuvioConstraints("HydrogenConstraints", parser)
+
+    def add_hydrogen_constraints(self, constraints):
+        self._hydrogen_constraints.extend(constraints)
+
+    def to_dict(self):
+        return {"BeamRadius": self._beam_radius,
+                "SampleHeight": self._sample_height,
+                "SampleWidth": self._sample_width,
+                "SampleDepth": self._sample_depth,
+                "SampleDensity": self._sample_density,
+                "Seed": self._seed,
+                "NumScatters": self._num_scatters,
+                "NumRuns": self._num_runs,
+                "NumEvents": self._num_events,
+                "SmoothNeighbours": self._smooth_neighbours,
+                "HydrogenConstraints": self._hydrogen_constraints.to_dict()}
+
+
+# -----------------------------------------------------------------------------------------
+
+class VesuvioTOFFitHelper(object):
+    """
+    A helper class for executing a VesuvioTOFFit.
+
+    Attributes:
+        _background              The background to use in the fit
+        _intensity_constraints   The intensity constraints to use in the fit
+        _ties                    The ties to use in the fit
+        _max_iterations          The max number of iterations in which to attempt to find
+                                 a peak using the minimizer
+        _minimizer               The minimizer to use in the fit
+    """
+
+    def __init__(self, background, intensity_constraints, ties, max_iterations, minimizer):
+        self._background = background
+        self._intensity_constraints = intensity_constraints
+        self._ties = ties
+        self._max_iterations = max_iterations
+        self._minimizer = minimizer
+
+    def __call__(self, **fit_args):
+        return VesuvioTOFFit(Background=self._background,
+                             IntensityConstraints=self._intensity_constraints,
+                             Ties=self._ties,
+                             MaxIterations=self._max_iterations,
+                             Minimizer=self._minimizer,
+                             **fit_args)
+
+
+# -----------------------------------------------------------------------------------------
+
+class VesuvioCorrectionsHelper(object):
+    """
+    A helper class for executing VesuvioCorrections.
+
+    Attributes:
+        _gamma_correct          Boolean specifying whether to calculate gamma
+                                background corrections
+        _multiple_scattering    Boolean specifying whether to calculate multiple
+                                scattering corrections
+        _gamma_background_scale The value to scale the gamma corrections by
+        _container_scale        The value to scale the container corrections by
+        _intensity_constraints  The intensity constraints to use in the corrections
+                                calculation
+    """
+
+    def __init__(self, gamma_correct, multiple_scattering, gamma_background_scale,
+                 container_scale, intensity_constraints):
+        self._gamma_correct = gamma_correct
+        self._multiple_scattering = multiple_scattering
+        self._gamma_background_scale = gamma_background_scale
+        self._container_scale = container_scale
+        self._intensity_constraints = intensity_constraints
+
+    def __call__(self, **correction_args):
+        return VesuvioCorrections(GammaBackground=self._gamma_correct,
+                                  IntensityConstraints=self._intensity_constraints,
+                                  MultipleScattering=self._multiple_scattering,
+                                  GammaBackgroundScale=self._gamma_background_scale,
+                                  ContainerScale=self._container_scale,
+                                  **correction_args)
+
+
+# -----------------------------------------------------------------------------------------
+
+class VesuvioConstraints(object):
+    """
+    A class for parsing and storing a set of constraints for the Vesuvio Fit Routine
+
+    Attributes:
+        _name           The name of this set of constraints
+        _parser         The parser to be used
+        _constraints    The set of parsed constraints
+    """
+
+    def __init__(self, name, parser):
+        self._name = name
+        self._parser = parser
+        self._constraints = dict()
+
+    def __iter__(self):
+        return self._constraints.__iter__()
+
+    def __contains__(self, key):
+        return self._constraints.__contains__(key)
+
+    def add(self, key, constraint):
+        self._constraints[key] = constraint
+
+    def extend(self, constraints):
+        try:
+            if not isinstance(constraints, dict):
+                for constraint in constraints:
+                    self._constraints.update(self._parser(constraint))
+            else:
+                self._constraints.update(self._parser(constraints))
+        except AttributeError:
+            raise RuntimeError(self._name + ": Constraints are incorrectly formatted.")
+
+    def to_dict(self):
+        return dict(self._constraints)
+
+
+# -----------------------------------------------------------------------------------------
+
+class MassProfile(object):
+    def __init__(self, symbol, mass, function, width, **parameters):
+        self.symbol = symbol
+        self.mass = mass
+        self.width = width
+        self._function = function
+        self._parameters = parameters
+
+    @property
+    def function(self):
+        return _create_function_str(self._function, value=self.mass, width=self.width, **self._parameters)
+
+    @property
+    def parameters(self):
+        return {'value': self.mass, 'width': self.width}.update(self._parameters)
+
+    @parameters.setter
+    def parameters(self, values):
+        self.mass = values.pop('value', self.mass)
+
+        if isinstance(self.width, list):
+            self.width[1] = values.pop('width', self.width)
         else:
-            raise ValueError("Fitting by bank requires selecting either 'forward' or 'backward' "
-                             "for the spectra to load")
-        bank_ranges = ["{0}-{1}".format(x, y) for x, y in bank_ranges]
-        spectra = ";".join(bank_ranges)
-    else:
-        sum_spectra = False
-        if spectra == "forward":
-            spectra = "{0}-{1}".format(*instrument.forward_spectra)
-        elif spectra == "backward":
-            spectra = "{0}-{1}".format(*instrument.backward_spectra)
+            self.width = values.pop('width', self.width)
 
-    if diff_mode == "double":
-        diff_mode = "DoubleDifference"
-    else:
-        diff_mode = "SingleDifference"
+        self._parameters = values
 
-    kwargs = {"Filename": runs,
-              "Mode": diff_mode, "InstrumentParFile": ip_file,
-              "SpectrumList": spectra, "SumSpectra": sum_spectra,
-              "OutputWorkspace": output_name}
-    full_range = ms.LoadVesuvio(**kwargs)
-    tof_data = ms.CropWorkspace(InputWorkspace=full_range,
-                                XMin=instrument.tof_range[0],
-                                XMax=instrument.tof_range[1],
-                                OutputWorkspace=output_name)
+    def copy(self):
+        return MassProfile(self.symbol, self.mass, self._function, self.width, **self._parameters.copy())
 
-    if rebin_params is not None:
-        tof_data = ms.Rebin(InputWorkspace=tof_data,
-                            OutputWorkspace=output_name,
-                            Params=rebin_params)
 
-    return tof_data
+# -----------------------------------------------------------------------------------------
+
+class MassProfileCollection(object):
+    def __init__(self, profiles):
+        self._profiles = profiles
+
+    @property
+    def functions(self):
+        return [profile.function for profile in self._profiles]
+
+    @property
+    def masses(self):
+        return [profile.mass for profile in self._profiles]
+
+    def filter(self, profile_filter):
+        return MassProfileCollection(filter(profile_filter, self._profiles))
+
+    def set_parameters(self, parameters, profile_filter=None):
+        if profile_filter is None:
+            profiles = self._profiles
+        else:
+            profiles = filter(profile_filter, self._profiles)
+
+        for profile, parameters in zip(profiles, parameters):
+            profile.parameters = parameters
+
+    def copy(self):
+        return MassProfileCollection([profile.copy() for profile in self._profiles])
+
+    def __iter__(self):
+        return iter(self._profiles)
+
+
+# -----------------------------------------------------------------------------------------
+
+class MassProfileCollection2D(object):
+    def __init__(self, collections):
+        self._collections = collections
+        self._index_to_symbol_map = {str(index): profile.symbol for index, profile in
+                                     enumerate(self._collections[0]) if profile.symbol is not None}
+
+    @classmethod
+    def from_collection(cls, collection, size=1):
+        return MassProfileCollection2D([collection.copy() for _ in range(size)])
+
+    @property
+    def masses(self):
+        return self._collections[0].masses
+
+    @property
+    def index_to_symbol_map(self):
+        return self._index_to_symbol_map
+
+    def functions(self, index):
+        return self._collections[index].functions
+
+    def filter(self, profile_filter):
+        filtered_profiles = [collection.filter(profile_filter) for collection in self._collections]
+        return MassProfileCollection2D(filtered_profiles)
+
+    def add_collection(self, collection):
+        self._collections.append(collection)
+
+    def update_profiles(self, parameters, profile_filter=None):
+        for index, collection_parameters in enumerate(parameters):
+            self._collections[index].set_parameters(collection_parameters, profile_filter)
+
+
+# -----------------------------------------------------------------------------------------
+
+
+class VesuvioFitNamer(object):
+    def __init__(self, sample_runs, suffix_prefix, index_to_spectrum, index_to_string,
+                 iteration=0, index=0, iteration_string="", index_string="", suffix=""):
+        self._sample_runs = sample_runs
+        self._suffix_prefix = suffix_prefix
+        self._index_to_spectrum = index_to_spectrum
+        self._index_to_string = index_to_string
+        self._iteration_string = iteration_string
+        self._index_string = index_string
+        self._suffix = suffix
+        self._index = index
+        self._iteration = iteration
+
+    @classmethod
+    def from_vesuvio_input(cls, vesuvio_input, fit_mode):
+        def index_to_spectrum(index):
+            return str(vesuvio_input.sample_data.getSpectrum(index).getSpectrumNo())
+
+        if fit_mode == "bank":
+            suffix_prefix = "_" + vesuvio_input.spectra + "_bank_"
+
+            def index_to_string(index):
+                return str(index + 1)
+        else:
+            suffix_prefix = "_spectrum_"
+
+            def index_to_string(index):
+                return str(index_to_spectrum(index))
+
+        return VesuvioFitNamer(vesuvio_input.sample_runs, suffix_prefix, index_to_spectrum, index_to_string)
+
+    @property
+    def suffix(self):
+        if self._suffix == "":
+            self._suffix = self._suffix_prefix + self._index_string + self._iteration_string
+        return self._suffix
+
+    def set_iteration(self, iteration):
+        if iteration is not None:
+            self._iteration_string = "_iteration_" + str(iteration)
+            self._iteration = iteration
+        else:
+            self._iteration_string = ""
+        self._suffix = ""
+
+    def set_index(self, index):
+        self._index_string = self._index_to_string(index)
+        self._index = index
+        self._suffix = ""
+
+    @property
+    def prefit_parameters_name(self):
+        return self._sample_runs + "_params_pre_correction" + self.suffix
+
+    @property
+    def corrections_parameters_name(self):
+        return self._sample_runs + "_correction_fit_scale" + self.suffix
+
+    @property
+    def corrected_data_name(self):
+        return self._sample_runs + "_tof_corrected" + self.suffix
+
+    @property
+    def fit_output_name(self):
+        return self._sample_runs + "_data" + self.suffix
+
+    @property
+    def fit_output_group_name(self):
+        return self._sample_runs + "_iteration_" + str(self._iteration) + "_data"
+
+    @property
+    def fit_parameters_name(self):
+        return self._sample_runs + "_params" + self.suffix
+
+    @property
+    def prefit_parameters_correction_name(self):
+        return self._sample_runs + "_params_pre_correction_iteration_" + str(self._iteration)
+
+    @property
+    def fit_parameters_correction_name(self):
+        return self._sample_runs + "_params_iteration_" + str(self._iteration)
+
+    @property
+    def fit_correction_name(self):
+        return self._sample_runs + "_correction_fit_scale_iteration_" + str(self._iteration)
+
+    @property
+    def corrections_group_name(self):
+        return self._sample_runs + "_correction" + self.suffix
+
+    @property
+    def corrected_group_name(self):
+        return self._sample_runs + "_corrected" + self.suffix
+
+    @property
+    def caad_group_name(self):
+        return self._sample_runs + "_CAAD_sum_iteration_" + str(self._iteration)
+
+    @property
+    def normalised_group_name(self):
+        return self._sample_runs + "_CAAD_normalised_iteration_" + str(self._iteration)
+
+    def copy(self):
+        return VesuvioFitNamer(self._sample_runs, self._suffix_prefix, self._index_to_string, self._iteration,
+                               self._index, self._index_to_spectrum, self._iteration_string, self._index_string,
+                               self._suffix)
+
+
+# -----------------------------------------------------------------------------------------
+
+class VesuvioTOFFitOutput(object):
+    def __init__(self, get_spectrum):
+        self._prefit_parameters = []
+        self._correction_parameters = []
+        self._fit_parameters = []
+        self._fit_output_workspaces = []
+        self._correction_groups = []
+        self._corrected_groups = []
+        self._chi2_values = []
+        self._get_spectrum = get_spectrum
+
+    @property
+    def prefit_parameters_workspace(self):
+        return _merge_table_workspaces(self._prefit_parameters, self._table_column_name)
+
+    @property
+    def correction_parameters_workspace(self):
+        return _merge_table_workspaces(self._correction_parameters, self._table_column_name)
+
+    @property
+    def fit_parameters_workspace(self):
+        return _merge_table_workspaces(self._fit_parameters, self._table_column_name)
+
+    @property
+    def fit_output_workspaces(self):
+        return self._fit_output_workspaces
+
+    @property
+    def correction_workspaces(self):
+        return _conjoin_groups(self._correction_groups)
+
+    @property
+    def corrected_workspaces(self):
+        return _conjoin_groups(self._corrected_groups)
+
+    @property
+    def chi2_values(self):
+        return np.asarray(self._chi2_values)
+
+    def add_prefit_parameters_workspace(self, workspace):
+        self._prefit_parameters.append(workspace)
+
+    def add_correction_parameters_workspace(self, workspace):
+        self._correction_parameters.append(workspace)
+
+    def add_fit_parameters_workspace(self, workspace):
+        self._fit_parameters.append(workspace)
+
+    def add_fit_output_workspace(self, workspace):
+        self._fit_output_workspaces.append(workspace)
+
+    def add_corrections_workspaces(self, workspaces):
+        self._correction_groups.append(workspaces)
+
+    def add_corrected_workspaces(self, workspaces):
+        self._corrected_groups.append(workspaces)
+
+    def add_chi2_value(self, value):
+        self._chi2_values.append(value)
+
+    def _table_column_name(self, index):
+        return "spectrum_" + str(self._get_spectrum(index))
+
 
 # --------------------------------------------------------------------------------
 # Private Functions
 # --------------------------------------------------------------------------------
 
+def _mass_profile_generator(material_builder):
+    def generator(mass_input):
+        return _create_mass_profile(material_builder, mass_input)
 
-def _update_masses_from_params(old_masses, param_ws):
-    """
-    Update the massses flag based on the results of a fit.
+    return generator
 
-    @param old_masses The existing masses dictionary
-    @param param_ws The workspace to update from
-    @return The modified mass dictionary
-    """
-    for mass in old_masses:
-        for param in mass.keys():
-            params_list = ['value', 'function', 'hermite_coeffs',
-                           'k_free', 'sears_flag', 'width']
-            if param.lower() not in params_list:
-                del mass[param]
-            elif param.lower() == 'width' and not isinstance(mass[param], list):
-                del mass[param]
 
-    masses = []
-    num_masses = len(old_masses)
-    for _ in range(param_ws.blocksize()):
-        masses.append(copy.deepcopy(old_masses))
+def _create_mass_profile(material_builder, mass_input):
+    mass_value = _extract_mass_value(material_builder, mass_input)
+    symbol = mass_input.pop('symbol', None)
+    mass_function = _extract_mass_function(mass_input)
+    width = mass_input.pop('width', None)
+    return MassProfile(symbol, mass_value, mass_function, width, **mass_input)
 
+
+def _extract_mass_function(mass_input):
+    mass_function = mass_input.pop('function', None)
+
+    if mass_function is None:
+        raise RuntimeError('Invalid mass specified - ' + str(mass_input)
+                           + " - no function was given.")
+    return mass_function
+
+
+def _extract_mass_value(material_builder, mass_input):
+    mass_value = mass_input.pop('value', None)
+
+    if mass_value is None:
+        symbol = mass_input.get('symbol', None)
+
+        if symbol is None:
+            raise RuntimeError('Invalid mass specified - ' + str(mass_input)
+                               + " - either 'value' or 'symbol' must be given.")
+
+        try:
+            mass_value = material_builder.setFormula(symbol).build().relativeMolecularMass()
+        except BaseException as exc:
+            raise RuntimeError('Error when parsing mass - ' + str(mass_input) + ": "
+                               + "\n" + str(exc))
+    return mass_value
+
+
+def _extract_parameters_from_workspace(workspace):
+    parameter_names, profile_indices = _extract_parameter_names_from_workspace(workspace)
+    profile_number = max(profile_indices) + 1
+    parameters = []
+
+    for spectrum in range(workspace.blocksize()):
+        parameters.append([])
+        parameters[spectrum] = [dict() for _ in range(profile_number)]
+
+        for index, parameter_name in enumerate(parameter_names):
+            parameters[spectrum][profile_indices[index]][parameter_name] = workspace.dataY(index)[spectrum]
+    return parameters
+
+
+def _extract_parameter_names_from_workspace(workspace):
     function_regex = re.compile("f([0-9]+).([A-z0-9_]+)")
-
-    for spec_idx in range(param_ws.blocksize()):
-        for idx, param in enumerate(param_ws.getAxis(1).extractValues()):
-            # Ignore the cost function
-            if param == "Cost function value":
-                continue
-
-            param_re = function_regex.match(param)
-            mass_idx = int(param_re.group(1))
-            if mass_idx >= num_masses:
-                continue
-
-            param_name = param_re.group(2).lower()
-            if param_name == 'width' and isinstance(masses[spec_idx][mass_idx].get(param_name, None), list):
-                masses[spec_idx][mass_idx][param_name][1] = param_ws.dataY(idx)[spec_idx]
-            else:
-                masses[spec_idx][mass_idx][param_name] = param_ws.dataY(idx)[spec_idx]
-
-    return masses
-
-
-def _create_param_workspace(num_spec, param_table):
-    num_params = param_table.rowCount()
-    param_workspace = WorkspaceFactory.Instance().create("Workspace2D",
-                                                         num_params, num_spec,
-                                                         num_spec)
-
-    x_axis = TextAxis.create(num_spec)
-    param_workspace.replaceAxis(0, x_axis)
-
-    vert_axis = TextAxis.create(num_params)
-    for idx, param_name in enumerate(param_table.column('Name')):
-        vert_axis.setLabel(idx, param_name)
-    param_workspace.replaceAxis(1, vert_axis)
-
-    return param_workspace
-
-
-def _update_fit_params(params_ws, spec_idx, params_table, name):
-    params_ws.getAxis(0).setLabel(spec_idx, name)
-    for idx in range(params_table.rowCount()):
-        params_ws.dataX(idx)[spec_idx] = spec_idx
-        params_ws.dataY(idx)[spec_idx] = params_table.column('Value')[idx]
-        params_ws.dataE(idx)[spec_idx] = params_table.column('Error')[idx]
-
-
-def _create_tof_workspace_suffix(runs, spectra):
-    return runs + "_" + spectra + "_tof"
-
-
-def _create_fit_workspace_suffix(index, tof_data, fit_mode, spectra, iteration=None):
-    if fit_mode == "bank":
-        suffix = "_" + spectra + "_bank_" + str(index+1)
-    else:
-        spectrum = tof_data.getSpectrum(index)
-        suffix = "_spectrum_" + str(spectrum.getSpectrumNo())
-
-    if iteration is not None:
-        suffix += "_iteration_" + str(iteration)
-
-    return suffix
-
-
-def _create_profile_strs_and_mass_list(profile_flags):
-    """
-    Create a string suitable for the algorithms out of the mass profile flags
-    and a list of mass values
-    :param profile_flags: A list of dict objects for the mass profile flags
-    :return: A string to pass to the algorithm & a list of masses
-    """
-    mass_values, profiles = [], []
-    for mass_prop in profile_flags:
-        function_props = ["function={0}".format(mass_prop["function"])]
-        del mass_prop["function"]
-        for key, value in iteritems(mass_prop):
-            if key == 'value':
-                mass_values.append(value)
-            else:
-                function_props.append("{0}={1}".format(key, value))
-        profiles.append(",".join(function_props))
-    profiles = ";".join(profiles)
-
-    return mass_values, profiles
+    parameter_labels = workspace.getAxis(1).extractValues()[:-1]
+    parameter_re = [function_regex.match(label) for label in parameter_labels]
+    return [regex.group(2) for regex in parameter_re], [int(regex.group(1)) for regex in parameter_re]
 
 
 def _create_background_str(background_flags):
@@ -412,26 +775,25 @@ def _create_background_str(background_flags):
     :return: A string to pass to the algorithm
     """
     if background_flags:
-        background_props = ["function={0}".format(background_flags["function"])]
-        del background_flags["function"]
-        for key, value in iteritems(background_flags):
-            background_props.append("{0}={1}".format(key, value))
-        background_str = ",".join(background_props)
-    else:
-        background_str = ""
+        return _create_function_str(background_flags.pop("function"), **background_flags)
+    return ""
 
-    return background_str
+
+def _create_function_str(function, **parameters):
+    parameter_string = ",".join(["{0}={1}".format(key, value) for key, value in parameters.items()
+                                 if value is not None])
+    return "function=" + function + "," + parameter_string
 
 
 def _create_intensity_constraint_str(intensity_constraints):
     """
     Create a string suitable for the algorithms out of the intensity constraint flags
-    :param inten_constr_flags: A list of lists for the constraints (can be None)
+    :param intensity_constraints: A list of lists for the constraints (can be None)
     :return: A string to pass to the algorithm
     """
     if intensity_constraints:
         if not isinstance(intensity_constraints[0], list):
-            intensity_constraints = [intensity_constraints,]
+            intensity_constraints = [intensity_constraints]
         # Make each element a string and then join them together
         intensity_constraints = [str(c) for c in intensity_constraints]
         intensity_constraints_str = ";".join(intensity_constraints)
@@ -451,11 +813,207 @@ def _create_user_defined_ties_str(masses):
     for index, mass in enumerate(masses):
         if 'ties' in mass:
             ties = mass['ties'].split(',')
-            function_indentifier = 'f' + str(index) + '.'
+            function_identifier = 'f' + str(index) + '.'
             for t in ties:
-                tie_str = function_indentifier + t
+                tie_str = function_identifier + t
                 equal_pos = tie_str.index('=') + 1
-                tie_str = tie_str[:equal_pos] + function_indentifier + tie_str[equal_pos:]
+                tie_str = tie_str[:equal_pos] + function_identifier + tie_str[equal_pos:]
                 user_defined_ties.append(tie_str)
     user_defined_ties = ','.join(user_defined_ties)
     return user_defined_ties
+
+
+def _merge_table_workspaces(table_workspaces, create_name):
+    merged = _create_parameter_workspace(len(table_workspaces), table_workspaces[0])
+
+    for index, parameter_workspace in enumerate(table_workspaces):
+        _read_table_into_workspace(merged, parameter_workspace, index, create_name(index))
+    return merged
+
+
+def _create_parameter_workspace(num_spec, param_table):
+    num_params = param_table.rowCount()
+    param_workspace = WorkspaceFactory.Instance().create("Workspace2D",
+                                                         num_params, num_spec,
+                                                         num_spec)
+    x_axis = TextAxis.create(num_spec)
+    param_workspace.replaceAxis(0, x_axis)
+
+    y_axis = TextAxis.create(num_params)
+    for idx, parameter_name in enumerate(param_table.column('Name')):
+        y_axis.setLabel(idx, parameter_name)
+    param_workspace.replaceAxis(1, y_axis)
+    return param_workspace
+
+
+def _read_table_into_workspace(workspace, table_workspace, spectrum, name):
+    workspace.getAxis(0).setLabel(spectrum, name)
+    for idx in range(table_workspace.rowCount()):
+        workspace.dataX(idx)[spectrum] = spectrum
+        workspace.dataY(idx)[spectrum] = table_workspace.column('Value')[idx]
+        workspace.dataE(idx)[spectrum] = table_workspace.column('Error')[idx]
+
+
+def _conjoin_groups(workspace_groups):
+    conjoined_workspaces = workspace_groups[0]
+
+    if len(workspace_groups) > 1:
+        for workspace_group in workspace_groups[1:]:
+            conjoined_workspaces = [_conjoin(conjoined, workspace) for conjoined, workspace
+                                    in zip(conjoined_workspaces, workspace_group)]
+    return conjoined_workspaces
+
+
+def _conjoin(workspace1, workspace2):
+    workspace_name = workspace1.getName()
+    ConjoinWorkspaces(InputWorkspace1=workspace_name, InputWorkspace2=workspace2, EnableLogging=False)
+    return mtd[workspace_name]
+
+
+def _append_all(workspaces):
+    if len(workspaces) == 1:
+        return workspaces[0]
+    else:
+        return reduce(_append, workspaces[1:], workspaces[0])
+
+
+def _append(workspace1, workspace2):
+    return AppendSpectra(InputWorkspace1=workspace1, InputWorkspace2=workspace2,
+                         OutputWorkspace="__appended", StoreInADS=False, EnableLogging=False)
+
+
+def _update_output(vesuvio_output, prefit_result, corrections_result, fit_result):
+    vesuvio_output.add_fit_output_workspace(fit_result[0])
+    vesuvio_output.add_chi2_value(fit_result[-1])
+    vesuvio_output.add_prefit_parameters_workspace(prefit_result[1])
+    vesuvio_output.add_correction_parameters_workspace(corrections_result[-2])
+    vesuvio_output.add_fit_parameters_workspace(fit_result[1])
+
+    if len(corrections_result) > 2:
+        vesuvio_output.add_corrections_workspaces(list(corrections_result[0]))
+        vesuvio_output.add_corrected_workspaces(list(corrections_result[1]))
+
+
+def _change_in_cost_function(previous_output, current_output):
+    return np.abs(np.max(previous_output.chi2_values - current_output.chi2_values))
+
+
+def _add_fit_output_to_ads(vesuvio_output, fit_namer):
+    if vesuvio_output.fit_output_workspaces:
+        return GroupWorkspaces(InputWorkspaces=[workspace.getName() for workspace
+                                                in vesuvio_output.fit_output_workspaces],
+                               OutputWorkspace=fit_namer.fit_output_group_name)
+    return None
+
+
+def _add_parameters_to_ads(vesuvio_output, fit_namer):
+    mtd.addOrReplace(fit_namer.prefit_parameters_correction_name, vesuvio_output.prefit_parameters_workspace)
+    mtd.addOrReplace(fit_namer.fit_correction_name, vesuvio_output.correction_parameters_workspace)
+    mtd.addOrReplace(fit_namer.fit_parameters_correction_name, vesuvio_output.fit_parameters_workspace)
+
+
+def _group_corrections(vesuvio_output, sample_runs, iteration):
+    prefix = sample_runs + "_iteration_" + str(iteration)
+    corrections = _add_corrections_to_ads(vesuvio_output.correction_workspaces, prefix + "_correction_")
+    corrected = _add_corrections_to_ads(vesuvio_output.corrected_workspaces, prefix + "_corrected_")
+
+    if corrections or corrected:
+        return GroupWorkspaces(InputWorkspaces=corrections + corrected, OutputWorkspace=prefix)
+    return None
+
+
+def _add_corrections_to_ads(corrections_group, prefix):
+    corrections_names = []
+
+    for correction_workspace in corrections_group:
+        name = prefix + correction_workspace.getName().rsplit('_', 1)[1]
+        mtd.addOrReplace(name, correction_workspace)
+        corrections_names.append(name)
+    return corrections_names
+
+
+def _add_and_group_caad(fit_namer, vesuvio_input, suffices, normalised_workspaces, summed_workspaces, indices):
+    normalised_names = [fit_namer.normalised_group_name + "_" + suffices[index] for index in indices]
+    summed_names = [fit_namer.caad_group_name + "_" + suffices[index] for index in indices]
+    name_count = dict()
+
+    for name, workspace in zip(normalised_names + summed_names, normalised_workspaces + summed_workspaces):
+        if name not in name_count:
+            mtd.addOrReplace(name, workspace)
+            name_count[name] = 1
+        else:
+            name_count[name] += 1
+            mtd.addOrReplace(name + str(name_count[name]), workspace)
+
+    map(_create_spectra_axis_copier(vesuvio_input.sample_data), normalised_workspaces)
+
+    GroupWorkspaces(InputWorkspaces=normalised_workspaces, OutputWorkspace=fit_namer.normalised_group_name)
+    GroupWorkspaces(InputWorkspaces=summed_workspaces, OutputWorkspace=fit_namer.caad_group_name)
+
+
+def _compute_caad(fit_workspaces):
+    indices = _get_caad_indices(fit_workspaces[0])
+    normalised_workspaces = [_normalise_by_integral(_extract_spectra(workspace, indices))
+                             for workspace in fit_workspaces]
+
+    number_of_spectrum = normalised_workspaces[0].getNumberHistograms()
+    normalised_workspaces = [[ExtractSingleSpectrum(InputWorkspace=workspace, OutputWorkspace="__extracted",
+                                                    WorkspaceIndex=index, StoreInADS=False, EnableLogging=True)
+                              for workspace in normalised_workspaces] for index in range(number_of_spectrum)]
+    normalised_workspaces = [_append_all(workspaces) for workspaces in normalised_workspaces]
+
+    summed_workspaces = [SumSpectra(InputWorkspace=workspace, OutputWorkspace="__summed",
+                                    StoreInADS=False, EnableLogging=False)
+                         for workspace in normalised_workspaces]
+    return normalised_workspaces, summed_workspaces, indices
+
+
+def _get_caad_indices(fit_workspace):
+    axis_labels = fit_workspace.getAxis(1).extractValues()
+    return [index for index, label in enumerate(axis_labels) if _is_valid_for_caad(label)]
+
+
+def _create_spectra_axis_copier(workspace_with_axis):
+    def _copy_spectra_axis(workspace):
+        workspace.replaceAxis(1, SpectraAxis.create(workspace_with_axis))
+
+    return _copy_spectra_axis
+
+
+def _is_valid_for_caad(label):
+    return label != "Data" and label != "Diff"
+
+
+def _extract_spectra(workspace, indices):
+    return ExtractSpectra(InputWorkspace=workspace, WorkspaceIndexList=indices,
+                          OutputWorkspace="__extracted", StoreInADS=False, EnableLogging=False)
+
+
+def _normalise_by_integral(workspace):
+    integrated = Integration(InputWorkspace=workspace, OutputWorkspace="__integral",
+                             StoreInADS=False, EnableLogging=False)
+    return Divide(LHSWorkspace=workspace, RHSWorkspace=integrated,
+                  OutputWorkspace="__divided", StoreInADS=False, EnableLogging=False)
+
+
+def _extract_bool_from_flags(key, flags, default=True):
+    value = flags.get(key, default)
+
+    if isinstance(value, bool):
+        return value
+    else:
+        raise RuntimeError("Expected boolean for '" + key + "', " + str(type(key)) + " found.")
+
+
+def _parse_hydrogen_constraint(constraint):
+    symbol = constraint.pop("symbol", None)
+
+    if symbol is None:
+        raise RuntimeError("Invalid hydrogen constraint: " +
+                           str(constraint) +
+                           " - No symbol provided")
+    return {symbol: constraint}
+
+
+def ignore_hydrogen_filter(profile):
+    return profile.symbol is None or profile.symbol != 'H'

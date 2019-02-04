@@ -1,19 +1,25 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_RULESSURFPOINTTEST__
 #define MANTID_RULESSURFPOINTTEST__
-#include <cxxtest/TestSuite.h>
-#include <cmath>
-#include <vector>
+#include "MantidGeometry/Objects/CSGObject.h"
+#include "MantidGeometry/Objects/Rules.h"
+#include "MantidGeometry/Surfaces/Cone.h"
+#include "MantidGeometry/Surfaces/Cylinder.h"
+#include "MantidGeometry/Surfaces/Plane.h"
+#include "MantidGeometry/Surfaces/Quadratic.h"
+#include "MantidGeometry/Surfaces/Sphere.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/System.h"
-#include <cfloat>
 #include "MantidKernel/V3D.h"
-#include "MantidGeometry/Surfaces/Quadratic.h"
-#include "MantidGeometry/Objects/Object.h"
-#include "MantidGeometry/Objects/Rules.h"
-#include "MantidGeometry/Surfaces/Plane.h"
-#include "MantidGeometry/Surfaces/Sphere.h"
-#include "MantidGeometry/Surfaces/Cylinder.h"
-#include "MantidGeometry/Surfaces/Cone.h"
+#include <cfloat>
+#include <cmath>
+#include <cxxtest/TestSuite.h>
+#include <vector>
 
 #include "boost/make_shared.hpp"
 
@@ -67,12 +73,12 @@ public:
   void testLeaf() { // SurfPoint will always be end of tree always returns 0
     SurfPoint A;
     TS_ASSERT_EQUALS(A.simplify(), 0);
-    TS_ASSERT_EQUALS(A.leaf(0), (Rule *)0);
+    TS_ASSERT_EQUALS(A.leaf(0), (Rule *)nullptr);
     auto P1 = boost::make_shared<Plane>();
     A.setKey(P1);
     A.setKeyN(10);
     TS_ASSERT_EQUALS(A.simplify(), 0);
-    TS_ASSERT_EQUALS(A.leaf(10), (Rule *)0);
+    TS_ASSERT_EQUALS(A.leaf(10), (Rule *)nullptr);
   }
 
   void
@@ -151,7 +157,7 @@ public:
     TS_ASSERT_EQUALS(A.getKeyN(), 10);
     TS_ASSERT_EQUALS(A.display(), "10");
     TS_ASSERT_EQUALS(A.findKey(10), &A);
-    TS_ASSERT_EQUALS(A.findKey(11), (Rule *)0);
+    TS_ASSERT_EQUALS(A.findKey(11), (Rule *)nullptr);
   }
 
   void testGetSign() {

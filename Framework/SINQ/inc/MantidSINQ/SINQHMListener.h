@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 /*
  * SINQHMListener.h
  *
@@ -6,40 +12,21 @@
  *
  * Original contributor: Mark Koennecke: mark.koennecke@psi.ch
  *
- * Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
- National Laboratory & European Spallation Source
-
- * This file is part of Mantid.
-
- * Mantid is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
  *
- * Mantid is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
-
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
- * File change history is stored at: <https://github.com/mantidproject/mantid>
- * Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 
 #ifndef SINQHMLISTENER_H_
 #define SINQHMLISTENER_H_
 
-#include "MantidSINQ/DllConfig.h"
-#include "MantidAPI/ILiveListener.h"
 #include "MantidAPI/IMDHistoWorkspace_fwd.h"
+#include "MantidAPI/LiveListener.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
-#include <Poco/Net/HTTPResponse.h>
+#include "MantidSINQ/DllConfig.h"
 #include <Poco/Net/HTTPClientSession.h>
+#include <Poco/Net/HTTPResponse.h>
 
-class MANTID_SINQ_DLL SINQHMListener : public Mantid::API::ILiveListener {
+class MANTID_SINQ_DLL SINQHMListener : public Mantid::API::LiveListener {
 public:
   SINQHMListener();
 
@@ -48,8 +35,8 @@ public:
   bool buffersEvents() const override { return false; }
 
   bool connect(const Poco::Net::SocketAddress &address) override;
-  void start(Mantid::Kernel::DateAndTime startTime =
-                 Mantid::Kernel::DateAndTime()) override;
+  void start(Mantid::Types::Core::DateAndTime startTime =
+                 Mantid::Types::Core::DateAndTime()) override;
   boost::shared_ptr<Mantid::API::Workspace> extractData() override;
   bool isConnected() override;
   ILiveListener::RunStatus runStatus() override;

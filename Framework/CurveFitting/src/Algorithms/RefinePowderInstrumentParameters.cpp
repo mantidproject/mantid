@@ -1,25 +1,31 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/Algorithms/RefinePowderInstrumentParameters.h"
 
-#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Statistics.h"
 
-#include "MantidAPI/TableRow.h"
+#include "MantidAPI/ConstraintFactory.h"
 #include "MantidAPI/FunctionDomain1D.h"
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/ParameterTie.h"
-#include "MantidAPI/ConstraintFactory.h"
-#include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/TableRow.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
 #include "MantidCurveFitting/Algorithms/Fit.h"
 #include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
 #include "MantidCurveFitting/Functions/BackgroundFunction.h"
-#include "MantidCurveFitting/Functions/Polynomial.h"
 #include "MantidCurveFitting/Functions/Gaussian.h"
+#include "MantidCurveFitting/Functions/Polynomial.h"
 
 #include "MantidGeometry/Crystal/UnitCell.h"
 
@@ -27,6 +33,8 @@
 #include <boost/algorithm/string/split.hpp>
 
 #include <fstream>
+#include <iomanip>
+#include <iostream>
 
 #include <gsl/gsl_sf_erf.h>
 
@@ -52,7 +60,9 @@ DECLARE_ALGORITHM(RefinePowderInstrumentParameters)
  */
 RefinePowderInstrumentParameters::RefinePowderInstrumentParameters()
     : m_BestGSLChi2(0.0), m_MinSigma(0.0), m_MinNumFittedPeaks(0),
-      m_MaxNumberStoredParameters(0) {}
+      m_MaxNumberStoredParameters(0) {
+  this->useAlgorithm("RefinePowderInstrumentParameters", 3);
+}
 
 //----------------------------------------------------------------------------------------------
 /** Parameter declaration
@@ -158,9 +168,9 @@ void RefinePowderInstrumentParameters::exec() {
   m_MaxNumberStoredParameters = static_cast<size_t>(tempint);
 
   string algoption = getProperty("RefinementAlgorithm");
-  if (algoption.compare("DirectFit") == 0)
+  if (algoption == "DirectFit")
     refinealgorithm = DirectFit;
-  else if (algoption.compare("MonteCarlo") == 0)
+  else if (algoption == "MonteCarlo")
     refinealgorithm = MonteCarlo;
   else
     throw runtime_error("RefinementAlgorithm other than DirectFit and "
@@ -220,8 +230,7 @@ void RefinePowderInstrumentParameters::fitInstrumentParameters() {
   cout << "=========== Method [FitInstrumentParameters] ===============\n";
 
   // 1. Initialize the fitting function
-  ThermalNeutronDtoTOFFunction rawfunc;
-  m_Function = boost::make_shared<ThermalNeutronDtoTOFFunction>(rawfunc);
+  m_Function = boost::make_shared<ThermalNeutronDtoTOFFunction>();
   m_Function->initialize();
 
   API::FunctionDomain1DVector domain(m_dataWS->x(1).rawData());
@@ -357,12 +366,14 @@ void RefinePowderInstrumentParameters::fitInstrumentParameters() {
   stringstream zss;
   zss << setw(20) << "d_h" << setw(20) << "Z DataY" << setw(20) << "Z ModelY"
       << setw(20) << "Z DiffY" << setw(20) << "DiffY\n";
+  const auto &X = m_dataWS->x(0);
+  const auto &Y = m_dataWS->y(2);
   for (size_t i = 0; i < z0.size(); ++i) {
-    double d_h = m_dataWS->x(0)[i];
+    double d_h = X[i];
     double zdatay = z0[i];
     double zmodely = z1[i];
     double zdiffy = z2[i];
-    double diffy = m_dataWS->y(2)[i];
+    double diffy = Y[i];
     zss << setw(20) << d_h << setw(20) << zdatay << setw(20) << zmodely
         << setw(20) << zdiffy << setw(20) << diffy << '\n';
   }
@@ -370,7 +381,7 @@ void RefinePowderInstrumentParameters::fitInstrumentParameters() {
 }
 
 /** Fit function to data
-  */
+ */
 bool RefinePowderInstrumentParameters::fitFunction(IFunction_sptr func,
                                                    double &gslchi2) {
   API::IAlgorithm_sptr fitalg = createChildAlgorithm("Fit", 0.0, 0.2, true);
@@ -397,13 +408,13 @@ bool RefinePowderInstrumentParameters::fitFunction(IFunction_sptr func,
   g_log.debug() << "Function Fit:  Chi^2 = " << gslchi2
                 << "; Fit Status = " << fitstatus << '\n';
 
-  bool fitgood = (fitstatus.compare("success") == 0);
+  bool fitgood = (fitstatus == "success");
 
   return fitgood;
 }
 
 /** Calculate function's statistic
-  */
+ */
 double RefinePowderInstrumentParameters::calculateFunctionStatistic(
     IFunction_sptr func, MatrixWorkspace_sptr dataws, size_t workspaceindex) {
   // 1. Fix all parameters of the function
@@ -442,7 +453,7 @@ double RefinePowderInstrumentParameters::calculateFunctionStatistic(
 }
 
 /** Refine instrument parameters by Monte Carlo method
-  */
+ */
 void RefinePowderInstrumentParameters::refineInstrumentParametersMC(
     TableWorkspace_sptr parameterWS, bool fit2) {
   // 1. Get function's parameter names
@@ -514,9 +525,9 @@ void RefinePowderInstrumentParameters::refineInstrumentParametersMC(
 }
 
 /** Core Monte Carlo random walk on parameter-space
-  * Arguments
-  * - fit2: boolean.  if True,then do Simplex fit for each step
-  */
+ * Arguments
+ * - fit2: boolean.  if True,then do Simplex fit for each step
+ */
 void RefinePowderInstrumentParameters::doParameterSpaceRandomWalk(
     vector<string> parnames, vector<double> lowerbounds,
     vector<double> upperbounds, vector<double> stepsizes, size_t maxsteps,
@@ -597,9 +608,9 @@ void RefinePowderInstrumentParameters::doParameterSpaceRandomWalk(
     // Constraint
     double lowerb = lowerbounds[i];
     double upperb = upperbounds[i];
-    BoundaryConstraint *newconstraint =
-        new BoundaryConstraint(func4fit.get(), parname, lowerb, upperb);
-    func4fit->addConstraint(newconstraint);
+    auto newconstraint = Kernel::make_unique<BoundaryConstraint>(
+        func4fit.get(), parname, lowerb, upperb);
+    func4fit->addConstraint(std::move(newconstraint));
   }
   cout << "Function for fitting in MC: " << func4fit->asString() << '\n';
 
@@ -774,25 +785,22 @@ void RefinePowderInstrumentParameters::doParameterSpaceRandomWalk(
 }
 
 /** Get the names of the parameters of D-TOF conversion function
-  */
+ */
 void RefinePowderInstrumentParameters::getD2TOFFuncParamNames(
     vector<string> &parnames) {
   // 1. Clear output
   parnames.clear();
 
   // 2. Get the parameter names from function
-  ThermalNeutronDtoTOFFunction d2toffunc;
-  d2toffunc.initialize();
-  std::vector<std::string> funparamnames = d2toffunc.getParameterNames();
-
-  m_Function = boost::make_shared<ThermalNeutronDtoTOFFunction>(d2toffunc);
+  m_Function = boost::make_shared<ThermalNeutronDtoTOFFunction>();
+  std::vector<std::string> funparamnames = m_Function->getParameterNames();
 
   // 3. Copy
   parnames = funparamnames;
 }
 
 /** Calculate the function
-  */
+ */
 double RefinePowderInstrumentParameters::calculateD2TOFFunction(
     API::IFunction_sptr func, API::FunctionDomain1DVector domain,
     API::FunctionValues &values, const Mantid::HistogramData::HistogramY &rawY,
@@ -836,8 +844,8 @@ double RefinePowderInstrumentParameters::calculateD2TOFFunction(
 //------------------------------- Processing Inputs
 //----------------------------------------
 /** Genearte peaks from input workspace
-  * m_Peaks are stored in a map.  (HKL) is the key
-  */
+ * m_Peaks are stored in a map.  (HKL) is the key
+ */
 void RefinePowderInstrumentParameters::genPeaksFromTable(
     DataObjects::TableWorkspace_sptr peakparamws) {
   // 1. Check and clear input and output
@@ -855,8 +863,9 @@ void RefinePowderInstrumentParameters::genPeaksFromTable(
 
   for (size_t ir = 0; ir < numrows; ++ir) {
     // a) Generate peak
-    BackToBackExponential newpeak;
-    newpeak.initialize();
+    BackToBackExponential_sptr newpeakptr =
+        boost::make_shared<BackToBackExponential>();
+    newpeakptr->initialize();
 
     // b) Parse parameters
     int h, k, l;
@@ -866,25 +875,25 @@ void RefinePowderInstrumentParameters::genPeaksFromTable(
 
     API::TableRow row = peakparamws->getRow(ir);
     for (auto &colname : colnames) {
-      if (colname.compare("H") == 0)
+      if (colname == "H")
         row >> h;
-      else if (colname.compare("K") == 0)
+      else if (colname == "K")
         row >> k;
-      else if (colname.compare("L") == 0)
+      else if (colname == "L")
         row >> l;
-      else if (colname.compare("Alpha") == 0)
+      else if (colname == "Alpha")
         row >> alpha;
-      else if (colname.compare("Beta") == 0)
+      else if (colname == "Beta")
         row >> beta;
-      else if (colname.compare("Sigma2") == 0)
+      else if (colname == "Sigma2")
         row >> sigma2;
-      else if (colname.compare("Sigma") == 0)
+      else if (colname == "Sigma")
         row >> sigma;
-      else if (colname.compare("Chi2") == 0)
+      else if (colname == "Chi2")
         row >> chi2;
-      else if (colname.compare("Height") == 0)
+      else if (colname == "Height")
         row >> height;
-      else if (colname.compare("TOF_h") == 0)
+      else if (colname == "TOF_h")
         row >> tof_h;
       else {
         try {
@@ -899,15 +908,11 @@ void RefinePowderInstrumentParameters::genPeaksFromTable(
       sigma = sqrt(sigma2);
 
     // c) Set peak parameters and etc.
-    newpeak.setParameter("A", alpha);
-    newpeak.setParameter("B", beta);
-    newpeak.setParameter("S", sigma);
-    newpeak.setParameter("X0", tof_h);
-    newpeak.setParameter("I", height);
-
-    // d) Make to share pointer and set to instance data structure (map)
-    BackToBackExponential_sptr newpeakptr =
-        boost::make_shared<BackToBackExponential>(newpeak);
+    newpeakptr->setParameter("A", alpha);
+    newpeakptr->setParameter("B", beta);
+    newpeakptr->setParameter("S", sigma);
+    newpeakptr->setParameter("X0", tof_h);
+    newpeakptr->setParameter("I", height);
 
     std::vector<int> hkl;
     hkl.push_back(h);
@@ -921,7 +926,7 @@ void RefinePowderInstrumentParameters::genPeaksFromTable(
     g_log.information() << "[Generatem_Peaks] Peak " << ir << " HKL = ["
                         << hkl[0] << ", " << hkl[1] << ", " << hkl[2]
                         << "], Input Center = " << setw(10) << setprecision(6)
-                        << newpeak.centre() << '\n';
+                        << newpeakptr->centre() << '\n';
 
   } // ENDFOR Each potential peak
 }
@@ -942,7 +947,7 @@ void RefinePowderInstrumentParameters::importParametersFromTable(
     throw std::runtime_error("Input parameter workspace is wrong. ");
   }
 
-  if (colnames[0].compare("Name") != 0 || colnames[1].compare("Value") != 0) {
+  if (colnames[0] != "Name" || colnames[1] != "Value") {
     g_log.error() << "Input parameter table workspace does not have the "
                      "columns in order.  "
                   << " It must be Name, Value, FitOrTie.\n";
@@ -961,7 +966,7 @@ void RefinePowderInstrumentParameters::importParametersFromTable(
       trow >> parname >> value;
       parameters.emplace(parname, value);
     } catch (runtime_error &) {
-      g_log.error() << "Import table workspace " << parameterWS->name()
+      g_log.error() << "Import table workspace " << parameterWS->getName()
                     << " error in line " << ir << ".  "
                     << " Requires [string, double] in the first 2 columns.\n";
       throw;
@@ -970,8 +975,8 @@ void RefinePowderInstrumentParameters::importParametersFromTable(
 }
 
 /** Import the Monte Carlo related parameters from table
-  * Arguments
-  */
+ * Arguments
+ */
 void RefinePowderInstrumentParameters::importMonteCarloParametersFromTable(
     TableWorkspace_sptr tablews, vector<string> parameternames,
     vector<double> &stepsizes, vector<double> &lowerbounds,
@@ -984,11 +989,11 @@ void RefinePowderInstrumentParameters::importMonteCarloParametersFromTable(
   istep = imax;
 
   for (size_t i = 0; i < colnames.size(); ++i) {
-    if (colnames[i].compare("Max") == 0)
+    if (colnames[i] == "Max")
       imax = i;
-    else if (colnames[i].compare("Min") == 0)
+    else if (colnames[i] == "Min")
       imin = i;
-    else if (colnames[i].compare("StepSize") == 0)
+    else if (colnames[i] == "StepSize")
       istep = i;
   }
 
@@ -1023,7 +1028,7 @@ void RefinePowderInstrumentParameters::importMonteCarloParametersFromTable(
       } catch (runtime_error &) {
         g_log.error() << "Import MC parameter " << colnames[ic]
                       << " error in row " << ir << " of workspace "
-                      << tablews->name() << '\n';
+                      << tablews->getName() << '\n';
         row >> tmpstr;
         g_log.error() << "Should be " << tmpstr << '\n';
       }
@@ -1080,10 +1085,10 @@ hkl, double lattice)
 */
 
 /** Calculate value n for thermal neutron peak profile
-  */
+ */
 void RefinePowderInstrumentParameters::calculateThermalNeutronSpecial(
     IFunction_sptr m_Function, const HistogramX &xVals, vector<double> &vec_n) {
-  if (m_Function->name().compare("ThermalNeutronDtoTOFFunction") != 0) {
+  if (m_Function->name() != "ThermalNeutronDtoTOFFunction") {
     g_log.warning() << "Function (" << m_Function->name()
                     << " is not ThermalNeutronDtoTOFFunction.  And it is not "
                        "required to calculate n.\n";
@@ -1104,8 +1109,8 @@ void RefinePowderInstrumentParameters::calculateThermalNeutronSpecial(
 //-------------------------------------------------------------------
 
 /** Get peak positions from peak functions
-  * Arguments:
-  * Output: outWS  1 spectrum .  dspacing - peak center
+ * Arguments:
+ * Output: outWS  1 spectrum .  dspacing - peak center
  */
 void RefinePowderInstrumentParameters::genPeakCentersWorkspace(
     bool montecarlo, size_t numbestfit) {
@@ -1120,9 +1125,9 @@ void RefinePowderInstrumentParameters::genPeakCentersWorkspace(
 
   string stdoption = getProperty("StandardError");
   enum { ConstantValue, InvertedPeakHeight } stderroroption;
-  if (stdoption.compare("ConstantValue") == 0) {
+  if (stdoption == "ConstantValue") {
     stderroroption = ConstantValue;
-  } else if (stdoption.compare("InvertedPeakHeight") == 0) {
+  } else if (stdoption == "InvertedPeakHeight") {
     stderroroption = InvertedPeakHeight;
   } else {
     stringstream errss;
@@ -1199,8 +1204,8 @@ void RefinePowderInstrumentParameters::genPeakCentersWorkspace(
 }
 
 /** Generate a Monte Carlo result table containing the N best results
-  * Column: chi2, parameter1, parameter2, ... ...
-  */
+ * Column: chi2, parameter1, parameter2, ... ...
+ */
 DataObjects::TableWorkspace_sptr
 RefinePowderInstrumentParameters::genMCResultTable() {
   // 1. Create table workspace
@@ -1230,9 +1235,9 @@ RefinePowderInstrumentParameters::genMCResultTable() {
 
 /** Generate an output table workspace containing the fitted instrument
  * parameters.
-  * Requirement (1): The output table workspace should be usable by Le Bail
+ * Requirement (1): The output table workspace should be usable by Le Bail
  * Fitting
-  */
+ */
 DataObjects::TableWorkspace_sptr
 RefinePowderInstrumentParameters::genOutputInstrumentParameterTable() {
   //  TableWorkspace is not copyable (default CC is incorrect and no point in

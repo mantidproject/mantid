@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -24,7 +24,7 @@ Usage
    # CNCS_7860_runinfo.xml references 3 beam monitor files.
    monitor_ws = LoadPreNexusMonitors("CNCS_7860_runinfo.xml")
 
-   print "The resulting workspace contains %i spectra -- one for each monitor." % monitor_ws.getNumberHistograms()
+   print("The resulting workspace contains {} spectra -- one for each monitor.".format(monitor_ws.getNumberHistograms()))
 
 Output:
 

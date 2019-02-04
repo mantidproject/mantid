@@ -1,10 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/FindDetectorsPar.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
@@ -97,38 +104,27 @@ void FindDetectorsPar::exec() {
   DetParameters AverageDetector;
   this->m_nDetectors = 0;
 
-  Progress progress(this, 0, 1, 100);
+  Progress progress(this, 0.0, 1.0, 100);
   const int progStep = static_cast<int>(ceil(double(nHist) / 100.0));
 
+  const auto &spectrumInfo = inputWS->spectrumInfo();
+
   // define the centre of coordinates:
-  Kernel::V3D Observer = inputWS->getInstrument()->getSample()->getPos();
+  Kernel::V3D Observer = spectrumInfo.samplePosition();
 
   // Loop over the spectra
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int64_t i = 0; i < nHist; i++) {
     PARALLEL_START_INTERUPT_REGION
-    Geometry::IDetector_const_sptr spDet;
-    try {
-      spDet = inputWS->getDetector(i);
-    } catch (Kernel::Exception::NotFoundError &) { // Intel compilers on MAC
-                                                   // hungs on continue here
-      // should be no problem with this if get detector implemented properly and
-      // workspace keeps ownership for the detector (I expet so)
-      spDet.reset();
-    }
-    // separate check as some compilers do not obey the standard evaluation
-    // order
-    if (!spDet)
-      continue;
     // Check that we aren't writing a monitor...
-    if (spDet->isMonitor())
+    if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i))
       continue;
 
     // valid detector has valid detID
-    Detectors[i].detID = spDet->getID();
+    Detectors[i].detID = spectrumInfo.detector(i).getID();
 
     // calculate all parameters for current composite detector
-    calcDetPar(spDet, Observer, Detectors[i]);
+    calcDetPar(spectrumInfo.detector(i), Observer, Detectors[i]);
 
     // make regular progress reports and check for canceling the algorithm
 
@@ -208,15 +204,15 @@ double AvrgDetector::nearAngle(const double &baseAngle, const double &anAngle) {
 }
 
 /** method to cacluate the detectors parameters and add them to the detectors
-*averages
-*@param spDet    -- shared pointer to the Mantid Detector
-*@param Observer -- sample position or the centre of the polar system of
-*coordinates to calculate detector's parameters.
-*/
-void AvrgDetector::addDetInfo(const Geometry::IDetector_const_sptr &spDet,
+ *averages
+ *@param det      -- reference to the Mantid Detector
+ *@param Observer -- sample position or the centre of the polar system of
+ *coordinates to calculate detector's parameters.
+ */
+void AvrgDetector::addDetInfo(const Geometry::IDetector &det,
                               const Kernel::V3D &Observer) {
   m_nComponents++;
-  Kernel::V3D detPos = spDet->getPos();
+  Kernel::V3D detPos = det.getPos();
   Kernel::V3D toDet = (detPos - Observer);
 
   double dist2Det, Polar, Azimut, ringPolar, ringAzim;
@@ -261,7 +257,7 @@ void AvrgDetector::addDetInfo(const Geometry::IDetector_const_sptr &spDet,
   coord[2] = e_tg; // new z
   bbox.setBoxAlignment(ringCentre, coord);
 
-  spDet->getBoundingBox(bbox);
+  det.getBoundingBox(bbox);
 
   // linear extensions of the bounding box orientied tangentially to the equal
   // scattering angle circle
@@ -315,7 +311,7 @@ void AvrgDetector::returnAvrgDetPar(DetParameters &avrgDet) {
 }
 /** Method calculates averaged polar coordinates of the detector's group
 (which may consist of one detector)
-*@param spDet    -- shared pointer to the Mantid Detector
+*@param det    -- reference to the Mantid Detector
 *@param Observer -- sample position or the centre of the polar system of
 coordinates to calculate detector's parameters.
 
@@ -323,33 +319,30 @@ coordinates to calculate detector's parameters.
 of the detector or detector's group in
                      spherical coordinate system with centre at Observer
 */
-void FindDetectorsPar::calcDetPar(const Geometry::IDetector_const_sptr &spDet,
+void FindDetectorsPar::calcDetPar(const Geometry::IDetector &det,
                                   const Kernel::V3D &Observer,
                                   DetParameters &Detector) {
 
   // get number of basic detectors within the composit detector
-  size_t nDetectors = spDet->nDets();
+  size_t nDetectors = det.nDets();
   // define summator
   AvrgDetector detSum;
   // do we want spherical or linear box sizes?
   detSum.setUseSpherical(!m_SizesAreLinear);
 
   if (nDetectors == 1) {
-    detSum.addDetInfo(spDet, Observer);
+    detSum.addDetInfo(det, Observer);
   } else {
     // access contributing detectors;
-    Geometry::DetectorGroup_const_sptr spDetGroup =
-        boost::dynamic_pointer_cast<const Geometry::DetectorGroup>(spDet);
-    if (!spDetGroup) {
+    auto detGroup = dynamic_cast<const Geometry::DetectorGroup *>(&det);
+    if (!detGroup) {
       g_log.error() << "calc_cylDetPar: can not downcast IDetector_sptr to "
-                       "detector group for det->ID: " << spDet->getID() << '\n';
+                       "detector group for det->ID: "
+                    << det.getID() << '\n';
       throw(std::bad_cast());
     }
-    auto detectors = spDetGroup->getDetectors();
-    auto it = detectors.begin();
-    auto it_end = detectors.end();
-    for (; it != it_end; it++) {
-      detSum.addDetInfo(*it, Observer);
+    for (const auto &det : detGroup->getDetectors()) {
+      detSum.addDetInfo(*det, Observer);
     }
   }
   // calculate averages and return the detector parameters
@@ -469,24 +462,14 @@ void FindDetectorsPar::populate_values_from_file(
     }
     m_SizesAreLinear = false;
   } else {
-
-    Geometry::IComponent_const_sptr sample =
-        inputWS->getInstrument()->getSample();
+    const auto &spectrumInfo = inputWS->spectrumInfo();
     secondaryFlightpath.resize(nHist);
-    // Loop over the spectra
     for (size_t i = 0; i < nHist; i++) {
-      Geometry::IDetector_const_sptr spDet;
-      try {
-        spDet = inputWS->getDetector(i);
-      } catch (Kernel::Exception::NotFoundError &) {
-        continue;
-      }
-      // Check that we aren't writing a monitor...
-      if (spDet->isMonitor())
+      if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i))
         continue;
       /// this is the only value, which is not defined in phx file, so we
       /// calculate it
-      secondaryFlightpath[i] = spDet->getDistance(*sample);
+      secondaryFlightpath[i] = spectrumInfo.l2(i);
     }
   }
 }
@@ -530,9 +513,9 @@ int FindDetectorsPar::count_changes(const char *const Buf, size_t buf_size) {
 }
 
 /**! The function reads line from inout stream and puts it into buffer.
-*   It behaves like std::ifstream getline but the getline reads additional
-* symbol from a row in a Unix-formatted file under windows;
-*/
+ *   It behaves like std::ifstream getline but the getline reads additional
+ * symbol from a row in a Unix-formatted file under windows;
+ */
 size_t FindDetectorsPar::get_my_line(std::ifstream &in, char *buf,
                                      size_t buf_size, const char DELIM) {
   size_t i;
@@ -558,7 +541,7 @@ size_t FindDetectorsPar::get_my_line(std::ifstream &in, char *buf,
  *  it also returns the FileTypeDescriptor, which identifyes the position of the
  *data in correcponding ASCII file
  *  plus characteristics of the data extracted from correspondent data header.
-*/
+ */
 FileTypeDescriptor
 FindDetectorsPar::get_ASCII_header(std::string const &fileName,
                                    std::ifstream &data_stream) {
@@ -625,9 +608,10 @@ FindDetectorsPar::get_ASCII_header(std::string const &fileName,
     file_descriptor.nData_records = static_cast<size_t>(nData_records);
     file_descriptor.nData_blocks = static_cast<size_t>(nData_blocks);
     if (nDatas != 2) {
-      g_log.error() << " File " << fileName << " iterpreted as SPE but does "
-                                               "not have two numbers in the "
-                                               "first row\n";
+      g_log.error() << " File " << fileName
+                    << " iterpreted as SPE but does "
+                       "not have two numbers in the "
+                       "first row\n";
       throw(Kernel::Exception::FileError(" File iterpreted as SPE but does not "
                                          "have two numbers in the first row",
                                          fileName));
@@ -649,7 +633,7 @@ FindDetectorsPar::get_ASCII_header(std::string const &fileName,
     file_descriptor.data_start_position =
         data_stream.tellg(); // if it is PHX or PAR file then the data begin
                              // after the first line;
-    file_descriptor.nData_records = atoi(&BUF[0]);
+    file_descriptor.nData_records = std::stoi(BUF.data());
     file_descriptor.nData_blocks = 0;
 
     // let's ifendify now if is PHX or PAR file;
@@ -678,7 +662,7 @@ FindDetectorsPar::get_ASCII_header(std::string const &fileName,
  *  the file should be already opened and the FILE_TYPE structure properly
  * defined using
  *  get_ASCII_header function
-*/
+ */
 static std::vector<char> BUF(1024, 0);
 void FindDetectorsPar::load_plain(std::ifstream &stream,
                                   std::vector<double> &Data,
@@ -757,5 +741,5 @@ void FindDetectorsPar::load_plain(std::ifstream &stream,
   }
 }
 
-} // end DataHandling namespace
-} // end MantidNamespace
+} // namespace DataHandling
+} // namespace Mantid

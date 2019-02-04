@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidPythonInterface/api/BinaryOperations.h"
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -5,7 +11,7 @@
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceGroup_fwd.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidPythonInterface/kernel/Policies/AsType.h"
 
@@ -18,40 +24,40 @@ void export_BinaryOperations() {
   using namespace boost::python;
 
   // Typedefs the various function types
-  typedef IMDWorkspace_sptr (*binary_fn_md_md)(
+  using binary_fn_md_md = IMDWorkspace_sptr (*)(
       const IMDWorkspace_sptr, const IMDWorkspace_sptr, const std::string &,
       const std::string &, bool, bool);
-  typedef WorkspaceGroup_sptr (*binary_fn_md_gp)(
+  using binary_fn_md_gp = WorkspaceGroup_sptr (*)(
       const IMDWorkspace_sptr, const WorkspaceGroup_sptr, const std::string &,
       const std::string &, bool, bool);
-  typedef WorkspaceGroup_sptr (*binary_fn_gp_md)(
+  using binary_fn_gp_md = WorkspaceGroup_sptr (*)(
       const WorkspaceGroup_sptr, const IMDWorkspace_sptr, const std::string &,
       const std::string &, bool, bool);
-  typedef WorkspaceGroup_sptr (*binary_fn_gp_gp)(
+  using binary_fn_gp_gp = WorkspaceGroup_sptr (*)(
       const WorkspaceGroup_sptr, const WorkspaceGroup_sptr, const std::string &,
       const std::string &, bool, bool);
 
-  typedef IMDHistoWorkspace_sptr (*binary_fn_mh_mh)(
+  using binary_fn_mh_mh = IMDHistoWorkspace_sptr (*)(
       const IMDHistoWorkspace_sptr, const IMDHistoWorkspace_sptr,
       const std::string &, const std::string &, bool, bool);
 
-  typedef IMDWorkspace_sptr (*binary_fn_md_db)(const IMDWorkspace_sptr, double,
-                                               const std::string &,
-                                               const std::string &, bool, bool);
-  typedef IMDHistoWorkspace_sptr (*binary_fn_mh_db)(
+  using binary_fn_md_db = IMDWorkspace_sptr (*)(
+      const IMDWorkspace_sptr, double, const std::string &, const std::string &,
+      bool, bool);
+  using binary_fn_mh_db = IMDHistoWorkspace_sptr (*)(
       const IMDHistoWorkspace_sptr, double, const std::string &,
       const std::string &, bool, bool);
-  typedef WorkspaceGroup_sptr (*binary_fn_gp_db)(
+  using binary_fn_gp_db = WorkspaceGroup_sptr (*)(
       const WorkspaceGroup_sptr, double, const std::string &,
       const std::string &, bool, bool);
 
   // Always a return a Workspace_sptr
-  typedef return_value_policy<AsType<Workspace_sptr>> ReturnWorkspaceSptr;
+  using ReturnWorkspaceSptr = return_value_policy<AsType<Workspace_sptr>>;
 
   // Binary operations that return a workspace
-  using boost::python::def;
   using Mantid::PythonInterface::performBinaryOp;
   using Mantid::PythonInterface::performBinaryOpWithDouble;
+  using boost::python::def;
 
   def("performBinaryOp", (binary_fn_md_md)&performBinaryOp,
       ReturnWorkspaceSptr());
@@ -127,7 +133,7 @@ ResultType performBinaryOp(const LHSType lhs, const RHSType rhs,
     }
   } catch (std::runtime_error &exc) {
     error = exc.what();
-    if (error.compare("algorithm") == 0) {
+    if (error == "algorithm") {
       error = "Unknown binary operation requested: " + op;
       throw std::runtime_error(error);
     } else {
@@ -138,53 +144,68 @@ ResultType performBinaryOp(const LHSType lhs, const RHSType rhs,
 }
 
 /**
-* Perform the given binary operation on a workspace and a double.
-* Generic to MDWorkspaces.
-* Called by python overloads for _binary_op (see api_exports.cpp)
-*
-* @param inputWS :: The input workspace
-* @param value :: The input value
-* @param op :: The operation
-* @param name :: The output name
-* @param inplace :: If true, then the lhs argument is replaced by the result of
-*the operation.
-* @param reverse :: If true then the double is the lhs argument
-* @return A shared pointer to the result workspace
-*/
+ * Perform the given binary operation on a workspace and a double.
+ * Generic to MDWorkspaces.
+ * Called by python overloads for _binary_op (see api_exports.cpp)
+ *
+ * @param inputWS :: The input workspace
+ * @param value :: The input value
+ * @param op :: The operation
+ * @param name :: The output name
+ * @param inplace :: If true, then the lhs argument is replaced by the result of
+ *the operation.
+ * @param reverse :: If true then the double is the lhs argument
+ * @return A shared pointer to the result workspace
+ */
 template <typename LHSType, typename ResultType>
 ResultType performBinaryOpWithDouble(const LHSType inputWS, const double value,
                                      const std::string &op,
                                      const std::string &name, bool inplace,
                                      bool reverse) {
-  std::string algoName = op;
+  // RAII struct to add/remove workspace from ADS
+  struct ScopedADSEntry {
+    ScopedADSEntry(const std::string &entryName,
+                   const MatrixWorkspace_sptr &value)
+        : name(entryName) {
+      ads.addOrReplace(entryName, value);
+    }
+    ~ScopedADSEntry() { ads.remove(name); }
 
-  // Create the single valued workspace first so that it is run as a top-level
-  // algorithm
-  // such that it's history can be recreated
-  API::Algorithm_sptr alg = API::AlgorithmManager::Instance().createUnmanaged(
+    const std::string &name;
+    API::AnalysisDataServiceImpl &ads = API::AnalysisDataService::Instance();
+  };
+
+  // In order to recreate a history record of the final binary operation
+  // there must be a record of the creation of the single value workspace used
+  // on the RHS here. This is achieved by running CreateSingleValuedWorkspace
+  // algorithm and adding the output workspace to the ADS. Adding the output
+  // to the ADS is critical so that workspace.name() is updated, by the ADS, to
+  // return the same string. WorkspaceProperty<TYPE>::createHistory() then
+  // records the correct workspace name for input into the final binary
+  // operation rather than creating a temporary name.
+  auto alg = API::AlgorithmManager::Instance().createUnmanaged(
       "CreateSingleValuedWorkspace");
   alg->setChild(false);
+  // we manually store the workspace as it's easier to retrieve the correct
+  // type from alg->getProperty rather than calling the ADS again and casting
+  alg->setAlwaysStoreInADS(false);
   alg->initialize();
   alg->setProperty<double>("DataValue", value);
-  const std::string tmp_name("__tmp_binary_operation_double");
-  alg->setPropertyValue("OutputWorkspace", tmp_name);
+  const std::string tmpName("__python_binary_op_single_value");
+  alg->setPropertyValue("OutputWorkspace", tmpName);
   alg->execute();
+
   MatrixWorkspace_sptr singleValue;
-  API::AnalysisDataServiceImpl &data_store =
-      API::AnalysisDataService::Instance();
   if (alg->isExecuted()) {
-    singleValue = boost::dynamic_pointer_cast<API::MatrixWorkspace>(
-        data_store.retrieve(tmp_name));
+    singleValue = alg->getProperty("OutputWorkspace");
   } else {
-    throw std::runtime_error(
-        "performBinaryOp: Error in execution of CreateSingleValuedWorkspace");
+    throw std::runtime_error("performBinaryOp: Error in execution of "
+                             "CreateSingleValuedWorkspace");
   }
-  // Call the function above with the signle-value workspace
+  ScopedADSEntry removeOnExit(tmpName, singleValue);
   ResultType result =
       performBinaryOp<LHSType, MatrixWorkspace_sptr, ResultType>(
-          inputWS, singleValue, algoName, name, inplace, reverse);
-  // Delete the temporary
-  data_store.remove(tmp_name);
+          inputWS, singleValue, op, name, inplace, reverse);
   return result;
 }
 
@@ -224,5 +245,5 @@ template WorkspaceGroup_sptr
 performBinaryOpWithDouble(const WorkspaceGroup_sptr, const double,
                           const std::string &op, const std::string &, bool,
                           bool);
-}
-}
+} // namespace PythonInterface
+} // namespace Mantid

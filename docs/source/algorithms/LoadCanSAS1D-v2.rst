@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -15,7 +15,7 @@ http://svn.smallangles.net/svn/canSAS/1dwg/trunk/cansas1d.xsd and
 creates output workspace. CANSAS has a Wiki page at
 http://www.smallangles.net/wgwiki/index.php/canSAS_Working_Groups
 
-If the file contains mulitple SASentry elements a workspace group will
+If the file contains multiple SASentry elements a workspace group will
 be created and each SASentry will be one workspace in the group. Loading
 multiple SASdata elements is not supported.
 
@@ -39,7 +39,7 @@ Usage
    SaveCanSAS1D(out_ws, file_path)
    in_ws = LoadCanSAS1D(file_path)
 
-   print "Contents of the file = " + str(in_ws.readY(0)) + "."
+   print("Contents of the file = {}.".format(in_ws.readY(0)))
 
 .. testcleanup:: ExSimpleSavingRoundtrip
 

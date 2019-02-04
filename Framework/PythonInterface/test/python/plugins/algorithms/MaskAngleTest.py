@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
@@ -11,14 +17,27 @@ class MaskAngleTest(unittest.TestCase):
     def testMaskAngle(self):
         w=WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(30,5,False,False)
         AnalysisDataService.add('w',w)
-        masklist = MaskAngle(w,10,20)
-        for i in arange(w.getNumberHistograms())+1:
-            if (i<10) or (i>19):
-                self.assertTrue(not w.getInstrument().getDetector(int(i)).isMasked())
+        masklist = MaskAngle(w,MinAngle=10,MaxAngle=20)
+        detInfo = w.detectorInfo()
+        for i in arange(w.getNumberHistograms()):
+            if (i<9) or (i>18):
+                self.assertFalse(detInfo.isMasked(int(i)))
             else:
-                self.assertTrue(w.getInstrument().getDetector(int(i)).isMasked())
+                self.assertTrue(detInfo.isMasked(int(i)))
         DeleteWorkspace(w)
         self.assertTrue(array_equal(masklist,arange(10)+10))
+
+    def testMaskAnglePhi(self):
+        w=WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(30,5,False,False)
+        AnalysisDataService.add('w',w)
+        masklist = MaskAngle(w,0,45,Angle='Phi')
+        detInfo = w.detectorInfo()
+        for i in arange(w.getNumberHistograms()):
+            if i==0:
+                self.assertTrue(detInfo.isMasked(int(i)))
+            else:
+                self.assertFalse(detInfo.isMasked(int(i)))
+        DeleteWorkspace(w)
 
     def testGroupMaskAngle(self):
         ws1=WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(30,5,False,False)
@@ -30,11 +49,12 @@ class MaskAngleTest(unittest.TestCase):
         MaskAngle(group, 10, 20)
 
         for w in group:
-            for i in arange(w.getNumberHistograms())+1:
-                if(i<10) or (i>19):
-                    self.assertTrue(not w.getInstrument().getDetector(int(i)).isMasked())
+            detInfo = w.detectorInfo()
+            for i in arange(w.getNumberHistograms()):
+                if(i<9) or (i>18):
+                    self.assertFalse(detInfo.isMasked(int(i)))
                 else:
-                    self.assertTrue(w.getInstrument().getDetector(int(i)).isMasked())
+                    self.assertTrue(detInfo.isMasked(int(i)))
 
         DeleteWorkspace(group)
 

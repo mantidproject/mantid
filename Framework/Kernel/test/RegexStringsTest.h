@@ -1,17 +1,23 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_TESTREGEXSUPPORT__
 #define MANTID_TESTREGEXSUPPORT__
 
-#include <cxxtest/TestSuite.h>
-#include <cmath>
-#include <vector>
 #include <algorithm>
+#include <cmath>
+#include <cxxtest/TestSuite.h>
 #include <sstream>
+#include <vector>
 
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/System.h"
 
-#include <boost/regex.hpp>
 #include "MantidKernel/RegexStrings.h"
+#include <boost/regex.hpp>
 
 using namespace Mantid;
 using namespace Mantid::Kernel::Strings;

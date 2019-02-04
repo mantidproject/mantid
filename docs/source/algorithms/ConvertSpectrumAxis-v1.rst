@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -36,8 +36,8 @@ Usage
    theta = ConvertSpectrumAxis(dataws, Target="theta", Version=1)
 
    vertical_axis = theta.getAxis(1)
-   print "There are %d axis values" % vertical_axis.length()
-   print "Final theta value: %f (degrees)" % vertical_axis.getValue(vertical_axis.length() - 1)
+   print("There are {} axis values".format(vertical_axis.length()))
+   print("Final theta value: {:.6f} (degrees)".format(vertical_axis.getValue(vertical_axis.length() - 1)))
 
 .. testoutput::
 

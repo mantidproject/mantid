@@ -1,10 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/GroupingWorkspace.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/IPropertyManager.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/SpectraAxis.h"
-
-using Mantid::API::SpectraAxis;
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/IPropertyManager.h"
+#include "MantidKernel/System.h"
 
 using std::size_t;
 using namespace Mantid::API;
@@ -44,7 +48,7 @@ GroupingWorkspace::GroupingWorkspace(Geometry::Instrument_const_sptr inst)
 void GroupingWorkspace::makeDetectorIDToGroupMap(
     std::map<detid_t, int> &detIDToGroup, int64_t &ngroups) const {
   ngroups = 0;
-  for (size_t wi = 0; wi < this->m_noVectors; ++wi) {
+  for (size_t wi = 0; wi < getNumberHistograms(); ++wi) {
     // Convert the Y value to a group number
     int group = static_cast<int>(this->readY(wi)[0]);
     if (group == 0)
@@ -70,7 +74,7 @@ void GroupingWorkspace::makeDetectorIDToGroupMap(
 void GroupingWorkspace::makeDetectorIDToGroupVector(
     std::vector<int> &detIDToGroup, int64_t &ngroups) const {
   ngroups = 0;
-  for (size_t wi = 0; wi < this->m_noVectors; ++wi) {
+  for (size_t wi = 0; wi < getNumberHistograms(); ++wi) {
     // Convert the Y value to a group number
     int group = static_cast<int>(this->readY(wi)[0]);
     if (group == 0)
@@ -89,8 +93,8 @@ void GroupingWorkspace::makeDetectorIDToGroupVector(
   }
 }
 
-} // namespace Mantid
 } // namespace DataObjects
+} // namespace Mantid
 
 ///\cond TEMPLATE
 

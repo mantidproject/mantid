@@ -3,7 +3,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -41,19 +41,19 @@ Usage
     a=MaskBTP(Instrument='CNCS',Tube='1-3')
     b=MaskBTP(Workspace='CNCSMaskBTP',Instrument='CNCS',Bank='40-50',Pixel='1-10')
     c=MaskBTP(Workspace='CNCSMaskBTP',Instrument='CNCS',Bank='42')
-    print "Detectors masked"
-    print "Step 1: 50 * 3 * 128 =", a.size
-    print "Step 2: 11 * 8 * 10 =", b.size
-    print "Step 3: 1 * 8 * 128 =", c.size
+    print("Detectors masked")
+    print("Step 1: 50 * 3 * 128 = {0.size}".format(a))
+    print("Step 2: 11 * 8 * 10 = {0.size}".format(b))
+    print("Step 3: 1 * 8 * 128 = {0.size}".format(c))
 
-    print "Here are some of the masked detectors:"
+    print("Here are some of the masked detectors:")
     instrument=mtd['CNCSMaskBTP'].getInstrument()
-    print "A pixel Bank 42, detector 42700: ",instrument.getDetector(42700).isMasked()
-    print "Pixel 1 in Tube 4 in Bank 45, detector 45440: ",instrument.getDetector(45440).isMasked()
-    print "Pixel 100 in Tube 2 in Bank 45, detector 45283: ",instrument.getDetector(45283).isMasked()
-    print
-    print "And one that should not be masked"
-    print "Pixel 128 in Tube 8 in Bank 50, detector 51199: ",instrument.getDetector(51199).isMasked()
+    print("A pixel Bank 42, detector 42700:  {}".format(instrument.getDetector(42700).isMasked()))
+    print("Pixel 1 in Tube 4 in Bank 45, detector 45440:  {}".format(instrument.getDetector(45440).isMasked()))
+    print("Pixel 100 in Tube 2 in Bank 45, detector 45283:  {}".format(instrument.getDetector(45283).isMasked()))
+    print("")
+    print("And one that should not be masked")
+    print("Pixel 128 in Tube 8 in Bank 50, detector 51199:  {}".format(instrument.getDetector(51199).isMasked()))
 
 .. testcleanup:: MaskBTP
 

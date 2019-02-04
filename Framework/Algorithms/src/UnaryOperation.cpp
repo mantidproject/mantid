@@ -1,9 +1,12 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/UnaryOperation.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/RebinnedOutput.h"
 
@@ -13,10 +16,6 @@ using namespace Mantid::DataObjects;
 
 namespace Mantid {
 namespace Algorithms {
-UnaryOperation::UnaryOperation() : API::Algorithm() {
-  this->useHistogram = false;
-}
-
 /** Initialisation method.
  *  Defines input and output workspace properties
  */
@@ -50,18 +49,11 @@ void UnaryOperation::exec() {
   MatrixWorkspace_sptr out_work = getProperty(outputPropName());
   // Only create output workspace if different to input one
   if (out_work != in_work) {
-    out_work = WorkspaceFactory::Instance().create(in_work);
-    if (out_work->id() == "RebinnedOutput") {
-      RebinnedOutput_const_sptr intemp =
-          boost::dynamic_pointer_cast<const RebinnedOutput>(in_work);
-      RebinnedOutput_sptr outtemp =
-          boost::dynamic_pointer_cast<RebinnedOutput>(out_work);
-      for (size_t i = 0; i < outtemp->getNumberHistograms(); ++i) {
-        // because setF wants a COW pointer
-        Kernel::cow_ptr<std::vector<double>> F;
-        F.access() = intemp->dataF(i);
-        outtemp->setF(i, F);
-      }
+    if (in_work->id() == "EventWorkspace") {
+      // Handles case of EventList which needs to be converted to Workspace2D
+      out_work = WorkspaceFactory::Instance().create(in_work);
+    } else {
+      out_work = in_work->clone();
     }
     setProperty(outputPropName(), out_work);
   }
@@ -77,7 +69,7 @@ void UnaryOperation::exec() {
 
   // Loop over every cell in the workspace, calling the abstract correction
   // function
-  PARALLEL_FOR2(in_work, out_work)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*in_work, *out_work))
   for (int64_t i = 0; i < int64_t(numSpec); ++i) {
     PARALLEL_START_INTERUPT_REGION
     // Copy the X values over
@@ -121,7 +113,7 @@ void UnaryOperation::execEvent() {
 
   int64_t numHistograms = static_cast<int64_t>(outputWS->getNumberHistograms());
   API::Progress prog = API::Progress(this, 0.0, 1.0, numHistograms);
-  PARALLEL_FOR1(outputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
   for (int64_t i = 0; i < numHistograms; ++i) {
     PARALLEL_START_INTERUPT_REGION
     // switch to weighted events if needed, and use the appropriate helper
@@ -131,8 +123,8 @@ void UnaryOperation::execEvent() {
     case TOF:
       // Switch to weights if needed.
       evlist.switchTo(WEIGHTED);
-    /* no break */
-    // Fall through
+      /* no break */
+      // Fall through
 
     case WEIGHTED:
       unaryOperationEventHelper(evlist.getWeightedEvents());
@@ -169,5 +161,5 @@ void UnaryOperation::unaryOperationEventHelper(std::vector<T> &wevector) {
     it->m_errorSquared = static_cast<float>(eout * eout);
   }
 }
-}
-}
+} // namespace Algorithms
+} // namespace Mantid

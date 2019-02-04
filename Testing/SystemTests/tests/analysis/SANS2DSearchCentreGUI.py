@@ -1,5 +1,13 @@
-﻿#pylint: disable=invalid-name
-from mantid.simpleapi import *
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
+#pylint: disable=invalid-name
+
+from __future__ import (absolute_import, division, print_function)
+import mantid  # noqa
 import ISISCommandInterface as i
 import isis_reducer
 import isis_instrument
@@ -28,6 +36,7 @@ class SANS2DGUISearchCentre(sansgui.SANS2DGUIReduction):
     def validate(self):
       # there is no workspace to be checked against
         return True
+
 
 if __name__ == "__main__":
     test = SANS2DGUISearchCentre()

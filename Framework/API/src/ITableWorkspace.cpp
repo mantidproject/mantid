@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/IPropertyManager.h"
@@ -9,7 +15,7 @@ namespace API {
 /// @param colNames :: Names of the column to clone. If empty clone
 ///   all columns.
 ITableWorkspace_uptr
-ITableWorkspace::clone(const std::vector<std::string> &colNames) const {
+ITableWorkspace::cloneColumns(const std::vector<std::string> &colNames) const {
   return ITableWorkspace_uptr(doCloneColumns(colNames));
 }
 

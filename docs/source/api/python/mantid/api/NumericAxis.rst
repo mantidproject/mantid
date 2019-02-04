@@ -2,7 +2,7 @@
  NumericAxis
 =============
 
-This a python binding to the C++ class Mantid::API::NumericAxis.
+This is a Python binding to the C++ class Mantid::API::NumericAxis.
 
 *bases:* :py:obj:`mantid.api.MantidAxis`
 

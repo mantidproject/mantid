@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAOBJECTS_SPECIALWORKSPACE2D_H_
 #define MANTID_DATAOBJECTS_SPECIALWORKSPACE2D_H_
 
@@ -34,6 +40,10 @@ public:
   std::unique_ptr<SpecialWorkspace2D> clone() const {
     return std::unique_ptr<SpecialWorkspace2D>(doClone());
   }
+  /// Returns a default-initialized clone of the workspace
+  std::unique_ptr<SpecialWorkspace2D> cloneEmpty() const {
+    return std::unique_ptr<SpecialWorkspace2D>(doCloneEmpty());
+  }
   SpecialWorkspace2D &operator=(const SpecialWorkspace2D &) = delete;
   /** Gets the name of the workspace type
   @return Standard string name  */
@@ -59,6 +69,9 @@ private:
   SpecialWorkspace2D *doClone() const override {
     return new SpecialWorkspace2D(*this);
   }
+  SpecialWorkspace2D *doCloneEmpty() const override {
+    return new SpecialWorkspace2D();
+  }
   bool isCompatible(boost::shared_ptr<const SpecialWorkspace2D> ws);
 
 protected:
@@ -67,6 +80,7 @@ protected:
 
   void init(const size_t &NVectors, const size_t &XLength,
             const size_t &YLength) override;
+  void init(const HistogramData::Histogram &histogram) override;
 
   /// Return human-readable string
   const std::string toString() const override;
@@ -81,13 +95,13 @@ protected:
 };
 
 /// shared pointer to the SpecialWorkspace2D class
-typedef boost::shared_ptr<SpecialWorkspace2D> SpecialWorkspace2D_sptr;
+using SpecialWorkspace2D_sptr = boost::shared_ptr<SpecialWorkspace2D>;
 
 /// shared pointer to a const SpecialWorkspace2D
-typedef boost::shared_ptr<const SpecialWorkspace2D>
-    SpecialWorkspace2D_const_sptr;
+using SpecialWorkspace2D_const_sptr =
+    boost::shared_ptr<const SpecialWorkspace2D>;
 
-} // namespace Mantid
 } // namespace DataObjects
+} // namespace Mantid
 
 #endif /* MANTID_DATAOBJECTS_SPECIALWORKSPACE2D_H_ */

@@ -30,17 +30,17 @@
 #ifndef IMAGEDIALOG_H
 #define IMAGEDIALOG_H
 
-#include <QDialog>
-#include <QSpinBox>
 #include <QCheckBox>
+#include <QDialog>
 #include <QPushButton>
+#include <QSpinBox>
 
 //! Image geometry dialog
 class ImageDialog : public QDialog {
   Q_OBJECT
 
 public:
-  ImageDialog(QWidget *parent = 0, Qt::WFlags fl = 0);
+  ImageDialog(QWidget *parent = nullptr, Qt::WFlags fl = nullptr);
 
   void setOrigin(const QPoint &o);
   void setSize(const QSize &size);

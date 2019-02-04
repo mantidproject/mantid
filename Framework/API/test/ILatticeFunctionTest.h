@@ -1,9 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_API_ILATTICEFUNCTIONTEST_H_
 #define MANTID_API_ILATTICEFUNCTIONTEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 #include "MantidAPI/ILatticeFunction.h"
 #include "MantidKernel/WarningSuppressions.h"
@@ -13,9 +19,9 @@ using Mantid::Kernel::V3D;
 
 using namespace Mantid::API;
 
-using ::testing::_;
 using ::testing::Mock;
 using ::testing::Return;
+using ::testing::_;
 
 class ILatticeFunctionTest : public CxxTest::TestSuite {
 public:
@@ -73,7 +79,7 @@ public:
 
 private:
   std::vector<V3D> getTestHKLs() { return {{1, 1, 0}}; }
-  GCC_DIAG_OFF_SUGGEST_OVERRIDE
+  GNU_DIAG_OFF_SUGGEST_OVERRIDE
   // Mock function to check whether the correct methods are called
   class MockLatticeFunction : public ILatticeFunction {
   public:
@@ -104,6 +110,6 @@ private:
   };
 };
 
-GCC_DIAG_ON_SUGGEST_OVERRIDE
+GNU_DIAG_ON_SUGGEST_OVERRIDE
 
 #endif /* MANTID_API_ILATTICEFUNCTIONTEST_H_ */

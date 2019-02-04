@@ -1,4 +1,11 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=bare-except,invalid-name
+from __future__ import (absolute_import, division, print_function)
 import sys
 # Check whether Mantid is available
 try:
@@ -58,5 +65,6 @@ class DataProxy(object):
 
                 logger.notice("Loaded data file: %s" % data_file)
             except:
-                logger.error("Error loading data file:\n%s" % sys.exc_value)
-                self.errors.append("Error loading data file:\n%s" % sys.exc_value)
+                msg = "Error loading data file:\n%s" % sys.exc_info()[1]
+                logger.error(msg)
+                self.errors.append(msg)

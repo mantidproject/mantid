@@ -1,18 +1,22 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 // WorkspaceFactory include must be first otherwise you get a bizarre
 // Poco-related compilation error on Windows
 #include "MantidAPI/WorkspaceFactory.h"
 #if GCC_VERSION >= 40800 // 4.8.0
-// clang-format off
-GCC_DIAG_OFF(literal-suffix)
-// clang-format on
+GNU_DIAG_OFF("literal-suffix")
 #endif
-#include "MantidICat/ICat3/ICat3Helper.h"
-#include "MantidICat/ICat3/ICat3ErrorHandling.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidICat/ICat3/ICat3ErrorHandling.h"
+#include "MantidICat/ICat3/ICat3Helper.h"
 #include "MantidKernel/Logger.h"
-#include <iomanip>
-#include <time.h>
 #include <boost/lexical_cast.hpp>
+#include <ctime>
+#include <iomanip>
 
 namespace Mantid {
 namespace ICat {
@@ -23,7 +27,7 @@ using namespace ICat3;
 namespace {
 /// static logger
 Kernel::Logger g_log("CICatHelper");
-}
+} // namespace
 
 CICatHelper::CICatHelper() : m_session() {}
 
@@ -186,18 +190,15 @@ void CICatHelper::saveInvestigationIncludesResponse(
         savetoTableWorkspace((*datafile_citr)->location, t);
 
         // File creation Time.
-        std::string *creationtime = nullptr;
-        if ((*datafile_citr)->datafileCreateTime != nullptr) {
-          time_t crtime = *(*datafile_citr)->datafileCreateTime;
-          char temp[25];
-          strftime(temp, 25, "%Y-%b-%d %H:%M:%S", localtime(&crtime));
-          std::string ftime(temp);
-          creationtime = new std::string;
-          creationtime->assign(ftime);
+        if ((*datafile_citr)->datafileCreateTime) {
+          const static std::string format("%Y-%b-%d %H:%M:%S");
+          std::string creationTime;
+          creationTime.resize(format.size());
+          const time_t crtime = *(*datafile_citr)->datafileCreateTime;
+          strftime(const_cast<char *>(creationTime.data()), creationTime.size(),
+                   format.data(), localtime(&crtime));
+          savetoTableWorkspace(creationTime.data(), t);
         }
-        savetoTableWorkspace(creationtime, t);
-        if (creationtime)
-          delete creationtime;
 
         //
         savetoTableWorkspace((*datafile_citr)->id, t);
@@ -381,8 +382,8 @@ void CICatHelper::doMyDataSearch(API::ITableWorkspace_sptr &ws_sptr) {
   std::string sessionID = m_session->getSessionId();
   request.sessionId = &sessionID;
   // investigation include
-  boost::shared_ptr<ns1__investigationInclude> invstInculde_sptr(
-      new ns1__investigationInclude);
+  boost::shared_ptr<ns1__investigationInclude> invstInculde_sptr =
+      boost::make_shared<ns1__investigationInclude>();
   request.investigationInclude = invstInculde_sptr.get();
   *request.investigationInclude =
       ns1__investigationInclude__INVESTIGATORS_USCORESHIFTS_USCOREAND_USCORESAMPLES;
@@ -586,7 +587,8 @@ CICatHelper::getNumberOfSearchResults(const CatalogSearchParam &inputs) {
   }
 
   g_log.debug() << "CICatHelper::getNumberOfSearchResults -> Number of results "
-                   "returned is: { " << numOfResults << " }\n";
+                   "returned is: { "
+                << numOfResults << " }\n";
 
   return numOfResults;
 }
@@ -706,5 +708,5 @@ void CICatHelper::setSSLContext(ICat3::ICATPortBindingProxy &icat) {
     CErrorHandling::throwErrorMessages(icat);
   }
 }
-}
-}
+} // namespace ICat
+} // namespace Mantid

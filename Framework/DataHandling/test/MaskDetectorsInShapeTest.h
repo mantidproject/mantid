@@ -1,13 +1,21 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MARKDEADDETECTORSINSHAPETEST_H_
 #define MARKDEADDETECTORSINSHAPETEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/MaskDetectorsInShape.h"
-#include "MantidDataHandling/LoadEmptyInstrument.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidKernel/ArrayProperty.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidDataHandling/LoadEmptyInstrument.h"
+#include "MantidDataHandling/MaskDetectorsInShape.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidKernel/ArrayProperty.h"
 
 using namespace Mantid::API;
 
@@ -26,13 +34,13 @@ public:
 
   void testCuboidMiss() {
     std::string xmlShape = "<cuboid id=\"shape\"> ";
-    xmlShape += "<left-front-bottom-point x=\"0.005\" y=\"-0.1\" z=\"0.0\" /> ";
+    xmlShape += R"(<left-front-bottom-point x="0.005" y="-0.1" z="0.0" /> )";
     xmlShape +=
-        "<left-front-top-point x=\"0.005\" y=\"-0.1\" z=\"0.0001\" />  ";
+        R"(<left-front-top-point x="0.005" y="-0.1" z="0.0001" />  )";
     xmlShape +=
-        "<left-back-bottom-point x=\"-0.005\" y=\"-0.1\" z=\"0.0\" />  ";
+        R"(<left-back-bottom-point x="-0.005" y="-0.1" z="0.0" />  )";
     xmlShape +=
-        "<right-front-bottom-point x=\"0.005\" y=\"0.1\" z=\"0.0\" />  ";
+        R"(<right-front-bottom-point x="0.005" y="0.1" z="0.0" />  )";
     xmlShape += "</cuboid> ";
     xmlShape += "<algebra val=\"shape\" /> ";
 
@@ -42,8 +50,8 @@ public:
   void testConeHitNoMonitors() {
     // algebra line is essential
     std::string xmlShape = "<cone id=\"shape\"> ";
-    xmlShape += "<tip-point x=\"0.0\" y=\"0.0\" z=\"0.0\" /> ";
-    xmlShape += "<axis x=\"0.0\" y=\"0.0\" z=\"-1\" /> ";
+    xmlShape += R"(<tip-point x="0.0" y="0.0" z="0.0" /> )";
+    xmlShape += R"(<axis x="0.0" y="0.0" z="-1" /> )";
     xmlShape += "<angle val=\"8.1\" /> ";
     xmlShape += "<height val=\"4\" /> ";
     xmlShape += "</cone>";
@@ -81,10 +89,9 @@ public:
     // check that the detectors have actually been marked dead
     std::vector<int> expectedDetectorArray =
         convertStringToVector(expectedHits);
-    Mantid::Geometry::Instrument_const_sptr i = outWS->getInstrument();
-    for (std::vector<int>::iterator it = expectedDetectorArray.begin();
-         it != expectedDetectorArray.end(); ++it) {
-      TS_ASSERT(i->getDetector((*it))->isMasked())
+    const auto &detectorInfo = outWS->detectorInfo();
+    for (const auto detID : expectedDetectorArray) {
+      TS_ASSERT(detectorInfo.isMasked(detectorInfo.indexOf(detID)));
     }
   }
 

@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
@@ -126,11 +132,11 @@ class EnggFocusTest(unittest.TestCase):
         self.assertEqual(wks.YUnit(), 'Counts')
         dimX = wks.getXDimension()
         self.assertAlmostEqual( dimX.getMaximum(), 36938.078125)
-        self.assertEqual(dimX.getName(), 'Time-of-flight')
+        self.assertEqual(dimX.name, 'Time-of-flight')
         self.assertEqual(dimX.getUnits(), 'microsecond')
         dimY = wks.getYDimension()
         self.assertEqual(dimY.getMaximum(), y_dim_max)
-        self.assertEqual(dimY.getName(), 'Spectrum')
+        self.assertEqual(dimY.name, 'Spectrum')
         self.assertEqual(dimY.getUnits(), '')
 
         if yvalues is None:

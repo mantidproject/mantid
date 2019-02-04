@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef GSLVECTORTEST_H_
 #define GSLVECTORTEST_H_
 
@@ -30,6 +36,14 @@ public:
     v[1] = 4;
     v[2] = 6;
     GSLVector gv(v);
+    TS_ASSERT_EQUALS(gv.size(), 3);
+    TS_ASSERT_EQUALS(gv[0], 2);
+    TS_ASSERT_EQUALS(gv[1], 4);
+    TS_ASSERT_EQUALS(gv[2], 6);
+  }
+
+  void test_create_from_initializer() {
+    GSLVector gv({2.0, 4.0, 6.0});
     TS_ASSERT_EQUALS(gv.size(), 3);
     TS_ASSERT_EQUALS(gv[0], 2);
     TS_ASSERT_EQUALS(gv[1], 4);

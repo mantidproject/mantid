@@ -1,9 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDTABLE_H
 #define MANTIDTABLE_H
 
 #include "../Table.h"
-#include "MantidQtAPI/WorkspaceObserver.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidQtWidgets/Common/WorkspaceObserver.h"
 
 /** A MantidTable appears to be a MantidPlot "Table" object
  * that shows the data from an ITableWorkspace.
@@ -35,6 +41,8 @@ signals:
 public slots:
   void deleteRows(int startRow, int endRow) override;
   void cellEdited(int, int col) override;
+  void setPlotDesignation(PlotDesignation pd,
+                          bool rightColumns = false) override;
 
 protected slots:
   void closeTable();
@@ -57,6 +65,9 @@ protected:
                    const QString &leadCol = QString()) override;
 
 private:
+  /// Set the plot type on the workspace for each selected column
+  void setPlotTypeForSelectedColumns(int plotType);
+
   /// ITableWorkspace being displayed
   Mantid::API::ITableWorkspace_sptr m_ws;
   /// Name of the TableWorkspace being displayed

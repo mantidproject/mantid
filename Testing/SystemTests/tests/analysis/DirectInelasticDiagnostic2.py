@@ -1,6 +1,13 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
+from __future__ import (absolute_import, division, print_function)
 #pylint: disable=invalid-name,no-init
 import os
-from stresstesting import MantidStressTest
+from systemtesting import MantidSystemTest
 from mantid.simpleapi import *
 from mantid.kernel import PropertyManager
 from mantid import config
@@ -15,7 +22,7 @@ def getNamedParameter(ws, name):
     return ws.getInstrument().getNumberParameter(name)[0]
 
 
-class DirectInelasticDiagnostic2(MantidStressTest):
+class DirectInelasticDiagnostic2(MantidSystemTest):
 
     saved_diag_file=''
 
@@ -70,12 +77,12 @@ class DirectInelasticDiagnostic2(MantidStressTest):
         # Save the masked spectra numbers to a simple ASCII file for comparison
         self.saved_diag_file = os.path.join(config['defaultsave.directory'],
                                             'CurrentDirectInelasticDiag2.txt')
-        handle = file(self.saved_diag_file, 'w')
-        for index in range(sample.getNumberHistograms()):
-            if sample.getDetector(index).isMasked():
-                spec_no = sample.getSpectrum(index).getSpectrumNo()
-                handle.write(str(spec_no) + '\n')
-        handle.close()
+        with open(self.saved_diag_file, 'w') as handle:
+            spectrumInfo = sample.spectrumInfo()
+            for index in range(sample.getNumberHistograms()):
+                if spectrumInfo.isMasked(index):
+                    spec_no = sample.getSpectrum(index).getSpectrumNo()
+                    handle.write(str(spec_no) + '\n')
 
     def cleanup(self):
         if os.path.exists(self.saved_diag_file):

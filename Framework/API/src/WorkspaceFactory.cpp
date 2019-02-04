@@ -1,19 +1,27 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/BinEdgeAxis.h"
+#include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/TextAxis.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidAPI/NumericAxis.h"
-#include "MantidAPI/TextAxis.h"
-#include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/IPeaksWorkspace.h"
 
 namespace Mantid {
 namespace API {
 namespace {
 /// static logger object
 Kernel::Logger g_log("WorkspaceFactory");
-}
+} // namespace
 
 using std::size_t;
 
@@ -35,6 +43,8 @@ WorkspaceFactoryImpl::WorkspaceFactoryImpl()
  *  If the workspace is the same size as its parent, then the X data, axes and
  * mask list are
  *  copied. If its a different size then they are not.
+ *
+ *  @deprecated Replaced by functions in MantidDataObjects/WorkspaceCreation.h
  *  @param  parent    A shared pointer to the parent workspace
  *  @param  NVectors  (Optional) The number of vectors/histograms/detectors in
  * the workspace
@@ -71,7 +81,7 @@ WorkspaceFactoryImpl::create(const MatrixWorkspace_const_sptr &parent,
   MatrixWorkspace_sptr ws = create(id, NVectors, XLength, YLength);
 
   // Copy over certain parent data members
-  initializeFromParent(parent, ws, differentSize);
+  initializeFromParent(*parent, *ws, differentSize);
 
   return ws;
 }
@@ -80,67 +90,72 @@ WorkspaceFactoryImpl::create(const MatrixWorkspace_const_sptr &parent,
  * This sets values such as title, instrument, units, sample, spectramap.
  * This does NOT copy any data.
  *
+ * @deprecated Replaced by functions in MantidDataObjects/WorkspaceCreation.h
  * @param parent :: the parent workspace
  * @param child :: the child workspace
  * @param differentSize :: A flag to indicate if the two workspace will be
  *different sizes
  */
 void WorkspaceFactoryImpl::initializeFromParent(
-    const MatrixWorkspace_const_sptr parent, const MatrixWorkspace_sptr child,
+    const MatrixWorkspace &parent, MatrixWorkspace &child,
     const bool differentSize) const {
-  child->setTitle(parent->getTitle());
-  child->setComment(parent->getComment());
-  child->setInstrument(parent->getInstrument()); // This call also copies the
-                                                 // SHARED POINTER to the
-                                                 // parameter map
-  // This call will (should) perform a COPY of the parameter map.
-  child->instrumentParameters();
-  child->m_sample = parent->m_sample;
-  child->m_run = parent->m_run;
-  child->setYUnit(parent->m_YUnit);
-  child->setYUnitLabel(parent->m_YUnitLabel);
-  child->setDistribution(parent->isDistribution());
+  child.setTitle(parent.getTitle());
+  child.setComment(parent.getComment());
+  child.copyExperimentInfoFrom(&parent);
+  child.setYUnit(parent.m_YUnit);
+  child.setYUnitLabel(parent.m_YUnitLabel);
+  child.setDistribution(parent.isDistribution());
 
   // Only copy the axes over if new sizes are not given
   if (!differentSize) {
     // Only copy mask map if same size for now. Later will need to check
     // continued validity.
-    child->m_masks = parent->m_masks;
+    child.m_masks = parent.m_masks;
   }
 
   // Same number of histograms = copy over the spectra data
-  if (parent->getNumberHistograms() == child->getNumberHistograms()) {
-    for (size_t wi = 0; wi < parent->getNumberHistograms(); wi++) {
-      auto &childSpec = child->getSpectrum(wi);
-      const auto &parentSpec = parent->getSpectrum(wi);
-      // Copy spectrum number and detector IDs
-      childSpec.copyInfoFrom(parentSpec);
-    }
+  if (parent.getNumberHistograms() == child.getNumberHistograms()) {
+    child.m_isInitialized = false;
+    for (size_t i = 0; i < parent.getNumberHistograms(); ++i)
+      child.getSpectrum(i).copyInfoFrom(parent.getSpectrum(i));
+    child.m_isInitialized = true;
+    // We use this variant without ISpectrum update to avoid costly rebuilds
+    // triggered by setIndexInfo(). ISpectrum::copyInfoFrom sets invalid flags
+    // for spectrum definitions, so it is important to call this *afterwards*,
+    // since it clears the flags:
+    child.setIndexInfoWithoutISpectrumUpdate(parent.indexInfo());
   }
 
   // deal with axis
-  for (size_t i = 0; i < parent->m_axes.size(); ++i) {
-    const size_t newAxisLength = child->getAxis(i)->length();
-    const size_t oldAxisLength = parent->getAxis(i)->length();
+  for (size_t i = 0; i < parent.m_axes.size(); ++i) {
+    if (parent.m_axes[i]->isSpectra()) {
+      // By default the child already has a spectra axis which
+      // does not need to get cloned from the parent.
+      continue;
+    }
+    const bool isBinEdge =
+        dynamic_cast<const BinEdgeAxis *const>(parent.m_axes[i]) != nullptr;
+    const size_t newAxisLength =
+        child.m_axes[i]->length() + (isBinEdge ? 1 : 0);
+    const size_t oldAxisLength = parent.m_axes[i]->length();
 
-    if (!differentSize || newAxisLength == oldAxisLength) {
-      // Need to delete the existing axis created in init above
-      delete child->m_axes[i];
+    // Need to delete the existing axis created in init above
+    delete child.m_axes[i];
+    child.m_axes[i] = nullptr;
+    if (newAxisLength == oldAxisLength) {
       // Now set to a copy of the parent workspace's axis
-      child->m_axes[i] = parent->m_axes[i]->clone(child.get());
+      child.m_axes[i] = parent.m_axes[i]->clone(&child);
     } else {
-      if (!parent->getAxis(i)->isSpectra()) // WHY???
-      {
-        delete child->m_axes[i];
-        // Call the 'different length' clone variant
-        child->m_axes[i] = parent->m_axes[i]->clone(newAxisLength, child.get());
-      }
+      // Call the 'different length' clone variant
+      child.m_axes[i] = parent.m_axes[i]->clone(newAxisLength, &child);
     }
   }
 }
 
 /** Creates a new instance of the class with the given name, and allocates
  * memory for the arrays
+ *
+ *  @deprecated Replaced by functions in MantidDataObjects/WorkspaceCreation.h
  *  @param  className The name of the class you wish to create
  *  @param  NVectors  The number of vectors/histograms/detectors in the
  * workspace

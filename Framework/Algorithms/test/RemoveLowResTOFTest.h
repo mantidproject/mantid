@@ -1,15 +1,21 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_REMOVELOWRESTOFTEST_H_
 #define MANTID_ALGORITHMS_REMOVELOWRESTOFTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 #include <set>
 #include <string>
 
@@ -29,7 +35,7 @@ private:
 
   void makeFakeEventWorkspace(std::string wsName) {
     // Make an event workspace with 2 events in each bin.
-    EventWorkspace_sptr test_in = WorkspaceCreationHelper::CreateEventWorkspace(
+    EventWorkspace_sptr test_in = WorkspaceCreationHelper::createEventWorkspace(
         NUMPIXELS, NUMBINS, NUMBINS, 0.0, BIN_DELTA, 2);
     // Fake a TOF unit in the data.
     test_in->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
@@ -97,8 +103,8 @@ public:
 
   /** Test the functionality to output the removed low resolution TOF events to
    * additional
-    * workspace.
-    */
+   * workspace.
+   */
   void test_OutputRemovedLowRefTOF() {
     // setup
     std::string name("RemoveLowResTOF");

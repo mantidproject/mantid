@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_SPECULARREFLECTIONCORRECTTHETATEST_H_
 #define MANTID_ALGORITHMS_SPECULARREFLECTIONCORRECTTHETATEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "SpecularReflectionAlgorithmTest.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "SpecularReflectionAlgorithmTest.h"
 
 #include "MantidAlgorithms/SpecularReflectionCalculateTheta.h"
 
@@ -14,8 +20,8 @@ using namespace Mantid::API;
 // clang-format off
 class SpecularReflectionCalculateThetaTest: public CxxTest::TestSuite,
     public SpecularReflectionAlgorithmTest
-      // clang-format on
-      {
+// clang-format on
+{
 
 private:
   Mantid::API::IAlgorithm_sptr makeAlgorithm() const {
@@ -49,7 +55,7 @@ public:
     IAlgorithm_sptr alg = makeAlgorithm();
     alg->setProperty(
         "InputWorkspace",
-        WorkspaceCreationHelper::Create1DWorkspaceConstant(1, 1, 1));
+        WorkspaceCreationHelper::create1DWorkspaceConstant(1, 1, 1, true));
 
     SpecularReflectionAlgorithmTest::
         test_throws_if_SpectrumNumbersOfDetectors_less_than_zero(alg);
@@ -59,7 +65,7 @@ public:
     IAlgorithm_sptr alg = makeAlgorithm();
     alg->setProperty(
         "InputWorkspace",
-        WorkspaceCreationHelper::Create1DWorkspaceConstant(1, 1, 1));
+        WorkspaceCreationHelper::create1DWorkspaceConstant(1, 1, 1, true));
 
     SpecularReflectionAlgorithmTest::
         test_throws_if_SpectrumNumbersOfDetectors_outside_range(alg);

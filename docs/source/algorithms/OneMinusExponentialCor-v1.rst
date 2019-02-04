@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -31,13 +31,13 @@ Usage
 .. testcode:: ExOneMinusExp
 
     ws=CreateWorkspace([1,2,3],[1,1,1])
-    print "You can divide the data by the factor"
+    print("You can divide the data by the factor")
     wsOut=OneMinusExponentialCor(ws,2,3,"Divide")
-    print wsOut.readY(0)
+    print(wsOut.readY(0))
 
-    print "Or multiply"
+    print("Or multiply")
     wsOut=OneMinusExponentialCor(ws,2,3,"Multiply")
-    print wsOut.readY(0)
+    print(wsOut.readY(0))
 
 
 Output:

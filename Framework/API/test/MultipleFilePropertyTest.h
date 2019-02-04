@@ -1,17 +1,23 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_API_MULTIPLEFILEPROPERTYTEST_H_
 #define MANTID_API_MULTIPLEFILEPROPERTYTEST_H_
 
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MultipleFileProperty.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
 
 #include <cxxtest/TestSuite.h>
 
-#include <Poco/Path.h>
 #include <Poco/File.h>
+#include <Poco/Path.h>
 
 #include <boost/algorithm/string/join.hpp>
 #include <unordered_set>
@@ -25,7 +31,7 @@ using Mantid::API::FileProperty;
 //////////////////////////////////////////////////////////////////////////////////////////////
 
 namespace // anonymous
-    {
+{
 /**
  * Given a directory name, create the directory and return its absolute path.
  *
@@ -77,6 +83,7 @@ private:
   std::string m_dirWithWhitespace;
   std::unordered_set<std::string> m_tempDirs;
   std::vector<std::string> m_exts;
+  std::string m_oldArchiveSearchSetting;
 
   Mantid::Kernel::ConfigServiceImpl &g_config;
 
@@ -97,6 +104,7 @@ public:
       : m_multiFileLoadingSetting(), m_oldDataSearchDirectories(),
         m_oldDefaultFacility(), m_oldDefaultInstrument(), m_dummyFilesDir(),
         m_dirWithWhitespace(), m_tempDirs(), m_exts{".raw", ".nxs"},
+        m_oldArchiveSearchSetting(),
         g_config(Mantid::Kernel::ConfigService::Instance()) {
     m_dummyFilesDir =
         createAbsoluteDirectory("_MultipleFilePropertyTestDummyFiles");
@@ -157,11 +165,13 @@ public:
     m_oldDataSearchDirectories = g_config.getString("datasearch.directories");
     m_oldDefaultFacility = g_config.getString("default.facilities");
     m_oldDefaultInstrument = g_config.getString("default.instrument");
+    m_oldArchiveSearchSetting = g_config.getString("datasearch.searcharchive");
 
     g_config.setString("datasearch.directories",
                        m_dummyFilesDir + ";" + m_dirWithWhitespace + ";");
     g_config.setString("default.facility", "ISIS");
     g_config.setString("default.instrument", "TOSCA");
+    g_config.setString("datasearch.searcharchive", "Off");
 
     // Make sure that multi file loading is enabled for each test.
     m_multiFileLoadingSetting =
@@ -173,6 +183,7 @@ public:
     g_config.setString("datasearch.directories", m_oldDataSearchDirectories);
     g_config.setString("default.facility", m_oldDefaultFacility);
     g_config.setString("default.instrument", m_oldDefaultInstrument);
+    g_config.setString("datasearch.searcharchive", m_oldArchiveSearchSetting);
 
     // Replace user's preference after the test has run.
     Kernel::ConfigService::Instance().setString("loading.multifile",
@@ -390,6 +401,37 @@ public:
     TS_ASSERT_EQUALS(fileNames[6][0], dummyFile("TSC00002.raw"));
     TS_ASSERT_EQUALS(fileNames[6][1], dummyFile("TSC00003.raw"));
     TS_ASSERT_EQUALS(fileNames[6][2], dummyFile("TSC00004.raw"));
+  }
+
+  void test_multipleFiles_shortForm_addRanges() {
+    MultipleFileProperty p("Filename");
+    p.setValue("TSC1-2+4-5.raw");
+    std::vector<std::vector<std::string>> fileNames = p();
+
+    TS_ASSERT_EQUALS(fileNames[0][0], dummyFile("TSC00001.raw"));
+    TS_ASSERT_EQUALS(fileNames[0][1], dummyFile("TSC00002.raw"));
+    TS_ASSERT_EQUALS(fileNames[0][2], dummyFile("TSC00004.raw"));
+    TS_ASSERT_EQUALS(fileNames[0][3], dummyFile("TSC00005.raw"));
+  }
+
+  void test_multipleFiles_shortForm_addSingleToRange() {
+    MultipleFileProperty p("Filename");
+    p.setValue("TSC2+4-5.raw");
+    std::vector<std::vector<std::string>> fileNames = p();
+
+    TS_ASSERT_EQUALS(fileNames[0][0], dummyFile("TSC00002.raw"));
+    TS_ASSERT_EQUALS(fileNames[0][1], dummyFile("TSC00004.raw"));
+    TS_ASSERT_EQUALS(fileNames[0][2], dummyFile("TSC00005.raw"));
+  }
+
+  void test_multipleFiles_shortForm_rangeToSingle() {
+    MultipleFileProperty p("Filename");
+    p.setValue("TSC1-2+5.raw");
+    std::vector<std::vector<std::string>> fileNames = p();
+
+    TS_ASSERT_EQUALS(fileNames[0][0], dummyFile("TSC00001.raw"));
+    TS_ASSERT_EQUALS(fileNames[0][1], dummyFile("TSC00002.raw"));
+    TS_ASSERT_EQUALS(fileNames[0][2], dummyFile("TSC00005.raw"));
   }
 
   void test_multipleFiles_longForm_commaList() {

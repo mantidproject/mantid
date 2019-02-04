@@ -1,22 +1,30 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
+#include "MantidMDAlgorithms/SaveMD2.h"
 #include "MantidAPI/CoordTransform.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidKernel/Matrix.h"
-#include "MantidKernel/System.h"
+#include "MantidAPI/Progress.h"
+#include "MantidAPI/WorkspaceHistory.h"
+#include "MantidDataObjects/BoxControllerNeXusIO.h"
+#include "MantidDataObjects/MDBox.h"
+#include "MantidDataObjects/MDBoxFlatTree.h"
 #include "MantidDataObjects/MDBoxIterator.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
-#include "MantidMDAlgorithms/SaveMD2.h"
-#include "MantidDataObjects/MDBox.h"
-#include "MantidAPI/Progress.h"
-#include "MantidKernel/EnabledWhenProperty.h"
-#include <Poco/File.h>
 #include "MantidDataObjects/MDHistoWorkspace.h"
-#include "MantidDataObjects/MDBoxFlatTree.h"
-#include "MantidDataObjects/BoxControllerNeXusIO.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/Matrix.h"
+#include "MantidKernel/Strings.h"
+#include "MantidKernel/System.h"
+#include <Poco/File.h>
 
-typedef std::unique_ptr<::NeXus::File> file_holder_type;
+using file_holder_type = std::unique_ptr<::NeXus::File>;
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -131,10 +139,11 @@ void SaveMD2::doSaveHisto(Mantid::DataObjects::MDHistoWorkspace_sptr ws) {
   for (size_t d = 0; d < numDims; d++) {
     std::vector<double> axis;
     IMDDimension_const_sptr dim = ws->getDimension(d);
-    for (size_t n = 0; n < dim->getNBins() + 1; n++)
+    auto nbounds = dim->getNBoundaries();
+    for (size_t n = 0; n < nbounds; n++)
       axis.push_back(dim->getX(n));
     file->makeData(dim->getDimensionId(), ::NeXus::FLOAT64,
-                   static_cast<int>(dim->getNBins() + 1), true);
+                   static_cast<int>(dim->getNBoundaries()), true);
     file->putData(&axis[0]);
     file->putAttr("units", std::string(dim->getUnits()));
     file->putAttr("long_name", std::string(dim->getName()));
@@ -217,5 +226,5 @@ void SaveMD2::exec() {
                              "type.");
 }
 
+} // namespace MDAlgorithms
 } // namespace Mantid
-} // namespace DataObjects

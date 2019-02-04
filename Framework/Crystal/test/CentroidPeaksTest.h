@@ -1,25 +1,29 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CRYSTAL_CentroidPeaksTEST_H_
 #define MANTID_CRYSTAL_CentroidPeaksTEST_H_
 
-#include "MantidHistogramData/LinearGenerator.h"
-#include "MantidCrystal/CentroidPeaks.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/Axis.h"
+#include "MantidCrystal/CentroidPeaks.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidHistogramData/LinearGenerator.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/FacilityHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include <boost/random/linear_congruential.hpp>
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/uniform_int.hpp>
-#include <boost/random/uniform_real.hpp>
-#include <boost/random/variate_generator.hpp>
-#include <math.h>
+#include <cmath>
 #include <cxxtest/TestSuite.h>
+#include <random>
 
 using namespace Mantid;
 using namespace Mantid::Crystal;
@@ -28,8 +32,9 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::DataHandling;
 using namespace Mantid::Geometry;
-using Mantid::HistogramData::BinEdges;
-using Mantid::HistogramData::LinearGenerator;
+using namespace Mantid::HistogramData;
+using Mantid::Types::Core::DateAndTime;
+using Mantid::Types::Event::TofEvent;
 
 class CentroidPeaksTest : public CxxTest::TestSuite {
 public:
@@ -40,42 +45,23 @@ public:
    */
   EventWorkspace_sptr createDiffractionEventWorkspace(int numEvents) {
     FacilityHelper::ScopedFacilities loadTESTFacility(
-        "IDFs_for_UNIT_TESTING/UnitTestFacilities.xml", "TEST");
+        "unit_testing/UnitTestFacilities.xml", "TEST");
 
     int numPixels = 10000;
     int numBins = 16;
     double binDelta = 10.0;
-    boost::mt19937 rng;
-    boost::uniform_real<double> u2(0, 1.0); // Random from 0 to 1.0
-    boost::variate_generator<boost::mt19937 &, boost::uniform_real<double>>
-        genUnit(rng, u2);
-    int randomSeed = 1;
-    rng.seed((unsigned int)(randomSeed));
-    size_t nd = 1;
-    // Make a random generator for each dimensions
-    typedef boost::variate_generator<boost::mt19937 &,
-                                     boost::uniform_real<double>> gen_t;
-    gen_t *gens[1];
-    for (size_t d = 0; d < nd; ++d) {
-      double min = -1.;
-      double max = 1.;
-      if (max <= min)
-        throw std::invalid_argument(
-            "UniformParams: min must be < max for all dimensions.");
-      boost::uniform_real<double> u(min, max); // Range
-      gen_t *gen = new gen_t(rng, u);
-      gens[d] = gen;
-    }
+    std::mt19937 rng(1);
+    std::uniform_real_distribution<double> flat(-1.0, 1.0);
 
-    EventWorkspace_sptr retVal(new EventWorkspace);
-    retVal->initialize(numPixels, 1, 1);
+    boost::shared_ptr<EventWorkspace> retVal = create<EventWorkspace>(
+        numPixels, BinEdges(numBins, LinearGenerator(0.0, binDelta)));
 
     // --------- Load the instrument -----------
     LoadInstrument *loadInst = new LoadInstrument();
     loadInst->initialize();
-    loadInst->setPropertyValue(
-        "Filename", "IDFs_for_UNIT_TESTING/MINITOPAZ_Definition.xml");
-    loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", retVal);
+    loadInst->setPropertyValue("Filename",
+                               "unit_testing/MINITOPAZ_Definition.xml");
+    loadInst->setProperty("Workspace", retVal);
     loadInst->setProperty("RewriteSpectraMap",
                           Mantid::Kernel::OptionalBool(true));
     loadInst->execute();
@@ -88,8 +74,6 @@ public:
 
     for (int pix = 0; pix < numPixels; ++pix) {
       auto &el = retVal->getSpectrum(pix);
-      el.setSpectrumNo(pix);
-      el.setDetectorID(pix);
       // Background
       for (int i = 0; i < numBins; i++) {
         // Two events per bin
@@ -103,18 +87,10 @@ public:
                                 (pix % 100 - 50.5) * (pix % 100 - 50.5)));
       for (int i = 0; i < r; i++) {
         el += TofEvent(
-            5844. +
-                10. * (((*gens[0])() + (*gens[0])() + (*gens[0])()) * 2. - 3.),
+            5844. + 10. * ((flat(rng) + flat(rng) + flat(rng)) * 2. - 3.),
             run_start + double(i));
       }
     }
-
-    /// Clean up the generators
-    for (size_t d = 0; d < nd; ++d)
-      delete gens[d];
-
-    // Set all the histograms at once.
-    retVal->setAllX(BinEdges(numBins, LinearGenerator(0.0, binDelta)));
 
     // Some sanity checks
     TS_ASSERT_EQUALS(retVal->getInstrument()->getName(), "MINITOPAZ");
@@ -143,10 +119,14 @@ public:
     PeaksWorkspace_sptr pkws(new PeaksWorkspace());
     // pkws->setName("TOPAZ");
 
-    // Create a single peak on that particular detector
-    Peak PeakObj(in_ws->getInstrument(), 5050, 2., V3D(1, 1, 1));
+    // Create two peaks on that particular detector
+    // First peak is at edge to check EdgePixels option
+    Peak PeakObj(in_ws->getInstrument(), 0, 2., V3D(1, 1, 1));
     PeakObj.setRunNumber(3007);
     pkws->addPeak(PeakObj);
+    Peak PeakObj2(in_ws->getInstrument(), 5050, 2., V3D(1, 1, 1));
+    PeakObj2.setRunNumber(3007);
+    pkws->addPeak(PeakObj2);
     AnalysisDataService::Instance().addOrReplace("TOPAZ", pkws);
 
     inputW->mutableRun().addProperty("run_number", 3007);

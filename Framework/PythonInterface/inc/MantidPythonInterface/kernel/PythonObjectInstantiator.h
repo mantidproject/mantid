@@ -1,34 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_PYTHONINTERFACE_PYTHONALGORITHMINSTANTIATOR_H_
 #define MANTID_PYTHONINTERFACE_PYTHONALGORITHMINSTANTIATOR_H_
-
-/*
-    Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-   National Laboratory & European Spallation Source
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
-*/
 
 //-----------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidKernel/Instantiator.h"
-#include "MantidPythonInterface/kernel/Environment/GlobalInterpreterLock.h"
+#include "MantidPythonInterface/core/GlobalInterpreterLock.h"
 
 #include <boost/python/extract.hpp>
 #include <boost/python/object.hpp>
@@ -52,7 +35,7 @@ struct GILSharedPtrDeleter {
    * @param data A pointer to the data to be deleted
    */
   void operator()(void const *data) {
-    Environment::GlobalInterpreterLock gil;
+    GlobalInterpreterLock gil;
     m_deleter(data);
   }
   /// Main deleter object
@@ -88,7 +71,7 @@ private:
 template <typename Base>
 boost::shared_ptr<Base> PythonObjectInstantiator<Base>::createInstance() const {
   using namespace boost::python;
-  Environment::GlobalInterpreterLock gil;
+  GlobalInterpreterLock gil;
 
   object instance = m_classObject();
   // The instantiator assumes that the exported type uses a
@@ -120,7 +103,7 @@ Base *PythonObjectInstantiator<Base>::createUnwrappedInstance() const {
   throw std::runtime_error(
       "Unable to create unwrapped instance of Python object");
 }
-}
-}
+} // namespace PythonInterface
+} // namespace Mantid
 
 #endif /* MANTID_PYTHONINTERFACE_PYTHONALGORITHMINSTANTIATOR_H_ */

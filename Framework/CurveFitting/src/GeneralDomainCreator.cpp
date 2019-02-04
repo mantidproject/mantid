@@ -1,11 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
+#include "MantidCurveFitting/GeneralDomainCreator.h"
 #include "MantidAPI/FunctionDomainGeneral.h"
 #include "MantidAPI/IFunctionGeneral.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/Workspace.h"
-#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidCurveFitting/GeneralDomainCreator.h"
 #include "MantidKernel/PropertyWithValue.h"
 
 #include <boost/lexical_cast.hpp>
@@ -207,7 +212,7 @@ Workspace_sptr GeneralDomainCreator::createOutputWorkspace(
       auto columnName = m_manager->getPropertyValue(propName);
       columnsToClone.push_back(columnName);
     }
-    outputWorkspace = inputWorkspace->clone(columnsToClone);
+    outputWorkspace = inputWorkspace->cloneColumns(columnsToClone);
     if (rowCount != outputWorkspace->rowCount()) {
       throw std::runtime_error("Cloned workspace has wrong number of rows.");
     }

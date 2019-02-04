@@ -1,9 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/UnwrapMonitor.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
-#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/RawCountValidator.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/IDetector.h"
@@ -24,14 +30,7 @@ using namespace API;
 /// Default constructor
 UnwrapMonitor::UnwrapMonitor()
     : m_conversionConstant(0.), m_inputWS(), m_LRef(0.), m_Tmin(0.), m_Tmax(0.),
-      m_XSize(0), m_progress(nullptr) {}
-
-/// Destructor
-UnwrapMonitor::~UnwrapMonitor() {
-  if (m_progress)
-    delete m_progress;
-  m_progress = nullptr;
-}
+      m_XSize(0) {}
 
 /// Initialisation method
 void UnwrapMonitor::init() {
@@ -97,12 +96,12 @@ void UnwrapMonitor::exec() {
 
   // This will be used later to store the maximum number of bin BOUNDARIES for
   // the rebinning
-  int max_bins = 0;
+  size_t max_bins = 0;
 
   const auto &spectrumInfo = m_inputWS->spectrumInfo();
   const double L1 = spectrumInfo.l1();
 
-  m_progress = new Progress(this, 0.0, 1.0, numberOfSpectra);
+  m_progress = make_unique<Progress>(this, 0.0, 1.0, numberOfSpectra);
   // Loop over the histograms (detector spectra)
   for (int i = 0; i < numberOfSpectra; ++i) {
     if (!spectrumInfo.hasDetectors(i)) {
@@ -124,12 +123,12 @@ void UnwrapMonitor::exec() {
 
     // Unwrap the x data. Returns the bin ranges that end up being used
     const double Ld = L1 + spectrumInfo.l2(i);
-    MantidVec newX;
+    std::vector<double> newX;
     const std::vector<int> rangeBounds = this->unwrapX(newX, i, Ld);
 
     // Unwrap the y & e data according to the ranges found above
-    MantidVec newY;
-    MantidVec newE;
+    std::vector<double> newY;
+    std::vector<double> newE;
     this->unwrapYandE(tempWS, i, rangeBounds, newY, newE);
 
     // Now set the new X, Y and E values on the Histogram
@@ -142,7 +141,7 @@ void UnwrapMonitor::exec() {
     // Get the maximum number of bins (excluding monitors) for the rebinning
     // below
     if (!spectrumInfo.isMonitor(i)) {
-      const int XLen = static_cast<int>(tempWS->x(i).size());
+      const size_t XLen = tempWS->x(i).size();
       if (XLen > max_bins)
         max_bins = XLen;
     }
@@ -176,8 +175,9 @@ void UnwrapMonitor::exec() {
  *  @return A 3-element vector containing the bins at which the upper and lower
  * ranges start & end
  */
-const std::vector<int>
-UnwrapMonitor::unwrapX(MantidVec &newX, const int &spectrum, const double &Ld) {
+const std::vector<int> UnwrapMonitor::unwrapX(std::vector<double> &newX,
+                                              const int &spectrum,
+                                              const double &Ld) {
   // Create and initalise the vector that will store the bin ranges, and will be
   // returned
   // Elements are: 0 - Lower range start, 1 - Lower range end, 2 - Upper range
@@ -302,10 +302,11 @@ std::pair<int, int> UnwrapMonitor::handleFrameOverlapped(
 void UnwrapMonitor::unwrapYandE(const API::MatrixWorkspace_sptr &tempWS,
                                 const int &spectrum,
                                 const std::vector<int> &rangeBounds,
-                                MantidVec &newY, MantidVec &newE) {
+                                std::vector<double> &newY,
+                                std::vector<double> &newE) {
   // Copy over the relevant ranges of Y & E data
-  MantidVec &Y = newY;
-  MantidVec &E = newE;
+  std::vector<double> &Y = newY;
+  std::vector<double> &E = newE;
   // Get references to the input data
   const auto &YIn = m_inputWS->y(spectrum);
   const auto &EIn = m_inputWS->e(spectrum);
@@ -360,9 +361,10 @@ void UnwrapMonitor::unwrapYandE(const API::MatrixWorkspace_sptr &tempWS,
  */
 API::MatrixWorkspace_sptr
 UnwrapMonitor::rebin(const API::MatrixWorkspace_sptr &workspace,
-                     const double &min, const double &max, const int &numBins) {
+                     const double &min, const double &max,
+                     const size_t &numBins) {
   // Calculate the width of a bin
-  const double step = (max - min) / numBins;
+  const double step = (max - min) / static_cast<double>(numBins);
 
   // Create a Rebin child algorithm
   IAlgorithm_sptr childAlg = createChildAlgorithm("Rebin");
@@ -370,10 +372,7 @@ UnwrapMonitor::rebin(const API::MatrixWorkspace_sptr &workspace,
   childAlg->setPropertyValue("OutputWorkspace", "Anonymous");
 
   // Construct the vector that holds the rebin parameters and set the property
-  std::vector<double> paramArray;
-  paramArray.push_back(min);
-  paramArray.push_back(step);
-  paramArray.push_back(max);
+  std::vector<double> paramArray = {min, step, max};
   childAlg->setProperty<std::vector<double>>("Params", paramArray);
   g_log.debug() << "Rebinning unwrapped data into " << numBins
                 << " bins of width " << step << " Angstroms, running from "
@@ -383,5 +382,5 @@ UnwrapMonitor::rebin(const API::MatrixWorkspace_sptr &workspace,
   return childAlg->getProperty("OutputWorkspace");
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

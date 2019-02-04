@@ -2,14 +2,14 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
 Description
 -----------
 
-For testing `MDEventWorkspaces <http://www.mantidproject.org/MDEventWorkspace>`_,
+For testing :ref:`MDEventWorkspaces <MDWorkspace>`,
 this algorithm either creates a uniform, random distribution of events, or generates
 regular events placed in boxes, or fills peaks around given points with a given
 number of events.
@@ -17,7 +17,7 @@ number of events.
 Usage
 -----
 
-This algorithm can be run on a pre-existing `MDEventWorkspace <http://www.mantidproject.org/MDEventWorkspace>`_
+This algorithm can be run on a pre-existing :ref:`MDEventWorkspace <MDWorkspace>`
 or a newly created one. All of the examples below will be done with newly created ones
 using :ref:`CreateMDWorkspace <algm-CreateMDWorkspace>`.
 
@@ -28,7 +28,7 @@ using :ref:`CreateMDWorkspace <algm-CreateMDWorkspace>`.
     ws = CreateMDWorkspace(Dimensions='2', EventType='MDEvent', Extents='-10,10,-10,10',
                            Names='Q_lab_x,Q_lab_y', Units='A,B')
     FakeMDEventData(ws, UniformParams="1000000")
-    print "Number of events =", ws.getNEvents()
+    print("Number of events = {}".format(ws.getNEvents()))
 
 Output:
 
@@ -54,7 +54,7 @@ Creates 3 peaks in (H,K,L) at (0,0,0), (1,1,0) and (1,1,1).
     FakeMDEventData(ws, PeakParams='10000,1,1,1,0.1', RandomSeed='63759', RandomizeSignal='1')
     FakeMDEventData(ws, PeakParams='100000,0,0,0,0.1', RandomSeed='63759', RandomizeSignal='1')
     FakeMDEventData(ws, PeakParams='40000,1,1,0,0.1', RandomSeed='63759', RandomizeSignal='1')
-    print "Number of events =", ws.getNEvents()
+    print("Number of events = {}".format(ws.getNEvents()))
 
 Output:
 
@@ -85,7 +85,7 @@ Creates a peak at (H,K,L) of (0,0,0) around T=5K.
     ws = CreateMDWorkspace(Dimensions='4', Extents='-1,1,-1,1,-1,1,0,10', Names='H,K,L,T', Units='rlu,rlu,rlu,K',
                            SplitInto='2', SplitThreshold='50')
     FakeMDEventData(ws, PeakParams='1e+06,0,0,0,5,0.2', RandomSeed='3873875')
-    print "Number of events =", ws.getNEvents()
+    print("Number of events = {}".format(ws.getNEvents()))
 
 Output:
 

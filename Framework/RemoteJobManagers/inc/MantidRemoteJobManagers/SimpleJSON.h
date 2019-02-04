@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 /*******************************************************************
   A cross-platform JSON parser that uses nothing more than C++ and
   STL templates.  It's probably slower than other JSON parsers, but
@@ -14,15 +20,15 @@
 #ifndef SIMPLEJSON_H
 #define SIMPLEJSON_H
 
+#include <istream>
 #include <map>
+#include <ostream>
 #include <string>
 #include <vector>
-#include <istream>
-#include <ostream>
 
 class JSONValue;
-typedef std::map<std::string, JSONValue> JSONObject;
-typedef std::vector<JSONValue> JSONArray;
+using JSONObject = std::map<std::string, JSONValue>;
+using JSONArray = std::vector<JSONValue>;
 // Note: according to the JSON spec, an array is a type of value.
 // That isn't strictly true in the C++ sense here (ie: JSONArray
 // doesn't inherit from JSONValue), but I think we'll be all right.

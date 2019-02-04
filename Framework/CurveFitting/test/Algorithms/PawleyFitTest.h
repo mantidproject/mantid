@@ -1,14 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CURVEFITTING_PAWLEYFITTEST_H_
 #define MANTID_CURVEFITTING_PAWLEYFITTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCurveFitting/Algorithms/PawleyFit.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidCurveFitting/Algorithms/PawleyFit.h"
 #include "MantidKernel/V3D.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
@@ -242,20 +248,13 @@ private:
 
     FunctionDomain1DVector xValues(xMin, xMax, n);
     FunctionValues yValues(xValues);
-    std::vector<double> eValues(n, 1.0);
 
     siFn->function(xValues, yValues);
 
-    std::vector<double> &xData = ws->dataX(0);
-    std::vector<double> &yData = ws->dataY(0);
-    std::vector<double> &eData = ws->dataE(0);
-
-    for (size_t i = 0; i < n; ++i) {
-      xData[i] = xValues[i];
-      yData[i] = yValues[i] + bg;
-      eData[i] = eValues[i];
-    }
-
+    ws->mutableX(0) = xValues.toVector();
+    ws->mutableY(0) = yValues.toVector();
+    ws->mutableY(0) += bg;
+    ws->mutableE(0) = 1.0;
     WorkspaceCreationHelper::addNoise(ws, 0, -0.5, 0.5);
 
     ws->getAxis(0)->setUnit(unit);

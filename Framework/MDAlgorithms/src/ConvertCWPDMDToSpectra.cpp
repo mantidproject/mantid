@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/ConvertCWPDMDToSpectra.h"
 
 #include "MantidAPI/Axis.h"
@@ -18,6 +24,9 @@ namespace MDAlgorithms {
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::MDAlgorithms;
+using HistogramData::BinEdges;
+using HistogramData::CountStandardDeviations;
+using HistogramData::Counts;
 
 DECLARE_ALGORITHM(ConvertCWPDMDToSpectra)
 
@@ -47,8 +56,8 @@ void ConvertCWPDMDToSpectra::init() {
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace for reduced data.");
 
-  std::vector<std::string> vecunits{"2theta", "dSpacing",
-                                    "Momentum Transfer (Q)"};
+  std::array<std::string, 3> vecunits = {
+      {"2theta", "dSpacing", "Momentum Transfer (Q)"}};
   auto unitval = boost::make_shared<ListValidator<std::string>>(vecunits);
   declareProperty("UnitOutput", "2theta", unitval,
                   "Unit of the output workspace.");
@@ -104,35 +113,34 @@ void ConvertCWPDMDToSpectra::exec() {
 
   // output unit: make a map for wavelength
   std::map<int, double> map_runWavelength;
-  if (outputunit.compare("2theta")) {
+  if (outputunit != "2theta") {
     // set up runid and wavelength  map
     std::string wavelengthpropertyname =
         getProperty("NeutornWaveLengthPropertyName");
 
     uint16_t numexpinfo = inputDataWS->getNumExperimentInfo();
     for (uint16_t iexp = 0; iexp < numexpinfo; ++iexp) {
-      int runid = atoi(inputDataWS->getExperimentInfo(iexp)
-                           ->run()
-                           .getProperty("run_number")
-                           ->value()
-                           .c_str());
+      int runid = std::stoi(inputDataWS->getExperimentInfo(iexp)
+                                ->run()
+                                .getProperty("run_number")
+                                ->value());
       // skip if run id is not a valid one
       if (runid < 0)
         continue;
       double thislambda = wavelength;
       if (inputDataWS->getExperimentInfo(iexp)->run().hasProperty(
               wavelengthpropertyname))
-        thislambda = atof(inputDataWS->getExperimentInfo(iexp)
-                              ->run()
-                              .getProperty(wavelengthpropertyname)
-                              ->value()
-                              .c_str());
+        thislambda = std::stod(inputDataWS->getExperimentInfo(iexp)
+                                   ->run()
+                                   .getProperty(wavelengthpropertyname)
+                                   ->value());
       else if (wavelength == EMPTY_DBL()) {
         std::stringstream errss;
         errss << "In order to convert unit to " << outputunit
               << ", either NeutronWaveLength "
-                 " is to be specified or property " << wavelengthpropertyname
-              << " must exist for run " << runid << ".";
+                 " is to be specified or property "
+              << wavelengthpropertyname << " must exist for run " << runid
+              << ".";
         throw std::runtime_error(errss.str());
       }
       map_runWavelength.emplace(runid, thislambda);
@@ -245,9 +253,9 @@ API::MatrixWorkspace_sptr ConvertCWPDMDToSpectra::reducePowderData(
 
   // Convert unit to unit char bit
   char unitchar = 't'; // default 2theta
-  if (targetunit.compare("dSpacing") == 0)
+  if (targetunit == "dSpacing")
     unitchar = 'd';
-  else if (targetunit.compare("Momentum Transfer (Q)") == 0)
+  else if (targetunit == "Momentum Transfer (Q)")
     unitchar = 'q';
 
   binMD(dataws, unitchar, map_runwavelength, vecx, vecy, vec_excludeddets);
@@ -287,15 +295,8 @@ API::MatrixWorkspace_sptr ConvertCWPDMDToSpectra::reducePowderData(
     pdws->getAxis(0)->setUnit("Degrees");
   }
 
-  MantidVec &dataX = pdws->dataX(0);
-  for (size_t i = 0; i < sizex; ++i)
-    dataX[i] = vecx[i];
-  MantidVec &dataY = pdws->dataY(0);
-  MantidVec &dataE = pdws->dataE(0);
-  for (size_t i = 0; i < sizey; ++i) {
-    dataY[i] = vecy[i];
-    dataE[i] = vece[i];
-  }
+  pdws->setHistogram(0, BinEdges(vecx), Counts(vecy),
+                     CountStandardDeviations(vece));
 
   // Interpolation
   m_infitesimal = 0.1 / (maxmonitorcounts);
@@ -387,15 +388,15 @@ void ConvertCWPDMDToSpectra::findXBoundary(
 
       // convert unit optionally
       double outx = -1;
-      if (targetunit.compare("2theta") == 0)
+      if (targetunit == "2theta")
         outx = twotheta;
       else {
         if (wavelength <= 0)
           throw std::runtime_error("Wavelength is not defined!");
 
-        if (targetunit.compare("dSpacing") == 0)
+        if (targetunit == "dSpacing")
           outx = calculateDspaceFrom2Theta(twotheta, wavelength);
-        else if (targetunit.compare("Momentum Transfer (Q)") == 0)
+        else if (targetunit == "Momentum Transfer (Q)")
           outx = calculateQFrom2Theta(twotheta, wavelength);
         else
           throw std::runtime_error("Unrecognized unit.");
@@ -455,7 +456,7 @@ void ConvertCWPDMDToSpectra::binMD(API::IMDEventWorkspace_const_sptr mdws,
                 << sourcepos.Y() << ", " << sourcepos.Z() << "\n";
 
   // Go through all events to find out their positions
-  IMDIterator *mditer = mdws->createIterator();
+  auto mditer = mdws->createIterator();
   bool scancell = true;
   size_t nextindex = 1;
   int currRunIndex = -1;
@@ -463,8 +464,8 @@ void ConvertCWPDMDToSpectra::binMD(API::IMDEventWorkspace_const_sptr mdws,
   while (scancell) {
     // get the number of events of this cell
     size_t numev2 = mditer->getNumEvents();
-    g_log.debug() << "MDWorkspace " << mdws->name() << " Cell " << nextindex - 1
-                  << ": Number of events = " << numev2
+    g_log.debug() << "MDWorkspace " << mdws->getName() << " Cell "
+                  << nextindex - 1 << ": Number of events = " << numev2
                   << " Does NEXT cell exist = " << mditer->next() << "\n";
 
     // loop over all the events in current cell
@@ -499,7 +500,7 @@ void ConvertCWPDMDToSpectra::binMD(API::IMDEventWorkspace_const_sptr mdws,
             std::stringstream errss;
             errss << "Event " << iev << " has run ID as " << temprun << ". "
                   << "It has no corresponding ExperimentInfo in MDWorkspace "
-                  << mdws->name() << ".";
+                  << mdws->getName() << ".";
             throw std::runtime_error(errss.str());
           }
           currWavelength = miter->second;

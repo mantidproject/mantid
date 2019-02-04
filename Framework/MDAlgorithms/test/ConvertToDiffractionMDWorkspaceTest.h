@@ -1,16 +1,23 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MDEVENTS_MAKEDIFFRACTIONMDEVENTWORKSPACETEST_H_
 #define MANTID_MDEVENTS_MAKEDIFFRACTIONMDEVENTWORKSPACETEST_H_
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidGeometry/MDGeometry/HKL.h"
+#include "MantidGeometry/MDGeometry/QLab.h"
+#include "MantidGeometry/MDGeometry/QSample.h"
 #include "MantidMDAlgorithms/ConvertToDiffractionMDWorkspace.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidGeometry/MDGeometry/QSample.h"
-#include "MantidGeometry/MDGeometry/QLab.h"
-#include "MantidGeometry/MDGeometry/HKL.h"
+
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
@@ -219,6 +226,44 @@ public:
   void test_MINITOPAZ_fromWorkspace2D() {
     do_test_MINITOPAZ(TOF, 100, 400, 1, false, true);
   }
+};
+
+class CTDMDWorkspaceTestPerformance : public CxxTest::TestSuite {
+public:
+  static CTDMDWorkspaceTestPerformance *createSuite() {
+    return new CTDMDWorkspaceTestPerformance();
+  }
+  static void destroySuite(CTDMDWorkspaceTestPerformance *suite) {
+    delete suite;
+  }
+
+  void setUp() override {
+    in_ws = MDEventsTestHelper::createDiffractionEventWorkspace(numEventsPer,
+                                                                numPixels);
+
+    // Rebin the workspace to have a manageable number bins
+    AnalysisDataService::Instance().addOrReplace("inputWS", in_ws);
+    FrameworkManager::Instance().exec("Rebin", 8, "InputWorkspace", "inputWS",
+                                      "OutputWorkspace", "inputWS", "Params",
+                                      "0, 500, 16e3", "PreserveEvents", "1");
+
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace", "inputWS");
+    alg.setProperty("OneEventPerBin", false);
+    alg.setPropertyValue("OutputWorkspace", "test_md3");
+  }
+
+  void tearDown() override { AnalysisDataService::Instance().clear(); }
+
+  void testConvertToDiffractionMDWorkspacePerformance() {
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+  }
+
+private:
+  ConvertToDiffractionMDWorkspace alg;
+  EventWorkspace_sptr in_ws;
+  int numEventsPer = 500;
+  int numPixels = 2000;
 };
 
 #endif /* MANTID_MDEVENTS_MAKEDIFFRACTIONMDEVENTWORKSPACETEST_H_ */

@@ -1,9 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_HISTOGRAMDATA_FIXEDLENGTHVECTOR_H_
 #define MANTID_HISTOGRAMDATA_FIXEDLENGTHVECTOR_H_
 
 #include "MantidHistogramData/DllConfig.h"
 #include "MantidHistogramData/Validation.h"
 
+#include <limits>
+#include <numeric>
 #include <stdexcept>
 #include <vector>
 
@@ -20,27 +28,6 @@ namespace detail {
   that the length cannot be changed after creation. This is an implementation
   detail of HistogramData::Histogram, HistogramData::BinEdges, and
   HistogramData::Points and is not intended for direct use in client code.
-
-  Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
-
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>
-  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 template <class T> class FixedLengthVector {
 public:
@@ -55,13 +42,11 @@ public:
   FixedLengthVector(const std::vector<double> &other) : m_data(other) {}
   FixedLengthVector(std::vector<double> &&other) : m_data(std::move(other)) {}
   template <class InputIt>
-  FixedLengthVector(InputIt first, InputIt last)
-      : m_data(first, last) {}
+  FixedLengthVector(InputIt first, InputIt last) : m_data(first, last) {}
   template <class Generator,
             class = typename std::enable_if<
                 !std::is_convertible<Generator, double>::value>::type>
-  FixedLengthVector(size_t count, const Generator &g)
-      : m_data(count) {
+  FixedLengthVector(size_t count, const Generator &g) : m_data(count) {
     std::generate(m_data.begin(), m_data.end(), g);
   }
 
@@ -105,6 +90,14 @@ public:
     return *this;
   }
 
+  bool operator==(const FixedLengthVector<T> &rhs) const {
+    return this->rawData() == rhs.rawData();
+  }
+
+  bool operator!=(const FixedLengthVector<T> &rhs) const {
+    return !(*this == rhs);
+  }
+
   bool empty() const { return m_data.empty(); }
   size_t size() const { return m_data.size(); }
 
@@ -113,6 +106,14 @@ public:
 
   /// Returns a const reference to the underlying vector.
   const std::vector<double> &rawData() const { return m_data; }
+
+  /// Returns the sum over a range of values from min (inclusive) to max
+  /// (exclusive)
+  double sum(size_t min = 0, size_t max = std::numeric_limits<size_t>::max(),
+             double initialValue = 0.0) const {
+    max = std::min(max, size());
+    return std::accumulate(begin() + min, begin() + max, initialValue);
+  }
 
 protected:
   /** Returns a reference to the underlying vector.
@@ -159,8 +160,8 @@ public:
   const double &back() const { return m_data.back(); }
 
   // expose typedefs for the iterator types in the underlying container
-  typedef std::vector<double>::iterator iterator;
-  typedef std::vector<double>::const_iterator const_iterator;
+  using iterator = std::vector<double>::iterator;
+  using const_iterator = std::vector<double>::const_iterator;
 };
 
 } // namespace detail

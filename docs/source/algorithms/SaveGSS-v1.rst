@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -11,9 +11,8 @@ Description
 
 Saves a focused data set into a three column GSAS format containing
 X\_i, Y\_i\*step, and E\_I\*step. Exclusively for the crystallography
-package `GSAS <http://www.ccp14.ac.uk/solution/gsas/index.html>`__ and
-data needs to be in time-of-flight. For data where the focusing routine
-has generated several spectra (for example, multi-bank instruments), the
+package `GSAS <http://www.ccp14.ac.uk/solution/gsas/index.html>`__ .
+For data where the focusing routine has generated several spectra (for example, multi-bank instruments), the
 option is provided for saving all spectra into a single file, separated
 by headers, or into several files that will be named
 "workspaceName\_"+workspace\_index\_number.
@@ -35,7 +34,7 @@ From the GSAS manual a description of the format options:
    the size of each step beyond BCOEF(3).
 
 The format is limited to saving 99 spectra in total. Trying to save more
-will generate an error.
+will generate an error, unless `SplitFiles` is on.
 
 Usage
 -----
@@ -44,17 +43,18 @@ Usage
 .. testcode:: ExSaveGSSSimple
 
     import os
-
-    ws = CreateSampleWorkspace()
+    # Create a workspace to save
+    ws = CreateSampleWorkspace(OutputWorkspace="SaveGSSWorkspace")
     ws = ExtractSingleSpectrum(ws, WorkspaceIndex=0)
+
+    # Save to the users home directory
     file_name = "myworkspace.ascii"
     path = os.path.join(os.path.expanduser("~"), file_name)
-
     SaveGSS(ws, path)
 
-    path = os.path.join(os.path.expanduser("~"), "myworkspace-0.ascii")
-    print os.path.isfile(path)
-
+    # Does the file exist
+    path = os.path.join(os.path.expanduser("~"), file_name)
+    print(os.path.isfile(path))
 
 Output:
 
@@ -65,6 +65,7 @@ Output:
 .. testcleanup:: ExSaveGSSSimple
 
     import os
+
     def removeFiles(files):
       for ws in files:
         try:
@@ -73,23 +74,26 @@ Output:
         except:
           pass
 
-    removeFiles(["myworkspace-0.ascii"])
+    removeFiles([file_name])
+    DeleteWorkspace("SaveGSSWorkspace")
 
-**Example - an example using SaveGSS with additonal options.**
+**Example - an example using SaveGSS with additional options.**
 
 .. testcode:: ExSaveGSSOptions
 
     import os
 
-    ws = CreateSampleWorkspace()
-    #GSAS file cannot have more than 99 entries
+    ws = CreateSampleWorkspace(OutputWorkspace="SaveGSSWorkspace")
+    # GSAS file cannot have more than 99 entries
     ws = CropWorkspace(ws, StartWorkspaceIndex=0, EndworkspaceIndex=98)
+
+    # Save out GSAS file
     file_name = "myworkspace.ascii"
     path = os.path.join(os.path.expanduser("~"), file_name)
     SaveGSS(ws, path, SplitFiles=False, ExtendedHeader=True, UseSpectrumNumberAsBankID=True)
 
-    print os.path.isfile(path)
-        
+    print(os.path.isfile(path))
+
 Output:
 
 .. testoutput:: ExSaveGSSOptions
@@ -108,6 +112,7 @@ Output:
           pass
 
     removeFiles([file_name])
+    DeleteWorkspace("SaveGSSWorkspace")
 
 
 .. categories::

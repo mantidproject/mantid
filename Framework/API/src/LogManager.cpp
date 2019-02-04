@@ -1,15 +1,22 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/LogManager.h"
+#include "MantidKernel/Cache.h"
+#include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/PropertyNexus.h"
-
 #include "MantidKernel/TimeSeriesProperty.h"
+
+#include <nexus/NeXusFile.hpp>
 
 namespace Mantid {
 namespace API {
 
 using namespace Kernel;
+using namespace Types::Core;
 
 namespace {
 /// static logger
@@ -83,7 +90,7 @@ bool convertPropertyToDouble(const Property *property, double &value,
          convertPropertyToDouble<uint64_t>(property, value, function) ||
          convertPropertyToDouble<float>(property, value, function);
 }
-}
+} // namespace
 
 /// Name of the log entry containing the proton charge when retrieved using
 /// getProtonCharge
@@ -93,13 +100,38 @@ const char *LogManager::PROTON_CHARGE_LOG_NAME = "gd_prtn_chrg";
 // Public member functions
 //----------------------------------------------------------------------
 
+LogManager::LogManager()
+    : m_manager(Kernel::make_unique<Kernel::PropertyManager>()),
+      m_singleValueCache(
+          Kernel::make_unique<Kernel::Cache<
+              std::pair<std::string, Kernel::Math::StatisticType>, double>>()) {
+}
+
+LogManager::LogManager(const LogManager &other)
+    : m_manager(Kernel::make_unique<Kernel::PropertyManager>(*other.m_manager)),
+      m_singleValueCache(
+          Kernel::make_unique<Kernel::Cache<
+              std::pair<std::string, Kernel::Math::StatisticType>, double>>(
+              *other.m_singleValueCache)) {}
+
+// Defined as default in source for forward declaration with std::unique_ptr.
+LogManager::~LogManager() = default;
+
+LogManager &LogManager::operator=(const LogManager &other) {
+  *m_manager = *other.m_manager;
+  m_singleValueCache = Kernel::make_unique<Kernel::Cache<
+      std::pair<std::string, Kernel::Math::StatisticType>, double>>(
+      *other.m_singleValueCache);
+  return *this;
+}
+
 /**
-* Set the run start and end
-* @param start :: The run start
-* @param end :: The run end
-*/
-void LogManager::setStartAndEndTime(const Kernel::DateAndTime &start,
-                                    const Kernel::DateAndTime &end) {
+ * Set the run start and end
+ * @param start :: The run start
+ * @param end :: The run end
+ */
+void LogManager::setStartAndEndTime(const Types::Core::DateAndTime &start,
+                                    const Types::Core::DateAndTime &end) {
   this->addProperty<std::string>("start_time", start.toISO8601String(), true);
   this->addProperty<std::string>("end_time", end.toISO8601String(), true);
 }
@@ -111,12 +143,12 @@ void LogManager::setStartAndEndTime(const Kernel::DateAndTime &start,
  *  @returns The start time of the run
  *  @throws std::runtime_error if neither property is defined
  */
-const Kernel::DateAndTime LogManager::startTime() const {
+const Types::Core::DateAndTime LogManager::startTime() const {
   const std::string start_prop("start_time");
   if (hasProperty(start_prop)) {
     try {
       DateAndTime start_time(getProperty(start_prop)->value());
-      if (start_time != DateAndTimeHelpers::GPS_EPOCH) {
+      if (start_time != DateAndTime::GPS_EPOCH) {
         return start_time;
       }
     } catch (std::invalid_argument &) { /*Swallow and move on*/
@@ -127,7 +159,7 @@ const Kernel::DateAndTime LogManager::startTime() const {
   if (hasProperty(run_start_prop)) {
     try {
       DateAndTime start_time(getProperty(run_start_prop)->value());
-      if (start_time != DateAndTimeHelpers::GPS_EPOCH) {
+      if (start_time != DateAndTime::GPS_EPOCH) {
         return start_time;
       }
     } catch (std::invalid_argument &) { /*Swallow and move on*/
@@ -143,7 +175,7 @@ const Kernel::DateAndTime LogManager::startTime() const {
  *  @returns The end time of the run
  *  @throws std::runtime_error if neither property is defined
  */
-const Kernel::DateAndTime LogManager::endTime() const {
+const Types::Core::DateAndTime LogManager::endTime() const {
   const std::string end_prop("end_time");
   if (hasProperty(end_prop)) {
     try {
@@ -174,10 +206,10 @@ const Kernel::DateAndTime LogManager::endTime() const {
  * @param stop :: Absolute stop time. Any log entries at times < than this time
  *are kept.
  */
-void LogManager::filterByTime(const Kernel::DateAndTime start,
-                              const Kernel::DateAndTime stop) {
+void LogManager::filterByTime(const Types::Core::DateAndTime start,
+                              const Types::Core::DateAndTime stop) {
   // The propery manager operator will make all timeseriesproperties filter.
-  m_manager.filterByTime(start, stop);
+  m_manager->filterByTime(start, stop);
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -195,12 +227,12 @@ void LogManager::splitByTime(TimeSplitterType &splitter,
   std::vector<PropertyManager *> output_managers(outputs.size(), nullptr);
   for (size_t i = 0; i < n; i++) {
     if (outputs[i]) {
-      output_managers[i] = &(outputs[i]->m_manager);
+      output_managers[i] = outputs[i]->m_manager.get();
     }
   }
 
   // Now that will do the split down here.
-  m_manager.splitByTime(splitter, output_managers);
+  m_manager->splitByTime(splitter, output_managers);
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -211,19 +243,19 @@ void LogManager::splitByTime(TimeSplitterType &splitter,
  */
 void LogManager::filterByLog(const Kernel::TimeSeriesProperty<bool> &filter) {
   // This will invalidate the cache
-  m_singleValueCache.clear();
-  m_manager.filterByProperty(filter);
+  m_singleValueCache->clear();
+  m_manager->filterByProperty(filter);
 }
 
 //-----------------------------------------------------------------------------------------------
 /**
-  * Add data to the object in the form of a property
-  * @param prop :: A pointer to a property whose ownership is transferred to
+ * Add data to the object in the form of a property
+ * @param prop :: A pointer to a property whose ownership is transferred to
  * this
-  * object
-  * @param overwrite :: If true, a current value is overwritten. (Default:
+ * object
+ * @param overwrite :: If true, a current value is overwritten. (Default:
  * False)
-  */
+ */
 void LogManager::addProperty(std::unique_ptr<Kernel::Property> prop,
                              bool overwrite) {
   // Make an exception for the proton charge
@@ -236,7 +268,7 @@ void LogManager::addProperty(std::unique_ptr<Kernel::Property> prop,
        prop->name() == "run_title")) {
     removeProperty(name);
   }
-  m_manager.declareProperty(std::move(prop), "");
+  m_manager->declareProperty(std::move(prop), "");
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -246,7 +278,7 @@ void LogManager::addProperty(std::unique_ptr<Kernel::Property> prop,
  * @return True if the property exists, false otherwise
  */
 bool LogManager::hasProperty(const std::string &name) const {
-  return m_manager.existsProperty(name);
+  return m_manager->existsProperty(name);
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -260,10 +292,18 @@ bool LogManager::hasProperty(const std::string &name) const {
 void LogManager::removeProperty(const std::string &name, bool delProperty) {
   // Remove any cached entries for this log. Need to make this more general
   for (unsigned int stat = 0; stat < 7; ++stat) {
-    m_singleValueCache.removeCache(
+    m_singleValueCache->removeCache(
         std::make_pair(name, static_cast<Math::StatisticType>(stat)));
   }
-  m_manager.removeProperty(name, delProperty);
+  m_manager->removeProperty(name, delProperty);
+}
+
+/**
+ * Return all of the current properties
+ * @returns A vector of the current list of properties
+ */
+const std::vector<Kernel::Property *> &LogManager::getProperties() const {
+  return m_manager->getProperties();
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -271,7 +311,7 @@ void LogManager::removeProperty(const std::string &name, bool delProperty) {
  */
 size_t LogManager::getMemorySize() const {
   size_t total = 0;
-  std::vector<Property *> props = m_manager.getProperties();
+  std::vector<Property *> props = m_manager->getProperties();
   for (auto p : props) {
     if (p)
       total += p->getMemorySize() + sizeof(Property *);
@@ -329,7 +369,7 @@ double LogManager::getPropertyAsSingleValue(
     const std::string &name, Kernel::Math::StatisticType statistic) const {
   double singleValue(0.0);
   const auto key = std::make_pair(name, statistic);
-  if (!m_singleValueCache.getCache(key, singleValue)) {
+  if (!m_singleValueCache->getCache(key, singleValue)) {
     const Property *log = getProperty(name);
     if (!convertPropertyToDouble(log, singleValue, statistic)) {
       if (const auto stringLog =
@@ -349,7 +389,7 @@ double LogManager::getPropertyAsSingleValue(
       }
     }
     // Put it in the cache
-    m_singleValueCache.setCache(key, singleValue);
+    m_singleValueCache->setCache(key, singleValue);
   }
   return singleValue;
 }
@@ -388,7 +428,7 @@ int LogManager::getPropertyAsIntegerValue(const std::string &name) const {
  * @return A pointer to the named property
  */
 Kernel::Property *LogManager::getProperty(const std::string &name) const {
-  return m_manager.getProperty(name);
+  return m_manager->getProperty(name);
 }
 
 /** Clear out the contents of all logs of type TimeSeriesProperty.
@@ -432,11 +472,11 @@ void LogManager::clearOutdatedTimeSeriesLogValues() {
  */
 void LogManager::saveNexus(::NeXus::File *file, const std::string &group,
                            bool keepOpen) const {
-  file->makeGroup(group, "NXgroup", 1);
+  file->makeGroup(group, "NXgroup", true);
   file->putAttr("version", 1);
 
   // Save all the properties as NXlog
-  std::vector<Property *> props = m_manager.getProperties();
+  std::vector<Property *> props = m_manager->getProperties();
   for (auto &prop : props) {
     try {
       prop->saveProperty(file);
@@ -451,39 +491,54 @@ void LogManager::saveNexus(::NeXus::File *file, const std::string &group,
 //--------------------------------------------------------------------------------------------
 /** Load the object from an open NeXus file.
  * @param file :: open NeXus file
- * @param group :: name of the group to open. Empty string to NOT open a group,
- * but
+ * @param group :: name of the group to open. Pass an empty string to NOT open a
+ * group
  * @param keepOpen :: do not close group on exit to allow overloading and child
  * classes reading from the same group
  * load any NXlog in the current open group.
  */
 void LogManager::loadNexus(::NeXus::File *file, const std::string &group,
                            bool keepOpen) {
-  if (!group.empty())
+  if (!group.empty()) {
     file->openGroup(group, "NXgroup");
-
+  }
   std::map<std::string, std::string> entries;
   file->getEntries(entries);
+  LogManager::loadNexus(file, entries);
+
+  if (!(group.empty() || keepOpen)) {
+    file->closeGroup();
+  }
+}
+
+//--------------------------------------------------------------------------------------------
+/** Load the object from an open NeXus file. Avoid multiple expensive calls to
+ * getEntries().
+ * @param file :: open NeXus file
+ * @param entries :: The entries available in the current place in the file.
+ * load any NXlog in the current open group.
+ */
+void LogManager::loadNexus(::NeXus::File *file,
+                           const std::map<std::string, std::string> &entries) {
+
   for (const auto &name_class : entries) {
     // NXLog types are the main one.
     if (name_class.second == "NXlog") {
       auto prop = PropertyNexus::loadProperty(file, name_class.first);
       if (prop) {
-        if (m_manager.existsProperty(prop->name())) {
-          m_manager.removeProperty(prop->name());
+        if (m_manager->existsProperty(prop->name())) {
+          m_manager->removeProperty(prop->name());
         }
-        m_manager.declareProperty(std::move(prop));
+        m_manager->declareProperty(std::move(prop));
       }
     }
   }
-  if (!(group.empty() || keepOpen))
-    file->closeGroup();
 }
 
 /**
  * Clear the logs.
  */
-void LogManager::clearLogs() { m_manager.clear(); }
+void LogManager::clearLogs() { m_manager->clear(); }
 
 //-----------------------------------------------------------------------------------------------------------------------
 // Private methods
@@ -492,10 +547,10 @@ void LogManager::clearLogs() { m_manager.clear(); }
 /** @cond */
 /// Macro to instantiate concrete template members
 #define INSTANTIATE(TYPE)                                                      \
-  template MANTID_API_DLL Kernel::TimeSeriesProperty<TYPE> *                   \
-  LogManager::getTimeSeriesProperty(const std::string &) const;                \
-  template MANTID_API_DLL TYPE                                                 \
-  LogManager::getPropertyValueAsType(const std::string &) const;
+  template MANTID_API_DLL Kernel::TimeSeriesProperty<TYPE>                     \
+      *LogManager::getTimeSeriesProperty(const std::string &) const;           \
+  template MANTID_API_DLL TYPE LogManager::getPropertyValueAsType(             \
+      const std::string &) const;
 
 INSTANTIATE(double)
 INSTANTIATE(int32_t)
@@ -517,5 +572,5 @@ template MANTID_API_DLL std::vector<long>
 LogManager::getPropertyValueAsType(const std::string &) const;
 /** @endcond */
 
-} // API namespace
-}
+} // namespace API
+} // namespace Mantid

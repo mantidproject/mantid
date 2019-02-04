@@ -1,4 +1,13 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidHistogramData/Histogram.h"
+#include "MantidHistogramData/HistogramIterator.h"
+
+#include <sstream>
 
 namespace Mantid {
 namespace HistogramData {
@@ -137,7 +146,8 @@ void Histogram::setSharedY(const Kernel::cow_ptr<HistogramY> &y) & {
   if (yMode() == YMode::Uninitialized)
     throw std::logic_error(
         "Histogram::setSharedY: YMode is not set and cannot be determined");
-  checkSize(*y);
+  if (y)
+    checkSize(*y);
   m_y = y;
 }
 
@@ -145,7 +155,8 @@ void Histogram::setSharedY(const Kernel::cow_ptr<HistogramY> &y) & {
 
   Throws if the size does not match the current size. */
 void Histogram::setSharedE(const Kernel::cow_ptr<HistogramE> &e) & {
-  checkSize(*e);
+  if (e)
+    checkSize(*e);
   m_e = e;
 }
 
@@ -232,15 +243,15 @@ void Histogram::setUncertainties(const FrequencyStandardDeviations &e) {
 
 void Histogram::checkAndSetYModeCounts() {
   if (yMode() == YMode::Frequencies)
-    throw std::logic_error("Histogram: Y is storing Counts, modifying "
-                           "Frequencies is not possible.");
+    throw std::logic_error("Histogram: Y is storing Frequencies, modifying "
+                           "Counts is not possible.");
   m_yMode = YMode::Counts;
 }
 
 void Histogram::checkAndSetYModeFrequencies() {
   if (yMode() == YMode::Counts)
-    throw std::logic_error("Histogram: Y is storing Frequencies, modifying "
-                           "Counts is not possible.");
+    throw std::logic_error("Histogram: Y is storing Counts, modifying "
+                           "Frequencies is not possible.");
   m_yMode = YMode::Frequencies;
 }
 
@@ -249,8 +260,12 @@ template <> void Histogram::checkSize(const BinEdges &binEdges) const {
   // 0 points -> 0 edges, otherwise edges are 1 more than points.
   if (xMode() == XMode::Points && target > 0)
     target++;
-  if (target != binEdges.size())
-    throw std::logic_error("Histogram: size mismatch of BinEdges\n");
+  if (target != binEdges.size()) {
+    std::stringstream msg;
+    msg << "Histogram: size mismatch of BinEdges: (" << target
+        << " != " << binEdges.size() << ")";
+    throw std::logic_error(msg.str());
+  }
 }
 
 /** Resets the size of the internal x, dx, y, and e data structures
@@ -260,7 +275,7 @@ template <> void Histogram::checkSize(const BinEdges &binEdges) const {
   std::vector::resize which either truncates the current values
   or applies zero padding. */
 void Histogram::resize(size_t n) {
-  auto newXSize = xMode() == XMode::Points ? n : n + 1;
+  auto newXSize = (xMode() == XMode::Points || n == 0) ? n : n + 1;
 
   m_x.access().mutableRawData().resize(newXSize);
   if (m_y) {
@@ -274,6 +289,14 @@ void Histogram::resize(size_t n) {
   if (m_dx) {
     m_dx.access().mutableRawData().resize(n);
   }
+}
+
+HistogramIterator Histogram::begin() const & {
+  return HistogramIterator(*this, 0);
+}
+
+HistogramIterator Histogram::end() const & {
+  return HistogramIterator(*this, size());
 }
 
 } // namespace HistogramData

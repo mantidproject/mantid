@@ -1,15 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_EDITTOFPOWDERDIFFRACTOMERGEOMETRYTEST_H_
 #define MANTID_ALGORITHMS_EDITTOFPOWDERDIFFRACTOMERGEOMETRYTEST_H_
 
-#include <cxxtest/TestSuite.h>
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAlgorithms/EditInstrumentGeometry.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidAPI/ISpectrum.h"
-#include "MantidGeometry/IDetector.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/System.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Mantid::Algorithms;
@@ -18,7 +19,7 @@ using namespace Mantid::API;
 class EditInstrumentGeometryTest : public CxxTest::TestSuite {
 public:
   /** Test algorithm initialization
-    */
+   */
   void test_Initialize() {
 
     EditInstrumentGeometry editdetector;
@@ -27,7 +28,7 @@ public:
   }
 
   /** Test for a workspace containing a single spectrum
-    */
+   */
   void test_SingleSpectrum() {
     // 1. Init
     EditInstrumentGeometry editdetector;
@@ -58,21 +59,18 @@ public:
         workspace = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve("inputWS")));
 
-    Geometry::Instrument_const_sptr instrument = workspace->getInstrument();
+    const auto &spectrumInfo = workspace->spectrumInfo();
+    TS_ASSERT_EQUALS(spectrumInfo.hasUniqueDetector(0), true);
 
-    auto detids = workspace->getSpectrum(0).getDetectorIDs();
-    TS_ASSERT_EQUALS(detids.size(), 1);
-    detid_t detid = *detids.rbegin();
-    Geometry::IDetector_const_sptr detector = instrument->getDetector(detid);
     double r, tth, phi;
-    detector->getPos().getSpherical(r, tth, phi);
+    spectrumInfo.position(0).getSpherical(r, tth, phi);
     TS_ASSERT_DELTA(r, 3.45, 0.000001);
     TS_ASSERT_DELTA(tth, 90.09, 0.000001);
     TS_ASSERT_DELTA(phi, 1.84, 0.000001);
   }
 
   /** Unit test to edit instrument parameters of all spectrums (>1)
-    */
+   */
   void test_MultipleWholeSpectrumEdit() {
     // 1. Init
     EditInstrumentGeometry editdetector;
@@ -116,7 +114,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Unit test to edit instrument parameters of all spectrums (>1) and using
    * new detector IDs
-    */
+   */
   void test_MultiplePartialSpectrumEdit() {
     // Init
     EditInstrumentGeometry editdetector;
@@ -160,18 +158,16 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Check detector parameter
-    */
+   */
   void checkDetectorParameters(API::MatrixWorkspace_sptr workspace,
                                size_t wsindex, double realr, double realtth,
                                double realphi) {
-    Geometry::Instrument_const_sptr instrument = workspace->getInstrument();
 
-    auto detids = workspace->getSpectrum(wsindex).getDetectorIDs();
-    TS_ASSERT_EQUALS(detids.size(), 1);
-    detid_t detid = *detids.rbegin();
-    Geometry::IDetector_const_sptr detector = instrument->getDetector(detid);
+    const auto &spectrumInfo = workspace->spectrumInfo();
+    TS_ASSERT_EQUALS(spectrumInfo.hasUniqueDetector(wsindex), true);
+
     double r, tth, phi;
-    detector->getPos().getSpherical(r, tth, phi);
+    spectrumInfo.position(wsindex).getSpherical(r, tth, phi);
     TS_ASSERT_DELTA(r, realr, 0.000001);
     TS_ASSERT_DELTA(tth, realtth, 0.000001);
     TS_ASSERT_DELTA(phi, realphi, 0.000001);
@@ -179,18 +175,13 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Check detector parameter
-    */
+   */
   void checkDetectorID(API::MatrixWorkspace_sptr workspace, size_t wsindex,
                        detid_t detid) {
-    Geometry::Instrument_const_sptr instrument = workspace->getInstrument();
 
-    auto detids = workspace->getSpectrum(wsindex).getDetectorIDs();
-    TS_ASSERT_EQUALS(detids.size(), 1);
-    detid_t thisdetid = *detids.rbegin();
-
-    TS_ASSERT_EQUALS(detid, thisdetid);
-
-    return;
+    const auto &spectrumInfo = workspace->spectrumInfo();
+    TS_ASSERT_EQUALS(spectrumInfo.hasUniqueDetector(wsindex), true);
+    TS_ASSERT_EQUALS(spectrumInfo.detector(wsindex).getID(), detid);
   }
 };
 

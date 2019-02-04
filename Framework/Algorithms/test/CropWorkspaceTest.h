@@ -1,13 +1,21 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef CROPWORKSPACETEST_H_
 #define CROPWORKSPACETEST_H_
 
-#include "MantidAlgorithms/CropWorkspace.h"
 #include "MantidAPI/TextAxis.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAlgorithms/CropWorkspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidTestHelpers/InstrumentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 #include <limits>
@@ -46,6 +54,8 @@ public:
         space2D->dataY(j) = std::vector<double>(a + (5 * j), a + (5 * j) + 5);
         space2D->dataE(j) = std::vector<double>(e + (5 * j), e + (5 * j) + 5);
       }
+      InstrumentCreationHelper::addFullInstrumentToWorkspace(*space2D, false,
+                                                             false, "");
       // Register the workspace in the data service
       AnalysisDataService::Instance().add(name, space);
     }
@@ -96,7 +106,7 @@ public:
   void makeFakeEventWorkspace(std::string wsName) {
     // Make an event workspace with 2 events in each bin.
     EventWorkspace_sptr test_in =
-        WorkspaceCreationHelper::CreateEventWorkspace(36, 50, 50, 0.0, 2., 2);
+        WorkspaceCreationHelper::createEventWorkspace(36, 50, 50, 0.0, 2., 2);
     // Fake a unit in the data.
     test_in->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
     test_in->setInstrument(
@@ -230,7 +240,7 @@ public:
 
   void testWithPointData() {
     AnalysisDataService::Instance().add(
-        "point", WorkspaceCreationHelper::Create2DWorkspace123(5, 5));
+        "point", WorkspaceCreationHelper::create2DWorkspace123(5, 5));
     CropWorkspace crop3;
     TS_ASSERT_THROWS_NOTHING(crop3.initialize());
     TS_ASSERT_THROWS_NOTHING(crop3.setPropertyValue("InputWorkspace", "point"));
@@ -310,7 +320,7 @@ public:
   void testRagged_events() {
     // Event workspace with 10 bins from 0 to 10
     EventWorkspace_sptr input =
-        WorkspaceCreationHelper::CreateEventWorkspace(5, 10, 10, 0.0, 1.0);
+        WorkspaceCreationHelper::createEventWorkspace(5, 10, 10, 0.0, 1.0);
     // Change the first X vector to 3, 4, 5 ..
     for (int k = 0; k <= 10; ++k) {
       input->dataX(0)[k] = k + 3;
@@ -348,7 +358,7 @@ public:
   void testNegativeBinBoundaries() {
     const std::string wsName("neg");
     AnalysisDataService::Instance().add(
-        wsName, WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 5, -6));
+        wsName, WorkspaceCreationHelper::create2DWorkspaceBinned(1, 5, -6));
     CropWorkspace crop4;
     TS_ASSERT_THROWS_NOTHING(crop4.initialize());
     TS_ASSERT_THROWS_NOTHING(crop4.setPropertyValue("InputWorkspace", wsName));
@@ -380,11 +390,12 @@ public:
   // Public so it can be used within ExtractSingleSpectrum test
   static void doTestWithTextAxis(Algorithm *alg) {
     Workspace2D_sptr inputWS =
-        WorkspaceCreationHelper::Create2DWorkspace(3, 10);
+        WorkspaceCreationHelper::create2DWorkspace(3, 10);
     // Change the data so we know we've cropped the correct one
     const size_t croppedIndex(1);
     const double flagged(100.0);
-    for (size_t i = 0; i < inputWS->blocksize(); ++i) {
+    const size_t numBins = inputWS->blocksize();
+    for (size_t i = 0; i < numBins; ++i) {
       inputWS->dataY(croppedIndex)[i] = flagged;
     }
     const char *labels[3] = {"Entry1", "Entry2", "Entry3"};
@@ -437,7 +448,7 @@ public:
 
   void setUp() override {
     AnalysisDataService::Instance().add(
-        "ToCrop", WorkspaceCreationHelper::CreateEventWorkspace(
+        "ToCrop", WorkspaceCreationHelper::createEventWorkspace(
                       5000, 10000, 8000, 0.0, 1.0, 3));
   }
 

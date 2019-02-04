@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDMATRIXDIALOG_H
 #define MANTIDMATRIXDIALOG_H
 
@@ -17,10 +23,10 @@ class MantidMatrixDialog : public QDialog {
 public:
   //! Constructor
   /**
-  * @param parent :: parent widget
-  * @param fl :: window flags
-  */
-  MantidMatrixDialog(QWidget *parent = 0, Qt::WFlags fl = 0);
+   * @param parent :: parent widget
+   * @param fl :: window flags
+   */
+  MantidMatrixDialog(QWidget *parent = nullptr, Qt::WFlags fl = nullptr);
   void setMatrix(MantidMatrix *m);
 
 private slots:

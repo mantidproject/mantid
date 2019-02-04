@@ -1,12 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_GEOMETRY_GENERALFRAMETEST_H_
 #define MANTID_GEOMETRY_GENERALFRAMETEST_H_
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidGeometry/MDGeometry/GeneralFrame.h"
 #include "MantidKernel/UnitLabel.h"
 #include "MantidKernel/UnitLabelTypes.h"
 #include "MantidKernel/make_unique.h"
-#include "MantidGeometry/MDGeometry/GeneralFrame.h"
 
 using Mantid::Geometry::GeneralFrame;
 using namespace Mantid::Kernel;
@@ -30,7 +36,7 @@ public:
   void test_string_unit_construction() {
     auto unit = make_unique<LabelUnit>(Units::Symbol::Metre);
     GeneralFrame frame("Distance", std::move(unit) /*sink transfer ownership*/);
-    TS_ASSERT(unit.get() == NULL);
+    TS_ASSERT(unit.get() == nullptr);
     TS_ASSERT_EQUALS(Units::Symbol::Metre, frame.getUnitLabel());
     TS_ASSERT_EQUALS("Distance", frame.name());
   }

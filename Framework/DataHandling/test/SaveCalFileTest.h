@@ -1,16 +1,23 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAHANDLING_SAVECALFILETEST_H_
 #define MANTID_DATAHANDLING_SAVECALFILETEST_H_
 
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataHandling/SaveCalFile.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
-#include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
+#include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
-#include <cxxtest/TestSuite.h>
 #include <Poco/File.h>
+#include <cxxtest/TestSuite.h>
 #include <fstream>
 #include <iosfwd>
 
@@ -42,7 +49,8 @@ public:
     groupWS->setValue(3, 45);
     offsetsWS->setValue(1, 0.123);
     offsetsWS->setValue(2, 0.456);
-    maskWS->maskWorkspaceIndex(0);
+    maskWS->getSpectrum(0).clearData();
+    maskWS->mutableSpectrumInfo().setMasked(0, true);
 
     // Name of the output workspace.
     std::string outWSName("SaveCalFileTest_OutputWS");

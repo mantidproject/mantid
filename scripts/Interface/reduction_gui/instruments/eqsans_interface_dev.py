@@ -1,10 +1,17 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 """
     This module defines the interface control for EQSANS.
     Each reduction method tab that needs to be presented is defined here.
     The actual view/layout is define in .ui files. The state of the reduction
     process is kept elsewhere (SNSReduction object)
 """
-from interface import InstrumentInterface
+from __future__ import (absolute_import, division, print_function)
+from reduction_gui.instruments.interface import InstrumentInterface
 from reduction_gui.widgets.sans.hfir_detector import DetectorWidget
 from reduction_gui.widgets.sans.eqsans_instrument import SANSInstrumentWidget
 from reduction_gui.widgets.sans.eqsans_data import DataSetsWidget
@@ -15,7 +22,6 @@ from reduction_gui.widgets.sans.sans_catalog import SANSCatalogWidget
 from reduction_gui.reduction.sans.eqsans_catalog import DataCatalog
 
 from reduction_gui.reduction.sans.eqsans_data_proxy import DataProxy
-from reduction_gui.widgets.cluster_status import RemoteJobsWidget
 
 IS_IN_MANTIDPLOT = False
 try:
@@ -30,7 +36,7 @@ class EQSANSInterface(InstrumentInterface):
     """
         Defines the widgets for EQSANS reduction
     """
-    data_type = "Data files *.nxs *.dat (*.nxs *.dat)"
+    data_type = "Data files *.nxs *.dat *.h5 (*.nxs *.dat *.h5)"
 
     def __init__(self, name, settings):
         super(EQSANSInterface, self).__init__(name, settings)
@@ -63,20 +69,10 @@ class EQSANSInterface(InstrumentInterface):
         # Reduction output
         self.attach(OutputWidget(settings = self._settings))
 
-        # Tabs that only make sense within MantidPlot
-        if IS_IN_MANTIDPLOT:
-            # Remote jobs status
-            if self.remote_resources_available():
-                self.attach(RemoteJobsWidget(settings = self._settings))
+        return
 
     def has_advanced_version(self):
         """
             Returns true if the instrument has simple and advanced views
         """
         return False
-
-    def is_cluster_enabled(self):
-        """
-            Returns true if the instrument is compatible with remote submission
-        """
-        return True

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef GAUSSIANTEST_H_
 #define GAUSSIANTEST_H_
 
@@ -52,8 +58,7 @@ public:
         new API::FunctionDomain1DVector(79292.4, 79603.6, 41));
     API::FunctionValues mockData(*domain);
     UserFunction dataMaker;
-    dataMaker.setAttributeValue("Formula", "b+h*exp(-((x-c)/s)^2)");
-    dataMaker.setParameter("b", 0);
+    dataMaker.setAttributeValue("Formula", "h*exp(-((x-c)/s)^2)");
     dataMaker.setParameter("h", 232.11);
     dataMaker.setParameter("c", 79430.1);
     dataMaker.setParameter("s", 26.14);
@@ -63,34 +68,16 @@ public:
     values->setFitDataFromCalculated(mockData);
     values->setFitWeights(1.0);
 
-    CompositeFunction_sptr fnWithBk(new CompositeFunction());
-
-    boost::shared_ptr<LinearBackground> bk =
-        boost::make_shared<LinearBackground>();
-    bk->initialize();
-
-    bk->setParameter("A0", 0.0);
-    bk->setParameter("A1", 0.0);
-    bk->tie("A1", "0");
-
     // set up Gaussian fitting function
     boost::shared_ptr<Gaussian> fn = boost::make_shared<Gaussian>();
     fn->initialize();
-    fn->setParameter("PeakCentre", 79450.0);
+    fn->setParameter("PeakCentre", 79440.0);
     fn->setParameter("Height", 200.0);
-    fn->setParameter("Sigma", 300.0);
-    BoundaryConstraint *bc =
-        new BoundaryConstraint(fn.get(), "Sigma", 20.0, 100.0);
-    // bc->setPenaltyFactor(1000.001);
-    fn->addConstraint(bc);
-
-    fnWithBk->addFunction(bk);
-    fnWithBk->addFunction(fn);
+    fn->setParameter("Sigma", 30.0);
 
     boost::shared_ptr<CostFuncLeastSquares> costFun =
         boost::make_shared<CostFuncLeastSquares>();
-    costFun->setFittingFunction(fnWithBk, domain, values);
-    // TS_ASSERT_EQUALS(costFun->nParams(),3);
+    costFun->setFittingFunction(fn, domain, values);
 
     FuncMinimisers::LevenbergMarquardtMDMinimizer s;
     s.initialize(costFun);
@@ -175,7 +162,7 @@ public:
     TS_ASSERT_DELTA(fn.intensity(), intensity, 1e-6);
     TS_ASSERT_DELTA(fn.getParameter("Height"), 0.132981, 1e-6);
 
-    fn.setParameter("Sigma", 0.0);
+    fn.setParameter("Sigma", 0.01);
     fn.applyTies();
     TS_ASSERT_DELTA(fn.intensity(), intensity, 1e-6);
 

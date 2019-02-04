@@ -1,11 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/V3D.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>
-#include <boost/python/operators.hpp>
-#include <boost/python/return_value_policy.hpp>
-#include <boost/python/return_arg.hpp>
-#include <boost/python/list.hpp>
+#include <boost/python/dict.hpp>
 #include <boost/python/errors.hpp>
+#include <boost/python/list.hpp>
+#include <boost/python/operators.hpp>
+#include <boost/python/return_arg.hpp>
+#include <boost/python/return_value_policy.hpp>
 
 using namespace boost::python;
 using Mantid::Kernel::V3D;
@@ -66,11 +74,30 @@ int getV3DLength(V3D &self) {
   UNUSED_ARG(self);
   return 3;
 }
-}
+} // namespace
+
+class V3DPickleSuite : public boost::python::pickle_suite {
+public:
+  static dict getstate(const V3D &vector) {
+    dict data;
+    data['x'] = vector.X();
+    data['y'] = vector.Y();
+    data['z'] = vector.Z();
+    return data;
+  }
+
+  static void setstate(V3D &vector, dict state) {
+    vector.setX(extract<double>(state['x']));
+    vector.setY(extract<double>(state['y']));
+    vector.setZ(extract<double>(state['z']));
+  }
+};
 
 void export_V3D() {
   // V3D class
+  GNU_DIAG_OFF("self-assign-overloaded")
   class_<V3D>("V3D", init<>("Construct a V3D at the origin"))
+      .def_pickle(V3DPickleSuite())
       .def(init<double, double, double>(
           "Construct a V3D with X,Y,Z coordinates"))
       .def("X", &V3D::X, arg("self"),
@@ -105,12 +132,16 @@ void export_V3D() {
            "Calculates the length of the vector")
       .def("norm2", &V3D::norm2, arg("self"),
            "Calculates the squared length of the vector")
-      .def("__add__", &V3D::operator+, (arg("left"), arg("right")))
+      .def("__add__", &V3D::operator+,(arg("left"), arg("right")))
       .def("__iadd__", &V3D::operator+=, return_self<>(),
            (arg("self"), arg("other")))
-      .def("__sub__", &V3D::operator-, (arg("left"), arg("right")))
+      .def("__sub__",
+           static_cast<V3D (V3D::*)(const V3D &) const>(&V3D::operator-),
+           (arg("left"), arg("right")))
       .def("__isub__", &V3D::operator-=, return_self<>(),
            (arg("self"), arg("other")))
+      .def("__neg__", static_cast<V3D (V3D::*)() const>(&V3D::operator-),
+           (arg("self")))
       .def("__len__", &getV3DLength, (arg("self")),
            "Returns the length of the vector for list-like interface. Always "
            "returns 3.")
@@ -122,12 +153,15 @@ void export_V3D() {
 
       .def(self * self)
       .def(self *= self)
+      // cppcheck-suppress duplicateExpression
       .def(self / self)
+      // cppcheck-suppress duplicateExpression
       .def(self /= self)
       .def(self * int())
       .def(self *= int())
       .def(self * double())
       .def(self *= double())
+      // cppcheck-suppress duplicateExpression
       .def(self < self)
       .def(self == self)
       .def(self != self) // must define != as Python's default is to compare
@@ -140,4 +174,5 @@ void export_V3D() {
            "Calculate direction angles from direction cosines")
       .def("directionAngles", &directionAnglesDefault, arg("self"),
            "Calculate direction angles from direction cosines");
+  GNU_DIAG_ON("self-assign-overloaded")
 }

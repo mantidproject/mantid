@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
+#include "MantidMDAlgorithms/CloneMDWorkspace.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidKernel/System.h"
 #include "MantidDataObjects/MDEventFactory.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidKernel/System.h"
 #include <Poco/File.h>
 #include <Poco/Path.h>
-#include "MantidAPI/FileProperty.h"
-#include "MantidDataObjects/MDHistoWorkspace.h"
-#include "MantidMDAlgorithms/CloneMDWorkspace.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -49,7 +55,6 @@ void CloneMDWorkspace::init() {
 template <typename MDE, size_t nd>
 void CloneMDWorkspace::doClone(
     const typename MDEventWorkspace<MDE, nd>::sptr ws) {
-  Progress prog(this, 0.0, 10.0, 100);
   BoxController_sptr bc = ws->getBoxController();
 
   if (!bc)
@@ -65,7 +70,6 @@ void CloneMDWorkspace::doClone(
     }
 
     // Generate a new filename to copy to
-    prog.report("Copying File");
     std::string originalFile = bc->getFilename();
     std::string outFilename = getPropertyValue("Filename");
     if (outFilename.empty()) {
@@ -126,5 +130,5 @@ void CloneMDWorkspace::exec() {
   }
 }
 
+} // namespace MDAlgorithms
 } // namespace Mantid
-} // namespace DataObjects

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_API_ICOLUMN_H_
 #define MANTID_API_ICOLUMN_H_
 
@@ -10,8 +16,8 @@
 #include <boost/shared_ptr.hpp>
 #endif
 #include <cstring>
-#include <string>
 #include <limits>
+#include <string>
 #include <typeinfo>
 #include <vector>
 
@@ -25,27 +31,6 @@ namespace API {
 
     \author Roman Tolchenov
     \date 31/10/2008
-
-    Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-   National Laboratory & European Spallation Source
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>.
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_API_DLL Column {
 public:
@@ -91,8 +76,17 @@ public:
     UNUSED_ARG(index);
   }
 
+  /// Read in from stream and set the value at the given index
+  virtual void read(const size_t index, std::istringstream &in) {
+    UNUSED_ARG(index)
+    UNUSED_ARG(in)
+  }
+
   /// Specialized type check
   virtual bool isBool() const = 0;
+
+  /// Are elements of the column interpretable as a number?
+  virtual bool isNumber() const = 0;
 
   /// Must return overall memory size taken by the column.
   virtual long int sizeOfData() const = 0;
@@ -221,8 +215,8 @@ MANTID_API_DLL std::ostream &operator<<(std::ostream &, const API::Boolean &);
 /// Redaing a Boolean from an input stream
 MANTID_API_DLL std::istream &operator>>(std::istream &istr, API::Boolean &);
 
-typedef boost::shared_ptr<Column> Column_sptr;
-typedef boost::shared_ptr<const Column> Column_const_sptr;
+using Column_sptr = boost::shared_ptr<Column>;
+using Column_const_sptr = boost::shared_ptr<const Column>;
 
 } // namespace API
 } // Namespace Mantid

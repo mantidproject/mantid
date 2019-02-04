@@ -1,16 +1,24 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/EventWorkspaceCollection.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
-#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidIndexing/IndexInfo.h"
+#include "MantidKernel/UnitFactory.h"
 
-#include <vector>
-#include <set>
-#include <memory>
 #include <boost/bind.hpp>
+#include <memory>
+#include <set>
+#include <unordered_set>
+#include <vector>
 
 namespace Mantid {
 namespace DataHandling {
@@ -39,7 +47,7 @@ void copyLogs(const EventWorkspace_sptr &from, EventWorkspace_sptr &to) {
     }
   }
 }
-}
+} // namespace
 
 /** Constructor
  */
@@ -47,9 +55,9 @@ EventWorkspaceCollection::EventWorkspaceCollection()
     : m_WsVec(1, createEmptyEventWorkspace()) {}
 
 /**
-* Create a blank event workspace
-* @returns A shared pointer to a new empty EventWorkspace object
-*/
+ * Create a blank event workspace
+ * @returns A shared pointer to a new empty EventWorkspace object
+ */
 EventWorkspace_sptr
 EventWorkspaceCollection::createEmptyEventWorkspace() const {
   // Create the output workspace
@@ -211,7 +219,7 @@ EventWorkspaceCollection::getDetectorIDToWorkspaceIndexVector(
   return m_WsVec[0]->getDetectorIDToWorkspaceIndexVector(offset, dothrow);
 }
 
-Kernel::DateAndTime EventWorkspaceCollection::getFirstPulseTime() const {
+Types::Core::DateAndTime EventWorkspaceCollection::getFirstPulseTime() const {
   return m_WsVec[0]->getFirstPulseTime();
 }
 void EventWorkspaceCollection::setAllX(const HistogramData::BinEdges &x) {
@@ -223,34 +231,10 @@ size_t EventWorkspaceCollection::getNumberEvents() const {
   return m_WsVec[0]->getNumberEvents(); // Should be the sum across all periods?
 }
 
-void EventWorkspaceCollection::resizeTo(const size_t size) {
-  for (auto &ws : m_WsVec) {
-    auto tmp = createWorkspace<DataObjects::EventWorkspace>(size, 2, 1);
-    WorkspaceFactory::Instance().initializeFromParent(ws, tmp, true);
-    ws = std::move(tmp);
-    for (size_t i = 0; i < ws->getNumberHistograms(); ++i)
-      ws->getSpectrum(i).setSpectrumNo(static_cast<specnum_t>(i + 1));
-  }
-}
-
-void EventWorkspaceCollection::padSpectra(const std::vector<int32_t> &padding) {
-  if (padding.empty()) {
-    const std::vector<detid_t> pixelIDs = getInstrument()->getDetectorIDs(true);
-    resizeTo(pixelIDs.size());
-    for (auto &ws : m_WsVec)
-      for (size_t i = 0; i < pixelIDs.size(); ++i)
-        ws->getSpectrum(i).setDetectorID(pixelIDs[i]);
-  } else {
-    resizeTo(padding.size());
-    for (auto &ws : m_WsVec) {
-      for (size_t i = 0; i < padding.size(); ++i) {
-        // specList ranges from 1, ..., N
-        // detector ranges from 0, ..., N-1
-        ws->getSpectrum(i).setDetectorID(padding[i] - 1);
-        ws->getSpectrum(i).setSpectrumNo(padding[i]);
-      }
-    }
-  }
+void EventWorkspaceCollection::setIndexInfo(
+    const Indexing::IndexInfo &indexInfo) {
+  for (auto &ws : m_WsVec)
+    ws = create<EventWorkspace>(*ws, indexInfo, HistogramData::BinEdges(2));
 }
 
 void EventWorkspaceCollection::setInstrument(
@@ -270,12 +254,6 @@ void EventWorkspaceCollection::updateSpectraUsing(
     const API::SpectrumDetectorMapping &map) {
   for (auto &ws : m_WsVec) {
     ws->updateSpectraUsing(map);
-  }
-}
-
-void EventWorkspaceCollection::populateInstrumentParameters() {
-  for (auto &ws : m_WsVec) {
-    ws->populateInstrumentParameters();
   }
 }
 

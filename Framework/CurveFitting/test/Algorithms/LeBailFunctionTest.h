@@ -1,14 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CURVEFITTING_LEBAILFITTEST_H_
 #define MANTID_CURVEFITTING_LEBAILFITTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidCurveFitting/Algorithms/LeBailFunction.h"
+#include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidKernel/cow_ptr.h"
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include "MantidKernel/cow_ptr.h"
 
 #include <fstream>
 
@@ -33,7 +39,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Test initialize profile number 9 (NeutronBk2BkExpConvPVoigt)
-    */
+   */
   void test_initProfNo9() {
     LeBailFunction function("ThermalNeutronBk2BkExpConvPVoigt");
     TS_ASSERT(function.isParameterValid());
@@ -187,9 +193,6 @@ public:
     const vector<double> vecX = testws->readX(0);
     const vector<double> vecY = testws->readY(0);
 
-    size_t nData = vecX.size();
-    vector<double> out(nData);
-
     // Calculate peak intensities
     vector<double> summedpeaksvalue(vecY.size(), 0.);
     lebailfunction.calculatePeaksIntensities(vecX, vecY, summedpeaksvalue);
@@ -214,8 +217,8 @@ public:
          << imax111 << "-th points.\n";
 
     // Calculate diffraction patters
-    lebailfunction.function(out, vecX, true, false);
-    TS_ASSERT_THROWS_ANYTHING(lebailfunction.function(out, vecX, true, true));
+    auto out = lebailfunction.function(vecX, true, false);
+    TS_ASSERT_THROWS_ANYTHING(lebailfunction.function(vecX, true, true));
 
     vector<string> vecbkgdparnames(2);
     vecbkgdparnames[0] = "A0";
@@ -226,7 +229,7 @@ public:
     lebailfunction.addBackgroundFunction("Polynomial", 2, vecbkgdparnames,
                                          bkgdvec, vecX.front(), vecX.back());
 
-    lebailfunction.function(out, vecX, true, true);
+    out = lebailfunction.function(vecX, true, true);
 
     double v1 = out[imax111];
     double v2 = out[imax110];
@@ -331,23 +334,17 @@ public:
     // Add peak parameters
     map<string, double> parammap
 
-        {{"Dtt1", 16370.650},
-         {"Dtt2", 0.10},
+        {{"Dtt1", 16370.650},    {"Dtt2", 0.10},
          {"Zero", 0.0},
 
-         {"Alph0", 1.0},
-         {"Alph1", 0.0},
-         {"Beta0", 0.109036},
-         {"Beta1", 0.009834},
+         {"Alph0", 1.0},         {"Alph1", 0.0},
+         {"Beta0", 0.109036},    {"Beta1", 0.009834},
 
-         {"Sig2", sqrt(91.127)},
-         {"Sig1", sqrt(1119.230)},
+         {"Sig2", sqrt(91.127)}, {"Sig1", sqrt(1119.230)},
          {"Sig0", sqrt(0.0)},
 
-         {"Gam0", 0.0},
-         {"Gam1", 7.688},
-         {"Gam2", 0.0},
-         {"LatticeConstant", 5.431363}};
+         {"Gam0", 0.0},          {"Gam1", 7.688},
+         {"Gam2", 0.0},          {"LatticeConstant", 5.431363}};
 
     lebailfunction.setProfileParameterValues(parammap);
 
@@ -392,7 +389,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Create a test data workspace
-    */
+   */
   MatrixWorkspace_sptr createDataWorkspace(int option) {
     // Create vectors
     std::vector<double> vecX;
@@ -518,10 +515,10 @@ public:
         1.950190,    1.613562,    1.335208,    1.104734,    0.914043,
         0.756362,    0.000000};
 
-    for (size_t i = 0; i < vecY.size(); ++i) {
+    for (double y : vecY) {
       double e = 1.0;
-      if (vecY[i] > 1.0)
-        e = sqrt(vecY[i]);
+      if (y > 1.0)
+        e = sqrt(y);
       vecE.push_back(e);
     }
 
@@ -690,8 +687,8 @@ public:
     vecy.push_back(0.03096179);
     vece.push_back(0.00105191);
 
-    for (size_t i = 0; i < vecy.size(); ++i)
-      vecy[i] -= 0.02295189;
+    for (double &i : vecy)
+      i -= 0.02295189;
 
     return;
   }

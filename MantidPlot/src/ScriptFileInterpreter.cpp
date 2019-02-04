@@ -1,7 +1,13 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "ScriptFileInterpreter.h"
+#include "MantidQtWidgets/Common/ScriptEditor.h"
 #include "ScriptOutputDisplay.h"
 #include "ScriptingEnv.h"
-#include "MantidQtMantidWidgets/ScriptEditor.h"
 #include <QAction>
 #include <QFileInfo>
 #include <QFontDatabase>
@@ -9,7 +15,7 @@
 #include <QMessageBox>
 #include <QPushButton>
 #include <QVBoxLayout>
-#include <qscilexer.h>
+#include <Qsci/qscilexer.h>
 
 #include <stdexcept>
 
@@ -24,7 +30,7 @@
 ScriptFileInterpreter::ScriptFileInterpreter(QWidget *parent,
                                              const QString &settingsGroup)
     : QWidget(parent), m_splitter(new QSplitter(Qt::Vertical, this)),
-      m_editor(new ScriptEditor(this, NULL, settingsGroup)),
+      m_editor(new ScriptEditor(this, nullptr, settingsGroup)),
       m_messages(new ScriptOutputDisplay), m_status(new QStatusBar),
       m_runner() {
 
@@ -76,7 +82,7 @@ void ScriptFileInterpreter::tabsToSpaces() {
     spaces = spaces + " ";
 
   text = text.replace("\t", spaces, Qt::CaseInsensitive);
-  replaceSelectedText(m_editor, text);
+  m_editor->replaceSelectedText(text);
 }
 
 /// Convert spaces in selection to tabs
@@ -96,7 +102,7 @@ void ScriptFileInterpreter::spacesToTabs() {
     spaces = spaces + " ";
 
   text = text.replace(spaces, "\t", Qt::CaseInsensitive);
-  replaceSelectedText(m_editor, text);
+  m_editor->replaceSelectedText(text);
 }
 
 /// Set a font
@@ -211,23 +217,8 @@ void ScriptFileInterpreter::toggleComment(bool addComment) {
 
   m_editor->setSelection(selFromLine, 0, selToLine,
                          m_editor->lineLength(selToLine));
-  replaceSelectedText(m_editor, replacementText);
+  m_editor->replaceSelectedText(replacementText);
   m_editor->setCursorPosition(selFromLine, selFromInd);
-}
-
-// Replaces the currently selected text in the editor
-// Reimplementation of .replaceSelectedText from QScintilla. Added as osx + rhel
-// builds are
-// using an older version(2.4.6) of the library missing the method, and too
-// close to code freeze to update.
-inline void
-ScriptFileInterpreter::replaceSelectedText(const ScriptEditor *editor,
-                                           const QString &text) {
-  int UTF8_CodePage = 65001;
-  const char *b = ((editor->SCI_GETCODEPAGE == UTF8_CodePage)
-                       ? text.toUtf8().constData()
-                       : text.toLatin1().constData());
-  editor->SendScintilla(editor->SCI_REPLACESEL, b);
 }
 
 /**
@@ -365,9 +356,9 @@ void ScriptFileInterpreter::showFindReplaceDialog() {
  * Execute the whole script in the editor. Always clears the contents of the
  * local variable dictionary first.
  */
-void ScriptFileInterpreter::executeAll(const Script::ExecutionMode mode) {
+bool ScriptFileInterpreter::executeAll(const Script::ExecutionMode mode) {
   m_runner->clearLocals();
-  executeCode(ScriptCode(m_editor->text()), mode);
+  return executeCode(ScriptCode(m_editor->text()), mode);
 }
 
 /**
@@ -526,20 +517,25 @@ bool ScriptFileInterpreter::readFileIntoEditor(const QString &filename) {
  * Use the current Script object to execute the code asynchronously
  * @param code :: The code string to run
  */
-void ScriptFileInterpreter::executeCode(const ScriptCode &code,
+bool ScriptFileInterpreter::executeCode(const ScriptCode &code,
                                         const Script::ExecutionMode mode) {
   if (code.isEmpty())
-    return;
+    // This cannot fail
+    return true;
   if (mode == Script::Asynchronous) {
     try {
       m_runner->executeAsync(code);
+      // Best attempt at returning a status
+      return true;
     } catch (std::runtime_error &exc) {
       QMessageBox::critical(this, "MantidPlot", exc.what());
+      return false; // To silence the compiler despite being useless
     }
   } else if (mode == Script::Serialised) {
-    m_runner->execute(code);
+    return m_runner->execute(code);
   } else {
     QMessageBox::warning(this, "MantidPlot", "Unknown script execution mode");
+    return false;
   }
 }
 

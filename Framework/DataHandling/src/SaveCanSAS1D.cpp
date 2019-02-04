@@ -1,23 +1,27 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/SaveCanSAS1D.h"
 
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 
-#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/Instrument.h"
 
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/Exception.h"
-#include "MantidKernel/MantidVersion.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/MantidVersion.h"
 
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/trim.hpp>
 #include <boost/shared_ptr.hpp>
 
-//-----------------------------------------------------------------------------
 namespace {
 void encode(std::string &data) {
   std::string buffer;
@@ -47,7 +51,7 @@ void encode(std::string &data) {
 
   data.swap(buffer);
 }
-}
+} // namespace
 
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
@@ -70,18 +74,25 @@ void SaveCanSAS1D::init() {
                       "Filename", "", API::FileProperty::Save, ".xml"),
                   "The name of the xml file to save");
 
-  std::vector<std::string> radiation_source{
-      "Spallation Neutron Source", "Pulsed Reactor Neutron Source",
-      "Reactor Neutron Source", "Synchrotron X-ray Source",
-      "Pulsed Muon Source", "Rotating Anode X-ray", "Fixed Tube X-ray",
-      "neutron", "x-ray", "muon", "electron"};
+  std::vector<std::string> radiation_source{"Spallation Neutron Source",
+                                            "Pulsed Reactor Neutron Source",
+                                            "Reactor Neutron Source",
+                                            "Synchrotron X-ray Source",
+                                            "Pulsed Muon Source",
+                                            "Rotating Anode X-ray",
+                                            "Fixed Tube X-ray",
+                                            "neutron",
+                                            "x-ray",
+                                            "muon",
+                                            "electron"};
   declareProperty(
       "RadiationSource", "Spallation Neutron Source",
       boost::make_shared<Kernel::StringListValidator>(radiation_source),
       "The type of radiation used.");
-  declareProperty("Append", false, "Selecting append allows the workspace to "
-                                   "be added to an existing canSAS 1-D file as "
-                                   "a new SASentry");
+  declareProperty("Append", false,
+                  "Selecting append allows the workspace to "
+                  "be added to an existing canSAS 1-D file as "
+                  "a new SASentry");
   declareProperty("Process", "", "Text to append to Process section");
   declareProperty("DetectorNames", "",
                   "Specify in a comma separated list, which detectors to store "
@@ -92,7 +103,9 @@ void SaveCanSAS1D::init() {
 
   // Collimation information
   std::vector<std::string> collimationGeometry{
-      "Cylinder", "Flat plate", "Disc",
+      "Cylinder",
+      "Flat plate",
+      "Disc",
   };
   declareProperty(
       "Geometry", "Disc",
@@ -436,14 +449,14 @@ void SaveCanSAS1D::createSASDataElement(std::string &sasData) {
   std::string sasIBlockData;
   std::string sasIHistData;
   for (size_t i = 0; i < m_workspace->getNumberHistograms(); ++i) {
-    auto intensities = m_workspace->points(i);
+    const auto intensities = m_workspace->points(i);
     auto intensityDeltas = m_workspace->pointStandardDeviations(i);
     if (!intensityDeltas)
       intensityDeltas =
           HistogramData::PointStandardDeviations(intensities.size(), 0.0);
-    const MantidVec &ydata = m_workspace->readY(i);
-    const MantidVec &edata = m_workspace->readE(i);
-    for (size_t j = 0; j < m_workspace->blocksize(); ++j) {
+    const auto &ydata = m_workspace->y(i);
+    const auto &edata = m_workspace->e(i);
+    for (size_t j = 0; j < ydata.size(); ++j) {
       // x data is the QData in xml.If histogramdata take the mean
       std::stringstream x;
       x << intensities[j];
@@ -578,7 +591,7 @@ void SaveCanSAS1D::createSASDetectorElement(std::string &sasDet) {
     } else {
       g_log.notice() << "Detector with name " << detectorName
                      << " does not exist in the instrument of the workspace: "
-                     << m_workspace->name() << '\n';
+                     << m_workspace->getName() << '\n';
     }
   }
 }
@@ -640,10 +653,28 @@ void SaveCanSAS1D::createSASProcessElement(std::string &sasProcess) {
 }
 
 /** This method creates an XML element named "SASinstrument"
-*  @param sasInstrument :: string for sasinstrument element in the xml
-*/
+ *
+ * The structure for required(r) parts of the SASinstrument and the parts
+ * we want to add is:
+ *
+ * SASinstrument
+ *   name(r)
+ *   SASsource(r)
+ *     radiation(r)
+ *   SAScollimation(r)
+ *     aperature[name]
+ *       size
+ *         x[units]
+ *         y[units]
+ *   SASdetector
+ *     name
+ *
+ *  @param sasInstrument :: string for sasinstrument element in the xml
+ */
 void SaveCanSAS1D::createSASInstrument(std::string &sasInstrument) {
   sasInstrument = "\n\t\t<SASinstrument>";
+
+  // Set name(r)
   std::string sasInstrName = "\n\t\t\t<name>";
   std::string instrname = m_workspace->getInstrument()->getName();
   // look for xml special characters and replace with entity refrence
@@ -652,10 +683,12 @@ void SaveCanSAS1D::createSASInstrument(std::string &sasInstrument) {
   sasInstrName += "</name>";
   sasInstrument += sasInstrName;
 
+  // Set SASsource(r)
   std::string sasSource;
   createSASSourceElement(sasSource);
   sasInstrument += sasSource;
 
+  // Set SAScollimation(r)
   // Add the collimation. We add the collimation information if
   // either the width of the height is different from 0
   double collimationHeight = getProperty("SampleHeight");
@@ -663,23 +696,33 @@ void SaveCanSAS1D::createSASInstrument(std::string &sasInstrument) {
   std::string sasCollimation = "\n\t\t\t<SAScollimation/>";
   if (collimationHeight > 0 || collimationWidth > 0) {
     sasCollimation = "\n\t\t\t<SAScollimation>";
-    // Geometry
+
+    // aperture with name
     std::string collimationGeometry = getProperty("Geometry");
-    sasCollimation += "\n\t\t\t\t<name>" + collimationGeometry + "</name>";
-    // Width
     sasCollimation +=
-        "\n\t\t\t\t<X unit=\"mm\">" + std::to_string(collimationWidth) + "</X>";
+        "\n\t\t\t\t<aperture name=\"" + collimationGeometry + "\">";
+
+    // size
+    sasCollimation += "\n\t\t\t\t\t<size>";
+
+    // Width
+    sasCollimation += "\n\t\t\t\t\t\t<x unit=\"mm\">" +
+                      std::to_string(collimationWidth) + "</x>";
     // Height
-    sasCollimation += "\n\t\t\t\t<Y unit=\"mm\">" +
-                      std::to_string(collimationHeight) + "</Y>";
+    sasCollimation += "\n\t\t\t\t\t\t<y unit=\"mm\">" +
+                      std::to_string(collimationHeight) + "</y>";
+
+    sasCollimation += "\n\t\t\t\t\t</size>";
+    sasCollimation += "\n\t\t\t\t</aperture>";
     sasCollimation += "\n\t\t\t</SAScollimation>";
   }
   sasInstrument += sasCollimation;
 
+  // Set SASdetector
   std::string sasDet;
   createSASDetectorElement(sasDet);
   sasInstrument += sasDet;
   sasInstrument += "\n\t\t</SASinstrument>";
 }
-}
-}
+} // namespace DataHandling
+} // namespace Mantid

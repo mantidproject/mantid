@@ -1,12 +1,19 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
 """
     Verifies that a calibration file can be loaded once and reused to apply, using CopyInstrumentParameters, the same calibration
     in successive reductions.
 """
-import stresstesting
+from __future__ import (absolute_import, division, print_function)
+import systemtesting
 
 
-class ReuseExistingCalibration(stresstesting.MantidStressTest):
+class ReuseExistingCalibration(systemtesting.MantidSystemTest):
     det_pos_first_run = None
     det_pos_second_run = None
 
@@ -36,5 +43,5 @@ class ReuseExistingCalibration(stresstesting.MantidStressTest):
         if self.det_pos_second_run == self.det_pos_first_run:
             return True
         else:
-            print "Error: Detector position is not the same after the second reduction!"
+            print("Error: Detector position is not the same after the second reduction!")
             return False

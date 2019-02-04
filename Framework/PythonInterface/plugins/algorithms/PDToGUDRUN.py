@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
 from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
@@ -14,6 +20,9 @@ class PDToGUDRUN(DataProcessorAlgorithm):
 
     def category(self):
         return "Workflow\\Diffraction"
+
+    def seeAlso(self):
+        return [ "PDToPDFgetN" ]
 
     def name(self):
         return "PDToGUDRUN"
@@ -181,6 +190,7 @@ class PDToGUDRUN(DataProcessorAlgorithm):
                     startProgress=0.9, endProgress=1.0)
 
         self.setProperty("OutputWorkspace", wksp)
+
 
 # Register algorithm with Mantid.
 AlgorithmFactory.subscribe(PDToGUDRUN)

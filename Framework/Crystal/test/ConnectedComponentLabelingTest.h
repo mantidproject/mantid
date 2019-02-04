@@ -1,18 +1,24 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CRYSTAL_CONNECTEDCOMPONENTLABELINGTEST_H_
 #define MANTID_CRYSTAL_CONNECTEDCOMPONENTLABELINGTEST_H_
 
+#include <algorithm>
+#include <boost/scoped_ptr.hpp>
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 #include <set>
-#include <algorithm>
-#include <boost/scoped_ptr.hpp>
 
-#include "MantidAPI/IMDIterator.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/Progress.h"
-#include "MantidCrystal/ConnectedComponentLabeling.h"
 #include "MantidCrystal/BackgroundStrategy.h"
+#include "MantidCrystal/ConnectedComponentLabeling.h"
 #include "MantidCrystal/HardThresholdBackground.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MockObjects.h"
@@ -48,7 +54,7 @@ connection_workspace_to_set_of_labels(IMDHistoWorkspace const *const ws) {
   }
   return unique_values;
 }
-}
+} // namespace
 
 //=====================================================================================
 // Functional Tests
@@ -410,9 +416,8 @@ public:
                              clusterThreeIndexes.end());
 
     // Add elevated signal to the workspace at cluster indexes.
-    for (auto it = allClusterIndexes.begin(); it != allClusterIndexes.end();
-         ++it) {
-      inWS->setSignalAt(*it, raisedSignal);
+    for (auto &clusterIndex : allClusterIndexes) {
+      inWS->setSignalAt(clusterIndex, raisedSignal);
     }
 
     // ---------- Run the cluster finding
@@ -450,7 +455,8 @@ public:
         std::stringstream stream;
         stream << "Linear index: " << i
                << " should be labeled. Actually labeled with: " << actualValue;
-        TSM_ASSERT(stream.str(), outWS->getSignalAt(i) >= labelingId)
+        TSM_ASSERT(stream.str(),
+                   outWS->getSignalAt(i) >= static_cast<double>(labelingId))
         // Background is marked as -1.
       } else {
         TSM_ASSERT_EQUALS("Should not be labeled", outWS->getSignalAt(i),

@@ -15,10 +15,10 @@ Units are a set of small classes in Mantid that define a unit of measure, and th
 The Unit Factory is a :ref:`Dynamic Factory <Dynamic Factory>` that creates
 and hands out instances of Mantid Unit objects.
 
-Available units
----------------
+Available TOF Convertible units
+-------------------------------
 
-The following units are available in the default Mantid distribution.
+The following units are available in the default Mantid distribution. These units are TOF convertible.
 
 +-------------------------------------------+---------------------------------+-----------------------------+------------------------------------------------------------------------------------------------------------------+
 | Name                                      | ID (as known by Unit Factory)   | Unit                        | Relevant equation                                                                                                |
@@ -49,6 +49,9 @@ The following units are available in the default Mantid distribution.
 | Spin Echo Time                            | SpinEchoTime                    | :math:`ns`                  | | :math:`constant \times \lambda^3`                                                                              |
 |                                           |                                 |                             | |  The constant is supplied in eFixed                                                                            |
 +-------------------------------------------+---------------------------------+-----------------------------+------------------------------------------------------------------------------------------------------------------+
+| d-spacingPerpendicular                    | dSpacingPerpendicular           | :math:`\mathrm{\AA}`        | :math:`d_{\perp} = \sqrt{\lambda^2 - 2\log\cos\theta}`                                                           |
++-------------------------------------------+---------------------------------+-----------------------------+------------------------------------------------------------------------------------------------------------------+
+
 
 Where :math:`L_1` and :math:`L_2` are sample to the source and sample to
 detector distances respectively, :math:`L_{tot} = L_1+L_2` and
@@ -58,12 +61,33 @@ here is the Bragg scattering angle (e.g. half of the
 Mantid z-axis)
 
 **Note on Wavelength**: If the emode property in
-:ref: `ConvertUnits <algm-ConvertUnits>`
+:ref:`ConvertUnits <algm-ConvertUnits>`
 is specified as inelastic Direct/Indirect (inelastic) then the
 conversion to wavelength will take into account the fixed initial/final
 energy respectively. Units conversion into elastic momentum transfer
 (MomentumTransfer) will throw in elastic mode (emode=0) on inelastic
 workspace (when energy transfer is specified along x-axis)
+
+**d-spacingPerpendicular** is a unit invented in `J. Appl. Cryst. (2015) 48, pp. 1627--1636 <https://doi.org/10.1107/S1600576715016520>`_ for 2D Rietveld refinement
+of angular and wavelength-dispersive neutron time-of-flight powder diffraction data. Together with the d-Spacing :math:`d`,
+d-SpacingPerpendicular :math:`d_{\perp}` forms a new orthogonal coordinate system.
+
+Available non-TOF Convertible units
+-----------------------------------
+
+The following units are available in the default Mantid distribution. These units cannot be converted to or from TOF.
+
++-------------------------------------------+---------------------------------+-----------------------------+------------------------------------------------------------------------------------------------------------------+
+| Name                                      | ID (as known by Unit Factory)   | Unit                        | Description                                                                                                      |
++===========================================+=================================+=============================+==================================================================================================================+
+|                                           | Empty                           | No unit                     | An empty label                                                                                                   |
++-------------------------------------------+---------------------------------+-----------------------------+------------------------------------------------------------------------------------------------------------------+
+| t                                         | Time                            | :math:`s`                   | An independent unit of time not related to energy or TOF                                                         |
++-------------------------------------------+---------------------------------+-----------------------------+------------------------------------------------------------------------------------------------------------------+
+| Scattering angle                          | Degrees                         | :math:`degrees`             | Degrees is a measurement of angular position                                                                     |
++-------------------------------------------+---------------------------------+-----------------------------+------------------------------------------------------------------------------------------------------------------+
+| Temperature                               | Temperature                     | :math:`K`                   | Temperature in Kelvin                                                                                            |
++-------------------------------------------+---------------------------------+-----------------------------+------------------------------------------------------------------------------------------------------------------+
 
 
 Working with Units in Python
@@ -80,14 +104,14 @@ Units on MatrixWorkspaces are accessed via the Axis.
   ws = CreateSampleWorkspace()
   for i in range(ws.axes()):
       axis = ws.getAxis(i)
-      print "Axis {0} is a {1}{2}{3}".format(i,
+      print("Axis {0} is a {1}{2}{3}".format(i,
                                              "Spectrum Axis" if axis.isSpectra() else "",
                                              "Text Axis" if axis.isText() else "",
-                                             "Numeric Axis" if axis.isNumeric() else "")
+                                             "Numeric Axis" if axis.isNumeric() else ""))
 
       unit = axis.getUnit()
-      print "\t caption:{0}".format(unit.caption())
-      print "\t symbol:{0}".format(unit.symbol())
+      print("\t caption:{0}".format(unit.caption()))
+      print("\t symbol:{0}".format(unit.symbol()))
 
 Output:
 
@@ -114,8 +138,8 @@ Setting the axisLabel to a Label of your choice
   axis.setUnit("Label").setLabel('Temperature', 'K')
 
   unit = axis.getUnit()
-  print "New caption:{0}".format(unit.caption())
-  print "New symbol:{0}".format(unit.symbol())
+  print("New caption:{0}".format(unit.caption()))
+  print("New symbol:{0}".format(unit.symbol()))
 
 Output:
 

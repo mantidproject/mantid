@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_API_IALGORITHM_H_
 #define MANTID_API_IALGORITHM_H_
 
@@ -11,7 +17,7 @@
 namespace Poco {
 class AbstractObserver;
 template <class T> class ActiveResult;
-}
+} // namespace Poco
 
 namespace Mantid {
 namespace API {
@@ -21,7 +27,7 @@ namespace API {
  *  we need a way of uniquely identifying managed algorithms. It can be
  * AlgorithmID.
  */
-typedef void *AlgorithmID;
+using AlgorithmID = void *;
 
 /**
  IAlgorithm is the interface implemented by the Algorithm base class.
@@ -32,27 +38,6 @@ typedef void *AlgorithmID;
  @author Based on the Gaudi class of the same name (see
  http://proj-gaudi.web.cern.ch/proj-gaudi/)
  @date 11/09/2007
-
- Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
- National Laboratory & European Spallation Source
-
- This file is part of Mantid.
-
- Mantid is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 3 of the License, or
- (at your option) any later version.
-
- Mantid is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License
- along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
- File change history is stored at: <https://github.com/mantidproject/mantid>.
- Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 class MANTID_API_DLL IAlgorithm : virtual public Kernel::IPropertyManager {
 public:
@@ -77,8 +62,15 @@ public:
   /// Function to return the separator token for the category string
   virtual const std::string categorySeparator() const = 0;
 
+  /// Function to return all of the seeAlso algorithms related to this algorithm
+  virtual const std::vector<std::string> seeAlso() const = 0;
+
   /// function to return any aliases of the algorithm.
   virtual const std::string alias() const = 0;
+
+  /// function to return an optional URL for documentation.
+  /// Override if the algorithm is not part of the Mantid distribution
+  virtual const std::string helpURL() const = 0;
 
   /** @name Algorithms As Methods */
   ///@{
@@ -133,6 +125,9 @@ public:
 
   /// To query whether algorithm is a child. Default to false
   virtual bool isChild() const = 0;
+
+  /// To query whether the output is stored in the analysis data service.
+  virtual bool getAlwaysStoreInADS() const = 0;
 
   /** To set whether algorithm is a child.
    *  @param isChild :: True - the algorithm is a child algorithm.  False - this

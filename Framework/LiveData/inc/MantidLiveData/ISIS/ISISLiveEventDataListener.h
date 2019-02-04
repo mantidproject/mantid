@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_LIVEDATA_ISISLIVEEVENTDATALISTENER_H_
 #define MANTID_LIVEDATA_ISISLIVEEVENTDATALISTENER_H_
 
@@ -6,26 +12,26 @@
 //----------------------------------------------------------------------
 #include "MantidLiveData/ISIS/TCPEventStreamDefs.h"
 
-#include "MantidAPI/ILiveListener.h"
+#include "MantidAPI/LiveListener.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
 #include "Poco/Net/StreamSocket.h"
 #include <Poco/Runnable.h>
 #include <Poco/Thread.h>
-#include <mutex>
 #include <map>
+#include <mutex>
 
 // Time we'll wait on a receive call (in seconds)
 const long RECV_TIMEOUT = 30;
 // Sleep time in case we need to wait for the data to become available (in
 // milliseconds)
-const long RECV_WAIT = 1;
+const long RECV_WAIT = 10;
 
 //----------------------------------------------------------------------
 // Forward declarations
 //----------------------------------------------------------------------
 struct idc_info;
-typedef struct idc_info *idc_handle_t;
+using idc_handle_t = struct idc_info *;
 
 namespace Mantid {
 namespace LiveData {
@@ -34,26 +40,8 @@ namespace LiveData {
    to
     instrument data acquisition systems (DAS) for retrieval of 'live' data into
    Mantid.
-
-    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-   National Laboratory & European Spallation Source
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-class ISISLiveEventDataListener : public API::ILiveListener,
+class ISISLiveEventDataListener : public API::LiveListener,
                                   public Poco::Runnable {
 public:
   /// Constructor.
@@ -95,7 +83,8 @@ public:
    *                   The value of 'now' is zero for compatibility with the SNS
    * live stream.
    */
-  void start(Kernel::DateAndTime startTime = Kernel::DateAndTime()) override;
+  void start(
+      Types::Core::DateAndTime startTime = Types::Core::DateAndTime()) override;
 
   /** Get the data that's been buffered since the last call to this method
    *  (or since start() was called).
@@ -147,7 +136,7 @@ protected:
   void initEventBuffer(const TCPStreamEventDataSetup &setup);
   // Save received event data in the buffer workspace
   void saveEvents(const std::vector<TCPStreamEventNeutron> &data,
-                  const Kernel::DateAndTime &pulseTime, size_t period);
+                  const Types::Core::DateAndTime &pulseTime, size_t period);
   // Set the spectra-detector map
   void loadSpectraMap();
   // Load the instrument
@@ -163,6 +152,8 @@ protected:
   void Receive(T &buffer, const std::string &head, const std::string &msg) {
     long timeout = 0;
     while (m_socket.available() < static_cast<int>(sizeof(buffer))) {
+      if (m_stopThread)
+        return;
       Poco::Thread::sleep(RECV_WAIT);
       timeout += RECV_WAIT;
       if (timeout > RECV_TIMEOUT * 1000)
@@ -189,7 +180,7 @@ protected:
   /// Thread that reads events from the DAE in the background
   Poco::Thread m_thread;
   /// background thread checks this periodically.  If true, the thread exits
-  bool m_stopThread;
+  std::atomic<bool> m_stopThread;
   /// Holds on to any exceptions that were thrown in the background thread so
   /// that we
   /// can re-throw them in the forground thread
@@ -200,7 +191,7 @@ protected:
   /// Protects m_eventBuffer
   std::mutex m_mutex;
   /// Run start time
-  Kernel::DateAndTime m_startTime;
+  Types::Core::DateAndTime m_startTime;
   /// Run number
   int m_runNumber;
 

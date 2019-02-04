@@ -1,15 +1,23 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CorrectToFile.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 
 namespace Mantid {
 namespace Algorithms {
-using namespace Mantid::API;
+using namespace API;
+using namespace DataObjects;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CorrectToFile)
@@ -48,9 +56,7 @@ void CorrectToFile::exec() {
   MatrixWorkspace_sptr rkhInput = loadInFile(getProperty("Filename"));
   // Only create the output workspace if it's not the same as the input one
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
-  if (outputWS != toCorrect) {
-    outputWS = WorkspaceFactory::Instance().create(toCorrect);
-  }
+  outputWS = create<HistoWorkspace>(*toCorrect);
   const std::string operation = getProperty("WorkspaceOperation");
 
   if (getPropertyValue("FirstColumnValue") == "SpectrumNumber") {
@@ -155,10 +161,10 @@ void CorrectToFile::exec() {
   setProperty("Outputworkspace", outputWS);
 }
 /** Load in the RKH file for that has the correction information
-*  @param corrFile :: the name of the correction to load
-*  @return workspace containing the loaded data
-*  @throw runtime_error if load algorithm fails
-*/
+ *  @param corrFile :: the name of the correction to load
+ *  @return workspace containing the loaded data
+ *  @throw runtime_error if load algorithm fails
+ */
 MatrixWorkspace_sptr CorrectToFile::loadInFile(const std::string &corrFile) {
   g_log.information() << "Loading file " << corrFile << '\n';
   progress(0, "Loading file");
@@ -175,13 +181,13 @@ MatrixWorkspace_sptr CorrectToFile::loadInFile(const std::string &corrFile) {
   return loadRKH->getProperty("OutputWorkspace");
 }
 /** Multiply or divide the input workspace as specified by the user
-*  @param[in] lhs the first input workspace
-*  @param[in] rhs the last input workspace
-*  @param[in] algName the name of the algorithm to use on the input files
-*  @param[out] result the output workspace
-*  @throw NotFoundError if requested algorithm requested doesn't exist
-*  @throw runtime_error if algorithm encounters an error
-*/
+ *  @param[in] lhs the first input workspace
+ *  @param[in] rhs the last input workspace
+ *  @param[in] algName the name of the algorithm to use on the input files
+ *  @param[out] result the output workspace
+ *  @throw NotFoundError if requested algorithm requested doesn't exist
+ *  @throw runtime_error if algorithm encounters an error
+ */
 void CorrectToFile::doWkspAlgebra(API::MatrixWorkspace_sptr lhs,
                                   API::MatrixWorkspace_sptr rhs,
                                   const std::string &algName,
@@ -209,5 +215,5 @@ void CorrectToFile::doWkspAlgebra(API::MatrixWorkspace_sptr lhs,
   result = algebra->getProperty("OutputWorkspace");
   g_log.debug() << algName << " complete\n";
 }
-}
-}
+} // namespace Algorithms
+} // namespace Mantid

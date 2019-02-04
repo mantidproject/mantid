@@ -27,22 +27,22 @@
  *                                                                         *
  ***************************************************************************/
 #include "MdiSubWindow.h"
-#include "FloatingWindow.h"
 #include "ApplicationWindow.h"
+#include "FloatingWindow.h"
 #include "Folder.h"
 
-#include "MantidQtAPI/IProjectSerialisable.h"
+#include "MantidQtWidgets/Common/IProjectSerialisable.h"
 
 #include <QApplication>
-#include <QMessageBox>
-#include <QEvent>
 #include <QCloseEvent>
-#include <QString>
 #include <QDateTime>
-#include <QMenu>
-#include <QTextStream>
-#include <QTemporaryFile>
+#include <QEvent>
 #include <QMdiArea>
+#include <QMenu>
+#include <QMessageBox>
+#include <QString>
+#include <QTemporaryFile>
+#include <QTextStream>
 
 #include <fstream>
 #include <string>
@@ -63,7 +63,7 @@ MdiSubWindow::MdiSubWindow(QWidget *parent, const QString &label,
 }
 
 MdiSubWindow::MdiSubWindow()
-    : MdiSubWindowParent_t(nullptr, 0), d_app(nullptr), d_folder(nullptr),
+    : MdiSubWindowParent_t(nullptr, nullptr), d_app(nullptr), d_folder(nullptr),
       d_label(""), d_status(Normal), d_caption_policy(Both),
       d_confirm_close(true),
       d_birthdate(QDateTime::currentDateTime().toString(Qt::LocalDate)),
@@ -91,6 +91,7 @@ void MdiSubWindow::init(QWidget *parent, const QString &label,
             SLOT(changeToFloating(MdiSubWindow *)));
   }
 }
+
 void MdiSubWindow::updateCaption() {
   switch (d_caption_policy) {
   case Name:
@@ -133,9 +134,15 @@ MdiSubWindow::loadFromProject(const std::string &lines, ApplicationWindow *app,
 
 std::string MdiSubWindow::saveToProject(ApplicationWindow *app) {
   Q_UNUSED(app);
-  throw std::runtime_error(
-      "SaveToProject not implemented for raw MdiSubWindow");
+  // By default this is unimplemented and so should return nothing
+  return "";
 }
+
+std::vector<std::string> MdiSubWindow::getWorkspaceNames() { return {}; }
+
+std::string MdiSubWindow::getWindowName() { return objectName().toStdString(); }
+
+std::string MdiSubWindow::getWindowType() { return metaObject()->className(); }
 
 void MdiSubWindow::resizeEvent(QResizeEvent *e) {
   emit resizedWindow(this);
@@ -215,7 +222,7 @@ void MdiSubWindow::undock() {
  * @return True if the subwindow is undocked
  */
 bool MdiSubWindow::isFloating() const {
-  return (this->getFloatingWindow() != NULL);
+  return (this->getFloatingWindow() != nullptr);
 }
 
 /**
@@ -229,7 +236,7 @@ void MdiSubWindow::dock() {
  * @return True if the subwindow is docked to the MDI area
  */
 bool MdiSubWindow::isDocked() const {
-  return (this->getDockedWindow() != NULL);
+  return (this->getDockedWindow() != nullptr);
 }
 
 /**
@@ -246,10 +253,11 @@ void MdiSubWindow::closeEvent(QCloseEvent *e) {
 
   // If you need to confirm the close, ask the user
   if (d_confirm_close) {
-    result = QMessageBox::information(
-        this, tr("MantidPlot"), tr("Do you want to hide or delete") +
-                                    "<p><b>'" + objectName() + "'</b> ?",
-        tr("Delete"), tr("Hide"), tr("Cancel"), 0, 2);
+    result =
+        QMessageBox::information(this, tr("MantidPlot"),
+                                 tr("Do you want to hide or delete") +
+                                     "<p><b>'" + objectName() + "'</b> ?",
+                                 tr("Delete"), tr("Hide"), tr("Cancel"), 0, 2);
   }
 
   switch (result) {
@@ -512,7 +520,7 @@ QString MdiSubWindow::parseMacAsciiFile(const QString &fname,
  */
 FloatingWindow *MdiSubWindow::getFloatingWindow() const {
   if (!parent() || !parent()->parent())
-    return NULL;
+    return nullptr;
   return dynamic_cast<FloatingWindow *>(parent()->parent());
 }
 
@@ -522,7 +530,7 @@ FloatingWindow *MdiSubWindow::getFloatingWindow() const {
  */
 QMdiSubWindow *MdiSubWindow::getDockedWindow() const {
   if (!parent())
-    return NULL;
+    return nullptr;
   return dynamic_cast<QMdiSubWindow *>(parent());
 }
 

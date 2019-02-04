@@ -1,10 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_COMMENTTEST_H_
 #define MANTID_ALGORITHMS_COMMENTTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/Comment.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidAPI/WorkspaceHistory.h"
+#include "MantidAlgorithms/Comment.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::API;
@@ -25,10 +32,10 @@ public:
   void test_exec() {
     std::string wsName = "CommentTest_Exec_workspace";
     // Create test input
-    auto ws = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+    auto ws = WorkspaceCreationHelper::create2DWorkspace(10, 10);
     AnalysisDataService::Instance().add(wsName, ws);
     // and an identical ws for comparison later
-    auto ws2 = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+    auto ws2 = WorkspaceCreationHelper::create2DWorkspace(10, 10);
 
     Mantid::Algorithms::Comment alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())

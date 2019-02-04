@@ -1,8 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/CombinePeaksWorkspaces.h"
+#include "MantidAPI/Sample.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidAPI/Sample.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -14,7 +20,6 @@ using namespace API;
 using DataObjects::PeaksWorkspace;
 using DataObjects::PeaksWorkspace_const_sptr;
 using DataObjects::PeaksWorkspace_sptr;
-using DataObjects::Peak;
 
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string CombinePeaksWorkspaces::name() const {
@@ -78,7 +83,7 @@ void CombinePeaksWorkspaces::exec() {
   // Get hold of the peaks in the second workspace
   auto &rhsPeaks = RHSWorkspace->getPeaks();
 
-  Progress progress(this, 0, 1, rhsPeaks.size());
+  Progress progress(this, 0.0, 1.0, rhsPeaks.size());
 
   // If not checking for matching peaks, then it's easy...
   if (!CombineMatchingPeaks) {

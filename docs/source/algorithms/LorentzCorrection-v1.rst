@@ -3,7 +3,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -33,9 +33,9 @@ Usage
    y = corrected.readY(2)
    e = corrected.readE(2)
    # print first corrected yvalues
-   print y[1:5]
+   print(y[1:5])
    # print first corrected evalues
-   print e[1:5]
+   print(e[1:5])
 
 Output:
 

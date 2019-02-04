@@ -1,11 +1,21 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_REMOVEBINS_H_
 #define MANTID_ALGORITHMS_REMOVEBINS_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/Unit.h"
 
 namespace Mantid {
+namespace HistogramData {
+class HistogramX;
+class HistogramY;
+class HistogramE;
+} // namespace HistogramData
 namespace API {
 class SpectrumInfo;
 }
@@ -32,27 +42,6 @@ namespace Algorithms {
 
     @author Matt Clarke
     @date 08/12/2008
-
-    Copyright &copy; 2008-9 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-   National Laboratory & European Spallation Source
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 class DLLExport RemoveBins : public API::Algorithm {
 public:
@@ -67,6 +56,9 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"CropWorkspace"};
+  }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override {
     return "Transforms\\Splitting";
@@ -75,18 +67,20 @@ public:
 private:
   // Overridden Algorithm methods
   void init() override;
+  std::map<std::string, std::string> validateInputs() override;
   void exec() override;
 
-  void checkProperties();
   void crop(const double &start, const double &end);
   void transformRangeUnit(const int index, double &startX, double &endX);
   void calculateDetectorPosition(const int index, double &l1, double &l2,
                                  double &twoTheta);
-  int findIndex(const double &value, const MantidVec &vec);
-  void RemoveFromEnds(int start, int end, MantidVec &Y, MantidVec &E);
+  int findIndex(const double &value, const HistogramData::HistogramX &vec);
+  void RemoveFromEnds(int start, int end, HistogramData::HistogramY &Y,
+                      HistogramData::HistogramE &E);
   void RemoveFromMiddle(const int &start, const int &end,
                         const double &startFrac, const double &endFrac,
-                        MantidVec &Y, MantidVec &E);
+                        HistogramData::HistogramY &Y,
+                        HistogramData::HistogramE &E);
 
   API::MatrixWorkspace_const_sptr m_inputWorkspace; ///< The input workspace
   const API::SpectrumInfo *m_spectrumInfo;
@@ -96,7 +90,7 @@ private:
   bool m_interpolate; ///< Whether removed bins should be interpolated
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHM_REMOVEBINS_H_*/

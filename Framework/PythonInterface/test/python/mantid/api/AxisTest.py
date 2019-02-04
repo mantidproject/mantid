@@ -1,8 +1,14 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
 from testhelpers import run_algorithm
-from mantid.api import NumericAxis, TextAxis, mtd
+from mantid.api import NumericAxis, SpectraAxis, TextAxis, mtd
 import numpy as np
 
 class AxisTest(unittest.TestCase):
@@ -17,8 +23,9 @@ class AxisTest(unittest.TestCase):
                     self.__class__._test_ws = alg.getProperty("OutputWorkspace").value
 
     def test_constructor_methods_return_the_correct_type(self):
-        self.assertTrue(isinstance(NumericAxis.create(2),NumericAxis))
-        self.assertTrue(isinstance(TextAxis.create(2),TextAxis))
+        self.assertTrue(isinstance(NumericAxis.create(2), NumericAxis))
+        self.assertTrue(isinstance(SpectraAxis.create(self._test_ws), SpectraAxis))
+        self.assertTrue(isinstance(TextAxis.create(2), TextAxis))
 
     def test_axis_meta_data(self):
         yAxis = self._test_ws.getAxis(1)

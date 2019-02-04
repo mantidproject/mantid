@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -12,7 +12,7 @@ Description
 This algorithm performs the ElasticWindow algorithm over a set of workspaces
 provided as a workspace group, the binning of each workspace must match.
 
-The Q and Q Suared output workspaces show the output of ElasticWindow for each
+The Q and Q-squared output workspaces show the output of ElasticWindow for each
 input workspace, the ELF workspace shows the data transposed with the X axis in
 either sample temperature or run number of temperature is not available.
 
@@ -72,9 +72,9 @@ Usage
     # Run the algorithm
     q, q2, elf = ElasticWindowMultiple(input, -0.1, 0.1)
 
-    print 'ELF X axis: %s' % elf.getAxis(0).getUnit().caption()
-    print 'ELF spectra count: %d' % elf.getNumberHistograms()
-    print 'ELF bin count: %d' % elf.blocksize()
+    print('ELF X axis: %s' % elf.getAxis(0).getUnit().caption())
+    print('ELF spectra count: %d' % elf.getNumberHistograms())
+    print('ELF bin count: %d' % elf.blocksize())
 
     # Reset the facility to the original setting
     config['default.facility'] = facility

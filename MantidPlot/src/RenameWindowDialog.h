@@ -30,8 +30,8 @@
 #ifndef RENAMEDIALOG_H
 #define RENAMEDIALOG_H
 
-#include <qvariant.h>
 #include <qdialog.h>
+#include <qvariant.h>
 
 #include "MdiSubWindow.h"
 
@@ -48,7 +48,7 @@ class RenameWindowDialog : public QDialog {
   Q_OBJECT
 
 public:
-  RenameWindowDialog(QWidget *parent = 0, Qt::WFlags fl = 0);
+  RenameWindowDialog(QWidget *parent = nullptr, Qt::WFlags fl = nullptr);
 
 private:
   QPushButton *buttonOk;

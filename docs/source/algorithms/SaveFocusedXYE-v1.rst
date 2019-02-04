@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -17,6 +17,10 @@ For data where the focusing routine has generated several spectra (for
 example, multi-bank instruments), the option is provided for saving all
 spectra into a single file, separated by headers, or into several files
 that will be named "workspaceName-"+spectra\_number
+
+Optionally, it can write the header lines (up to 6) which are preceded with **#** symbol, so do not count as data.
+Header provides some metadata information about the file.
+When the spectrum axis unit caption of the input workspace is **Temperature**, the corresponding header entry would be preceded with the Fullprof keyword **TEMP**.
 
 Current Issues
 --------------
@@ -41,10 +45,10 @@ Usage
 
     file_name = "myworkspace.ascii"
     path = os.path.join(os.path.expanduser("~"), "myworkspace.ascii")
-    
+
     SaveFocusedXYE(ws, path)
     path = os.path.join(os.path.expanduser("~"), "myworkspace-0.ascii")
-    print os.path.isfile(path)
+    print(os.path.isfile(path))
 
 Output:
 
@@ -78,7 +82,7 @@ Output:
     path = os.path.join(os.path.expanduser("~"), file_name)
 
     SaveFocusedXYE(ws, path, SplitFiles=False, IncludeHeader=True, Format='MAUD')
-    print os.path.isfile(path)
+    print(os.path.isfile(path))
 
 
 Output:

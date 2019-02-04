@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAOBJECTS_PEAKCOLUMN_H_
 #define MANTID_DATAOBJECTS_PEAKCOLUMN_H_
 
@@ -5,6 +11,7 @@
 #include "MantidDataObjects/Peak.h"
 
 #include <boost/variant.hpp>
+#include <list>
 
 namespace Mantid {
 namespace DataObjects {
@@ -40,8 +47,13 @@ public:
 
   void read(size_t index, const std::string &text) override;
 
+  /// Sets item from a stream
+  void read(const size_t index, std::istringstream &in) override;
+
   /// Specialized type check
   bool isBool() const override;
+
+  bool isNumber() const override;
 
   /// Must return overall memory size taken by the column.
   long int sizeOfData() const override;
@@ -74,12 +86,14 @@ private:
   int m_hklPrec;
 
   /// Type of the row cache value
-  typedef boost::variant<double, int, std::string, Kernel::V3D> CacheValueType;
+  using CacheValueType = boost::variant<double, int, std::string, Kernel::V3D>;
   ///
   mutable std::list<CacheValueType> m_oldRows;
+  /// Sets the correct value in the referenced peak.
+  void setPeakHKLOrRunNumber(const size_t index, const double val);
 };
 
-} // namespace Mantid
 } // namespace DataObjects
+} // namespace Mantid
 
 #endif /* MANTID_DATAOBJECTS_PEAKCOLUMN_H_ */

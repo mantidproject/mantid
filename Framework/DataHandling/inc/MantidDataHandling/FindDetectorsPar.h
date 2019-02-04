@@ -1,8 +1,13 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef DATAHANDLING_FIND_DETPAR_H_
 #define DATAHANDLING_FIND_DETPAR_H_
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
+
+#include <float.h>
 #include <fstream>
 
 #include "MantidAPI/Algorithm.h"
@@ -112,27 +117,6 @@ transformation of these arrays into strings.
 @author Alex Buts ISIS; initially extracted from Stuart Campbell's SaveNXSPE
 algorithm,
 @date 17/05/2012
-
-Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>.
-Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 // predefine class, used to cashe precalculated detector's parameters
 class DetParameters;
@@ -187,8 +171,8 @@ private:
   std::vector<size_t> detID;
 
   // calculate generic detectors parameters:
-  void calcDetPar(const Geometry::IDetector_const_sptr &spDet,
-                  const Kernel::V3D &Observer, DetParameters &Detector);
+  void calcDetPar(const Geometry::IDetector &det, const Kernel::V3D &Observer,
+                  DetParameters &Detector);
 
   /// if ASCII file is selected as the datasource, this structure describes the
   /// type of this file.
@@ -264,8 +248,7 @@ public:
         m_PolarBase(0), m_useSphericalSizes(false), m_AzimMin(FLT_MAX),
         m_PolarMin(FLT_MAX), m_AzimMax(-FLT_MAX), m_PolarMax(-FLT_MAX),
         m_nComponents(0) {}
-  void addDetInfo(const Geometry::IDetector_const_sptr &spDet,
-                  const Kernel::V3D &Observer);
+  void addDetInfo(const Geometry::IDetector &det, const Kernel::V3D &Observer);
   void returnAvrgDetPar(DetParameters &avrgDet);
 
   void setUseSpherical(bool shouldWe = true) { m_useSphericalSizes = shouldWe; }
@@ -274,6 +257,6 @@ public:
 };
 
 } // end namespace DataHandling
-} // end namespace Mandid
+} // namespace Mantid
 
 #endif

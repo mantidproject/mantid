@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -36,10 +36,19 @@ it belongs to, so that equivalent reflections have the same intensity and error 
 
 Finally, the peaks in the output workspace are sorted by H, K and L.
 
+The EquivalentsWorkspace contains specta that can be plotted for each set of
+equivalent intensities.  The X axis is the wavelength and the Y axis is the corrected intensity of the
+peaks.  The error is the difference in the intensity of that peak and the average for all equivalent
+peaks.  For example, see the 424 equivalent intensities in plot below.  The intensity of the peak at 
+wavelength 0.5 is marked as an outlier by setting the error to the same value as the intensity. 
+The average intensity is 21903.
+
+.. figure:: /images/EquivalentIntensities.png
+
 Usage
 -----
 
-The following usage example uses data obtained from a trigonal structure. The peaks are loaded and a UB-matrix
+The following usage example uses data obtained from a trigonal structure. The peaks are loaded and a :ref:`UB matrix <Lattice>`
 is determined. The peaks are transformed to conform with a conventional cell, which has hexagonal metric
 and rhombohedral centering:
 
@@ -54,16 +63,16 @@ and rhombohedral centering:
                                CellType='Hexagonal', Apply=True, Tolerance=0.2)
 
     # Run the SortHKL algorithm
-    sorted, chi2, statistics_table = SortHKL(peaks, PointGroup='-3m1 (Trigonal - Hexagonal)',
+    sorted, chi2, statistics_table, equivI = SortHKL(peaks, PointGroup='-3m1 (Trigonal - Hexagonal)',
                                              LatticeCentering='Rhombohedrally centred, obverse')
 
     statistics = statistics_table.row(0)
 
-    print 'Data set statistics:'
-    print '        Peaks: {0}'.format(sorted.getNumberPeaks())
-    print '       Unique: {0}'.format(statistics['No. of Unique Reflections'])
-    print ' Completeness: {0}%'.format(round(statistics['Data Completeness'], 2))
-    print '   Redundancy: {0}'.format(round(statistics['Multiplicity'], 2))
+    print('Data set statistics:')
+    print('        Peaks: {0}'.format(sorted.getNumberPeaks()))
+    print('       Unique: {0}'.format(statistics['No. of Unique Reflections']))
+    print(' Completeness: {0}%'.format(round(statistics['Data Completeness'], 2)))
+    print('   Redundancy: {0}'.format(round(statistics['Multiplicity'], 2)))
 
 Output:
 

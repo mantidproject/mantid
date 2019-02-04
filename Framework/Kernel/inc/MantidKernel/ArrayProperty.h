@@ -1,10 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_KERNEL_ARRAYPROPERTY_H_
 #define MANTID_KERNEL_ARRAYPROPERTY_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
+#include "DllConfig.h"
+#include "MantidKernel/IValidator.h"
+#include "MantidKernel/NullValidator.h"
+#include "MantidKernel/Property.h"
 #include "PropertyWithValue.h"
+#include <string>
+#include <vector>
 
 namespace Mantid {
 namespace Kernel {
@@ -16,120 +25,44 @@ namespace Kernel {
 
     @author Russell Taylor, Tessella Support Services plc
     @date 27/02/2008
-
-    Copyright &copy; 2008-2010 ISIS Rutherford Appleton Laboratory, NScD Oak
-   Ridge National Laboratory & European Spallation Source
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>.
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 template <typename T>
 class DLLExport ArrayProperty : public PropertyWithValue<std::vector<T>> {
 public:
-  /** Constructor
-   *  @param name ::      The name to assign to the property
-   *  @param vec ::       The initial vector of values to assign to the
-   * property.
-   *  @param validator :: The validator to use for this property, if required.
-   *  @param direction :: The direction (Input/Output/InOut) of this property
-   */
-  ArrayProperty(const std::string &name, const std::vector<T> &vec,
+  ArrayProperty(std::string name, std::vector<T> vec,
                 IValidator_sptr validator = IValidator_sptr(new NullValidator),
-                const unsigned int direction = Direction::Input)
-      : PropertyWithValue<std::vector<T>>(name, vec, validator, direction) {}
-
-  /** Constructor
-   *  Will lead to the property having a default-constructed (i.e. empty) vector
-   *  as its initial (default) value
-   *  @param name ::      The name to assign to the property
-   *  @param validator :: The validator to use for this property, if required
-   *  @param direction :: The direction (Input/Output/InOut) of this property
-   */
-
-  ArrayProperty(const std::string &name, IValidator_sptr validator,
-                const unsigned int direction = Direction::Input)
-      : PropertyWithValue<std::vector<T>>(name, std::vector<T>(), validator,
-                                          direction) {}
-
-  /** Constructor that's useful for output properties or inputs with an empty
-   * default and no validator.
-   *  Will lead to the property having a default-constructed (i.e. empty) vector
-   *  as its initial (default) value and no validator
-   *  @param name ::      The name to assign to the property
-   *  @param direction :: The direction (Input/Output/InOut) of this property
-   */
-  ArrayProperty(const std::string &name,
-                const unsigned int direction = Direction::Input)
-      : PropertyWithValue<std::vector<T>>(name, std::vector<T>(),
-                                          IValidator_sptr(new NullValidator),
-                                          direction) {}
-
-  /** Constructor from which you can set the property's values through a string:
-   *
-   * Inherits from the constructor of PropertyWithValue specifically made to
-   * handle a list
-   * of numeric values in a string format so that initial value is set
-   * correctly.
-   *
-   *  @param name ::      The name to assign to the property
-   *  @param values ::    A comma-separated string containing the values to
-   * store in the property
-   *  @param validator :: The validator to use for this property, if required
-   *  @param direction :: The direction (Input/Output/InOut) of this property
-   *  @throw std::invalid_argument if the string passed is not compatible with
-   * the array type
-   */
-  ArrayProperty(const std::string &name, const std::string &values,
+                const unsigned int direction = Direction::Input);
+  ArrayProperty(std::string name, IValidator_sptr validator,
+                const unsigned int direction = Direction::Input);
+  ArrayProperty(std::string name,
+                const unsigned int direction = Direction::Input);
+  ArrayProperty(std::string name, const std::string &values,
                 IValidator_sptr validator = IValidator_sptr(new NullValidator),
-                const unsigned int direction = Direction::Input)
-      : PropertyWithValue<std::vector<T>>(name, std::vector<T>(), values,
-                                          validator, direction) {}
+                const unsigned int direction = Direction::Input);
 
-  /// 'Virtual copy constructor'
-  ArrayProperty<T> *clone() const override {
-    return new ArrayProperty<T>(*this);
-  }
+  ArrayProperty<T> *clone() const override;
 
   // Unhide the base class assignment operator
   using PropertyWithValue<std::vector<T>>::operator=;
 
-  /** Returns the values stored in the ArrayProperty
-   *  @return The stored values as a comma-separated list
-   */
-  std::string value() const override {
-    // Implemented this method for documentation reasons. Just calls base class
-    // method.
-    return PropertyWithValue<std::vector<T>>::value();
-  }
+  std::string value() const override;
 
-  /** Sets the values stored in the ArrayProperty from a string representation
-   *  @param value :: The values to assign to the property, given as a
-   * comma-separated list
-   *  @return True if the assignment was successful
-   */
-  std::string setValue(const std::string &value) override {
-    // Implemented this method for documentation reasons. Just calls base class
-    // method.
-    return PropertyWithValue<std::vector<T>>::setValue(value);
-  }
+  std::string setValue(const std::string &value) override;
   // May want to add specialisation the the class later, e.g. setting just one
   // element of the vector
+
+private:
+  // This method is a workaround for the C4661 compiler warning in visual
+  // studio. This allows the template declaration and definition to be separated
+  // in different files. See stack overflow article for a more detailed
+  // explanation:
+  // https://stackoverflow.com/questions/44160467/warning-c4661no-suitable-definition-provided-for-explicit-template-instantiatio
+  // https://stackoverflow.com/questions/33517902/how-to-export-a-class-derived-from-an-explicitly-instantiated-template-in-visual
+  void visualStudioC4661Workaround();
 };
+
+template <>
+MANTID_KERNEL_DLL void ArrayProperty<int>::visualStudioC4661Workaround();
 
 } // namespace Kernel
 } // namespace Mantid

@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -32,7 +32,7 @@ Usage
 
     b_det_1_l1 = sample.getPos().distance(b_det_1.getPos())
 
-    print "First backscattering detector L1 = %.5fm" % (b_det_1_l1)
+    print("First backscattering detector L1 = {:.5f}m".format(b_det_1_l1))
 
 Output:
 
@@ -53,7 +53,7 @@ Output:
 
     b_det_1_l1 = sample.getPos().distance(b_det_1.getPos())
 
-    print "First backscattering detector L1 = %.5fm" % (b_det_1_l1)
+    print("First backscattering detector L1 = {:.5f}m".format(b_det_1_l1))
 
 Output:
 

@@ -7,10 +7,6 @@
 
 .. _contents:
 
-.. image:: images/Mantid_Logo_Transparent.png
-   :alt: The logo for the Mantid Project
-   :align: center
-
 ====================
 Mantid Documentation
 ====================
@@ -18,14 +14,20 @@ Mantid Documentation
 .. toctree::
    :hidden:
    :glob:
-   :maxdepth: 1
+   :maxdepth: 4
 
+   tutorials/index
    algorithms/index
    algorithms/*
    concepts/index
    interfaces/index
-   fitfunctions/*
+   fitting/index
+   fitting/fitfunctions/index
+   fitting/fitfunctions/*
+   fitting/fitminimizers/index
+   techniques/index
    api/index
+   plotting/index
    release/index
 
 
@@ -38,13 +40,20 @@ This is the documentation for Mantid |release|.
    :width: 200px
    :align: right
 
-* `Algorithms <algorithms/index.html>`_
-* `Concepts <concepts/index.html>`_
-* `Interfaces <interfaces/index.html>`_
-* `Fit Functions <fitfunctions/index.html>`_
-* `API <api/index.html>`_
-    - `Python <api/python/index.html>`_
+* :ref:`Algorithms List`
+* :ref:`training`
+    - :ref:`mantid_basic_course`
+    - `Introduction To Python <http://www.mantidproject.org/Introduction_To_Python>`_
+    - `Python in Mantid <http://www.mantidproject.org/Python_In_Mantid>`_
+    - `Extending Mantid With Python <http://www.mantidproject.org/Extending_Mantid_With_Python>`_
+* :ref:`concepts contents`
+* :ref:`interfaces contents`
+* :ref:`fitting contents`
+    - :ref:`Fit Functions List`
+    - :ref:`fitminimizers`
+* :ref:`techniques contents`
+* :ref:`api`
+    - :ref:`Python <pythonapi>`
     - `C++ <http://doxygen.mantidproject.org/>`_ (Doxygen)
-* `Release Notes <release/index.html>`_
-
-
+* :ref:`Mantid Matplotlib Plot Gallery and Examples <plotting>`
+* :ref:`release_notes`

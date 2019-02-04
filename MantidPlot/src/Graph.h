@@ -29,32 +29,32 @@
 #ifndef GRAPH_H
 #define GRAPH_H
 
+#include <QEvent>
 #include <QList>
 #include <QPointer>
 #include <QPrinter>
-#include <QVector>
-#include <QEvent>
-#include <QSettings>
 #include <QSet>
+#include <QSettings>
+#include <QVector>
 
-#include <qwt_text.h>
-#include <qwt_plot.h>
-#include <qwt_plot_marker.h>
-#include <qwt_plot_curve.h>
-#include <qwt_plot_panner.h>
-#include <qwt_plot_magnifier.h>
 #include <qwt_global.h>
+#include <qwt_plot.h>
+#include <qwt_plot_curve.h>
+#include <qwt_plot_magnifier.h>
+#include <qwt_plot_marker.h>
+#include <qwt_plot_panner.h>
+#include <qwt_text.h>
 #if QWT_VERSION >= 0x050200
 #include <qwt_plot_rescaler.h>
 #endif
-#include "Plot.h"
-#include "Table.h"
 #include "AxesDialog.h"
-#include "PlotToolInterface.h"
+#include "MantidQtWidgets/Common/GraphOptions.h"
+#include "MantidQtWidgets/LegacyQwt/ScaleEngine.h"
 #include "MultiLayer.h"
+#include "Plot.h"
+#include "PlotToolInterface.h"
 #include "ScaleDraw.h"
-#include "MantidQtAPI/GraphOptions.h"
-#include "MantidQtAPI/ScaleEngine.h"
+#include "Table.h"
 #include <boost/shared_ptr.hpp>
 #include <set>
 
@@ -95,7 +95,7 @@ namespace Mantid {
 namespace Kernel {
 class Unit;
 }
-}
+} // namespace Mantid
 
 //! Structure containing curve layout parameters
 typedef struct {
@@ -116,7 +116,7 @@ namespace Mantid {
 namespace API {
 class MatrixWorkspace;
 }
-}
+} // namespace Mantid
 /**
  * \brief A 2D-plotting widget.
  *
@@ -159,37 +159,11 @@ class Graph : public QWidget {
 
 public:
   Graph(int x = 0, int y = 0, int width = 500, int height = 400,
-        QWidget *parent = 0, Qt::WFlags f = 0);
+        QWidget *parent = nullptr, Qt::WFlags f = nullptr);
   ~Graph() override;
 
   enum Ticks { NoTicks = 0, Out = 1, InOut = 2, In = 3 };
   enum MarkerType { None = -1, Text = 0, Arrow = 1, Image = 2 };
-  enum CurveType {
-    Unspecified = -1,
-    Line,
-    Scatter,
-    LineSymbols,
-    VerticalBars,
-    Area,
-    Pie,
-    VerticalDropLines,
-    Spline,
-    HorizontalSteps,
-    Histogram,
-    HorizontalBars,
-    VectXYXY,
-    ErrorBars,
-    Box,
-    VectXYAM,
-    VerticalSteps,
-    ColorMap,
-    GrayScale,
-    ColorMapContour,
-    Contour,
-    Function,
-    ImagePlot,
-    User
-  };
 
   bool hasSynchronizedScaleDivisions() { return d_synchronize_scales; };
   void setSynchronizedScaleDivisions(bool on) { d_synchronize_scales = on; };
@@ -260,7 +234,9 @@ public slots:
   //! \name Pie Curves
   //@{
   //! Returns true if this Graph is a pie plot, false otherwise.
-  bool isPiePlot() { return (c_type.count() == 1 && c_type[0] == Pie); };
+  bool isPiePlot() {
+    return (c_type.count() == 1 && c_type[0] == GraphOptions::Pie);
+  };
   //! Used when creating a pie plot.
   QwtPieCurve *plotPie(Table *w, const QString &name, int startRow = 0,
                        int endRow = -1);
@@ -289,11 +265,12 @@ public slots:
   PlotCurve *insertCurve(Table *w, const QString &xColName,
                          const QString &yColName, int style, int startRow = 0,
                          int endRow = -1);
-  PlotCurve *insertCurve(QString workspaceName, int index, bool err = false,
-                         Graph::CurveType style = Graph::Unspecified,
-                         bool distribution = false);
+  PlotCurve *
+  insertCurve(QString workspaceName, int index, bool err = false,
+              GraphOptions::CurveType style = GraphOptions::Unspecified,
+              bool distribution = false);
   PlotCurve *insertCurve(PlotCurve *c, int lineWidth = -1,
-                         int curveType = User);
+                         int curveType = GraphOptions::User);
   void insertPlotItem(QwtPlotItem *i, int type);
 
   void insertCurve(Graph *g, int i);
@@ -471,7 +448,7 @@ public slots:
   //! \name Zoom
   //@{
   void zoomed(const QwtDoubleRect &);
-  void zoom(bool on);
+  void zoomMode(bool on);
   void zoomOut();
   bool zoomOn();
   //@}
@@ -691,7 +668,7 @@ public slots:
   void setCurveTitle(int index, const QString &title);
   //@}
 
-  //! \name Modifing insertCurve Data
+  //! \name Modifying insertCurve Data
   //@{
   int selectedCurveID();
   int selectedCurveIndex() { return curveIndex(selectedCurveID()); }
@@ -708,7 +685,7 @@ public slots:
    * the generic
    * tool interface.
    */
-  bool enableRangeSelectors(const QObject *status_target = NULL,
+  bool enableRangeSelectors(const QObject *status_target = nullptr,
                             const char *status_slot = "");
   /// Check if the gange selectors are active
   bool areRangeSelectorsOn() const { return !d_range_selector.isNull(); }
@@ -830,18 +807,18 @@ public slots:
   //! Returns a pointer to a 2D plot, if the Graph has one
   Spectrogram *spectrogram();
   //! Add a spectrogram to the graph
-  Spectrogram *plotSpectrogram(Matrix *m, CurveType type);
+  Spectrogram *plotSpectrogram(Matrix *m, GraphOptions::CurveType type);
   Spectrogram *plotSpectrogram(Function2D *f, int nrows, int ncols, double left,
                                double top, double width, double height,
                                double minz, double maxz,
-                               CurveType type); // Mantid
+                               GraphOptions::CurveType type); // Mantid
   Spectrogram *plotSpectrogram(Function2D *f, int nrows, int ncols,
                                QwtDoubleRect bRect, double minz, double maxz,
-                               CurveType type); // Mantid
+                               GraphOptions::CurveType type); // Mantid
   // Spectrogram* plotSpectrogram(UserHelperFunction *f,int nrows, int
   // ncols,QwtDoubleRect bRect,double minz,double maxz,CurveType type);//Mantid
   Spectrogram *plotSpectrogram(Spectrogram *d_spectrogram,
-                               CurveType type); // Mantid
+                               GraphOptions::CurveType type); // Mantid
   //! Add a matrix histogram  to the graph
   QwtHistogram *addHistogram(Matrix *m);
   //! Restores a histogram from a project file.
@@ -871,6 +848,7 @@ public slots:
   //@}
   void updateDataCurves();
   void reverseCurveOrder();
+  int getNumCurves() { return n_curves; };
 
 signals:
   void selectedGraph(Graph *);
@@ -921,6 +899,8 @@ private:
   void niceLogScales(QwtPlot::Axis axis);
   void deselectCurves();
   void addLegendItem();
+  /// trim a title from a legend key
+  QString trimTableNameFromLegendKey(const QString &key) const;
 
   QString yAxisTitleFromFirstCurve();
 
@@ -1007,6 +987,6 @@ private:
   boost::shared_ptr<Mantid::Kernel::Unit> m_yUnits;
 };
 
-Q_DECLARE_METATYPE(Graph::CurveType)
+Q_DECLARE_METATYPE(GraphOptions::CurveType)
 
 #endif // GRAPH_H

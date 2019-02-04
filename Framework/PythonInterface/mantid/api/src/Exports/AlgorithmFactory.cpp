@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/FileLoaderRegistry.h"
@@ -19,7 +25,6 @@
 
 using namespace Mantid::API;
 using namespace boost::python;
-using Mantid::Kernel::AbstractInstantiator;
 using Mantid::PythonInterface::PythonObjectInstantiator;
 
 GET_POINTER_SPECIALIZATION(AlgorithmFactoryImpl)
@@ -60,6 +65,21 @@ dict getRegisteredAlgorithms(AlgorithmFactoryImpl &self, bool includeHidden) {
   return inventory;
 }
 
+/**
+ * Return algorithm descriptors as a python list of lists.
+ * @param self :: An instance of AlgorithmFactory.
+ * @param includeHidden :: If true hidden algorithms are included.
+ */
+list getDescriptors(AlgorithmFactoryImpl &self, bool includeHidden) {
+  auto descriptors = self.getDescriptors(includeHidden);
+  list pyDescriptors;
+  for (auto &descr : descriptors) {
+    boost::python::object d(descr);
+    pyDescriptors.append(d);
+  }
+  return pyDescriptors;
+}
+
 //------------------------------------------------------------------------------
 // Python algorithm subscription
 //------------------------------------------------------------------------------
@@ -67,9 +87,7 @@ dict getRegisteredAlgorithms(AlgorithmFactoryImpl &self, bool includeHidden) {
 // Python algorithm registration mutex in anonymous namespace (aka static)
 std::recursive_mutex PYALG_REGISTER_MUTEX;
 
-// clang-format off
-GCC_DIAG_OFF(cast-qual)
-// clang-format on
+GNU_DIAG_OFF("cast-qual")
 
 /**
  * A free function to subscribe a Python algorithm into the factory
@@ -104,23 +122,28 @@ void subscribe(AlgorithmFactoryImpl &self, const boost::python::object &obj) {
   // from the FileLoaderRegistry
   FileLoaderRegistry::Instance().unsubscribe(descr.first, descr.second);
 }
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunknown-pragmas"
-#pragma clang diagnostic ignored "-Wunused-local-typedef"
-#endif
+
+GNU_DIAG_OFF("unused-local-typedef")
+// Ignore -Wconversion warnings coming from boost::python
+// Seen with GCC 7.1.1 and Boost 1.63.0
+GNU_DIAG_OFF("conversion")
+
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(existsOverloader, exists, 1, 2)
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
+
+GNU_DIAG_ON("conversion")
+GNU_DIAG_ON("unused-local-typedef")
 
 ///@endcond
-}
-// clang-format off
-GCC_DIAG_ON(cast-qual)
-// clang-format on
+} // namespace
+GNU_DIAG_ON("cast-qual")
 
 void export_AlgorithmFactory() {
+
+  class_<AlgorithmDescriptor>("AlgorithmDescriptor")
+      .def_readonly("name", &AlgorithmDescriptor::name)
+      .def_readonly("alias", &AlgorithmDescriptor::alias)
+      .def_readonly("category", &AlgorithmDescriptor::category)
+      .def_readonly("version", &AlgorithmDescriptor::version);
 
   class_<AlgorithmFactoryImpl, boost::noncopyable>("AlgorithmFactoryImpl",
                                                    no_init)
@@ -139,6 +162,14 @@ void export_AlgorithmFactory() {
       .def("subscribe", &subscribe, (arg("self"), arg("object")),
            "Register a Python class derived from "
            "PythonAlgorithm into the factory")
+      .def("getDescriptors", &getDescriptors,
+           (arg("self"), arg("include_hidden")),
+           "Return a list of descriptors of registered algorithms. Each "
+           "descriptor is a list: [name, version, category, alias].")
+      .def("unsubscribe", &AlgorithmFactoryImpl::unsubscribe,
+           (arg("self"), arg("name"), arg("version")),
+           "Returns the highest version of the named algorithm. Throws "
+           "ValueError if no algorithm can be found")
 
       .def("Instance", &AlgorithmFactory::Instance,
            return_value_policy<reference_existing_object>(),

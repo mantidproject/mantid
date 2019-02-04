@@ -1,8 +1,15 @@
-#include "MantidAPI/Axis.h"
-#include "MantidAPI/MatrixWorkspace.h"
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/Policies/AsType.h"
 
@@ -45,19 +52,19 @@ Workspace_sptr createFromParentPtr(WorkspaceFactoryImpl &self,
 }
 
 /// Overload generator for create
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunknown-pragmas"
-#pragma clang diagnostic ignored "-Wunused-local-typedef"
-#endif
+GNU_DIAG_OFF("unused-local-typedef")
+// Ignore -Wconversion warnings coming from boost::python
+// Seen with GCC 7.1.1 and Boost 1.63.0
+GNU_DIAG_OFF("conversion")
+
 BOOST_PYTHON_FUNCTION_OVERLOADS(createFromParent_Overload, createFromParentPtr,
                                 2, 5)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(createTable_Overload, createTable, 0, 1)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(createPeaks_Overload, createPeaks, 0, 1)
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
-}
+
+GNU_DIAG_ON("conversion")
+GNU_DIAG_ON("unused-local-typedef")
+} // namespace
 
 void export_WorkspaceFactory() {
   const char *createFromParentDoc = "Create a workspace based on the given "
@@ -68,7 +75,7 @@ void export_WorkspaceFactory() {
 
   const char *createFromScratchDoc =
       "Create a clean new worksapce of the given size.";
-  typedef MatrixWorkspace_sptr (WorkspaceFactoryImpl::*createFromScratchPtr)(
+  using createFromScratchPtr = MatrixWorkspace_sptr (WorkspaceFactoryImpl::*)(
       const std::string &, const size_t &, const size_t &, const size_t &)
       const;
 

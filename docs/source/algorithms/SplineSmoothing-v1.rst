@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -27,9 +27,9 @@ period of time. The lower breaking points number is set the faster
 algorithm will execute the function but it will not produce high
 quality smoothing function. By inserting high number of breaking points,
 a detailed smoothing function can also be produced. By not providing
-MaxNumberOfBreaks, the alogirthm will assume that user would like to
+MaxNumberOfBreaks, the algorithm will assume that user would like to
 execute the maximum number of breaks possible. This comes with a risk
-of alogirthm falling in to a very long loop.
+of algorithm falling in to a very long loop.
 
 By providing MaxNumberOfBreaks as a parameter, the users are also will
 be able to successfully and efficiently apply the algorithm to a workspace
@@ -58,7 +58,7 @@ Usage
         XMax=30, BinWidth=0.3)
     wsOut = SplineSmoothing(ws,Error=1)
 
-    print "This has created a spline for each spectra in the %s workspace" % wsOut
+    print("This has created a spline for each spectra in the %s workspace" % wsOut)
 
     try:
         plotSpectrum([ws,wsOut],0)

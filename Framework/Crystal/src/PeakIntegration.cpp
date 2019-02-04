@@ -1,19 +1,25 @@
-#include "MantidAPI/InstrumentValidator.h"
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
+#include "MantidCrystal/PeakIntegration.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IPeakFunction.h"
+#include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidCrystal/PeakIntegration.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidKernel/VectorHelper.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 
-#include <cmath>
 #include <boost/math/special_functions/round.hpp>
+#include <cmath>
 
 namespace Mantid {
 namespace Crystal {
@@ -45,10 +51,11 @@ void PeakIntegration::init() {
   declareProperty("IkedaCarpenterTOF", false,
                   "Integrate TOF using IkedaCarpenter fit.\n"
                   "Default is false which is best for corrected data.");
-  declareProperty("MatchingRunNo", true, "Integrate only peaks where run "
-                                         "number of peak matches run number of "
-                                         "sample.\n"
-                                         "Default is true.");
+  declareProperty("MatchingRunNo", true,
+                  "Integrate only peaks where run "
+                  "number of peak matches run number of "
+                  "sample.\n"
+                  "Default is true.");
   declareProperty("NBadEdgePixels", 0, "Number of bad Edge Pixels");
 }
 
@@ -95,11 +102,13 @@ void PeakIntegration::exec() {
   outputW = API::WorkspaceFactory::Instance().create(
       inputW, peaksW->getNumberPeaks(), YLength + 1, YLength);
   // Copy geometry over.
-  API::WorkspaceFactory::Instance().initializeFromParent(inputW, outputW, true);
+  API::WorkspaceFactory::Instance().initializeFromParent(*inputW, *outputW,
+                                                         true);
   size_t Numberwi = inputW->getNumberHistograms();
   int NumberPeaks = peaksW->getNumberPeaks();
   int MinPeaks = 0;
 
+  std::vector<int> badPeaks;
   for (int i = NumberPeaks - 1; i >= 0; i--) {
     Peak &peak = peaksW->getPeaks()[i];
     int pixelID = peak.getDetectorID();
@@ -110,12 +119,13 @@ void PeakIntegration::exec() {
       size_t wi = wiEntry->second;
       if ((matchRun && peak.getRunNumber() != inputW->getRunNumber()) ||
           wi >= Numberwi)
-        peaksW->removePeak(i);
+        badPeaks.push_back(i);
     } else // This is for appending peak workspaces when running
            // SNSSingleCrystalReduction one bank at at time
         if (i + 1 > MinPeaks)
       MinPeaks = i + 1;
   }
+  peaksW->removePeaks(std::move(badPeaks));
   NumberPeaks = peaksW->getNumberPeaks();
   if (NumberPeaks <= 0) {
     g_log.error(
@@ -350,8 +360,8 @@ int PeakIntegration::fitneighbours(int ipeak, std::string det_name, int x0,
   if (wiEntry != pixel_to_wi.end()) {
     size_t wi = wiEntry->second;
     // Set detectorIDs
-    outputW->getSpectrum(idet)
-        .addDetectorIDs(inputW->getSpectrum(wi).getDetectorIDs());
+    outputW->getSpectrum(idet).addDetectorIDs(
+        inputW->getSpectrum(wi).getDetectorIDs());
   }
 
   return TOFmax - 1;

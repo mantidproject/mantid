@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,too-many-public-methods,invalid-name,protected-access
 from __future__ import (absolute_import, division, print_function)
 
@@ -61,6 +67,10 @@ class SpaceGroupBuilderTest(unittest.TestCase):
 
         self.assertEqual(fn('P m -3 m :1'), 'P m -3 m')
         self.assertEqual(fn('P m -3 m :H'), 'P m -3 m')
+        self.assertEqual(fn('F d -3 m S'), 'F d -3 m')
+        self.assertEqual(fn('F d -3 m Z'), 'F d -3 m :2')
+        self.assertEqual(fn('R 3 H'), 'R 3')
+        self.assertEqual(fn('R 3 R'), 'R 3 :r')
 
     def test_getSpaceGroupFromNumber_invalid(self):
         invalid_old = {u'_symmetry_int_tables_number': u'400'}

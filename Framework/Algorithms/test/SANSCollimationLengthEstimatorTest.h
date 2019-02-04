@@ -1,15 +1,22 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_SANSCOLLIMATIONLENGTHESTIMATORTEST_H
 #define MANTID_ALGORITHMS_SANSCOLLIMATIONLENGTHESTIMATORTEST_H
-#include <cxxtest/TestSuite.h>
-#include "MantidAlgorithms/SANSCollimationLengthEstimator.h"
 #include "MantidAlgorithms/AddSampleLog.h"
+#include "MantidAlgorithms/SANSCollimationLengthEstimator.h"
+#include <cxxtest/TestSuite.h>
 
-#include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/DateAndTime.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/LogFilter.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::Algorithms;
@@ -47,12 +54,12 @@ createTestInstrument(const Mantid::detid_t id,
   inst->markAsSamplePos(sampleHolder);
 
   // Just give it a single detector
-  Detector *det0(NULL);
+  Detector *det0(nullptr);
   if (!detShapeXML.empty()) {
     auto shape = ShapeFactory().createShape(detShapeXML);
-    det0 = new Detector("det0", id, shape, NULL);
+    det0 = new Detector("det0", id, shape, nullptr);
   } else {
-    det0 = new Detector("det0", id, NULL);
+    det0 = new Detector("det0", id, nullptr);
   }
   det0->setPos(detPos);
   inst->add(det0);
@@ -105,7 +112,7 @@ void addSampleLog(Mantid::API::MatrixWorkspace_sptr workspace,
                   unsigned int length) {
   auto timeSeries =
       new Mantid::Kernel::TimeSeriesProperty<double>(sampleLogName);
-  Mantid::Kernel::DateAndTime startTime("2010-01-01T00:10:00");
+  Mantid::Types::Core::DateAndTime startTime("2010-01-01T00:10:00");
   timeSeries->setUnits("mm");
   for (unsigned int i = 0; i < length; i++) {
     timeSeries->addValue(startTime + static_cast<double>(i), value);
@@ -123,7 +130,7 @@ Mantid::API::MatrixWorkspace_sptr createTestWorkspace(
     double numberOfGuides = 5, V3D sourcePosition = V3D(0.0, 0.0, -25.0),
     V3D samplePosition = V3D(0.0, 0.0, 0.0),
     std::vector<double> guideLogDetails = std::vector<double>()) {
-  auto ws2d = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
+  auto ws2d = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
       ones(), static_cast<int>(nhist), x0, x1, dx);
 
   // Add the instrument with a single detector
@@ -159,7 +166,7 @@ Mantid::API::MatrixWorkspace_sptr createTestWorkspace(
   }
   return ws2d;
 }
-}
+} // namespace
 
 class SANSCollimationLengthEstimatorTest : public CxxTest::TestSuite {
 public:

@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name,too-many-branches
 from __future__ import (absolute_import, division, print_function)
 
@@ -95,7 +101,7 @@ class HFIRSANSReduction(PythonAlgorithm):
                 self.default_output_dir = head
         return output_str
 
-    def PyExec(self):
+    def PyExec(self):  # noqa: C901
         filename = self.getProperty("Filename").value
         output_ws = self.getPropertyValue("OutputWorkspace")
         #output_ws = '__'+output_ws+'_reduced'
@@ -475,5 +481,6 @@ class HFIRSANSReduction(PythonAlgorithm):
         return output_msg
 
 #############################################################################################
+
 
 AlgorithmFactory.subscribe(HFIRSANSReduction)

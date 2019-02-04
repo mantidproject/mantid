@@ -1,21 +1,29 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef WORKSPACEVALIDATORSTEST_H_
 #define WORKSPACEVALIDATORSTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/OrientedLatticeValidator.h"
 #include "MantidAPI/RawCountValidator.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SampleValidator.h"
-#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/NeutronAtom.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -218,8 +226,24 @@ public:
     }
   }
 
+  void testOrientedLatticeValidator() {
+    using Mantid::API::OrientedLatticeValidator;
+    using Mantid::DataObjects::Workspace2D;
+    using Mantid::Geometry::OrientedLattice;
+    OrientedLatticeValidator validator;
+    auto ws = boost::make_shared<Workspace2D>();
+    TS_ASSERT_EQUALS(
+        validator.isValid(ws),
+        "Workspace must have a sample with an orientation matrix defined.");
+
+    OrientedLattice lattice;
+    ws->mutableSample().setOrientedLattice(&lattice);
+
+    TS_ASSERT_EQUALS(validator.isValid(ws), "");
+  }
+
   void testSampleValidator() {
-    using Mantid::Geometry::Object;
+    using Mantid::Geometry::CSGObject;
     using Mantid::Kernel::Material;
     using Mantid::PhysicalConstants::NeutronAtom;
     // These should be separate tests when they are refactored out
@@ -231,7 +255,7 @@ public:
       TS_ASSERT_EQUALS(sampleVal->isValid(ws),
                        "The sample is missing the following properties: shape");
       auto shape = ComponentCreationHelper::createSphere(0.01);
-      ws->mutableSample().setShape(*shape);
+      ws->mutableSample().setShape(shape);
       TS_ASSERT_EQUALS(sampleVal->isValid(ws), "");
     }
 
@@ -243,9 +267,9 @@ public:
       TS_ASSERT_EQUALS(
           sampleVal->isValid(ws),
           "The sample is missing the following properties: material");
-      auto noShape = boost::make_shared<Object>();
+      auto noShape = boost::make_shared<CSGObject>();
       noShape->setMaterial(Material("V", NeutronAtom(), 0.072));
-      ws->mutableSample().setShape(*noShape);
+      ws->mutableSample().setShape(noShape);
       TS_ASSERT_EQUALS(sampleVal->isValid(ws), "");
     }
 
@@ -259,7 +283,7 @@ public:
           "The sample is missing the following properties: shape,material");
       auto shape = ComponentCreationHelper::createSphere(0.01);
       shape->setMaterial(Material("V", NeutronAtom(), 0.072));
-      ws->mutableSample().setShape(*shape);
+      ws->mutableSample().setShape(shape);
       TS_ASSERT_EQUALS(sampleVal->isValid(ws), "");
     }
   }

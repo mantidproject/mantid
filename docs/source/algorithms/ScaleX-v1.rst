@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -36,12 +36,12 @@ Usage
 
     # Center the Gaussian by shifting the X-axis, then find its average
     ws2 = ScaleX(ws, Factor=-mean, Operation='Add')
-    print 'mean=%.2f'%abs(np.sum( ws2.dataX(0) *ws2.dataY(0) ) / np.sum( ws2.dataY(0) ))
+    print('mean={:.2f}'.format(abs(np.sum( ws2.dataX(0) *ws2.dataY(0) ) / np.sum( ws2.dataY(0) ))))
 
     # Decrease the standard deviation of the Gaussian by half via shrinkage of the X-axis,
     # then find its standard deviation
     ws3 = ScaleX(ws2, Factor=0.5, Operation='Multiply')
-    print 'sigma=%.2f'%np.sqrt( np.sum( ws3.dataX(0)**2 *ws3.dataY(0) ) / np.sum( ws3.dataY(0) ) )
+    print('sigma={:.2f}'.format(np.sqrt( np.sum( ws3.dataX(0)**2 *ws3.dataY(0) ) / np.sum( ws3.dataY(0) ) )))
 
 Output:
 

@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -11,9 +11,9 @@ Description
 
 The algorithm calculates expensive part of the transformation from real to reciprocal space, calculating namely, 
 detector positions, sample-detector distances, angular detectors positions, etc. These values can be slow to calculate 
-for composite detectors and other algorithms can substantially benifit from using preprocessed values. 
+for composite detectors and other algorithms can substantially benefit from using preprocessed values. 
 
-The algorithm places processed values into a table workspace with the following colums:
+The algorithm places processed values into a table workspace with the following columns:
 
 +---------------+--------+------------------------------------------------------+
 | Column Name : |  Type  |  Description:                                        |
@@ -41,7 +41,7 @@ In addition to the preprocessed detectors intofmation, the following log entries
 -  **L1** -- Source-sample distance.
 -  **ActualDetectorsNum** -- total number of existing preprocessed detectors (number of rows in the table above).
 -  **InstrumentName** -- the name of the source instrument.
--  **FakeDetectors** -- if detectors posisions were not actually preprocessed but fake detectros were used instread 
+-  **FakeDetectors** -- if detectors posisions were not actually preprocessed but fake detectros were used instead 
     (InstrumentName==*FakeInstrument* in this case).
 
     
@@ -64,12 +64,12 @@ Usage
     # 
     preprDetWS = PreprocessDetectorsToMD(InputWorkspace=detWS,GetMaskState=1,GetEFixed=1)
     # Look at sample results:       
-    print "The resulting table has the following columns:"
-    print preprDetWS.keys()
-    print "The number of rows in the workspace is : ",len(preprDetWS.column('L2'))
+    print("The resulting table has the following columns:")
+    print(preprDetWS.keys())
+    print("The number of rows in the workspace is :  {}".format(len(preprDetWS.column('L2'))))
     polar = preprDetWS.column('TwoTheta')
-    print "The polar angle for detector N {0} is {1:5f} rad".format(10,polar[10])
-    print "The table workspace logs (properties) are currently not availible from python"
+    print("The polar angle for detector N {0} is {1:5f} rad".format(10,polar[10]))
+    print("The table workspace logs (properties) are currently not available from python")
     
     
 .. testcleanup:: ExPreprocessDetectoresToMD
@@ -85,7 +85,7 @@ Usage
    ['DetDirections', 'L2', 'TwoTheta', 'Azimuthal', 'DetectorID', 'detIDMap', 'spec2detMap', 'detMask', 'eFixed']
    The number of rows in the workspace is :  918
    The polar angle for detector N 10 is 0.314159 rad
-   The table workspace logs (properties) are currently not availible from python
+   The table workspace logs (properties) are currently not available from python
 
 
 

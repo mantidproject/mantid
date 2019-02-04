@@ -1,14 +1,24 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MDALGORITHMS_INTEGRATEPEAKSMD_H_
 #define MANTID_MDALGORITHMS_INTEGRATEPEAKSMD_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/IMDEventWorkspace_fwd.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidKernel/System.h"
-#include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/IMDEventWorkspace_fwd.h"
+#include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
+namespace Geometry {
+class DetectorInfo;
+}
 namespace MDAlgorithms {
 
 /** Integrate single-crystal peaks in reciprocal-space.
@@ -28,6 +38,10 @@ public:
 
   /// Algorithm's version for identification
   int version() const override { return 2; };
+  const std::vector<std::string> seeAlso() const override {
+    return {"CentroidPeaksMD", "IntegratePeaksHybrid", "IntegratePeaksMDHKL",
+            "IntegratePeaksUsingClusters", "IntegratePeaksCWSD"};
+  }
   /// Algorithm's category for identification
   const std::string category() const override { return "MDAlgorithms\\Peaks"; }
 
@@ -44,7 +58,7 @@ private:
   Mantid::API::IMDEventWorkspace_sptr inWS;
 
   /// Calculate if this Q is on a detector
-  void calculateE1(Geometry::Instrument_const_sptr inst);
+  void calculateE1(const Geometry::DetectorInfo &detectorInfo);
   double detectorQ(Mantid::Kernel::V3D QLabFrame, double r);
   void runMaskDetectors(Mantid::DataObjects::PeaksWorkspace_sptr peakWS,
                         std::string property, std::string values);
@@ -58,7 +72,7 @@ private:
                     double radius);
 };
 
+} // namespace MDAlgorithms
 } // namespace Mantid
-} // namespace DataObjects
 
 #endif /* MANTID_MDALGORITHMS_INTEGRATEPEAKSMD_H_ */

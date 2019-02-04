@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
 from __future__ import (absolute_import, division, print_function)
 
@@ -172,5 +178,6 @@ class EQSANSNormalise(PythonAlgorithm):
         else:
             self.setProperty("OutputMessage", "Monitor not available. Data [%s] NOT normalized to monitor" % (input_ws_name))
 #############################################################################################
+
 
 AlgorithmFactory.subscribe(EQSANSNormalise)

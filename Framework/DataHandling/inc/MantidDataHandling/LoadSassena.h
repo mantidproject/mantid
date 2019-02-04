@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAHANDLING_LOADSASSENA_H_
 #define MANTID_DATAHANDLING_LOADSASSENA_H_
 
@@ -23,24 +29,6 @@ Required Properties:
 
 @author Jose Borreguero
 @date 2012-04-24
-
-Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 /* Base class to Load a sassena dataset into a MatrixWorkspace
@@ -83,15 +71,16 @@ protected:
   herr_t dataSetDouble(const hid_t &h5file, const std::string setName,
                        std::vector<double> &buf);
   /// Load qvectors dataset, calculate modulus of vectors
-  MantidVec loadQvectors(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
-                         std::vector<int> &sorting_indexes);
+  HistogramData::Points loadQvectors(const hid_t &h5file,
+                                     API::WorkspaceGroup_sptr gws,
+                                     std::vector<int> &sorting_indexes);
   /// Load structure factor asa function of q-vector modulus
   void loadFQ(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
-              const std::string setName, const MantidVec &qvmod,
+              const std::string setName, const HistogramData::Points &qvmod,
               const std::vector<int> &sorting_indexes);
   /// Load time-dependent structure factor
   void loadFQT(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
-               const std::string setName, const MantidVec &qvmod,
+               const std::string setName, const HistogramData::Points &qvmod,
                const std::vector<int> &sorting_indexes);
 
 private:

@@ -38,8 +38,8 @@ namespace Mantid {
 namespace API {
 class IFunction;
 class MatrixWorkspace;
-}
-}
+} // namespace API
+} // namespace Mantid
 
 // Function curve class
 class FunctionCurve : public PlotCurve {
@@ -52,6 +52,8 @@ public:
                 int wsIndex = 0, const QString &name = QString());
   FunctionCurve(const FunctionCurve &c);
   ~FunctionCurve() override;
+
+  FunctionCurve &operator=(const FunctionCurve &rhs) = delete;
 
   PlotCurve *clone(const Graph *) const override {
     return new FunctionCurve(*this);
@@ -84,7 +86,7 @@ public:
   void loadData(int points = 0);
 
   void loadMantidData(boost::shared_ptr<const Mantid::API::MatrixWorkspace> ws,
-                      size_t wi);
+                      size_t wi, int peakRadius = 0);
 
   /// No error bars on this curve: Always return an empty list.
   QList<ErrorBarSettings *> errorBarSettingsList() const override {

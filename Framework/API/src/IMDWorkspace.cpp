@@ -1,7 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/IPropertyManager.h"
-#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/VMD.h"
 
 #include <sstream>
@@ -12,7 +19,8 @@ namespace Mantid {
 namespace API {
 //-----------------------------------------------------------------------------------------------
 /** Default constructor */
-IMDWorkspace::IMDWorkspace() : Workspace(), Mantid::API::MDGeometry() {
+IMDWorkspace::IMDWorkspace(const Parallel::StorageMode storageMode)
+    : Workspace(storageMode), Mantid::API::MDGeometry() {
   m_convention = Kernel::ConfigService::Instance().getString("Q.convention");
 }
 
@@ -24,15 +32,16 @@ IMDWorkspace::IMDWorkspace() : Workspace(), Mantid::API::MDGeometry() {
  * @param function :: Implicit function limiting space to look at
  * @return a single IMDIterator pointer
  */
-IMDIterator *IMDWorkspace::createIterator(
+std::unique_ptr<IMDIterator> IMDWorkspace::createIterator(
     Mantid::Geometry::MDImplicitFunction *function) const {
-  std::vector<IMDIterator *> iterators = this->createIterators(1, function);
+  std::vector<std::unique_ptr<IMDIterator>> iterators =
+      this->createIterators(1, function);
   if (iterators.empty())
     throw std::runtime_error("IMDWorkspace::createIterator(): iterator "
                              "creation was not successful. No iterators "
                              "returned by " +
                              this->id());
-  return iterators[0];
+  return std::move(iterators[0]);
 }
 
 //---------------------------------------------------------------------------------------------
@@ -94,7 +103,7 @@ const std::string IMDWorkspace::toString() const {
   os << id() << "\n"
      << "Title: " + getTitle() << "\n";
   for (size_t i = 0; i < getNumDims(); i++) {
-    Geometry::IMDDimension_const_sptr dim = getDimension(i);
+    const auto &dim = getDimension(i);
     os << "Dim " << i << ": (" << dim->getName() << ") " << dim->getMinimum()
        << " to " << dim->getMaximum() << " in " << dim->getNBins() << " bins";
     // Also show the dimension ID string, if different than name
@@ -187,8 +196,8 @@ none for the generic case, but overriden elsewhere.
 MDNormalization IMDWorkspace::displayNormalizationHisto() const {
   return NoNormalization;
 }
-}
-}
+} // namespace API
+} // namespace Mantid
 
 namespace Mantid {
 namespace Kernel {

@@ -1,18 +1,25 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_GEOMETRY_POINTGROUP_H_
 #define MANTID_GEOMETRY_POINTGROUP_H_
 
 #include "MantidGeometry/DllConfig.h"
-#include "MantidKernel/V3D.h"
 #include "MantidKernel/Matrix.h"
+#include "MantidKernel/V3D.h"
 #ifndef Q_MOC_RUN
 #include <boost/shared_ptr.hpp>
 #endif
-#include <vector>
-#include <string>
+#include <map>
 #include <set>
+#include <string>
+#include <vector>
 
-#include "MantidGeometry/Crystal/SymmetryOperation.h"
 #include "MantidGeometry/Crystal/Group.h"
+#include "MantidGeometry/Crystal/SymmetryOperation.h"
 
 namespace Mantid {
 namespace Geometry {
@@ -63,7 +70,7 @@ public:
   Kernel::V3D getReflectionFamily(const Kernel::V3D &hkl) const;
 
 protected:
-  std::vector<Kernel::V3D> getEquivalentSet(const Kernel::V3D &hkl) const;
+  std::vector<Kernel::V3D> getAllEquivalents(const Kernel::V3D &hkl) const;
 
   CrystalSystem getCrystalSystemFromGroup() const;
   LatticeSystem getLatticeSystemFromCrystalSystemAndGroup(
@@ -76,7 +83,7 @@ protected:
 };
 
 /// Shared pointer to a PointGroup
-typedef boost::shared_ptr<PointGroup> PointGroup_sptr;
+using PointGroup_sptr = boost::shared_ptr<PointGroup>;
 
 MANTID_GEOMETRY_DLL std::vector<PointGroup_sptr> getAllPointGroups();
 
@@ -96,6 +103,9 @@ MANTID_GEOMETRY_DLL
 PointGroup::LatticeSystem
 getLatticeSystemFromString(const std::string &latticeSystem);
 
+MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &stream,
+                                             const PointGroup &self);
+
 /// This is necessary to make the map work with older compilers. Can be removed
 /// when GCC 4.4 is not used anymore.
 struct MANTID_GEOMETRY_DLL CrystalSystemComparator {
@@ -103,12 +113,13 @@ struct MANTID_GEOMETRY_DLL CrystalSystemComparator {
                   const PointGroup::CrystalSystem &rhs) const;
 };
 
-typedef std::multimap<PointGroup::CrystalSystem, PointGroup_sptr,
-                      CrystalSystemComparator> PointGroupCrystalSystemMap;
+using PointGroupCrystalSystemMap =
+    std::multimap<PointGroup::CrystalSystem, PointGroup_sptr,
+                  CrystalSystemComparator>;
 
 MANTID_GEOMETRY_DLL PointGroupCrystalSystemMap getPointGroupsByCrystalSystem();
 
-} // namespace Mantid
 } // namespace Geometry
+} // namespace Mantid
 
 #endif /* MANTID_GEOMETRY_POINTGROUP_H_ */

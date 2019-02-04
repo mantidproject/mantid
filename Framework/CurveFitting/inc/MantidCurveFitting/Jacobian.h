@@ -1,11 +1,15 @@
-#ifndef MANTID_CURVEFITTING_GSLFUNCTIONS_H_
-#define MANTID_CURVEFITTING_GSLFUNCTIONS_H_
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
+#ifndef MANTID_CURVEFITTING_Jacobian_H_
+#define MANTID_CURVEFITTING_Jacobian_H_
 
 #include "MantidAPI/Jacobian.h"
-#include <gsl/gsl_matrix.h>
 
 #include <vector>
-#include <stdexcept>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -14,27 +18,6 @@ An implementation of Jacobian using std::vector.
 
 @author Roman Tolchenov
 @date 17/02/2012
-
-Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>
-Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class Jacobian : public API::Jacobian {
   /// Number of data points
@@ -74,7 +57,7 @@ public:
       throw std::out_of_range("Data index in Jacobian is out of range");
     }
     if (iP >= m_np) {
-      throw std::out_of_range("Parameter index in Jacobian is out of range");
+      throw Kernel::Exception::FitSizeWarning(m_np);
     }
     m_data[iY * m_np + iP] = value;
   }
@@ -84,7 +67,7 @@ public:
       throw std::out_of_range("Data index in Jacobian is out of range");
     }
     if (iP >= m_np) {
-      throw std::out_of_range("Parameter index in Jacobian is out of range");
+      throw Kernel::Exception::FitSizeWarning(m_np);
     }
     return m_data[iY * m_np + iP];
   }
@@ -95,4 +78,4 @@ public:
 } // namespace CurveFitting
 } // namespace Mantid
 
-#endif /*MANTID_CURVEFITTING_GSLFUNCTIONS_H_*/
+#endif /*MANTID_CURVEFITTING_Jacobian_H_*/

@@ -3,7 +3,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -31,8 +31,8 @@ Usage
     ows = ExtractUnmaskedSpectra(ws)
 
     # Compare workspace sizes
-    print 'Number of spectra in original workspace', ws.getNumberHistograms()
-    print 'Number of spectra in cropped  workspace', ows.getNumberHistograms()
+    print('Number of spectra in original workspace {}'.format(ws.getNumberHistograms()))
+    print('Number of spectra in cropped  workspace {}'.format(ows.getNumberHistograms()))
 
 Output:
 

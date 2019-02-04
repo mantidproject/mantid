@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_KERNEL_UNIT_H_
 #define MANTID_KERNEL_UNIT_H_
 
@@ -5,7 +11,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/UnitLabel.h"
-#include <map>
 #include <vector>
 #ifndef Q_MOC_RUN
 #include <boost/shared_ptr.hpp>
@@ -24,27 +29,6 @@ namespace Kernel {
 
     @author Russell Taylor, Tessella Support Services plc
     @date 25/02/2008
-
-    Copyright &copy; 2008-2011 ISIS Rutherford Appleton Laboratory, NScD Oak
-   Ridge National Laboratory & European Spallation Source
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>.
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_KERNEL_DLL Unit {
 public:
@@ -227,23 +211,23 @@ protected:
 private:
   /// A 'quick conversion' requires the constant by which to multiply the input
   /// and the power to which to raise it
-  typedef std::pair<double, double> ConstantAndPower;
+  using ConstantAndPower = std::pair<double, double>;
   /// Lists, for a given starting unit, the units to which a 'quick conversion'
   /// can be made
-  typedef tbb::concurrent_unordered_map<std::string, ConstantAndPower>
-      UnitConversions;
+  using UnitConversions =
+      tbb::concurrent_unordered_map<std::string, ConstantAndPower>;
   /// The possible 'quick conversions' are held in a map with the starting unit
   /// as the key
-  typedef tbb::concurrent_unordered_map<std::string, UnitConversions>
-      ConversionsMap;
+  using ConversionsMap =
+      tbb::concurrent_unordered_map<std::string, UnitConversions>;
   /// The table of possible 'quick conversions'
   static ConversionsMap s_conversionFactors;
 };
 
 /// Shared pointer to the Unit base class
-typedef boost::shared_ptr<Unit> Unit_sptr;
+using Unit_sptr = boost::shared_ptr<Unit>;
 /// Shared pointer to the Unit base class (const version)
-typedef boost::shared_ptr<const Unit> Unit_const_sptr;
+using Unit_const_sptr = boost::shared_ptr<const Unit>;
 
 //----------------------------------------------------------------------
 // Now the concrete units classes
@@ -409,6 +393,33 @@ protected:
 };
 
 //=================================================================================================
+/// d-SpacingPerpendicular in Angstrom
+class MANTID_KERNEL_DLL dSpacingPerpendicular : public Unit {
+public:
+  const std::string unitID() const override; ///< "dSpacingPerpendicular"
+  const std::string caption() const override {
+    return "d-SpacingPerpendicular";
+  }
+  const UnitLabel label() const override;
+
+  double singleToTOF(const double x) const override;
+  double singleFromTOF(const double tof) const override;
+  void init() override;
+  Unit *clone() const override;
+  double conversionTOFMin() const override;
+  double conversionTOFMax() const override;
+
+  /// Constructor
+  dSpacingPerpendicular();
+
+protected:
+  double factorTo;   ///< Constant factor for to conversion
+  double sfpTo;      ///< Extra correction factor in to conversion
+  double factorFrom; ///< Constant factor for from conversion
+  double sfpFrom;    ///< Extra correction factor in to conversion
+};
+
+//=================================================================================================
 /// Momentum Transfer in Angstrom^-1
 class MANTID_KERNEL_DLL MomentumTransfer : public Unit {
 public:
@@ -494,6 +505,22 @@ public:
   double conversionTOFMax() const override;
   /// Constructor
   DeltaE_inWavenumber();
+};
+
+//=================================================================================================
+/// Energy transfer in units of frequency (GHz)
+class MANTID_KERNEL_DLL DeltaE_inFrequency : public DeltaE {
+public:
+  const std::string unitID() const override; ///< "DeltaE_inFrequency"
+  const std::string caption() const override { return "Energy transfer"; }
+  const UnitLabel label() const override;
+
+  void init() override;
+  Unit *clone() const override;
+  double conversionTOFMin() const override;
+  double conversionTOFMax() const override;
+  /// Constructor
+  DeltaE_inFrequency();
 };
 
 //=================================================================================================
@@ -584,7 +611,7 @@ protected:
 };
 
 //=================================================================================================
-/// Degrees that has degrees as unit at "Scattering angle" as title
+/// Degrees that has degrees as unit and "Scattering angle" as title
 class MANTID_KERNEL_DLL Degrees : public Empty {
 public:
   Degrees();
@@ -605,11 +632,31 @@ private:
 };
 
 //=================================================================================================
-
-/// Phi that has degrees as unit at "Phi" as title
+/// Phi that has degrees as unit and "Phi" as title
 class MANTID_KERNEL_DLL Phi : public Degrees {
   const std::string caption() const override { return "Phi"; }
   Unit *clone() const override { return new Phi(*this); }
+};
+
+//=================================================================================================
+/// Temperature in kelvin
+class MANTID_KERNEL_DLL Temperature : public Empty {
+public:
+  Temperature();
+  const std::string unitID() const override; ///< "Temperature"
+  const std::string caption() const override { return "Temperature"; }
+  const UnitLabel label() const override;
+
+  void init() override;
+  Unit *clone() const override;
+
+  double singleToTOF(const double x) const override;
+  double singleFromTOF(const double tof) const override;
+  double conversionTOFMin() const override;
+  double conversionTOFMax() const override;
+
+private:
+  UnitLabel m_label;
 };
 
 //=================================================================================================

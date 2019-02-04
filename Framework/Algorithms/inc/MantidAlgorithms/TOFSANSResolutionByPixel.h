@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_TOFSANSRESOLUTIONBYPIXEL_H_
 #define MANTID_ALGORITHMS_TOFSANSRESOLUTIONBYPIXEL_H_
 
@@ -30,6 +36,9 @@ public:
 
   /// Algorithm's version
   int version() const override { return (1); }
+  const std::vector<std::string> seeAlso() const override {
+    return {"TOFSANSResolution"};
+  }
   /// Algorithm's category for identification
   const std::string category() const override { return "SANS"; }
 

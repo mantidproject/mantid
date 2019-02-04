@@ -1,9 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CalculateZscore.h"
-
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidHistogramData/Histogram.h"
+#include "MantidHistogramData/HistogramBuilder.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Statistics.h"
 
@@ -13,6 +20,7 @@ using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
+using namespace Mantid::HistogramData;
 using namespace std;
 
 namespace Mantid {
@@ -22,7 +30,7 @@ DECLARE_ALGORITHM(CalculateZscore)
 
 //----------------------------------------------------------------------------------------------
 /** Define properties
-  */
+ */
 void CalculateZscore::init() {
   declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "Anonymous", Direction::Input),
@@ -39,7 +47,7 @@ void CalculateZscore::init() {
 
 //----------------------------------------------------------------------------------------------
 /** Execute body
-  */
+ */
 void CalculateZscore::exec() {
   // 1. Get input and validate
   MatrixWorkspace_const_sptr inpWS = getProperty("InputWorkspace");
@@ -60,11 +68,13 @@ void CalculateZscore::exec() {
   size_t sizex = inpWS->x(0).size();
   size_t sizey = inpWS->y(0).size();
 
-  Workspace2D_sptr outWS = boost::dynamic_pointer_cast<Workspace2D>(
-      WorkspaceFactory::Instance().create("Workspace2D", numspec, sizex,
-                                          sizey));
+  HistogramBuilder builder;
+  builder.setX(sizex);
+  builder.setY(sizey);
+  builder.setDistribution(inpWS->isDistribution());
+  Workspace2D_sptr outWS = create<Workspace2D>(numspec, builder.build());
 
-  Progress progress(this, 0, 1, numspec);
+  Progress progress(this, 0.0, 1.0, numspec);
 
   // 3. Get Z values
   for (size_t i = 0; i < numspec; ++i) {

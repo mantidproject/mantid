@@ -1,13 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidDataHandling/GroupDetectors.h"
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
-#include "MantidDataHandling/GroupDetectors.h"
 #include "MantidHistogramData/HistogramMath.h"
 #include "MantidKernel/ArrayProperty.h"
-#include <set>
 #include <numeric>
+#include <set>
 
 namespace Mantid {
 namespace DataHandling {
@@ -59,7 +65,7 @@ void GroupDetectors::exec() {
   }
 
   // Bin boundaries need to be the same, so check if they actually are
-  if (!API::WorkspaceHelpers::commonBoundaries(WS)) {
+  if (!API::WorkspaceHelpers::commonBoundaries(*WS)) {
     g_log.error("Can only group if the histograms have common bin boundaries");
     throw std::runtime_error(
         "Can only group if the histograms have common bin boundaries");

@@ -1,15 +1,21 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MDALGORITHMS_CREATEMDTEST_H_
 #define MANTID_MDALGORITHMS_CREATEMDTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidMDAlgorithms/CreateMD.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
+#include "MantidMDAlgorithms/CreateMD.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-#include <stdexcept>
 #include <Poco/File.h>
+#include <stdexcept>
 
 using Mantid::MDAlgorithms::CreateMD;
 
@@ -61,7 +67,7 @@ public:
   }
 
   void test_psi_right_size() {
-    auto sample_ws = WorkspaceCreationHelper::Create2DWorkspace(1, 1);
+    auto sample_ws = WorkspaceCreationHelper::create2DWorkspace(1, 1);
     Mantid::API::AnalysisDataService::Instance().add("__CreateMDTest_sample",
                                                      sample_ws);
 
@@ -87,7 +93,7 @@ public:
   }
 
   void test_gl_right_size() {
-    auto sample_ws = WorkspaceCreationHelper::Create2DWorkspace(1, 1);
+    auto sample_ws = WorkspaceCreationHelper::create2DWorkspace(1, 1);
     Mantid::API::AnalysisDataService::Instance().add("__CreateMDTest_sample",
                                                      sample_ws);
 
@@ -113,7 +119,7 @@ public:
   }
 
   void test_gs_right_size() {
-    auto sample_ws = WorkspaceCreationHelper::Create2DWorkspace(1, 1);
+    auto sample_ws = WorkspaceCreationHelper::create2DWorkspace(1, 1);
     Mantid::API::AnalysisDataService::Instance().add("__CreateMDTest_sample",
                                                      sample_ws);
 

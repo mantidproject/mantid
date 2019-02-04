@@ -1,12 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/ThresholdMD.h"
+#include "MantidAPI/Progress.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
-#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MultiThreaded.h"
-#include "MantidAPI/Progress.h"
-#include <boost/function.hpp>
 #include <boost/bind.hpp>
+#include <boost/function.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -57,9 +63,10 @@ void ThresholdMD::init() {
   declareProperty("ReferenceValue", 0.0,
                   "Comparator value used by the Condition.");
 
-  declareProperty("OverwriteWithZero", true, "Flag for enabling overwriting "
-                                             "with a custom value. Defaults to "
-                                             "overwrite signals with zeros.");
+  declareProperty("OverwriteWithZero", true,
+                  "Flag for enabling overwriting "
+                  "with a custom value. Defaults to "
+                  "overwrite signals with zeros.");
 
   declareProperty("CustomOverwriteValue", 0.0,
                   "Custom overwrite value for the signal. Defaults to zero.");
@@ -103,13 +110,13 @@ void ThresholdMD::exec() {
     comparitor = boost::bind(std::greater<double>(), _1, referenceValue);
   }
 
-  Progress prog(this, 0, 1, 100);
+  Progress prog(this, 0.0, 1.0, 100);
   int64_t frequency = nPoints;
   if (nPoints > 100) {
     frequency = nPoints / 100;
   }
 
-  PARALLEL_FOR2(inputWS, outWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outWS))
   for (int64_t i = 0; i < nPoints; ++i) {
     PARALLEL_START_INTERUPT_REGION
     const double signalAt = inputWS->getSignalAt(i);

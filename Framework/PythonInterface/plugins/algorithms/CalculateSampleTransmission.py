@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name
 from __future__ import (absolute_import, division, print_function)
 
@@ -19,6 +25,9 @@ class CalculateSampleTransmission(PythonAlgorithm):
 
     def category(self):
         return 'Sample'
+
+    def seeAlso(self):
+        return [ "SetSampleMaterial" ]
 
     def summary(self):
         return 'Calculates the scattering & transmission for a given sample material and size over a given wavelength range.'
@@ -110,9 +119,11 @@ class CalculateSampleTransmission(PythonAlgorithm):
         @return Tuple of transmission and scattering percentages
         """
 
+        TABULATED_WAVELENGTH = 1.798
+
         material = mtd[self._output_ws].mutableSample().getMaterial()
 
-        absorption_x_section = material.absorbXSection() * wavelength
+        absorption_x_section = material.absorbXSection() * wavelength / TABULATED_WAVELENGTH
         total_x_section = absorption_x_section + material.totalScatterXSection()
 
         transmission = math.exp(-self._density * total_x_section * self._thickness)

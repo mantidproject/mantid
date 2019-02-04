@@ -1,0 +1,128 @@
+/*-------------------- $GENERAL --------------------*/
+
+#table-of-contents { border: none; }
+
+/*-------------------- $NAV --------------------*/
+
+.navbar-version { display: none; }
+
+/*-------------------- $LINKS --------------------*/
+
+a {
+  color: #009933;
+  text-decoration: none;
+}
+
+a:hover {
+  color: #009933;
+  text-decoration: underline;
+}
+
+/*-------------------- $SPACING --------------------*/
+
+body { font-size: 1.6em; } /* 16px */
+
+h1{
+  margin-top: 0;
+}
+
+/*-------------------- $MATH ----------------------*/
+
+img.math {
+    vertical-align: middle;
+}
+
+div.math p {
+    text-align: center;
+}
+
+span.eqno {
+    float: right;
+}
+
+/*-------------------- $IMAGES --------------------*/
+
+.screenshot {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  padding-bottom: 0.1em;
+}
+
+.caption {
+  text-align: center;
+  font-size: 0.9em;
+}
+
+.navbar-brand {
+  padding: 4px 15px 0px 15px;
+}
+
+.navbar-brand > img{
+  width: 85px;
+}
+
+/*-------------------- $TABLES --------------------*/
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.6em 0;
+}
+
+/* Zebra striping */
+tr:nth-of-type(odd) { background: white; }
+
+tr:hover { background-color: whiteSmoke; }
+
+th {
+  background: #E0DFDE;
+  font-size: 1.3em;
+}
+
+td, th {
+  padding: .75em;
+  border: 1px solid #CCC;
+  text-align: left;
+}
+
+/*-------------------- $SPHINX-OVERRIDES --------------------*/
+
+.warning { overflow: hidden; }
+
+/*-------------------- $MEDIA-QUERIES --------------------*/
+
+@media (min-width: 1200px) {
+  #table-of-contents {
+    width: auto;
+    max-width: 40%;
+  }
+}
+/*---------------------Coloured_text-------------------------*/
+
+.red {
+    color:red;
+}
+.blue {
+    color:blue;
+}
+.green {
+    color:green;
+}
+
+/*-------Introduced here for colors in table cells, for the comparisons of minimizers-----*/
+.ranking-top-1 {
+    background-color: #fef0d9;
+}
+.ranking-top-2 {
+    background-color: #fdcc8a;
+}
+.ranking-med-3 {
+    background-color: #fc8d59;
+}
+.ranking-low-4 {
+    background-color: #e34a33;
+}
+.ranking-low-5 {
+    background-color: #b30000;
+}

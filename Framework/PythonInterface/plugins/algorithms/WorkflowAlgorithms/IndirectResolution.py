@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
 from __future__ import (absolute_import, division, print_function)
 
@@ -74,7 +80,7 @@ class IndirectResolution(DataProcessorAlgorithm):
         iet_alg.execute()
 
         group_ws = iet_alg.getProperty('OutputWorkspace').value
-        icon_ws = group_ws.getItem(0).getName()
+        icon_ws = group_ws.getItem(0).name()
 
         workflow_prog = Progress(self, start=0.7, end=0.9, nreports=4)
 

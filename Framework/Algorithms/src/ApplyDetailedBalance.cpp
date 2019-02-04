@@ -1,8 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/ApplyDetailedBalance.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
-#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -13,6 +20,7 @@
 using std::string;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using namespace Mantid::DataObjects;
 
 namespace Mantid {
 namespace Algorithms {
@@ -28,13 +36,18 @@ void ApplyDetailedBalance::init() {
   declareProperty(make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "An input workspace.");
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
-                  "An output workspace.");
   declareProperty(
       make_unique<PropertyWithValue<string>>("Temperature", "",
                                              Direction::Input),
       "SampleLog variable name that contains the temperature, or a number");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "An output workspace.");
+  std::vector<std::string> unitOptions{"Energy", "Frequency"};
+  declareProperty(
+      "OutputUnits", "Energy",
+      boost::make_shared<StringListValidator>(unitOptions),
+      "Susceptibility as a function of energy (meV) or frequency (GHz)");
 }
 
 /** Execute the algorithm.
@@ -45,7 +58,7 @@ void ApplyDetailedBalance::exec() {
   // If input and output workspaces are not the same, create a new workspace for
   // the output
   if (outputWS != inputWS) {
-    outputWS = API::WorkspaceFactory::Instance().create(inputWS);
+    outputWS = create<MatrixWorkspace>(*inputWS);
   }
 
   std::string Tstring = getProperty("Temperature");
@@ -80,8 +93,17 @@ void ApplyDetailedBalance::exec() {
   // Get back the result
   outputWS = expcor->getProperty("OutputWorkspace");
 
+  // Select the unit, transform if different than energy
+  std::string unit = getProperty("OutputUnits");
+  if (unit == "Frequency") {
+    IAlgorithm_sptr convert = createChildAlgorithm("ConvertUnits");
+    convert->setProperty<MatrixWorkspace_sptr>("InputWorkspace", outputWS);
+    convert->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", outputWS);
+    convert->setProperty<std::string>("Target", "DeltaE_inFrequency");
+    convert->executeAsChildAlg();
+  }
   setProperty("OutputWorkspace", outputWS);
 }
 
-} // namespace Mantid
 } // namespace Algorithms
+} // namespace Mantid

@@ -30,10 +30,10 @@
 #ifndef MVALUESDIALOG_H
 #define MVALUESDIALOG_H
 
-#include <QDialog>
-#include "ScriptingEnv.h"
-#include "Script.h"
 #include "Matrix.h"
+#include "Script.h"
+#include "ScriptingEnv.h"
+#include <QDialog>
 
 #ifdef SCRIPTING_PYTHON
 class QCheckBox;
@@ -50,7 +50,8 @@ class MatrixValuesDialog : public QDialog, public Scripted {
   Q_OBJECT
 
 public:
-  MatrixValuesDialog(ScriptingEnv *env, QWidget *parent = 0, Qt::WFlags fl = 0);
+  MatrixValuesDialog(ScriptingEnv *env, QWidget *parent = nullptr,
+                     Qt::WFlags fl = nullptr);
   void setMatrix(Matrix *m);
 
 private slots:

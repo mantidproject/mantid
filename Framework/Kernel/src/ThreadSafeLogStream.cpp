@@ -1,7 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //-----------------------------------------------
 // Includes
 //-----------------------------------------------
 #include "MantidKernel/ThreadSafeLogStream.h"
+
+#include <Poco/Logger.h>
+#include <Poco/StreamUtil.h>
+#include <Poco/UnbufferedStreamBuf.h>
 
 using namespace Mantid::Kernel;
 
@@ -79,8 +89,8 @@ ThreadSafeLogStream::ThreadSafeLogStream(Poco::Logger &logger,
  */
 ThreadSafeLogStream::ThreadSafeLogStream(const std::string &loggerName,
                                          Poco::Message::Priority priority)
-    : ThreadSafeLogIOS(Poco::Logger::get(loggerName), priority),
-      std::ostream(&m_buf) {}
+    : ThreadSafeLogIOS(Poco::Logger::get(loggerName), priority), std::ostream(
+                                                                     &m_buf) {}
 
 /**
  * Return a reference to the log stream with the priority set to fatal

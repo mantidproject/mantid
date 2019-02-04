@@ -1,11 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef RENAMEWORKSPACESTEST_H_
 #define RENAMEWORKSPACESTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidAlgorithms/RenameWorkspaces.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAlgorithms/RenameWorkspaces.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -264,7 +271,7 @@ public:
 
   MatrixWorkspace_sptr createWorkspace() {
     MatrixWorkspace_sptr inputWS =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(4, 4, 0.5);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(4, 4, 0.5);
     return inputWS;
   }
 

@@ -1,18 +1,24 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_MAYERSSAMPLECORRECTIONTEST_H_
 #define MANTID_ALGORITHMS_MAYERSSAMPLECORRECTIONTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/SampleCorrections/MayersSampleCorrection.h"
-#include "MantidGeometry/Instrument/ComponentHelper.h"
-#include "MantidKernel/Material.h"
 #include "MantidAPI/Sample.h"
+#include "MantidAlgorithms/SampleCorrections/MayersSampleCorrection.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidKernel/Material.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-using Mantid::Algorithms::MayersSampleCorrection;
 using Mantid::API::IAlgorithm_sptr;
 using Mantid::API::MatrixWorkspace_sptr;
+using Mantid::Algorithms::MayersSampleCorrection;
 
 class MayersSampleCorrectionTest : public CxxTest::TestSuite {
 public:
@@ -41,11 +47,11 @@ public:
     TS_ASSERT_DELTA(99.5, tof.front(), delta);
     TS_ASSERT_DELTA(199.5, tof.back(), delta);
 
-    TS_ASSERT_DELTA(0.37497317, signal.front(), delta);
-    TS_ASSERT_DELTA(0.37629282, signal.back(), delta);
+    TS_ASSERT_DELTA(0.374435, signal.front(), delta);
+    TS_ASSERT_DELTA(0.377909, signal.back(), delta);
 
-    TS_ASSERT_DELTA(0.26514607, error.front(), delta);
-    TS_ASSERT_DELTA(0.2660792, error.back(), delta);
+    TS_ASSERT_DELTA(0.264766, error.front(), delta);
+    TS_ASSERT_DELTA(0.267222, error.back(), delta);
   }
 
   void test_Success_With_Just_Absorption_Correction() {
@@ -96,6 +102,8 @@ private:
     alg->initialize();
     alg->setProperty("InputWorkspace", inputWS);
     alg->setProperty("MultipleScattering", mscatOn);
+    alg->setProperty("MSEvents", 2000);
+    alg->setProperty("MSRuns", 5);
     alg->setPropertyValue("OutputWorkspace", "_unused_for_child");
     alg->execute();
     return alg;
@@ -104,19 +112,17 @@ private:
   MatrixWorkspace_sptr createTestWorkspaceForCorrection() {
     using ComponentCreationHelper::createCappedCylinder;
     using ComponentCreationHelper::createTestInstrumentCylindrical;
-    using Mantid::Geometry::ComponentHelper::Absolute;
-    using Mantid::Geometry::ComponentHelper::moveComponent;
+    using Mantid::Geometry::CSGObject;
     using Mantid::Geometry::ObjComponent;
-    using Mantid::Geometry::Object;
     using Mantid::Kernel::Material;
     using Mantid::Kernel::V3D;
     using Mantid::PhysicalConstants::getNeutronAtom;
-    using WorkspaceCreationHelper::Create2DWorkspaceBinned;
+    using WorkspaceCreationHelper::create2DWorkspaceBinned;
 
     const int nhist(1), nbins(100);
     const double xstart(99.5), deltax(1.0);
     // Filled Y with 2.0 and E with sqrt(2)
-    auto testWS = Create2DWorkspaceBinned(nhist, nbins, xstart, deltax);
+    auto testWS = create2DWorkspaceBinned(nhist, nbins, xstart, deltax);
 
     const int nbanks(1);
     // Ids 1->9
@@ -130,41 +136,39 @@ private:
       spectrum.addDetectorID(i + 1);
     }
 
-    // Sample properties - cylinder of vanadium
+    // Sample properties
     const double radius(0.0025), height(0.04);
     auto cylinder =
         createCappedCylinder(radius, height, V3D(), V3D(0., 1., 0.), "sample");
     const double numberDensity(0.07261);
     cylinder->setMaterial(Material("V", getNeutronAtom(23), numberDensity));
-    testWS->mutableSample().setShape(*cylinder);
+    testWS->mutableSample().setShape(cylinder);
 
     // Move the detector to a known position
-    auto &pmap = testWS->instrumentParameters();
     const double twoTheta = 0.10821;
     const double l2 = 2.2;
-    auto det = testWS->getDetector(0);
-    moveComponent(*det, pmap, V3D(l2 * sin(twoTheta), 0.0, l2 * cos(twoTheta)),
-                  Absolute);
+    auto &detInfo = testWS->mutableDetectorInfo();
+    detInfo.setPosition(0, V3D(l2 * sin(twoTheta), 0.0, l2 * cos(twoTheta)));
     return testWS;
   }
 
   MatrixWorkspace_sptr createTestWorkspaceWithNoInstrument() {
     const int nhist(1), nbins(1);
     const double xstart(99.5), deltax(1.0);
-    return WorkspaceCreationHelper::Create2DWorkspaceBinned(nhist, nbins,
+    return WorkspaceCreationHelper::create2DWorkspaceBinned(nhist, nbins,
                                                             xstart, deltax);
   }
 
   MatrixWorkspace_sptr createTestWorkspaceWithNoSampleShape() {
     using ComponentCreationHelper::createTestInstrumentCylindrical;
+    using Mantid::Geometry::CSGObject;
     using Mantid::Geometry::ObjComponent;
-    using Mantid::Geometry::Object;
     using Mantid::Kernel::V3D;
-    using WorkspaceCreationHelper::Create2DWorkspaceBinned;
+    using WorkspaceCreationHelper::create2DWorkspaceBinned;
 
     const int nhist(1), nbins(1);
     const double xstart(99.5), deltax(1.0);
-    auto testWS = Create2DWorkspaceBinned(nhist, nbins, xstart, deltax);
+    auto testWS = create2DWorkspaceBinned(nhist, nbins, xstart, deltax);
 
     const int nbanks(1);
     auto testInst = createTestInstrumentCylindrical(nbanks, V3D(0., 0., -14.));

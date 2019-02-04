@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidWorkflowAlgorithms/LoadEventAndCompress.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FileProperty.h"
@@ -71,18 +77,18 @@ void LoadEventAndCompress::init() {
 
   copyProperty(algLoadEventNexus, "NXentryName");
   copyProperty(algLoadEventNexus, "LoadMonitors");
-  copyProperty(algLoadEventNexus, "MonitorsAsEvents");
+  copyProperty(algLoadEventNexus, "MonitorsLoadOnly");
   copyProperty(algLoadEventNexus, "FilterMonByTofMin");
   copyProperty(algLoadEventNexus, "FilterMonByTofMax");
   copyProperty(algLoadEventNexus, "FilterMonByTimeStart");
   copyProperty(algLoadEventNexus, "FilterMonByTimeStop");
 
   setPropertySettings(
-      "MonitorsAsEvents",
+      "MonitorsLoadOnly",
       make_unique<VisibleWhenProperty>("LoadMonitors", IS_EQUAL_TO, "1"));
   auto asEventsIsOn = [] {
     std::unique_ptr<IPropertySettings> settings =
-        make_unique<VisibleWhenProperty>("MonitorsAsEvents", IS_EQUAL_TO, "1");
+        make_unique<VisibleWhenProperty>("MonitorsLoadOnly", IS_EQUAL_TO, "1");
     return settings;
   };
   setPropertySettings("FilterMonByTofMin", asEventsIsOn());
@@ -92,7 +98,7 @@ void LoadEventAndCompress::init() {
 
   std::string grp4 = "Monitors";
   setPropertyGroup("LoadMonitors", grp4);
-  setPropertyGroup("MonitorsAsEvents", grp4);
+  setPropertyGroup("MonitorsLoadOnly", grp4);
   setPropertyGroup("FilterMonByTofMin", grp4);
   setPropertyGroup("FilterMonByTofMax", grp4);
   setPropertyGroup("FilterMonByTimeStart", grp4);
@@ -141,7 +147,7 @@ MatrixWorkspace_sptr LoadEventAndCompress::loadChunk(const size_t rowIndex) {
 
   alg->setProperty<string>("NXentryName", getProperty("NXentryName"));
   alg->setProperty<bool>("LoadMonitors", getProperty("LoadMonitors"));
-  alg->setProperty<bool>("MonitorsAsEvents", getProperty("MonitorsAsEvents"));
+  alg->setProperty<string>("MonitorsLoadOnly", getProperty("MonitorsLoadOnly"));
   alg->setProperty<double>("FilterMonByTofMin",
                            getProperty("FilterMonByTofMin"));
   alg->setProperty<double>("FilterMonByTofMax",
@@ -205,7 +211,7 @@ void LoadEventAndCompress::exec() {
 
   m_chunkingTable = determineChunk(filename);
 
-  Progress progress(this, 0, 1, 2);
+  Progress progress(this, 0.0, 1.0, 2);
 
   // first run is free
   progress.report("Loading Chunk");
@@ -237,6 +243,12 @@ void LoadEventAndCompress::exec() {
   // to prefer loading full banks so no further savings should be available.
 
   setProperty("OutputWorkspace", total);
+}
+
+Parallel::ExecutionMode LoadEventAndCompress::getParallelExecutionMode(
+    const std::map<std::string, Parallel::StorageMode> &storageModes) const {
+  static_cast<void>(storageModes);
+  return Parallel::ExecutionMode::Distributed;
 }
 
 } // namespace WorkflowAlgorithms

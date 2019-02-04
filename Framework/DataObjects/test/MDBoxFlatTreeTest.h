@@ -1,13 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAOBJECTS_MDBOX_FLATTREE_H_
 #define MANTID_DATAOBJECTS_MDBOX_FLATTREE_H_
 
 #include "MantidDataObjects/MDBoxFlatTree.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidDataObjects/MDLeanEvent.h"
+#include "MantidTestHelpers/MDEventsTestHelper.h"
 
+#include <Poco/File.h>
 #include <boost/make_shared.hpp>
 #include <cxxtest/TestSuite.h>
-#include <Poco/File.h>
 
 using Mantid::DataObjects::MDBoxFlatTree;
 
@@ -93,8 +99,8 @@ public:
       if (!Boxes[i]->isBox())
         gridIndices.push_back(i);
     }
-    for (size_t i = 0; i < gridIndices.size(); ++i) {
-      delete Boxes[gridIndices[i]];
+    for (auto gridIndex : gridIndices) {
+      delete Boxes[gridIndex];
     }
 
     // Clean up file

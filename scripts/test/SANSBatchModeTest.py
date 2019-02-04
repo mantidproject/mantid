@@ -1,4 +1,11 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 
+from __future__ import (absolute_import, division, print_function)
 import unittest
 import re
 # Need to import mantid before we import SANSUtility
@@ -72,7 +79,7 @@ class TestSettingUserFileInBatchMode(unittest.TestCase):
         # Clean up
         self._delete_minimal_user_files(user_files)
 
-    def test_user_file_is_set_to_new__user_file_when_it_exists_and_is_different_from_orig_and_current(self):
+    def test_user_file_is_set_to_new_user_file_when_it_exists_and_is_different_from_orig_and_current(self):
         #Arrange
         user_files = self._create_minimal_user_files(3)
         new_user_file = user_files[0]
@@ -92,6 +99,28 @@ class TestSettingUserFileInBatchMode(unittest.TestCase):
                         "The physical reducer should not change.")
         self.assertEqual(ReductionSingleton().user_settings.filename, new_user_file,
                          "The reducer should use the new user file.")
+        # Clean up
+        self._delete_minimal_user_files(user_files)
+
+    def test_user_file_is_set_to_new_user_file_when_it_exists_but_reduction_dimensionality_remains_unchanged(self):
+        #Arrange
+        user_files = self._create_minimal_user_files(3)
+        new_user_file = user_files[0]
+        current_user_file = user_files[1]
+        original_user_file = user_files[2]
+        original_settings, original_prop_man_settings = self._prepare_reducer(current_user_file = current_user_file,
+                                                                              original_user_file = original_user_file)
+        ReductionSingleton().to_Q.output_type = "2D"
+        # Act
+        
+        bm.setUserFileInBatchMode(new_user_file=new_user_file,
+                                  current_user_file=current_user_file,
+                                  original_user_file=original_user_file,
+                                  original_settings = original_settings,
+                                  original_prop_man_settings = original_prop_man_settings)
+        # Assert
+        self.assertTrue(ReductionSingleton().to_Q.output_type=="2D",
+                        "The reducer should retain the same dimensionality.")
         # Clean up
         self._delete_minimal_user_files(user_files)
 
@@ -140,6 +169,23 @@ class TestSettingUserFileInBatchMode(unittest.TestCase):
                          "The reducer should use the current user file.")
         # Clean up
         self._delete_minimal_user_files(user_files)
+
+
+class TestGeometrySettings(unittest.TestCase):
+    def test_that_can_get_geometry_properties(self):
+        LOQ()
+        reducer = ReductionSingleton()
+        geometry_settings = bm.get_geometry_properties(reducer)
+        self.assertTrue("Geometry" in geometry_settings)
+        self.assertTrue("SampleHeight" in geometry_settings)
+        self.assertTrue("SampleWidth" in geometry_settings)
+        self.assertTrue("SampleThickness" in geometry_settings)
+
+        self.assertTrue(geometry_settings["Geometry"] == "Disc")
+        self.assertTrue(geometry_settings["SampleHeight"] == 1.)
+        self.assertTrue(geometry_settings["SampleWidth"] == 1.)
+        self.assertTrue(geometry_settings["SampleThickness"] == 1.)
+
 
 if __name__ == "__main__":
     unittest.main()

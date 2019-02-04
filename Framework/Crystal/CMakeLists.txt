@@ -4,6 +4,7 @@ set ( SRC_FILES
 	src/AnvredCorrection.cpp
 	src/CalculatePeaksHKL.cpp
 	src/CalculateUMatrix.cpp
+	src/CalibrationHelpers.cpp
 	src/CentroidPeaks.cpp
 	src/ClearUB.cpp
 	src/Cluster.cpp
@@ -11,11 +12,13 @@ set ( SRC_FILES
 	src/CombinePeaksWorkspaces.cpp
 	src/CompositeCluster.cpp
 	src/ConnectedComponentLabeling.cpp
+	src/CountReflections.cpp
 	src/DiffPeaksWorkspaces.cpp
 	src/DisjointElement.cpp
 	src/FilterPeaks.cpp
 	src/FindClusterFaces.cpp
 	src/FindSXPeaks.cpp
+	src/FindSXPeaksHelper.cpp
 	src/FindUBUsingFFT.cpp
 	src/FindUBUsingIndexedPeaks.cpp
 	src/FindUBUsingLatticeParameters.cpp
@@ -35,13 +38,13 @@ set ( SRC_FILES
 	src/MaskPeaksWorkspace.cpp
 	src/NormaliseVanadium.cpp
 	src/OptimizeCrystalPlacement.cpp
-	src/OptimizeExtinctionParameters.cpp
 	src/OptimizeLatticeForCellType.cpp
 	src/PeakBackground.cpp
 	src/PeakClusterProjection.cpp
 	src/PeakHKLErrors.cpp
 	src/PeakIntegration.cpp
 	src/PeakIntensityVsRadius.cpp
+	src/PeakStatisticsTools.cpp
 	src/PeaksInRegion.cpp
 	src/PeaksIntersection.cpp
 	src/PeaksOnSurface.cpp
@@ -53,9 +56,9 @@ set ( SRC_FILES
 	src/SaveIsawPeaks.cpp
 	src/SaveIsawUB.cpp
 	src/SaveLauenorm.cpp
-	src/SavePeaksFile.cpp
 	src/SelectCellOfType.cpp
 	src/SelectCellWithForm.cpp
+	src/SetCrystalLocation.cpp
 	src/SetGoniometer.cpp
 	src/SetSpecialCoordinates.cpp
 	src/SetUB.cpp
@@ -64,7 +67,6 @@ set ( SRC_FILES
 	src/SortHKL.cpp
 	src/SortPeaksWorkspace.cpp
 	src/StatisticsOfPeaksWorkspace.cpp
-	src/TOFExtinction.cpp
 	src/TransformHKL.cpp
 )
 
@@ -75,6 +77,7 @@ set ( INC_FILES
 	inc/MantidCrystal/BackgroundStrategy.h
 	inc/MantidCrystal/CalculatePeaksHKL.h
 	inc/MantidCrystal/CalculateUMatrix.h
+	inc/MantidCrystal/CalibrationHelpers.h
 	inc/MantidCrystal/CentroidPeaks.h
 	inc/MantidCrystal/ClearUB.h
 	inc/MantidCrystal/Cluster.h
@@ -82,11 +85,13 @@ set ( INC_FILES
 	inc/MantidCrystal/CombinePeaksWorkspaces.h
 	inc/MantidCrystal/CompositeCluster.h
 	inc/MantidCrystal/ConnectedComponentLabeling.h
+	inc/MantidCrystal/CountReflections.h
 	inc/MantidCrystal/DiffPeaksWorkspaces.h
 	inc/MantidCrystal/DisjointElement.h
 	inc/MantidCrystal/FilterPeaks.h
 	inc/MantidCrystal/FindClusterFaces.h
 	inc/MantidCrystal/FindSXPeaks.h
+	inc/MantidCrystal/FindSXPeaksHelper.h
 	inc/MantidCrystal/FindUBUsingFFT.h
 	inc/MantidCrystal/FindUBUsingIndexedPeaks.h
 	inc/MantidCrystal/FindUBUsingLatticeParameters.h
@@ -108,13 +113,13 @@ set ( INC_FILES
 	inc/MantidCrystal/MaskPeaksWorkspace.h
 	inc/MantidCrystal/NormaliseVanadium.h
 	inc/MantidCrystal/OptimizeCrystalPlacement.h
-	inc/MantidCrystal/OptimizeExtinctionParameters.h
 	inc/MantidCrystal/OptimizeLatticeForCellType.h
 	inc/MantidCrystal/PeakBackground.h
 	inc/MantidCrystal/PeakClusterProjection.h
 	inc/MantidCrystal/PeakHKLErrors.h
 	inc/MantidCrystal/PeakIntegration.h
 	inc/MantidCrystal/PeakIntensityVsRadius.h
+	inc/MantidCrystal/PeakStatisticsTools.h
 	inc/MantidCrystal/PeaksInRegion.h
 	inc/MantidCrystal/PeaksIntersection.h
 	inc/MantidCrystal/PeaksOnSurface.h
@@ -126,9 +131,9 @@ set ( INC_FILES
 	inc/MantidCrystal/SaveIsawPeaks.h
 	inc/MantidCrystal/SaveIsawUB.h
 	inc/MantidCrystal/SaveLauenorm.h
-	inc/MantidCrystal/SavePeaksFile.h
 	inc/MantidCrystal/SelectCellOfType.h
 	inc/MantidCrystal/SelectCellWithForm.h
+	inc/MantidCrystal/SetCrystalLocation.h
 	inc/MantidCrystal/SetGoniometer.h
 	inc/MantidCrystal/SetSpecialCoordinates.h
 	inc/MantidCrystal/SetUB.h
@@ -137,7 +142,6 @@ set ( INC_FILES
 	inc/MantidCrystal/SortHKL.h
 	inc/MantidCrystal/SortPeaksWorkspace.h
 	inc/MantidCrystal/StatisticsOfPeaksWorkspace.h
-	inc/MantidCrystal/TOFExtinction.h
 	inc/MantidCrystal/TransformHKL.h
 )
 
@@ -146,6 +150,7 @@ set ( TEST_FILES
 	AnvredCorrectionTest.h
 	CalculatePeaksHKLTest.h
 	CalculateUMatrixTest.h
+	CalibrationHelpersTest.h
 	CentroidPeaksTest.h
 	ClearUBTest.h
 	ClusterRegisterTest.h
@@ -157,6 +162,7 @@ set ( TEST_FILES
 	DisjointElementTest.h
 	FilterPeaksTest.h
 	FindClusterFacesTest.h
+	FindSXPeaksHelperTest.h
 	FindSXPeaksTest.h
 	FindUBUsingFFTTest.h
 	FindUBUsingIndexedPeaksTest.h
@@ -183,6 +189,7 @@ set ( TEST_FILES
 	PeakHKLErrorsTest.h
 	PeakIntegrationTest.h
 	PeakIntensityVsRadiusTest.h
+	PeakStatisticsToolsTest.h
 	PeaksInRegionTest.h
 	PeaksOnSurfaceTest.h
 	PredictFractionalPeaksTest.h
@@ -192,9 +199,9 @@ set ( TEST_FILES
 	SaveIsawPeaksTest.h
 	SaveIsawUBTest.h
 	SaveLauenormTest.h
-	SavePeaksFileTest.h
 	SelectCellOfTypeTest.h
 	SelectCellWithFormTest.h
+    SetCrystalLocationTest.h
 	SetGoniometerTest.h
 	SetSpecialCoordinatesTest.h
 	SetUBTest.h
@@ -220,8 +227,13 @@ endif()
 # Add the target for this directory
 add_library ( Crystal ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
-set_target_properties ( Crystal PROPERTIES OUTPUT_NAME MantidCrystal 
-                                           INSTALL_RPATH "@loader_path/../Contents/MacOS/")
+set_target_properties ( Crystal PROPERTIES OUTPUT_NAME MantidCrystal )
+if (OSX_VERSION VERSION_GREATER 10.8)
+  set_target_properties(Crystal PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS/" )
+elseif ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
+  set_target_properties(Crystal PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
+endif()
+
 # Add to the 'Framework' group in VS
 set_property ( TARGET Crystal PROPERTY FOLDER "MantidFramework" )
 
@@ -236,4 +248,4 @@ add_subdirectory ( test )
 # Installation settings
 ###########################################################################
 
-install ( TARGETS Crystal ${SYSTEM_PACKAGE_TARGET} DESTINATION ${PLUGINS_DIR} )
+mtd_install_targets( TARGETS Crystal INSTALL_DIRS ${PLUGINS_DIR} ${WORKBENCH_PLUGINS_DIR})

@@ -31,19 +31,19 @@
 #include "ApplicationWindow.h"
 #include "LegendWidget.h"
 
-#include <QFontDialog>
-#include <QFont>
-#include <QGroupBox>
-#include <QTextEdit>
-#include <QTextCursor>
+#include <QCheckBox>
 #include <QComboBox>
-#include <QLabel>
+#include <QFont>
+#include <QFontDialog>
 #include <QGridLayout>
-#include <QVBoxLayout>
+#include <QGroupBox>
 #include <QHBoxLayout>
+#include <QLabel>
 #include <QPushButton>
 #include <QSpinBox>
-#include <QCheckBox>
+#include <QTextCursor>
+#include <QTextEdit>
+#include <QVBoxLayout>
 
 #include <qwt_scale_widget.h>
 
@@ -53,9 +53,9 @@ TextDialog::TextDialog(TextType type, QWidget *parent, Qt::WFlags fl)
   setWindowTitle(tr("MantidPlot - Text options"));
   setSizeGripEnabled(true);
 
-  d_graph = NULL;
-  d_scale = NULL;
-  d_legend = NULL;
+  d_graph = nullptr;
+  d_scale = nullptr;
+  d_legend = nullptr;
 
   textType = type;
 
@@ -81,8 +81,8 @@ TextDialog::TextDialog(TextType type, QWidget *parent, Qt::WFlags fl)
   buttonApply->setDefault(true);
   topLayout->addWidget(buttonApply, 1, 3);
 
-  alignmentBox = NULL;
-  backgroundBox = NULL;
+  alignmentBox = nullptr;
+  backgroundBox = nullptr;
   if (textType != TextDialog::TextMarker) {
     topLayout->addWidget(new QLabel(tr("Alignment")), 2, 0);
     alignmentBox = new QComboBox();
@@ -105,12 +105,12 @@ TextDialog::TextDialog(TextType type, QWidget *parent, Qt::WFlags fl)
   buttonCancel = new QPushButton(tr("&Cancel"));
   topLayout->addWidget(buttonCancel, 2, 3);
 
-  backgroundBtn = NULL;
+  backgroundBtn = nullptr;
 
-  buttonDefault = NULL;
-  boxBackgroundTransparency = NULL;
+  buttonDefault = nullptr;
+  boxBackgroundTransparency = nullptr;
   if (textType == TextMarker) { // TODO: Sometime background features for axes
-                                // lables should be implemented
+                                // labels should be implemented
     topLayout->addWidget(new QLabel(tr("Opacity")), 3, 0);
     boxBackgroundTransparency = new QSpinBox();
     boxBackgroundTransparency->setRange(0, 255);

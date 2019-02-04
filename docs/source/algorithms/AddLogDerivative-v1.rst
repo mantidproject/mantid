@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -41,8 +41,8 @@ Usage
     AddLogDerivative(ws,"MyLog",derivative=3,NewLogName="Derivative3")
 
     for logName in ["MyLog","Derivative1","Derivative2","Derivative3"]:
-        print "Log: " + logName
-        print ws.getRun().getProperty(logName).valueAsString()
+        print("Log: {}".format(logName))
+        print(ws.getRun().getProperty(logName).valueAsString())
 
 
 Output:

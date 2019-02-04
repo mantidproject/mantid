@@ -5,9 +5,9 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
 	<key>CFBundleExecutable</key>
-	<string>MantidPlot</string>
+	<string>Mantid_osx_launcher</string>
 	<key>CFBundleGetInfoString</key>
-	<string>@VERSION_MAJOR@.@VERSION_MINOR@.@MtdVersion_WC_LAST_CHANGED_REV@</string>
+	<string>@VERSION_MAJOR@.@VERSION_MINOR@.@VERSION_PATCH@</string>
 	<key>CFBundleIconFile</key>
 	<string>MantidPlot.icns</string>
 	<key>CFBundleIdentifier</key>
@@ -15,22 +15,22 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleLongVersionString</key>
-	<string>@VERSION_MAJOR@.@VERSION_MINOR@.@MtdVersion_WC_LAST_CHANGED_REV@</string>
+	<string>@VERSION_MAJOR@.@VERSION_MINOR@.@VERSION_PATCH@</string>
 	<key>CFBundleName</key>
 	<string>MantidPlot</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>@VERSION_MAJOR@.@VERSION_MINOR@.@MtdVersion_WC_LAST_CHANGED_REV@</string>
+	<string>@VERSION_MAJOR@.@VERSION_MINOR@.@VERSION_PATCH@</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>@VERSION_MAJOR@.@VERSION_MINOR@.@MtdVersion_WC_LAST_CHANGED_REV@</string>
+	<string>@VERSION_MAJOR@.@VERSION_MINOR@.@VERSION_PATCH@</string>
 	<key>CSResourcesFileMapped</key>
 	<true/>
 	<key>LSRequiresCarbon</key>
 	<true/>
 	<key>NSHumanReadableCopyright</key>
-	<string>Copyright 2011 ISIS Rutherford Appleton Laboratory and NScD Oak Ridge National Laboratory</string>
+	<string>Copyright (c) 2007 ISIS Rutherford Appleton Laboratory UKRI, NScD Oak Ridge National Laboratory, European Spallation Source, and Institut Laue - Langevin</string>
 </dict>
 </plist>

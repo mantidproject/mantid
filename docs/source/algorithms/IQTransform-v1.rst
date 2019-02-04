@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -65,8 +65,8 @@ Usage
 
    output = IQTransform(input, 'Zimm')
 
-   print 'Output Y:', output.readY(0)
-   print 'Output X:', output.readX(0)
+   print('Output Y: {}'.format(output.readY(0)))
+   print('Output X: {}'.format(output.readX(0)))
 
 Output:
 
@@ -87,8 +87,8 @@ Output:
 
    output = IQTransform(input, 'Zimm', BackgroundValue=0.5)
 
-   print 'Output Y:', output.readY(0)
-   print 'Output X:', output.readX(0)
+   print('Output Y: {}'.format(output.readY(0)))
+   print('Output X: {}'.format(output.readX(0)))
 
 Output:
 
@@ -112,8 +112,8 @@ Output:
    constants = [2,2,0,0,math.e,3,0,0,0,math.e]
    output = IQTransform(input, 'General', GeneralFunctionConstants=constants)
 
-   print 'Output Y:', output.readY(0)
-   print 'Output X:', output.readX(0)
+   print('Output Y: {}'.format(output.readY(0)))
+   print('Output X: {}'.format(output.readX(0)))
    
 Output:
 

@@ -1,16 +1,21 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef IFUNCTIONTEST_H_
 #define IFUNCTIONTEST_H_
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/Jacobian.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ParamFunction.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/ParameterTie.h"
-#include "PropertyManagerHelper.h"
 #include "MantidTestHelpers/FakeObjects.h"
+#include "PropertyManagerHelper.h"
 
 #include <cxxtest/TestSuite.h>
 
@@ -59,6 +64,7 @@ public:
   }
   const std::string id(void) const override { return ""; }
   void init(const size_t &, const size_t &, const size_t &) override {}
+  void init(const HistogramData::Histogram &) override {}
 
 private:
   std::vector<MocSpectrum> m_spectra;
@@ -255,7 +261,7 @@ public:
     f.setParameter("c3", 1.3);
 
     f.tie("c1", "0");
-    f.tie("c3", "0");
+    f.tie("c3", "c2");
 
     TS_ASSERT_EQUALS(f.nParams(), 4);
 
@@ -268,7 +274,8 @@ public:
     TS_ASSERT(!f.isFixed(0));
     TS_ASSERT(f.isFixed(1));
     TS_ASSERT(!f.isFixed(2));
-    TS_ASSERT(f.isFixed(3));
+    TS_ASSERT(!f.isFixed(3));
+    TS_ASSERT(!f.isActive(3));
 
     TS_ASSERT(f.isActive(0));
     TS_ASSERT(!f.isActive(1));
@@ -276,7 +283,7 @@ public:
     TS_ASSERT(!f.isActive(3));
 
     TS_ASSERT(!f.getTie(0));
-    TS_ASSERT(f.getTie(1) && !f.getTie(1)->isDefault());
+    TS_ASSERT(!f.getTie(1));
     TS_ASSERT(!f.getTie(2));
     TS_ASSERT(f.getTie(3) && !f.getTie(3)->isDefault());
   }
@@ -333,9 +340,12 @@ public:
     TS_ASSERT_EQUALS(f.getParameter("c3"), 3.3);
 
     TS_ASSERT(!f.isFixed(0));
-    TS_ASSERT(f.isFixed(1));
+    TS_ASSERT(!f.isFixed(1));
+    TS_ASSERT(!f.isActive(1));
     TS_ASSERT(!f.isFixed(2));
+    TS_ASSERT(f.isActive(2));
     TS_ASSERT(!f.isFixed(3));
+    TS_ASSERT(f.isActive(3));
 
     TS_ASSERT(!f.getTie(0));
     TS_ASSERT(f.getTie(1) && !f.getTie(1)->isDefault());
@@ -392,9 +402,9 @@ public:
   }
 
   /**
-  * Test declaring a const IFunction property and retrieving as const or
-  * non-const
-  */
+   * Test declaring a const IFunction property and retrieving as const or
+   * non-const
+   */
   void testGetProperty_const_sptr() {
     const std::string funcName = "InputFunction";
     IFunction_sptr funcInput(new IFT_Funct());
@@ -406,10 +416,10 @@ public:
     IFunction_sptr funcNonConst;
     TS_ASSERT_THROWS_NOTHING(
         funcConst = manager.getValue<IFunction_const_sptr>(funcName));
-    TS_ASSERT(funcConst != NULL);
+    TS_ASSERT(funcConst != nullptr);
     TS_ASSERT_THROWS_NOTHING(funcNonConst =
                                  manager.getValue<IFunction_sptr>(funcName));
-    TS_ASSERT(funcNonConst != NULL);
+    TS_ASSERT(funcNonConst != nullptr);
     TS_ASSERT_EQUALS(funcConst, funcNonConst);
 
     // Check TypedValue can be cast to const_sptr or to sptr
@@ -417,9 +427,9 @@ public:
     IFunction_const_sptr funcCastConst;
     IFunction_sptr funcCastNonConst;
     TS_ASSERT_THROWS_NOTHING(funcCastConst = (IFunction_const_sptr)val);
-    TS_ASSERT(funcCastConst != NULL);
+    TS_ASSERT(funcCastConst != nullptr);
     TS_ASSERT_THROWS_NOTHING(funcCastNonConst = (IFunction_sptr)val);
-    TS_ASSERT(funcCastNonConst != NULL);
+    TS_ASSERT(funcCastNonConst != nullptr);
     TS_ASSERT_EQUALS(funcCastConst, funcCastNonConst);
   }
 

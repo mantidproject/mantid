@@ -1,8 +1,15 @@
-﻿# pylint: disable=too-many-lines, invalid-name, redefined-builtin, protected-access, too-many-arguments
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
+# pylint: disable=too-many-lines, invalid-name, redefined-builtin, protected-access, too-many-arguments
 """
     Enables the SANS commands (listed at http://www.mantidproject.org/SANS) to
     be run
 """
+from __future__ import (absolute_import, division, print_function)
 import isis_instrument
 from reducer_singleton import ReductionSingleton
 from mantid.kernel import Logger
@@ -17,13 +24,12 @@ from SANSadd2 import *
 import SANSUtility as su
 from SANSUtility import deprecated
 import SANSUserFileParser as UserFileParser
-
 sanslog = Logger("SANS")
 
 # disable plotting if running outside Mantidplot
 try:
     import mantidplot
-except (StandardError, Warning):
+except (Exception, Warning):
     mantidplot = None
     # this should happen when this is called from outside Mantidplot and only then,
     # the result is that attempting to plot will raise an exception
@@ -52,7 +58,7 @@ def _printMessage(msg, log=True, no_console=False):
     if log and _VERBOSE_:
         sanslog.notice(msg)
     if not no_console:
-        print msg
+        print(msg)
 
 
 def issueWarning(msg):
@@ -90,7 +96,7 @@ def SANS2D(idf_path=None):
             raise RuntimeError("The provided idf path seems to have been incorrect")
         ReductionSingleton().set_instrument(instrument)
         config['default.instrument'] = 'SANS2D'
-    except (StandardError, Warning):
+    except (Exception, Warning):
         return False
     return True
 
@@ -115,7 +121,7 @@ def LOQ(idf_path='LOQ_Definition_20020226-.xml'):
             raise RuntimeError("The provided idf path seems to have been incorrect")
         ReductionSingleton().set_instrument(instrument)
         config['default.instrument'] = 'LOQ'
-    except(StandardError, Warning):
+    except(Exception, Warning):
         return False
     return True
 
@@ -134,7 +140,7 @@ def LARMOR(idf_path = None):
             raise RuntimeError("The provided idf path seems to have been incorrect")
         ReductionSingleton().set_instrument(instrument)
         config['default.instrument'] = 'LARMOR'
-    except (StandardError, Warning):
+    except (Exception, Warning):
         return False
     return True
 
@@ -218,6 +224,17 @@ def SetFrontDetRescaleShift(scale=1.0, shift=0.0, fitScale=False, fitShift=False
     _printMessage('#Set front detector rescale/shift values')
 
 
+def SetMergeQRange(q_min=None, q_max=None):
+    """
+        Stores property about the detector which is used to specify merge range.
+        @param qMin: When set to None (default) then for merge use the overlapping q region of front and rear detectors
+        @param qMax: When set to None (default) then for merge use the overlapping q region of front and rear detectors
+    """
+    ReductionSingleton().instrument.getDetector('FRONT').mergeRange = ReductionSingleton().instrument. \
+        getDetector('FRONT')._MergeRange(q_min, q_max)
+    _printMessage('#Set merge range values')
+
+
 def TransFit(mode, lambdamin=None, lambdamax=None, selector='BOTH'):
     """
         Sets the fit method to calculate the transmission fit and the wavelength range
@@ -261,7 +278,7 @@ def _return_old_compatibility_assign_methods(ws_name):
     if isinstance(ReductionSingleton().instrument, isis_instrument.SANS2D):
         try:
             logs = ReductionSingleton().instrument.get_detector_log(ws_name)
-        except (StandardError, Warning):
+        except (Exception, Warning):
             pass
     return ws_name, logs
 
@@ -370,7 +387,7 @@ def GetMismatchedDetList():
 # pylint: disable = too-many-branches
 
 
-def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_suffix=None, combineDet=None,
+def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_suffix=None, combineDet=None, # noqa: C901
                       resetSetup=True, out_fit_settings=dict()):
     """
         Run reduction from loading the raw data to calculating Q. Its optional arguments allows specifics
@@ -415,7 +432,6 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
         ReductionSingleton().full_trans_wav = full_trans_wav
 
     ReductionSingleton().to_wavelen.set_range(wav_start, wav_end)
-
     rAnds = ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift
     # check if fit is required.
     fitRequired = False
@@ -450,7 +466,7 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
     # do reduce rear bank data
     if reduce_rear_flag:
         ReductionSingleton().instrument.setDetector('rear')
-        retWSname_rear = _WavRangeReduction(name_suffix)
+        retWSname_rear, rear_slices = _WavRangeReduction(name_suffix)
         retWSname = retWSname_rear
 
     # do reduce front bank
@@ -484,95 +500,30 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
 
         ReductionSingleton().instrument.setDetector('front')
 
-        retWSname_front = _WavRangeReduction(name_suffix)
+        retWSname_front, front_slices = _WavRangeReduction(name_suffix)
         retWSname = retWSname_front
 
     # This section provides a the REAR -- FRONT fitting and a stitched workspace.
     # If merge_flag is selected we use SANSStitch and get the fitting for free
-    # If fitRequired is selected, then we explicity call the SANSFitScale algorithm
+    # If fitRequired is selected, then we explicitly call the SANSFitScale algorithm
     if merge_flag:
-        # Prepare the Norm and Count workspaces for the FRONT and the REAR detectors
-        retWSname_merged = retWSname_rear
-        if retWSname_merged.count('rear') == 1:
-            retWSname_merged = retWSname_merged.replace('rear', 'merged')
+        if ReductionSingleton().getNumSlices() > 1:
+            slices = []
+            for index in range(ReductionSingleton().getNumSlices()):
+                merge_workspace = _merge_workspaces(front_slices[index], rear_slices[index], rAnds)
+                slices.append(merge_workspace)
+            ReductionSingleton().setSliceIndex(0)
+            group_name = _common_substring(slices[0], slices[1])
+            if group_name[-2] == "_":
+                group_name = group_name[:-2]
+            _group_workspaces(slices, group_name)
+            retWSname_merged = group_name
         else:
-            retWSname_merged = retWSname_merged + "_merged"
-
-        Nf = mtd[retWSname_front + "_sumOfNormFactors"]
-        Nr = mtd[retWSname_rear + "_sumOfNormFactors"]
-        Cf = mtd[retWSname_front + "_sumOfCounts"]
-        Cr = mtd[retWSname_rear + "_sumOfCounts"]
-        consider_can = True
-        try:
-            Nf_can = mtd[retWSname_front + "_can_tmp_sumOfNormFactors"]
-            Nr_can = mtd[retWSname_rear + "_can_tmp_sumOfNormFactors"]
-            Cf_can = mtd[retWSname_front + "_can_tmp_sumOfCounts"]
-            Cr_can = mtd[retWSname_rear + "_can_tmp_sumOfCounts"]
-            if Cr_can is None:
-                consider_can = False
-        except KeyError:
-            # The CAN was not specified
-            consider_can = False
-
-        # Get fit paramters
-        scale_factor, shift_factor, fit_mode = su.extract_fit_parameters(rAnds)
-
-        kwargs_stitch = {"HABCountsSample": Cf,
-                         "HABNormSample": Nf,
-                         "LABCountsSample": Cr,
-                         "LABNormSample": Nr,
-                         "ProcessCan": False,
-                         "Mode": fit_mode,
-                         "ScaleFactor": scale_factor,
-                         "ShiftFactor": shift_factor,
-                         "OutputWorkspace": retWSname_merged}
-        if consider_can:
-            kwargs_can = {"HABCountsCan": Cf_can,
-                          "HABNormCan": Nf_can,
-                          "LABCountsCan": Cr_can,
-                          "LABNormCan": Nr_can,
-                          "ProcessCan": True}
-            kwargs_stitch.update(kwargs_can)
-
-        alg_stitch = su.createUnmanagedAlgorithm("SANSStitch", **kwargs_stitch)
-        alg_stitch.execute()
-
-        # Get the fit values
-        shift_from_alg = alg_stitch.getProperty("OutShiftFactor").value
-        scale_from_alg = alg_stitch.getProperty("OutScaleFactor").value
-        ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.shift = shift_from_alg
-        ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.scale = scale_from_alg
-
-        # Get the merged workspace
-        mergedQ = alg_stitch.getProperty("OutputWorkspace").value
-        # Add the ouput to the Analysis Data Service
-        AnalysisDataService.addOrReplace(retWSname_merged, mergedQ)
-
-        # save the properties Transmission and TransmissionCan inside the merged workspace
-        # get these values from the rear_workspace because they are the same value as the front one.
-        # ticket #6929
-        rear_ws = mtd[retWSname_rear]
-        for prop in ['Transmission', 'TransmissionCan']:
-            if rear_ws.getRun().hasProperty(prop):
-                ws_name = rear_ws.getRun().getLogData(prop).value
-                if mtd.doesExist(ws_name):  # ensure the workspace has not been deleted
-                    AddSampleLog(Workspace=retWSname_merged, LogName=prop, LogText=ws_name)
+            retWSname_merged = _merge_workspaces(retWSname_front, retWSname_rear, rAnds)
 
         retWSname = retWSname_merged
-
-        # Remove the partial workspaces, this needs to be done for when we merge and/or fit
-        delete_workspaces(retWSname_rear + "_sumOfCounts")
-        delete_workspaces(retWSname_rear + "_sumOfNormFactors")
-        delete_workspaces(retWSname_front + "_sumOfCounts")
-        delete_workspaces(retWSname_front + "_sumOfNormFactors")
-        if consider_can:
-            delete_workspaces(retWSname_front + "_can_tmp_sumOfNormFactors")
-            delete_workspaces(retWSname_rear + "_can_tmp_sumOfNormFactors")
-            delete_workspaces(retWSname_front + "_can_tmp_sumOfCounts")
-            delete_workspaces(retWSname_rear + "_can_tmp_sumOfCounts")
-
     elif fitRequired:
-        # Get fit paramters
+        # Get fit parameters
         scale_factor, shift_factor, fit_mode = su.extract_fit_parameters(rAnds)
 
         # Since only the fit is required we use only the SANSFitScale algorithm
@@ -595,11 +546,8 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
 
     # applying scale and shift on the front detector reduced data
     if reduce_front_flag:
-        frontWS = mtd[retWSname_front]
-        buffer = Scale(InputWorkspace=frontWS, Operation="Add", Factor=shift)
-        frontWS = Scale(InputWorkspace=buffer, Operation="Multiply", Factor=scale)
-        RenameWorkspace(InputWorkspace=frontWS, OutputWorkspace=retWSname_front)
-        DeleteWorkspace(buffer)
+        Scale(InputWorkspace=retWSname_front, OutputWorkspace=retWSname_front, Operation="Add", Factor=shift)
+        Scale(InputWorkspace=retWSname_front, OutputWorkspace=retWSname_front, Operation="Multiply", Factor=scale)
 
     # finished calculating cross section so can restore these value
     ReductionSingleton().to_Q.outputParts = toRestoreOutputParts
@@ -629,6 +577,121 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
     return retWSname
 
 
+def _merge_workspaces(retWSname_front, retWSname_rear, rAnds):
+    # Prepare the Norm and Count workspaces for the FRONT and the REAR detectors
+    retWSname_merged = retWSname_rear
+    if retWSname_merged.count('rear') == 1:
+        retWSname_merged = retWSname_merged.replace('rear', 'merged')
+    elif retWSname_merged.count('main') == 1:
+        retWSname_merged = retWSname_merged.replace('main', 'merged')
+    else:
+        retWSname_merged = retWSname_merged + "_merged"
+
+    Nf = mtd[retWSname_front + "_sumOfNormFactors"]
+    Nr = mtd[retWSname_rear + "_sumOfNormFactors"]
+    Cf = mtd[retWSname_front + "_sumOfCounts"]
+    Cr = mtd[retWSname_rear + "_sumOfCounts"]
+    consider_can = True
+    try:
+        Nf_can = mtd[retWSname_front + "_can_tmp_sumOfNormFactors"]
+        Nr_can = mtd[retWSname_rear + "_can_tmp_sumOfNormFactors"]
+        Cf_can = mtd[retWSname_front + "_can_tmp_sumOfCounts"]
+        Cr_can = mtd[retWSname_rear + "_can_tmp_sumOfCounts"]
+        if Cr_can is None:
+            consider_can = False
+    except KeyError:
+        # The CAN was not specified
+        consider_can = False
+
+    # Get fit parameters
+    scale_factor, shift_factor, fit_mode, fit_min, fit_max = su.extract_fit_parameters(rAnds)
+    merge_range = ReductionSingleton().instrument.getDetector('FRONT').mergeRange
+
+    kwargs_stitch = {"HABCountsSample": Cf,
+                     "HABNormSample": Nf,
+                     "LABCountsSample": Cr,
+                     "LABNormSample": Nr,
+                     "ProcessCan": False,
+                     "Mode": fit_mode,
+                     "ScaleFactor": scale_factor,
+                     "ShiftFactor": shift_factor,
+                     "OutputWorkspace": retWSname_merged,
+                     "MergeMask": merge_range.q_merge_range}
+    if consider_can:
+        kwargs_can = {"HABCountsCan": Cf_can,
+                      "HABNormCan": Nf_can,
+                      "LABCountsCan": Cr_can,
+                      "LABNormCan": Nr_can,
+                      "ProcessCan": True}
+        kwargs_stitch.update(kwargs_can)
+
+    if rAnds.qRangeUserSelected:
+        q_range_stitch = {"FitMin": fit_min,
+                          "FitMax": fit_max}
+        kwargs_stitch.update(q_range_stitch)
+
+    if merge_range.q_merge_range:
+        if merge_range.q_min:
+            q_range_options = {"MergeMin": merge_range.q_min}
+            kwargs_stitch.update(q_range_options)
+        if merge_range.q_max:
+            q_range_options = {"MergeMax": merge_range.q_max}
+            kwargs_stitch.update(q_range_options)
+
+    alg_stitch = su.createUnmanagedAlgorithm("SANSStitch", **kwargs_stitch)
+    alg_stitch.execute()
+
+    # Get the fit values
+    shift_from_alg = alg_stitch.getProperty("OutShiftFactor").value
+    scale_from_alg = alg_stitch.getProperty("OutScaleFactor").value
+    ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.shift = shift_from_alg
+    ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.scale = scale_from_alg
+
+    # Get the merged workspace
+    mergedQ = alg_stitch.getProperty("OutputWorkspace").value
+    # Add the output to the Analysis Data Service
+    AnalysisDataService.addOrReplace(retWSname_merged, mergedQ)
+
+    # save the properties Transmission and TransmissionCan inside the merged workspace
+    # get these values from the rear_workspace because they are the same value as the front one.
+    # ticket #6929
+    rear_ws = mtd[retWSname_rear]
+    for prop in ['Transmission', 'TransmissionCan']:
+        if rear_ws.getRun().hasProperty(prop):
+            ws_name = rear_ws.getRun().getLogData(prop).value
+            if mtd.doesExist(ws_name):  # ensure the workspace has not been deleted
+                AddSampleLog(Workspace=retWSname_merged, LogName=prop, LogText=ws_name)
+
+    retWSname = retWSname_merged
+
+    # Remove the partial workspaces, this needs to be done for when we merge and/or fit
+    delete_workspaces(retWSname_rear + "_sumOfCounts")
+    delete_workspaces(retWSname_rear + "_sumOfNormFactors")
+    delete_workspaces(retWSname_front + "_sumOfCounts")
+    delete_workspaces(retWSname_front + "_sumOfNormFactors")
+    if consider_can:
+        delete_workspaces(retWSname_front + "_can_tmp_sumOfNormFactors")
+        delete_workspaces(retWSname_rear + "_can_tmp_sumOfNormFactors")
+        delete_workspaces(retWSname_front + "_can_tmp_sumOfCounts")
+        delete_workspaces(retWSname_rear + "_can_tmp_sumOfCounts")
+
+    return retWSname
+
+
+def _common_substring(val1, val2):
+    l = []
+    for i in range(len(val1)):
+        if val1[i] == val2[i]:
+            l.append(val1[i])
+        else:
+            return ''.join(l)
+
+
+def _group_workspaces(list_of_values, outputname):
+    allnames = ','.join(list_of_values)
+    GroupWorkspaces(InputWorkspaces=allnames, OutputWorkspace=outputname)
+
+
 def _WavRangeReduction(name_suffix=None):
     """
         Run a reduction that has been set up, from loading the raw data to calculating Q
@@ -643,7 +706,7 @@ def _WavRangeReduction(name_suffix=None):
         for trans in [ReductionSingleton().samp_trans_load, ReductionSingleton().can_trans_load]:
             if trans and trans.direct.periods_in_file > 1 and trans.trans.periods_in_file > 1:
                 trans.direct.move2ws(period)
-                trans.trans.move2next(period)
+                trans.trans.move2ws(period)
         return
 
     def _applySuffix(result, name_suffix):
@@ -653,18 +716,6 @@ def _WavRangeReduction(name_suffix=None):
             RenameWorkspace(InputWorkspace=old, OutputWorkspace=result)
         return result
 
-    def _common_substring(val1, val2):
-        l = []
-        for i in range(len(val1)):
-            if val1[i] == val2[i]:
-                l.append(val1[i])
-            else:
-                return ''.join(l)
-
-    def _group_workspaces(list_of_values, outputname):
-        allnames = ','.join(list_of_values)
-        GroupWorkspaces(InputWorkspaces=allnames, OutputWorkspace=outputname)
-
     def _reduceAllSlices():
         if ReductionSingleton().getNumSlices() > 1:
             slices = []
@@ -673,30 +724,32 @@ def _WavRangeReduction(name_suffix=None):
                 slices.append(ReductionSingleton()._reduce())
             ReductionSingleton().setSliceIndex(0)
             group_name = _common_substring(slices[0], slices[1])
+
             if group_name[-2] == "_":
                 group_name = group_name[:-2]
             _group_workspaces(slices, group_name)
-            return group_name
+            return group_name, slices
         else:
-            return ReductionSingleton()._reduce()
-
+            return ReductionSingleton()._reduce(), None
     result = ""
+    slices = []
     if ReductionSingleton().get_sample().loader.periods_in_file == 1:
-        result = _reduceAllSlices()
-        return _applySuffix(result, name_suffix)
+        result, slices = _reduceAllSlices()
+        return _applySuffix(result, name_suffix), slices
 
     calculated = []
     try:
         for period in ReductionSingleton().get_sample().loader.entries:
             _setUpPeriod(period)
-            calculated.append(_reduceAllSlices())
+            result, slices = _reduceAllSlices()
+            calculated.append(result)
 
     finally:
         if len(calculated) > 0:
             result = ReductionSingleton().get_out_ws_name(show_period=False)
             _group_workspaces(calculated, result)
 
-    return _applySuffix(result, name_suffix)
+    return _applySuffix(result, name_suffix), slices
 
 
 def delete_workspaces(workspaces):
@@ -713,7 +766,7 @@ def delete_workspaces(workspaces):
         if wksp and wksp in mtd:
             try:
                 DeleteWorkspace(Workspace=wksp)
-            except (StandardError, Warning):
+            except (Exception, Warning):
                 # we're only deleting to save memory, if the workspace really won't delete leave it
                 pass
 
@@ -729,12 +782,6 @@ def CompWavRanges(wavelens, plot=True, combineDet=None, resetSetup=True):
     """
 
     _printMessage('CompWavRanges( %s,plot=%s)' % (str(wavelens), plot))
-
-    # this only makes sense for 1D reductions
-    if ReductionSingleton().to_Q.output_type == '2D':
-        issueWarning('This wave ranges check is a 1D analysis, ignoring 2D setting')
-        _printMessage('Set1D()')
-        ReductionSingleton().to_Q.output_type = '1D'
 
     if not isinstance(wavelens, type([])) or len(wavelens) < 2:
         if not isinstance(wavelens, type((1,))):
@@ -983,10 +1030,6 @@ def DisplayMask(mask_worksp=None):
         @param mask_worksp: optional this named workspace will be modified and should be from the currently selected instrument
         @return the name of the workspace that was displayed
     """
-    # this will be copied from a sample work space if one exists
-    counts_data = None
-    _instrument = ReductionSingleton().instrument
-
     if not mask_worksp:
         mask_worksp = '__CurrentMask'
         samp = LAST_SAMPLE
@@ -999,18 +1042,12 @@ def DisplayMask(mask_worksp=None):
                 CloneWorkspace(InputWorkspace=samp + "_monitors",
                                OutputWorkspace=mask_worksp + "_monitors")
                 su.fromEvent2Histogram(mask_worksp, mtd[mask_worksp + "_monitors"])
-
-            counts_data = '__DisplayMasked_tempory_wksp'
-            Integration(InputWorkspace=mask_worksp, OutputWorkspace=counts_data)
         else:
             msg = 'Cannot display the mask without a sample workspace'
             _printMessage(msg, log=True, no_console=False)
             return
 
-    ReductionSingleton().mask.display(mask_worksp, ReductionSingleton(), counts_data)
-    if counts_data:
-        DeleteWorkspace(counts_data)
-
+    ReductionSingleton().mask.display(mask_worksp, ReductionSingleton())
     return mask_worksp
 
 
@@ -1091,7 +1128,6 @@ def FindBeamCentre(rlow, rupp, MaxIter=10, xstart=None, ystart=None, tolerance=1
     """
     COORD1STEP = ReductionSingleton().inst.cen_find_step
     COORD2STEP = ReductionSingleton().inst.cen_find_step2
-
     XSF = ReductionSingleton().inst.beam_centre_scale_factor1
     YSF = ReductionSingleton().inst.beam_centre_scale_factor2
     coord1_scale_factor = XSF
@@ -1144,7 +1180,7 @@ def FindBeamCentre(rlow, rupp, MaxIter=10, xstart=None, ystart=None, tolerance=1
     resCoord1_old, resCoord2_old = centre.SeekCentre(centre_reduction, [COORD1NEW, COORD2NEW])
     centre_reduction = copy.deepcopy(ReductionSingleton().reference())
     LimitsR(str(float(rlow)), str(float(rupp)), quiet=True, reducer=centre_reduction)
-    beam_center_logger.report_status(0, original[0], original[1], resCoord1_old, resCoord2_old)
+    beam_center_logger.report_status(0, COORD1NEW, COORD2NEW, resCoord1_old, resCoord2_old)
 
     # If we have 0 iterations then we should return here. At this point the
     # Left/Right/Up/Down workspaces have been already created by the SeekCentre function.
@@ -1179,7 +1215,7 @@ def FindBeamCentre(rlow, rupp, MaxIter=10, xstart=None, ystart=None, tolerance=1
                     graph_handle = mantidplot.plotSpectrum(centre.QUADS, 0)
                 graph_handle.activeLayer().setTitle(
                     beam_center_logger.get_status_message(it, COORD1NEW, COORD2NEW, resCoord1, resCoord2))
-            except (StandardError, Warning):
+            except (Exception, Warning):
                 # if plotting is not available it probably means we are running outside a GUI, in which case
                 # do everything but don't plot
                 pass
@@ -1264,7 +1300,7 @@ def check_if_event_workspace(file_name):
     @returns true if the workspace is an event workspace otherwise false
     '''
     result = su.can_load_as_event_workspace(filename=file_name)
-    print result
+    print(result)
     return result
 
 
@@ -1287,14 +1323,14 @@ def check_time_shifts_for_added_event_files(number_of_files, time_shifts=''):
         except ValueError:
             message = ('Error: Elements of the time shift list cannot be ' +
                        'converted to a numeric value, e.g ' + time_shift_element)
-            print message
+            print(message)
             return message
 
     if number_of_files - 1 != len(time_shift_container):
         message = ('Error: Expected N-1 time shifts for N files, but read ' +
                    str(len(time_shift_container)) + ' time shifts for ' +
                    str(number_of_files) + ' files.')
-        print message
+        print(message)
         return message
 
 
@@ -1319,7 +1355,7 @@ def GetTransmissionMonitorSpectrum():
     """
         Gets the transmission monitor spectrum. In the case of 4 or 17788 (for LOQ)
         the result is 4.
-        @return: tranmission monitor spectrum
+        @return: transmission monitor spectrum
     """
     transmission_monitor = ReductionSingleton().transmission_calculator.trans_mon
     if ReductionSingleton().instrument._NAME == "LOQ" and transmission_monitor == 17788:
@@ -1352,7 +1388,7 @@ def GetTransmissionMonitorSpectrumShift():
     """
         Gets the addditional shift for the transmission monitor spectrum.
         This currently only exists for SANS2D
-        @return: tranmission monitor spectrum
+        @return: transmission monitor spectrum
     """
     inst = ReductionSingleton().get_instrument()
     if inst.name() != "SANS2D" and inst.name() != "SANS2DTUBES":
@@ -1379,7 +1415,7 @@ def SetTransmissionMonitorSpectrumShift(trans_mon_shift):
 def GetTransmissionRadiusInMM():
     """
         Gets the radius for usage with beam stop as transmission monitor in mm
-        @return: tranmission radius in mm
+        @return: transmission radius in mm
     """
     radius = ReductionSingleton().transmission_calculator.radius
     if radius is not None:
@@ -1423,7 +1459,7 @@ def SetTransmissionROI(trans_roi_files):
 
 def GetTransmissionMask():
     """
-        Gets the list of transmission maks file names
+        Gets the list of transmission mask file names
         @return: list of transmission mask file names or None
     """
     trans_mask_files = ReductionSingleton().transmission_calculator.mask_files
@@ -1456,7 +1492,7 @@ def AddRuns(runs, instrument='sans2d', saveAsEvent=False, binning="Monitors", is
                     string list with the same format that is used for the Rebin algorithm. This property is ignored
                     when saving as event data.
     @param isOverlay: sets if the the overlay mechanism should be used when the saveAsEvent flag is set
-    @param time_shifts: provides additional time shifts if the isOverlay flag is specified. The time shifts are specifed
+    @param time_shifts: provides additional time shifts if the isOverlay flag is specified. The time shifts are specified
                         in a string list. Either time_shifts is not used or a list with times in secomds. Note that there
                         has to be one entry fewer than the number of workspaces to add.
     @param defType: the file type
@@ -1492,7 +1528,7 @@ def get_q_resolution_moderator():
     val = ReductionSingleton().to_Q.get_q_resolution_moderator()
     if val is None:
         val = ''
-    print str(val)
+    print(str(val))
     return val
 
 
@@ -1503,19 +1539,19 @@ def set_q_resolution_moderator(file_name):
     '''
     try:
         ReductionSingleton().to_Q.set_q_resolution_moderator(file_name)
-    except RuntimeError, details:
+    except RuntimeError as details:
         sanslog.error("The specified moderator file could not be found. Please specify a file"
                       "which exists in the search directories. See details: %s" % str(details))
 
 
-# -- Use q resoltion
+# -- Use q resolution
 def get_q_resultution_use():
     '''
     Gets if the q resolution option is being used
     @returns true if the resolution option is being used, else false
     '''
     val = ReductionSingleton().to_Q.get_use_q_resolution()
-    print str(val)
+    print(str(val))
     return val
 
 
@@ -1529,7 +1565,7 @@ def set_q_resolution_use(use):
     elif not use:
         ReductionSingleton().to_Q.set_use_q_resolution(False)
     else:
-        sanslog.warning('Warning: Could could not set useage of QResolution')
+        sanslog.warning('Warning: Could could not set usage of QResolution')
 
 
 # -- Collimation length
@@ -1544,7 +1580,7 @@ def get_q_resolution_collimation_length():
         pass
     else:
         sanslog.warning('Warning: Could not convert %s to float.' % msg)
-    print str(element)
+    print(str(element))
     return element
 
 
@@ -1570,7 +1606,7 @@ def get_q_resolution_delta_r():
     @returns the delta r in mm
     '''
     val = get_q_resolution_float(ReductionSingleton().to_Q.get_q_resolution_delta_r, "DeltaR")
-    print str(val)
+    print(str(val))
     return val
 
 
@@ -1589,7 +1625,7 @@ def get_q_resolution_a1():
     @returns the diameter for the first aperature in mm
     '''
     val = get_q_resolution_float(ReductionSingleton().to_Q.get_q_resolution_a1, "A1")
-    print str(val)
+    print(str(val))
     return val
 
 
@@ -1608,7 +1644,7 @@ def get_q_resolution_a2():
     @returns the diameter for the second aperature in mm
     '''
     val = get_q_resolution_float(ReductionSingleton().to_Q.get_q_resolution_a2, "A2")
-    print str(val)
+    print(str(val))
     return val
 
 
@@ -1627,7 +1663,7 @@ def get_q_resolution_h1():
     @returns the first height in mm
     '''
     val = get_q_resolution_float(ReductionSingleton().to_Q.get_q_resolution_h1, "H1")
-    print str(val)
+    print(str(val))
     return val
 
 
@@ -1646,7 +1682,7 @@ def get_q_resolution_h2():
     @returns the second height in mm
     '''
     val = get_q_resolution_float(ReductionSingleton().to_Q.get_q_resolution_h2, "H2")
-    print str(val)
+    print(str(val))
     return val
 
 
@@ -1665,7 +1701,7 @@ def get_q_resolution_w1():
     @returns the first width in mm
     '''
     val = get_q_resolution_float(ReductionSingleton().to_Q.get_q_resolution_w1, "W1")
-    print str(val)
+    print(str(val))
     return val
 
 
@@ -1684,7 +1720,7 @@ def get_q_resolution_w2():
     @returns the second width in mm
     '''
     val = get_q_resolution_float(ReductionSingleton().to_Q.get_q_resolution_w2, "W2")
-    print str(val)
+    print(str(val))
     return val
 
 
@@ -1708,7 +1744,7 @@ def reset_q_resolution_settings():
 def set_q_resolution_float(func, arg, msg):
     '''
     Set a q resolution value
-    @param func: the speficied function to run
+    @param func: the specified function to run
     @param arg: the argument
     @param mgs: error message
     '''
@@ -1725,7 +1761,7 @@ def set_q_resolution_float(func, arg, msg):
 def get_q_resolution_float(func, msg):
     '''
     Gets a q resolution value and checks if it has been set.
-    @param func: the speficied function to run
+    @param func: the specified function to run
     @param mgs: error message
     @return the correct value
     '''
@@ -1747,7 +1783,7 @@ def are_settings_consistent():
     '''
     try:
         ReductionSingleton().perform_consistency_check()
-    except RuntimeError, details:
+    except RuntimeError as details:
         sanslog.error("There was an inconsistency issue with your settings. See details: %s" % str(details))
         raise RuntimeError("Please fix the following inconsistencies: %s" % str(details))
 
@@ -1761,19 +1797,18 @@ def is_current_workspace_an_angle_workspace():
     is_angle = False
     try:
         is_angle = is_workspace_which_requires_angle(reducer=ReductionSingleton())
-    except (StopIteration, StandardError, Warning):
+    except (StopIteration, Exception, Warning):
         is_angle = False
     return is_angle
 
 
-def MatchIDFInReducerAndWorkspace(file_name):
-    '''
-    This method checks if the IDF which gets loaded with the workspace associated
-    with the file name and the current instrument in the reducer singleton refer
-    to the same IDF. If not then switch the IDF in the reducer.
-    '''
-    is_matched = True
+def _get_idf_path_for_run(file_name):
+    """
+    This method finds the full file location for a run number
 
+    :param file_name: the file name or run number
+    :return: the full path to the corresponding IDF
+    """
     # Get measurement time from file
     measurement_time = su.get_measurement_time_from_file(file_name)
 
@@ -1782,16 +1817,30 @@ def MatchIDFInReducerAndWorkspace(file_name):
 
     # Get the path to the instrument definition file
     idf_path_workspace = ExperimentInfo.getInstrumentFilename(instrument_name, measurement_time)
-    idf_path_workspace = os.path.normpath(idf_path_workspace)
+    return os.path.normpath(idf_path_workspace)
+
+
+def get_idf_path_for_run(file_name):
+    idf_path_workspace = _get_idf_path_for_run(file_name)
+    print(idf_path_workspace)
+    return idf_path_workspace
+
+
+def MatchIDFInReducerAndWorkspace(file_name):
+    '''
+    This method checks if the IDF which gets loaded with the workspace associated
+    with the file name and the current instrument in the reducer singleton refer
+    to the same IDF. If not then switch the IDF in the reducer.
+    '''
+
+    # Get the IDF path
+    idf_path_workspace = _get_idf_path_for_run(file_name)
 
     # Get the idf from the reducer
     idf_path_reducer = get_current_idf_path_in_reducer()
 
-    if ((idf_path_reducer == idf_path_workspace) and
-            su.are_two_files_identical(idf_path_reducer, idf_path_reducer)):
-        is_matched = True
-    else:
-        is_matched = False
+    is_matched = ((idf_path_reducer == idf_path_workspace) and
+                  su.are_two_files_identical(idf_path_reducer, idf_path_reducer))
 
     return is_matched
 
@@ -1803,7 +1852,7 @@ def has_user_file_valid_extension(file_name):
     @returns true if it is valid else false
     '''
     is_valid = su.is_valid_user_file_extension(file_name)
-    print str(is_valid)
+    print(str(is_valid))
     return is_valid
 
 
@@ -1815,7 +1864,7 @@ def get_current_idf_path_in_reducer():
     '''
     idf_path_reducer = ReductionSingleton().get_idf_file_path()
     idf_path_reducer = os.path.normpath(idf_path_reducer)
-    print str(idf_path_reducer)
+    print(str(idf_path_reducer))
     return idf_path_reducer
 
 
@@ -1894,7 +1943,7 @@ def get_background_correction(is_time, is_mon, component):
             value = convert_from_int_list_to_string(setting.mon_numbers)
         else:
             pass
-    print str(value)
+    print(str(value))
     return value
 
 
@@ -1957,15 +2006,15 @@ def SetFrontEfficiencyFile(filename):
 
 @deprecated
 def displayUserFile():
-    print '-- Mask file defaults --'
-    print ReductionSingleton().to_wavlen
-    print ReductionSingleton().Q_string()
+    print('-- Mask file defaults --')
+    print(ReductionSingleton().to_wavlen)
+    print(ReductionSingleton().Q_string())
     #    print correction_files()
-    print '    direct beam file rear:',
-    print ReductionSingleton().instrument.detector_file('rear')
-    print '    direct beam file front:',
-    print ReductionSingleton().instrument.detector_file('front')
-    print ReductionSingleton().mask
+    print('    direct beam file rear:', end=' ')
+    print(ReductionSingleton().instrument.detector_file('rear'))
+    print('    direct beam file front:', end=' ')
+    print(ReductionSingleton().instrument.detector_file('front'))
+    print(ReductionSingleton().mask)
 
 
 @deprecated
@@ -1976,8 +2025,8 @@ def displayMaskFile():
 @deprecated
 def displayGeometry():
     [x, y] = ReductionSingleton().get_beam_center()
-    print 'Beam centre: [' + str(x) + ',' + str(y) + ']'
-    print ReductionSingleton().get_sample().geometry
+    print('Beam centre: [' + str(x) + ',' + str(y) + ']')
+    print(ReductionSingleton().get_sample().geometry)
 
 
 @deprecated

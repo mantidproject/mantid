@@ -11,6 +11,9 @@
       <value val="304"/>
     </parameter>
 
+    <parameter name="pixel-width">
+      <value val="0.7"/>
+    </parameter>
   </component-link>
 
 </parameter-file>

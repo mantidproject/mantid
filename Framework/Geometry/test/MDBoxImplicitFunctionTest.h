@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MDALGORITHMS_MDBOXIMPLICITFUNCTIONTEST_H_
 #define MANTID_MDALGORITHMS_MDBOXIMPLICITFUNCTIONTEST_H_
 
@@ -11,7 +17,7 @@ using namespace Mantid;
 using namespace Mantid::Geometry;
 
 namespace {
-typedef boost::tuple<Mantid::coord_t, Mantid::coord_t> Extent;
+using Extent = boost::tuple<Mantid::coord_t, Mantid::coord_t>;
 }
 
 class MDBoxImplicitFunctionTest : public CxxTest::TestSuite {

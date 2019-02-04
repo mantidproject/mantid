@@ -2,27 +2,33 @@
 ## Tests for PythonAlgorithms
 ##
 
+add_subdirectory( WorkflowAlgorithms )
+
 set ( TEST_PY_FILES
-  AddSampleLogMultipleTest.py
+  AbinsBasicTest.py
+  AbinsAdvancedParametersTest.py
   AlignComponentsTest.py
   AngularAutoCorrelationsSingleAxisTest.py
   AngularAutoCorrelationsTwoAxesTest.py
-  ApplyPaalmanPingsCorrectionTest.py
-  BayesQuasiTest.py
-  BayesStretchTest.py
+  ApplyDetectorScanEffCorrTest.py
+  BinWidthAtXTest.py
+  CalculateEfficiencyCorrectionTest.py
   CalculateSampleTransmissionTest.py
   CheckForSampleLogsTest.py
   ConjoinSpectraTest.py
+  ConvertWANDSCDtoQTest.py
   CompareSampleLogsTest.py
   ComputeCalibrationCoefVanTest.py
+  ComputeIncoherentDOSTest.py
   CorrectLogTimesTest.py
   CreateLeBailFitInputTest.py
-  DetectorFloodWeightingTest.py
-  IndirectCalibrationTest.py
   CorrectTOFTest.py
   CreateWorkspaceTest.py
+  CropWorkspaceForMDNormTest.py
+  CropWorkspaceRaggedTest.py
   CylinderPaalmanPingsCorrection2Test.py
   DakotaChiSquaredTest.py
+  DeltaPDF3DTest.py
   DNSComputeDetEffCorrCoefsTest.py
   DNSMergeRunsTest.py
   DNSFlippingRatioCorrTest.py
@@ -32,93 +38,87 @@ set ( TEST_PY_FILES
   EnggFitDIFCFromPeaksTest.py
   EnggFitPeaksTest.py
   EnggFocusTest.py
+  EnggSaveGSASIIFitResultsToHDF5Test.py
+  EnggSaveSinglePeakFitResultsToHDF5Test.py
   EnggVanadiumCorrectionsTest.py
-  ExportSpectraMaskTest.py   
+  ExportSampleLogsToHDF5Test.py
+  ExportSpectraMaskTest.py
   FilterLogByTimeTest.py
   FindEPPTest.py
   FindReflectometryLinesTest.py
   FitGaussianTest.py
-  FlatPlatePaalmanPingsCorrectionTest.py
-  GSASIIRefineFitPeaksTest.py
+  FractionalIndexingTest.py
   GetEiT0atSNSTest.py
   GetNegMuMuonicXRDTest.py
-  IndirectAnnulusAbsorptionTest.py
-  IndirectCylinderAbsorptionTest.py
-  IndirectFlatPlateAbsorptionTest.py
-  IndirectILLReductionTest.py
-  IndirectResolutionTest.py
+  HB2AReduceTest.py
   IndirectTransmissionTest.py
-  IndirectTransmissionMonitorTest.py
-  ILLIN16BCalibrationTest.py
-  IqtFitMultipleTest.py
-  IqtFitSequentialTest.py
-  ISISIndirectDiffractionReductionTest.py
-  ISISIndirectEnergyTransferTest.py
+  IndexSatellitePeaksTest.py
+  LoadAndMergeTest.py
   LoadDNSLegacyTest.py
   LoadEmptyVesuvioTest.py
   LoadFullprofFileTest.py
+  LoadGudrunOutputTest.py
   LoadLiveDataTest.py
+  LoadLampTest.py
   LoadLogPropertyTableTest.py
   LoadMultipleGSSTest.py
   LoadNMoldyn3AsciiTest.py
   LoadNMoldyn4Ascii1DTest.py
   LoadNMoldyn4AsciiTest.py
+  LoadWANDSCDTest.py
+  LRPeakSelectionTest.py
+  MatchSpectraTest.py
   MaskAngleTest.py
   MaskBTPTest.py
   MaskWorkspaceToCalFileTest.py
   MatchPeaksTest.py
   MeanTest.py
+  MedianBinWidthTest.py
   MergeCalFilesTest.py
-  MolDynTest.py
-  MSDFitTest.py
   MuscatSofQWTest.py
+  MuonMaxEntTest.py
+  NMoldyn4InterpolationTest.py
   NormaliseSpectraTest.py
-  OSIRISDiffractionReductionTest.py
-  ResNorm2Test.py
+  OptimizeCrystalPlacementByRunTest.py
+  ReflectometryReductionOneLiveDataTest.py
+  ReflectometrySliceEventWorkspaceTest.py
   RetrieveRunInfoTest.py
-  SANSFitShiftScaleTest.py
   SANSWideAngleCorrectionTest.py
+  SaveGEMMAUDParamFileTest.py
   SaveNexusPDTest.py
-  SavePlot1DTest.py
   SavePlot1DAsJsonTest.py
-  SaveVulcanGSSTest.py
+  SaveReflectionsTest.py
   ExtractMonitorsTest.py
   SetDetScaleTest.py
-  SimulatedDensityOfStatesTest.py
   SortByQVectorsTest.py
-  SofQWMomentsTest.py
   SortDetectorsTest.py
-  SortXAxisTest.py
   StatisticsOfTableWorkspaceTest.py
   StringToPngTest.py
   SuggestTibCNCSTest.py
   SuggestTibHYSPECTest.py
-  SwapWidthsTest.py
   SymmetriseTest.py
   UpdatePeakParameterTableValueTest.py
-  SANSDarkRunBackgroundCorrectionTest.py
   SANSSubtractTest.py
-  TimeSliceTest.py
   TOFTOFCropWorkspaceTest.py
   TOFTOFMergeRunsTest.py
-  TOSCABankCorrectionTest.py
-  TransformToIqtTest.py
   ExportSampleLogsToCSVFileTest.py
   ExportExperimentLogTest.py
   PoldiMergeTest.py
   VelocityCrossCorrelationsTest.py
   VelocityAutoCorrelationsTest.py
   SelectNexusFilesByMetadataTest.py
-  VesuvioDiffractionReductionTest.py
+  VesuvioPeakPredictionTest.py
   VesuvioPreFitTest.py
   VesuvioResolutionTest.py
   VesuvioThicknessTest.py
   VesuvioTOFFitTest.py
   PoldiCreatePeaksFromFileTest.py
   LoadCIFTest.py
+  SaveYDATest.py
 )
 
 check_tests_valid ( ${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES} )
 
 # Prefix for test name=PythonAlgorithms
-pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR} PythonAlgorithms ${TEST_PY_FILES} )
+set ( PYUNITTEST_PYTHONPATH_EXTRA ${PYTHONINTERFACE_PLUGINS_DIR}/algorithms )
+pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR} python.algorithms ${TEST_PY_FILES} )

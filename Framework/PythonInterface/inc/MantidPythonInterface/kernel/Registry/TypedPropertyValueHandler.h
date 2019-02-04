@@ -1,37 +1,22 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_PYTHONINTERFACE_TYPEDPROPERTYVALUEHANDLER_H_
 #define MANTID_PYTHONINTERFACE_TYPEDPROPERTYVALUEHANDLER_H_
-/**
-    Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-   National Laboratory & European Spallation Source
 
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
-*/
 #include "MantidPythonInterface/api/ExtractWorkspace.h"
-#include "MantidPythonInterface/kernel/Registry/PropertyValueHandler.h"
 #include "MantidPythonInterface/kernel/IsNone.h" // includes object.hpp
+#include "MantidPythonInterface/kernel/Registry/PropertyValueHandler.h"
 
 #include "MantidAPI/Workspace.h"
-#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/IPropertyManager.h"
+#include "MantidKernel/PropertyWithValue.h"
 
-#include <boost/python/converter/arg_from_python.hpp>
 #include <boost/python/call_method.hpp>
+#include <boost/python/converter/arg_from_python.hpp>
 #include <boost/python/extract.hpp>
 #include <boost/weak_ptr.hpp>
 
@@ -44,10 +29,10 @@ namespace Registry {
  * This class provides a templated class object that is able to take a
  * python object and perform operations with a given C type.
  */
-template <typename ValueType>
+template <typename ValueType, typename Enable = void>
 struct DLLExport TypedPropertyValueHandler : public PropertyValueHandler {
   /// Type required by TypeRegistry framework
-  typedef ValueType HeldType;
+  using HeldType = ValueType;
 
   /**
    * Set function to handle Python -> C++ calls and get the correct type
@@ -96,15 +81,17 @@ struct DLLExport TypedPropertyValueHandler : public PropertyValueHandler {
 // workspaces
 //
 template <typename T>
-struct DLLExport TypedPropertyValueHandler<boost::shared_ptr<T>>
+struct DLLExport TypedPropertyValueHandler<
+    boost::shared_ptr<T>,
+    typename std::enable_if<std::is_base_of<API::Workspace, T>::value>::type>
     : public PropertyValueHandler {
   /// Type required by TypeRegistry framework
-  typedef boost::shared_ptr<T> HeldType;
+  using HeldType = boost::shared_ptr<T>;
 
   /// Convenience typedef
-  typedef T PointeeType;
+  using PointeeType = T;
   /// Convenience typedef
-  typedef boost::shared_ptr<T> PropertyValueType;
+  using PropertyValueType = boost::shared_ptr<T>;
 
   /**
    * Set function to handle Python -> C++ calls and get the correct type
@@ -114,8 +101,11 @@ struct DLLExport TypedPropertyValueHandler<boost::shared_ptr<T>>
    */
   void set(Kernel::IPropertyManager *alg, const std::string &name,
            const boost::python::object &value) const override {
-    alg->setProperty<HeldType>(
-        name, boost::dynamic_pointer_cast<T>(ExtractWorkspace(value)()));
+    if (value == boost::python::object())
+      alg->setProperty<HeldType>(name, boost::shared_ptr<T>(nullptr));
+    else
+      alg->setProperty<HeldType>(
+          name, boost::dynamic_pointer_cast<T>(ExtractWorkspace(value)()));
   }
 
   /**
@@ -153,8 +143,8 @@ struct DLLExport TypedPropertyValueHandler<boost::shared_ptr<T>>
     return valueProp;
   }
 };
-}
-}
-}
+} // namespace Registry
+} // namespace PythonInterface
+} // namespace Mantid
 
 #endif /* MANTID_PYTHONINTERFACE_TYPEDPROPERTYVALUEHANDLER_H_ */

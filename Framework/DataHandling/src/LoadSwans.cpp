@@ -1,14 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadSwans.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidDataHandling/LoadHelper.h"
-#include "MantidGeometry/Instrument/ComponentHelper.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/StringTokenizer.h"
 
-#include <map>
-#include <iostream>
-#include <fstream>
 #include <algorithm>
 #include <boost/tokenizer.hpp>
+#include <fstream>
+#include <map>
 
 namespace Mantid {
 namespace DataHandling {
@@ -17,6 +23,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
+using Mantid::Types::Event::TofEvent;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(LoadSwans)
@@ -51,7 +58,7 @@ const std::string LoadSwans::summary() const { return "Loads SNS SWANS Data"; }
 int LoadSwans::confidence(Kernel::FileDescriptor &descriptor) const {
   // since this is a test loader, the confidence will always be 0!
   // I don't want the Load algorithm to pick this one!
-  if (descriptor.extension().compare(".dat") != 0)
+  if (descriptor.extension() != ".dat")
     return 1;
   else
     return 0;
@@ -80,7 +87,7 @@ void LoadSwans::init() {
 /** Execute the algorithm.
  */
 void LoadSwans::exec() {
-
+  m_ws = boost::make_shared<Mantid::DataObjects::EventWorkspace>();
   // Load instrument here to get the necessary Parameters from the XML file
   loadInstrument();
   m_detector_size = getDetectorSize();
@@ -200,8 +207,9 @@ std::vector<double> LoadSwans::loadMetaData() {
     if (!line.empty() && line[0] != '#') {
       g_log.debug() << "Metadata parsed line: " << line << '\n';
       auto tokenizer = Mantid::Kernel::StringTokenizer(
-          line, "\t ", Mantid::Kernel::StringTokenizer::TOK_TRIM |
-                           Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+          line, "\t ",
+          Mantid::Kernel::StringTokenizer::TOK_TRIM |
+              Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
       for (const auto &token : tokenizer) {
         metadata.push_back(boost::lexical_cast<double>(token));
       }

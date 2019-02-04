@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name
 #from mantid.api import AlgorithmFactory
 #from mantid.simpleapi import PythonAlgorithm, WorkspaceProperty
@@ -15,6 +21,9 @@ class LoadVisionElasticBS(PythonAlgorithm):
 
     def category(self):
         return "DataHandling\\Nexus"
+
+    def seeAlso(self):
+        return [ "LoadVisionElasticEQ","LoadVisionInelastic" ]
 
     def name(self):
         return "LoadVisionElasticBS"
@@ -77,6 +86,7 @@ class LoadVisionElasticBS(PythonAlgorithm):
 
         self.setProperty("OutputWorkspace", ws)
         mantid.simpleapi.DeleteWorkspace(wksp_name)
+
 
 # Register
 AlgorithmFactory.subscribe(LoadVisionElasticBS)

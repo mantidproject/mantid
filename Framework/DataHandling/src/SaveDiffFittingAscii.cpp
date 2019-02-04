@@ -1,10 +1,14 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/SaveDiffFittingAscii.h"
 
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
@@ -23,7 +27,9 @@ DECLARE_ALGORITHM(SaveDiffFittingAscii)
 
 /// Empty constructor
 SaveDiffFittingAscii::SaveDiffFittingAscii()
-    : Mantid::API::Algorithm(), m_sep(','), m_counter(0) {}
+    : Mantid::API::Algorithm(), m_sep(','), m_counter(0) {
+  useAlgorithm("EnggSaveSinglePeakFitResultsToHDF5", 1);
+}
 
 /// Initialisation method.
 void SaveDiffFittingAscii::init() {
@@ -41,12 +47,12 @@ void SaveDiffFittingAscii::init() {
                   "The filename to use for the saved data");
 
   declareProperty(
-      "RunNumber", "", boost::make_shared<MandatoryValidator<std::string>>(),
+      "RunNumber", "",
       "Run number list of the focused files, which is used to generate the "
       "parameters table workspace");
 
   declareProperty(
-      "Bank", "", boost::make_shared<MandatoryValidator<std::string>>(),
+      "Bank", "",
       "Bank number list of the focused files, which is used to generate "
       "the parameters table workspace");
 
@@ -88,6 +94,7 @@ bool SaveDiffFittingAscii::processGroups() {
         AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(name);
 
     std::vector<API::ITableWorkspace_sptr> input_ws;
+    input_ws.reserve(inputGroup->getNumberOfEntries());
     for (int i = 0; i < inputGroup->getNumberOfEntries(); ++i) {
       input_ws.push_back(
           boost::dynamic_pointer_cast<ITableWorkspace>(inputGroup->getItem(i)));
@@ -142,7 +149,7 @@ void SaveDiffFittingAscii::processAll(
   std::vector<std::string> splitBank = splitList(bankList);
 
   // Create a progress reporting object
-  Progress progress(this, 0, 1, input_ws.size());
+  Progress progress(this, 0.0, 1.0, input_ws.size());
 
   size_t breaker = input_ws.size();
   if (outMode == "AppendToExistingFile" && input_ws.size() == 1)
@@ -152,7 +159,9 @@ void SaveDiffFittingAscii::processAll(
 
     std::string runNum = splitRunNum[m_counter];
     std::string bank = splitBank[m_counter];
-    writeInfo(runNum, bank, file);
+
+    if (!runNum.empty() || !bank.empty())
+      writeInfo(runNum, bank, file);
 
     // write header
     std::vector<std::string> columnHeadings = input_ws[i]->getColumnNames();
@@ -190,8 +199,8 @@ void SaveDiffFittingAscii::writeInfo(const std::string &runNumber,
 void SaveDiffFittingAscii::writeHeader(
     const std::vector<std::string> &columnHeadings, std::ofstream &file) {
   for (const auto &heading : columnHeadings) {
-    // Chi being the last header in the table workspace
-    if (heading == "Chi") {
+    // if last header in the table workspace, put eol
+    if (&heading == &columnHeadings.back()) {
       writeVal(heading, file, true);
     } else {
       writeVal(heading, file, false);
@@ -275,11 +284,11 @@ std::map<std::string, std::string> SaveDiffFittingAscii::validateInputs() {
   std::string bankNumber = getPropertyValue("Bank");
   std::vector<std::string> splitBank = splitList(bankNumber);
 
-  if (runNumber.empty()) {
-    errors["Bank"] = "Please provide a valid bank list";
-  }
-  if (splitBank.empty()) {
-    errors["Bank"] = "Please provide a valid bank list";
+  if (bankNumber.empty()) {
+    if (!runNumber.empty())
+      errors["Bank"] = "Please provide a valid bank list";
+  } else if (runNumber.empty()) {
+    errors["RunNumber"] = "Please provide a valid run number list";
   } else if (!is_grp) {
     if (splitRunNum.size() > 1) {
       errors["RunNumber"] = "One run number should be provided when a Table"

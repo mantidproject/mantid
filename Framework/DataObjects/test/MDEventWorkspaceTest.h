@@ -1,34 +1,36 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MDEVENTWORKSPACETEST_H
 #define MDEVENTWORKSPACETEST_H
 
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/BoxController.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/ITableWorkspace.h"
-#include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
-#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
-#include "MantidGeometry/MDGeometry/MDBoxImplicitFunction.h"
-#include "MantidGeometry/MDGeometry/QSample.h"
-#include "MantidKernel/ProgressText.h"
-#include "MantidKernel/Timer.h"
-#include "MantidAPI/BoxController.h"
 #include "MantidDataObjects/CoordTransformDistance.h"
 #include "MantidDataObjects/MDBox.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidDataObjects/MDGridBox.h"
 #include "MantidDataObjects/MDLeanEvent.h"
+#include "MantidGeometry/MDGeometry/MDBoxImplicitFunction.h"
+#include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidGeometry/MDGeometry/QSample.h"
+#include "MantidKernel/ProgressText.h"
+#include "MantidKernel/Timer.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "PropertyManagerHelper.h"
-#include <boost/random/linear_congruential.hpp>
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/uniform_int.hpp>
-#include <boost/random/uniform_real.hpp>
-#include <boost/random/variate_generator.hpp>
+#include <cmath>
 #include <cxxtest/TestSuite.h>
 #include <map>
 #include <memory>
-#include <vector>
 #include <typeinfo>
-#include <cmath>
+#include <vector>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -41,7 +43,7 @@ private:
   /// Helper function to return the number of masked bins in a workspace. TODO:
   /// move helper into test helpers
   size_t getNumberMasked(Mantid::API::IMDWorkspace_sptr ws) {
-    Mantid::API::IMDIterator *it = ws->createIterator(NULL);
+    auto it = ws->createIterator(nullptr);
     size_t numberMasked = 0;
     size_t counter = 0;
     for (; counter < it->getDataSize(); ++counter) {
@@ -50,7 +52,6 @@ private:
       }
       it->next(1); // Doesn't perform skipping on masked, bins, but next() does.
     }
-    delete it;
     return numberMasked;
   }
 
@@ -122,7 +123,7 @@ public:
 
     /*Test that the boxes were deep copied and that their BoxController pointers
      * have been updated too.*/
-    std::vector<API::IMDNode *> originalBoxes(0, NULL);
+    std::vector<API::IMDNode *> originalBoxes(0, nullptr);
     ew3.getBox()->getBoxes(originalBoxes, 10000, false);
 
     std::vector<API::IMDNode *> copiedBoxes;
@@ -151,6 +152,22 @@ public:
           "BoxController on copied box does not match that in copied workspace",
           copy.getBoxController().get(), copiedMDBox->getBoxController());
     }
+  }
+
+  void test_clone_clear_workspace_name() {
+    auto ws = boost::make_shared<MDEventWorkspace<MDLeanEvent<3>, 3>>();
+    Mantid::Geometry::GeneralFrame frame("m", "m");
+    for (size_t i = 0; i < 3; i++) {
+      ws->addDimension(MDHistoDimension_sptr(
+          new MDHistoDimension("x", "x", frame, -1, 1, 0)));
+    }
+    ws->initialize();
+    const std::string name{"MatrixWorkspace_testCloneClearsWorkspaceName"};
+    AnalysisDataService::Instance().add(name, ws);
+    TS_ASSERT_EQUALS(ws->getName(), name)
+    auto cloned = ws->clone();
+    TS_ASSERT(cloned->getName().empty())
+    AnalysisDataService::Instance().clear();
   }
 
   void test_initialize_throws() {
@@ -221,42 +238,34 @@ public:
   //-------------------------------------------------------------------------------------
   /** Create an IMDIterator */
   void test_createIterator() {
-    MDEventWorkspace3 *ew = new MDEventWorkspace3();
+    auto ew = boost::make_shared<MDEventWorkspace3>();
     BoxController_sptr bc = ew->getBoxController();
     bc->setSplitInto(4);
     ew->splitBox();
-    IMDIterator *it = ew->createIterator();
+    auto it = ew->createIterator();
     TS_ASSERT(it);
     TS_ASSERT_EQUALS(it->getDataSize(), 4 * 4 * 4);
     TS_ASSERT(it->next());
-    delete it;
-    auto *mdfunction = new MDImplicitFunction();
-    it = ew->createIterator(mdfunction);
+    MDImplicitFunction mdfunction;
+    it = ew->createIterator(&mdfunction);
     TS_ASSERT(it);
     TS_ASSERT_EQUALS(it->getDataSize(), 4 * 4 * 4);
     TS_ASSERT(it->next());
-    delete mdfunction;
-    delete it;
-    delete ew;
   }
 
   //-------------------------------------------------------------------------------------
   /** Create several IMDIterators to run them in parallel */
   void test_createIterators() {
-    MDEventWorkspace3 *ew = new MDEventWorkspace3();
+    auto ew = boost::make_shared<MDEventWorkspace3>();
     BoxController_sptr bc = ew->getBoxController();
     bc->setSplitInto(4);
     ew->splitBox();
-    std::vector<IMDIterator *> iterators = ew->createIterators(3);
+    auto iterators = ew->createIterators(3);
     TS_ASSERT_EQUALS(iterators.size(), 3);
 
     TS_ASSERT_EQUALS(iterators[0]->getDataSize(), 21);
     TS_ASSERT_EQUALS(iterators[1]->getDataSize(), 21);
     TS_ASSERT_EQUALS(iterators[2]->getDataSize(), 22);
-
-    for (size_t i = 0; i < 3; ++i)
-      delete iterators[i];
-    delete ew;
   }
 
   //-------------------------------------------------------------------------------------
@@ -362,7 +371,7 @@ public:
     for (size_t i = 0; i < 50; i++) {
       ew->addEvent(ev);
     }
-    ew->splitAllIfNeeded(NULL);
+    ew->splitAllIfNeeded(nullptr);
     ew->refreshCache();
 
     // Create dimension-aligned line through the workspace
@@ -577,7 +586,7 @@ public:
 
   void test_maskNULL() {
     // Should do nothing in terms of masking, but should not throw.
-    doTestMasking(NULL, 0); // 0 out of 1000 bins masked
+    doTestMasking(nullptr, 0); // 0 out of 1000 bins masked
   }
 
   void test_maskNothing() {
@@ -761,9 +770,9 @@ public:
   }
 
   /**
-  * Test declaring an input IMDEventWorkspace and retrieving as const_sptr or
-  * sptr
-  */
+   * Test declaring an input IMDEventWorkspace and retrieving as const_sptr or
+   * sptr
+   */
   void testGetProperty_const_sptr() {
     const std::string wsName = "InputWorkspace";
     IMDEventWorkspace_sptr wsInput(new MDEventWorkspace<MDLeanEvent<3>, 3>());
@@ -775,10 +784,10 @@ public:
     IMDEventWorkspace_sptr wsNonConst;
     TS_ASSERT_THROWS_NOTHING(
         wsConst = manager.getValue<IMDEventWorkspace_const_sptr>(wsName));
-    TS_ASSERT(wsConst != NULL);
+    TS_ASSERT(wsConst != nullptr);
     TS_ASSERT_THROWS_NOTHING(
         wsNonConst = manager.getValue<IMDEventWorkspace_sptr>(wsName));
-    TS_ASSERT(wsNonConst != NULL);
+    TS_ASSERT(wsNonConst != nullptr);
     TS_ASSERT_EQUALS(wsConst, wsNonConst);
 
     // Check TypedValue can be cast to const_sptr or to sptr
@@ -786,9 +795,9 @@ public:
     IMDEventWorkspace_const_sptr wsCastConst;
     IMDEventWorkspace_sptr wsCastNonConst;
     TS_ASSERT_THROWS_NOTHING(wsCastConst = (IMDEventWorkspace_const_sptr)val);
-    TS_ASSERT(wsCastConst != NULL);
+    TS_ASSERT(wsCastConst != nullptr);
     TS_ASSERT_THROWS_NOTHING(wsCastNonConst = (IMDEventWorkspace_sptr)val);
-    TS_ASSERT(wsCastNonConst != NULL);
+    TS_ASSERT(wsCastNonConst != nullptr);
     TS_ASSERT_EQUALS(wsCastConst, wsCastNonConst);
   }
 };
@@ -836,9 +845,10 @@ public:
   void teadDown() { m_ws.reset(); }
   void test_splitting_performance_single_threaded() {
     std::cout << "Starting Workspace splitting performance test, single "
-                 "threaded with " << nBoxes << " events \n";
+                 "threaded with "
+              << nBoxes << " events \n";
     Kernel::Timer clock;
-    m_ws->splitAllIfNeeded(NULL);
+    m_ws->splitAllIfNeeded(nullptr);
     std::cout
         << "Finished Workspace splitting performance test, single threaded in "
         << clock.elapsed() << " sec\n";

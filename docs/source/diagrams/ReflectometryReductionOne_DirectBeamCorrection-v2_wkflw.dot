@@ -1,0 +1,39 @@
+digraph ReflectometryReductionOne {
+splines=line
+label = "\n"
+rankdir = TB;
+ $global_style
+
+subgraph params {
+ $param_style
+  inputWS             [label="InputWorkspace", group=gmain]
+  outputWS            [label="DirectBeamWorkspace", group=gmain]
+  regionOfDirectBeam  [label="RegionOf-\nDirectBeam"]
+}
+
+subgraph decisions {
+ $decision_style
+}
+
+subgraph algorithms {
+ $algorithm_style
+  convertDB     [label="ConvertUnits\n(AlignBins = True)", group=gmain]
+  groupDetRDB   [label="GroupDetectors", group=gmain]
+}
+
+subgraph processes {
+ $process_style
+}
+
+subgraph values {
+ $value_style
+}
+
+inputWS             -> groupDetRDB
+
+regionOfDirectBeam  -> groupDetRDB
+groupDetRDB         -> convertDB
+
+convertDB           -> outputWS
+
+}

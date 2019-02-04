@@ -1,7 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/ResampleX.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/VectorHelper.h"
@@ -15,7 +23,6 @@ using namespace DataObjects;
 using namespace Kernel;
 using HistogramData::BinEdges;
 using std::map;
-using std::pair;
 using std::string;
 using std::stringstream;
 using std::vector;
@@ -112,8 +119,21 @@ map<string, string> ResampleX::validateInputs() {
  */
 string determineXMinMax(MatrixWorkspace_sptr inputWS, vector<double> &xmins,
                         vector<double> &xmaxs) {
-  bool updateXMins = xmins.empty(); // they weren't set
-  bool updateXMaxs = xmaxs.empty(); // they weren't set
+  const size_t numSpectra = inputWS->getNumberHistograms();
+
+  // pad out the ranges by copying the first value to the rest that are needed
+  if (xmins.size() == 1 && numSpectra > xmins.size()) {
+    const double value = xmins.front();
+    xmins.insert(xmins.end(), numSpectra - xmins.size(), value);
+  }
+  if (xmaxs.size() == 1 && numSpectra > xmaxs.size()) {
+    const double value = xmaxs.front();
+    xmaxs.insert(xmaxs.end(), numSpectra - xmaxs.size(), value);
+  }
+
+  // should the individiual values be calculated?
+  const bool updateXMins = xmins.empty(); // they weren't set
+  const bool updateXMaxs = xmaxs.empty(); // they weren't set
 
   stringstream msg;
 
@@ -127,23 +147,24 @@ string determineXMinMax(MatrixWorkspace_sptr inputWS, vector<double> &xmins,
     xmax_wksp = inputEventWS->getTofMax();
   }
 
-  size_t numSpectra = inputWS->getNumberHistograms();
   for (size_t i = 0; i < numSpectra; ++i) {
     // determine ranges if necessary
     if (updateXMins || updateXMaxs) {
       const auto &xvalues = inputWS->x(i);
       if (updateXMins) {
-        if (std::isnan(xvalues.front())) {
+        const auto minimum = xvalues.front();
+        if (std::isnan(minimum) || minimum >= xmax_wksp) {
           xmins.push_back(xmin_wksp);
         } else {
-          xmins.push_back(xvalues.front());
+          xmins.push_back(minimum);
         }
       }
       if (updateXMaxs) {
-        if (std::isnan(xvalues.back())) {
+        const auto maximum = xvalues.back();
+        if (std::isnan(maximum) || maximum <= xmin_wksp) {
           xmaxs.push_back(xmax_wksp);
         } else {
-          xmaxs.push_back(xvalues.back());
+          xmaxs.push_back(maximum);
         }
       }
     }
@@ -279,7 +300,7 @@ void ResampleX::exec() {
   bool inPlace = (inputWS == outputWS); // Rebinning in-place
   m_isDistribution = inputWS->isDistribution();
   m_isHistogram = inputWS->isHistogramData();
-  int numSpectra = static_cast<int>(inputWS->getNumberHistograms());
+  const int numSpectra = static_cast<int>(inputWS->getNumberHistograms());
 
   // the easy parameters
   m_useLogBinning = getProperty("LogBinning");
@@ -331,8 +352,8 @@ void ResampleX::exec() {
       if (common_limits) {
         // get the delta from the first since they are all the same
         BinEdges xValues(0);
-        double delta = this->determineBinning(xValues.mutableRawData(),
-                                              xmins[0], xmaxs[0]);
+        const double delta = this->determineBinning(xValues.mutableRawData(),
+                                                    xmins[0], xmaxs[0]);
         g_log.debug() << "delta = " << delta << "\n";
         outputEventWS->setAllX(xValues);
       } else {
@@ -340,11 +361,11 @@ void ResampleX::exec() {
         Progress prog(this, 0.0, 1.0, numSpectra);
 
         // do the rebinning
-        PARALLEL_FOR2(inputEventWS, outputWS)
+        PARALLEL_FOR_IF(Kernel::threadSafe(*inputEventWS, *outputWS))
         for (int wkspIndex = 0; wkspIndex < numSpectra; ++wkspIndex) {
           PARALLEL_START_INTERUPT_REGION
           BinEdges xValues(0);
-          double delta = this->determineBinning(
+          const double delta = this->determineBinning(
               xValues.mutableRawData(), xmins[wkspIndex], xmaxs[wkspIndex]);
           g_log.debug() << "delta[wkspindex=" << wkspIndex << "] = " << delta
                         << " xmin=" << xmins[wkspIndex]
@@ -359,29 +380,22 @@ void ResampleX::exec() {
     else // event workspace -> matrix workspace
     {
       //--------- Different output, OR you're inplace but not preserving Events
-      //--- create a Workspace2D -------
       g_log.information() << "Creating a Workspace2D from the EventWorkspace "
                           << inputEventWS->getName() << ".\n";
+      outputWS = create<DataObjects::Workspace2D>(
+          *inputWS, numSpectra, HistogramData::BinEdges(m_numBins + 1));
 
-      // Create a Workspace2D
-      // This creates a new Workspace2D through a torturous route using the
-      // WorkspaceFactory.
-      // The Workspace2D is created with an EMPTY CONSTRUCTOR
-      outputWS = WorkspaceFactory::Instance().create("Workspace2D", numSpectra,
-                                                     m_numBins, m_numBins - 1);
-      WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS,
-                                                        true);
       // Initialize progress reporting.
       Progress prog(this, 0.0, 1.0, numSpectra);
 
       // Go through all the histograms and set the data
-      PARALLEL_FOR2(inputEventWS, outputWS)
+      PARALLEL_FOR_IF(Kernel::threadSafe(*inputEventWS, *outputWS))
       for (int wkspIndex = 0; wkspIndex < numSpectra; ++wkspIndex) {
         PARALLEL_START_INTERUPT_REGION
 
         // Set the X axis for each output histogram
         MantidVec xValues;
-        double delta =
+        const double delta =
             this->determineBinning(xValues, xmins[wkspIndex], xmaxs[wkspIndex]);
         g_log.debug() << "delta[wkspindex=" << wkspIndex << "] = " << delta
                       << "\n";
@@ -445,7 +459,7 @@ void ResampleX::exec() {
       outputWS->replaceAxis(1, inputWS->getAxis(1)->clone(outputWS.get()));
 
     Progress prog(this, 0.0, 1.0, numSpectra);
-    PARALLEL_FOR2(inputWS, outputWS)
+    PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
     for (int wkspIndex = 0; wkspIndex < numSpectra; ++wkspIndex) {
       PARALLEL_START_INTERUPT_REGION
       // get const references to input Workspace arrays (no copying)
@@ -461,8 +475,8 @@ void ResampleX::exec() {
 
       // create new output X axis
       MantidVec XValues_new;
-      double delta = this->determineBinning(XValues_new, xmins[wkspIndex],
-                                            xmaxs[wkspIndex]);
+      const double delta = this->determineBinning(XValues_new, xmins[wkspIndex],
+                                                  xmaxs[wkspIndex]);
       g_log.debug() << "delta[wkspindex=" << wkspIndex << "] = " << delta
                     << "\n";
 

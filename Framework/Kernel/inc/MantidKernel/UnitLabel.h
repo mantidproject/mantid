@@ -1,30 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_KERNEL_UNITLABEL_H_
 #define MANTID_KERNEL_UNITLABEL_H_
 /**
   Define a
-
-  Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
-
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>
-  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-#include "MantidKernel/ClassMacros.h"
 #include "MantidKernel/DllConfig.h"
 #include <string>
 
@@ -36,12 +20,14 @@ namespace Kernel {
  */
 class MANTID_KERNEL_DLL UnitLabel {
 public:
+  UnitLabel() = delete;
+
   /// Type that contains a plain-text string
-  typedef std::string AsciiString;
+  using AsciiString = std::string;
   /// Type that can hold a unicode string. This may vary per-platform depending
   /// on the
   /// width of the the built-in std::wstring
-  typedef std::wstring Utf8String;
+  using Utf8String = std::wstring;
 
   /// Constructor giving labels as ascii, unicode, and latex respectively
   UnitLabel(const AsciiString &ascii, const Utf8String &unicode,
@@ -80,8 +66,6 @@ public:
   operator std::string() const;
 
 private:
-  DISABLE_DEFAULT_CONSTRUCT(UnitLabel)
-
   /// Value of plain-text label
   std::string m_ascii;
   /// Value of utf-8 encoded string

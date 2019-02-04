@@ -1,16 +1,22 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CalculateEfficiency.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
-#include "MantidGeometry/IDetector.h"
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidGeometry/Instrument.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/IDTypes.h"
+#include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
-#include "MantidKernel/ArrayProperty.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/BoundedValidator.h"
 #include <vector>
 
 namespace Mantid {
@@ -103,7 +109,7 @@ void CalculateEfficiency::exec() {
   rebinnedWS = childAlg->getProperty("OutputWorkspace");
 
   outputWS = WorkspaceFactory::Instance().create(rebinnedWS);
-  WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS, false);
+  WorkspaceFactory::Instance().initializeFromParent(*inputWS, *outputWS, false);
   for (int i = 0; i < static_cast<int>(rebinnedWS->getNumberHistograms());
        i++) {
     outputWS->setSharedX(i, rebinnedWS->sharedX(i));
@@ -242,8 +248,8 @@ void CalculateEfficiency::normalizeDetectors(MatrixWorkspace_sptr rebinnedWS,
   }
 
   g_log.debug() << "normalizeDetectors: Masked pixels outside the acceptable "
-                   "efficiency range [" << min_eff << "," << max_eff
-                << "] = " << dets_to_mask.size()
+                   "efficiency range ["
+                << min_eff << "," << max_eff << "] = " << dets_to_mask.size()
                 << " from a total of non masked = " << nPixels
                 << " (from a total number of spectra in the ws = "
                 << numberOfSpectra << ")\n";
@@ -311,8 +317,11 @@ void CalculateEfficiency::maskComponent(MatrixWorkspace &ws,
       }
     }
     auto indexList = ws.getIndicesFromDetectorIDs(detectorList);
-    for (const auto &idx : indexList)
-      ws.maskWorkspaceIndex(idx);
+    auto &spectrumInfo = ws.mutableSpectrumInfo();
+    for (const auto &idx : indexList) {
+      ws.getSpectrum(idx).clearData();
+      spectrumInfo.setMasked(idx, true);
+    }
   } catch (std::exception &) {
     g_log.warning("Expecting the component " + componentName +
                   " to be a CompAssembly, e.g., a bank. Component not masked!");

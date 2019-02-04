@@ -1,21 +1,29 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CRYSTAL_FIND_UB_USING_INDEXED_PEAKS_TEST_H_
 #define MANTID_CRYSTAL_FIND_UB_USING_INDEXED_PEAKS_TEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/System.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Sample.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include <cxxtest/TestSuite.h>
 
 #include "MantidCrystal/FindUBUsingIndexedPeaks.h"
-#include "MantidCrystal/LoadIsawPeaks.h"
-#include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidCrystal/LoadIsawUB.h"
+#include "MantidDataHandling/LoadNexusProcessed.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 
-using namespace Mantid;
 using namespace Mantid::Crystal;
 using Mantid::Geometry::OrientedLattice;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
+using namespace Mantid::DataHandling;
 using namespace Mantid::Kernel;
 
 class FindUBUsingIndexedPeaksTest : public CxxTest::TestSuite {
@@ -29,10 +37,10 @@ public:
   void test_exec() {
     // Name of the output workspace.
     std::string WSName("peaks");
-    LoadIsawPeaks loader;
+    LoadNexusProcessed loader;
     TS_ASSERT_THROWS_NOTHING(loader.initialize());
     TS_ASSERT(loader.isInitialized());
-    loader.setPropertyValue("Filename", "TOPAZ_3007.peaks");
+    loader.setPropertyValue("Filename", "TOPAZ_3007.peaks.nxs");
     loader.setPropertyValue("OutputWorkspace", WSName);
 
     TS_ASSERT(loader.execute());

@@ -30,13 +30,13 @@
 #include "ExportDialog.h"
 #include "ApplicationWindow.h"
 
+#include <QCheckBox>
 #include <QCloseEvent>
-#include <QLayout>
+#include <QComboBox>
 #include <QLabel>
+#include <QLayout>
 #include <QMessageBox>
 #include <QPushButton>
-#include <QCheckBox>
-#include <QComboBox>
 
 ExportDialog::ExportDialog(const QString &tableName, QWidget *parent,
                            Qt::WFlags fl)
@@ -148,7 +148,7 @@ void ExportDialog::help() {
          "can be used:\n\\t for a TAB character \n\\s for a SPACE");
   s += "\n" +
        tr("The separator must not contain the following characters: 0-9eE.+-");
-  QMessageBox::about(0, tr("MantidPlot - Help"), s);
+  QMessageBox::about(nullptr, tr("MantidPlot - Help"), s);
 }
 
 void ExportDialog::enableTableName(bool ok) { boxTable->setEnabled(!ok); }
@@ -165,7 +165,7 @@ void ExportDialog::accept() {
   sep.replace("\\t", "\t");
 
   if (sep.contains(QRegExp("[0-9.eE+-]"))) {
-    QMessageBox::warning(0, tr("MantidPlot - Import options error"),
+    QMessageBox::warning(nullptr, tr("MantidPlot - Import options error"),
                          tr("The separator must not contain the following "
                             "characters: 0-9eE.+-"));
     return;

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_API_IMMUTABLECOMPOSITEFUNCTION_H_
 #define MANTID_API_IMMUTABLECOMPOSITEFUNCTION_H_
 
@@ -17,27 +23,6 @@ namespace API {
    methods).
     The function factory treat an ImmutableCompositeFunction as a simple
    function.
-
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-   National Laboratory & European Spallation Source
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>.
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_API_DLL ImmutableCompositeFunction : public CompositeFunction {
 public:
@@ -45,8 +30,6 @@ public:
 
   /// Returns the function's name
   std::string name() const override { return "ImmutableCompositeFunction"; }
-  /// Writes itself into a string
-  std::string asString() const override;
   /// Set i-th parameter
   void setParameter(size_t i, const double &value,
                     bool explicitlySet = true) override {
@@ -85,6 +68,9 @@ protected:
   void addDefaultTies(const std::string &ties);
   /// Add default constraints
   void addDefaultConstraints(const std::string &constraints);
+  /// Writes itself into a string
+  std::string writeToString(
+      const std::string &parentLocalAttributesStr = "") const override;
 
 private:
   /// Keep paramater aliases

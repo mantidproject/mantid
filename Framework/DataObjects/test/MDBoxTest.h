@@ -1,22 +1,28 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MDBOXTEST_H
 #define MDBOXTEST_H
 
-#include <cxxtest/TestSuite.h>
-#include <map>
-#include <memory>
-#include <Poco/File.h>
-#include <nexus/NeXusFile.hpp>
-#include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
-#include "MantidKernel/ConfigService.h"
-#include "MantidKernel/CPUTimer.h"
-#include "MantidKernel/DiskBuffer.h"
-#include "MantidKernel/MultiThreaded.h"
 #include "MantidAPI/BoxController.h"
 #include "MantidDataObjects/CoordTransformDistance.h"
 #include "MantidDataObjects/MDBin.h"
 #include "MantidDataObjects/MDBox.h"
 #include "MantidDataObjects/MDLeanEvent.h"
+#include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
+#include "MantidKernel/CPUTimer.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/DiskBuffer.h"
+#include "MantidKernel/MultiThreaded.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
+#include <Poco/File.h>
+#include <cxxtest/TestSuite.h>
+#include <map>
+#include <memory>
+#include <nexus/NeXusFile.hpp>
 
 using namespace Mantid;
 using namespace Mantid::Geometry;
@@ -365,15 +371,15 @@ public:
   }
 
   void test_sptr() {
-    typedef MDBox<MDLeanEvent<3>, 3> mdbox3;
+    using mdbox3 = MDBox<MDLeanEvent<3>, 3>;
     TS_ASSERT_THROWS_NOTHING(mdbox3::sptr a(new mdbox3(sc.get()));)
   }
 
   void test_bad_splitter() {
     BoxController_sptr sc(new BoxController(4));
     sc->setSplitThreshold(10);
-    typedef MDBox<MDLeanEvent<3>, 3>
-        MACROS_ARE_DUMB; //...since they get confused by commas
+    using MACROS_ARE_DUMB =
+        MDBox<MDLeanEvent<3>, 3>; //...since they get confused by commas
     TS_ASSERT_THROWS(MACROS_ARE_DUMB b3(sc.get()), std::invalid_argument);
   }
 
@@ -407,7 +413,7 @@ public:
     // First, a bin object that holds everything
     MDBin<MDLeanEvent<2>, 2> bin;
     // Perform the centerpoint binning
-    box.centerpointBin(bin, NULL);
+    box.centerpointBin(bin, nullptr);
     // 100 events = 100 weight.
     TS_ASSERT_DELTA(bin.m_signal, 100.0, 1e-4);
     TS_ASSERT_DELTA(bin.m_errorSquared, 150.0, 1e-4);
@@ -419,7 +425,7 @@ public:
     bin.m_max[0] = 6.0;
     bin.m_min[1] = 1.0;
     bin.m_max[1] = 3.0;
-    box.centerpointBin(bin, NULL);
+    box.centerpointBin(bin, nullptr);
     TS_ASSERT_DELTA(bin.m_signal, 4.0, 1e-4);
     TS_ASSERT_DELTA(bin.m_errorSquared, 6.0, 1e-4);
   }
@@ -445,6 +451,25 @@ public:
     TS_ASSERT_DELTA(errorSquared, 1.5 * numExpected, 1e-5);
   }
 
+  void dotest_integrateSphereWithInnerRadius(MDBox<MDLeanEvent<3>, 3> &box,
+                                             coord_t x, coord_t y, coord_t z,
+                                             const coord_t radius,
+                                             const coord_t innerRadius,
+                                             const bool useOnePercent,
+                                             double numExpected) {
+    // The sphere transformation
+    bool dimensionsUsed[3] = {true, true, true};
+    coord_t center[3] = {x, y, z};
+    CoordTransformDistance sphere(3, center, dimensionsUsed);
+
+    signal_t signal = 0;
+    signal_t errorSquared = 0;
+    box.integrateSphere(sphere, radius * radius, signal, errorSquared,
+                        innerRadius * innerRadius, useOnePercent);
+    TS_ASSERT_DELTA(signal, 1.0 * numExpected, 1e-5);
+    TS_ASSERT_DELTA(errorSquared, 1.5 * numExpected, 1e-5);
+  }
+
   void test_integrateSphere() {
     // One event at each integer coordinate value between 1 and 9
     MDBox<MDLeanEvent<3>, 3> box(sc.get());
@@ -464,6 +489,34 @@ public:
     dotest_integrateSphere(box, 0.5, 0.5, 0.5, 0.5, 0.0);
     dotest_integrateSphere(box, 5.0, 5.0, 5.0, 1.1f, 7.0);
     dotest_integrateSphere(box, 5.0, 5.0, 5.0, 10., 9 * 9 * 9);
+  }
+
+  void test_integrateSphereWithLowerRadiusBoundAndNoOnePercentCutoff() {
+    // One event at each integer coordinate value between 1 and 9
+    MDBox<MDLeanEvent<3>, 3> box(sc.get());
+    for (double x = 1.0; x < 10.0; x += 1.0)
+      for (double y = 1.0; y < 10.0; y += 1.0)
+        for (double z = 1.0; z < 10.0; z += 1.0) {
+          MDLeanEvent<3> ev(1.0, 1.5);
+          ev.setCenter(0, x);
+          ev.setCenter(1, y);
+          ev.setCenter(2, z);
+          box.addEvent(ev);
+        }
+
+    TS_ASSERT_EQUALS(box.getNPoints(), 9 * 9 * 9);
+
+    // Too small shell
+    dotest_integrateSphereWithInnerRadius(box, 5.0f, 5.0f, 5.0f, 0.5f, 0.4f,
+                                          false, 0.0);
+
+    // The 0.7 shell contains 2 but the 1.15 inner shell excludes one of them
+    dotest_integrateSphereWithInnerRadius(box, 5.6f, 5.0f, 5.0f, 0.7f, 0.5f,
+                                          false, 1.0);
+
+    // The 1.3 shell contains 2 and the 1.05 inner shell contains 2
+    dotest_integrateSphereWithInnerRadius(box, 5.6f, 5.0f, 5.0f, 0.7f, 0.4f,
+                                          false, 2.0);
   }
 
   //-----------------------------------------------------------------------------------------
@@ -538,8 +591,8 @@ public:
     coord_t centroid[2] = {0, 0};
     signal_t signal = 0.0;
     b.centroidSphere(sphere, 400., centroid, signal);
-    for (size_t d = 0; d < 2; d++)
-      centroid[d] /= static_cast<coord_t>(signal);
+    for (float &d : centroid)
+      d /= static_cast<coord_t>(signal);
 
     // This should be the weighted centroid
     TS_ASSERT_DELTA(signal, 6.000, 0.001);
@@ -548,11 +601,11 @@ public:
 
     // --- Reset and reduce the radius ------
     signal = 0;
-    for (size_t d = 0; d < 2; d++)
-      centroid[d] = 0.0;
+    for (float &d : centroid)
+      d = 0.0;
     b.centroidSphere(sphere, 16., centroid, signal);
-    for (size_t d = 0; d < 2; d++)
-      centroid[d] /= static_cast<coord_t>(signal);
+    for (float &d : centroid)
+      d /= static_cast<coord_t>(signal);
     // Only one event was contained
     TS_ASSERT_DELTA(signal, 2.000, 0.001);
     TS_ASSERT_DELTA(centroid[0], 2.000, 0.001);

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_API_WRAPPEDFUNCTIONTEST_H_
 #define MANTID_API_WRAPPEDFUNCTIONTEST_H_
 
@@ -17,8 +23,8 @@
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
-using ::testing::_;
 using ::testing::Mock;
+using ::testing::_;
 
 class FunctionParameterDecoratorTest;
 
@@ -153,6 +159,17 @@ public:
     TS_ASSERT_EQUALS(fn->nParams(), decoratedFunction->nParams());
   }
 
+  void testHasParameter() {
+    TestableFunctionParameterDecorator fn;
+
+    fn.setDecoratedFunction("FunctionWithParameters");
+
+    TS_ASSERT(fn.hasParameter("Height"));
+    TS_ASSERT(fn.hasParameter("PeakCentre"));
+    TS_ASSERT(fn.hasParameter("Sigma"));
+    TS_ASSERT(!fn.hasParameter("Hello"));
+  }
+
   void testGetSetParameter() {
     TestableFunctionParameterDecorator invalidFn;
     TS_ASSERT_THROWS(invalidFn.setParameter(0, 2.0), std::runtime_error);
@@ -280,7 +297,8 @@ public:
         getFunctionParameterDecoratorGaussian();
     IFunction_sptr decoratedFunction = fn->getDecoratedFunction();
 
-    ParameterTie *tie = fn->tie("Height", "Height=2.0*Sigma");
+    fn->tie("Height", "Height=2.0*Sigma");
+    ParameterTie *tie = fn->getTie(fn->parameterIndex("Height"));
     TS_ASSERT(tie);
     TS_ASSERT_EQUALS(decoratedFunction->getTie(0), tie);
 
@@ -431,9 +449,9 @@ private:
   class MockTestableFunctionParameterDecorator
       : public TestableFunctionParameterDecorator {
   public:
-    GCC_DIAG_OFF_SUGGEST_OVERRIDE
+    GNU_DIAG_OFF_SUGGEST_OVERRIDE
     MOCK_METHOD1(beforeDecoratedFunctionSet, void(const IFunction_sptr &));
-    GCC_DIAG_ON_SUGGEST_OVERRIDE
+    GNU_DIAG_ON_SUGGEST_OVERRIDE
   };
 };
 

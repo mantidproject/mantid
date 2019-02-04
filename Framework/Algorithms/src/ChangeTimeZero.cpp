@@ -1,16 +1,22 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/ChangeTimeZero.h"
-#include "MantidAlgorithms/CloneWorkspace.h"
-#include "MantidAlgorithms/ChangePulsetime.h"
-#include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/IEventWorkspace.h"
+#include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/Run.h"
+#include "MantidAlgorithms/ChangePulsetime.h"
+#include "MantidAlgorithms/CloneWorkspace.h"
 #include "MantidDataObjects/EventList.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/DateTimeValidator.h"
+#include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 #include <boost/lexical_cast.hpp>
 #include <boost/shared_ptr.hpp>
@@ -23,6 +29,7 @@ DECLARE_ALGORITHM(ChangeTimeZero)
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using Types::Core::DateAndTime;
 using std::size_t;
 
 namespace {
@@ -38,7 +45,7 @@ bool isTimeSeries(Mantid::Kernel::Property *prop) {
   }
   return isTimeSeries;
 }
-}
+} // namespace
 
 /** Initialize the algorithm's properties.
  */
@@ -237,7 +244,7 @@ ChangeTimeZero::getStartTimeFromWorkspace(API::MatrixWorkspace_sptr ws) const {
   Mantid::Kernel::TimeSeriesProperty<double> *goodFrame = nullptr;
   try {
     goodFrame = run.getTimeSeriesProperty<double>("proton_charge");
-  } catch (std::invalid_argument) {
+  } catch (const std::invalid_argument &) {
     throw std::invalid_argument("ChangeTimeZero: The log needs a proton_charge "
                                 "time series to determine the zero time.");
   }
@@ -331,7 +338,7 @@ bool ChangeTimeZero::checkForDateTime(const std::string &val) const {
   // Hedge for bad lexical casts in the DateTimeValidator
   try {
     DateTimeValidator validator = DateTimeValidator();
-    isDateTime = validator.isValid(val) == "";
+    isDateTime = validator.isValid(val).empty();
   } catch (...) {
     isDateTime = false;
   }
@@ -356,5 +363,5 @@ bool ChangeTimeZero::isAbsoluteTimeShift(const std::string &offset) const {
   return offset != m_defaultAbsoluteTimeShift && checkForDateTime(offset);
 }
 
-} // namespace Mantid
 } // namespace Algorithms
+} // namespace Mantid

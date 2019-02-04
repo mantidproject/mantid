@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -38,7 +38,7 @@ Usage
 
    transmission_ws = IndirectTransmissionMonitor(SampleWorkspace=sample_ws, CanWorkspace=can_ws)
 
-   print ', '.join(transmission_ws.getNames())
+   print(', '.join(transmission_ws.getNames()))
 
 **Output:**
 

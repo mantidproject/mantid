@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 """
 MantidPlot module with functions specific to the traditional,
 qti-based MantidPlot Python plotting interface
@@ -19,9 +25,6 @@ from PyQt4 import QtCore
 
 #-----------------------------------------------------------------------------
 # Intercept qtiplot "plot" command and forward to plotSpectrum for a workspace
-#
-# This function has been moved inside qtiplot when pymantidplot.pyplot (which
-# has another plot() function) was imported into the standard MantidPlot namespace
 def plot(source, *args, **kwargs):
     """Create a new plot given a workspace, table or matrix.
 

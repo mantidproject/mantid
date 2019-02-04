@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef INSTRUMENTWINDOW_H
 #define INSTRUMENTWINDOW_H
 
 #include "MantidAPI/AlgorithmObserver.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include <MantidQtAPI/GraphOptions.h>
-#include <MantidQtAPI/IProjectSerialisable.h>
+#include <MantidQtWidgets/Common/GraphOptions.h>
+#include <MantidQtWidgets/Common/IProjectSerialisable.h>
 
 #include <MdiSubWindow.h>
 #include <boost/shared_ptr.hpp>
@@ -16,8 +22,8 @@ namespace MantidQt {
 namespace MantidWidgets {
 class InstrumentWidget;
 class InstrumentWidgetTab;
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 class InstrumentWindow : public MdiSubWindow {
   Q_OBJECT
@@ -32,6 +38,11 @@ public:
   static MantidQt::API::IProjectSerialisable *
   loadFromProject(const std::string &lines, ApplicationWindow *app,
                   const int fileVersion);
+  /// Returns a list of workspace names that are used by this window
+  std::vector<std::string> getWorkspaceNames() override;
+  /// Returns the user friendly name of the window
+  std::string getWindowName() override;
+
   /// Save the state of the instrument window to a Mantid project file
   std::string saveToProject(ApplicationWindow *app) override;
   void selectTab(int tab);
@@ -48,6 +59,8 @@ public:
   void selectComponent(const QString &);
   void setScaleType(GraphOptions::ScaleType);
   void setViewType(const QString &);
+  /// Get the window type as a string
+  std::string getWindowType() override { return "Instrument"; }
 
 public slots:
   void closeSafely();

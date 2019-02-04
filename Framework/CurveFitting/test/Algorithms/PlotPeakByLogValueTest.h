@@ -1,27 +1,35 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef PLOTPEAKBYLOGVALUETEST_H_
 #define PLOTPEAKBYLOGVALUETEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidHistogramData/LinearGenerator.h"
-#include "MantidCurveFitting/Algorithms/PlotPeakByLogValue.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataObjects/TableWorkspace.h"
-#include "MantidAPI/TableRow.h"
+#include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/WorkspaceGroup.h"
-#include "MantidAPI/SpectraAxis.h"
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/ParamFunction.h"
-#include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/SpectraAxis.h"
+#include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidAPI/BinEdgeAxis.h"
+#include "MantidAPI/WorkspaceHistory.h"
+#include "MantidCurveFitting/Algorithms/PlotPeakByLogValue.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidHistogramData/LinearGenerator.h"
+#include "MantidKernel/PropertyHistory.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include <sstream>
 #include <algorithm>
+#include <sstream>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -31,10 +39,9 @@ using namespace Mantid::CurveFitting::Algorithms;
 using Mantid::HistogramData::BinEdges;
 using Mantid::HistogramData::LinearGenerator;
 
-typedef Mantid::DataObjects::Workspace2D_sptr WS_type;
-typedef Mantid::DataObjects::TableWorkspace_sptr TWS_type;
+using WS_type = Mantid::DataObjects::Workspace2D_sptr;
+using TWS_type = Mantid::DataObjects::TableWorkspace_sptr;
 
-namespace {
 struct Fun {
   double operator()(double, int i) { return double(i + 1); }
 };
@@ -70,7 +77,6 @@ public:
 private:
   std::string m_name;
 };
-}
 
 class PlotPeak_Expression {
 public:
@@ -281,7 +287,7 @@ public:
   }
 
   void test_passWorkspaceIndexToFunction() {
-    auto ws = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
         Fun(), 3, -5.0, 5.0, 0.1, false);
     AnalysisDataService::Instance().add("PLOTPEAKBYLOGVALUETEST_WS", ws);
     PlotPeakByLogValue alg;
@@ -308,7 +314,7 @@ public:
   }
 
   void test_dont_passWorkspaceIndexToFunction() {
-    auto ws = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
         Fun(), 3, -5.0, 5.0, 0.1, false);
     AnalysisDataService::Instance().add("PLOTPEAKBYLOGVALUETEST_WS", ws);
     PlotPeakByLogValue alg;
@@ -337,7 +343,7 @@ public:
   }
 
   void test_passWorkspaceIndexToFunction_composit_function_case() {
-    auto ws = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
         Fun(), 3, -5.0, 5.0, 0.1, false);
     AnalysisDataService::Instance().add("PLOTPEAKBYLOGVALUETEST_WS", ws);
     PlotPeakByLogValue alg;
@@ -366,7 +372,7 @@ public:
   }
 
   void test_createOutputOption() {
-    auto ws = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
         Fun(), 3, -5.0, 5.0, 0.1, false);
     AnalysisDataService::Instance().add("PLOTPEAKBYLOGVALUETEST_WS", ws);
     PlotPeakByLogValue alg;
@@ -496,10 +502,10 @@ public:
     TS_ASSERT(fits->getNames().size() == 2);
 
     auto wsNames = fits->getNames();
-    for (size_t i = 0; i < wsNames.size(); ++i) {
+    for (const auto &wsName : wsNames) {
       auto fit =
           AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(
-              wsNames[i]);
+              wsName);
       TS_ASSERT(fit);
       TS_ASSERT(fit->getNumberHistograms() == 5);
     }
@@ -533,35 +539,87 @@ public:
     TS_ASSERT(fits);
 
     if (fits->size() > 0) {
-      // Get the Fit algorithm history
       auto fit = fits->getItem(0);
-      const auto &wsHistory = fit->getHistory();
-      const auto &child = wsHistory.getAlgorithmHistory(0);
-      TS_ASSERT_EQUALS(child->name(), "Fit");
-      const auto &properties = child->getProperties();
-
-      // Check max iterations property
-      PropertyNameIs maxIterationsCheck("MaxIterations");
-      auto prop = std::find_if(properties.begin(), properties.end(),
-                               maxIterationsCheck);
-      TS_ASSERT_EQUALS((*prop)->value(), "50");
-
-      // Check minimizer property
-      PropertyNameIs minimizerCheck("Minimizer");
-      prop = std::find_if(properties.begin(), properties.end(), minimizerCheck);
-      TS_ASSERT_EQUALS((*prop)->value(),
-                       "Levenberg-Marquardt,AbsError=0.01,RelError=1");
+      TS_ASSERT_EQUALS(fit->history().size(), 0);
+      TS_ASSERT_EQUALS(fit->getName(), "PlotPeakResult_Workspaces_1");
     }
 
     AnalysisDataService::Instance().clear();
   }
 
-  void test_histogram_fit() {
-    size_t nbins = 10;
+  void test_parameters_are_correct_for_a_histogram_fit() {
+    createHistogramWorkspace("InputWS", 10, -10.0, 10.0);
+
+    PlotPeakByLogValue alg;
+    alg.initialize();
+    alg.setAlwaysStoreInADS(false);
+    alg.setProperty("EvaluationType", "Histogram");
+    alg.setPropertyValue("Input", "InputWS,v1:3");
+    alg.setPropertyValue("OutputWorkspace", "out");
+    alg.setProperty("CreateOutput", true);
+    alg.setPropertyValue("Function", "name=FlatBackground,A0=2");
+    alg.execute();
+
+    ITableWorkspace_sptr params = alg.getProperty("OutputWorkspace");
+    TS_ASSERT_DELTA(params->Double(0, 1), 1.0, 1e-15);
+    TS_ASSERT_DELTA(params->Double(1, 1), 1.1, 1e-15);
+    TS_ASSERT_DELTA(params->Double(2, 1), 0.6, 1e-15);
+
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_exclude_range() {
+    HistogramData::Points points{-2, -1, 0, 1, 2};
+    HistogramData::Counts counts(points.size(), 0.0);
+    // This value should be excluded.
+    counts.mutableData()[2] = 10.0;
+    MatrixWorkspace_sptr ws(DataObjects::create<Workspace2D>(
+                                1, HistogramData::Histogram(points, counts))
+                                .release());
+    AnalysisDataService::Instance().addOrReplace("InputWS", ws);
+
+    PlotPeakByLogValue alg;
+    alg.initialize();
+    alg.setPropertyValue("Input", "InputWS,i0");
+    alg.setPropertyValue("Exclude", "-0.5, 0.5");
+    alg.setPropertyValue("OutputWorkspace", "PlotPeakResult");
+    alg.setProperty("CreateOutput", true);
+    alg.setPropertyValue("Function", "name=FlatBackground,A0=2");
+    alg.setPropertyValue("MaxIterations", "50");
+    alg.execute();
+
+    TS_ASSERT(alg.isExecuted());
+    AnalysisDataService::Instance().remove("InputWS");
+  }
+
+private:
+  WorkspaceGroup_sptr m_wsg;
+
+  void createData(bool hist = false) {
+    m_wsg.reset(new WorkspaceGroup);
+    AnalysisDataService::Instance().add("PlotPeakGroup", m_wsg);
+    const int N = 3;
+    for (int iWS = 0; iWS < N; ++iWS) {
+      auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
+          PlotPeak_Expression(iWS), 3, 0, 10, 0.005, hist);
+      for (int i = 0; i < 3; ++i) {
+        ws->getSpectrum(i).setSpectrumNo(0);
+      }
+      Kernel::TimeSeriesProperty<double> *logd =
+          new Kernel::TimeSeriesProperty<double>("var");
+      logd->addValue("2007-11-01T18:18:53", 1 + iWS * 0.3);
+      ws->mutableRun().addLogData(logd);
+      std::ostringstream wsName;
+      wsName << "PlotPeakGroup_" << iWS;
+      WorkspaceCreationHelper::storeWS(wsName.str(), ws);
+      m_wsg->add(wsName.str());
+    }
+  }
+
+  void createHistogramWorkspace(const std::string &name, std::size_t nbins,
+                                double x0, double x1) {
     auto ws =
         WorkspaceFactory::Instance().create("Workspace2D", 3, nbins + 1, nbins);
-    double x0 = -10.0;
-    double x1 = 10.0;
     double dx = (x1 - x0) / static_cast<double>(nbins);
     ws->setBinEdges(0, nbins + 1, HistogramData::LinearGenerator(x0, dx));
     ws->setSharedX(1, ws->sharedX(0));
@@ -583,60 +641,7 @@ public:
           AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out");
       ws->dataY(i) = calc->readY(1);
     }
-    AnalysisDataService::Instance().addOrReplace("InputWS", ws);
-
-    PlotPeakByLogValue alg;
-    alg.initialize();
-    alg.setProperty("EvaluationType", "Histogram");
-    alg.setPropertyValue("Input", "InputWS,v1:3");
-    alg.setPropertyValue("OutputWorkspace", "out");
-    alg.setProperty("CreateOutput", true);
-    alg.setPropertyValue("Function", "name=FlatBackground,A0=2");
-    alg.execute();
-
-    {
-      auto params = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
-          "InputWS_0_Parameters");
-      TS_ASSERT_DELTA(params->Double(0, 1), 1.0, 1e-15);
-    }
-
-    {
-      auto params = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
-          "InputWS_1_Parameters");
-      TS_ASSERT_DELTA(params->Double(0, 1), 1.1, 1e-15);
-    }
-
-    {
-      auto params = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
-          "InputWS_2_Parameters");
-      TS_ASSERT_DELTA(params->Double(0, 1), 0.6, 1e-15);
-    }
-
-    AnalysisDataService::Instance().clear();
-  }
-
-private:
-  WorkspaceGroup_sptr m_wsg;
-
-  void createData(bool hist = false) {
-    m_wsg.reset(new WorkspaceGroup);
-    AnalysisDataService::Instance().add("PlotPeakGroup", m_wsg);
-    const int N = 3;
-    for (int iWS = 0; iWS < N; ++iWS) {
-      auto ws = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
-          PlotPeak_Expression(iWS), 3, 0, 10, 0.005, hist);
-      for (int i = 0; i < 3; ++i) {
-        ws->getSpectrum(i).setSpectrumNo(0);
-      }
-      Kernel::TimeSeriesProperty<double> *logd =
-          new Kernel::TimeSeriesProperty<double>("var");
-      logd->addValue("2007-11-01T18:18:53", 1 + iWS * 0.3);
-      ws->mutableRun().addLogData(logd);
-      std::ostringstream wsName;
-      wsName << "PlotPeakGroup_" << iWS;
-      WorkspaceCreationHelper::storeWS(wsName.str(), ws);
-      m_wsg->add(wsName.str());
-    }
+    AnalysisDataService::Instance().addOrReplace(name, ws);
   }
 
   MatrixWorkspace_sptr createTestWorkspace() {

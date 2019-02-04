@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -36,12 +36,12 @@ Usage
     result=DakotaChiSquared(datafile,simfile,chifile)
     
     #Test to see if everything is ok
-    print "Chi squared is ",result[0]
-    print "Residuals are ", result[1].dataY(0)
+    print("Chi squared is {}".format(result[0]))
+    print("Residuals are {}".format(result[1].dataY(0)))
     #and the content of the file
     f = open(chifile,'r')
     chistr=f.read()
-    print "Content of the file : ",chistr.strip()
+    print("Content of the file : {}".format(chistr.strip()))
     f.close()
 	
 .. testcleanup:: DakotaChiSquared
@@ -57,9 +57,9 @@ Usage
      
 .. testoutput:: DakotaChiSquared    
     
-    Chi squared is  5.5
-    Residuals are  [ 0.  -1.   0.   1.5  1.5]
-    Content of the file :  5.5 obj_fn
+    Chi squared is 5.5
+    Residuals are [ 0.  -1.   0.   1.5  1.5]
+    Content of the file : 5.5 obj_fn
 
 
 

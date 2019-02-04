@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGPUAlgorithms/GPUTester.h"
 #include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/System.h"
@@ -138,14 +144,16 @@ void GPUTester::exec() {
 
   if (result)
     g_log.notice() << "GPUTester runKernel succeeded - the output from the GPU "
-                      "matched the expected values." << std::endl;
+                      "matched the expected values."
+                   << std::endl;
   else
     g_log.notice() << "GPUTester runKernel failed - the output from the GPU "
-                      "did not match the expected values." << std::endl;
+                      "did not match the expected values."
+                   << std::endl;
 
   // Set the output
   setProperty("Result", result);
 }
 
-} // namespace Mantid
 } // namespace GPUAlgorithms
+} // namespace Mantid

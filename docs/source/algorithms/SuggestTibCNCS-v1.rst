@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -25,11 +25,11 @@ Usage
 
     incidentEnergy = 3
     (tibMin,tibMax) = SuggestTibCNCS(incidentEnergy)
-    print "Incident Energy = %i, tibMin = %.2f, tibMax = %.2f" % (incidentEnergy,tibMin,tibMax)
+    print("Incident Energy = %i, tibMin = %.2f, tibMax = %.2f" % (incidentEnergy,tibMin,tibMax))
 
     incidentEnergy = 1
     (tibMin,tibMax) = SuggestTibCNCS(incidentEnergy)
-    print "Incident Energy = %i, tibMin = %.2f, tibMax = %.2f" % (incidentEnergy,tibMin,tibMax)
+    print("Incident Energy = %i, tibMin = %.2f, tibMax = %.2f" % (incidentEnergy,tibMin,tibMax))
 
 Output:
 

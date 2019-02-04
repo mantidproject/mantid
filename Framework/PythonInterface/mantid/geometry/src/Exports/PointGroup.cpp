@@ -1,13 +1,21 @@
-#include "MantidPythonInterface/kernel/GetPointer.h"
-#include "MantidGeometry/Crystal/Group.h"
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Crystal/PointGroup.h"
+#include "MantidGeometry/Crystal/Group.h"
 #include "MantidPythonInterface/kernel/Converters/PyObjectToV3D.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/enum.hpp>
-#include <boost/python/scope.hpp>
 #include <boost/python/list.hpp>
+#include <boost/python/operators.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
+#include <boost/python/scope.hpp>
+#include <boost/python/self.hpp>
 
 using Mantid::Geometry::Group;
 using Mantid::Geometry::PointGroup;
@@ -17,7 +25,7 @@ using namespace boost::python;
 GET_POINTER_SPECIALIZATION(PointGroup)
 
 namespace //<unnamed>
-    {
+{
 using namespace Mantid::PythonInterface;
 
 bool isEquivalent(PointGroup &self, const object &hkl1, const object &hkl2) {
@@ -40,7 +48,15 @@ boost::python::list getEquivalents(PointGroup &self, const object &hkl) {
 Mantid::Kernel::V3D getReflectionFamily(PointGroup &self, const object &hkl) {
   return self.getReflectionFamily(Converters::PyObjectToV3D(hkl)());
 }
+
+std::string __repr__implementation(const PointGroup &self) {
+  std::stringstream ss;
+  ss << "PointGroupFactory.createPointGroup(\"";
+  ss << self.getSymbol();
+  ss << "\")";
+  return ss.str();
 }
+} // namespace
 
 void export_PointGroup() {
   register_ptr_to_python<boost::shared_ptr<PointGroup>>();
@@ -79,5 +95,7 @@ void export_PointGroup() {
            "HKL.")
       .def("getReflectionFamily", &getReflectionFamily,
            (arg("self"), arg("hkl")),
-           "Returns the same HKL for all symmetry equivalents.");
+           "Returns the same HKL for all symmetry equivalents.")
+      .def(str(self))
+      .def("__repr__", &__repr__implementation);
 }

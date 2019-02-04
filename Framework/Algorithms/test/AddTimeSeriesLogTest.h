@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_ADDTIMESERIESLOGTEST_H_
 #define MANTID_ALGORITHMS_ADDTIMESERIESLOGTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidAlgorithms/AddTimeSeriesLog.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
 class AddTimeSeriesLogTest : public CxxTest::TestSuite {
 private:
@@ -20,7 +26,7 @@ public:
   static void destroySuite(AddTimeSeriesLogTest *suite) { delete suite; }
 
   void test_defaults_create_a_double_type_series() {
-    auto ws = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+    auto ws = WorkspaceCreationHelper::create2DWorkspace(10, 10);
     TS_ASSERT_THROWS_NOTHING(
         executeAlgorithm(ws, "Test Name", "2010-09-14T04:20:12", 20.0));
     checkLogWithEntryExists<double>(ws, "Test Name", "2010-09-14T04:20:12",
@@ -32,7 +38,7 @@ public:
   }
 
   void test_forcing_to_int_creates_int_from_double() {
-    auto ws = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+    auto ws = WorkspaceCreationHelper::create2DWorkspace(10, 10);
     TS_ASSERT_THROWS_NOTHING(executeAlgorithm(
         ws, "Test Name", "2010-09-14T04:20:12", 20.5, Integer));
 
@@ -57,7 +63,7 @@ public:
   }
 
   void test_delete_existing_removes_complete_log_first() {
-    auto ws = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+    auto ws = WorkspaceCreationHelper::create2DWorkspace(10, 10);
     TS_ASSERT_THROWS_NOTHING(
         executeAlgorithm(ws, "Test Name", "2010-09-14T04:20:12", 20.0));
     checkLogWithEntryExists<double>(ws, "Test Name", "2010-09-14T04:20:12",
@@ -105,7 +111,7 @@ public:
   }
 
   void test_algorithm_fails_if_log_exists_but_is_not_a_time_series() {
-    auto ws = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+    auto ws = WorkspaceCreationHelper::create2DWorkspace(10, 10);
     auto &run = ws->mutableRun();
     run.addProperty<double>("Test Name", 1.0);
     TS_ASSERT_THROWS(
@@ -114,7 +120,7 @@ public:
   }
 
   void test_algorithm_fails_if_time_series_exists_but_it_is_incorrect_type() {
-    auto ws = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+    auto ws = WorkspaceCreationHelper::create2DWorkspace(10, 10);
     auto &run = ws->mutableRun();
     const std::string logName = "DoubleSeries";
     auto *timeSeries = new Mantid::Kernel::TimeSeriesProperty<double>(logName);
@@ -153,8 +159,8 @@ private:
                                const std::string &logName,
                                const std::string &logTime, const T logValue,
                                const size_t position) {
-    using Mantid::Kernel::DateAndTime;
     using Mantid::Kernel::TimeSeriesProperty;
+    using Mantid::Types::Core::DateAndTime;
 
     const auto &run = testWS->run();
     TSM_ASSERT("Run does not contain the expected log entry",

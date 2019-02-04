@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -46,7 +46,7 @@ This small usage example merges two compatible POLDI-files which have been loade
     
     # The result has one spectrum with one bin, which contains the total counts.
     counts_6903 = int(total_6903.dataY(0)[0])
-    print "6903 contains a total of", counts_6903, "counts."
+    print("6903 contains a total of {} counts.".format(counts_6903))
     
     # The same with the second data file
     raw_6904 = LoadSINQFile(Filename = "poldi2013n006904.hdf", Instrument = "POLDI")
@@ -56,7 +56,7 @@ This small usage example merges two compatible POLDI-files which have been loade
     total_6904 = SumSpectra(spectra_6904)
     
     counts_6904 = int(total_6904.dataY(0)[0])
-    print "6904 contains a total of", counts_6904, "counts."
+    print("6904 contains a total of {} counts.".format(counts_6904))
 
     # Now PoldiMerge is used to merge the two raw spectra by supplying a list of workspace names.
     raw_summed = PoldiMerge("raw_6903,raw_6904")
@@ -66,8 +66,8 @@ This small usage example merges two compatible POLDI-files which have been loade
     spectra_summed = Integration(histo_summed)
     total_summed = SumSpectra(spectra_summed)
 
-    print "6903+6904 contains a total of", int(total_summed.dataY(0)[0]), "counts."
-    print "Summing the counts of the single data files leads to", counts_6903 + counts_6904, "counts."
+    print("6903+6904 contains a total of {} counts.".format(int(total_summed.dataY(0)[0])))
+    print("Summing the counts of the single data files leads to {} counts.".format(int(counts_6903 + counts_6904)))
 
 Output:
 

@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_API_IMDHISTOWORKSPACE_H_
 #define MANTID_API_IMDHISTOWORKSPACE_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/IMDHistoWorkspace_fwd.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/MultipleExperimentInfos.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace API {
@@ -13,27 +19,6 @@ namespace API {
   for use in exposing to Python.
 
   @date 2011-11-09
-
-  Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
-
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>
-  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport IMDHistoWorkspace : public IMDWorkspace,
                                     public MultipleExperimentInfos {
@@ -43,6 +28,10 @@ public:
   /// Returns a clone of the workspace
   IMDHistoWorkspace_uptr clone() const {
     return IMDHistoWorkspace_uptr(doClone());
+  }
+  /// Returns a default-initialized clone of the workspace
+  IMDHistoWorkspace_uptr cloneEmpty() const {
+    return IMDHistoWorkspace_uptr(doCloneEmpty());
   }
   /// See the MDHistoWorkspace definition for descriptions of these
   virtual coord_t getInverseVolume() const = 0;
@@ -101,6 +90,11 @@ public:
   virtual void setDisplayNormalization(
       const Mantid::API::MDNormalization &preferredNormalization) = 0;
 
+  // Check if this class has an oriented lattice on any sample object
+  virtual bool hasOrientedLattice() const override {
+    return MultipleExperimentInfos::hasOrientedLattice();
+  }
+
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
   IMDHistoWorkspace(const IMDHistoWorkspace &) = default;
@@ -109,6 +103,7 @@ protected:
 
 private:
   IMDHistoWorkspace *doClone() const override = 0;
+  IMDHistoWorkspace *doCloneEmpty() const override = 0;
 };
 
 } // namespace API

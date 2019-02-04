@@ -1,19 +1,25 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/IMWDomainCreator.h"
-#include "MantidCurveFitting/SeqDomain.h"
 #include "MantidCurveFitting/Functions/Convolution.h"
 #include "MantidCurveFitting/ParameterEstimator.h"
+#include "MantidCurveFitting/SeqDomain.h"
 
 #include "MantidAPI/CompositeFunction.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/FunctionProperty.h"
 #include "MantidAPI/FunctionDomain1D.h"
+#include "MantidAPI/FunctionProperty.h"
 #include "MantidAPI/FunctionValues.h"
-#include "MantidAPI/IFunctionMW.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/IEventWorkspace.h"
+#include "MantidAPI/IFunctionMW.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceProperty.h"
 
 #include "MantidAPI/TextAxis.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -51,14 +57,11 @@ private:
 };
 
 bool greaterIsLess(double x1, double x2) { return x1 > x2; }
-}
+} // namespace
 
 using namespace Kernel;
-using API::Workspace;
-using API::Axis;
 using API::MatrixWorkspace;
-using API::Algorithm;
-using API::Jacobian;
+using API::Workspace;
 
 /**
  * Constructor.
@@ -145,45 +148,42 @@ std::pair<size_t, size_t> IMWDomainCreator::getXInterval() const {
 
   setParameters();
 
-  // find the fitting interval: from -> to
+  // From points to the first occurrence of StartX in the workspace interval.
+  // End points to the last occurrence of EndX in the workspace interval.
+  // Find the fitting interval: from -> to
   Mantid::MantidVec::const_iterator from;
   Mantid::MantidVec::const_iterator to;
 
   bool isXAscending = X.front() < X.back();
 
-  if (isXAscending) {
-    if (m_startX == EMPTY_DBL() && m_endX == EMPTY_DBL()) {
-      m_startX = X.front();
-      from = X.begin();
-      m_endX = X.back();
-      to = X.end();
-    } else if (m_startX == EMPTY_DBL() || m_endX == EMPTY_DBL()) {
-      throw std::invalid_argument(
-          "Both StartX and EndX must be given to set fitting interval.");
-    } else {
-      if (m_startX > m_endX) {
-        std::swap(m_startX, m_endX);
-      }
-      from = std::lower_bound(X.begin(), X.end(), m_startX);
-      to = std::upper_bound(from, X.end(), m_endX);
+  if (m_startX == EMPTY_DBL() && m_endX == EMPTY_DBL()) {
+    m_startX = X.front();
+    from = X.begin();
+    m_endX = X.back();
+    to = X.end();
+  } else if (m_startX == EMPTY_DBL() || m_endX == EMPTY_DBL()) {
+    throw std::invalid_argument(
+        "Both StartX and EndX must be given to set fitting interval.");
+  } else if (isXAscending) {
+    if (m_startX > m_endX) {
+      std::swap(m_startX, m_endX);
     }
-  } else {
-    // x is descending
-    if (m_startX == EMPTY_DBL() && m_endX == EMPTY_DBL()) {
-      m_startX = X.front();
-      from = X.begin();
-      m_endX = X.back();
-      to = X.end();
-    } else if (m_startX == EMPTY_DBL() || m_endX == EMPTY_DBL()) {
-      throw std::invalid_argument(
-          "Both StartX and EndX must be given to set fitting interval.");
-    } else {
-      if (m_startX < m_endX) {
-        std::swap(m_startX, m_endX);
-      }
-      from = std::lower_bound(X.begin(), X.end(), m_startX, greaterIsLess);
-      to = std::upper_bound(from, X.end(), m_endX, greaterIsLess);
+    from = std::lower_bound(X.begin(), X.end(), m_startX);
+    to = std::upper_bound(from, X.end(), m_endX);
+  } else { // x is descending
+    if (m_startX < m_endX) {
+      std::swap(m_startX, m_endX);
     }
+    from = std::lower_bound(X.begin(), X.end(), m_startX, greaterIsLess);
+    to = std::upper_bound(from, X.end(), m_endX, greaterIsLess);
+  }
+
+  // Check whether the fitting interval defined by StartX and EndX is 0.
+  // This occurs when StartX and EndX are both less than the minimum workspace
+  // x-value or greater than the maximum workspace x-value.
+  if (to - from == 0) {
+    throw std::invalid_argument("StartX and EndX values do not capture a range "
+                                "within the workspace interval.");
   }
 
   if (m_matrixWorkspace->isHistogramData()) {
@@ -322,7 +322,11 @@ boost::shared_ptr<API::Workspace> IMWDomainCreator::createOutputWorkspace(
   auto &Diff = ws->mutableY(2);
   const size_t nData = values->size();
   for (size_t i = 0; i < nData; ++i) {
-    Diff[i] = values->getFitData(i) - Ycal[i];
+    if (values->getFitWeight(i) != 0.0) {
+      Diff[i] = values->getFitData(i) - Ycal[i];
+    } else {
+      Diff[i] = 0.0;
+    }
   }
 
   if (!outputWorkspacePropertyName.empty()) {
@@ -379,18 +383,18 @@ void IMWDomainCreator::appendCompositeFunctionMembers(
 }
 
 /**
-  * If the fit function is Convolution and flag m_convolutionCompositeMembers is
+ * If the fit function is Convolution and flag m_convolutionCompositeMembers is
  * set and Convolution's
-  * second function (the model) is composite then use members of the model for
+ * second function (the model) is composite then use members of the model for
  * the output.
-  * @param functionList :: A list of Convolutions constructed from the
+ * @param functionList :: A list of Convolutions constructed from the
  * resolution of the fitting function (index 0)
-  *   and members of the model.
-  * @param function A Convolution function which model may or may not be a
+ *   and members of the model.
+ * @param function A Convolution function which model may or may not be a
  * composite function.
-  * @return True if all conditions are fulfilled and it is possible to produce
+ * @return True if all conditions are fulfilled and it is possible to produce
  * the output.
-  */
+ */
 void IMWDomainCreator::appendConvolvedCompositeFunctionMembers(
     std::list<API::IFunction_sptr> &functionList,
     const API::IFunction_sptr &function) const {
@@ -436,60 +440,78 @@ void IMWDomainCreator::addFunctionValuesToWS(
   function->function(*domain, *resultValues);
 
   size_t nParams = function->nParams();
-  // and errors
-  SimpleJacobian J(nData, nParams);
-  try {
-    function->functionDeriv(*domain, J);
-  } catch (...) {
-    function->calNumericalDeriv(*domain, J);
-  }
 
   // the function should contain the parameter's covariance matrix
   auto covar = function->getCovarianceMatrix();
+  bool hasErrors = false;
+  if (!covar) {
+    for (size_t j = 0; j < nParams; ++j) {
+      if (function->getError(j) != 0.0) {
+        hasErrors = true;
+        break;
+      }
+    }
+  }
 
-  if (covar) {
-    // if the function has a covariance matrix attached - use it for the errors
-    const Kernel::Matrix<double> &C = *covar;
-    // The formula is E = J * C * J^T
-    // We don't do full 3-matrix multiplication because we only need the
-    // diagonals of E
-    std::vector<double> E(nData);
-    for (size_t k = 0; k < nData; ++k) {
-      double s = 0.0;
-      for (size_t i = 0; i < nParams; ++i) {
-        double tmp = J.get(k, i);
-        s += C[i][i] * tmp * tmp;
-        for (size_t j = i + 1; j < nParams; ++j) {
-          s += J.get(k, i) * C[i][j] * J.get(k, j) * 2;
+  if (covar || hasErrors) {
+    // and errors
+    SimpleJacobian J(nData, nParams);
+    try {
+      function->functionDeriv(*domain, J);
+    } catch (...) {
+      function->calNumericalDeriv(*domain, J);
+    }
+    if (covar) {
+      // if the function has a covariance matrix attached - use it for the
+      // errors
+      const Kernel::Matrix<double> &C = *covar;
+      // The formula is E = J * C * J^T
+      // We don't do full 3-matrix multiplication because we only need the
+      // diagonals of E
+      std::vector<double> E(nData);
+      for (size_t k = 0; k < nData; ++k) {
+        double s = 0.0;
+        for (size_t i = 0; i < nParams; ++i) {
+          double tmp = J.get(k, i);
+          s += C[i][i] * tmp * tmp;
+          for (size_t j = i + 1; j < nParams; ++j) {
+            s += J.get(k, i) * C[i][j] * J.get(k, j) * 2;
+          }
         }
+        E[k] = s;
       }
-      E[k] = s;
-    }
 
-    double chi2 = function->getChiSquared();
-    auto &yValues = ws->mutableY(wsIndex);
-    auto &eValues = ws->mutableE(wsIndex);
-    for (size_t i = 0; i < nData; i++) {
-      yValues[i] = resultValues->getCalculated(i);
-      eValues[i] = std::sqrt(E[i] * chi2);
-    }
+      double chi2 = function->getChiSquared();
+      auto &yValues = ws->mutableY(wsIndex);
+      auto &eValues = ws->mutableE(wsIndex);
+      for (size_t i = 0; i < nData; i++) {
+        yValues[i] = resultValues->getCalculated(i);
+        eValues[i] = std::sqrt(E[i] * chi2);
+      }
 
+    } else {
+      // otherwise use the parameter errors which is OK for uncorrelated
+      // parameters
+      auto &yValues = ws->mutableY(wsIndex);
+      auto &eValues = ws->mutableE(wsIndex);
+      for (size_t i = 0; i < nData; i++) {
+        yValues[i] = resultValues->getCalculated(i);
+        double err = 0.0;
+        for (size_t j = 0; j < nParams; ++j) {
+          double d = J.get(i, j) * function->getError(j);
+          err += d * d;
+        }
+        eValues[i] = std::sqrt(err);
+      }
+    }
   } else {
-    // otherwise use the parameter errors which is OK for uncorrelated
-    // parameters
+    // No errors
     auto &yValues = ws->mutableY(wsIndex);
-    auto &eValues = ws->mutableE(wsIndex);
     for (size_t i = 0; i < nData; i++) {
       yValues[i] = resultValues->getCalculated(i);
-      double err = 0.0;
-      for (size_t j = 0; j < nParams; ++j) {
-        double d = J.get(i, j) * function->getError(j);
-        err += d * d;
-      }
-      eValues[i] = std::sqrt(err);
     }
   }
 }
 
-} // namespace Algorithm
+} // namespace CurveFitting
 } // namespace Mantid

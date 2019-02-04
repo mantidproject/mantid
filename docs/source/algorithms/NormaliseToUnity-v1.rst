@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -29,20 +29,21 @@ Usage
    # Run algorithm
    wsNorm = NormaliseToUnity (ws)
 
-   print "Normalised Workspace"
+   print("Normalised Workspace")
    for i in range(4):
-      print "[ %.4f,%.4f,%.4f, %.4f, %.4f ]" % (wsNorm.readY(i)[0], wsNorm.readY(i)[1], 
-      wsNorm.readY(i)[2], wsNorm.readY(i)[3], wsNorm.readY(i)[4],)
+      print("[ {:.4f}, {:.4f}, {:.4f}, {:.4f}, {:.4f} ]".format(
+            wsNorm.readY(i)[0], wsNorm.readY(i)[1], wsNorm.readY(i)[2],
+            wsNorm.readY(i)[3], wsNorm.readY(i)[4]))
 
 Output:
 
 .. testoutput:: ExNormaliseToUnitySimple
 
    Normalised Workspace
-   [ 0.2239,0.0065,0.0065, 0.0065, 0.0065 ]
-   [ 0.2239,0.0065,0.0065, 0.0065, 0.0065 ]
-   [ 0.2239,0.0065,0.0065, 0.0065, 0.0065 ]
-   [ 0.2239,0.0065,0.0065, 0.0065, 0.0065 ]
+   [ 0.2239, 0.0065, 0.0065, 0.0065, 0.0065 ]
+   [ 0.2239, 0.0065, 0.0065, 0.0065, 0.0065 ]
+   [ 0.2239, 0.0065, 0.0065, 0.0065, 0.0065 ]
+   [ 0.2239, 0.0065, 0.0065, 0.0065, 0.0065 ]
 
 .. categories::
 

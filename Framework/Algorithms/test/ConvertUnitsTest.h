@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef CONVERTUNITSTEST_H_
 #define CONVERTUNITSTEST_H_
 
@@ -8,14 +14,14 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAlgorithms/ConvertToDistribution.h"
 #include "MantidAlgorithms/ConvertUnits.h"
-#include "MantidDataHandling/LoadEventPreNexus.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Objects/CSGObject.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/UnitFactory.h"
 
 using namespace Mantid::Kernel;
@@ -24,10 +30,10 @@ using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using Mantid::HistogramData::BinEdges;
+using Mantid::HistogramData::CountStandardDeviations;
+using Mantid::HistogramData::CountVariances;
 using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::Points;
-using Mantid::HistogramData::CountVariances;
-using Mantid::HistogramData::CountStandardDeviations;
 
 namespace {
 
@@ -57,7 +63,8 @@ void setup_WS(std::string &inputSpace) {
   loader.initialize();
   // Path to test input file assumes Test directory checked out from SVN
   const std::string inputFile =
-      ConfigService::Instance().getInstrumentDirectory() + "HET_Definition.xml";
+      ConfigService::Instance().getInstrumentDirectory() +
+      "HET_Definition_old.xml";
   loader.setPropertyValue("Filename", inputFile);
   loader.setPropertyValue("Workspace", inputSpace);
   loader.setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(false));
@@ -92,13 +99,14 @@ void setup_Points_WS(std::string &inputSpace) {
   loader.initialize();
   // Path to test input file assumes Test directory checked out from SVN
   const std::string inputFile =
-      ConfigService::Instance().getInstrumentDirectory() + "HET_Definition.xml";
+      ConfigService::Instance().getInstrumentDirectory() +
+      "HET_Definition_old.xml";
   loader.setPropertyValue("Filename", inputFile);
   loader.setPropertyValue("Workspace", inputSpace);
   loader.setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(false));
   loader.execute();
 }
-}
+} // namespace
 
 class ConvertUnitsTest : public CxxTest::TestSuite {
 public:
@@ -411,7 +419,7 @@ public:
 
   void testConvertQuicklyCommonBins() {
     Workspace2D_sptr input =
-        WorkspaceCreationHelper::Create2DWorkspace123(3, 10, 1);
+        WorkspaceCreationHelper::create2DWorkspace123(3, 10, 1);
     input->getAxis(0)->unit() =
         UnitFactory::Instance().create("MomentumTransfer");
     AnalysisDataService::Instance().add("quickIn", input);
@@ -455,7 +463,7 @@ public:
     // the scaling of Y and E for the distribution case is not testable.
     double deltax = 0.123;
     Workspace2D_sptr input =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(2, 10, x0, deltax);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(2, 10, x0, deltax);
     input->getAxis(0)->unit() =
         UnitFactory::Instance().create("MomentumTransfer");
     // Y must have units, otherwise ConvertUnits does not treat data as
@@ -527,23 +535,22 @@ public:
 
   void testDeltaE() {
     MatrixWorkspace_sptr ws =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 2663, 5, 7.5);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(1, 2663, 5, 7.5);
     ws->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
 
     Instrument_sptr testInst(new Instrument);
-    ws->setInstrument(testInst);
     // Make it look like MARI (though not bin boundaries are different to the
     // real MARI file used before)
     // Define a source and sample position
     // Define a source component
     ObjComponent *source =
-        new ObjComponent("moderator", Object_sptr(), testInst.get());
+        new ObjComponent("moderator", IObject_sptr(), testInst.get());
     source->setPos(V3D(0, 0.0, -11.739));
     testInst->add(source);
     testInst->markAsSource(source);
     // Define a sample as a simple sphere
     ObjComponent *sample =
-        new ObjComponent("samplePos", Object_sptr(), testInst.get());
+        new ObjComponent("samplePos", IObject_sptr(), testInst.get());
     testInst->setPos(0.0, 0.0, 0.0);
     testInst->add(sample);
     testInst->markAsSamplePos(sample);
@@ -551,6 +558,7 @@ public:
     physicalPixel->setPos(-0.34732, -3.28797, -2.29022);
     testInst->add(physicalPixel);
     testInst->markAsDetector(physicalPixel);
+    ws->setInstrument(testInst);
     ws->getSpectrum(0).addDetectorID(physicalPixel->getID());
 
     ConvertUnits conv;
@@ -589,6 +597,41 @@ public:
     TS_ASSERT_EQUALS(output->blocksize(), 2275);
     // Check EMode has been set
     TS_ASSERT_EQUALS(Mantid::Kernel::DeltaEMode::Indirect, output->getEMode());
+
+    ConvertUnits conv3;
+    conv3.initialize();
+    conv3.setProperty("InputWorkspace", ws);
+    conv3.setPropertyValue("OutputWorkspace", outputSpace);
+    conv3.setPropertyValue("Target", "DeltaE_inFrequency");
+    conv3.setPropertyValue("Emode", "Direct");
+    conv3.setPropertyValue("Efixed", "12.95");
+    conv3.execute();
+
+    TS_ASSERT_THROWS_NOTHING(
+        output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            outputSpace));
+    TS_ASSERT_EQUALS(output->getAxis(0)->unit()->unitID(),
+                     "DeltaE_inFrequency");
+    TS_ASSERT_EQUALS(output->blocksize(), 1669);
+    // Check EMode has been set
+    TS_ASSERT_EQUALS(Mantid::Kernel::DeltaEMode::Direct, output->getEMode());
+
+    ConvertUnits conv4;
+    conv4.initialize();
+    conv4.setProperty("InputWorkspace", ws);
+    conv4.setPropertyValue("OutputWorkspace", outputSpace);
+    conv4.setPropertyValue("Target", "dSpacingPerpendicular");
+    conv4.setPropertyValue("Emode", "Direct");
+    conv4.execute();
+
+    TS_ASSERT_THROWS_NOTHING(
+        output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            outputSpace));
+    TS_ASSERT_EQUALS(output->getAxis(0)->unit()->unitID(),
+                     "dSpacingPerpendicular");
+    TS_ASSERT_EQUALS(output->blocksize(), 2663);
+    // Check EMode has been set
+    TS_ASSERT_EQUALS(Mantid::Kernel::DeltaEMode::Direct, output->getEMode());
 
     AnalysisDataService::Instance().remove(outputSpace);
   }
@@ -676,7 +719,7 @@ public:
         WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(1, 10,
                                                                         false);
     ws->getAxis(0)->setUnit("TOF");
-    ws->sortAll(sortType, NULL);
+    ws->sortAll(sortType, nullptr);
 
     if (sortType == TOF_SORT) {
       // Only threadsafe if all the event lists are sorted
@@ -716,9 +759,9 @@ public:
       }
     } else if (sortType == PULSETIME_SORT) {
       // Check directly that it is indeed increasing
-      Mantid::Kernel::DateAndTime last_x;
+      Mantid::Types::Core::DateAndTime last_x;
       for (size_t i = 0; i < el.getNumberEvents(); i++) {
-        Mantid::Kernel::DateAndTime x = el.getEvent(i).pulseTime();
+        Mantid::Types::Core::DateAndTime x = el.getEvent(i).pulseTime();
         TS_ASSERT(x >= last_x);
         last_x = x;
       }

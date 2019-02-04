@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -283,11 +283,11 @@ that the first three detectors (monitors) were not touched and the next three we
    def write_detectors(instr_type,instr,ndet):
        ''' print first ndet detectors from given instrument '''
 
-       print "{0} {1} instrument".format(instr_type, instr.getName())
-       print  'det ID | monitor? | polar angle| position X | position Y | position Z |  Pressure  | Wall thick |'
+       print("{0} {1} instrument".format(instr_type, instr.getName()))
+       print('det ID | monitor? | polar angle| position X | position Y | position Z |  Pressure  | Wall thick |')
        
        # get first nder detectors using detector ID    
-       for i in xrange(0,ndet):
+       for i in range(0,ndet):
          if i<3:
              detBase = 1
          else:
@@ -297,9 +297,9 @@ that the first three detectors (monitors) were not touched and the next three we
          pos = det1.getPos();
          pressure = det1.getNumberParameter('TubePressure');
          thickness = det1.getNumberParameter('TubeThickness');
-         print ' {0:5} | {1:8} | {2:10.3f} | {3:>10.3f} | {4:>10.3f} | {5:>10.3f} | {6:10} | {7:10} |\n'.format(\
-                detID,det1.isMonitor(),(det1.getPhi()*(180/math.pi)),pos.X(),pos.Y(),pos.Z(),pressure[0],thickness[0]),
-       print '*********************************************************************************'
+         print(' {0:5} | {1:8} | {2:10.3f} | {3:>10.3f} | {4:>10.3f} | {5:>10.3f} | {6:10} | {7:10} |'.format(\
+                detID,det1.isMonitor(),(det1.getPhi()*(180/math.pi)),pos.X(),pos.Y(),pos.Z(),pressure[0],thickness[0]))
+       print('*********************************************************************************')
    # 
    def prepare_test_detector(ind):
         """  prepare modified detector with random test values  """
@@ -347,7 +347,7 @@ that the first three detectors (monitors) were not touched and the next three we
       f.write("{0}    14\n".format(ndet))
       f.write("det no.  offset    l2     code     theta        phi         w_x         w_y         w_z         f_x         f_y         f_z         a_x         a_y         a_z        det_1       det_2       det_3       det4\n");
    
-      for i in xrange(0,ndet):
+      for i in range(0,ndet):
          detBase,offset,l2,code,theta,phi,w_xyz,f_xyz,a_xyz,det1,det2,det3,det4=prepare_test_detector(i);
          detID = detBase+i
          f.write("{0:>9} {1:>7} {2: >8f} {3:>5} {4:>11f} {5:>11f} {6:>11f} {7:>11f} {8:>11f} {9:>11f} {10:>11f} {11:>11f} {12:>11f} {13:>11f} {14:>11f} {15:>11f} {16:>11f} {17:>11f} {18:>11f} {19:>11f}\n".format(\

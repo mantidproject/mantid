@@ -1,15 +1,21 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_REMOVEPROMPTPULSETEST_H_
 #define MANTID_ALGORITHMS_REMOVEPROMPTPULSETEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/RemovePromptPulse.h"
 
@@ -30,7 +36,7 @@ private:
 
   void makeFakeEventWorkspace(std::string wsName) {
     // Make an event workspace with 2 events in each bin.
-    EventWorkspace_sptr test_in = WorkspaceCreationHelper::CreateEventWorkspace(
+    EventWorkspace_sptr test_in = WorkspaceCreationHelper::createEventWorkspace(
         NUMPIXELS, NUMBINS, NUMEVENTS, 1000., BIN_DELTA, 2);
     // Fake a TOF unit in the data.
     test_in->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
@@ -76,7 +82,6 @@ public:
         ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(
             inWSName));
     std::size_t num_events = ws->getNumberEvents();
-
     RemovePromptPulse alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
@@ -89,8 +94,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
-    // Retrieve the workspace from data service. TODO: Change to your desired
-    // type
+    // Retrieve the workspace from data service.
     TS_ASSERT_THROWS_NOTHING(
         ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(
             outWSName));
@@ -99,8 +103,8 @@ public:
       return;
 
     // Verify the results
-    TS_ASSERT_EQUALS(num_events,
-                     ws->getNumberEvents()); // should not drop events
+    // drop events 36 spectra, 2 events/bin, 10 bins/pulse, 9 pulses
+    TS_ASSERT_EQUALS(num_events - 36 * 2 * 10 * 9, ws->getNumberEvents());
 
     AnalysisDataService::Instance().remove(inWSName);
     AnalysisDataService::Instance().remove(outWSName);

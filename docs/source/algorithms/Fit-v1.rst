@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -45,8 +45,8 @@ no additional properties will be declared. The Function property must be
 set before any other.
 
 The function and the initial values for its parameters are set with the
-Function property. A function can be simple or composite. A `simple
-function <../fitfunctions/categories/FitFunctions.html>`__ has a name registered with Mantid
+Function property. A function can be simple or composite. A :ref:`simple
+function <Fit Functions List>` has a name registered with Mantid
 framework. The Fit algorithm creates an instance of a function by this
 name. A composite function is an arithmetic sum of two or more functions
 (simple or composite). Each function has a number of named parameters,
@@ -61,7 +61,7 @@ to perform the minimization. By default if the function's derivatives
 can be evaluated then Fit uses the GSL Levenberg-Marquardt minimizer.
 
 In Mantidplot this algorithm can be run from the `Fit Property
-Browser <MantidPlot:_Data Analysis and Curve Fitting#Simple_Peak_Fitting_with_the_Fit_Wizard>`__
+Browser <http://www.mantidproject.org/MantidPlot:_Data_Analysis_and_Curve_Fitting>`__
 which allows all the settings to be specified via its graphical user
 interface.
 
@@ -71,8 +71,8 @@ Setting a simple function
 To use a simple function for a fit set its name and initial parameter
 values using the Function property. This property is a comma separated
 list of name=value pairs. The name of the first name=value pairs must be
-"name" and it must be set equal to the name of one of a `simple
-function <../fitfunctions/categories/FitFunctions.html>`__. This name=value pair is followed
+"name" and it must be set equal to the name of one of a :ref:`simple
+function <Fit Functions List>`. This name=value pair is followed
 by name=value pairs specifying values for the parameters of this
 function. If a parameter is not set in Function it will be given its
 default value defined by the function. All names are case sensitive. For
@@ -94,7 +94,7 @@ are created when the Formula attribute is set. It is important that
 Formula is defined before initializing the parameters.
 
 A list of the available simple functions can be found
-`here <../fitfunctions/categories/FitFunctions.html>`__.
+:ref:`here <Fit Functions List>`.
 
 Setting a composite function
 ############################
@@ -210,6 +210,33 @@ If any other functions need to be included in the list please leave a request at
 `Forum <http://forum.mantidproject.org/>`_.
 
 
+Excluding data from fit
+#######################
+
+Regions of a 1D data set can be excluded from fit with the `Exclude` property. It is a list of
+pairs of real numbers which define the regions to exclude. In the following example the regions
+under the peaks are excluded thus fitting only the background
+
+.. code-block:: python
+
+    x = np.linspace(-10, 10, 100)
+    y = np.exp(-4*(x+3)**2) + np.exp(-4*(x-3)**2) + 0.1 - 0.001*x**2
+    ws = CreateWorkspace(x, y)
+    Fit("name=Polynomial,n=2", ws, Exclude=[-5, -1, 1, 5], Output='out')
+
+.. figure:: /images/FitExcludeRange.png
+
+Peak Radius
+###########
+
+The effect of setting `PeakRadius` to a non-default value can be seen from next figure.
+
+.. figure:: /images/PeakRadius_Fit.png
+   :width: 700
+
+It can be used to speed up computations but there is a danger of introducing higher errors.
+
+
 Output
 ######
 
@@ -228,8 +255,8 @@ replace the name of the workspace with a different name if you give a
 value to the property 'Output' which redefines the base name of the
 output workspaces.
 
-OutputParameters is is a `TableWorkspace
-<http://www.mantidproject.org/TableWorkspace>`_ with the fitted
+OutputParameters is a :ref:`TableWorkspace
+<Table Workspaces>` with the fitted
 parameter values. OutputWorkspace is a :ref:`Workspace2D
 <Workspace2D>` which compares the fit with the original data. The
 names given to these workspaces are built by appending the suffixes
@@ -247,7 +274,7 @@ spectra:
 3. The third spectrum is the difference between the first two.
 
 Also, if the function's derivatives can be evaluated an additional
-`TableWorkspace <http://www.mantidproject.org/TableWorkspace>`_ is
+:ref:`TableWorkspace <Table Workspaces>` is
 produced. If for example the property Output is set to "MyResults"
 then this TableWorkspace will have the name
 "MyResults\_NormalisedCovarianceMatrix" and it contains a calculated
@@ -258,6 +285,21 @@ off diagonal elements as percentages of correlation between parameter
 
 .. math:: 100 \cdot c_{ij} / \sqrt{c_{ii} \cdot c_{jj}}.
 
+
+Multiple Fit
+############
+
+It is possible to fit to multiple data sets using the fit algorithm. This
+can be either simultaneously or sequentially. There are a few differences
+to a single fit. Firstly is that the :ref:`CompositeFunction <func-CompositeFunction>`
+must be a :code:`MultiDomainFunction` and each of the individual fitting functions must include 
+:code:`$domain=i`. The extra workspaces can be added by placing an :code:`_i` after :code:`InputWorkspace` and
+:code:`InputWorkspaceIndex` starting with :math:`i=1` for the second workspace. It is also possible to 
+set the fitting range for each data set individually in the same way as the :code:`InputWorkspace`. 
+If a variable is to be fitted using data from multiple data sets then a :code:`tie` has 
+to be used. The values that are tied will have the same value and be calculated from multiple
+data sets. 
+ 
 Examples
 --------
 
@@ -359,17 +401,18 @@ Usage
    #myFunc = 'name=LinearBackground, A0=0.3;name=Gaussian, Height='+height+', PeakCentre='+tryCentre+', Sigma='+sigma
 
    # Do the fitting
-   fitStatus, chiSq, covarianceTable, paramTable, fitWorkspace = Fit(InputWorkspace='ws', \
-      WorkspaceIndex=0, StartX = startX, EndX=endX, Output='fit', Function=myFunc)
+   fit_output = Fit(InputWorkspace='ws', WorkspaceIndex=0, StartX = startX, EndX=endX, Output='fit', Function=myFunc)
+   paramTable = fit_output.OutputParameters  # table containing the optimal fit parameters
+   fitWorkspace = fit_output.OutputWorkspace
 
-   print "The fit was: " + fitStatus
-   print("chi-squared of fit is: %.2f" % chiSq)
-   print("Fitted Height value is: %.2f" % paramTable.column(1)[0])
-   print("Fitted centre value is: %.2f" % paramTable.column(1)[1])
-   print("Fitted sigma value is: %.2f" % paramTable.column(1)[2])
+   print("The fit was: {}".format(fit_output.OutputStatus))
+   print("chi-squared of fit is: {:.2f}".format(fit_output.OutputChi2overDoF))
+   print("Fitted Height value is: {:.2f}".format(paramTable.column(1)[0]))
+   print("Fitted centre value is: {:.2f}".format(paramTable.column(1)[1]))
+   print("Fitted sigma value is: {:.2f}".format(paramTable.column(1)[2]))
    # fitWorkspace contains the data, the calculated and the difference patterns
-   print "Number of spectra in fitWorkspace is: " +  str(fitWorkspace.getNumberHistograms())
-   print("The 20th y-value of the calculated pattern: %.4f" % fitWorkspace.readY(1)[19])
+   print("Number of spectra in fitWorkspace is: {}".format(fitWorkspace.getNumberHistograms()))
+   print("The 20th y-value of the calculated pattern: {:.4f}".format(fitWorkspace.readY(1)[19]))
 
 Output:
 
@@ -383,6 +426,125 @@ Output:
    Number of spectra in fitWorkspace is: 3
    The 20th y-value of the calculated pattern: 0.2361
 
+**Example - Fit to two data sets simultaneously:**
+
+.. testcode:: simFit
+
+    import math
+    import numpy as np
+
+    # create data
+    xData=np.linspace(start=0,stop=10,num=22)
+    yData=[]
+    for x in xData:
+        yData.append(2.0)
+    yData2=[]
+    for x in xData:
+        yData2.append(5.0)
+    # create workspaces
+    input = CreateWorkspace(xData,yData)
+    input2 = CreateWorkspace(xData,yData2)
+    # create function
+    myFunc=';name=FlatBackground,$domains=i,A0=0'
+    multiFunc='composite=MultiDomainFunction,NumDeriv=1'+myFunc+myFunc+";"
+    # do fit
+    fit_output = Fit(Function=multiFunc, InputWorkspace=input, WorkspaceIndex=0, \
+                     InputWorkspace_1=input2, WorkspaceIndex_1=0, \
+                     StartX = 0.1, EndX=9.5, StartX_1 = 0.1, EndX_1=9.5,Output='fit' )
+    paramTable = fit_output.OutputParameters  # table containing the optimal fit parameters
+    # print results
+    print("Constant 1: {0:.2f}".format(paramTable.column(1)[0]))
+    print("Constant 2: {0:.2f}".format(paramTable.column(1)[1]))
+
+
+Output:
+
+.. testoutput:: simFit
+
+    Constant 1: 2.00
+    Constant 2: 5.00
+   
+**Example - Fit to two data sets with shared parameter:**
+
+.. testcode:: shareFit
+
+    import math
+    import numpy as np
+
+    # create data
+    xData=np.linspace(start=0,stop=10,num=22)
+    yData=[]
+    for x in xData:
+        yData.append(2.0)
+    yData2=[]
+    for x in xData:
+        yData2.append(5.0)
+    # create workspaces
+    input = CreateWorkspace(xData,yData)
+    input2 = CreateWorkspace(xData,yData2)
+    # create function
+    myFunc=';name=FlatBackground,$domains=i,A0=0'
+    multiFunc='composite=MultiDomainFunction,NumDeriv=1'+myFunc+myFunc+';ties=(f0.A0=f1.A0)'
+    # do fit
+    fit_output = Fit(Function=multiFunc, InputWorkspace=input, WorkspaceIndex=0, \
+                     InputWorkspace_1=input2, WorkspaceIndex_1=0, \
+                     StartX = 0.1, EndX=9.5, StartX_1 = 0.1, EndX_1=9.5,Output='fit')
+    paramTable = fit_output.OutputParameters  # table containing the optimal fit parameters
+    # print results
+    print("Constant 1: {0:.2f}".format(paramTable.column(1)[0]))
+    print("Constant 2: {0:.2f}".format(paramTable.column(1)[1]))
+   
+Output:
+
+.. testoutput:: shareFit
+
+    Constant 1: 3.50
+    Constant 2: 3.50
+
+**Example - Fit to two data sets with one shared parameter:**
+
+.. testcode:: shareFit2
+
+    import math
+    import numpy as np
+
+    # create data
+    xData=np.linspace(start=0,stop=10,num=22)
+    yData=[]
+    for x in xData:
+        yData.append(2.0*x+10.)
+    yData2=[]
+    for x in xData:
+        yData2.append(5.0*x+7.)
+    # create workspaces
+    input = CreateWorkspace(xData,yData)
+    input2 = CreateWorkspace(xData,yData2)
+    # create function
+    myFunc=';name=LinearBackground,$domains=i,A0=0,A1=0'
+    multiFunc='composite=MultiDomainFunction,NumDeriv=1'+myFunc+myFunc+';ties=(f0.A1=f1.A1)'
+    # do fit
+    fit_output = Fit(Function=multiFunc, InputWorkspace=input, WorkspaceIndex=0, \
+                     InputWorkspace_1=input2, WorkspaceIndex_1=0, \
+                     StartX = 0.1, EndX=9.5, StartX_1 = 0.1, EndX_1=9.5,Output='fit')
+    paramTable = fit_output.OutputParameters  # table containing the optimal fit parameters
+    # print results
+    print('Gradients (shared):')
+    print("Gradient 1: {0:.2f}".format(paramTable.column(1)[3]))
+    print("Gradient 2: {0:.2f}".format(paramTable.column(1)[1]))
+    print('offsets:')
+    print("Constant 1: {0:.2f}".format(paramTable.column(1)[0]))
+    print("Constant 2: {0:.2f}".format(paramTable.column(1)[2]))
+
+Output:
+
+.. testoutput:: shareFit2
+
+    Gradients (shared):
+    Gradient 1: 3.50
+    Gradient 2: 3.50
+    offsets:
+    Constant 1: 2.86
+    Constant 2: 14.14
 
 .. categories::
 

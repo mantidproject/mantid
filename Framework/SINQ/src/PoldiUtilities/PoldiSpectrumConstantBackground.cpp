@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidSINQ/PoldiUtilities/PoldiSpectrumConstantBackground.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -38,7 +44,7 @@ void PoldiSpectrumConstantBackground::setWorkspace(
       boost::dynamic_pointer_cast<const MatrixWorkspace>(ws);
 
   if (matrixWs && matrixWs->getNumberHistograms() > 0) {
-    m_timeBinCount = matrixWs->readX(0).size();
+    m_timeBinCount = matrixWs->x(0).size();
   }
 }
 
@@ -97,5 +103,5 @@ void PoldiSpectrumConstantBackground::init() {
   declareParameter("A0");
 }
 
-} // namespace SINQ
+} // namespace Poldi
 } // namespace Mantid

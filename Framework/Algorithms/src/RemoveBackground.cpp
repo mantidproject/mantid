@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/RemoveBackground.h"
 
 #include "MantidAPI/Axis.h"
@@ -13,9 +19,14 @@
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/RebinParamsValidator.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidKernel/make_unique.h"
+
+using Mantid::HistogramData::HistogramE;
+using Mantid::HistogramData::HistogramX;
+using Mantid::HistogramData::HistogramY;
 
 namespace Mantid {
 namespace Algorithms {
@@ -27,8 +38,8 @@ using namespace Kernel;
 using namespace API;
 
 /** Initialization method. Declares properties to be used in algorithm.
-*
-*/
+ *
+ */
 void RemoveBackground::init() {
   auto sourceValidator = boost::make_shared<CompositeValidator>();
   sourceValidator->add<InstrumentValidator>();
@@ -75,10 +86,10 @@ void RemoveBackground::init() {
 }
 
 /** Executes the rebin algorithm
-*
-*  @throw runtime_error Thrown if the bin range does not intersect the range of
-*the input workspace
-*/
+ *
+ *  @throw runtime_error Thrown if the bin range does not intersect the range of
+ *the input workspace
+ */
 void RemoveBackground::exec() {
 
   // Get the input workspace
@@ -116,15 +127,15 @@ void RemoveBackground::exec() {
                                 inPlace, nullifyNegative);
 
   Progress prog(this, 0.0, 1.0, histnumber);
-  PARALLEL_FOR2(inputWS, outputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
   for (int hist = 0; hist < histnumber; ++hist) {
     PARALLEL_START_INTERUPT_REGION
     // get references to output Workspace X-arrays.
-    MantidVec &XValues = outputWS->dataX(hist);
+    auto &XValues = outputWS->mutableX(hist);
     // get references to output workspace data and error. If it is new
     // workspace, data will be copied there, if old, modified in-place
-    MantidVec &YValues = outputWS->dataY(hist);
-    MantidVec &YErrors = outputWS->dataE(hist);
+    auto &YValues = outputWS->mutableY(hist);
+    auto &YErrors = outputWS->mutableE(hist);
 
     // output data arrays are implicitly filled by function
     int id = PARALLEL_THREAD_NUMBER;
@@ -213,9 +224,9 @@ void BackgroundHelper::initialize(const API::MatrixWorkspace_const_sptr &bkgWS,
   if (bkgWS->getNumberHistograms() <= 1)
     m_singleValueBackground = true;
 
-  const MantidVec &dataX = bkgWS->readX(0);
-  const MantidVec &dataY = bkgWS->readY(0);
-  const MantidVec &dataE = bkgWS->readE(0);
+  auto &dataX = bkgWS->x(0);
+  auto &dataY = bkgWS->y(0);
+  auto &dataE = bkgWS->e(0);
   m_NBg = dataY[0];
   m_dtBg = dataX[1] - dataX[0];
   m_ErrSq = dataE[0] * dataE[0]; // needs further clarification
@@ -229,18 +240,18 @@ void BackgroundHelper::initialize(const API::MatrixWorkspace_const_sptr &bkgWS,
   m_Efix = this->getEi(sourceWS);
 }
 /**Method removes background from vectors which represent a histogram data for a
-* single spectra
-* @param nHist   -- number (workspaceID) of the spectra in the workspace, where
-* background going to be removed
-* @param x_data  -- the spectra x-values (presumably not in TOF units)
-* @param y_data  -- the spectra signal
-* @param e_data  -- the spectra errors
-* @param threadNum -- the number of thread doing conversion (by default 0,
-* single thread, in multithreading -- result of
-*                      omp_get_thread_num() )
-*/
-void BackgroundHelper::removeBackground(int nHist, MantidVec &x_data,
-                                        MantidVec &y_data, MantidVec &e_data,
+ * single spectra
+ * @param nHist   -- number (workspaceID) of the spectra in the workspace, where
+ * background going to be removed
+ * @param x_data  -- the spectra x-values (presumably not in TOF units)
+ * @param y_data  -- the spectra signal
+ * @param e_data  -- the spectra errors
+ * @param threadNum -- the number of thread doing conversion (by default 0,
+ * single thread, in multithreading -- result of
+ *                      omp_get_thread_num() )
+ */
+void BackgroundHelper::removeBackground(int nHist, HistogramX &x_data,
+                                        HistogramY &y_data, HistogramE &e_data,
                                         int threadNum) const {
 
   double dtBg, IBg, ErrBgSq;
@@ -249,9 +260,9 @@ void BackgroundHelper::removeBackground(int nHist, MantidVec &x_data,
     ErrBgSq = m_ErrSq;
     IBg = m_NBg;
   } else {
-    const MantidVec &dataX = m_bgWs->readX(nHist);
-    const MantidVec &dataY = m_bgWs->readY(nHist);
-    const MantidVec &dataE = m_bgWs->readE(nHist);
+    auto &dataX = m_bgWs->x(nHist);
+    auto &dataY = m_bgWs->y(nHist);
+    auto &dataE = m_bgWs->e(nHist);
     dtBg = (dataX[1] - dataX[0]);
     IBg = dataY[0];
     ErrBgSq = dataE[0] * dataE[0]; // Needs further clarification
@@ -263,9 +274,9 @@ void BackgroundHelper::removeBackground(int nHist, MantidVec &x_data,
     double L2 = m_spectrumInfo->l2(nHist);
     double delta(std::numeric_limits<double>::quiet_NaN());
     // get access to source workspace in case if target is different from source
-    const MantidVec &XValues = m_wkWS->readX(nHist);
-    const MantidVec &YValues = m_wkWS->readY(nHist);
-    const MantidVec &YErrors = m_wkWS->readE(nHist);
+    auto &XValues = m_wkWS->x(nHist);
+    auto &YValues = m_wkWS->y(nHist);
+    auto &YErrors = m_wkWS->e(nHist);
 
     // use thread-specific unit conversion class to avoid multithreading issues
     Kernel::Unit *unitConv = m_WSUnit[threadNum];
@@ -317,17 +328,17 @@ void BackgroundHelper::removeBackground(int nHist, MantidVec &x_data,
   }
 }
 /** Method returns the efixed or Ei value stored in properties of the input
-*workspace.
-*  Indirect instruments can have eFxed and Direct instruments can have Ei
-*defined as the properties of the workspace.
-*
-*  This method provide guess for efixed for all other kind of instruments.
-*Correct indirect instrument will overwrite
-*  this value while wrongly defined or different types of instruments will
-*provide the value of "Ei" property (log value)
-*  or undefined if "Ei" property is not found.
-*
-*/
+ *workspace.
+ *  Indirect instruments can have eFxed and Direct instruments can have Ei
+ *defined as the properties of the workspace.
+ *
+ *  This method provide guess for efixed for all other kind of instruments.
+ *Correct indirect instrument will overwrite
+ *  this value while wrongly defined or different types of instruments will
+ *provide the value of "Ei" property (log value)
+ *  or undefined if "Ei" property is not found.
+ *
+ */
 double
 BackgroundHelper::getEi(const API::MatrixWorkspace_const_sptr &inputWS) const {
   double Efi = std::numeric_limits<double>::quiet_NaN();
@@ -357,5 +368,5 @@ BackgroundHelper::getEi(const API::MatrixWorkspace_const_sptr &inputWS) const {
   return Efi;
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

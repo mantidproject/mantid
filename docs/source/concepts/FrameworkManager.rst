@@ -19,7 +19,7 @@ What does it allow you to do?
 -----------------------------
 
 The frameworkManager allows you to create and execute algorithms as well
-as retrieving workspaces, and deleteing them if they are no longer
+as retrieving workspaces, and deleting them if they are no longer
 required.
 
 It is good practice to delete workspaces that are no longer required to

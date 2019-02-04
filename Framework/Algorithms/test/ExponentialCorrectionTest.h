@@ -1,12 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef EXPONENTIALCORRECTIONTEST_H_
 #define EXPONENTIALCORRECTIONTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidAlgorithms/ExponentialCorrection.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAlgorithms/ExponentialCorrection.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -50,7 +56,7 @@ public:
 
   void testDivide() {
     MatrixWorkspace_sptr inputWS =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(2, 3, 0.5);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(2, 3, 0.5);
     AnalysisDataService::Instance().add("InputWS", inputWS);
 
     Mantid::Algorithms::ExponentialCorrection expon3;
@@ -88,7 +94,7 @@ public:
 
   void testMultiply() {
     MatrixWorkspace_sptr inputWS =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(2, 3, 0.5);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(2, 3, 0.5);
     AnalysisDataService::Instance().add("InputWS", inputWS);
 
     Mantid::Algorithms::ExponentialCorrection expon3;
@@ -126,7 +132,7 @@ public:
   }
 
   void testEvents() {
-    EventWorkspace_sptr evin = WorkspaceCreationHelper::CreateEventWorkspace(
+    EventWorkspace_sptr evin = WorkspaceCreationHelper::createEventWorkspace(
                             1, 5, 10, 0, 1, 3),
                         evout;
     AnalysisDataService::Instance().add("test_ev_ec", evin);

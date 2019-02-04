@@ -1,8 +1,13 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/Unit.h"
-#include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/UnitLabelTypes.h"
@@ -132,7 +137,7 @@ void Unit::initialize(const double &_l1, const double &_l2,
 
 //---------------------------------------------------------------------------------------
 /** Perform the conversion to TOF on a vector of data
-*/
+ */
 void Unit::toTOF(std::vector<double> &xdata, std::vector<double> &ydata,
                  const double &_l1, const double &_l2, const double &_twoTheta,
                  const int &_emode, const double &_efixed,
@@ -163,7 +168,7 @@ double Unit::convertSingleToTOF(const double xvalue, const double &l1,
 
 //---------------------------------------------------------------------------------------
 /** Perform the conversion to TOF on a vector of data
-*/
+ */
 void Unit::fromTOF(std::vector<double> &xdata, std::vector<double> &ydata,
                    const double &_l1, const double &_l2,
                    const double &_twoTheta, const int &_emode,
@@ -257,8 +262,8 @@ Label::Label(const std::string &caption, const std::string &label)
 }
 
 /**
-  * Set a caption and a label
-  */
+ * Set a caption and a label
+ */
 void Label::setLabel(const std::string &cpt, const UnitLabel &lbl) {
   m_caption = cpt;
   m_label = lbl;
@@ -583,6 +588,61 @@ double dSpacing::conversionTOFMax() const { return DBL_MAX / factorTo; }
 
 Unit *dSpacing::clone() const { return new dSpacing(*this); }
 
+// ==================================================================================================
+/* D-SPACING Perpendicular
+ * ==================================================================================================
+ *
+ * Conversion uses equation: dp^2 = lambda^2 - 2[Angstrom^2]*ln(cos(theta))
+ */
+DECLARE_UNIT(dSpacingPerpendicular)
+
+const UnitLabel dSpacingPerpendicular::label() const {
+  return Symbol::Angstrom;
+}
+
+dSpacingPerpendicular::dSpacingPerpendicular()
+    : Unit(), factorTo(DBL_MIN), factorFrom(DBL_MIN) {}
+
+void dSpacingPerpendicular::init() {
+  factorTo =
+      (PhysicalConstants::NeutronMass * (l1 + l2)) / PhysicalConstants::h;
+
+  // Now adjustments for the scale of units used
+  const double TOFisinMicroseconds = 1e6;
+  const double toAngstroms = 1e10;
+  factorTo *= TOFisinMicroseconds / toAngstroms;
+  factorFrom = factorTo;
+  if (factorFrom == 0.0)
+    factorFrom = DBL_MIN; // Protect against divide by zero
+  double cos_theta = cos(twoTheta / 2.0);
+  sfpTo = 0.0;
+  if (cos_theta > 0)
+    sfpTo = 2.0 * log(cos_theta);
+  sfpFrom = sfpTo;
+}
+
+double dSpacingPerpendicular::singleToTOF(const double x) const {
+  double sqrtarg = x * x + sfpTo;
+  // consider very small values to be a rounding error
+  if (sqrtarg < 1.0e-17)
+    return 0.0;
+  return sqrt(sqrtarg) * factorTo;
+}
+double dSpacingPerpendicular::singleFromTOF(const double tof) const {
+  double temp = tof / factorFrom;
+  return sqrt(temp * temp - sfpFrom);
+}
+double dSpacingPerpendicular::conversionTOFMin() const {
+  return sqrt(-1.0 * sfpFrom);
+}
+double dSpacingPerpendicular::conversionTOFMax() const {
+  return sqrt(std::numeric_limits<double>::max()) / factorFrom;
+}
+
+Unit *dSpacingPerpendicular::clone() const {
+  return new dSpacingPerpendicular(*this);
+}
+
 // ================================================================================
 /* MOMENTUM TRANSFER
  * ================================================================================
@@ -714,6 +774,7 @@ DeltaE::DeltaE()
     : Unit(), factorTo(DBL_MIN), factorFrom(DBL_MIN), t_other(DBL_MIN),
       t_otherFrom(DBL_MIN), unitScaling(DBL_MIN) {
   addConversion("DeltaE_inWavenumber", PhysicalConstants::meVtoWavenumber, 1.);
+  addConversion("DeltaE_inFrequency", PhysicalConstants::meVtoFrequency, 1.);
 }
 
 void DeltaE::init() {
@@ -854,6 +915,40 @@ double DeltaE_inWavenumber::conversionTOFMin() const {
 }
 
 double DeltaE_inWavenumber::conversionTOFMax() const {
+  return DeltaE::conversionTOFMax();
+}
+
+// =====================================================================================================
+/* Energy Transfer in units of frequency
+ * =====================================================================================================
+ *
+ * This is identical to Energy Transfer in meV, with one division by Plank's
+ *constant, or multiplication
+ * by factor PhysicalConstants::meVtoFrequency
+ */
+DECLARE_UNIT(DeltaE_inFrequency)
+
+const UnitLabel DeltaE_inFrequency::label() const { return Symbol::GHz; }
+
+void DeltaE_inFrequency::init() {
+  DeltaE::init();
+  // Change the unit scaling factor
+  unitScaling = PhysicalConstants::meVtoFrequency;
+}
+
+Unit *DeltaE_inFrequency::clone() const {
+  return new DeltaE_inFrequency(*this);
+}
+
+DeltaE_inFrequency::DeltaE_inFrequency() : DeltaE() {
+  addConversion("DeltaE", 1.0 / PhysicalConstants::meVtoFrequency, 1.);
+}
+
+double DeltaE_inFrequency::conversionTOFMin() const {
+  return DeltaE::conversionTOFMin();
+}
+
+double DeltaE_inFrequency::conversionTOFMax() const {
   return DeltaE::conversionTOFMax();
 }
 
@@ -1093,7 +1188,7 @@ double Time::singleToTOF(const double x) const {
 
 double Time::singleFromTOF(const double tof) const {
   UNUSED_ARG(tof);
-  throw std::runtime_error("Time is not allwed to be converted from TOF. ");
+  throw std::runtime_error("Time is not allowed to be converted from TOF. ");
 }
 
 double Time::conversionTOFMax() const {
@@ -1122,12 +1217,12 @@ void Degrees::init() {}
 
 double Degrees::singleToTOF(const double x) const {
   UNUSED_ARG(x);
-  throw std::runtime_error("Degrees is not allowed to be convert to TOF. ");
+  throw std::runtime_error("Degrees is not allowed to be converted to TOF. ");
 }
 
 double Degrees::singleFromTOF(const double tof) const {
   UNUSED_ARG(tof);
-  throw std::runtime_error("Degrees is not allwed to be converted from TOF. ");
+  throw std::runtime_error("Degrees is not allowed to be converted from TOF. ");
 }
 
 double Degrees::conversionTOFMax() const {
@@ -1139,6 +1234,43 @@ double Degrees::conversionTOFMin() const {
 }
 
 Unit *Degrees::clone() const { return new Degrees(*this); }
+
+// ================================================================================
+/* Temperature in kelvin
+ * ================================================================================
+ *
+ * TemperatureKelvin prints Temperature in units of Kelvin as a label
+ */
+
+DECLARE_UNIT(Temperature)
+
+Temperature::Temperature() : Empty(), m_label("K") {}
+
+const UnitLabel Temperature::label() const { return m_label; }
+
+void Temperature::init() {}
+
+double Temperature::singleToTOF(const double x) const {
+  UNUSED_ARG(x);
+  throw std::runtime_error(
+      "Temperature is not allowed to be converted to TOF. ");
+}
+
+double Temperature::singleFromTOF(const double tof) const {
+  UNUSED_ARG(tof);
+  throw std::runtime_error(
+      "Temperature is not allowed to be converted from TOF. ");
+}
+
+double Temperature::conversionTOFMin() const {
+  return std::numeric_limits<double>::quiet_NaN();
+}
+
+double Temperature::conversionTOFMax() const {
+  return std::numeric_limits<double>::quiet_NaN();
+}
+
+Unit *Temperature::clone() const { return new Temperature(*this); }
 
 } // namespace Units
 

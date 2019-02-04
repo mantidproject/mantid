@@ -1,15 +1,22 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name
 """
 System test that loads TOPAZ single-crystal data,
 converts to Q space, finds peaks and indexes
 them.
 """
-import stresstesting
+from __future__ import (absolute_import, division, print_function)
+import systemtesting
 import numpy
 from mantid.simpleapi import *
 
 
-class TOPAZPeakFinding(stresstesting.MantidStressTest):
+class TOPAZPeakFinding(systemtesting.MantidSystemTest):
 
     def requiredMemoryMB(self):
         """ Require about 2GB free """
@@ -91,7 +98,7 @@ class TOPAZPeakFinding(stresstesting.MantidStressTest):
         newUB = numpy.array(mtd["topaz_3132"].sample().getOrientedLattice().getUB())
         # UB Matrices are not necessarily the same, some of the H,K and/or L sign can be reversed
         diff = abs(newUB) - abs(originalUB) < 0.001
-        for c in xrange(3):
+        for c in range(3):
             # This compares each column, allowing old == new OR old == -new
             if not numpy.all(diff[:,c]) :
                 raise Exception("More than 0.001 difference between UB matrices: Q (lab frame):\n"

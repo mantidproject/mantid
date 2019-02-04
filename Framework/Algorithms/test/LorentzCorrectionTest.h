@@ -1,15 +1,23 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_LORENTZCORRECTIONTEST_H_
 #define MANTID_ALGORITHMS_LORENTZCORRECTIONTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAlgorithms/LorentzCorrection.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/V3D.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cmath>
@@ -26,12 +34,9 @@ private:
   /*
    * Calculate what the weight should be.
    */
-  double calculate_weight_at(MatrixWorkspace_sptr &ws, const int bin_index) {
-    auto &xData = ws->x(0);
+  double calculate_weight_at(double xMin, double xMax, double twotheta) {
 
-    auto detector = ws->getDetector(0);
-    double twotheta = ws->detectorTwoTheta(*detector);
-    double lam = 0.5 * (xData[bin_index] + xData[bin_index + 1]);
+    double lam = 0.5 * (xMin + xMax);
     double weight = std::sin(0.5 * twotheta);
     weight = weight * weight;
     weight = weight / (lam * lam * lam * lam);
@@ -57,7 +62,7 @@ private:
     instrument->add(sample);
     instrument->markAsSamplePos(sample);
 
-    Detector *det = new Detector("my-detector", 1, NULL);
+    Detector *det = new Detector("my-detector", 1, nullptr);
     det->setPos(20, (20 - sample->getPos().X()), 0);
     instrument->add(det);
     instrument->markAsDetector(det);
@@ -65,7 +70,7 @@ private:
     const int nSpectra = 1;
     const double deltaX = 10;
     const double startX = 0;
-    auto workspace = Create2DWorkspaceBinned(nSpectra, nBins, startX,
+    auto workspace = create2DWorkspaceBinned(nSpectra, nBins, startX,
                                              deltaX); // Creates histogram data
     workspace->mutableY(0) = 1.0;
     workspace->mutableE(0) = 1.0;
@@ -127,21 +132,25 @@ public:
     alg.setPropertyValue("OutputWorkspace", "temp");
     alg.execute();
     MatrixWorkspace_sptr out_ws = alg.getProperty("OutputWorkspace");
-    TS_ASSERT(out_ws != NULL);
+    TS_ASSERT(out_ws != nullptr);
 
     const std::string unitID = out_ws->getAxis(0)->unit()->unitID();
     TS_ASSERT_EQUALS(unitID, "Wavelength");
 
-    auto &yData = out_ws->y(0);
-    auto &eData = out_ws->e(0);
+    const auto &xData = out_ws->x(0);
+    const auto &yData = out_ws->y(0);
+    const auto &eData = out_ws->e(0);
+    const auto &spectrumInfo = out_ws->spectrumInfo();
 
     int index = 0;
-    double weight = calculate_weight_at(out_ws, index /*y index*/);
+    double weight = calculate_weight_at(xData[index], xData[index + 1],
+                                        spectrumInfo.twoTheta(0));
     TS_ASSERT_EQUALS(yData[index], weight);
     TS_ASSERT_EQUALS(eData[index], weight);
 
     index++; // go to 1
-    weight = calculate_weight_at(out_ws, index /*y index*/);
+    weight = calculate_weight_at(xData[index], xData[index + 1],
+                                 spectrumInfo.twoTheta(0));
     TS_ASSERT_EQUALS(yData[index], weight);
     TS_ASSERT_EQUALS(eData[index], weight);
   }

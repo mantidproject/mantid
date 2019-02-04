@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_API_SCRIPTREPOSITORY_H_
 #define MANTID_API_SCRIPTREPOSITORY_H_
 
 #include <string>
 #include <vector>
 
-#include "MantidKernel/DateAndTime.h"
 #include "MantidAPI/DllConfig.h"
+#include "MantidKernel/DateAndTime.h"
 #include <vector>
 
 namespace Mantid {
@@ -16,7 +22,7 @@ struct ScriptInfo {
   /// Identification of the author of the script.
   std::string author;
   /// Time of the last update of this file (remotelly)
-  Kernel::DateAndTime pub_date;
+  Types::Core::DateAndTime pub_date;
   /// Marked for auto update
   bool auto_update;
   /// Directory Flag to indicate if the entry is a directory.
@@ -200,27 +206,6 @@ mantid web service is available, through the ScriptRepository::connect.
 
 @author Gesner Passos, ISIS, RAL
 @date 11/12/2012
-
-Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>.
-Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
 /** @page ScriptRepositoryDescription The Description of the ScriptRepository
@@ -605,8 +590,8 @@ public:
 };
 
 /// shared pointer to the function base class
-typedef boost::shared_ptr<ScriptRepository> ScriptRepository_sptr;
-}
-}
+using ScriptRepository_sptr = boost::shared_ptr<ScriptRepository>;
+} // namespace API
+} // namespace Mantid
 
 #endif // MANTID_API_SCRIPTREPOSITORY_H_

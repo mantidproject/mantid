@@ -8,6 +8,14 @@ A TimeSeriesProperty is a specialised :class:`mantid.kernel.Property`
 class that holds time/value pairs. It offers a selection of statistics
 through it's Python interface which you can use in your scripts.
 
+Specific classes that implement this are:
+
+* :class:`mantid.kernel.BoolTimeSeriesProperty`
+* :class:`mantid.kernel.FloatTimeSeriesProperty`
+* :class:`mantid.kernel.Int32TimeSeriesProperty`
+* :class:`mantid.kernel.Int64TimeSeriesProperty`
+* :class:`mantid.kernel.StringTimeSeriesProperty`
+
 Introduction
 ============
 

@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -41,9 +41,9 @@ Usage
     # perform the algorithm
     ws = Minus(ws1, ws2)
 
-    print "The X values are: " + str(ws.readX(0))
-    print "The Y values are: " + str(ws.readY(0))
-    print "The updated Error values are: " + str(ws.readE(0))
+    print("The X values are: {}".format(ws.readX(0)))
+    print("The Y values are: {}".format(ws.readY(0)))
+    print("The updated Error values are: {}".format(ws.readE(0)))
 
 Output:
 
@@ -71,9 +71,9 @@ Output:
     # perform the algorithm
     ws = ws1 - ws2
 
-    print "The X values are: " + str(ws.readX(0))
-    print "The Y values are: " + str(ws.readY(0))
-    print "The updated Error values are: " + str(ws.readE(0))
+    print("The X values are: {}".format(ws.readX(0)))
+    print("The Y values are: {}".format(ws.readY(0)))
+    print("The updated Error values are: {}".format(ws.readE(0)))
 
 Output:
 
@@ -101,9 +101,9 @@ Output:
     # perform the algorithm
     ws -= ws1
 
-    print "The X values are: " + str(ws.readX(0))
-    print "The Y values are: " + str(ws.readY(0))
-    print "The updated Error values are: " + str(ws.readE(0))
+    print("The X values are: {}".format(ws.readX(0)))
+    print("The Y values are: {}".format(ws.readY(0)))
+    print("The updated Error values are: {}".format(ws.readE(0)))
 
 Output:
 
@@ -127,9 +127,9 @@ Output:
     # perform the algorithm
     ws = ws1 - 2.5
 
-    print "The X values are: " + str(ws.readX(0))
-    print "The Y values are: " + str(ws.readY(0))
-    print "The updated Error values are: " + str(ws.readE(0))
+    print("The X values are: {}".format(ws.readX(0)))
+    print("The Y values are: {}".format(ws.readY(0)))
+    print("The updated Error values are: {}".format(ws.readE(0)))
 
 Output:
 

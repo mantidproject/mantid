@@ -1,21 +1,27 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_CREATEUSERDEFINEDBACKGROUNDTEST_H_
 #define MANTID_ALGORITHMS_CREATEUSERDEFINEDBACKGROUNDTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/CreateUserDefinedBackground.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAlgorithms/CreateUserDefinedBackground.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cmath>
 
-using Mantid::Algorithms::CreateUserDefinedBackground;
 using Mantid::API::ITableWorkspace_sptr;
 using Mantid::API::MatrixWorkspace_sptr;
+using Mantid::Algorithms::CreateUserDefinedBackground;
 
 namespace {
 // Gaussian
@@ -40,7 +46,7 @@ double peaks(double xPoint) {
 double dataFunction(double xPoint, int iSpec) {
   return background(xPoint, iSpec) + peaks(xPoint);
 }
-}
+} // namespace
 
 class CreateUserDefinedBackgroundTest : public CxxTest::TestSuite {
 public:
@@ -271,7 +277,7 @@ public:
 private:
   /// Create workspace containing test data
   MatrixWorkspace_sptr createTestData(bool isHisto) {
-    return WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
+    return WorkspaceCreationHelper::create2DWorkspaceFromFunction(
         dataFunction, 1, 0.0, 10.0, 0.1, isHisto);
   }
 

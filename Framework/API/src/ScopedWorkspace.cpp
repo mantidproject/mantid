@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/ScopedWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -74,9 +80,9 @@ void ScopedWorkspace::remove() {
 void ScopedWorkspace::set(Workspace_sptr newWS) {
   AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
 
-  if (!newWS->name().empty() && ads.doesExist(newWS->name()))
+  if (!newWS->getName().empty() && ads.doesExist(newWS->getName()))
     throw std::invalid_argument(
-        "Workspace is already in the ADS under the name " + newWS->name());
+        "Workspace is already in the ADS under the name " + newWS->getName());
 
   // Remove previous workspace entry
   remove();

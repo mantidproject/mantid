@@ -1,7 +1,13 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/FilterByTime.h"
 #include "MantidAPI/Run.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -16,8 +22,9 @@ using namespace Kernel;
 using namespace API;
 using DataObjects::EventList;
 using DataObjects::EventWorkspace;
-using DataObjects::EventWorkspace_sptr;
 using DataObjects::EventWorkspace_const_sptr;
+using DataObjects::EventWorkspace_sptr;
+using Types::Core::DateAndTime;
 
 void FilterByTime::init() {
   std::string commonHelp("\nYou can only specify the relative or absolute "
@@ -108,16 +115,7 @@ void FilterByTime::exec() {
     throw std::invalid_argument(
         "The stop time should be larger than the start time.");
 
-  // Make a brand new EventWorkspace
-  EventWorkspace_sptr outputWS = boost::dynamic_pointer_cast<EventWorkspace>(
-      API::WorkspaceFactory::Instance().create(
-          "EventWorkspace", inputWS->getNumberHistograms(), 2, 1));
-  // Copy geometry over.
-  API::WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS,
-                                                         false);
-  // But we don't copy the data.
-
-  setProperty("OutputWorkspace", outputWS);
+  auto outputWS = DataObjects::create<EventWorkspace>(*inputWS);
 
   size_t numberOfSpectra = inputWS->getNumberHistograms();
 
@@ -144,6 +142,7 @@ void FilterByTime::exec() {
 
   // Now filter out the run, using the DateAndTime type.
   outputWS->mutableRun().filterByTime(start, stop);
+  setProperty("OutputWorkspace", std::move(outputWS));
 }
 
 } // namespace Algorithms

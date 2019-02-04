@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-many-branches,too-many-locals, invalid-name
 from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
@@ -39,9 +45,9 @@ class AngularAutoCorrelationsTwoAxes(PythonAlgorithm):
         file_name=self.getPropertyValue("InputFile")
 
         # Get the user-specified species
-        type1=self.getPropertyValue("SpeciesOne")
-        type2=self.getPropertyValue("SpeciesTwo")
-        type3=self.getPropertyValue("SpeciesThree")
+        types=[self.getPropertyValue("SpeciesOne").lower(),
+               self.getPropertyValue("SpeciesTwo").lower(),
+               self.getPropertyValue("SpeciesThree").lower()]
 
         # Load trajectory file
         trajectory=netcdf.netcdf_file(file_name,mode="r")
@@ -82,12 +88,9 @@ class AngularAutoCorrelationsTwoAxes(PythonAlgorithm):
             atoms_to_species[key]=str(element)
 
         # Check wether user-specified species present in the trajectory file
-        if type1.lower() not in elements:
-            raise RuntimeError('Species one not found in the trajectory file. Please try again...')
-        if type2.lower() not in elements:
-            raise RuntimeError('Species two not found in the trajectory file. Please try again...')
-        if type3.lower() not in elements:
-            raise RuntimeError('Species three not found in the trajectory file. Please try again...')
+        for i in range(3):
+            if types[i] not in elements:
+                raise RuntimeError('Species '+['one','two','three'][i]+' not found in the trajectory file. Please try again...')
 
         # Initialise lists in the species_to_particles dictionary
         for j in elements:
@@ -177,11 +180,11 @@ class AngularAutoCorrelationsTwoAxes(PythonAlgorithm):
             species_two=[]
             species_three=[]
             for j in temp:
-                if atoms_to_species[j]==type1.lower():
+                if atoms_to_species[j]==types[0]:
                     species_one.append(j)
-                if atoms_to_species[j]==type2.lower():
+                if atoms_to_species[j]==types[1]:
                     species_two.append(j)
-                if atoms_to_species[j]==type3.lower():
+                if atoms_to_species[j]==types[2]:
                     species_three.append(j)
             # Find the average positions of species one and two
             sum_position_species_one=np.zeros((n_timesteps,n_dimensions))
@@ -313,10 +316,11 @@ class AngularAutoCorrelationsTwoAxes(PythonAlgorithm):
 
     def fold_correlation(self,omega):
         # Folds an array with symmetrical values into half by averaging values around the centre
-        right_half=omega[int(len(omega))/2:]
+        right_half=omega[int(len(omega))//2:]
         left_half=omega[:int(np.ceil(len(omega)/2.0))][::-1]
 
         return (left_half+right_half)/2.0
+
 
 # Subscribe algorithm to Mantid software
 AlgorithmFactory.subscribe(AngularAutoCorrelationsTwoAxes)

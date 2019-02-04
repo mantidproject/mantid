@@ -1,15 +1,22 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name
 """
 Tests masking functionality specific to WISH. Working masking behaviour is critical in general, but is heavily used on WISH.
 - Email Pascal Manuel @ ISIS if things break here and let him know how his scripts may need to be modified.
 """
 
-import stresstesting
+from __future__ import (absolute_import, division, print_function)
+import systemtesting
 import os
 from mantid.simpleapi import *
 
 
-class WishMasking(stresstesting.MantidStressTest):
+class WishMasking(systemtesting.MantidSystemTest):
 
         # Utility function will return the masking corresponding to a workspace index from a cal file.
     def get_masking_for_index(self, cal_file, requested_index):
@@ -28,9 +35,9 @@ class WishMasking(stresstesting.MantidStressTest):
                 continue
 
     # Tests that the cal file is being created in the expected way.
-        #  1) Uses the masks to create a cal file
-        #  2) Read the cal file
-        #  3) Use the known masking boundaries to determine whether the cal file has been created propertly accoring to the function inputs.
+        # 1) Uses the masks to create a cal file
+        # 2) Read the cal file
+        # 3) Use the known masking boundaries to determine whether the cal file has been created propertly according to the function inputs.
         #pylint: disable=too-many-arguments
     def do_test_cal_file(self, masked_workspace, should_invert, expected_masking_identifier, expected_not_masking_identifier, masking_edge):
 
@@ -44,7 +51,7 @@ class WishMasking(stresstesting.MantidStressTest):
             self.assertTrue(mask_boundary_inside == expected_masking_identifier)
             self.assertTrue(mask_boundary_outside == expected_not_masking_identifier)
         except LookupError:
-            print "Could not find the requested index"
+            print("Could not find the requested index")
             self.assertTrue(False)
         finally:
             cfile.close()
@@ -62,8 +69,8 @@ class WishMasking(stresstesting.MantidStressTest):
         masking_edge = 9
 
                 # Test the 'isMasked' property on the detectors of the original workspace
-        self.assertTrue( ws.getDetector(masking_edge).isMasked() )
-        self.assertTrue( not ws.getDetector(masking_edge + 1).isMasked() )
+        self.assertTrue( ws.spectrumInfo().isMasked(masking_edge) )
+        self.assertTrue( not ws.spectrumInfo().isMasked(masking_edge + 1) )
 
                 # Extract a masking workspace
         ExtractMask( InputWorkspace=ws, OutputWorkspace='masking_wish_workspace' )
@@ -74,8 +81,8 @@ class WishMasking(stresstesting.MantidStressTest):
                 # Test the 'isMasked' property on the detectors of the masked workspace
                 # The following tests have been added even though they are broken because extracted workspaces currently do not preserve the
                 # Masking flags (buty they SHOULD!). Hopefully the broken functionality will be fixed and I can enable them.
-                #self.assertTrue( mask_ws.getDetector(masking_edge).isMasked() )
-                #self.assertTrue( not mask_ws.getDetector(masking_edge + 1).isMasked() )
+                #self.assertTrue( mask_ws.spectrumInfo().isMasked(masking_edge) )
+                #self.assertTrue( not mask_ws.spectrumInfo().isMasked(masking_edge + 1) )
 
                 # Save masking
         mask_file = 'wish_masking_system_test_mask_file_temp.xml'
@@ -101,7 +108,7 @@ class WishMasking(stresstesting.MantidStressTest):
 
                 # Testing that the isMasking is the same on both sides of the masking boundary.
         # If things were working properly the following would not pass!
-        self.assertTrue( mask_ws.getDetector(masking_edge).isMasked() == mask_ws.getDetector(masking_edge + 1).isMasked() )
+        self.assertTrue( mask_ws.spectrumInfo().isMasked(masking_edge) == mask_ws.spectrumInfo().isMasked(masking_edge + 1) )
                 ## END CHARACTERISATION TESTS
 
                 #Test creation with normal masking

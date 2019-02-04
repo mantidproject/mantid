@@ -1,8 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/FilteredTimeSeriesProperty.h"
+#include "MantidKernel/IPropertySettings.h"
 #include "MantidKernel/StringTokenizer.h"
 
 #include <json/json.h>
@@ -15,7 +22,7 @@ using std::string;
 namespace {
 // static logger reference
 Logger g_log("PropertyManager");
-}
+} // namespace
 
 //-----------------------------------------------------------------------------------------------
 /// Default constructor
@@ -97,8 +104,8 @@ PropertyManager &PropertyManager::operator+=(const PropertyManager &rhs) {
  * @param stop :: Absolute stop time. Any log entries at times < than this time
  *are kept.
  */
-void PropertyManager::filterByTime(const Kernel::DateAndTime &start,
-                                   const Kernel::DateAndTime &stop) {
+void PropertyManager::filterByTime(const Types::Core::DateAndTime &start,
+                                   const Types::Core::DateAndTime &stop) {
   // Iterate through all properties
   PropertyMap::const_iterator it;
   for (it = this->m_properties.begin(); it != this->m_properties.end(); ++it) {
@@ -141,7 +148,7 @@ void PropertyManager::splitByTime(
     }
 
     // Now the property does the splitting.
-    bool isProtonCharge = prop->name().compare("proton_charge") == 0;
+    bool isProtonCharge = prop->name() == "proton_charge";
     prop->splitByTime(splitter, output_properties, isProtonCharge);
 
   } // for each property
@@ -346,12 +353,11 @@ void PropertyManager::setPropertiesWithSimpleString(
     const std::unordered_set<std::string> &ignoreProperties) {
   ::Json::Value propertyJson;
   // Split up comma-separated properties
-  typedef Mantid::Kernel::StringTokenizer tokenizer;
+  using tokenizer = Mantid::Kernel::StringTokenizer;
 
   boost::char_separator<char> sep(";");
   tokenizer propPairs(propertiesString, ";",
                       Mantid::Kernel::StringTokenizer::TOK_TRIM);
-  int index = 0;
   // Iterate over the properties
   for (const auto &pair : propPairs) {
     size_t n = pair.find('=');
@@ -372,7 +378,6 @@ void PropertyManager::setPropertiesWithSimpleString(
       // Set it
       propertyJson[propName] = value;
     }
-    index++;
   }
   setProperties(propertyJson, ignoreProperties);
 }
@@ -490,18 +495,24 @@ std::string PropertyManager::asString(bool withDefaultValues) const {
 
 //-----------------------------------------------------------------------------------------------
 /** Return the property manager serialized as a json object.
- * * @param withDefaultValues :: If true then the value of default parameters
- will
- *be included
-
+ * Note that this method does not serialize WorkspacePropertys with workspaces
+ * not
+ * in the ADS.
+ * @param withDefaultValues :: If true then the value of default parameters
+ * will be included
  * @returns A serialized version of the manager
  */
 ::Json::Value PropertyManager::asJson(bool withDefaultValues) const {
   ::Json::Value jsonMap;
-  const size_t count = propertyCount();
-  for (size_t i = 0; i < count; ++i) {
-    Property *p = getPointerToPropertyOrdinal(static_cast<int>(i));
-    if (withDefaultValues || !(p->isDefault())) {
+  const int count = static_cast<int>(propertyCount());
+  for (int i = 0; i < count; ++i) {
+    Property *p = getPointerToPropertyOrdinal(i);
+    bool is_enabled = true;
+    if (p->getSettings()) {
+      is_enabled = p->getSettings()->isEnabled(this);
+    }
+    if (p->isValueSerializable() && (withDefaultValues || !p->isDefault()) &&
+        is_enabled) {
       jsonMap[p->name()] = p->value();
     }
   }

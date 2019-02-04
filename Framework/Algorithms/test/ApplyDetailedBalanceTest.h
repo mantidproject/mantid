@@ -1,15 +1,22 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_APPLYDETAILEDBALANCETEST_H_
 #define MANTID_ALGORITHMS_APPLYDETAILEDBALANCETEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/System.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidAlgorithms/ApplyDetailedBalance.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Mantid::Algorithms;
@@ -42,7 +49,7 @@ public:
         alg.setPropertyValue("InputWorkspace", inputWSname));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputWorkspace", outputWSname));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Temperature", "300."));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Temperature", "300.0"));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
@@ -61,9 +68,10 @@ public:
     for (std::size_t i = 0; i < 5; ++i) {
       TS_ASSERT_DELTA(
           outws->readY(0)[i],
-          M_PI * (1 - std::exp(-11.604519 *
-                               (inws->readX(0)[i] + inws->readX(0)[i + 1]) /
-                               2. / 300.)) *
+          M_PI *
+              (1 - std::exp(-11.604519 *
+                            (inws->readX(0)[i] + inws->readX(0)[i + 1]) / 2. /
+                            300.)) *
               inws->readY(0)[i],
           1e-8);
     }
@@ -81,7 +89,7 @@ public:
         alg.setPropertyValue("OutputWorkspace", outputWSname));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Temperature", "x"));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
-    TS_ASSERT(alg.isExecuted());
+    TS_ASSERT(!alg.isExecuted());
     Workspace2D_sptr outws;
     TS_ASSERT_THROWS_ANYTHING(
         outws = AnalysisDataService::Instance().retrieveWS<Workspace2D>(
@@ -92,7 +100,7 @@ public:
   }
 
   void test_event() {
-    EventWorkspace_sptr evin = WorkspaceCreationHelper::CreateEventWorkspace(
+    EventWorkspace_sptr evin = WorkspaceCreationHelper::createEventWorkspace(
                             1, 5, 10, 0, 1, 3),
                         evout;
     evin->getAxis(0)->unit() = UnitFactory::Instance().create("DeltaE");
@@ -123,6 +131,22 @@ public:
     AnalysisDataService::Instance().remove(outputWSname);
 
     AnalysisDataService::Instance().remove(inputWSname);
+  }
+
+  void test_units() {
+    createWorkspace2D(true);
+    Workspace2D_sptr inws =
+        AnalysisDataService::Instance().retrieveWS<Workspace2D>(inputWSname);
+    TS_ASSERT_EQUALS(inws->getAxis(0)->unit()->unitID(), "DeltaE");
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace", inputWSname);
+    alg.setPropertyValue("OutputWorkspace", outputWSname);
+    alg.setPropertyValue("Temperature", "300.0");
+    alg.setPropertyValue("OutputUnits", "Frequency");
+    alg.execute();
+    Workspace2D_sptr outws =
+        AnalysisDataService::Instance().retrieveWS<Workspace2D>(outputWSname);
+    TS_ASSERT_EQUALS(outws->getAxis(0)->unit()->unitID(), "DeltaE_inFrequency");
   }
 
 private:
@@ -160,7 +184,6 @@ private:
       ws2D->setX(i, cow_xv);
       ws2D->dataY(i) = {1, 2, 3, 4, 5};
       ws2D->dataE(i) = {sqrt(1), sqrt(2), sqrt(3), sqrt(4), sqrt(5)};
-      ws2D->getSpectrum(i).setSpectrumNo(i);
     }
 
     AnalysisDataService::Instance().add(inputWSname, ws2D);

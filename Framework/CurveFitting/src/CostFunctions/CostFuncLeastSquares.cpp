@@ -1,14 +1,22 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h"
-#include "MantidCurveFitting/Jacobian.h"
-#include "MantidCurveFitting/SeqDomain.h"
-#include "MantidAPI/IConstraint.h"
 #include "MantidAPI/CompositeDomain.h"
 #include "MantidAPI/FunctionValues.h"
+#include "MantidAPI/IConstraint.h"
+#include "MantidCurveFitting/Jacobian.h"
+#include "MantidCurveFitting/SeqDomain.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MultiThreaded.h"
+
+#include <sstream>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -16,7 +24,7 @@ namespace CostFunctions {
 namespace {
 /// static logger
 Kernel::Logger g_log("CostFuncLeastSquares");
-}
+} // namespace
 
 DECLARE_COSTFUNCTION(CostFuncLeastSquares, Least squares)
 
@@ -189,7 +197,7 @@ double CostFuncLeastSquares::valDerivHessian(bool evalDeriv,
     m_dirtyDeriv = false;
   }
 
-  if (evalDeriv) {
+  if (evalHessian) {
     if (m_includePenalty) {
       size_t i = 0;
       for (size_t ip = 0; ip < np; ++ip) {
@@ -367,38 +375,10 @@ void CostFuncLeastSquares::drop() {
 }
 
 /**
- * Copy the parameter values from a GSLVector.
- * @param params :: A vector to copy the parameters from
+ * Calculates covariance matrix for fitting function's active parameters.
+ * @param covar :: Output cavariance matrix.
+ * @param epsrel :: Tolerance.
  */
-void CostFuncLeastSquares::setParameters(const GSLVector &params) {
-  if (nParams() != params.size()) {
-    throw std::runtime_error(
-        "Parameter vector has wrong size in CostFuncLeastSquares.");
-  }
-  for (size_t i = 0; i < nParams(); ++i) {
-    setParameter(i, params.get(i));
-  }
-  m_function->applyTies();
-}
-
-/**
- * Copy the parameter values to a GSLVector.
- * @param params :: A vector to copy the parameters to
- */
-void CostFuncLeastSquares::getParameters(GSLVector &params) const {
-  if (params.size() != nParams()) {
-    params.resize(nParams());
-  }
-  for (size_t i = 0; i < nParams(); ++i) {
-    params.set(i, getParameter(i));
-  }
-}
-
-/**
-  * Calculates covariance matrix for fitting function's active parameters.
-  * @param covar :: Output cavariance matrix.
-  * @param epsrel :: Tolerance.
-  */
 void CostFuncLeastSquares::calActiveCovarianceMatrix(GSLMatrix &covar,
                                                      double epsrel) {
   UNUSED_ARG(epsrel);

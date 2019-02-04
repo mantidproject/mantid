@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -96,11 +96,11 @@ Usage
 
    det_id = pos_table.column(0)[0]
    cal_pos =  pos_table.column(2)[0]
-   print "Det ID:", det_id
-   print "Calibrated position: (%.3f,%.3f,%.3f)" % (cal_pos.getX(), cal_pos.getY(), cal_pos.getZ())
+   print("Det ID: {}".format(det_id))
+   print("Calibrated position: (%.3f,%.3f,%.3f)" % (cal_pos.getX(), cal_pos.getY(), cal_pos.getZ()))
    ws = mtd[ws_name]
    posInWSInst = ws.getInstrument().getDetector(det_id).getPos()
-   print "Is the detector position calibrated now in the original workspace instrument?", (cal_pos == posInWSInst)
+   print("Is the detector position calibrated now in the original workspace instrument? {}".format(cal_pos == posInWSInst))
 
 .. testcleanup:: ExCalFull
 
@@ -140,13 +140,13 @@ Output:
 
    det_id = pos_table.column(0)[0]
    pos =  pos_table.column(2)[0]
-   print "Det ID:", det_id
-   print "Calibrated position: ({0:.3f},{1:.3f},{2:.3f})".format(pos.getX(),pos.getY(),pos.getZ())
-   print "Got details on the peaks fitted for {0:d} detector(s)".format(peaks_info.rowCount())
-   print "Was the file created?", os.path.exists(pos_filename)
+   print("Det ID: {}".format(det_id))
+   print("Calibrated position: ({0:.3f},{1:.3f},{2:.3f})".format(pos.getX(),pos.getY(),pos.getZ()))
+   print("Got details on the peaks fitted for {0:d} detector(s)".format(peaks_info.rowCount()))
+   print("Was the file created? {}".format(os.path.exists(pos_filename)))
    with open(pos_filename) as csvf:
       reader = csv.reader(csvf, dialect='excel')
-      reader.next()
+      next(reader)
       calibOK = True
       for i,row in enumerate(reader):
          cal_pos = pos_table.column(2)[i]
@@ -154,7 +154,7 @@ Output:
                    (abs(float(row[5]) - cal_pos.getY()) < 1e-6) and\
                    (abs(float(row[6]) - cal_pos.getZ()) < 1e-6)
          if not calibOK: break
-   print "Does the calibration file have the expected values?", calibOK
+   print("Does the calibration file have the expected values? {}".format(calibOK))
 
 .. testcleanup:: ExCalFullWithOutputFile
 

@@ -1,10 +1,30 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_KERNEL_MATRIX_H_
 #define MANTID_KERNEL_MATRIX_H_
 
 #include "MantidKernel/DllConfig.h"
-#include <vector>
 #include <cfloat>
-#include <ostream>
+#include <iosfwd>
+#include <memory>
+#include <vector>
+
+// Our aim with Matrix is to provide the definition for
+// predefined types and avoid multiple copies of the same
+// definition in multiple shared libraries.
+// On MSVC template declarations cannot have
+// both extern and __declspec(dllexport) but gcc
+// requires the __attribute__((visibility("default")))
+// attribute on the class definition.
+#if defined(_MSC_VER)
+#define KERNEL_MATRIX_CLASS_DLL
+#else
+#define KERNEL_MATRIX_CLASS_DLL MANTID_KERNEL_DLL
+#endif
 
 namespace Mantid {
 
@@ -17,39 +37,26 @@ class V3D;
 /**  Numerical Matrix class.     Holds a matrix of variable type and size.
 Should work for real and complex objects. Carries out eigenvalue
 and inversion if the matrix is square
-
-Copyright &copy; 2008-2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>.
-Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-template <typename T> class DLLExport Matrix {
+template <typename T> class KERNEL_MATRIX_CLASS_DLL Matrix {
 public:
-  /// Enable users to retrive the element type
-  typedef T value_type;
+  /// Enable users to retrieve the element type
+  using value_type = T;
 
 private:
-  size_t nx; ///< Number of rows    (x coordinate)
-  size_t ny; ///< Number of columns (y coordinate)
+  size_t m_numRows;    ///< Number of rows    (x coordinate)
+  size_t m_numColumns; ///< Number of columns (y coordinate)
 
-  T **V;                     ///< Raw data
-  void deleteMem();          ///< Helper function to delete memory
+  /// 1D memory allocation to be wrapped with pointers to the rows
+  template <class U> using CMemoryArray = std::unique_ptr<U[]>;
+  /// Pointers to rows in the raw data array to make it appear 2D
+  template <typename U> using MatrixMemoryPtrs = std::unique_ptr<U *[]>;
+
+  /// Pointer to allocated memory
+  CMemoryArray<T> m_rawDataAlloc;
+  /// Representation of 2D data
+  MatrixMemoryPtrs<T> m_rawData;
+
   void lubcmp(int *, int &); ///< starts inversion process
   void lubksb(int const *, double *);
   void rotate(double const, double const, int const, int const, int const,
@@ -62,7 +69,7 @@ public:
    * (assuming that we have columns x row vector. */
   Matrix(const std::vector<T> &, const std::vector<T> &);
   /// Build square matrix from a linear vector. Throw if the vector.size() !=
-  /// nx*nx;
+  /// m_numRows * m_numRows;
   Matrix(const std::vector<T> &);
   /// Build a non-square matrix from vector and dimensions
   Matrix(const std::vector<T> &, const size_t nrow, const size_t ncol);
@@ -73,12 +80,12 @@ public:
   Matrix<T> &operator=(const Matrix<T> &);
   Matrix(Matrix<T> &&) noexcept;
   Matrix<T> &operator=(Matrix<T> &&) noexcept;
-  ~Matrix();
 
-  /// const Array accessor
-  const T *operator[](const size_t A) const { return V[A]; }
+  /// const Array accessor. Use, e.g. Matrix[row][col]
+  const T *operator[](const size_t row) const { return m_rawData[row]; }
+
   /// Array accessor. Use, e.g. Matrix[row][col]
-  T *operator[](const size_t A) { return V[A]; }
+  T *operator[](const size_t row) { return m_rawData[row]; };
 
   Matrix<T> &operator+=(const Matrix<T> &);     ///< Basic addition operator
   Matrix<T> operator+(const Matrix<T> &) const; ///< Basic addition operator
@@ -86,10 +93,12 @@ public:
   Matrix<T> &operator-=(const Matrix<T> &);     ///< Basic subtraction operator
   Matrix<T> operator-(const Matrix<T> &) const; ///< Basic subtraction operator
 
-  Matrix<T> operator*(const Matrix<T> &) const; ///< Basic matrix multiply
-  std::vector<T> operator*(const std::vector<T> &) const; ///< Multiply M*Vec
-  V3D operator*(const V3D &) const;                       ///< Multiply M*Vec
-  Matrix<T> operator*(const T &) const; ///< Multiply by constant
+  Matrix<T> operator*(const Matrix<T> &)const; ///< Basic matrix multiply
+  std::vector<T> operator*(const std::vector<T> &)const; ///< Multiply M*Vec
+  void multiplyPoint(const std::vector<T> &in,
+                     std::vector<T> &out) const; ///< Multiply M*Vec
+  V3D operator*(const V3D &)const;               ///< Multiply M*Vec
+  Matrix<T> operator*(const T &)const;           ///< Multiply by constant
 
   Matrix<T> &operator*=(const Matrix<T> &); ///< Basic matrix multipy
   Matrix<T> &operator*=(const T &);         ///< Multiply by constant
@@ -100,9 +109,7 @@ public:
   bool operator!=(const Matrix<T> &) const;
   bool operator==(const Matrix<T> &) const;
   bool equals(const Matrix<T> &A, const double Tolerance = FLT_EPSILON) const;
-  T item(const int a, const int b) const {
-    return V[a][b];
-  } ///< disallows access
+  T item(size_t row, size_t col) const { return m_rawData[row][col]; }
 
   void print() const;
   void write(std::ostream &, int const = 0) const;
@@ -135,17 +142,19 @@ public:
 
   /// Access matrix sizes
   std::pair<size_t, size_t> size() const {
-    return std::pair<size_t, size_t>(nx, ny);
+    return std::pair<size_t, size_t>(m_numRows, m_numColumns);
   }
 
   /// Return the number of rows in the matrix
-  size_t numRows() const { return nx; }
+  size_t numRows() const { return m_numRows; }
 
   /// Return the number of columns in the matrix
-  size_t numCols() const { return ny; }
+  size_t numCols() const { return m_numColumns; }
 
   /// Return the smallest matrix size
-  size_t Ssize() const { return (nx > ny) ? ny : nx; }
+  size_t Ssize() const {
+    return (m_numRows > m_numColumns) ? m_numColumns : m_numRows;
+  }
 
   void swapRows(const size_t, const size_t); ///< Swap rows (first V index)
   void swapCols(const size_t, const size_t); ///< Swap cols (second V index)
@@ -179,27 +188,47 @@ private:
                              const char);
 };
 
+template <>
+inline void Matrix<int>::GaussJordan(Kernel::Matrix<int> &)
+/**
+Not valid for Integer
+@throw std::invalid_argument
+*/
+{
+  throw std::invalid_argument(
+      "Gauss-Jordan inversion not valid for integer matrix");
+}
+
+// Explicit declarations required by Visual C++. Symbols provided by matching
+// explicit instantiations in source file
+#if defined(_MSC_VER)
+extern template class Matrix<double>;
+extern template class Matrix<int>;
+extern template class Matrix<float>;
+#endif
+
+// clean up
+#undef KERNEL_MATRIX_CLASS_DLL
+
 //-------------------------------------------------------------------------
 // Typedefs
 //-------------------------------------------------------------------------
-/// A matrix of doubles
-typedef Mantid::Kernel::Matrix<double> DblMatrix;
-/// A matrix of ints
-typedef Mantid::Kernel::Matrix<int> IntMatrix;
+using DblMatrix = Mantid::Kernel::Matrix<double>;
+using IntMatrix = Mantid::Kernel::Matrix<int>;
+using FloatMatrix = Mantid::Kernel::Matrix<float>;
 
 //-------------------------------------------------------------------------
 // Utility methods
 //-------------------------------------------------------------------------
 template <typename T>
-DLLExport std::ostream &operator<<(std::ostream &, const Kernel::Matrix<T> &);
+std::ostream &operator<<(std::ostream &, const Kernel::Matrix<T> &);
 template <typename T>
-DLLExport void dumpToStream(std::ostream &, const Kernel::Matrix<T> &,
-                            const char);
+void dumpToStream(std::ostream &, const Kernel::Matrix<T> &, const char);
 
 template <typename T>
-DLLExport std::istream &operator>>(std::istream &, Kernel::Matrix<T> &);
+std::istream &operator>>(std::istream &, Kernel::Matrix<T> &);
 template <typename T>
-DLLExport void fillFromStream(std::istream &, Kernel::Matrix<T> &, const char);
-}
-}
+void fillFromStream(std::istream &, Kernel::Matrix<T> &, const char);
+} // namespace Kernel
+} // namespace Mantid
 #endif // MANTID_KERNEL_MATRIX_H_

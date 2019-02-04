@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Instrument/SampleEnvironmentFactory.h"
 #include "MantidGeometry/Instrument/SampleEnvironmentSpecParser.h"
 #include "MantidKernel/Material.h"
@@ -6,6 +12,7 @@
 #include "Poco/Path.h"
 
 #include <fstream>
+#include <sstream>
 
 namespace Mantid {
 namespace Geometry {
@@ -41,7 +48,7 @@ std::string createCacheKey(const std::string &facility,
                            const std::string &specName) {
   return facility + "/" + instrument + "/" + specName;
 }
-}
+} // namespace
 
 //------------------------------------------------------------------------------
 // SampleEnvironmentFactory

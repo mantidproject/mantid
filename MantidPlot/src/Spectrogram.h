@@ -30,24 +30,24 @@
 #define SPECTROGRAM_H
 
 #include "Matrix.h"
-#include "UserFunction.h"
-#include <qwt_raster_data.h>
-#include <qwt_plot.h>
-#include <qwt_plot_spectrogram.h>
-#include <qwt_color_map.h>
-#include <qwt_plot_marker.h>
-#include "qwt_color_map.h"
 #include "PlotCurve.h"
+#include "UserFunction.h"
+#include "qwt_color_map.h"
+#include <qwt_color_map.h>
+#include <qwt_plot.h>
+#include <qwt_plot_marker.h>
+#include <qwt_plot_spectrogram.h>
+#include <qwt_raster_data.h>
 
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidQtAPI/MantidColorMap.h"
-#include "MantidQtAPI/WorkspaceObserver.h"
-#include <MantidQtMantidWidgets/InstrumentView/InstrumentWidget.h>
+#include "MantidQtWidgets/Common/WorkspaceObserver.h"
+#include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
+#include "MantidQtWidgets/LegacyQwt/MantidColorMap.h"
 
-#include <fstream>
-#include <float.h>
-#include <boost/shared_ptr.hpp>
 #include <QPainter>
+#include <boost/shared_ptr.hpp>
+#include <float.h>
+#include <fstream>
 #include <qobject.h>
 
 class MatrixData;
@@ -57,7 +57,7 @@ namespace MantidQt {
 namespace API {
 class QwtRasterDataMD;
 }
-}
+} // namespace MantidQt
 
 class Spectrogram : public QObject,
                     public QwtPlotSpectrogram,
@@ -84,7 +84,7 @@ public:
   void afterReplaceHandle(
       const std::string &wsName,
       const boost::shared_ptr<Mantid::API::Workspace> ws) override;
-  /// Handle an ADS clear notificiation
+  /// Handle an ADS clear notification
   void clearADSHandle() override;
 
   enum ColorMapPolicy { GrayScale, Default, Custom };
@@ -175,6 +175,8 @@ public:
   void setIntensityChange(bool on);
   /// returns boolan flag intensity change
   bool isIntensityChanged();
+  /// returns the name of workspace for this spectrogram
+  std::string workspaceName() { return d_wsName; };
 
 signals:
   void removeMe(Spectrogram *);
@@ -188,6 +190,8 @@ protected:
                     const QwtScaleMap &yMap,
                     const QwtRasterData::ContourLines &lines) const;
   void createLabels();
+  void checkRaggedMatrixWorkspace(const Mantid::API::Workspace *workspace,
+                                  Mantid::coord_t &minX, Mantid::coord_t &maxX);
 
   //! Pointer to the source data matrix
   Matrix *d_matrix;

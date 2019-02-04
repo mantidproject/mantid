@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef FUNCTIONTASKTEST_H_
 #define FUNCTIONTASKTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include <MantidKernel/Timer.h>
-#include "MantidKernel/Task.h"
 #include "MantidKernel/FunctionTask.h"
+#include "MantidKernel/Task.h"
+#include <MantidKernel/Timer.h>
 
 using namespace Mantid::Kernel;
 
@@ -24,7 +30,7 @@ double my_complicated_function(int arg1, double arg2) {
 class FunctionTaskTest : public CxxTest::TestSuite {
 public:
   void test_NullFunction_throws() {
-    FunctionTask mytask(NULL);
+    FunctionTask mytask(nullptr);
     TS_ASSERT_THROWS(mytask.run(), std::runtime_error);
   }
 

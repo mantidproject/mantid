@@ -1,10 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef SUMROWCOLUMNTEST_H_
 #define SUMROWCOLUMNTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidAlgorithms/SumRowColumn.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAlgorithms/SumRowColumn.h"
+#include "MantidKernel/Unit.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -16,7 +23,7 @@ public:
 
   SumRowColumnTest() : inputWS("SumRowColumnTestWS") {
     AnalysisDataService::Instance().add(
-        inputWS, WorkspaceCreationHelper::Create2DWorkspaceBinned(100, 10));
+        inputWS, WorkspaceCreationHelper::create2DWorkspaceBinned(100, 10));
   }
 
   ~SumRowColumnTest() override { AnalysisDataService::Instance().clear(); }

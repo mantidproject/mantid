@@ -1,11 +1,18 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,attribute-defined-outside-init
-import stresstesting
+from __future__ import (absolute_import, division, print_function)
+import systemtesting
 import mantid.simpleapi as ms
 
 #====================================================================================================
 
 
-class IN10SiliconTest(stresstesting.MantidStressTest):
+class IN10SiliconTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
         import IndirectNeutron as Main
@@ -28,7 +35,7 @@ class IN10SiliconTest(stresstesting.MantidStressTest):
 #====================================================================================================
 
 
-class IN13CaFTest(stresstesting.MantidStressTest):
+class IN13CaFTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
         import IndirectNeutron as Main
@@ -60,7 +67,7 @@ class IN13CaFTest(stresstesting.MantidStressTest):
     # function to check two workspaces match
     # Used when the result of a test produces more than a single workspace
     def checkWorkspacesMatch(self, ws1, ws2):
-        checker = ms.AlgorithmManager.create("CheckWorkspacesMatch")
+        checker = ms.AlgorithmManager.create("CompareWorkspaces")
         checker.setLogging(True)
         checker.setPropertyValue("Workspace1", ws1)
         checker.setPropertyValue("Workspace2", ws2)
@@ -69,8 +76,8 @@ class IN13CaFTest(stresstesting.MantidStressTest):
 
         checker.execute()
 
-        if checker.getPropertyValue("Result") != 'Success!':
-            print self.__class__.__name__
+        if not checker.getProperty("Result"):
+            print(self.__class__.__name__)
             ms.SaveNexus(InputWorkspace=ws2,Filename=self.__class__.__name__+'-mismatch.nxs')
             return False
 
@@ -78,7 +85,7 @@ class IN13CaFTest(stresstesting.MantidStressTest):
 
 
 #====================================================================================================
-class IN16SiliconTest(stresstesting.MantidStressTest):
+class IN16SiliconTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
         import IndirectNeutron as Main

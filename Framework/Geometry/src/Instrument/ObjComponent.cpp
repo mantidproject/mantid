@@ -1,18 +1,25 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Instrument/ObjComponent.h"
-#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/ComponentVisitor.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
+#include "MantidGeometry/Objects/CSGObject.h"
+#include "MantidGeometry/Objects/IObject.h"
+#include "MantidGeometry/Objects/Track.h"
+#include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Material.h"
-#include "MantidGeometry/Rendering/GeometryHandler.h"
 #include <cfloat>
 
 namespace Mantid {
 namespace Geometry {
-using Kernel::V3D;
 using Kernel::Quat;
+using Kernel::V3D;
 
 /** Constructor for a parametrized ObjComponent
  * @param base: the base (un-parametrized) IComponent
@@ -22,25 +29,26 @@ ObjComponent::ObjComponent(const IComponent *base, const ParameterMap *map)
     : Component(base, map), m_shape() {}
 
 /** Constructor
-*  @param name ::   The name of the component
-*  @param parent :: The Parent geometry object of this component
-*/
+ *  @param name ::   The name of the component
+ *  @param parent :: The Parent geometry object of this component
+ */
 ObjComponent::ObjComponent(const std::string &name, IComponent *parent)
     : IObjComponent(), Component(name, parent), m_shape() {}
 
 /** Constructor
-*  @param name ::   The name of the component
-*  @param shape ::  A pointer to the object describing the shape of this
-* component
-*  @param parent :: The Parent geometry object of this component
-*/
-ObjComponent::ObjComponent(const std::string &name, Object_const_sptr shape,
+ *  @param name ::   The name of the component
+ *  @param shape ::  A pointer to the object describing the shape of this
+ * component
+ *  @param parent :: The Parent geometry object of this component
+ */
+ObjComponent::ObjComponent(const std::string &name,
+                           boost::shared_ptr<const IObject> shape,
                            IComponent *parent)
     : IObjComponent(), Component(name, parent), m_shape(shape) {}
 
 /** Return the shape of the component
  */
-const Object_const_sptr ObjComponent::shape() const {
+const IObject_const_sptr ObjComponent::shape() const {
   if (m_map) {
     auto base = dynamic_cast<const ObjComponent *>(m_base);
     if (!base) {
@@ -52,7 +60,7 @@ const Object_const_sptr ObjComponent::shape() const {
 }
 
 /// Set a new shape on the component
-void ObjComponent::setShape(Object_const_sptr newShape) {
+void ObjComponent::setShape(boost::shared_ptr<const IObject> newShape) {
   if (m_map)
     throw std::runtime_error("ObjComponent::setShape - Cannot change the shape "
                              "of a parameterized object");
@@ -74,7 +82,7 @@ bool ObjComponent::isValid(const V3D &point) const {
   if (!shape())
     return (this->getPos() == point);
 
-  // Otherwise pass through the shifted point to the Object::isValid method
+  // Otherwise pass through the shifted point to the IObject::isValid method
   V3D scaleFactor = this->getScaleFactor();
   return shape()->isValid(factorOutComponentPosition(point) / scaleFactor) != 0;
 }
@@ -84,20 +92,21 @@ bool ObjComponent::isOnSide(const V3D &point) const {
   // If the form of this component is not defined, just treat as a point
   if (!shape())
     return (this->getPos() == point);
-  // Otherwise pass through the shifted point to the Object::isOnSide method
+  // Otherwise pass through the shifted point to the IObject::isOnSide method
   V3D scaleFactor = this->getScaleFactor();
   return shape()->isOnSide(factorOutComponentPosition(point) / scaleFactor) !=
          0;
 }
 
 /** Checks whether the track given will pass through this Component.
-*  @param track :: The Track object to test (N.B. Will be modified if hits are
-* found)
-*  @returns The number of track segments added (i.e. 1 if the track enters and
-* exits the object once each)
-*  @throw NullPointerException if the underlying geometrical Object has not been
-* set
-*/
+ *  @param track :: The Track Iobject to test (N.B. Will be modified if hits are
+ * found)
+ *  @returns The number of track segments added (i.e. 1 if the track enters and
+ * exits the Iobject once each)
+ *  @throw NullPointerException if the underlying geometrical IObject has not
+ * been
+ * set
+ */
 int ObjComponent::interceptSurface(Track &track) const {
   // If the form of this component is not defined, throw NullPointerException
   if (!shape())
@@ -132,13 +141,18 @@ int ObjComponent::interceptSurface(Track &track) const {
 }
 
 /** Finds the approximate solid angle covered by the component when viewed from
-* the point given
-*  @param observer :: The position from which the component is being viewed
-*  @returns The solid angle in steradians
-*  @throw NullPointerException if the underlying geometrical Object has not been
-* set
-*/
+ * the point given
+ *  @param observer :: The position from which the component is being viewed
+ *  @returns The solid angle in steradians
+ *  @throw NullPointerException if the underlying geometrical Object has not
+ * been set
+ */
 double ObjComponent::solidAngle(const V3D &observer) const {
+  if (m_map) {
+    if (hasComponentInfo()) {
+      return m_map->componentInfo().solidAngle(index(), observer);
+    }
+  }
   // If the form of this component is not defined, throw NullPointerException
   if (!shape())
     throw Kernel::Exception::NullPointerException("ObjComponent::solidAngle",
@@ -157,22 +171,27 @@ double ObjComponent::solidAngle(const V3D &observer) const {
 }
 
 /**
-  * Given an input estimate of the axis aligned (AA) bounding box (BB), return
+ * Given an input estimate of the axis aligned (AA) bounding box (BB), return
  * an improved set of values.
-  * The AA BB is determined in the frame of the object and the initial estimate
+ * The AA BB is determined in the frame of the object and the initial estimate
  * will be transformed there.
-  * The returned BB will be the frame of the ObjComponent and may not be
+ * The returned BB will be the frame of the ObjComponent and may not be
  * optimal.
-  * @param absoluteBB :: [InOut] The bounding box for this object component will
+ * @param absoluteBB :: [InOut] The bounding box for this object component will
  * be stored here.
-  * if BB alignment is different from axis alignment, the system of coordinates
+ * if BB alignment is different from axis alignment, the system of coordinates
  * to alighn is taken fron
-  * the absoluteBB
-  */
+ * the absoluteBB
+ */
 void ObjComponent::getBoundingBox(BoundingBox &absoluteBB) const {
-
+  if (m_map) {
+    if (hasComponentInfo()) {
+      absoluteBB = m_map->componentInfo().boundingBox(index(), &absoluteBB);
+      return;
+    }
+  }
   // Start with the box in the shape's coordinates
-  const Object_const_sptr s = shape();
+  const IObject_const_sptr s = shape();
   if (!s) {
     absoluteBB.nullify();
     return;
@@ -218,37 +237,37 @@ void ObjComponent::getBoundingBox(BoundingBox &absoluteBB) const {
 }
 
 /**
-* Gets the Height of the object by querying the underlying BoundingBox.
-* @return height of object
-*/
+ * Gets the Height of the object by querying the underlying BoundingBox.
+ * @return height of object
+ */
 double ObjComponent::getHeight() const {
   const BoundingBox &bbox = shape()->getBoundingBox();
   return (bbox.yMax() - bbox.yMin()) / getScaleFactor().Y();
 }
 
 /**
-* Gets the Width of the object by querying the underlying BoundingBox.
-* @return width of object
-*/
+ * Gets the Width of the object by querying the underlying BoundingBox.
+ * @return width of object
+ */
 double ObjComponent::getWidth() const {
   const BoundingBox &bbox = shape()->getBoundingBox();
   return (bbox.xMax() - bbox.xMin()) / getScaleFactor().X();
 }
 
 /**
-* Gets the Depth of the object by querying the underlying BoundingBox.
-* @return depth of object
-*/
+ * Gets the Depth of the object by querying the underlying BoundingBox.
+ * @return depth of object
+ */
 double ObjComponent::getDepth() const {
   const BoundingBox &bbox = shape()->getBoundingBox();
   return (bbox.zMax() - bbox.zMin()) / getScaleFactor().Z();
 }
 
 /**
-* Try to find a point that lies within (or on) the object
-* @param point :: On exit, set to the point value (if found)
-* @return 1 if point found, 0 otherwise
-*/
+ * Try to find a point that lies within (or on) the object
+ * @param point :: On exit, set to the point value (if found)
+ * @return 1 if point found, 0 otherwise
+ */
 int ObjComponent::getPointInObject(V3D &point) const {
   // If the form of this component is not defined, throw NullPointerException
   if (!shape())
@@ -294,35 +313,46 @@ const V3D ObjComponent::takeOutRotation(V3D point) const {
 }
 
 /**
-* Draws the objcomponent, If the handler is not set then this function does
-* nothing.
-*/
+ * Draws the objcomponent, If the handler is not set then this function does
+ * nothing.
+ */
 void ObjComponent::draw() const {
   if (Handle() == nullptr)
     return;
   // Render the ObjComponent and then render the object
-  Handle()->Render();
+  Handle()->render();
 }
 
 /**
-* Draws the Object
-*/
+ * Draws the Object
+ */
 void ObjComponent::drawObject() const {
   if (shape() != nullptr)
     shape()->draw();
 }
 
 /**
-* Initializes the ObjComponent for rendering, this function should be called
-* before rendering.
-*/
+ * Initializes the ObjComponent for rendering, this function should be called
+ * before rendering.
+ */
 void ObjComponent::initDraw() const {
   if (Handle() == nullptr)
     return;
   // Render the ObjComponent and then render the object
   if (shape() != nullptr)
     shape()->initDraw();
-  Handle()->Initialize();
+  Handle()->initialize();
+}
+
+/**
+ * Register the contents of this ObjComponent
+ */
+size_t
+ObjComponent::registerContents(class ComponentVisitor &componentVisitor) const {
+  if (this->shape() != nullptr && this->shape()->isFiniteGeometry())
+    return componentVisitor.registerGenericObjComponent(*this);
+  else
+    return componentVisitor.registerInfiniteObjComponent(*this);
 }
 
 } // namespace Geometry

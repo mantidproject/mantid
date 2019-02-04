@@ -1,18 +1,27 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef TESTHISTOGRAM1D_
 #define TESTHISTOGRAM1D_
 
-#include <vector>
 #include <algorithm>
 #include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>
+#include <vector>
 
-#include "MantidHistogramData/LinearGenerator.h"
+#include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/Histogram1D.h"
+#include "MantidHistogramData/LinearGenerator.h"
+#include "MantidKernel/make_unique.h"
 
-using Mantid::DataObjects::Histogram1D;
-using Mantid::MantidVec;
-using Mantid::Kernel::make_cow;
-using namespace Mantid::HistogramData;
+using namespace Mantid;
+using namespace API;
+using namespace Kernel;
+using namespace DataObjects;
+using namespace HistogramData;
 
 class Histogram1DTest : public CxxTest::TestSuite {
 private:
@@ -35,12 +44,77 @@ public:
     std::fill(pa->begin(), pa->end(), rand());
     pb = boost::make_shared<HistogramE>(nel);
     std::fill(pb->begin(), pb->end(), rand());
-    h.setHistogram(Histogram(Points(100, LinearGenerator(0.0, 1.0))));
-    h2.setHistogram(Histogram(Points(100, LinearGenerator(0.0, 1.0))));
+    h.setHistogram(Histogram(Points(100, LinearGenerator(0.0, 1.0)),
+                             Counts(100, 0.0), CountVariances(100, 0.0)));
+    h2.setHistogram(Histogram(Points(100, LinearGenerator(0.0, 1.0)),
+                              Counts(100, 0.0), CountVariances(100, 0.0)));
     h.setCounts(100);
     h.setCountStandardDeviations(100);
     h2.setCounts(100);
     h2.setCountStandardDeviations(100);
+  }
+
+  void test_copyDataFrom() {
+    Histogram1D histogram{Histogram::XMode::Points, Histogram::YMode::Counts};
+    histogram.setHistogram(Points(1), Counts(1));
+    EventList eventList;
+    eventList.setHistogram(BinEdges(2));
+    std::unique_ptr<const ISpectrum> specHist =
+        Kernel::make_unique<Histogram1D>(histogram);
+    std::unique_ptr<const ISpectrum> specEvent =
+        Kernel::make_unique<EventList>(eventList);
+    std::unique_ptr<ISpectrum> target = make_unique<Histogram1D>(
+        Histogram::XMode::Points, Histogram::YMode::Counts);
+
+    TS_ASSERT_THROWS_NOTHING(target->copyDataFrom(*specHist));
+    TS_ASSERT(target->points());
+    TS_ASSERT_EQUALS(&target->points()[0], &histogram.points()[0]);
+
+    TS_ASSERT_THROWS_NOTHING(target->copyDataFrom(*specEvent));
+    TS_ASSERT(target->binEdges());
+    TS_ASSERT_EQUALS(&target->binEdges()[0], &eventList.binEdges()[0]);
+  }
+
+  void test_copyDataFrom_does_not_copy_indices() {
+    Histogram1D histogram{Histogram::XMode::Points, Histogram::YMode::Counts};
+    histogram.setHistogram(Points(1), Counts(1));
+    EventList eventList;
+    eventList.setHistogram(BinEdges(2));
+    std::unique_ptr<const ISpectrum> specHist =
+        Kernel::make_unique<Histogram1D>(histogram);
+    std::unique_ptr<const ISpectrum> specEvent =
+        Kernel::make_unique<EventList>(eventList);
+    std::unique_ptr<ISpectrum> target = make_unique<Histogram1D>(
+        Histogram::XMode::Points, Histogram::YMode::Counts);
+    target->setSpectrumNo(37);
+    target->setDetectorID(42);
+
+    TS_ASSERT_THROWS_NOTHING(target->copyDataFrom(*specHist));
+    TS_ASSERT(target->points());
+    TS_ASSERT_EQUALS(&target->points()[0], &histogram.points()[0]);
+    TS_ASSERT_EQUALS(target->getSpectrumNo(), 37);
+    TS_ASSERT_EQUALS(target->getDetectorIDs(), std::set<detid_t>{42});
+
+    TS_ASSERT_THROWS_NOTHING(target->copyDataFrom(*specEvent));
+    TS_ASSERT(target->binEdges());
+    TS_ASSERT_EQUALS(&target->binEdges()[0], &eventList.binEdges()[0]);
+    TS_ASSERT_EQUALS(target->getSpectrumNo(), 37);
+    TS_ASSERT_EQUALS(target->getDetectorIDs(), std::set<detid_t>{42});
+  }
+
+  void testcheckAndSanitizeHistogramThrowsNullY() {
+    Histogram1D h{Histogram::XMode::Points, Histogram::YMode::Counts};
+    BinEdges edges{-0.04, 1.7};
+    TS_ASSERT_THROWS(h.setHistogram(edges), std::invalid_argument);
+  }
+
+  void testcheckAndSanitizeHistogramThrowsNullE() {
+    Histogram1D h{Histogram::XMode::Points, Histogram::YMode::Counts};
+    BinEdges edges{-0.04, 1.7};
+    Histogram histogram{edges};
+    Counts counts{23};
+    histogram.setCounts(counts);
+    TS_ASSERT_THROWS(h.setHistogram(histogram), std::invalid_argument);
   }
 
   void testsetgetXvector() {

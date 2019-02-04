@@ -1,17 +1,23 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CURVEFITTING_BIVARIATENORMAL_H_
 #define MANTID_CURVEFITTING_BIVARIATENORMAL_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
-#include "MantidCurveFitting/Functions/UserFunction.h"
-#include "MantidAPI/IFunctionMW.h"
 #include "MantidAPI/IFunction1D.h"
+#include "MantidAPI/IFunctionMW.h"
 #include "MantidAPI/ParamFunction.h"
-#include "MantidKernel/cow_ptr.h"
 #include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
+#include "MantidCurveFitting/Functions/UserFunction.h"
+#include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
+namespace HistogramData {
+class HistogramY;
+}
 namespace CurveFitting {
 namespace Functions {
 
@@ -62,26 +68,6 @@ namespace Functions {
   * @author Ruth Mikkelson, SNS ORNL
   * @date 11/4/2011
   *
-   Copyright &copy; 2011-12 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
-
-   This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 3 of the License, or
-   (at your option) any later version.
-
-   Mantid is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-
-   You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses>.
-
-   File change history is stored at: <https://github.com/mantidproject/mantid>
-   Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
 class DLLExport BivariateNormal : public API::ParamFunction,
                                   public API::IFunction1D,
@@ -140,7 +126,7 @@ public:
   }
 
   bool hasAttribute(const std::string &attName) const override {
-    return attName.compare("CalcVariances") == 0;
+    return attName == "CalcVariances";
   }
 
   bool CalcVxx, CalcVyy, CalcVxy;
@@ -152,14 +138,16 @@ protected:
 
   bool CalcVariances; ///< from experimental data versus fit the (Co)Variances
 
-  double initCommon(); ///<Check for changes in parameters, etc. Calculates
+  double initCommon(); ///< Check for changes in parameters, etc. Calculates
   /// common values
 
   // Returns penalty.
-  double initCoeff(const MantidVec &D, const MantidVec &X, const MantidVec &Y,
-                   double &coefNorm, double &expCoeffx2, double &expCoeffy2,
-                   double &expCoeffxy, int &NCells, double &Varxx,
-                   double &Varxy, double &Varyy) const;
+  double initCoeff(const HistogramData::HistogramY &D,
+                   const HistogramData::HistogramY &X,
+                   const HistogramData::HistogramY &Y, double &coefNorm,
+                   double &expCoeffx2, double &expCoeffy2, double &expCoeffxy,
+                   int &NCells, double &Varxx, double &Varxy,
+                   double &Varyy) const;
 
   double mIx, mx, mIy, my;                //< For calculating variances
   double SIxx, SIyy, SIxy, Sxx, Syy, Sxy; //< For calculating variances
@@ -177,7 +165,7 @@ protected:
                   //<derivatives
 };
 } // namespace Functions
-}
-}
+} // namespace CurveFitting
+} // namespace Mantid
 
 #endif

@@ -1,12 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAHANDLING_GROUPDETECTORS2_H_
 #define MANTID_DATAHANDLING_GROUPDETECTORS2_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
+#include "MantidKernel/StringTokenizer.h"
 
 #include <map>
 
@@ -85,27 +89,6 @@ namespace DataHandling {
 
     @author Steve Williams and Russell Taylor (Tessella Support Services plc)
     @date 27/07/2009
-
-    Copyright &copy; 2008-11 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>.
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport GroupDetectors2 : public API::Algorithm {
 public:
@@ -122,6 +105,9 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 2; };
+  const std::vector<std::string> seeAlso() const override {
+    return {"SpatialGrouping"};
+  }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Transforms\\Grouping"; }
 
@@ -151,7 +137,7 @@ private:
 
   /// used to store the lists of WORKSPACE INDICES that will be grouped, the
   /// keys are not used
-  typedef std::map<specnum_t, std::vector<size_t>> storage_map;
+  using storage_map = std::map<specnum_t, std::vector<size_t>>;
 
   /// An estimate of the percentage of the algorithm runtimes that has been
   /// completed
@@ -168,15 +154,13 @@ private:
   /// read in the input parameters and see what findout what will be to grouped
   void getGroups(API::MatrixWorkspace_const_sptr workspace,
                  std::vector<int64_t> &unUsedSpec);
-  /// read in a list of instructions and output commands in .map file format
-  void translateInstructions(const std::string &instructions,
-                             std::stringstream &commands);
   /// gets the list of spectra _index_ _numbers_ from a file of _spectra_
   /// _numbers_
-  void processFile(std::string fname, API::MatrixWorkspace_const_sptr workspace,
+  void processFile(const std::string &fname,
+                   API::MatrixWorkspace_const_sptr workspace,
                    std::vector<int64_t> &unUsedSpec);
   /// gets groupings from XML file
-  void processXMLFile(std::string fname,
+  void processXMLFile(const std::string &fname,
                       API::MatrixWorkspace_const_sptr workspace,
                       std::vector<int64_t> &unUsedSpec);
   void
@@ -188,18 +172,19 @@ private:
                               std::vector<int64_t> &unUsedSpec);
   /// used while reading the file turns the string into an integer number (if
   /// possible), white space and # comments ignored
-  int readInt(std::string line);
+  int readInt(const std::string &line);
 
-  void readFile(spec2index_map &specs2index, std::istream &File,
+  void readFile(const spec2index_map &specs2index, std::istream &File,
                 size_t &lineNum, std::vector<int64_t> &unUsedSpec,
-                bool ignoreGroupNumber);
+                const bool ignoreGroupNumber);
 
   /// used while reading the file reads reads spectra numbers from the string
   /// and returns spectra indexes
-  void readSpectraIndexes(std::string line, spec2index_map &specs2index,
+  void readSpectraIndexes(const std::string &line,
+                          const spec2index_map &specs2index,
                           std::vector<size_t> &output,
                           std::vector<int64_t> &unUsedSpec,
-                          std::string seperator = "#");
+                          const std::string &seperator = "#");
 
   /// Estimate how much what has been read from the input file constitutes
   /// progress for the algorithm
@@ -210,16 +195,14 @@ private:
   /// Copy the and combine the histograms that the user requested from the input
   /// into the output workspace
   size_t formGroups(API::MatrixWorkspace_const_sptr inputWS,
-                    API::MatrixWorkspace_sptr outputWS, const double prog4Copy);
+                    API::MatrixWorkspace_sptr outputWS, const double prog4Copy,
+                    const bool keepAll, const std::set<int64_t> &unGroupedSet,
+                    Indexing::IndexInfo &indexInfo);
   /// Copy the and combine the event lists that the user requested from the
   /// input into the output workspace
   size_t formGroupsEvent(DataObjects::EventWorkspace_const_sptr inputWS,
                          DataObjects::EventWorkspace_sptr outputWS,
                          const double prog4Copy);
-
-  /// Returns true if detectors exists and is masked
-  bool isMaskedDetector(const API::SpectrumInfo &detector,
-                        const size_t index) const;
 
   /// Copy the ungrouped spectra from the input workspace to the output
   template <class TIn, class TOut>
@@ -232,7 +215,7 @@ private:
     /// spectrum will be included in a group, any other
     /// value and it isn't. Spectra numbers should always
     /// be positive so we shouldn't accidientally set a
-    /// spectrum number to the this
+    /// spectrum number to this
     EMPTY_LINE = 1001 - INT_MAX, ///< when reading from the input file this
     /// value means that we found any empty line
     IGNORE_SPACES = Mantid::Kernel::StringTokenizer::TOK_TRIM ///< equal to
@@ -255,15 +238,15 @@ private:
 };
 
 /**
-*  Only to be used if the KeepUnGrouped property is true, moves the spectra that
-* were not selected
-*  to be in a group to the end of the output spectrum
-*  @param unGroupedSet :: list of WORKSPACE indexes that were included in a
-* group
-*  @param inputWS :: user selected input workspace for the algorithm
-*  @param outputWS :: user selected output workspace for the algorithm
-*  @param outIndex :: the next spectra index available after the grouped spectra
-*/
+ *  Only to be used if the KeepUnGrouped property is true, moves the spectra
+ * that were not selected to be in a group to the end of the output spectrum
+ *  @param unGroupedSet :: list of WORKSPACE indexes that were included in a
+ * group
+ *  @param inputWS :: user selected input workspace for the algorithm
+ *  @param outputWS :: user selected output workspace for the algorithm
+ *  @param outIndex :: the next spectra index available after the grouped
+ * spectra
+ */
 template <class TIn, class TOut>
 void GroupDetectors2::moveOthers(const std::set<int64_t> &unGroupedSet,
                                  const TIn &inputWS, TOut &outputWS,

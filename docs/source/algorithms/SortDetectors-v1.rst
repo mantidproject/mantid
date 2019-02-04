@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -22,11 +22,11 @@ Usage
    upIDs,upDistances,downIDs,downDistances=SortDetectors(ws)
    
    # No upstream detectors
-   print "Type of upID:",type(upIDs)
-   print "Number of upDistances:",upDistances.shape[0]
+   print("Type of upID: {}".format(type(upIDs)))
+   print("Number of upDistances: {}".format(upDistances.shape[0]))
    #Downstream detectors
-   print "First few values of downIDs: ", downIDs[0:5]
-   print "First few values of downDistances: ", downDistances[0], downDistances[1], downDistances[2], downDistances[3],downDistances[4]
+   print("First few values of downIDs: {}".format(downIDs[0:5]))
+   print("First few values of downDistances: {} {} {} {} {}".format(downDistances[0], downDistances[1], downDistances[2], downDistances[3],downDistances[4]))
 
 .. testcleanup:: SortDetectors
 
@@ -35,11 +35,12 @@ Usage
 Output:
 
 .. testoutput:: SortDetectors
+   :options: +ELLIPSIS
 
-   Type of upID: <type 'numpy.ndarray'>
+   Type of upID: <... 'numpy.ndarray'>
    Number of upDistances: 0
-   First few values of downIDs:  [ 0  1 10 11  2]
-   First few values of downDistances:  5.0 5.0000064 5.0000064 5.00001279998 5.00002559993
+   First few values of downIDs: [ 0  1 10 11  2]
+   First few values of downDistances: 5.0 5.000006... 5.000006... 5.00001279... 5.00002559...
    
 .. categories::
 

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef LISTVALIDATORTEST_H_
 #define LISTVALIDATORTEST_H_
 
@@ -17,6 +23,12 @@ public:
   void testVectorConstructor() {
     std::vector<std::string> vec{"one", "two", "three"};
     StringListValidator v(vec);
+    TS_ASSERT_EQUALS(v.allowedValues().size(), 3)
+  }
+
+  void testArrayConstructor() {
+    std::array<int, 3> arr = {{1, 2, 3}};
+    ListValidator<int> v(arr);
     TS_ASSERT_EQUALS(v.allowedValues().size(), 3)
   }
 

@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -12,7 +12,7 @@ Description
 Uses the binary operation algorithms :ref:`algm-Multiply` or
 :ref:`algm-Plus` to scale the input workspace by the amount requested.
 This algorithm is provided as a simple, but less powerful, alternative
-to the python `workspace algebra <http://www.mantidproject.org/MatrixWorkspace_Attributes#Workspace_algebra>`__ functionality.
+to the python :ref:`workspace algebra <MatrixWorkspace Algebra>` functionality.
 
 
 Usage
@@ -23,18 +23,18 @@ Usage
 .. testcode:: ExOffsetScale
 
     ws = CreateSampleWorkspace(BankPixelWidth=1)
-    print "Every 10th bin value of " + ws.getName()
-    print ws.readY(0)[0:100:10]
+    print("Every 10th bin value of " + ws.name())
+    print(ws.readY(0)[0:100:10])
 
     # Add 2 using scale
     wsOffset = Scale(ws,2,"Add")
-    print "Every 10th bin value of " + wsOffset.getName()
-    print wsOffset.readY(0)[0:100:10]
+    print("Every 10th bin value of " + wsOffset.name())
+    print(wsOffset.readY(0)[0:100:10])
 
     # Add 2 using the workspace operator overloads
     wsOffset2 = ws + 2
-    print "Every 10th bin value of " + wsOffset2.getName()
-    print wsOffset2.readY(0)[0:100:10]
+    print("Every 10th bin value of " + wsOffset2.name())
+    print(wsOffset2.readY(0)[0:100:10])
 
 Output:
 
@@ -52,18 +52,18 @@ Output:
 .. testcode:: ExOffsetScale
 
     ws = CreateSampleWorkspace(BankPixelWidth=1)
-    print "Every 10th bin value of " + ws.getName()
-    print ws.readY(0)[0:100:10]
+    print("Every 10th bin value of " + ws.name())
+    print(ws.readY(0)[0:100:10])
 
     # Multiply by 10 using scale
     wsScaled = Scale(ws,10,"Multiply")
-    print "Every 10th bin value of " + wsScaled.getName()
-    print wsScaled.readY(0)[0:100:10]
+    print("Every 10th bin value of " + wsScaled.name())
+    print(wsScaled.readY(0)[0:100:10])
 
     # Multiply by 10 using the workspace operator overloads
     wsScaled2 = ws * 10
-    print "Every 10th bin value of " + wsScaled2.getName()
-    print wsScaled2.readY(0)[0:100:10]
+    print("Every 10th bin value of " + wsScaled2.name())
+    print(wsScaled2.readY(0)[0:100:10])
 
 Output:
 

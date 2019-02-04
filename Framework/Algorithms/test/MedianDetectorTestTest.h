@@ -1,36 +1,34 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef WBVMEDIANTESTTEST_H_
 #define WBVMEDIANTESTTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
-#include "MantidHistogramData/LinearGenerator.h"
-#include "MantidAlgorithms/MedianDetectorTest.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataObjects/Workspace2D.h"
+#include "MantidAlgorithms/MedianDetectorTest.h"
 #include "MantidDataHandling/LoadInstrument.h"
-//#include "MantidDataHandling/LoadEmptyInstrument.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidHistogramData/LinearGenerator.h"
+#include "MantidKernel/OptionalBool.h"
+#include "MantidKernel/UnitFactory.h"
 #include <boost/shared_ptr.hpp>
-#include <boost/lexical_cast.hpp>
-#include <Poco/File.h>
-#include <Poco/Path.h>
-#include <cmath>
-#include <sstream>
-#include <fstream>
-#include <ios>
-#include <string>
 
 using namespace Mantid::Kernel;
-using namespace Mantid::Geometry;
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 using Mantid::HistogramData::BinEdges;
-using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::CountStandardDeviations;
+using Mantid::HistogramData::Counts;
 
 const int THEMASKED(40);
 const int SAVEDBYERRORBAR(143);
@@ -71,7 +69,6 @@ public:
     input =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_IWSName);
     TS_ASSERT(input);
-    // TS_ASSERT(input->getInstrument()->isDetectorMasked(input->getSpectrum(THEMASKED).getDetectorIDs()));
 
     MatrixWorkspace_sptr outputMat =
         boost::dynamic_pointer_cast<MatrixWorkspace>(output);
@@ -109,9 +106,10 @@ public:
         WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(
             5, 10, 1);
 
+    const auto &spectrumInfo = ws->spectrumInfo();
+
     for (size_t i = 0; i < ws->getNumberHistograms(); i++) {
-      ws->dataY(i)[0] =
-          std::floor(1e9 * ws->getDetector(i)->solidAngle(V3D(0, 0, 0)));
+      ws->dataY(i)[0] = 1e9 * spectrumInfo.detector(i).solidAngle(V3D(0, 0, 0));
     }
     AnalysisDataService::Instance().addOrReplace("MDTSolidAngle", ws);
 
@@ -143,9 +141,11 @@ public:
         WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(
             5, 10, 1);
 
+    const auto &spectrumInfo = ws->spectrumInfo();
+
     for (size_t i = 0; i < ws->getNumberHistograms(); i++) {
       ws->dataY(i)[0] =
-          std::floor(1e9 * ws->getDetector(i)->solidAngle(V3D(0, 0, 0)));
+          std::floor(1e9 * spectrumInfo.detector(i).solidAngle(V3D(0, 0, 0)));
     }
     AnalysisDataService::Instance().addOrReplace("MDTLevelsUp", ws);
 
@@ -186,8 +186,8 @@ public:
                                      1,   0, 15, 4,     0, 0.001, 2e-10,
                                      0,   8, 0,  1e-4,  1, 7,     11};
     m_YSum = 0;
-    for (int i = 0; i < specLength - 1; i++) {
-      m_YSum += yArray[i];
+    for (double i : yArray) {
+      m_YSum += i;
     }
 
     // most error values will be small so that they wont affect the tests
@@ -213,8 +213,6 @@ public:
 
       m_2DWS->setCounts(j, spectrum);
       m_2DWS->setCountStandardDeviations(j, errors);
-      // Just set the spectrum number to match the index
-      m_2DWS->getSpectrum(j).setSpectrumNo(j + 1);
     }
 
     // Register the workspace in the data service
@@ -233,7 +231,8 @@ public:
     m_2DWS->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
 
     // mask the detector
-    m_2DWS->maskWorkspaceIndex(THEMASKED);
+    m_2DWS->getSpectrum(THEMASKED).clearData();
+    m_2DWS->mutableSpectrumInfo().setMasked(THEMASKED, true);
   }
 
 private:

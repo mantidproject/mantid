@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -23,12 +23,18 @@ derivatives of each of the interpolated points as a side product.
 Setting the DerivOrder property to zero will force the algorithm to
 calculate no derivatives.
 
+For the points outside the x-axis range covered by the WorkspaceToInterpolate, flat extrapolation will be performed.
+
+The algorithm can also perform linear interpolation by enabling `Linear2Points` if the WorkspaceToInterpolate has only 2 bins.
+Only 1st order derivative can be computed in this case. X-axis of the workspace to match must be sorted in ascending order.
+
 For Histogram Workspaces
 ########################
 
 If the input workspace contains histograms, rather than data points,
 then SplineInterpolation will automatically convert the input to point
-data. The output returned with be in the same format as the input.
+data for interpolation. The original inputs however will not be modified.
+The output returned will be in the same format as the input.
 
 Histogram workspaces being interpolated will show a warning when the
 range of the data is equal to the size of the workspace to match, but
@@ -77,6 +83,30 @@ Usage
 
     #interpolate using the reference workspace and output a group workspace of derivatives for each spectrum
     interpolated_ws = SplineInterpolation(WorkspaceToMatch=spline_ws, WorkspaceToInterpolate=ws, DerivOrder=2, OutputWorkspaceDeriv='derivs')
+
+**Example - linear interpolation:**
+
+.. testcode:: ExSplineInterpolationLinear
+
+    iws = CreateSampleWorkspace(NumBanks = 1, XMin = 7, XMax = 29, BinWidth = 11)
+    mws = CreateSampleWorkspace(NumBanks = 1, XMin = 6, XMax = 30, BinWidth = 3)
+    ows = SplineInterpolation(WorkspaceToMatch = mws, WorkspaceToInterpolate = iws, Linear2Points = True, DerivOrder = 0)
+
+    import numpy
+
+    for y in numpy.nditer(ows.readY(0)):
+        print("%0.2f"% y)
+
+.. testoutput:: ExSplineInterpolationLinear
+
+    10.30
+    10.30
+    9.39
+    6.66
+    3.94
+    1.21
+    0.30
+    0.30
 
 .. categories::
 

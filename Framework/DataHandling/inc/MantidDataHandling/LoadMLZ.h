@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAHANDLING_LOADMLZ_H_
 #define MANTID_DATAHANDLING_LOADMLZ_H_
 
@@ -5,34 +11,13 @@
 // Includes
 //---------------------------------------------------
 #include "MantidAPI/IFileLoader.h"
-#include "MantidNexus/NexusClasses.h"
 #include "MantidDataHandling/LoadHelper.h"
+#include "MantidNexus/NexusClasses.h"
 
 namespace Mantid {
 namespace DataHandling {
 /**
     LoadMLZ : Loads MLZ nexus or hdf file into a Mantid workspace.
-
-    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge
-   National Laboratory
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 class DLLExport LoadMLZ : public API::IFileLoader<Kernel::NexusDescriptor> {
 public:
@@ -54,20 +39,15 @@ private:
   void init() override;
   void exec() override;
 
-  // int getEPPFromVanadium(const std::string
-  // &,Mantid::API::MatrixWorkspace_sptr);
   void loadInstrumentDetails(NeXus::NXEntry &);
   void loadTimeDetails(NeXus::NXEntry &entry);
 
   std::vector<std::vector<int>> getMonitorInfo(NeXus::NXEntry &firstEntry);
 
-  // void initWorkSpace(NeXus::NXEntry& entry, const
-  // std::vector<std::vector<int> >&);
   void initWorkSpace(NeXus::NXEntry &entry);
   void initInstrumentSpecific();
   void loadRunDetails(NeXus::NXEntry &entry);
   void loadExperimentDetails(NeXus::NXEntry &entry);
-  // int getDetectorElasticPeakPosition(const NeXus::NXInt &data);
 
   NeXus::NXData loadNexusFileData(NeXus::NXEntry &entry);
   void maskDetectors(NeXus::NXEntry &entry);
@@ -76,14 +56,7 @@ private:
 
   void runLoadInstrument();
 
-  /// Calculate error for y
-  static double calculateError(double in) { return sqrt(in); }
-  // int validateVanadium(const std::string &);
-
   API::MatrixWorkspace_sptr m_localWorkspace;
-
-  //	NeXus::NXRoot m_dataRoot;
-  //	NeXus::NXRoot m_vanaRoot;
 
   std::string m_instrumentName; ///< Name of the instrument
   std::string m_instrumentPath; ///< Name of the instrument path

@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -37,8 +37,8 @@ Usage
                                     BackgroundRange=[-0.16, -0.14],
                                     RebinParam='-0.175,0.002,0.175')
 
-    print 'Number of histograms: %d' % resolution.getNumberHistograms()
-    print 'Number of bins: %d' % resolution.blocksize()
+    print('Number of histograms: {:d}'.format(resolution.getNumberHistograms()))
+    print('Number of bins: {:d}'.format(resolution.blocksize()))
 
 Output:
 

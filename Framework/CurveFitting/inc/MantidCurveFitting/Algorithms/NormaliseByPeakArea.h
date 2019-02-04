@@ -1,36 +1,26 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CURVEFITTING_NORMALISEBYPEAKAREA_H_
 #define MANTID_CURVEFITTING_NORMALISEBYPEAKAREA_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
+
+namespace HistogramData {
+class HistogramY;
+class HistogramE;
+} // namespace HistogramData
+
 namespace CurveFitting {
 namespace Algorithms {
 
-/**
-
-Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>
-Code Documentation is available at: <http://doxygen.mantidproject.org>
- */
 class DLLExport NormaliseByPeakArea : public API::Algorithm {
 public:
   NormaliseByPeakArea();
@@ -40,6 +30,10 @@ public:
   const std::string summary() const override {
     return "Normalises the input data by the area of of peak defined by the "
            "input mass value.";
+  }
+
+  const std::vector<std::string> seeAlso() const override {
+    return {"MonitorEfficiencyCorUser", "Divide"};
   }
 
   int version() const override;
@@ -65,8 +59,9 @@ private:
   void normaliseTOFData(const double area, const size_t index);
   /// Stores/accumulates the results
   void saveToOutput(const API::MatrixWorkspace_sptr &accumWS,
-                    const std::vector<double> &yValues,
-                    const std::vector<double> &eValues, const size_t index);
+                    const Kernel::cow_ptr<HistogramData::HistogramY> &yValues,
+                    const Kernel::cow_ptr<HistogramData::HistogramE> &eValues,
+                    const size_t index);
   /// Symmetrises the data in yspace about the origin
   void symmetriseYSpace();
 

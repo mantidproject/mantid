@@ -3,16 +3,16 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
 Description
 -----------
 
-Add a peak in the HKL frame to an existing :ref:`PeaksWorkspace <PeaksWorkspace>`. The OrientedLattice must be provided and the Goniometer should be set correctly before running the algorithm. 
+Add a peak in the HKL frame to an existing :ref:`PeaksWorkspace <PeaksWorkspace>`. The OrientedLattice must be provided and the Goniometer should be set correctly before running the algorithm.
 
-The peak is added to the existing PeaksWorkspace. Run information and goniometer setting and the UB matrix are taken from the provided PeaksWorkspace.
+The peak is added to the existing PeaksWorkspace. Run information and goniometer setting and the :ref:`UB matrix <Lattice>` are taken from the provided PeaksWorkspace.
 
 
 Usage
@@ -23,10 +23,10 @@ Usage
 .. testcode:: AddPeakHKLExample
 
    import os
-   import numpy 
+   import numpy
    import mantid.kernel
 
-   # Create an instrument workspace 
+   # Create an instrument workspace
    inst_dir = config.getInstrumentDirectory()
    sxd_ws = LoadEmptyInstrument(os.path.join(inst_dir, "SXD_Definition.xml"))
    AddSampleLog(sxd_ws, 'run_number', '1', 'Number')
@@ -44,10 +44,10 @@ Usage
 
    # Get info on newly added peak
    peak = peak_ws.getPeak(0)
-   print 'Peak wavelength', round(peak.getWavelength(), 4)
-   print 'Peak detector id', peak.getDetectorID()
-   print 'Peak run number', peak.getRunNumber()
-   print 'Peak HKL', peak.getHKL()
+   print('Peak wavelength {}'.format(round(peak.getWavelength(), 4)))
+   print('Peak detector id {}'.format(peak.getDetectorID()))
+   print('Peak run number {}'.format(peak.getRunNumber()))
+   print('Peak HKL {}'.format(peak.getHKL()))
 
 Output:
 
@@ -61,4 +61,3 @@ Output:
 .. categories::
 
 .. sourcelink::
-

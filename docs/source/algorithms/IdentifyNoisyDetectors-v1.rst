@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -40,9 +40,9 @@ Usage
 
     ws = CreateSampleWorkspace()
     wsOut = IdentifyNoisyDetectors(ws)
-    print "The output workspace is filled with %i for good detectors and 0 for noisy ones." % wsOut.readY(0)[0]
+    print('The output workspace is filled with {:.0f} for good detectors and 0 for noisy ones.'.format( wsOut.readY(0)[0]))
     sum = SumSpectra(wsOut)
-    print "%i good spectra left" % sum.readY(0)[0]
+    print("{:.0f} good spectra left".format(sum.readY(0)[0]))
 
 Output:
 
@@ -62,7 +62,7 @@ Output:
 
     wsOut = IdentifyNoisyDetectors(ws)
     sum = SumSpectra(wsOut)
-    print "%i good spectra left from an original %i." % (sum.readY(0)[0], wsOut.getNumberHistograms())
+    print('{:.0f} good spectra left from an original {:.0f}.'.format(sum.readY(0)[0], wsOut.getNumberHistograms()))
 
 Output:
 

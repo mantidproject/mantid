@@ -1,15 +1,26 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadNXSPE.h"
-#include "MantidKernel/UnitFactory.h"
+#include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectraAxis.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/DeltaEMode.h"
+#include "MantidKernel/UnitFactory.h"
 
+#include "MantidNexus/NexusClasses.h"
+// clang-format off
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
-#include "MantidNexus/NexusClasses.h"
+// clang-format on
 
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
@@ -18,6 +29,8 @@
 #include "MantidGeometry/Surfaces/Sphere.h"
 
 #include <boost/regex.hpp>
+
+#include <Poco/File.h>
 
 #include <map>
 #include <sstream>
@@ -31,6 +44,7 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadNXSPE)
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using Mantid::HistogramData::BinEdges;
 
 /**
  * Calculate the confidence in the string value. This is used for file
@@ -40,7 +54,7 @@ using namespace Mantid::API;
  */
 int LoadNXSPE::identiferConfidence(const std::string &value) {
   int confidence = 0;
-  if (value.compare("NXSPE") == 0) {
+  if (value == "NXSPE") {
     confidence = 99;
   } else {
     boost::regex re("^NXSP", boost::regex::icase);
@@ -59,7 +73,7 @@ int LoadNXSPE::identiferConfidence(const std::string &value) {
  */
 int LoadNXSPE::confidence(Kernel::NexusDescriptor &descriptor) const {
   int confidence(0);
-  typedef std::map<std::string, std::string> string_map_t;
+  using string_map_t = std::map<std::string, std::string>;
   try {
     ::NeXus::File file = ::NeXus::File(descriptor.filename());
     string_map_t entries = file.getEntries();
@@ -215,6 +229,17 @@ void LoadNXSPE::exec() {
   }
 
   file.closeGroup(); // data group
+
+  file.openGroup("instrument", "NXinstrument");
+  entries = file.getEntries();
+  std::string instrument_name;
+  if (entries.count("name")) {
+    file.openData("name");
+    instrument_name = file.getStrData();
+    file.closeData();
+  }
+  file.closeGroup(); // instrument group
+
   file.closeGroup(); // Main entry
   file.close();
 
@@ -247,18 +272,18 @@ void LoadNXSPE::exec() {
   outputWS->mutableRun().setGoniometer(gm, true);
 
   // generate instrument
-  Geometry::Instrument_sptr instrument(new Geometry::Instrument("NXSPE"));
-  outputWS->setInstrument(instrument);
+  Geometry::Instrument_sptr instrument(new Geometry::Instrument(
+      instrument_name.empty() ? "NXSPE" : instrument_name));
 
   Geometry::ObjComponent *source = new Geometry::ObjComponent("source");
-  source->setPos(0.0, 0.0, -10.0);
+  source->setPos(0.0, 0.0, -10.);
   instrument->add(source);
   instrument->markAsSource(source);
   Geometry::ObjComponent *sample = new Geometry::ObjComponent("sample");
   instrument->add(sample);
   instrument->markAsSamplePos(sample);
 
-  Geometry::Object_const_sptr cuboid(
+  boost::shared_ptr<const Geometry::CSGObject> cuboid(
       createCuboid(0.1, 0.1, 0.1)); // FIXME: memory hog on rendering. Also,
                                     // make each detector separate size
   for (std::size_t i = 0; i < numSpectra; ++i) {
@@ -277,33 +302,57 @@ void LoadNXSPE::exec() {
     instrument->add(det);
     instrument->markAsDetector(det);
   }
+  outputWS->setInstrument(instrument);
 
-  Geometry::ParameterMap &pmap = outputWS->instrumentParameters();
   std::vector<double>::iterator itdata = data.begin(), iterror = error.begin(),
                                 itdataend, iterrorend;
+  auto &spectrumInfo = outputWS->mutableSpectrumInfo();
   API::Progress prog = API::Progress(this, 0.0, 0.9, numSpectra);
+  BinEdges edges(std::move(energies));
   for (std::size_t i = 0; i < numSpectra; ++i) {
     itdataend = itdata + numBins;
     iterrorend = iterror + numBins;
-    outputWS->dataX(i) = energies;
+    outputWS->getSpectrum(i).setDetectorID(static_cast<detid_t>(i + 1));
+    outputWS->setBinEdges(i, edges);
     if ((!std::isfinite(*itdata)) || (*itdata <= -1e10)) // masked bin
     {
-      outputWS->dataY(i) = std::vector<double>(numBins, 0);
-      outputWS->dataE(i) = std::vector<double>(numBins, 0);
-      pmap.addBool(outputWS->getDetector(i)->getComponentID(), "masked", true);
+      spectrumInfo.setMasked(i, true);
     } else {
-      outputWS->dataY(i) = std::vector<double>(itdata, itdataend);
-      outputWS->dataE(i) = std::vector<double>(iterror, iterrorend);
+      outputWS->mutableY(i).assign(itdata, itdataend);
+      outputWS->mutableE(i).assign(iterror, iterrorend);
     }
     itdata = (itdataend);
     iterror = (iterrorend);
     prog.report();
   }
 
+  // If an instrument name is defined, load instrument parameter file for Emode
+  // NB. LoadParameterFile must be used on a workspace with an instrument
+  if (!instrument_name.empty() && instrument_name != "NXSPE") {
+    std::string IDF_filename =
+        ExperimentInfo::getInstrumentFilename(instrument_name);
+    std::string instrument_parfile =
+        IDF_filename.substr(0, IDF_filename.find("_Definition")) +
+        "_Parameters.xml";
+    if (Poco::File(instrument_parfile).exists()) {
+      try {
+        IAlgorithm_sptr loadParamAlg =
+            createChildAlgorithm("LoadParameterFile");
+        loadParamAlg->setProperty("Filename", instrument_parfile);
+        loadParamAlg->setProperty("Workspace", outputWS);
+        loadParamAlg->execute();
+      } catch (...) {
+        g_log.information("Cannot load the instrument parameter file.");
+      }
+    }
+  }
+  // For NXSPE files generated by Mantid data is actually a distribution.
+  outputWS->setDistribution(true);
   setProperty("OutputWorkspace", outputWS);
 }
 
-Geometry::Object_sptr LoadNXSPE::createCuboid(double dx, double dy, double dz) {
+boost::shared_ptr<Geometry::CSGObject>
+LoadNXSPE::createCuboid(double dx, double dy, double dz) {
 
   dx = 0.5 * std::fabs(dx);
   dy = 0.5 * std::fabs(dy);
@@ -364,12 +413,13 @@ Geometry::Object_sptr LoadNXSPE::createCuboid(double dx, double dy, double dz) {
 
   // A sphere
   std::string ObjSphere = "-41";
-  Geometry::Object_sptr retVal = boost::make_shared<Geometry::Object>();
+  boost::shared_ptr<Geometry::CSGObject> retVal =
+      boost::make_shared<Geometry::CSGObject>();
   retVal->setObject(41, ObjSphere);
   retVal->populate(SphSurMap);
 
   return retVal;
 }
 
-} // namespace Mantid
 } // namespace DataHandling
+} // namespace Mantid

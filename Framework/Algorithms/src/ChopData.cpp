@@ -1,8 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/ChopData.h"
 #include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectraAxisValidator.h"
-#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/MultiThreaded.h"
 
@@ -11,6 +20,8 @@ namespace Algorithms {
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;
+using namespace DataObjects;
+using namespace HistogramData;
 
 DECLARE_ALGORITHM(ChopData)
 
@@ -35,7 +46,7 @@ void ChopData::init() {
 
 void ChopData::exec() {
   // Get the input workspace
-  MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
+  MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   const std::string output = getPropertyValue("OutputWorkspace");
   const double step = getProperty("Step");
   const int chops = getProperty("NChops");
@@ -48,8 +59,7 @@ void ChopData::exec() {
   std::map<int, double> intMap;
   int prelow = -1;
   std::vector<MatrixWorkspace_sptr> workspaces;
-
-  boost::shared_ptr<Progress> progress;
+  std::unique_ptr<Progress> progress;
 
   if (maxX < step) {
     throw std::invalid_argument(
@@ -59,14 +69,13 @@ void ChopData::exec() {
   if (rLower != EMPTY_DBL() && rUpper != EMPTY_DBL() &&
       monitorWi != EMPTY_INT()) {
 
-    progress = boost::make_shared<Progress>(this, 0, 1, chops * 2);
+    progress = Kernel::make_unique<Progress>(this, 0.0, 1.0, chops * 2);
 
     // Select the spectrum that is to be used to compare the sections of the
     // workspace
     // This will generally be the monitor spectrum.
-    MatrixWorkspace_sptr monitorWS;
-    monitorWS = WorkspaceFactory::Instance().create(inputWS, 1);
-    monitorWS->setHistogram(0, inputWS->histogram(monitorWi));
+    MatrixWorkspace_sptr monitorWS =
+        create<MatrixWorkspace>(*inputWS, 1, inputWS->histogram(monitorWi));
 
     int lowest = 0;
 
@@ -93,10 +102,11 @@ void ChopData::exec() {
     if (nlow != intMap.end() && intMap[lowest] < (0.1 * nlow->second)) {
       prelow = nlow->first;
     }
-  } else
-    progress = boost::make_shared<Progress>(this, 0, 1, chops);
+  } else {
+    progress = Kernel::make_unique<Progress>(this, 0.0, 1.0, chops);
+  }
 
-  int wsCounter(1);
+  int wsCounter{1};
 
   for (int i = 0; i < chops; i++) {
     const double stepDiff = (i * step);
@@ -125,11 +135,10 @@ void ChopData::exec() {
     size_t nbins = indexHigh - indexLow;
 
     MatrixWorkspace_sptr workspace =
-        Mantid::API::WorkspaceFactory::Instance().create(inputWS, nHist,
-                                                         nbins + 1, nbins);
+        create<MatrixWorkspace>(*inputWS, BinEdges(nbins + 1));
 
     // Copy over X, Y and E data
-    PARALLEL_FOR2(inputWS, workspace)
+    PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *workspace))
     for (int j = 0; j < nHist; j++) {
 
       auto edges = inputWS->binEdges(j);

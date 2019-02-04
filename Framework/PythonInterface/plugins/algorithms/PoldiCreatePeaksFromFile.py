@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 # pylint: disable=no-init,invalid-name,too-few-public-methods,unused-import
@@ -143,6 +149,9 @@ class PoldiCreatePeaksFromFile(PythonAlgorithm):
 
     def category(self):
         return "SINQ\\Poldi"
+
+    def seeAlso(self):
+        return [ "PoldiCreatePeaksFromCell" ]
 
     def name(self):
         return "PoldiLoadCrystalData"

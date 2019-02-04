@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MDALGORITHMS_UNARYOPERATIONMDTEST_H_
 #define MANTID_MDALGORITHMS_UNARYOPERATIONMDTEST_H_
 
@@ -23,11 +29,11 @@ using namespace testing;
 
 class MockUnaryOperationMD : public UnaryOperationMD {
 public:
-  GCC_DIAG_OFF_SUGGEST_OVERRIDE
+  GNU_DIAG_OFF_SUGGEST_OVERRIDE
   MOCK_METHOD1(execEvent, void(Mantid::API::IMDEventWorkspace_sptr));
   MOCK_METHOD0(checkInputs, void());
   MOCK_METHOD1(execHisto, void(Mantid::DataObjects::MDHistoWorkspace_sptr));
-  GCC_DIAG_ON_SUGGEST_OVERRIDE
+  GNU_DIAG_ON_SUGGEST_OVERRIDE
   void exec() override { UnaryOperationMD::exec(); }
 };
 
@@ -48,7 +54,7 @@ public:
   void setUp() override {
     histo = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 5, 10.0, 1.0);
     event = MDEventsTestHelper::makeMDEW<2>(3, 0.0, 10.0, 1);
-    scalar = WorkspaceCreationHelper::CreateWorkspaceSingleValue(2.5);
+    scalar = WorkspaceCreationHelper::createWorkspaceSingleValue(2.5);
     AnalysisDataService::Instance().addOrReplace("histo", histo);
     AnalysisDataService::Instance().addOrReplace("event", event);
     AnalysisDataService::Instance().addOrReplace("scalar", scalar);

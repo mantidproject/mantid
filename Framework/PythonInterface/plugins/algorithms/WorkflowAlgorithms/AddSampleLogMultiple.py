@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
 from __future__ import (absolute_import, division, print_function)
 
@@ -13,6 +19,9 @@ class AddSampleLogMultiple(PythonAlgorithm):
 
     def summary(self):
         return 'Add multiple sample logs to a workspace'
+
+    def seeAlso(self):
+        return ["AddSampleLog"]
 
     def PyInit(self):
         self.declareProperty(WorkspaceProperty('Workspace', '', direction=Direction.InOut),
@@ -31,7 +40,7 @@ class AddSampleLogMultiple(PythonAlgorithm):
                              doc='Determine the value type by parsing the string')
 
     def PyExec(self):
-        workspace = self.getPropertyValue('Workspace')
+        workspace = self.getProperty('Workspace').value
         log_names = self.getProperty('LogNames').value
         log_values = self.getProperty('LogValues').value
         log_units = self.getProperty('LogUnits').value

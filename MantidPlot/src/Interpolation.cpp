@@ -30,9 +30,9 @@
 
 #include <QMessageBox>
 
+#include <gsl/gsl_interp.h>
 #include <gsl/gsl_sort.h>
 #include <gsl/gsl_spline.h>
-#include <gsl/gsl_interp.h>
 
 Interpolation::Interpolation(ApplicationWindow *parent, Graph *g,
                              const QString &curveTitle, int m)
@@ -124,7 +124,7 @@ void Interpolation::setMethod(int m) {
 
 void Interpolation::calculateOutputData(double *x, double *y) {
   gsl_interp_accel *acc = gsl_interp_accel_alloc();
-  const gsl_interp_type *method = NULL;
+  const gsl_interp_type *method = nullptr;
   switch (d_method) {
   case 0:
     method = gsl_interp_linear;

@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name
 from __future__ import (absolute_import, division, print_function)
 from six import u
@@ -10,6 +16,9 @@ class StringToPng(mantid.api.PythonAlgorithm):
         """ Category
         """
         return "DataHandling\\Plots"
+
+    def seeAlso(self):
+        return [ "SavePlot1D" ]
 
     def name(self):
         """ Algorithm name
@@ -39,16 +48,17 @@ class StringToPng(mantid.api.PythonAlgorithm):
                 ok2run='Wrong version of matplotlib. Required >= 1.2.0'
         if ok2run!='':
             raise RuntimeError(ok2run)
-        matplotlib.use("agg")
+        if 'backend_mtdqt4agg' not in matplotlib.get_backend():
+            matplotlib.use("agg")
         import matplotlib.pyplot as plt
         fig=plt.figure(figsize=(.1,.1))
         ax1=plt.axes(frameon=False)
         ax1.text(0.,1,bytearray(u(self.getProperty("String").valueAsStr), 'utf-8').decode('unicode_escape'),va="center",fontsize=16)
         ax1.axes.get_xaxis().set_visible(False)
         ax1.axes.get_yaxis().set_visible(False)
-        plt.show()
         filename = self.getProperty("OutputFilename").value
-        plt.savefig(filename,bbox_inches='tight')
+        fig.savefig(filename,bbox_inches='tight')
         plt.close(fig)
+
 
 mantid.api.AlgorithmFactory.subscribe(StringToPng)

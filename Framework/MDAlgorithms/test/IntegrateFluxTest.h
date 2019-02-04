@@ -1,13 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MDALGORITHMS_INTEGRATEFLUXTEST_H_
 #define MANTID_MDALGORITHMS_INTEGRATEFLUXTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidMDAlgorithms/IntegrateFlux.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidMDAlgorithms/IntegrateFlux.h"
 
 #include <numeric>
 
@@ -42,8 +49,8 @@ struct TestingFunction {
       return x * x / dx;
     case HistogramNonUniform: {
       double res = 0.0;
-      auto &X = workspace.readX(0);
-      auto &Y = workspace.readY(0);
+      auto &X = workspace.x(0);
+      auto &Y = workspace.y(0);
       auto ix = std::lower_bound(X.begin(), X.end(), x);
       if (ix != X.end()) {
         if (x < *ix) {
@@ -65,7 +72,7 @@ struct TestingFunction {
     throw std::logic_error("Cannot test this workspace type.");
   }
 };
-}
+} // namespace
 
 class IntegrateFluxTest : public CxxTest::TestSuite {
 public:
@@ -196,8 +203,8 @@ private:
     TS_ASSERT(ws->getAxis(0)->unit() == inWS->getAxis(0)->unit());
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 4);
 
-    auto &x = ws->readX(0);
-    auto &y = ws->readY(0);
+    auto &x = ws->x(0);
+    auto &y = ws->y(0);
 
     size_t n = x.size();
     TS_ASSERT_EQUALS(n, y.size());
@@ -239,7 +246,7 @@ private:
   }
 
   void do_test_unsorted(const MatrixWorkspace &outWS) {
-    auto &y = outWS.readY(0);
+    auto &y = outWS.y(0);
     double oldValue = 0.0;
     for (size_t i = 0; i < y.size(); ++i) {
       if (y[i] != 0.0 && y[i] != oldValue) {
@@ -373,7 +380,7 @@ private:
     x[0] = 0.0;
     for (auto i = x.begin() + 1; i != x.end(); ++i) {
       double tmp = *(i - 1);
-      *i = tmp *(1.0 + 0.0001 * tmp) + 0.3;
+      *i = tmp * (1.0 + 0.0001 * tmp) + 0.3;
     }
     for (size_t spec = 0; spec != ws->getNumberHistograms(); ++spec) {
       ws->setBinEdges(spec, x);
@@ -433,7 +440,7 @@ private:
     x[0] = 0.0;
     for (auto i = x.begin() + 1; i != x.end(); ++i) {
       double tmp = *(i - 1);
-      *i = tmp *(1.0 + 0.0001 * tmp) + 0.3;
+      *i = tmp * (1.0 + 0.0001 * tmp) + 0.3;
     }
     for (size_t spec = 0; spec != ws->getNumberHistograms(); ++spec) {
       ws->setPoints(spec, x);

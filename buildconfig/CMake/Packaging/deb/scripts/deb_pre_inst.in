@@ -37,6 +37,9 @@ case "$1" in
 	    if [ -h /etc/profile.d/mantid.csh ]; then
 		rm /etc/profile.d/mantid.csh
 	    fi
+	    if [ -h @PYTHON_SITE@/mantid.pth ]; then
+		rm @PYTHON_SITE@/mantid.pth
+	    fi
 	fi
 	;;
 

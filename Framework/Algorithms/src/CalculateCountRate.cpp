@@ -1,21 +1,31 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CalculateCountRate.h"
-
-#include "MantidKernel/PropertyWithValue.h"
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/ListValidator.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/MandatoryValidator.h"
-#include "MantidKernel/make_unique.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Run.h"
-#include "MantidAPI/WorkspaceFactory.h"
-
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidHistogramData/Histogram.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/Unit.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/make_unique.h"
+
 #include <numeric>
+
+using namespace Mantid::DataObjects;
+using namespace Mantid::HistogramData;
 
 namespace Mantid {
 namespace Algorithms {
@@ -150,7 +160,7 @@ void CalculateCountRate::exec() {
   DataObjects::EventWorkspace_sptr sourceWS = getProperty("Workspace");
   API::EventType et = sourceWS->getEventType();
   if (et == API::EventType::WEIGHTED_NOTIME) {
-    throw std::runtime_error("Event workspace " + sourceWS->name() +
+    throw std::runtime_error("Event workspace " + sourceWS->getName() +
                              " contains events without necessary frame "
                              "information. Can not process counting rate");
   }
@@ -183,14 +193,14 @@ void CalculateCountRate::exec() {
 }
 
 /** Process input workspace to calculate instrument counting rate as function of
-*experiment time
-*@param InputWorkspace :: shared pointer to the input workspace to process
-*@param targLog        :: pointer to time series property containing count rate
-*log.
-*                         Property should exist on input and will be modified
-*with
-*                         counting rate log on output.
-*/
+ *experiment time
+ *@param InputWorkspace :: shared pointer to the input workspace to process
+ *@param targLog        :: pointer to time series property containing count rate
+ *log.
+ *                         Property should exist on input and will be modified
+ *with
+ *                         counting rate log on output.
+ */
 void CalculateCountRate::calcRateLog(
     DataObjects::EventWorkspace_sptr &InputWorkspace,
     Kernel::TimeSeriesProperty<double> *const targLog) {
@@ -212,14 +222,13 @@ void CalculateCountRate::calcRateLog(
   double dTRangeMin = static_cast<double>(m_TRangeMin.totalNanoseconds());
   double dTRangeMax = static_cast<double>(m_TRangeMax.totalNanoseconds());
   std::vector<MantidVec> Buff;
-  int nThreads;
 
 #pragma omp parallel
   {
+    int nThreads = PARALLEL_NUMBER_OF_THREADS;
 #pragma omp single
     {
       // initialize thread's histogram buffer
-      nThreads = PARALLEL_NUMBER_OF_THREADS;
       Buff.resize(nThreads);
     }
     auto nThread = PARALLEL_THREAD_NUMBER;
@@ -263,21 +272,21 @@ void CalculateCountRate::calcRateLog(
   }
 
   // generate target log timing
-  std::vector<Kernel::DateAndTime> times(m_numLogSteps);
+  std::vector<Types::Core::DateAndTime> times(m_numLogSteps);
   double dt = (dTRangeMax - dTRangeMin) / static_cast<double>(m_numLogSteps);
   auto t0 = m_TRangeMin.totalNanoseconds();
   for (auto i = 0; i < m_numLogSteps; i++) {
-    times[i] =
-        Kernel::DateAndTime(t0 + static_cast<int64_t>((0.5 + double(i)) * dt));
+    times[i] = Types::Core::DateAndTime(
+        t0 + static_cast<int64_t>((0.5 + double(i)) * dt));
   }
   // store calculated values within the target log.
   targLog->replaceValues(times, countRate);
 }
 /** histogram event list into visualization workspace
-* @param el       :: event list to rebin into visualization workspace
-* @param spectraLocks :: pointer to the array of mutexes to lock modifyed
-*                        visualization workspace spectra for a thread
-*/
+ * @param el       :: event list to rebin into visualization workspace
+ * @param spectraLocks :: pointer to the array of mutexes to lock modifyed
+ *                        visualization workspace spectra for a thread
+ */
 void CalculateCountRate::histogramEvents(const DataObjects::EventList &el,
                                          std::mutex *spectraLocks) {
 
@@ -285,7 +294,7 @@ void CalculateCountRate::histogramEvents(const DataObjects::EventList &el,
     return;
 
   auto events = el.getEvents();
-  for (const DataObjects::TofEvent &ev : events) {
+  for (const Types::Event::TofEvent &ev : events) {
     double pulsetime = static_cast<double>(ev.pulseTime().totalNanoseconds());
     double tof = ev.tof();
     if (pulsetime < m_visT0 || pulsetime >= m_visTmax)
@@ -389,11 +398,11 @@ void CalculateCountRate::setOutLogParameters(
   } //---------------------------------------------------------------------
   // find target log ranges and identify what normalization should be used
 
-  Kernel::DateAndTime runTMin, runTMax;
+  Types::Core::DateAndTime runTMin, runTMax;
   InputWorkspace->getPulseTimeMinMax(runTMin, runTMax);
   //
   if (useLogAccuracy) { // extract log times located inside the run time
-    Kernel::DateAndTime tLogMin, tLogMax;
+    Types::Core::DateAndTime tLogMin, tLogMax;
     if (m_useLogDerivative) { // derivative moves events to the bin centre,
                               // but we need initial range
       auto pSource =
@@ -478,7 +487,7 @@ void CalculateCountRate::setOutLogParameters(
         m_numLogSteps++;
         iTMax1 = iTMin + provDT * m_numLogSteps;
       }
-      m_TRangeMax = Kernel::DateAndTime(iTMax1);
+      m_TRangeMax = Types::Core::DateAndTime(iTMax1);
     }
   }
 
@@ -499,7 +508,7 @@ void CalculateCountRate::setOutLogParameters(
  *@return -- the input workspace cropped according to XMin-XMax ranges in units,
  *           requested by the user
  *
-*/
+ */
 void CalculateCountRate::setSourceWSandXRanges(
     DataObjects::EventWorkspace_sptr &InputWorkspace) {
 
@@ -510,7 +519,7 @@ void CalculateCountRate::setSourceWSandXRanges(
   API::MatrixWorkspace_sptr wst;
   if (unit->unitID() != RangeUnits) {
     auto conv = createChildAlgorithm("ConvertUnits", 0, 1);
-    std::string wsName = InputWorkspace->name();
+    std::string wsName = InputWorkspace->getName();
     if (wsName.empty()) {
       wsName = "_CountRate_UnitsConverted";
     } else {
@@ -583,15 +592,15 @@ void CalculateCountRate::setSourceWSandXRanges(
   if (m_XRangeMin > m_XRangeMax) {
     throw std::invalid_argument(" Minimal spurion search data limit is bigger "
                                 "than the maximal limit. ( Min: " +
-                                std::to_string(m_XRangeMin) + "> Max: " +
-                                std::to_string(m_XRangeMax) + ")");
+                                std::to_string(m_XRangeMin) +
+                                "> Max: " + std::to_string(m_XRangeMax) + ")");
   }
 }
 
 /**Check if visualization workspace is necessary and initiate it if requested.
-* Sets or clears up internal m_visWS pointer and "do-visualization workspace"
-* option.
-*/
+ * Sets or clears up internal m_visWS pointer and "do-visualization workspace"
+ * option.
+ */
 void CalculateCountRate::checkAndInitVisWorkspace() {
   std::string visWSName = getProperty("VisualizationWs");
   if (visWSName.empty()) {
@@ -615,9 +624,7 @@ void CalculateCountRate::checkAndInitVisWorkspace() {
   int numXBins = getProperty("XResolution");
   std::string RangeUnits = getProperty("RangeUnits");
 
-  m_visWs = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
-      API::WorkspaceFactory::Instance().create("Workspace2D", numTBins,
-                                               numXBins + 1, numXBins));
+  m_visWs = create<Workspace2D>(numTBins, BinEdges(numXBins + 1));
   m_visWs->setTitle(visWSName);
 
   double Xmax = m_XRangeMax;
@@ -684,13 +691,13 @@ void CalculateCountRate::checkAndInitVisWorkspace() {
 bool CalculateCountRate::buildVisWS() const { return m_doVis; }
 
 /** Helper function, mainly for testing
-* @return  true if count rate should be normalized and false
-* otherwise */
+ * @return  true if count rate should be normalized and false
+ * otherwise */
 bool CalculateCountRate::normalizeCountRate() const {
   return m_normalizeResult;
 }
 /** Helper function, mainly for testing
-* @return  true if log derivative is used instead of log itself */
+ * @return  true if log derivative is used instead of log itself */
 bool CalculateCountRate::useLogDerivative() const { return m_useLogDerivative; }
 
 /** method to prepare normalization vector for the visualisation workspace using

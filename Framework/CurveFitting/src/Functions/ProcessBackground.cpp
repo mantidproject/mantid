@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/Functions/ProcessBackground.h"
-#include "MantidCurveFitting/Functions/Polynomial.h"
-#include "MantidCurveFitting/Functions/Chebyshev.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidCurveFitting/Functions/Chebyshev.h"
+#include "MantidCurveFitting/Functions/Polynomial.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidKernel/ListValidator.h"
@@ -229,7 +235,7 @@ void ProcessBackground::init() {
 
 //----------------------------------------------------------------------------------------------
 /** Main execution function
-  */
+ */
 void ProcessBackground::exec() {
   // Process general properties
   m_dataWS = this->getProperty("InputWorkspace");
@@ -257,13 +263,13 @@ void ProcessBackground::exec() {
 
   // 2. Do different work
   std::string option = getProperty("Options");
-  if (option.compare("RemovePeaks") == 0) {
+  if (option == "RemovePeaks") {
     removePeaks();
-  } else if (option.compare("DeleteRegion") == 0) {
+  } else if (option == "DeleteRegion") {
     deleteRegion();
-  } else if (option.compare("AddRegion") == 0) {
+  } else if (option == "AddRegion") {
     addRegion();
-  } else if (option.compare("SelectBackgroundPoints") == 0) {
+  } else if (option == "SelectBackgroundPoints") {
 
     selectBkgdPoints();
   } else {
@@ -277,7 +283,7 @@ void ProcessBackground::exec() {
 
 //----------------------------------------------------------------------------------------------
 /** Set dummy output workspaces to avoid python error for optional workspaces
-  */
+ */
 void ProcessBackground::setupDummyOutputWSes() {
   // Dummy outputs to make it work with python script
   setPropertyValue("UserBackgroundWorkspace", "dummy0");
@@ -440,7 +446,7 @@ void ProcessBackground::addRegion() {
 
 //----------------------------------------------------------------------------------------------
 /** Main method to select background points
-  */
+ */
 void ProcessBackground::selectBkgdPoints() {
   // Select background points
   string smode = getProperty("SelectionMode");
@@ -456,8 +462,7 @@ void ProcessBackground::selectBkgdPoints() {
   // explicitly
   string outbkgdparwsname =
       getPropertyValue("OutputBackgroundParameterWorkspace");
-  if (outbkgdparwsname.size() > 0 &&
-      outbkgdparwsname.compare("_dummy02") != 0) {
+  if (!outbkgdparwsname.empty() && outbkgdparwsname != "_dummy02") {
     // Will fit the selected background
     string bkgdfunctype = getPropertyValue("OutputBackgroundType");
     fitBackgroundFunction(bkgdfunctype);
@@ -470,7 +475,7 @@ void ProcessBackground::selectBkgdPoints() {
 
 //----------------------------------------------------------------------------------------------
 /** Select background points
-  */
+ */
 void ProcessBackground::selectFromGivenXValues() {
   // Get special input properties
   std::vector<double> bkgdpoints = getProperty("BackgroundPoints");
@@ -526,10 +531,10 @@ void ProcessBackground::selectFromGivenXValues() {
   }
 
   // Select background points according to mode
-  if (mode.compare("All Background Points") == 0) {
+  if (mode == "All Background Points") {
     // Select (possibly) all background points
     m_outputWS = autoBackgroundSelection(bkgdWS);
-  } else if (mode.compare("Input Background Points Only") == 0) {
+  } else if (mode == "Input Background Points Only") {
     // Use the input background points only
     m_outputWS = bkgdWS;
   } else {
@@ -543,7 +548,7 @@ void ProcessBackground::selectFromGivenXValues() {
 
 //----------------------------------------------------------------------------------------------
 /** Select background points via a given background function
-  */
+ */
 void ProcessBackground::selectFromGivenFunction() {
   // Process properties
   BackgroundFunction_sptr bkgdfunc = createBackgroundFunction(m_bkgdType);
@@ -621,12 +626,12 @@ ProcessBackground::autoBackgroundSelection(Workspace2D_sptr bkgdWS) {
   // Get fit result
   // a) Status
   std::string fitStatus = fit->getProperty("OutputStatus");
-  bool allowedfailure = (fitStatus.find("cannot") < fitStatus.size()) &&
-                        (fitStatus.find("tolerance") < fitStatus.size());
-  if (fitStatus.compare("success") != 0 && !allowedfailure) {
+  bool allowedfailure = (fitStatus.find("Changes") < fitStatus.size()) &&
+                        (fitStatus.find("small") < fitStatus.size());
+  if (fitStatus != "success" && !allowedfailure) {
     g_log.error() << "ProcessBackground: Fit Status = " << fitStatus
                   << ".  Not to update fit result\n";
-    throw std::runtime_error("Bad Fit");
+    throw std::runtime_error("Bad Fit " + fitStatus);
   }
 
   // b) check that chi2 got better
@@ -642,16 +647,16 @@ ProcessBackground::autoBackgroundSelection(Workspace2D_sptr bkgdWS) {
 
 //----------------------------------------------------------------------------------------------
 /** Create a background function from input properties
-  */
+ */
 BackgroundFunction_sptr
 ProcessBackground::createBackgroundFunction(const string backgroundtype) {
   Functions::BackgroundFunction_sptr bkgdfunction;
 
-  if (backgroundtype.compare("Polynomial") == 0) {
+  if (backgroundtype == "Polynomial") {
     bkgdfunction = boost::dynamic_pointer_cast<Functions::BackgroundFunction>(
         boost::make_shared<Functions::Polynomial>());
     bkgdfunction->initialize();
-  } else if (backgroundtype.compare("Chebyshev") == 0) {
+  } else if (backgroundtype == "Chebyshev") {
     Chebyshev_sptr cheby = boost::make_shared<Functions::Chebyshev>();
     bkgdfunction =
         boost::dynamic_pointer_cast<Functions::BackgroundFunction>(cheby);
@@ -673,7 +678,7 @@ ProcessBackground::createBackgroundFunction(const string backgroundtype) {
 
 //----------------------------------------------------------------------------------------------
 /** Filter non-background data points out and create a background workspace
-  */
+ */
 Workspace2D_sptr
 ProcessBackground::filterForBackground(BackgroundFunction_sptr bkgdfunction) {
   double posnoisetolerance = getProperty("NoiseTolerance");
@@ -692,7 +697,7 @@ ProcessBackground::filterForBackground(BackgroundFunction_sptr bkgdfunction) {
 
   // Optional output
   string userbkgdwsname = getPropertyValue("UserBackgroundWorkspace");
-  if (userbkgdwsname.size() == 0)
+  if (userbkgdwsname.empty())
     throw runtime_error("In mode SelectBackgroundPoints, "
                         "UserBackgroundWorkspace must be given!");
 
@@ -745,7 +750,7 @@ ProcessBackground::filterForBackground(BackgroundFunction_sptr bkgdfunction) {
 
 //----------------------------------------------------------------------------------------------
 /** Fit background function
-  */
+ */
 void ProcessBackground::fitBackgroundFunction(std::string bkgdfunctiontype) {
   // Get background type and create bakground function
   BackgroundFunction_sptr bkgdfunction =
@@ -796,12 +801,12 @@ void ProcessBackground::fitBackgroundFunction(std::string bkgdfunctiontype) {
 
   // Get fit status and chi^2
   std::string fitStatus = fit->getProperty("OutputStatus");
-  bool allowedfailure = (fitStatus.find("cannot") < fitStatus.size()) &&
-                        (fitStatus.find("tolerance") < fitStatus.size());
-  if (fitStatus.compare("success") != 0 && !allowedfailure) {
+  bool allowedfailure = (fitStatus.find("Changes") < fitStatus.size()) &&
+                        (fitStatus.find("small") < fitStatus.size());
+  if (fitStatus != "success" && !allowedfailure) {
     g_log.error() << "ProcessBackground: Fit Status = " << fitStatus
                   << ".  Not to update fit result\n";
-    throw std::runtime_error("Bad Fit");
+    throw std::runtime_error("Bad Fit " + fitStatus);
   }
 
   const double chi2 = fit->getProperty("OutputChi2overDoF");
@@ -878,7 +883,7 @@ void ProcessBackground::removePeaks() {
 
 //----------------------------------------------------------------------------------------------
 /** Set up: parse peak workspace to vectors
-  */
+ */
 void RemovePeaks::setup(TableWorkspace_sptr peaktablews) {
   // Parse table workspace
   parsePeakTableWorkspace(peaktablews, m_vecPeakCentre, m_vecPeakFWHM);
@@ -893,7 +898,7 @@ void RemovePeaks::setup(TableWorkspace_sptr peaktablews) {
 
 //----------------------------------------------------------------------------------------------
 /** Remove peaks from a input workspace
-  */
+ */
 Workspace2D_sptr
 RemovePeaks::removePeaks(API::MatrixWorkspace_const_sptr dataws, int wsindex,
                          double numfwhm) {
@@ -950,7 +955,7 @@ RemovePeaks::removePeaks(API::MatrixWorkspace_const_sptr dataws, int wsindex,
 
 //----------------------------------------------------------------------------------------------
 /** Parse table workspace
-  */
+ */
 void RemovePeaks::parsePeakTableWorkspace(TableWorkspace_sptr peaktablews,
                                           vector<double> &vec_peakcentre,
                                           vector<double> &vec_peakfwhm) {
@@ -960,9 +965,9 @@ void RemovePeaks::parsePeakTableWorkspace(TableWorkspace_sptr peaktablews,
   int index_fwhm = -1;
   for (int i = 0; i < static_cast<int>(colnames.size()); ++i) {
     string colname = colnames[i];
-    if (colname.compare("TOF_h") == 0)
+    if (colname == "TOF_h")
       index_centre = i;
-    else if (colname.compare("FWHM") == 0)
+    else if (colname == "FWHM")
       index_fwhm = i;
   }
 
@@ -986,7 +991,7 @@ void RemovePeaks::parsePeakTableWorkspace(TableWorkspace_sptr peaktablews,
 
 //----------------------------------------------------------------------------------------------
 /** Exclude peaks from
-  */
+ */
 size_t RemovePeaks::excludePeaks(vector<double> v_inX, vector<bool> &v_useX,
                                  vector<double> v_centre, vector<double> v_fwhm,
                                  double num_fwhm) {

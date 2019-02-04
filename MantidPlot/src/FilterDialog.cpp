@@ -28,24 +28,24 @@
  *                                                                         *
  ***************************************************************************/
 #include "FilterDialog.h"
-#include "Graph.h"
-#include "MyParser.h"
 #include "ColorBox.h"
 #include "FFTFilter.h"
+#include "Graph.h"
+#include "MyParser.h"
 
-#include <QGroupBox>
 #include <QCheckBox>
-#include <QMessageBox>
-#include <QLayout>
-#include <QPushButton>
-#include <QLabel>
-#include <QLineEdit>
 #include <QComboBox>
+#include <QGroupBox>
+#include <QLabel>
+#include <QLayout>
+#include <QLineEdit>
+#include <QMessageBox>
+#include <QPushButton>
 
 FilterDialog::FilterDialog(int type, QWidget *parent, Qt::WFlags fl)
-    : QDialog(parent, fl), graph(NULL), buttonFilter(NULL), buttonCancel(NULL),
-      boxName(NULL), boxOffset(NULL), boxStart(NULL), boxEnd(NULL),
-      boxColor(NULL) {
+    : QDialog(parent, fl), graph(nullptr), buttonFilter(nullptr),
+      buttonCancel(nullptr), boxName(nullptr), boxOffset(nullptr),
+      boxStart(nullptr), boxEnd(nullptr), boxColor(nullptr) {
   setWindowTitle(tr("MantidPlot - Filter options"));
   filter_type = type;
 
@@ -79,7 +79,7 @@ FilterDialog::FilterDialog(int type, QWidget *parent, Qt::WFlags fl)
     if (type == FFTFilter::BandPass)
       gl1->addWidget(new QLabel(tr("Add DC Offset")), 3, 0);
     else
-      gl1->addWidget(new QLabel(tr("Substract DC Offset")), 3, 0);
+      gl1->addWidget(new QLabel(tr("Subtract DC Offset")), 3, 0);
 
     boxOffset = new QCheckBox();
     gl1->addWidget(boxOffset, 3, 1);

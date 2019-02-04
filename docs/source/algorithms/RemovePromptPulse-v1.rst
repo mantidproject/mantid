@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -31,10 +31,10 @@ Usage
     x=w1.dataX(0)
     y=w1.dataY(0)
     
-    print "Y(",x[100],") = ",y[100]
-    print "Y(",x[1000],") = ",y[1000]
-    print "Y(",x[4100],") = ",y[4100]
-    print "Y(",x[5000],") = ",y[5000]   
+    print("Y( {} ) =  {:.1f}".format(x[100], y[100]))
+    print("Y( {} ) =  {:.1f}".format(x[1000], y[1000]))
+    print("Y( {} ) =  {:.1f}".format(x[4100], y[4100]))
+    print("Y( {} ) =  {:.1f}".format(x[5000], y[5000]))
 
 .. testcleanup:: RemovePromptPulse
 

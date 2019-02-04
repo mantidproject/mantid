@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -28,7 +28,7 @@ The algorithm
       store in peak-list.
    #. Split the list in two parts,
       :math:`[i_{0} + \Delta, i_{max} - \Delta)` and :math:`(i_{max} + \Delta, i_{n} - \Delta]`,
-      where :math:`\Delta` is the mininum number of data points between two peaks.
+      where :math:`\Delta` is the minimum number of data points between two peaks.
    #. If ranges are valid, perform algorithm on each of the sublists,
       append returned lists to peak-list.
    #. Return peak-list.
@@ -70,7 +70,7 @@ A typical peak search procedure would be performed on correlation data, so this 
     peaks_6904 = PoldiPeakSearch(correlated_6904)
     
     # The tableworkspace should contain 14 peaks.
-    print "The correlation spectrum of sample 6904 contains", peaks_6904.rowCount(), "peaks."
+    print("The correlation spectrum of sample 6904 contains {} peaks.".format(peaks_6904.rowCount()))
     
 Output:
 

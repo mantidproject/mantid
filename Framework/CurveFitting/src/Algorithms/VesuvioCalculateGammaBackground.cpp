@@ -1,22 +1,28 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/Algorithms/VesuvioCalculateGammaBackground.h"
 #include "MantidCurveFitting/Algorithms/ConvertToYSpace.h"
 #include "MantidCurveFitting/Functions/ComptonProfile.h"
 #include "MantidCurveFitting/Functions/VesuvioResolution.h"
 
 #include "MantidAPI/CompositeFunction.h"
-#include "MantidAPI/FunctionProperty.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/FunctionProperty.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/CompositeValidator.h"
-#include "MantidKernel/MandatoryValidator.h"
-#include "MantidKernel/PhysicalConstants.h"
 
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 
 namespace Mantid {
 namespace CurveFitting {
@@ -44,7 +50,7 @@ double ABSORB_WAVELENGTH = 1.83618;
 specnum_t FORWARD_SCATTER_SPECMIN = 135;
 /// End of forward scattering spectrum numbers (inclusive)
 specnum_t FORWARD_SCATTER_SPECMAX = 198;
-}
+} // namespace
 
 //--------------------------------------------------------------------------------------------------------
 // Public members
@@ -55,11 +61,10 @@ VesuvioCalculateGammaBackground::VesuvioCalculateGammaBackground()
     : Algorithm(), m_inputWS(), m_indices(), m_profileFunction(), m_npeaks(0),
       m_reversed(), m_samplePos(), m_l1(0.0), m_foilRadius(0.0),
       m_foilUpMin(0.0), m_foilUpMax(0.0), m_foils0(), m_foils1(),
-      m_backgroundWS(), m_correctedWS(), m_progress(nullptr) {}
+      m_backgroundWS(), m_correctedWS() {}
 
 /// Destructor
 VesuvioCalculateGammaBackground::~VesuvioCalculateGammaBackground() {
-  delete m_progress;
   m_indices.clear();
 }
 
@@ -87,7 +92,7 @@ void VesuvioCalculateGammaBackground::init() {
                   "An input workspace containing TOF data");
 
   declareProperty(
-      make_unique<API::FunctionProperty>("ComptonFunction"),
+      make_unique<API::FunctionProperty>("ComptonFunction", Direction::InOut),
       "Function that is able to compute the mass spectrum for the input data"
       "This will usually be the output from the Fitting");
 
@@ -113,7 +118,7 @@ void VesuvioCalculateGammaBackground::exec() {
   const int64_t nhist = static_cast<int64_t>(m_indices.size());
   const int64_t nreports =
       10 + nhist * (m_npeaks + 2 * m_foils0.size() * NTHETA * NUP * m_npeaks);
-  m_progress = new Progress(this, 0.0, 1.0, nreports);
+  m_progress = make_unique<Progress>(this, 0.0, 1.0, nreports);
 
   PARALLEL_FOR_IF(
       Kernel::threadSafe(*m_inputWS, *m_correctedWS, *m_backgroundWS))
@@ -175,12 +180,13 @@ bool VesuvioCalculateGammaBackground::calculateBackground(
 }
 
 /**
-* Calculate & apply gamma correction for the given index of the
-* input workspace
-* @param inputIndex A workspace index that defines the input spectrum to correct
-* @param outputIndex A workspace index that defines the output to hold the
-* results
-*/
+ * Calculate & apply gamma correction for the given index of the
+ * input workspace
+ * @param inputIndex A workspace index that defines the input spectrum to
+ * correct
+ * @param outputIndex A workspace index that defines the output to hold the
+ * results
+ */
 void VesuvioCalculateGammaBackground::applyCorrection(
     const size_t inputIndex, const size_t outputIndex) {
   m_progress->report("Computing TOF from detector");
@@ -224,11 +230,11 @@ void VesuvioCalculateGammaBackground::applyCorrection(
 }
 
 /**
-* Results are placed in the mapped index on the output corrected workspace
-* @param inputIndex Workspace index that defines the input spectrum to correct
-* @param outputIndex Workspace index that defines the spectrum to hold the
-* results
-*/
+ * Results are placed in the mapped index on the output corrected workspace
+ * @param inputIndex Workspace index that defines the input spectrum to correct
+ * @param outputIndex Workspace index that defines the spectrum to hold the
+ * results
+ */
 void VesuvioCalculateGammaBackground::calculateSpectrumFromDetector(
     const size_t inputIndex, const size_t outputIndex) {
   // -- Setup detector & resolution parameters --
@@ -252,12 +258,12 @@ void VesuvioCalculateGammaBackground::calculateSpectrumFromDetector(
 }
 
 /**
-* Calculate & apply gamma correction for the given index of the
-* input workspace
-* @param inputIndex Workspace index that defines the input spectrum to correct
-* @param outputIndex Workspace index that defines the spectrum to hold the
-* results
-*/
+ * Calculate & apply gamma correction for the given index of the
+ * input workspace
+ * @param inputIndex Workspace index that defines the input spectrum to correct
+ * @param outputIndex Workspace index that defines the spectrum to hold the
+ * results
+ */
 void VesuvioCalculateGammaBackground::calculateBackgroundFromFoils(
     const size_t inputIndex, const size_t outputIndex) {
   // -- Setup detector & resolution parameters --
@@ -288,8 +294,9 @@ void VesuvioCalculateGammaBackground::calculateBackgroundFromFoils(
     std::transform(ctfoil.begin(), ctfoil.end(), foilSpectrum.begin(),
                    ctfoil.begin(), std::minus<double>());
   }
-  bool reversed = (m_reversed.count(m_inputWS->getSpectrum(inputIndex)
-                                        .getSpectrumNo()) != 0);
+  bool reversed =
+      (m_reversed.count(m_inputWS->getSpectrum(inputIndex).getSpectrumNo()) !=
+       0);
   // This is quicker than the if within the loop
   if (reversed) {
     // The reversed ones should be (C0 - C1)
@@ -299,26 +306,26 @@ void VesuvioCalculateGammaBackground::calculateBackgroundFromFoils(
 }
 
 /**
-* Integrates over the foil area defined by the foil radius to accumulate an
-* estimate of the counts
-* resulting from this region
-* @param ctfoil Output vector to hold results
-* @param wsIndex Index on output background workspaces currently operating
-* @param foilInfo Foil description object
-* @param detPos The pre-calculated detector V3D
-* @param detPar DetectorParams object that defines information on the detector
-* associated with spectrum at wsIndex
-* @param detRes ResolutionParams object that defines information on the
-* resolution associated with spectrum at wsIndex
-*/
+ * Integrates over the foil area defined by the foil radius to accumulate an
+ * estimate of the counts
+ * resulting from this region
+ * @param ctfoil Output vector to hold results
+ * @param wsIndex Index on output background workspaces currently operating
+ * @param foilInfo Foil description object
+ * @param detPos The pre-calculated detector V3D
+ * @param detPar DetectorParams object that defines information on the detector
+ * associated with spectrum at wsIndex
+ * @param detRes ResolutionParams object that defines information on the
+ * resolution associated with spectrum at wsIndex
+ */
 void VesuvioCalculateGammaBackground::calculateBackgroundSingleFoil(
     std::vector<double> &ctfoil, const size_t wsIndex, const FoilInfo &foilInfo,
     const V3D &detPos, const DetectorParams &detPar,
     const ResolutionParams &detRes) {
   /** Integrates over the foils
-  *  by dividing into 2cm^2 elements
-  *  The integration is performed in cylindrical coordinates
-  */
+   *  by dividing into 2cm^2 elements
+   *  The integration is performed in cylindrical coordinates
+   */
 
   const double thetaStep =
       (foilInfo.thetaMax - foilInfo.thetaMin) / static_cast<double>(NTHETA);
@@ -373,14 +380,14 @@ void VesuvioCalculateGammaBackground::calculateBackgroundSingleFoil(
 }
 
 /**
-* Uses the compton profile functions to compute a particular mass spectrum
-* @param inSpectrum The value of the computed spectrum
-* @param tmpWork Pre-allocated working area that will be overwritten
-* @param wsIndex Index on the output background workspace that gives the X
-* values to use
-* @param detpar Struct containing parameters about the detector
-* @param respar Struct containing parameters about the resolution
-*/
+ * Uses the compton profile functions to compute a particular mass spectrum
+ * @param inSpectrum The value of the computed spectrum
+ * @param tmpWork Pre-allocated working area that will be overwritten
+ * @param wsIndex Index on the output background workspace that gives the X
+ * values to use
+ * @param detpar Struct containing parameters about the detector
+ * @param respar Struct containing parameters about the resolution
+ */
 std::vector<double> VesuvioCalculateGammaBackground::calculateTofSpectrum(
     const std::vector<double> &inSpectrum, std::vector<double> &tmpWork,
     const size_t wsIndex, const DetectorParams &detpar,
@@ -426,8 +433,8 @@ std::vector<double> VesuvioCalculateGammaBackground::calculateTofSpectrum(
 }
 
 /**
-* Caches input details for the peak information
-*/
+ * Caches input details for the peak information
+ */
 void VesuvioCalculateGammaBackground::retrieveInputs() {
   m_inputWS = getProperty("InputWorkspace");
   m_profileFunction = getPropertyValue("ComptonFunction");
@@ -483,8 +490,8 @@ void VesuvioCalculateGammaBackground::retrieveInputs() {
 }
 
 /**
-* Create & cache output workspaces
-*/
+ * Create & cache output workspaces
+ */
 void VesuvioCalculateGammaBackground::createOutputWorkspaces() {
   const size_t nhist = m_indices.size();
   m_backgroundWS = WorkspaceFactory::Instance().create(m_inputWS, nhist);
@@ -492,7 +499,7 @@ void VesuvioCalculateGammaBackground::createOutputWorkspaces() {
 }
 
 /**
-*/
+ */
 void VesuvioCalculateGammaBackground::cacheInstrumentGeometry() {
   auto inst = m_inputWS->getInstrument();
   auto refFrame = inst->getReferenceFrame();
@@ -546,9 +553,9 @@ void VesuvioCalculateGammaBackground::cacheInstrumentGeometry() {
     descr.thetaMin = thetaRng0.first;
     descr.thetaMax = thetaRng0.second;
     descr.lorentzWidth =
-        ConvertToYSpace::getComponentParameter(foil0, pmap, "hwhm_lorentz");
+        ConvertToYSpace::getComponentParameter(*foil0, pmap, "hwhm_lorentz");
     descr.gaussWidth =
-        ConvertToYSpace::getComponentParameter(foil0, pmap, "sigma_gauss");
+        ConvertToYSpace::getComponentParameter(*foil0, pmap, "sigma_gauss");
     m_foils0[i] = descr; // copy
 
     const auto &foil1 = foils1[i];
@@ -557,9 +564,9 @@ void VesuvioCalculateGammaBackground::cacheInstrumentGeometry() {
     descr.thetaMin = thetaRng1.first;
     descr.thetaMax = thetaRng1.second;
     descr.lorentzWidth =
-        ConvertToYSpace::getComponentParameter(foil1, pmap, "hwhm_lorentz");
+        ConvertToYSpace::getComponentParameter(*foil1, pmap, "hwhm_lorentz");
     descr.gaussWidth =
-        ConvertToYSpace::getComponentParameter(foil1, pmap, "sigma_gauss");
+        ConvertToYSpace::getComponentParameter(*foil1, pmap, "sigma_gauss");
     m_foils1[i] = descr; // copy
   }
 
@@ -584,13 +591,13 @@ void VesuvioCalculateGammaBackground::cacheInstrumentGeometry() {
 }
 
 /**
-* @param foilComp A pointer to the foil component
-* @param radius The radius that gives the distance to the centre of the bounding
-* box
-* @param horizDir An enumeration defining which direction is horizontal
-* @return The min/max angle in theta(degrees) (horizontal direction if you
-* assume mid-point theta = 0)
-*/
+ * @param foilComp A pointer to the foil component
+ * @param radius The radius that gives the distance to the centre of the
+ * bounding box
+ * @param horizDir An enumeration defining which direction is horizontal
+ * @return The min/max angle in theta(degrees) (horizontal direction if you
+ * assume mid-point theta = 0)
+ */
 std::pair<double, double> VesuvioCalculateGammaBackground::calculateThetaRange(
     const Geometry::IComponent_const_sptr &foilComp, const double radius,
     const unsigned int horizDir) const {

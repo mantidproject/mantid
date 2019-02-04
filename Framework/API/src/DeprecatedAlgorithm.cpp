@@ -1,7 +1,13 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidAPI/AlgorithmFactory.h"
-#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Logger.h"
+#include "MantidTypes/Core/DateAndTimeHelpers.h"
 #include <sstream>
 
 namespace Mantid {
@@ -9,7 +15,7 @@ namespace API {
 namespace {
 /// Static logger
 Kernel::Logger g_log("DeprecatedAlgorithm");
-}
+} // namespace
 
 /// Does nothing other than make the compiler happy.
 DeprecatedAlgorithm::DeprecatedAlgorithm()
@@ -42,7 +48,7 @@ void DeprecatedAlgorithm::deprecatedDate(const std::string &date) {
     // TODO warn people that it wasn't set
     return;
   }
-  if (!Kernel::DateAndTime::stringIsISO8601(date)) {
+  if (!Types::Core::DateAndTimeHelpers::stringIsISO8601(date)) {
     // TODO warn people that it wasn't set
     return;
   }
@@ -83,5 +89,5 @@ const std::string DeprecatedAlgorithm::deprecationMsg(const IAlgorithm *algo) {
 
   return msg.str();
 }
-} // namesapce API
+} // namespace API
 } // namespace Mantid

@@ -1,17 +1,25 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef LOADPARAMETERFILETEST_H_
 #define LOADPARAMETERFILETEST_H_
 
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/OptionalBool.h"
 
 #include <vector>
 
@@ -33,7 +41,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             wsName));
-    const ParameterMap &paramMap = output->instrumentParameters();
+    const auto &paramMap = output->constInstrumentParameters();
     std::string descr = paramMap.getDescription("nickel-holder", "fjols");
     TS_ASSERT_EQUALS(descr, "test fjols description.");
 
@@ -43,8 +51,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(pLoaderPF->initialize());
     pLoaderPF->setPropertyValue(
-        "Filename",
-        "IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING2_paramFile.xml");
+        "Filename", "unit_testing/IDF_for_UNIT_TESTING2_paramFile.xml");
     pLoaderPF->setPropertyValue("Workspace", wsName);
     TS_ASSERT_THROWS_NOTHING(pLoaderPF->execute());
     TS_ASSERT(pLoaderPF->isExecuted());
@@ -54,29 +61,29 @@ public:
         output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             wsName));
 
-    boost::shared_ptr<const Instrument> i = output->getInstrument();
-    boost::shared_ptr<const IDetector> ptrDet = i->getDetector(1008);
-    TS_ASSERT_EQUALS(ptrDet->getID(), 1008);
-    TS_ASSERT_EQUALS(ptrDet->getName(), "combined translation6");
-    Parameter_sptr param = paramMap.get(&(*ptrDet), "fjols");
+    const auto &detectorInfo = output->detectorInfo();
+    const auto &det = detectorInfo.detector(detectorInfo.indexOf(1008));
+    TS_ASSERT_EQUALS(det.getID(), 1008);
+    TS_ASSERT_EQUALS(det.getName(), "combined translation6");
+    Parameter_sptr param = paramMap.get(&det, "fjols");
     TS_ASSERT_DELTA(param->value<double>(), 20.0, 0.0001);
 
-    param = paramMap.get(&(*ptrDet), "nedtur");
+    param = paramMap.get(&det, "nedtur");
     TS_ASSERT_DELTA(param->value<double>(), 77.0, 0.0001);
-    param = paramMap.get(&(*ptrDet), "fjols-test-paramfile");
+    param = paramMap.get(&det, "fjols-test-paramfile");
     TS_ASSERT_DELTA(param->value<double>(), 50.0, 0.0001);
     descr = param->getDescription();
     TS_ASSERT_EQUALS(descr, "test description. Full test description.");
 
-    ptrDet = i->getDetector(1301);
-    TS_ASSERT_EQUALS(ptrDet->getID(), 1301);
-    TS_ASSERT_EQUALS(ptrDet->getName(), "pixel");
-    param = paramMap.get(ptrDet.get(), "testDouble");
-    TS_ASSERT_DELTA(param->value<double>(), 25.0, 0.0001);
-    TS_ASSERT_EQUALS(paramMap.getString(ptrDet.get(), "testString"),
-                     "hello world");
+    const auto &det2 = detectorInfo.detector(detectorInfo.indexOf(1301));
 
-    param = paramMap.get(ptrDet.get(), "testString");
+    TS_ASSERT_EQUALS(det2.getID(), 1301);
+    TS_ASSERT_EQUALS(det2.getName(), "pixel");
+    param = paramMap.get(&det2, "testDouble");
+    TS_ASSERT_DELTA(param->value<double>(), 25.0, 0.0001);
+    TS_ASSERT_EQUALS(paramMap.getString(&det2, "testString"), "hello world");
+
+    param = paramMap.get(&det2, "testString");
     TS_ASSERT_EQUALS(param->getShortDescription(), "its test hello word.");
     TS_ASSERT_EQUALS(param->getDescription(), "its test hello word.");
     TS_ASSERT_EQUALS(paramMap.getDescription("pixel", "testString"),
@@ -145,29 +152,28 @@ public:
         output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             wsName));
 
-    const ParameterMap &paramMap = output->instrumentParameters();
-    boost::shared_ptr<const Instrument> i = output->getInstrument();
-    boost::shared_ptr<const IDetector> ptrDet = i->getDetector(1008);
-    TS_ASSERT_EQUALS(ptrDet->getID(), 1008);
-    TS_ASSERT_EQUALS(ptrDet->getName(), "combined translation6");
-    Parameter_sptr param = paramMap.get(&(*ptrDet), "fjols");
+    const auto &paramMap = output->constInstrumentParameters();
+    const auto &detectorInfo = output->detectorInfo();
+    const auto &det = detectorInfo.detector(detectorInfo.indexOf(1008));
+    TS_ASSERT_EQUALS(det.getID(), 1008);
+    TS_ASSERT_EQUALS(det.getName(), "combined translation6");
+    Parameter_sptr param = paramMap.get(&det, "fjols");
     TS_ASSERT_DELTA(param->value<double>(), 20.0, 0.0001);
-    param = paramMap.get(&(*ptrDet), "nedtur");
+    param = paramMap.get(&det, "nedtur");
     TS_ASSERT_DELTA(param->value<double>(), 77.0, 0.0001);
-    param = paramMap.get(&(*ptrDet), "fjols-test-paramfile");
+    param = paramMap.get(&det, "fjols-test-paramfile");
     TS_ASSERT_DELTA(param->value<double>(), 52.0, 0.0001);
     std::string descr = param->getDescription();
     TS_ASSERT_EQUALS(descr, "test description2. Full test description2.");
 
-    ptrDet = i->getDetector(1301);
-    TS_ASSERT_EQUALS(ptrDet->getID(), 1301);
-    TS_ASSERT_EQUALS(ptrDet->getName(), "pixel");
-    param = paramMap.get(ptrDet.get(), "testDouble");
+    const auto &det2 = detectorInfo.detector(detectorInfo.indexOf(1301));
+    TS_ASSERT_EQUALS(det2.getID(), 1301);
+    TS_ASSERT_EQUALS(det2.getName(), "pixel");
+    param = paramMap.get(&det2, "testDouble");
     TS_ASSERT_DELTA(param->value<double>(), 27.0, 0.0001);
-    TS_ASSERT_EQUALS(paramMap.getString(ptrDet.get(), "testString"),
-                     "goodbye world");
+    TS_ASSERT_EQUALS(paramMap.getString(&det2, "testString"), "goodbye world");
 
-    param = paramMap.get(ptrDet.get(), "testString");
+    param = paramMap.get(&det2, "testString");
     TS_ASSERT_EQUALS(param->getShortDescription(), "its test goodbye world.");
     TS_ASSERT_EQUALS(param->getDescription(), "its test goodbye world.");
     TS_ASSERT_EQUALS(paramMap.getDescription("pixel", "testString"),
@@ -219,8 +225,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
 
     // Path to test input file assumes Test directory checked out from git
-    pLoadInstrument->setPropertyValue(
-        "Filename", "IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING2.xml");
+    pLoadInstrument->setPropertyValue("Filename",
+                                      "unit_testing/IDF_for_UNIT_TESTING2.xml");
     // inputFile = loaderIDF2.getPropertyValue("Filename");
     pLoadInstrument->setPropertyValue("Workspace", wsName);
     pLoadInstrument->setProperty("RewriteSpectraMap",

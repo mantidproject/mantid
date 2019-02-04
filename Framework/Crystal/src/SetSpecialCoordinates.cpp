@@ -1,7 +1,13 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/SetSpecialCoordinates.h"
-#include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidKernel/ListValidator.h"
 
 using namespace Mantid::Kernel;
@@ -121,7 +127,7 @@ bool SetSpecialCoordinates::writeCoordinatesToPeaksWorkspace(
 
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
-   */
+ */
 void SetSpecialCoordinates::exec() {
 
   Workspace_sptr inputWS = getProperty("InputWorkspace");

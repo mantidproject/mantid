@@ -1,14 +1,21 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_FITPEAKTEST_H_
 #define MANTID_ALGORITHMS_FITPEAKTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/FitPeak.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAlgorithms/FitPeak.h"
+#include "MantidDataObjects/Workspace2D.h"
 
 using Mantid::Algorithms::FitPeak;
 
@@ -19,9 +26,9 @@ using namespace Mantid::DataObjects;
 
 using namespace std;
 
-using Mantid::HistogramData::Points;
-using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::CountStandardDeviations;
+using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::Points;
 
 class FitPeakTest : public CxxTest::TestSuite {
 public:
@@ -35,7 +42,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Test on init and setup
-    */
+   */
   void test_Init() {
     // Generate input workspace
     MatrixWorkspace_sptr dataws = gen_4866P5Data();
@@ -88,7 +95,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Test on fit a peak with significantly high background
-    */
+   */
   void test_FitPeakWithHighBkgd() {
     // Generate input workspace
     MatrixWorkspace_sptr dataws = gen_4866P5Data();
@@ -157,7 +164,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Generate a workspace contains PG3_4866 5-th peak
-    */
+   */
   void gen_PeakParameters(vector<string> &parnames, vector<double> &parvalues) {
     parnames.clear();
     parvalues.clear();
@@ -176,7 +183,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Generate a workspace contains PG3_4866 5-th peak
-    */
+   */
   void gen_BkgdParameters(vector<string> &parnames, vector<double> &parvalues) {
     parnames.clear();
     parvalues.clear();
@@ -195,7 +202,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Generate a workspace contains PG3_4866 5-th peak
-    */
+   */
   MatrixWorkspace_sptr gen_4866P5Data() {
 
     const size_t size = 84;
@@ -239,7 +246,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Test on fit a peak with 1 step
-    */
+   */
   void test_FitPeakOneStep() {
     // Generate input workspace
     MatrixWorkspace_sptr dataws = gen_PG3DiamondData();
@@ -296,7 +303,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Test on fit a peak with 1 step
-    */
+   */
   void test_FitPeakOneStepFullPeakName() {
     // Generate input workspace
     MatrixWorkspace_sptr dataws = gen_PG3DiamondData();
@@ -350,7 +357,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Generate a workspace contains PG3_4866 5-th peak
-    */
+   */
   MatrixWorkspace_sptr gen_PG3DiamondData() {
     vector<double> vecx, vecy, vece;
 
@@ -374,15 +381,15 @@ public:
             2.090424, 2.091260, 2.092096, 2.092933, 2.093770,
         },
         Counts{
-            1.000000, 0.000000, 0.000000, 2.000000, 0.000000, 0.000000,
-            2.000000, 2.000000, 3.000000, 4.000000, 5.000000, 16.000000,
+            1.000000,  0.000000,  0.000000,  2.000000,  0.000000,  0.000000,
+            2.000000,  2.000000,  3.000000,  4.000000,  5.000000,  16.000000,
             20.000000, 31.000000, 26.000000, 28.000000, 29.000000, 41.000000,
             40.000000, 38.000000, 40.000000, 34.000000, 35.000000, 18.000000,
-            21.000000, 9.000000, 6.000000, 6.000000, 11.000000, 10.000000,
-            4.000000, 7.000000, 0.000000, 1.000000, 1.000000, 1.000000,
-            0.000000, 0.000000, 0.000000, 0.000000, 2.000000, 1.000000,
-            1.000000, 1.000000, 0.000000, 1.000000, 0.000000, 0.000000,
-            0.000000, 0.000000, 0.000000, 0.000000, 0.000000,
+            21.000000, 9.000000,  6.000000,  6.000000,  11.000000, 10.000000,
+            4.000000,  7.000000,  0.000000,  1.000000,  1.000000,  1.000000,
+            0.000000,  0.000000,  0.000000,  0.000000,  2.000000,  1.000000,
+            1.000000,  1.000000,  0.000000,  1.000000,  0.000000,  0.000000,
+            0.000000,  0.000000,  0.000000,  0.000000,  0.000000,
         });
 
     return ws;
@@ -390,7 +397,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Generate a workspace contains PG3_4866 5-th peak
-    */
+   */
   void gen_linearBkgdParameters(vector<string> &parnames,
                                 vector<double> &parvalues) {
     parnames.clear();

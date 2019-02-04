@@ -1,7 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/MaskWorkspace.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/IPropertyManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidKernel/IPropertyManager.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace DataObjects {
@@ -23,7 +30,7 @@ const double DEAD_VALUE = 1.;
 
 /// The value for uncertainty.
 const double ERROR_VALUE = 0.;
-}
+} // namespace
 
 //--------------------------------------------------------------------------
 
@@ -71,8 +78,7 @@ void MaskWorkspace::clearMask() {
   }
 
   // Clear the mask flags
-  Geometry::ParameterMap &pmap = this->instrumentParameters();
-  pmap.clearParametersByName("masked");
+  mutableDetectorInfo().clearMaskFlags();
 }
 
 /**
@@ -95,7 +101,7 @@ size_t MaskWorkspace::getNumberMasked() const {
     } else {
       std::stringstream errss;
       errss << "No instrument is associated with mask workspace "
-            << this->name();
+            << this->getName();
       throw std::runtime_error(errss.str());
     }
   }
@@ -148,8 +154,8 @@ set<size_t> MaskWorkspace::getMaskedWkspIndices() const {
 
 //--------------------------------------------------------------------------------------------
 /**
-  * @param detectorID :: ID of the detector to check whether it is masked or not
-  * @return True if the data should be deleted.
+ * @param detectorID :: ID of the detector to check whether it is masked or not
+ * @return True if the data should be deleted.
  */
 bool MaskWorkspace::isMasked(const detid_t detectorID) const {
   if (!this->hasInstrument()) {
@@ -170,7 +176,16 @@ bool MaskWorkspace::isMasked(const detid_t detectorID) const {
   }
 
   // the mask bit on the workspace can be set
-  return this->getInstrument()->isDetectorMasked(detectorID);
+  // Performance wise, it is not optimal to call detectorInfo() for every index,
+  // but this method seems to be used rarely enough to justify this until the
+  // Instrument-2.0 implementation has progressed far enough to make this cheap.
+  const auto &detectorInfo = this->detectorInfo();
+  try {
+    return detectorInfo.isMasked(detectorInfo.indexOf(detectorID));
+  } catch (std::out_of_range &) {
+    // The workspace can contain bad detector IDs. DetectorInfo::indexOf throws.
+    return false;
+  }
 }
 
 /**
@@ -241,7 +256,7 @@ const std::string MaskWorkspace::id() const { return "MaskWorkspace"; }
 
 //--------------------------------------------------------------------------------------------
 /** Copy from
-  */
+ */
 void MaskWorkspace::copyFrom(
     boost::shared_ptr<const SpecialWorkspace2D> sourcews) {
   SpecialWorkspace2D::copyFrom(sourcews);
@@ -259,9 +274,9 @@ const std::string MaskWorkspace::toString() const {
 
 //--------------------------------------------------------------------------------------------
 /** Check whether workspace has a non-trivial instrument
-  * (1) There is an instrument associated with
-  * (2) Number of detectors is larger than 0
-  */
+ * (1) There is an instrument associated with
+ * (2) Number of detectors is larger than 0
+ */
 bool MaskWorkspace::hasInstrument() const {
   bool hasinst;
   Geometry::Instrument_const_sptr inst = this->getInstrument();

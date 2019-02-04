@@ -1,12 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MDALGORITHMS_MDBOXIMPLICITFUNCTION_H_
 #define MANTID_MDALGORITHMS_MDBOXIMPLICITFUNCTION_H_
 
-#include "MantidKernel/System.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
+#include "MantidKernel/System.h"
 #include "MantidKernel/VMD.h"
-#include <vector>
 #include <boost/tuple/tuple.hpp>
+#include <vector>
 
 namespace Mantid {
 namespace Geometry {
@@ -17,27 +23,6 @@ namespace Geometry {
 
   @author Janik Zikovsky
   @date 2011-07-21
-
-  Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
- National Laboratory & European Spallation Source
-
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>
-  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport MDBoxImplicitFunction : public MDImplicitFunction {
 public:
@@ -50,8 +35,8 @@ public:
   double volume() const;
 
   double
-  fraction(const std::vector<boost::tuple<Mantid::coord_t, Mantid::coord_t>> &
-               boxExtents) const;
+  fraction(const std::vector<boost::tuple<Mantid::coord_t, Mantid::coord_t>>
+               &boxExtents) const;
 
 private:
   void construct(const Mantid::Kernel::VMD &min,

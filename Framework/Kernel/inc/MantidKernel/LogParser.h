@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_KERNEL_LOGPARSER_H_
 #define MANTID_KERNEL_LOGPARSER_H_
 
@@ -14,13 +20,16 @@
 #include <sstream>
 
 namespace Mantid {
-
+namespace Types {
+namespace Core {
+class DateAndTime;
+}
+} // namespace Types
 namespace Kernel {
 
 //-------------------------------------------------------------------------
 // Forward declarations
 //-------------------------------------------------------------------------
-class DateAndTime;
 class Property;
 template <typename T> class TimeSeriesProperty;
 
@@ -29,27 +38,6 @@ LogParser parses the instrument log files to select records corresponding
 to 'RUNNING' instrument status. It determines the values of the logged variables
 at the beginning and the end of each RUNNING interval and keeps track of changes
 within the interval.
-
-Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>.
-Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_KERNEL_DLL LogParser {
 public:
@@ -64,7 +52,7 @@ public:
                                              const std::string &name);
   /// Check if the icp log commands are in the new style
   static bool isICPEventLogNewStyle(
-      const std::multimap<Kernel::DateAndTime, std::string> &logm);
+      const std::multimap<Types::Core::DateAndTime, std::string> &logm);
 
 public:
   /// Create given the icpevent log property
@@ -89,22 +77,22 @@ public:
 private:
   /// Parse the icp event log with old style commands
   void parseOldStyleCommands(
-      const std::multimap<Kernel::DateAndTime, std::string> &logm,
+      const std::multimap<Types::Core::DateAndTime, std::string> &logm,
       Kernel::TimeSeriesProperty<int> *periods,
       Kernel::TimeSeriesProperty<bool> *status);
 
   /// Parse the icp event log with new style commands
   void parseNewStyleCommands(
-      const std::multimap<Kernel::DateAndTime, std::string> &logm,
+      const std::multimap<Types::Core::DateAndTime, std::string> &logm,
       Kernel::TimeSeriesProperty<int> *periods,
       Kernel::TimeSeriesProperty<bool> *status);
 
   /// Available commands.
-  enum commands { NONE = 0, BEGIN, END, CHANGE_PERIOD };
+  enum class commands { NONE = 0, BEGIN, END, CHANGE_PERIOD, ABORT };
 
   /// Typedef for a map of string commands to an enum of strongly typed
   /// commands.
-  typedef std::map<std::string, commands> CommandMap;
+  using CommandMap = std::map<std::string, commands>;
 
   /// TimeSeriesProperty<int> containing data periods. Created by LogParser
   boost::shared_ptr<Kernel::Property> m_periods;
@@ -119,7 +107,8 @@ private:
   CommandMap createCommandMap(bool newStyle) const;
 
   /// Try to parse period data.
-  void tryParsePeriod(const std::string &scom, const DateAndTime &time,
+  void tryParsePeriod(const std::string &scom,
+                      const Types::Core::DateAndTime &time,
                       std::istringstream &idata,
                       Kernel::TimeSeriesProperty<int> *const periods);
 };

@@ -1,8 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include <algorithm>
 
-#include "MantidGeometry/MDGeometry/MDGeometryXMLParser.h"
-#include "MantidGeometry/MDGeometry/MDGeometryXMLDefinitions.h"
 #include "MantidGeometry/MDGeometry/IMDDimensionFactory.h"
+#include "MantidGeometry/MDGeometry/MDGeometryXMLDefinitions.h"
+#include "MantidGeometry/MDGeometry/MDGeometryXMLParser.h"
 
 #include <Poco/AutoPtr.h>
 #include <Poco/DOM/DOMParser.h>
@@ -84,7 +90,7 @@ void MDGeometryXMLParser::execute() {
   std::string xDimId =
       xDimensionElement
           ->getChildElement(
-                MDGeometryXMLDefinitions::workspaceRefDimensionElementName())
+              MDGeometryXMLDefinitions::workspaceRefDimensionElementName())
           ->innerText();
   if (!xDimId.empty()) {
     auto xDimensionIt =
@@ -93,8 +99,10 @@ void MDGeometryXMLParser::execute() {
       throw std::invalid_argument("Cannot determine x-dimension mapping.");
     }
     m_xDimension = *xDimensionIt;
-    vecNonMappedDims.erase(std::remove_if(
-        vecNonMappedDims.begin(), vecNonMappedDims.end(), findID(xDimId)));
+    vecNonMappedDims.erase(std::remove_if(vecNonMappedDims.begin(),
+                                          vecNonMappedDims.end(),
+                                          findID(xDimId)),
+                           vecNonMappedDims.end());
   }
 
   Poco::XML::Element *yDimensionElement = geometryXMLElement->getChildElement(
@@ -102,7 +110,7 @@ void MDGeometryXMLParser::execute() {
   std::string yDimId =
       yDimensionElement
           ->getChildElement(
-                MDGeometryXMLDefinitions::workspaceRefDimensionElementName())
+              MDGeometryXMLDefinitions::workspaceRefDimensionElementName())
           ->innerText();
 
   if (!yDimId.empty()) {
@@ -112,8 +120,10 @@ void MDGeometryXMLParser::execute() {
       throw std::invalid_argument("Cannot determine y-dimension mapping.");
     }
     m_yDimension = *yDimensionIt;
-    vecNonMappedDims.erase(std::remove_if(
-        vecNonMappedDims.begin(), vecNonMappedDims.end(), findID(yDimId)));
+    vecNonMappedDims.erase(std::remove_if(vecNonMappedDims.begin(),
+                                          vecNonMappedDims.end(),
+                                          findID(yDimId)),
+                           vecNonMappedDims.end());
   }
 
   Poco::XML::Element *zDimensionElement = geometryXMLElement->getChildElement(
@@ -121,7 +131,7 @@ void MDGeometryXMLParser::execute() {
   std::string zDimId =
       zDimensionElement
           ->getChildElement(
-                MDGeometryXMLDefinitions::workspaceRefDimensionElementName())
+              MDGeometryXMLDefinitions::workspaceRefDimensionElementName())
           ->innerText();
 
   if (!zDimId.empty()) {
@@ -131,8 +141,10 @@ void MDGeometryXMLParser::execute() {
       throw std::invalid_argument("Cannot determine z-dimension mapping.");
     }
     m_zDimension = *zDimensionIt;
-    vecNonMappedDims.erase(std::remove_if(
-        vecNonMappedDims.begin(), vecNonMappedDims.end(), findID(zDimId)));
+    vecNonMappedDims.erase(std::remove_if(vecNonMappedDims.begin(),
+                                          vecNonMappedDims.end(),
+                                          findID(zDimId)),
+                           vecNonMappedDims.end());
   }
 
   Poco::XML::Element *tDimensionElement = geometryXMLElement->getChildElement(
@@ -140,7 +152,7 @@ void MDGeometryXMLParser::execute() {
   std::string tDimId =
       tDimensionElement
           ->getChildElement(
-                MDGeometryXMLDefinitions::workspaceRefDimensionElementName())
+              MDGeometryXMLDefinitions::workspaceRefDimensionElementName())
           ->innerText();
   if (!tDimId.empty()) {
     auto tDimensionIt =
@@ -150,8 +162,10 @@ void MDGeometryXMLParser::execute() {
     }
     m_tDimension = *tDimensionIt;
     if (!vecNonMappedDims.empty()) {
-      vecNonMappedDims.erase(std::remove_if(
-          vecNonMappedDims.begin(), vecNonMappedDims.end(), findID(tDimId)));
+      vecNonMappedDims.erase(std::remove_if(vecNonMappedDims.begin(),
+                                            vecNonMappedDims.end(),
+                                            findID(tDimId)),
+                             vecNonMappedDims.end());
     }
   }
   m_vecNonMappedDims = vecNonMappedDims; // Copy with strong guarantee.
@@ -397,5 +411,5 @@ bool MDGeometryXMLParser::isTDimension(
   }
   return bResult;
 }
-}
-}
+} // namespace Geometry
+} // namespace Mantid

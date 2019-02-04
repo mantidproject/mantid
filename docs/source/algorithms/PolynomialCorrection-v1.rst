@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -37,8 +37,8 @@ Usage
    coefficients = [1., 3., 5.] #  1 + 3x + 5x^2
    data_ws = PolynomialCorrection(data_ws, coefficients, Operation="Divide")
 
-   print "First 5 y values:", data_ws.readY(0)[0:5]
-   print "First 5 error values:", data_ws.readE(0)[0:5]
+   print("First 5 y values: {}".format(data_ws.readY(0)[0:5]))
+   print("First 5 error values: {}".format(data_ws.readE(0)[0:5]))
 
 .. testoutput::
 
@@ -58,8 +58,8 @@ Usage
    coefficients = [2., 4.] #  2 + 4x
    data_ws = PolynomialCorrection(data_ws, coefficients, Operation="Multiply")
 
-   print "First 5 y values:", data_ws.readY(0)[0:5]
-   print "First 5 error values:", data_ws.readE(0)[0:5]
+   print("First 5 y values: {}".format(data_ws.readY(0)[0:5]))
+   print("First 5 error values: {}".format(data_ws.readE(0)[0:5]))
 
 .. testoutput::
 
