@@ -218,7 +218,7 @@ Resolution
   \omega)` file (*_sqw.nxs*) or workspace (*_sqw*).
 
 ELow, EHigh
-  The rebiinning range.
+  The rebinning range.
 
 SampleBinning
   The ratio at which to decrease the number of bins by merging of
@@ -251,18 +251,22 @@ Save Result
 A note on Binning
 ~~~~~~~~~~~~~~~~~
   
-The bin width is determined by the binning range and the sample binning factor. The number of bins is automatically calculated based on the **SampleBinning** specified. The width is the determined by the width of the range divided by the number of bins.
+The bin width is determined by the binning range and the sample binning factor. The number of bins is automatically 
+calculated based on the **SampleBinning** specified. The width is determined by the width of the range divided 
+by the number of bins.
 
-The calculated binning parameters are displayed alongside the binning options:
+The following binning parameters are not enterable by the user and are instead automatically calculated through
+the :ref:`TransformToIqt <algm-TransformToIqt>` algorithm once a valid resolution file has been loaded. These binning parameters are 
+displayed alongside the binning options:
 
 EWidth
   The calculated bin width.
 
 SampleBins
-  Number of bins in the sample after rebinning.
+  The number of bins in the sample after rebinning.
 
 ResolutionBins
-  Number of bins in the resolution after rebinning, typically this should be at
+  The number of bins in the resolution after rebinning. Typically this should be at
   least 5 and a warning will be shown if it is less.
 
 
@@ -454,7 +458,7 @@ This interface can be used for a jump diffusion fit as well as fitting across
 EISF. This is done by means of the
 :ref:`QENSFitSequential <algm-QENSFitSequential>` algorithm.
 
-The fit types available in F(Q)Fit are :ref:`ChudleyElliot <func-ChudleyElliot>`, :ref:`HallRoss <func-HallRoss>`, 
+The fit types available in F(Q)Fit are :ref:`ChudleyElliot <func-ChudleyElliot>`, :ref:`HallRoss <func-Hall-Ross>`, 
 :ref:`FickDiffusion <func-FickDiffusion>`, :ref:`TeixeiraWater <func-TeixeiraWater>`, :ref:`EISFDiffCylinder <func-EISFDiffCylinder>`, 
 :ref:`EISFDiffSphere <func-EISFDiffSphere>` and :ref:`EISFDiffSphereAlkyl <func-EISFDiffSphereAlkyl>`.
 

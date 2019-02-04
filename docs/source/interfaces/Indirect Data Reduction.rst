@@ -48,17 +48,24 @@ Manage Directories
   Opens the Manage Directories dialog allowing you to change your search directories
   and default save directory and enable/disable data archive search.
 
-ISIS Energy Transfer
---------------------
+ISIS/ILL Energy Transfer
+------------------------
 
-This tab provides you with the functionality to convert the raw data from the
-experiment run into units of :math:`\Delta E`. See the algorithm :ref:`ISISIndirectEnergyTransfer <algm-ISISIndirectEnergyTransfer>`.
+If the default facility has been set to ISIS, then the ISIS Energy Transfer tab will be available. However, this tab will 
+be replaced by the ILL Energy Transfer tab if the default facility has been set to ILL. A further explanation of each tab 
+can be found below.
+
+ISIS Energy Transfer
+~~~~~~~~~~~~~~~~~~~~
+
+This tab provides you with the functionality to convert the raw data from the experiment run into 
+units of :math:`\Delta E`. See the algorithm :ref:`ISISIndirectEnergyTransfer <algm-ISISIndirectEnergyTransfer>`.
 
 .. interface:: Data Reduction
   :widget: tabISISEnergyTransfer
 
 Options
-~~~~~~~
+#######
 
 Run Files
   Allows you to select the raw data files for an experiment. You can enter these
@@ -136,7 +143,7 @@ Select Save Formats
   in all cases the file will be saved in the default save directory.
 
 Grouping
-~~~~~~~~
+########
 
 The following options are available for grouping output data:
 
@@ -165,30 +172,26 @@ Default
   This grouping option is only available for TOSCA. It uses the spectra grouping specified in the IPF.
 
 Rebinning
-~~~~~~~~~
+#########
 
 Rebinning can be done using either a single step or multiple steps as described
 in the sections below.
 
 Single
-######
-
-In this mode only a single binning range is defined as a range and width.
+  In this mode only a single binning range is defined as a range and width.
 
 .. interface:: Data Reduction
   :widget: pgSingleRebin
 
 Multiple
-########
-
-In this mode multiple binning ranges can be defined using the rebin string syntax
-used by the :ref:`Rebin <algm-Rebin>` algorithm.
+  In this mode multiple binning ranges can be defined using the rebin string syntax
+  used by the :ref:`Rebin <algm-Rebin>` algorithm.
 
 .. interface:: Data Reduction
   :widget: pgMultipleRebin
 
 ILL Energy Transfer
--------------------
+~~~~~~~~~~~~~~~~~~~
 
 This tab handles the reduction of data from the IN16B instrument and will appear when the default facility is set to be 
 the ILL. See the algorithm :ref:`IndirectILLEnergyTransfer <algm-IndirectILLEnergyTransfer>`.
@@ -197,7 +200,7 @@ the ILL. See the algorithm :ref:`IndirectILLEnergyTransfer <algm-IndirectILLEner
   :widget: tabILLEnergyTransfer
 
 Reduction Type
-~~~~~~~~~~~~~~
+##############
 
 There are two reduction types of IN16B data: Quasi-Elastic Neutron Scattering (QENS) or Fixed Window Scans (FWS).
 The latter can be either Elastic (EFWS) or Inelastic (IFWS).
@@ -207,7 +210,7 @@ There are several properties in common between the two, and several others that 
 The specific ones will show up or disappear corresponding to the choice of the reduction type.
 
 Common Options
-~~~~~~~~~~~~~~
+##############
 
 Input File
   Used to select the raw data in ``.nxs`` format. Note that multiple files can be specified following :py:obj:`MultipleFileProperty <mantid.api.MultipleFileProperty>` instructions.
@@ -239,7 +242,7 @@ Save
   directory.
 
 QENS-only Options
-~~~~~~~~~~~~~~~~~
+#################
 
 Sum All Runs
   If checked, all the input runs will be summed while loading.
@@ -260,7 +263,7 @@ Unmirror Options
 
 
 FWS-only Options
-~~~~~~~~~~~~~~~~
+################
 
 Observable
   This is the scanning observable, that will become the x-axis of the final result.
@@ -275,10 +278,10 @@ Sum/Interpolate
   Default behaviour is Sum. Interpolation is done using cubic (or linear for 2 measured values only) splines.
   If interpolation is requested, x-axis will be sorted automatically.
 
-ISIS Calibration & Resolution
------------------------------
+ISIS Calibration
+----------------
 
-This tab gives you the ability to create Calibration and Resolution files.
+This tab gives you the ability to create Calibration and Resolution files, and is only available when the default facility is set to ISIS.
 
 The calibration file is normalised to an average of 1.
 
@@ -365,7 +368,7 @@ ISIS Diagnostics
 
 This tab allows you to perform an integration on a raw file over a specified
 time of flight range, and is equivalent to the Slice functionality found in
-MODES.
+MODES. It is only available when the default facility is set to ISIS.
 
 .. interface:: Data Reduction
   :widget: tabISISDiagnostics
