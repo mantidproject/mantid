@@ -1,18 +1,10 @@
-import sys
 import six
-
 import unittest
-
-if sys.version_info.major < 2:
-    from unittest import mock
-else:
-    import mock
-
 import os
 from Muon.GUI.Common.load_file_widget.model import BrowseFileWidgetModel
 from Muon.GUI.Common.muon_load_data import MuonLoadData
 from Muon.GUI.Common.muon_data_context import MuonDataContext
-from Muon.GUI.Common.utilities.muon_test_helpers import IteratorWithException
+
 
 class LoadFileWidgetModelTest(unittest.TestCase):
 
@@ -21,14 +13,6 @@ class LoadFileWidgetModelTest(unittest.TestCase):
         self.context = MuonDataContext()
         self.context.instrument = 'EMU'
         self.model = BrowseFileWidgetModel(self.data, self.context)
-
-        # patcher = mock.patch('Muon.GUI.Common.load_file_widget.model.load_utils')
-        # self.addCleanup(patcher.stop)
-        # self.load_utils_patcher = patcher.start()
-
-    def mock_load_function(self, files_to_load, load_return_values):
-        self.load_utils_patcher.load_workspace_from_filename = mock.Mock(side_effect=load_return_values)
-        self.model.loadData(files_to_load)
 
     def assert_model_empty(self):
         self.assertEqual(self.model.loaded_workspaces, [])
@@ -72,7 +56,8 @@ class LoadFileWidgetModelTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.model.execute()
 
-        six.assertCountEqual(self, [os.path.split(filename)[-1] for filename in self.model.loaded_filenames], ['EMU00019489.nxs', 'EMU00006473.nxs'])
+        six.assertCountEqual(self, [os.path.split(filename)[-1] for filename in self.model.loaded_filenames],
+                             ['EMU00019489.nxs', 'EMU00006473.nxs'])
         six.assertCountEqual(self, self.model.loaded_runs, [[19489], [6473]])
 
 
