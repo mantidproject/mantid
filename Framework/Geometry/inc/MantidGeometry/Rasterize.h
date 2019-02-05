@@ -21,7 +21,7 @@ class CSGObject;
 /// beam
 struct MANTID_GEOMETRY_DLL Raster {
 public:
-  void resize(size_t numVolumeElements);
+  void reserve(size_t numVolumeElements);
 
   std::vector<double> l1;            ///< Cached L1 distances
   std::vector<double> volume;        ///< Cached element volumes
@@ -30,6 +30,14 @@ public:
 };
 
 namespace Rasterize {
+
+MANTID_GEOMETRY_DLL Raster calculate(const Kernel::V3D &beamDirection,
+                                     const Geometry::CSGObject &shape,
+                                     const double cubeSizeInMetre);
+
+MANTID_GEOMETRY_DLL Raster calculate(const Kernel::V3D &beamDirection,
+                                     const boost::shared_ptr<IObject> shape,
+                                     const double cubeSizeInMetre);
 
 MANTID_GEOMETRY_DLL Raster calculateCylinder(const Kernel::V3D &beamDirection,
                                              const Geometry::CSGObject &shape,
