@@ -19,9 +19,9 @@ The input filename follows the syntax from
 :py:obj:`MultipleFileProperty <mantid.api.MultipleFileProperty>`
 
 This workflow makes use of :ref:`ConvertToMD <algm-ConvertToMD>` and
-:ref:`MDNormSCD <algm-MDNormSCD>` so these should be reviewed to
-better understand all the options. An example of creating the Solid
-Angle and Flux workspaces are included in :ref:`MDNormSCD
+:ref:`MDNorm <algm-MDNorm>` so these should be reviewed to better
+understand all the options. An example of creating the Solid Angle and
+Flux workspaces are included in :ref:`MDNormSCD
 <algm-MDNormSCD>`. :ref:`MDNormSCDPreprocessIncoherent
 <algm-MDNormSCDPreprocessIncoherent>` can be used to process Vanadium
 data for the Solid Angle and Flux workspaces.
@@ -41,9 +41,10 @@ Background
 ##########
 
 The background is processed the same as the data except that the
-Goniometer is copied from the data before setting the :ref:`UB matrix <Lattice>`. If a
-background is included three workspaces are create. If
-"OutputWorkspace" is set to "ws" you will get the following.
+Goniometer is copied from the data before setting the :ref:`UB matrix
+<Lattice>`. If a background is included three workspaces are
+create. If "OutputWorkspace" is set to "ws" you will get the
+following.
 
 "ws_normalizedBackground" containing the normalised background.
 
@@ -61,15 +62,15 @@ If no background is used then the "ws" is just the normalised data.
 Symmetries
 ##########
 
-The symmetry is applied by manipulating the :ref:`UB matrix <Lattice>`.
-The SymmetryOps parameters can either be defined as a :ref:`space group <Point and
-space groups>` (number or name) were all the symmetries for that group
-is applied, or you can specify individual :ref:`symmetries <Symmetry
-groups>` to apply.
+The SymmetryOperations parameters can either be defined as a
+:ref:`point or space group <Point and space groups>` were all the
+symmetries for that group is applied, or you can specify individual
+:ref:`symmetries <Symmetry groups>` to apply.
 
-For example setting SymmetryOps to "P 31 2 1", "152" or "x,y,z;
--y,x-y,z+1/3; -x+y,-x,z+2/3; y,x,-z; x-y,-y,-z+2/3; -x,-x+y,-z+1/3"
-are equivalent.
+For example setting SymmetryOperations to space group "P 31 2 1",
+point group "321" or "x,y,z; -y,x-y,z; -x+y,-x,z; y,x,-z; x-y,-y,-z;
+-x,-x+y,-z" are equivalent. Note these symmetries are on the real
+lattice not reciprocal.
 
 Temporary Workspaces
 ####################
@@ -113,9 +114,9 @@ Usage
                                  OutputWorkspace='output',
                                  SetGoniometer=True,
                                  Axis0="BL9:Mot:Sample:Axis1,0,1,0,1",
-                                 BinningDim0='-10.05,10.05,201',
-                                 BinningDim1='-10.05,10.05,201',
-                                 BinningDim2='-0.1,0.1,1')
+                                 Dimension0Binning='-10.05,0.1,10.05',
+                                 Dimension1Binning='-10.05,0.1,10.05',
+                                 Dimension2Binning='-0.1,0.1')
 
 .. figure:: /images/SingleCrystalDiffuseReduction_corelli_single.png
 
@@ -130,10 +131,9 @@ Usage
                                  OutputWorkspace='output',
                                  SetGoniometer=True,
                                  Axis0="BL9:Mot:Sample:Axis1,0,1,0,1",
-                                 BinningDim0='-10.05,10.05,201',
-                                 BinningDim1='-10.05,10.05,201',
-                                 BinningDim2='-0.1,0.1,1')
-
+                                 Dimension0Binning='-10.05,0.1,10.05',
+                                 Dimension1Binning='-10.05,0.1,10.05',
+                                 Dimension2Binning='-0.1,0.1')
 
 .. figure:: /images/SingleCrystalDiffuseReduction_corelli_multiple.png
 
@@ -148,10 +148,10 @@ Usage
                                  OutputWorkspace='output',
                                  SetGoniometer=True,
                                  Axis0="BL9:Mot:Sample:Axis1,0,1,0,1",
-                                 BinningDim0='-10.05,10.05,201',
-                                 BinningDim1='-10.05,10.05,201',
-                                 BinningDim2='-0.1,0.1,1',
-                                 SymmetryOps="P 31 2 1")
+                                 Dimension0Binning='-10.05,0.1,10.05',
+                                 Dimension1Binning='-10.05,0.1,10.05',
+                                 Dimension2Binning='-0.1,0.1',
+                                 SymmetryOperations="P 31 2 1")
 
 .. figure:: /images/SingleCrystalDiffuseReduction_corelli_single_sym.png
 
@@ -166,10 +166,10 @@ Usage
                                  OutputWorkspace='output',
                                  SetGoniometer=True,
                                  Axis0="BL9:Mot:Sample:Axis1,0,1,0,1",
-                                 BinningDim0='-10.05,10.05,201',
-                                 BinningDim1='-10.05,10.05,201',
-                                 BinningDim2='-0.1,0.1,1',
-                                 SymmetryOps="P 31 2 1")
+                                 Dimension0Binning='-10.05,0.1,10.05',
+                                 Dimension1Binning='-10.05,0.1,10.05',
+                                 Dimension2Binning='-0.1,0.1',
+                                 SymmetryOperations="P 31 2 1")
 
 
 .. figure:: /images/SingleCrystalDiffuseReduction_corelli_multiple_sym.png
@@ -187,10 +187,10 @@ Usage
                                  OutputWorkspace='output',
                                  SetGoniometer=True,
                                  Axis0="BL9:Mot:Sample:Axis1,0,1,0,1",
-                                 BinningDim0='-10.05,10.05,201',
-                                 BinningDim1='-10.05,10.05,201',
-                                 BinningDim2='-0.1,0.1,1',
-                                 SymmetryOps="P 31 2 1")
+                                 Dimension0Binning='-10.05,0.1,10.05',
+                                 Dimension1Binning='-10.05,0.1,10.05',
+                                 Dimension2Binning='-0.1,0.1',
+                                 SymmetryOperations="P 31 2 1")
 
 .. figure:: /images/SingleCrystalDiffuseReduction_corelli_multiple_sym_bkg.png
 
@@ -207,10 +207,10 @@ Usage
                                  OutputWorkspace='output',
                                  SetGoniometer=True,
                                  Axis0="BL9:Mot:Sample:Axis1,0,1,0,1",
-                                 BinningDim0='-10.05,10.05,201',
-                                 BinningDim1='-10.05,10.05,201',
-                                 BinningDim2='-0.1,0.1,1',
-                                 SymmetryOps="P 31 2 1")
+                                 Dimension0Binning='-10.05,10.05,0.1',
+                                 Dimension1Binning='-10.05,10.05,0.1',
+                                 Dimension2Binning='-0.1,0.1',
+                                 SymmetryOperations="P 31 2 1")
 
 .. figure:: /images/SingleCrystalDiffuseReduction_corelli_multiple_sym_bkg_elastic.png
 
@@ -227,13 +227,20 @@ Usage
                                  OutputWorkspace='output',
                                  SetGoniometer=True,
                                  Axis0="BL9:Mot:Sample:Axis1,0,1,0,1",
-                                 Uproj='1,1,0',
-                                 Vproj='1,-1,0',
-                                 Wproj='0,0,1',
-                                 BinningDim0='-7.5375,7.5375,201',
-                                 BinningDim1='-13.165625,13.165625,201',
-                                 BinningDim2='-0.1,0.1,1',
-                                 SymmetryOps="P 31 2 1")
+                                 QDimension0='1,1,0',
+                                 QDimension1='1,-1,0',
+                                 QDimension2='0,0,1',
+                                 Dimension0Binning='-7.5375,0.075,7.5375',
+                                 Dimension1Binning='-13.165625,0.13100125,13.165625',
+                                 Dimension2Binning='-0.1,0.1',
+                                 SymmetryOperations="P 31 2 1")
+
+   import matplotlib.pyplot as plt
+   from mantid import plots
+   fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})
+   c = ax.pcolormesh(mtd['output'],vmin=0, vmax=1e-5)
+   fig.colorbar(c)
+   plt.show()
 
 .. figure:: /images/SingleCrystalDiffuseReduction_corelli_multiple_sym_bkg_HH0.png
 
