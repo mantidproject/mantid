@@ -533,6 +533,10 @@ class SANSDataProcessorGui(QMainWindow,
         # Notify presenters
         self._call_settings_listeners(lambda listener: listener.on_user_file_load())
 
+    def on_user_file_load_failure(self):
+        set_setting(self.__generic_settings, self.__user_file_key, "")
+        self.user_file_line_edit.setText("")
+
     def set_out_default_user_file(self):
         """
         Load a default user file, called on view set-up

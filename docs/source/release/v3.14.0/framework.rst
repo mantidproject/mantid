@@ -88,6 +88,7 @@ Improvements
 - The documentation in :ref:`EventFiltering` and :ref:`FilterEvents <algm-FilterEvents>` have been extensively rewritten to aid in understanding what the code does.
 - All of the numerical integration based absorption corrections which use :ref:`AbsorptionCorrection <algm-AbsorptionCorrection>` will generate an exception when they fail to generate a gauge volume. Previously, they would silently generate a correction workspace that was all not-a-number (``NAN``).
 - Various clarifications and additional links in the geometry and material documentation pages
+- :ref:`SetSample <algm-SetSample>` and :ref:`SetSampleMaterial <algm-SetSampleMaterial>` now accept materials without ``ChemicalFormula`` or ``AtomicNumber``. In this case, all cross sections and ``SampleNumberDensity`` have to be given.
 
 Bugfixes
 ########
@@ -126,8 +127,8 @@ New
  * :class:`mantid.geometry.DetectorInfo`
  * :class:`mantid.api.SpectrumInfo`
 
-- :class:`mantid.geometry.ComponentInfo` is exposed to allow the user to access geometric information about the components which are part of a beamline.
-- :class:`mantid.geometry.DetectorInfo` offers the user the ability to access geometric information about the detector(s) which are part of a beamline. ``DetectorInfo`` has also been given an iterator to allow users to write more Pythonic loops rather than normal index based loops.
+- :class:`mantid.geometry.ComponentInfo` is exposed to allow the user to access geometric information about the components which are part of a beamline. Iterator support is also provided via python.
+- :class:`mantid.geometry.DetectorInfo` offers the user the ability to access geometric information about the detector(s) which are part of a beamline. ``DetectorInfo`` has also been given a python iterator.
 - :class:`mantid.api.SpectrumInfo` allows the user to access information about the spectra being used in a beamline. ``SpectrumInfo`` has also been given an iterator to allow users to write more Pythonic loops rather than normal index based loops. In addition to this ``SpectrumDefinition`` objects can also be accessed via a :class:`mantid.api.SpectrumInfo` object. The ``SpectrumDefinition`` object can be used to obtain information about the spectrum to detector mapping and provides a definition of what a spectrum comprises, i.e. indices of all detectors that contribute to the data stored in the spectrum.
 - Added new :ref:`unit <Unit Factory>` called ``Temperature`` which has units of Kelvin.
 - Importing ``mantid`` no longer initializes the ``FrameworkManager``. This allows separate classes to be imported without requiring a long delay in waiting for the framework to start. Amongst other things this allows the application name to be set correctly:
@@ -146,7 +147,9 @@ Improvements
 - :ref:`ChudleyElliot <func-ChudleyElliot>` includes hbar in the definition
 - :ref:`Functions <FitFunctionsInPython>` may now have their constraint penalties for fitting set in python using ``function.setConstraintPenaltyFactor("parameterName", double)``.
 - :py:obj:`mantid.kernel.Logger` now handles unicode in python2
-
+- :py:meth:`mantid.api.ITableWorkspace.columnTypes` now returns human readable strings for non-primitive column types.
+- It is now possible to build custom materials with :class:`mantid.kernel.MaterialBuilder` without setting a formula or atomic number. In this case, all cross sections and number density have to be given.
+- Python plotting now handles `twinx` and `twiny` axes for workspaces.
 
 Bugfixes
 ########

@@ -74,24 +74,6 @@ class WorkbenchTableWidgetItemTest(unittest.TestCase):
         self.assertEqual(mock_data, w.data(Qt.DisplayRole))
         self.assertEqual(mock_data, w.display_data)
 
-    def test_lt(self):
-        """
-        Test that the widget properly compares with other widgets.
-
-        :return:
-        """
-        w1 = WorkbenchTableWidgetItem(500, editable=False)
-        w2 = WorkbenchTableWidgetItem(1500, editable=False)
-        self.assertTrue(w1 < w2)
-
-        w1 = WorkbenchTableWidgetItem(100.40, editable=False)
-        w2 = WorkbenchTableWidgetItem(100.41, editable=False)
-        self.assertTrue(w1 < w2)
-
-        w1 = WorkbenchTableWidgetItem("apples", editable=False)
-        w2 = WorkbenchTableWidgetItem("potatoes", editable=False)
-        self.assertTrue(w1 < w2)
-
     def test_reset(self):
         w = WorkbenchTableWidgetItem(500, editable=False)
 

@@ -12,6 +12,7 @@ from __future__ import (absolute_import, division, print_function)
 
 from mantid.dataobjects import PeaksWorkspace, TableWorkspace
 from mantid.kernel import V3D
+from mantid.simpleapi import DeleteTableRows, SortPeaksWorkspace, SortTableWorkspace, StatisticsOfTableWorkspace
 from mantidqt.widgets.tableworkspacedisplay.marked_columns import MarkedColumns
 
 
@@ -42,7 +43,6 @@ class TableWorkspaceDisplayModel:
         self.ws = ws
         self.ws_num_rows = self.ws.rowCount()
         self.ws_num_cols = self.ws.columnCount()
-        self.ws_column_types = self.ws.columnTypes()
         self.marked_columns = MarkedColumns()
         self._original_column_headers = self.get_column_headers()
 
@@ -86,4 +86,29 @@ class TableWorkspaceDisplayModel:
         # from the string to that it can be properly set
         if is_v3d:
             data = self._get_v3d_from_str(data)
-        self.ws.setCell(row, col, data)
+        # The False stops the replace workspace ADS event from being triggered
+        # The replace event causes the TWD model to be replaced, which in turn
+        # deletes the previous table item objects, however this happens
+        # at the same time as we are trying to locally update the data in the
+        # item object itself, which causes a Qt exception that the object has
+        # already been deleted and a crash
+        self.ws.setCell(row, col, data, notify_replace=False)
+
+    def workspace_equals(self, workspace_name):
+        return self.ws.name() == workspace_name
+
+    def delete_rows(self, selected_rows):
+        DeleteTableRows(self.ws, selected_rows)
+
+    def get_statistics(self, selected_columns):
+        stats = StatisticsOfTableWorkspace(self.ws, selected_columns)
+        return stats
+
+    def sort(self, column_index, sort_ascending):
+        column_name = self.ws.getColumnNames()[column_index]
+        if self.is_peaks_workspace():
+            SortPeaksWorkspace(InputWorkspace=self.ws, OutputWorkspace=self.ws, ColumnNameToSortBy=column_name,
+                               SortAscending=sort_ascending)
+        else:
+            SortTableWorkspace(InputWorkspace=self.ws, OutputWorkspace=self.ws, Columns=column_name,
+                               Ascending=sort_ascending)
