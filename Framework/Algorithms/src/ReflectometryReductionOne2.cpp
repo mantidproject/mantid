@@ -420,11 +420,10 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::makeIvsLam() {
       outputDebugWorkspace(result, wsName, "_norm_trans", debug, step);
     }
 
-	// Crop to wavelength limits
+    // Crop to wavelength limits
     g_log.debug("Cropping output workspace\n");
     result = cropWavelength(result, false);
     outputDebugWorkspace(result, wsName, "_cropped", debug, step);
-
   }
 
   return result;
