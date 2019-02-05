@@ -9,13 +9,15 @@
 
 from mantidqt.project.recovery.recoverygui.projectrecoverymodel import ProjectRecoveryModel
 from mantidqt.project.recovery.recoverygui.projectrecoverywidgetview import ProjectRecoveryWidgetView
+from mantidqt.project.recovery.recoverygui.recoveryfailureview import RecoveryFailureView
+
 
 class ProjectRecoveryPresenter(object):
     def __init__(self, project_recovery):
         self.project_recovery = project_recovery
 
         self.current_view = None
-        self.model = ProjectRecoveryModel(self.project_recovery)
+        self.model = ProjectRecoveryModel(self.project_recovery, self)
 
         self.start_mantid_normally_called = False
 
@@ -65,7 +67,11 @@ class ProjectRecoveryPresenter(object):
         return False
 
     def get_row(self, index):
-        return self.model.get_row(index)
+        row = self.model.get_row(index)
+        if row == []:
+            return ["", "", ""]
+        else:
+            return row
 
     def recover_last(self):
         if self.model.has_recovery_started():
@@ -107,9 +113,7 @@ class ProjectRecoveryPresenter(object):
         self.current_view.change_start_mantid_button("Cancel Recovery")
 
     def fill_all_rows(self):
-        # We only want this to run once so only if current_view is RecoveryView
-        if isinstance(self.current_view, ProjectRecoveryWidgetView):
-            self.model.fill_rows()
+        self.model.fill_rows()
 
     def set_up_progress_bar(self, max_value):
         self.current_view.set_progress_bar_maximum(max_value)

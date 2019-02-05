@@ -53,6 +53,7 @@ from mantidqt.widgets.codeeditor.execution import PythonCodeExecution  # noqa
 from mantidqt.utils.qt import (add_actions, create_action, plugins,
                                widget_updates_disabled)  # noqa
 from mantidqt.project.project import Project  # noqa
+from mantidqt.project.recovery.projectrecovery import ProjectRecovery  # noqa
 
 # Pre-application setup
 plugins.setup_library_paths()
@@ -170,6 +171,7 @@ class MainWindow(QMainWindow):
 
         # Project
         self.project = None
+        self.project_recovery = None
 
     def setup(self):
         # menus must be done first so they can be filled by the
@@ -214,8 +216,11 @@ class MainWindow(QMainWindow):
         self.workspacewidget.register_plugin()
         self.widgets.append(self.workspacewidget)
 
-        # Set up the project object
+        # Set up the project and recovery objects
         self.project = Project(GlobalFigureManager, find_all_windows_that_are_savable)
+        self.project_recovery = ProjectRecovery(globalfiguremanager=GlobalFigureManager,
+                                                multifileinterpreter=MultiFileEditor,
+                                                window_finder=find_all_windows_that_are_savable)
 
         # uses default configuration as necessary
         self.readSettings(CONF)
@@ -576,6 +581,12 @@ def start_workbench(app, command_line_options):
         if command_line_options.quit:
             main_window.close()
             return 0
+
+    # Let's get going with project recovery checks and spawning of GUIs
+    if main_window.project_recovery.check_for_recover_checkpoint():
+        main_window.project_recovery.attempt_recovery()
+
+    main_window.project_recovery.start_recovery_thread()
 
     # lift-off!
     return app.exec_()

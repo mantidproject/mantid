@@ -19,18 +19,21 @@ from mantid.kernel import ConfigService, logger
 from mantid.api import AnalysisDataService as ADS, WorkspaceGroup
 from mantidqt.project.projectsaver import ProjectSaver
 from mantidqt.project.projectloader import ProjectLoader
+from mantidqt.project.recovery.recoverygui.projectrecoverypresenter import ProjectRecoveryPresenter
 from mantid.simpleapi import OrderWorkspaceHistory, AlgorithmManager
 
 
 class ProjectRecovery(object):
     def __init__(self, globalfiguremanager, window_finder, multifileinterpreter):
-        self.recovery_directory = os.path.join(ConfigService.getAppDataDir(), "workbench-recovery")
+        self.recovery_directory = os.path.join(ConfigService.getAppDataDirectory(), "workbench-recovery")
         self.recovery_directory_hostname = os.path.join(self.recovery_directory, getpass.getuser())
-        self.recovery_directory_pid = os.path.join(self.recovery_directory_hostname, os.getpid())
+        self.recovery_directory_pid = os.path.join(self.recovery_directory_hostname, str(os.getpid()))
 
-        self.recovery_order_workspace_history_file = os.path.join(ConfigService.getAppDataDir(), "ordered_recovery.py")
+        self.recovery_order_workspace_history_file = os.path.join(ConfigService.getAppDataDirectory(), "ordered_recovery.py")
 
-        self.time_between_saves = 300.0  # seconds
+        self.maximum_num_checkpoints = 5
+
+        self.time_between_saves = 5.0  # seconds
         self._timer_thread = Timer(self.time_between_saves, self.recovery_save)
 
         self.recovery_file_ext = ".recfile"
@@ -63,15 +66,20 @@ class ProjectRecovery(object):
         # The recovery GUI's presenter is set when needed
         self.recovery_presenter = None
 
+        self.thread_on = False
+
     ######################################################
     #  Utility
     ######################################################
 
     def start_recovery_thread(self):
-        self._timer_thread.start()
+        if not self.thread_on:
+            self._timer_thread.start()
+            self.thread_on = True
 
     def stop_recovery_thread(self):
         self._timer_thread.cancel()
+        self.thread_on = False
 
     @staticmethod
     def _remove_empty_folders_from_dir(directory):
@@ -87,36 +95,72 @@ class ProjectRecovery(object):
     def _remove_all_folders_from_dir(directory):
         shutil.rmtree(directory)
 
+    @staticmethod
+    def sort_by_last_modified(paths):
+        paths.sort(key=lambda x: os.path.getmtime(x))
+        return paths
+
+    def get_pid_folder_to_be_used_to_load_a_checkpoint_from(self):
+        # Get all pids and order them
+        paths = self.listdir_fullpath(self.recovery_directory_hostname)
+        paths = self.sort_by_last_modified(paths)
+
+        # Get just the pids in a list
+        pids = []
+        for path in paths:
+            pids.append(int(os.path.basename(path)))
+
+        for pid in pids:
+            if not psutil.pid_exists(pid):
+                return os.path.join(self.recovery_directory_hostname, str(pid))
+
+    @staticmethod
+    def listdir_fullpath(directory):
+        return [os.path.join(directory, item) for item in os.listdir(directory)]
+
     ######################################################
     #  Saving
     ######################################################
 
     def recovery_save(self):
+        # Set that recovery thread is not running anymore
+        self.thread_on = False
+
         # todo: Get a list of interfaces that could be saved and pass it down to save_project but check it's length is
         #  greater than 0 for this check
-        if len(ADS.getObjectNames()) == 0:
-            logger.debug("Project Recovery: Nothing to save")
-            self._spin_off_another_time_thread()
-            return
+        try:
+            if len(ADS.getObjectNames()) == 0:
+                logger.debug("Project Recovery: Nothing to save")
+                self._spin_off_another_time_thread()
+                return
 
-        logger.debug("Project Recovery: Saving Started")
+            logger.debug("Project Recovery: Saving Started")
 
-        # Create directory for save location
-        recovery_dir = os.path.join(self.recovery_directory_pid, datetime.datetime.now().isoformat())
-        if not os.path.exists(recovery_dir):
-            os.makedirs(recovery_dir)
+            # Create directory for save location
+            recovery_dir = os.path.join(self.recovery_directory_pid, datetime.datetime.now().isoformat())
+            if not os.path.exists(recovery_dir):
+                os.makedirs(recovery_dir)
 
-        self._add_lock_file(directory=recovery_dir)
+            self._add_lock_file(directory=recovery_dir)
 
-        # Save workspaces
-        self._save_workspaces(directory=recovery_dir)
+            # Save workspaces
+            self._save_workspaces(directory=recovery_dir)
 
-        # Save project
-        self._save_project(directory=recovery_dir)
+            # Save project
+            self._save_project(directory=recovery_dir)
 
-        self._remove_lock_file(directory=recovery_dir)
+            self._remove_lock_file(directory=recovery_dir)
 
-        logger.debug("Project Recovery: Saving finished")
+            # Clear the oldest checkpoints
+            self.remove_oldest_checkpoints()
+
+            logger.debug("Project Recovery: Saving finished")
+
+        except Exception as e:
+            if isinstance(e, KeyboardInterrupt):
+                raise
+            # Fail and print to debugger
+            logger.debug("Project Recovery: Failed to save error msg: " + str(e))
 
         # Spin off another timer thread
         self._spin_off_another_time_thread()
@@ -188,7 +232,7 @@ class ProjectRecovery(object):
             # Clean directory first
             self._remove_empty_folders_from_dir(self.recovery_directory_hostname)
 
-            checkpoints = os.listdir(self.recovery_directory_hostname)
+            checkpoints = self.listdir_fullpath(self.recovery_directory_hostname)
             return len(checkpoints) != 0 and len(checkpoints) > self._number_of_workbench_processes()
         except Exception as e:
             if isinstance(e, KeyboardInterrupt):
@@ -205,9 +249,13 @@ class ProjectRecovery(object):
 
         total_mantids = 0
         for proc in psutil.process_iter():
-            process_name = os.path.basename(os.path.normpath(proc.cmdline()[1]))
-            if process_name in executable_names:
-                total_mantids += 1
+            try:
+                process_name = os.path.basename(os.path.normpath(proc.cmdline()[1]))
+                if process_name in executable_names:
+                    total_mantids += 1
+            except IndexError:
+                # Ignore these errors as it's checking the cmdline which causes this on process with no args
+                pass
 
         return total_mantids
 
@@ -216,7 +264,13 @@ class ProjectRecovery(object):
     ######################################################
 
     def attempt_recovery(self):
-        self.recovery_presenter =
+        self.recovery_presenter = ProjectRecoveryPresenter(self)
+
+        failure = self.recovery_presenter.start_recovery_view()
+
+        if failure:
+            while failure:
+                failure = self.recovery_presenter.start_recovery_failure()
 
     def load_checkpoint(self, directory):
         # Start Regen of workspaces
@@ -225,6 +279,10 @@ class ProjectRecovery(object):
         # Load interfaces back. This must occur after workspaces have been loaded back because otherwise some interfaces
         # may be unable to be recreated.
         self._load_project_interfaces(directory)
+
+    def open_checkpoint_in_script_editor(self, checkpoint):
+        self._compile_recovery_script(directory=checkpoint)
+        self._open_script_in_editor(self.recovery_order_workspace_history_file)
 
     def _load_project_interfaces(self, directory):
         project_loader = ProjectLoader(self.recovery_file_ext)
@@ -268,8 +326,27 @@ class ProjectRecovery(object):
     #  Checkpoint Repair
     ######################################################
 
-    # todo: Function for removing oldest checkpoint
-    # def remove_oldest_checkpoint(self):
+    def remove_oldest_checkpoints(self):
+        paths = self.listdir_fullpath(self.recovery_directory_pid)
+
+        if len(paths) > self.maximum_num_checkpoints:
+            # Order paths in reverse and remove the last folder from existance
+            paths.sort(reverse=True)
+            for ii in range(self.maximum_num_checkpoints, len(paths)):
+                shutil.rmtree(paths[ii])
+
+    def clear_all_unused_checkpoints(self, pid_dir=None):
+        if pid_dir is None:
+            # If no pid directory given then remove user level folder if multiple users else remove workbench-recovery
+            # folder
+            if len(os.listdir(self.recovery_directory)) == 1 and len(os.listdir(self.recovery_directory_hostname)) == 0:
+                path = self.recovery_directory
+            else:
+                path = self.recovery_directory_hostname
+        else:
+            path = pid_dir
+        shutil.rmtree(path)
+
     # todo: Function for deleting all checkpoints
 
     # todo: function to load recovery checkpoint given directory
@@ -280,7 +357,7 @@ class ProjectRecovery(object):
     # todo: Implement repair of checkpoint directory
         # todo: function to find all older checkpoints
             # todo: function to check if a checkpoint is older than a given time
-        # todo:  function to check if a directory is locked
+        # todo: function to check if a directory is locked
 
     # todo: Function to check if recovery checkpoint PIDs are not in use and remove them if they are
 

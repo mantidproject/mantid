@@ -8,19 +8,19 @@
 #
 
 from qtpy.QtWidgets import QDialog, QHeaderView, QTableWidgetItem
-from qtpy.QtCore import pyqtSignal, pyqtSlot, QObject
+from qtpy.QtCore import Signal, Slot, QObject
 from mantidqt.utils.qt import load_ui
 
 
 class ProjectRecoveryWidgetView(QDialog):
     def __init__(self, presenter):
         super(ProjectRecoveryWidgetView, self).__init__()
-        self.ui = load_ui(__file__, "ProjectRecoveryWidget", baseinstance=self)
+        self.ui = load_ui(__file__, "ProjectRecoveryWidget.ui", baseinstance=self)
         self.presenter = presenter
 
         # Set up the ui
-        self.ui.tableWidget.horizontalHeader().setResizeMode(QHeaderView.Stretch)
-        self.ui.tableWidget.verticalHeader().setResizeMode(QHeaderView.Stretch)
+        self.ui.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.ui.tableWidget.verticalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.ui.progressBar.setMinimum(0)
         self._add_data_to_table()
 
@@ -52,23 +52,23 @@ class ProjectRecoveryWidgetView(QDialog):
     #  Signals
     ######################################################
 
-    abort_project_recovery_script = pyqtSignal()
+    abort_project_recovery_script = Signal()
 
     ######################################################
     #  Slots
     ######################################################
-    @pyqtSlot(int)
+    @Slot(int)
     def update_progress_bar(self, new_value):
         self.ui.progressBar.setValue(new_value)
 
-    @pyqtSlot()
+    @Slot()
     def onClickLastCheckpoint(self):
         self.presenter.recover_last()
 
-    @pyqtSlot()
+    @Slot()
     def onClickOpenLastInScriptWindow(self):
         self.presenter.recover_last_in_editor()
 
-    @pyqtSlot()
+    @Slot()
     def onClickStartMantidNormally(self):
         self.presenter.start_mantid_normally()
