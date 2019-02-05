@@ -7,9 +7,9 @@
 #ifndef MANTID_DATAOBJECTS_MORTONINDEX_TYPES_H_
 #define MANTID_DATAOBJECTS_MORTONINDEX_TYPES_H_
 
+#include "int.h"
 #include <Eigen/Dense>
 #include <ostream>
-#include "int.h"
 
 namespace morton_index {
 using std::operator"" _uint128;
@@ -18,7 +18,6 @@ using uint96_t = std::wide_uint<96>;
 using uint128_t = std::uint128_t;
 using uint256_t = std::uint256_t;
 } // namespace morton_index
-
 
 namespace morton_index {
 
