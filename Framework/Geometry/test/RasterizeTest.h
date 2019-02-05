@@ -7,13 +7,13 @@
 #ifndef MANTID_GEOMETRY_RASTERIZETEST_H_
 #define MANTID_GEOMETRY_RASTERIZETEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include <numeric>
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Rasterize.h"
 #include "MantidKernel/V3D.h"
+#include <cxxtest/TestSuite.h>
+#include <numeric>
 
 using namespace Mantid::Geometry;
 using Mantid::Kernel::V3D;
@@ -121,8 +121,8 @@ public:
   }
 
   void test_calculateOffsetCylinder() {
-    const size_t NUM_SLICE{ 3 };
-    const size_t NUM_ANNULLI{ 3 };
+    const size_t NUM_SLICE{3};
+    const size_t NUM_ANNULLI{3};
 
     boost::shared_ptr<IObject> cylinder = createCylinder(false);
     TS_ASSERT(cylinder);

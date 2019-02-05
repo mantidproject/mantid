@@ -24,9 +24,9 @@ void Raster::reserve(size_t numVolumeElements) {
 
 namespace { // anonymous
 
-const V3D X_AXIS{ 1, 0, 0 };
-const V3D Y_AXIS{ 0, 1, 0 };
-const V3D Z_AXIS{ 0, 0, 1 };
+const V3D X_AXIS{1, 0, 0};
+const V3D Y_AXIS{0, 1, 0};
+const V3D Z_AXIS{0, 0, 1};
 
 void getCylinderParameters(const CSGObject &shape, double &radius,
                            double &height, V3D &centerBottomBase, V3D &axis) {
@@ -46,9 +46,9 @@ void getCylinderParameters(const CSGObject &shape, double &radius,
 }
 
 V3D createPerpendicular(const V3D &z_axis) {
-  const std::vector<double> scalars = { fabs(z_axis.scalar_prod(X_AXIS)),
-                                        fabs(z_axis.scalar_prod(Y_AXIS)),
-                                        fabs(z_axis.scalar_prod(Z_AXIS)) };
+  const std::vector<double> scalars = {fabs(z_axis.scalar_prod(X_AXIS)),
+                                       fabs(z_axis.scalar_prod(Y_AXIS)),
+                                       fabs(z_axis.scalar_prod(Z_AXIS))};
   // check against the cardinal axes
   if (scalars[0] == 0.)
     return z_axis.cross_prod(X_AXIS);
@@ -131,8 +131,8 @@ Raster calculate(const V3D &beamDirection, const CSGObject &shape,
     const double yLength = bbox.yMax() - bbox.yMin();
     const double zLength = bbox.zMax() - bbox.zMin();
 
-    const V3D center{ bbox.xMin() + 0.5 * xLength, bbox.yMin() + 0.5 * yLength,
-                      bbox.zMin() + 0.5 * zLength };
+    const V3D center{bbox.xMin() + 0.5 * xLength, bbox.yMin() + 0.5 * yLength,
+                     bbox.zMin() + 0.5 * zLength};
 
     const size_t numXSlices = static_cast<size_t>(xLength / cubeSizeInMetre);
     const size_t numYSlices = static_cast<size_t>(yLength / cubeSizeInMetre);
@@ -148,8 +148,7 @@ Raster calculate(const V3D &beamDirection, const CSGObject &shape,
     Raster result;
     try {
       result.reserve(numVolumeElements);
-    }
-    catch (...) {
+    } catch (...) {
       // Typically get here if the number of volume elements is too large
       // Provide a bit more information
       throw std::logic_error(

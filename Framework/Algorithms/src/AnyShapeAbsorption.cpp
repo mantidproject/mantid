@@ -56,7 +56,8 @@ void AnyShapeAbsorption::initialiseCachedDistances() {
     integrationVolume = constructGaugeVolume();
   }
 
-  const auto raster = Geometry::Rasterize::calculate(m_beamDirection, integrationVolume, m_cubeSide);
+  const auto raster = Geometry::Rasterize::calculate(
+      m_beamDirection, integrationVolume, m_cubeSide);
   m_sampleVolume = raster.totalvolume;
   if (raster.l1.size() == 0)
     throw std::runtime_error("Failed to rasterize shape");

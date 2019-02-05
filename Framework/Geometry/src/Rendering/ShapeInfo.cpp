@@ -61,7 +61,7 @@ void ShapeInfo::setSphere(const V3D &c, double r) {
 void ShapeInfo::setCylinder(const V3D &centerBottomBase, const V3D &axis,
                             double r, double h) {
   m_shape = GeometryShape::CYLINDER;
-  m_points.assign({ centerBottomBase, axis });
+  m_points.assign({centerBottomBase, axis});
   m_radius = r;
   m_height = h;
 }
