@@ -9,11 +9,15 @@
 
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/Q1DWeighted.h"
+#include "MantidDataHandling/LoadNexusProcessed.h"
 #include "MantidDataHandling/LoadSpice2D.h"
 #include "MantidDataHandling/MoveInstrumentComponent.h"
+
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
+using Mantid::Algorithms::Q1DWeighted;
+using Mantid::DataHandling::LoadNexusProcessed;
 using namespace Mantid::Kernel;
 
 class Q1DWeightedTest : public CxxTest::TestSuite {
@@ -297,8 +301,40 @@ private:
     mover.execute();
   }
 
-  Mantid::Algorithms::Q1DWeighted radial_average;
+  Q1DWeighted radial_average;
   std::string m_inputWS;
+};
+
+class Q1DWeightedTestPerformance : public CxxTest::TestSuite {
+public:
+  static Q1DWeightedTestPerformance *createSuite() {
+    return new Q1DWeightedTestPerformance();
+  }
+  static void destroySuite(Q1DWeightedTestPerformance *suite) { delete suite; }
+
+  Q1DWeightedTestPerformance() {}
+
+  void setUp() override {
+    LoadNexusProcessed loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename", "ILL_D33_LTOF_red.nxs");
+    loader.setPropertyValue("OutputWorkspace", "__in");
+    loader.execute();
+    m_alg.initialize();
+    m_alg.setPropertyValue("InputWorkspace", "__in");
+    m_alg.setPropertyValue("OutputBinning", "0.0003,-0.1,10.");
+    m_alg.setPropertyValue("OutputWorkspace", "__out");
+  }
+
+  void tearDown() override {
+    AnalysisDataService::Instance().remove("__in");
+    AnalysisDataService::Instance().remove("__out");
+  }
+
+  void test_performance() { TS_ASSERT_THROWS_NOTHING(m_alg.execute()); }
+
+private:
+  Q1DWeighted m_alg;
 };
 
 #endif /*Q1DWEIGHTEDTEST_H_*/
