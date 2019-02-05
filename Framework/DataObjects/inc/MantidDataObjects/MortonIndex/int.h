@@ -34,7 +34,6 @@
 #include <system_error>
 #include <type_traits>
 
-
 /**
  * class wide_integer has been created working on
  * proposals for c++ standard "Numbers TS" in 2017
@@ -151,7 +150,6 @@ public:
   base_type *ptr() { return m_arr; }
 
 private:
-
   template <size_t Bits2, typename Signed2> friend class wide_integer;
 
   friend class numeric_limits<wide_integer<Bits, signed>>;
