@@ -198,7 +198,7 @@ class SANSILLIntegration(PythonAlgorithm):
         """
         Returns default q binning for tof mode
         """
-        return [q_min, -0.2, q_max]
+        return [q_min, -0.01, q_max]
 
     def _pixel_q_binning(self, q_min, q_max, pixel_size, wavelength, l2):
         """
@@ -312,8 +312,6 @@ class SANSILLIntegration(PythonAlgorithm):
             wedge_angle = self.getProperty('WedgeAngle').value
             wedge_offset = self.getProperty('WedgeOffset').value
             asymm_wedges = self.getProperty('AsymmetricWedges').value
-            if run.getLogData('tof_mode').value == 'TOF':
-                ConvertToDistribution(Workspace=self._input_ws)
             Q1DWeighted(InputWorkspace=self._input_ws, OutputWorkspace=self._output_ws,
                         NumberOfWedges=n_wedges, OutputBinning=q_binning,
                         WedgeWorkspace=wedge_ws, WedgeAngle=wedge_angle, WedgeOffset=wedge_offset,
