@@ -45,9 +45,10 @@ class LoadRunWidgetPresenterMultipleFileTest(unittest.TestCase):
 
         self.data = MuonLoadData()
         self.context = MuonDataContext()
+        self.context.instrument = 'MUSR'
         self.load_file_view = BrowseFileWidgetView(self.obj)
         self.load_run_view = LoadRunWidgetView(self.obj)
-        self.load_file_model = BrowseFileWidgetModel(self.data)
+        self.load_file_model = BrowseFileWidgetModel(self.data, self.context)
         self.load_run_model = LoadRunWidgetModel(self.data)
 
         self.view = LoadWidgetView(parent=self.obj, load_file_view=self.load_file_view,
@@ -63,7 +64,7 @@ class LoadRunWidgetPresenterMultipleFileTest(unittest.TestCase):
         self.presenter.handle_multiple_files_option_changed()
 
         self.runs = [15196, 15197]
-        self.workspaces = [{'OutputWorkspace': mock.MagicMock()} for _ in self.runs]
+        self.workspaces = [self.create_fake_workspace(1) for _ in self.runs]
         self.filenames = FileFinder.findRuns('MUSR00015196.nxs, MUSR00015197.nxs')
 
     def tearDown(self):
@@ -77,6 +78,14 @@ class LoadRunWidgetPresenterMultipleFileTest(unittest.TestCase):
     def assert_interface_contains_correct_runs_and_files(self):
         self.assertEqual(self.load_file_view.get_file_edit_text(), ";".join(['Co-added']))
         self.assertEqual(self.load_run_view.get_run_edit_text(), "15196-15197")
+
+    def create_fake_workspace(self, name):
+        workspace_mock = mock.MagicMock()
+        instrument_mock = mock.MagicMock()
+        instrument_mock.getName.return_value = 'MUSR'
+        workspace_mock.workspace.getInstrument.return_value = instrument_mock
+
+        return {'OutputWorkspace': [workspace_mock]}
 
     # ------------------------------------------------------------------------------------------------------------------
     # TESTS : The loading of multiple files is supported by the widget
