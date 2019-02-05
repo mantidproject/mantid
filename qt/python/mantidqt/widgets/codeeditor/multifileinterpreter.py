@@ -14,13 +14,17 @@ import os.path as osp
 
 # 3rd party imports
 from qtpy.QtCore import Qt
-from qtpy.QtWidgets import (QTabWidget, QToolButton, QVBoxLayout, QWidget)
+from qtpy.QtWidgets import (QTabWidget, QToolButton, QVBoxLayout, QWidget, QMessageBox)
+from qtpy.QtGui import QIcon
 
 # local imports
 from mantidqt.widgets.codeeditor.interpreter import PythonFileInterpreter
+from mantid import simpleapi
 
 NEW_TAB_TITLE = 'New'
 MODIFIED_MARKER = '*'
+API_IMPORT = ("# import mantid algorithms\n"
+              "from mantid.simpleapi import *\n\n")
 
 
 def _tab_title_and_toolip(filename):
@@ -182,7 +186,10 @@ class MultiPythonFileInterpreter(QWidget):
         """
         with open(filepath, 'r') as code_file:
             content = code_file.read()
+
         self.append_new_editor(content=content, filename=filepath)
+        if self._mantid_api_import_needed(content) is True:
+            self.current_editor().editor.insert(API_IMPORT)
 
     def open_files_in_new_tabs(self, filepaths):
         for filepath in filepaths:
@@ -225,3 +232,41 @@ class MultiPythonFileInterpreter(QWidget):
             for idx in range(self.editor_count):
                 self.editor_at(idx).set_whitespace_visible()
             self.whitespace_visible = True
+
+    def _mantid_algorithm_used(self, content):
+        for attr in dir(simpleapi):
+            if not attr.startswith('_') and attr == attr.title():
+                if attr in content:
+                    return True
+        return False
+
+    def _mantid_api_import_needed(self, content):
+        """Check if a python script's contents uses Mantid algorithms
+        but does not import Mantid's SimpleAPI. Launch QMessageBox to
+        ask if import should be added.
+        """
+        if not self._mantid_api_imported(content):
+            if self._mantid_algorithm_used(content):
+                if self._permission_box_to_prepend_import():
+                    return True
+        return False
+
+    def _mantid_api_imported(self, content):
+        if 'from mantid.simpleapi import ' in content:
+            return True
+        return False
+
+    def _permission_box_to_prepend_import(self):
+        msg_box = QMessageBox()
+        msg_box.setWindowTitle("Mantid Workbench")
+        msg_box.setWindowIcon(QIcon(':/images/MantidIcon.ico'))
+        msg_box.setText("It looks like this python file uses a Mantid "
+                        "algorithm but does not import the Mantid API.")
+        msg_box.setInformativeText("Would you like to add a line to import "
+                                   "the Mantid API?")
+        msg_box.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+        msg_box.setDefaultButton(QMessageBox.Yes)
+        permission = msg_box.exec_()
+        if permission == QMessageBox.Yes:
+            return True
+        return False
