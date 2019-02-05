@@ -343,8 +343,9 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
         self._filenames = filenames = sorted(self._getLinearizedFilenames('Filename'))
         import collections
         self._accumulate_calls = collections.defaultdict(int) # bookkeeping for __accumulate
-        # get the instrument name
+        # get the instrument name - will not work if the instrument has a '_' in its name
         self.instr = os.path.basename(filenames[0]).split('_')[0]
+        self.__loaderName = 'Load'   # set the loader to be generic on first load
         for ext in ['_cal', '_group',' _mask']:
             if AnalysisDataService.doesExist(self.instr+ext):
                 DeleteWorkspace(Workspace=self.instr+ext)
@@ -460,6 +461,7 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
         else:
             n = N
         for (i, f) in enumerate(files):
+            self.__loaderName = 'Load'  # reset to generic load with each file
             wkspname = self.__processFile2_withcache(f, useCaching, unfocusname, unfocusname_file)
             # accumulate into partial sum
             grain_start = i//n*n
@@ -490,7 +492,6 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
         # default name is based off of filename
         wkspname = os.path.split(filename)[-1].split('.')[0]
 
-        self.__loaderName = 'Load'  # reset to generic load with each file
         if useCaching:
             self.__determineCharacterizations(filename, wkspname)  # updates instance variable
             cachefile = self.__getCacheName(wkspname)
