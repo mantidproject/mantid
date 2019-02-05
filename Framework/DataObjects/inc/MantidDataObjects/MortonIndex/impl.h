@@ -30,7 +30,7 @@ public:
   static constexpr bool is_bounded = true;
   static constexpr bool is_modulo = true;
   static constexpr int digits = Bits - (is_same<Signed, signed>::value ? 1 : 0);
-  static constexpr int digits10 = digits * 0.30103 /*std::log10(2)*/;
+  static constexpr int digits10 = static_cast<int>(digits * 0.30103) /*std::log10(2)*/;
   static constexpr int max_digits10 = 0;
   static constexpr int radix = 2;
   static constexpr int min_exponent = 0;
@@ -226,7 +226,7 @@ struct wide_integer<Bits, Signed>::_impl {
       r = -r;
     }
 
-    size_t count = r / std::numeric_limits<uint64_t>::max();
+    size_t count = static_cast<size_t>(r / std::numeric_limits<uint64_t>::max());
     self = count;
     self *= std::numeric_limits<uint64_t>::max();
     long double to_diff = count;
@@ -368,7 +368,7 @@ struct wide_integer<Bits, Signed>::_impl {
     return lhs;
   }
 
-  template <typename T>
+  template <typename T, typename std::enable_if_t<std::is_signed<T>::value, void*> = nullptr>
   constexpr static wide_integer<Bits, Signed>
   operator_plus_T(const wide_integer<Bits, Signed> &lhs,
                   T rhs) noexcept(is_same<Signed, unsigned>::value) {
@@ -377,6 +377,13 @@ struct wide_integer<Bits, Signed>::_impl {
     } else {
       return _operator_plus_T(lhs, rhs);
     }
+  }
+
+  template <typename T, typename std::enable_if_t<!std::is_signed<T>::value, void*> = nullptr>
+  constexpr static wide_integer<Bits, Signed>
+  operator_plus_T(const wide_integer<Bits, Signed> &lhs,
+                  T rhs) noexcept(is_same<Signed, unsigned>::value) {
+      return _operator_plus_T(lhs, rhs);
   }
 
 private:

@@ -34,7 +34,29 @@
 #include <system_error>
 #include <type_traits>
 
-struct _test;
+
+/**
+ * class wide_integer has been created working on
+ * proposals for c++ standard "Numbers TS" in 2017
+ * by Igor Klevanets <cerevra@yandex.ru>,
+ * <cerevra@yandex-team.ru> and Antony Polukhin
+ * <antoshkka@gmail.com>, <antoshkka@yandex-team.ru>
+ * and has been approved by committee:
+ * http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2015/p0104r0.html
+ * The original source could be found:
+ * https://github.com/cerevra/int/tree/master/v3.
+ *
+ * This class is adopted to use 32 bit integet type
+ * as the base class (for performance) to inplemant
+ * uint96, uint128, uint256 types, used in indexed
+ * version of ConvertToMD for Morton index. Class is
+ * not much optimized due to it is not the bottleneck
+ * in algorithm. Minor changes have been applyed to
+ * avoid compiler warnings.
+ *
+ * Should be substituted by something from stdlib in
+ * the proper c++ standard.
+ */
 
 namespace std {
 template <size_t Bits, typename Signed> class wide_integer;
@@ -129,12 +151,11 @@ public:
   base_type *ptr() { return m_arr; }
 
 private:
-  friend struct ::_test;
 
   template <size_t Bits2, typename Signed2> friend class wide_integer;
 
-  friend struct numeric_limits<wide_integer<Bits, signed>>;
-  friend struct numeric_limits<wide_integer<Bits, unsigned>>;
+  friend class numeric_limits<wide_integer<Bits, signed>>;
+  friend class numeric_limits<wide_integer<Bits, unsigned>>;
 
   base_type m_arr[_impl::arr_size];
 };
@@ -364,7 +385,7 @@ constexpr uint512_t operator"" _uint512(const char *n);
 
 // numeric limits
 template <size_t Bits, typename Signed>
-struct numeric_limits<wide_integer<Bits, Signed>>;
+class numeric_limits<wide_integer<Bits, Signed>>;
 
 template <size_t Bits, typename Signed> struct hash<wide_integer<Bits, Signed>>;
 
