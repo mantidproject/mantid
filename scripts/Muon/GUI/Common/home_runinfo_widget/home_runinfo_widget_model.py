@@ -45,7 +45,7 @@ class HomeRunInfoWidgetModel(object):
         good_frames = self.get_log_value("goodfrm")
 
         if good_frames != 'Log not found':
-            return counts/float(good_frames)
+            return round(counts/float(good_frames), 3)
         else:
             return 'Good frames not defined'
 
@@ -53,7 +53,7 @@ class HomeRunInfoWidgetModel(object):
         good_frames = self.get_log_value("goodfrm")
 
         if good_frames != 'Log not found':
-            return counts/float(good_frames)/float(self._data.num_detectors)
+            return round(counts/float(good_frames)/float(self._data.num_detectors), 3)
         else:
             return 'Good frames not defined'
 
