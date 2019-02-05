@@ -23,6 +23,7 @@ set ( SRC_FILES
 	src/CalculateDIFC.cpp
 	src/CalculateDynamicRange.cpp
 	src/CalculateEfficiency.cpp
+	src/CalculateSensitivity.cpp
 	src/CalculateFlatBackground.cpp
 	src/CalculateIqt.cpp
 	src/CalculatePolynomialBackground.cpp
@@ -362,6 +363,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/CalculateDIFC.h
 	inc/MantidAlgorithms/CalculateDynamicRange.h
 	inc/MantidAlgorithms/CalculateEfficiency.h
+	inc/MantidAlgorithms/CalculateSensitivity.h
 	inc/MantidAlgorithms/CalculateFlatBackground.h
 	inc/MantidAlgorithms/CalculateIqt.h
 	inc/MantidAlgorithms/CalculatePolynomialBackground.h
@@ -716,6 +718,7 @@ set ( TEST_FILES
 	CalculateDIFCTest.h
 	CalculateDynamicRangeTest.h
 	CalculateEfficiencyTest.h
+	CalculateSensitivityTest.h
 	CalculateFlatBackgroundTest.h
 	CalculateIqtTest.h
 	CalculatePolynomialBackgroundTest.h
