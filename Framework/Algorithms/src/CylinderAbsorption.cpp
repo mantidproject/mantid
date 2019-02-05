@@ -142,7 +142,7 @@ void CylinderAbsorption::initialiseCachedDistances() {
       m_beamDirection, *shape, m_numSlices, m_numAnnuli);
   m_sampleVolume = raster.totalvolume;
   if (raster.l1.size() == 0)
-    throw std::runtime_error("It stopped in a weird place");
+    throw std::runtime_error("Failed to rasterize shape");
   m_numVolumeElements = raster.l1.size();
   m_L1s.assign(raster.l1.begin(), raster.l1.end());
   m_elementPositions.assign(raster.position.begin(), raster.position.end());

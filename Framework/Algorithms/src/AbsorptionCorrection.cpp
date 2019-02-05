@@ -144,15 +144,7 @@ void AbsorptionCorrection::exec() {
         "Failed to define any initial scattering gauge volume for geometry");
   }
 
-  // If sample not at origin, shift cached positions.
   const auto &spectrumInfo = m_inputWS->spectrumInfo();
-  const V3D samplePos = spectrumInfo.samplePosition();
-  if (samplePos != V3D(0, 0, 0)) {
-    for (auto &elementPosition : m_elementPositions) {
-      elementPosition += samplePos;
-    }
-  }
-
   Progress prog(this, 0.0, 1.0, numHists);
   // Loop over the spectra
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS, *correctionFactors))
