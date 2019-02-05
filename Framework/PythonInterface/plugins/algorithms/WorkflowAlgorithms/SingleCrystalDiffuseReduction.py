@@ -15,8 +15,8 @@ from mantid.api import (DataProcessorAlgorithm, mtd, AlgorithmFactory,
 from mantid.simpleapi import (LoadIsawUB, MaskDetectors, ConvertUnits,
                               CropWorkspace, LoadInstrument,
                               SetGoniometer, ConvertToMD, MDNorm,
-                              RenameWorkspace, MinusMD, Load,
-                              DeleteWorkspace, RenameWorkspaces,
+                              MinusMD, Load, DeleteWorkspace,
+                              RenameWorkspaces,
                               CreateSingleValuedWorkspace, LoadNexus,
                               MultiplyMD, LoadIsawDetCal, LoadMask,
                               CopyInstrumentParameters,
@@ -38,7 +38,7 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
         return "Diffraction\\Reduction"
 
     def seeAlso(self):
-        return [ "ConvertToMD","MDNormSCD",'MDNorm' ]
+        return [ "ConvertToMD","MDNormSCDPreprocessIncoherent","MDNorm" ]
 
     def name(self):
         return "SingleCrystalDiffuseReduction"
@@ -67,8 +67,9 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
                              "it will be reused otherwise it will be loaded.")
         self.declareProperty(FileProperty(name="SolidAngle",defaultValue="",action=FileAction.Load,
                                           extensions=[".nxs"]),
-                             doc="An input workspace containing momentum integrated vanadium (a measure"
-                             "of the solid angle). See :ref:`MDNormSCD <algm-MDNormSCD>` for details")
+                             doc="An input workspace containing momentum integrated vanadium (a measure "
+                             "of the solid angle). See :ref:`MDNormSCDPreprocessIncoherent <algm-MDNormSCDPreprocessIncoherent>` "
+                             "for details")
         self.declareProperty(FileProperty(name="Flux",defaultValue="",action=FileAction.Load,
                                           extensions=[".nxs"]),
                              "An input workspace containing momentum dependent flux. See :ref:`MDnormSCD <algm-MDnormSCD>` for details")
@@ -259,7 +260,7 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
                    TemporaryDataWorkspace='__data' if mtd.doesExist('__data') else None,
                    OutputNormalizationWorkspace='__norm',
                    TemporaryNormalizationWorkspace='__norm' if mtd.doesExist('__norm') else None,
-                   OutputWorkspace='__normalizedData',
+                   OutputWorkspace=_outWS_name,
                    QDimension0=self.getProperty('QDimension0').value,
                    QDimension1=self.getProperty('QDimension1').value,
                    QDimension2=self.getProperty('QDimension2').value,
@@ -310,14 +311,12 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
                        RHSWorkspace='__scale',
                        OutputWorkspace='__normalizedBackground')
             DeleteWorkspace('__scale')
-            MinusMD(LHSWorkspace='__normalizedData',RHSWorkspace='__normalizedBackground',OutputWorkspace=_outWS_name)
+            MinusMD(LHSWorkspace=_outWS_name,RHSWorkspace='__normalizedBackground',OutputWorkspace=_outWS_name)
             if self.getProperty('KeepTemporaryWorkspaces').value:
                 RenameWorkspaces(InputWorkspaces=['__data','__norm','__bkg_data','__bkg_norm'],
                                  WorkspaceNames=[_outWS_name+'_data', _outWS_name+'_normalization',
                                                  _outWS_name+'_background_data',_outWS_name+'_background_normalization'])
         else:
-            # outWS = data / norm
-            RenameWorkspace(InputWorkspace='__normalizedData',OutputWorkspace=_outWS_name)
             if self.getProperty('KeepTemporaryWorkspaces').value:
                 RenameWorkspaces(InputWorkspaces=['__data','__norm'],
                                  WorkspaceNames=[_outWS_name+'_data', _outWS_name+'_normalization'])

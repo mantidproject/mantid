@@ -69,7 +69,8 @@ symmetries for that group is applied, or you can specify individual
 
 For example setting SymmetryOperations to space group "P 31 2 1",
 point group "321" or "x,y,z; -y,x-y,z; -x+y,-x,z; y,x,-z; x-y,-y,-z;
--x,-x+y,-z" are equivalent.
+-x,-x+y,-z" are equivalent. Note these symmetries are on the real
+lattice not reciprocal.
 
 Temporary Workspaces
 ####################
@@ -234,6 +235,8 @@ Usage
                                  Dimension2Binning='-0.1,0.1',
                                  SymmetryOperations="P 31 2 1")
 
+   import matplotlib.pyplot as plt
+   from mantid import plots
    fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})
    c = ax.pcolormesh(mtd['output'],vmin=0, vmax=1e-5)
    fig.colorbar(c)
