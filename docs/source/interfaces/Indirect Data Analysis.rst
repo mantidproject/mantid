@@ -221,8 +221,7 @@ ELow, EHigh
   The rebinning range.
 
 SampleBinning
-  The ratio at which to decrease the number of bins by merging of
-  intensities from neighbouring bins.
+  The number of neighbouring bins are summed.
 
 Plot Current Preview
   Plots the currently selected preview plot in a separate external window
@@ -251,13 +250,13 @@ Save Result
 A note on Binning
 ~~~~~~~~~~~~~~~~~
   
-The bin width is determined by the binning range and the sample binning factor. The number of bins is automatically 
+The bin width is determined by the energy range and the sample binning factor. The number of bins is automatically 
 calculated based on the **SampleBinning** specified. The width is determined by the width of the range divided 
 by the number of bins.
 
 The following binning parameters are not enterable by the user and are instead automatically calculated through
-the :ref:`TransformToIqt <algm-TransformToIqt>` algorithm once a valid resolution file has been loaded. These binning parameters are 
-displayed alongside the binning options:
+the :ref:`TransformToIqt <algm-TransformToIqt>` algorithm once a valid resolution file has been loaded. The calculated 
+binning parameters are displayed alongside the binning options:
 
 EWidth
   The calculated bin width.
