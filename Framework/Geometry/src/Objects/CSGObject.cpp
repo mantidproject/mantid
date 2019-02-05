@@ -2182,7 +2182,8 @@ V3D CSGObject::generatePointInObject(PseudoRandomNumberGenerator &rng,
   // the bounding box well but slows down shapes that leave lots of void
   // within the box. So there is a sweet spot which depends on the actual
   // shape, its dimension and orientation.
-  const size_t bruteForceAttempts{std::min(5ul, maxAttempts)};
+  const size_t bruteForceAttempts{
+      std::min(static_cast<size_t>(5), maxAttempts)};
   auto maybePoint{randomPointInNoShapeObject(rng, bbox, bruteForceAttempts)};
   if (maybePoint) {
     point = *maybePoint;
@@ -2236,7 +2237,8 @@ V3D CSGObject::generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
   // the bounding box well but slows down shapes that leave lots of void
   // within the box. So there is a sweet spot which depends on the actual
   // shape, its dimension and orientation.
-  const size_t bruteForceAttempts{std::min(5ul, maxAttempts)};
+  const size_t bruteForceAttempts{
+      std::min(static_cast<size_t>(5), maxAttempts)};
   point = randomPointInNoShapeObject(rng, activeRegion, bruteForceAttempts);
   if (!point) {
     detail::ShapeInfo::GeometryShape shape;
