@@ -36,8 +36,8 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
         self._view.on_dead_time_from_data_selected(self.handle_user_selects_dead_time_from_data)
         self._view.on_dead_time_unselected(self.handle_dead_time_unselected)
         self._view.on_dead_time_browse_clicked(self.handle_dead_time_browse_clicked)
-        self._view.on_dead_time_from_file_selected(self.handle_dead_time_from_file_selected)
-        self._view.on_dead_time_file_option_changed(self.handle_dead_time_from_file_changed)
+        self._view.on_dead_time_from_file_selected(self.handle_dead_time_from_table_workspace_selected)
+        self._view.on_dead_time_file_option_changed(self.handle_dead_time_table_workspace_selector_changed)
 
         self._view.on_instrument_changed(self.handle_instrument_changed)
 
@@ -157,8 +157,6 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
 
     def handle_user_selects_dead_time_from_data(self):
         """User chooses to load dead time from the currently loaded workspace."""
-        import pydevd
-        pydevd.settrace('localhost', port=5434, stdoutToServer=True, stderrToServer=True)
         dtc = self._model.get_dead_time_table_from_data()
         if dtc is not None:
             self._model.set_dead_time_from_data()
@@ -173,7 +171,7 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
         dead_time_text = self.dead_time_from_data_text([0.0])
         self._view.set_dead_time_label(dead_time_text)
 
-    def handle_dead_time_from_file_selected(self):
+    def handle_dead_time_from_table_workspace_selected(self):
         """User has selected the dead time "from Table Workspace" option."""
         table_names = load_utils.get_table_workspace_names_from_ADS()
         self._view.populate_dead_time_combo(table_names)
@@ -184,7 +182,7 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
         self.set_dead_time_text_to_default()
         self._model.set_dead_time_to_none()
 
-    def handle_dead_time_from_file_changed(self):
+    def handle_dead_time_table_workspace_selector_changed(self):
         """The user changes the selected Table Workspace to use as dead time."""
         selection = self._view.get_dead_time_file_selection()
         if selection == "None" or selection == "":
@@ -193,7 +191,7 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
         try:
             self._model.check_dead_time_file_selection(selection)
             self._model.set_user_dead_time_from_ADS(selection)
-            dead_times = self._model.get_dead_time_table().toDict()['dead-time']
+            dead_times = self._model._data.gui_variables['DeadTimeTable'].toDict()['dead-time']
             dead_time_text = self.dead_time_from_data_text(dead_times)
             self._view.set_dead_time_label(dead_time_text)
         except ValueError as error:

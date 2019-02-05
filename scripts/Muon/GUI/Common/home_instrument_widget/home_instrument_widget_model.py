@@ -79,11 +79,6 @@ class InstrumentWidgetModel(object):
     # ------------------------------------------------------------------------------------------------------------------
     # Dead Time
     # ------------------------------------------------------------------------------------------------------------------
-
-    def load_dead_time(self):
-        # TODO : Create this function
-        pass
-
     def check_dead_time_file_selection(self, selection):
         try:
             table = api.AnalysisDataServiceImpl.Instance().retrieve(str(selection))
@@ -115,5 +110,4 @@ class InstrumentWidgetModel(object):
     def set_user_dead_time_from_ADS(self, name):
         self._data.gui_variables['DeadTimeSource'] = 'FromADS'
         dtc = api.AnalysisDataService.retrieve(str(name))
-        # self._data.current_data["UserDeadTimeTable"] = dtc
         self._data.gui_variables["DeadTimeTable"] = dtc
