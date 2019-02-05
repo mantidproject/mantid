@@ -64,7 +64,7 @@ public:
   /// sets the geometry handler for a sphere
   void setSphere(const Kernel::V3D &center, double radius);
   /// sets the geometry handler for a cylinder
-  void setCylinder(const Kernel::V3D &center, const Kernel::V3D &axis,
+  void setCylinder(const Kernel::V3D &centerBottomBase, const Kernel::V3D &axis,
                    double radius, double height);
   /// sets the geometry handler for a cone
   void setCone(const Kernel::V3D &center, const Kernel::V3D &axis,
