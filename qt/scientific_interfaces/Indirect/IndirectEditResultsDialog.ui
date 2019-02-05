@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>421</width>
+    <width>531</width>
     <height>185</height>
    </rect>
   </property>
@@ -17,9 +17,30 @@
    <item>
     <widget class="QGroupBox" name="gbReFitSingleSpectrum">
      <property name="title">
-      <string>Re-Fit Single Spectrum</string>
+      <string>Edit Results</string>
      </property>
      <layout class="QGridLayout" name="gridLayout">
+      <item row="1" column="0">
+       <widget class="QLabel" name="lbSpectrum">
+        <property name="text">
+         <string>Single Spectrum Workspace:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="lbOutputWorkspace">
+        <property name="text">
+         <string>Output Workspace:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0" colspan="3">
+       <widget class="QLabel" name="lbStatus">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
       <item row="0" column="0">
        <widget class="QLabel" name="lbInputWorkspace">
         <property name="text">
@@ -27,7 +48,7 @@
         </property>
        </widget>
       </item>
-      <item row="5" column="2">
+      <item row="4" column="2">
        <spacer name="verticalSpacer">
         <property name="orientation">
          <enum>Qt::Vertical</enum>
@@ -40,40 +61,39 @@
         </property>
        </spacer>
       </item>
-      <item row="3" column="2">
-       <widget class="QLineEdit" name="leOutputWorkspace"/>
-      </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="lbOutputWorkspace">
-        <property name="text">
-         <string>Output Workspace:</string>
-        </property>
-       </widget>
-      </item>
       <item row="2" column="2">
-       <widget class="QSpinBox" name="spSpectrum"/>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="lbSpectrum">
+       <widget class="QLineEdit" name="leOutputWorkspace">
         <property name="text">
-         <string>Spectrum:</string>
+         <string/>
         </property>
        </widget>
       </item>
       <item row="0" column="2">
-       <widget class="QComboBox" name="cbInputWorkspace">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="sizeAdjustPolicy">
-         <enum>QComboBox::AdjustToContents</enum>
-        </property>
-       </widget>
+       <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="wsInputWorkspace"/>
       </item>
-      <item row="4" column="0" colspan="3">
-       <widget class="QLabel" name="lbStatus">
+      <item row="1" column="2">
+       <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="wsSingleSpectrumWorkspace"/>
+      </item>
+      <item row="2" column="3">
+       <widget class="QPushButton" name="pbPasteInputName">
+        <property name="minimumSize">
+         <size>
+          <width>27</width>
+          <height>23</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>27</width>
+          <height>23</height>
+         </size>
+        </property>
         <property name="text">
          <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../images/images.qrc">
+          <normaloff>:/data_replace.png</normaloff>:/data_replace.png</iconset>
         </property>
        </widget>
       </item>
@@ -109,9 +129,9 @@
        </spacer>
       </item>
       <item>
-       <widget class="QPushButton" name="pbFitSingleSpectrum">
+       <widget class="QPushButton" name="pbInsertSpectrum">
         <property name="text">
-         <string>Re-Fit Single Spectrum</string>
+         <string>Insert Spectrum</string>
         </property>
        </widget>
       </item>
@@ -127,6 +147,15 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <customwidgets>
+  <customwidget>
+   <class>MantidQt::MantidWidgets::WorkspaceSelector</class>
+   <extends>QComboBox</extends>
+   <header>MantidQtWidgets/Common/WorkspaceSelector.h</header>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="../../../images/images.qrc"/>
+ </resources>
  <connections/>
 </ui>
