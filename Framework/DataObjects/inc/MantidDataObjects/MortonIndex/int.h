@@ -45,12 +45,12 @@
  * The original source could be found:
  * https://github.com/cerevra/int/tree/master/v3.
  *
- * This class is adopted to use 32 bit integet type
- * as the base class (for performance) to inplemant
+ * This class is adopted to use 32 bit integer type
+ * as the base class (for performance) to implement
  * uint96, uint128, uint256 types, used in indexed
  * version of ConvertToMD for Morton index. Class is
  * not much optimized due to it is not the bottleneck
- * in algorithm. Minor changes have been applyed to
+ * in algorithm. Minor changes have been applied to
  * avoid compiler warnings.
  *
  * Should be substituted by something from stdlib in
