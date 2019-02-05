@@ -27,6 +27,7 @@ from Muon.GUI.Common.load_file_widget.model import BrowseFileWidgetModel
 from Muon.GUI.Common import mock_widget
 
 from Muon.GUI.Common.muon_load_data import MuonLoadData
+from Muon.GUI.Common.muon_data_context import MuonDataContext
 import Muon.GUI.Common.utilities.muon_file_utils as file_utils
 
 
@@ -35,6 +36,14 @@ class LoadRunWidgetPresenterLoadFailTest(unittest.TestCase):
         if thread_model:
             thread_model._thread.wait()
             self._qapp.processEvents()
+
+    def create_fake_workspace(self, name):
+        workspace_mock = mock.MagicMock()
+        instrument_mock = mock.MagicMock()
+        instrument_mock.getName.return_value = 'EMU'
+        workspace_mock.workspace.getInstrument.return_value = instrument_mock
+
+        return {'OutputWorkspace': [workspace_mock]}
 
     def setUp(self):
         self._qapp = mock_widget.mockQapp()
@@ -56,9 +65,11 @@ class LoadRunWidgetPresenterLoadFailTest(unittest.TestCase):
         self.load_run_mock = self.load_run_patcher.start()
 
         self.data = MuonLoadData()
+        self.context = MuonDataContext()
+        self.context.instrument = 'EMU'
         self.load_file_view = BrowseFileWidgetView(self.obj)
         self.load_run_view = LoadRunWidgetView(self.obj)
-        self.load_file_model = BrowseFileWidgetModel(self.data)
+        self.load_file_model = BrowseFileWidgetModel(self.data, self.context)
         self.load_run_model = LoadRunWidgetModel(self.data)
 
         self.model = LoadWidgetModel(self.data)
@@ -75,8 +86,9 @@ class LoadRunWidgetPresenterLoadFailTest(unittest.TestCase):
 
         self.load_file_view.show_file_browser_and_return_selection = mock.Mock(
             return_value=["C:\\dir1\\EMU0001234.nxs"])
-        self.load_mock.return_value = ([1], 1234, "C:\\dir1\\EMU0001234.nxs")
-        self.load_run_mock.return_value = ([1], 1234, "C:\\dir1\\EMU0001234.nxs")
+        self.workspace_mock = self.create_fake_workspace(1)
+        self.load_mock.return_value = (self.workspace_mock, 1234, "C:\\dir1\\EMU0001234.nxs")
+        self.load_run_mock.return_value = (self.workspace_mock, 1234, "C:\\dir1\\EMU0001234.nxs")
 
         self.presenter.load_file_widget.on_browse_button_clicked()
         self.wait_for_thread(self.presenter.load_file_widget._load_thread)
@@ -102,8 +114,8 @@ class LoadRunWidgetPresenterLoadFailTest(unittest.TestCase):
 
     def assert_model_unchanged(self):
         self.assertEqual(self.presenter._model.filenames, ["C:\\dir1\\EMU0001234.nxs"])
-        self.assertEqual(self.presenter._model.workspaces, [[1]])
-        self.assertEqual(self.presenter._model.runs, [1234])
+        self.assertEqual(self.presenter._model.workspaces, [self.workspace_mock])
+        self.assertEqual(self.presenter._model.runs, [[1234]])
 
     def assert_interface_unchanged(self):
         self.assertEqual(self.load_file_view.get_file_edit_text(), "C:\\dir1\\EMU0001234.nxs")
@@ -161,6 +173,7 @@ class LoadRunWidgetPresenterLoadFailTest(unittest.TestCase):
         self.assertEqual(self.presenter.load_run_widget._view.warning_popup.call_count, 1)
 
     def test_that_if_load_fails_from_user_run_entry_that_warning_is_displayed(self):
+        self.presenter.load_run_widget._view.run_edit.setText('1234')
         self.presenter.load_run_widget.handle_run_changed_by_user()
         self.wait_for_thread(self.presenter.load_run_widget._load_thread)
 
