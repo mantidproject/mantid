@@ -25,8 +25,7 @@ using namespace API;
 
 CylinderAbsorption::CylinderAbsorption()
     : AbsorptionCorrection(), m_cylHeight(0.0), m_cylRadius(0.0),
-      m_numSlices(0), m_sliceThickness(0), m_numAnnuli(0), m_deltaR(0),
-      m_useSampleShape(false) {}
+      m_numSlices(0), m_numAnnuli(0), m_useSampleShape(false) {}
 
 void CylinderAbsorption::defineProperties() {
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
