@@ -14,14 +14,14 @@ def get_raw_data_workspace_name(context, run):
 def get_group_data_workspace_name(context, group_name, run):
     if context.is_multi_period():
         return context._base_run_name(run) + "; Group; " + group_name + \
-               "; Counts; Periods; " + context.period_string + "; #1"
+               "; Counts; Periods; " + context.period_string(run) + "; #1"
     else:
         return context._base_run_name(run) + "; Group; " + group_name + "; Counts; #1"
 
 
 def get_pair_data_workspace_name(context, pair_name, run):
     if context.is_multi_period():
-        return context._base_run_name(run) + "; Pair Asym; " + pair_name + "; Periods; " + context.period_string + "; #1"
+        return context._base_run_name(run) + "; Pair Asym; " + pair_name + "; Periods; " + context.period_string(run) + "; #1"
     else:
         return context._base_run_name(run) + "; Pair Asym; " + pair_name + "; #1"
 
@@ -40,22 +40,22 @@ def get_raw_data_directory(context, run):
         return context._base_run_name(run) + " Raw Data/"
 
 
-def get_cached_data_directory(context):
+def get_cached_data_directory(context, run):
     if context.is_multi_period():
-        return context._base_run_name() + " Period " + context.period_string + "; Cached/"
+        return context._base_run_name() + " Period " + context.period_string(run) + "; Cached/"
     else:
         return context._base_run_name() + " Cached/"
 
 
 def get_group_data_directory(context, run):
     if context.is_multi_period():
-        return context._base_run_name(run) + " Period " + context.period_string + "; Groups/"
+        return context._base_run_name(run) + " Period " + context.period_string(run) + "; Groups/"
     else:
         return context._base_run_name(run) + " Groups/"
 
 
 def get_pair_data_directory(context, run):
     if context.is_multi_period():
-        return context._base_run_name(run) + " Period " + context.period_string + "; Pairs/"
+        return context._base_run_name(run) + " Period " + context.period_string(run) + "; Pairs/"
     else:
         return context._base_run_name(run) + " Pairs/"
