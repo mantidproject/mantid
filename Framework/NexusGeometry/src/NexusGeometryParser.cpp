@@ -452,8 +452,7 @@ std::vector<Mantid::detid_t> getDetectorIds(const Group &detectorGroup) {
       const auto data = detectorGroup.openDataSet(objName);
       if (data.getDataType().getSize() == 8) {
         // Note the narrowing here!
-
-            extractVector<int64_t>(data));
+        extractVector<int64_t>(data);
       } else {
         detIds = extractVector<Mantid::detid_t>(data);
       }
