@@ -52,8 +52,8 @@ struct common_type<Arithmetic, wide_integer<Bits, Signed>>;
 template <size_t Bits, typename Signed>
 class wide_integer {
 public:
-    using base_type = uint8_t;
-    using signed_base_type = int8_t;
+    using base_type = uint32_t;
+    using signed_base_type = int32_t;
 
     // ctors
     wide_integer() = default;

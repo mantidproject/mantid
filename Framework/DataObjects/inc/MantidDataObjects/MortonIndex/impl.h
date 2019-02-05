@@ -531,7 +531,7 @@ public:
 
         for (size_t i = 0; i < arr_size * base_bits; ++i) {
             if (t.m_arr[arr_size - 1] & 1) {
-                res = operator_plus(res, shift_left(a, i));
+                res = operator_plus(res, shift_left(a, static_cast<int>(i)));
             }
 
             t = shift_right(t, 1);
