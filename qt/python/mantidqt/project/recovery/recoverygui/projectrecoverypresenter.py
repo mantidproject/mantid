@@ -100,8 +100,8 @@ class ProjectRecoveryPresenter(object):
         self.model.open_selected_in_editor(selected)
 
     def close_view(self):
+        self.current_view.setVisible(False)
         self.current_view = None
-        # todo: actively delete the view
 
     def connect_progress_bar_to_recovery_view(self):
         self.current_view.connect_progress_bar()

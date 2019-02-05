@@ -219,7 +219,7 @@ class MainWindow(QMainWindow):
         # Set up the project and recovery objects
         self.project = Project(GlobalFigureManager, find_all_windows_that_are_savable)
         self.project_recovery = ProjectRecovery(globalfiguremanager=GlobalFigureManager,
-                                                multifileinterpreter=MultiFileEditor,
+                                                multifileinterpreter=self.editor.editors,
                                                 window_finder=find_all_windows_that_are_savable)
 
         # uses default configuration as necessary
@@ -440,6 +440,9 @@ class MainWindow(QMainWindow):
             if app is not None:
                 app.closeAllWindows()
 
+            # Kill the project recovery thread
+            self.project_recovery.stop_recovery_thread()
+
             event.accept()
         else:
             # Cancel was pressed when closing an editor
@@ -583,10 +586,11 @@ def start_workbench(app, command_line_options):
             return 0
 
     # Let's get going with project recovery checks and spawning of GUIs
+    # Project recovery will handle starting it's own thread
     if main_window.project_recovery.check_for_recover_checkpoint():
         main_window.project_recovery.attempt_recovery()
-
-    main_window.project_recovery.start_recovery_thread()
+    else:
+        main_window.project_recovery.start_recovery_thread()
 
     # lift-off!
     return app.exec_()

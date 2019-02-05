@@ -37,7 +37,7 @@ class ProjectRecoveryModel(object):
         self.recovery_running = False
         self.failed_run = False
 
-        self.rows = [[]]
+        self.rows = []
 
         self._fill_first_row()
 
@@ -67,6 +67,7 @@ class ProjectRecoveryModel(object):
     def start_mantid_normally(self):
         self.project_recovery.clear_all_unused_checkpoints()
         self.project_recovery.start_recovery_thread()
+        self.presenter.close_view()
 
     def recover_selected_checkpoint(self, selected):
         self.recovery_running = True
@@ -92,13 +93,14 @@ class ProjectRecoveryModel(object):
         ADS.clear()
 
         # Open editor for this checkpoint
+        pid_dir = self.project_recovery.get_pid_folder_to_be_used_to_load_a_checkpoint_from()
         selected = replace_space_with_t(selected)
-        checkpoint = os.path.join(self.project_recovery.pid_to_load_checkpoint_from(), selected)
+        checkpoint = os.path.join(pid_dir, selected)
 
-        self.project_recovery.open_script_in_editor(checkpoint)
+        self.project_recovery.open_checkpoint_in_script_editor(checkpoint)
 
         # Restart project recovery as we stay synchronous
-        shutil.rmtree(self.project_recovery.pid_to_load_checkpoint_from())
+        self.project_recovery.clear_all_unused_checkpoints(pid_dir)
         self.project_recovery.start_recovery_thread()
 
         if self.failed_run:
@@ -143,7 +145,7 @@ class ProjectRecoveryModel(object):
             self.rows.append(["", "", ""])
 
         # Now sort based on the first element of the lists (So it is in order of most recent checkpoint first)
-        self.rows.sort(key=lambda x: x[0], reverse=True)
+        self.rows.sort(key=lambda x: x[0])
 
     @staticmethod
     def get_number_of_checkpoints():

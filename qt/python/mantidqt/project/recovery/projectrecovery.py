@@ -15,7 +15,7 @@ from glob import glob
 import shutil
 import psutil
 
-from mantid.kernel import ConfigService, logger
+from mantid.kernel import ConfigService, logger, UsageService
 from mantid.api import AnalysisDataService as ADS, WorkspaceGroup
 from mantidqt.project.projectsaver import ProjectSaver
 from mantidqt.project.projectloader import ProjectLoader
@@ -134,7 +134,7 @@ class ProjectRecovery(object):
                 self._spin_off_another_time_thread()
                 return
 
-            logger.debug("Project Recovery: Saving Started")
+            logger.debug("Project Recovery: Saving started")
 
             # Create directory for save location
             recovery_dir = os.path.join(self.recovery_directory_pid, datetime.datetime.now().isoformat())
@@ -176,7 +176,7 @@ class ProjectRecovery(object):
         if len(ws_list) == 0:
             return
 
-        start_time = datetime.datetime.now().isoformat()
+        start_time = UsageService.getStartTime().toISO8601String()
 
         alg_name = "GeneratePythonScript"
         alg = AlgorithmManager.createUnmanaged(alg_name, 1)
@@ -305,7 +305,7 @@ class ProjectRecovery(object):
         alg.setChild(True)
         alg.setLogging(False)
         alg.setRethrows(True)
-        alg.setProperty("RecoverCheckpointFolder", directory)
+        alg.setProperty("RecoveryCheckpointFolder", directory)
         alg.setProperty("OutputFilePath", self.recovery_order_workspace_history_file)
         alg.execute()
 
@@ -362,3 +362,5 @@ class ProjectRecovery(object):
     # todo: Function to check if recovery checkpoint PIDs are not in use and remove them if they are
 
     # todo: Function to remove folders in they are empty from a list of dicrectories
+
+    # todo: Shorten saved time and dates to removed micro and milli seconds

@@ -67,7 +67,7 @@ class ProjectRecoveryWidgetView(QDialog):
 
     @Slot()
     def onClickOpenLastInScriptWindow(self):
-        self.presenter.recover_last_in_editor()
+        self.presenter.open_last_in_editor()
 
     @Slot()
     def onClickStartMantidNormally(self):
