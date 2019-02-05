@@ -109,7 +109,7 @@
      <item>
       <widget class="QPushButton" name="scriptWindowButton">
        <property name="text">
-        <string>Just open in script window</string>
+        <string>Just open in script editor</string>
        </property>
        <attribute name="buttonGroup">
         <string notr="true">buttonGroup</string>

@@ -101,7 +101,7 @@ checkpoint</string>
         <widget class="QPushButton" name="pushButton_2">
          <property name="text">
           <string>Open selected 
-in script window</string>
+in script editor</string>
          </property>
         </widget>
        </item>
