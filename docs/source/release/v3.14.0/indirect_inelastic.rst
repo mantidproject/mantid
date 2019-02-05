@@ -76,7 +76,7 @@ Bugfixes
 - Selecting multiple data using the All Spectra checkbox without first selected a sample file used to cause an unexpected error.
   This is now prevented. Meaningful error messages are also displayed when a sample or resolution file are not selected.
 - In the Elwin interface, the errors are now propagated correctly through to the workspace with extension _elt.
-- The :ref:`HallRoss <func-HallRoss>` fit function was updated to have :math:`\hbar` in its formula. The 
+- The :ref:`HallRoss <func-Hall-Ross>` fit function was updated to have :math:`\hbar` in its formula. The 
   :ref:`TeixeiraWater <func-TeixeiraWater>` and :ref:`ChudleyElliot <func-ChudleyElliot>` fit functions 
   now have a functionDeriv1D method.
 
