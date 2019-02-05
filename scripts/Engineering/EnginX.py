@@ -29,6 +29,8 @@ def main(vanadium_run, user, focus_run, **kwargs):
         crop_name (string): what to call the cropped bank workspace
         crop_on (string): the bank of spectrum to crop on if cropping
         pre_process_run (bool): set whether or not to pre-process run before focusing
+        params (string): rebin parameters for pre-process
+        time_period (string): time period for pre-process
         grouping_file (string): the path of the grouping file for texture focusing
         directory (string): the path of the directory to save to
 
@@ -308,6 +310,8 @@ def save_calibration(ceria_run, van_run, cal_dir, cal_gen, name, bank_names, zer
                                         ceria_run=ceria_run, vanadium_run=van_run,
                                         template_file=template_file)
     # copy the param file to the general directory
+    if not os.path.exists(cal_gen):
+        os.makedirs(cal_gen)
     copy2(gsas_iparm_fname, cal_gen)
 
 
@@ -515,6 +519,8 @@ def _save_out(run_number, focus_dir, focus_gen, output, join_string, bank_id):
     simple.SaveOpenGenieAscii(InputWorkspace=output, Filename=filename + ".his", OpenGenieFormat="ENGIN-X Format")
     simple.SaveNexus(InputWorkspace=output, Filename=filename + ".nxs")
     simple.ExportSampleLogsToHDF5(InputWorkspace=output, Filename=hdf5_name, Blacklist="bankid")
+    if not os.path.exists(focus_gen):
+        os.makedirs(focus_gen)
     # copy the files to the general directory
     copy2(filename+".dat", focus_gen)
     copy2(filename + ".gss", focus_gen)
