@@ -107,6 +107,8 @@ class MuonDataContext(object):
         self._loaded_data = load_data
         self._current_data = {"workspace": load_utils.empty_loaded_data()}  # self.get_result(False)
 
+        self.current_runs = []
+
         self._instrument = ConfigService.getInstrument().name() if ConfigService.getInstrument().name()\
             in allowed_instruments else 'EMU'
 
@@ -177,7 +179,6 @@ class MuonDataContext(object):
         # Update the current data; resetting the groups and pairs to their default values
         if self._loaded_data.num_items() > 0:
             self._current_data = self._loaded_data.get_latest_data()
-            self.set_groups_and_pairs_to_default()
         else:
             self._current_data = {"workspace": load_utils.empty_loaded_data()}
 
@@ -272,18 +273,18 @@ class MuonDataContext(object):
         workspace_list = self._loaded_data.params
         for workspace in workspace_list:
             run = run_list_to_string(workspace['run'])
-            workspace = workspace['workspace']['OutputWorkspace']
+            workspace_wrapper = workspace['workspace']['OutputWorkspace']
             directory = get_base_data_directory(self, run) + get_raw_data_directory(self, run)
 
-            if len(workspace) > 1:
+            if len(workspace_wrapper) > 1:
                 # Multi-period data
-                for i, single_ws in enumerate(workspace):
+                for i, single_ws in enumerate(workspace_wrapper):
                     name = directory + get_raw_data_workspace_name(self, run) + "_period_" + str(i)
                     single_ws.show(name)
             else:
                 # Single period data
                 name = directory + get_raw_data_workspace_name(self, run)
-                workspace[0].show(name)
+                workspace_wrapper[0].show(name)
 
     def show_all_groups(self):
         for group_name in self._groups.keys():
