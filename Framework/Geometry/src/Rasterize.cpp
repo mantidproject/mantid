@@ -74,7 +74,7 @@ namespace Rasterize {
 // work on
 
 Raster calculate(const V3D &beamDirection,
-                 const boost::shared_ptr<IObject> shape,
+                 const boost::shared_ptr<const IObject> shape,
                  const double cubeSizeInMetre) {
   // convert to the underlying CSGObject
   const auto csgshape =
@@ -88,7 +88,7 @@ Raster calculate(const V3D &beamDirection,
 }
 
 Raster calculateCylinder(const V3D &beamDirection,
-                         const boost::shared_ptr<Geometry::IObject> shape,
+                         const boost::shared_ptr<const Geometry::IObject> shape,
                          const size_t numSlices, const size_t numAnnuli) {
   // convert to the underlying CSGObject
   const auto csgshape =
