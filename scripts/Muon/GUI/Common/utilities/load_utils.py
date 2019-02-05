@@ -149,7 +149,7 @@ DEFAULT_OUTPUTS = ["OutputWorkspace",
                    "FirstGoodData",
                    "MainFieldDirection"]
 # List of default values for the DEFAULT_OUTPUTS list
-DEFAULT_OUTPUT_VALUES = [__default_workspace(),
+DEFAULT_OUTPUT_VALUES = [[__default_workspace()],
                          None,  # api.WorkspaceFactoryImpl.Instance().createTable("TableWorkspace"),
                          api.WorkspaceFactoryImpl.Instance().createTable("TableWorkspace"),
                          0.0,

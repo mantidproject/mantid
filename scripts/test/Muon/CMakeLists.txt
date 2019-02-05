@@ -22,6 +22,7 @@ set ( TEST_PY_FILES
    loading_tab/loadwidget_presenter_failure_test.py
    grouping_tab/grouping_table_presenter_test.py
    grouping_tab/pairing_table_presenter_test.py
+   grouping_tab/grouping_tab_presenter_test.py
    grouping_tab/pairing_table_group_selector_test.py
    grouping_tab/pairing_table_alpha_test.py
    LoadWidgetModel_test.py
@@ -46,6 +47,7 @@ set ( TEST_PY_FILES
    utilities/run_string_utils_operator_test.py
    utilities/run_string_utils_conversion_test.py
    subplotObject_test.py
+   help_widget_presenter_test.py
 )
 
 check_tests_valid ( ${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES} )

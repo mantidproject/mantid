@@ -13,14 +13,13 @@ import unittest
 
 from mock import Mock, call, patch
 
-from mantidqt.widgets.matrixworkspacedisplay.test_helpers.matrixworkspacedisplay_common import MockQModelIndex, \
-    MockWorkspace
-from mantidqt.widgets.matrixworkspacedisplay.test_helpers.mock_matrixworkspacedisplay import MockQSelectionModel
+from mantidqt.widgets.common.test_mocks.mock_mantid import MockWorkspace
+from mantidqt.widgets.common.test_mocks.mock_plotlib import MockAx, MockPlotLib
+from mantidqt.widgets.common.test_mocks.mock_qt import MockQModelIndex, MockQSelectionModel
 from mantidqt.widgets.tableworkspacedisplay.error_column import ErrorColumn
 from mantidqt.widgets.tableworkspacedisplay.model import TableWorkspaceDisplayModel
 from mantidqt.widgets.tableworkspacedisplay.plot_type import PlotType
 from mantidqt.widgets.tableworkspacedisplay.presenter import TableWorkspaceDisplay
-from mantidqt.widgets.tableworkspacedisplay.test_helpers.mock_plotlib import MockAx, MockPlotLib
 from mantidqt.widgets.tableworkspacedisplay.view import TableWorkspaceDisplayView
 from mantidqt.widgets.tableworkspacedisplay.workbench_table_widget_item import WorkbenchTableWidgetItem
 
@@ -44,7 +43,8 @@ def with_mock_presenter(add_selection_model=False, add_plot=False):
     And an answer with a little more description of the logic behind it all
     https://stackoverflow.com/a/25827070/2823526
 
-    :param add_selection_model:
+    :param add_selection_model: Adds a mock selection model to the presenter
+    :param add_plot: Adds mock plotting to the presenter
     """
 
     def real_decorator(func, *args, **kwargs):
@@ -97,7 +97,7 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
 
         item.row.assert_called_once_with()
         item.column.assert_called_once_with()
-        ws.setCell.assert_called_once_with(5, 5, "magic parameter")
+        ws.setCell.assert_called_once_with(5, 5, "magic parameter", notify_replace=False)
         item.update.assert_called_once_with()
         item.reset.assert_called_once_with()
 
@@ -174,7 +174,7 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
         twd.action_keypress_copy()
         self.assertEqual(4, mock_copy_cells.call_count)
 
-    @patch('mantidqt.widgets.tableworkspacedisplay.presenter.DeleteTableRows')
+    @patch('mantidqt.widgets.tableworkspacedisplay.model.DeleteTableRows')
     @with_mock_presenter(add_selection_model=True)
     def test_action_delete_row(self, ws, view, twd, mock_DeleteTableRows):
         twd.action_delete_row()
@@ -221,7 +221,7 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
         view.mock_selection_model.selectedColumns.assert_called_once_with()
 
     @patch('mantidqt.widgets.tableworkspacedisplay.presenter.TableWorkspaceDisplay')
-    @patch('mantidqt.widgets.tableworkspacedisplay.presenter.StatisticsOfTableWorkspace')
+    @patch('mantidqt.widgets.tableworkspacedisplay.model.StatisticsOfTableWorkspace')
     @with_mock_presenter(add_selection_model=True)
     def test_action_statistics_on_columns(self, ws, view, twd, mock_StatisticsOfTableWorkspace,
                                           mock_TableWorkspaceDisplay):
@@ -291,16 +291,31 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
         twd.action_set_as_y_err(1, "0")
         view.show_warning.assert_called_once_with(ErrorColumn.CANNOT_SET_Y_TO_BE_OWN_YERR_MESSAGE)
 
+    @patch('mantidqt.widgets.tableworkspacedisplay.model.SortTableWorkspace')
     @with_mock_presenter(add_selection_model=True)
-    def test_action_sort(self, ws, view, twd):
-        view.mock_selection_model.selectedColumns = Mock(return_value=[MockQModelIndex(0, 4444)])
-        order = 1
-        twd.action_sort(order)
-        view.sortByColumn.assert_called_once_with(4444, order)
+    def test_action_sort_table_ws(self, ws, view, twd, mock_SortTableWorkspace):
+        view.mock_selection_model.selectedColumns = Mock(return_value=[MockQModelIndex(0, 0)])
+        ascending = True
+        twd.action_sort(ascending)
+        mock_SortTableWorkspace.assert_called_once_with(InputWorkspace=twd.model.ws, OutputWorkspace=twd.model.ws,
+                                                        Columns="col0", Ascending=ascending)
+
+    @patch('mantidqt.widgets.tableworkspacedisplay.model.SortPeaksWorkspace')
+    @with_mock_presenter(add_selection_model=True)
+    def test_action_sort_peaks_ws(self, ws, view, twd, mock_SortPeaksWorkspace):
+        view.mock_selection_model.selectedColumns = Mock(return_value=[MockQModelIndex(0, 0)])
+        ascending = True
+        with patch('mantidqt.widgets.tableworkspacedisplay.model.TableWorkspaceDisplayModel.is_peaks_workspace',
+                   return_value=True) as mock_is_peaks_workspace:
+            twd.action_sort(ascending)
+            mock_SortPeaksWorkspace.assert_called_once_with(InputWorkspace=twd.model.ws, OutputWorkspace=twd.model.ws,
+                                                            ColumnNameToSortBy="col0", SortAscending=ascending)
+            mock_is_peaks_workspace.assert_called_once_with()
 
     @with_mock_presenter(add_selection_model=True)
     def test_action_sort_too_many(self, ws, view, twd):
         twd.action_sort(1)
+        # by default we have more than 1 column selected
         view.show_warning.assert_called_once_with(TableWorkspaceDisplay.TOO_MANY_SELECTED_TO_SORT)
 
     @with_mock_presenter(add_selection_model=True)
@@ -552,6 +567,49 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
                  label=TableWorkspaceDisplay.COLUMN_DISPLAY_LABEL.format(col_y2_name), yerr=expected_y2_err_data)])
         twd.plot.mock_fig.show.assert_called_once_with()
         twd.plot.mock_ax.legend.assert_called_once_with()
+
+    @with_mock_presenter()
+    def test_close_incorrect_workspace(self, ws, view, presenter):
+        presenter.close(ws.TEST_NAME + "123")
+        self.assertNotCalled(view.emit_close)
+        self.assertIsNotNone(presenter.ads_observer)
+
+    @with_mock_presenter()
+    def test_close(self, ws, view, presenter):
+        presenter.close(ws.TEST_NAME)
+        view.emit_close.assert_called_once_with()
+        self.assertIsNone(presenter.ads_observer)
+
+    @with_mock_presenter()
+    def test_force_close_even_with_incorrect_name(self, _, view, presenter):
+        # window always closes, regardless of the workspace
+        presenter.force_close()
+        view.emit_close.assert_called_once_with()
+        self.assertIsNone(presenter.ads_observer)
+
+    @with_mock_presenter()
+    def test_force_close(self, _, view, presenter):
+        presenter.force_close()
+        view.emit_close.assert_called_once_with()
+        self.assertIsNone(presenter.ads_observer)
+
+    @with_mock_presenter()
+    def test_replace_incorrect_workspace(self, ws, view, presenter):
+        with patch(
+                'mantidqt.widgets.tableworkspacedisplay.presenter.TableWorkspaceDisplay.load_data') as mock_load_data:
+            presenter.replace_workspace(ws.TEST_NAME + "123", ws)
+            self.assertNotCalled(mock_load_data)
+            self.assertNotCalled(view.emit_repaint)
+
+    @with_mock_presenter()
+    def test_replace(self, ws, view, presenter):
+        # patch this out after the constructor of the presenter has finished,
+        # so that we reset any calls it might have made
+        with patch(
+                'mantidqt.widgets.tableworkspacedisplay.presenter.TableWorkspaceDisplay.load_data') as mock_load_data:
+            presenter.replace_workspace(ws.TEST_NAME, ws)
+            mock_load_data.assert_called_once_with(view)
+            view.emit_repaint.assert_called_once_with()
 
 
 if __name__ == '__main__':
