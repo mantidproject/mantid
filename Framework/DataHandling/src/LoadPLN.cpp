@@ -250,8 +250,8 @@ public:
   inline double xval(double ix) const { return (ix - m_B) / m_M; }
 
   inline void add(double val) {
-    auto ix = static_cast<int64_t>(std::floor(ival(val)));
-    if (ix >= 0 && ix < m_hist.size()) {
+    auto ix = static_cast<size_t>(std::floor(ival(val)));
+    if (ix < m_hist.size()) {
       m_hist[ix]++;
       m_count++;
       if (m_hist[ix] > m_peak)
@@ -396,7 +396,7 @@ public:
     for (size_t i = 0; i < hvec.size(); i++) {
       if (hvec[i] >= minLevel) {
         auto ix = static_cast<double>(i);
-        sum += hvec[i] * m_histogram.xval(ix + 0.5);
+        sum += static_cast<double>(hvec[i]) * m_histogram.xval(ix + 0.5);
         count += hvec[i];
       }
     }
