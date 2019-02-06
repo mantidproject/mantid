@@ -96,6 +96,8 @@ public:
 
   std::string setValue(const std::string &value) override;
 
+  std::string setValueFromJson(const Json::Value &value) override;
+
   std::string
   setDataItem(const boost::shared_ptr<Kernel::DataItem> value) override;
 

@@ -86,6 +86,8 @@ public:
           std::unordered_set<std::string>()) override;
   void setPropertyValue(const std::string &name,
                         const std::string &value) override;
+  void setPropertyValueFromJson(const std::string &name,
+                                const Json::Value &value) override;
   void setPropertyOrdinal(const int &index, const std::string &value) override;
 
   bool existsProperty(const std::string &name) const override;

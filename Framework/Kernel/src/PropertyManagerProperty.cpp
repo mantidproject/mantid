@@ -7,6 +7,7 @@
 #include "MantidKernel/PropertyManagerProperty.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/PropertyManagerDataService.h"
+#include "MantidKernel/PropertyWithValueJSON.h"
 
 #include <json/value.h>
 
@@ -113,6 +114,29 @@ std::string PropertyManagerProperty::setValue(const std::string &strValue) {
   return msg.str();
 }
 
+/**
+ * Sets the value of the property from a Json object
+ * @param value A Json objectValue
+ * @return An empty string indicating success otherwise a help message
+ * indicating what error has occurred
+ */
+std::string
+PropertyManagerProperty::setValueFromJson(const Json::Value &value) {
+  if (value.type() == Json::objectValue) {
+    try {
+      *this = createPropertyManager(value);
+      return "";
+    } catch (std::exception &exc) {
+      return std::string("Attempt to set Json value to property failed: ") +
+             exc.what();
+    }
+  } else {
+    return std::string("Attempt to set incorrect Json type to "
+                       "PropertyManager. Expected objectValue, found " +
+                       std::to_string(value.type()));
+  }
+}
+
 // -----------------------------------------------------------------------------
 // IPropertyManager::getValue instantiations
 // -----------------------------------------------------------------------------
@@ -125,10 +149,9 @@ IPropertyManager::getValue<PropertyManager_sptr>(
   if (prop) {
     return *prop;
   } else {
-    std::string message =
-        "Attempt to assign property " + name +
-        " to incorrect type. Expected shared_ptr<PropertyManager>.";
-    throw std::runtime_error(message);
+    throw std::runtime_error(
+        std::string("Attempt to assign property ") + name +
+        " to incorrect type. Expected shared_ptr<PropertyManager>.");
   }
 }
 

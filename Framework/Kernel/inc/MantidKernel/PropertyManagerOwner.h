@@ -67,6 +67,8 @@ public:
 
   void setPropertyValue(const std::string &name,
                         const std::string &value) override;
+  void setPropertyValueFromJson(const std::string &name,
+                                const Json::Value &value) override;
   void setPropertyOrdinal(const int &index, const std::string &value) override;
 
   /// Make m_properties point to the same PropertyManager as po.

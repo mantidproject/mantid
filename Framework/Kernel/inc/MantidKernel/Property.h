@@ -143,6 +143,12 @@ public:
   /// Set the value of the property via a string.  If the value is unacceptable
   /// the value is not changed but a string is returned
   virtual std::string setValue(const std::string &) = 0;
+  /// Set the value of the property via a Json object.  If the value is
+  /// unacceptable the value is not changed but a string is returned
+  /// A const char * can be implicitly converted to both Json::Value
+  /// and std::string so using simple setValue for both functions
+  /// causes an abiguity error
+  virtual std::string setValueFromJson(const Json::Value &) = 0;
   /// Set the value of the property via a reference to another property.
   virtual std::string setValueFromProperty(const Property &right) = 0;
   /// Set the value of the property via a DataItem pointer.  If the value is

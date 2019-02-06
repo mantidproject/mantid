@@ -173,9 +173,10 @@ std::string WorkspaceProperty<TYPE>::getDefault() const {
 }
 
 /** Set the name of the workspace.
- *  Also tries to retrieve it from the AnalysisDataService.
- *  @param value :: The new name for the workspace
- *  @return
+ * Also tries to retrieve it from the AnalysisDataService.
+ * @param value :: The new name for the workspace
+ * @return An empty string indicating success otherwise a string containing the
+ * error
  */
 template <typename TYPE>
 std::string WorkspaceProperty<TYPE>::setValue(const std::string &value) {
@@ -185,6 +186,23 @@ std::string WorkspaceProperty<TYPE>::setValue(const std::string &value) {
   }
   retrieveWorkspaceFromADS();
   return isValid();
+}
+
+/**
+ * Set the name of the workspace from a Json::Value object
+ * Also tries to retrieve it from the AnalysisDataService.
+ * @param value :: The new name for the workspace
+ * @return An empty string indicating success otherwise a string containing the
+ * error
+ */
+template <typename TYPE>
+std::string
+WorkspaceProperty<TYPE>::setValueFromJson(const Json::Value &value) {
+  try {
+    return setValue(value.asString());
+  } catch (std::exception &exc) {
+    return exc.what();
+  }
 }
 
 /** Set a value from a data item

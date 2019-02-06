@@ -24,6 +24,7 @@ public:
   std::string value() const override { return "Nothing"; }
   Json::Value valueAsJson() const override { return Json::Value(); }
   std::string setValue(const std::string &) override { return ""; }
+  std::string setValueFromJson(const Json::Value &) override { return ""; }
   std::string setValueFromProperty(const Property &) override { return ""; }
   std::string setDataItem(const boost::shared_ptr<DataItem>) override {
     return "";

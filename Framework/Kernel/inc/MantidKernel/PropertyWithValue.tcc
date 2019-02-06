@@ -218,6 +218,27 @@ std::string PropertyWithValue<TYPE>::setValue(const std::string &value) {
 }
 
 /**
+ * Set the value of the property from a Json representation.
+ * @param value :: The value to assign to the property
+ * @return Returns "" if the assignment was successful or a user level
+ * description of the problem
+ */
+template <typename TYPE>
+std::string
+PropertyWithValue<TYPE>::setValueFromJson(const Json::Value &value) {
+  if (value.type() != Json::stringValue) {
+    try {
+      *this = decode<TYPE>(value);
+    } catch (std::invalid_argument &exc) {
+      return exc.what();
+    }
+    return "";
+  } else {
+    return setValue(value.asString());
+  }
+}
+
+/**
  * Set a property value via a DataItem
  * @param data :: A shared pointer to a data item
  * @return "" if the assignment was successful or a user level description of
@@ -230,7 +251,7 @@ PropertyWithValue<TYPE>::setDataItem(const boost::shared_ptr<DataItem> data) {
   // the TYPE of the PropertyWithValue can be converted to a
   // shared_ptr<DataItem>
   return setTypedValue(
-      data, boost::is_convertible<TYPE, boost::shared_ptr<DataItem>>());
+      data, std::is_convertible<TYPE, boost::shared_ptr<DataItem>>());
 }
 
 /// Copy assignment operator assigns only the value and the validator not the
@@ -396,7 +417,7 @@ PropertyWithValue<TYPE>::setValueFromProperty(const Property &right) {
 template <typename TYPE>
 template <typename U>
 std::string PropertyWithValue<TYPE>::setTypedValue(const U &value,
-                                                   const boost::true_type &) {
+                                                   const std::true_type &) {
   TYPE data = boost::dynamic_pointer_cast<typename TYPE::element_type>(value);
   std::string msg;
   if (data) {
@@ -424,7 +445,7 @@ std::string PropertyWithValue<TYPE>::setTypedValue(const U &value,
 template <typename TYPE>
 template <typename U>
 std::string PropertyWithValue<TYPE>::setTypedValue(const U &value,
-                                                   const boost::false_type &) {
+                                                   const std::false_type &) {
   UNUSED_ARG(value);
   return "Attempt to assign object of type DataItem to property (" + name() +
          ") of incorrect type";

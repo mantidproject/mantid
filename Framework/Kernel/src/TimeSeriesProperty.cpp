@@ -1445,6 +1445,18 @@ std::string TimeSeriesProperty<TYPE>::setValue(const std::string &) {
 }
 
 /**
+ * Set the property from a Json value. Throws a NotImplementedError
+ *  @throw Exception::NotImplementedError Not yet implemented
+ * @return Nothing in this case
+ */
+template <typename TYPE>
+std::string TimeSeriesProperty<TYPE>::setValueFromJson(const Json::Value &) {
+  throw Exception::NotImplementedError("TimeSeriesProperty<TYPE>::setValue - "
+                                       "Cannot extract TimeSeries from a "
+                                       "Json::Value");
+}
+
+/**
  * @throw Exception::NotImplementedError Not yet implemented
  * @return Nothing in this case
  */

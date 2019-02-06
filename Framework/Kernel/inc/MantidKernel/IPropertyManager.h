@@ -15,12 +15,12 @@
 
 #ifndef Q_MOC_RUN
 #include <boost/make_shared.hpp>
-#include <type_traits>
 #endif
 
 #include <memory>
 #include <stdexcept>
 #include <string>
+#include <type_traits>
 #include <unordered_set>
 #include <vector>
 
@@ -58,7 +58,6 @@ template <typename T> class Matrix;
  */
 class MANTID_KERNEL_DLL IPropertyManager {
 public:
-  // IPropertyManager(){}
   virtual ~IPropertyManager() = default;
 
   /// Function to declare properties (i.e. store them)
@@ -115,6 +114,13 @@ public:
    */
   virtual void setPropertyValue(const std::string &name,
                                 const std::string &value) = 0;
+
+  /** Sets property value from a Json::Value
+      @param name :: Property name
+      @param value :: New property value
+   */
+  virtual void setPropertyValueFromJson(const std::string &name,
+                                        const Json::Value &value) = 0;
 
   /// Set the value of a property by an index
   virtual void setPropertyOrdinal(const int &index,

@@ -94,6 +94,20 @@ std::string FunctionProperty::setValue(const std::string &value) {
   return error;
 }
 
+/**
+ * Assumes the Json object is a string and parses it to create the function
+ * @param value A Json::Value containing a string
+ * @return An empty string indicating success otherwise the string will contain
+ * the value of the error.
+ */
+std::string FunctionProperty::setValueFromJson(const Json::Value &value) {
+  try {
+    return setValue(value.asString());
+  } catch (std::exception &exc) {
+    return exc.what();
+  }
+}
+
 /** Checks whether the entered function is valid.
  *  To be valid it has to be other then default which is no function defined.
  *  @returns A user level description of the problem or "" if it is valid.

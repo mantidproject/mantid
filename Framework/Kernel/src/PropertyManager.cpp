@@ -34,7 +34,6 @@ const std::string createKey(const std::string &name) {
   std::transform(key.begin(), key.end(), key.begin(), toupper);
   return key;
 }
-
 } // namespace
 
 //-----------------------------------------------------------------------------------------------
@@ -342,8 +341,7 @@ void PropertyManager::setProperties(
       targetPropertyManager->declareOrReplaceProperty(
           decodeAsProperty(propName, propValue));
     } else {
-      const std::string value = propValue.asString();
-      targetPropertyManager->setPropertyValue(propName, value);
+      targetPropertyManager->setPropertyValueFromJson(propName, propValue);
     }
   }
 }
@@ -442,14 +440,33 @@ void PropertyManager::setPropertiesWithSimpleString(
  */
 void PropertyManager::setPropertyValue(const std::string &name,
                                        const std::string &value) {
-  Property *p = getPointerToProperty(
-      name); // throws NotFoundError if property not in vector
-  std::string errorMsg = p->setValue(value);
-  this->afterPropertySet(name);
-  if (!errorMsg.empty()) {
-    errorMsg = "Invalid value for property " + p->name() + " (" + p->type() +
-               ") \"" + value + "\": " + errorMsg;
-    throw std::invalid_argument(errorMsg);
+  auto *prop = getPointerToProperty(name);
+  auto helpMsg = prop->setValue(value);
+  afterPropertySet(name);
+  if (!helpMsg.empty()) {
+    helpMsg = "Invalid value for property " + prop->name() + " (" +
+              prop->type() + ") from string \"" + value + "\": " + helpMsg;
+    throw std::invalid_argument(helpMsg);
+  }
+}
+
+/** Set the value of a property by Json::Value
+ *  @param name :: The name of the property (case insensitive)
+ *  @param value :: The value to assign to the property
+ *  @throw Exception::NotFoundError if the named property is unknown
+ *  @throw std::invalid_argument If the value is not valid for the property
+ * given
+ */
+void PropertyManager::setPropertyValueFromJson(const std::string &name,
+                                               const Json::Value &value) {
+  auto *prop = getPointerToProperty(name);
+  auto helpMsg = prop->setValueFromJson(value);
+  afterPropertySet(name);
+  if (!helpMsg.empty()) {
+    helpMsg = "Invalid value for property " + prop->name() + " (" +
+              prop->type() + ") from Json \"" + value.toStyledString() +
+              "\": " + helpMsg;
+    throw std::invalid_argument(helpMsg);
   }
 }
 

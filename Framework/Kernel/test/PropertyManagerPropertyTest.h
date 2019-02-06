@@ -127,6 +127,29 @@ public:
                      static_cast<std::string>(mgr->getProperty("anotherProp")));
   }
 
+  void test_Property_Set_With_Non_Json_ObjectValue_Returns_Help_Msg() {
+    PropertyManagerProperty prop("Test");
+    const std::string helpMsg{prop.setValueFromJson(Json::Value(1))};
+    TS_ASSERT(!helpMsg.empty());
+  }
+
+  void test_Property_Set_With_Json_ObjectValue_Is_Accepted() {
+    const std::string intKey{"k1"}, realKey{"k2"};
+    const int intValue(1);
+    const double realValue(5.3);
+    Json::Value dict(Json::objectValue);
+    dict[intKey] = intValue;
+    dict[realKey] = realValue;
+
+    PropertyManagerProperty prop("Test");
+    prop.setValueFromJson(dict);
+
+    auto propMgr = prop();
+    TS_ASSERT_EQUALS(intValue, static_cast<int>(propMgr->getProperty(intKey)));
+    TS_ASSERT_EQUALS(realValue,
+                     static_cast<double>(propMgr->getProperty(realKey)));
+  }
+
   void test_Property_Set_With_String_Checks_PropertyManager_DataService() {
     using Mantid::Kernel::PropertyManagerDataService;
     auto globalMgr = createPropMgrWithInt();

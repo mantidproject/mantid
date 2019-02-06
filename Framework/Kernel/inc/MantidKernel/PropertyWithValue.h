@@ -59,6 +59,7 @@ public:
   int size() const override;
   std::string getDefault() const override;
   std::string setValue(const std::string &value) override;
+  std::string setValueFromJson(const Json::Value &value) override;
   std::string setDataItem(const boost::shared_ptr<DataItem> data) override;
   PropertyWithValue &operator=(const PropertyWithValue &right);
   PropertyWithValue &operator+=(Property const *right) override;
@@ -83,10 +84,10 @@ private:
   std::string setValueFromProperty(const Property &right) override;
 
   template <typename U>
-  std::string setTypedValue(const U &value, const boost::true_type &);
+  std::string setTypedValue(const U &value, const std::true_type &);
 
   template <typename U>
-  std::string setTypedValue(const U &value, const boost::false_type &);
+  std::string setTypedValue(const U &value, const std::false_type &);
 
   const TYPE getValueForAlias(const TYPE &alias) const;
 

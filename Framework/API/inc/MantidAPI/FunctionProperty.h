@@ -65,6 +65,9 @@ public:
   /// Set the value of the property.
   std::string setValue(const std::string &value) override;
 
+  /// Set the value of the property as a Json representation
+  std::string setValueFromJson(const Json::Value &value) override;
+
   /// Checks whether the entered function is valid.
   std::string isValid() const override;
 

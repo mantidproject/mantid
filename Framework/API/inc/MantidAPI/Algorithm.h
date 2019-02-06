@@ -274,6 +274,8 @@ public:
   ::Json::Value toJson() const override;
   /// De-serialize an object from a string
   static IAlgorithm_sptr fromString(const std::string &input);
+  /// De-serialize an object from a Json
+  static IAlgorithm_sptr fromJson(const Json::Value &input);
   /// Construct an object from a history entry
   static IAlgorithm_sptr fromHistory(const AlgorithmHistory &history);
   //@}

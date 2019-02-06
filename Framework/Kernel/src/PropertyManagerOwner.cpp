@@ -115,6 +115,19 @@ void PropertyManagerOwner::setPropertyValue(const std::string &name,
   this->afterPropertySet(name);
 }
 
+/** Set the value of a property by Json::Value object
+ *  @param name :: The name of the property (case insensitive)
+ *  @param value :: The value to assign to the property
+ *  @throw Exception::NotFoundError if the named property is unknown
+ *  @throw std::invalid_argument If the value is not valid for the property
+ * given
+ */
+void PropertyManagerOwner::setPropertyValueFromJson(const std::string &name,
+                                                    const Json::Value &value) {
+  m_properties->setPropertyValueFromJson(name, value);
+  this->afterPropertySet(name);
+}
+
 /** Set the value of a property by an index
  *  N.B. bool properties must be set using 1/0 rather than true/false
  *  @param index :: The index of the property to assign

@@ -20,14 +20,20 @@ namespace Kernel {
 namespace {
 
 // A pointer to a member function for doing the Json::Value->C++ type conversion
+// Used only for type deduction in the FromJson constructor
 template <typename T> using ValueAsTypeMemFn = T (Json::Value::*)() const;
 
-// A struct mapping a Json::Value to a property. Follows the
-//  Runtime concept idiom to store a templated type internally
+// A non-templated outer struct that can be stored in a container without
+// requiring a pointer. The implementation follows the concept-model idiom
+// of storing the templated type using type erasure. Creating an object
+// of this type uses the type passed to the constructor to infer the
+// template parameter type. This template type is then used to call
+// the appropriate ToCpp conversion function defined in the header when
+// createProperty is called.
 struct FromJson {
   template <typename T>
-  explicit FromJson(ValueAsTypeMemFn<T> asFn) noexcept
-      : m_self{std::make_unique<ModelT<T>>(std::move(asFn))} {}
+  explicit FromJson(ValueAsTypeMemFn<T>)
+      : m_self{std::make_unique<ModelT<T>>()} {}
 
   std::unique_ptr<Property> createProperty(const std::string &name,
                                            const Json::Value &value,
@@ -50,34 +56,19 @@ private:
   };
 
   template <typename T> struct ModelT : ConceptT {
-    explicit ModelT(ValueAsTypeMemFn<T> asFn) noexcept
-        : m_asFn{std::move(asFn)} {}
-
     std::unique_ptr<Property>
     singleValueProperty(const std::string &name,
-                        const Json::Value &value) const override {
-      return std::make_unique<PropertyWithValue<T>>(name, (value.*m_asFn)());
+                        const Json::Value &value) const override final {
+      using ToCppT = pwvjdetail::ToCpp<T>;
+      return std::make_unique<PropertyWithValue<T>>(name, ToCppT()(value));
     }
 
     std::unique_ptr<Property>
     arrayValueProperty(const std::string &name,
-                       const Json::Value &value) const override {
-      std::vector<T> arrayValue;
-      arrayValue.reserve(value.size());
-      for (const auto &elem : value) {
-        try {
-          arrayValue.emplace_back((elem.*m_asFn)());
-        } catch (Json::Exception &exc) {
-          throw std::invalid_argument(
-              "Mixed-type JSON array values not supported:" +
-              std::string(exc.what()));
-        }
-      }
-      return std::make_unique<ArrayProperty<T>>(name, std::move(arrayValue));
+                       const Json::Value &value) const override final {
+      using ToCppVectorT = pwvjdetail::ToCpp<std::vector<T>>;
+      return std::make_unique<ArrayProperty<T>>(name, ToCppVectorT()(value));
     }
-
-  private:
-    ValueAsTypeMemFn<T> m_asFn;
   };
   std::unique_ptr<ConceptT> m_self;
 };
@@ -91,8 +82,7 @@ using FromJsonConverters = std::map<Json::ValueType, FromJson>;
 const FromJsonConverters &converters() {
   static FromJsonConverters converters;
   if (converters.empty()) {
-    using namespace std::placeholders;
-    // Build a map of Json types to fromJson functions of the appropriate type
+    // Build a map of Json types to FromJson converters of the appropriate type
     converters.insert(
         std::make_pair(Json::booleanValue, FromJson(&Json::Value::asBool)));
     converters.insert(
@@ -108,7 +98,8 @@ const FromJsonConverters &converters() {
 /**
  * @brief Create a PropertyWithValue object from the given Json::Value
  * @param name The name of the new property
- * @param value The value as Json::Value. For an array is guaranteed to have at
+ * @param value The value as Json::Value. For an array is guaranteed to have
+ at
  * least 1 element
  * @param createArray If true creates an ArrayProperty
  * @return A pointer to a new Property object
@@ -142,6 +133,19 @@ std::unique_ptr<Property> createSingleTypeProperty(const std::string &name,
  */
 std::unique_ptr<Property> createKeyValueProperty(const std::string &name,
                                                  const Json::Value &keyValues) {
+  return std::make_unique<PropertyManagerProperty>(
+      name, createPropertyManager(keyValues));
+}
+
+} // namespace
+
+/**
+ * @brief Create a PropertyManager from a Json Object.
+ * @param keyValues A Json objectValue. This is not checked.
+ * @return A new PropertyManager
+ * @throws std::invalid_argument if the Json::Value can't be interpreted
+ */
+PropertyManager_sptr createPropertyManager(const Json::Value &keyValues) {
   auto propMgr = boost::make_shared<PropertyManager>();
   auto members = keyValues.getMemberNames();
   for (const auto &key : members) {
@@ -151,10 +155,8 @@ std::unique_ptr<Property> createKeyValueProperty(const std::string &name,
     else
       propMgr->declareProperty(createSingleTypeProperty(key, value));
   }
-  return std::make_unique<PropertyManagerProperty>(name, propMgr);
+  return propMgr;
 }
-
-} // namespace
 
 /**
  * @param name The name of the new property
