@@ -37,7 +37,7 @@ linked_panels = {
 }
 
 
-class WISHPowderReductionTest(MantidSystemTest):
+class WISHPowderReductionNoAbsorptionTest(MantidSystemTest):
     # still missing required files check with ./systemtest -R PowderReduction --showskipped
     def requiredFiles(self):
         input_files = ["vana19612-{}foc-SF-SS.nxs".format(panel) for panel in panels]
@@ -73,7 +73,7 @@ class WISHPowderReductionTest(MantidSystemTest):
             mantid.DeleteWorkspace(ws + "-d")
 
 
-class WISHPowderReductionNoAbsorptionTest(MantidSystemTest):
+class WISHPowderReductionTest(MantidSystemTest):
     # still missing required files check with ./systemtest -R PowderReduction --showskipped
     def requiredFiles(self):
         input_files = ["vana19612-{}foc-SF-SS.nxs".format(panel) for panel in panels]
