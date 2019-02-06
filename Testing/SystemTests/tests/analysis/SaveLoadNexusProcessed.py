@@ -91,3 +91,13 @@ class SaveLoadNexusProcessedMaskWorkspaceTest(SaveLoadNexusProcessedTestBase):
         loaded_ws = AnalysisDataService.Instance()[self.loaded_ws_name]
         self.assertTrue(isinstance(loaded_ws, MaskWorkspace))
         return self.compareWorkspaces()
+
+
+class SaveLoadNexusProcessedNoDetectorsSpectraNumbersTest(SaveLoadNexusProcessedTestBase):
+
+    def createTestWorkspace(self):
+        ws = CreateWorkspace([0.], [-1., -2., -3.], NSpec=3, StoreInADS=False)
+        ExtractSingleSpectrum(ws, 1, OutputWorkspace=self.test_ws_name)
+
+    def savedFilename(self):
+        return 'tmp_saveload_nexusprocessed_nodetectorsspectranumbers'

@@ -112,6 +112,7 @@ Bugfixes
 - Fixed a bug in :ref:`ExtractSpectra <algm-ExtractSpectra>` which was causing a wrong last value in the output's vertical axis if the axis type was ``BinEdgeAxis``.
 - Fixed an issue in :ref:`Rebin2D <algm-Rebin2D>` where `NaN` values would result if there were zero-area bins in the input workspace.
 - Fixed a bug in :ref:`MayersSampleCorrection <algm-MayersSampleCorrection>` for when using the multiple scattering correction.
+- Fixed a bug in :ref:`SaveNexusProcessed <algm-SaveNexusProcessed>` which prevented saving spectrum numbers when histograms had no detectors.
 
 Python
 ------
