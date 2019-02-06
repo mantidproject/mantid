@@ -9,23 +9,24 @@
 #
 from __future__ import (absolute_import, unicode_literals)
 
+import os.path
 # std imports
 import sys
-import os.path
 import traceback
 
 # 3rd party imports
 from qtpy.QtCore import QObject, Signal
 from qtpy.QtGui import QColor, QFontMetrics
-from qtpy.QtWidgets import QMessageBox, QStatusBar, QVBoxLayout, QWidget, QFileDialog
+from qtpy.QtWidgets import QFileDialog, QMessageBox, QStatusBar, QVBoxLayout, QWidget
 
+from mantidqt.io import open_a_file_dialog
 # local imports
 from mantidqt.widgets.codeeditor.editor import CodeEditor
 from mantidqt.widgets.codeeditor.errorformatter import ErrorFormatter
 from mantidqt.widgets.codeeditor.execution import PythonCodeExecution
-from mantidqt.io import open_a_file_dialog
-
 # Status messages
+from mantidqt.widgets.inline_find_replace_dialog.presenter import InlineFindReplaceDialog
+
 IDLE_STATUS_MSG = "Status: Idle."
 LAST_JOB_MSG_TEMPLATE = "Last job completed {} at {} in {:.3f}s"
 RUNNING_STATUS_MSG = "Status: Running"
@@ -112,11 +113,11 @@ class PythonFileInterpreter(QWidget):
         self.clear_key_binding("Ctrl+/")
 
         self.status = QStatusBar(self)
-        layout = QVBoxLayout()
-        layout.addWidget(self.editor)
-        layout.addWidget(self.status)
-        self.setLayout(layout)
-        layout.setContentsMargins(0, 0, 0, 0)
+        self.layout = QVBoxLayout()
+        self.layout.addWidget(self.editor)
+        self.layout.addWidget(self.status)
+        self.setLayout(self.layout)
+        self.layout.setContentsMargins(0, 0, 0, 0)
         self._setup_editor(content, filename)
 
         self._presenter = PythonFileInterpreterPresenter(self,
@@ -124,6 +125,19 @@ class PythonFileInterpreter(QWidget):
 
         self.editor.modificationChanged.connect(self.sig_editor_modified)
         self.editor.fileNameChanged.connect(self.sig_filename_modified)
+        self.find_replace_dialog = None
+        self.find_replace_dialog_shown = False
+
+    def show_find_replace_dialog(self):
+        if self.find_replace_dialog is None:
+            self.find_replace_dialog = InlineFindReplaceDialog(self)
+            self.layout.insertWidget(0, self.find_replace_dialog.view)
+
+        if not self.find_replace_dialog.visible:
+            self.find_replace_dialog.show()
+        else:
+            self.find_replace_dialog.hide()
+            self.editor.setFocus()
 
     @property
     def filename(self):

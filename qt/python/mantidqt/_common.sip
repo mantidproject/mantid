@@ -148,6 +148,8 @@ public:
 
 public slots:
   void updateProgressMarker(int lineno, bool error);
+  void showFindReplaceDialog();
+  void showInlineFindReplaceDialog();
 
 signals:
   void fileNameChanged(const QString &fileName);

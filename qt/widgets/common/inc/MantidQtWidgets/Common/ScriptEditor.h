@@ -124,6 +124,7 @@ public slots:
   void print();
   /// Raise find replace dialog
   virtual void showFindReplaceDialog();
+  virtual void showInlineFindReplaceDialog();
 
   /// Override zoomTo slot
   void zoomTo(int level) override;
