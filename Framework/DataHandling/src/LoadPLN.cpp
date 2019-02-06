@@ -239,7 +239,7 @@ class SimpleHist {
 
 public:
   SimpleHist(size_t N, double minVal, double maxVal) : m_hist(N, 0) {
-    m_M = (N / (maxVal - minVal));
+    m_M = (static_cast<double>(N) / (maxVal - minVal));
     m_B = -m_M * minVal;
     m_peak = 0;
     m_count = 0;
@@ -250,7 +250,7 @@ public:
   inline double xval(double ix) const { return (ix - m_B) / m_M; }
 
   inline void add(double val) {
-    auto ix = static_cast<size_t>(std::floor(ival(val)));
+    auto ix = static_cast<int64_t>(std::floor(ival(val)));
     if (ix >= 0 && ix < m_hist.size()) {
       m_hist[ix]++;
       m_count++;
@@ -395,12 +395,13 @@ public:
     size_t count = 0;
     for (size_t i = 0; i < hvec.size(); i++) {
       if (hvec[i] >= minLevel) {
-        sum += hvec[i] * m_histogram.xval(i + 0.5);
+        auto ix = static_cast<double>(i);
+        sum += hvec[i] * m_histogram.xval(ix + 0.5);
         count += hvec[i];
       }
     }
 
-    return (count > 0 ? sum / count : 0.0);
+    return (count > 0 ? sum / static_cast<double>(count) : 0.0);
   }
 };
 
@@ -414,7 +415,7 @@ protected:
   double m_tofCorrection;
   double m_sampleTime;
 
-  void addEventImpl(size_t id, size_t x, size_t, double tobs) override {
+  void addEventImpl(size_t id, size_t, size_t, double tobs) override {
 
     // get the absolute time for the start of the frame
     auto offset = m_startTime + frameStart();
@@ -579,13 +580,8 @@ void LoadPLN::exec(const std::string &hdfFile, const std::string &eventFile) {
     timeMaxBoundary = std::numeric_limits<double>::infinity();
   TimeLimits timeBoundary(getProperty(FilterByTimeStartStr), timeMaxBoundary);
 
-  // lambda fn to simplify loading instrument parameters
-  auto instr = m_localWorkspace->getInstrument();
-  auto iparam = [&instr](std::string tag) {
-    return instr->getNumberParameter(tag)[0];
-  };
-
   // get the detector map from raw input to a physical detector
+  auto instr = m_localWorkspace->getInstrument();
   std::string dmapStr = instr->getParameterAsString("DetectorMap");
   std::vector<size_t> detMapIndex = std::vector<size_t>(HISTO_BINS_X, 0);
   mapRangeToIndex(dmapStr, detMapIndex, [](size_t n) { return n; });
