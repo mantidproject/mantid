@@ -4,9 +4,8 @@
 <instrument xmlns="http://www.mantidproject.org/IDF/1.0" 
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
             xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
- name="MARI" valid-from   ="2016-09-11 23:59:59"
-                        valid-to     ="2100-01-01 23:59:59"
-                        last-modified="2016-11-02 15:50:00">
+            name="MARI" valid-from = "2017-07-01 00:00:00"
+            last-modified="2019-02-06 09:11:00">
 
   <defaults>
     <length unit="meter"/>
