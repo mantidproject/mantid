@@ -345,11 +345,19 @@ public:
   Q1DWeightedTestPerformance() {}
 
   void setUp() override {
+    // We use the largest D33 detector in LTOF mode and with bin masking,
+    // which makes up presumably the heaviest duty for the algorithm.
     LoadNexusProcessed loader;
     loader.initialize();
     loader.setPropertyValue("Filename", "ILL_D33_LTOF_red.nxs");
     loader.setPropertyValue("OutputWorkspace", "__in");
     loader.execute();
+    MaskBinsIf masker;
+    masker.initialize();
+    masker.setPropertyValue("InputWorkspace", "__in");
+    masker.setPropertyValue("OutputWorkspace", "__in");
+    masker.setPropertyValue("Criterion", "x < 1 || x > 10");
+    masker.execute();
     m_alg.initialize();
     m_alg.setPropertyValue("InputWorkspace", "__in");
     m_alg.setPropertyValue("OutputBinning", "0.0003,-0.1,10.");
