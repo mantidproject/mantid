@@ -13,7 +13,8 @@
 #include "GUI/Runs/RunsView.h"
 #include "GUI/Save/SaveView.h"
 #include "IBatchView.h"
-#include "MantidAPI/IAlgorithm.h"
+#include "MantidAPI/IAlgorithm_fwd.h"
+#include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "ui_BatchWidget.h"
 #include <memory>
 
@@ -39,8 +40,13 @@ public:
 private slots:
   void onBatchComplete(bool error);
   void onBatchCancelled();
-  void onAlgorithmComplete();
-  void onAlgorithmError(std::string const &errorMessage);
+  void
+  onAlgorithmComplete(Mantid::API::IAlgorithm_sptr algorithm,
+                      MantidQt::API::BatchAlgorithmRunnerSubscriber *notifyee);
+  void
+  onAlgorithmError(std::string const &errorMessage,
+                   Mantid::API::IAlgorithm_sptr algorithm,
+                   MantidQt::API::BatchAlgorithmRunnerSubscriber *notifyee);
 
 private:
   void initLayout();

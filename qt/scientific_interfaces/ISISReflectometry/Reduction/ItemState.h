@@ -9,7 +9,6 @@
 #define MANTID_CUSTOMINTERFACES_STATE_H_
 #include "Common/DllConfig.h"
 #include <boost/optional.hpp>
-#include <mutex>
 #include <string>
 
 namespace MantidQt {
@@ -46,7 +45,6 @@ private:
   State m_state;
   boost::optional<std::string> m_message;
   double m_progress;
-  std::mutex m_mutex;
 
   bool requiresMessage() const;
 };

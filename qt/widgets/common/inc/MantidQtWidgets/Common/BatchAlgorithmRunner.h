@@ -143,8 +143,12 @@ signals:
   /// Emitted when a batch has finished executing
   void batchComplete(bool error);
   void batchCancelled();
-  void algorithmComplete();
-  void algorithmError(std::string const &errorMessage);
+  void
+  algorithmComplete(Mantid::API::IAlgorithm_sptr algorithm,
+                    MantidQt::API::BatchAlgorithmRunnerSubscriber *notifyee);
+  void algorithmError(std::string const &errorMessage,
+                      Mantid::API::IAlgorithm_sptr algorithm,
+                      MantidQt::API::BatchAlgorithmRunnerSubscriber *notifyee);
 
 private:
   /// Implementation of algorithm runner

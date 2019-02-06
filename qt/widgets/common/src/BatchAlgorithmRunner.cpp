@@ -104,9 +104,6 @@ bool BatchAlgorithmRunner::executeBatch() {
  * Starts executing the queue of algorithms on a separate thread.
  */
 void BatchAlgorithmRunner::executeBatchAsync() {
-  // A previous async process may have left observers running so
-  // make sure we don't add duplicates
-  removeAllObservers();
   addAllObservers();
   Poco::ActiveResult<bool> result = m_executeAsync(Poco::Void());
 }
@@ -167,7 +164,7 @@ bool BatchAlgorithmRunner::executeBatchAsyncImpl(const Poco::Void &) {
 
   m_notificationCenter.postNotification(
       new BatchCompleteNotification(false, errorFlag));
-  m_notificationCenter.removeObserver(m_batchCompleteObserver);
+  removeAllObservers();
 
   return !errorFlag;
 }
@@ -255,22 +252,15 @@ void BatchAlgorithmRunner::handleBatchCancelled(
 
 void BatchAlgorithmRunner::handleAlgorithmComplete(
     const Poco::AutoPtr<AlgorithmCompleteNotification> &pNf) {
-  // Update subscriber
-  if (pNf->notifyee())
-    pNf->notifyee()->notifyAlgorithmComplete(pNf->algorithm());
   // Notify UI elements
-  emit algorithmComplete();
+  emit algorithmComplete(pNf->algorithm(), pNf->notifyee());
 }
 
 void BatchAlgorithmRunner::handleAlgorithmError(
     const Poco::AutoPtr<AlgorithmErrorNotification> &pNf) {
   auto errorMessage = pNf->errorMessage();
-  // Update subscriber
-  if (pNf->notifyee())
-    pNf->notifyee()->notifyAlgorithmError(pNf->algorithm(),
-                                          pNf->errorMessage());
   // Notify UI elements
-  emit algorithmError(errorMessage);
+  emit algorithmError(errorMessage, pNf->algorithm(), pNf->notifyee());
 }
 } // namespace API
 } // namespace MantidQt

@@ -26,7 +26,7 @@ void EventView::initLayout() {
   initLogValueSliceTypeLayout();
   initCustomSliceTypeLayout();
   connect(m_ui.disabledSlicingButton, SIGNAL(toggled(bool)), this,
-          SLOT(toggleDisabledSlicing(bool)));
+          SLOT(onToggleDisabledSlicing(bool)));
 
   m_sliceTypeRadioButtons = makeQWidgetGroup(
       m_ui.uniformEvenButton, m_ui.uniformButton, m_ui.logValueButton,

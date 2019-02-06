@@ -12,18 +12,28 @@
 #include "GUI/Instrument/IInstrumentView.h"
 #include "GUI/Runs/IRunsView.h"
 #include "GUI/Save/ISaveView.h"
-#include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include <string>
 
 namespace MantidQt {
+
+namespace API {
+class BatchAlgorithmRunner;
+class BatchAlgorithmRunnerSubscriber;
+} // namespace API
+
 namespace CustomInterfaces {
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL BatchViewSubscriber {
 public:
   virtual void notifyBatchFinished(bool error) = 0;
   virtual void notifyBatchCancelled() = 0;
-  virtual void notifyAlgorithmFinished() = 0;
-  virtual void notifyAlgorithmError(std::string const &message) = 0;
+  virtual void
+  notifyAlgorithmFinished(Mantid::API::IAlgorithm_sptr algorithm,
+                          API::BatchAlgorithmRunnerSubscriber *notifyee) = 0;
+  virtual void
+  notifyAlgorithmError(std::string const &message,
+                       Mantid::API::IAlgorithm_sptr algorithm,
+                       API::BatchAlgorithmRunnerSubscriber *notifyee) = 0;
 };
 
 /** @class IBatchView

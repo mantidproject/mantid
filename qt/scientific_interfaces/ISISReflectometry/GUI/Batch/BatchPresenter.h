@@ -43,8 +43,13 @@ public:
   // BatchViewSubscriber overrides
   void notifyBatchFinished(bool error) override;
   void notifyBatchCancelled() override;
-  void notifyAlgorithmFinished() override;
-  void notifyAlgorithmError(std::string const &message) override;
+  void notifyAlgorithmFinished(
+      Mantid::API::IAlgorithm_sptr algorithm,
+      API::BatchAlgorithmRunnerSubscriber *notifyee) override;
+  void
+  notifyAlgorithmError(std::string const &message,
+                       Mantid::API::IAlgorithm_sptr algorithm,
+                       API::BatchAlgorithmRunnerSubscriber *notifyee) override;
 
   // IBatchPresenter overrides
   void notifyReductionPaused() override;

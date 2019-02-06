@@ -9,14 +9,12 @@
 
 #include "Common/DllConfig.h"
 #include "MantidAPI/IAlgorithm_fwd.h"
-#include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "Reduction/Batch.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class MANTIDQT_ISISREFLECTOMETRY_DLL BatchJobRunner
-    : public API::BatchAlgorithmRunnerSubscriber {
+class MANTIDQT_ISISREFLECTOMETRY_DLL BatchJobRunner {
 public:
   BatchJobRunner(Batch batch, API::BatchAlgorithmRunner &batchAlgoRunner);
 
@@ -30,8 +28,9 @@ public:
 
   void setReprocessFailedItems(bool reprocessFailed);
 
-private slots:
-  void rowReductionComplete(bool error);
+  void algorithmFinished(Mantid::API::IAlgorithm_sptr algorithm);
+  void algorithmError(std::string const &message,
+                      Mantid::API::IAlgorithm_sptr algorithm);
 
 private:
   Batch m_batch;

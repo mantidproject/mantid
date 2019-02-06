@@ -7,12 +7,13 @@
 #include "BatchJobRunner.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IAlgorithm.h"
+#include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
 using API::BatchAlgorithmRunner;
-using Mantid::API::IAlgorithm;
+using Mantid::API::IAlgorithm_sptr;
 using AlgorithmRuntimeProps = std::map<std::string, std::string>;
 
 namespace { // unnamed
@@ -301,5 +302,16 @@ void BatchJobRunner::setUpBatchAlgorithmRunner() {
     addAlgorithmsForGroup(group, m_batch, m_batchAlgoRunner, m_reprocessFailed,
                           m_processAll);
 }
+
+void BatchJobRunner::algorithmFinished(IAlgorithm_sptr algorithm) {
+  UNUSED_ARG(algorithm);
+}
+
+void BatchJobRunner::algorithmError(std::string const &message,
+                                    IAlgorithm_sptr algorithm) {
+  UNUSED_ARG(message);
+  UNUSED_ARG(algorithm);
+}
+
 } // namespace CustomInterfaces
 } // namespace MantidQt

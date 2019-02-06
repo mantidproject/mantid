@@ -19,6 +19,9 @@ using namespace MantidQt::MantidWidgets::DataProcessor;
 namespace MantidQt {
 namespace CustomInterfaces {
 
+using API::BatchAlgorithmRunnerSubscriber;
+using Mantid::API::IAlgorithm_sptr;
+
 // unnamed namespace
 namespace {
 Mantid::Kernel::Logger g_log("Reflectometry GUI");
@@ -105,12 +108,20 @@ void BatchPresenter::notifyBatchCancelled() {
   m_runsPresenter->notifyRowStateChanged();
 }
 
-void BatchPresenter::notifyAlgorithmFinished() {
+void BatchPresenter::notifyAlgorithmFinished(
+    IAlgorithm_sptr algorithm, BatchAlgorithmRunnerSubscriber *notifyee) {
+  if (notifyee)
+    notifyee->notifyAlgorithmComplete(algorithm);
+  m_jobRunner.algorithmFinished(algorithm);
   m_runsPresenter->notifyRowStateChanged();
 }
 
-void BatchPresenter::notifyAlgorithmError(std::string const &message) {
-  UNUSED_ARG(message);
+void BatchPresenter::notifyAlgorithmError(
+    std::string const &message, IAlgorithm_sptr algorithm,
+    BatchAlgorithmRunnerSubscriber *notifyee) {
+  if (notifyee)
+    notifyee->notifyAlgorithmError(algorithm, message);
+  m_jobRunner.algorithmError(message, algorithm);
   m_runsPresenter->notifyRowStateChanged();
 }
 
