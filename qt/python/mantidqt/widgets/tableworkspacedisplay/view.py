@@ -59,6 +59,7 @@ class TableWorkspaceDisplayView(QTableWidget, ObservingView):
 
         self.setWindowTitle("{} - Mantid".format(name))
         self.setWindowFlags(Qt.Window)
+        self.setAttribute(Qt.WA_DeleteOnClose, True)
 
         self.close_signal.connect(self._run_close)
         self.rename_signal.connect(self._run_rename)
