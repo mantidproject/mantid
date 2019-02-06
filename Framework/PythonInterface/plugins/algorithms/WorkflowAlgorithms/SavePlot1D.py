@@ -175,8 +175,6 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
                                    xaxis={'title': {'text': xlabel}},
                                    margin={'l': 40, 'r': 0, 't': 0, 'b': 40})
 
-
-
             fig = go.Figure(data=traces, layout=layout)
 
         # extra arguments for div vs full page
