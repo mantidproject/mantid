@@ -11,7 +11,7 @@ import numpy as np
 
 class LinkedUBs(DataProcessorAlgorithm):
     _qtol = None
-    _q_decrement = None
+    _qdecrement = None
     _dtol = None
     _num_peaks = None
     _peak_increment = None
@@ -228,11 +228,11 @@ class LinkedUBs(DataProcessorAlgorithm):
         self.setPropertyGroup("alpha", "Lattice")
         self.setPropertyGroup("beta", "Lattice")
         self.setPropertyGroup("gamma", "Lattice")
-        self.setPropertyGroup("MinWavelength", "LinkedPredictedPeaks")
-        self.setPropertyGroup("MaxWavelength", "LinkedPredictedPeaks")
-        self.setPropertyGroup("MinDSpacing", "LinkedPredictedPeaks")
-        self.setPropertyGroup("MaxDSpacing", "LinkedPredictedPeaks")
-        self.setPropertyGroup("ReflectionCondition", "LinkedPredictedPeaks")
+        self.setPropertyGroup("MinWavelength", "PredictPeaksParameters")
+        self.setPropertyGroup("MaxWavelength", "PredictPeaksParameters")
+        self.setPropertyGroup("MinDSpacing", "PredictPeaksParameters")
+        self.setPropertyGroup("MaxDSpacing", "PredictPeaksParameters")
+        self.setPropertyGroup("ReflectionCondition", "PredictPeaksParameters")
         self.setPropertyGroup("Workspace", "Input")
         self.setPropertyGroup("ObservedPeaks", "Input")
         self.setPropertyGroup("PredictedPeaks", "Input")
@@ -274,143 +274,82 @@ class LinkedUBs(DataProcessorAlgorithm):
 
     def PyExec(self):
         # create peaks workspace to store linked peaks
-        _LinkedPeaks = CreatePeaksWorkspace(
+        linked_peaks = CreatePeaksWorkspace(
             InstrumentWorkspace=self._workspace,
             NumberOfPeaks=0,
             StoreInADS=False)
 
         # create peaks table to store linked predicted peaks
-        _LinkedPeaksPredicted = CreatePeaksWorkspace(
+        linked_peaks_predicted = CreatePeaksWorkspace(
             InstrumentWorkspace=self._workspace,
             NumberOfPeaks=0,
             StoreInADS=False)
 
-        for iter in range(0, self._iterations):
-            if iter == 0:
-                _predictor = self._predicted_peaks
-            if iter > 0:
-                _predictor = _LinkedPeaksPredicted
+        for m in range(0, self._iterations):
+            if m == 0:
+                predictor = self._predicted_peaks
+            if m > 0:
+                predictor = linked_peaks_predicted
 
-            _qtol_var = self._qtol * (self._q_decrement)**iter
-            _num_peaks_var = self._num_peaks + (self._peak_increment) * iter
+            qtol_var = self._qtol * self._q_decrement**m
+            num_peaks_var = self._num_peaks + self._peak_increment * m
 
             # add q_lab and dpsacing values of found peaks to a list
-            q_find = []
-            d_find = []
-
-            for i in range(len(self._observed_peaks.column(1))):
-                _q_find = self._observed_peaks.cell(i, 15)
-                _d_find = self._observed_peaks.cell(i, 8)
-
-                q_find.append(_q_find)
-                d_find.append(_d_find)
-
-            # recast these lists as numpy arrays
-            q_find = np.array(q_find)
-            d_find = np.array(d_find)
+            qlabs_observed = np.array(self._observed_peaks.column(15))
+            dspacings_observed = np.array(self._observed_peaks.column(8))
 
             # sort the predicted peaks from largest to smallest dspacing
-            q_predicted = []
-            d_predicted = []
-            ind_h = []
-            ind_k = []
-            ind_l = []
-
-            for i in range(len(_predictor.column(1))):
-                _q_predicted = _predictor.cell(i, 15)
-                _d_predicted = _predictor.cell(i, 8)
-                _h_predicted = _predictor.cell(i, 2)
-                _k_predicted = _predictor.cell(i, 3)
-                _l_predicted = _predictor.cell(i, 4)
-
-                q_predicted.append(_q_predicted)
-                d_predicted.append(_d_predicted)
-                ind_h.append(_h_predicted)
-                ind_k.append(_k_predicted)
-                ind_l.append(_l_predicted)
-
-            # recast these lists as numpy arrays
-            q_predicted = np.array(q_predicted)
-            d_predicted = np.array(d_predicted)
-
-            ind_h = np.array(ind_h)
-            ind_k = np.array(ind_k)
-            ind_l = np.array(ind_l)
+            qlabs_predicted = np.array(predictor.column(15))
+            dspacings_predicted = np.array(predictor.column(8))
 
             # get the indexing list that sorts dspacing from largest to
             # smallest
-            idx = d_predicted.argsort()[::-1]
+            hkls = np.array([[p['h'], p['k'], p['l']] for p in predictor])
+            idx = dspacings_predicted.argsort()[::-1]
+            HKL_predicted = hkls[idx, :]
 
             # sort q, d and h, k, l by this indexing
-            q_predicted = q_predicted[idx]
-            d_predicted = d_predicted[idx]
-            ind_h = ind_h[idx]
-            ind_k = ind_k[idx]
-            ind_l = ind_l[idx]
+            qlabs_predicted = qlabs_predicted[idx]
+            dspacings_predicted = dspacings_predicted[idx]
 
-            HKL_predicted = []
-            for i in range(len(ind_h)):
-                _HKL = (ind_h[i], ind_k[i], ind_l[i])
-                HKL_predicted.append(_HKL)
-
-            # recast h,k,l list as numpy array
-            HKL_predicted = np.array(HKL_predicted)
-
-            # create the list of predicted peaks to be considered in
-            # linking procedure, with peak list partitioned by num_peaks
-            q_ordered = []
-            d_ordered = []
-            HKL_ordered = []
-
-            for i in range(0, _num_peaks_var):
-                _q_ordered = q_predicted[i]
-                _d_ordered = d_predicted[i]
-                _HKL_ordered = HKL_predicted[i]
-
-                q_ordered.append(_q_ordered)
-                d_ordered.append(_d_ordered)
-                HKL_ordered.append(_HKL_ordered)
-
-            # recast these ordered lists as numpy arrays
-            q_ordered = np.array(q_ordered)
-            d_ordered = np.array(d_ordered)
-            HKL_ordered = np.array(HKL_ordered)
+            q_ordered = qlabs_predicted[:num_peaks_var]
+            d_ordered = dspacings_predicted[:num_peaks_var]
+            HKL_ordered = HKL_predicted[:num_peaks_var]
 
             # loop through the ordered find peaks, compare q and d to each
             # predicted peak if the q and d values of a found peak match a
             # predicted peak within tolerance, the found peak inherits
             # the HKL of the predicted peak
-            for i in range(len(q_find)):
-                _qx_obs, _qy_obs, _qz_obs = q_find[i]
-                _q_obs = V3D(_qx_obs, _qy_obs, _qz_obs)
-                _p_obs = _LinkedPeaks.createPeak(_q_obs)
-                _d_obs = d_find[i]
+            for i in range(len(qlabs_observed)):
+                qx_obs, qy_obs, qz_obs = qlabs_observed[i]
+                q_obs = V3D(qx_obs, qy_obs, qz_obs)
+                p_obs = linked_peaks.createPeak(q_obs)
+                d_obs = dspacings_observed[i]
 
                 for j in range(len(q_ordered)):
-                    _qx_pred, _qy_pred, _qz_pred = q_ordered[j]
-                    _d_pred = d_ordered[j]
+                    qx_pred, qy_pred, qz_pred = q_ordered[j]
+                    d_pred = d_ordered[j]
 
-                    if (_qx_pred -
-                        _qtol_var <= _qx_obs <= _qx_pred +
-                        _qtol_var and _qy_pred -
-                        _qtol_var <= _qy_obs <= _qy_pred +
-                        _qtol_var and _qz_pred -
-                        _qtol_var <= _qz_obs <= _qz_pred +
-                        _qtol_var and _d_pred -
-                        self._dtol <= _d_obs <= _d_pred +
-                            self._dtol):
-                        _h, _k, _l = HKL_ordered[j]
-                        _p_obs.setHKL(_h, _k, _l)
-                        _LinkedPeaks.addPeak(_p_obs)
+                    if (qx_pred - qtol_var <= qx_obs <= qx_pred
+                        + qtol_var and qy_pred
+                        - qtol_var <= qy_obs <= qy_pred
+                        + qtol_var and qz_pred
+                        - qtol_var <= qz_obs <= qz_pred
+                        + qtol_var and d_pred
+                        - self._dtol <= d_obs <= d_pred
+                            + self._dtol):
+                        h, k, l = HKL_ordered[j]
+                        p_obs.setHKL(h, k, l)
+                        linked_peaks.addPeak(p_obs)
 
             # Clean up peaks where H == K == L == 0
-            _LinkedPeaks = FilterPeaks(_LinkedPeaks,
+            linked_peaks = FilterPeaks(linked_peaks,
                                        FilterVariable="h^2+k^2+l^2",
                                        Operator="!=",
                                        FilterValue="0")
 
-            # force UB on LinkedPeaks using known lattice parameters
-            CalculateUMatrix(PeaksWorkspace=_LinkedPeaks,
+            # force UB on linked_peaks using known lattice parameters
+            CalculateUMatrix(PeaksWorkspace=linked_peaks,
                              a=self._a,
                              b=self._b,
                              c=self._c,
@@ -420,8 +359,8 @@ class LinkedUBs(DataProcessorAlgorithm):
                              StoreInADS=False)
 
             # new linked predicted peaks
-            _LinkedPeaksPredicted = PredictPeaks(
-                InputWorkspace=_LinkedPeaks,
+            linked_peaks_predicted = PredictPeaks(
+                InputWorkspace=linked_peaks,
                 WavelengthMin=self._wavelength_min,
                 WavelengthMax=self._wavelength_max,
                 MinDSpacing=self._min_dspacing,
@@ -430,12 +369,12 @@ class LinkedUBs(DataProcessorAlgorithm):
                 StoreInADS=False)
 
         # clean up
-        self.setProperty("LinkedPeaks", _LinkedPeaks)
-        self.setProperty("LinkedPredictedPeaks", _LinkedPeaksPredicted)
-        if mtd.doesExist("_LinkedPeaks"):
-            DeleteWorkspace(_LinkedPeaks)
-        if mtd.doesExist("_LinkedPeaksPredicted"):
-            DeleteWorkspace(_LinkedPeaksPredicted)
+        self.setProperty("LinkedPeaks", linked_peaks)
+        self.setProperty("LinkedPredictedPeaks", linked_peaks_predicted)
+        if mtd.doesExist("linked_peaks"):
+            DeleteWorkspace(linked_peaks)
+        if mtd.doesExist("linked_peaks_predicted"):
+            DeleteWorkspace(linked_peaks_predicted)
         if self._delete_ws:
             DeleteWorkspace(self._workspace)
 
