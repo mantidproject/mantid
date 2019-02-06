@@ -998,41 +998,10 @@ void AlignAndFocusPowder::loadCalFile(const std::string &calFilename,
   if (calFilename.empty() && groupFilename.empty())
     return;
 
-  // load grouping file if it was already specified
-  if (!groupFilename.empty()) {
-    g_log.information() << "Loading Grouping file \"" << groupFilename
-                        << "\"\n";
-    if (groupFilename.find(".cal") != std::string::npos) {
-      IAlgorithm_sptr alg = createChildAlgorithm("LoadDiffCal");
-      alg->setProperty("InputWorkspace", m_inputW);
-      alg->setPropertyValue("Filename", groupFilename);
-      alg->setProperty<bool>("MakeCalWorkspace", false);
-      alg->setProperty<bool>("MakeGroupingWorkspace", true);
-      alg->setProperty<bool>("MakeMaskWorkspace", false);
-      alg->setPropertyValue("WorkspaceName", m_instName);
-      alg->executeAsChildAlg();
-
-      // get the workspace
-      m_groupWS = alg->getProperty("OutputGroupingWorkspace");
-    } else {
-      IAlgorithm_sptr alg = createChildAlgorithm("LoadDetectorsGroupingFile");
-      alg->setProperty("InputFile", groupFilename);
-      alg->executeAsChildAlg();
-
-      // get the workspace
-      m_groupWS = alg->getProperty("OutputWorkspace");
-    }
-
-    // register the workspace with the ADS
-    const std::string name = m_instName + "_group";
-    AnalysisDataService::Instance().addOrReplace(name, m_groupWS);
-    this->setPropertyValue("GroupingWorkspace", name);
-  }
-
-  if (calFilename.empty())
-    return;
-
-  g_log.information() << "Loading Calibration file \"" << calFilename << "\"\n";
+  g_log.information() << "Loading Calibration file \"" << calFilename << "\"";
+  if (!groupFilename.empty())
+    g_log.information() << "with grouping from \"" << groupFilename << "\"";
+  g_log.information("");
 
   // bunch of booleans to keep track of things
   const bool loadMask = !m_maskWS;
@@ -1042,6 +1011,7 @@ void AlignAndFocusPowder::loadCalFile(const std::string &calFilename,
   IAlgorithm_sptr alg = createChildAlgorithm("LoadDiffCal");
   alg->setProperty("InputWorkspace", m_inputW);
   alg->setPropertyValue("Filename", calFilename);
+  alg->setPropertyValue("GroupFilename", groupFilename);
   alg->setProperty<bool>("MakeCalWorkspace", loadCalibration);
   alg->setProperty<bool>("MakeGroupingWorkspace", loadGrouping);
   alg->setProperty<bool>("MakeMaskWorkspace", loadMask);
