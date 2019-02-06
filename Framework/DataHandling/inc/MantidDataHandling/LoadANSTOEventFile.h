@@ -29,9 +29,8 @@ struct EventFileHeader_Base { // total content should be 16*int (64 bytes)
   int32_t anstohm_version; // ANSTOHM_VERSION server/filler version number that
                            // generated the file
   int32_t pack_format; // typically 0 if packed binary, 1 if unpacked binary.
-  int32_t
-      oob_enabled; // if set, OOB events can be present in the data, otherwise
-                   // only neutron and t0 events are stored
+  int32_t oob_enabled; // if set, OOB events can be present in the data,
+                       // otherwise only neutron and t0 events are stored
   int32_t clock_scale; // the CLOCK_SCALE setting, ns per timestamp unit
   // cppcheck-suppress unusedStructMember
   int32_t spares[16 - 6]; // spares (padding)
@@ -42,11 +41,10 @@ struct EventFileHeader_Packed { // total content should be 16*int (64 bytes)
   int32_t evt_stg_nbits_y;      // number of bits in y datum
   int32_t evt_stg_nbits_v;      // number of bits in v datum
   int32_t evt_stg_nbits_w;      // number of bits in w datum
-  int32_t evt_stg_nbits_wa; // number of bits in wa datum // MJL added 5/15 for
-                            // format 0x00010002
-  int32_t
-      evt_stg_xy_signed; // 0 if x and y are unsigned, 1 if x and y are signed
-                         // ints
+  int32_t evt_stg_nbits_wa;  // number of bits in wa datum // MJL added 5/15 for
+                             // format 0x00010002
+  int32_t evt_stg_xy_signed; // 0 if x and y are unsigned, 1 if x and y are
+                             // signed ints
   // cppcheck-suppress unusedStructMember
   int32_t spares[16 - 6]; // spares (padding)
 };
