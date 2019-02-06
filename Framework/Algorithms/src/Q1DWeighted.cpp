@@ -182,7 +182,7 @@ void Q1DWeighted::exec() {
   std::vector<std::vector<double>> wedgeXNormLambda(
       nWedges, std::vector<double>(sizeOut - 1, 0.0));
 
-  const auto &spectrumInfo = inputWS->spectrumInfo();  
+  const auto &spectrumInfo = inputWS->spectrumInfo();
   const double l1 = spectrumInfo.l1();
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))

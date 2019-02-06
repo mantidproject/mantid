@@ -19,10 +19,10 @@
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using Mantid::Algorithms::MaskBinsIf;
-using Mantid::DataHandling::MoveInstrumentComponent;
 using Mantid::Algorithms::Q1DWeighted;
 using Mantid::DataHandling::LoadNexusProcessed;
 using Mantid::DataHandling::LoadSpice2D;
+using Mantid::DataHandling::MoveInstrumentComponent;
 
 class Q1DWeightedTest : public CxxTest::TestSuite {
 public:
@@ -141,14 +141,14 @@ public:
     // Get wedge 0 of the result with offset 0.
     auto result1 = boost::dynamic_pointer_cast<WorkspaceGroup>(
         AnalysisDataService::Instance().retrieve(wedgeWS1));
-    auto wedge1 = boost::dynamic_pointer_cast<MatrixWorkspace>(
-        result1->getItem(0));
+    auto wedge1 =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(result1->getItem(0));
 
     // Get wedge 1 of the result with offset 90.
     auto result2 = boost::dynamic_pointer_cast<WorkspaceGroup>(
         AnalysisDataService::Instance().retrieve(wedgeWS2));
-    auto wedge2 = boost::dynamic_pointer_cast<MatrixWorkspace>(
-        result2->getItem(1));
+    auto wedge2 =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(result2->getItem(1));
 
     double tolerance = 1e-12;
 
@@ -182,8 +182,6 @@ public:
     TS_ASSERT_EQUALS(result->getNumberHistograms(), 1)
     TS_ASSERT_DELTA(result->y(0)[6], 247.106, 0.001);
   }
-
-
 
   // Test the asymmetric wedges option
   void testWedgeAsymm() {
@@ -248,10 +246,10 @@ public:
     auto result1 = boost::dynamic_pointer_cast<WorkspaceGroup>(
         AnalysisDataService::Instance().retrieve(wedgeWS1));
     TS_ASSERT(result1)
-    auto wedge1 = boost::dynamic_pointer_cast<MatrixWorkspace>(
-        result1->getItem(0));
-    auto wedge2 = boost::dynamic_pointer_cast<MatrixWorkspace>(
-        result1->getItem(1));
+    auto wedge1 =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(result1->getItem(0));
+    auto wedge2 =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(result1->getItem(1));
 
     TS_ASSERT(wedge1)
     TS_ASSERT(wedge2)
@@ -260,14 +258,14 @@ public:
     auto result2 = boost::dynamic_pointer_cast<WorkspaceGroup>(
         AnalysisDataService::Instance().retrieve(wedgeWS2));
     TS_ASSERT(result2)
-    auto wedgeA1 = boost::dynamic_pointer_cast<MatrixWorkspace>(
-        result2->getItem(0));
-    auto wedgeA2 = boost::dynamic_pointer_cast<MatrixWorkspace>(
-        result2->getItem(1));
-    auto wedgeA3 = boost::dynamic_pointer_cast<MatrixWorkspace>(
-        result2->getItem(2));
-    auto wedgeA4 = boost::dynamic_pointer_cast<MatrixWorkspace>(
-        result2->getItem(3));
+    auto wedgeA1 =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(result2->getItem(0));
+    auto wedgeA2 =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(result2->getItem(1));
+    auto wedgeA3 =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(result2->getItem(2));
+    auto wedgeA4 =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(result2->getItem(3));
 
     TS_ASSERT(wedgeA1)
     TS_ASSERT(wedgeA2)
@@ -358,9 +356,7 @@ public:
     m_alg.setPropertyValue("OutputWorkspace", "__out");
   }
 
-  void tearDown() override {
-    AnalysisDataService::Instance().clear();
-  }
+  void tearDown() override { AnalysisDataService::Instance().clear(); }
 
   void test_performance() { TS_ASSERT_THROWS_NOTHING(m_alg.execute()); }
 
