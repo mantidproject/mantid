@@ -6,6 +6,9 @@
 using namespace MantidQt::MantidWidgets;
 %End
 
+%Include string.sip
+%Include vector.sip
+
 %InitialisationCode
 qRegisterMetaType<std::string>("StdString");
 qRegisterMetaType<Mantid::API::Workspace_sptr>("Workspace");
@@ -83,6 +86,7 @@ public:
   void appendNotice(const QString &text);
   void appendInformation(const QString &text);
   void appendDebug(const QString &text);
+  void setSource(const QString &source);
 };
 
 class ScriptEditor : QWidget {
@@ -292,4 +296,39 @@ signals:
     void startXChanged(double);
     void endXChanged(double);
     void fittingDone(const QString &);
+};
+
+// ---------------------------------
+// Hint Strategy
+// ---------------------------------
+class Hint {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/Hint.h"
+%End
+public:
+  Hint(std::string word, std::string description);
+  const std::string& word() const;
+  const std::string& description() const;
+};
+
+class HintStrategy
+{
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/HintStrategy.h"
+%End
+public:
+  HintStrategy();
+  virtual std::vector<Hint> createHints() = 0;
+  virtual ~HintStrategy();
+};
+
+class AlgorithmHintStrategy : public HintStrategy
+{
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/AlgorithmHintStrategy.h"
+%End
+public:
+  AlgorithmHintStrategy(const std::string& algorithmName,
+                        std::vector<std::string> blacklist);
+  virtual std::vector<Hint> createHints();
 };

@@ -13,13 +13,15 @@ and masked SANS workspace.
 from __future__ import (absolute_import, division, print_function)
 
 from abc import ABCMeta, abstractmethod
-
-from PyQt4 import QtGui
+from qtpy import QtGui, QtWidgets
 from six import with_metaclass
-from . import ui_masking_table
+
+from mantidqt.utils.qt import load_ui
+
+Ui_MaskingTable, _ = load_ui(__file__, "masking_table.ui")
 
 
-class MaskingTable(QtGui.QWidget, ui_masking_table.Ui_MaskingTable):
+class MaskingTable(QtWidgets.QWidget, Ui_MaskingTable):
     class MaskingTableListener(with_metaclass(ABCMeta, object)):
         """
         Defines the elements which a presenter can listen to for the masking table
@@ -42,7 +44,7 @@ class MaskingTable(QtGui.QWidget, ui_masking_table.Ui_MaskingTable):
         # Hook up signal and slots
         self.connect_signals()
         self._masking_tab_listeners = []
-        self.masking_table.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
+        self.masking_table.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
 
     def add_listener(self, listener):
         if not isinstance(listener, MaskingTable.MaskingTableListener):

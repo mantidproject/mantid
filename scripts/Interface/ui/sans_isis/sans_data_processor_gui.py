@@ -20,6 +20,7 @@ from qtpy.QtGui import (QDoubleValidator, QIcon, QIntValidator, QRegExpValidator
 
 from mantid.kernel import (Logger)
 from mantidqtpython import MantidQt
+from mantidqt.widgets import jobtreeview
 
 try:
     from mantidplot import *
@@ -395,7 +396,7 @@ class SANSDataProcessorGui(QMainWindow,
         if self.data_processor_table:
             self.data_processor_table.setParent(None)
 
-        self.data_processor_table = MantidQt.MantidWidgets.Batch.JobTreeView(
+        self.data_processor_table = jobtreeview.JobTreeView(
             ["Sample Scatter", "ssp", "Sample Transmission", "stp", "Sample Direct", "sdp",
              "Can Scatter", "csp",
              "Can Transmission", "ctp", "Can Direct", "cdp", "Output Name", "User File",
@@ -410,7 +411,7 @@ class SANSDataProcessorGui(QMainWindow,
         self._call_settings_listeners(lambda listener: listener.on_row_inserted(0, row_entry))
 
         self.table_signals = \
-            MantidQt.MantidWidgets.Batch.JobTreeViewSignalAdapter(self.data_processor_table, self)
+            jobtreeview.JobTreeViewSignalAdapter(self.data_processor_table, self)
         # The signal adapter subscribes to events from the table
         # and emits signals whenever it is notified.
 
@@ -432,11 +433,11 @@ class SANSDataProcessorGui(QMainWindow,
         border_color = "black"
         border_opacity = 255
         is_editable = True
-        return MantidQt.MantidWidgets.Batch.Cell(text, background_color, border_thickness,
+        return jobtreeview.Cell(text, background_color, border_thickness,
                                                  border_color, border_opacity, is_editable)
 
     def row(self, path):
-        return MantidQt.MantidWidgets.Batch.RowLocation(path)
+        return jobtreeview.RowLocation(path)
 
     def _setup_main_tab(self):
         self.user_file_button.clicked.connect(self._on_user_file_load)

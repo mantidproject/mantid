@@ -1,4 +1,5 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
+# Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
 #     NScD Oak Ridge National Laboratory, European Spallation Source
@@ -305,7 +306,6 @@ class MainWindow(QMainWindow):
 
         # list of custom interfaces that are not qt4/qt5 compatible
         GUI_BLACKLIST = ['ISIS_Reflectometry_Old.py',
-                         'ISIS_SANS_v2_experimental.py',
                          'Frequency_Domain_Analysis.py',
                          'Elemental_Analysis.py']
 

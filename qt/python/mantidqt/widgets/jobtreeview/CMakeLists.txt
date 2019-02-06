@@ -1,20 +1,17 @@
-include ( SipQtTargetFunctions )
 
-set ( COMMON_INC_DIR ../../widgets/common/inc )
+# This wraps the low-level classes.
+
+set ( JOBTREEVIEW_INC_DIR ../../../../widgets/common/inc/MantidQtWidgets/Common )
 set ( _header_depends
   SIPVector.h
   string.sip
   vector.sip
 
-  ${COMMON_INC_DIR}/MantidQtWidgets/Common/AlgorithmDialog.h
-  ${COMMON_INC_DIR}/MantidQtWidgets/Common/Message.h
-  ${COMMON_INC_DIR}/MantidQtWidgets/Common/MessageDisplay.h
-  ${COMMON_INC_DIR}/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidget.h
-  ${COMMON_INC_DIR}/MantidQtWidgets/Common/HintStrategy.h
-  ${COMMON_INC_DIR}/MantidQtWidgets/Common/Hint.h
+  ${JOBTREEVIEW_INC_DIR}/Batch/Row.h
+  ${JOBTREEVIEW_INC_DIR}/Batch/RowLocation.h
+  ${JOBTREEVIEW_INC_DIR}/Batch/JobTreeView.h
+  ${JOBTREEVIEW_INC_DIR}/Batch/JobTreeViewSignalAdapter.h
 )
-
-find_package ( BoostPython REQUIRED )
 
 list ( APPEND common_link_libs
   ${TCMALLOC_LIBRARIES_LINKTIME}
@@ -26,9 +23,9 @@ list ( APPEND common_link_libs
 # Wrapper module linked against Qt4 - not currently installed until required for backward compatability
 # with MantidPlot
 mtd_add_sip_module (
-  MODULE_NAME _commonqt4
-  TARGET_NAME mantidqt_commonqt4
-  SIP_SRCS _common.sip
+  MODULE_NAME _jobtreeviewqt4
+  TARGET_NAME mantidqt_jobtreeviewqt4
+  SIP_SRCS _jobtreeview.sip
   HEADER_DEPS ${_header_depends}
   PYQT_VERSION 4
   INCLUDE_DIRS
@@ -46,15 +43,12 @@ mtd_add_sip_module (
   FOLDER Qt4
 )
 
-if ( ENABLE_WORKBENCH )
-  find_package ( QScintillaQt5 REQUIRED )
-endif()
-
-# Wrapper module linked against Qt5
+# The wrapper is only defined for Qt5 and does not support
+# legacy Qt4 mode
 mtd_add_sip_module (
-  MODULE_NAME _commonqt5
-  TARGET_NAME mantidqt_commonqt5
-  SIP_SRCS _common.sip
+  MODULE_NAME _jobtreeviewqt5
+  TARGET_NAME mantidqt_jobtreeviewqt5
+  SIP_SRCS _jobtreeview.sip
   HEADER_DEPS ${_header_depends}
   PYQT_VERSION 5
   INCLUDE_DIRS
@@ -64,20 +58,16 @@ mtd_add_sip_module (
   LINK_LIBS
     ${common_link_libs}
     MantidQtWidgetsCommonQt5
+    MantidQtWidgetsMplCppQt5
     Qt5::Core
     Qt5::Gui
-Qt5::Widgets
-    Qt5::Qscintilla
-    ${Boost_LIBRARIES}
-    API
+    Qt5::OpenGL
+    Qt5::Widgets
   INSTALL_DIR
-    ${WORKBENCH_LIB_DIR}/mantidqt
+    ${WORKBENCH_LIB_DIR}/mantidqt/widgets/jobtreeview
   LINUX_INSTALL_RPATH
-    "\$ORIGIN/.."
+    "\$ORIGIN/../../.."
   OSX_INSTALL_RPATH
-    "@loader_path/.." 
+    "@loader_path/../../.."
   FOLDER Qt5
 )
-
-add_subdirectory ( widgets/instrumentview )
-add_subdirectory ( widgets/jobtreeview )
