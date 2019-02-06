@@ -117,20 +117,10 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
     def handle_instrument_changed(self):
         """User changes the selected instrument."""
         instrument = self._view.get_instrument()
-        current_instrument = self._view.cached_instrument
         if instrument != self._model._data.instrument:
-            # prompt user to continue or not
-            user_response = self._view.instrument_changed_warning()
-            if user_response == 1:
-                # User selects "Ok"
-                self._model.clear_data()
-                self.clear_view()
-                self._model._data.instrument = instrument
-                self._view.set_instrument(instrument, block=True)
-                self.instrumentNotifier.notify_subscribers(instrument)
-            else:
-                # User selects "Cancel", reset the instrument selector
-                self._view.set_instrument(current_instrument, block=True)
+            self._model._data.instrument = instrument
+            self._view.set_instrument(instrument, block=True)
+            self.instrumentNotifier.notify_subscribers(instrument)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Dead Time

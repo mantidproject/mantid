@@ -208,7 +208,8 @@ class MuonDataContext(object):
         # Update the current data; resetting the groups and pairs to their default values
         if self._loaded_data.num_items() > 0:
             self._current_data = self._loaded_data.get_latest_data()
-            self.set_groups_and_pairs_to_default()
+            if not self.groups:
+                self.set_groups_and_pairs_to_default()
         else:
             self._current_data = {"workspace": load_utils.empty_loaded_data()}
 

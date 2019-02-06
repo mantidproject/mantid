@@ -123,7 +123,6 @@ class LoadWidgetPresenter(object):
         self.load_run_widget.set_current_instrument(instrument)
 
     def update_new_instrument(self, instrument):
-        self.clear_data_and_view()
         self.set_current_instrument(instrument)
 
     class LoadNotifier(Observable):
