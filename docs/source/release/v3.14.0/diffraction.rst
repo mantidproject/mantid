@@ -26,6 +26,7 @@ Improvements
 - :ref:`Le Bail concept page <Le Bail Fit>` moved from mediawiki
 - Rework of :ref:`powder diffraction calibration <Powder Diffraction Calibration>` documentation
 - New TOPAZ instrument geometry for 2019 run cycle
+- :ref:`LoadDiffCal <algm-LoadDiffCal>` has an additional parameter to allow for a second file specifying a grouping to override the one in the calibration file
 
 
 Single Crystal Diffraction
