@@ -339,11 +339,15 @@ void ReadEventFile(IReader &loader, IEventHandler &handler, IProgress &progress,
       }
 
       if (frame_start_event) {
-        // reset timestamp at start of a new frame and pass the absolute time if
-        // it is available resolve the logic for the running time so that that
-        // the absolute time can be used
+        // reset timestamp at start of a new frame 
+        // the auxillary time is only available in OOB mode
+        // otherwise, auxillary time = primary time
         primary_time = 0;
         primary_ok = true;
+        if (!oob_en) {
+          auxillary_time = 0;
+          auxillary_ok = true;
+        }
         handler.newFrame();
       }
 
