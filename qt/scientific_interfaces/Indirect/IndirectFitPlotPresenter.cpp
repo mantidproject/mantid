@@ -148,11 +148,11 @@ void IndirectFitPlotPresenter::setModelEndX(double endX) {
 }
 
 void IndirectFitPlotPresenter::setModelHWHM(double minimum, double maximum) {
-  m_model->setFWHM(maximum - minimum);
+//  m_model->setFWHM(maximum - minimum);
 }
 
 void IndirectFitPlotPresenter::setModelBackground(double background) {
-  m_model->setBackground(background);
+//  m_model->setBackground(background);
 }
 
 void IndirectFitPlotPresenter::hideMultipleDataSelection() {

@@ -5,13 +5,13 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/IndirectFitPropertyBrowser.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceGroup.h"
-#include "MantidQtWidgets/Common/SignalBlocker.h"
 
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MultiDomainFunction.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidQtWidgets/Common/SignalBlocker.h"
 
 #include "MantidQtWidgets/Common/FitOptionsBrowser.h"
 #include "MantidQtWidgets/Common/FunctionBrowser.h"
@@ -87,20 +87,24 @@ void IndirectFitPropertyBrowser::setFunction(const QString &funStr) {
   m_functionBrowser->setFunction(funStr);
 }
 
-IFunction_sptr IndirectFitPropertyBrowser::getFittingFunction() const {
+MultiDomainFunction_sptr
+IndirectFitPropertyBrowser::getFittingFunction() const {
   try {
     if (m_functionBrowser->getNumberOfDatasets() == 0) {
-      return m_functionBrowser->getFunction();
+        auto multiDomainFunction = boost::make_shared<MultiDomainFunction>();
+        multiDomainFunction->addFunction(m_functionBrowser->getFunction());
+        multiDomainFunction->setDomainIndex(0, 0);
+        return multiDomainFunction;
     }
-    return m_functionBrowser->getGlobalFunction();
+    return boost::dynamic_pointer_cast<MultiDomainFunction>(m_functionBrowser->getGlobalFunction());
   } catch (std::invalid_argument) {
-    return IFunction_sptr(new CompositeFunction);
+    return boost::make_shared<MultiDomainFunction>();
   }
 }
 
-IFunction_sptr IndirectFitPropertyBrowser::compositeFunction() const {
-  return getFittingFunction();
-}
+//IFunction_sptr IndirectFitPropertyBrowser::compositeFunction() const {
+//  return getFittingFunction();
+//}
 
 std::string IndirectFitPropertyBrowser::minimizer(bool withProperties) const {
   return m_fitOptionsBrowser->getProperty("Minimizer").toStdString();
@@ -124,9 +128,13 @@ bool IndirectFitPropertyBrowser::isHistogramFit() const { return false; }
 
 bool IndirectFitPropertyBrowser::ignoreInvalidData() const { return false; }
 
+int IndirectFitPropertyBrowser::getNumberOfDatasets() const
+{
+  return m_functionBrowser->getNumberOfDatasets();
+}
+
 void IndirectFitPropertyBrowser::updateParameters(
     const Mantid::API::IFunction &fun) {
-  std::cerr << "Update parameters " << std::endl;
   m_functionBrowser->updateParameters(fun);
 }
 

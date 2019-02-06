@@ -61,8 +61,8 @@ signals:
   void dataAdded();
   void dataRemoved();
   void dataChanged();
-  void startXChanged(double, std::size_t, std::size_t);
-  void endXChanged(double, std::size_t, std::size_t);
+  void startXChanged(double, std::size_t=0, std::size_t=0);
+  void endXChanged(double, std::size_t=0, std::size_t=0);
   void excludeRegionChanged(const std::string &, std::size_t, std::size_t);
   void multipleDataViewSelected();
   void singleDataViewSelected();

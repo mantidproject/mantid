@@ -264,16 +264,16 @@ void cleanTemporaries(
     cleanTemporaries(prefix + std::to_string(i + 1), fittingData[i]);
 }
 
-CompositeFunction_sptr createMultiDomainFunction(IFunction_sptr function,
-                                                 std::size_t numberOfDomains) {
-  auto multiDomainFunction = boost::make_shared<MultiDomainFunction>();
-
-  for (auto i = 0u; i < numberOfDomains; ++i) {
-    multiDomainFunction->addFunction(function);
-    multiDomainFunction->setDomainIndex(i, i);
-  }
-  return multiDomainFunction;
-}
+//CompositeFunction_sptr createMultiDomainFunction(IFunction_sptr function,
+//                                                 std::size_t numberOfDomains) {
+//  auto multiDomainFunction = boost::make_shared<MultiDomainFunction>();
+//
+//  for (auto i = 0u; i < numberOfDomains; ++i) {
+//    multiDomainFunction->addFunction(function);
+//    multiDomainFunction->setDomainIndex(i, i);
+//  }
+//  return multiDomainFunction;
+//}
 
 IFunction_sptr extractFirstInnerFunction(IFunction_sptr function) {
   if (const auto multiDomain =
@@ -447,7 +447,7 @@ std::vector<std::string> IndirectFittingModel::getFitParameterNames() const {
   return std::vector<std::string>();
 }
 
-Mantid::API::IFunction_sptr IndirectFittingModel::getFittingFunction() const {
+Mantid::API::MultiDomainFunction_sptr IndirectFittingModel::getFittingFunction() const {
   return m_activeFunction;
 }
 
@@ -575,7 +575,8 @@ void IndirectFittingModel::setFittingMode(FittingMode mode) {
   m_fittingMode = mode;
 }
 
-void IndirectFittingModel::setFitFunction(IFunction_sptr function) {
+void IndirectFittingModel::setFitFunction(MultiDomainFunction_sptr function) {
+  std::cerr << "Set fun " << function->getNumberDomains() << std::endl;
   m_activeFunction = function;
   m_previousModelSelected = isPreviousModelSelected();
 }
@@ -750,8 +751,9 @@ bool IndirectFittingModel::isPreviousModelSelected() const {
          equivalentFunctions(getFittingFunction(), m_fitFunction);
 }
 
-CompositeFunction_sptr IndirectFittingModel::getMultiDomainFunction() const {
-  return createMultiDomainFunction(getFittingFunction(), numberOfWorkspaces());
+MultiDomainFunction_sptr
+IndirectFittingModel::getMultiDomainFunction() const {
+  return m_activeFunction; // createMultiDomainFunction(getFittingFunction(), numberOfWorkspaces());
 }
 
 IAlgorithm_sptr IndirectFittingModel::getFittingAlgorithm() const {
@@ -773,8 +775,14 @@ IAlgorithm_sptr IndirectFittingModel::getSingleFit(std::size_t dataIndex,
   const auto range = fitData->getRange(spectrum);
   const auto exclude = fitData->excludeRegionsVector(spectrum);
 
+  auto function = getFittingFunction();
+  assert(function->getNumberDomains() == getNumberOfDatasets());
+  if (function->getNumberDomains() == 0) {
+    throw std::runtime_error("Cannot set up a fit: is the function defined?");
+  }
+  std::cerr << "Single fit " << function->getNumberDomains() << std::endl;
   auto fitAlgorithm = simultaneousFitAlgorithm();
-  addFitProperties(*fitAlgorithm, getFittingFunction(), getResultXAxisUnit());
+  addFitProperties(*fitAlgorithm, function->getFunction(dataIndex), getResultXAxisUnit());
   addInputDataToSimultaneousFit(fitAlgorithm, workspace, spectrum, range,
                                 exclude, "");
   fitAlgorithm->setProperty("OutputWorkspace",
@@ -784,11 +792,17 @@ IAlgorithm_sptr IndirectFittingModel::getSingleFit(std::size_t dataIndex,
 
 Mantid::API::IAlgorithm_sptr
 IndirectFittingModel::sequentialFitAlgorithm() const {
+  auto function = getFittingFunction();
+  assert(function->getNumberDomains() == getNumberOfDatasets());
+  std::cerr << "Sequential fit " << function->getNumberDomains() << std::endl;
   return AlgorithmManager::Instance().create("QENSFitSequential");
 }
 
 Mantid::API::IAlgorithm_sptr
 IndirectFittingModel::simultaneousFitAlgorithm() const {
+  auto function = getFittingFunction();
+  assert(function->getNumberDomains() == getNumberOfDatasets());
+  std::cerr << "Simultaneous fit " << function->getNumberDomains() << std::endl;
   return AlgorithmManager::Instance().create("QENSFitSimultaneous");
 }
 

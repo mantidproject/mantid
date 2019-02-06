@@ -11,6 +11,7 @@
 #include "ui_MSDFit.h"
 
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/make_unique.h"
@@ -317,11 +318,7 @@ size_t IndirectFitAnalysisTab::numberOfCustomFunctions(
 }
 
 void IndirectFitAnalysisTab::setModelFitFunction() {
-  try {
-    m_fittingModel->setFitFunction(m_fitPropertyBrowser->getFittingFunction());
-  } catch (const std::out_of_range &) {
-    m_fittingModel->setFitFunction(m_fitPropertyBrowser->compositeFunction());
-  }
+  m_fittingModel->setFitFunction(m_fitPropertyBrowser->getFittingFunction());
 }
 
 void IndirectFitAnalysisTab::setModelStartX(double startX) {
@@ -708,6 +705,7 @@ void IndirectFitAnalysisTab::setupFit(IAlgorithm_sptr fitAlgorithm) {
 
 void IndirectFitAnalysisTab::updateDataReferences() {
   m_fitPropertyBrowser->updateFunctionBrowserData(m_fittingModel->getNumberOfDatasets());
+  m_fittingModel->setFitFunction(m_fitPropertyBrowser->getFittingFunction());
 }
 
 /**

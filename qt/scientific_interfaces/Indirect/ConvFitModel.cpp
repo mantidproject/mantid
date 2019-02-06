@@ -7,7 +7,7 @@
 #include "ConvFitModel.h"
 
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidGeometry/Instrument.h"
 
@@ -469,14 +469,15 @@ std::string ConvFitModel::singleFitOutputName(std::size_t index,
       "%1%_conv_" + m_fitType + m_backgroundString + "_s%2%", index, spectrum);
 }
 
-Mantid::API::IFunction_sptr ConvFitModel::getFittingFunction() const {
-  auto function = shallowCopy(IndirectFittingModel::getFittingFunction());
-  auto composite = boost::dynamic_pointer_cast<CompositeFunction>(function);
+Mantid::API::MultiDomainFunction_sptr ConvFitModel::getFittingFunction() const {
+  //auto function = shallowCopy(IndirectFittingModel::getFittingFunction());
+  //auto composite = boost::dynamic_pointer_cast<CompositeFunction>(function);
 
-  IFunction_sptr background(nullptr);
-  if (composite && m_backgroundIndex)
-    background = removeFunction(composite, *m_backgroundIndex);
-  return createConvolutionFitModel(function, background, m_temperature);
+  //IFunction_sptr background(nullptr);
+  //if (composite && m_backgroundIndex)
+  //  background = removeFunction(composite, *m_backgroundIndex);
+  //return createConvolutionFitModel(function, background, m_temperature);
+  return IndirectFittingModel::getFittingFunction();
 }
 
 boost::optional<double>
@@ -496,7 +497,8 @@ MatrixWorkspace_sptr ConvFitModel::getResolution(std::size_t index) const {
   return nullptr;
 }
 
-CompositeFunction_sptr ConvFitModel::getMultiDomainFunction() const {
+MultiDomainFunction_sptr
+ConvFitModel::getMultiDomainFunction() const {
   auto function = IndirectFittingModel::getMultiDomainFunction();
   const std::string base = "__ConvFitResolution";
 
@@ -512,7 +514,8 @@ std::vector<std::string> ConvFitModel::getSpectrumDependentAttributes() const {
   return {"WorkspaceIndex"};
 }
 
-void ConvFitModel::setFitFunction(IFunction_sptr function) {
+void ConvFitModel::setFitFunction(
+    MultiDomainFunction_sptr function) {
   auto const composite =
       boost::dynamic_pointer_cast<CompositeFunction>(function);
   m_backgroundIndex = getFirstInCategory(composite, "Background");

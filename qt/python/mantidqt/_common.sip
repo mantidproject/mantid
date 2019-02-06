@@ -304,4 +304,5 @@ class IndirectFitPropertyBrowser : public QDockWidget {
 public:
     IndirectFitPropertyBrowser(QWidget *parent = nullptr, QObject *mantidui = nullptr);
     void init();
+    int getNumberOfDatasets() const;
 };

@@ -8,7 +8,7 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -133,16 +133,16 @@ void IndirectFitPlotModel::setEndX(double endX) {
     m_fittingModel->setEndX(endX, m_activeIndex, m_activeSpectrum);
 }
 
-void IndirectFitPlotModel::setFWHM(double fwhm) {
-  m_fittingModel->setDefaultParameterValue("FWHM", fwhm, m_activeIndex);
-  setFunctionParameters(m_fittingModel->getFittingFunction(), "Peak", "FWHM",
-                        fwhm);
-}
-
-void IndirectFitPlotModel::setBackground(double background) {
-  m_fittingModel->setDefaultParameterValue("A0", background, m_activeIndex);
-  setFirstBackground(m_fittingModel->getFittingFunction(), background);
-}
+//void IndirectFitPlotModel::setFWHM(double fwhm) {
+//  m_fittingModel->setDefaultParameterValue("FWHM", fwhm, m_activeIndex);
+//  setFunctionParameters(m_fittingModel->getFittingFunction(), "Peak", "FWHM",
+//                        fwhm);
+//}
+//
+//void IndirectFitPlotModel::setBackground(double background) {
+//  m_fittingModel->setDefaultParameterValue("A0", background, m_activeIndex);
+//  setFirstBackground(m_fittingModel->getFittingFunction(), background);
+//}
 
 void IndirectFitPlotModel::deleteExternalGuessWorkspace() {
   if (AnalysisDataService::Instance().doesExist(INPUT_AND_GUESS_NAME))
@@ -201,18 +201,18 @@ std::string IndirectFitPlotModel::getLastFitDataName() const {
 }
 
 boost::optional<double> IndirectFitPlotModel::getFirstHWHM() const {
-  auto fwhm = findFirstFWHM(m_fittingModel->getFittingFunction());
-  if (fwhm)
-    return *fwhm / 2.0;
+  //auto fwhm = findFirstFWHM(m_fittingModel->getFittingFunction());
+  //if (fwhm)
+  //  return *fwhm / 2.0;
   return boost::none;
 }
 
 boost::optional<double> IndirectFitPlotModel::getFirstPeakCentre() const {
-  return findFirstPeakCentre(m_fittingModel->getFittingFunction());
+  return 0.0; // findFirstPeakCentre(m_fittingModel->getFittingFunction());
 }
 
 boost::optional<double> IndirectFitPlotModel::getFirstBackgroundLevel() const {
-  return findFirstBackgroundLevel(m_fittingModel->getFittingFunction());
+  return 0.0; // findFirstBackgroundLevel(m_fittingModel->getFittingFunction());
 }
 
 double IndirectFitPlotModel::calculateHWHMMaximum(double minimum) const {

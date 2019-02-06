@@ -31,6 +31,14 @@ using CompositeFunction_sptr = boost::shared_ptr<CompositeFunction>;
 /// Shared pointer to Mantid::API::CompositeFunction (const version)
 using CompositeFunction_const_sptr = boost::shared_ptr<const CompositeFunction>;
 
+/// forward declare of Mantid::API::MultiDomainFunction
+class MultiDomainFunction;
+/// Shared pointer to Mantid::API::MultiDomainFunction
+using MultiDomainFunction_sptr = boost::shared_ptr<MultiDomainFunction>;
+/// Shared pointer to Mantid::API::MultiDomainFunction (const version)
+using MultiDomainFunction_const_sptr =
+    boost::shared_ptr<const MultiDomainFunction>;
+
 } // namespace API
 } // namespace Mantid
 

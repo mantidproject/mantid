@@ -187,7 +187,7 @@ IqtFitModel::IqtFitModel()
     : IndirectFittingModel(), m_makeBetaGlobal(false),
       m_constrainIntensities(false) {}
 
-CompositeFunction_sptr IqtFitModel::getMultiDomainFunction() const {
+MultiDomainFunction_sptr IqtFitModel::getMultiDomainFunction() const {
   if (m_makeBetaGlobal)
     return createFunctionWithGlobalBeta(getFittingFunction());
   return IndirectFittingModel::getMultiDomainFunction();
@@ -242,7 +242,7 @@ void IqtFitModel::setFitTypeString(const std::string &fitType) {
   m_fitType = fitType;
 }
 
-void IqtFitModel::setFitFunction(Mantid::API::IFunction_sptr function) {
+void IqtFitModel::setFitFunction(Mantid::API::MultiDomainFunction_sptr function) {
   IndirectFittingModel::setFitFunction(function);
   if (m_constrainIntensities)
     constrainIntensities(function);
@@ -279,7 +279,7 @@ IqtFitModel::createDefaultParameters(std::size_t index) const {
   return parameters;
 }
 
-CompositeFunction_sptr
+MultiDomainFunction_sptr
 IqtFitModel::createFunctionWithGlobalBeta(IFunction_sptr function) const {
   boost::shared_ptr<MultiDomainFunction> multiDomainFunction(
       new MultiDomainFunction);

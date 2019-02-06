@@ -36,9 +36,12 @@ public:
   /// Initialise the layout.
   void init();
 
+  /// Set the function to the browser
   Q_INVOKABLE void setFunction(const QString &funStr);
-  Mantid::API::IFunction_sptr getFittingFunction() const;
-  Mantid::API::IFunction_sptr compositeFunction() const;
+  /// Get the number of datasets to fit to
+  Q_INVOKABLE int getNumberOfDatasets() const;
+  Mantid::API::MultiDomainFunction_sptr getFittingFunction() const;
+  //Mantid::API::IFunction_sptr compositeFunction() const;
   /// Get the minimizer
   std::string minimizer(bool withProperties = false) const;
   /// Get the max number of iterations
