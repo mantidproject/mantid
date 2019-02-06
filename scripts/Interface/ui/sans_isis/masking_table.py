@@ -13,7 +13,7 @@ and masked SANS workspace.
 from __future__ import (absolute_import, division, print_function)
 
 from abc import ABCMeta, abstractmethod
-from qtpy import QtGui, QtWidgets
+from qtpy import QtWidgets
 from six import with_metaclass
 
 from mantidqt.utils.qt import load_ui
@@ -103,9 +103,9 @@ class MaskingTable(QtWidgets.QWidget, Ui_MaskingTable):
 
         # Populate the rows
         for row, table_entry in enumerate(table_entries):
-            entry_type = QtGui.QTableWidgetItem(table_entry.first)
-            entry_detector = QtGui.QTableWidgetItem(table_entry.second)
-            entry_detail = QtGui.QTableWidgetItem(table_entry.third)
+            entry_type = QtWidgets.QTableWidgetItem(table_entry.first)
+            entry_detector = QtWidgets.QTableWidgetItem(table_entry.second)
+            entry_detail = QtWidgets.QTableWidgetItem(table_entry.third)
 
             self.masking_table.setItem(row, 0, entry_type)
             self.masking_table.setItem(row, 1, entry_detector)

@@ -11,7 +11,7 @@ from __future__ import absolute_import, print_function
 
 import unittest
 
-from mantidqt.widgets.workspacewidget.workspacetreewidget import WorkspaceTreeWidget
+from mantidqt.widgets.workspacewidget.workspacetreewidget import WorkspaceTreeWidgetSimple
 from mantidqt.utils.qt.test import GuiTest
 import sip
 
@@ -20,7 +20,7 @@ class WorkspaceWidgetTest(GuiTest):
     """Minimal testing as it is exported from C++"""
 
     def test_widget_creation(self):
-        widget = WorkspaceTreeWidget()
+        widget = WorkspaceTreeWidgetSimple()
         self.assertTrue(widget is not None)
         sip.delete(widget)
 

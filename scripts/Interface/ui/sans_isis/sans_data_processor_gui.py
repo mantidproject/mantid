@@ -12,25 +12,24 @@ from __future__ import (absolute_import, division, print_function)
 
 from abc import ABCMeta, abstractmethod
 from inspect import isclass
-
-from six import with_metaclass
-from qtpy.QtWidgets import (QListWidgetItem, QMainWindow, QMessageBox, QFileDialog)  # noqa
+import os
+from qtpy.QtWidgets import (QListWidgetItem, QMessageBox, QFileDialog, QMainWindow)  # noqa
 from qtpy.QtCore import (QRegExp, QSettings)  # noqa
 from qtpy.QtGui import (QDoubleValidator, QIcon, QIntValidator, QRegExpValidator)  # noqa
+from six import with_metaclass
 
 from mantid.kernel import (Logger)
-from mantidqtpython import MantidQt
-from mantidqt.widgets import jobtreeview
+from mantidqt.utils.qt import load_ui
+from mantidqt.widgets import jobtreeview, manageuserdirectories
 
 try:
-    from mantidplot import *
-
-    canMantidPlot = True
+    from mantidplot import pymantidplot
+    QT4 = True
 except ImportError:
-    canMantidPlot = False
-from reduction_gui.reduction.scripter import execute_script
+    # When workbench has help functionality exposed, use that for both MantidPlot and Workbench
+    QT4 = False
 
-from . import ui_sans_data_processor_window as ui_sans_data_processor_window
+from reduction_gui.reduction.scripter import execute_script
 from sans.common.enums import (ReductionDimensionality, OutputMode, SaveType, SANSInstrument,
                                RangeStepType, ReductionMode, FitType)
 from sans.common.file_information import SANSFileInformationFactory
@@ -53,6 +52,8 @@ from ui.sans_isis.SANSSaveOtherWindow import SANSSaveOtherDialog
 
 DEFAULT_BIN_SETTINGS = \
     '5.5,45.5,50.0, 50.0,1000.0, 500.0,1500.0, 750.0,99750.0, 255.0,100005.0'
+
+Ui_SansDataProcessorWindow, _ = load_ui(__file__, "sans_data_processor_window.ui")
 
 
 class RunSelectorPresenterFactory(object):
@@ -83,7 +84,7 @@ def _make_run_summation_settings_presenter(summation_settings_view, parent_view)
 # Gui Classes
 # ----------------------------------------------------------------------------------------------------------------------
 class SANSDataProcessorGui(QMainWindow,
-                           ui_sans_data_processor_window.Ui_SansDataProcessorWindow):
+                           Ui_SansDataProcessorWindow):
     data_processor_table = None
     INSTRUMENTS = None
     VARIABLE = "Variable"
@@ -518,7 +519,8 @@ class SANSDataProcessorGui(QMainWindow,
         self._call_settings_listeners(lambda listener: listener.on_compatibility_unchecked())
 
     def _on_help_button_clicked(self):
-        pymantidplot.proxies.showCustomInterfaceHelp('ISIS SANS v2')
+        if QT4:
+            pymantidplot.proxies.showCustomInterfaceHelp('ISIS SANS v2')
 
     def _on_user_file_load(self):
         """
@@ -775,7 +777,7 @@ class SANSDataProcessorGui(QMainWindow,
         return str(self.mask_file_input_line_edit.text())
 
     def show_directory_manager(self):
-        MantidQt.API.ManageUserDirectories.openUserDirsDialog(self)
+        manageuserdirectories.ManageUserDirectories.openUserDirsDialog(self)
 
     def _on_load_mask_file(self):
         load_file(self.mask_file_input_line_edit, "*.*", self.__generic_settings,
@@ -2068,4 +2070,4 @@ class SANSDataProcessorGui(QMainWindow,
         for child in self.children():
             if isinstance(child, SANSSaveOtherDialog):
                 child.done(0)
-        super(QtGui.QMainWindow, self).closeEvent(event)
+        super(QMainWindow, self).closeEvent(event)

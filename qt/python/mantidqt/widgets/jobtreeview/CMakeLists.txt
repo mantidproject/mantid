@@ -3,9 +3,6 @@
 
 set ( JOBTREEVIEW_INC_DIR ../../../../widgets/common/inc/MantidQtWidgets/Common )
 set ( _header_depends
-  SIPVector.h
-  string.sip
-  vector.sip
 
   ${JOBTREEVIEW_INC_DIR}/Batch/Row.h
   ${JOBTREEVIEW_INC_DIR}/Batch/RowLocation.h
@@ -58,11 +55,10 @@ mtd_add_sip_module (
   LINK_LIBS
     ${common_link_libs}
     MantidQtWidgetsCommonQt5
-    MantidQtWidgetsMplCppQt5
     Qt5::Core
     Qt5::Gui
-    Qt5::OpenGL
     Qt5::Widgets
+    ${Boost_LIBRARIES}
   INSTALL_DIR
     ${WORKBENCH_LIB_DIR}/mantidqt/widgets/jobtreeview
   LINUX_INSTALL_RPATH

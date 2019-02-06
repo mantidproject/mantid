@@ -22,7 +22,7 @@ from mantidqt.widgets.instrumentview.presenter import InstrumentViewPresenter
 from mantidqt.widgets.matrixworkspacedisplay.presenter import MatrixWorkspaceDisplay
 from mantidqt.widgets.samplelogs.presenter import SampleLogs
 from mantidqt.widgets.tableworkspacedisplay.presenter import TableWorkspaceDisplay
-from mantidqt.widgets.workspacewidget.workspacetreewidget import WorkspaceTreeWidget
+from mantidqt.widgets.workspacewidget.workspacetreewidget import WorkspaceTreeWidgetSimple
 from mantidqt.plotting.functions import can_overplot, pcolormesh, plot, plot_from_names
 # local package imports
 from workbench.plugins.base import PluginWidget
@@ -37,7 +37,7 @@ class WorkspaceWidget(PluginWidget):
         self._ads = AnalysisDataService.Instance()
 
         # layout
-        self.workspacewidget = WorkspaceTreeWidget()
+        self.workspacewidget = WorkspaceTreeWidgetSimple()
         layout = QVBoxLayout()
         layout.addWidget(self.workspacewidget)
         self.setLayout(layout)

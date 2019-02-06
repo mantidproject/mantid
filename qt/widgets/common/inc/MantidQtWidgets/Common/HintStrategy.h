@@ -22,11 +22,16 @@ public:
   HintStrategy(){};
   virtual ~HintStrategy() = default;
 
-  /** Create a list of hints for auto completion
+  /** Create a list of hints for auto completion.
+      This implementation does nothing as it is intended to be overwritten.
+      However, if we make this an abstract class we cannot easily add the method
+      on the python side, as in basic_hint_strategy.py
 
       @returns A map of keywords to short descriptions for the keyword.
    */
-  virtual std::vector<Hint> createHints() = 0;
+  virtual std::vector<Hint> createHints() {
+    return std::vector<Hint>();
+  };
 };
 } // namespace MantidWidgets
 } // namespace MantidQt
