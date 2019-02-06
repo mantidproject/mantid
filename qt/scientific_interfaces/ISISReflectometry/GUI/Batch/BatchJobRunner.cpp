@@ -8,6 +8,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
+#include <boost/range/adaptor/transformed.hpp>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -42,9 +43,27 @@ void updateProperty(std::string const &property,
   updateProperty(property, value, properties);
 }
 
+void updateProperty(std::string const &property,
+                    std::vector<double> const &values,
+                    AlgorithmRuntimeProps &properties) {
+  if (values.size() < 1)
+    return;
+
+  auto value = boost::algorithm::join(
+      values | boost::adaptors::transformed(
+                   [](double d) { return std::to_string(d); }),
+      ", ");
+  updateProperty(property, value, properties);
+}
+
 void updateProperty(std::string const &property, bool value,
                     AlgorithmRuntimeProps &properties) {
   updateProperty(property, boolToString(value), properties);
+}
+
+void updateProperty(std::string const &property, int value,
+                    AlgorithmRuntimeProps &properties) {
+  updateProperty(property, std::to_string(value), properties);
 }
 
 void updateProperty(std::string const &property, size_t value,
@@ -227,13 +246,62 @@ void updateInstrumentProperties(AlgorithmRuntimeProps &properties,
                                      instrument.detectorCorrections());
 }
 
+class UpdateEventPropertiesVisitor : public boost::static_visitor<> {
+public:
+  explicit UpdateEventPropertiesVisitor(AlgorithmRuntimeProps &properties)
+      : m_properties(properties) {}
+  void operator()(boost::blank const &) const {
+    // No slicing specified so there is nothing to do
+  }
+  void operator()(InvalidSlicing const &) const {
+    throw std::runtime_error("Program error: Invalid slicing");
+  }
+  void operator()(UniformSlicingByTime const &slicing) const {
+    enableSlicing();
+    updateProperty("TimeInterval", slicing.sliceLengthInSeconds(),
+                   m_properties);
+  }
+  void operator()(UniformSlicingByNumberOfSlices const &slicing) const {
+    enableSlicing();
+    updateProperty("NumberOfSlices", slicing.numberOfSlices(), m_properties);
+  }
+  void operator()(CustomSlicingByList const &slicing) const {
+    enableSlicing();
+    updateProperty("TimeInterval", slicing.sliceTimes(), m_properties);
+  }
+  void operator()(SlicingByEventLog const &slicing) const {
+    if (slicing.sliceAtValues().size() < 1)
+      return;
+    if (slicing.sliceAtValues().size() > 1)
+      throw std::runtime_error("Custom log value intervals are not "
+                               "implemented; please specify a single "
+                               "interval width");
+    enableSlicing();
+    updateProperty("LogName", slicing.blockName(), m_properties);
+    updateProperty("LogValueInterval", slicing.sliceAtValues()[0],
+                   m_properties);
+  }
+
+private:
+  AlgorithmRuntimeProps &m_properties;
+
+  void enableSlicing() const {
+    updateProperty("SliceWorkspace", true, m_properties);
+  }
+};
+
+void updateEventProperties(AlgorithmRuntimeProps &properties,
+                           Slicing const &slicing) {
+  boost::apply_visitor(UpdateEventPropertiesVisitor(properties), slicing);
+}
+
 void addAlgorithmForRow(Row &row, Batch const &model,
                         BatchAlgorithmRunner &batchAlgoRunner) {
   auto alg = Mantid::API::AlgorithmManager::Instance().create(
       "ReflectometryISISLoadAndProcess");
 
   auto properties = AlgorithmRuntimeProps();
-  // updateEventProperties(properties, model.experiment());
+  updateEventProperties(properties, model.slicing());
   updateExperimentProperties(properties, model.experiment());
   updatePerThetaDefaultProperties(properties,
                                   model.defaultsForTheta(row.theta()));
