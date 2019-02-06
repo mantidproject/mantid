@@ -52,6 +52,16 @@ Usage
 
 This algorithm is not intended to be run individually, rather as a part of the `SANSReduction <http://www.mantidproject.org/Reduction_for_HFIR_SANS>`_.
 
+Masked Bins
+-----------
+
+Bins masked in the input workspace will not enter the calculation.
+
+AccountForGravity
+-----------------
+
+If enabled, this will correct for the gravity effect by analytical calculation of the drop during the time-of-flight from sample to detector.
+
 .. categories::
 
 .. sourcelink::

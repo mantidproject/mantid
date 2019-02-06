@@ -89,6 +89,7 @@ Improvements
 - All of the numerical integration based absorption corrections which use :ref:`AbsorptionCorrection <algm-AbsorptionCorrection>` will generate an exception when they fail to generate a gauge volume. Previously, they would silently generate a correction workspace that was all not-a-number (``NAN``).
 - Various clarifications and additional links in the geometry and material documentation pages
 - :ref:`SetSample <algm-SetSample>` and :ref:`SetSampleMaterial <algm-SetSampleMaterial>` now accept materials without ``ChemicalFormula`` or ``AtomicNumber``. In this case, all cross sections and ``SampleNumberDensity`` have to be given.
+- :ref:`Q1DWeighted <algm-Q1DWeighted>` will now discard the masked bins in the input and can optionally account for the gravity drop.
 
 Bugfixes
 ########

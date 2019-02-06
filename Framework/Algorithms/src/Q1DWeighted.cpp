@@ -244,7 +244,7 @@ void Q1DWeighted::exec() {
         // For reference - in the case where we don't use sub-pixels, simply
         // use:
         //     double sinTheta = sin( spectrumInfo.twoTheta(i)/2.0 );
-        double wavelength = (XIn[j] + XIn[j + 1]) / 2.;
+        const double wavelength = (XIn[j] + XIn[j + 1]) / 2.;
         V3D pos = spectrumInfo.position(i) - V3D(subX, subY, 0.0) - samplePos;
 
         if (correctGravity) {
@@ -258,8 +258,8 @@ void Q1DWeighted::exec() {
           pos += correction;
         }
 
-        double sinTheta = sin(0.5 * pos.angle(beamLine));
-        double q = 4.0 * M_PI * sinTheta / wavelength;
+        const double sinTheta = sin(0.5 * pos.angle(beamLine));
+        const double q = 4.0 * M_PI * sinTheta / wavelength;
         int iq = 0;
 
         // Bin assignment depends on whether we have log or linear bins
