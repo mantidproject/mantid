@@ -33,7 +33,7 @@ def main(vanadium_run, user, focus_run, **kwargs):
         time_period (string): time period for pre-process
         grouping_file (string): the path of the grouping file for texture focusing
         directory (string): the path of the directory to save to
-
+        user_struct (bool): whether or not to use the enginx file structure (defaults to true)
     """
     # Set all values at top,
     ceria_run = kwargs.get("ceria_run", "241391")
@@ -66,11 +66,16 @@ def main(vanadium_run, user, focus_run, **kwargs):
     directory = kwargs.get("directory", path)
 
     # path setup
-    user_dir = os.path.join(directory, "User", user)
-    calibration_directory = os.path.join(user_dir, "Calibration")
+    create_user_dir = kwargs.get("user_struct", True)
     calibration_general = os.path.join(directory, "Calibration")
-    focus_directory = os.path.join(user_dir, "Focus")
     focus_general = os.path.join(directory, "Focus")
+    if create_user_dir:
+        user_dir = os.path.join(directory, "User", user)
+        calibration_directory = os.path.join(user_dir, "Calibration")
+        focus_directory = os.path.join(user_dir, "Focus")
+    else:
+        calibration_directory = calibration_general
+        focus_directory = focus_general
 
     # call methods with set parameters
     run(ceria_run, do_cal, do_van, vanadium_run, calibration_directory, calibration_general, cropped, crop_name,
@@ -297,6 +302,7 @@ def save_calibration(ceria_run, van_run, cal_dir, cal_gen, name, bank_names, zer
     @param zeros :: the list of tzero values to save
 
     """
+
     gsas_iparm_fname = os.path.join(cal_dir, "ENGINX_"+van_run+"_"+ceria_run+"_"+name+".prm")
     # work out what template to use
     if name == "all_banks":
@@ -306,13 +312,15 @@ def save_calibration(ceria_run, van_run, cal_dir, cal_gen, name, bank_names, zer
     else:
         template_file = "template_ENGINX_241391_236516_North_bank.prm"
     # write out the param file to the users directory
+
     Utils.write_ENGINX_GSAS_iparam_file(output_file=gsas_iparm_fname, bank_names=bank_names, difc=difcs, tzero=zeros,
                                         ceria_run=ceria_run, vanadium_run=van_run,
                                         template_file=template_file)
-    # copy the param file to the general directory
-    if not os.path.exists(cal_gen):
-        os.makedirs(cal_gen)
-    copy2(gsas_iparm_fname, cal_gen)
+    if not cal_gen == cal_dir:
+        # copy the param file to the general directory
+        if not os.path.exists(cal_gen):
+            os.makedirs(cal_gen)
+        copy2(gsas_iparm_fname, cal_gen)
 
 
 def create_params_table(difc, tzero, difa):
@@ -519,14 +527,15 @@ def _save_out(run_number, focus_dir, focus_gen, output, join_string, bank_id):
     simple.SaveOpenGenieAscii(InputWorkspace=output, Filename=filename + ".his", OpenGenieFormat="ENGIN-X Format")
     simple.SaveNexus(InputWorkspace=output, Filename=filename + ".nxs")
     simple.ExportSampleLogsToHDF5(InputWorkspace=output, Filename=hdf5_name, Blacklist="bankid")
-    if not os.path.exists(focus_gen):
-        os.makedirs(focus_gen)
-    # copy the files to the general directory
-    copy2(filename+".dat", focus_gen)
-    copy2(filename + ".gss", focus_gen)
-    copy2(filename + ".his", focus_gen)
-    copy2(filename + ".nxs", focus_gen)
-    copy2(hdf5_name, focus_gen)
+    if not focus_gen == focus_dir:
+        if not os.path.exists(focus_gen):
+            os.makedirs(focus_gen)
+        # copy the files to the general directory
+        copy2(filename+".dat", focus_gen)
+        copy2(filename + ".gss", focus_gen)
+        copy2(filename + ".his", focus_gen)
+        copy2(filename + ".nxs", focus_gen)
+        copy2(hdf5_name, focus_gen)
 
 
 def _decomment_csv(csvfile):
