@@ -12,11 +12,12 @@ import Muon.GUI.Common.utilities.load_utils as load_utils
 class LoadRunWidgetModel(object):
     """Stores info on all currently loaded workspaces"""
 
-    def __init__(self, loaded_data_store=MuonLoadData()):
+    def __init__(self, loaded_data_store=MuonLoadData(), context=None):
         # Used with load thread
         self._filenames = []
 
         self._loaded_data_store = loaded_data_store
+        self.context = context
         self._current_run = None
 
     def remove_previous_data(self):

@@ -27,6 +27,8 @@ class LoadRunWidgetPresenter(object):
         self._instrument = ""
         self._view.set_current_instrument(self._instrument)
 
+        self.run_list = []
+
         self._set_connections()
 
     def _set_connections(self):
@@ -103,9 +105,9 @@ class LoadRunWidgetPresenter(object):
 
     def handle_run_changed_by_user(self):
         run_string = self._view.get_run_edit_text()
-        run_list = run_utils.run_string_to_list(run_string)
+        self.run_list = run_utils.run_string_to_list(run_string)
         file_names = [file_utils.file_path_for_instrument_and_run(self.get_current_instrument(), new_run)
-                      for new_run in run_list]
+                      for new_run in self.run_list]
 
         self.load_runs(file_names)
     # ------------------------------------------------------------------------------------------------------------------
@@ -123,6 +125,7 @@ class LoadRunWidgetPresenter(object):
             self._view.warning_popup("Cannot find directory for current instrument : " + self._instrument)
             return
 
+        self.run_list = ['Current']
         self.load_runs([current_run_file])
 
     # ------------------------------------------------------------------------------------------------------------------
@@ -130,10 +133,10 @@ class LoadRunWidgetPresenter(object):
     # ------------------------------------------------------------------------------------------------------------------
 
     def handle_increment_run(self):
-        run_list = self.get_incremented_run_list()
-        if not run_list:
+        self.run_list = self.get_incremented_run_list()
+        if not self.run_list:
             return
-        new_run = max(run_list)
+        new_run = max(self.run_list)
 
         # if self._model.current_run and new_run > self._model.current_run[0]:
         #     self._view.warning_popup("Requested run exceeds the current run for this instrument")
@@ -143,10 +146,10 @@ class LoadRunWidgetPresenter(object):
         self.load_runs([file_name])
 
     def handle_decrement_run(self):
-        run_list = self.get_decremented_run_list()
-        if not run_list:
+        self.run_list = self.get_decremented_run_list()
+        if not self.run_list:
             return
-        new_run = min(run_list)
+        new_run = min(self.run_list)
 
         file_name = file_utils.file_path_for_instrument_and_run(self.get_current_instrument(), new_run)
         self.load_runs([file_name])
@@ -177,9 +180,13 @@ class LoadRunWidgetPresenter(object):
             run_list = run_utils.decrement_run_list(run_list)
         return run_list
 
-    def load_runs(self, file_names):
+    def load_runs(self, filenames):
+        unloaded_file_names = []
+        for filename in filenames:
+            if not self._model._loaded_data_store.get_data(filename=filename):
+                unloaded_file_names.append(filename)
 
-        self.handle_loading(file_names, self._use_threading)
+        self.handle_loading(unloaded_file_names, self._use_threading)
 
     def handle_loading(self, filenames, threaded=True):
         if threaded:
@@ -218,12 +225,16 @@ class LoadRunWidgetPresenter(object):
         self.on_loading_finished()
 
     def on_loading_finished(self):
-        run_string = self._view.get_run_edit_text()
-        self._view.set_run_edit_text(run_string)
+        if self.run_list[0] == 'Current':
+            self.run_list = [self._model._loaded_data_store.get_latest_data['run']]
 
         if self._load_multiple_runs and self._multiple_file_mode == "Co-Add":
-            run_list = run_utils.run_string_to_list(run_string)
+            run_list = [run for run in self.run_list if self._model._loaded_data_store.get_data(run=[run])]
             load_utils.combine_loaded_runs(self._model, run_list)
+        else:
+            run_list = [[run] for run in self.run_list if self._model._loaded_data_store.get_data(run=[run])]
+
+        self._model.context.current_runs = run_list
 
         self._view.notify_loading_finished()
         self.enable_loading()

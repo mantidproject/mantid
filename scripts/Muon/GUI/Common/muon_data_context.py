@@ -108,7 +108,7 @@ class MuonDataContext(object):
         self._gui_variables = {}
         self._current_data = {"workspace": load_utils.empty_loaded_data()}  # self.get_result(False)
 
-        self.current_runs = []
+        self._current_runs = []
 
         self._instrument = ConfigService.getInstrument().name() if ConfigService.getInstrument().name()\
             in allowed_instruments else 'EMU'
@@ -169,6 +169,29 @@ class MuonDataContext(object):
     def gui_variables(self):
         return self._gui_variables
 
+    @property
+    def current_runs(self):
+        return self._current_runs
+
+    @current_runs.setter
+    def current_runs(self, value):
+        self._current_runs = value
+
+    @property
+    def current_filenames(self):
+        current_filenames = []
+        for run in self.current_runs:
+            if self._loaded_data.get_data(run=run):
+                current_filenames.append(self._loaded_data.get_data(run=run)['filename'])
+        return current_filenames
+
+    @property
+    def current_workspaces(self):
+        current_workspaces = []
+        for run in self.current_runs:
+            current_workspaces.append(self._loaded_data.get_data(run=run)['workspace'])
+        return current_workspaces
+
     def add_group(self, group):
         assert isinstance(group, MuonGroup)
         if self.check_group_contains_valid_detectors(group):
@@ -184,6 +207,7 @@ class MuonDataContext(object):
         # Update the current data; resetting the groups and pairs to their default values
         if self._loaded_data.num_items() > 0:
             self._current_data = self._loaded_data.get_latest_data()
+            self.set_groups_and_pairs_to_default()
         else:
             self._current_data = {"workspace": load_utils.empty_loaded_data()}
 

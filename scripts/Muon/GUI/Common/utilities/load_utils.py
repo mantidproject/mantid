@@ -256,23 +256,22 @@ def get_table_workspace_names_from_ADS():
 
 
 def combine_loaded_runs(model, run_list):
-    return_ws = model._loaded_data_store.get_data(run=run_list[0])["workspace"]
+    return_ws = model._loaded_data_store.get_data(run=[run_list[0]])["workspace"]
     running_total = []
 
     for index, workspace in enumerate(return_ws["OutputWorkspace"]):
         running_total.append(workspace.workspace)
 
         for run in run_list[1:]:
-            ws = model._loaded_data_store.get_data(run=run)["workspace"]["OutputWorkspace"][index].workspace
+            ws = model._loaded_data_store.get_data(run=[run])["workspace"]["OutputWorkspace"][index].workspace
             running_total[index] = algorithm_utils.run_Plus({
                 "LHSWorkspace": running_total[index],
                 "RHSWorkspace": ws,
                 "AllowDifferentNumberSpectra": False}
             )
-            # remove the single loaded filename
 
     for run in run_list:
-        model._loaded_data_store.remove_data(run=run)
+        model._loaded_data_store.remove_data(run=[run])
 
     return_ws["OutputWorkspace"] = [MuonWorkspaceWrapper(running_total_period) for running_total_period in running_total]
     model._loaded_data_store.add_data(run=flatten_run_list(run_list), workspace=return_ws,

@@ -7,6 +7,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 import os
+from mantid.api import FileFinder
 
 allowed_instruments = ["EMU", "MUSR", "CHRONUS", "HIFI"]
 allowed_extensions = ["nxs"]
@@ -76,10 +77,7 @@ def _instrument_data_directory(instrument_directory):
 
 def file_path_for_instrument_and_run(instrument, run):
     """Returns the path to the data file for a given instrument/run"""
-    instrument_directory = get_instrument_directory(instrument)
-    base_dir = _instrument_data_directory(instrument_directory)
-    file_name = instrument + format_run_for_file(run) + ".nxs"
-    return base_dir.lower() + FILE_SEP + file_name
+    return FileFinder.findRuns(str(run), exts_list=['.nxs'], useExtsOnly=True)[0]
 
 
 def remove_duplicated_files_from_list(file_list):
