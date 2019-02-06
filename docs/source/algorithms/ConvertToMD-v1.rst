@@ -310,7 +310,7 @@ file is available in `Mantid system tests repository <https://github.com/mantidp
    # produce some test output
    print("Resulting MD workspace contains {0} events and {1} dimensions".format(TOPAZ_3132_md.getNEvents(),TOPAZ_3132_md.getNumDims()))
 
-.. testcleanup:: ExConvertToMD|Q|T
+.. testcleanup:: ExConvertToMD|Q|
 
    DeleteWorkspace(TOPAZ_3132_event)
    DeleteWorkspace(TOPAZ_3132_md)
