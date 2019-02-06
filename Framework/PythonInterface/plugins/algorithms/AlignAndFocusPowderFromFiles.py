@@ -12,7 +12,7 @@ from mantid.kernel import Direction
 from mantid.simpleapi import AlignAndFocusPowder, CompressEvents, ConvertUnits, CopyLogs, CreateCacheFilename, \
     DeleteWorkspace, DetermineChunking, Divide, EditInstrumentGeometry, FilterBadPulses, LoadNexusProcessed, \
     PDDetermineCharacterizations, Plus, RemoveLogs, RenameWorkspace, SaveNexusProcessed, LoadDiffCal, \
-    MaskDetectors, LoadDetectorsGroupingFile
+    LoadDetectorsGroupingFile
 import os
 
 EXTENSIONS_NXS = ["_event.nxs", ".nxs.h5"]
@@ -560,7 +560,6 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
         if not os.path.exists(cache_file):
             SaveNexusProcessed(InputWorkspace=wksp, Filename=cache_file)
         return
-
 
 
 # Register algorithm with Mantid.
