@@ -247,7 +247,7 @@ class LinkedUBs(DataProcessorAlgorithm):
 
     def _get_properties(self):
         self._qtol = self.getProperty("qTolerance").value
-        self._q_decrement = self.getProperty("qDecrement").value
+        self._qdecrement = self.getProperty("qDecrement").value
         self._dtol = self.getProperty("dTolerance").value
         self._num_peaks = self.getProperty("numPeaks").value
         self._peak_increment = self.getProperty("peakIncrement").value
@@ -291,7 +291,7 @@ class LinkedUBs(DataProcessorAlgorithm):
             if m > 0:
                 predictor = linked_peaks_predicted
 
-            qtol_var = self._qtol * self._q_decrement**m
+            qtol_var = self._qtol * self._qdecrement**m
             num_peaks_var = self._num_peaks + self._peak_increment * m
 
             # add q_lab and dpsacing values of found peaks to a list
