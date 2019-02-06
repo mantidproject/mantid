@@ -13,7 +13,8 @@ from mantid.api import (AlgorithmFactory, AnalysisDataService, DataProcessorAlgo
 
 from mantid.simpleapi import (AddSampleLog, LoadEventNexus, LoadISISNexus, Plus)
 
-from mantid.kernel import (CompositeValidator, Direction, StringArrayLengthValidator,
+from mantid.kernel import (CompositeValidator, Direction, IntBoundedValidator,
+                           Property, StringArrayLengthValidator,
                            StringArrayMandatoryValidator, StringArrayProperty)
 
 
@@ -22,6 +23,7 @@ class Prop:
     FIRST_TRANS_RUNS = 'FirstTransmissionRunList'
     SECOND_TRANS_RUNS = 'SecondTransmissionRunList'
     SLICE = 'SliceWorkspace'
+    NUMBER_OF_SLICES = 'NumberOfSlices'
     OUTPUT_WS='OutputWorkspace'
     OUTPUT_WS_BINNED='OutputWorkspaceBinned'
     OUTPUT_WS_LAM='OutputWorkspaceWavelength'
@@ -118,11 +120,15 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         return issues
 
     def _declareSliceAlgorithmProperties(self):
-        """Copy properties from the child slicing algorithm"""
+        """Copy properties from the child slicing algorithm and add our own custom ones"""
         self._slice_properties = [
-            'StartTime', 'StopTime','TimeInterval',
-            'LogName','MinimumLogValue','MaximumLogValue', 'LogValueInterval']
+            'TimeInterval', 'LogName', 'LogValueInterval']
         self.copyProperties('ReflectometrySliceEventWorkspace', self._slice_properties)
+        self.declareProperty(name=Prop.NUMBER_OF_SLICES,
+                             defaultValue=Property.EMPTY_INT,
+                             validator=IntBoundedValidator(lower=1),
+                             direction=Direction.Input,
+                             doc='The number of uniform-length slices to slice the input workspace into')
 
     def _declareReductionAlgorithmProperties(self):
         """Copy properties from the child reduction algorithm"""
@@ -252,6 +258,28 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
     def _slicingEnabled(self):
         return self.getProperty(Prop.SLICE).value
 
+    def _setUniformNumberOfSlices(self, alg, workspace_name):
+        """If slicing by a specified number of slices is requested, find the time
+        interval to use to give this number of even time slices and set the relevant
+        property on the given slicing algorithm"""
+        if self.getProperty(Prop.NUMBER_OF_SLICES).isDefault:
+            return
+        number_of_slices = self.getProperty(Prop.NUMBER_OF_SLICES).value
+        run=AnalysisDataService.retrieve(workspace_name).run()
+        total_duration = (run.endTime() - run.startTime()).total_seconds()
+        slice_duration = total_duration / number_of_slices
+        alg.setProperty("TimeInterval", slice_duration)
+
+    def _setSliceStartStopTimes(self, alg, workspace_name):
+        """Set the start/stop time for the slicing algorithm based on the
+        run start/end times if the time interval is specified, otherwise
+        we can end up with more slices than we expect"""
+        if alg.getProperty("TimeInterval").isDefault:
+            return
+        run=AnalysisDataService.retrieve(workspace_name).run()
+        alg.setProperty("StartTime", str(run.startTime()))
+        alg.setProperty("StopTime", str(run.endTime()))
+
     def _runSliceAlgorithm(self, input_workspace, output_workspace):
         """Run the child algorithm to perform the slicing"""
         self.log().information('Running ReflectometrySliceEventWorkspace')
@@ -261,6 +289,8 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         alg.setProperty("OutputWorkspace", output_workspace)
         alg.setProperty("InputWorkspace", input_workspace)
         alg.setProperty("MonitorWorkspace", _monitorWorkspace(input_workspace))
+        self._setUniformNumberOfSlices(alg, input_workspace)
+        self._setSliceStartStopTimes(alg, input_workspace)
         alg.execute()
 
     def _sliceWorkspace(self, workspace):
