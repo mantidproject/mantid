@@ -105,9 +105,11 @@ std::vector<MDEventType<ND>> ConvToMDEventsWSIndexing::convertEvents() {
     // create local unit conversion class
     UnitsConversionHelper localUnitConv(m_UnitConversion);
     // create local QConverter
-    MDTransf_sptr localQConverter =
-        qConverters[qConverters.size() % numWorkers()];
-
+#ifdef _OPENMP
+    MDTransf_sptr localQConverter = qConverters[omp_get_thread_num()];
+#else
+    MDTransf_sptr localQConverter = qConverters[0];
+#endif // _OPENMP
     int32_t detID = m_detID[workspaceIndex];
     uint16_t runIndexLoc = m_RunIndex;
 
