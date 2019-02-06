@@ -89,7 +89,10 @@ std::vector<MDEventType<ND>> ConvToMDEventsWSIndexing::convertEvents() {
                                 pws->getDimension(ax)->getMaximum());
   }
 
-#pragma omp parallel for
+  std::vector<MDTransf_sptr> qConverters;
+  for (int i = 0; i < numWorkers(); ++i)
+    qConverters.emplace_back(m_QConverter->clone());
+#pragma omp parallel for num_threads(numWorkers())
   for (int workspaceIndex = 0; workspaceIndex < static_cast<int>(m_NSpectra);
        ++workspaceIndex) {
     const Mantid::DataObjects::EventList &el =
@@ -102,7 +105,8 @@ std::vector<MDEventType<ND>> ConvToMDEventsWSIndexing::convertEvents() {
     // create local unit conversion class
     UnitsConversionHelper localUnitConv(m_UnitConversion);
     // create local QConverter
-    MDTransf_sptr localQConverter(m_QConverter->clone());
+    MDTransf_sptr localQConverter =
+        qConverters[qConverters.size()%numWorkers()];
 
     int32_t detID = m_detID[workspaceIndex];
     uint16_t runIndexLoc = m_RunIndex;
