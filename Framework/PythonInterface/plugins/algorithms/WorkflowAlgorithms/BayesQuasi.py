@@ -211,9 +211,9 @@ class BayesQuasi(PythonAlgorithm):
             else:
                 raise ValueError('Stretched Exp ONLY works with RES file')
 
-        logger.information('Version is %s ' % prog)
-        logger.information(' Number of spectra = %i ' % (nsam))
-        logger.information(' Erange : %f  to %f ' % (erange[0], erange[1]))
+        logger.information('Version is {0}'.format(prog))
+        logger.information(' Number of spectra = {0} '.format(nsam))
+        logger.information(' Erange : {0}  to {1} '.format(erange[0], erange[1]))
 
         setup_prog.report('Reading files')
         Wy, We = self._read_width_file(self._width, self._wfile, totalNoSam)
@@ -246,7 +246,7 @@ class BayesQuasi(PythonAlgorithm):
         group = ''
         workflow_prog = Progress(self, start=0.3, end=0.7, nreports=nsam * 3)
         for spectrum in range(0, nsam):
-            logger.information('Group %i at angle %f ' % (spectrum, theta[spectrum]))
+            logger.information('Group {0} at angle {1} '.format(spectrum, theta[spectrum]))
             nsp = spectrum + 1
 
             nout, bnorm, Xdat, Xv, Yv, Ev = CalcErange(self._samWS, spectrum, erange, nbin)
@@ -263,19 +263,19 @@ class BayesQuasi(PythonAlgorithm):
             reals = [efix, theta[spectrum], rscl, bnorm]
 
             if prog == 'QLr':
-                workflow_prog.report('Processing Sample number %i as Lorentzian' % spectrum)
+                workflow_prog.report('Processing Sample number {0} as Lorentzian'.format(spectrum))
                 nd, xout, yout, eout, yfit, yprob = QLr.qlres(numb, Xv, Yv, Ev, reals, fitOp,
                                                               Xdat, Xb, Yb, Wy, We, dtn, xsc,
                                                               wrks, wrkr, lwrk)
-                logger.information(' Log(prob) : %f %f %f %f' % (yprob[0], yprob[1], yprob[2], yprob[3]))
+                logger.information(' Log(prob) : {0} {1} {2} {3}'.format(yprob[0], yprob[1], yprob[2], yprob[3]))
             elif prog == 'QLd':
-                workflow_prog.report('Processing Sample number %i' % spectrum)
+                workflow_prog.report('Processing Sample number {0}'.format(spectrum))
                 nd, xout, yout, eout, yfit, yprob = QLd.qldata(numb, Xv, Yv, Ev, reals, fitOp,
                                                                Xdat, Xb, Yb, Eb, Wy, We,
                                                                wrks, wrkr, lwrk)
-                logger.information(' Log(prob) : %f %f %f %f' % (yprob[0], yprob[1], yprob[2], yprob[3]))
+                logger.information(' Log(prob) : {0} {1} {2} {3}'.format(yprob[0], yprob[1], yprob[2], yprob[3]))
             elif prog == 'QSe':
-                workflow_prog.report('Processing Sample number %i as Stretched Exp' % spectrum)
+                workflow_prog.report('Processing Sample number {0} as Stretched Exp'.format(spectrum))
                 nd, xout, yout, eout, yfit, yprob = Qse.qlstexp(numb, Xv, Yv, Ev, reals, fitOp,
                                                                 Xdat, Xb, Yb, Wy, We, dtn, xsc,
                                                                 wrks, wrkr, lwrk)
