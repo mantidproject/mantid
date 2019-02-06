@@ -134,12 +134,6 @@ class DataCopierTest(TestCase):
         self.assertEqual(9, mock_index.sibling.call_count)
         mock_show_mouse_toast.assert_called_once_with(UserNotifier.COPY_SUCCESSFUL_MESSAGE)
 
-    def test_copy_to_clipboard(self):
-        copy_data = "123"
-        with patch('qtpy.QtGui.QGuiApplication.clipboard', return_value=self.mock_clipboard):
-            self.data_copier.copy_to_clipboard(copy_data)
-            self.mock_clipboard.setText.assert_called_once_with(copy_data, mode=self.mock_clipboard.Clipboard)
-
     @patch('qtpy.QtWidgets.QMessageBox.question', return_value=QMessageBox.Yes)
     def test_ask_confirmation(self, mock_question):
         message = "Hello"

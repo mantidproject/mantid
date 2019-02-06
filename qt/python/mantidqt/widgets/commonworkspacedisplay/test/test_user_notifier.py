@@ -1,3 +1,4 @@
+import sys
 import unittest
 
 from mock import patch
@@ -30,7 +31,10 @@ class UserNotifierTest(unittest.TestCase):
         with patch('mantidqt.widgets.commonworkspacedisplay.user_notifier.UserNotifier._get_mouse_position',
                    return_value=mouse_position) as mock_get_mouse_position:
             self.user_notifier.show_mouse_toast(message)
-            mock_get_mouse_position.assert_called_once_with()
+            if sys.platform == "win32":
+                mock_get_mouse_position.assert_called_once_with()
+            else:
+                self.assertNotCalled(mock_get_mouse_position)
             mock_showText.assert_called_once_with(mouse_position, message)
 
     @patch('qtpy.QtWidgets.QToolTip.showText')
