@@ -42,6 +42,16 @@ using Mantid::Kernel::PropertyWithValue;
 
 using namespace H5;
 
+namespace {
+namespace PropertyNames {
+const std::string CAL_FILE("Filename");
+const std::string GROUP_FILE("GroupFilename");
+const std::string MAKE_CAL("MakeCalWorkspace");
+const std::string MAKE_GRP("MakeGroupingWorkspace");
+const std::string MAKE_MSK("MakeMaskWorkspace");
+} // namespace PropertyNames
+}
+
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(LoadDiffCal)
 
@@ -68,22 +78,26 @@ void LoadDiffCal::init() {
   LoadCalFile::getInstrument3WaysInit(this);
 
   const std::vector<std::string> exts{".h5", ".hd5", ".hdf", ".cal"};
-  declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
+  declareProperty(Kernel::make_unique<FileProperty>(PropertyNames::CAL_FILE, "",
                                                     FileProperty::Load, exts),
                   "Path to the .h5 file.");
+  declareProperty(Kernel::make_unique<FileProperty>(
+                      PropertyNames::GROUP_FILE, "", FileProperty::OptionalLoad,
+                      std::vector<std::string>{ ".xml", ".cal" }),
+                  "Overrides grouping from CalFileName");
 
   declareProperty(Kernel::make_unique<PropertyWithValue<bool>>(
-                      "MakeGroupingWorkspace", true, Direction::Input),
+                      PropertyNames::MAKE_GRP, true, Direction::Input),
                   "Set to true to create a GroupingWorkspace with called "
                   "WorkspaceName_group.");
 
   declareProperty(Kernel::make_unique<PropertyWithValue<bool>>(
-                      "MakeCalWorkspace", true, Direction::Input),
+                      PropertyNames::MAKE_CAL, true, Direction::Input),
                   "Set to true to create a CalibrationWorkspace with called "
                   "WorkspaceName_cal.");
 
   declareProperty(
-      Kernel::make_unique<PropertyWithValue<bool>>("MakeMaskWorkspace", true,
+      Kernel::make_unique<PropertyWithValue<bool>>(PropertyNames::MAKE_MSK, true,
                                                    Direction::Input),
       "Set to true to create a MaskWorkspace with called WorkspaceName_mask.");
 
@@ -148,8 +162,8 @@ void setCalWSProperty(API::Algorithm *alg, const std::string &prefix,
 
 void LoadDiffCal::getInstrument(H5File &file) {
   // don't bother if there isn't a mask or grouping requested
-  bool makeMask = getProperty("MakeMaskWorkspace");
-  bool makeGrouping = getProperty("MakeGroupingWorkspace");
+  bool makeMask = getProperty(PropertyNames::MAKE_MSK);
+  bool makeGrouping = getProperty(PropertyNames::MAKE_GRP);
   if ((!makeMask) & (!makeGrouping))
     return;
 
@@ -188,9 +202,11 @@ void LoadDiffCal::getInstrument(H5File &file) {
 
 void LoadDiffCal::makeGroupingWorkspace(const std::vector<int32_t> &detids,
                                         const std::vector<int32_t> &groups) {
-  bool makeWS = getProperty("MakeGroupingWorkspace");
+  // load grouping from a separate file if supplied
+  bool makeWS = loadGroupingFromAlternateFile();
   if (!makeWS) {
-    g_log.information("Not making a GroupingWorkspace");
+    g_log.information(
+        "Not loading GroupingWorkspace from the calibration file");
     return;
   }
 
@@ -213,7 +229,7 @@ void LoadDiffCal::makeGroupingWorkspace(const std::vector<int32_t> &detids,
 
 void LoadDiffCal::makeMaskWorkspace(const std::vector<int32_t> &detids,
                                     const std::vector<int32_t> &use) {
-  bool makeWS = getProperty("MakeMaskWorkspace");
+  bool makeWS = getProperty(PropertyNames::MAKE_MSK);
   if (!makeWS) {
     g_log.information("Not making a MaskWorkspace");
     return;
@@ -246,7 +262,7 @@ void LoadDiffCal::makeCalWorkspace(const std::vector<int32_t> &detids,
                                    const std::vector<int32_t> &dasids,
                                    const std::vector<double> &offsets,
                                    const std::vector<int32_t> &use) {
-  bool makeWS = getProperty("MakeCalWorkspace");
+  bool makeWS = getProperty(PropertyNames::MAKE_CAL);
   if (!makeWS) {
     g_log.information("Not making a calibration workspace");
     return;
@@ -350,11 +366,55 @@ void LoadDiffCal::makeCalWorkspace(const std::vector<int32_t> &detids,
   setCalWSProperty(this, m_workspaceName, wksp);
 }
 
+/// @return true if the grouping information should be taken from the
+/// calibration file
+bool LoadDiffCal::loadGroupingFromAlternateFile() {
+  bool makeWS = getProperty(PropertyNames::MAKE_GRP);
+  if (!makeWS)
+    return false; // input property says not to load grouping
+
+  if (isDefault(PropertyNames::GROUP_FILE))
+    return true; // a separate grouping file was not specified
+
+  std::string filename = getPropertyValue(PropertyNames::GROUP_FILE);
+  g_log.information() << "Override grouping with information from \""
+                      << filename << "\"\n";
+  GroupingWorkspace_sptr wksp =
+      boost::make_shared<DataObjects::GroupingWorkspace>(m_instrument);
+
+  if (filename.find(".cal") != std::string::npos) {
+    auto alg = createChildAlgorithm("LoadDiffCal");
+    alg->setProperty("InputWorkspace", wksp);
+    alg->setPropertyValue(PropertyNames::CAL_FILE, filename);
+    alg->setProperty<bool>(PropertyNames::MAKE_CAL, false);
+    alg->setProperty<bool>(PropertyNames::MAKE_GRP, true);
+    alg->setProperty<bool>(PropertyNames::MAKE_MSK, false);
+    alg->setPropertyValue("WorkspaceName", m_workspaceName);
+    alg->executeAsChildAlg();
+
+    // get the workspace
+    wksp = alg->getProperty("OutputGroupingWorkspace");
+  } else {
+    auto alg = createChildAlgorithm("LoadDetectorsGroupingFile");
+    alg->setProperty("InputWorkspace", wksp);
+    alg->setProperty("InputFile", filename);
+    alg->executeAsChildAlg();
+
+    // get the workspace
+    wksp = alg->getProperty("OutputWorkspace");
+  }
+  setGroupWSProperty(this, m_workspaceName, wksp);
+
+  return false; // the information has already been loaded
+}
+
 void LoadDiffCal::runLoadCalFile() {
-  bool makeCalWS = getProperty("MakeCalWorkspace");
-  bool makeMaskWS = getProperty("MakeMaskWorkspace");
-  bool makeGroupWS = getProperty("MakeGroupingWorkspace");
+  bool makeCalWS = getProperty(PropertyNames::MAKE_CAL);
+  bool makeMaskWS = getProperty(PropertyNames::MAKE_MSK);
   API::MatrixWorkspace_sptr inputWs = getProperty("InputWorkspace");
+
+  // load grouping from a separate file if supplied
+  bool makeGroupWS = loadGroupingFromAlternateFile();
 
   auto alg = createChildAlgorithm("LoadCalFile", 0., 1.);
   alg->setPropertyValue("CalFilename", m_filename);
@@ -390,7 +450,7 @@ void LoadDiffCal::runLoadCalFile() {
 /** Execute the algorithm.
  */
 void LoadDiffCal::exec() {
-  m_filename = getPropertyValue("Filename");
+  m_filename = getPropertyValue(PropertyNames::CAL_FILE);
   m_workspaceName = getPropertyValue("WorkspaceName");
 
   if (endswith(m_filename, ".cal")) {
