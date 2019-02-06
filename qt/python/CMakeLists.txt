@@ -100,9 +100,11 @@ endif ()
     mantidqt/widgets/samplelogs/test/test_samplelogs_model.py
     mantidqt/widgets/samplelogs/test/test_samplelogs_presenter.py
 
-    mantidqt/widgets/common/test/test_workspacedisplay_ads_observer.py
-    mantidqt/widgets/common/test/test_observing_presenter.py
-    mantidqt/widgets/common/test/test_observing_view.py
+    mantidqt/widgets/commonworkspacedisplay/test/test_ads_observer.py
+    mantidqt/widgets/commonworkspacedisplay/test/test_data_copier.py
+    mantidqt/widgets/commonworkspacedisplay/test/test_observing_presenter.py
+    mantidqt/widgets/commonworkspacedisplay/test/test_observing_view.py
+    mantidqt/widgets/commonworkspacedisplay/test/test_user_notifier.py
 
     mantidqt/widgets/matrixworkspacedisplay/test/test_matrixworkspacedisplay_model.py
     mantidqt/widgets/matrixworkspacedisplay/test/test_matrixworkspacedisplay_presenter.py
@@ -111,7 +113,6 @@ endif ()
     mantidqt/widgets/tableworkspacedisplay/test/test_tableworkspacedisplay_error_column.py
     mantidqt/widgets/tableworkspacedisplay/test/test_tableworkspacedisplay_marked_columns.py
     mantidqt/widgets/tableworkspacedisplay/test/test_tableworkspacedisplay_workbench_table_widget_item.py
-
     mantidqt/widgets/tableworkspacedisplay/test/test_tableworkspacedisplay_model.py
     mantidqt/widgets/tableworkspacedisplay/test/test_tableworkspacedisplay_presenter.py
   )
