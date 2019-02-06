@@ -50,7 +50,7 @@ const std::string MAKE_CAL("MakeCalWorkspace");
 const std::string MAKE_GRP("MakeGroupingWorkspace");
 const std::string MAKE_MSK("MakeMaskWorkspace");
 } // namespace PropertyNames
-}
+} // namespace
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(LoadDiffCal)
@@ -83,7 +83,7 @@ void LoadDiffCal::init() {
                   "Path to the .h5 file.");
   declareProperty(Kernel::make_unique<FileProperty>(
                       PropertyNames::GROUP_FILE, "", FileProperty::OptionalLoad,
-                      std::vector<std::string>{ ".xml", ".cal" }),
+                      std::vector<std::string>{".xml", ".cal"}),
                   "Overrides grouping from CalFileName");
 
   declareProperty(Kernel::make_unique<PropertyWithValue<bool>>(
@@ -97,8 +97,8 @@ void LoadDiffCal::init() {
                   "WorkspaceName_cal.");
 
   declareProperty(
-      Kernel::make_unique<PropertyWithValue<bool>>(PropertyNames::MAKE_MSK, true,
-                                                   Direction::Input),
+      Kernel::make_unique<PropertyWithValue<bool>>(PropertyNames::MAKE_MSK,
+                                                   true, Direction::Input),
       "Set to true to create a MaskWorkspace with called WorkspaceName_mask.");
 
   declareProperty(

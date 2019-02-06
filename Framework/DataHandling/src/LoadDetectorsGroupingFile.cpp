@@ -41,7 +41,7 @@ const std::string INPUT_FILE("InputFile");
 const std::string INPUT_WKSP("InputWorkspace");
 const std::string OUTPUT_WKSP("OutputWorkspace");
 } // namespace PropertyNames
-}
+} // namespace
 
 DECLARE_ALGORITHM(LoadDetectorsGroupingFile)
 
@@ -54,14 +54,14 @@ void LoadDetectorsGroupingFile::init() {
                   "The XML or Map file with full path.");
 
   declareProperty(
-      make_unique<WorkspaceProperty<> >(PropertyNames::INPUT_WKSP, "",
-                                        Direction::Input,
-                                        PropertyMode::Optional),
+      make_unique<WorkspaceProperty<>>(PropertyNames::INPUT_WKSP, "",
+                                       Direction::Input,
+                                       PropertyMode::Optional),
       "Optional: An input workspace with the instrument we want to use. This "
       "will override what is specified in the grouping file.");
 
   declareProperty(
-      make_unique<WorkspaceProperty<DataObjects::GroupingWorkspace> >(
+      make_unique<WorkspaceProperty<DataObjects::GroupingWorkspace>>(
           PropertyNames::OUTPUT_WKSP, "", Direction::Output),
       "The name of the output workspace.");
 }

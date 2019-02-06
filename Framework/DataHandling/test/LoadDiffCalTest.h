@@ -14,8 +14,8 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidDataHandling/LoadDiffCal.h"
 // reuse what another test has for creating dummy workspaces
-#include "SaveDiffCalTest.h"
 #include "MantidDataHandling/SaveDetectorsGrouping.h"
+#include "SaveDiffCalTest.h"
 
 #include <Poco/File.h>
 
