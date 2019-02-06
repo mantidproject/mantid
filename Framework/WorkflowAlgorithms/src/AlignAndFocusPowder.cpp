@@ -960,44 +960,34 @@ void AlignAndFocusPowder::loadCalFile(const std::string &calFilename,
   // check if the workspaces exist with their canonical names so they are not
   // reloaded for chunks
   if ((!m_groupWS) && (!calFilename.empty()) && (!groupFilename.empty())) {
-    try {
+    if (AnalysisDataService::Instance().doesExist(m_instName + "_group"))
       m_groupWS = AnalysisDataService::Instance().retrieveWS<GroupingWorkspace>(
           m_instName + "_group");
-    } catch (Exception::NotFoundError &) {
-      ; // not noteworthy
-    }
   }
   if ((!m_calibrationWS) && (!calFilename.empty())) {
     OffsetsWorkspace_sptr offsetsWS = getProperty("OffsetsWorkspace");
     if (offsetsWS) {
       convertOffsetsToCal(offsetsWS);
     } else {
-      try {
+      if (AnalysisDataService::Instance().doesExist(m_instName + "_cal"))
         m_calibrationWS =
             AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
                 m_instName + "_cal");
-      } catch (Exception::NotFoundError &) {
-        ; // not noteworthy
-      }
       if (!m_calibrationWS) {
-        try {
+        if (AnalysisDataService::Instance().doesExist(m_instName +
+                                                      "_offsets")) {
           OffsetsWorkspace_sptr offsetsWS =
               AnalysisDataService::Instance().retrieveWS<OffsetsWorkspace>(
                   m_instName + "_offsets");
           convertOffsetsToCal(offsetsWS);
-        } catch (Exception::NotFoundError &) {
-          ; // not noteworthy
         }
       }
     }
   }
   if ((!m_maskWS) && (!calFilename.empty())) {
-    try {
+    if (AnalysisDataService::Instance().doesExist(m_instName + "_mask"))
       m_maskWS = AnalysisDataService::Instance().retrieveWS<MaskWorkspace>(
           m_instName + "_mask");
-    } catch (Exception::NotFoundError &) {
-      ; // not noteworthy
-    }
   }
 
   // see if everything exists to exit early
