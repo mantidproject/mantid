@@ -39,6 +39,8 @@ import numpy as np
 """
 # Accepted extensions for drag-and-drop to editor
 ACCEPTED_FILE_EXTENSIONS = ['.py', '.pyw']
+# QSettings key for session tabs
+TAB_SETTINGS_KEY = "Editors/SessionTabs"
 
 
 class MultiFileEditor(PluginWidget):
@@ -97,8 +99,9 @@ class MultiFileEditor(PluginWidget):
         '''This is used by MainWindow to execute a file after opening it'''
         return self.editors.execute_current()
 
-    def restore_session_tabs(self):
-        self.editors.restore_session_tabs()
+    def restore_session_tabs(self, session_tabs):
+        self.open_files_in_new_tabs(session_tabs)
+        self.editors.close_tab(0)  # close default empty tab
 
     # ----------- Plugin API --------------------
 
@@ -133,12 +136,13 @@ class MultiFileEditor(PluginWidget):
 
     def readSettings(self, settings):
         try:
-            self.editors.prev_session_tabs = settings.get('Editor/SessionTabs')
+            prev_session_tabs = settings.get(TAB_SETTINGS_KEY)
         except KeyError:
-            pass
+            return
+        self.restore_session_tabs(prev_session_tabs)
 
     def writeSettings(self, settings):
-        settings.set('Editor/SessionTabs', self.editors.tab_filepaths)
+        settings.set(TAB_SETTINGS_KEY, self.editors.tab_filepaths)
 
     def register_plugin(self):
         self.main.add_dockwidget(self)
@@ -149,6 +153,13 @@ class MultiFileEditor(PluginWidget):
 
     def open_file_in_new_tab(self, filepath):
         return self.editors.open_file_in_new_tab(filepath)
+
+    def open_files_in_new_tabs(self, filepaths):
+        for filepath in filepaths:
+            try:
+                self.open_file_in_new_tab(filepath)
+            except IOError:
+                pass
 
     def save_current_file(self):
         self.editors.save_current_file()

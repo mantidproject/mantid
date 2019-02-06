@@ -220,8 +220,6 @@ class MainWindow(QMainWindow):
         # uses default configuration as necessary
         self.readSettings(CONF)
 
-        self.editor.restore_session_tabs()
-
         self.setup_layout()
         self.create_actions()
         self.populate_menus()
