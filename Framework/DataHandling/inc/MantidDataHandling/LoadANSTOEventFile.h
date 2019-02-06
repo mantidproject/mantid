@@ -339,7 +339,7 @@ void ReadEventFile(IReader &loader, IEventHandler &handler, IProgress &progress,
       }
 
       if (frame_start_event) {
-        // reset timestamp at start of a new frame 
+        // reset timestamp at start of a new frame
         // the auxillary time is only available in OOB mode
         // otherwise, auxillary time = primary time
         primary_time = 0;

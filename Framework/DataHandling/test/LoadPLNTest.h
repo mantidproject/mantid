@@ -36,12 +36,12 @@ public:
     // should fail because mandatory parameter has not been set
     TS_ASSERT_THROWS(algToBeTested.execute(), std::runtime_error);
 
-	// missing event file - should fail execution
+    // missing event file - should fail execution
     std::string inputFile = "PLN0044464.hdf";
     algToBeTested.setPropertyValue("Filename", inputFile);
     TS_ASSERT(!algToBeTested.execute());
 
-	// should succeed now
+    // should succeed now
     algToBeTested.setPropertyValue("Filename", inputFile);
     algToBeTested.setPropertyValue("BinaryEventPath", "./PLN0044464.bin");
     algToBeTested.setPropertyValue("CalibrateTOFBias", "1");

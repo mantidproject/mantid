@@ -316,7 +316,7 @@ void SofQWNormalisedPolygon::initAngularCachesPSD(
   for (size_t i = 0; i < nHistos; ++i) {
     m_progress->report("Calculating detector angular widths");
 
-	// If no detector found, skip onto the next spectrum
+    // If no detector found, skip onto the next spectrum
     if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i)) {
       continue;
     }
