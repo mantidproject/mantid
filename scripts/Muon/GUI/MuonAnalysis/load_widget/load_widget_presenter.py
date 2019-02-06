@@ -124,6 +124,8 @@ class LoadWidgetPresenter(object):
 
     def update_new_instrument(self, instrument):
         self.set_current_instrument(instrument)
+        self._model._context.current_runs = []
+        self.handle_run_widget_data_changed()
 
     class LoadNotifier(Observable):
         """

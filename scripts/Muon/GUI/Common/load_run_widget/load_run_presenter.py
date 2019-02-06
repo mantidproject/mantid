@@ -107,7 +107,9 @@ class LoadRunWidgetPresenter(object):
         run_string = self._view.get_run_edit_text()
         self.run_list = run_utils.run_string_to_list(run_string)
         file_names = [file_utils.file_path_for_instrument_and_run(self.get_current_instrument(), new_run)
-                      for new_run in self.run_list]
+                      for new_run in self.run_list if not self._model._loaded_data_store.get_data(run=[new_run],
+                                                                                                  instrument=
+                                                                                                  self._model.context.instrument)]
 
         self.load_runs(file_names)
     # ------------------------------------------------------------------------------------------------------------------
@@ -181,12 +183,7 @@ class LoadRunWidgetPresenter(object):
         return run_list
 
     def load_runs(self, filenames):
-        unloaded_file_names = []
-        for filename in filenames:
-            if not self._model._loaded_data_store.get_data(filename=filename):
-                unloaded_file_names.append(filename)
-
-        self.handle_loading(unloaded_file_names, self._use_threading)
+        self.handle_loading(filenames, self._use_threading)
 
     def handle_loading(self, filenames, threaded=True):
         if threaded:

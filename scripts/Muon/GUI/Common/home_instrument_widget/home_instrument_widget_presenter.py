@@ -44,9 +44,6 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
         self.handle_loaded_time_zero_checkState_change()
         self.handle_loaded_first_good_data_checkState_change()
 
-        # notifier for instrument changes
-        self.instrumentNotifier = InstrumentWidgetPresenter.InstrumentNotifier(self)
-
     def show(self):
         self._view.show()
 
@@ -120,7 +117,6 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
         if instrument != self._model._data.instrument:
             self._model._data.instrument = instrument
             self._view.set_instrument(instrument, block=True)
-            self.instrumentNotifier.notify_subscribers(instrument)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Dead Time
@@ -192,15 +188,3 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
         self._model.set_dead_time_to_none()
         self._view.set_dead_time_file_selection(0)
         self.set_dead_time_text_to_default()
-
-    # ------------------------------------------------------------------------------------------------------------------
-    # Observer / Observable
-    # ------------------------------------------------------------------------------------------------------------------
-
-    class InstrumentNotifier(Observable):
-        def __init__(self, outer):
-            Observable.__init__(self)
-            self.outer = outer  # handle to containing class
-
-        def notify_subscribers(self, *args, **kwargs):
-            Observable.notify_subscribers(self, *args)
