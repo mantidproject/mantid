@@ -21,7 +21,7 @@ namespace CustomInterfaces {
 namespace IDA {
 
 IndirectFitDataView::IndirectFitDataView(QWidget *parent)
-    : QTabWidget(parent), m_dataForm(new Ui::IndirectFitDataForm) {
+    : IIndirectFitDataView(parent), m_dataForm(new Ui::IndirectFitDataForm) {
   m_dataForm->setupUi(this);
   m_dataForm->dsResolution->hide();
   m_dataForm->lbResolution->hide();

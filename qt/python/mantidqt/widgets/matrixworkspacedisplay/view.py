@@ -12,15 +12,38 @@ from __future__ import (absolute_import, division, print_function)
 from functools import partial
 
 from qtpy import QtGui
-from qtpy.QtCore import QPoint, Qt
-from qtpy.QtGui import QCursor, QFont, QFontMetrics, QKeySequence
-from qtpy.QtWidgets import (QAbstractItemView, QAction, QHeaderView, QMessageBox, QTabWidget, QTableView, QToolTip)
+from qtpy.QtCore import Qt, Signal, Slot
+from qtpy.QtGui import QKeySequence
+from qtpy.QtWidgets import (QAbstractItemView, QAction, QHeaderView, QMessageBox, QTabWidget, QTableView)
 
 import mantidqt.icons
+from mantidqt.widgets.common.observing_view import ObservingView
 from mantidqt.widgets.matrixworkspacedisplay.table_view_model import MatrixWorkspaceTableViewModelType
 
 
-class MatrixWorkspaceDisplayView(QTabWidget):
+class MatrixWorkspaceTableView(QTableView):
+    def __init__(self, parent):
+        super(MatrixWorkspaceTableView, self).__init__(parent)
+        self.setSelectionBehavior(QAbstractItemView.SelectItems)
+
+        header = self.horizontalHeader()
+        header.sectionDoubleClicked.connect(self.handle_double_click)
+
+    def resizeEvent(self, event):
+        super(MatrixWorkspaceTableView, self).resizeEvent(event)
+
+        header = self.horizontalHeader()
+        header.setSectionResizeMode(QHeaderView.Interactive)
+
+    def handle_double_click(self, section):
+        header = self.horizontalHeader()
+        header.resizeSection(section, header.defaultSectionSize())
+
+
+class MatrixWorkspaceDisplayView(QTabWidget, ObservingView):
+    close_signal = Signal()
+    rename_signal = Signal(str)
+
     def __init__(self, presenter, parent=None, name=''):
         super(MatrixWorkspaceDisplayView, self).__init__(parent)
 
@@ -47,12 +70,24 @@ class MatrixWorkspaceDisplayView(QTabWidget):
         self.table_x = self.add_table("X values")
         self.table_e = self.add_table("E values")
 
+        self.close_signal.connect(self._run_close)
+        self.rename_signal.connect(self._run_rename)
+
         self.resize(600, 400)
         self.show()
 
+    @Slot()
+    def _run_close(self):
+        self.presenter.clear_observer()
+        self.close()
+
+    @Slot(str)
+    def _run_rename(self, new_name):
+        self._rename(new_name)
+
     def add_table(self, label):
-        tab = QTableView()
-        tab.setSelectionBehavior(QAbstractItemView.SelectItems)
+        tab = MatrixWorkspaceTableView(self)
+
         self.addTab(tab, label)
         self.tabs.append(tab)
         return tab
@@ -61,6 +96,9 @@ class MatrixWorkspaceDisplayView(QTabWidget):
         if event.matches(QKeySequence.Copy):
             self.presenter.action_keypress_copy(self.tabs[self.currentIndex()])
         super(MatrixWorkspaceDisplayView, self).keyPressEvent(event)
+
+    def get_active_tab(self):
+        return self.tabs[self.active_tab_index]
 
     def set_scroll_position_on_new_focused_tab(self, new_tab_index):
         """
@@ -143,26 +181,6 @@ class MatrixWorkspaceDisplayView(QTabWidget):
             "The model for the table with {0} values has a wrong model type: {1}".format(expected_model_type.upper(),
                                                                                          model.model_type)
         table.setModel(model)
-
-    @staticmethod
-    def copy_to_clipboard(data):
-        """
-        Uses the QGuiApplication to copy to the system clipboard.
-
-        :type data: str
-        :param data: The data that will be copied to the clipboard
-        :return:
-        """
-        cb = QtGui.QGuiApplication.clipboard()
-        cb.setText(data, mode=cb.Clipboard)
-
-    def show_mouse_toast(self, message):
-        # Creates a text with empty space to get the height of the rendered text - this is used
-        # to provide the same offset for the tooltip, scaled relative to the current resolution and zoom.
-        font_metrics = QFontMetrics(QFont(" "))
-        # The height itself is divided by 2 just to reduce the offset so that the tooltip is
-        # reasonably position relative to the cursor
-        QToolTip.showText(QCursor.pos() + QPoint(font_metrics.height() / 2, 0), message)
 
     def ask_confirmation(self, message, title="Mantid Workbench"):
         """

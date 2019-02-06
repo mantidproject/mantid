@@ -64,6 +64,7 @@ Bugfixes
 - Project recovery will now successfully recover live data, it will however be unable to recover any data that was up at the time, but will start the live data streams again from scratch.
 - If an empty group workspace is present in the ADS it will no longer crash the save thread of project recovery and instead will delete it from the ADS and ignore it.
 - A bug has been fixed in Indirect I(Q,t) interface when analyzing IN16B reduced data.
+- :ref:`SavePlot1D <algm-SavePlot1D>` has been updated to follow changes to the plotly api.
 
 MantidPlot
 ----------
@@ -73,11 +74,39 @@ Changes
 
 - All File Browser dialog boxes will now (by default) display all valid file extensions as the first file filter.
 - Plot -> Advanced now allows for plotting against any property in the ``Run`` object that can be represented as a single number. It uses the time-average value for time series properties and the average for others.
+- A new option in the right-click menu for the results log allows users to set the number of lines retained by the widget. The default is 8192. This avoids memory problems for long running instances.
 
 BugFixes
 ########
 
 - Fixed issue where an open set of data from ITableWorkspace wouldn't update if the data was changed via python
 - Fixed an issue where MantidPlot would crash when renaming workspaces.
+- Fixed issue with filenames containing spaces that are passed to Mantid when launched from the command line
+
+MantidWorkbench
+---------------
+
+Changes
+#######
+- Colorfill plots with uniform bin widths were made more responsive by resampling to 4K resolution and using :func:`~mantid.plots.MantidAxes.imshow`.
+
+BugFixes
+########
+
+Instrument View
+---------------
+
+Changes
+#######
+ - The miniplot on the pick tab of the instrument view now shows the HKL values for peaks when viewing a summed collection of detectors.
+
+
+Logging
+-------
+
+Changes
+#######
+
+ - Increased the log level from information to notice when creating an instrument geometry.
 
 :ref:`Release 3.14.0 <v3.14.0>`

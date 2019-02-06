@@ -24,6 +24,14 @@ public:
 
   void reset() override;
   bool isAuthenticated();
+  /**
+   * String describing the rate limit status. This uses a url that github claims
+   * will never count against your REST API limit.
+   * https://developer.github.com/v3/rate_limit/
+   *
+   * @return description of the status or an empty string
+   */
+  std::string getRateLimitDescription();
 
 protected:
   virtual void processResponseHeaders(const Poco::Net::HTTPResponse &res) override;

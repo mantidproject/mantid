@@ -37,8 +37,8 @@ class SANSILLReductionTest(unittest.TestCase):
         run = mtd['Db'].getRun()
         self.assertAlmostEqual(run.getLogData('BeamCenterX').value, -0.0048, delta=1e-4)
         self.assertAlmostEqual(run.getLogData('BeamCenterY').value, -0.0027, delta=1e-4)
-        self.assertAlmostEqual(run.getLogData('BeamFluxValue').value, 6618939, delta=1)
-        self.assertAlmostEqual(run.getLogData('BeamFluxError').value, 8554, delta=1)
+        self.assertAlmostEqual(run.getLogData('BeamFluxValue').value, 6628249, delta=1)
+        self.assertAlmostEqual(run.getLogData('BeamFluxError').value, 8566, delta=1)
 
     def test_transmission(self):
         SANSILLReduction(Run='010414', ProcessAs='Beam', OutputWorkspace='Db')
@@ -79,7 +79,7 @@ class SANSILLReductionTest(unittest.TestCase):
         run = mtd['beam'].getRun()
         self.assertAlmostEqual(run.getLogData('BeamCenterX').value, -0.0025, delta=1e-4)
         self.assertAlmostEqual(run.getLogData('BeamCenterY').value, 0.0009, delta=1e-4)
-        self.assertAlmostEqual(run.getLogData('BeamFluxValue').value, 33698, delta=1)
+        self.assertAlmostEqual(run.getLogData('BeamFluxValue').value, 33963, delta=1)
         self.assertAlmostEqual(run.getLogData('BeamFluxError').value, 16, delta=1)
 
     def test_transmission_tof(self):

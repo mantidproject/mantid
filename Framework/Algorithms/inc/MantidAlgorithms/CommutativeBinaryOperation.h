@@ -4,12 +4,9 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHM_COMMUTATIVEBINARYOPERATION_H_
-#define MANTID_ALGORITHM_COMMUTATIVEBINARYOPERATION_H_
+#ifndef MANTID_ALGORITHMS_COMMUTATIVEBINARYOPERATION_H_
+#define MANTID_ALGORITHMS_COMMUTATIVEBINARYOPERATION_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/BinaryOperation.h"
 
 namespace Mantid {
@@ -38,4 +35,4 @@ protected:
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif /*MANTID_ALGORITHM_COMMUTATIVEBINARYOPERATION_H_*/
+#endif /*MANTID_ALGORITHMS_COMMUTATIVEBINARYOPERATION_H_*/

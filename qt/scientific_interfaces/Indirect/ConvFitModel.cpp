@@ -24,6 +24,10 @@ MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) {
       workspaceName);
 }
 
+bool doesExistInADS(std::string const &workspaceName) {
+  return AnalysisDataService::Instance().doesExist(workspaceName);
+}
+
 boost::optional<std::size_t>
 getFirstInCategory(CompositeFunction_const_sptr composite,
                    const std::string &category) {
@@ -450,7 +454,7 @@ IAlgorithm_sptr ConvFitModel::simultaneousFitAlgorithm() const {
 
 std::string ConvFitModel::sequentialFitOutputName() const {
   if (isMultiFit())
-    return "MultiConvFit_" + m_fitType + m_backgroundString + "_Result";
+    return "MultiConvFit_" + m_fitType + m_backgroundString + "_Results";
   return createOutputName(
       "%1%_conv_" + m_fitType + m_backgroundString + "_s%2%", "_to_", 0);
 }
@@ -461,8 +465,9 @@ std::string ConvFitModel::simultaneousFitOutputName() const {
 
 std::string ConvFitModel::singleFitOutputName(std::size_t index,
                                               std::size_t spectrum) const {
-  return createSingleFitOutputName(
-      "%1%_conv_" + m_fitType + m_backgroundString + "_s%2%", index, spectrum);
+  return createSingleFitOutputName("%1%_conv_" + m_fitType +
+                                       m_backgroundString + "_s%2%_Results",
+                                   index, spectrum);
 }
 
 Mantid::API::IFunction_sptr ConvFitModel::getFittingFunction() const {
@@ -553,7 +558,10 @@ void ConvFitModel::removeWorkspace(std::size_t index) {
 }
 
 void ConvFitModel::setResolution(const std::string &name, std::size_t index) {
-  setResolution(getADSMatrixWorkspace(name), index);
+  if (!name.empty() && doesExistInADS(name))
+    setResolution(getADSMatrixWorkspace(name), index);
+  else
+    throw std::runtime_error("A valid resolution file needs to be selected.");
 }
 
 void ConvFitModel::setResolution(MatrixWorkspace_sptr resolution,

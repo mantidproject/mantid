@@ -13,17 +13,20 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/Unit.h"
-
 #include <boost/make_shared.hpp>
 
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
+using namespace Mantid::HistogramData;
 using std::size_t;
 
 namespace Mantid {
@@ -105,7 +108,7 @@ bool BinaryOperation::handleSpecialDivideMinus() {
     } else if (this->name() == "Minus") {
       // x - workspace = x + (workspace * -1)
       MatrixWorkspace_sptr minusOne =
-          WorkspaceFactory::Instance().create("WorkspaceSingleValue", 1, 1, 1);
+          create<WorkspaceSingleValue>(1, Points(1));
       minusOne->dataY(0)[0] = -1.0;
       minusOne->dataE(0)[0] = 0.0;
 
@@ -148,6 +151,9 @@ void BinaryOperation::exec() {
   m_rhs = getProperty(inputPropName2());
   m_AllowDifferentNumberSpectra = getProperty("AllowDifferentNumberSpectra");
 
+  m_lhsBlocksize = m_lhs->blocksize();
+  m_rhsBlocksize = m_rhs->blocksize();
+
   // Special handling for 1-WS and 1/WS.
   if (this->handleSpecialDivideMinus())
     return;
@@ -182,6 +188,7 @@ void BinaryOperation::exec() {
     // Flip the workspaces left and right
     std::swap(m_lhs, m_rhs);
     std::swap(m_elhs, m_erhs);
+    std::swap(m_lhsBlocksize, m_rhsBlocksize);
   }
 
   // Check that the input workspaces are compatible
@@ -234,7 +241,7 @@ void BinaryOperation::exec() {
     //   (b) it has been, but it's not the correct dimensions
     if ((m_out != m_lhs && m_out != m_rhs) ||
         (m_out == m_rhs && (m_lhs->size() > m_rhs->size()))) {
-      m_out = WorkspaceFactory::Instance().create(m_lhs);
+      m_out = create<HistoWorkspace>(*m_lhs);
     }
   }
 
@@ -261,7 +268,7 @@ void BinaryOperation::exec() {
   }
   // Single column on rhs; if the RHS is an event workspace with one bin, it is
   // treated as a scalar.
-  else if ((m_rhs->blocksize() == 1) && !m_do2D_even_for_SingleColumn_on_rhs) {
+  else if ((m_rhsBlocksize == 1) && !m_do2D_even_for_SingleColumn_on_rhs) {
     doSingleColumn();
   } else // The two are both 2D and should be the same size (except if LHS is an
          // event workspace)
@@ -315,15 +322,15 @@ bool BinaryOperation::checkCompatibility(
   const std::string rhs_unitID = (rhs_unit ? rhs_unit->unitID() : "");
 
   // Check the workspaces have the same units and distribution flag
-  if (lhs_unitID != rhs_unitID && lhs->blocksize() > 1 &&
-      rhs->blocksize() > 1) {
+  if (lhs_unitID != rhs_unitID && m_lhsBlocksize > 1 && m_rhsBlocksize > 1) {
     g_log.error("The two workspace are not compatible because they have "
                 "different units on the X axis.");
     return false;
   }
 
   // Check the size compatibility
-  std::string checkSizeCompatibilityResult = checkSizeCompatibility(lhs, rhs);
+  const std::string checkSizeCompatibilityResult =
+      checkSizeCompatibility(lhs, rhs);
   if (!checkSizeCompatibilityResult.empty()) {
     throw std::invalid_argument(checkSizeCompatibilityResult);
   }
@@ -380,7 +387,7 @@ std::string BinaryOperation::checkSizeCompatibility(
   }
   // Otherwise they must match both ways, or horizontally or vertically with the
   // other rhs dimension=1
-  if (rhs->blocksize() == 1 &&
+  if (m_rhsBlocksize == 1 &&
       lhs->getNumberHistograms() == rhs->getNumberHistograms())
     return "";
   // Past this point, we require the X arrays to match. Note this only checks
@@ -392,7 +399,7 @@ std::string BinaryOperation::checkSizeCompatibility(
 
   const size_t rhsSpec = rhs->getNumberHistograms();
 
-  if (lhs->blocksize() == rhs->blocksize()) {
+  if (m_lhsBlocksize == m_rhsBlocksize) {
     if (rhsSpec == 1 || lhs->getNumberHistograms() == rhsSpec) {
       return "";
     } else {
@@ -456,8 +463,8 @@ void BinaryOperation::doSingleValue() {
   // single value was masked
 
   // Pull out the single value and its error
-  const double rhsY = m_rhs->readY(0)[0];
-  const double rhsE = m_rhs->readE(0)[0];
+  const double rhsY = m_rhs->y(0)[0];
+  const double rhsE = m_rhs->e(0)[0];
 
   // Now loop over the spectra of the left hand side calling the virtual
   // function
@@ -468,7 +475,7 @@ void BinaryOperation::doSingleValue() {
     PARALLEL_FOR_IF(Kernel::threadSafe(*m_lhs, *m_rhs, *m_out))
     for (int64_t i = 0; i < numHists; ++i) {
       PARALLEL_START_INTERUPT_REGION
-      m_out->setX(i, m_lhs->refX(i));
+      m_out->setSharedX(i, m_lhs->sharedX(i));
       performEventBinaryOperation(m_eout->getSpectrum(i), rhsY, rhsE);
       m_progress->report(this->name());
       PARALLEL_END_INTERUPT_REGION
@@ -479,15 +486,14 @@ void BinaryOperation::doSingleValue() {
     PARALLEL_FOR_IF(Kernel::threadSafe(*m_lhs, *m_rhs, *m_out))
     for (int64_t i = 0; i < numHists; ++i) {
       PARALLEL_START_INTERUPT_REGION
-      m_out->setX(i, m_lhs->refX(i));
+      m_out->setSharedX(i, m_lhs->sharedX(i));
       // Get reference to output vectors here to break any sharing outside the
       // function call below
       // where the order of argument evaluation is not guaranteed (if it's L->R
       // there would be a data race)
-      MantidVec &outY = m_out->dataY(i);
-      MantidVec &outE = m_out->dataE(i);
-      performBinaryOperation(m_lhs->readX(i), m_lhs->readY(i), m_lhs->readE(i),
-                             rhsY, rhsE, outY, outE);
+      HistogramData::HistogramY &outY = m_out->mutableY(i);
+      HistogramData::HistogramE &outE = m_out->mutableE(i);
+      performBinaryOperation(m_lhs->histogram(i), rhsY, rhsE, outY, outE);
       m_progress->report(this->name());
       PARALLEL_END_INTERUPT_REGION
     }
@@ -515,10 +521,8 @@ void BinaryOperation::doSingleColumn() {
     PARALLEL_FOR_IF(Kernel::threadSafe(*m_lhs, *m_rhs, *m_out))
     for (int64_t i = 0; i < numHists; ++i) {
       PARALLEL_START_INTERUPT_REGION
-      const double rhsY = m_rhs->readY(i)[0];
-      const double rhsE = m_rhs->readE(i)[0];
-
-      // m_out->setX(i, m_lhs->refX(i)); //unnecessary - that was copied before.
+      const double rhsY = m_rhs->y(i)[0];
+      const double rhsE = m_rhs->e(i)[0];
       if (propagateSpectraMask(lhsSpectrumInfo, rhsSpectrumInfo, i, *m_out,
                                outSpectrumInfo)) {
         performEventBinaryOperation(m_eout->getSpectrum(i), rhsY, rhsE);
@@ -532,20 +536,19 @@ void BinaryOperation::doSingleColumn() {
     PARALLEL_FOR_IF(Kernel::threadSafe(*m_lhs, *m_rhs, *m_out))
     for (int64_t i = 0; i < numHists; ++i) {
       PARALLEL_START_INTERUPT_REGION
-      const double rhsY = m_rhs->readY(i)[0];
-      const double rhsE = m_rhs->readE(i)[0];
+      const double rhsY = m_rhs->y(i)[0];
+      const double rhsE = m_rhs->e(i)[0];
 
-      m_out->setX(i, m_lhs->refX(i));
+      m_out->setSharedX(i, m_lhs->sharedX(i));
       if (propagateSpectraMask(lhsSpectrumInfo, rhsSpectrumInfo, i, *m_out,
                                outSpectrumInfo)) {
         // Get reference to output vectors here to break any sharing outside the
         // function call below
         // where the order of argument evaluation is not guaranteed (if it's
         // L->R there would be a data race)
-        MantidVec &outY = m_out->dataY(i);
-        MantidVec &outE = m_out->dataE(i);
-        performBinaryOperation(m_lhs->readX(i), m_lhs->readY(i),
-                               m_lhs->readE(i), rhsY, rhsE, outY, outE);
+        HistogramData::HistogramY &outY = m_out->mutableY(i);
+        HistogramData::HistogramE &outE = m_out->mutableE(i);
+        performBinaryOperation(m_lhs->histogram(i), rhsY, rhsE, outY, outE);
       }
       m_progress->report(this->name());
       PARALLEL_END_INTERUPT_REGION
@@ -578,9 +581,6 @@ void BinaryOperation::doSingleSpectrum() {
       PARALLEL_FOR_IF(Kernel::threadSafe(*m_lhs, *m_rhs, *m_out))
       for (int64_t i = 0; i < numHists; ++i) {
         PARALLEL_START_INTERUPT_REGION
-        // m_out->setX(i,m_lhs->refX(i)); //unnecessary - that was copied
-        // before.
-
         // Perform the operation on the event list on the output (== lhs)
         performEventBinaryOperation(m_eout->getSpectrum(i), rhs_spectrum);
         m_progress->report(this->name());
@@ -601,8 +601,6 @@ void BinaryOperation::doSingleSpectrum() {
       PARALLEL_FOR_IF(Kernel::threadSafe(*m_lhs, *m_rhs, *m_out))
       for (int64_t i = 0; i < numHists; ++i) {
         PARALLEL_START_INTERUPT_REGION
-        // m_out->setX(i,m_lhs->refX(i)); //unnecessary - that was copied
-        // before.
         // Perform the operation on the event list on the output (== lhs)
         performEventBinaryOperation(m_eout->getSpectrum(i), rhsX, rhsY, rhsE);
         m_progress->report(this->name());
@@ -617,8 +615,7 @@ void BinaryOperation::doSingleSpectrum() {
     //  will be used instead)
 
     // Pull m_out the m_rhs spectrum
-    const MantidVec &rhsY = m_rhs->readY(0);
-    const MantidVec &rhsE = m_rhs->readE(0);
+    const auto rhs = m_rhs->histogram(0);
 
     // Now loop over the spectra of the left hand side calling the virtual
     // function
@@ -627,15 +624,14 @@ void BinaryOperation::doSingleSpectrum() {
     PARALLEL_FOR_IF(Kernel::threadSafe(*m_lhs, *m_rhs, *m_out))
     for (int64_t i = 0; i < numHists; ++i) {
       PARALLEL_START_INTERUPT_REGION
-      m_out->setX(i, m_lhs->refX(i));
+      m_out->setSharedX(i, m_lhs->sharedX(i));
       // Get reference to output vectors here to break any sharing outside the
       // function call below
       // where the order of argument evaluation is not guaranteed (if it's L->R
       // there would be a data race)
-      MantidVec &outY = m_out->dataY(i);
-      MantidVec &outE = m_out->dataE(i);
-      performBinaryOperation(m_lhs->readX(i), m_lhs->readY(i), m_lhs->readE(i),
-                             rhsY, rhsE, outY, outE);
+      HistogramData::HistogramY &outY = m_out->mutableY(i);
+      HistogramData::HistogramE &outE = m_out->mutableE(i);
+      performBinaryOperation(m_lhs->histogram(i), rhs, outY, outE);
       m_progress->report(this->name());
       PARALLEL_END_INTERUPT_REGION
     }
@@ -748,7 +744,7 @@ void BinaryOperation::do2D(bool mismatchedSpectra) {
     for (int64_t i = 0; i < numHists; ++i) {
       PARALLEL_START_INTERUPT_REGION
       m_progress->report(this->name());
-      m_out->setX(i, m_lhs->refX(i));
+      m_out->setSharedX(i, m_lhs->sharedX(i));
       int64_t rhs_wi = i;
       if (mismatchedSpectra && table) {
         rhs_wi = (*table)[i];
@@ -765,11 +761,10 @@ void BinaryOperation::do2D(bool mismatchedSpectra) {
       // function call below
       // where the order of argument evaluation is not guaranteed (if it's L->R
       // there would be a data race)
-      MantidVec &outY = m_out->dataY(i);
-      MantidVec &outE = m_out->dataE(i);
-      performBinaryOperation(m_lhs->readX(i), m_lhs->readY(i), m_lhs->readE(i),
-                             m_rhs->readY(rhs_wi), m_rhs->readE(rhs_wi), outY,
-                             outE);
+      HistogramData::HistogramY &outY = m_out->mutableY(i);
+      HistogramData::HistogramE &outE = m_out->mutableE(i);
+      performBinaryOperation(m_lhs->histogram(i), m_rhs->histogram(rhs_wi),
+                             outY, outE);
 
       // Free up memory on the RHS if that is possible
       if (m_ClearRHSWorkspace)
@@ -832,9 +827,9 @@ void BinaryOperation::performEventBinaryOperation(
  * with another (histogrammed) spectrum as the right-hand operand.
  *
  *  @param lhs :: Reference to the EventList that will be modified in place.
- *  @param rhsX :: The vector of rhs X bin boundaries
- *  @param rhsY :: The vector of rhs data values
- *  @param rhsE :: The vector of rhs error values
+ *  @param rhsX :: Rhs X bin boundaries
+ *  @param rhsY :: Rhs data values
+ *  @param rhsE :: Rhs error values
  */
 void BinaryOperation::performEventBinaryOperation(DataObjects::EventList &lhs,
                                                   const MantidVec &rhsX,

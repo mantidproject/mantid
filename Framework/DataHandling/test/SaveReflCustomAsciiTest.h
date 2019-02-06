@@ -8,16 +8,20 @@
 #define SAVEREFLCUSTOMASCIITEST_H_
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidDataHandling/SaveReflCustomAscii.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidHistogramData/Points.h"
 #include <Poco/File.h>
 #include <boost/algorithm/string.hpp>
+#include <boost/lexical_cast.hpp>
 #include <cxxtest/TestSuite.h>
 #include <fstream>
 
 using namespace Mantid::API;
 using namespace Mantid::DataHandling;
+using namespace Mantid::HistogramData;
 using namespace Mantid::DataObjects;
 
 class SaveReflCustomAsciiTest : public CxxTest::TestSuite {
@@ -32,16 +36,12 @@ public:
     m_filename = "SaveReflCustomAsciiFile.txt";
     m_name = "SaveReflCustomAsciiWS";
     for (int i = 1; i < 11; ++i) {
-      // X, Y and E get [1,2,3,4,5,6,7,8,9,10]
-      // 0 gets [0,0,0,0,0,0,0,0,0,0] and is used to make sure there is no
-      // problem with divide by zero
-      m_dataX.push_back(i);
-      m_dataY.push_back(i);
-      m_dataE.push_back(i);
-      m_data0.push_back(0);
+      m_dataX.emplace_back(i);
+      m_dataY.emplace_back(i);
+      m_dataE.emplace_back(i);
     }
+    m_dataX.emplace_back(11.);
   }
-  ~SaveReflCustomAsciiTest() override {}
 
   void testExec() {
     // create a new workspace and then delete it later on
@@ -62,6 +62,7 @@ public:
     std::ifstream in(m_long_filename.c_str());
     std::string fullline;
     headingsTests(in, fullline);
+
     getline(in, fullline);
 
     std::vector<std::string> columns;
@@ -71,8 +72,8 @@ public:
     // the first is black due to the leading separator
     TS_ASSERT(columns.at(0) == "");
     TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 2.5, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 2, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(3)), 2, 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 2., 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(3)), 2., 0.01);
     in.close();
 
     cleanupafterwards();
@@ -103,9 +104,9 @@ public:
     TS_ASSERT_EQUALS(columns.size(), 4);
     // the first is black due to the leading separator
     TS_ASSERT(columns.at(0) == "");
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 0, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 2, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(3)), 2, 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 0., 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 2., 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(3)), 2., 0.01);
     in.close();
 
     cleanupafterwards();
@@ -137,8 +138,8 @@ public:
     // the first is black due to the leading separator
     TS_ASSERT(columns.at(0) == "");
     TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 2.5, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 0, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(3)), 2, 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 0., 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(3)), 2., 0.01);
     in.close();
 
     cleanupafterwards();
@@ -170,15 +171,15 @@ public:
     // the first is black due to the leading separator
     TS_ASSERT(columns.at(0) == "");
     TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 2.5, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 2, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(3)), 0, 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 2., 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(3)), 0., 0.01);
     in.close();
 
     cleanupafterwards();
   }
   void testParameters() {
     // create a new workspace and then delete it later on
-    createWS(false, false, false, true);
+    createWS(false, false, false);
 
     Mantid::API::IAlgorithm_sptr alg =
         Mantid::API::AlgorithmManager::Instance().create("SaveReflCustomAscii");
@@ -206,8 +207,8 @@ public:
     // the first is black due to the leading separator
     TS_ASSERT(columns.at(0) == "");
     TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 1.5, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 1, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(3)), 1, 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 1., 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(3)), 1., 0.01);
     in.close();
 
     cleanupafterwards();
@@ -236,39 +237,22 @@ private:
     } else {
     };
   }
-  void createWS(bool zeroX = false, bool zeroY = false, bool zeroE = false,
-                bool createLogs = false) {
-    createLogs = false;
-    MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspace(1, 10);
-    AnalysisDataService::Instance().addOrReplace(m_name, ws);
+  void createWS(bool zeroX = false, bool zeroY = false, bool zeroE = false) {
     // Check if any of X, Y or E should be zeroed to check for divide by zero or
     // similiar
-    if (zeroX) {
-      ws->dataX(0) = m_data0;
-    } else {
-      ws->dataX(0) = m_dataX;
-    }
-
-    if (zeroY) {
-      ws->dataY(0) = m_data0;
-    } else {
-      ws->dataY(0) = m_dataY;
-    }
-
-    if (zeroE) {
-      ws->dataE(0) = m_data0;
-    } else {
-      ws->dataE(0) = m_dataE;
-    }
-    if (createLogs) {
-    } else {
-    }
+    BinEdges edges = zeroX ? BinEdges(11, 0.) : BinEdges(m_dataX);
+    Counts counts = zeroY ? Counts(10, 0.) : Counts(m_dataY);
+    CountStandardDeviations stddev = zeroE ? CountStandardDeviations(10, 0.)
+                                           : CountStandardDeviations(m_dataE);
+    MatrixWorkspace_sptr ws =
+        create<Workspace2D>(1, Histogram(edges, counts, stddev));
+    AnalysisDataService::Instance().addOrReplace(m_name, ws);
   }
   void cleanupafterwards() {
     Poco::File(m_long_filename).remove();
     AnalysisDataService::Instance().remove(m_name);
   }
   std::string m_filename, m_name, m_long_filename;
-  std::vector<double> m_dataX, m_dataY, m_dataE, m_data0;
+  std::vector<double> m_dataX, m_dataY, m_dataE;
 };
 #endif /*SAVEREFLCUSTOMASCIITEST_H_*/

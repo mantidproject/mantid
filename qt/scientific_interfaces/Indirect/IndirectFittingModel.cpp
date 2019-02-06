@@ -25,6 +25,17 @@ using namespace Mantid::API;
 namespace {
 using namespace MantidQt::CustomInterfaces::IDA;
 
+bool doesExistInADS(std::string const &workspaceName) {
+  return AnalysisDataService::Instance().doesExist(workspaceName);
+}
+
+std::string cutLastOf(std::string const &str, std::string const &delimiter) {
+  auto const cutIndex = str.rfind(delimiter);
+  if (cutIndex != std::string::npos)
+    return str.substr(0, cutIndex);
+  return str;
+}
+
 bool equivalentWorkspaces(MatrixWorkspace_const_sptr lhs,
                           MatrixWorkspace_const_sptr rhs) {
   if (!lhs || !rhs)
@@ -199,15 +210,6 @@ void addInputDataToSimultaneousFit(
                                   counter);
 }
 
-IAlgorithm_sptr saveNexusProcessedAlgorithm(Workspace_sptr workspace,
-                                            const std::string &filename) {
-  IAlgorithm_sptr saveAlg =
-      AlgorithmManager::Instance().create("SaveNexusProcessed");
-  saveAlg->setProperty("InputWorkspace", workspace);
-  saveAlg->setProperty("Filename", filename);
-  return saveAlg;
-}
-
 template <typename Map> Map combine(const Map &mapA, const Map &mapB) {
   Map newMap(mapA);
   newMap.insert(std::begin(mapB), std::end(mapB));
@@ -377,14 +379,19 @@ std::string
 IndirectFittingModel::createDisplayName(const std::string &formatString,
                                         const std::string &rangeDelimiter,
                                         std::size_t dataIndex) const {
-  return m_fittingData[dataIndex]->displayName(formatString, rangeDelimiter);
+  if (m_fittingData.size() > dataIndex)
+    return m_fittingData[dataIndex]->displayName(formatString, rangeDelimiter);
+  else
+    throw std::runtime_error("Cannot create a display name for a workspace: "
+                             "the workspace index provided is too large.");
 }
 
 std::string
 IndirectFittingModel::createOutputName(const std::string &formatString,
                                        const std::string &rangeDelimiter,
                                        std::size_t dataIndex) const {
-  return createDisplayName(formatString, rangeDelimiter, dataIndex) + "_Result";
+  return createDisplayName(formatString, rangeDelimiter, dataIndex) +
+         "_Results";
 }
 
 bool IndirectFittingModel::isMultiFit() const {
@@ -496,6 +503,9 @@ void IndirectFittingModel::addWorkspace(const std::string &workspaceName,
   if (spectra.empty())
     throw std::runtime_error(
         "Fitting Data must consist of one or more spectra.");
+  if (workspaceName.empty() || !doesExistInADS(workspaceName))
+    throw std::runtime_error("A valid sample file needs to be selected.");
+
   addWorkspace(workspaceName, DiscontinuousSpectra<std::size_t>(spectra));
 }
 
@@ -723,17 +733,6 @@ IndirectFittingModel::getResultLocation(std::size_t index,
   return boost::none;
 }
 
-void IndirectFittingModel::saveResult() const {
-  const auto resultWorkspace = getResultWorkspace();
-
-  if (resultWorkspace) {
-    const auto filename = Mantid::Kernel::ConfigService::Instance().getString(
-                              "defaultsave.directory") +
-                          resultWorkspace->getName() + ".nxs";
-    saveNexusProcessedAlgorithm(resultWorkspace, filename)->execute();
-  }
-}
-
 WorkspaceGroup_sptr IndirectFittingModel::getResultWorkspace() const {
   return m_fitOutput->getLastResultWorkspace();
 }
@@ -840,7 +839,15 @@ std::string
 IndirectFittingModel::createSingleFitOutputName(const std::string &formatString,
                                                 std::size_t index,
                                                 std::size_t spectrum) const {
-  return m_fittingData[index]->displayName(formatString, spectrum);
+  if (m_fittingData.size() > index)
+    return m_fittingData[index]->displayName(formatString, spectrum);
+  else
+    throw std::runtime_error("Cannot create a display name for a workspace: "
+                             "the workspace index provided is too large.");
+}
+
+std::string IndirectFittingModel::getOutputBasename() const {
+  return cutLastOf(sequentialFitOutputName(), "_Results");
 }
 
 void IndirectFittingModel::cleanFailedRun(IAlgorithm_sptr fittingAlgorithm) {

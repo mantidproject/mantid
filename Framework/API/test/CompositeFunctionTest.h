@@ -54,6 +54,7 @@ public:
 
   /// Return the underlying ISpectrum ptr at the given workspace index.
   ISpectrum &getSpectrum(const size_t index) override {
+    invalidateCommonBinsFlag();
     return m_spectra[index];
   }
 
@@ -84,6 +85,9 @@ private:
     throw std::runtime_error("Cloning of "
                              "CompositeFunctionTest_MocMatrixWorkspace is not "
                              "implemented.");
+  }
+  ISpectrum &getSpectrumWithoutInvalidation(const size_t index) override {
+    return m_spectra[index];
   }
   std::vector<CompositeFunctionTest_MocSpectrum> m_spectra;
   size_t m_blocksize;

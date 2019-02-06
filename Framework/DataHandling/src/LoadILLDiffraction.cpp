@@ -514,8 +514,8 @@ void LoadILLDiffraction::fillStaticInstrumentScan(const NXUInt &data,
                                                   const NXDouble &scan,
                                                   const NXFloat &twoTheta0) {
 
-  std::vector<double> axis = getAxis(scan);
-  std::vector<double> monitor = getMonitor(scan);
+  const std::vector<double> axis = getAxis(scan);
+  const std::vector<double> monitor = getMonitor(scan);
 
   // Assign monitor counts
   m_outWorkspace->mutableX(0) = axis;

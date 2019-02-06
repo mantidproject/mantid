@@ -57,13 +57,13 @@ private:
   removeExpDecay(const API::MatrixWorkspace_sptr &wsInput);
   /// Fit the workspace
   void fitWorkspace(const API::MatrixWorkspace_sptr &ws, double freq,
-                    std::string groupName, API::ITableWorkspace_sptr &resTab,
+                    std::string groupName, API::ITableWorkspace_sptr resTab,
                     API::WorkspaceGroup_sptr &resGroup);
   /// Create the fitting function as string
   std::string createFittingFunction(double freq, bool fixFreq);
   /// Extract asymmetry and phase from fitting results
-  void extractDetectorInfo(const API::ITableWorkspace_sptr &paramTab,
-                           const API::ITableWorkspace_sptr &resultsTab,
+  void extractDetectorInfo(API::ITableWorkspace &paramTab,
+                           API::ITableWorkspace &resultsTab,
                            const Indexing::SpectrumNumber spectrumNumber);
   /// Find frequency to use in sequential fit
   double getFrequency(const API::MatrixWorkspace_sptr &ws);
