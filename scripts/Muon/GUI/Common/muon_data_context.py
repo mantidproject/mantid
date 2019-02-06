@@ -129,6 +129,7 @@ class MuonDataContext(object):
 
     @instrument.setter
     def instrument(self, value):
+        ConfigService['default.instrument'] = value
         self._instrument = value
 
     @property
