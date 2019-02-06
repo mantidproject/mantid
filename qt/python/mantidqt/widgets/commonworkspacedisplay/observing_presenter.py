@@ -31,15 +31,25 @@ class ObservingPresenter(object):
         self.ads_observer = None
 
     def close(self, workspace_name):
-        if self.model.workspace_equals(workspace_name):
-            # if the observer is not cleared here then the C++ object is never freed,
-            # and observers keep getting created, and triggering on ADS events
-            self.ads_observer = None
+        if self.current_workspace_equals(workspace_name):
+            self.clear_observer()
             self.view.emit_close()
 
     def force_close(self):
-        self.ads_observer = None
+        self.clear_observer()
         self.view.emit_close()
+
+    def current_workspace_equals(self, name):
+        """
+        This function is provided as a means of objects inheriting to override the
+        workspace name comparison based on difference in storage.
+
+        An example is the InstrumentWidget presenter, which doesn't have a model,
+        but a variable holding the workspace name
+        :param name: Name of the workspace
+        :return: True if the name matches the current workspace, otherwise False
+        """
+        return self.model.workspace_equals(name)
 
     def replace_workspace(self, workspace_name, workspace):
         raise NotImplementedError("This method must be overridden.")

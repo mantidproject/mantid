@@ -21,6 +21,7 @@ class MockObservingView(ObservingView):
         self.presenter = Mock()
         self.presenter.clear_observer = Mock()
         self.setWindowTitle = Mock()
+        self.deleteLater = Mock()
 
 
 class MockObservingPresenter(ObservingPresenter):

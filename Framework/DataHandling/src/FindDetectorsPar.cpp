@@ -70,10 +70,6 @@ void FindDetectorsPar::exec() {
 
   // Get the input workspace
   const MatrixWorkspace_sptr inputWS = this->getProperty("InputWorkspace");
-  if (inputWS.get() == nullptr) {
-    throw(Kernel::Exception::NotFoundError(
-        "can not obtain InoputWorkspace for the algorithm to work", ""));
-  }
   // Number of spectra
   const int64_t nHist = static_cast<int64_t>(inputWS->getNumberHistograms());
 
@@ -101,7 +97,6 @@ void FindDetectorsPar::exec() {
   m_SizesAreLinear = this->getProperty("ReturnLinearRanges");
 
   std::vector<DetParameters> Detectors(nHist);
-  DetParameters AverageDetector;
   this->m_nDetectors = 0;
 
   Progress progress(this, 0.0, 1.0, 100);

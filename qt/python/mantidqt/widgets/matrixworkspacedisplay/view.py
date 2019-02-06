@@ -57,6 +57,8 @@ class MatrixWorkspaceDisplayView(QTabWidget, ObservingView):
         palette.setColor(QtGui.QPalette.Base, QtGui.QColor(128, 255, 255))
         self.setPalette(palette)
 
+        self.setAttribute(Qt.WA_DeleteOnClose, True)
+
         self.active_tab_index = 0
         self.currentChanged.connect(self.set_scroll_position_on_new_focused_tab)
 
@@ -72,7 +74,6 @@ class MatrixWorkspaceDisplayView(QTabWidget, ObservingView):
 
     @Slot()
     def _run_close(self):
-        self.presenter.clear_observer()
         self.close()
 
     @Slot(str)

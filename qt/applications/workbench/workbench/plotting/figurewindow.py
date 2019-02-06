@@ -14,7 +14,7 @@ from __future__ import absolute_import
 import weakref
 
 # 3rdparty imports
-from qtpy.QtCore import QEvent, Signal, Slot
+from qtpy.QtCore import QEvent, Qt, Signal, Slot
 from qtpy.QtWidgets import QMainWindow
 
 # local imports
@@ -33,8 +33,9 @@ class FigureWindow(QMainWindow, ObservingView):
         QMainWindow.__init__(self, parent=parent)
         # attributes
         self._canvas = weakref.proxy(canvas)
-        self.close_signal.connect(self._run_close)
+        self.setAttribute(Qt.WA_DeleteOnClose, True)
 
+        self.close_signal.connect(self._run_close)
         self.setAcceptDrops(True)
 
     @Slot()

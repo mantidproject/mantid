@@ -379,7 +379,11 @@ std::string
 IndirectFittingModel::createDisplayName(const std::string &formatString,
                                         const std::string &rangeDelimiter,
                                         std::size_t dataIndex) const {
-  return m_fittingData[dataIndex]->displayName(formatString, rangeDelimiter);
+  if (m_fittingData.size() > dataIndex)
+    return m_fittingData[dataIndex]->displayName(formatString, rangeDelimiter);
+  else
+    throw std::runtime_error("Cannot create a display name for a workspace: "
+                             "the workspace index provided is too large.");
 }
 
 std::string
@@ -835,7 +839,11 @@ std::string
 IndirectFittingModel::createSingleFitOutputName(const std::string &formatString,
                                                 std::size_t index,
                                                 std::size_t spectrum) const {
-  return m_fittingData[index]->displayName(formatString, spectrum);
+  if (m_fittingData.size() > index)
+    return m_fittingData[index]->displayName(formatString, spectrum);
+  else
+    throw std::runtime_error("Cannot create a display name for a workspace: "
+                             "the workspace index provided is too large.");
 }
 
 std::string IndirectFittingModel::getOutputBasename() const {

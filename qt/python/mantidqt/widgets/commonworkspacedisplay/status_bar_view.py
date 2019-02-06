@@ -7,6 +7,7 @@
 #  This file is part of the mantid workbench.
 #
 #
+from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QMainWindow, QStatusBar
 
 
@@ -15,6 +16,9 @@ class StatusBarView(QMainWindow):
         super(StatusBarView, self).__init__(parent)
         self.setCentralWidget(central_widget)
         self.setWindowTitle("{} - Mantid".format(name))
+        self.setAttribute(Qt.WA_DeleteOnClose, True)
+
         self.status_bar = QStatusBar(self)
         self.setStatusBar(self.status_bar)
+
         self.resize(600, 400)

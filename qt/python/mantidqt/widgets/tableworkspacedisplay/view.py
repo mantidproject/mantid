@@ -57,6 +57,8 @@ class TableWorkspaceDisplayView(QTableWidget, ObservingView):
         item_delegate.setItemEditorFactory(PreciseDoubleFactory())
         self.setItemDelegate(item_delegate)
 
+        self.setAttribute(Qt.WA_DeleteOnClose, True)
+
         self.close_signal.connect(self._run_close)
         self.rename_signal.connect(self._run_rename)
         self.repaint_signal.connect(self._run_repaint)
