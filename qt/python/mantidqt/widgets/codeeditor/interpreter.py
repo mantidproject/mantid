@@ -130,14 +130,10 @@ class PythonFileInterpreter(QWidget):
 
     def show_find_replace_dialog(self):
         if self.find_replace_dialog is None:
-            self.find_replace_dialog = InlineFindReplaceDialog(self)
+            self.find_replace_dialog = InlineFindReplaceDialog(self, self.editor)
             self.layout.insertWidget(0, self.find_replace_dialog.view)
 
-        if not self.find_replace_dialog.visible:
-            self.find_replace_dialog.show()
-        else:
-            self.find_replace_dialog.hide()
-            self.editor.setFocus()
+        self.find_replace_dialog.toggle()
 
     @property
     def filename(self):

@@ -102,6 +102,11 @@ public:
   /// Return a pointer to the object responsible for code completion
   inline QsciAPIs *scintillaAPI() const { return m_completer; }
 
+  /// Replace all occurences of a string
+  void replaceAll(const QString &search, const QString &replace, bool regex,
+                  bool caseSensitive, bool matchWords, bool wrap,
+                  bool forward = true);
+
 public slots:
   /// Save the script, opening a dialog
   void saveAs();
@@ -124,7 +129,6 @@ public slots:
   void print();
   /// Raise find replace dialog
   virtual void showFindReplaceDialog();
-  virtual void showInlineFindReplaceDialog();
 
   /// Override zoomTo slot
   void zoomTo(int level) override;

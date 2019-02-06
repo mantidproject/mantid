@@ -146,10 +146,17 @@ public:
   void setWhitespaceVisibility(WhitespaceVisibility mode);
   void updateCompletionAPI(const QStringList & completions);
 
+  int findFirst(const QString &expr, bool re, bool cs, bool wo, bool wrap, bool forward);
+  int findNext();
+  void replace(const QString &replaceStr);
+  void replaceAll(const QString &search, const QString &replace,
+                              bool regex, bool caseSensitive, bool matchWords,
+                              bool wrap, bool backward);
+
+
 public slots:
   void updateProgressMarker(int lineno, bool error);
   void showFindReplaceDialog();
-  void showInlineFindReplaceDialog();
 
 signals:
   void fileNameChanged(const QString &fileName);

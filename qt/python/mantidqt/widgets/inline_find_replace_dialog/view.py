@@ -24,11 +24,18 @@ class InlineFindReplaceDialogView(DialogBase, DialogForm):
         self.replace.lineEdit().setPlaceholderText("Replace with")
 
         self.button_next.clicked.connect(self.presenter.action_next)
-        self.button_previous.clicked.connect(self.presenter.action_previous)
         self.button_replace.clicked.connect(self.presenter.action_replace)
         self.button_replace_all.clicked.connect(self.presenter.action_replace_all)
 
+        self.find.currentTextChanged.connect(self.presenter.clear_search)
+        self.match_case.stateChanged.connect(self.presenter.clear_search)
+        self.search_backwards.stateChanged.connect(self.presenter.clear_search)
+        self.words.stateChanged.connect(self.presenter.clear_search)
+        self.regex.stateChanged.connect(self.presenter.clear_search)
+        self.wrap_around.stateChanged.connect(self.presenter.clear_search)
+
     def get_options(self):
+        # TODO when any of those are checked we need to kill the search
         return FindReplaceOptions(match_case=self.match_case.isChecked(),
                                   search_backwards=self.search_backwards.isChecked(),
                                   words=self.words.isChecked(),
