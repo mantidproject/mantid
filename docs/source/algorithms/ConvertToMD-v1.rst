@@ -317,7 +317,7 @@ file is available in `Mantid system tests repository <https://github.com/mantidp
 
 **Output:**
 
-.. testoutput:: ExConvertToMD|Q|T
+.. testoutput:: ExConvertToMD|Q|
 
    Resulting MD workspace contains 15329354 events and 3 dimensions
 
