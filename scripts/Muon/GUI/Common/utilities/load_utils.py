@@ -270,9 +270,6 @@ def combine_loaded_runs(model, run_list):
                 "AllowDifferentNumberSpectra": False}
             )
 
-    for run in run_list:
-        model._loaded_data_store.remove_data(run=[run])
-
     return_ws["OutputWorkspace"] = [MuonWorkspaceWrapper(running_total_period) for running_total_period in running_total]
     model._loaded_data_store.add_data(run=flatten_run_list(run_list), workspace=return_ws,
                                       filename="Co-added")

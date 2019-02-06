@@ -41,6 +41,7 @@ class LoadWidgetPresenter(object):
 
         self._view.on_multiple_loading_check_changed(self.handle_multiple_files_option_changed)
         self._view.on_multiple_load_type_changed(self.handle_multiple_files_option_changed)
+        self._use_threading = True
 
         self.instrumentObserver = LoadWidgetPresenter.InstrumentObserver(self)
         self.loadNotifier = LoadWidgetPresenter.LoadNotifier(self)
@@ -140,7 +141,9 @@ class LoadWidgetPresenter(object):
     class InstrumentObserver(Observer):
 
         def __init__(self, outer):
+            Observer.__init__(self)
             self.outer = outer
 
         def update(self, observable, arg):
+            print("update called : ", arg)
             self.outer.update_new_instrument(arg)
