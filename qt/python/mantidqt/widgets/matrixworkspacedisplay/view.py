@@ -44,7 +44,7 @@ class MatrixWorkspaceDisplayView(QTabWidget, ObservingView):
     close_signal = Signal()
     rename_signal = Signal(str)
 
-    def __init__(self, presenter, parent=None, name=''):
+    def __init__(self, presenter, parent=None):
         super(MatrixWorkspaceDisplayView, self).__init__(parent)
 
         self.presenter = presenter
@@ -56,9 +56,6 @@ class MatrixWorkspaceDisplayView(QTabWidget, ObservingView):
         palette = self.palette()
         palette.setColor(QtGui.QPalette.Base, QtGui.QColor(128, 255, 255))
         self.setPalette(palette)
-
-        self.setWindowTitle("{} - Mantid".format(name))
-        self.setWindowFlags(Qt.Window)
 
         self.active_tab_index = 0
         self.currentChanged.connect(self.set_scroll_position_on_new_focused_tab)

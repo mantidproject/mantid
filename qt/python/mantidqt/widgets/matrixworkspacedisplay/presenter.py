@@ -1,6 +1,6 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
@@ -37,8 +37,8 @@ class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
         """
         # Create model and view, or accept mocked versions
         self.model = model if model else MatrixWorkspaceDisplayModel(ws)
-        self.view = view if view else MatrixWorkspaceDisplayView(self, parent, self.model.get_name())
-        self.container = container if container else StatusBarView(parent, self.view)
+        self.view = view if view else MatrixWorkspaceDisplayView(self, parent)
+        self.container = container if container else StatusBarView(parent, self.view, self.model.get_name())
 
         super(MatrixWorkspaceDisplay, self).__init__(self.container.status_bar)
 

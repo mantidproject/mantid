@@ -57,8 +57,8 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
         """
         self.model = model if model else TableWorkspaceDisplayModel(ws)
         self.name = name if name else self.model.get_name()
-        self.view = view if view else TableWorkspaceDisplayView(self, parent, self.name)
-        self.container = container if container else StatusBarView(parent, self.view)
+        self.view = view if view else TableWorkspaceDisplayView(self, parent)
+        self.container = container if container else StatusBarView(parent, self.view, self.name)
 
         DataCopier.__init__(self, self.container.status_bar)
 
