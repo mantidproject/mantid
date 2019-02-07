@@ -7,7 +7,6 @@
 from __future__ import (absolute_import, division, print_function)
 
 import os
-from mantid.api import FileFinder
 
 allowed_instruments = ["EMU", "MUSR", "CHRONUS", "HIFI"]
 allowed_extensions = ["nxs"]

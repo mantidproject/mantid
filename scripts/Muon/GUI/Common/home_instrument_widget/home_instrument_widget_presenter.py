@@ -9,7 +9,6 @@ from __future__ import (absolute_import, division, print_function)
 from Muon.GUI.Common.home_tab.home_tab_presenter import HomeTabSubWidget
 import Muon.GUI.Common.utilities.load_utils as load_utils
 from Muon.GUI.Common.utilities.muon_file_utils import filter_for_extensions
-from Muon.GUI.Common.observer_pattern import Observable
 
 
 class InstrumentWidgetPresenter(HomeTabSubWidget):
