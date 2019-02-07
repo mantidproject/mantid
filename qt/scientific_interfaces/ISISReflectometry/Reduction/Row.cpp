@@ -5,18 +5,20 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "Row.h"
-#include "../Map.h"
+#include "Common/Map.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/variant.hpp>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
-Row::Row(std::vector<std::string> runNumbers, double theta,
-         std::pair<std::string, std::string> transmissionRuns, RangeInQ qRange,
-         boost::optional<double> scaleFactor,
-         ReductionOptionsMap reductionOptions,
-         ReductionWorkspaces reducedWorkspaceNames)
+Row::Row( // cppcheck-suppress passedByValue
+    std::vector<std::string> runNumbers, double theta,
+    // cppcheck-suppress passedByValue
+    std::pair<std::string, std::string> transmissionRuns, RangeInQ qRange,
+    boost::optional<double> scaleFactor, ReductionOptionsMap reductionOptions,
+    // cppcheck-suppress passedByValue
+    ReductionWorkspaces reducedWorkspaceNames)
     : m_runNumbers(std::move(runNumbers)), m_theta(std::move(theta)),
       m_qRange(std::move(qRange)), m_scaleFactor(std::move(scaleFactor)),
       m_transmissionRuns(std::move(transmissionRuns)),

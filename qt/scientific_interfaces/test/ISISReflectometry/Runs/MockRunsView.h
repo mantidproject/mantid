@@ -60,7 +60,7 @@ public:
   MOCK_METHOD0(stopMonitor, void());
 
   // Calls we don't care about
-  void showSearch(ReflSearchModel_sptr) override{};
+  void showSearch(SearchModel_sptr) override{};
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

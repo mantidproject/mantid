@@ -5,15 +5,23 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ReductionWorkspaces.h"
-#include "../Map.h"
+#include "Common/Map.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 ReductionWorkspaces::ReductionWorkspaces(
+    // cppcheck-suppress passedByValue
     std::vector<std::string> timeOfFlight,
+    // cppcheck-suppress passedByValue
     std::pair<std::string, std::string> transmissionRuns,
-    std::string combinedTransmissionRuns, std::string iVsLambda,
-    std::string iVsQ, std::string iVsQBinned)
+    // cppcheck-suppress passedByValue
+    std::string combinedTransmissionRuns,
+    // cppcheck-suppress passedByValue
+    std::string iVsLambda,
+    // cppcheck-suppress passedByValue
+    std::string iVsQ,
+    // cppcheck-suppress passedByValue
+    std::string iVsQBinned)
     : m_timeOfFlight(std::move(timeOfFlight)),
       m_transmissionRuns(std::move(transmissionRuns)),
       m_combinedTransmissionRuns(combinedTransmissionRuns),

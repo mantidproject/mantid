@@ -8,7 +8,7 @@
 #ifndef MANTID_CUSTOMINTERFACES_RUNSTABLEPRESENTER_H_
 #define MANTID_CUSTOMINTERFACES_RUNSTABLEPRESENTER_H_
 #include "../Runs/IRunsPresenter.h"
-#include "DllConfig.h"
+#include "Common/DllConfig.h"
 #include "IRunsTablePresenter.h"
 #include "IRunsTableView.h"
 #include "JobsViewUpdater.h"

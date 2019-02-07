@@ -5,18 +5,22 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "Group.h"
-#include "../IndexOf.h"
-#include "../Map.h"
+#include "Common/IndexOf.h"
+#include "Common/Map.h"
 #include "MantidQtWidgets/Common/Batch/AssertOrThrow.h"
 #include <cmath>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
-Group::Group(std::string name, std::vector<boost::optional<Row>> rows)
+Group::Group( // cppcheck-suppress passedByValue
+    std::string name, std::vector<boost::optional<Row>> rows)
     : m_name(std::move(name)), m_rows(std::move(rows)) {}
 
-Group::Group(std::string name) : m_name(std::move(name)), m_rows() {}
+Group::Group(
+    // cppcheck-suppress passedByValue
+    std::string name)
+    : m_name(std::move(name)), m_rows() {}
 
 std::string const &Group::name() const { return m_name; }
 

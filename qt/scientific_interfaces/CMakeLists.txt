@@ -40,16 +40,13 @@ set ( TEST_FILES
   test/EnggVanadiumCorrectionsModelTest.h
   test/IO_MuonGroupingTest.h
   test/MDFLogValueFinderTest.h
-  test/MeasurementItemTest.h
   test/MuonAnalysisDataLoaderTest.h
   test/MuonAnalysisFitDataPresenterTest.h
   test/MuonAnalysisFitFunctionPresenterTest.h
   test/MuonAnalysisHelperTest.h
   test/MuonAnalysisResultTableCreatorTest.h
-  test/ReflNexusMeasurementItemSourceTest.h
   test/RunMapTest.h
   test/UserInputValidatorTest.h
-
   test/ISISReflectometry/Reduction/GroupTest.h
   test/ISISReflectometry/Reduction/ValidateRowTest.h
   test/ISISReflectometry/Reduction/ParseReflectometryStringsTest.h

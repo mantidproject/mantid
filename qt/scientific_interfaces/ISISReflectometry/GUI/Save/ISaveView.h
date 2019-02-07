@@ -7,7 +7,7 @@
 #ifndef MANTID_ISISREFLECTOMETRY_ISAVEVIEW_H
 #define MANTID_ISISREFLECTOMETRY_ISAVEVIEW_H
 
-#include "../../DllConfig.h"
+#include "Common/DllConfig.h"
 #include <string>
 #include <vector>
 

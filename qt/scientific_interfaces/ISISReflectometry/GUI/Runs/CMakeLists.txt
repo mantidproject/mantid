@@ -1,6 +1,9 @@
 set ( RUNS_SRC_FILES
     RunsPresenter.cpp
     RunsView.cpp
+    CatalogSearcher.cpp
+    Autoreduction.cpp
+    SearchModel.cpp
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
@@ -11,10 +14,16 @@ set ( RUNS_INC_FILES
     RunsPresenter.h
     RunsPresenterFactory.h
     RunsView.h
+    IAutoreduction.h
+    ISearcher.h
+    Autoreduction.h
+    CatalogSearcher.h
+    SearchModel.h
 )
 
 set ( RUNS_MOC_FILES
     RunsView.h
+    SearchModel.h
 )
 
 set ( RUNS_UI_FILES

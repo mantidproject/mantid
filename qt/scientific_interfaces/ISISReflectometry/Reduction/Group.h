@@ -7,7 +7,7 @@
 
 #ifndef MANTID_CUSTOMINTERFACES_GROUP_H_
 #define MANTID_CUSTOMINTERFACES_GROUP_H_
-#include "../DllConfig.h"
+#include "Common/DllConfig.h"
 #include "Row.h"
 #include <boost/optional.hpp>
 #include <string>
@@ -18,7 +18,7 @@ namespace CustomInterfaces {
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL Group {
 public:
-  Group(std::string name);
+  explicit Group(std::string name);
   Group(std::string name, std::vector<boost::optional<Row>> rows);
 
   std::string const &name() const;

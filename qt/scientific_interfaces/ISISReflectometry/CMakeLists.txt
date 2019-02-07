@@ -6,84 +6,33 @@ FUNCTION(PREPEND var prefix)
    SET(${var} ${listVar} PARENT_SCOPE)
 ENDFUNCTION(PREPEND)
 
+add_subdirectory(Common)
 add_subdirectory(GUI)
 add_subdirectory(Reduction)
 
 message(${GUI_SRC_FILES})
 
 set ( SRC_FILES
+    ${COMMON_SRC_FILES}
     ${GUI_SRC_FILES}
     ${REDUCTION_SRC_FILES}
-    MeasurementItem.cpp
-    InstrumentOptionDefaults.cpp
-    InstrumentParameters.cpp
-    ExperimentOptionDefaults.cpp
-    QtReflMainWindowView.cpp
-    QtReflBatchView.cpp
-    ReflCatalogSearcher.cpp
-    ReflAsciiSaver.cpp
-    IReflAsciiSaver.cpp
-    ReflAutoreduction.cpp
-    ReflFromStdStringMap.cpp
-    ReflMainWindowPresenter.cpp
-    ReflBatchPresenter.cpp
-    ReflNexusMeasurementItemSource.cpp
-    ReflSearchModel.cpp
-    ReflTableSchema.cpp
-    Parse.cpp
-    TransferResults.cpp
-    GetInstrumentParameter.cpp
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
 # IMPORTANT: Include files are required in the MOC_FILES set. Scroll down to find it.
 set ( INC_FILES
+    ${COMMON_INC_FILES}
     ${GUI_INC_FILES}
     ${REDUCTION_INC_FILES}
-    DllConfig.h
-    InstrumentParameters.h
-    IReflAutoreduction.h
-    IReflMainWindowPresenter.h
-    IReflBatchPresenter.h
-    IReflMainWindowView.h
-    IReflBatchView.h
-    IReflMessageHandler.h
-    IReflSearcher.h
-    MeasurementItem.h
     PrecompiledHeader.h
-    QtReflMainWindowView.h
-    QtReflBatchView.h
-    QWidgetGroup.h
-    ReflAutoreduction.h
-    ReflCatalogSearcher.h
-    ReflAsciiSaver.h
-    IReflAsciiSaver.h
-    ReflFromStdStringMap.h
-    ReflMainWindowPresenter.h
-    ReflBatchPresenter.h
-    ReflMeasurementItemSource.h
-    ReflNexusMeasurementItemSource.h
-    ReflSearchModel.h
-    ReflTableSchema.h
-    TransferResults.h
-    GetInstrumentParameter.h
-    ExperimentOptionDefaults.h
-    InstrumentOptionDefaults.h
-    First.h
 )
 
 set ( MOC_FILES
     ${GUI_MOC_FILES}
-    ReflSearchModel.h
-    QtReflMainWindowView.h
-    QtReflBatchView.h
 )
 
 set ( UI_FILES
    ${GUI_UI_FILES}
-   ReflMainWindowWidget.ui
-   ReflBatchWidget.ui
-   ReflWindow.ui
 )
 
 

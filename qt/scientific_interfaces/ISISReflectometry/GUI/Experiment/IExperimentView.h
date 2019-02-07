@@ -7,9 +7,9 @@
 #ifndef MANTID_ISISREFLECTOMETRY_IEXPERIMENTVIEW_H
 #define MANTID_ISISREFLECTOMETRY_IEXPERIMENTVIEW_H
 
-#include "DllConfig.h"
-#include "GetInstrumentParameter.h"
-#include "InstrumentParameters.h"
+#include "Common/DllConfig.h"
+#include "Common/GetInstrumentParameter.h"
+#include "Common/InstrumentParameters.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/OptionsQMap.h"
 #include "MantidQtWidgets/Common/Hint.h"
@@ -21,9 +21,10 @@ namespace CustomInterfaces {
 
 /** @class IExperimentView
 
-IExperimentView is the base view class for the Reflectometry experiment
-settings. It
-contains no QT specific functionality as that should be handled by a subclass.
+    IExperimentView is the base view class for the Reflectometry experiment
+    settings. It
+    contains no QT specific functionality as that should be handled by a
+   subclass.
 */
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL ExperimentViewSubscriber {

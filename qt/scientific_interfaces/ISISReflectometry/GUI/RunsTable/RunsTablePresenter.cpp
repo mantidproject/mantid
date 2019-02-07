@@ -5,9 +5,9 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "RunsTablePresenter.h"
+#include "Common/Map.h"
 #include "MantidQtWidgets/Common/Batch/RowLocation.h"
 #include "MantidQtWidgets/Common/Batch/RowPredicate.h"
-#include "Map.h"
 #include "Reduction/Group.h"
 #include "Reduction/ValidateRow.h"
 #include "RegexRowFilter.h"

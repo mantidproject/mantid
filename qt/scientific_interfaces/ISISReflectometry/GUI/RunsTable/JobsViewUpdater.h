@@ -7,9 +7,9 @@
 
 #ifndef MANTID_ISISREFLECTOMETRY_JOBVIEWUPDATER_H
 #define MANTID_ISISREFLECTOMETRY_JOBVIEWUPDATER_H
+#include "Common/Map.h"
 #include "MantidQtWidgets/Common/Batch/IJobTreeView.h"
 #include "MantidQtWidgets/Common/ParseKeyValueString.h"
-#include "Map.h"
 #include "Reduction/Group.h"
 
 namespace MantidQt {

@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CUSTOMINTERFACES_FLOODCORRECTIONS_H_
 #define MANTID_CUSTOMINTERFACES_FLOODCORRECTIONS_H_
-#include "../DllConfig.h"
+#include "Common/DllConfig.h"
 #include <boost/optional.hpp>
 #include <string>
 namespace MantidQt {

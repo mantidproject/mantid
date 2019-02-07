@@ -7,7 +7,7 @@
 
 #ifndef MANTID_CUSTOMINTERFACES_REDUCTIONJOBS_H_
 #define MANTID_CUSTOMINTERFACES_REDUCTIONJOBS_H_
-#include "../DllConfig.h"
+#include "Common/DllConfig.h"
 #include <boost/optional.hpp>
 
 #include "Group.h"
@@ -18,7 +18,7 @@ namespace CustomInterfaces {
 class MANTIDQT_ISISREFLECTOMETRY_DLL ReductionJobs {
 public:
   ReductionJobs();
-  ReductionJobs(std::vector<Group> groups);
+  explicit ReductionJobs(std::vector<Group> groups);
   Group &appendGroup(Group group);
   Group &insertGroup(Group group, int beforeIndex);
   bool hasGroupWithName(std::string const &groupName) const;

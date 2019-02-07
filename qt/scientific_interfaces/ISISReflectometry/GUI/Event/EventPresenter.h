@@ -7,8 +7,8 @@
 #ifndef MANTID_ISISREFLECTOMETRY_REFLEVENTPRESENTER_H
 #define MANTID_ISISREFLECTOMETRY_REFLEVENTPRESENTER_H
 
-#include "../../DllConfig.h"
 #include "../../Reduction/Slicing.h"
+#include "Common/DllConfig.h"
 #include "IEventPresenter.h"
 #include "IEventView.h"
 
@@ -24,9 +24,9 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL EventPresenter
     : public IEventPresenter,
       public EventViewSubscriber {
 public:
-  EventPresenter(IEventView *view);
+  explicit EventPresenter(IEventView *view);
 
-  void acceptMainPresenter(IReflBatchPresenter *mainPresenter) override;
+  void acceptMainPresenter(IBatchPresenter *mainPresenter) override;
   void reductionPaused() override;
   void reductionResumed() override;
   void autoreductionPaused() override;
@@ -44,7 +44,7 @@ public:
   Slicing const &slicing() const;
 
 private:
-  IReflBatchPresenter *m_mainPresenter;
+  IBatchPresenter *m_mainPresenter;
   Slicing m_slicing;
   void setUniformSlicingByNumberOfSlicesFromView();
   void setUniformSlicingByTimeFromView();

@@ -22,7 +22,7 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL SaveView : public QWidget,
   Q_OBJECT
 public:
   /// Constructor
-  SaveView(QWidget *parent = nullptr);
+  explicit SaveView(QWidget *parent = nullptr);
   /// Destructor
   ~SaveView() override;
 

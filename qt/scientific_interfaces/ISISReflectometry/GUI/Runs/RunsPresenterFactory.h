@@ -6,11 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ISISREFLECTOMETRY_RUNSPRESENTERFACTORY_H
 #define MANTID_ISISREFLECTOMETRY_RUNSPRESENTERFACTORY_H
-#include "../General/IReflSearcher.h"
 #include "../RunsTable/RunsTablePresenterFactory.h"
-#include "DllConfig.h"
+#include "Common/DllConfig.h"
 #include "IRunsPresenter.h"
 #include "IRunsView.h"
+#include "ISearcher.h"
 #include "MantidQtWidgets/Common/ProgressableView.h"
 #include "RunsPresenter.h"
 #include <memory>
@@ -20,14 +20,12 @@ namespace CustomInterfaces {
 
 class RunsPresenterFactory {
 public:
-  RunsPresenterFactory(RunsTablePresenterFactory runsTablePresenterFactory,
-                       double thetaTolerance,
-                       // cppcheck-suppress passedByValue
-                       std::vector<std::string> instruments,
-                       int defaultInstrumentIndex,
-                       IReflMessageHandler *messageHandler,
-                       boost::shared_ptr<IReflAutoreduction> autoreduction,
-                       boost::shared_ptr<IReflSearcher> searcher)
+  RunsPresenterFactory( // cppcheck-suppress passedByValue
+      RunsTablePresenterFactory runsTablePresenterFactory,
+      double thetaTolerance, std::vector<std::string> instruments,
+      int defaultInstrumentIndex, IMessageHandler *messageHandler,
+      boost::shared_ptr<IAutoreduction> autoreduction,
+      boost::shared_ptr<ISearcher> searcher)
       : m_runsTablePresenterFactory(std::move(runsTablePresenterFactory)),
         m_thetaTolerance(std::move(thetaTolerance)),
         m_instruments(std::move(instruments)),
@@ -48,9 +46,9 @@ private:
   double m_thetaTolerance;
   std::vector<std::string> m_instruments;
   int m_defaultInstrumentIndex;
-  IReflMessageHandler *m_messageHandler;
-  boost::shared_ptr<IReflAutoreduction> m_autoreduction;
-  boost::shared_ptr<IReflSearcher> m_searcher;
+  IMessageHandler *m_messageHandler;
+  boost::shared_ptr<IAutoreduction> m_autoreduction;
+  boost::shared_ptr<ISearcher> m_searcher;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

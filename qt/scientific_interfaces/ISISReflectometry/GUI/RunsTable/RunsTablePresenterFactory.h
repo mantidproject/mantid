@@ -7,7 +7,7 @@
 
 #ifndef MANTID_CUSTOMINTERFACES_BATCHPRESENTERFACTORY_H_
 #define MANTID_CUSTOMINTERFACES_BATCHPRESENTERFACTORY_H_
-#include "DllConfig.h"
+#include "Common/DllConfig.h"
 #include "IRunsTablePresenter.h"
 #include <memory>
 #include <string>

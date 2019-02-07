@@ -6,9 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ISISREFLECTOMETRY_PERTHETADEFAULTSTABLEVALIDATOR_H
 #define MANTID_ISISREFLECTOMETRY_PERTHETADEFAULTSTABLEVALIDATOR_H
-#include "../../Reduction/PerThetaDefaults.h"
-#include "../../ValidationResult.h"
+#include "Common/ValidationResult.h"
 #include "PerThetaDefaultsTableValidationError.h"
+#include "Reduction/PerThetaDefaults.h"
 #include <array>
 
 namespace MantidQt {

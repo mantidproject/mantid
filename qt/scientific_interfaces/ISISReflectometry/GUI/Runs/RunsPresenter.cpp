@@ -5,10 +5,11 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "RunsPresenter.h"
-#include "../../IReflBatchPresenter.h"
-#include "../RunsTable/RunsTablePresenter.h"
-#include "IReflMainWindowPresenter.h"
-#include "IReflMessageHandler.h"
+#include "Autoreduction.h"
+#include "CatalogSearcher.h"
+#include "Common/IMessageHandler.h"
+#include "GUI/Batch/IBatchPresenter.h"
+#include "GUI/RunsTable/RunsTablePresenter.h"
 #include "IRunsView.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/CatalogManager.h"
@@ -22,11 +23,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPresenter.h"
 #include "MantidQtWidgets/Common/ParseKeyValueString.h"
 #include "MantidQtWidgets/Common/ProgressPresenter.h"
-#include "ReflAutoreduction.h"
-#include "ReflCatalogSearcher.h"
-#include "ReflFromStdStringMap.h"
-#include "ReflNexusMeasurementItemSource.h"
-#include "ReflSearchModel.h"
+#include "SearchModel.h"
 
 #include <QStringList>
 #include <algorithm>
@@ -61,13 +58,15 @@ namespace CustomInterfaces {
  * @param autoreduction :: [input] The autoreduction implementation
  * @param searcher :: [input] The search implementation
  */
-RunsPresenter::RunsPresenter(
-    IRunsView *mainView, ProgressableView *progressableView,
-    RunsTablePresenterFactory makeRunsTablePresenter, double thetaTolerance,
-    std::vector<std::string> const &instruments, int defaultInstrumentIndex,
-    IReflMessageHandler *messageHandler,
-    boost::shared_ptr<IReflAutoreduction> autoreduction,
-    boost::shared_ptr<IReflSearcher> searcher)
+RunsPresenter::RunsPresenter(IRunsView *mainView,
+                             ProgressableView *progressableView,
+                             RunsTablePresenterFactory makeRunsTablePresenter,
+                             double thetaTolerance,
+                             std::vector<std::string> const &instruments,
+                             int defaultInstrumentIndex,
+                             IMessageHandler *messageHandler,
+                             boost::shared_ptr<IAutoreduction> autoreduction,
+                             boost::shared_ptr<ISearcher> searcher)
     : m_autoreduction(autoreduction), m_view(mainView),
       m_progressView(progressableView),
       m_makeRunsTablePresenter(std::move(makeRunsTablePresenter)),
@@ -82,11 +81,11 @@ RunsPresenter::RunsPresenter(
   m_tablePresenter->acceptMainPresenter(this);
 
   if (!m_autoreduction)
-    m_autoreduction.reset(new ReflAutoreduction());
+    m_autoreduction.reset(new Autoreduction());
 
-  // If we don't have a searcher yet, use ReflCatalogSearcher
+  // If we don't have a searcher yet, use CatalogSearcher
   if (!m_searcher)
-    m_searcher.reset(new ReflCatalogSearcher());
+    m_searcher.reset(new CatalogSearcher());
 
   updateViewWhenMonitorStopped();
 }
@@ -99,7 +98,7 @@ RunsPresenter::~RunsPresenter() {
 /** Accept a main presenter
  * @param mainPresenter :: [input] A main presenter
  */
-void RunsPresenter::acceptMainPresenter(IReflBatchPresenter *mainPresenter) {
+void RunsPresenter::acceptMainPresenter(IBatchPresenter *mainPresenter) {
   m_mainPresenter = mainPresenter;
   // Must do this after setting main presenter or notifications don't get
   // through
@@ -116,7 +115,7 @@ void RunsPresenter::acceptMainPresenter(IReflBatchPresenter *mainPresenter) {
 }
 
 /**
-Used by the view to tell the presenter something has changed
+   Used by the view to tell the presenter something has changed
 */
 
 void RunsPresenter::notifySearch() {
@@ -225,7 +224,7 @@ bool RunsPresenter::search() {
   if (searchString.empty())
     return false;
 
-  // This is breaking the abstraction provided by IReflSearcher, but provides a
+  // This is breaking the abstraction provided by ISearcher, but provides a
   // nice usability win
   // If we're not logged into a catalog, prompt the user to do so
   if (CatalogManager::Instance().getActiveSessions().empty()) {
@@ -283,8 +282,8 @@ void RunsPresenter::populateSearch(IAlgorithm_sptr searchAlg) {
     m_searchModel->addDataFromTable(results, m_view->getSearchInstrument());
   } else {
     // Create a new search results list and display it on the view
-    m_searchModel = boost::make_shared<ReflSearchModel>(
-        results, m_view->getSearchInstrument());
+    m_searchModel =
+        boost::make_shared<SearchModel>(results, m_view->getSearchInstrument());
     m_view->showSearch(m_searchModel);
   }
 }

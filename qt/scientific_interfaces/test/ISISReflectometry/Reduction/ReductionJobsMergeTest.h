@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CUSTOMINTERFACES_REDUCTIONJOBSMERGETEST_H_
 #define MANTID_CUSTOMINTERFACES_REDUCTIONJOBSMERGETEST_H_
-#include "../../../ISISReflectometry/Reduction/ReductionJobs.h"
-#include "../../../ISISReflectometry/ZipRange.h"
+#include "Common/ZipRange.h"
+#include "Reduction/ReductionJobs.h"
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 

@@ -1,6 +1,7 @@
 set ( INSTRUMENT_SRC_FILES
   InstrumentView.cpp
   InstrumentPresenter.cpp
+  InstrumentOptionDefaults.cpp
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
@@ -11,6 +12,7 @@ set ( INSTRUMENT_INC_FILES
   IInstrumentView.h
   InstrumentView.h
   InstrumentPresenter.h
+  InstrumentOptionDefaults.h
 )
 
 set ( INSTRUMENT_MOC_FILES

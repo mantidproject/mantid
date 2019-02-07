@@ -7,7 +7,7 @@
 #ifndef MANTID_CUSTOMINTERFACES_PROCESSINGINSTRUCTIONS_H_
 #define MANTID_CUSTOMINTERFACES_PROCESSINGINSTRUCTIONS_H_
 
-#include "../DllConfig.h"
+#include "Common/DllConfig.h"
 #include <boost/optional.hpp>
 namespace MantidQt {
 namespace CustomInterfaces {

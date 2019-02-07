@@ -5,10 +5,10 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ExperimentPresenter.h"
-#include "../../IReflBatchPresenter.h"
-#include "../../Reduction/ParseReflectometryStrings.h"
-#include "../../Reduction/ValidatePerThetaDefaults.h"
+#include "GUI/Batch/IBatchPresenter.h"
 #include "PerThetaDefaultsTableValidator.h"
+#include "Reduction/ParseReflectometryStrings.h"
+#include "Reduction/ValidatePerThetaDefaults.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -21,8 +21,7 @@ ExperimentPresenter::ExperimentPresenter(IExperimentView *view,
   m_view->subscribe(this);
 }
 
-void ExperimentPresenter::acceptMainPresenter(
-    IReflBatchPresenter *mainPresenter) {
+void ExperimentPresenter::acceptMainPresenter(IBatchPresenter *mainPresenter) {
   m_mainPresenter = mainPresenter;
   notifySettingsChanged();
 }

@@ -5,10 +5,10 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "EventPresenter.h"
-#include "../../IReflBatchPresenter.h"
+#include "Common/Parse.h"
+#include "GUI/Batch/IBatchPresenter.h"
 #include "IEventPresenter.h"
 #include "IEventView.h"
-#include "Parse.h"
 #include <boost/algorithm/string.hpp>
 
 namespace MantidQt {
@@ -22,7 +22,7 @@ EventPresenter::EventPresenter(IEventView *view)
   m_view->subscribe(this);
 }
 
-void EventPresenter::acceptMainPresenter(IReflBatchPresenter *mainPresenter) {
+void EventPresenter::acceptMainPresenter(IBatchPresenter *mainPresenter) {
   m_mainPresenter = mainPresenter;
 }
 

@@ -7,7 +7,7 @@
 #ifndef MANTID_ISISREFLECTOMETRY_IREFLEVENTPRESENTER_H
 #define MANTID_ISISREFLECTOMETRY_IREFLEVENTPRESENTER_H
 
-#include "../../IReflBatchPresenter.h"
+#include "GUI/Batch/IBatchPresenter.h"
 #include <string>
 
 namespace MantidQt {
@@ -15,14 +15,14 @@ namespace CustomInterfaces {
 
 /** @class IEventPresenter
 
-IReflEventPresenter is an interface which defines the functions that need
+IEventPresenter is an interface which defines the functions that need
 to be implemented by a concrete 'Event' presenter
 */
 
 class IEventPresenter {
 public:
   virtual ~IEventPresenter() = default;
-  virtual void acceptMainPresenter(IReflBatchPresenter *mainPresenter) = 0;
+  virtual void acceptMainPresenter(IBatchPresenter *mainPresenter) = 0;
   virtual void reductionPaused() = 0;
   virtual void reductionResumed() = 0;
   virtual void autoreductionPaused() = 0;

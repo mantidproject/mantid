@@ -7,7 +7,7 @@
 
 #ifndef MANTID_CUSTOMINTERFACES_SLICING_H_
 #define MANTID_CUSTOMINTERFACES_SLICING_H_
-#include "../DllConfig.h"
+#include "Common/DllConfig.h"
 #include <boost/variant.hpp>
 #include <ostream>
 #include <string>

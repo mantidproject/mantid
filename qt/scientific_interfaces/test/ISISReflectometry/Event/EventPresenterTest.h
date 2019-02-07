@@ -8,7 +8,7 @@
 #define MANTID_CUSTOMINTERFACES_REFLEVENTPRESENTERTEST_H_
 
 #include "../../../ISISReflectometry/GUI/Event/EventPresenter.h"
-#include "../../ReflMockObjects.h"
+#include "../ReflMockObjects.h"
 #include "MockEventView.h"
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
@@ -222,7 +222,7 @@ public:
 
 private:
   NiceMock<MockEventView> m_view;
-  NiceMock<MockReflBatchPresenter> m_mainPresenter;
+  NiceMock<MockBatchPresenter> m_mainPresenter;
 
   EventPresenter makePresenter() {
     auto presenter = EventPresenter(&m_view);

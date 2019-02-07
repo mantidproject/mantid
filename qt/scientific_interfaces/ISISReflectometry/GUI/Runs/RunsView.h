@@ -7,7 +7,7 @@
 #ifndef MANTID_ISISREFLECTOMETRY_RUNSTABVIEW_H_
 #define MANTID_ISISREFLECTOMETRY_RUNSTABVIEW_H_
 
-#include "DllConfig.h"
+#include "Common/DllConfig.h"
 #include "GUI/RunsTable/RunsTableView.h"
 #include "IRunsView.h"
 #include "MantidKernel/System.h"
@@ -34,7 +34,7 @@ class AlgorithmRunner;
 namespace CustomInterfaces {
 
 // Forward decs
-class ReflSearchModel;
+class SearchModel;
 
 using MantidWidgets::SlitCalculator;
 namespace DataProcessor = MantidWidgets::DataProcessor;
@@ -53,7 +53,7 @@ public:
   IRunsTableView *table() const override;
 
   // Connect the model
-  void showSearch(boost::shared_ptr<ReflSearchModel> model) override;
+  void showSearch(boost::shared_ptr<SearchModel> model) override;
 
   // Setter methods
   void setInstrumentList(const std::vector<std::string> &instruments,
@@ -112,7 +112,7 @@ private:
 
   RunsViewSubscriber *m_notifyee;
 
-  boost::shared_ptr<ReflSearchModel> m_searchModel;
+  boost::shared_ptr<SearchModel> m_searchModel;
   std::vector<std::unique_ptr<DataProcessor::QtCommandAdapter>> m_commands;
 
   // the interface (uses actions owned by m_commands)

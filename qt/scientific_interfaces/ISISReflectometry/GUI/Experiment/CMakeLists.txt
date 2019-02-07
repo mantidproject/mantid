@@ -1,9 +1,11 @@
 set ( EXPERIMENT_SRC_FILES
   ExperimentView.cpp
   ExperimentPresenter.cpp
+  ExperimentOptionDefaults.cpp
   InvalidDefaultsError.cpp
   PerThetaDefaultsTableValidationError.cpp
   PerThetaDefaultsTableValidator.cpp
+  ExperimentOptionDefaults.h
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio

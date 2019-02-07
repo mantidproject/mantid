@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CUSTOMINTERFACES_TRANSMISSIONRUNPAIR_H_
 #define MANTID_CUSTOMINTERFACES_TRANSMISSIONRUNPAIR_H_
-#include "../DllConfig.h"
+#include "Common/DllConfig.h"
 #include <string>
 #include <utility>
 

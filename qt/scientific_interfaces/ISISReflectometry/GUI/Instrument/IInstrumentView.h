@@ -7,8 +7,8 @@
 #ifndef MANTID_ISISREFLECTOMETRY_IINSTRUMENTVIEW_H
 #define MANTID_ISISREFLECTOMETRY_IINSTRUMENTVIEW_H
 
-#include "DllConfig.h"
-#include "InstrumentParameters.h"
+#include "Common/DllConfig.h"
+#include "Common/InstrumentParameters.h"
 #include "MantidAPI/Algorithm.h"
 
 namespace MantidQt {

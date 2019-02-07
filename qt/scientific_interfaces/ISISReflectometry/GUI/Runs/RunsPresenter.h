@@ -7,7 +7,7 @@
 #ifndef MANTID_ISISREFLECTOMETRY_RUNSPRESENTER_H
 #define MANTID_ISISREFLECTOMETRY_RUNSPRESENTER_H
 
-#include "DllConfig.h"
+#include "Common/DllConfig.h"
 #include "GUI/Runs/IRunsPresenter.h"
 #include "GUI/Runs/IRunsView.h"
 #include "GUI/RunsTable/IRunsTablePresenter.h"
@@ -29,10 +29,10 @@ class ProgressableView;
 namespace CustomInterfaces {
 
 // Forward decs
-class IReflAutoreduction;
-class IReflMessageHandler;
-class IReflSearcher;
-class ReflSearchModel;
+class IAutoreduction;
+class IMessageHandler;
+class ISearcher;
+class SearchModel;
 
 using MantidWidgets::ProgressableView;
 
@@ -52,15 +52,14 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL RunsPresenter
       public RunsViewSubscriber,
       public Mantid::API::AlgorithmObserver {
 public:
-  RunsPresenter(IRunsView *mainView, ProgressableView *progressView,
-                RunsTablePresenterFactory makeRunsTablePresenter,
-                double thetaTolerance,
-                std::vector<std::string> const &instruments,
-                int defaultInstrumentIndex, IReflMessageHandler *messageHandler,
-                boost::shared_ptr<IReflAutoreduction> autoreduction =
-                    boost::shared_ptr<IReflAutoreduction>(),
-                boost::shared_ptr<IReflSearcher> searcher =
-                    boost::shared_ptr<IReflSearcher>());
+  RunsPresenter(
+      IRunsView *mainView, ProgressableView *progressView,
+      RunsTablePresenterFactory makeRunsTablePresenter, double thetaTolerance,
+      std::vector<std::string> const &instruments, int defaultInstrumentIndex,
+      IMessageHandler *messageHandler,
+      boost::shared_ptr<IAutoreduction> autoreduction =
+          boost::shared_ptr<IAutoreduction>(),
+      boost::shared_ptr<ISearcher> searcher = boost::shared_ptr<ISearcher>());
   RunsPresenter(RunsPresenter const &) = delete;
   ~RunsPresenter() override;
   RunsPresenter const &operator=(RunsPresenter const &) = delete;
@@ -69,7 +68,7 @@ public:
   RunsPresenter &operator=(RunsPresenter &&) = default;
 
   // IRunsPresenter overrides
-  void acceptMainPresenter(IReflBatchPresenter *mainPresenter) override;
+  void acceptMainPresenter(IBatchPresenter *mainPresenter) override;
   bool isProcessing() const override;
   bool isAutoreducing() const override;
   void notifyInstrumentChanged(std::string const &instrumentName) override;
@@ -97,9 +96,9 @@ public:
 protected:
   IRunsTablePresenter *tablePresenter() const;
   /// Information about the autoreduction process
-  boost::shared_ptr<IReflAutoreduction> m_autoreduction;
+  boost::shared_ptr<IAutoreduction> m_autoreduction;
   /// The search model
-  boost::shared_ptr<ReflSearchModel> m_searchModel;
+  boost::shared_ptr<SearchModel> m_searchModel;
   /// The current transfer method
   std::string m_currentTransferMethod;
 
@@ -112,11 +111,11 @@ private:
   /// The data processor presenters stored in a vector
   std::unique_ptr<IRunsTablePresenter> m_tablePresenter;
   /// The main presenter
-  IReflBatchPresenter *m_mainPresenter;
+  IBatchPresenter *m_mainPresenter;
   /// The message reporting implementation
-  IReflMessageHandler *m_messageHandler;
+  IMessageHandler *m_messageHandler;
   /// The search implementation
-  boost::shared_ptr<IReflSearcher> m_searcher;
+  boost::shared_ptr<ISearcher> m_searcher;
   /// The list of instruments
   std::vector<std::string> m_instruments;
   /// The default index in the instrument list

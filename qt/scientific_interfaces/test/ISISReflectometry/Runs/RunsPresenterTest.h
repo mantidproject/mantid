@@ -8,7 +8,7 @@
 #define MANTID_CUSTOMINTERFACES_RUNSPRESENTERTEST_H
 
 #include "../../../ISISReflectometry/GUI/Runs/RunsPresenter.h"
-#include "../../ReflMockObjects.h"
+#include "../ReflMockObjects.h"
 #include "../RunsTable/MockRunsTablePresenterFactory.h"
 #include "../RunsTable/MockRunsTableView.h"
 #include "MantidKernel/ConfigService.h"
@@ -41,8 +41,7 @@ public:
       : m_thetaTolerance(0.01), m_instruments{"INTER", "SURF", "CRISP",
                                               "POLREF", "OFFSPEC"},
         m_view(), m_runsTableView(), m_progressView(), m_messageHandler(),
-        m_autoreduction(new MockReflAutoreduction),
-        m_searcher(new MockReflSearcher) {
+        m_autoreduction(new MockAutoreduction), m_searcher(new MockSearcher) {
     ON_CALL(m_view, table()).WillByDefault(Return(&m_runsTableView));
     ON_CALL(m_runsTableView, jobs()).WillByDefault(ReturnRef(m_jobs));
   }
@@ -266,16 +265,14 @@ private:
     friend class RunsPresenterTest;
 
   public:
-    RunsPresenterFriend(IRunsView *mainView, ProgressableView *progressView,
-                        RunsTablePresenterFactory makeRunsTablePresenter,
-                        double thetaTolerance,
-                        std::vector<std::string> const &instruments,
-                        int defaultInstrumentIndex,
-                        IReflMessageHandler *messageHandler,
-                        boost::shared_ptr<IReflAutoreduction> autoreduction =
-                            boost::shared_ptr<IReflAutoreduction>(),
-                        boost::shared_ptr<IReflSearcher> searcher =
-                            boost::shared_ptr<IReflSearcher>())
+    RunsPresenterFriend(
+        IRunsView *mainView, ProgressableView *progressView,
+        RunsTablePresenterFactory makeRunsTablePresenter, double thetaTolerance,
+        std::vector<std::string> const &instruments, int defaultInstrumentIndex,
+        IMessageHandler *messageHandler,
+        boost::shared_ptr<IAutoreduction> autoreduction =
+            boost::shared_ptr<IAutoreduction>(),
+        boost::shared_ptr<ISearcher> searcher = boost::shared_ptr<ISearcher>())
         : RunsPresenter(mainView, progressView, makeRunsTablePresenter,
                         thetaTolerance, instruments, defaultInstrumentIndex,
                         messageHandler, autoreduction, searcher) {}
@@ -343,7 +340,7 @@ private:
         .WillOnce(Return(selectedRows));
     // Set up a mock search model in the presenter to return something
     // sensible for getRowData
-    auto searchModel = boost::make_shared<MockReflSearchModel>(
+    auto searchModel = boost::make_shared<MockSearchModel>(
         "13460", "my title th=0.5", "my location");
     presenter.m_searchModel = searchModel;
   }
@@ -426,11 +423,11 @@ private:
   std::vector<std::string> m_instruments;
   NiceMock<MockRunsView> m_view;
   NiceMock<MockRunsTableView> m_runsTableView;
-  NiceMock<MockReflBatchPresenter> m_mainPresenter;
+  NiceMock<MockBatchPresenter> m_mainPresenter;
   NiceMock<MockProgressableView> m_progressView;
   NiceMock<MockMessageHandler> m_messageHandler;
-  boost::shared_ptr<MockReflAutoreduction> m_autoreduction;
-  boost::shared_ptr<MockReflSearcher> m_searcher;
+  boost::shared_ptr<MockAutoreduction> m_autoreduction;
+  boost::shared_ptr<MockSearcher> m_searcher;
   NiceMock<MantidQt::MantidWidgets::Batch::MockJobTreeView> m_jobs;
 };
 

@@ -8,7 +8,7 @@
 #define MANTID_CUSTOMINTERFACES_INSTRUMENTPRESENTERTEST_H_
 
 #include "../../../ISISReflectometry/GUI/Instrument/InstrumentPresenter.h"
-#include "../../ReflMockObjects.h"
+#include "../ReflMockObjects.h"
 #include "MockInstrumentView.h"
 
 #include <cxxtest/TestSuite.h>
@@ -225,7 +225,7 @@ public:
 
 private:
   NiceMock<MockInstrumentView> m_view;
-  NiceMock<MockReflBatchPresenter> m_mainPresenter;
+  NiceMock<MockBatchPresenter> m_mainPresenter;
 
   Instrument makeModel() {
     auto wavelengthRange = RangeInLambda(0.0, 0.0);

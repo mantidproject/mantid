@@ -7,7 +7,7 @@
 #ifndef MANTID_ISISREFLECTOMETRY_EXPERIMENTPRESENTERFACTORY_H
 #define MANTID_ISISREFLECTOMETRY_EXPERIMENTPRESENTERFACTORY_H
 #include "../../Reduction/Experiment.h"
-#include "DllConfig.h"
+#include "Common/DllConfig.h"
 #include "ExperimentPresenter.h"
 #include "IExperimentPresenter.h"
 #include "IExperimentView.h"

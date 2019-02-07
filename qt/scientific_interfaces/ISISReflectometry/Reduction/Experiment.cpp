@@ -17,7 +17,9 @@ Experiment::Experiment(AnalysisMode analysisMode, ReductionType reductionType,
                        PolarizationCorrections polarizationCorrections,
                        FloodCorrections floodCorrections,
                        boost::optional<RangeInLambda> transmissionRunRange,
+                       // cppcheck-suppress passedByValue
                        std::map<std::string, std::string> stitchParameters,
+                       // cppcheck-suppress passedByValue
                        std::vector<PerThetaDefaults> perThetaDefaults)
     : m_analysisMode(analysisMode), m_reductionType(reductionType),
       m_summationType(summationType), m_includePartialBins(includePartialBins),

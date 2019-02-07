@@ -5,8 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "SavePresenter.h"
-#include "../../IReflBatchPresenter.h"
-#include "../../IReflMainWindowPresenter.h"
+#include "GUI/Batch/IBatchPresenter.h"
 #include "ISaveView.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -30,13 +29,13 @@ using namespace Mantid::API;
  * @param view :: The view we are handling
  */
 SavePresenter::SavePresenter(ISaveView *view,
-                             std::unique_ptr<IReflAsciiSaver> saver)
+                             std::unique_ptr<IAsciiSaver> saver)
     : m_view(view), m_saver(std::move(saver)), m_shouldAutosave(false) {
 
   m_view->subscribe(this);
 }
 
-void SavePresenter::acceptMainPresenter(IReflBatchPresenter *mainPresenter) {
+void SavePresenter::acceptMainPresenter(IBatchPresenter *mainPresenter) {
   m_mainPresenter = mainPresenter;
 }
 

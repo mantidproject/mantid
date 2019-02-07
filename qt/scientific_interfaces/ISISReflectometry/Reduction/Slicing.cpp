@@ -5,7 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "Slicing.h"
-#include "../multivisitors.hpp"
+#include "Common/multivisitors.hpp"
 // equivalent to
 //         #include <boost/variant/multivisitors.hpp>
 // available in boost 1.54+ - required for RHEL7.
@@ -58,7 +58,8 @@ std::ostream &operator<<(std::ostream &os,
   return (os << slicing.numberOfSlices() << " even slices");
 }
 
-CustomSlicingByList::CustomSlicingByList(std::vector<double> sliceTimes)
+CustomSlicingByList::CustomSlicingByList( // cppcheck-suppress passedByValue
+    std::vector<double> sliceTimes)
     : m_sliceTimes(std::move(sliceTimes)) {}
 
 std::vector<double> const &CustomSlicingByList::sliceTimes() const {
@@ -88,8 +89,8 @@ std::ostream &operator<<(std::ostream &os, InvalidSlicing const &) {
   return (os << "invalid slices");
 }
 
-SlicingByEventLog::SlicingByEventLog(std::vector<double> sliceAtValues,
-                                     std::string blockValue)
+SlicingByEventLog::SlicingByEventLog( // cppcheck-suppress passedByValue
+    std::vector<double> sliceAtValues, std::string blockValue)
     : m_sliceAtValues(std::move(sliceAtValues)),
       m_blockName(std::move(blockValue)) {}
 

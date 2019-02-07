@@ -5,7 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "InstrumentPresenter.h"
-#include "IReflBatchPresenter.h"
+#include "GUI/Batch/IBatchPresenter.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -26,8 +26,7 @@ InstrumentPresenter::InstrumentPresenter(IInstrumentView *view,
   m_view->subscribe(this);
 }
 
-void InstrumentPresenter::acceptMainPresenter(
-    IReflBatchPresenter *mainPresenter) {
+void InstrumentPresenter::acceptMainPresenter(IBatchPresenter *mainPresenter) {
   m_mainPresenter = mainPresenter;
   notifySettingsChanged();
 }

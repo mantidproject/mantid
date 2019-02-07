@@ -8,7 +8,7 @@
 #ifndef MANTID_CUSTOMINTERFACES_REDUCTIONWORKSPACES_H_
 #define MANTID_CUSTOMINTERFACES_REDUCTIONWORKSPACES_H_
 
-#include "../DllConfig.h"
+#include "Common/DllConfig.h"
 #include <boost/algorithm/string/join.hpp>
 #include <boost/optional.hpp>
 #include <string>

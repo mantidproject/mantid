@@ -5,8 +5,8 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ReductionJobs.h"
-#include "../IndexOf.h"
-#include "../Map.h"
+#include "Common/IndexOf.h"
+#include "Common/Map.h"
 #include "MantidQtWidgets/Common/Batch/AssertOrThrow.h"
 #include <iostream>
 namespace MantidQt {
@@ -23,7 +23,8 @@ Group &findOrMakeGroupWithName(ReductionJobs &jobs,
 } // unnamed
 } // namespace
 
-ReductionJobs::ReductionJobs(std::vector<Group> groups)
+ReductionJobs::ReductionJobs( // cppcheck-suppress passedByValue
+    std::vector<Group> groups)
     : m_groups(std::move(groups)), m_groupNameSuffix(1) {}
 
 ReductionJobs::ReductionJobs() : m_groupNameSuffix(1) {}

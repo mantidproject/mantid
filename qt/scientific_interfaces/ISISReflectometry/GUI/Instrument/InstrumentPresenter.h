@@ -7,8 +7,8 @@
 #ifndef MANTID_ISISREFLECTOMETRY_INSTRUMENTPRESENTER_H
 #define MANTID_ISISREFLECTOMETRY_INSTRUMENTPRESENTER_H
 
-#include "../../DllConfig.h"
 #include "../../Reduction/Instrument.h"
+#include "Common/DllConfig.h"
 #include "IInstrumentPresenter.h"
 #include "IInstrumentView.h"
 #include <boost/optional.hpp>
@@ -30,7 +30,7 @@ public:
   Instrument const &instrument() const;
 
   // IInstrumentPresenver overrides
-  void acceptMainPresenter(IReflBatchPresenter *mainPresenter) override;
+  void acceptMainPresenter(IBatchPresenter *mainPresenter) override;
   void reductionPaused() override;
   void reductionResumed() override;
   void autoreductionPaused() override;
@@ -43,7 +43,7 @@ public:
 private:
   IInstrumentView *m_view;
   Instrument m_model;
-  IReflBatchPresenter *m_mainPresenter;
+  IBatchPresenter *m_mainPresenter;
 
   boost::optional<RangeInLambda> wavelengthRangeFromView();
   boost::optional<RangeInLambda> monitorBackgroundRangeFromView();

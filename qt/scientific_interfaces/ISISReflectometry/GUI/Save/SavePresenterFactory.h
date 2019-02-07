@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ISISREFLECTOMETRY_SAVEPRESENTERFACTORY_H
 #define MANTID_ISISREFLECTOMETRY_SAVEPRESENTERFACTORY_H
-#include "../../DllConfig.h"
-#include "../../ReflAsciiSaver.h"
+#include "AsciiSaver.h"
+#include "Common/DllConfig.h"
 #include "ISavePresenter.h"
 #include "ISaveView.h"
 #include "SavePresenter.h"
@@ -20,7 +20,7 @@ class SavePresenterFactory {
 public:
   std::unique_ptr<ISavePresenter> make(ISaveView *view) {
     return Mantid::Kernel::make_unique<SavePresenter>(
-        view, Mantid::Kernel::make_unique<ReflAsciiSaver>());
+        view, Mantid::Kernel::make_unique<AsciiSaver>());
   }
 };
 } // namespace CustomInterfaces

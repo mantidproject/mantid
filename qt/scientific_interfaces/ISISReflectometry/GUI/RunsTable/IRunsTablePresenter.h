@@ -7,7 +7,7 @@
 #ifndef MANTID_ISISREFLECTOMETRY_IREFLRUNSTABLEPRESENTER_H
 #define MANTID_ISISREFLECTOMETRY_IREFLRUNSTABLEPRESENTER_H
 
-#include "IReflBatchPresenter.h"
+#include "GUI/Batch/IBatchPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/OptionsMap.h"
 
 namespace MantidQt {
