@@ -120,7 +120,7 @@ class LoadRunWidgetIncrementDecrementMultipleFileModeTest(unittest.TestCase):
 
         six.assertCountEqual(self, self.model.loaded_filenames, ["file1.nxs", "file2.nxs", "file3.nxs", "file4.nxs"])
         six.assertCountEqual(self, self.model.loaded_workspaces, [[1], [2], [3], [4]])
-        six.assertCountEqual(self, self.model.loaded_runs, [1, 2, 3, 4])
+        six.assertCountEqual(self, self.model.loaded_runs, [[1], [2], [3], [4]])
 
         self.assertEqual(self.view.get_run_edit_text(), "1-4")
 
@@ -134,7 +134,7 @@ class LoadRunWidgetIncrementDecrementMultipleFileModeTest(unittest.TestCase):
 
         six.assertCountEqual(self, self.model.loaded_filenames, ["file2.nxs", "file3.nxs", "file4.nxs", "file5.nxs"])
         six.assertCountEqual(self, self.model.loaded_workspaces, [[2], [3], [4], [5]])
-        six.assertCountEqual(self, self.model.loaded_runs, [2, 3, 4, 5])
+        six.assertCountEqual(self, self.model.loaded_runs, [[2], [3], [4], [5]])
 
         self.assertEqual(self.view.get_run_edit_text(), "2-5")
 
@@ -149,7 +149,7 @@ class LoadRunWidgetIncrementDecrementMultipleFileModeTest(unittest.TestCase):
 
         six.assertCountEqual(self, self.model.loaded_filenames, ["file2.nxs", "file3.nxs", "file4.nxs"])
         six.assertCountEqual(self, self.model.loaded_workspaces, [[2], [3], [4]])
-        six.assertCountEqual(self, self.model.loaded_runs, [2, 3, 4])
+        six.assertCountEqual(self, self.model.loaded_runs, [[2], [3], [4]])
 
         self.assertEqual(self.view.get_run_edit_text(), "2-4")
 
@@ -164,7 +164,7 @@ class LoadRunWidgetIncrementDecrementMultipleFileModeTest(unittest.TestCase):
 
         six.assertCountEqual(self, self.model.loaded_filenames, ["file2.nxs", "file3.nxs", "file4.nxs"])
         six.assertCountEqual(self, self.model.loaded_workspaces, [[2], [3], [4]])
-        six.assertCountEqual(self, self.model.loaded_runs, [2, 3, 4])
+        six.assertCountEqual(self, self.model.loaded_runs, [[2], [3], [4]])
 
         self.assertEqual(self.view.get_run_edit_text(), "2-4")
 
