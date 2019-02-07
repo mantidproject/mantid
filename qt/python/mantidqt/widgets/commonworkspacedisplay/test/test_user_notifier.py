@@ -33,9 +33,10 @@ class UserNotifierTest(unittest.TestCase):
             self.user_notifier.show_mouse_toast(message)
             if sys.platform == "win32":
                 mock_get_mouse_position.assert_called_once_with()
+                mock_showText.assert_called_once_with(mouse_position, message)
             else:
+                self.assertNotCalled(mock_showText)
                 self.assertNotCalled(mock_get_mouse_position)
-            mock_showText.assert_called_once_with(mouse_position, message)
 
     @patch('qtpy.QtWidgets.QToolTip.showText')
     def test_no_mouse_toast_if_platform_not_windows(self, mock_showText):
