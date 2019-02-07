@@ -7,13 +7,13 @@
 from __future__ import (absolute_import, division, print_function)
 
 from mantid.api import mtd, AlgorithmFactory, DistributedDataProcessorAlgorithm, ITableWorkspaceProperty, \
-    MatrixWorkspaceProperty, MultipleFileProperty, PropertyMode, AnalysisDataService
+    MatrixWorkspaceProperty, MultipleFileProperty, PropertyMode
 from mantid.kernel import Direction
-from mantid.simpleapi import AlignAndFocusPowder, CompressEvents, ConvertUnits, CopyLogs, CreateCacheFilename, \
-    DeleteWorkspace, DetermineChunking, Divide, EditInstrumentGeometry, FilterBadPulses, LoadNexusProcessed, \
-    PDDetermineCharacterizations, Plus, RemoveLogs, RenameWorkspace, SaveNexusProcessed, LoadDiffCal, \
-    LoadDetectorsGroupingFile
+from mantid.simpleapi import AlignAndFocusPowder, CompressEvents, ConvertDiffCal, ConvertUnits, CopyLogs, \
+    CreateCacheFilename, DeleteWorkspace, DetermineChunking, Divide, EditInstrumentGeometry, FilterBadPulses, \
+    LoadDiffCal, LoadNexusProcessed, PDDetermineCharacterizations, Plus, RemoveLogs, RenameWorkspace, SaveNexusProcessed
 import os
+import numpy as np
 
 EXTENSIONS_NXS = ["_event.nxs", ".nxs.h5"]
 PROPS_FOR_INSTR = ["PrimaryFlightPath", "SpectrumIDs", "L2", "Polar", "Azimuthal"]
@@ -193,6 +193,9 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
         else:
             tempname = wkspname  # assume it is already loaded
 
+        # some bit of data has been loaded so use it to get the characterizations
+        self.__setupCalibration(tempname)
+
         # put together argument list
         args = dict(ReductionProperties=self.getProperty('ReductionProperties').valueAsStr)
         for name in PROPS_FOR_PD_CHARACTER:
@@ -218,31 +221,27 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
 
         propman_properties = ['bank', 'd_min', 'd_max', 'tof_min', 'tof_max', 'wavelength_min', 'wavelength_max']
         alignandfocusargs = []
+        # calculate general properties
         for name in PROPS_FOR_ALIGN:
+            # skip these because this has been reworked to only worry about information in workspaces
+            if name in (CAL_FILE, GROUP_FILE, CAL_WKSP, GRP_WKSP, MASK_WKSP):
+                continue
             prop = self.getProperty(name)
             if name == 'PreserveEvents' or not prop.isDefault:
-                # TODO need unique identifier for absorption workspace
                 value = prop.valueAsStr  # default representation for everything
-                if name == 'GroupFilename':
-                    if not self.getProperty('GroupingWorkspace').isDefault:
-                        # do not add this property to the cache calculation
-                        continue
-                    if prop.valueAsStr.split('.')[1] == 'cal':
-                        __groups = LoadDiffCal(InstrumentName=self.instr, Filename=prop.valueAsStr,
-                                               MakeCalWorkspace=False,
-                                               WorkspaceName="__groups", MakeMaskWorkspace=False)
-                    else:
-                        __groups = LoadDetectorsGroupingFile(InputFile=prop.valueAsStr)
-                    value = ','.join(__groups.extractY().astype(int).astype(str).ravel())
-                    DeleteWorkspace(Workspace=__groups)
-                elif name == 'GroupingWorkspace':
-                    __groups = mtd[prop.valueAsStr]
-                    value = ','.join(__groups.extractY().astype(int).astype(str).ravel())
-                elif name == 'MaskWorkspace':
-                    __mask = mtd[prop.valueAsStr]
-                    value = ','.join([str(item) for item in __mask.getMaskedDetectors()])
-                # add the calculated value
+                if name == 'AbsorptionWorkspace':  # TODO need better unique identifier for absorption workspace
+                    value = str(mtd[self.__grpWksp].extractY().sum())
                 alignandfocusargs.append('%s=%s' % (name, value))
+        # special calculations for group and mask - calibration hasn't been customized yet
+        if self.__calWksp:
+            value = str(np.sum(mtd[self.__calWksp].column('difc')))  # less false collisions than the workspace name
+            alignandfocusargs.append('%s=%s' % (CAL_WKSP, value))
+        if self.__grpWksp:
+            value = ','.join(mtd[self.__grpWksp].extractY().astype(int).astype(str).ravel())
+            alignandfocusargs.append('%s=%s' % (GRP_WKSP, value))
+        if self.__mskWksp:
+            value = ','.join([str(item) for item in mtd[self.__mskWksp].getMaskedDetectors()])
+            alignandfocusargs.append('%s=%s' % (MASK_WKSP, value))
 
         alignandfocusargs += additional_props or []
         return CreateCacheFilename(Prefix=wkspname,
@@ -280,6 +279,8 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
                 else:
                     loader.setProperty(key, value)
             loader.execute()
+            if j == 0:
+                self.__setupCalibration(chunkname)
 
             # copy the necessary logs onto the workspace
             if canSkipLoadingLogs:
@@ -415,16 +416,72 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
             # not compressing unfocussed workspace because it is in d-spacing
             # and is likely to be from a different part of the instrument
 
+    def __setupCalibration(self, wksp):
+        '''Convert whatever calibration/grouping/masking into workspaces that will be passed down'''
+        if self.haveDeterminedCalibration:
+            return  # nothing to do
+        self.haveDeterminedCalibration = True
+
+        self.__calWksp = ''
+        self.__grpWksp = ''
+        self.__mskWksp = ''
+        # first see if the workspaces have been specified
+        # check that the canonical names don't already exist as a backup
+        if not self.getProperty('CalibrationWorkspace').isDefault:
+            self.__calWksp = self.getPropertyValue('CalibrationWorkspace')
+        elif not self.getProperty('OffsetsWorkspace').isDefault:
+            self.__calWksp = self.getPropertyValue('OffsetsWorkspace') + '_cal'
+            ConvertDiffCal(OffsetsWorkspace=self.getPropertyValue('OffsetsWorkspace'),
+                           OutputWorkspace=self.instr + '_cal')
+            self.setProperty('CalibrationWorkspace', self.__calWksp)
+        elif mtd.doesExist(self.instr + '_cal'):
+            self.__calWksp = mtd[self.instr + '_cal']
+
+        if not self.getProperty('GroupingWorkspace').isDefault:
+            self.__grpWksp = self.getPropertyValue('GroupingWorkspace')
+        elif mtd.doesExist(self.instr + '_group'):
+            self.__grpWksp = mtd[self.instr + '_group']
+
+        if not self.getProperty('MaskWorkspace').isDefault:
+            self.__mskWksp = self.getPropertyValue('MaskWorkspace')
+        elif mtd.doesExist(self.instr + '_mask'):
+            self.__mskWksp = mtd[self.instr + '_mask']
+
+        # check that anything was specified
+        if self.getProperty('CalFileName').isDefault and self.getProperty('GroupFilename').isDefault:
+            return
+
+        # decide what to load
+        loadCalibration = self.__calWksp != ''
+        loadGrouping = self.__grpWksp != ''
+        loadMask = self.__mskWksp != ''
+
+        # load and update
+        LoadDiffCal(InputWorkspace=wksp,
+                    Filename=self.getPropertyValue('CalFileName'),
+                    GroupFilename=self.getPropertyValue('GroupFilename'),
+                    MakeCalWorkspace=loadCalibration,
+                    MakeGroupingWorkspace=loadGrouping,
+                    MakeMaskWorkspace=loadMask,
+                    WorkspaceName=self.instr)
+        if loadCalibration:
+            self.__calWksp = self.instr + '_cal'
+            self.setPropertyValue('CalibrationWorkspace', self.instr + '_cal')
+        if loadGrouping:
+            self.__grpWksp = self.instr + '_group'
+            self.setPropertyValue('GroupingWorkspace', self.instr + '_group')
+        if loadMask:
+            self.__mskWksp = self.instr + '_mask'
+            self.setPropertyValue('MaskWorkspace', self.instr + '_mask')
+
     def PyExec(self):
         self._filenames = filenames = sorted(self._getLinearizedFilenames('Filename'))
         import collections
-        self._accumulate_calls = collections.defaultdict(int) # bookkeeping for __accumulate
+        self._accumulate_calls = collections.defaultdict(int)  # bookkeeping for __accumulate
         # get the instrument name - will not work if the instrument has a '_' in its name
         self.instr = os.path.basename(filenames[0]).split('_')[0]
+        self.haveDeterminedCalibration = False  # setup variables for loading calibration into workspaces
         self.__loaderName = 'Load'   # set the loader to be generic on first load
-        for ext in ['_cal', '_group',' _mask']:
-            if AnalysisDataService.doesExist(self.instr+ext):
-                DeleteWorkspace(Workspace=self.instr+ext)
         self.filterBadPulses = self.getProperty('FilterBadPulses').value
         self.chunkSize = self.getProperty('MaxChunkSize').value
         self.absorption = self.getProperty('AbsorptionWorkspace').value
@@ -532,8 +589,8 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
         finalname = self.getPropertyValue('OutputWorkspace')
         N = len(files)
         import math
-        if N>3: #9
-            n = int(math.sqrt(N)) # grain size
+        if N > 3:
+            n = int(math.sqrt(N))  # grain size
         else:
             n = N
         for (i, f) in enumerate(files):
@@ -546,8 +603,8 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
             partialsum_wkspname = self.__get_grp_ws_name(grain)
             self.__accumulate(
                 wkspname, partialsum_wkspname, unfocusname, unfocusname_file)
-            if i==grain_end-1:
-                if useCaching and len(grain)>1:
+            if i == grain_end - 1:
+                if useCaching and len(grain) > 1:
                     # save partial cache
                     self.__saveSummedGroupToCache(grain)
                 # accumulate into final sum
