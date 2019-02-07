@@ -7,7 +7,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 from Muon.GUI.Common.muon_data_context import MuonDataContext
-from mantid.api import ITableWorkspace, WorkspaceGroup
+from mantid.api import ITableWorkspace
 from mantid import api
 
 
@@ -101,11 +101,6 @@ class InstrumentWidgetModel(object):
 
     def set_dead_time_from_data(self):
         self._data.gui_variables['DeadTimeSource'] = 'FromFile'
-        # data_dead_time = self._data.current_data["DataDeadTimeTable"]
-        # if isinstance(data_dead_time, WorkspaceGroup):
-        #     self._data.gui_variables["DeadTimeTable"] = data_dead_time[0]
-        # else:
-        #     self._data.gui_variables["DeadTimeTable"] = data_dead_time
 
     def set_user_dead_time_from_ADS(self, name):
         self._data.gui_variables['DeadTimeSource'] = 'FromADS'
