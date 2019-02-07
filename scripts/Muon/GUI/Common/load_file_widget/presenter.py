@@ -20,8 +20,8 @@ class BrowseFileWidgetPresenter(object):
         self._model = model
 
         # Whether to allow single or multiple files to be loaded
-        self._multiple_files = False
-        self._multiple_file_mode = "Single"
+        self._multiple_files = True
+        self._multiple_file_mode = "Simultaneous"
 
         self._use_threading = True
         self._load_thread = None
@@ -157,9 +157,6 @@ class BrowseFileWidgetPresenter(object):
 
     def enable_loading(self):
         self._view.enable_load_buttons()
-
-    def enable_multiple_files(self, enabled):
-        self._multiple_files = enabled
 
     @property
     def workspaces(self):

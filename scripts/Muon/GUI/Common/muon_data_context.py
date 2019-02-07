@@ -184,9 +184,11 @@ class MuonDataContext(object):
 
     @property
     def current_filenames(self):
+        import pydevd
+        pydevd.settrace('localhost', port=5434, stdoutToServer=True, stderrToServer=True)
         current_filenames = []
         for run in self.current_runs:
-            if self._loaded_data.get_data(run=run):
+            if self._loaded_data.get_data(run=run, instrument=self.instrument):
                 current_filenames.append(self._loaded_data.get_data(run=run, instrument=self.instrument)['filename'])
         return current_filenames
 

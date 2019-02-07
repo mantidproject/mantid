@@ -39,7 +39,6 @@ class LoadWidgetPresenter(object):
 
         self.view.on_clear_button_clicked(self.clear_data_and_view)
 
-        self._view.on_multiple_loading_check_changed(self.handle_multiple_files_option_changed)
         self._view.on_multiple_load_type_changed(self.handle_multiple_files_option_changed)
         self._use_threading = True
 
@@ -48,31 +47,20 @@ class LoadWidgetPresenter(object):
 
     def set_load_run_widget(self, widget):
         self.load_run_widget = widget
-        self.load_run_widget.enable_multiple_files(False)
         self.load_run_widget.update_view_from_model([])
 
     def set_load_file_widget(self, widget):
         self.load_file_widget = widget
-        self.load_file_widget.enable_multiple_files(False)
         self.load_file_widget.update_view_from_model([])
 
     def handle_multiple_files_option_changed(self, unused=None):
-        if self._view.get_multiple_loading_state():
-            self.enable_multiple_files(True)
-        else:
-            self.enable_multiple_files(False)
-
-        selection = self._view.get_multiple_loading_combo_text()
-
-        if selection == CO_ADD:
+        selection = self._view.get_multiple_loading_state()
+        if selection:
             self.load_file_widget.update_multiple_loading_behaviour(CO_ADD)
             self.load_run_widget.update_multiple_loading_behaviour(CO_ADD)
-
-        if selection == SIMULTANEOUS:
+        else:
             self.load_file_widget.update_multiple_loading_behaviour(SIMULTANEOUS)
             self.load_run_widget.update_multiple_loading_behaviour(SIMULTANEOUS)
-
-        self.clear_data_and_view()
 
     def enable_multiple_files(self, enabled=True):
         self.load_run_widget.enable_multiple_files(enabled)

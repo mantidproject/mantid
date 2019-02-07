@@ -20,9 +20,9 @@ class LoadRunWidgetPresenter(object):
         self._model = model
         self._load_thread = None
 
-        self._load_multiple_runs = False
+        self._load_multiple_runs = True
         self._use_threading = True
-        self._multiple_file_mode = "Co-add"
+        self._multiple_file_mode = "Simultaneous"
 
         self._instrument = ""
         self._view.set_current_instrument(self._instrument)
@@ -66,9 +66,6 @@ class LoadRunWidgetPresenter(object):
         self._view.clear()
         self._model.clear_loaded_data()
 
-    def enable_multiple_files(self, enabled):
-        self._load_multiple_runs = enabled
-
     @property
     def workspaces(self):
         return self._model.loaded_workspaces
@@ -109,7 +106,7 @@ class LoadRunWidgetPresenter(object):
         file_names = [file_utils.file_path_for_instrument_and_run(self.get_current_instrument(), new_run)
                       for new_run in self.run_list if not self._model._loaded_data_store.get_data(run=[new_run],
                                                                                                   instrument=
-                                                                                                  self._model.context.instrument)]
+                                                                                                  self._model._context.instrument)]
 
         self.load_runs(file_names)
     # ------------------------------------------------------------------------------------------------------------------
@@ -232,7 +229,7 @@ class LoadRunWidgetPresenter(object):
         else:
             run_list = [[run] for run in self.run_list if self._model._loaded_data_store.get_data(run=[run])]
 
-        self._model.context.current_runs = run_list
+        self._model._context.current_runs = run_list
 
         self._view.notify_loading_finished()
         self.enable_loading()
