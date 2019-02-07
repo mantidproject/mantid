@@ -11,6 +11,8 @@ from PyQt4 import QtCore, QtGui
 from Muon.GUI.Common.utilities import table_utils
 
 
+construct = "Construct"
+
 class MaxEntView(QtGui.QWidget):
 
     """
@@ -63,9 +65,10 @@ class MaxEntView(QtGui.QWidget):
         self.use_phaseTable_box = table_utils.addCheckBoxToTable(
             self.table, False, 4)
 
-        table_utils.setRowName(self.table, 5, "Construct Phase Table")
-        self.phaseTable_box = table_utils.addCheckBoxToTable(
-            self.table, True, 5)
+        table_utils.setRowName(self.table, 5, "Select Phase Table")
+        options = [construct]
+        self.phaseTable_box = table_utils.addComboToTable(
+            self.table, 5, options)
 
         table_utils.setRowName(self.table, 6, "Fix phases")
         self.fix_phase_box = table_utils.addCheckBoxToTable(
@@ -166,6 +169,15 @@ class MaxEntView(QtGui.QWidget):
         self.ws.clear()
         self.ws.addItems(options)
 
+    def getPhaseTableIndex(self):
+        return self.phaseTable_box.currentIndex()
+
+    def setPhaseTableIndex(self,index):
+        self.phaseTable_box.setCurrentIndex(index)
+
+    def addPhaseTableToGUI(self, option):
+        self.phaseTable_box.addItem(option)
+
     def addNPoints(self, options):
         self.N_points.clear()
         self.N_points.addItems(options)
@@ -220,7 +232,10 @@ class MaxEntView(QtGui.QWidget):
         return inputs
 
     def addPhaseTable(self, inputs):
-        inputs['InputPhaseTable'] = "PhaseTable"
+        if self.usePhases():
+           inputs['InputPhaseTable'] = "PhaseTable"
+        else:
+            inputs['InputPhaseTable'] = self.phaseTable_box.currentText()
 
     def outputPhases(self):
         return self.output_phase_box.checkState() == QtCore.Qt.Checked
@@ -251,7 +266,7 @@ class MaxEntView(QtGui.QWidget):
             str(self.ws.currentText()) + ";TimeDomain;MaxEnt"
 
     def calcPhases(self):
-        return self.phaseTable_box.checkState() == QtCore.Qt.Checked
+        return self.phaseTable_box.currentText() == construct
 
     def usePhases(self):
         return self.use_phaseTable_box.checkState() == QtCore.Qt.Checked

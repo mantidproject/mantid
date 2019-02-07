@@ -19,7 +19,8 @@ if sys.version_info.major == 3:
     from unittest import mock
 else:
     import mock
-
+def test(inputs):
+    inputs["OutputPhaseTable"] = "test"
 
 class MaxEntPresenterTest(unittest.TestCase):
     def setUp(self):
@@ -87,6 +88,40 @@ class MaxEntPresenterTest(unittest.TestCase):
         self.presenter.deactivate()
         assert(self.view.deactivateCalculateButton.call_count==1)
 
+    def test_updatePhaseOptions(self):
+        self.view.addOutputPhases = mock.MagicMock(side_effect = test)
+        self.view.addPhaseTableToGUI = mock.MagicMock()
+        self.presenter.thread = mock.MagicMock()
+        self.presenter.phaseTableAdded = mock.Mock(return_value = True)
+        self.view.getPhaseTableIndex = mock.Mock(return_value = 2)
+        self.view.setPhaseTableIndex = mock.Mock()
+
+        inputs = {}
+        self.view.addOutputPhases(inputs)
+        self.presenter.handleFinished()
+
+        self.assertEquals(inputs["OutputPhaseTable"],"test")
+        self.assertEquals(self.view.getPhaseTableIndex.call_count, 1)
+        self.assertEquals(self.view.addPhaseTableToGUI.call_count, 1)
+        self.assertEquals(self.view.setPhaseTableIndex.call_count, 1)
+        self.view.setPhaseTableIndex.assert_called_with(2)
+
+    def test_noUpdatePhaseOptions(self):
+        self.view.addOutputPhases = mock.MagicMock(side_effect = test)
+        self.view.addPhaseTableToGUI = mock.MagicMock()
+        self.presenter.thread = mock.MagicMock()
+        self.presenter.phaseTableAdded = mock.Mock(return_value = False)
+        self.view.getPhaseTableIndex = mock.Mock(return_value = 2)
+        self.view.setPhaseTableIndex = mock.Mock()
+
+        inputs = {}
+        self.view.addOutputPhases(inputs)
+        self.presenter.handleFinished()
+
+        self.assertEquals(inputs["OutputPhaseTable"],"test")
+        self.assertEquals(self.view.getPhaseTableIndex.call_count, 0)
+        self.assertEquals(self.view.addPhaseTableToGUI.call_count, 0)
+        self.assertEquals(self.view.setPhaseTableIndex.call_count, 0)
 
 if __name__ == '__main__':
     unittest.main()
