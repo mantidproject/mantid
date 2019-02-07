@@ -16,7 +16,7 @@ import traceback
 
 # 3rd party imports
 from qtpy.QtCore import QObject, Signal
-from qtpy.QtGui import QColor, QFontMetrics, QKeySequence
+from qtpy.QtGui import QColor, QFontMetrics
 from qtpy.QtWidgets import QMessageBox, QStatusBar, QVBoxLayout, QWidget, QFileDialog
 
 # local imports
@@ -33,6 +33,8 @@ RUNNING_STATUS_MSG = "Status: Running"
 # Editor
 CURRENTLINE_BKGD_COLOR = QColor(247, 236, 248)
 TAB_WIDTH = 4
+TAB_CHAR = '\t'
+SPACE_CHAR = " "
 
 
 class EditorIO(object):
@@ -155,16 +157,16 @@ class PythonFileInterpreter(QWidget):
         self.status.showMessage(msg)
 
     def replace_tabs_with_spaces(self):
+        self.replace_text(TAB_CHAR, SPACE_CHAR*4)
+
+    def replace_text(self, match_text, replace_text):
         if self.editor.selectedText() == '':
             self.editor.selectAll()
-        new_text = self.editor.selectedText().replace('\t', '    ')
+        new_text = self.editor.selectedText().replace(match_text, replace_text)
         self.editor.replaceSelectedText(new_text)
 
     def replace_spaces_with_tabs(self):
-        if self.editor.selectedText() == '':
-            self.editor.selectAll()
-        new_text = self.editor.selectedText().replace('    ', '\t')
-        self.editor.replaceSelectedText(new_text)
+        self.replace_text(SPACE_CHAR*4, TAB_CHAR)
 
     def set_whitespace_visible(self):
         self.editor.setWhitespaceVisibility(CodeEditor.WsVisible)
@@ -174,8 +176,6 @@ class PythonFileInterpreter(QWidget):
 
     def clear_key_binding(self, key_str):
         """Clear a keyboard shortcut bound to a Scintilla command"""
-        if not QKeySequence(key_str).toString():
-            raise ValueError("Invalid key combination '%s'".format(key_str))
         self.editor.clearKeyBinding(key_str)
 
     def toggle_comment(self):
