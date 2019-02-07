@@ -269,6 +269,8 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         total_duration = (run.endTime() - run.startTime()).total_seconds()
         slice_duration = total_duration / number_of_slices
         alg.setProperty("TimeInterval", slice_duration)
+        self.log().information('Slicing ' + workspace_name + ' into ' + str(number_of_slices)
+                               + ' even slices of duration ' + str(slice_duration))
 
     def _setSliceStartStopTimes(self, alg, workspace_name):
         """Set the start/stop time for the slicing algorithm based on the

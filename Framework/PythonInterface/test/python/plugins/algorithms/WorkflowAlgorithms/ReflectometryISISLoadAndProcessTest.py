@@ -325,6 +325,56 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
                    'ReflectometryReductionOneAuto', 'GroupWorkspaces', 'GroupWorkspaces']
         self._check_history(mtd['IvsQ_binned_38415_1'], history, False)
 
+    def test_slicing_with_no_interval_returns_single_slice(self):
+        self._create_event_workspace(38415, 'TOF_')
+        args = self._default_options
+        args['InputRunList'] = '38415'
+        args['SliceWorkspace'] = True
+        outputs = ['IvsQ_38415', 'IvsQ_38415_1', 'IvsQ_binned_38415', 'IvsQ_binned_38415_1',
+                   'IvsLam_38415', 'IvsLam_38415_1', 'TOF_38415', 'TOF_38415_monitors',
+                   'TOF_38415_sliced', 'TOF_38415_sliced_1']
+        self._assert_run_algorithm_succeeds(args, outputs)
+        history = ['ReflectometryReductionOneAuto', 'GroupWorkspaces', 'GroupWorkspaces']
+        self._check_history(mtd['IvsQ_binned_38415_1'], history, False)
+
+    def test_slicing_by_number_of_slices(self):
+        self._create_event_workspace(38415, 'TOF_')
+        args = self._default_options
+        args['InputRunList'] = '38415'
+        args['SliceWorkspace'] = True
+        args['NumberOfSlices'] = 3;
+        outputs = self._expected_sliced_outputs
+        self._assert_run_algorithm_succeeds(args, outputs)
+        history = ['ReflectometryReductionOneAuto', 'ReflectometryReductionOneAuto',
+                   'ReflectometryReductionOneAuto', 'GroupWorkspaces', 'GroupWorkspaces']
+        self._check_history(mtd['IvsQ_binned_38415_1'], history, False)
+
+    def test_slicing_by_log_value(self):
+        self._create_event_workspace(38415, 'TOF_')
+        args = self._default_options
+        args['InputRunList'] = '38415'
+        args['SliceWorkspace'] = True
+        args['LogName'] = 'proton_charge';
+        args['LogValueInterval'] = 60;
+        outputs = self._expected_sliced_outputs
+        self._assert_run_algorithm_succeeds(args, outputs)
+        history = ['ReflectometryReductionOneAuto', 'ReflectometryReductionOneAuto',
+                   'ReflectometryReductionOneAuto', 'GroupWorkspaces', 'GroupWorkspaces']
+        self._check_history(mtd['IvsQ_binned_38415_1'], history, False)
+
+    def test_slicing_by_log_value_with_no_interval_returns_single_slice(self):
+        self._create_event_workspace(38415, 'TOF_')
+        args = self._default_options
+        args['InputRunList'] = '38415'
+        args['SliceWorkspace'] = True
+        args['LogName'] = 'proton_charge';
+        outputs = ['IvsQ_38415', 'IvsQ_38415_1', 'IvsQ_binned_38415', 'IvsQ_binned_38415_1',
+                   'IvsLam_38415', 'IvsLam_38415_1', 'TOF_38415', 'TOF_38415_monitors',
+                   'TOF_38415_sliced', 'TOF_38415_sliced_1']
+        self._assert_run_algorithm_succeeds(args, outputs)
+        history = ['ReflectometryReductionOneAuto', 'GroupWorkspaces', 'GroupWorkspaces']
+        self._check_history(mtd['IvsQ_binned_38415_1'], history, False)
+
     def _create_workspace(self, run_number, prefix=''):
         name = prefix + str(run_number)
         ws = CreateSampleWorkspace(WorkspaceType='Histogram',NumBanks=1, NumMonitors=2,
