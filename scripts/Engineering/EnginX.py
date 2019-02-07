@@ -184,8 +184,8 @@ def create_calibration(ceria_run, van_run, calibration_directory, calibration_ge
                                  calibration_general)
 
 
-def create_calibration_cropped_file(ceria_run, van_run, curve_van, int_van, calibration_directory, calibration_general, use_spectrum_number,
-                                    crop_name, spec_nos):
+def create_calibration_cropped_file(ceria_run, van_run, curve_van, int_van, calibration_directory, calibration_general,
+                                    use_spectrum_number, crop_name, spec_nos):
     """
     create and save a cropped calibration file
 
@@ -214,9 +214,10 @@ def create_calibration_cropped_file(ceria_run, van_run, curve_van, int_van, cali
         difc = [output.DIFC]
         tzero = [output.TZERO]
         difa = [output.DIFA]
-        save_calibration(ceria_run, van_run, calibration_directory, calibration_general, "all_banks", [param_tbl_name], tzero, difc)
-        save_calibration(ceria_run, van_run, calibration_directory, calibration_general, "bank_{}".format(param_tbl_name), [param_tbl_name],
+        save_calibration(ceria_run, van_run, calibration_directory, calibration_general, "all_banks", [param_tbl_name],
                          tzero, difc)
+        save_calibration(ceria_run, van_run, calibration_directory, calibration_general,
+                         "bank_{}".format(param_tbl_name), [param_tbl_name],  tzero, difc)
     else:
         # work out which bank number to crop on, then calibrate
         if spec_nos.lower() == "north":
@@ -232,8 +233,10 @@ def create_calibration_cropped_file(ceria_run, van_run, curve_van, int_van, cali
         difc = [output.DIFC]
         tzero = [output.TZERO]
         difa = [output.DIFA]
-        save_calibration(ceria_run, van_run, calibration_directory, calibration_general, "all_banks", [spec_nos], tzero, difc)
-        save_calibration(ceria_run, van_run, calibration_directory, calibration_general, "bank_{}".format(spec_nos), [spec_nos], tzero, difc)
+        save_calibration(ceria_run, van_run, calibration_directory, calibration_general, "all_banks", [spec_nos], tzero,
+                         difc)
+        save_calibration(ceria_run, van_run, calibration_directory, calibration_general, "bank_{}".format(spec_nos),
+                         [spec_nos], tzero, difc)
     # create the table workspace containing the parameters
     create_params_table(difc, tzero, difa)
 
@@ -268,10 +271,12 @@ def create_calibration_files(ceria_run, van_run, curve_van, int_van, calibration
         tzeros.append(output.TZERO)
         difa.append(output.DIFA)
         # save out the ones needed for this loop
-        save_calibration(ceria_run, van_run, calibration_directory, calibration_general, "bank_{}".format(bank_names[i - 1]), [bank_names[i - 1]],
+        save_calibration(ceria_run, van_run, calibration_directory, calibration_general,
+                         "bank_{}".format(bank_names[i - 1]), [bank_names[i - 1]],
                          [tzeros[i - 1]], [difcs[i - 1]])
     # save out the total version, then create the table of params
-    save_calibration(ceria_run, van_run, calibration_directory, calibration_general, "all_banks", bank_names, tzeros, difcs)
+    save_calibration(ceria_run, van_run, calibration_directory, calibration_general, "all_banks", bank_names, tzeros,
+                     difcs)
     create_params_table(difcs, tzeros, difa)
 
 
