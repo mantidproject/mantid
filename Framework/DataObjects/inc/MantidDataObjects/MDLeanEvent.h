@@ -53,6 +53,8 @@ template <size_t nd> void swap(MDLeanEvent<nd> &first, MDLeanEvent<nd> &second);
  * defines the type EventAccessType = EventAccessor,
  * it can call private retrieve functions throuhg the
  * api described in MDLeanEvent (struct AccessFor).
+ * Keeping the event state in the coordinates mode
+ * is the concern of EventAccessor itself.
  */
 struct EventAccessor {};
 

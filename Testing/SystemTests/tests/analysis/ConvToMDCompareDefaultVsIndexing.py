@@ -10,7 +10,7 @@ import systemtesting
 from mantid.simpleapi import *
 
 
-class ConvToMDCompareDefaultVsIndexung(systemtesting.MantidSystemTest):
+class ConvToMDCompareDefaultVsIndexing(systemtesting.MantidSystemTest):
     @staticmethod
     def name(params, postfix):
         name = ''
@@ -20,11 +20,11 @@ class ConvToMDCompareDefaultVsIndexung(systemtesting.MantidSystemTest):
 
     @staticmethod
     def default_name(params):
-        return ConvToMDCompareDefaultVsIndexung.name(params, 'ws_default')
+        return ConvToMDCompareDefaultVsIndexing.name(params, 'ws_default')
 
     @staticmethod
     def indexed_name(params):
-        return ConvToMDCompareDefaultVsIndexung.name(params, 'ws_indexed')
+        return ConvToMDCompareDefaultVsIndexing.name(params, 'ws_indexed')
 
     test_functions = ['Multiple Peaks',
                       'Exp Decay',

@@ -72,7 +72,7 @@ Notes
    to `Indexed` increases performance especially for bigger files, but has some
    restrictions:
 
- a. `SplitInto` should be the power of to,e.g. 2, 4, 8, 16 etc.,
+ a. `SplitInto` should be the power of two,e.g. 2, 4, 8, 16 etc.,
 
  b. `FileBackEnd` and `TopLevelSplitting` are not applicable and
     should be disabled.
@@ -290,11 +290,6 @@ This example produces 3-dimensional dataset, with a temperature axis.
 
 **Example - Convert to Q-space, indexed version:**
 
-The code iteslef works but disabled from doc tests as takes too long to complete. User should provide its own
-event nexus file instead of **TOPAZ_3132_event.nxs** used within this example. The original **TOPAZ_3132_event.nxs**
-file is available in `Mantid system tests repository <https://github.com/mantidproject/systemtests/tree/master/Data/TOPAZ_3132_event.nxs>`_.
-
-
 .. code-block:: python
    :linenos:
 
@@ -305,7 +300,7 @@ file is available in `Mantid system tests repository <https://github.com/mantidp
 
    # build peak workspace necessary for IntegrateEllipsoids algorithm to work
    TOPAZ_3132_md = ConvertToMD(InputWorkspace=TOPAZ_3132_event,QDimensions='Q3D',dEAnalysisMode='Elastic',Q3DFrames='Q_sample',LorentzCorrection='1',\
-   MinValues='-25,-25,-25',MaxValues='25,25,25',SplitInto='2',SplitThreshold='50',MaxRecursionDepth='13',MinRecursionDepth='7')
+   MinValues='-25,-25,-25',MaxValues='25,25,25',SplitInto='4',SplitThreshold='50',MaxRecursionDepth='13',MinRecursionDepth='7')
 
    # produce some test output
    print("Resulting MD workspace contains {0} events and {1} dimensions".format(TOPAZ_3132_md.getNEvents(),TOPAZ_3132_md.getNumDims()))

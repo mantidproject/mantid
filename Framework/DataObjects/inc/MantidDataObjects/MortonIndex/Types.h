@@ -7,6 +7,10 @@
 #ifndef MANTID_DATAOBJECTS_MORTONINDEX_TYPES_H_
 #define MANTID_DATAOBJECTS_MORTONINDEX_TYPES_H_
 
+// boost::multiprecision is not used here because the
+// with of the number is one WORD bigger, than actual
+// number size, see here
+// https://www.boost.org/doc/libs/1_61_0/libs/multiprecision/doc/html/boost_multiprecision/tut/ints/cpp_int.html
 #include "int.h"
 #include <Eigen/Dense>
 #include <ostream>

@@ -180,11 +180,7 @@ MDEventTreeBuilder<ND, MDEventType, EventIterator>::convertToIndex(
         morton_index::indexToCoordinates<ND, IntT, MortonT>(
             IndexCoordinateSwitcher::getIndex(mdEvents[i]), space);
     newCoord -= oldCoord;
-#ifdef _OPENMP
-    morton_index::MDCoordinate<ND> &threadErr{perThread[omp_get_thread_num()]};
-#else
-    morton_index::MDCoordinate<ND> &threadErr{perThread[0]};
-#endif // _OPENMP
+    morton_index::MDCoordinate<ND> &threadErr{perThread[PARALLEL_THREAD_NUMBER]};
     for (size_t d = 0; d < ND; ++d)
       threadErr[d] = std::max(threadErr[d], std::abs(newCoord[d]));
   }
