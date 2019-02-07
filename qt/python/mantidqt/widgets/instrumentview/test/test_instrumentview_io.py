@@ -14,7 +14,6 @@ from mantidqt.widgets.instrumentview.io import InstrumentViewEncoder, Instrument
 from mantid.simpleapi import CreateSampleWorkspace
 from mantidqt.utils.qt.test import GuiTest
 
-import os
 
 INSTRUMENT_VIEW_DICT = {u'workspaceName': u'ws',
                         u'tabs': {u'maskTab': {
