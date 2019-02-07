@@ -59,6 +59,7 @@ class MatrixWorkspaceDisplayView(QTabWidget, ObservingView):
 
         self.setWindowTitle("{} - Mantid".format(name))
         self.setWindowFlags(Qt.Window)
+        self.setAttribute(Qt.WA_DeleteOnClose, True)
 
         self.active_tab_index = 0
         self.currentChanged.connect(self.set_scroll_position_on_new_focused_tab)
@@ -78,7 +79,6 @@ class MatrixWorkspaceDisplayView(QTabWidget, ObservingView):
 
     @Slot()
     def _run_close(self):
-        self.presenter.clear_observer()
         self.close()
 
     @Slot(str)

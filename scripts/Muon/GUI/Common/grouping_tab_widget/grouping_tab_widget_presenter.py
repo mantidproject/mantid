@@ -5,8 +5,8 @@ from Muon.GUI.Common.observer_pattern import Observer, Observable
 import Muon.GUI.Common.utilities.muon_file_utils as file_utils
 import Muon.GUI.Common.utilities.xml_utils as xml_utils
 import Muon.GUI.Common.utilities.algorithm_utils as algorithm_utils
-from ui.sans_isis.work_handler import WorkHandler
-from sans.gui_logic.presenter.work_handler_listener_wrapper import GenericWorkHandlerListener
+from Muon.GUI.Common import thread_model
+from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapper
 
 
 class GroupingTabPresenter(object):
@@ -36,9 +36,6 @@ class GroupingTabPresenter(object):
         self._view.on_save_grouping_button_clicked(self.handle_save_grouping_file)
         self._view.on_default_grouping_button_clicked(self.handle_default_grouping_button_clicked)
 
-        # multi-threading
-        self.thread_manager = WorkHandler()
-
         # monitors for loaded data changing
         self.loadObserver = GroupingTabPresenter.LoadObserver(self)
         self.instrumentObserver = GroupingTabPresenter.InstrumentObserver(self)
@@ -65,8 +62,9 @@ class GroupingTabPresenter(object):
             instrument, n_detectors, main_field)
         return text
 
-    def update_description_text(self):
-        description_text = self.text_for_description()
+    def update_description_text(self, description_text=''):
+        if not description_text:
+            description_text = self.text_for_description()
         self._view.set_description_text(description_text)
 
     def add_pair_from_grouping_table(self, group_name1, group_name2):
@@ -93,23 +91,29 @@ class GroupingTabPresenter(object):
         self.pairing_table_widget.update_view_from_model()
 
         self.groupingNotifier.notify_subscribers()
+        self.handle_update_all_clicked()
 
     def handle_load_grouping_from_file(self):
         # Only XML format
         file_filter = file_utils.filter_for_extensions(["xml"])
         filename = self._view.show_file_browser_and_return_selection(file_filter, [""])
 
-        groups, pairs = xml_utils.load_grouping_from_XML(filename)
+        groups, pairs, description = xml_utils.load_grouping_from_XML(filename)
 
         self._model.clear()
         for group in groups:
-            self._model.add_group(group)
+            try:
+                self._model.add_group(group)
+            except ValueError as error:
+                self._view.display_warning_box(str(error))
+
         for pair in pairs:
-            self._model.add_pair(pair)
+            if pair.forward_group in self._model.group_names and pair.backward_group in self._model.group_names:
+                self._model.add_pair(pair)
 
         self.grouping_table_widget.update_view_from_model()
         self.pairing_table_widget.update_view_from_model()
-        self.update_description_text()
+        self.update_description_text(description)
 
         self.groupingNotifier.notify_subscribers()
 
@@ -123,13 +127,15 @@ class GroupingTabPresenter(object):
         self.grouping_table_widget.enable_editing()
         self.pairing_table_widget.enable_editing()
 
-    def calculate_all_data(self, arg):
+    def calculate_all_data(self):
         self._model.show_all_groups_and_pairs()
 
     def handle_update_all_clicked(self):
-        self.disable_editing()
-        self.listener = GenericWorkHandlerListener(self.enable_editing, self.enable_editing)
-        self.thread_manager.process(self.listener, self.calculate_all_data, 0, [1])
+        self.update_thread = self.create_update_thread()
+        self.update_thread.threadWrapperSetUp(self.disable_editing,
+                                              self.enable_editing,
+                                              self._view.display_warning_box)
+        self.update_thread.start()
 
     def handle_default_grouping_button_clicked(self):
         self._model.reset_groups_and_pairs_to_default()
@@ -160,8 +166,11 @@ class GroupingTabPresenter(object):
     def handle_save_grouping_file(self):
         filename = self._view.show_file_save_browser_and_return_selection()
         if filename != "":
-            xml_utils.save_grouping_to_XML(self._model.groups, self._model.pairs, filename)
+            xml_utils.save_grouping_to_XML(self._model.groups, self._model.pairs, filename, description=self._view.get_description_text())
 
+    def create_update_thread(self):
+        self._update_model = ThreadModelWrapper(self.calculate_all_data)
+        return thread_model.ThreadModel(self._update_model)
     # ------------------------------------------------------------------------------------------------------------------
     # Observer / Observable
     # ------------------------------------------------------------------------------------------------------------------

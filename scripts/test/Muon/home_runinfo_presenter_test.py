@@ -38,7 +38,7 @@ class HomeTabRunInfoPresenterTest(unittest.TestCase):
         self.obj = None
 
     def test_runinfo_correct(self):
-        file_path = FileFinder.findRuns('22725')[0]
+        file_path = FileFinder.findRuns('MUSR00022725.nxs')[0]
         ws, run, filename = load_utils.load_workspace_from_filename(file_path)
         self.context._loaded_data.remove_data(run=run)
         self.context._loaded_data.add_data(run=run, workspace=ws, filename=filename)
@@ -48,18 +48,13 @@ class HomeTabRunInfoPresenterTest(unittest.TestCase):
 
         self.presenter.update_view_from_model()
 
-        self.assertEqual(self.view.run_info_box.toPlainText(),
-                         'Instrument                : MUSR\n'
-                         'Run                       : 22725\n'
-                         'Title                     : FeTeSe T=1 F=100\n'
-                         'Comment                   : FC first sample\n'
-                         'Start                     : 2009-03-24T04:18:58\n'
-                         'End                       : 2009-03-24T04:56:26\n'
-                         'Good Frames               : 88540\n'
-                         'Counts (MeV)              : 20.076704\n'
-                         'Average Temperature (K)   : 2.5338574658342083\n'
-                         'Sample Temperature (K)    : 1.0\n'
-                         'Sample Magnetic Field (G) : 100.0')
+        expected_string_list = ['Instrument:MUSR', 'Run:22725', 'Title:FeTeSeT=1F=100', 'Comment:FCfirstsample',
+                                'Start:2009-03-24T04:18:58', 'End:2009-03-24T04:56:26', 'Counts(MEv):20.076704',
+                                'GoodFrames:88540', 'CountsperGoodFrame:226.753',
+                                'CountsperGoodFrameperdet:3.543', 'AverageTemperature(K):2.53386',
+                                'SampleTemperature(K):1.0', 'SampleMagneticField(G):100.0']
+
+        self.assertEqual(str(self.view.run_info_box.toPlainText()).replace(' ', '').splitlines(), expected_string_list)
 
 
 if __name__ == '__main__':

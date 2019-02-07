@@ -23,6 +23,7 @@ from Muon.GUI.Common.ADSHandler.workspace_naming import (get_raw_data_workspace_
                                                          get_pair_data_directory)
 
 from Muon.GUI.Common.calculate_pair_and_group import calculate_group_data, calculate_pair_data
+from Muon.GUI.Common.utilities.muon_file_utils import allowed_instruments
 
 from collections import OrderedDict
 
@@ -43,7 +44,7 @@ def get_default_grouping(workspace, instrument, main_field_direction):
         return [], []
     instrument_directory = ConfigServiceImpl.Instance().getInstrumentDirectory()
     filename = instrument_directory + grouping_file
-    new_groups, new_pairs = xml_utils.load_grouping_from_XML(filename)
+    new_groups, new_pairs, description = xml_utils.load_grouping_from_XML(filename)
     return new_groups, new_pairs
 
 
@@ -107,7 +108,8 @@ class MuonDataContext(object):
         self._gui_variables = {}
         self._current_data = {"workspace": load_utils.empty_loaded_data()}  # self.get_result(False)
 
-        self._instrument = ConfigService.getInstrument().name()
+        self._instrument = ConfigService.getInstrument().name() if ConfigService.getInstrument().name()\
+            in allowed_instruments else 'EMU'
 
     def is_data_loaded(self):
         return self._loaded_data.num_items() > 0
@@ -167,7 +169,10 @@ class MuonDataContext(object):
 
     def add_group(self, group):
         assert isinstance(group, MuonGroup)
-        self._groups[group.name] = group
+        if self.check_group_contains_valid_detectors(group):
+            self._groups[group.name] = group
+        else:
+            raise ValueError('Invalid detectors in group {}'.format(group.name))
 
     def add_pair(self, pair):
         assert isinstance(pair, MuonPair)
@@ -331,3 +336,9 @@ class MuonDataContext(object):
         self.clear_pairs()
         for pair in pairs:
             self.add_pair(pair)
+
+    def check_group_contains_valid_detectors(self, group):
+        if max(group.detectors) > self.num_detectors or min(group.detectors) < 1:
+            return False
+        else:
+            return True

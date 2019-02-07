@@ -11,3 +11,13 @@ def warning(error, parent=None):
     if not parent:
         parent = QtGui.QWidget()
     QtGui.QMessageBox.warning(parent, "Error", str(error))
+
+
+def question(question, parent=None):
+    qm = QtGui.QMessageBox
+    ret = qm.question(parent, '', question, qm.Yes | qm.No)
+
+    if ret == qm.Yes:
+        return True
+    else:
+        return False

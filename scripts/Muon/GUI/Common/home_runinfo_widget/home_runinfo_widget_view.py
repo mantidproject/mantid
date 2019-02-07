@@ -34,7 +34,6 @@ class HomeRunInfoWidgetView(QtGui.QWidget):
 
         self.group = QtGui.QGroupBox("Run Information")
         self.group.setFlat(False)
-
         self.setStyleSheet("QGroupBox {border: 1px solid grey;border-radius: 10px;margin-top: 1ex; margin-right: 0ex}"
                            "QGroupBox:title {"
                            'subcontrol-origin: margin;'

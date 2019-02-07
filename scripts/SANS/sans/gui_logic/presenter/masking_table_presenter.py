@@ -85,6 +85,15 @@ def perform_load(serialized_state):
 def perform_move(state, workspace):
     serialized_state = state.property_manager
     move_name = "SANSMove"
+
+    zero_options = {"SANSState": serialized_state,
+                    "Workspace": workspace,
+                    "MoveType": "SetToZero",
+                    "Component": ""}
+    zero_alg = create_unmanaged_algorithm(move_name, **zero_options)
+    zero_alg.execute()
+    workspace = zero_alg.getProperty("Workspace").value
+
     move_options = {"SANSState": serialized_state,
                     "Workspace": workspace,
                     "MoveType": "InitialMove"}

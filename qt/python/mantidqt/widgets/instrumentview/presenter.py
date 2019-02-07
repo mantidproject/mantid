@@ -36,24 +36,8 @@ class InstrumentViewPresenter(ObservingPresenter):
         else:
             self.ads_observer = WorkspaceDisplayADSObserver(self, observe_replace=False)
 
-    def close(self, workspace_name):
-        """
-        This closes the external window of the Instrument view.
-
-        The C++ InstrumentWidget handles all events to the workspace itself,
-        if the workspace is deleted then the widget closes itself.
-
-        The InstrumentWidget is also wrapped in a QWidget made from Python,
-        and that needs to be closed from here, otherwise we are left with an empty window,
-        when the InstrumentWidget closes itself on workspace deletion.
-
-        :param workspace_name: Used to check if it is the current workspace of the instrument view.
-                               If it is - then close the instrument view,
-                               but if it isn't - it does nothing
-        """
-        if self.ws_name == workspace_name:
-            self.clear_observer()
-            self.view.emit_close()
+    def current_workspace_equals(self, name):
+        return self.ws_name == name
 
     def replace_workspace(self, workspace_name, workspace):
         # replace is handled by the InstrumentWidget inside C++
