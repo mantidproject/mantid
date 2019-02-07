@@ -114,6 +114,8 @@ endif ()
 
     mantidqt/widgets/tableworkspacedisplay/test/test_tableworkspacedisplay_model.py
     mantidqt/widgets/tableworkspacedisplay/test/test_tableworkspacedisplay_presenter.py
+
+    mantidqt/widgets/inline_find_replace_dialog/test/test_inline_find_replace_dialog_presenter.py
   )
 
   # ctest targets for interpreters (Encoder/Decoder) tests only get tested in qt5 as only for workbench

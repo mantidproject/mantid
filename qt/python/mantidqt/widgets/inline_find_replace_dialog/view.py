@@ -1,3 +1,10 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
+#  This file is part of the mantidqt package
 from mantidqt.utils.qt import load_ui
 
 DialogBase, DialogForm = load_ui(__file__, 'dialog.ui')
@@ -35,7 +42,6 @@ class InlineFindReplaceDialogView(DialogBase, DialogForm):
         self.wrap_around.stateChanged.connect(self.presenter.clear_search)
 
     def get_options(self):
-        # TODO when any of those are checked we need to kill the search
         return FindReplaceOptions(match_case=self.match_case.isChecked(),
                                   search_backwards=self.search_backwards.isChecked(),
                                   words=self.words.isChecked(),

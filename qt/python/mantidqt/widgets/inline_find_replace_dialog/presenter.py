@@ -1,3 +1,10 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
+#  This file is part of the mantidqt package
 from mantidqt.widgets.inline_find_replace_dialog.view import InlineFindReplaceDialogView
 
 
@@ -13,8 +20,8 @@ class InlineFindReplaceDialog(object):
 
     def show(self):
         self.view.show()
-        self.focus_find_field()
         self.visible = True
+        self.focus_find_field()
 
     def hide(self):
         self.view.hide()
@@ -31,17 +38,16 @@ class InlineFindReplaceDialog(object):
         self.view.find.setFocus()
 
     def action_next(self):
-        search = self.view.find.currentText()
+        searchString = self.view.find.currentText()
 
-        if search == "":
+        if searchString == "":
             self.focus_find_field()
 
-        if self.view.find.findText(search) == -1:
-            self.view.find.addItem(search)
+        self.add_to_field_history(self.view.find, searchString)
 
         if not self.find_in_progress:
             options = self.view.get_options()
-            self.find_in_progress = self.editor.findFirst(search,
+            self.find_in_progress = self.editor.findFirst(searchString,
                                                           options.regex,
                                                           options.match_case,
                                                           options.words,
@@ -51,40 +57,44 @@ class InlineFindReplaceDialog(object):
             self.find_in_progress = self.editor.findNext()
 
     def action_replace(self):
-        search = self.view.find.currentText()
+        searchString = self.view.find.currentText()
 
-        if search == "":
+        if searchString == "":
             self.focus_find_field()
 
         # if the editor hasn't been searched before, run a find first, but do not replace anything
         # this allows the user to see where the first match is, instead of having _one_ of the matches
         # being replaced to the replacement string, without knowing which one will be done
-        if not self.editor.hasSelectedText() or self.editor.selectedText() != search:
+        if not self.editor.hasSelectedText() or self.editor.selectedText() != searchString:
             self.action_next()
             return
-        replace = self.view.replace.currentText()
-        self.editor.replace(replace)
+
+        replaceString = self.view.replace.currentText()
+        self.editor.replace(replaceString)
         self.action_next()
-        if self.view.replace.findText(replace) == -1:
-            self.view.replace.addItem(replace)
+
+        self.add_to_field_history(self.view.replace, replaceString)
 
     def action_replace_all(self):
-        search = self.view.find.currentText()
+        searchString = self.view.find.currentText()
 
-        if search == "":
+        if searchString == "":
             self.focus_find_field()
 
-        if self.view.find.findText(search) == -1:
-            self.view.find.addItem(search)
+        self.add_to_field_history(self.view.find, searchString)
 
-        replace = self.view.replace.currentText()
+        replaceString = self.view.replace.currentText()
 
-        if self.view.replace.findText(replace) == -1:
-            self.view.replace.addItem(replace)
+        self.add_to_field_history(self.view.replace, replaceString)
 
         options = self.view.get_options()
-        self.editor.replaceAll(search, replace, options.regex,
+        self.editor.replaceAll(searchString, replaceString,
+                               options.regex,
                                options.match_case,
                                options.words,
                                options.wrap_around,
                                not options.search_backwards)
+
+    def add_to_field_history(self, field, search):
+        if field.findText(search) == -1:
+            field.addItem(search)

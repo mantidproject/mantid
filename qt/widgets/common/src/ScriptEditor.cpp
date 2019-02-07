@@ -558,15 +558,16 @@ void ScriptEditor::forwardKeyPressToBase(QKeyEvent *event) {
 #endif
 }
 
-void ScriptEditor::replaceAll(const QString &search, const QString &replace,
-                              bool regex, bool caseSensitive, bool matchWords,
-                              bool wrap, bool forward) {
+void ScriptEditor::replaceAll(const QString &searchString,
+                              const QString &replaceString, bool regex,
+                              bool caseSensitive, bool matchWords, bool wrap,
+                              bool forward) {
   int line(-1), index(-1), prevLine(-1), prevIndex(-1);
 
   // Mark this as a set of actions that can be undone as one
   this->beginUndoAction();
-  bool found = this->findFirst(search, regex, caseSensitive, matchWords, wrap,
-                               forward, 0, 0);
+  bool found = this->findFirst(searchString, regex, caseSensitive, matchWords,
+                               wrap, forward, 0, 0);
   // If find first fails then there is nothing to replace
   if (!found) {
     QMessageBox::information(this, "MantidPlot - Find and Replace",
@@ -575,7 +576,7 @@ void ScriptEditor::replaceAll(const QString &search, const QString &replace,
 
   while (found) {
     this->getCursorPosition(&prevLine, &prevIndex);
-    this->replace(replace);
+    this->replace(replaceString);
     found = this->findNext();
     this->getCursorPosition(&line, &index);
     // if the next match is on the previous line
