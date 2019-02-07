@@ -62,8 +62,6 @@ class LoadWidgetView(QtGui.QWidget):
         self.vertical_layout.addWidget(self.load_file_widget)
         self.vertical_layout.addWidget(self.tool_widget)
 
-        self.vertical_layout.addStretch(1)
-
         self.group = QtGui.QGroupBox("Loading")
         self.group.setFlat(False)
         self.setStyleSheet("QGroupBox {border: 1px solid grey;border-radius: 10px;margin-top: 1ex; margin-right: 0ex}"
@@ -71,7 +69,7 @@ class LoadWidgetView(QtGui.QWidget):
                            'subcontrol-origin: margin;'
                            "padding: 0 3px;"
                            'subcontrol-position: top center;'
-                           'padding-top: -10px;'
+                           'padding-top: 0px;'
                            'padding-bottom: 0px;'
                            "padding-right: 10px;"
                            ' color: grey; }')

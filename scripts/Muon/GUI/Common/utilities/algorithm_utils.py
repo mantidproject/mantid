@@ -18,9 +18,6 @@ def run_MuonPreProcess(parameter_dict):
     the input dictionary of {proeprty_name:property_value} pairs.
     Returns the calculated workspace.
     """
-    muon_logger.notice("Pre-process : " + str({key: val for key, val in parameter_dict.items() if key != "InputWorkspace"}))
-    if "DeadTimeTable" in parameter_dict.keys():
-        muon_logger.notice("DTC : " + str(type(parameter_dict["DeadTimeTable"]), parameter_dict["DeadTimeTable"].toDict()))
     alg = mantid.AlgorithmManager.create("MuonPreProcess")
     alg.initialize()
     alg.setAlwaysStoreInADS(False)
