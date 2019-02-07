@@ -330,26 +330,26 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
     @with_mock_presenter
     def test_close_incorrect_workspace(self, ws, view, presenter):
         presenter.close(ws.TEST_NAME + "123")
-        self.assertNotCalled(view.emit_close)
+        self.assertNotCalled(presenter.container.emit_close)
         self.assertIsNotNone(presenter.ads_observer)
 
     @with_mock_presenter
     def test_close(self, ws, view, presenter):
         presenter.close(ws.TEST_NAME)
-        view.emit_close.assert_called_once_with()
+        presenter.container.emit_close.assert_called_once_with()
         self.assertIsNone(presenter.ads_observer)
 
     @with_mock_presenter
     def test_force_close_even_with_incorrect_name(self, _, view, presenter):
         # window always closes, regardless of the workspace
         presenter.force_close()
-        view.emit_close.assert_called_once_with()
+        presenter.container.emit_close.assert_called_once_with()
         self.assertIsNone(presenter.ads_observer)
 
     @with_mock_presenter
     def test_force_close(self, _, view, presenter):
         presenter.force_close()
-        view.emit_close.assert_called_once_with()
+        presenter.container.emit_close.assert_called_once_with()
         self.assertIsNone(presenter.ads_observer)
 
     @with_mock_presenter
