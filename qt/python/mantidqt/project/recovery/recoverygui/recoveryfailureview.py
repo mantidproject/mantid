@@ -8,8 +8,9 @@
 #
 
 from qtpy.QtWidgets import QDialog, QHeaderView, QTableWidgetItem
-from qtpy.QtCore import Signal, Slot, QObject
+from qtpy.QtCore import Signal, Slot
 from mantidqt.utils.qt import load_ui
+from mantid.kernel import logger
 
 
 class RecoveryFailureView(QDialog):
@@ -20,18 +21,15 @@ class RecoveryFailureView(QDialog):
         self.ui.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.presenter = presenter
 
-        # Make sure that the presenter has all the data we need
-        self.presenter.fill_all_rows()
-
         # Set the table data
-        self._add_data_table()
+        self._add_data_to_table()
 
     def _add_data_to_table(self):
         # This table's size was generated for 5 which is the default but will take the
         number_of_rows = self.presenter.get_number_of_checkpoints()
         for ii in range(0, number_of_rows):
             row = self.presenter.get_row(ii)
-            for jj in range(0, row.size()):
+            for jj in range(0, len(row)):
                 self.ui.tableWidget.setItem(ii, jj, QTableWidgetItem(row[jj]))
 
     def reject(self):
@@ -41,12 +39,12 @@ class RecoveryFailureView(QDialog):
         self.ui.progressBar.setValue(new_value)
 
     def connect_progress_bar(self):
-        QObject.connect(self.presenter.project_recovery.multi_file_interpreter.current_editor(),
-                        self.presenter.project_recovery.multi_file_interpreter.current_editor().sig_progress(int),
-                        self, self.update_progress_bar(int))
+        self.presenter.project_recovery.multi_file_interpreter.current_editor().sig_progress.connect(
+            self.update_progress_bar)
 
     def emit_abort_script(self):
-        #todo: make a connection between this, with signal abort, and mainwindow's scripthandler to abort
+        self.abort_project_recovery_script.connect(self.presenter.project_recovery.multi_file_interpreter.abort_all)
+        logger.error("Project Recovery: Cancelling recovery")
         self.abort_project_recovery_script.emit()
 
     def change_start_mantid_button(self, string):
@@ -88,7 +86,7 @@ class RecoveryFailureView(QDialog):
             if text == "":
                 return
             else:
-                self.presenter.open_selected_in_editor(text)
+                self.presenter.open_selected_checkpoint_in_editor(text)
 
     @Slot()
     def onClickStartMantidNormally(self):

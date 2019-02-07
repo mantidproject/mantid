@@ -21,7 +21,7 @@ from six import PY2, iteritems
 
 # local imports
 from mantidqt.widgets.codeeditor.inputsplitter import InputSplitter
-from mantidqt.utils.asynchronous import AsyncTask, blocking_async_task
+from mantidqt.utils.asynchronous import AsyncTask, BlockingAsyncTask
 
 if PY2:
     from inspect import getargspec as getfullargspec
@@ -107,11 +107,7 @@ class PythonCodeExecution(QObject):
 
         self._globals_ns = None
 
-        # Task wrapper class is required because task needs to be set inside of a function before function exits
-        class task_wrapper(object):
-            def __init__(self, task):
-                self._task = task
-        self._task = task_wrapper(None)
+        self._task = None
 
         self.reset_context()
 
@@ -123,12 +119,8 @@ class PythonCodeExecution(QObject):
         return self._globals_ns
 
     def abort(self):
-        """Cancel an asynchronous execution"""
-        # Implementation is based on
-        # https://stackoverflow.com/questions/5019436/python-how-to-terminate-a-blocking-thread
-        ctypes.pythonapi.PyThreadState_SetAsyncExc(ctypes.c_long(self._task._task.ident),
-                                                   ctypes.py_object(KeyboardInterrupt))
-        time.sleep(0.1)
+        if self._task is not None:
+            self._task.abort()
 
     def execute_async(self, code_str, filename='', blocking=False):
         """
@@ -146,12 +138,13 @@ class PythonCodeExecution(QObject):
             task = AsyncTask(self.execute, args=(code_str, filename),
                              success_cb=self._on_success, error_cb=self._on_error)
             task.start()
-            self._task._task = task
+            self._task = task
             return task
         else:
-            blocking_async_task(self.execute, args=(code_str, filename),
-                                success_cb=self._on_success, error_cb=self._on_error,
-                                blocking_cb=QApplication.processEvents, task_reference=self._task)
+            self._task = BlockingAsyncTask(self.execute, args=(code_str, filename),
+                                           success_cb=self._on_success, error_cb=self._on_error,
+                                           blocking_cb=QApplication.processEvents)
+            return self._task.begin()
 
     def execute(self, code_str, filename=None):
         """Execute the given code on the calling thread
@@ -204,7 +197,7 @@ class PythonCodeExecution(QObject):
 
     # --------------------- Private -------------------------------
     def _reset_task(self):
-        self._task._task = None
+        self._task = None
 
 
 class CodeBlock(object):

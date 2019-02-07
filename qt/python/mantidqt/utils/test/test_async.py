@@ -16,7 +16,7 @@ import unittest
 # 3rdparty imports
 
 # local imports
-from mantidqt.utils.asynchronous import AsyncTask, blocking_async_task
+from mantidqt.utils.asynchronous import AsyncTask, BlockingAsyncTask
 
 
 class AsyncTaskTest(unittest.TestCase):
@@ -163,29 +163,35 @@ class BlockingAsyncTaskTest(unittest.TestCase):
         def foo():
             return 42
 
-        self.assertEqual(42, blocking_async_task(foo))
+        task = BlockingAsyncTask(foo)
+
+        self.assertEqual(42, task.begin())
 
     def test_successful_positional_args_operation(self):
         def foo(shift):
             return 42 + shift
 
         shift = 2
-        self.assertEqual(42 + shift, blocking_async_task(foo, args=(shift,)))
+        task = BlockingAsyncTask(foo, args=(shift,))
+
+        self.assertEqual(42 + shift, task.begin())
 
     def test_successful_args_and_kwargs_operation(self):
         def foo(scale, shift):
             return scale*42 + shift
 
         scale, shift = 2, 4
-        self.assertEqual(scale*42 + shift, blocking_async_task(foo, args=(scale,), kwargs={'shift': shift}))
+
+        task = BlockingAsyncTask(foo, args=(scale,), kwargs={'shift': shift})
+        self.assertEqual(scale*42 + shift, task.begin())
 
     def test_unsuccessful_args_and_kwargs_operation_raises_exception(self):
         def foo(scale, shift):
             raise RuntimeError("Bad operation")
 
         scale, shift = 2, 4
-        self.assertRaises(RuntimeError,
-                          blocking_async_task, foo, args=(scale,), kwargs={'shift': shift})
+        task = BlockingAsyncTask(foo, args=(scale,), kwargs={'shift': shift})
+        self.assertRaises(RuntimeError, task.begin())
 
 
 if __name__ == "__main__":

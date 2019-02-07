@@ -286,12 +286,22 @@ class ProjectRecovery(object):
             while failure:
                 failure = self.recovery_presenter.start_recovery_failure()
 
+        pid_dir = self.get_pid_folder_to_be_used_to_load_a_checkpoint_from()
+        # Restart project recovery as we stay synchronous
+        self.clear_all_unused_checkpoints(pid_dir)
+        self.start_recovery_thread()
+
     def load_checkpoint(self, directory):
+        """
+        Load in a checkpoint that was saved by project recovery
+        :param directory: The directory from which to recover
+        :return: True, when recovery fails, False when recovery succeeds
+        """
         # Start Regen of workspaces
         self._regen_workspaces(directory)
 
-        # Load interfaces back. This must occur after workspaces have been loaded back because otherwise some interfaces
-        # may be unable to be recreated.
+        # Load interfaces back. This must occur after workspaces have been loaded back because otherwise some
+        # interfaces may be unable to be recreated.
         self._load_project_interfaces(directory)
 
     def open_checkpoint_in_script_editor(self, checkpoint):
@@ -328,13 +338,24 @@ class ProjectRecovery(object):
         with open(script) as f:
             num_lines = len(f.readlines())
 
-        QMetaObject.invokeMethod(self.multi_file_interpreter, "open_file_in_new_tab", Qt.BlockingQueuedConnection,
-                                 Q_ARG(str, script))
+        if self.recovery_presenter.open_selected_in_editor_selected:
+            self._open_script_in_editor_call(Qt.QueuedConnection, script)
+        else:
+            self._open_script_in_editor_call(Qt.BlockingQueuedConnection, script)
 
         self.recovery_presenter.connect_progress_bar_to_recovery_view()
         self.recovery_presenter.set_up_progress_bar(num_lines)
 
+    def _open_script_in_editor_call(self, connection_type, script):
+        QMetaObject.invokeMethod(self.multi_file_interpreter, "open_file_in_new_tab", connection_type,
+                                 Q_ARG(str, script))
+
     def _run_script_in_open_editor(self):
+        # Make sure the current editor is connected to the recovery thread's error function
+        self.multi_file_interpreter.current_editor().sig_exec_error.connect(
+            self.recovery_presenter.model.recovery_thread.exec_error)
+
+        # Actually execute he current tab
         QMetaObject.invokeMethod(self.multi_file_interpreter, "execute_current_async_blocking",
                                  Qt.BlockingQueuedConnection)
 
@@ -390,3 +411,5 @@ class ProjectRecovery(object):
     # todo: Shorten saved time and dates to removed micro and milli seconds
 
     # todo: Remove checkpoint of current pid on successful save
+
+    # todo: Update status on abort of script on the status bar of script editor

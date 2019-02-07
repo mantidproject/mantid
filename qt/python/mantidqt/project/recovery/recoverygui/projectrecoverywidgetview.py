@@ -8,8 +8,9 @@
 #
 
 from qtpy.QtWidgets import QDialog, QHeaderView, QTableWidgetItem
-from qtpy.QtCore import Signal, Slot, QObject
+from qtpy.QtCore import Signal, Slot
 from mantidqt.utils.qt import load_ui
+from mantid.kernel import logger
 
 
 class ProjectRecoveryWidgetView(QDialog):
@@ -35,8 +36,8 @@ class ProjectRecoveryWidgetView(QDialog):
             self.update_progress_bar)
 
     def emit_abort_script(self):
-        # todo: actually connect these values
         self.abort_project_recovery_script.connect(self.presenter.project_recovery.multi_file_interpreter.abort_all)
+        logger.error("Project Recovery: Cancelling recovery")
         self.abort_project_recovery_script.emit()
 
     def change_start_mantid_button(self, string):

@@ -29,6 +29,7 @@ from mantidqt.io import open_a_file_dialog
 IDLE_STATUS_MSG = "Status: Idle."
 LAST_JOB_MSG_TEMPLATE = "Last job completed {} at {} in {:.3f}s"
 RUNNING_STATUS_MSG = "Status: Running"
+ABORTED_STATUS_MSG = "Status: Aborted"
 
 # Editor
 CURRENTLINE_BKGD_COLOR = QColor(247, 236, 248)
@@ -224,6 +225,7 @@ class PythonFileInterpreterPresenter(QObject):
     def req_abort(self):
         if self.is_executing:
             self.model.abort()
+            self.view.set_status_message(ABORTED_STATUS_MSG)
 
     def req_execute_async(self):
         self._req_execute_impl(blocking=False)

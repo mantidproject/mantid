@@ -21,6 +21,7 @@ class ProjectRecoveryPresenter(object):
 
         self.start_mantid_normally_called = False
         self.allow_start_mantid_normally = True
+        self.open_selected_in_editor_selected = False
 
     def start_recovery_view(self):
         # Only start this view if there is nothing as current_view
@@ -49,6 +50,11 @@ class ProjectRecoveryPresenter(object):
         if self.current_view is not None:
             raise RuntimeError("Project Recovery: A view is already open")
 
+        # Reset whether model believes recovery has been started.
+        rows = self.model.rows
+        self.model = ProjectRecoveryModel(self.project_recovery, self)
+        self._set_checkpoint_tried_values_from_rows(rows)
+
         try:
             self.current_view = RecoveryFailureView(self)
             self.current_view.exec_()
@@ -66,6 +72,10 @@ class ProjectRecoveryPresenter(object):
             return True
 
         return False
+
+    def _set_checkpoint_tried_values_from_rows(self, rows):
+        for ii in range(0, self.get_number_of_checkpoints()):
+            self.model.rows[ii][2] = rows[ii][2]
 
     def get_row(self, index):
         row = self.model.get_row(index)
@@ -104,6 +114,7 @@ class ProjectRecoveryPresenter(object):
     def open_selected_checkpoint_in_editor(self, selected):
         if self.model.has_recovery_started():
             return
+        self.open_selected_in_editor_selected = True
         self.model.open_selected_in_editor(selected)
 
     def close_view(self):
@@ -117,9 +128,6 @@ class ProjectRecoveryPresenter(object):
     def change_start_mantid_to_cancel_label(self):
         self.allow_start_mantid_normally = False
         self.current_view.change_start_mantid_button("Cancel Recovery")
-
-    def fill_all_rows(self):
-        self.model.fill_rows()
 
     def set_up_progress_bar(self, max_value):
         self.current_view.set_progress_bar_maximum(max_value)

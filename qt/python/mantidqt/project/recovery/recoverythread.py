@@ -13,12 +13,16 @@ from qtpy.QtCore import QThread, Slot
 class RecoveryThread(QThread):
     def __init__(self):
         super(RecoveryThread, self).__init__()
-        self.failed_run_in_thread = True
+        self.failed_run_in_thread = False
         self.checkpoint = None
         self.project_recovery = None
 
     def run(self):
-        self.failed_run_in_thread = self.project_recovery.load_checkpoint(self.checkpoint)
+        self.project_recovery.load_checkpoint(self.checkpoint)
+
+    @Slot()
+    def exec_error(self):
+        self.failed_run_in_thread = True
 
 
 

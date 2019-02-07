@@ -36,8 +36,7 @@ class ProjectRecoveryModel(QObject):
         self.failed_run = False
 
         self.rows = []
-
-        self._fill_first_row()
+        self.fill_rows()
 
         self.recovery_thread = None
 
@@ -67,8 +66,6 @@ class ProjectRecoveryModel(QObject):
             return self.rows[checkpoint]
 
     def start_mantid_normally(self):
-        self.project_recovery.clear_all_unused_checkpoints()
-        self.project_recovery.start_recovery_thread()
         self.presenter.close_view()
 
     def recover_selected_checkpoint(self, selected):
@@ -108,10 +105,6 @@ class ProjectRecoveryModel(QObject):
             # Fail "silently"
             self.failed_run = True
 
-        # Restart project recovery as we stay synchronous
-        self.project_recovery.clear_all_unused_checkpoints(pid_dir)
-        self.project_recovery.start_recovery_thread()
-
         if self.failed_run:
             self._update_checkpoint_tried(selected)
 
@@ -135,15 +128,11 @@ class ProjectRecoveryModel(QObject):
         pid_folder = self.project_recovery.get_pid_folder_to_be_used_to_load_a_checkpoint_from()
         paths = self.project_recovery.listdir_fullpath(os.path.join(self.project_recovery.recovery_directory_hostname,
                                                                     pid_folder))
-        self.project_recovery.sort_by_last_modified(paths)
 
+        paths.sort()
         for path in paths:
             checkpoint_name = os.path.basename(path)
             checkpoint_name = replace_t_with_space(checkpoint_name)
-
-            # If checkpoint is already present in paths then ignore and continue (Needed due to first GUI)
-            if self.rows[0][0] == checkpoint_name:
-                continue
 
             self._fill_row(path, checkpoint_name)
 
@@ -153,7 +142,7 @@ class ProjectRecoveryModel(QObject):
             self.rows.append(["", "", ""])
 
         # Now sort based on the first element of the lists (So it is in order of most recent checkpoint first)
-        self.rows.sort(key=lambda x: x[0])
+        self.rows.sort(key=lambda x: x[0], reverse=True)
 
     @staticmethod
     def get_number_of_checkpoints():
@@ -165,17 +154,17 @@ class ProjectRecoveryModel(QObject):
             # Fail silently and return 5 (the default)
             return 5
 
-    def _fill_first_row(self):
-        pid_folder = self.project_recovery.get_pid_folder_to_be_used_to_load_a_checkpoint_from()
-        paths = self.project_recovery.listdir_fullpath(os.path.join(
-            self.project_recovery.recovery_directory_hostname, pid_folder))
-        paths = self.project_recovery.sort_by_last_modified(paths)
-
-        # Grab the first path as that is the one that should be loaded into the rows
-        path = paths[0]
-        checkpoint_name = os.path.basename(path)
-        checkpoint_name = replace_t_with_space(checkpoint_name)
-        self._fill_row(path, checkpoint_name)
+    # def _fill_first_row(self):
+    #     pid_folder = self.project_recovery.get_pid_folder_to_be_used_to_load_a_checkpoint_from()
+    #     paths = self.project_recovery.listdir_fullpath(os.path.join(
+    #         self.project_recovery.recovery_directory_hostname, pid_folder))
+    #
+    #     # Grab the first path as that is the one that should be loaded into the rows
+    #     paths.sort()
+    #     path = paths[-1]
+    #     checkpoint_name = os.path.basename(path)
+    #     checkpoint_name = replace_t_with_space(checkpoint_name)
+    #     self._fill_row(path, checkpoint_name)
 
     def _fill_row(self, path, checkpoint_name):
         num_of_ws = str(self.find_number_of_workspaces_in_directory(path))
@@ -204,16 +193,9 @@ class ProjectRecoveryModel(QObject):
     def recovery_complete(self):
         self.failed_run = self.recovery_thread.failed_run_in_thread
 
-        pid_dir = self.project_recovery.get_pid_folder_to_be_used_to_load_a_checkpoint_from()
         # If the run failed update the tried else it wasn't a failure and
         if self.failed_run:
             self._update_checkpoint_tried(self.selected_checkpoint)
-        else:
-            self.project_recovery.clear_all_unused_checkpoints(pid_dir)
-
-        # Restart project recovery as we stay synchronous
-        self.project_recovery.clear_all_unused_checkpoints(pid_dir)
-        self.project_recovery.start_recovery_thread()
 
         self.recovery_running = False
         self.presenter.close_view()

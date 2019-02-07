@@ -78,9 +78,7 @@ class MultiPythonFileInterpreter(QWidget):
         """Request that all executing tabs are cancelled"""
         for ii in range(0, len(self._tabs)):
             editor = self.editor_at(ii)
-            # Check if the editor is actually running a task
-            if editor._presenter.model._task._task is not None:
-                editor.abort()
+            editor.abort()
 
     def close_all(self):
         """
