@@ -202,11 +202,16 @@ void LoadDiffCal::getInstrument(H5File &file) {
 
 void LoadDiffCal::makeGroupingWorkspace(const std::vector<int32_t> &detids,
                                         const std::vector<int32_t> &groups) {
-  // load grouping from a separate file if supplied
-  bool makeWS = loadGroupingFromAlternateFile();
+  bool makeWS = getProperty(PropertyNames::MAKE_GRP);
   if (!makeWS) {
     g_log.information(
         "Not loading GroupingWorkspace from the calibration file");
+    return;
+  }
+
+  // load grouping from a separate file if supplied
+  if (!isDefault(PropertyNames::GROUP_FILE)) {
+    loadGroupingFromAlternateFile();
     return;
   }
 
@@ -368,17 +373,21 @@ void LoadDiffCal::makeCalWorkspace(const std::vector<int32_t> &detids,
 
 /// @return true if the grouping information should be taken from the
 /// calibration file
-bool LoadDiffCal::loadGroupingFromAlternateFile() {
+void LoadDiffCal::loadGroupingFromAlternateFile() {
   bool makeWS = getProperty(PropertyNames::MAKE_GRP);
   if (!makeWS)
-    return false; // input property says not to load grouping
+    return; // input property says not to load grouping
 
   if (isDefault(PropertyNames::GROUP_FILE))
-    return true; // a separate grouping file was not specified
+    return; // a separate grouping file was not specified
 
   std::string filename = getPropertyValue(PropertyNames::GROUP_FILE);
   g_log.information() << "Override grouping with information from \""
                       << filename << "\"\n";
+  if (!m_instrument) {
+    throw std::runtime_error(
+        "Do not have an instrument defined before loading separate grouping");
+  }
   GroupingWorkspace_sptr wksp =
       boost::make_shared<DataObjects::GroupingWorkspace>(m_instrument);
 
@@ -404,17 +413,15 @@ bool LoadDiffCal::loadGroupingFromAlternateFile() {
     wksp = alg->getProperty("OutputWorkspace");
   }
   setGroupWSProperty(this, m_workspaceName, wksp);
-
-  return false; // the information has already been loaded
 }
 
 void LoadDiffCal::runLoadCalFile() {
   bool makeCalWS = getProperty(PropertyNames::MAKE_CAL);
   bool makeMaskWS = getProperty(PropertyNames::MAKE_MSK);
+  bool makeGroupWS = getProperty(PropertyNames::MAKE_GRP);
   API::MatrixWorkspace_sptr inputWs = getProperty("InputWorkspace");
 
-  // load grouping from a separate file if supplied
-  bool makeGroupWS = loadGroupingFromAlternateFile();
+  bool haveGroupingFile = !isDefault(PropertyNames::GROUP_FILE);
 
   auto alg = createChildAlgorithm("LoadCalFile", 0., 1.);
   alg->setPropertyValue("CalFilename", m_filename);
@@ -442,7 +449,14 @@ void LoadDiffCal::runLoadCalFile() {
 
   if (makeGroupWS) {
     GroupingWorkspace_sptr wksp = alg->getProperty("OutputGroupingWorkspace");
-    setGroupWSProperty(this, m_workspaceName, wksp);
+    if (haveGroupingFile) {
+      // steal the instrument from what was loaded already
+      if (!m_instrument)
+        m_instrument = wksp->getInstrument();
+      loadGroupingFromAlternateFile();
+    } else {
+      setGroupWSProperty(this, m_workspaceName, wksp);
+    }
   }
 }
 
