@@ -258,6 +258,9 @@ void ReflectometryReductionOne2::exec() {
   // Create the output workspace in wavelength
   MatrixWorkspace_sptr IvsLam = makeIvsLam();
 
+  // Crop to wavelength limits
+  IvsLam = cropWavelength(IvsLam, false);
+
   // Convert to Q
   auto IvsQ = convertToQ(IvsLam);
 
@@ -419,11 +422,6 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::makeIvsLam() {
       result = transOrAlgCorrection(result, true);
       outputDebugWorkspace(result, wsName, "_norm_trans", debug, step);
     }
-
-    // Crop to wavelength limits
-    g_log.debug("Cropping output workspace\n");
-    result = cropWavelength(result, false);
-    outputDebugWorkspace(result, wsName, "_cropped", debug, step);
   }
 
   return result;
