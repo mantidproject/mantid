@@ -18,8 +18,8 @@ IndirectEditResultsDialog::IndirectEditResultsDialog(QWidget *parent)
 
   connect(m_uiForm.pbPasteInputName, SIGNAL(clicked()), this,
           SLOT(setOutputWorkspaceName()));
-  connect(m_uiForm.pbInsertSpectrum, SIGNAL(clicked()), this,
-          SIGNAL(insertSingleSpectrum()));
+  connect(m_uiForm.pbReplaceBin, SIGNAL(clicked()), this,
+          SIGNAL(replaceSingleSpectrum()));
   connect(m_uiForm.pbClose, SIGNAL(clicked()), this, SIGNAL(closeDialog()));
 }
 
@@ -30,17 +30,22 @@ void IndirectEditResultsDialog::setWorkspaceSelectorSuffices(
 }
 
 void IndirectEditResultsDialog::setOutputWorkspaceName() {
-  m_uiForm.leOutputWorkspace->setText(getSelectedInputWorkspaceName());
+  m_uiForm.leOutputWorkspace->setText(
+      QString::fromStdString(getSelectedInputWorkspaceName()));
 }
 
-QString IndirectEditResultsDialog::getSelectedInputWorkspaceName() const {
-  return m_uiForm.wsInputWorkspace->currentText();
+std::string IndirectEditResultsDialog::getSelectedInputWorkspaceName() const {
+  return m_uiForm.wsInputWorkspace->currentText().toStdString();
 }
 
-// std::string
-// IndirectEditResultsDialog::getSelectedSingleSpectrumWorkspaceName() const {
-//  return m_uiForm.wsSingleSpectrumWorkspace->currentText().toStdString();
-//}
+std::string
+IndirectEditResultsDialog::getSelectedSingleFitWorkspaceName() const {
+  return m_uiForm.wsSingleSpectrumWorkspace->currentText().toStdString();
+}
+
+std::string IndirectEditResultsDialog::getOutputWorkspaceName() const {
+  return m_uiForm.leOutputWorkspace->text().toStdString();
+}
 
 } // namespace IDA
 } // namespace CustomInterfaces

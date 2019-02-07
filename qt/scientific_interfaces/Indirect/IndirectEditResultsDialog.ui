@@ -23,7 +23,7 @@
       <item row="1" column="0">
        <widget class="QLabel" name="lbSpectrum">
         <property name="text">
-         <string>Single Spectrum Workspace:</string>
+         <string>Single Fit Result Workspace:</string>
         </property>
        </widget>
       </item>
@@ -129,9 +129,9 @@
        </spacer>
       </item>
       <item>
-       <widget class="QPushButton" name="pbInsertSpectrum">
+       <widget class="QPushButton" name="pbReplaceBin">
         <property name="text">
-         <string>Insert Spectrum</string>
+         <string>Replace Bin</string>
         </property>
        </widget>
       </item>

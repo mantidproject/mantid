@@ -58,7 +58,7 @@ private slots:
   void plotResult();
   void saveResult();
   void editResult();
-  void insertSingleSpectrum();
+  void replaceSingleSpectrum();
   void closeEditResultDialog();
 
 private:

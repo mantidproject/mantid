@@ -261,6 +261,7 @@ set ( SRC_FILES
 	src/RemoveWorkspaceHistory.cpp
 	src/RenameWorkspace.cpp
 	src/RenameWorkspaces.cpp
+	src/ReplaceIndirectFitResultBin.cpp
 	src/ReplaceSpecialValues.cpp
 	src/ResampleX.cpp
 	src/ResetNegatives.cpp
@@ -603,6 +604,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/RemoveWorkspaceHistory.h
 	inc/MantidAlgorithms/RenameWorkspace.h
 	inc/MantidAlgorithms/RenameWorkspaces.h
+	inc/MantidAlgorithms/ReplaceIndirectFitResultBin.h
 	inc/MantidAlgorithms/ReplaceSpecialValues.h
 	inc/MantidAlgorithms/ResampleX.h
 	inc/MantidAlgorithms/ResetNegatives.h

@@ -168,8 +168,8 @@ void IndirectFitOutputOptionsPresenter::editResult() {
   m_editResultsDialog = getEditResultsDialog(m_view->parentWidget());
   m_editResultsDialog->setWorkspaceSelectorSuffices({"_Result"});
   m_editResultsDialog->show();
-  connect(m_editResultsDialog.get(), SIGNAL(insertSingleSpectrum()), this,
-          SLOT(insertSingleSpectrum()));
+  connect(m_editResultsDialog.get(), SIGNAL(replaceSingleSpectrum()), this,
+          SLOT(replaceSingleSpectrum()));
   connect(m_editResultsDialog.get(), SIGNAL(closeDialog()), this,
           SLOT(closeEditResultDialog()));
 }
@@ -179,11 +179,17 @@ IndirectFitOutputOptionsPresenter::getEditResultsDialog(QWidget *parent) const {
   return Mantid::Kernel::make_unique<IndirectEditResultsDialog>(parent);
 }
 
-void IndirectFitOutputOptionsPresenter::insertSingleSpectrum() {}
+void IndirectFitOutputOptionsPresenter::replaceSingleSpectrum() {
+  auto const inputName = m_editResultsDialog->getSelectedInputWorkspaceName();
+  auto const singleFitName =
+      m_editResultsDialog->getSelectedSingleFitWorkspaceName();
+  auto const outputName = m_editResultsDialog->getOutputWorkspaceName();
+  m_model->runReplaceSingleSpectrum(inputName, singleFitName, outputName);
+}
 
 void IndirectFitOutputOptionsPresenter::closeEditResultDialog() {
-  disconnect(m_editResultsDialog.get(), SIGNAL(insertSingleSpectrum()), this,
-             SLOT(insertSingleSpectrum()));
+  disconnect(m_editResultsDialog.get(), SIGNAL(replaceSingleSpectrum()), this,
+             SLOT(replaceSingleSpectrum()));
   disconnect(m_editResultsDialog.get(), SIGNAL(closeDialog()), this,
              SLOT(closeEditResultDialog()));
   m_editResultsDialog->close();

@@ -7,6 +7,7 @@
 #include "IndirectFitOutputOptionsModel.h"
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/Workspace.h"
@@ -21,6 +22,11 @@ std::string noWorkspaceErrorMessage(std::string const &process) {
 
 MatrixWorkspace_const_sptr convertToMatrixWorkspace(Workspace_sptr workspace) {
   return boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
+}
+
+MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) {
+  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+      workspaceName);
 }
 
 std::unordered_map<std::string, std::size_t> extractAxisLabels(Axis *axis) {
@@ -238,6 +244,18 @@ IndirectFitOutputOptionsModel::getPDFWorkspaceNames() const {
 bool IndirectFitOutputOptionsModel::isResultGroupSelected(
     std::string const &selectedGroup) const {
   return selectedGroup == "Result Group";
+}
+
+void IndirectFitOutputOptionsModel::runReplaceSingleSpectrum(
+    std::string const &inputName, std::string const &singleFitName,
+    std::string const &outputName) const {
+  auto replaceAlg =
+      AlgorithmManager::Instance().create("ReplaceIndirectFitResultBin");
+  replaceAlg->setProperty("InputWorkspace", getADSMatrixWorkspace(inputName));
+  replaceAlg->setProperty("SingleBinWorkspace",
+                          getADSMatrixWorkspace(singleFitName));
+  replaceAlg->setProperty("OutputWorkspace", outputName);
+  replaceAlg->execute();
 }
 
 } // namespace IDA

@@ -24,17 +24,18 @@ public:
 
   void setWorkspaceSelectorSuffices(QStringList const &suffices);
 
+  std::string getSelectedInputWorkspaceName() const;
+  std::string getSelectedSingleFitWorkspaceName() const;
+  std::string getOutputWorkspaceName() const;
+
 signals:
-  void insertSingleSpectrum();
+  void replaceSingleSpectrum();
   void closeDialog();
 
 private slots:
   void setOutputWorkspaceName();
 
 private:
-  QString getSelectedInputWorkspaceName() const;
-  //std::string getSelectedSingleSpectrumWorkspaceName() const;
-
   Ui::IndirectEditResultsDialog m_uiForm;
 };
 
