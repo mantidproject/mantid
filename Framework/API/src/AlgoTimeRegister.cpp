@@ -49,9 +49,11 @@ AlgoTimeRegister::~AlgoTimeRegister() {
   for (auto &elem : m_info) {
     auto st = diff(m_hstart, elem.m_begin);
     auto fi = diff(m_hstart, elem.m_end);
-    fs << elem.m_threadId << ">>" << elem.m_name << ":"
-       << std::size_t(st.tv_sec * 1000000000) + st.tv_nsec << "<>"
-       << std::size_t(fi.tv_sec * 1000000000) + fi.tv_nsec << "\n";
+    fs << "ThreadID=" << elem.m_threadId
+       << ", AlgorithmName=" << elem.m_name
+       << ", StartTime=" << std::size_t(st.tv_sec * 1000000000) + st.tv_nsec
+       << ", EndTime=" << std::size_t(fi.tv_sec * 1000000000) + fi.tv_nsec
+       << "\n";
   }
 }
 
