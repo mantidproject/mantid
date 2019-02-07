@@ -368,20 +368,20 @@ public:
   int rowRelativeToParent();
   bool isRoot();
   int depth();
-  bool isChildOf(const RowLocation &other);
-  bool isSiblingOf(const RowLocation &other);
-  bool isChildOrSiblingOf(const RowLocation &other);
-  bool isDescendantOf(const RowLocation &other);
-  RowLocation parent();
-  RowLocation relativeTo(const RowLocation &ancestor);
-  RowLocation child(int n);
+  bool isChildOf(const MantidQt::MantidWidgets::Batch::RowLocation &other);
+  bool isSiblingOf(const MantidQt::MantidWidgets::Batch::RowLocation &other);
+  bool isChildOrSiblingOf(const MantidQt::MantidWidgets::Batch::RowLocation &other);
+  bool isDescendantOf(const MantidQt::MantidWidgets::Batch::RowLocation &other);
+  MantidQt::MantidWidgets::Batch::RowLocation parent();
+  MantidQt::MantidWidgets::Batch::RowLocation relativeTo(const MantidQt::MantidWidgets::Batch::RowLocation &ancestor);
+  MantidQt::MantidWidgets::Batch::RowLocation child(int n);
 
-  bool operator==(const RowLocation& other);
-  bool operator!=(const RowLocation& other);
-  bool operator<(const RowLocation& other);
-  bool operator<=(const RowLocation& other);
-  bool operator>(const RowLocation& other);
-  bool operator>=(const RowLocation& other);
+  bool operator==(const MantidQt::MantidWidgets::Batch::RowLocation& other);
+  bool operator!=(const MantidQt::MantidWidgets::Batch::RowLocation& other);
+  bool operator<(const MantidQt::MantidWidgets::Batch::RowLocation& other);
+  bool operator<=(const MantidQt::MantidWidgets::Batch::RowLocation& other);
+  bool operator>(const MantidQt::MantidWidgets::Batch::RowLocation& other);
+  bool operator>=(const MantidQt::MantidWidgets::Batch::RowLocation& other);
 };
 
 }; // Batch
