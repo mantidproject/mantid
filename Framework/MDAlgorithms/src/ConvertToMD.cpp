@@ -30,8 +30,8 @@
 
 #include "MantidGeometry/MDGeometry/MDHistoDimensionBuilder.h"
 
-#include "MantidMDAlgorithms/ConvToMDSelector.h"
 #include "MantidMDAlgorithms/ConvToMDEventsWSIndexing.h"
+#include "MantidMDAlgorithms/ConvToMDSelector.h"
 #include "MantidMDAlgorithms/MDTransfQ3D.h"
 #include "MantidMDAlgorithms/MDWSTransform.h"
 

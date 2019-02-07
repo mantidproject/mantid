@@ -36,8 +36,10 @@ class ConvToMDEventsWSIndexing : public ConvToMDEventsWS {
   // Interface function
   void appendEventsFromInputWS(API::Progress *pProgress,
                                const API::BoxController_sptr &bc) override;
+
 public:
   static bool isSplitValid(const std::vector<int> &split_into);
+
 private:
   // Returns number of workers for parallel parts
   int numWorkers() {
