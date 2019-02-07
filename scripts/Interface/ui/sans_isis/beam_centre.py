@@ -13,7 +13,7 @@ from six import with_metaclass
 from mantidqt.utils.qt import load_ui
 from mantidqt.widgets import messagedisplay
 from sans.gui_logic.gui_common import get_detector_from_gui_selection, \
-    get_detector_strings_for_gui, get_string_for_gui_from_reduction_mode
+     get_detector_strings_for_gui, get_string_for_gui_from_reduction_mode
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
