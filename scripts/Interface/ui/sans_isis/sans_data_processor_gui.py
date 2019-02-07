@@ -18,18 +18,11 @@ from qtpy.QtCore import (QRegExp, QSettings)  # noqa
 from qtpy.QtGui import (QDoubleValidator, QIcon, QIntValidator, QRegExpValidator)  # noqa
 from six import with_metaclass
 
+from reduction_gui.reduction.scripter import execute_script
 from mantid.kernel import (Logger)
+from mantidqt import icons
 from mantidqt.utils.qt import load_ui
 from mantidqt.widgets import jobtreeview, manageuserdirectories
-
-try:
-    from mantidplot import pymantidplot
-    QT4 = True
-except ImportError:
-    # When workbench has help functionality exposed, use that for both MantidPlot and Workbench
-    QT4 = False
-
-from reduction_gui.reduction.scripter import execute_script
 from sans.common.enums import (ReductionDimensionality, OutputMode, SaveType, SANSInstrument,
                                RangeStepType, ReductionMode, FitType)
 from sans.common.file_information import SANSFileInformationFactory
@@ -43,12 +36,17 @@ from sans.gui_logic.models.run_selection import RunSelection
 from sans.gui_logic.models.run_finder import SummableRunFinder
 from sans.gui_logic.models.summation_settings import SummationSettings
 from sans.gui_logic.models.binning_type import BinningType
-
 from sans.gui_logic.presenter.add_runs_presenter import AddRunsPagePresenter
 from sans.gui_logic.presenter.run_selector_presenter import RunSelectorPresenter
 from sans.gui_logic.presenter.summation_settings_presenter import SummationSettingsPresenter
 from ui.sans_isis.work_handler import WorkHandler
 from ui.sans_isis.SANSSaveOtherWindow import SANSSaveOtherDialog
+
+try:
+    from pymantidplot import proxies
+    QT4 = True
+except ImportError:
+    QT4 = False
 
 DEFAULT_BIN_SETTINGS = \
     '5.5,45.5,50.0, 50.0,1000.0, 500.0,1500.0, 750.0,99750.0, 255.0,100005.0'
@@ -204,12 +202,12 @@ class SANSDataProcessorGui(QMainWindow,
 
         self.instrument = SANSInstrument.NoInstrument
 
-        self.paste_button.setIcon(QIcon(":/paste.png"))
-        self.copy_button.setIcon(QIcon(":/copy.png"))
-        self.cut_button.setIcon(QIcon(":/cut.png"))
-        self.erase_button.setIcon(QIcon(":/erase.png"))
-        self.delete_row_button.setIcon(QIcon(":/delete_row.png"))
-        self.insert_row_button.setIcon(QIcon(":/insert_row.png"))
+        self.paste_button.setIcon(icons.get_icon("fa.paste"))
+        self.copy_button.setIcon(icons.get_icon("fa.copy"))
+        self.cut_button.setIcon(icons.get_icon("fa.cut"))
+        self.erase_button.setIcon(icons.get_icon("fa.eraser"))
+        self.delete_row_button.setIcon(icons.get_icon("fa.trash"))
+        self.insert_row_button.setIcon(icons.get_icon("fa.table"))
 
         self.paste_button.clicked.connect(self._paste_rows_requested)
         self.copy_button.clicked.connect(self._copy_rows_requested)
@@ -267,25 +265,19 @@ class SANSDataProcessorGui(QMainWindow,
         self.tab_choice_list.currentRowChanged.connect(self.set_current_page)
         self.set_current_page(0)
 
-        path = os.path.dirname(__file__)
-        runs_icon_path = os.path.join(path, "icons", "run.png")
-        runs_icon = QIcon(runs_icon_path)
+        runs_icon = icons.get_icon("fa.play-circle-o")
         _ = QListWidgetItem(runs_icon, "Runs", self.tab_choice_list)  # noqa
 
-        settings_icon_path = os.path.join(path, "icons", "settings.png")
-        settings_icon = QIcon(settings_icon_path)
+        settings_icon = icons.get_icon("fa.cog")
         _ = QListWidgetItem(settings_icon, "Settings", self.tab_choice_list)  # noqa
 
-        centre_icon_path = os.path.join(path, "icons", "centre.png")
-        centre_icon = QIcon(centre_icon_path)
+        centre_icon = icons.get_icon("fa.dot-circle-o")
         _ = QListWidgetItem(centre_icon, "Beam Centre", self.tab_choice_list)  # noqa
 
-        add_runs_page_icon_path = os.path.join(path, "icons", "sum.png")
-        add_runs_page_icon = QIcon(add_runs_page_icon_path)
+        add_runs_page_icon = icons.get_icon("fa.plus-circle")
         _ = QListWidgetItem(add_runs_page_icon, "Sum Runs", self.tab_choice_list)  # noqa
 
-        diagnostic_icon_path = os.path.join(path, "icons", "diagnostic.png")
-        diagnostic_icon = QIcon(diagnostic_icon_path)
+        diagnostic_icon = icons.get_icon("fa.question-circle")
         _ = QListWidgetItem(diagnostic_icon, "Diagnostic Page", self.tab_choice_list)  # noqa
 
         # Set the 0th row enabled
@@ -520,7 +512,7 @@ class SANSDataProcessorGui(QMainWindow,
 
     def _on_help_button_clicked(self):
         if QT4:
-            pymantidplot.proxies.showCustomInterfaceHelp('ISIS SANS v2')
+            proxies.showCustomInterfaceHelp('ISIS SANS v2')
 
     def _on_user_file_load(self):
         """

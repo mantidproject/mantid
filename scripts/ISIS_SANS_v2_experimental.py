@@ -8,14 +8,9 @@
 """
     Script used to start the Test Interface from MantidPlot
 """
-import sys
-
-#from gui_helper import get_qapplication
 from sans.common.enums import SANSFacility
 from sans.gui_logic.presenter.run_tab_presenter import RunTabPresenter
 from ui.sans_isis import sans_data_processor_gui
-
-#app, within_mantid = get_qapplication()
 
 # -----------------------------------------------
 # Create presenter
@@ -34,5 +29,3 @@ run_tab_presenter.set_view(ui)
 
 # Show
 ui.show()
-#if not within_mantid:
-#    sys.exit(app.exec_())

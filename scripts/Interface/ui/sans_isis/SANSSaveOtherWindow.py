@@ -11,10 +11,11 @@ from mantidqt.widgets.workspacewidget import workspacetreewidget
 from sans.common.enums import SaveType
 
 try:
-    from mantidplot import pymantidplot
+    from pymantidplot import proxies
     QT4 = True
 except ImportError:
     QT4 = False
+
 
 Ui_SaveOtherDialog, _ = load_ui(__file__, "save_other_dialog.ui")
 
@@ -97,7 +98,7 @@ class SANSSaveOtherDialog(QtWidgets.QDialog, Ui_SaveOtherDialog):
 
     def _on_help_button_clicked(self):
         if QT4:
-            pymantidplot.proxies.showCustomInterfaceHelp('sans_save_other')
+            proxies.showCustomInterfaceHelp('sans_save_other')
 
     @property
     def progress_bar_minimum(self):
