@@ -289,7 +289,7 @@ void LoadILLIndirect2::loadDataIntoTheWorkSpace(
   for (size_t im = 0; im < m_numberOfMonitors; im++) {
 
     if (im > 0) {
-      m_localWorkspace->dataX(im) = m_localWorkspace->readX(0);
+      m_localWorkspace->setSharedX(im, m_localWorkspace->sharedX(0));
     }
 
     // Assign Y

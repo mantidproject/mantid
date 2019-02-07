@@ -7,6 +7,7 @@
 #include "MantidQtWidgets/Common/Batch/CellDelegate.h"
 #include "MantidQtWidgets/Common/Batch/CellStandardItem.h"
 #include "MantidQtWidgets/Common/Batch/QtStandardItemTreeAdapter.h"
+#include <QKeyEvent>
 #include <QPainter>
 
 namespace MantidQt {

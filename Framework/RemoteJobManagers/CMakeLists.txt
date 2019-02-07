@@ -63,4 +63,4 @@ add_subdirectory ( test )
 # Installation settings
 ###########################################################################
 
-install ( TARGETS RemoteJobManagers ${SYSTEM_PACKAGE_TARGET} DESTINATION ${PLUGINS_DIR} )
+mtd_install_targets( TARGETS RemoteJobManagers INSTALL_DIRS ${PLUGINS_DIR} ${WORKBENCH_PLUGINS_DIR})

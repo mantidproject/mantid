@@ -401,49 +401,6 @@ MatrixWorkspace_sptr operator/=(const MatrixWorkspace_sptr lhs,
 // Now the WorkspaceHelpers methods
 //----------------------------------------------------------------------
 
-/** Checks whether a workspace has common bins (or values) in X
- *  @param WS :: The workspace to check
- *  @return True if the bins match
- */
-bool WorkspaceHelpers::commonBoundaries(const MatrixWorkspace &WS) {
-  if (WS.getNumberHistograms() < 2 || WS.size() == 0)
-    return true;
-
-  // Quickest check is to see if they are actually all the same vector
-  if (sharedXData(WS))
-    return true;
-
-  // But even if they're not they could still match...
-  const auto &x_0 = WS.x(0);
-  const double commonSum = std::accumulate(x_0.begin(), x_0.end(), 0.);
-  // If this results in infinity or NaN, then we can't tell - return false
-  if (!std::isfinite(commonSum))
-    return false;
-  const size_t numHist = WS.getNumberHistograms();
-  for (size_t j = 1; j < numHist; ++j) {
-    const auto &x_j = WS.x(j);
-    // they should all have the same number of x-values
-    if (x_0.size() != x_j.size())
-      return false;
-
-    const double sum = std::accumulate(x_j.begin(), x_j.end(), 0.);
-    // If this results in infinity or NaN, then we can't tell - return false
-    if (!std::isfinite(sum))
-      return false;
-
-    if (std::abs(commonSum) < 1.0E-7 && std::abs(sum) < 1.0E-7) {
-      for (size_t i = 0; i < x_0.size(); i++) {
-        if (std::abs(x_0[i] - x_j[i]) > 1.0E-7)
-          return false;
-      }
-    } else if (std::abs(commonSum - sum) /
-                   std::max<double>(std::abs(commonSum), std::abs(sum)) >
-               1.0E-7)
-      return false;
-  }
-  return true;
-}
-
 /** Checks whether the bins (X values) of two workspace are the same
  *  @param ws1 :: The first workspace
  *  @param ws2 :: The second workspace

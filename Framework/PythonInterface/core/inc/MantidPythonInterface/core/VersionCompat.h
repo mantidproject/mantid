@@ -20,6 +20,7 @@
 #define FROM_CSTRING PyUnicode_FromString
 #define CODE_OBJECT(x) x
 #else
+#define IS_PY2K
 #define INT_CHECK PyInt_Check
 #define TO_LONG PyInt_AsLong
 #define STR_CHECK PyString_Check

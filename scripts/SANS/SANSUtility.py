@@ -255,6 +255,8 @@ def getBinsBoundariesFromWorkspace(ws_reference):
 
 def getFilePathFromWorkspace(ws):
     ws_pointer = getWorkspaceReference(ws)
+    if isinstance(ws_pointer, WorkspaceGroup):
+        ws_pointer = ws_pointer[0]
     file_path = None
 
     try:

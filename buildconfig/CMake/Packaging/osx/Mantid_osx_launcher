@@ -1,5 +1,0 @@
-#!/usr/bin/env bash
-
-INSTALLDIR=$(cd "$(dirname "$0")"; pwd)
-cd $INSTALLDIR
-./MantidPlot || /usr/bin/python ../../scripts/ErrorReporter/error_dialog_app.py --exitcode=$1 --directory=$INSTALLDIR --qtdir=$INSTALLDIR/../PlugIns

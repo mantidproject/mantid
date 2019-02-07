@@ -1,6 +1,6 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
@@ -21,6 +21,10 @@ class WorkspaceLoader(object):
         :param directory: String or string castable object; The project directory
         :param workspaces_to_load: List of Strings; of the workspaces to load
         """
+
+        if workspaces_to_load is None:
+            return
+
         from mantid.simpleapi import Load  # noqa
         for workspace in workspaces_to_load:
             try:

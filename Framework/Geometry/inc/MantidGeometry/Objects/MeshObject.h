@@ -43,17 +43,17 @@ class vtkGeometryCacheWriter;
 
 Mesh Object of Triangles assumed to form one or more
 non-intersecting closed surfaces enclosing separate volumes.
-The number of vertices is limited to 2^16 based on index type. For 2D Meshes see
+The number of vertices is limited to 2^32 based on index type. For 2D Meshes see
 Mesh2DObject
 */
 class MANTID_GEOMETRY_DLL MeshObject : public IObject {
 public:
   /// Constructor
-  MeshObject(const std::vector<uint16_t> &faces,
+  MeshObject(const std::vector<uint32_t> &faces,
              const std::vector<Kernel::V3D> &vertices,
-             const Kernel::Material &material);
+             const Kernel::Material material);
   /// Constructor
-  MeshObject(std::vector<uint16_t> &&faces, std::vector<Kernel::V3D> &&vertices,
+  MeshObject(std::vector<uint32_t> &&faces, std::vector<Kernel::V3D> &&vertices,
              const Kernel::Material &&material);
 
   /// Copy constructor
@@ -133,6 +133,8 @@ public:
   size_t numberOfTriangles() const;
   std::vector<uint32_t> getTriangles() const;
 
+  void rotate(const Kernel::Matrix<double> &);
+  void translate(Kernel::V3D);
   void updateGeometryHandler();
 
 private:
@@ -170,7 +172,7 @@ private:
 
   /// Contents
   /// Triangles are specified by indices into a list of vertices.
-  std::vector<uint16_t> m_triangles;
+  std::vector<uint32_t> m_triangles;
   std::vector<Kernel::V3D> m_vertices;
   /// material composition
   Kernel::Material m_material;

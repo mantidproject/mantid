@@ -542,7 +542,7 @@ void IntegratePeaksMD::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
             FunctionFactory::Instance().createInitialized(fun_str.str());
         boost::shared_ptr<const CompositeFunction> fun =
             boost::dynamic_pointer_cast<const CompositeFunction>(ifun);
-        const auto x = wsProfile2D->x(i);
+        const auto &x = wsProfile2D->x(i);
         wsFit2D->setSharedX(i, wsProfile2D->sharedX(i));
         wsDiff2D->setSharedX(i, wsProfile2D->sharedX(i));
 

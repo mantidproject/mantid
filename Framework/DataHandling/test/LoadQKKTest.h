@@ -61,15 +61,15 @@ public:
     for (size_t i = 0; i < data->getNumberHistograms(); ++i) {
       TS_ASSERT_THROWS_NOTHING(spectrumInfo.detector(i));
 
-      auto x = data->x(i);
+      const auto &x = data->x(i);
       TS_ASSERT_EQUALS(x.size(), 2);
       TS_ASSERT_DELTA(x[0], 4.9639999139, 1e-8);
       TS_ASSERT_DELTA(x[1], 5.1039999245, 1e-8);
 
-      auto y = data->y(i);
+      const auto &y = data->y(i);
       TS_ASSERT_DIFFERS(y[0], 0.0);
 
-      auto e = data->e(i);
+      const auto &e = data->e(i);
       TS_ASSERT_DIFFERS(e[0], 0.0);
     }
   }

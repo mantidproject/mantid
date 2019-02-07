@@ -482,7 +482,7 @@ void LeBailFit::execPatternCalculation() {
   bool resultphysical = calculateDiffractionPattern(
       m_dataWS->x(m_wsIndex), m_dataWS->y(m_wsIndex), true, true, emptyvec,
       vecY, rfactor);
-  m_outputWS->mutableY(CALDATAINDEX) = vecY;
+  m_outputWS->mutableY(CALDATAINDEX) = std::move(vecY);
 
   // Calculate background
   m_outputWS->mutableY(INPUTBKGDINDEX) =
@@ -659,8 +659,8 @@ void LeBailFit::execRefineBackground() {
 
   //   (3: peak without background, 4: input background)
   // m_backgroundFunction->function(domain, values);
-  m_outputWS->mutableY(CALBKGDINDEX) = backgroundvalues;
-  m_outputWS->mutableY(CALPUREPEAKINDEX) = valueVec;
+  m_outputWS->mutableY(CALBKGDINDEX) = std::move(backgroundvalues);
+  m_outputWS->mutableY(CALPUREPEAKINDEX) = std::move(valueVec);
 
   // 5. Output background to table workspace
   auto outtablews = boost::make_shared<TableWorkspace>();

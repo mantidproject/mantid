@@ -69,6 +69,12 @@ Input File
   Specify a range of input files that are either reduced (*_red.nxs*) or
   :math:`S(Q, \omega)`.
 
+Group Input
+  Provides an option to group or ungroup the input data.
+
+Load History
+  If unchecked the input workspace will be loaded without it's history.
+
 Integration Range
   The energy range over which to integrate the values.
 
@@ -433,8 +439,8 @@ Output
 
 The results of the fit may be plotted and saved under the 'Output' section of the fitting interfaces.
 
-Next to the 'Plot Output' label, you can select a parameter to plot and then click 'Plot' to plot it across the
-fit spectra (if multiple data-sets have been used, a separate plot will be produced for each data-set). 
+Next to the 'Plot Output' label, you can select a parameter to plot and then click 'Plot' to plot it with error 
+bars across the fit spectra (if multiple data-sets have been used, a separate plot will be produced for each data-set). 
 The 'Plot Output' options will be disabled after a fit if there is only one data point for the parameters.
 
 Clicking the 'Save Result' button will save the result of the fit to your default save location.

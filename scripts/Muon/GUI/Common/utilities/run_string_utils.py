@@ -43,6 +43,8 @@ def run_list_to_string(run_list):
     :param run_list: list of integers
     :return: string representation
     """
+    if not isinstance(run_list, list):
+        run_list = [run_list]
     run_list = _remove_duplicates_from_list(run_list)
     run_list = [i for i in run_list if i >= 0]
     run_list.sort()
@@ -92,8 +94,15 @@ def run_string_to_list(run_string):
         if len(runs) == 1:
             run_list += [int(runs)]
         else:
-            range_max = int(split_runs[-1])
-            range_min = int(split_runs[0])
+            range_max = split_runs[-1]
+            range_min = split_runs[0]
+            max_length = len(range_max)
+            min_length = len(range_min)
+            if(max_length < min_length):
+                range_max = range_min[:min_length - max_length] + range_max
+
+            range_max = int(range_max)
+            range_min = int(range_min)
             if (range_max - range_min) > max_run_list_size:
                 raise IndexError(
                     "Too many runs ({}) must be <{}".format(range_max - range_min, max_run_list_size))

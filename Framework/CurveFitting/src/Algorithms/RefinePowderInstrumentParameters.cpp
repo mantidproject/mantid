@@ -366,12 +366,14 @@ void RefinePowderInstrumentParameters::fitInstrumentParameters() {
   stringstream zss;
   zss << setw(20) << "d_h" << setw(20) << "Z DataY" << setw(20) << "Z ModelY"
       << setw(20) << "Z DiffY" << setw(20) << "DiffY\n";
+  const auto &X = m_dataWS->x(0);
+  const auto &Y = m_dataWS->y(2);
   for (size_t i = 0; i < z0.size(); ++i) {
-    double d_h = m_dataWS->x(0)[i];
+    double d_h = X[i];
     double zdatay = z0[i];
     double zmodely = z1[i];
     double zdiffy = z2[i];
-    double diffy = m_dataWS->y(2)[i];
+    double diffy = Y[i];
     zss << setw(20) << d_h << setw(20) << zdatay << setw(20) << zmodely
         << setw(20) << zdiffy << setw(20) << diffy << '\n';
   }

@@ -1,6 +1,6 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
@@ -10,7 +10,11 @@ import unittest
 import tempfile
 
 import os
+import json
 from shutil import rmtree
+
+import matplotlib.backend_bases
+import matplotlib.figure
 
 from mantid.api import AnalysisDataService as ADS
 from mantid.simpleapi import CreateSampleWorkspace
@@ -37,6 +41,7 @@ class ProjectSaverTest(unittest.TestCase):
         file_name = working_directory + "/" + os.path.basename(working_directory) + project_file_ext
 
         workspaces_string = "\"workspaces\": [\"ws1\"]"
+        plots_string = "\"plots\": []"
 
         project_saver.save_project(workspace_to_save=[ws1_name], directory=working_directory)
 
@@ -44,6 +49,7 @@ class ProjectSaverTest(unittest.TestCase):
         f = open(file_name, "r")
         file_string = f.read()
         self.assertTrue(workspaces_string in file_string)
+        self.assertTrue(plots_string in file_string)
 
         # Check workspace is saved
         list_of_files = os.listdir(working_directory)
@@ -66,6 +72,8 @@ class ProjectSaverTest(unittest.TestCase):
         file_name = working_directory + "/" + os.path.basename(working_directory) + project_file_ext
 
         workspaces_string = "\"workspaces\": [\"ws1\", \"ws2\", \"ws3\", \"ws4\", \"ws5\"]"
+        plots_string = "\"plots\": []"
+
         project_saver.save_project(workspace_to_save=[ws1_name, ws2_name, ws3_name, ws4_name, ws5_name],
                                    directory=working_directory)
 
@@ -73,6 +81,7 @@ class ProjectSaverTest(unittest.TestCase):
         f = open(file_name, "r")
         file_string = f.read()
         self.assertTrue(workspaces_string in file_string)
+        self.assertTrue(plots_string in file_string)
 
         # Check workspace is saved
         list_of_files = os.listdir(working_directory)
@@ -93,19 +102,42 @@ class ProjectSaverTest(unittest.TestCase):
         CreateSampleWorkspace(OutputWorkspace=ws3_name)
         project_saver = projectsaver.ProjectSaver(project_file_ext)
         file_name = working_directory + "/" + os.path.basename(working_directory) + project_file_ext
+
         workspaces_string = "\"workspaces\": [\"ws1\"]"
+        plots_string = "\"plots\": []"
+
         project_saver.save_project(workspace_to_save=[ws1_name], directory=working_directory)
 
         # Check project file is saved correctly
         f = open(file_name, "r")
         file_string = f.read()
         self.assertTrue(workspaces_string in file_string)
+        self.assertTrue(plots_string in file_string)
 
         # Check workspace is saved
         list_of_files = os.listdir(working_directory)
         self.assertEqual(len(list_of_files), 2)
         self.assertTrue(os.path.basename(working_directory) + project_file_ext in list_of_files)
         self.assertTrue(ws1_name + ".nxs" in list_of_files)
+
+    def test_saving_plots_when_plots_are_passed(self):
+        fig = matplotlib.figure.Figure(dpi=100, figsize=(6.4, 4.8))
+        fig_manager = matplotlib.backend_bases.FigureManagerBase(matplotlib.backend_bases.FigureCanvasBase(fig), 1)
+        matplotlib.axes.Axes(fig=fig, rect=[0, 0, 0, 0])
+
+        project_saver = projectsaver.ProjectSaver(project_file_ext)
+        file_name = working_directory + "/" + os.path.basename(working_directory) + project_file_ext
+
+        project_saver.save_project(directory=working_directory,
+                                   plots_to_save={1: fig_manager})
+
+        plots_dict = {u"creationArguments": [], u"axes": [], u"label": u"", u"properties": {u"figWidth": 6.4,
+                                                                                            u"figHeight": 4.8,
+                                                                                            u"dpi": 100.0}}
+
+        f = open(file_name, "r")
+        file_dict = json.load(f)
+        self.assertDictEqual(plots_dict, file_dict["plots"][0])
 
 
 class ProjectWriterTest(unittest.TestCase):
@@ -119,28 +151,70 @@ class ProjectWriterTest(unittest.TestCase):
 
     def test_write_out_empty_workspaces(self):
         workspace_list = []
-        project_writer = projectsaver.ProjectWriter(working_directory, workspace_list, project_file_ext)
+        plots_to_save = []
+        project_writer = projectsaver.ProjectWriter(save_location=working_directory, workspace_names=workspace_list,
+                                                    project_file_ext=project_file_ext, plots_to_save=plots_to_save)
         file_name = working_directory + "/" + os.path.basename(working_directory) + project_file_ext
 
         workspaces_string = "\"workspaces\": []"
+        plots_string = "\"plots\": []"
 
         project_writer.write_out()
 
         f = open(file_name, "r")
         file_string = f.read()
         self.assertTrue(workspaces_string in file_string)
+        self.assertTrue(plots_string in file_string)
 
     def test_write_out_on_just_workspaces(self):
+        plots_to_save = []
         workspace_list = ["ws1", "ws2", "ws3", "ws4"]
-        project_writer = projectsaver.ProjectWriter(working_directory, workspace_list, project_file_ext)
+        project_writer = projectsaver.ProjectWriter(save_location=working_directory, workspace_names=workspace_list,
+                                                    project_file_ext=project_file_ext, plots_to_save=plots_to_save)
         file_name = working_directory + "/" + os.path.basename(working_directory) + project_file_ext
 
         workspaces_string = "\"workspaces\": [\"ws1\", \"ws2\", \"ws3\", \"ws4\"]"
+        plots_string = "\"plots\": []"
 
         project_writer.write_out()
         f = open(file_name, "r")
         file_string = f.read()
         self.assertTrue(workspaces_string in file_string)
+        self.assertTrue(plots_string in file_string)
+
+    def test_write_out_on_just_plots(self):
+        plots_to_save = [{"plots1": {"plot-information": "axes data"}}]
+        workspace_list = []
+        project_writer = projectsaver.ProjectWriter(save_location=working_directory, workspace_names=workspace_list,
+                                                    project_file_ext=project_file_ext, plots_to_save=plots_to_save)
+        file_name = working_directory + "/" + os.path.basename(working_directory) + project_file_ext
+
+        workspaces_string = "\"workspaces\": []"
+        plots_string = "\"plots\": [{\"plots1\": {\"plot-information\": \"axes data\"}}]"
+
+        project_writer.write_out()
+
+        f = open(file_name, "r")
+        file_string = f.read()
+        self.assertTrue(workspaces_string in file_string)
+        self.assertTrue(plots_string in file_string)
+
+    def test_write_out_on_both_workspaces_and_plots(self):
+        plots_to_save = [{"plots1": {"plot-information": "axes data"}}]
+        workspace_list = ["ws1", "ws2", "ws3", "ws4"]
+        project_writer = projectsaver.ProjectWriter(save_location=working_directory, workspace_names=workspace_list,
+                                                    project_file_ext=project_file_ext, plots_to_save=plots_to_save)
+        file_name = working_directory + "/" + os.path.basename(working_directory) + project_file_ext
+
+        workspaces_string = "\"workspaces\": [\"ws1\", \"ws2\", \"ws3\", \"ws4\"]"
+        plots_string = "\"plots\": [{\"plots1\": {\"plot-information\": \"axes data\"}}]"
+
+        project_writer.write_out()
+
+        f = open(file_name, "r")
+        file_string = f.read()
+        self.assertTrue(workspaces_string in file_string)
+        self.assertTrue(plots_string in file_string)
 
 
 if __name__ == "__main__":

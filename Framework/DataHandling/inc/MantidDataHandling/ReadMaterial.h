@@ -59,14 +59,14 @@ public:
    * @param params A struct containing all the parameters to be set.
    * @returns A map containing the relevent failure messages, if any.
    */
-  static ValidationErrors validateInputs(MaterialParameters params);
+  static ValidationErrors validateInputs(const MaterialParameters &params);
   /**
    * Set the parameters to build the material to the builder,
    * taking into account which values were and weren't set.
    *
    * @param params A struct containing all the parameters to be set.
    */
-  void setMaterialParameters(MaterialParameters params);
+  void setMaterialParameters(const MaterialParameters &params);
   /**
    * Construct the material,
    *

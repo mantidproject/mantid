@@ -32,7 +32,8 @@ def assert_valid_result(result, expected, assert_true):
     for key in keys_result:
         assert_true(key in keys_expected)
         if result[key] != expected[key]:
-            assert_true(result[key] == expected[key])
+            assert_true(result[key] == expected[key], "For key {}, {} does not equal {}".format(key, result[key],
+                                                                                                expected[key]))
 
 
 def assert_valid_parse(parser, to_parse, expected, assert_true):
@@ -201,7 +202,9 @@ class LimitParserTest(unittest.TestCase):
 
     def test_that_event_time_limit_is_parsed_correctly(self):
         valid_settings = {"L  / EVEnTStime 0,-10,32,434,34523,35": {LimitsId.events_binning:
-                                                                    "0.0,-10.0,32.0,434.0,34523.0,35.0"}}
+                                                                    "0.0,-10.0,32.0,434.0,34523.0,35.0"},
+                          "L / Eventstime 0 -10 32 434 34523 35": {LimitsId.events_binning:
+                                                                   "0.0,-10.0,32.0,434.0,34523.0,35.0"}}
 
         invalid_settings = {"L  / EEnTStime 0,-10,32,434,34523,35": RuntimeError,
                             "L/EVENTSTIME 123g, sdf": RuntimeError,
@@ -245,25 +248,29 @@ class LimitParserTest(unittest.TestCase):
                                                                               rebin_string="-12.0,-2.7,34.6")},
                           "L/q -12 3.6 2 /LIN": {LimitsId.q: q_rebin_values(min=-12., max=3.6,
                                                                             rebin_string="-12.0,2.0,3.6")},
-                          "L/q -12 ,  0.4  ,23 ,-34.8, 3.6": {LimitsId.q: q_rebin_values(min=-12., max=3.6,
-                                                              rebin_string="-12.0,0.4,23.0,-34.8,3.6")},  # noqa
-                          "L/q -12  , 0.4 , 23 ,-34.8 ,3.6 /LIn": {LimitsId.q: q_rebin_values(min=-12., max=3.6,
-                                                                   rebin_string="-12.0,0.4,23.0,34.8,3.6")},
-                          "L/q -12  , 0.4 , 23  ,34.8 ,3.6  /Log": {LimitsId.q: q_rebin_values(min=-12., max=3.6,
-                                                                    rebin_string="-12.0,-0.4,23.0,-34.8,3.6")},
-                          "L/q -12  , 0.4 , 23  ,34.8 ,3.6, .123, 5.6  /Log": {LimitsId.q: q_rebin_values(min=-12.,
+                          "L/q -12   0.41  23 -34.8 3.6": {LimitsId.q: q_rebin_values(min=-12., max=3.6,
+                                                              rebin_string="-12.0,0.41,23.0,-34.8,3.6")},  # noqa
+                          "L/q -12   0.42  23 -34.8 3.6 /LIn": {LimitsId.q: q_rebin_values(min=-12., max=3.6,
+                                                                   rebin_string="-12.0,0.42,23.0,34.8,3.6")},
+                          "L/q -12   0.43     23 -34.8 3.6": {LimitsId.q: q_rebin_values(min=-12., max=3.6,
+                                                                            rebin_string="-12.0,0.43,23.0,-34.8,3.6")},
+                          "L/q -12   0.44  23  ,34.8,3.6  /Log": {LimitsId.q: q_rebin_values(min=-12., max=3.6,
+                                                                    rebin_string="-12.0,-0.44,23.0,-34.8,3.6")},
+                          "L/q -12  , 0.45 , 23  ,34.8 ,3.6, .123, 5.6  /Log": {LimitsId.q: q_rebin_values(min=-12.,
                                                                                                           max=5.6,
-                                                                    rebin_string="-12.0,-0.4,23.0,-34.8,3.6,"
+                                                                    rebin_string="-12.0,-0.45,23.0,-34.8,3.6,"
                                                                                  "-0.123,5.6")},
-                          "L/q -12  , 0.4 , 23  ,34.8 ,3.6, -.123, 5.6": {LimitsId.q: q_rebin_values(min=-12.,
+                          "L/q -12  , 0.46 , 23  ,34.8 ,3.6, -.123, 5.6": {LimitsId.q: q_rebin_values(min=-12.,
                                                                                                      max=5.6,
-                                                                          rebin_string="-12.0,0.4,23.0,34.8,3.6,"
-                                                                                       "-0.123,5.6")}
+                                                                          rebin_string="-12.0,0.46,23.0,34.8,3.6,"
+                                                                                       "-0.123,5.6")},
+                          "L/q -12   0.47   23 34.8  3.6, -.123    5.6": {LimitsId.q: q_rebin_values(min=-12.,
+                                                                            max=5.6,
+                                                                            rebin_string="-12.0,0.47,23.0,34.8,3.6,"
+                                                                                            "-0.123,5.6")}
                           }
 
-        invalid_settings = {"L/Q 12 2 3 4": RuntimeError,
-                            "L/Q 12 2 3 4 23 3": RuntimeError,
-                            "L/Q 12 2 3 4 5/LUG": RuntimeError,
+        invalid_settings = {"L/Q 12 2 3 4 5/LUG": RuntimeError,
                             "L/Q 12 2 /LIN": RuntimeError,
                             "L/Q ": RuntimeError,
                             "L/Q a 1 2 3 4 /LIN": RuntimeError}
@@ -277,19 +284,21 @@ class LimitParserTest(unittest.TestCase):
                           "L/QXY -12 34.6 2.7/LOG": {LimitsId.qxy: simple_range(start=-12, stop=34.6, step=2.7,
                                                                                 step_type=RangeStepType.Log)},
                           "L/qxY -12 3.6 2 /LIN": {LimitsId.qxy: simple_range(start=-12, stop=3.6, step=2,
-                                                                              step_type=RangeStepType.Lin)},
-                          "L/qxy -12  , 0.4,  23, -34.8, 3.6": {LimitsId.qxy: complex_range(start=-12, step1=0.4,
-                                                                mid=23, step2=34.8, stop=3.6,
-                                                                step_type1=RangeStepType.Lin,
-                                                                step_type2=RangeStepType.Log)},
-                          "L/qXY -12  , 0.4 , 23 ,34.8 ,3.6 /LIn": {LimitsId.qxy: complex_range(start=-12,
-                                                                    step1=0.4, mid=23, step2=34.8, stop=3.6,
-                                                                    step_type1=RangeStepType.Lin,
-                                                                    step_type2=RangeStepType.Lin)},
-                          "L/qXY -12   ,0.4,  23  ,34.8 ,3.6  /Log": {LimitsId.qxy: complex_range(start=-12,
-                                                                      step1=0.4, mid=23, step2=34.8, stop=3.6,
-                                                                      step_type1=RangeStepType.Log,
-                                                                      step_type2=RangeStepType.Log)}}
+                                                                              step_type=RangeStepType.Lin)}}
+        """
+        These tests should be added back to valid settings when SANS GUI can accept complex QXY strings.
+        "L/qxy -12  , 0.4,  23, -3.48, 36": {LimitsId.qxy: complex_range(start=-12, step1=0.4,
+                                               mid=23, step2=3.48, stop=36,
+                                               step_type1=RangeStepType.Lin,
+                                               step_type2=RangeStepType.Log)},
+        "L/qXY -12   0.4  23 3.48 36 /LIn": {LimitsId.qxy: complex_range(start=-12,
+                                                    step1=0.4, mid=23, step2=3.48, stop=36,
+                                                    step_type1=RangeStepType.Lin,
+                                                    step_type2=RangeStepType.Lin)},
+        "L/qXY -12   0.4  23  3.48 36  /Log": {LimitsId.qxy: complex_range(start=-12,
+                                                      step1=0.4, mid=23, step2=3.48, stop=36,
+                                                      step_type1=RangeStepType.Log,
+                                                      step_type2=RangeStepType.Log)}"""
 
         invalid_settings = {"L/QXY 12 2 3 4": RuntimeError,
                             "L/QXY 12 2 3 4 23 3": RuntimeError,

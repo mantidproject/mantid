@@ -16,13 +16,11 @@ namespace IDA {
 
 class ConvFitAddWorkspaceDialog;
 
-/**
-  A presenter.
-*/
-class DLLExport ConvFitDataPresenter : public IndirectFitDataPresenter {
+class MANTIDQT_INDIRECT_DLL ConvFitDataPresenter
+    : public IndirectFitDataPresenter {
   Q_OBJECT
 public:
-  ConvFitDataPresenter(ConvFitModel *model, IndirectFitDataView *view);
+  ConvFitDataPresenter(ConvFitModel *model, IIndirectFitDataView *view);
 
 private slots:
   void setModelResolution(const QString &name);
@@ -31,6 +29,7 @@ protected:
   void addModelData(const std::string &name) override;
 
 private:
+  void setModelResolution(std::string const &name, std::size_t const &index);
   void addDataToModel(IAddWorkspaceDialog const *dialog) override;
   std::unique_ptr<IAddWorkspaceDialog>
   getAddWorkspaceDialog(QWidget *parent) const override;
