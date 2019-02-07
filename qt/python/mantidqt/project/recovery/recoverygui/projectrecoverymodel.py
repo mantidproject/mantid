@@ -8,15 +8,12 @@
 #
 
 import os
-import shutil
-import time
 
 from mantid.kernel import ConfigService
 from mantid.api import AnalysisDataService as ADS
 from mantidqt.project.recovery.recoverythread import RecoveryThread
 
-from qtpy.QtCore import QThread
-from qtpy.QtWidgets import QApplication
+from qtpy.QtCore import QThread, Slot, QObject
 
 
 def replace_space_with_t(string):
@@ -29,8 +26,9 @@ def replace_t_with_space(string):
     return string
 
 
-class ProjectRecoveryModel(object):
+class ProjectRecoveryModel(QObject):
     def __init__(self, project_recovery, presenter):
+        super(ProjectRecoveryModel, self).__init__()
         self.presenter = presenter
         self.project_recovery = project_recovery
 
@@ -40,6 +38,10 @@ class ProjectRecoveryModel(object):
         self.rows = []
 
         self._fill_first_row()
+
+        self.recovery_thread = None
+
+        self.selected_checkpoint = None
 
     def find_number_of_workspaces_in_directory(self, path):
         if not os.path.exists(path):
@@ -71,22 +73,23 @@ class ProjectRecoveryModel(object):
 
     def recover_selected_checkpoint(self, selected):
         self.recovery_running = True
-        self.presenter.change_mantid_to_cancel_label()
+        self.presenter.change_start_mantid_to_cancel_label()
 
         ADS.clear()
 
         # Recover given the checkpoint selected
+        pid_dir = self.project_recovery.get_pid_folder_to_be_used_to_load_a_checkpoint_from()
         selected = replace_space_with_t(selected)
-        checkpoint = os.path.join(self.project_recovery.pid_to_load_checkpoint_from(), selected)
+        checkpoint = os.path.join(pid_dir, selected)
+        self.selected_checkpoint = selected
 
-        self.project_recovery.load_checkpoint(checkpoint)
-
-        selected = replace_t_with_space(selected)
-        if self.failed_run:
-            self._update_checkpoint_tried(selected)
-
-        self.recovery_running = False
-        self.presenter.close_view()
+        try:
+            self._create_thread_and_manage(checkpoint)
+        except Exception as e:
+            if isinstance(e, KeyboardInterrupt):
+                raise
+            # Fail "Silently" by setting failed run to true
+            self.failed_run = True
 
     def open_selected_in_editor(self, selected):
         self.recovery_running = True
@@ -97,7 +100,13 @@ class ProjectRecoveryModel(object):
         selected = replace_space_with_t(selected)
         checkpoint = os.path.join(pid_dir, selected)
 
-        self.project_recovery.open_checkpoint_in_script_editor(checkpoint)
+        try:
+            self.project_recovery.open_checkpoint_in_script_editor(checkpoint)
+        except Exception as e:
+            if isinstance(e, KeyboardInterrupt):
+                raise
+            # Fail "silently"
+            self.failed_run = True
 
         # Restart project recovery as we stay synchronous
         self.project_recovery.clear_all_unused_checkpoints(pid_dir)
@@ -107,7 +116,6 @@ class ProjectRecoveryModel(object):
             self._update_checkpoint_tried(selected)
 
         self.recovery_running = False
-        self.failed_run = False
         self.presenter.close_view()
 
     def get_failed_run(self):
@@ -174,7 +182,8 @@ class ProjectRecoveryModel(object):
         checked = "No"
         self.rows.append([checkpoint_name, num_of_ws, checked])
 
-    def _update_checkpoint_tried(self, checkpoint_name):
+    def _update_checkpoint_tried(self, checkpoint_path):
+        checkpoint_name = os.path.basename(checkpoint_path)
         for row in self.rows:
             if row[0] == checkpoint_name:
                 row[2] = "Yes"
@@ -183,13 +192,28 @@ class ProjectRecoveryModel(object):
                            + checkpoint_name)
 
     def _create_thread_and_manage(self, checkpoint):
-        recovery_thread = RecoveryThread()
-        recovery_thread.project_recovery = self.project_recovery
-        recovery_thread.checkpoint = checkpoint
-        recovery_thread.start(QThread.LowPriority)
+        self.recovery_thread = RecoveryThread()
+        self.recovery_thread.project_recovery = self.project_recovery
+        self.recovery_thread.checkpoint = checkpoint
 
-        while not recovery_thread.isFinished():
-            time.sleep(0.10)
-            QApplication.processEvents()
+        self.recovery_thread.finished.connect(self.recovery_complete)
 
-        self.failed_run = recovery_thread.failed_run_in_thread
+        self.recovery_thread.start(QThread.LowPriority)
+
+    @Slot()
+    def recovery_complete(self):
+        self.failed_run = self.recovery_thread.failed_run_in_thread
+
+        pid_dir = self.project_recovery.get_pid_folder_to_be_used_to_load_a_checkpoint_from()
+        # If the run failed update the tried else it wasn't a failure and
+        if self.failed_run:
+            self._update_checkpoint_tried(self.selected_checkpoint)
+        else:
+            self.project_recovery.clear_all_unused_checkpoints(pid_dir)
+
+        # Restart project recovery as we stay synchronous
+        self.project_recovery.clear_all_unused_checkpoints(pid_dir)
+        self.project_recovery.start_recovery_thread()
+
+        self.recovery_running = False
+        self.presenter.close_view()

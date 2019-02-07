@@ -76,6 +76,8 @@ class OrderWorkspaceHistory(mantid.api.PythonAlgorithm):
         destination = self.getPropertyValue(_destination_file)
 
         with open(destination, 'w') as outfile:
+            # Add in an extra line to import the previously implicit imports from MantidPlot
+            outfile.write("from mantid.simpleapi import *\n\n")
             for x in unique_lines:
                 outfile.write(x[0])
 

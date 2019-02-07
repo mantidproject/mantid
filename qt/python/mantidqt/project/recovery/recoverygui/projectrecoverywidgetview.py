@@ -31,13 +31,12 @@ class ProjectRecoveryWidgetView(QDialog):
         self.ui.progressBar.setMaximum(new_value)
 
     def connect_progress_bar(self):
-        QObject.connect(self.presenter.project_recovery.multi_file_interpreter.current_editor(),
-                        self.presenter.project_recovery.multi_file_interpreter.current_editor().sig_progress(int),
-                        self, self.update_progress_bar(int))
+        self.presenter.project_recovery.multi_file_interpreter.current_editor().sig_progress.connect(
+            self.update_progress_bar)
 
     def emit_abort_script(self):
         # todo: actually connect these values
-        self.presenter.project_recovery.multi_file_interpreter.connect()
+        self.abort_project_recovery_script.connect(self.presenter.project_recovery.multi_file_interpreter.abort_all)
         self.abort_project_recovery_script.emit()
 
     def change_start_mantid_button(self, string):

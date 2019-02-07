@@ -15,6 +15,8 @@ from glob import glob
 import shutil
 import psutil
 
+from qtpy.QtCore import QMetaObject, Q_ARG, Qt
+
 from mantid.kernel import ConfigService, logger, UsageService
 from mantid.api import AnalysisDataService as ADS, WorkspaceGroup
 from mantidqt.project.projectsaver import ProjectSaver
@@ -68,6 +70,9 @@ class ProjectRecovery(object):
 
         self.thread_on = False
 
+        # Set to true by workbench on close to kill the thread on completion of project save
+        self.closing_workbench = False
+
     ######################################################
     #  Utility
     ######################################################
@@ -78,8 +83,9 @@ class ProjectRecovery(object):
             self.thread_on = True
 
     def stop_recovery_thread(self):
-        self._timer_thread.cancel()
-        self.thread_on = False
+        if self._timer_thread is not None:
+            self._timer_thread.cancel()
+            self.thread_on = False
 
     @staticmethod
     def _remove_empty_folders_from_dir(directory):
@@ -116,7 +122,10 @@ class ProjectRecovery(object):
 
     @staticmethod
     def listdir_fullpath(directory):
-        return [os.path.join(directory, item) for item in os.listdir(directory)]
+        try:
+            return [os.path.join(directory, item) for item in os.listdir(directory)]
+        except OSError:
+            return []
 
     ######################################################
     #  Saving
@@ -126,10 +135,12 @@ class ProjectRecovery(object):
         # Set that recovery thread is not running anymore
         self.thread_on = False
 
-        # todo: Get a list of interfaces that could be saved and pass it down to save_project but check it's length is
-        #  greater than 0 for this check
         try:
-            if len(ADS.getObjectNames()) == 0:
+            # Get the interfaces_list
+            interfaces_list = self.interface_finding_func()
+
+            # Check if there is anything to be saved or not
+            if len(ADS.getObjectNames()) == 0 and len(interfaces_list) == 0:
                 logger.debug("Project Recovery: Nothing to save")
                 self._spin_off_another_time_thread()
                 return
@@ -147,7 +158,7 @@ class ProjectRecovery(object):
             self._save_workspaces(directory=recovery_dir)
 
             # Save project
-            self._save_project(directory=recovery_dir)
+            self._save_project(directory=recovery_dir, interfaces_list=interfaces_list)
 
             self._remove_lock_file(directory=recovery_dir)
 
@@ -163,7 +174,8 @@ class ProjectRecovery(object):
             logger.debug("Project Recovery: Failed to save error msg: " + str(e))
 
         # Spin off another timer thread
-        self._spin_off_another_time_thread()
+        if not self.closing_workbench:
+            self._spin_off_another_time_thread()
 
     def _spin_off_another_time_thread(self):
         self._timer_thread = Timer(self.time_between_saves, self.recovery_save)
@@ -205,11 +217,12 @@ class ProjectRecovery(object):
         if isinstance(ws, WorkspaceGroup) and len(ws.getNames()) == 0:
             return True
 
-    def _save_project(self, directory):
+    def _save_project(self, directory, interfaces_list=None):
         project_saver = ProjectSaver(project_file_ext=self.recovery_file_ext)
 
         plots = self.gfm.figs
-        interfaces_list = self.interface_finding_func()
+        if interfaces_list is None:
+            interfaces_list = self.interface_finding_func()
 
         project_saver.save_project(directory, workspace_to_save=None, plots_to_save=plots,
                                    interfaces_to_save=interfaces_list, save_workspaces=False)
@@ -233,7 +246,7 @@ class ProjectRecovery(object):
             self._remove_empty_folders_from_dir(self.recovery_directory_hostname)
 
             checkpoints = self.listdir_fullpath(self.recovery_directory_hostname)
-            return len(checkpoints) != 0 and len(checkpoints) > self._number_of_workbench_processes()
+            return len(checkpoints) != 0 and len(checkpoints) > (self._number_of_workbench_processes() - 1)
         except Exception as e:
             if isinstance(e, KeyboardInterrupt):
                 raise
@@ -250,9 +263,10 @@ class ProjectRecovery(object):
         total_mantids = 0
         for proc in psutil.process_iter():
             try:
-                process_name = os.path.basename(os.path.normpath(proc.cmdline()[1]))
-                if process_name in executable_names:
-                    total_mantids += 1
+                for line in proc.cmdline():
+                    process_name = os.path.basename(os.path.normpath(line))
+                    if process_name in executable_names:
+                        total_mantids += 1
             except IndexError:
                 # Ignore these errors as it's checking the cmdline which causes this on process with no args
                 pass
@@ -311,16 +325,18 @@ class ProjectRecovery(object):
 
     def _open_script_in_editor(self, script):
         # Get number of lines
-        num_lines = 0
         with open(script) as f:
             num_lines = len(f.readlines())
 
-        # todo: attach this to the GUI process bar
+        QMetaObject.invokeMethod(self.multi_file_interpreter, "open_file_in_new_tab", Qt.BlockingQueuedConnection,
+                                 Q_ARG(str, script))
 
-        self.multi_file_interpreter.open_file_in_new_tab(script)
+        self.recovery_presenter.connect_progress_bar_to_recovery_view()
+        self.recovery_presenter.set_up_progress_bar(num_lines)
 
     def _run_script_in_open_editor(self):
-        self.multi_file_interpreter.execute_current()
+        QMetaObject.invokeMethod(self.multi_file_interpreter, "execute_current_async_blocking",
+                                 Qt.BlockingQueuedConnection)
 
     ######################################################
     #  Checkpoint Repair
@@ -345,7 +361,15 @@ class ProjectRecovery(object):
                 path = self.recovery_directory_hostname
         else:
             path = pid_dir
-        shutil.rmtree(path)
+        if os.path.exists(path):
+            try:
+                shutil.rmtree(path)
+            except Exception as e:
+                if isinstance(e, KeyboardInterrupt):
+                    raise
+                else:
+                    # Fail silently because it is just over diligent calls to clear checkpoints
+                    pass
 
     # todo: Function for deleting all checkpoints
 
@@ -364,3 +388,5 @@ class ProjectRecovery(object):
     # todo: Function to remove folders in they are empty from a list of dicrectories
 
     # todo: Shorten saved time and dates to removed micro and milli seconds
+
+    # todo: Remove checkpoint of current pid on successful save

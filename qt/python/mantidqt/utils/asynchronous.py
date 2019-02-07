@@ -16,8 +16,8 @@ import time
 from traceback import extract_tb
 
 
-def blocking_async_task(target, args=(), kwargs=None, blocking_cb=None,
-                        period_secs=0.05):
+def blocking_async_task(target, args=(), kwargs=None, success_cb=None, error_cb=None, blocking_cb=None,
+                        period_secs=0.05, task_reference=None):
     """Run the target in a separate thread and block the calling thread
     until execution is complete.
 
@@ -28,28 +28,41 @@ def blocking_async_task(target, args=(), kwargs=None, blocking_cb=None,
     to finish
     :param period_secs: Sleep for this many seconds at the start of each loop that checks
     the task is still alive. This will be the minimum time between calls to blocking_cb.
+    :param task_reference: The wrapper around a task reference, allows setting the task of this object to outside of it,
+     allowing the task to be aborted from outside sources/functions.
     :returns: An AsyncTaskResult object
     """
-    blocking_cb = blocking_cb if blocking_cb is not None else lambda: None
+    def create_callback(cb):
+        return cb if cb is not None else lambda: None
+
+    blocking_cb = create_callback(blocking_cb)
+    success_cb = create_callback(success_cb)
+    error_cb = create_callback(error_cb)
 
     class Receiver(object):
         output, exc_value = None, None
 
         def on_success(self, result):
             self.output = result.output
+            success_cb(result)
 
         def on_error(self, result):
             self.exc_value = result.exc_value
+            error_cb(result)
 
     recv = Receiver()
     task = AsyncTask(target, args, kwargs, success_cb=recv.on_success,
                      error_cb=recv.on_error)
+
+    if task is not None:
+        task_reference._task = task
+
     task.start()
     while task.is_alive():
         time.sleep(period_secs)
         blocking_cb()
 
-    if recv.exc_value is not None:
+    if recv.exc_value is not None and not KeyboardInterrupt:
         raise recv.exc_value
     else:
         return recv.output

@@ -440,8 +440,9 @@ class MainWindow(QMainWindow):
             if app is not None:
                 app.closeAllWindows()
 
-            # Kill the project recovery thread
+            # Kill the project recovery thread and don't restart should a save be in progress
             self.project_recovery.stop_recovery_thread()
+            self.project_recovery.closing_workbench = True
 
             event.accept()
         else:
@@ -579,7 +580,7 @@ def start_workbench(app, command_line_options):
     if command_line_options.script is not None:
         main_window.editor.open_file_in_new_tab(command_line_options.script)
         if command_line_options.execute:
-            main_window.editor.execute_current()  # TODO use the result as an exit code
+            main_window.editor.execute_current_async()  # TODO use the result as an exit code
 
         if command_line_options.quit:
             main_window.close()

@@ -16,11 +16,12 @@ import time
 
 # 3rdparty imports
 from qtpy.QtCore import QObject, Signal
+from qtpy.QtWidgets import QApplication
 from six import PY2, iteritems
 
 # local imports
 from mantidqt.widgets.codeeditor.inputsplitter import InputSplitter
-from mantidqt.utils.asynchronous import AsyncTask
+from mantidqt.utils.asynchronous import AsyncTask, blocking_async_task
 
 if PY2:
     from inspect import getargspec as getfullargspec
@@ -105,7 +106,12 @@ class PythonCodeExecution(QObject):
         super(PythonCodeExecution, self).__init__()
 
         self._globals_ns = None
-        self._task = None
+
+        # Task wrapper class is required because task needs to be set inside of a function before function exits
+        class task_wrapper(object):
+            def __init__(self, task):
+                self._task = task
+        self._task = task_wrapper(None)
 
         self.reset_context()
 
@@ -120,26 +126,32 @@ class PythonCodeExecution(QObject):
         """Cancel an asynchronous execution"""
         # Implementation is based on
         # https://stackoverflow.com/questions/5019436/python-how-to-terminate-a-blocking-thread
-        ctypes.pythonapi.PyThreadState_SetAsyncExc(ctypes.c_long(self._task.ident),
+        ctypes.pythonapi.PyThreadState_SetAsyncExc(ctypes.c_long(self._task._task.ident),
                                                    ctypes.py_object(KeyboardInterrupt))
         time.sleep(0.1)
 
-    def execute_async(self, code_str, filename=''):
+    def execute_async(self, code_str, filename='', blocking=False):
         """
         Execute the given code string on a separate thread. This function
         returns as soon as the new thread starts
 
         :param code_str: A string containing code to execute
         :param filename: See PythonCodeExecution.execute()
-        :returns: The created async task
+        :param blocking: If True the call will block until the task is finished
+        :returns: The created async task, only returns task if the blocking is False
         """
         # Stack is chopped on error to avoid the  AsyncTask.run->self.execute calls appearing
         # as these are not useful for the user in this context
-        task = AsyncTask(self.execute, args=(code_str, filename),
-                         success_cb=self._on_success, error_cb=self._on_error)
-        task.start()
-        self._task = task
-        return task
+        if not blocking:
+            task = AsyncTask(self.execute, args=(code_str, filename),
+                             success_cb=self._on_success, error_cb=self._on_error)
+            task.start()
+            self._task._task = task
+            return task
+        else:
+            blocking_async_task(self.execute, args=(code_str, filename),
+                                success_cb=self._on_success, error_cb=self._on_error,
+                                blocking_cb=QApplication.processEvents, task_reference=self._task)
 
     def execute(self, code_str, filename=None):
         """Execute the given code on the calling thread
@@ -192,7 +204,7 @@ class PythonCodeExecution(QObject):
 
     # --------------------- Private -------------------------------
     def _reset_task(self):
-        self._task = None
+        self._task._task = None
 
 
 class CodeBlock(object):

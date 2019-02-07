@@ -7,7 +7,7 @@
 #  This file is part of the mantidqt package
 #
 
-from qtpy.QtCore import QThread
+from qtpy.QtCore import QThread, Slot
 
 
 class RecoveryThread(QThread):
@@ -18,4 +18,7 @@ class RecoveryThread(QThread):
         self.project_recovery = None
 
     def run(self):
-        self.failed_run_in_thread = self.project_recovery.recover_checkpoint(self.checkpoint)
+        self.failed_run_in_thread = self.project_recovery.load_checkpoint(self.checkpoint)
+
+
+

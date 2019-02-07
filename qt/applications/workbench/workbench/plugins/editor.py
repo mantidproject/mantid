@@ -52,7 +52,7 @@ class MultiFileEditor(PluginWidget):
 
         # attributes
         self.run_action = create_action(self, "Run",
-                                        on_triggered=self.editors.execute_current,
+                                        on_triggered=self.editors.execute_current_async,
                                         shortcut=("Ctrl+Return", "Ctrl+Enter"),
                                         shortcut_context=Qt.ApplicationShortcut)
         self.abort_action = create_action(self, "Abort",
@@ -62,7 +62,7 @@ class MultiFileEditor(PluginWidget):
 
     def execute_current(self):
         '''This is used by MainWindow to execute a file after opening it'''
-        return self.editors.execute_current()
+        return self.editors.execute_current_async()
 
     # ----------- Plugin API --------------------
 

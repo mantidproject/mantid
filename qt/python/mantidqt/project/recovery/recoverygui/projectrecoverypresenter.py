@@ -20,6 +20,7 @@ class ProjectRecoveryPresenter(object):
         self.model = ProjectRecoveryModel(self.project_recovery, self)
 
         self.start_mantid_normally_called = False
+        self.allow_start_mantid_normally = True
 
     def start_recovery_view(self):
         # Only start this view if there is nothing as current_view
@@ -86,6 +87,12 @@ class ProjectRecoveryPresenter(object):
         self.model.open_selected_in_editor(checkpoint_to_recover)
 
     def start_mantid_normally(self):
+        # If a recovery has been started then
+        if not self.allow_start_mantid_normally:
+            if self.current_view is None:
+                return
+            self.current_view.emit_abort_script()
+
         self.start_mantid_normally_called = True
         self.model.start_mantid_normally()
 
@@ -100,16 +107,15 @@ class ProjectRecoveryPresenter(object):
         self.model.open_selected_in_editor(selected)
 
     def close_view(self):
-        self.current_view.setVisible(False)
-        self.current_view = None
+        if self.current_view is not None:
+            self.current_view.setVisible(False)
+            self.current_view = None
 
     def connect_progress_bar_to_recovery_view(self):
         self.current_view.connect_progress_bar()
 
-    def emit_abort_script(self):
-        self.current_view.emit_abort_script()
-
     def change_start_mantid_to_cancel_label(self):
+        self.allow_start_mantid_normally = False
         self.current_view.change_start_mantid_button("Cancel Recovery")
 
     def fill_all_rows(self):
