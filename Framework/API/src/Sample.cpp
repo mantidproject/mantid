@@ -4,9 +4,6 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/Sample.h"
 #include "MantidGeometry/Crystal/CrystalStructure.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
@@ -33,7 +30,7 @@ using Geometry::ShapeFactory;
  * Default constructor. Required for cow_ptr.
  */
 Sample::Sample()
-    : m_name(""), m_shape(ShapeFactory().createShape("")), m_environment(),
+    : m_name(), m_shape(ShapeFactory().createShape("")), m_environment(),
       m_lattice(nullptr), m_crystalStructure(), m_samples(), m_geom_id(0),
       m_thick(0.0), m_height(0.0), m_width(0.0) {}
 

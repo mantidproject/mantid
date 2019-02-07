@@ -955,16 +955,13 @@ bool CompareWorkspaces::checkRunProperties(const API::Run &run1,
     return false;
   } else {
     // Now loop over the individual logs
-    int64_t length(static_cast<int64_t>(ws1logs.size()));
-    for (int64_t i = 0; i < length; ++i) {
-      PARALLEL_START_INTERUPT_REGION
+    for (size_t i = 0; i < ws1logs.size(); ++i) {
       if (*(ws1logs[i]) != *(ws2logs[i])) {
         g_log.debug("WS1 log: " + ws1logs[i]->name());
         g_log.debug("WS2 log: " + ws2logs[i]->name());
         recordMismatch("Log mismatch");
         return false;
       }
-      PARALLEL_END_INTERUPT_REGION
     }
   }
   return true;
