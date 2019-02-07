@@ -448,7 +448,7 @@ class OptionsColumnModel(object):
     def __ne__(self, other):
         return self.__dict__ != other.__dict__
 
-      
+
 class SampleShapeColumnModel(object):
     SAMPLE_SHAPES = ["cylinder", "disc", "flatplate"]
     SAMPLE_SHAPES_DICT = {"cylinder": "Cylinder",
@@ -492,8 +492,8 @@ class SampleShapeColumnModel(object):
 
     def __ne__(self, other):
         return self.__dict__ != other.__dict__
-    
-    
+
+
 def options_column_bool(string):
     """
     Evaluate input string as a bool. Used for UseMirror in Options column,
