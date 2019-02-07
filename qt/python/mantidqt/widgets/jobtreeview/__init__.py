@@ -11,9 +11,9 @@ from __future__ import (absolute_import)
 
 from mantidqt.utils.qt import import_qt
 
-jobtreeview = import_qt('.._common', 'mantidqt.widgets.jobtreeview')
+Cell = import_qt('.._common', 'mantidqt.widgets.jobtreeview', 'Cell')
+JobTreeView = import_qt('.._common', 'mantidqt.widgets.jobtreeview', 'JobTreeView')
+JobTreeViewSignalAdapter = import_qt('.._common', 'mantidqt.widgets.jobtreeview', 'JobTreeViewSignalAdapter')
 
-Cell = jobtreeview.MantidQt.MantidWidgets.Batch.Cell
-JobTreeView = jobtreeview.MantidQt.MantidWidgets.Batch.JobTreeView
-JobTreeViewSignalAdapter = jobtreeview.MantidQt.MantidWidgets.Batch.JobTreeViewSignalAdapter
-RowLocation = jobtreeview.MantidQt.MantidWidgets.Batch.RowLocation
+# RowLocation must be accessed differently as it is wrapped in a SIP namespace class
+RowLocation = import_qt('.._common', 'mantidqt.widgets.jobtreeview').MantidQt.MantidWidgets.Batch.RowLocation
