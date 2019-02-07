@@ -90,7 +90,7 @@ class SANSSaveOtherDialog(QtWidgets.QDialog, Ui_SaveOtherDialog):
 
     def launch_file_browser(self, current_directory):
         filename = QtWidgets.QFileDialog.getExistingDirectory(self, 'Select Directory', current_directory,
-                                                          QtWidgets.QFileDialog.ShowDirsOnly)
+                                                              QtWidgets.QFileDialog.ShowDirsOnly)
         return filename
 
     def rename_filebox(self, name):

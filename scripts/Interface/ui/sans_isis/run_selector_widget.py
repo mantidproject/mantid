@@ -62,7 +62,7 @@ class RunSelectorWidget(QtWidgets.QWidget, Ui_RunSelectorWidget):
 
     def run_not_found(self):
         QtWidgets.QMessageBox.warning(self, "Run Not Found!",
-                                  "Could not find one or more of the runs specified.")
+                                      "Could not find one or more of the runs specified.")
 
     def invalid_run_query(self, message):
         QtWidgets.QMessageBox.warning(self, "Invalid Run Query!", message)

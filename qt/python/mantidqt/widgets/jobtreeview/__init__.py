@@ -17,4 +17,3 @@ Cell = jobtreeview.MantidQt.MantidWidgets.Batch.Cell
 JobTreeView = jobtreeview.MantidQt.MantidWidgets.Batch.JobTreeView
 JobTreeViewSignalAdapter = jobtreeview.MantidQt.MantidWidgets.Batch.JobTreeViewSignalAdapter
 RowLocation = jobtreeview.MantidQt.MantidWidgets.Batch.RowLocation
-

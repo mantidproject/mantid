@@ -38,7 +38,7 @@ class AddRunsPage(QtWidgets.QWidget, Ui_AddRunsPage):
 
     def no_save_directory(self):
         QtWidgets.QMessageBox.warning(self, "No Save Directory Set!",
-                                  "You must set the mantid output directory before suming files.")
+                                      "You must set the mantid output directory before suming files.")
 
     def set_out_file_name(self, out_file_name):
         self.fileNameEdit.setText(out_file_name)

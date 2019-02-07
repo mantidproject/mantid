@@ -12,7 +12,6 @@ from __future__ import (absolute_import, division, print_function)
 
 from abc import ABCMeta, abstractmethod
 from inspect import isclass
-import os
 from qtpy.QtWidgets import (QListWidgetItem, QMessageBox, QFileDialog, QMainWindow)  # noqa
 from qtpy.QtCore import (QRegExp, QSettings)  # noqa
 from qtpy.QtGui import (QDoubleValidator, QIcon, QIntValidator, QRegExpValidator)  # noqa
@@ -427,7 +426,7 @@ class SANSDataProcessorGui(QMainWindow,
         border_opacity = 255
         is_editable = True
         return jobtreeview.Cell(text, background_color, border_thickness,
-                                                 border_color, border_opacity, is_editable)
+                                border_color, border_opacity, is_editable)
 
     def row(self, path):
         return jobtreeview.RowLocation(path)
