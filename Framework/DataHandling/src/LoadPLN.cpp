@@ -279,7 +279,6 @@ protected:
 
   // time boundaries
   const TimeLimits m_timeBoundary; // seconds
-  const TimeLimits m_tofLimits;    // microsec
 
   virtual void addEventImpl(size_t id, size_t x, size_t y, double tof) = 0;
 
