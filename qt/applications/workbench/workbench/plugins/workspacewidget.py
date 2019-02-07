@@ -20,8 +20,8 @@ from mantid.api import AnalysisDataService
 from mantid.kernel import logger
 from mantidqt.plotting.functions import can_overplot, pcolormesh, plot, plot_from_names
 from mantidqt.widgets.instrumentview.presenter import InstrumentViewPresenter
-from mantidqt.widgets.workspacedisplay.matrix import MatrixWorkspaceDisplay
 from mantidqt.widgets.samplelogs.presenter import SampleLogs
+from mantidqt.widgets.workspacedisplay.matrix.presenter import MatrixWorkspaceDisplay
 from mantidqt.widgets.workspacedisplay.table.presenter import TableWorkspaceDisplay
 from mantidqt.widgets.workspacewidget.workspacetreewidget import WorkspaceTreeWidget
 # local package imports

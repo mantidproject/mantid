@@ -12,9 +12,9 @@ from __future__ import absolute_import, division, print_function
 from mantid.plots.utility import MantidAxType
 from mantidqt.widgets.workspacedisplay.ads_observer import WorkspaceDisplayADSObserver
 from mantidqt.widgets.workspacedisplay.data_copier import DataCopier
+from mantidqt.widgets.workspacedisplay.matrix.table_view_model import MatrixWorkspaceTableViewModelType
 from mantidqt.widgets.workspacedisplay.observing_presenter import ObservingPresenter
 from mantidqt.widgets.workspacedisplay.status_bar_view import StatusBarView
-from mantidqt.widgets.workspacedisplay.matrix.table_view_model import MatrixWorkspaceTableViewModelType
 from .model import MatrixWorkspaceDisplayModel
 from .view import MatrixWorkspaceDisplayView
 
@@ -23,7 +23,8 @@ class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
     A_LOT_OF_THINGS_TO_PLOT_MESSAGE = "You selected {} spectra to plot. Are you sure you want to plot that many?"
     NUM_SELECTED_FOR_CONFIRMATION = 10
 
-    def __init__(self, ws, plot=None, parent=None, model=None, view=None, ads_observer=None, container=None):
+    def __init__(self, ws, plot=None, parent=None, model=None, view=None, ads_observer=None, container=None,
+                 window_width=600, window_height=400):
         """
         Creates a display for the provided workspace.
 
@@ -38,7 +39,9 @@ class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
         # Create model and view, or accept mocked versions
         self.model = model if model else MatrixWorkspaceDisplayModel(ws)
         self.view = view if view else MatrixWorkspaceDisplayView(self, parent)
-        self.container = container if container else StatusBarView(parent, self.view, self.model.get_name())
+        self.container = container if container else StatusBarView(parent, self.view, self.model.get_name(),
+                                                                   window_width=window_width,
+                                                                   window_height=window_height)
 
         super(MatrixWorkspaceDisplay, self).__init__(self.container.status_bar)
 

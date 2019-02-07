@@ -12,7 +12,7 @@ from qtpy.QtWidgets import QMainWindow, QStatusBar
 
 
 class StatusBarView(QMainWindow):
-    def __init__(self, parent, central_widget, name):
+    def __init__(self, parent, central_widget, name, window_width=600, window_height=400):
         super(StatusBarView, self).__init__(parent)
         self.setCentralWidget(central_widget)
         self.setWindowTitle("{} - Mantid".format(name))
@@ -21,4 +21,4 @@ class StatusBarView(QMainWindow):
         self.status_bar = QStatusBar(self)
         self.setStatusBar(self.status_bar)
 
-        self.resize(600, 400)
+        self.resize(window_width, window_height)

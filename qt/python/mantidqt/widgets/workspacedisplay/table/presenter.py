@@ -41,7 +41,8 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
     INVALID_DATA_WINDOW_TITLE = "Invalid data - Mantid Workbench"
     COLUMN_DISPLAY_LABEL = 'Column {}'
 
-    def __init__(self, ws, plot=None, parent=None, model=None, view=None, name=None, ads_observer=None, container=None):
+    def __init__(self, ws, plot=None, parent=None, model=None, view=None, name=None, ads_observer=None, container=None,
+                 window_width=600, window_height=400):
         """
         Creates a display for the provided workspace.
 
@@ -58,7 +59,9 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
         self.model = model if model else TableWorkspaceDisplayModel(ws)
         self.name = name if name else self.model.get_name()
         self.view = view if view else TableWorkspaceDisplayView(self, parent)
-        self.container = container if container else StatusBarView(parent, self.view, self.name)
+        self.container = container if container else StatusBarView(parent, self.view, self.name,
+                                                                   window_width=window_width,
+                                                                   window_height=window_height)
 
         DataCopier.__init__(self, self.container.status_bar)
 
