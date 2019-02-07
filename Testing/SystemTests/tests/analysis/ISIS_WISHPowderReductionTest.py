@@ -72,6 +72,9 @@ class WISHPowderReductionTest(MantidSystemTest):
             mantid.DeleteWorkspace(ws)
             mantid.DeleteWorkspace(ws + "-d")
 
+    def requiredMemoryMB(self):
+        return 12000
+
 
 class WISHPowderReductionNoAbsorptionTest(MantidSystemTest):
     # still missing required files check with ./systemtest -R PowderReduction --showskipped
@@ -107,6 +110,9 @@ class WISHPowderReductionNoAbsorptionTest(MantidSystemTest):
             mantid.DeleteWorkspace(ws)
             mantid.DeleteWorkspace(ws + "-d")
 
+    def requiredMemoryMB(self):
+        return 12000
+
 
 class WISHPowderReductionCreateVanadiumTest(MantidSystemTest):
     # still missing required files check with ./systemtest -R PowderReduction --showskipped
@@ -132,3 +138,6 @@ class WISHPowderReductionCreateVanadiumTest(MantidSystemTest):
             validation_files = validation_files + ["w19612-{}foc".format(panel),
                                                    "vana19612-{}foc-SF-SS.nxs".format(panel)]
         return validation_files
+
+    def requiredMemoryMB(self):
+        return 12000
