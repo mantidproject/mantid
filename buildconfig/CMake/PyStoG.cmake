@@ -1,6 +1,6 @@
 include (ExternalProject)
 
-set ( _PyStoG_VERSION cfb40237984fa743372b3d92731c724c4b26a1f2)
+set ( _PyStoG_VERSION 4ad6d316bb94221e52b9a57fccbb65f4959972d3)
 set ( _PyStoG_download_dir ${CMAKE_CURRENT_BINARY_DIR}/../PyStoG-download )
 set ( _PyStoG_source_dir ${_PyStoG_download_dir}/src/PyStoG/pystog )
 set ( _PyStoG_source_test_dir ${_PyStoG_download_dir}/src/PyStoG/tests )

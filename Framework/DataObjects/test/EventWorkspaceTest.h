@@ -747,22 +747,30 @@ public:
   }
 
   void test_writeAccessInvalidatesCommonBinsFlagIsSet() {
-    int numEvents = 2;
-    int numHistograms = 2;
+    const int numEvents = 2;
+    const int numHistograms = 2;
     EventWorkspace_sptr ws =
         WorkspaceCreationHelper::createRandomEventWorkspace(numEvents,
                                                             numHistograms);
     // Calling isCommonBins() sets the flag m_isCommonBinsFlagSet
-    TS_ASSERT(ws->isCommonBins());
+    TS_ASSERT(ws->isCommonBins())
     // Calling dataX should unset the flag m_isCommonBinsFlagSet
     ws->dataX(0)[0] += 0.0;
     // m_isCommonBinsFlagSet is false, so this will re-validate and notice that
     // dataX is still identical.
-    TS_ASSERT(ws->isCommonBins());
+    TS_ASSERT(ws->isCommonBins())
     ws->dataX(0)[0] += 0.1;
     // m_isCommonBinsFlagSet is false, so this will re-validate and notice that
     // dataX(0) is now different from dataX(1).
-    TS_ASSERT(!ws->isCommonBins());
+    TS_ASSERT(!ws->isCommonBins())
+    const BinEdges edges{-0.5, 0.5, 1.3};
+    // Check methods not inherited from MatrixWorkspace
+    ws->setAllX(edges);
+    TS_ASSERT(ws->isCommonBins())
+    ws->dataX(0)[0] -= 0.1;
+    TS_ASSERT(!ws->isCommonBins())
+    ws->resetAllXToSingleBin();
+    TS_ASSERT(ws->isCommonBins())
   }
 
   void test_readYE() {
