@@ -187,8 +187,11 @@ class MuonDataContext(object):
             self._current_data = {"workspace": load_utils.empty_loaded_data()}
 
     def loaded_data(self, run):
-        return self._loaded_data.get_data(run=run)['workspace']
-        # return self._current_data["workspace"]
+        loaded_dict = self._loaded_data.get_data(run=run)
+        if loaded_dict:
+            return self._loaded_data.get_data(run=run)['workspace']
+        else:
+            return None
 
     @property
     def loaded_workspace(self):
