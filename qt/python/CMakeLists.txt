@@ -100,21 +100,21 @@ endif ()
     mantidqt/widgets/samplelogs/test/test_samplelogs_model.py
     mantidqt/widgets/samplelogs/test/test_samplelogs_presenter.py
 
-    mantidqt/widgets/commonworkspacedisplay/test/test_ads_observer.py
-    mantidqt/widgets/commonworkspacedisplay/test/test_data_copier.py
-    mantidqt/widgets/commonworkspacedisplay/test/test_observing_presenter.py
-    mantidqt/widgets/commonworkspacedisplay/test/test_observing_view.py
-    mantidqt/widgets/commonworkspacedisplay/test/test_user_notifier.py
+    mantidqt/widgets/workspacedisplay/test/test_ads_observer.py
+    mantidqt/widgets/workspacedisplay/test/test_data_copier.py
+    mantidqt/widgets/workspacedisplay/test/test_observing_presenter.py
+    mantidqt/widgets/workspacedisplay/test/test_observing_view.py
+    mantidqt/widgets/workspacedisplay/test/test_user_notifier.py
 
-    mantidqt/widgets/matrixworkspacedisplay/test/test_matrixworkspacedisplay_model.py
-    mantidqt/widgets/matrixworkspacedisplay/test/test_matrixworkspacedisplay_presenter.py
-    mantidqt/widgets/matrixworkspacedisplay/test/test_matrixworkspacedisplay_table_view_model.py
+    mantidqt/widgets/workspacedisplay/matrix/test/test_matrixworkspacedisplay_model.py
+    mantidqt/widgets/workspacedisplay/matrix/test/test_matrixworkspacedisplay_presenter.py
+    mantidqt/widgets/workspacedisplay/matrix/test/test_matrixworkspacedisplay_table_view_model.py
 
-    mantidqt/widgets/tableworkspacedisplay/test/test_tableworkspacedisplay_error_column.py
-    mantidqt/widgets/tableworkspacedisplay/test/test_tableworkspacedisplay_marked_columns.py
-    mantidqt/widgets/tableworkspacedisplay/test/test_tableworkspacedisplay_workbench_table_widget_item.py
-    mantidqt/widgets/tableworkspacedisplay/test/test_tableworkspacedisplay_model.py
-    mantidqt/widgets/tableworkspacedisplay/test/test_tableworkspacedisplay_presenter.py
+    mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_error_column.py
+    mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_marked_columns.py
+    mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_workbench_table_widget_item.py
+    mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_model.py
+    mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_presenter.py
   )
 
   # Tests

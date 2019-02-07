@@ -13,8 +13,8 @@ Contains the presenter for displaying the InstrumentWidget
 from __future__ import (absolute_import, unicode_literals)
 
 # local imports
-from mantidqt.widgets.commonworkspacedisplay.observing_presenter import ObservingPresenter
-from mantidqt.widgets.commonworkspacedisplay.ads_observer import WorkspaceDisplayADSObserver
+from mantidqt.widgets.workspacedisplay.observing_presenter import ObservingPresenter
+from mantidqt.widgets.workspacedisplay.ads_observer import WorkspaceDisplayADSObserver
 from .view import InstrumentView
 
 
