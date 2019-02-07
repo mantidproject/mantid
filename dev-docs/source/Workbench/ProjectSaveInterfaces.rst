@@ -7,7 +7,7 @@ Project Save
 Overview
 ########
 
-Project save is the attempt to allow all parts of a user's project to be saved, namely interfaces (C++ and Python), plots and  workspaces. This is achieved by using either dedicated classes, in the case of plots and workspaces, or by adding a encoder and decoder to the EncoderFactory and the DecoderFactory. The way in which the saving is currently achieved is by returning a dictionary containing only either primitive types (by far the most common approach) or by returning current the python JSON library's serializeable types. Examples of how types are converted to JSON and back can be found at https://docs.python.org/2/library/json.html under section 18.2.2 Encoders and Decoders. 
+Project save is the attempt to allow all parts of a user's project to be saved, namely interfaces (C++ and Python), plots and  workspaces. 
 
 Handy links
 ###########
@@ -16,6 +16,11 @@ Handy links
 - QMap - http://doc.qt.io/qt-5/qmap.html
 - QVariant - http://doc.qt.io/qt-5/QVariant.html 
 - SIP (documentation on SIP is relatively limited) - http://pyqt.sourceforge.net/Docs/sip4/using.html
+
+Implementation
+##############
+
+Project save will save interfaces, plots and workspaces, this is achieved by using either dedicated classes, in the case of plots and workspaces, or by adding a encoder and decoder to the EncoderFactory and the DecoderFactory. The way in which the saving is currently achieved is by returning a dictionary containing only either primitive types (by far the most common approach) or by returning current the python JSON library's serializeable types. Examples of how types are converted to JSON and back can be found at https://docs.python.org/2/library/json.html under section 18.2.2 Encoders and Decoders. 
 
 Saving and loading an interface (Python)
 ########################################
