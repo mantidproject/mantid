@@ -181,10 +181,14 @@ IndirectFitOutputOptionsPresenter::getEditResultsDialog(QWidget *parent) const {
 
 void IndirectFitOutputOptionsPresenter::replaceSingleSpectrum() {
   auto const inputName = m_editResultsDialog->getSelectedInputWorkspaceName();
-  auto const singleFitName =
+  auto const singleBinName =
       m_editResultsDialog->getSelectedSingleFitWorkspaceName();
   auto const outputName = m_editResultsDialog->getOutputWorkspaceName();
-  m_model->runReplaceSingleSpectrum(inputName, singleFitName, outputName);
+  try {
+    m_model->replaceResultBin(inputName, singleBinName, outputName);
+  } catch (std::exception const &ex) {
+    m_view->displayWarning(ex.what());
+  }
 }
 
 void IndirectFitOutputOptionsPresenter::closeEditResultDialog() {

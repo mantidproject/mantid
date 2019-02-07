@@ -94,6 +94,33 @@ bool containsPlottableWorkspace(WorkspaceGroup_const_sptr groupWorkspace) {
   return false;
 }
 
+std::vector<std::string>
+validateReplaceAlgorithm(std::string const &inputWorkspaceName,
+                         std::string const &singleBinWorkspaceName,
+                         std::string const &outputName) {
+  std::vector<std::string> errors;
+
+  if (inputWorkspaceName.empty())
+    errors.emplace_back("Select a valid input workspace.");
+  if (singleBinWorkspaceName.empty())
+    errors.emplace_back("Select a valid Single Fit Result workspace.");
+  if (outputName.empty())
+    errors.emplace_back("Enter a valid output workspace name.");
+
+  return errors;
+}
+
+void replaceBin(MatrixWorkspace_sptr inputWorkspace,
+                MatrixWorkspace_sptr singleBinWorkspace,
+                std::string const &outputName) {
+  auto replaceAlg =
+      AlgorithmManager::Instance().create("ReplaceIndirectFitResultBin");
+  replaceAlg->setProperty("InputWorkspace", inputWorkspace);
+  replaceAlg->setProperty("SingleBinWorkspace", singleBinWorkspace);
+  replaceAlg->setProperty("OutputWorkspace", outputName);
+  replaceAlg->execute();
+}
+
 } // namespace
 
 namespace MantidQt {
@@ -246,16 +273,17 @@ bool IndirectFitOutputOptionsModel::isResultGroupSelected(
   return selectedGroup == "Result Group";
 }
 
-void IndirectFitOutputOptionsModel::runReplaceSingleSpectrum(
-    std::string const &inputName, std::string const &singleFitName,
+void IndirectFitOutputOptionsModel::replaceResultBin(
+    std::string const &inputName, std::string const &singleBinName,
     std::string const &outputName) const {
-  auto replaceAlg =
-      AlgorithmManager::Instance().create("ReplaceIndirectFitResultBin");
-  replaceAlg->setProperty("InputWorkspace", getADSMatrixWorkspace(inputName));
-  replaceAlg->setProperty("SingleBinWorkspace",
-                          getADSMatrixWorkspace(singleFitName));
-  replaceAlg->setProperty("OutputWorkspace", outputName);
-  replaceAlg->execute();
+  auto const errors =
+      validateReplaceAlgorithm(inputName, singleBinName, outputName);
+
+  if (errors.empty())
+    replaceBin(getADSMatrixWorkspace(inputName),
+               getADSMatrixWorkspace(singleBinName), outputName);
+  else
+    throw std::runtime_error(errors[0]);
 }
 
 } // namespace IDA

@@ -219,11 +219,12 @@ void ReplaceIndirectFitResultBin::init() {
   declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "The result workspace containing the poor fit value which "
-                  "needs replacing.");
+                  "needs replacing. It's name must end with _Result.");
 
   declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "SingleBinWorkspace", "", Direction::Input),
-                  "The result workspace containing the replacement bin.");
+                  "The result workspace containing the replacement bin. It's "
+                  "name must end with _Result.");
 
   declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),

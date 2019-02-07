@@ -52,9 +52,9 @@ public:
 
   bool isResultGroupSelected(std::string const &selectedGroup) const override;
 
-  void runReplaceSingleSpectrum(std::string const &inputName,
-                                std::string const &singleFitName,
-                                std::string const &outputName) const override;
+  void replaceResultBin(std::string const &inputName,
+                        std::string const &singleBinName,
+                        std::string const &outputName) const override;
 
 private:
   void plotResult(Mantid::API::WorkspaceGroup_const_sptr groupWorkspace,
