@@ -51,14 +51,40 @@ class MultiFileEditor(PluginWidget):
         self.setLayout(layout)
 
         # attributes
-        self.run_action = create_action(self, "Run",
-                                        on_triggered=self.editors.execute_current,
-                                        shortcut=("Ctrl+Return", "Ctrl+Enter"),
-                                        shortcut_context=Qt.ApplicationShortcut)
-        self.abort_action = create_action(self, "Abort",
-                                          on_triggered=self.editors.abort_current)
+        self.run_action = create_action(
+            self, "Run",
+            on_triggered=self.editors.execute_current,
+            shortcut=("Ctrl+Return", "Ctrl+Enter"),
+            shortcut_context=Qt.ApplicationShortcut)
 
-        self.editor_actions = [self.run_action, self.abort_action]
+        self.abort_action = create_action(
+            self, "Abort", on_triggered=self.editors.abort_current)
+
+        self.toggle_comment_action = create_action(
+            self.editors.current_editor(), "Comment/Uncomment",
+            on_triggered=self.editors.toggle_comment_current,
+            shortcut="Ctrl+/",
+            shortcut_context=Qt.ApplicationShortcut)
+
+        self.tabs_to_spaces_action = create_action(
+            self, 'Tabs to Spaces',
+            on_triggered=self.editors.tabs_to_spaces_current)
+
+        self.spaces_to_tabs_action = create_action(
+            self, 'Spaces to Tabs',
+            on_triggered=self.editors.spaces_to_tabs_current)
+
+        self.toggle_whitespace_action = create_action(
+            self, 'Toggle Whitespace Visible',
+            on_triggered=self.editors.toggle_whitespace_visible_all)
+
+        # Store actions for adding to menu bar; None will add a separator
+        self.editor_actions = [self.run_action,
+                               self.abort_action, None,
+                               self.toggle_comment_action,
+                               self.toggle_whitespace_action, None,
+                               self.tabs_to_spaces_action,
+                               self.spaces_to_tabs_action, None]
 
     def execute_current(self):
         '''This is used by MainWindow to execute a file after opening it'''
