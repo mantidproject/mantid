@@ -101,11 +101,6 @@ void SofQWNormalisedPolygon::init() {
  */
 void SofQWNormalisedPolygon::exec() {
   MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
-  // Do the full check for common binning
-  if (!WorkspaceHelpers::commonBoundaries(*inputWS)) {
-    throw std::invalid_argument(
-        "The input workspace must have common binning across all spectra");
-  }
 
   // Compute input caches
   m_EmodeProperties.initCachedValues(*inputWS, this);

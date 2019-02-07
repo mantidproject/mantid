@@ -34,14 +34,6 @@ void SofQWCentre::exec() {
 
   MatrixWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");
 
-  // Do the full check for common binning
-  if (!WorkspaceHelpers::commonBoundaries(*inputWorkspace)) {
-    g_log.error(
-        "The input workspace must have common binning across all spectra");
-    throw std::invalid_argument(
-        "The input workspace must have common binning across all spectra");
-  }
-
   m_EmodeProperties.initCachedValues(*inputWorkspace, this);
   const int emode = m_EmodeProperties.m_emode;
 

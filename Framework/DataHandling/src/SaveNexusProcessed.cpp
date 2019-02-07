@@ -12,7 +12,6 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/WorkspaceHistory.h"
-#include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
@@ -244,8 +243,7 @@ void SaveNexusProcessed::doExec(
     prog_init.reportIncrement(1, "Writing sample and instrument");
 
     // check if all X() are in fact the same array
-    const bool uniformSpectra =
-        API::WorkspaceHelpers::commonBoundaries(*matrixWorkspace);
+    const bool uniformSpectra = matrixWorkspace->isCommonBins();
 
     // Retrieve the workspace indices (from params)
     std::vector<int> spec;

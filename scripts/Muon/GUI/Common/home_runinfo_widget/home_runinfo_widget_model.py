@@ -67,7 +67,7 @@ class HomeRunInfoWidgetModel(object):
         except Exception:
             return "Log not found"
         if temps:
-            return temps.timeAverageValue()
+            return round(temps.timeAverageValue(), 5)
         else:
             return "Log not found"
 

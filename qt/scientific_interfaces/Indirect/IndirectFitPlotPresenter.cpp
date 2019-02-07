@@ -326,7 +326,8 @@ void IndirectFitPlotPresenter::updateFitRangeSelector() {
 }
 
 void IndirectFitPlotPresenter::plotCurrentPreview() {
-  if (m_model->getWorkspace()) {
+  const auto inputWorkspace = m_model->getWorkspace();
+  if (inputWorkspace && !inputWorkspace->getName().empty()) {
     const auto plotString = getPlotString(m_model->getActiveSpectrum());
     m_pythonRunner.runPythonCode(QString::fromStdString(plotString));
   } else

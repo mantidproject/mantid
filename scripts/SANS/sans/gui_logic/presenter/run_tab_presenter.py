@@ -309,6 +309,8 @@ class RunTabPresenter(object):
                     "The user path {} does not exist. Make sure a valid user file path"
                     " has been specified.".format(user_file_path))
         except RuntimeError as path_error:
+            # This exception block runs if user file does not exist
+            self._view.on_user_file_load_failure()
             self.display_errors(path_error, error_msg + " when finding file.")
         else:
             try:
@@ -320,6 +322,8 @@ class RunTabPresenter(object):
                 user_file_reader = UserFileReader(user_file_path)
                 user_file_items = user_file_reader.read_user_file()
             except (RuntimeError, ValueError) as e:
+                # It is in this exception block that loading fails if the file is invalid (e.g. a csv)
+                self._view.on_user_file_load_failure()
                 self.display_errors(e, error_msg + " when reading file.", use_error_name=True)
             else:
                 try:
@@ -338,13 +342,14 @@ class RunTabPresenter(object):
                         raise RuntimeError("User file did not contain a SANS Instrument.")
 
                 except RuntimeError as instrument_e:
-                    # Only catch the error we know about
-                    # If a new exception is caused, we can now see the stack trace
+                    # This exception block runs if the user file does not contain an parsable instrument
+                    self._view.on_user_file_load_failure()
                     self.display_errors(instrument_e, error_msg + " when reading instrument.")
                 except Exception as other_error:
                     # If we don't catch all exceptions, SANS can fail to open if last loaded
-                    # user file contains an error
+                    # user file contains an error that would not otherwise be caught
                     traceback.print_exc()
+                    self._view.on_user_file_load_failure()
                     self.display_errors(other_error, "Unknown error in loading user file.", use_error_name=True)
 
     def on_batch_file_load(self):
