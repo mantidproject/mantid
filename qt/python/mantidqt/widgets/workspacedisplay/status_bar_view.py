@@ -5,8 +5,6 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
-#
-#
 from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QMainWindow, QStatusBar
 
