@@ -7,8 +7,8 @@
 from __future__ import (absolute_import, division, print_function)
 
 from Muon.GUI.Common.home_tab.home_tab_presenter import HomeTabSubWidget
-import Muon.GUI.Common.load_utils as load_utils
-from Muon.GUI.Common.muon_file_utils import filter_for_extensions
+import Muon.GUI.Common.utilities.load_utils as load_utils
+from Muon.GUI.Common.utilities.muon_file_utils import filter_for_extensions
 from Muon.GUI.Common.observer_pattern import Observable
 
 
@@ -41,6 +41,9 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
 
         self._view.on_instrument_changed(self.handle_instrument_changed)
 
+        self.handle_loaded_time_zero_checkState_change()
+        self.handle_loaded_first_good_data_checkState_change()
+
         # notifier for instrument changes
         self.instrumentNotifier = InstrumentWidgetPresenter.InstrumentNotifier(self)
 
@@ -51,6 +54,7 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
         self.handle_loaded_first_good_data_checkState_change()
         self.handle_loaded_time_zero_checkState_change()
         self._view.set_instrument(self._model._data.instrument)
+        self._view.on_dead_time_combo_changed(self._view.deadtime_selector.currentIndex())
 
     def clear_view(self):
         self._view.set_time_zero(0.0)
@@ -95,11 +99,11 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
     # ------------------------------------------------------------------------------------------------------------------
 
     def handle_fixed_rebin_changed(self):
-        fixed_bin_size = float(self._view.get_fixed_bin_text())
+        fixed_bin_size = self._view.get_fixed_bin_text()
         self._model.add_fixed_binning(fixed_bin_size)
 
     def handle_variable_rebin_changed(self):
-        variable_bin_size = float(self._view.get_fixed_bin_text())
+        variable_bin_size = self._view.get_variable_bin_text()
         self._model.add_variable_binning(variable_bin_size)
 
     # ------------------------------------------------------------------------------------------------------------------
@@ -117,6 +121,7 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
                 # User selects "Ok"
                 self._model.clear_data()
                 self.clear_view()
+                self._model._data.instrument = instrument
                 self._view.set_instrument(instrument, block=True)
                 self.instrumentNotifier.notify_subscribers(instrument)
             else:
@@ -131,6 +136,10 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
         """User selects the option to Browse for a nexus file to load dead times from."""
         filename = self._view.show_file_browser_and_return_selection(
             filter_for_extensions(['nxs']), [''], multiple_files=False)[0]
+
+        if filename == '':
+            return
+
         name = load_utils.load_dead_time_from_filename(filename)
         if name == "":
             self._view.warning_popup("File does not appear to contain dead time data.")
@@ -183,7 +192,7 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
             self._view.set_dead_time_label(dead_time_text)
         except ValueError as error:
             self._handle_selected_table_is_invalid()
-            self._view.warning_popup(error.args[0])
+            self._view.warning_popup(error.args[0] + ' ' + error.args[1])
 
     def _handle_selected_table_is_invalid(self):
         self._model.set_dead_time_to_none()

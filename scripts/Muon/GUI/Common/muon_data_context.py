@@ -15,7 +15,7 @@ from Muon.GUI.Common.muon_group import MuonGroup
 from Muon.GUI.Common.muon_pair import MuonPair
 from Muon.GUI.Common.muon_load_data import MuonLoadData
 from Muon.GUI.Common.utilities.muon_file_utils import format_run_for_file
-from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
+from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string, run_string_to_list
 
 from Muon.GUI.Common.ADSHandler.workspace_naming import (get_raw_data_workspace_name, get_group_data_workspace_name,
                                                          get_pair_data_workspace_name, get_base_data_directory,
@@ -23,9 +23,11 @@ from Muon.GUI.Common.ADSHandler.workspace_naming import (get_raw_data_workspace_
                                                          get_pair_data_directory)
 
 from Muon.GUI.Common.calculate_pair_and_group import calculate_group_data, calculate_pair_data
+from Muon.GUI.Common.utilities.muon_file_utils import allowed_instruments
 
 from collections import OrderedDict
 
+from mantid.api import WorkspaceGroup
 from mantid.kernel import ConfigServiceImpl, ConfigService
 
 
@@ -34,7 +36,10 @@ def get_default_grouping(workspace, instrument, main_field_direction):
     if instrument == "MUSR":
         parameter_name += " - " + main_field_direction
     try:
-        grouping_file = workspace.getInstrument().getStringParameter(parameter_name)[0]
+        if isinstance(workspace, WorkspaceGroup):
+            grouping_file = workspace[0].getInstrument().getStringParameter(parameter_name)[0]
+        else:
+            grouping_file = workspace.getInstrument().getStringParameter(parameter_name)[0]
     except IndexError:
         return [], []
     instrument_directory = ConfigServiceImpl.Instance().getInstrumentDirectory()
@@ -102,11 +107,14 @@ class MuonDataContext(object):
         self._loaded_data = load_data
         self._current_data = {"workspace": load_utils.empty_loaded_data()}  # self.get_result(False)
 
+        self._instrument = ConfigService.getInstrument().name() if ConfigService.getInstrument().name()\
+            in allowed_instruments else 'EMU'
+
     def is_data_loaded(self):
         return self._loaded_data.num_items() > 0
 
     def is_multi_period(self):
-        return isinstance(self.current_data["OutputWorkspace"], list)
+        return len(self.current_data["OutputWorkspace"]) > 1
 
     @property
     def current_data(self):
@@ -114,9 +122,11 @@ class MuonDataContext(object):
 
     @property
     def instrument(self):
-        ConfigService['default.instrument'] = 'EMU'
-        inst = ConfigService.getInstrument().name()
-        return inst
+        return self._instrument
+
+    @instrument.setter
+    def instrument(self, value):
+        self._instrument = value
 
     @property
     def current_run(self):
@@ -177,16 +187,25 @@ class MuonDataContext(object):
 
     @property
     def loaded_workspace(self):
+        return self.current_data["OutputWorkspace"][0].workspace
+
+    def loaded_workspace_as_group(self, run):
         if self.is_multi_period():
-            # return the first workspace in the group
-            return self.current_data["OutputWorkspace"][0].workspace
+            workspace_group = WorkspaceGroup()
+            for workspace_wrapper in self._loaded_data.get_data(run=run_string_to_list(run))['workspace']['OutputWorkspace']:
+                workspace_group.addWorkspace(workspace_wrapper.workspace)
+            return workspace_group
         else:
             return self.current_data["OutputWorkspace"][0].workspace
 
     @property
     def period_string(self):
-        # Get the period string i.e. "1+2-3+4" to be used in workspace naming.
-        return "1"
+        summed_periods = self.loaded_data["SummedPeriods"] if 'SummedPeriods' in self.loaded_data else [1]
+        subtracted_periods = self.loaded_data["SubtractedPeriods"] if 'SubtractedPeriods' in self.loaded_data else []
+        if subtracted_periods:
+            return '+'.join([str(period) for period in summed_periods]) + '-' + '-'.join([str(period) for period in subtracted_periods])
+        else:
+            return '+'.join([str(period) for period in summed_periods])
 
     @property
     def num_detectors(self):
@@ -236,56 +255,67 @@ class MuonDataContext(object):
         self.clear_pairs()
         self._current_data = {"workspace": load_utils.empty_loaded_data()}
 
-    def _base_run_name(self):
+    def _base_run_name(self, run=None):
         """ e.g. EMU0001234 """
-        if isinstance(self.run, int):
-            return str(self.instrument) + format_run_for_file(self.run)
+        if not run:
+            run = self.run
+        if isinstance(run, int):
+            return str(self.instrument) + format_run_for_file(run)
         else:
-            return str(self.instrument) + self.run
+            return str(self.instrument) + run
 
     # ------------------------------------------------------------------------------------------------------------------
     # Showing workspaces in the ADS
     # ------------------------------------------------------------------------------------------------------------------
 
     def show_raw_data(self):
-        workspace = self.current_data["OutputWorkspace"]
-        directory = get_base_data_directory(self) + get_raw_data_directory(self)
+        workspace_list = self._loaded_data.params
+        for workspace in workspace_list:
+            run = run_list_to_string(workspace['run'])
+            workspace = workspace['workspace']['OutputWorkspace']
+            directory = get_base_data_directory(self, run) + get_raw_data_directory(self, run)
 
-        if isinstance(workspace, list):
-            # Multi-period data
-            for i, single_ws in enumerate(workspace):
-                name = directory + get_raw_data_workspace_name(self) + "_period_" + str(i)
-                single_ws.show(name)
-        else:
-            # Single period data
-            name = directory + get_raw_data_workspace_name(self)
-            workspace.show(name)
+            if len(workspace) > 1:
+                # Multi-period data
+                for i, single_ws in enumerate(workspace):
+                    name = directory + get_raw_data_workspace_name(self, run) + "_period_" + str(i)
+                    single_ws.show(name)
+            else:
+                # Single period data
+                name = directory + get_raw_data_workspace_name(self, run)
+                workspace[0].show(name)
 
     def show_all_groups(self):
         for group_name in self._groups.keys():
             self.show_group_data(group_name)
 
     def show_group_data(self, group_name, show=True):
-        name = get_group_data_workspace_name(self, group_name)
-        directory = get_base_data_directory(self) + get_group_data_directory(self)
-        workspace = calculate_group_data(self, group_name)
+        workspace_list = self._loaded_data.params
+        for workspace in workspace_list:
+            run = run_list_to_string(workspace['run'])
+            workspace = calculate_group_data(self, group_name, run)
+            directory = get_base_data_directory(self, run) + get_group_data_directory(self, run)
+            name = get_group_data_workspace_name(self, group_name, run)
 
-        self._groups[group_name].workspace = MuonWorkspaceWrapper(workspace)
-        if show:
-            self._groups[group_name].workspace.show(directory + name)
+            self._groups[group_name].workspace = MuonWorkspaceWrapper(workspace)
+            if show:
+                self._groups[group_name].workspace.show(directory + name)
 
     def show_all_pairs(self):
         for pair_name in self._pairs.keys():
             self.show_pair_data(pair_name)
 
     def show_pair_data(self, pair_name, show=True):
-        name = get_pair_data_workspace_name(self, pair_name)
-        directory = get_base_data_directory(self) + get_pair_data_directory(self)
-        workspace = calculate_pair_data(self, pair_name)
+        workspace_list = self._loaded_data.params
+        for workspace in workspace_list:
+            run = run_list_to_string(workspace['run'])
+            name = get_pair_data_workspace_name(self, pair_name, run)
+            directory = get_base_data_directory(self, run) + get_pair_data_directory(self, run)
+            workspace = calculate_pair_data(self, pair_name, run)
 
-        self._pairs[pair_name].workspace = MuonWorkspaceWrapper(workspace)
-        if show:
-            self._pairs[pair_name].workspace.show(directory + name)
+            self._pairs[pair_name].workspace = MuonWorkspaceWrapper(workspace)
+            if show:
+                self._pairs[pair_name].workspace.show(directory + name)
 
     def calculate_all_groups(self):
         for group_name in self._groups.keys():

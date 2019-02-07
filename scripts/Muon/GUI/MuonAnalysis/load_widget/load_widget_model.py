@@ -15,8 +15,9 @@ class LoadWidgetModel(object):
     (both the nun numbers, filenames and workspaces) as well as loading new runs using a separate loading thread.
     """
 
-    def __init__(self, loaded_data_store=MuonLoadData()):
+    def __init__(self, loaded_data_store=MuonLoadData(), muon_context=None):
         self._loaded_data_store = loaded_data_store
+        self._context = muon_context
 
     def add_muon_data(self, filename, workspace, run):
         self._loaded_data_store.add_data(run=run, filename=filename, workspace=workspace)
