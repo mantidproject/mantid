@@ -33,12 +33,10 @@ class ObservingPresenter(object):
     def close(self, workspace_name):
         if self.current_workspace_equals(workspace_name):
             self.clear_observer()
-            self.view.emit_close()
             self.container.emit_close()
 
     def force_close(self):
         self.clear_observer()
-        self.view.emit_close()
         self.container.emit_close()
 
     def current_workspace_equals(self, name):

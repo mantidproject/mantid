@@ -27,6 +27,7 @@ class StatusBarView(QMainWindow, ObservingView):
         self.close_signal.connect(self._run_close)
 
     def closeEvent(self, event):
+        self.centralWidget().close()
         QMainWindow.closeEvent(self, event)
 
     @Slot()

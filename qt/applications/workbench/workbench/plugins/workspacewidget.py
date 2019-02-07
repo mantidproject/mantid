@@ -120,7 +120,7 @@ class WorkspaceWidget(PluginWidget):
         """
         for ws in self._ads.retrieveWorkspaces(names, unrollGroups=True):
             presenter = InstrumentViewPresenter(ws, parent=self)
-            presenter.view.show()
+            presenter.show_view()
 
     def _do_show_data(self, names):
         for ws in self._ads.retrieveWorkspaces(names, unrollGroups=True):

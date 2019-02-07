@@ -37,11 +37,12 @@ class InstrumentView(QWidget, ObservingView):
 
     close_signal = Signal()
 
-    def __init__(self, presenter, name, parent=None):
+    def __init__(self, parent, presenter, name):
         super(InstrumentView, self).__init__(parent)
 
         self.widget = InstrumentWidget(name)
 
+        # used by the observing view to delete the ADS observer
         self.presenter = presenter
 
         self.setWindowTitle(name)

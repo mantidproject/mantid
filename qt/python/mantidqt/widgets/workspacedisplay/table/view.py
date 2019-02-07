@@ -5,8 +5,6 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
-#
-#
 from __future__ import (absolute_import, division, print_function)
 
 import sys
@@ -39,11 +37,10 @@ class PreciseDoubleFactory(QItemEditorFactory):
 
 
 class TableWorkspaceDisplayView(QTableWidget, ObservingView):
-    close_signal = Signal()
     rename_signal = Signal(str)
     repaint_signal = Signal()
 
-    def __init__(self, presenter, parent=None, name=''):
+    def __init__(self, presenter, parent=None):
         super(TableWorkspaceDisplayView, self).__init__(parent)
 
         self.presenter = presenter
@@ -59,7 +56,6 @@ class TableWorkspaceDisplayView(QTableWidget, ObservingView):
 
         self.setAttribute(Qt.WA_DeleteOnClose, True)
 
-        self.close_signal.connect(self._run_close)
         self.rename_signal.connect(self._run_rename)
         self.repaint_signal.connect(self._run_repaint)
 
@@ -77,10 +73,6 @@ class TableWorkspaceDisplayView(QTableWidget, ObservingView):
     @Slot()
     def _run_repaint(self):
         self.viewport().update()
-
-    @Slot()
-    def _run_close(self):
-        self.close()
 
     @Slot(str)
     def _run_rename(self, new_name):

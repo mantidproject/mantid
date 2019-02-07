@@ -17,8 +17,8 @@ from qtpy.QtGui import QKeySequence
 from qtpy.QtWidgets import (QAbstractItemView, QAction, QHeaderView, QMessageBox, QTabWidget, QTableView)
 
 import mantidqt.icons
-from mantidqt.widgets.workspacedisplay.observing_view import ObservingView
 from mantidqt.widgets.workspacedisplay.matrix.table_view_model import MatrixWorkspaceTableViewModelType
+from mantidqt.widgets.workspacedisplay.observing_view import ObservingView
 
 
 class MatrixWorkspaceTableView(QTableView):
@@ -41,7 +41,6 @@ class MatrixWorkspaceTableView(QTableView):
 
 
 class MatrixWorkspaceDisplayView(QTabWidget, ObservingView):
-    close_signal = Signal()
     rename_signal = Signal(str)
 
     def __init__(self, presenter, parent=None):
@@ -69,12 +68,7 @@ class MatrixWorkspaceDisplayView(QTabWidget, ObservingView):
         self.table_x = self.add_table("X values")
         self.table_e = self.add_table("E values")
 
-        self.close_signal.connect(self._run_close)
         self.rename_signal.connect(self._run_rename)
-
-    @Slot()
-    def _run_close(self):
-        self.close()
 
     @Slot(str)
     def _run_rename(self, new_name):

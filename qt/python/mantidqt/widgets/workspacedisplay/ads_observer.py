@@ -33,9 +33,9 @@ def _catch_exceptions(func):
 
 class WorkspaceDisplayADSObserver(AnalysisDataServiceObserver):
 
-    def __init__(self, workspace_display, observe_replace=True):
+    def __init__(self, presenter, observe_replace=True):
         super(WorkspaceDisplayADSObserver, self).__init__()
-        self.window = workspace_display
+        self.presenter = presenter
 
         self.observeClear(True)
         self.observeDelete(True)
@@ -47,7 +47,7 @@ class WorkspaceDisplayADSObserver(AnalysisDataServiceObserver):
         """
         Called when the ADS is deleted all of its workspaces
         """
-        self.window.force_close()
+        self.presenter.force_close()
 
     @_catch_exceptions
     def deleteHandle(self, name, _):
@@ -59,7 +59,7 @@ class WorkspaceDisplayADSObserver(AnalysisDataServiceObserver):
         :param _: The name of the workspace. Unused
         :param __: A pointer to the workspace. Unused
         """
-        self.window.close(name)
+        self.presenter.close(name)
 
     @_catch_exceptions
     def replaceHandle(self, name, workspace):
@@ -69,8 +69,8 @@ class WorkspaceDisplayADSObserver(AnalysisDataServiceObserver):
         :param _: The name of the workspace. Unused
         :param workspace: A reference to the new workspace
         """
-        self.window.replace_workspace(name, workspace)
+        self.presenter.replace_workspace(name, workspace)
 
     @_catch_exceptions
     def renameHandle(self, old_name, new_name):
-        self.window.rename_workspace(old_name, new_name)
+        self.presenter.rename_workspace(old_name, new_name)
