@@ -35,7 +35,7 @@ class SANSSaveOtherDialog(QtWidgets.QDialog, Ui_SaveOtherDialog):
         self.cancel_button.pressed.connect(self.on_cancel_clicked)
         self.directory_lineEdit.textChanged.connect(self.on_directory_changed)
         self.nxcansas_checkBox.setChecked(True)
-        self.ads_widget = workspacetreewidget.WorkspaceTreeWidgetSimple(True, self)
+        self.ads_widget = workspacetreewidget.WorkspaceTreeWidget(True, self)
         self.ads_widget.treeSelectionChanged.connect(self.on_item_selection_changed)
         self.ads_widget.refreshWorkspaces()
         self.ads_widget.installEventFilter(self)

@@ -4,10 +4,6 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-"""try:
-    from PyQt4.QtCore import pyqtSlot, QThreadPool, pyqtSignal, QObject
-except ImportError:
-    from PyQt5.QtCore import pyqtSlot, QThreadPool, pyqtSignal, QObject"""
 from qtpy.QtCore import Slot, QThreadPool, Signal, QObject
 from sans.sans_batch import SANSBatchReduction
 from sans.algorithm_detail.batch_execution import load_workspaces_from_states

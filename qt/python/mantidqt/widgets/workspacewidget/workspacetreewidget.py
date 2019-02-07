@@ -17,5 +17,5 @@ from __future__ import (absolute_import, unicode_literals)
 from mantidqt.utils.qt import import_qt
 
 
-WorkspaceTreeWidgetSimple = import_qt('..._common', 'mantidqt.widgets.workspacewidget',
+WorkspaceTreeWidget = import_qt('..._common', 'mantidqt.widgets.workspacewidget',
                                 'WorkspaceTreeWidgetSimple')
