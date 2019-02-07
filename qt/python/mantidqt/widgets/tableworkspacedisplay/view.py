@@ -13,16 +13,18 @@ import sys
 from functools import partial
 
 from qtpy import QtGui
-from qtpy.QtCore import QVariant, Qt
+from qtpy.QtCore import QVariant, Qt, Signal, Slot
 from qtpy.QtGui import QKeySequence
 from qtpy.QtWidgets import (QAction, QHeaderView, QItemEditorFactory, QMenu, QMessageBox,
                             QStyledItemDelegate, QTableWidget)
 
 import mantidqt.icons
+from mantidqt.widgets.common.observing_view import ObservingView
 from mantidqt.widgets.tableworkspacedisplay.plot_type import PlotType
 
 
 class PreciseDoubleFactory(QItemEditorFactory):
+
     def __init__(self):
         QItemEditorFactory.__init__(self)
 
@@ -36,7 +38,11 @@ class PreciseDoubleFactory(QItemEditorFactory):
         return widget
 
 
-class TableWorkspaceDisplayView(QTableWidget):
+class TableWorkspaceDisplayView(QTableWidget, ObservingView):
+    close_signal = Signal()
+    rename_signal = Signal(str)
+    repaint_signal = Signal()
+
     def __init__(self, presenter, parent=None, name=''):
         super(TableWorkspaceDisplayView, self).__init__(parent)
 
@@ -53,12 +59,41 @@ class TableWorkspaceDisplayView(QTableWidget):
 
         self.setWindowTitle("{} - Mantid".format(name))
         self.setWindowFlags(Qt.Window)
+        self.setAttribute(Qt.WA_DeleteOnClose, True)
+
+        self.close_signal.connect(self._run_close)
+        self.rename_signal.connect(self._run_rename)
+        self.repaint_signal.connect(self._run_repaint)
 
         self.resize(600, 400)
         self.show()
 
-    def doubleClickedHeader(self):
-        print("Double clicked WOO")
+        header = self.horizontalHeader()
+        header.sectionDoubleClicked.connect(self.handle_double_click)
+
+    def resizeEvent(self, event):
+        QTableWidget.resizeEvent(self, event)
+        header = self.horizontalHeader()
+        header.setSectionResizeMode(QHeaderView.Interactive)
+
+    def emit_repaint(self):
+        self.repaint_signal.emit()
+
+    @Slot()
+    def _run_repaint(self):
+        self.viewport().update()
+
+    @Slot()
+    def _run_close(self):
+        self.close()
+
+    @Slot(str)
+    def _run_rename(self, new_name):
+        self._rename(new_name)
+
+    def handle_double_click(self, section):
+        header = self.horizontalHeader()
+        header.resizeSection(section, header.defaultSectionSize())
 
     def keyPressEvent(self, event):
         if event.matches(QKeySequence.Copy):
@@ -144,10 +179,10 @@ class TableWorkspaceDisplayView(QTableWidget):
         show_all_columns.triggered.connect(self.presenter.action_show_all_columns)
 
         sort_ascending = QAction("Sort Ascending", menu_main)
-        sort_ascending.triggered.connect(partial(self.presenter.action_sort_ascending, Qt.AscendingOrder))
+        sort_ascending.triggered.connect(partial(self.presenter.action_sort, True))
 
         sort_descending = QAction("Sort Descending", menu_main)
-        sort_descending.triggered.connect(partial(self.presenter.action_sort_ascending, Qt.DescendingOrder))
+        sort_descending.triggered.connect(partial(self.presenter.action_sort, False))
 
         menu_main.addAction(copy_bin_values)
         menu_main.addAction(self.make_separator(menu_main))
@@ -160,14 +195,18 @@ class TableWorkspaceDisplayView(QTableWidget):
         # If any columns are marked as Y then generate the set error menu
         if num_y_cols > 0:
             menu_set_as_y_err = QMenu("Set error for Y...")
-            for col in range(num_y_cols):
-                set_as_y_err = QAction("Y{}".format(col), menu_main)
-                # the column index of the column relative to the whole table, this is necessary
+            for label_index in range(num_y_cols):
+                set_as_y_err = QAction("Y{}".format(label_index), menu_main)
+
+                # This is the column index of the Y column for which a YERR column is being added.
+                # The column index is relative to the whole table, this is necessary
                 # so that later the data of the column marked as error can be retrieved
-                real_column_index = marked_y_cols[col]
-                # col here holds the index in the LABEL (multiple Y columns have labels Y0, Y1, YN...)
+                related_y_column = marked_y_cols[label_index]
+
+                # label_index here holds the index in the LABEL (multiple Y columns have labels Y0, Y1, YN...)
                 # this is NOT the same as the column relative to the WHOLE table
-                set_as_y_err.triggered.connect(partial(self.presenter.action_set_as_y_err, real_column_index, col))
+                set_as_y_err.triggered.connect(
+                    partial(self.presenter.action_set_as_y_err, related_y_column, label_index))
                 menu_set_as_y_err.addAction(set_as_y_err)
             menu_main.addMenu(menu_set_as_y_err)
 

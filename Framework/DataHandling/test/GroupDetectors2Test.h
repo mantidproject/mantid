@@ -1209,7 +1209,7 @@ public:
     for (size_t pix = 0; pix < inputEventWs->getNumberHistograms(); pix++) {
       size_t xAxisSize = inputEventWs->x(pix).size();
       Mantid::HistogramData::HistogramX axisVals(xAxisSize, 1.0);
-      inputEventWs->mutableX(pix) = axisVals;
+      inputEventWs->mutableX(pix) = std::move(axisVals);
       inputEventWs->getSpectrum(pix).addEventQuickly(TofEvent(1000.0));
     }
     setupGroupWS(numGroups);

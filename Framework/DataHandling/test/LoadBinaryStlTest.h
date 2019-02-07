@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef LOAD_BINARYSTL_TEST_H_
 #define LOAD_BINARYSTL_TEST_H_
 #include "MantidAPI/FileFinder.h"
@@ -48,7 +54,7 @@ public:
     std::string path =
         FileFinder::Instance().getFullPath("invalid_vertexBin.stl");
     auto loader = LoadBinaryStl(path);
-    TS_ASSERT(!(loader.isBinarySTL()));
+    TS_ASSERT(!(loader.isBinarySTL(path)));
   }
   // check that isBinaryStl returns false if the file contains an incomplete
   // triangle
@@ -56,14 +62,20 @@ public:
     std::string path =
         FileFinder::Instance().getFullPath("invalid_triangleBin.stl");
     auto loader = LoadBinaryStl(path);
-    TS_ASSERT(!(loader.isBinarySTL()));
+    TS_ASSERT(!(loader.isBinarySTL(path)));
   }
 
   void test_fail_ascii_stl() {
     std::string path = FileFinder::Instance().getFullPath("cube.stl");
     auto loader = LoadBinaryStl(path);
-    TS_ASSERT(!(loader.isBinarySTL()));
+    TS_ASSERT(!(loader.isBinarySTL(path)));
+  }
+
+  void test_loading_large_stl() {
+    std::string path = FileFinder::Instance().getFullPath("SI-4200-610.stl");
+    auto loader = LoadBinaryStl(path);
+    auto LargeFile = loader.readStl();
+    assert_shape_matches(LargeFile, 174388, 424694, 21218, 1);
   }
 };
-
 #endif /* LOAD_BINARYSTL_TEST_H_ */

@@ -123,7 +123,6 @@ class SampleLogsView(QSplitter):
             ax.plot(ws,
                     LogName=log_text,
                     label=log_text,
-                    marker='.',
                     FullTime=not self.full_time.isChecked(),
                     ExperimentInfo=exp)
 

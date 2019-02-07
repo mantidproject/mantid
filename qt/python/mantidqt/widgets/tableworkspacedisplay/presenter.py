@@ -13,8 +13,10 @@ from functools import partial
 
 from qtpy.QtCore import Qt
 
-from mantid.simpleapi import DeleteTableRows, StatisticsOfTableWorkspace
+from mantid.kernel import logger
+from mantidqt.widgets.common.observing_presenter import ObservingPresenter
 from mantidqt.widgets.common.table_copying import copy_cells, show_no_selection_to_copy_toast
+from mantidqt.widgets.common.workspacedisplay_ads_observer import WorkspaceDisplayADSObserver
 from mantidqt.widgets.tableworkspacedisplay.error_column import ErrorColumn
 from mantidqt.widgets.tableworkspacedisplay.plot_type import PlotType
 from mantidqt.widgets.tableworkspacedisplay.workbench_table_widget_item import WorkbenchTableWidgetItem
@@ -22,33 +24,45 @@ from .model import TableWorkspaceDisplayModel
 from .view import TableWorkspaceDisplayView
 
 
-class TableWorkspaceDisplay(object):
+class TableWorkspaceDisplay(ObservingPresenter):
     A_LOT_OF_THINGS_TO_PLOT_MESSAGE = "You selected {} spectra to plot. Are you sure you want to plot that many?"
     TOO_MANY_SELECTED_FOR_X = "Too many columns are selected to use as X. Please select only 1."
     TOO_MANY_SELECTED_TO_SORT = "Too many columns are selected to sort by. Please select only 1."
     TOO_MANY_SELECTED_FOR_PLOT = "Too many columns are selected to plot. Please select only 1."
     NUM_SELECTED_FOR_CONFIRMATION = 10
     NO_COLUMN_MARKED_AS_X = "No columns marked as X."
+    ITEM_CHANGED_INVALID_DATA_MESSAGE = "Error: Trying to set invalid data for the column."
+    ITEM_CHANGED_UNKNOWN_ERROR_MESSAGE = "Unknown error occurred: {}"
+    TOO_MANY_TO_SET_AS_Y_ERR_MESSAGE = "Too many selected to set as Y Error"
+    CANNOT_PLOT_AGAINST_SELF_MESSAGE = "Cannot plot column against itself."
+    NO_ASSOCIATED_YERR_FOR_EACH_Y_MESSAGE = "There is no associated YErr for each selected Y column."
+    PLOT_FUNCTION_ERROR_MESSAGE = "One or more of the columns being plotted contain invalid data for Matplotlib.\n\nError message:\n{}"
+    INVALID_DATA_WINDOW_TITLE = "Invalid data - Mantid Workbench"
+    COLUMN_DISPLAY_LABEL = 'Column {}'
 
-    def __init__(self, ws, plot=None, parent=None, model=None, view=None, name=None):
+    def __init__(self, ws, plot=None, parent=None, model=None, view=None, name=None, ads_observer=None):
         """
         Creates a display for the provided workspace.
 
         :param ws: Workspace to be displayed
         :param parent: Parent of the widget
-        :param plot: Plotting function that will be used to plot workspaces. This requires MatPlotLib directly.
+        :param plot: Plotting function that will be used to plot workspaces. This requires Matplotlib directly.
                      Passed in as parameter to allow mocking
         :param model: Model to be used by the widget. Passed in as parameter to allow mocking
         :param view: View to be used by the widget. Passed in as parameter to allow mocking
         :param name: Custom name for the window
+        :param ads_observer: ADS observer to be used by the presenter. If not provided the default
+                             one is used. Mainly intended for testing.
         """
-        # Create model and view, or accept mocked versions
+
         self.model = model if model else TableWorkspaceDisplayModel(ws)
-        self.name = self.model.get_name() if name is None else name
+        self.name = name if name else self.model.get_name()
         self.view = view if view else TableWorkspaceDisplayView(self, parent, self.name)
         self.parent = parent
         self.plot = plot
         self.view.set_context_menu_actions(self.view)
+
+        self.ads_observer = ads_observer if ads_observer else WorkspaceDisplayADSObserver(self)
 
         self.update_column_headers()
         self.load_data(self.view)
@@ -66,19 +80,23 @@ class TableWorkspaceDisplay(object):
         """
         return TableWorkspaceDisplayModel.supports(ws)
 
+    def replace_workspace(self, workspace_name, workspace):
+        if self.model.workspace_equals(workspace_name):
+            self.model = TableWorkspaceDisplayModel(workspace)
+            self.load_data(self.view)
+            self.view.emit_repaint()
+
     def handleItemChanged(self, item):
         """
         :type item: WorkbenchTableWidgetItem
-        :param item:
-        :return:
         """
         try:
             self.model.set_cell_data(item.row(), item.column(), item.data(Qt.DisplayRole), item.is_v3d)
             item.update()
         except ValueError:
-            self.view.show_warning("Error: Trying to set invalid data for the column.")
+            self.view.show_warning(self.ITEM_CHANGED_INVALID_DATA_MESSAGE)
         except Exception as x:
-            self.view.show_warning("Unknown error occurred: {}".format(x))
+            self.view.show_warning(self.ITEM_CHANGED_UNKNOWN_ERROR_MESSAGE.format(x))
         finally:
             item.reset()
 
@@ -138,11 +156,7 @@ class TableWorkspaceDisplay(object):
         selected_rows_list = [index.row() for index in selected_rows]
         selected_rows_str = ",".join([str(row) for row in selected_rows_list])
 
-        DeleteTableRows(self.model.ws, selected_rows_str)
-        # Reverse the list so that we delete in order from bottom -> top
-        # this prevents the row index from shifting up when deleting rows above
-        for row in reversed(selected_rows_list):
-            self.view.removeRow(row)
+        self.model.delete_rows(selected_rows_str)
 
     def _get_selected_columns(self, max_selected=None, message_if_over_max=None):
         selection_model = self.view.selectionModel()
@@ -162,7 +176,10 @@ class TableWorkspaceDisplay(object):
             show_no_selection_to_copy_toast()
             raise ValueError("No selection")
         else:
-            return [index.column() for index in selected_columns]
+            col_selected = [index.column() for index in selected_columns]
+            if max_selected == 1:
+                return col_selected[0]
+            return col_selected
 
     def action_statistics_on_columns(self):
         try:
@@ -170,7 +187,7 @@ class TableWorkspaceDisplay(object):
         except ValueError:
             return
 
-        stats = StatisticsOfTableWorkspace(self.model.ws, selected_columns)
+        stats = self.model.get_statistics(selected_columns)
         TableWorkspaceDisplay(stats, parent=self.parent, name="Column Statistics of {}".format(self.name))
 
     def action_hide_selected(self):
@@ -202,23 +219,22 @@ class TableWorkspaceDisplay(object):
     def action_set_as_y(self):
         self._action_set_as(self.model.marked_columns.add_y)
 
-    def action_set_as_y_err(self, error_for_column, label_index):
+    def action_set_as_y_err(self, related_y_column, label_index):
         """
 
-        :param error_for_column: The real index of the column for which the error is being marked
+        :param related_y_column: The real index of the column for which the error is being marked
         :param label_index: The index present in the label of the column for which the error is being marked
                             This will be the number in <ColumnName>[Y10] -> the 10
         """
         try:
-            selected_columns = self._get_selected_columns(1, "Too many selected to set as Y Error")
+            selected_column = self._get_selected_columns(1, self.TOO_MANY_TO_SET_AS_Y_ERR_MESSAGE)
         except ValueError:
             return
 
-        selected_column = selected_columns[0]
         try:
-            err_column = ErrorColumn(selected_column, error_for_column, label_index)
+            err_column = ErrorColumn(selected_column, related_y_column, label_index)
         except ValueError as e:
-            self.view.show_warning(e.message)
+            self.view.show_warning(str(e))
             return
 
         self.model.marked_columns.add_y_err(err_column)
@@ -227,14 +243,17 @@ class TableWorkspaceDisplay(object):
     def action_set_as_none(self):
         self._action_set_as(self.model.marked_columns.remove)
 
-    def action_sort_ascending(self, order):
+    def action_sort(self, sort_ascending):
+        """
+        :type sort_ascending: bool
+        :param sort_ascending: Whether to sort ascending
+        """
         try:
-            selected_columns = self._get_selected_columns(1, self.TOO_MANY_SELECTED_TO_SORT)
+            selected_column = self._get_selected_columns(1, self.TOO_MANY_SELECTED_TO_SORT)
         except ValueError:
             return
 
-        selected_column = selected_columns[0]
-        self.view.sortByColumn(selected_column, order)
+        self.model.sort(selected_column, sort_ascending)
 
     def action_plot(self, plot_type):
         try:
@@ -270,7 +289,7 @@ class TableWorkspaceDisplay(object):
             pass
 
         if len(selected_columns) == 0:
-            self.view.show_warning("Cannot plot column against itself.")
+            self.view.show_warning(self.CANNOT_PLOT_AGAINST_SELF_MESSAGE)
             return
 
         self._do_plot(selected_columns, selected_x, plot_type)
@@ -279,7 +298,7 @@ class TableWorkspaceDisplay(object):
         if plot_type == PlotType.LINEAR_WITH_ERR:
             yerr = self.model.marked_columns.find_yerr(selected_columns)
             if len(yerr) != len(selected_columns):
-                self.view.show_warning("There is no associated YErr for each selected Y column.")
+                self.view.show_warning(self.NO_ASSOCIATED_YERR_FOR_EACH_Y_MESSAGE)
                 return
         x = self.model.get_column(selected_x)
 
@@ -298,12 +317,11 @@ class TableWorkspaceDisplay(object):
             y = self.model.get_column(column)
             column_label = self.model.get_column_header(column)
             try:
-                plot_func(x, y, label='Column {}'.format(column_label), **kwargs)
+                plot_func(x, y, label=self.COLUMN_DISPLAY_LABEL.format(column_label), **kwargs)
             except ValueError as e:
-                #     TODO log error?
-                self.view.show_warning(
-                    "One or more of the columns being plotted contain invalid data for MatPlotLib."
-                    "\n\nError message:\n{}".format(e), "Invalid data - Mantid Workbench")
+                error_message = self.PLOT_FUNCTION_ERROR_MESSAGE.format(e)
+                logger.error(error_message)
+                self.view.show_warning(error_message, self.INVALID_DATA_WINDOW_TITLE)
                 return
 
             ax.set_ylabel(column_label)

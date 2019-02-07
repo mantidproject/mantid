@@ -14,7 +14,7 @@
 #include <Poco/URI.h>
 
 #include <boost/lexical_cast.hpp>
-
+#include <json/json.h>
 #include <map>
 #include <ostream>
 #include <string>
@@ -32,7 +32,21 @@ using std::string;
 namespace {
 // anonymous namespace for some utility functions
 /// static Logger object
-Logger g_log("InternetHelper");
+Logger g_log("GitHubApiHelper");
+
+const std::string RATE_LIMIT_URL("https://api.github.com/rate_limit");
+
+std::string formatRateLimit(const int rateLimit, const int remaining,
+                            const int expires) {
+  DateAndTime expiresDateAndTime;
+  expiresDateAndTime.set_from_time_t(expires);
+
+  std::stringstream msg;
+  msg << "GitHub API limited to " << remaining << " of " << rateLimit
+      << " calls left. Resets at " << expiresDateAndTime.toISO8601String()
+      << "Z";
+  return msg.str();
+}
 } // namespace
 
 //----------------------------------------------------------------------------------------------
@@ -64,28 +78,47 @@ void GitHubApiHelper::processResponseHeaders(
   // get github api rate limit information if available;
   int rateLimitRemaining = 0;
   int rateLimitLimit;
-  DateAndTime rateLimitReset;
+  int rateLimitReset;
   try {
     rateLimitLimit =
         boost::lexical_cast<int>(res.get("X-RateLimit-Limit", "-1"));
     rateLimitRemaining =
         boost::lexical_cast<int>(res.get("X-RateLimit-Remaining", "-1"));
-    rateLimitReset.set_from_time_t(
-        boost::lexical_cast<int>(res.get("X-RateLimit-Reset", "0")));
+    rateLimitReset =
+        boost::lexical_cast<int>(res.get("X-RateLimit-Reset", "0"));
   } catch (boost::bad_lexical_cast const &) {
     rateLimitLimit = -1;
   }
   if (rateLimitLimit > -1) {
-    g_log.debug() << "GitHub API " << rateLimitRemaining << " of "
-                  << rateLimitLimit << " calls left. Resets at "
-                  << rateLimitReset.toSimpleString() << " GMT\n";
+    g_log.debug(
+        formatRateLimit(rateLimitLimit, rateLimitRemaining, rateLimitReset));
   }
+}
+
+std::string GitHubApiHelper::getRateLimitDescription() {
+  std::stringstream responseStream;
+  this->sendRequest(RATE_LIMIT_URL, responseStream);
+  Json::Reader reader;
+  Json::Value root;
+  if (!reader.parse(responseStream, root)) {
+    return "Failed to parse json document from \"" + RATE_LIMIT_URL + "\"";
+  }
+
+  const auto &rateInfo = root.get("rate", "");
+  if (rateInfo.empty())
+    return std::string();
+
+  const int limit = rateInfo.get("limit", -1).asInt();
+  const int remaining = rateInfo.get("remaining", -1).asInt();
+  const int expires = rateInfo.get("reset", 0).asInt();
+
+  return formatRateLimit(limit, remaining, expires);
 }
 
 int GitHubApiHelper::processAnonymousRequest(
     const Poco::Net::HTTPResponse &response, Poco::URI &uri,
     std::ostream &responseStream) {
-  if (isAuthenticated()) {
+  if (!isAuthenticated()) {
     g_log.debug("Repeating API call anonymously\n");
     removeHeader("Authorization");
     return this->sendRequest(uri.toString(), responseStream);
@@ -110,7 +143,10 @@ int GitHubApiHelper::sendRequestAndProcess(HTTPClientSession &session,
   if (retStatus == HTTP_OK ||
       (retStatus == HTTP_CREATED && m_method == HTTPRequest::HTTP_POST)) {
     Poco::StreamCopier::copyStream(rs, responseStream);
-    processResponseHeaders(*m_response);
+    if (m_response)
+      processResponseHeaders(*m_response);
+    else
+      g_log.warning("Response is null pointer");
     return retStatus;
   } else if ((retStatus == HTTP_FORBIDDEN && isAuthenticated()) ||
              (retStatus == HTTP_UNAUTHORIZED) ||

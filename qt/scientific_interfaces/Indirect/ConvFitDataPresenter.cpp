@@ -25,7 +25,7 @@ namespace CustomInterfaces {
 namespace IDA {
 
 ConvFitDataPresenter::ConvFitDataPresenter(ConvFitModel *model,
-                                           IndirectFitDataView *view)
+                                           IIndirectFitDataView *view)
     : IndirectFitDataPresenter(
           model, view,
           Mantid::Kernel::make_unique<ConvFitDataTablePresenter>(
@@ -43,7 +43,16 @@ void ConvFitDataPresenter::setModelResolution(const QString &name) {
   auto const numberOfWorkspaces = m_convModel->numberOfWorkspaces();
   auto const index = m_convModel->getWorkspace(0) ? numberOfWorkspaces - 1
                                                   : numberOfWorkspaces;
-  m_convModel->setResolution(name.toStdString(), index);
+  setModelResolution(name.toStdString(), index);
+}
+
+void ConvFitDataPresenter::setModelResolution(std::string const &name,
+                                              std::size_t const &index) {
+  try {
+    m_convModel->setResolution(name, index);
+  } catch (std::exception const &ex) {
+    displayWarning(ex.what());
+  }
 }
 
 void ConvFitDataPresenter::addDataToModel(IAddWorkspaceDialog const *dialog) {

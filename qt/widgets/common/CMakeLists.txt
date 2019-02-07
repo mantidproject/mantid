@@ -746,11 +746,12 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsCommon
     Qt5::Qscintilla
   INSTALL_DIR
     ${LIB_DIR}
+    ${WORKBENCH_LIB_DIR}
   OSX_INSTALL_RPATH
     @loader_path/../MacOS
     @loader_path/../Libraries
   LINUX_INSTALL_RPATH
-    "\$ORIGIN/../${LIB_DIR}"
+    "\$ORIGIN/../${WORKBENCH_LIB_DIR}"
 )
 
 ###########################################################################

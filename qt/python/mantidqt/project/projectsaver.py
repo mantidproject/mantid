@@ -1,6 +1,6 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
@@ -11,7 +11,8 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 from json import dump
 import os
 
-from mantidqt.project import workspacesaver
+from mantidqt.project.workspacesaver import WorkspaceSaver
+from mantidqt.project.plotssaver import PlotsSaver
 from mantid import logger
 
 
@@ -19,11 +20,12 @@ class ProjectSaver(object):
     def __init__(self, project_file_ext):
         self.project_file_ext = project_file_ext
 
-    def save_project(self, directory, workspace_to_save=None):
+    def save_project(self, directory, workspace_to_save=None, plots_to_save=None):
         """
         The method that will actually save the project and call relevant savers for workspaces, plots, interfaces etc.
         :param directory: String; The directory of the
         :param workspace_to_save: List; of Strings that will have workspace names in it, if None will save all
+        :param plots_to_save: List; of matplotlib.figure objects to save to the project file.
         :return: None; If the method cannot be completed.
         """
         # Check if the directory doesn't exist
@@ -32,32 +34,38 @@ class ProjectSaver(object):
             return
 
         # Check this isn't saving a blank project file
-        if workspace_to_save is None:
+        if workspace_to_save is None and plots_to_save is None:
             logger.warning("Can not save an empty project")
             return
 
         # Save workspaces to that location
-        workspace_saver = workspacesaver.WorkspaceSaver(directory=directory)
+        workspace_saver = WorkspaceSaver(directory=directory)
         workspace_saver.save_workspaces(workspaces_to_save=workspace_to_save)
 
+        # Generate plots
+        plots_to_save_list = PlotsSaver().save_plots(plots_to_save)
+
         # Pass dicts to Project Writer
-        writer = ProjectWriter(directory, workspace_saver.get_output_list(),
-                               self.project_file_ext)
+        writer = ProjectWriter(workspace_names=workspace_saver.get_output_list(),
+                               plots_to_save=plots_to_save_list,
+                               save_location=directory,
+                               project_file_ext=self.project_file_ext)
         writer.write_out()
 
 
 class ProjectWriter(object):
-    def __init__(self, save_location, workspace_names, project_file_ext):
+    def __init__(self, save_location, workspace_names, project_file_ext, plots_to_save):
         self.workspace_names = workspace_names
         self.directory = save_location
         self.project_file_ext = project_file_ext
+        self.plots_to_save = plots_to_save
 
     def write_out(self):
         """
         Write out the project file that contains workspace names, interfaces information, plot preferences etc.
         """
         # Get the JSON string versions
-        to_save_dict = {"workspaces": self.workspace_names}
+        to_save_dict = {"workspaces": self.workspace_names, "plots": self.plots_to_save}
 
         # Open file and save the string to it alongside the workspace_names
         if not os.path.isdir(self.directory):

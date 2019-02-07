@@ -38,6 +38,7 @@ MSDFit::MSDFit(QWidget *parent)
       m_msdFittingModel, m_uiForm->fitDataView));
   setPlotView(m_uiForm->pvFitPlotView);
   setSpectrumSelectionView(m_uiForm->svSpectrumView);
+  setOutputOptionsView(m_uiForm->ovOutputOptionsView);
   setFitPropertyBrowser(m_uiForm->fitPropertyBrowser);
 }
 
@@ -54,8 +55,6 @@ void MSDFit::setupFitTab() {
   setSampleFBSuffices({"_eq.nxs"});
 
   connect(m_uiForm->pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
-  connect(m_uiForm->pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
-  connect(m_uiForm->pbSave, SIGNAL(clicked()), this, SLOT(saveResult()));
   connect(this, SIGNAL(functionChanged()), this,
           SLOT(updateModelFitTypeString()));
 }
@@ -64,57 +63,13 @@ void MSDFit::updateModelFitTypeString() {
   m_msdFittingModel->setFitType(selectedFitType().toStdString());
 }
 
-void MSDFit::updatePlotOptions() {
-  IndirectFitAnalysisTab::updatePlotOptions(m_uiForm->cbPlotType);
-}
-
 void MSDFit::runClicked() { runTab(); }
-
-void MSDFit::plotClicked() {
-  setPlotResultIsPlotting(true);
-  IndirectFitAnalysisTab::plotResult(m_uiForm->cbPlotType->currentText());
-  setPlotResultIsPlotting(false);
-}
 
 void MSDFit::setRunIsRunning(bool running) {
   m_uiForm->pbRun->setText(running ? "Running..." : "Run");
-  setButtonsEnabled(!running);
 }
 
-void MSDFit::setFitSingleSpectrumIsFitting(bool fitting) {
-  m_uiForm->pvFitPlotView->setFitSingleSpectrumText(
-      fitting ? "Fitting..." : "Fit Single Spectrum");
-  setButtonsEnabled(!fitting);
-}
-
-void MSDFit::setPlotResultIsPlotting(bool plotting) {
-  m_uiForm->pbPlot->setText(plotting ? "Plotting..." : "Plot");
-  setButtonsEnabled(!plotting);
-}
-
-void MSDFit::setButtonsEnabled(bool enabled) {
-  setRunEnabled(enabled);
-  setPlotResultEnabled(enabled);
-  setSaveResultEnabled(enabled);
-  setFitSingleSpectrumEnabled(enabled);
-}
-
-void MSDFit::setRunEnabled(bool enabled) {
-  m_uiForm->pbRun->setEnabled(enabled);
-}
-
-void MSDFit::setPlotResultEnabled(bool enabled) {
-  m_uiForm->pbPlot->setEnabled(enabled);
-  m_uiForm->cbPlotType->setEnabled(enabled);
-}
-
-void MSDFit::setFitSingleSpectrumEnabled(bool enabled) {
-  m_uiForm->pvFitPlotView->enableFitSingleSpectrum(enabled);
-}
-
-void MSDFit::setSaveResultEnabled(bool enabled) {
-  m_uiForm->pbSave->setEnabled(enabled);
-}
+void MSDFit::setRunEnabled(bool enable) { m_uiForm->pbRun->setEnabled(enable); }
 
 } // namespace IDA
 } // namespace CustomInterfaces

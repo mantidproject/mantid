@@ -23,7 +23,7 @@ from mantidqt.widgets.matrixworkspacedisplay.presenter import MatrixWorkspaceDis
 from mantidqt.widgets.samplelogs.presenter import SampleLogs
 from mantidqt.widgets.tableworkspacedisplay.presenter import TableWorkspaceDisplay
 from mantidqt.widgets.workspacewidget.workspacetreewidget import WorkspaceTreeWidget
-from workbench.plotting.functions import can_overplot, pcolormesh, plot, plot_from_names
+from mantidqt.plotting.functions import can_overplot, pcolormesh, plot, plot_from_names
 # local package imports
 from workbench.plugins.base import PluginWidget
 
@@ -137,7 +137,7 @@ class WorkspaceWidget(PluginWidget):
                     presenter.view.show()
                 except ValueError:
                     logger.error(
-                        "Could not open workspace: {0} with either MatrixWorkspaceDisplay nor TableWorkspaceDisplay.")
+                        "Could not open workspace: {0} with neither MatrixWorkspaceDisplay nor TableWorkspaceDisplay.")
 
     def _action_double_click_workspace(self, name):
         self._do_show_data([name])

@@ -12,7 +12,6 @@
 #include "MantidQtWidgets/InstrumentView/OpenGLError.h"
 
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/IMaskWorkspace.h"
@@ -182,8 +181,7 @@ void InstrumentActor::setUpWorkspace(
   resetColors();
 
   // set the ragged flag using a workspace validator
-  auto wsValidator = Mantid::API::CommonBinsValidator();
-  m_ragged = !wsValidator.isValid(sharedWorkspace).empty();
+  m_ragged = !sharedWorkspace->isCommonBins();
 }
 
 void InstrumentActor::setupPhysicalInstrumentIfExists() {
@@ -461,8 +459,9 @@ void InstrumentActor::sumDetectors(const std::vector<size_t> &dets,
                                    std::vector<double> &x,
                                    std::vector<double> &y, size_t size) const {
   Mantid::API::MatrixWorkspace_const_sptr ws = getWorkspace();
-  if (size > ws->blocksize() || size == 0) {
-    size = ws->blocksize();
+  const auto blocksize = ws->blocksize();
+  if (size > blocksize || size == 0) {
+    size = blocksize;
   }
 
   if (m_ragged) {

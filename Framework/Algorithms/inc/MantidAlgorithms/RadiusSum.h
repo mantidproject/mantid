@@ -62,7 +62,7 @@ private:
   double getMaxDistance(const Kernel::V3D &centre,
                         const std::vector<double> &boundary_limits);
 
-  void setUpOutputWorkspace(std::vector<double> &values);
+  void setUpOutputWorkspace(const std::vector<double> &values);
 
   int getBinForPixelPos(const Kernel::V3D &pos);
 

@@ -1,6 +1,6 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
@@ -19,7 +19,7 @@ from mantidqt.project.projectsaver import ProjectSaver
 
 
 class Project(AnalysisDataServiceObserver):
-    def __init__(self):
+    def __init__(self, globalfiguremanager_instance):
         super(Project, self).__init__()
         # Has the project been saved, to Access this call .saved
         self.__saved = True
@@ -30,6 +30,9 @@ class Project(AnalysisDataServiceObserver):
         self.observeAll(True)
 
         self.project_file_ext = ".mtdproj"
+
+        self.plot_gfm = globalfiguremanager_instance
+        self.plot_gfm.add_observer(self)
 
     def __get_saved(self):
         return self.__saved
@@ -96,8 +99,10 @@ class Project(AnalysisDataServiceObserver):
 
     def _save(self):
         workspaces_to_save = AnalysisDataService.getObjectNames()
+        plots_to_save = self.plot_gfm.figs
         project_saver = ProjectSaver(self.project_file_ext)
-        project_saver.save_project(directory=self.last_project_location, workspace_to_save=workspaces_to_save)
+        project_saver.save_project(directory=self.last_project_location, workspace_to_save=workspaces_to_save,
+                                   plots_to_save=plots_to_save)
         self.__saved = True
 
     def load(self):
@@ -159,5 +164,11 @@ class Project(AnalysisDataServiceObserver):
         """
         The method that will be triggered if any of the changes in the ADS have occurred, that are checked for using the
         AnalysisDataServiceObserver class' observeAll method
+        """
+        self.modified_project()
+
+    def notify(self, *args):
+        """
+        The method that will trigger when a plot is added, destroyed, or changed in the global figure manager.
         """
         self.modified_project()

@@ -2610,7 +2610,7 @@ InstrumentDefinitionParser::writeAndApplyCache(
   IDFObject_const_sptr usedCache = firstChoiceCache;
   auto cachingOption = WroteGeomCache;
 
-  g_log.information("Geometry cache is not available");
+  g_log.notice("Geometry cache is not available");
   try {
     Poco::File dir = usedCache->getParentDirectory();
     if (dir.path().empty() || !dir.exists() || !dir.canWrite()) {
@@ -2627,7 +2627,7 @@ InstrumentDefinitionParser::writeAndApplyCache(
                              "attempting to write cache.\n");
   }
   const std::string cacheFullPath = usedCache->getFileFullPathStr();
-  g_log.information() << "Creating cache in " << cacheFullPath << "\n";
+  g_log.notice() << "Creating cache in " << cacheFullPath << "\n";
   // create a vtk writer
   std::map<std::string, boost::shared_ptr<Geometry::IObject>>::iterator objItr;
   boost::shared_ptr<Mantid::Geometry::vtkGeometryCacheWriter> writer(

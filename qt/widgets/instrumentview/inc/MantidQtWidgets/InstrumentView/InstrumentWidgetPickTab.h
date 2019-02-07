@@ -273,6 +273,7 @@ private:
   static double getOutOfPlaneAngle(const Mantid::Kernel::V3D &pos,
                                    const Mantid::Kernel::V3D &origin,
                                    const Mantid::Kernel::V3D &normal);
+  void addPeakLabels(const std::vector<size_t> &detIndices);
 
   InstrumentWidgetPickTab *m_tab;
   InstrumentWidget *m_instrWidget;

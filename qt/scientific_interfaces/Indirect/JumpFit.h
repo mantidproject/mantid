@@ -26,27 +26,18 @@ public:
   void setupFitTab() override;
 
 protected slots:
-  void updatePlotOptions() override;
   void updateModelFitTypeString();
-  void plotClicked();
   void runClicked();
 
 protected:
   void setRunIsRunning(bool running) override;
-  void setFitSingleSpectrumIsFitting(bool fitting) override;
-  void setPlotResultEnabled(bool enabled) override;
-  void setSaveResultEnabled(bool enabled) override;
+  void setRunEnabled(bool enable) override;
 
 private slots:
   void updateAvailableFitTypes();
 
 private:
   void addFunctions(std::vector<std::string> const &functions);
-
-  void setPlotResultIsPlotting(bool plotting);
-  void setButtonsEnabled(bool enabled);
-  void setRunEnabled(bool enabled);
-  void setFitSingleSpectrumEnabled(bool enabled);
 
   JumpFitModel *m_jumpFittingModel;
   std::unique_ptr<Ui::JumpFit> m_uiForm;
