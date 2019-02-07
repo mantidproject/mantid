@@ -31,6 +31,7 @@
 #include "MantidGeometry/MDGeometry/MDHistoDimensionBuilder.h"
 
 #include "MantidMDAlgorithms/ConvToMDSelector.h"
+#include "MantidMDAlgorithms/ConvToMDEventsWSIndexing.h"
 #include "MantidMDAlgorithms/MDTransfQ3D.h"
 #include "MantidMDAlgorithms/MDWSTransform.h"
 
@@ -157,14 +158,7 @@ std::map<std::string, std::string> ConvertToMD::validateInputs() {
           "The usage of top level splitting is "
           "not possible for indexed version of algorithm. ";
 
-    bool validSplitInfo = !split_into.empty();
-    if (validSplitInfo) {
-      const int &n = split_into[0];
-      validSplitInfo &= (n > 1 && ((n & (n - 1)) == 0));
-      if (validSplitInfo)
-        validSplitInfo &= std::all_of(split_into.begin(), split_into.end(),
-                                      [&n](int i) { return i == n; });
-    }
+    bool validSplitInfo = ConvToMDEventsWSIndexing::isSplitValid(split_into);
     if (!validSplitInfo)
       result["ConverterType"] +=
           "The split parameter should be the same for"
