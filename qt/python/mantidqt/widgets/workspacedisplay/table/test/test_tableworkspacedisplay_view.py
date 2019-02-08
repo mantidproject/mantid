@@ -10,7 +10,7 @@ from qtpy.QtWidgets import QApplication
 from mantid.simpleapi import CreateEmptyTableWorkspace
 from mantidqt.utils.qt.test import GuiTest
 from mantidqt.widgets.workspacedisplay.table.presenter import TableWorkspaceDisplay
-from mantidqt.widgets.workspacedisplay.test_helper.qt_widget_finder import QtWidgetFinder
+from mantidqt.utils.qt.test.qt_widget_finder import QtWidgetFinder
 
 
 class TableWorkspaceDisplayViewTest(GuiTest, QtWidgetFinder):

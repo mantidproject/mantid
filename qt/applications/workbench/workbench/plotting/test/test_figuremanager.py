@@ -9,7 +9,7 @@ import unittest
 
 from qtpy.QtWidgets import QApplication
 
-from mantidqt.widgets.workspacedisplay.test_helper.qt_widget_finder import QtWidgetFinder
+from mantidqt.utils.qt.test.qt_widget_finder import QtWidgetFinder
 
 try:
     from unittest import MagicMock, patch
