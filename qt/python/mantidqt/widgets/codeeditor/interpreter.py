@@ -157,7 +157,7 @@ class PythonFileInterpreter(QWidget):
         self.status.showMessage(msg)
 
     def replace_tabs_with_spaces(self):
-        self.replace_text(TAB_CHAR, SPACE_CHAR*4)
+        self.replace_text(TAB_CHAR, SPACE_CHAR*TAB_WIDTH)
 
     def replace_text(self, match_text, replace_text):
         if self.editor.selectedText() == '':
@@ -166,7 +166,7 @@ class PythonFileInterpreter(QWidget):
         self.editor.replaceSelectedText(new_text)
 
     def replace_spaces_with_tabs(self):
-        self.replace_text(SPACE_CHAR*4, TAB_CHAR)
+        self.replace_text(SPACE_CHAR*TAB_WIDTH, TAB_CHAR)
 
     def set_whitespace_visible(self):
         self.editor.setWhitespaceVisibility(CodeEditor.WsVisible)

@@ -60,6 +60,9 @@ class MultiFileEditor(PluginWidget):
         self.setAcceptDrops(True)
 
         # attributes
+        self.tabs_open_on_closing = None
+
+        # attributes
         self.run_action = create_action(
             self, "Run",
             on_triggered=self.editors.execute_current,
@@ -110,6 +113,7 @@ class MultiFileEditor(PluginWidget):
         Tries to close all editors
         :return: True if editors can be closed, false if cancelled
         """
+        self.tabs_open_on_closing = self.editors.tab_filepaths
         return self.editors.close_all()
 
     def dragEnterEvent(self, event):
@@ -142,7 +146,7 @@ class MultiFileEditor(PluginWidget):
         self.restore_session_tabs(prev_session_tabs)
 
     def writeSettings(self, settings):
-        settings.set(TAB_SETTINGS_KEY, self.editors.tab_filepaths)
+        settings.set(TAB_SETTINGS_KEY, self.tabs_open_on_closing)
 
     def register_plugin(self):
         self.main.add_dockwidget(self)

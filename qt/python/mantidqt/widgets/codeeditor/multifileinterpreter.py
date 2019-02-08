@@ -42,7 +42,6 @@ class MultiPythonFileInterpreter(QWidget):
         self.prev_session_tabs = None
         self.whitespace_visible = False
 
-
         # widget setup
         self._tabs = self.create_tabwidget()
         layout = QVBoxLayout()
