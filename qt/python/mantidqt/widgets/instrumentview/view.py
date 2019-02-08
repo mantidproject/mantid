@@ -32,7 +32,7 @@ class InstrumentView(QWidget, ObservingView):
     to the presenter and keeps it alive for the duration that
     the window is open
     """
-    presenter = None
+    _presenter = None
     _widget = None
 
     close_signal = Signal()
@@ -50,7 +50,6 @@ class InstrumentView(QWidget, ObservingView):
 
         layout = QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
-
         layout.addWidget(self.widget)
         self.setLayout(layout)
 
