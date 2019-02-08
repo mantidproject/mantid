@@ -14,17 +14,17 @@ the 'linking' of the UBs across orientations - in other words, ensuring the
 continuity of the indexing of reflections throughout reciprocal space allowing
 for grouping of reflections and refinement.
 
-On chopper instruments such as WISH, when the sample is lowered into the
-blockhouse there is no possibility to adjust its position. When rotating the
+On chopper instruments, when the sample is lowered into the
+blockhouse there is often no possibility to adjust its position. When rotating the
 crystal via the goniometer, since the crystal is likely not centred exactly, the
-predicted peaks from the initial UB often do not capture the data. This
-algorithm performs a U matrix correction as well as consistently indexing the
-peaks resulting in a linked peaks table that well describes the data and is
-consistent with the initial sample orientation which can be used for
-integration of single crystal reflections.
+predicted peaks from the initial UB often do not capture the data. As well as 
+consistently indexing the peaks, the algorithm also effectively carries out a U
+matrix correction that accounts for sample miscentering. Use of this algorithm 
+will result in a seperate UB matrix for each orientation which can then be used 
+for integration. 
 
 The algorithm requires a set of predicted peaks that have been generated from
-the initial UB via gonioemter rotation, a set of observed (found) peaks, and
+the initial UB via goniometer rotation, a set of observed (found) peaks, and
 the lattice parameters in order to calculate the B matrix. A search within a
 Q-envelope is carried out in which all peaks within the envelope are screened
 as potential 'matches' to the observed peaks by comparing dspacing values.
@@ -37,9 +37,7 @@ used for the first cycle. As the refinement of the UB is carried out, more
 peaks at shorter d are added, encoded by the PeakIncrement parameter. This adds
 a defined number of peaks after each cycle.
 
-It is recommended that at least 10 iterations are carried out, but in cases
-where the crystal is well centred and the goniometer angles are known accurately
-as few as 1 iteration could be necessary.
+The main limitation of this approach is that the lattice parameters of the sample should be known accurately. It is recommended that at least 10 iterations are carried out, but in cases where the crystal is well centred and the goniometer angles are known accurately fewer iterations are necessary. 
 
 Useage
 -----
