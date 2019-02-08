@@ -126,7 +126,6 @@ Useage
 
     # calculate phi axis at omega = 270 
     u_phi_x, u_phi_y, u_phi_z = CalculatePhiAxis(0,54)
-    print 'Vector describing phi axis in lab frame: ',u_phi_x, u_phi_y, u_phi_z
 
     # load and process 41598
     LoadRaw(Filename='/archive/NDXWISH/Instrument/data/cycle_18_1/WISH00041598.raw', OutputWorkspace='WISH00041598')
