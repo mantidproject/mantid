@@ -1141,18 +1141,16 @@ def save_workspace_to_file(workspace_name, file_formats, file_name,
     """
     save_name = "SANSSave"
     save_options = {"InputWorkspace": workspace_name}
-    save_options.update({"Filename": file_name})
+    save_options.update({"Filename": file_name,
+                         "Transmission": transmission_name,
+                         "TransmissionCan": transmission_can_name})
 
     if SaveType.Nexus in file_formats:
         save_options.update({"Nexus": True})
     if SaveType.CanSAS in file_formats:
         save_options.update({"CanSAS": True})
-        save_options.update({"Transmission": transmission_name})
-        save_options.update({"TransmissionCan": transmission_can_name})
     if SaveType.NXcanSAS in file_formats:
         save_options.update({"NXcanSAS": True})
-        save_options.update({"Transmission": transmission_name})
-        save_options.update({"TransmissionCan": transmission_can_name})
     if SaveType.NistQxy in file_formats:
         save_options.update({"NistQxy": True})
     if SaveType.RKH in file_formats:
