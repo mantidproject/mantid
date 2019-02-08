@@ -125,13 +125,13 @@ class HomeTabInstrumentPresenterTest(unittest.TestCase):
         self.view.rebin_steps_edit.setText('50')
         self.view.rebin_steps_edit.editingFinished.emit()
 
-        self.assertEqual(self.model._data.loaded_data['Rebin'], '50')
+        self.assertEqual(self.model._data.gui_variables['Rebin'], '50')
 
     def test_that_changeing_variable_rebin_updates_fixed_binning_in_model(self):
         self.view.rebin_variable_edit.setText('1,5,8,150')
         self.view.rebin_variable_edit.editingFinished.emit()
 
-        self.assertEqual(self.model._data.loaded_data['Rebin'], '1,5,8,150')
+        self.assertEqual(self.model._data.gui_variables['Rebin'], '1,5,8,150')
 
     # TODO Need to add validation to rebin input strings once I've worked out what they should be
 
@@ -140,7 +140,7 @@ class HomeTabInstrumentPresenterTest(unittest.TestCase):
         self.view.deadtime_selector.setCurrentIndex(0)
 
         self.assertEqual(self.view.deadtime_label_3.text(), self.presenter.dead_time_from_data_text([0.0]))
-        self.assertEqual(self.model._data.loaded_data["DeadTimeTable"], None)
+        self.assertEqual(self.model._data.current_data["DeadTimeTable"], None)
 
     def test_that_on_deadtime_data_selected_updates_with_no_loaded_data(self):
         self.view.deadtime_selector.setCurrentIndex(1)
