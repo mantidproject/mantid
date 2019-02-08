@@ -48,7 +48,12 @@ from ui.sans_isis.work_handler import WorkHandler
 
 from qtpy import PYQT4
 if PYQT4:
-    from mantidplot import graph, newGraph
+    IN_MANTIDPLOT = False
+    try:
+        from mantidplot import graph, newGraph
+        IN_MANTIDPLOT = True
+    except ImportError:
+        pass
 
 row_state_to_colour_mapping = {RowState.Unprocessed: '#FFFFFF', RowState.Processed: '#d0f4d0',
                                RowState.Error: '#accbff'}
@@ -159,6 +164,8 @@ class RunTabPresenter(object):
         self.sans_logger = Logger("SANS")
         # Name of graph to output to
         self.output_graph = 'SANS-Latest'
+        # For matplotlib continuous plotting
+        self.output_fig = None
         self.progress = 0
 
         # Models that are being used by the presenter
@@ -475,17 +482,18 @@ class RunTabPresenter(object):
         Plot a graph if continuous output specified.
         This is currently not available in Workbench
         """
-        if PYQT4:
-            if self._view.plot_results and not graph(self.output_graph):
-                newGraph(self.output_graph)
-        else:
-            import matplotlib.pyplot as plt
-            fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
-            fig.canvas.set_window_title(self.output_graph)
-            ax.set_xscale('log')
-            ax.set_yscale('log')
-            fig.show()
-            self.output_fig = fig
+        if self._view.plot_results:
+            if PYQT4:
+                if not graph(self.output_graph):
+                    newGraph(self.output_graph)
+            else:
+                import matplotlib.pyplot as plt
+                fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
+                fig.canvas.set_window_title(self.output_graph)
+                ax.set_xscale('log')
+                ax.set_yscale('log')
+                fig.show()
+                self.output_fig = fig
 
     def _set_progress_bar_min_max(self, min, max):
         """

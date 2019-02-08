@@ -21,7 +21,11 @@ from ui.sans_isis.work_handler import WorkHandler
 
 from qtpy import PYQT4
 if PYQT4:
-    import mantidplot
+    try:
+        import mantidplot
+        IN_MANTIDPLOT = True
+    except ImportError:
+        IN_MANTIDPLOT = False
 else:
     from mantidqt.widgets.instrumentview.presenter import InstrumentViewPresenter
 

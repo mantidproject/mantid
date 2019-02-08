@@ -43,7 +43,13 @@ from ui.sans_isis.SANSSaveOtherWindow import SANSSaveOtherDialog
 
 from qtpy import PYQT4
 if PYQT4:
-    from pymantidplot import proxies
+    IN_MANTIDPLOT = False
+    try:
+        from pymantidplot import proxies
+        IN_MANTIDPLOT = True
+    except ImportError:
+        # We are not in MantidPlot e.g. testing
+        pass
 
 DEFAULT_BIN_SETTINGS = \
     '5.5,45.5,50.0, 50.0,1000.0, 500.0,1500.0, 750.0,99750.0, 255.0,100005.0'

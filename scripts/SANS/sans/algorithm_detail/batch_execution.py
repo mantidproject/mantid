@@ -22,7 +22,11 @@ from sans.state.data import StateData
 
 from qtpy import PYQT4
 if PYQT4:
-    from mantidplot import graph, plotSpectrum
+    try:
+        from mantidplot import graph, plotSpectrum
+        IN_MANTIDPLOT = True
+    except ImportError:
+        IN_MANTIDPLOT = False
 else:
     from mantidqt.plotting.functions import plot
 
@@ -120,7 +124,7 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
         if plot_results:
             if PYQT4:
                 plot_workspace(reduction_package, output_graph)
-            else:
+            elif output_graph:
                 plot_workspace_matplotlib(reduction_package, output_graph)
         # -----------------------------------
         # The workspaces are already on the ADS, but should potentially be grouped

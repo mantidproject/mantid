@@ -9,7 +9,7 @@ from sans.gui_logic.presenter.create_file_information import create_file_informa
 from ui.sans_isis.work_handler import WorkHandler
 import sys
 import unittest
-from PyQt4.QtCore import QCoreApplication
+from qtpy.QtCore import QCoreApplication
 
 if sys.version_info.major == 3:
     from unittest import mock

@@ -12,7 +12,12 @@ from sans.common.enums import SaveType
 
 from qtpy import PYQT4
 if PYQT4:
-    from pymantidplot import proxies
+    IN_MANTIDPLOT = False
+    try:
+        from pymantidplot import proxies
+        IN_MANTIDPLOT = True
+    except ImportError:
+        pass
 
 
 Ui_SaveOtherDialog, _ = load_ui(__file__, "save_other_dialog.ui")
