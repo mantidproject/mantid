@@ -31,7 +31,8 @@ public:
   template <typename T> bool isSelected(T const &item) const;
 
   PerThetaDefaults const *defaultsForTheta(double thetaAngle) const;
-
+  void resetState();
+  boost::optional<Row&> getItemWithOutputWorkspaceOrNone(std::string const &wsName);
 private:
   Experiment const &m_experiment;
   Instrument const &m_instrument;

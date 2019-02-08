@@ -109,6 +109,18 @@ std::string Row::message() const { return m_itemState.message(); }
 
 void Row::resetState() { m_itemState.reset(); }
 
+void Row::setProgress(double p, std::string const &msg) {
+  m_itemState.setProgress(p, msg);
+}
+
+void Row::setStarting() { m_itemState.setStarting(); }
+
+void Row::setRunning() { m_itemState.setRunning(); }
+
+void Row::setSuccess() { m_itemState.setSuccess(); }
+
+void Row::setError(std::string const &msg) { m_itemState.setError(msg); }
+
 bool Row::requiresProcessing(bool reprocessFailed) const {
   switch (state()) {
   case State::ITEM_NOT_STARTED:
@@ -126,16 +138,12 @@ bool Row::requiresProcessing(bool reprocessFailed) const {
   return false;
 }
 
-void Row::setProgress(double p, std::string const &msg) {
-  m_itemState.setProgress(p, msg);
+bool Row::hasOutputWorkspace(std::string const &wsName) const {
+  return m_reducedWorkspaceNames.hasOutputName(wsName);
 }
 
-void Row::setStarting() { m_itemState.setStarting(); }
-
-void Row::setRunning() { m_itemState.setRunning(); }
-
-void Row::setSuccess() { m_itemState.setSuccess(); }
-
-void Row::setError(std::string const &msg) { m_itemState.setError(msg); }
+void Row::renameOutputWorkspace(std::string const &oldName, std::string const &newName) {
+  m_reducedWorkspaceNames.renameOutput(oldName, newName);
+}
 } // namespace CustomInterfaces
 } // namespace MantidQt

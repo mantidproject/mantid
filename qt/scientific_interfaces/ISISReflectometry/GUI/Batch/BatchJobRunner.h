@@ -31,9 +31,15 @@ public:
   void algorithmFinished(Mantid::API::IAlgorithm_sptr algorithm);
   void algorithmError(std::string const &message,
                       Mantid::API::IAlgorithm_sptr algorithm);
+
   std::vector<std::string> algorithmOutputWorkspacesToSave(
       Mantid::API::IAlgorithm_sptr algorithm,
       const API::BatchAlgorithmRunnerSubscriber *const item) const;
+
+  void notifyWorkspaceDeleted(std::string const &wsName);
+  void notifyWorkspaceRenamed(std::string const &oldName,
+                              std::string const &newName);
+  void notifyAllWorkspacesDeleted();
 
 private:
   Batch m_batch;

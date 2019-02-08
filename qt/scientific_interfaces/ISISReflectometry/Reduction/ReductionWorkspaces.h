@@ -32,6 +32,8 @@ public:
   void setOutputNames(std::string iVsLambda, std::string iVsQ,
                       std::string iVsQBinned);
   void resetOutputNames();
+  bool hasOutputName(std::string const &wsName) const;
+  void renameOutput(std::string const &oldName, std::string const &newName);
 
 private:
   std::vector<std::string> m_inputRunNumbers;

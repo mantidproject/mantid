@@ -77,5 +77,15 @@ void Group::updateRow(int rowIndex, boost::optional<Row> const &row) {
 boost::optional<Row> const &Group::operator[](int rowIndex) const {
   return m_rows[rowIndex];
 }
+
+boost::optional<Row&> Group::getItemWithOutputWorkspaceOrNone(
+    std::string const &wsName) {
+  // Check if any of the child rows have this workspace output
+  for (auto &row : m_rows) {
+    if (row && row->hasOutputWorkspace(wsName))
+      return boost::optional<Row&>(row.get());
+  }
+  return boost::none;
+}
 } // namespace CustomInterfaces
 } // namespace MantidQt

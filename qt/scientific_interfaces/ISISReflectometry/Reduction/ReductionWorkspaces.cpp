@@ -50,6 +50,22 @@ void ReductionWorkspaces::resetOutputNames() {
   m_iVsQBinned = std::string();
 }
 
+bool ReductionWorkspaces::hasOutputName(std::string const &wsName) const {
+  return m_iVsLambda == wsName || m_iVsQ == wsName || m_iVsQBinned == wsName;
+}
+
+void ReductionWorkspaces::renameOutput(std::string const &oldName,
+                                       std::string const &newName) {
+  if (m_iVsLambda == oldName)
+    m_iVsLambda = newName;
+  else if (m_iVsQ == oldName)
+    m_iVsQ = newName;
+  else if (m_iVsQBinned == oldName)
+    m_iVsQBinned = newName;
+  else
+    throw std::runtime_error("Internal error: attempted to rename workspace in invalid row");
+}
+
 bool operator==(ReductionWorkspaces const &lhs,
                 ReductionWorkspaces const &rhs) {
   return lhs.inputRunNumbers() == rhs.inputRunNumbers() &&

@@ -408,5 +408,26 @@ BatchJobRunner::getWorkspacesToSave(Row const &row) const {
   workspaces.push_back(row.reducedWorkspaceNames().iVsQBinned());
   return workspaces;
 }
+
+void BatchJobRunner::notifyWorkspaceDeleted(std::string const &wsName) {
+  // Reset the state for the relevant row if the workspace was one of our
+  // outputs
+  auto item = m_batch.getItemWithOutputWorkspaceOrNone(wsName);
+  if (item)
+    item->resetState();
+}
+
+void BatchJobRunner::notifyWorkspaceRenamed(std::string const &oldName,
+                                            std::string const &newName) {
+  // Update the workspace name in the model, if it is one of our outputs
+  auto item = m_batch.getItemWithOutputWorkspaceOrNone(oldName);
+  if (item)
+    item->renameOutputWorkspace(oldName, newName);
+}
+
+void BatchJobRunner::notifyAllWorkspacesDeleted() {
+  // All output workspaces will be deleted so reset all rows and groups
+  m_batch.resetState();
+}
 } // namespace CustomInterfaces
 } // namespace MantidQt

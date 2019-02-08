@@ -36,6 +36,7 @@ public:
   MantidWidgets::Batch::RowPath getPath(Group const &group) const;
   MantidWidgets::Batch::RowPath getPath(Row const &row) const;
   Group const &getParentGroup(Row const &row) const;
+  boost::optional<Row&> getItemWithOutputWorkspaceOrNone(std::string const &wsName);
 
 private:
   std::vector<Group> m_groups;

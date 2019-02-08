@@ -62,6 +62,10 @@ BatchPresenter::BatchPresenter(
   m_experimentPresenter->acceptMainPresenter(this);
   m_instrumentPresenter->acceptMainPresenter(this);
   m_runsPresenter->acceptMainPresenter(this);
+
+  observePostDelete();
+  observeAfterReplace();
+  observeADSClear();
 }
 
 bool BatchPresenter::requestClose() const { return true; }
@@ -226,6 +230,22 @@ bool BatchPresenter::isProcessing() const { return m_jobRunner.isProcessing(); }
    */
 bool BatchPresenter::isAutoreducing() const {
   return m_jobRunner.isAutoreducing();
+}
+
+void BatchPresenter::postDeleteHandle(const std::string &wsName) {
+  m_jobRunner.notifyWorkspaceDeleted(wsName);
+  m_runsPresenter->notifyRowStateChanged();
+}
+
+void BatchPresenter::renameHandle(const std::string &oldName,
+                  const std::string &newName) {
+  m_jobRunner.notifyWorkspaceRenamed(oldName, newName);
+  m_runsPresenter->notifyRowStateChanged();
+}
+
+void BatchPresenter::clearADSHandle() {
+  m_jobRunner.notifyAllWorkspacesDeleted();
+  m_runsPresenter->notifyRowStateChanged();
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt

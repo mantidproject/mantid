@@ -29,5 +29,13 @@ PerThetaDefaults const *Batch::defaultsForTheta(double thetaAngle) const {
   return experiment().defaultsForTheta(thetaAngle,
                                        runsTable().thetaTolerance());
 }
+
+void Batch::resetState() {
+  m_runsTable.resetState();
+}
+
+boost::optional<Row&> Batch::getItemWithOutputWorkspaceOrNone(std::string const &wsName) {
+  return m_runsTable.getItemWithOutputWorkspaceOrNone(wsName);
+}
 } // namespace CustomInterfaces
 } // namespace MantidQt

@@ -56,7 +56,8 @@ public:
   void resetState();
 
   bool requiresProcessing(bool reprocessFailed) const;
-
+  bool hasOutputWorkspace(std::string const &wsName) const;
+  void renameOutputWorkspace(std::string const &oldName, std::string const &newName);
 private:
   std::vector<std::string> m_runNumbers;
   double m_theta;

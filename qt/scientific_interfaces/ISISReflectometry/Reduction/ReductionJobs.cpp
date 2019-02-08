@@ -212,5 +212,20 @@ Group const &ReductionJobs::getParentGroup(Row const &row) const {
   auto const groupIndex = path[0];
   return m_groups[groupIndex];
 }
+
+boost::optional<Row&> ReductionJobs::getItemWithOutputWorkspaceOrNone(
+    std::string const &wsName) {
+  for (auto &group : m_groups) {
+    // First check if this group has the workspace as its output
+    // TODO
+    //if (group.postprocessedWorkspaceName() == wsName)
+    //  return group;
+    // If it has a child row with this workspace output, return it
+    auto maybeRow = group.getItemWithOutputWorkspaceOrNone(wsName);
+    if (maybeRow)
+      return maybeRow;
+  }
+  return boost::none;
+}
 } // namespace CustomInterfaces
 } // namespace MantidQt

@@ -42,6 +42,8 @@ public:
   std::vector<boost::optional<Row>> const &rows() const;
   std::vector<boost::optional<Row>> &mutableRows();
 
+  boost::optional<Row&> getItemWithOutputWorkspaceOrNone(std::string const &wsName);
+
 private:
   std::string m_name;
   std::string m_postprocessedWorkspaceName;

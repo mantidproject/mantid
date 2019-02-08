@@ -16,6 +16,7 @@
 #include "GUI/Save/ISavePresenter.h"
 #include "IBatchPresenter.h"
 #include "IBatchView.h"
+#include "MantidQtWidgets/Common/WorkspaceObserver.h"
 #include <memory>
 
 namespace MantidQt {
@@ -30,7 +31,8 @@ class IBatchView;
 */
 class MANTIDQT_ISISREFLECTOMETRY_DLL BatchPresenter
     : public IBatchPresenter,
-      public BatchViewSubscriber {
+      public BatchViewSubscriber,
+      public MantidQt::API::WorkspaceObserver {
 public:
   /// Constructor
   BatchPresenter(IBatchView *view, Batch model,
@@ -65,6 +67,12 @@ public:
   bool requestClose() const override;
   bool isProcessing() const override;
   bool isAutoreducing() const override;
+
+  // WorkspaceObserver overrides
+  void postDeleteHandle(const std::string &wsName) override;
+  void renameHandle(const std::string &oldName,
+                    const std::string &newName) override;
+  void clearADSHandle() override;
 
 private:
   void resumeReduction();
