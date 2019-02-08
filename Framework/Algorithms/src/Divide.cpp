@@ -89,7 +89,7 @@ void Divide::setOutputUnits(const API::MatrixWorkspace_const_sptr lhs,
   }
   // If the Y units match, then the output will be a distribution and will be
   // dimensionless
-  else if (lhs->YUnit() == rhs->YUnit() && rhs->blocksize() > 1) {
+  else if (lhs->YUnit() == rhs->YUnit() && m_rhsBlocksize > 1) {
     out->setYUnit("");
     out->setDistribution(true);
   }
@@ -205,11 +205,10 @@ std::string Divide::checkSizeCompatibility(
   // If RHS only has one value (1D vertical), the number of histograms needs to
   // match.
   // Each lhs spectrum will be divided by that scalar
-  // std::cout << "rhs->blocksize() " << rhs->blocksize() << '\n';
   // Are we allowing the division by different # of spectra, using detector IDs
   // to match up?
   if (m_AllowDifferentNumberSpectra ||
-      (rhs->blocksize() == 1 &&
+      (m_rhsBlocksize == 1 &&
        lhs->getNumberHistograms() == rhs->getNumberHistograms())) {
     return "";
   }

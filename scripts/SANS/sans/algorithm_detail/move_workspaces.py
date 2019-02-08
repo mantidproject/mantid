@@ -523,9 +523,8 @@ class SANSMoveLOQ(SANSMove):
         super(SANSMoveLOQ, self).__init__()
 
     def do_move_initial(self, move_info, workspace, coordinates, component, is_transmission_workspace):
-        # For LOQ we only have to coordinates
+        # For LOQ we only have two coordinates
         assert len(coordinates) == 2
-
         if not is_transmission_workspace:
             # First move the sample holder
             move_sample_holder(workspace, move_info.sample_offset, move_info.sample_offset_direction)

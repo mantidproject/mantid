@@ -43,7 +43,7 @@ requirements.check_qt()
 # -----------------------------------------------------------------------------
 # Qt
 # -----------------------------------------------------------------------------
-from qtpy.QtCore import (QEventLoop, Qt, QCoreApplication, QPoint, QSize, QSettings)  # noqa
+from qtpy.QtCore import (QEventLoop, Qt, QCoreApplication, QPoint, QSize)  # noqa
 from qtpy.QtGui import (QColor, QGuiApplication, QIcon, QPixmap)  # noqa
 from qtpy.QtWidgets import (QApplication, QDesktopWidget, QFileDialog,
                             QMainWindow, QSplashScreen)  # noqa
@@ -59,6 +59,7 @@ plugins.setup_library_paths()
 
 from workbench.config import APPNAME, CONF, ORG_DOMAIN, ORGANIZATION  # noqa
 from workbench.plotting.globalfiguremanager import GlobalFigureManager  # noqa
+from workbench.app.windowfinder import find_all_windows_that_are_savable  # noqa
 
 
 # -----------------------------------------------------------------------------
@@ -214,7 +215,7 @@ class MainWindow(QMainWindow):
         self.widgets.append(self.workspacewidget)
 
         # Set up the project object
-        self.project = Project(GlobalFigureManager)
+        self.project = Project(GlobalFigureManager, find_all_windows_that_are_savable)
 
         # uses default configuration as necessary
         self.readSettings(CONF)

@@ -48,7 +48,7 @@ void LoadDetectorsGroupingFile::init() {
   declareProperty(
       make_unique<WorkspaceProperty<DataObjects::GroupingWorkspace>>(
           "OutputWorkspace", "", Direction::Output),
-      "The name of the output workspace.");
+      "The output workspace containing the loaded grouping information.");
 }
 
 /// Run the algorithm

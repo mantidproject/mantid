@@ -177,6 +177,15 @@ def _fillTemplateTOFWorkspace(templateWS, bkgLevel):
     run_algorithm('AddSampleLog', **kwargs)
     kwargs = {
         'Workspace': ws,
+        'LogName': 'monitor.monsum',
+        'LogText': str(1000),
+        'LogType': 'Number',
+        'NumberType': 'Int',
+        'child': True
+    }
+    run_algorithm('AddSampleLog', **kwargs)
+    kwargs = {
+        'Workspace': ws,
         'ParameterName': 'default-incident-monitor-spectrum',
         'ParameterType': 'Number',
         'Value': str(98305),

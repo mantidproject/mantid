@@ -4,33 +4,33 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-import Muon.GUI.Common.load_utils as load_utils
+import Muon.GUI.Common.utilities.algorithm_utils as algorithm_utils
 
 
-def calculate_group_data(context, group_name):
-    processed_data = _run_pre_processing(context)
+def calculate_group_data(context, group_name, run):
+    processed_data = _run_pre_processing(context, run)
 
     params = _get_MuonGroupingCounts_parameters(context, group_name)
     params["InputWorkspace"] = processed_data
-    group_data = load_utils.run_MuonGroupingCounts(context, params)
+    group_data = algorithm_utils.run_MuonGroupingCounts(params)
 
     return group_data
 
 
-def calculate_pair_data(context, pair_name):
-    processed_data = _run_pre_processing(context)
+def calculate_pair_data(context, pair_name, run):
+    processed_data = _run_pre_processing(context, run)
 
     params = _get_MuonPairingAsymmetry_parameters(context, pair_name)
     params["InputWorkspace"] = processed_data
-    pair_data = load_utils.run_MuonPairingAsymmetry(context, params)
+    pair_data = algorithm_utils.run_MuonPairingAsymmetry(params)
 
     return pair_data
 
 
-def _run_pre_processing(context):
-    params = context._get_pre_processing_params()
-    params["InputWorkspace"] = context.loaded_workspace
-    processed_data = load_utils.run_MuonPreProcess(context, params)
+def _run_pre_processing(context, run):
+    params = _get_pre_processing_params(context)
+    params["InputWorkspace"] = context.loaded_workspace_as_group(run)
+    processed_data = algorithm_utils.run_MuonPreProcess(params)
     return processed_data
 
 
@@ -68,13 +68,13 @@ def _get_MuonGroupingCounts_parameters(context, group_name):
     params = {}
     try:
         summed_periods = context.loaded_data["SummedPeriods"]
-        params["SummedPeriods"] = str(summed_periods)
+        params["SummedPeriods"] = summed_periods
     except KeyError:
         params["SummedPeriods"] = "1"
 
     try:
         subtracted_periods = context.loaded_data["SubtractedPeriods"]
-        params["SubtractedPeriods"] = str(subtracted_periods)
+        params["SubtractedPeriods"] = subtracted_periods
     except KeyError:
         params["SubtractedPeriods"] = ""
 
@@ -90,13 +90,13 @@ def _get_MuonPairingAsymmetry_parameters(context, pair_name):
     params = {}
     try:
         summed_periods = context.loaded_data["SummedPeriods"]
-        params["SummedPeriods"] = str(summed_periods)
+        params["SummedPeriods"] = summed_periods
     except KeyError:
         params["SummedPeriods"] = "1"
 
     try:
         subtracted_periods = context.loaded_data["SubtractedPeriods"]
-        params["SubtractedPeriods"] = str(subtracted_periods)
+        params["SubtractedPeriods"] = subtracted_periods
     except KeyError:
         params["SubtractedPeriods"] = ""
 

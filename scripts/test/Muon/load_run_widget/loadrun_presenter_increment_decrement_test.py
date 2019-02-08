@@ -7,9 +7,9 @@
 import sys
 import os
 
-from Muon.GUI.Common.load_run_widget.model import LoadRunWidgetModel
-from Muon.GUI.Common.load_run_widget.view import LoadRunWidgetView
-from Muon.GUI.Common.load_run_widget.presenter import LoadRunWidgetPresenter
+from Muon.GUI.Common.load_run_widget.load_run_model import LoadRunWidgetModel
+from Muon.GUI.Common.load_run_widget.load_run_view import LoadRunWidgetView
+from Muon.GUI.Common.load_run_widget.load_run_presenter import LoadRunWidgetPresenter
 from Muon.GUI.Common import mock_widget
 from Muon.GUI.Common.muon_load_data import MuonLoadData
 
@@ -52,7 +52,7 @@ class LoadRunWidgetIncrementDecrementSingleFileModeTest(unittest.TestCase):
         self.presenter.enable_multiple_files(False)
         self.presenter.set_current_instrument("EMU")
 
-        patcher = mock.patch('Muon.GUI.Common.load_run_widget.model.load_utils')
+        patcher = mock.patch('Muon.GUI.Common.load_run_widget.load_run_model.load_utils')
         self.addCleanup(patcher.stop)
         self.load_utils_patcher = patcher.start()
         self.load_utils_patcher.exception_message_for_failed_files.return_value = ''
@@ -75,7 +75,7 @@ class LoadRunWidgetIncrementDecrementSingleFileModeTest(unittest.TestCase):
 
     def assert_model_has_not_changed(self):
         self.assertEqual(self.model.loaded_workspaces, [self._loaded_workspace])
-        self.assertEqual(self.model.loaded_runs, [self._loaded_run])
+        self.assertEqual(self.model.loaded_runs, [[self._loaded_run]])
         self.assertEqual(self.model.loaded_filenames, [self._loaded_filename])
 
     def assert_view_has_not_changed(self):
@@ -125,7 +125,7 @@ class LoadRunWidgetIncrementDecrementSingleFileModeTest(unittest.TestCase):
         self.wait_for_thread(self.presenter._load_thread)
 
         self.assertEqual(self.presenter.filenames, [new_filename])
-        self.assertEqual(self.presenter.runs, [new_run])
+        self.assertEqual(self.presenter.runs, [[new_run]])
         self.assertEqual(self.presenter.workspaces, [[1]])
 
         self.assertEqual(self.view.get_run_edit_text(), str(new_run))
@@ -140,7 +140,7 @@ class LoadRunWidgetIncrementDecrementSingleFileModeTest(unittest.TestCase):
         self.wait_for_thread(self.presenter._load_thread)
 
         self.assertEqual(self.presenter.filenames, [new_filename])
-        self.assertEqual(self.presenter.runs, [new_run])
+        self.assertEqual(self.presenter.runs, [[new_run]])
         self.assertEqual(self.presenter.workspaces, [[1]])
 
         self.assertEqual(self.view.get_run_edit_text(), str(new_run))
