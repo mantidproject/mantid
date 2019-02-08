@@ -88,7 +88,7 @@ class EmbeddedFindReplaceDialog(object):
                                Else the strings will be compared as they are without changes
         """
         return (not case_sensitive and string1.lower() != string2.lower()) \
-               or (case_sensitive and string1 != string2)
+            or (case_sensitive and string1 != string2)
 
     def action_replace_all(self):
         search_string = self.view.find.currentText()
