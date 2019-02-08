@@ -5,6 +5,8 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package
+from qtpy.QtCore import Qt
+
 from mantidqt.utils.qt import load_ui
 
 DialogBase, DialogForm = load_ui(__file__, 'dialog.ui')
@@ -29,6 +31,8 @@ class EmbeddedFindReplaceDialogView(DialogBase, DialogForm):
 
         self.find.lineEdit().setPlaceholderText("Find")
         self.replace.lineEdit().setPlaceholderText("Replace with")
+
+        self.setAttribute(Qt.WA_DeleteOnClose, True)
 
         self.button_next.clicked.connect(self.presenter.action_next)
         self.button_replace.clicked.connect(self.presenter.action_replace)

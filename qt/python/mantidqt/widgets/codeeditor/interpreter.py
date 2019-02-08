@@ -5,26 +5,20 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package
-#
-#
 from __future__ import (absolute_import, unicode_literals)
 
 import os.path
-# std imports
 import sys
 import traceback
 
-# 3rd party imports
-from qtpy.QtCore import QObject, Signal
-from qtpy.QtGui import QColor, QFontMetrics
-from qtpy.QtWidgets import QFileDialog, QMessageBox, QStatusBar, QVBoxLayout, QWidget
+from qtpy.QtCore import QObject, Qt, Signal
+from qtpy.QtGui import QColor, QFontMetrics, QKeySequence
+from qtpy.QtWidgets import QAction, QFileDialog, QMessageBox, QStatusBar, QVBoxLayout, QWidget
 
 from mantidqt.io import open_a_file_dialog
-# local imports
 from mantidqt.widgets.codeeditor.editor import CodeEditor
 from mantidqt.widgets.codeeditor.errorformatter import ErrorFormatter
 from mantidqt.widgets.codeeditor.execution import PythonCodeExecution
-# Status messages
 from mantidqt.widgets.embedded_find_replace_dialog.presenter import EmbeddedFindReplaceDialog
 
 IDLE_STATUS_MSG = "Status: Idle."
@@ -120,13 +114,19 @@ class PythonFileInterpreter(QWidget):
         self.layout.setContentsMargins(0, 0, 0, 0)
         self._setup_editor(content, filename)
 
-        self._presenter = PythonFileInterpreterPresenter(self,
-                                                         PythonCodeExecution(content))
+        self.setAttribute(Qt.WA_DeleteOnClose, True)
+
+        self._presenter = PythonFileInterpreterPresenter(self, PythonCodeExecution(content))
 
         self.editor.modificationChanged.connect(self.sig_editor_modified)
         self.editor.fileNameChanged.connect(self.sig_filename_modified)
         self.find_replace_dialog = None
         self.find_replace_dialog_shown = False
+
+        find_replace = QAction("Find and Replace", self)
+        find_replace.setShortcut(QKeySequence.Find)
+        find_replace.triggered.connect(self.show_find_replace_dialog)
+        self.addAction(find_replace)
 
     def show_find_replace_dialog(self):
         if self.find_replace_dialog is None:
@@ -167,7 +167,7 @@ class PythonFileInterpreter(QWidget):
         self.status.showMessage(msg)
 
     def replace_tabs_with_spaces(self):
-        self.replace_text(TAB_CHAR, SPACE_CHAR*4)
+        self.replace_text(TAB_CHAR, SPACE_CHAR * 4)
 
     def replace_text(self, match_text, replace_text):
         if self.editor.selectedText() == '':
@@ -176,7 +176,7 @@ class PythonFileInterpreter(QWidget):
         self.editor.replaceSelectedText(new_text)
 
     def replace_spaces_with_tabs(self):
-        self.replace_text(SPACE_CHAR*4, TAB_CHAR)
+        self.replace_text(SPACE_CHAR * 4, TAB_CHAR)
 
     def set_whitespace_visible(self):
         self.editor.setWhitespaceVisibility(CodeEditor.WsVisible)
@@ -189,7 +189,7 @@ class PythonFileInterpreter(QWidget):
         self.editor.clearKeyBinding(key_str)
 
     def toggle_comment(self):
-        if self.editor.selectedText() == '':   # If nothing selected, do nothing
+        if self.editor.selectedText() == '':  # If nothing selected, do nothing
             return
 
         # Note selection indices to restore highlighting later

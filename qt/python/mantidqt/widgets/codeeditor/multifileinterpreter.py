@@ -14,8 +14,7 @@ import os.path as osp
 
 # 3rd party imports
 from qtpy.QtCore import Qt
-from qtpy.QtGui import QKeySequence
-from qtpy.QtWidgets import (QAction, QTabWidget, QToolButton, QVBoxLayout, QWidget)
+from qtpy.QtWidgets import (QTabWidget, QToolButton, QVBoxLayout, QWidget)
 
 # local imports
 from mantidqt.widgets.codeeditor.interpreter import PythonFileInterpreter
@@ -49,20 +48,12 @@ class MultiPythonFileInterpreter(QWidget):
         self.setLayout(layout)
         layout.setContentsMargins(0, 0, 0, 0)
 
-        find_replace = QAction("Find and Replace", self)
-        find_replace.setShortcut(QKeySequence.Find)
-        find_replace.triggered.connect(self._show_find_replace)
-        self.addAction(find_replace)
-
         # add a single editor by default
         self.append_new_editor()
 
     @property
     def editor_count(self):
         return self._tabs.count()
-
-    def _show_find_replace(self):
-        self.current_editor().show_find_replace_dialog()
 
     def append_new_editor(self, content=None, filename=None):
         if content is None:
@@ -109,7 +100,10 @@ class MultiPythonFileInterpreter(QWidget):
         # are being prompted to save
         self._tabs.setCurrentIndex(idx)
         if self.current_editor().confirm_close():
+            widget = self._tabs.widget(idx)
+            # note: this does not close the widget, that is why we manually close it
             self._tabs.removeTab(idx)
+            widget.close()
         else:
             return False
 
