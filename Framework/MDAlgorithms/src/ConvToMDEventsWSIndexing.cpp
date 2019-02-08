@@ -11,7 +11,7 @@ size_t ConvToMDEventsWSIndexing::initialize(
   // check if split parameters are valid
   std::vector<int> split_into;
   auto bc = m_OutWSWrapper->pWorkspace()->getBoxController();
-  for (uint32_t i = 0; i < bc->getNDims(); ++i)
+  for (size_t i = 0; i < bc->getNDims(); ++i)
     split_into.emplace_back(bc->getSplitInto(i));
   bool validSplitInfo = isSplitValid(split_into);
   if (!validSplitInfo) {
