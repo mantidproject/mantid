@@ -40,7 +40,7 @@ a defined number of peaks after each cycle.
 The main limitation of this approach is that the lattice parameters of the sample should be known accurately. It is recommended that at least 10 iterations are carried out, but in cases where the crystal is well centred and the goniometer angles are known accurately fewer iterations are necessary. 
 
 Useage
------
+-----------
 
 **Example:**
 
