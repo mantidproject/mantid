@@ -225,7 +225,6 @@ void FindReplaceDialog::replaceAll() {
     boxReplace->addItem(replaceString);
   }
 
-  int line(-1), index(-1), prevLine(-1), prevIndex(-1);
   bool regex = boxRegex->isChecked();
   bool cs = boxCaseSensitive->isChecked();
   bool whole = boxWholeWords->isChecked();
