@@ -94,8 +94,8 @@ The following figure exemplifies the foreground and background for the D17 instr
    ax.text(5, 223, 'LowAngleBkgOffset')
    ax.axhspan(185, 215, color='blue', alpha=0.15)
    ax.text(5.5, 206, 'ForegroundWidth [0]')
-   ax.axhline(203, linestyle=':', color='k')  # Beam centre
-   ax.text(22, 200, 'BeamCentre')
+   ax.axhline(203, linestyle=':', color='k')  # Line position
+   ax.text(22, 200, 'LinePosition')
    ax.text(5.5, 190, 'ForegroundWidth [1]')
    ax.text(5, 162, 'HighAngleBkgOffset')
    ax.axhspan(75, 145, color='red', alpha=0.15)
