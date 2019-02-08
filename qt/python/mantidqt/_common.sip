@@ -98,6 +98,17 @@ public:
       AcsAPIs
   };
 
+  enum WhitespaceVisibility {
+     //! Whitespace is invisible.
+     WsInvisible = SCWS_INVISIBLE,
+
+     //! Whitespace is always visible.
+     WsVisible = SCWS_VISIBLEALWAYS,
+
+     //! Whitespace is visible after the whitespace used for indentation.
+     WsVisibleAfterIndent = SCWS_VISIBLEAFTERINDENT
+  };
+
 public:
   ScriptEditor(const QString & language,
                QWidget *parent /TransferThis/ = 0) throw(std::invalid_argument);
@@ -116,10 +127,14 @@ public:
   QString selectedText() const;
   QString text() const;
 
+  void clearKeyBinding(const QString &keyCombination) throw(std::invalid_argument);
   void enableAutoCompletion(AutoCompletionSource source);
   void disableAutoCompletion();
+  void getCursorPosition(int *line, int *index) const;
+  void selectAll(bool select = true);
   void setCaretLineBackgroundColor (const QColor & col);
   void setCaretLineVisible(bool enable);
+  void setCursorPosition(int line, int index);
   void setIndentationsUseTabs(bool tabs);
   void setFileName(const QString &filename);
   void setMarginWidth(int margin, int width);
@@ -128,6 +143,7 @@ public:
   void setSelection(int lineFrom, int indexFrom, int lineTo, int indexTo);
   void setTabWidth(int width);
   void setText(const QString &text);
+  void setWhitespaceVisibility(WhitespaceVisibility mode);
   void updateCompletionAPI(const QStringList & completions);
 
 public slots:

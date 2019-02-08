@@ -32,6 +32,7 @@
 
 // Qscintilla
 #include <Qsci/qsciapis.h>
+#include <Qsci/qscicommandset.h>
 
 // std
 #include <cmath>
@@ -308,6 +309,23 @@ void ScriptEditor::wheelEvent(QWheelEvent *e) {
     QsciScintilla::wheelEvent(e);
   }
 }
+/*
+ *  Remove shortcut key binding from its command.
+ *  @param keyCombination :: QString of the key combination e.g. "Ctrl+/".
+ */
+void ScriptEditor::clearKeyBinding(const QString &keyCombination) {
+  int keyIdentifier = QKeySequence(keyCombination)[0];
+  if (QsciCommand::validKey(keyIdentifier)) {
+    QsciCommand *cmd = standardCommands()->boundTo(keyIdentifier);
+    if (cmd) { /// if key identifier bound to a command
+      cmd->setKey(0);
+    } else {
+      throw std::invalid_argument("Key combination is not set by Scintilla.");
+    }
+  } else {
+    throw std::invalid_argument("Key combination is not valid!");
+  }
+}
 
 //-----------------------------------------------
 // Public slots
@@ -337,8 +355,8 @@ void ScriptEditor::setMarkerState(bool enabled) {
 }
 
 /**
- * Update the arrow marker to point to the correct line and colour it depending
- * on the error state
+ * Update the arrow marker to point to the correct line and colour it
+ * depending on the error state
  * @param lineno :: The line to place the marker at. A negative number will
  * clear all markers
  * @param error :: If true, the marker will turn red
@@ -390,13 +408,11 @@ void ScriptEditor::updateCompletionAPI(const QStringList &keywords) {
    * halted
    * correctly.
    *
-   * This line adds a single character that is guaranteed to be after all of the
-   * other completions
-   * (due to ascii ordering) but is not alpha-numeric so a user would not want
-   * to complete on it.
-   * Even better it won't show up in the auto complete list because a user has
-   * to type at least
-   * 2 characters for that to appear.
+   * This line adds a single character that is guaranteed to be after all of
+   * the other completions (due to ascii ordering) but is not alpha-numeric so
+   * a user would not want to complete on it. Even better it won't show up in
+   * the auto complete list because a user has to type at least 2 characters
+   * for that to appear.
    *
    */
   m_completer->add("{");
@@ -428,8 +444,8 @@ void ScriptEditor::dragEnterEvent(QDragEnterEvent *de) {
  * If the QMimeData object holds workspaces names then extract text from a
  * QMimeData object and add the necessary wrapping text to import mantid.
  * @param source An existing QMimeData object
- * @param rectangular On return rectangular is set if the text corresponds to a
- * rectangular selection.
+ * @param rectangular On return rectangular is set if the text corresponds to
+ * a rectangular selection.
  * @return The text
  */
 QByteArray ScriptEditor::fromMimeData(const QMimeData *source,
@@ -469,8 +485,8 @@ void ScriptEditor::print() {
 void ScriptEditor::showFindReplaceDialog() { m_findDialog->show(); }
 
 /**
- * Override the zoomTo slot to make the font size larger on Mac as the defaults
- * are tiny
+ * Override the zoomTo slot to make the font size larger on Mac as the
+ * defaults are tiny
  * @param level Set the font size to this level of zoom
  */
 void ScriptEditor::zoomTo(int level) {
@@ -494,12 +510,10 @@ void ScriptEditor::writeToDevice(QIODevice &device) const {
 
 /**
  * Forward the QKeyEvent to the QsciScintilla base class.
- * Under Gnome on Linux with Qscintilla versions < 2.4.2 there is a bug with the
- * autocomplete
- * box that means the editor loses focus as soon as it the box appears. This
- * functions
- * forwards the call and sets the correct flags on the resulting window so that
- * this does not occur
+ * Under Gnome on Linux with Qscintilla versions < 2.4.2 there is a bug with
+ * the autocomplete box that means the editor loses focus as soon as it the
+ * box appears. This functions forwards the call and sets the correct flags on
+ * the resulting window so that this does not occur
  */
 void ScriptEditor::forwardKeyPressToBase(QKeyEvent *event) {
   // Hack to get around a bug in QScitilla

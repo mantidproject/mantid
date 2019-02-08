@@ -23,9 +23,6 @@ Action Buttons
 ?
   Opens this help page.
 
-Run
-  Runs the processing configured on the current tab.
-
 Manage Directories
   Opens the Manage Directories dialog allowing you to change your search directories
   and default save directory and enable/disable data archive search.
@@ -45,7 +42,7 @@ Reflection
   please speak to the instrument scientist who dealt with your experiment.
 
 Run Numbers
-  The raw run files that are to be used in the reduction, multiple files cab be
+  The raw run files that are to be used in the reduction, multiple files can be
   specified in the same manner as in the Energy Transfer tab on Indirect Data
   Reduction.
 
@@ -62,6 +59,9 @@ Spectra Min & Spectra Max
   options will be disabled when using OSIRIS in diffonly mode, in which case the
   entire spectra range will be used.
 
+Run
+  Runs the processing configured on the current tab.
+
 Plot Type
   Specify the type of plot to be created when the reduction is complete, either
   a contour or spectra plot can be created.
@@ -74,19 +74,16 @@ Save Formats
 OSIRIS diffonly
 ---------------
 
-.. interface:: Diffraction
-  :widget: pageCalibration
-
 OSIRIS is supported through the :ref:`OSIRISDiffractionReduction
 <algm-OSIRISDiffractionReduction>` algorithm, and as such has a radically
 different workflow to IRIS and TOSCA.
 
 The available options are the same, except that a single calibration file and
 one or more vanadium files must be specified instead of rebinning values. These
-files are remembered by the interface so only have to be set once per cycle.
+files are remembered by the interface so they only have to be set once per cycle.
 
 There is also the option to manually set the dRange used in all of the sample
-runs, note that in this case all sample iles must correspond to the same dRange.
+runs, note that in this case all sample files must correspond to the same dRange.
 The dRanges are numbered as per the `OSIRIS manual
 <http://www.isis.stfc.ac.uk/instruments/osiris/documents/osiris-user-guide6672.pdf>`_.
 Otherwise the dRange is determined based on the table provided in the manual.
@@ -98,15 +95,18 @@ order of files should not be problematic either.
 
 Multiple data files with the same dRanges will be "averaged" together.
 
+.. interface:: Diffraction
+  :widget: pageCalibration
+
 IRIS, OSIRIS diffspec, TOSCA & VESUVIO
 --------------------------------------
-
-.. interface:: Diffraction
-  :widget: pageDSpaceRebin
 
 All other instruments are supported through the
 :ref:`ISISIndirectDiffractionReduction <algm-ISISIndirectDiffractionReduction>`
 algorithm and share the same set of options:
+
+.. interface:: Diffraction
+  :widget: pageDSpaceRebin
 
 Sum Files
   If selected the raw files will be summed after they are loaded and the
@@ -117,7 +117,7 @@ Rebin in D-Spacing
   are provided then a rebin will not be done.
 
 Use Individual Grouping
-  If selected each detector will be output on its own spectrum in the reduced
+  If selected, each detector will be output on its own spectrum in the reduced
   file, this can be useful to verify detector positioning on instruments such
   as VESUVIO.
 

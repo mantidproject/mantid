@@ -39,6 +39,7 @@ class FigureManagerWorkbenchTest(GuiTest, QtWidgetFinder):
         self.assert_window_created()
 
         fig_mgr.destroy()
+        canvas.close()
 
         QApplication.processEvents()
 
