@@ -10,13 +10,16 @@
 from __future__ import (absolute_import, unicode_literals)
 
 # system imports
+import os.path as osp
+
+# third-party library imports
 from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QVBoxLayout
 
-# third-party library imports
+# local package imports
+from mantid.kernel import logger
 from mantidqt.utils.qt import add_actions, create_action
 from mantidqt.widgets.codeeditor.multifileinterpreter import MultiPythonFileInterpreter
-# local package imports
 from workbench.plugins.base import PluginWidget
 
 # from mantidqt.utils.qt import toQSettings when readSettings/writeSettings are implemented
@@ -34,6 +37,8 @@ import matplotlib.pyplot as plt
 
 import numpy as np
 """
+# Accepted extensions for drag-and-drop to editor
+ACCEPTED_FILE_EXTENSIONS = ['.py', '.pyw']
 
 
 class MultiFileEditor(PluginWidget):
@@ -49,6 +54,8 @@ class MultiFileEditor(PluginWidget):
         layout.addWidget(self.editors)
         layout.setContentsMargins(0, 0, 0, 0)
         self.setLayout(layout)
+
+        self.setAcceptDrops(True)
 
         # attributes
         self.run_action = create_action(
@@ -98,6 +105,25 @@ class MultiFileEditor(PluginWidget):
         :return: True if editors can be closed, false if cancelled
         """
         return self.editors.close_all()
+
+    def dragEnterEvent(self, event):
+        data = event.mimeData()
+        if data.hasText() and data.hasUrls():
+            filepaths = [url.toLocalFile() for url in data.urls()]
+            for filepath in filepaths:
+                if osp.splitext(filepath)[1] in ACCEPTED_FILE_EXTENSIONS:
+                    event.acceptProposedAction()
+
+    def dropEvent(self, event):
+        data = event.mimeData()
+        for url in data.urls():
+            filepath = url.toLocalFile()
+            if osp.splitext(filepath)[1] in ACCEPTED_FILE_EXTENSIONS:
+                try:
+                    self.open_file_in_new_tab(filepath)
+                except IOError as io_error:
+                    logger.warning("Could not load file:\n  '{}'"
+                                   "".format(str(io_error)))
 
     def get_plugin_title(self):
         return "Editor"
