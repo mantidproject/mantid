@@ -25,7 +25,6 @@ public:
 
   virtual void setGroupWorkspaceComboBoxVisible(bool visible) = 0;
   virtual void setWorkspaceComboBoxVisible(bool visible) = 0;
-  virtual void setEditResultVisible(bool visible) = 0;
 
   virtual void clearPlotWorkspaces() = 0;
   virtual void clearPlotTypes() = 0;
@@ -49,6 +48,8 @@ public:
   virtual void setPlotEnabled(bool enable) = 0;
   virtual void setEditResultEnabled(bool enable) = 0;
   virtual void setSaveEnabled(bool enable) = 0;
+
+  virtual void setEditResultVisible(bool visible) = 0;
 
   virtual void displayWarning(std::string const &message) = 0;
 

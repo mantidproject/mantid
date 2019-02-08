@@ -10,6 +10,7 @@
 #include "IIndirectFitOutputOptionsModel.h"
 
 #include "DllConfig.h"
+#include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
@@ -54,7 +55,7 @@ public:
 
   void replaceResultBin(std::string const &inputName,
                         std::string const &singleBinName,
-                        std::string const &outputName) const override;
+                        std::string const &outputName) override;
 
 private:
   void plotResult(Mantid::API::WorkspaceGroup_const_sptr groupWorkspace,
@@ -71,6 +72,12 @@ private:
 
   void plotPDF(Mantid::API::MatrixWorkspace_const_sptr workspace,
                std::string const &plotType);
+
+  void replaceResultBin(Mantid::API::MatrixWorkspace_sptr inputWorkspace,
+                        Mantid::API::MatrixWorkspace_sptr singleBinWorkspace,
+                        std::string const &outputName);
+  void setOutputAsResultWorkspace(Mantid::API::IAlgorithm_sptr algorithm);
+  void setResultWorkspace(std::string const &groupName);
 
   Mantid::API::WorkspaceGroup_sptr m_resultGroup;
   Mantid::API::WorkspaceGroup_sptr m_pdfGroup;

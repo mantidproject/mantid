@@ -10,7 +10,9 @@
 #include <cxxtest/TestSuite.h>
 
 #include "IndirectFitOutputOptionsModel.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidTestHelpers/IndirectFitDataCreationHelper.h"
 
@@ -68,12 +70,17 @@ public:
   }
 
   void setUp() override {
+    m_ads =
+        std::make_unique<SetUpADSWithWorkspace>("Name", createWorkspace(3, 4));
+
     m_groupWorkspace = createGroupWorkspaceWithTextAxes(
         NUMBER_OF_WORKSPACES, getThreeAxisLabels(), NUMBER_OF_SPECTRA);
     m_model = std::make_unique<IndirectFitOutputOptionsModel>();
   }
 
   void tearDown() override {
+    AnalysisDataService::Instance().clear();
+
     m_groupWorkspace.reset();
     m_model.reset();
   }
@@ -262,7 +269,78 @@ public:
     TS_ASSERT(!m_model->isResultGroupSelected("PDF Group"));
   }
 
+  void
+  test_that_replaceResultBin_will_throw_when_provided_an_empty_inputWorkspace_name() {
+    auto const singleBinName("Workspace_s0_Result");
+    auto const outputName("Output_Result");
+
+    TS_ASSERT_THROWS(m_model->replaceResultBin("", singleBinName, outputName),
+                     std::runtime_error);
+  }
+
+  void
+  test_that_replaceResultBin_will_throw_when_provided_an_empty_singleBinWorkspace_name() {
+    auto const inputName("Workspace_s0_to_s2_Result");
+    auto const outputName("Output_Result");
+
+    TS_ASSERT_THROWS(m_model->replaceResultBin(inputName, "", outputName),
+                     std::runtime_error);
+  }
+
+  void
+  test_that_replaceResultBin_will_throw_when_provided_an_empty_outputWorkspace_name() {
+    auto const inputName("Workspace_s0_to_s2_Result");
+    auto const singleBinName("Workspace_s0_Result");
+
+    TS_ASSERT_THROWS(m_model->replaceResultBin(inputName, singleBinName, ""),
+                     std::runtime_error);
+  }
+
+  void test_that_replaceResultBin_will_not_throw_when_provided_valid_data() {
+    std::string const inputName("Workspace_s0_to_s2_Result");
+    std::string const singleBinName("Workspace_s0_Result");
+    auto const outputName("Output_Result");
+
+    setUpResultWorkspaces(inputName, singleBinName);
+
+    TS_ASSERT_THROWS_NOTHING(
+        m_model->replaceResultBin(inputName, singleBinName, outputName));
+  }
+
+  void
+  test_that_replaceResultBin_will_set_the_result_group_to_a_group_workspace_with_the_correct_number_of_entries() {
+    std::string const inputName("Workspace_s0_to_s2_Result");
+    std::string const singleBinName("Workspace_s0_Result");
+    auto const outputName("Output_Result");
+
+    setUpResultWorkspaces(inputName, singleBinName);
+    m_model->replaceResultBin(inputName, singleBinName, outputName);
+
+    auto const outputWorkspace = m_model->getResultWorkspace();
+    TS_ASSERT(outputWorkspace);
+    TS_ASSERT_EQUALS(outputWorkspace->getNumberOfEntries(), 2);
+  }
+
 private:
+  void setUpResultWorkspaces(std::string const &inputName,
+                             std::string const &singleBinName) {
+    auto const inputWorkspace =
+        createWorkspaceWithBinValues(3, {2.0, 3.0, 4.0}, 3);
+    auto const singleBinWorkspace = createWorkspaceWithBinValues(3, {2.0}, 1);
+    createSingleWorkspaceGroup(inputName, inputWorkspace);
+    createSingleWorkspaceGroup(singleBinName, singleBinWorkspace);
+  }
+
+  void createSingleWorkspaceGroup(std::string const &workspaceName,
+                                  MatrixWorkspace_sptr const &workspace) {
+    m_ads->addOrReplace(workspaceName, workspace);
+
+    auto group = boost::make_shared<WorkspaceGroup>();
+    group->addWorkspace(workspace);
+    m_ads->addOrReplace(workspaceName + "s", group);
+  }
+
+  std::unique_ptr<SetUpADSWithWorkspace> m_ads;
   WorkspaceGroup_sptr m_groupWorkspace;
   std::unique_ptr<IndirectFitOutputOptionsModel> m_model;
 };

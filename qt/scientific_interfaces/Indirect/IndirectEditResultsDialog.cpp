@@ -19,7 +19,7 @@ IndirectEditResultsDialog::IndirectEditResultsDialog(QWidget *parent)
   connect(m_uiForm.pbPasteInputName, SIGNAL(clicked()), this,
           SLOT(setOutputWorkspaceName()));
   connect(m_uiForm.pbReplaceBin, SIGNAL(clicked()), this,
-          SIGNAL(replaceSingleSpectrum()));
+          SIGNAL(replaceSingleBin()));
   connect(m_uiForm.pbClose, SIGNAL(clicked()), this, SIGNAL(closeDialog()));
 }
 
@@ -45,6 +45,14 @@ IndirectEditResultsDialog::getSelectedSingleFitWorkspaceName() const {
 
 std::string IndirectEditResultsDialog::getOutputWorkspaceName() const {
   return m_uiForm.leOutputWorkspace->text().toStdString();
+}
+
+void IndirectEditResultsDialog::setReplaceBinText(QString const &text) {
+  m_uiForm.pbReplaceBin->setText(text);
+}
+
+void IndirectEditResultsDialog::setReplaceBinEnabled(bool enable) {
+  m_uiForm.pbReplaceBin->setEnabled(enable);
 }
 
 } // namespace IDA

@@ -28,8 +28,11 @@ public:
   std::string getSelectedSingleFitWorkspaceName() const;
   std::string getOutputWorkspaceName() const;
 
+  void setReplaceBinText(QString const &text);
+  void setReplaceBinEnabled(bool enable);
+
 signals:
-  void replaceSingleSpectrum();
+  void replaceSingleBin();
   void closeDialog();
 
 private slots:

@@ -58,7 +58,7 @@ private slots:
   void plotResult();
   void saveResult();
   void editResult();
-  void replaceSingleSpectrum();
+  void replaceSingleBin();
   void closeEditResultDialog();
 
 private:
@@ -69,6 +69,11 @@ private:
 
   std::unique_ptr<IndirectEditResultsDialog>
   getEditResultsDialog(QWidget *parent) const;
+  void setEditingResult(bool editing);
+
+  void replaceSingleBin(std::string const &inputName,
+                        std::string const &singleBinName,
+                        std::string const &outputName);
 
   void displayWarning(std::string const &message);
 

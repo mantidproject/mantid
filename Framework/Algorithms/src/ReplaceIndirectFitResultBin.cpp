@@ -90,18 +90,23 @@ HistogramY replaceYBinValue(MatrixWorkspace_const_sptr workspace,
   return replaceBinValue(histogram, binIndex, newValue);
 }
 
+void replaceBinValues(MatrixWorkspace_sptr outputWorkspace,
+                      std::size_t const &binIndex, std::vector<double> yValues,
+                      std::vector<double> eValues) {
+  for (auto i = 0u; i < outputWorkspace->getNumberHistograms(); ++i) {
+    outputWorkspace->mutableY(i) =
+        replaceYBinValue(outputWorkspace, i, binIndex, yValues[i]);
+    outputWorkspace->mutableE(i) =
+        replaceEBinValue(outputWorkspace, i, binIndex, eValues[i]);
+  }
+}
+
 void processBinReplacement(MatrixWorkspace_const_sptr singleBinWorkspace,
                            MatrixWorkspace_sptr outputWorkspace) {
   auto const yValues = getValuesInYBin(singleBinWorkspace, 0);
   auto const eValues = getValuesInEBin(singleBinWorkspace, 0);
   auto const insertionIndex = getBinIndex(singleBinWorkspace, outputWorkspace);
-
-  for (auto i = 0u; i < outputWorkspace->getNumberHistograms(); ++i) {
-    outputWorkspace->mutableY(i) =
-        replaceYBinValue(outputWorkspace, i, insertionIndex, yValues[i]);
-    outputWorkspace->mutableE(i) =
-        replaceEBinValue(outputWorkspace, i, insertionIndex, eValues[i]);
-  }
+  replaceBinValues(outputWorkspace, insertionIndex, yValues, eValues);
 }
 
 bool doesExistInADS(std::string const &workspaceName) {
@@ -163,16 +168,23 @@ WorkspaceGroup_sptr getADSGroupWorkspace(std::string const &workspaceName) {
       getADSWorkspace(workspaceName));
 }
 
+void addOutputToResultsGroup(WorkspaceGroup_sptr resultGroup,
+                             std::string const &inputName,
+                             std::string const &outputName,
+                             MatrixWorkspace_sptr output) {
+  if (inputName == outputName)
+    resultGroup->remove(inputName);
+  resultGroup->addWorkspace(output);
+}
+
 void addOutputToResultsGroup(std::string const &resultGroupName,
                              std::string const &inputName,
                              std::string const &outputName,
                              MatrixWorkspace_sptr output) {
-  if (!resultGroupName.empty()) {
-    auto resultGroup = getADSGroupWorkspace(resultGroupName);
-    if (inputName == outputName)
-      resultGroup->remove(inputName);
-    resultGroup->addWorkspace(output);
-  } else
+  if (!resultGroupName.empty())
+    addOutputToResultsGroup(getADSGroupWorkspace(resultGroupName), inputName,
+                            outputName, output);
+  else
     throw std::runtime_error(
         "The input workspaces corresponding result group could not be found.");
 }

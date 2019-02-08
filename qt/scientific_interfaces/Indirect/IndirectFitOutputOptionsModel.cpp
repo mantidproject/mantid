@@ -20,13 +20,24 @@ std::string noWorkspaceErrorMessage(std::string const &process) {
   return "The " + process + " of a workspace failed:\n\n No workspace found";
 }
 
-MatrixWorkspace_const_sptr convertToMatrixWorkspace(Workspace_sptr workspace) {
+MatrixWorkspace_sptr convertToMatrixWorkspace(Workspace_sptr workspace) {
   return boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
 }
 
+WorkspaceGroup_sptr convertToGroupWorkspace(Workspace_sptr workspace) {
+  return boost::dynamic_pointer_cast<WorkspaceGroup>(workspace);
+}
+
+Workspace_sptr getADSWorkspace(std::string const &workspaceName) {
+  return AnalysisDataService::Instance().retrieveWS<Workspace>(workspaceName);
+}
+
 MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-      workspaceName);
+  return convertToMatrixWorkspace(getADSWorkspace(workspaceName));
+}
+
+WorkspaceGroup_sptr getADSGroupWorkspace(std::string const &workspaceName) {
+  return convertToGroupWorkspace(getADSWorkspace(workspaceName));
 }
 
 std::unordered_map<std::string, std::size_t> extractAxisLabels(Axis *axis) {
@@ -56,8 +67,7 @@ std::vector<std::string> extractParameterNames(Axis *axis) {
   return parameters;
 }
 
-std::vector<std::string>
-extractParameterNames(MatrixWorkspace_const_sptr workspace) {
+std::vector<std::string> extractParameterNames(MatrixWorkspace_sptr workspace) {
   auto const axis = workspace->getAxis(1);
   if (axis->isText())
     return extractParameterNames(axis);
@@ -68,7 +78,7 @@ std::vector<std::string> extractParameterNames(Workspace_sptr workspace) {
   return extractParameterNames(convertToMatrixWorkspace(workspace));
 }
 
-IAlgorithm_sptr saveNexusProcessedAlgorithm(Workspace_const_sptr workspace,
+IAlgorithm_sptr saveNexusProcessedAlgorithm(Workspace_sptr workspace,
                                             std::string const &filename) {
   auto saveAlg = AlgorithmManager::Instance().create("SaveNexusProcessed");
   saveAlg->setProperty("InputWorkspace", workspace);
@@ -76,7 +86,7 @@ IAlgorithm_sptr saveNexusProcessedAlgorithm(Workspace_const_sptr workspace,
   return saveAlg;
 }
 
-void saveWorkspace(WorkspaceGroup_const_sptr resultWorkspace) {
+void saveWorkspace(WorkspaceGroup_sptr resultWorkspace) {
   auto const filename = Mantid::Kernel::ConfigService::Instance().getString(
                             "defaultsave.directory") +
                         resultWorkspace->getName() + ".nxs";
@@ -95,9 +105,9 @@ bool containsPlottableWorkspace(WorkspaceGroup_const_sptr groupWorkspace) {
 }
 
 std::vector<std::string>
-validateReplaceAlgorithm(std::string const &inputWorkspaceName,
-                         std::string const &singleBinWorkspaceName,
-                         std::string const &outputName) {
+validateInputs(std::string const &inputWorkspaceName,
+               std::string const &singleBinWorkspaceName,
+               std::string const &outputName) {
   std::vector<std::string> errors;
 
   if (inputWorkspaceName.empty())
@@ -110,15 +120,61 @@ validateReplaceAlgorithm(std::string const &inputWorkspaceName,
   return errors;
 }
 
-void replaceBin(MatrixWorkspace_sptr inputWorkspace,
-                MatrixWorkspace_sptr singleBinWorkspace,
-                std::string const &outputName) {
+IAlgorithm_sptr replaceAlgorithm(MatrixWorkspace_sptr inputWorkspace,
+                                 MatrixWorkspace_sptr singleBinWorkspace,
+                                 std::string const &outputName) {
   auto replaceAlg =
       AlgorithmManager::Instance().create("ReplaceIndirectFitResultBin");
   replaceAlg->setProperty("InputWorkspace", inputWorkspace);
   replaceAlg->setProperty("SingleBinWorkspace", singleBinWorkspace);
   replaceAlg->setProperty("OutputWorkspace", outputName);
-  replaceAlg->execute();
+  return replaceAlg;
+}
+
+template <typename Predicate>
+void removeVectorElements(std::vector<std::string> &strings,
+                          Predicate const &filter) {
+  strings.erase(std::remove_if(strings.begin(), strings.end(), filter),
+                strings.end());
+}
+
+bool doesStringEndWith(std::string const &str, std::string const &delimiter) {
+  if (str.size() > delimiter.size())
+    return str.substr(str.size() - delimiter.size(), str.size()) == delimiter;
+  return false;
+}
+
+std::vector<std::string> filterByEndSuffix(std::vector<std::string> &strings,
+                                           std::string const &delimiter) {
+  removeVectorElements(strings, [&delimiter](std::string const &str) {
+    return !doesStringEndWith(str, delimiter);
+  });
+  return strings;
+}
+
+bool doesGroupContain(std::string const &groupName,
+                      MatrixWorkspace_sptr workspace) {
+  auto const adsWorkspace = getADSWorkspace(groupName);
+  if (adsWorkspace->isGroup()) {
+    auto const group =
+        boost::dynamic_pointer_cast<WorkspaceGroup>(adsWorkspace);
+    return group->contains(workspace);
+  }
+  return false;
+}
+
+std::string filterByContents(std::vector<std::string> &strings,
+                             MatrixWorkspace_sptr workspace) {
+  removeVectorElements(strings, [&workspace](std::string const &str) {
+    return !doesGroupContain(str, workspace);
+  });
+  return !strings.empty() ? strings[0] : "";
+}
+
+std::string findGroupWorkspaceContaining(MatrixWorkspace_sptr workspace) {
+  auto resultGroups = filterByEndSuffix(
+      AnalysisDataService::Instance().getObjectNames(), "_Results");
+  return !resultGroups.empty() ? filterByContents(resultGroups, workspace) : "";
 }
 
 } // namespace
@@ -275,15 +331,37 @@ bool IndirectFitOutputOptionsModel::isResultGroupSelected(
 
 void IndirectFitOutputOptionsModel::replaceResultBin(
     std::string const &inputName, std::string const &singleBinName,
-    std::string const &outputName) const {
-  auto const errors =
-      validateReplaceAlgorithm(inputName, singleBinName, outputName);
-
+    std::string const &outputName) {
+  auto const errors = validateInputs(inputName, singleBinName, outputName);
   if (errors.empty())
-    replaceBin(getADSMatrixWorkspace(inputName),
-               getADSMatrixWorkspace(singleBinName), outputName);
+    replaceResultBin(getADSMatrixWorkspace(inputName),
+                     getADSMatrixWorkspace(singleBinName), outputName);
   else
     throw std::runtime_error(errors[0]);
+}
+
+void IndirectFitOutputOptionsModel::replaceResultBin(
+    MatrixWorkspace_sptr inputWorkspace,
+    MatrixWorkspace_sptr singleBinWorkspace, std::string const &outputName) {
+  auto const replaceAlg =
+      replaceAlgorithm(inputWorkspace, singleBinWorkspace, outputName);
+  replaceAlg->execute();
+  setOutputAsResultWorkspace(replaceAlg);
+}
+
+void IndirectFitOutputOptionsModel::setOutputAsResultWorkspace(
+    IAlgorithm_sptr algorithm) {
+  auto const outputName = algorithm->getPropertyValue("OutputWorkspace");
+  auto const output = getADSMatrixWorkspace(outputName);
+  setResultWorkspace(findGroupWorkspaceContaining(output));
+}
+
+void IndirectFitOutputOptionsModel::setResultWorkspace(
+    std::string const &groupName) {
+  if (!groupName.empty())
+    setResultWorkspace(getADSGroupWorkspace(groupName));
+  else
+    throw std::runtime_error("The result group could not be found in the ADS.");
 }
 
 } // namespace IDA

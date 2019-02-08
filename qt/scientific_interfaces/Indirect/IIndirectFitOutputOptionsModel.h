@@ -51,7 +51,7 @@ public:
 
   virtual void replaceResultBin(std::string const &inputName,
                                 std::string const &singleBinName,
-                                std::string const &outputName) const = 0;
+                                std::string const &outputName) = 0;
 };
 
 } // namespace IDA

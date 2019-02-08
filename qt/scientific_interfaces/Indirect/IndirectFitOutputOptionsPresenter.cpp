@@ -168,8 +168,8 @@ void IndirectFitOutputOptionsPresenter::editResult() {
   m_editResultsDialog = getEditResultsDialog(m_view->parentWidget());
   m_editResultsDialog->setWorkspaceSelectorSuffices({"_Result"});
   m_editResultsDialog->show();
-  connect(m_editResultsDialog.get(), SIGNAL(replaceSingleSpectrum()), this,
-          SLOT(replaceSingleSpectrum()));
+  connect(m_editResultsDialog.get(), SIGNAL(replaceSingleBin()), this,
+          SLOT(replaceSingleBin()));
   connect(m_editResultsDialog.get(), SIGNAL(closeDialog()), this,
           SLOT(closeEditResultDialog()));
 }
@@ -179,11 +179,20 @@ IndirectFitOutputOptionsPresenter::getEditResultsDialog(QWidget *parent) const {
   return Mantid::Kernel::make_unique<IndirectEditResultsDialog>(parent);
 }
 
-void IndirectFitOutputOptionsPresenter::replaceSingleSpectrum() {
+void IndirectFitOutputOptionsPresenter::replaceSingleBin() {
   auto const inputName = m_editResultsDialog->getSelectedInputWorkspaceName();
   auto const singleBinName =
       m_editResultsDialog->getSelectedSingleFitWorkspaceName();
   auto const outputName = m_editResultsDialog->getOutputWorkspaceName();
+
+  setEditingResult(true);
+  replaceSingleBin(inputName, singleBinName, outputName);
+  setEditingResult(false);
+}
+
+void IndirectFitOutputOptionsPresenter::replaceSingleBin(
+    std::string const &inputName, std::string const &singleBinName,
+    std::string const &outputName) {
   try {
     m_model->replaceResultBin(inputName, singleBinName, outputName);
   } catch (std::exception const &ex) {
@@ -191,9 +200,18 @@ void IndirectFitOutputOptionsPresenter::replaceSingleSpectrum() {
   }
 }
 
+void IndirectFitOutputOptionsPresenter::setEditingResult(bool editing) {
+  m_editResultsDialog->setReplaceBinText(editing ? "Editing..."
+                                                 : "Replace Bin");
+  m_editResultsDialog->setReplaceBinEnabled(!editing);
+  setPlotEnabled(!editing);
+  setEditResultEnabled(!editing);
+  setSaveEnabled(!editing);
+}
+
 void IndirectFitOutputOptionsPresenter::closeEditResultDialog() {
-  disconnect(m_editResultsDialog.get(), SIGNAL(replaceSingleSpectrum()), this,
-             SLOT(replaceSingleSpectrum()));
+  disconnect(m_editResultsDialog.get(), SIGNAL(replaceSingleBin()), this,
+             SLOT(replaceSingleBin()));
   disconnect(m_editResultsDialog.get(), SIGNAL(closeDialog()), this,
              SLOT(closeEditResultDialog()));
   m_editResultsDialog->close();
