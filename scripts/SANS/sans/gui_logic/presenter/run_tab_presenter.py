@@ -478,6 +478,14 @@ class RunTabPresenter(object):
         if PYQT4:
             if self._view.plot_results and not graph(self.output_graph):
                 newGraph(self.output_graph)
+        else:
+            import matplotlib.pyplot as plt
+            fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
+            fig.canvas.set_window_title(self.output_graph)
+            ax.set_xscale('log')
+            ax.set_yscale('log')
+            fig.show()
+            self.output_fig = fig
 
     def _set_progress_bar_min_max(self, min, max):
         """
@@ -510,11 +518,13 @@ class RunTabPresenter(object):
             self._set_progress_bar_min_max(self.progress, len(states))
             save_can = self._view.save_can
 
+            # MantidPlot and Workbench have different approaches to plotting
+            output_graph = self.output_graph if PYQT4 else self.output_fig
             self.batch_process_runner.process_states(states,
                                                      self._view.use_optimizations,
                                                      self._view.output_mode,
                                                      self._view.plot_results,
-                                                     self.output_graph,
+                                                     output_graph,
                                                      save_can)
 
         except Exception as e:

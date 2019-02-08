@@ -203,12 +203,6 @@ public:
       const QString &optionalMsg = QString(),
       const QStringList &enabled = QStringList(),
       const QStringList &disabled = QStringList());
-  void showHelpPage(const QString &url = QString());
-  void showWikiPage(const QString &page);
-  void showAlgorithmHelp(const QString &name, const int version = -1);
-  void showConceptHelp(const QString &name);
-  void showFitFunctionHelp(const QString &name = QString());
-  void showCustomInterfaceHelp(const QString &name);
 };
 
 // ---------------------------------
@@ -327,7 +321,7 @@ class HintStrategy
 %End
 public:
   HintStrategy();
-  virtual std::vector<Hint> createHints();
+  virtual std::vector<Hint> createHints() = 0;
   virtual ~HintStrategy();
 };
 

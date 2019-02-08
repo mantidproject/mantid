@@ -26,6 +26,12 @@ except (Exception, Warning):
     # this should happen when this is called from outside Mantidplot and only then,
     # the result is that attempting to plot will raise an exception
 
+from qtpy import PYQT4
+if PYQT4:
+    from mantidplot import graph, plotSpectrum
+else:
+    from mantidqt.plotting.functions import plot
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Functions for the execution of a single batch iteration
@@ -117,8 +123,11 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
         reduction_package.out_scale_factor = reduction_alg.getProperty("OutScaleFactor").value
         reduction_package.out_shift_factor = reduction_alg.getProperty("OutShiftFactor").value
 
-        if plot_results and mantidplot:
-            plot_workspace(reduction_package, output_graph)
+        if plot_results:
+            if PYQT4:
+                plot_workspace(reduction_package, output_graph)
+            else:
+                plot_workspace_workbench(reduction_package, output_graph)
         # -----------------------------------
         # The workspaces are already on the ADS, but should potentially be grouped
         # -----------------------------------
@@ -172,21 +181,53 @@ def load_workspaces_from_states(state):
 # Function for plotting
 # ----------------------------------------------------------------------------------------------------------------------
 def plot_workspace(reduction_package, output_graph):
+    """
+    Plotting continuous output when on MantidPlot
+    This function should be deleted if and when MantidPlot is no longer a part of Mantid
+
+    :param reduction_package: An object containing the reduced workspaces
+    :param output_graph: Name to the plot window
+    :return: None
+    """
     if reduction_package.reduction_mode == ISISReductionMode.All:
-        graph_handle = mantidplot.plotSpectrum([reduction_package.reduced_hab, reduction_package.reduced_lab], 0,
-                                               window=mantidplot.graph(output_graph), clearWindow=True)
+        graph_handle = plotSpectrum([reduction_package.reduced_hab, reduction_package.reduced_lab], 0,
+                                               window=graph(output_graph), clearWindow=True)
         graph_handle.activeLayer().logLogAxes()
     elif reduction_package.reduction_mode == ISISReductionMode.HAB:
-        graph_handle = mantidplot.plotSpectrum(reduction_package.reduced_hab, 0, window=mantidplot.graph(output_graph), clearWindow=True)
+        graph_handle = plotSpectrum(reduction_package.reduced_hab, 0, window=graph(output_graph), clearWindow=True)
         graph_handle.activeLayer().logLogAxes()
     elif reduction_package.reduction_mode == ISISReductionMode.LAB:
-        graph_handle = mantidplot.plotSpectrum(reduction_package.reduced_lab, 0, window=mantidplot.graph(output_graph), clearWindow=True)
+        graph_handle = plotSpectrum(reduction_package.reduced_lab, 0, window=graph(output_graph), clearWindow=True)
         graph_handle.activeLayer().logLogAxes()
     elif reduction_package.reduction_mode == ISISReductionMode.Merged:
-        graph_handle = mantidplot.plotSpectrum([reduction_package.reduced_merged,
+        graph_handle = plotSpectrum([reduction_package.reduced_merged,
                                                 reduction_package.reduced_hab, reduction_package.reduced_lab], 0,
-                                               window=mantidplot.graph(output_graph), clearWindow=True)
+                                               window=graph(output_graph), clearWindow=True)
         graph_handle.activeLayer().logLogAxes()
+
+
+def plot_workspace_workbench(reduction_package, output_graph):
+    """
+    Continuous plotting when on Workbench.
+
+    :param reduction_package: An object containing the reduced workspaces
+    :param output_graph: A matplotlib fig
+    :return: None
+    """
+    plot_kwargs = {"scalex": True,
+                       "scaley": True}
+    if reduction_package.reduction_mode == ISISReductionMode.All:
+        plot([reduction_package.reduced_hab, reduction_package.reduced_lab],
+             wksp_indices=[0], overplot=True, fig=output_graph, plot_kwargs=plot_kwargs)
+    elif reduction_package.reduction_mode == ISISReductionMode.HAB:
+        plot([reduction_package.reduced_hab],
+             wksp_indices=[0], overplot=True, fig=output_graph, plot_kwargs=plot_kwargs)
+    elif reduction_package.reduction_mode == ISISReductionMode.LAB:
+        plot([reduction_package.reduced_lab],
+             wksp_indices=[0], overplot=True, fig=output_graph, plot_kwargs=plot_kwargs)
+    elif reduction_package.reduction_mode == ISISReductionMode.Merged:
+        plot([reduction_package.reduced_merged, reduction_package.reduced_hab, reduction_package.reduced_lab],
+             wksp_indices=[0], overplot=True, fig=output_graph, plot_kwargs=plot_kwargs)
 
 
 # ----------------------------------------------------------------------------------------------------------------------

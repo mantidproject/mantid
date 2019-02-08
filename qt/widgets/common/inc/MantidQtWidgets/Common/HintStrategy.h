@@ -29,7 +29,7 @@ public:
 
       @returns A map of keywords to short descriptions for the keyword.
    */
-  virtual std::vector<Hint> createHints() { return std::vector<Hint>(); };
+  virtual std::vector<Hint> createHints() = 0;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt
