@@ -50,6 +50,7 @@ class FigureWindow(QMainWindow, ObservingView):
     def closeEvent(self, event):
         self.closing.emit()
         QMainWindow.closeEvent(self, event)
+        self.deleteLater()
 
     def hideEvent(self, event):
         self.visibility_changed.emit()

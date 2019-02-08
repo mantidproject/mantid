@@ -31,18 +31,19 @@ class FigureManagerWorkbenchTest(GuiTest, QtWidgetFinder):
         fig_mgr = FigureManagerWorkbench(canvas, 1)
         self.assertTrue(fig_mgr is not None)
 
-    @patch("workbench.plotting.qappthreadcall.QAppThreadCall")
-    def test_closing_deletion(self, mock_qappthread):
+    def test_correctly_deleted_on_close(self):
         fig = MagicMock()
         canvas = FigureCanvasQTAgg(fig)
         fig_mgr = FigureManagerWorkbench(canvas, 1)
         self.assertTrue(fig_mgr is not None)
         self.assert_window_created()
-        canvas.close()
+
         fig_mgr.destroy()
 
         QApplication.processEvents()
+
         self.find_qt_widget("fig")
+        self.assert_no_widgets()
 
 
 if __name__ == "__main__":
