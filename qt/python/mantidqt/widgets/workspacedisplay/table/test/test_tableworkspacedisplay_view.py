@@ -26,6 +26,7 @@ class TableWorkspaceDisplayViewTest(GuiTest, QtWidgetFinder):
 
         self.assertEqual(None, p.ads_observer)
         self.find_qt_widget("work")
+        self.assert_no_widgets()
 
     def test_window_force_deleted_correctly(self):
         ws = CreateEmptyTableWorkspace()
@@ -38,3 +39,4 @@ class TableWorkspaceDisplayViewTest(GuiTest, QtWidgetFinder):
 
         self.assertEqual(None, p.ads_observer)
         self.find_qt_widget("work")
+        self.assert_no_widgets()

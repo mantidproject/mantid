@@ -18,7 +18,12 @@ class QtWidgetFinder(object):
         all = [x for x in a if name.lower() in str(type(x)).lower()]
 
         self.assertEqual(0, len(all),
-                         "Alive widgets were detected in the QApplication. Something has not been deleted: {}".format(all))
+                         "Widgets with name '{}' are present in the QApplication. Something has not been deleted: {}".format(
+                             name, all))
 
     def assert_window_created(self):
         self.assertGreater(QApplication.topLevelWidgets(), 0)
+
+    def assert_no_widgets(self):
+        a = QApplication.topLevelWidgets()
+        self.assertEqual(len(a), 0, "Widgets are present in the QApplication: {}".format(a))
