@@ -9,12 +9,8 @@
 #
 from __future__ import (absolute_import, unicode_literals)
 
-# system imports
 import unittest
 
-# third-party library imports
-
-# local imports
 from mantidqt.utils.qt.test import GuiTest
 from mantidqt.widgets.codeeditor.multifileinterpreter import MultiPythonFileInterpreter
 
@@ -30,6 +26,9 @@ class MultiPythonFileInterpreterTest(GuiTest):
         self.assertEqual(1, widget.editor_count)
         widget.append_new_editor()
         self.assertEqual(2, widget.editor_count)
+
+    def test_editor_widget_not_leaked(self):
+        self.fail("Todo after #24700 has been merged, to reuse the helper functions.")
 
 
 if __name__ == '__main__':
