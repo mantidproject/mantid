@@ -38,7 +38,18 @@ class ConvToMDEventsWSIndexing : public ConvToMDEventsWS {
                                const API::BoxController_sptr &bc) override;
 
 public:
-  static bool isSplitValid(const std::vector<int> &split_into);
+  template<typename T>
+  static bool isSplitValid(const std::vector<T> &split_into) {
+    bool validSplitInfo = !split_into.empty();
+    if (validSplitInfo) {
+      const int &n = split_into[0];
+      validSplitInfo &= (n > 1 && ((n & (n - 1)) == 0));
+      if (validSplitInfo)
+        validSplitInfo &= all_of(split_into.begin(), split_into.end(),
+                                 [&n](int i) { return i == n; });
+    }
+    return validSplitInfo;
+  }
 
 private:
   // Returns number of workers for parallel parts

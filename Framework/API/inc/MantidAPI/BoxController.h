@@ -126,6 +126,15 @@ public:
   }
 
   //-----------------------------------------------------------------------------------
+  /** Return into how many to split along a every dimension
+   *
+   * @return the dimension will be split into this many even boxes,
+   * for every dimension.
+   */
+  const std::vector<size_t>& getSplitInto() const {
+    return m_splitInto;
+  }
+  //-----------------------------------------------------------------------------------
   /** Return into how many to split along a dimension for the top level
    *
    * @return the splits in each dimesion for the top level
