@@ -157,7 +157,7 @@ class LoadRunWidgetPresenter(object):
         """
         Updates list of runs by adding a run equal to 1 after to the highest run.
         """
-        run_list = load_utils.flatten_run_list(copy.copy(self.runs))
+        run_list = load_utils.flatten_run_list(copy.copy(self._model._context.current_runs))
         if run_list is None or len(run_list) == 0:
             return []
         if len(run_list) == 1:
@@ -170,7 +170,7 @@ class LoadRunWidgetPresenter(object):
         """
         Updates list of runs by adding a run equal to 1 before to the lowest run.
         """
-        run_list = load_utils.flatten_run_list(copy.copy(self.runs))
+        run_list = load_utils.flatten_run_list(copy.copy(self._model._context.current_runs))
         if run_list is None or len(run_list) == 0:
             return []
         if len(run_list) == 1:
