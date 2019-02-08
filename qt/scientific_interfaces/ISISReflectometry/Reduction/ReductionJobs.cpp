@@ -198,5 +198,14 @@ MantidWidgets::Batch::RowPath ReductionJobs::getPath(Row const &row) const {
   throw std::runtime_error(
       "Internal error: could not find table location for row");
 }
+
+Group const &ReductionJobs::getParentGroup(Row const &row) const {
+  auto const path = getPath(row);
+  if (path.size() < 1)
+    throw std::runtime_error(
+        "Internal error: could not find parent group for row");
+  auto const groupIndex = path[0];
+  return m_groups[groupIndex];
+}
 } // namespace CustomInterfaces
 } // namespace MantidQt

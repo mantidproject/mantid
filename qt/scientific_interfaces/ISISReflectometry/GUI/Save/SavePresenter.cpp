@@ -115,32 +115,6 @@ void SavePresenter::onSavePathChanged() {
 
 bool SavePresenter::shouldAutosave() const { return m_shouldAutosave; }
 
-void SavePresenter::reductionCompletedForGroup(
-    MantidWidgets::DataProcessor::GroupData const &group,
-    std::string const &workspaceName) {
-  UNUSED_ARG(group);
-  if (shouldAutosave()) {
-    try {
-      saveWorkspaces(std::vector<std::string>({workspaceName}));
-    } catch (InvalidWorkspaceName &) {
-      // ignore workspaces that don't exist
-    }
-  }
-}
-
-void SavePresenter::reductionCompletedForRow(
-    MantidWidgets::DataProcessor::GroupData const &group,
-    std::string const &workspaceName) {
-  if (!MantidWidgets::DataProcessor::canPostprocess(group) &&
-      shouldAutosave()) {
-    try {
-      saveWorkspaces(std::vector<std::string>({workspaceName}));
-    } catch (InvalidWorkspaceName &) {
-      // ignore workspaces that don't exist
-    }
-  }
-}
-
 /** Fills the 'List of Workspaces' widget with the names of all available
  * workspaces
  */

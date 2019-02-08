@@ -54,12 +54,6 @@ public:
   // IBatchPresenter overrides
   void notifyReductionPaused() override;
   void notifyReductionResumed() override;
-  void notifyReductionCompletedForGroup(
-      MantidWidgets::DataProcessor::GroupData const &group,
-      std::string const &workspaceName) override;
-  void notifyReductionCompletedForRow(
-      MantidWidgets::DataProcessor::GroupData const &group,
-      std::string const &workspaceName) override;
   void notifyAutoreductionResumed() override;
   void notifyAutoreductionPaused() override;
   void notifyAutoreductionCompleted() override;
@@ -77,12 +71,6 @@ private:
   void reductionResumed();
   void pauseReduction();
   void reductionPaused();
-  void reductionCompletedForGroup(
-      MantidWidgets::DataProcessor::GroupData const &group,
-      std::string const &workspaceName);
-  void
-  reductionCompletedForRow(MantidWidgets::DataProcessor::GroupData const &group,
-                           std::string const &workspaceName);
   void resumeAutoreduction();
   void autoreductionResumed();
   void pauseAutoreduction();

@@ -23,7 +23,9 @@ public:
 
   std::string const &name() const;
   void setName(std::string const &name);
+  bool requiresPostprocessing() const;
   std::string postprocessedWorkspaceName() const;
+  void setOutputNames(std::string const &postprocessedWorkspaceName);
 
   void appendEmptyRow();
   void appendRow(boost::optional<Row> const &row);
@@ -41,6 +43,7 @@ public:
 
 private:
   std::string m_name;
+  std::string m_postprocessedWorkspaceName;
   std::vector<boost::optional<Row>> m_rows;
 };
 

@@ -77,16 +77,6 @@ void BatchPresenter::notifyReductionResumed() { resumeReduction(); }
 
 void BatchPresenter::notifyReductionPaused() { pauseReduction(); }
 
-void BatchPresenter::notifyReductionCompletedForGroup(
-    GroupData const &group, std::string const &workspaceName) {
-  reductionCompletedForGroup(group, workspaceName);
-}
-
-void BatchPresenter::notifyReductionCompletedForRow(
-    GroupData const &group, std::string const &workspaceName) {
-  reductionCompletedForRow(group, workspaceName);
-}
-
 void BatchPresenter::notifyAutoreductionResumed() { resumeAutoreduction(); }
 
 void BatchPresenter::notifyAutoreductionPaused() { pauseAutoreduction(); }
@@ -114,6 +104,13 @@ void BatchPresenter::notifyAlgorithmFinished(
     notifyee->notifyAlgorithmComplete(algorithm);
   m_jobRunner.algorithmFinished(algorithm);
   m_runsPresenter->notifyRowStateChanged();
+  /// TODO Longer term it would probably be better if algorithms took care
+  /// of saving their outputs so we could remove this callback
+  if (m_savePresenter->shouldAutosave()) {
+    auto const workspaces =
+        m_jobRunner.algorithmOutputWorkspacesToSave(algorithm, notifyee);
+    m_savePresenter->saveWorkspaces(workspaces);
+  }
 }
 
 void BatchPresenter::notifyAlgorithmError(
@@ -153,16 +150,6 @@ void BatchPresenter::reductionPaused() {
   m_experimentPresenter->reductionPaused();
   m_instrumentPresenter->reductionPaused();
   m_runsPresenter->reductionPaused();
-}
-
-void BatchPresenter::reductionCompletedForGroup(
-    GroupData const &group, std::string const &workspaceName) {
-  m_savePresenter->reductionCompletedForGroup(group, workspaceName);
-}
-
-void BatchPresenter::reductionCompletedForRow(
-    GroupData const &group, std::string const &workspaceName) {
-  m_savePresenter->reductionCompletedForRow(group, workspaceName);
 }
 
 void BatchPresenter::resumeAutoreduction() {

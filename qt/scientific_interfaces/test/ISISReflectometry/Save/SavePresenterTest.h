@@ -233,58 +233,6 @@ public:
     verifyAndClear();
   }
 
-  void testCompletedGroupReductionSuccessfullySavesWorkspace() {
-    auto presenter = makePresenter();
-    auto group = makeGroupWithTwoRows();
-    enableAutosave(presenter);
-    expectSaveWorkspaces(std::vector<std::string>{"test2"});
-    presenter.reductionCompletedForGroup(group, "test2");
-    verifyAndClear();
-  }
-
-  void testCompletedGroupReductionSuccessfullyWithAutosaveOff() {
-    auto presenter = makePresenter();
-    auto group = makeGroupWithTwoRows();
-    disableAutosave(presenter);
-    EXPECT_CALL(m_view, getSelectedParameters()).Times(0);
-    EXPECT_CALL(m_view, getSavePath()).Times(0);
-    presenter.reductionCompletedForGroup(group, "test2");
-    verifyAndClear();
-  }
-
-  void testCompletedRowReductionSuccessfullyWithSingleRowGroup() {
-    auto presenter = makePresenter();
-    // Workspace will be saved if autosave is on and the group contains only 1
-    // row
-    auto group = makeGroupWithOneRow();
-    enableAutosave(presenter);
-    expectSaveWorkspaces(std::vector<std::string>{"test2"});
-    presenter.reductionCompletedForRow(group, "test2");
-    verifyAndClear();
-  }
-
-  void testCompletedRowReductionSuccessfullyWithMultiRowGroup() {
-    auto presenter = makePresenter();
-    // Workspace will not be saved if the group contains only 1 row, even if
-    // autosave is on
-    auto group = makeGroupWithTwoRows();
-    enableAutosave(presenter);
-    EXPECT_CALL(m_view, getSelectedParameters()).Times(0);
-    EXPECT_CALL(m_view, getSavePath()).Times(0);
-    presenter.reductionCompletedForRow(group, "test2");
-    verifyAndClear();
-  }
-
-  void testCompletedRowReductionSuccessfullyWithAutosaveOff() {
-    auto presenter = makePresenter();
-    auto group = makeGroupWithTwoRows();
-    disableAutosave(presenter);
-    EXPECT_CALL(m_view, getSelectedParameters()).Times(0);
-    EXPECT_CALL(m_view, getSavePath()).Times(0);
-    presenter.reductionCompletedForRow(group, "test2");
-    verifyAndClear();
-  }
-
   void testControlsEnabledWhenReductionPaused() {
     auto presenter = makePresenter();
     auto workspaceNames = createWorkspaces();

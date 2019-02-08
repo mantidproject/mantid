@@ -15,7 +15,8 @@ namespace CustomInterfaces {
 
 Group::Group( // cppcheck-suppress passedByValue
     std::string name, std::vector<boost::optional<Row>> rows)
-    : m_name(std::move(name)), m_rows(std::move(rows)) {}
+    : m_name(std::move(name)), m_postprocessedWorkspaceName(),
+      m_rows(std::move(rows)) {}
 
 Group::Group(
     // cppcheck-suppress passedByValue
@@ -23,6 +24,12 @@ Group::Group(
     : m_name(std::move(name)), m_rows() {}
 
 std::string const &Group::name() const { return m_name; }
+
+bool Group::requiresPostprocessing() const { return m_rows.size() > 1; }
+
+std::string Group::postprocessedWorkspaceName() const {
+  return m_postprocessedWorkspaceName;
+}
 
 boost::optional<int> Group::indexOfRowWithTheta(double theta,
                                                 double tolerance) const {

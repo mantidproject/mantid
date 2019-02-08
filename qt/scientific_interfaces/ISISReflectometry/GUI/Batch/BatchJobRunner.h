@@ -31,6 +31,9 @@ public:
   void algorithmFinished(Mantid::API::IAlgorithm_sptr algorithm);
   void algorithmError(std::string const &message,
                       Mantid::API::IAlgorithm_sptr algorithm);
+  std::vector<std::string> algorithmOutputWorkspacesToSave(
+      Mantid::API::IAlgorithm_sptr algorithm,
+      const API::BatchAlgorithmRunnerSubscriber *const item) const;
 
 private:
   Batch m_batch;
@@ -41,6 +44,8 @@ private:
   API::BatchAlgorithmRunner &m_batchAlgoRunner;
 
   void setUpBatchAlgorithmRunner();
+  std::vector<std::string> getWorkspacesToSave(Group const &group) const;
+  std::vector<std::string> getWorkspacesToSave(Row const &row) const;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

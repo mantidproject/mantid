@@ -14,6 +14,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 using API::BatchAlgorithmRunner;
+using API::BatchAlgorithmRunnerSubscriber;
 using Mantid::API::IAlgorithm_sptr;
 using AlgorithmRuntimeProps = std::map<std::string, std::string>;
 
@@ -370,5 +371,42 @@ void BatchJobRunner::algorithmError(std::string const &message,
   UNUSED_ARG(algorithm);
 }
 
+std::vector<std::string> BatchJobRunner::algorithmOutputWorkspacesToSave(
+    IAlgorithm_sptr algorithm,
+    const BatchAlgorithmRunnerSubscriber *const item) const {
+
+  if (algorithm->name() == "ReflectometryISISLoadAndProcess") {
+    auto const *row = dynamic_cast<Row const *>(item);
+    if (!row)
+      throw std::runtime_error("Internal error: invalid row type");
+    return getWorkspacesToSave(*row);
+  } else if (algorithm->name() == "Stitch1DMany") {
+    auto const *group = dynamic_cast<Group const *>(item);
+    if (!group)
+      throw std::runtime_error("Internal error: invalid group type");
+    return getWorkspacesToSave(*group);
+  }
+  return std::vector<std::string>();
+}
+
+std::vector<std::string>
+BatchJobRunner::getWorkspacesToSave(Group const &group) const {
+  return std::vector<std::string>{group.postprocessedWorkspaceName()};
+}
+
+std::vector<std::string>
+BatchJobRunner::getWorkspacesToSave(Row const &row) const {
+  // Get the output workspaces for the given row. Note that we only save
+  // workspaces for the row if the group does not have postprocessing, because
+  // in that case users just want to see the postprocessed output instead.
+  auto workspaces = std::vector<std::string>();
+  auto const group = m_batch.runsTable().reductionJobs().getParentGroup(row);
+  if (group.requiresPostprocessing())
+    return workspaces;
+
+  // We currently only save the binned workspace in Q
+  workspaces.push_back(row.reducedWorkspaceNames().iVsQBinned());
+  return workspaces;
+}
 } // namespace CustomInterfaces
 } // namespace MantidQt
