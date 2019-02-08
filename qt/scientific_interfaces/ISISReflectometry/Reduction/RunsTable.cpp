@@ -41,8 +41,8 @@ void RunsTable::setSelectedRowLocations(std::vector<RowLocation> selected) {
 
 void RunsTable::resetState() { m_reductionJobs.resetState(); }
 
-boost::optional<Row&> RunsTable::getItemWithOutputWorkspaceOrNone(
-    std::string const &wsName) {
+boost::optional<Item &>
+RunsTable::getItemWithOutputWorkspaceOrNone(std::string const &wsName) {
   return m_reductionJobs.getItemWithOutputWorkspaceOrNone(wsName);
 }
 } // namespace CustomInterfaces

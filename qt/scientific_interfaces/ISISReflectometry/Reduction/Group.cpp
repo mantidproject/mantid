@@ -43,6 +43,7 @@ boost::optional<int> Group::indexOfRowWithTheta(double theta,
 void Group::setName(std::string const &name) { m_name = name; }
 
 void Group::resetState() {
+  Item::resetState();
   for (auto &row : m_rows)
     row->resetState();
 }
@@ -78,14 +79,22 @@ boost::optional<Row> const &Group::operator[](int rowIndex) const {
   return m_rows[rowIndex];
 }
 
-boost::optional<Row&> Group::getItemWithOutputWorkspaceOrNone(
-    std::string const &wsName) {
+boost::optional<Item &>
+Group::getItemWithOutputWorkspaceOrNone(std::string const &wsName) {
   // Check if any of the child rows have this workspace output
   for (auto &row : m_rows) {
-    if (row && row->hasOutputWorkspace(wsName))
-      return boost::optional<Row&>(row.get());
+    if (row && row->hasOutputWorkspace(wsName)) {
+      Item &item = *row;
+      return boost::optional<Item &>(item);
+    }
   }
   return boost::none;
+}
+
+void Group::renameOutputWorkspace(std::string const &oldName,
+                                  std::string const &newName) {
+  UNUSED_ARG(oldName);
+  m_postprocessedWorkspaceName = newName;
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt

@@ -213,17 +213,16 @@ Group const &ReductionJobs::getParentGroup(Row const &row) const {
   return m_groups[groupIndex];
 }
 
-boost::optional<Row&> ReductionJobs::getItemWithOutputWorkspaceOrNone(
-    std::string const &wsName) {
+boost::optional<Item &>
+ReductionJobs::getItemWithOutputWorkspaceOrNone(std::string const &wsName) {
   for (auto &group : m_groups) {
-    // First check if this group has the workspace as its output
-    // TODO
-    //if (group.postprocessedWorkspaceName() == wsName)
-    //  return group;
+    // Return this group if it has the output we're looking for
+    if (group.postprocessedWorkspaceName() == wsName)
+      return group;
     // If it has a child row with this workspace output, return it
     auto maybeRow = group.getItemWithOutputWorkspaceOrNone(wsName);
     if (maybeRow)
-      return maybeRow;
+      return boost::optional<Item &>(maybeRow.get());
   }
   return boost::none;
 }

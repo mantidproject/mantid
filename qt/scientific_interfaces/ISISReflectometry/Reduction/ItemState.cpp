@@ -13,17 +13,6 @@ ItemState::ItemState()
     : m_state(State::ITEM_NOT_STARTED), m_message(boost::none),
       m_progress(0.0) {}
 
-ItemState::ItemState(ItemState const &rhs)
-    : m_state(rhs.state()), m_message(rhs.message()),
-      m_progress(rhs.progress()) {}
-
-ItemState &ItemState::operator=(ItemState const &rhs) {
-  m_state = rhs.state();
-  m_message = rhs.message();
-  m_progress = rhs.progress();
-  return *this;
-}
-
 State ItemState::state() const { return m_state; }
 
 std::string ItemState::message() const {

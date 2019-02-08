@@ -8,8 +8,7 @@
 #ifndef MANTID_CUSTOMINTERFACES_RUN_H_
 #define MANTID_CUSTOMINTERFACES_RUN_H_
 #include "Common/DllConfig.h"
-#include "ItemState.h"
-#include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
+#include "Item.h"
 #include "RangeInQ.h"
 #include "ReductionOptionsMap.h"
 #include "ReductionWorkspaces.h"
@@ -23,8 +22,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 // Immutability here makes update notification easier.
-class MANTIDQT_ISISREFLECTOMETRY_DLL Row
-    : public API::BatchAlgorithmRunnerSubscriber {
+class MANTIDQT_ISISREFLECTOMETRY_DLL Row : public Item {
 public:
   Row(std::vector<std::string> number, double theta,
       TransmissionRunPair tranmissionRuns, RangeInQ qRange,
@@ -51,13 +49,10 @@ public:
   void notifyAlgorithmError(Mantid::API::IAlgorithm_sptr const algorithm,
                             std::string const &msg) override;
 
-  State state() const;
-  std::string message() const;
-  void resetState();
-
-  bool requiresProcessing(bool reprocessFailed) const;
   bool hasOutputWorkspace(std::string const &wsName) const;
-  void renameOutputWorkspace(std::string const &oldName, std::string const &newName);
+  void renameOutputWorkspace(std::string const &oldName,
+                             std::string const &newName) override;
+
 private:
   std::vector<std::string> m_runNumbers;
   double m_theta;
@@ -66,13 +61,6 @@ private:
   TransmissionRunPair m_transmissionRuns;
   ReductionWorkspaces m_reducedWorkspaceNames;
   ReductionOptionsMap m_reductionOptions;
-  ItemState m_itemState;
-
-  void setProgress(double p, std::string const &msg);
-  void setStarting();
-  void setRunning();
-  void setSuccess();
-  void setError(std::string const &msg);
 };
 
 MANTIDQT_ISISREFLECTOMETRY_DLL Row mergedRow(Row const &rowA, Row const &rowB);

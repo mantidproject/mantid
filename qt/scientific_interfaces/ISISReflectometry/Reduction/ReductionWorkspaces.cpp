@@ -62,8 +62,6 @@ void ReductionWorkspaces::renameOutput(std::string const &oldName,
     m_iVsQ = newName;
   else if (m_iVsQBinned == oldName)
     m_iVsQBinned = newName;
-  else
-    throw std::runtime_error("Internal error: attempted to rename workspace in invalid row");
 }
 
 bool operator==(ReductionWorkspaces const &lhs,

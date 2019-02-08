@@ -238,7 +238,7 @@ void BatchPresenter::postDeleteHandle(const std::string &wsName) {
 }
 
 void BatchPresenter::renameHandle(const std::string &oldName,
-                  const std::string &newName) {
+                                  const std::string &newName) {
   m_jobRunner.notifyWorkspaceRenamed(oldName, newName);
   m_runsPresenter->notifyRowStateChanged();
 }

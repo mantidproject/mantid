@@ -33,7 +33,8 @@ public:
       std::vector<MantidWidgets::Batch::RowLocation> selected);
   template <typename T> bool isSelected(T const &item);
   void resetState();
-  boost::optional<Row&> getItemWithOutputWorkspaceOrNone(std::string const &wsName);
+  boost::optional<Item &>
+  getItemWithOutputWorkspaceOrNone(std::string const &wsName);
 
 private:
   std::vector<std::string> m_instruments;

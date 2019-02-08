@@ -19,20 +19,20 @@ Row::Row( // cppcheck-suppress passedByValue
     boost::optional<double> scaleFactor, ReductionOptionsMap reductionOptions,
     // cppcheck-suppress passedByValue
     ReductionWorkspaces reducedWorkspaceNames)
-    : m_runNumbers(std::move(runNumbers)), m_theta(std::move(theta)),
+    : Item(), m_runNumbers(std::move(runNumbers)), m_theta(std::move(theta)),
       m_qRange(std::move(qRange)), m_scaleFactor(std::move(scaleFactor)),
       m_transmissionRuns(std::move(transmissionRuns)),
       m_reducedWorkspaceNames(std::move(reducedWorkspaceNames)),
-      m_reductionOptions(std::move(reductionOptions)), m_itemState() {
+      m_reductionOptions(std::move(reductionOptions)) {
   std::sort(m_runNumbers.begin(), m_runNumbers.end());
 }
 
 Row::Row(Row const &rhs)
-    : m_runNumbers(rhs.runNumbers()), m_theta(rhs.theta()),
+    : Item(rhs), m_runNumbers(rhs.runNumbers()), m_theta(rhs.theta()),
       m_qRange(rhs.qRange()), m_scaleFactor(rhs.scaleFactor()),
       m_transmissionRuns(rhs.transmissionWorkspaceNames()),
       m_reducedWorkspaceNames(rhs.reducedWorkspaceNames()),
-      m_reductionOptions(rhs.reductionOptions()), m_itemState() {}
+      m_reductionOptions(rhs.reductionOptions()) {}
 
 Row &Row::operator=(Row const &rhs) {
   m_runNumbers = rhs.runNumbers();
@@ -103,46 +103,12 @@ void Row::notifyAlgorithmError(Mantid::API::IAlgorithm_sptr const algorithm,
   setError(msg);
 }
 
-State Row::state() const { return m_itemState.state(); }
-
-std::string Row::message() const { return m_itemState.message(); }
-
-void Row::resetState() { m_itemState.reset(); }
-
-void Row::setProgress(double p, std::string const &msg) {
-  m_itemState.setProgress(p, msg);
-}
-
-void Row::setStarting() { m_itemState.setStarting(); }
-
-void Row::setRunning() { m_itemState.setRunning(); }
-
-void Row::setSuccess() { m_itemState.setSuccess(); }
-
-void Row::setError(std::string const &msg) { m_itemState.setError(msg); }
-
-bool Row::requiresProcessing(bool reprocessFailed) const {
-  switch (state()) {
-  case State::ITEM_NOT_STARTED:
-    return true;
-  case State::ITEM_STARTING:
-  case State::ITEM_RUNNING:  // fall through
-  case State::ITEM_COMPLETE: // fall through
-  case State::ITEM_WARNING:  // fall through
-    return false;
-  case State::ITEM_ERROR:
-    return reprocessFailed;
-    // Don't include default so that the compiler warns if a value is not
-    // handled
-  }
-  return false;
-}
-
 bool Row::hasOutputWorkspace(std::string const &wsName) const {
   return m_reducedWorkspaceNames.hasOutputName(wsName);
 }
 
-void Row::renameOutputWorkspace(std::string const &oldName, std::string const &newName) {
+void Row::renameOutputWorkspace(std::string const &oldName,
+                                std::string const &newName) {
   m_reducedWorkspaceNames.renameOutput(oldName, newName);
 }
 } // namespace CustomInterfaces
