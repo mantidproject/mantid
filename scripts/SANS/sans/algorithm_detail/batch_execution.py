@@ -19,12 +19,6 @@ from sans.common.constants import (TRANS_SUFFIX, SANS_SUFFIX, ALL_PERIODS,
                                    CAN_AND_SAMPLE_WORKSPACE)
 from sans.common.file_information import (get_extension_for_file_type, SANSFileInformationFactory)
 from sans.state.data import StateData
-try:
-    import mantidplot
-except (Exception, Warning):
-    mantidplot = None
-    # this should happen when this is called from outside Mantidplot and only then,
-    # the result is that attempting to plot will raise an exception
 
 from qtpy import PYQT4
 if PYQT4:
