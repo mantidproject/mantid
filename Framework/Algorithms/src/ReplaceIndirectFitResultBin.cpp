@@ -46,15 +46,25 @@ std::vector<double> getValuesInYBin(MatrixWorkspace_const_sptr workspace,
   return binValues;
 }
 
+std::size_t getBinIndexOfValue(NumericAxis const *axis, double value) {
+  auto const axisValues = axis->getValues();
+  auto const iter = std::find(axisValues.begin(), axisValues.end(), value);
+  if (iter != axisValues.end())
+    return axisValues.end() - iter - 1;
+  else
+    throw std::runtime_error(
+        "The corresponding bin in the input workspace could not be found.");
+}
+
 std::size_t getBinIndexOfValue(MatrixWorkspace_const_sptr workspace,
                                double value) {
-  auto const xValues = workspace->x(0);
-  for (auto i = 0u; i < xValues.size(); ++i)
-    if (xValues[i] == value)
-      return i;
-
-  throw std::runtime_error(
-      "The corresponding bin in the input workspace could not be found.");
+  auto const axis = workspace->getAxis(0);
+  if (axis->isNumeric()) {
+    auto const *numericAxis = dynamic_cast<NumericAxis *>(axis);
+    return getBinIndexOfValue(numericAxis, value);
+  } else
+    throw std::runtime_error(
+        "The input workspace does not have a numeric x axis.");
 }
 
 std::size_t getBinIndex(MatrixWorkspace_const_sptr singleBinWorkspace,
@@ -280,6 +290,12 @@ ReplaceIndirectFitResultBin::validateInputs() {
 
   if (outputWorkspaceName.empty())
     errors["OutputWorkspace"] = "No OutputWorkspace name was provided.";
+
+  try {
+    (void)getBinIndex(singleBinWorkspace, inputWorkspace);
+  } catch (std::exception const &ex) {
+    errors["InputWorkspace"] = ex.what();
+  }
 
   return errors;
 }

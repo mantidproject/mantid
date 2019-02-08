@@ -947,6 +947,7 @@ set ( TEST_FILES
 	RemoveWorkspaceHistoryTest.h
 	RenameWorkspaceTest.h
 	RenameWorkspacesTest.h
+	ReplaceIndirectFitResultBinTest.h
 	ReplaceSpecialValuesTest.h
 	ResampleXTest.h
 	ResetNegativesTest.h
