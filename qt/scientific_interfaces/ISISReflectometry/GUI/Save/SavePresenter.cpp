@@ -51,12 +51,10 @@ void SavePresenter::notifySuggestSaveDir() { suggestSaveDir(); }
 
 void SavePresenter::notifyAutosaveDisabled() {
   disableAutosave();
-  m_mainPresenter->notifySettingsChanged();
 }
 
 void SavePresenter::notifyAutosaveEnabled() {
   enableAutosave();
-  m_mainPresenter->notifySettingsChanged();
 }
 
 void SavePresenter::notifySavePathChanged() { onSavePathChanged(); }

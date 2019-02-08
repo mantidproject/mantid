@@ -318,14 +318,12 @@ public:
 
   void testAutosaveDisabledNotifiesMainPresenter() {
     auto presenter = makePresenter();
-    EXPECT_CALL(m_mainPresenter, notifySettingsChanged()).Times(AtLeast(1));
     presenter.notifyAutosaveDisabled();
     verifyAndClear();
   }
 
   void testAutosaveEnabledNotifiesMainPresenter() {
     auto presenter = makePresenter();
-    EXPECT_CALL(m_mainPresenter, notifySettingsChanged()).Times(AtLeast(1));
     presenter.notifyAutosaveEnabled();
     verifyAndClear();
   }
