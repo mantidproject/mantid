@@ -77,7 +77,7 @@ namespace MantidWidgets {
  * @param parent A pointer to its parent widget
  */
 MiniPlotMpl::MiniPlotMpl(QWidget *parent)
-    : QWidget(parent), m_canvas(new FigureCanvasQt(111, parent)),
+    : QWidget(parent), m_canvas(new FigureCanvasQt(111)),
       m_homeBtn(createHomeButton()), m_lines(), m_peakLabels(),
       m_colorCycler(cycler("color", STORED_LINE_COLOR_CYCLE)), m_xunit(),
       m_activeCurveLabel(), m_storedCurveLabels(), m_zoomer(m_canvas),
