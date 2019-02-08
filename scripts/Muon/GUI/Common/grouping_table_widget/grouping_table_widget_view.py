@@ -45,17 +45,27 @@ class GroupingTableView(QtGui.QWidget):
         self.remove_group_button = QtGui.QToolButton()
 
         self.group_range_label = QtGui.QLabel()
-        self.group_range_label.setText('Group Asymmetry Range')
+        self.group_range_label.setText('Group Asymmetry Range from:')
         self.group_range_min = QtGui.QLineEdit()
+        self.group_range_use_first_good_data = QtGui.QCheckBox()
+        self.group_range_use_first_good_data.setText('from first good data')
         self.group_range_max = QtGui.QLineEdit()
+        self.group_range_use_last_data = QtGui.QCheckBox()
+        self.group_range_use_last_data.setText('from file')
         self.group_range_to_label = QtGui.QLabel()
-        self.group_range_to_label.setText(' to ')
+        self.group_range_to_label.setText('to:')
 
-        self.group_range_layout = QtGui.QHBoxLayout()
-        self.group_range_layout.addWidget(self.group_range_label)
-        self.group_range_layout.addWidget(self.group_range_min)
-        self.group_range_layout.addWidget(self.group_range_to_label)
-        self.group_range_layout.addWidget(self.group_range_max)
+        self.group_range_layout = QtGui.QGridLayout()
+        self.group_range_layout_min = QtGui.QHBoxLayout()
+        self.group_range_layout.addWidget(self.group_range_label, 0, 0)
+        self.group_range_layout.addWidget(self.group_range_min, 0, 1)
+        self.group_range_layout.addWidget(self.group_range_use_first_good_data, 0, 2)
+
+
+        self.group_range_layout_max = QtGui.QHBoxLayout()
+        self.group_range_layout.addWidget(self.group_range_to_label, 1, 0, QtCore.Qt.AlignRight)
+        self.group_range_layout.addWidget(self.group_range_max, 1, 1)
+        self.group_range_layout.addWidget(self.group_range_use_last_data, 1, 2)
 
         size_policy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
         size_policy.setHorizontalStretch(0)
@@ -86,6 +96,7 @@ class GroupingTableView(QtGui.QWidget):
         self.vertical_layout.addWidget(self.grouping_table)
         self.vertical_layout.addLayout(self.horizontal_layout)
         self.vertical_layout.addLayout(self.group_range_layout)
+        # self.vertical_layout.addLayout(self.group_range_layout_max)
 
         self.setLayout(self.vertical_layout)
 
