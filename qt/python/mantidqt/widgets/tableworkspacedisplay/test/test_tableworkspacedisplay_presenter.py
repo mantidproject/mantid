@@ -174,7 +174,7 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
         twd.action_keypress_copy()
         self.assertEqual(4, mock_copy_cells.call_count)
 
-    @patch('mantidqt.widgets.tableworkspacedisplay.presenter.DeleteTableRows')
+    @patch('mantidqt.widgets.tableworkspacedisplay.model.DeleteTableRows')
     @with_mock_presenter(add_selection_model=True)
     def test_action_delete_row(self, ws, view, twd, mock_DeleteTableRows):
         twd.action_delete_row()
@@ -221,7 +221,7 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
         view.mock_selection_model.selectedColumns.assert_called_once_with()
 
     @patch('mantidqt.widgets.tableworkspacedisplay.presenter.TableWorkspaceDisplay')
-    @patch('mantidqt.widgets.tableworkspacedisplay.presenter.StatisticsOfTableWorkspace')
+    @patch('mantidqt.widgets.tableworkspacedisplay.model.StatisticsOfTableWorkspace')
     @with_mock_presenter(add_selection_model=True)
     def test_action_statistics_on_columns(self, ws, view, twd, mock_StatisticsOfTableWorkspace,
                                           mock_TableWorkspaceDisplay):
@@ -291,16 +291,31 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
         twd.action_set_as_y_err(1, "0")
         view.show_warning.assert_called_once_with(ErrorColumn.CANNOT_SET_Y_TO_BE_OWN_YERR_MESSAGE)
 
+    @patch('mantidqt.widgets.tableworkspacedisplay.model.SortTableWorkspace')
     @with_mock_presenter(add_selection_model=True)
-    def test_action_sort(self, ws, view, twd):
-        view.mock_selection_model.selectedColumns = Mock(return_value=[MockQModelIndex(0, 4444)])
-        order = 1
-        twd.action_sort(order)
-        view.sortByColumn.assert_called_once_with(4444, order)
+    def test_action_sort_table_ws(self, ws, view, twd, mock_SortTableWorkspace):
+        view.mock_selection_model.selectedColumns = Mock(return_value=[MockQModelIndex(0, 0)])
+        ascending = True
+        twd.action_sort(ascending)
+        mock_SortTableWorkspace.assert_called_once_with(InputWorkspace=twd.model.ws, OutputWorkspace=twd.model.ws,
+                                                        Columns="col0", Ascending=ascending)
+
+    @patch('mantidqt.widgets.tableworkspacedisplay.model.SortPeaksWorkspace')
+    @with_mock_presenter(add_selection_model=True)
+    def test_action_sort_peaks_ws(self, ws, view, twd, mock_SortPeaksWorkspace):
+        view.mock_selection_model.selectedColumns = Mock(return_value=[MockQModelIndex(0, 0)])
+        ascending = True
+        with patch('mantidqt.widgets.tableworkspacedisplay.model.TableWorkspaceDisplayModel.is_peaks_workspace',
+                   return_value=True) as mock_is_peaks_workspace:
+            twd.action_sort(ascending)
+            mock_SortPeaksWorkspace.assert_called_once_with(InputWorkspace=twd.model.ws, OutputWorkspace=twd.model.ws,
+                                                            ColumnNameToSortBy="col0", SortAscending=ascending)
+            mock_is_peaks_workspace.assert_called_once_with()
 
     @with_mock_presenter(add_selection_model=True)
     def test_action_sort_too_many(self, ws, view, twd):
         twd.action_sort(1)
+        # by default we have more than 1 column selected
         view.show_warning.assert_called_once_with(TableWorkspaceDisplay.TOO_MANY_SELECTED_TO_SORT)
 
     @with_mock_presenter(add_selection_model=True)

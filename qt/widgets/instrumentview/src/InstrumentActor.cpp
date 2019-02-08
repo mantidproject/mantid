@@ -12,7 +12,6 @@
 #include "MantidQtWidgets/InstrumentView/OpenGLError.h"
 
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/IMaskWorkspace.h"
@@ -182,8 +181,7 @@ void InstrumentActor::setUpWorkspace(
   resetColors();
 
   // set the ragged flag using a workspace validator
-  auto wsValidator = Mantid::API::CommonBinsValidator();
-  m_ragged = !wsValidator.isValid(sharedWorkspace).empty();
+  m_ragged = !sharedWorkspace->isCommonBins();
 }
 
 void InstrumentActor::setupPhysicalInstrumentIfExists() {

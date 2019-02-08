@@ -14,25 +14,33 @@ from __future__ import absolute_import
 import weakref
 
 # 3rdparty imports
-from qtpy.QtCore import QEvent, Signal
+from qtpy.QtCore import QEvent, Qt, Signal, Slot
 from qtpy.QtWidgets import QMainWindow
 
 # local imports
-from mantidqt.plotting.figuretype import figure_type, FigureType
+from mantidqt.plotting.figuretype import FigureType, figure_type
+from mantidqt.widgets.common.observing_view import ObservingView
 
 
-class FigureWindow(QMainWindow):
+class FigureWindow(QMainWindow, ObservingView):
     """A MainWindow that will hold plots"""
     activated = Signal()
     closing = Signal()
     visibility_changed = Signal()
+    close_signal = Signal()
 
     def __init__(self, canvas, parent=None):
         QMainWindow.__init__(self, parent=parent)
         # attributes
         self._canvas = weakref.proxy(canvas)
+        self.setAttribute(Qt.WA_DeleteOnClose, True)
 
+        self.close_signal.connect(self._run_close)
         self.setAcceptDrops(True)
+
+    @Slot()
+    def _run_close(self):
+        self.close()
 
     def event(self, event):
         if event.type() == QEvent.WindowActivate:

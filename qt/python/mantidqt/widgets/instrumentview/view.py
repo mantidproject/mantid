@@ -46,6 +46,7 @@ class InstrumentView(QWidget, ObservingView):
 
         self.setWindowTitle(name)
         self.setWindowFlags(Qt.Window)
+        self.setAttribute(Qt.WA_DeleteOnClose, True)
 
         layout = QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)

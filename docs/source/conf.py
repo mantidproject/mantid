@@ -213,5 +213,6 @@ intersphinx_mapping = {
     'numpy': ('https://docs.scipy.org/doc/numpy/', None),
     'python': ('https://docs.python.org/3/', None),
     'SciPy': ('http://docs.scipy.org/doc/scipy/reference', None),
-    'pandas': ('http://pandas.pydata.org/pandas-docs/stable', None)
+    'pandas': ('http://pandas.pydata.org/pandas-docs/stable', None),
+    'pystog': ('https://pystog.readthedocs.io/en/latest/', None)
 }

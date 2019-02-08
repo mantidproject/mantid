@@ -10,7 +10,7 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 
 class DecoderFactory(object):
-    decoder_list = []
+    decoder_list = set([])
 
     @classmethod
     def find_decoder(cls, tag):
@@ -30,5 +30,4 @@ class DecoderFactory(object):
         Will register the decoder class with the factory
         :param decoder: The Decoder class; to be registered with the Factory
         """
-        if decoder not in cls.decoder_list:
-            cls.decoder_list.append(decoder)
+        cls.decoder_list.add(decoder)

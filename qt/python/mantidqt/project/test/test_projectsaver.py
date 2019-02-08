@@ -149,7 +149,7 @@ class ProjectWriterTest(unittest.TestCase):
         if os.path.isdir(working_directory):
             rmtree(working_directory)
 
-        self.file_name = working_directory + "/" + os.path.basename(working_directory) + project_file_ext
+        self.file_name = os.path.join(working_directory, os.path.basename(working_directory) + project_file_ext)
 
     def test_write_out_empty_workspaces(self):
         workspace_list = []

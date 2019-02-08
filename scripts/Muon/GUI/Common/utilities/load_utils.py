@@ -149,7 +149,7 @@ DEFAULT_OUTPUTS = ["OutputWorkspace",
                    "FirstGoodData",
                    "MainFieldDirection"]
 # List of default values for the DEFAULT_OUTPUTS list
-DEFAULT_OUTPUT_VALUES = [__default_workspace(),
+DEFAULT_OUTPUT_VALUES = [[__default_workspace()],
                          None,  # api.WorkspaceFactoryImpl.Instance().createTable("TableWorkspace"),
                          api.WorkspaceFactoryImpl.Instance().createTable("TableWorkspace"),
                          0.0,
@@ -293,4 +293,7 @@ def flatten_run_list(run_list):
 
 
 def exception_message_for_failed_files(failed_file_list):
-    return "Could not load the following files : \n - " + "\n - ".join(failed_file_list)
+    message = "Could not load the following files : \n "
+    for failure in failed_file_list:
+        message += '{} ; {}'.format(os.path.split(failure[0])[-1], failure[1])
+    return message

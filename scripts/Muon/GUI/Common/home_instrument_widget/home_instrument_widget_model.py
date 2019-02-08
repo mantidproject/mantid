@@ -1,6 +1,12 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
-from Muon.GUI.Common.muon_context import MuonContext
+from Muon.GUI.Common.muon_data_context import MuonDataContext
 from mantid.api import ITableWorkspace, WorkspaceGroup
 from mantid import api
 
@@ -15,7 +21,7 @@ class InstrumentWidgetModel(object):
     GUI.
     """
 
-    def __init__(self, muon_data=MuonContext()):
+    def __init__(self, muon_data=MuonDataContext()):
         self._data = muon_data
 
     def clear_data(self):

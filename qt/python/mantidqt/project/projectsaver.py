@@ -52,10 +52,16 @@ class ProjectSaver(object):
         interfaces = []
         for interface, encoder in interfaces_to_save:
             # Add to the dictionary encoded data with the key as the first tag in the list on the encoder attributes
-            tag = encoder.tags[0]
-            encoded_dict = encoder.encode(interface, directory)
-            encoded_dict["tag"] = tag
-            interfaces.append(encoded_dict)
+            try:
+                tag = encoder.tags[0]
+                encoded_dict = encoder.encode(interface, directory)
+                encoded_dict["tag"] = tag
+                interfaces.append(encoded_dict)
+            except Exception as e:
+                # Catch any exception and log it
+                if isinstance(e, KeyboardInterrupt):
+                    raise
+                logger.warning("Project Saver: An interface could not be saver error: " + str(e))
 
         # Pass dicts to Project Writer
         writer = ProjectWriter(workspace_names=workspace_saver.get_output_list(),
@@ -89,5 +95,8 @@ class ProjectWriter(object):
         try:
             with open(file_path, "w+") as f:
                 dump(obj=to_save_dict, fp=f)
-        except Exception:
+        except Exception as e:
+            # Catch any exception and log it
+            if isinstance(e, KeyboardInterrupt):
+                raise
             logger.warning("JSON project file unable to be opened/written to")

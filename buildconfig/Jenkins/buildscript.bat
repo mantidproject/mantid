@@ -203,7 +203,9 @@ set USERPROPS=bin\%BUILD_CONFIG%\Mantid.user.properties
 del %USERPROPS%
 set CONFIGDIR=%APPDATA%\mantidproject
 rmdir /S /Q %CONFIGDIR%
-:: Create the directory to avoid any race conditions
+:: remove old MantidPlot state (sets errorlevel on failure but we don't check so script continues)
+reg delete HKCU\Software\Mantid /f
+:: create the config directory to avoid any race conditions
 mkdir %CONFIGDIR%\mantid
 :: use a fixed number of openmp threads to avoid overloading the system
 echo MultiThreaded.MaxCores=2 > %USERPROPS%
