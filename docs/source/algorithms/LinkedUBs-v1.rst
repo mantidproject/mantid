@@ -49,8 +49,6 @@ Useage
     # WISH single crystal
     # demonstration of linkedUBs algorithm on D10 Ruby (cyle 18/1)
 
-    import numpy as np
-    from math import sin, cos, pi
     from mantid.simpleapi import *
 
     # lattice parameters
@@ -77,55 +75,16 @@ Useage
     Iterations = 10
     DeleteWorkspace = False
 
-
-    # calculate phi axis at given omega
-    def CalculatePhiAxis(omega,chi):
-        """
-        calculates the vector associated with the phi axis ready for SetGoniometer
-        -omega axis is taken as (0,1,0)  in xyz right handed cartesian system
-        -the phi axis is first defined at omega = 270
-        -examples of useage:
-        -phi axis at (270.54) is given by CalculatePhiAxis(0,54)
-        -phi axis at (0,54) is given by CalculatePhiAxis(-90,54)
-        -phi axis at (90,54) is given by CalculatePhiAxis(-180,54)
-        """    
-        # omega axis
-        ux_omega = 0
-        uy_omega = 1
-        uz_omega = 0
-        u_omega = np.array([ux_omega,uy_omega,uz_omega])
-        # angle between phi axis and beam
-        chi = chi * pi/180
-        # phi axis at omega = 270
-        ux_phi = cos(chi)
-        uy_phi = sin(chi)
-        uz_phi = 0
-        u_phi = np.array([ux_phi, uy_phi, uz_phi])
-        # the omega angle at which to calculate the phi axis 
-        omega_axis_setting = omega * pi/180
-        # rotation around omega axis
-        c_omega = cos(omega_axis_setting)
-        s_omega = sin(omega_axis_setting) 
-        r1 = np.array([c_omega + ux_omega**2 * (1-c_omega), ux_omega * uy_omega * (1-c_omega) - uz_omega * s_omega, ux_omega * uz_omega * (1-c_omega) + uy_omega * s_omega])
-        r2 = np.array([uy_omega * ux_omega * (1-c_omega) + uz_omega * s_omega, c_omega + uy_omega**2 * (1-c_omega), uy_omega * uz_omega * (1-c_omega) - ux_omega * s_omega])
-        r3 = np.array([uz_omega * ux_omega * (1-c_omega) - uy_omega * s_omega, uz_omega * uy_omega * (1 - c_omega) + ux_omega * s_omega, c_omega + uz_omega**2 * (1-c_omega)])
-        r = np.vstack([r1, r2, r3])
-        # phi axis vector at given omega is the product of the rotation matrix and the initial phi axis vector at omega = 270
-        u_phi_rotated = np.dot(r, u_phi)
-        u_phi_rotated = np.round(u_phi_rotated,5)
-        return u_phi_rotated 
-
-
-    # calculate phi axis at omega = 270 
-    u_phi_x, u_phi_y, u_phi_z = CalculatePhiAxis(0,54)
+    # phi axis at omega = 270 
+    u_phi_x, u_phi_y, u_phi_z = 0.58779, 0.80902, 0.0
 
     # load and process 41598
-    LoadRaw(Filename='/archive/NDXWISH/Instrument/data/cycle_18_1/WISH00041598.raw', OutputWorkspace='WISH00041598')
+    LoadRaw(Filename='WISH00041598.raw', OutputWorkspace='WISH00041598')
     CropWorkspace(InputWorkspace='WISH00041598', OutputWorkspace='WISH00041598', XMin=6000, XMax=99000)
     ConvertUnits(InputWorkspace='WISH00041598', OutputWorkspace='WISH00041598', Target='dSpacing', ConvertFromPointData=False)
 
     # load and process 41599
-    LoadRaw(Filename='/archive/NDXWISH/Instrument/data/cycle_18_1/WISH00041599.raw', OutputWorkspace='WISH00041599')
+    LoadRaw(Filename='WISH00041599.raw', OutputWorkspace='WISH00041599')
     CropWorkspace(InputWorkspace='WISH00041599', OutputWorkspace='WISH00041599', XMin=6000, XMax=99000)
     ConvertUnits(InputWorkspace='WISH00041599', OutputWorkspace='WISH00041599', Target='dSpacing', ConvertFromPointData=False)
 
