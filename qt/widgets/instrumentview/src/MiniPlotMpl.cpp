@@ -22,8 +22,8 @@
 #include <QVBoxLayout>
 
 using Mantid::PythonInterface::GlobalInterpreterLock;
-using MantidQt::Widgets::MplCpp::cycler;
 using MantidQt::Widgets::MplCpp::FigureCanvasQt;
+using MantidQt::Widgets::MplCpp::cycler;
 
 namespace {
 const char *ACTIVE_CURVE_FORMAT = "k-";
