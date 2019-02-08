@@ -17,7 +17,6 @@ from qtpy.QtWidgets import (QAction, QHeaderView, QItemEditorFactory, QMenu, QMe
                             QStyledItemDelegate, QTableWidget)
 
 import mantidqt.icons
-from mantidqt.widgets.workspacedisplay.observing_view import ObservingView
 from mantidqt.widgets.workspacedisplay.table.plot_type import PlotType
 
 
@@ -36,7 +35,7 @@ class PreciseDoubleFactory(QItemEditorFactory):
         return widget
 
 
-class TableWorkspaceDisplayView(QTableWidget, ObservingView):
+class TableWorkspaceDisplayView(QTableWidget):
     repaint_signal = Signal()
 
     def __init__(self, presenter, parent=None):

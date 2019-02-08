@@ -7,8 +7,6 @@
 #  This file is part of the mantid workbench.
 import unittest
 
-from qtpy.QtWidgets import QApplication
-
 from mantidqt.utils.qt.test.qt_widget_finder import QtWidgetFinder
 
 try:
@@ -31,19 +29,6 @@ class FigureManagerWorkbenchTest(GuiTest, QtWidgetFinder):
         fig_mgr = FigureManagerWorkbench(canvas, 1)
         self.assertTrue(fig_mgr is not None)
 
-    def test_correctly_deleted_on_close(self):
-        fig = MagicMock()
-        canvas = FigureCanvasQTAgg(fig)
-        fig_mgr = FigureManagerWorkbench(canvas, 1)
-        self.assertTrue(fig_mgr is not None)
-        self.assert_window_created()
-
-        fig_mgr.destroy()
-
-        QApplication.processEvents()
-
-        self.assert_no_widgets()
-
-
+    
 if __name__ == "__main__":
     unittest.main()

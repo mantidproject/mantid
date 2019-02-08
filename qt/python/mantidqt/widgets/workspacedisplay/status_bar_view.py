@@ -15,8 +15,10 @@ class StatusBarView(QMainWindow, ObservingView):
     close_signal = Signal()
     rename_signal = Signal(str)
 
-    def __init__(self, parent, central_widget, name, window_width=600, window_height=400):
+    def __init__(self, parent, central_widget, name, window_width=600, window_height=400, presenter=None):
         super(StatusBarView, self).__init__(parent)
+
+        self.presenter = presenter
         self.setCentralWidget(central_widget)
         self.setWindowTitle("{} - Mantid".format(name))
         self.setAttribute(Qt.WA_DeleteOnClose, True)
@@ -29,6 +31,7 @@ class StatusBarView(QMainWindow, ObservingView):
         self.rename_signal.connect(self._run_rename)
 
     def closeEvent(self, event):
+        self.presenter.clear_observer()
         self.centralWidget().close()
         QMainWindow.closeEvent(self, event)
         self.deleteLater()

@@ -18,7 +18,6 @@ from qtpy.QtWidgets import (QAbstractItemView, QAction, QHeaderView, QMessageBox
 
 import mantidqt.icons
 from mantidqt.widgets.workspacedisplay.matrix.table_view_model import MatrixWorkspaceTableViewModelType
-from mantidqt.widgets.workspacedisplay.observing_view import ObservingView
 
 
 class MatrixWorkspaceTableView(QTableView):
@@ -40,7 +39,7 @@ class MatrixWorkspaceTableView(QTableView):
         header.resizeSection(section, header.defaultSectionSize())
 
 
-class MatrixWorkspaceDisplayView(QTabWidget, ObservingView):
+class MatrixWorkspaceDisplayView(QTabWidget):
 
     def __init__(self, presenter, parent=None):
         super(MatrixWorkspaceDisplayView, self).__init__(parent)

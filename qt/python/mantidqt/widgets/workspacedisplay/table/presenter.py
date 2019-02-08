@@ -61,7 +61,8 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
         self.view = view if view else TableWorkspaceDisplayView(self, parent)
         self.container = container if container else StatusBarView(parent, self.view, self.name,
                                                                    window_width=window_width,
-                                                                   window_height=window_height)
+                                                                   window_height=window_height,
+                                                                   presenter=self)
 
         DataCopier.__init__(self, self.container.status_bar)
 
