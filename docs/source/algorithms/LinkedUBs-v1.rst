@@ -1,6 +1,3 @@
-import numpy as np
-from math import sin, cos, pi
-from mantid.simpleapi import *
 .. algorithm::
 
 .. summary::
@@ -49,22 +46,19 @@ Useage
 
 **Example:**
 
-.. testcode:: ExLinkedUBs
+.. code-block:: python 
 
     # WISH single crystal
     # demonstration of linkedUBs algorithm on D10 Ruby (cyle 18/1)
 
-    from mantid.simpleapi import * 
-    from math import sin, cos, pi 
-    import numpy as np 
+    import numpy as np
+    from math import sin, cos, pi
+    from mantid.simpleapi import *
 
-    # working directory (where UB is stored)
-    wDir='/home/xpb15563/Documents/Linked_UBs/Ruby/testing/'
-
-    # lattice parameters (for CalculateUMatrix)
-    a = 4.7750
-    b = 4.7750
-    c =  13.1154
+    # lattice parameters
+    a = 4.764407
+    b = 4.76440
+    c = 13.037904
     alpha = 90
     beta = 90
     gamma = 120
@@ -137,13 +131,21 @@ Useage
     CropWorkspace(InputWorkspace='WISH00041599', OutputWorkspace='WISH00041599', XMin=6000, XMax=99000)
     ConvertUnits(InputWorkspace='WISH00041599', OutputWorkspace='WISH00041599', Target='dSpacing', ConvertFromPointData=False)
 
-    # find peaks on 41599
+    # find peaks on 41598 and 41599
+    FindSXPeaks(InputWorkspace='WISH00041598', PeakFindingStrategy='AllPeaks', ResolutionStrategy='AbsoluteResolution', XResolution=0.2, PhiResolution=2, TwoThetaResolution=2, OutputWorkspace='WISH00041598_find_peaks')
+
     FindSXPeaks(InputWorkspace='WISH00041599', PeakFindingStrategy='AllPeaks', ResolutionStrategy='AbsoluteResolution', XResolution=0.2, PhiResolution=2, TwoThetaResolution=2, OutputWorkspace='WISH00041599_find_peaks')
 
-    # load UB on 41598
-    LoadIsawUB(InputWorkspace='WISH00041598', Filename=wDir+'41598.mat')
+    # find and optimise UB on 41598 using lattice parameters
+    FindUBUsingLatticeParameters(PeaksWorkspace='WISH00041598_find_peaks', a=a, b=b, c=c, alpha=alpha, beta=beta, gamma=gamma, NumInitial=10, Tolerance=0.1, Iterations=10)
 
-    # set gonio and predict the peaks of 41599 from 41598 UB
+    PredictPeaks(InputWorkspace='WISH00041598_find_peaks', WavelengthMin=MinWavelength, WavelengthMax=MaxWavelength, MinDSpacing=MinDSpacing, ReflectionCondition=ReflectionCondition, OutputWorkspace='WISH00041598_predict_peaks')
+
+    OptimizeLatticeForCellType(PeaksWorkspace='WISH00041598_predict_peaks', CellType='Hexagonal', Apply=True)
+
+    CopySample(InputWorkspace='WISH00041598_predict_peaks', OutputWorkspace='WISH00041598', CopyName=False, CopyMaterial=False, CopyEnvironment=False, CopyShape=False)
+
+    # set gonio on 41598 and predict the peaks of 41599 
     SetGoniometer(Workspace='WISH00041598', Axis0='0,0,1,0,1', Axis1='25,{},{},{},-1'.format(u_phi_x, u_phi_y, u_phi_z))
     PredictPeaks(InputWorkspace='WISH00041598', WavelengthMin=MinWavelength, WavelengthMax=MaxWavelength, MinDSpacing=MinDSpacing, ReflectionCondition=ReflectionCondition, OutputWorkspace='WISH00041599_predict_peaks')
 
