@@ -26,6 +26,7 @@ class InstrumentViewTest(GuiTest, QtWidgetFinder):
         QApplication.processEvents()
         self.assertEqual(None, p.ads_observer)
         self.find_qt_widget("instr")
+        self.assert_no_widgets()
 
     def test_window_force_deleted_correctly(self):
         ws = CreateSampleWorkspace()
@@ -39,3 +40,4 @@ class InstrumentViewTest(GuiTest, QtWidgetFinder):
         QApplication.processEvents()
         self.assertEqual(None, p.ads_observer)
         self.find_qt_widget("instr")
+        self.assert_no_widgets()
