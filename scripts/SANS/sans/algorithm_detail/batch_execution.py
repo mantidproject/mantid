@@ -127,7 +127,7 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
             if PYQT4:
                 plot_workspace(reduction_package, output_graph)
             else:
-                plot_workspace_workbench(reduction_package, output_graph)
+                plot_workspace_matplotlib(reduction_package, output_graph)
         # -----------------------------------
         # The workspaces are already on the ADS, but should potentially be grouped
         # -----------------------------------
@@ -206,9 +206,9 @@ def plot_workspace(reduction_package, output_graph):
         graph_handle.activeLayer().logLogAxes()
 
 
-def plot_workspace_workbench(reduction_package, output_graph):
+def plot_workspace_matplotlib(reduction_package, output_graph):
     """
-    Continuous plotting when on Workbench.
+    Continuous plotting using a matplotlib backend.
 
     :param reduction_package: An object containing the reduced workspaces
     :param output_graph: A matplotlib fig
