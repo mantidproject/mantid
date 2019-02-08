@@ -191,7 +191,7 @@ def plot_workspace(reduction_package, output_graph):
     """
     if reduction_package.reduction_mode == ISISReductionMode.All:
         graph_handle = plotSpectrum([reduction_package.reduced_hab, reduction_package.reduced_lab], 0,
-                                               window=graph(output_graph), clearWindow=True)
+                                    window=graph(output_graph), clearWindow=True)
         graph_handle.activeLayer().logLogAxes()
     elif reduction_package.reduction_mode == ISISReductionMode.HAB:
         graph_handle = plotSpectrum(reduction_package.reduced_hab, 0, window=graph(output_graph), clearWindow=True)
@@ -201,8 +201,8 @@ def plot_workspace(reduction_package, output_graph):
         graph_handle.activeLayer().logLogAxes()
     elif reduction_package.reduction_mode == ISISReductionMode.Merged:
         graph_handle = plotSpectrum([reduction_package.reduced_merged,
-                                                reduction_package.reduced_hab, reduction_package.reduced_lab], 0,
-                                               window=graph(output_graph), clearWindow=True)
+                                    reduction_package.reduced_hab, reduction_package.reduced_lab], 0,
+                                    window=graph(output_graph), clearWindow=True)
         graph_handle.activeLayer().logLogAxes()
 
 
@@ -215,7 +215,7 @@ def plot_workspace_workbench(reduction_package, output_graph):
     :return: None
     """
     plot_kwargs = {"scalex": True,
-                       "scaley": True}
+                   "scaley": True}
     if reduction_package.reduction_mode == ISISReductionMode.All:
         plot([reduction_package.reduced_hab, reduction_package.reduced_lab],
              wksp_indices=[0], overplot=True, fig=output_graph, plot_kwargs=plot_kwargs)
