@@ -9,7 +9,7 @@ size_t ConvToMDEventsWSIndexing::initialize(
   size_t numSpec = ConvToMDEventsWS::initialize(WSD, inWSWrapper, ignoreZeros);
 
   // check if split parameters are valid
-  auto& split_into = m_OutWSWrapper->pWorkspace()->getBoxController()->getSplitInto();
+  auto& split_into = m_OutWSWrapper->pWorkspace()->getBoxController()->getSplitIntoAll();
 
   bool validSplitInfo = isSplitValid(split_into);
   if (!validSplitInfo) {

@@ -42,11 +42,11 @@ public:
   static bool isSplitValid(const std::vector<T> &split_into) {
     bool validSplitInfo = !split_into.empty();
     if (validSplitInfo) {
-      const int &n = split_into[0];
+      const T &n = split_into[0];
       validSplitInfo &= (n > 1 && ((n & (n - 1)) == 0));
       if (validSplitInfo)
         validSplitInfo &= all_of(split_into.begin(), split_into.end(),
-                                 [&n](int i) { return i == n; });
+                                 [&n](T i) { return i == n; });
     }
     return validSplitInfo;
   }
