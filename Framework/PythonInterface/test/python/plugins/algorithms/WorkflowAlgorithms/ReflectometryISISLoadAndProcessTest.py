@@ -100,6 +100,15 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         history = ['LoadISISNexus', 'ReflectometryReductionOneAuto']
         self._check_history(mtd['IvsQ_binned_13460'], history)
 
+    def test_existing_workspace_is_used_when_name_passed_in_input_list(self):
+        self._create_workspace(13460, 'TEST_')
+        args = self._default_options
+        args['InputRunList'] = 'TEST_13460'
+        outputs = ['IvsQ_13460', 'IvsQ_binned_13460', 'TEST_13460']
+        self._assert_run_algorithm_succeeds(args, outputs)
+        history = ['ReflectometryReductionOneAuto']
+        self._check_history(mtd['IvsQ_binned_13460'], history)
+
     def test_overriding_output_names(self):
         self._create_workspace(13460, 'TOF_')
         args = self._default_options
@@ -209,6 +218,20 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
                     'TEST_13463', 'TEST_13464', 'TRANS_LAM_13463', 'TRANS_LAM_13464']
         self._assert_run_algorithm_succeeds(args, outputs)
         history = ['LoadISISNexus', 'LoadISISNexus', 'ReflectometryReductionOneAuto']
+        self._check_history(mtd['IvsQ_binned_13460'], history)
+
+    def test_existing_workspace_is_used_for_trans_runs_when_name_passed_in_input_list(self):
+        self._create_workspace(13460, 'TOF_')
+        self._create_workspace(13463, 'TEST_')
+        self._create_workspace(13464, 'TEST_')
+        args = self._default_options
+        args['InputRunList'] = '13460'
+        args['FirstTransmissionRunList'] = 'TEST_13463'
+        args['SecondTransmissionRunList'] = 'TEST_13464'
+        outputs = ['IvsQ_13460', 'IvsQ_binned_13460', 'TOF_13460', 'TEST_13463', 'TEST_13464',
+                   'TRANS_LAM_13463', 'TRANS_LAM_13464']
+        self._assert_run_algorithm_succeeds(args, outputs)
+        history = ['ReflectometryReductionOneAuto']
         self._check_history(mtd['IvsQ_binned_13460'], history)
 
     def test_first_and_second_trans_runs_are_combined(self):

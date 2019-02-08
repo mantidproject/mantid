@@ -11,7 +11,8 @@ from __future__ import (absolute_import, division, print_function)
 from mantid.api import (AlgorithmFactory, AnalysisDataService, DataProcessorAlgorithm,
                         PropertyMode, WorkspaceGroup, WorkspaceProperty)
 
-from mantid.simpleapi import (AddSampleLog, LoadEventNexus, LoadISISNexus, Plus)
+from mantid.simpleapi import (AddSampleLog, LoadEventNexus, LoadISISNexus, Plus,
+                              RenameWorkspace)
 
 from mantid.kernel import (CompositeValidator, Direction, IntBoundedValidator,
                            Property, StringArrayLengthValidator,
@@ -158,12 +159,12 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             workspaces.append(ws)
         return workspaces
 
-    def _prefixedRunName(self, run, isTrans):
-        """Add a prefix for TOF workspaces onto the given run name"""
+    def _prefixedName(self, name, isTrans):
+        """Add a prefix for TOF workspaces onto the given name"""
         if isTrans:
-            return self._transPrefix + run
+            return self._transPrefix + name
         else:
-            return self._tofPrefix + run
+            return self._tofPrefix + name
 
     def _workspaceExists(self, workspace_name):
         """Return true if the given workspace exists in the ADS
@@ -216,16 +217,28 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         if self._workspaceExistsAndIsValid(workspace_name, isTrans):
             return workspace_name
         # Try with prefix
-        workspace_name = self._prefixedRunName(run, isTrans)
+        workspace_name = self._prefixedName(run, isTrans)
         if self._workspaceExistsAndIsValid(workspace_name, isTrans):
             return workspace_name
         # Not found
         return None
 
+    def _renameWorkspaceBasedOnRunNumber(self, workspace_name, isTrans):
+        """Rename the given workspace based on its run number and a standard prefix"""
+        workspace = AnalysisDataService.retrieve(workspace_name)
+        new_name = self._prefixedName(str(workspace.getRunNumber()), isTrans)
+        if new_name != workspace.name():
+            RenameWorkspace(InputWorkspace=workspace_name, OutputWorkspace=new_name)
+            # Also rename the monitor workspace, if there is one
+            if AnalysisDataService.doesExist(_monitorWorkspace(workspace_name)):
+                RenameWorkspace(InputWorkspace=_monitorWorkspace(workspace_name),
+                                OutputWorkspace=_monitorWorkspace(new_name))
+        return new_name
+
     def _loadRun(self, run, isTrans):
         """Load a run as an event workspace if slicing is requested, or a non-event
         workspace otherwise"""
-        workspace_name=self._prefixedRunName(run, isTrans)
+        workspace_name=self._prefixedName(run, isTrans)
         if self._slicingEnabled():
             LoadEventNexus(Filename=run, OutputWorkspace=workspace_name, LoadMonitors=True)
             _throwIfNotValidReflectometryEventWorkspace(workspace_name)
@@ -233,6 +246,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         else:
             LoadISISNexus(Filename=run, OutputWorkspace=workspace_name)
             self.log().information('Loaded workspace ' + workspace_name)
+        workspace_name = self._renameWorkspaceBasedOnRunNumber(workspace_name, isTrans)
         return workspace_name
 
     def _sumWorkspaces(self, runs, workspaces, isTrans):
@@ -242,8 +256,9 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             return None
         if len(workspaces) < 2:
             return workspaces[0]
-        concatenated_names = "+".join(runs)
-        summed = self._prefixedRunName(concatenated_names, isTrans)
+        workspaces_without_prefixes = [self._removePrefix(ws, isTrans) for ws in workspaces]
+        concatenated_names = "+".join(workspaces_without_prefixes)
+        summed = self._prefixedName(concatenated_names, isTrans)
         self.log().information('Summing workspaces' + " ".join(workspaces) + ' into ' + summed)
         lhs = workspaces[0]
         for rhs in workspaces[1:]:
@@ -329,12 +344,13 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         alg.execute()
         return alg
 
-    def _removePrefix(self, workspace):
+    def _removePrefix(self, workspace, isTrans):
         """Remove the TOF prefix from the given workspace name"""
-        prefix_len = len(self._tofPrefix)
+        prefix = self._transPrefix if isTrans else self._tofPrefix
+        prefix_len = len(prefix)
         name_start = workspace[:prefix_len]
-        if len(workspace) > prefix_len and name_start == self._tofPrefix:
-            return workspace[len(self._tofPrefix):]
+        if len(workspace) > prefix_len and name_start == prefix:
+            return workspace[prefix_len:]
         else:
             return workspace
 
