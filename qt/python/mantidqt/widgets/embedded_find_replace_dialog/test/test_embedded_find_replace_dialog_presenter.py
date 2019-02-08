@@ -205,3 +205,24 @@ class EmbeddedFindReplaceDialogTest(TestCase):
 
         presenter.action_replace_all()
         editor.replaceAll.assert_called_once_with(self.default_search_string, "tomato", True, True, True, True, False)
+
+    @with_mock_presenter
+    def test_strings_different(self, view, presenter, editor):
+        str1 = "apples"
+        str2 = "potatoes"
+        self.assertTrue(presenter.strings_different(str1, str2, case_sensitive=True))
+
+        str2 = "APPles"
+        self.assertTrue(presenter.strings_different(str1, str2, case_sensitive=True))
+
+        str2 = "apples"
+        self.assertFalse(presenter.strings_different(str1, str2, case_sensitive=True))
+
+    @with_mock_presenter
+    def test_strings_different_case_insensitive(self, view, presenter, editor):
+        str1 = "APPLES"
+        str2 = "potatoes"
+        self.assertTrue(presenter.strings_different(str1, str2, case_sensitive=False))
+
+        str2 = "apples"
+        self.assertFalse(presenter.strings_different(str1, str2, case_sensitive=False))

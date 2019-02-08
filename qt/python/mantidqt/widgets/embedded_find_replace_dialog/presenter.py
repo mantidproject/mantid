@@ -64,10 +64,14 @@ class EmbeddedFindReplaceDialog(object):
             self.focus_find_field()
             return
 
+        options = self.view.get_options()
+
         # if the editor hasn't been searched before, run a find first, but do not replace anything
         # this allows the user to see where the first match is, instead of having _one_ of the matches
         # being replaced to the replacement string, without knowing which one will be done
-        if not self.editor.hasSelectedText() or self.editor.selectedText() != search_string:
+
+        if not self.editor.hasSelectedText() or self.strings_different(self.editor.selectedText(), search_string,
+                                                                       options.match_case):
             self.action_next()
             return
 
@@ -76,6 +80,15 @@ class EmbeddedFindReplaceDialog(object):
         self.action_next()
 
         self.add_to_field_history(self.view.replace, replace_string)
+
+    def strings_different(self, string1, string2, case_sensitive):
+        """
+
+        :param case_sensitive: If case_sensitive is NOT selected, then both strings will be made lowercase
+                               Else the strings will be compared as they are without changes
+        """
+        return (not case_sensitive and string1.lower() != string2.lower()) \
+               or (case_sensitive and string1 != string2)
 
     def action_replace_all(self):
         search_string = self.view.find.currentText()
