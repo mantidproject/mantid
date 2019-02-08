@@ -16,7 +16,7 @@ from mantid.api import (AlgorithmFactory,
                         PropertyMode,
                         WorkspaceUnitValidator)
 from mantid.kernel import (CompositeValidator, Direction, IntArrayLengthValidator, IntArrayBoundedValidator,
-                           IntArrayProperty, IntBoundedValidator, Property, StringListValidator)
+                           IntArrayProperty, IntBoundedValidator, FloatBoundedValidator, Property, StringListValidator)
 from mantid.simpleapi import (CalculatePolynomialBackground, CloneWorkspace, ConvertUnits,
                               Divide, ExtractMonitors, FindReflectometryLines, LoadAndMerge, Minus, mtd,
                               NormaliseToMonitor, RebinToWorkspace, Scale, SpecularReflectionPositionCorrect, Transpose)
@@ -144,6 +144,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         maxTwoNonnegativeInts = CompositeValidator()
         maxTwoNonnegativeInts.add(IntArrayLengthValidator(lenmin=0, lenmax=2))
         maxTwoNonnegativeInts.add(nonnegativeIntArray)
+        workspaceIndexRange = FloatBoundedValidator(lower=0.0, upper=255.)
         self.declareProperty(MultipleFileProperty(Prop.RUN,
                                                   action=FileAction.OptionalLoad,
                                                   extensions=['nxs']),
@@ -158,8 +159,9 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
                              defaultValue=Property.EMPTY_DBL,
                              doc='A user-defined scattering angle 2 theta (unit degrees).')
         self.declareProperty(name=Prop.LINE_POSITION_INPUT,
+                             validator=workspaceIndexRange,
                              defaultValue=Property.EMPTY_DBL,
-                             doc='A workspace index corresponding to the beam centre between 0.0 and 255.0')
+                             doc='A workspace index corresponding to the beam centre between 0.0 and 255.0.')
         self.declareProperty(MatrixWorkspaceProperty(Prop.OUTPUT_WS,
                                                      defaultValue='',
                                                      direction=Direction.Output),
@@ -251,10 +253,6 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
                     issues[Prop.LINE_POSITION_INPUT] = 'Cannot subtract flat background without knowledge of /'\
                                                        'line position.'
                     issues[Prop.INPUT_WS] = 'Consider to give a sample log entry ' + common.SampleLogs.LINE_POSITION
-        if not self.getProperty(Prop.LINE_POSITION_INPUT).isDefault:
-            beamCentre = self.getProperty(Prop.LINE_POSITION_INPUT).value
-            if beamCentre < 0. or beamCentre > 255.:
-                issues[Prop.LINE_POSITION_INPUT] = 'Value should be between 0.0 and 255.0'
         # Early input validation to prevent FindReflectometryLines to fail its validation
         if not self.getProperty(Prop.XMIN).isDefault and not self.getProperty(Prop.XMAX).isDefault:
             xmin = self.getProperty(Prop.XMIN).value
