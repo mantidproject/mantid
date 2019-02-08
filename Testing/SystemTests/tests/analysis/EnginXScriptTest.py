@@ -27,6 +27,13 @@ param_deltas = [0.1, 0.1, 1, 2]
 cal_deltas = [0.1, 90000, 0.8, 52000, 1, 0.1, 4, 3, 250, 9, 800, 1.5, 10, 0.5, 5, 0.5]
 
 
+def _skip_test():
+    """Helper function to determine if we run the test"""
+    import platform
+    # Issue with comparing values in tables on other platforms
+    return "linux" not in platform.platform().lower()
+
+
 class CreateVanadiumTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
@@ -42,6 +49,9 @@ class CreateVanadiumTest(systemtesting.MantidSystemTest):
 
 
 class CreateCalibrationWholeTest(systemtesting.MantidSystemTest):
+
+    def skipTests(self):
+        return _skip_test()
 
     def runTest(self):
         os.makedirs(cal_directory)
@@ -64,6 +74,9 @@ class CreateCalibrationWholeTest(systemtesting.MantidSystemTest):
 
 class CreateCalibrationCroppedTest(systemtesting.MantidSystemTest):
 
+    def skipTests(self):
+        return _skip_test()
+
     def runTest(self):
         os.makedirs(cal_directory)
         main(vanadium_run="236516", user="test", focus_run=None, do_cal=True, directory=cal_directory,
@@ -82,6 +95,9 @@ class CreateCalibrationCroppedTest(systemtesting.MantidSystemTest):
 
 
 class CreateCalibrationBankTest(systemtesting.MantidSystemTest):
+
+    def skipTests(self):
+        return _skip_test()
 
     def runTest(self):
         os.makedirs(cal_directory)
