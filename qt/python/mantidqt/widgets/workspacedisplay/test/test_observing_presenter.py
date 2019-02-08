@@ -63,4 +63,4 @@ class ObservingPresenterTest(unittest.TestCase):
     def test_not_renaming_workspace_with_invalid_name(self, presenter):
         new_name = "xax"
         presenter.rename_workspace("", new_name)
-        self.assertNotCalled(presenter.view.rename_signal)
+        self.assertNotCalled(presenter.container.rename_signal.emit)

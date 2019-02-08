@@ -28,6 +28,5 @@ class MockObservingPresenter(ObservingPresenter):
     def __init__(self, workspaces_are_equal=True):
         self.ads_observer = Mock()
         self.container = MockObservingView(None)
-        self.view = MockObservingView(None)
         self.model = Mock()
         self.model.workspace_equals = Mock(return_value=workspaces_are_equal)
