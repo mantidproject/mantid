@@ -167,7 +167,8 @@ void RunsTablePresenter::instrumentChanged(std::string const &instrumentName) {
 }
 
 void RunsTablePresenter::settingsChanged() {
-  // TODO: reset state in reduction jobs
+  m_model.resetState();
+  notifyRowStateChanged();
 }
 
 void RunsTablePresenter::appendRowsToGroupsInView(

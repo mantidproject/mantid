@@ -32,6 +32,7 @@ public:
   void insertRow(boost::optional<Row> const &row, int beforeRowAtIndex);
   void removeRow(int rowIndex);
   void updateRow(int rowIndex, boost::optional<Row> const &row);
+  void resetState();
   bool allRowsAreValid() const;
 
   boost::optional<int> indexOfRowWithTheta(double angle,

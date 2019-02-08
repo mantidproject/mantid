@@ -40,6 +40,7 @@ public:
   void setSuccess();
   void setWarning(std::string const &message);
   void setError(std::string const &message);
+  void reset();
 
 private:
   State m_state;

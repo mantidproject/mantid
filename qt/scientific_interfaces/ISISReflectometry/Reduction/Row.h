@@ -53,6 +53,8 @@ public:
 
   State state() const;
   std::string message() const;
+  void resetState();
+
   bool requiresProcessing(bool reprocessFailed) const;
 
 private:

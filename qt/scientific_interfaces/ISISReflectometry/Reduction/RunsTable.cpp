@@ -38,5 +38,7 @@ bool RunsTable::hasSelection() const {
 void RunsTable::setSelectedRowLocations(std::vector<RowLocation> selected) {
   m_selectedRowLocations = std::move(selected);
 }
+
+void RunsTable::resetState() { m_reductionJobs.resetState(); }
 } // namespace CustomInterfaces
 } // namespace MantidQt

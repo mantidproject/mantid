@@ -54,5 +54,10 @@ void ItemState::setError(std::string const &message) {
   m_state = State::ITEM_ERROR;
   m_message = message;
 }
+
+void ItemState::reset() {
+  m_state = State::ITEM_NOT_STARTED;
+  m_message = std::string();
+}
 } // namespace CustomInterfaces
 } // namespace MantidQt

@@ -32,6 +32,7 @@ public:
   void setSelectedRowLocations(
       std::vector<MantidWidgets::Batch::RowLocation> selected);
   template <typename T> bool isSelected(T const &item);
+  void resetState();
 
 private:
   std::vector<std::string> m_instruments;

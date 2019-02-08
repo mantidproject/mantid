@@ -26,6 +26,7 @@ public:
   boost::optional<int> indexOfGroupWithName(std::string const &groupName);
   void removeGroup(int index);
   void removeAllGroups();
+  void resetState();
 
   std::vector<Group> &mutableGroups();
   std::vector<Group> const &groups() const;

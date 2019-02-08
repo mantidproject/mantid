@@ -49,13 +49,9 @@ void SavePresenter::notifySaveSelectedWorkspaces() { saveSelectedWorkspaces(); }
 
 void SavePresenter::notifySuggestSaveDir() { suggestSaveDir(); }
 
-void SavePresenter::notifyAutosaveDisabled() {
-  disableAutosave();
-}
+void SavePresenter::notifyAutosaveDisabled() { disableAutosave(); }
 
-void SavePresenter::notifyAutosaveEnabled() {
-  enableAutosave();
-}
+void SavePresenter::notifyAutosaveEnabled() { enableAutosave(); }
 
 void SavePresenter::notifySavePathChanged() { onSavePathChanged(); }
 

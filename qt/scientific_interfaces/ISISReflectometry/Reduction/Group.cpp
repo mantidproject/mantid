@@ -42,6 +42,11 @@ boost::optional<int> Group::indexOfRowWithTheta(double theta,
 
 void Group::setName(std::string const &name) { m_name = name; }
 
+void Group::resetState() {
+  for (auto &row : m_rows)
+    row->resetState();
+}
+
 bool Group::allRowsAreValid() const {
   return std::all_of(m_rows.cbegin(), m_rows.cend(),
                      [](boost::optional<Row> const &row) -> bool {

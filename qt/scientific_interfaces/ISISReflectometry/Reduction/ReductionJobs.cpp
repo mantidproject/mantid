@@ -66,6 +66,11 @@ void ReductionJobs::removeAllGroups() {
   ensureAtLeastOneGroupExists(*this);
 }
 
+void ReductionJobs::resetState() {
+  for (auto &group : m_groups)
+    group.resetState();
+}
+
 std::vector<Group> &ReductionJobs::mutableGroups() { return m_groups; }
 
 std::vector<Group> const &ReductionJobs::groups() const { return m_groups; }

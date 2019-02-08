@@ -107,6 +107,8 @@ State Row::state() const { return m_itemState.state(); }
 
 std::string Row::message() const { return m_itemState.message(); }
 
+void Row::resetState() { m_itemState.reset(); }
+
 bool Row::requiresProcessing(bool reprocessFailed) const {
   switch (state()) {
   case State::ITEM_NOT_STARTED:
