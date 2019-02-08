@@ -29,7 +29,7 @@ class ObservingPresenterTest(unittest.TestCase):
         mock_name = "dawn"
         presenter.close(mock_name)
         presenter.model.workspace_equals.assert_called_once_with(mock_name)
-        presenter.view.close_signal.emit.assert_called_once_with()
+        presenter.container.close_signal.emit.assert_called_once_with()
         self.assertIsNone(presenter.ads_observer)
 
     @with_presenter(workspaces_are_equal=False)
@@ -37,13 +37,13 @@ class ObservingPresenterTest(unittest.TestCase):
         mock_name = "dawn"
         presenter.close(mock_name)
         presenter.model.workspace_equals.assert_called_once_with(mock_name)
-        self.assertEqual(0, presenter.view.close_signal.emit.call_count)
+        self.assertEqual(0, presenter.container.close_signal.emit.call_count)
         self.assertIsNotNone(presenter.ads_observer)
 
     @with_presenter(workspaces_are_equal=False)
     def test_force_close(self, presenter):
         presenter.force_close()
-        presenter.view.close_signal.emit.assert_called_once_with()
+        presenter.container.close_signal.emit.assert_called_once_with()
         self.assertIsNone(presenter.ads_observer)
 
     @with_presenter(workspaces_are_equal=False)
@@ -54,10 +54,10 @@ class ObservingPresenterTest(unittest.TestCase):
     def test_rename_workspace(self, presenter):
         new_name = "xax"
         presenter.rename_workspace("", new_name)
-        presenter.view.rename_signal.emit.assert_called_once_with(new_name)
+        presenter.container.rename_signal.emit.assert_called_once_with(new_name)
 
     @with_presenter(workspaces_are_equal=False)
     def test_not_renaming_workspace_with_invalid_name(self, presenter):
         new_name = "xax"
         presenter.rename_workspace("", new_name)
-        self.assertEqual(0, presenter.view.rename_signal.emit.call_count)
+        self.assertEqual(0, presenter.container.rename_signal.emit.call_count)

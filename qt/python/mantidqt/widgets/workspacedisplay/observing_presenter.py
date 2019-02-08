@@ -56,4 +56,4 @@ class ObservingPresenter(object):
 
     def rename_workspace(self, old_name, new_name):
         if self.model.workspace_equals(old_name):
-            self.view.emit_rename(new_name)
+            self.container.emit_rename(new_name)
