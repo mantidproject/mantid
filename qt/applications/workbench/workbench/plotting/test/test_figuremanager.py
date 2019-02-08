@@ -7,8 +7,6 @@
 #  This file is part of the mantid workbench.
 import unittest
 
-from mantidqt.utils.qt.test.qt_widget_finder import QtWidgetFinder
-
 try:
     from unittest import MagicMock, patch
 except ImportError:
@@ -19,7 +17,7 @@ from mantidqt.utils.qt.test import GuiTest
 from workbench.plotting.figuremanager import FigureCanvasQTAgg, FigureManagerWorkbench
 
 
-class FigureManagerWorkbenchTest(GuiTest, QtWidgetFinder):
+class FigureManagerWorkbenchTest(GuiTest):
 
     @patch("workbench.plotting.qappthreadcall.QAppThreadCall")
     def test_construction(self, mock_qappthread):
@@ -29,6 +27,6 @@ class FigureManagerWorkbenchTest(GuiTest, QtWidgetFinder):
         fig_mgr = FigureManagerWorkbench(canvas, 1)
         self.assertTrue(fig_mgr is not None)
 
-    
+
 if __name__ == "__main__":
     unittest.main()
