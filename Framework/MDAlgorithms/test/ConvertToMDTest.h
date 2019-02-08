@@ -744,13 +744,9 @@ public:
         boost::lexical_cast<std::string>(sec) + " sec");
   }
 
-  void test_EventFromTOFConvBuildTreeDefault() {
-    convertAlgDefault->execute();
-  }
+  void test_EventFromTOFConvBuildTreeDefault() { convertAlgDefault->execute(); }
 
-  void test_EventFromTOFConvBuildTreeIndexed() {
-    convertAlgIndexed->execute();
-  }
+  void test_EventFromTOFConvBuildTreeIndexed() { convertAlgIndexed->execute(); }
 
   ConvertToMDTestPerformance() : Rot(3, 3) {
     numHist = 100 * 100;
@@ -825,7 +821,9 @@ public:
     alg->execute();
 
     std::vector<int> splits(3, 2);
-    convertAlgDefault = Mantid::API::AlgorithmManager::Instance().createUnmanaged("ConvertToMD");
+    convertAlgDefault =
+        Mantid::API::AlgorithmManager::Instance().createUnmanaged(
+            "ConvertToMD");
     convertAlgDefault->initialize();
     convertAlgDefault->setProperty("SplitInto", splits);
     convertAlgDefault->setProperty("SplitThreshold", 10);
@@ -836,7 +834,9 @@ public:
     convertAlgDefault->setProperty("Q3DFrames", "Q_lab");
     convertAlgDefault->setProperty("ConverterType", "Default");
 
-    convertAlgIndexed = Mantid::API::AlgorithmManager::Instance().createUnmanaged("ConvertToMD");
+    convertAlgIndexed =
+        Mantid::API::AlgorithmManager::Instance().createUnmanaged(
+            "ConvertToMD");
     convertAlgIndexed->initialize();
     convertAlgIndexed->setProperty("SplitInto", splits);
     convertAlgIndexed->setProperty("SplitThreshold", 10);
