@@ -25,7 +25,7 @@ from mantidqt.widgets.codeeditor.editor import CodeEditor
 from mantidqt.widgets.codeeditor.errorformatter import ErrorFormatter
 from mantidqt.widgets.codeeditor.execution import PythonCodeExecution
 # Status messages
-from mantidqt.widgets.inline_find_replace_dialog.presenter import InlineFindReplaceDialog
+from mantidqt.widgets.embedded_find_replace_dialog.presenter import EmbeddedFindReplaceDialog
 
 IDLE_STATUS_MSG = "Status: Idle."
 LAST_JOB_MSG_TEMPLATE = "Last job completed {} at {} in {:.3f}s"
@@ -130,7 +130,7 @@ class PythonFileInterpreter(QWidget):
 
     def show_find_replace_dialog(self):
         if self.find_replace_dialog is None:
-            self.find_replace_dialog = InlineFindReplaceDialog(self, self.editor)
+            self.find_replace_dialog = EmbeddedFindReplaceDialog(self, self.editor)
             self.layout.insertWidget(0, self.find_replace_dialog.view)
 
         self.find_replace_dialog.toggle()

@@ -19,9 +19,9 @@ class FindReplaceOptions(object):
         self.wrap_around = wrap_around
 
 
-class InlineFindReplaceDialogView(DialogBase, DialogForm):
+class EmbeddedFindReplaceDialogView(DialogBase, DialogForm):
     def __init__(self, parent, presenter):
-        super(InlineFindReplaceDialogView, self).__init__(parent)
+        super(EmbeddedFindReplaceDialogView, self).__init__(parent)
         self.setupUi(self)
         self.resize(self.width(), 100)
 
