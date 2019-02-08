@@ -668,7 +668,8 @@ bool ReflectometryWorkflowBase2::populateTransmissionProperties(
       alg->setPropertyValue("StartOverlap", getPropertyValue("StartOverlap"));
       alg->setPropertyValue("EndOverlap", getPropertyValue("EndOverlap"));
       alg->setPropertyValue("Params", getPropertyValue("Params"));
-      alg->setProperty("ScaleRHSWorkspace", getPropertyValue("ScaleRHSWorkspace"));
+      alg->setProperty("ScaleRHSWorkspace",
+                       getPropertyValue("ScaleRHSWorkspace"));
     }
   }
 

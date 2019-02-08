@@ -397,7 +397,6 @@ public:
     for (auto itr = y_counts.begin(); itr != y_counts.end(); ++itr) {
       TS_ASSERT_DELTA(3.0, *itr, 0.000001);
     }
-
   }
 
   void test_one_run_store_in_ADS() {
