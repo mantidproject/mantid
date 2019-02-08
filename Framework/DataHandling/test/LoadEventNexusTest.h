@@ -196,6 +196,25 @@ public:
 
   void test_SingleBank_PixelsOnlyInThatBank() { doTestSingleBank(true, false); }
 
+  void test_load_event_nexus_ornl_eqsans() {
+    // This file has a 2D entry/sample/name
+    const std::string file = "EQSANS_89157.nxs.h5";
+    LoadEventNexus alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("Filename", file);
+    alg.setProperty("MetaDataOnly", true);
+    alg.setProperty("OutputWorkspace", "dummy_for_child");
+    alg.execute();
+    Workspace_sptr ws = alg.getProperty("OutputWorkspace");
+    auto eventWS = boost::dynamic_pointer_cast<EventWorkspace>(ws);
+    TS_ASSERT(eventWS);
+    const double duration =
+        eventWS->mutableRun().getPropertyValueAsType<double>("duration");
+    TS_ASSERT_DELTA(duration, 7200.012, 0.01);
+  }
+
   void test_Normal_vs_Precount() {
     Mantid::API::FrameworkManager::Instance();
     LoadEventNexus ld;

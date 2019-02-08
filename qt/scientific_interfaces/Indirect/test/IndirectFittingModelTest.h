@@ -301,7 +301,7 @@ public:
 
     model->setExcludeRegion("0,1,3,4", 0, 0);
 
-    TS_ASSERT_EQUALS(model->getExcludeRegion(0, 0), "0.0,1.0,3.0,4.0");
+    TS_ASSERT_EQUALS(model->getExcludeRegion(0, 0), "0.000,1.000,3.000,4.000");
   }
 
   void
@@ -330,7 +330,7 @@ public:
 
     model->setExcludeRegion("0,1,6,4", 0, 0);
 
-    TS_ASSERT_EQUALS(model->getExcludeRegion(0, 0), "0.0,1.0,4.0,6.0");
+    TS_ASSERT_EQUALS(model->getExcludeRegion(0, 0), "0.000,1.000,4.000,6.000");
   }
 
   void
@@ -592,7 +592,7 @@ public:
 
     model->setExcludeRegion("0,1,3,4", 3, 0);
 
-    TS_ASSERT_EQUALS(model->getExcludeRegion(0, 0), "0.0,1.0,3.0,4.0");
+    TS_ASSERT_EQUALS(model->getExcludeRegion(0, 0), "0.000,1.000,3.000,4.000");
   }
 
   void

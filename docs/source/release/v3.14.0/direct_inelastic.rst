@@ -32,6 +32,7 @@ Improvements
 
 - :ref:`ComputeIncoherentDOS <algm-ComputeIncoherentDOS>` now supports computation from :math:`S(2\theta,E)` workspace.
 - The upper limit of the empty container scaling factor in :ref:`DirectILLApplySelfShielding <algm-DirectILLApplySelfShielding>` has been removed.
+- :ref:`DirectILLCollectData <algm-DirectILLCollectData>` now automatically disables incident energy calibration and normalises to time instead of monitor counts if the monitor counts are deemed too low.
 
 Bugfixes
 ########
@@ -39,6 +40,7 @@ Bugfixes
 - Fixed a bug in :ref:`DirectILLCollectData <algm-DirectILLCollectData>` which prevented the *OutputIncidentEnergyWorkspace* being generated if *IncidentEnergyCalibration* was turned off.
 - Fixed the detector :math:`2\theta` width calculation in :ref:`SofQWNormalisedPolygon <algm-SofQWNormalisedPolygon>`. The algorithm was computing the angle between the detector center and top point, not the actual :math:`2\theta` width.
 - Fixed a bug in :ref:`Rebin2D <algm-Rebin2D>` which requires that an input workspace had to have fractional area weights for the `UseFractionalArea` option to work. The behaviour is now that if the input workspace does not have fractional areas, and `UseFractionalArea` is true, then fractional area tracking will be used with input fractions set to unity.
+- :ref:`LoadILLTOF <algm-LoadILLTOF>` now properly closes the loaded file.
 
 Interfaces
 ----------

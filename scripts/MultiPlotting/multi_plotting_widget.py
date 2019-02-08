@@ -8,7 +8,7 @@ from __future__ import (absolute_import, division, print_function)
 
 from qtpy import QtWidgets, QtCore
 from copy import deepcopy
-from MultiPlotting.subplot.subPlot import subPlot
+from MultiPlotting.subplot.subplot import subplot
 from MultiPlotting.QuickEdit.quickEdit_widget import QuickEditWidget
 
 
@@ -27,7 +27,7 @@ class MultiPlotWidget(QtWidgets.QWidget):
         self.quickEdit.connect_plot_selection(self._selection_changed)
 
         # add some dummy plot
-        self.plots = subPlot(self._context)
+        self.plots = subplot(self._context)
         self.plots.connect_quick_edit_signal(self._update_quick_edit)
 
         # create GUI layout
@@ -44,6 +44,16 @@ class MultiPlotWidget(QtWidgets.QWidget):
 
     def plot(self, subplotName, ws, specNum=1):
         self.plots.plot(subplotName, ws, specNum=specNum)
+
+    def add_vline_and_annotate(self,subplotName, xvalue, label ):
+        self.add_annotate(subplotName, label)
+        self.add_vline(subplotName, xvalue, label.text)
+
+    def add_annotate(self,subplotName,label):
+        self.plots.add_annotate(subplotName,label)
+
+    def add_vline(self,subplotName, xvalue,name):
+        self.plots.add_vline(subplotName, xvalue, name)
 
     # gets inital values for quickEdit
     def set_all_values(self):

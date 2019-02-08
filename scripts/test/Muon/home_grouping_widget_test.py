@@ -14,7 +14,8 @@ from Muon.GUI.Common import mock_widget
 import unittest
 from PyQt4 import QtGui
 from Muon.GUI.Common.observer_pattern import Observer
-from mantid.api import FileFinder, AnalysisDataService
+from mantid.api import FileFinder
+from mantid import ConfigService
 import Muon.GUI.Common.utilities.load_utils as load_utils
 from Muon.GUI.Common.muon_pair import MuonPair
 
@@ -29,6 +30,7 @@ class HomeTabGroupingPresenterTest(unittest.TestCase):
     def setUp(self):
         self._qapp = mock_widget.mockQapp()
         self.obj = QtGui.QWidget()
+        ConfigService['default.instrument'] = 'MUSR'
         self.context = MuonDataContext()
         self.view = HomeGroupingWidgetView(self.obj)
         self.model = HomeGroupingWidgetModel(self.context)
@@ -37,7 +39,7 @@ class HomeTabGroupingPresenterTest(unittest.TestCase):
         self.view.warning_popup = mock.MagicMock()
         self.view.instrument_changed_warning = mock.MagicMock(return_value=1)
 
-        file_path = FileFinder.findRuns('22725')[0]
+        file_path = FileFinder.findRuns('MUSR00022725.nxs')[0]
         ws, run, filename = load_utils.load_workspace_from_filename(file_path)
         self.context._loaded_data.remove_data(run=run)
         self.context._loaded_data.add_data(run=run, workspace=ws, filename=filename)

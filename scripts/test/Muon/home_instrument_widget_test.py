@@ -26,7 +26,9 @@ class HomeTabInstrumentPresenterTest(unittest.TestCase):
         self._qapp = mock_widget.mockQapp()
         self.obj = QtGui.QWidget()
         self.context = MuonDataContext()
+        self.context.instrument = 'MUSR'
         self.view = InstrumentWidgetView(self.obj)
+        self.view.set_instrument('MUSR', block=True)
         self.model = InstrumentWidgetModel(self.context)
         self.presenter = InstrumentWidgetPresenter(self.view, self.model)
 
@@ -53,21 +55,15 @@ class HomeTabInstrumentPresenterTest(unittest.TestCase):
 
         self.assertEqual(self.model._data.instrument, 'CHRONUS')
 
-    def test_that_instrument_not_changed_is_user_responds_no(self):
-        self.view.set_instrument('CHRONUS')
-        self.view.instrument_changed_warning = mock.MagicMock(return_value=0)
-        self.view.set_instrument('MUSR')
-
-        self.assertEqual(self.model._data.instrument, 'CHRONUS')
-
     def test_that_subscribers_notified_when_instrument_changed(self):
         observer = Observer()
         observer.update = mock.MagicMock()
-        self.presenter.instrumentNotifier.add_subscriber(observer)
+        self.context.instrumentNotifier.add_subscriber(observer)
 
+        self.view.set_instrument('MUSR', block=True)
         self.view.set_instrument('CHRONUS')
 
-        observer.update.assert_called_once_with(self.presenter.instrumentNotifier, 'CHRONUS')
+        observer.update.assert_called_once_with(self.context.instrumentNotifier, 'CHRONUS')
 
     def test_that_changeing_time_zero_updates_model(self):
         time_zero = 1.23456
@@ -125,13 +121,13 @@ class HomeTabInstrumentPresenterTest(unittest.TestCase):
         self.view.rebin_steps_edit.setText('50')
         self.view.rebin_steps_edit.editingFinished.emit()
 
-        self.assertEqual(self.model._data.loaded_data['Rebin'], '50')
+        self.assertEqual(self.model._data.gui_variables['Rebin'], '50')
 
     def test_that_changeing_variable_rebin_updates_fixed_binning_in_model(self):
         self.view.rebin_variable_edit.setText('1,5,8,150')
         self.view.rebin_variable_edit.editingFinished.emit()
 
-        self.assertEqual(self.model._data.loaded_data['Rebin'], '1,5,8,150')
+        self.assertEqual(self.model._data.gui_variables['Rebin'], '1,5,8,150')
 
     # TODO Need to add validation to rebin input strings once I've worked out what they should be
 
@@ -140,7 +136,7 @@ class HomeTabInstrumentPresenterTest(unittest.TestCase):
         self.view.deadtime_selector.setCurrentIndex(0)
 
         self.assertEqual(self.view.deadtime_label_3.text(), self.presenter.dead_time_from_data_text([0.0]))
-        self.assertEqual(self.model._data.loaded_data["DeadTimeTable"], None)
+        self.assertEqual(self.model._data.current_data["DeadTimeTable"], None)
 
     def test_that_on_deadtime_data_selected_updates_with_no_loaded_data(self):
         self.view.deadtime_selector.setCurrentIndex(1)

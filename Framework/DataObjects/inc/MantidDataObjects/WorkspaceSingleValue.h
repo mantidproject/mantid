@@ -48,8 +48,13 @@ public:
   /// @return the number of histograms (spectra)
   std::size_t getNumberHistograms() const override { return 1; }
 
-  Histogram1D &getSpectrum(const size_t index) override;
-  const Histogram1D &getSpectrum(const size_t index) const override;
+  Histogram1D &getSpectrum(const size_t index) override {
+    invalidateCommonBinsFlag();
+    return getSpectrumWithoutInvalidation(index);
+  }
+  const Histogram1D &getSpectrum(const size_t /*index*/) const override {
+    return data;
+  }
 
   void generateHistogram(const std::size_t index, const MantidVec &X,
                          MantidVec &Y, MantidVec &E,
@@ -74,7 +79,7 @@ private:
   void init(const std::size_t &NVectors, const std::size_t &XLength,
             const std::size_t &YLength) override;
   void init(const HistogramData::Histogram &histogram) override;
-
+  Histogram1D &getSpectrumWithoutInvalidation(const size_t index) override;
   /// Instance of Histogram1D that holds the "spectrum" (AKA the single value);
   Histogram1D data{HistogramData::Histogram::XMode::Points,
                    HistogramData::Histogram::YMode::Counts};

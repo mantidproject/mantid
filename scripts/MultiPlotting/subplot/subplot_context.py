@@ -8,7 +8,7 @@ from copy import copy
 # to recover plot when using the plot selector
 
 
-class subPlotContext(object):
+class subplotContext(object):
 
     def __init__(self, name, subplot):
         self.name = name
@@ -17,6 +17,31 @@ class subPlotContext(object):
         self._lines = {}
         self._specNum = {}
         self._errors = False
+        self._vLines = {}
+        self._labelObjects = {}
+        self._labels = {}
+
+    def add_vline(self, xvalue, name):
+        self._vLines[name] = self._subplot.axvline(xvalue, 0, 1)
+
+    def add_annotate(self, label):
+        self._labelObjects[label.text] = label
+        x_range = self._subplot.get_xlim()
+        y_range = self._subplot.get_ylim()
+        if label.in_x_range(x_range):
+            self._labels[label.text] = self._subplot.annotate(
+                label.text,
+                xy=(label.get_xval(x_range),
+                    label.get_yval(y_range)),
+                xycoords="axes fraction",
+                rotation=label.rotation)
+
+    def redraw_annotations(self):
+        for key in list(self._labels.keys()):
+            self._labels[key].remove()
+            del self._labels[key]
+        for label in list(self._labelObjects.keys()):
+            self.add_annotate(self._labelObjects[label])
 
     def addLine(self, ws, specNum=1):
         # make plot/get label
@@ -62,16 +87,29 @@ class subPlotContext(object):
 
     def change_errors(self, state):
         self._errors = state
-        for label in self._lines.keys():
+        for label in list(self._lines.keys()):
             self.redraw(label)
 
     def change_auto(self, state):
-        for label in self._lines.keys():
+        for label in list(self._lines.keys()):
             self._subplot.autoscale(enable=state, axis="y")
+            self.redraw_annotations()
 
     @property
     def lines(self):
         return self._lines
+
+    @property
+    def vlines(self):
+        # only return unprotected vlines and annotations
+        vlines = []
+        for name in list(self._labelObjects.keys()):
+            if not self._labelObjects[name].protected:
+                vlines.append(name)
+        for name in list(self._vLines.keys()):
+            if name not in self._labelObjects.keys():
+                vlines.append(name)
+        return vlines
 
     @property
     def ws(self):
@@ -99,6 +137,14 @@ class subPlotContext(object):
                 return ws
 
     def removeLine(self, name):
+        if name in list(self._lines.keys()):
+            self.removePlotLine(name)
+        if name in list(self._vLines.keys()):
+            self.removeVLine(name)
+        if name in list(self._labelObjects.keys()):
+            self.removeLabel(name)
+
+    def removePlotLine(self, name):
         lines = self._lines[name]
         for line in lines:
             line.remove()
@@ -115,7 +161,24 @@ class subPlotContext(object):
         for key in to_delete:
             del self._ws[key]
 
+    def removeVLine(self, name):
+        line = self._vLines[name]
+        line.remove()
+        del self._vLines[name]
+
+    def removeLabel(self, name):
+        label = self._labels[name]
+        label.remove()
+        del self._labels[name]
+        del self._labelObjects[name]
+
     def delete(self):
-        keys = self._lines.keys()
+        keys = list(self._lines.keys())
         for label in keys:
             self.removeLine(label)
+        keys = list(self._vLines.keys())
+        for label in keys:
+            self.removeLine(label)
+        keys = list(self._labelObjects.keys())
+        for label in keys:
+            self.removeLabel(label)
