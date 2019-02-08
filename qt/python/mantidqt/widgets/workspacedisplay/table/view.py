@@ -37,7 +37,6 @@ class PreciseDoubleFactory(QItemEditorFactory):
 
 
 class TableWorkspaceDisplayView(QTableWidget, ObservingView):
-    rename_signal = Signal(str)
     repaint_signal = Signal()
 
     def __init__(self, presenter, parent=None):
@@ -56,7 +55,6 @@ class TableWorkspaceDisplayView(QTableWidget, ObservingView):
 
         self.setAttribute(Qt.WA_DeleteOnClose, True)
 
-        self.rename_signal.connect(self._run_rename)
         self.repaint_signal.connect(self._run_repaint)
 
         header = self.horizontalHeader()
@@ -73,10 +71,6 @@ class TableWorkspaceDisplayView(QTableWidget, ObservingView):
     @Slot()
     def _run_repaint(self):
         self.viewport().update()
-
-    @Slot(str)
-    def _run_rename(self, new_name):
-        self._rename(new_name)
 
     def handle_double_click(self, section):
         header = self.horizontalHeader()

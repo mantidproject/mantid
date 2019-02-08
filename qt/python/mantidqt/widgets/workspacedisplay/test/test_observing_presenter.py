@@ -24,6 +24,9 @@ def with_presenter(workspaces_are_equal=True):
 
 
 class ObservingPresenterTest(unittest.TestCase):
+    def assertNotCalled(self, mock):
+        self.assertEqual(0, mock.call_count)
+
     @with_presenter()
     def test_close(self, presenter):
         mock_name = "dawn"
@@ -60,4 +63,4 @@ class ObservingPresenterTest(unittest.TestCase):
     def test_not_renaming_workspace_with_invalid_name(self, presenter):
         new_name = "xax"
         presenter.rename_workspace("", new_name)
-        self.assertEqual(0, presenter.container.rename_signal.emit.call_count)
+        self.assertNotCalled(presenter.view.rename_signal)

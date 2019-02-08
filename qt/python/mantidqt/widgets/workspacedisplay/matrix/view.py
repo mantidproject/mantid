@@ -12,7 +12,7 @@ from __future__ import (absolute_import, division, print_function)
 from functools import partial
 
 from qtpy import QtGui
-from qtpy.QtCore import Qt, Signal, Slot
+from qtpy.QtCore import Qt
 from qtpy.QtGui import QKeySequence
 from qtpy.QtWidgets import (QAbstractItemView, QAction, QHeaderView, QMessageBox, QTabWidget, QTableView)
 
@@ -41,7 +41,6 @@ class MatrixWorkspaceTableView(QTableView):
 
 
 class MatrixWorkspaceDisplayView(QTabWidget, ObservingView):
-    rename_signal = Signal(str)
 
     def __init__(self, presenter, parent=None):
         super(MatrixWorkspaceDisplayView, self).__init__(parent)
@@ -67,12 +66,6 @@ class MatrixWorkspaceDisplayView(QTabWidget, ObservingView):
         self.table_y = self.add_table("Y values")
         self.table_x = self.add_table("X values")
         self.table_e = self.add_table("E values")
-
-        self.rename_signal.connect(self._run_rename)
-
-    @Slot(str)
-    def _run_rename(self, new_name):
-        self._rename(new_name)
 
     def add_table(self, label):
         tab = MatrixWorkspaceTableView(self)
