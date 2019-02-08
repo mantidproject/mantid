@@ -10,6 +10,7 @@
 import os
 import getpass
 from threading import Timer
+import time
 import datetime
 from glob import glob
 import shutil
@@ -25,17 +26,24 @@ from mantidqt.project.recovery.recoverygui.projectrecoverypresenter import Proje
 from mantid.simpleapi import OrderWorkspaceHistory, AlgorithmManager
 
 
+SAVING_TIME_KEY = "projectRecovery.secondsBetween"
+NO_OF_CHECKPOINTS_KEY = "projectRecovery.numberOfCheckpoints"
+RECOVERY_ENABLED_KEY = "projectRecovery.enabled"
+
+
 class ProjectRecovery(object):
     def __init__(self, globalfiguremanager, window_finder, multifileinterpreter):
         self.recovery_directory = os.path.join(ConfigService.getAppDataDirectory(), "workbench-recovery")
         self.recovery_directory_hostname = os.path.join(self.recovery_directory, getpass.getuser())
         self.recovery_directory_pid = os.path.join(self.recovery_directory_hostname, str(os.getpid()))
 
-        self.recovery_order_workspace_history_file = os.path.join(ConfigService.getAppDataDirectory(), "ordered_recovery.py")
+        self.recovery_order_workspace_history_file = os.path.join(ConfigService.getAppDataDirectory(),
+                                                                  "ordered_recovery.py")
 
-        self.maximum_num_checkpoints = 5
+        self.recovery_enabled = ConfigService[RECOVERY_ENABLED_KEY]
+        self.maximum_num_checkpoints = ConfigService[NO_OF_CHECKPOINTS_KEY]
+        self.time_between_saves = ConfigService[SAVING_TIME_KEY]  # seconds
 
-        self.time_between_saves = 5.0  # seconds
         self._timer_thread = Timer(self.time_between_saves, self.recovery_save)
 
         self.recovery_file_ext = ".recfile"
@@ -45,6 +53,8 @@ class ProjectRecovery(object):
         self.interface_finding_func = window_finder
         self.multi_file_interpreter = multifileinterpreter
 
+        # To ignore an algorithm in project recovery please put it's name here. e.g. MonitorLiveData is ignored because
+        # StartLiveData is the only one that is needed to restart this workspace.
         self.algs_to_ignore = ["MonitorLiveData", "EnggSaveGSASIIFitResultsToHDF5",
                                "EnggSaveSinglePeakFitResultsToHDF5", "ExampleSaveAscii", "SANSSave", "SaveANSTOAscii",
                                "SaveAscii", "SaveBankScatteringAngles", "SaveCSV", "SaveCalFile", "SaveCanSAS1D",
@@ -78,6 +88,10 @@ class ProjectRecovery(object):
     ######################################################
 
     def start_recovery_thread(self):
+        if not self.recovery_enabled:
+            logger.debug("Project Recovery: Recovery thread not started as recovery is disabled")
+            return
+
         if not self.thread_on:
             self._timer_thread.start()
             self.thread_on = True
@@ -97,8 +111,14 @@ class ProjectRecovery(object):
                 # Fail silently as expected for all folders
                 pass
 
-    @staticmethod
-    def _remove_all_folders_from_dir(directory):
+    def _remove_all_folders_from_dir(self, directory):
+        if directory is None or not os.path.exists(directory):
+            return
+
+        # Only allow deleting in subdirectories of workbench-recovery
+        if self.recovery_directory not in directory:
+            raise RuntimeError("Project Recovery: Only allowed to delete trees in the recovery directory")
+
         shutil.rmtree(directory)
 
     @staticmethod
@@ -148,7 +168,8 @@ class ProjectRecovery(object):
             logger.debug("Project Recovery: Saving started")
 
             # Create directory for save location
-            recovery_dir = os.path.join(self.recovery_directory_pid, datetime.datetime.now().isoformat())
+            recovery_dir = os.path.join(self.recovery_directory_pid,
+                                        datetime.datetime.fromtimestamp(time.time()).strftime('%d-%m-%YT%H:%M:%S'))
             if not os.path.exists(recovery_dir):
                 os.makedirs(recovery_dir)
 
@@ -370,7 +391,7 @@ class ProjectRecovery(object):
             # Order paths in reverse and remove the last folder from existance
             paths.sort(reverse=True)
             for ii in range(self.maximum_num_checkpoints, len(paths)):
-                shutil.rmtree(paths[ii])
+                self._remove_all_folders_from_dir(paths[ii])
 
     def clear_all_unused_checkpoints(self, pid_dir=None):
         if pid_dir is None:
@@ -384,7 +405,7 @@ class ProjectRecovery(object):
             path = pid_dir
         if os.path.exists(path):
             try:
-                shutil.rmtree(path)
+                self._remove_all_folders_from_dir(path)
             except Exception as e:
                 if isinstance(e, KeyboardInterrupt):
                     raise
@@ -392,24 +413,35 @@ class ProjectRecovery(object):
                     # Fail silently because it is just over diligent calls to clear checkpoints
                     pass
 
-    # todo: Function for deleting all checkpoints
+    def repair_checkpoints(self):
+        pid_dirs = self.listdir_fullpath(self.recovery_directory_hostname)
 
-    # todo: function to load recovery checkpoint given directory
+        dirs_to_delete = []
 
-    # todo: function for putting script in new editor tab
-        # todo: function must also setup progress bar of the recoveryGUI with line length
+        dirs_to_delete += self._find_checkpoints_older_than_a_month(pid_dirs)
+        dirs_to_delete += self._find_checkpoints_which_are_locked(pid_dirs)
 
-    # todo: Implement repair of checkpoint directory
-        # todo: function to find all older checkpoints
-            # todo: function to check if a checkpoint is older than a given time
-        # todo: function to check if a directory is locked
+        for dir in dirs_to_delete:
+            self._remove_all_folders_from_dir(dir)
 
-    # todo: Function to check if recovery checkpoint PIDs are not in use and remove them if they are
+        # Now the checkpoints have been deleted we may have PID directories with no checkpoints present so delete them
+        self._remove_empty_folders_from_dir(self.recovery_directory_hostname)
 
-    # todo: Function to remove folders in they are empty from a list of dicrectories
+    @staticmethod
+    def _find_checkpoints_older_than_a_month(pid_dirs):
+        old_pids = []
+        for pid_dir in pid_dirs:
+            last_modified = os.path.getmtime(pid_dir)
+            # If pid folder hasn't been touched in 30 days delete it
+            if last_modified < time.time() - (30*86400):
+                old_pids.append(pid_dir)
+        return old_pids
 
-    # todo: Shorten saved time and dates to removed micro and milli seconds
-
-    # todo: Remove checkpoint of current pid on successful save
-
-    # todo: Update status on abort of script on the status bar of script editor
+    def _find_checkpoints_which_are_locked(self, pid_dirs):
+        locked_checkpoints = []
+        for pid_dir in pid_dirs:
+            checkpoints = self.listdir_fullpath(pid_dir)
+            for checkpoint in checkpoints:
+                if os.path.isfile(os.path.join(checkpoint, self.lock_file_name)):
+                    locked_checkpoints.append(checkpoint)
+        return locked_checkpoints
