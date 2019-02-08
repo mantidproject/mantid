@@ -4,10 +4,9 @@
 # NScD Oak Ridge National Laboratory, European Spallation Source
 # & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=invalid-name,no-init
-"""
-System test that loads short SXD numors and runs LinkedUBs.
-"""
+# pylint: disable=invalid-name,no-init
+# System test that loads short SXD numors and runs LinkedUBs.
+
 from __future__ import (absolute_import, division, print_function)
 import systemtesting
 from mantid.simpleapi import *
@@ -22,11 +21,12 @@ class LinkedUBs_Test(systemtesting.MantidSystemTest):
 
         ws2 = LoadRaw(Filename='SXD30905.raw.md5', OutputWorkspace='SXD30905')
 
-        UB1 = np.array([[ 0.00099434,  0.17716870, -0.00397909],
-                        [ 0.17703120, -0.00117345, -0.00800899],
+        UB1 = np.array([[0.00099434,  0.17716870, -0.00397909],
+                        [0.17703120, -0.00117345, -0.00800899],
                         [-0.00803319, -0.00393000, -0.17699037]])
 
         SetUB(ws1, UB=UB1)
+
         SetGoniometer(Workspace=ws1, Axis0='-206,0,1,0,-1')
         PredictPeaks(InputWorkspace=ws1,
                      WavelengthMin=0.2,
@@ -69,17 +69,17 @@ class LinkedUBs_Test(systemtesting.MantidSystemTest):
                         [0.17702963,  0.0028714,  -0.00762388],
                         [0.0056306,   0.07673189,  0.15964452]])
 
-        linkedUB = mtd['SXD30905_linked_peaks'].sample().getOrientedLattice().getUB()
+        linked_peaks = mtd['SXD30905_linked_peaks']
+        linked_UB = linked_peaks.sample().getOrientedLattice().getUB()
 
-        diff = linkedUB - UB2
+        diff = linked_UB - UB2
         print(diff)
 
         for i in range(len(diff)):
             for j in range(len(diff)):
-                if abs(diff[i,j]) > 1e-7:
+                if abs(diff[i, j]) > 1e-7:
                     raise Exception(
-                        "More than 1e-7 difference between UB matrices: Q (lab frame):\n%s\nQ (sample frame):\n%s" %
-                        (linkedUB, UB2))
+                      "More than 1e-7 difference between UB matrices")
 
     def doValidation(self):
         # If we reach here, no validation failed

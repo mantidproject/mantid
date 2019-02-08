@@ -52,14 +52,14 @@ class LinkedUBs(DataProcessorAlgorithm):
     def PyInit(self):
         # Refinement parameters
         self.declareProperty(
-            name="qTolerance",
+            name="QTolerance",
             defaultValue=0.5,
             direction=Direction.Input,
             validator=FloatBoundedValidator(
                 lower=0.0),
             doc="Radius of isotropic q envelope to search within.")
         self.declareProperty(
-            name="qDecrement",
+            name="QDecrement",
             defaultValue=0.95,
             validator=FloatBoundedValidator(
                 lower=0.0,
@@ -68,15 +68,15 @@ class LinkedUBs(DataProcessorAlgorithm):
             doc="Multiplicative factor by which to decrement q envelope\
              on each iteration.")
         self.declareProperty(
-            name="dTolerance",
+            name="DTolerance",
             defaultValue=0.01,
             direction=Direction.Input,
             validator=FloatBoundedValidator(
                 lower=0.0),
             doc="Observed peak is linked if\
-             |dSpacing| < dPredicted + dTolerance.")
+             abs(dSpacing) < dPredicted + dTolerance.")
         self.declareProperty(
-            name="numPeaks",
+            name="NumPeaks",
             defaultValue=15,
             direction=Direction.Input,
             validator=IntBoundedValidator(
@@ -84,7 +84,7 @@ class LinkedUBs(DataProcessorAlgorithm):
             doc="Number of peaks, ordered from highest to lowest \
             dSpacing to consider.")
         self.declareProperty(
-            name="peakIncrement",
+            name="PeakIncrement",
             defaultValue=10,
             validator=IntBoundedValidator(
                 lower=0),
@@ -216,11 +216,11 @@ class LinkedUBs(DataProcessorAlgorithm):
             doc="Delete workspace after execution for memory management.")
 
         # groupings
-        self.setPropertyGroup("qTolerance", "Refinement parameters")
-        self.setPropertyGroup("qDecrement", "Refinement parameters")
-        self.setPropertyGroup("dTolerance", "Refinement parameters")
-        self.setPropertyGroup("numPeaks", "Refinement parameters")
-        self.setPropertyGroup("peakIncrement", "Refinement parameters")
+        self.setPropertyGroup("QTolerance", "Refinement parameters")
+        self.setPropertyGroup("QDecrement", "Refinement parameters")
+        self.setPropertyGroup("DTolerance", "Refinement parameters")
+        self.setPropertyGroup("NumPeaks", "Refinement parameters")
+        self.setPropertyGroup("PeakIncrement", "Refinement parameters")
         self.setPropertyGroup("Iterations", "Refinement parameters")
         self.setPropertyGroup("a", "Lattice")
         self.setPropertyGroup("b", "Lattice")
@@ -246,11 +246,11 @@ class LinkedUBs(DataProcessorAlgorithm):
         return issues
 
     def _get_properties(self):
-        self._qtol = self.getProperty("qTolerance").value
-        self._qdecrement = self.getProperty("qDecrement").value
-        self._dtol = self.getProperty("dTolerance").value
-        self._num_peaks = self.getProperty("numPeaks").value
-        self._peak_increment = self.getProperty("peakIncrement").value
+        self._qtol = self.getProperty("QTolerance").value
+        self._qdecrement = self.getProperty("QDecrement").value
+        self._dtol = self.getProperty("DTolerance").value
+        self._num_peaks = self.getProperty("NumPeaks").value
+        self._peak_increment = self.getProperty("PeakIncrement").value
         self._iterations = self.getProperty("Iterations").value
         self._a = self.getProperty("a").value
         self._b = self.getProperty("b").value
@@ -330,14 +330,11 @@ class LinkedUBs(DataProcessorAlgorithm):
                     qx_pred, qy_pred, qz_pred = q_ordered[j]
                     d_pred = d_ordered[j]
 
-                    if (qx_pred - qtol_var <= qx_obs <= qx_pred
-                        + qtol_var and qy_pred
-                        - qtol_var <= qy_obs <= qy_pred
-                        + qtol_var and qz_pred
-                        - qtol_var <= qz_obs <= qz_pred
-                        + qtol_var and d_pred
-                        - self._dtol <= d_obs <= d_pred
-                            + self._dtol):
+                    if (qx_pred - qtol_var <= qx_obs <= qx_pred +
+                        qtol_var and qy_pred - qtol_var <= qy_obs <= qy_pred +
+                        qtol_var and qz_pred - qtol_var <= qz_obs <= qz_pred +
+                        qtol_var and d_pred - self._dtol <= d_obs <= d_pred +
+                            self._dtol):
                         h, k, l = HKL_ordered[j]
                         p_obs.setHKL(h, k, l)
                         linked_peaks.addPeak(p_obs)
