@@ -63,7 +63,7 @@ Input File
   :math:`S(Q, \omega)`.
 
 Group Input
-  The :ref:`ElasticWindowMultiple <algm-ElasticWindowMultiple>` algorithm is performed on the inputed files and returns a group
+  The :ref:`ElasticWindowMultiple <algm-ElasticWindowMultiple>` algorithm is performed on the input files and returns a group
   workspace as the output. This option, if unchecked, will ungroup these output workspaces.
 
 Load History

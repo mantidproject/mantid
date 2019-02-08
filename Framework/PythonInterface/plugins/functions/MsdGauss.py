@@ -17,7 +17,7 @@ import numpy as np
 from mantid.api import IFunction1D, FunctionFactory
 
 
-# For a Gaussian distribution the elastic intensity is proportional to exp(-msd*Q^2)
+# For a Gaussian distribution the elastic intensity is proportional to exp(-(msd*Q^2)/6)
 # where the mean square displacement msd = <r^2>.
 
 class MsdGauss(IFunction1D):

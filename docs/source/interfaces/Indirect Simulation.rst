@@ -92,7 +92,7 @@ Run
   Runs the processing configured on the current tab.
 
 Plot Result
-  If clicked will create a spectra plot of the outputted data.
+  If clicked will create a spectra plot of the output data.
 
 Save Result
   Saves the result in the default save directory.

@@ -32,7 +32,7 @@ Manage Directories
 Container Subtraction
 ---------------------
 
-The Container Subtraction Tab is used to remove the containers contribution to a run.
+The Container Subtraction Tab is used to remove the container's contribution to a run.
 
 Once run the corrected output and can correction is shown in the preview plot. Note 
 that when this plot shows the result of a calculation the X axis is always in wavelength, 
@@ -55,7 +55,7 @@ Container
   Either a reduced file (_red.nxs) or workspace (_red) or an S(Q,\omega) file (_sqw.nxs) or workspace (_sqw) that represents the container.
   
 Scale Container by Factor
-  Allows the containers intensity to be scaled by a given scale factor before being used in the corrections calculation.
+  Allows the container's intensity to be scaled by a given scale factor before being used in the corrections calculation.
 
 Shift X-values by Adding
   Allows the X-values to be shifted by a specified amount.

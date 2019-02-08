@@ -98,7 +98,7 @@ Use Map & Map File
   Allows the filtering of spectra using a map file.
 
 Reject Zero
-  If selected it will remove any spectra that have no counts.
+  If selected, it will remove any spectra that have no counts.
 
 Run
   Runs the processing configured on the current tab.
