@@ -41,11 +41,9 @@ from sans.gui_logic.presenter.summation_settings_presenter import SummationSetti
 from ui.sans_isis.work_handler import WorkHandler
 from ui.sans_isis.SANSSaveOtherWindow import SANSSaveOtherDialog
 
-try:
+from qtpy import PYQT4
+if PYQT4:
     from pymantidplot import proxies
-    QT4 = True
-except ImportError:
-    QT4 = False
 
 DEFAULT_BIN_SETTINGS = \
     '5.5,45.5,50.0, 50.0,1000.0, 500.0,1500.0, 750.0,99750.0, 255.0,100005.0'
@@ -510,7 +508,7 @@ class SANSDataProcessorGui(QMainWindow,
         self._call_settings_listeners(lambda listener: listener.on_compatibility_unchecked())
 
     def _on_help_button_clicked(self):
-        if QT4:
+        if PYQT4:
             proxies.showCustomInterfaceHelp('ISIS SANS v2')
 
     def _on_user_file_load(self):

@@ -46,12 +46,9 @@ from ui.sans_isis import SANSSaveOtherWindow
 from ui.sans_isis.sans_data_processor_gui import SANSDataProcessorGui
 from ui.sans_isis.work_handler import WorkHandler
 
-try:
-    import mantidplot
-except (Exception, Warning):
-    mantidplot = None
-    # this should happen when this is called from outside Mantidplot and only then,
-    # the result is that attempting to plot will raise an exception
+from qtpy import PYQT4
+if PYQT4:
+    from mantidplot import graph, newGraph
 
 row_state_to_colour_mapping = {RowState.Unprocessed: '#FFFFFF', RowState.Processed: '#d0f4d0',
                                RowState.Error: '#accbff'}
@@ -475,12 +472,12 @@ class RunTabPresenter(object):
 
     def _plot_graph(self):
         """
-        Plot a graph if continuous output specified
+        Plot a graph if continuous output specified.
+        This is currently not available in Workbench
         """
-        # Create the graph if continuous output is specified
-        if mantidplot:
-            if self._view.plot_results and not mantidplot.graph(self.output_graph):
-                mantidplot.newGraph(self.output_graph)
+        if PYQT4:
+            if self._view.plot_results and not graph(self.output_graph):
+                newGraph(self.output_graph)
 
     def _set_progress_bar_min_max(self, min, max):
         """

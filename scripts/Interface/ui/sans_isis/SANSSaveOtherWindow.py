@@ -10,11 +10,9 @@ from mantidqt.utils.qt import load_ui
 from mantidqt.widgets.workspacewidget import workspacetreewidget
 from sans.common.enums import SaveType
 
-try:
+from qtpy import PYQT4
+if PYQT4:
     from pymantidplot import proxies
-    QT4 = True
-except ImportError:
-    QT4 = False
 
 
 Ui_SaveOtherDialog, _ = load_ui(__file__, "save_other_dialog.ui")
@@ -97,7 +95,7 @@ class SANSSaveOtherDialog(QtWidgets.QDialog, Ui_SaveOtherDialog):
         self.filename_label.setText(name)
 
     def _on_help_button_clicked(self):
-        if QT4:
+        if PYQT4:
             proxies.showCustomInterfaceHelp('sans_save_other')
 
     @property
