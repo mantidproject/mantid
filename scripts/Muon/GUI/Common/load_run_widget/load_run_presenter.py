@@ -24,7 +24,7 @@ class LoadRunWidgetPresenter(object):
         self._use_threading = True
         self._multiple_file_mode = "Simultaneous"
 
-        self._instrument = ""
+        self._instrument = self._model._context.instrument
         self._view.set_current_instrument(self._instrument)
 
         self.run_list = []
@@ -137,9 +137,9 @@ class LoadRunWidgetPresenter(object):
             return
         new_run = max(self.run_list)
 
-        # if self._model.current_run and new_run > self._model.current_run[0]:
-        #     self._view.warning_popup("Requested run exceeds the current run for this instrument")
-        #     return
+        if self._model.current_run and new_run > self._model.current_run[0]:
+            self._view.warning_popup("Requested run exceeds the current run for this instrument")
+            return
 
         file_name = file_utils.file_path_for_instrument_and_run(self.get_current_instrument(), new_run)
         self.load_runs([file_name])
@@ -219,8 +219,9 @@ class LoadRunWidgetPresenter(object):
         self.on_loading_finished()
 
     def on_loading_finished(self):
-        if self.run_list[0] == 'Current':
-            self.run_list = [self._model._loaded_data_store.get_latest_data['run']]
+        if self.run_list and self.run_list[0] == 'Current':
+            self.run_list = [self._model._loaded_data_store.get_latest_data()['run']][0]
+            self._model.current_run = self.run_list
 
         if self._load_multiple_runs and self._multiple_file_mode == "Co-Add":
             run_list_to_add = [run for run in self.run_list if self._model._loaded_data_store.get_data(run=[run])]
@@ -231,5 +232,6 @@ class LoadRunWidgetPresenter(object):
 
         self._model._context.current_runs = run_list
 
+        self.update_view_from_model(run_list)
         self._view.notify_loading_finished()
         self.enable_loading()

@@ -128,6 +128,6 @@ class MuonLoadData:
         if self.num_items() > 0:
             return self.params[-1]
         else:
-            ret = {key: None for key in self.params.keys()}
+            ret = self.defaults
             ret["workspace"] = load_utils.empty_loaded_data()
             return ret
