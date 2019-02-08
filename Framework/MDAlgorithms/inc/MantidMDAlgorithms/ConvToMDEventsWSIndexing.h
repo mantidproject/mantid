@@ -38,7 +38,7 @@ class ConvToMDEventsWSIndexing : public ConvToMDEventsWS {
                                const API::BoxController_sptr &bc) override;
 
 public:
-  template<typename T>
+  template <typename T>
   static bool isSplitValid(const std::vector<T> &split_into) {
     bool validSplitInfo = !split_into.empty();
     if (validSplitInfo) {
