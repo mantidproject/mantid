@@ -572,8 +572,8 @@ class ConvertToMDTestPerformance : public CxxTest::TestSuite {
   Mantid::API::MatrixWorkspace_sptr inWs2D;
   Mantid::API::MatrixWorkspace_sptr inWsEv;
 
-  Mantid::API::Algorithm_sptr convertAlgDefault;
-  Mantid::API::Algorithm_sptr convertAlgIndexed;
+  Mantid::MDAlgorithms::ConvertToMD convertAlgDefault;
+  Mantid::MDAlgorithms::ConvertToMD convertAlgIndexed;
 
   WorkspaceCreationHelper::MockAlgorithm reporter;
 
@@ -744,10 +744,25 @@ public:
         boost::lexical_cast<std::string>(sec) + " sec");
   }
 
-  void test_EventFromTOFConvBuildTreeDefault() { convertAlgDefault->execute(); }
+  void test_EventFromTOFConvBuildTreeDefault() { convertAlgDefault.execute(); }
 
-  void test_EventFromTOFConvBuildTreeIndexed() { convertAlgIndexed->execute(); }
+  void test_EventFromTOFConvBuildTreeIndexed() { convertAlgIndexed.execute(); }
 
+  static void setUpConvAlg(Mantid::MDAlgorithms::ConvertToMD &convAlg,
+		  const std::string &type,
+		  const std::string &inName){	    
+    std::vector<int> splits(3, 2);
+    convAlg.initialize();
+    convAlg.setProperty("SplitInto", splits);
+    convAlg.setProperty("SplitThreshold", 10);
+    convAlg.setPropertyValue("InputWorkspace", inName);
+    convAlg.setPropertyValue("OutputWorkspace", "wsDefault");
+    convAlg.setProperty("QDimensions", "Q3D");
+    convAlg.setProperty("dEAnalysisMode", "Elastic");
+    convAlg.setProperty("Q3DFrames", "Q_lab");
+    convAlg.setProperty("ConverterType", type);
+  }
+  
   ConvertToMDTestPerformance() : Rot(3, 3) {
     numHist = 100 * 100;
     size_t nEvents = 1000;
@@ -820,32 +835,8 @@ public:
     alg->setPropertyValue("OutputWorkspace", inWsSampleName);
     alg->execute();
 
-    std::vector<int> splits(3, 2);
-    convertAlgDefault =
-        Mantid::API::AlgorithmManager::Instance().createUnmanaged(
-            "ConvertToMD");
-    convertAlgDefault->initialize();
-    convertAlgDefault->setProperty("SplitInto", splits);
-    convertAlgDefault->setProperty("SplitThreshold", 10);
-    convertAlgDefault->setPropertyValue("InputWorkspace", inWsSampleName);
-    convertAlgDefault->setPropertyValue("OutputWorkspace", "wsDefault");
-    convertAlgDefault->setProperty("QDimensions", "Q3D");
-    convertAlgDefault->setProperty("dEAnalysisMode", "Elastic");
-    convertAlgDefault->setProperty("Q3DFrames", "Q_lab");
-    convertAlgDefault->setProperty("ConverterType", "Default");
-
-    convertAlgIndexed =
-        Mantid::API::AlgorithmManager::Instance().createUnmanaged(
-            "ConvertToMD");
-    convertAlgIndexed->initialize();
-    convertAlgIndexed->setProperty("SplitInto", splits);
-    convertAlgIndexed->setProperty("SplitThreshold", 10);
-    convertAlgIndexed->setPropertyValue("InputWorkspace", inWsSampleName);
-    convertAlgIndexed->setPropertyValue("OutputWorkspace", "wsIndexed");
-    convertAlgIndexed->setProperty("QDimensions", "Q3D");
-    convertAlgIndexed->setProperty("dEAnalysisMode", "Elastic");
-    convertAlgIndexed->setProperty("Q3DFrames", "Q_lab");
-    convertAlgIndexed->setProperty("ConverterType", "Indexed");
+    setUpConvAlg(convertAlgDefault, "Default", inWsSampleName);
+    setUpConvAlg(convertAlgIndexed, "Indexed", inWsSampleName);
   }
 };
 
