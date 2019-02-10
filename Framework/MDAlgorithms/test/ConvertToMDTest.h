@@ -749,8 +749,7 @@ public:
   void test_EventFromTOFConvBuildTreeIndexed() { convertAlgIndexed.execute(); }
 
   static void setUpConvAlg(Mantid::MDAlgorithms::ConvertToMD &convAlg,
-		  const std::string &type,
-		  const std::string &inName){	    
+                           const std::string &type, const std::string &inName) {
     std::vector<int> splits(3, 2);
     convAlg.initialize();
     convAlg.setProperty("SplitInto", splits);
@@ -762,7 +761,7 @@ public:
     convAlg.setProperty("Q3DFrames", "Q_lab");
     convAlg.setProperty("ConverterType", type);
   }
-  
+
   ConvertToMDTestPerformance() : Rot(3, 3) {
     numHist = 100 * 100;
     size_t nEvents = 1000;
