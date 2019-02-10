@@ -4,11 +4,8 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Run.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/LoadPLN.h"
-#include "MantidDataObjects/WorkspaceSingleValue.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
