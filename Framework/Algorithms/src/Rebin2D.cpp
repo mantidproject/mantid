@@ -121,19 +121,16 @@ void Rebin2D::exec() {
     useFractionalArea = true;
   }
 
-  MatrixWorkspace_sptr outputWS =
+  auto outputWS =
       createOutputWorkspace(inputWS, newXBins, newYBins, useFractionalArea);
   auto outputRB = boost::dynamic_pointer_cast<RebinnedOutput>(outputWS);
 
   // Progress reports & cancellation
   const size_t nreports(static_cast<size_t>(numYBins));
-  m_progress = boost::shared_ptr<API::Progress>(
-      new API::Progress(this, 0.0, 1.0, nreports));
+  m_progress = std::make_unique<API::Progress>(this, 0.0, 1.0, nreports);
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
-  for (int64_t i = 0; i < static_cast<int64_t>(numYBins);
-       ++i) // signed for openmp
-  {
+  for (int64_t i = 0; i < static_cast<int64_t>(numYBins); ++i) {
     PARALLEL_START_INTERUPT_REGION
 
     m_progress->report("Computing polygon intersections");
@@ -161,7 +158,7 @@ void Rebin2D::exec() {
     outputRB->finalize(true, true);
   }
 
-  FractionalRebinning::normaliseOutput(outputWS, inputWS, m_progress);
+  FractionalRebinning::normaliseOutput(outputWS, inputWS, m_progress.get());
 
   bool Transpose = this->getProperty("Transpose");
   if (Transpose) {

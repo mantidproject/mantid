@@ -118,7 +118,7 @@ void SofQWNormalisedPolygon::exec() {
 
   // Progress reports & cancellation
   const size_t nreports(nHistos * nEnergyBins);
-  m_progress = boost::make_shared<API::Progress>(this, 0.0, 1.0, nreports);
+  m_progress = std::make_unique<API::Progress>(this, 0.0, 1.0, nreports);
 
   std::vector<double> par =
       inputWS->getInstrument()->getNumberParameter("detector-neighbour-offset");
@@ -205,7 +205,7 @@ void SofQWNormalisedPolygon::exec() {
   PARALLEL_CHECK_INTERUPT_REGION
 
   outputWS->finalize();
-  FractionalRebinning::normaliseOutput(outputWS, inputWS, m_progress);
+  FractionalRebinning::normaliseOutput(outputWS, inputWS, m_progress.get());
 
   // Set the output spectrum-detector mapping
   auto outputIndices = outputWS->indexInfo();

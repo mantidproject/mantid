@@ -28,10 +28,9 @@ class ConvexPolygon;
 namespace DataObjects {
 
 /**
-FractionalRebinning helper functionality, used by the Rebin2D algorithm.
-
-@author Harry Jeffery
-*/
+ * FractionalRebinning helper functionality, used by the
+ * Rebin2D algorithm.
+ */
 
 namespace FractionalRebinning {
 
@@ -46,8 +45,7 @@ getIntersectionRegion(const std::vector<double> &xAxis,
 MANTID_DATAOBJECTS_DLL void
 normaliseOutput(API::MatrixWorkspace_sptr outputWS,
                 API::MatrixWorkspace_const_sptr inputWS,
-                boost::shared_ptr<API::Progress> progress =
-                    boost::shared_ptr<API::Progress>());
+                API::Progress *progress = nullptr);
 
 /// Rebin the input quadrilateral to to output grid
 MANTID_DATAOBJECTS_DLL void

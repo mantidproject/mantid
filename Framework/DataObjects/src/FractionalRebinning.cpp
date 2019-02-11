@@ -499,8 +499,7 @@ void calcGeneralIntersections(const std::vector<double> &xAxis,
  * @param progress An optional progress object. Reported to once per bin.
  */
 void normaliseOutput(MatrixWorkspace_sptr outputWS,
-                     MatrixWorkspace_const_sptr inputWS,
-                     boost::shared_ptr<Progress> progress) {
+                     MatrixWorkspace_const_sptr inputWS, Progress *progress) {
   const bool removeBinWidth(inputWS->isDistribution() &&
                             outputWS->id() != "RebinnedOutput");
   for (size_t i = 0; i < outputWS->getNumberHistograms(); ++i) {
