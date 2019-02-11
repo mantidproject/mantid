@@ -120,7 +120,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
 
         twoTheta = self._addSampleLogInfo(ws, linePosition)
 
-        ws = self._moveDetector(ws, twoTheta, linePosition)
+        ws = self._moveDetector(ws, linePosition)
 
         ws = self._waterCalibration(ws)
 
@@ -353,7 +353,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         if inputFiles:
             mergedWSName = self._names.withSuffix('merged')
             loadOption = {'XUnit': 'TimeOfFlight',
-                          'BeamCentre': 127.5}
+                          'BeamCentre': self.getPropertyValue(Prop.LINE_POSITION_INPUT)}
             # MergeRunsOptions are defined by the parameter files and will not be modified here!
             ws = LoadAndMerge(Filename=inputFiles,
                               LoaderName='LoadILLReflectometry',
@@ -375,11 +375,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         l2 = ws.spectrumInfo().l2(mindex)
         theta = ws.spectrumInfo().twoTheta(mindex) / 2.
         linePosition = 0.0
-        if not self.getProperty(Prop.INPUT_WS).isDefault:
-            inputWS = self.getProperty(Prop.INPUT_WS).value
-            if inputWS.run().hasProperty(common.SampleLogs.LINE_POSITION):
-                linePosition = inputWS.run().getLogData(common.SampleLogs.LINE_POSITION).value
-        if not self.getProperty(Prop.LINE_POSITION_INPUT).isDefault and linePosition == 0.0:
+        if not self.getProperty(Prop.LINE_POSITION_INPUT).isDefault:
             linePosition = self.getProperty(Prop.LINE_POSITION_INPUT).value
         else:
             # Fit peak position
@@ -426,9 +422,8 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
             spectrum_info = ws.spectrumInfo()
             twoTheta = numpy.rad2deg(spectrum_info.twoTheta(int(numpy.rint(linePosition))))
         run.addProperty(common.SampleLogs.TWO_THETA, float(twoTheta), 'degree', True)
-        return twoTheta
 
-    def _moveDetector(self, ws, twoTheta, linePosition):
+    def _moveDetector(self, ws, linePosition):
         """Perform detector position correction for direct and reflected beams."""
         if self.getProperty(Prop.DIRECT_LINE_WORKSPACE).isDefault:
             return ws
