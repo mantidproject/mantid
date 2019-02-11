@@ -409,7 +409,7 @@ def dynamicsusceptibility(workspace, temperature, outputName=None, zeroEnergyEps
     """
     workspace = _normws(workspace)
     if not _validate._isSofQW(workspace):
-        raise RuntimeError('Failed to calculate dynamic susceptibility. ' 
+        raise RuntimeError('Failed to calculate dynamic susceptibility. '
                            + "The workspace '{}' does not look like a S(Q,E).".format(str(workspace)))
     horAxis = workspace.getAxis(0)
     horUnit = horAxis.getUnit().unitID()
