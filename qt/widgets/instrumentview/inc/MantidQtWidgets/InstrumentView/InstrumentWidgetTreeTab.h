@@ -35,6 +35,8 @@ private:
   void showEvent(QShowEvent *) override;
   /// Widget to display instrument tree
   InstrumentTreeWidget *m_instrumentTree;
+  friend class InstrumentWidgetEncoder;
+  friend class InstrumentWidgetDecoder;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt

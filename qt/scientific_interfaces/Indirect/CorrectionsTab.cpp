@@ -54,8 +54,8 @@ bool CorrectionsTab::checkWorkspaceBinningMatches(
     MatrixWorkspace_const_sptr left, MatrixWorkspace_const_sptr right) {
   if (left && right) // check the workspaces actually point to something first
   {
-    const auto leftX = left->x(0);
-    const auto rightX = right->x(0);
+    const auto &leftX = left->x(0);
+    const auto &rightX = right->x(0);
     return leftX.size() == rightX.size() &&
            std::equal(leftX.begin(), leftX.end(), rightX.begin());
   } else {

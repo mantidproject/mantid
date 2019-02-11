@@ -475,7 +475,7 @@
               <bool>false</bool>
              </property>
              <property name="text">
-              <string>Save</string>
+              <string>Save Result</string>
              </property>
             </widget>
            </item>

@@ -9,6 +9,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidKernel/Atom.h"
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/MaterialBuilder.h"
 #include "MantidKernel/NeutronAtom.h"
@@ -82,6 +83,23 @@ public:
     // Other isotop
     TS_ASSERT_DELTA(mat.totalScatterXSection(), 26.1, 0.0001);
     TS_ASSERT_DELTA(mat.absorbXSection(), 4.6, 0.0001);
+  }
+
+  void test_Build_From_Cross_Sections() {
+    MaterialBuilder builder;
+    Material mat = builder.setNumberDensity(0.1)
+                       .setTotalScatterXSection(2.3)
+                       .setCoherentXSection(0.5)
+                       .setIncoherentXSection(5.0)
+                       .setAbsorptionXSection(0.23)
+                       .build();
+    TS_ASSERT_EQUALS(mat.chemicalFormula().size(), 1)
+    TS_ASSERT_EQUALS(mat.chemicalFormula().front().atom->symbol, "user")
+    TS_ASSERT_EQUALS(mat.numberDensity(), 0.1)
+    TS_ASSERT_EQUALS(mat.totalScatterXSection(), 2.3)
+    TS_ASSERT_EQUALS(mat.cohScatterXSection(), 0.5)
+    TS_ASSERT_EQUALS(mat.incohScatterXSection(), 5.0)
+    TS_ASSERT_EQUALS(mat.absorbXSection(), 0.23)
   }
 
   void test_Number_Density_Set_By_Formula_ZParameter_And_Cell_Volume() {
@@ -172,6 +190,51 @@ public:
         "The number density could not be determined. Please "
         "provide the number density, ZParameter and unit "
         "cell volume or mass density.")
+  }
+
+  void test_User_Defined_Material_Without_NumberDensity_Throws() {
+    MaterialBuilder builder;
+    builder = builder.setTotalScatterXSection(2.3)
+                  .setCoherentXSection(0.5)
+                  .setIncoherentXSection(5.0)
+                  .setAbsorptionXSection(0.23);
+    TS_ASSERT_THROWS(builder.build(), std::runtime_error)
+  }
+
+  void test_User_Defined_Material_Without_TotalScatterXSection_Throws() {
+    MaterialBuilder builder;
+    builder = builder.setNumberDensity(0.1)
+                  .setCoherentXSection(0.5)
+                  .setIncoherentXSection(5.0)
+                  .setAbsorptionXSection(0.23);
+    TS_ASSERT_THROWS(builder.build(), std::runtime_error)
+  }
+
+  void test_User_Defined_Material_Without_CoherentXSection_Throws() {
+    MaterialBuilder builder;
+    builder = builder.setNumberDensity(0.1)
+                  .setTotalScatterXSection(2.3)
+                  .setIncoherentXSection(5.0)
+                  .setAbsorptionXSection(0.23);
+    TS_ASSERT_THROWS(builder.build(), std::runtime_error)
+  }
+
+  void test_User_Defined_Material_Without_IncoherentXSection_Throws() {
+    MaterialBuilder builder;
+    builder = builder.setNumberDensity(0.1)
+                  .setTotalScatterXSection(2.3)
+                  .setCoherentXSection(5.0)
+                  .setAbsorptionXSection(0.23);
+    TS_ASSERT_THROWS(builder.build(), std::runtime_error)
+  }
+
+  void test_User_Defined_Material_Without_AbsorptionXSection_Throws() {
+    MaterialBuilder builder;
+    builder = builder.setNumberDensity(0.1)
+                  .setTotalScatterXSection(2.3)
+                  .setCoherentXSection(5.0)
+                  .setIncoherentXSection(5.0);
+    TS_ASSERT_THROWS(builder.build(), std::runtime_error)
   }
 };
 

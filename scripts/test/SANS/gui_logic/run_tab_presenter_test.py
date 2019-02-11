@@ -52,6 +52,10 @@ BATCH_FILE_TEST_CONTENT_4 = [{BatchReductionEntry.SampleScatter: 'SANS2D00022024
                              {BatchReductionEntry.SampleScatter: 'SANS2D00022024', BatchReductionEntry.Output: 'test_file2'}]
 
 
+def get_non_empty_row_mock(value):
+    return value
+
+
 class MultiPeriodMock(object):
     def __init__(self, call_pattern):
         self._counter = 0
@@ -863,12 +867,32 @@ class RunTabPresenterTest(unittest.TestCase):
         
         presenter.set_view(view)
         presenter._table_model.reset_row_state = mock.MagicMock()
+        presenter._table_model.get_non_empty_rows = mock.MagicMock(side_effect=get_non_empty_row_mock)
 
         presenter.on_process_selected_clicked()
         self.assertEqual(
             presenter._table_model.reset_row_state.call_count, 3,
             "Expected reset_row_state to have been called 3 times. Called {} times.".format(
                 presenter._table_model.reset_row_state.call_count))
+
+    def test_that_process_selected_ignores_all_empty_rows(self):
+        presenter = RunTabPresenter(SANSFacility.ISIS)
+        view = mock.MagicMock()
+        view.get_selected_rows = mock.MagicMock(return_value=[0, 1])
+        presenter.set_view(view)
+
+        table_model = TableModel()
+        row_entry0 = [''] * 16
+        row_entry1 = ['74040', '', '74040', '', '74040', '', '74040', '', '74040', '', '74040', '', 'test_reduction',
+                      'user_file', '1.2', '']
+        table_model.add_table_entry(0, TableIndexModel(*row_entry0))
+        table_model.add_table_entry(1, TableIndexModel(*row_entry1))
+
+        presenter._table_model = table_model
+        presenter._process_rows = mock.MagicMock()
+
+        presenter.on_process_selected_clicked()
+        presenter._process_rows.assert_called_with([1])
         
     def test_that_process_all_ignores_selected_rows(self):
         presenter = RunTabPresenter(SANSFacility.ISIS)
@@ -878,12 +902,77 @@ class RunTabPresenterTest(unittest.TestCase):
         presenter._table_model.get_number_of_rows = mock.MagicMock(return_value=7)
         presenter.set_view(view)
         presenter._table_model.reset_row_state = mock.MagicMock()
+        presenter._table_model.get_non_empty_rows = mock.MagicMock(side_effect=get_non_empty_row_mock)
         
         presenter.on_process_all_clicked()
         self.assertEqual(
             presenter._table_model.reset_row_state.call_count, 7,
             "Expected reset_row_state to have been called 7 times. Called {} times.".format(
                 presenter._table_model.reset_row_state.call_count))
+
+    def test_that_process_all_ignores_empty_rows(self):
+        presenter = RunTabPresenter(SANSFacility.ISIS)
+
+        table_model = TableModel()
+        row_entry0 = [''] * 16
+        row_entry1 = ['74040', '', '74040', '', '74040', '', '74040', '', '74040', '', '74040', '', 'test_reduction',
+                      'user_file', '1.2', '']
+        table_model.add_table_entry(0, TableIndexModel(*row_entry0))
+        table_model.add_table_entry(1, TableIndexModel(*row_entry1))
+
+        presenter._table_model = table_model
+        presenter._process_rows = mock.MagicMock()
+
+        presenter.on_process_all_clicked()
+        presenter._process_rows.assert_called_with([1])
+
+    def test_that_table_not_exported_if_table_is_empty(self):
+        presenter = RunTabPresenter(SANSFacility.ISIS)
+        view = mock.MagicMock()
+        presenter.set_view(view)
+
+        presenter._export_table = mock.MagicMock()
+
+        presenter.on_export_table_clicked()
+        self.assertEqual(presenter._export_table.call_count, 0,
+                         "_export table should not have been called."
+                         " It was called {} times.".format(presenter._export_table.call_count))
+
+    def test_row_created_for_batch_file_correctly(self):
+        presenter = RunTabPresenter(SANSFacility.ISIS)
+        view = mock.MagicMock()
+        presenter.set_view(view)
+
+        test_row = ["SANS2D00022025", "another_file", "SANS2D00022052", "SANS2D00022022",
+                    "", "", "", "a_user_file.txt"]
+
+        expected_list = ["sample_sans", "SANS2D00022025", "output_as", "another_file",
+                         "sample_trans", "SANS2D00022052", "sample_direct_beam", "SANS2D00022022",
+                         "can_sans", "", "can_trans", "", "can_direct_beam", "",
+                         "user_file", "a_user_file.txt"]
+
+        actual_list = presenter._create_batch_entry_from_row(test_row)
+
+        self.assertEqual(actual_list, expected_list)
+
+    def test_buttons_enabled_after_export_table_fails(self):
+        presenter = RunTabPresenter(SANSFacility.ISIS)
+        view = mock.MagicMock()
+        presenter.set_view(view)
+
+        presenter.get_row_indices = mock.MagicMock(return_value=[0, 1, 2])
+        presenter._view.enable_buttons = mock.MagicMock()
+        # Mock error throw on disable buttons so export fails
+        presenter._view.disable_buttons = mock.MagicMock(side_effect=RuntimeError("A test exception"))
+        try:
+            presenter.on_export_table_clicked()
+        except Exception as e:
+            self.assertTrue(False, "Exceptions should have been caught in the method. "
+                                   "Exception thrown is {}".format(str(e)))
+        else:
+            self.assertEqual(presenter._view.enable_buttons.call_count, 1,
+                             "Expected enable buttons to be called once, "
+                             "was called {} times.".format(presenter._view.enable_buttons.call_count))
 
     @staticmethod
     def _clear_property_manager_data_service():

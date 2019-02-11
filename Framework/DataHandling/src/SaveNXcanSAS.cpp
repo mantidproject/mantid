@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/SaveNXcanSAS.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Progress.h"
@@ -16,6 +17,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MDUnit.h"
 #include "MantidKernel/MantidVersion.h"
@@ -701,7 +703,7 @@ void addTransmission(H5::Group &group,
 
   //-----------------------------------------
   // Add Tdev with units
-  const auto transmissionErrors = workspace->e(0);
+  const auto &transmissionErrors = workspace->e(0);
   std::map<std::string, std::string> transmissionErrorAttributes;
   transmissionErrorAttributes.emplace(sasUnitAttr, unit);
 
@@ -711,7 +713,7 @@ void addTransmission(H5::Group &group,
 
   //-----------------------------------------
   // Add lambda with units
-  const auto lambda = workspace->x(0);
+  const auto &lambda = workspace->x(0);
   std::map<std::string, std::string> lambdaAttributes;
   auto lambdaUnit = getUnitFromMDDimension(workspace->getDimension(0));
   if (lambdaUnit.empty() || lambdaUnit == "Angstrom") {
@@ -733,10 +735,12 @@ DECLARE_ALGORITHM(SaveNXcanSAS)
 SaveNXcanSAS::SaveNXcanSAS() {}
 
 void SaveNXcanSAS::init() {
+  auto inputWSValidator = boost::make_shared<Kernel::CompositeValidator>();
+  inputWSValidator->add<API::WorkspaceUnitValidator>("MomentumTransfer");
+  inputWSValidator->add<API::CommonBinsValidator>();
   declareProperty(
       Mantid::Kernel::make_unique<Mantid::API::WorkspaceProperty<>>(
-          "InputWorkspace", "", Kernel::Direction::Input,
-          boost::make_shared<API::WorkspaceUnitValidator>("MomentumTransfer")),
+          "InputWorkspace", "", Kernel::Direction::Input, inputWSValidator),
       "The input workspace, which must be in units of Q");
   declareProperty(Mantid::Kernel::make_unique<Mantid::API::FileProperty>(
                       "Filename", "", API::FileProperty::Save, ".h5"),
@@ -789,12 +793,6 @@ std::map<std::string, std::string> SaveNXcanSAS::validateInputs() {
           workspace)) {
     result.emplace("InputWorkspace",
                    "The InputWorkspace must be a Workspace2D.");
-  }
-
-  // Don't allow ragged workspaces for now
-  if (!API::WorkspaceHelpers::commonBoundaries(*workspace)) {
-    result.emplace("InputWorkspace",
-                   "The InputWorkspace cannot be a ragged workspace.");
   }
 
   // Transmission data should be 1D

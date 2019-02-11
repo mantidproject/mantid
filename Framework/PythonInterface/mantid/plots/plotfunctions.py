@@ -8,20 +8,24 @@
 #
 #
 from __future__ import (absolute_import, division, print_function)
+
+from mantid.plots.utility import MantidAxType
 import collections
 import sys
 
-import numpy
-from skimage.transform import resize
-import mantid.kernel
-import mantid.api
-from mantid.plots.helperfunctions import *
 import matplotlib
 import matplotlib.collections as mcoll
 import matplotlib.colors
 import matplotlib.dates as mdates
 import matplotlib.image as mimage
+import numpy
+from skimage.transform import resize
 
+import mantid.api
+import mantid.kernel
+from mantid.plots.helperfunctions import get_axes_labels, get_bins, get_data_uneven_flag, get_distribution, \
+    get_matrix_2d_data, get_md_data1d, get_md_data2d_bin_bounds, get_md_data2d_bin_centers, get_normalization, \
+    get_sample_log, get_spectrum, get_uneven_data, get_wksp_index_dist_and_label
 
 # Used for initializing searches of max, min values
 _LARGEST, _SMALLEST = float(sys.maxsize), -sys.maxsize
@@ -29,7 +33,6 @@ _LARGEST, _SMALLEST = float(sys.maxsize), -sys.maxsize
 # ================================================
 # Private 2D Helper functions
 # ================================================
-from mantid.plots.utility import MantidAxType
 
 
 def _setLabels1D(axes, workspace):
@@ -430,10 +433,10 @@ class ScalingAxesImage(mimage.AxesImage):
 
     def set_data(self, A):
         dims = A.shape
-        max_dims = (3840,2160) # 4K resolution
+        max_dims = (3840, 2160)  # 4K resolution
         if dims[0] > max_dims[0] or dims[1] > max_dims[1]:
             new_dims = numpy.minimum(dims, max_dims)
-            if(_skimage_version()):
+            if (_skimage_version()):
                 self.unsampled_data = resize(A, new_dims, mode='constant', cval=numpy.nan, anti_aliasing=True)
             else:
                 self.unsampled_data = resize(A, new_dims, mode='constant', cval=numpy.nan)
@@ -447,13 +450,14 @@ class ScalingAxesImage(mimage.AxesImage):
         we = ax.get_window_extent()
         dx = round(we.x1 - we.x0)
         dy = round(we.y1 - we.y0)
-        #decide if we should downsample
+        # decide if we should downsample
         dims = self.unsampled_data.shape
         if dx != self.dx or dy != self.dy:
             if dims[0] > dx or dims[1] > dy:
-                new_dims = numpy.minimum(dims,[dx,dy])
-                if(_skimage_version()):
-                    sampled_data = resize(self.unsampled_data, new_dims, mode='constant', cval=numpy.nan, anti_aliasing=True)
+                new_dims = numpy.minimum(dims, [dx, dy])
+                if (_skimage_version()):
+                    sampled_data = resize(self.unsampled_data, new_dims, mode='constant', cval=numpy.nan,
+                                          anti_aliasing=True)
                 else:
                     sampled_data = resize(self.unsampled_data, new_dims, mode='constant', cval=numpy.nan)
                 self.dx = dx
