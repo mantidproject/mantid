@@ -1,6 +1,6 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
@@ -9,8 +9,8 @@
 #
 
 # 3rd party imports
-from qtpy.QtWidgets import QMessageBox
 from qtpy.QtGui import QIcon
+from qtpy.QtWidgets import QMessageBox
 
 # local imports
 from mantid import simpleapi
@@ -18,16 +18,20 @@ from mantid import simpleapi
 
 def mantid_algorithm_used(content):
     for attr in dir(simpleapi):
-        if not attr.startswith('_') and attr == attr.title():
-            if attr in content:
+        if (not attr.startswith('_') and attr == attr.title()
+                and attr in content):
                 return True
     return False
 
 
 def mantid_api_import_needed(content):
-    """Check if a python script's contents uses Mantid algorithms
+    """
+    Check if a python script's contents uses Mantid algorithms
     but does not import Mantid's SimpleAPI. Launch QMessageBox to
     ask if import should be added.
+
+    :param content: Contents of a python script as a string
+    :return: True if simpleapi import should be added, False if not
     """
     if not mantid_api_imported(content):
         if mantid_algorithm_used(content):
@@ -37,7 +41,8 @@ def mantid_api_import_needed(content):
 
 
 def mantid_api_imported(content):
-    if 'from mantid.simpleapi import ' in content:
+    if ('from mantid.simpleapi import ' in content or
+            'from mantid import simpleapi' in content):
         return True
     return False
 

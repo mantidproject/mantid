@@ -1,6 +1,6 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
@@ -38,14 +38,19 @@ class ScriptCompatibilityTest(unittest.TestCase):
         expected_results = [False, False, True, False]
         with mock.patch(PERMISSION_BOX_FUNC, lambda: True):
             for case, expected_out in zip(self.test_cases, expected_results):
-                self.assertEqual(mantid_api_import_needed(case), expected_out,
+                self.assertEqual(expected_out, mantid_api_import_needed(case),
                                  msg=self.gen_fail_msg(case, expected_out))
 
     def test_mantid_algorithm_used(self):
         expected_results = [False, True, True, False]
         for case, expected_out in zip(self.test_cases, expected_results):
-            self.assertEqual(mantid_algorithm_used(case), expected_out,
+            self.assertEqual(expected_out, mantid_algorithm_used(case),
                              msg=self.gen_fail_msg(case, expected_out))
+
+    def test_non_implicit_import(self):
+        content = "from mantid import simpleapi\ntest string"
+        with mock.patch(PERMISSION_BOX_FUNC, lambda: True):
+            self.assertEqual(False, mantid_api_import_needed(content))
 
 
 if __name__ == '__main__':
