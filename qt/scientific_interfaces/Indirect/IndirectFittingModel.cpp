@@ -752,7 +752,7 @@ bool IndirectFittingModel::isPreviousModelSelected() const {
 
 MultiDomainFunction_sptr
 IndirectFittingModel::getMultiDomainFunction() const {
-  return m_activeFunction; // createMultiDomainFunction(getFittingFunction(), numberOfWorkspaces());
+  return m_activeFunction;
 }
 
 IAlgorithm_sptr IndirectFittingModel::getFittingAlgorithm() const {
@@ -761,9 +761,12 @@ IAlgorithm_sptr IndirectFittingModel::getFittingAlgorithm() const {
 
 IAlgorithm_sptr
 IndirectFittingModel::getFittingAlgorithm(FittingMode mode) const {
-  if (mode == FittingMode::SEQUENTIAL)
-    return createSequentialFit(getFittingFunction());
-  else
+  if (mode == FittingMode::SEQUENTIAL) {
+    if (m_activeFunction->getNumberDomains() == 0) {
+      throw std::runtime_error("Function is undefined");
+    }
+    return createSequentialFit(getFittingFunction()->getFunction(0));
+  } else
     return createSimultaneousFit(getMultiDomainFunction());
 }
 

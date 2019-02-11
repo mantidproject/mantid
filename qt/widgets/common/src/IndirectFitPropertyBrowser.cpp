@@ -60,11 +60,13 @@ void IndirectFitPropertyBrowser::initFunctionBrowser() {
   connect(m_functionBrowser,
           SIGNAL(localParameterButtonClicked(const QString &)), this,
           SIGNAL(localParameterEditRequested(const QString &)));
+  connect(m_functionBrowser, SIGNAL(globalsChanged()), this, SLOT(updateFitType()));
 }
 
 void IndirectFitPropertyBrowser::iniFitOptionsBrowser() {
   m_fitOptionsBrowser = new FitOptionsBrowser(nullptr, FitOptionsBrowser::SimultaneousAndSequential);
   m_fitOptionsBrowser->setObjectName("fitOptionsBrowser");
+  m_fitOptionsBrowser->setCurrentFittingType(FitOptionsBrowser::Sequential);
 }
 
 void IndirectFitPropertyBrowser::init() {
@@ -138,11 +140,15 @@ void IndirectFitPropertyBrowser::updateParameters(
   m_functionBrowser->updateParameters(fun);
 }
 
+void IndirectFitPropertyBrowser::updateMultiDatasetParameters(const Mantid::API::IFunction & fun) {
+  m_functionBrowser->updateMultiDatasetParameters(fun);
+}
+
 /**
  * @return  The selected fit type in the fit type combo box.
  */
 QString IndirectFitPropertyBrowser::selectedFitType() const {
-  return "Sequential";
+  return m_fitOptionsBrowser->getCurrentFittingType() == FitOptionsBrowser::Simultaneous ? "Simultaneous" : "Sequential";
 }
 
 /**
@@ -213,6 +219,15 @@ void IndirectFitPropertyBrowser::sequentialFit() {
 void IndirectFitPropertyBrowser::browserVisibilityChanged(bool isVisible) {
   if (!isVisible)
     emit browserClosed();
+}
+
+void IndirectFitPropertyBrowser::updateFitType() {
+  auto const nGlobals = m_functionBrowser->getGlobalParameters().size();
+  if (nGlobals == 0) {
+    m_fitOptionsBrowser->setCurrentFittingType(FitOptionsBrowser::Sequential);
+  } else {
+    m_fitOptionsBrowser->setCurrentFittingType(FitOptionsBrowser::Simultaneous);
+  }
 }
 
 } // namespace MantidWidgets

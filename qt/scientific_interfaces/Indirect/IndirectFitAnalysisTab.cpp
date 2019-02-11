@@ -479,7 +479,11 @@ void IndirectFitAnalysisTab::updateFitBrowserParameterValues() {
   if (m_fittingAlgorithm) {
     MantidQt::API::SignalBlocker<QObject> blocker(m_fitPropertyBrowser);
     IFunction_sptr fun = m_fittingAlgorithm->getProperty("Function");
-    m_fitPropertyBrowser->updateParameters(*fun);
+    if (m_fittingModel->getFittingMode() == FittingMode::SEQUENTIAL) {
+      m_fitPropertyBrowser->updateParameters(*fun);
+    } else {
+      m_fitPropertyBrowser->updateMultiDatasetParameters(*fun);
+    }
   }
 }
 
@@ -601,6 +605,12 @@ void IndirectFitAnalysisTab::run() {
   setRunIsRunning(true);
   enableFitButtons(false);
   enableOutputOptions(false);
+  auto const fitType = m_fitPropertyBrowser->selectedFitType();
+  if (fitType == "Simultaneous") {
+    m_fittingModel->setFittingMode(FittingMode::SIMULTANEOUS);
+  } else {
+    m_fittingModel->setFittingMode(FittingMode::SEQUENTIAL);
+  }
   runFitAlgorithm(m_fittingModel->getFittingAlgorithm());
 }
 

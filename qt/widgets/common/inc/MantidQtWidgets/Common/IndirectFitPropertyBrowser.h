@@ -58,6 +58,7 @@ public:
   bool ignoreInvalidData() const;
 
   void updateParameters(const Mantid::API::IFunction &fun);
+  void updateMultiDatasetParameters(const Mantid::API::IFunction &fun);
   QString selectedFitType() const;
   void setConvolveMembers(bool convolveMembers);
   void setFitEnabled(bool enable);
@@ -75,7 +76,7 @@ public slots:
 protected slots:
   void clear();
   void browserVisibilityChanged(bool isVisible);
-
+  void updateFitType();
 
 signals:
   void functionChanged();
@@ -83,6 +84,7 @@ signals:
   void sequentialFitScheduled();
   void browserClosed();
   void localParameterEditRequested(const QString &parName);
+  void globalsChanged(int n);
 
 private:
   void initFunctionBrowser();
