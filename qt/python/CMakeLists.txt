@@ -107,7 +107,6 @@ endif ()
     mantidqt/widgets/workspacedisplay/test/test_data_copier.py
     mantidqt/widgets/workspacedisplay/test/test_user_notifier.py
 
-
     mantidqt/widgets/workspacedisplay/matrix/test/test_matrixworkspacedisplay_model.py
     mantidqt/widgets/workspacedisplay/matrix/test/test_matrixworkspacedisplay_presenter.py
     mantidqt/widgets/workspacedisplay/matrix/test/test_matrixworkspacedisplay_table_view_model.py
