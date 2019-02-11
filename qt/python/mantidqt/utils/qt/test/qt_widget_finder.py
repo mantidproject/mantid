@@ -14,16 +14,24 @@ class QtWidgetFinder(object):
     """
 
     def find_qt_widget(self, name):
-        a = QApplication.topLevelWidgets()
-        all = [x for x in a if name.lower() in str(type(x)).lower()]
+        all = self._find_qt_widget_by_name(name)
 
         self.assertEqual(0, len(all),
                          "Widgets with name '{}' are present in the QApplication. Something has not been deleted: {}".format(
                              name, all))
 
+    def _find_qt_widget_by_name(self, name):
+        a = QApplication.allWidgets()
+        return [x for x in a if name.lower() in str(type(x)).lower()]
+
     def assert_window_created(self):
-        self.assertGreater(len(QApplication.topLevelWidgets()), 0)
+        self.assertGreater(0, len(QApplication.topLevelWidgets()))
 
     def assert_no_widgets(self):
         a = QApplication.topLevelWidgets()
-        self.assertEqual(len(a), 0, "Widgets are present in the QApplication: {}".format(a))
+        self.assertEqual(0, len(a), "Widgets are present in the QApplication: {}".format(a))
+
+    def assert_number_of_widgets_matching(self, name, number):
+        all = self._find_qt_widget_by_name(name)
+
+        self.assertEqual(number, len(all), "Widgets are present in the QApplication: {}".format(all))
