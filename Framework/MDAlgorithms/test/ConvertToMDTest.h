@@ -760,6 +760,7 @@ public:
     convAlg.setProperty("dEAnalysisMode", "Elastic");
     convAlg.setProperty("Q3DFrames", "Q_lab");
     convAlg.setProperty("ConverterType", type);
+    convAlg.setRethrows(true);
   }
 
   ConvertToMDTestPerformance() : Rot(3, 3) {
@@ -832,6 +833,7 @@ public:
     alg->setProperty("Random", false);
     std::string inWsSampleName = "dummy";
     alg->setPropertyValue("OutputWorkspace", inWsSampleName);
+    alg->setRethrows(true);
     alg->execute();
 
     setUpConvAlg(convertAlgDefault, "Default", inWsSampleName);
