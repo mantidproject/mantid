@@ -385,12 +385,12 @@ using uint512_t = wide_uint<512>;
 } // namespace wide_integer_literals
 } // namespace literals
 
-constexpr int128_t operator"" _int128(const char *n);
-constexpr int256_t operator"" _int256(const char *n);
-constexpr int512_t operator"" _int512(const char *n);
-constexpr uint128_t operator"" _uint128(const char *n);
-constexpr uint256_t operator"" _uint256(const char *n);
-constexpr uint512_t operator"" _uint512(const char *n);
+constexpr int128_t operator"" _cppi128(const char *n);
+constexpr int256_t operator"" _cppi256(const char *n);
+constexpr int512_t operator"" _cppi512(const char *n);
+constexpr uint128_t operator"" _cppui128(const char *n);
+constexpr uint256_t operator"" _cppui256(const char *n);
+constexpr uint512_t operator"" _cppui512(const char *n);
 
 // numeric limits
 template <size_t Bits, typename Signed>

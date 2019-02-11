@@ -1584,22 +1584,22 @@ from_chars_result from_chars(const char *first, const char *last,
   return {cur, {}};
 }
 
-constexpr int128_t operator"" _int128(const char *n) {
+constexpr int128_t operator"" _cppi128(const char *n) {
   return int128_t::_impl::from_str(n);
 }
-constexpr int256_t operator"" _int256(const char *n) {
+constexpr int256_t operator"" _cppi256(const char *n) {
   return int256_t::_impl::from_str(n);
 }
-constexpr int512_t operator"" _int512(const char *n) {
+constexpr int512_t operator"" _cppi512(const char *n) {
   return int512_t::_impl::from_str(n);
 }
-constexpr uint128_t operator"" _uint128(const char *n) {
+constexpr uint128_t operator"" _cppui128(const char *n) {
   return uint128_t::_impl::from_str(n);
 }
-constexpr uint256_t operator"" _uint256(const char *n) {
+constexpr uint256_t operator"" _cppui256(const char *n) {
   return uint256_t::_impl::from_str(n);
 }
-constexpr uint512_t operator"" _uint512(const char *n) {
+constexpr uint512_t operator"" _cppui512(const char *n) {
   return uint512_t::_impl::from_str(n);
 }
 

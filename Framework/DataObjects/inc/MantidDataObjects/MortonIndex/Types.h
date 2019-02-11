@@ -16,8 +16,8 @@
 #include <ostream>
 
 namespace morton_index {
-using std::operator"" _uint128;
-using std::operator"" _uint256;
+using std::operator"" _cppui128;
+using std::operator"" _cppui256;
 using uint96_t = std::wide_uint<96>;
 using uint128_t = std::uint128_t;
 using uint256_t = std::uint256_t;
