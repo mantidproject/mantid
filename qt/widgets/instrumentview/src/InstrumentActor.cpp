@@ -487,10 +487,12 @@ void InstrumentActor::sumDetectorsUniform(const std::vector<size_t> &dets,
                                           std::vector<double> &x,
                                           std::vector<double> &y) const {
   auto firstWorkspaceIndex = [this](const std::vector<size_t> &dets) {
-    if (dets.empty()) return INVALID_INDEX;
+    if (dets.empty())
+      return INVALID_INDEX;
     for (auto i : dets) {
       auto const index = getWorkspaceIndex(i);
-      if (index != INVALID_INDEX) return index;
+      if (index != INVALID_INDEX)
+        return index;
     }
     return INVALID_INDEX;
   };
