@@ -181,8 +181,6 @@ void IndirectFitAnalysisTab::connectFitBrowserAndPlotPresenter() {
           this, SLOT(updateParameterValues()));
   connect(m_plotPresenter.get(), SIGNAL(plotSpectrumChanged(std::size_t)), this,
           SLOT(setBrowserWorkspaceIndex(std::size_t)));
-  connect(m_plotPresenter.get(), SIGNAL(plotSpectrumChanged(std::size_t)), this,
-          SLOT(updateParameterValues()));
 
   connect(m_fitPropertyBrowser,
           SIGNAL(localParameterEditRequested(const QString &)), this,
@@ -359,6 +357,7 @@ void IndirectFitAnalysisTab::tableStartXChanged(double startX,
                                                 std::size_t spectrum) {
   if (isRangeCurrentlySelected(dataIndex, spectrum)) {
     m_plotPresenter->setStartX(startX);
+    m_fittingModel->setStartX(startX, m_plotPresenter->getSelectedDataIndex(), m_plotPresenter->getSelectedSpectrumIndex());
   }
 }
 
@@ -367,6 +366,7 @@ void IndirectFitAnalysisTab::tableEndXChanged(double endX,
                                               std::size_t spectrum) {
   if (isRangeCurrentlySelected(dataIndex, spectrum)) {
     m_plotPresenter->setEndX(endX);
+    m_fittingModel->setEndX(endX, m_plotPresenter->getSelectedDataIndex(), m_plotPresenter->getSelectedSpectrumIndex());
   }
 }
 

@@ -576,7 +576,6 @@ void IndirectFittingModel::setFittingMode(FittingMode mode) {
 }
 
 void IndirectFittingModel::setFitFunction(MultiDomainFunction_sptr function) {
-  std::cerr << "Set fun " << function->getNumberDomains() << std::endl;
   m_activeFunction = function;
   m_previousModelSelected = isPreviousModelSelected();
 }
@@ -733,7 +732,7 @@ std::string IndirectFittingModel::getResultXAxisUnit() const {
 boost::optional<ResultLocation>
 IndirectFittingModel::getResultLocation(std::size_t index,
                                         std::size_t spectrum) const {
-  if (m_previousModelSelected && m_fitOutput && m_fittingData.size() > index)
+  if (/*m_previousModelSelected && */m_fitOutput && m_fittingData.size() > index)
     return m_fitOutput->getResultLocation(m_fittingData[index].get(), spectrum);
   return boost::none;
 }
@@ -780,7 +779,6 @@ IAlgorithm_sptr IndirectFittingModel::getSingleFit(std::size_t dataIndex,
   if (function->getNumberDomains() == 0) {
     throw std::runtime_error("Cannot set up a fit: is the function defined?");
   }
-  std::cerr << "Single fit " << function->getNumberDomains() << std::endl;
   auto fitAlgorithm = simultaneousFitAlgorithm();
   addFitProperties(*fitAlgorithm, function->getFunction(dataIndex), getResultXAxisUnit());
   addInputDataToSimultaneousFit(fitAlgorithm, workspace, spectrum, range,
@@ -794,7 +792,6 @@ Mantid::API::IAlgorithm_sptr
 IndirectFittingModel::sequentialFitAlgorithm() const {
   auto function = getFittingFunction();
   assert(function->getNumberDomains() == getNumberOfDatasets());
-  std::cerr << "Sequential fit " << function->getNumberDomains() << std::endl;
   return AlgorithmManager::Instance().create("QENSFitSequential");
 }
 
@@ -802,7 +799,6 @@ Mantid::API::IAlgorithm_sptr
 IndirectFittingModel::simultaneousFitAlgorithm() const {
   auto function = getFittingFunction();
   assert(function->getNumberDomains() == getNumberOfDatasets());
-  std::cerr << "Simultaneous fit " << function->getNumberDomains() << std::endl;
   return AlgorithmManager::Instance().create("QENSFitSimultaneous");
 }
 
