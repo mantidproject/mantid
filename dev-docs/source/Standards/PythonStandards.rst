@@ -27,6 +27,21 @@ Prefer ``if obj is not None:`` over ``if obj:``. The latter invokes
 ``object.__nonzero__`` whereas the former simply compares that obj
 references the same object as ``None``.
 
+License
+-------
+
+Include the following licence agreement at the top of each file, replacing ``YEAR`` with the appropriate
+year:
+
+.. code-block:: python
+
+   # Mantid Repository : https://github.com/mantidproject/mantid
+   #
+   # Copyright &copy; YEAR ISIS Rutherford Appleton Laboratory UKRI,
+   #     NScD Oak Ridge National Laboratory, European Spallation Source
+   #     & Institut Laue - Langevin
+   # SPDX - License - Identifier: GPL - 3.0 +
+
 Imports
 -------
 

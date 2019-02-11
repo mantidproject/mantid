@@ -21,10 +21,9 @@ const char *TOOLBAR_MODE_ZOOM = "zoom rect";
 /// for our backend
 Python::Object mplNavigationToolbar(FigureCanvasQt *canvas) {
   auto backend = backendModule();
-  Python::Object parent; // None
   bool showCoordinates(false);
-  return Python::Object(
-      backend.attr(TOOLBAR_CLS)(canvas->pyobj(), parent, showCoordinates));
+  return Python::Object(backend.attr(TOOLBAR_CLS)(
+      canvas->pyobj(), canvas->pyobj(), showCoordinates));
 }
 
 } // namespace

@@ -33,6 +33,8 @@ RUNNING_STATUS_MSG = "Status: Running"
 # Editor
 CURRENTLINE_BKGD_COLOR = QColor(247, 236, 248)
 TAB_WIDTH = 4
+TAB_CHAR = '\t'
+SPACE_CHAR = " "
 
 
 class EditorIO(object):
@@ -105,6 +107,10 @@ class PythonFileInterpreter(QWidget):
 
         # layout
         self.editor = CodeEditor("AlternateCSPythonLexer", self)
+
+        # Clear QsciScintilla key bindings that may override PyQt's bindings
+        self.clear_key_binding("Ctrl+/")
+
         self.status = QStatusBar(self)
         layout = QVBoxLayout()
         layout.addWidget(self.editor)
@@ -149,6 +155,78 @@ class PythonFileInterpreter(QWidget):
 
     def set_status_message(self, msg):
         self.status.showMessage(msg)
+
+    def replace_tabs_with_spaces(self):
+        self.replace_text(TAB_CHAR, SPACE_CHAR*TAB_WIDTH)
+
+    def replace_text(self, match_text, replace_text):
+        if self.editor.selectedText() == '':
+            self.editor.selectAll()
+        new_text = self.editor.selectedText().replace(match_text, replace_text)
+        self.editor.replaceSelectedText(new_text)
+
+    def replace_spaces_with_tabs(self):
+        self.replace_text(SPACE_CHAR*TAB_WIDTH, TAB_CHAR)
+
+    def set_whitespace_visible(self):
+        self.editor.setWhitespaceVisibility(CodeEditor.WsVisible)
+
+    def set_whitespace_invisible(self):
+        self.editor.setWhitespaceVisibility(CodeEditor.WsInvisible)
+
+    def clear_key_binding(self, key_str):
+        """Clear a keyboard shortcut bound to a Scintilla command"""
+        self.editor.clearKeyBinding(key_str)
+
+    def toggle_comment(self):
+        if self.editor.selectedText() == '':   # If nothing selected, do nothing
+            return
+
+        # Note selection indices to restore highlighting later
+        selection_idxs = list(self.editor.getSelection())
+
+        # Expand selection from first character on start line to end char on last line
+        line_end_pos = len(self.editor.text().split('\n')[selection_idxs[2]].rstrip())
+        line_selection_idxs = [selection_idxs[0], 0,
+                               selection_idxs[2], line_end_pos]
+        self.editor.setSelection(*line_selection_idxs)
+        selected_lines = self.editor.selectedText().split('\n')
+
+        if self._are_comments(selected_lines) is True:
+            toggled_lines = self._uncomment_lines(selected_lines)
+            # Track deleted characters to keep highlighting consistent
+            selection_idxs[1] -= 2
+            selection_idxs[-1] -= 2
+        else:
+            toggled_lines = self._comment_lines(selected_lines)
+            selection_idxs[1] += 2
+            selection_idxs[-1] += 2
+
+        # Replace lines with commented/uncommented lines
+        self.editor.replaceSelectedText('\n'.join(toggled_lines))
+
+        # Restore highlighting
+        self.editor.setSelection(*selection_idxs)
+
+    def _comment_lines(self, lines):
+        for i in range(len(lines)):
+            lines[i] = '# ' + lines[i]
+        return lines
+
+    def _uncomment_lines(self, lines):
+        for i in range(len(lines)):
+            uncommented_line = lines[i].replace('# ', '', 1)
+            if uncommented_line == lines[i]:
+                uncommented_line = lines[i].replace('#', '', 1)
+            lines[i] = uncommented_line
+        return lines
+
+    def _are_comments(self, code_lines):
+        for line in code_lines:
+            if line.strip():
+                if not line.strip().startswith('#'):
+                    return False
+        return True
 
     def _setup_editor(self, default_content, filename):
         editor = self.editor

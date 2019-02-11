@@ -12,9 +12,8 @@ Contains the presenter for displaying the InstrumentWidget
 """
 from __future__ import (absolute_import, unicode_literals)
 
-# local imports
-from mantidqt.widgets.common.observing_presenter import ObservingPresenter
-from mantidqt.widgets.common.workspacedisplay_ads_observer import WorkspaceDisplayADSObserver
+from mantidqt.widgets.observers.ads_observer import WorkspaceDisplayADSObserver
+from mantidqt.widgets.observers.observing_presenter import ObservingPresenter
 from .view import InstrumentView
 
 
@@ -24,12 +23,10 @@ class InstrumentViewPresenter(ObservingPresenter):
     It has no model as its an old widget written in C++ with out MVP
     """
 
-    view = None
-
     def __init__(self, ws, parent=None, ads_observer=None):
         super(InstrumentViewPresenter, self).__init__()
         self.ws_name = ws.name()
-        self.view = InstrumentView(self, self.ws_name, parent)
+        self.container = InstrumentView(parent, self, self.ws_name)
 
         if ads_observer:
             self.ads_observer = ads_observer
@@ -47,3 +44,6 @@ class InstrumentViewPresenter(ObservingPresenter):
     def rename_workspace(self, old_name, new_name):
         # rename is handled by the InstrumentWidget inside C++
         pass
+
+    def show_view(self):
+        self.container.show()
