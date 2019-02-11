@@ -172,8 +172,8 @@ std::string filterByContents(std::vector<std::string> &strings,
 }
 
 std::string findGroupWorkspaceContaining(MatrixWorkspace_sptr workspace) {
-  auto resultGroups = filterByEndSuffix(
-      AnalysisDataService::Instance().getObjectNames(), "_Results");
+  auto workspaceNames = AnalysisDataService::Instance().getObjectNames();
+  auto resultGroups = filterByEndSuffix(workspaceNames, "_Results");
   return !resultGroups.empty() ? filterByContents(resultGroups, workspace) : "";
 }
 

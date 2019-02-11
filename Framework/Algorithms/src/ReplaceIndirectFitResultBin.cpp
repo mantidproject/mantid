@@ -118,10 +118,6 @@ void processBinReplacement(MatrixWorkspace_const_sptr singleBinWorkspace,
   replaceBinValues(outputWorkspace, insertionIndex, yValues, eValues);
 }
 
-bool doesExistInADS(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().doesExist(workspaceName);
-}
-
 Workspace_sptr getADSWorkspace(std::string const &workspaceName) {
   return AnalysisDataService::Instance().retrieveWS<Workspace>(workspaceName);
 }
@@ -167,8 +163,8 @@ std::string filterByContents(std::vector<std::string> &strings,
 }
 
 std::string findResultGroupContaining(MatrixWorkspace_sptr workspace) {
-  auto resultGroups = filterByEndSuffix(
-      AnalysisDataService::Instance().getObjectNames(), "_Results");
+  auto workspaceNames = AnalysisDataService::Instance().getObjectNames();
+  auto resultGroups = filterByEndSuffix(workspaceNames, "_Results");
   return !resultGroups.empty() ? filterByContents(resultGroups, workspace) : "";
 }
 

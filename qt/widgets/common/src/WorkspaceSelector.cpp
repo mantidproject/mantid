@@ -38,7 +38,7 @@ WorkspaceSelector::WorkspaceSelector(QWidget *parent, bool init)
       m_renameObserver(*this, &WorkspaceSelector::handleRenameEvent),
       m_replaceObserver(*this, &WorkspaceSelector::handleReplaceEvent),
       m_init(init), m_workspaceTypes(), m_showHidden(false), m_showGroups(true),
-      m_optional(false), m_suffix(), m_binLimits(std::make_pair(0, -1)),
+      m_optional(false), m_binLimits(std::make_pair(0, -1)), m_suffix(),
       m_algName(), m_algPropName(), m_algorithm() {
   setEditable(false);
   if (init) {
@@ -295,7 +295,7 @@ bool WorkspaceSelector::hasValidNumberOfBins(
     if (group == nullptr) {
       auto const workspace =
           boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(object);
-      auto const numberOfBins = workspace->y(0).size();
+      auto const numberOfBins = static_cast<int>(workspace->y(0).size());
       if (m_binLimits.second != -1)
         return numberOfBins >= m_binLimits.first &&
                numberOfBins <= m_binLimits.second;
