@@ -8,7 +8,7 @@
 from qtpy.QtCore import Qt, Signal, Slot
 from qtpy.QtWidgets import QMainWindow, QStatusBar
 
-from mantidqt.widgets.workspacedisplay.observing_view import ObservingView
+from mantidqt.widgets.observers.observing_view import ObservingView
 
 
 class StatusBarView(QMainWindow, ObservingView):

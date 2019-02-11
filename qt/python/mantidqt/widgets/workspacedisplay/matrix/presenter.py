@@ -10,10 +10,10 @@
 from __future__ import absolute_import, division, print_function
 
 from mantid.plots.utility import MantidAxType
-from mantidqt.widgets.workspacedisplay.ads_observer import WorkspaceDisplayADSObserver
+from mantidqt.widgets.observers.ads_observer import WorkspaceDisplayADSObserver
 from mantidqt.widgets.workspacedisplay.data_copier import DataCopier
 from mantidqt.widgets.workspacedisplay.matrix.table_view_model import MatrixWorkspaceTableViewModelType
-from mantidqt.widgets.workspacedisplay.observing_presenter import ObservingPresenter
+from mantidqt.widgets.observers.observing_presenter import ObservingPresenter
 from mantidqt.widgets.workspacedisplay.status_bar_view import StatusBarView
 from .model import MatrixWorkspaceDisplayModel
 from .view import MatrixWorkspaceDisplayView

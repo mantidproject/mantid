@@ -14,9 +14,9 @@ from functools import partial
 from qtpy.QtCore import Qt
 
 from mantid.kernel import logger
-from mantidqt.widgets.workspacedisplay.ads_observer import WorkspaceDisplayADSObserver
+from mantidqt.widgets.observers.ads_observer import WorkspaceDisplayADSObserver
 from mantidqt.widgets.workspacedisplay.data_copier import DataCopier
-from mantidqt.widgets.workspacedisplay.observing_presenter import ObservingPresenter
+from mantidqt.widgets.observers.observing_presenter import ObservingPresenter
 from mantidqt.widgets.workspacedisplay.status_bar_view import StatusBarView
 from mantidqt.widgets.workspacedisplay.table.error_column import ErrorColumn
 from mantidqt.widgets.workspacedisplay.table.model import TableWorkspaceDisplayModel
