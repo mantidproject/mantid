@@ -100,4 +100,13 @@ Changes
 #######
  - The miniplot on the pick tab of the instrument view now shows the HKL values for peaks when viewing a summed collection of detectors.
 
+
+Logging
+-------
+
+Changes
+#######
+
+ - Increased the log level from information to notice when creating an instrument geometry.
+
 :ref:`Release 3.14.0 <v3.14.0>`

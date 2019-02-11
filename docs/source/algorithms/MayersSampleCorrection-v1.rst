@@ -89,7 +89,7 @@ Output:
 .. testoutput:: WithMultipleScattering
 
    Uncorrected signal: 0.0556
-   Corrected signal: 0.0120
+   Corrected signal: 0.0736
 
 References
 ----------

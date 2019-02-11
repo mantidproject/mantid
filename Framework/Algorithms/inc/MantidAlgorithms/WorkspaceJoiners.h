@@ -40,8 +40,8 @@ protected:
   execEvent(const DataObjects::EventWorkspace &eventWs1,
             const DataObjects::EventWorkspace &eventWs2);
   using Mantid::API::Algorithm::validateInputs;
-  void validateInputs(const API::MatrixWorkspace &ws1,
-                      const API::MatrixWorkspace &ws2, const bool checkBinning);
+  void checkCompatibility(const API::MatrixWorkspace &ws1,
+                          const API::MatrixWorkspace &ws2);
   void getMinMax(const API::MatrixWorkspace &ws, specnum_t &min,
                  specnum_t &max);
 

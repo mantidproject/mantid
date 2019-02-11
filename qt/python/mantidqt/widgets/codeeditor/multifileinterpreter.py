@@ -39,6 +39,7 @@ class MultiPythonFileInterpreter(QWidget):
 
         # attributes
         self.default_content = default_content
+        self.whitespace_visible = False
 
         # widget setup
         self._tabs = self.create_tabwidget()
@@ -59,6 +60,9 @@ class MultiPythonFileInterpreter(QWidget):
             content = self.default_content
         interpreter = PythonFileInterpreter(content, filename=filename,
                                             parent=self._tabs)
+        if self.whitespace_visible:
+            interpreter.set_whitespace_visible()
+
         # monitor future modifications
         interpreter.sig_editor_modified.connect(self.mark_current_tab_modified)
         interpreter.sig_filename_modified.connect(self.on_filename_modified)
@@ -174,3 +178,22 @@ class MultiPythonFileInterpreter(QWidget):
     def save_current_file(self):
         """Save the current file"""
         self.current_editor().save()
+
+    def toggle_comment_current(self):
+        self.current_editor().toggle_comment()
+
+    def tabs_to_spaces_current(self):
+        self.current_editor().replace_tabs_with_spaces()
+
+    def spaces_to_tabs_current(self):
+        self.current_editor().replace_spaces_with_tabs()
+
+    def toggle_whitespace_visible_all(self):
+        if self.whitespace_visible:
+            for idx in range(self.editor_count):
+                self.editor_at(idx).set_whitespace_invisible()
+            self.whitespace_visible = False
+        else:
+            for idx in range(self.editor_count):
+                self.editor_at(idx).set_whitespace_visible()
+            self.whitespace_visible = True

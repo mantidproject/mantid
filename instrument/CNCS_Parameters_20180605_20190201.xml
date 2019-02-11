@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<parameter-file instrument="CNCS" valid-from="2018-06-06 00:00:00" valid-to="2019-02-01 00:00:00">
+
+	<component-link name="CNCS">
+
+		<parameter name="deltaE-mode" type="string">
+			<value val="direct" />
+		</parameter>
+
+		<parameter name="ei-mon1-spec">
+			<value val="2" />
+		</parameter>
+
+		<parameter name="ei-mon2-spec">
+			<value val="3" />
+		</parameter>
+
+		<parameter name="TS_mapping_file" type="string">
+			<value val="CNCS_TS_2008_08_18.dat" />
+		</parameter>
+
+		<!-- TODO: Update with real vanadium mass -->
+		<parameter name="vanadium-mass">
+			<value val="-1" />
+		</parameter>
+
+		<parameter name="bkgd-range-min">
+			<value val="44500" />
+		</parameter>
+
+		<parameter name="bkgd-range-max">
+			<value val="48000" />
+		</parameter>
+
+		<parameter name="scale-factor">
+			<value val="1.0" />
+		</parameter>
+
+		<parameter name="monovan-integr-min">
+			<value val="-1" />
+		</parameter>
+
+		<parameter name="monovan-integr-max">
+			<value val="1" />
+		</parameter>
+
+		<!-- Diagnostic test defaults -->
+
+		<!-- Absolute lo threshold for vanadium diag (tiny) -->
+		<parameter name="diag_tiny">
+		  <value val="1e-10"/>
+		</parameter>
+
+		<!-- Absolute hi threshold for vanadium diag (huge) -->
+		<parameter name="diag_huge">
+		  <value val="1e10"/>
+		</parameter>
+
+		<!-- Remove zeroes in background (s_zero)-->
+		<parameter name="diag_samp_zero">
+		  <value val="0.0"/>
+		</parameter>
+
+		<!-- Fraction of median to consider counting low for the white beam diag (sv_lo)-->
+		<parameter name="diag_samp_lo">
+		  <value val="0.0"/>
+		</parameter>
+
+		<!-- Fraction of median to consider counting high for the white beam diag (sv_hi)-->
+		<parameter name="diag_samp_hi">
+		  <value val="5.0"/>
+		</parameter>
+
+		<!-- Error criterion as a multiple of error bar for background (sv_sig) -->
+		<parameter name="diag_samp_sig">
+		  <value val="3.3"/>
+		</parameter>
+
+		<!-- Lower bound defining outliers as fraction of median value (v_out_lo)-->
+		<parameter name="diag_van_out_lo">
+		  <value val="0.01"/>
+		</parameter>
+
+		<!-- Upper bound defining outliers as fraction of median value (v_out_hi)-->
+		<parameter name="diag_van_out_hi">
+		  <value val="100."/>
+		</parameter>
+
+		<!-- Fraction of median to consider counting low for the white beam diag (vv_lo)-->
+		<parameter name="diag_van_lo">
+		  <value val="0.1"/>
+		</parameter>
+
+		<!-- Fraction of median to consider counting high for the white beam diag (vv_hi)-->
+		<parameter name="diag_van_hi">
+		  <value val="1.5"/>
+		</parameter>
+
+		<!-- Error criterion as a multiple of error bar for background (vv_sig) -->
+		<parameter name="diag_van_sig">
+		  <value val="3.3"/>
+		</parameter>
+
+		<!-- True if background is to be checked -->
+		<parameter name="check_background">
+		  <value val="0.0"/>
+		</parameter>
+
+		<!-- True if the bleed tests should be run -->
+		<parameter name="diag_bleed_test">
+		  <value val="0.0"/>
+		</parameter>
+
+		<!-- Variation for ratio test with second white beam -->
+		<parameter name="diag_variation">
+		  <value val="1.1"/>
+		</parameter>
+
+		<!-- Absolute units conversion average -->
+
+		<parameter name="monovan_lo_bound">
+			<value val="0.01" />
+		</parameter>
+
+		<parameter name="monovan_hi_bound">
+			<value val="100" />
+		</parameter>
+
+		<parameter name="monovan_lo_frac">
+			<value val="0.8" />
+		</parameter>
+
+		<parameter name="monovan_hi_frac">
+			<value val="1.2" />
+		</parameter>
+
+		<!-- All the following parameters are taken directly from the MARI definition 
+			and are WRONG! They are only here for now to get things working -->
+
+		<parameter name="wb-scale-factor">
+			<value val="1.0" />
+		</parameter>
+
+		<parameter name="wb-integr-min"><!-- tof=53000 -->
+			<value val="2.93" />
+		</parameter>
+
+		<parameter name="wb-integr-max"><!-- tof=52000 -->
+			<value val="3.07" />
+		</parameter>
+
+		<parameter name="norm-mon1-spec">
+			<value val="-3" />
+		</parameter>
+
+		<parameter name="norm-mon1-min">
+			<value val="1000" />
+		</parameter>
+
+		<parameter name="norm-mon1-max">
+			<value val="2000" />
+		</parameter>
+
+		<parameter name="abs-average-min">
+			<value val="1e-10" />
+		</parameter>
+
+		<parameter name="abs-average-max">
+			<value val="1e10" />
+		</parameter>
+
+		<parameter name="abs-median-lbound">
+			<value val="0.01" />
+		</parameter>
+
+		<parameter name="abs-median-ubound">
+			<value val="100" />
+		</parameter>
+
+		<parameter name="abs-median-lo-frac">
+			<value val="0.8" />
+		</parameter>
+
+		<parameter name="abs-median-hi-frac">
+			<value val="1.2" />
+		</parameter>
+
+		<parameter name="abs-median-signif">
+			<value val="3.3" />
+		</parameter>
+		
+		<!--   formula for t0 calculation. See http://muparser.sourceforge.net/mup_features.html#idDef2 for available operators-->
+		<parameter name="t0_formula" type="string">
+			<!--<value val="198.2 * (1.0 + incidentEnergy)^(-0.84098)" /> Old formula (valid till august 2015) -->
+            <!--<value val="157.539+ln(incidentEnergy)*(-33.04593+ln(incidentEnergy)*(-8.07523+ln(incidentEnergy)*(2.2143-0.109521767*ln(incidentEnergy))))"/> Old formula (valid from august 2015 to august 2017) -->
+            <!--   <value val="111.67-28.527*ln(incidentEnergy)-1.4753*ln(incidentEnergy)*ln(incidentEnergy)"/> -->
+                <value val="131.54757872-53.76763428*ln(incidentEnergy)-(-13.86307494)*ln(incidentEnergy)*ln(incidentEnergy)-(2.6780689)*ln(incidentEnergy) *ln(incidentEnergy) *ln(incidentEnergy)"/>
+		</parameter>
+
+		<parameter name="treat-background-as-events" type="string">
+			<value val="yes" />
+		</parameter>
+
+	</component-link>
+</parameter-file>

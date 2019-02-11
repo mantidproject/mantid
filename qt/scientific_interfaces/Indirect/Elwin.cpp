@@ -325,7 +325,7 @@ void Elwin::setPlotSpectrumValue(int value) {
 }
 
 void Elwin::updateAvailablePlotSpectra() {
-  auto const name = m_uiForm.cbPlotWorkspace->currentText().toStdString();
+  auto const name = getPlotWorkspaceName().toStdString();
   auto const maximumValue = getNumberOfSpectra(name) - 1;
   setPlotSpectrumMinMax(0, maximumValue);
   setPlotSpectrumValue(0);

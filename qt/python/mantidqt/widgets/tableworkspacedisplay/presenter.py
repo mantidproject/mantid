@@ -12,10 +12,11 @@ from __future__ import absolute_import, division, print_function
 from functools import partial
 
 from qtpy.QtCore import Qt
-from mantid.kernel import logger
 
-from mantid.simpleapi import DeleteTableRows, StatisticsOfTableWorkspace
+from mantid.kernel import logger
+from mantidqt.widgets.common.observing_presenter import ObservingPresenter
 from mantidqt.widgets.common.table_copying import copy_cells, show_no_selection_to_copy_toast
+from mantidqt.widgets.common.workspacedisplay_ads_observer import WorkspaceDisplayADSObserver
 from mantidqt.widgets.tableworkspacedisplay.error_column import ErrorColumn
 from mantidqt.widgets.tableworkspacedisplay.plot_type import PlotType
 from mantidqt.widgets.tableworkspacedisplay.workbench_table_widget_item import WorkbenchTableWidgetItem
@@ -23,7 +24,7 @@ from .model import TableWorkspaceDisplayModel
 from .view import TableWorkspaceDisplayView
 
 
-class TableWorkspaceDisplay(object):
+class TableWorkspaceDisplay(ObservingPresenter):
     A_LOT_OF_THINGS_TO_PLOT_MESSAGE = "You selected {} spectra to plot. Are you sure you want to plot that many?"
     TOO_MANY_SELECTED_FOR_X = "Too many columns are selected to use as X. Please select only 1."
     TOO_MANY_SELECTED_TO_SORT = "Too many columns are selected to sort by. Please select only 1."
@@ -39,7 +40,7 @@ class TableWorkspaceDisplay(object):
     INVALID_DATA_WINDOW_TITLE = "Invalid data - Mantid Workbench"
     COLUMN_DISPLAY_LABEL = 'Column {}'
 
-    def __init__(self, ws, plot=None, parent=None, model=None, view=None, name=None):
+    def __init__(self, ws, plot=None, parent=None, model=None, view=None, name=None, ads_observer=None):
         """
         Creates a display for the provided workspace.
 
@@ -50,14 +51,18 @@ class TableWorkspaceDisplay(object):
         :param model: Model to be used by the widget. Passed in as parameter to allow mocking
         :param view: View to be used by the widget. Passed in as parameter to allow mocking
         :param name: Custom name for the window
+        :param ads_observer: ADS observer to be used by the presenter. If not provided the default
+                             one is used. Mainly intended for testing.
         """
-        # Create model and view, or accept mocked versions
+
         self.model = model if model else TableWorkspaceDisplayModel(ws)
-        self.name = self.model.get_name() if name is None else name
+        self.name = name if name else self.model.get_name()
         self.view = view if view else TableWorkspaceDisplayView(self, parent, self.name)
         self.parent = parent
         self.plot = plot
         self.view.set_context_menu_actions(self.view)
+
+        self.ads_observer = ads_observer if ads_observer else WorkspaceDisplayADSObserver(self)
 
         self.update_column_headers()
         self.load_data(self.view)
@@ -75,11 +80,15 @@ class TableWorkspaceDisplay(object):
         """
         return TableWorkspaceDisplayModel.supports(ws)
 
+    def replace_workspace(self, workspace_name, workspace):
+        if self.model.workspace_equals(workspace_name):
+            self.model = TableWorkspaceDisplayModel(workspace)
+            self.load_data(self.view)
+            self.view.emit_repaint()
+
     def handleItemChanged(self, item):
         """
         :type item: WorkbenchTableWidgetItem
-        :param item:
-        :return:
         """
         try:
             self.model.set_cell_data(item.row(), item.column(), item.data(Qt.DisplayRole), item.is_v3d)
@@ -147,11 +156,7 @@ class TableWorkspaceDisplay(object):
         selected_rows_list = [index.row() for index in selected_rows]
         selected_rows_str = ",".join([str(row) for row in selected_rows_list])
 
-        DeleteTableRows(self.model.ws, selected_rows_str)
-        # Reverse the list so that we delete in order from bottom -> top
-        # this prevents the row index from shifting up when deleting rows above
-        for row in reversed(selected_rows_list):
-            self.view.removeRow(row)
+        self.model.delete_rows(selected_rows_str)
 
     def _get_selected_columns(self, max_selected=None, message_if_over_max=None):
         selection_model = self.view.selectionModel()
@@ -171,7 +176,10 @@ class TableWorkspaceDisplay(object):
             show_no_selection_to_copy_toast()
             raise ValueError("No selection")
         else:
-            return [index.column() for index in selected_columns]
+            col_selected = [index.column() for index in selected_columns]
+            if max_selected == 1:
+                return col_selected[0]
+            return col_selected
 
     def action_statistics_on_columns(self):
         try:
@@ -179,7 +187,7 @@ class TableWorkspaceDisplay(object):
         except ValueError:
             return
 
-        stats = StatisticsOfTableWorkspace(self.model.ws, selected_columns)
+        stats = self.model.get_statistics(selected_columns)
         TableWorkspaceDisplay(stats, parent=self.parent, name="Column Statistics of {}".format(self.name))
 
     def action_hide_selected(self):
@@ -219,11 +227,10 @@ class TableWorkspaceDisplay(object):
                             This will be the number in <ColumnName>[Y10] -> the 10
         """
         try:
-            selected_columns = self._get_selected_columns(1, self.TOO_MANY_TO_SET_AS_Y_ERR_MESSAGE)
+            selected_column = self._get_selected_columns(1, self.TOO_MANY_TO_SET_AS_Y_ERR_MESSAGE)
         except ValueError:
             return
 
-        selected_column = selected_columns[0]
         try:
             err_column = ErrorColumn(selected_column, related_y_column, label_index)
         except ValueError as e:
@@ -236,14 +243,17 @@ class TableWorkspaceDisplay(object):
     def action_set_as_none(self):
         self._action_set_as(self.model.marked_columns.remove)
 
-    def action_sort(self, order):
+    def action_sort(self, sort_ascending):
+        """
+        :type sort_ascending: bool
+        :param sort_ascending: Whether to sort ascending
+        """
         try:
-            selected_columns = self._get_selected_columns(1, self.TOO_MANY_SELECTED_TO_SORT)
+            selected_column = self._get_selected_columns(1, self.TOO_MANY_SELECTED_TO_SORT)
         except ValueError:
             return
 
-        selected_column = selected_columns[0]
-        self.view.sortByColumn(selected_column, order)
+        self.model.sort(selected_column, sort_ascending)
 
     def action_plot(self, plot_type):
         try:

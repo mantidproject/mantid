@@ -8,7 +8,8 @@ import unittest
 import sys
 from ui.sans_isis.add_runs_page import AddRunsPage
 from ui.sans_isis.sans_data_processor_gui import SANSDataProcessorGui
-from sans.gui_logic.presenter.add_runs_presenter import AddRunsPagePresenter
+from mantid.kernel import ConfigService
+from sans.gui_logic.presenter.add_runs_presenter import AddRunsPagePresenter, AddRunsFilenameManager
 from sans.gui_logic.models.run_summation import RunSummation
 from sans.gui_logic.models.run_file import SummableRunFile
 from sans.gui_logic.models.run_selection import RunSelection
@@ -23,6 +24,18 @@ if sys.version_info.major == 2:
     import mock
 else:
     from unittest import mock
+
+class MockedOutAddRunsFilenameManager(AddRunsFilenameManager):
+    def __init__(self):
+        self.instrument_string = "LOQ"
+
+    def _get_leading_zeroes(self, run_number):
+        # Return four 0s as all examples we are using in testing
+        # Would normally require 4
+        return 4*"0"
+
+    def make_filename(self, run_numbers):
+        return "LOQ0000" + max(run_numbers) + "-add"
 
 
 class AddRunsPagePresenterTestCase(unittest.TestCase):
@@ -178,11 +191,13 @@ class SummationSettingsViewEnablednessTest(SelectionMockingTestCase):
         return self._just_use(self._summation_settings_presenter)
 
     def _make_presenter(self):
-        return AddRunsPagePresenter(mock.Mock(),
-                                    self._capture_on_change_callback(self.run_selector_presenter),
-                                    self._just_use_summation_settings_presenter(),
-                                    self._view,
-                                    self._parent_view)
+        presenter =  AddRunsPagePresenter(mock.Mock(),
+                                         self._capture_on_change_callback(self.run_selector_presenter),
+                                         self._just_use_summation_settings_presenter(),
+                                         self._view,
+                                         self._parent_view)
+        presenter._get_filename_manager = mock.Mock(return_value=MockedOutAddRunsFilenameManager())
+        return presenter
 
     def test_disables_summation_settings_when_no_event_data(self):
         runs = self._make_mock_run_selection([self._histogram_run,
@@ -213,11 +228,13 @@ class SummationConfigurationTest(SelectionMockingTestCase):
                         run_summation,
                         run_selection,
                         summation_settings):
-        return AddRunsPagePresenter(run_summation,
-                                    run_selection,
-                                    summation_settings,
-                                    self.view,
-                                    self.parent_view)
+        presenter = AddRunsPagePresenter(run_summation,
+                                         run_selection,
+                                         summation_settings,
+                                         self.view,
+                                         self.parent_view)
+        presenter._get_filename_manager = mock.Mock(return_value=MockedOutAddRunsFilenameManager())
+        return presenter
 
     def _just_use_summation_settings_presenter(self):
         return self._just_use(self._summation_settings_presenter)
@@ -236,7 +253,7 @@ class SummationConfigurationTest(SelectionMockingTestCase):
         self.view.sum.emit()
         run_summation.assert_called_with(fake_run_selection,
                                          self._summation_settings,
-                                         'LOQ3-add')
+                                         'LOQ00003-add')
 
     def test_shows_error_when_empty_default_directory(self):
         summation_settings_model = self._summation_settings_with_save_directory('')
@@ -258,12 +275,14 @@ class BaseFileNameTest(SelectionMockingTestCase):
 
     def _make_presenter(self,
                         run_summation):
-        return AddRunsPagePresenter(
+        presenter = AddRunsPagePresenter(
             run_summation,
             self._capture_on_change_callback(self.run_selector_presenter),
             self._just_use_summation_settings_presenter(),
             self.view,
             self.parent_view)
+        presenter._get_filename_manager = mock.Mock(return_value=MockedOutAddRunsFilenameManager())
+        return presenter
 
     def _just_use_summation_settings_presenter(self):
         return self._just_use(self._summation_settings_presenter)
@@ -286,7 +305,7 @@ class BaseFileNameTest(SelectionMockingTestCase):
 
     def test_generates_correct_base_name(self):
         generated_name = self._retrieve_generated_name_for(['1', '2', '3'])
-        self.assertEqual('LOQ3-add', generated_name)
+        self.assertEqual('LOQ00003-add', generated_name)
 
     def test_regenerates_correct_base_name_after_highest_removed(self):
         run_summation = mock.Mock()
@@ -294,7 +313,7 @@ class BaseFileNameTest(SelectionMockingTestCase):
         self._update_selection_model(self._make_mock_run_selection_from_paths(['4', '5', '6']))
         self._update_selection_model(self._make_mock_run_selection_from_paths(['4', '5']))
         self.view.sum.emit()
-        self.assertEqual('LOQ5-add', self._base_file_name_arg(run_summation))
+        self.assertEqual('LOQ00005-add', self._base_file_name_arg(run_summation))
 
     def test_correct_base_name_after_set_by_user(self):
         user_out_file_name = 'Output'
@@ -326,9 +345,9 @@ class BaseFileNameTest(SelectionMockingTestCase):
         run_summation = mock.Mock()
         presenter = self._make_presenter(run_summation)
         self._update_selection_model(self._make_mock_run_selection_from_paths(['4', '6', '5']))
-        self.view.set_out_file_name.assert_called_with('LOQ6-add')
+        self.view.set_out_file_name.assert_called_with('LOQ00006-add')
         self._update_selection_model(self._make_mock_run_selection_from_paths(['5', '4']))
-        self.view.set_out_file_name.assert_called_with('LOQ5-add')
+        self.view.set_out_file_name.assert_called_with('LOQ00005-add')
 
 
 class SumButtonTest(SelectionMockingTestCase):
@@ -340,12 +359,14 @@ class SumButtonTest(SelectionMockingTestCase):
         self.presenter = self._make_presenter()
 
     def _make_presenter(self):
-        return AddRunsPagePresenter(
+        presenter = AddRunsPagePresenter(
             self._make_mock_run_summation(),
             self._capture_on_change_callback(self.run_selector_presenter),
             self._just_use_summation_settings_presenter(),
             self.view,
             self.parent_view)
+        presenter._get_filename_manager = mock.Mock(return_value=MockedOutAddRunsFilenameManager())
+        return presenter
 
     def test_enables_sum_button_when_row_added(self):
         fake_run_selection = self._make_mock_run_selection_from_paths(['5'])
@@ -360,5 +381,50 @@ class SumButtonTest(SelectionMockingTestCase):
         fake_run_selection.has_any_runs.return_value = False
         self._update_selection_model(fake_run_selection)
         assert_called(self.view.disable_sum)
+
+
+class AddRunsFilenameManagerTest(unittest.TestCase):
+    def _get_filename_manager(self, inst_string):
+        return AddRunsFilenameManager(inst_string)
+
+    def test_that_filename_manager_selects_correct_run_for_name(self):
+        filename_manager = self._get_filename_manager("LOQ")
+        expected_run = "105476"
+        actual_run = filename_manager._select_max_run([105475, 105476, 105475, 99999])
+        self.assertEqual(actual_run, expected_run)
+
+    def test_that_filename_manager_gets_correct_zeros(self):
+        filename_manager = self._get_filename_manager("LOQ")
+
+        expected_zeroes = 2*"0"
+        actual_zeroes = filename_manager._get_leading_zeroes("105476")
+        self.assertEqual(actual_zeroes, expected_zeroes)
+
+    def test_that_filename_manager_gets_facility_zeros_for_run_before_definition(self):
+        filename_manager = self._get_filename_manager("LOQ")
+        expected_zeroes = 1*"0"
+        actual_zeroes = filename_manager._get_leading_zeroes("7777")
+        self.assertEqual(actual_zeroes, expected_zeroes)
+
+    def test_that_make_filename_return_empty_string_if_no_runs(self):
+        filename_manager = self._get_filename_manager("LOQ")
+        expected_name = ""
+        actual_name = filename_manager.make_filename([])
+        self.assertEqual(actual_name, expected_name)
+
+    def test_that_make_filename_returns_correct_string_if_runs_present(self):
+        filename_manager = self._get_filename_manager("LOQ")
+        expected_name = "LOQ00105476-add"
+        runs = ["105476", "105466"]
+        actual_name = filename_manager.make_filename(runs)
+        self.assertEqual(actual_name, expected_name)
+
+    def test_that_make_filename_returns_fullname_if_one_is_given(self):
+        filename_manager = self._get_filename_manager("LOQ")
+        expected_name = "LOQ74044-add"
+        runs = ["74045", "74065", "LOQ74044"]
+        actual_name = filename_manager.make_filename(runs)
+        self.assertEqual(actual_name, expected_name)
+
 
 if __name__ == '__main__': unittest.main()

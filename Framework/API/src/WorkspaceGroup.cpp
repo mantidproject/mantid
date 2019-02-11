@@ -51,8 +51,8 @@ const std::string WorkspaceGroup::toString() const {
  * Turn on/off observing delete and rename notifications to update the group
  * accordingly
  * It can be useful to turn them off when constructing the group.
- * @param observeADS :: If true observe the ADS notifications, otherwise disable
- * them
+ * @param observeADS :: If true observe the ADS notifications, otherwise
+ * disable them
  */
 void WorkspaceGroup::observeADSNotifications(const bool observeADS) {
   if (observeADS) {
@@ -105,9 +105,10 @@ void WorkspaceGroup::sortMembersByName() {
 }
 
 /**
- * Adds a workspace to the group. The workspace does not have to be in the ADS
- * @param workspace :: A shared pointer to a workspace to add. If the workspace
- * already exists give a warning.
+ * Adds a workspace to the group. The workspace does not have to be in the
+ * ADS
+ * @param workspace :: A shared pointer to a workspace to add. If the
+ * workspace already exists give a warning.
  */
 void WorkspaceGroup::addWorkspace(const Workspace_sptr &workspace) {
   std::lock_guard<std::recursive_mutex> _lock(m_mutex);
@@ -188,8 +189,8 @@ Workspace_sptr WorkspaceGroup::getItem(const size_t index) const {
 /**
  * Return the workspace by name
  * @param wsName The name of the workspace
- * @throws an out_of_range error if the workspace's name not contained in the
- * group's list of workspace names
+ * @throws an out_of_range error if the workspace's name not contained in
+ * the group's list of workspace names
  */
 Workspace_sptr WorkspaceGroup::getItem(const std::string &wsName) const {
   std::lock_guard<std::recursive_mutex> _lock(m_mutex);
@@ -228,8 +229,8 @@ void WorkspaceGroup::removeByADS(const std::string &wsName) {
   }
 }
 
-/// Print the names of all the workspaces in this group to the logger (at debug
-/// level)
+/// Print the names of all the workspaces in this group to the logger (at
+/// debug level)
 void WorkspaceGroup::print() const {
   std::lock_guard<std::recursive_mutex> _lock(m_mutex);
   for (const auto &workspace : m_workspaces) {
@@ -268,7 +269,8 @@ std::vector<Workspace_sptr>::iterator WorkspaceGroup::end() {
   return m_workspaces.end();
 }
 
-/** Returns a const iterator pointing to the past-the-end element in the group.
+/** Returns a const iterator pointing to the past-the-end element in the
+ * group.
  *
  * @return  A const iterator pointing to the last workspace in this
  *          workspace group.
@@ -278,8 +280,8 @@ std::vector<Workspace_sptr>::const_iterator WorkspaceGroup::end() const {
 }
 
 /**
- * Remove a workspace pointed to by an index. The workspace remains in the ADS
- * if it was there
+ * Remove a workspace pointed to by an index. The workspace remains in the
+ * ADS if it was there
  *
  * @param index :: Index of a workspace to delete.
  */
@@ -287,8 +289,8 @@ void WorkspaceGroup::removeItem(const size_t index) {
   std::lock_guard<std::recursive_mutex> _lock(m_mutex);
   // do not allow this way of removing for groups in the ADS
   if (!this->getName().empty()) {
-    throw std::runtime_error(
-        "AnalysisDataService must be used to remove a workspace from group.");
+    throw std::runtime_error("AnalysisDataService must be used to remove a "
+                             "workspace from group.");
   }
   if (index >= this->size()) {
     std::ostringstream os;
@@ -334,7 +336,8 @@ void WorkspaceGroup::workspaceDeleteHandle(
  * Callback when a before-replace notification is received
  * Replaces a member if it was replaced in the ADS and checks
  * for duplicate members within the group
- * @param notice :: A pointer to a workspace before-replace notification object
+ * @param notice :: A pointer to a workspace before-replace notification
+ * object
  */
 void WorkspaceGroup::workspaceBeforeReplaceHandle(
     Mantid::API::WorkspaceBeforeReplaceNotification_ptr notice) {
@@ -446,10 +449,10 @@ bool WorkspaceGroup::isMultiperiod() const {
 
 /**
  * @param workspaceToCheck :: A workspace to check.
- * @param level :: The current nesting level. Intended for internal use only by
- * WorkspaceGroup.
- * @return :: True if the worspace is found in any of the nested groups in this
- * group.
+ * @param level :: The current nesting level. Intended for internal use only
+ * by WorkspaceGroup.
+ * @return :: True if the worspace is found in any of the nested groups in
+ * this group.
  */
 bool WorkspaceGroup::isInGroup(const Workspace &workspaceToCheck,
                                size_t level) const {

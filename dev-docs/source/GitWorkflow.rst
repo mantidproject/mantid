@@ -94,8 +94,31 @@ When creating a pull request you should:
 
 A good example is `here <https://github.com/mantidproject/mantid/pull/18713>`__.
 
-Recommended reading: `How to Write the Perfect Pull Request
-<https://github.com/blog/1943-how-to-write-the-perfect-pull-request>`_
+Recommended reading: `How to Write the Perfect Pull Request <https://github.com/blog/1943-how-to-write-the-perfect-pull-request>`_
+
+For further information about the review process see :ref:`reviewing a pull request <ReviewingAPullRequest>`.
+
+To check out a particular pull request for functional testing use the following commmands:
+
+.. code-block:: sh
+
+   git fetch <main-remote-name>  +pull/<ID>/merge:pr/<ID>-merged
+   git checkout pr/<ID>-merged
+
+where ``<ID>`` is the pull request number given on GitHub and ``<main-remote-name>`` is the name
+of the remote pointing to the original ``mantid`` repository. If you cloned directly from `mantid <https://github.com/mantidproject/mantid>`_
+then ``main-remote-name=origin`` else if you cloned from a fork then it is the name of remote that points
+back to the original repository.
+
+Note that these commands will checkout a temporary branch that has the development branch merged with master and not just
+the development branch on its own. This command can be aliased by adding the following to the ``[alias]]`` section of your ``~/.gitconfig``
+file:
+
+.. code-block:: sh
+
+   test-pr=!f() { git fetch <main-remote-name> +pull/$1/merge:pr/$1-merged && git checkout pr/$1-merged; }; f
+
+where again ``<main-remote-name>`` has the same meaning as above
 
 Stale Pull Requests
 -------------------

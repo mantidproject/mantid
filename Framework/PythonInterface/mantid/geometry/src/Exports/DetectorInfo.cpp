@@ -62,6 +62,8 @@ void export_DetectorInfo() {
   void (DetectorInfo::*setMasked)(const size_t, bool) =
       &DetectorInfo::setMasked;
 
+  double (DetectorInfo::*l2)(const size_t) const = &DetectorInfo::l2;
+
   // Export to Python
   class_<DetectorInfo, boost::noncopyable>("DetectorInfo", no_init)
 
@@ -105,5 +107,9 @@ void export_DetectorInfo() {
            "Returns the absolute rotation of the detector where the detector "
            "is identified by 'index'.")
       .def("detectorIDs", &DetectorInfo::detectorIDs, return_readonly_numpy(),
-           "Returns all detector ids sorted by detector index");
+           "Returns all detector ids sorted by detector index")
+      .def("l2", l2, (arg("self"), arg("index")),
+           "Returns the l2 scattering distance")
+      .def("l1", &DetectorInfo::l1, arg("self"),
+           "Returns the l1 scattering distance");
 }

@@ -170,7 +170,7 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
                 layout = go.Layout(yaxis={'title': ylabel},
                                    xaxis={'title': xlabel},
                                    margin={'l': 40, 'r': 0, 't': 0, 'b': 40})
-            except RuntimeError:
+            except:  # try different call when any exception happens
                 layout = go.Layout(yaxis={'title': {'text': ylabel}},
                                    xaxis={'title': {'text': xlabel}},
                                    margin={'l': 40, 'r': 0, 't': 0, 'b': 40})

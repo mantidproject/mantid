@@ -385,6 +385,9 @@ private:
   /// Set when the picking image must be redrawn regardless of the interaction
   /// mode
   mutable bool m_redrawPicking;
+
+  friend class InstrumentWidgetEncoder;
+  friend class InstrumentWidgetDecoder;
 };
 
 using ProjectionSurface_sptr = boost::shared_ptr<ProjectionSurface>;

@@ -195,23 +195,17 @@ class MuonWorkspaceTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             workspace_handle.name = "new_name"
 
-    def test_that_hiding_workspace_more_than_once_has_no_effect_but_raises_RuntimeWarning(self):
+    def test_that_hiding_workspace_more_than_once_has_no_effect(self):
         workspace_handle = MuonWorkspaceWrapper(workspace=self.workspace)
         workspace_handle.show("name1")
 
         workspace_handle.hide()
 
-        with self.assertRaises(RuntimeWarning):
-            workspace_handle.hide()
-
-    def test_that_if_workspace_deleted_from_ADS_then_hide_raises_a_RuntimeWarning(self):
+    def test_that_if_workspace_deleted_from_ADS_then_hide_does_nothing(self):
         workspace_handle = MuonWorkspaceWrapper(workspace=self.workspace)
         workspace_handle.show("name1")
 
         simpleapi.mtd.clear()
-
-        with self.assertRaises(RuntimeWarning):
-            workspace_handle.hide()
 
     def test_that_hiding_workspace_deletes_groups_which_are_left_empty(self):
         # TODO

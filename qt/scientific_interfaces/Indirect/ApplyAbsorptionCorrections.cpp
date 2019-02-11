@@ -261,8 +261,9 @@ void ApplyAbsorptionCorrections::run() {
         boost::dynamic_pointer_cast<MatrixWorkspace>(corrections->getItem(i));
 
     // Check for matching binning
-    if (sampleWs && (factorWs->blocksize() != sampleWs->blocksize() &&
-                     factorWs->blocksize() != 1)) {
+    const auto factorBlocksize = factorWs->blocksize();
+    if (sampleWs &&
+        (factorBlocksize != sampleWs->blocksize() && factorBlocksize != 1)) {
       int result;
       if (interpolateAll) {
         result = QMessageBox::Yes;

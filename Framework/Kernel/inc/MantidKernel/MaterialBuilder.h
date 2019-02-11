@@ -10,8 +10,6 @@
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/Material.h"
 #include <boost/optional/optional.hpp>
-#include <string>
-#include <tuple>
 
 namespace Mantid {
 // Forward declare
@@ -58,7 +56,7 @@ private:
   double getOrCalculateRho(const Material::ChemicalFormula &formula) const;
 
   std::string m_name;
-  std::unique_ptr<Material::ChemicalFormula> m_formula;
+  Material::ChemicalFormula m_formula;
   boost::optional<int> m_atomicNo;
   int m_massNo;
   boost::optional<double> m_numberDensity, m_zParam, m_cellVol, m_massDensity;
