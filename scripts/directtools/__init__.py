@@ -7,7 +7,8 @@
 from __future__ import (absolute_import, division, print_function)
 
 import collections
-from mantid import mtd
+from directtools import _validate
+from mantid import logger, mtd
 from mantid.simpleapi import DeleteWorkspace, LineProfile, OneMinusExponentialCor, Transpose
 import matplotlib
 import matplotlib.colors
@@ -407,6 +408,9 @@ def dynamicsusceptibility(workspace, temperature, outputName=None, zeroEnergyEps
     :returns: a :class:`mantid.api.MatrixWorkspace` containing :math:`\chi''(Q,E)`
     """
     workspace = _normws(workspace)
+    if not _validate._isSofQW(workspace):
+        raise RuntimeError('Failed to calculate dynamic susceptibility. ' 
+                           + "The workspace '{}' does not look like a S(Q,E).".format(str(workspace)))
     horAxis = workspace.getAxis(0)
     horUnit = horAxis.getUnit().unitID()
     doTranspose = horUnit != 'DeltaE'
@@ -480,7 +484,19 @@ def plotconstE(workspaces, E, dE, style='l', keepCutWorkspaces=True, xscale='lin
     :type yscale: str
     :returns: A tuple of (:class:`matplotlib.Figure`, :class:`matplotlib.Axes`, a :class:`list` of names)
     """
-    figure, axes, cutWSList = plotcuts('Horizontal', workspaces, E, dE, r'$E$', 'meV', style, keepCutWorkspaces,
+    _validate._styleordie(style)
+    workspaces = _normwslist(workspaces)
+    eID = 'DeltaE'
+    if workspaces[0].getAxis(1).getUnit().unitID() == eID:
+        axisIndex = 1
+        direction = 'Horizontal'
+    else:
+        axisIndex = 0
+        direction = 'Vertical'
+    for ws in workspaces:
+        if ws.getAxis(axisIndex).getUnit().unitID() != eID:
+            raise RuntimeError("Cannot cut in const E. The workspace '{}' is not in units of energy transfer.".format(str(ws)))
+    figure, axes, cutWSList = plotcuts(direction, workspaces, E, dE, r'$E$', 'meV', style, keepCutWorkspaces,
                                        xscale, yscale)
     _profiletitle(workspaces, cutWSList, r'$E$', 'meV', figure)
     if len(cutWSList) > 1:
@@ -514,7 +530,19 @@ def plotconstQ(workspaces, Q, dQ, style='l', keepCutWorkspaces=True, xscale='lin
     :type yscale: str
     :returns: A tuple of (:class:`matplotlib.Figure`, :class:`matplotlib.Axes`, a :class:`list` of names)
     """
-    figure, axes, cutWSList = plotcuts('Vertical', workspaces, Q, dQ, r'$Q$', u'\u00c5$^{-1}$', style, keepCutWorkspaces,
+    _validate._styleordie(style)
+    workspaces = _normwslist(workspaces)
+    qID = 'MomentumTransfer'
+    if workspaces[0].getAxis(0).getUnit().unitID() == qID:
+        axisIndex = 0
+        direction = 'Vertical'
+    else:
+        axisIndex = 1
+        direction = 'Horizontal'
+    for ws in workspaces:
+        if ws.getAxis(axisIndex).getUnit().unitID() != qID:
+            raise RuntimeError("Cannot cut in const Q. The workspace '{}' is not in units of momentum transfer.".format(str(ws)))
+    figure, axes, cutWSList = plotcuts(direction, workspaces, Q, dQ, r'$Q$', u'\u00c5$^{-1}$', style, keepCutWorkspaces,
                                        xscale, yscale)
     _profiletitle(workspaces, cutWSList, r'$Q$', u'\u00c5$^{-1}$', figure)
     if len(cutWSList) > 1:
@@ -554,6 +582,7 @@ def plotcuts(direction, workspaces, cuts, widths, quantity, unit, style='l', kee
     :type yscale: str
     :returns: A tuple of (:class:`matplotlib.Figure`, :class:`matplotlib.Axes`, a :class:`list` of names)
     """
+    _validate._styleordie(style)
     workspaces = _normwslist(workspaces)
     if not isinstance(cuts, collections.Iterable):
         cuts = [cuts]
@@ -612,7 +641,11 @@ def plotDOS(workspaces, labels=None, style='l', xscale='linear', yscale='linear'
     :type yscale: str
     :returns: a tuple of (:mod:`matplotlib.Figure`, :mod:`matplotlib.Axes`)
     """
+    _validate._styleordie(style)
     workspaces = _normwslist(workspaces)
+    for ws in workspaces:
+        if not _validate._isDOS(ws):
+            logger.warning("The workspace '{}' does not look like proper DOS data. Trying to plot nonetheless.")
     if labels is None:
         labels = [_workspacelabel(ws) for ws in workspaces]
     figure, axes = _plotfirsthistograms(workspaces, labels, style, xscale, yscale)
@@ -639,6 +672,7 @@ def plotprofiles(workspaces, labels=None, style='l', xscale='linear', yscale='li
     :type yscale: str
     :returns: a tuple of (:mod:`matplotlib.Figure`, :mod:`matplotlib.Axes`)
     """
+    _validate._styleordie(style)
     workspaces = _normwslist(workspaces)
     figure, axes = _plotfirsthistograms(workspaces, labels, style, xscale, yscale)
     xUnit = workspaces[0].getAxis(0).getUnit().unitID()
@@ -674,6 +708,8 @@ def plotSofQW(workspace, QMin=0., QMax=None, EMin=None, EMax=None, VMin=0., VMax
     """
     # Accept both workspace names and actual workspaces.
     workspace = _normws(workspace)
+    if not _validate._isSofQW(workspace):
+        logger.warning("The workspace '{}' does not look like proper S(Q,W) data. Trying to plot nonetheless.".format(str(workspace)))
     isSusceptibility = workspace.YUnit() == 'Dynamic susceptibility'
     figure, axes = subplots()
     if QMin is None:
