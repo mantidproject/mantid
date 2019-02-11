@@ -109,6 +109,14 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         history = ['ReflectometryReductionOneAuto']
         self._check_history(mtd['IvsQ_binned_13460'], history)
 
+    def test_loading_run_with_instrument_prefix_in_name(self):
+        args = self._default_options
+        args['InputRunList'] = 'INTER13460'
+        outputs = ['IvsQ_13460', 'IvsQ_binned_13460', 'TOF_13460']
+        self._assert_run_algorithm_succeeds(args, outputs)
+        history = ['LoadISISNexus', 'RenameWorkspace', 'ReflectometryReductionOneAuto']
+        self._check_history(mtd['IvsQ_binned_13460'], history)
+
     def test_overriding_output_names(self):
         self._create_workspace(13460, 'TOF_')
         args = self._default_options
