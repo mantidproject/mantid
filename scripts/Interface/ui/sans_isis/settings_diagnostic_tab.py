@@ -21,7 +21,7 @@ from six import with_metaclass
 from PyQt4 import QtGui
 
 from sans.gui_logic.gui_common import (GENERIC_SETTINGS, JSON_SUFFIX, load_file)
-import ui_settings_diagnostic_tab
+from . import ui_settings_diagnostic_tab
 
 if six.PY3:
     unicode = str

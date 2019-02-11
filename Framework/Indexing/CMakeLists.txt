@@ -92,4 +92,4 @@ add_subdirectory ( test )
 # Installation settings
 ###########################################################################
 
-install ( TARGETS Indexing ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )
+mtd_install_targets( TARGETS Indexing INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})

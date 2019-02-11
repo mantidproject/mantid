@@ -5,12 +5,12 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
-import stresstesting
+import systemtesting
 from mantid import *
 from mantid.simpleapi import *
 
 
-class LiquidsReflectometryReductionWithBackgroundPreciseTest(stresstesting.MantidStressTest):
+class LiquidsReflectometryReductionWithBackgroundPreciseTest(systemtesting.MantidSystemTest):
     """
         This test checks that the new liquids reflectometer reduction code
         always produces the same results.
@@ -53,7 +53,7 @@ class LiquidsReflectometryReductionWithBackgroundPreciseTest(stresstesting.Manti
         return "reflectivity_precise_119816", 'LiquidsReflectometryReductionTestWithBackground.nxs'
 
 
-class NoNormalizationTest(stresstesting.MantidStressTest):
+class NoNormalizationTest(systemtesting.MantidSystemTest):
     def runTest(self):
         #TODO: The reduction algorithm should not require an absolute path
         scaling_factor_file = FileFinder.getFullPath("directBeamDatabaseFall2014_IPTS_11601_2.cfg")
@@ -91,7 +91,7 @@ class NoNormalizationTest(stresstesting.MantidStressTest):
         return "reflectivity_119816", 'REFL_NoNormalizationTest.nxs'
 
 
-class TOFRangeOFFTest(stresstesting.MantidStressTest):
+class TOFRangeOFFTest(systemtesting.MantidSystemTest):
     def runTest(self):
         #TODO: The reduction algorithm should not require an absolute path
         scaling_factor_file = FileFinder.getFullPath("directBeamDatabaseFall2014_IPTS_11601_2.cfg")
@@ -130,7 +130,7 @@ class TOFRangeOFFTest(stresstesting.MantidStressTest):
         return "reflectivity_119816", 'TOFRangeOFFTest.nxs'
 
 
-class NoBackgroundTest(stresstesting.MantidStressTest):
+class NoBackgroundTest(systemtesting.MantidSystemTest):
     def runTest(self):
         #TODO: The reduction algorithm should not require an absolute path
         scaling_factor_file = FileFinder.getFullPath("directBeamDatabaseFall2014_IPTS_11601_2.cfg")
@@ -169,7 +169,7 @@ class NoBackgroundTest(stresstesting.MantidStressTest):
         return "reflectivity_119816", 'REFL_NoBackgroundTest.nxs'
 
 
-class TOFMismatchTest(stresstesting.MantidStressTest):
+class TOFMismatchTest(systemtesting.MantidSystemTest):
     correct_exception_caught = False
 
     def runTest(self):
@@ -210,7 +210,7 @@ class TOFMismatchTest(stresstesting.MantidStressTest):
         return self.correct_exception_caught
 
 
-class BadDataTOFRangeTest(stresstesting.MantidStressTest):
+class BadDataTOFRangeTest(systemtesting.MantidSystemTest):
     correct_exception_caught = False
 
     def runTest(self):
@@ -251,7 +251,7 @@ class BadDataTOFRangeTest(stresstesting.MantidStressTest):
         return self.correct_exception_caught
 
 
-class BadPeakSelectionTest(stresstesting.MantidStressTest):
+class BadPeakSelectionTest(systemtesting.MantidSystemTest):
     correct_exception_caught = False
 
     def runTest(self):

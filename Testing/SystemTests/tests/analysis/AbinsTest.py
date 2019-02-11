@@ -5,7 +5,7 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
-import stresstesting
+import systemtesting
 from mantid.simpleapi import Abins, mtd, DeleteWorkspace
 from AbinsModules import AbinsConstants, AbinsTestHelpers
 
@@ -160,7 +160,7 @@ class HelperTestingClass(object):
 # ----------------------------------------------------------------------------------------------------------------
 
 
-class AbinsCRYSTALTestScratch(stresstesting.MantidStressTest, HelperTestingClass):
+class AbinsCRYSTALTestScratch(systemtesting.MantidSystemTest, HelperTestingClass):
     """
     In this benchmark it is tested if calculation from scratch with input data from CRYSTAL and for 1-4 quantum
     order events is correct.
@@ -190,7 +190,7 @@ class AbinsCRYSTALTestScratch(stresstesting.MantidStressTest, HelperTestingClass
 # ----------------------------------------------------------------------------------------------------------------
 
 
-class AbinsCRYSTALTestBiggerSystem(stresstesting.MantidStressTest, HelperTestingClass):
+class AbinsCRYSTALTestBiggerSystem(systemtesting.MantidSystemTest, HelperTestingClass):
     """
     In this benchmark it is tested if calculation from scratch with input data from CRYSTAL and for only 1 quantum
     order event is correct.
@@ -217,7 +217,7 @@ class AbinsCRYSTALTestBiggerSystem(stresstesting.MantidStressTest, HelperTesting
 # ----------------------------------------------------------------------------------------------------------------
 
 
-class AbinsCRYSTALTestT(stresstesting.MantidStressTest, HelperTestingClass):
+class AbinsCRYSTALTestT(systemtesting.MantidSystemTest, HelperTestingClass):
     """
     In this benchmark scenario of restart is considered in which data for other temperature already exists in an hdf
     file. In this benchmark input data from CRYSTAL DFT program is used.
@@ -247,7 +247,7 @@ class AbinsCRYSTALTestT(stresstesting.MantidStressTest, HelperTestingClass):
 # ----------------------------------------------------------------------------------------------------------------
 
 
-class AbinsCRYSTALTestLargerOrder(stresstesting.MantidStressTest, HelperTestingClass):
+class AbinsCRYSTALTestLargerOrder(systemtesting.MantidSystemTest, HelperTestingClass):
     """
     In this benchmark it is tested if calculation from restart with input data from CRYSTAL is correct. Requested order
     of quantum event is larger than the one which is saved to an hdf file so S has to be calculated.
@@ -277,7 +277,7 @@ class AbinsCRYSTALTestLargerOrder(stresstesting.MantidStressTest, HelperTestingC
 # ----------------------------------------------------------------------------------------------------------------
 
 
-class AbinsCRYSTALTestSmallerOrder(stresstesting.MantidStressTest, HelperTestingClass):
+class AbinsCRYSTALTestSmallerOrder(systemtesting.MantidSystemTest, HelperTestingClass):
     """
     In this benchmark it is tested if calculation from restart with input data from CRYSTAL is correct. Requested
     order of quantum event is smaller than the one which is saved to an hdf file so S is loaded from an hdf file.
@@ -301,7 +301,7 @@ class AbinsCRYSTALTestSmallerOrder(stresstesting.MantidStressTest, HelperTesting
         return self._output_name, self.ref_result
 
 
-class AbinsCRYSTALTestScale(stresstesting.MantidStressTest, HelperTestingClass):
+class AbinsCRYSTALTestScale(systemtesting.MantidSystemTest, HelperTestingClass):
     """
     In this benchmark it is tested if scaling is correct.
     """
@@ -329,7 +329,7 @@ class AbinsCRYSTALTestScale(stresstesting.MantidStressTest, HelperTestingClass):
 
 
 # noinspection PyAttributeOutsideInit,PyPep8Naming
-class AbinsCASTEPNoH(stresstesting.MantidStressTest, HelperTestingClass):
+class AbinsCASTEPNoH(systemtesting.MantidSystemTest, HelperTestingClass):
     """
     In this benchmark it is tested if calculation for systems without H is correct.
     """
@@ -354,7 +354,7 @@ class AbinsCASTEPNoH(stresstesting.MantidStressTest, HelperTestingClass):
 
 
 # noinspection PyAttributeOutsideInit,PyPep8Naming
-class AbinsCASTEP1DDispersion(stresstesting.MantidStressTest, HelperTestingClass):
+class AbinsCASTEP1DDispersion(systemtesting.MantidSystemTest, HelperTestingClass):
     """
     In this benchmark it is tested if calculation of S from phonon dispersion is correct (1D case).
     """
@@ -378,7 +378,7 @@ class AbinsCASTEP1DDispersion(stresstesting.MantidStressTest, HelperTestingClass
         return self._output_name, self.ref_result
 
 
-class AbinsDMOL3TestScratch(stresstesting.MantidStressTest, HelperTestingClass):
+class AbinsDMOL3TestScratch(systemtesting.MantidSystemTest, HelperTestingClass):
     """
     In this benchmark it is tested if calculation from scratch with input data from DMOL3 and for 1-4 quantum
     order events is correct.
@@ -406,7 +406,7 @@ class AbinsDMOL3TestScratch(stresstesting.MantidStressTest, HelperTestingClass):
         return self._output_name, self.ref_result
 
 
-class AbinsGAUSSIANestScratch(stresstesting.MantidStressTest, HelperTestingClass):
+class AbinsGAUSSIANestScratch(systemtesting.MantidSystemTest, HelperTestingClass):
     """
     In this benchmark it is tested if calculation from scratch with input data from GAUSSIAN and for 1-4 quantum
     order events is correct.
@@ -434,7 +434,7 @@ class AbinsGAUSSIANestScratch(stresstesting.MantidStressTest, HelperTestingClass
         return self._output_name, self.ref_result
 
 
-class AbinsBinWidth(stresstesting.MantidStressTest, HelperTestingClass):
+class AbinsBinWidth(systemtesting.MantidSystemTest, HelperTestingClass):
     """
     In this benchmark it is tested if calculation with bin width different than the default value is correct.
     Calculation performed for crystalline benzene for 1st and 2nd quantum event for output from CASTEP and bin width
@@ -459,7 +459,7 @@ class AbinsBinWidth(stresstesting.MantidStressTest, HelperTestingClass):
         return self._output_name, self.ref_result
 
 
-class AbinsCASTEPIsotopes(stresstesting.MantidStressTest, HelperTestingClass):
+class AbinsCASTEPIsotopes(systemtesting.MantidSystemTest, HelperTestingClass):
     """
     In this benchmark it is tested if calculation of the system with isotopic substitutions: H -> 2H, Li -> 7Li,
     produces correct results. Input data is generated by CASTEP. This system test should be fast so no need for

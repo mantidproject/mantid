@@ -6,8 +6,10 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 import unittest
-import mantid
 import math
+
+from mantid.api import FrameworkManager
+
 from sans.test_helper.test_director import TestDirector
 from sans.algorithm_detail.scale_helpers import (DivideByVolumeFactory, DivideByVolumeISIS, NullDivideByVolume,
                                                  MultiplyByAbsoluteScaleFactory, MultiplyByAbsoluteScaleLOQ,
@@ -20,6 +22,11 @@ from sans.test_helper.file_information_mock import SANSFileInformationMock
 
 
 class ScaleHelperTest(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        FrameworkManager.Instance()
+
     @staticmethod
     def _get_workspace(width=1.0, height=1.0, thickness=1.0, shape=1):
         sample_name = "CreateSampleWorkspace"

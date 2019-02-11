@@ -285,8 +285,7 @@ void Workspace2D::setImageYAndE(const API::MantidImage &imageY,
 }
 
 /// Return reference to Histogram1D at the given workspace index.
-Histogram1D &Workspace2D::getSpectrum(const size_t index) {
-  invalidateCommonBinsFlag();
+Histogram1D &Workspace2D::getSpectrumWithoutInvalidation(const size_t index) {
   auto &spec = const_cast<Histogram1D &>(
       static_cast<const Workspace2D &>(*this).getSpectrum(index));
   spec.setMatrixWorkspace(this, index);
@@ -359,11 +358,9 @@ void Workspace2D::generateHistogram(const std::size_t index, const MantidVec &X,
 }
 
 Workspace2D *Workspace2D::doClone() const { return new Workspace2D(*this); }
-
 Workspace2D *Workspace2D::doCloneEmpty() const {
   return new Workspace2D(storageMode());
 }
-
 } // namespace DataObjects
 } // namespace Mantid
 

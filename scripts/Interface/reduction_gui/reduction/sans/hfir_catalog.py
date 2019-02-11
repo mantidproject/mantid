@@ -11,6 +11,7 @@
 from __future__ import (absolute_import, division, print_function)
 from reduction_gui.reduction.sans.data_cat import DataCatalog as BaseCatalog
 from reduction_gui.reduction.sans.data_cat import DataSet, DataType
+from reduction_gui.reduction.scripter import execute_script
 import os
 import time
 
@@ -23,7 +24,7 @@ except:
     HAS_MANTID = False
 
 try:
-    import mantidplot
+    import mantidplot  # noqa
     IN_MANTIDPLOT = True
 except:
     IN_MANTIDPLOT = False
@@ -46,7 +47,7 @@ class HFIRDataSet(DataSet):
         try:
             if IN_MANTIDPLOT:
                 script = "LoadSpice2D(Filename='%s', OutputWorkspace='%s')" % (file_path, outputWorkspace)
-                mantidplot.runPythonScript(script, True)
+                execute_script(script)
                 if not AnalysisDataService.doesExist(outputWorkspace):
                     return False
             else:

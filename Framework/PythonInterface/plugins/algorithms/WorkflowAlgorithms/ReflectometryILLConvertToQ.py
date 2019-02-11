@@ -10,8 +10,7 @@ from __future__ import (absolute_import, division, print_function)
 
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, MatrixWorkspaceProperty, WorkspaceUnitValidator)
 from mantid.kernel import (Direction, FloatBoundedValidator, Property, StringListValidator)
-from mantid.simpleapi import (ConvertToPointData, CreateWorkspace, Divide, ReflectometryMomentumTransfer)
-import numpy
+from mantid.simpleapi import (ConvertToPointData, CreateWorkspace, Divide, GroupToXResolution, ReflectometryMomentumTransfer)
 import ReflectometryILL_common as common
 
 
@@ -217,44 +216,11 @@ class ReflectometryILLConvertToQ(DataProcessorAlgorithm):
         if self.getProperty(Prop.GROUPING_FRACTION).isDefault:
             return ws
         qFraction = self.getProperty(Prop.GROUPING_FRACTION).value
-        xs = ws.readX(0)
-        ys = ws.readY(0)
-        es = ws.readE(0)
-        dxs = ws.readDx(0)
-        if numpy.any(dxs <= 0.):
-            raise RuntimeError('Cannot proceed: the momentum transfer workspace contains nonpositive Q resolutions.')
-        index = 0
-        start = xs[index]
-        groupedXs = list()
-        groupedYs = list()
-        groupedEs = list()
-        groupedDxs = list()
-
-        while True:
-            width = qFraction * dxs[index]
-            end = xs[index] + width
-            pick = numpy.logical_and(xs >= start, xs < end)
-            pickedXs = xs[pick]
-            if len(pickedXs) > 0:
-                groupedXs.append(numpy.mean(pickedXs))
-                groupedYs.append(numpy.mean(ys[pick]))
-                pickedEs = es[pick]
-                groupedEs.append(numpy.sqrt(numpy.dot(pickedEs, pickedEs)) / len(pickedEs))
-                groupWidth = pickedXs[-1] - pickedXs[0]
-                groupedDxs.append(numpy.sqrt(dxs[index]**2 + (0.68 * groupWidth)**2))
-            start = end
-            if start > xs[-1]:
-                break
-            index = numpy.nonzero(xs > start)[0][0]
         groupedWSName = self._names.withSuffix(extraLabel + 'grouped')
-        groupedWS = CreateWorkspace(
+        groupedWS = GroupToXResolution(
+            InputWorkspace=ws,
             OutputWorkspace=groupedWSName,
-            DataX=groupedXs,
-            DataY=groupedYs,
-            DataE=groupedEs,
-            Dx=groupedDxs,
-            UnitX=ws.getAxis(0).getUnit().unitID(),
-            ParentWorkspace=ws,
+            FractionOfDx=qFraction,
             EnableLogging=self._subalgLogging)
         self._cleanup.cleanup(ws)
         return groupedWS

@@ -82,6 +82,13 @@ private:
   void runOSIRISdiffonlyReduction();
   void createGroupingWorkspace(const std::string &outputWsName);
 
+  void setRunIsRunning(bool running);
+  void setPlotIsPlotting(bool plotting);
+  void setButtonsEnabled(bool enabled);
+  void setRunEnabled(bool enabled);
+  void setPlotEnabled(bool enabled);
+  void setSaveEnabled(bool enabled);
+
 private:
   Ui::IndirectDiffractionReduction
       m_uiForm; /// The form generated using Qt Designer

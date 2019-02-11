@@ -118,3 +118,9 @@ class GuiStateDirector(object):
 
         if "EventSlices" in options.keys():
             state_gui_model.event_slices = options["EventSlices"]
+
+        if "MergeScale" in options.keys():
+            state_gui_model.merge_scale = options["MergeScale"]
+
+        if "MergeShift" in options.keys():
+            state_gui_model.merge_shift = options["MergeShift"]

@@ -8,7 +8,6 @@
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/WarningSuppressions.h"
-#include "MantidPythonInterface/kernel/Converters/PyObjectToString.h"
 #include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
 #include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/StlExportDefinitions.h"
@@ -23,82 +22,47 @@ using Mantid::Kernel::ConfigServiceImpl;
 using Mantid::Kernel::FacilityInfo;
 using Mantid::Kernel::InstrumentInfo;
 using Mantid::PythonInterface::Converters::PySequenceToVector;
-using Mantid::PythonInterface::Converters::pyObjIsStr;
-using Mantid::PythonInterface::Converters::pyObjToStr;
 
 using namespace boost::python;
+
+using ExtractStdString = boost::python::extract<std::string>;
 
 GET_POINTER_SPECIALIZATION(ConfigServiceImpl)
 
 namespace {
 /// Set directories from a python list
 void setDataSearchDirs(ConfigServiceImpl &self, const object &paths) {
-  if (pyObjIsStr(paths)) {
-    self.setDataSearchDirs(pyObjToStr(paths));
+  ExtractStdString singleString(paths);
+  if (singleString.check()) {
+    self.setDataSearchDirs(singleString());
   } else {
     self.setDataSearchDirs(PySequenceToVector<std::string>(paths)());
   }
 }
 
 /// Forward call from __getitem__ to getString with use_cache_true
-std::string getStringUsingCache(ConfigServiceImpl &self, const object &key) {
-  return self.getString(pyObjToStr(key), true);
-}
-
-bool hasProperty(ConfigServiceImpl &self, const object &name) {
-  return self.hasProperty(pyObjToStr(name));
-}
-
-const FacilityInfo &getFacility(ConfigServiceImpl &self, const object &name) {
-  return self.getFacility(pyObjToStr(name));
-}
-
-void setFacility(ConfigServiceImpl &self, const object &name) {
-  return self.setFacility(pyObjToStr(name));
-}
-
-void updateFacilities(ConfigServiceImpl &self, const object &filename) {
-  return self.updateFacilities(pyObjToStr(filename));
+std::string getStringUsingCache(ConfigServiceImpl &self,
+                                const std::string &key) {
+  return self.getString(key, true);
 }
 
 const InstrumentInfo &getInstrument(ConfigServiceImpl &self,
                                     const object &name = object()) {
-  if (name.ptr() == Py_None)
+  if (name.is_none())
     return self.getInstrument();
   else
-    return self.getInstrument(pyObjToStr(name));
-}
-
-std::string getString(ConfigServiceImpl &self, const object &name,
-                      bool use_cache = true) {
-  return self.getString(pyObjToStr(name), use_cache);
-}
-
-void setString(ConfigServiceImpl &self, const object &key,
-               const object &value) {
-  self.setString(pyObjToStr(key), pyObjToStr(value));
-}
-
-void appendDataSearchDir(ConfigServiceImpl &self, const object &path) {
-  self.appendDataSearchDir(pyObjToStr(path));
-}
-
-void appendDataSearchSubDir(ConfigServiceImpl &self, const object &subdir) {
-  self.appendDataSearchSubDir(pyObjToStr(subdir));
-}
-
-void saveConfig(ConfigServiceImpl &self, const object &filename) {
-  self.saveConfig(pyObjToStr(filename));
+    return self.getInstrument(ExtractStdString(name)());
 }
 
 GNU_DIAG_OFF("unused-local-typedef")
 // Ignore -Wconversion warnings coming from boost::python
 // Seen with GCC 7.1.1 and Boost 1.63.0
 GNU_DIAG_OFF("conversion")
-/// Overload generator for getInstrument
+// Overload generator for getInstrument
 BOOST_PYTHON_FUNCTION_OVERLOADS(getInstrument_Overload, getInstrument, 1, 2)
-/// Overload generator for getString
-BOOST_PYTHON_FUNCTION_OVERLOADS(getString_Overload, getString, 2, 3)
+// Overload generator for getString
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(getStringOverload,
+                                       ConfigServiceImpl::getString, 1, 2)
 
 GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("unused-local-typedef")
@@ -138,13 +102,18 @@ void export_ConfigService() {
                ConfigServiceImpl::getFacility,
            arg("self"), return_value_policy<reference_existing_object>(),
            "Returns the default facility")
-      .def("getFacility", &getFacility, (arg("self"), arg("facilityName")),
+      .def("getFacility",
+           (const FacilityInfo &(
+               ConfigServiceImpl::*)(const std::string &)const) &
+               ConfigServiceImpl::getFacility,
+           (arg("self"), arg("facilityName")),
            return_value_policy<reference_existing_object>(),
            "Returns the named facility. Raises an RuntimeError if it does not "
            "exist")
-      .def("setFacility", &setFacility, (arg("self"), arg("facilityName")),
+      .def("setFacility", &ConfigServiceImpl::setFacility,
+           (arg("self"), arg("facilityName")),
            "Sets the current facility to the given name")
-      .def("updateFacilities", &updateFacilities,
+      .def("updateFacilities", &ConfigServiceImpl::updateFacilities,
            (arg("self"), arg("fileName")),
            "Loads facility information from a provided file")
       .def("getInstrument", &getInstrument,
@@ -153,22 +122,24 @@ void export_ConfigService() {
                "default.instrument is returned",
                (arg("self"), arg("instrumentName") = boost::python::object()))
                [return_value_policy<copy_const_reference>()])
-      .def("getString", &getString,
-           getString_Overload(
-               "Returns the named key's value. If use_cache = "
-               "true [default] then relative paths->absolute",
-               (arg("self"), arg("key"), arg("use_cache") = true)))
-      .def("setString", &setString, (arg("self"), arg("key"), arg("value")),
+      .def(
+          "getString", &ConfigServiceImpl::getString,
+          getStringOverload("Returns the named key's value. If use_cache = "
+                            "true [default] then relative paths->absolute",
+                            (arg("self"), arg("key"), arg("use_cache") = true)))
+      .def("setString", &ConfigServiceImpl::setString,
+           (arg("self"), arg("key"), arg("value")),
            "Set the given property name. "
            "If it does not exist it is added to the current configuration")
-      .def("hasProperty", &hasProperty, (arg("self"), arg("rootName")))
+      .def("hasProperty", &ConfigServiceImpl::hasProperty,
+           (arg("self"), arg("rootName")))
       .def("getDataSearchDirs", &ConfigServiceImpl::getDataSearchDirs,
            arg("self"), return_value_policy<copy_const_reference>(),
            "Return the current list of data search paths")
-      .def("appendDataSearchDir", &appendDataSearchDir,
+      .def("appendDataSearchDir", &ConfigServiceImpl::appendDataSearchDir,
            (arg("self"), arg("path")),
            "Append a directory to the current list of data search paths")
-      .def("appendDataSearchSubDir", &appendDataSearchSubDir,
+      .def("appendDataSearchSubDir", &ConfigServiceImpl::appendDataSearchSubDir,
            (arg("self"), arg("subdir")),
            "Appends a sub-directory to each data search directory "
            "and appends the new paths back to datasearch directories")
@@ -176,7 +147,8 @@ void export_ConfigService() {
            (arg("self"), arg("searchDirs")),
            "Set the datasearch.directories property from a list of strings or "
            "a single ';' separated string.")
-      .def("saveConfig", &saveConfig, (arg("self"), arg("filename")),
+      .def("saveConfig", &ConfigServiceImpl::saveConfig,
+           (arg("self"), arg("filename")),
            "Saves the keys that have changed from their default to the given "
            "filename")
       .def("setLogLevel", &ConfigServiceImpl::setLogLevel,
@@ -187,8 +159,10 @@ void export_ConfigService() {
 
       // Treat this as a dictionary
       .def("__getitem__", &getStringUsingCache, (arg("self"), arg("key")))
-      .def("__setitem__", &setString, (arg("self"), arg("key"), arg("value")))
-      .def("__contains__", &hasProperty, (arg("self"), arg("key")))
+      .def("__setitem__", &ConfigServiceImpl::setString,
+           (arg("self"), arg("key"), arg("value")))
+      .def("__contains__", &ConfigServiceImpl::hasProperty,
+           (arg("self"), arg("key")))
       .def("Instance", &ConfigService::Instance,
            return_value_policy<reference_existing_object>(),
            "Returns a reference to the ConfigService")

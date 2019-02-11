@@ -74,6 +74,11 @@ void GeneratePythonScript::init() {
   declareProperty("IgnoreTheseAlgs", std::vector<std::string>(),
                   "A list of algorithms to filter out of the built script",
                   Direction::Input);
+
+  declareProperty(
+      "IgnoreTheseAlgProperties", std::vector<std::vector<std::string>>(),
+      "A list of algorithm properties to filter out of the built script",
+      Direction::Input);
 }
 
 /** Execute the algorithm.
@@ -87,6 +92,8 @@ void GeneratePythonScript::exec() {
   const bool appendTimestamp = getProperty("AppendTimestamp");
   const std::vector<std::string> ignoreTheseAlgs =
       getProperty("IgnoreTheseAlgs");
+  const std::vector<std::vector<std::string>> ignoreTheseAlgProperties =
+      getProperty("IgnoreTheseAlgProperties");
 
   // Get the algorithm histories of the workspace.
   const WorkspaceHistory wsHistory = ws->getHistory();
@@ -118,7 +125,7 @@ void GeneratePythonScript::exec() {
     versionSpecificity = "all";
 
   ScriptBuilder builder(view, versionSpecificity, appendTimestamp,
-                        ignoreTheseAlgs);
+                        ignoreTheseAlgs, ignoreTheseAlgProperties);
   std::string generatedScript;
   generatedScript += "#########################################################"
                      "#############\n";

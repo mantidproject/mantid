@@ -23,7 +23,8 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidKernel/V3D.h"
-#include "WorkspaceCreationHelperTest.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+
 #include <stdexcept>
 
 using namespace Mantid::Algorithms;
@@ -105,8 +106,8 @@ public:
     const std::string wsName("ApplyCabrationWs");
     Mantid::DataHandling::LoadEmptyInstrument loader;
     loader.initialize();
-    loader.setPropertyValue(
-        "Filename", "IDFs_for_UNIT_TESTING/MAPS_Definition_Reduced.xml");
+    loader.setPropertyValue("Filename",
+                            "unit_testing/MAPS_Definition_Reduced.xml");
     loader.setPropertyValue("OutputWorkspace", wsName);
     loader.execute();
     AnalysisDataServiceImpl &dataStore = AnalysisDataService::Instance();

@@ -10,7 +10,7 @@ set ( SRC_FILES
 	ConvFitDataTablePresenter.cpp
 	ConvFitModel.cpp
 	DensityOfStates.cpp
-        Elwin.cpp
+	Elwin.cpp
 	ILLEnergyTransfer.cpp
 	ISISCalibration.cpp
 	ISISDiagnostics.cpp
@@ -30,6 +30,9 @@ set ( SRC_FILES
 	IndirectFitDataPresenter.cpp
 	IndirectFitDataView.cpp
 	IndirectFitOutput.cpp
+	IndirectFitOutputOptionsModel.cpp
+	IndirectFitOutputOptionsPresenter.cpp
+	IndirectFitOutputOptionsView.cpp
 	IndirectFitPlotModel.cpp
 	IndirectFitPlotPresenter.cpp
 	IndirectFitPlotView.cpp
@@ -67,7 +70,7 @@ set ( SRC_FILES
 # Include files aren't required, but this makes them appear in Visual Studio
 # IMPORTANT: Include files are required in the MOC_FILES set. Scroll down to find it.
 set ( INC_FILES
-    DllConfig.h
+	DllConfig.h
 	AbsorptionCorrections.h
 	ApplyAbsorptionCorrections.h
 	CalculatePaalmanPings.h
@@ -79,8 +82,12 @@ set ( INC_FILES
 	ConvFitModel.h
 	CorrectionsTab.h
 	DensityOfStates.h
-        Elwin.h
+	Elwin.h
 	IAddWorkspaceDialog.h
+	IIndirectFitDataView.h
+	IIndirectFitOutputOptionsModel.h
+	IIndirectFitOutputOptionsView.h
+	IIndirectFitPlotView.h
 	ILLEnergyTransfer.h
 	ISISCalibration.h
 	ISISDiagnostics.h
@@ -100,6 +107,9 @@ set ( INC_FILES
 	IndirectFitDataPresenter.h
 	IndirectFitDataView.h
 	IndirectFitOutput.h
+	IndirectFitOutputOptionsModel.h
+	IndirectFitOutputOptionsPresenter.h
+	IndirectFitOutputOptionsView.h
 	IndirectFitPlotModel.h
 	IndirectFitPlotPresenter.h
 	IndirectFitPlotView.h
@@ -147,6 +157,11 @@ set ( MOC_FILES
     CorrectionsTab.h
     DensityOfStates.h
     Elwin.h
+    IAddWorkspaceDialog.h
+    IIndirectFitDataView.h
+    IIndirectFitOutputOptionsModel.h
+    IIndirectFitOutputOptionsView.h
+    IIndirectFitPlotView.h
     ILLEnergyTransfer.h
     IndirectAddWorkspaceDialog.h
     IndirectBayes.h
@@ -161,6 +176,8 @@ set ( MOC_FILES
     IndirectFitAnalysisTab.h
     IndirectFitDataPresenter.h
     IndirectFitDataView.h
+    IndirectFitOutputOptionsPresenter.h
+    IndirectFitOutputOptionsView.h
     IndirectFitPlotPresenter.h
     IndirectFitPlotView.h
     IndirectLoadILL.h
@@ -211,6 +228,7 @@ set ( UI_FILES
    IndirectDataReduction.ui
    IndirectDiffractionReduction.ui
    IndirectFitDataView.ui
+   IndirectFitOutputOptions.ui
    IndirectFitPreviewPlot.ui
    IndirectLoadILL.ui
    IndirectMolDyn.ui

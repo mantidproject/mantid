@@ -63,18 +63,52 @@ public:
     TS_ASSERT(run.hasProperty("qmax"))
     const double qmin = run.getPropertyAsSingleValue("qmin");
     const double qmax = run.getPropertyAsSingleValue("qmax");
-    TS_ASSERT_DELTA(qmin, 0.03553, 1E-5)
-    TS_ASSERT_DELTA(qmax, 0.88199, 1E-5)
+    TS_ASSERT_DELTA(qmin, 0.03701, 1E-5)
+    TS_ASSERT_DELTA(qmax, 0.73499, 1E-5)
+  }
+
+  void test_components() {
+    CalculateDynamicRange alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    alg.setChild(true);
+    MatrixWorkspace_sptr ws = create_workspace(2);
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Workspace", ws))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty(
+        "ComponentNames", std::vector<std::string>{"bank1", "bank2"}))
+    TS_ASSERT_THROWS_NOTHING(alg.execute(););
+    TS_ASSERT(alg.isExecuted());
+    ws = alg.getProperty("Workspace");
+    TS_ASSERT(ws);
+    const auto &run = ws->run();
+    TS_ASSERT(run.hasProperty("qmin"))
+    TS_ASSERT(run.hasProperty("qmax"))
+    double qmin = run.getPropertyAsSingleValue("qmin");
+    double qmax = run.getPropertyAsSingleValue("qmax");
+    TS_ASSERT_DELTA(qmin, 0.01851, 1E-5)
+    TS_ASSERT_DELTA(qmax, 0.73499, 1E-5)
+    TS_ASSERT(run.hasProperty("qmin_bank1"))
+    TS_ASSERT(run.hasProperty("qmax_bank1"))
+    qmin = run.getPropertyAsSingleValue("qmin_bank1");
+    qmax = run.getPropertyAsSingleValue("qmax_bank1");
+    TS_ASSERT_DELTA(qmin, 0.03701, 1E-5)
+    TS_ASSERT_DELTA(qmax, 0.73499, 1E-5)
+    TS_ASSERT(run.hasProperty("qmin_bank2"))
+    TS_ASSERT(run.hasProperty("qmax_bank2"))
+    qmin = run.getPropertyAsSingleValue("qmin_bank2");
+    qmax = run.getPropertyAsSingleValue("qmax_bank2");
+    TS_ASSERT_DELTA(qmin, 0.01851, 1E-5)
+    TS_ASSERT_DELTA(qmax, 0.66242, 1E-5)
   }
 
 private:
-  MatrixWorkspace_sptr create_workspace() {
+  MatrixWorkspace_sptr create_workspace(const int numBanks = 1) {
     CreateSampleWorkspace creator;
     creator.initialize();
     creator.setChild(true);
     creator.setPropertyValue("OutputWorkspace", "__unused");
     creator.setProperty("XUnit", "Wavelength");
-    creator.setProperty("NumBanks", 1);
+    creator.setProperty("NumBanks", numBanks);
     creator.setProperty("PixelSpacing", 0.1);
     creator.setProperty("XMin", 1.);
     creator.setProperty("XMax", 5.);

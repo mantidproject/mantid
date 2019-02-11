@@ -71,8 +71,9 @@ ranges::
   60 1.4  1 0 0 0 .31,.25,.13,.13,.13,.42 13.66,5.83,3.93,2.09,1.57,31.42 300.00 16666.67 .1 2.9
 
 The :literal:`exp.ini` file is specific to the NOMAD instrument at SNS
-and is optional. This file is generally discouraged. An example
-version of this file is::
+and is optional. It will update the vanadium, container, and empty
+instrument value in all rows of the table. This file is generally
+discouraged. An example version of this file is::
 
   required *******************
   Dia 49262

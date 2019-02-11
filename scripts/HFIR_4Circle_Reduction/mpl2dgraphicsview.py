@@ -9,8 +9,8 @@ from __future__ import (absolute_import, division, print_function)
 import os
 import numpy as np
 from qtpy.QtWidgets import (QWidget, QVBoxLayout, QSizePolicy)
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar2
+from MPLwidgets import FigureCanvasQTAgg as FigureCanvas
+from MPLwidgets import NavigationToolbar2QT as NavigationToolbar2
 from matplotlib.figure import Figure
 import matplotlib.image
 from matplotlib import pyplot as plt

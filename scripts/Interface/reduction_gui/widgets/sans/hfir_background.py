@@ -6,12 +6,18 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
 from __future__ import (absolute_import, division, print_function)
-from PyQt4 import QtGui, QtCore
+from qtpy.QtWidgets import (QFrame)  # noqa
+from qtpy.QtGui import (QDoubleValidator)  # noqa
 import reduction_gui.widgets.util as util
 from reduction_gui.reduction.sans.hfir_background_script import Background
 from reduction_gui.widgets.base_widget import BaseWidget
 from reduction_gui.widgets.sans.hfir_sample_data import BeamSpreader, DirectBeam
-import ui.sans.ui_hfir_background
+try:
+    from mantidqt.utils.qt import load_ui
+except ImportError:
+    from mantid.kernel import Logger
+    Logger("BckDirectBeam").information('Using legacy ui importer')
+    from mantidplot import load_ui
 
 
 class BckDirectBeam(DirectBeam):
@@ -60,10 +66,10 @@ class BackgroundWidget(BaseWidget):
     def __init__(self, parent=None, state=None, settings=None, show_transmission=True, data_type=None, data_proxy=None):
         super(BackgroundWidget, self).__init__(parent, state, settings, data_type, data_proxy=data_proxy)
 
-        class BckFrame(QtGui.QFrame, ui.sans.ui_hfir_background.Ui_Frame):
+        class BckFrame(QFrame):
             def __init__(self, parent=None):
-                QtGui.QFrame.__init__(self, parent)
-                self.setupUi(self)
+                QFrame.__init__(self, parent)
+                self.ui = load_ui(__file__, '../../../ui/sans/hfir_background.ui', baseinstance=self)
 
         self._content = BckFrame(self)
         self._layout.addWidget(self._content)
@@ -88,20 +94,20 @@ class BackgroundWidget(BaseWidget):
             widgets loaded through the .ui file.
         """
         # Validators
-        self._content.transmission_edit.setValidator(QtGui.QDoubleValidator(self._content.transmission_edit))
-        self._content.dtransmission_edit.setValidator(QtGui.QDoubleValidator(self._content.dtransmission_edit))
-        #self._content.thickness_edit.setValidator(QtGui.QDoubleValidator(self._content.thickness_edit))
+        self._content.transmission_edit.setValidator(QDoubleValidator(self._content.transmission_edit))
+        self._content.dtransmission_edit.setValidator(QDoubleValidator(self._content.dtransmission_edit))
+        #self._content.thickness_edit.setValidator(QDoubleValidator(self._content.thickness_edit))
 
         # Connections
-        self.connect(self._content.calculate_trans_chk, QtCore.SIGNAL("clicked(bool)"), self._calculate_clicked)
-        self.connect(self._content.trans_direct_chk, QtCore.SIGNAL("clicked()"), self._direct_beam)
-        self.connect(self._content.trans_spreader_chk, QtCore.SIGNAL("clicked()"), self._beam_spreader)
-        self.connect(self._content.background_chk, QtCore.SIGNAL("clicked(bool)"), self._background_clicked)
-        self.connect(self._content.background_browse, QtCore.SIGNAL("clicked()"), self._background_browse)
-        self.connect(self._content.trans_dark_current_button, QtCore.SIGNAL("clicked()"), self._trans_dark_current_browse)
+        self._content.calculate_trans_chk.clicked.connect(self._calculate_clicked)
+        self._content.trans_direct_chk.clicked.connect(self._direct_beam)
+        self._content.trans_spreader_chk.clicked.connect(self._beam_spreader)
+        self._content.background_chk.clicked.connect(self._background_clicked)
+        self._content.background_browse.clicked.connect(self._background_browse)
+        self._content.trans_dark_current_button.clicked.connect(self._trans_dark_current_browse)
 
-        self.connect(self._content.background_plot_button, QtCore.SIGNAL("clicked()"), self._background_plot_clicked)
-        self.connect(self._content.trans_dark_current_plot_button, QtCore.SIGNAL("clicked()"), self._trans_dark_current_plot_clicked)
+        self._content.background_plot_button.clicked.connect(self._background_plot_clicked)
+        self._content.trans_dark_current_plot_button.clicked.connect(self._trans_dark_current_plot_clicked)
 
         # Process transmission option
         if not self.show_transmission:
@@ -118,7 +124,7 @@ class BackgroundWidget(BaseWidget):
             self._content.trans_dark_current_edit.hide()
             self._content.trans_dark_current_button.hide()
 
-        if not self._in_mantidplot:
+        if not self._has_instrument_view:
             self._content.background_plot_button.hide()
             self._content.trans_dark_current_plot_button.hide()
 
@@ -143,7 +149,7 @@ class BackgroundWidget(BaseWidget):
         if self.show_transmission:
             self._content.transmission_edit.setText(str("%6.4f" % state.bck_transmission))
             self._content.dtransmission_edit.setText(str("%6.4f" % state.bck_transmission_spread))
-            #self._content.thickness_edit.setText(QtCore.QString("%6.4f" % state.sample_thickness))
+            #self._content.thickness_edit.setText("%6.4f" % state.sample_thickness)
 
             if isinstance(state.trans_calculation_method, state.DirectBeam):
                 self._content.trans_direct_chk.setChecked(True)

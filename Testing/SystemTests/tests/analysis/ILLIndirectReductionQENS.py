@@ -4,12 +4,12 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-import stresstesting
+import systemtesting
 from mantid.simpleapi import IndirectILLReductionQENS, Plus, CompareWorkspaces, GroupWorkspaces, Scale
 from mantid import config, mtd
 
 
-class ILLIndirectReductionQENSTest(stresstesting.MantidStressTest):
+class ILLIndirectReductionQENSTest(systemtesting.MantidSystemTest):
 
     # cache default instrument and datadirs
     facility = config['default.facility']

@@ -9,6 +9,7 @@ from sphinx import __version__ as sphinx_version
 import sphinx_bootstrap_theme # checked at cmake time
 import mantid
 from mantid.kernel import ConfigService
+from distutils.version import LooseVersion
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -17,7 +18,7 @@ sys.path.insert(0, os.path.abspath(os.path.join('..', 'sphinxext')))
 
 # -- General configuration ------------------------------------------------
 
-if sphinx_version > "1.6":
+if LooseVersion(sphinx_version) > LooseVersion("1.6"):
     def setup(app):
         """Called automatically by Sphinx when starting the build process
         """
@@ -30,7 +31,6 @@ if sphinx_version > "1.6":
 extensions = [
      # we use pngmath over mathjax so that the the offline help isn't reliant on
      # anything external and we don't need to include the large mathjax package
-    'sphinx.ext.pngmath',
     'sphinx.ext.autodoc',
     'sphinx.ext.intersphinx',
     'sphinx.ext.doctest',
@@ -39,6 +39,10 @@ extensions = [
     'mantiddoc.doctest',
     'matplotlib.sphinxext.plot_directive'
 ]
+if LooseVersion(sphinx_version) > LooseVersion("1.8"):
+    extensions.append('sphinx.ext.imgmath')
+else:
+    extensions.append('sphinx.ext.pngmath')
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -209,5 +213,6 @@ intersphinx_mapping = {
     'numpy': ('https://docs.scipy.org/doc/numpy/', None),
     'python': ('https://docs.python.org/3/', None),
     'SciPy': ('http://docs.scipy.org/doc/scipy/reference', None),
-    'pandas': ('http://pandas.pydata.org/pandas-docs/stable', None)
+    'pandas': ('http://pandas.pydata.org/pandas-docs/stable', None),
+    'pystog': ('https://pystog.readthedocs.io/en/latest/', None)
 }

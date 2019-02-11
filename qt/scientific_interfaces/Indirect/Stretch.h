@@ -37,13 +37,28 @@ private slots:
   void handleSampleInputReady(const QString &filename);
   /// Save the workspaces produces from the algorithm
   void saveWorkspaces();
-  /// Plot the workspaces specified by the interface
+
+  void runClicked();
   void plotWorkspaces();
+  void plotContourClicked();
   void algorithmComplete(const bool &error);
   void plotCurrentPreview();
   void previewSpecChanged(int value);
 
 private:
+  void populateContourWorkspaceComboBox();
+  void displayMessageAndRun(std::string const &saveDirectory);
+  int displaySaveDirectoryMessage();
+
+  void setRunEnabled(bool enabled);
+  void setPlotResultEnabled(bool enabled);
+  void setPlotContourEnabled(bool enabled);
+  void setSaveResultEnabled(bool enabled);
+  void setButtonsEnabled(bool enabled);
+  void setRunIsRunning(bool running);
+  void setPlotResultIsPlotting(bool plotting);
+  void setPlotContourIsPlotting(bool plotting);
+
   /// Current preview spectrum
   int m_previewSpec;
   // The ui form
@@ -52,7 +67,6 @@ private:
   std::string m_fitWorkspaceName;
   std::string m_contourWorkspaceName;
   // state of plot and save when algorithm is run
-  std::string m_plotType;
   bool m_save;
 };
 } // namespace CustomInterfaces

@@ -8,7 +8,7 @@
 
 from __future__ import (absolute_import, division, print_function)
 import unittest
-import stresstesting
+import systemtesting
 
 from mantid.dataobjects import (Workspace2D, EventWorkspace)
 from mantid.api import (AnalysisDataService, AlgorithmManager)
@@ -204,7 +204,6 @@ class SANSLoadTest(unittest.TestCase):
         load_alg.setProperty("SANSState", state_dict)
         load_alg.setProperty("PublishToCache", publish_to_cache)
         load_alg.setProperty("UseCached", use_cached)
-        load_alg.setProperty("MoveWorkspace", move_workspace)
         if move_workspace:
             load_alg.setProperty("Component", component)
             load_alg.setProperty("BeamCoordinates", beam_coordinates)
@@ -495,9 +494,9 @@ class SANSLoadTest(unittest.TestCase):
         remove_all_workspaces_from_ads()
 
 
-class SANSLoadDataRunnerTest(stresstesting.MantidStressTest):
+class SANSLoadDataRunnerTest(systemtesting.MantidSystemTest):
     def __init__(self):
-        stresstesting.MantidStressTest.__init__(self)
+        systemtesting.MantidSystemTest.__init__(self)
         self._success = False
 
     def runTest(self):

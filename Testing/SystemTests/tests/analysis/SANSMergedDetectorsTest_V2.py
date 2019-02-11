@@ -7,7 +7,7 @@
 #pylint: disable=invalid-name
 
 from __future__ import (absolute_import, division, print_function)
-import stresstesting
+import systemtesting
 from mantid.simpleapi import DeleteWorkspace, mtd
 from sans.command_interface.ISISCommandInterface import (SANS2DTUBES, MaskFile, SetDetectorOffsets, Gravity, Set1D,
                                                          SetFrontDetRescaleShift, WavRangeReduction, AssignSample,
@@ -15,9 +15,9 @@ from sans.command_interface.ISISCommandInterface import (SANS2DTUBES, MaskFile, 
                                                          UseCompatibilityMode)
 
 
-class SANSMergedDetectorsTest_V2(stresstesting.MantidStressTest):
+class SANSMergedDetectorsTest_V2(systemtesting.MantidSystemTest):
     def __init__(self):
-        stresstesting.MantidStressTest.__init__(self)
+        systemtesting.MantidSystemTest.__init__(self)
 
     def runTest(self):
         # Select instrument and user file

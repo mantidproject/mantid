@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_INDIRECTFITPLOTMODELTEST_H_
 #define MANTID_INDIRECTFITPLOTMODELTEST_H_
 
@@ -50,10 +56,14 @@ private:
   std::string simultaneousFitOutputName() const override { return ""; };
   std::string singleFitOutputName(std::size_t index,
                                   std::size_t spectrum) const override {
-    (void)index;
-    (void)spectrum;
+    UNUSED_ARG(index);
+    UNUSED_ARG(spectrum);
     return "";
   };
+
+  std::vector<std::string> getSpectrumDependentAttributes() const override {
+    return std::vector<std::string>();
+  }
 };
 
 void setFittingFunction(IndirectFittingModel *model,
@@ -79,8 +89,8 @@ createModelWithSingleWorkspace(std::string const &workspaceName,
 
 void addWorkspacesToModel(IndirectFittingModel *model,
                           int const &numberOfSpectra) {
-  (void)model;
-  (void)numberOfSpectra;
+  UNUSED_ARG(model);
+  UNUSED_ARG(numberOfSpectra);
 }
 
 template <typename Name, typename... Names>
@@ -125,7 +135,7 @@ IAlgorithm_sptr setupFitAlgorithm(MatrixWorkspace_sptr workspace,
   alg->setProperty("ConvolveMembers", true);
   alg->setProperty("Minimizer", "Levenberg-Marquardt");
   alg->setProperty("MaxIterations", 500);
-  alg->setProperty("OutputWorkspace", "output");
+  alg->setProperty("OutputWorkspace", "OutputResults");
   alg->setLogging(false);
   return alg;
 }

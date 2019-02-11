@@ -11,7 +11,6 @@
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 
 #include "MantidDataHandling/FindDetectorsPar.h"
@@ -87,12 +86,6 @@ void SaveNXSPE::init() {
 void SaveNXSPE::exec() {
   // Retrieve the input workspace
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
-
-  // Do the full check for common binning
-  if (!WorkspaceHelpers::commonBoundaries(*inputWS)) {
-    g_log.error("The input workspace must have common bins");
-    throw std::invalid_argument("The input workspace must have common bins");
-  }
 
   // Number of spectra
   const int64_t nHist = static_cast<int64_t>(inputWS->getNumberHistograms());

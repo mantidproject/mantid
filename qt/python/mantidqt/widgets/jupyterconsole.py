@@ -26,7 +26,7 @@ except ImportError:
     from IPython.qt.inprocess import QtInProcessKernelManager
 
 # local imports
-from mantidqt.utils.async import blocking_async_task
+from mantidqt.utils.asynchronous import blocking_async_task
 
 
 class InProcessJupyterConsole(RichJupyterWidget):

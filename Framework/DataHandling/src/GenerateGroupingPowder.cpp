@@ -7,8 +7,10 @@
 #include "MantidDataHandling/GenerateGroupingPowder.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Crystal/AngleUnits.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/System.h"
@@ -22,8 +24,9 @@
 
 #include <fstream>
 
-using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using namespace Mantid::Kernel;
+using namespace Mantid::Geometry;
 using namespace Poco::XML;
 
 namespace Mantid {
@@ -50,49 +53,57 @@ const std::string GenerateGroupingPowder::category() const {
 void GenerateGroupingPowder::init() {
   declareProperty(
       make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
-      "An input workspace.");
+      "A workspace from which to generate the grouping.");
   auto positiveDouble = boost::make_shared<BoundedValidator<double>>();
   positiveDouble->setLower(0.0);
   declareProperty("AngleStep", -1.0, positiveDouble,
-                  "The angle step for grouping");
-  declareProperty(
-      make_unique<FileProperty>("GroupingFilename", "", FileProperty::Save,
-                                ".xml"),
-      "A grouping file that will be created. The corresponding .par file will "
-      "be created as well.");
+                  "The angle step for grouping, in degrees.");
+  declareProperty(make_unique<FileProperty>("GroupingFilename", "",
+                                            FileProperty::Save, ".xml"),
+                  "A grouping file that will be created.");
+  declareProperty("GenerateParFile", true,
+                  "If true, a par file with a corresponding name to the "
+                  "grouping file will be generated.");
 }
 
 /** Execute the algorithm.
  */
 void GenerateGroupingPowder::exec() {
   MatrixWorkspace_const_sptr input_ws = getProperty("InputWorkspace");
-  // Check if workspace has detectors. If not, throw an exception.
+  const auto &spectrumInfo = input_ws->spectrumInfo();
   const auto &detectorInfo = input_ws->detectorInfo();
   const auto &detectorIDs = detectorInfo.detectorIDs();
   if (detectorIDs.empty())
     throw std::invalid_argument("Workspace contains no detectors.");
 
-  double step = getProperty("AngleStep");
-  size_t numSteps = static_cast<size_t>(180. / step + 1);
+  const double step = getProperty("AngleStep");
+  const size_t numSteps = static_cast<size_t>(180. / step + 1);
 
   std::vector<std::vector<detid_t>> groups(numSteps);
-  std::vector<double> twoThetaAverage(numSteps, 0.), rAverage(numSteps, 0.);
+  std::vector<double> twoThetaAverage(numSteps, 0.);
+  std::vector<double> rAverage(numSteps, 0.);
 
-  for (size_t i = 0; i < detectorIDs.size(); ++i) {
-    if (detectorInfo.isMonitor(i))
+  for (size_t i = 0; i < spectrumInfo.size(); ++i) {
+    if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMasked(i) ||
+        spectrumInfo.isMonitor(i)) {
       continue;
-
-    double tt = detectorInfo.twoTheta(i) * Geometry::rad2deg;
-    double r = detectorInfo.l2(i);
-    size_t where = static_cast<size_t>(tt / step);
-    groups.at(where).push_back(detectorIDs[i]);
-    twoThetaAverage.at(where) += tt;
-    rAverage.at(where) += r;
+    }
+    const auto &det = spectrumInfo.detector(i);
+    const double tt = spectrumInfo.twoTheta(i) * Geometry::rad2deg;
+    const double r = spectrumInfo.l2(i);
+    const size_t where = static_cast<size_t>(tt / step);
+    twoThetaAverage[where] += tt;
+    rAverage[where] += r;
+    if (spectrumInfo.hasUniqueDetector(i)) {
+      groups[where].emplace_back(det.getID());
+    } else {
+      const auto &group = dynamic_cast<const DetectorGroup &>(det);
+      const auto ids = group.getDetectorIDs();
+      groups[where].insert(groups[where].end(), ids.begin(), ids.end());
+    }
   }
 
-  std::string XMLfilename = getProperty("GroupingFilename");
-  std::string PARfilename = XMLfilename;
-  PARfilename.replace(PARfilename.end() - 3, PARfilename.end(), "par");
+  const std::string XMLfilename = getProperty("GroupingFilename");
 
   // XML
   AutoPtr<Document> pDoc = new Document;
@@ -114,7 +125,7 @@ void GenerateGroupingPowder::exec() {
       std::copy(groups.at(i).begin(), groups.at(i).end(),
                 std::ostream_iterator<size_t>(textvalue, ","));
       std::string text = textvalue.str();
-      size_t found = text.rfind(',');
+      const size_t found = text.rfind(',');
       if (found != std::string::npos) {
         text.erase(found, 1); // erase the last comma
       }
@@ -126,10 +137,8 @@ void GenerateGroupingPowder::exec() {
     }
   }
   if (goodGroups == 0) {
-    g_log.error("Something terrible has happened: I cannot find any detectors "
-                "with scattering angle between 0 and 180 degrees");
     throw Exception::InstrumentDefinitionError(
-        "Detector scattering angles not between 0 and 180 degrees");
+        "No detectors found in scattering angles between 0 and 180 degrees");
   }
 
   DOMWriter writer;
@@ -147,36 +156,41 @@ void GenerateGroupingPowder::exec() {
   ofs.close();
 
   // PAR file
-  std::ofstream outPAR_file(PARfilename.c_str());
-  if (!outPAR_file) {
-    g_log.error("Unable to create file: " + PARfilename);
-    throw Exception::FileError("Unable to create file: ", PARfilename);
-  }
-  // Write the number of detectors to the file.
-  outPAR_file << " " << goodGroups << '\n';
-
-  for (size_t i = 0; i < numSteps; ++i) {
-    size_t gSize = groups.at(i).size();
-    if (gSize > 0) {
-      outPAR_file << std::fixed << std::setprecision(3);
-      outPAR_file.width(10);
-      outPAR_file << rAverage.at(i) / static_cast<double>(gSize);
-      outPAR_file.width(10);
-      outPAR_file << twoThetaAverage.at(i) / static_cast<double>(gSize);
-      outPAR_file.width(10);
-      outPAR_file << 0.;
-      outPAR_file.width(10);
-      outPAR_file << step * Geometry::deg2rad * rAverage.at(i) /
-                         static_cast<double>(gSize);
-      outPAR_file.width(10);
-      outPAR_file << 0.01;
-      outPAR_file.width(10);
-      outPAR_file << (groups.at(i)).at(0) << '\n';
+  const bool generatePar = getProperty("GenerateParFile");
+  if (generatePar) {
+    std::string PARfilename = XMLfilename;
+    PARfilename.replace(PARfilename.end() - 3, PARfilename.end(), "par");
+    std::ofstream outPAR_file(PARfilename.c_str());
+    if (!outPAR_file) {
+      g_log.error("Unable to create file: " + PARfilename);
+      throw Exception::FileError("Unable to create file: ", PARfilename);
     }
-  }
+    // Write the number of detectors to the file.
+    outPAR_file << " " << goodGroups << '\n';
 
-  // Close the file
-  outPAR_file.close();
+    for (size_t i = 0; i < numSteps; ++i) {
+      const size_t gSize = groups.at(i).size();
+      if (gSize > 0) {
+        outPAR_file << std::fixed << std::setprecision(3);
+        outPAR_file.width(10);
+        outPAR_file << rAverage.at(i) / static_cast<double>(gSize);
+        outPAR_file.width(10);
+        outPAR_file << twoThetaAverage.at(i) / static_cast<double>(gSize);
+        outPAR_file.width(10);
+        outPAR_file << 0.;
+        outPAR_file.width(10);
+        outPAR_file << step * Geometry::deg2rad * rAverage.at(i) /
+                           static_cast<double>(gSize);
+        outPAR_file.width(10);
+        outPAR_file << 0.01;
+        outPAR_file.width(10);
+        outPAR_file << (groups.at(i)).at(0) << '\n';
+      }
+    }
+
+    // Close the file
+    outPAR_file.close();
+  }
 }
 
 } // namespace DataHandling

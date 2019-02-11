@@ -14,8 +14,10 @@
 #include "MantidGeometry/Instrument/DetectorInfoIterator.h"
 #include "MantidGeometry/Instrument/InstrumentVisitor.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
-
 #include <cxxtest/TestSuite.h>
+#include <iterator>
+#include <type_traits>
+#include <typeinfo>
 
 using namespace ComponentCreationHelper;
 using namespace Mantid::Geometry;
@@ -146,6 +148,26 @@ public:
     TS_ASSERT(iter == detectorInfo->cbegin());
   }
 
+  void test_iterator_catagory() {
+    // Characterisation tests
+    using ItTag =
+        typename std::iterator_traits<DetectorInfoConstIt>::iterator_category;
+    using InputItTag = std::input_iterator_tag;
+    using BidirectionalItTag = std::bidirectional_iterator_tag;
+    const static bool inputit = std::is_convertible<ItTag, InputItTag>::value;
+    const static bool bidirectionalit =
+        std::is_convertible<ItTag, BidirectionalItTag>::value;
+    TSM_ASSERT("Iterator expected to be treated as input_iterator", inputit);
+    // Assert below. Iterator not bidirectional. This is why decrement via
+    // std::advance is not supported. Iterator reference must be true reference
+    // to support this.
+    TSM_ASSERT(
+        "Iterator expected not to be treated as legacy bidirectional iterator",
+        !bidirectionalit);
+
+    // see https://en.cppreference.com/w/cpp/iterator/advance
+  }
+
   void test_iterator_advance_and_positions() {
     // Get the DetectorInfo object
     auto detectorInfo = create_detector_info_object();
@@ -161,12 +183,12 @@ public:
 
     // Go backwards 2 places
     xValue = 15.0;
-    std::advance(iter, -2);
+    iter -= 2;
     TS_ASSERT_EQUALS(iter->position().X(), xValue)
 
     // Go to the start
-    std::advance(iter, -4);
-    TS_ASSERT(iter == detectorInfo->cbegin());
+    iter -= 4;
+    TS_ASSERT_EQUALS(iter, detectorInfo->cbegin());
   }
 
   void test_copy_iterator_and_positions() {

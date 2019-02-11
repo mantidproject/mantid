@@ -7,7 +7,7 @@
 #pylint: disable=invalid-name,no-init,too-few-public-methods
 
 from __future__ import (absolute_import, division, print_function)
-import stresstesting
+import systemtesting
 from mantid.simpleapi import *
 import SANSUtility as su
 import SANSadd2 as add
@@ -19,7 +19,7 @@ def unixLikePathFromWorkspace(ws):
     return su.getFilePathFromWorkspace(ws).replace('\\','/')
 
 
-class SANSUtilityTest(stresstesting.MantidStressTest):
+class SANSUtilityTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
         # created after issue reported in #8156

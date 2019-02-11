@@ -9,7 +9,7 @@
 from __future__ import (absolute_import, division, print_function)
 import unittest
 import os
-import stresstesting
+import systemtesting
 
 import mantid
 from mantid.api import AlgorithmManager
@@ -35,7 +35,6 @@ class SANSBeamCentreFinderCoreTest(unittest.TestCase):
         load_alg.setProperty("SANSState", state_dict)
         load_alg.setProperty("PublishToCache", False)
         load_alg.setProperty("UseCached", False)
-        load_alg.setProperty("MoveWorkspace", False)
         load_alg.setProperty("SampleScatterWorkspace", EMPTY_NAME)
         load_alg.setProperty("SampleScatterMonitorWorkspace", EMPTY_NAME)
         if state.data.sample_transmission:
@@ -195,9 +194,9 @@ class SANSBeamCentreFinderCoreTest(unittest.TestCase):
         self._compare_workspace(output_workspace_bottom, reference_file_name_bottom)
 
 
-class SANSBeamCentreCoreRunnerTest(stresstesting.MantidStressTest):
+class SANSBeamCentreCoreRunnerTest(systemtesting.MantidSystemTest):
     def __init__(self):
-        stresstesting.MantidStressTest.__init__(self)
+        systemtesting.MantidSystemTest.__init__(self)
         self._success = False
 
     def runTest(self):

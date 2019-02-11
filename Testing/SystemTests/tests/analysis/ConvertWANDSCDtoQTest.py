@@ -4,12 +4,12 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-import stresstesting
+import systemtesting
 import numpy as np
 from mantid.simpleapi import *
 
 
-class ConvertWANDSCDtoQTest(stresstesting.MantidStressTest):
+class ConvertWANDSCDtoQTest(systemtesting.MantidSystemTest):
     def requiredMemoryMB(self):
             return 8000
 

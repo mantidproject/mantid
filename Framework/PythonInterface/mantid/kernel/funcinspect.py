@@ -20,7 +20,7 @@ import sys
 import dis
 from six import PY3
 
-#-------------------------------------------------------------------------------
+
 def replace_signature(func, varnames):
     """
     Replace the signature of the given function object with that given by
@@ -48,7 +48,7 @@ def replace_signature(func, varnames):
     #endif
     setattr(func, code_attr, c)
 
-#-------------------------------------------------------------------------------
+
 def customise_func(func, name, signature, docstring):
     """
     Takes the definition of the algorithm function and replaces

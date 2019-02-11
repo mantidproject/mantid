@@ -12,6 +12,7 @@
 #include "MantidAlgorithms/ReflectometryReductionOneAuto2.h"
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
@@ -70,7 +71,7 @@ private:
     alg.setProperty("InputWorkspace", inter);
     alg.setProperty("ThetaIn", theta);
     alg.setProperty("CorrectionAlgorithm", "None");
-    alg.setProperty("ProcessingInstructions", "3");
+    alg.setProperty("ProcessingInstructions", "4");
     alg.setProperty("Debug", false);
   }
 
@@ -109,7 +110,7 @@ public:
     alg.setProperty("InputWorkspace", m_notTOF);
     alg.setProperty("WavelengthMin", 1.0);
     alg.setProperty("WavelengthMax", 15.0);
-    alg.setProperty("ProcessingInstructions", "0");
+    alg.setProperty("ProcessingInstructions", "1");
     alg.setPropertyValue("OutputWorkspace", "IvsQ");
     alg.setPropertyValue("OutputWorkspaceBinned", "IvsQ_binned");
     alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
@@ -123,7 +124,7 @@ public:
     alg.setProperty("InputWorkspace", m_TOF);
     alg.setProperty("WavelengthMin", 15.0);
     alg.setProperty("WavelengthMax", 1.0);
-    alg.setProperty("ProcessingInstructions", "0");
+    alg.setProperty("ProcessingInstructions", "1");
     alg.setPropertyValue("OutputWorkspace", "IvsQ");
     alg.setPropertyValue("OutputWorkspaceBinned", "IvsQ_binned");
     alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
@@ -137,7 +138,7 @@ public:
     alg.setProperty("InputWorkspace", m_TOF);
     alg.setProperty("WavelengthMin", 1.0);
     alg.setProperty("WavelengthMax", 15.0);
-    alg.setProperty("ProcessingInstructions", "0");
+    alg.setProperty("ProcessingInstructions", "1");
     alg.setProperty("MonitorBackgroundWavelengthMin", 3.0);
     alg.setProperty("MonitorBackgroundWavelengthMax", 0.5);
     alg.setPropertyValue("OutputWorkspace", "IvsQ");
@@ -153,7 +154,7 @@ public:
     alg.setProperty("InputWorkspace", m_TOF);
     alg.setProperty("WavelengthMin", 1.0);
     alg.setProperty("WavelengthMax", 15.0);
-    alg.setProperty("ProcessingInstructions", "0");
+    alg.setProperty("ProcessingInstructions", "1");
     alg.setProperty("MonitorIntegrationWavelengthMin", 15.0);
     alg.setProperty("MonitorIntegrationWavelengthMax", 1.5);
     alg.setPropertyValue("OutputWorkspace", "IvsQ");
@@ -170,7 +171,7 @@ public:
     alg.setProperty("FirstTransmissionRun", m_notTOF);
     alg.setProperty("WavelengthMin", 1.0);
     alg.setProperty("WavelengthMax", 15.0);
-    alg.setProperty("ProcessingInstructions", "0");
+    alg.setProperty("ProcessingInstructions", "1");
     alg.setProperty("MonitorIntegrationWavelengthMin", 1.0);
     alg.setProperty("MonitorIntegrationWavelengthMax", 15.0);
     alg.setPropertyValue("OutputWorkspace", "IvsQ");
@@ -272,7 +273,7 @@ public:
     alg.setProperty("OutputWorkspace", "IvsQ");
     alg.setProperty("OutputWorkspaceBinned", "IvsQ_binned");
     alg.setProperty("OutputWorkspaceWavelength", "IvsLam");
-    alg.setProperty("ProcessingInstructions", "3");
+    alg.setProperty("ProcessingInstructions", "4");
     alg.execute();
     MatrixWorkspace_sptr out = alg.getProperty("OutputWorkspaceBinned");
 
@@ -418,7 +419,7 @@ public:
     alg.setProperty("OutputWorkspace", "IvsQ");
     alg.setProperty("OutputWorkspaceBinned", "IvsQ_binned");
     alg.setProperty("OutputWorkspaceWavelength", "IvsLam");
-    alg.setProperty("ProcessingInstructions", "3");
+    alg.setProperty("ProcessingInstructions", "4");
     alg.execute();
     MatrixWorkspace_sptr corrected = alg.getProperty("OutputWorkspace");
 
@@ -463,7 +464,7 @@ public:
     alg.setProperty("OutputWorkspace", "IvsQ");
     alg.setProperty("OutputWorkspaceBinned", "IvsQ_binned");
     alg.setProperty("OutputWorkspaceWavelength", "IvsLam");
-    alg.setProperty("ProcessingInstructions", "3");
+    alg.setProperty("ProcessingInstructions", "4");
     alg.execute();
     MatrixWorkspace_sptr corrected = alg.getProperty("OutputWorkspace");
 
@@ -487,7 +488,7 @@ public:
     alg.setProperty("InputWorkspace", m_TOF);
     alg.setProperty("WavelengthMin", 1.5);
     alg.setProperty("WavelengthMax", 15.0);
-    alg.setProperty("ProcessingInstructions", "1");
+    alg.setProperty("ProcessingInstructions", "2");
     alg.setProperty("MomentumTransferMin", 1.0);
     alg.setProperty("MomentumTransferMax", 10.0);
     alg.setProperty("MomentumTransferStep", -0.04);
@@ -520,7 +521,7 @@ public:
     alg.setProperty("InputWorkspace", m_TOF);
     alg.setProperty("WavelengthMin", 1.5);
     alg.setProperty("WavelengthMax", 15.0);
-    alg.setProperty("ProcessingInstructions", "1");
+    alg.setProperty("ProcessingInstructions", "2");
     alg.setProperty("MomentumTransferMin", 1.0);
     alg.setProperty("MomentumTransferMax", 10.0);
     alg.setProperty("MomentumTransferStep", 0.04);
@@ -544,7 +545,7 @@ public:
     alg.setProperty("InputWorkspace", m_TOF);
     alg.setProperty("WavelengthMin", 1.5);
     alg.setProperty("WavelengthMax", 15.0);
-    alg.setProperty("ProcessingInstructions", "2");
+    alg.setProperty("ProcessingInstructions", "3");
     alg.setProperty("MomentumTransferStep", 0.04);
     alg.setPropertyValue("OutputWorkspace", "IvsQ");
     alg.setPropertyValue("OutputWorkspaceBinned", "IvsQ_binned");
@@ -573,7 +574,7 @@ public:
     alg.setProperty("InputWorkspace", inter);
     alg.setProperty("ThetaIn", theta);
     alg.setProperty("CorrectionAlgorithm", "None");
-    alg.setProperty("ProcessingInstructions", "3");
+    alg.setProperty("ProcessingInstructions", "4");
     alg.execute();
 
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_binned_13460"));
@@ -593,7 +594,7 @@ public:
     alg.setProperty("InputWorkspace", inter);
     alg.setProperty("ThetaIn", theta);
     alg.setProperty("CorrectionAlgorithm", "None");
-    alg.setProperty("ProcessingInstructions", "3");
+    alg.setProperty("ProcessingInstructions", "4");
     alg.setProperty("OutputWorkspaceBinned", "IvsQ_binned");
     alg.execute();
 
@@ -615,7 +616,7 @@ public:
     alg.setProperty("InputWorkspace", inter);
     alg.setProperty("ThetaIn", theta);
     alg.setProperty("CorrectionAlgorithm", "None");
-    alg.setProperty("ProcessingInstructions", "3");
+    alg.setProperty("ProcessingInstructions", "4");
     alg.setProperty("OutputWorkspaceBinned", "IvsQ_binned");
     alg.setProperty("OutputWorkspace", "IvsQ");
     alg.setProperty("OutputWorkspaceWavelength", "IvsLam");
@@ -638,7 +639,7 @@ public:
     alg.setProperty("InputWorkspace", inter);
     alg.setProperty("ThetaIn", theta);
     alg.setProperty("CorrectionAlgorithm", "None");
-    alg.setProperty("ProcessingInstructions", "3");
+    alg.setProperty("ProcessingInstructions", "4");
     alg.setProperty("Debug", true);
     alg.execute();
 
@@ -659,7 +660,7 @@ public:
     alg.setProperty("InputWorkspace", inter);
     alg.setProperty("ThetaIn", theta);
     alg.setProperty("CorrectionAlgorithm", "None");
-    alg.setProperty("ProcessingInstructions", "3");
+    alg.setProperty("ProcessingInstructions", "4");
     alg.setProperty("Debug", false);
     alg.execute();
 
@@ -681,7 +682,7 @@ public:
     alg.setProperty("InputWorkspace", inter);
     alg.setProperty("ThetaIn", theta);
     alg.setProperty("CorrectionAlgorithm", "None");
-    alg.setProperty("ProcessingInstructions", "3");
+    alg.setProperty("ProcessingInstructions", "4");
     alg.setProperty("Debug", true);
     alg.execute();
 
@@ -703,7 +704,7 @@ public:
     alg.setProperty("InputWorkspace", inter);
     alg.setProperty("ThetaIn", theta);
     alg.setProperty("CorrectionAlgorithm", "None");
-    alg.setProperty("ProcessingInstructions", "3");
+    alg.setProperty("ProcessingInstructions", "4");
     alg.setProperty("Debug", false);
     alg.execute();
 
@@ -725,13 +726,13 @@ public:
     alg.setProperty("WavelengthMin", 1.0);
     alg.setProperty("WavelengthMax", 15.0);
     alg.setProperty("ThetaIn", 10.0);
-    alg.setProperty("ProcessingInstructions", "1");
+    alg.setProperty("ProcessingInstructions", "2");
     alg.setProperty("MomentumTransferStep", 0.04);
     alg.setProperty("PolarizationAnalysis", "PA");
-    alg.setProperty("Pp", "0.9,0,0");
-    alg.setProperty("Ap", "0.8,0,0");
-    alg.setProperty("Rho", "0.7778,0,0");
-    alg.setProperty("Alpha", "0.75,0");
+    alg.setProperty("CPp", "0.9,0,0");
+    alg.setProperty("CAp", "0.8,0,0");
+    alg.setProperty("CRho", "0.7778,0,0");
+    alg.setProperty("CAlpha", "0.75,0");
     alg.setPropertyValue("OutputWorkspace", "IvsQ");
     alg.setPropertyValue("OutputWorkspaceBinned", "IvsQ_binned");
     alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
@@ -773,13 +774,13 @@ public:
     alg.setProperty("WavelengthMin", 1.0);
     alg.setProperty("WavelengthMax", 15.0);
     alg.setProperty("ThetaIn", 10.0);
-    alg.setProperty("ProcessingInstructions", "1");
+    alg.setProperty("ProcessingInstructions", "2");
     alg.setProperty("MomentumTransferStep", 0.04);
     alg.setProperty("PolarizationAnalysis", "PNR");
-    alg.setProperty("Pp", "1,1,2");
-    alg.setProperty("Ap", "1,1,2");
-    alg.setProperty("Rho", "1,1");
-    alg.setProperty("Alpha", "1");
+    alg.setProperty("CPp", "1,1,2");
+    alg.setProperty("CAp", "1,1,2");
+    alg.setProperty("CRho", "1,1");
+    alg.setProperty("CAlpha", "1");
     alg.setPropertyValue("OutputWorkspace", "IvsQ");
     alg.setPropertyValue("OutputWorkspaceBinned", "IvsQ_binned");
     alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
@@ -798,11 +799,11 @@ public:
     alg.setProperty("WavelengthMin", 1.0);
     alg.setProperty("WavelengthMax", 15.0);
     alg.setProperty("ThetaIn", 10.0);
-    alg.setProperty("ProcessingInstructions", "1");
+    alg.setProperty("ProcessingInstructions", "2");
     alg.setProperty("MomentumTransferStep", 0.04);
     alg.setProperty("PolarizationAnalysis", "PNR");
-    alg.setProperty("Pp", "1,1,2");
-    alg.setProperty("Rho", "1,1");
+    alg.setProperty("CPp", "1,1,2");
+    alg.setProperty("CRho", "1,1");
     alg.setPropertyValue("OutputWorkspace", "IvsQ");
     alg.setPropertyValue("OutputWorkspaceBinned", "IvsQ_binned");
     alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
@@ -841,7 +842,7 @@ public:
     alg.setProperty("ThetaIn", 10.0);
     alg.setProperty("WavelengthMin", 1.0);
     alg.setProperty("WavelengthMax", 15.0);
-    alg.setProperty("ProcessingInstructions", "1");
+    alg.setProperty("ProcessingInstructions", "2");
     alg.setProperty("MomentumTransferStep", 0.04);
     alg.setProperty("PolarizationAnalysis", "ParameterFile");
     alg.setPropertyValue("OutputWorkspace", "IvsQ");
@@ -871,6 +872,85 @@ public:
     TS_ASSERT_DELTA(outQGroup[1]->y(0)[0], 0.8, 0.0001);
     TS_ASSERT_DELTA(outQGroup[2]->y(0)[0], 0.7, 0.0001);
     TS_ASSERT_DELTA(outQGroup[3]->y(0)[0], 0.6, 0.0001);
+
+    ADS.clear();
+  }
+
+  void test_input_workspace_group_with_default_output_workspaces() {
+    ReflectometryReductionOneAuto2 alg;
+    setup_alg_on_input_workspace_group_with_run_number(alg);
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+    // Mandatory workspaces should exist
+    TS_ASSERT_EQUALS(ADS.doesExist("IvsQ_1234"), true);
+    TS_ASSERT_EQUALS(ADS.doesExist("IvsQ_binned_1234"), true);
+    // IvsLam is currently always output for group workspaces
+    TS_ASSERT_EQUALS(ADS.doesExist("IvsLam_1234"), true);
+
+    auto outQGroup = retrieveOutWS("IvsQ_1234");
+    auto outQGroupBinned = retrieveOutWS("IvsQ_binned_1234");
+    TS_ASSERT_EQUALS(outQGroup.size(), 4);
+    TS_ASSERT_EQUALS(outQGroupBinned.size(), 4);
+
+    ADS.clear();
+  }
+
+  void
+  test_input_workspace_group_with_default_output_workspaces_and_debug_on() {
+    ReflectometryReductionOneAuto2 alg;
+    setup_alg_on_input_workspace_group_with_run_number(alg);
+    alg.setProperty("Debug", true);
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+    // Mandatory workspaces should exist
+    TS_ASSERT_EQUALS(ADS.doesExist("IvsQ_1234"), true);
+    TS_ASSERT_EQUALS(ADS.doesExist("IvsQ_binned_1234"), true);
+    TS_ASSERT_EQUALS(ADS.doesExist("IvsLam_1234"), true);
+
+    auto outLamGroup = retrieveOutWS("IvsLam_1234");
+    TS_ASSERT_EQUALS(outLamGroup.size(), 4);
+
+    ADS.clear();
+  }
+
+  void test_input_workspace_group_with_named_output_workspaces() {
+    ReflectometryReductionOneAuto2 alg;
+    setup_alg_on_input_workspace_group_with_run_number(alg);
+    alg.setPropertyValue("OutputWorkspace", "testIvsQ");
+    alg.setPropertyValue("OutputWorkspaceBinned", "testIvsQ_binned");
+    alg.setPropertyValue("OutputWorkspaceWavelength", "testIvsLam");
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+    // Mandatory workspaces should exist
+    TS_ASSERT_EQUALS(ADS.doesExist("testIvsQ"), true);
+    TS_ASSERT_EQUALS(ADS.doesExist("testIvsQ_binned"), true);
+    // IvsLam is currently always output for group workspaces
+    TS_ASSERT_EQUALS(ADS.doesExist("testIvsLam"), true);
+
+    auto outQGroup = retrieveOutWS("testIvsQ");
+    auto outQGroupBinned = retrieveOutWS("testIvsQ_binned");
+    TS_ASSERT_EQUALS(outQGroup.size(), 4);
+    TS_ASSERT_EQUALS(outQGroupBinned.size(), 4);
+
+    ADS.clear();
+  }
+
+  void test_input_workspace_group_with_named_output_workspaces_and_debug_on() {
+    ReflectometryReductionOneAuto2 alg;
+    setup_alg_on_input_workspace_group_with_run_number(alg);
+    alg.setPropertyValue("OutputWorkspace", "testIvsQ");
+    alg.setPropertyValue("OutputWorkspaceBinned", "testIvsQ_binned");
+    alg.setPropertyValue("OutputWorkspaceWavelength", "testIvsLam");
+    alg.setProperty("Debug", true);
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+    // Mandatory workspaces should exist
+    TS_ASSERT_EQUALS(ADS.doesExist("testIvsQ"), true);
+    TS_ASSERT_EQUALS(ADS.doesExist("testIvsQ_binned"), true);
+    TS_ASSERT_EQUALS(ADS.doesExist("testIvsLam"), true);
+
+    auto outLamGroup = retrieveOutWS("testIvsLam");
+    TS_ASSERT_EQUALS(outLamGroup.size(), 4);
 
     ADS.clear();
   }
@@ -909,12 +989,13 @@ public:
     alg.setProperty("WavelengthMin", 0.0000000001);
     alg.setProperty("WavelengthMax", 15.0);
     alg.setProperty("ThetaIn", 10.0);
-    alg.setProperty("ProcessingInstructions", "1");
+    alg.setProperty("ProcessingInstructions", "2");
     alg.setProperty("MomentumTransferStep", 0.04);
     alg.setPropertyValue("OutputWorkspace", "IvsQ");
     alg.setPropertyValue("OutputWorkspaceBinned", "IvsQ_binned");
     alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
     alg.setPropertyValue("FirstTransmissionRun", "transWSGroup");
+    alg.setProperty("Debug", true);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
     auto outQGroup = retrieveOutWS("IvsQ");
@@ -973,11 +1054,11 @@ public:
     alg.setProperty("WavelengthMin", 0.0000000001);
     alg.setProperty("WavelengthMax", 15.0);
     alg.setProperty("ThetaIn", 10.0);
-    alg.setProperty("ProcessingInstructions", "1");
+    alg.setProperty("ProcessingInstructions", "2");
     alg.setProperty("MomentumTransferStep", 0.04);
     alg.setProperty("PolarizationAnalysis", "PNR");
-    alg.setProperty("Pp", "1");
-    alg.setProperty("Rho", "1");
+    alg.setProperty("CPp", "1");
+    alg.setProperty("CRho", "1");
     alg.setPropertyValue("OutputWorkspace", "IvsQ");
     alg.setPropertyValue("OutputWorkspaceBinned", "IvsQ_binned");
     alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
@@ -1047,13 +1128,14 @@ public:
     alg.setProperty("WavelengthMin", 0.0000000001);
     alg.setProperty("WavelengthMax", 15.0);
     alg.setProperty("ThetaIn", 10.0);
-    alg.setProperty("ProcessingInstructions", "1");
+    alg.setProperty("ProcessingInstructions", "2");
     alg.setProperty("MomentumTransferStep", 0.04);
     alg.setPropertyValue("OutputWorkspace", "IvsQ");
     alg.setPropertyValue("OutputWorkspaceBinned", "IvsQ_binned");
     alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
     alg.setPropertyValue("FirstTransmissionRun", "transWSGroup");
     alg.setPropertyValue("SecondTransmissionRun", "transWSGroup2");
+    alg.setProperty("Debug", true);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
     auto outQGroup = retrieveOutWS("IvsQ");
@@ -1086,7 +1168,7 @@ public:
     alg.setProperty("ThetaIn", 10.0);
     alg.setProperty("WavelengthMin", 1.0);
     alg.setProperty("WavelengthMax", 15.0);
-    alg.setProperty("ProcessingInstructions", "1");
+    alg.setProperty("ProcessingInstructions", "2");
     alg.setProperty("MomentumTransferStep", 0.04);
     alg.setProperty("PolarizationAnalysis", "ParameterFile");
     alg.setPropertyValue("OutputWorkspace", "IvsQ");
@@ -1130,15 +1212,16 @@ public:
     alg.setPropertyValue("InputWorkspace", name);
     alg.setProperty("WavelengthMin", 1.0);
     alg.setProperty("WavelengthMax", 5.0);
-    alg.setProperty("ProcessingInstructions", "0");
+    alg.setProperty("ProcessingInstructions", "1");
     alg.setProperty("MomentumTransferStep", 0.04);
     alg.setProperty("PolarizationAnalysis", "ParameterFile");
     alg.setPropertyValue("OutputWorkspace", "IvsQ");
     alg.setPropertyValue("OutputWorkspaceBinned", "IvsQ_binned");
     alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
-    TS_ASSERT_THROWS_EQUALS(
-        alg.execute(), std::invalid_argument & e, std::string(e.what()),
-        "A detector is expected at spectrum 0, found a monitor");
+    TS_ASSERT_THROWS_EQUALS(alg.execute(), std::invalid_argument & e,
+                            std::string(e.what()),
+                            "A detector is expected at workspace index 0 (Was "
+                            "converted from specnum), found a monitor");
   }
 
   void test_I0MonitorIndex_is_detector() {
@@ -1154,7 +1237,7 @@ public:
     alg.setProperty("MonitorBackgroundWavelengthMin", 1.0);
     alg.setProperty("MonitorBackgroundWavelengthMax", 5.0);
     alg.setPropertyValue("I0MonitorIndex", "1");
-    alg.setProperty("ProcessingInstructions", "1");
+    alg.setProperty("ProcessingInstructions", "2");
     alg.setProperty("MomentumTransferStep", 0.04);
     alg.setPropertyValue("OutputWorkspace", "IvsQ");
     alg.setPropertyValue("OutputWorkspaceBinned", "IvsQ_binned");
@@ -1178,8 +1261,8 @@ public:
 
     MatrixWorkspace_sptr outQBin = alg.getProperty("OutputWorkspaceBinned");
 
-    auto outX = outQBin->x(0);
-    auto outY = outQBin->y(0);
+    const auto &outX = outQBin->x(0);
+    const auto &outY = outQBin->y(0);
 
     TS_ASSERT_DELTA(outX[0], 0.1, 0.0001);
     TS_ASSERT_DELTA(outY[0], 0.0, 0.0001);
@@ -1203,8 +1286,8 @@ public:
 
     MatrixWorkspace_sptr outQbinned = alg.getProperty("OutputWorkspaceBinned");
 
-    auto outX = outQbinned->x(0);
-    auto outY = outQbinned->y(0);
+    const auto &outX = outQbinned->x(0);
+    const auto &outY = outQbinned->y(0);
 
     TS_ASSERT_DELTA(outX[0], 0.1, 0.0001);
     TS_ASSERT_DELTA(outY[0], 0.0, 0.0001);
@@ -1227,8 +1310,8 @@ public:
 
     MatrixWorkspace_sptr outQBin = alg.getProperty("OutputWorkspaceBinned");
 
-    auto outX = outQBin->x(0);
-    auto outY = outQBin->y(0);
+    const auto &outX = outQBin->x(0);
+    const auto &outY = outQBin->y(0);
 
     TS_ASSERT_DELTA(outX[0], 0.009, 0.0001);
     TS_ASSERT_DELTA(outY[0], 0.0006, 0.0001);
@@ -1253,8 +1336,8 @@ public:
 
     MatrixWorkspace_sptr outQBin = alg.getProperty("OutputWorkspaceBinned");
 
-    auto outX = outQBin->x(0);
-    auto outY = outQBin->y(0);
+    const auto &outX = outQBin->x(0);
+    const auto &outY = outQBin->y(0);
 
     TS_ASSERT_DELTA(outX[0], 0.1, 0.0001);
     TS_ASSERT_DELTA(outY[0], 0.0, 0.0001);
@@ -1278,8 +1361,8 @@ public:
 
     MatrixWorkspace_sptr outQBin = alg.getProperty("OutputWorkspaceBinned");
 
-    auto outX = outQBin->x(0);
-    auto outY = outQBin->y(0);
+    const auto &outX = outQBin->x(0);
+    const auto &outY = outQBin->y(0);
 
     TS_ASSERT_DELTA(outX[0], 0.009, 0.0001);
     TS_ASSERT_DELTA(outY[0], 0.0021, 0.0001);
@@ -1304,8 +1387,8 @@ public:
 
     MatrixWorkspace_sptr outQBin = alg.getProperty("OutputWorkspaceBinned");
 
-    auto outX = outQBin->x(0);
-    auto outY = outQBin->y(0);
+    const auto &outX = outQBin->x(0);
+    const auto &outY = outQBin->y(0);
 
     TS_ASSERT_DELTA(outX[0], 0.1, 0.0001);
     TS_ASSERT_DELTA(outY[0], 0.0, 0.0001);
@@ -1329,8 +1412,8 @@ public:
 
     MatrixWorkspace_sptr outQBin = alg.getProperty("OutputWorkspaceBinned");
 
-    auto outX = outQBin->x(0);
-    auto outY = outQBin->y(0);
+    const auto &outX = outQBin->x(0);
+    const auto &outY = outQBin->y(0);
 
     TS_ASSERT_DELTA(outX[0], 0.009, 0.0001);
     TS_ASSERT_DELTA(outY[0], 0.0021, 0.0001);
@@ -1345,7 +1428,7 @@ public:
   void test_flood_correction() {
     auto inputWS =
         create2DWorkspaceWithReflectometryInstrumentMultiDetector(0, 0.1);
-    auto flood = createFloodWorkspace();
+    auto flood = createFloodWorkspace(inputWS->getInstrument());
 
     // Correct by rotating detectors around the sample
     ReflectometryReductionOneAuto2 alg;
@@ -1360,7 +1443,7 @@ public:
     alg.setProperty("MomentumTransferStep", 0.01);
     alg.setProperty("WavelengthMin", 1.0);
     alg.setProperty("WavelengthMax", 15.0);
-    alg.setProperty("ProcessingInstructions", "1+2");
+    alg.setProperty("ProcessingInstructions", "2+3");
     alg.execute();
     MatrixWorkspace_sptr out = alg.getProperty("OutputWorkspace");
     TS_ASSERT_DELTA(out->y(0)[0], 4.5, 0.000001);
@@ -1376,7 +1459,7 @@ public:
       auto &y = transWS->mutableY(i);
       y.assign(y.size(), 10.0 * double(i + 1));
     }
-    auto flood = createFloodWorkspace();
+    auto flood = createFloodWorkspace(inputWS->getInstrument());
 
     ReflectometryReductionOneAuto2 alg;
     alg.initialize();
@@ -1390,7 +1473,7 @@ public:
     alg.setProperty("MomentumTransferStep", 0.01);
     alg.setProperty("WavelengthMin", 1.0);
     alg.setProperty("WavelengthMax", 15.0);
-    alg.setProperty("ProcessingInstructions", "1+2");
+    alg.setProperty("ProcessingInstructions", "2+3");
     alg.setProperty("FirstTransmissionRun", transWS);
     alg.execute();
     MatrixWorkspace_sptr out = alg.getProperty("OutputWorkspace");
@@ -1408,7 +1491,7 @@ public:
     group->addWorkspace(inputWS1);
     group->addWorkspace(inputWS2);
     AnalysisDataService::Instance().addOrReplace("input", group);
-    auto flood = createFloodWorkspace();
+    auto flood = createFloodWorkspace(inputWS1->getInstrument());
 
     // Correct by rotating detectors around the sample
     ReflectometryReductionOneAuto2 alg;
@@ -1422,7 +1505,7 @@ public:
     alg.setProperty("MomentumTransferStep", 0.01);
     alg.setProperty("WavelengthMin", 1.0);
     alg.setProperty("WavelengthMax", 15.0);
-    alg.setProperty("ProcessingInstructions", "1+2");
+    alg.setProperty("ProcessingInstructions", "2+3");
     alg.setProperty("OutputWorkspaceWavelength", "IvsLam");
     alg.setProperty("OutputWorkspace", "IvsQ");
     alg.setProperty("OutputWorkspaceBinned", "IvsQb");
@@ -1437,11 +1520,13 @@ public:
   }
 
   void test_flood_correction_polarization_correction() {
-
     std::string const name = "input";
     prepareInputGroup(name, "Fredrikze");
     applyPolarizationEfficiencies(name);
-    auto flood = createFloodWorkspace(257);
+    auto const inputWS =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name +
+                                                                    "_1");
+    auto flood = createFloodWorkspace(inputWS->getInstrument(), 257);
 
     ReflectometryReductionOneAuto2 alg;
     alg.initialize();
@@ -1450,7 +1535,7 @@ public:
     alg.setProperty("ThetaIn", 10.0);
     alg.setProperty("WavelengthMin", 1.0);
     alg.setProperty("WavelengthMax", 15.0);
-    alg.setProperty("ProcessingInstructions", "1");
+    alg.setProperty("ProcessingInstructions", "2");
     alg.setProperty("MomentumTransferStep", 0.04);
     alg.setProperty("PolarizationAnalysis", "ParameterFile");
     alg.setPropertyValue("OutputWorkspace", "IvsQ");
@@ -1469,6 +1554,7 @@ public:
     TS_ASSERT_DELTA(out3->y(0)[0], 70.0, 0.003);
     auto out4 = boost::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(3));
     TS_ASSERT_DELTA(out4->y(0)[0], 60.0, 0.003);
+
     AnalysisDataService::Instance().clear();
   }
 
@@ -1476,7 +1562,10 @@ public:
 
     std::string const name = "input";
     prepareInputGroup(name, "Flood");
-    auto flood = createFloodWorkspace(257);
+    auto const inputWS =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name +
+                                                                    "_1");
+    auto flood = createFloodWorkspace(inputWS->getInstrument(), 257);
 
     ReflectometryReductionOneAuto2 alg;
     alg.initialize();
@@ -1485,7 +1574,7 @@ public:
     alg.setProperty("ThetaIn", 10.0);
     alg.setProperty("WavelengthMin", 1.0);
     alg.setProperty("WavelengthMax", 15.0);
-    alg.setProperty("ProcessingInstructions", "1");
+    alg.setProperty("ProcessingInstructions", "2");
     alg.setProperty("MomentumTransferStep", 0.04);
     alg.setPropertyValue("OutputWorkspace", "IvsQ");
     alg.setPropertyValue("OutputWorkspaceBinned", "IvsQ_binned");
@@ -1510,7 +1599,6 @@ public:
 
     std::string const name = "input";
     prepareInputGroup(name, "No_Flood");
-    auto flood = createFloodWorkspace(257);
 
     ReflectometryReductionOneAuto2 alg;
     alg.initialize();
@@ -1520,7 +1608,7 @@ public:
     alg.setProperty("ThetaIn", 10.0);
     alg.setProperty("WavelengthMin", 1.0);
     alg.setProperty("WavelengthMax", 15.0);
-    alg.setProperty("ProcessingInstructions", "1");
+    alg.setProperty("ProcessingInstructions", "2");
     alg.setProperty("MomentumTransferStep", 0.04);
     alg.setPropertyValue("OutputWorkspace", "IvsQ");
     alg.setPropertyValue("OutputWorkspaceBinned", "IvsQ_binned");
@@ -1533,7 +1621,10 @@ public:
   }
 
 private:
-  MatrixWorkspace_sptr createFloodWorkspace(size_t n = 4) {
+  MatrixWorkspace_sptr
+  createFloodWorkspace(Mantid::Geometry::Instrument_const_sptr instrument,
+                       size_t n = 4) {
+    size_t detid = 1;
     auto flood = create2DWorkspace(int(n), 1);
     if (n == 4) {
       flood->mutableY(0)[0] = 0.7;
@@ -1544,8 +1635,33 @@ private:
       for (size_t i = 0; i < n; ++i) {
         flood->mutableY(i)[0] = double(i) * 0.01;
       }
+      detid = 1000;
     }
+    flood->setInstrument(instrument);
+    for (size_t i = 0; i < flood->getNumberHistograms(); ++i) {
+      flood->getSpectrum(i).setDetectorID(Mantid::detid_t(i + detid));
+    }
+    flood->getAxis(0)->setUnit("TOF");
     return flood;
+  }
+
+  void setup_alg_on_input_workspace_group_with_run_number(
+      ReflectometryReductionOneAuto2 &alg) {
+    std::string const name = "input";
+    prepareInputGroup(name);
+    WorkspaceGroup_sptr group = ADS.retrieveWS<WorkspaceGroup>("input");
+    MatrixWorkspace_sptr ws =
+        ADS.retrieveWS<MatrixWorkspace>(group->getNames()[0]);
+    ws->mutableRun().addProperty<std::string>("run_number", "1234");
+
+    alg.initialize();
+    alg.setChild(true);
+    alg.setPropertyValue("InputWorkspace", name);
+    alg.setProperty("WavelengthMin", 0.0000000001);
+    alg.setProperty("WavelengthMax", 15.0);
+    alg.setProperty("ThetaIn", 10.0);
+    alg.setProperty("ProcessingInstructions", "2");
+    alg.setProperty("MomentumTransferStep", 0.04);
   }
 };
 

@@ -12,8 +12,8 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/WorkspaceHistory.h"
-#include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/AngleUnits.h"
@@ -166,6 +166,8 @@ void SaveNexusProcessed::doExec(
       boost::dynamic_pointer_cast<const PeaksWorkspace>(inputWorkspace);
   OffsetsWorkspace_const_sptr offsetsWorkspace =
       boost::dynamic_pointer_cast<const OffsetsWorkspace>(inputWorkspace);
+  MaskWorkspace_const_sptr maskWorkspace =
+      boost::dynamic_pointer_cast<const MaskWorkspace>(inputWorkspace);
   if (peaksWorkspace)
     g_log.debug("We have a peaks workspace");
   // check if inputWorkspace is something we know how to save
@@ -192,10 +194,11 @@ void SaveNexusProcessed::doExec(
   const std::string workspaceID = inputWorkspace->id();
   if ((workspaceID.find("Workspace2D") == std::string::npos) &&
       (workspaceID.find("RebinnedOutput") == std::string::npos) &&
-      !m_eventWorkspace && !tableWorkspace && !offsetsWorkspace)
+      !m_eventWorkspace && !tableWorkspace && !offsetsWorkspace &&
+      !maskWorkspace)
     throw Exception::NotImplementedError(
         "SaveNexusProcessed passed invalid workspaces. Must be Workspace2D, "
-        "EventWorkspace, ITableWorkspace, or OffsetsWorkspace.");
+        "EventWorkspace, ITableWorkspace, OffsetsWorkspace or MaskWorkspace.");
 
   // Create progress object for initial part - depends on whether events are
   // processed
@@ -240,8 +243,7 @@ void SaveNexusProcessed::doExec(
     prog_init.reportIncrement(1, "Writing sample and instrument");
 
     // check if all X() are in fact the same array
-    const bool uniformSpectra =
-        API::WorkspaceHelpers::commonBoundaries(*matrixWorkspace);
+    const bool uniformSpectra = matrixWorkspace->isCommonBins();
 
     // Retrieve the workspace indices (from params)
     std::vector<int> spec;
@@ -251,14 +253,18 @@ void SaveNexusProcessed::doExec(
     // Write out the data (2D or event)
     if (m_eventWorkspace && PreserveEvents) {
       this->execEvent(nexusFile.get(), uniformSpectra, spec);
-    } else if (offsetsWorkspace) {
-      g_log.warning() << "Writing SpecialWorkspace2D ID=" << workspaceID
-                      << "\n";
-      nexusFile->writeNexusProcessedData2D(matrixWorkspace, uniformSpectra,
-                                           spec, "offsets_workspace", true);
     } else {
+      std::string workspaceTypeGroupName;
+      if (offsetsWorkspace)
+        workspaceTypeGroupName = "offsets_workspace";
+      else if (maskWorkspace)
+        workspaceTypeGroupName = "mask_workspace";
+      else
+        workspaceTypeGroupName = "workspace";
+
       nexusFile->writeNexusProcessedData2D(matrixWorkspace, uniformSpectra,
-                                           spec, "workspace", true);
+                                           spec, workspaceTypeGroupName.c_str(),
+                                           true);
     }
 
     cppFile.openGroup("instrument", "NXinstrument");
@@ -512,16 +518,16 @@ bool SaveNexusProcessed::processGroups() {
     }
   }
 
-  // Only the input workspace property can take group workspaces. Therefore
-  // index = 0.
-  std::vector<Workspace_sptr> &thisGroup = m_groups[0];
-  if (!thisGroup.empty()) {
-    for (size_t entry = 0; entry < m_groupSize; entry++) {
-      Workspace_sptr ws = thisGroup[entry];
+  // If we have arrived here then a WorkspaceGroup was passed to the
+  // InputWorkspace property. Pull out the unrolled workspaces and append an
+  // entry for each one. We only have a single input workspace property declared
+  // so there will only be a single list of unrolled workspaces
+  const auto &workspaces = m_unrolledInputWorkspaces[0];
+  if (!workspaces.empty()) {
+    for (size_t entry = 0; entry < workspaces.size(); entry++) {
+      const Workspace_sptr ws = workspaces[entry];
       this->doExec(ws, nexusFile, true /*keepFile*/, entry);
-      std::stringstream buffer;
-      buffer << "Saving group index " << entry;
-      m_log.information(buffer.str());
+      g_log.information() << "Saving group index " << entry << "\n";
     }
   }
 

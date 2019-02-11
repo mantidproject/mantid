@@ -6,11 +6,17 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
 from __future__ import (absolute_import, division, print_function)
-from PyQt4 import QtGui, QtCore
+from qtpy.QtWidgets import (QButtonGroup, QFrame)  # noqa
+from qtpy.QtGui import (QIntValidator)  # noqa
 from reduction_gui.widgets.base_widget import BaseWidget
 from reduction_gui.reduction.inelastic.dgs_data_corrections_script import DataCorrectionsScript
 import reduction_gui.widgets.util as util
-import ui.inelastic.ui_dgs_data_corrections
+try:
+    from mantidqt.utils.qt import load_ui
+except ImportError:
+    from mantid.kernel import Logger
+    Logger("DataCorrectionsWidget").information('Using legacy ui importer')
+    from mantidplot import load_ui
 
 
 class DataCorrectionsWidget(BaseWidget):
@@ -27,10 +33,10 @@ class DataCorrectionsWidget(BaseWidget):
     def __init__(self, parent=None, state=None, settings=None, data_type=None):
         super(DataCorrectionsWidget, self).__init__(parent, state, settings, data_type=data_type)
 
-        class DataCorrsFrame(QtGui.QFrame, ui.inelastic.ui_dgs_data_corrections.Ui_DataCorrsFrame):
+        class DataCorrsFrame(QFrame):
             def __init__(self, parent=None):
-                QtGui.QFrame.__init__(self, parent)
-                self.setupUi(self)
+                QFrame.__init__(self, parent)
+                self.ui = load_ui(__file__, '../../../ui/inelastic/dgs_data_corrections.ui', baseinstance=self)
 
         self._content = DataCorrsFrame(self)
         self._layout.addWidget(self._content)
@@ -44,36 +50,30 @@ class DataCorrectionsWidget(BaseWidget):
 
     def initialize_content(self):
         # Set some validators
-        self._content.monint_low_edit.setValidator(QtGui.QIntValidator(self._content.monint_low_edit))
-        self._content.monint_high_edit.setValidator(QtGui.QIntValidator(self._content.monint_high_edit))
-        self._content.tof_start_edit.setValidator(QtGui.QIntValidator(self._content.tof_start_edit))
-        self._content.tof_end_edit.setValidator(QtGui.QIntValidator(self._content.tof_end_edit))
+        self._content.monint_low_edit.setValidator(QIntValidator(self._content.monint_low_edit))
+        self._content.monint_high_edit.setValidator(QIntValidator(self._content.monint_high_edit))
+        self._content.tof_start_edit.setValidator(QIntValidator(self._content.tof_start_edit))
+        self._content.tof_end_edit.setValidator(QIntValidator(self._content.tof_end_edit))
 
         # Make group for incident beam normalisation radio buttons
-        self.incident_beam_norm_grp = QtGui.QButtonGroup()
+        self.incident_beam_norm_grp = QButtonGroup()
         self.incident_beam_norm_grp.addButton(self._content.none_rb, 0)
         self.incident_beam_norm_grp.addButton(self._content.current_rb, 1)
         self.incident_beam_norm_grp.addButton(self._content.monitor1_rb, 2)
 
         self._monitor_intrange_widgets_state(self._content.monitor1_rb.isChecked())
-        self.connect(self._content.monitor1_rb, QtCore.SIGNAL("toggled(bool)"),
-                     self._monitor_intrange_widgets_state)
+        self._content.monitor1_rb.toggled.connect(self._monitor_intrange_widgets_state)
 
         self._detvan_intrange_widgets_state(self._content.van_int_cb.isChecked())
-        self.connect(self._content.van_int_cb, QtCore.SIGNAL("toggled(bool)"),
-                     self._detvan_intrange_widgets_state)
-        self.connect(self._content.use_procdetvan_cb, QtCore.SIGNAL("toggled(bool)"),
-                     self._detvan_widgets_opp_state)
+        self._content.van_int_cb.toggled.connect(self._detvan_intrange_widgets_state)
+        self._content.use_procdetvan_cb.toggled.connect(self._detvan_widgets_opp_state)
 
         self._save_detvan_widgets_state(self._content.save_procdetvan_cb.isChecked())
-        self.connect(self._content.save_procdetvan_cb, QtCore.SIGNAL("toggled(bool)"),
-                     self._save_detvan_widgets_state)
+        self._content.save_procdetvan_cb.toggled.connect(self._save_detvan_widgets_state)
 
         # Connections
-        self.connect(self._content.van_input_browse, QtCore.SIGNAL("clicked()"),
-                     self._detvan_browse)
-        self.connect(self._content.save_procdetvan_save, QtCore.SIGNAL("clicked()"),
-                     self._save_procdetvan_save)
+        self._content.van_input_browse.clicked.connect(self._detvan_browse)
+        self._content.save_procdetvan_save.clicked.connect(self._save_procdetvan_save)
 
     def _monitor_intrange_widgets_state(self, state=False):
         self._content.monint_label.setEnabled(state)

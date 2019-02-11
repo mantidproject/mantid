@@ -49,6 +49,7 @@ set ( SRC_FILES
 	src/Instrument/ComponentHelper.cpp
 	src/Instrument/ComponentInfo.cpp
 	src/Instrument/ComponentInfoBankHelpers.cpp
+	src/Instrument/ComponentInfoIterator.cpp
 	src/Instrument/Container.cpp
 	src/Instrument/Detector.cpp
 	src/Instrument/DetectorGroup.cpp
@@ -108,6 +109,7 @@ set ( SRC_FILES
 	src/Objects/InstrumentRayTracer.cpp
 	src/Objects/MeshObject.cpp
 	src/Objects/MeshObject2D.cpp
+	src/Objects/MeshObjectCommon.cpp
 	src/Objects/RuleItems.cpp
 	src/Objects/Rules.cpp
 	src/Objects/ShapeFactory.cpp
@@ -197,6 +199,8 @@ set ( INC_FILES
 	inc/MantidGeometry/Instrument/ComponentHelper.h
 	inc/MantidGeometry/Instrument/ComponentInfo.h
 	inc/MantidGeometry/Instrument/ComponentInfoBankHelpers.h
+	inc/MantidGeometry/Instrument/ComponentInfoItem.h
+	inc/MantidGeometry/Instrument/ComponentInfoIterator.h
 	inc/MantidGeometry/Instrument/ComponentVisitor.h
 	inc/MantidGeometry/Instrument/Container.h
 	inc/MantidGeometry/Instrument/Detector.h
@@ -206,9 +210,10 @@ set ( INC_FILES
 	inc/MantidGeometry/Instrument/DetectorInfoIterator.h
 	inc/MantidGeometry/Instrument/FitParameter.h
 	inc/MantidGeometry/Instrument/Goniometer.h
-        inc/MantidGeometry/Instrument/GridDetector.h
+	inc/MantidGeometry/Instrument/GridDetector.h
 	inc/MantidGeometry/Instrument/GridDetectorPixel.h
 	inc/MantidGeometry/Instrument/IDFObject.h
+	inc/MantidGeometry/Instrument/InfoIteratorBase.h
 	inc/MantidGeometry/Instrument/InstrumentDefinitionParser.h
 	inc/MantidGeometry/Instrument/InstrumentVisitor.h
 	inc/MantidGeometry/Instrument/ObjCompAssembly.h
@@ -267,6 +272,7 @@ set ( INC_FILES
 	inc/MantidGeometry/Objects/InstrumentRayTracer.h
 	inc/MantidGeometry/Objects/MeshObject.h
 	inc/MantidGeometry/Objects/MeshObject2D.h
+	inc/MantidGeometry/Objects/MeshObjectCommon.h
 	inc/MantidGeometry/Objects/Rules.h
 	inc/MantidGeometry/Objects/ShapeFactory.h
 	inc/MantidGeometry/Objects/Track.h
@@ -305,6 +311,7 @@ set ( TEST_FILES
 	CenteringGroupTest.h
 	CompAssemblyTest.h
 	ComponentInfoBankHelpersTest.h
+	ComponentInfoIteratorTest.h
 	ComponentInfoTest.h
 	ComponentParserTest.h
 	ComponentTest.h
@@ -325,8 +332,8 @@ set ( TEST_FILES
 	GeneralFrameTest.h
 	GeneralTest.h
 	GoniometerTest.h
-        GridDetectorTest.h
 	GridDetectorPixelTest.h
+	GridDetectorTest.h
 	GroupTest.h
 	GroupTransformationTest.h
 	HKLFilterTest.h
@@ -357,6 +364,7 @@ set ( TEST_FILES
 	MatrixVectorPairParserTest.h
 	MatrixVectorPairTest.h
 	MeshObject2DTest.h
+	MeshObjectCommonTest.h
 	MeshObjectTest.h
 	NiggliCellTest.h
 	NullImplicitFunctionTest.h
@@ -487,4 +495,4 @@ add_subdirectory ( test )
 # Installation settings
 ###########################################################################
 
-install ( TARGETS Geometry  ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )
+mtd_install_targets( TARGETS Geometry INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})

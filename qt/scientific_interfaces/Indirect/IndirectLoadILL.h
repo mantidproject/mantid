@@ -34,8 +34,13 @@ protected:
 private slots:
   /// Set the instrument based on the file name if possible
   void handleFilesFound();
+  void runClicked();
 
 private:
+  void setRunIsRunning(bool running);
+  void setRunEnabled(bool enabled);
+  void setPlotOptionsEnabled(bool enabled);
+
   /// Map to store instrument analysers and reflections for this instrument
   QMap<QString, QStringList> m_paramMap;
   /// The ui form

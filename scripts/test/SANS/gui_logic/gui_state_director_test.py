@@ -71,6 +71,16 @@ class GuiStateDirectorTest(unittest.TestCase):
         self.assertTrue(state.wavelength.wavelength_low == [3.14])
         self.assertTrue(state.wavelength.wavelength_high == [10.3])
 
+    def test_that_shift_and_scale_set_on_state_from_options_column(self):
+        table_model = self._get_table_model(option_string="MergeScale=1.2,MergeShift=0.5")
+        state_model = self._get_state_gui_model()
+        director = GuiStateDirector(table_model, state_model, SANSFacility.ISIS)
+
+        state = director.create_state(0)
+        self.assertTrue(isinstance(state, State))
+        self.assertEqual(state.reduction.merge_scale, 1.2)
+        self.assertEqual(state.reduction.merge_shift, 0.5)
+
     def test_that_sample_thickness_set_on_state(self):
         table_model = self._get_table_model()
         state_model = self._get_state_gui_model()

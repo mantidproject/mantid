@@ -6,13 +6,19 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
 from __future__ import (absolute_import, division, print_function)
-from PyQt4 import QtGui, QtCore
+from qtpy.QtWidgets import (QFileDialog, QFrame)  # noqa
+from qtpy.QtGui import (QDoubleValidator, QIntValidator)  # noqa
 from functools import partial
 from reduction_gui.widgets.base_widget import BaseWidget
 from reduction_gui.reduction.inelastic.dgs_sample_data_setup_script import SampleSetupScript
 import reduction_gui.widgets.util as util
-import ui.inelastic.ui_dgs_sample_setup
 import os
+try:
+    from mantidqt.utils.qt import load_ui
+except ImportError:
+    from mantid.kernel import Logger
+    Logger("SampleSetupWidget").information('Using legacy ui importer')
+    from mantidplot import load_ui
 
 IS_IN_MANTIDPLOT = False
 try:
@@ -33,10 +39,10 @@ class SampleSetupWidget(BaseWidget):
     def __init__(self, parent=None, state=None, settings=None, data_type=None):
         super(SampleSetupWidget, self).__init__(parent, state, settings, data_type=data_type)
 
-        class SamSetFrame(QtGui.QFrame, ui.inelastic.ui_dgs_sample_setup.Ui_Frame):
+        class SamSetFrame(QFrame):
             def __init__(self, parent=None):
-                QtGui.QFrame.__init__(self, parent)
-                self.setupUi(self)
+                QFrame.__init__(self, parent)
+                self.ui = load_ui(__file__, '../../../ui/inelastic/dgs_sample_setup.ui', baseinstance=self)
 
         self._content = SamSetFrame(self)
         self._instrument_name = settings.instrument_name
@@ -54,34 +60,28 @@ class SampleSetupWidget(BaseWidget):
 
     def initialize_content(self):
         # Constraints
-        dv = QtGui.QDoubleValidator(self._content.ei_guess_edit)
+        dv = QDoubleValidator(self._content.ei_guess_edit)
         dv.setBottom(0.0)
         self._content.ei_guess_edit.setValidator(dv)
         if "SNS" != self._facility_name:
             util.set_valid(self._content.ei_guess_edit, False)
-        self._content.tzero_guess_edit.setValidator(QtGui.QDoubleValidator(self._content.tzero_guess_edit))
-        self._content.etr_low_edit.setValidator(QtGui.QDoubleValidator(self._content.etr_low_edit))
-        self._content.etr_width_edit.setValidator(QtGui.QDoubleValidator(self._content.etr_width_edit))
-        self._content.etr_high_edit.setValidator(QtGui.QDoubleValidator(self._content.etr_high_edit))
-        self._content.monitor1_specid_edit.setValidator(QtGui.QIntValidator(self._content.monitor1_specid_edit))
-        self._content.monitor2_specid_edit.setValidator(QtGui.QIntValidator(self._content.monitor2_specid_edit))
+        self._content.tzero_guess_edit.setValidator(QDoubleValidator(self._content.tzero_guess_edit))
+        self._content.etr_low_edit.setValidator(QDoubleValidator(self._content.etr_low_edit))
+        self._content.etr_width_edit.setValidator(QDoubleValidator(self._content.etr_width_edit))
+        self._content.etr_high_edit.setValidator(QDoubleValidator(self._content.etr_high_edit))
+        self._content.monitor1_specid_edit.setValidator(QIntValidator(self._content.monitor1_specid_edit))
+        self._content.monitor2_specid_edit.setValidator(QIntValidator(self._content.monitor2_specid_edit))
 
         # Default states
         self._handle_tzero_guess(self._content.use_ei_guess_chkbox.isChecked())
 
         # Connections
-        self.connect(self._content.sample_browse, QtCore.SIGNAL("clicked()"),
-                     self._sample_browse)
-        self.connect(self._content.detcal_browse, QtCore.SIGNAL("clicked()"),
-                     self._detcal_browse)
-        self.connect(self._content.hardmask_browse, QtCore.SIGNAL("clicked()"),
-                     self._hardmask_browse)
-        self.connect(self._content.grouping_browse, QtCore.SIGNAL("clicked()"),
-                     self._grouping_browse)
-        self.connect(self._content.use_ei_guess_chkbox, QtCore.SIGNAL("stateChanged(int)"),
-                     self._handle_tzero_guess)
-        self.connect(self._content.savedir_browse, QtCore.SIGNAL("clicked()"),
-                     self._savedir_browse)
+        self._content.sample_browse.clicked.connect(self._sample_browse)
+        self._content.detcal_browse.clicked.connect(self._detcal_browse)
+        self._content.hardmask_browse.clicked.connect(self._hardmask_browse)
+        self._content.grouping_browse.clicked.connect(self._grouping_browse)
+        self._content.use_ei_guess_chkbox.stateChanged.connect(self._handle_tzero_guess)
+        self._content.savedir_browse.clicked.connect(self._savedir_browse)
 
         # Validated widgets
         self._connect_validated_lineedit(self._content.sample_edit)
@@ -121,9 +121,13 @@ class SampleSetupWidget(BaseWidget):
 
     def _connect_validated_lineedit(self, ui_ctrl):
         call_back = partial(self._validate_edit, ctrl=ui_ctrl)
-        self.connect(ui_ctrl, QtCore.SIGNAL("editingFinished()"), call_back)
-        self.connect(ui_ctrl, QtCore.SIGNAL("textEdited(QString)"), call_back)
-        self.connect(ui_ctrl, QtCore.SIGNAL("textChanged(QString)"), call_back)
+        if IS_IN_MANTIDPLOT and isinstance(ui_ctrl, mantidqtpython.MantidQt.API.MWRunFiles):
+            ui_ctrl.fileEditingFinished.connect(call_back)
+            ui_ctrl.fileFindingFinished.connect(call_back)
+        else:  # assume QLineEdit
+            ui_ctrl.editingFinished.connect(call_back)
+            ui_ctrl.textEdited.connect(call_back)
+            ui_ctrl.textChanged.connect(call_back)
 
     def _validate_edit(self, ctrl=None):
         is_valid = True
@@ -156,12 +160,15 @@ class SampleSetupWidget(BaseWidget):
             self._content.grouping_edit.setText(fname)
 
     def _savedir_browse(self):
-        save_dir = QtGui.QFileDialog.getExistingDirectory(self, "Output Directory - Choose a directory",
+        save_dir = QFileDialog.getExistingDirectory(self, "Output Directory - Choose a directory",
                                                           os.path.expanduser('~'),
-                                                          QtGui.QFileDialog.ShowDirsOnly
-                                                          | QtGui.QFileDialog.DontResolveSymlinks)
-        if save_dir:
-            self._content.savedir_edit.setText(save_dir)
+                                                          QFileDialog.ShowDirsOnly
+                                                          | QFileDialog.DontResolveSymlinks)
+        if not save_dir:
+            return
+        if isinstance(save_dir, tuple):
+            save_dir = save_dir[0]
+        self._content.savedir_edit.setText(save_dir)
 
     def set_state(self, state):
         """

@@ -178,7 +178,7 @@ MayersSampleCorrectionStrategy::getCorrectedHisto() {
     if (m_pars.mscat) {
       const double msVal = chebyPoly(msCoeffs, xcap);
       const double beta = m_pars.sigmaSc * msVal / sigt;
-      corrfact *= (1.0 - beta) / rns;
+      corrfact *= (1.0 - (beta / rns));
     }
     // apply correction
 

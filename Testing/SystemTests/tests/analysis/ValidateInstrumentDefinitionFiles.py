@@ -9,14 +9,14 @@
 from __future__ import (absolute_import, division, print_function)
 from mantid import config
 import os
-import stresstesting
+import systemtesting
 import glob
 
 
 EXPECTED_EXT = '.expected'
 
 
-class ValidateInstrumentDefinitionFiles(stresstesting.MantidStressTest):
+class ValidateInstrumentDefinitionFiles(systemtesting.MantidSystemTest):
 
     xsdFile=''
     # Explicitly specify single file to test. If None, test all.

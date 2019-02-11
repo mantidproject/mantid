@@ -12,7 +12,6 @@
 #include "MantidQtWidgets/InstrumentView/OpenGLError.h"
 
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/IMaskWorkspace.h"
@@ -121,7 +120,7 @@ InstrumentActor::InstrumentActor(const QString &wsName, bool autoscaling,
 
   // If the instrument is empty, maybe only having the sample and source
   if (detectorInfo().size() == 0) {
-    QMessageBox::warning(nullptr, "MantidPlot - Warning",
+    QMessageBox::warning(nullptr, "Mantid - Warning",
                          "This instrument appears to contain no detectors",
                          "OK");
   }
@@ -182,8 +181,7 @@ void InstrumentActor::setUpWorkspace(
   resetColors();
 
   // set the ragged flag using a workspace validator
-  auto wsValidator = Mantid::API::CommonBinsValidator();
-  m_ragged = !wsValidator.isValid(sharedWorkspace).empty();
+  m_ragged = !sharedWorkspace->isCommonBins();
 }
 
 void InstrumentActor::setupPhysicalInstrumentIfExists() {
@@ -322,7 +320,7 @@ void InstrumentActor::applyMaskWorkspace() {
       // after-replace notification
       // and updates this instrument actor.
     } catch (...) {
-      QMessageBox::warning(nullptr, "MantidPlot - Warning",
+      QMessageBox::warning(nullptr, "Mantid - Warning",
                            "An error accured when applying the mask.", "OK");
     }
   }
@@ -461,8 +459,9 @@ void InstrumentActor::sumDetectors(const std::vector<size_t> &dets,
                                    std::vector<double> &x,
                                    std::vector<double> &y, size_t size) const {
   Mantid::API::MatrixWorkspace_const_sptr ws = getWorkspace();
-  if (size > ws->blocksize() || size == 0) {
-    size = ws->blocksize();
+  const auto blocksize = ws->blocksize();
+  if (size > blocksize || size == 0) {
+    size = blocksize;
   }
 
   if (m_ragged) {
@@ -598,16 +597,16 @@ void InstrumentActor::sumDetectorsRagged(const std::vector<size_t> &dets,
         Mantid::API::AnalysisDataService::Instance().retrieve(outName));
     Mantid::API::AnalysisDataService::Instance().remove(outName);
 
-    const auto &X = ws->x(0);
-    const auto &Y = ws->y(0);
-    x.assign(X.begin(), X.end());
-    y.assign(Y.begin(), Y.end());
+    const auto &commonX = ws->points(0);
+    const auto &firstY = ws->y(0);
+    x.assign(std::cbegin(commonX), std::cend(commonX));
+    y.assign(std::cbegin(firstY), std::cend(firstY));
 
     // add the spectra
     for (size_t i = 0; i < nSpec; ++i) {
-      const auto &Y = ws->y(i);
-      std::transform(y.begin(), y.end(), Y.begin(), y.begin(),
-                     std::plus<double>());
+      const auto &specY = ws->y(i);
+      std::transform(std::cbegin(y), std::cend(y), std::cbegin(specY),
+                     std::begin(y), std::plus<double>());
     }
   } catch (std::invalid_argument &) {
     // wrong Params for any reason
@@ -795,7 +794,7 @@ void InstrumentActor::initMaskHelper() const {
     m_maskWorkspace = extractCurrentMask();
   } catch (...) {
     // don't know what to do here yet ...
-    QMessageBox::warning(nullptr, "MantidPlot - Warning",
+    QMessageBox::warning(nullptr, "Mantid - Warning",
                          "An error occurred when extracting the mask.", "OK");
   }
 }

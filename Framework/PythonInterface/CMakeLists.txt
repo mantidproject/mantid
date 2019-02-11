@@ -110,6 +110,7 @@ clean_orphaned_pyc_files ( ${CMAKE_CURRENT_SOURCE_DIR}/plugins )
 ###########################################################################
 # tests
 ###########################################################################
+set ( PYTHONINTERFACE_PLUGINS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/plugins )
 add_subdirectory( test )
 
 ###########################################################################
@@ -118,5 +119,9 @@ add_subdirectory( test )
 
 # Python algorithms
 install ( DIRECTORY plugins/ DESTINATION ${PLUGINS_DIR}/python
+          PATTERN "*.pyc" EXCLUDE
+          PATTERN ".svn" EXCLUDE )
+
+install ( DIRECTORY plugins/ DESTINATION ${WORKBENCH_PLUGINS_DIR}/python
           PATTERN "*.pyc" EXCLUDE
           PATTERN ".svn" EXCLUDE )

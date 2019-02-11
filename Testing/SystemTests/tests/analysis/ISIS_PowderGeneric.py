@@ -5,11 +5,11 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
-import stresstesting
+import systemtesting
 from mantid.simpleapi import *
 
 
-class PEARLPowderDiffraction(stresstesting.MantidStressTest):
+class PEARLPowderDiffraction(systemtesting.MantidSystemTest):
 
     sample = "PEARL00073987.raw"
     calfile = "pearl_offset_11_4.cal"
