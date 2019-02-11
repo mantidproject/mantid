@@ -23,27 +23,27 @@ private:
   // all examples are taken from ShapeFactoryTest with some small modifications
   const std::string cylinderXml =
       "<cylinder id=\"shape\"> "
-      "(<centre-of-bottom-base x=\"0.0\" y=\"-1.5\" z=\"0\"/>)"
-      "(<axis x=\"0.0\" y=\"1\" z=\"0\" /> )"
+      "<centre-of-bottom-base x=\"0.0\" y=\"-1.5\" z=\"0\"/>"
+      "<axis x=\"0.0\" y=\"1\" z=\"0\" /> "
       "<radius val=\"0.1\" /> "
       "<height val=\"3\" /> "
       "</cylinder>";
   const std::string cylinderOffsetXml =
       "<cylinder id=\"shape\"> "
-      "(<centre-of-bottom-base x=\"0.0\" y=\"3.0\" z=\"0.0\"/>)"
-      "(<axis x=\"0.0\" y=\"0.0\" z=\"1\" /> )"
+      "<centre-of-bottom-base x=\"0.0\" y=\"3.0\" z=\"0.0\"/>"
+      "<axis x=\"0.0\" y=\"0.0\" z=\"1\" /> "
       "<radius val=\"0.1\" /> "
       "<height val=\"3\" /> "
       "</cylinder>";
   static constexpr double CYLINDER_VOLUME = M_PI * .1 * .1 * 3.;
 
   const std::string sphereXml = "<sphere id=\"shape\"> "
-                                "(<centre x=\"0.0\"  y=\"0.0\" z=\"0.0\" /> )"
+                                "<centre x=\"0.0\"  y=\"0.0\" z=\"0.0\" /> "
                                 "<radius val=\"3.2\" /> "
                                 "</sphere>"
                                 "<algebra val=\"shape\" /> ";
   const std::string sphereOffsetXml = "<sphere id=\"shape\"> "
-                                      "(<centre x=\"4\"  y=\"4\" z=\"4\" /> )"
+                                      "<centre x=\"4\"  y=\"4\" z=\"4\" /> "
                                       "<radius val=\"3.2\" /> "
                                       "</sphere>"
                                       "<algebra val=\"shape\" /> ";
