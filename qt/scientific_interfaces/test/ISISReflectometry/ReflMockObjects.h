@@ -8,14 +8,20 @@
 #define MANTID_CUSTOMINTERFACES_REFLMOCKOBJECTS_H
 
 #include "Common/IMessageHandler.h"
+#include "GUI/Batch/BatchJobRunner.h"
 #include "GUI/Batch/IBatchPresenter.h"
+#include "GUI/Event/IEventPresenter.h"
+#include "GUI/Experiment/IExperimentPresenter.h"
+#include "GUI/Instrument/IInstrumentPresenter.h"
 #include "GUI/Instrument/InstrumentOptionDefaults.h"
 #include "GUI/MainWindow/IMainWindowPresenter.h"
 #include "GUI/MainWindow/IMainWindowView.h"
 #include "GUI/Runs/IAutoreduction.h"
+#include "GUI/Runs/IRunsPresenter.h"
 #include "GUI/Runs/ISearcher.h"
 #include "GUI/Runs/SearchModel.h"
 #include "GUI/Save/IAsciiSaver.h"
+#include "GUI/Save/ISavePresenter.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidKernel/ICatalogInfo.h"
@@ -32,24 +38,6 @@ using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets::DataProcessor;
 
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
-
-/**** Models ****/
-
-class MockSearchModel : public SearchModel {
-public:
-  MockSearchModel(std::string const &run, std::string const &description,
-                  std::string const &location)
-      : SearchModel(ITableWorkspace_sptr(), std::string()),
-        m_result(run, description, location) {}
-  ~MockSearchModel() override {}
-  MOCK_CONST_METHOD2(data, QVariant(const QModelIndex &, int role));
-  MOCK_METHOD2(setError, void(int, std::string const &));
-
-  SearchResult const &getRowData(int) const override { return m_result; }
-
-private:
-  SearchResult m_result;
-};
 
 /**** Views ****/
 
@@ -99,6 +87,67 @@ public:
   MOCK_CONST_METHOD0(requestClose, bool());
 };
 
+class MockRunsPresenter : public IRunsPresenter {
+public:
+  MOCK_METHOD1(acceptMainPresenter, void(IBatchPresenter *));
+  MOCK_CONST_METHOD0(runsTable, RunsTable const &());
+  MOCK_METHOD0(mutableRunsTable, RunsTable &());
+  MOCK_METHOD1(notifyInstrumentChanged, void(std::string const &));
+  MOCK_METHOD0(notifyReductionResumed, void());
+  MOCK_METHOD0(notifyReductionPaused, void());
+  MOCK_METHOD0(notifyRowStateChanged, void());
+  MOCK_METHOD0(reductionPaused, void());
+  MOCK_METHOD0(reductionResumed, void());
+  MOCK_METHOD0(autoreductionPaused, void());
+  MOCK_METHOD0(autoreductionResumed, void());
+  MOCK_METHOD1(instrumentChanged, void(std::string const &));
+  MOCK_METHOD0(settingsChanged, void());
+  MOCK_CONST_METHOD0(isProcessing, bool());
+  MOCK_CONST_METHOD0(isAutoreducing, bool());
+};
+
+class MockEventPresenter : public IEventPresenter {
+public:
+  MOCK_METHOD1(acceptMainPresenter, void(IBatchPresenter *));
+  MOCK_METHOD0(reductionPaused, void());
+  MOCK_METHOD0(reductionResumed, void());
+  MOCK_METHOD0(autoreductionPaused, void());
+  MOCK_METHOD0(autoreductionResumed, void());
+  MOCK_CONST_METHOD0(slicing, Slicing &());
+};
+
+class MockExperimentPresenter : public IExperimentPresenter {
+public:
+  MOCK_METHOD1(acceptMainPresenter, void(IBatchPresenter *));
+  MOCK_CONST_METHOD0(experiment, Experiment const &());
+  MOCK_METHOD0(reductionPaused, void());
+  MOCK_METHOD0(reductionResumed, void());
+  MOCK_METHOD0(autoreductionPaused, void());
+  MOCK_METHOD0(autoreductionResumed, void());
+};
+
+class MockInstrumentPresenter : public IInstrumentPresenter {
+public:
+  MOCK_METHOD1(acceptMainPresenter, void(IBatchPresenter *));
+  MOCK_CONST_METHOD0(instrument, Instrument const &());
+  MOCK_METHOD0(reductionPaused, void());
+  MOCK_METHOD0(reductionResumed, void());
+  MOCK_METHOD0(autoreductionPaused, void());
+  MOCK_METHOD0(autoreductionResumed, void());
+  MOCK_METHOD1(instrumentChanged, void(std::string const &));
+};
+
+class MockSavePresenter : public ISavePresenter {
+public:
+  MOCK_METHOD1(acceptMainPresenter, void(IBatchPresenter *));
+  MOCK_METHOD1(saveWorkspaces, void(std::vector<std::string> const &));
+  MOCK_CONST_METHOD0(shouldAutosave, bool());
+  MOCK_METHOD0(reductionPaused, void());
+  MOCK_METHOD0(reductionResumed, void());
+  MOCK_METHOD0(autoreductionPaused, void());
+  MOCK_METHOD0(autoreductionResumed, void());
+};
+
 /**** Progress ****/
 
 class MockProgressBase : public Mantid::Kernel::ProgressBase {
@@ -123,6 +172,35 @@ public:
   ~MockICatalogInfo() override {}
 };
 
+class MockSearcher : public ISearcher {
+public:
+  MOCK_METHOD1(search, Mantid::API::ITableWorkspace_sptr(const std::string &));
+};
+
+class MockSearchModel : public SearchModel {
+public:
+  MockSearchModel(std::string const &run, std::string const &description,
+                  std::string const &location)
+      : SearchModel(ITableWorkspace_sptr(), std::string()),
+        m_result(run, description, location) {}
+  ~MockSearchModel() override {}
+  MOCK_CONST_METHOD2(data, QVariant(const QModelIndex &, int role));
+  MOCK_METHOD2(setError, void(int, std::string const &));
+
+  SearchResult const &getRowData(int) const override { return m_result; }
+
+private:
+  SearchResult m_result;
+};
+
+class MockMessageHandler : public IMessageHandler {
+public:
+  MOCK_METHOD2(giveUserCritical,
+               void(const std::string &, const std::string &));
+  MOCK_METHOD2(giveUserInfo, void(const std::string &, const std::string &));
+};
+
+/**** Saver ****/
 class MockAsciiSaver : public IAsciiSaver {
 public:
   MOCK_CONST_METHOD1(isValidSaveDirectory, bool(std::string const &));
@@ -131,19 +209,6 @@ public:
                           std::vector<std::string> const &,
                           FileFormatOptions const &));
   virtual ~MockAsciiSaver() = default;
-};
-
-class MockSearcher : public ISearcher {
-public:
-  MOCK_METHOD1(search, Mantid::API::ITableWorkspace_sptr(const std::string &));
-};
-
-/**** Catalog ****/
-class MockMessageHandler : public IMessageHandler {
-public:
-  MOCK_METHOD2(giveUserCritical,
-               void(const std::string &, const std::string &));
-  MOCK_METHOD2(giveUserInfo, void(const std::string &, const std::string &));
 };
 
 /**** Autoreduction ****/
@@ -157,6 +222,33 @@ public:
   MOCK_METHOD1(setupNewAutoreduction, bool(const std::string &));
   MOCK_METHOD0(pause, bool());
   MOCK_METHOD0(stop, void());
+};
+
+/**** Job runner ****/
+
+class MockBatchJobRunner : public BatchJobRunner {
+public:
+  MockBatchJobRunner(Batch model) : BatchJobRunner(model){};
+  MOCK_CONST_METHOD0(isProcessing, bool());
+  MOCK_CONST_METHOD0(isAutoreducing, bool());
+  MOCK_METHOD0(resumeReduction, void());
+  MOCK_METHOD0(reductionPaused, void());
+  MOCK_METHOD0(resumeAutoreduction, void());
+  MOCK_METHOD0(autoreductionPaused, void());
+  MOCK_METHOD1(setReprocessFailedItems, void(bool));
+  MOCK_METHOD1(algorithmFinished,
+               void(MantidQt::API::ConfiguredAlgorithm_sptr));
+  MOCK_METHOD2(algorithmError, void(MantidQt::API::ConfiguredAlgorithm_sptr,
+                                    std::string const &));
+  MOCK_CONST_METHOD1(
+      algorithmOutputWorkspacesToSave,
+      std::vector<std::string>(MantidQt::API::ConfiguredAlgorithm_sptr));
+  MOCK_METHOD1(notifyWorkspaceDeleted, void(std::string const &));
+  MOCK_METHOD2(notifyWorkspaceRenamed,
+               void(std::string const &, std::string const &));
+  MOCK_METHOD0(notifyAllWorkspacesDeleted, void());
+  MOCK_METHOD0(getAlgorithms,
+               std::deque<MantidQt::API::ConfiguredAlgorithm_sptr>());
 };
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE
