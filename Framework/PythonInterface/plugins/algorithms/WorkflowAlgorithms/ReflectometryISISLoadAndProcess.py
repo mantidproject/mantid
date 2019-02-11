@@ -14,9 +14,10 @@ from mantid.api import (AlgorithmFactory, AnalysisDataService, DataProcessorAlgo
 from mantid.simpleapi import (AddSampleLog, LoadEventNexus, LoadISISNexus, Plus,
                               RenameWorkspace)
 
-from mantid.kernel import (CompositeValidator, Direction, IntBoundedValidator,
-                           Property, StringArrayLengthValidator,
-                           StringArrayMandatoryValidator, StringArrayProperty)
+from mantid.kernel import (CompositeValidator, Direction, EnabledWhenProperty,
+                           IntBoundedValidator, Property, PropertyCriterion,
+                           StringArrayLengthValidator, StringArrayMandatoryValidator,
+                           StringArrayProperty)
 
 
 class Prop:
@@ -78,6 +79,8 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
                                                  values=[]),
                              doc='A list of run numbers or workspace names for the second transmission run. '
                              'Multiple runs will be summed before reduction.')
+        self._declareSliceAlgorithmProperties()
+        self._declareReductionAlgorithmProperties()
         self.declareProperty(WorkspaceProperty(Prop.OUTPUT_WS, '',
                                                optional=PropertyMode.Optional,
                                                direction=Direction.Output),
@@ -90,9 +93,6 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
                                                optional=PropertyMode.Optional,
                                                direction=Direction.Output),
                              doc='The output workspace in wavelength, or workspace group if sliced.')
-        self.declareProperty('SliceWorkspace', False, doc = 'If true, slice the input workspace')
-        self._declareSliceAlgorithmProperties()
-        self._declareReductionAlgorithmProperties()
 
     def PyExec(self):
         """Execute the algorithm."""
@@ -122,14 +122,20 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
 
     def _declareSliceAlgorithmProperties(self):
         """Copy properties from the child slicing algorithm and add our own custom ones"""
-        self._slice_properties = [
-            'TimeInterval', 'LogName', 'LogValueInterval']
+        self.declareProperty('SliceWorkspace', False, doc = 'If true, slice the input workspace')
+        whenSliceEnabled = EnabledWhenProperty('SliceWorkspace', PropertyCriterion.IsEqualTo, "1")
+
+        self._slice_properties = ['TimeInterval', 'LogName', 'LogValueInterval']
         self.copyProperties('ReflectometrySliceEventWorkspace', self._slice_properties)
+        for property in self._slice_properties:
+            self.setPropertySettings(property, whenSliceEnabled)
+
         self.declareProperty(name=Prop.NUMBER_OF_SLICES,
                              defaultValue=Property.EMPTY_INT,
                              validator=IntBoundedValidator(lower=1),
                              direction=Direction.Input,
                              doc='The number of uniform-length slices to slice the input workspace into')
+        self.setPropertySettings(Prop.NUMBER_OF_SLICES, whenSliceEnabled)
 
     def _declareReductionAlgorithmProperties(self):
         """Copy properties from the child reduction algorithm"""
