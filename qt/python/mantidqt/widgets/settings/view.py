@@ -7,12 +7,14 @@
 #  This file is part of the mantid workbench.
 #
 #
-from __future__ import (absolute_import, division, print_function)
+from __future__ import absolute_import, division, print_function
+
+from qtpy.QtWidgets import QMessageBox
 
 from mantidqt.utils.qt import load_ui
+from mantidqt.widgets.settings.general.presenter import GeneralSettings
 
 form, base = load_ui(__file__, "ui/main.ui")
-general_form, general_base = load_ui(__file__, "ui/section_general.ui")
 plots_form, plots_base = load_ui(__file__, "ui/section_plots.ui")
 
 
@@ -23,24 +25,24 @@ class PlotsSettingsView(plots_base, plots_form):
         self.setVisible(False)
 
 
-class GeneralSettingsView(general_base, general_form):
-    def __init__(self, parent=None):
-        super(GeneralSettingsView, self).__init__(parent)
-        self.setupUi(self)
-        self.setVisible(False)
-
-
 class SettingsView(base, form):
     def __init__(self, parent, presenter):
         super(SettingsView, self).__init__(parent)
         self.setupUi(self)
         self.presenter = presenter
-        self.sections.currentRowChanged.connect(self.presenter.action_current_row_changed)
 
-        self.general_settings_view = GeneralSettingsView(self)
-        self.current = self.general_settings_view
-        self.container.addWidget(self.general_settings_view)
-        self.current.show()
+        self.sections.currentRowChanged.connect(self.presenter.action_current_row_changed)
+        self.ok_button.clicked.connect(self.presenter.action_ok_button)
+        self.cancel_button.clicked.connect(self.presenter.action_cancel_button)
+        self.apply_button.clicked.connect(self.presenter.action_apply_button)
+
+        self.general_settings = GeneralSettings()
+        self.current = self.general_settings.view
+        self.container.addWidget(self.general_settings.view)
 
         self.plots_settings_view = PlotsSettingsView(self)
 
+    def ask_before_close(self):
+        reply = QMessageBox.question(self, self.presenter.ASK_BEFORE_CLOSE_TITLE,
+                                     self.presenter.ASK_BEFORE_CLOSE_MESSAGE, QMessageBox.Yes, QMessageBox.No)
+        return True if reply == QMessageBox.Yes else False

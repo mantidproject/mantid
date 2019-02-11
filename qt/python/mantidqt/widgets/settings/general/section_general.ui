@@ -36,13 +36,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QComboBox" name="facility">
-             <item>
-              <property name="text">
-               <string>ISIS</string>
-              </property>
-             </item>
-            </widget>
+            <widget class="QComboBox" name="facility"/>
            </item>
           </layout>
          </item>
@@ -56,13 +50,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QComboBox" name="instrument">
-             <item>
-              <property name="text">
-               <string>IMAT</string>
-              </property>
-             </item>
-            </widget>
+            <widget class="QComboBox" name="instrument"/>
            </item>
           </layout>
          </item>
