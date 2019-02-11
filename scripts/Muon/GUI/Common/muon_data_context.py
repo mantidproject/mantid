@@ -29,6 +29,7 @@ from collections import OrderedDict
 
 from mantid.api import WorkspaceGroup
 from mantid.kernel import ConfigServiceImpl, ConfigService
+from Muon.GUI.Common.observer_pattern import Observable
 
 
 def get_default_grouping(workspace, instrument, main_field_direction):
@@ -108,8 +109,12 @@ class MuonDataContext(object):
         self._gui_variables = {}
         self._current_data = {"workspace": load_utils.empty_loaded_data()}  # self.get_result(False)
 
+        self._current_runs = []
+
         self._instrument = ConfigService.getInstrument().name() if ConfigService.getInstrument().name()\
             in allowed_instruments else 'EMU'
+
+        self.instrumentNotifier = MuonDataContext.InstrumentNotifier(self)
 
     def is_data_loaded(self):
         return self._loaded_data.num_items() > 0
@@ -127,7 +132,9 @@ class MuonDataContext(object):
 
     @instrument.setter
     def instrument(self, value):
+        ConfigService['default.instrument'] = value
         self._instrument = value
+        self.instrumentNotifier.notify_subscribers(self._instrument)
 
     @property
     def current_run(self):
@@ -167,6 +174,29 @@ class MuonDataContext(object):
     def gui_variables(self):
         return self._gui_variables
 
+    @property
+    def current_runs(self):
+        return self._current_runs
+
+    @current_runs.setter
+    def current_runs(self, value):
+        self._current_runs = value
+
+    @property
+    def current_filenames(self):
+        current_filenames = []
+        for run in self.current_runs:
+            if self._loaded_data.get_data(run=run, instrument=self.instrument):
+                current_filenames.append(self._loaded_data.get_data(run=run, instrument=self.instrument)['filename'])
+        return current_filenames
+
+    @property
+    def current_workspaces(self):
+        current_workspaces = []
+        for run in self.current_runs:
+            current_workspaces.append(self._loaded_data.get_data(run=run, instrument=self.instrument)['workspace'])
+        return current_workspaces
+
     def add_group(self, group):
         assert isinstance(group, MuonGroup)
         if self.check_group_contains_valid_detectors(group):
@@ -182,7 +212,8 @@ class MuonDataContext(object):
         # Update the current data; resetting the groups and pairs to their default values
         if self._loaded_data.num_items() > 0:
             self._current_data = self._loaded_data.get_latest_data()
-            self.set_groups_and_pairs_to_default()
+            if not self.groups:
+                self.set_groups_and_pairs_to_default()
         else:
             self._current_data = {"workspace": load_utils.empty_loaded_data()}
 
@@ -200,7 +231,7 @@ class MuonDataContext(object):
     def loaded_workspace_as_group(self, run):
         if self.is_multi_period():
             workspace_group = WorkspaceGroup()
-            for workspace_wrapper in self._loaded_data.get_data(run=run)['workspace']['OutputWorkspace']:
+            for workspace_wrapper in self._loaded_data.get_data(run=run, instrument=self.instrument)['workspace']['OutputWorkspace']:
                 workspace_group.addWorkspace(workspace_wrapper.workspace)
             return workspace_group
         else:
@@ -277,20 +308,19 @@ class MuonDataContext(object):
     # ------------------------------------------------------------------------------------------------------------------
 
     def show_raw_data(self):
-        loaded_data_list = self._loaded_data.params
-        for loaded_data in loaded_data_list:
-            run = run_list_to_string(loaded_data['run'])
-            loaded_workspace = loaded_data['workspace']['OutputWorkspace']
-            directory = get_base_data_directory(self, run) + get_raw_data_directory(self, run)
+        for run in self.current_runs:
+            run_string = run_list_to_string(run)
+            loaded_workspace = self._loaded_data.get_data(run=run, instrument=self.instrument)['workspace']['OutputWorkspace']
+            directory = get_base_data_directory(self, run_string) + get_raw_data_directory(self, run_string)
 
             if len(loaded_workspace) > 1:
                 # Multi-period data
                 for i, single_ws in enumerate(loaded_workspace):
-                    name = directory + get_raw_data_workspace_name(self, run) + "_period_" + str(i)
+                    name = directory + get_raw_data_workspace_name(self, run_string) + "_period_" + str(i)
                     single_ws.show(name)
             else:
                 # Single period data
-                name = directory + get_raw_data_workspace_name(self, run)
+                name = directory + get_raw_data_workspace_name(self, run_string)
                 loaded_workspace[0].show(name)
 
     def show_all_groups(self):
@@ -298,12 +328,11 @@ class MuonDataContext(object):
             self.show_group_data(group_name)
 
     def show_group_data(self, group_name, show=True):
-        loaded_data_list = self._loaded_data.params
-        for workspace in loaded_data_list:
-            run = run_list_to_string(workspace['run'])
-            group_workspace = calculate_group_data(self, group_name, workspace['run'])
-            directory = get_base_data_directory(self, run) + get_group_data_directory(self, run)
-            name = get_group_data_workspace_name(self, group_name, run)
+        for run in self.current_runs:
+            run_as_string = run_list_to_string(run)
+            group_workspace = calculate_group_data(self, group_name, run)
+            directory = get_base_data_directory(self, run_as_string) + get_group_data_directory(self, run_as_string)
+            name = get_group_data_workspace_name(self, group_name, run_as_string)
 
             self._groups[group_name].workspace = MuonWorkspaceWrapper(group_workspace)
             if show:
@@ -314,12 +343,11 @@ class MuonDataContext(object):
             self.show_pair_data(pair_name)
 
     def show_pair_data(self, pair_name, show=True):
-        workspace_list = self._loaded_data.params
-        for workspace in workspace_list:
-            run = run_list_to_string(workspace['run'])
-            name = get_pair_data_workspace_name(self, pair_name, run)
-            directory = get_base_data_directory(self, run) + get_pair_data_directory(self, run)
-            pair_workspace = calculate_pair_data(self, pair_name, workspace['run'])
+        for run in self.current_runs:
+            run_as_string = run_list_to_string(run)
+            name = get_pair_data_workspace_name(self, pair_name, run_as_string)
+            directory = get_base_data_directory(self, run_as_string) + get_pair_data_directory(self, run_as_string)
+            pair_workspace = calculate_pair_data(self, pair_name, run)
 
             self._pairs[pair_name].workspace = MuonWorkspaceWrapper(pair_workspace)
             if show:
@@ -345,3 +373,11 @@ class MuonDataContext(object):
             return False
         else:
             return True
+
+    class InstrumentNotifier(Observable):
+        def __init__(self, outer):
+            Observable.__init__(self)
+            self.outer = outer  # handle to containing class
+
+        def notify_subscribers(self, *args, **kwargs):
+            Observable.notify_subscribers(self, *args)

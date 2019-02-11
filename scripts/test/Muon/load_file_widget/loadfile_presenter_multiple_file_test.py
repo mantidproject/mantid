@@ -72,7 +72,6 @@ class LoadFileWidgetPresenterMultipleFileModeTest(unittest.TestCase):
         self.view.warning_popup = mock.Mock()
 
         self.presenter = BrowseFileWidgetPresenter(self.view, self.model)
-        self.presenter.enable_multiple_files(True)
 
         patcher = mock.patch('Muon.GUI.Common.load_file_widget.model.load_utils')
         self.addCleanup(patcher.stop)
@@ -152,7 +151,6 @@ class LoadFileWidgetPresenterMultipleFileModeTest(unittest.TestCase):
 
     @run_test_with_and_without_threading
     def test_that_loading_two_files_from_browse_sets_model_and_interface_correctly(self):
-        self.presenter.enable_multiple_files(True)
         workspace_1 = self.create_fake_workspace(1)
         workspace_2 = self.create_fake_workspace(2)
         self.mock_loading_multiple_files_from_browse([1234, 1235], [workspace_1, workspace_2],
@@ -169,7 +167,6 @@ class LoadFileWidgetPresenterMultipleFileModeTest(unittest.TestCase):
 
     @run_test_with_and_without_threading
     def test_that_loading_two_files_from_user_input_sets_model_and_interface_correctly(self):
-        self.presenter.enable_multiple_files(True)
         workspace_1 = self.create_fake_workspace(1)
         workspace_2 = self.create_fake_workspace(2)
         self.load_utils_patcher.load_workspace_from_filename = mock.Mock(side_effect=zip([workspace_1, workspace_2],
@@ -213,7 +210,6 @@ class LoadFileWidgetPresenterMultipleFileModeTest(unittest.TestCase):
 
     @run_test_with_and_without_threading
     def test_that_loading_multiple_files_from_browse_ignores_loads_which_throw(self):
-        self.presenter.enable_multiple_files(True)
         workspace= self.create_fake_workspace(1)
 
         files = ["C:/dir1/file1.nxs", "C:/dir2/file2.nxs", "C:/dir2/file3.nxs"]
@@ -250,10 +246,10 @@ class LoadFileWidgetPresenterMultipleFileModeTest(unittest.TestCase):
         six.assertCountEqual(self, self.model.loaded_workspaces, [workspace_1, workspace_2, workspace_3])
         six.assertCountEqual(self, self.model.loaded_runs, [[1234], [1235], [1236]])
 
-        self.assertEqual(self.view.get_file_edit_text(), "C:/dir1/file1.nxs;C:/dir1/file3.nxs;C:/dir2/file2.nxs")
+        self.assertEqual(self.view.get_file_edit_text(), "C:/dir1/file3.nxs")
 
     @run_test_with_and_without_threading
-    def test_that_loading_an_already_loaded_file_from_browse_overwrites_it(self):
+    def test_that_loading_an_already_loaded_run_from_different_file_overwrites(self):
         workspace_1 = self.create_fake_workspace(1)
         workspace_2 = self.create_fake_workspace(2)
         workspace_3 = self.create_fake_workspace(3)
@@ -274,7 +270,7 @@ class LoadFileWidgetPresenterMultipleFileModeTest(unittest.TestCase):
         six.assertCountEqual(self, self.model.loaded_workspaces, [workspace_3, workspace_2])
         six.assertCountEqual(self, self.model.loaded_runs, [[1234], [1235]])
 
-        self.assertEqual(self.view.get_file_edit_text(), "C:/dir2/file1.nxs;C:/dir2/file2.nxs")
+        self.assertEqual(self.view.get_file_edit_text(), "C:/dir2/file1.nxs")
 
 
 if __name__ == '__main__':

@@ -126,7 +126,7 @@ class MuonWorkspaceWrapper(object):
         name = dirs/../dirs/workspace_name
         """
         if not self.is_hidden:
-            self.hide()
+            return
 
         if len(name) > 0 and self.is_hidden:
             self.name = str(name)
