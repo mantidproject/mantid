@@ -47,13 +47,12 @@ std::vector<double> getValuesInYBin(MatrixWorkspace_const_sptr workspace,
 }
 
 std::size_t getBinIndexOfValue(NumericAxis const *axis, double value) {
-  auto const axisValues = axis->getValues();
-  auto const iter = std::find(axisValues.begin(), axisValues.end(), value);
-  if (iter != axisValues.end())
-    return axisValues.end() - iter - 1;
-  else
-    throw std::runtime_error(
-        "The corresponding bin in the input workspace could not be found.");
+  for (auto index = 0u; index < axis->length(); ++index)
+    if (axis->getValue(index) == value)
+      return index;
+
+  throw std::runtime_error(
+      "The corresponding bin in the input workspace could not be found.");
 }
 
 std::size_t getBinIndexOfValue(MatrixWorkspace_const_sptr workspace,
