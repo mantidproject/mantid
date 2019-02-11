@@ -353,7 +353,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         if inputFiles:
             mergedWSName = self._names.withSuffix('merged')
             loadOption = {'XUnit': 'TimeOfFlight',
-                          'BeamCentre': 0.0}
+                          'BeamCentre': 127.5}
             # MergeRunsOptions are defined by the parameter files and will not be modified here!
             ws = LoadAndMerge(Filename=inputFiles,
                               LoaderName='LoadILLReflectometry',
