@@ -364,7 +364,7 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
         view.set_model.reset_mock()
 
         presenter.replace_workspace(ws.TEST_NAME, ws)
-        
+
         self.assertEqual(3, view.set_context_menu_actions.call_count)
         self.assertEqual(1, view.set_model.call_count)
 
