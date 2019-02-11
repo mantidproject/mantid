@@ -16,7 +16,8 @@ class LoadUtilsDummy(object):
     The current run is the same as the one in MonAnalysis
     """
 
-    def __init__(self, parent=None):
+    def __init__(self, context):
+        self.context = context
         self.options = "None"
         self.options = [item.replace(" ", "") for item in self.options]
         self.N_points = 1

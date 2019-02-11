@@ -65,7 +65,7 @@ class FrequencyAnalysisGui(QtGui.QMainWindow):
         self.load_widget = LoadWidget(self.loaded_data, self.context, self)
         self.grouping_tab_widget = GroupingTabWidget(self.context)
         self.home_tab = HomeTabWidget(self.context, self)
-        load = load_utils_dummy.LoadUtilsDummy()
+        load = load_utils_dummy.LoadUtilsDummy( self.context)
         self.transform = TransformWidget(load = load, parent = self)
 
         self.setup_tabs()
@@ -98,6 +98,8 @@ class FrequencyAnalysisGui(QtGui.QMainWindow):
         self.load_widget.load_widget.loadNotifier.add_subscriber(self.home_tab.home_tab_widget.loadObserver)
 
         self.load_widget.load_widget.loadNotifier.add_subscriber(self.grouping_tab_widget.group_tab_presenter.loadObserver)
+
+        self.load_widget.load_widget.loadNotifier.add_subscriber(self.transform.LoadObserver)
 
     def setup_tabs(self):
         """

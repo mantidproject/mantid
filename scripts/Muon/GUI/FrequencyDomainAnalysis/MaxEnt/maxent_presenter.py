@@ -34,6 +34,9 @@ class MaxEntPresenter(object):
     def widget(self):
         return self.view
 
+    def runChanged(self):
+        print("moo")
+
     # functions
     def getWorkspaceNames(self):
         final_options = self.load.getGroupedWorkspaceNames()
