@@ -7,8 +7,8 @@
 #include "BatchJobRunner.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IAlgorithm.h"
+#include "MantidKernel/Strings.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
-#include <boost/range/adaptor/transformed.hpp>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -33,26 +33,15 @@ void updateProperty(std::string const &property,
     updateProperty(property, value.get(), properties);
 }
 
+template <typename VALUE_TYPE>
 void updateProperty(std::string const &property,
-                    std::vector<std::string> const &values,
+                    std::vector<VALUE_TYPE> const &values,
                     AlgorithmRuntimeProps &properties) {
   if (values.size() < 1)
     return;
 
-  auto value = boost::algorithm::join(values, ", ");
-  updateProperty(property, value, properties);
-}
-
-void updateProperty(std::string const &property,
-                    std::vector<double> const &values,
-                    AlgorithmRuntimeProps &properties) {
-  if (values.size() < 1)
-    return;
-
-  auto value = boost::algorithm::join(
-      values | boost::adaptors::transformed(
-                   [](double d) { return std::to_string(d); }),
-      ", ");
+  auto value =
+      Mantid::Kernel::Strings::simpleJoin(values.cbegin(), values.cend(), ", ");
   updateProperty(property, value, properties);
 }
 
