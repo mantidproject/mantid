@@ -225,9 +225,8 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
 
     def _renameWorkspaceBasedOnRunNumber(self, workspace_name, isTrans):
         """Rename the given workspace based on its run number and a standard prefix"""
-        workspace = AnalysisDataService.retrieve(workspace_name)
-        new_name = self._prefixedName(str(workspace.getRunNumber()), isTrans)
-        if new_name != workspace.name():
+        new_name = self._prefixedName(_getRunNumberAsString(workspace_name), isTrans)
+        if new_name != workspace_name:
             RenameWorkspace(InputWorkspace=workspace_name, OutputWorkspace=new_name)
             # Also rename the monitor workspace, if there is one
             if AnalysisDataService.doesExist(_monitorWorkspace(workspace_name)):
@@ -386,6 +385,19 @@ def _throwIfNotValidReflectometryEventWorkspace(workspace_name):
 def _monitorWorkspace(workspace):
     """Return the associated monitor workspace name for the given workspace"""
     return workspace + '_monitors'
+
+
+def _getRunNumberAsString(workspace_name):
+    """Get the run number for a workspace. If it's a workspace group, get
+    the run number from the first child workspace."""
+    try:
+        workspace = AnalysisDataService.retrieve(workspace_name)
+        if not isinstance(workspace, WorkspaceGroup):
+            return str(workspace.getRunNumber())
+        # Get first child in the group
+        return str(workspace[0].getRunNumber())
+    except:
+        raise RuntimeError('Could not find run number for workspace ' + workspace_name)
 
 
 AlgorithmFactory.subscribe(ReflectometryISISLoadAndProcess)

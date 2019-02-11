@@ -11,7 +11,7 @@ import unittest
 from mantid import config
 from mantid.api import mtd
 from mantid.simpleapi import (AddSampleLog, AddTimeSeriesLog, CreateSampleWorkspace,
-                              CropWorkspace, Rebin)
+                              CropWorkspace, GroupWorkspaces, Rebin)
 from testhelpers import (assertRaisesNothing, create_algorithm)
 
 
@@ -398,8 +398,20 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         history = ['ReflectometryReductionOneAuto', 'GroupWorkspaces', 'GroupWorkspaces']
         self._check_history(mtd['IvsQ_binned_38415_1'], history, False)
 
-    def _create_workspace(self, run_number, prefix=''):
-        name = prefix + str(run_number)
+    def test_with_input_workspace_group(self):
+        self._create_workspace_group(12345, 2, 'TOF_')
+        args = self._default_options
+        args['InputRunList'] = '12345'
+        outputs = ['IvsQ_12345', 'IvsQ_12345_1', 'IvsQ_12345_2', 'IvsQ_binned_12345',
+                   'IvsQ_binned_12345_2', 'IvsQ_binned_12345_1', 'IvsLam_12345', 'IvsLam_12345_1', 'IvsLam_12345_2', 'TOF_12345', 'TOF_12345_1', 'TOF_12345_2']
+        self._assert_run_algorithm_succeeds(args, outputs)
+        history = ['CreateSampleWorkspace', 'AddSampleLog',  'CreateSampleWorkspace', 'AddSampleLog',
+                   'GroupWorkspaces', 'ReflectometryReductionOneAuto', 'ReflectometryReductionOneAuto',
+                   'GroupWorkspaces', 'GroupWorkspaces']
+        self._check_history(mtd['IvsQ_binned_12345_1'], history, False)
+
+    def _create_workspace(self, run_number, prefix='', suffix=''):
+        name = prefix + str(run_number) + suffix
         ws = CreateSampleWorkspace(WorkspaceType='Histogram',NumBanks=1, NumMonitors=2,
                               BankPixelWidth=2, XMin=200, OutputWorkspace=name)
         AddSampleLog(Workspace=ws, LogName='run_number', LogText=str(run_number))
@@ -422,6 +434,16 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         AddTimeSeriesLog(Workspace=name, Name="proton_charge", Time="2010-01-01T00:30:00", Value=80)
         AddTimeSeriesLog(Workspace=name, Name="proton_charge", Time="2010-01-01T00:40:00", Value=15)
         AddTimeSeriesLog(Workspace=name, Name="proton_charge", Time="2010-01-01T00:50:00", Value=100)
+
+    def _create_workspace_group(self, run_number, number_of_items, prefix=''):
+        group_name = prefix + str(run_number)
+        child_names = list()
+        for index in range(0, number_of_items):
+            child_suffix = '_' + str(index+1)
+            child_name = group_name + child_suffix
+            self._create_workspace(run_number, prefix, child_suffix)
+            child_names.append(child_name)
+        GroupWorkspaces(InputWorkspaces=",".join(child_names), OutputWorkspace=group_name)
 
     def _check_history(self, ws, expected, unroll = True):
         """Return true if algorithm names listed in algorithmNames are found in the
