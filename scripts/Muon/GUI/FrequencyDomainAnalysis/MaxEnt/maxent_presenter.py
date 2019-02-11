@@ -11,6 +11,7 @@ import math
 from Muon.GUI.Common import thread_model
 import mantid.simpleapi as mantid
 
+
 class MaxEntPresenter(object):
 
     """
@@ -108,17 +109,17 @@ class MaxEntPresenter(object):
         self.updatePhaseOptions()
 
     def updatePhaseOptions(self):
-        inputs ={}
+        inputs = {}
         self.view.addOutputPhases(inputs)
         name = inputs['OutputPhaseTable']
-        if self.phaseTableAdded(name):
+        current_list = self.view.getPhaseTableOptions()
+        if self.phaseTableAdded(name) and name not in current_list:
             index = self.view.getPhaseTableIndex()
             self.view.addPhaseTableToGUI(name)
             self.view.setPhaseTableIndex(index)
 
     def phaseTableAdded(self, name):
         return mantid.AnalysisDataService.doesExist(name)
-
 
     def getMaxEntInput(self):
         inputs = self.view.initMaxEntInput()

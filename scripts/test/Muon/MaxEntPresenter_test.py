@@ -95,16 +95,37 @@ class MaxEntPresenterTest(unittest.TestCase):
         self.presenter.phaseTableAdded = mock.Mock(return_value = True)
         self.view.getPhaseTableIndex = mock.Mock(return_value = 2)
         self.view.setPhaseTableIndex = mock.Mock()
+        self.view.getPhaseTableOptions = mock.Mock(return_value = [])
 
         inputs = {}
         self.view.addOutputPhases(inputs)
         self.presenter.handleFinished()
 
         self.assertEquals(inputs["OutputPhaseTable"],"test")
+        self.assertEquals(self.view.getPhaseTableOptions.call_count, 1)
         self.assertEquals(self.view.getPhaseTableIndex.call_count, 1)
         self.assertEquals(self.view.addPhaseTableToGUI.call_count, 1)
         self.assertEquals(self.view.setPhaseTableIndex.call_count, 1)
         self.view.setPhaseTableIndex.assert_called_with(2)
+
+    def test_phaseOptionAlreadyExists(self):
+        self.view.addOutputPhases = mock.MagicMock(side_effect = test)
+        self.view.addPhaseTableToGUI = mock.MagicMock()
+        self.presenter.thread = mock.MagicMock()
+        self.presenter.phaseTableAdded = mock.Mock(return_value = True)
+        self.view.getPhaseTableIndex = mock.Mock(return_value = 2)
+        self.view.setPhaseTableIndex = mock.Mock()
+        self.view.getPhaseTableOptions = mock.Mock(return_value = ["test"])
+
+        inputs = {}
+        self.view.addOutputPhases(inputs)
+        self.presenter.handleFinished()
+
+        self.assertEquals(inputs["OutputPhaseTable"],"test")
+        self.assertEquals(self.view.getPhaseTableOptions.call_count, 1)
+        self.assertEquals(self.view.getPhaseTableIndex.call_count, 0)
+        self.assertEquals(self.view.addPhaseTableToGUI.call_count, 0)
+        self.assertEquals(self.view.setPhaseTableIndex.call_count, 0)
 
     def test_noUpdatePhaseOptions(self):
         self.view.addOutputPhases = mock.MagicMock(side_effect = test)
@@ -113,12 +134,14 @@ class MaxEntPresenterTest(unittest.TestCase):
         self.presenter.phaseTableAdded = mock.Mock(return_value = False)
         self.view.getPhaseTableIndex = mock.Mock(return_value = 2)
         self.view.setPhaseTableIndex = mock.Mock()
+        self.view.getPhaseTableOptions = mock.Mock(return_value = [])
 
         inputs = {}
         self.view.addOutputPhases(inputs)
         self.presenter.handleFinished()
 
         self.assertEquals(inputs["OutputPhaseTable"],"test")
+        self.assertEquals(self.view.getPhaseTableOptions.call_count, 1)
         self.assertEquals(self.view.getPhaseTableIndex.call_count, 0)
         self.assertEquals(self.view.addPhaseTableToGUI.call_count, 0)
         self.assertEquals(self.view.setPhaseTableIndex.call_count, 0)

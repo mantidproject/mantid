@@ -13,6 +13,7 @@ from Muon.GUI.Common.utilities import table_utils
 
 construct = "Construct"
 
+
 class MaxEntView(QtGui.QWidget):
 
     """
@@ -172,8 +173,11 @@ class MaxEntView(QtGui.QWidget):
     def getPhaseTableIndex(self):
         return self.phaseTable_box.currentIndex()
 
-    def setPhaseTableIndex(self,index):
+    def setPhaseTableIndex(self, index):
         self.phaseTable_box.setCurrentIndex(index)
+
+    def getPhaseTableOptions(self):
+        return [self.phaseTable_box.itemText(j) for j in range(self.phaseTable_box.count())]
 
     def addPhaseTableToGUI(self, option):
         self.phaseTable_box.addItem(option)
@@ -233,7 +237,7 @@ class MaxEntView(QtGui.QWidget):
 
     def addPhaseTable(self, inputs):
         if self.usePhases():
-           inputs['InputPhaseTable'] = "PhaseTable"
+            inputs['InputPhaseTable'] = "PhaseTable"
         else:
             inputs['InputPhaseTable'] = self.phaseTable_box.currentText()
 
