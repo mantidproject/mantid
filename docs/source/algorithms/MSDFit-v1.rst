@@ -60,7 +60,7 @@ Output (the numbers on your machine my not match exactly):
 	
     Using Gauss Model
     A0: [ 0.87...]
-    A1: [ 0.03...]
+    A1: [ 0.19...]
     Using Yi Model
     A0: [ 0.95...]
     A1: [ 0.58...]

@@ -116,11 +116,16 @@ endif ()
     mantidqt/widgets/tableworkspacedisplay/test/test_tableworkspacedisplay_presenter.py
   )
 
+  # ctest targets for interpreters (Encoder/Decoder) tests only get tested in qt5 as only for workbench
+  set ( PYTHON_WIDGET_INTERPRETER_TESTS
+    mantidqt/widgets/instrumentview/test/test_instrumentview_io.py
+  )
+
   # Tests
   set ( PYUNITTEST_RUN_SERIAL ON )
   set ( PYUNITTEST_QT_API pyqt5 )
   pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR}
-    mantidqt_qt5 ${PYTHON_TEST_FILES}
+    mantidqt_qt5 ${PYTHON_TEST_FILES} ${PYTHON_WIDGET_INTERPRETER_TESTS}
   )
   # The jupyterconsole test segfaults on Python 3 and Qt 4
   # despite the code functioning in a normal usage.

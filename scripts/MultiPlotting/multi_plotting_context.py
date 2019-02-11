@@ -5,7 +5,7 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import absolute_import, print_function
-from MultiPlotting.subplot.subPlot_context import subPlotContext
+from MultiPlotting.subplot.subplot_context import subplotContext
 
 
 xBounds = "xBounds"
@@ -21,7 +21,7 @@ class PlottingContext(object):
         self.context[yBounds] = [0., 0.]
 
     def addSubplot(self, name, subplot):
-        self.subplots[name] = subPlotContext(name, subplot)
+        self.subplots[name] = subplotContext(name, subplot)
 
     def addLine(self, subplotName, workspace, specNum):
         try:
@@ -32,6 +32,12 @@ class PlottingContext(object):
                 self.subplots[subplotName].addLine(workspace, specNum)
         except:
             print("cannot plot workspace")
+
+    def add_annotate(self, subplotName, label):
+        self.subplots[subplotName].add_annotate(label)
+
+    def add_vline(self, subplotName, xvalue, name):
+        self.subplots[subplotName].add_vline(xvalue, name)
 
     def get_xBounds(self):
         return self.context[xBounds]

@@ -213,13 +213,14 @@ def load_workspace_from_filename(filename,
         load_result = _get_algorithm_properties(alg, output_properties)
         load_result["OutputWorkspace"] = [MuonWorkspaceWrapper(ws) for ws in load_result["OutputWorkspace"]]
         run = get_run_from_multi_period_data(workspace)
+        load_result["DataDeadTimeTable"] = load_result["DeadTimeTable"][0]
     else:
         # single period data
         load_result = _get_algorithm_properties(alg, output_properties)
         load_result["OutputWorkspace"] = [MuonWorkspaceWrapper(load_result["OutputWorkspace"])]
         run = int(workspace.getRunNumber())
+        load_result["DataDeadTimeTable"] = load_result["DeadTimeTable"]
 
-    load_result["DataDeadTimeTable"] = load_result["DeadTimeTable"]
     load_result["DeadTimeTable"] = None
 
     filename = alg.getProperty("Filename").value
@@ -293,4 +294,7 @@ def flatten_run_list(run_list):
 
 
 def exception_message_for_failed_files(failed_file_list):
-    return "Could not load the following files : \n - " + "\n - ".join(failed_file_list)
+    message = "Could not load the following files : \n "
+    for failure in failed_file_list:
+        message += '{} ; {}'.format(os.path.split(failure[0])[-1], failure[1])
+    return message

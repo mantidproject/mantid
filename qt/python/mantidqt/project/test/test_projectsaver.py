@@ -149,72 +149,93 @@ class ProjectWriterTest(unittest.TestCase):
         if os.path.isdir(working_directory):
             rmtree(working_directory)
 
+        self.file_name = os.path.join(working_directory, os.path.basename(working_directory) + project_file_ext)
+
     def test_write_out_empty_workspaces(self):
         workspace_list = []
         plots_to_save = []
+        interfaces_to_save = []
         project_writer = projectsaver.ProjectWriter(save_location=working_directory, workspace_names=workspace_list,
-                                                    project_file_ext=project_file_ext, plots_to_save=plots_to_save)
-        file_name = working_directory + "/" + os.path.basename(working_directory) + project_file_ext
-
+                                                    project_file_ext=project_file_ext, plots_to_save=plots_to_save,
+                                                    interfaces_to_save=interfaces_to_save)
         workspaces_string = "\"workspaces\": []"
         plots_string = "\"plots\": []"
 
         project_writer.write_out()
 
-        f = open(file_name, "r")
-        file_string = f.read()
+        with open(self.file_name, 'r') as f:
+            file_string = f.read()
         self.assertTrue(workspaces_string in file_string)
         self.assertTrue(plots_string in file_string)
 
     def test_write_out_on_just_workspaces(self):
         plots_to_save = []
         workspace_list = ["ws1", "ws2", "ws3", "ws4"]
+        interfaces_to_save = []
         project_writer = projectsaver.ProjectWriter(save_location=working_directory, workspace_names=workspace_list,
-                                                    project_file_ext=project_file_ext, plots_to_save=plots_to_save)
-        file_name = working_directory + "/" + os.path.basename(working_directory) + project_file_ext
-
+                                                    project_file_ext=project_file_ext, plots_to_save=plots_to_save,
+                                                    interfaces_to_save=interfaces_to_save)
         workspaces_string = "\"workspaces\": [\"ws1\", \"ws2\", \"ws3\", \"ws4\"]"
         plots_string = "\"plots\": []"
 
         project_writer.write_out()
-        f = open(file_name, "r")
-        file_string = f.read()
+        with open(self.file_name, 'r') as f:
+            file_string = f.read()
         self.assertTrue(workspaces_string in file_string)
         self.assertTrue(plots_string in file_string)
 
     def test_write_out_on_just_plots(self):
         plots_to_save = [{"plots1": {"plot-information": "axes data"}}]
         workspace_list = []
+        interfaces_to_save = []
         project_writer = projectsaver.ProjectWriter(save_location=working_directory, workspace_names=workspace_list,
-                                                    project_file_ext=project_file_ext, plots_to_save=plots_to_save)
-        file_name = working_directory + "/" + os.path.basename(working_directory) + project_file_ext
-
+                                                    project_file_ext=project_file_ext, plots_to_save=plots_to_save,
+                                                    interfaces_to_save=interfaces_to_save)
         workspaces_string = "\"workspaces\": []"
         plots_string = "\"plots\": [{\"plots1\": {\"plot-information\": \"axes data\"}}]"
 
         project_writer.write_out()
 
-        f = open(file_name, "r")
-        file_string = f.read()
+        with open(self.file_name, 'r') as f:
+            file_string = f.read()
         self.assertTrue(workspaces_string in file_string)
         self.assertTrue(plots_string in file_string)
 
     def test_write_out_on_both_workspaces_and_plots(self):
         plots_to_save = [{"plots1": {"plot-information": "axes data"}}]
         workspace_list = ["ws1", "ws2", "ws3", "ws4"]
+        interfaces_to_save = []
         project_writer = projectsaver.ProjectWriter(save_location=working_directory, workspace_names=workspace_list,
-                                                    project_file_ext=project_file_ext, plots_to_save=plots_to_save)
-        file_name = working_directory + "/" + os.path.basename(working_directory) + project_file_ext
-
+                                                    project_file_ext=project_file_ext, plots_to_save=plots_to_save,
+                                                    interfaces_to_save=interfaces_to_save)
         workspaces_string = "\"workspaces\": [\"ws1\", \"ws2\", \"ws3\", \"ws4\"]"
         plots_string = "\"plots\": [{\"plots1\": {\"plot-information\": \"axes data\"}}]"
 
         project_writer.write_out()
 
-        f = open(file_name, "r")
-        file_string = f.read()
+        with open(self.file_name, 'r') as f:
+            file_string = f.read()
         self.assertTrue(workspaces_string in file_string)
         self.assertTrue(plots_string in file_string)
+
+    def test_write_out_on_interfaces(self):
+        plots_to_save = []
+        workspace_list = []
+        interfaces_to_save = [{"interface1": {"interface data": "data"}}]
+        project_writer = projectsaver.ProjectWriter(save_location=working_directory, workspace_names=workspace_list,
+                                                    project_file_ext=project_file_ext, plots_to_save=plots_to_save,
+                                                    interfaces_to_save=interfaces_to_save)
+        workspaces_string = "\"workspaces\": []"
+        plots_string = "\"plots\": []"
+        interface_string = "\"interfaces\": [{\"interface1\": {\"interface data\": \"data\"}}]"
+
+        project_writer.write_out()
+
+        with open(self.file_name, 'r') as f:
+            file_string = f.read()
+        self.assertTrue(workspaces_string in file_string)
+        self.assertTrue(plots_string in file_string)
+        self.assertTrue(interface_string in file_string)
 
 
 if __name__ == "__main__":

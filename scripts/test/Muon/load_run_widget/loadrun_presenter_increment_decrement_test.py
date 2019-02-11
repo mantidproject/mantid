@@ -75,7 +75,7 @@ class LoadRunWidgetIncrementDecrementSingleFileModeTest(unittest.TestCase):
 
     def assert_model_has_not_changed(self):
         self.assertEqual(self.model.loaded_workspaces, [self._loaded_workspace])
-        self.assertEqual(self.model.loaded_runs, [self._loaded_run])
+        self.assertEqual(self.model.loaded_runs, [[self._loaded_run]])
         self.assertEqual(self.model.loaded_filenames, [self._loaded_filename])
 
     def assert_view_has_not_changed(self):
@@ -125,7 +125,7 @@ class LoadRunWidgetIncrementDecrementSingleFileModeTest(unittest.TestCase):
         self.wait_for_thread(self.presenter._load_thread)
 
         self.assertEqual(self.presenter.filenames, [new_filename])
-        self.assertEqual(self.presenter.runs, [new_run])
+        self.assertEqual(self.presenter.runs, [[new_run]])
         self.assertEqual(self.presenter.workspaces, [[1]])
 
         self.assertEqual(self.view.get_run_edit_text(), str(new_run))
@@ -140,7 +140,7 @@ class LoadRunWidgetIncrementDecrementSingleFileModeTest(unittest.TestCase):
         self.wait_for_thread(self.presenter._load_thread)
 
         self.assertEqual(self.presenter.filenames, [new_filename])
-        self.assertEqual(self.presenter.runs, [new_run])
+        self.assertEqual(self.presenter.runs, [[new_run]])
         self.assertEqual(self.presenter.workspaces, [[1]])
 
         self.assertEqual(self.view.get_run_edit_text(), str(new_run))
