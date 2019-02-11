@@ -49,8 +49,9 @@ void CylinderAbsorption::defineProperties() {
 
 // returns an empty string if anything is wrong
 void CylinderAbsorption::getShapeFromSample(
-    const Geometry::IObject &sampleShape) {
-  if ((!isEmpty(m_cylHeight)) && (!isEmpty(m_cylRadius)))
+    const Geometry::IObject &sampleShape, bool updateHeight,
+    bool updateRadius) {
+  if (!(updateHeight || updateRadius))
     return; // nothing to update
   if (!sampleShape.hasValidShape())
     return; // no valid shape
@@ -64,31 +65,45 @@ void CylinderAbsorption::getShapeFromSample(
     return;
   const auto &shapeObj = csgshape->shapeInfo();
 
-  if (isEmpty(m_cylRadius))
+  if (updateRadius)
     m_cylRadius = shapeObj.radius();
-  if (isEmpty(m_cylHeight))
+  if (updateHeight)
     m_cylHeight = shapeObj.height();
 }
 
 /// Fetch the properties and set the appropriate member variables
 void CylinderAbsorption::retrieveProperties() {
-  m_cylHeight = getProperty("CylinderSampleHeight"); // in cm
-  if (!isEmpty(m_cylHeight))
-    m_cylHeight *= 0.01;                             // now in m
-  m_cylRadius = getProperty("CylinderSampleRadius"); // in cm
-  if (!isEmpty(m_cylRadius))
-    m_cylRadius *= 0.01; // now in m
-
-  // this declares that at least part of the built-in sample geometry should be
-  // ignored and use the supplied parameters instead
-  m_useSampleShape = (isEmpty(m_cylHeight) && isEmpty(m_cylRadius));
-
   m_numSlices = getProperty("NumberOfSlices");
   m_numAnnuli = getProperty("NumberOfAnnuli");
 
+  bool userSuppliedHeight = false;
+  bool userSuppliedRadius = false;
+
+  m_cylHeight = getProperty("CylinderSampleHeight"); // in cm
+  if (!isEmpty(m_cylHeight)) {
+    m_cylHeight *= 0.01; // now in m
+    userSuppliedHeight = true;
+  }
+  m_cylRadius = getProperty("CylinderSampleRadius"); // in cm
+  if (!isEmpty(m_cylRadius)) {
+    m_cylRadius *= 0.01; // now in m
+    userSuppliedRadius = true;
+  }
+
+  // this declares that at least part of the built-in sample geometry should be
+  // ignored and use the supplied parameters instead
+  m_useSampleShape = !(userSuppliedHeight || userSuppliedRadius);
+
+  // if the user supplied both, then just ignore the built-in shape
+  if (userSuppliedHeight && userSuppliedRadius) {
+    g_log.information(
+        "Chosing user supplied sample geometry in CylinderAbsorption");
+    return;
+  }
+
   // get the missing parameters from the sample shape
   const auto &sampleShape = m_inputWS->sample().getShape();
-  getShapeFromSample(sampleShape);
+  getShapeFromSample(sampleShape, !userSuppliedHeight, !userSuppliedRadius);
 
   g_log.information() << "Creating cylinder with radius=" << m_cylRadius
                       << "m, height=" << m_cylHeight << "m\n";
@@ -115,7 +130,7 @@ std::string CylinderAbsorption::sampleXML() {
   xmlShapeStream << "<cylinder id=\"detector-shape\"> "
                  << "<centre-of-bottom-base x=\"" << samplePos.X() << "\" y=\""
                  << cylinderBase << "\" z=\"" << samplePos.Z() << "\" /> "
-                 << "(<axis x=\"0\" y=\"1\" z=\"0\" /> )"
+                 << "<axis x=\"0\" y=\"1\" z=\"0\" /> "
                  << "<radius val=\"" << m_cylRadius << "\" /> "
                  << "<height val=\"" << m_cylHeight << "\" /> "
                  << "</cylinder>";

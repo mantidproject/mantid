@@ -94,7 +94,8 @@ private:
   void retrieveProperties() override;
   std::string sampleXML() override;
   void initialiseCachedDistances() override;
-  void getShapeFromSample(const Geometry::IObject &sampleShape);
+  void getShapeFromSample(const Geometry::IObject &sampleShape,
+                          bool updateHeight, bool updateRadius);
 
   double m_cylHeight; ///< The height of the cylindrical sample in m
   double m_cylRadius; ///< The radius of the cylindrical sample in m
