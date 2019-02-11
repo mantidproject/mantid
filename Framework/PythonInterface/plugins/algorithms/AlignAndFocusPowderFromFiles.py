@@ -452,18 +452,19 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
             return
 
         # decide what to load
-        loadCalibration = self.__calWksp != ''
-        loadGrouping = self.__grpWksp != ''
-        loadMask = self.__mskWksp != ''
+        loadCalibration = not bool(self.__calWksp)
+        loadGrouping = not bool(self.__grpWksp)
+        loadMask = not bool(self.__mskWksp)
 
         # load and update
-        LoadDiffCal(InputWorkspace=wksp,
-                    Filename=self.getPropertyValue('CalFileName'),
-                    GroupFilename=self.getPropertyValue('GroupFilename'),
-                    MakeCalWorkspace=loadCalibration,
-                    MakeGroupingWorkspace=loadGrouping,
-                    MakeMaskWorkspace=loadMask,
-                    WorkspaceName=self.instr)
+        if loadCalibration or loadGrouping or loadMask:
+            LoadDiffCal(InputWorkspace=wksp,
+                        Filename=self.getPropertyValue('CalFileName'),
+                        GroupFilename=self.getPropertyValue('GroupFilename'),
+                        MakeCalWorkspace=loadCalibration,
+                        MakeGroupingWorkspace=loadGrouping,
+                        MakeMaskWorkspace=loadMask,
+                        WorkspaceName=self.instr)
         if loadCalibration:
             self.__calWksp = self.instr + '_cal'
             self.setPropertyValue('CalibrationWorkspace', self.instr + '_cal')
