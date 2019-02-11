@@ -118,7 +118,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
 
         ws, linePosition = self._peakFitting(ws)
 
-        twoTheta = self._addSampleLogInfo(ws, linePosition)
+        self._addSampleLogInfo(ws, linePosition)
 
         ws = self._moveDetector(ws, linePosition)
 
@@ -154,16 +154,21 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
                                                      validator=WorkspaceUnitValidator('TOF'),
                                                      optional=PropertyMode.Optional),
                              doc='An input workspace (units TOF) if no Run is specified.')
+        self.declareProperty(MatrixWorkspaceProperty(Prop.OUTPUT_WS,
+                                                     defaultValue='',
+                                                     direction=Direction.Output),
+                             doc='The preprocessed output workspace (unit wavelength), single histogram.')
         self.declareProperty(Prop.TWO_THETA,
                              defaultValue=Property.EMPTY_DBL,
                              doc='A user-defined scattering angle 2 theta (unit degrees).')
         self.declareProperty(name=Prop.LINE_POSITION_INPUT,
                              defaultValue=Property.EMPTY_DBL,
                              doc='A workspace index corresponding to the beam centre between 0.0 and 255.0.')
-        self.declareProperty(MatrixWorkspaceProperty(Prop.OUTPUT_WS,
+        self.declareProperty(MatrixWorkspaceProperty(Prop.DIRECT_LINE_WORKSPACE,
                                                      defaultValue='',
-                                                     direction=Direction.Output),
-                             doc='The preprocessed output workspace (unit wavelength), single histogram.')
+                                                     direction=Direction.Input,
+                                                     optional=PropertyMode.Optional),
+                             doc='A pre-processed direct beam workspace (sample log entries).')
         self.declareProperty(Prop.SUBALG_LOGGING,
                              defaultValue=SubalgLogging.OFF,
                              validator=StringListValidator([SubalgLogging.OFF, SubalgLogging.ON]),
@@ -229,11 +234,6 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         self.declareProperty(Prop.XMAX,
                              defaultValue=Property.EMPTY_DBL,
                              doc='Maximum x value (unit Angstrom) used for peak fitting.')
-        self.declareProperty(MatrixWorkspaceProperty(Prop.DIRECT_LINE_WORKSPACE,
-                                                     defaultValue='',
-                                                     direction=Direction.Input,
-                                                     optional=PropertyMode.Optional),
-                             doc='A pre-processed direct beam workspace (sample log entries).')
 
     def validateInputs(self):
         """Return a dictionary containing issues found in properties."""
@@ -278,7 +278,8 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
             OutputWorkspace=wavelengthWSName,
             Target='Wavelength',
             EMode='Elastic',
-            EnableLogging=self._subalgLogging)
+            EnableLogging=self._subalgLogging
+        )
         self._cleanup.cleanup(ws)
         return wavelengthWS
 
@@ -286,10 +287,12 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         """Extract monitor spectra from ws to another workspace."""
         detWSName = self._names.withSuffix('detectors')
         monWSName = self._names.withSuffix('monitors')
-        ExtractMonitors(InputWorkspace=ws,
-                        DetectorWorkspace=detWSName,
-                        MonitorWorkspace=monWSName,
-                        EnableLogging=self._subalgLogging)
+        ExtractMonitors(
+            InputWorkspace=ws,
+            DetectorWorkspace=detWSName,
+            MonitorWorkspace=monWSName,
+            EnableLogging=self._subalgLogging
+        )
         if mtd.doesExist(detWSName) is None:
             raise RuntimeError('No detectors in the input data.')
         detWS = mtd[detWSName]
@@ -352,15 +355,25 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         inputFiles = inputFiles.replace(',', '+')
         if inputFiles:
             mergedWSName = self._names.withSuffix('merged')
-            loadOption = {'XUnit': 'TimeOfFlight',
-                          'BeamCentre': self.getPropertyValue(Prop.LINE_POSITION_INPUT)}
+            linePosition = 127.5
+            if not self.getProperty(Prop.LINE_POSITION_INPUT):
+                linePosition = self.getProperty(Prop.LINE_POSITION_INPUT).value
+            loadOption = {
+                'XUnit': 'TimeOfFlight',
+                'BeamCentre': linePosition
+            }
+            if not self.getProperty(Prop.TWO_THETA).isDefault:
+                twoTheta = self.getProperty(Prop.TWO_THETA).value / 2.
+                loadOption.update({'BraggAngle': twoTheta})
             # MergeRunsOptions are defined by the parameter files and will not be modified here!
-            ws = LoadAndMerge(Filename=inputFiles,
-                              LoaderName='LoadILLReflectometry',
-                              LoaderVersion=-1,
-                              LoaderOptions=loadOption,
-                              OutputWorkspace=mergedWSName,
-                              EnableLogging=self._subalgLogging)
+            ws = LoadAndMerge(
+                Filename=inputFiles,
+                LoaderName='LoadILLReflectometry',
+                LoaderVersion=-1,
+                LoaderOptions=loadOption,
+                OutputWorkspace=mergedWSName,
+                EnableLogging=self._subalgLogging
+            )
         else:
             ws = self.getProperty(Prop.INPUT_WS).value
             self._cleanup.protect(ws)
@@ -380,20 +393,24 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         else:
             # Fit peak position
             peakWSName = self._names.withSuffix('peak')
-            args = {'InputWorkspace': ws, 'OutputWorkspace': peakWSName, 'EnableLogging': self._subalgLogging}
-            if not self.getProperty(Prop.XMIN).isDefault:
+            xmin = self.getProperty(Prop.XMIN).value
+            if not xmin == Property.EMPTY_DBL:
                 xmin = self.getProperty(Prop.XMIN).value
-                args['RangeLower'] = common.inTOF(xmin, l1, l2, theta)
+                xmin = common.inTOF(xmin, l1, l2, theta)
+            xmax = self.getProperty(Prop.XMAX).value
             if not self.getProperty(Prop.XMAX).isDefault:
                 xmax = self.getProperty(Prop.XMAX).value
-                args['RangeUpper'] = common.inTOF(xmax, l1, l2, theta)
-            if not self.getProperty(Prop.START_WS_INDEX).isDefault:
-                args['StartWorkspaceIndex'] = self.getProperty(Prop.START_WS_INDEX).value
-            if not self.getProperty(Prop.END_WS_INDEX).isDefault:
-                args['EndWorkspaceIndex'] = self.getPropertyValue(Prop.END_WS_INDEX).value
-            FindReflectometryLines(**args)
-            linePosition = mtd[peakWSName].readY(0)[0]
-            self._cleanup.cleanup(peakWSName)
+                xmax = common.inTOF(xmax, l1, l2, theta)
+            peak = FindReflectometryLines(
+                InputWorkspace=ws,
+                OutputWorkspace=peakWSName,
+                RangeLower=xmin,
+                RangeUpper=xmax,
+                StartWorkspaceIndex=self.getProperty(Prop.START_WS_INDEX).value,
+                EndWorkspaceIndex=self.getProperty(Prop.END_WS_INDEX).value
+            )
+            linePosition = peak.LineCentre
+            self._cleanup.cleanup(peak.OutputWorkspace)
         return ws, linePosition
 
     def _addSampleLogInfo(self, ws, linePosition):
@@ -415,13 +432,6 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         run.addProperty(common.SampleLogs.FOREGROUND_START, int(startIndex), True)
         run.addProperty(common.SampleLogs.FOREGROUND_CENTRE, int(beamPosIndex), True)
         run.addProperty(common.SampleLogs.FOREGROUND_END, int(endIndex), True)
-        # Add two theta to the sample logs of ws.
-        if not self.getProperty(Prop.TWO_THETA).isDefault:
-            twoTheta = self.getProperty(Prop.TWO_THETA).value
-        else:
-            spectrum_info = ws.spectrumInfo()
-            twoTheta = numpy.rad2deg(spectrum_info.twoTheta(int(numpy.rint(linePosition))))
-        run.addProperty(common.SampleLogs.TWO_THETA, float(twoTheta), 'degree', True)
 
     def _moveDetector(self, ws, linePosition):
         """Perform detector position correction for direct and reflected beams."""
@@ -431,19 +441,18 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         detectorMovedWSName = self._names.withSuffix('detectors_moved')
         directLineWS = self.getProperty(Prop.DIRECT_LINE_WORKSPACE).value
         directLinePosition = directLineWS.run().getLogData(common.SampleLogs.LINE_POSITION).value
-        args = {'InputWorkspace': ws,
-                'OutputWorkspace': detectorMovedWSName,
-                'EnableLogging': self._subalgLogging,
-                'DetectorComponentName': 'detector',
-                'LinePosition': linePosition,
-                'DirectLinePosition': directLinePosition,
-                'DirectLineWorkspace': directLineWS}
-        if self._instrumentName is not 'D17':
-            args['DetectorCorrectionType'] = 'RotateAroundSample'
-            args['DetectorFacesSample'] = True
-            args['PixelSize'] = common.pixelSize(self._instrumentName)
-        SpecularReflectionPositionCorrect(**args)
-        detectorMovedWS = mtd[detectorMovedWSName]
+        detectorMovedWS = SpecularReflectionPositionCorrect(
+            InputWorkspace=ws,
+            OutputWorkspace=detectorMovedWSName,
+            EnableLogging=self._subalgLogging,
+            DetectorComponentName='detector',
+            PixelSize=common.pixelSize(self._instrumentName),
+            LinePosition=linePosition,
+            DirectLinePosition=directLinePosition,
+            DirectLineWorkspace=directLineWS,
+            DetectorCorrectionType='RotateAroundSample',
+            DetectorFacesSample=True
+        )
         self._cleanup.cleanup(ws)
         return detectorMovedWS
 
@@ -458,23 +467,26 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
             monXs = monWS.readX(0)
             minX = monXs[0]
             maxX = monXs[-1]
-            NormaliseToMonitor(InputWorkspace=detWS,
-                               OutputWorkspace=normalisedWSName,
-                               MonitorWorkspace=monWS,
-                               MonitorWorkspaceIndex=monIndex,
-                               IntegrationRangeMin=minX,
-                               IntegrationRangeMax=maxX,
-                               EnableLogging=self._subalgLogging)
-            normalisedWS = mtd[normalisedWSName]
+            normalisedWS = NormaliseToMonitor(
+                InputWorkspace=detWS,
+                OutputWorkspace=normalisedWSName,
+                MonitorWorkspace=monWS,
+                MonitorWorkspaceIndex=monIndex,
+                IntegrationRangeMin=minX,
+                IntegrationRangeMax=maxX,
+                EnableLogging=self._subalgLogging
+            )
             self._cleanup.cleanup(detWS)
             return normalisedWS
         elif method == FluxNormMethod.TIME:
             t = detWS.run().getProperty('time').value
             normalisedWSName = self._names.withSuffix('normalised_to_time')
-            scaledWS = Scale(InputWorkspace=detWS,
-                             OutputWorkspace=normalisedWSName,
-                             Factor=1.0 / t,
-                             EnableLogging=self._subalgLogging)
+            scaledWS = Scale(
+                InputWorkspace=detWS,
+                OutputWorkspace=normalisedWSName,
+                Factor=1.0 / t,
+                EnableLogging=self._subalgLogging
+            )
             self._cleanup.cleanup(detWS)
             return scaledWS
         return detWS
@@ -491,10 +503,12 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
             return ws
         f = slit2width.value * slit3width.value
         normalisedWSName = self._names.withSuffix('normalised_to_slits')
-        normalisedWS = Scale(InputWorkspace=ws,
-                             OutputWorkspace=normalisedWSName,
-                             Factor=1.0 / f,
-                             EnableLogging=self._subalgLogging)
+        normalisedWS = Scale(
+            InputWorkspace=ws,
+            OutputWorkspace=normalisedWSName,
+            Factor=1.0 / f,
+            EnableLogging=self._subalgLogging
+        )
         self._cleanup.cleanup(ws)
         return normalisedWS
 
@@ -504,34 +518,44 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         if method == BkgMethod.OFF:
             return ws
         clonedWSName = self._names.withSuffix('cloned_for_flat_bkg')
-        clonedWS = CloneWorkspace(InputWorkspace=ws,
-                                  OutputWorkspace=clonedWSName,
-                                  EnableLogging=self._subalgLogging)
+        clonedWS = CloneWorkspace(
+            InputWorkspace=ws,
+            OutputWorkspace=clonedWSName,
+            EnableLogging=self._subalgLogging
+        )
         transposedWSName = self._names.withSuffix('transposed_clone')
-        transposedWS = Transpose(InputWorkspace=clonedWS,
-                                 OutputWorkspace=transposedWSName,
-                                 EnableLogging=self._subalgLogging)
+        transposedWS = Transpose(
+            InputWorkspace=clonedWS,
+            OutputWorkspace=transposedWSName,
+            EnableLogging=self._subalgLogging
+        )
         self._cleanup.cleanup(clonedWS)
         ranges = self._flatBkgRanges(ws)
         polynomialDegree = 0 if self.getProperty(Prop.BKG_METHOD).value == BkgMethod.CONSTANT else 1
         transposedBkgWSName = self._names.withSuffix('transposed_flat_background')
-        transposedBkgWS = CalculatePolynomialBackground(InputWorkspace=transposedWS,
-                                                        OutputWorkspace=transposedBkgWSName,
-                                                        Degree=polynomialDegree,
-                                                        XRanges=ranges,
-                                                        CostFunction='Unweighted least squares',
-                                                        EnableLogging=self._subalgLogging)
+        transposedBkgWS = CalculatePolynomialBackground(
+            InputWorkspace=transposedWS,
+            OutputWorkspace=transposedBkgWSName,
+            Degree=polynomialDegree,
+            XRanges=ranges,
+            CostFunction='Unweighted least squares',
+            EnableLogging=self._subalgLogging
+        )
         self._cleanup.cleanup(transposedWS)
         bkgWSName = self._names.withSuffix('flat_background')
-        bkgWS = Transpose(InputWorkspace=transposedBkgWS,
-                          OutputWorkspace=bkgWSName,
-                          EnableLogging=self._subalgLogging)
+        bkgWS = Transpose(
+            InputWorkspace=transposedBkgWS,
+            OutputWorkspace=bkgWSName,
+            EnableLogging=self._subalgLogging
+        )
         self._cleanup.cleanup(transposedBkgWS)
         subtractedWSName = self._names.withSuffix('flat_background_subtracted')
-        subtractedWS = Minus(LHSWorkspace=ws,
-                             RHSWorkspace=bkgWS,
-                             OutputWorkspace=subtractedWSName,
-                             EnableLogging=self._subalgLogging)
+        subtractedWS = Minus(
+            LHSWorkspace=ws,
+            RHSWorkspace=bkgWS,
+            OutputWorkspace=subtractedWSName,
+            EnableLogging=self._subalgLogging
+        )
         self._cleanup.cleanup(ws)
         self._cleanup.cleanup(bkgWS)
         return subtractedWS
@@ -542,23 +566,29 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
             return ws
         waterWS = self.getProperty(Prop.WATER_REFERENCE).value
         detWSName = self._names.withSuffix('water_detectors')
-        waterWS = ExtractMonitors(InputWorkspace=waterWS,
-                                  DetectorWorkspace=detWSName,
-                                  EnableLogging=self._subalgLogging)
+        waterWS = ExtractMonitors(
+            InputWorkspace=waterWS,
+            DetectorWorkspace=detWSName,
+            EnableLogging=self._subalgLogging
+        )
         if mtd.doesExist(detWSName) is None:
             raise RuntimeError('No detectors in the water reference data.')
         if waterWS.getNumberHistograms() != ws.getNumberHistograms():
             self.log().error('Water workspace and run do not have the same number of histograms.')
         rebinnedWaterWSName = self._names.withSuffix('water_rebinned')
-        rebinnedWaterWS = RebinToWorkspace(WorkspaceToRebin=waterWS,
-                                           WorkspaceToMatch=ws,
-                                           OutputWorkspace=rebinnedWaterWSName,
-                                           EnableLogging=self._subalgLogging)
+        rebinnedWaterWS = RebinToWorkspace(
+            WorkspaceToRebin=waterWS,
+            WorkspaceToMatch=ws,
+            OutputWorkspace=rebinnedWaterWSName,
+            EnableLogging=self._subalgLogging
+        )
         calibratedWSName = self._names.withSuffix('water_calibrated')
-        calibratedWS = Divide(LHSWorkspace=ws,
-                              RHSWorkspace=rebinnedWaterWS,
-                              OutputWorkspace=calibratedWSName,
-                              EnableLogging=self._subalgLogging)
+        calibratedWS = Divide(
+            LHSWorkspace=ws,
+            RHSWorkspace=rebinnedWaterWS,
+            OutputWorkspace=calibratedWSName,
+            EnableLogging=self._subalgLogging
+        )
         self._cleanup.cleanup(waterWS)
         self._cleanup.cleanup(rebinnedWaterWS)
         self._cleanup.cleanup(ws)

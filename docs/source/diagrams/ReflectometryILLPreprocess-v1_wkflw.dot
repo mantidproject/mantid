@@ -5,8 +5,8 @@ digraph ReflectometryILLPreprocess {
   subgraph params {
     $param_style
     background        [label="Background options:\nLow/HighAngleBkgOffset\nLow/HighAngleBkgWidth"]
-    beamCentre        [label="LinePosition"]
-    braggAngle        [label="TwoTheta"]
+    linePosition      [label="LinePosition"]
+    twoTheta          [label="TwoTheta"]
     run               [label="Run"]
     inputBeamPosition [label="Sample log reduction.line_position"]
     inputDirect       [label="DirectLineWorkspace"]
@@ -40,15 +40,15 @@ digraph ReflectometryILLPreprocess {
   whichInput -> load [label="Read from disk"]
 
   run                   -> load
-  braggAngle            -> load [label="Override angles in .nxs"]
+  twoTheta              -> load [label="Override angles in .nxs"]
   load                  -> extractMonitors
   inputWorkspace        -> extractMonitors
-  beamCentre            -> determinePeakPosition
+  linePosition          -> determinePeakPosition
   extractMonitors       -> determinePeakPosition
   inputBeamPosition     -> determinePeakPosition [label="From InputWorkspace"]
   inputDirect           -> moveDetectors [label="In case of reflected beam calibration"]
   determinePeakPosition -> moveDetectors
-  braggAngle            -> moveDetectors [label="If user input,\nloader took already care\nof the correct detector position"]
+  twoTheta              -> moveDetectors [label="If user input,\nloader took already care\nof the correct detector position"]
   moveDetectors         -> addSampleLogs
   addSampleLogs         -> waterNorm [label="WaterWorkspace available"]
   waterReference        -> waterNorm [label="Rebin"]
