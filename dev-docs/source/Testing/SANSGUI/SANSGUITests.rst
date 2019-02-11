@@ -36,16 +36,16 @@ Data reduction
     - Change the ``Reduction`` button to 2D
     - Check the ``Plot Results`` box
     - Click ``Process All``
-    - A plot window will open; initially empty, then with a red line
+    - A plot window will open; initially empty, then with a line
     - Change ``Reduction`` back to 1D
     - Click ``Process All``
-    - In the plot you should end up with a red and a black line plotted
+    - In the plot you should end up with a line plotted
     - Check the ``Multi-period`` box
-    - 6 additional rows should appear in the table
+    - 6 additional columns should appear in the table
     - Check that the ``Add``, ``Delete``, ``Copy``, ``Paste``, ``Cut`` and ``Erase`` icons work as expected
     - Delete all rows and re-load the batch file as previously
 #. In the ``Settings`` tab
-    - Set ``Reduction Type`` to ``Merged``
+    - Set ``Reduction Mode`` to ``Merged``
     - Return to the ``Runs`` tab
     - Ensure ``Plot results`` is checked
     - Click ``Process All``
