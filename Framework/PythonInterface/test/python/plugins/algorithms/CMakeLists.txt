@@ -79,6 +79,9 @@ set ( TEST_PY_FILES
   MuonMaxEntTest.py
   NMoldyn4InterpolationTest.py
   NormaliseSpectraTest.py
+  OptimizeCrystalPlacementByRunTest.py
+  PDConvertRealSpaceTest.py
+  PDConvertReciprocalSpaceTest.py
   ReflectometryReductionOneLiveDataTest.py
   ReflectometrySliceEventWorkspaceTest.py
   RetrieveRunInfoTest.py

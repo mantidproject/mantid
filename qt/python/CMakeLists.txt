@@ -69,6 +69,9 @@ endif ()
     mantidqt/dialogs/test/test_algorithm_dialog.py
     mantidqt/dialogs/test/test_spectraselectiondialog.py
 
+    mantidqt/plotting/test/test_figuretype.py
+    mantidqt/plotting/test/test_functions.py
+
     mantidqt/project/test/test_plotssaver.py
     mantidqt/project/test/test_plotsloader.py
     mantidqt/project/test/test_project.py
@@ -97,6 +100,10 @@ endif ()
     mantidqt/widgets/samplelogs/test/test_samplelogs_model.py
     mantidqt/widgets/samplelogs/test/test_samplelogs_presenter.py
 
+    mantidqt/widgets/common/test/test_workspacedisplay_ads_observer.py
+    mantidqt/widgets/common/test/test_observing_presenter.py
+    mantidqt/widgets/common/test/test_observing_view.py
+
     mantidqt/widgets/matrixworkspacedisplay/test/test_matrixworkspacedisplay_model.py
     mantidqt/widgets/matrixworkspacedisplay/test/test_matrixworkspacedisplay_presenter.py
     mantidqt/widgets/matrixworkspacedisplay/test/test_matrixworkspacedisplay_table_view_model.py
@@ -109,11 +116,16 @@ endif ()
     mantidqt/widgets/tableworkspacedisplay/test/test_tableworkspacedisplay_presenter.py
   )
 
+  # ctest targets for interpreters (Encoder/Decoder) tests only get tested in qt5 as only for workbench
+  set ( PYTHON_WIDGET_INTERPRETER_TESTS
+    mantidqt/widgets/instrumentview/test/test_instrumentview_io.py
+  )
+
   # Tests
   set ( PYUNITTEST_RUN_SERIAL ON )
   set ( PYUNITTEST_QT_API pyqt5 )
   pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR}
-    mantidqt_qt5 ${PYTHON_TEST_FILES}
+    mantidqt_qt5 ${PYTHON_TEST_FILES} ${PYTHON_WIDGET_INTERPRETER_TESTS}
   )
   # The jupyterconsole test segfaults on Python 3 and Qt 4
   # despite the code functioning in a normal usage.

@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 from PyQt4 import QtGui
@@ -77,7 +83,6 @@ class BrowseFileWidgetView(QtGui.QWidget):
 
     def show_file_browser_and_return_selection(self, file_filter, search_directories, multiple_files=False):
         default_directory = search_directories[0]
-        print("OPENING FILE BROWSER")
         if multiple_files:
             chosen_files = QtGui.QFileDialog.getOpenFileNames(self, "Select files", default_directory,
                                                               file_filter)

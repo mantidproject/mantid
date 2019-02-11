@@ -34,26 +34,6 @@ class WorkbenchTableWidgetItem(QTableWidgetItem):
         else:
             raise RuntimeError("'{}' is not a valid V3D string.".format(string))
 
-    def __lt__(self, other):
-        """
-        Overrides the comparison to other items. Used to provide correct sorting for types Qt doesn't handle
-        like V3D. Additionally, it makes sure strings are converted to floats for correct comparison.
-
-        This is necessary because if the data is a float then it is stored as a string.
-
-        :type other: WorkbenchTableWidgetItem
-        :param other: Other item that will be compared against
-        :return:
-        """
-        if self.is_v3d:
-            return self._get_v3d_from_str(self.data(Qt.DisplayRole)) < self._get_v3d_from_str(
-                other.data(Qt.DisplayRole))
-        try:
-            # if the data can be parsed as numbers then compare properly, otherwise default to the Qt implementation
-            return float(self.data(Qt.DisplayRole)) < float(other.data(Qt.DisplayRole))
-        except:
-            return super(WorkbenchTableWidgetItem, self).__lt__(other)
-
     def reset(self):
         self.setData(Qt.DisplayRole, self.display_data)
 

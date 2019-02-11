@@ -20,6 +20,7 @@
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/RebinParamsValidator.h"
+#include "MantidKernel/UnitConversion.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
 
@@ -85,6 +86,9 @@ void Q1DWeighted::init() {
 
   declareProperty("AsymmetricWedges", false,
                   "Choose to produce the results for asymmetric wedges.");
+
+  declareProperty("AccountForGravity", false,
+                  "Take the nominal gravity drop into account.");
 }
 
 void Q1DWeighted::exec() {
@@ -104,10 +108,13 @@ void Q1DWeighted::exec() {
   // Convert from mm to meters
   pixelSizeX /= 1000.0;
   pixelSizeY /= 1000.0;
-  int nSubPixels = getProperty("NPixelDivision");
+  const int nSubPixels = getProperty("NPixelDivision");
 
   // Get weighting option
   const bool errorWeighting = getProperty("ErrorWeighting");
+
+  // Get gravity flag
+  const bool correctGravity = getProperty("AccountForGravity");
 
   // Now create the output workspace
   MatrixWorkspace_sptr outputWS =
@@ -129,7 +136,6 @@ void Q1DWeighted::exec() {
   const V3D samplePos = inputWS->getInstrument()->getSample()->getPos();
 
   const int xLength = static_cast<int>(inputWS->readX(0).size());
-  constexpr double fmp = 4.0 * M_PI;
 
   // Set up the progress reporting object
   Progress progress(this, 0.0, 1.0, numSpec * (xLength - 1));
@@ -138,7 +144,7 @@ void Q1DWeighted::exec() {
   std::vector<double> XNormLambda(sizeOut - 1, 0.0);
 
   // Beam line axis, to compute scattering angle
-  V3D beamLine = samplePos - sourcePos;
+  const V3D beamLine = samplePos - sourcePos;
 
   // Get wedge properties
   const int nWedges = getProperty("NumberOfWedges");
@@ -177,12 +183,13 @@ void Q1DWeighted::exec() {
       nWedges, std::vector<double>(sizeOut - 1, 0.0));
 
   const auto &spectrumInfo = inputWS->spectrumInfo();
+  const double l1 = spectrumInfo.l1();
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
   // Loop over all xLength-1 detector channels
   // Note: xLength -1, because X is a histogram and has a number of boundaries
   // equal to the number of detector channels + 1.
-  for (int j = 0; j < xLength - 1; j++) {
+  for (int j = 0; j < xLength - 1; ++j) {
     PARALLEL_START_INTERUPT_REGION
 
     std::vector<double> lambdaIq(sizeOut - 1, 0.0);
@@ -197,7 +204,7 @@ void Q1DWeighted::exec() {
     std::vector<std::vector<double>> wedgeXNorm(
         nWedges, std::vector<double>(sizeOut - 1, 0.0));
 
-    for (int i = 0; i < numSpec; i++) {
+    for (int i = 0; i < numSpec; ++i) {
       if (!spectrumInfo.hasDetectors(i)) {
         g_log.warning() << "Workspace index " << i
                         << " has no detector assigned to it - discarding\n";
@@ -207,6 +214,15 @@ void Q1DWeighted::exec() {
       if (spectrumInfo.isMonitor(i) || spectrumInfo.isMasked(i))
         continue;
 
+      // Skip the masked bins
+      if (inputWS->hasMaskedBins(i)) {
+        const auto &maskedBins = inputWS->maskedBinsIndices(i);
+        if (std::find(maskedBins.cbegin(), maskedBins.cend(), j) !=
+            maskedBins.cend()) {
+          continue;
+        }
+      }
+
       // Get the current spectrum for both input workspaces
       auto &XIn = inputWS->x(i);
       auto &YIn = inputWS->y(i);
@@ -214,7 +230,7 @@ void Q1DWeighted::exec() {
 
       // Each pixel is sub-divided in the number of pixels given as input
       // parameter (NPixelDivision)
-      for (int isub = 0; isub < nSubPixels * nSubPixels; isub++) {
+      for (int isub = 0; isub < nSubPixels * nSubPixels; ++isub) {
         // Find the position offset for this sub-pixel in real space
         double subY = pixelSizeY *
                       ((isub % nSubPixels) - (nSubPixels - 1.0) / 2.0) /
@@ -228,10 +244,22 @@ void Q1DWeighted::exec() {
         // For reference - in the case where we don't use sub-pixels, simply
         // use:
         //     double sinTheta = sin( spectrumInfo.twoTheta(i)/2.0 );
+        const double wavelength = (XIn[j] + XIn[j + 1]) / 2.;
         V3D pos = spectrumInfo.position(i) - V3D(subX, subY, 0.0) - samplePos;
-        double sinTheta = sin(0.5 * pos.angle(beamLine));
-        double factor = fmp * sinTheta;
-        double q = factor * 2.0 / (XIn[j] + XIn[j + 1]);
+
+        if (correctGravity) {
+          const double l2 = spectrumInfo.l2(i);
+          const double tof =
+              UnitConversion::run("Wavelength", "TOF", wavelength, l1, l2, 0.,
+                                  DeltaEMode::Elastic, 0.) *
+              1E-6 * l2 / (l1 + l2);
+          const double drop = PhysicalConstants::g * tof * tof / 2.;
+          V3D correction(0., drop, 0.);
+          pos += correction;
+        }
+
+        const double sinTheta = sin(0.5 * pos.angle(beamLine));
+        const double q = 4.0 * M_PI * sinTheta / wavelength;
         int iq = 0;
 
         // Bin assignment depends on whether we have log or linear bins
@@ -245,8 +273,8 @@ void Q1DWeighted::exec() {
           // If we got a more complicated binning, find the q bin the slow way
         } else {
           for (int iQbin = 0; iQbin < static_cast<int>(XOut.size()) - 1;
-               iQbin++) {
-            if (q >= XOut[iQbin] && q < XOut[(iQbin + 1)]) {
+               ++iQbin) {
+            if (q >= XOut[iQbin] && q < XOut[iQbin + 1]) {
               iq = iQbin;
               break;
             }
@@ -278,7 +306,7 @@ void Q1DWeighted::exec() {
             XNorm[iq] += w;
 
             // Fill in the wedge data
-            for (int iWedge = 0; iWedge < nWedges; iWedge++) {
+            for (int iWedge = 0; iWedge < nWedges; ++iWedge) {
               double centerAngle = M_PI / nWedges * iWedge;
               if (asymmWedges) {
                 centerAngle *= 2;
@@ -303,7 +331,7 @@ void Q1DWeighted::exec() {
     // Normalize according to the chosen weighting scheme
     PARALLEL_CRITICAL(iq) /* Write to shared memory - must protect */
     {
-      for (int k = 0; k < sizeOut - 1; k++) {
+      for (int k = 0; k < sizeOut - 1; ++k) {
         if (XNorm[k] > 0) {
           YOut[k] += lambdaIq[k] / XNorm[k];
           EOut[k] += lambdaIqErr[k] / XNorm[k] / XNorm[k];
@@ -311,7 +339,7 @@ void Q1DWeighted::exec() {
         }
 
         // Normalize wedges
-        for (int iWedge = 0; iWedge < nWedges; iWedge++) {
+        for (int iWedge = 0; iWedge < nWedges; ++iWedge) {
           if (wedgeXNorm[iWedge][k] > 0) {
             auto &wedgeYOut = wedgeWorkspaces[iWedge]->mutableY(0);
             auto &wedgeEOut = wedgeWorkspaces[iWedge]->mutableE(0);
@@ -328,11 +356,11 @@ void Q1DWeighted::exec() {
   PARALLEL_CHECK_INTERUPT_REGION
 
   // Normalize according to the chosen weighting scheme
-  for (int i = 0; i < sizeOut - 1; i++) {
+  for (int i = 0; i < sizeOut - 1; ++i) {
     YOut[i] /= XNormLambda[i];
     EOut[i] = sqrt(EOut[i]) / XNormLambda[i];
   }
-  for (int iWedge = 0; iWedge < nWedges; iWedge++) {
+  for (int iWedge = 0; iWedge < nWedges; ++iWedge) {
     for (int i = 0; i < sizeOut - 1; i++) {
       auto &wedgeYOut = wedgeWorkspaces[iWedge]->mutableY(0);
       auto &wedgeEOut = wedgeWorkspaces[iWedge]->mutableE(0);

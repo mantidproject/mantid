@@ -48,3 +48,6 @@ class MatrixWorkspaceDisplayModel(object):
         return (MatrixWorkspaceTableViewModel(self._ws, MatrixWorkspaceTableViewModelType.x),
                 MatrixWorkspaceTableViewModel(self._ws, MatrixWorkspaceTableViewModelType.y),
                 MatrixWorkspaceTableViewModel(self._ws, MatrixWorkspaceTableViewModelType.e))
+
+    def workspace_equals(self, workspace_name):
+        return workspace_name == self._ws.name()

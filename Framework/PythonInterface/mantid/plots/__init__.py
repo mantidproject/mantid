@@ -24,6 +24,7 @@ from matplotlib import cbook
 from matplotlib.axes import Axes
 from matplotlib.container import Container
 from matplotlib.projections import register_projection
+from matplotlib.colors import Colormap
 
 try:
     from mpl_toolkits.mplot3d.axes3d import Axes3D
@@ -52,24 +53,11 @@ def plot_decorator(func):
         # Saves saving it on array objects
         if helperfunctions.validate_args(*args, **kwargs):
             # Fill out kwargs with the values of args
-            for index, arg in enumerate(args):
-                if index is 0:
-                    kwargs["workspaces"] = args[0].name()
-                if index is 1:
-                    kwargs["spectrum_nums"] = args[1]
-                if index is 2:
-                    kwargs["wksp_indices"] = args[2]
-                if index is 3:
-                    kwargs["errors"] = args[3]
-                if index is 4:
-                    kwargs["overplot"] = arg[4]
-                # ignore 5 as no need to save the fig object
-                if index is 6:
-                    kwargs["plot_kwargs"] = arg[6]
-            if hasattr(self, "creation_args"):
-                self.creation_args.append(kwargs)
-            else:
-                self.creation_args = [kwargs]
+            kwargs["workspaces"] = args[0].name()
+            kwargs["function"] = func.__name__
+            if "cmap" in kwargs and isinstance(kwargs["cmap"], Colormap):
+                kwargs["cmap"] = kwargs["cmap"].name
+            self.creation_args.append(kwargs)
         return func_value
     return wrapper
 
@@ -151,6 +139,7 @@ class MantidAxes(Axes):
     def __init__(self, *args, **kwargs):
         super(MantidAxes, self).__init__(*args, **kwargs)
         self.tracked_workspaces = dict()
+        self.creation_args = []
 
     def track_workspace_artist(self, workspace, artists, data_replace_cb=None):
         """
@@ -215,6 +204,66 @@ class MantidAxes(Axes):
         return _empty(self.lines) and _empty(self.images) and _empty(self.collections)\
                and _empty(self.containers)
 
+    def twinx(self):
+        """
+        Create a twin Axes sharing the xaxis
+
+        Create a new Axes instance with an invisible x-axis and an independent
+        y-axis positioned opposite to the original one (i.e. at right). The
+        x-axis autoscale setting will be inherited from the original Axes.
+        To ensure that the tick marks of both y-axes align, see
+        `~matplotlib.ticker.LinearLocator`
+
+        Returns
+        -------
+        ax_twin : Axes
+            The newly created Axes instance
+
+        Notes
+        -----
+        For those who are 'picking' artists while using twinx, pick
+        events are only called for the artists in the top-most axes.
+        """
+        ax2 = self._make_twin_axes(sharex=self, projection='mantid')
+        ax2.yaxis.tick_right()
+        ax2.yaxis.set_label_position('right')
+        ax2.yaxis.set_offset_position('right')
+        ax2.set_autoscalex_on(self.get_autoscalex_on())
+        self.yaxis.tick_left()
+        ax2.xaxis.set_visible(False)
+        ax2.patch.set_visible(False)
+        return ax2
+
+    def twiny(self):
+        """
+        Create a twin Axes sharing the yaxis
+
+        Create a new Axes instance with an invisible y-axis and an independent
+        x-axis positioned opposite to the original one (i.e. at top). The
+        y-axis autoscale setting will be inherited from the original Axes.
+        To ensure that the tick marks of both x-axes align, see
+        `~matplotlib.ticker.LinearLocator`
+
+        Returns
+        -------
+        ax_twin : Axes
+            The newly created Axes instance
+
+        Notes
+        -----
+        For those who are 'picking' artists while using twiny, pick
+        events are only called for the artists in the top-most axes.
+        """
+        ax2 = self._make_twin_axes(sharey=self, projection='mantid')
+        ax2.xaxis.tick_top()
+        ax2.xaxis.set_label_position('top')
+        ax2.set_autoscaley_on(self.get_autoscaley_on())
+        self.xaxis.tick_bottom()
+        ax2.yaxis.set_visible(False)
+        ax2.patch.set_visible(False)
+        return ax2
+    
+
     @plot_decorator
     def plot(self, *args, **kwargs):
         """
@@ -250,6 +299,7 @@ class MantidAxes(Axes):
         else:
             return Axes.plot(self, *args, **kwargs)
 
+    @plot_decorator
     def scatter(self, *args, **kwargs):
         """
         If the **mantid** projection is chosen, it can be
@@ -274,6 +324,7 @@ class MantidAxes(Axes):
         else:
             return Axes.scatter(self, *args, **kwargs)
 
+    @plot_decorator
     def errorbar(self, *args, **kwargs):
         """
         If the **mantid** projection is chosen, it can be
@@ -327,6 +378,7 @@ class MantidAxes(Axes):
         else:
             return Axes.errorbar(self, *args, **kwargs)
 
+    @plot_decorator
     def pcolor(self, *args, **kwargs):
         """
         If the **mantid** projection is chosen, it can be
@@ -348,6 +400,7 @@ class MantidAxes(Axes):
         """
         return self._pcolor_func('pcolor', *args, **kwargs)
 
+    @plot_decorator
     def pcolorfast(self, *args, **kwargs):
         """
         If the **mantid** projection is chosen, it can be
@@ -369,6 +422,7 @@ class MantidAxes(Axes):
         """
         return self._pcolor_func('pcolorfast', *args, **kwargs)
 
+    @plot_decorator
     def pcolormesh(self, *args, **kwargs):
         """
         If the **mantid** projection is chosen, it can be
@@ -390,6 +444,7 @@ class MantidAxes(Axes):
         """
         return self._pcolor_func('pcolormesh', *args, **kwargs)
 
+    @plot_decorator
     def imshow(self, *args, **kwargs):
         """
         If the **mantid** projection is chosen, it can be
@@ -477,6 +532,7 @@ class MantidAxes(Axes):
             self.set_aspect('auto')
         return artists_new
 
+    @plot_decorator
     def contour(self, *args, **kwargs):
         """
         If the **mantid** projection is chosen, it can be
@@ -528,6 +584,7 @@ class MantidAxes(Axes):
         else:
             return Axes.contourf(self, *args, **kwargs)
 
+    @plot_decorator
     def tripcolor(self, *args, **kwargs):
         """
         If the **mantid** projection is chosen, it can be
@@ -553,6 +610,7 @@ class MantidAxes(Axes):
         else:
             return Axes.tripcolor(self, *args, **kwargs)
 
+    @plot_decorator
     def tricontour(self, *args, **kwargs):
         """
         If the **mantid** projection is chosen, it can be
@@ -578,6 +636,7 @@ class MantidAxes(Axes):
         else:
             return Axes.tricontour(self, *args, **kwargs)
 
+    @plot_decorator
     def tricontourf(self, *args, **kwargs):
         """
         If the **mantid** projection is chosen, it can be

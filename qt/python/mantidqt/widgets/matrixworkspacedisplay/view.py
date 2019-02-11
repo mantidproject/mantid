@@ -12,11 +12,12 @@ from __future__ import (absolute_import, division, print_function)
 from functools import partial
 
 from qtpy import QtGui
-from qtpy.QtCore import Qt
+from qtpy.QtCore import Qt, Signal, Slot
 from qtpy.QtGui import QKeySequence
 from qtpy.QtWidgets import (QAbstractItemView, QAction, QHeaderView, QMessageBox, QTabWidget, QTableView)
 
 import mantidqt.icons
+from mantidqt.widgets.common.observing_view import ObservingView
 from mantidqt.widgets.matrixworkspacedisplay.table_view_model import MatrixWorkspaceTableViewModelType
 
 
@@ -28,7 +29,9 @@ class MatrixWorkspaceTableView(QTableView):
         header = self.horizontalHeader()
         header.sectionDoubleClicked.connect(self.handle_double_click)
 
-    def resizeEvent(self, _):
+    def resizeEvent(self, event):
+        super(MatrixWorkspaceTableView, self).resizeEvent(event)
+
         header = self.horizontalHeader()
         header.setSectionResizeMode(QHeaderView.Interactive)
 
@@ -37,7 +40,10 @@ class MatrixWorkspaceTableView(QTableView):
         header.resizeSection(section, header.defaultSectionSize())
 
 
-class MatrixWorkspaceDisplayView(QTabWidget):
+class MatrixWorkspaceDisplayView(QTabWidget, ObservingView):
+    close_signal = Signal()
+    rename_signal = Signal(str)
+
     def __init__(self, presenter, parent=None, name=''):
         super(MatrixWorkspaceDisplayView, self).__init__(parent)
 
@@ -53,6 +59,7 @@ class MatrixWorkspaceDisplayView(QTabWidget):
 
         self.setWindowTitle("{} - Mantid".format(name))
         self.setWindowFlags(Qt.Window)
+        self.setAttribute(Qt.WA_DeleteOnClose, True)
 
         self.active_tab_index = 0
         self.currentChanged.connect(self.set_scroll_position_on_new_focused_tab)
@@ -64,8 +71,19 @@ class MatrixWorkspaceDisplayView(QTabWidget):
         self.table_x = self.add_table("X values")
         self.table_e = self.add_table("E values")
 
+        self.close_signal.connect(self._run_close)
+        self.rename_signal.connect(self._run_rename)
+
         self.resize(600, 400)
         self.show()
+
+    @Slot()
+    def _run_close(self):
+        self.close()
+
+    @Slot(str)
+    def _run_rename(self, new_name):
+        self._rename(new_name)
 
     def add_table(self, label):
         tab = MatrixWorkspaceTableView(self)
@@ -78,6 +96,9 @@ class MatrixWorkspaceDisplayView(QTabWidget):
         if event.matches(QKeySequence.Copy):
             self.presenter.action_keypress_copy(self.tabs[self.currentIndex()])
         super(MatrixWorkspaceDisplayView, self).keyPressEvent(event)
+
+    def get_active_tab(self):
+        return self.tabs[self.active_tab_index]
 
     def set_scroll_position_on_new_focused_tab(self, new_tab_index):
         """

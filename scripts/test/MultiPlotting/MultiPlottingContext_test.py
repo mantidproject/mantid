@@ -6,8 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from MultiPlotting.multiPlotting_context import PlottingContext
-from MultiPlotting.subplot.subPlot_context import subPlotContext
+from MultiPlotting.multi_plotting_context import PlottingContext
+from MultiPlotting.subplot.subplot_context import subplotContext
 
 
 try:
@@ -36,8 +36,8 @@ class MultiPlottingContextTest(unittest.TestCase):
         ws = mock.MagicMock()
         # add mock subplot
         subplot = mock.MagicMock()
-        self.subplot = mock.create_autospec(subPlotContext)
-        with mock.patch("MultiPlotting.subplot.subPlot_context.subPlotContext.addLine") as patch:
+        self.subplot = mock.create_autospec(subplotContext)
+        with mock.patch("MultiPlotting.subplot.subplot_context.subplotContext.addLine") as patch:
             self.context.addSubplot("one",subplot) 
             self.context.addLine("one",ws,specNum)
             self.assertEquals(patch.call_count,1)
@@ -49,8 +49,8 @@ class MultiPlottingContextTest(unittest.TestCase):
         ws = gen_ws(mockWS)
         # add mock subplot
         subplot = mock.MagicMock()
-        self.subplot = mock.create_autospec(subPlotContext)
-        with mock.patch("MultiPlotting.subplot.subPlot_context.subPlotContext.addLine") as patch:
+        self.subplot = mock.create_autospec(subplotContext)
+        with mock.patch("MultiPlotting.subplot.subplot_context.subplotContext.addLine") as patch:
             self.context.addSubplot("one",subplot) 
             self.context.addLine("one",ws,specNum)
             self.assertEquals(patch.call_count,1)
