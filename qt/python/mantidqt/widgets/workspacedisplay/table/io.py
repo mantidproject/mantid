@@ -7,8 +7,8 @@
 #  This file is part of the mantid workbench.
 #
 
-from mantidqt.widgets.tableworkspacedisplay.presenter import TableWorkspaceDisplay
-from mantidqt.widgets.tableworkspacedisplay.error_column import ErrorColumn
+from mantidqt.widgets.workspacedisplay.table.presenter import TableWorkspaceDisplay
+from mantidqt.widgets.workspacedisplay.table.error_column import ErrorColumn
 from mantid.api import AnalysisDataService as ADS  # noqa
 
 

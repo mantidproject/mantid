@@ -7,7 +7,7 @@
 #  This file is part of the mantid workbench.
 #
 
-from mantidqt.widgets.matrixworkspacedisplay.presenter import MatrixWorkspaceDisplay
+from mantidqt.widgets.workspacedisplay.matrix.presenter import MatrixWorkspaceDisplay
 from mantid.api import AnalysisDataService as ADS  # noqa
 
 

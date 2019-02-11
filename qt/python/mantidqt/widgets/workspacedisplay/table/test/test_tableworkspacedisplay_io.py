@@ -9,8 +9,8 @@
 
 from mantidqt.utils.qt.test import GuiTest
 from mantid.simpleapi import Load
-from mantidqt.widgets.tableworkspacedisplay.io import TableWorkspaceDisplayDecoder, TableWorkspaceDisplayEncoder
-from mantidqt.widgets.tableworkspacedisplay.view import TableWorkspaceDisplayView
+from mantidqt.widgets.workspacedisplay.table.io import TableWorkspaceDisplayDecoder, TableWorkspaceDisplayEncoder
+from mantidqt.widgets.workspacedisplay.table.view import TableWorkspaceDisplayView
 
 
 TABLEWORKSPACEDISPLAY_DICT = {"markedColumns": {"as_y": [2], "as_x": [1],

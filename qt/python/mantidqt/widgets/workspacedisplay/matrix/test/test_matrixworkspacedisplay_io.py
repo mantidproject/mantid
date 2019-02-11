@@ -9,8 +9,8 @@
 
 from mantidqt.utils.qt.test import GuiTest
 from mantid.simpleapi import CreateSampleWorkspace
-from mantidqt.widgets.matrixworkspacedisplay.io import MatrixWorkspaceDisplayDecoder, MatrixWorkspaceDisplayEncoder
-from mantidqt.widgets.matrixworkspacedisplay.view import MatrixWorkspaceDisplayView
+from mantidqt.widgets.workspacedisplay.matrix.io import MatrixWorkspaceDisplayDecoder, MatrixWorkspaceDisplayEncoder
+from mantidqt.widgets.workspacedisplay.matrix.view import MatrixWorkspaceDisplayView
 
 
 MATRIXWORKSPACEDISPLAY_DICT = {"workspace": "ws"}
