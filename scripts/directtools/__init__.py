@@ -18,19 +18,19 @@ from scipy import constants
 import time
 
 
-def _applyIfTimeSeries(logValue, function):
+def _applyiftimeseries(logValue, function):
     """Apply function to logValue, if it is time series log, otherwise return logValue as is."""
     if isinstance(logValue, collections.Iterable):
         return function(logValue)
     return logValue
 
 
-def _binCentres(edges):
+def _bincentres(edges):
     """Return bin centers."""
     return (edges[:-1] + edges[1:]) / 2
 
 
-def _chooseMarker(markers, index):
+def _choosemarker(markers, index):
     """Pick a marker from markers and return next cyclic index."""
     if index >= len(markers):
         index = 0
@@ -67,7 +67,7 @@ def _chooseylabel(workspace, axes):
         axes.set_ylabel('$S(Q,E)$')
 
 
-def _cutCentreAndWidth(line):
+def _cutcentreandwidth(line):
     """Return cut centre and width as tuple."""
     axis = line.getAxis(1)
     aMin = axis.getMin()
@@ -77,7 +77,7 @@ def _cutCentreAndWidth(line):
     return centre, width
 
 
-def _denormalizeLine(line):
+def _denormalizeline(line):
     """Multiplies line workspace by the line width."""
     axis = line.getAxis(1)
     height = axis.getMax() - axis.getMin()
@@ -95,13 +95,13 @@ def _dostitle(workspaces, figure):
     else:
         title = _plottingtime()
         logs = workspaces[0].run()
-        instrument = _instrumentName(logs)
+        instrument = _instrumentname(logs)
         if instrument is not None:
             title = instrument + ' ' + title
     figure.suptitle(title)
 
 
-def _energyLimits(workspaces):
+def _energylimits(workspaces):
     """Find suitable xmin and xmax for energy transfer plots."""
     workspaces = _normwslist(workspaces)
     eMax = 0.
@@ -110,8 +110,8 @@ def _energyLimits(workspaces):
         eMax = max(eMax, Xs[-1])
     eMin = -eMax
     logs = workspaces[0].run()
-    ei = _incidentEnergy(logs)
-    T = _applyIfTimeSeries(_sampleTemperature(logs), numpy.mean)
+    ei = _incidentenergy(logs)
+    T = _applyiftimeseries(_sampletemperature(logs), numpy.mean)
     if ei is not None:
         if T is not None:
             eMin = min(-T / 6., -0.2 * ei)
@@ -132,7 +132,7 @@ def _finalizeprofileE(axes):
 def _finalizeprofileQ(workspaces, axes):
     """Set axes for const Q axes."""
     workspaces = _normwslist(workspaces)
-    eMin, eMax = _energyLimits(workspaces)
+    eMin, eMax = _energylimits(workspaces)
     axes.set_xlim(xmax=eMax)
     if axes.get_xscale() == 'linear':
         axes.set_xlim(xmin=eMin)
@@ -155,13 +155,13 @@ def _globalnanminmax(workspaces):
     return globalMin, globalMax
 
 
-def _horizontalLineAtZero(axes):
+def _horizontallineatzero(axes):
     """Add a horizontal line at Y = 0."""
     spine = axes.spines['bottom']
     axes.axhline(linestyle=spine.get_linestyle(), color=spine.get_edgecolor(), linewidth=spine.get_linewidth())
 
 
-def _incidentEnergy(logs):
+def _incidentenergy(logs):
     """Return the incident energy value from the logs or None."""
     if logs.hasProperty('Ei'):
         return logs.getProperty('Ei').value
@@ -169,7 +169,7 @@ def _incidentEnergy(logs):
         return None
 
 
-def _instrumentName(logs):
+def _instrumentname(logs):
     """Return the instrument name from the logs or None."""
     if logs.hasProperty('instrument.name'):
         return logs.getProperty('instrument.name').value
@@ -227,12 +227,12 @@ def _plotfirsthistograms(workspaces, labels, style, xscale, yscale):
     markerIndex = 0
     for ws, label in zip(workspaces, labels):
         if 'm' in style:
-            markerStyle, markerIndex = _chooseMarker(markers, markerIndex)
+            markerStyle, markerIndex = _choosemarker(markers, markerIndex)
         axes.errorbar(ws, specNum=0, linestyle=lineStyle, marker=markerStyle, label=label, distribution=True)
     axes.set_xscale(xscale)
     axes.set_yscale(yscale)
     if axes.get_yscale() == 'linear':
-        _horizontalLineAtZero(axes)
+        _horizontallineatzero(axes)
     _chooseylabel(workspaces[0], axes)
     return figure, axes
 
@@ -248,12 +248,12 @@ def _profiletitle(workspaces, cuts, scan, units, figure):
     cuts = _normwslist(cuts)
     if len(cuts) == 1:
         title = _singledatatitle(workspaces[0])
-        centre, width = _cutCentreAndWidth(cuts[0])
+        centre, width = _cutcentreandwidth(cuts[0])
         title = title + '\n' + scan + r' = {:0.2f} $\pm$ {:0.2f}'.format(centre, width) + ' ' + units
     else:
         title = _plottingtime()
         logs = workspaces[0].run()
-        instrument = _instrumentName(logs)
+        instrument = _instrumentname(logs)
         if instrument is not None:
             title = instrument + ' ' + title
     figure.suptitle(title)
@@ -266,14 +266,14 @@ def _removesingularity(ws, epsilon):
         ys = ws.dataY(i)
         es = ws.dataE(i)
         if len(xs) != len(ys):
-            xs = _binCentres(xs)
+            xs = _bincentres(xs)
         binIndex = numpy.argmin(numpy.abs(xs))
         if xs[binIndex] >= -epsilon and xs[binIndex] < epsilon:
             ys[binIndex] = 0.
             es[binIndex] = 0.
 
 
-def _runNumber(logs):
+def _runnumber(logs):
     """Return run number from the logs or None."""
     if logs.hasProperty('run_number'):
         return logs.getProperty('run_number').value
@@ -281,9 +281,9 @@ def _runNumber(logs):
         return None
 
 
-def _sampleTemperature(logs):
+def _sampletemperature(logs):
     """Return the instrument specific sample temperature from the logs or None."""
-    instrument = _instrumentName(logs)
+    instrument = _instrumentname(logs)
     if instrument in ['IN4', 'IN5', 'IN6']:
         return logs.getProperty('sample.temperature').value
     else:
@@ -302,18 +302,18 @@ def _singledatatitle(workspace):
     wsName = _sanitize(str(workspace))
     title = wsName
     logs = workspace.run()
-    instrument= _instrumentName(logs)
+    instrument= _instrumentname(logs)
     if instrument is not None:
         title = title + ' ' + instrument
-    run = _runNumber(logs)
+    run = _runnumber(logs)
     if run is not None:
         title = title + ' #{:06d}'.format(run)
     title = title + '\n' + _plottingtime() + '\n'
-    T = _sampleTemperature(logs)
+    T = _sampletemperature(logs)
     if T is not None:
-        T = _applyIfTimeSeries(T, numpy.mean)
+        T = _applyiftimeseries(T, numpy.mean)
         title = title + r'$T$ = {:0.1f} K'.format(T)
-    ei = _incidentEnergy(logs)
+    ei = _incidentenergy(logs)
     if ei is not None:
         title = title + r' $E_i$ = {:0.2f} meV'.format(ei)
     return title
@@ -339,14 +339,14 @@ def _workspacelabel(workspace):
     workspace = _normws(workspace)
     label = ''
     logs = workspace.run()
-    run = _runNumber(logs)
+    run = _runnumber(logs)
     if run is not None:
         label = label + r'#{:06d} '.format(run)
-    T = _sampleTemperature(logs)
+    T = _sampletemperature(logs)
     if T is not None:
-        T = _applyIfTimeSeries(T, numpy.mean)
+        T = _applyiftimeseries(T, numpy.mean)
         label = label + r'$T$ = {:0.1f} K '.format(T)
-    ei = _incidentEnergy(logs)
+    ei = _incidentenergy(logs)
     if ei is not None:
         label =  label + r'$E_i$ = {:0.2f} meV'.format(ei)
     return label
@@ -370,7 +370,7 @@ def box2D(xs, vertAxis, horMin=-numpy.inf, horMax=numpy.inf, vertMin=-numpy.inf,
     :returns: a tuple of two :class:`slice` objects, the first one for vertical dimension, the second for horizontal.
     """
     if len(vertAxis) > xs.shape[0]:
-        vertAxis = _binCentres(vertAxis)
+        vertAxis = _bincentres(vertAxis)
     horBegin = numpy.argwhere(xs[0, :] >= horMin)[0][0]
     horEnd = numpy.argwhere(xs[0, :] < horMax)[-1][0] + 1
     vertBegin = numpy.argwhere(vertAxis >= vertMin)[0][0]
@@ -378,7 +378,7 @@ def box2D(xs, vertAxis, horMin=-numpy.inf, horMax=numpy.inf, vertMin=-numpy.inf,
     return slice(vertBegin, vertEnd), slice(horBegin, horEnd)
 
 
-def defaultrcParams():
+def defaultrcparams():
     """Return a dictionary of directtools default matplotlib rc parameters.
 
     :returns: a :class:`dict` of default :mod:`matplotlib` rc parameters needed by :mod:`directtools`
@@ -450,7 +450,7 @@ def nanminmax(workspace, horMin=-numpy.inf, horMax=numpy.inf, vertMin=-numpy.inf
     xs = workspace.extractX()
     ys = workspace.extractY()
     if xs.shape[1] > ys.shape[1]:
-        xs = numpy.apply_along_axis(_binCentres, 1, xs)
+        xs = numpy.apply_along_axis(_bincentres, 1, xs)
     vertAxis = workspace.getAxis(1).extractValues()
     box = box2D(xs, vertAxis, horMin, horMax, vertMin, vertMax)
     ys = ys[box]
@@ -610,16 +610,16 @@ def plotcuts(direction, workspaces, cuts, widths, quantity, unit, style='l', kee
                 line = LineProfile(ws, cut, width, Direction=direction,
                                    OutputWorkspace=wsName, StoreInADS=keepCutWorkspaces, EnableLogging=False)
                 if ws.isDistribution() and direction == 'Vertical':
-                    _denormalizeLine(line)
+                    _denormalizeline(line)
                 if 'm' in style:
-                    markerStyle, markerIndex = _chooseMarker(markers, markerIndex)
-                realCutCentre, realCutWidth = _cutCentreAndWidth(line)
+                    markerStyle, markerIndex = _choosemarker(markers, markerIndex)
+                realCutCentre, realCutWidth = _cutcentreandwidth(line)
                 label = _label(ws, realCutCentre, realCutWidth, len(workspaces) == 1, len(cuts) == 1, len(widths) == 1, quantity, unit)
                 axes.errorbar(line, specNum=0, linestyle=lineStyle, marker=markerStyle, label=label, distribution=True)
     axes.set_xscale(xscale)
     axes.set_yscale(yscale)
     if axes.get_yscale() == 'linear':
-        _horizontalLineAtZero(axes)
+        _horizontallineatzero(axes)
     _chooseylabel(workspaces[0], axes)
     return figure, axes, cutWSList
 
@@ -720,7 +720,7 @@ def plotSofQW(workspace, QMin=0., QMax=None, EMin=None, EMax=None, VMin=0., VMax
         if isSusceptibility:
             EMin = 0.
         else:
-            EMin, unusedEMax = _energyLimits(workspace)
+            EMin, unusedEMax = _energylimits(workspace)
     if EMax is None:
         EAxis = workspace.getAxis(1).extractValues()
         EMax = EAxis[-1]
@@ -785,7 +785,7 @@ def validQ(workspace, E=0.0):
     workspace = _normws(workspace)
     vertBins = workspace.getAxis(1).extractValues()
     if len(vertBins) > workspace.getNumberHistograms():
-        vertBins = _binCentres(vertBins)
+        vertBins = _bincentres(vertBins)
     elasticIndex = numpy.argmin(numpy.abs(vertBins - E))
     ys = workspace.readY(int(elasticIndex))
     validIndices = numpy.argwhere(numpy.logical_not(numpy.isnan(ys)))
@@ -810,25 +810,25 @@ def wsreport(workspace):
     workspace = _normws(workspace)
     logs = workspace.run()
     print(str(workspace))
-    instrument = _instrumentName(logs)
+    instrument = _instrumentname(logs)
     if instrument is not None:
         print('Instrument: ' + instrument)
     if logs.hasProperty('run_number'):
         print('Run Number: {:06d}'.format(logs.getProperty('run_number').value))
     if logs.hasProperty('start_time'):
         print('Start Time: {}'.format(logs.getProperty('start_time').value.replace('T', ' ')))
-    ei = _incidentEnergy(logs)
+    ei = _incidentenergy(logs)
     wavelength = _wavelength(logs)
     if ei is not None and wavelength is not None:
         print('Ei = {:0.2f} meV    lambda = {:0.2f} A'.format(ei, wavelength))
-    T = _sampleTemperature(logs)
+    T = _sampletemperature(logs)
     if T is not None:
         if isinstance(T, collections.Iterable):
-            meanT = _applyIfTimeSeries(T, numpy.mean)
-            stdT = _applyIfTimeSeries(T, numpy.std)
+            meanT = _applyiftimeseries(T, numpy.mean)
+            stdT = _applyiftimeseries(T, numpy.std)
             print('T = {:0.2f} +- {:4.2f} K'.format(meanT, stdT))
-            minT = _applyIfTimeSeries(T, numpy.amin)
-            maxT = _applyIfTimeSeries(T, numpy.amax)
+            minT = _applyiftimeseries(T, numpy.amin)
+            maxT = _applyiftimeseries(T, numpy.amax)
             print('T in [{:0.2f},{:0.2f}]'.format(minT, maxT))
         else:
             print('T = {:0.2f} K'.format(T))
@@ -885,4 +885,4 @@ class SampleLogs:
 
 
 # Set default matplotlib rc parameters.
-_configurematplotlib(defaultrcParams())
+_configurematplotlib(defaultrcparams())

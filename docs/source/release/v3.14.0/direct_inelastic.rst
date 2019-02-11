@@ -70,6 +70,7 @@ Improved
   - Added a new function :func:`directtools.plotDOS` to support plotting the density-of-states
   - Improved the automatic E ranges, cut labels and other visuals
   - All functions should be applicable to non-ILL data
+  - ``defaultrcParams`` was renamed to ``defaultrcparams`` to be consistent with the rest of the functions
 
 Instrument definitions
 ----------------------

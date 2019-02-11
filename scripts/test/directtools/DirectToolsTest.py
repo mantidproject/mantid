@@ -71,14 +71,14 @@ class DirectToolsTest(unittest.TestCase):
         numpy.testing.assert_equal(xs[box], expected)
 
     def test_configurematplotlib(self):
-        defaultParams = directtools.defaultrcParams()
+        defaultParams = directtools.defaultrcparams()
         directtools._configurematplotlib(defaultParams)
         for key in defaultParams:
             self.assertTrue(key in matplotlib.rcParams)
             self.assertEqual(matplotlib.rcParams[key], defaultParams[key])
 
     def test_defaultrcParams(self):
-        result = directtools.defaultrcParams()
+        result = directtools.defaultrcparams()
         self.assertEqual(result, {'legend.numpoints': 1})
 
     def test_dynamicsusceptibility(self):
