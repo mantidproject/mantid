@@ -100,10 +100,6 @@ endif ()
     mantidqt/widgets/samplelogs/test/test_samplelogs_model.py
     mantidqt/widgets/samplelogs/test/test_samplelogs_presenter.py
 
-    mantidqt/widgets/common/test/test_workspacedisplay_ads_observer.py
-    mantidqt/widgets/common/test/test_observing_presenter.py
-    mantidqt/widgets/common/test/test_observing_view.py
-
     mantidqt/widgets/observers/test/test_ads_observer.py
     mantidqt/widgets/observers/test/test_observing_presenter.py
     mantidqt/widgets/observers/test/test_observing_view.py
@@ -124,7 +120,6 @@ endif ()
     mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_model.py
     mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_presenter.py
     mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_view.py
-
   )
 
   # ctest target for widgets that only get tested in qt5, because they are only used in the workbench

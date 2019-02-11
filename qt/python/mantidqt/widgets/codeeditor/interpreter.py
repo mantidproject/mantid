@@ -167,7 +167,7 @@ class PythonFileInterpreter(QWidget):
         self.status.showMessage(msg)
 
     def replace_tabs_with_spaces(self):
-        self.replace_text(TAB_CHAR, SPACE_CHAR*TAB_WIDTH)
+        self.replace_text(TAB_CHAR, SPACE_CHAR * TAB_WIDTH)
 
     def replace_text(self, match_text, replace_text):
         if self.editor.selectedText() == '':
@@ -176,7 +176,7 @@ class PythonFileInterpreter(QWidget):
         self.editor.replaceSelectedText(new_text)
 
     def replace_spaces_with_tabs(self):
-        self.replace_text(SPACE_CHAR*TAB_WIDTH, TAB_CHAR)
+        self.replace_text(SPACE_CHAR * TAB_WIDTH, TAB_CHAR)
 
     def set_whitespace_visible(self):
         self.editor.setWhitespaceVisibility(CodeEditor.WsVisible)
@@ -328,8 +328,7 @@ class PythonFileInterpreterPresenter(QObject):
         self._finish(success=True, task_result=task_result)
 
     def _on_exec_error(self, task_error):
-        exc_type, exc_value, exc_stack = task_error.exc_type, task_error.exc_value, \
-            task_error.stack
+        exc_type, exc_value, exc_stack = task_error.exc_type, task_error.exc_value, task_error.stack
         exc_stack = traceback.extract_tb(exc_stack)[self.MAX_STACKTRACE_LENGTH:]
         if hasattr(exc_value, 'lineno'):
             lineno = exc_value.lineno + self._code_start_offset
@@ -351,7 +350,7 @@ class PythonFileInterpreterPresenter(QObject):
 
     def _create_status_msg(self, status, timestamp, elapsed_time):
         return IDLE_STATUS_MSG + ' ' + \
-            LAST_JOB_MSG_TEMPLATE.format(status, timestamp, elapsed_time)
+               LAST_JOB_MSG_TEMPLATE.format(status, timestamp, elapsed_time)
 
     def _on_progress_update(self, lineno):
         """Update progress on the view taking into account if a selection of code is
