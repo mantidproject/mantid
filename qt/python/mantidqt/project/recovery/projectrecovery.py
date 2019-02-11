@@ -42,7 +42,7 @@ class ProjectRecovery(object):
 
         self.recovery_enabled = ConfigService[RECOVERY_ENABLED_KEY]
         self.maximum_num_checkpoints = ConfigService[NO_OF_CHECKPOINTS_KEY]
-        self.time_between_saves = ConfigService[SAVING_TIME_KEY]  # seconds
+        self.time_between_saves = int(ConfigService[SAVING_TIME_KEY])  # seconds
 
         self._timer_thread = Timer(self.time_between_saves, self.recovery_save)
 
@@ -267,7 +267,8 @@ class ProjectRecovery(object):
             self._remove_empty_folders_from_dir(self.recovery_directory_hostname)
 
             checkpoints = self.listdir_fullpath(self.recovery_directory_hostname)
-            return len(checkpoints) != 0 and len(checkpoints) > (self._number_of_workbench_processes() - 1)
+            num_of_mantids = self._number_of_other_workbench_processes()
+            return len(checkpoints) != 0 and len(checkpoints) > num_of_mantids
         except Exception as e:
             if isinstance(e, KeyboardInterrupt):
                 raise
@@ -275,7 +276,7 @@ class ProjectRecovery(object):
             return False
 
     @staticmethod
-    def _number_of_workbench_processes():
+    def _number_of_other_workbench_processes():
         if os.name == 'nt':  # Windows packaged and development
             executable_names = ["launch_workbench.pyw", "workbench-script.pyw"]
         else:  # Confirmed on Ubuntu 18.04 Dev and MacOS
@@ -292,7 +293,8 @@ class ProjectRecovery(object):
                 # Ignore these errors as it's checking the cmdline which causes this on process with no args
                 pass
 
-        return total_mantids
+        # One of these will be the mantid process running the information
+        return total_mantids - 1
 
     ######################################################
     #  Loading
