@@ -118,9 +118,13 @@ public:
   constexpr wide_integer<Bits, Signed> &
   operator^=(const Integral &rhs) noexcept;
 
-  template<typename T2, typename = std::enable_if<std::is_integral<T2>::value && std::is_unsigned<T2>::value>>
-  constexpr wide_integer<Bits, Signed> &operator<<=(T2 n) noexcept ;
-  template<typename T2, typename = std::enable_if<std::is_integral<T2>::value && std::is_unsigned<T2>::value>>
+  template <typename T2,
+            typename = std::enable_if<std::is_integral<T2>::value &&
+                                      std::is_unsigned<T2>::value>>
+  constexpr wide_integer<Bits, Signed> &operator<<=(T2 n) noexcept;
+  template <typename T2,
+            typename = std::enable_if<std::is_integral<T2>::value &&
+                                      std::is_unsigned<T2>::value>>
   constexpr wide_integer<Bits, Signed> &operator>>=(T2 n) noexcept;
 
   constexpr wide_integer<Bits, Signed> &
@@ -268,11 +272,15 @@ std::common_type_t<Integral, Integral2> constexpr
 operator^(const Integral &rhs, const Integral2 &lhs);
 
 // TODO: Integral
-template <size_t Bits, typename Signed, typename T2, typename = std::enable_if<std::is_integral<T2>::value && std::is_unsigned<T2>::value>>
+template <size_t Bits, typename Signed, typename T2,
+          typename = std::enable_if<std::is_integral<T2>::value &&
+                                    std::is_unsigned<T2>::value>>
 constexpr wide_integer<Bits, Signed>
 operator<<(const wide_integer<Bits, Signed> &lhs, T2 n) noexcept;
 
-template <size_t Bits, typename Signed, typename T2, typename = std::enable_if<std::is_integral<T2>::value && std::is_unsigned<T2>::value>>
+template <size_t Bits, typename Signed, typename T2,
+          typename = std::enable_if<std::is_integral<T2>::value &&
+                                    std::is_unsigned<T2>::value>>
 constexpr wide_integer<Bits, Signed>
 operator>>(const wide_integer<Bits, Signed> &lhs, T2 n) noexcept;
 
