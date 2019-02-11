@@ -32,6 +32,10 @@ class LoadUtils(object):
         else:
             raise RuntimeError("No data loaded. \n Please load data using Muon Analysis")
 
+    @property
+    def version(self):
+        return 1
+
     def setUp(self, tmpWS):
         # get everything from the ADS
         self.options = mantid.AnalysisDataService.getObjectNames()

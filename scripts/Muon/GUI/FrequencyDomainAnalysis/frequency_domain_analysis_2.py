@@ -86,13 +86,12 @@ class FrequencyAnalysisGui(QtGui.QMainWindow):
 
         self.grouping_tab_widget.group_tab_presenter.groupingNotifier.add_subscriber(self.home_tab.home_tab_widget.groupingObserver)
 
-        self.home_tab.instrument_widget.instrumentNotifier.add_subscriber(
-            self.home_tab.home_tab_widget.instrumentObserver)
+        self.context.instrumentNotifier.add_subscriber(self.home_tab.home_tab_widget.instrumentObserver)
 
-        self.home_tab.instrument_widget.instrumentNotifier.add_subscriber(
+        self.context.instrumentNotifier.add_subscriber(
             self.load_widget.load_widget.instrumentObserver)
 
-        self.home_tab.instrument_widget.instrumentNotifier.add_subscriber(
+        self.context.instrumentNotifier.add_subscriber(
             self.grouping_tab_widget.group_tab_presenter.instrumentObserver)
 
         self.load_widget.load_widget.loadNotifier.add_subscriber(self.home_tab.home_tab_widget.loadObserver)

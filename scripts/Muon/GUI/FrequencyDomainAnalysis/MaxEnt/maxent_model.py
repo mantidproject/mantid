@@ -103,6 +103,7 @@ class MaxEntModel(object):
         self.alg = None
 
     def addOutput(self, inputs, alg, name):
+
         if name in inputs:
             mantid.AnalysisDataService.addOrReplace(
                 inputs[name],
@@ -113,7 +114,6 @@ class MaxEntModel(object):
             group = mantid.AnalysisDataService.retrieve(self.run)
         else:
             mantid.GroupWorkspaces(OutputWorkspace=self.run)
-
         group.add(inputs[name])
 
     def cancel(self):

@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
+import mantid.simpleapi as mantid
 
 
 
@@ -25,6 +26,10 @@ class LoadUtilsDummy(object):
 
         self.runName = "None"
 
+    @property
+    def version(self):
+        return 2
+
     def setUp(self, tmpWS):
         # get everything from the ADS
         return
@@ -37,6 +42,15 @@ class LoadUtilsDummy(object):
 
     # get methods
     def getNPoints(self):
+        print(self.context.current_runs)
+        run_numbers = self.context.current_runs
+        instrument = str(self.context.instrument)
+        ws = [instrument+str(run_number[0])+"_raw_data" for run_number in run_numbers]
+        for name in ws:
+            data = mantid.AnalysisDataService.retrieve(name)
+            if self.N_points < len(data.readX(0)):
+               self.N_points = len(data.readX(0))
+
         return self.N_points
 
     def getCurrentWS(self):
@@ -53,13 +67,6 @@ class LoadUtilsDummy(object):
         return int(filter(str.isdigit, x) or 0)
 
     def hasDataChanged(self):
-        exists, ws = self.MuonAnalysisExists()
-        if exists:
-            current = ws.getInstrument().getName() + str(ws.getRunNumber()).zfill(8)
-            if self.runName != current:
-                mantid.logger.error("Active workspace has changed. Reloading the data")
-                self.setUp(ws)
-                return True
         return False
 
     # check if muon analysis exists
@@ -89,12 +96,9 @@ class LoadUtilsDummy(object):
 
     # Get the groups/pairs for active WS
     def getGroupedWorkspaceNames(self):
-        # gets all WS in the ADS
-        runName, options = self.getCurrentWS()
-        final_options = []
-        # only keep the relevant WS (same run as Muon Analysis)
-        for pick in options:
-            if "MuonAnalysisGrouped_" in pick and ";" not in pick:
-                final_options.append(pick)
-        return final_options
-
+        print(self.context.current_runs)
+        run_numbers = self.context.current_runs
+        instrument = str(self.context.instrument)
+        runs = [instrument+str(run_number[0]) for run_number in run_numbers]
+        print(runs)
+        return runs
