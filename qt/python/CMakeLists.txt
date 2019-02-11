@@ -100,32 +100,37 @@ endif ()
     mantidqt/widgets/samplelogs/test/test_samplelogs_model.py
     mantidqt/widgets/samplelogs/test/test_samplelogs_presenter.py
 
-    mantidqt/widgets/common/test/test_workspacedisplay_ads_observer.py
-    mantidqt/widgets/common/test/test_observing_presenter.py
-    mantidqt/widgets/common/test/test_observing_view.py
+    mantidqt/widgets/observers/test/test_ads_observer.py
+    mantidqt/widgets/observers/test/test_observing_presenter.py
+    mantidqt/widgets/observers/test/test_observing_view.py
 
-    mantidqt/widgets/matrixworkspacedisplay/test/test_matrixworkspacedisplay_model.py
-    mantidqt/widgets/matrixworkspacedisplay/test/test_matrixworkspacedisplay_presenter.py
-    mantidqt/widgets/matrixworkspacedisplay/test/test_matrixworkspacedisplay_table_view_model.py
+    mantidqt/widgets/workspacedisplay/test/test_data_copier.py
+    mantidqt/widgets/workspacedisplay/test/test_user_notifier.py
 
-    mantidqt/widgets/tableworkspacedisplay/test/test_tableworkspacedisplay_error_column.py
-    mantidqt/widgets/tableworkspacedisplay/test/test_tableworkspacedisplay_marked_columns.py
-    mantidqt/widgets/tableworkspacedisplay/test/test_tableworkspacedisplay_workbench_table_widget_item.py
+    mantidqt/widgets/workspacedisplay/matrix/test/test_matrixworkspacedisplay_model.py
+    mantidqt/widgets/workspacedisplay/matrix/test/test_matrixworkspacedisplay_presenter.py
+    mantidqt/widgets/workspacedisplay/matrix/test/test_matrixworkspacedisplay_table_view_model.py
+    mantidqt/widgets/workspacedisplay/matrix/test/test_matrixworkspacedisplay_view.py
 
-    mantidqt/widgets/tableworkspacedisplay/test/test_tableworkspacedisplay_model.py
-    mantidqt/widgets/tableworkspacedisplay/test/test_tableworkspacedisplay_presenter.py
+    mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_error_column.py
+    mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_marked_columns.py
+    mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_workbench_table_widget_item.py
+    mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_model.py
+    mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_presenter.py
+    mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_view.py
   )
 
-  # ctest targets for interpreters (Encoder/Decoder) tests only get tested in qt5 as only for workbench
-  set ( PYTHON_WIDGET_INTERPRETER_TESTS
+  # ctest target for widgets that only get tested in qt5, because they are only used in the workbench
+  set ( PYTHON_WIDGET_QT5_ONLY_TESTS
     mantidqt/widgets/instrumentview/test/test_instrumentview_io.py
+    mantidqt/widgets/instrumentview/test/test_instrumentview_view.py
   )
 
   # Tests
   set ( PYUNITTEST_RUN_SERIAL ON )
   set ( PYUNITTEST_QT_API pyqt5 )
   pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR}
-    mantidqt_qt5 ${PYTHON_TEST_FILES} ${PYTHON_WIDGET_INTERPRETER_TESTS}
+    mantidqt_qt5 ${PYTHON_TEST_FILES} ${PYTHON_WIDGET_QT5_ONLY_TESTS}
   )
   # The jupyterconsole test segfaults on Python 3 and Qt 4
   # despite the code functioning in a normal usage.
