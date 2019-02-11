@@ -425,7 +425,6 @@ class MainWindow(QMainWindow):
         # Close editors
         if self.editor.app_closing():
             self.writeSettings(CONF)  # write current window information to global settings object
-
             # Close all open plots
             # We don't want this at module scope here
             import matplotlib.pyplot as plt  # noqa
