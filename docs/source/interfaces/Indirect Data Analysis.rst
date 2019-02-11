@@ -339,6 +339,10 @@ Run
 Plot
   Plots the selected parameter stored in the result (or PDF) workspace.
 
+Edit Result
+  Allows you to replace values within your *_Results* workspace using the :ref:`ReplaceIndirectFitResultBin <algm-ReplaceIndirectFitResultBin>`
+  algorithm. See below for more detail.
+
 Save Result
   Saves the result workspace in the default save directory.
 
@@ -437,6 +441,10 @@ Run
 
 Plot
   Plots the selected parameter stored in the result (or PDF) workspace.
+
+Edit Result
+  Allows you to replace values within your *_Results* workspace using the :ref:`ReplaceIndirectFitResultBin <algm-ReplaceIndirectFitResultBin>`
+  algorithm. See below for more detail.
 
 Save Result
   Saves the result workspace in the default save directory.
@@ -615,15 +623,21 @@ a separate plotting window.
 
 The 'Plot Guess' check-box can be used to enable/disable the guess curve in the top preview plot.
 
-
 Output
 ~~~~~~
 
 The results of the fit may be plotted and saved under the 'Output' section of the fitting interfaces.
 
-Next to the 'Plot Output' label, you can select a parameter to plot and then click 'Plot' to plot it with error 
+Next to the 'Plot' label, you can select a parameter to plot and then click 'Plot' to plot it with error 
 bars across the fit spectra (if multiple data-sets have been used, a separate plot will be produced for each data-set). 
 The 'Plot Output' options will be disabled after a fit if there is only one data point for the parameters.
+
+During a sequential fit, the parameters calculated for one spectrum become the start parameters for the next spectrum to be fitted. 
+Although this normally yields better parameter values for the later spectra, it can also lead to poorly fitted parameters if the
+next spectrum is not 'related' to the previous spectrum. It may be useful to replace this poorly fitted spectrum with the results 
+from a single fit using the 'Edit Result' option. 
+Clicking the 'Edit Result' button will allow you to modify the data within your *_Results* workspace using results 
+produced from a singly fit spectrum. See the algorithm :ref:`ReplaceIndirectFitResultBin <algm-ReplaceIndirectFitResultBin>`.
 
 Clicking the 'Save Result' button will save the result of the fit to your default save location.
 

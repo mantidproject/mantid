@@ -25,6 +25,13 @@ New Algorithms
 Data Analysis Interface
 -----------------------
 
+New Features
+############
+- IqtFit and ConvFit have a new option to edit the *_Results* workspace. This option allows the selection of two *_Result* 
+  workspaces (one containing the results of a sequential fit for multiple spectra (1), and the other containing the results of a fit 
+  for a single spectrum(2)). The algorithm :ref:`ReplaceIndirectFitResultBin <algm-ReplaceIndirectFitResultBin>` will replace the 
+  relevant values in workspace (1) with the values found in workspace (2).
+
 Improvements
 ############
 
