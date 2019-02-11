@@ -524,10 +524,6 @@ void RunsTablePresenter::notifyRowStateChanged() {
     }
     ++groupIndex;
   }
-  if (m_model.reductionJobs().groups().size() > 1) {
-    auto itemIndex = MantidWidgets::Batch::RowLocation({1});
-    showCellsAsErrorStateInView(itemIndex, "this is a test error message");
-  }
 }
 
 bool RunsTablePresenter::isProcessing() const {
