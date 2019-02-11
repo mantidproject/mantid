@@ -547,12 +547,11 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
             return ws
         waterWS = self.getProperty(Prop.WATER_REFERENCE).value
         detWSName = self._names.withSuffix('water_detectors')
-        ExtractMonitors(InputWorkspace=waterWS,
-                        DetectorWorkspace=detWSName,
-                        EnableLogging=self._subalgLogging)
+        waterWS = ExtractMonitors(InputWorkspace=waterWS,
+                                  DetectorWorkspace=detWSName,
+                                  EnableLogging=self._subalgLogging)
         if mtd.doesExist(detWSName) is None:
             raise RuntimeError('No detectors in the water reference data.')
-        waterWS = mtd[detWSName]
         if waterWS.getNumberHistograms() != ws.getNumberHistograms():
             self.log().error('Water workspace and run do not have the same number of histograms.')
         rebinnedWaterWSName = self._names.withSuffix('water_rebinned')
