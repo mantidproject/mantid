@@ -19,7 +19,7 @@ from qtpy.QtWidgets import QVBoxLayout, QWidget
 # local imports
 from mantidqt.utils.qt import import_qt
 # import widget class from C++ wrappers
-from mantidqt.widgets.workspacedisplay.observing_view import ObservingView
+from mantidqt.widgets.observers.observing_view import ObservingView
 
 InstrumentWidget = import_qt('._instrumentview', 'mantidqt.widgets.instrumentview',
                              'InstrumentWidget')
@@ -42,7 +42,7 @@ class InstrumentView(QWidget, ObservingView):
 
         self.widget = InstrumentWidget(name)
 
-        # used by the observing view to delete the ADS observer
+        # used by the observers view to delete the ADS observer
         self.presenter = presenter
 
         self.setWindowTitle(name)

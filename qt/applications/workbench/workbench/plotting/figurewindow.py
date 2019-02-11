@@ -19,7 +19,7 @@ from qtpy.QtWidgets import QMainWindow
 
 # local imports
 from mantidqt.plotting.figuretype import FigureType, figure_type
-from mantidqt.widgets.workspacedisplay.observing_view import ObservingView
+from mantidqt.widgets.observers.observing_view import ObservingView
 
 
 class FigureWindow(QMainWindow, ObservingView):

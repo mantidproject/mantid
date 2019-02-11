@@ -11,7 +11,7 @@ from __future__ import (absolute_import, division, print_function)
 
 class ObservingView(object):
     """
-    This class provides some common functions needed across views observing the ADS.
+    This class provides some common functions needed across views observers the ADS.
     It runs the close_signal so that the view is closed from the GUI thread,
     and ensures that the closeEvent will clear the observer to prevent a memory leak.
 

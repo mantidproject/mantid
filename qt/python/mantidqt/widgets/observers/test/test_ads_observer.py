@@ -11,7 +11,7 @@ import unittest
 
 from mock import Mock
 
-from mantidqt.widgets.workspacedisplay.ads_observer import WorkspaceDisplayADSObserver
+from mantidqt.widgets.observers.ads_observer import WorkspaceDisplayADSObserver
 
 
 class MockWorkspaceDisplay:

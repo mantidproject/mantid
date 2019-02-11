@@ -39,6 +39,8 @@ import numpy as np
 """
 # Accepted extensions for drag-and-drop to editor
 ACCEPTED_FILE_EXTENSIONS = ['.py', '.pyw']
+# QSettings key for session tabs
+TAB_SETTINGS_KEY = "Editors/SessionTabs"
 
 
 class MultiFileEditor(PluginWidget):
@@ -56,6 +58,9 @@ class MultiFileEditor(PluginWidget):
         self.setLayout(layout)
 
         self.setAcceptDrops(True)
+
+        # attributes
+        self.tabs_open_on_closing = None
 
         # attributes
         self.run_action = create_action(
@@ -97,6 +102,10 @@ class MultiFileEditor(PluginWidget):
         '''This is used by MainWindow to execute a file after opening it'''
         return self.editors.execute_current()
 
+    def restore_session_tabs(self, session_tabs):
+        self.open_files_in_new_tabs(session_tabs)
+        self.editors.close_tab(0)  # close default empty tab
+
     # ----------- Plugin API --------------------
 
     def app_closing(self):
@@ -104,6 +113,7 @@ class MultiFileEditor(PluginWidget):
         Tries to close all editors
         :return: True if editors can be closed, false if cancelled
         """
+        self.tabs_open_on_closing = self.editors.tab_filepaths
         return self.editors.close_all()
 
     def dragEnterEvent(self, event):
@@ -123,16 +133,20 @@ class MultiFileEditor(PluginWidget):
                     self.open_file_in_new_tab(filepath)
                 except IOError as io_error:
                     logger.warning("Could not load file:\n  '{}'"
-                                   "".format(str(io_error)))
+                                   "".format(io_error))
 
     def get_plugin_title(self):
         return "Editor"
 
-    def readSettings(self, _):
-        pass
+    def readSettings(self, settings):
+        try:
+            prev_session_tabs = settings.get(TAB_SETTINGS_KEY)
+        except KeyError:
+            return
+        self.restore_session_tabs(prev_session_tabs)
 
-    def writeSettings(self, _):
-        pass
+    def writeSettings(self, settings):
+        settings.set(TAB_SETTINGS_KEY, self.tabs_open_on_closing)
 
     def register_plugin(self):
         self.main.add_dockwidget(self)
@@ -143,6 +157,14 @@ class MultiFileEditor(PluginWidget):
 
     def open_file_in_new_tab(self, filepath):
         return self.editors.open_file_in_new_tab(filepath)
+
+    def open_files_in_new_tabs(self, filepaths):
+        for filepath in filepaths:
+            try:
+                self.open_file_in_new_tab(filepath)
+            except IOError as io_error:
+                logger.warning("Could not load file:\n  {}"
+                               "".format(io_error))
 
     def save_current_file(self):
         self.editors.save_current_file()
