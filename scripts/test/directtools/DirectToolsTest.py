@@ -260,7 +260,7 @@ class DirectTest(unittest.TestCase):
             InputWorkspace='sample',
             OutputWorkspace='reduced'
         )
-        Q = 2.5
+        Q = 2.512
         figure, axes, cuts = directtools.plotconstQ('reduced', Q, 0.01)
         lineDataQ = axes.get_lines()[0].get_data()
         E = 2.2
