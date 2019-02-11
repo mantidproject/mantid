@@ -265,8 +265,9 @@ struct wide_integer<Bits, Signed>::_impl {
   using __need_increase_size =
       typename std::enable_if < Bits<Bits2, wide_integer<Bits2, Signed>>::type;
 
+  template<typename T2, typename = std::enable_if<std::is_integral<T2>::value && std::is_unsigned<T2>::value>>
   constexpr static wide_integer<Bits, unsigned>
-  shift_left(const wide_integer<Bits, unsigned> &rhs, int n) {
+  shift_left(const wide_integer<Bits, unsigned> &rhs, T2 n) {
     if (static_cast<size_t>(n) >= base_bits * arr_size)
       return 0;
     if (n <= 0)
@@ -284,7 +285,7 @@ struct wide_integer<Bits, Signed>::_impl {
       n -= cur_shift;
     }
     if (n) {
-      int i = 0;
+      decltype(arr_size - n / base_bits) i = 0;
       for (; i < arr_size - n / base_bits; ++i) {
         lhs.m_arr[i] = lhs.m_arr[i + n / base_bits];
       }
@@ -295,8 +296,9 @@ struct wide_integer<Bits, Signed>::_impl {
     return lhs;
   }
 
+  template<typename T2, typename = std::enable_if<std::is_integral<T2>::value && std::is_unsigned<T2>::value>>
   constexpr static wide_integer<Bits, signed>
-  shift_left(const wide_integer<Bits, signed> &rhs, int n) {
+  shift_left(const wide_integer<Bits, signed> &rhs, T2 n) {
     // static_assert(is_negative(rhs), "shift left for negative lhsbers is
     // underfined!");
     if (is_negative(rhs)) {
@@ -307,8 +309,9 @@ struct wide_integer<Bits, Signed>::_impl {
         shift_left(wide_integer<Bits, unsigned>(rhs), n));
   }
 
+  template<typename T2, typename = std::enable_if<std::is_integral<T2>::value && std::is_unsigned<T2>::value>>
   constexpr static wide_integer<Bits, unsigned>
-  shift_right(const wide_integer<Bits, unsigned> &rhs, int n) noexcept {
+  shift_right(const wide_integer<Bits, unsigned> &rhs, T2 n) noexcept {
     if (static_cast<size_t>(n) >= base_bits * arr_size)
       return 0;
     if (n <= 0)
@@ -327,8 +330,8 @@ struct wide_integer<Bits, Signed>::_impl {
       n -= cur_shift;
     }
     if (n) {
-      int i = arr_size - 1;
-      for (; i >= static_cast<int>(n / base_bits); --i) {
+      decltype(n/base_bits) i = arr_size - 1;
+      for (; i >= n / base_bits; --i) {
         lhs.m_arr[i] = lhs.m_arr[i - n / base_bits];
       }
       for (; i >= 0; --i) {
@@ -338,8 +341,10 @@ struct wide_integer<Bits, Signed>::_impl {
     return lhs;
   }
 
+  
+  template<typename T2, typename = std::enable_if<std::is_integral<T2>::value && std::is_unsigned<T2>::value>>
   constexpr static wide_integer<Bits, signed>
-  shift_right(const wide_integer<Bits, signed> &rhs, int n) noexcept {
+  shift_right(const wide_integer<Bits, signed> &rhs, T2 n) noexcept {
     if (static_cast<size_t>(n) >= base_bits * arr_size)
       return 0;
     if (n <= 0)
@@ -359,8 +364,8 @@ struct wide_integer<Bits, Signed>::_impl {
       n -= cur_shift;
     }
     if (n) {
-      int i = arr_size - 1;
-      for (; i >= static_cast<int>(n / base_bits); --i) {
+      decltype(n / base_bits) i = arr_size - 1;
+      for (; i >= n / base_bits; --i) {
         lhs.m_arr[i] = lhs.m_arr[i - n / base_bits];
       }
       for (; i >= 0; --i) {
@@ -594,7 +599,7 @@ public:
 
     for (size_t i = 0; i < arr_size * base_bits; ++i) {
       if (t.m_arr[arr_size - 1] & 1) {
-        res = operator_plus(res, shift_left(a, static_cast<int>(i)));
+        res = operator_plus(res, shift_left(a, i));
       }
 
       t = shift_right(t, 1);
@@ -1055,15 +1060,17 @@ operator^=(const T &rhs) noexcept {
 }
 
 template <size_t Bits, typename Signed>
+template<typename T2, typename>
 constexpr wide_integer<Bits, Signed> &wide_integer<Bits, Signed>::
-operator<<=(int n) {
+operator<<=(T2 n) noexcept {
   *this = _impl::shift_left(*this, n);
   return *this;
 }
 
 template <size_t Bits, typename Signed>
+template<typename T2, typename>
 constexpr wide_integer<Bits, Signed> &wide_integer<Bits, Signed>::
-operator>>=(int n) noexcept {
+operator>>=(T2 n) noexcept {
   *this = _impl::shift_right(*this, n);
   return *this;
 }
