@@ -51,7 +51,7 @@ class InstrumentViewDecoder(InstrumentViewAttributes):
 
         # Make the widget
         ws = ADS.retrieve(obj_dic["workspaceName"])
-        instrument_view = InstrumentViewPresenter(ws).view
+        instrument_view = InstrumentViewPresenter(ws).container
         instrument_widget = instrument_view.widget
 
         #  Then 'decode' set the values from the dictionary
