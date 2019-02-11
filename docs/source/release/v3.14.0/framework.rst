@@ -112,6 +112,7 @@ Bugfixes
 - Fixed a bug in :ref:`ExtractSpectra <algm-ExtractSpectra>` which was causing a wrong last value in the output's vertical axis if the axis type was ``BinEdgeAxis``.
 - Fixed an issue in :ref:`Rebin2D <algm-Rebin2D>` where `NaN` values would result if there were zero-area bins in the input workspace.
 - Fixed a bug in :ref:`MayersSampleCorrection <algm-MayersSampleCorrection>` for when using the multiple scattering correction.
+- :ref:`SaveNexusProcessed <algm-SaveNexusProcessed>` and :ref:`LoadNexusProcessed <algm-LoadNexusProcessed>` now save and load an empty sample name correctly. Note, that files saved before this change will still load with an empty sample name replaced by a space as before.
 
 Python
 ------
