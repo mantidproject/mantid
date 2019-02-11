@@ -79,6 +79,9 @@ protected:
   bool m_wireframe;
 
   Viewport m_viewport;
+
+  friend class InstrumentWidgetEncoder;
+  friend class InstrumentWidgetDecoder;
 };
 
 } // namespace MantidWidgets

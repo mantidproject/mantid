@@ -64,7 +64,7 @@ QStringList defaultHeaders() {
           << "WS Index"
           << "StartX"
           << "EndX"
-          << "Exclude";
+          << "Mask Energies";
   return headers;
 }
 

@@ -14,6 +14,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidDataHandling/LoadDiffCal.h"
 // reuse what another test has for creating dummy workspaces
+#include "MantidDataHandling/SaveDetectorsGrouping.h"
 #include "SaveDiffCalTest.h"
 
 #include <Poco/File.h>
@@ -88,6 +89,76 @@ public:
     // cleanup
     if (Poco::File(filename).exists())
       Poco::File(filename).remove();
+  }
+
+  void test_override_grouping() {
+    // this is a round-trip test
+    std::string outWSName("LoadDiffCalTest");
+    std::string filename("LoadDiffCalTest.h5");
+    std::string groupingfile("LoadDiffCalTest_grp.xml");
+
+    // save a test file
+    SaveDiffCalTest saveDiffCal;
+    auto inst = saveDiffCal.createInstrument();
+    auto groupWSIn = saveDiffCal.createGrouping(inst, false);
+    auto maskWSIn = saveDiffCal.createMasking(inst);
+    auto calWSIn =
+        saveDiffCal.createCalibration(5 * 9); // nine components per bank
+    SaveDiffCal saveAlg;
+    saveAlg.initialize();
+    saveAlg.setProperty("GroupingWorkspace", groupWSIn);
+    saveAlg.setProperty("MaskWorkspace", maskWSIn);
+    saveAlg.setProperty("Filename", filename);
+    saveAlg.setProperty("CalibrationWorkspace", calWSIn);
+    TS_ASSERT_THROWS_NOTHING(saveAlg.execute();); // make sure it runs
+    filename = saveAlg.getPropertyValue("Filename");
+
+    // create the overriding grouping file
+    groupWSIn = saveDiffCal.createGrouping(inst, true);
+    SaveDetectorsGrouping saveGrouping;
+    saveGrouping.initialize();
+    saveGrouping.setProperty("InputWorkspace", groupWSIn);
+    saveGrouping.setProperty("OutputFile", groupingfile);
+    TS_ASSERT_THROWS_NOTHING(saveGrouping.execute();); // make sure it runs
+    groupingfile = saveGrouping.getPropertyValue("OutputFile");
+
+    // run the algorithm of interest
+    LoadDiffCal loadAlg;
+    TS_ASSERT_THROWS_NOTHING(loadAlg.initialize());
+    TS_ASSERT(loadAlg.isInitialized());
+    TS_ASSERT_THROWS_NOTHING(loadAlg.setProperty("InputWorkspace", groupWSIn));
+    TS_ASSERT_THROWS_NOTHING(loadAlg.setPropertyValue("Filename", filename));
+    TS_ASSERT_THROWS_NOTHING(
+        loadAlg.setPropertyValue("GroupFilename", groupingfile));
+    TS_ASSERT_THROWS_NOTHING(
+        loadAlg.setPropertyValue("WorkspaceName", outWSName));
+    TS_ASSERT_THROWS_NOTHING(
+        loadAlg.setProperty("MakeGroupingWorkspace", true));
+    TS_ASSERT_THROWS_NOTHING(loadAlg.setProperty("MakeMaskWorkspace", false));
+    TS_ASSERT_THROWS_NOTHING(loadAlg.execute(););
+    TS_ASSERT(loadAlg.isExecuted());
+
+    ITableWorkspace_sptr ws;
+    TS_ASSERT_THROWS_NOTHING(
+        ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
+            outWSName + "_cal"));
+    TS_ASSERT(ws);
+
+    if (ws) {
+      auto checkAlg = AlgorithmManager::Instance().create("CompareWorkspaces");
+      checkAlg->setProperty("Workspace1", calWSIn);
+      checkAlg->setProperty("Workspace2", ws);
+      checkAlg->execute();
+      TS_ASSERT(checkAlg->getProperty("Result"));
+
+      AnalysisDataService::Instance().remove(outWSName + "_cal");
+    }
+
+    // cleanup
+    if (Poco::File(filename).exists())
+      Poco::File(filename).remove();
+    if (Poco::File(groupingfile).exists())
+      Poco::File(groupingfile).remove();
   }
 };
 

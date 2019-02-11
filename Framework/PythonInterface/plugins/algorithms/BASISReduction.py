@@ -4,7 +4,7 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=no-init
+# pylint: disable=no-init
 from __future__ import (absolute_import, division, print_function)
 
 import numpy as np
@@ -20,32 +20,34 @@ from mantid.kernel import (IntArrayProperty, StringListValidator,
 from mantid import config
 from os.path import join as pjoin
 
-TEMPERATURE_SENSOR = "SensorA"
+TEMPERATURE_SENSOR = 'SensorA'
 DEFAULT_RANGE = [6.24, 6.30]
-DEFAULT_MASK_GROUP_DIR = "/SNS/BSS/shared/autoreduce/new_masks_08_12_2015"
-DEFAULT_CONFIG_DIR = config["instrumentDefinition.directory"]
+DEFAULT_MASK_GROUP_DIR = '/SNS/BSS/shared/autoreduce/new_masks_08_12_2015'
+DEFAULT_CONFIG_DIR = config['instrumentDefinition.directory']
 
 # BASIS allows two possible reflections, with associated default properties
-#pylint: disable=line-too-long
-REFLECTIONS_DICT = {"silicon111": {"name": "silicon111",
-                                   "energy_bins": [-150, 0.4, 500],  # micro-eV
-                                   "q_bins": [0.3, 0.2, 1.9],  # inverse Angstroms
-                                   "mask_file": "BASIS_Mask_default_111.xml",
-                                   "parameter_file": "BASIS_silicon_111_Parameters.xml",
-                                   "default_energy": 2.0826,  # mili-eV
-                                   "vanadium_bins": [-0.0034, 0.068, 0.0034]  # mili-eV
+# pylint: disable=line-too-long
+REFLECTIONS_DICT = {'silicon111': {'name': 'silicon111',
+                                   'energy_bins': [-150, 0.4, 500],  # micro-eV
+                                   'q_bins': [0.3, 0.2, 1.9],  # inverse Angst
+                                   'banks': 'bank1,bank3,bank4',
+                                   'mask_file': 'BASIS_Mask_default_111.xml',
+                                   'parameter_file': 'BASIS_silicon_111_Parameters.xml',
+                                   'default_energy': 2.0826,  # meV
+                                   'vanadium_bins': [-0.0034, 0.068, 0.0034]
                                    },
-                    "silicon311": {"name": "silicon311",
-                                   "energy_bins": [-740, 1.6, 740],
-                                   "q_bins": [0.5, 0.2, 3.7],
-                                   "mask_file": "BASIS_Mask_default_311.xml",
-                                   "parameter_file": "BASIS_silicon_311_Parameters.xml",
-                                   "default_energy": 7.6368,  # mili-eV
-                                   "vanadium_bins": [-0.015, 0.030, 0.015]# mili-eV
+                    'silicon311': {'name': 'silicon311',
+                                   'energy_bins': [-740, 1.6, 740],
+                                   'q_bins': [0.5, 0.2, 3.7],
+                                   'banks': 'bank2',
+                                   'mask_file': 'BASIS_Mask_default_311.xml',
+                                   'parameter_file': 'BASIS_silicon_311_Parameters.xml',
+                                   'default_energy': 7.6368,  # meV
+                                   'vanadium_bins': [-0.015, 0.030, 0.015]
                                    }
                     }
 
-#pylint: disable=too-many-instance-attributes
+# pylint: disable=too-many-instance-attributes
 
 
 class BASISReduction(PythonAlgorithm):
@@ -114,15 +116,15 @@ class BASISReduction(PythonAlgorithm):
         self.declareProperty('MonitorNorm', True,
                              'Normalization with wavelength-dependent monitor counts')
         self.declareProperty('ExcludeTimeSegment', '',
-                             'Exclude a contigous time segment; '+
-                             'Examples: "71546:0-60" filter run 71546 from '+
-                             'start to 60 seconds, "71546:300-600", '+
+                             'Exclude a contigous time segment; ' +
+                             'Examples: "71546:0-60" filter run 71546 from ' +
+                             'start to 60 seconds, "71546:300-600", ' +
                              '"71546:120-end" from 120s to the end of the run')
-        grouping_type = ["None", "Low-Resolution", "By-Tube"]
-        self.declareProperty("GroupDetectors", "None",
+        grouping_type = ['None', 'Low-Resolution', 'By-Tube']
+        self.declareProperty('GroupDetectors', 'None',
                              StringListValidator(grouping_type),
-                             "Switch for grouping detectors")
-        self.declareProperty('NormalizeToFirst', False, 'Normalize spectra '+
+                             'Switch for grouping detectors')
+        self.declareProperty('NormalizeToFirst', False, 'Normalize spectra ' +
                              'to intensity of spectrum with lowest Q?')
 
         # Properties affected by the reflection selected
@@ -178,7 +180,7 @@ class BASISReduction(PythonAlgorithm):
         self.setPropertyGroup('NormWavelengthRange', titleDivideByVanadium)
 
         # Properties setting the saving of NSXPE file
-        title_nxspe= 'Save to NXSPE'
+        title_nxspe = 'Save to NXSPE'
         self.declareProperty('SaveNXSPE', False, direction=Direction.Input,
                              doc='Do we save to NXSPE format?')
         nxspe_enabled = EnabledWhenProperty('SaveNXSPE',
@@ -202,7 +204,7 @@ class BASISReduction(PythonAlgorithm):
                              doc='Output dynamic susceptibility (Xqw)')
         self.setPropertyGroup('OutputSusceptibility', titleAddionalOutput)
 
-    #pylint: disable=too-many-branches
+    # pylint: disable=too-many-branches
     def PyExec(self):
         config['default.facility'] = 'SNS'
         config['default.instrument'] = self._long_inst
@@ -229,15 +231,15 @@ class BASISReduction(PythonAlgorithm):
             self._nxspe_psi_angle_log = self.getProperty('PsiAngleLog').value
             self._nxspe_offset = self.getProperty('PsiOffset').value
 
-        datasearch = config["datasearch.searcharchive"]
-        if datasearch != "On":
-            config["datasearch.searcharchive"] = "On"
+        datasearch = config['datasearch.searcharchive']
+        if datasearch != 'On':
+            config['datasearch.searcharchive'] = 'On'
 
         # Apply default mask if not supplied by user
         self._overrideMask = bool(self._maskFile)
         if not self._overrideMask:
             config.appendDataSearchDir(DEFAULT_MASK_GROUP_DIR)
-            self._maskFile = self._reflection["mask_file"]
+            self._maskFile = self._reflection['mask_file']
 
         sapi.LoadMask(Instrument='BASIS',
                       OutputWorkspace='BASIS_MASK',
@@ -248,29 +250,29 @@ class BASISReduction(PythonAlgorithm):
         self._dMask = _dMask[1]
         sapi.DeleteWorkspace(_dMask[0])
 
-        ############################
-        ##  Process the Vanadium  ##
-        ############################
+        ##########################
+        #  Process the Vanadium  #
+        ##########################
 
-        norm_runs = self.getProperty("NormRunNumbers").value
+        norm_runs = self.getProperty('NormRunNumbers').value
         if self._doNorm and bool(norm_runs):
-            if ";" in norm_runs:
-                raise SyntaxError("Normalization does not support run groups")
-            self._normalizationType = self.getProperty("NormalizationType").value
-            self.log().information("Divide by Vanadium with normalization" +
+            if ';' in norm_runs:
+                raise SyntaxError('Normalization does not support run groups')
+            self._normalizationType = self.getProperty('NormalizationType').value
+            self.log().information('Divide by Vanadium with normalization' +
                                    self._normalizationType)
 
             # Following steps common to all types of Vanadium normalization
 
             # norm_runs encompasses a single set, thus _getRuns returns
             # a list of only one item
-            norm_set = self._getRuns(norm_runs, doIndiv=False)[0]
-            normWs = self._sum_and_calibrate(norm_set, extra_extension="_norm")
+            norm_set = self._get_runs(norm_runs, doIndiv=False)[0]
+            normWs = self._sum_and_calibrate(norm_set, extra_extension='_norm')
 
-            normRange = self.getProperty("NormWavelengthRange").value
+            normRange = self.getProperty('NormWavelengthRange').value
             bin_width = normRange[1] - normRange[0]
             # This rebin integrates counts onto a histogram of a single bin
-            if self._normalizationType == "by detector ID":
+            if self._normalizationType == 'by detector ID':
                 self._normRange = [normRange[0], bin_width, normRange[1]]
                 sapi.Rebin(InputWorkspace=normWs,
                            OutputWorkspace=normWs,
@@ -284,20 +286,20 @@ class BASISReduction(PythonAlgorithm):
                                             RangeUpper=normRange[1],
                                             OutputWorkspace='BASIS_NORM_MASK')
             # additional reduction steps when normalizing by Q slice
-            if self._normalizationType == "by Q slice":
+            if self._normalizationType == 'by Q slice':
                 self._normWs = self._group_and_SofQW(normWs, self._etBins,
                                                      isSample=False)
 
-        ##########################
-        ##  Process the sample  ##
-        ##########################
-        self._run_list = self._getRuns(self.getProperty("RunNumbers").value,
-                                       doIndiv=self._doIndiv)
+        ########################
+        #  Process the sample  #
+        ########################
+        self._run_list = self._get_runs(self.getProperty('RunNumbers').value,
+                                        doIndiv=self._doIndiv)
         for run_set in self._run_list:
             self._samWs = self._sum_and_calibrate(run_set)
             self._samWsRun = str(run_set[0])
             # Divide by Vanadium detector ID, if pertinent
-            if self._normalizationType == "by detector ID":
+            if self._normalizationType == 'by detector ID':
                 # Mask detectors with insufficient Vanadium signal before dividing
                 sapi.MaskDetectors(Workspace=self._samWs,
                                    MaskedWorkspace='BASIS_NORM_MASK')
@@ -310,7 +312,7 @@ class BASISReduction(PythonAlgorithm):
             if not self._debugMode:
                 sapi.DeleteWorkspace(self._samWs)  # delete events file
             # Divide by Vanadium Q slice, if pertinent
-            if self._normalizationType == "by Q slice":
+            if self._normalizationType == 'by Q slice':
                 sapi.Divide(LHSWorkspace=self._samSqwWs,
                             RHSWorkspace=self._normWs,
                             OutputWorkspace=self._samSqwWs)
@@ -333,49 +335,49 @@ class BASISReduction(PythonAlgorithm):
                            OutputWorkspace=self._samSqwWs)
             self.serialize_in_log(self._samSqwWs)  # store the call
             # Output Dave and Nexus files
-            extension = "_divided.dat" if self._doNorm else ".dat"
-            dave_grp_filename = self._makeRunName(self._samWsRun, False) +\
+            extension = '_divided.dat' if self._doNorm else '.dat'
+            dave_grp_filename = self._make_run_name(self._samWsRun, False) + \
                 extension
             sapi.SaveDaveGrp(Filename=dave_grp_filename,
                              InputWorkspace=self._samSqwWs,
                              ToMicroEV=True)
-            extension = "_divided_sqw.nxs" if self._doNorm else "_sqw.nxs"
-            processed_filename = self._makeRunName(self._samWsRun, False) +\
+            extension = '_divided_sqw.nxs' if self._doNorm else '_sqw.nxs'
+            processed_filename = self._make_run_name(self._samWsRun, False) + \
                 extension
             sapi.SaveNexus(Filename=processed_filename,
                            InputWorkspace=self._samSqwWs)
 
             # additional output
-            if self.getProperty("OutputSusceptibility").value:
+            if self.getProperty('OutputSusceptibility').value:
                 temperature = mtd[self._samSqwWs].getRun().\
                     getProperty(TEMPERATURE_SENSOR).getStatistics().mean
-                samXqsWs = self._samSqwWs.replace("sqw", "Xqw")
+                samXqsWs = self._samSqwWs.replace('sqw', 'Xqw')
                 sapi.ApplyDetailedBalance(InputWorkspace=self._samSqwWs,
                                           OutputWorkspace=samXqsWs,
                                           Temperature=str(temperature))
                 sapi.ConvertUnits(InputWorkspace=samXqsWs,
                                   OutputWorkspace=samXqsWs,
-                                  Target="DeltaE_inFrequency",
-                                  Emode="Indirect")
+                                  Target='DeltaE_inFrequency',
+                                  Emode='Indirect')
                 self.serialize_in_log(samXqsWs)
-                susceptibility_filename = processed_filename.replace("sqw", "Xqw")
+                susceptibility_filename = processed_filename.replace('sqw', 'Xqw')
                 sapi.SaveNexus(Filename=susceptibility_filename,
                                InputWorkspace=samXqsWs)
 
         if not self._debugMode:
-            sapi.DeleteWorkspace("BASIS_MASK")  # delete the mask
+            sapi.DeleteWorkspace('BASIS_MASK')  # delete the mask
             if self._doNorm and bool(norm_runs):
-                sapi.DeleteWorkspace("BASIS_NORM_MASK")  # delete vanadium mask
+                sapi.DeleteWorkspace('BASIS_NORM_MASK')  # delete vanadium mask
                 sapi.DeleteWorkspace(self._normWs)  # Delete vanadium S(Q)
-                if self._normalizationType == "by Q slice":
+                if self._normalizationType == 'by Q slice':
                     sapi.DeleteWorkspace(normWs)  # Delete vanadium events file
-            if self.getProperty("ExcludeTimeSegment").value:
+            if self.getProperty('ExcludeTimeSegment').value:
                 sapi.DeleteWorkspace('splitter')
                 [sapi.DeleteWorkspace(name) for name in
                  ('splitted_unfiltered', 'TOFCorrectWS') if
                  AnalysisDataService.doesExist(name)]
 
-    def _getRuns(self, rlist, doIndiv=True):
+    def _get_runs(self, rlist, doIndiv=True):
         """
         Create sets of run numbers for analysis. A semicolon indicates a
         separate group of runs to be processed together.
@@ -386,33 +388,33 @@ class BASISReduction(PythonAlgorithm):
          each string is a run number.
         """
         run_list = []
-        # ";" separates the runs into substrings. Each substring
+        # ';' separates the runs into substrings. Each substring
         #  represents a set of runs
         rlvals = rlist.split(';')
         for rlval in rlvals:
-            iap = IntArrayProperty("", rlval)  # split the substring
+            iap = IntArrayProperty('', rlval)  # split the substring
             if doIndiv:
                 run_list.extend([[x] for x in iap.value])
             else:
                 run_list.append(iap.value)
         return run_list
 
-    def _makeRunName(self, run, useShort=True):
+    def _make_run_name(self, run, useShort=True):
         """
         Make name like BSS_24234
         """
         if useShort:
-            return self._short_inst + "_" + str(run)
+            return self._short_inst + '_' + str(run)
         else:
-            return self._long_inst + "_" + str(run)
+            return self._long_inst + '_' + str(run)
 
-    def _makeRunFile(self, run):
+    def _make_run_file(self, run):
         """
         Make name like BSS_24234_event.nxs
         """
-        return "{0}_{1}_event.nxs".format(self._short_inst,str(run))
+        return '{0}_{1}_event.nxs'.format(self._short_inst, str(run))
 
-    def _sumRuns(self, run_set, sam_ws, mon_ws, extra_ext=None):
+    def _sum_runs(self, run_set, sam_ws, mon_ws, extra_ext=None):
         """
         Aggregate the set of runs
         @param run_set: list of run numbers
@@ -421,21 +423,16 @@ class BASISReduction(PythonAlgorithm):
         @param extra_ext: string to be added to the temporary workspaces
         """
         for run in run_set:
-            ws_name = self._makeRunName(run)
+            ws_name = self._make_run_name(run)
             if extra_ext is not None:
                 ws_name += extra_ext
-            mon_ws_name = ws_name + "_monitors"
-            run_file = self._makeRunFile(run)
-
-            # Faster loading for the 311 reflection
-            if self._reflection["name"] == "silicon311":
-                kwargs = {"BankName": "bank2"}  # 311 analyzers only in bank2
-            else:
-                kwargs = {}
+            mon_ws_name = ws_name + '_monitors'
+            run_file = self._make_run_file(run)
 
             sapi.LoadEventNexus(Filename=run_file,
-                                OutputWorkspace=ws_name, **kwargs)
-            if str(run)+':' in self.getProperty("ExcludeTimeSegment").value:
+                                OutputWorkspace=ws_name,
+                                BankName=self._reflection['banks'])
+            if str(run)+':' in self.getProperty('ExcludeTimeSegment').value:
                 self._filterEvents(str(run), ws_name)
 
             if self._MonNorm:
@@ -453,14 +450,14 @@ class BASISReduction(PythonAlgorithm):
                           OutputWorkspace=mon_ws)
                 sapi.DeleteWorkspace(mon_ws_name)
 
-    def _calibData(self, sam_ws, mon_ws):
+    def _calibrate_data(self, sam_ws, mon_ws):
         sapi.MaskDetectors(Workspace=sam_ws,
                            DetectorList=self._dMask)
         sapi.ModeratorTzeroLinear(InputWorkspace=sam_ws,
                                   OutputWorkspace=sam_ws)
         sapi.LoadParameterFile(Workspace=sam_ws,
                                Filename=pjoin(DEFAULT_CONFIG_DIR,
-                                              self._reflection["parameter_file"]))
+                                              self._reflection['parameter_file']))
         sapi.ConvertUnits(InputWorkspace=sam_ws,
                           OutputWorkspace=sam_ws,
                           Target='Wavelength',
@@ -490,18 +487,18 @@ class BASISReduction(PythonAlgorithm):
                         RHSWorkspace=mon_ws,
                         OutputWorkspace=sam_ws)
 
-    def _sum_and_calibrate(self, run_set, extra_extension=""):
+    def _sum_and_calibrate(self, run_set, extra_extension=''):
         """
         Aggregate the set of runs and calibrate
         @param run_set: list of run numbers
         @param extra_extension: string to be added to the workspace names
         @return: workspace name of the aggregated and calibrated data
         """
-        wsName = self._makeRunName(run_set[0])
+        wsName = self._make_run_name(run_set[0])
         wsName += extra_extension
-        wsName_mon = wsName + "_monitors"
-        self._sumRuns(run_set, wsName, wsName_mon, extra_extension)
-        self._calibData(wsName, wsName_mon)
+        wsName_mon = wsName + '_monitors'
+        self._sum_runs(run_set, wsName, wsName_mon, extra_extension)
+        self._calibrate_data(wsName, wsName_mon)
         if not self._debugMode:
             if self._MonNorm:
                 sapi.DeleteWorkspace(wsName_mon)  # delete monitors
@@ -524,11 +521,11 @@ class BASISReduction(PythonAlgorithm):
         sapi.Rebin(InputWorkspace=wsName,
                    OutputWorkspace=wsName,
                    Params=etRebins)
-        if self._groupDetOpt != "None":
-            if self._groupDetOpt == "Low-Resolution":
-                grp_file = "BASIS_Grouping_LR.xml"
+        if self._groupDetOpt != 'None':
+            if self._groupDetOpt == 'Low-Resolution':
+                grp_file = 'BASIS_Grouping_LR.xml'
             else:
-                grp_file = "BASIS_Grouping.xml"
+                grp_file = 'BASIS_Grouping.xml'
             # If mask override used, we need to add default grouping file
             # location to search paths
             if self._overrideMask:
@@ -536,7 +533,7 @@ class BASISReduction(PythonAlgorithm):
                 sapi.GroupDetectors(InputWorkspace=wsName,
                                     OutputWorkspace=wsName,
                                     MapFile=grp_file,
-                                    Behaviour="Sum")
+                                    Behaviour='Sum')
 
         # Output NXSPE file (must be done before transforming the
         # vertical axis to point data)
@@ -564,13 +561,13 @@ class BASISReduction(PythonAlgorithm):
         sapi.SofQW3(InputWorkspace=wsName,
                     QAxisBinning=self._qBins,
                     EMode='Indirect',
-                    EFixed=self._reflection["default_energy"],
+                    EFixed=self._reflection['default_energy'],
                     OutputWorkspace=wsSqwName)
         # Rebin the vanadium within the elastic line
         if not isSample:
             sapi.Rebin(InputWorkspace=wsSqwName,
                        OutputWorkspace=wsSqwName,
-                       Params=self._reflection["vanadium_bins"])
+                       Params=self._reflection['vanadium_bins'])
         return wsSqwName
 
     def _ScaleY(self, wsName):
@@ -584,7 +581,7 @@ class BASISReduction(PythonAlgorithm):
         sapi.Scale(InputWorkspace=wsName,
                    OutputWorkspace=wsName,
                    Factor=1./maximumYvalue,
-                   Operation="Multiply")
+                   Operation='Multiply')
 
     def generateSplitterWorkspace(self, fragment):
         r"""Create a table workspace with time intervals to keep
@@ -601,7 +598,7 @@ class BASISReduction(PythonAlgorithm):
         splitter = sapi.CreateEmptyTableWorkspace(OutputWorkspace='splitter')
         splitter.addColumn('double', 'start')
         splitter.addColumn('double', 'stop')
-        splitter.addColumn('str', 'target') #, 'str')
+        splitter.addColumn('str', 'target')
         if a == 0.0:
             splitter.addRow([b, inf, '0'])
         elif b == inf:
@@ -620,7 +617,7 @@ class BASISReduction(PythonAlgorithm):
         ws_name : str
             name of the workspace to filter
         """
-        for run_fragment in self.getProperty("ExcludeTimeSegment").value.split(';'):
+        for run_fragment in self.getProperty('ExcludeTimeSegment').value.split(';'):
             if run+':' in run_fragment:
                 self.generateSplitterWorkspace(run_fragment.split(':')[1])
                 sapi.FilterEvents(InputWorkspace=ws_name,
@@ -660,6 +657,7 @@ class BASISReduction(PythonAlgorithm):
             self._as_json['properties'].update(forced)
         r = mtd[ws_name].mutableRun()
         r.addProperty('asString', json.dumps(self._as_json), True)
+
 
 # Register algorithm with Mantid.
 AlgorithmFactory.subscribe(BASISReduction)

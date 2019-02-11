@@ -74,8 +74,6 @@ void Shape2DCollection::draw(QPainter &painter) const {
     shape->draw(painter);
     painter.restore();
   }
-  // std::cerr << m_transform.m11() << ' ' << m_transform.m22() << ' ' <<
-  // m_transform.m33() << '\n';
 }
 
 /**

@@ -224,14 +224,14 @@ std::pair<double, double> getBinRange(MatrixWorkspace_sptr workspace) {
 }
 
 double convertBoundToDoubleAndFormat(std::string const &str) {
-  return std::round(std::stod(str) * 10) / 10;
+  return std::round(std::stod(str) * 1000) / 1000;
 }
 
 std::string constructExcludeRegionString(std::vector<double> const &bounds) {
   std::string excludeRegion;
   for (auto it = bounds.begin(); it < bounds.end(); ++it) {
-    auto splitDouble = splitStringBy(std::to_string(*it), ".");
-    excludeRegion += splitDouble[0] + "." + splitDouble[1].front();
+    auto const splitDouble = splitStringBy(std::to_string(*it), ".");
+    excludeRegion += splitDouble[0] + "." + splitDouble[1].substr(0, 3);
     excludeRegion += it == bounds.end() - 1 ? "" : ",";
   }
   return excludeRegion;

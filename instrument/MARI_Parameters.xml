@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<parameter-file instrument = "MARI" valid-from = "2013-06-12T00:00:00">
+<parameter-file instrument = "MARI" valid-from = "2016-09-12T00:00:00">
 
 <component-link name = "MARI">
 
@@ -347,10 +347,15 @@
 <parameter name="sample_rmm">
   <value val="1"/>
 </parameter>
-<!-- Vanaduim mass used in absolute units normalization and is usually instrument specific (changes rarely) -->
+<!-- Vanadium mass used in absolute units normalization and is usually instrument specific (changes rarely) -->
+<!-- This is the value for the cylinder mounted on the CCR stick (39.2g with legs) -->
 <parameter name="vanadium-mass">
   <value val="32.58"/>
 </parameter>
+<!-- This is the value for the cylinder mounted on the candle stick (37.36g with legs)
+<parameter name="vanadium-mass">
+  <value val="37.36"/>
+</parameter> -->
 <!-- if this value set to true, modo-vanadium run is not analyzed and masks obtained for arbitrary units are used for mono-vanadium -->
 <parameter name="use_sam_msk_on_monovan" type = "bool">
   <value val="False"/>
