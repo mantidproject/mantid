@@ -42,7 +42,7 @@ class TransformWidget(QtGui.QWidget):
 
     def updateDisplay(self,method):
         self._view.hideAll()
-        self._view.show(method)
+        self._view.showMethod(method)
 
     def getViews(self):
         groupedViews = {}
