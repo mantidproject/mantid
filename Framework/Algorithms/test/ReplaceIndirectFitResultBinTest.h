@@ -34,6 +34,11 @@ MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) {
       workspaceName);
 }
 
+WorkspaceGroup_sptr getADSGroupWorkspace(std::string const &workspaceName) {
+  return AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+      workspaceName);
+}
+
 IAlgorithm_sptr setUpReplaceAlgorithm(MatrixWorkspace_sptr inputWorkspace,
                                       MatrixWorkspace_sptr singleBinWorkspace,
                                       std::string const &outputName) {
@@ -114,13 +119,33 @@ public:
 
     algorithm->execute();
 
-    auto const outputName = algorithm->getPropertyValue("OutputWorkspace");
-    auto const output = getADSMatrixWorkspace(outputName);
-
-    auto const expectedWorkspace =
+    auto const output = getADSMatrixWorkspace(OUTPUT_NAME);
+    auto const expectedOutput =
         createWorkspaceWithBinValues(3, {2.0, 3.0, 4.0}, 3);
-    populateWorkspace(expectedWorkspace, {1.1, 25.0, 1.3}, {0.1, 2.5, 0.3});
-    TS_ASSERT(!compareWorkspaces(output, expectedWorkspace));
+    populateWorkspace(expectedOutput, {1.1, 25.0, 1.3}, {0.1, 2.5, 0.3});
+    TS_ASSERT(!compareWorkspaces(output, expectedOutput));
+  }
+
+  void
+  test_that_the_algorithm_produces_an_output_workspace_which_is_put_into_a_group_with_the_correct_number_of_workspaces() {
+    setUpResultWorkspaces(INPUT_NAME, SINGLE_BIN_NAME);
+    auto algorithm =
+        setUpReplaceAlgorithm(INPUT_NAME, SINGLE_BIN_NAME, OUTPUT_NAME);
+
+    algorithm->execute();
+
+    assertIsInGroupWithEntries(OUTPUT_NAME, 2);
+  }
+
+  void
+  test_that_the_algorithm_produces_an_output_workspace_which_is_put_into_a_group_with_the_correct_number_of_workspaces_when_the_inputName_and_outputName_are_the_same() {
+    setUpResultWorkspaces(INPUT_NAME, SINGLE_BIN_NAME);
+    auto algorithm =
+        setUpReplaceAlgorithm(INPUT_NAME, SINGLE_BIN_NAME, INPUT_NAME);
+
+    algorithm->execute();
+
+    assertIsInGroupWithEntries(INPUT_NAME, 1);
   }
 
   void
@@ -178,16 +203,6 @@ public:
   }
 
   void
-  test_that_the_algorithm_throws_when_provided_an_empty_string_for_the_output_workspace_name() {
-    setUpResultWorkspaces(INPUT_NAME, SINGLE_BIN_NAME, 3, 3, {2.0, 3.0, 4.0},
-                          {1.1, 1.2, 1.3}, {0.1, 0.2, 0.3}, {3.0}, {25.0},
-                          {2.5});
-    auto algorithm = setUpReplaceAlgorithm(INPUT_NAME, SINGLE_BIN_NAME, "");
-
-    TS_ASSERT_THROWS(algorithm->execute(), std::runtime_error);
-  }
-
-  void
   test_that_the_algorithm_throws_when_provided_an_empty_string_for_the_output_workspace_namessasdasdasdas() {
     setUpResultWorkspaces(INPUT_NAME, SINGLE_BIN_NAME, 3, 3, {2.0, 3.0, 4.0},
                           {1.1, 1.2, 1.3}, {0.1, 0.2, 0.3}, {1000.0}, {25.0},
@@ -227,6 +242,16 @@ private:
     auto group = boost::make_shared<WorkspaceGroup>();
     group->addWorkspace(workspace);
     m_ads->addOrReplace(workspaceName + "s", group);
+  }
+
+  void assertIsInGroupWithEntries(std::string const &outputName,
+                                  int numberOfEntries) {
+    auto const group = getADSGroupWorkspace(INPUT_NAME + "s");
+    auto const output = getADSMatrixWorkspace(outputName);
+
+    TS_ASSERT(group);
+    TS_ASSERT(group->contains(output));
+    TS_ASSERT_EQUALS(group->getNumberOfEntries(), numberOfEntries);
   }
 
   std::unique_ptr<SetUpADSWithWorkspace> m_ads;
