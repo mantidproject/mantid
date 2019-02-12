@@ -251,7 +251,7 @@ template<>
 inline bool TableColumn<long>::compareVectors(const std::vector<long> &newVector, double tolerance) const {
   long roundedTol = lround(tolerance);
   for(size_t i =0; i<m_data.size(); i++){
-      if(abs(m_data[i]-newVector[i])>roundedTol){
+      if(std::labs(m_data[i]-newVector[i])>roundedTol){
         return false;
       }
     }
@@ -264,13 +264,13 @@ template<>
 inline bool TableColumn<unsigned long>::compareVectors(const std::vector<unsigned long> &newVector, double tolerance) const {
   long roundedTol = lround(tolerance);
   for(size_t i =0; i<m_data.size(); i++){
-      if(abs(m_data[i]-newVector[i])>roundedTol){
+      if(std::labs(m_data[i]-newVector[i])>roundedTol){
         return false;
       }
     }
   return true;
   }
-}
+
 
 
 ///Template specialisation for strings for comparison
@@ -289,9 +289,9 @@ inline bool TableColumn<std::string>::compareVectors(const std::vector<std::stri
 template <>
 inline bool TableColumn<Kernel::V3D>::compareVectors(const std::vector<Kernel::V3D> &newVector, double tolerance)const {
   for(size_t i =0; i<m_data.size(); i++){
-      double dif_x= m_data[i].X() - newVector[i].X();
-      double dif_y= m_data[i].Y() - newVector[i].Y();
-      double dif_z= m_data[i].Z() - newVector[i].Z();
+      double dif_x= fabs(m_data[i].X() - newVector[i].X());
+      double dif_y= fabs(m_data[i].Y() - newVector[i].Y());
+      double dif_z= fabs(m_data[i].Z() - newVector[i].Z());
       if(dif_x>tolerance||dif_y>tolerance||dif_z>tolerance){
         return false;
       }
