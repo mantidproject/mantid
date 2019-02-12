@@ -18,13 +18,33 @@ from qtpy.QtWidgets import QMessageBox
 # local imports
 from mantid import simpleapi
 
+API_IMPORT = ("# import mantid algorithms\n"
+              "from mantid.simpleapi import *\n\n")
+
+
+def add_mantid_api_import(editor, content):
+    future_imported_line_no = check_future_import(content)
+    if future_imported_line_no:
+        editor.setCursorPosition(future_imported_line_no, 0)
+    editor.insert(API_IMPORT)
+
 
 def attr_imported(attr, content):
     return bool(re.search(r"import .*(| |,)" + attr, content))
 
 
 def attr_called(attr, content):
-    return re.search(r'(^|\s)+' + attr + '\(*\)', content)
+    return bool(re.search(r'(^|\s)+' + attr + '\(.*\)', content))
+
+
+def check_future_import(content):
+    """Return line number of __future__ import in content, if present"""
+    match = re.search(r'(import .*__future__|from __future__  *import)',
+                      content)
+    if match:
+        line_no = content.count('\n', 0, match.end()) + 1
+        return line_no
+    return False
 
 
 def mantid_algorithm_used_without_import(content):

@@ -18,13 +18,12 @@ from qtpy.QtWidgets import (QTabWidget, QToolButton, QVBoxLayout, QWidget)
 
 # local imports
 from mantidqt.widgets.codeeditor.interpreter import PythonFileInterpreter
-from mantidqt.widgets.codeeditor.scriptcompatibility import mantid_api_import_needed
+from mantidqt.widgets.codeeditor.scriptcompatibility import (mantid_api_import_needed,
+                                                             add_mantid_api_import)
 
 
 NEW_TAB_TITLE = 'New'
 MODIFIED_MARKER = '*'
-API_IMPORT = ("# import mantid algorithms\n"
-              "from mantid.simpleapi import *\n\n")
 
 
 def _tab_title_and_toolip(filename):
@@ -189,7 +188,7 @@ class MultiPythonFileInterpreter(QWidget):
 
         self.append_new_editor(content=content, filename=filepath)
         if mantid_api_import_needed(content) is True:
-            self.current_editor().editor.insert(API_IMPORT)
+            add_mantid_api_import(self.current_editor().editor, content)
 
     def open_files_in_new_tabs(self, filepaths):
         for filepath in filepaths:
