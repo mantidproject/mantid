@@ -19,6 +19,7 @@ using namespace Mantid::API;
 using MantidQt::API::BatchAlgorithmRunner;
 
 namespace {
+Mantid::Kernel::Logger g_log("ISISEnergyTransfer");
 
 bool doesExistInADS(std::string const &workspaceName) {
   return AnalysisDataService::Instance().doesExist(workspaceName);
@@ -29,7 +30,7 @@ WorkspaceGroup_sptr getADSWorkspaceGroup(std::string const &workspaceName) {
       workspaceName);
 }
 
-std::string createRangeString(std::size_t const &from, std::size_t const &to) {
+std::string createRangeString(std::size_t from, std::size_t to) {
   return std::to_string(from) + "-" + std::to_string(to);
 }
 
