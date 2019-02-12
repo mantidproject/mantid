@@ -197,6 +197,19 @@ public:
   /// Re-arrange values in this column according to indices in indexVec
   void sortValues(const std::vector<size_t> &indexVec) override;
 
+  bool equals(Column *otherColumn,double tolerance) const override{
+    auto convertedOtherColumn = dynamic_cast<TableColumn*>(otherColumn);
+    if(!convertedOtherColumn){
+      return false;
+    }
+    auto type = this->type();
+    if(convertedOtherColumn->size()!=this->size()||convertedOtherColumn->type()!=type){
+      return false;
+    }
+    auto otherData = convertedOtherColumn->data();
+    return compareVectors(otherData, tolerance);
+  }
+
 protected:
   /// Resize.
   void resize(size_t count) override { m_data.resize(count); }
@@ -220,6 +233,16 @@ private:
   /// Column data
   std::vector<Type> m_data;
   friend class TableWorkspace;
+
+  //helper function template for equality
+  bool compareVectors(const std::vector<Type> &newVector, double tolerance) const{
+    for(size_t i =0; i<m_data.size(); i++){
+      if(fabs(m_data[i]-newVector[i])>tolerance){
+        return false;
+      }
+    }
+  return true;
+  }
 };
 
 /// Template specialization for strings so they can contain spaces
