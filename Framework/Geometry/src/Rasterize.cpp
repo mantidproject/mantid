@@ -8,7 +8,6 @@
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidGeometry/Objects/Track.h"
-#include <iostream> // REMOVE
 
 namespace Mantid {
 namespace Geometry {
@@ -259,16 +258,16 @@ Raster calculateCylinder(const V3D &beamDirection, const CSGObject &shape,
       for (size_t k = 0; k < Ni; ++k) {
         const double phi =
             2. * M_PI * static_cast<double>(k) / static_cast<double>(Ni);
-        const double rSinPhi = R * sin(phi);
-        const double rCosPhi = R * cos(phi);
+        const double rSinPhi = -1. * R * sin(phi);
+        const double rCosPhi = -1. * R * cos(phi);
 
         // Calculate the current position in the shape in Cartesian coordinates
         const double xcomp =
-            rSinPhi * x_prime[0] + rCosPhi * y_prime[0] + z * z_prime[0];
+            rCosPhi * x_prime[0] + rSinPhi * y_prime[0] + z * z_prime[0];
         const double ycomp =
-            rSinPhi * x_prime[1] + rCosPhi * y_prime[1] + z * z_prime[1];
+            rCosPhi * x_prime[1] + rSinPhi * y_prime[1] + z * z_prime[1];
         const double zcomp =
-            rSinPhi * x_prime[2] + rCosPhi * y_prime[2] + z * z_prime[2];
+            rCosPhi * x_prime[2] + rSinPhi * y_prime[2] + z * z_prime[2];
         const auto position = center + V3D(xcomp, ycomp, zcomp);
 
         result.position.push_back(position);
