@@ -194,6 +194,7 @@ set ( TEST_FILES
 	WorkspaceCreationTest.h
 	WorkspaceSingleValueTest.h
 	WorkspaceValidatorsTest.h
+	MortonIndex/BitInterleavingTest.h
 )
 
 if(UNITY_BUILD)
