@@ -100,6 +100,9 @@ class FrequencyAnalysisGui(QtGui.QMainWindow):
 
         self.load_widget.load_widget.loadNotifier.add_subscriber(self.transform.LoadObserver)
 
+        self.grouping_tab_widget.group_tab_presenter.groupingNotifier.add_subscriber(self.transform.GroupPairObserver)
+
+
         self.context.instrumentNotifier.add_subscriber(
             self.transform.instrumentObserver)
 

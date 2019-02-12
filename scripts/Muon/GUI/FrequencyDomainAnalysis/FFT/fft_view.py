@@ -155,6 +155,18 @@ class FFTView(QtGui.QWidget):
        index = self.ws.findText(pattern)
        self.ws.removeItem(index)
 
+    def setReTo(self,name):
+        index = self.ws.findText(name)
+        if index == -1:
+           return
+        self.ws.setCurrentIndex(index)
+
+    def setImTo(self,name):
+        index = self.Im_ws.findText(name)
+        if index == -1:
+           return
+        self.Im_ws.setCurrentIndex(index)
+
     # connect signals
     def phaseCheck(self):
         self.phaseCheckSignal.emit()
@@ -167,6 +179,9 @@ class FFTView(QtGui.QWidget):
 
     def getInputWS(self):
         return self.ws.currentText()
+
+    def getInputImWS(self):
+        return self.Im_ws.currentText()
 
     # responses to commands
     def activateButton(self):

@@ -24,6 +24,7 @@ class TransformWidget(QtGui.QWidget):
         self._selector = TransformSelectionWidget(parent=self)
         self.LoadObserver = LoadObserver(self)
         self.instrumentObserver = instrumentObserver(self)
+        self.GroupPairObserver = GroupPairObserver(self)
 
         groupedViews = self.getViews()
 
@@ -60,6 +61,10 @@ class TransformWidget(QtGui.QWidget):
     def handle_new_instrument(self):
         self._maxent.clear()
 
+    def handle_new_group_pair(self):
+        # may have new groups/pairs for multiple runs
+        self._fft.runChanged()
+
 class LoadObserver(Observer):
 
     def __init__(self, outer):
@@ -77,3 +82,12 @@ class instrumentObserver(Observer):
 
     def update(self, observable, arg):
         self.outer.handle_new_instrument()
+
+class GroupPairObserver(Observer):
+
+    def __init__(self, outer):
+        Observer.__init__(self)
+        self.outer = outer
+
+    def update(self, observable, arg):
+        self.outer.handle_new_group_pair()
