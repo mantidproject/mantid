@@ -222,7 +222,8 @@ template <> inline uint256_t pad<2, uint64_t, uint256_t>(uint64_t v) {
   x = (x | x << 16) & 0xff0000ff0000ff0000ff0000ff0000ff0000ff0000ff_cppui256;
   x = (x | x << 8) & 0xf00f00f00f00f00f00f00f00f00f00f00f00f00f00f00f_cppui256;
   x = (x | x << 4) & 0xc30c30c30c30c30c30c30c30c30c30c30c30c30c30c30c3_cppui256;
-  x = (x | x << 2) & 0x249249249249249249249249249249249249249249249249_cppui256;
+  x = (x | x << 2) &
+      0x249249249249249249249249249249249249249249249249_cppui256;
   return x;
 }
 
