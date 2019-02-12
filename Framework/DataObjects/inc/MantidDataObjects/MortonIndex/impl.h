@@ -199,10 +199,10 @@ struct wide_integer<Bits, Signed>::_impl {
 
     int r_idx = 0;
 
-    for (; static_cast<size_t>(r_idx) < sizeof(Integral) && r_idx < arr_size;
+    for (; static_cast<size_t>(r_idx) < sizeof(Integral)/sizeof(base_type) && r_idx < arr_size;
          ++r_idx) {
       base_type &curr = self.m_arr[arr_size - 1 - r_idx];
-      base_type curr_rhs = static_cast<base_type>(r >> (r_idx * CHAR_BIT)) &
+      base_type curr_rhs = static_cast<base_type>(r >> (r_idx * CHAR_BIT*sizeof(base_type))) &
                            std::numeric_limits<base_type>::max();
       curr = curr_rhs;
     }
@@ -1122,10 +1122,8 @@ template <class T, class>
 constexpr wide_integer<Bits, Signed>::operator T() const noexcept {
   static_assert(std::numeric_limits<T>::is_integer, "");
   T res = 0;
-  for (size_t r_idx = 0; r_idx < _impl::arr_size && r_idx < sizeof(T);
-       ++r_idx) {
-    res |=
-        (T(m_arr[_impl::arr_size - 1 - r_idx]) << (_impl::base_bits * r_idx));
+  for (size_t r_idx = 0; r_idx < _impl::arr_size && r_idx < sizeof(T)/sizeof(base_type); ++r_idx) {
+    res |= (T(m_arr[_impl::arr_size - 1 - r_idx]) << (_impl::base_bits * r_idx * sizeof(base_type)));
   }
   return res;
 }
