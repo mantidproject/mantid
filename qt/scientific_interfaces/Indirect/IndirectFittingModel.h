@@ -127,7 +127,7 @@ protected:
   Mantid::API::IAlgorithm_sptr
   createSequentialFit(Mantid::API::IFunction_sptr function) const;
   Mantid::API::IAlgorithm_sptr
-  createSimultaneousFit(Mantid::API::IFunction_sptr function) const;
+  createSimultaneousFit(Mantid::API::MultiDomainFunction_sptr function) const;
   Mantid::API::IAlgorithm_sptr createSimultaneousFitWithEqualRange(
       Mantid::API::IFunction_sptr function) const;
   virtual Mantid::API::MultiDomainFunction_sptr getMultiDomainFunction() const;

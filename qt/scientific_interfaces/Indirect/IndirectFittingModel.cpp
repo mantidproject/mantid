@@ -832,7 +832,7 @@ IAlgorithm_sptr IndirectFittingModel::createSequentialFit(
 }
 
 IAlgorithm_sptr
-IndirectFittingModel::createSimultaneousFit(IFunction_sptr function) const {
+IndirectFittingModel::createSimultaneousFit(MultiDomainFunction_sptr function) const {
   auto fitAlgorithm = simultaneousFitAlgorithm();
   addFitProperties(*fitAlgorithm, function, getResultXAxisUnit());
   addInputDataToSimultaneousFit(fitAlgorithm, m_fittingData);

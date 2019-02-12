@@ -74,129 +74,77 @@ void IndirectFitAnalysisTab::setup() {
   setupFitTab();
   updateResultOptions();
 
-  connect(m_dataPresenter.get(),
-          SIGNAL(startXChanged(double, std::size_t, std::size_t)), this,
-          SLOT(tableStartXChanged(double, std::size_t, std::size_t)));
-  connect(m_dataPresenter.get(),
-          SIGNAL(endXChanged(double, std::size_t, std::size_t)), this,
-          SLOT(tableEndXChanged(double, std::size_t, std::size_t)));
-  connect(
-      m_dataPresenter.get(),
-      SIGNAL(
-          excludeRegionChanged(const std::string &, std::size_t, std::size_t)),
-      this,
-      SLOT(tableExcludeChanged(const std::string &, std::size_t, std::size_t)));
-  connect(m_dataPresenter.get(), SIGNAL(singleResolutionLoaded()), this,
-          SLOT(setModelFitFunction()));
-
-  //connect(m_fitPropertyBrowser, SIGNAL(fitScheduled()), this,
-  //        SLOT(singleFit()));
-  //connect(m_fitPropertyBrowser, SIGNAL(sequentialFitScheduled()), this,
-  //        SLOT(executeFit()));
-
-  //connect(m_fitPropertyBrowser,
-  //        SIGNAL(parameterChanged(const Mantid::API::IFunction *)), this,
-  //        SIGNAL(parameterChanged(const Mantid::API::IFunction *)));
-
-  connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
-          SLOT(setModelFitFunction()));
-  //connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
-  //        SIGNAL(functionChanged()));
-  //connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
-  //        SLOT(updatePlotOptions()));
-  //connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
-  //        SLOT(updateResultOptions()));
-  //connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
-  //        SLOT(updateParameterValues()));
-
-  //connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
-  //        SLOT(updatePlotGuess()));
-
-  connect(m_plotPresenter.get(),
-          SIGNAL(fitSingleSpectrum(std::size_t, std::size_t)), this,
-          SLOT(singleFit(std::size_t, std::size_t)));
-  connect(m_plotPresenter.get(),
-          SIGNAL(runAsPythonScript(const QString &, bool)), this,
-          SIGNAL(runAsPythonScript(const QString &, bool)));
-
-  connect(m_dataPresenter.get(), SIGNAL(dataChanged()), this,
-          SLOT(updateResultOptions()));
-  connect(m_dataPresenter.get(), SIGNAL(dataChanged()), this,
-          SLOT(updateDataReferences()));
-  //connect(m_dataPresenter.get(), SIGNAL(updateAvailableFitTypes()), this,
-  //        SLOT(updateAvailableFitTypes()));
-
   connect(m_outOptionsPresenter.get(), SIGNAL(plotSpectra()), this,
           SLOT(plotSelectedSpectra()));
 
-  connectDataAndSpectrumPresenters();
-  connectDataAndPlotPresenters();
-  connectDataAndFitBrowserPresenters();
-  connectSpectrumAndPlotPresenters();
-  connectFitBrowserAndPlotPresenter();
+  connectDataPresenter();
+  connectPlotPresenter();
+  connectFitPropertyBrowser();
+  connectSpectrumPresenter();
 }
 
-void IndirectFitAnalysisTab::connectDataAndPlotPresenters() {
-  connect(m_dataPresenter.get(), SIGNAL(multipleDataViewSelected()),
-          m_plotPresenter.get(), SLOT(showMultipleDataSelection()));
-  connect(m_dataPresenter.get(), SIGNAL(singleDataViewSelected()),
-          m_plotPresenter.get(), SLOT(hideMultipleDataSelection()));
+void IndirectFitAnalysisTab::connectDataPresenter() {
+  connect(m_dataPresenter.get(),
+    SIGNAL(startXChanged(double, std::size_t, std::size_t)), this,
+    SLOT(tableStartXChanged(double, std::size_t, std::size_t)));
 
-  connect(m_dataPresenter.get(), SIGNAL(dataAdded()), m_plotPresenter.get(),
-          SLOT(appendLastDataToSelection()));
-  connect(m_dataPresenter.get(), SIGNAL(dataRemoved()), m_plotPresenter.get(),
-          SLOT(updateDataSelection()));
+  connect(m_dataPresenter.get(),
+    SIGNAL(endXChanged(double, std::size_t, std::size_t)), this,
+    SLOT(tableEndXChanged(double, std::size_t, std::size_t)));
 
-  connect(m_dataPresenter.get(), SIGNAL(dataChanged()), m_plotPresenter.get(),
-          SLOT(updateAvailableSpectra()));
-  connect(m_dataPresenter.get(), SIGNAL(dataChanged()), m_plotPresenter.get(),
-          SLOT(updatePlots()));
-  connect(m_dataPresenter.get(), SIGNAL(dataChanged()), m_plotPresenter.get(),
-          SLOT(updateGuess()));
+  connect(m_dataPresenter.get(), SIGNAL(excludeRegionChanged(const std::string &, std::size_t, std::size_t)),
+    this, SLOT(tableExcludeChanged(const std::string &, std::size_t, std::size_t)));
 
-  connect(m_dataPresenter.get(), SIGNAL(singleResolutionLoaded()),
-          m_plotPresenter.get(), SLOT(updatePlots()));
-  connect(m_dataPresenter.get(), SIGNAL(singleResolutionLoaded()),
-          m_plotPresenter.get(), SLOT(updateGuess()));
+  connect(m_dataPresenter.get(), SIGNAL(singleResolutionLoaded()), this, SLOT(respondToSingleResolutionLoaded()));
+  connect(m_dataPresenter.get(), SIGNAL(dataChanged()), this, SLOT(respondToDataChanged()));
+  connect(m_dataPresenter.get(), SIGNAL(singleDataViewSelected()), this, SLOT(respondToSingleDataViewSelected()));
+  connect(m_dataPresenter.get(), SIGNAL(multipleDataViewSelected()), this, SLOT(respondToMultipleDataViewSelected()));
+  connect(m_dataPresenter.get(), SIGNAL(dataAdded()), this, SLOT(respondToDataAdded()));
+  connect(m_dataPresenter.get(), SIGNAL(dataRemoved()), this, SLOT(respondToDataRemoved()));
 
+}
+
+void IndirectFitAnalysisTab::connectPlotPresenter() {
+  connect(m_plotPresenter.get(),
+    SIGNAL(fitSingleSpectrum(std::size_t, std::size_t)), this,
+    SLOT(singleFit(std::size_t, std::size_t)));
+  connect(m_plotPresenter.get(),
+    SIGNAL(runAsPythonScript(const QString &, bool)), this,
+    SIGNAL(runAsPythonScript(const QString &, bool)));
   connect(m_plotPresenter.get(), SIGNAL(startXChanged(double)), this,
           SLOT(setDataTableStartX(double)));
   connect(m_plotPresenter.get(), SIGNAL(endXChanged(double)), this,
           SLOT(setDataTableEndX(double)));
-}
-
-void IndirectFitAnalysisTab::connectSpectrumAndPlotPresenters() {
   connect(m_plotPresenter.get(), SIGNAL(selectedFitDataChanged(std::size_t)),
-          m_spectrumPresenter.get(), SLOT(setActiveModelIndex(std::size_t)));
+    this, SLOT(respondToSelectedFitDataChanged(size_t)));
   connect(m_plotPresenter.get(), SIGNAL(noFitDataSelected()),
-          m_spectrumPresenter.get(), SLOT(disableView()));
-  connect(m_spectrumPresenter.get(), SIGNAL(spectraChanged(std::size_t)),
-          m_plotPresenter.get(), SLOT(updateSelectedDataName()));
-  connect(m_spectrumPresenter.get(), SIGNAL(spectraChanged(std::size_t)),
-          m_plotPresenter.get(), SLOT(updateAvailableSpectra()));
+    this, SLOT(respondToNoFitDataSelected()));
+  connect(m_plotPresenter.get(), SIGNAL(plotSpectrumChanged(std::size_t)), this,
+    SLOT(respondToPlotSpectrumChanged(std::size_t)));
+  connect(m_plotPresenter.get(), SIGNAL(fwhmChanged(double)), this,
+    SLOT(respondToFwhmChanged(double)));
+  connect(m_plotPresenter.get(), SIGNAL(backgroundChanged(double)), this,
+    SLOT(respondToBackgroundChanged(double)));
 }
 
-void IndirectFitAnalysisTab::connectFitBrowserAndPlotPresenter() {
-  connect(m_plotPresenter.get(), SIGNAL(selectedFitDataChanged(std::size_t)),
-          this, SLOT(updateParameterValues()));
-  connect(m_plotPresenter.get(), SIGNAL(plotSpectrumChanged(std::size_t)), this,
-          SLOT(setBrowserWorkspaceIndex(std::size_t)));
+void IndirectFitAnalysisTab::connectSpectrumPresenter() {
+  connect(m_spectrumPresenter.get(), SIGNAL(spectraChanged(size_t)),
+    this, SLOT(respondToChangeOfSpectraRange(size_t)));
 
+
+  connect(m_spectrumPresenter.get(), SIGNAL(maskChanged(const std::string &)),
+    this, SLOT(setDataTableExclude(const std::string &)));
+}
+
+void IndirectFitAnalysisTab::connectFitPropertyBrowser() {
+  connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
+    SLOT(setModelFitFunction()));
   connect(m_fitPropertyBrowser,
           SIGNAL(localParameterEditRequested(const QString &)), this,
           SLOT(editLocalParameterValues(const QString &)));
   //connect(m_fitPropertyBrowser, SIGNAL(updatePlotSpectrum(int)),
   //        m_plotPresenter.get(), SLOT(updatePlotSpectrum(int)));
 
-  connect(m_plotPresenter.get(), SIGNAL(fwhmChanged(double)), this,
-          SLOT(updateFitBrowserParameterValues()));
-  connect(m_plotPresenter.get(), SIGNAL(backgroundChanged(double)), this,
-          SLOT(updateFitBrowserParameterValues()));
-
-  connect(m_plotPresenter.get(), SIGNAL(fwhmChanged(double)),
-          m_plotPresenter.get(), SLOT(updateGuess()));
-  connect(m_plotPresenter.get(), SIGNAL(backgroundChanged(double)),
-          m_plotPresenter.get(), SLOT(updateGuess()));
 
   //connect(m_fitPropertyBrowser,
   //        SIGNAL(parameterChanged(const Mantid::API::IFunction *)),
@@ -212,20 +160,6 @@ void IndirectFitAnalysisTab::connectFitBrowserAndPlotPresenter() {
 
   //connect(m_fitPropertyBrowser, SIGNAL(plotGuess()), m_plotPresenter.get(),
   //        SLOT(enablePlotGuessInSeparateWindow()));
-}
-
-void IndirectFitAnalysisTab::connectDataAndSpectrumPresenters() {
-  connect(m_dataPresenter.get(), SIGNAL(singleDataViewSelected()),
-          m_spectrumPresenter.get(), SLOT(setActiveIndexToZero()));
-  connect(m_dataPresenter.get(), SIGNAL(dataChanged()),
-          m_spectrumPresenter.get(), SLOT(updateSpectra()));
-  connect(m_spectrumPresenter.get(), SIGNAL(spectraChanged(std::size_t)),
-          m_dataPresenter.get(), SLOT(updateSpectraInTable(std::size_t)));
-  connect(m_spectrumPresenter.get(), SIGNAL(maskChanged(const std::string &)),
-          this, SLOT(setDataTableExclude(const std::string &)));
-}
-
-void IndirectFitAnalysisTab::connectDataAndFitBrowserPresenters() {
 }
 
 void IndirectFitAnalysisTab::setFitDataPresenter(
@@ -747,6 +681,79 @@ void IndirectFitAnalysisTab::editLocalParameterValues(const QString &parName) {
     }
   }
   m_fitPropertyBrowser->editLocalParameter(parName, wsNames, wsIndices);
+}
+
+void IndirectFitAnalysisTab::respondToChangeOfSpectraRange(size_t i)
+{
+  m_plotPresenter->updateSelectedDataName();
+  m_plotPresenter->updateAvailableSpectra();
+  m_dataPresenter->updateSpectraInTable(i);
+}
+
+void IndirectFitAnalysisTab::respondToSingleResolutionLoaded()
+{
+  setModelFitFunction();
+  m_plotPresenter->updatePlots();
+  m_plotPresenter->updateGuess();
+}
+
+void IndirectFitAnalysisTab::respondToDataChanged()
+{
+  updateResultOptions();
+  updateDataReferences();
+  m_spectrumPresenter->updateSpectra();
+  m_plotPresenter->updateAvailableSpectra();
+  m_plotPresenter->updatePlots();
+  m_plotPresenter->updateGuess();
+}
+
+void IndirectFitAnalysisTab::respondToSingleDataViewSelected()
+{
+  m_spectrumPresenter->setActiveIndexToZero();
+  m_plotPresenter->hideMultipleDataSelection();
+}
+
+void IndirectFitAnalysisTab::respondToMultipleDataViewSelected()
+{
+  m_plotPresenter->showMultipleDataSelection();
+}
+
+void IndirectFitAnalysisTab::respondToDataAdded()
+{
+  m_plotPresenter->appendLastDataToSelection();
+}
+
+void IndirectFitAnalysisTab::respondToDataRemoved()
+{
+  m_plotPresenter->updateDataSelection();
+}
+
+void IndirectFitAnalysisTab::respondToSelectedFitDataChanged(std::size_t i)
+{
+  m_spectrumPresenter->setActiveModelIndex(i);
+  updateParameterValues();
+}
+
+void IndirectFitAnalysisTab::respondToNoFitDataSelected()
+{
+  m_spectrumPresenter->disableView();
+}
+
+void IndirectFitAnalysisTab::respondToPlotSpectrumChanged(std::size_t i)
+{
+  setBrowserWorkspaceIndex(i);
+}
+
+void IndirectFitAnalysisTab::respondToFwhmChanged(double)
+{
+  updateFitBrowserParameterValues();
+  m_plotPresenter->updateGuess();
+}
+
+void IndirectFitAnalysisTab::respondToBackgroundChanged(double)
+{
+  updateFitBrowserParameterValues();
+  m_plotPresenter->updateGuess();
 }
 
 } // namespace IDA

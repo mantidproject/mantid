@@ -117,6 +117,19 @@ private slots:
   void plotSelectedSpectra();
   void editLocalParameterValues(const QString &parName);
 
+  void respondToChangeOfSpectraRange(size_t);
+  void respondToSingleResolutionLoaded();
+  void respondToDataChanged();
+  void respondToSingleDataViewSelected();
+  void respondToMultipleDataViewSelected();
+  void respondToDataAdded();
+  void respondToDataRemoved();
+  void respondToSelectedFitDataChanged(std::size_t);
+  void respondToNoFitDataSelected();
+  void respondToPlotSpectrumChanged(std::size_t);
+  void respondToFwhmChanged(double);
+  void respondToBackgroundChanged(double);
+
 private:
   /// Overidden by child class.
   void setup() override;
@@ -124,11 +137,10 @@ private:
   virtual void setupFitTab() = 0;
   bool validate() override;
 
-  void connectDataAndPlotPresenters();
-  void connectSpectrumAndPlotPresenters();
-  void connectFitBrowserAndPlotPresenter();
-  void connectDataAndSpectrumPresenters();
-  void connectDataAndFitBrowserPresenters();
+  void connectPlotPresenter();
+  void connectSpectrumPresenter();
+  void connectFitPropertyBrowser();
+  void connectDataPresenter();
 
   void plotSelectedSpectra(std::vector<SpectrumToPlot> const &spectra);
   void plotSpectrum(std::string const &workspaceName, std::size_t const &index,
