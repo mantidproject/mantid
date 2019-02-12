@@ -1,0 +1,66 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
+#  This file is part of the mantidqt package
+#
+#
+from __future__ import (absolute_import, unicode_literals)
+
+from workbench.widgets.settings.general.presenter import GeneralSettings
+from workbench.widgets.settings.view import PlotsSettingsView, SettingsView
+
+
+class SettingsPresenter(object):
+    ASK_BEFORE_CLOSE_TITLE = "Confirm exit"
+    ASK_BEFORE_CLOSE_MESSAGE = "Are you sure you want to exit without applying the settings?"
+
+    def __init__(self, parent, view=None):
+        self.view = view if view else SettingsView(parent, self)
+        self.general_settings = GeneralSettings(parent)
+
+        self.current = self.general_settings.view
+        self.view.container.addWidget(self.general_settings.view)
+
+        self.plots_settings_view = PlotsSettingsView(self.view)
+        self.ask_before_close = False
+
+    def show(self):
+        self.view.show()
+
+    def hide(self):
+        self.view.hide()
+
+    def action_current_row_changed(self, new_pos):
+        print("Row changed to", new_pos)
+        self.current.hide()
+        if 0 == new_pos:
+            new_view = self.general_settings.view
+        else:  # 1 == new_pos
+            new_view = self.plots_settings_view
+        # elif 2 == new_pos:
+        #     new_view = self.view.plots_settings_view
+        #     pass
+
+        if self.current != new_view:
+            print("Changing widget.")
+            self.view.container.replaceWidget(self.current, new_view)
+            self.current = new_view
+
+        self.current.show()
+
+    def action_cancel_button(self):
+        if not self.ask_before_close or self.view.ask_before_close():
+            self.view.close()
+
+    def action_ok_button(self):
+        self.ask_before_close = False
+        # TODO save stuff
+        self.view.close()
+        print("OK Button")
+
+    def action_apply_button(self):
+        self.ask_before_close = False
+        print("Apply Button")

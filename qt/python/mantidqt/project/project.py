@@ -9,13 +9,14 @@
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import os
+
 from qtpy.QtWidgets import QFileDialog, QMessageBox
-from qtpy.QtGui import QIcon  # noqa
 
 from mantid.api import AnalysisDataService, AnalysisDataServiceObserver
 from mantidqt.io import open_a_file_dialog
 from mantidqt.project.projectloader import ProjectLoader
 from mantidqt.project.projectsaver import ProjectSaver
+from workbench.config import CONF
 
 
 class Project(AnalysisDataServiceObserver):
@@ -159,11 +160,15 @@ class Project(AnalysisDataServiceObserver):
         # if yes or no return false
         return False
 
-    @staticmethod
-    def _offer_save_message_box(parent):
-        return QMessageBox.question(parent, 'Unsaved Project', "The project is currently unsaved would you like to "
-                                    "save before closing?", QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel,
-                                    QMessageBox.Yes)
+    def _offer_save_message_box(self, parent):
+        if CONF.prompt_save_on_close:
+            return QMessageBox.question(parent, 'Unsaved Project',
+                                        "The project is currently unsaved. Would you like to "
+                                        "save before closing?",
+                                        QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel,
+                                        QMessageBox.Yes)
+        else:
+            return QMessageBox.No
 
     def modified_project(self):
         self.__saved = False

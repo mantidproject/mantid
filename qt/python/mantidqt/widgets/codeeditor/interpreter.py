@@ -1,6 +1,6 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
@@ -9,23 +9,24 @@
 #
 from __future__ import (absolute_import, unicode_literals)
 
+import os.path
 # std imports
 import sys
-import os.path
 import traceback
 
 # 3rd party imports
 from qtpy.QtCore import QObject, Signal
 from qtpy.QtGui import QColor, QFontMetrics
-from qtpy.QtWidgets import QMessageBox, QStatusBar, QVBoxLayout, QWidget, QFileDialog
+from qtpy.QtWidgets import QFileDialog, QMessageBox, QStatusBar, QVBoxLayout, QWidget
 
+from mantidqt.io import open_a_file_dialog
 # local imports
 from mantidqt.widgets.codeeditor.editor import CodeEditor
 from mantidqt.widgets.codeeditor.errorformatter import ErrorFormatter
 from mantidqt.widgets.codeeditor.execution import PythonCodeExecution
-from mantidqt.io import open_a_file_dialog
-
 # Status messages
+from workbench.config import CONF
+
 IDLE_STATUS_MSG = "Status: Idle."
 LAST_JOB_MSG_TEMPLATE = "Last job completed {} at {} in {:.3f}s"
 RUNNING_STATUS_MSG = "Status: Running"
@@ -135,7 +136,7 @@ class PythonFileInterpreter(QWidget):
 
         :return: True if closing was considered successful, false otherwise
         """
-        return self.save(confirm=True)
+        return self.save(confirm=CONF.prompt_save_editor_modified)
 
     def abort(self):
         self._presenter.req_abort()
@@ -157,7 +158,7 @@ class PythonFileInterpreter(QWidget):
         self.status.showMessage(msg)
 
     def replace_tabs_with_spaces(self):
-        self.replace_text(TAB_CHAR, SPACE_CHAR*TAB_WIDTH)
+        self.replace_text(TAB_CHAR, SPACE_CHAR * TAB_WIDTH)
 
     def replace_text(self, match_text, replace_text):
         if self.editor.selectedText() == '':
@@ -166,7 +167,7 @@ class PythonFileInterpreter(QWidget):
         self.editor.replaceSelectedText(new_text)
 
     def replace_spaces_with_tabs(self):
-        self.replace_text(SPACE_CHAR*TAB_WIDTH, TAB_CHAR)
+        self.replace_text(SPACE_CHAR * TAB_WIDTH, TAB_CHAR)
 
     def set_whitespace_visible(self):
         self.editor.setWhitespaceVisibility(CodeEditor.WsVisible)
@@ -179,7 +180,7 @@ class PythonFileInterpreter(QWidget):
         self.editor.clearKeyBinding(key_str)
 
     def toggle_comment(self):
-        if self.editor.selectedText() == '':   # If nothing selected, do nothing
+        if self.editor.selectedText() == '':  # If nothing selected, do nothing
             return
 
         # Note selection indices to restore highlighting later

@@ -20,14 +20,14 @@ import importlib
 import os
 import sys
 
-# third party imports
-from mantid.kernel import (ConfigService, logger, UsageService,
-                           version_str as mantid_version_str)
 from mantid.api import FrameworkManagerImpl
-
+# third party imports
+from mantid.kernel import (ConfigService, UsageService, logger, version_str as mantid_version_str)
 # -----------------------------------------------------------------------------
 # Constants
 # -----------------------------------------------------------------------------
+from workbench.widgets.settings.presenter import SettingsPresenter
+
 SYSCHECK_INTERVAL = 50
 ORIGINAL_SYS_EXIT = sys.exit
 ORIGINAL_STDOUT = sys.stdout
@@ -266,11 +266,15 @@ class MainWindow(QMainWindow):
         action_manage_directories = create_action(self, "Manage User Directories",
                                                   on_triggered=self.open_manage_directories)
 
+        action_settings = create_action(self, "Settings", shortcut="Ctrl+Alt+S",
+                                        on_triggered=self.open_settings_window)
+
         action_quit = create_action(self, "&Quit", on_triggered=self.close,
                                     shortcut="Ctrl+Q",
                                     shortcut_context=Qt.ApplicationShortcut)
         self.file_menu_actions = [action_open, action_load_project, None, action_save_script, action_save_project,
-                                  action_save_project_as, None, action_manage_directories, None, action_quit]
+                                  action_save_project_as, None, action_settings, None, action_manage_directories, None,
+                                  action_quit]
         # view menu
         action_restore_default = create_action(self, "Restore Default Layout",
                                                on_triggered=self.prep_window_for_reset,
@@ -462,6 +466,10 @@ class MainWindow(QMainWindow):
 
     def open_manage_directories(self):
         ManageUserDirectories(self).exec_()
+
+    def open_settings_window(self):
+        settings = SettingsPresenter(self)
+        settings.show()
 
     def readSettings(self, settings):
         qapp = QApplication.instance()
