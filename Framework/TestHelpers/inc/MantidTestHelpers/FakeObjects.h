@@ -411,6 +411,10 @@ class ColumnTester : public Column {
   void fromDouble(size_t, double) override {
     throw std::runtime_error("fromDouble not implemented");
   }
+  
+  bool equals(Column *otherColumn,double tolerance) const{
+    throw std::runtime_error("equals not implemented");
+  }
 
 protected:
   void resize(size_t) override {
