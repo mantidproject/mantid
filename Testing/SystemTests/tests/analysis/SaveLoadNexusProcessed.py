@@ -105,5 +105,4 @@ class SaveLoadNexusProcessedEmptySampleNameTest(SaveLoadNexusProcessedTestBase):
         return 'tmp_saveload_nexusprocessed_emptysamplename'
 
     def validate(self):
-        loaded_ws = AnalysisDataService.Instance()[self.loaded_ws_name]
         return self.compareWorkspaces()
