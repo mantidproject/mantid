@@ -322,7 +322,7 @@ public:
     const size_t n = 10;
     TableWorkspace ws(n);
     ws.addColumn("int", "col1");
-    ws.addColumn("int", "col2");
+
     auto column = static_cast<TableColumn<int> &>(*ws.getColumn("col1"));
     auto &data = column.data();
     data[0] = 5;
@@ -337,8 +337,19 @@ public:
     data[9] = 12;
 
     auto column2 =
-        ws.getColumn("col2");
-    auto &data2 = column2.data();
+       std::unique_ptr<Mantid::API::Column>(column.clone());
+
+
+    TS_ASSERT(column.equals(column2.get(),0))
+  }
+
+  void test_equals_fail(){
+    const size_t n = 10;
+    TableWorkspace ws(n);
+    ws.addColumn("int", "col1");
+
+    auto column = static_cast<TableColumn<int> &>(*ws.getColumn("col1"));
+    auto &data = column.data();
     data[0] = 5;
     data[1] = 7;
     data[2] = 3;
@@ -349,7 +360,12 @@ public:
     data[7] = 2;
     data[8] = 0;
     data[9] = 12;
-    TS_ASSERT(column.equals(column2.get(),0))
+
+    auto column2 =
+       std::unique_ptr<Mantid::API::Column>(column.clone());
+
+    data[0] = 9;
+    TS_ASSERT(!column.equals(column2.get(),0))
   }
 
 private:
