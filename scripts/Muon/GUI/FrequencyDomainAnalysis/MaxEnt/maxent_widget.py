@@ -31,6 +31,9 @@ class MaxEntWidget(QtGui.QWidget):
     def widget(self):
         return self._presenter.widget
 
+    def clear(self):
+        self._presenter.clear()
+
     def runChanged(self):
         self._presenter.runChanged()
 

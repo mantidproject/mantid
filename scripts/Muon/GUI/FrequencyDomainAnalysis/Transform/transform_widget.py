@@ -23,6 +23,7 @@ class TransformWidget(QtGui.QWidget):
         self._maxent = MaxEntWidget(load=load,parent=self)
         self._selector = TransformSelectionWidget(parent=self)
         self.LoadObserver = LoadObserver(self)
+        self.instrumentObserver = instrumentObserver(self)
 
         groupedViews = self.getViews()
 
@@ -55,6 +56,9 @@ class TransformWidget(QtGui.QWidget):
     def handle_new_data_loaded(self):
         self._maxent.runChanged()
 
+    def handle_new_instrument(self):
+        self._maxent.clear()
+
 class LoadObserver(Observer):
 
     def __init__(self, outer):
@@ -63,3 +67,12 @@ class LoadObserver(Observer):
 
     def update(self, observable, arg):
         self.outer.handle_new_data_loaded()
+
+class instrumentObserver(Observer):
+
+    def __init__(self, outer):
+        Observer.__init__(self)
+        self.outer = outer
+
+    def update(self, observable, arg):
+        self.outer.handle_new_instrument()

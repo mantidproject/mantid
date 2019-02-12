@@ -170,6 +170,10 @@ class MaxEntView(QtGui.QWidget):
         self.ws.clear()
         self.ws.addItems(options)
 
+    def clearPhaseTables(self):
+        self.phaseTable_box.clear()
+        self.phaseTable_box.addItems([construct])
+
     def getPhaseTableIndex(self):
         return self.phaseTable_box.currentIndex()
 
