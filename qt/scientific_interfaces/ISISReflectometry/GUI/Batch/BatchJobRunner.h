@@ -16,7 +16,7 @@ namespace CustomInterfaces {
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL BatchJobRunner {
 public:
-  BatchJobRunner(Batch batch, API::BatchAlgorithmRunner &batchAlgoRunner);
+  BatchJobRunner(Batch batch);
 
   bool isProcessing() const;
   bool isAutoreducing() const;
@@ -41,15 +41,15 @@ public:
                               std::string const &newName);
   void notifyAllWorkspacesDeleted();
 
+  std::deque<MantidQt::API::ConfiguredAlgorithm> getAlgorithms();
+
 private:
   Batch m_batch;
   bool m_isProcessing;
   bool m_isAutoreducing;
   bool m_reprocessFailed;
   bool m_processAll;
-  API::BatchAlgorithmRunner &m_batchAlgoRunner;
 
-  void setUpBatchAlgorithmRunner();
   std::vector<std::string> getWorkspacesToSave(Group const &group) const;
   std::vector<std::string> getWorkspacesToSave(Row const &row) const;
 };

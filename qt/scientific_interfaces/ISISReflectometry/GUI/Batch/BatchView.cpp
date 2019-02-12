@@ -20,6 +20,7 @@ namespace CustomInterfaces {
 
 using API::BatchAlgorithmRunner;
 using API::BatchAlgorithmRunnerSubscriber;
+using API::ConfiguredAlgorithm;
 using Mantid::API::IAlgorithm_sptr;
 
 BatchView::BatchView(QWidget *parent)
@@ -28,6 +29,7 @@ BatchView::BatchView(QWidget *parent)
   qRegisterMetaType<BatchAlgorithmRunnerSubscriber>(
       "MantidQt::API::BatchAlgorithmRunnerSubscriber");
   initLayout();
+  m_batchAlgoRunner.stopOnFailure(false);
 }
 
 void BatchView::subscribe(BatchViewSubscriber *notifyee) {
@@ -65,11 +67,13 @@ IEventView *BatchView::eventHandling() const { return m_eventHandling.get(); }
 
 ISaveView *BatchView::save() const { return m_save.get(); }
 
-BatchAlgorithmRunner &BatchView::batchAlgorithmRunner() {
-  return m_batchAlgoRunner;
+void BatchView::clearAlgorithmQueue() { m_batchAlgoRunner.clearQueue(); }
+
+void BatchView::setAlgorithmQueue(std::deque<ConfiguredAlgorithm> algorithms) {
+  m_batchAlgoRunner.addAlgorithms(algorithms);
 }
 
-void BatchView::executeBatchAlgorithmRunner() {
+void BatchView::executeAlgorithmQueue() {
   connect(&m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(onBatchComplete(bool)));
   connect(&m_batchAlgoRunner, SIGNAL(batchCancelled()), this,
@@ -91,6 +95,8 @@ void BatchView::executeBatchAlgorithmRunner() {
                             MantidQt::API::BatchAlgorithmRunnerSubscriber *)));
   m_batchAlgoRunner.executeBatchAsync();
 }
+
+void BatchView::cancelAlgorithmQueue() { m_batchAlgoRunner.cancelBatch(); }
 
 void BatchView::onBatchComplete(bool error) {
   m_notifyee->notifyBatchFinished(error);

@@ -34,8 +34,11 @@ public:
   ISaveView *save() const override;
   IExperimentView *experiment() const override;
   IInstrumentView *instrument() const override;
-  API::BatchAlgorithmRunner &batchAlgorithmRunner() override;
-  void executeBatchAlgorithmRunner() override;
+  void clearAlgorithmQueue() override;
+  void setAlgorithmQueue(
+      std::deque<MantidQt::API::ConfiguredAlgorithm> algorithms) override;
+  void executeAlgorithmQueue() override;
+  void cancelAlgorithmQueue() override;
 
 private slots:
   void onBatchComplete(bool error);

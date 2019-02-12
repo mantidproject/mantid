@@ -22,7 +22,7 @@ public:
   MOCK_CONST_METHOD0(experiment, IExperimentView *());
   MOCK_CONST_METHOD0(instrument, IInstrumentView *());
   MOCK_METHOD0(clearAlgorithmQueue, void());
-  MOCK_METHOD1(setAlgorithmQueue, void(std::vector<API::ConfiguredAlgorithm>));
+  MOCK_METHOD1(setAlgorithmQueue, void(std::deque<API::ConfiguredAlgorithm>));
   MOCK_METHOD0(executeAlgorithmQueue, void());
   MOCK_METHOD0(cancelAlgorithmQueue, void());
 };

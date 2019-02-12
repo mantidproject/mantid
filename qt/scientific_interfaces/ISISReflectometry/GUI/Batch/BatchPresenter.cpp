@@ -46,13 +46,11 @@ BatchPresenter::BatchPresenter(
     std::unique_ptr<IExperimentPresenter> experimentPresenter,
     std::unique_ptr<IInstrumentPresenter> instrumentPresenter,
     std::unique_ptr<ISavePresenter> savePresenter)
-    : m_view(view),
-      m_jobRunner(std::move(model), m_view->batchAlgorithmRunner()),
-      m_runsPresenter(std::move(runsPresenter)),
+    : m_view(view), m_runsPresenter(std::move(runsPresenter)),
       m_eventPresenter(std::move(eventPresenter)),
       m_experimentPresenter(std::move(experimentPresenter)),
       m_instrumentPresenter(std::move(instrumentPresenter)),
-      m_savePresenter(std::move(savePresenter)) {
+      m_savePresenter(std::move(savePresenter)), m_jobRunner(std::move(model)) {
 
   m_view->subscribe(this);
 
@@ -128,7 +126,9 @@ void BatchPresenter::notifyAlgorithmError(
 
 void BatchPresenter::resumeReduction() {
   m_jobRunner.resumeReduction();
-  m_view->executeBatchAlgorithmRunner();
+  m_view->clearAlgorithmQueue();
+  m_view->setAlgorithmQueue(m_jobRunner.getAlgorithms());
+  m_view->executeAlgorithmQueue();
   reductionResumed();
 }
 
@@ -141,9 +141,7 @@ void BatchPresenter::reductionResumed() {
   m_runsPresenter->reductionResumed();
 }
 
-void BatchPresenter::pauseReduction() {
-  m_view->batchAlgorithmRunner().cancelBatch();
-}
+void BatchPresenter::pauseReduction() { m_view->cancelAlgorithmQueue(); }
 
 void BatchPresenter::reductionPaused() {
   // Update the model
@@ -158,7 +156,9 @@ void BatchPresenter::reductionPaused() {
 
 void BatchPresenter::resumeAutoreduction() {
   m_jobRunner.resumeAutoreduction();
-  m_view->executeBatchAlgorithmRunner();
+  m_view->clearAlgorithmQueue();
+  m_view->setAlgorithmQueue(m_jobRunner.getAlgorithms());
+  m_view->executeAlgorithmQueue();
   autoreductionResumed();
 }
 

@@ -31,7 +31,7 @@ public:
                                     std::string const &){};
 };
 
-class ConfiguredAlgorithm {
+class EXPORT_OPT_MANTIDQT_COMMON ConfiguredAlgorithm {
 public:
   using AlgorithmRuntimeProps = std::map<std::string, std::string>;
 
@@ -122,8 +122,8 @@ public:
 
   /// Adds an algorithm to the execution queue
   void addAlgorithm(Mantid::API::IAlgorithm_sptr algo,
-                    AlgorithmRuntimeProps props = AlgorithmRuntimeProps(),
-                    BatchAlgorithmRunnerSubscriber *notifyee = nullptr);
+                    AlgorithmRuntimeProps props = AlgorithmRuntimeProps());
+  void addAlgorithms(std::deque<ConfiguredAlgorithm> algorithm);
   /// Clears all algorithms from queue
   void clearQueue();
   /// Gets size of queue

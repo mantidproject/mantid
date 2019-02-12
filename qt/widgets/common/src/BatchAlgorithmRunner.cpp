@@ -67,14 +67,29 @@ void BatchAlgorithmRunner::stopOnFailure(bool stopOnFailure) {
  * @param notifyee Optional subscriber to be notified when this algorithm
  *finishes
  */
-void BatchAlgorithmRunner::addAlgorithm(
-    IAlgorithm_sptr algo, AlgorithmRuntimeProps props,
-    BatchAlgorithmRunnerSubscriber *notifyee) {
-  m_algorithms.emplace_back(algo, props, notifyee);
+void BatchAlgorithmRunner::addAlgorithm(IAlgorithm_sptr algo,
+                                        AlgorithmRuntimeProps props) {
+  m_algorithms.emplace_back(algo, props);
 
   g_log.debug() << "Added algorithm \""
                 << m_algorithms.back().algorithm()->name()
                 << "\" to batch queue\n";
+}
+
+/**
+ * Adds an algorithm to the end of the queue.
+ *
+ * @param algorithm The configured algorithm to add to the queue
+ */
+void BatchAlgorithmRunner::addAlgorithms(
+    std::deque<ConfiguredAlgorithm> algorithms) {
+  m_algorithms.insert(m_algorithms.end(),
+                      std::make_move_iterator(algorithms.begin()),
+                      std::make_move_iterator(algorithms.end()));
+
+  g_log.debug() << "Added algorithm list to batch queue:\n";
+  for (auto &algorithm : algorithms)
+    g_log.debug() << algorithm.algorithm()->name() << "\n";
 }
 
 /**

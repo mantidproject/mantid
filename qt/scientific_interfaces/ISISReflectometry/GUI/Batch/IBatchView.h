@@ -19,6 +19,7 @@ namespace MantidQt {
 namespace API {
 class BatchAlgorithmRunner;
 class BatchAlgorithmRunnerSubscriber;
+class ConfiguredAlgorithm;
 } // namespace API
 
 namespace CustomInterfaces {
@@ -51,8 +52,11 @@ public:
   virtual ISaveView *save() const = 0;
   virtual IExperimentView *experiment() const = 0;
   virtual IInstrumentView *instrument() const = 0;
-  virtual API::BatchAlgorithmRunner &batchAlgorithmRunner() = 0;
-  virtual void executeBatchAlgorithmRunner() = 0;
+  virtual void clearAlgorithmQueue() = 0;
+  virtual void setAlgorithmQueue(
+      std::deque<MantidQt::API::ConfiguredAlgorithm> algorithms) = 0;
+  virtual void executeAlgorithmQueue() = 0;
+  virtual void cancelAlgorithmQueue() = 0;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

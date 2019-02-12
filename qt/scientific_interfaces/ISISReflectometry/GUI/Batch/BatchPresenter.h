@@ -88,12 +88,14 @@ private:
   void settingsChanged();
 
   IBatchView *m_view;
-  BatchJobRunner m_jobRunner;
   std::unique_ptr<IRunsPresenter> m_runsPresenter;
   std::unique_ptr<IEventPresenter> m_eventPresenter;
   std::unique_ptr<IExperimentPresenter> m_experimentPresenter;
   std::unique_ptr<IInstrumentPresenter> m_instrumentPresenter;
   std::unique_ptr<ISavePresenter> m_savePresenter;
+
+protected:
+  BatchJobRunner m_jobRunner;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
