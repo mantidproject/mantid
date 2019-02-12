@@ -9,11 +9,13 @@
 
 #include <boost/numeric/conversion/cast.hpp>
 #include <boost/shared_ptr.hpp>
+#include <cmath>
 #include <limits>
 #include <sstream>
 #include <vector>
 
 #include "MantidAPI/Column.h"
+#include "MantidKernel/V3D.h"
 
 namespace Mantid {
 namespace DataObjects {
@@ -171,9 +173,9 @@ public:
   }
 
   /// Reference to the data.
-  std::vector<Type> &data() { return m_data; }
+  std::vector<Type> &data() { return m_data; } 
   /// Const reference to the data.
-  const std::vector<Type> &data() const { return m_data; }
+  const std::vector<Type> &data() const { return m_data; } 
   /// Pointer to the data array
   Type *dataArray() { return &m_data[0]; }
 
@@ -244,6 +246,59 @@ private:
   return true;
   }
 };
+///Template specialisation for long int
+template<>
+inline bool TableColumn<long>::compareVectors(const std::vector<long> &newVector, double tolerance) const {
+  long roundedTol = lround(tolerance);
+  for(size_t i =0; i<m_data.size(); i++){
+      if(abs(m_data[i]-newVector[i])>roundedTol){
+        return false;
+      }
+    }
+  return true;
+  }
+
+
+///Template specialisation for unsigned long int
+template<>
+inline bool TableColumn<unsigned long>::compareVectors(const std::vector<unsigned long> &newVector, double tolerance) const {
+  long roundedTol = lround(tolerance);
+  for(size_t i =0; i<m_data.size(); i++){
+      if(abs(m_data[i]-newVector[i])>roundedTol){
+        return false;
+      }
+    }
+  return true;
+  }
+}
+
+
+///Template specialisation for strings for comparison
+template <>
+inline bool TableColumn<std::string>::compareVectors(const std::vector<std::string> &newVector, double tolerance) const {
+  (void)tolerance;
+  for(size_t i =0; i<m_data.size(); i++){
+      if(m_data[i]!=newVector[i]){
+        return false;
+      }
+    }
+  return true;
+}
+
+///Template specialisation for V3D for comparison
+template <>
+inline bool TableColumn<Kernel::V3D>::compareVectors(const std::vector<Kernel::V3D> &newVector, double tolerance)const {
+  for(size_t i =0; i<m_data.size(); i++){
+      double dif_x= m_data[i].X() - newVector[i].X();
+      double dif_y= m_data[i].Y() - newVector[i].Y();
+      double dif_z= m_data[i].Z() - newVector[i].Z();
+      if(dif_x>tolerance||dif_y>tolerance||dif_z>tolerance){
+        return false;
+      }
+  }
+  return true;
+}
+
 
 /// Template specialization for strings so they can contain spaces
 template <>
