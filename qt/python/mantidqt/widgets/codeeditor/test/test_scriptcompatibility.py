@@ -15,7 +15,7 @@ except ImportError:
     import mock
 
 from mantidqt.widgets.codeeditor.scriptcompatibility import (mantid_api_import_needed,
-                                                             mantid_algorithm_used)
+                                                             mantid_algorithm_used_without_import)
 
 PERMISSION_BOX_FUNC = ('mantidqt.widgets.codeeditor.scriptcompatibility.'
                        'permission_box_to_prepend_import')
@@ -24,33 +24,35 @@ PERMISSION_BOX_FUNC = ('mantidqt.widgets.codeeditor.scriptcompatibility.'
 class ScriptCompatibilityTest(unittest.TestCase):
 
     def setUp(self):
-        self.api_import = "from mantid.simpleapi import *"
-        self.test_cases = [self.api_import + "\ntest string",
-                           self.api_import + "\nRebin()",
-                           "Rebin()",
-                           "test string"]
+        self.api_implicit_import = "from mantid.simpleapi import *"
+        self.api_explicit_import = "from mantid import simpleapi"
+        self.test_cases = [
+            self.api_implicit_import + "\ntest string",
+            self.api_implicit_import + "\nRebin()",
+            "Rebin()",
+            "test string",
+            self.api_explicit_import + "\ntest string",
+            self.api_explicit_import + "\nRebin()",
+            self.api_explicit_import + "\nsimpleapi.Rebin()",
+            self.api_implicit_import[:-1] + " Rebin" + "\nRebin()"]
 
     def gen_fail_msg(self, case, expected_out):
-        return "Test case '{}' failed with expected output '{}'" \
+        return "Test case: \n  '{}' \nfailed with expected output:\n  '{}'" \
                "".format(case, expected_out)
 
     def test_mantid_api_import_needed(self):
-        expected_results = [False, False, True, False]
+        expected_results = [False, False, True, False, False, True, False, False]
         with mock.patch(PERMISSION_BOX_FUNC, lambda: True):
             for case, expected_out in zip(self.test_cases, expected_results):
                 self.assertEqual(expected_out, mantid_api_import_needed(case),
                                  msg=self.gen_fail_msg(case, expected_out))
 
-    def test_mantid_algorithm_used(self):
-        expected_results = [False, True, True, False]
+    def test_mantid_algorithm_used_without_import(self):
+        expected_results = [False, True, True, False, False, True, False, False]
         for case, expected_out in zip(self.test_cases, expected_results):
-            self.assertEqual(expected_out, mantid_algorithm_used(case),
+            self.assertEqual(expected_out,
+                             mantid_algorithm_used_without_import(case),
                              msg=self.gen_fail_msg(case, expected_out))
-
-    def test_non_implicit_import(self):
-        content = "from mantid import simpleapi\ntest string"
-        with mock.patch(PERMISSION_BOX_FUNC, lambda: True):
-            self.assertEqual(False, mantid_api_import_needed(content))
 
 
 if __name__ == '__main__':

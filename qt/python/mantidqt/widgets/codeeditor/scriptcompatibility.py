@@ -8,6 +8,9 @@
 #
 #
 
+# System imports
+import re
+
 # 3rd party imports
 from qtpy.QtGui import QIcon
 from qtpy.QtWidgets import QMessageBox
@@ -16,10 +19,19 @@ from qtpy.QtWidgets import QMessageBox
 from mantid import simpleapi
 
 
-def mantid_algorithm_used(content):
+def attr_imported(attr, content):
+    return bool(re.search(r"import .*(| |,)" + attr, content))
+
+
+def attr_called(attr, content):
+    return re.search(r'(^|\s)+' + attr + '\(*\)', content)
+
+
+def mantid_algorithm_used_without_import(content):
     for attr in dir(simpleapi):
-        if (not attr.startswith('_') and attr == attr.title()
-                and attr in content):
+        if (not attr.startswith('_') and attr == attr.title() and
+                attr_called(attr, content) and not
+                attr_imported(attr, content)):
                 return True
     return False
 
@@ -34,15 +46,14 @@ def mantid_api_import_needed(content):
     :return: True if simpleapi import should be added, False if not
     """
     if not mantid_api_imported(content):
-        if mantid_algorithm_used(content):
+        if mantid_algorithm_used_without_import(content):
             if permission_box_to_prepend_import():
                 return True
     return False
 
 
 def mantid_api_imported(content):
-    if ('from mantid.simpleapi import ' in content or
-            'from mantid import simpleapi' in content):
+    if 'from mantid.simpleapi import *' in content:
         return True
     return False
 
