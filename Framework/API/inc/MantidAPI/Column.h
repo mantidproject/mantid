@@ -163,6 +163,8 @@ public:
     return vec;
   }
 
+  virtual bool equals(Column *otherColumn,double tolerance) const =0;
+
 protected:
   /// Sets the new column size.
   virtual void resize(size_t count) = 0;
