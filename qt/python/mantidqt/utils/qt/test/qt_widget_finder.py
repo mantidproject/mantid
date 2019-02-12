@@ -25,7 +25,7 @@ class QtWidgetFinder(object):
         return [x for x in a if name.lower() in str(type(x)).lower()]
 
     def assert_window_created(self):
-        self.assertGreater(0, len(QApplication.topLevelWidgets()))
+        self.assertGreater(len(QApplication.topLevelWidgets()), 0)
 
     def assert_no_widgets(self):
         a = QApplication.topLevelWidgets()
