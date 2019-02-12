@@ -10,7 +10,7 @@ import mantid.simpleapi as mantid
 
 import Muon.GUI.Common.ADSHandler.workspace_naming as wsName
 
-class LoadUtilsDummy(object):
+class FrequencyContext(object):
     """
     A simple class for identifing the current run
     and it can return the name, run and instrument.

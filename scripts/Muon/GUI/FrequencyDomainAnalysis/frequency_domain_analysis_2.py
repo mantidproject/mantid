@@ -22,8 +22,7 @@ from Muon.GUI.Common.help_widget.help_widget_presenter import HelpWidget
 from Muon.GUI.Common.home_tab.home_tab_widget import HomeTabWidget
 
 from Muon.GUI.FrequencyDomainAnalysis.Transform.transform_widget import TransformWidget
-from Muon.GUI.Common.utilities import load_utils_dummy
-
+from Muon.GUI.FrequencyDomainAnalysis.frequency_context import FrequencyContext
 SUPPORTED_FACILITIES = ["ISIS", "SmuS"]
 
 
@@ -65,8 +64,8 @@ class FrequencyAnalysisGui(QtGui.QMainWindow):
         self.load_widget = LoadWidget(self.loaded_data, self.context, self)
         self.grouping_tab_widget = GroupingTabWidget(self.context)
         self.home_tab = HomeTabWidget(self.context, self)
-        load = load_utils_dummy.LoadUtilsDummy( self.context)
-        self.transform = TransformWidget(load = load, parent = self)
+        freq_context = FrequencyContext( self.context)
+        self.transform = TransformWidget(load = freq_context, parent = self)
 
         self.setup_tabs()
         self.help_widget = HelpWidget()
