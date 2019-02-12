@@ -70,7 +70,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         args['InputRunList'] = '13460'
         outputs = ['IvsQ_13460', 'IvsQ_binned_13460', 'TOF_13460']
         self._assert_run_algorithm_succeeds(args, outputs)
-        history = ['LoadISISNexus', 'ReflectometryReductionOneAuto']
+        history = ['LoadNexus', 'ReflectometryReductionOneAuto']
         self._check_history(mtd['IvsQ_binned_13460'], history)
 
     def test_input_run_that_is_in_ADS_with_prefixed_name_is_not_reloaded(self):
@@ -97,7 +97,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         args['InputRunList'] = '13460'
         outputs = ['IvsQ_13460', 'IvsQ_binned_13460', 'TEST_13460', 'TOF_13460']
         self._assert_run_algorithm_succeeds(args, outputs)
-        history = ['LoadISISNexus', 'ReflectometryReductionOneAuto']
+        history = ['LoadNexus', 'ReflectometryReductionOneAuto']
         self._check_history(mtd['IvsQ_binned_13460'], history)
 
     def test_existing_workspace_is_used_when_name_passed_in_input_list(self):
@@ -114,7 +114,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         args['InputRunList'] = 'INTER13460'
         outputs = ['IvsQ_13460', 'IvsQ_binned_13460', 'TOF_13460']
         self._assert_run_algorithm_succeeds(args, outputs)
-        history = ['LoadISISNexus', 'RenameWorkspace', 'ReflectometryReductionOneAuto']
+        history = ['LoadNexus', 'RenameWorkspace', 'ReflectometryReductionOneAuto']
         self._check_history(mtd['IvsQ_binned_13460'], history)
 
     def test_overriding_output_names(self):
@@ -193,7 +193,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         outputs = ['IvsQ_13460', 'IvsQ_binned_13460', 'TOF_13460', 'TRANS_13463', 'TRANS_13464',
                     'TRANS_LAM_13463', 'TRANS_LAM_13464']
         self._assert_run_algorithm_succeeds(args, outputs)
-        history = ['LoadISISNexus', 'LoadISISNexus', 'ReflectometryReductionOneAuto']
+        history = ['LoadNexus', 'LoadNexus', 'ReflectometryReductionOneAuto']
         self._check_history(mtd['IvsQ_binned_13460'], history)
 
     def test_trans_runs_are_not_loaded_if_in_ADS_without_prefix(self):
@@ -225,7 +225,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         outputs = ['IvsQ_13460', 'IvsQ_binned_13460', 'TOF_13460', 'TRANS_13463', 'TRANS_13464',
                     'TEST_13463', 'TEST_13464', 'TRANS_LAM_13463', 'TRANS_LAM_13464']
         self._assert_run_algorithm_succeeds(args, outputs)
-        history = ['LoadISISNexus', 'LoadISISNexus', 'ReflectometryReductionOneAuto']
+        history = ['LoadNexus', 'LoadNexus', 'ReflectometryReductionOneAuto']
         self._check_history(mtd['IvsQ_binned_13460'], history)
 
     def test_existing_workspace_is_used_for_trans_runs_when_name_passed_in_input_list(self):
@@ -334,7 +334,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
                    'ReflectometryReductionOneAuto', 'GroupWorkspaces', 'GroupWorkspaces']
         self._check_history(mtd['IvsQ_binned_38415_1'], history, False)
 
-    def test_slicing_loads_input_run_if_loaded_run_is_incorrect_type(self):
+    def test_slicing_reloads_input_run_if_workspace_is_incorrect_type(self):
         self._create_workspace(38415, 'TOF_')
         args = self._default_options
         args.update(self._default_slice_options_real_run)
@@ -411,7 +411,8 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         args = self._default_options
         args['InputRunList'] = '12345'
         outputs = ['IvsQ_12345', 'IvsQ_12345_1', 'IvsQ_12345_2', 'IvsQ_binned_12345',
-                   'IvsQ_binned_12345_2', 'IvsQ_binned_12345_1', 'IvsLam_12345', 'IvsLam_12345_1', 'IvsLam_12345_2', 'TOF_12345', 'TOF_12345_1', 'TOF_12345_2']
+                   'IvsQ_binned_12345_2', 'IvsQ_binned_12345_1', 'IvsLam_12345',
+                   'IvsLam_12345_1', 'IvsLam_12345_2', 'TOF_12345', 'TOF_12345_1', 'TOF_12345_2']
         self._assert_run_algorithm_succeeds(args, outputs)
         history = ['CreateSampleWorkspace', 'AddSampleLog',  'CreateSampleWorkspace', 'AddSampleLog',
                    'GroupWorkspaces', 'ReflectometryReductionOneAuto', 'ReflectometryReductionOneAuto',

@@ -11,7 +11,7 @@ from __future__ import (absolute_import, division, print_function)
 from mantid.api import (AlgorithmFactory, AnalysisDataService, DataProcessorAlgorithm,
                         PropertyMode, WorkspaceGroup, WorkspaceProperty)
 
-from mantid.simpleapi import (AddSampleLog, LoadEventNexus, LoadISISNexus, Plus,
+from mantid.simpleapi import (AddSampleLog, LoadEventNexus, LoadNexus, Plus,
                               RenameWorkspace)
 
 from mantid.kernel import (CompositeValidator, Direction, EnabledWhenProperty,
@@ -122,8 +122,8 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
 
     def _declareSliceAlgorithmProperties(self):
         """Copy properties from the child slicing algorithm and add our own custom ones"""
-        self.declareProperty('SliceWorkspace', False, doc = 'If true, slice the input workspace')
-        whenSliceEnabled = EnabledWhenProperty('SliceWorkspace', PropertyCriterion.IsEqualTo, "1")
+        self.declareProperty(Prop.SLICE, False, doc = 'If true, slice the input workspace')
+        whenSliceEnabled = EnabledWhenProperty(Prop.SLICE, PropertyCriterion.IsEqualTo, "1")
 
         self._slice_properties = ['TimeInterval', 'LogName', 'LogValueInterval']
         self.copyProperties('ReflectometrySliceEventWorkspace', self._slice_properties)
@@ -182,37 +182,42 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             self.log().information('Workspace ' + workspace_name + ' does not exist')
             return False
 
-    def _inputWorkspaceIsValid(self, workspace_name):
+    def _isValidEventWorkspace(self, workspace_name):
         """Return true if the given workspace exists in the ADS and is
-        a valid reflectometry workspace for the requested reduction."""
-        workspace = AnalysisDataService.retrieve(workspace_name)
-        if self._slicingEnabled():
-            # If slicing, check that it's an event workspace
-            if workspace.id() != "EventWorkspace":
-                self.log().information('Workspace ' + workspace_name +
-                                       ' exists but is not an event workspace')
-                return False
-            # Check that the monitors workspace is also loaded
-            if not AnalysisDataService.doesExist(workspace_name + '_monitors'):
-                self.log().information('Workspace ' + workspace_name + ' exists but ' +
-                                       workspace_name + '_monitors does not')
-                return False
-        else:
-            # If not slicing, check that it's a Workspace2D
-            if workspace.id() != "Workspace2D":
-                self.log().information('Workspace ' + workspace_name +
-                                       ' exists but is not a Workspace2D')
-        return True
+        a valid reflectometry event workspace."""
+        valid = True
+        if not _isEventWorkspace(workspace_name):
+            self.log().information('Workspace ' + workspace_name +
+                                   ' exists but is not an event workspace')
+            valid = False
+        # Check that the monitors workspace is also loaded
+        if not AnalysisDataService.doesExist(_monitorWorkspace(workspace_name)):
+            self.log().information('Workspace ' + workspace_name + ' exists but ' +
+                                   workspace_name + '_monitors does not')
+            valid = False
+        _removeWorkspaceIfNotValid(workspace_name, valid)
+        return valid
+
+    def _isValidHistogramWorkspace(self, workspace_name):
+        """Return true if the given workspace exists in the ADS and is
+        a valid reflectometry histogram workspace."""
+        valid = True
+        if not _isWorkspace2D(workspace_name):
+            self.log().information('Workspace ' + workspace_name +
+                                   ' exists but is not a Workspace2D')
+            valid = False
+        _removeWorkspaceIfNotValid(workspace_name, valid)
+        return valid
 
     def _workspaceExistsAndIsValid(self, workspace_name, isTrans):
         """Return true if the given workspace exists in the ADS and is valid"""
         if not self._workspaceExists(workspace_name):
             return False
-        # No further validation is currently required for transmission runs
-        if isTrans:
-            return True
-        # Do validation for input runs
-        return self._inputWorkspaceIsValid(workspace_name)
+        # Check existing workspace is of correct type and delete it if not
+        if not isTrans and self._slicingEnabled():
+            return self._isValidEventWorkspace(workspace_name)
+        else:
+            return self._isValidHistogramWorkspace(workspace_name)
 
     def _getRunFromADSOrNone(self, run, isTrans):
         """Given a run name, return the name of the equivalent workspace in the ADS (
@@ -241,15 +246,15 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         return new_name
 
     def _loadRun(self, run, isTrans):
-        """Load a run as an event workspace if slicing is requested, or a non-event
-        workspace otherwise"""
+        """Load a run as an event workspace if slicing is requested, or a histogram
+        workspace otherwise. Transmission runs are always loaded as histogram workspaces."""
         workspace_name=self._prefixedName(run, isTrans)
-        if self._slicingEnabled():
+        if not isTrans and self._slicingEnabled():
             LoadEventNexus(Filename=run, OutputWorkspace=workspace_name, LoadMonitors=True)
             _throwIfNotValidReflectometryEventWorkspace(workspace_name)
             self.log().information('Loaded event workspace ' + workspace_name)
         else:
-            LoadISISNexus(Filename=run, OutputWorkspace=workspace_name)
+            LoadNexus(Filename=run, OutputWorkspace=workspace_name)
             self.log().information('Loaded workspace ' + workspace_name)
         workspace_name = self._renameWorkspaceBasedOnRunNumber(workspace_name, isTrans)
         return workspace_name
@@ -404,6 +409,42 @@ def _getRunNumberAsString(workspace_name):
         return str(workspace[0].getRunNumber())
     except:
         raise RuntimeError('Could not find run number for workspace ' + workspace_name)
+
+
+def _isEventWorkspace(workspace_name):
+    workspace = AnalysisDataService.retrieve(workspace_name)
+    if isinstance(workspace, WorkspaceGroup):
+        return workspace[0].id() == "EventWorkspace"
+    else:
+        return workspace.id() == "EventWorkspace"
+
+
+def _isWorkspace2D(workspace_name):
+    workspace = AnalysisDataService.retrieve(workspace_name)
+    if isinstance(workspace, WorkspaceGroup):
+        return workspace[0].id() == "Workspace2D"
+    else:
+        return workspace.id() == "Workspace2D"
+
+
+def _removeWorkspace(workspace_name):
+    workspace = AnalysisDataService.retrieve(workspace_name)
+    if isinstance(workspace, WorkspaceGroup):
+        # Remove child workspaces first
+        while workspace.getNumberOfEntries():
+            AnalysisDataService.remove(workspace[0].name())
+    AnalysisDataService.remove(workspace_name)
+
+
+def _removeWorkspaceIfNotValid(workspace_name, valid):
+    """If valid is false, remove the given workspace and its related
+    monitor workspace, if it has one"""
+    if valid:
+        return
+    if AnalysisDataService.doesExist(workspace_name):
+        _removeWorkspace(workspace_name)
+    if AnalysisDataService.doesExist(_monitorWorkspace(workspace_name)):
+        _removeWorkspace(_monitorWorkspace(workspace_name))
 
 
 AlgorithmFactory.subscribe(ReflectometryISISLoadAndProcess)
