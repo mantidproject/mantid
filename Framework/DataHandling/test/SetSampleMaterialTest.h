@@ -286,9 +286,12 @@ public:
     MatrixWorkspace_sptr ws =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1, 10);
     TS_ASSERT_THROWS_NOTHING(setMaterial.setProperty("InputWorkspace", ws))
-    TS_ASSERT_THROWS_NOTHING(setMaterial.setProperty("ChemicalFormula", "Al2 O3"))
-    TS_ASSERT_THROWS_NOTHING(setMaterial.setProperty("SampleNumberDensity", 0.23))
-    TS_ASSERT_THROWS_NOTHING(setMaterial.setProperty("NumberDensityUnit", "Formula Units"))
+    TS_ASSERT_THROWS_NOTHING(
+        setMaterial.setProperty("ChemicalFormula", "Al2 O3"))
+    TS_ASSERT_THROWS_NOTHING(
+        setMaterial.setProperty("SampleNumberDensity", 0.23))
+    TS_ASSERT_THROWS_NOTHING(
+        setMaterial.setProperty("NumberDensityUnit", "Formula Units"))
     TS_ASSERT_THROWS_NOTHING(setMaterial.execute())
     TS_ASSERT(setMaterial.isExecuted())
     const auto &material{ws->sample().getMaterial()};

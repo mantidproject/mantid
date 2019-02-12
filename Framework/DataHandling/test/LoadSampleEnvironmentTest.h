@@ -37,7 +37,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
 
-    TSM_ASSERT_EQUALS("should be 19 properties here", 20,
+    TSM_ASSERT_EQUALS("should be 20 properties here", 20,
                       (size_t)(alg.getProperties().size()));
   }
 

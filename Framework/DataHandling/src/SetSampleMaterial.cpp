@@ -133,8 +133,7 @@ std::map<std::string, std::string> SetSampleMaterial::validateInputs() {
   if (numberDensityUnit == "Atoms") {
     params.numberDensityUnit = MaterialBuilder::NumberDensityUnit::Atoms;
   } else {
-    params.numberDensityUnit =
-        MaterialBuilder::NumberDensityUnit::FormulaUnits;
+    params.numberDensityUnit = MaterialBuilder::NumberDensityUnit::FormulaUnits;
   }
   auto result = ReadMaterial::validateInputs(params);
 
