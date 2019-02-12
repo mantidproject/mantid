@@ -212,6 +212,19 @@ public:
     return compareVectors(otherData, tolerance);
   }
 
+  bool equalsRelErr(Column *otherColumn,double tolerance) const override{
+    auto convertedOtherColumn = dynamic_cast<TableColumn*>(otherColumn);
+    if(!convertedOtherColumn){
+      return false;
+    }
+    auto type = this->type();
+    if(convertedOtherColumn->size()!=this->size()||convertedOtherColumn->type()!=type){
+      return false;
+    }
+    auto otherData = convertedOtherColumn->data();
+    return compareVectorsRelError(otherData, tolerance);
+  }
+
 protected:
   /// Resize.
   void resize(size_t count) override { m_data.resize(count); }
@@ -243,7 +256,21 @@ private:
         return false;
       }
     }
-  return true;
+    return true;
+  }
+
+  //helper function template for equality with relative error
+  bool compareVectorsRelError(const std::vector<Type> &newVector, double tolerance) const{
+    for(size_t i =0; i<m_data.size(); i++){
+      double num = fabs(m_data[i]-newVector[i]);
+      double den = (fabs(m_data[i])+fabs(newVector[i]))/2;
+      if (den<tolerance&&num>tolerance){
+        return false;
+      }else if(num/den >tolerance){
+        return false;
+      }
+    }
+    return true;
   }
 };
 ///Template specialisation for long64
@@ -295,6 +322,71 @@ inline bool TableColumn<Kernel::V3D>::compareVectors(const std::vector<Kernel::V
       if(dif_x>tolerance||dif_y>tolerance||dif_z>tolerance){
         return false;
       }
+  }
+  return true;
+}
+
+///Template specialisation for long64 with relative error
+template<>
+inline bool TableColumn<int64_t>::compareVectorsRelError(const std::vector<int64_t> &newVector, double tolerance) const {
+  int64_t roundedTol = llround(tolerance);
+  for(size_t i =0; i<m_data.size(); i++){
+      int64_t num = llabs(m_data[i]-newVector[i]);
+      int64_t den = (llabs(m_data[i])+llabs(newVector[i]))/2;
+      if (den<roundedTol&&num>roundedTol){
+        return false;
+      }else if(num/den >roundedTol){
+        return false;
+      }
+    }
+    return true;
+  }
+
+
+///Template specialisation for unsigned long int
+template<>
+inline bool TableColumn<unsigned long>::compareVectorsRelError(const std::vector<unsigned long> &newVector, double tolerance) const {
+  long unsigned int roundedTol = lround(tolerance);
+  for(size_t i =0; i<m_data.size(); i++){
+      long unsigned int num = labs(m_data[i]-newVector[i]);
+      long unsigned int den = (labs(m_data[i])+labs(newVector[i]))/2;
+      if (den<roundedTol&&num>roundedTol){
+        return false;
+      }else if(num/den >roundedTol){
+        return false;
+      }
+    }
+    return true;
+  }
+
+
+
+///Template specialisation for strings for comparison
+template <>
+inline bool TableColumn<std::string>::compareVectorsRelError(const std::vector<std::string> &newVector, double tolerance) const {
+  return compareVectors(newVector,tolerance);
+}
+
+///Template specialisation for V3D for comparison
+template <>
+inline bool TableColumn<Kernel::V3D>::compareVectorsRelError(const std::vector<Kernel::V3D> &newVector, double tolerance)const {
+  for(size_t i =0; i<m_data.size(); i++){
+      double dif_x= fabs(m_data[i].X() - newVector[i].X());
+      double dif_y= fabs(m_data[i].Y() - newVector[i].Y());
+      double dif_z= fabs(m_data[i].Z() - newVector[i].Z());
+      double den_x = 0.5*(fabs(m_data[i].X())+fabs(newVector[i].X()));
+      double den_y = 0.5*(fabs(m_data[i].X())+fabs(newVector[i].X()));
+      double den_z = 0.5*(fabs(m_data[i].X())+fabs(newVector[i].X()));
+      if(den_x>tolerance||den_y>tolerance||den_z>tolerance){
+        if(dif_x/den_x>tolerance||dif_y/den_y>tolerance||dif_z/den_z>tolerance){
+          return false;
+        }
+      }else{
+        if(dif_x>tolerance||dif_y>tolerance||dif_z>tolerance){
+          return false;
+        }
+      }
+      
   }
   return true;
 }
