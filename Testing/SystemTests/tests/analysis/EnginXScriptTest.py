@@ -46,7 +46,7 @@ class CreateCalibrationWholeTest(systemtesting.MantidSystemTest):
         main(vanadium_run="236516", user="test", focus_run=None, do_cal=True, directory=cal_directory)
 
     def validate(self):
-        self.tolerance(1e-6)
+        self.tolerance = 1e-6
         if _current_os_has_gsl_lvl2():
             return("engg_calibration_bank_1", "engggui_calibration_bank_1.nxs",
                    "engg_calibration_bank_2", "engggui_calibration_bank_2.nxs",
@@ -69,7 +69,7 @@ class CreateCalibrationCroppedTest(systemtesting.MantidSystemTest):
              crop_type="spectra", crop_on="1-20")
 
     def validate(self):
-        self.tolerance(1e-6)
+        self.tolerance = 1e-6
         if _current_os_has_gsl_lvl2():
             return ("cropped", "engggui_calibration_bank_cropped.nxs",
                     "engg_calibration_banks_parameters", "engggui_calibration_bank_cropped_parameters.nxs")
@@ -89,7 +89,7 @@ class CreateCalibrationBankTest(systemtesting.MantidSystemTest):
              crop_type="banks", crop_on="South")
 
     def validate(self):
-        self.tolerance(1e-6)
+        self.tolerance = 1e-6
         if _current_os_has_gsl_lvl2():
             return("engg_calibration_bank_2", "engggui_calibration_bank_2.nxs",
                    "engg_calibration_banks_parameters", "engggui_calibration_bank_south_parameters.nxs")
