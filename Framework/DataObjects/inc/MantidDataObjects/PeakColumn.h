@@ -73,7 +73,8 @@ public:
   bool equals(Column *otherColumn,double tolerance) const override {
     (void)otherColumn;
     (void)tolerance;
-    return true;}
+    throw std::runtime_error("equals not implemented, to compare use peaksworkspace");
+    }
 
 protected:
   /// Sets the new column size.
