@@ -14,6 +14,7 @@
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/lexical_cast.hpp>
 
+#include <cmath>
 namespace Mantid {
 namespace DataObjects {
 
@@ -139,7 +140,7 @@ public:
         return false;
       }
       for(size_t j =0; j<m_data[i].size();j++){
-        if(m_data[i][j]-m_data[i][j]>tolerance){
+        if(abs(m_data[i][j]-otherData[i][j])>tolerance){
           return false;
         }
       }
