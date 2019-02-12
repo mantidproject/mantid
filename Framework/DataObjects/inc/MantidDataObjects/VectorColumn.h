@@ -122,6 +122,31 @@ public:
     throw std::runtime_error("VectorColumn is not assignable from double.");
   }
 
+  /// Reference to the data.
+  const std::vector<std::vector<Type>> &data() const { return m_data; } 
+
+  bool equals(Column* otherColumn,double tolerance) const override {
+    auto convertedOtherColumn = dynamic_cast<VectorColumn*>(otherColumn);
+    if(!convertedOtherColumn){
+      return false;
+    }
+    if(convertedOtherColumn->size()!=this->size()||convertedOtherColumn->type()!=this->type()){
+      return false;
+    }
+    auto otherData = convertedOtherColumn->data();
+    for(size_t i =0; i<m_data.size(); i++){
+      if(m_data[i].size()!=otherData[i].size()){
+        return false;
+      }
+      for(size_t j =0; j<m_data[i].size();j++){
+        if(m_data[i][j]-m_data[i][j]>tolerance){
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
 protected:
   /// Sets the new column size.
   void resize(size_t count) override { m_data.resize(count); }
