@@ -47,9 +47,9 @@ class LoadRunWidgetModelTest(unittest.TestCase):
         self.assertEqual(len(model.loaded_workspaces), len(model.loaded_runs))
         self.assertEqual(len(model.loaded_workspaces), len(model.loaded_filenames))
         self.assertEqual(len(model.loaded_workspaces), 3)
-        self.assertEqual(model.loaded_runs[0], 19489)
-        self.assertEqual(model.loaded_runs[1], 19490)
-        self.assertEqual(model.loaded_runs[2], 19491)
+        self.assertEqual(model.loaded_runs[0], [19489])
+        self.assertEqual(model.loaded_runs[1], [19490])
+        self.assertEqual(model.loaded_runs[2], [19491])
 
     @mock.patch('Muon.GUI.Common.load_run_widget.load_run_model.load_utils')
     def test_model_is_cleared_correctly(self, load_utils_mock):
@@ -84,8 +84,8 @@ class LoadRunWidgetModelTest(unittest.TestCase):
         self.assertEqual(len(model.loaded_workspaces), 2)
         self.assertEqual(model.loaded_filenames[0], files[0])
         self.assertEqual(model.loaded_filenames[1], files[2])
-        self.assertEqual(model.loaded_runs[0], 19489)
-        self.assertEqual(model.loaded_runs[1], 19491)
+        self.assertEqual(model.loaded_runs[0], [19489])
+        self.assertEqual(model.loaded_runs[1], [19491])
 
 
 if __name__ == '__main__':

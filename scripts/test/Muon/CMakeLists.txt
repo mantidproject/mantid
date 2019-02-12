@@ -7,6 +7,10 @@ set ( TEST_PY_FILES
    AxisChangerView_test.py
    FFTModel_test.py
    FFTPresenter_test.py
+   home_grouping_widget_test.py
+   home_instrument_widget_test.py
+   home_plot_widget_test.py
+   home_runinfo_presenter_test.py
    load_run_widget/loadrun_model_test.py
    load_run_widget/loadrun_presenter_current_run_test.py
    load_run_widget/loadrun_presenter_single_file_test.py
