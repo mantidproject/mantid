@@ -246,12 +246,12 @@ private:
   return true;
   }
 };
-///Template specialisation for long int
+///Template specialisation for long64
 template<>
-inline bool TableColumn<long>::compareVectors(const std::vector<long> &newVector, double tolerance) const {
-  long roundedTol = lround(tolerance);
+inline bool TableColumn<int64_t>::compareVectors(const std::vector<int64_t> &newVector, double tolerance) const {
+  int64_t roundedTol = llround(tolerance);
   for(size_t i =0; i<m_data.size(); i++){
-      if(std::labs(m_data[i]-newVector[i])>roundedTol){
+      if(std::llabs(m_data[i]-newVector[i])>roundedTol){
         return false;
       }
     }
