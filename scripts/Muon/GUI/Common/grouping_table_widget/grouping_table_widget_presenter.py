@@ -141,3 +141,13 @@ class GroupingTablePresenter(object):
             self.add_group_to_view(group)
 
         self._view.enable_updates()
+
+    def first_good_data_checkbox_changed(self):
+        if self._view.group_range_use_first_good_data.isChecked():
+            self._view.group_range_min.setText(self._model._context.first_good_data)
+            self._view.group_range_min.setEnabled(False)
+            self._model._context.gui_variables.pop('GroupRangeMin')
+        else:
+            self._view.group_range_min.setEnabled(True)
+            self._model._context.gui_variables['GroupRangeMin'] = self._view.group_range_min.text()
+
