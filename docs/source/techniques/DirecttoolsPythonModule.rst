@@ -176,7 +176,7 @@ Functions
 ~~~~~~~~~
 
 .. automodule:: directtools
-   :members: box2D, defaultrcParams, dynamicsusceptibility, nanminmax, plotconstE,
+   :members: box2D, defaultrcparams, dynamicsusceptibility, nanminmax, plotconstE,
              plotconstQ, plotcuts, plotprofiles, plotDOS, plotSofQW, subplots, validQ,
              wsreport
 
