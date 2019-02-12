@@ -76,6 +76,9 @@ Bugfixes
 - Selecting multiple data using the All Spectra checkbox without first selected a sample file used to cause an unexpected error.
   This is now prevented. Meaningful error messages are also displayed when a sample or resolution file are not selected.
 - In the Elwin interface, the errors are now propagated correctly through to the workspace with extension _elt.
+- The :ref:`HallRoss <func-Hall-Ross>` fit function was updated to have :math:`\hbar` in its formula. The 
+  :ref:`TeixeiraWater <func-TeixeiraWater>` and :ref:`ChudleyElliot <func-ChudleyElliot>` fit functions 
+  now have a functionDeriv1D method.
 
 
 Data Corrections Interface
@@ -124,6 +127,8 @@ Improvements
   Plot Current Preview.
 - The sample logs are now copied over properly for the result workspace in the ResNorm tab.
 - Sqw files can now be loaded as Vanadium in the ResNorm interface.
+- In the Quasi interface, fit. 3 and diff. 3 are now stored in the fit workspaces. The probabilities for 3 peaks is now 
+  available in the probability workspace.
 
 Bugfixes
 ########

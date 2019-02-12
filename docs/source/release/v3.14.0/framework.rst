@@ -66,6 +66,7 @@ New Algorithms
 - :ref:`LoadSampleEnvironment <algm-LoadSampleEnvironment>` loads or adds to a sample environment from a .stl file, as well as allowing setting the material of the environment to load.
 - :ref:`ParallaxCorrection <algm-ParallaxCorrection>` will perform a geometric correction for the so-called parallax effect in tube based SANS detectors.
 - :ref:`CalculateEfficiencyCorrection <algm-CalculateEfficiencyCorrection>` will calculate a detection efficiency correction with multiple and flexible inputs for calculation.
+- :ref:`LinkedUBs <algm-LinkedUBs>` is an algorithm that ensures continuity of indexing across single crystal runs, as well as indirectly performing a U matrix correction for mis-centered samples or cases where there is error in the gonio angles. Results in a seperate UB for each run when used on a whole dataset.
 
 Improvements
 ############
@@ -112,6 +113,8 @@ Bugfixes
 - Fixed a bug in :ref:`ExtractSpectra <algm-ExtractSpectra>` which was causing a wrong last value in the output's vertical axis if the axis type was ``BinEdgeAxis``.
 - Fixed an issue in :ref:`Rebin2D <algm-Rebin2D>` where `NaN` values would result if there were zero-area bins in the input workspace.
 - Fixed a bug in :ref:`MayersSampleCorrection <algm-MayersSampleCorrection>` for when using the multiple scattering correction.
+- Fixed the `CheckSample` option of algorithm :ref:`CompareWorkspaces <algm-CompareWorkspaces>`: it crashed Mantid when comparing the run's sample logs. The algorithm's debug logging will now tell explicitly about the first entry which caused the log mismatch.
+- Fixed a bug in :ref:`MayersSampleCorrection <algm-MayersSampleCorrection>` when using the multiple scattering correction.
 - :ref:`SaveNexusProcessed <algm-SaveNexusProcessed>` and :ref:`LoadNexusProcessed <algm-LoadNexusProcessed>` now save and load an empty sample name correctly. Note, that files saved before this change will still load with an empty sample name replaced by a space as before.
 
 Python

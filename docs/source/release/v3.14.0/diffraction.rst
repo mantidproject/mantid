@@ -26,6 +26,7 @@ Improvements
 - :ref:`Le Bail concept page <Le Bail Fit>` moved from mediawiki
 - Rework of :ref:`powder diffraction calibration <Powder Diffraction Calibration>` documentation
 - New TOPAZ instrument geometry for 2019 run cycle
+- :ref:`LoadDiffCal <algm-LoadDiffCal>` has an additional parameter to allow for a second file specifying a grouping to override the one in the calibration file
 
 
 Single Crystal Diffraction
@@ -90,6 +91,7 @@ Bugfixes
 - Normalisation is fixed in :ref:`SumOverlappingTubes <algm-SumOverlappingTubes>`, which was causing very low peak to background ratio for reduced D2B data.
 - sudden drops at either end of spectra in Pearl caused by partial bins are now cropped.
 - The Powder Diffraction GUI now remembers whether linear or logorithmic binning was selected between uses
+- Fixed a bug in :ref:`GenerateGroupingPowder <algm-GenerateGroupingPowder>` which caused detectors without corresponding spectrum to get included in grouping.
 - :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` now does not use cache file when the grouping has changed.
 
 New Algorithms
