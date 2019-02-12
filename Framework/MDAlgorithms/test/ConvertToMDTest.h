@@ -750,12 +750,13 @@ public:
 
   static void setUpConvAlg(Mantid::MDAlgorithms::ConvertToMD &convAlg,
                            const std::string &type, const std::string &inName) {
+    static uint32_t cnt = 0;
     std::vector<int> splits(3, 2);
     convAlg.initialize();
     convAlg.setProperty("SplitInto", splits);
     convAlg.setProperty("SplitThreshold", 10);
     convAlg.setPropertyValue("InputWorkspace", inName);
-    convAlg.setPropertyValue("OutputWorkspace", "wsDefault");
+    convAlg.setPropertyValue("OutputWorkspace", std::to_string(cnt++) + "_ws");
     convAlg.setProperty("QDimensions", "Q3D");
     convAlg.setProperty("dEAnalysisMode", "Elastic");
     convAlg.setProperty("Q3DFrames", "Q_lab");
