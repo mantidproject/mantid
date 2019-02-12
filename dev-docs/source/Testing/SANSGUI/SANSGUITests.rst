@@ -39,7 +39,7 @@ Data reduction
     - A plot window will open; initially empty, then with a line
     - Change ``Reduction`` back to 1D
     - Click ``Process All``
-    - In the plot you should end up with a line plotted
+    - In the plot you should end up with multiple lines plotted
     - Check the ``Multi-period`` box
     - 6 additional columns should appear in the table
     - Check that the ``Add``, ``Delete``, ``Copy``, ``Paste``, ``Cut`` and ``Erase`` icons work as expected
