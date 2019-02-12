@@ -74,7 +74,7 @@ private:
       sumUnmaskedAndDeadPixels(API::MatrixWorkspace_sptr);
 
   void averageAndNormalizePixels(API::MatrixWorkspace_sptr,
-                                    std::tuple<double, double, int>);
+                                 std::tuple<double, double, int>);
 
   void applyBadPixelThreshold(API::MatrixWorkspace_sptr, double, double);
 };
