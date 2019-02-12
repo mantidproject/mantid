@@ -285,7 +285,8 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
             # get the underlying loader name if we used the generic one
             if self.__loaderName == 'Load':
                 self.__loaderName = loader.getPropertyValue('LoaderName')
-            canSkipLoadingLogs = self.__loaderName == 'LoadEventNexus'
+            # only LoadEventNexus can turn off loading logs, but FilterBadPulses requires them to be loaded from the file
+            canSkipLoadingLogs = self.__loaderName == 'LoadEventNexus' and self.filterBadPulses <= 0.
 
             if determineCharacterizations and j == 0:
                 self.__determineCharacterizations(filename, chunkname)  # updates instance variable

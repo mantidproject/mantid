@@ -20,7 +20,7 @@ using namespace Mantid::API;
 
 namespace {
 const std::string FILENAME{"ARCS_sim_event.nxs"};
-const double CHUNKSIZE{.005}; // REALLY small file
+const double CHUNKSIZE{.00001}; // REALLY small file
 const size_t NUMEVENTS(117760);
 } // anonymous namespace
 

@@ -157,8 +157,10 @@ MatrixWorkspace_sptr LoadEventAndCompress::loadChunk(const size_t rowIndex) {
   alg->setProperty<double>("FilterMonByTimeStop",
                            getProperty("FilterMonByTimeStop"));
 
-  // determine if loading logs
-  bool loadLogs = (rowIndex == 0); // only load logs for first chunk
+  // determine if loading logs - always load logs for first chunk or
+  // `FilterBadPulses` which will change delete some of the proton_charge log
+  // and change its value
+  bool loadLogs = (rowIndex == 0) || (m_filterBadPulses > 0.);
   if (!loadLogs) {
     // logs are needed for any of these
     const double filterByTimeStart = getProperty("FilterByTimeStart");
@@ -186,21 +188,17 @@ MatrixWorkspace_sptr LoadEventAndCompress::loadChunk(const size_t rowIndex) {
 
 /**
  * Process a chunk in-place
- *
- * @param filterBadPulses
- * @param wksp
  */
 API::MatrixWorkspace_sptr
-LoadEventAndCompress::processChunk(API::MatrixWorkspace_sptr &wksp,
-                                   double filterBadPulses) {
+LoadEventAndCompress::processChunk(API::MatrixWorkspace_sptr &wksp) {
   EventWorkspace_sptr eventWS =
       boost::dynamic_pointer_cast<EventWorkspace>(wksp);
 
-  if (filterBadPulses > 0.) {
+  if (m_filterBadPulses > 0.) {
     auto filterBadPulsesAlgo = createChildAlgorithm("FilterBadPulses");
     filterBadPulsesAlgo->setProperty("InputWorkspace", eventWS);
     filterBadPulsesAlgo->setProperty("OutputWorkspace", eventWS);
-    filterBadPulsesAlgo->setProperty("LowerCutoff", filterBadPulses);
+    filterBadPulsesAlgo->setProperty("LowerCutoff", m_filterBadPulses);
     filterBadPulsesAlgo->executeAsChildAlg();
     eventWS = filterBadPulsesAlgo->getProperty("OutputWorkspace");
   }
@@ -221,7 +219,7 @@ LoadEventAndCompress::processChunk(API::MatrixWorkspace_sptr &wksp,
  */
 void LoadEventAndCompress::exec() {
   const std::string filename = getPropertyValue("Filename");
-  const double filterBadPulses = getProperty("FilterBadPulses");
+  m_filterBadPulses = getProperty("FilterBadPulses");
 
   m_chunkingTable = determineChunk(filename);
 
@@ -231,7 +229,7 @@ void LoadEventAndCompress::exec() {
   progress.report("Loading Chunk");
   MatrixWorkspace_sptr resultWS = loadChunk(0);
   progress.report("Process Chunk");
-  resultWS = processChunk(resultWS, filterBadPulses);
+  resultWS = processChunk(resultWS);
 
   // load the other chunks
   const size_t numRows = m_chunkingTable->rowCount();
@@ -240,19 +238,7 @@ void LoadEventAndCompress::exec() {
 
   for (size_t i = 1; i < numRows; ++i) {
     MatrixWorkspace_sptr temp = loadChunk(i);
-
-    // copy logs if need to filter events
-    if (filterBadPulses > 0.) {
-      auto copyLogsAlg = createChildAlgorithm("CopyLogs");
-      copyLogsAlg->setProperty("InputWorkspace", resultWS);
-      copyLogsAlg->setProperty("OutputWorkspace", temp);
-      copyLogsAlg->setProperty("MergeStrategy", "WipeExisting");
-      copyLogsAlg->executeAsChildAlg();
-      temp = copyLogsAlg->getProperty("OutputWorkspace");
-    }
-
-    // process the data
-    temp = processChunk(temp, filterBadPulses);
+    temp = processChunk(temp);
 
     // remove logs
     auto removeLogsAlg = createChildAlgorithm("RemoveLogs");
@@ -272,6 +258,12 @@ void LoadEventAndCompress::exec() {
     progress.report();
   }
   Workspace_sptr total = assemble(resultWS);
+
+  // don't assume that any chunk had the correct binning so just reset it here
+  EventWorkspace_sptr totalEventWS =
+      boost::dynamic_pointer_cast<EventWorkspace>(total);
+  if (totalEventWS->getNEvents())
+    totalEventWS->resetAllXToSingleBin();
 
   // Don't bother compressing combined workspace. DetermineChunking is designed
   // to prefer loading full banks so no further savings should be available.
