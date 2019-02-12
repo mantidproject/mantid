@@ -31,38 +31,26 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-IndirectSettingsDialog::IndirectSettingsDialog(QWidget *parent,
-                                               QString const &settingGroup)
-    : QDialog(parent), m_settingsGroup(settingGroup) {
+IndirectSettingsDialog::IndirectSettingsDialog(QWidget *parent)
+    : QDialog(parent) { //, m_settingsGroup(settingGroup) {
   m_uiForm.setupUi(this);
-  m_uiForm.iicInstrumentConfiguration->setShowInstrumentLabel(true);
+  //m_uiForm.iicInstrumentConfiguration->setShowInstrumentLabel(true);
 
   loadProperties();
 
   connect(m_uiForm.pbOk, SIGNAL(clicked()), this, SLOT(okClicked()));
   connect(m_uiForm.pbApply, SIGNAL(clicked()), this, SLOT(applyClicked()));
   connect(m_uiForm.pbCancel, SIGNAL(clicked()), this, SLOT(cancelClicked()));
-
-  // connect(m_uiForm.iicInstrumentConfiguration,
-  //        SIGNAL(instrumentConfigurationUpdated(
-  //            QString const &, QString const &, QString const &)),
-  //        this,
-  //        SIGNAL(instrumentSetupChanged(QString const &, QString const &,
-  //                                      QString const &)));
 }
 
 void IndirectSettingsDialog::okClicked() {
   saveProperties();
-  emit instrumentSetupChanged(getSelectedInstrument(), getSelectedAnalyser(),
-                              getSelectedReflection());
   this->close();
 }
 
 void IndirectSettingsDialog::applyClicked() {
   setApplyingChanges(true);
   saveProperties();
-  emit instrumentSetupChanged(getSelectedInstrument(), getSelectedAnalyser(),
-                              getSelectedReflection());
   setApplyingChanges(false);
 }
 
@@ -71,40 +59,41 @@ void IndirectSettingsDialog::cancelClicked() { this->close(); }
 void IndirectSettingsDialog::loadProperties() {
   setSelectedFacility(getSavedFacility());
 
-  QSettings settings;
-  settings.beginGroup(m_settingsGroup);
+  // QSettings settings;
+  // settings.beginGroup(m_settingsGroup);
 
-  auto const instrumentName = settings.value("instrument-name", "").toString();
-  auto const analyserName = settings.value("analyser-name", "").toString();
-  auto const reflectionName = settings.value("reflection-name", "").toString();
+  // auto const instrumentName = settings.value("instrument-name",
+  // "").toString(); auto const analyserName = settings.value("analyser-name",
+  // "").toString(); auto const reflectionName =
+  // settings.value("reflection-name", "").toString();
 
-  if (!instrumentName.isEmpty())
-    setSelectedInstrument(instrumentName);
-  if (!analyserName.isEmpty())
-    setSelectedAnalyser(analyserName);
-  if (!reflectionName.isEmpty())
-    setSelectedReflection(reflectionName);
+  // if (!instrumentName.isEmpty())
+  //  setSelectedInstrument(instrumentName);
+  // if (!analyserName.isEmpty())
+  //  setSelectedAnalyser(analyserName);
+  // if (!reflectionName.isEmpty())
+  //  setSelectedReflection(reflectionName);
 
-  settings.endGroup();
+  // settings.endGroup();
 }
 
 void IndirectSettingsDialog::saveProperties() {
   setSavedFacility(getSelectedFacility().toStdString());
 
-  QSettings settings;
-  settings.beginGroup(m_settingsGroup);
+  // QSettings settings;
+  // settings.beginGroup(m_settingsGroup);
 
-  settings.setValue("instrument-name", getSelectedInstrument());
-  settings.setValue("analyser-name", getSelectedAnalyser());
-  settings.setValue("reflection-name", getSelectedReflection());
+  // settings.setValue("instrument-name", getSelectedInstrument());
+  // settings.setValue("analyser-name", getSelectedAnalyser());
+  // settings.setValue("reflection-name", getSelectedReflection());
 
-  settings.endGroup();
+  // settings.endGroup();
 }
 
 void IndirectSettingsDialog::setSelectedFacility(std::string const &facility) {
   setSavedFacility(facility);
-  m_uiForm.iicInstrumentConfiguration->setFacility(
-      QString::fromStdString(facility));
+  // m_uiForm.iicInstrumentConfiguration->setFacility(
+  //    QString::fromStdString(facility));
   m_uiForm.cbFacility->setCurrentIndex(findFacilityIndex(facility));
 }
 
@@ -114,42 +103,44 @@ int IndirectSettingsDialog::findFacilityIndex(std::string const &text) {
   return index != -1 ? index : 0;
 }
 
-void IndirectSettingsDialog::setSelectedInstrument(QString const &instrument) {
-  m_uiForm.iicInstrumentConfiguration->setInstrument(instrument);
-}
-
-void IndirectSettingsDialog::setSelectedAnalyser(QString const &analyser) {
-  m_uiForm.iicInstrumentConfiguration->setAnalyser(analyser);
-}
-
-void IndirectSettingsDialog::setSelectedReflection(QString const &reflection) {
-  m_uiForm.iicInstrumentConfiguration->setReflection(reflection);
-}
+// void IndirectSettingsDialog::setSelectedInstrument(QString const &instrument)
+// {
+//  m_uiForm.iicInstrumentConfiguration->setInstrument(instrument);
+//}
+//
+// void IndirectSettingsDialog::setSelectedAnalyser(QString const &analyser) {
+//  m_uiForm.iicInstrumentConfiguration->setAnalyser(analyser);
+//}
+//
+// void IndirectSettingsDialog::setSelectedReflection(QString const &reflection)
+// {
+//  m_uiForm.iicInstrumentConfiguration->setReflection(reflection);
+//}
 
 QString IndirectSettingsDialog::getSelectedFacility() const {
   return m_uiForm.cbFacility->currentText();
 }
 
-QString IndirectSettingsDialog::getSelectedInstrument() const {
-  return m_uiForm.iicInstrumentConfiguration->getInstrumentName();
-}
+// QString IndirectSettingsDialog::getSelectedInstrument() const {
+//  return m_uiForm.iicInstrumentConfiguration->getInstrumentName();
+//}
+//
+// QString IndirectSettingsDialog::getSelectedAnalyser() const {
+//  return m_uiForm.iicInstrumentConfiguration->getAnalyserName();
+//}
+//
+// QString IndirectSettingsDialog::getSelectedReflection() const {
+//  return m_uiForm.iicInstrumentConfiguration->getReflectionName();
+//}
 
-QString IndirectSettingsDialog::getSelectedAnalyser() const {
-  return m_uiForm.iicInstrumentConfiguration->getAnalyserName();
-}
-
-QString IndirectSettingsDialog::getSelectedReflection() const {
-  return m_uiForm.iicInstrumentConfiguration->getReflectionName();
-}
-
-void IndirectSettingsDialog::setDisabledInstruments(
-    QStringList const &instrumentNames) {
-  m_uiForm.iicInstrumentConfiguration->setDisabledInstruments(instrumentNames);
-}
-
-void IndirectSettingsDialog::updateInstrumentConfiguration() {
-  m_uiForm.iicInstrumentConfiguration->newInstrumentConfiguration();
-}
+// void IndirectSettingsDialog::setDisabledInstruments(
+//    QStringList const &instrumentNames) {
+//  m_uiForm.iicInstrumentConfiguration->setDisabledInstruments(instrumentNames);
+//}
+//
+// void IndirectSettingsDialog::updateInstrumentConfiguration() {
+//  m_uiForm.iicInstrumentConfiguration->newInstrumentConfiguration();
+//}
 
 void IndirectSettingsDialog::setApplyingChanges(bool applyingChanges) {
   setApplyText(applyingChanges ? "Applying..." : "Apply");

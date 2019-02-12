@@ -61,43 +61,6 @@
     </widget>
    </item>
    <item>
-    <widget class="QGroupBox" name="gbReduction">
-     <property name="title">
-      <string>Data Reduction</string>
-     </property>
-     <layout class="QHBoxLayout" name="horizontalLayout_2">
-      <item>
-       <widget class="MantidQt::MantidWidgets::IndirectInstrumentConfig" name="iicInstrumentConfiguration">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>100</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="techniques" stdset="0">
-         <stringlist>
-          <string>TOF Indirect Geometry Spectroscopy</string>
-          <string>Reactor Indirect Geometry Spectroscopy</string>
-         </stringlist>
-        </property>
-        <property name="enableDiffraction" stdset="0">
-         <bool>false</bool>
-        </property>
-        <property name="showInstrumentLabel" stdset="0">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item>
     <spacer name="verticalSpacer">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
@@ -152,13 +115,6 @@
    </item>
   </layout>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>MantidQt::MantidWidgets::IndirectInstrumentConfig</class>
-   <extends>QComboBox</extends>
-   <header>MantidQtWidgets/Common/IndirectInstrumentConfig.h</header>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections/>
 </ui>

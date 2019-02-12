@@ -69,9 +69,6 @@ public:
   std::vector<std::pair<std::string, std::vector<std::string>>>
   getInstrumentModes();
   QMap<QString, QString> getInstrumentDetails();
-  QString getSelectedInstrument() const;
-  QString getSelectedAnalyser() const;
-  QString getSelectedReflection() const;
 
 signals:
   /// Emitted when the instrument setup is changed
@@ -155,6 +152,8 @@ private:
   Ui::IndirectDataReduction m_uiForm;
   /// The settings dialog
   std::unique_ptr<IDA::IndirectSettingsDialog> m_settingsDialog;
+  /// The settings group
+  QString m_settingsGroup;
   /// Runner for insturment load algorithm
   MantidQt::API::AlgorithmRunner *m_algRunner;
 

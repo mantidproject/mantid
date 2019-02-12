@@ -222,6 +222,7 @@ QString ISISCalibration::instrumentDetectorRangeString() {
 }
 
 QString ISISCalibration::outputWorkspaceName() const {
+  const auto configuration = getInstrumentConfiguration();
   auto name = QFileInfo(m_uiForm.leRunNo->getFirstFilename()).baseName();
   if (m_uiForm.leRunNo->getFilenames().size() > 1)
     name += "_multi";

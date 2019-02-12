@@ -19,6 +19,40 @@
      <number>9</number>
     </property>
     <item>
+     <widget class="QGroupBox" name="gbC2EInstrument">
+      <property name="title">
+       <string>Instrument</string>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout_27">
+       <property name="topMargin">
+        <number>1</number>
+       </property>
+       <item>
+        <widget class="MantidQt::MantidWidgets::IndirectInstrumentConfig" name="iicInstrumentConfiguration">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="techniques" stdset="0">
+          <stringlist>
+           <string>TOF Indirect Geometry Spectroscopy</string>
+           <string>Reactor Indirect Geometry Spectroscopy</string>
+          </stringlist>
+         </property>
+         <property name="enableDiffraction" stdset="0">
+          <bool>false</bool>
+         </property>
+         <property name="showInstrumentLabel" stdset="0">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
      <widget class="QTabWidget" name="twIDRTabs">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">

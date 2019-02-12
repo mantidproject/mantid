@@ -54,8 +54,9 @@ using namespace MantidQt::CustomInterfaces::IDA;
  */
 IndirectDataReduction::IndirectDataReduction(QWidget *parent)
     : UserSubWindow(parent),
-      m_settingsDialog(Mantid::Kernel::make_unique<IndirectSettingsDialog>(
-          this, "CustomInterfaces/IndirectDataReduction")),
+      m_settingsDialog(
+          Mantid::Kernel::make_unique<IndirectSettingsDialog>(this)),
+      m_settingsGroup("CustomInterfaces/IndirectDataReduction"),
       m_algRunner(new MantidQt::API::AlgorithmRunner(this)),
       m_changeObserver(*this, &IndirectDataReduction::handleConfigChange) {
   // Signals to report load instrument algo result
@@ -77,10 +78,7 @@ IndirectDataReduction::~IndirectDataReduction() {
   saveSettings();
 }
 
-void IndirectDataReduction::settingsClicked() {
-  m_settingsDialog->show();
-  m_settingsDialog->setFocus();
-}
+void IndirectDataReduction::settingsClicked() { m_settingsDialog->show(); }
 
 /**
  * On user clicking the "help" button on the interface, directs their request to
@@ -129,15 +127,15 @@ void IndirectDataReduction::initLayout() {
           SLOT(openDirectoryDialog()));
 
   // Handle instrument configuration changes
-  connect(m_settingsDialog.get(),
-          SIGNAL(instrumentSetupChanged(QString const &, QString const &,
-                                        QString const &)),
+  connect(m_uiForm.iicInstrumentConfiguration,
+          SIGNAL(instrumentConfigurationUpdated(
+              const QString &, const QString &, const QString &)),
           this,
-          SLOT(instrumentSetupChanged(QString const &, QString const &,
-                                      QString const &)));
+          SLOT(instrumentSetupChanged(const QString &, const QString &,
+                                      const QString &)));
 
   // Update the instrument configuration across the UI
-  m_settingsDialog->updateInstrumentConfiguration();
+  m_uiForm.iicInstrumentConfiguration->newInstrumentConfiguration();
 
   auto facility = Mantid::Kernel::ConfigService::Instance().getFacility();
   filterUiForFacility(QString::fromStdString(facility.name()));
@@ -243,9 +241,12 @@ IndirectDataReduction::loadInstrumentIfNotExist(
 QMap<QString, QString> IndirectDataReduction::getInstrumentDetails() {
   QMap<QString, QString> instDetails;
 
-  auto const instrumentName = getSelectedInstrument().toStdString();
-  auto analyser = getSelectedAnalyser().toStdString();
-  auto const reflection = getSelectedReflection().toStdString();
+  std::string instrumentName =
+      m_uiForm.iicInstrumentConfiguration->getInstrumentName().toStdString();
+  std::string analyser =
+      m_uiForm.iicInstrumentConfiguration->getAnalyserName().toStdString();
+  std::string reflection =
+      m_uiForm.iicInstrumentConfiguration->getReflectionName().toStdString();
 
   instDetails["instrument"] = QString::fromStdString(instrumentName);
   instDetails["analyser"] = QString::fromStdString(analyser);
@@ -301,18 +302,6 @@ QMap<QString, QString> IndirectDataReduction::getInstrumentDetails() {
   }
 
   return instDetails;
-}
-
-QString IndirectDataReduction::getSelectedInstrument() const {
-  return m_settingsDialog->getSelectedInstrument();
-}
-
-QString IndirectDataReduction::getSelectedAnalyser() const {
-  return m_settingsDialog->getSelectedAnalyser();
-}
-
-QString IndirectDataReduction::getSelectedReflection() const {
-  return m_settingsDialog->getSelectedReflection();
 }
 
 /**
@@ -384,7 +373,7 @@ void IndirectDataReduction::handleConfigChange(
     QString facility = QString::fromStdString(value);
 
     filterUiForFacility(facility);
-    m_settingsDialog->setSelectedFacility(facility.toStdString());
+    m_uiForm.iicInstrumentConfiguration->setFacility(facility);
   }
 }
 
@@ -392,15 +381,18 @@ void IndirectDataReduction::handleConfigChange(
  * Read Qt settings for the interface.
  */
 void IndirectDataReduction::readSettings() {
-  auto const &config = Mantid::Kernel::ConfigService::Instance();
-
   // Set values of m_dataDir and m_saveDir
-  m_dataDir =
-      QString::fromStdString(config.getString("datasearch.directories"));
+  m_dataDir = QString::fromStdString(
+      Mantid::Kernel::ConfigService::Instance().getString(
+          "datasearch.directories"));
   m_dataDir.replace(" ", "");
   if (m_dataDir.length() > 0)
     m_dataDir = m_dataDir.split(";", QString::SkipEmptyParts)[0];
-  m_saveDir = QString::fromStdString(config.getString("defaultsave.directory"));
+  m_saveDir = QString::fromStdString(
+      Mantid::Kernel::ConfigService::Instance().getString(
+          "defaultsave.directory"));
+
+  QSettings settings;
 
   // Load settings for MWRunFile widgets
   // TODO
@@ -420,14 +412,43 @@ void IndirectDataReduction::readSettings() {
   /* m_uiForm.sqw_dsSampleInput->readSettings(settings.group()); */
   /* settings.endGroup(); */
 
-  m_settingsDialog->loadProperties();
+  // Load the last used instrument
+  settings.beginGroup(m_settingsGroup);
+
+  QString instrumentName = settings.value("instrument-name", "").toString();
+  if (!instrumentName.isEmpty())
+    m_uiForm.iicInstrumentConfiguration->setInstrument(instrumentName);
+
+  QString analyserName = settings.value("analyser-name", "").toString();
+  if (!analyserName.isEmpty())
+    m_uiForm.iicInstrumentConfiguration->setAnalyser(analyserName);
+
+  QString reflectionName = settings.value("reflection-name", "").toString();
+  if (!reflectionName.isEmpty())
+    m_uiForm.iicInstrumentConfiguration->setReflection(reflectionName);
+
+  settings.endGroup();
 }
 
 /**
  * Save settings to a persistent storage.
  */
 void IndirectDataReduction::saveSettings() {
-  m_settingsDialog->saveProperties();
+  QSettings settings;
+  settings.beginGroup(m_settingsGroup);
+
+  QString instrumentName =
+      m_uiForm.iicInstrumentConfiguration->getInstrumentName();
+  settings.setValue("instrument-name", instrumentName);
+
+  QString analyserName = m_uiForm.iicInstrumentConfiguration->getAnalyserName();
+  settings.setValue("analyser-name", analyserName);
+
+  QString reflectionName =
+      m_uiForm.iicInstrumentConfiguration->getReflectionName();
+  settings.setValue("reflection-name", reflectionName);
+
+  settings.endGroup();
 }
 
 /**
@@ -485,7 +506,8 @@ void IndirectDataReduction::filterUiForFacility(QString facility) {
   }
 
   // Disable instruments as required
-  m_settingsDialog->setDisabledInstruments(disabledInstruments);
+  m_uiForm.iicInstrumentConfiguration->setDisabledInstruments(
+      disabledInstruments);
 }
 
 /**
