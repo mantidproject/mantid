@@ -8,7 +8,7 @@ from __future__ import (absolute_import, division, print_function)
 
 import mantid.simpleapi as mantid
 
-
+import Muon.GUI.Common.ADSHandler.workspace_naming as wsName
 
 class LoadUtilsDummy(object):
     """
@@ -60,7 +60,7 @@ class LoadUtilsDummy(object):
         return self.runName
 
     def getInstrument(self):
-        return self.instrument
+        return self.context.instrument
 
     # check if data matches current
     def digit(self, x):
@@ -85,20 +85,18 @@ class LoadUtilsDummy(object):
     # Get the groups/pairs for active WS
     # ignore raw files
     def getWorkspaceNames(self):
-        # gets all WS in the ADS
-        runName, options = self.getCurrentWS()
+        pair_names = list(self.context.pair_names)
+        run_numbers = self.context.current_runs
         final_options = []
-        # only keep the relevant WS (same run as Muon Analysis)
-        for pick in options:
-            if ";" in pick and "Raw" not in pick and runName in pick:
-                final_options.append(pick)
+        for run in run_numbers:
+            final_options.append(self.context.instrument+str(run[0])+" (PhaseQuad)")
+            for name in pair_names:
+                final_options.append(wsName.get_pair_data_workspace_name(self.context,str(name),str(run[0])))
         return final_options
 
     # Get the groups/pairs for active WS
     def getGroupedWorkspaceNames(self):
-        print(self.context.current_runs)
         run_numbers = self.context.current_runs
         instrument = str(self.context.instrument)
         runs = [instrument+str(run_number[0]) for run_number in run_numbers]
-        print(runs)
         return runs

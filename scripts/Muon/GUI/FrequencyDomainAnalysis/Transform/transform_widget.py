@@ -55,6 +55,7 @@ class TransformWidget(QtGui.QWidget):
 
     def handle_new_data_loaded(self):
         self._maxent.runChanged()
+        self._fft.runChanged()
 
     def handle_new_instrument(self):
         self._maxent.clear()
