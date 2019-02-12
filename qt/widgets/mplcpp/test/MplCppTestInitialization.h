@@ -7,8 +7,9 @@
 #ifndef MPLCPPTESTGLOBALINITIALIZATION_H
 #define MPLCPPTESTGLOBALINITIALIZATION_H
 
-#include "cxxtest/GlobalFixture.h"
+#include <cxxtest/GlobalFixture.h>
 
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/core/NDArray.h"
 #include "MantidPythonInterface/core/VersionCompat.h"
 #include <QApplication>
@@ -51,9 +52,8 @@ public:
 class QApplicationHolder : CxxTest::GlobalFixture {
 public:
   bool setUpWorld() override {
-    int argc(0);
-    char **argv = {};
-    m_app = new QApplication(argc, argv);
+    m_app = new QApplication(m_argc, m_argv);
+
     return true;
   }
 
@@ -62,7 +62,10 @@ public:
     return true;
   }
 
-private:
+  int m_argc = 1;
+  GNU_DIAG_OFF("pedantic")
+  char *m_argv[1] = {"MplCppTest"};
+  GNU_DIAG_ON("pedantic")
   QApplication *m_app;
 };
 

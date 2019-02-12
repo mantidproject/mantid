@@ -53,6 +53,7 @@ Bug fixes
 * Fixed error message when trying to load or process table with empty rows.
 * Removed option to process in non-compatibility mode to avoid calculation issues.
 * Default name for added runs has correct number of digits.
+* RKH files no longer append to existing files, but overwrite instead.
 
 Improvements
 ############

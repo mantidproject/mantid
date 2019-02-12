@@ -324,7 +324,7 @@ public:
     TS_ASSERT_EQUALS(ptrDet1.getID(), 1);
     TS_ASSERT_DELTA(ptrDet1.getPos().X(), 0.0000, 0.0001);
     TS_ASSERT_DELTA(ptrDet1.getPos().Y(), 0.0000, 0.0001);
-    TS_ASSERT_DELTA(ptrDet1.getPos().Z(), -4.7390, 0.0001);
+    TS_ASSERT_DELTA(ptrDet1.getPos().Z(), -3.2500, 0.0001);
 
     const auto &ptrDet2 = detectorInfo.detector(detectorInfo.indexOf(4816));
     TS_ASSERT_EQUALS(ptrDet2.getName(), "tall He3 element");

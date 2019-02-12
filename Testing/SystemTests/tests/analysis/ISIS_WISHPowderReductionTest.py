@@ -37,7 +37,7 @@ linked_panels = {
 }
 
 
-class WISHPowderReductionTest(MantidSystemTest):
+class WISHPowderReductionNoAbsorptionTest(MantidSystemTest):
     # still missing required files check with ./systemtest -R PowderReduction --showskipped
     def requiredFiles(self):
         input_files = ["vana19612-{}foc-SF-SS.nxs".format(panel) for panel in panels]
@@ -50,7 +50,7 @@ class WISHPowderReductionTest(MantidSystemTest):
             shutil.rmtree(output_dir)
 
     def runTest(self):
-        os.makedirs(output_dir)
+        create_folder()
         wish_test = Wish(calibration_dir, output_dir, True, input_dir + "/", False)
         runs = [40503]
 
@@ -72,8 +72,11 @@ class WISHPowderReductionTest(MantidSystemTest):
             mantid.DeleteWorkspace(ws)
             mantid.DeleteWorkspace(ws + "-d")
 
+    def requiredMemoryMB(self):
+        return 12000
 
-class WISHPowderReductionNoAbsorptionTest(MantidSystemTest):
+
+class WISHPowderReductionTest(MantidSystemTest):
     # still missing required files check with ./systemtest -R PowderReduction --showskipped
     def requiredFiles(self):
         input_files = ["vana19612-{}foc-SF-SS.nxs".format(panel) for panel in panels]
@@ -86,7 +89,7 @@ class WISHPowderReductionNoAbsorptionTest(MantidSystemTest):
             shutil.rmtree(output_dir)
 
     def runTest(self):
-        os.makedirs(output_dir)
+        create_folder()
         wish_test = Wish(calibration_dir, output_dir, True, input_dir + "/")
         runs = [40503]
 
@@ -107,6 +110,9 @@ class WISHPowderReductionNoAbsorptionTest(MantidSystemTest):
             mantid.DeleteWorkspace(ws)
             mantid.DeleteWorkspace(ws + "-d")
 
+    def requiredMemoryMB(self):
+        return 12000
+
 
 class WISHPowderReductionCreateVanadiumTest(MantidSystemTest):
     # still missing required files check with ./systemtest -R PowderReduction --showskipped
@@ -121,7 +127,7 @@ class WISHPowderReductionCreateVanadiumTest(MantidSystemTest):
             shutil.rmtree(output_dir)
 
     def runTest(self):
-        os.makedirs(output_dir)
+        create_folder()
         wish_test = Wish(calibration_dir, output_dir, True, input_dir + "/")
         wish_test.create_vanadium_run(19612, 19618, panels)
 
@@ -132,3 +138,15 @@ class WISHPowderReductionCreateVanadiumTest(MantidSystemTest):
             validation_files = validation_files + ["w19612-{}foc".format(panel),
                                                    "vana19612-{}foc-SF-SS.nxs".format(panel)]
         return validation_files
+
+    def requiredMemoryMB(self):
+        return 12000
+
+
+def create_folder():
+    # make folder in try catch because we can't guarantee that the cleanup has run, once we dont need to support
+    # python 2 we can use tempfile.TemporaryDirectory() which is automatically deleted like tempfile is
+    try:
+        os.makedirs(output_dir)
+    except OSError:
+        return

@@ -58,6 +58,7 @@ def get_save_strategy(file_format_bundle, file_name, save_options):
     elif file_format is SaveType.RKH:
         file_name = get_file_name(file_format_bundle, file_name, "", ".txt")
         save_name = "SaveRKH"
+        save_options.update({"Append": False})
     elif file_format is SaveType.CSV:
         file_name = get_file_name(file_format_bundle, file_name, "", ".csv")
         save_name = "SaveCSV"
