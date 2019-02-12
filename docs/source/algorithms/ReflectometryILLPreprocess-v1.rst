@@ -44,7 +44,7 @@ A fitting of the present peak position takes place in order to determine the det
 For preventing fitting of the present peak position, the property *LinePosition* allows to provide a peak position.
 A use case is to enter a direct peak position, which can be obtained from the direct beam workspaces sample logs, when the *Run* is a reflected beam.
 
-Alternatively, the properties *TwoTheta* and the sample log *reduction.line_position* affect the pixel :math:`2\theta` angles.
+Alternatively, the properties *TwoTheta* and the sample log *reduction.line_position* affect the pixel :math:`2\theta` angle.
 
 Foreground and backgrounds
 ##########################

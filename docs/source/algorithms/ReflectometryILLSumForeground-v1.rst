@@ -17,7 +17,7 @@ The following diagram gives an overview of the algorithm:
 
 .. diagram:: ReflectometryILLSumForeground-v1_wkflw.dot
 
-The algorihtm runs :ref:`ReflectometryBeamStatistics <algm-ReflectometryBeamStatistics>` when processing the reflected beam. This adds some sample log entries to *OutputWorkspace* and *DirectBeamWorkspace*. See the :ref:`algorithm's documentation <algm-ReflectometryBeamStatistics>` for more details.
+The algorihtm runs :ref:`ReflectometryBeamStatistics <algm-ReflectometryBeamStatistics>` when processing the reflected beam. This adds some sample log entries to *OutputWorkspace* and *DirectLineWorkspace*. See the :ref:`algorithm's documentation <algm-ReflectometryBeamStatistics>` for more details.
 
 Summation type
 ##############
@@ -75,7 +75,7 @@ Usage
    reflectivity = ReflectometryILLSumForeground(
        InputWorkspace=reflected,
        DirectForegroundWorkspace=directFgd,
-       DirectBeamWorkspace=direct,
+       DirectLineWorkspace=direct,
        WavelengthRange=[2, 15],
    )
    
@@ -124,7 +124,7 @@ Output:
    reflectivity = ReflectometryILLSumForeground(
        InputWorkspace=reflected,
        DirectForegroundWorkspace=directFgd,
-       DirectBeamWorkspace=direct,
+       DirectLineWorkspace=direct,
        SummationType='SumInQ',
        WavelengthRange=[0., 14.]
    )

@@ -244,24 +244,31 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
             if self.getProperty(Prop.LOW_BKG_WIDTH).value == 0 and self.getProperty(Prop.HIGH_BKG_WIDTH).value == 0:
                 issues[Prop.BKG_METHOD] = 'Cannot calculate flat background if both upper and lower background /' \
                                           ' widths are zero.'
-            if not self.getProperty(Prop.INPUT_WS).isDefault:
-                ws = self.getProperty(Prop.INPUT_WS).value
-                if not ws.run().hasProperty(common.SampleLogs.LINE_POSITION) and \
-                        self.getProperty(Prop.LINE_POSITION_INPUT).isDefault:
-                    issues[Prop.LINE_POSITION_INPUT] = 'Cannot subtract flat background without knowledge of /'\
-                                                       'line position.'
-                    issues[Prop.INPUT_WS] = 'Consider to give a sample log entry ' + common.SampleLogs.LINE_POSITION
         # We cannot use a FloatBoundedValidator here since we need to check for the default empty double
         if not self.getProperty(Prop.LINE_POSITION_INPUT).isDefault:
             beamCentre = self.getProperty(Prop.LINE_POSITION_INPUT).value
             if beamCentre < 0. or beamCentre > 255.:
                 issues[Prop.LINE_POSITION_INPUT] = 'Value should be between 0.0 and 255.0'
+        # Check whether user provides TwoTheta or sample log entry exist
+        if not self.getProperty(Prop.INPUT_WS).isDefault:
+            ws = self.getProperty(Prop.INPUT_WS).value
+            if not ws.run().hasProperty(common.SampleLogs.TWO_THETA):
+                if self.getProperty(Prop.TWO_THETA).isDefault:
+                    issues[Prop.TWO_THETA] = 'Must provide TwoTheta or in sample logs ' + common.SampleLogs.TWO_THETA
+                else:
+                    # Write two theta to sample logs
+                    ws.run().addProperty(common.SampleLogs.TWO_THETA, float(self.getProperty(Prop.TWO_THETA).value),
+                                         'degree', True)
         # Early input validation to prevent FindReflectometryLines to fail its validation
         if not self.getProperty(Prop.XMIN).isDefault and not self.getProperty(Prop.XMAX).isDefault:
             xmin = self.getProperty(Prop.XMIN).value
             xmax = self.getProperty(Prop.XMAX).value
             if xmax < xmin:
                 issues[Prop.XMIN] = 'Must be smaller than RangeUpper.'
+            if xmin < 0.0:
+                issues[Prop.XMIN] = 'Must be larger or equal than 0.0.'
+            if xmax > 255.0:
+                issues[Prop.XMAX] = 'Must be smaller or equal than 255.0.'
         if not self.getProperty(Prop.START_WS_INDEX).isDefault \
                 and not self.getProperty(Prop.END_WS_INDEX).isDefault:
             minIndex = self.getProperty(Prop.START_WS_INDEX).value
@@ -309,7 +316,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
     def _flatBkgRanges(self, ws):
         """Return spectrum number ranges for flat background fitting."""
         sign = self._workspaceIndexDirection(ws)
-        peakPos = ws.getRun().getProperty(common.SampleLogs.FOREGROUND_CENTRE).value
+        peakPos = ws.run().getProperty(common.SampleLogs.FOREGROUND_CENTRE).value
         # Convert to spectrum numbers
         peakPos = ws.getSpectrum(peakPos).getSpectrumNo()
         peakHalfWidths = self._foregroundWidths()
@@ -356,15 +363,15 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         if inputFiles:
             mergedWSName = self._names.withSuffix('merged')
             linePosition = 127.5
-            if not self.getProperty(Prop.LINE_POSITION_INPUT):
+            if not self.getProperty(Prop.LINE_POSITION_INPUT).isDefault:
                 linePosition = self.getProperty(Prop.LINE_POSITION_INPUT).value
             loadOption = {
                 'XUnit': 'TimeOfFlight',
                 'BeamCentre': linePosition
             }
             if not self.getProperty(Prop.TWO_THETA).isDefault:
-                twoTheta = self.getProperty(Prop.TWO_THETA).value / 2.
-                loadOption.update({'BraggAngle': twoTheta})
+                theta = self.getProperty(Prop.TWO_THETA).value / 2.
+                loadOption.update({'BraggAngle': theta})
             # MergeRunsOptions are defined by the parameter files and will not be modified here!
             ws = LoadAndMerge(
                 Filename=inputFiles,
@@ -386,8 +393,6 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         hists = ws.getNumberHistograms()
         mindex = int(hists / 2)
         l2 = ws.spectrumInfo().l2(mindex)
-        theta = ws.spectrumInfo().twoTheta(mindex) / 2.
-        linePosition = 0.0
         if not self.getProperty(Prop.LINE_POSITION_INPUT).isDefault:
             linePosition = self.getProperty(Prop.LINE_POSITION_INPUT).value
         else:
@@ -396,11 +401,11 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
             xmin = self.getProperty(Prop.XMIN).value
             if not xmin == Property.EMPTY_DBL:
                 xmin = self.getProperty(Prop.XMIN).value
-                xmin = common.inTOF(xmin, l1, l2, theta)
+                xmin = common.inTOF(xmin, l1, l2)
             xmax = self.getProperty(Prop.XMAX).value
             if not self.getProperty(Prop.XMAX).isDefault:
                 xmax = self.getProperty(Prop.XMAX).value
-                xmax = common.inTOF(xmax, l1, l2, theta)
+                xmax = common.inTOF(xmax, l1, l2)
             peak = FindReflectometryLines(
                 InputWorkspace=ws,
                 OutputWorkspace=peakWSName,
@@ -411,19 +416,16 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
             )
             linePosition = peak.LineCentre
             self._cleanup.cleanup(peak.OutputWorkspace)
+        # Add the fractional workspace index of the beam position to the sample logs of ws.
+        ws.run().addProperty(common.SampleLogs.LINE_POSITION, float(linePosition), True)
         return ws, linePosition
 
     def _addSampleLogInfo(self, ws, linePosition):
-        """Add foreground indices and linePosition to the sample logs, names start with reduction."""
-        # Add the fractional workspace index of the beam position to the sample logs of ws.
+        """Add foreground indices to the sample logs, names start with reduction."""
         run = ws.run()
-        run.addProperty(common.SampleLogs.LINE_POSITION, float(linePosition), True)
         # Add foreground start and end workspace indices to the sample logs of ws.
         hws = self._foregroundWidths()
         beamPosIndex = int(numpy.rint(linePosition))
-        if beamPosIndex > 255:
-            beamPosIndex = 255
-            self.self.log().warning('Is it a monitor spectrum?')
         sign = self._workspaceIndexDirection(ws)
         startIndex = beamPosIndex - sign * hws[0]
         endIndex = beamPosIndex + sign * hws[1]
@@ -435,24 +437,31 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
 
     def _moveDetector(self, ws, linePosition):
         """Perform detector position correction for direct and reflected beams."""
-        if self.getProperty(Prop.DIRECT_LINE_WORKSPACE).isDefault:
-            return ws
         # Reflected beam calibration
+        if self.getProperty(Prop.DIRECT_LINE_WORKSPACE).isDefault and \
+           self.getProperty(Prop.LINE_POSITION_INPUT).isDefault:
+            return ws
         detectorMovedWSName = self._names.withSuffix('detectors_moved')
+        args = {
+            'InputWorkspace': ws,
+            'OutputWorkspace': detectorMovedWSName,
+            'EnableLogging': self._subalgLogging,
+            'DetectorComponentName': 'detector',
+            'PixelSize': common.pixelSize(self._instrumentName),
+            'DetectorCorrectionType': 'RotateAroundSample',
+            'DetectorFacesSample': True
+        }
         directLineWS = self.getProperty(Prop.DIRECT_LINE_WORKSPACE).value
-        directLinePosition = directLineWS.run().getLogData(common.SampleLogs.LINE_POSITION).value
-        detectorMovedWS = SpecularReflectionPositionCorrect(
-            InputWorkspace=ws,
-            OutputWorkspace=detectorMovedWSName,
-            EnableLogging=self._subalgLogging,
-            DetectorComponentName='detector',
-            PixelSize=common.pixelSize(self._instrumentName),
-            LinePosition=linePosition,
-            DirectLinePosition=directLinePosition,
-            DirectLineWorkspace=directLineWS,
-            DetectorCorrectionType='RotateAroundSample',
-            DetectorFacesSample=True
-        )
+        if not self.getProperty(Prop.DIRECT_LINE_WORKSPACE).isDefault:
+            args['DirectLineWorkspace'] = directLineWS
+            args['DirectLinePosition'] = directLineWS.run().getLogData(common.SampleLogs.LINE_POSITION).value
+        else:
+            if not self.getProperty(Prop.TWO_THETA).isDefault:
+                args['TwoTheta'] = self.getProperty(Prop.TWO_THETA).value
+            else:
+                args['TwoTheta'] = ws.run().getLogData(common.SampleLogs.TWO_THETA).value
+        args['LinePosition'] = linePosition
+        detectorMovedWS = SpecularReflectionPositionCorrect(**args)
         self._cleanup.cleanup(ws)
         return detectorMovedWS
 

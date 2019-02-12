@@ -12,6 +12,7 @@ import numpy
 from testhelpers import create_algorithm, run_algorithm
 import ReflectometryILL_common as common
 
+
 def _gaussian(x, height, x0, sigma):
     """Return a point in the gaussian curve."""
     x = x - x0
@@ -199,6 +200,11 @@ def refl_add_line_position(ws, linePosition):
     return ws
 
 
+def refl_add_two_theta(ws, twoTheta):
+    ws.run().addProperty(common.SampleLogs.TWO_THETA, float(twoTheta), 'degree', True)
+    return ws
+
+
 def refl_preprocess(outputWSName, ws):
     args = {
         'InputWorkspace': ws,
@@ -252,7 +258,7 @@ def refl_sum_foreground(outputWSName, sumType, ws, dirFgdWS=None, dirWS=None):
         'OutputWorkspace': outputWSName,
         'SummationType': sumType,
         'DirectForegroundWorkspace': dirFgdWS,
-        'DirectBeamWorkspace': dirWS,
+        'DirectLineWorkspace': dirWS,
         'WavelengthRange': [0.1]
     }
     alg = create_algorithm('ReflectometryILLSumForeground', **args)

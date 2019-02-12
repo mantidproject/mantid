@@ -23,8 +23,9 @@ class ReflectometryILLPolarizationCorTest(unittest.TestCase):
         illhelpers.add_flipper_configuration_D17(ws, 1, 1)
         mtd.add('ws', ws)
         ws = illhelpers.refl_add_line_position(ws, 128.0)
+        ws = illhelpers.refl_add_two_theta(ws, 6.6)
         ws = illhelpers.refl_preprocess('ws', ws)
-        ws = illhelpers.refl_sum_foreground('ws', 'SumInLambda', ws)
+        illhelpers.refl_sum_foreground('ws', 'SumInLambda', ws)
         args = {
             'InputWorkspaces': 'ws',
             'OutputWorkspace': 'corrected',

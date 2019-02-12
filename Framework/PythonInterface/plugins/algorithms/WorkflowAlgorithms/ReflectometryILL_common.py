@@ -108,9 +108,9 @@ def slitSizeLogEntry(instrumentName, slitNumber):
     return entry.format(slitNumber + 1)
 
 
-def inTOF(value, l1, l2, theta):
+def inTOF(value, l1, l2):
     """Return the number (tof) converted to wavelength"""
-    return UnitConversion.run('Wavelength', 'TOF', value, l1, l2, theta, DeltaEModeType.Elastic, 0.)
+    return UnitConversion.run('Wavelength', 'TOF', value, l1, l2, 0., DeltaEModeType.Elastic, 0.)
 
 
 def instrumentName(ws):
