@@ -67,6 +67,14 @@ public:
   /// Assign from double
   void fromDouble(size_t i, double value) override;
 
+  /// Reference to the data.
+  const std::vector<Peak> &data() const { return m_peaks; } 
+
+  bool equals(Column *otherColumn,double tolerance) const override {
+    (void)otherColumn;
+    (void)tolerance;
+    return true;}
+
 protected:
   /// Sets the new column size.
   void resize(size_t count) override;
