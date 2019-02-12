@@ -167,6 +167,10 @@ public:
     throw std::runtime_error("equals not implemented");
   };
 
+  virtual bool equalsRelErr(Column *,double) const {
+    throw std::runtime_error("equals not implemented");
+  };
+
 protected:
   /// Sets the new column size.
   virtual void resize(size_t count) = 0;
