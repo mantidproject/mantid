@@ -118,6 +118,10 @@ void processBinReplacement(MatrixWorkspace_const_sptr singleBinWorkspace,
   replaceBinValues(outputWorkspace, insertionIndex, yValues, eValues);
 }
 
+bool doesExistInADS(std::string const &workspaceName) {
+  return AnalysisDataService::Instance().doesExist(workspaceName);
+}
+
 Workspace_sptr getADSWorkspace(std::string const &workspaceName) {
   return AnalysisDataService::Instance().retrieveWS<Workspace>(workspaceName);
 }
@@ -186,7 +190,7 @@ void addOutputToResultsGroup(std::string const &resultGroupName,
                              std::string const &inputName,
                              std::string const &outputName,
                              MatrixWorkspace_sptr output) {
-  if (!resultGroupName.empty())
+  if (!resultGroupName.empty() && doesExistInADS(resultGroupName))
     addOutputToResultsGroup(getADSGroupWorkspace(resultGroupName), inputName,
                             outputName, output);
   else

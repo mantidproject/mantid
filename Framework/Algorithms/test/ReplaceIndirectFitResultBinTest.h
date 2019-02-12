@@ -170,7 +170,7 @@ public:
   }
 
   void
-  test_that_the_algorithm_throws_when_provided_a_two_workspaces_with_different_a_numbers_of_histograms() {
+  test_that_the_algorithm_throws_when_provided_two_workspaces_with_a_different_number_of_histograms() {
     setUpResultWorkspaces(INPUT_NAME, SINGLE_BIN_NAME, 3, 2, {2.0, 3.0, 4.0},
                           {1.1, 1.2, 1.3}, {0.1, 0.2, 0.3}, {3.0}, {25.0},
                           {2.5});
