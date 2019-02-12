@@ -27,8 +27,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>456</width>
-        <height>461</height>
+        <width>473</width>
+        <height>441</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -50,7 +50,14 @@
                </widget>
               </item>
               <item>
-               <widget class="QComboBox" name="facility"/>
+               <widget class="QComboBox" name="facility">
+                <property name="maximumSize">
+                 <size>
+                  <width>202</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+               </widget>
               </item>
              </layout>
             </item>
@@ -64,7 +71,20 @@
                </widget>
               </item>
               <item>
-               <widget class="QComboBox" name="instrument"/>
+               <widget class="QComboBox" name="instrument">
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>202</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+               </widget>
               </item>
              </layout>
             </item>
@@ -94,87 +114,18 @@
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_5">
             <item>
-             <layout class="QHBoxLayout" name="horizontalLayout_8">
-              <property name="sizeConstraint">
-               <enum>QLayout::SetMinimumSize</enum>
-              </property>
-              <item>
-               <widget class="QLabel" name="python_scripts_label">
-                <property name="minimumSize">
-                 <size>
-                  <width>121</width>
-                  <height>0</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>16777215</width>
-                  <height>16777215</height>
-                 </size>
-                </property>
-                <property name="text">
-                 <string>Python scripts</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPlainTextEdit" name="python_scripts_dir">
-                <property name="maximumSize">
-                 <size>
-                  <width>16777215</width>
-                  <height>25</height>
-                 </size>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="python_scripts_find">
-                <property name="text">
-                 <string>Find</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-            <item>
-             <layout class="QHBoxLayout" name="horizontalLayout_9">
-              <property name="sizeConstraint">
-               <enum>QLayout::SetMinimumSize</enum>
-              </property>
-              <item>
-               <widget class="QLabel" name="python_extensions_label">
-                <property name="text">
-                 <string>Python extensions
-(algorithms, fit functions)</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPlainTextEdit" name="python_extensions_dir">
-                <property name="maximumSize">
-                 <size>
-                  <width>16777215</width>
-                  <height>25</height>
-                 </size>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="python_extensions_find">
-                <property name="text">
-                 <string>Find</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-            <item>
              <layout class="QHBoxLayout" name="horizontalLayout_10">
               <property name="sizeConstraint">
                <enum>QLayout::SetMinimumSize</enum>
               </property>
               <item>
                <widget class="QLabel" name="instrument_definitions_label">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
                 <property name="minimumSize">
                  <size>
                   <width>121</width>
@@ -187,19 +138,12 @@
                </widget>
               </item>
               <item>
-               <widget class="QPlainTextEdit" name="instrument_definitions_dir">
-                <property name="maximumSize">
-                 <size>
-                  <width>16777215</width>
-                  <height>25</height>
-                 </size>
-                </property>
-               </widget>
+               <widget class="QLineEdit" name="instrument_definitions_dir"/>
               </item>
               <item>
                <widget class="QPushButton" name="instrument_definitions_find">
                 <property name="text">
-                 <string>Find</string>
+                 <string/>
                 </property>
                </widget>
               </item>
@@ -222,7 +166,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QCheckBox" name="prompt_to_save_editor_modified">
+             <widget class="QCheckBox" name="prompt_save_editor_modified">
               <property name="text">
                <string>Prompt to save file when editor is modified</string>
               </property>
@@ -232,7 +176,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QCheckBox" name="prompt_to_save_on_close">
+             <widget class="QCheckBox" name="prompt_save_on_close">
               <property name="text">
                <string>Prompt to save project on closing the Workbench</string>
               </property>
@@ -251,7 +195,7 @@
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_4">
             <item>
-             <widget class="QCheckBox" name="checkBox">
+             <widget class="QCheckBox" name="project_recovery_enabled">
               <property name="text">
                <string>Enable</string>
               </property>
@@ -274,11 +218,26 @@
               </item>
               <item>
                <widget class="QSpinBox" name="time_between_recovery">
+                <property name="minimumSize">
+                 <size>
+                  <width>202</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>202</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <property name="minimum">
+                 <number>0</number>
+                </property>
                 <property name="maximum">
                  <number>3600</number>
                 </property>
                 <property name="value">
-                 <number>60</number>
+                 <number>900</number>
                 </property>
                </widget>
               </item>
@@ -294,7 +253,23 @@
                </widget>
               </item>
               <item>
-               <widget class="QSpinBox" name="total_number_checkpoints"/>
+               <widget class="QSpinBox" name="total_number_checkpoints">
+                <property name="minimumSize">
+                 <size>
+                  <width>202</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>202</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <property name="value">
+                 <number>5</number>
+                </property>
+               </widget>
               </item>
              </layout>
             </item>

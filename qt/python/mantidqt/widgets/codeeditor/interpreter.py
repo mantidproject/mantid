@@ -59,10 +59,15 @@ class EditorIO(object):
         the operation should be cancelled
         """
         if confirm:
-            button = QMessageBox.question(self.editor, "",
-                                          "Save changes to document before closing?",
-                                          buttons=(QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel),
-                                          defaultButton=QMessageBox.Cancel)
+            # if a confirmation is wanted, but the user has specified to NOT ask for confirmation
+            # then return the same answer as clicking `No` on the message box
+            if not CONF.get('project', 'prompt_save_editor_modified'):
+                button = QMessageBox.No
+            else:
+                button = QMessageBox.question(self.editor, "",
+                                              "Save changes to document before closing?",
+                                              buttons=(QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel),
+                                              defaultButton=QMessageBox.Cancel)
             if button == QMessageBox.Yes:
                 return self.write()
             elif button == QMessageBox.No:
@@ -120,8 +125,7 @@ class PythonFileInterpreter(QWidget):
         layout.setContentsMargins(0, 0, 0, 0)
         self._setup_editor(content, filename)
 
-        self._presenter = PythonFileInterpreterPresenter(self,
-                                                         PythonCodeExecution(content))
+        self._presenter = PythonFileInterpreterPresenter(self, PythonCodeExecution(content))
 
         self.editor.modificationChanged.connect(self.sig_editor_modified)
         self.editor.fileNameChanged.connect(self.sig_filename_modified)
@@ -136,7 +140,7 @@ class PythonFileInterpreter(QWidget):
 
         :return: True if closing was considered successful, false otherwise
         """
-        return self.save(confirm=CONF.prompt_save_editor_modified)
+        return self.save(confirm=True)
 
     def abort(self):
         self._presenter.req_abort()

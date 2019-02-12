@@ -40,8 +40,13 @@ DEFAULTS = {
     'project':
         {
             'prompt_save_on_close': True,
-            'prompt_save_editor_modified': True
-        }
+            'prompt_save_editor_modified': True,
+            'recovery': {
+                'enabled': True,
+                'time_between_recovery_checkpoints': 900,
+                'total_number_of_checkpoints': 5
+            }
+        },
 }
 
 # -----------------------------------------------------------------------------

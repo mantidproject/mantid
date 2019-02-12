@@ -161,7 +161,7 @@ class Project(AnalysisDataServiceObserver):
         return False
 
     def _offer_save_message_box(self, parent):
-        if CONF.prompt_save_on_close:
+        if CONF.get('project', 'prompt_save_on_close'):
             return QMessageBox.question(parent, 'Unsaved Project',
                                         "The project is currently unsaved. Would you like to "
                                         "save before closing?",

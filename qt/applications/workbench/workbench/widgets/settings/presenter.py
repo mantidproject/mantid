@@ -9,6 +9,8 @@
 #
 from __future__ import (absolute_import, unicode_literals)
 
+from qtpy.QtCore import Qt
+
 from workbench.widgets.settings.general.presenter import GeneralSettings
 from workbench.widgets.settings.view import PlotsSettingsView, SettingsView
 
@@ -27,8 +29,12 @@ class SettingsPresenter(object):
         self.plots_settings_view = PlotsSettingsView(self.view)
         self.ask_before_close = False
 
-    def show(self):
+    def show(self, modal=True):
+        if modal:
+            self.view.setWindowModality(Qt.WindowModal)
+
         self.view.show()
+        self.current.show()
 
     def hide(self):
         self.view.hide()

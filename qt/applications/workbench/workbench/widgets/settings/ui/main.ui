@@ -33,13 +33,13 @@
         </property>
         <property name="minimumSize">
          <size>
-          <width>200</width>
+          <width>0</width>
           <height>0</height>
          </size>
         </property>
         <property name="maximumSize">
          <size>
-          <width>200</width>
+          <width>140</width>
           <height>16777215</height>
          </size>
         </property>
@@ -49,12 +49,15 @@
 }
 
 QListView::item {
-    padding:20px;
+    padding:15px;
 }
 </string>
         </property>
         <property name="selectionRectVisible">
          <bool>true</bool>
+        </property>
+        <property name="currentRow">
+         <number>0</number>
         </property>
         <item>
          <property name="text">
@@ -87,7 +90,7 @@ QListView::item {
              </size>
             </property>
             <property name="text">
-             <string>Apply</string>
+             <string>Accept</string>
             </property>
            </widget>
           </item>
@@ -116,7 +119,7 @@ QListView::item {
              <string notr="true"/>
             </property>
             <property name="text">
-             <string>Cancel</string>
+             <string>Confirm</string>
             </property>
            </widget>
           </item>
