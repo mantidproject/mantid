@@ -11,7 +11,7 @@
 // with of the number is one WORD bigger, than actual
 // number size, see here
 // https://www.boost.org/doc/libs/1_61_0/libs/multiprecision/doc/html/boost_multiprecision/tut/ints/cpp_int.html
-#include "int.h"
+#include "WideInt.h"
 #include <Eigen/Dense>
 #include <ostream>
 
