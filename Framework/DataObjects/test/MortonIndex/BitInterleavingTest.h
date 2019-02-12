@@ -11,8 +11,6 @@
 
 using namespace morton_index;
 
-#include <boost/multiprecision/cpp_int.hpp>
-
 /**
  * Interleaves four 32 bit integers into a single 128 bit integer (represented
  * by 64 bit LSB and MSB).
