@@ -163,7 +163,9 @@ public:
     return vec;
   }
 
-  virtual bool equals(Column *otherColumn,double tolerance) const =0;
+  virtual bool equals(Column *,double) const {
+    throw std::runtime_error("equals not implemented");
+  };
 
 protected:
   /// Sets the new column size.
