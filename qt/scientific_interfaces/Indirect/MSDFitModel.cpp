@@ -28,8 +28,8 @@ std::string MSDFitModel::simultaneousFitOutputName() const {
 
 std::string MSDFitModel::singleFitOutputName(std::size_t index,
                                              std::size_t spectrum) const {
-  return createSingleFitOutputName("%1%_MSDFit_" + m_fitType + "_s%2%", index,
-                                   spectrum);
+  return createSingleFitOutputName("%1%_MSDFit_" + m_fitType + "_s%2%_Results",
+                                   index, spectrum);
 }
 
 std::vector<std::string> MSDFitModel::getSpectrumDependentAttributes() const {

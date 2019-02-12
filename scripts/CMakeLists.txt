@@ -18,6 +18,9 @@ set_property ( TARGET CompileUIErrorReporter PROPERTY FOLDER "CompilePyUI" )
 # External GUIs
 add_subdirectory ( ExternalInterfaces )
 
+# External projects
+include ( PyStoG )
+
 # --------------------------------------------------------------------
 # .pth files
 # --------------------------------------------------------------------
@@ -48,6 +51,7 @@ foreach ( _dir ${_pth_dirs} )
   list ( APPEND _pth_list_dev "${CMAKE_SOURCE_DIR}/scripts/${_dir}" )
   list ( APPEND _pth_list_install "${_scripts_rel_path}/${_dir}" )
 endforeach()
+list ( APPEND _pth_list_dev ${CMAKE_CURRENT_BINARY_DIR} )
 list ( APPEND _pth_list_dev ${MSLICE_DEV} )
 list ( APPEND _pth_list_install "${_scripts_rel_path}/ExternalInterfaces" )
 

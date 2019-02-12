@@ -171,8 +171,7 @@ size_t EventWorkspace::blocksize() const {
 size_t EventWorkspace::getNumberHistograms() const { return this->data.size(); }
 
 /// Return const reference to EventList at the given workspace index.
-EventList &EventWorkspace::getSpectrum(const size_t index) {
-  invalidateCommonBinsFlag();
+EventList &EventWorkspace::getSpectrumWithoutInvalidation(const size_t index) {
   auto &spec = const_cast<EventList &>(
       static_cast<const EventWorkspace &>(*this).getSpectrum(index));
   spec.setMatrixWorkspace(this, index);
@@ -586,6 +585,7 @@ void EventWorkspace::setAllX(const HistogramData::BinEdges &x) {
   // This is an EventWorkspace, so changing X size is ok as long as we clear
   // the MRU below, i.e., we avoid the size check of Histogram::setBinEdges and
   // just reset the whole Histogram.
+  invalidateCommonBinsFlag();
   for (auto &eventList : this->data)
     eventList->setHistogram(x);
 

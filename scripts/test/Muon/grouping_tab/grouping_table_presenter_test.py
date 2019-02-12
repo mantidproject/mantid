@@ -295,6 +295,17 @@ class GroupingTablePresenterTest(unittest.TestCase):
 
         self.assertEqual(self.view.get_table_item_text(0, 2), "1")
 
+    def test_modifying_detector_ids_to_non_existent_detector_fails(self):
+        self.presenter.handle_add_group_button_clicked()
+        self.view.grouping_table.item(0, 1).setText("1000")
+
+        self.view.warning_popup.assert_called_once_with('Invalid detector list.')
+
+    def test_modifying_detector_ids_to_negative_detectors_fails(self):
+        self.presenter.handle_add_group_button_clicked()
+        self.view.grouping_table.item(0, 1).setText("-10-10")
+
+        self.view.warning_popup.assert_called_once_with('Invalid detector list.')
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)

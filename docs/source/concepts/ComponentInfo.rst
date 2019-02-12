@@ -18,17 +18,26 @@ Python Interface
 
 Examples of using ``ComponentInfo`` in python
 
-Print indices of detectors in "bank1" that are masked
+**Print indices of detectors in "bank1" that are masked**
 
-.. code-block:: python 
+.. testcode:: show_masked_detectors_in_bank 
 
-  from mantid.simpleapi import CreateSampleWorkspace
+   from mantid.simpleapi import CreateSampleWorkspace
+   
+   ws = CreateSampleWorkspace()
+   comp_info = ws.componentInfo()
+   det_info = ws.detectorInfo()
+   det_info.setMasked(2, True) # Mask  a bank 1 detector for demo
+   det_info.setMasked(len(det_info)-1, True) # Mask detector not in bank 1
+   bank_index = comp_info.indexOfAny('bank1')
+   for det_index in comp_info.detectorsInSubtree(bank_index):
+       if det_info.isMasked(int(det_index)):
+           print('Masked detector index of bank1 is {}'.format(det_index))
 
-  ws = CreateSampleWorkspace()
-  comp_info = ws.componentInfo()
-  det_info = ws.detectorInfo()
-  bank_index compinfo.indexOfAny('bank1')
-  for det_index in compinfo.detectorsInSubtree(bank_index):
-      if det_info.isMasked(int(det_index)):
-          print('Masked detector of bank1, ', det_index)
+Output:
 
+.. testoutput:: show_masked_detectors_in_bank
+
+   Masked detector index of bank1 is 2
+
+.. categories:: Concepts

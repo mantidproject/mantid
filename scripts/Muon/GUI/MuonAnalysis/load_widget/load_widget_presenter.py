@@ -7,7 +7,6 @@
 from __future__ import (absolute_import, division, print_function)
 
 from Muon.GUI.Common.observer_pattern import Observer, Observable
-from mantid import ConfigService
 
 CO_ADD = 'Co-Add'
 SIMULTANEOUS = 'Simultaneous'
@@ -108,7 +107,7 @@ class LoadWidgetPresenter(object):
         self._model.clear_data()
         self.handle_run_widget_data_changed()
         self.handle_run_widget_data_changed()
-        self.load_run_widget.set_current_instrument(ConfigService.getInstrument().name())
+        self.load_run_widget.set_current_instrument(self._model._context.instrument)
         self.loadNotifier.notify_subscribers()
 
     @property
@@ -134,11 +133,6 @@ class LoadWidgetPresenter(object):
             self.outer = outer  # handle to containing class
 
         def notify_subscribers(self, arg=None):
-            for workspace, run in zip(self.outer._model.workspaces, self.outer._model.runs):
-                for i, single_ws in enumerate(workspace['OutputWorkspace']):
-                    name = str(run) + "_period_" + str(i)
-                    single_ws.show(name)
-
             Observable.notify_subscribers(self, arg)
 
     class InstrumentObserver(Observer):
@@ -147,5 +141,4 @@ class LoadWidgetPresenter(object):
             self.outer = outer
 
         def update(self, observable, arg):
-            print("update called : ", arg)
             self.outer.update_new_instrument(arg)
