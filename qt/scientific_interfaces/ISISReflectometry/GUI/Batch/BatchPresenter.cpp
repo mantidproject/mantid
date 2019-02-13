@@ -50,7 +50,8 @@ BatchPresenter::BatchPresenter(
       m_eventPresenter(std::move(eventPresenter)),
       m_experimentPresenter(std::move(experimentPresenter)),
       m_instrumentPresenter(std::move(instrumentPresenter)),
-      m_savePresenter(std::move(savePresenter)), m_jobRunner(std::move(model)) {
+      m_savePresenter(std::move(savePresenter)),
+      m_jobRunner(new BatchJobRunner(std::move(model))) {
 
   m_view->subscribe(this);
 
@@ -102,27 +103,27 @@ void BatchPresenter::notifyBatchCancelled() {
 
 void BatchPresenter::notifyAlgorithmFinished(
     ConfiguredAlgorithm_sptr algorithm) {
-  m_jobRunner.algorithmFinished(algorithm);
+  m_jobRunner->algorithmFinished(algorithm);
   m_runsPresenter->notifyRowStateChanged();
   /// TODO Longer term it would probably be better if algorithms took care
   /// of saving their outputs so we could remove this callback
   if (m_savePresenter->shouldAutosave()) {
     auto const workspaces =
-        m_jobRunner.algorithmOutputWorkspacesToSave(algorithm);
+        m_jobRunner->algorithmOutputWorkspacesToSave(algorithm);
     m_savePresenter->saveWorkspaces(workspaces);
   }
 }
 
 void BatchPresenter::notifyAlgorithmError(ConfiguredAlgorithm_sptr algorithm,
                                           std::string const &message) {
-  m_jobRunner.algorithmError(algorithm, message);
+  m_jobRunner->algorithmError(algorithm, message);
   m_runsPresenter->notifyRowStateChanged();
 }
 
 void BatchPresenter::resumeReduction() {
-  m_jobRunner.resumeReduction();
+  m_jobRunner->resumeReduction();
   m_view->clearAlgorithmQueue();
-  m_view->setAlgorithmQueue(m_jobRunner.getAlgorithms());
+  m_view->setAlgorithmQueue(m_jobRunner->getAlgorithms());
   m_view->executeAlgorithmQueue();
   reductionResumed();
 }
@@ -140,7 +141,7 @@ void BatchPresenter::pauseReduction() { m_view->cancelAlgorithmQueue(); }
 
 void BatchPresenter::reductionPaused() {
   // Update the model
-  m_jobRunner.reductionPaused();
+  m_jobRunner->reductionPaused();
   // Notify child presenters
   m_savePresenter->reductionPaused();
   m_eventPresenter->reductionPaused();
@@ -150,9 +151,9 @@ void BatchPresenter::reductionPaused() {
 }
 
 void BatchPresenter::resumeAutoreduction() {
-  m_jobRunner.resumeAutoreduction();
+  m_jobRunner->resumeAutoreduction();
   m_view->clearAlgorithmQueue();
-  m_view->setAlgorithmQueue(m_jobRunner.getAlgorithms());
+  m_view->setAlgorithmQueue(m_jobRunner->getAlgorithms());
   m_view->executeAlgorithmQueue();
   autoreductionResumed();
 }
@@ -168,7 +169,7 @@ void BatchPresenter::autoreductionResumed() {
 
 void BatchPresenter::pauseAutoreduction() {
   // Update the model
-  m_jobRunner.autoreductionPaused();
+  m_jobRunner->autoreductionPaused();
   // Stop all processing
   pauseReduction();
   autoreductionPaused();
@@ -216,7 +217,9 @@ bool BatchPresenter::hasPerAngleOptions() const {
    Checks whether or not data is currently being processed in this batch
    * @return : Bool on whether data is being processed
    */
-bool BatchPresenter::isProcessing() const { return m_jobRunner.isProcessing(); }
+bool BatchPresenter::isProcessing() const {
+  return m_jobRunner->isProcessing();
+}
 
 /**
    Checks whether or not autoprocessing is currently running in this batch
@@ -224,22 +227,22 @@ bool BatchPresenter::isProcessing() const { return m_jobRunner.isProcessing(); }
    * @return : Bool on whether data is being processed
    */
 bool BatchPresenter::isAutoreducing() const {
-  return m_jobRunner.isAutoreducing();
+  return m_jobRunner->isAutoreducing();
 }
 
 void BatchPresenter::postDeleteHandle(const std::string &wsName) {
-  m_jobRunner.notifyWorkspaceDeleted(wsName);
+  m_jobRunner->notifyWorkspaceDeleted(wsName);
   m_runsPresenter->notifyRowStateChanged();
 }
 
 void BatchPresenter::renameHandle(const std::string &oldName,
                                   const std::string &newName) {
-  m_jobRunner.notifyWorkspaceRenamed(oldName, newName);
+  m_jobRunner->notifyWorkspaceRenamed(oldName, newName);
   m_runsPresenter->notifyRowStateChanged();
 }
 
 void BatchPresenter::clearADSHandle() {
-  m_jobRunner.notifyAllWorkspacesDeleted();
+  m_jobRunner->notifyAllWorkspacesDeleted();
   m_runsPresenter->notifyRowStateChanged();
 }
 } // namespace CustomInterfaces

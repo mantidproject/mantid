@@ -92,7 +92,7 @@ private:
   std::unique_ptr<ISavePresenter> m_savePresenter;
 
 protected:
-  BatchJobRunner m_jobRunner;
+  std::unique_ptr<BatchJobRunner> m_jobRunner;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
