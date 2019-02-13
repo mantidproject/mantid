@@ -8,10 +8,9 @@
 #define MANTID_GEOMETRY_RASTERIZETEST_H_
 
 #include "MantidGeometry/Objects/CSGObject.h"
-#include "MantidGeometry/Objects/IObject.h"
-#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Rasterize.h"
 #include "MantidKernel/V3D.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 #include <numeric>
 
@@ -20,51 +19,43 @@ using Mantid::Kernel::V3D;
 
 class RasterizeTest : public CxxTest::TestSuite {
 private:
-  // all examples are taken from ShapeFactoryTest with some small modifications
-  const std::string cylinderXml =
-      "<cylinder id=\"shape\"> "
-      "<centre-of-bottom-base x=\"0.0\" y=\"-1.5\" z=\"0\"/>"
-      "<axis x=\"0.0\" y=\"1\" z=\"0\" /> "
-      "<radius val=\"0.1\" /> "
-      "<height val=\"3\" /> "
-      "</cylinder>";
-  const std::string cylinderOffsetXml =
-      "<cylinder id=\"shape\"> "
-      "<centre-of-bottom-base x=\"0.0\" y=\"3.0\" z=\"0.0\"/>"
-      "<axis x=\"0.0\" y=\"0.0\" z=\"1\" /> "
-      "<radius val=\"0.1\" /> "
-      "<height val=\"3\" /> "
-      "</cylinder>";
-  static constexpr double CYLINDER_VOLUME = M_PI * .1 * .1 * 3.;
+  static constexpr double CYLINDER_RADIUS = .1;
+  static constexpr double CYLINDER_HEIGHT = 3.;
+  static constexpr double CYLINDER_VOLUME =
+      M_PI * CYLINDER_RADIUS * CYLINDER_RADIUS * CYLINDER_HEIGHT;
 
-  const std::string sphereXml = "<sphere id=\"shape\"> "
-                                "<centre x=\"0.0\"  y=\"0.0\" z=\"0.0\" /> "
-                                "<radius val=\"3.2\" /> "
-                                "</sphere>"
-                                "<algebra val=\"shape\" /> ";
-  const std::string sphereOffsetXml = "<sphere id=\"shape\"> "
-                                      "<centre x=\"4\"  y=\"4\" z=\"4\" /> "
-                                      "<radius val=\"3.2\" /> "
-                                      "</sphere>"
-                                      "<algebra val=\"shape\" /> ";
-  static constexpr double SPHERE_VOLUME = (4. / 3.) * M_PI * 3.2 * 3.2 * 3.2;
+  static constexpr double SPHERE_RADIUS = 3.2;
+  static constexpr double SPHERE_VOLUME =
+      (4. / 3.) * M_PI * SPHERE_RADIUS * SPHERE_RADIUS * SPHERE_RADIUS;
 
-  boost::shared_ptr<IObject> createCylinder(bool centered) {
-    if (centered)
-      return ShapeFactory().createShape(cylinderXml);
-    else
-      return ShapeFactory().createShape(cylinderOffsetXml);
+  boost::shared_ptr<CSGObject> createCylinder(bool centered) {
+    V3D baseCenter;
+    V3D symmetryAxis;
+    if (centered) {
+      baseCenter = V3D(0., -.5 * CYLINDER_HEIGHT, 0.);
+      symmetryAxis = V3D(0., 1., 0.);
+    } else {
+      baseCenter = V3D(0.0, 3.0, 0.);
+      symmetryAxis = V3D(0., 0., 1.);
+    }
+
+    return ComponentCreationHelper::createCappedCylinder(
+        CYLINDER_RADIUS, CYLINDER_HEIGHT, baseCenter, symmetryAxis, "shape");
   }
 
-  boost::shared_ptr<IObject> createSphere(bool centered) {
+  boost::shared_ptr<CSGObject> createSphere(bool centered) {
+    V3D center;
     if (centered)
-      return ShapeFactory().createShape(sphereXml);
+      center = V3D(0., 0., 0.);
     else
-      return ShapeFactory().createShape(sphereOffsetXml);
+      center = V3D(4., 4., 4.);
+
+    return ComponentCreationHelper::createSphere(SPHERE_RADIUS, center,
+                                                 "shape");
   }
 
   void simpleRasterChecks(const Raster &raster,
-                          const boost::shared_ptr<IObject> &shape,
+                          const boost::shared_ptr<CSGObject> &shape,
                           const size_t numEle, const double volume,
                           const double relVolumeTol = 0.001) {
     TS_ASSERT_EQUALS(raster.l1.size(), numEle);
@@ -106,10 +97,10 @@ public:
   static void destroySuite(RasterizeTest *suite) { delete suite; }
 
   void test_calculateCylinder() {
-    const size_t NUM_SLICE{3};
-    const size_t NUM_ANNULLI{3};
+    constexpr size_t NUM_SLICE{ 3 };
+    constexpr size_t NUM_ANNULLI{ 3 };
 
-    boost::shared_ptr<IObject> cylinder = createCylinder(true);
+    boost::shared_ptr<CSGObject> cylinder = createCylinder(true);
     TS_ASSERT(cylinder);
     const auto raster = Rasterize::calculateCylinder(V3D(0., 0., 1.), cylinder,
                                                      NUM_SLICE, NUM_ANNULLI);
@@ -121,10 +112,10 @@ public:
   }
 
   void test_calculateOffsetCylinder() {
-    const size_t NUM_SLICE{3};
-    const size_t NUM_ANNULLI{3};
+    constexpr size_t NUM_SLICE{ 3 };
+    constexpr size_t NUM_ANNULLI{ 3 };
 
-    boost::shared_ptr<IObject> cylinder = createCylinder(false);
+    boost::shared_ptr<CSGObject> cylinder = createCylinder(false);
     TS_ASSERT(cylinder);
     const auto raster = Rasterize::calculateCylinder(V3D(0., 0., 1.), cylinder,
                                                      NUM_SLICE, NUM_ANNULLI);
@@ -136,7 +127,7 @@ public:
   }
 
   void test_calculateCylinderOnSphere() {
-    boost::shared_ptr<IObject> sphere = createSphere(true);
+    boost::shared_ptr<CSGObject> sphere = createSphere(true);
     TS_ASSERT(sphere);
     TS_ASSERT_THROWS(
         Rasterize::calculateCylinder(V3D(0., 0., 1.), sphere, 3, 3),
@@ -144,16 +135,16 @@ public:
   }
 
   void test_calculateArbitraryOnCylinder() {
-    boost::shared_ptr<IObject> cylinder = createCylinder(true);
+    boost::shared_ptr<CSGObject> cylinder = createCylinder(true);
     TS_ASSERT(cylinder);
-    const auto raster = Rasterize::calculate(V3D(0., 0., 1.), cylinder, .1);
+    const auto raster = Rasterize::calculate(V3D(0., 0., 1.), *cylinder, .1);
 
     // all the vector lengths should match
     simpleRasterChecks(raster, cylinder, 180, CYLINDER_VOLUME);
   }
 
   void test_calculateArbitraryOnSphere() {
-    boost::shared_ptr<IObject> sphere = createSphere(true);
+    boost::shared_ptr<CSGObject> sphere = createSphere(true);
     TS_ASSERT(sphere);
     const auto raster = Rasterize::calculate(V3D(0., 0., 1.), sphere, .5);
 
@@ -163,7 +154,7 @@ public:
   }
 
   void test_calculateArbitraryOnOffsetSphere() {
-    boost::shared_ptr<IObject> sphere = createSphere(false);
+    boost::shared_ptr<CSGObject> sphere = createSphere(false);
     TS_ASSERT(sphere);
     const auto raster = Rasterize::calculate(V3D(0., 0., 1.), sphere, .5);
 
