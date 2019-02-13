@@ -124,23 +124,24 @@ public:
   }
 
   /// Reference to the data.
-  const std::vector<std::vector<Type>> &data() const { return m_data; } 
+  const std::vector<std::vector<Type>> &data() const { return m_data; }
 
-  bool equals(Column* otherColumn,double tolerance) const override {
-    auto convertedOtherColumn = dynamic_cast<VectorColumn*>(otherColumn);
-    if(!convertedOtherColumn){
+  bool equals(Column *otherColumn, double tolerance) const override {
+    auto convertedOtherColumn = dynamic_cast<VectorColumn *>(otherColumn);
+    if (!convertedOtherColumn) {
       return false;
     }
-    if(convertedOtherColumn->size()!=this->size()||convertedOtherColumn->type()!=this->type()){
+    if (convertedOtherColumn->size() != this->size() ||
+        convertedOtherColumn->type() != this->type()) {
       return false;
     }
     auto otherData = convertedOtherColumn->data();
-    for(size_t i =0; i<m_data.size(); i++){
-      if(m_data[i].size()!=otherData[i].size()){
+    for (size_t i = 0; i < m_data.size(); i++) {
+      if (m_data[i].size() != otherData[i].size()) {
         return false;
       }
-      for(size_t j =0; j<m_data[i].size();j++){
-        if(abs(m_data[i][j]-otherData[i][j])>tolerance){
+      for (size_t j = 0; j < m_data[i].size(); j++) {
+        if (abs(m_data[i][j] - otherData[i][j]) > tolerance) {
           return false;
         }
       }
@@ -148,27 +149,28 @@ public:
     return true;
   }
 
-  bool equalsRelErr(Column* otherColumn,double tolerance) const override {
-    auto convertedOtherColumn = dynamic_cast<VectorColumn*>(otherColumn);
-    if(!convertedOtherColumn){
+  bool equalsRelErr(Column *otherColumn, double tolerance) const override {
+    auto convertedOtherColumn = dynamic_cast<VectorColumn *>(otherColumn);
+    if (!convertedOtherColumn) {
       return false;
     }
-    if(convertedOtherColumn->size()!=this->size()||convertedOtherColumn->type()!=this->type()){
+    if (convertedOtherColumn->size() != this->size() ||
+        convertedOtherColumn->type() != this->type()) {
       return false;
     }
     auto otherData = convertedOtherColumn->data();
-    for(size_t i =0; i<m_data.size(); i++){
-      if(m_data[i].size()!=otherData[i].size()){
+    for (size_t i = 0; i < m_data.size(); i++) {
+      if (m_data[i].size() != otherData[i].size()) {
         return false;
       }
-      for(size_t j =0; j<m_data[i].size();j++){
-        double num = fabs(m_data[i][j]-otherData[i][j]);
-        double den = (fabs(m_data[i][j])+fabs(otherData[i][j]))/2;
-      if (den<tolerance&&num>tolerance){
-        return false;
-      }else if(num/den >tolerance){
-        return false;
-      }
+      for (size_t j = 0; j < m_data[i].size(); j++) {
+        double num = fabs(m_data[i][j] - otherData[i][j]);
+        double den = (fabs(m_data[i][j]) + fabs(otherData[i][j])) / 2;
+        if (den < tolerance && num > tolerance) {
+          return false;
+        } else if (num / den > tolerance) {
+          return false;
+        }
       }
     }
     return true;

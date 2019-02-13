@@ -163,11 +163,11 @@ public:
     return vec;
   }
 
-  virtual bool equals(Column *,double) const {
+  virtual bool equals(Column *, double) const {
     throw std::runtime_error("equals not implemented");
   };
 
-  virtual bool equalsRelErr(Column *,double) const {
+  virtual bool equalsRelErr(Column *, double) const {
     throw std::runtime_error("equals not implemented");
   };
 

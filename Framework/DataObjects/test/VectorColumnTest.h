@@ -120,7 +120,7 @@ public:
     TS_ASSERT(!col.isNumber());
   }
 
-  void test_equals(){
+  void test_equals() {
     VectorColumnTestHelper<int> col;
 
     col.resize(3);
@@ -130,11 +130,10 @@ public:
     col.read(2, "7,8,9,10");
     auto compare = std::unique_ptr<Mantid::API::Column>(col.clone());
 
-    TS_ASSERT(col.equals(compare.get(),0));
-    
+    TS_ASSERT(col.equals(compare.get(), 0));
   }
 
-  void test_equals_failure(){
+  void test_equals_failure() {
     VectorColumnTestHelper<int> col;
     VectorColumnTestHelper<int> col2;
 
@@ -148,11 +147,10 @@ public:
     col2.read(0, "1,2,3");
     col2.read(1, "3,4,5");
     col2.read(2, "7,8,9,11");
-    TS_ASSERT(!col2.equals(compare.get(),0));
-    
+    TS_ASSERT(!col2.equals(compare.get(), 0));
   }
 
-  void test_equals_tolerance(){
+  void test_equals_tolerance() {
     VectorColumnTestHelper<int> col;
     VectorColumnTestHelper<int> col2;
 
@@ -166,11 +164,10 @@ public:
     col2.read(0, "1,2,2");
     col2.read(1, "3,4,5");
     col2.read(2, "7,8,9,11");
-    TS_ASSERT(col2.equals(compare.get(),1));
-    
+    TS_ASSERT(col2.equals(compare.get(), 1));
   }
 
-  void test_equals_tolerance_fail(){
+  void test_equals_tolerance_fail() {
     VectorColumnTestHelper<int> col;
     VectorColumnTestHelper<int> col2;
 
@@ -184,11 +181,10 @@ public:
     col2.read(0, "1,2,2");
     col2.read(1, "3,4,5");
     col2.read(2, "7,8,9,12");
-    TS_ASSERT(!col2.equals(compare.get(),1));
-    
+    TS_ASSERT(!col2.equals(compare.get(), 1));
   }
 
-  void test_equalsRelErr(){
+  void test_equalsRelErr() {
     VectorColumnTestHelper<int> col;
     VectorColumnTestHelper<int> col2;
 
@@ -202,8 +198,7 @@ public:
     col2.read(0, "90,2,2");
     col2.read(1, "3,4,5");
     col2.read(2, "7,8,9,11");
-    TS_ASSERT(col2.equalsRelErr(compare.get(),1));
-    
+    TS_ASSERT(col2.equalsRelErr(compare.get(), 1));
   }
 };
 

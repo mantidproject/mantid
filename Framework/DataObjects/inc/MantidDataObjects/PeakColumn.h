@@ -68,13 +68,14 @@ public:
   void fromDouble(size_t i, double value) override;
 
   /// Reference to the data.
-  const std::vector<Peak> &data() const { return m_peaks; } 
+  const std::vector<Peak> &data() const { return m_peaks; }
 
-  bool equals(Column *otherColumn,double tolerance) const override {
+  bool equals(Column *otherColumn, double tolerance) const override {
     (void)otherColumn;
     (void)tolerance;
-    throw std::runtime_error("equals not implemented, to compare use peaksworkspace");
-    }
+    throw std::runtime_error(
+        "equals not implemented, to compare use peaksworkspace");
+  }
 
 protected:
   /// Sets the new column size.
