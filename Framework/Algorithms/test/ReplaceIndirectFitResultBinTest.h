@@ -4,8 +4,8 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_REPLACEINDIRECTFITRESULTBINTEST_H_
-#define MANTID_REPLACEINDIRECTFITRESULTBINTEST_H_
+#ifndef MANTID_COPYDATARANGETEST_H_
+#define MANTID_COPYDATARANGETEST_H_
 
 #include <cxxtest/TestSuite.h>
 
@@ -14,10 +14,11 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidHistogramData/HistogramE.h"
 #include "MantidHistogramData/HistogramY.h"
 #include "MantidTestHelpers/IndirectFitDataCreationHelper.h"
+
+#include <algorithm>
 
 using namespace Mantid::API;
 using namespace Mantid::IndirectFitDataCreationHelper;
@@ -25,37 +26,43 @@ using namespace Mantid::HistogramData;
 
 namespace {
 
-std::string const INPUT_NAME("Workspace_s0_to_s2_Result");
-std::string const SINGLE_BIN_NAME("Workspace_s0_Result");
-auto const OUTPUT_NAME("Output_Result");
+std::string const INPUT_NAME("Input_Workspace");
+std::string const DESTINATION_NAME("Destination_Workspace");
+auto const OUTPUT_NAME("Output_Workspace");
 
 MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) {
   return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
       workspaceName);
 }
 
-WorkspaceGroup_sptr getADSGroupWorkspace(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-      workspaceName);
+IAlgorithm_sptr setUpAlgorithm(MatrixWorkspace_sptr inputWorkspace,
+                               MatrixWorkspace_sptr destWorkspace,
+                               int const &specMin, int const &specMax,
+                               int const &xMin, int const &xMax,
+                               int const &yInsertionIndex,
+                               int const &xInsertionIndex,
+                               std::string const &outputName) {
+  auto copyAlg = AlgorithmManager::Instance().create("CopyDataRange");
+  copyAlg->setProperty("InputWorkspace", inputWorkspace);
+  copyAlg->setProperty("DestWorkspace", destWorkspace);
+  copyAlg->setProperty("StartWorkspaceIndex", specMin);
+  copyAlg->setProperty("EndWorkspaceIndex", specMax);
+  copyAlg->setProperty("XMinIndex", xMin);
+  copyAlg->setProperty("XMaxIndex", xMax);
+  copyAlg->setProperty("InsertionYIndex", yInsertionIndex);
+  copyAlg->setProperty("InsertionXIndex", xInsertionIndex);
+  return copyAlg;
 }
 
-IAlgorithm_sptr setUpReplaceAlgorithm(MatrixWorkspace_sptr inputWorkspace,
-                                      MatrixWorkspace_sptr singleBinWorkspace,
-                                      std::string const &outputName) {
-  auto replaceAlg =
-      AlgorithmManager::Instance().create("ReplaceIndirectFitResultBin");
-  replaceAlg->setProperty("InputWorkspace", inputWorkspace);
-  replaceAlg->setProperty("SingleBinWorkspace", singleBinWorkspace);
-  replaceAlg->setProperty("OutputWorkspace", outputName);
-  return replaceAlg;
-}
-
-IAlgorithm_sptr setUpReplaceAlgorithm(std::string const &inputName,
-                                      std::string const &singleBinName,
-                                      std::string const &outputName) {
-  return setUpReplaceAlgorithm(getADSMatrixWorkspace(inputName),
-                               getADSMatrixWorkspace(singleBinName),
-                               outputName);
+IAlgorithm_sptr setUpAlgorithm(std::string const &inputName,
+                               std::string const &destName, int const &specMin,
+                               int const &specMax, int const &xMin,
+                               int const &xMax, int const &yInsertionIndex,
+                               int const &xInsertionIndex,
+                               std::string const &outputName) {
+  return setUpAlgorithm(getADSMatrixWorkspace(inputName),
+                        getADSMatrixWorkspace(destName), specMin, specMax, xMin,
+                        xMax, yInsertionIndex, xInsertionIndex, outputName);
 }
 
 void populateWorkspace(MatrixWorkspace_sptr workspace,
@@ -64,6 +71,21 @@ void populateWorkspace(MatrixWorkspace_sptr workspace,
   for (auto i = 0u; i < workspace->getNumberHistograms(); ++i) {
     workspace->mutableY(i) = HistogramY(yData);
     workspace->mutableE(i) = HistogramE(eData);
+  }
+}
+
+void populateOutputWorkspace(MatrixWorkspace_sptr workspace,
+                             std::vector<double> const &yData,
+                             std::vector<double> const &eData) {
+  std::vector<double> histogram;
+  auto const numberOfBins = yData.size() / workspace->getNumberHistograms();
+  for (auto i = 0u; i < workspace->getNumberHistograms(); ++i) {
+    std::copy(yData.begin() + i * numberOfBins,
+              yData.begin() + (i + 1) * numberOfBins, histogram.begin());
+    workspace->mutableY(i) = HistogramY(histogram);
+    std::copy(eData.begin() + i * numberOfBins,
+              eData.begin() + (i + 1) * numberOfBins, histogram.begin());
+    workspace->mutableE(i) = HistogramE(histogram);
   }
 }
 
@@ -104,157 +126,131 @@ public:
   }
 
   void test_that_the_algorithm_does_not_throw_when_given_valid_properties() {
-    setUpResultWorkspaces(INPUT_NAME, SINGLE_BIN_NAME);
-    auto algorithm =
-        setUpReplaceAlgorithm(INPUT_NAME, SINGLE_BIN_NAME, OUTPUT_NAME);
+    setUpWorkspaces(INPUT_NAME, DESTINATION_NAME);
+    auto algorithm = setUpAlgorithm(INPUT_NAME, DESTINATION_NAME, 0, 3, 0, 3, 0,
+                                    0, OUTPUT_NAME);
 
     TS_ASSERT_THROWS_NOTHING(algorithm->execute());
   }
 
   void
   test_that_the_algorithm_produces_an_output_workspace_with_the_correct_data() {
-    setUpResultWorkspaces(INPUT_NAME, SINGLE_BIN_NAME);
-    auto algorithm =
-        setUpReplaceAlgorithm(INPUT_NAME, SINGLE_BIN_NAME, OUTPUT_NAME);
+    setUpWorkspaces(INPUT_NAME, DESTINATION_NAME);
+    auto algorithm = setUpAlgorithm(INPUT_NAME, DESTINATION_NAME, 0, 3, 0, 3, 0,
+                                    0, OUTPUT_NAME);
 
     algorithm->execute();
 
     auto const output = getADSMatrixWorkspace(OUTPUT_NAME);
-    auto const expectedOutput =
-        createWorkspaceWithBinValues(3, {2.0, 3.0, 4.0}, 3);
-    populateWorkspace(expectedOutput, {1.1, 25.0, 1.3}, {0.1, 2.5, 0.3});
+    auto const expectedOutput = createWorkspace(5, 5);
+    populateOutputWorkspace(
+        expectedOutput,
+        {1.1, 1.2,  1.3, 1.4, 29.0, 1.1, 1.2,  1.3,  1.4,  29.0, 1.1,  1.2, 1.3,
+         1.4, 29.0, 1.1, 1.2, 1.3,  1.4, 29.0, 25.0, 26.0, 27.0, 28.0, 29.0},
+        {0.1, 0.2, 0.3, 0.4, 2.9, 0.1, 0.2, 0.3, 0.4, 2.9, 0.1, 0.2, 0.3,
+         0.4, 2.9, 0.1, 0.2, 0.3, 0.4, 2.9, 2.5, 2.6, 2.7, 2.8, 2.9});
     TS_ASSERT(!compareWorkspaces(output, expectedOutput));
   }
 
   void
-  test_that_the_algorithm_produces_an_output_workspace_which_is_put_into_a_group_with_the_correct_number_of_workspaces() {
-    setUpResultWorkspaces(INPUT_NAME, SINGLE_BIN_NAME);
-    auto algorithm =
-        setUpReplaceAlgorithm(INPUT_NAME, SINGLE_BIN_NAME, OUTPUT_NAME);
+  test_that_the_algorithm_produces_an_output_workspace_with_the_correct_data_when_the_start_indices_are_not_zero() {
+    setUpWorkspaces(INPUT_NAME, DESTINATION_NAME);
+    auto algorithm = setUpAlgorithm(INPUT_NAME, DESTINATION_NAME, 2, 3, 1, 3, 2,
+                                    2, OUTPUT_NAME);
 
     algorithm->execute();
 
-    assertIsInGroupWithEntries(OUTPUT_NAME, 2);
-  }
-
-  void
-  test_that_the_algorithm_produces_an_output_workspace_which_is_put_into_a_group_with_the_correct_number_of_workspaces_when_the_inputName_and_outputName_are_the_same() {
-    setUpResultWorkspaces(INPUT_NAME, SINGLE_BIN_NAME);
-    auto algorithm =
-        setUpReplaceAlgorithm(INPUT_NAME, SINGLE_BIN_NAME, INPUT_NAME);
-
-    algorithm->execute();
-
-    assertIsInGroupWithEntries(INPUT_NAME, 1);
+    auto const output = getADSMatrixWorkspace(OUTPUT_NAME);
+    auto const expectedOutput = createWorkspace(5, 5);
+    //populateOutputWorkspace(
+    //    expectedOutput,
+    //    {2.5, 2.6,  2.7, 2.8, 2.9, 2.5, 2.6,  2.7,  2.8,  2.9,  2.5,  1.2, 1.3,
+    //     1.4, 29.0, 2.5, 1.2, 1.3, 1.4, 29.0, 25.0, 26.0, 27.0, 28.0, 29.0},
+    //    {0.1, 0.2, 0.3, 0.4, 2.9, 0.1, 0.2, 0.3, 0.4, 2.9, 0.1, 0.2, 0.3,
+    //     0.4, 2.9, 0.1, 0.2, 0.3, 0.4, 2.9, 2.5, 2.6, 2.7, 2.8, 2.9});
+    //populateWorkspace(expectedOutput, {25.0, 26.0, 1.3, 1.4, 29.0},
+    //                  {0.1, 0.2, 0.3, 0.4, 2.9});
+    TS_ASSERT(!compareWorkspaces(output, expectedOutput));
   }
 
   void
   test_that_the_algorithm_throws_when_provided_a_singleBinWorkspace_with_more_than_one_bin() {
-    setUpResultWorkspaces(INPUT_NAME, SINGLE_BIN_NAME, 3, 3, {2.0, 3.0, 4.0},
-                          {1.1, 1.2, 1.3}, {0.1, 0.2, 0.3}, {3.0, 4.0},
-                          {25.0, 26.0}, {2.5, 2.6});
-    auto algorithm =
-        setUpReplaceAlgorithm(INPUT_NAME, SINGLE_BIN_NAME, OUTPUT_NAME);
+    setUpWorkspaces(INPUT_NAME, DESTINATION_NAME, 3, 3, {2.0, 3.0, 4.0},
+                    {1.1, 1.2, 1.3}, {0.1, 0.2, 0.3}, {3.0, 4.0}, {25.0, 26.0},
+                    {2.5, 2.6});
+    auto algorithm = setUpAlgorithm(INPUT_NAME, DESTINATION_NAME, OUTPUT_NAME);
 
     TS_ASSERT_THROWS(algorithm->execute(), std::runtime_error);
   }
 
   void
   test_that_the_algorithm_throws_when_provided_an_inputWorkspace_with_only_one_bin() {
-    setUpResultWorkspaces(INPUT_NAME, SINGLE_BIN_NAME, 3, 3, {3.0}, {1.2},
-                          {0.2}, {3.0}, {25.0}, {2.5});
-    auto algorithm =
-        setUpReplaceAlgorithm(INPUT_NAME, SINGLE_BIN_NAME, OUTPUT_NAME);
+    setUpWorkspaces(INPUT_NAME, DESTINATION_NAME, 3, 3, {3.0}, {1.2}, {0.2},
+                    {3.0}, {25.0}, {2.5});
+    auto algorithm = setUpAlgorithm(INPUT_NAME, DESTINATION_NAME, OUTPUT_NAME);
 
     TS_ASSERT_THROWS(algorithm->execute(), std::runtime_error);
   }
 
   void
   test_that_the_algorithm_throws_when_provided_two_workspaces_with_a_different_number_of_histograms() {
-    setUpResultWorkspaces(INPUT_NAME, SINGLE_BIN_NAME, 3, 2, {2.0, 3.0, 4.0},
-                          {1.1, 1.2, 1.3}, {0.1, 0.2, 0.3}, {3.0}, {25.0},
-                          {2.5});
-    auto algorithm =
-        setUpReplaceAlgorithm(INPUT_NAME, SINGLE_BIN_NAME, OUTPUT_NAME);
+    setUpWorkspaces(INPUT_NAME, DESTINATION_NAME, 3, 2, {2.0, 3.0, 4.0},
+                    {1.1, 1.2, 1.3}, {0.1, 0.2, 0.3}, {3.0}, {25.0}, {2.5});
+    auto algorithm = setUpAlgorithm(INPUT_NAME, DESTINATION_NAME, OUTPUT_NAME);
 
     TS_ASSERT_THROWS(algorithm->execute(), std::runtime_error);
   }
 
   void
   test_that_the_algorithm_throws_when_provided_a_singleBinWorkspace_with_a_name_not_ending_with_Result() {
-    setUpResultWorkspaces(INPUT_NAME, "Wrong_Name", 3, 3, {2.0, 3.0, 4.0},
-                          {1.1, 1.2, 1.3}, {0.1, 0.2, 0.3}, {3.0}, {25.0},
-                          {2.5});
-    auto algorithm =
-        setUpReplaceAlgorithm(INPUT_NAME, "Wrong_Name", OUTPUT_NAME);
+    setUpWorkspaces(INPUT_NAME, "Wrong_Name", 3, 3, {2.0, 3.0, 4.0},
+                    {1.1, 1.2, 1.3}, {0.1, 0.2, 0.3}, {3.0}, {25.0}, {2.5});
+    auto algorithm = setUpAlgorithm(INPUT_NAME, "Wrong_Name", OUTPUT_NAME);
 
     TS_ASSERT_THROWS(algorithm->execute(), std::runtime_error);
   }
 
   void
   test_that_the_algorithm_throws_when_provided_an_inputWorkspace_with_a_name_not_ending_with_Result() {
-    setUpResultWorkspaces("Wrong_Name", SINGLE_BIN_NAME, 3, 3, {2.0, 3.0, 4.0},
-                          {1.1, 1.2, 1.3}, {0.1, 0.2, 0.3}, {3.0}, {25.0},
-                          {2.5});
+    setUpWorkspaces("Wrong_Name", DESTINATION_NAME, 3, 3, {2.0, 3.0, 4.0},
+                    {1.1, 1.2, 1.3}, {0.1, 0.2, 0.3}, {3.0}, {25.0}, {2.5});
     auto algorithm =
-        setUpReplaceAlgorithm("Wrong_Name", SINGLE_BIN_NAME, OUTPUT_NAME);
+        setUpAlgorithm("Wrong_Name", DESTINATION_NAME, OUTPUT_NAME);
 
     TS_ASSERT_THROWS(algorithm->execute(), std::runtime_error);
   }
 
   void
   test_that_the_algorithm_throws_when_provided_an_empty_string_for_the_output_workspace_namessasdasdasdas() {
-    setUpResultWorkspaces(INPUT_NAME, SINGLE_BIN_NAME, 3, 3, {2.0, 3.0, 4.0},
-                          {1.1, 1.2, 1.3}, {0.1, 0.2, 0.3}, {1000.0}, {25.0},
-                          {2.5});
-    auto algorithm =
-        setUpReplaceAlgorithm(INPUT_NAME, SINGLE_BIN_NAME, OUTPUT_NAME);
+    setUpWorkspaces(INPUT_NAME, DESTINATION_NAME, 3, 3, {2.0, 3.0, 4.0},
+                    {1.1, 1.2, 1.3}, {0.1, 0.2, 0.3}, {1000.0}, {25.0}, {2.5});
+    auto algorithm = setUpAlgorithm(INPUT_NAME, DESTINATION_NAME, OUTPUT_NAME);
 
     TS_ASSERT_THROWS(algorithm->execute(), std::runtime_error);
   }
 
 private:
-  void setUpResultWorkspaces(
-      std::string const &inputName, std::string const &singleBinName,
-      int inputNumberOfSpectra = 3, int singleNumberOfSpectra = 3,
-      std::vector<double> const &inputBins = {2.0, 3.0, 4.0},
-      std::vector<double> const &inputYValues = {1.1, 1.2, 1.3},
-      std::vector<double> const &inputEValues = {0.1, 0.2, 0.3},
-      std::vector<double> const &singleBin = {3.0},
-      std::vector<double> const &singleYValue = {25.0},
-      std::vector<double> const &singleEValue = {2.5}) {
-    auto const inputWorkspace = createWorkspaceWithBinValues(
-        inputNumberOfSpectra, inputBins, static_cast<int>(inputBins.size()));
-    auto const singleBinWorkspace = createWorkspaceWithBinValues(
-        singleNumberOfSpectra, singleBin, static_cast<int>(singleBin.size()));
+  void setUpWorkspaces(
+      std::string const &inputName, std::string const &destName,
+      int inputNumberOfSpectra = 5, int destNumberOfSpectra = 5,
+      int inputNumberOfBins = 5, int destNumberOfBins = 5,
+      std::vector<double> const &inputYValues = {1.1, 1.2, 1.3, 1.4, 1.5},
+      std::vector<double> const &inputEValues = {0.1, 0.2, 0.3, 0.4, 0.5},
+      std::vector<double> const &destYValues = {25.0, 26.0, 27.0, 28.0, 29.0},
+      std::vector<double> const &destEValues = {2.5, 2.6, 2.7, 2.8, 2.9}) {
+    auto const inputWorkspace =
+        createWorkspace(inputNumberOfSpectra, inputNumberOfBins);
+    auto const destWorkspace =
+        createWorkspace(destNumberOfSpectra, destNumberOfBins);
 
     populateWorkspace(inputWorkspace, inputYValues, inputEValues);
-    populateWorkspace(singleBinWorkspace, singleYValue, singleEValue);
+    populateWorkspace(destWorkspace, destYValues, destEValues);
 
-    createSingleWorkspaceGroup(inputName, inputWorkspace);
-    createSingleWorkspaceGroup(singleBinName, singleBinWorkspace);
-  }
-
-  void createSingleWorkspaceGroup(std::string const &workspaceName,
-                                  MatrixWorkspace_sptr const &workspace) {
-    m_ads->addOrReplace(workspaceName, workspace);
-
-    auto group = boost::make_shared<WorkspaceGroup>();
-    group->addWorkspace(workspace);
-    m_ads->addOrReplace(workspaceName + "s", group);
-  }
-
-  void assertIsInGroupWithEntries(std::string const &outputName,
-                                  int numberOfEntries) {
-    auto const group = getADSGroupWorkspace(INPUT_NAME + "s");
-    auto const output = getADSMatrixWorkspace(outputName);
-
-    TS_ASSERT(group);
-    TS_ASSERT(group->contains(output));
-    TS_ASSERT_EQUALS(group->getNumberOfEntries(), numberOfEntries);
+    m_ads->addOrReplace(inputName, inputWorkspace);
+    m_ads->addOrReplace(destName, destWorkspace);
   }
 
   std::unique_ptr<SetUpADSWithWorkspace> m_ads;
 };
 
-#endif /* MANTID_REPLACEINDIRECTFITRESULTBINTEST_H_ */
+#endif /* MANTID_COPYDATARANGETEST_H_ */

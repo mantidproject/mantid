@@ -4,7 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidAlgorithms/ReplaceIndirectFitResultBin.h"
+#include "MantidAlgorithms/CopyDataRange.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
@@ -14,6 +14,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidHistogramData/HistogramE.h"
 #include "MantidHistogramData/HistogramY.h"
+#include "MantidKernel/BoundedValidator.h"
 
 #include <algorithm>
 #include <boost/cast.hpp>
@@ -118,194 +119,118 @@ void processBinReplacement(MatrixWorkspace_const_sptr singleBinWorkspace,
   replaceBinValues(outputWorkspace, insertionIndex, yValues, eValues);
 }
 
-bool doesExistInADS(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().doesExist(workspaceName);
-}
-
-Workspace_sptr getADSWorkspace(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().retrieveWS<Workspace>(workspaceName);
-}
-
-template <typename Predicate>
-void removeVectorElements(std::vector<std::string> &strings,
-                          Predicate const &filter) {
-  strings.erase(std::remove_if(strings.begin(), strings.end(), filter),
-                strings.end());
-}
-
-bool doesStringEndWith(std::string const &str, std::string const &delimiter) {
-  if (str.size() > delimiter.size())
-    return str.substr(str.size() - delimiter.size(), str.size()) == delimiter;
-  return false;
-}
-
-std::vector<std::string> filterByEndSuffix(std::vector<std::string> &strings,
-                                           std::string const &delimiter) {
-  removeVectorElements(strings, [&delimiter](std::string const &str) {
-    return !doesStringEndWith(str, delimiter);
-  });
-  return strings;
-}
-
-bool doesGroupContain(std::string const &groupName,
-                      MatrixWorkspace_sptr workspace) {
-  auto const adsWorkspace = getADSWorkspace(groupName);
-  if (adsWorkspace->isGroup()) {
-    auto const group =
-        boost::dynamic_pointer_cast<WorkspaceGroup>(adsWorkspace);
-    return group->contains(workspace);
-  }
-  return false;
-}
-
-std::string filterByContents(std::vector<std::string> &strings,
-                             MatrixWorkspace_sptr workspace) {
-  removeVectorElements(strings, [&workspace](std::string const &str) {
-    return !doesGroupContain(str, workspace);
-  });
-  return !strings.empty() ? strings[0] : "";
-}
-
-std::string findResultGroupContaining(MatrixWorkspace_sptr workspace) {
-  auto workspaceNames = AnalysisDataService::Instance().getObjectNames();
-  auto resultGroups = filterByEndSuffix(workspaceNames, "_Results");
-  return !resultGroups.empty() ? filterByContents(resultGroups, workspace) : "";
-}
-
-WorkspaceGroup_sptr getADSGroupWorkspace(std::string const &workspaceName) {
-  return boost::dynamic_pointer_cast<WorkspaceGroup>(
-      getADSWorkspace(workspaceName));
-}
-
-void addOutputToResultsGroup(WorkspaceGroup_sptr resultGroup,
-                             std::string const &inputName,
-                             std::string const &outputName,
-                             MatrixWorkspace_sptr output) {
-  if (inputName == outputName)
-    resultGroup->remove(inputName);
-  resultGroup->addWorkspace(output);
-}
-
-void addOutputToResultsGroup(std::string const &resultGroupName,
-                             std::string const &inputName,
-                             std::string const &outputName,
-                             MatrixWorkspace_sptr output) {
-  if (!resultGroupName.empty() && doesExistInADS(resultGroupName))
-    addOutputToResultsGroup(getADSGroupWorkspace(resultGroupName), inputName,
-                            outputName, output);
-  else
-    throw std::runtime_error(
-        "The input workspaces corresponding result group could not be found.");
-}
-
 } // namespace
 
 namespace Mantid {
 namespace Algorithms {
 
-DECLARE_ALGORITHM(ReplaceIndirectFitResultBin)
+DECLARE_ALGORITHM(CopyDataRange)
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string ReplaceIndirectFitResultBin::name() const {
-  return "ReplaceIndirectFitResultBin";
-}
+const std::string CopyDataRange::name() const { return "CopyDataRange"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int ReplaceIndirectFitResultBin::version() const { return 1; }
+int CopyDataRange::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string ReplaceIndirectFitResultBin::category() const {
+const std::string CopyDataRange::category() const {
   return "Inelastic\\Indirect";
 }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-const std::string ReplaceIndirectFitResultBin::summary() const {
-  return "Replaces the corresponding bin within the Input Workspace with the "
-         "bin found in the Single Bin Workspace.";
+const std::string CopyDataRange::summary() const {
+  return "Replaces a range of data in the input workspace with a range of data "
+         "from the copy workspace";
 }
 
-void ReplaceIndirectFitResultBin::init() {
+void CopyDataRange::init() {
 
   declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
-                  "The result workspace containing the poor fit value which "
-                  "needs replacing. It's name must end with _Result.");
+                  "The workspace to have range of data replaced.");
 
   declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "SingleBinWorkspace", "", Direction::Input),
-                  "The result workspace containing the replacement bin. It's "
-                  "name must end with _Result.");
+                      "CopyWorkspace", "", Direction::Input),
+                  "The workspace containing a range of data to be used for the "
+                  "replacement.");
+
+  auto positiveInt = boost::make_shared<Kernel::BoundedValidator<int>>();
+  positiveInt->setLower(0);
+  declareProperty("SpecMin", EMPTY_INT(), positiveInt,
+                  "The index denoting the start of the y range.");
+
+  declareProperty("SpecMax", EMPTY_INT(), positiveInt,
+                  "The index denoting the end of the y range.");
+
+  declareProperty("XMin", EMPTY_INT(), positiveInt,
+                  "The index denoting the start of the x range.");
+
+  declareProperty("XMax", EMPTY_INT(), positiveInt,
+                  "The index denoting the end of the x range.");
 
   declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The name to give the output workspace.");
 }
 
-std::map<std::string, std::string>
-ReplaceIndirectFitResultBin::validateInputs() {
+std::map<std::string, std::string> CopyDataRange::validateInputs() {
   std::map<std::string, std::string> errors;
 
   auto const inputWorkspaceName = getPropertyValue("InputWorkspace");
   MatrixWorkspace_sptr inputWorkspace = getProperty("InputWorkspace");
-  auto const singleBinWorkspaceName = getPropertyValue("SingleBinWorkspace");
-  MatrixWorkspace_sptr singleBinWorkspace = getProperty("SingleBinWorkspace");
+  auto const copyWorkspaceName = getPropertyValue("CopyWorkspace");
+  MatrixWorkspace_sptr copyWorkspace = getProperty("CopyWorkspace");
   auto const outputWorkspaceName = getPropertyValue("OutputWorkspace");
+
+  int const specMin = getProperty("SpecMin");
+  int const specMax = getProperty("SpecMax");
+  int const xMin = getProperty("XMin");
+  int const xMax = getProperty("XMax");
 
   if (inputWorkspaceName.empty())
     errors["InputWorkspace"] = "No input workspace was provided.";
-  else if (!doesStringEndWith(inputWorkspaceName, "_Result"))
-    errors["InputWorkspace"] =
-        "The input workspace must be a result workspace ending in _Result.";
-  else if (inputWorkspace->y(0).size() < 2)
-    errors["InputWorkspace"] =
-        "The input workspace must contain 2 or more bins.";
 
-  if (singleBinWorkspaceName.empty())
-    errors["SingleBinWorkspace"] =
-        "No single fit result workspace was provided.";
-  else if (!doesStringEndWith(singleBinWorkspaceName, "_Result"))
-    errors["SingleBinWorkspace"] = "The single bin workspace must be a result "
-                                   "workspace ending in _Result.";
-  else if (singleBinWorkspace->y(0).size() > 1)
-    errors["SingleBinWorkspace"] =
-        "The single bin workspace must contain only 1 bin.";
+  if (copyWorkspaceName.empty())
+    errors["CopyWorkspace"] = "No copy workspace was provided.";
 
-  if (singleBinWorkspace->getNumberHistograms() !=
-      inputWorkspace->getNumberHistograms())
-    errors["InputWorkspace"] =
-        "The input workspace and single bin workspace must "
-        "have the same number of histograms.";
+  if (xMin < 0)
+    errors["XMin"] = "XMin must be a number above zero.";
+  if (xMax > inputWorkspace->y(0).size() || xMax > copyWorkspace->y(0).size())
+    errors["XMax"] =
+        "XMax is larger than the maximum range in the input or copy workspace.";
+  if (xMin > xMax)
+    errors["XMin"] = "XMin must be smaller than XMax.";
+
+  if (specMin < 0)
+    errors["SpecMin"] = "SpecMin must be a number above zero.";
+  if (specMax >= inputWorkspace->getNumberHistograms() ||
+      specMax >= copyWorkspace->getNumberHistograms())
+    errors["SpecMax"] = "SpecMax is larger than the number of histograms in "
+                        "the input or copy workspace.";
+  if (specMin > specMax)
+    errors["SpecMin"] = "SpecMin must be smaller than SpecMax.";
 
   if (outputWorkspaceName.empty())
     errors["OutputWorkspace"] = "No OutputWorkspace name was provided.";
 
-  try {
-    (void)getBinIndex(singleBinWorkspace, inputWorkspace);
-  } catch (std::exception const &ex) {
-    errors["InputWorkspace"] = ex.what();
-  }
-
   return errors;
 }
 
-void ReplaceIndirectFitResultBin::exec() {
+void CopyDataRange::exec() {
   MatrixWorkspace_sptr inputWorkspace = getProperty("InputWorkspace");
-  MatrixWorkspace_const_sptr singleBinWorkspace =
-      getProperty("SingleBinWorkspace");
+  MatrixWorkspace_const_sptr copyWorkspace = getProperty("CopyWorkspace");
   auto const outputName = getPropertyValue("OutputWorkspace");
 
   auto const inputName = inputWorkspace->getName();
 
   auto outputWorkspace = cloneWorkspace(inputName);
-  processBinReplacement(singleBinWorkspace, outputWorkspace);
+  processBinReplacement(copyWorkspace, outputWorkspace);
 
   setProperty("OutputWorkspace", outputWorkspace);
-  addOutputToResultsGroup(findResultGroupContaining(inputWorkspace), inputName,
-                          outputName, outputWorkspace);
 }
 
 MatrixWorkspace_sptr
-ReplaceIndirectFitResultBin::cloneWorkspace(std::string const &inputName) {
+CopyDataRange::cloneWorkspace(std::string const &inputName) {
   auto cloneAlg = createChildAlgorithm("CloneWorkspace", -1.0, -1.0, false);
   cloneAlg->initialize();
   cloneAlg->setProperty("InputWorkspace", inputName);

@@ -4,8 +4,8 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_REPLACEINDIRECTFITRESULTBIN_H_
-#define MANTID_ALGORITHMS_REPLACEINDIRECTFITRESULTBIN_H_
+#ifndef MANTID_ALGORITHMS_COPYDATARANGE_H_
+#define MANTID_ALGORITHMS_COPYDATARANGE_H_
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -15,17 +15,12 @@ namespace Mantid {
 namespace Algorithms {
 
 /**
-  During a sequential fit in Indirect Data Analysis, the parameters fitted for a
-  spectrum become the start parameters for the next spectrum. This can be a
-  problem if the next spectrum is not similar to the previous spectrum and will
-  lead to a bad fit for that spectrum.
-
-  ReplaceIndirectFitResultBin : This algorithm takes a results workspace of a
-  sequential fit for multiple spectra (1), and a results workspace for a singly
-  fit spectrum (2), and it will replace the corresponding bad bin value in
-  workspace (1) with the bin found in workspace (2).
+  CopyDataRange : This algorithm takes a continuous block of data
+  from an input workspace specified by spectra indices and x indices and
+  replaces a block of data within a destination workspace. Where this block of
+  data is inserted is decided by an InsertionYIndex and an InsertionXIndex.
  */
-class DLLExport ReplaceIndirectFitResultBin : public API::Algorithm {
+class DLLExport CopyDataRange : public API::Algorithm {
 public:
   std::string const name() const override;
   int version() const override;
@@ -44,4 +39,4 @@ private:
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif /* MANTID_ALGORITHMS_REPLACEINDIRECTFITRESULTBIN_H_ */
+#endif /* MANTID_ALGORITHMS_COPYDATARANGE_H_ */

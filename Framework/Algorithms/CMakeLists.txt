@@ -64,6 +64,7 @@ set ( SRC_FILES
 	src/ConvertToPointData.cpp
 	src/ConvertUnits.cpp
 	src/ConvertUnitsUsingDetectorTable.cpp
+	src/CopyDataRange.cpp
 	src/CopyDetectorMapping.cpp
 	src/CopyInstrumentParameters.cpp
 	src/CopyLogs.cpp
@@ -261,7 +262,6 @@ set ( SRC_FILES
 	src/RemoveWorkspaceHistory.cpp
 	src/RenameWorkspace.cpp
 	src/RenameWorkspaces.cpp
-	src/ReplaceIndirectFitResultBin.cpp
 	src/ReplaceSpecialValues.cpp
 	src/ResampleX.cpp
 	src/ResetNegatives.cpp
@@ -403,6 +403,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ConvertToPointData.h
 	inc/MantidAlgorithms/ConvertUnits.h
 	inc/MantidAlgorithms/ConvertUnitsUsingDetectorTable.h
+	inc/MantidAlgorithms/CopyDataRange.h
 	inc/MantidAlgorithms/CopyDetectorMapping.h
 	inc/MantidAlgorithms/CopyInstrumentParameters.h
 	inc/MantidAlgorithms/CopyLogs.h
@@ -604,7 +605,6 @@ set ( INC_FILES
 	inc/MantidAlgorithms/RemoveWorkspaceHistory.h
 	inc/MantidAlgorithms/RenameWorkspace.h
 	inc/MantidAlgorithms/RenameWorkspaces.h
-	inc/MantidAlgorithms/ReplaceIndirectFitResultBin.h
 	inc/MantidAlgorithms/ReplaceSpecialValues.h
 	inc/MantidAlgorithms/ResampleX.h
 	inc/MantidAlgorithms/ResetNegatives.h

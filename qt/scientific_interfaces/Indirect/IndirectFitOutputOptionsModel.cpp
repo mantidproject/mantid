@@ -333,11 +333,11 @@ void IndirectFitOutputOptionsModel::replaceResultBin(
     std::string const &inputName, std::string const &singleBinName,
     std::string const &outputName) {
   auto const errors = validateInputs(inputName, singleBinName, outputName);
-  if (errors.empty())
-    replaceResultBin(getADSMatrixWorkspace(inputName),
-                     getADSMatrixWorkspace(singleBinName), outputName);
-  else
-    throw std::runtime_error(errors[0]);
+  // if (errors.empty())
+  //  replaceResultBin(getADSMatrixWorkspace(inputName),
+  //                   getADSMatrixWorkspace(singleBinName), outputName);
+  // else
+  //  throw std::runtime_error(errors[0]);
 }
 
 void IndirectFitOutputOptionsModel::replaceResultBin(
