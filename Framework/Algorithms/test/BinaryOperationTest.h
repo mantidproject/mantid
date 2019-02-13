@@ -47,6 +47,8 @@ public:
                                      const MatrixWorkspace_const_sptr ws2) {
     m_lhs = ws1;
     m_rhs = ws2;
+    m_lhsBlocksize = ws1->blocksize();
+    m_rhsBlocksize = ws2->blocksize();
     BinaryOperation::checkRequirements();
     return BinaryOperation::checkSizeCompatibility(ws1, ws2);
   }

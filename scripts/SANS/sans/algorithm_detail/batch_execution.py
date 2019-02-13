@@ -339,8 +339,7 @@ def provide_loaded_data(state, use_optimizations, workspace_to_name, workspace_t
     load_name = "SANSLoad"
     load_options = {"SANSState": state_serialized,
                     "PublishToCache": use_optimizations,
-                    "UseCached": use_optimizations,
-                    "MoveWorkspace": False}
+                    "UseCached": use_optimizations}
 
     # Set the output workspaces
     set_output_workspaces_on_load_algorithm(load_options, state)

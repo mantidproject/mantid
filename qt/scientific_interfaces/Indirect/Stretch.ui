@@ -191,7 +191,7 @@
        <item>
         <widget class="QLabel" name="lbPreviewSpectrum">
          <property name="text">
-          <string>Current Spectrum:</string>
+          <string>Preview Spectrum:</string>
          </property>
         </widget>
        </item>
@@ -364,6 +364,9 @@
                <width>200</width>
                <height>0</height>
               </size>
+             </property>
+             <property name="sizeAdjustPolicy">
+              <enum>QComboBox::AdjustToContents</enum>
              </property>
             </widget>
            </item>

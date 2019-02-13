@@ -52,6 +52,7 @@ Improvements
 - The AddWorkspace windows (opened from the Multiple Input tab) now stay open after adding a workspace to the data table. This 
   is found on the MSDFit, I(Q,t)Fit, ConvFit and F(Q)Fit interfaces.
 - It is now possible to load a Nexus file without it's history on the Elwin interface by unchecking the Load History checkbox.
+- It is now possible to undock the mini-plots on the MSDFit, IqtFit, ConvFit and F(Q)Fit interfaces.
 
 
 Bugfixes
@@ -74,6 +75,10 @@ Bugfixes
 - The output workspace ending with _Results now contains workspaces with corrected names which detail the fit functions used.
 - Selecting multiple data using the All Spectra checkbox without first selected a sample file used to cause an unexpected error.
   This is now prevented. Meaningful error messages are also displayed when a sample or resolution file are not selected.
+- In the Elwin interface, the errors are now propagated correctly through to the workspace with extension _elt.
+- The :ref:`HallRoss <func-Hall-Ross>` fit function was updated to have :math:`\hbar` in its formula. The 
+  :ref:`TeixeiraWater <func-TeixeiraWater>` and :ref:`ChudleyElliot <func-ChudleyElliot>` fit functions 
+  now have a functionDeriv1D method.
 
 
 Data Corrections Interface
@@ -122,6 +127,8 @@ Improvements
   Plot Current Preview.
 - The sample logs are now copied over properly for the result workspace in the ResNorm tab.
 - Sqw files can now be loaded as Vanadium in the ResNorm interface.
+- In the Quasi interface, fit. 3 and diff. 3 are now stored in the fit workspaces. The probabilities for 3 peaks is now 
+  available in the probability workspace.
 
 Bugfixes
 ########
