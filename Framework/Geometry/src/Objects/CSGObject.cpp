@@ -2171,7 +2171,7 @@ const std::vector<uint32_t> &CSGObject::getTriangleFaces() const {
 }
 
 detail::ShapeInfo::GeometryShape CSGObject::shape() const {
-  if (m_handler != nullptr && m_handler->hasShapeInfo()) {
+  if (m_handler && m_handler->hasShapeInfo()) {
     return m_handler->shapeInfo().shape();
   } else {
     return detail::ShapeInfo::GeometryShape::NOSHAPE;
@@ -2179,7 +2179,7 @@ detail::ShapeInfo::GeometryShape CSGObject::shape() const {
 }
 
 const detail::ShapeInfo &CSGObject::shapeInfo() const {
-  if (m_handler->hasShapeInfo()) {
+  if (m_handler && m_handler->hasShapeInfo()) {
     return m_handler->shapeInfo();
   } else {
     throw std::logic_error("CSGObject has no ShapeInfo to return");
