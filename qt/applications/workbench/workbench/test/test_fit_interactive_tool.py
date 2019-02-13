@@ -312,7 +312,6 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         trigger_action(find_action_with_text(self.w, 'Fit'))
         yield 0.1
         self.fit_browser = manager.fit_browser
-        self.w.close()
 
     def test_ws_index(self):
         yield self.start_emu()
