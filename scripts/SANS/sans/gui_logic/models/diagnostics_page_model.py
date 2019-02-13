@@ -24,7 +24,6 @@ if PYQT4:
     except (Exception, Warning):
         IN_MANTIDPLOT = False
 else:
-    import matplotlib.pyplot as plt
     from mantidqt.plotting.functions import plot
 
 
