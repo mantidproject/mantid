@@ -23,12 +23,19 @@ from sans.algorithm_detail.single_execution import perform_can_subtraction
 from mantid import AnalysisDataService
 from mantid.simpleapi import CloneWorkspace, GroupWorkspaces
 
-try:
-    import mantidplot
-except (Exception, Warning):
-    mantidplot = None
-# this should happen when this is called from outside Mantidplot and only then,
-# the result is that attempting to plot will raise an exception
+from qtpy import PYQT4
+if PYQT4:
+    try:
+        IN_MANTIDPLOT = True
+        import mantidplot
+    except (Exception, Warning):
+        # Exception will be raised if running this code in a Qt4 environment
+        # but outside of MantidPlot. E.g. Qt4 unit tests
+        # Plotting functionality should not be imported/used in this case
+        IN_MANTIDPLOT = False
+else:
+    import matplotlib.pyplot as plt
+    from mantidqt.plotting.functions import plot
 
 
 class SANSBeamCentreFinder(DataProcessorAlgorithm):
@@ -183,7 +190,7 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
                 for key in sample_quartiles:
                     sample_quartiles[key] = perform_can_subtraction(sample_quartiles[key], can_quartiles[key], self)
 
-            if mantidplot:
+            if not PYQT4 or IN_MANTIDPLOT:
                 output_workspaces = self._publish_to_ADS(sample_quartiles)
                 if verbose:
                     self._rename_and_group_workspaces(j, output_workspaces)
@@ -195,7 +202,9 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
             if(j == 0):
                 logger.notice("Itr {0}: ( {1}, {2} )  SX={3:.5g}  SY={4:.5g}".
                               format(j, self.scale_1 * centre1, self.scale_2 * centre2, residueLR[j], residueTB[j]))
-                if mantidplot:
+                if not PYQT4:
+                    self._plot_quartiles_matplotlib(output_workspaces, state.data.sample_scatter)
+                elif IN_MANTIDPLOT:
                     self._plot_quartiles(output_workspaces, state.data.sample_scatter)
 
             else:
@@ -248,6 +257,26 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
         graph_handle.activeLayer().setTitle(title)
         graph_handle.setName(title)
         return graph_handle
+
+    def _plot_quartiles_matplotlib(self, output_workspaces, sample_scatter):
+        title = '{}_beam_centre_finder'.format(sample_scatter)
+
+        fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
+        fig.canvas.set_window_title(title)
+        ax.set_title(title)
+        ax.set_xscale('log')
+        ax.set_yscale('log')
+
+        plot_kwargs = {"scalex": True,
+                       "scaley": True}
+
+        if not isinstance(output_workspaces, list):
+            output_workspaces = [output_workspaces]
+
+        # Send the workspaces to matplotlib plotting function, not the workspace names
+        workspaces = AnalysisDataService.Instance().retrieveWorkspaces(output_workspaces, unrollGroups=True)
+
+        plot(workspaces, wksp_indices=[0], fig=fig, overplot=True, plot_kwargs=plot_kwargs)
 
     def _get_cloned_workspace(self, workspace_name):
         workspace = self.getProperty(workspace_name).value
