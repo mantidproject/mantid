@@ -119,12 +119,15 @@ private:
   void clearStateCellStyling(MantidWidgets::Batch::Cell &cell);
   void
   clearStateCellStyling(MantidWidgets::Batch::RowLocation const &itemIndex);
+  void applyInvalidStateCellStyling(MantidWidgets::Batch::Cell &cell);
   void applyRunningStateCellStyling(MantidWidgets::Batch::Cell &cell);
   void applyCompletedStateCellStyling(MantidWidgets::Batch::Cell &cell);
   void applyErrorStateCellStyling(MantidWidgets::Batch::Cell &cell,
                                   std::string const &errorMessage);
   void applyWarningStateCellStyling(MantidWidgets::Batch::Cell &cell,
                                     std::string const &errorMessage);
+  void showCellsAsInvalidStateInView(
+      MantidWidgets::Batch::RowLocation const &itemIndex);
   void showCellsAsRunningStateInView(
       MantidWidgets::Batch::RowLocation const &itemIndex);
   void showCellsAsCompletedStateInView(

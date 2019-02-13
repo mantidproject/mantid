@@ -59,6 +59,7 @@ void RunsTablePresenter::notifyDeleteRowRequested() {
     if (!containsGroups(selected)) {
       removeRowsAndGroupsFromView(selected);
       removeRowsFromModel(selected);
+      notifyRowStateChanged();
     } else {
       m_view->mustNotSelectGroup();
     }
@@ -73,6 +74,7 @@ void RunsTablePresenter::notifyDeleteGroupRequested() {
     auto groupIndicesOrderedLowToHigh = groupIndexesFromSelection(selected);
     removeGroupsFromModel(groupIndicesOrderedLowToHigh);
     removeGroupsFromView(groupIndicesOrderedLowToHigh);
+    notifyRowStateChanged();
   } else {
     m_view->mustSelectGroupOrRow();
   }
@@ -109,6 +111,7 @@ void RunsTablePresenter::notifyInsertRowRequested() {
   } else {
     m_view->mustSelectGroupOrRow();
   }
+  notifyRowStateChanged();
 }
 
 void RunsTablePresenter::notifyFilterChanged(std::string const &filterString) {
@@ -195,6 +198,7 @@ void RunsTablePresenter::notifyInsertGroupRequested() {
     appendEmptyGroupInView();
     appendEmptyGroupInModel();
   }
+  notifyRowStateChanged();
 }
 
 void RunsTablePresenter::appendEmptyGroupInModel() {
@@ -300,7 +304,6 @@ void RunsTablePresenter::updateRowField(
   } else {
     showCellsAsInvalidInView(itemIndex, rowValidationResult.assertError());
   }
-  notifyRowStateChanged();
 }
 
 void RunsTablePresenter::notifyCellTextChanged(
@@ -310,6 +313,7 @@ void RunsTablePresenter::notifyCellTextChanged(
     updateGroupName(itemIndex, column, oldValue, newValue);
   else
     updateRowField(itemIndex, column, oldValue, newValue);
+  notifyRowStateChanged();
 }
 
 void RunsTablePresenter::notifySelectionChanged() {
@@ -334,6 +338,7 @@ void RunsTablePresenter::notifyRowInserted(
   } else if (isRowLocation(newRowLocation)) {
     insertEmptyRowInModel(groupOf(newRowLocation), rowOf(newRowLocation));
   }
+  notifyRowStateChanged();
 }
 
 void RunsTablePresenter::removeRowsAndGroupsFromModel(
@@ -404,6 +409,7 @@ void RunsTablePresenter::notifyPasteRowsRequested() {
     else
       m_view->jobs().appendSubtreesAt(MantidWidgets::Batch::RowLocation(),
                                       m_clipboard.get());
+    notifyRowStateChanged();
   } else {
     m_view->invalidSelectionForPaste();
   }
@@ -413,6 +419,14 @@ void RunsTablePresenter::clearStateCellStyling(
     MantidWidgets::Batch::Cell &cell) {
   cell.setBackgroundColor("white");
   cell.setToolTip("");
+}
+
+void RunsTablePresenter::applyInvalidStateCellStyling(
+    MantidWidgets::Batch::Cell &cell) {
+  cell.setBackgroundColor("grey");
+  cell.setToolTip(
+      "Row will not be processed: it either contains invalid cell values, "
+      "or duplicates a reduction in another row");
 }
 
 void RunsTablePresenter::applyRunningStateCellStyling(
@@ -442,6 +456,16 @@ void RunsTablePresenter::clearStateCellStyling(
   auto cells = m_view->jobs().cellsAt(itemIndex);
   for (size_t column = 0; column < cells.size(); ++column) {
     clearStateCellStyling(cells[column]);
+  }
+  m_view->jobs().setCellsAt(itemIndex, cells);
+}
+
+void RunsTablePresenter::showCellsAsInvalidStateInView(
+    MantidWidgets::Batch::RowLocation const &itemIndex) {
+  auto cells = m_view->jobs().cellsAt(itemIndex);
+  for (size_t column = 0; column < cells.size(); ++column) {
+    clearStateCellStyling(cells[column]);
+    applyInvalidStateCellStyling(cells[column]);
   }
   m_view->jobs().setCellsAt(itemIndex, cells);
 }
@@ -496,10 +520,12 @@ void RunsTablePresenter::notifyRowStateChanged() {
 
     int rowIndex = 0;
     for (auto &row : group.rows()) {
-      if (!row)
-        continue;
-
       auto rowPath = MantidWidgets::Batch::RowPath{groupIndex, rowIndex};
+      if (!row) {
+        showCellsAsInvalidStateInView(rowPath);
+        ++rowIndex;
+        continue;
+      }
 
       switch (row->state()) {
       case State::ITEM_NOT_STARTED:
