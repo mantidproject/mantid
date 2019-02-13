@@ -68,6 +68,8 @@ struct MANTID_GEOMETRY_DLL Link {
                            //@}
 };
 
+enum TrackDirection { LEAVING = -1, INVALID = 0, ENTERING = 1 };
+
 /**
  * Stores a point of intersection along a track. The component intersected
  * is linked using its ComponentID.
@@ -88,12 +90,14 @@ struct IntersectionPoint {
    * (Default=NULL)
    * @param obj :: A reference to the object that was intersected
    */
-  inline IntersectionPoint(const int flag, const Kernel::V3D &end,
+  inline IntersectionPoint(const TrackDirection direction,
+                           const Kernel::V3D &end,
                            const double distFromStartOfTrack,
                            const IObject &obj,
                            const ComponentID compID = nullptr)
-      : directionFlag(flag), endPoint(end), distFromStart(distFromStartOfTrack),
-        object(&obj), componentID(compID) {}
+      : direction(direction), endPoint(end),
+        distFromStart(distFromStartOfTrack), object(&obj), componentID(compID) {
+  }
 
   /**
    * A IntersectionPoint is less-than another if either
@@ -108,17 +112,17 @@ struct IntersectionPoint {
   inline bool operator<(const IntersectionPoint &other) const {
     const double diff = fabs(distFromStart - other.distFromStart);
     return (diff > Kernel::Tolerance) ? distFromStart < other.distFromStart
-                                      : directionFlag < other.directionFlag;
+                                      : direction < other.direction;
   }
 
   /** @name Attributes. */
   //@{
-  int directionFlag;       ///< Directional flag
-  Kernel::V3D endPoint;    ///< Point
-  double distFromStart;    ///< Total distance from track begin
-  const IObject *object;   ///< The object that was intersected
-  ComponentID componentID; ///< Unique component ID
-                           //@}
+  TrackDirection direction; ///< Directional flag
+  Kernel::V3D endPoint;     ///< Point
+  double distFromStart;     ///< Total distance from track begin
+  const IObject *object;    ///< The object that was intersected
+  ComponentID componentID;  ///< Unique component ID
+                            //@}
 };
 
 /**
@@ -138,7 +142,7 @@ public:
   /// Constructor
   Track(const Kernel::V3D &startPt, const Kernel::V3D &unitVector);
   /// Adds a point of intersection to the track
-  void addPoint(const int directionFlag, const Kernel::V3D &endPoint,
+  void addPoint(const TrackDirection direction, const Kernel::V3D &endPoint,
                 const IObject &obj, const ComponentID compID = nullptr);
   /// Adds a link to the track
   int addLink(const Kernel::V3D &firstPoint, const Kernel::V3D &secondPoint,
