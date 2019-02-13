@@ -458,6 +458,13 @@ double InstrumentActor::getIntegratedCounts(size_t index) const {
 void InstrumentActor::sumDetectors(const std::vector<size_t> &dets,
                                    std::vector<double> &x,
                                    std::vector<double> &y, size_t size) const {
+  // don't bother if no detectors are supplied
+  if (dets.empty() || size == 0) {
+    x.clear();
+    y.clear();
+    return;
+  }
+
   Mantid::API::MatrixWorkspace_const_sptr ws = getWorkspace();
   const auto blocksize = ws->blocksize();
   if (size > blocksize || size == 0) {
@@ -486,32 +493,25 @@ void InstrumentActor::sumDetectors(const std::vector<size_t> &dets,
 void InstrumentActor::sumDetectorsUniform(const std::vector<size_t> &dets,
                                           std::vector<double> &x,
                                           std::vector<double> &y) const {
-
-  bool isDataEmpty = dets.empty();
-
-  auto wi = getWorkspaceIndex(dets[0]);
-
-  if (wi == INVALID_INDEX)
-    isDataEmpty = true;
-
-  if (isDataEmpty) {
-    x.clear();
-    y.clear();
-    return;
-  }
-
   // find the bins inside the integration range
   size_t imin, imax;
-
-  getBinMinMaxIndex(wi, imin, imax);
+  size_t wi;
+  for (const auto det : dets) {
+    wi = getWorkspaceIndex(det);
+    if (wi != INVALID_INDEX) {
+      // first valid index is the one to use
+      getBinMinMaxIndex(wi, imin, imax);
+      break;
+    }
+  }
 
   Mantid::API::MatrixWorkspace_const_sptr ws = getWorkspace();
   const auto &XPoints = ws->points(wi);
   x.assign(XPoints.begin() + imin, XPoints.begin() + imax);
   y.resize(x.size(), 0);
   // sum the spectra
-  for (auto det : dets) {
-    auto index = getWorkspaceIndex(det);
+  for (const auto det : dets) {
+    const auto index = getWorkspaceIndex(det);
     if (index == INVALID_INDEX)
       continue;
     const auto &Y = ws->y(index);
@@ -535,12 +535,6 @@ void InstrumentActor::sumDetectorsRagged(const std::vector<size_t> &dets,
                                          std::vector<double> &x,
                                          std::vector<double> &y,
                                          size_t size) const {
-  if (dets.empty() || size == 0) {
-    x.clear();
-    y.clear();
-    return;
-  }
-
   Mantid::API::MatrixWorkspace_const_sptr ws = getWorkspace();
   //  create a workspace to hold the data from the selected detectors
   Mantid::API::MatrixWorkspace_sptr dws =
@@ -552,8 +546,8 @@ void InstrumentActor::sumDetectorsRagged(const std::vector<size_t> &dets,
 
   size_t nSpec = 0; // number of actual spectra to add
   // fill in the temp workspace with the data from the detectors
-  for (auto det : dets) {
-    auto index = getWorkspaceIndex(det);
+  for (const auto det : dets) {
+    const auto index = getWorkspaceIndex(det);
     if (index == INVALID_INDEX)
       continue;
     dws->setHistogram(nSpec, ws->histogram(index));
