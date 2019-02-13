@@ -40,7 +40,7 @@ using BatchJobAlgorithm_sptr = boost::shared_ptr<BatchJobAlgorithm>;
  */
 class MANTIDQT_ISISREFLECTOMETRY_DLL BatchJobRunner {
 public:
-  BatchJobRunner(Batch batch);
+  explicit BatchJobRunner(Batch batch);
 
   bool isProcessing() const;
   bool isAutoreducing() const;

@@ -324,7 +324,7 @@ Item *BatchJobAlgorithm::item() { return m_item; }
 
 BatchJobRunner::BatchJobRunner(Batch batch)
     : m_batch(std::move(batch)), m_isProcessing(false), m_isAutoreducing(false),
-      m_reprocessFailed(false) {}
+      m_reprocessFailed(false), m_processAll(false) {}
 
 bool BatchJobRunner::isProcessing() const { return m_isProcessing; }
 
