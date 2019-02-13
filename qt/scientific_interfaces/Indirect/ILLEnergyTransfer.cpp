@@ -29,6 +29,15 @@ ILLEnergyTransfer::ILLEnergyTransfer(IndirectDataReduction *idrUI,
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(algorithmComplete(bool)));
 
+  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
+
+  connect(this,
+          SIGNAL(updateRunButton(bool, std::string const &, QString const &,
+                                 QString const &)),
+          this,
+          SLOT(updateRunButton(bool, std::string const &, QString const &,
+                               QString const &)));
+
   // Validate to remove invalid markers
   validateTab();
 }
@@ -321,6 +330,11 @@ void ILLEnergyTransfer::algorithmComplete(bool error) {
 }
 
 /**
+ * Handle when Run is clicked
+ */
+void ILLEnergyTransfer::runClicked() { runTab(); }
+
+/**
  * Handles plotting of the reduced ws.
  */
 void ILLEnergyTransfer::plot() {
@@ -357,6 +371,20 @@ void ILLEnergyTransfer::setInstrumentDefault() {
   // Set instrument in run file widgets
   m_uiForm.rfInput->setInstrumentOverride(instDetails["instrument"]);
   m_uiForm.rfMapFile->setInstrumentOverride(instDetails["instrument"]);
+}
+
+void ILLEnergyTransfer::setRunEnabled(bool enabled) {
+  m_uiForm.pbRun->setEnabled(enabled);
+}
+
+void ILLEnergyTransfer::updateRunButton(bool enabled,
+                                        std::string const &enableOutputButtons,
+                                        QString const message,
+                                        QString const tooltip) {
+  UNUSED_ARG(enableOutputButtons);
+  setRunEnabled(enabled);
+  m_uiForm.pbRun->setText(message);
+  m_uiForm.pbRun->setToolTip(tooltip);
 }
 
 } // namespace CustomInterfaces

@@ -131,14 +131,6 @@ void SaveNXTomo::processAll() {
         (workspaceID.find("RebinnedOutput") == std::string::npos))
       throw Exception::NotImplementedError(
           "SaveNXTomo passed invalid workspaces. Must be Workspace2D");
-
-    // Note: check disabled for the same reason as in the input properties
-    // Do the full check for common binning
-    // if (!WorkspaceHelpers::commonBoundaries(workspace)) {
-    //   g_log.error("The input workspace must have common bins");
-    //   throw std::invalid_argument("The input workspace must have common
-    //   bins");
-    // }
   }
 
   // Retrieve the filename from the properties

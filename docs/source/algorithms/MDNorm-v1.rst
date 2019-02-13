@@ -15,7 +15,13 @@ in either reciprocal space of the sample (if `RLU` is selected) or in the goniom
 then it normalizes to get the scattering cross section.
 For diffraction data, the output workspace contains the differential cross section :math:`\frac{d\sigma}{d\Omega}`, while
 for direct geometry inelastic data one obtains the double differential cross section  :math:`\frac{d^2 \sigma}{dE d\Omega}`.
-One can choose any orientation for the momentum axes (to get the first axis to be `[-H,H,0]`, set `QDimension1` to `-1,1,0`.
+One can choose any orientation for the momentum axes (to get the first axis to be `[-H,H,0]`, set `QDimension0` to `-1,1,0`.
+
+**Note:** In order to calculate the trajectories, the algorithm relies on finding information about detector
+trajectories stored in the workspace. The algorithm :ref:`CropWorkspaceForMDNorm <algm-CropWorkspaceForMDNorm>` must
+be run *before* converting to multidimensional workspace. Optionally, in aaddition, one can recalculate the extents of the trajectories 
+using the :ref:`RecalculateTrajectoriesExtents  <algm-RecalculateTrajectoriesExtents>` algorithm after convering to the 
+multidimensional workspace.
 
 The solid angle workspace is a :ref:`MatrixWorkspace <MatrixWorkspace>` that contains the solid angle/efficiency of the detectors.
 One can just integrate a vanadium file between some appropriate limits. For diffraction measurements, the flux workspace 
@@ -26,8 +32,8 @@ detectors that have the same energy response. The algorithm :ref:`MDNormSCDPrepr
 data for the Solid Angle and Flux workspaces.
 
 The input workspace is binned using the :ref:`BinMD <algm-BinMD>` algorithm, to account for the selected momentum
-dimensions. For each dimension to be binned, we specify a name (for example `Dimension0Name='QDimension1'`). For any momentum dimension
-the name is one of `QDimension1`, `QDimension2`, or `QDimension3` along the axes specified in the algorithm. All three momentum 
+dimensions. For each dimension to be binned, we specify a name (for example `Dimension0Name='QDimension0'`). For any momentum dimension
+the name is one of `QDimension0`, `QDimension1`, or `QDimension2` along the axes specified in the algorithm. All three momentum 
 dimensions must be present in the parameter list of the algorithm. Any other dimension name, such as `DeltaE`, is optional, 
 and must be identical to a dimension in the input workspace. If a dimension name is present in the input workspace but not within the 
 parameters of this algorithm, the corresponding data will be integrated. The semnification of binning parameters is as following: 
@@ -96,14 +102,14 @@ For diffraction measurements a sample code is found below:
    MDNorm(InputWorkspace='md', 
           SolidAngleWorkspace='SolidAngle',
           FluxWorkspace='Flux',
-          QDimension1='1,1,0',
-          QDimension2='1,-1,0',
-          QDimension3='0,0,1',
-          Dimension0Name='QDimension1', 
+          QDimension0='1,1,0',
+          QDimension1='1,-1,0',
+          QDimension2='0,0,1',
+          Dimension0Name='QDimension0', 
           Dimension0Binning='-10.0,0.1,10.0', 
-          Dimension1Name='QDimension2', 
+          Dimension1Name='QDimension1', 
           Dimension1Binning='-10.0,0.1,10.0', 
-          Dimension2Name='QDimension3', 
+          Dimension2Name='QDimension2', 
           Dimension2Binning='-0.1,0.1',
           SymmetryOperations='P 31 2 1',
           OutputWorkspace='result', 
@@ -161,13 +167,13 @@ Here is a sample code for inelastic data:
                MaxValues='11,11,11,49')
    MergeMD(InputWorkspaces='md', OutputWorkspace='merged')
    MDNorm(InputWorkspace='merged', 
-          Dimension0Name='QDimension2', 
+          Dimension0Name='QDimension1', 
           Dimension0Binning='-5,0.05,5', 
-          Dimension1Name='QDimension3', 
+          Dimension1Name='QDimension2', 
           Dimension1Binning='-5,0.05,5', 
           Dimension2Name='DeltaE', 
           Dimension2Binning='-2,2', 
-          Dimension3Name='QDimension1', 
+          Dimension3Name='QDimension0', 
           Dimension3Binning='-0.5,0.5', 
           SymmetryOperations='x,y,z;x,-y,z;x,y,-z;x,-y,-z',
           OutputWorkspace='result', 

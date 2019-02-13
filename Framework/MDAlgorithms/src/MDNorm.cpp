@@ -101,31 +101,31 @@ void MDNorm::init() {
   setPropertyGroup("RLU", "Q projections RLU");
 
   auto mustBe3D = boost::make_shared<Kernel::ArrayLengthValidator<double>>(3);
-  std::vector<double> Q1(3, 0.), Q2(3, 0), Q3(3, 0);
-  Q1[0] = 1.;
-  Q2[1] = 1.;
-  Q3[2] = 1.;
+  std::vector<double> Q0(3, 0.), Q1(3, 0), Q2(3, 0);
+  Q0[0] = 1.;
+  Q1[1] = 1.;
+  Q2[2] = 1.;
+
+  declareProperty(
+      make_unique<ArrayProperty<double>>("QDimension0", Q0, mustBe3D),
+      "The first Q projection axis - Default is (1,0,0)");
+  setPropertySettings("QDimension0", make_unique<Kernel::VisibleWhenProperty>(
+                                         "RLU", IS_EQUAL_TO, "1"));
+  setPropertyGroup("QDimension0", "Q projections RLU");
 
   declareProperty(
       make_unique<ArrayProperty<double>>("QDimension1", Q1, mustBe3D),
-      "The first Q projection axis - Default is (1,0,0)");
+      "The second Q projection axis - Default is (0,1,0)");
   setPropertySettings("QDimension1", make_unique<Kernel::VisibleWhenProperty>(
                                          "RLU", IS_EQUAL_TO, "1"));
   setPropertyGroup("QDimension1", "Q projections RLU");
 
   declareProperty(
       make_unique<ArrayProperty<double>>("QDimension2", Q2, mustBe3D),
-      "The second Q projection axis - Default is (0,1,0)");
+      "The thirdtCalculateCover Q projection axis - Default is (0,0,1)");
   setPropertySettings("QDimension2", make_unique<Kernel::VisibleWhenProperty>(
                                          "RLU", IS_EQUAL_TO, "1"));
   setPropertyGroup("QDimension2", "Q projections RLU");
-
-  declareProperty(
-      make_unique<ArrayProperty<double>>("QDimension3", Q3, mustBe3D),
-      "The thirdtCalculateCover Q projection axis - Default is (0,0,1)");
-  setPropertySettings("QDimension3", make_unique<Kernel::VisibleWhenProperty>(
-                                         "RLU", IS_EQUAL_TO, "1"));
-  setPropertyGroup("QDimension3", "Q projections RLU");
 
   // vanadium
   auto fluxValidator = boost::make_shared<CompositeValidator>();
@@ -152,8 +152,12 @@ void MDNorm::init() {
   for (std::size_t i = 0; i < 6; i++) {
     std::string propName = "Dimension" + Strings::toString(i) + "Name";
     std::string propBinning = "Dimension" + Strings::toString(i) + "Binning";
+    std::string defaultName = "";
+    if (i < 3) {
+      defaultName = "QDimension" + Strings::toString(i);
+    }
     declareProperty(Kernel::make_unique<PropertyWithValue<std::string>>(
-                        propName, "", Direction::Input),
+                        propName, defaultName, Direction::Input),
                     "Name for the " + Strings::toString(i) +
                         "th dimension. Leave blank for NONE.");
     auto atMost3 = boost::make_shared<ArrayLengthValidator<double>>(0, 3);
@@ -226,7 +230,7 @@ std::map<std::string, std::string> MDNorm::validateInputs() {
   // Check if the vanadium is available for diffraction
   bool diffraction = true;
   if ((inputWS->getNumDims() > 3) &&
-      (inputWS->getDimension(3)->getMDFrame().name() == "DeltaE")) {
+      (inputWS->getDimension(3)->getName() == "DeltaE")) {
     diffraction = false;
   }
   if (diffraction) {
@@ -266,18 +270,18 @@ std::map<std::string, std::string> MDNorm::validateInputs() {
   // check projections and UB
   if (getProperty("RLU")) {
     DblMatrix W = DblMatrix(3, 3);
+    std::vector<double> Q0Basis = getProperty("QDimension0");
     std::vector<double> Q1Basis = getProperty("QDimension1");
     std::vector<double> Q2Basis = getProperty("QDimension2");
-    std::vector<double> Q3Basis = getProperty("QDimension3");
-    W.setColumn(0, Q1Basis);
-    W.setColumn(1, Q2Basis);
-    W.setColumn(2, Q3Basis);
+    W.setColumn(0, Q0Basis);
+    W.setColumn(1, Q1Basis);
+    W.setColumn(2, Q2Basis);
     if (fabs(W.determinant()) < 1e-5) {
+      errorMessage.emplace("QDimension0",
+                           "The projection dimensions are coplanar or zero");
       errorMessage.emplace("QDimension1",
                            "The projection dimensions are coplanar or zero");
       errorMessage.emplace("QDimension2",
-                           "The projection dimensions are coplanar or zero");
-      errorMessage.emplace("QDimension3",
                            "The projection dimensions are coplanar or zero");
     }
     if (!inputWS->getExperimentInfo(0)->sample().hasOrientedLattice()) {
@@ -292,9 +296,9 @@ std::map<std::string, std::string> MDNorm::validateInputs() {
   for (size_t i = 3; i < inputWS->getNumDims(); i++) {
     originalDimensionNames.push_back(inputWS->getDimension(i)->getName());
   }
+  originalDimensionNames.push_back("QDimension0");
   originalDimensionNames.push_back("QDimension1");
   originalDimensionNames.push_back("QDimension2");
-  originalDimensionNames.push_back("QDimension3");
   std::vector<std::string> selectedDimensions;
   for (std::size_t i = 0; i < 6; i++) {
     std::string propName = "Dimension" + Strings::toString(i) + "Name";
@@ -330,16 +334,16 @@ std::map<std::string, std::string> MDNorm::validateInputs() {
   }
   // since Q dimensions can be non - orthogonal, all must be present
   if ((std::find(selectedDimensions.begin(), selectedDimensions.end(),
+                 "QDimension0") == selectedDimensions.end()) ||
+      (std::find(selectedDimensions.begin(), selectedDimensions.end(),
                  "QDimension1") == selectedDimensions.end()) ||
       (std::find(selectedDimensions.begin(), selectedDimensions.end(),
-                 "QDimension2") == selectedDimensions.end()) ||
-      (std::find(selectedDimensions.begin(), selectedDimensions.end(),
-                 "QDimension3") == selectedDimensions.end())) {
+                 "QDimension2") == selectedDimensions.end())) {
     for (std::size_t i = 0; i < 6; i++) {
       std::string propName = "Dimension" + Strings::toString(i) + "Name";
       errorMessage.emplace(
           propName,
-          "All of QDimension1, QDimension2, QDimension3 must be present");
+          "All of QDimension0, QDimension1, QDimension2 must be present");
     }
   }
   // symmetry operations
@@ -407,7 +411,7 @@ void MDNorm::exec() {
   m_beamDir = m_samplePos - source->getPos();
   m_beamDir.normalize();
   if ((m_inputWS->getNumDims() > 3) &&
-      (m_inputWS->getDimension(3)->getMDFrame().name() == "DeltaE")) {
+      (m_inputWS->getDimension(3)->getName() == "DeltaE")) {
     m_diffraction = false;
     if (exptInfoZero.run().hasProperty("Ei")) {
       Kernel::Property *eiprop = exptInfoZero.run().getProperty("Ei");
@@ -503,25 +507,25 @@ std::map<std::string, std::string> MDNorm::getBinParameters() {
   std::stringstream extents;
   std::stringstream bins;
   std::vector<std::string> originalDimensionNames;
+  originalDimensionNames.push_back("QDimension0");
   originalDimensionNames.push_back("QDimension1");
   originalDimensionNames.push_back("QDimension2");
-  originalDimensionNames.push_back("QDimension3");
   for (size_t i = 3; i < m_inputWS->getNumDims(); i++) {
     originalDimensionNames.push_back(m_inputWS->getDimension(i)->getName());
   }
 
   if (m_isRLU) {
+    m_Q0Basis = getProperty("QDimension0");
     m_Q1Basis = getProperty("QDimension1");
     m_Q2Basis = getProperty("QDimension2");
-    m_Q3Basis = getProperty("QDimension3");
     m_UB =
         m_inputWS->getExperimentInfo(0)->sample().getOrientedLattice().getUB() *
         2 * M_PI;
   }
 
-  std::vector<double> W(m_Q1Basis);
+  std::vector<double> W(m_Q0Basis);
+  W.insert(W.end(), m_Q1Basis.begin(), m_Q1Basis.end());
   W.insert(W.end(), m_Q2Basis.begin(), m_Q2Basis.end());
-  W.insert(W.end(), m_Q3Basis.begin(), m_Q3Basis.end());
   m_W = DblMatrix(W);
   m_W.Transpose();
 
@@ -619,15 +623,25 @@ std::map<std::string, std::string> MDNorm::getBinParameters() {
         bins << 1 << ",";
       } else if (binning.size() == 1) {
         auto step = binning[0];
-        int nsteps = static_cast<int>(std::ceil((dimMax - dimMin) / step));
-        bins << nsteps << ",";
+        double nsteps = (dimMax - dimMin) / step;
+        if (nsteps + 1 - std::ceil(nsteps) >= 1e-4) {
+          nsteps = std::ceil(nsteps);
+        } else {
+          nsteps = std::floor(nsteps);
+        }
+        bins << static_cast<int>(nsteps) << ",";
         extents << dimMin << "," << dimMin + nsteps * step << ",";
       } else if (binning.size() == 3) {
         dimMin = static_cast<coord_t>(binning[0]);
         auto step = binning[1];
         dimMax = static_cast<coord_t>(binning[2]);
-        int nsteps = static_cast<int>(std::ceil((dimMax - dimMin) / step));
-        bins << nsteps << ",";
+        double nsteps = (dimMax - dimMin) / step;
+        if (nsteps + 1 - std::ceil(nsteps) >= 1e-4) {
+          nsteps = std::ceil(nsteps);
+        } else {
+          nsteps = std::floor(nsteps);
+        }
+        bins << static_cast<int>(nsteps) << ",";
         extents << dimMin << "," << dimMin + nsteps * step << ",";
       }
       basisVectorIndex++;
@@ -708,7 +722,7 @@ MDNorm::binInputWS(std::vector<Geometry::SymmetryOperation> symmetryOps) {
 
       std::stringstream basisVector;
       std::vector<double> projection(m_inputWS->getNumDims(), 0.);
-      if (value.find("QDimension1") != std::string::npos) {
+      if (value.find("QDimension0") != std::string::npos) {
         m_hIdx = qindex;
         if (!m_isRLU) {
           projection[0] = 1.;
@@ -718,9 +732,9 @@ MDNorm::binInputWS(std::vector<Geometry::SymmetryOperation> symmetryOps) {
           projection[0] = Qtransform[0][0];
           projection[1] = Qtransform[1][0];
           projection[2] = Qtransform[2][0];
-          basisVector << QDimensionName(m_Q1Basis) << ", r.l.u.";
+          basisVector << QDimensionName(m_Q0Basis) << ", r.l.u.";
         }
-      } else if (value.find("QDimension2") != std::string::npos) {
+      } else if (value.find("QDimension1") != std::string::npos) {
         m_kIdx = qindex;
         if (!m_isRLU) {
           projection[1] = 1.;
@@ -730,9 +744,9 @@ MDNorm::binInputWS(std::vector<Geometry::SymmetryOperation> symmetryOps) {
           projection[0] = Qtransform[0][1];
           projection[1] = Qtransform[1][1];
           projection[2] = Qtransform[2][1];
-          basisVector << QDimensionName(m_Q2Basis) << ", r.l.u.";
+          basisVector << QDimensionName(m_Q1Basis) << ", r.l.u.";
         }
-      } else if (value.find("QDimension3") != std::string::npos) {
+      } else if (value.find("QDimension2") != std::string::npos) {
         m_lIdx = qindex;
         if (!m_isRLU) {
           projection[2] = 1.;
@@ -742,7 +756,7 @@ MDNorm::binInputWS(std::vector<Geometry::SymmetryOperation> symmetryOps) {
           projection[0] = Qtransform[0][2];
           projection[1] = Qtransform[1][2];
           projection[2] = Qtransform[2][2];
-          basisVector << QDimensionName(m_Q3Basis) << ", r.l.u.";
+          basisVector << QDimensionName(m_Q2Basis) << ", r.l.u.";
         }
       } else if (value.find("DeltaE") != std::string::npos) {
         m_eIdx = qindex;
@@ -1169,9 +1183,9 @@ void MDNorm::calculateIntersections(
     for (size_t i = 0; i < eNBins; i++) {
       double kfi = m_eX[i];
       if ((kfi - kfmin) * (kfi - kfmax) <= 0) {
-        double h = qin.X() - qout.X() * kfi;
-        double k = qin.Y() - qout.Y() * kfi;
-        double l = qin.Z() - qout.Z() * kfi;
+        double h = qin.X() * kimin - qout.X() * kfi;
+        double k = qin.Y() * kimin - qout.Y() * kfi;
+        double l = qin.Z() * kimin - qout.Z() * kfi;
         if ((h >= m_hX[0]) && (h <= m_hX[hNBins - 1]) && (k >= m_kX[0]) &&
             (k <= m_kX[kNBins - 1]) && (l >= m_lX[0]) &&
             (l <= m_lX[lNBins - 1])) {

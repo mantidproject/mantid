@@ -8,10 +8,10 @@ import unittest
 
 from Muon.GUI.Common import mock_widget
 
-from MultiPlotting.multiPlotting_widget import MultiPlotWidget
+from MultiPlotting.multi_plotting_widget import MultiPlotWidget
 from MultiPlotting.QuickEdit.quickEdit_widget import QuickEditWidget
-from MultiPlotting.subplot.subPlot import subPlot
-from MultiPlotting.multiPlotting_context import PlottingContext
+from MultiPlotting.subplot.subplot import subplot
+from MultiPlotting.multi_plotting_context import PlottingContext
 
 
 try:
@@ -53,13 +53,12 @@ class MultiPlotWidgetTest(unittest.TestCase):
         self.widget = MultiPlotWidget(context)
  
     def test_add_subplot(self):
-        #with mock.patch("MultiPlotting.subplot.subPlot_context.subPlotContext.addLine") as patch:
         with mock.patch("MultiPlotting.QuickEdit.quickEdit_widget.QuickEditWidget.add_subplot") as qe_patch:
             self.widget.add_subplot("test",111)
             self.assertEquals(qe_patch.call_count,1)
 
     def test_plot(self):
-        with mock.patch("MultiPlotting.subplot.subPlot.subPlot.plot") as patch:
+        with mock.patch("MultiPlotting.subplot.subplot.subplot.plot") as patch:
              ws = mock.MagicMock()
              subplotName = "test"
              specNum = 4

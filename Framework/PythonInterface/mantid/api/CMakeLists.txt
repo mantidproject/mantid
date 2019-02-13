@@ -118,6 +118,7 @@ set ( INC_FILES
   ${HEADER_DIR}/api/WorkspacePropertyExporter.h
   ${HEADER_DIR}/api/SpectrumInfoPythonIterator.h
   ${HEADER_DIR}/api/DetectorInfoPythonIterator.h
+  ${HEADER_DIR}/api/ComponentInfoPythonIterator.h
 )
 
 set ( PY_FILES
@@ -175,7 +176,7 @@ endif ()
 ###########################################################################
 # Installation settings
 ###########################################################################
-install ( TARGETS PythonAPIModule ${SYSTEM_PACKAGE_TARGET} DESTINATION ${BIN_DIR}/mantid/api )
+mtd_install_targets( TARGETS PythonAPIModule INSTALL_DIRS ${BIN_DIR}/mantid/api ${WORKBENCH_BIN_DIR}/mantid/api )
 
 # Pure Python files
-install ( FILES ${PY_FILES} DESTINATION ${BIN_DIR}/mantid/api )
+mtd_install_files( FILES ${PY_FILES} INSTALL_DIRS ${BIN_DIR}/mantid/api ${WORKBENCH_BIN_DIR}/mantid/api)
