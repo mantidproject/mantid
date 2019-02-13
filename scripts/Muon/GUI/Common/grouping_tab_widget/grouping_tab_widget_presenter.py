@@ -6,6 +6,7 @@ import Muon.GUI.Common.utilities.muon_file_utils as file_utils
 import Muon.GUI.Common.utilities.xml_utils as xml_utils
 import Muon.GUI.Common.utilities.algorithm_utils as algorithm_utils
 from Muon.GUI.Common import thread_model
+from Muon.GUI.Common.run_selection_dialog import RunSelectionDialog
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapper
 
 
@@ -79,8 +80,13 @@ class GroupingTabPresenter(object):
         """
         Calculate alpha for the pair for which "Guess Alpha" button was clicked.
         """
-        ws1 = self._model.get_group_workspace(group1_name)
-        ws2 = self._model.get_group_workspace(group2_name)
+        if len(self._model._context.current_runs) > 1:
+            run_to_use = RunSelectionDialog.get_run(self._view)
+        else:
+            run_to_use = self._model._context.current_runs[0]
+
+        ws1 = self._model.get_group_workspace(group1_name, run_to_use)
+        ws2 = self._model.get_group_workspace(group2_name, run_to_use)
 
         ws = algorithm_utils.run_AppendSpectra(ws1, ws2)
 
