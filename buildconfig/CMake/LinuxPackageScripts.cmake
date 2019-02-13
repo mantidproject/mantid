@@ -265,7 +265,7 @@ if (ENABLE_MANTIDPLOT)
   install ( PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidplot.sh.install
             DESTINATION ${BIN_DIR} RENAME launch_mantidplot.sh )
 endif ()
-if (PACKAGE_WORKBENCH) # will eventually switch to ENABLE_WORKBENCH
+if (ENABLE_WORKBENCH)
   set ( MANTIDWORKBENCH_EXEC workbench-script ) # what the actual thing is called
   configure_file ( ${CMAKE_MODULE_PATH}/Packaging/launch_mantidworkbench.sh.in
                    ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidworkbench.sh.install @ONLY )

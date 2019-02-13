@@ -14,4 +14,4 @@ build as normal. A ``workbench`` startup script (Linux/macOS) or executable (Win
 Packaging
 #########
 
-Packaging is currently supported on all platforms that MantidPlot works with (Windows, RHEL7, Ubuntu 16.04, macOS) ``PACKAGE_WORKBENCH=ON``.
+Packaging is currently supported on all platforms that MantidPlot works with (Windows, RHEL7, Ubuntu 16.04, macOS).
