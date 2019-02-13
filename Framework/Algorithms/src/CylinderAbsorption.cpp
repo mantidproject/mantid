@@ -105,15 +105,21 @@ void CylinderAbsorption::retrieveProperties() {
   const auto &sampleShape = m_inputWS->sample().getShape();
   getShapeFromSample(sampleShape, !userSuppliedHeight, !userSuppliedRadius);
 
-  g_log.information() << "Creating cylinder with radius=" << m_cylRadius
-                      << "m, height=" << m_cylHeight << "m\n";
-  if (isEmpty(m_cylHeight) || isEmpty(m_cylRadius)) {
-    throw std::invalid_argument(
-        "Need to specify both height and radius of cylinder");
+  bool heightOk = m_cylRadius >= 0. && (!isEmpty(m_cylHeight));
+  bool radiusOk = (m_cylRadius >= 0.) && (!isEmpty(m_cylRadius));
+  if (heightOk && radiusOk) {
+    g_log.information() << "Creating cylinder with radius=" << m_cylRadius
+                        << "m, height=" << m_cylHeight << "m\n";
+  } else if (!heightOk) {
+    if (radiusOk) {
+      throw std::invalid_argument("Failed to specify height of cylinder");
+    } else { // radiusOk == false
+      throw std::invalid_argument(
+          "Failed to specify height and radius of cylinder");
+    }
+  } else { // radiusOk == false
+    throw std::invalid_argument("Failed to specify radius of cylinder");
   }
-  if (m_cylHeight <= 0. || m_cylRadius <= 0.)
-    throw std::invalid_argument(
-        "Failed to specify height and radius of cylinder");
 }
 
 std::string CylinderAbsorption::sampleXML() {
@@ -126,6 +132,8 @@ std::string CylinderAbsorption::sampleXML() {
   // Shift so that cylinder is centered at sample position
   const double cylinderBase = (-0.5 * m_cylHeight) + samplePos.Y();
 
+  // The default behavior is to have the sample along the y-axis. If something
+  // else is desired, it will have to be done through SetSample.
   std::ostringstream xmlShapeStream;
   xmlShapeStream << "<cylinder id=\"detector-shape\"> "
                  << "<centre-of-bottom-base x=\"" << samplePos.X() << "\" y=\""
@@ -157,10 +165,11 @@ void CylinderAbsorption::initialiseCachedDistances() {
   m_sampleVolume = raster.totalvolume;
   if (raster.l1.size() == 0)
     throw std::runtime_error("Failed to rasterize shape");
+  // move over the information
   m_numVolumeElements = raster.l1.size();
-  m_L1s.assign(raster.l1.begin(), raster.l1.end());
-  m_elementPositions.assign(raster.position.begin(), raster.position.end());
-  m_elementVolumes.assign(raster.volume.begin(), raster.volume.end());
+  m_L1s = std::move(raster.l1);
+  m_elementPositions = std::move(raster.position);
+  m_elementVolumes = std::move(raster.volume);
 }
 
 } // namespace Algorithms

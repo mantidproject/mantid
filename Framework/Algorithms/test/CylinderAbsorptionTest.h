@@ -60,8 +60,8 @@ public:
     MatrixWorkspace_sptr testWS = createTestWorkspace();
 
     Mantid::Algorithms::CylinderAbsorption atten;
-    atten.setRethrows(
-        true); // required to get the proper behavior of failed exec
+    // required to get the proper behavior of failed exec
+    atten.setRethrows(true);
 
     // intentionally skip the sample information
     configureAbsCommon(atten, testWS, "factors");

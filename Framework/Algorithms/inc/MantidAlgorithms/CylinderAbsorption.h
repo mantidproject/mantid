@@ -101,7 +101,6 @@ private:
   double m_cylRadius; ///< The radius of the cylindrical sample in m
   int m_numSlices;    ///< The number of slices
   int m_numAnnuli;    ///< The number of annuli
-  /// annuli
   bool m_useSampleShape;
 };
 

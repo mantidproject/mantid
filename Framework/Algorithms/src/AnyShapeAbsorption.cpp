@@ -61,10 +61,11 @@ void AnyShapeAbsorption::initialiseCachedDistances() {
   m_sampleVolume = raster.totalvolume;
   if (raster.l1.size() == 0)
     throw std::runtime_error("Failed to rasterize shape");
+  // move over the information
   m_numVolumeElements = raster.l1.size();
-  m_L1s.assign(raster.l1.begin(), raster.l1.end());
-  m_elementPositions.assign(raster.position.begin(), raster.position.end());
-  m_elementVolumes.assign(raster.volume.begin(), raster.volume.end());
+  m_L1s = std::move(raster.l1);
+  m_elementPositions = std::move(raster.position);
+  m_elementVolumes = std::move(raster.volume);
 }
 
 boost::shared_ptr<const Geometry::IObject>
