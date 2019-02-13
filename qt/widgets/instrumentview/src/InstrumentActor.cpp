@@ -486,15 +486,20 @@ void InstrumentActor::sumDetectors(const std::vector<size_t> &dets,
 void InstrumentActor::sumDetectorsUniform(const std::vector<size_t> &dets,
                                           std::vector<double> &x,
                                           std::vector<double> &y) const {
+  auto firstWorkspaceIndex = [this](const std::vector<size_t> &dets) {
+    if (dets.empty())
+      return INVALID_INDEX;
+    for (auto i : dets) {
+      auto const index = getWorkspaceIndex(i);
+      if (index != INVALID_INDEX)
+        return index;
+    }
+    return INVALID_INDEX;
+  };
 
-  bool isDataEmpty = dets.empty();
+  auto const wi = firstWorkspaceIndex(dets);
 
-  auto wi = getWorkspaceIndex(dets[0]);
-
-  if (wi == INVALID_INDEX)
-    isDataEmpty = true;
-
-  if (isDataEmpty) {
+  if (wi == INVALID_INDEX) {
     x.clear();
     y.clear();
     return;
