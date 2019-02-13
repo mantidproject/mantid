@@ -1143,6 +1143,7 @@ void CompareWorkspaces::doTableComparison(
   }
 
   const bool checkAllData = getProperty("CheckAllData");
+  const bool relErr = getProperty("ToleranceRelErr");
   const double tolerance = getProperty("Tolerance");
   
   for (size_t i = 0; i < numCols; ++i) {
@@ -1151,12 +1152,22 @@ void CompareWorkspaces::doTableComparison(
     const auto c2 =
         boost::const_pointer_cast<ITableWorkspace>(tws2)->getColumn(i);
     
+        if(relErr){
+          if (!c1->equalsRelErr(c2.get(),tolerance)) {
+            g_log.debug() << "Table data mismatch at column " << i;
+            recordMismatch("Table data mismatch");
+            if (!checkAllData){
+              return;
+            }
+          }
+        }else{
     
-        if (!c1->equals(c2.get(),tolerance)) {
-          g_log.debug() << "Table data mismatch at column " << i;
-          recordMismatch("Table data mismatch");
-          if (!checkAllData){
-            return;
+          if (!c1->equals(c2.get(),tolerance)) {
+            g_log.debug() << "Table data mismatch at column " << i;
+            recordMismatch("Table data mismatch");
+            if (!checkAllData){
+              return;
+            } 
           }
         }
   } // loop over columns
