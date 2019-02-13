@@ -34,9 +34,8 @@ class SettingsView(base, form):
         self.presenter = presenter
 
         self.sections.currentRowChanged.connect(self.presenter.action_current_row_changed)
-        self.ok_button.clicked.connect(self.presenter.action_ok_button)
-        self.cancel_button.clicked.connect(self.presenter.action_cancel_button)
-        self.apply_button.clicked.connect(self.presenter.action_apply_button)
+
+
 
     def closeEvent(self, event):
         self.deleteLater()

@@ -26,6 +26,8 @@ class SettingsPresenter(object):
         self.current = self.general_settings.view
         self.view.container.addWidget(self.general_settings.view)
 
+        self.view.save_settings_button.clicked.connect(self.action_save_settings_button)
+
         self.plots_settings_view = PlotsSettingsView(self.view)
         self.ask_before_close = False
 
@@ -57,16 +59,6 @@ class SettingsPresenter(object):
 
         self.current.show()
 
-    def action_cancel_button(self):
+    def action_save_settings_button(self):
         if not self.ask_before_close or self.view.ask_before_close():
             self.view.close()
-
-    def action_ok_button(self):
-        self.ask_before_close = False
-        # TODO save stuff
-        self.view.close()
-        print("OK Button")
-
-    def action_apply_button(self):
-        self.ask_before_close = False
-        print("Apply Button")

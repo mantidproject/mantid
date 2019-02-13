@@ -18,7 +18,7 @@
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <property name="spacing">
-       <number>5</number>
+       <number>0</number>
       </property>
       <property name="sizeConstraint">
        <enum>QLayout::SetNoConstraint</enum>
@@ -74,41 +74,44 @@ QListView::item {
       <item>
        <layout class="QVBoxLayout" name="vlayout">
         <item>
-         <layout class="QVBoxLayout" name="container"/>
+         <layout class="QVBoxLayout" name="container">
+          <property name="spacing">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+         </layout>
         </item>
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_3">
+          <property name="spacing">
+           <number>0</number>
+          </property>
           <property name="sizeConstraint">
            <enum>QLayout::SetMinimumSize</enum>
           </property>
           <item>
-           <widget class="QPushButton" name="apply_button">
-            <property name="maximumSize">
+           <spacer name="horizontalSpacer">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
              <size>
-              <width>100</width>
-              <height>16777215</height>
+              <width>40</width>
+              <height>20</height>
              </size>
             </property>
-            <property name="text">
-             <string>Accept</string>
-            </property>
-           </widget>
+           </spacer>
           </item>
           <item>
-           <widget class="QPushButton" name="ok_button">
-            <property name="maximumSize">
+           <widget class="QPushButton" name="save_settings_button">
+            <property name="minimumSize">
              <size>
-              <width>100</width>
-              <height>16777215</height>
+              <width>150</width>
+              <height>0</height>
              </size>
             </property>
-            <property name="text">
-             <string>OK</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="cancel_button">
             <property name="maximumSize">
              <size>
               <width>100</width>
@@ -119,7 +122,7 @@ QListView::item {
              <string notr="true"/>
             </property>
             <property name="text">
-             <string>Confirm</string>
+             <string>Save Settings</string>
             </property>
            </widget>
           </item>
