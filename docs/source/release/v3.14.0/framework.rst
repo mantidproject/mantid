@@ -112,6 +112,7 @@ Bugfixes
 - Fixed a bug in `AlignAndFocusPowder <algm-AlignAndFocusPowder>` where a histogram input workspace did not clone propertly to the output workspace and properly masking a grouping workspace passed to `DiffractionFocussing <algm-DiffractionFocussing>`. Also adds initial unit tests for `AlignAndFocusPowder <algm-AlignAndFocusPowder>`.
 - Fixed a bug in :ref:`ExtractSpectra <algm-ExtractSpectra>` which was causing a wrong last value in the output's vertical axis if the axis type was ``BinEdgeAxis``.
 - Fixed an issue in :ref:`Rebin2D <algm-Rebin2D>` where `NaN` values would result if there were zero-area bins in the input workspace.
+- Fixed a bug in :ref:`MayersSampleCorrection <algm-MayersSampleCorrection>` for when using the multiple scattering correction.
 - Fixed the `CheckSample` option of algorithm :ref:`CompareWorkspaces <algm-CompareWorkspaces>`: it crashed Mantid when comparing the run's sample logs. The algorithm's debug logging will now tell explicitly about the first entry which caused the log mismatch.
 - Fixed a bug in :ref:`MayersSampleCorrection <algm-MayersSampleCorrection>` when using the multiple scattering correction.
 - :ref:`SaveNexusProcessed <algm-SaveNexusProcessed>` and :ref:`LoadNexusProcessed <algm-LoadNexusProcessed>` now save and load an empty sample name correctly. Note, that files saved before this change will still load with an empty sample name replaced by a space as before.
