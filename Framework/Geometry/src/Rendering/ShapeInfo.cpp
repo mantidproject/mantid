@@ -25,13 +25,13 @@ double ShapeInfo::height() const { return m_height; }
 
 ShapeInfo::GeometryShape ShapeInfo::shape() const { return m_shape; }
 
-void ShapeInfo::getObjectGeometry(ShapeInfo::GeometryShape &myshape,
+void ShapeInfo::getObjectGeometry(ShapeInfo::GeometryShape &shape,
                                   std::vector<Kernel::V3D> &points,
-                                  double &myradius, double &myheight) const {
-  myshape = m_shape;
+                                  double &radius, double &height) const {
+  shape = m_shape;
   points = m_points;
-  myradius = m_radius;
-  myheight = m_height;
+  radius = m_radius;
+  height = m_height;
 }
 
 void ShapeInfo::setCuboid(const V3D &p1, const V3D &p2, const V3D &p3,
@@ -51,26 +51,26 @@ void ShapeInfo::setHexahedron(const V3D &p1, const V3D &p2, const V3D &p3,
   m_height = 0;
 }
 
-void ShapeInfo::setSphere(const V3D &c, double r) {
+void ShapeInfo::setSphere(const V3D &center, double radius) {
   m_shape = GeometryShape::SPHERE;
-  m_points.assign({c});
-  m_radius = r;
+  m_points.assign({center});
+  m_radius = radius;
   m_height = 0;
 }
 
-void ShapeInfo::setCylinder(const V3D &centerBottomBase, const V3D &axis,
-                            double r, double h) {
+void ShapeInfo::setCylinder(const V3D &centerBottomBase,
+                            const V3D &symmetryAxis, double radius, double height) {
   m_shape = GeometryShape::CYLINDER;
-  m_points.assign({centerBottomBase, axis});
-  m_radius = r;
-  m_height = h;
+  m_points.assign({ centerBottomBase, symmetryAxis });
+  m_radius = radius;
+  m_height = height;
 }
 
-void ShapeInfo::setCone(const V3D &c, const V3D &a, double r, double h) {
+void ShapeInfo::setCone(const V3D &center, const V3D &symmetryAxis, double radius, double height) {
   m_shape = GeometryShape::CONE;
-  m_points.assign({c, a});
-  m_radius = r;
-  m_height = h;
+  m_points.assign({center, symmetryAxis});
+  m_radius = radius;
+  m_height = height;
 }
 
 bool ShapeInfo::operator==(const ShapeInfo &other) {

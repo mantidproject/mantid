@@ -50,9 +50,9 @@ public:
   double height() const;
   GeometryShape shape() const;
 
-  void getObjectGeometry(GeometryShape &myshape,
-                         std::vector<Kernel::V3D> &points, double &myradius,
-                         double &myheight) const;
+  void getObjectGeometry(GeometryShape &shape,
+                         std::vector<Kernel::V3D> &points, double &radius,
+                         double &height) const;
   /// sets the geometry handler for a cuboid
   void setCuboid(const Kernel::V3D &, const Kernel::V3D &, const Kernel::V3D &,
                  const Kernel::V3D &);
@@ -64,10 +64,11 @@ public:
   /// sets the geometry handler for a sphere
   void setSphere(const Kernel::V3D &center, double radius);
   /// sets the geometry handler for a cylinder
-  void setCylinder(const Kernel::V3D &centerBottomBase, const Kernel::V3D &axis,
-                   double radius, double height);
+  void setCylinder(const Kernel::V3D &centerBottomBase,
+                   const Kernel::V3D &symmetryAxis, double radius,
+                   double height);
   /// sets the geometry handler for a cone
-  void setCone(const Kernel::V3D &center, const Kernel::V3D &axis,
+  void setCone(const Kernel::V3D &center, const Kernel::V3D &symmetryAxis,
                double radius, double height);
 
   bool operator==(const ShapeInfo &other);
