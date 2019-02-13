@@ -9,10 +9,7 @@
 #
 from __future__ import absolute_import, unicode_literals
 
-from qtpy.QtWidgets import QFileDialog
-
-from mantid.kernel import ConfigService
-from mantidqt.icons import get_icon
+from mantid.kernel import ConfigService, config
 from workbench.config import CONF
 from workbench.widgets.settings.general.view import GeneralSettingsView
 
@@ -20,9 +17,6 @@ from workbench.widgets.settings.general.view import GeneralSettingsView
 class GeneralSettings(object):
     def __init__(self, parent, view=None):
         self.view = view if view else GeneralSettingsView(parent, self)
-
-        icon = get_icon('fa.folder-open-o')
-        self.view.instrument_definitions_find.setIcon(icon)
 
         self.setup_facilities()
         self.setup_confirmations()
@@ -42,11 +36,6 @@ class GeneralSettings(object):
         self.view.instrument.setCurrentIndex(self.view.instrument.findText(default_instrument))
         self.action_instrument_changed(default_instrument)
         self.view.instrument.currentTextChanged.connect(self.action_instrument_changed)
-
-        self.view.instrument_definitions_dir.setText(ConfigService.getInstrumentDirectory())
-        # todo this triggers on every keypress - it is not what we want. pressing enter or apply/OK should save it
-        self.view.instrument_definitions_dir.editingFinished.connect(self.action_instrument_definitions_dir_changed)
-        self.view.instrument_definitions_find.clicked.connect(self.action_instrument_definitions_find)
 
         self.view.project_recovery_enabled.stateChanged.connect(self.action_project_recovery_enabled)
         self.view.time_between_recovery.valueChanged.connect(self.action_time_between_recovery)
@@ -88,15 +77,3 @@ class GeneralSettings(object):
     def action_instrument_changed(self, new_instrument):
         print("Changing def instrument to", new_instrument)
         ConfigService.setString("default.instrument", new_instrument)
-
-    def action_instrument_definitions_find(self):
-        new_dir = str(QFileDialog.getExistingDirectory(self.view, "Select Directory",
-                                                       self.view.instrument_definitions_dir.text()))
-        print("New dir:", new_dir)
-        if new_dir != "":
-            # TODO: how to set in ConfigService when it only takes a list? Replace last one?
-            self.view.instrument_definitions_dir.setText(new_dir)
-
-    def action_instrument_definitions_dir_changed(self):
-        nv = self.view.instrument_definitions_dir.text()
-        print(nv)
