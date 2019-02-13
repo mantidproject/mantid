@@ -117,14 +117,7 @@
     </component>
   </type>
   <component name="panelFinal" type="PanelStth" idlist="direct_ids">
-    <location>
-      <!-- TODO Not clear what this parameter is
-      <parameter name="roty">
-        <logfile id="stth_adj"/>
-      </parameter>
-      -->    
-    </location>
-
+    <location/>
   </component>
   <idlist idname="direct_ids">
     <id start="0" end="12799" />

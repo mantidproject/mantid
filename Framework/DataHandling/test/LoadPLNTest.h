@@ -54,7 +54,7 @@ public:
     TS_ASSERT_EQUALS(output->getNumberHistograms(), 12808);
     double sum = 0.0;
     for (size_t i = 0; i < output->getNumberHistograms(); i++)
-      sum += output->readY(i)[0];
+      sum += output->y(i)[0];
     TS_ASSERT_EQUALS(sum, 163118);
 
     // check that all required log values are there
