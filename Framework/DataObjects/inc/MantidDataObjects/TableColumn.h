@@ -312,6 +312,18 @@ inline bool TableColumn<std::string>::compareVectors(const std::vector<std::stri
   return true;
 }
 
+///Template specialisation for strings for comparison
+template <>
+inline bool TableColumn<API::Boolean>::compareVectors(const std::vector<API::Boolean> &newVector, double tolerance) const {
+  (void)tolerance;
+  for(size_t i =0; i<m_data.size(); i++){
+      if(!(m_data[i]==newVector[i])){
+        return false;
+      }
+    }
+  return true;
+}
+
 ///Template specialisation for V3D for comparison
 template <>
 inline bool TableColumn<Kernel::V3D>::compareVectors(const std::vector<Kernel::V3D> &newVector, double tolerance)const {
@@ -364,6 +376,12 @@ inline bool TableColumn<unsigned long>::compareVectorsRelError(const std::vector
 ///Template specialisation for strings for comparison
 template <>
 inline bool TableColumn<std::string>::compareVectorsRelError(const std::vector<std::string> &newVector, double tolerance) const {
+  return compareVectors(newVector,tolerance);
+}
+
+///Template specialisation for bools for comparison
+template <>
+inline bool TableColumn<API::Boolean>::compareVectorsRelError(const std::vector<API::Boolean> &newVector, double tolerance) const {
   return compareVectors(newVector,tolerance);
 }
 
