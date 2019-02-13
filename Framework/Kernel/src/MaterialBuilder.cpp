@@ -14,8 +14,8 @@
 
 namespace Mantid {
 using PhysicalConstants::Atom;
-using PhysicalConstants::getAtom;
 using PhysicalConstants::NeutronAtom;
+using PhysicalConstants::getAtom;
 namespace Kernel {
 
 namespace {
