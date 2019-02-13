@@ -50,9 +50,8 @@ public:
   double height() const;
   GeometryShape shape() const;
 
-  void getObjectGeometry(GeometryShape &shape,
-                         std::vector<Kernel::V3D> &points, double &radius,
-                         double &height) const;
+  void getObjectGeometry(GeometryShape &shape, std::vector<Kernel::V3D> &points,
+                         double &radius, double &height) const;
   /// sets the geometry handler for a cuboid
   void setCuboid(const Kernel::V3D &, const Kernel::V3D &, const Kernel::V3D &,
                  const Kernel::V3D &);

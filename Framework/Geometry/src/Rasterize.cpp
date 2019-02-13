@@ -57,10 +57,9 @@ CylinderParameters getCylinderParameters(const CSGObject &shape) {
 // since cylinders are symmetric around the main axis, choose a random
 // perpendicular to have as the second axis
 V3D createPerpendicular(const V3D &symmetryAxis) {
-  const std::vector<double> scalars = { fabs(symmetryAxis.scalar_prod(X_AXIS)),
-                                        fabs(symmetryAxis.scalar_prod(Y_AXIS)),
-                                        fabs(
-                                            symmetryAxis.scalar_prod(Z_AXIS)) };
+  const std::vector<double> scalars = {fabs(symmetryAxis.scalar_prod(X_AXIS)),
+                                       fabs(symmetryAxis.scalar_prod(Y_AXIS)),
+                                       fabs(symmetryAxis.scalar_prod(Z_AXIS))};
   // check against the cardinal axes
   if (scalars[0] == 0.)
     return symmetryAxis.cross_prod(X_AXIS);
@@ -142,7 +141,7 @@ Raster calculate(const V3D &beamDirection, const CSGObject &shape,
     const double yLength = bbox.yMax() - bbox.yMin();
     const double zLength = bbox.zMax() - bbox.zMin();
 
-    const V3D center{ bbox.centrePoint() };
+    const V3D center{bbox.centrePoint()};
 
     const size_t numXSlices = static_cast<size_t>(xLength / cubeSizeInMetre);
     const size_t numYSlices = static_cast<size_t>(yLength / cubeSizeInMetre);
@@ -220,8 +219,8 @@ Raster calculateCylinder(const V3D &beamDirection, const CSGObject &shape,
       (params.symmetryaxis * .5 * params.height) + params.centerBottomBase;
   params.symmetryaxis.normalize();
 
-  const double sliceThickness{ params.height / static_cast<double>(numSlices) };
-  const double deltaR{ params.radius / static_cast<double>(numAnnuli) };
+  const double sliceThickness{params.height / static_cast<double>(numSlices)};
+  const double deltaR{params.radius / static_cast<double>(numAnnuli)};
 
   /* The number of volume elements is
    * numslices*(1+2+3+.....+numAnnuli)*6

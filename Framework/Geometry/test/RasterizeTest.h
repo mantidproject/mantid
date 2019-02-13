@@ -97,8 +97,8 @@ public:
   static void destroySuite(RasterizeTest *suite) { delete suite; }
 
   void test_calculateCylinder() {
-    constexpr size_t NUM_SLICE{ 3 };
-    constexpr size_t NUM_ANNULLI{ 3 };
+    constexpr size_t NUM_SLICE{3};
+    constexpr size_t NUM_ANNULLI{3};
 
     boost::shared_ptr<CSGObject> cylinder = createCylinder(true);
     TS_ASSERT(cylinder);
@@ -112,8 +112,8 @@ public:
   }
 
   void test_calculateOffsetCylinder() {
-    constexpr size_t NUM_SLICE{ 3 };
-    constexpr size_t NUM_ANNULLI{ 3 };
+    constexpr size_t NUM_SLICE{3};
+    constexpr size_t NUM_ANNULLI{3};
 
     boost::shared_ptr<CSGObject> cylinder = createCylinder(false);
     TS_ASSERT(cylinder);

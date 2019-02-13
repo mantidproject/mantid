@@ -59,14 +59,16 @@ void ShapeInfo::setSphere(const V3D &center, double radius) {
 }
 
 void ShapeInfo::setCylinder(const V3D &centerBottomBase,
-                            const V3D &symmetryAxis, double radius, double height) {
+                            const V3D &symmetryAxis, double radius,
+                            double height) {
   m_shape = GeometryShape::CYLINDER;
-  m_points.assign({ centerBottomBase, symmetryAxis });
+  m_points.assign({centerBottomBase, symmetryAxis});
   m_radius = radius;
   m_height = height;
 }
 
-void ShapeInfo::setCone(const V3D &center, const V3D &symmetryAxis, double radius, double height) {
+void ShapeInfo::setCone(const V3D &center, const V3D &symmetryAxis,
+                        double radius, double height) {
   m_shape = GeometryShape::CONE;
   m_points.assign({center, symmetryAxis});
   m_radius = radius;
