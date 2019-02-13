@@ -187,6 +187,24 @@ public:
     TS_ASSERT(!col2.equals(compare.get(),1));
     
   }
+
+  void test_equalsRelErr(){
+    VectorColumnTestHelper<int> col;
+    VectorColumnTestHelper<int> col2;
+
+    col.resize(3);
+    col2.resize(3);
+
+    col.read(0, "100,2,3");
+    col.read(1, "3,4,5");
+    col.read(2, "7,8,9,10");
+    auto compare = std::unique_ptr<Mantid::API::Column>(col.clone());
+    col2.read(0, "90,2,2");
+    col2.read(1, "3,4,5");
+    col2.read(2, "7,8,9,11");
+    TS_ASSERT(col2.equalsRelErr(compare.get(),1));
+    
+  }
 };
 
 #endif /* MANTID_DATAOBJECTS_VECTORCOLUMNTEST_H_ */

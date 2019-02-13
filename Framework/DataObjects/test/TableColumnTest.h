@@ -412,6 +412,39 @@ public:
     TS_ASSERT(column.equals(columnPointer,1));
   }
 
+  void test_equalsRelErr(){
+    const size_t n = 10;
+    TableWorkspace ws(n);
+    ws.addColumn("int", "col1");
+    ws.addColumn("int", "col2");
+    auto column = static_cast<TableColumn<int> &>(*ws.getColumn("col1"));
+    auto column2 = static_cast<TableColumn<int> &>(*ws.getColumn("col2"));    
+    auto &data = column.data();
+    data[0] = 100;
+    data[1] = 7;
+    data[2] = 3;
+    data[3] = 12;
+    data[4] = 1;
+    data[5] = 6;
+    data[6] = 3;
+    data[7] = 2;
+    data[8] = 0;
+    data[9] = 12;
+    auto &data2 = column2.data();
+    data2[0] = 90;
+    data2[1] = 6;
+    data2[2] = 3;
+    data2[3] = 12;
+    data2[4] = 1;
+    data2[5] = 7;
+    data2[6] = 2;
+    data2[7] = 3;
+    data2[8] = 0;
+    data2[9] = 12;
+    Mantid::API::Column *columnPointer = &column2;
+    TS_ASSERT(column.equalsRelErr(columnPointer,1));
+  }
+
   void test_equals_tolerance_int64(){
     const size_t n = 10;
     TableWorkspace ws(n);
