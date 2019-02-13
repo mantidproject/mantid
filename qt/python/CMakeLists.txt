@@ -104,7 +104,7 @@ endif ()
     mantidqt/widgets/observers/test/test_observing_presenter.py
     mantidqt/widgets/observers/test/test_observing_view.py
 
-    mantidqt/widgets/inline_find_replace_dialog/test/test_embedded_find_replace_dialog_presenter.py
+    mantidqt/widgets/embedded_find_replace_dialog/test/test_embedded_find_replace_dialog_presenter.py
 
     mantidqt/widgets/workspacedisplay/test/test_data_copier.py
     mantidqt/widgets/workspacedisplay/test/test_user_notifier.py
