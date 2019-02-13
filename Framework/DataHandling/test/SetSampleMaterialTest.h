@@ -294,7 +294,7 @@ public:
         setMaterial.setProperty("NumberDensityUnit", "Formula Units"))
     TS_ASSERT_THROWS_NOTHING(setMaterial.execute())
     TS_ASSERT(setMaterial.isExecuted())
-    const auto &material{ws->sample().getMaterial()};
+    const Material &material{ws->sample().getMaterial()};
     TS_ASSERT_DELTA(material.numberDensity(), 0.23 * (2. + 3.), 1e-12)
   }
 };
