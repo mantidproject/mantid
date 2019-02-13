@@ -11,6 +11,7 @@ from __future__ import (absolute_import, unicode_literals)
 
 from qtpy.QtCore import Qt
 
+from mantid import ConfigService
 from workbench.widgets.settings.general.presenter import GeneralSettings
 from workbench.widgets.settings.view import PlotsSettingsView, SettingsView
 
@@ -42,7 +43,6 @@ class SettingsPresenter(object):
         self.view.hide()
 
     def action_current_row_changed(self, new_pos):
-        print("Row changed to", new_pos)
         self.current.hide()
         if 0 == new_pos:
             new_view = self.general_settings.view
@@ -61,4 +61,5 @@ class SettingsPresenter(object):
 
     def action_save_settings_button(self):
         if not self.ask_before_close or self.view.ask_before_close():
+            ConfigService.saveConfig(ConfigService.getUserFilename())
             self.view.close()

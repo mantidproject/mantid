@@ -428,7 +428,10 @@ class MainWindow(QMainWindow):
 
         # Close editors
         if self.editor.app_closing():
-            self.writeSettings(CONF)  # write current window information to global settings object
+            # write out any changes to the mantid config file
+            ConfigService.saveConfig(ConfigService.getUserFilename())
+            # write current window information to global settings object
+            self.writeSettings(CONF)
             # Close all open plots
             # We don't want this at module scope here
             import matplotlib.pyplot as plt  # noqa

@@ -9,7 +9,7 @@
 #
 from __future__ import absolute_import, unicode_literals
 
-from mantid.kernel import ConfigService, config
+from mantid.kernel import ConfigService
 from workbench.config import CONF
 from workbench.widgets.settings.general.view import GeneralSettingsView
 
@@ -75,5 +75,4 @@ class GeneralSettings(object):
         CONF.set('project/recovery', 'total_number_of_checkpoints', int(value))
 
     def action_instrument_changed(self, new_instrument):
-        print("Changing def instrument to", new_instrument)
         ConfigService.setString("default.instrument", new_instrument)
