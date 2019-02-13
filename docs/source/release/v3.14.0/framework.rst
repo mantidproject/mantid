@@ -114,6 +114,7 @@ Bugfixes
 - Fixed an issue in :ref:`Rebin2D <algm-Rebin2D>` where `NaN` values would result if there were zero-area bins in the input workspace.
 - Fixed the `CheckSample` option of algorithm :ref:`CompareWorkspaces <algm-CompareWorkspaces>`: it crashed Mantid when comparing the run's sample logs. The algorithm's debug logging will now tell explicitly about the first entry which caused the log mismatch.
 - Fixed a bug in :ref:`MayersSampleCorrection <algm-MayersSampleCorrection>` when using the multiple scattering correction.
+- Fixed a bug in :ref:`IntegrateMDHistoWorkspace <algm-IntegrateMDHistoWorkspace>` in some cases where NaN's are present outside the integration range.
 
 Python
 ------
