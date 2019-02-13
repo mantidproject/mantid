@@ -277,6 +277,15 @@ signals:
   void plotColorfillClicked(const QStringList &workspaceNames);
   void sampleLogsClicked(const QStringList &workspaceNames);
   void showInstrumentClicked(const QStringList &workspaceNames);
+  void showAlgorithmHistoryClicked(const QStringList &workspaceNames);
+};
+
+class AlgorithmHistoryWindow : public QDialog {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/AlgorithmHistoryWindow.h"
+%End
+public:
+	AlgorithmHistoryWindow(QWidget *parent, const QString &workspaceName);
 };
 
 // ---------------------------------

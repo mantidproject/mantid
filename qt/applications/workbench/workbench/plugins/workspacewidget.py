@@ -23,7 +23,9 @@ from mantidqt.widgets.instrumentview.presenter import InstrumentViewPresenter
 from mantidqt.widgets.samplelogs.presenter import SampleLogs
 from mantidqt.widgets.workspacedisplay.matrix.presenter import MatrixWorkspaceDisplay
 from mantidqt.widgets.workspacedisplay.table.presenter import TableWorkspaceDisplay
+from mantidqt.widgets.workspacewidget.workspacehistorydialog import AlgorithmHistoryWindow
 from mantidqt.widgets.workspacewidget.workspacetreewidget import WorkspaceTreeWidget
+
 # local package imports
 from workbench.plugins.base import PluginWidget
 
@@ -55,6 +57,7 @@ class WorkspaceWidget(PluginWidget):
         self.workspacewidget.sampleLogsClicked.connect(self._do_sample_logs)
         self.workspacewidget.showDataClicked.connect(self._do_show_data)
         self.workspacewidget.showInstrumentClicked.connect(self._do_show_instrument)
+        self.workspacewidget.showAlgorithmHistoryClicked.connect(self._do_show_algorithm_history)
 
         self.workspacewidget.workspaceDoubleClicked.connect(self._action_double_click_workspace)
 
@@ -137,7 +140,14 @@ class WorkspaceWidget(PluginWidget):
                     presenter.show_view()
                 except ValueError:
                     logger.error(
-                        "Could not open workspace: {0} with neither MatrixWorkspaceDisplay nor TableWorkspaceDisplay.")
+                        "Could not open workspace: {0} with neither "
+                        "MatrixWorkspaceDisplay nor TableWorkspaceDisplay.")
+
+    def _do_show_algorithm_history(self, names):
+        self.alg_hist_windows = []
+        for name in names:
+            self.alg_hist_windows.append(AlgorithmHistoryWindow(self, name))
+            self.alg_hist_windows[-1].show()
 
     def _action_double_click_workspace(self, name):
         self._do_show_data([name])

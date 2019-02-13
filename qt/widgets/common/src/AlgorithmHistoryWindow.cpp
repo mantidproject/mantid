@@ -4,12 +4,13 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "AlgorithmHistoryWindow.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Strings.h"
 
+#include "MantidQtWidgets/Common/AlgorithmHistoryWindow.h"
 #include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
 
 #include <QAction>
@@ -195,7 +196,7 @@ AlgEnvHistoryGrpBox::~AlgEnvHistoryGrpBox() {
 
 AlgorithmHistoryWindow::AlgorithmHistoryWindow(
     QWidget *parent, const boost::shared_ptr<const Workspace> wsptr)
-    : MantidDialog(parent), m_algHist(wsptr->getHistory()),
+    : QDialog(parent), m_algHist(wsptr->getHistory()),
       m_histPropWindow(nullptr), m_execSumGrpBox(nullptr),
       m_envHistGrpBox(nullptr), m_wsName(wsptr->getName().c_str()),
       m_view(wsptr->getHistory().createView()) {
@@ -296,6 +297,12 @@ AlgorithmHistoryWindow::AlgorithmHistoryWindow(
   mainLayout->addLayout(treeLayout);
   mainLayout->addLayout(environmentLayout);
   mainLayout->addLayout(buttonLayout);
+}
+
+AlgorithmHistoryWindow::AlgorithmHistoryWindow(
+    QWidget *parent, const QString &workspaceName)
+    : AlgorithmHistoryWindow(
+        parent, AnalysisDataService::Instance().retrieveWS<const Workspace>(workspaceName.toStdString())) {
 }
 
 AlgorithmHistoryWindow::~AlgorithmHistoryWindow() {

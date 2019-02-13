@@ -1,5 +1,6 @@
 set ( QT5_SRC_FILES
   src/AlgorithmDialog.cpp
+  src/AlgorithmHistoryWindow.cpp
   src/AlgorithmInputHistory.cpp
   src/AlgorithmPropertiesWidget.cpp
   src/AlgorithmRunner.cpp
@@ -104,6 +105,7 @@ set ( QT5_SRC_FILES
   
 set ( QT5_MOC_FILES
   inc/MantidQtWidgets/Common/AlgorithmDialog.h
+  inc/MantidQtWidgets/Common/AlgorithmHistoryWindow.h
   inc/MantidQtWidgets/Common/AlgorithmPropertiesWidget.h
   inc/MantidQtWidgets/Common/AlgorithmRunner.h
   inc/MantidQtWidgets/Common/AlgorithmSelectorWidget.h
@@ -234,6 +236,7 @@ set ( QT5_UI_FILES
 
 set ( SRC_FILES
   src/AlgorithmDialog.cpp
+  src/AlgorithmHistoryWindow.cpp
   src/AlgorithmInputHistory.cpp
   src/AlgorithmPropertiesWidget.cpp
   src/AlgorithmRunner.cpp
@@ -399,6 +402,7 @@ set ( SRC_FILES
 
 set ( MOC_FILES
   inc/MantidQtWidgets/Common/AlgorithmDialog.h
+  inc/MantidQtWidgets/Common/AlgorithmHistoryWindow.h
   inc/MantidQtWidgets/Common/AlgorithmRunner.h
   inc/MantidQtWidgets/Common/AlgorithmPropertiesWidget.h
   inc/MantidQtWidgets/Common/BatchAlgorithmRunner.h
@@ -508,6 +512,7 @@ set ( MOC_FILES
 # Include files aren't required, but this makes them appear in Visual Studio
 set ( INC_FILES
 	${MOC_FILES}
+  inc/MantidQtWidgets/Common/AlgorithmHistoryWindow.h
   inc/MantidQtWidgets/Common/AlgorithmInputHistory.h
   inc/MantidQtWidgets/Common/AlgorithmRunner.h
   inc/MantidQtWidgets/Common/AlternateCSPythonLexer.h

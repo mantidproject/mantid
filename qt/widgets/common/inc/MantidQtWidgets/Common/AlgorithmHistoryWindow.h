@@ -7,16 +7,19 @@
 #ifndef ALGORITHMHISTORYWINDOW_H
 #define ALGORITHMHISTORYWINDOW_H
 
+#include "DllOption.h"
+
 #include "MantidAPI/HistoryItem.h"
 #include "MantidAPI/HistoryView.h"
 #include "MantidAPI/ScriptBuilder.h"
+#include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/EnvironmentHistory.h"
-#include "MantidQtWidgets/Common/MantidDialog.h"
 
 #include <QAbstractListModel>
 #include <QComboBox>
+#include <QDialog>
 #include <QGroupBox>
 #include <QPushButton>
 #include <QStandardItemModel>
@@ -134,7 +137,7 @@ private:
 };
 
 class AlgHistoryProperties;
-class AlgorithmHistoryWindow : public MantidQt::API::MantidDialog {
+class EXPORT_OPT_MANTIDQT_COMMON AlgorithmHistoryWindow : public QDialog {
   Q_OBJECT
 signals:
   void updateAlgorithmHistoryWindow(QString algName);
@@ -142,6 +145,7 @@ signals:
 public:
   AlgorithmHistoryWindow(QWidget *parent,
                          const boost::shared_ptr<const Mantid::API::Workspace>);
+  AlgorithmHistoryWindow(QWidget *parent, const QString &workspaceName);
   ~AlgorithmHistoryWindow() override;
 public slots:
   void updateAll(Mantid::API::AlgorithmHistory_const_sptr algHistmakeory);
