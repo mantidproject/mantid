@@ -141,8 +141,6 @@ Raster calculate(const V3D &beamDirection, const CSGObject &shape,
     const double yLength = bbox.yMax() - bbox.yMin();
     const double zLength = bbox.zMax() - bbox.zMin();
 
-    const V3D center{bbox.centrePoint()};
-
     const size_t numXSlices = static_cast<size_t>(xLength / cubeSizeInMetre);
     const size_t numYSlices = static_cast<size_t>(yLength / cubeSizeInMetre);
     const size_t numZSlices = static_cast<size_t>(zLength / cubeSizeInMetre);
