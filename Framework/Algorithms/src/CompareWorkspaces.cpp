@@ -945,8 +945,8 @@ bool CompareWorkspaces::checkRunProperties(const API::Run &run1,
     return false;
   }
 
-  const std::vector<Kernel::Property *> &ws1logs = run1.getLogData();
-  const std::vector<Kernel::Property *> &ws2logs = run2.getLogData();
+  std::vector<Kernel::Property *> ws1logs = run1.getLogData();
+  std::vector<Kernel::Property *> ws2logs = run2.getLogData();
   // Check that the number of separate logs is the same
   if (ws1logs.size() != ws2logs.size()) {
     g_log.debug() << "WS1 number of logs: " << ws1logs.size() << "\n";
@@ -954,12 +954,17 @@ bool CompareWorkspaces::checkRunProperties(const API::Run &run1,
     recordMismatch("Different numbers of logs");
     return false;
   } else {
-    // Now loop over the individual logs
+    // Sort logs by name before one-by-one comparison
+    auto compareNames = [](Kernel::Property *p1, Kernel::Property *p2) {
+      return p1->name() < p2->name();
+    };
+    std::sort(ws1logs.begin(), ws1logs.end(), compareNames);
+    std::sort(ws2logs.begin(), ws2logs.end(), compareNames);
     for (size_t i = 0; i < ws1logs.size(); ++i) {
       if (*(ws1logs[i]) != *(ws2logs[i])) {
         if (g_log.is(Logger::Priority::PRIO_DEBUG)) {
-          g_log.debug("WS1 log: " + ws1logs[i]->name());
-          g_log.debug("WS2 log: " + ws2logs[i]->name());
+          g_log.debug("WS1 log entry mismatch: " + ws1logs[i]->name());
+          g_log.debug("WS2 log entry mismatch: " + ws2logs[i]->name());
         }
         recordMismatch("Log mismatch");
         return false;
