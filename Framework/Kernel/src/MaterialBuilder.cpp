@@ -10,11 +10,12 @@
 #include "MantidKernel/NeutronAtom.h"
 #include "MantidKernel/make_unique.h"
 #include <boost/make_shared.hpp>
+#include <numeric>
 
 namespace Mantid {
 using PhysicalConstants::Atom;
-using PhysicalConstants::NeutronAtom;
 using PhysicalConstants::getAtom;
+using PhysicalConstants::NeutronAtom;
 namespace Kernel {
 
 namespace {
