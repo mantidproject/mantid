@@ -19,7 +19,7 @@ using namespace MantidQt::MantidWidgets::DataProcessor;
 namespace MantidQt {
 namespace CustomInterfaces {
 
-using API::BatchAlgorithmRunnerSubscriber;
+using API::ConfiguredAlgorithm_sptr;
 using Mantid::API::IAlgorithm_sptr;
 
 // unnamed namespace
@@ -101,26 +101,21 @@ void BatchPresenter::notifyBatchCancelled() {
 }
 
 void BatchPresenter::notifyAlgorithmFinished(
-    IAlgorithm_sptr algorithm, BatchAlgorithmRunnerSubscriber *notifyee) {
-  if (notifyee)
-    notifyee->notifyAlgorithmComplete(algorithm);
+    ConfiguredAlgorithm_sptr algorithm) {
   m_jobRunner.algorithmFinished(algorithm);
   m_runsPresenter->notifyRowStateChanged();
   /// TODO Longer term it would probably be better if algorithms took care
   /// of saving their outputs so we could remove this callback
   if (m_savePresenter->shouldAutosave()) {
     auto const workspaces =
-        m_jobRunner.algorithmOutputWorkspacesToSave(algorithm, notifyee);
+        m_jobRunner.algorithmOutputWorkspacesToSave(algorithm);
     m_savePresenter->saveWorkspaces(workspaces);
   }
 }
 
-void BatchPresenter::notifyAlgorithmError(
-    std::string const &message, IAlgorithm_sptr algorithm,
-    BatchAlgorithmRunnerSubscriber *notifyee) {
-  if (notifyee)
-    notifyee->notifyAlgorithmError(algorithm, message);
-  m_jobRunner.algorithmError(message, algorithm);
+void BatchPresenter::notifyAlgorithmError(ConfiguredAlgorithm_sptr algorithm,
+                                          std::string const &message) {
+  m_jobRunner.algorithmError(algorithm, message);
   m_runsPresenter->notifyRowStateChanged();
 }
 

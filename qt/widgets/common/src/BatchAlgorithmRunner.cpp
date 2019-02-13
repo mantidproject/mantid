@@ -8,6 +8,7 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/make_unique.h"
 
 using namespace Mantid::API;
 
@@ -17,6 +18,20 @@ Mantid::Kernel::Logger g_log("BatchAlgorithmRunner");
 
 namespace MantidQt {
 namespace API {
+
+ConfiguredAlgorithm::ConfiguredAlgorithm(Mantid::API::IAlgorithm_sptr algorithm,
+                                         AlgorithmRuntimeProps properties)
+    : m_algorithm(algorithm), m_properties(std::move(properties)) {}
+
+ConfiguredAlgorithm::~ConfiguredAlgorithm() {}
+
+IAlgorithm_sptr ConfiguredAlgorithm::algorithm() const { return m_algorithm; }
+
+ConfiguredAlgorithm::AlgorithmRuntimeProps
+ConfiguredAlgorithm::properties() const {
+  return m_properties;
+}
+
 BatchAlgorithmRunner::BatchAlgorithmRunner(QObject *parent)
     : QObject(parent), m_stopOnFailure(true), m_cancelRequested(false),
       m_notificationCenter(),
@@ -64,32 +79,29 @@ void BatchAlgorithmRunner::stopOnFailure(bool stopOnFailure) {
  * @param algo Algorithm to add to queue
  * @param props Optional map of property name to property values to be set just
  *before execution (mainly intended for input and inout workspace names)
- * @param notifyee Optional subscriber to be notified when this algorithm
- *finishes
  */
 void BatchAlgorithmRunner::addAlgorithm(IAlgorithm_sptr algo,
                                         AlgorithmRuntimeProps props) {
-  m_algorithms.emplace_back(algo, props);
+  m_algorithms.emplace_back(
+      Mantid::Kernel::make_unique<ConfiguredAlgorithm>(algo, props));
 
   g_log.debug() << "Added algorithm \""
-                << m_algorithms.back().algorithm()->name()
+                << m_algorithms.back()->algorithm()->name()
                 << "\" to batch queue\n";
 }
 
 /**
- * Adds an algorithm to the end of the queue.
+ * Set the queue of algorithms
  *
- * @param algorithm The configured algorithm to add to the queue
+ * @param algorithms The queue of configured algorithms
  */
-void BatchAlgorithmRunner::addAlgorithms(
-    std::deque<ConfiguredAlgorithm> algorithms) {
-  m_algorithms.insert(m_algorithms.end(),
-                      std::make_move_iterator(algorithms.begin()),
-                      std::make_move_iterator(algorithms.end()));
-
-  g_log.debug() << "Added algorithm list to batch queue:\n";
+void BatchAlgorithmRunner::setQueue(
+    std::deque<ConfiguredAlgorithm_sptr> algorithms) {
+  g_log.debug() << "Set batch queue to algorithm list:\n";
   for (auto &algorithm : algorithms)
-    g_log.debug() << algorithm.algorithm()->name() << "\n";
+    g_log.debug() << algorithm->algorithm()->name() << "\n";
+
+  m_algorithms = std::move(algorithms);
 }
 
 /**
@@ -151,14 +163,14 @@ bool BatchAlgorithmRunner::executeBatchAsyncImpl(const Poco::Void &) {
   resetState();
   bool errorFlag = false;
 
-  for (auto it = m_algorithms.begin(); it != m_algorithms.end(); ++it) {
+  for (auto &it : m_algorithms) {
     if (cancelRequested()) {
       g_log.information("Stopping batch algorithm execution: cancelled");
       break;
     }
 
     // Try to execute the algorithm
-    if (!executeAlgo(*it)) {
+    if (!executeAlgo(it)) {
       g_log.warning() << "Got error from algorithm \""
                       << m_currentAlgorithm->name() << "\"\n";
 
@@ -190,12 +202,12 @@ bool BatchAlgorithmRunner::executeBatchAsyncImpl(const Poco::Void &) {
  * @param algorithm Algorithm and properties to assign to it
  * @return False if algorithm execution failed
  */
-bool BatchAlgorithmRunner::executeAlgo(ConfiguredAlgorithm &algorithm) {
+bool BatchAlgorithmRunner::executeAlgo(ConfiguredAlgorithm_sptr algorithm) {
   try {
-    m_currentAlgorithm = algorithm.algorithm();
+    m_currentAlgorithm = algorithm->algorithm();
 
     // Assign the properties to be set at runtime
-    for (auto const &kvp : algorithm.properties()) {
+    for (auto const &kvp : algorithm->properties()) {
       m_currentAlgorithm->setProperty(kvp.first, kvp.second);
     }
 
@@ -206,7 +218,7 @@ bool BatchAlgorithmRunner::executeAlgo(ConfiguredAlgorithm &algorithm) {
     auto result = m_currentAlgorithm->execute();
 
     if (!result) {
-      auto message = std::string("Algorithm") + algorithm.algorithm()->name() +
+      auto message = std::string("Algorithm") + algorithm->algorithm()->name() +
                      std::string(" execution failed");
       m_notificationCenter.postNotification(
           new AlgorithmErrorNotification(algorithm, message));
@@ -268,14 +280,14 @@ void BatchAlgorithmRunner::handleBatchCancelled(
 void BatchAlgorithmRunner::handleAlgorithmComplete(
     const Poco::AutoPtr<AlgorithmCompleteNotification> &pNf) {
   // Notify UI elements
-  emit algorithmComplete(pNf->algorithm(), pNf->notifyee());
+  emit algorithmComplete(pNf->algorithm());
 }
 
 void BatchAlgorithmRunner::handleAlgorithmError(
     const Poco::AutoPtr<AlgorithmErrorNotification> &pNf) {
   auto errorMessage = pNf->errorMessage();
   // Notify UI elements
-  emit algorithmError(errorMessage, pNf->algorithm(), pNf->notifyee());
+  emit algorithmError(pNf->algorithm(), errorMessage);
 }
 } // namespace API
 } // namespace MantidQt

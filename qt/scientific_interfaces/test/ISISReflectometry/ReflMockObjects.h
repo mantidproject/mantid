@@ -239,7 +239,7 @@ public:
   MOCK_METHOD1(algorithmFinished,
                void(MantidQt::API::ConfiguredAlgorithm_sptr));
   MOCK_METHOD2(algorithmError, void(MantidQt::API::ConfiguredAlgorithm_sptr,
-                                    std::string const &));
+                                    std::string const ));
   MOCK_CONST_METHOD1(
       algorithmOutputWorkspacesToSave,
       std::vector<std::string>(MantidQt::API::ConfiguredAlgorithm_sptr));

@@ -14,20 +14,21 @@
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 
 #include <QMessageBox>
+#include <QMetaType>
+
+Q_DECLARE_METATYPE(std::string)
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
 using API::BatchAlgorithmRunner;
-using API::BatchAlgorithmRunnerSubscriber;
-using API::ConfiguredAlgorithm;
 using Mantid::API::IAlgorithm_sptr;
 
 BatchView::BatchView(QWidget *parent)
     : QWidget(parent), m_batchAlgoRunner(this) {
-  qRegisterMetaType<IAlgorithm_sptr>("Mantid::API::IAlgorithm_sptr");
-  qRegisterMetaType<BatchAlgorithmRunnerSubscriber>(
-      "MantidQt::API::BatchAlgorithmRunnerSubscriber");
+  qRegisterMetaType<API::ConfiguredAlgorithm_sptr>(
+      "MantidQt::API::ConfiguredAlgorithm_sptr");
+  qRegisterMetaType<std::string>();
   initLayout();
   m_batchAlgoRunner.stopOnFailure(false);
 }
@@ -69,8 +70,9 @@ ISaveView *BatchView::save() const { return m_save.get(); }
 
 void BatchView::clearAlgorithmQueue() { m_batchAlgoRunner.clearQueue(); }
 
-void BatchView::setAlgorithmQueue(std::deque<ConfiguredAlgorithm> algorithms) {
-  m_batchAlgoRunner.addAlgorithms(algorithms);
+void BatchView::setAlgorithmQueue(
+    std::deque<API::ConfiguredAlgorithm_sptr> algorithms) {
+  m_batchAlgoRunner.setQueue(algorithms);
 }
 
 void BatchView::executeAlgorithmQueue() {
@@ -79,20 +81,15 @@ void BatchView::executeAlgorithmQueue() {
   connect(&m_batchAlgoRunner, SIGNAL(batchCancelled()), this,
           SLOT(onBatchCancelled()));
   connect(&m_batchAlgoRunner,
-          SIGNAL(algorithmComplete(
-              Mantid::API::IAlgorithm_sptr,
-              MantidQt::API::BatchAlgorithmRunnerSubscriber *)),
+          SIGNAL(algorithmComplete(MantidQt::API::ConfiguredAlgorithm_sptr)),
           this,
-          SLOT(onAlgorithmComplete(
-              Mantid::API::IAlgorithm_sptr,
-              MantidQt::API::BatchAlgorithmRunnerSubscriber *)));
-  connect(
-      &m_batchAlgoRunner,
-      SIGNAL(algorithmError(std::string const &, Mantid::API::IAlgorithm_sptr,
-                            MantidQt::API::BatchAlgorithmRunnerSubscriber *)),
-      this,
-      SLOT(onAlgorithmError(std::string const &, Mantid::API::IAlgorithm_sptr,
-                            MantidQt::API::BatchAlgorithmRunnerSubscriber *)));
+          SLOT(onAlgorithmComplete(MantidQt::API::ConfiguredAlgorithm_sptr)));
+  connect(&m_batchAlgoRunner,
+          SIGNAL(algorithmError(MantidQt::API::ConfiguredAlgorithm_sptr,
+                                std::string)),
+          this,
+          SLOT(onAlgorithmError(MantidQt::API::ConfiguredAlgorithm_sptr,
+                                std::string)));
   m_batchAlgoRunner.executeBatchAsync();
 }
 
@@ -104,16 +101,13 @@ void BatchView::onBatchComplete(bool error) {
 
 void BatchView::onBatchCancelled() { m_notifyee->notifyBatchCancelled(); }
 
-void BatchView::onAlgorithmComplete(
-    Mantid::API::IAlgorithm_sptr algorithm,
-    MantidQt::API::BatchAlgorithmRunnerSubscriber *notifyee) {
-  m_notifyee->notifyAlgorithmFinished(algorithm, notifyee);
+void BatchView::onAlgorithmComplete(API::ConfiguredAlgorithm_sptr algorithm) {
+  m_notifyee->notifyAlgorithmFinished(algorithm);
 }
 
-void BatchView::onAlgorithmError(
-    std::string const &message, Mantid::API::IAlgorithm_sptr algorithm,
-    MantidQt::API::BatchAlgorithmRunnerSubscriber *notifyee) {
-  m_notifyee->notifyAlgorithmError(message, algorithm, notifyee);
+void BatchView::onAlgorithmError(API::ConfiguredAlgorithm_sptr algorithm,
+                                 std::string message) {
+  m_notifyee->notifyAlgorithmError(algorithm, message);
 }
 
 std::unique_ptr<RunsView> BatchView::createRunsTab() {

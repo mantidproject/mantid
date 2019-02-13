@@ -16,9 +16,9 @@
 #include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "ui_BatchWidget.h"
-#include <memory>
 
 #include <QCloseEvent>
+#include <memory>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -36,20 +36,16 @@ public:
   IInstrumentView *instrument() const override;
   void clearAlgorithmQueue() override;
   void setAlgorithmQueue(
-      std::deque<MantidQt::API::ConfiguredAlgorithm> algorithms) override;
+      std::deque<MantidQt::API::ConfiguredAlgorithm_sptr> algorithms) override;
   void executeAlgorithmQueue() override;
   void cancelAlgorithmQueue() override;
 
 private slots:
   void onBatchComplete(bool error);
   void onBatchCancelled();
-  void
-  onAlgorithmComplete(Mantid::API::IAlgorithm_sptr algorithm,
-                      MantidQt::API::BatchAlgorithmRunnerSubscriber *notifyee);
-  void
-  onAlgorithmError(std::string const &errorMessage,
-                   Mantid::API::IAlgorithm_sptr algorithm,
-                   MantidQt::API::BatchAlgorithmRunnerSubscriber *notifyee);
+  void onAlgorithmComplete(MantidQt::API::ConfiguredAlgorithm_sptr algorithm);
+  void onAlgorithmError(MantidQt::API::ConfiguredAlgorithm_sptr algorithm,
+                        std::string errorMessage);
 
 private:
   void initLayout();

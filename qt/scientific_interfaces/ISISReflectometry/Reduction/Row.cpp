@@ -84,7 +84,7 @@ Row mergedRow(Row const &rowA, Row const &rowB) {
 void Row::notifyAlgorithmStarted(Mantid::API::IAlgorithm_sptr const algorithm) {
   UNUSED_ARG(algorithm);
   m_reducedWorkspaceNames.resetOutputNames();
-  setRunning();
+  Item::notifyAlgorithmStarted(algorithm);
 }
 
 void Row::notifyAlgorithmComplete(
@@ -93,14 +93,13 @@ void Row::notifyAlgorithmComplete(
       algorithm->getPropertyValue("OutputWorkspaceWavelength"),
       algorithm->getPropertyValue("OutputWorkspace"),
       algorithm->getPropertyValue("OutputWorkspaceBinned"));
-  setSuccess();
+  Item::notifyAlgorithmComplete(algorithm);
 }
 
 void Row::notifyAlgorithmError(Mantid::API::IAlgorithm_sptr const algorithm,
                                std::string const &msg) {
-  UNUSED_ARG(algorithm);
   m_reducedWorkspaceNames.resetOutputNames();
-  setError(msg);
+  Item::notifyAlgorithmError(algorithm, msg);
 }
 
 bool Row::hasOutputWorkspace(std::string const &wsName) const {

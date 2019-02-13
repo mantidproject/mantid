@@ -8,13 +8,12 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidKernel/Strings.h"
-#include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
+#include <typeinfo>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
-using API::ConfiguredAlgorithm;
-using API::BatchAlgorithmRunnerSubscriber;
+using API::ConfiguredAlgorithm_sptr;
 using Mantid::API::IAlgorithm_sptr;
 using AlgorithmRuntimeProps = std::map<std::string, std::string>;
 
@@ -285,7 +284,8 @@ void updateEventProperties(AlgorithmRuntimeProps &properties,
   boost::apply_visitor(UpdateEventPropertiesVisitor(properties), slicing);
 }
 
-ConfiguredAlgorithm getAlgorithmForRow(Row &row, Batch const &model) {
+void getAlgorithmForRow(Row &row, Batch const &model,
+                        std::deque<ConfiguredAlgorithm_sptr> &algorithms) {
   auto alg = Mantid::API::AlgorithmManager::Instance().create(
       "ReflectometryISISLoadAndProcess");
 
@@ -297,23 +297,30 @@ ConfiguredAlgorithm getAlgorithmForRow(Row &row, Batch const &model) {
   updateInstrumentProperties(properties, model.instrument());
   // updateSaveProperties(properties, model.experiment());
   updateRowProperties(properties, row);
-  return ConfiguredAlgorithm(alg, properties, &row);
+  auto jobAlgorithm =
+      boost::make_shared<BatchJobAlgorithm>(alg, properties, &row);
+  algorithms.emplace_back(std::move(jobAlgorithm));
 }
 
-std::deque<ConfiguredAlgorithm> getAlgorithmsForGroup(Group &group,
-                                                      Batch const &model,
-                                                      bool reprocessFailed,
-                                                      bool processAll) {
-  auto algorithms = std::deque<ConfiguredAlgorithm>();
+void getAlgorithmsForGroup(Group &group, Batch const &model,
+                           bool reprocessFailed, bool processAll,
+                           std::deque<ConfiguredAlgorithm_sptr> &algorithms) {
   auto &rows = group.mutableRows();
   for (auto &row : rows) {
     if (row && row->requiresProcessing(reprocessFailed) &&
         (processAll || model.isSelected(row.get())))
-      algorithms.emplace_back(getAlgorithmForRow(row.get(), model));
+      getAlgorithmForRow(row.get(), model, algorithms);
   }
-  return algorithms;
 }
 } // namespace
+
+BatchJobAlgorithm::BatchJobAlgorithm(
+    Mantid::API::IAlgorithm_sptr algorithm,
+    MantidQt::API::ConfiguredAlgorithm::AlgorithmRuntimeProps properties,
+    Item *item)
+    : ConfiguredAlgorithm(algorithm, properties), m_item(item) {}
+
+Item *BatchJobAlgorithm::item() { return m_item; }
 
 BatchJobRunner::BatchJobRunner(Batch batch)
     : m_batch(std::move(batch)), m_isProcessing(false), m_isAutoreducing(false),
@@ -347,45 +354,37 @@ void BatchJobRunner::setReprocessFailedItems(bool reprocessFailed) {
   m_reprocessFailed = reprocessFailed;
 }
 
-std::deque<ConfiguredAlgorithm> BatchJobRunner::getAlgorithms() {
-  auto algorithms = std::deque<ConfiguredAlgorithm>();
+std::deque<ConfiguredAlgorithm_sptr> BatchJobRunner::getAlgorithms() {
+  auto algorithms = std::deque<ConfiguredAlgorithm_sptr>();
   auto &groups =
       m_batch.mutableRunsTable().mutableReductionJobs().mutableGroups();
   for (auto &group : groups) {
-    auto groupAlgorithms =
-        getAlgorithmsForGroup(group, m_batch, m_reprocessFailed, m_processAll);
-    algorithms.insert(algorithms.end(),
-                      std::make_move_iterator(groupAlgorithms.begin()),
-                      std::make_move_iterator(groupAlgorithms.end()));
+    getAlgorithmsForGroup(group, m_batch, m_reprocessFailed, m_processAll,
+                          algorithms);
   }
   return algorithms;
 }
 
-void BatchJobRunner::algorithmFinished(IAlgorithm_sptr algorithm) {
-  UNUSED_ARG(algorithm);
+void BatchJobRunner::algorithmFinished(ConfiguredAlgorithm_sptr algorithm) {
+  auto jobAlgorithm = boost::dynamic_pointer_cast<BatchJobAlgorithm>(algorithm);
+  jobAlgorithm->item()->notifyAlgorithmComplete(algorithm->algorithm());
 }
 
-void BatchJobRunner::algorithmError(std::string const &message,
-                                    IAlgorithm_sptr algorithm) {
-  UNUSED_ARG(message);
-  UNUSED_ARG(algorithm);
+void BatchJobRunner::algorithmError(ConfiguredAlgorithm_sptr algorithm,
+                                    std::string const &message) {
+  auto jobAlgorithm = boost::dynamic_pointer_cast<BatchJobAlgorithm>(algorithm);
+  jobAlgorithm->item()->notifyAlgorithmError(algorithm->algorithm(), message);
 }
 
 std::vector<std::string> BatchJobRunner::algorithmOutputWorkspacesToSave(
-    IAlgorithm_sptr algorithm,
-    const BatchAlgorithmRunnerSubscriber *const item) const {
+    ConfiguredAlgorithm_sptr algorithm) const {
+  auto jobAlgorithm = boost::dynamic_pointer_cast<BatchJobAlgorithm>(algorithm);
 
-  if (algorithm->name() == "ReflectometryISISLoadAndProcess") {
-    auto const *row = dynamic_cast<Row const *>(item);
-    if (!row)
-      throw std::runtime_error("Internal error: invalid row type");
-    return getWorkspacesToSave(*row);
-  } else if (algorithm->name() == "Stitch1DMany") {
-    auto const *group = dynamic_cast<Group const *>(item);
-    if (!group)
-      throw std::runtime_error("Internal error: invalid group type");
-    return getWorkspacesToSave(*group);
-  }
+  if (typeid(algorithm).name() == std::string("Row"))
+    return getWorkspacesToSave(dynamic_cast<Row &>(*jobAlgorithm->item()));
+  else if (typeid(algorithm).name() == std::string("Group"))
+    return getWorkspacesToSave(dynamic_cast<Group &>(*jobAlgorithm->item()));
+
   return std::vector<std::string>();
 }
 

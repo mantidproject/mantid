@@ -14,8 +14,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class MANTIDQT_ISISREFLECTOMETRY_DLL Item
-    : public API::BatchAlgorithmRunnerSubscriber {
+class MANTIDQT_ISISREFLECTOMETRY_DLL Item {
 public:
   Item();
   Item(Item const &rhs);
@@ -28,6 +27,14 @@ public:
   virtual void resetState();
   virtual void renameOutputWorkspace(std::string const &oldName,
                                      std::string const &newName) = 0;
+
+  virtual void
+  notifyAlgorithmStarted(Mantid::API::IAlgorithm_sptr const algorithm);
+  virtual void
+  notifyAlgorithmComplete(Mantid::API::IAlgorithm_sptr const algorithm);
+  virtual void
+  notifyAlgorithmError(Mantid::API::IAlgorithm_sptr const algorithm,
+                       std::string const &msg);
 
 protected:
   ItemState m_itemState;

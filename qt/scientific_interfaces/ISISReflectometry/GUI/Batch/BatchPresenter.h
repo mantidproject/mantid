@@ -46,12 +46,9 @@ public:
   void notifyBatchFinished(bool error) override;
   void notifyBatchCancelled() override;
   void notifyAlgorithmFinished(
-      Mantid::API::IAlgorithm_sptr algorithm,
-      API::BatchAlgorithmRunnerSubscriber *notifyee) override;
-  void
-  notifyAlgorithmError(std::string const &message,
-                       Mantid::API::IAlgorithm_sptr algorithm,
-                       API::BatchAlgorithmRunnerSubscriber *notifyee) override;
+      MantidQt::API::ConfiguredAlgorithm_sptr algorithm) override;
+  void notifyAlgorithmError(MantidQt::API::ConfiguredAlgorithm_sptr algorithm,
+                            std::string const &message) override;
 
   // IBatchPresenter overrides
   void notifyReductionPaused() override;
