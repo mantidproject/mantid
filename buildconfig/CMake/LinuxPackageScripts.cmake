@@ -205,7 +205,7 @@ if [ -n \"\$1\" ] && [ \"\$1\" = \"--debug\" ]; then
     GDB=\"gdb --args\"
 fi" )
 
-set ( ERROR_CMD "ErrorReporter/error_dialog_app.py --exitcode=\$? --directory=\$INSTALLDIR/bin" )
+set ( ERROR_CMD "ErrorReporter/error_dialog_app.py --exitcode=\$?" )
 
 # Local dev version
 if ( MAKE_VATES )
