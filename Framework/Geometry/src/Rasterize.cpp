@@ -27,8 +27,14 @@ const V3D X_AXIS{1, 0, 0};
 const V3D Y_AXIS{0, 1, 0};
 const V3D Z_AXIS{0, 0, 1};
 
-void getCylinderParameters(const CSGObject &shape, double &radius,
-                           double &height, V3D &centerBottomBase, V3D &axis) {
+struct CylinderParameters {
+  double radius;
+  double height;
+  V3D centerBottomBase;
+  V3D symmetryaxis;
+};
+
+CylinderParameters getCylinderParameters(const CSGObject &shape) {
   // fundamental checks for any object
   if (!shape.hasValidShape())
     throw std::logic_error("Shape[CSGObject] does not have a valid shape");
@@ -36,41 +42,48 @@ void getCylinderParameters(const CSGObject &shape, double &radius,
     throw std::logic_error("Shape[CSGObject] is not a cylinder");
 
   const auto &shapeInfo = shape.shapeInfo();
-  radius = shapeInfo.radius();
-  height = shapeInfo.height();
 
-  std::vector<V3D> points = shapeInfo.points();
-  centerBottomBase = points[0];
-  axis = points[1];
+  CylinderParameters params;
+  params.radius = shapeInfo.radius();
+  params.height = shapeInfo.height();
+
+  const std::vector<V3D> points = shapeInfo.points();
+  params.centerBottomBase = points[0];
+  params.symmetryaxis = points[1];
+
+  return params;
 }
 
-V3D createPerpendicular(const V3D &z_axis) {
-  const std::vector<double> scalars = {fabs(z_axis.scalar_prod(X_AXIS)),
-                                       fabs(z_axis.scalar_prod(Y_AXIS)),
-                                       fabs(z_axis.scalar_prod(Z_AXIS))};
+// since cylinders are symmetric around the main axis, choose a random
+// perpendicular to have as the second axis
+V3D createPerpendicular(const V3D &symmetryAxis) {
+  const std::vector<double> scalars = { fabs(symmetryAxis.scalar_prod(X_AXIS)),
+                                        fabs(symmetryAxis.scalar_prod(Y_AXIS)),
+                                        fabs(
+                                            symmetryAxis.scalar_prod(Z_AXIS)) };
   // check against the cardinal axes
   if (scalars[0] == 0.)
-    return z_axis.cross_prod(X_AXIS);
+    return symmetryAxis.cross_prod(X_AXIS);
   else if (scalars[1] == 0.)
-    return z_axis.cross_prod(Y_AXIS);
+    return symmetryAxis.cross_prod(Y_AXIS);
   else if (scalars[2] == 0.)
-    return z_axis.cross_prod(Z_AXIS);
+    return symmetryAxis.cross_prod(Z_AXIS);
 
   // see which one is smallest
   if (scalars[0] < scalars[1] && scalars[0] < scalars[2])
-    return z_axis.cross_prod(X_AXIS);
+    return symmetryAxis.cross_prod(X_AXIS);
   else if (scalars[1] < scalars[0] && scalars[1] < scalars[2])
-    return z_axis.cross_prod(Y_AXIS);
+    return symmetryAxis.cross_prod(Y_AXIS);
   else
-    return z_axis.cross_prod(Z_AXIS);
+    return symmetryAxis.cross_prod(Z_AXIS);
 }
 
 } // namespace
 
 namespace Rasterize {
 
-// --------- collection of calculations that convert to CSGObjects and pass the
-// work on
+// -------------------
+// collection of calculations that convert to CSGObjects and pass the work on
 
 Raster calculate(const V3D &beamDirection,
                  const boost::shared_ptr<const IObject> shape,
@@ -100,7 +113,8 @@ Raster calculateCylinder(const V3D &beamDirection,
   return calculateCylinder(beamDirection, *csgshape, numSlices, numAnnuli);
 }
 
-// --------- actual calculations
+// -------------------
+// actual calculations
 
 /*
  * This method attempts to convert the object to one of the primitive types. If
@@ -112,13 +126,11 @@ Raster calculate(const V3D &beamDirection, const CSGObject &shape,
     throw std::runtime_error("Tried to section shape into zero size elements");
 
   if (shape.shape() == Geometry::detail::ShapeInfo::GeometryShape::CYLINDER) {
-    double radius, height;
-    V3D center, axis; // these values are ignored
-    getCylinderParameters(shape, radius, height, center, axis);
-    const size_t numSlice =
-        std::max<size_t>(1, static_cast<size_t>(height / cubeSizeInMetre));
-    const size_t numAnnuli =
-        std::max<size_t>(1, static_cast<size_t>(radius / cubeSizeInMetre));
+    const auto params = getCylinderParameters(shape);
+    const size_t numSlice = std::max<size_t>(
+        1, static_cast<size_t>(params.height / cubeSizeInMetre));
+    const size_t numAnnuli = std::max<size_t>(
+        1, static_cast<size_t>(params.radius / cubeSizeInMetre));
     return calculateCylinder(beamDirection, shape, numSlice, numAnnuli);
   } else { // arbitrary shape code
     const auto bbox = shape.getBoundingBox();
@@ -130,8 +142,7 @@ Raster calculate(const V3D &beamDirection, const CSGObject &shape,
     const double yLength = bbox.yMax() - bbox.yMin();
     const double zLength = bbox.zMax() - bbox.zMin();
 
-    const V3D center{bbox.xMin() + 0.5 * xLength, bbox.yMin() + 0.5 * yLength,
-                     bbox.zMin() + 0.5 * zLength};
+    const V3D center{ bbox.centrePoint() };
 
     const size_t numXSlices = static_cast<size_t>(xLength / cubeSizeInMetre);
     const size_t numYSlices = static_cast<size_t>(yLength / cubeSizeInMetre);
@@ -173,20 +184,16 @@ Raster calculate(const V3D &beamDirection, const CSGObject &shape,
           // Check if the current point is within the object. If not, skip.
           if (shape.isValid(currentPosition)) {
             // Create track for distance in sample before scattering point
-            Track incoming(currentPosition, beamDirection * -1.0);
+            Track incoming(currentPosition, -beamDirection);
             // We have an issue where occasionally, even though a point is
-            // within
-            // the object a track segment to the surface isn't correctly
-            // created.
-            // In the context of this algorithm I think it's safe to just chuck
-            // away the element in this case.
-            // This will also throw away points that are inside a gauge volume
-            // but
-            // outside the sample
+            // within the object a track segment to the surface isn't correctly
+            // created. In the context of this algorithm I think it's safe to
+            // just chuck away the element in this case. This will also throw
+            // away points that are inside a gauge volume but outside the sample
             if (shape.interceptSurface(incoming) > 0) {
-              result.l1.push_back(incoming.cbegin()->distFromStart);
-              result.position.push_back(currentPosition);
-              result.volume.push_back(elementVolume);
+              result.l1.emplace_back(incoming.cbegin()->distFromStart);
+              result.position.emplace_back(currentPosition);
+              result.volume.emplace_back(elementVolume);
             }
           }
         }
@@ -208,14 +215,13 @@ Raster calculateCylinder(const V3D &beamDirection, const CSGObject &shape,
     throw std::runtime_error("Tried to section cylinder into zero annuli");
 
   // get the geometry for the volume elements
-  double radius, height;
-  V3D centerBottomBase, z_prime;
-  getCylinderParameters(shape, radius, height, centerBottomBase, z_prime);
-  V3D center = (z_prime * .5 * height) + centerBottomBase;
-  z_prime.normalize();
+  auto params = getCylinderParameters(shape);
+  V3D center =
+      (params.symmetryaxis * .5 * params.height) + params.centerBottomBase;
+  params.symmetryaxis.normalize();
 
-  const double sliceThickness{height / static_cast<double>(numSlices)};
-  const double deltaR{radius / static_cast<double>(numAnnuli)};
+  const double sliceThickness{ params.height / static_cast<double>(numSlices) };
+  const double deltaR{ params.radius / static_cast<double>(numAnnuli) };
 
   /* The number of volume elements is
    * numslices*(1+2+3+.....+numAnnuli)*6
@@ -226,10 +232,11 @@ Raster calculateCylinder(const V3D &beamDirection, const CSGObject &shape,
 
   Raster result;
   result.reserve(numVolumeElements);
-  result.totalvolume = height * M_PI * radius * radius;
+  result.totalvolume = params.height * M_PI * params.radius * params.radius;
 
   // Assume that z' = axis. Then select whatever has the smallest dot product
   // with axis to be the x' direction
+  V3D z_prime = params.symmetryaxis; // copy to make code easier to read
   V3D x_prime = createPerpendicular(z_prime);
   V3D y_prime = z_prime.cross_prod(x_prime);
 
@@ -237,16 +244,16 @@ Raster calculateCylinder(const V3D &beamDirection, const CSGObject &shape,
   // loop over slices
   for (size_t i = 0; i < numSlices; ++i) {
     const double z =
-        (static_cast<double>(i) + 0.5) * sliceThickness - 0.5 * height;
+        (static_cast<double>(i) + 0.5) * sliceThickness - 0.5 * params.height;
 
     // Number of elements in 1st annulus
     size_t Ni = 0;
     // loop over annuli
     for (size_t j = 0; j < numAnnuli; ++j) {
       Ni += 6;
-      const double R =
-          (static_cast<double>(j) * radius / static_cast<double>(numAnnuli)) +
-          (0.5 * deltaR);
+      const double R = (static_cast<double>(j) * params.radius /
+                        static_cast<double>(numAnnuli)) +
+                       (0.5 * deltaR);
 
       // all the volume elements in the ring/slice are the same
       const double outerR = R + (deltaR / 2.0);
@@ -258,8 +265,8 @@ Raster calculateCylinder(const V3D &beamDirection, const CSGObject &shape,
       for (size_t k = 0; k < Ni; ++k) {
         const double phi =
             2. * M_PI * static_cast<double>(k) / static_cast<double>(Ni);
-        const double rSinPhi = -1. * R * sin(phi);
-        const double rCosPhi = -1. * R * cos(phi);
+        const double rSinPhi = -R * sin(phi);
+        const double rCosPhi = -R * cos(phi);
 
         // Calculate the current position in the shape in Cartesian coordinates
         const double xcomp =
@@ -270,15 +277,17 @@ Raster calculateCylinder(const V3D &beamDirection, const CSGObject &shape,
             rCosPhi * x_prime[2] + rSinPhi * y_prime[2] + z * z_prime[2];
         const auto position = center + V3D(xcomp, ycomp, zcomp);
 
-        result.position.push_back(position);
-        assert(shape->isValid(position));
+        assert(shape.isValid(position));
+
+        result.position.emplace_back(position);
+
         // Create track for distance in cylinder before scattering point
-        Track incoming(position, beamDirection * -1.0);
+        Track incoming(position, -beamDirection);
 
         shape.interceptSurface(incoming);
-        result.l1.push_back(incoming.cbegin()->distFromStart);
+        result.l1.emplace_back(incoming.front().distFromStart);
 
-        result.volume.push_back(elementVolume);
+        result.volume.emplace_back(elementVolume);
       } // loop over k
     }   // loop over j
   }     // loop over i
