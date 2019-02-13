@@ -130,7 +130,7 @@ public:
     col.read(2, "7,8,9,10");
     auto compare = std::unique_ptr<Mantid::API::Column>(col.clone());
 
-    TS_ASSERT(col.equals(compare.get(), 0));
+    TS_ASSERT(col.equals(*compare, 0));
   }
 
   void test_equals_failure() {
@@ -147,7 +147,7 @@ public:
     col2.read(0, "1,2,3");
     col2.read(1, "3,4,5");
     col2.read(2, "7,8,9,11");
-    TS_ASSERT(!col2.equals(compare.get(), 0));
+    TS_ASSERT(!col2.equals(*compare, 0));
   }
 
   void test_equals_tolerance() {
@@ -164,7 +164,7 @@ public:
     col2.read(0, "1,2,2");
     col2.read(1, "3,4,5");
     col2.read(2, "7,8,9,11");
-    TS_ASSERT(col2.equals(compare.get(), 1));
+    TS_ASSERT(col2.equals(*compare, 1));
   }
 
   void test_equals_tolerance_fail() {
@@ -181,7 +181,7 @@ public:
     col2.read(0, "1,2,2");
     col2.read(1, "3,4,5");
     col2.read(2, "7,8,9,12");
-    TS_ASSERT(!col2.equals(compare.get(), 1));
+    TS_ASSERT(!col2.equals(*compare, 1));
   }
 
   void test_equalsRelErr() {
@@ -198,7 +198,7 @@ public:
     col2.read(0, "90,2,2");
     col2.read(1, "3,4,5");
     col2.read(2, "7,8,9,11");
-    TS_ASSERT(col2.equalsRelErr(compare.get(), 1));
+    TS_ASSERT(col2.equalsRelErr(*compare, 1));
   }
 };
 

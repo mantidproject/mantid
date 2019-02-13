@@ -70,11 +70,11 @@ public:
   /// Reference to the data.
   const std::vector<Peak> &data() const { return m_peaks; }
 
-  bool equals(Column *otherColumn, double tolerance) const override {
+  bool equals(const Column &otherColumn, double tolerance) const override {
     (void)otherColumn;
     (void)tolerance;
     throw std::runtime_error(
-        "equals not implemented, to compare use peaksworkspace");
+        "equals not implemented, to compare use CompareWorkspace");
   }
 
 protected:

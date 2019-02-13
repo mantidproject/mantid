@@ -199,31 +199,24 @@ public:
   /// Re-arrange values in this column according to indices in indexVec
   void sortValues(const std::vector<size_t> &indexVec) override;
 
-  bool equals(Column *otherColumn, double tolerance) const override {
-    auto convertedOtherColumn = dynamic_cast<TableColumn *>(otherColumn);
-    if (!convertedOtherColumn) {
+  bool equals(const Column &otherColumn, double tolerance) const override {
+    if (!possibleToCompare(otherColumn)) {
       return false;
     }
-    auto type = this->type();
-    if (convertedOtherColumn->size() != this->size() ||
-        convertedOtherColumn->type() != type) {
-      return false;
-    }
-    auto otherData = convertedOtherColumn->data();
+    const auto &otherColumnTyped =
+        static_cast<const TableColumn<Type> &>(otherColumn);
+    const auto &otherData = otherColumnTyped.data();
     return compareVectors(otherData, tolerance);
   }
 
-  bool equalsRelErr(Column *otherColumn, double tolerance) const override {
-    auto convertedOtherColumn = dynamic_cast<TableColumn *>(otherColumn);
-    if (!convertedOtherColumn) {
+  bool equalsRelErr(const Column &otherColumn,
+                    double tolerance) const override {
+    if (!possibleToCompare(otherColumn)) {
       return false;
     }
-    auto type = this->type();
-    if (convertedOtherColumn->size() != this->size() ||
-        convertedOtherColumn->type() != type) {
-      return false;
-    }
-    auto otherData = convertedOtherColumn->data();
+    const auto &otherColumnTyped =
+        static_cast<const TableColumn<Type> &>(otherColumn);
+    const auto &otherData = otherColumnTyped.data();
     return compareVectorsRelError(otherData, tolerance);
   }
 

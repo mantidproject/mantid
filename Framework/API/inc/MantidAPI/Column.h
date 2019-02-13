@@ -163,11 +163,11 @@ public:
     return vec;
   }
 
-  virtual bool equals(Column *, double) const {
+  virtual bool equals(const Column &, double) const {
     throw std::runtime_error("equals not implemented");
   };
 
-  virtual bool equalsRelErr(Column *, double) const {
+  virtual bool equalsRelErr(const Column &, double) const {
     throw std::runtime_error("equals not implemented");
   };
 
@@ -182,6 +182,15 @@ protected:
   virtual void *void_pointer(size_t index) = 0;
   /// Pointer to a data element
   virtual const void *void_pointer(size_t index) const = 0;
+
+  bool possibleToCompare(const Column &otherColumn) const {
+    if (otherColumn.get_type_info() != this->get_type_info())
+      return false;
+    if (otherColumn.size() != this->size()) {
+      return false;
+    }
+    return true;
+  }
 
   std::string m_name; ///< name
   std::string m_type; ///< type

@@ -338,7 +338,7 @@ public:
 
     auto column2 = std::unique_ptr<Mantid::API::Column>(column.clone());
 
-    TS_ASSERT(column.equals(column2.get(), 0));
+    TS_ASSERT(column.equals(*column2, 0));
   }
 
   void test_equals_fail() {
@@ -363,7 +363,7 @@ public:
 
     data[0] = 9;
 
-    TS_ASSERT(!column.equals(column2.get(), 0));
+    TS_ASSERT(!column.equals(*column2, 0));
   }
 
   void test_equals_fail_wrong_type() {
@@ -373,7 +373,7 @@ public:
     ws.addColumn("vector_int", "col2");
     auto column = static_cast<TableColumn<int> &>(*ws.getColumn("col1"));
     auto column2 = ws.getColumn("col2");
-    TS_ASSERT(!column.equals(column2.get(), 0));
+    TS_ASSERT(!column.equals(*column2, 0));
   }
 
   void test_equals_tolerance_normal_case() {
@@ -405,8 +405,7 @@ public:
     data2[7] = 1;
     data2[8] = 1;
     data2[9] = 11;
-    Mantid::API::Column *columnPointer = &column2;
-    TS_ASSERT(column.equals(columnPointer, 1));
+    TS_ASSERT(column.equals(column2, 1));
   }
 
   void test_equalsRelErr() {
@@ -438,8 +437,7 @@ public:
     data2[7] = 3;
     data2[8] = 0;
     data2[9] = 12;
-    Mantid::API::Column *columnPointer = &column2;
-    TS_ASSERT(column.equalsRelErr(columnPointer, 1));
+    TS_ASSERT(column.equalsRelErr(column2, 1));
   }
 
   void test_equals_tolerance_int64() {
@@ -453,8 +451,7 @@ public:
     data[0] = 165538;
     auto &data2 = column2.data();
     data2[0] = 165539;
-    Mantid::API::Column *columnPointer = &column2;
-    TS_ASSERT(column.equals(columnPointer, 1));
+    TS_ASSERT(column.equals(column2, 1));
   }
 
   void test_equals_string() {
@@ -466,7 +463,7 @@ public:
     auto &data = column.data();
     data[0] = "hello";
     auto column2 = std::unique_ptr<Mantid::API::Column>(column.clone());
-    TS_ASSERT(column.equals(column2.get(), 0));
+    TS_ASSERT(column.equals(*column2, 0));
   }
 
   void test_equals_string_tolerance_fail() {
@@ -479,7 +476,7 @@ public:
     data[0] = "1";
     auto column2 = std::unique_ptr<Mantid::API::Column>(column.clone());
     data[0] = "2";
-    TS_ASSERT(!column.equals(column2.get(), 1));
+    TS_ASSERT(!column.equals(*column2, 1));
   }
 
   void test_equals_general_tolerance_fail() {
@@ -511,8 +508,7 @@ public:
     data2[7] = 1;
     data2[8] = 1;
     data2[9] = 11;
-    Mantid::API::Column *columnPointer = &column2;
-    TS_ASSERT(!column.equals(columnPointer, 1));
+    TS_ASSERT(!column.equals(*ws.getColumn("col2"), 1));
   }
 
 private:
