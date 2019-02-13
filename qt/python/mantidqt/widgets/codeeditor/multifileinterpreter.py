@@ -213,6 +213,9 @@ class MultiPythonFileInterpreter(QWidget):
     def toggle_comment_current(self):
         self.current_editor().toggle_comment()
 
+    def toggle_find_replace_dialog(self):
+        self.current_editor().show_find_replace_dialog()
+
     def toggle_whitespace_visible_all(self):
         if self.whitespace_visible:
             for idx in range(self.editor_count):

@@ -12,8 +12,8 @@ import sys
 import traceback
 
 from qtpy.QtCore import QObject, Qt, Signal
-from qtpy.QtGui import QColor, QFontMetrics, QKeySequence
-from qtpy.QtWidgets import QAction, QFileDialog, QMessageBox, QStatusBar, QVBoxLayout, QWidget
+from qtpy.QtGui import QColor, QFontMetrics
+from qtpy.QtWidgets import QFileDialog, QMessageBox, QStatusBar, QVBoxLayout, QWidget
 
 from mantidqt.io import open_a_file_dialog
 from mantidqt.widgets.codeeditor.editor import CodeEditor
@@ -123,11 +123,6 @@ class PythonFileInterpreter(QWidget):
         self.find_replace_dialog = None
         self.find_replace_dialog_shown = False
 
-        find_replace = QAction("Find and Replace", self)
-        find_replace.setShortcut(QKeySequence.Find)
-        find_replace.triggered.connect(self.show_find_replace_dialog)
-        self.addAction(find_replace)
-
     def closeEvent(self, event):
         self.deleteLater()
         super(PythonFileInterpreter, self).closeEvent(event)
@@ -137,7 +132,13 @@ class PythonFileInterpreter(QWidget):
             self.find_replace_dialog = EmbeddedFindReplaceDialog(self, self.editor)
             self.layout.insertWidget(0, self.find_replace_dialog.view)
 
-        self.find_replace_dialog.toggle()
+        self.find_replace_dialog.show()
+
+    def hide_find_replace_dialog(self):
+        print("Trying to hide f/r dialog")
+        if self.find_replace_dialog is not None:
+            print("Hiding f/r dialog")
+            self.find_replace_dialog.hide()
 
     @property
     def filename(self):
