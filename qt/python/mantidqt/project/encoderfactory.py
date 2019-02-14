@@ -24,10 +24,10 @@ class EncoderFactory(object):
             # Perform check if optional_cb is present if it is, then check whether the the optional_cb returns true for
             # this object.
             if encoder[1] is not None and encoder[1](obj):
-                return encoder[0]
+                return encoder[0]()
 
             if encoder[0].has_tag(obj.__class__.__name__):
-                return encoder[0]
+                return encoder[0]()
         return None
 
     @classmethod

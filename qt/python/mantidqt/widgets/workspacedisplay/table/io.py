@@ -23,6 +23,7 @@ class TableWorkspaceDisplayEncoder(TableWorkspaceDisplayAttributes):
         super(TableWorkspaceDisplayEncoder, self).__init__()
 
     def encode(self, obj, _):
+        obj = obj.presenter.view
         return {"workspace": obj.presenter.model.ws.name(),
                 "markedColumns": self._encode_marked_columns(obj.presenter.model.marked_columns),
                 "windowName": obj.presenter.name}
