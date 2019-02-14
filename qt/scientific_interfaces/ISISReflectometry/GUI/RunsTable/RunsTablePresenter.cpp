@@ -20,39 +20,48 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace Colour {
+constexpr const char *DEFAULT = "#ffffff"; // white
+constexpr const char *INVALID = "#dddddd"; // very pale grey
+constexpr const char *RUNNING = "#f0e442"; // pale yellow
+constexpr const char *SUCCESS = "#d0f4d0"; // pale green
+constexpr const char *WARNING = "#e69f00"; // pale orange
+constexpr const char *FAILURE = "#accbff"; // pale blue
+} // namespace Colour
+
 namespace { // unnamed
 void clearStateStyling(MantidWidgets::Batch::Cell &cell) {
-  cell.setBackgroundColor("white");
+  cell.setBackgroundColor(Colour::DEFAULT);
   cell.setToolTip("");
 }
 
 void applyInvalidStateStyling(MantidWidgets::Batch::Cell &cell) {
-  cell.setBackgroundColor("grey");
+  cell.setBackgroundColor(Colour::INVALID);
   cell.setToolTip(
       "Row will not be processed: it either contains invalid cell values, "
       "or duplicates a reduction in another row");
 }
 
 void applyRunningStateStyling(MantidWidgets::Batch::Cell &cell) {
-  cell.setBackgroundColor("yellow");
+  cell.setBackgroundColor(Colour::RUNNING);
 }
 
 void applyCompletedStateStyling(MantidWidgets::Batch::Cell &cell) {
-  cell.setBackgroundColor("green");
+  cell.setBackgroundColor(Colour::SUCCESS);
 }
 
 void applyErrorStateStyling(MantidWidgets::Batch::Cell &cell,
-                          std::string const &errorMessage) {
-  cell.setBackgroundColor("red");
+                            std::string const &errorMessage) {
+  cell.setBackgroundColor(Colour::FAILURE);
   cell.setToolTip(errorMessage);
 }
 
 void applyWarningStateStyling(MantidWidgets::Batch::Cell &cell,
-                            std::string const &errorMessage) {
-  cell.setBackgroundColor("orange");
+                              std::string const &errorMessage) {
+  cell.setBackgroundColor(Colour::WARNING);
   cell.setToolTip(errorMessage);
 }
-} // unnamed
+} // namespace
 
 RunsTablePresenter::RunsTablePresenter(
     IRunsTableView *view, std::vector<std::string> const &instruments,
