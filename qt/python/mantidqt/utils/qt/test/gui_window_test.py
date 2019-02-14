@@ -9,6 +9,7 @@
 #
 from __future__ import print_function
 import inspect
+import sys
 from unittest import TestCase
 
 from mantidqt.utils.qt.test.gui_test_runner import open_in_window
@@ -46,6 +47,20 @@ def mouse_click(widget, pos, button=Qt.LeftButton):
     yield
     QTest.mouseRelease(widget, button, Qt.NoModifier, pos)
     yield 0.1
+
+
+def skipIf(test, reason):
+
+    def wrap(method):
+        def wrapper(self):
+            pass
+        if test:
+            print('Skip {name}. Reason: {reason}'.format(name=method.__name__, reason=reason), file=sys.stderr)
+            return wrapper
+        else:
+            return method
+
+    return wrap
 
 
 class GuiTestBase(object):
