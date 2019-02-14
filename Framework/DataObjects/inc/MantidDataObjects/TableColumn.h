@@ -248,7 +248,7 @@ private:
   bool compareVectors(const std::vector<Type> &newVector,
                       double tolerance) const {
     for (size_t i = 0; i < m_data.size(); i++) {
-      if (fabs(m_data[i] - newVector[i]) > tolerance) {
+      if (fabs((double)m_data[i] - (double)newVector[i]) > tolerance) {
         return false;
       }
     }
@@ -259,8 +259,8 @@ private:
   bool compareVectorsRelError(const std::vector<Type> &newVector,
                               double tolerance) const {
     for (size_t i = 0; i < m_data.size(); i++) {
-      double num = fabs(m_data[i] - newVector[i]);
-      double den = (fabs(m_data[i]) + fabs(newVector[i])) / 2;
+      double num = fabs((double)m_data[i] - (double)newVector[i]);
+      double den = (fabs((double)m_data[i]) + fabs((double)newVector[i])) / 2;
       if (den < tolerance && num > tolerance) {
         return false;
       } else if (num / den > tolerance) {
@@ -288,9 +288,10 @@ TableColumn<int64_t>::compareVectors(const std::vector<int64_t> &newVector,
 template <>
 inline bool TableColumn<unsigned long>::compareVectors(
     const std::vector<unsigned long> &newVector, double tolerance) const {
-  long roundedTol = lround(tolerance);
+  long long roundedTol = llround(tolerance);
   for (size_t i = 0; i < m_data.size(); i++) {
-    if (std::labs(m_data[i] - newVector[i]) > roundedTol) {
+    if (std::llabs((long long)m_data[i] - (long long)newVector[i]) >
+        roundedTol) {
       return false;
     }
   }
@@ -359,10 +360,10 @@ inline bool TableColumn<int64_t>::compareVectorsRelError(
 template <>
 inline bool TableColumn<unsigned long>::compareVectorsRelError(
     const std::vector<unsigned long> &newVector, double tolerance) const {
-  long unsigned int roundedTol = lround(tolerance);
+  long long roundedTol = lround(tolerance);
   for (size_t i = 0; i < m_data.size(); i++) {
-    long unsigned int num = labs(m_data[i] - newVector[i]);
-    long unsigned int den = (labs(m_data[i]) + labs(newVector[i])) / 2;
+    long long num = labs((long long)m_data[i] - (long long)newVector[i]);
+    long long den = (m_data[i] + newVector[i]) / 2;
     if (den < roundedTol && num > roundedTol) {
       return false;
     } else if (num / den > roundedTol) {

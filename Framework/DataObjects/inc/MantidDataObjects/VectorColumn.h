@@ -138,7 +138,7 @@ public:
         return false;
       }
       for (size_t j = 0; j < m_data[i].size(); j++) {
-        if (abs(m_data[i][j] - otherData[i][j]) > tolerance) {
+        if (fabs((double)m_data[i][j] - (double)otherData[i][j]) > tolerance) {
           return false;
         }
       }
@@ -159,8 +159,9 @@ public:
         return false;
       }
       for (size_t j = 0; j < m_data[i].size(); j++) {
-        double num = fabs(m_data[i][j] - otherData[i][j]);
-        double den = (fabs(m_data[i][j]) + fabs(otherData[i][j])) / 2;
+        double num = fabs((double)m_data[i][j] - (double)otherData[i][j]);
+        double den =
+            (fabs((double)m_data[i][j]) + fabs((double)otherData[i][j])) / 2;
         if (den < tolerance && num > tolerance) {
           return false;
         } else if (num / den > tolerance) {
