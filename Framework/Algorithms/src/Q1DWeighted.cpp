@@ -169,7 +169,7 @@ void Q1DWeighted::exec() {
   // Set up the progress
   Progress progress(this, 0.0, 1.0, nSpec * nLambda);
 
-  PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS))
   // first we loop over spectra
   for (int index = 0; index < static_cast<int>(nSpec); ++index) {
     PARALLEL_START_INTERUPT_REGION
@@ -266,7 +266,8 @@ void Q1DWeighted::exec() {
               // restriction for those; they can also overlap
               // that is the same pixel can simultaneously be in many wedges
               for (size_t iw = 0; iw < nWedges; ++iw) {
-                double centerAngle = M_PI / nWedges * iw;
+                double centerAngle = static_cast<double>(iw) * M_PI /
+                                     static_cast<double>(nWedges);
                 if (asymmWedges) {
                   centerAngle *= 2;
                 }
@@ -330,7 +331,9 @@ void Q1DWeighted::exec() {
 
     // Create wedge workspaces
     for (size_t iw = 0; iw < nWedges; ++iw) {
-      const double centerAngle = iw * wedgeFullAngle / nWedges + wedgeOffset;
+      const double centerAngle = static_cast<double>(iw) * wedgeFullAngle /
+                                     static_cast<double>(nWedges) +
+                                 wedgeOffset;
       MatrixWorkspace_sptr wedgeWs = createOutputWorkspace(inputWS, nQ);
       wedgeWs->setBinEdges(0, qBinEdges);
       wedgeWs->mutableRun().addProperty("wedge_angle", centerAngle, "degrees",
