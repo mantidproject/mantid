@@ -14,7 +14,6 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
@@ -179,7 +178,7 @@ void CompareWorkspaces::init() {
           "Messages", "compare_msgs", Direction::Output),
       "TableWorkspace containing messages about any mismatches detected");
 
-  m_messages = WorkspaceFactory::Instance().createTable("TableWorkspace");
+  m_messages = boost::make_shared<TableWorkspace>();
   m_messages->addColumn("str", "Message");
   m_messages->addColumn("str", "Workspace 1");
   m_messages->addColumn("str", "Workspace 2");
@@ -653,12 +652,12 @@ bool CompareWorkspaces::checkData(API::MatrixWorkspace_const_sptr ws1,
     if (resultBool || checkAllData) // Avoid checking unnecessarily
     {
       // Get references to the current spectrum
-      const MantidVec &X1 = ws1->readX(i);
-      const MantidVec &Y1 = ws1->readY(i);
-      const MantidVec &E1 = ws1->readE(i);
-      const MantidVec &X2 = ws2->readX(i);
-      const MantidVec &Y2 = ws2->readY(i);
-      const MantidVec &E2 = ws2->readE(i);
+      const auto &X1 = ws1->x(i);
+      const auto &Y1 = ws1->y(i);
+      const auto &E1 = ws1->e(i);
+      const auto &X2 = ws2->x(i);
+      const auto &Y2 = ws2->y(i);
+      const auto &E2 = ws2->e(i);
 
       for (int j = 0; j < static_cast<int>(numBins); ++j) {
         bool err;
@@ -905,9 +904,11 @@ bool CompareWorkspaces::checkMasking(API::MatrixWorkspace_const_sptr ws1,
 /// @retval false The samples does not match
 bool CompareWorkspaces::checkSample(const API::Sample &sample1,
                                     const API::Sample &sample2) {
-  if (sample1.getName() != sample2.getName()) {
-    g_log.debug() << "WS1 sample name: \"" << sample1.getName() << "\"\n";
-    g_log.debug() << "WS2 sample name: \"" << sample2.getName() << "\"\n";
+  std::string const name1 = sample1.getName();
+  std::string const name2 = sample2.getName();
+  if (name1 != name2) {
+    g_log.debug("WS1 sample name: " + name1);
+    g_log.debug("WS2 sample name: " + name2);
     recordMismatch("Sample name mismatch");
     return false;
   }
@@ -952,24 +953,20 @@ bool CompareWorkspaces::checkRunProperties(const API::Run &run1,
     g_log.debug() << "WS2 number of logs: " << ws2logs.size() << "\n";
     recordMismatch("Different numbers of logs");
     return false;
-  }
-
-  // Now loop over the individual logs
-  bool matched(true);
-  int64_t length(static_cast<int64_t>(ws1logs.size()));
-  PARALLEL_FOR_IF(true)
-  for (int64_t i = 0; i < length; ++i) {
-    PARALLEL_START_INTERUPT_REGION
-    if (matched) {
+  } else {
+    // Now loop over the individual logs
+    for (size_t i = 0; i < ws1logs.size(); ++i) {
       if (*(ws1logs[i]) != *(ws2logs[i])) {
-        matched = false;
+        if (g_log.is(Logger::Priority::PRIO_DEBUG)) {
+          g_log.debug("WS1 log: " + ws1logs[i]->name());
+          g_log.debug("WS2 log: " + ws2logs[i]->name());
+        }
         recordMismatch("Log mismatch");
+        return false;
       }
     }
-    PARALLEL_END_INTERUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
-  return matched;
+  return true;
 }
 
 //------------------------------------------------------------------------------------------------

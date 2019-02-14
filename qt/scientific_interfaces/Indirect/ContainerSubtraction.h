@@ -34,12 +34,13 @@ private slots:
   void plotPreview(int wsIndex);
   /// Handle abs. correction algorithm completion
   void containerSubtractionComplete();
-  /// Handles saving workspace
-  void saveClicked();
-  /// Handles mantid plotting
-  void plotClicked();
   /// Handles plotting the preview.
   void plotCurrentPreview();
+
+  void saveClicked();
+  void plotSpectrumClicked();
+  void plotContourClicked();
+  void runClicked();
 
 private:
   void setup() override;
@@ -50,6 +51,10 @@ private:
   void plotInPreview(const QString &curveName,
                      Mantid::API::MatrixWorkspace_sptr &ws,
                      const QColor &curveColor);
+
+  std::size_t getOutWsNumberOfSpectra() const;
+  Mantid::API::MatrixWorkspace_const_sptr
+  getADSWorkspace(std::string const &name) const;
 
   std::string createOutputName();
 
@@ -89,6 +94,18 @@ private:
   addSampleLogAlgorithm(Mantid::API::MatrixWorkspace_sptr workspace,
                         const std::string &name, const std::string &type,
                         const std::string &value) const;
+
+  void setPlotSpectrumIndexMax(int maximum);
+  int getPlotSpectrumIndex();
+
+  void setRunEnabled(bool enabled);
+  void setPlotSpectrumEnabled(bool enabled);
+  void setPlotContourEnabled(bool enabled);
+  void setSaveResultEnabled(bool enabled);
+  void setButtonsEnabled(bool enabled);
+  void setRunIsRunning(bool running);
+  void setPlotSpectrumIsPlotting(bool plotting);
+  void setPlotContourIsPlotting(bool plotting);
 
   Ui::ContainerSubtraction m_uiForm;
   std::string m_originalSampleUnits;

@@ -3,8 +3,8 @@ set ( PY_FILES
   helperfunctions.py
   plotfunctions.py
   plotfunctions3D.py
+  utility.py
 )
-
 
 #############################################################################################
 # Copy over the pure Python files for the module
@@ -27,4 +27,4 @@ add_custom_target ( PythonPlotsModule ALL DEPENDS ${PYTHON_INSTALL_FILES} )
 # Installation settings
 ###########################################################################
 # Pure Python files
-install ( FILES ${PY_FILES} DESTINATION ${BIN_DIR}/mantid/plots )
+mtd_install_files( FILES ${PY_FILES} INSTALL_DIRS ${WORKBENCH_BIN_DIR}/mantid/plots ${BIN_DIR}/mantid/plots )

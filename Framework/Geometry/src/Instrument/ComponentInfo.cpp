@@ -428,15 +428,33 @@ ComponentInfo::componentType(const size_t componentIndex) const {
 }
 
 void ComponentInfo::setScanInterval(
-    const std::pair<int64_t, int64_t> &interval) {
-  m_componentInfo->setScanInterval(interval);
+    const std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime>
+        &interval) {
+  m_componentInfo->setScanInterval(
+      {interval.first.totalNanoseconds(), interval.second.totalNanoseconds()});
 }
+
+size_t ComponentInfo::scanCount() const { return m_componentInfo->scanCount(); }
 
 void ComponentInfo::merge(const ComponentInfo &other) {
   m_componentInfo->merge(*other.m_componentInfo);
 }
 
-size_t ComponentInfo::scanSize() const { return m_componentInfo->scanSize(); }
+ComponentInfoIt ComponentInfo::begin() {
+  return ComponentInfoIt(*this, 0, size());
+}
+
+ComponentInfoIt ComponentInfo::end() {
+  return ComponentInfoIt(*this, size(), size());
+}
+
+const ComponentInfoConstIt ComponentInfo::cbegin() {
+  return ComponentInfoConstIt(*this, 0, size());
+}
+
+const ComponentInfoConstIt ComponentInfo::cend() {
+  return ComponentInfoConstIt(*this, size(), size());
+}
 
 } // namespace Geometry
 } // namespace Mantid

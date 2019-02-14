@@ -8,13 +8,13 @@
 from __future__ import (absolute_import, division, print_function)
 from mantid import config
 import os
-import stresstesting
+import systemtesting
 
 
 EXPECTED_EXT = '.expected'
 
 
-class ValidateFacilitiesFile(stresstesting.MantidStressTest):
+class ValidateFacilitiesFile(systemtesting.MantidSystemTest):
 
     def skipTests(self):
         try:

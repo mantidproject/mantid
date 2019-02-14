@@ -2,7 +2,7 @@
  AlgorithmID
 =============
 
-This a python binding to the C++ class Mantid::API::AlgorithmID.
+This is a Python binding to the C++ class Mantid::API::AlgorithmID.
 
 
 .. module:`mantid.api`

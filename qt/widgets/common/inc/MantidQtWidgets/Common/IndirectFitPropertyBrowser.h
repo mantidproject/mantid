@@ -65,6 +65,8 @@ public:
 
   void setCustomSettingEnabled(const QString &customName, bool enabled);
 
+  void setFitEnabled(bool enable) override;
+
   void addCheckBoxFunctionGroup(
       const QString &groupName,
       const std::vector<Mantid::API::IFunction_sptr> &functions,
@@ -78,6 +80,7 @@ public:
   void addComboBoxFunctionGroup(
       const QString &groupName,
       const std::vector<Mantid::API::IFunction_sptr> &functions);
+  void clearFitTypeComboBox();
 
   void setBackgroundOptions(const QStringList &backgrounds);
 
@@ -132,6 +135,8 @@ public:
 
   void setWorkspaceIndex(int i) override;
 
+  void updatePlotGuess(Mantid::API::MatrixWorkspace_const_sptr sampleWorkspace);
+
 public slots:
   void fit() override;
   void sequentialFit() override;
@@ -150,8 +155,6 @@ protected slots:
   void clear() override;
 
   void clearAllCustomFunctions();
-
-  void updatePlotGuess();
 
   void browserVisibilityChanged(bool isVisible);
 

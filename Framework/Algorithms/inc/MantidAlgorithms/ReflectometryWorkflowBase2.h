@@ -11,6 +11,9 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidGeometry/Instrument_fwd.h"
 
+using namespace Mantid::API;
+using namespace Mantid::Kernel;
+using namespace Mantid::Geometry;
 namespace Mantid {
 namespace Algorithms {
 
@@ -69,10 +72,9 @@ protected:
   populateMonitorProperties(Mantid::API::IAlgorithm_sptr alg,
                             Mantid::Geometry::Instrument_const_sptr instrument);
   /// Populate processing instructions
-  std::string populateProcessingInstructions(
-      Mantid::API::IAlgorithm_sptr alg,
-      Mantid::Geometry::Instrument_const_sptr instrument,
-      Mantid::API::MatrixWorkspace_sptr inputWS) const;
+  std::string
+  findProcessingInstructions(Mantid::Geometry::Instrument_const_sptr instrument,
+                             Mantid::API::MatrixWorkspace_sptr inputWS) const;
   /// Populate transmission properties
   bool populateTransmissionProperties(Mantid::API::IAlgorithm_sptr alg) const;
   /// Find theta from a named log value
@@ -80,6 +82,28 @@ protected:
                           const std::string &logName);
   // Retrieve the run number from the logs of the input workspace.
   std::string getRunNumber(Mantid::API::MatrixWorkspace const &ws) const;
+
+  void convertProcessingInstructions(Instrument_const_sptr instrument,
+                                     MatrixWorkspace_sptr inputWS);
+  void convertProcessingInstructions(MatrixWorkspace_sptr inputWS);
+  std::string m_processingInstructionsWorkspaceIndex;
+  std::string m_processingInstructions;
+
+protected:
+  std::string
+  convertToSpectrumNumber(const std::string &workspaceIndex,
+                          Mantid::API::MatrixWorkspace_const_sptr ws) const;
+
+  std::string convertProcessingInstructionsToWorkspaceIndices(
+      const std::string &instructions,
+      Mantid::API::MatrixWorkspace_const_sptr ws) const;
+
+  std::string convertToWorkspaceIndex(const std::string &spectrumNumber,
+                                      MatrixWorkspace_const_sptr ws) const;
+
+  std::string convertProcessingInstructionsToSpectrumNumbers(
+      const std::string &instructions,
+      Mantid::API::MatrixWorkspace_const_sptr ws) const;
 };
 } // namespace Algorithms
 } // namespace Mantid

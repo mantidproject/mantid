@@ -16,7 +16,6 @@
 #include <Poco/File.h>
 #include <QApplication>
 #include <boost/algorithm/string.hpp>
-#include <boost/regex.hpp>
 
 #include <utility>
 

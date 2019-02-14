@@ -8,7 +8,9 @@
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidQtWidgets/Common/MantidDesktopServices.h"
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
+#endif
 #include "MantidQtWidgets/InstrumentView/DetXMLFile.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetMaskTab.h"
@@ -49,6 +51,7 @@
 #include <QLineEdit>
 #include <QMenu>
 #include <QMessageBox>
+#include <QMimeData>
 #include <QPushButton>
 #include <QRadioButton>
 #include <QSettings>
@@ -153,6 +156,7 @@ InstrumentWidget::InstrumentWidget(const QString &wsName, QWidget *parent,
 
   m_instrumentActor.reset(
       new InstrumentActor(m_workspaceName, autoscaling, scaleMin, scaleMax));
+
   // Create the b=tabs
   createTabs(settings);
 
@@ -196,7 +200,9 @@ InstrumentWidget::InstrumentWidget(const QString &wsName, QWidget *parent,
 
   setWindowTitle(QString("Instrument - ") + m_workspaceName);
 
-  init(resetGeometry, autoscaling, scaleMin, scaleMax, setDefaultView);
+  const bool resetActor(false);
+  init(resetGeometry, autoscaling, scaleMin, scaleMax, setDefaultView,
+       resetActor);
 }
 
 /**
@@ -254,13 +260,15 @@ InstrumentWidget::getSurfaceAxis(const int surfaceType) const {
  * @param scaleMax :: Maximum value of the colormap scale. Ignored if
  * autoscaling == true.
  * @param setDefaultView :: Set the default surface type
+ * @param resetActor :: If true reset the instrumentActor object
  */
 void InstrumentWidget::init(bool resetGeometry, bool autoscaling,
                             double scaleMin, double scaleMax,
-                            bool setDefaultView) {
-  // Previously in (now removed) setWorkspaceName method
-  m_instrumentActor.reset(
-      new InstrumentActor(m_workspaceName, autoscaling, scaleMin, scaleMax));
+                            bool setDefaultView, bool resetActor) {
+  if (resetActor) {
+    m_instrumentActor.reset(
+        new InstrumentActor(m_workspaceName, autoscaling, scaleMin, scaleMax));
+  }
   m_xIntegration->setTotalRange(m_instrumentActor->minBinValue(),
                                 m_instrumentActor->maxBinValue());
   m_xIntegration->setUnits(QString::fromStdString(
@@ -644,8 +652,8 @@ void InstrumentWidget::selectComponent(const QString &name) {
  * Set the scale type programmatically
  * @param type :: The scale choice
  */
-void InstrumentWidget::setScaleType(GraphOptions::ScaleType type) {
-  emit scaleTypeChanged(type);
+void InstrumentWidget::setScaleType(ColorMap::ScaleType type) {
+  emit scaleTypeChanged(static_cast<int>(type));
 }
 
 /**
@@ -979,7 +987,7 @@ bool InstrumentWidget::overlay(const QString &wsName) {
   auto mask = boost::dynamic_pointer_cast<IMaskWorkspace>(workspace);
 
   if (!pws && !table && !mask) {
-    QMessageBox::warning(this, "MantidPlot - Warning",
+    QMessageBox::warning(this, "Mantid - Warning",
                          "Work space called '" + wsName +
                              "' is not suitable."
                              " Please select another workspace. ");
@@ -1193,9 +1201,9 @@ void InstrumentWidget::createTabs(QSettings &settings) {
   m_renderTab->loadSettings(settings);
 
   // Pick controls
-  InstrumentWidgetPickTab *pickTab = new InstrumentWidgetPickTab(this);
-  mControlsTab->addTab(pickTab, QString("Pick"));
-  pickTab->loadSettings(settings);
+  m_pickTab = new InstrumentWidgetPickTab(this);
+  mControlsTab->addTab(m_pickTab, QString("Pick"));
+  m_pickTab->loadSettings(settings);
 
   // Mask controls
   m_maskTab = new InstrumentWidgetMaskTab(this);
@@ -1207,14 +1215,14 @@ void InstrumentWidget::createTabs(QSettings &settings) {
   m_maskTab->loadSettings(settings);
 
   // Instrument tree controls
-  InstrumentWidgetTreeTab *treeTab = new InstrumentWidgetTreeTab(this);
-  mControlsTab->addTab(treeTab, QString("Instrument"));
-  treeTab->loadSettings(settings);
+  m_treeTab = new InstrumentWidgetTreeTab(this);
+  mControlsTab->addTab(m_treeTab, QString("Instrument"));
+  m_treeTab->loadSettings(settings);
 
   connect(mControlsTab, SIGNAL(currentChanged(int)), this,
           SLOT(tabChanged(int)));
 
-  m_tabs << m_renderTab << pickTab << m_maskTab << treeTab;
+  m_tabs << m_renderTab << m_pickTab << m_maskTab << m_treeTab;
 }
 
 /**
@@ -1222,7 +1230,7 @@ void InstrumentWidget::createTabs(QSettings &settings) {
  * configuration.
  */
 QString InstrumentWidget::getSettingsGroupName() const {
-  return QString::fromAscii(InstrumentWidgetSettingsGroup);
+  return QString::fromLatin1(InstrumentWidgetSettingsGroup);
 }
 
 /**
@@ -1230,7 +1238,7 @@ QString InstrumentWidget::getSettingsGroupName() const {
  * configuration.
  */
 QString InstrumentWidget::getInstrumentSettingsGroupName() const {
-  return QString::fromAscii(InstrumentWidgetSettingsGroup) + "/" +
+  return QString::fromLatin1(InstrumentWidgetSettingsGroup) + "/" +
          QString::fromStdString(getInstrumentActor().getInstrumentName());
 }
 
@@ -1356,7 +1364,7 @@ Workspace_sptr InstrumentWidget::getWorkspaceFromADS(const std::string &name) {
   try {
     workspace = AnalysisDataService::Instance().retrieve(name);
   } catch (std::runtime_error) {
-    QMessageBox::warning(this, "MantidPlot - Warning",
+    QMessageBox::warning(this, "Mantid - Warning",
                          "No workspace called '" +
                              QString::fromStdString(name) + "' found. ");
     return nullptr;
@@ -1373,7 +1381,7 @@ boost::shared_ptr<UnwrappedSurface> InstrumentWidget::getUnwrappedSurface() {
   auto surface = boost::dynamic_pointer_cast<UnwrappedSurface>(getSurface());
   if (!surface) {
     QMessageBox::warning(
-        this, "MantidPlot - Warning",
+        this, "Mantid - Warning",
         "Please change to an unwrapped view to overlay a workspace.");
     return nullptr;
   }
@@ -1389,6 +1397,7 @@ int InstrumentWidget::getCurrentTab() const {
  * @return string representing the current state of the instrumet widget.
  */
 std::string InstrumentWidget::saveToProject() const {
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   TSVSerialiser tsv;
 
   // serialise widget properties
@@ -1404,6 +1413,10 @@ std::string InstrumentWidget::saveToProject() const {
   tsv.writeSection("tabs", saveTabs());
 
   return tsv.outputLines();
+#else
+  throw std::runtime_error(
+      "InstrumentWidget::saveToProject() not implemented for Qt >= 5");
+#endif
 }
 
 /**
@@ -1434,6 +1447,7 @@ void InstrumentWidget::loadTabs(const std::string &lines) const {
  * file.
  */
 void InstrumentWidget::loadFromProject(const std::string &lines) {
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   TSVSerialiser tsv(lines);
 
   if (tsv.selectLine("SurfaceType")) {
@@ -1473,6 +1487,11 @@ void InstrumentWidget::loadFromProject(const std::string &lines) {
   }
 
   updateInstrumentView();
+#else
+  Q_UNUSED(lines);
+  throw std::runtime_error(
+      "InstrumentWidget::loadFromProject() not implemented for Qt >= 5");
+#endif
 }
 
 } // namespace MantidWidgets

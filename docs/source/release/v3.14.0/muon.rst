@@ -13,11 +13,14 @@ Improvements
 - Elemental Analysis added to Muon Interfaces: Includes a selectable Periodic Table.
 - TF Asymmetry mode now displays the chi squared value at the top of the browser.
 - ALC interface now sorts the data into ascending order.
+- Muon Analysis now includes number of event per frame and number of events per frame per detector in the run info box on the home tab.
 
 Bugfixes
 ########
 - Results table now includes all logs that are common to all of the loaded files.
 - When turning TF Asymmetry mode off it no longer resets the global options.
+- Results table will produce correct values for co-added runs.
+- The x limits on the settings tab will now correct themselves if bad values are entered. 
 
 Algorithms
 ----------
@@ -35,5 +38,7 @@ Improvements
 
 Bugfixes
 ########
+- :ref: `EstimateMuonAsymmetryFromCounts <algm-EstimateMuonAsymmetryFromCounts>` had a bug that meant the first good bin was excluded from calculating the normalization.   
+
 
 :ref:`Release 3.14.0 <v3.14.0>`

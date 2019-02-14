@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,attribute-defined-outside-init
 from __future__ import (absolute_import, division, print_function)
-import stresstesting
+import systemtesting
 from mantid.simpleapi import *
 from reduction_workflow.instruments.sans.sns_command_interface import *
 from reduction_workflow.instruments.sans.hfir_command_interface import *
@@ -23,7 +23,7 @@ def do_cleanup():
     return True
 
 
-class EQSANSSolid(stresstesting.MantidStressTest):
+class EQSANSSolid(systemtesting.MantidSystemTest):
     """
         Analysis Tests for EQSANS
         Testing that the I(Q) output of is correct

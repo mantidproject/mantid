@@ -8,7 +8,7 @@
 from __future__ import (absolute_import, division, print_function)
 import os
 import sys
-import stresstesting
+import systemtesting
 from mantid.simpleapi import *
 from mantid.api import Workspace,IEventWorkspace
 
@@ -22,9 +22,9 @@ except ImportError:
 #----------------------------------------------------------------------
 
 
-class ISIS_ReductionWebLike(stresstesting.MantidStressTest):
+class ISIS_ReductionWebLike(systemtesting.MantidSystemTest):
     def __init__(self):
-        stresstesting.MantidStressTest.__init__(self)
+        systemtesting.MantidSystemTest.__init__(self)
 
        # prepare reduction variable
         self.rd = mr.ReduceMARIFromFile()
@@ -90,9 +90,9 @@ class ISIS_ReductionWebLike(stresstesting.MantidStressTest):
         return result, reference
 
 
-class ISIS_ReductionWrapperValidate(stresstesting.MantidStressTest):
+class ISIS_ReductionWrapperValidate(systemtesting.MantidSystemTest):
     def __init__(self):
-        stresstesting.MantidStressTest.__init__(self)
+        systemtesting.MantidSystemTest.__init__(self)
         self.result = False
 
     def runTest(self):
@@ -138,10 +138,10 @@ class ISIS_ReductionWrapperValidate(stresstesting.MantidStressTest):
 
 
 #----------------------------------------------------------------------
-class ISISLoadFilesRAW(stresstesting.MantidStressTest):
+class ISISLoadFilesRAW(systemtesting.MantidSystemTest):
 
     def __init__(self):
-        stresstesting.MantidStressTest.__init__(self)
+        systemtesting.MantidSystemTest.__init__(self)
         self.valid = False
 
     def runTest(self):
@@ -184,10 +184,10 @@ class ISISLoadFilesRAW(stresstesting.MantidStressTest):
         return self.valid
 
 
-class ISISLoadFilesMER(stresstesting.MantidStressTest):
+class ISISLoadFilesMER(systemtesting.MantidSystemTest):
 
     def __init__(self):
-        stresstesting.MantidStressTest.__init__(self)
+        systemtesting.MantidSystemTest.__init__(self)
         self.valid = False
 
     def runTest(self):
@@ -265,10 +265,10 @@ class ISISLoadFilesMER(stresstesting.MantidStressTest):
         return self.valid
 
 
-class ISISLoadFilesLET(stresstesting.MantidStressTest):
+class ISISLoadFilesLET(systemtesting.MantidSystemTest):
 
     def __init__(self):
-        stresstesting.MantidStressTest.__init__(self)
+        systemtesting.MantidSystemTest.__init__(self)
         self.valid = False
 
     def runTest(self):

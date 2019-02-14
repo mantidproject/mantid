@@ -72,6 +72,7 @@ class MaxEntModel(object):
         self.alg.setAlwaysStoreInADS(False)
         for name, value in iteritems(inputs):
             self.alg.setProperty(name, value)
+        self.alg.setRethrows(True)
         self.alg.execute()
         self.addOutput(inputs, self.alg, "OutputWorkspace")
         self.addOutput(inputs, self.alg, "OutputPhaseTable")
@@ -87,6 +88,7 @@ class MaxEntModel(object):
         self.alg = mantid.AlgorithmManager.create("CalMuonDetectorPhases")
         self.alg.initialize()
         self.alg.setAlwaysStoreInADS(False)
+        self.alg.setRethrows(True)
 
         for name, value in iteritems(inputs):
             self.alg.setProperty(name, value)

@@ -480,7 +480,7 @@ public:
 
   void test_instrument_with_multiple_padding() {
     FacilityHelper::ScopedFacilities loadTESTFacility(
-        "IDFs_for_UNIT_TESTING/UnitTestFacilities.xml", "TEST");
+        "unit_testing/UnitTestFacilities.xml", "TEST");
 
     Parser parser;
     parser.parse("TESTHISTOLISTENER123,299-301");

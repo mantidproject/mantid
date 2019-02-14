@@ -1959,7 +1959,8 @@ template <typename TYPE> void TimeSeriesProperty<TYPE>::countSize() const {
  */
 template <typename TYPE>
 bool TimeSeriesProperty<TYPE>::isTimeString(const std::string &str) {
-  boost::regex re("^[0-9]{4}.[0-9]{2}.[0-9]{2}.[0-9]{2}.[0-9]{2}.[0-9]{2}");
+  static const boost::regex re(
+      "^[0-9]{4}.[0-9]{2}.[0-9]{2}.[0-9]{2}.[0-9]{2}.[0-9]{2}");
   return boost::regex_search(str.begin(), str.end(), re);
 }
 

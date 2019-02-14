@@ -1607,8 +1607,9 @@ class LARMOR(ISISInstrument):
 
             start = log_data.getLogData('run_start')
             dt_0 = format_date(start.value, "%Y-%m-%dT%H:%M:%S", 19)
+            property_times = property.times
             for i in range(0, size):
-                dt = format_date(str(property.times[i]), "%Y-%m-%dT%H:%M:%S", 19)
+                dt = format_date(str(property_times[i]), "%Y-%m-%dT%H:%M:%S", 19)
                 if dt > dt_0:
                     if i == 0:
                         return float(log_data.getLogData(log_name).value[0])

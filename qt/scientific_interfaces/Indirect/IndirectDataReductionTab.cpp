@@ -43,7 +43,8 @@ void IndirectDataReductionTab::runTab() {
   if (validate()) {
     m_tabStartTime = DateAndTime::getCurrentTime();
     m_tabRunning = true;
-    emit updateRunButton(false, "Running...", "Running data reduction...");
+    emit updateRunButton(false, "disable", "Running...",
+                         "Running data reduction...");
     run();
   } else {
     g_log.warning("Failed to validate indirect tab input!");
@@ -60,7 +61,8 @@ void IndirectDataReductionTab::tabExecutionComplete(bool error) {
   UNUSED_ARG(error);
   if (m_tabRunning) {
     m_tabRunning = false;
-    emit updateRunButton();
+    auto const enableOutputButtons = error == false ? "enable" : "disable";
+    emit updateRunButton(true, enableOutputButtons);
   }
 }
 
@@ -224,7 +226,7 @@ std::map<std::string, double> IndirectDataReductionTab::getRangesFromInstrument(
   convUnitsAlg->execute();
   MatrixWorkspace_sptr tofWs = convUnitsAlg->getProperty("OutputWorkspace");
 
-  const auto tofData = tofWs->x(0);
+  const auto &tofData = tofWs->x(0);
   ranges["peak-start-tof"] = tofData[0];
   ranges["peak-end-tof"] = tofData[2];
   ranges["back-start-tof"] = tofData[3];

@@ -76,8 +76,7 @@ public:
 
   void testMINITOPAZ() {
     const std::string wsName("testMINITOPAZ");
-    loadEmptyInstrument("IDFs_for_UNIT_TESTING/MINITOPAZ_Definition.xml",
-                        wsName);
+    loadEmptyInstrument("unit_testing/MINITOPAZ_Definition.xml", wsName);
 
     // generate test file
     std::string inputFile = "test.DetCal";

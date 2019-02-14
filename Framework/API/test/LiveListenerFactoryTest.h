@@ -71,9 +71,8 @@ public:
 
   void setUp() override {
     auto &config = Kernel::ConfigService::Instance();
-    Poco::Path testFile =
-        Poco::Path(config.getInstrumentDirectory())
-            .resolve("IDFs_for_UNIT_TESTING/UnitTestFacilities.xml");
+    Poco::Path testFile = Poco::Path(config.getInstrumentDirectory())
+                              .resolve("unit_testing/UnitTestFacilities.xml");
     // Load the test facilities file
     config.updateFacilities(testFile.toString());
   }

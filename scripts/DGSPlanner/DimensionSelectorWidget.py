@@ -6,11 +6,12 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name,no-name-in-module,too-many-instance-attributes,super-on-old-class,too-few-public-methods
 from __future__ import (absolute_import, division, print_function)
-from PyQt4 import QtGui, QtCore
+from qtpy import QtGui, QtCore, QtWidgets
 import sys
 import numpy
+
 try:
-    from PyQt4.QtCore import QString
+    from qtpy.QtCore import QString
 except ImportError:
     QString = type("")
 
@@ -84,8 +85,8 @@ def translation(number,character):
     return str(number)+character
 
 
-class DimensionSelectorWidget(QtGui.QWidget):
-    changed=QtCore.pyqtSignal(dict)
+class DimensionSelectorWidget(QtWidgets.QWidget):
+    changed=QtCore.Signal(dict)
 
     def __init__(self,parent=None):
         # pylint: disable=unused-argument,super-on-old-class
@@ -96,44 +97,44 @@ class DimensionSelectorWidget(QtGui.QWidget):
         self.positiveDoubleValidator.setBottom(1e-10)
         self.V3DValidator=V3DValidator(self)
         #labels
-        self._labelBasis=QtGui.QLabel('    Projection Basis')
-        self._labelBasis1=QtGui.QLabel('    Projection u')
-        self._labelBasis2=QtGui.QLabel('    Projection v')
-        self._labelBasis3=QtGui.QLabel('    Projection w')
-        self._labelMin=QtGui.QLabel('Min')
-        self._labelMax=QtGui.QLabel('Max')
-        self._labelStep=QtGui.QLabel('Step')
+        self._labelBasis=QtWidgets.QLabel('    Projection Basis')
+        self._labelBasis1=QtWidgets.QLabel('    Projection u')
+        self._labelBasis2=QtWidgets.QLabel('    Projection v')
+        self._labelBasis3=QtWidgets.QLabel('    Projection w')
+        self._labelMin=QtWidgets.QLabel('Min')
+        self._labelMax=QtWidgets.QLabel('Max')
+        self._labelStep=QtWidgets.QLabel('Step')
         #lineedits
-        self._editBasis1=QtGui.QLineEdit()
+        self._editBasis1=QtWidgets.QLineEdit()
         self._editBasis1.setValidator(self.V3DValidator)
-        self._editBasis2=QtGui.QLineEdit()
+        self._editBasis2=QtWidgets.QLineEdit()
         self._editBasis2.setValidator(self.V3DValidator)
-        self._editBasis3=QtGui.QLineEdit()
+        self._editBasis3=QtWidgets.QLineEdit()
         self._editBasis3.setValidator(self.V3DValidator)
-        self._editMin1=QtGui.QLineEdit()
+        self._editMin1=QtWidgets.QLineEdit()
         self._editMin1.setValidator(self.doubleValidator)
-        self._editMin2=QtGui.QLineEdit()
+        self._editMin2=QtWidgets.QLineEdit()
         self._editMin2.setValidator(self.doubleValidator)
-        self._editMin3=QtGui.QLineEdit()
+        self._editMin3=QtWidgets.QLineEdit()
         self._editMin3.setValidator(self.doubleValidator)
-        self._editMin4=QtGui.QLineEdit()
+        self._editMin4=QtWidgets.QLineEdit()
         self._editMin4.setValidator(self.doubleValidator)
-        self._editMax1=QtGui.QLineEdit()
+        self._editMax1=QtWidgets.QLineEdit()
         self._editMax1.setValidator(self.doubleValidator)
-        self._editMax2=QtGui.QLineEdit()
+        self._editMax2=QtWidgets.QLineEdit()
         self._editMax2.setValidator(self.doubleValidator)
-        self._editMax3=QtGui.QLineEdit()
+        self._editMax3=QtWidgets.QLineEdit()
         self._editMax3.setValidator(self.doubleValidator)
-        self._editMax4=QtGui.QLineEdit()
+        self._editMax4=QtWidgets.QLineEdit()
         self._editMax4.setValidator(self.doubleValidator)
-        self._editStep1=QtGui.QLineEdit()
+        self._editStep1=QtWidgets.QLineEdit()
         self._editStep1.setValidator(self.positiveDoubleValidator)
-        self._editStep2=QtGui.QLineEdit()
+        self._editStep2=QtWidgets.QLineEdit()
         self._editStep2.setValidator(self.positiveDoubleValidator)
-        self._comboDim1=QtGui.QComboBox(self)
-        self._comboDim2=QtGui.QComboBox(self)
-        self._comboDim3=QtGui.QComboBox(self)
-        self._comboDim4=QtGui.QComboBox(self)
+        self._comboDim1=QtWidgets.QComboBox(self)
+        self._comboDim2=QtWidgets.QComboBox(self)
+        self._comboDim3=QtWidgets.QComboBox(self)
+        self._comboDim4=QtWidgets.QComboBox(self)
         self._comboDim4.setMinimumContentsLength(12)
         #basis
         self.basis=['1,0,0','0,1,0','0,0,1']
@@ -144,7 +145,7 @@ class DimensionSelectorWidget(QtGui.QWidget):
         self.dimStep=[0.05,0.05,0.05,1]
         self.dimIndex=[0,1,2,3]
         #layout
-        grid = QtGui.QGridLayout()
+        grid = QtWidgets.QGridLayout()
         self.setLayout(grid)
         grid.addWidget(self._labelMin,0,1)
         grid.addWidget(self._labelMax,0,2)
@@ -351,7 +352,7 @@ class DimensionSelectorWidget(QtGui.QWidget):
 
 
 if __name__=='__main__':
-    app=QtGui.QApplication(sys.argv)
+    app=QtWidgets.QApplication(sys.argv)
     mainForm=DimensionSelectorWidget()
     mainForm.show()
     sys.exit(app.exec_())

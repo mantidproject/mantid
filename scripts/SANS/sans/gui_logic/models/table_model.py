@@ -12,12 +12,16 @@ information regarding the custom output name and the information in the options 
 
 from __future__ import (absolute_import, division, print_function)
 
+import functools
 import os
 import re
 
 from sans.common.constants import ALL_PERIODS
+from sans.common.enums import RowState, SampleShape
+from sans.common.file_information import SANSFileInformationFactory
 from sans.gui_logic.models.basic_hint_strategy import BasicHintStrategy
-from sans.common.enums import RowState
+from sans.gui_logic.presenter.create_file_information import create_file_information
+from ui.sans_isis.work_handler import WorkHandler
 
 
 class TableModel(object):
@@ -25,13 +29,18 @@ class TableModel(object):
                              "sample_transmission_period", "sample_direct", "sample_direct_period",
                              "can_scatter", "can_scatter_period",
                              "can_transmission", "can_transmission_period", "can_direct", "can_direct_period",
-                             "output_name", "user_file", "sample_thickness", "options_column_model"]
+                             "output_name", "user_file", "sample_thickness", "sample_height", "sample_width",
+                             "sample_shape", "options_column_model"]
+    THICKNESS_ROW = 14
 
     def __init__(self):
         super(TableModel, self).__init__()
         self._user_file = ""
         self._batch_file = ""
         self._table_entries = []
+        self.work_handler = WorkHandler()
+        self._subscriber_list = []
+        self._id_count = 0
 
     @staticmethod
     def _validate_file_name(file_name):
@@ -66,10 +75,20 @@ class TableModel(object):
         return self._table_entries[index]
 
     def add_table_entry(self, row, table_index_model):
+        table_index_model.id = self._id_count
+        self._id_count += 1
         self._table_entries.insert(row, table_index_model)
+        if row >= self.get_number_of_rows():
+            row = self.get_number_of_rows() - 1
+        self.get_thickness_for_rows([row])
+        self.notify_subscribers()
 
     def append_table_entry(self, table_index_model):
+        table_index_model.id = self._id_count
+        self._id_count += 1
         self._table_entries.append(table_index_model)
+        self.get_thickness_for_rows([self.get_number_of_rows() - 1])
+        self.notify_subscribers()
 
     def remove_table_entries(self, rows):
         # For speed rows should be a Set here but don't think it matters for the list sizes involved.
@@ -77,6 +96,8 @@ class TableModel(object):
         if not self._table_entries:
             row_index_model = self.create_empty_row()
             self.append_table_entry(row_index_model)
+        else:
+            self.notify_subscribers()
 
     def replace_table_entries(self, row_to_replace_index, rows_to_insert):
         self.remove_table_entries(row_to_replace_index)
@@ -95,6 +116,9 @@ class TableModel(object):
         self._table_entries[row].update_attribute(self.column_name_converter[column], value)
         self._table_entries[row].update_attribute('row_state', RowState.Unprocessed)
         self._table_entries[row].update_attribute('tool_tip', '')
+        if column == 0:
+            self.get_thickness_for_rows([row])
+        self.notify_subscribers()
 
     def is_empty_row(self, row):
         return self._table_entries[row].is_empty()
@@ -104,26 +128,123 @@ class TableModel(object):
         row = [''] * 16
         return TableIndexModel(*row)
 
+    def get_non_empty_rows(self, rows):
+        return list(filter(lambda x: not self.get_table_entry(x).is_empty(), rows))
+
     def get_options_hint_strategy(self):
         return OptionsColumnModel.get_hint_strategy()
+
+    def get_sample_shape_hint_strategy(self):
+        return SampleShapeColumnModel.get_hint_strategy()
 
     def set_row_to_processed(self, row, tool_tip):
         self._table_entries[row].update_attribute('row_state', RowState.Processed)
         self._table_entries[row].update_attribute('tool_tip', tool_tip)
+        self.notify_subscribers()
 
     def reset_row_state(self, row):
         self._table_entries[row].update_attribute('row_state', RowState.Unprocessed)
         self._table_entries[row].update_attribute('tool_tip', '')
+        self.notify_subscribers()
 
     def set_row_to_error(self, row, tool_tip):
         self._table_entries[row].update_attribute('row_state', RowState.Error)
         self._table_entries[row].update_attribute('tool_tip', tool_tip)
+        self.notify_subscribers()
+
+    def get_thickness_for_rows(self, rows=None):
+        """
+        Read in the sample thickness for the given rows from the file and set it in the table.
+        :param rows: list of table rows
+        """
+        if not rows:
+            rows = range(len(self._table_entries))
+        for row in rows:
+            entry = self._table_entries[row]
+            if entry.is_empty():
+                continue
+            entry.file_finding = True
+            success_callback = functools.partial(self.update_thickness_from_file_information, entry.id)
+
+            error_callback = functools.partial(self.failure_handler, entry.id)
+            create_file_information(entry.sample_scatter, error_callback, success_callback,
+                                    self.work_handler, entry.id)
+
+    def failure_handler(self, id, error):
+        row = self.get_row_from_id(id)
+        self._table_entries[row].update_attribute('file_information', '')
+        self._table_entries[row].update_attribute('sample_thickness', '')
+        self._table_entries[row].update_attribute('sample_height', '')
+        self._table_entries[row].update_attribute('sample_width', '')
+        self._table_entries[row].update_attribute('sample_shape', '')
+        self._table_entries[row].file_finding = False
+        self.set_row_to_error(row, str(error[1]))
+
+    def update_thickness_from_file_information(self, id, file_information):
+        row = self.get_row_from_id(id)
+        if file_information:
+            rounded_file_thickness = round(file_information.get_thickness(), 2)
+            rounded_file_height = round(file_information.get_height(), 2)
+            rounded_file_width = round(file_information.get_width(), 2)
+
+            self._table_entries[row].update_attribute('file_information', file_information)
+            self._table_entries[row].update_attribute('sample_thickness', rounded_file_thickness)
+            self._table_entries[row].update_attribute('sample_height', rounded_file_height)
+            self._table_entries[row].update_attribute('sample_width', rounded_file_width)
+            if self._table_entries[row].sample_shape_string == "":
+                self._table_entries[row].update_attribute('sample_shape', file_information.get_shape())
+            self._table_entries[row].file_finding = False
+            self.reset_row_state(row)
+
+    def subscribe_to_model_changes(self, subscriber):
+        self._subscriber_list.append(subscriber)
+
+    def notify_subscribers(self):
+        for subscriber in self._subscriber_list:
+            subscriber.on_update_rows()
+
+    def get_file_information_for_row(self, row):
+        return self._table_entries[row].file_information
+
+    def get_row_from_id(self, id):
+        for row, entry in enumerate(self._table_entries):
+            if entry.id == id:
+                return row
+        return None
+
+    def wait_for_file_finding_done(self):
+        self.work_handler.wait_for_done()
+
+    def wait_for_file_information(self, row):
+        if self._table_entries[row].file_finding:
+            self.wait_for_file_finding_done()
+
+    def add_table_entry_no_thread_or_signal(self, row, table_index_model):
+        table_index_model.id = self._id_count
+        self._id_count += 1
+        self._table_entries.insert(row, table_index_model)
+        if row >= self.get_number_of_rows():
+            row = self.get_number_of_rows() - 1
+
+        entry = self._table_entries[row]
+        file_information_factory = SANSFileInformationFactory()
+        file_information = file_information_factory.create_sans_file_information(entry.sample_scatter)
+        self.update_thickness_from_file_information(entry.id, file_information)
+
+    def set_option(self, row, key, value):
+        self._table_entries[row].options_column_model.set_option(key, value)
 
     def __eq__(self, other):
-        return self.__dict__ == other.__dict__
+        return self.equal_dicts(self.__dict__, other.__dict__, ['work_handler'])
 
     def __ne__(self, other):
-        return self.__dict__ != other.__dict__
+        return not self.equal_dicts(self.__dict__, other.__dict__, ['work_handler'])
+
+    @staticmethod
+    def equal_dicts(d1, d2, ignore_keys):
+        d1_filtered = dict((k, v) for k, v in d1.items() if k not in ignore_keys)
+        d2_filtered = dict((k, v) for k, v in d2.items() if k not in ignore_keys)
+        return d1_filtered == d2_filtered
 
 
 class TableIndexModel(object):
@@ -133,8 +254,10 @@ class TableIndexModel(object):
                  can_scatter, can_scatter_period,
                  can_transmission, can_transmission_period,
                  can_direct, can_direct_period,
-                 output_name="", user_file="", sample_thickness='0.0', options_column_string=""):
+                 output_name="", user_file="", sample_thickness='', sample_height='', sample_width='',
+                 sample_shape='', options_column_string=""):
         super(TableIndexModel, self).__init__()
+        self.id = None
         self.sample_scatter = sample_scatter
         self.sample_scatter_period = sample_scatter_period
         self.sample_transmission = sample_transmission
@@ -151,12 +274,19 @@ class TableIndexModel(object):
 
         self.user_file = user_file
         self.sample_thickness = sample_thickness
+        self.sample_height = sample_height
+        self.sample_width = sample_width
         self.output_name = output_name
 
         self.options_column_model = options_column_string
+        self.sample_shape_model = SampleShapeColumnModel()
+        self.sample_shape = sample_shape
 
         self.row_state = RowState.Unprocessed
+
         self.tool_tip = ''
+        self.file_information = None
+        self.file_finding = False
 
     # Options column entries
     @property
@@ -166,6 +296,19 @@ class TableIndexModel(object):
     @options_column_model.setter
     def options_column_model(self, value):
         self._options_column_model = OptionsColumnModel(value)
+
+    # Sample shape
+    @property
+    def sample_shape_string(self):
+        return self.sample_shape_model.sample_shape_string
+
+    @property
+    def sample_shape(self):
+        return self.sample_shape_model.sample_shape
+
+    @sample_shape.setter
+    def sample_shape(self, value):
+        self.sample_shape_model(value)
 
     def update_attribute(self, attribute_name, value):
         setattr(self, attribute_name, value)
@@ -183,11 +326,25 @@ class TableIndexModel(object):
                 self._string_period(self.can_scatter_period), self.can_transmission,
                 self._string_period(self.can_transmission_period), self.can_direct,
                 self._string_period(self.can_direct_period), self.output_name, self.user_file, self.sample_thickness,
+                self.sample_height, self.sample_width,
+                self.sample_shape_string,
                 self.options_column_model.get_options_string()]
 
+    def to_batch_list(self):
+        """
+        :return: a list of data in the order as would typically appear
+        in a batch file
+        """
+        return_list = [self.sample_scatter, self.output_name, self.sample_transmission,
+                       self.sample_direct, self.can_scatter, self.can_transmission,
+                       self.can_direct, self.user_file]
+        return_list = list(map(str, return_list))
+        return_list = list(map(str.strip, return_list))
+        return return_list
+
     def isMultiPeriod(self):
-        return any ((self.sample_scatter_period, self.sample_transmission_period ,self.sample_direct_period,
-                     self.can_scatter_period, self.can_transmission_period, self.can_direct_period))
+        return any((self.sample_scatter_period, self.sample_transmission_period, self.sample_direct_period,
+                    self.can_scatter_period, self.can_transmission_period, self.can_direct_period))
 
     def is_empty(self):
         return not any((self.sample_scatter, self.sample_transmission, self.sample_direct, self.can_scatter,
@@ -206,17 +363,23 @@ class OptionsColumnModel(object):
     def get_options(self):
         return self._options
 
+    def set_option(self, key, value):
+        self._options.update({key: value})
+
     def get_options_string(self):
-        return self._options_column_string
+        return self._serialise_options_dict()
 
     @staticmethod
     def _get_permissible_properties():
-        return {"WavelengthMin":float, "WavelengthMax": float, "EventSlices": str}
+        return {"WavelengthMin":float, "WavelengthMax": float, "EventSlices": str, "MergeScale": float,
+                "MergeShift": float}
 
     @staticmethod
     def get_hint_strategy():
         return BasicHintStrategy({"WavelengthMin": 'The min value of the wavelength when converting from TOF.',
                                   "WavelengthMax": 'The max value of the wavelength when converting from TOF.',
+                                  "MergeScale": 'The scale applied to the HAB when mergeing',
+                                  "MergeShift": 'The shift applied to the HAB when mergeing',
                                   "EventSlices": 'The event slices to reduce.'
                                   ' The format is the same as for the event slices'
                                   ' box in settings, however if a comma separated list is given '
@@ -253,6 +416,9 @@ class OptionsColumnModel(object):
 
         return parsed
 
+    def _serialise_options_dict(self):
+        return ', '.join(['{}={}'.format(k,self._options[k]) for k in sorted(self._options)])
+
     @staticmethod
     def _get_options(options_column_string):
         """
@@ -270,6 +436,51 @@ class OptionsColumnModel(object):
                 conversion_functions = permissible_properties[key]
                 options.update({key: conversion_functions(value)})
         return options
+
+    def __eq__(self, other):
+        return self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return self.__dict__ != other.__dict__
+
+
+class SampleShapeColumnModel(object):
+    SAMPLE_SHAPES = ["cylinder", "disc", "flatplate"]
+    SAMPLE_SHAPES_DICT = {"cylinder": "Cylinder",
+                          "disc": "Disc",
+                          "flatplate": "FlatPlate"}
+
+    def __init__(self):
+        self.sample_shape = ""
+        self.sample_shape_string = ""
+
+    def __call__(self, original_value):
+        self._get_sample_shape(original_value)
+
+    def _get_sample_shape(self, original_value):
+        try:
+            original_value = SampleShape.to_string(original_value)
+        except RuntimeError as e:
+            if not isinstance(original_value, str):
+                raise ValueError(str(e))
+
+        value = original_value.strip().lower()
+        if value == "":
+            self.sample_shape = ""
+            self.sample_shape_string = ""
+        else:
+            for shape in SampleShapeColumnModel.SAMPLE_SHAPES:
+                if shape.startswith(value):
+                    shape_enum_string = SampleShapeColumnModel.SAMPLE_SHAPES_DICT[shape]
+                    self.sample_shape = SampleShape.from_string(shape_enum_string)
+                    self.sample_shape_string = shape_enum_string
+                    break
+
+    @staticmethod
+    def get_hint_strategy():
+        return BasicHintStrategy({"Cylinder": "",
+                                  "Disc": "",
+                                  "FlatPlate": ""})
 
     def __eq__(self, other):
         return self.__dict__ == other.__dict__

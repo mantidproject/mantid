@@ -11,10 +11,10 @@ ISIS reflectometry instruments signed theta value
 """
 import os
 from mantid.simpleapi import *
-import stresstesting
+import systemtesting
 
 
-class ReflectometryInstrumentSignedThetaTest(stresstesting.MantidStressTest):
+class ReflectometryInstrumentSignedThetaTest(systemtesting.MantidSystemTest):
     def signed_theta_test(self, idf_name, detector_vertical_position, detector_name = 'point-detector'):
         idf_dir=config['instrumentDefinition.directory']
         # Load instrument definition

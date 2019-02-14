@@ -328,7 +328,7 @@ void IFunctionAdapter::evaluateDerivative(API::Jacobian *out,
   PyObject_CallMethod(getSelf(), const_cast<char *>(m_derivName.c_str()),
                       const_cast<char *>("(OO)"), xvals, jacobian);
   if (PyErr_Occurred())
-    throw PythonRuntimeError();
+    throw PythonException();
 }
 } // namespace PythonInterface
 } // namespace Mantid

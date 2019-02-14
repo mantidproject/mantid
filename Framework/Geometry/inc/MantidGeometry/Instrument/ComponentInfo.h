@@ -9,7 +9,9 @@
 
 #include "MantidBeamline/ComponentType.h"
 #include "MantidGeometry/DllConfig.h"
+#include "MantidGeometry/Instrument/ComponentInfoIterator.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
+#include "MantidKernel/DateAndTime.h"
 #include <boost/shared_ptr.hpp>
 #include <unordered_map>
 #include <vector>
@@ -135,11 +137,21 @@ public:
   BoundingBox boundingBox(const size_t componentIndex,
                           const BoundingBox *reference = nullptr) const;
   Beamline::ComponentType componentType(const size_t componentIndex) const;
-  void setScanInterval(const std::pair<int64_t, int64_t> &interval);
+  void setScanInterval(const std::pair<Types::Core::DateAndTime,
+                                       Types::Core::DateAndTime> &interval);
+  size_t scanCount() const;
   void merge(const ComponentInfo &other);
-  size_t scanSize() const;
+
+  ComponentInfoIterator<ComponentInfo> begin();
+  ComponentInfoIterator<ComponentInfo> end();
+  const ComponentInfoIterator<const ComponentInfo> cbegin();
+  const ComponentInfoIterator<const ComponentInfo> cend();
+
   friend class Instrument;
 };
+
+using ComponentInfoIt = ComponentInfoIterator<ComponentInfo>;
+using ComponentInfoConstIt = ComponentInfoIterator<const ComponentInfo>;
 
 } // namespace Geometry
 } // namespace Mantid

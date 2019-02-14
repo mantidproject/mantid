@@ -14,7 +14,6 @@
 #include "MantidQtWidgets/Common/ParseKeyValueString.h"
 
 #include <boost/algorithm/string.hpp>
-#include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
 #include <fstream>
 #include <memory>

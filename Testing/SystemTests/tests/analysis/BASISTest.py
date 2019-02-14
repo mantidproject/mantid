@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
-import stresstesting
+import systemtesting
 from mantid import config
 from mantid.simpleapi import (BASISCrystalDiffraction, Load, GroupWorkspaces,
                               ElasticWindowMultiple, MSDFit,
@@ -29,7 +29,7 @@ class PreppingMixin(object):
             config[key] = value  # config object does not have update method like python dict
 
 
-class ElwinTest(stresstesting.MantidStressTest, PreppingMixin):
+class ElwinTest(systemtesting.MantidSystemTest, PreppingMixin):
     r"""ELWIN tab of the Indirect Inelastic Interface
     """
 
@@ -77,7 +77,7 @@ class ElwinTest(stresstesting.MantidStressTest, PreppingMixin):
         return 'outQ2', 'BASIS_elwin_eq2.nxs'
 
 
-class GaussianMSDTest(stresstesting.MantidStressTest, PreppingMixin):
+class GaussianMSDTest(systemtesting.MantidSystemTest, PreppingMixin):
     r"""MSD tab of the Indirect Inelastic Interface
     """
 
@@ -113,7 +113,7 @@ class GaussianMSDTest(stresstesting.MantidStressTest, PreppingMixin):
         return 'outMSD', 'BASIS_63652_63720_Gaussian_msd.nxs'
 
 
-class CrystalDiffractionTest(stresstesting.MantidStressTest, PreppingMixin):
+class CrystalDiffractionTest(systemtesting.MantidSystemTest, PreppingMixin):
     r"""Reduction for a scan of runs probing different orientations of a crystal.
     """
 
@@ -164,7 +164,7 @@ class CrystalDiffractionTest(stresstesting.MantidStressTest, PreppingMixin):
         return 'peaky', 'BASISOrientedSample.nxs'
 
 
-class PowderSampleTest(stresstesting.MantidStressTest, PreppingMixin):
+class PowderSampleTest(systemtesting.MantidSystemTest, PreppingMixin):
     r"""Run a elastic reduction for powder sample"""
 
     def __init__(self):
@@ -174,8 +174,8 @@ class PowderSampleTest(stresstesting.MantidStressTest, PreppingMixin):
 
     def requiredFiles(self):
         return ['BASIS_Mask_default_diff.xml',
-                'BSS_74799_event.nxs',
-                'BASISPowderSample.nxs']
+                'BSS_74799_event.nxs', 'BSS_75527_event.nxs',
+                'BSS_64642_event.nxs', 'BASISPowderSample.nxs']
 
     def runTest(self):
         r"""

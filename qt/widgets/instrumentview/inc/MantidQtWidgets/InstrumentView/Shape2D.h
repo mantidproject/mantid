@@ -7,7 +7,6 @@
 #ifndef MANTIDPLOT_SHAPE2D_H_
 #define MANTIDPLOT_SHAPE2D_H_
 
-#include "MantidQtWidgets/Common/TSVSerialiser.h"
 #include "RectF.h"
 
 #include <QColor>
@@ -129,6 +128,7 @@ public:
   static Shape2D *loadFromProject(const std::string &lines);
   /// Save settings for the widget tab to a project file
   virtual std::string saveToProject() const;
+  virtual std::string type() const { return "base"; }
 
   // --- Properties. for gui interaction --- //
 
@@ -188,6 +188,9 @@ private:
   /// Instantiate specifc shapes from a type string
   static Shape2D *loadShape2DFromType(const std::string &type,
                                       const std::string &lines);
+
+  friend class InstrumentWidgetEncoder;
+  friend class InstrumentWidgetDecoder;
 };
 
 /**
@@ -216,6 +219,7 @@ public:
   static Shape2D *loadFromProject(const std::string &lines);
   /// Save state for the shape to a project file
   virtual std::string saveToProject() const override;
+  std::string type() const override { return "ellipse"; }
 
 protected:
   void drawShape(QPainter &painter) const override;
@@ -242,6 +246,7 @@ public:
   static Shape2D *loadFromProject(const std::string &lines);
   /// Save state for the shape to a project file
   virtual std::string saveToProject() const override;
+  std::string type() const override { return "rectangle"; }
 
 protected:
   void drawShape(QPainter &painter) const override;
@@ -278,6 +283,7 @@ public:
   static Shape2D *loadFromProject(const std::string &lines);
   /// Save state for the shape to a project file
   virtual std::string saveToProject() const override;
+  std::string type() const override { return "ring"; }
 
 protected:
   void drawShape(QPainter &painter) const override;
@@ -313,6 +319,7 @@ public:
   static Shape2D *loadFromProject(const std::string &lines);
   /// Save state for the shape to a project file
   virtual std::string saveToProject() const override;
+  std::string type() const override { return "free"; }
 
 protected:
   void drawShape(QPainter &painter) const override;
@@ -323,6 +330,8 @@ private:
   RectF getPolygonBoundingRect() const;
   QPolygonF m_polygon;    ///< Implements the shape.
   QPainterPath m_outline; ///< Object to draw the shape's border.
+  friend class InstrumentWidgetEncoder;
+  friend class InstrumentWidgetDecoder;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt

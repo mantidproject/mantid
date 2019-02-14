@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,attribute-defined-outside-init, too-few-public-methods
 from __future__ import (absolute_import, division, print_function)
-import stresstesting
+import systemtesting
 import os
 from abc import ABCMeta, abstractmethod
 from mantid.simpleapi import *
@@ -31,7 +31,7 @@ def _cleanup_files(dirname, filenames):
 #==============================================================================
 
 
-class QLresTest(stresstesting.MantidStressTest):
+class QLresTest(systemtesting.MantidSystemTest):
 
     def skipTests(self):
         return not platform.system() == "Windows"
@@ -75,7 +75,7 @@ class QLresTest(stresstesting.MantidStressTest):
 #==============================================================================
 
 
-class ResNormTest(stresstesting.MantidStressTest):
+class ResNormTest(systemtesting.MantidSystemTest):
 
     def skipTests(self):
         return not platform.system() == "Windows"
@@ -107,7 +107,7 @@ class ResNormTest(stresstesting.MantidStressTest):
 #==============================================================================
 
 
-class QuestTest(stresstesting.MantidStressTest):
+class QuestTest(systemtesting.MantidSystemTest):
 
     def skipTests(self):
         return not platform.system() == "Windows"
@@ -146,7 +146,7 @@ class QuestTest(stresstesting.MantidStressTest):
 #==============================================================================
 
 
-class QSeTest(stresstesting.MantidStressTest):
+class QSeTest(systemtesting.MantidSystemTest):
 
     def skipTests(self):
         return not platform.system() == "Windows"
@@ -188,7 +188,7 @@ class QSeTest(stresstesting.MantidStressTest):
 #==============================================================================
 
 
-class QLDataTest(stresstesting.MantidStressTest):
+class QLDataTest(systemtesting.MantidSystemTest):
 
     def skipTests(self):
         return not platform.system() == "Windows"
@@ -232,7 +232,7 @@ class QLDataTest(stresstesting.MantidStressTest):
 #==============================================================================
 
 
-class QLResNormTest(stresstesting.MantidStressTest):
+class QLResNormTest(systemtesting.MantidSystemTest):
 
     def skipTests(self):
         return not platform.system() == "Windows"
@@ -280,7 +280,7 @@ class QLResNormTest(stresstesting.MantidStressTest):
 #==============================================================================
 
 
-class QLWidthTest(stresstesting.MantidStressTest):
+class QLWidthTest(systemtesting.MantidSystemTest):
 
     def skipTests(self):
         return not platform.system() == "Windows"
@@ -324,10 +324,10 @@ class QLWidthTest(stresstesting.MantidStressTest):
 #==============================================================================
 
 
-class JumpFitFunctionTestBase(with_metaclass(ABCMeta, stresstesting.MantidStressTest)):
+class JumpFitFunctionTestBase(with_metaclass(ABCMeta, systemtesting.MantidSystemTest)):
 
     def __init__(self):
-        stresstesting.MantidStressTest.__init__(self)
+        systemtesting.MantidSystemTest.__init__(self)
 
         self._sample_name = 'irs26176_graphite002_QLr_Workspace'
         self._q_range = [0.6, 1.705600]
@@ -390,7 +390,7 @@ class JumpHallRossTest(JumpFitFunctionTestBase):
         JumpFitFunctionTestBase.__init__(self)
 
         self._function = 'name=HallRoss,Tau=2.7,L=1.75'
-        self.tolerance = 1e-5
+        self.tolerance = 5e-3
 
     def get_reference_files(self):
         return 'ISISIndirectBayes_JumpHallRossTest.nxs'

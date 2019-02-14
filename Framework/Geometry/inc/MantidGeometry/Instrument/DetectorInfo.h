@@ -13,6 +13,7 @@
 #include <vector>
 
 #include "MantidGeometry/DllConfig.h"
+#include "MantidGeometry/Instrument/DetectorInfoIterator.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/V3D.h"
@@ -28,7 +29,6 @@ class SpectrumInfo;
 namespace Geometry {
 class IDetector;
 class Instrument;
-class DetectorInfoIterator;
 
 /** Geometry::DetectorInfo is an intermediate step towards a DetectorInfo that
   is part of Instrument-2.0. The aim is to provide a nearly identical interface
@@ -63,7 +63,6 @@ public:
   size_t size() const;
   size_t scanSize() const;
   bool isScanning() const;
-  bool isSyncScan() const;
 
   bool isMonitor(const size_t index) const;
   bool isMonitor(const std::pair<size_t, size_t> &index) const;
@@ -104,22 +103,18 @@ public:
   /// This will throw an out of range exception if the detector does not exist.
   size_t indexOf(const detid_t id) const { return m_detIDToIndex->at(id); }
 
-  size_t scanCount(const size_t index) const;
-  std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime>
-  scanInterval(const std::pair<size_t, size_t> &index) const;
-  void setScanInterval(const size_t index,
-                       const std::pair<Types::Core::DateAndTime,
-                                       Types::Core::DateAndTime> &interval);
-  void setScanInterval(const std::pair<Types::Core::DateAndTime,
-                                       Types::Core::DateAndTime> &interval);
-
-  void merge(const DetectorInfo &other);
+  size_t scanCount() const;
+  const std::vector<
+      std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime>>
+  scanIntervals() const;
 
   friend class API::SpectrumInfo;
   friend class Instrument;
 
-  DetectorInfoIterator begin() const;
-  DetectorInfoIterator end() const;
+  DetectorInfoIterator<DetectorInfo> begin();
+  DetectorInfoIterator<DetectorInfo> end();
+  const DetectorInfoIterator<const DetectorInfo> cbegin() const;
+  const DetectorInfoIterator<const DetectorInfo> cend() const;
 
 private:
   const Geometry::IDetector &getDetector(const size_t index) const;
@@ -137,6 +132,9 @@ private:
       m_lastDetector;
   mutable std::vector<size_t> m_lastIndex;
 };
+
+using DetectorInfoIt = DetectorInfoIterator<DetectorInfo>;
+using DetectorInfoConstIt = DetectorInfoIterator<const DetectorInfo>;
 
 } // namespace Geometry
 } // namespace Mantid

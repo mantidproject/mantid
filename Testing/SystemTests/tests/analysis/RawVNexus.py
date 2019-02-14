@@ -5,11 +5,11 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,unused-variable
-import stresstesting
+import systemtesting
 from mantid.simpleapi import *
 
 
-class RawVNexus(stresstesting.MantidStressTest):
+class RawVNexus(systemtesting.MantidSystemTest):
     ''' Simply tests that our LoadRaw and LoadISISNexus algorithms produce the same workspace'''
 
     def runTest(self):

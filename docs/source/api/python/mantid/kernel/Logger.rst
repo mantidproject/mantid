@@ -2,7 +2,7 @@
  Logger
 ========
 
-This a python binding to the C++ class Mantid::Kernel::Logger.
+This is a Python binding to the C++ class Mantid::Kernel::Logger.
 
 
 .. module:`mantid.kernel`

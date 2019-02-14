@@ -7,18 +7,15 @@ set ( CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../buildconfig/CMake")
 # Define the project name. Allows building framework as a separate project.
 project ( MantidFramework )
 
-# Set paths to Third_Party for Windows
-if ( NOT THIRD_PARTY_DIR )
-  if ( MSVC )
-    include ( MSVC)
-  elseif ( APPLE )
-    include ( DarwinSetup )
-  endif ()
-endif ()
-
 # If building as a stand-alone project, call our common setup script
 if ( NOT COMMONSETUP_DONE )
-  include ( CommonSetup )
+    if (MSVC)
+        include(MSVC)
+    elseif(APPLE)
+        include(DarwinSetup)
+    endif()
+
+    include ( CommonSetup )
 endif ()
 
 ###########################################################################
@@ -64,6 +61,7 @@ endif ()
 ###########################################################################
 # Now add the packages one-by-one, building up the dependencies as we go
 ###########################################################################
+include (TargetFunctions)
 
 add_custom_target ( FrameworkTests ) # target for all framework tests
 add_dependencies ( check FrameworkTests )
@@ -117,6 +115,8 @@ include_directories (DataObjects/inc)
 add_subdirectory (DataObjects)
 set ( MANTIDLIBS ${MANTIDLIBS} DataObjects )
 
+add_subdirectory (Catalog)
+
 add_subdirectory (Nexus)
 add_subdirectory (DataHandling)
 add_subdirectory (Algorithms)
@@ -151,7 +151,7 @@ add_subdirectory (ScriptRepository)
 
 set ( FRAMEWORK_LIBS Kernel HistogramData Indexing Beamline Geometry API DataObjects
                      PythonInterface DataHandling Nexus NexusGeometry Algorithms CurveFitting ICat
-                     Crystal MDAlgorithms WorkflowAlgorithms
+                     Catalog Crystal MDAlgorithms WorkflowAlgorithms
                      LiveData RemoteAlgorithms RemoteJobManagers
                      SINQ Muon
 )
@@ -166,37 +166,43 @@ add_custom_target( Framework DEPENDS ${FRAMEWORK_LIBS} )
 ###########################################################################
 
 # Create instrument directory
-install ( DIRECTORY ../instrument/ DESTINATION ${INBUNDLE}instrument
-          PATTERN "*UNIT_TESTING*" EXCLUDE
-          PATTERN ".gitignore" EXCLUDE
-)
+if(APPLE)
+    set(_BUNDLES ${INBUNDLE} MantidWorkbench.app/)
+else()
+    set(_BUNDLES "./")
+endif()
 
-# Ships .py files but only ship compiled pyd files for supported platforms.
-if ( WIN32 ) # General windows environment
-  if ( CMAKE_SIZEOF_VOID_P EQUAL 8 ) # Recommended way of detecting 64- vs 32-bit build
-    # Excludes .so files & _win32 binaries
-    install ( DIRECTORY ../scripts/ DESTINATION ${INBUNDLE}scripts PATTERN "*.pyc"
-              EXCLUDE PATTERN ".svn" EXCLUDE PATTERN ".gitignore"
-              EXCLUDE PATTERN "*.so" EXCLUDE PATTERN "*_win32.pyd" EXCLUDE PATTERN "CMakeLists.txt"
-              EXCLUDE PATTERN "test" EXCLUDE )
-  else ()
-    # Excludes so files & _win64 binaries
-    install ( DIRECTORY ../scripts/ DESTINATION ${INBUNDLE}scripts PATTERN "*.pyc"
-              EXCLUDE PATTERN ".svn" EXCLUDE PATTERN ".gitignore"
-              EXCLUDE PATTERN "*.so" EXCLUDE PATTERN "*_win64.pyd" EXCLUDE PATTERN "CMakeLists.txt"
-              EXCLUDE PATTERN "test" EXCLUDE )
-  endif ()
+foreach ( _bundle ${_BUNDLES} )
+    install ( DIRECTORY ../instrument/ DESTINATION ${_bundle}instrument
+        PATTERN "*UNIT_TESTING*" EXCLUDE
+        PATTERN ".gitignore" EXCLUDE
+        )
+    # Ships .py files but only ship compiled pyd files for supported platforms.
+    if ( WIN32 ) # General windows environment
+        if ( CMAKE_SIZEOF_VOID_P EQUAL 8 ) # Recommended way of detecting 64- vs 32-bit build
+            # Excludes .so files & _win32 binaries
+            install ( DIRECTORY ../scripts/ DESTINATION ${_bundle}scripts PATTERN "*.pyc"
+                EXCLUDE PATTERN ".svn" EXCLUDE PATTERN ".gitignore"
+                EXCLUDE PATTERN "*.so" EXCLUDE PATTERN "*_win32.pyd" EXCLUDE PATTERN "CMakeLists.txt"
+                EXCLUDE PATTERN "test" EXCLUDE )
+        else ()
+            # Excludes so files & _win64 binaries
+            install ( DIRECTORY ../scripts/ DESTINATION ${_bundle}scripts PATTERN "*.pyc"
+                EXCLUDE PATTERN ".svn" EXCLUDE PATTERN ".gitignore"
+                EXCLUDE PATTERN "*.so" EXCLUDE PATTERN "*_win64.pyd" EXCLUDE PATTERN "CMakeLists.txt"
+                EXCLUDE PATTERN "test" EXCLUDE )
+        endif ()
 
-  # Also ship mingw libraries for Inelastic fortran code. We need to do a better job here and build things
-  file ( GLOB MINGW_DLLS "${THIRD_PARTY_DIR}/bin/mingw/*.dll" )
-  install ( FILES ${MINGW_DLLS} DESTINATION ${INBUNDLE}scripts/Inelastic )
-else ()
-  # These don't work correctly and the linux ones are in no way general. They really need to be part of the build
-  install ( DIRECTORY ../scripts/ DESTINATION ${INBUNDLE}scripts PATTERN "*.pyc"
+        # Also ship mingw libraries for Inelastic fortran code. We need to do a better job here and build things
+        file ( GLOB MINGW_DLLS "${THIRD_PARTY_DIR}/bin/mingw/*.dll" )
+        install ( FILES ${MINGW_DLLS} DESTINATION ${_bundle}scripts/Inelastic )
+    else()
+        install ( DIRECTORY ../scripts/ DESTINATION ${_bundle}scripts PATTERN "*.pyc"
             EXCLUDE PATTERN ".svn" EXCLUDE PATTERN ".gitignore"
             EXCLUDE PATTERN "*_win*.pyd" EXCLUDE PATTERN "*_lnx64.so" EXCLUDE PATTERN "CMakeLists.txt"
             EXCLUDE PATTERN "test" EXCLUDE )
-endif ()
+    endif ()
+endforeach()
 
 # THIS MUST BE THE LAST SUB_DIRECTORY ADDED. See Properties/CMakeLists.txt.
 # This is included by the top-level CMakeLists if it is a full build but do it here for a Framework only

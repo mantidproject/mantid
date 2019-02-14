@@ -1,3 +1,4 @@
+#!/usr/bin/python
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
@@ -8,6 +9,7 @@ from __future__ import (absolute_import, division, print_function)
 import datetime
 import argparse
 import os
+import pprint
 import re
 
 ######################################################################################################################
@@ -39,13 +41,17 @@ directories_to_ignore = ["external","CMake","GSoapGenerated","buildconfig"]
 #Accepted file extensions
 accepted_file_extensions = [".py",".cpp",".h",".tcc",".in",".hh"]
 #excluded_file_tokens
-excluded_files = [".cmake.in", ".rb.in", ".py.in"]
+excluded_files = [".cmake.in", ".rb.in", ".py.in", "systemtest.in", "systemtest.bat.in"]
 #python file exxtensions
 python_file_extensions = [".py"]
 #extensions to ignore, don't even report these
 exts_to_ignore = [".txt",".pyc",".sh",".template",".png",".odg",".md",
                   ".doxyfile",".properties",".pbs",".rst",".md5",".xml",
                   ".dot",".ui",".jpg",".png",".svg"]
+# manually edit these files
+manually_editable_files = ["Testing/SystemTests/scripts/systemtest.in",
+                           "Testing/SystemTests/scripts/systemtest.bat.in",
+                           "installers/MacInstaller/Info.plist.in"]
 
 #global reporting dictionaries
 report_new_statements_updated = {}
@@ -245,3 +251,7 @@ if not args.noreport:
         with open(reporting_filename,"w") as reporting_file:
                 for key, value in reporting_dict.iteritems():
                     reporting_file.write("{0}\t{1}{2}".format(key,value,os.linesep))
+
+# Final comments
+print()
+print("The following files must be manually edited:\n{}".format(pprint.pformat(manually_editable_files)))

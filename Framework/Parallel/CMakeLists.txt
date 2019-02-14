@@ -6,13 +6,13 @@ set ( SRC_FILES
 	src/IO/EventParser.cpp
 	src/IO/EventsListsShmemManager.cpp
 	src/IO/EventsListsShmemStorage.cpp
-		src/IO/MultiProcessEventLoader.cpp
-		src/IO/NXEventDataLoader.cpp
-		src/IO/EventLoaderChild.cpp
+	src/IO/MultiProcessEventLoader.cpp
+	src/IO/NXEventDataLoader.cpp
+	src/IO/EventLoaderChild.cpp
 	src/Request.cpp
 	src/StorageMode.cpp
 	src/ThreadingBackend.cpp
-		src/IO/EventLoaderHelpers.cpp)
+	src/IO/EventLoaderHelpers.cpp)
 
 set ( INC_FILES
 	inc/MantidParallel/Collectives.h
@@ -25,7 +25,7 @@ set ( INC_FILES
 	inc/MantidParallel/IO/EventParser.h
 	inc/MantidParallel/IO/EventsListsShmemManager.h
 	inc/MantidParallel/IO/EventsListsShmemStorage.h
-		inc/MantidParallel/IO/MultiProcessEventLoader.h
+	inc/MantidParallel/IO/MultiProcessEventLoader.h
 	inc/MantidParallel/IO/NXEventDataLoader.h
 	inc/MantidParallel/IO/NXEventDataSource.h
 	inc/MantidParallel/IO/PulseTimeGenerator.h
@@ -115,5 +115,5 @@ add_subdirectory ( test )
 # Installation settings
 ###########################################################################
 
-install ( TARGETS Parallel ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )
-install(TARGETS EventParallelLoader ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR})
+mtd_install_targets( TARGETS Parallel INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})
+mtd_install_targets( TARGETS EventParallelLoader INSTALL_DIRS  ${LIB_DIR} ${WORKBENCH_LIB_DIR})

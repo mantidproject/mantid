@@ -152,7 +152,6 @@ public:
 
   /// Return the underlying ISpectrum ptr at the given workspace index.
   virtual ISpectrum &getSpectrum(const size_t index) = 0;
-
   /// Return the underlying ISpectrum ptr (const version) at the given workspace
   /// index.
   virtual const ISpectrum &getSpectrum(const size_t index) const = 0;
@@ -166,10 +165,10 @@ public:
     getSpectrum(index).setHistogram(std::forward<T>(data)...);
   }
   void convertToCounts(const size_t index) {
-    getSpectrum(index).convertToCounts();
+    getSpectrumWithoutInvalidation(index).convertToCounts();
   }
   void convertToFrequencies(const size_t index) {
-    getSpectrum(index).convertToFrequencies();
+    getSpectrumWithoutInvalidation(index).convertToFrequencies();
   }
   HistogramData::BinEdges binEdges(const size_t index) const {
     return getSpectrum(index).binEdges();
@@ -190,11 +189,13 @@ public:
   }
   template <typename... T>
   void setPointVariances(const size_t index, T &&... data) & {
-    getSpectrum(index).setPointVariances(std::forward<T>(data)...);
+    getSpectrumWithoutInvalidation(index).setPointVariances(
+        std::forward<T>(data)...);
   }
   template <typename... T>
   void setPointStandardDeviations(const size_t index, T &&... data) & {
-    getSpectrum(index).setPointStandardDeviations(std::forward<T>(data)...);
+    getSpectrumWithoutInvalidation(index).setPointStandardDeviations(
+        std::forward<T>(data)...);
   }
   HistogramData::Counts counts(const size_t index) const {
     return getSpectrum(index).counts();
@@ -218,27 +219,32 @@ public:
     return getSpectrum(index).frequencyStandardDeviations();
   }
   template <typename... T> void setCounts(const size_t index, T &&... data) & {
-    getSpectrum(index).setCounts(std::forward<T>(data)...);
+    getSpectrumWithoutInvalidation(index).setCounts(std::forward<T>(data)...);
   }
   template <typename... T>
   void setCountVariances(const size_t index, T &&... data) & {
-    getSpectrum(index).setCountVariances(std::forward<T>(data)...);
+    getSpectrumWithoutInvalidation(index).setCountVariances(
+        std::forward<T>(data)...);
   }
   template <typename... T>
   void setCountStandardDeviations(const size_t index, T &&... data) & {
-    getSpectrum(index).setCountStandardDeviations(std::forward<T>(data)...);
+    getSpectrumWithoutInvalidation(index).setCountStandardDeviations(
+        std::forward<T>(data)...);
   }
   template <typename... T>
   void setFrequencies(const size_t index, T &&... data) & {
-    getSpectrum(index).setFrequencies(std::forward<T>(data)...);
+    getSpectrumWithoutInvalidation(index).setFrequencies(
+        std::forward<T>(data)...);
   }
   template <typename... T>
   void setFrequencyVariances(const size_t index, T &&... data) & {
-    getSpectrum(index).setFrequencyVariances(std::forward<T>(data)...);
+    getSpectrumWithoutInvalidation(index).setFrequencyVariances(
+        std::forward<T>(data)...);
   }
   template <typename... T>
   void setFrequencyStandardDeviations(const size_t index, T &&... data) & {
-    getSpectrum(index).setFrequencyStandardDeviations(std::forward<T>(data)...);
+    getSpectrumWithoutInvalidation(index).setFrequencyStandardDeviations(
+        std::forward<T>(data)...);
   }
   const HistogramData::HistogramX &x(const size_t index) const {
     return getSpectrum(index).x();
@@ -256,13 +262,13 @@ public:
     return getSpectrum(index).mutableX();
   }
   HistogramData::HistogramDx &mutableDx(const size_t index) & {
-    return getSpectrum(index).mutableDx();
+    return getSpectrumWithoutInvalidation(index).mutableDx();
   }
   HistogramData::HistogramY &mutableY(const size_t index) & {
-    return getSpectrum(index).mutableY();
+    return getSpectrumWithoutInvalidation(index).mutableY();
   }
   HistogramData::HistogramE &mutableE(const size_t index) & {
-    return getSpectrum(index).mutableE();
+    return getSpectrumWithoutInvalidation(index).mutableE();
   }
   Kernel::cow_ptr<HistogramData::HistogramX> sharedX(const size_t index) const {
     return getSpectrum(index).sharedX();
@@ -283,15 +289,15 @@ public:
   }
   void setSharedDx(const size_t index,
                    const Kernel::cow_ptr<HistogramData::HistogramDx> &dx) & {
-    getSpectrum(index).setSharedDx(dx);
+    getSpectrumWithoutInvalidation(index).setSharedDx(dx);
   }
   void setSharedY(const size_t index,
                   const Kernel::cow_ptr<HistogramData::HistogramY> &y) & {
-    getSpectrum(index).setSharedY(y);
+    getSpectrumWithoutInvalidation(index).setSharedY(y);
   }
   void setSharedE(const size_t index,
                   const Kernel::cow_ptr<HistogramData::HistogramE> &e) & {
-    getSpectrum(index).setSharedE(e);
+    getSpectrumWithoutInvalidation(index).setSharedE(e);
   }
   // Methods for getting read-only access to the data.
   // Just passes through to the virtual dataX/Y/E function (const version)
@@ -322,20 +328,19 @@ public:
 
   /// Deprecated, use mutableX() instead. Returns the x data
   virtual MantidVec &dataX(const std::size_t index) {
-    invalidateCommonBinsFlag();
     return getSpectrum(index).dataX();
   }
   /// Deprecated, use mutableY() instead. Returns the y data
   virtual MantidVec &dataY(const std::size_t index) {
-    return getSpectrum(index).dataY();
+    return getSpectrumWithoutInvalidation(index).dataY();
   }
   /// Deprecated, use mutableE() instead. Returns the error data
   virtual MantidVec &dataE(const std::size_t index) {
-    return getSpectrum(index).dataE();
+    return getSpectrumWithoutInvalidation(index).dataE();
   }
   /// Deprecated, use mutableDx() instead. Returns the x error data
   virtual MantidVec &dataDx(const std::size_t index) {
-    return getSpectrum(index).dataDx();
+    return getSpectrumWithoutInvalidation(index).dataDx();
   }
 
   /// Deprecated, use x() instead. Returns the x data const
@@ -370,7 +375,6 @@ public:
   virtual void setX(const std::size_t index,
                     const Kernel::cow_ptr<HistogramData::HistogramX> &X) {
     getSpectrum(index).setX(X);
-    invalidateCommonBinsFlag();
   }
 
   /// Deprecated, use setSharedX() instead. Set the specified X array to point
@@ -378,7 +382,6 @@ public:
   virtual void setX(const std::size_t index,
                     const boost::shared_ptr<HistogramData::HistogramX> &X) {
     getSpectrum(index).setX(X);
-    invalidateCommonBinsFlag();
   }
 
   /**
@@ -414,7 +417,7 @@ public:
   /// to point-like)
   virtual bool isHistogramData() const;
 
-  /// Returns true if the workspace contains has common X bins
+  /// Returns true if the workspace contains common X bins
   virtual bool isCommonBins() const;
 
   std::string YUnit() const;
@@ -436,6 +439,7 @@ public:
   /// index, weight>
   using MaskList = std::map<size_t, double>;
   const MaskList &maskedBins(const size_t &workspaceIndex) const;
+  std::vector<size_t> maskedBinsIndices(const size_t &workspaceIndex) const;
   void setMaskedBins(const size_t workspaceIndex, const MaskList &maskedBins);
 
   // Methods handling the internal monitor workspace
@@ -549,9 +553,11 @@ protected:
                     const std::size_t &YLength) = 0;
   virtual void init(const HistogramData::Histogram &histogram) = 0;
 
+  virtual ISpectrum &getSpectrumWithoutInvalidation(const size_t index) = 0;
+
   /// Invalidates the commons bins flag.  This is generally called when a method
   /// could allow the X values to be changed.
-  void invalidateCommonBinsFlag() { m_isCommonBinsFlagSet = false; }
+  void invalidateCommonBinsFlag() { m_isCommonBinsFlagValid.store(false); }
 
   void updateCachedDetectorGrouping(const size_t index) const override;
 
@@ -585,11 +591,12 @@ private:
   /// A text label for use when plotting spectra
   std::string m_YUnitLabel;
 
-  /// Flag indicating whether the m_isCommonBinsFlag has been set. False by
-  /// default
-  mutable bool m_isCommonBinsFlagSet{false};
-  /// Flag indicating whether the data has common bins. False by default
+  /// Flag indicating if the common bins flag is in a valid state
+  mutable std::atomic<bool> m_isCommonBinsFlagValid{false};
+  /// Flag indicating whether the data has common bins
   mutable bool m_isCommonBinsFlag{false};
+  /// A mutex protecting the update of m_isCommonBinsFlag.
+  mutable std::mutex m_isCommonBinsMutex;
 
   /// The set of masked bins in a map keyed on workspace index
   std::map<int64_t, MaskList> m_masks;

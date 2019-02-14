@@ -9,9 +9,12 @@ from __future__ import (absolute_import, division, print_function)
 from six.moves import range
 import numpy
 import math
+import os
+import csv
 from scipy.optimize import curve_fit
 import mantid.simpleapi as mantidsimple
 from mantid.api import AnalysisDataService
+from HFIR_4Circle_Reduction.fourcircle_utility import *
 
 
 def apply_lorentz_correction(peak_intensity, q, wavelength, step_omega):
@@ -26,15 +29,18 @@ def apply_lorentz_correction(peak_intensity, q, wavelength, step_omega):
 
 def calculate_lorentz_correction_factor(q_sample, wavelength, motor_step):
     """
-
+    Lorenz correction = sin(2theta)
     :param q_sample:
     :param wavelength:
     :param motor_step:
     :return:
     """
+    # TODO/FIXME/NOW2 - Q sample shall be calculated from HKL and UB matrix but not from observation
     sin_theta = q_sample * wavelength / (4 * numpy.pi)
     theta = math.asin(sin_theta)
-    factor = numpy.sin(2 * theta) * motor_step
+    # MOTOR step does not make sense!
+    # factor = numpy.sin(2 * theta) * motor_step
+    factor = numpy.sin(2 * theta)
 
     return factor
 
@@ -60,26 +66,36 @@ def calculate_motor_step(motor_pos_array, motor_step_tolerance=0.5):
     return motor_step
 
 
-def convert_motor_pos_intensity(integrated_pt_dict, motor_pos_dict):
+def calculate_peak_intensity_gauss(gauss_a, gauss_sigma, error_a_sq=None, error_sigma_sq=None,
+                                   error_a_sigma=None):
     """
-    :except: raise RuntimeError if
-    :param integrated_pt_dict:
-    :param motor_pos_dict:
-    :return: motor_pos_vec, pt_intensity_vec
+    calculate the peak intensity, which is the area under the peak
+    if sigma == 1, then the integral is sqrt(pi);
+    then the value is sqrt(pi) * e^{-1/(2.*sigma**2)}
+    :param gauss_a:
+    :param gauss_sigma:
+    :param error_a_sq: error(a)**2
+    :param error_sigma_sq: error(sigma)**2
+    :param error_a_sigma: correlated error for a and sigma
+    :return:
     """
-    pt_list = sorted(integrated_pt_dict.keys())
+    integral = numpy.sqrt(2. * numpy.pi) * gauss_a * gauss_sigma
 
-    if len(motor_pos_dict) != len(pt_list):
-        raise RuntimeError('Integrated Pt intensities does not match motor positions')
+    if error_a_sq is not None:
+        # calculate integral intensity error by propagation
+        # check
+        assert isinstance(error_a_sq, float), 'Error(a)**2 must be a float but not a {0}.'.format(type(error_a_sq))
+        assert isinstance(error_sigma_sq, float), 'Error(sigma)**2 must be a float but not a {0}.' \
+                                                  ''.format(type(error_sigma_sq))
+        assert isinstance(error_a_sigma, float), 'Error(a,sigma) must be a float but not a {0}.' \
+                                                 ''.format(type(error_a_sigma))
+        # calculate
+        error2 = gauss_a**2 * error_sigma_sq + error_a_sq * gauss_sigma**2 + 2. * gauss_a * gauss_sigma * error_a_sigma
+        error = numpy.sqrt(error2)
+    else:
+        error = numpy.sqrt(integral)
 
-    pt_intensity_vec = numpy.ndarray(shape=(len(pt_list), ), dtype='float')
-    motor_pos_vec = numpy.ndarray(shape=(len(pt_list), ), dtype='float')
-
-    for i_pt, pt in enumerate(pt_list):
-        pt_intensity_vec[i_pt] = integrated_pt_dict[pt]
-        motor_pos_vec[i_pt] = motor_pos_dict[pt]
-
-    return motor_pos_vec, pt_intensity_vec
+    return integral, error
 
 
 def calculate_penalty(model_vec_y, exp_vec_y):
@@ -107,6 +123,50 @@ def calculate_penalty(model_vec_y, exp_vec_y):
     cost = numpy.sqrt(diff_y2.sum()) / (len(model_vec_y) - 1.)
 
     return cost
+
+
+def calculate_single_pt_scan_peak_intensity(peak_height, fwhm, is_fwhm):
+    """
+    calculate peak intensity for single-measurement peak (1-measurement-1-scan)
+    :param peak_height:
+    :param fwhm:
+    :param is_fwhm:
+    :return:
+    """
+    # check input
+    assert isinstance(fwhm, float), 'blabla'
+
+    # convert fwhm
+    if is_fwhm:
+        sigma = fwhm / 2.355
+    else:
+        sigma = fwhm
+
+    peak_intensity, no_error = calculate_peak_intensity_gauss(peak_height, sigma)
+
+    return peak_intensity
+
+
+def convert_motor_pos_intensity(integrated_pt_dict, motor_pos_dict):
+    """
+    :except: raise RuntimeError if
+    :param integrated_pt_dict:
+    :param motor_pos_dict:
+    :return: motor_pos_vec, pt_intensity_vec
+    """
+    pt_list = sorted(integrated_pt_dict.keys())
+
+    if len(motor_pos_dict) != len(pt_list):
+        raise RuntimeError('Integrated Pt intensities does not match motor positions')
+
+    pt_intensity_vec = numpy.ndarray(shape=(len(pt_list), ), dtype='float')
+    motor_pos_vec = numpy.ndarray(shape=(len(pt_list), ), dtype='float')
+
+    for i_pt, pt in enumerate(pt_list):
+        pt_intensity_vec[i_pt] = integrated_pt_dict[pt]
+        motor_pos_vec[i_pt] = motor_pos_dict[pt]
+
+    return motor_pos_vec, pt_intensity_vec
 
 
 def estimate_background(pt_intensity_dict, bg_pt_list):
@@ -160,6 +220,81 @@ def find_gaussian_start_values_by_observation(vec_x, vec_y):
     return [x0, est_sigma, est_a, est_background]
 
 
+def fit_gaussian_linear_background_mtd(matrix_ws_name):
+    """
+    fit Gaussian with linear background by calling Mantid's FitPeaks
+    :param matrix_ws_name:
+    :return: 2-tuple: dictionary for fit result (key = ws index, value = dictionary),
+                      model workspace name
+    """
+    # check input workspace
+    check_string('MatrixWorkspace name', matrix_ws_name)
+
+    if not AnalysisDataService.doesExist(matrix_ws_name):
+        raise RuntimeError('Workspace {} does not exist in Mantid ADS.'.format(matrix_ws_name))
+    else:
+        peak_ws = AnalysisDataService.retrieve(matrix_ws_name)
+
+    # fit peaks
+    out_ws_name = '{}_fit_positions'.format(matrix_ws_name)
+    model_ws_name = '{}_model'.format(matrix_ws_name)
+    fit_param_table_name = '{}_params_table'.format(matrix_ws_name)
+
+    # estimated peak center
+    vec_x = peak_ws.readX(0)
+    estimated_peak_center = numpy.mean(vec_x)
+
+    mantidsimple.FitPeaks(InputWorkspace=matrix_ws_name,
+                          OutputWorkspace=out_ws_name,
+                          PeakCenters=estimated_peak_center,
+                          FitWindowBoundaryList='{}, {}'.format(vec_x[0], vec_x[-1]),
+                          FitFromRight=False,
+                          Minimizer='Levenberg-MarquardtMD',
+                          HighBackground=False,
+                          ConstrainPeakPositions=False,
+                          FittedPeaksWorkspace=model_ws_name,
+                          OutputPeakParametersWorkspace=fit_param_table_name)
+
+    # Convert the table workspace to a standard dictionary
+    fit_param_dict = convert_fit_parameter_table_to_dict(fit_param_table_name)
+
+    return fit_param_dict, model_ws_name
+
+
+def convert_fit_parameter_table_to_dict(table_name):
+    """
+
+    :param table_name:
+    :return:
+    """
+    # table workspace
+    assert isinstance(table_name, str), 'blabla'
+    table_ws = AnalysisDataService.retrieve(table_name)
+
+    # create dictionary
+    fit_param_dict = dict()
+    params_list = table_ws.getColumnNames()
+    #  ['wsindex', 'peakindex', 'Height', 'PeakCentre', 'Sigma', 'A0', 'A1', 'chi2']
+
+    # go through all lines
+    num_rows = table_ws.rowCount()
+    for irow in range(num_rows):
+        value_dict = dict()
+        ws_index = None
+        for iparam, par_name in enumerate(params_list):
+            value_i = table_ws.cell(irow, iparam)
+            if par_name == 'wsindex':
+                ws_index = int(value_i)
+            else:
+                value_dict[par_name] = float(value_i)
+        # END-FOR (column)
+        assert ws_index is not None
+        fit_param_dict[ws_index] = value_dict
+    # END-FOR (row)
+
+    return fit_param_dict
+
+
 def fit_gaussian_linear_background(vec_x, vec_y, vec_e, start_value_list=None, find_start_value_by_fit=False):
     """
     Fit a curve with Gaussian + linear background
@@ -197,8 +332,9 @@ def fit_gaussian_linear_background(vec_x, vec_y, vec_e, start_value_list=None, f
 
     # do second round fit
     assert isinstance(start_value_list, list) and len(start_value_list) == 4, 'Starting value list must have 4 elements'
+
     fit2_coeff, fit2_cov_matrix = curve_fit(gaussian_linear_background, vec_x, vec_y,  sigma=vec_e, p0=start_value_list)
-    # take sigma=vec_e,  out as it increases unstable
+    # take sigma=vec_e out as it increases unstable
 
     # calculate the model
     x0, sigma, a, b = fit2_coeff
@@ -266,13 +402,23 @@ def fit_motor_intensity_model(motor_pos_dict, integrated_pt_dict):
         cov_matrix = None
     else:
         # good
-        assert isinstance(cov_matrix, numpy.ndarray), 'Covarance matrix must be a numpy array'
+        assert isinstance(cov_matrix, numpy.ndarray), 'Covariance matrix must be a numpy array'
+        # calculate fitting error/standard deviation
+        g_error_array = numpy.sqrt(numpy.diag(cov_matrix))
+        # print('[DB...BAT] Gaussian fit error (type {0}): {1}'.format(type(g_error_array), g_error_array))
+
+        gauss_error_dict['x0'] = g_error_array[0]
+        gauss_error_dict['s'] = g_error_array[1]
+        gauss_error_dict['A'] = g_error_array[2]
+        gauss_error_dict['B'] = g_error_array[3]
+
         gauss_error_dict['x02'] = cov_matrix[0, 0]
         gauss_error_dict['s2'] = cov_matrix[1, 1]
         gauss_error_dict['A2'] = cov_matrix[2, 2]
         gauss_error_dict['B2'] = cov_matrix[3, 3]
         gauss_error_dict['s_A'] = cov_matrix[1, 2]
         gauss_error_dict['A_s'] = cov_matrix[2, 1]
+    # END-FOR
 
     return gauss_parameter_dict, gauss_error_dict, cov_matrix
 
@@ -408,38 +554,6 @@ def gaussian_peak_intensity(parameter_dict, error_dict):
     return peak_intensity, intensity_error
 
 
-def calculate_peak_intensity_gauss(gauss_a, gauss_sigma, error_a_sq=None, error_sigma_sq=None,
-                                   error_a_sigma=None):
-    """
-    calculate the peak intensity, which is the area under the peak
-    if sigma == 1, then the integral is sqrt(pi);
-    then the value is sqrt(pi) * e^{-1/(2.*sigma**2)}
-    :param gauss_a:
-    :param gauss_sigma:
-    :param error_a_sq: error(a)**2
-    :param error_sigma_sq: error(sigma)**2
-    :param error_a_sigma: correlated error for a and sigma
-    :return:
-    """
-    integral = numpy.sqrt(2. * numpy.pi) * gauss_a * gauss_sigma
-
-    if error_a_sq is not None:
-        # calculate integral intensity error by propagation
-        # check
-        assert isinstance(error_a_sq, float), 'Error(a)**2 must be a float but not a {0}.'.format(type(error_a_sq))
-        assert isinstance(error_sigma_sq, float), 'Error(sigma)**2 must be a float but not a {0}.' \
-                                                  ''.format(type(error_sigma_sq))
-        assert isinstance(error_a_sigma, float), 'Error(a,sigma) must be a float but not a {0}.' \
-                                                 ''.format(type(error_a_sigma))
-        # calculate
-        error2 = gauss_a**2 * error_sigma_sq + error_a_sq * gauss_sigma**2 + 2. * gauss_a * gauss_sigma * error_a_sigma
-        error = numpy.sqrt(error2)
-    else:
-        error = numpy.sqrt(integral)
-
-    return integral, error
-
-
 def get_finer_grid(vec_x, factor):
     """
     insert values to a vector (grid) to make it finer
@@ -542,6 +656,7 @@ def integrate_single_scan_peak(merged_scan_workspace_name, integrated_peak_ws_na
     return True, pt_dict
 
 
+# TEST NOW3 - API changed!
 def integrate_peak_full_version(scan_md_ws_name, spice_table_name, output_peak_ws_name,
                                 peak_center, mask_workspace_name, norm_type,
                                 intensity_scale_factor, background_pt_tuple):
@@ -550,7 +665,7 @@ def integrate_peak_full_version(scan_md_ws_name, spice_table_name, output_peak_w
     1. simple summation
     2. simple summation with gaussian fit
     3. integrate with fitted gaussian
-    :return: peak integration result in dictionary
+    :return: dictionary: peak integration result
     """
     def create_peak_integration_dict():
         """
@@ -579,7 +694,7 @@ def integrate_peak_full_version(scan_md_ws_name, spice_table_name, output_peak_w
                      'gauss error': 0.,
                      'gauss background': 0.,
                      'gauss parameters': None,
-                     'gauss errors': None,
+                     'gauss errors': None,   # details can be found in (this module) fit_motor_intensity_model()
                      'motor positions': None,
                      'pt intensities': None,
                      'covariance matrix': None
@@ -641,9 +756,9 @@ def integrate_peak_full_version(scan_md_ws_name, spice_table_name, output_peak_w
     peak_int_dict['simple background'] = averaged_background
 
     # fit gaussian + flat background
-    parameters, errors, covariance_matrix = fit_motor_intensity_model(motor_pos_dict, integrated_pt_dict)
+    parameters, gauss_error_dict, covariance_matrix = fit_motor_intensity_model(motor_pos_dict, integrated_pt_dict)
     peak_int_dict['gauss parameters'] = parameters
-    peak_int_dict['gauss errors'] = errors
+    peak_int_dict['gauss errors'] = gauss_error_dict
     peak_int_dict['covariance matrix'] = covariance_matrix
 
     if covariance_matrix is None or parameters['B'] < 0.:
@@ -670,12 +785,48 @@ def integrate_peak_full_version(scan_md_ws_name, spice_table_name, output_peak_w
         peak_int_dict['pt_range'] = pt_range
 
         # calculate gaussian (method 3)
-        intensity_gauss, intensity_gauss_error = gaussian_peak_intensity(parameters, errors)
+        intensity_gauss, intensity_gauss_error = gaussian_peak_intensity(parameters, gauss_error_dict)
         peak_int_dict['gauss intensity'] = intensity_gauss
         peak_int_dict['gauss error'] = intensity_gauss_error
     # END-IF-ELSE
 
     return peak_int_dict
+
+
+def read_peak_integration_table_csv(peak_file_name):
+    """
+    read a csv file saved from the peak integration information table
+    :param peak_file_name:
+    :return: a dictionary of peak integration result information in STRING form
+    """
+    # check input
+    assert isinstance(peak_file_name, str), 'Peak integration table file {0} must be a string but not a {1}.' \
+                                            ''.format(peak_file_name, type(peak_file_name))
+
+    if os.path.exists(peak_file_name) is False:
+        raise RuntimeError('Peak integration information file {0} does not exist.'.format(peak_file_name))
+
+    # read
+    scan_peak_dict = dict()
+    with open(peak_file_name, 'r') as csv_file:
+        reader = csv.reader(csv_file, delimiter='\t', quotechar='#')
+        title_list = None
+        for index, row in enumerate(reader):
+            if index == 0:
+                # title
+                title_list = row
+            else:
+                # value
+                peak_dict = dict()
+                for term_index, value in enumerate(row):
+                    peak_dict[title_list[term_index]] = value
+                scan_number = int(peak_dict['Scan'])
+                scan_peak_dict[scan_number] = peak_dict
+            # END-IF-ELSE
+        # END-FOR
+    # END-WITH
+
+    return scan_peak_dict
 
 
 def simple_integrate_peak(pt_intensity_dict, bg_value, motor_step_dict, peak_center=None,

@@ -88,7 +88,8 @@ class LoadLogPropertyTableTest(unittest.TestCase):
         ExecptionThrownOnBadLogName = False
         try:
             alg_test = run_algorithm("LoadLogPropertyTable", FirstFile = "emu00006473.nxs",
-                                     LastFile = "emu00006475.nxs", LogNames="WrongTemp", OutputWorkspace = outputWorskapceName)
+                                     LastFile = "emu00006475.nxs", LogNames="WrongTemp", OutputWorkspace = outputWorskapceName,
+                                     rethrow=True)
         except RuntimeError:
             ExecptionThrownOnBadLogName = True
         self.assertEqual(True, ExecptionThrownOnBadLogName)
@@ -97,7 +98,8 @@ class LoadLogPropertyTableTest(unittest.TestCase):
         ExecptionThrownOnBadFileParameter = False
         try:
             alg_test = run_algorithm("LoadLogPropertyTable", FirstFile = "emu0000000.nxs",
-                LastFile = "emu00006475.nxs", LogNames="Temp_Sample", OutputWorkspace = outputWorskapceName)
+                LastFile = "emu00006475.nxs", LogNames="Temp_Sample", OutputWorkspace = outputWorskapceName,
+                rethrow=True)
             self.assertFalse(alg_test.isExecuted())
         except:
             ExecptionThrownOnBadFileParameter = True
@@ -107,7 +109,8 @@ class LoadLogPropertyTableTest(unittest.TestCase):
         ExecptionThrownOnBadFileParameter = False
         try:
             alg_test = run_algorithm("LoadLogPropertyTable", FirstFile = "emu00006473.nxs",
-                LastFile = "emu9999999.nxs", LogNames="Temp_Sample", OutputWorkspace = outputWorskapceName)
+                LastFile = "emu9999999.nxs", LogNames="Temp_Sample", OutputWorkspace = outputWorskapceName,
+                rethrow=True)
             self.assertFalse(alg_test.isExecuted())
         except:
             ExecptionThrownOnBadFileParameter = True

@@ -12,12 +12,13 @@
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/Workspace_fwd.h"
 #include "MantidKernel/make_unique.h"
 
 namespace {
 using namespace Mantid::API;
 
-// The name of the conjoined input and guess name -- required for
+// The name of the conjoined input and guess workspaces -- required for
 // creating an external guess plot.
 const std::string INPUT_AND_GUESS_NAME = "__QENSInputAndGuess";
 
@@ -100,6 +101,11 @@ void setFirstBackground(IFunction_sptr function, double value) {
   firstFunctionWithParameter(function, "Background", "A0")
       ->setParameter("A0", value);
 }
+
+MatrixWorkspace_sptr castToMatrixWorkspace(Workspace_sptr workspace) {
+  return boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
+}
+
 } // namespace
 
 namespace MantidQt {
@@ -124,11 +130,13 @@ void IndirectFitPlotModel::setActiveSpectrum(std::size_t spectrum) {
 }
 
 void IndirectFitPlotModel::setStartX(double startX) {
-  m_fittingModel->setStartX(startX, m_activeIndex, m_activeSpectrum);
+  if (getRange().second > startX)
+    m_fittingModel->setStartX(startX, m_activeIndex, m_activeSpectrum);
 }
 
 void IndirectFitPlotModel::setEndX(double endX) {
-  m_fittingModel->setEndX(endX, m_activeIndex, m_activeSpectrum);
+  if (getRange().first < endX)
+    m_fittingModel->setEndX(endX, m_activeIndex, m_activeSpectrum);
 }
 
 void IndirectFitPlotModel::setFWHM(double fwhm) {
@@ -182,7 +190,9 @@ std::size_t IndirectFitPlotModel::numberOfWorkspaces() const {
 }
 
 std::string IndirectFitPlotModel::getFitDataName(std::size_t index) const {
-  return m_fittingModel->createDisplayName("%1% (%2%)", "-", index);
+  if (m_fittingModel->getWorkspace(index))
+    return m_fittingModel->createDisplayName("%1% (%2%)", "-", index);
+  return "";
 }
 
 std::string IndirectFitPlotModel::getFitDataName() const {
@@ -190,7 +200,10 @@ std::string IndirectFitPlotModel::getFitDataName() const {
 }
 
 std::string IndirectFitPlotModel::getLastFitDataName() const {
-  return getFitDataName(m_fittingModel->numberOfWorkspaces() - 1);
+  auto const numberOfWorkspaces = m_fittingModel->numberOfWorkspaces();
+  if (numberOfWorkspaces > 0)
+    return getFitDataName(numberOfWorkspaces - 1);
+  return "";
 }
 
 boost::optional<double> IndirectFitPlotModel::getFirstHWHM() const {
@@ -235,8 +248,8 @@ MatrixWorkspace_sptr IndirectFitPlotModel::getResultWorkspace() const {
 
   if (location) {
     const auto group = location->result.lock();
-    return boost::dynamic_pointer_cast<MatrixWorkspace>(
-        group->getItem(location->index));
+    if (group)
+      return castToMatrixWorkspace(group->getItem(location->index));
   }
   return nullptr;
 }

@@ -51,6 +51,8 @@ class InstrumentActor;
 class InstrumentWidgetTab;
 class InstrumentWidgetRenderTab;
 class InstrumentWidgetMaskTab;
+class InstrumentWidgetPickTab;
+class InstrumentWidgetTreeTab;
 class CollapsiblePanel;
 class XIntegrationControl;
 class SimpleWidget;
@@ -75,6 +77,9 @@ class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentWidget
       public Mantid::API::AlgorithmObserver,
       public InstrumentWidgetTypes {
   Q_OBJECT
+
+  friend class InstrumentWidgetEncoder;
+  friend class InstrumentWidgetDecoder;
 
 public:
   enum SurfaceType {
@@ -118,7 +123,7 @@ public:
   void setColorMapMaxValue(double maxValue);
   void setColorMapRange(double minValue, double maxValue);
   void selectComponent(const QString &name);
-  void setScaleType(GraphOptions::ScaleType type);
+  void setScaleType(ColorMap::ScaleType type);
   void setExponent(double nth_power);
   void setViewType(const QString &type);
   const InstrumentActor &getInstrumentActor() const {
@@ -222,7 +227,7 @@ private slots:
 
 protected:
   void init(bool resetGeometry, bool autoscaling, double scaleMin,
-            double scaleMax, bool setDefaultView);
+            double scaleMax, bool setDefaultView, bool resetActor = true);
   /// Set newly created projection surface
   void setSurface(ProjectionSurface *surface);
   QWidget *createInstrumentTreeTab(QTabWidget *ControlsTab);
@@ -254,6 +259,8 @@ protected:
   QList<InstrumentWidgetTab *> m_tabs;
   InstrumentWidgetRenderTab *m_renderTab;
   InstrumentWidgetMaskTab *m_maskTab;
+  InstrumentWidgetTreeTab *m_treeTab;
+  InstrumentWidgetPickTab *m_pickTab;
   XIntegrationControl *m_xIntegration;
   /// The OpenGL widget to display the instrument
   MantidGLWidget *m_InstrumentDisplay;

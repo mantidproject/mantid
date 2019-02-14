@@ -18,6 +18,7 @@ from qtpy.QtWidgets import QVBoxLayout
 from workbench.plugins.base import PluginWidget
 from workbench.plotting.globalfiguremanager import GlobalFigureManager
 from workbench.widgets.plotselector.presenter import PlotSelectorPresenter
+# from mantidqt.utils.qt import toQSettings when readSettings/writeSettings are implemented
 
 
 class PlotSelector(PluginWidget):
@@ -42,5 +43,8 @@ class PlotSelector(PluginWidget):
     def get_plugin_title(self):
         return "Plots"
 
-    def read_user_settings(self, _):
+    def readSettings(self, _):
+        pass
+
+    def writeSettings(self, _):
         pass

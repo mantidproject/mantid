@@ -11,16 +11,15 @@ add_subdirectory ( mantidqtpython )
 ###########################################################################
 
 if ( ENABLE_WORKBENCH )
-
+  # The default value is just an empty string - this prevents a Python syntax error when not on Windows
   # Configure utils.qt.plugins file for build. It is placed in the source
   # directory and added to the .gitignore for simplicity.
   if ( WIN32 )
+    # Note: single quotes are added here to make this a Python string
     set ( QT_PLUGINS_PATH "${THIRD_PARTY_DIR}/lib/qt%V/plugins" )
   endif ()
-    configure_file ( mantidqt/utils/qt/plugins.py.in
-      ${CMAKE_CURRENT_SOURCE_DIR}/mantidqt/utils/qt/plugins.py
-  )
-
+  # Configure the file necessary for DEVELOPMENT builds to run and detect Qt's plugins
+  configure_file ( mantidqt/utils/qt/plugins.py.in ${CMAKE_CURRENT_SOURCE_DIR}/mantidqt/utils/qt/plugins.py )
   add_python_package ( mantidqt )
 
   # Configure resources data in place for ease of development. The output
@@ -40,9 +39,10 @@ if ( ENABLE_WORKBENCH )
 
   # Setup dependency chain
   add_dependencies ( mantidqt
+    mantidqt_resources
     mantidqt_commonqt4
     mantidqt_commonqt5
-    mantidqt_resources
+    mantidqt_instrumentviewqt5
   )
 
   if ( MSVC )
@@ -69,6 +69,17 @@ endif ()
     mantidqt/dialogs/test/test_algorithm_dialog.py
     mantidqt/dialogs/test/test_spectraselectiondialog.py
 
+    mantidqt/plotting/test/test_figuretype.py
+    mantidqt/plotting/test/test_functions.py
+
+    mantidqt/project/test/test_plotssaver.py
+    mantidqt/project/test/test_plotsloader.py
+    mantidqt/project/test/test_project.py
+    mantidqt/project/test/test_projectloader.py
+    mantidqt/project/test/test_projectsaver.py
+    mantidqt/project/test/test_workspaceloader.py
+    mantidqt/project/test/test_workspacesaver.py
+
     mantidqt/utils/test/test_async.py
     mantidqt/utils/test/test_modal_tester.py
     mantidqt/utils/test/test_qt_utils.py
@@ -84,13 +95,42 @@ endif ()
 
     mantidqt/widgets/test/test_jupyterconsole.py
     mantidqt/widgets/test/test_messagedisplay.py
+    mantidqt/widgets/test/test_fitpropertybrowser.py
+
+    mantidqt/widgets/samplelogs/test/test_samplelogs_model.py
+    mantidqt/widgets/samplelogs/test/test_samplelogs_presenter.py
+
+    mantidqt/widgets/observers/test/test_ads_observer.py
+    mantidqt/widgets/observers/test/test_observing_presenter.py
+    mantidqt/widgets/observers/test/test_observing_view.py
+
+    mantidqt/widgets/workspacedisplay/test/test_data_copier.py
+    mantidqt/widgets/workspacedisplay/test/test_user_notifier.py
+
+    mantidqt/widgets/workspacedisplay/matrix/test/test_matrixworkspacedisplay_model.py
+    mantidqt/widgets/workspacedisplay/matrix/test/test_matrixworkspacedisplay_presenter.py
+    mantidqt/widgets/workspacedisplay/matrix/test/test_matrixworkspacedisplay_table_view_model.py
+    mantidqt/widgets/workspacedisplay/matrix/test/test_matrixworkspacedisplay_view.py
+
+    mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_error_column.py
+    mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_marked_columns.py
+    mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_workbench_table_widget_item.py
+    mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_model.py
+    mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_presenter.py
+    mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_view.py
+  )
+
+  # ctest target for widgets that only get tested in qt5, because they are only used in the workbench
+  set ( PYTHON_WIDGET_QT5_ONLY_TESTS
+    mantidqt/widgets/instrumentview/test/test_instrumentview_io.py
+    mantidqt/widgets/instrumentview/test/test_instrumentview_view.py
   )
 
   # Tests
   set ( PYUNITTEST_RUN_SERIAL ON )
   set ( PYUNITTEST_QT_API pyqt5 )
   pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR}
-    mantidqt_qt5 ${PYTHON_TEST_FILES}
+    mantidqt_qt5 ${PYTHON_TEST_FILES} ${PYTHON_WIDGET_QT5_ONLY_TESTS}
   )
   # The jupyterconsole test segfaults on Python 3 and Qt 4
   # despite the code functioning in a normal usage.

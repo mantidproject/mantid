@@ -420,6 +420,8 @@ private slots:
 private:
   /// Attempt to automatically load a file
   void autoLoadFile(const QString &filenames);
+  /// Set the index of the combobox containing the loaded workspace
+  void setWorkspaceSelectorIndex(QString const &workspaceName);
   /// Member containing the widgets child widgets.
   Ui::DataSelector m_uiForm;
   /// Algorithm Runner used to run the load algorithm

@@ -16,7 +16,7 @@ import sys
 from mantidqt.widgets.jupyterconsole import InProcessJupyterConsole
 try:
     from IPython.core.usage import quick_guide
-except ImportError: # quick_guide was removed in IPython 6.0
+except ImportError:  # quick_guide was removed in IPython 6.0
     quick_guide = ''
 from IPython.core.usage import release as ipy_release
 from matplotlib import __version__ as mpl_version
@@ -25,6 +25,7 @@ from qtpy.QtWidgets import QVBoxLayout
 
 # local package imports
 from workbench.plugins.base import PluginWidget
+# from mantidqt.utils.qt import toQSettings when readSettings/writeSettings are implemented
 
 DEFAULT_BANNER_PARTS = [
     'IPython {version} -- An enhanced Interactive Python.\n'.format(
@@ -63,7 +64,10 @@ class JupyterConsole(PluginWidget):
     def get_plugin_title(self):
         return "IPython"
 
-    def read_user_settings(self, _):
+    def readSettings(self, _):
+        pass
+
+    def writeSettings(self, _):
         pass
 
     def register_plugin(self, menu=None):

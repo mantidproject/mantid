@@ -20,6 +20,10 @@
 #include <QPoint>
 #include <QRect>
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+#error "TSVSerialiser os only available in Qt 4 builds"
+#endif
+
 /** Parses the formatting used in MantidPlot project files
 
   @author Harry Jeffery, ISIS, RAL

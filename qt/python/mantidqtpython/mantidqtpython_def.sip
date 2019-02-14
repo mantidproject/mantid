@@ -207,6 +207,7 @@ bool isValid();
 void setUserInput(const QVariant &);
 void setText(const QString&);
 signals:
+void fileEditingFinished();
 void fileFindingFinished();
 void liveButtonPressed(bool);
 };
@@ -1527,7 +1528,47 @@ public:
   virtual std::vector<MantidQt::MantidWidgets::Hint> createHints();
 };
 
+// ---------------------------------
+// WorkspaceWidget and dependencies
+// ---------------------------------
 
+class MantidDisplayBase /Abstract/ {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/MantidDisplayBase.h"
+%End
+private:
+  MantidDisplayBase();
+};
+
+class MantidTreeModel : MantidQt::MantidWidgets::MantidDisplayBase {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/MantidTreeModel.h"
+%End
+public:
+  MantidTreeModel();
+private:
+  MantidTreeModel(const MantidQt::MantidWidgets::MantidTreeModel &);
+};
+
+class WorkspaceTreeWidget : QWidget {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidget.h"
+%End
+public:
+  WorkspaceTreeWidget(MantidQt::MantidWidgets::MantidDisplayBase *mdb /Transfer/, bool viewOnly=false,
+                      QWidget *parent /TransferThis/ = nullptr);
+  void refreshWorkspaces();
+  std::vector<std::string> getSelectedWorkspaceNames() const;
+};
+
+// Implementation to override context menu
+class WorkspaceTreeWidgetSimple : MantidQt::MantidWidgets::WorkspaceTreeWidget {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidgetSimple.h"
+%End
+public:
+  WorkspaceTreeWidgetSimple(bool viewOnly=false, QWidget *parent /TransferThis/ = nullptr);
+};
 }; // end namespace MantidWidgets
 }; // end namespace MantidQt
 
@@ -2528,6 +2569,9 @@ public:
   void setColorMapRange(double, double);
   void selectComponent(const QString &);
   void setScaleType(GraphOptions::ScaleType);
+  %MethodCode
+    sipCpp->setScaleType(MantidQt::MantidWidgets::ColorMap::ScaleType(a0));
+  %End
   void setViewType(const QString &);
 
 private:
@@ -2546,6 +2590,9 @@ public:
 %Docstring
     Returns the current scale type. 0=Linear, 1=Log10
 %End
+%MethodCode
+  sipRes = static_cast<GraphOptions::ScaleType>(sipCpp->getScaleType());
+%End
 
   void setScaleType(GraphOptions::ScaleType type);
 %Docstring
@@ -2553,6 +2600,9 @@ public:
 
     Args:
         type The new type Options are: GraphOptions.Linear, GraphOptions.Log10
+%End
+%MethodCode
+  sipCpp->setScaleType(MantidQt::MantidWidgets::ColorMap::ScaleType(a0));
 %End
 
   void setAxis(const QString& axisName);

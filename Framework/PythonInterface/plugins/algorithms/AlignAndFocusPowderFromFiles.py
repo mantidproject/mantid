@@ -8,18 +8,19 @@ from __future__ import (absolute_import, division, print_function)
 
 from mantid.api import mtd, AlgorithmFactory, DistributedDataProcessorAlgorithm, ITableWorkspaceProperty, \
     MatrixWorkspaceProperty, MultipleFileProperty, PropertyMode
-from mantid.kernel import ConfigService, Direction
-from mantid.simpleapi import AlignAndFocusPowder, CompressEvents, ConvertUnits, CreateCacheFilename, \
-    DeleteWorkspace, DetermineChunking, Divide, EditInstrumentGeometry, FilterBadPulses, Load, \
-    LoadNexusProcessed, PDDetermineCharacterizations, Plus, RenameWorkspace, SaveNexusProcessed
+from mantid.kernel import Direction
+from mantid.simpleapi import AlignAndFocusPowder, CompressEvents, ConvertDiffCal, ConvertUnits, CopyLogs, \
+    CreateCacheFilename, DeleteWorkspace, DetermineChunking, Divide, EditInstrumentGeometry, FilterBadPulses, \
+    LoadDiffCal, LoadNexusProcessed, PDDetermineCharacterizations, Plus, RemoveLogs, RenameWorkspace, SaveNexusProcessed
 import os
+import numpy as np
 
 EXTENSIONS_NXS = ["_event.nxs", ".nxs.h5"]
 PROPS_FOR_INSTR = ["PrimaryFlightPath", "SpectrumIDs", "L2", "Polar", "Azimuthal"]
 CAL_FILE, GROUP_FILE = "CalFileName", "GroupFilename"
 CAL_WKSP, GRP_WKSP, MASK_WKSP = "CalibrationWorkspace", "GroupingWorkspace", "MaskWorkspace"
 PROPS_FOR_ALIGN = [CAL_FILE, GROUP_FILE,
-                   GRP_WKSP,CAL_WKSP, "OffsetsWorkspace",
+                   GRP_WKSP, CAL_WKSP, "OffsetsWorkspace",
                    MASK_WKSP, "MaskBinTable",
                    "Params", "ResampleX", "Dspacing", "DMin", "DMax",
                    "TMin", "TMax", "PreserveEvents",
@@ -63,7 +64,7 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
         return "Diffraction\\Reduction"
 
     def seeAlso(self):
-        return [ "AlignAndFocusPowder" ]
+        return ["AlignAndFocusPowder"]
 
     def name(self):
         return "AlignAndFocusPowderFromFiles"
@@ -124,11 +125,28 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
                 linearizedRuns.append(item)
         return linearizedRuns
 
+    def __createLoader(self, filename, wkspname, progstart=None, progstop=None):
+        # load a chunk - this is a bit crazy long because we need to get an output property from `Load` when it
+        # is run and the algorithm history doesn't exist until the parent algorithm (this) has finished
+        if progstart is None or progstop is None:
+            loader = self.createChildAlgorithm(self.__loaderName)
+        else:
+            loader = self.createChildAlgorithm(self.__loaderName,
+                                               startProgress=progstart, endProgress=progstop)
+        loader.setAlwaysStoreInADS(True)
+        loader.setLogging(True)
+        loader.initialize()
+        loader.setPropertyValue('Filename', filename)
+        loader.setPropertyValue('OutputWorkspace', wkspname)
+        return loader
+
     def __getAlignAndFocusArgs(self):
         args = {}
         for name in PROPS_FOR_ALIGN:
             prop = self.getProperty(name)
-            if name == 'PreserveEvents' or not prop.isDefault:
+            name_list = ['PreserveEvents', 'CompressTolerance',
+                         'CompressWallClockTolerance', 'CompressStartTime']
+            if name in name_list or not prop.isDefault:
                 if 'Workspace' in name:
                     args[name] = prop.valueAsStr
                 else:
@@ -149,28 +167,34 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
         if CAL_FILE in self.kwargs:
             del self.kwargs[GROUP_FILE]
 
-        # get the instrument name
-        instr = mtd[wkspname].getInstrument().getName()
-        instr = ConfigService.getInstrument(instr).shortName()
-
         # use the canonical names if they weren't specifed
         for key, ext in zip((CAL_WKSP, GRP_WKSP, MASK_WKSP),
                             ('_cal', '_group', '_mask')):
             if key not in self.kwargs:
-                self.kwargs[key] = instr + ext
+                self.kwargs[key] = self.instr + ext
 
-    def __determineCharacterizations(self, filename, wkspname, loadFile):
+    def __determineCharacterizations(self, filename, wkspname):
         useCharac = bool(self.charac is not None)
+        loadFile = not mtd.doesExist(wkspname)
 
         # input workspace is only needed to find a row in the characterizations table
         tempname = None
         if loadFile:
             if useCharac:
                 tempname = '__%s_temp' % wkspname
-                Load(Filename=filename, OutputWorkspace=tempname,
-                     MetaDataOnly=True)
+                # set the loader for this file
+                loader = self.__createLoader(filename, tempname)
+                loader.setProperty('MetaDataOnly', True)  # this is only supported by LoadEventNexus
+                loader.execute()
+
+                # get the underlying loader name if we used the generic one
+                if self.__loaderName == 'Load':
+                    self.__loaderName = loader.getPropertyValue('LoaderName')
         else:
-            tempname = wkspname # assume it is already loaded
+            tempname = wkspname  # assume it is already loaded
+
+        # some bit of data has been loaded so use it to get the characterizations
+        self.__setupCalibration(tempname)
 
         # put together argument list
         args = dict(ReductionProperties=self.getProperty('ReductionProperties').valueAsStr)
@@ -179,7 +203,7 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
             if not prop.isDefault:
                 args[name] = prop.value
         if tempname is not None:
-            args['InputWorkspace']=tempname
+            args['InputWorkspace'] = tempname
         if useCharac:
             args['Characterizations'] = self.charac
 
@@ -188,19 +212,38 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
         if loadFile and useCharac:
             DeleteWorkspace(Workspace=tempname)
 
-    def __getCacheName(self, wkspname):
+    def __getCacheName(self, wkspname, additional_props=None):
+        """additional_props: list. additional properties to be hashed
+        """
         cachedir = self.getProperty('CacheDir').value
         if len(cachedir) <= 0:
             return None
 
         propman_properties = ['bank', 'd_min', 'd_max', 'tof_min', 'tof_max', 'wavelength_min', 'wavelength_max']
         alignandfocusargs = []
+        # calculate general properties
         for name in PROPS_FOR_ALIGN:
+            # skip these because this has been reworked to only worry about information in workspaces
+            if name in (CAL_FILE, GROUP_FILE, CAL_WKSP, GRP_WKSP, MASK_WKSP):
+                continue
             prop = self.getProperty(name)
             if name == 'PreserveEvents' or not prop.isDefault:
-                # TODO need unique identifier for absorption workspace
-                alignandfocusargs.append('%s=%s' % (name, prop.valueAsStr))
+                value = prop.valueAsStr  # default representation for everything
+                if name == 'AbsorptionWorkspace':  # TODO need better unique identifier for absorption workspace
+                    value = str(mtd[self.__grpWksp].extractY().sum())
+                alignandfocusargs.append('%s=%s' % (name, value))
+        # special calculations for group and mask - calibration hasn't been customized yet
+        if self.__calWksp:
+            value = str(np.sum(mtd[self.__calWksp].column('difc')))  # less false collisions than the workspace name
+            alignandfocusargs.append('%s=%s' % (CAL_WKSP, value))
+        if self.__grpWksp:
+            value = ','.join(mtd[self.__grpWksp].extractY().astype(int).astype(str).ravel())
+            alignandfocusargs.append('%s=%s' % (GRP_WKSP, value))
+        if self.__mskWksp:
+            value = ','.join([str(item) for item in mtd[self.__mskWksp].getMaskedDetectors()])
+            alignandfocusargs.append('%s=%s' % (MASK_WKSP, value))
 
+        alignandfocusargs += additional_props or []
         return CreateCacheFilename(Prefix=wkspname,
                                    PropertyManager=self.getProperty('ReductionProperties').valueAsStr,
                                    Properties=propman_properties,
@@ -209,12 +252,13 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
 
     def __processFile(self, filename, wkspname, unfocusname, file_prog_start, determineCharacterizations):
         chunks = determineChunking(filename, self.chunkSize)
-        numSteps = 6 # for better progress reporting - 6 steps per chunk
+        numSteps = 6  # for better progress reporting - 6 steps per chunk
         if unfocusname != '':
-            numSteps = 7 # one more for accumulating the unfocused workspace
+            numSteps = 7  # one more for accumulating the unfocused workspace
         self.log().information('Processing \'{}\' in {:d} chunks'.format(filename, len(chunks)))
         prog_per_chunk_step = self.prog_per_file * 1./(numSteps*float(len(chunks)))
         unfocusname_chunk = ''
+        canSkipLoadingLogs = False
 
         # inner loop is over chunks
         for (j, chunk) in enumerate(chunks):
@@ -223,11 +267,33 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
             if unfocusname != '':  # only create unfocus chunk if needed
                 unfocusname_chunk = '{}_c{:d}'.format(unfocusname, j)
 
-            Load(Filename=filename, OutputWorkspace=chunkname,
-                 startProgress=prog_start, endProgress=prog_start+prog_per_chunk_step,
-                 **chunk)
-            if determineCharacterizations:
-                self.__determineCharacterizations(filename, chunkname, False) # updates instance variable
+            # load a chunk - this is a bit crazy long because we need to get an output property from `Load` when it
+            # is run and the algorithm history doesn't exist until the parent algorithm (this) has finished
+            loader = self.__createLoader(filename, chunkname,
+                                         progstart=prog_start, progstop=prog_start + prog_per_chunk_step)
+            if canSkipLoadingLogs:
+                loader.setProperty('LoadLogs', False)
+            for key, value in chunk.items():
+                if isinstance(value, str):
+                    loader.setPropertyValue(key, value)
+                else:
+                    loader.setProperty(key, value)
+            loader.execute()
+            if j == 0:
+                self.__setupCalibration(chunkname)
+
+            # copy the necessary logs onto the workspace
+            if canSkipLoadingLogs:
+                CopyLogs(InputWorkspace=wkspname, OutputWorkspace=chunkname, MergeStrategy='WipeExisting')
+
+            # get the underlying loader name if we used the generic one
+            if self.__loaderName == 'Load':
+                self.__loaderName = loader.getPropertyValue('LoaderName')
+            # only LoadEventNexus can turn off loading logs, but FilterBadPulses requires them to be loaded from the file
+            canSkipLoadingLogs = self.__loaderName == 'LoadEventNexus' and self.filterBadPulses <= 0.
+
+            if determineCharacterizations and j == 0:
+                self.__determineCharacterizations(filename, chunkname)  # updates instance variable
                 determineCharacterizations = False
 
             prog_start += prog_per_chunk_step
@@ -250,7 +316,7 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
             AlignAndFocusPowder(InputWorkspace=chunkname, OutputWorkspace=chunkname, UnfocussedWorkspace=unfocusname_chunk,
                                 startProgress=prog_start, endProgress=prog_start+2.*prog_per_chunk_step,
                                 **self.kwargs)
-            prog_start += 2.*prog_per_chunk_step # AlignAndFocusPowder counts for two steps
+            prog_start += 2. * prog_per_chunk_step  # AlignAndFocusPowder counts for two steps
 
             if j == 0:
                 self.__updateAlignAndFocusArgs(chunkname)
@@ -258,23 +324,166 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
                 if unfocusname != '':
                     RenameWorkspace(InputWorkspace=unfocusname_chunk, OutputWorkspace=unfocusname)
             else:
+                RemoveLogs(Workspace=chunkname)  # accumulation has them already
                 Plus(LHSWorkspace=wkspname, RHSWorkspace=chunkname, OutputWorkspace=wkspname,
                      ClearRHSWorkspace=self.kwargs['PreserveEvents'],
                      startProgress=prog_start, endProgress=prog_start+prog_per_chunk_step)
                 DeleteWorkspace(Workspace=chunkname)
 
                 if unfocusname != '':
+                    RemoveLogs(Workspace=unfocusname_chunk)  # accumulation has them already
                     Plus(LHSWorkspace=unfocusname, RHSWorkspace=unfocusname_chunk, OutputWorkspace=unfocusname,
                          ClearRHSWorkspace=self.kwargs['PreserveEvents'],
                          startProgress=prog_start, endProgress=prog_start + prog_per_chunk_step)
                     DeleteWorkspace(Workspace=unfocusname_chunk)
 
-                if self.kwargs['PreserveEvents']:
-                    CompressEvents(InputWorkspace=wkspname, OutputWorkspace=wkspname)
+                if self.kwargs['PreserveEvents'] and self.kwargs['CompressTolerance'] > 0.:
+                    CompressEvents(InputWorkspace=wkspname, OutputWorkspace=wkspname,
+                                   WallClockTolerance=self.kwargs['CompressWallClockTolerance'],
+                                   Tolerance=self.kwargs['CompressTolerance'],
+                                   StartTime=self.kwargs['CompressStartTime'])
         # end of inner loop
 
+    def __processFile_withcache(self, filename, useCaching, unfocusname, unfocusname_file):
+        """process the given file and save the result in `wkspname`
+        the difference between this and __processFile is this function takes cached into account
+        """
+        # default name is based off of filename
+        wkspname = os.path.split(filename)[-1].split('.')[0]
+
+        if useCaching:
+            self.__determineCharacterizations(filename, wkspname)  # updates instance variable
+            cachefile = self.__getCacheName(wkspname)
+        else:
+            cachefile = None
+
+        i = self._filenames.index(filename)
+        wkspname += '_f%d' % i  # add file number to be unique
+
+        # if the unfocussed data is requested, don't read it from disk
+        # because of the extra complication of the unfocussed workspace
+        if useCaching and os.path.exists(cachefile) and unfocusname == '':
+            LoadNexusProcessed(Filename=cachefile, OutputWorkspace=wkspname)
+            # TODO LoadNexusProcessed has a bug. When it finds the
+            # instrument name without xml it reads in from an IDF
+            # in the instrument directory.
+            editinstrargs = {}
+            for name in PROPS_FOR_INSTR:
+                prop = self.getProperty(name)
+                if not prop.isDefault:
+                    editinstrargs[name] = prop.value
+            if editinstrargs:
+                EditInstrumentGeometry(Workspace=wkspname, **editinstrargs)
+        else:
+            self.__processFile(filename, wkspname, unfocusname_file, self.prog_per_file * float(i), not useCaching)
+
+            # write out the cachefile for the main reduced data independent of whether
+            # the unfocussed workspace was requested
+            if useCaching:
+                SaveNexusProcessed(InputWorkspace=wkspname, Filename=cachefile)
+        return wkspname
+
+    def __accumulate(self, wkspname, sumwkspname, unfocusname, unfocusname_file):
+        """accumulate newdata `wkspname` into sum `sumwkspname` and delete `wkspname`"""
+        # the first call to accumulate to a specific target should be a simple rename
+        self._accumulate_calls[sumwkspname] += 1
+        firstrun = self._accumulate_calls[sumwkspname] == 1
+        if firstrun:
+            if wkspname != sumwkspname:
+                RenameWorkspace(InputWorkspace=wkspname, OutputWorkspace=sumwkspname)
+        else:
+            Plus(LHSWorkspace=sumwkspname, RHSWorkspace=wkspname, OutputWorkspace=sumwkspname,
+                 ClearRHSWorkspace=self.kwargs['PreserveEvents'])
+            DeleteWorkspace(Workspace=wkspname)
+            if self.kwargs['PreserveEvents'] and self.kwargs['CompressTolerance'] > 0.:
+                finalname = self.getPropertyValue('OutputWorkspace')
+                # only compress when adding individual files
+                if sumwkspname != finalname:
+                    CompressEvents(InputWorkspace=sumwkspname, OutputWorkspace=sumwkspname,
+                                   WallClockTolerance=self.kwargs['CompressWallClockTolerance'],
+                                   Tolerance=self.kwargs['CompressTolerance'],
+                                   StartTime=self.kwargs['CompressStartTime'])
+        #
+        if unfocusname == '':
+            return
+        self._accumulate_calls[unfocusname] += 1
+        firstrun = self._accumulate_calls[unfocusname] == 1
+        if firstrun:
+            RenameWorkspace(InputWorkspace=unfocusname_file, OutputWorkspace=unfocusname)
+        else:
+            Plus(LHSWorkspace=unfocusname, RHSWorkspace=unfocusname_file, OutputWorkspace=unfocusname,
+                 ClearRHSWorkspace=self.kwargs['PreserveEvents'])
+            DeleteWorkspace(Workspace=unfocusname_file)
+            # not compressing unfocussed workspace because it is in d-spacing
+            # and is likely to be from a different part of the instrument
+
+    def __setupCalibration(self, wksp):
+        '''Convert whatever calibration/grouping/masking into workspaces that will be passed down'''
+        if self.haveDeterminedCalibration:
+            return  # nothing to do
+        self.haveDeterminedCalibration = True
+
+        self.__calWksp = ''
+        self.__grpWksp = ''
+        self.__mskWksp = ''
+        # first see if the workspaces have been specified
+        # check that the canonical names don't already exist as a backup
+        if not self.getProperty('CalibrationWorkspace').isDefault:
+            self.__calWksp = self.getPropertyValue('CalibrationWorkspace')
+        elif not self.getProperty('OffsetsWorkspace').isDefault:
+            self.__calWksp = self.getPropertyValue('OffsetsWorkspace') + '_cal'
+            ConvertDiffCal(OffsetsWorkspace=self.getPropertyValue('OffsetsWorkspace'),
+                           OutputWorkspace=self.instr + '_cal')
+            self.setProperty('CalibrationWorkspace', self.__calWksp)
+        elif mtd.doesExist(self.instr + '_cal'):
+            self.__calWksp = mtd[self.instr + '_cal']
+
+        if not self.getProperty('GroupingWorkspace').isDefault:
+            self.__grpWksp = self.getPropertyValue('GroupingWorkspace')
+        elif mtd.doesExist(self.instr + '_group'):
+            self.__grpWksp = mtd[self.instr + '_group']
+
+        if not self.getProperty('MaskWorkspace').isDefault:
+            self.__mskWksp = self.getPropertyValue('MaskWorkspace')
+        elif mtd.doesExist(self.instr + '_mask'):
+            self.__mskWksp = mtd[self.instr + '_mask']
+
+        # check that anything was specified
+        if self.getProperty('CalFileName').isDefault and self.getProperty('GroupFilename').isDefault:
+            return
+
+        # decide what to load
+        loadCalibration = not bool(self.__calWksp)
+        loadGrouping = not bool(self.__grpWksp)
+        loadMask = not bool(self.__mskWksp)
+
+        # load and update
+        if loadCalibration or loadGrouping or loadMask:
+            LoadDiffCal(InputWorkspace=wksp,
+                        Filename=self.getPropertyValue('CalFileName'),
+                        GroupFilename=self.getPropertyValue('GroupFilename'),
+                        MakeCalWorkspace=loadCalibration,
+                        MakeGroupingWorkspace=loadGrouping,
+                        MakeMaskWorkspace=loadMask,
+                        WorkspaceName=self.instr)
+        if loadCalibration:
+            self.__calWksp = self.instr + '_cal'
+            self.setPropertyValue('CalibrationWorkspace', self.instr + '_cal')
+        if loadGrouping:
+            self.__grpWksp = self.instr + '_group'
+            self.setPropertyValue('GroupingWorkspace', self.instr + '_group')
+        if loadMask:
+            self.__mskWksp = self.instr + '_mask'
+            self.setPropertyValue('MaskWorkspace', self.instr + '_mask')
+
     def PyExec(self):
-        filenames = self._getLinearizedFilenames('Filename')
+        self._filenames = filenames = sorted(self._getLinearizedFilenames('Filename'))
+        import collections
+        self._accumulate_calls = collections.defaultdict(int)  # bookkeeping for __accumulate
+        # get the instrument name - will not work if the instrument has a '_' in its name
+        self.instr = os.path.basename(filenames[0]).split('_')[0]
+        self.haveDeterminedCalibration = False  # setup variables for loading calibration into workspaces
+        self.__loaderName = 'Load'   # set the loader to be generic on first load
         self.filterBadPulses = self.getProperty('FilterBadPulses').value
         self.chunkSize = self.getProperty('MaxChunkSize').value
         self.absorption = self.getProperty('AbsorptionWorkspace').value
@@ -296,67 +505,32 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
         else:
             self.log().warning('CacheDir is not specified - functionality disabled')
 
-        self.prog_per_file = 1./float(len(filenames)) # for better progress reporting
+        assert len(filenames), "No files specified"
+        self.prog_per_file = 1./float(len(filenames))  # for better progress reporting
 
         # these are also passed into the child-algorithms
         self.kwargs = self.__getAlignAndFocusArgs()
 
-        # outer loop creates chunks to load
-        for (i, filename) in enumerate(filenames):
-            # default name is based off of filename
+        # initialization for caching mechanism
+        if useCaching:
+            filename = filenames[0]
             wkspname = os.path.split(filename)[-1].split('.')[0]
+            self.__determineCharacterizations(filename, wkspname)
 
-            if useCaching:
-                self.__determineCharacterizations(filename,
-                                                  wkspname, True) # updates instance variable
-                cachefile = self.__getCacheName(wkspname)
-            else:
-                cachefile = None
-
-            wkspname += '_f%d' % i # add file number to be unique
-
-            # if the unfocussed data is requested, don't read it from disk
-            # because of the extra complication of the unfocussed workspace
-            if useCaching and os.path.exists(cachefile) and unfocusname == '':
-                LoadNexusProcessed(Filename=cachefile, OutputWorkspace=wkspname)
-                # TODO LoadNexusProcessed has a bug. When it finds the
-                # instrument name without xml it reads in from an IDF
-                # in the instrument directory.
-                editinstrargs = {}
-                for name in PROPS_FOR_INSTR:
-                    prop = self.getProperty(name)
-                    if not prop.isDefault:
-                        editinstrargs[name] = prop.value
-                if editinstrargs:
-                    EditInstrumentGeometry(Workspace=wkspname, **editinstrargs)
-            else:
-                self.__processFile(filename, wkspname, unfocusname_file, self.prog_per_file*float(i), not useCaching)
-
-                # write out the cachefile for the main reduced data independent of whether
-                # the unfocussed workspace was requested
-                if useCaching:
-                    SaveNexusProcessed(InputWorkspace=wkspname, Filename=cachefile)
-
-            # accumulate runs
-            if i == 0:
-                if wkspname != finalname:
-                    RenameWorkspace(InputWorkspace=wkspname, OutputWorkspace=finalname)
-                if unfocusname != '':
-                    RenameWorkspace(InputWorkspace=unfocusname_file, OutputWorkspace=unfocusname)
-            else:
-                Plus(LHSWorkspace=finalname, RHSWorkspace=wkspname, OutputWorkspace=finalname,
-                     ClearRHSWorkspace=self.kwargs['PreserveEvents'])
-                DeleteWorkspace(Workspace=wkspname)
-
-                if unfocusname != '':
-                    Plus(LHSWorkspace=unfocusname, RHSWorkspace=unfocusname_file, OutputWorkspace=unfocusname,
-                         ClearRHSWorkspace=self.kwargs['PreserveEvents'])
-                    DeleteWorkspace(Workspace=unfocusname_file)
-
-                if self.kwargs['PreserveEvents']:
-                    CompressEvents(InputWorkspace=finalname, OutputWorkspace=finalname)
-                    # not compressing unfocussed workspace because it is in d-spacing
-                    # and is likely to be from a different part of the instrument
+        if useCaching:
+            # find caches and sum them. return files without cache
+            nocache = self.__find_caches(filenames, finalname, unfocusname, unfocusname_file)
+        else:
+            nocache = filenames
+        self.log().notice('Files remained to add: {}'.format(nocache,))
+        #
+        # process not-cached files
+        if nocache:
+            self.__processFiles(nocache, useCaching, unfocusname, unfocusname_file)
+        #
+        # create cache of everything summed together
+        if useCaching:
+            self.__saveSummedGroupToCache(filenames, wkspname=finalname)
 
         # with more than one chunk or file the integrated proton charge is
         # generically wrong
@@ -366,6 +540,85 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
         self.setProperty('OutputWorkspace', mtd[finalname])
         if unfocusname != '':
             self.setProperty('UnfocussedWorkspace', mtd[unfocusname])
+
+    def __find_caches(self, filenames, finalname, unfocusname, unfocusname_file, firstcall=True):
+        """find caches and load them using a greedy algorithm
+
+        Find cache for the longest partial sum of the given filenames.
+        If no cache found for any partial sum, return the filename list.
+        If a cache found for a partial sum, continue to work on the remained files by calling this function.
+        When a cache is found, it will be loaded and accumulated, and then deleted.
+        """
+        N = len(filenames)
+        found = False
+        for length in range(N, 1, -1):
+            for start in range(N-length+1):
+                end = start+length-1
+                files1 = filenames[start:end+1]
+                summed_cache_file = self.__get_grp_cache_fn(files1)
+                if os.path.exists(summed_cache_file):
+                    self.log().notice('Found cache for {}'.format(files1))
+                    wkspname = self.__get_grp_ws_name(files1)
+                    self.log().notice('Loading cache from {}'.format(summed_cache_file))
+                    LoadNexusProcessed(Filename=summed_cache_file, OutputWorkspace=wkspname)
+                    self.__accumulate(wkspname, finalname, unfocusname, unfocusname_file)
+                    found = True
+                    break
+            if found:
+                break
+            continue
+        if not found:
+            return filenames
+        remained = filenames[:start] + filenames[end+1:]
+        if remained:
+            return self.__find_caches(remained, finalname, unfocusname, unfocusname_file, firstcall=False)
+        return []
+
+    def __get_grp_ws_name(self, group):
+        def _(filename):
+            return os.path.split(filename)[-1].split('.')[0]
+        return _(group[0]) + "-" + _(group[-1])
+
+    def __get_grp_cache_fn(self, group):
+        wsname = self.__get_grp_ws_name(group)
+        filenames_str = ','.join(group)
+        newprop = 'files_to_sum={}'.format(filenames_str)
+        return self.__getCacheName('summed_'+wsname, additional_props=[newprop])
+
+    def __processFiles(self, files, useCaching, unfocusname, unfocusname_file):
+        """process given files, separate them to "grains". Sum each grain, and add the grain sum to final sum
+        """
+        finalname = self.getPropertyValue('OutputWorkspace')
+        N = len(files)
+        import math
+        if N > 3:
+            n = int(math.sqrt(N))  # grain size
+        else:
+            n = N
+        for (i, f) in enumerate(files):
+            self.__loaderName = 'Load'  # reset to generic load with each file
+            wkspname = self.__processFile_withcache(f, useCaching, unfocusname, unfocusname_file)
+            # accumulate into partial sum
+            grain_start = i//n*n
+            grain_end = min((i//n+1)*n, N)
+            grain = files[grain_start:grain_end]
+            partialsum_wkspname = self.__get_grp_ws_name(grain)
+            self.__accumulate(
+                wkspname, partialsum_wkspname, unfocusname, unfocusname_file)
+            if i == grain_end - 1:
+                if useCaching and len(grain) > 1:
+                    # save partial cache
+                    self.__saveSummedGroupToCache(grain)
+                # accumulate into final sum
+                self.__accumulate(partialsum_wkspname, finalname, unfocusname, unfocusname_file)
+        return
+
+    def __saveSummedGroupToCache(self, group, wkspname=None):
+        cache_file = self.__get_grp_cache_fn(group)
+        wksp = wkspname or self.__get_grp_ws_name(group)
+        if not os.path.exists(cache_file):
+            SaveNexusProcessed(InputWorkspace=wksp, Filename=cache_file)
+        return
 
 
 # Register algorithm with Mantid.

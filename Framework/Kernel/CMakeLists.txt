@@ -25,7 +25,6 @@ set ( SRC_FILES
 	src/DirectoryValidator.cpp
 	src/DiskBuffer.cpp
 	src/DllOpen.cpp
-	src/EmptyValues.cpp
 	src/EnabledWhenProperty.cpp
 	src/EnvironmentHistory.cpp
 	src/EqualBinsChecker.cpp
@@ -500,10 +499,6 @@ if ( GCC_COMPILER_VERSION AND GCC_COMPILER_VERSION VERSION_LESS "4.5" )
 endif()
 target_link_libraries ( Kernel LINK_PUBLIC ${NEXUS_LIBRARIES} Eigen3::Eigen LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${GSL_LIBRARIES} ${MANTIDLIBS} ${NETWORK_LIBRARIES} ${JSONCPP_LIBRARIES} ${TBB_LIBRARIES} ${TBB_MALLOC_LIBRARIES})
 
-if (WITH_ASAN)
-  target_link_libraries ( Kernel LINK_PRIVATE -lasan )
-endif ()
-
 if ( WIN32 )
   target_link_libraries ( Kernel LINK_PRIVATE Psapi.lib ) # For memory usage queries
 endif()
@@ -589,37 +584,6 @@ set ( COLORMAPS_FOLDER ${MANTID_ROOT}/installers/colormaps/ )
 set ( MANTIDPUBLISHER "http://upload.mantidproject.org/scriptrepository?debug=1" )
 set ( HTML_ROOT ${DOCS_BUILDDIR}/html )
 
-# Construct script paths.
-set ( MANTID_SCRIPTS ${MANTID_ROOT}/scripts )
-# First the required scripts variable...
-# Omitting the following (as of now) empty directories as CMake doesn't copy them on install and you then end up with a warning message....
-set ( REQUIREDSCRIPT_SUBDIRS Engineering Inelastic Reflectometry SANS)
-
-# If other external interfaces are added then we need a better approach here..
-set ( REQUIREDSCRIPT_DIRS ${MANTID_ROOT}/scripts;${CMAKE_BINARY_DIR}/scripts/ExternalInterfaces/mslice/src/mslice )
-foreach ( SUBDIR ${REQUIREDSCRIPT_SUBDIRS} )
-  set ( REQUIREDSCRIPT_DIRS "${REQUIREDSCRIPT_DIRS};${MANTID_SCRIPTS}/${SUBDIR}" )
-endforeach()
-
-# Second the standard scripts variable. The variable in the file is NOT recursive so add the top level directories from here
-set ( EXCLUDED_DIRS test )
-set ( PYTHONSCRIPT_DIRS "" )
-file ( GLOB SCRIPT_SUBDIRS RELATIVE ${MANTID_SCRIPTS} ${MANTID_SCRIPTS}/* )
-foreach ( SUBDIR ${SCRIPT_SUBDIRS} )
-  set ( DIR ${MANTID_SCRIPTS}/${SUBDIR} )
-  if ( IS_DIRECTORY ${DIR} AND NOT EXISTS ${DIR}/__init__.py )
-    list ( FIND REQUIREDSCRIPT_SUBDIRS ${SUBDIR} HAVE_DIR )
-    list ( FIND EXCLUDED_DIRS ${SUBDIR} EXCLUDE_DIR )
-    if ( HAVE_DIR EQUAL -1 AND EXCLUDE_DIR EQUAL -1 ) # If it is not in REQUIRED and not EXCLUDED
-      if ( PYTHONSCRIPT_DIRS )
-        set ( PYTHONSCRIPT_DIRS "${PYTHONSCRIPT_DIRS};${DIR}" )
-      else()
-        set ( PYTHONSCRIPT_DIRS "${DIR}" ) # Avoid first ;
-      endif()
-    endif()
-  endif()
-endforeach()
-
 # For an mpi-enabled build, do not log to file, format console output (which winds up in a file) differently
 # These settings carry down to the installation configuration below
 if ( MPI_BUILD )
@@ -639,7 +603,7 @@ configure_file ( ../Properties/Mantid.properties.template
 if(MSVC)
   file(GENERATE
      OUTPUT
-     ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>/Mantid.properties
+     ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/$<CONFIG>/Mantid.properties
      INPUT
      ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.config
   )
@@ -656,7 +620,7 @@ endif()
 # Installation settings
 ###########################################################################
 
-install ( TARGETS Kernel ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )
+mtd_install_targets( TARGETS Kernel INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})
 
 # Create the properties file for the installer
 set ( MANTID_ROOT_BUILD ${MANTID_ROOT} )
@@ -694,25 +658,6 @@ set ( DATADIRS "" )
 set ( MANTIDPUBLISHER "http://upload.mantidproject.org/scriptrepository" )
 set ( HTML_ROOT ../share/doc/html )
 
-# script paths
-set ( MANTID_SCRIPTS ${MANTID_ROOT}/scripts )
-set ( REQUIREDSCRIPT_DIRS ${MANTID_SCRIPTS};${MANTID_SCRIPTS}/ExternalInterfaces )
-foreach ( SUBDIR ${REQUIREDSCRIPT_SUBDIRS} )
-  set ( REQUIREDSCRIPT_DIRS "${REQUIREDSCRIPT_DIRS};${MANTID_SCRIPTS}/${SUBDIR}" )
-endforeach()
-
-# PYTHONSCRIPT_DIRS
-set ( WITH_SEMICOLONS "" )
-foreach ( DIR ${PYTHONSCRIPT_DIRS} )
-  string ( REGEX REPLACE "${MANTID_ROOT_BUILD}" "${MANTID_ROOT}" DIR ${DIR} )
-  if ( WITH_SEMICOLONS )
-    set ( WITH_SEMICOLONS "${WITH_SEMICOLONS};${DIR}" )
-  else()
-    set ( WITH_SEMICOLONS "${DIR}" ) # Avoid first ;
-  endif()
-endforeach()
-set ( PYTHONSCRIPT_DIRS "${WITH_SEMICOLONS}" )
-
 # For a framework-only (e.g. MPI) build some of these are not relevant and should
 # be left empty to avoid warnings on starting Mantid
 if ( ${CMAKE_PROJECT_NAME} MATCHES "MantidFramework" )
@@ -731,5 +676,7 @@ configure_file ( ../Properties/Mantid.properties.template
                  ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.install
 )
 install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.install
-          DESTINATION ${BIN_DIR} RENAME Mantid.properties
-)
+          DESTINATION ${BIN_DIR} RENAME Mantid.properties )
+
+install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.install
+          DESTINATION ${WORKBENCH_BIN_DIR} RENAME Mantid.properties )

@@ -27,23 +27,10 @@ class IAlgorithm;
 class Algorithm;
 class AlgorithmHistory;
 
-namespace Detail {
-// Written as a template in order to get around circular issue of CompareHistory
-// needing to know the implementation of AlgorithmHistory and AlgorithmHistory
-// needing to know the implementation of CompareHistory.
-template <class T> struct CompareHistory {
-  bool operator()(const boost::shared_ptr<T> &lhs,
-                  const boost::shared_ptr<T> &rhs) const {
-    return (*lhs) < (*rhs);
-  }
-};
-} // namespace Detail
-
 // typedefs for algorithm history pointers
 using AlgorithmHistory_sptr = boost::shared_ptr<AlgorithmHistory>;
 using AlgorithmHistory_const_sptr = boost::shared_ptr<const AlgorithmHistory>;
-using AlgorithmHistories =
-    std::set<AlgorithmHistory_sptr, Detail::CompareHistory<AlgorithmHistory>>;
+using AlgorithmHistories = std::vector<AlgorithmHistory_sptr>;
 
 /** @class AlgorithmHistory AlgorithmHistory.h API/MAntidAPI/AlgorithmHistory.h
 
@@ -69,7 +56,7 @@ public:
   ~AlgorithmHistory();
   AlgorithmHistory &operator=(const AlgorithmHistory &);
   AlgorithmHistory(const AlgorithmHistory &);
-  AlgorithmHistory(const std::string &name, int vers,
+  AlgorithmHistory(const std::string &name, int vers, std::string uuid,
                    const Types::Core::DateAndTime &start =
                        Types::Core::DateAndTime::getCurrentTime(),
                    const double &duration = -1.0, std::size_t uexeccount = 0);
@@ -93,6 +80,8 @@ public:
   }
   /// get the execution count
   const std::size_t &execCount() const { return m_execCount; }
+  /// get the uuid
+  const std::string &uuid() const { return m_uuid; }
   /// get parameter list of algorithm in history const
   const Mantid::Kernel::PropertyHistories &getProperties() const {
     return m_properties;
@@ -114,7 +103,7 @@ public:
                  const size_t maxPropertyLength = 0) const;
   /// Less than operator
   inline bool operator<(const AlgorithmHistory &other) const {
-    return (execCount() < other.execCount());
+    return execCount() < other.execCount();
   }
   /// Equality operator
   inline bool operator==(const AlgorithmHistory &other) const {
@@ -138,7 +127,7 @@ public:
 
 private:
   // private constructor
-  AlgorithmHistory() = default;
+  AlgorithmHistory();
   // Set properties of algorithm
   void setProperties(const Algorithm *const alg);
   /// The name of the Algorithm
@@ -155,6 +144,8 @@ private:
   std::size_t m_execCount{0};
   /// set of child algorithm histories for this history record
   AlgorithmHistories m_childHistories;
+  /// UUID for this algorithm history
+  std::string m_uuid;
 };
 
 MANTID_API_DLL std::ostream &operator<<(std::ostream &,

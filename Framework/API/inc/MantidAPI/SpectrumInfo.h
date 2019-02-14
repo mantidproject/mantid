@@ -8,6 +8,7 @@
 #define MANTID_API_SPECTRUMINFO_H_
 
 #include "MantidAPI/DllConfig.h"
+#include "MantidAPI/SpectrumInfoIterator.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/cow_ptr.h"
 
@@ -28,7 +29,6 @@ class Instrument;
 class ParameterMap;
 } // namespace Geometry
 namespace API {
-class SpectrumInfoIterator;
 class ExperimentInfo;
 
 /** API::SpectrumInfo is an intermediate step towards a SpectrumInfo that is
@@ -84,8 +84,10 @@ public:
   Kernel::V3D samplePosition() const;
   double l1() const;
 
-  SpectrumInfoIterator begin() const;
-  SpectrumInfoIterator end() const;
+  SpectrumInfoIterator<SpectrumInfo> begin();
+  SpectrumInfoIterator<SpectrumInfo> end();
+  const SpectrumInfoIterator<const SpectrumInfo> cbegin() const;
+  const SpectrumInfoIterator<const SpectrumInfo> cend() const;
 
   friend class ExperimentInfo;
 
@@ -101,6 +103,9 @@ private:
       m_lastDetector;
   mutable std::vector<size_t> m_lastIndex;
 };
+
+using SpectrumInfoIt = SpectrumInfoIterator<SpectrumInfo>;
+using SpectrumInfoConstIt = SpectrumInfoIterator<const SpectrumInfo>;
 
 } // namespace API
 } // namespace Mantid

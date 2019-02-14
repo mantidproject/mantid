@@ -2,7 +2,7 @@
  IntArrayLengthValidator
 =========================
 
-This a python binding to the C++ class Mantid::Kernel::ArrayLengthValidator.
+This is a Python binding to the C++ class Mantid::Kernel::ArrayLengthValidator.
 
 *bases:* :py:obj:`mantid.kernel.IValidator`
 

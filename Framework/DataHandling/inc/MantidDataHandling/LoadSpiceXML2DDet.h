@@ -71,25 +71,29 @@ private:
   /// Process inputs
   void processInputs();
 
+  /// create workspace (good to load instrument) from vector of counts
+  API::MatrixWorkspace_sptr
+  createMatrixWorkspace(const std::vector<unsigned int> &vec_counts);
+  /// parse binary integer file
+  std::vector<unsigned int> binaryParseIntegers(std::string &binary_file_name);
+
   /// Parse SPICE XML file
-  std::vector<SpiceXMLNode> parseSpiceXML(const std::string &xmlfilename);
+  std::vector<SpiceXMLNode> xmlParseSpice(const std::string &xmlfilename);
 
   /// Create output MatrixWorkspace
-  API::MatrixWorkspace_sptr
-  createMatrixWorkspace(const std::vector<SpiceXMLNode> &vecxmlnode,
-                        const size_t &numpixelx, const size_t &numpixely,
-                        const std::string &detnodename,
-                        const bool &loadinstrument);
+  API::MatrixWorkspace_sptr xmlCreateMatrixWorkspaceKnownGeometry(
+      const std::vector<SpiceXMLNode> &vecxmlnode, const size_t &numpixelx,
+      const size_t &numpixely, const std::string &detnodename,
+      const bool &loadinstrument);
 
   /// Create output MatrixWorkspace
-  API::MatrixWorkspace_sptr
-  createMatrixWorkspaceVersion2(const std::vector<SpiceXMLNode> &vecxmlnode,
-                                const std::string &detnodename,
-                                const bool &loadinstrument);
+  API::MatrixWorkspace_sptr xmlCreateMatrixWorkspaceUnknowGeometry(
+      const std::vector<SpiceXMLNode> &vecxmlnode,
+      const std::string &detnodename, const bool &loadinstrument);
 
-  API::MatrixWorkspace_sptr parseDetectorNode(const std::string &detvaluestr,
-                                              bool loadinstrument,
-                                              double &max_counts);
+  API::MatrixWorkspace_sptr xmlParseDetectorNode(const std::string &detvaluestr,
+                                                 bool loadinstrument,
+                                                 double &max_counts);
 
   /// Set up sample logs from table workspace loaded where SPICE data file is
   /// loaded

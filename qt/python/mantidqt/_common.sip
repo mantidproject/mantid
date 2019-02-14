@@ -1,10 +1,14 @@
 %ModuleCode
 #include "MantidQtWidgets/Common/Message.h"
+#include "MantidQtWidgets/Common/WorkspaceObserver.h"
+#include "MantidPythonInterface/core/VersionCompat.h"
 // Allows suppression of namespaces within the module
 using namespace MantidQt::MantidWidgets;
 %End
 
 %InitialisationCode
+qRegisterMetaType<std::string>("StdString");
+qRegisterMetaType<Mantid::API::Workspace_sptr>("Workspace");
 qRegisterMetaType<Message>("Message");
 %End
 
@@ -94,6 +98,17 @@ public:
       AcsAPIs
   };
 
+  enum WhitespaceVisibility {
+     //! Whitespace is invisible.
+     WsInvisible = SCWS_INVISIBLE,
+
+     //! Whitespace is always visible.
+     WsVisible = SCWS_VISIBLEALWAYS,
+
+     //! Whitespace is visible after the whitespace used for indentation.
+     WsVisibleAfterIndent = SCWS_VISIBLEAFTERINDENT
+  };
+
 public:
   ScriptEditor(const QString & language,
                QWidget *parent /TransferThis/ = 0) throw(std::invalid_argument);
@@ -112,10 +127,14 @@ public:
   QString selectedText() const;
   QString text() const;
 
+  void clearKeyBinding(const QString &keyCombination) throw(std::invalid_argument);
   void enableAutoCompletion(AutoCompletionSource source);
   void disableAutoCompletion();
+  void getCursorPosition(int *line, int *index) const;
+  void selectAll(bool select = true);
   void setCaretLineBackgroundColor (const QColor & col);
   void setCaretLineVisible(bool enable);
+  void setCursorPosition(int line, int index);
   void setIndentationsUseTabs(bool tabs);
   void setFileName(const QString &filename);
   void setMarginWidth(int margin, int width);
@@ -124,6 +143,7 @@ public:
   void setSelection(int lineFrom, int indexFrom, int lineTo, int indexTo);
   void setTabWidth(int width);
   void setText(const QString &text);
+  void setWhitespaceVisibility(WhitespaceVisibility mode);
   void updateCompletionAPI(const QStringList & completions);
 
 public slots:
@@ -223,7 +243,7 @@ class WorkspaceTreeWidget : QWidget {
 #include "MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidget.h"
 %End
 public:
-  WorkspaceTreeWidget(MantidDisplayBase *mdb /Transfer/,
+  WorkspaceTreeWidget(MantidDisplayBase *mdb /Transfer/, bool viewOnly=false,
                       QWidget *parent /TransferThis/ = nullptr);
 };
 
@@ -233,7 +253,7 @@ class WorkspaceTreeWidgetSimple : WorkspaceTreeWidget {
 #include "MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidgetSimple.h"
 %End
 public:
-  WorkspaceTreeWidgetSimple(QWidget *parent /TransferThis/ = nullptr);
+  WorkspaceTreeWidgetSimple(bool viewOnly=false, QWidget *parent /TransferThis/ = nullptr);
 
 signals:
   void plotSpectrumClicked(const QStringList & workspaceNames);
@@ -241,6 +261,8 @@ signals:
   void plotSpectrumWithErrorsClicked(const QStringList & workspaceNames);
   void overplotSpectrumWithErrorsClicked(const QStringList & workspaceNames);
   void plotColorfillClicked(const QStringList &workspaceNames);
+  void sampleLogsClicked(const QStringList &workspaceNames);
+  void showInstrumentClicked(const QStringList &workspaceNames);
 };
 
 // ---------------------------------
@@ -253,4 +275,37 @@ class ManageUserDirectories : QDialog {
 %End
 public:
   ManageUserDirectories(QWidget *parent /TransferThis/ = nullptr);
+};
+
+// ---------------------------------
+// Fit Property Browser
+// ---------------------------------
+class FitPropertyBrowser : public QDockWidget {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/FitPropertyBrowser.h"
+%End
+public:
+    FitPropertyBrowser(QWidget *parent = nullptr, QObject *mantidui = nullptr);
+    void init();
+    SIP_PYOBJECT getFittingFunction() const;
+%MethodCode
+    auto f = sipCpp->getFittingFunction();
+    sipRes = FROM_CSTRING(f->asString().c_str());
+%End
+    int sizeOfFunctionsGroup() const;
+    void loadFunction(QString funStr);
+    double startX() const;
+    void setStartX(double start);
+    double endX() const;
+    void setEndX(double end);
+    void setXRange(double start, double end);
+    int workspaceIndex() const;
+    void setWorkspaceIndex(int i);
+    QStringList getWorkspaceNames();
+    void fit();
+    void addAllowedSpectra(const QString &wsName, const QList<int> &wsIndices);
+signals:
+    void startXChanged(double);
+    void endXChanged(double);
+    void fittingDone(const QString &);
 };

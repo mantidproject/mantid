@@ -20,7 +20,7 @@ from six import PY2, iteritems
 
 # local imports
 from mantidqt.widgets.codeeditor.inputsplitter import InputSplitter
-from mantidqt.utils.async import AsyncTask
+from mantidqt.utils.asynchronous import AsyncTask
 
 if PY2:
     from inspect import getargspec as getfullargspec
@@ -136,7 +136,6 @@ class PythonCodeExecution(QObject):
         # Stack is chopped on error to avoid the  AsyncTask.run->self.execute calls appearing
         # as these are not useful for the user in this context
         task = AsyncTask(self.execute, args=(code_str, filename),
-                         stack_chop=2,
                          success_cb=self._on_success, error_cb=self._on_error)
         task.start()
         self._task = task

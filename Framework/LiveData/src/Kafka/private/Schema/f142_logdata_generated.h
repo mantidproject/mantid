@@ -14,762 +14,765 @@
 
 #include "fwdi_forwarder_internal_generated.h"
 
-struct fwdinfo_1_t;
+/// Due to type conflicts with other schemas it was necessary to 
+/// add this namespace LogSchema. 
+namespace LogSchema {
+  struct fwdinfo_1_t;
 
 
-struct Byte;
-struct UByte;
-struct Short;
-struct UShort;
-struct Int;
-struct UInt;
-struct Long;
-struct ULong;
-struct Float;
-struct Double;
-struct ArrayByte;
-struct ArrayUByte;
-struct ArrayShort;
-struct ArrayUShort;
-struct ArrayInt;
-struct ArrayUInt;
-struct ArrayLong;
-struct ArrayULong;
-struct ArrayFloat;
-struct ArrayDouble;
-struct LogData;
+  struct Byte;
+  struct UByte;
+  struct Short;
+  struct UShort;
+  struct Int;
+  struct UInt;
+  struct Long;
+  struct ULong;
+  struct Float;
+  struct Double;
+  struct ArrayByte;
+  struct ArrayUByte;
+  struct ArrayShort;
+  struct ArrayUShort;
+  struct ArrayInt;
+  struct ArrayUInt;
+  struct ArrayLong;
+  struct ArrayULong;
+  struct ArrayFloat;
+  struct ArrayDouble;
+  struct LogData;
 
-enum Value {
-  Value_NONE = 0,
-  Value_Byte = 1,
-  Value_UByte = 2,
-  Value_Short = 3,
-  Value_UShort = 4,
-  Value_Int = 5,
-  Value_UInt = 6,
-  Value_Long = 7,
-  Value_ULong = 8,
-  Value_Float = 9,
-  Value_Double = 10,
-  Value_ArrayByte = 11,
-  Value_ArrayUByte = 12,
-  Value_ArrayShort = 13,
-  Value_ArrayUShort = 14,
-  Value_ArrayInt = 15,
-  Value_ArrayUInt = 16,
-  Value_ArrayLong = 17,
-  Value_ArrayULong = 18,
-  Value_ArrayFloat = 19,
-  Value_ArrayDouble = 20,
-  Value_MIN = Value_NONE,
-  Value_MAX = Value_ArrayDouble
-};
-
-inline const char **EnumNamesValue() {
-  static const char *names[] = { "NONE", "Byte", "UByte", "Short", "UShort", "Int", "UInt", "Long", "ULong", "Float", "Double", "ArrayByte", "ArrayUByte", "ArrayShort", "ArrayUShort", "ArrayInt", "ArrayUInt", "ArrayLong", "ArrayULong", "ArrayFloat", "ArrayDouble", nullptr };
-  return names;
-}
-
-inline const char *EnumNameValue(Value e) { return EnumNamesValue()[static_cast<int>(e)]; }
-
-inline bool VerifyValue(flatbuffers::Verifier &verifier, const void *union_obj, Value type);
-
-struct Byte FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  enum {
-    VT_VALUE = 4
+  enum Value {
+    Value_NONE = 0,
+    Value_Byte = 1,
+    Value_UByte = 2,
+    Value_Short = 3,
+    Value_UShort = 4,
+    Value_Int = 5,
+    Value_UInt = 6,
+    Value_Long = 7,
+    Value_ULong = 8,
+    Value_Float = 9,
+    Value_Double = 10,
+    Value_ArrayByte = 11,
+    Value_ArrayUByte = 12,
+    Value_ArrayShort = 13,
+    Value_ArrayUShort = 14,
+    Value_ArrayInt = 15,
+    Value_ArrayUInt = 16,
+    Value_ArrayLong = 17,
+    Value_ArrayULong = 18,
+    Value_ArrayFloat = 19,
+    Value_ArrayDouble = 20,
+    Value_MIN = Value_NONE,
+    Value_MAX = Value_ArrayDouble
   };
-  int8_t value() const { return GetField<int8_t>(VT_VALUE, 0); }
-  bool Verify(flatbuffers::Verifier &verifier) const {
-    return VerifyTableStart(verifier) &&
-           VerifyField<int8_t>(verifier, VT_VALUE) &&
-           verifier.EndTable();
+
+  inline const char **EnumNamesValue() {
+    static const char *names[] = { "NONE", "Byte", "UByte", "Short", "UShort", "Int", "UInt", "Long", "ULong", "Float", "Double", "ArrayByte", "ArrayUByte", "ArrayShort", "ArrayUShort", "ArrayInt", "ArrayUInt", "ArrayLong", "ArrayULong", "ArrayFloat", "ArrayDouble", nullptr };
+    return names;
   }
-};
 
-struct ByteBuilder {
-  flatbuffers::FlatBufferBuilder &fbb_;
-  flatbuffers::uoffset_t start_;
-  void add_value(int8_t value) { fbb_.AddElement<int8_t>(Byte::VT_VALUE, value, 0); }
-  ByteBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
-  ByteBuilder &operator=(const ByteBuilder &);
-  flatbuffers::Offset<Byte> Finish() {
-    auto o = flatbuffers::Offset<Byte>(fbb_.EndTable(start_, 1));
-    return o;
-  }
-};
+  inline const char *EnumNameValue(Value e) { return EnumNamesValue()[static_cast<int>(e)]; }
 
-inline flatbuffers::Offset<Byte> CreateByte(flatbuffers::FlatBufferBuilder &_fbb,
-   int8_t value = 0) {
-  ByteBuilder builder_(_fbb);
-  builder_.add_value(value);
-  return builder_.Finish();
-}
+  inline bool VerifyValue(flatbuffers::Verifier &verifier, const void *union_obj, Value type);
 
-struct UByte FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  enum {
-    VT_VALUE = 4
+  struct Byte FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+    enum {
+      VT_VALUE = 4
+    };
+    int8_t value() const { return GetField<int8_t>(VT_VALUE, 0); }
+    bool Verify(flatbuffers::Verifier &verifier) const {
+      return VerifyTableStart(verifier) &&
+        VerifyField<int8_t>(verifier, VT_VALUE) &&
+        verifier.EndTable();
+    }
   };
-  uint8_t value() const { return GetField<uint8_t>(VT_VALUE, 0); }
-  bool Verify(flatbuffers::Verifier &verifier) const {
-    return VerifyTableStart(verifier) &&
-           VerifyField<uint8_t>(verifier, VT_VALUE) &&
-           verifier.EndTable();
-  }
-};
 
-struct UByteBuilder {
-  flatbuffers::FlatBufferBuilder &fbb_;
-  flatbuffers::uoffset_t start_;
-  void add_value(uint8_t value) { fbb_.AddElement<uint8_t>(UByte::VT_VALUE, value, 0); }
-  UByteBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
-  UByteBuilder &operator=(const UByteBuilder &);
-  flatbuffers::Offset<UByte> Finish() {
-    auto o = flatbuffers::Offset<UByte>(fbb_.EndTable(start_, 1));
-    return o;
-  }
-};
-
-inline flatbuffers::Offset<UByte> CreateUByte(flatbuffers::FlatBufferBuilder &_fbb,
-   uint8_t value = 0) {
-  UByteBuilder builder_(_fbb);
-  builder_.add_value(value);
-  return builder_.Finish();
-}
-
-struct Short FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  enum {
-    VT_VALUE = 4
+  struct ByteBuilder {
+    flatbuffers::FlatBufferBuilder &fbb_;
+    flatbuffers::uoffset_t start_;
+    void add_value(int8_t value) { fbb_.AddElement<int8_t>(Byte::VT_VALUE, value, 0); }
+    ByteBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
+    ByteBuilder &operator=(const ByteBuilder &);
+    flatbuffers::Offset<Byte> Finish() {
+      auto o = flatbuffers::Offset<Byte>(fbb_.EndTable(start_, 1));
+      return o;
+    }
   };
-  int16_t value() const { return GetField<int16_t>(VT_VALUE, 0); }
-  bool Verify(flatbuffers::Verifier &verifier) const {
-    return VerifyTableStart(verifier) &&
-           VerifyField<int16_t>(verifier, VT_VALUE) &&
-           verifier.EndTable();
+
+  inline flatbuffers::Offset<Byte> CreateByte(flatbuffers::FlatBufferBuilder &_fbb,
+    int8_t value = 0) {
+    ByteBuilder builder_(_fbb);
+    builder_.add_value(value);
+    return builder_.Finish();
   }
-};
 
-struct ShortBuilder {
-  flatbuffers::FlatBufferBuilder &fbb_;
-  flatbuffers::uoffset_t start_;
-  void add_value(int16_t value) { fbb_.AddElement<int16_t>(Short::VT_VALUE, value, 0); }
-  ShortBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
-  ShortBuilder &operator=(const ShortBuilder &);
-  flatbuffers::Offset<Short> Finish() {
-    auto o = flatbuffers::Offset<Short>(fbb_.EndTable(start_, 1));
-    return o;
-  }
-};
-
-inline flatbuffers::Offset<Short> CreateShort(flatbuffers::FlatBufferBuilder &_fbb,
-   int16_t value = 0) {
-  ShortBuilder builder_(_fbb);
-  builder_.add_value(value);
-  return builder_.Finish();
-}
-
-struct UShort FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  enum {
-    VT_VALUE = 4
+  struct UByte FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+    enum {
+      VT_VALUE = 4
+    };
+    uint8_t value() const { return GetField<uint8_t>(VT_VALUE, 0); }
+    bool Verify(flatbuffers::Verifier &verifier) const {
+      return VerifyTableStart(verifier) &&
+        VerifyField<uint8_t>(verifier, VT_VALUE) &&
+        verifier.EndTable();
+    }
   };
-  uint16_t value() const { return GetField<uint16_t>(VT_VALUE, 0); }
-  bool Verify(flatbuffers::Verifier &verifier) const {
-    return VerifyTableStart(verifier) &&
-           VerifyField<uint16_t>(verifier, VT_VALUE) &&
-           verifier.EndTable();
-  }
-};
 
-struct UShortBuilder {
-  flatbuffers::FlatBufferBuilder &fbb_;
-  flatbuffers::uoffset_t start_;
-  void add_value(uint16_t value) { fbb_.AddElement<uint16_t>(UShort::VT_VALUE, value, 0); }
-  UShortBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
-  UShortBuilder &operator=(const UShortBuilder &);
-  flatbuffers::Offset<UShort> Finish() {
-    auto o = flatbuffers::Offset<UShort>(fbb_.EndTable(start_, 1));
-    return o;
-  }
-};
-
-inline flatbuffers::Offset<UShort> CreateUShort(flatbuffers::FlatBufferBuilder &_fbb,
-   uint16_t value = 0) {
-  UShortBuilder builder_(_fbb);
-  builder_.add_value(value);
-  return builder_.Finish();
-}
-
-struct Int FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  enum {
-    VT_VALUE = 4
+  struct UByteBuilder {
+    flatbuffers::FlatBufferBuilder &fbb_;
+    flatbuffers::uoffset_t start_;
+    void add_value(uint8_t value) { fbb_.AddElement<uint8_t>(UByte::VT_VALUE, value, 0); }
+    UByteBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
+    UByteBuilder &operator=(const UByteBuilder &);
+    flatbuffers::Offset<UByte> Finish() {
+      auto o = flatbuffers::Offset<UByte>(fbb_.EndTable(start_, 1));
+      return o;
+    }
   };
-  int32_t value() const { return GetField<int32_t>(VT_VALUE, 0); }
-  bool Verify(flatbuffers::Verifier &verifier) const {
-    return VerifyTableStart(verifier) &&
-           VerifyField<int32_t>(verifier, VT_VALUE) &&
-           verifier.EndTable();
+
+  inline flatbuffers::Offset<UByte> CreateUByte(flatbuffers::FlatBufferBuilder &_fbb,
+    uint8_t value = 0) {
+    UByteBuilder builder_(_fbb);
+    builder_.add_value(value);
+    return builder_.Finish();
   }
-};
 
-struct IntBuilder {
-  flatbuffers::FlatBufferBuilder &fbb_;
-  flatbuffers::uoffset_t start_;
-  void add_value(int32_t value) { fbb_.AddElement<int32_t>(Int::VT_VALUE, value, 0); }
-  IntBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
-  IntBuilder &operator=(const IntBuilder &);
-  flatbuffers::Offset<Int> Finish() {
-    auto o = flatbuffers::Offset<Int>(fbb_.EndTable(start_, 1));
-    return o;
-  }
-};
-
-inline flatbuffers::Offset<Int> CreateInt(flatbuffers::FlatBufferBuilder &_fbb,
-   int32_t value = 0) {
-  IntBuilder builder_(_fbb);
-  builder_.add_value(value);
-  return builder_.Finish();
-}
-
-struct UInt FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  enum {
-    VT_VALUE = 4
+  struct Short FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+    enum {
+      VT_VALUE = 4
+    };
+    int16_t value() const { return GetField<int16_t>(VT_VALUE, 0); }
+    bool Verify(flatbuffers::Verifier &verifier) const {
+      return VerifyTableStart(verifier) &&
+        VerifyField<int16_t>(verifier, VT_VALUE) &&
+        verifier.EndTable();
+    }
   };
-  uint32_t value() const { return GetField<uint32_t>(VT_VALUE, 0); }
-  bool Verify(flatbuffers::Verifier &verifier) const {
-    return VerifyTableStart(verifier) &&
-           VerifyField<uint32_t>(verifier, VT_VALUE) &&
-           verifier.EndTable();
-  }
-};
 
-struct UIntBuilder {
-  flatbuffers::FlatBufferBuilder &fbb_;
-  flatbuffers::uoffset_t start_;
-  void add_value(uint32_t value) { fbb_.AddElement<uint32_t>(UInt::VT_VALUE, value, 0); }
-  UIntBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
-  UIntBuilder &operator=(const UIntBuilder &);
-  flatbuffers::Offset<UInt> Finish() {
-    auto o = flatbuffers::Offset<UInt>(fbb_.EndTable(start_, 1));
-    return o;
-  }
-};
-
-inline flatbuffers::Offset<UInt> CreateUInt(flatbuffers::FlatBufferBuilder &_fbb,
-   uint32_t value = 0) {
-  UIntBuilder builder_(_fbb);
-  builder_.add_value(value);
-  return builder_.Finish();
-}
-
-struct Long FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  enum {
-    VT_VALUE = 4
+  struct ShortBuilder {
+    flatbuffers::FlatBufferBuilder &fbb_;
+    flatbuffers::uoffset_t start_;
+    void add_value(int16_t value) { fbb_.AddElement<int16_t>(Short::VT_VALUE, value, 0); }
+    ShortBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
+    ShortBuilder &operator=(const ShortBuilder &);
+    flatbuffers::Offset<Short> Finish() {
+      auto o = flatbuffers::Offset<Short>(fbb_.EndTable(start_, 1));
+      return o;
+    }
   };
-  int64_t value() const { return GetField<int64_t>(VT_VALUE, 0); }
-  bool Verify(flatbuffers::Verifier &verifier) const {
-    return VerifyTableStart(verifier) &&
-           VerifyField<int64_t>(verifier, VT_VALUE) &&
-           verifier.EndTable();
+
+  inline flatbuffers::Offset<Short> CreateShort(flatbuffers::FlatBufferBuilder &_fbb,
+    int16_t value = 0) {
+    ShortBuilder builder_(_fbb);
+    builder_.add_value(value);
+    return builder_.Finish();
   }
-};
 
-struct LongBuilder {
-  flatbuffers::FlatBufferBuilder &fbb_;
-  flatbuffers::uoffset_t start_;
-  void add_value(int64_t value) { fbb_.AddElement<int64_t>(Long::VT_VALUE, value, 0); }
-  LongBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
-  LongBuilder &operator=(const LongBuilder &);
-  flatbuffers::Offset<Long> Finish() {
-    auto o = flatbuffers::Offset<Long>(fbb_.EndTable(start_, 1));
-    return o;
-  }
-};
-
-inline flatbuffers::Offset<Long> CreateLong(flatbuffers::FlatBufferBuilder &_fbb,
-   int64_t value = 0) {
-  LongBuilder builder_(_fbb);
-  builder_.add_value(value);
-  return builder_.Finish();
-}
-
-struct ULong FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  enum {
-    VT_VALUE = 4
+  struct UShort FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+    enum {
+      VT_VALUE = 4
+    };
+    uint16_t value() const { return GetField<uint16_t>(VT_VALUE, 0); }
+    bool Verify(flatbuffers::Verifier &verifier) const {
+      return VerifyTableStart(verifier) &&
+        VerifyField<uint16_t>(verifier, VT_VALUE) &&
+        verifier.EndTable();
+    }
   };
-  uint64_t value() const { return GetField<uint64_t>(VT_VALUE, 0); }
-  bool Verify(flatbuffers::Verifier &verifier) const {
-    return VerifyTableStart(verifier) &&
-           VerifyField<uint64_t>(verifier, VT_VALUE) &&
-           verifier.EndTable();
-  }
-};
 
-struct ULongBuilder {
-  flatbuffers::FlatBufferBuilder &fbb_;
-  flatbuffers::uoffset_t start_;
-  void add_value(uint64_t value) { fbb_.AddElement<uint64_t>(ULong::VT_VALUE, value, 0); }
-  ULongBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
-  ULongBuilder &operator=(const ULongBuilder &);
-  flatbuffers::Offset<ULong> Finish() {
-    auto o = flatbuffers::Offset<ULong>(fbb_.EndTable(start_, 1));
-    return o;
-  }
-};
-
-inline flatbuffers::Offset<ULong> CreateULong(flatbuffers::FlatBufferBuilder &_fbb,
-   uint64_t value = 0) {
-  ULongBuilder builder_(_fbb);
-  builder_.add_value(value);
-  return builder_.Finish();
-}
-
-struct Float FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  enum {
-    VT_VALUE = 4
+  struct UShortBuilder {
+    flatbuffers::FlatBufferBuilder &fbb_;
+    flatbuffers::uoffset_t start_;
+    void add_value(uint16_t value) { fbb_.AddElement<uint16_t>(UShort::VT_VALUE, value, 0); }
+    UShortBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
+    UShortBuilder &operator=(const UShortBuilder &);
+    flatbuffers::Offset<UShort> Finish() {
+      auto o = flatbuffers::Offset<UShort>(fbb_.EndTable(start_, 1));
+      return o;
+    }
   };
-  float value() const { return GetField<float>(VT_VALUE, 0); }
-  bool Verify(flatbuffers::Verifier &verifier) const {
-    return VerifyTableStart(verifier) &&
-           VerifyField<float>(verifier, VT_VALUE) &&
-           verifier.EndTable();
+
+  inline flatbuffers::Offset<UShort> CreateUShort(flatbuffers::FlatBufferBuilder &_fbb,
+    uint16_t value = 0) {
+    UShortBuilder builder_(_fbb);
+    builder_.add_value(value);
+    return builder_.Finish();
   }
-};
 
-struct FloatBuilder {
-  flatbuffers::FlatBufferBuilder &fbb_;
-  flatbuffers::uoffset_t start_;
-  void add_value(float value) { fbb_.AddElement<float>(Float::VT_VALUE, value, 0); }
-  FloatBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
-  FloatBuilder &operator=(const FloatBuilder &);
-  flatbuffers::Offset<Float> Finish() {
-    auto o = flatbuffers::Offset<Float>(fbb_.EndTable(start_, 1));
-    return o;
-  }
-};
-
-inline flatbuffers::Offset<Float> CreateFloat(flatbuffers::FlatBufferBuilder &_fbb,
-   float value = 0) {
-  FloatBuilder builder_(_fbb);
-  builder_.add_value(value);
-  return builder_.Finish();
-}
-
-struct Double FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  enum {
-    VT_VALUE = 4
+  struct Int FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+    enum {
+      VT_VALUE = 4
+    };
+    int32_t value() const { return GetField<int32_t>(VT_VALUE, 0); }
+    bool Verify(flatbuffers::Verifier &verifier) const {
+      return VerifyTableStart(verifier) &&
+        VerifyField<int32_t>(verifier, VT_VALUE) &&
+        verifier.EndTable();
+    }
   };
-  double value() const { return GetField<double>(VT_VALUE, 0); }
-  bool Verify(flatbuffers::Verifier &verifier) const {
-    return VerifyTableStart(verifier) &&
-           VerifyField<double>(verifier, VT_VALUE) &&
-           verifier.EndTable();
-  }
-};
 
-struct DoubleBuilder {
-  flatbuffers::FlatBufferBuilder &fbb_;
-  flatbuffers::uoffset_t start_;
-  void add_value(double value) { fbb_.AddElement<double>(Double::VT_VALUE, value, 0); }
-  DoubleBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
-  DoubleBuilder &operator=(const DoubleBuilder &);
-  flatbuffers::Offset<Double> Finish() {
-    auto o = flatbuffers::Offset<Double>(fbb_.EndTable(start_, 1));
-    return o;
-  }
-};
-
-inline flatbuffers::Offset<Double> CreateDouble(flatbuffers::FlatBufferBuilder &_fbb,
-   double value = 0) {
-  DoubleBuilder builder_(_fbb);
-  builder_.add_value(value);
-  return builder_.Finish();
-}
-
-struct ArrayByte FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  enum {
-    VT_VALUE = 4
+  struct IntBuilder {
+    flatbuffers::FlatBufferBuilder &fbb_;
+    flatbuffers::uoffset_t start_;
+    void add_value(int32_t value) { fbb_.AddElement<int32_t>(Int::VT_VALUE, value, 0); }
+    IntBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
+    IntBuilder &operator=(const IntBuilder &);
+    flatbuffers::Offset<Int> Finish() {
+      auto o = flatbuffers::Offset<Int>(fbb_.EndTable(start_, 1));
+      return o;
+    }
   };
-  const flatbuffers::Vector<int8_t> *value() const { return GetPointer<const flatbuffers::Vector<int8_t> *>(VT_VALUE); }
-  bool Verify(flatbuffers::Verifier &verifier) const {
-    return VerifyTableStart(verifier) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, VT_VALUE) &&
-           verifier.Verify(value()) &&
-           verifier.EndTable();
+
+  inline flatbuffers::Offset<Int> CreateInt(flatbuffers::FlatBufferBuilder &_fbb,
+    int32_t value = 0) {
+    IntBuilder builder_(_fbb);
+    builder_.add_value(value);
+    return builder_.Finish();
   }
-};
 
-struct ArrayByteBuilder {
-  flatbuffers::FlatBufferBuilder &fbb_;
-  flatbuffers::uoffset_t start_;
-  void add_value(flatbuffers::Offset<flatbuffers::Vector<int8_t>> value) { fbb_.AddOffset(ArrayByte::VT_VALUE, value); }
-  ArrayByteBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
-  ArrayByteBuilder &operator=(const ArrayByteBuilder &);
-  flatbuffers::Offset<ArrayByte> Finish() {
-    auto o = flatbuffers::Offset<ArrayByte>(fbb_.EndTable(start_, 1));
-    return o;
-  }
-};
-
-inline flatbuffers::Offset<ArrayByte> CreateArrayByte(flatbuffers::FlatBufferBuilder &_fbb,
-   flatbuffers::Offset<flatbuffers::Vector<int8_t>> value = 0) {
-  ArrayByteBuilder builder_(_fbb);
-  builder_.add_value(value);
-  return builder_.Finish();
-}
-
-struct ArrayUByte FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  enum {
-    VT_VALUE = 4
+  struct UInt FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+    enum {
+      VT_VALUE = 4
+    };
+    uint32_t value() const { return GetField<uint32_t>(VT_VALUE, 0); }
+    bool Verify(flatbuffers::Verifier &verifier) const {
+      return VerifyTableStart(verifier) &&
+        VerifyField<uint32_t>(verifier, VT_VALUE) &&
+        verifier.EndTable();
+    }
   };
-  const flatbuffers::Vector<uint8_t> *value() const { return GetPointer<const flatbuffers::Vector<uint8_t> *>(VT_VALUE); }
-  bool Verify(flatbuffers::Verifier &verifier) const {
-    return VerifyTableStart(verifier) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, VT_VALUE) &&
-           verifier.Verify(value()) &&
-           verifier.EndTable();
-  }
-};
 
-struct ArrayUByteBuilder {
-  flatbuffers::FlatBufferBuilder &fbb_;
-  flatbuffers::uoffset_t start_;
-  void add_value(flatbuffers::Offset<flatbuffers::Vector<uint8_t>> value) { fbb_.AddOffset(ArrayUByte::VT_VALUE, value); }
-  ArrayUByteBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
-  ArrayUByteBuilder &operator=(const ArrayUByteBuilder &);
-  flatbuffers::Offset<ArrayUByte> Finish() {
-    auto o = flatbuffers::Offset<ArrayUByte>(fbb_.EndTable(start_, 1));
-    return o;
-  }
-};
-
-inline flatbuffers::Offset<ArrayUByte> CreateArrayUByte(flatbuffers::FlatBufferBuilder &_fbb,
-   flatbuffers::Offset<flatbuffers::Vector<uint8_t>> value = 0) {
-  ArrayUByteBuilder builder_(_fbb);
-  builder_.add_value(value);
-  return builder_.Finish();
-}
-
-struct ArrayShort FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  enum {
-    VT_VALUE = 4
+  struct UIntBuilder {
+    flatbuffers::FlatBufferBuilder &fbb_;
+    flatbuffers::uoffset_t start_;
+    void add_value(uint32_t value) { fbb_.AddElement<uint32_t>(UInt::VT_VALUE, value, 0); }
+    UIntBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
+    UIntBuilder &operator=(const UIntBuilder &);
+    flatbuffers::Offset<UInt> Finish() {
+      auto o = flatbuffers::Offset<UInt>(fbb_.EndTable(start_, 1));
+      return o;
+    }
   };
-  const flatbuffers::Vector<int16_t> *value() const { return GetPointer<const flatbuffers::Vector<int16_t> *>(VT_VALUE); }
-  bool Verify(flatbuffers::Verifier &verifier) const {
-    return VerifyTableStart(verifier) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, VT_VALUE) &&
-           verifier.Verify(value()) &&
-           verifier.EndTable();
+
+  inline flatbuffers::Offset<UInt> CreateUInt(flatbuffers::FlatBufferBuilder &_fbb,
+    uint32_t value = 0) {
+    UIntBuilder builder_(_fbb);
+    builder_.add_value(value);
+    return builder_.Finish();
   }
-};
 
-struct ArrayShortBuilder {
-  flatbuffers::FlatBufferBuilder &fbb_;
-  flatbuffers::uoffset_t start_;
-  void add_value(flatbuffers::Offset<flatbuffers::Vector<int16_t>> value) { fbb_.AddOffset(ArrayShort::VT_VALUE, value); }
-  ArrayShortBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
-  ArrayShortBuilder &operator=(const ArrayShortBuilder &);
-  flatbuffers::Offset<ArrayShort> Finish() {
-    auto o = flatbuffers::Offset<ArrayShort>(fbb_.EndTable(start_, 1));
-    return o;
-  }
-};
-
-inline flatbuffers::Offset<ArrayShort> CreateArrayShort(flatbuffers::FlatBufferBuilder &_fbb,
-   flatbuffers::Offset<flatbuffers::Vector<int16_t>> value = 0) {
-  ArrayShortBuilder builder_(_fbb);
-  builder_.add_value(value);
-  return builder_.Finish();
-}
-
-struct ArrayUShort FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  enum {
-    VT_VALUE = 4
+  struct Long FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+    enum {
+      VT_VALUE = 4
+    };
+    int64_t value() const { return GetField<int64_t>(VT_VALUE, 0); }
+    bool Verify(flatbuffers::Verifier &verifier) const {
+      return VerifyTableStart(verifier) &&
+        VerifyField<int64_t>(verifier, VT_VALUE) &&
+        verifier.EndTable();
+    }
   };
-  const flatbuffers::Vector<uint16_t> *value() const { return GetPointer<const flatbuffers::Vector<uint16_t> *>(VT_VALUE); }
-  bool Verify(flatbuffers::Verifier &verifier) const {
-    return VerifyTableStart(verifier) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, VT_VALUE) &&
-           verifier.Verify(value()) &&
-           verifier.EndTable();
-  }
-};
 
-struct ArrayUShortBuilder {
-  flatbuffers::FlatBufferBuilder &fbb_;
-  flatbuffers::uoffset_t start_;
-  void add_value(flatbuffers::Offset<flatbuffers::Vector<uint16_t>> value) { fbb_.AddOffset(ArrayUShort::VT_VALUE, value); }
-  ArrayUShortBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
-  ArrayUShortBuilder &operator=(const ArrayUShortBuilder &);
-  flatbuffers::Offset<ArrayUShort> Finish() {
-    auto o = flatbuffers::Offset<ArrayUShort>(fbb_.EndTable(start_, 1));
-    return o;
-  }
-};
-
-inline flatbuffers::Offset<ArrayUShort> CreateArrayUShort(flatbuffers::FlatBufferBuilder &_fbb,
-   flatbuffers::Offset<flatbuffers::Vector<uint16_t>> value = 0) {
-  ArrayUShortBuilder builder_(_fbb);
-  builder_.add_value(value);
-  return builder_.Finish();
-}
-
-struct ArrayInt FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  enum {
-    VT_VALUE = 4
+  struct LongBuilder {
+    flatbuffers::FlatBufferBuilder &fbb_;
+    flatbuffers::uoffset_t start_;
+    void add_value(int64_t value) { fbb_.AddElement<int64_t>(Long::VT_VALUE, value, 0); }
+    LongBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
+    LongBuilder &operator=(const LongBuilder &);
+    flatbuffers::Offset<Long> Finish() {
+      auto o = flatbuffers::Offset<Long>(fbb_.EndTable(start_, 1));
+      return o;
+    }
   };
-  const flatbuffers::Vector<int32_t> *value() const { return GetPointer<const flatbuffers::Vector<int32_t> *>(VT_VALUE); }
-  bool Verify(flatbuffers::Verifier &verifier) const {
-    return VerifyTableStart(verifier) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, VT_VALUE) &&
-           verifier.Verify(value()) &&
-           verifier.EndTable();
+
+  inline flatbuffers::Offset<Long> CreateLong(flatbuffers::FlatBufferBuilder &_fbb,
+    int64_t value = 0) {
+    LongBuilder builder_(_fbb);
+    builder_.add_value(value);
+    return builder_.Finish();
   }
-};
 
-struct ArrayIntBuilder {
-  flatbuffers::FlatBufferBuilder &fbb_;
-  flatbuffers::uoffset_t start_;
-  void add_value(flatbuffers::Offset<flatbuffers::Vector<int32_t>> value) { fbb_.AddOffset(ArrayInt::VT_VALUE, value); }
-  ArrayIntBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
-  ArrayIntBuilder &operator=(const ArrayIntBuilder &);
-  flatbuffers::Offset<ArrayInt> Finish() {
-    auto o = flatbuffers::Offset<ArrayInt>(fbb_.EndTable(start_, 1));
-    return o;
-  }
-};
-
-inline flatbuffers::Offset<ArrayInt> CreateArrayInt(flatbuffers::FlatBufferBuilder &_fbb,
-   flatbuffers::Offset<flatbuffers::Vector<int32_t>> value = 0) {
-  ArrayIntBuilder builder_(_fbb);
-  builder_.add_value(value);
-  return builder_.Finish();
-}
-
-struct ArrayUInt FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  enum {
-    VT_VALUE = 4
+  struct ULong FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+    enum {
+      VT_VALUE = 4
+    };
+    uint64_t value() const { return GetField<uint64_t>(VT_VALUE, 0); }
+    bool Verify(flatbuffers::Verifier &verifier) const {
+      return VerifyTableStart(verifier) &&
+        VerifyField<uint64_t>(verifier, VT_VALUE) &&
+        verifier.EndTable();
+    }
   };
-  const flatbuffers::Vector<uint32_t> *value() const { return GetPointer<const flatbuffers::Vector<uint32_t> *>(VT_VALUE); }
-  bool Verify(flatbuffers::Verifier &verifier) const {
-    return VerifyTableStart(verifier) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, VT_VALUE) &&
-           verifier.Verify(value()) &&
-           verifier.EndTable();
-  }
-};
 
-struct ArrayUIntBuilder {
-  flatbuffers::FlatBufferBuilder &fbb_;
-  flatbuffers::uoffset_t start_;
-  void add_value(flatbuffers::Offset<flatbuffers::Vector<uint32_t>> value) { fbb_.AddOffset(ArrayUInt::VT_VALUE, value); }
-  ArrayUIntBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
-  ArrayUIntBuilder &operator=(const ArrayUIntBuilder &);
-  flatbuffers::Offset<ArrayUInt> Finish() {
-    auto o = flatbuffers::Offset<ArrayUInt>(fbb_.EndTable(start_, 1));
-    return o;
-  }
-};
-
-inline flatbuffers::Offset<ArrayUInt> CreateArrayUInt(flatbuffers::FlatBufferBuilder &_fbb,
-   flatbuffers::Offset<flatbuffers::Vector<uint32_t>> value = 0) {
-  ArrayUIntBuilder builder_(_fbb);
-  builder_.add_value(value);
-  return builder_.Finish();
-}
-
-struct ArrayLong FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  enum {
-    VT_VALUE = 4
+  struct ULongBuilder {
+    flatbuffers::FlatBufferBuilder &fbb_;
+    flatbuffers::uoffset_t start_;
+    void add_value(uint64_t value) { fbb_.AddElement<uint64_t>(ULong::VT_VALUE, value, 0); }
+    ULongBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
+    ULongBuilder &operator=(const ULongBuilder &);
+    flatbuffers::Offset<ULong> Finish() {
+      auto o = flatbuffers::Offset<ULong>(fbb_.EndTable(start_, 1));
+      return o;
+    }
   };
-  const flatbuffers::Vector<int64_t> *value() const { return GetPointer<const flatbuffers::Vector<int64_t> *>(VT_VALUE); }
-  bool Verify(flatbuffers::Verifier &verifier) const {
-    return VerifyTableStart(verifier) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, VT_VALUE) &&
-           verifier.Verify(value()) &&
-           verifier.EndTable();
+
+  inline flatbuffers::Offset<ULong> CreateULong(flatbuffers::FlatBufferBuilder &_fbb,
+    uint64_t value = 0) {
+    ULongBuilder builder_(_fbb);
+    builder_.add_value(value);
+    return builder_.Finish();
   }
-};
 
-struct ArrayLongBuilder {
-  flatbuffers::FlatBufferBuilder &fbb_;
-  flatbuffers::uoffset_t start_;
-  void add_value(flatbuffers::Offset<flatbuffers::Vector<int64_t>> value) { fbb_.AddOffset(ArrayLong::VT_VALUE, value); }
-  ArrayLongBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
-  ArrayLongBuilder &operator=(const ArrayLongBuilder &);
-  flatbuffers::Offset<ArrayLong> Finish() {
-    auto o = flatbuffers::Offset<ArrayLong>(fbb_.EndTable(start_, 1));
-    return o;
-  }
-};
-
-inline flatbuffers::Offset<ArrayLong> CreateArrayLong(flatbuffers::FlatBufferBuilder &_fbb,
-   flatbuffers::Offset<flatbuffers::Vector<int64_t>> value = 0) {
-  ArrayLongBuilder builder_(_fbb);
-  builder_.add_value(value);
-  return builder_.Finish();
-}
-
-struct ArrayULong FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  enum {
-    VT_VALUE = 4
+  struct Float FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+    enum {
+      VT_VALUE = 4
+    };
+    float value() const { return GetField<float>(VT_VALUE, 0); }
+    bool Verify(flatbuffers::Verifier &verifier) const {
+      return VerifyTableStart(verifier) &&
+        VerifyField<float>(verifier, VT_VALUE) &&
+        verifier.EndTable();
+    }
   };
-  const flatbuffers::Vector<uint64_t> *value() const { return GetPointer<const flatbuffers::Vector<uint64_t> *>(VT_VALUE); }
-  bool Verify(flatbuffers::Verifier &verifier) const {
-    return VerifyTableStart(verifier) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, VT_VALUE) &&
-           verifier.Verify(value()) &&
-           verifier.EndTable();
-  }
-};
 
-struct ArrayULongBuilder {
-  flatbuffers::FlatBufferBuilder &fbb_;
-  flatbuffers::uoffset_t start_;
-  void add_value(flatbuffers::Offset<flatbuffers::Vector<uint64_t>> value) { fbb_.AddOffset(ArrayULong::VT_VALUE, value); }
-  ArrayULongBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
-  ArrayULongBuilder &operator=(const ArrayULongBuilder &);
-  flatbuffers::Offset<ArrayULong> Finish() {
-    auto o = flatbuffers::Offset<ArrayULong>(fbb_.EndTable(start_, 1));
-    return o;
-  }
-};
-
-inline flatbuffers::Offset<ArrayULong> CreateArrayULong(flatbuffers::FlatBufferBuilder &_fbb,
-   flatbuffers::Offset<flatbuffers::Vector<uint64_t>> value = 0) {
-  ArrayULongBuilder builder_(_fbb);
-  builder_.add_value(value);
-  return builder_.Finish();
-}
-
-struct ArrayFloat FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  enum {
-    VT_VALUE = 4
+  struct FloatBuilder {
+    flatbuffers::FlatBufferBuilder &fbb_;
+    flatbuffers::uoffset_t start_;
+    void add_value(float value) { fbb_.AddElement<float>(Float::VT_VALUE, value, 0); }
+    FloatBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
+    FloatBuilder &operator=(const FloatBuilder &);
+    flatbuffers::Offset<Float> Finish() {
+      auto o = flatbuffers::Offset<Float>(fbb_.EndTable(start_, 1));
+      return o;
+    }
   };
-  const flatbuffers::Vector<float> *value() const { return GetPointer<const flatbuffers::Vector<float> *>(VT_VALUE); }
-  bool Verify(flatbuffers::Verifier &verifier) const {
-    return VerifyTableStart(verifier) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, VT_VALUE) &&
-           verifier.Verify(value()) &&
-           verifier.EndTable();
+
+  inline flatbuffers::Offset<Float> CreateFloat(flatbuffers::FlatBufferBuilder &_fbb,
+    float value = 0) {
+    FloatBuilder builder_(_fbb);
+    builder_.add_value(value);
+    return builder_.Finish();
   }
-};
 
-struct ArrayFloatBuilder {
-  flatbuffers::FlatBufferBuilder &fbb_;
-  flatbuffers::uoffset_t start_;
-  void add_value(flatbuffers::Offset<flatbuffers::Vector<float>> value) { fbb_.AddOffset(ArrayFloat::VT_VALUE, value); }
-  ArrayFloatBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
-  ArrayFloatBuilder &operator=(const ArrayFloatBuilder &);
-  flatbuffers::Offset<ArrayFloat> Finish() {
-    auto o = flatbuffers::Offset<ArrayFloat>(fbb_.EndTable(start_, 1));
-    return o;
-  }
-};
-
-inline flatbuffers::Offset<ArrayFloat> CreateArrayFloat(flatbuffers::FlatBufferBuilder &_fbb,
-   flatbuffers::Offset<flatbuffers::Vector<float>> value = 0) {
-  ArrayFloatBuilder builder_(_fbb);
-  builder_.add_value(value);
-  return builder_.Finish();
-}
-
-struct ArrayDouble FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  enum {
-    VT_VALUE = 4
+  struct Double FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+    enum {
+      VT_VALUE = 4
+    };
+    double value() const { return GetField<double>(VT_VALUE, 0); }
+    bool Verify(flatbuffers::Verifier &verifier) const {
+      return VerifyTableStart(verifier) &&
+        VerifyField<double>(verifier, VT_VALUE) &&
+        verifier.EndTable();
+    }
   };
-  const flatbuffers::Vector<double> *value() const { return GetPointer<const flatbuffers::Vector<double> *>(VT_VALUE); }
-  bool Verify(flatbuffers::Verifier &verifier) const {
-    return VerifyTableStart(verifier) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, VT_VALUE) &&
-           verifier.Verify(value()) &&
-           verifier.EndTable();
-  }
-};
 
-struct ArrayDoubleBuilder {
-  flatbuffers::FlatBufferBuilder &fbb_;
-  flatbuffers::uoffset_t start_;
-  void add_value(flatbuffers::Offset<flatbuffers::Vector<double>> value) { fbb_.AddOffset(ArrayDouble::VT_VALUE, value); }
-  ArrayDoubleBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
-  ArrayDoubleBuilder &operator=(const ArrayDoubleBuilder &);
-  flatbuffers::Offset<ArrayDouble> Finish() {
-    auto o = flatbuffers::Offset<ArrayDouble>(fbb_.EndTable(start_, 1));
-    return o;
-  }
-};
-
-inline flatbuffers::Offset<ArrayDouble> CreateArrayDouble(flatbuffers::FlatBufferBuilder &_fbb,
-   flatbuffers::Offset<flatbuffers::Vector<double>> value = 0) {
-  ArrayDoubleBuilder builder_(_fbb);
-  builder_.add_value(value);
-  return builder_.Finish();
-}
-
-struct LogData FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  enum {
-    VT_SOURCE_NAME = 4,
-    VT_VALUE_TYPE = 6,
-    VT_VALUE = 8,
-    VT_TIMESTAMP = 10,
-    VT_FWDINFO_TYPE = 12,
-    VT_FWDINFO = 14
+  struct DoubleBuilder {
+    flatbuffers::FlatBufferBuilder &fbb_;
+    flatbuffers::uoffset_t start_;
+    void add_value(double value) { fbb_.AddElement<double>(Double::VT_VALUE, value, 0); }
+    DoubleBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
+    DoubleBuilder &operator=(const DoubleBuilder &);
+    flatbuffers::Offset<Double> Finish() {
+      auto o = flatbuffers::Offset<Double>(fbb_.EndTable(start_, 1));
+      return o;
+    }
   };
-  const flatbuffers::String *source_name() const { return GetPointer<const flatbuffers::String *>(VT_SOURCE_NAME); }
-  Value value_type() const { return static_cast<Value>(GetField<uint8_t>(VT_VALUE_TYPE, 0)); }
-  const void *value() const { return GetPointer<const void *>(VT_VALUE); }
-  uint64_t timestamp() const { return GetField<uint64_t>(VT_TIMESTAMP, 0); }
-  forwarder_internal fwdinfo_type() const { return static_cast<forwarder_internal>(GetField<uint8_t>(VT_FWDINFO_TYPE, 0)); }
-  const void *fwdinfo() const { return GetPointer<const void *>(VT_FWDINFO); }
-  bool Verify(flatbuffers::Verifier &verifier) const {
-    return VerifyTableStart(verifier) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, VT_SOURCE_NAME) &&
-           verifier.Verify(source_name()) &&
-           VerifyField<uint8_t>(verifier, VT_VALUE_TYPE) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, VT_VALUE) &&
-           VerifyValue(verifier, value(), value_type()) &&
-           VerifyField<uint64_t>(verifier, VT_TIMESTAMP) &&
-           VerifyField<uint8_t>(verifier, VT_FWDINFO_TYPE) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, VT_FWDINFO) &&
-           Verifyforwarder_internal(verifier, fwdinfo(), fwdinfo_type()) &&
-           verifier.EndTable();
+
+  inline flatbuffers::Offset<Double> CreateDouble(flatbuffers::FlatBufferBuilder &_fbb,
+    double value = 0) {
+    DoubleBuilder builder_(_fbb);
+    builder_.add_value(value);
+    return builder_.Finish();
   }
-};
 
-struct LogDataBuilder {
-  flatbuffers::FlatBufferBuilder &fbb_;
-  flatbuffers::uoffset_t start_;
-  void add_source_name(flatbuffers::Offset<flatbuffers::String> source_name) { fbb_.AddOffset(LogData::VT_SOURCE_NAME, source_name); }
-  void add_value_type(Value value_type) { fbb_.AddElement<uint8_t>(LogData::VT_VALUE_TYPE, static_cast<uint8_t>(value_type), 0); }
-  void add_value(flatbuffers::Offset<void> value) { fbb_.AddOffset(LogData::VT_VALUE, value); }
-  void add_timestamp(uint64_t timestamp) { fbb_.AddElement<uint64_t>(LogData::VT_TIMESTAMP, timestamp, 0); }
-  void add_fwdinfo_type(forwarder_internal fwdinfo_type) { fbb_.AddElement<uint8_t>(LogData::VT_FWDINFO_TYPE, static_cast<uint8_t>(fwdinfo_type), 0); }
-  void add_fwdinfo(flatbuffers::Offset<void> fwdinfo) { fbb_.AddOffset(LogData::VT_FWDINFO, fwdinfo); }
-  LogDataBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
-  LogDataBuilder &operator=(const LogDataBuilder &);
-  flatbuffers::Offset<LogData> Finish() {
-    auto o = flatbuffers::Offset<LogData>(fbb_.EndTable(start_, 6));
-    return o;
+  struct ArrayByte FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+    enum {
+      VT_VALUE = 4
+    };
+    const flatbuffers::Vector<int8_t> *value() const { return GetPointer<const flatbuffers::Vector<int8_t> *>(VT_VALUE); }
+    bool Verify(flatbuffers::Verifier &verifier) const {
+      return VerifyTableStart(verifier) &&
+        VerifyField<flatbuffers::uoffset_t>(verifier, VT_VALUE) &&
+        verifier.Verify(value()) &&
+        verifier.EndTable();
+    }
+  };
+
+  struct ArrayByteBuilder {
+    flatbuffers::FlatBufferBuilder &fbb_;
+    flatbuffers::uoffset_t start_;
+    void add_value(flatbuffers::Offset<flatbuffers::Vector<int8_t>> value) { fbb_.AddOffset(ArrayByte::VT_VALUE, value); }
+    ArrayByteBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
+    ArrayByteBuilder &operator=(const ArrayByteBuilder &);
+    flatbuffers::Offset<ArrayByte> Finish() {
+      auto o = flatbuffers::Offset<ArrayByte>(fbb_.EndTable(start_, 1));
+      return o;
+    }
+  };
+
+  inline flatbuffers::Offset<ArrayByte> CreateArrayByte(flatbuffers::FlatBufferBuilder &_fbb,
+    flatbuffers::Offset<flatbuffers::Vector<int8_t>> value = 0) {
+    ArrayByteBuilder builder_(_fbb);
+    builder_.add_value(value);
+    return builder_.Finish();
   }
-};
 
-inline flatbuffers::Offset<LogData> CreateLogData(flatbuffers::FlatBufferBuilder &_fbb,
-   flatbuffers::Offset<flatbuffers::String> source_name = 0,
-   Value value_type = Value_NONE,
-   flatbuffers::Offset<void> value = 0,
-   uint64_t timestamp = 0,
-   forwarder_internal fwdinfo_type = forwarder_internal_NONE,
-   flatbuffers::Offset<void> fwdinfo = 0) {
-  LogDataBuilder builder_(_fbb);
-  builder_.add_timestamp(timestamp);
-  builder_.add_fwdinfo(fwdinfo);
-  builder_.add_value(value);
-  builder_.add_source_name(source_name);
-  builder_.add_fwdinfo_type(fwdinfo_type);
-  builder_.add_value_type(value_type);
-  return builder_.Finish();
-}
+  struct ArrayUByte FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+    enum {
+      VT_VALUE = 4
+    };
+    const flatbuffers::Vector<uint8_t> *value() const { return GetPointer<const flatbuffers::Vector<uint8_t> *>(VT_VALUE); }
+    bool Verify(flatbuffers::Verifier &verifier) const {
+      return VerifyTableStart(verifier) &&
+        VerifyField<flatbuffers::uoffset_t>(verifier, VT_VALUE) &&
+        verifier.Verify(value()) &&
+        verifier.EndTable();
+    }
+  };
 
-inline bool VerifyValue(flatbuffers::Verifier &verifier, const void *union_obj, Value type) {
-  switch (type) {
+  struct ArrayUByteBuilder {
+    flatbuffers::FlatBufferBuilder &fbb_;
+    flatbuffers::uoffset_t start_;
+    void add_value(flatbuffers::Offset<flatbuffers::Vector<uint8_t>> value) { fbb_.AddOffset(ArrayUByte::VT_VALUE, value); }
+    ArrayUByteBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
+    ArrayUByteBuilder &operator=(const ArrayUByteBuilder &);
+    flatbuffers::Offset<ArrayUByte> Finish() {
+      auto o = flatbuffers::Offset<ArrayUByte>(fbb_.EndTable(start_, 1));
+      return o;
+    }
+  };
+
+  inline flatbuffers::Offset<ArrayUByte> CreateArrayUByte(flatbuffers::FlatBufferBuilder &_fbb,
+    flatbuffers::Offset<flatbuffers::Vector<uint8_t>> value = 0) {
+    ArrayUByteBuilder builder_(_fbb);
+    builder_.add_value(value);
+    return builder_.Finish();
+  }
+
+  struct ArrayShort FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+    enum {
+      VT_VALUE = 4
+    };
+    const flatbuffers::Vector<int16_t> *value() const { return GetPointer<const flatbuffers::Vector<int16_t> *>(VT_VALUE); }
+    bool Verify(flatbuffers::Verifier &verifier) const {
+      return VerifyTableStart(verifier) &&
+        VerifyField<flatbuffers::uoffset_t>(verifier, VT_VALUE) &&
+        verifier.Verify(value()) &&
+        verifier.EndTable();
+    }
+  };
+
+  struct ArrayShortBuilder {
+    flatbuffers::FlatBufferBuilder &fbb_;
+    flatbuffers::uoffset_t start_;
+    void add_value(flatbuffers::Offset<flatbuffers::Vector<int16_t>> value) { fbb_.AddOffset(ArrayShort::VT_VALUE, value); }
+    ArrayShortBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
+    ArrayShortBuilder &operator=(const ArrayShortBuilder &);
+    flatbuffers::Offset<ArrayShort> Finish() {
+      auto o = flatbuffers::Offset<ArrayShort>(fbb_.EndTable(start_, 1));
+      return o;
+    }
+  };
+
+  inline flatbuffers::Offset<ArrayShort> CreateArrayShort(flatbuffers::FlatBufferBuilder &_fbb,
+    flatbuffers::Offset<flatbuffers::Vector<int16_t>> value = 0) {
+    ArrayShortBuilder builder_(_fbb);
+    builder_.add_value(value);
+    return builder_.Finish();
+  }
+
+  struct ArrayUShort FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+    enum {
+      VT_VALUE = 4
+    };
+    const flatbuffers::Vector<uint16_t> *value() const { return GetPointer<const flatbuffers::Vector<uint16_t> *>(VT_VALUE); }
+    bool Verify(flatbuffers::Verifier &verifier) const {
+      return VerifyTableStart(verifier) &&
+        VerifyField<flatbuffers::uoffset_t>(verifier, VT_VALUE) &&
+        verifier.Verify(value()) &&
+        verifier.EndTable();
+    }
+  };
+
+  struct ArrayUShortBuilder {
+    flatbuffers::FlatBufferBuilder &fbb_;
+    flatbuffers::uoffset_t start_;
+    void add_value(flatbuffers::Offset<flatbuffers::Vector<uint16_t>> value) { fbb_.AddOffset(ArrayUShort::VT_VALUE, value); }
+    ArrayUShortBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
+    ArrayUShortBuilder &operator=(const ArrayUShortBuilder &);
+    flatbuffers::Offset<ArrayUShort> Finish() {
+      auto o = flatbuffers::Offset<ArrayUShort>(fbb_.EndTable(start_, 1));
+      return o;
+    }
+  };
+
+  inline flatbuffers::Offset<ArrayUShort> CreateArrayUShort(flatbuffers::FlatBufferBuilder &_fbb,
+    flatbuffers::Offset<flatbuffers::Vector<uint16_t>> value = 0) {
+    ArrayUShortBuilder builder_(_fbb);
+    builder_.add_value(value);
+    return builder_.Finish();
+  }
+
+  struct ArrayInt FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+    enum {
+      VT_VALUE = 4
+    };
+    const flatbuffers::Vector<int32_t> *value() const { return GetPointer<const flatbuffers::Vector<int32_t> *>(VT_VALUE); }
+    bool Verify(flatbuffers::Verifier &verifier) const {
+      return VerifyTableStart(verifier) &&
+        VerifyField<flatbuffers::uoffset_t>(verifier, VT_VALUE) &&
+        verifier.Verify(value()) &&
+        verifier.EndTable();
+    }
+  };
+
+  struct ArrayIntBuilder {
+    flatbuffers::FlatBufferBuilder &fbb_;
+    flatbuffers::uoffset_t start_;
+    void add_value(flatbuffers::Offset<flatbuffers::Vector<int32_t>> value) { fbb_.AddOffset(ArrayInt::VT_VALUE, value); }
+    ArrayIntBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
+    ArrayIntBuilder &operator=(const ArrayIntBuilder &);
+    flatbuffers::Offset<ArrayInt> Finish() {
+      auto o = flatbuffers::Offset<ArrayInt>(fbb_.EndTable(start_, 1));
+      return o;
+    }
+  };
+
+  inline flatbuffers::Offset<ArrayInt> CreateArrayInt(flatbuffers::FlatBufferBuilder &_fbb,
+    flatbuffers::Offset<flatbuffers::Vector<int32_t>> value = 0) {
+    ArrayIntBuilder builder_(_fbb);
+    builder_.add_value(value);
+    return builder_.Finish();
+  }
+
+  struct ArrayUInt FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+    enum {
+      VT_VALUE = 4
+    };
+    const flatbuffers::Vector<uint32_t> *value() const { return GetPointer<const flatbuffers::Vector<uint32_t> *>(VT_VALUE); }
+    bool Verify(flatbuffers::Verifier &verifier) const {
+      return VerifyTableStart(verifier) &&
+        VerifyField<flatbuffers::uoffset_t>(verifier, VT_VALUE) &&
+        verifier.Verify(value()) &&
+        verifier.EndTable();
+    }
+  };
+
+  struct ArrayUIntBuilder {
+    flatbuffers::FlatBufferBuilder &fbb_;
+    flatbuffers::uoffset_t start_;
+    void add_value(flatbuffers::Offset<flatbuffers::Vector<uint32_t>> value) { fbb_.AddOffset(ArrayUInt::VT_VALUE, value); }
+    ArrayUIntBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
+    ArrayUIntBuilder &operator=(const ArrayUIntBuilder &);
+    flatbuffers::Offset<ArrayUInt> Finish() {
+      auto o = flatbuffers::Offset<ArrayUInt>(fbb_.EndTable(start_, 1));
+      return o;
+    }
+  };
+
+  inline flatbuffers::Offset<ArrayUInt> CreateArrayUInt(flatbuffers::FlatBufferBuilder &_fbb,
+    flatbuffers::Offset<flatbuffers::Vector<uint32_t>> value = 0) {
+    ArrayUIntBuilder builder_(_fbb);
+    builder_.add_value(value);
+    return builder_.Finish();
+  }
+
+  struct ArrayLong FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+    enum {
+      VT_VALUE = 4
+    };
+    const flatbuffers::Vector<int64_t> *value() const { return GetPointer<const flatbuffers::Vector<int64_t> *>(VT_VALUE); }
+    bool Verify(flatbuffers::Verifier &verifier) const {
+      return VerifyTableStart(verifier) &&
+        VerifyField<flatbuffers::uoffset_t>(verifier, VT_VALUE) &&
+        verifier.Verify(value()) &&
+        verifier.EndTable();
+    }
+  };
+
+  struct ArrayLongBuilder {
+    flatbuffers::FlatBufferBuilder &fbb_;
+    flatbuffers::uoffset_t start_;
+    void add_value(flatbuffers::Offset<flatbuffers::Vector<int64_t>> value) { fbb_.AddOffset(ArrayLong::VT_VALUE, value); }
+    ArrayLongBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
+    ArrayLongBuilder &operator=(const ArrayLongBuilder &);
+    flatbuffers::Offset<ArrayLong> Finish() {
+      auto o = flatbuffers::Offset<ArrayLong>(fbb_.EndTable(start_, 1));
+      return o;
+    }
+  };
+
+  inline flatbuffers::Offset<ArrayLong> CreateArrayLong(flatbuffers::FlatBufferBuilder &_fbb,
+    flatbuffers::Offset<flatbuffers::Vector<int64_t>> value = 0) {
+    ArrayLongBuilder builder_(_fbb);
+    builder_.add_value(value);
+    return builder_.Finish();
+  }
+
+  struct ArrayULong FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+    enum {
+      VT_VALUE = 4
+    };
+    const flatbuffers::Vector<uint64_t> *value() const { return GetPointer<const flatbuffers::Vector<uint64_t> *>(VT_VALUE); }
+    bool Verify(flatbuffers::Verifier &verifier) const {
+      return VerifyTableStart(verifier) &&
+        VerifyField<flatbuffers::uoffset_t>(verifier, VT_VALUE) &&
+        verifier.Verify(value()) &&
+        verifier.EndTable();
+    }
+  };
+
+  struct ArrayULongBuilder {
+    flatbuffers::FlatBufferBuilder &fbb_;
+    flatbuffers::uoffset_t start_;
+    void add_value(flatbuffers::Offset<flatbuffers::Vector<uint64_t>> value) { fbb_.AddOffset(ArrayULong::VT_VALUE, value); }
+    ArrayULongBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
+    ArrayULongBuilder &operator=(const ArrayULongBuilder &);
+    flatbuffers::Offset<ArrayULong> Finish() {
+      auto o = flatbuffers::Offset<ArrayULong>(fbb_.EndTable(start_, 1));
+      return o;
+    }
+  };
+
+  inline flatbuffers::Offset<ArrayULong> CreateArrayULong(flatbuffers::FlatBufferBuilder &_fbb,
+    flatbuffers::Offset<flatbuffers::Vector<uint64_t>> value = 0) {
+    ArrayULongBuilder builder_(_fbb);
+    builder_.add_value(value);
+    return builder_.Finish();
+  }
+
+  struct ArrayFloat FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+    enum {
+      VT_VALUE = 4
+    };
+    const flatbuffers::Vector<float> *value() const { return GetPointer<const flatbuffers::Vector<float> *>(VT_VALUE); }
+    bool Verify(flatbuffers::Verifier &verifier) const {
+      return VerifyTableStart(verifier) &&
+        VerifyField<flatbuffers::uoffset_t>(verifier, VT_VALUE) &&
+        verifier.Verify(value()) &&
+        verifier.EndTable();
+    }
+  };
+
+  struct ArrayFloatBuilder {
+    flatbuffers::FlatBufferBuilder &fbb_;
+    flatbuffers::uoffset_t start_;
+    void add_value(flatbuffers::Offset<flatbuffers::Vector<float>> value) { fbb_.AddOffset(ArrayFloat::VT_VALUE, value); }
+    ArrayFloatBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
+    ArrayFloatBuilder &operator=(const ArrayFloatBuilder &);
+    flatbuffers::Offset<ArrayFloat> Finish() {
+      auto o = flatbuffers::Offset<ArrayFloat>(fbb_.EndTable(start_, 1));
+      return o;
+    }
+  };
+
+  inline flatbuffers::Offset<ArrayFloat> CreateArrayFloat(flatbuffers::FlatBufferBuilder &_fbb,
+    flatbuffers::Offset<flatbuffers::Vector<float>> value = 0) {
+    ArrayFloatBuilder builder_(_fbb);
+    builder_.add_value(value);
+    return builder_.Finish();
+  }
+
+  struct ArrayDouble FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+    enum {
+      VT_VALUE = 4
+    };
+    const flatbuffers::Vector<double> *value() const { return GetPointer<const flatbuffers::Vector<double> *>(VT_VALUE); }
+    bool Verify(flatbuffers::Verifier &verifier) const {
+      return VerifyTableStart(verifier) &&
+        VerifyField<flatbuffers::uoffset_t>(verifier, VT_VALUE) &&
+        verifier.Verify(value()) &&
+        verifier.EndTable();
+    }
+  };
+
+  struct ArrayDoubleBuilder {
+    flatbuffers::FlatBufferBuilder &fbb_;
+    flatbuffers::uoffset_t start_;
+    void add_value(flatbuffers::Offset<flatbuffers::Vector<double>> value) { fbb_.AddOffset(ArrayDouble::VT_VALUE, value); }
+    ArrayDoubleBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
+    ArrayDoubleBuilder &operator=(const ArrayDoubleBuilder &);
+    flatbuffers::Offset<ArrayDouble> Finish() {
+      auto o = flatbuffers::Offset<ArrayDouble>(fbb_.EndTable(start_, 1));
+      return o;
+    }
+  };
+
+  inline flatbuffers::Offset<ArrayDouble> CreateArrayDouble(flatbuffers::FlatBufferBuilder &_fbb,
+    flatbuffers::Offset<flatbuffers::Vector<double>> value = 0) {
+    ArrayDoubleBuilder builder_(_fbb);
+    builder_.add_value(value);
+    return builder_.Finish();
+  }
+
+  struct LogData FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+    enum {
+      VT_SOURCE_NAME = 4,
+      VT_VALUE_TYPE = 6,
+      VT_VALUE = 8,
+      VT_TIMESTAMP = 10,
+      VT_FWDINFO_TYPE = 12,
+      VT_FWDINFO = 14
+    };
+    const flatbuffers::String *source_name() const { return GetPointer<const flatbuffers::String *>(VT_SOURCE_NAME); }
+    Value value_type() const { return static_cast<Value>(GetField<uint8_t>(VT_VALUE_TYPE, 0)); }
+    const void *value() const { return GetPointer<const void *>(VT_VALUE); }
+    uint64_t timestamp() const { return GetField<uint64_t>(VT_TIMESTAMP, 0); }
+    forwarder_internal fwdinfo_type() const { return static_cast<forwarder_internal>(GetField<uint8_t>(VT_FWDINFO_TYPE, 0)); }
+    const void *fwdinfo() const { return GetPointer<const void *>(VT_FWDINFO); }
+    bool Verify(flatbuffers::Verifier &verifier) const {
+      return VerifyTableStart(verifier) &&
+        VerifyField<flatbuffers::uoffset_t>(verifier, VT_SOURCE_NAME) &&
+        verifier.Verify(source_name()) &&
+        VerifyField<uint8_t>(verifier, VT_VALUE_TYPE) &&
+        VerifyField<flatbuffers::uoffset_t>(verifier, VT_VALUE) &&
+        VerifyValue(verifier, value(), value_type()) &&
+        VerifyField<uint64_t>(verifier, VT_TIMESTAMP) &&
+        VerifyField<uint8_t>(verifier, VT_FWDINFO_TYPE) &&
+        VerifyField<flatbuffers::uoffset_t>(verifier, VT_FWDINFO) &&
+        Verifyforwarder_internal(verifier, fwdinfo(), fwdinfo_type()) &&
+        verifier.EndTable();
+    }
+  };
+
+  struct LogDataBuilder {
+    flatbuffers::FlatBufferBuilder &fbb_;
+    flatbuffers::uoffset_t start_;
+    void add_source_name(flatbuffers::Offset<flatbuffers::String> source_name) { fbb_.AddOffset(LogData::VT_SOURCE_NAME, source_name); }
+    void add_value_type(Value value_type) { fbb_.AddElement<uint8_t>(LogData::VT_VALUE_TYPE, static_cast<uint8_t>(value_type), 0); }
+    void add_value(flatbuffers::Offset<void> value) { fbb_.AddOffset(LogData::VT_VALUE, value); }
+    void add_timestamp(uint64_t timestamp) { fbb_.AddElement<uint64_t>(LogData::VT_TIMESTAMP, timestamp, 0); }
+    void add_fwdinfo_type(forwarder_internal fwdinfo_type) { fbb_.AddElement<uint8_t>(LogData::VT_FWDINFO_TYPE, static_cast<uint8_t>(fwdinfo_type), 0); }
+    void add_fwdinfo(flatbuffers::Offset<void> fwdinfo) { fbb_.AddOffset(LogData::VT_FWDINFO, fwdinfo); }
+    LogDataBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
+    LogDataBuilder &operator=(const LogDataBuilder &);
+    flatbuffers::Offset<LogData> Finish() {
+      auto o = flatbuffers::Offset<LogData>(fbb_.EndTable(start_, 6));
+      return o;
+    }
+  };
+
+  inline flatbuffers::Offset<LogData> CreateLogData(flatbuffers::FlatBufferBuilder &_fbb,
+    flatbuffers::Offset<flatbuffers::String> source_name = 0,
+    Value value_type = Value_NONE,
+    flatbuffers::Offset<void> value = 0,
+    uint64_t timestamp = 0,
+    forwarder_internal fwdinfo_type = forwarder_internal_NONE,
+    flatbuffers::Offset<void> fwdinfo = 0) {
+    LogDataBuilder builder_(_fbb);
+    builder_.add_timestamp(timestamp);
+    builder_.add_fwdinfo(fwdinfo);
+    builder_.add_value(value);
+    builder_.add_source_name(source_name);
+    builder_.add_fwdinfo_type(fwdinfo_type);
+    builder_.add_value_type(value_type);
+    return builder_.Finish();
+  }
+
+  inline bool VerifyValue(flatbuffers::Verifier &verifier, const void *union_obj, Value type) {
+    switch (type) {
     case Value_NONE: return true;
     case Value_Byte: return verifier.VerifyTable(reinterpret_cast<const Byte *>(union_obj));
     case Value_UByte: return verifier.VerifyTable(reinterpret_cast<const UByte *>(union_obj));
@@ -792,19 +795,19 @@ inline bool VerifyValue(flatbuffers::Verifier &verifier, const void *union_obj, 
     case Value_ArrayFloat: return verifier.VerifyTable(reinterpret_cast<const ArrayFloat *>(union_obj));
     case Value_ArrayDouble: return verifier.VerifyTable(reinterpret_cast<const ArrayDouble *>(union_obj));
     default: return false;
+    }
   }
+
+  inline const LogData *GetLogData(const void *buf) { return flatbuffers::GetRoot<LogData>(buf); }
+
+  inline bool VerifyLogDataBuffer(flatbuffers::Verifier &verifier) { return verifier.VerifyBuffer<LogData>(); }
+
+  inline const char *LogDataIdentifier() { return "f142"; }
+
+  inline bool LogDataBufferHasIdentifier(const void *buf) { return flatbuffers::BufferHasIdentifier(buf, LogDataIdentifier()); }
+
+  inline void FinishLogDataBuffer(flatbuffers::FlatBufferBuilder &fbb, flatbuffers::Offset<LogData> root) { fbb.Finish(root, LogDataIdentifier()); }
 }
-
-inline const LogData *GetLogData(const void *buf) { return flatbuffers::GetRoot<LogData>(buf); }
-
-inline bool VerifyLogDataBuffer(flatbuffers::Verifier &verifier) { return verifier.VerifyBuffer<LogData>(); }
-
-inline const char *LogDataIdentifier() { return "f142"; }
-
-inline bool LogDataBufferHasIdentifier(const void *buf) { return flatbuffers::BufferHasIdentifier(buf, LogDataIdentifier()); }
-
-inline void FinishLogDataBuffer(flatbuffers::FlatBufferBuilder &fbb, flatbuffers::Offset<LogData> root) { fbb.Finish(root, LogDataIdentifier()); }
-
 
 #endif  // FLATBUFFERS_GENERATED_F142LOGDATA_H_
 // clang-format on

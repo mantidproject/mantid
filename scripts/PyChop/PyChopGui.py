@@ -23,14 +23,18 @@ import os
 import warnings
 import copy
 from .Instruments import Instrument
-from PyQt4 import QtGui, QtCore
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
+from qtpy.QtCore import (QEventLoop, Qt)  # noqa
+from qtpy.QtWidgets import (QAction, QCheckBox, QComboBox, QDialog, QFileDialog, QGridLayout, QHBoxLayout, QMenu, QLabel,
+                            QLineEdit, QMainWindow, QMessageBox, QPushButton, QSizePolicy, QSpacerItem, QTabWidget,
+                            QTextEdit, QVBoxLayout, QWidget)  # noqa
+from MPLwidgets import FigureCanvasQTAgg as FigureCanvas
+from MPLwidgets import NavigationToolbar2QT as NavigationToolbar
+import matplotlib
 from matplotlib.figure import Figure
 from matplotlib.widgets import Slider
 
 
-class PyChopGui(QtGui.QMainWindow):
+class PyChopGui(QMainWindow):
     """
     GUI Class using PyQT for PyChop to help users plan inelastic neutron experiments
     at spallation sources by calculating the resolution and flux at a given neutron energies.
@@ -112,6 +116,7 @@ class PyChopGui(QtGui.QMainWindow):
         self.flxedt.setText('%3.2f' % (val))
         nframe = self.engine.moderator.n_frame if hasattr(self.engine.moderator, 'n_frame') else 1
         self.repfig_nframe_edit.setText(str(nframe))
+        self.repfig_nframe_rep1only.setChecked(False)
         if hasattr(self.engine.chopper_system, 'default_frequencies'):
             cb = [self.widgets['FrequencyCombo']['Combo'], self.widgets['PulseRemoverCombo']['Combo']]
             for idx, freq in enumerate(self.engine.chopper_system.default_frequencies):
@@ -229,7 +234,8 @@ class PyChopGui(QtGui.QMainWindow):
     def _set_overplot(self, overplot, axisname):
         axis = getattr(self, axisname)
         if overplot:
-            axis.hold(True)
+            if matplotlib.compare_versions('2.1.0',matplotlib.__version__):
+                axis.hold(True)
         else:
             setattr(self, axisname+'_xlim', 0)
             axis.clear()
@@ -248,7 +254,8 @@ class PyChopGui(QtGui.QMainWindow):
         if hasattr(freq, '__len__'):
             freq = freq[0]
         if multiplot:
-            self.resaxes.hold(True)
+            if matplotlib.compare_versions('2.1.0',matplotlib.__version__):
+                self.resaxes.hold(True)
             for ie, Ei in enumerate(self.eis):
                 en = np.linspace(0, 0.95*Ei, 200)
                 if any(self.res[ie]):
@@ -260,7 +267,8 @@ class PyChopGui(QtGui.QMainWindow):
                     if self.tabs.isTabEnabled(self.qetabID):
                         self.plot_qe(Ei, label_text, hold=True)
                     self.resaxes_xlim = max(Ei, self.resaxes_xlim)
-            self.resaxes.hold(False)
+            if matplotlib.compare_versions('2.1.0',matplotlib.__version__):
+                self.resaxes.hold(False)
         else:
             ei = self.engine.getEi()
             en = np.linspace(0, 0.95*ei, 200)
@@ -292,6 +300,8 @@ class PyChopGui(QtGui.QMainWindow):
         line.set_label(label_text)
         self.qeaxes.set_xlim([0, self.qeaxes_xlim])
         self.qeaxes.legend().draggable()
+        self.qeaxes.set_xlabel(r'$|Q| (\mathrm{\AA}^{-1})$')
+        self.qeaxes.set_ylabel('Energy Transfer (meV)')
         self.qecanvas.draw()
 
     def plot_flux_ei(self, **kwargs):
@@ -326,8 +336,9 @@ class PyChopGui(QtGui.QMainWindow):
         if update:
             self.flxaxes1.clear()
             self.flxaxes2.clear()
-            self.flxaxes1.hold(True)
-            self.flxaxes2.hold(True)
+            if matplotlib.compare_versions('2.1.0',matplotlib.__version__):
+                self.flxaxes1.hold(True)
+                self.flxaxes2.hold(True)
             for ii, instrument in enumerate(tmpinst):
                 for ie, ei in enumerate(eis):
                     with warnings.catch_warnings(record=True):
@@ -344,8 +355,9 @@ class PyChopGui(QtGui.QMainWindow):
                     flux[ie] = self.engine.getFlux(ei)
                     elres[ie] = self.engine.getResolution(0., ei)[0]
             if overplot:
-                self.flxaxes1.hold(True)
-                self.flxaxes2.hold(True)
+                if matplotlib.compare_versions('2.1.0',matplotlib.__version__):
+                    self.flxaxes1.hold(True)
+                    self.flxaxes2.hold(True)
             else:
                 self.flxaxes1.clear()
                 self.flxaxes2.clear()
@@ -410,8 +422,9 @@ class PyChopGui(QtGui.QMainWindow):
                 flux[ie] = self.engine.getFlux(ei)
                 elres[ie] = self.engine.getResolution(0., ei)[0]
         if overplot:
-            self.frqaxes1.hold(True)
-            self.frqaxes2.hold(True)
+            if matplotlib.compare_versions('2.1.0',matplotlib.__version__):
+                self.frqaxes1.hold(True)
+                self.frqaxes2.hold(True)
         else:
             self.frqaxes1.clear()
             self.frqaxes2.clear()
@@ -451,13 +464,16 @@ class PyChopGui(QtGui.QMainWindow):
             self.scrtab.hide()
 
     def errormessage(self, message):
-        msg = QtGui.QMessageBox()
+        msg = QMessageBox()
         msg.setText(str(message))
-        msg.setStandardButtons(QtGui.QMessageBox.Ok)
+        msg.setStandardButtons(QMessageBox.Ok)
         msg.exec_()
 
     def loadYaml(self):
-        yaml_file = str(QtGui.QFileDialog().getOpenFileName(self.mainWidget, 'Open Instrument YAML File', self.folder, 'Files (*.yaml)'))
+        yaml_file = QFileDialog().getOpenFileName(self.mainWidget, 'Open Instrument YAML File', self.folder, 'Files (*.yaml)')
+        if isinstance(yaml_file, tuple):
+            yaml_file = yaml_file[0]
+        yaml_file = str(yaml_file)
         new_folder = os.path.dirname(yaml_file)
         if new_folder != self.folder:
             self.folder = new_folder
@@ -483,11 +499,11 @@ class PyChopGui(QtGui.QMainWindow):
         self.setInstrument(newname)
 
     def _ask_overwrite(self):
-        msg = QtGui.QDialog()
+        msg = QDialog()
         msg.setWindowTitle('Load overwrite')
-        layout = QtGui.QGridLayout()
-        layout.addWidget(QtGui.QLabel('Instrument %s already exists in memory. Overwrite this?'), 0, 0, 1, -1)
-        buttons = [QtGui.QPushButton(label) for label in ['Load and overwrite', 'Cancel Load', 'Load and rename to']]
+        layout = QGridLayout()
+        layout.addWidget(QLabel('Instrument %s already exists in memory. Overwrite this?'), 0, 0, 1, -1)
+        buttons = [QPushButton(label) for label in ['Load and overwrite', 'Cancel Load', 'Load and rename to']]
         locations = [[1, 0], [1, 1], [2, 0]]
         self.overwrite_flag = 1
 
@@ -497,7 +513,7 @@ class PyChopGui(QtGui.QMainWindow):
         for idx, button in enumerate(buttons):
             button.clicked.connect(lambda _, idx=idx: overwriteCB(idx))
             layout.addWidget(button, locations[idx][0], locations[idx][1])
-        newname = QtGui.QLineEdit()
+        newname = QLineEdit()
         newname.editingFinished.connect(lambda: overwriteCB(2))
         layout.addWidget(newname, 2, 1)
         msg.setLayout(layout)
@@ -522,23 +538,19 @@ class PyChopGui(QtGui.QMainWindow):
         if len(self.engine.chopper_system.choppers) > 1:
             self.engine.n_frame = int(self.repfig_nframe_edit.text())
             self.repaxes.clear()
-            self.engine.plotMultiRepFrame(self.repaxes)
+            self.engine.plotMultiRepFrame(self.repaxes, first_rep=self.repfig_nframe_rep1only.isChecked())
             self.repcanvas.draw()
 
-    def genText(self):
-        """
-        Generates text output of the resolution function versus energy transfer and other information.
-        """
-        en = np.linspace(0, 0.95*self.engine.getEi(), 10)
+    def _gen_text_ei(self, ei, obj_in):
+        obj = Instrument(obj_in)
+        obj.setEi(ei)
+        en = np.linspace(0, 0.95*ei, 10)
         try:
             flux = self.engine.getFlux()
             res = self.engine.getResolution(en)
         except ValueError as err:
             self.errormessage(err)
             raise ValueError(err)
-        obj = self.engine
-        instname, chtyp, freqs, ei_in = tuple([obj.instname, obj.getChopper(), obj.getFrequency(), obj.getEi()])
-        ei = ei_in
         tsqvan, tsqdic, tsqmodchop = obj.getVanVar()
         v_mod, v_chop = tuple(np.sqrt(tsqmodchop[:2]) * 1e6)
         x0, _, x1, x2, _ = obj.chopper_system.getDistances()
@@ -547,21 +559,13 @@ class PyChopGui(QtGui.QMainWindow):
             x0 = tsqmodchop[2]
             first_component = 'chopper 1'
         txt = '# ------------------------------------------------------------- #\n'
-        txt += '# Chop calculation for instrument %s\n' % (instname)
-        if obj.isFermi:
-            txt += '#     with chopper %s at %3i Hz\n' % (chtyp, freqs[0])
-        else:
-            txt += '#     in %s mode with:\n' % (chtyp)
-            freq_names = obj.chopper_system.frequency_names
-            for idx in range(len(freq_names)):
-                txt += '#     %s at %3i Hz\n' % (freq_names[idx], freqs[idx])
-        txt += '# ------------------------------------------------------------- #\n'
+        txt += '# Ei = %8.2f meV\n' % (ei)
         txt += '# Flux = %8.2f n/cm2/s\n' % (flux)
         txt += '# Elastic resolution = %6.2f meV\n' % (res[0])
         txt += '# Time width at sample = %6.2f us, of which:\n' % (1e6*np.sqrt(tsqvan))
         for ky, val in list(tsqdic.items()):
             txt += '#     %20s : %6.2f us\n' % (ky, 1e6*np.sqrt(val))
-        txt += '# %s distances:\n' % (instname)
+        txt += '# %s distances:\n' % (obj.instname)
         txt += '#     x0 = %6.2f m (%s to Fermi)\n' % (x0, first_component)
         txt += '#     x1 = %6.2f m (Fermi to sample)\n' % (x1)
         txt += '#     x2 = %6.2f m (sample to detector)\n' % (x2)
@@ -583,6 +587,33 @@ class PyChopGui(QtGui.QMainWindow):
             txt += '%12.5f %12.5f %12.5f\n' % (en[ii], res[ii], approx)
         return txt
 
+    def genText(self):
+        """
+        Generates text output of the resolution function versus energy transfer and other information.
+        """
+        multiplot = self.widgets['MultiRepCheck'].isChecked()
+        obj = self.engine
+        if obj.getChopper() is None:
+            self.setChopper(self.widgets['ChopperCombo']['Combo'].currentText())
+        if obj.getEi() is None:
+            self.setEi()
+        instname, chtyp, freqs, ei_in = tuple([obj.instname, obj.getChopper(), obj.getFrequency(), obj.getEi()])
+        txt = '# ------------------------------------------------------------- #\n'
+        txt += '# Chop calculation for instrument %s\n' % (instname)
+        if obj.isFermi:
+            txt += '#     with chopper %s at %3i Hz\n' % (chtyp, freqs[0])
+        else:
+            txt += '#     in %s mode with:\n' % (chtyp)
+            freq_names = obj.chopper_system.frequency_names
+            for idx in range(len(freq_names)):
+                txt += '#     %s at %3i Hz\n' % (freq_names[idx], freqs[idx])
+        txt += self._gen_text_ei(ei_in, obj)
+        if multiplot:
+            for ei in sorted(self.engine.getAllowedEi()):
+                if np.abs(ei - ei_in) > 0.001:
+                    txt += self._gen_text_ei(ei, obj)
+        return txt
+
     def showText(self):
         """
         Creates a dialog to show the generated text output.
@@ -591,29 +622,31 @@ class PyChopGui(QtGui.QMainWindow):
             generatedText = self.genText()
         except ValueError:
             return
-        self.txtwin = QtGui.QDialog()
-        self.txtedt = QtGui.QTextEdit()
-        self.txtbtn = QtGui.QPushButton('OK')
-        self.txtwin.layout = QtGui.QVBoxLayout(self.txtwin)
+        self.txtwin = QDialog()
+        self.txtedt = QTextEdit()
+        self.txtbtn = QPushButton('OK')
+        self.txtwin.layout = QVBoxLayout(self.txtwin)
         self.txtwin.layout.addWidget(self.txtedt)
         self.txtwin.layout.addWidget(self.txtbtn)
         self.txtbtn.clicked.connect(self.txtwin.deleteLater)
         self.txtedt.setText(generatedText)
         self.txtedt.setReadOnly(True)
         self.txtwin.setWindowTitle('Resolution information')
-        self.txtwin.setWindowModality(QtCore.Qt.ApplicationModal)
-        self.txtwin.setAttribute(QtCore.Qt.WA_DeleteOnClose)
+        self.txtwin.setWindowModality(Qt.ApplicationModal)
+        self.txtwin.setAttribute(Qt.WA_DeleteOnClose)
         self.txtwin.setMinimumSize(400, 600)
         self.txtwin.resize(400, 600)
         self.txtwin.show()
-        self.txtloop = QtCore.QEventLoop()
+        self.txtloop = QEventLoop()
         self.txtloop.exec_()
 
     def saveText(self):
         """
         Saves the generated text to a file (opens file dialog).
         """
-        fname = QtGui.QFileDialog.getSaveFileName(self, 'Open file', '')
+        fname = QFileDialog.getSaveFileName(self, 'Open file', '')
+        if isinstance(fname, tuple):
+            fname = fname[0]
         fid = open(fname, 'w')
         fid.write(self.genText())
         fid.close()
@@ -657,20 +690,20 @@ class PyChopGui(QtGui.QMainWindow):
             helpTxt += "all graphs will be updated. If the 'Hold current plot'\ncheck box is ticked, additional settings will be\n"
             helpTxt += "overplotted on the existing graphs if they are\ndifferent from previous settings.\n\nMore in-depth help "
             helpTxt += "can be obtained from the\nMantid help pages."
-            self.hlpwin = QtGui.QDialog()
-            self.hlpedt = QtGui.QLabel(helpTxt)
-            self.hlpbtn = QtGui.QPushButton('OK')
-            self.hlpwin.layout = QtGui.QVBoxLayout(self.hlpwin)
+            self.hlpwin = QDialog()
+            self.hlpedt = QLabel(helpTxt)
+            self.hlpbtn = QPushButton('OK')
+            self.hlpwin.layout = QVBoxLayout(self.hlpwin)
             self.hlpwin.layout.addWidget(self.hlpedt)
             self.hlpwin.layout.addWidget(self.hlpbtn)
             self.hlpbtn.clicked.connect(self.hlpwin.deleteLater)
             self.hlpwin.setWindowTitle('Help')
-            self.hlpwin.setWindowModality(QtCore.Qt.ApplicationModal)
-            self.hlpwin.setAttribute(QtCore.Qt.WA_DeleteOnClose)
+            self.hlpwin.setWindowModality(Qt.ApplicationModal)
+            self.hlpwin.setAttribute(Qt.WA_DeleteOnClose)
             self.hlpwin.setMinimumSize(370, 300)
             self.hlpwin.resize(370, 300)
             self.hlpwin.show()
-            self.hlploop = QtCore.QEventLoop()
+            self.hlploop = QEventLoop()
             self.hlploop.exec_()
 
     def drawLayout(self):
@@ -697,21 +730,21 @@ class PyChopGui(QtGui.QMainWindow):
         self.singles = []
         self.widgets = {}
 
-        self.leftPanel = QtGui.QVBoxLayout()
-        self.rightPanel = QtGui.QVBoxLayout()
-        self.tabs = QtGui.QTabWidget(self)
-        self.fullWindow = QtGui.QGridLayout()
+        self.leftPanel = QVBoxLayout()
+        self.rightPanel = QVBoxLayout()
+        self.tabs = QTabWidget(self)
+        self.fullWindow = QGridLayout()
         for widget in self.widgetslist:
             if 'pair' in widget[0]:
-                self.droplabels.append(QtGui.QLabel(widget[2]))
+                self.droplabels.append(QLabel(widget[2]))
                 if 'combo' in widget[3]:
-                    self.dropboxes.append(QtGui.QComboBox(self))
+                    self.dropboxes.append(QComboBox(self))
                     self.dropboxes[-1].activated['QString'].connect(widget[5])
                     for item in widget[4]:
                         self.dropboxes[-1].addItem(item)
                     self.widgets[widget[-1]] = {'Combo':self.dropboxes[-1], 'Label':self.droplabels[-1]}
                 elif 'edit' in widget[3]:
-                    self.dropboxes.append(QtGui.QLineEdit(self))
+                    self.dropboxes.append(QLineEdit(self))
                     self.dropboxes[-1].returnPressed.connect(widget[5])
                     self.widgets[widget[-1]] = {'Edit':self.dropboxes[-1], 'Label':self.droplabels[-1]}
                 else:
@@ -723,10 +756,10 @@ class PyChopGui(QtGui.QMainWindow):
                     self.dropboxes[-1].hide()
             elif 'single' in widget[0]:
                 if 'check' in widget[3]:
-                    self.singles.append(QtGui.QCheckBox(widget[2], self))
+                    self.singles.append(QCheckBox(widget[2], self))
                     self.singles[-1].stateChanged.connect(widget[4])
                 elif 'button' in widget[3]:
-                    self.singles.append(QtGui.QPushButton(widget[2]))
+                    self.singles.append(QPushButton(widget[2]))
                     self.singles[-1].clicked.connect(widget[4])
                 else:
                     raise RuntimeError('Bug in code - widget %s is not recognised.' % (widget[3]))
@@ -735,7 +768,7 @@ class PyChopGui(QtGui.QMainWindow):
                     self.singles[-1].hide()
                 self.widgets[widget[-1]] = self.singles[-1]
             elif 'spacer' in widget[0]:
-                self.leftPanel.addItem(QtGui.QSpacerItem(0, 35))
+                self.leftPanel.addItem(QSpacerItem(0, 35))
             else:
                 raise RuntimeError('Bug in code - widget class %s is not recognised.' % (widget[0]))
 
@@ -748,8 +781,8 @@ class PyChopGui(QtGui.QMainWindow):
         self.resaxes.set_xlabel('Energy Transfer (meV)')
         self.resaxes.set_ylabel(r'$\Delta$E (meV FWHM)')
         self.resfig_controls = NavigationToolbar(self.rescanvas, self)
-        self.restab = QtGui.QWidget(self.tabs)
-        self.restabbox = QtGui.QVBoxLayout()
+        self.restab = QWidget(self.tabs)
+        self.restabbox = QVBoxLayout()
         self.restabbox.addWidget(self.rescanvas)
         self.restabbox.addWidget(self.resfig_controls)
         self.restab.setLayout(self.restabbox)
@@ -771,19 +804,19 @@ class PyChopGui(QtGui.QMainWindow):
         self.flxslder = Slider(self.flxsldax, 'Ei (meV)', 0, 100, valinit=100)
         self.flxslder.valtext.set_visible(False)
         self.flxslder.on_changed(self.update_slider)
-        self.flxedt = QtGui.QLineEdit()
+        self.flxedt = QLineEdit()
         self.flxedt.setText('1000')
         self.flxedt.returnPressed.connect(self.update_slider)
-        self.flxtab = QtGui.QWidget(self.tabs)
-        self.flxsldbox = QtGui.QHBoxLayout()
+        self.flxtab = QWidget(self.tabs)
+        self.flxsldbox = QHBoxLayout()
         self.flxsldbox.addWidget(self.flxsldcv)
         self.flxsldbox.addWidget(self.flxedt)
-        self.flxsldwdg = QtGui.QWidget()
+        self.flxsldwdg = QWidget()
         self.flxsldwdg.setLayout(self.flxsldbox)
         sz = self.flxsldwdg.maximumSize()
         sz.setHeight(50)
         self.flxsldwdg.setMaximumSize(sz)
-        self.flxtabbox = QtGui.QVBoxLayout()
+        self.flxtabbox = QVBoxLayout()
         self.flxtabbox.addWidget(self.flxcanvas)
         self.flxtabbox.addWidget(self.flxsldwdg)
         self.flxtabbox.addWidget(self.flxfig_controls)
@@ -799,8 +832,8 @@ class PyChopGui(QtGui.QMainWindow):
         self.frqaxes1.set_xlabel('Chopper Frequency (Hz)')
         self.frqaxes2.set_ylabel('Elastic Resolution FWHM (meV)')
         self.frqfig_controls = NavigationToolbar(self.frqcanvas, self)
-        self.frqtab = QtGui.QWidget(self.tabs)
-        self.frqtabbox = QtGui.QVBoxLayout()
+        self.frqtab = QWidget(self.tabs)
+        self.frqtabbox = QVBoxLayout()
         self.frqtabbox.addWidget(self.frqcanvas)
         self.frqtabbox.addWidget(self.frqfig_controls)
         self.frqtab.setLayout(self.frqtabbox)
@@ -813,19 +846,21 @@ class PyChopGui(QtGui.QMainWindow):
         self.repaxes.set_xlabel(r'TOF ($\mu$sec)')
         self.repaxes.set_ylabel('Distance (m)')
         self.repfig_controls = NavigationToolbar(self.repcanvas, self)
-        self.repfig_nframe_label = QtGui.QLabel('Number of frames to plot')
-        self.repfig_nframe_edit = QtGui.QLineEdit('1')
-        self.repfig_nframe_button = QtGui.QPushButton('Replot')
+        self.repfig_nframe_label = QLabel('Number of frames to plot')
+        self.repfig_nframe_edit = QLineEdit('1')
+        self.repfig_nframe_button = QPushButton('Replot')
         self.repfig_nframe_button.clicked.connect(lambda: self.plot_frame())
-        self.repfig_nframe_box = QtGui.QHBoxLayout()
+        self.repfig_nframe_rep1only = QCheckBox('First Rep Only')
+        self.repfig_nframe_box = QHBoxLayout()
         self.repfig_nframe_box.addWidget(self.repfig_nframe_label)
         self.repfig_nframe_box.addWidget(self.repfig_nframe_edit)
         self.repfig_nframe_box.addWidget(self.repfig_nframe_button)
-        self.reptab = QtGui.QWidget(self.tabs)
-        self.repfig_nframe = QtGui.QWidget(self.reptab)
+        self.repfig_nframe_box.addWidget(self.repfig_nframe_rep1only)
+        self.reptab = QWidget(self.tabs)
+        self.repfig_nframe = QWidget(self.reptab)
         self.repfig_nframe.setLayout(self.repfig_nframe_box)
-        self.repfig_nframe.setSizePolicy(QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Fixed))
-        self.reptabbox = QtGui.QVBoxLayout()
+        self.repfig_nframe.setSizePolicy(QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed))
+        self.reptabbox = QVBoxLayout()
         self.reptabbox.addWidget(self.repcanvas)
         self.reptabbox.addWidget(self.repfig_nframe)
         self.reptabbox.addWidget(self.repfig_controls)
@@ -839,17 +874,17 @@ class PyChopGui(QtGui.QMainWindow):
         self.qeaxes.set_xlabel(r'$|Q| (\mathrm{\AA}^{-1})$')
         self.qeaxes.set_ylabel('Energy Transfer (meV)')
         self.qefig_controls = NavigationToolbar(self.qecanvas, self)
-        self.qetabbox = QtGui.QVBoxLayout()
+        self.qetabbox = QVBoxLayout()
         self.qetabbox.addWidget(self.qecanvas)
         self.qetabbox.addWidget(self.qefig_controls)
-        self.qetab = QtGui.QWidget(self.tabs)
+        self.qetab = QWidget(self.tabs)
         self.qetab.setLayout(self.qetabbox)
 
-        self.scrtab = QtGui.QWidget(self.tabs)
-        self.scredt = QtGui.QTextEdit()
-        self.scrcls = QtGui.QPushButton("Clear")
+        self.scrtab = QWidget(self.tabs)
+        self.scredt = QTextEdit()
+        self.scrcls = QPushButton("Clear")
         self.scrcls.clicked.connect(lambda: self.scredt.clear())
-        self.scrbox = QtGui.QVBoxLayout()
+        self.scrbox = QVBoxLayout()
         self.scrbox.addWidget(self.scredt)
         self.scrbox.addWidget(self.scrcls)
         self.scrtab.setLayout(self.scrbox)
@@ -867,65 +902,33 @@ class PyChopGui(QtGui.QMainWindow):
         self.scrtabID = 5
         self.rightPanel.addWidget(self.tabs)
 
-        self.menuLoad = QtGui.QMenu('Load')
-        self.loadAct = QtGui.QAction('Load YAML', self.menuLoad)
+        self.menuLoad = QMenu('Load')
+        self.loadAct = QAction('Load YAML', self.menuLoad)
         self.loadAct.triggered.connect(self.loadYaml)
         self.menuLoad.addAction(self.loadAct)
-        self.menuOptions = QtGui.QMenu('Options')
-        self.instSciAct = QtGui.QAction('Instrument Scientist Mode', self.menuOptions, checkable=True)
+        self.menuOptions = QMenu('Options')
+        self.instSciAct = QAction('Instrument Scientist Mode', self.menuOptions, checkable=True)
         self.instSciAct.triggered.connect(self.instSciCB)
         self.menuOptions.addAction(self.instSciAct)
-        self.eiPlots = QtGui.QAction('Press Enter in Ei box updates plots', self.menuOptions, checkable=True)
+        self.eiPlots = QAction('Press Enter in Ei box updates plots', self.menuOptions, checkable=True)
         self.menuOptions.addAction(self.eiPlots)
-        self.overwriteload = QtGui.QAction('Always overwrite instruments in memory', self.menuOptions, checkable=True)
+        self.overwriteload = QAction('Always overwrite instruments in memory', self.menuOptions, checkable=True)
         self.menuOptions.addAction(self.overwriteload)
         self.menuBar().addMenu(self.menuLoad)
         self.menuBar().addMenu(self.menuOptions)
 
-        self.leftPanelWidget = QtGui.QWidget()
+        self.leftPanelWidget = QWidget()
         self.leftPanelWidget.setLayout(self.leftPanel)
-        self.leftPanelWidget.setSizePolicy(QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Preferred))
+        self.leftPanelWidget.setSizePolicy(QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Preferred))
         self.fullWindow.addWidget(self.leftPanelWidget, 0, 0)
         self.fullWindow.addLayout(self.rightPanel, 0, 1)
-        self.helpbtn = QtGui.QPushButton("?", self)
+        self.helpbtn = QPushButton("?", self)
         self.helpbtn.setMaximumWidth(30)
         self.helpbtn.clicked.connect(self.onHelp)
         self.fullWindow.addWidget(self.helpbtn, 1, 0, 1, -1)
 
-        self.mainWidget = QtGui.QWidget()
+        self.mainWidget = QWidget()
         self.mainWidget.setLayout(self.fullWindow)
         self.setCentralWidget(self.mainWidget)
         self.setWindowTitle('PyChopGUI')
         self.show()
-
-
-def show():
-    """
-    Create a Qt window in Python, or interactively in IPython with Qt GUI
-    event loop integration.
-    """
-    app_created = False
-    app = QtCore.QCoreApplication.instance()
-    if app is None:
-        app = QtGui.QApplication(sys.argv)
-        app_created = True
-    app.references = set()
-    window = PyChopGui()
-    app.references.add(window)
-    window.show()
-    if app_created:
-        app.exec_()
-    return window
-
-
-if __name__ == '__main__':
-    if QtGui.QApplication.instance():
-        app = QtGui.QApplication.instance()
-    else:
-        app = QtGui.QApplication(sys.argv)
-    window = PyChopGui()
-    window.show()
-    try: # check if started from within mantidplot
-        import mantidplot # noqa
-    except ImportError:
-        sys.exit(app.exec_())

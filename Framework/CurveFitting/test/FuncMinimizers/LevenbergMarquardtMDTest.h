@@ -256,6 +256,7 @@ public:
     // 0
     fun->addConstraint(
         Kernel::make_unique<BoundaryConstraint>(fun.get(), "a", 0.001, 2.0));
+    fun->setConstraintPenaltyFactor("a", 1.e20);
 
     boost::shared_ptr<CostFuncLeastSquares> costFun =
         boost::make_shared<CostFuncLeastSquares>();

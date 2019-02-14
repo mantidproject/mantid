@@ -8,7 +8,6 @@
 #define MANTID_API_SPECTRUMINFOITERATOR_H_
 
 #include "MantidAPI/SpectrumInfoItem.h"
-
 #include <boost/iterator/iterator_facade.hpp>
 
 using Mantid::API::SpectrumInfoItem;
@@ -27,13 +26,14 @@ iterator.
 @date 2018
 */
 
-class MANTID_API_DLL SpectrumInfoIterator
-    : public boost::iterator_facade<SpectrumInfoIterator,
-                                    const SpectrumInfoItem &,
+template <typename T>
+class SpectrumInfoIterator
+    : public boost::iterator_facade<SpectrumInfoIterator<T>,
+                                    SpectrumInfoItem<T> &,
                                     boost::random_access_traversal_tag> {
 
 public:
-  SpectrumInfoIterator(const SpectrumInfo &spectrumInfo, const size_t index)
+  SpectrumInfoIterator(T &spectrumInfo, const size_t index)
       : m_item(spectrumInfo, index) {}
 
 private:
@@ -69,18 +69,18 @@ private:
 
   void setIndex(const size_t index) { m_item.m_index = index; }
 
-  uint64_t distance_to(const SpectrumInfoIterator &other) const {
+  uint64_t distance_to(const SpectrumInfoIterator<T> &other) const {
     return static_cast<uint64_t>(other.getIndex()) -
            static_cast<uint64_t>(getIndex());
   }
 
-  bool equal(const SpectrumInfoIterator &other) const {
+  bool equal(const SpectrumInfoIterator<T> &other) const {
     return getIndex() == other.getIndex();
   }
 
-  const SpectrumInfoItem &dereference() const { return m_item; }
+  SpectrumInfoItem<T> &dereference() const { return m_item; }
 
-  SpectrumInfoItem m_item;
+  mutable SpectrumInfoItem<T> m_item;
 };
 
 } // namespace API

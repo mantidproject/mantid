@@ -14,6 +14,7 @@ class ProgressObserver(AlgorithmObserver):
     Observes a single algorithm for its progress and finish notifications
     and updates presenter accordingly.
     """
+
     def __init__(self, model, alg):
         super(ProgressObserver, self).__init__()
         self.model = model
@@ -52,6 +53,7 @@ class AlgorithmProgressModel(AlgorithmObserver):
     Observes AlgorithmManager for new algorithms and starts
     ProgressObservers.
     """
+
     def __init__(self):
         super(AlgorithmProgressModel, self).__init__()
         self.presenters = []
@@ -102,6 +104,9 @@ class AlgorithmProgressModel(AlgorithmObserver):
         if index >= 0:
             del self.progress_observers[index]
             self.update_presenter()
+            # Remove the observers from the algorithm, otherwise we
+            # leave dangling pointers to the now-deleted observers in the algorithm
+            progress_observer.stopObserving(progress_observer.algorithm)
 
     def get_running_algorithms(self):
         return [obs.algorithm for obs in self.progress_observers]
@@ -119,6 +124,6 @@ class AlgorithmProgressModel(AlgorithmObserver):
         for observer in self.progress_observers:
             properties = []
             for prop in observer.properties():
-                properties.append([prop.name, str(prop.value), 'Default' if prop.isDefault else ''])
+                properties.append([prop.name, str(prop.valueAsStr), 'Default' if prop.isDefault else ''])
             algorithm_data.append((observer.name(), observer.algorithm, properties))
         return algorithm_data

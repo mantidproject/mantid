@@ -85,6 +85,15 @@ def perform_load(serialized_state):
 def perform_move(state, workspace):
     serialized_state = state.property_manager
     move_name = "SANSMove"
+
+    zero_options = {"SANSState": serialized_state,
+                    "Workspace": workspace,
+                    "MoveType": "SetToZero",
+                    "Component": ""}
+    zero_alg = create_unmanaged_algorithm(move_name, **zero_options)
+    zero_alg.execute()
+    workspace = zero_alg.getProperty("Workspace").value
+
     move_options = {"SANSState": serialized_state,
                     "Workspace": workspace,
                     "MoveType": "InitialMove"}
@@ -165,18 +174,22 @@ class MaskingTablePresenter(object):
         # Disable the button
         self._view.set_display_mask_button_to_processing()
 
-        row_index = self._view.get_current_row()
-        state = self.get_state(row_index)
+        try:
+            row_index = self._view.get_current_row()
+            state = self.get_state(row_index)
+        except Exception as e:
+            self.on_processing_error_masking_display(e)
+            raise Exception(str(e))  # propagate errors for run_tab_presenter to deal with
+        else:
+            if not state:
+                self._logger.information("You can only show a masked workspace if a user file has been loaded and there"
+                                         "valid sample scatter entry has been provided in the selected row.")
+                return
 
-        if not state:
-            self._logger.information("You can only show a masked workspace if a user file has been loaded and there"
-                                     "valid sample scatter entry has been provided in the selected row.")
-            return
-
-        # Run the task
-        listener = MaskingTablePresenter.DisplayMaskListener(self)
-        state_copy = copy.copy(state)
-        self._work_handler.process(listener, load_and_mask_workspace, state_copy, self.DISPLAY_WORKSPACE_NAME)
+            # Run the task
+            listener = MaskingTablePresenter.DisplayMaskListener(self)
+            state_copy = copy.copy(state)
+            self._work_handler.process(listener, load_and_mask_workspace, 0, state_copy, self.DISPLAY_WORKSPACE_NAME)
 
     def on_processing_finished_masking_display(self, result):
         # Enable button

@@ -9,6 +9,7 @@ set ( TEST_PY_FILES
   AlgorithmManagerTest.py
   AlgorithmPropertyTest.py
   AnalysisDataServiceTest.py
+  AnalysisDataServiceObserverTest.py
   AxisTest.py
   CatalogManagerTest.py
   CompositeFunctionTest.py

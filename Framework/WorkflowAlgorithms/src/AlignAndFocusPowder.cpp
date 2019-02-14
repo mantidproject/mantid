@@ -271,8 +271,12 @@ void AlignAndFocusPowder::exec() {
   m_inputW = getProperty("InputWorkspace");
   m_inputEW = boost::dynamic_pointer_cast<EventWorkspace>(m_inputW);
   m_instName = m_inputW->getInstrument()->getName();
-  m_instName =
-      Kernel::ConfigService::Instance().getInstrument(m_instName).shortName();
+  try {
+    m_instName =
+        Kernel::ConfigService::Instance().getInstrument(m_instName).shortName();
+  } catch (Exception::NotFoundError &) {
+    ; // not noteworthy
+  }
   std::string calFilename = getPropertyValue("CalFileName");
   std::string groupFilename = getPropertyValue("GroupFilename");
   m_calibrationWS = getProperty("CalibrationWorkspace");
@@ -379,7 +383,7 @@ void AlignAndFocusPowder::exec() {
   } else {
     // workspace2D
     if (m_outputW != m_inputW) {
-      m_outputW = WorkspaceFactory::Instance().create(m_inputW);
+      m_outputW = m_inputW->clone();
     }
   }
 
@@ -720,7 +724,6 @@ void AlignAndFocusPowder::exec() {
     API::IAlgorithm_sptr compressAlg = createChildAlgorithm("CompressEvents");
     compressAlg->setProperty("InputWorkspace", m_outputEW);
     compressAlg->setProperty("OutputWorkspace", m_outputEW);
-    compressAlg->setProperty("OutputWorkspace", m_outputEW);
     compressAlg->setProperty("Tolerance", tolerance);
     if (!isEmpty(wallClockTolerance)) {
       compressAlg->setProperty("WallClockTolerance", wallClockTolerance);
@@ -774,6 +777,13 @@ AlignAndFocusPowder::diffractionFocus(API::MatrixWorkspace_sptr ws) {
   if (!m_groupWS) {
     g_log.information() << "not focussing data\n";
     return ws;
+  }
+
+  if (m_maskWS) {
+    API::IAlgorithm_sptr maskAlg = createChildAlgorithm("MaskDetectors");
+    maskAlg->setProperty("Workspace", m_groupWS);
+    maskAlg->setProperty("MaskedWorkspace", m_maskWS);
+    maskAlg->executeAsChildAlg();
   }
 
   g_log.information() << "running DiffractionFocussing started at "
@@ -950,44 +960,34 @@ void AlignAndFocusPowder::loadCalFile(const std::string &calFilename,
   // check if the workspaces exist with their canonical names so they are not
   // reloaded for chunks
   if ((!m_groupWS) && (!calFilename.empty()) && (!groupFilename.empty())) {
-    try {
+    if (AnalysisDataService::Instance().doesExist(m_instName + "_group"))
       m_groupWS = AnalysisDataService::Instance().retrieveWS<GroupingWorkspace>(
           m_instName + "_group");
-    } catch (Exception::NotFoundError &) {
-      ; // not noteworthy
-    }
   }
   if ((!m_calibrationWS) && (!calFilename.empty())) {
     OffsetsWorkspace_sptr offsetsWS = getProperty("OffsetsWorkspace");
     if (offsetsWS) {
       convertOffsetsToCal(offsetsWS);
     } else {
-      try {
+      if (AnalysisDataService::Instance().doesExist(m_instName + "_cal"))
         m_calibrationWS =
             AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
                 m_instName + "_cal");
-      } catch (Exception::NotFoundError &) {
-        ; // not noteworthy
-      }
       if (!m_calibrationWS) {
-        try {
+        if (AnalysisDataService::Instance().doesExist(m_instName +
+                                                      "_offsets")) {
           OffsetsWorkspace_sptr offsetsWS =
               AnalysisDataService::Instance().retrieveWS<OffsetsWorkspace>(
                   m_instName + "_offsets");
           convertOffsetsToCal(offsetsWS);
-        } catch (Exception::NotFoundError &) {
-          ; // not noteworthy
         }
       }
     }
   }
   if ((!m_maskWS) && (!calFilename.empty())) {
-    try {
+    if (AnalysisDataService::Instance().doesExist(m_instName + "_mask"))
       m_maskWS = AnalysisDataService::Instance().retrieveWS<MaskWorkspace>(
           m_instName + "_mask");
-    } catch (Exception::NotFoundError &) {
-      ; // not noteworthy
-    }
   }
 
   // see if everything exists to exit early
@@ -998,41 +998,10 @@ void AlignAndFocusPowder::loadCalFile(const std::string &calFilename,
   if (calFilename.empty() && groupFilename.empty())
     return;
 
-  // load grouping file if it was already specified
-  if (!groupFilename.empty()) {
-    g_log.information() << "Loading Grouping file \"" << groupFilename
-                        << "\"\n";
-    if (groupFilename.find(".cal") != std::string::npos) {
-      IAlgorithm_sptr alg = createChildAlgorithm("LoadDiffCal");
-      alg->setProperty("InputWorkspace", m_inputW);
-      alg->setPropertyValue("Filename", groupFilename);
-      alg->setProperty<bool>("MakeCalWorkspace", false);
-      alg->setProperty<bool>("MakeGroupingWorkspace", true);
-      alg->setProperty<bool>("MakeMaskWorkspace", false);
-      alg->setPropertyValue("WorkspaceName", m_instName);
-      alg->executeAsChildAlg();
-
-      // get the workspace
-      m_groupWS = alg->getProperty("OutputGroupingWorkspace");
-    } else {
-      IAlgorithm_sptr alg = createChildAlgorithm("LoadDetectorsGroupingFile");
-      alg->setProperty("InputFile", groupFilename);
-      alg->executeAsChildAlg();
-
-      // get the workspace
-      m_groupWS = alg->getProperty("OutputWorkspace");
-    }
-
-    // register the workspace with the ADS
-    const std::string name = m_instName + "_group";
-    AnalysisDataService::Instance().addOrReplace(name, m_groupWS);
-    this->setPropertyValue("GroupingWorkspace", name);
-  }
-
-  if (calFilename.empty())
-    return;
-
-  g_log.information() << "Loading Calibration file \"" << calFilename << "\"\n";
+  g_log.information() << "Loading Calibration file \"" << calFilename << "\"";
+  if (!groupFilename.empty())
+    g_log.information() << "with grouping from \"" << groupFilename << "\"";
+  g_log.information("");
 
   // bunch of booleans to keep track of things
   const bool loadMask = !m_maskWS;
@@ -1042,6 +1011,7 @@ void AlignAndFocusPowder::loadCalFile(const std::string &calFilename,
   IAlgorithm_sptr alg = createChildAlgorithm("LoadDiffCal");
   alg->setProperty("InputWorkspace", m_inputW);
   alg->setPropertyValue("Filename", calFilename);
+  alg->setPropertyValue("GroupFilename", groupFilename);
   alg->setProperty<bool>("MakeCalWorkspace", loadCalibration);
   alg->setProperty<bool>("MakeGroupingWorkspace", loadGrouping);
   alg->setProperty<bool>("MakeMaskWorkspace", loadMask);

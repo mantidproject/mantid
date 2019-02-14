@@ -461,4 +461,14 @@ public:
   }
 };
 
+class DateAndTimeTestPerformance : public CxxTest::TestSuite {
+public:
+  void test_construction_from_iso8601_string() {
+    for (size_t i = 0; i < 500000; ++i) {
+      DateAndTime d("2010-03-24T14:12:51.562Z");
+      d.totalNanoseconds();
+    }
+  }
+};
+
 #endif /* DATEANDTIMETEST_H_ */

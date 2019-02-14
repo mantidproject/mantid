@@ -19,6 +19,7 @@ from qtpy.QtWidgets import QHBoxLayout
 
 # local imports
 from workbench.plugins.base import PluginWidget
+from mantidqt.utils.qt import toQSettings
 
 # Default logs at notice
 DEFAULT_LOG_PRIORITY = 5
@@ -47,8 +48,11 @@ class LogMessageDisplay(PluginWidget):
     def get_plugin_title(self):
         return "Messages"
 
-    def read_user_settings(self, qsettings):
-        self.display.readSettings(qsettings)
+    def readSettings(self, settings):
+        self.display.readSettings(toQSettings(settings))
+
+    def writeSettings(self, settings):
+        self.display.writeSettings(toQSettings(settings))
 
     def register_plugin(self, menu=None):
         self.display.attachLoggingChannel(DEFAULT_LOG_PRIORITY)

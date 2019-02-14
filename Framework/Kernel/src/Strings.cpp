@@ -119,6 +119,22 @@ MANTID_KERNEL_DLL std::string replaceAll(const std::string &input,
   return replaced;
 }
 
+/** Convert all characters in string to lowercase
+ */
+MANTID_KERNEL_DLL std::string toLower(const std::string &input) {
+  std::string output(input);
+  std::transform(output.begin(), output.end(), output.begin(), ::tolower);
+  return output;
+}
+
+/** Convert all characters in string to uppercase
+ */
+MANTID_KERNEL_DLL std::string toUpper(const std::string &input) {
+  std::string output(input);
+  std::transform(output.begin(), output.end(), output.begin(), ::toupper);
+  return output;
+}
+
 //------------------------------------------------------------------------------------------------
 /**
  * Function to convert a number into hex
@@ -745,6 +761,14 @@ template <typename T> std::string toString(const std::set<T> &value) {
 
 template <> MANTID_KERNEL_DLL std::string toString(const UnitLabel &value) {
   return value;
+}
+
+/// Template overload for a vector of strings.
+/// @param value :: A value to convert to a string.
+/// @return :: A string with comma separated items of the value vector.
+template <>
+MANTID_KERNEL_DLL std::string toString(const std::vector<std::string> &value) {
+  return join(value.begin(), value.end(), ",");
 }
 
 //------------------------------------------------------------------------------------------------

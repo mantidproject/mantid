@@ -13,7 +13,10 @@ This algorithm is a facade over :ref:`algm-ReflectometryReductionOne` (see :ref:
 for more information on the wrapped algorithm). It optionally corrects the detector position and then pulls numeric
 parameters out of the instrument parameter file where possible. These automatically applied defaults
 can be overridden by providing your own values. In addition, it outputs a rebinned workspace in Q, and it optionally
-performs polarization analysis if the input workspace is a workspace group.
+performs polarization analysis if the input workspace is a workspace group. The input and transmission workspaces can also be optionally
+corrected for flood using :ref:`algm-ApplyFloodWorkspace` algorithm. The flood workspace either can be provided in :literal:`FloodWorkspace`
+property or it is created on the fly with the :ref:`algm-CreateFloodWorkspace` algorithm using properties stored in the instrument
+parameter file.
 
 First, if :literal:`ThetaIn` is given the algorithm will try to correct the detector position. For this, it uses
 :literal:`ProcessingInstructions`, which corresponds to the grouping pattern of workspace indices that define the
@@ -83,12 +86,12 @@ The diagram below illustrates this process (note that, for the sake of clarity, 
 workspace in Q, :literal:`OutputWorkspaceBinned`, is not represented but it is handled analogously to
 :literal:`OutputWorkspace` and :literal:`OutputWorkspaceWavelength`):
 
-.. diagram:: ReflectometryReductionOneAuto-v2-Groups_noPA_wkflw.dot
+.. diagram:: ReflectometryReductionOneAuto-v2-Groups_wkflw.dot
 
 Polarization Analysis Off
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-If :literal:`PolarizationAnalysis = None` the reduction stops here. Note that if
+If :literal:`PolarizationAnalysis = None` the reduction stops. Note that if
 transmission runs are given in the form of a workspace group, then the first 
 element in the group will be used on every input workspace. If transmission runs
 are provided as matrix workspaces the specified runs will be used for all members
@@ -122,8 +125,6 @@ workspace that will be used as the transmission run for all items in the input
 workspace group, as illustrated in the diagram below (note that, for the sake of 
 clarity, the rebinned output workspace in Q, :literal:`OutputWorkspaceBinned`, is 
 not represented but it is handled analogously to :literal:`OutputWorkspace`).
-
-.. diagram:: ReflectometryReductionOneAuto-v2-Groups_PA_wkflw.dot
 
 Previous Versions
 -----------------

@@ -53,7 +53,7 @@ public:
     TS_ASSERT(outputWS);
     auto histo = outputWS->histogram(0);
     auto x = histo.points();
-    auto y = histo.y();
+    const auto &y = histo.y();
     for (size_t i = 0; i < x.size(); ++i) {
       if (x[i] < 4) {
         TS_ASSERT_LESS_THAN(y[i], 0);

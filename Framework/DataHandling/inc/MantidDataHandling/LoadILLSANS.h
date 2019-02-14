@@ -89,9 +89,12 @@ private:
   bool m_isTOF;          ///< TOF or monochromatic flag
   double m_sourcePos;    ///< Source Z (for D33 TOF)
 
-  double calculateQ(const double lambda, const double twoTheta) const;
-  std::pair<double, double> calculateQMaxQMin();
   void setFinalProperties(const std::string &filename);
+  void setPixelSize();
+  std::vector<double> getVariableTimeBinning(const NeXus::NXEntry &,
+                                             const std::string &,
+                                             const NeXus::NXInt &,
+                                             const NeXus::NXFloat &) const;
 };
 
 } // namespace DataHandling

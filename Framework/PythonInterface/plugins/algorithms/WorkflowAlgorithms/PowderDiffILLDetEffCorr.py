@@ -472,21 +472,6 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
                 mtd[constants_ws].dataY(pixel)[0] = 1.
                 mtd[constants_ws].dataE(pixel)[0] = 0.
 
-    def _mask_outside_range(self, constants_ws):
-        """
-            Sets the efficiencies to zero, if they are outside the given range
-        """
-        y = mtd[constants_ws].extractY()
-        x = mtd[constants_ws].extractX()
-        e = mtd[constants_ws].extractE()
-        lower = self._mask_criterion[0]
-        upper = self._mask_criterion[1]
-        y[y<lower]=0.
-        y[y>upper]=0.
-        self.log().information('Masking pixels with constant outisde ({0},{1})'.format(lower, upper))
-        CreateWorkspace(DataY=y, DataX=x, DataE=e, NSpec=mtd[constants_ws].getNumberHistograms(),
-                        OutputWorkspace=constants_ws, ParentWorkspace=constants_ws)
-
     def _derive_calibration_sequential(self, ws_2d, constants_ws, response_ws):
         """
             Computes the relative calibration factors sequentailly for all the pixels.
@@ -553,17 +538,19 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
             if self._out_response:
                 # take care of combined response
                 end = self._bin_offset
+                response = mtd[response_ws]
+                responseBlockSize = response.blocksize()
                 if det == self._pixel_range[1] - 1:
                     end = self._scan_points - self._bin_offset
                     for scan_point in range(0, self._bin_offset):
-                        index = mtd[response_ws].blocksize() - self._bin_offset + scan_point
-                        mtd[response_ws].dataY(0)[index] = mtd[ws].readY(0)[end + scan_point]
-                        mtd[response_ws].dataE(0)[index] = mtd[ws].readE(0)[end + scan_point]
+                        index = responseBlockSize - self._bin_offset + scan_point
+                        response.dataY(0)[index] = mtd[ws].readY(0)[end + scan_point]
+                        response.dataE(0)[index] = mtd[ws].readE(0)[end + scan_point]
 
                 for scan_point in range(0, end):
                     index = det * self._bin_offset + scan_point
-                    mtd[response_ws].dataY(0)[index] = mtd[ref_ws].readY(0)[scan_point]
-                    mtd[response_ws].dataE(0)[index] = mtd[ref_ws].readE(0)[scan_point]
+                    response.dataY(0)[index] = mtd[ref_ws].readY(0)[scan_point]
+                    response.dataE(0)[index] = mtd[ref_ws].readE(0)[scan_point]
 
             DeleteWorkspace(ws)
         # end of loop over pixels
@@ -811,7 +798,8 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
             self._process_global()
 
         if self._mask_criterion.any():
-            self._mask_outside_range(constants_ws)
+            MaskBinsIf(InputWorkspace=constants_ws, OutputWorkspace=constants_ws,
+                       Criterion='y<'+str(self._mask_criterion[0])+'||y>'+str(self._mask_criterion[1]))
 
         # set output workspace[s]
         RenameWorkspace(InputWorkspace=constants_ws, OutputWorkspace=self._out_name)

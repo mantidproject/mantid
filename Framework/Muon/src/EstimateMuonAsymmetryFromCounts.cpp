@@ -13,11 +13,11 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/Workspace_fwd.h"
-
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidMuon/MuonAlgorithmHelper.h"
 
 #include <cmath>
 #include <numeric>
@@ -26,6 +26,7 @@
 namespace Mantid {
 namespace Algorithms {
 
+using namespace Mantid::DataObjects;
 using namespace Kernel;
 using API::Progress;
 using std::size_t;
@@ -59,7 +60,8 @@ void EstimateMuonAsymmetryFromCounts::init() {
 
   std::vector<int> empty;
   declareProperty(
-      Kernel::make_unique<Kernel::ArrayProperty<int>>("Spectra", empty),
+      Kernel::make_unique<Kernel::ArrayProperty<int>>("Spectra",
+                                                      std::move(empty)),
       "The workspace indices to remove the exponential decay from.");
   declareProperty(
       "StartX", 0.1,
@@ -74,7 +76,8 @@ void EstimateMuonAsymmetryFromCounts::init() {
 
   declareProperty(
       make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
-          "NormalizationTable", "", Direction::InOut),
+          "NormalizationTable", "", Direction::InOut,
+          API::PropertyMode::Optional),
       "Name of the table containing the normalizations for the asymmetries.");
 }
 
@@ -119,11 +122,10 @@ void EstimateMuonAsymmetryFromCounts::exec() {
   // Create output workspace with same dimensions as input
   API::MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
   if (inputWS != outputWS) {
-    outputWS = API::WorkspaceFactory::Instance().create(inputWS);
+    outputWS = create<API::MatrixWorkspace>(*inputWS);
   }
   bool extraData = getProperty("OutputUnNormData");
-  API::MatrixWorkspace_sptr unnormWS =
-      API::WorkspaceFactory::Instance().create(outputWS);
+  API::MatrixWorkspace_sptr unnormWS = create<API::MatrixWorkspace>(*outputWS);
   double startX = getProperty("StartX");
   double endX = getProperty("EndX");
   const Mantid::API::Run &run = inputWS->run();
@@ -195,7 +197,7 @@ void EstimateMuonAsymmetryFromCounts::exec() {
     outputWS->setHistogram(
         specNum, normaliseCounts(inputWS->histogram(specNum), numGoodFrames));
     if (extraData) {
-      unnormWS->mutableX(specNum) = outputWS->x(specNum);
+      unnormWS->setSharedX(specNum, outputWS->sharedX(specNum));
       unnormWS->mutableY(specNum) = outputWS->y(specNum);
       unnormWS->mutableE(specNum) = outputWS->e(specNum);
     }
@@ -213,10 +215,20 @@ void EstimateMuonAsymmetryFromCounts::exec() {
   }
   // update table
   Mantid::API::ITableWorkspace_sptr table = getProperty("NormalizationTable");
-  updateNormalizationTable(table, wsNames, norm, methods);
-  setProperty("NormalizationTable", table);
+  if (table) {
+    updateNormalizationTable(table, wsNames, norm, methods);
+    setProperty("NormalizationTable", table);
+  }
   // Update Y axis units
   outputWS->setYUnit("Asymmetry");
+
+  std::string normString = std::accumulate(
+      norm.begin() + 1, norm.end(), std::to_string(norm[0]),
+      [](const std::string &currentString, double valueToAppend) {
+        return currentString + ',' + std::to_string(valueToAppend);
+      });
+  MuonAlgorithmHelper::addSampleLog(outputWS, "analysis_asymmetry_norm",
+                                    normString);
 
   setProperty("OutputWorkspace", outputWS);
 }

@@ -11,25 +11,30 @@ from __future__ import (absolute_import, unicode_literals)
 
 # std imports
 import sys
+import os.path
+import traceback
 
 # 3rd party imports
 from qtpy.QtCore import QObject, Signal
 from qtpy.QtGui import QColor, QFontMetrics
-from qtpy.QtWidgets import QFileDialog, QMessageBox, QStatusBar, QVBoxLayout, QWidget
+from qtpy.QtWidgets import QMessageBox, QStatusBar, QVBoxLayout, QWidget, QFileDialog
 
 # local imports
 from mantidqt.widgets.codeeditor.editor import CodeEditor
 from mantidqt.widgets.codeeditor.errorformatter import ErrorFormatter
 from mantidqt.widgets.codeeditor.execution import PythonCodeExecution
+from mantidqt.io import open_a_file_dialog
 
 # Status messages
 IDLE_STATUS_MSG = "Status: Idle."
-LAST_JOB_MSG_TEMPLATE = "Last job completed {} in {:.3f}s"
+LAST_JOB_MSG_TEMPLATE = "Last job completed {} at {} in {:.3f}s"
 RUNNING_STATUS_MSG = "Status: Running"
 
 # Editor
 CURRENTLINE_BKGD_COLOR = QColor(247, 236, 248)
 TAB_WIDTH = 4
+TAB_CHAR = '\t'
+SPACE_CHAR = " "
 
 
 class EditorIO(object):
@@ -38,7 +43,11 @@ class EditorIO(object):
         self.editor = editor
 
     def ask_for_filename(self):
-        filename, _ = QFileDialog.getSaveFileName(self.editor, "Choose filename...")
+        filename = open_a_file_dialog(parent=self.editor, default_suffix=".py", file_filter="Python Files (*.py)",
+                                      accept_mode=QFileDialog.AcceptSave, file_mode=QFileDialog.AnyFile)
+        if filename is not None and os.path.isdir(filename):
+            # Set value to None as, we do not want to be saving a directory, it is possible to receive a directory
+            filename = None
         return filename
 
     def save_if_required(self, confirm=True):
@@ -98,6 +107,10 @@ class PythonFileInterpreter(QWidget):
 
         # layout
         self.editor = CodeEditor("AlternateCSPythonLexer", self)
+
+        # Clear QsciScintilla key bindings that may override PyQt's bindings
+        self.clear_key_binding("Ctrl+/")
+
         self.status = QStatusBar(self)
         layout = QVBoxLayout()
         layout.addWidget(self.editor)
@@ -143,6 +156,78 @@ class PythonFileInterpreter(QWidget):
     def set_status_message(self, msg):
         self.status.showMessage(msg)
 
+    def replace_tabs_with_spaces(self):
+        self.replace_text(TAB_CHAR, SPACE_CHAR*TAB_WIDTH)
+
+    def replace_text(self, match_text, replace_text):
+        if self.editor.selectedText() == '':
+            self.editor.selectAll()
+        new_text = self.editor.selectedText().replace(match_text, replace_text)
+        self.editor.replaceSelectedText(new_text)
+
+    def replace_spaces_with_tabs(self):
+        self.replace_text(SPACE_CHAR*TAB_WIDTH, TAB_CHAR)
+
+    def set_whitespace_visible(self):
+        self.editor.setWhitespaceVisibility(CodeEditor.WsVisible)
+
+    def set_whitespace_invisible(self):
+        self.editor.setWhitespaceVisibility(CodeEditor.WsInvisible)
+
+    def clear_key_binding(self, key_str):
+        """Clear a keyboard shortcut bound to a Scintilla command"""
+        self.editor.clearKeyBinding(key_str)
+
+    def toggle_comment(self):
+        if self.editor.selectedText() == '':   # If nothing selected, do nothing
+            return
+
+        # Note selection indices to restore highlighting later
+        selection_idxs = list(self.editor.getSelection())
+
+        # Expand selection from first character on start line to end char on last line
+        line_end_pos = len(self.editor.text().split('\n')[selection_idxs[2]].rstrip())
+        line_selection_idxs = [selection_idxs[0], 0,
+                               selection_idxs[2], line_end_pos]
+        self.editor.setSelection(*line_selection_idxs)
+        selected_lines = self.editor.selectedText().split('\n')
+
+        if self._are_comments(selected_lines) is True:
+            toggled_lines = self._uncomment_lines(selected_lines)
+            # Track deleted characters to keep highlighting consistent
+            selection_idxs[1] -= 2
+            selection_idxs[-1] -= 2
+        else:
+            toggled_lines = self._comment_lines(selected_lines)
+            selection_idxs[1] += 2
+            selection_idxs[-1] += 2
+
+        # Replace lines with commented/uncommented lines
+        self.editor.replaceSelectedText('\n'.join(toggled_lines))
+
+        # Restore highlighting
+        self.editor.setSelection(*selection_idxs)
+
+    def _comment_lines(self, lines):
+        for i in range(len(lines)):
+            lines[i] = '# ' + lines[i]
+        return lines
+
+    def _uncomment_lines(self, lines):
+        for i in range(len(lines)):
+            uncommented_line = lines[i].replace('# ', '', 1)
+            if uncommented_line == lines[i]:
+                uncommented_line = lines[i].replace('#', '', 1)
+            lines[i] = uncommented_line
+        return lines
+
+    def _are_comments(self, code_lines):
+        for line in code_lines:
+            if line.strip():
+                if not line.strip().startswith('#'):
+                    return False
+        return True
+
     def _setup_editor(self, default_content, filename):
         editor = self.editor
 
@@ -172,6 +257,7 @@ class PythonFileInterpreter(QWidget):
 
 class PythonFileInterpreterPresenter(QObject):
     """Presenter part of MVP to control actions on the editor"""
+    MAX_STACKTRACE_LENGTH = 2
 
     def __init__(self, view, model):
         super(PythonFileInterpreterPresenter, self).__init__()
@@ -209,10 +295,10 @@ class PythonFileInterpreterPresenter(QObject):
     def req_execute_async(self):
         if self.is_executing:
             return
-        self.is_executing = True
         code_str, self._code_start_offset = self._get_code_for_execution()
         if not code_str:
             return
+        self.is_executing = True
         self.view.set_editor_readonly(True)
         self.view.set_status_message(RUNNING_STATUS_MSG)
         return self.model.execute_async(code_str, self.view.filename)
@@ -229,32 +315,33 @@ class PythonFileInterpreterPresenter(QObject):
 
     def _on_exec_success(self, task_result):
         self.view.editor.updateCompletionAPI(self.model.generate_calltips())
-        self._finish(success=True, elapsed_time=task_result.elapsed_time)
+        self._finish(success=True, task_result=task_result)
 
     def _on_exec_error(self, task_error):
         exc_type, exc_value, exc_stack = task_error.exc_type, task_error.exc_value, \
                                          task_error.stack
+        exc_stack = traceback.extract_tb(exc_stack)[self.MAX_STACKTRACE_LENGTH:]
         if hasattr(exc_value, 'lineno'):
             lineno = exc_value.lineno + self._code_start_offset
         elif exc_stack is not None:
             lineno = exc_stack[-1][1] + self._code_start_offset
         else:
             lineno = -1
-        sys.stderr.write(self._error_formatter.format(exc_type, exc_value, exc_stack) + '\n')
+        sys.stderr.write(self._error_formatter.format(exc_type, exc_value, exc_stack) + os.linesep)
         self.view.editor.updateProgressMarker(lineno, True)
-        self._finish(success=False, elapsed_time=task_error.elapsed_time)
+        self._finish(success=False, task_result=task_error)
 
-    def _finish(self, success, elapsed_time):
+    def _finish(self, success, task_result):
         status = 'successfully' if success else 'with errors'
-        self.view.set_status_message(self._create_status_msg(status,
-                                                             elapsed_time))
+        status_message = self._create_status_msg(status, task_result.timestamp,
+                                                 task_result.elapsed_time)
+        self.view.set_status_message(status_message)
         self.view.set_editor_readonly(False)
         self.is_executing = False
 
-    def _create_status_msg(self, status, elapsed_time):
+    def _create_status_msg(self, status, timestamp, elapsed_time):
         return IDLE_STATUS_MSG + ' ' + \
-               LAST_JOB_MSG_TEMPLATE.format(status,
-                                            elapsed_time)
+               LAST_JOB_MSG_TEMPLATE.format(status, timestamp, elapsed_time)
 
     def _on_progress_update(self, lineno):
         """Update progress on the view taking into account if a selection of code is

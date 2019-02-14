@@ -43,6 +43,7 @@ IqtFit::IqtFit(QWidget *parent)
       m_iqtFittingModel, m_uiForm->fitDataView));
   setPlotView(m_uiForm->pvFitPlotView);
   setSpectrumSelectionView(m_uiForm->svSpectrumView);
+  setOutputOptionsView(m_uiForm->ovOutputOptionsView);
   setFitPropertyBrowser(m_uiForm->fitPropertyBrowser);
 }
 
@@ -69,8 +70,6 @@ void IqtFit::setupFitTab() {
   setBackgroundOptions({"None", "FlatBackground"});
 
   connect(m_uiForm->pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
-  connect(m_uiForm->pbPlot, SIGNAL(clicked()), this, SLOT(plotResult()));
-  connect(m_uiForm->pbSave, SIGNAL(clicked()), this, SLOT(saveResult()));
 
   connect(this, SIGNAL(functionChanged()), this, SLOT(fitFunctionChanged()));
   connect(this, SIGNAL(customBoolChanged(const QString &, bool)), this,
@@ -119,53 +118,19 @@ std::string IqtFit::fitTypeString() const {
   return "";
 }
 
-void IqtFit::updatePlotOptions() {
-  IndirectFitAnalysisTab::updatePlotOptions(m_uiForm->cbPlotType);
-}
-
 void IqtFit::setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm) {
   fitAlgorithm->setProperty("ExtractMembers",
                             boolSettingValue("ExtractMembers"));
   IndirectFitAnalysisTab::setupFit(fitAlgorithm);
 }
 
-void IqtFit::plotResult() {
-  setPlotResultIsPlotting(true);
-  IndirectFitAnalysisTab::plotResult(m_uiForm->cbPlotType->currentText());
-  setPlotResultIsPlotting(false);
-}
-
-void IqtFit::setRunEnabled(bool enabled) {
-  m_uiForm->pbRun->setEnabled(enabled);
-}
-
-void IqtFit::setPlotResultEnabled(bool enabled) {
-  m_uiForm->pbPlot->setEnabled(enabled);
-  m_uiForm->cbPlotType->setEnabled(enabled);
-}
-
-void IqtFit::setFitSingleSpectrumEnabled(bool enabled) {
-  m_uiForm->pvFitPlotView->enableFitSingleSpectrum(enabled);
-}
-
-void IqtFit::setSaveResultEnabled(bool enabled) {
-  m_uiForm->pbSave->setEnabled(enabled);
-}
+void IqtFit::runClicked() { runTab(); }
 
 void IqtFit::setRunIsRunning(bool running) {
   m_uiForm->pbRun->setText(running ? "Running..." : "Run");
-  setRunEnabled(!running);
-  setPlotResultEnabled(!running);
-  setSaveResultEnabled(!running);
-  setFitSingleSpectrumEnabled(!running);
 }
 
-void IqtFit::setPlotResultIsPlotting(bool plotting) {
-  m_uiForm->pbPlot->setText(plotting ? "Plotting..." : "Plot");
-  setPlotResultEnabled(!plotting);
-}
-
-void IqtFit::runClicked() { runTab(); }
+void IqtFit::setRunEnabled(bool enable) { m_uiForm->pbRun->setEnabled(enable); }
 
 } // namespace IDA
 } // namespace CustomInterfaces

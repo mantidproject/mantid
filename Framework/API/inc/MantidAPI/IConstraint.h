@@ -61,6 +61,13 @@ public:
   /// Return the string that can be used in this->initialize() to recreate this
   /// constraint
   virtual std::string asString() const = 0;
+
+  /// Return the value for default fitting penalties
+  static double getDefaultPenaltyFactor() { return m_defaultPenaltyFactor; }
+
+protected:
+  /// default penalty factor for constraints
+  static constexpr double m_defaultPenaltyFactor = 1000;
 };
 
 } // namespace API

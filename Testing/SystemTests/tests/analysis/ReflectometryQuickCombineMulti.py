@@ -5,13 +5,13 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
-import stresstesting
+import systemtesting
 from mantid.simpleapi import *
 from isis_reflectometry import quick
 from isis_reflectometry import combineMulti
 
 
-class ReflectometryQuickCombineMulti(stresstesting.MantidStressTest):
+class ReflectometryQuickCombineMulti(systemtesting.MantidSystemTest):
     """
     This is a system test for the top-level CombineMulti routines. Quick is the name given to the
     ISIS reflectometry reduction scripts. CombineMulti is used for stitching together runs converted Into I/I0 vs |Q| taken at

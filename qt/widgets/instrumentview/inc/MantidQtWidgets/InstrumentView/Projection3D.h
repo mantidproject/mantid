@@ -15,7 +15,6 @@
 #include <QGLWidget>
 #include <QString>
 
-#include <boost/scoped_ptr.hpp>
 #include <boost/shared_ptr.hpp>
 
 namespace MantidQt {
@@ -80,6 +79,9 @@ protected:
   bool m_wireframe;
 
   Viewport m_viewport;
+
+  friend class InstrumentWidgetEncoder;
+  friend class InstrumentWidgetDecoder;
 };
 
 } // namespace MantidWidgets

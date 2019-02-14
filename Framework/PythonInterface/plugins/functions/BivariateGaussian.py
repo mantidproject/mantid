@@ -116,7 +116,7 @@ class BivariateGaussian(IFunction1D):
     def getMuSigma(self):
         return self.getMu(), self.getSigma()
 
-    def setConstraints(self, boundsDict):
+    def setConstraints(self, boundsDict, penalty=None):
         """
         setConstraints sets fitting constraints for the mbvg function.
         Intput:
@@ -130,9 +130,10 @@ class BivariateGaussian(IFunction1D):
                     constraintString = "{:4.4e} < {:s} < {:4.4e}".format(boundsDict[param][0], param, boundsDict[param][1])
                     self.addConstraints(constraintString)
                 else:
-                    self.addConstraints("{:4.4e} < A < {:4.4e}".format(boundsDict[param][1], boundsDict[param][0]))
+                    self.addConstraints("{:4.4e} < {:s} < {:4.4e}".format(boundsDict[param][1], param, boundsDict[param][0]))
+                if penalty is not None:
+                    self.setConstraintPenaltyFactor(param, penalty)
             except ValueError:
-                raise
                 raise UserWarning("Cannot set parameter {:s} for mbvg.  Valid choices are " +
                                   "('A', 'MuX', 'MuY', 'SigX', 'SigY', 'SigP', 'Bg')".format(param))
 

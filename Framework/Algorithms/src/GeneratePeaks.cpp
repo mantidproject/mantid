@@ -11,9 +11,9 @@
 #include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/IBackgroundFunction.h"
 #include "MantidAPI/SpectraAxis.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidHistogramData/HistogramBuilder.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
@@ -705,10 +705,12 @@ API::MatrixWorkspace_sptr GeneratePeaks::createOutputWorkspace() {
           << "Both binning parameters and input workspace are given. "
           << "Using input worksapce to generate output workspace!\n";
 
-    outputWS = API::WorkspaceFactory::Instance().create(
-        inputWS, inputWS->getNumberHistograms(), inputWS->x(0).size(),
-        inputWS->y(0).size());
+    HistogramBuilder builder;
+    builder.setX(inputWS->x(0).size());
+    builder.setY(inputWS->y(0).size());
 
+    builder.setDistribution(inputWS->isDistribution());
+    outputWS = create<MatrixWorkspace>(*inputWS, builder.build());
     // Only copy the X-values from spectra with peaks specified in the table
     // workspace.
     for (const auto &iws : m_spectraSet) {

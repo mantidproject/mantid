@@ -31,19 +31,17 @@ class GeometryHandler;
 class MANTID_GEOMETRY_DLL MeshObject2D : public IObject {
 public:
   /// Constructor
-  MeshObject2D(const std::vector<uint16_t> &faces,
-               const std::vector<Mantid::Kernel::V3D> &vertices,
+  MeshObject2D(const std::vector<uint32_t> &faces,
+               const std::vector<Kernel::V3D> &vertices,
                const Kernel::Material &material);
   /// Constructor
-  MeshObject2D(std::vector<uint16_t> &&faces,
-               std::vector<Mantid::Kernel::V3D> &&vertices,
+  MeshObject2D(std::vector<uint32_t> &&faces,
+               std::vector<Kernel::V3D> &&vertices,
                const Kernel::Material &&material);
 
   double volume() const override;
 
-  static bool isOnTriangle(const Kernel::V3D &point, const Kernel::V3D &a,
-                           const Kernel::V3D &b, const Kernel::V3D &c);
-  static bool pointsCoplanar(const std::vector<Mantid::Kernel::V3D> &vertices);
+  static bool pointsCoplanar(const std::vector<Kernel::V3D> &vertices);
 
   bool hasValidShape() const override;
   double distanceToPlane(const Kernel::V3D &point) const;
@@ -99,7 +97,7 @@ private:
   void initialize();
   /// Triangles are specified by indices into a list of vertices. Offset is
   /// always 3.
-  std::vector<uint16_t> m_triangles;
+  std::vector<uint32_t> m_triangles;
   /// Vertices
   std::vector<Kernel::V3D> m_vertices;
   /// Material composition

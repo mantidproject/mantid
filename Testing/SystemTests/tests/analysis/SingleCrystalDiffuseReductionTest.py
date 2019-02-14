@@ -4,11 +4,11 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-import stresstesting
+import systemtesting
 from mantid.simpleapi import SingleCrystalDiffuseReduction, Load, AlgorithmManager, SaveMD
 
 
-class SingleCrystalDiffuseTest(stresstesting.MantidStressTest):
+class SingleCrystalDiffuseTest(systemtesting.MantidSystemTest):
     def requiredFiles(self):
         return ["CORELLI_29782.nxs","CORELLI_29792.nxs",
                 "SingleCrystalDiffuseReduction_SA.nxs",
@@ -23,13 +23,12 @@ class SingleCrystalDiffuseTest(stresstesting.MantidStressTest):
                                       OutputWorkspace='SCDR_output',
                                       SetGoniometer=True,
                                       Axis0="BL9:Mot:Sample:Axis1,0,1,0,1",
-                                      Uproj='1,1,0',
-                                      Vproj='1,-1,0',
-                                      Wproj='0,0,1',
-                                      BinningDim0='-7.5375,7.5375,201',
-                                      BinningDim1='-13.165625,13.165625,201',
-                                      BinningDim2='-0.1,0.1,1',
-                                      SymmetryOps="P 31 2 1")
+                                      QDimension0='1,1,0',
+                                      QDimension1='1,-1,0',
+                                      Dimension0Binning='-7.5375,0.075,7.5375',
+                                      Dimension1Binning='-13.165625,0.13100125,13.165625',
+                                      Dimension2Binning='-0.1,0.1',
+                                      SymmetryOperations="P 31 2 1")
 
     def validate(self):
         results = 'SCDR_output'

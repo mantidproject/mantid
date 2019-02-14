@@ -4,6 +4,8 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+from __future__ import (absolute_import, print_function)
+
 import sys
 import argparse
 
@@ -16,25 +18,27 @@ command_line_args = parser.parse_args()
 
 sys.path.insert(0, command_line_args.directory)
 
-from PyQt4 import QtGui # noqa
+from qtpy import QtGui, QtWidgets # noqa
 
 import mantid # noqa
-from ErrorReporter import resources # noqa
-from mantid.kernel import UsageService # noqa
+try:
+    from ErrorReporter import resources_qt5 # noqa
+except ImportError:
+    from ErrorReporter import resources_qt4 # noqa
 from ErrorReporter.error_report_presenter import ErrorReporterPresenter # noqa
 from ErrorReporter.errorreport import CrashReportPage # noqa
 # Set path to look for package qt libraries
 if command_line_args.qtdir is not None:
-    from PyQt4.QtCore import QCoreApplication
+    from qtpy.QtCore import QCoreApplication
     QCoreApplication.addLibraryPath(
         command_line_args.qtdir
     )
 
 
 def main():
-    if not UsageService.isEnabled():
+    if mantid.config['usagereports.enabled'] != '1':
         return int(command_line_args.exit_code)
-    app = QtGui.QApplication(sys.argv)
+    app = QtWidgets.QApplication(sys.argv)
     form = CrashReportPage(show_continue_terminate=False)
     presenter = ErrorReporterPresenter(form, command_line_args.exit_code)
     presenter.show_view()

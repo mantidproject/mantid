@@ -44,14 +44,23 @@ private slots:
   void updateMiniPlot();
   /// Handles what happen after the algorithm is run
   void algorithmComplete(bool error);
-  // Handles saving of workspace
-  void saveClicked();
-  // Handles plotting
+
+  void runClicked();
   void plotClicked();
-  // Handles plotting current preview
   void plotCurrentPreview();
+  void saveClicked();
 
 private:
+  void displayMessageAndRun(std::string const &saveDirectory);
+  int displaySaveDirectoryMessage();
+
+  void setRunEnabled(bool enabled);
+  void setPlotResultEnabled(bool enabled);
+  void setSaveResultEnabled(bool enabled);
+  void setButtonsEnabled(bool enabled);
+  void setRunIsRunning(bool running);
+  void setPlotResultIsPlotting(bool plotting);
+
   /// Current preview spectrum
   int m_previewSpec;
   /// The ui form

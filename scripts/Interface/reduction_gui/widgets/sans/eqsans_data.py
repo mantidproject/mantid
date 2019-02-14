@@ -7,12 +7,19 @@
 #pylint: disable=invalid-name
 from __future__ import (absolute_import, division, print_function)
 import six
-from PyQt4 import QtGui, QtCore
-import reduction_gui.widgets.util as util
+from qtpy.QtWidgets import (QButtonGroup, QFrame, QMessageBox)  # noqa
+from qtpy.QtGui import (QDoubleValidator)  # noqa
 import os
 from reduction_gui.reduction.sans.eqsans_data_script import DataSets
 from reduction_gui.widgets.base_widget import BaseWidget
-import ui.sans.ui_eqsans_sample_data
+from reduction_gui.widgets import util
+
+try:
+    from mantidqt.utils.qt import load_ui
+except ImportError:
+    from mantid.kernel import Logger
+    Logger("DataSetsWidget").information('Using legacy ui importer')
+    from mantidplot import load_ui
 
 if six.PY3:
     unicode = str
@@ -30,10 +37,10 @@ class DataSetsWidget(BaseWidget):
     def __init__(self, parent=None, state=None, settings=None, data_type=None, data_proxy=None):
         super(DataSetsWidget, self).__init__(parent, state, settings, data_type, data_proxy=data_proxy)
 
-        class DataFrame(QtGui.QFrame, ui.sans.ui_eqsans_sample_data.Ui_Frame):
+        class DataFrame(QFrame):
             def __init__(self, parent=None):
-                QtGui.QFrame.__init__(self, parent)
-                self.setupUi(self)
+                QFrame.__init__(self, parent)
+                self.ui = load_ui(__file__, '../../../ui/sans/eqsans_sample_data.ui', baseinstance=self)
 
         self._content = DataFrame(self)
         self._layout.addWidget(self._content)
@@ -53,25 +60,25 @@ class DataSetsWidget(BaseWidget):
         # Sample data
 
         # Validators
-        self._content.transmission_edit.setValidator(QtGui.QDoubleValidator(self._content.transmission_edit))
-        self._content.dtransmission_edit.setValidator(QtGui.QDoubleValidator(self._content.dtransmission_edit))
-        self._content.beam_radius_edit.setValidator(QtGui.QDoubleValidator(self._content.beam_radius_edit))
-        self._content.sample_thickness_edit.setValidator(QtGui.QDoubleValidator(self._content.sample_thickness_edit))
+        self._content.transmission_edit.setValidator(QDoubleValidator(self._content.transmission_edit))
+        self._content.dtransmission_edit.setValidator(QDoubleValidator(self._content.dtransmission_edit))
+        self._content.beam_radius_edit.setValidator(QDoubleValidator(self._content.beam_radius_edit))
+        self._content.sample_thickness_edit.setValidator(QDoubleValidator(self._content.sample_thickness_edit))
 
         # Connections
-        self.connect(self._content.data_file_browse_button, QtCore.SIGNAL("clicked()"), self._data_file_browse)
-        self.connect(self._content.calculate_radio, QtCore.SIGNAL("clicked()"), self._calculate_clicked)
-        self.connect(self._content.fix_trans_radio, QtCore.SIGNAL("clicked()"), self._calculate_clicked)
+        self._content.data_file_browse_button.clicked.connect(self._data_file_browse)
+        self._content.calculate_radio.clicked.connect(self._calculate_clicked)
+        self._content.fix_trans_radio.clicked.connect(self._calculate_clicked)
 
-        self.connect(self._content.empty_button, QtCore.SIGNAL("clicked()"), self._empty_browse)
-        self.connect(self._content.sample_button, QtCore.SIGNAL("clicked()"), self._sample_browse)
+        self._content.empty_button.clicked.connect(self._empty_browse)
+        self._content.sample_button.clicked.connect(self._sample_browse)
 
-        self.connect(self._content.data_file_plot_button, QtCore.SIGNAL("clicked()"), self._data_file_plot)
-        self.connect(self._content.empty_plot_button, QtCore.SIGNAL("clicked()"), self._empty_plot)
-        self.connect(self._content.sample_plot_button, QtCore.SIGNAL("clicked()"), self._sample_plot)
+        self._content.data_file_plot_button.clicked.connect(self._data_file_plot)
+        self._content.empty_plot_button.clicked.connect(self._empty_plot)
+        self._content.sample_plot_button.clicked.connect(self._sample_plot)
 
         # Calculate/Fix radio button
-        g1 = QtGui.QButtonGroup(self)
+        g1 = QButtonGroup(self)
         g1.addButton(self._content.calculate_radio)
         g1.addButton(self._content.fix_trans_radio)
         g1.setExclusive(True)
@@ -84,33 +91,33 @@ class DataSetsWidget(BaseWidget):
             self._content.transmission_edit.hide()
             self._content.dtransmission_edit.hide()
 
-        if not self._in_mantidplot:
+        if not self._has_instrument_view:
             self._content.data_file_plot_button.hide()
             self._content.empty_plot_button.hide()
             self._content.sample_plot_button.hide()
 
         # Background ##########
         # Validators
-        self._content.bck_transmission_edit.setValidator(QtGui.QDoubleValidator(self._content.bck_transmission_edit))
-        self._content.bck_dtransmission_edit.setValidator(QtGui.QDoubleValidator(self._content.bck_dtransmission_edit))
-        self._content.bck_beam_radius_edit.setValidator(QtGui.QDoubleValidator(self._content.beam_radius_edit))
-        #self._content.bck_thickness_edit.setValidator(QtGui.QDoubleValidator(self._content.bck_thickness_edit))
+        self._content.bck_transmission_edit.setValidator(QDoubleValidator(self._content.bck_transmission_edit))
+        self._content.bck_dtransmission_edit.setValidator(QDoubleValidator(self._content.bck_dtransmission_edit))
+        self._content.bck_beam_radius_edit.setValidator(QDoubleValidator(self._content.beam_radius_edit))
+        #self._content.bck_thickness_edit.setValidator(QDoubleValidator(self._content.bck_thickness_edit))
 
         # Connections
-        self.connect(self._content.background_chk, QtCore.SIGNAL("clicked(bool)"), self._background_clicked)
-        self.connect(self._content.background_browse, QtCore.SIGNAL("clicked()"), self._background_browse)
-        self.connect(self._content.bck_calculate_radio, QtCore.SIGNAL("clicked()"), self._bck_calculate_clicked)
-        self.connect(self._content.bck_fix_trans_radio, QtCore.SIGNAL("clicked()"), self._bck_calculate_clicked)
+        self._content.background_chk.clicked.connect(self._background_clicked)
+        self._content.background_browse.clicked.connect(self._background_browse)
+        self._content.bck_calculate_radio.clicked.connect(self._bck_calculate_clicked)
+        self._content.bck_fix_trans_radio.clicked.connect(self._bck_calculate_clicked)
 
-        self.connect(self._content.bck_empty_button, QtCore.SIGNAL("clicked()"), self._bck_empty_browse)
-        self.connect(self._content.bck_sample_button, QtCore.SIGNAL("clicked()"), self._bck_sample_browse)
+        self._content.bck_empty_button.clicked.connect(self._bck_empty_browse)
+        self._content.bck_sample_button.clicked.connect(self._bck_sample_browse)
 
-        self.connect(self._content.background_plot_button, QtCore.SIGNAL("clicked()"), self._background_plot_clicked)
-        self.connect(self._content.bck_empty_plot_button, QtCore.SIGNAL("clicked()"), self._bck_empty_plot)
-        self.connect(self._content.bck_sample_plot_button, QtCore.SIGNAL("clicked()"), self._bck_sample_plot)
+        self._content.background_plot_button.clicked.connect(self._background_plot_clicked)
+        self._content.bck_empty_plot_button.clicked.connect(self._bck_empty_plot)
+        self._content.bck_sample_plot_button.clicked.connect(self._bck_sample_plot)
 
         # Calculate/Fix radio button
-        g2 = QtGui.QButtonGroup(self)
+        g2 = QButtonGroup(self)
         g2.addButton(self._content.bck_calculate_radio)
         g2.addButton(self._content.bck_fix_trans_radio)
         g2.setExclusive(True)
@@ -131,7 +138,7 @@ class DataSetsWidget(BaseWidget):
                 #self._content.bck_thickness_label.hide()
                 #self._content.bck_thickness_edit.hide()
 
-        if not self._in_mantidplot:
+        if not self._has_instrument_view:
             self._content.background_plot_button.hide()
             self._content.bck_empty_plot_button.hide()
             self._content.bck_sample_plot_button.hide()
@@ -231,7 +238,7 @@ class DataSetsWidget(BaseWidget):
         self._bck_calculate_clicked(state.background.calculate_transmission)
 
         if len(popup_warning)>0:
-            QtGui.QMessageBox.warning(self, "Turn ON debug mode", popup_warning)
+            QMessageBox.warning(self, "Turn ON debug mode", popup_warning)
 
     def get_state(self):
         """
@@ -408,7 +415,7 @@ class DataSetsWidget(BaseWidget):
         if len(str(fname).strip())>0:
             dataproxy = self._data_proxy(fname)
             if len(dataproxy.errors)>0:
-                #QtGui.QMessageBox.warning(self, "Error", dataproxy.errors[0])
+                #QMessageBox.warning(self, "Error", dataproxy.errors[0])
                 return
 
             self._settings.last_data_ws = dataproxy.data_ws

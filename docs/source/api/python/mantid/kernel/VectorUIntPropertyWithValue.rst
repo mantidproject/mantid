@@ -2,7 +2,7 @@
  VectorUIntPropertyWithValue
 =============================
 
-This a python binding to the C++ class Mantid::Kernel::VectorUIntPropertyWithValue.
+This is a Python binding to the C++ class Mantid::Kernel::VectorUIntPropertyWithValue.
 
 *bases:* :py:obj:`mantid.kernel.Property`
 
