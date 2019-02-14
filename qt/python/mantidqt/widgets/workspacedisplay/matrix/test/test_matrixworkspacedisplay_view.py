@@ -14,7 +14,6 @@ from mantidqt.utils.qt.test.qt_widget_finder import QtWidgetFinder
 
 
 class MatrixWorkspaceDisplayViewTest(GuiTest, QtWidgetFinder):
-
     def test_window_deleted_correctly(self):
         ws = CreateSampleWorkspace()
 
