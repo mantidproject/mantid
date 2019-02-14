@@ -41,6 +41,24 @@ LOGGER = Logger("workspace.plotting.functions")
 
 
 # -----------------------------------------------------------------------------
+# Decorators
+# -----------------------------------------------------------------------------
+
+def manage_workspace_names(func):
+    """
+    A decorator to go around plotting functions.
+    This will retrieve workspaces from workspace names before
+    calling the plotting function
+    :param func: A plotting function
+    :return:
+    """
+    def inner_func(workspaces, *args, **kwargs):
+        workspaces = _validate_workspace_names(workspaces)
+        return func(workspaces, *args, **kwargs)
+    return inner_func
+
+
+# -----------------------------------------------------------------------------
 # 'Public' Functions
 # -----------------------------------------------------------------------------
 
@@ -127,6 +145,7 @@ def plot_from_names(names, errors, overplot, fig=None):
                 errors=errors, overplot=overplot, fig=fig)
 
 
+@manage_workspace_names
 def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
          overplot=False, fig=None, plot_kwargs=None):
     """
@@ -327,6 +346,22 @@ def _validate_plot_inputs(workspaces, spectrum_nums, wksp_indices):
 
     if wksp_indices is not None:
         _raise_if_not_sequence(wksp_indices, 'wksp_indices')
+
+
+def _validate_workspace_names(workspaces):
+    """
+    Checks if the workspaces passed into a plotting function are workspace names, and
+    retrieves the workspaces if they are.
+    This function assumes that we do not have a mix of workspaces and workspace names.
+    :param workspaces: A list of workspaces or workspace names
+    :return: A list of workspaces
+    """
+    try:
+        _raise_if_not_sequence(workspaces, 'workspaces', MatrixWorkspace)
+    except ValueError:
+        return AnalysisDataService.Instance().retrieveWorkspaces(workspaces, unrollGroups=True)
+    else:
+        return workspaces
 
 
 def _validate_pcolormesh_inputs(workspaces):
