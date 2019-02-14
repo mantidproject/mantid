@@ -239,8 +239,8 @@ class MuonDataContext(object):
 
     def period_string(self, run):
         run_list = run_string_to_list(run)
-        summed_periods = self.loaded_data(run)["SummedPeriods"] if 'SummedPeriods' in self.loaded_data(run_list) else [1]
-        subtracted_periods = self.loaded_data(run)["SubtractedPeriods"] if 'SubtractedPeriods' in self.loaded_data(run_list) else []
+        summed_periods = self.loaded_data(run_list)["SummedPeriods"] if 'SummedPeriods' in self.loaded_data(run_list) else [1]
+        subtracted_periods = self.loaded_data(run_list)["SubtractedPeriods"] if 'SubtractedPeriods' in self.loaded_data(run_list) else []
         if subtracted_periods:
             return '+'.join([str(period) for period in summed_periods]) + '-' + '-'.join([str(period) for period in subtracted_periods])
         else:
