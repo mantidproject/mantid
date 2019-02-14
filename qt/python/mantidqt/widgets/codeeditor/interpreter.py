@@ -125,7 +125,8 @@ class PythonFileInterpreter(QWidget):
 
     def closeEvent(self, event):
         self.deleteLater()
-        self.find_replace_dialog.close()
+        if self.find_replace_dialog:
+            self.find_replace_dialog.close()
         super(PythonFileInterpreter, self).closeEvent(event)
 
     def show_find_replace_dialog(self):
