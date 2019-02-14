@@ -10,8 +10,13 @@ import PyQt4.QtCore as QtCore
 class RunSelectionDialog(QtGui.QDialog):
     def __init__(self, current_runs, parent=None):
         QtGui.QDialog.__init__(self,parent)
-        
+
+        self.setWindowTitle('Run Selection')
         layout = QtGui.QVBoxLayout(self)
+
+        self.message = QtGui.QLabel()
+        self.message.setText('Which run do you wish to use for calculation?')
+        layout.addWidget(self.message)
 
         current_runs_as_string = [str(run) for run in current_runs]
         self.run_selector_combo = QtGui.QComboBox()

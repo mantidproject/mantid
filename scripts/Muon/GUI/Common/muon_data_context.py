@@ -235,7 +235,7 @@ class MuonDataContext(object):
                 workspace_group.addWorkspace(workspace_wrapper.workspace)
             return workspace_group
         else:
-            return self.current_data["OutputWorkspace"][0].workspace
+            return self._loaded_data.get_data(run=run, instrument=self.instrument)['workspace']['OutputWorkspace'][0].workspace
 
     def period_string(self, run):
         run_list = run_string_to_list(run)

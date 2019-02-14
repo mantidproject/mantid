@@ -8,6 +8,7 @@ import Muon.GUI.Common.utilities.algorithm_utils as algorithm_utils
 from Muon.GUI.Common import thread_model
 from Muon.GUI.Common.run_selection_dialog import RunSelectionDialog
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapper
+from mantid.api import AnalysisDataService
 
 
 class GroupingTabPresenter(object):
@@ -91,6 +92,8 @@ class GroupingTabPresenter(object):
         ws2 = self._model.get_group_workspace(group2_name, run_to_use)
 
         ws = algorithm_utils.run_AppendSpectra(ws1, ws2)
+
+        AnalysisDataService.addOrReplace('workspace used in calc', ws)
 
         new_alpha = algorithm_utils.run_AlphaCalc({"InputWorkspace": ws,
                                                    "ForwardSpectra": [0],
