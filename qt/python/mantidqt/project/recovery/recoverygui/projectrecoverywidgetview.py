@@ -8,7 +8,7 @@
 #
 
 from qtpy.QtWidgets import QDialog, QHeaderView, QTableWidgetItem
-from qtpy.QtCore import Signal, Slot
+from qtpy.QtCore import Signal, Slot, Qt
 from mantidqt.utils.qt import load_ui
 from mantid.kernel import logger
 
@@ -18,6 +18,9 @@ class ProjectRecoveryWidgetView(QDialog):
         super(ProjectRecoveryWidgetView, self).__init__()
         self.ui = load_ui(__file__, "ProjectRecoveryWidget.ui", baseinstance=self)
         self.presenter = presenter
+
+        # Make sure the UI doesn't leak memory
+        self.ui.setAttribute(Qt.WA_DeleteOnClose, True)
 
         # Set up the ui
         self.ui.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)

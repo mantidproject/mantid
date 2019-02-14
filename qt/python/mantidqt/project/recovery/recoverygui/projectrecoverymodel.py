@@ -60,7 +60,7 @@ class ProjectRecoveryModel(QObject):
             for index in self.rows:
                 if index[0] == checkpoint:
                     return index
-            return ["", "", "0"]
+            return ["", "", ""]
         # if the checkpoint is a number
         if isinstance(checkpoint, int):
             return self.rows[checkpoint]
@@ -125,9 +125,12 @@ class ProjectRecoveryModel(QObject):
         return checkpoints[-1]
 
     def fill_rows(self):
+        # Clear the rows
+        self.rows = []
+
         pid_folder = self.project_recovery.get_pid_folder_to_be_used_to_load_a_checkpoint_from()
         paths = self.project_recovery.listdir_fullpath(os.path.join(self.project_recovery.recovery_directory_hostname,
-                                                                    pid_folder))
+                                                       pid_folder))
 
         paths.sort()
         for path in paths:
@@ -153,18 +156,6 @@ class ProjectRecoveryModel(QObject):
                 raise
             # Fail silently and return 5 (the default)
             return 5
-
-    # def _fill_first_row(self):
-    #     pid_folder = self.project_recovery.get_pid_folder_to_be_used_to_load_a_checkpoint_from()
-    #     paths = self.project_recovery.listdir_fullpath(os.path.join(
-    #         self.project_recovery.recovery_directory_hostname, pid_folder))
-    #
-    #     # Grab the first path as that is the one that should be loaded into the rows
-    #     paths.sort()
-    #     path = paths[-1]
-    #     checkpoint_name = os.path.basename(path)
-    #     checkpoint_name = replace_t_with_space(checkpoint_name)
-    #     self._fill_row(path, checkpoint_name)
 
     def _fill_row(self, path, checkpoint_name):
         num_of_ws = str(self.find_number_of_workspaces_in_directory(path))

@@ -8,7 +8,7 @@
 #
 
 from qtpy.QtWidgets import QDialog, QHeaderView, QTableWidgetItem
-from qtpy.QtCore import Signal, Slot
+from qtpy.QtCore import Signal, Slot, Qt
 from mantidqt.utils.qt import load_ui
 from mantid.kernel import logger
 
@@ -20,6 +20,9 @@ class RecoveryFailureView(QDialog):
         self.ui.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.ui.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.presenter = presenter
+
+        # Make sure the UI doesn't leak memory
+        self.ui.setAttribute(Qt.WA_DeleteOnClose, True)
 
         # Set the table data
         self._add_data_to_table()
