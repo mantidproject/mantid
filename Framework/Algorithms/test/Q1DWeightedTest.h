@@ -361,6 +361,9 @@ public:
     m_alg.initialize();
     m_alg.setPropertyValue("InputWorkspace", "__in");
     m_alg.setPropertyValue("OutputBinning", "0.0003,-0.1,10.");
+    m_alg.setProperty("NumberOfWedges", 2);
+    m_alg.setProperty("NPixelDivision", 2);
+    m_alg.setProperty("AccountForGravity", true);
     m_alg.setPropertyValue("OutputWorkspace", "__out");
   }
 
