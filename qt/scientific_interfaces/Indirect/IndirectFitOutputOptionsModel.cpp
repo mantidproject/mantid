@@ -106,13 +106,13 @@ bool containsPlottableWorkspace(WorkspaceGroup_const_sptr groupWorkspace) {
 
 std::vector<std::string>
 validateInputs(std::string const &inputWorkspaceName,
-               std::string const &singleBinWorkspaceName,
+               std::string const &singleFitWorkspaceName,
                std::string const &outputName) {
   std::vector<std::string> errors;
 
   if (inputWorkspaceName.empty())
     errors.emplace_back("Select a valid input workspace.");
-  if (singleBinWorkspaceName.empty())
+  if (singleFitWorkspaceName.empty())
     errors.emplace_back("Select a valid Single Fit Result workspace.");
   if (outputName.empty())
     errors.emplace_back("Enter a valid output workspace name.");
@@ -121,12 +121,12 @@ validateInputs(std::string const &inputWorkspaceName,
 }
 
 IAlgorithm_sptr replaceAlgorithm(MatrixWorkspace_sptr inputWorkspace,
-                                 MatrixWorkspace_sptr singleBinWorkspace,
+                                 MatrixWorkspace_sptr singleFitWorkspace,
                                  std::string const &outputName) {
   auto replaceAlg =
-      AlgorithmManager::Instance().create("ReplaceIndirectFitResultBin");
+      AlgorithmManager::Instance().create("IndirectReplaceFitResult");
   replaceAlg->setProperty("InputWorkspace", inputWorkspace);
-  replaceAlg->setProperty("SingleBinWorkspace", singleBinWorkspace);
+  replaceAlg->setProperty("SingleFitWorkspace", singleFitWorkspace);
   replaceAlg->setProperty("OutputWorkspace", outputName);
   return replaceAlg;
 }
@@ -329,22 +329,22 @@ bool IndirectFitOutputOptionsModel::isResultGroupSelected(
   return selectedGroup == "Result Group";
 }
 
-void IndirectFitOutputOptionsModel::replaceResultBin(
+void IndirectFitOutputOptionsModel::replaceFitResult(
     std::string const &inputName, std::string const &singleBinName,
     std::string const &outputName) {
   auto const errors = validateInputs(inputName, singleBinName, outputName);
-  // if (errors.empty())
-  //  replaceResultBin(getADSMatrixWorkspace(inputName),
-  //                   getADSMatrixWorkspace(singleBinName), outputName);
-  // else
-  //  throw std::runtime_error(errors[0]);
+  if (errors.empty())
+    replaceFitResult(getADSMatrixWorkspace(inputName),
+                     getADSMatrixWorkspace(singleBinName), outputName);
+  else
+    throw std::runtime_error(errors[0]);
 }
 
-void IndirectFitOutputOptionsModel::replaceResultBin(
+void IndirectFitOutputOptionsModel::replaceFitResult(
     MatrixWorkspace_sptr inputWorkspace,
-    MatrixWorkspace_sptr singleBinWorkspace, std::string const &outputName) {
+    MatrixWorkspace_sptr singleFitWorkspace, std::string const &outputName) {
   auto const replaceAlg =
-      replaceAlgorithm(inputWorkspace, singleBinWorkspace, outputName);
+      replaceAlgorithm(inputWorkspace, singleFitWorkspace, outputName);
   replaceAlg->execute();
   setOutputAsResultWorkspace(replaceAlg);
 }

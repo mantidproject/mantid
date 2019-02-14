@@ -53,8 +53,8 @@ public:
 
   bool isResultGroupSelected(std::string const &selectedGroup) const override;
 
-  void replaceResultBin(std::string const &inputName,
-                        std::string const &singleBinName,
+  void replaceFitResult(std::string const &inputName,
+                        std::string const &singleFitName,
                         std::string const &outputName) override;
 
 private:
@@ -73,8 +73,8 @@ private:
   void plotPDF(Mantid::API::MatrixWorkspace_const_sptr workspace,
                std::string const &plotType);
 
-  void replaceResultBin(Mantid::API::MatrixWorkspace_sptr inputWorkspace,
-                        Mantid::API::MatrixWorkspace_sptr singleBinWorkspace,
+  void replaceFitResult(Mantid::API::MatrixWorkspace_sptr inputWorkspace,
+                        Mantid::API::MatrixWorkspace_sptr singleFitWorkspace,
                         std::string const &outputName);
   void setOutputAsResultWorkspace(Mantid::API::IAlgorithm_sptr algorithm);
   void setResultWorkspace(std::string const &groupName);

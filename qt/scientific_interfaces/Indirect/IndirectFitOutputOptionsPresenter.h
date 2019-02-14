@@ -58,7 +58,7 @@ private slots:
   void plotResult();
   void saveResult();
   void editResult();
-  void replaceSingleBin();
+  void replaceSingleFitResult();
   void closeEditResultDialog();
 
 private:
@@ -71,9 +71,9 @@ private:
   getEditResultsDialog(QWidget *parent) const;
   void setEditingResult(bool editing);
 
-  void replaceSingleBin(std::string const &inputName,
-                        std::string const &singleBinName,
-                        std::string const &outputName);
+  void replaceSingleFitResult(std::string const &inputName,
+                              std::string const &singleBinName,
+                              std::string const &outputName);
 
   void displayWarning(std::string const &message);
 

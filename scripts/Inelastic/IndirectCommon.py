@@ -281,8 +281,8 @@ def CheckAnalysers(in1WS, in2WS):
       @return None
 
     Raises:
-      @exception Valuerror - workspaces have different analysers
-      @exception Valuerror - workspaces have different reflections
+      @exception ValueError - workspaces have different analysers
+      @exception ValueError - workspaces have different reflections
     """
     ws1 = s_api.mtd[in1WS]
     try:
@@ -307,7 +307,7 @@ def CheckAnalysers(in1WS, in2WS):
 
 def CheckHistZero(inWS):
     """
-    Retrieves basic info on a worskspace
+    Retrieves basic info on a workspace
 
     Checks the workspace is not empty, then returns the number of histogram and
     the number of X-points, which is the number of bin boundaries minus one

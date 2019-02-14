@@ -179,31 +179,31 @@ IndirectFitOutputOptionsPresenter::getEditResultsDialog(QWidget *parent) const {
   return Mantid::Kernel::make_unique<IndirectEditResultsDialog>(parent);
 }
 
-void IndirectFitOutputOptionsPresenter::replaceSingleBin() {
+void IndirectFitOutputOptionsPresenter::replaceSingleFitResult() {
   auto const inputName = m_editResultsDialog->getSelectedInputWorkspaceName();
   auto const singleBinName =
       m_editResultsDialog->getSelectedSingleFitWorkspaceName();
   auto const outputName = m_editResultsDialog->getOutputWorkspaceName();
 
   setEditingResult(true);
-  replaceSingleBin(inputName, singleBinName, outputName);
+  replaceSingleFitResult(inputName, singleBinName, outputName);
   setEditingResult(false);
 }
 
-void IndirectFitOutputOptionsPresenter::replaceSingleBin(
+void IndirectFitOutputOptionsPresenter::replaceSingleFitResult(
     std::string const &inputName, std::string const &singleBinName,
     std::string const &outputName) {
   try {
-    m_model->replaceResultBin(inputName, singleBinName, outputName);
+    m_model->replaceFitResult(inputName, singleBinName, outputName);
   } catch (std::exception const &ex) {
     m_view->displayWarning(ex.what());
   }
 }
 
 void IndirectFitOutputOptionsPresenter::setEditingResult(bool editing) {
-  m_editResultsDialog->setReplaceBinText(editing ? "Editing..."
-                                                 : "Replace Bin");
-  m_editResultsDialog->setReplaceBinEnabled(!editing);
+  m_editResultsDialog->setReplaceFitResultText(editing ? "Processing..."
+                                                       : "Replace Fit Result");
+  m_editResultsDialog->setReplaceFitResultEnabled(!editing);
   setPlotEnabled(!editing);
   setEditResultEnabled(!editing);
   setSaveEnabled(!editing);

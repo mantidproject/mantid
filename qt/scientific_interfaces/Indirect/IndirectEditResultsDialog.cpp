@@ -14,19 +14,19 @@ IndirectEditResultsDialog::IndirectEditResultsDialog(QWidget *parent)
     : QDialog(parent) {
   m_uiForm.setupUi(this);
   m_uiForm.wsInputWorkspace->setLowerBinLimit(2);
-  m_uiForm.wsSingleSpectrumWorkspace->setUpperBinLimit(1);
+  m_uiForm.wsSingleFitWorkspace->setUpperBinLimit(1);
 
   connect(m_uiForm.pbPasteInputName, SIGNAL(clicked()), this,
           SLOT(setOutputWorkspaceName()));
-  connect(m_uiForm.pbReplaceBin, SIGNAL(clicked()), this,
-          SIGNAL(replaceSingleBin()));
+  connect(m_uiForm.pbReplaceFitResult, SIGNAL(clicked()), this,
+          SIGNAL(replaceSingleFitResult()));
   connect(m_uiForm.pbClose, SIGNAL(clicked()), this, SIGNAL(closeDialog()));
 }
 
 void IndirectEditResultsDialog::setWorkspaceSelectorSuffices(
     QStringList const &suffices) {
   m_uiForm.wsInputWorkspace->setSuffixes(suffices);
-  m_uiForm.wsSingleSpectrumWorkspace->setSuffixes(suffices);
+  m_uiForm.wsSingleFitWorkspace->setSuffixes(suffices);
 }
 
 void IndirectEditResultsDialog::setOutputWorkspaceName() {
@@ -40,19 +40,19 @@ std::string IndirectEditResultsDialog::getSelectedInputWorkspaceName() const {
 
 std::string
 IndirectEditResultsDialog::getSelectedSingleFitWorkspaceName() const {
-  return m_uiForm.wsSingleSpectrumWorkspace->currentText().toStdString();
+  return m_uiForm.wsSingleFitWorkspace->currentText().toStdString();
 }
 
 std::string IndirectEditResultsDialog::getOutputWorkspaceName() const {
   return m_uiForm.leOutputWorkspace->text().toStdString();
 }
 
-void IndirectEditResultsDialog::setReplaceBinText(QString const &text) {
-  m_uiForm.pbReplaceBin->setText(text);
+void IndirectEditResultsDialog::setReplaceFitResultText(QString const &text) {
+  m_uiForm.pbReplaceFitResult->setText(text);
 }
 
-void IndirectEditResultsDialog::setReplaceBinEnabled(bool enable) {
-  m_uiForm.pbReplaceBin->setEnabled(enable);
+void IndirectEditResultsDialog::setReplaceFitResultEnabled(bool enable) {
+  m_uiForm.pbReplaceFitResult->setEnabled(enable);
 }
 
 } // namespace IDA

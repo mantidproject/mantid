@@ -7,8 +7,8 @@
 # pylint: disable=no-init,too-many-instance-attributes
 from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
-from mantid.api import (AlgorithmFactory, AnalysisDataService, MatrixWorkspaceProperty, PythonAlgorithm,
-                        PropertyMode, WorkspaceGroup)
+from mantid.api import (AlgorithmFactory, AnalysisDataService, MatrixWorkspace, MatrixWorkspaceProperty,
+                        PythonAlgorithm, PropertyMode, WorkspaceGroup)
 from mantid.kernel import Direction
 
 
@@ -37,9 +37,9 @@ def filter_by_name_end(workspace_names, delimiter):
     return [name for name in workspace_names if string_ends_with(name, delimiter)]
 
 
-def find_result_group_containing(workspace_name):
+def find_result_group_containing(workspace_name, group_extension):
     workspace_names = AnalysisDataService.Instance().getObjectNames()
-    result_groups = filter_by_name_end(workspace_names, '_Results')
+    result_groups = filter_by_name_end(workspace_names, group_extension)
     groups = filter_by_contents(result_groups, workspace_name)
     return groups[0] if groups else None
 
@@ -76,7 +76,7 @@ class IndirectReplaceFitResult(PythonAlgorithm):
     _allowed_extension = '_Result'
 
     def category(self):
-        return "Workflow\\Inelastic"
+        return "Workflow\\DataHandling;Inelastic\\Indirect"
 
     def summary(self):
         return 'Replaces a fit result within the Input Workspace with the corresponding fit result found in the ' \
@@ -110,9 +110,6 @@ class IndirectReplaceFitResult(PythonAlgorithm):
         input_workspace = self.getProperty('InputWorkspace').value
         single_fit_workspace = self.getProperty('SingleFitWorkspace').value
 
-        input_x_axis = input_workspace.getAxis(0)
-        single_fit_x_axis = single_fit_workspace.getAxis(0)
-
         if not string_ends_with(input_name, self._allowed_extension):
             issues['InputWorkspace'] = 'The input workspace must have a name ending in ' \
                                        '{0}'.format(self._allowed_extension)
@@ -124,20 +121,29 @@ class IndirectReplaceFitResult(PythonAlgorithm):
         if not output_name:
             issues['OutputWorkspace'] = 'No OutputWorkspace name was provided.'
 
-        if len(input_workspace.readY(0)) < 2:
-            issues['InputWorkspace'] = 'The input workspace must contain data of a fit involving 2 or more spectra.'
+        if not isinstance(input_workspace, MatrixWorkspace):
+            issues['InputWorkspace'] = 'The input workspace must be a matrix workspace.'
+        else:
+            input_x_axis = input_workspace.getAxis(0)
+            if not input_x_axis.isNumeric():
+                issues['InputWorkspace'] = 'The input workspace must have a numeric x axis.'
+            if len(input_workspace.readY(0)) < 2:
+                issues['InputWorkspace'] = 'The input workspace must contain result data from a fit involving 2 or ' \
+                                           'more spectra.'
 
-        if len(single_fit_workspace.readY(0)) > 1:
-            issues['SingleFitWorkspace'] = 'The single fit workspace must contain data from a single fit.'
+        if not isinstance(single_fit_workspace, MatrixWorkspace):
+            issues['SingleFitWorkspace'] = 'The single fit workspace must be a matrix workspace.'
+        else:
+            single_fit_x_axis = single_fit_workspace.getAxis(0)
+            if not single_fit_x_axis.isNumeric():
+                issues['SingleFitWorkspace'] = 'The single fit workspace must have a numeric x axis.'
+            if len(single_fit_workspace.readY(0)) > 1:
+                issues['SingleFitWorkspace'] = 'The single fit workspace must contain data from a single fit.'
 
-        if input_workspace.getNumberHistograms() != single_fit_workspace.getNumberHistograms():
-            issues['InputWorkspace'] = 'The input workspace and single fit workspace must have the same number of ' \
-                                       'histograms.'
-
-        if not input_x_axis.isNumeric():
-            issues['InputWorkspace'] = 'The input workspace must have a numeric x axis.'
-        if not single_fit_x_axis.isNumeric():
-            issues['SingleFitWorkspace'] = 'The single fit workspace must have a numeric x axis.'
+        if isinstance(input_workspace, MatrixWorkspace) and isinstance(single_fit_workspace, MatrixWorkspace):
+            if input_workspace.getNumberHistograms() != single_fit_workspace.getNumberHistograms():
+                issues['InputWorkspace'] = 'The input workspace and single fit workspace must have the same number ' \
+                                           'of histograms.'
 
         return issues
 
@@ -151,7 +157,7 @@ class IndirectReplaceFitResult(PythonAlgorithm):
         self._insertion_x_index = get_x_insertion_index(get_ads_workspace(self._input_workspace),
                                                         get_ads_workspace(self._single_fit_workspace))
 
-        self._result_group = find_result_group_containing(self._input_workspace)
+        self._result_group = find_result_group_containing(self._input_workspace, self._allowed_extension + 's')
 
     def PyExec(self):
         self._setup()
