@@ -7,14 +7,14 @@
 # pylint: disable=no-init,too-many-instance-attributes
 from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
-from mantid.api import (AnalysisDataService, PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty,
-                        ITableWorkspaceProperty, PropertyMode, Progress)
-from mantid.kernel import Direction, logger, IntBoundedValidator
+from mantid.api import (AlgorithmFactory, AnalysisDataService, MatrixWorkspaceProperty, PythonAlgorithm,
+                        PropertyMode, WorkspaceGroup)
+from mantid.kernel import Direction
 
 
 def string_ends_with(string, delimiter):
-    delimiter_length = delimiter.len()
-    return string[-delimiter_length:] == delimiter if string.len() > delimiter_length else False
+    delimiter_length = len(delimiter)
+    return string[-delimiter_length:] == delimiter if len(string) > delimiter_length else False
 
 
 def exists_in_ads(workspace_name):
@@ -26,7 +26,7 @@ def get_ads_workspace(workspace_name):
 
 
 def contains_workspace(group, workspace):
-    return group.contains(workspace) if group.isGroup() else False
+    return group.contains(workspace) if isinstance(group, WorkspaceGroup) else False
 
 
 def filter_by_contents(workspace_names, workspace):
@@ -44,10 +44,14 @@ def find_result_group_containing(workspace_name):
     return groups[0] if groups else None
 
 
+def is_equal(a, b, tolerance):
+    return abs(a - b) <= tolerance * max(abs(a), abs(b))
+
+
 def get_bin_index_of_value(workspace, value):
     x_axis = workspace.getAxis(0)
     for i in range(0, x_axis.length()):
-        if x_axis.getValue(i) == value:
+        if is_equal(x_axis.getValue(i), value, 0.000001):
             return i
 
     raise ValueError('The corresponding bin in the input workspace could not be found.')
@@ -55,7 +59,7 @@ def get_bin_index_of_value(workspace, value):
 
 def get_x_insertion_index(input_workspace, single_fit_workspace):
     single_fit_x_axis = single_fit_workspace.getAxis(0)
-    bin_value = single_fit_x_axis.label(0)
+    bin_value = float(single_fit_x_axis.label(0))
     return get_bin_index_of_value(input_workspace, bin_value)
 
 
@@ -65,7 +69,7 @@ class IndirectReplaceFitResult(PythonAlgorithm):
     _output_workspace = None
 
     _end_row = None
-    _end_column = None
+    _column_index = None
     _insertion_x_index = None
 
     _result_group = None
@@ -75,8 +79,8 @@ class IndirectReplaceFitResult(PythonAlgorithm):
         return "Workflow\\Inelastic"
 
     def summary(self):
-        return 'Replaces the corresponding bin within the Input Workspace with the bin found in the Single Bin ' \
-               'Workspace.'
+        return 'Replaces a fit result within the Input Workspace with the corresponding fit result found in the ' \
+               'Single Fit Workspace.'
 
     def PyInit(self):
         self.declareProperty(MatrixWorkspaceProperty('InputWorkspace', '',
@@ -88,8 +92,8 @@ class IndirectReplaceFitResult(PythonAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty('SingleFitWorkspace', '',
                                                      optional=PropertyMode.Mandatory,
                                                      direction=Direction.Input),
-                             doc='The result workspace containing the replacement data. It\'s name must end with '
-                                 '_Result.')
+                             doc='The result workspace containing the result data from a single fit. It\'s name must '
+                                 'end with _Result.')
 
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '',
                                                      direction=Direction.Output,
@@ -103,8 +107,8 @@ class IndirectReplaceFitResult(PythonAlgorithm):
         single_fit_name = self.getPropertyValue('SingleFitWorkspace')
         output_name = self.getPropertyValue('OutputWorkspace')
 
-        input_workspace = self.getProperty('InputWorkspace')
-        single_fit_workspace = self.getProperty('SingleFitWorkspace')
+        input_workspace = self.getProperty('InputWorkspace').value
+        single_fit_workspace = self.getProperty('SingleFitWorkspace').value
 
         input_x_axis = input_workspace.getAxis(0)
         single_fit_x_axis = single_fit_workspace.getAxis(0)
@@ -120,10 +124,10 @@ class IndirectReplaceFitResult(PythonAlgorithm):
         if not output_name:
             issues['OutputWorkspace'] = 'No OutputWorkspace name was provided.'
 
-        if input_workspace.readY(0).len() < 2:
+        if len(input_workspace.readY(0)) < 2:
             issues['InputWorkspace'] = 'The input workspace must contain data of a fit involving 2 or more spectra.'
 
-        if single_fit_workspace.readY(0).len() > 1:
+        if len(single_fit_workspace.readY(0)) > 1:
             issues['SingleFitWorkspace'] = 'The single fit workspace must contain data from a single fit.'
 
         if input_workspace.getNumberHistograms() != single_fit_workspace.getNumberHistograms():
@@ -142,8 +146,8 @@ class IndirectReplaceFitResult(PythonAlgorithm):
         self._single_fit_workspace = self.getPropertyValue('SingleFitWorkspace')
         self._output_workspace = self.getPropertyValue('OutputWorkspace')
 
-        self._end_row = get_ads_workspace(self.single_fit_workspace).getNumberHistograms() - 1
-        self._end_column = get_ads_workspace(self.single_fit_workspace).readY(0).len() - 1
+        self._end_row = get_ads_workspace(self._single_fit_workspace).getNumberHistograms() - 1
+        self._column_index = len(get_ads_workspace(self._single_fit_workspace).readY(0)) - 1
         self._insertion_x_index = get_x_insertion_index(get_ads_workspace(self._input_workspace),
                                                         get_ads_workspace(self._single_fit_workspace))
 
@@ -151,12 +155,7 @@ class IndirectReplaceFitResult(PythonAlgorithm):
 
     def PyExec(self):
         self._setup()
-
         self._copy_data()
-
-        #CopyDataRange(InputWorkspace=self.single_fit_workspace, DestWorkspace=self._input_workspace,
-        #              StartWorkspaceIndex=0, EndWorkspaceIndex=end_row, XMinIndex=0, XMaxIndex=end_column,
-        #              InsertionYIndex=0, InsertionXIndex=insertion_x_index, OutputWorkspace=self._output_workspace)
 
         self.setProperty('OutputWorkspace', self._output_workspace)
 
@@ -164,11 +163,12 @@ class IndirectReplaceFitResult(PythonAlgorithm):
 
     def _copy_data(self):
         copy_algorithm = self.createChildAlgorithm(name='CopyDataRange', startProgress=0.1,
-                                                   endProgress=1.0, enableLogging=False)
+                                                   endProgress=1.0, enableLogging=True)
+        copy_algorithm.setAlwaysStoreInADS(True)
 
-        args = {"InputWorkspace": self.single_fit_workspace, "DestWorkspace": self._input_workspace,
-                "StartWorkspaceIndex": 0, "EndWorkspaceIndex": self._end_row, "XMinIndex": 0,
-                "XMaxIndex": self._end_column, "InsertionYIndex": 0, "InsertionXIndex": self._insertion_x_index,
+        args = {"InputWorkspace": self._single_fit_workspace, "DestWorkspace": self._input_workspace,
+                "StartWorkspaceIndex": 0, "EndWorkspaceIndex": self._end_row, "XMinIndex": self._column_index,
+                "XMaxIndex": self._column_index, "InsertionYIndex": 0, "InsertionXIndex": self._insertion_x_index,
                 "OutputWorkspace": self._output_workspace}
 
         for key, value in args.items():
@@ -177,9 +177,10 @@ class IndirectReplaceFitResult(PythonAlgorithm):
         copy_algorithm.execute()
 
     def _add_workspace_to_group(self):
+        group_workspace = get_ads_workspace(self._result_group)
         if self._input_workspace == self._output_workspace:
-            self._result_group.remove(self._input_workspace)
-        self._result_group.addWorkspace(get_ads_workspace(self._output_workspace))
+            group_workspace.remove(self._input_workspace)
+        group_workspace.addWorkspace(get_ads_workspace(self._output_workspace))
 
 
 # Register algorithm with Mantid
