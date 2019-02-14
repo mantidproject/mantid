@@ -22,7 +22,6 @@
 
 #include <Poco/AutoPtr.h>
 #include <Poco/TemporaryFile.h>
-#include <Poco/Util/PropertyFileConfiguration.h>
 
 #include <algorithm>
 #include <cmath>
