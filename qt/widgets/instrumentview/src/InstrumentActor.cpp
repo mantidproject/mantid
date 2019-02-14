@@ -493,25 +493,6 @@ void InstrumentActor::sumDetectors(const std::vector<size_t> &dets,
 void InstrumentActor::sumDetectorsUniform(const std::vector<size_t> &dets,
                                           std::vector<double> &x,
                                           std::vector<double> &y) const {
-  /*
-<<<<<<< HEAD
-||||||| merged common ancestors
-
-  bool isDataEmpty = dets.empty();
-
-  auto wi = getWorkspaceIndex(dets[0]);
-
-  if (wi == INVALID_INDEX)
-    isDataEmpty = true;
-
-  if (isDataEmpty) {
-    x.clear();
-    y.clear();
-    return;
-  }
-
-=======
-*/
   auto firstWorkspaceIndex = [this](const std::vector<size_t> &dets) {
     if (dets.empty())
       return INVALID_INDEX;
@@ -530,19 +511,7 @@ void InstrumentActor::sumDetectorsUniform(const std::vector<size_t> &dets,
     y.clear();
     return;
   }
-/*
->>>>>>> origin/master
 
-  size_t wi;
-  for (const auto det : dets) {
-    wi = getWorkspaceIndex(det);
-    if (wi != INVALID_INDEX) {
-      // first valid index is the one to use
-      getBinMinMaxIndex(wi, imin, imax);
-      break;
-    }
-  }
-*/
   // find the bins inside the integration range
   size_t imin, imax;
   getBinMinMaxIndex(wi, imin, imax);
