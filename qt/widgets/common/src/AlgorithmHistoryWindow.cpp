@@ -324,6 +324,11 @@ AlgorithmHistoryWindow::~AlgorithmHistoryWindow() {
   }
 }
 
+// Delete window object on close
+void AlgorithmHistoryWindow::closeEvent(QCloseEvent *) {
+    AlgorithmHistoryWindow::~AlgorithmHistoryWindow();
+}
+
 AlgExecSummaryGrpBox *AlgorithmHistoryWindow::createExecSummaryGrpBox() {
   AlgExecSummaryGrpBox *pgrpBox =
       new AlgExecSummaryGrpBox("Execution Summary", this);

@@ -16,14 +16,14 @@ import matplotlib.pyplot
 from qtpy.QtWidgets import QMessageBox, QVBoxLayout
 
 # third-party library imports
-from mantid.api import AnalysisDataService
+from mantid.api import AnalysisDataService, MatrixWorkspace, ITableWorkspace
 from mantid.kernel import logger
 from mantidqt.plotting.functions import can_overplot, pcolormesh, plot, plot_from_names
 from mantidqt.widgets.instrumentview.presenter import InstrumentViewPresenter
 from mantidqt.widgets.samplelogs.presenter import SampleLogs
 from mantidqt.widgets.workspacedisplay.matrix.presenter import MatrixWorkspaceDisplay
 from mantidqt.widgets.workspacedisplay.table.presenter import TableWorkspaceDisplay
-from mantidqt.widgets.workspacewidget.workspacehistorydialog import AlgorithmHistoryWindow
+from mantidqt.widgets.workspacewidget.algorithmhistorywindow import AlgorithmHistoryWindow
 from mantidqt.widgets.workspacewidget.workspacetreewidget import WorkspaceTreeWidget
 
 # local package imports
@@ -141,13 +141,18 @@ class WorkspaceWidget(PluginWidget):
                 except ValueError:
                     logger.error(
                         "Could not open workspace: {0} with neither "
-                        "MatrixWorkspaceDisplay nor TableWorkspaceDisplay.")
+                        "MatrixWorkspaceDisplay nor TableWorkspaceDisplay."
+                        "".format(ws.name()))
 
     def _do_show_algorithm_history(self, names):
-        self.alg_hist_windows = []
         for name in names:
-            self.alg_hist_windows.append(AlgorithmHistoryWindow(self, name))
-            self.alg_hist_windows[-1].show()
+            if any(isinstance(self._ads.retrieve(name), ws_type)
+                   for ws_type in [MatrixWorkspace, ITableWorkspace]):
+                AlgorithmHistoryWindow(self, name).show()
+            else:
+                logger.warning("Could not open history of '{}'. "
+                               "Not a MatrixWorkspace or ITableWorkspace"
+                               "".format(name))
 
     def _action_double_click_workspace(self, name):
         self._do_show_data([name])
