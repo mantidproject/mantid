@@ -27,6 +27,9 @@ class EmbeddedFindReplaceDialogView(DialogBase, DialogForm):
         self.setupUi(self)
         self.resize(self.width(), 100)
 
+        self.find.completer().setCaseSensitivity(Qt.CaseSensitive)
+        self.replace.completer().setCaseSensitivity(Qt.CaseSensitive)
+
         self.presenter = presenter
 
         self.hide_find_replace = create_action(self, '',

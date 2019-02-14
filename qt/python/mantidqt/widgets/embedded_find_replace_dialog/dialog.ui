@@ -55,7 +55,7 @@
          </property>
          <property name="maximumSize">
           <size>
-           <width>230</width>
+           <width>300</width>
            <height>23</height>
           </size>
          </property>
@@ -80,7 +80,7 @@
          </property>
          <property name="maximumSize">
           <size>
-           <width>230</width>
+           <width>300</width>
            <height>23</height>
           </size>
          </property>
@@ -153,16 +153,28 @@
            <property name="enabled">
             <bool>false</bool>
            </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="minimumSize">
             <size>
-             <width>68</width>
+             <width>80</width>
              <height>0</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>68</width>
+             <width>100</width>
              <height>16777215</height>
+            </size>
+           </property>
+           <property name="baseSize">
+            <size>
+             <width>80</width>
+             <height>0</height>
             </size>
            </property>
            <property name="text">
@@ -202,15 +214,27 @@
          <item>
           <widget class="QPushButton" name="replace_all_button">
            <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
+           <property name="minimumSize">
+            <size>
+             <width>80</width>
+             <height>0</height>
+            </size>
+           </property>
            <property name="maximumSize">
             <size>
-             <width>68</width>
+             <width>100</width>
              <height>16777215</height>
+            </size>
+           </property>
+           <property name="baseSize">
+            <size>
+             <width>80</width>
+             <height>0</height>
             </size>
            </property>
            <property name="text">
@@ -244,7 +268,7 @@
             <widget class="QCheckBox" name="match_case">
              <property name="maximumSize">
               <size>
-               <width>85</width>
+               <width>150</width>
                <height>16777215</height>
               </size>
              </property>
@@ -257,7 +281,7 @@
             <widget class="QCheckBox" name="regex">
              <property name="maximumSize">
               <size>
-               <width>80</width>
+               <width>150</width>
                <height>16777215</height>
               </size>
              </property>
@@ -281,7 +305,7 @@
             <widget class="QCheckBox" name="words">
              <property name="maximumSize">
               <size>
-               <width>85</width>
+               <width>150</width>
                <height>16777215</height>
               </size>
              </property>
@@ -294,7 +318,7 @@
             <widget class="QCheckBox" name="wrap_around">
              <property name="maximumSize">
               <size>
-               <width>85</width>
+               <width>150</width>
                <height>16777215</height>
               </size>
              </property>
