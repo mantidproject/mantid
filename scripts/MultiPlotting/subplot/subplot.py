@@ -4,6 +4,7 @@ from qtpy import QtWidgets, QtCore
 
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.gridspec import GridSpec
 
 from MultiPlotting.navigation_toolbar import myToolbar
 from MultiPlotting.edit_windows.remove_plot_window import RemovePlotWindow
@@ -39,12 +40,14 @@ class subplot(QtWidgets.QWidget):
         grid.addWidget(self.canvas, 1, 0)
         self.setLayout(grid)
 
+        self.gridspec = None#GridSpec(2,2)
+
     """ this is called when the zoom
     or pan are used. We want to send a
     signal to update the axis ranges """
 
     def draw_event_callback(self, event):
-        self.figure.tight_layout()
+        #self.figure.tight_layout()
         for subplot in self.plotObjects.keys():
             self.emit_subplot_range(subplot)
 
@@ -81,11 +84,25 @@ class subplot(QtWidgets.QWidget):
         self._context.addLine(subplotName, workspace, specNum)
         self.canvas.draw()
 
-    def add_subplot(self, subplotName, code=111):
-        self.plotObjects[subplotName] = self.figure.add_subplot(code)
+    def add_subplot(self, subplotName, number, code=111):
+        self.gridspec = GridSpec(number+1, 1)
+        self.plotObjects[subplotName] = self.figure.add_subplot(self.gridspec[number])
         self.plotObjects[subplotName].set_title(subplotName)
         self._context.addSubplot(subplotName, self.plotObjects[subplotName])
-        self.figure.tight_layout()
+        print("moo",number, self.plotObjects[subplotName] )
+        #self.figure.tight_layout()
+        print("hi")
+        self.update(number+1)
+
+    def update(self,number):
+        keys = list(self._context.subplots.keys())
+        print(keys)
+        for j, name in zip(range(len(keys)), keys):
+            print("baaa", self.gridspec[j], name,j)
+            tmp = self.gridspec[j].get_position(self.figure)
+            self._context.subplots[name]._subplot.set_position(tmp)
+            self._context.subplots[name]._subplot.set_subplotspec([j-1][0])
+        self.canvas.draw()
 
     def emit_subplot_range(self, subplotName):
         self.quickEditSignal.emit(subplotName)

@@ -65,7 +65,7 @@ class plotTestGui(QtGui.QMainWindow):
 
 
 def setUpSubplot():
-    ws = mantid.Load("MUSR00015089", OutputWorkspace="ws")
+    ws = mantid.LoadMuonNexus("MUSR00062260", OutputWorkspace="ws")
     return ws
 
 
