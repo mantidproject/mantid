@@ -379,8 +379,7 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         outWS = alg.getProperty('OutputWorkspace').value
         self.assertEquals(outWS.getRun().getProperty(common.SampleLogs.LINE_POSITION).value, 10.23)
         self.assertEquals(outWS.getRun().getProperty(common.SampleLogs.FOREGROUND_CENTRE).value, 10)
-        # LinePosition modifies the offset, which gets subtracted from TwoTheta -> (40.66 > 38.07166305928363):
-        self.assertEquals(outWS.getRun().getProperty(common.SampleLogs.TWO_THETA).value, 38.07166305928363)
+        self.assertEquals(outWS.getRun().getProperty(common.SampleLogs.TWO_THETA).value, 40.66)
         self.assertEquals(outWS.getAxis(0).getUnit().caption(), 'Wavelength')
         self.assertEquals(mtd.getObjectNames(), [])
 
@@ -424,9 +423,7 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
                                             TwoTheta=60.0,
                                             LinePosition=101.2)
         self.assertEquals(direct.run().getLogData(common.SampleLogs.LINE_POSITION).value, 101.2)
-        # Loader corrects user input by subtracting an offset angle, that's why we expect a smaller angle than 60.0
-        # degrees here
-        self.assertEquals(direct.run().getLogData(common.SampleLogs.TWO_THETA).value, 59.41914152651559)
+        self.assertEquals(direct.run().getLogData(common.SampleLogs.TWO_THETA).value, 60.0)
         self.assertEquals(direct.getAxis(0).getUnit().caption(), 'Wavelength')
         reflected = ReflectometryILLPreprocess(Run='ILL/D17/317370',
                                                TwoTheta=80.0,

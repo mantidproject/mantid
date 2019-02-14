@@ -727,33 +727,40 @@ double LoadILLReflectometry::detectorRotation() {
     p.peakCentre = peakCentre;
     setProperty("OutputBeamPosition", createPeakPositionTable(p));
   }
-  const double userAngle = getProperty("BraggAngle");
-  const double offset =
-      offsetAngle(peakCentre, PIXEL_CENTER, m_detectorDistance);
-  m_log.debug() << "Beam offset angle: " << offset << '\n';
-  if (userAngle != EMPTY_DBL()) {
+  double twoTheta{m_detectorAngle};
+  double detectorAngle{0.0};
+  if (!isDefault("BraggAngle")) {
     if (posTable) {
       g_log.notice()
           << "Ignoring DirectBeamPosition, using BraggAngle instead.";
     }
-    return 2 * userAngle - offset;
-  }
-  if (!posTable) {
+    const double userAngle = getProperty("BraggAngle");
+    twoTheta = 2. * userAngle;
+    const double offset =
+        offsetAngle(peakCentre, PIXEL_CENTER, m_detectorDistance);
+    m_log.debug() << "Beam offset angle: " << offset << '\n';
+    detectorAngle = twoTheta - offset;
+  } else if (!posTable) {
     const double deflection = collimationAngle();
     if (deflection != 0) {
       g_log.debug() << "Using incident deflection angle (degrees): "
                     << deflection << '\n';
     }
-    return m_detectorAngle + deflection;
+    detectorAngle = twoTheta + deflection;
+  } else {
+    const auto dbPeak = parseBeamPositionTable(*posTable);
+    const double dbOffset =
+        offsetAngle(dbPeak.peakCentre, PIXEL_CENTER, dbPeak.detectorDistance);
+    m_log.debug() << "Direct beam offset angle: " << dbOffset << '\n';
+    detectorAngle = m_detectorAngle - dbPeak.detectorAngle - dbOffset;
   }
-  const auto dbPeak = parseBeamPositionTable(*posTable);
-  const double dbOffset =
-      offsetAngle(dbPeak.peakCentre, PIXEL_CENTER, dbPeak.detectorDistance);
-  m_log.debug() << "Direct beam offset angle: " << dbOffset << '\n';
-  const double detectorAngle =
-      m_detectorAngle - dbPeak.detectorAngle - dbOffset;
   m_log.debug() << "Direct beam calibrated detector angle (degrees): "
                 << detectorAngle << '\n';
+  // Add two theta to the sample logs
+  m_localWorkspace->mutableRun().addProperty("reduction.two_theta", twoTheta);
+  m_localWorkspace->mutableRun()
+      .getProperty("reduction.two_theta")
+      ->setUnits("degree");
   return detectorAngle;
 }
 
@@ -796,12 +803,6 @@ void LoadILLReflectometry::placeDetector() {
   m_detectorAngle = detectorAngle();
   g_log.debug() << "Sample-detector distance: " << m_detectorDistance << "m.\n";
   const auto detectorRotationAngle = detectorRotation();
-  // Add two theta to the sample logs
-  m_localWorkspace->mutableRun().addLogData(new PropertyWithValue<double>(
-      "reduction.two_theta", detectorRotationAngle));
-  m_localWorkspace->mutableRun()
-      .getProperty("reduction.two_theta")
-      ->setUnits("degree");
   const std::string componentName = "detector";
   const RotationPlane rotPlane = [this]() {
     if (m_instrument != Supported::FIGARO)

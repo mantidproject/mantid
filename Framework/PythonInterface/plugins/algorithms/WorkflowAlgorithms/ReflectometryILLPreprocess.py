@@ -252,13 +252,8 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         # Check whether user provides TwoTheta or sample log entry exist
         if not self.getProperty(Prop.INPUT_WS).isDefault:
             ws = self.getProperty(Prop.INPUT_WS).value
-            if not ws.run().hasProperty(common.SampleLogs.TWO_THETA):
-                if self.getProperty(Prop.TWO_THETA).isDefault:
-                    issues[Prop.TWO_THETA] = 'Must provide TwoTheta or in sample logs ' + common.SampleLogs.TWO_THETA
-                else:
-                    # Write two theta to sample logs
-                    ws.run().addProperty(common.SampleLogs.TWO_THETA, float(self.getProperty(Prop.TWO_THETA).value),
-                                         'degree', True)
+            if not ws.run().hasProperty(common.SampleLogs.TWO_THETA) and self.getProperty(Prop.TWO_THETA).isDefault:
+                issues[Prop.TWO_THETA] = 'Must provide TwoTheta or in sample logs ' + common.SampleLogs.TWO_THETA
         # Early input validation to prevent FindReflectometryLines to fail its validation
         if not self.getProperty(Prop.XMIN).isDefault and not self.getProperty(Prop.XMAX).isDefault:
             xmin = self.getProperty(Prop.XMIN).value
@@ -383,6 +378,10 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
             )
         else:
             ws = self.getProperty(Prop.INPUT_WS).value
+            if not ws.run().hasProperty(common.SampleLogs.TWO_THETA):
+                # Write two theta to sample logs
+                ws.run().addProperty(common.SampleLogs.TWO_THETA,
+                                     float(self.getProperty(Prop.TWO_THETA).value), 'degree', True)
             self._cleanup.protect(ws)
         return ws
 
@@ -437,30 +436,26 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
 
     def _moveDetector(self, ws, linePosition):
         """Perform detector position correction for direct and reflected beams."""
-        # Reflected beam calibration
-        if self.getProperty(Prop.DIRECT_LINE_WORKSPACE).isDefault and \
-           self.getProperty(Prop.LINE_POSITION_INPUT).isDefault:
+        if self.getProperty(Prop.INPUT_WS).isDefault and \
+                not self.getProperty(Prop.LINE_POSITION_INPUT).isDefault and \
+                not self.getProperty(Prop.TWO_THETA).isDefault:
             return ws
         detectorMovedWSName = self._names.withSuffix('detectors_moved')
         args = {
             'InputWorkspace': ws,
             'OutputWorkspace': detectorMovedWSName,
+            'TwoTheta': ws.run().getLogData(common.SampleLogs.TWO_THETA).value,
             'EnableLogging': self._subalgLogging,
             'DetectorComponentName': 'detector',
             'PixelSize': common.pixelSize(self._instrumentName),
             'DetectorCorrectionType': 'RotateAroundSample',
-            'DetectorFacesSample': True
+            'DetectorFacesSample': True,
+            'LinePosition': linePosition
         }
         directLineWS = self.getProperty(Prop.DIRECT_LINE_WORKSPACE).value
         if not self.getProperty(Prop.DIRECT_LINE_WORKSPACE).isDefault:
             args['DirectLineWorkspace'] = directLineWS
             args['DirectLinePosition'] = directLineWS.run().getLogData(common.SampleLogs.LINE_POSITION).value
-        else:
-            if not self.getProperty(Prop.TWO_THETA).isDefault:
-                args['TwoTheta'] = self.getProperty(Prop.TWO_THETA).value
-            else:
-                args['TwoTheta'] = ws.run().getLogData(common.SampleLogs.TWO_THETA).value
-        args['LinePosition'] = linePosition
         detectorMovedWS = SpecularReflectionPositionCorrect(**args)
         self._cleanup.cleanup(ws)
         return detectorMovedWS
