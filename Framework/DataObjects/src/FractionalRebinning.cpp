@@ -478,13 +478,11 @@ void calcGeneralIntersections(const std::vector<double> &xAxis,
     const double vlo = yAxis[yi];
     const double vhi = yAxis[yi + 1];
     for (size_t xi = x_start; xi < x_end; ++xi) {
-      const V2D ll(xAxis[xi], vlo);
-      const V2D lr(xAxis[xi + 1], vlo);
-      const V2D ur(xAxis[xi + 1], vhi);
-      const V2D ul(xAxis[xi], vhi);
-      const Quadrilateral outputQ(ll, lr, ur, ul);
       intersectOverlap.clear();
-      if (intersection(outputQ, inputQ, intersectOverlap)) {
+      if (intersection(
+              Quadrilateral(V2D(xAxis[xi], vlo), V2D(xAxis[xi + 1], vlo),
+                            V2D(xAxis[xi + 1], vhi), V2D(xAxis[xi], vhi)),
+              inputQ, intersectOverlap)) {
         areaInfos.emplace_back(xi, yi, intersectOverlap.area());
       }
     }
@@ -506,9 +504,9 @@ void normaliseOutput(MatrixWorkspace_sptr outputWS,
     const auto &outputX = outputWS->x(i);
     auto &outputY = outputWS->mutableY(i);
     auto &outputE = outputWS->mutableE(i);
+    if (progress)
+      progress->report("Calculating errors");
     for (size_t j = 0; j < outputY.size(); ++j) {
-      if (progress)
-        progress->report("Calculating errors");
       double eValue = std::sqrt(outputE[j]);
       if (removeBinWidth) {
         const double binWidth = outputX[j + 1] - outputX[j];
@@ -554,18 +552,10 @@ void rebinToOutput(const Quadrilateral &inputQ,
     auto &outY = outputWS.mutableY(y);
     auto &outE = outputWS.mutableE(y);
     for (size_t xi = x_start; xi < x_end; ++xi) {
-      const V2D ll(X[xi], vlo);
-      const V2D lr(X[xi + 1], vlo);
-      const V2D ur(X[xi + 1], vhi);
-      const V2D ul(X[xi], vhi);
-      const Quadrilateral outputQ(ll, lr, ur, ul);
-
-      double yValue = inY[j];
-      if (std::isnan(yValue)) {
-        continue;
-      }
       intersectOverlap.clear();
-      if (intersection(outputQ, inputQ, intersectOverlap)) {
+      if (intersection(Quadrilateral(V2D(X[xi], vlo), V2D(X[xi + 1], vlo),
+                                     V2D(X[xi + 1], vhi), V2D(X[xi], vhi)),
+                       inputQ, intersectOverlap)) {
         const double overlapArea = intersectOverlap.area();
         if (overlapArea == 0.) {
           continue;

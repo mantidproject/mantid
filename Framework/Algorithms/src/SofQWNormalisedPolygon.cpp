@@ -152,7 +152,6 @@ void SofQWNormalisedPolygon::exec() {
 
     // Compute polygon points
     const double thetaHalfWidth = 0.5 * thetaWidth;
-
     const double thetaLower = theta - thetaHalfWidth;
     const double thetaUpper = theta + thetaHalfWidth;
 
@@ -166,7 +165,6 @@ void SofQWNormalisedPolygon::exec() {
       const double dE_jp1 = X[j + 1];
 
       const double lrQ = m_EmodeProperties.q(dE_jp1, thetaLower, det);
-
       const V2D ll(dE_j, m_EmodeProperties.q(dE_j, thetaLower, det));
       const V2D lr(dE_jp1, lrQ);
       const V2D ur(dE_jp1, m_EmodeProperties.q(dE_jp1, thetaUpper, det));
@@ -177,10 +175,10 @@ void SofQWNormalisedPolygon::exec() {
                   << ", lr=" << lr << ", ur=" << ur << ", ul=" << ul << "\n";
       }
 
-      Quadrilateral inputQ = Quadrilateral(ll, lr, ur, ul);
-
-      FractionalRebinning::rebinToFractionalOutput(inputQ, inputWS, i, j,
-                                                   *outputWS, m_Qout);
+      using FractionalRebinning::rebinToFractionalOutput;
+      rebinToFractionalOutput(Quadrilateral(std::move(ll), std::move(lr),
+                                            std::move(ur), std::move(ul)),
+                              inputWS, i, j, *outputWS, m_Qout);
 
       // Find which q bin this point lies in
       const MantidVec::difference_type qIndex =
