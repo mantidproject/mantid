@@ -113,7 +113,8 @@ void Q1DWeighted::exec() {
   std::vector<double> qBinEdges;
   // number of Q bins in the output
   const size_t nQ = static_cast<size_t>(VectorHelper::createAxisFromRebinParams(
-      binParams, qBinEdges)) - 1;
+                        binParams, qBinEdges)) -
+                    1;
 
   // number of spectra in the input
   const size_t nSpec = inputWS->getNumberHistograms();
@@ -201,8 +202,8 @@ void Q1DWeighted::exec() {
     for (size_t j = 0; j < nLambda; ++j) {
 
       // skip if the bin is masked
-      if(std::binary_search(maskedBins.cbegin(), maskedBins.cend(), j)) {
-          continue;
+      if (std::binary_search(maskedBins.cbegin(), maskedBins.cend(), j)) {
+        continue;
       }
 
       const double wavelength = (XIn[j] + XIn[j + 1]) / 2.;
@@ -236,57 +237,57 @@ void Q1DWeighted::exec() {
         const double sinTheta = sin(0.5 * position.angle(beamLine));
         const double q = 4.0 * M_PI * sinTheta / wavelength;
         try {
-            const size_t k = VectorHelper::indexOfValueFromEdges(qBinEdges, q);
-            double w = 1.0;
-            if (errorWeighting) {
-              // When using the error as weight we have:
-              //    w_i = 1/s_i^2   where s_i is the uncertainty on the ith pixel.
-              //
-              //    I(q_i) = (sum over i of I_i * w_i) / (sum over i of w_i)
-              //       where all pixels i contribute to the q_i bin, and I_i is
-              //       the intensity in the ith pixel.
-              //
-              //    delta I(q_i) = 1/sqrt( (sum over i of w_i) )  using simple
-              //    error propagation.
-              double err = 1.0;
-              if (EIn[j] > 0)
-                err = EIn[j];
-              w /= nSubPixels * nSubPixels * err * err;
-            }
-            PARALLEL_CRITICAL(iqnorm) /* Write to shared memory - must protect */
-            {
-              // Fill in the data for full azimuthal integral
-              intensities[0][j][k] += YIn[j] * w;
-              errors[0][j][k] += w * w * EIn[j] * EIn[j];
-              normalisation[0][j][k] += w;
+          const size_t k = VectorHelper::indexOfValueFromEdges(qBinEdges, q);
+          double w = 1.0;
+          if (errorWeighting) {
+            // When using the error as weight we have:
+            //    w_i = 1/s_i^2   where s_i is the uncertainty on the ith pixel.
+            //
+            //    I(q_i) = (sum over i of I_i * w_i) / (sum over i of w_i)
+            //       where all pixels i contribute to the q_i bin, and I_i is
+            //       the intensity in the ith pixel.
+            //
+            //    delta I(q_i) = 1/sqrt( (sum over i of w_i) )  using simple
+            //    error propagation.
+            double err = 1.0;
+            if (EIn[j] > 0)
+              err = EIn[j];
+            w /= nSubPixels * nSubPixels * err * err;
+          }
+          PARALLEL_CRITICAL(iqnorm) /* Write to shared memory - must protect */
+          {
+            // Fill in the data for full azimuthal integral
+            intensities[0][j][k] += YIn[j] * w;
+            errors[0][j][k] += w * w * EIn[j] * EIn[j];
+            normalisation[0][j][k] += w;
 
-              if (nWedges != 0) {
-                // we do need to loop over all the wedges, since there is no
-                // restriction for those; they can also overlap
-                // that is the same pixel can simultaneously be in many wedges
-                for (size_t iw = 0; iw < nWedges; ++iw) {
-                  double centerAngle = M_PI / nWedges * iw;
-                  if (asymmWedges) {
-                    centerAngle *= 2;
-                  }
-                  centerAngle += deg2rad * wedgeOffset;
-                  const V3D subPix = V3D(position.X(), position.Y(), 0.0);
-                  const double angle = fabs(subPix.angle(
-                      V3D(cos(centerAngle), sin(centerAngle), 0.0)));
-                  if (angle < deg2rad * wedgeAngle * 0.5 ||
-                      (!asymmWedges &&
-                       fabs(M_PI - angle) < deg2rad * wedgeAngle * 0.5)) {
-                    // first index 0 is the full azimuth, need to offset +1
-                    intensities[iw + 1][j][k] += YIn[j] * w;
-                    errors[iw + 1][j][k] += w * w * EIn[j] * EIn[j];
-                    normalisation[iw + 1][j][k] += w;
-                  }
+            if (nWedges != 0) {
+              // we do need to loop over all the wedges, since there is no
+              // restriction for those; they can also overlap
+              // that is the same pixel can simultaneously be in many wedges
+              for (size_t iw = 0; iw < nWedges; ++iw) {
+                double centerAngle = M_PI / nWedges * iw;
+                if (asymmWedges) {
+                  centerAngle *= 2;
+                }
+                centerAngle += deg2rad * wedgeOffset;
+                const V3D subPix = V3D(position.X(), position.Y(), 0.0);
+                const double angle = fabs(
+                    subPix.angle(V3D(cos(centerAngle), sin(centerAngle), 0.0)));
+                if (angle < deg2rad * wedgeAngle * 0.5 ||
+                    (!asymmWedges &&
+                     fabs(M_PI - angle) < deg2rad * wedgeAngle * 0.5)) {
+                  // first index 0 is the full azimuth, need to offset +1
+                  intensities[iw + 1][j][k] += YIn[j] * w;
+                  errors[iw + 1][j][k] += w * w * EIn[j] * EIn[j];
+                  normalisation[iw + 1][j][k] += w;
                 }
               }
             }
+          }
         } catch (std::out_of_range) {
-            // if the Q is out of our binning, skip it
-            continue;
+          // if the Q is out of our binning, skip it
+          continue;
         }
       }
       progress.report("Computing I(Q)");
@@ -305,14 +306,14 @@ void Q1DWeighted::exec() {
   std::vector<double> normLambda(nQ, 0.0);
 
   for (size_t il = 0; il < nLambda; ++il) {
-      for (size_t iq = 0; iq < nQ; ++iq) {
-          const double& norm = normalisation[0][il][iq];
-          if (norm != 0.) {
-            YOut[iq] += intensities[0][il][iq] / norm;
-            EOut[iq] += errors[0][il][iq] / (norm * norm);
-            normLambda[iq] += 1.;
-          }
+    for (size_t iq = 0; iq < nQ; ++iq) {
+      const double &norm = normalisation[0][il][iq];
+      if (norm != 0.) {
+        YOut[iq] += intensities[0][il][iq] / norm;
+        EOut[iq] += errors[0][il][iq] / (norm * norm);
+        normLambda[iq] += 1.;
       }
+    }
   }
 
   for (size_t i = 0; i < nQ; ++i) {
