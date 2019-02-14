@@ -146,6 +146,7 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         self.assertFalse(self.fit_browser.toolbar_state_checker.is_tool_active())
         self.w.close()
 
+    @unittest.skipIf(on_windows(), "Something is wrong with mouse moving on windows")
     def test_zoom_active_fit_inactive(self):
         yield self.start()
         self.figure_manager.toolbar.zoom()
@@ -158,6 +159,7 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         self.assertAlmostEqual(self.fit_browser.startX(), start_x, 2)
         self.w.close()
 
+    @unittest.skipIf(on_windows(), "Something is wrong with mouse moving on windows")
     def test_pan_active_fit_inactive(self):
         yield self.start()
         self.figure_manager.toolbar.pan()
@@ -183,6 +185,7 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         self.assertEqual(self.draw_count, 1)
         self.w.close()
 
+    @unittest.skipIf(on_windows(), "Something is wrong with mouse moving on windows")
     def test_fit_range(self):
         yield self.start()
         start_x = self.fit_browser.startX()
@@ -198,6 +201,7 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         self.assertAlmostEqual(self.fit_browser.endX(), end_x - 0.25, 1)
         self.w.close()
 
+    @unittest.skipIf(on_windows(), "Something is wrong with mouse moving on windows")
     def test_fit_range_start_moved_too_far(self):
         yield self.start()
         start_x = self.fit_browser.startX()
@@ -214,6 +218,7 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         self.assertAlmostEqual(self.fit_browser.startX(), new_end_x)
         self.w.close()
 
+    @unittest.skipIf(on_windows(), "Something is wrong with mouse moving on windows")
     def test_fit_range_end_moved_too_far(self):
         yield self.start()
         start_x = self.fit_browser.startX()
@@ -230,6 +235,7 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         self.assertAlmostEqual(self.fit_browser.endX(), new_start_x)
         self.w.close()
 
+    @unittest.skipIf(on_windows(), "Something is wrong with mouse moving on windows")
     def test_fit_range_moved_start_outside(self):
         yield self.start()
         start_x_pxl = self.fit_browser.tool.fit_start_x.get_x_in_pixels()
@@ -239,6 +245,7 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         self.assertTrue(abs(start_x_pxl - self.fit_browser.tool.fit_start_x.get_x_in_pixels()) < 5)
         self.w.close()
 
+    @unittest.skipIf(on_windows(), "Something is wrong with mouse moving on windows")
     def test_fit_range_moved_end_outside(self):
         yield self.start()
         end_x_pxl = self.fit_browser.tool.fit_end_x.get_x_in_pixels()
@@ -383,6 +390,7 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         self.assertTrue(self.fit_browser.getPeakFwhmOf('f0') != 0.0)
         self.w.close()
 
+    @unittest.skipIf(on_windows(), "Something is wrong with mouse moving on windows")
     def test_move_peak(self):
         yield self.start()
         self.fit_browser.tool.add_peak(1.0, 4.3, 4.1)
@@ -400,6 +408,7 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         self.assertTrue(self.fit_browser.getPeakFwhmOf('f0') != 0.0)
         self.w.close()
 
+    @unittest.skipIf(on_windows(), "Something is wrong with mouse moving on windows")
     def test_change_peak_fwhm(self):
         yield self.start()
         self.fit_browser.tool.add_peak(1.0, 4.3, 4.1)
@@ -414,6 +423,7 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         self.assertAlmostEqual(self.fit_browser.getPeakFwhmOf('f0'), 0.5, 1)
         self.w.close()
 
+    @unittest.skipIf(on_windows(), "Something is wrong with mouse moving on windows")
     def test_add_two_peaks(self):
         if on_windows():
             self.stop()
