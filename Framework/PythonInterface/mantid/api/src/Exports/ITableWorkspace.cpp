@@ -66,7 +66,7 @@ namespace {
 
 /// Boost macro for "looping" over builtin types
 #define BUILTIN_TYPES                                                          \
-  BOOST_PP_TUPLE_TO_LIST(7, (double, std::string, int, size_t, uint32_t,       \
+  BOOST_PP_TUPLE_TO_LIST(8, (double, std::string, int, size_t, uint32_t,       \
                              int64_t, float, uint64_t))
 #define USER_TYPES BOOST_PP_TUPLE_TO_LIST(1, (Mantid::Kernel::V3D))
 #define ARRAY_TYPES                                                            \
