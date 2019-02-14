@@ -21,7 +21,6 @@
 #include <boost/math/tools/minima.hpp>
 
 #include <Poco/AutoPtr.h>
-#include <Poco/TemporaryFile.h>
 
 #include <algorithm>
 #include <cmath>
