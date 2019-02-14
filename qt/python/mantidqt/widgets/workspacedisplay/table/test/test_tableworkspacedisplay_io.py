@@ -10,7 +10,7 @@
 from mantidqt.utils.qt.test import GuiTest
 from mantid.simpleapi import Load
 from mantidqt.widgets.workspacedisplay.table.io import TableWorkspaceDisplayDecoder, TableWorkspaceDisplayEncoder
-from mantidqt.widgets.workspacedisplay.table.view import TableWorkspaceDisplayView
+from mantidqt.widgets.workspacedisplay.table import StatusBarView
 
 
 TABLEWORKSPACEDISPLAY_DICT = {"markedColumns": {"as_y": [2], "as_x": [1],
@@ -34,7 +34,7 @@ class TableWorkspaceDisplayDecoderTest(GuiTest):
         self.decoder = TableWorkspaceDisplayDecoder()
 
     def test_decoder_returns_view(self):
-        self.assertEqual(self.decoder.decode(TABLEWORKSPACEDISPLAY_DICT).__class__, TableWorkspaceDisplayView)
+        self.assertEqual(self.decoder.decode(TABLEWORKSPACEDISPLAY_DICT).__class__, StatusBarView)
 
     def test_decoder_returns_custom_features(self):
         view = self.decoder.decode(TABLEWORKSPACEDISPLAY_DICT)

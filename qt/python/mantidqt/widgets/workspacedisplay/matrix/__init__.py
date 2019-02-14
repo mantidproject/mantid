@@ -6,9 +6,16 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 
+from mantidqt.widgets.workspacedisplay.status_bar_view import StatusBarView
+from mantidqt.widgets.workspacedisplay.matrix.presenter import MatrixWorkspaceDisplay
 from mantidqt.widgets.workspacedisplay.matrix.io import MatrixWorkspaceDisplayDecoder, MatrixWorkspaceDisplayEncoder
 from mantidqt.project.encoderfactory import EncoderFactory
 from mantidqt.project.decoderfactory import DecoderFactory
 
-EncoderFactory.register_encoder(MatrixWorkspaceDisplayEncoder)
+
+def optional_cb(obj):
+    return isinstance(obj, StatusBarView) and isinstance(obj.presenter, MatrixWorkspaceDisplay)
+
+
+EncoderFactory.register_encoder(MatrixWorkspaceDisplayEncoder, optional_cb)
 DecoderFactory.register_decoder(MatrixWorkspaceDisplayDecoder)

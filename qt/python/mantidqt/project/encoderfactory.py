@@ -20,14 +20,22 @@ class EncoderFactory(object):
         :return: Encoder or None; Returns the Encoder of the obj or None.
         """
         for encoder in cls.encoder_list:
-            if encoder().has_tag(obj.__class__.__name__):
-                return encoder()
+
+            # Perform check if optional_cb is present if it is, then check whether the the optional_cb returns true for
+            # this object.
+            if encoder[1] is not None and encoder[1](obj):
+                return encoder[0]
+
+            if encoder[0].has_tag(obj.__class__.__name__):
+                return encoder[0]
         return None
 
     @classmethod
-    def register_encoder(cls, encoder):
+    def register_encoder(cls, encoder, optional_cb=None):
         """
         This adds the passed encoder's class to the available encoders in the Factory
         :param encoder: Class of Encoder; The class of the encoder to be added to the list.
+        :param optional_cb: An optional function reference that will be used instead of comparing the encoder to
+        potential widget candidates. Function should return True if compatible else False.
         """
-        cls.encoder_list.add(encoder)
+        cls.encoder_list.add((encoder, optional_cb))

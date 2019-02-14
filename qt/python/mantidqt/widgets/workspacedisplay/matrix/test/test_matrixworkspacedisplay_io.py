@@ -10,7 +10,7 @@
 from mantidqt.utils.qt.test import GuiTest
 from mantid.simpleapi import CreateSampleWorkspace
 from mantidqt.widgets.workspacedisplay.matrix.io import MatrixWorkspaceDisplayDecoder, MatrixWorkspaceDisplayEncoder
-from mantidqt.widgets.workspacedisplay.matrix.view import MatrixWorkspaceDisplayView
+from mantidqt.widgets.workspacedisplay.matrix import StatusBarView, MatrixWorkspaceDisplay
 
 
 MATRIXWORKSPACEDISPLAY_DICT = {"workspace": "ws"}
@@ -32,7 +32,9 @@ class MatrixWorkspaceDisplayDecoderTest(GuiTest):
         self.decoder = MatrixWorkspaceDisplayDecoder()
 
     def test_decoder_returns_view(self):
-        self.assertEqual(self.decoder.decode(MATRIXWORKSPACEDISPLAY_DICT).__class__, MatrixWorkspaceDisplayView)
+        decoded_object = self.decoder.decode(MATRIXWORKSPACEDISPLAY_DICT)
+        self.assertEqual(decoded_object.__class__, StatusBarView)
+        self.assertEqual(decoded_object.presenter.__class__, MatrixWorkspaceDisplay)
 
     def test_decoder_returns_workspace(self):
         view = self.decoder.decode(MATRIXWORKSPACEDISPLAY_DICT)
