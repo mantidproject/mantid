@@ -107,7 +107,7 @@ void Track::removeCojoins() {
  * Objective is to merge in partial information about the beginning and end of
  * the tracks.
  * The points are kept in order
- * @param directionFlag :: A flag indicating if the direction of travel is
+ * @param direction :: A flag indicating if the direction of travel is
  * entering/leaving
  * an object. +1 is entering, -1 is leaving.
  * @param endPoint :: Point of intersection

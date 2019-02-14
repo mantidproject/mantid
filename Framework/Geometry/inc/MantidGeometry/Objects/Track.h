@@ -79,15 +79,13 @@ inline bool operator<(const TrackDirection left, const TrackDirection right) {
  * is linked using its ComponentID.
  *
  * Ordering for IntersectionPoint is special since we need that when dist is
- *close
- * that the +/- flag is taken into
- * account.
+ * close that the +/- flag is taken into account.
  */
 struct IntersectionPoint {
   /**
    * Constuctor
-   * @param flag :: Indicates the direction of travel of the track with respect
-   * to the object: +1 is entering, -1 is leaving.
+   * @param direction :: Indicates the direction of travel of the track with
+   * respect to the object: +1 is entering, -1 is leaving.
    * @param end :: The end point for this partial segment
    * @param distFromStartOfTrack :: Total distance from start of track
    * @param compID :: An optional unique ID marking the component intersected.
