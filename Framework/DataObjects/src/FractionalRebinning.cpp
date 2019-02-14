@@ -549,8 +549,6 @@ void rebinToOutput(const Quadrilateral &inputQ,
   for (size_t y = qstart; y < qend; ++y) {
     const double vlo = verticalAxis[y];
     const double vhi = verticalAxis[y + 1];
-    auto &outY = outputWS.mutableY(y);
-    auto &outE = outputWS.mutableE(y);
     for (size_t xi = x_start; xi < x_end; ++xi) {
       intersectOverlap.clear();
       if (intersection(Quadrilateral(V2D(X[xi], vlo), V2D(X[xi + 1], vlo),
@@ -571,8 +569,11 @@ void rebinToOutput(const Quadrilateral &inputQ,
         }
         eValue = eValue * eValue * weight;
         PARALLEL_CRITICAL(overlap_sum) {
-          outY[xi] += yValue;
-          outE[xi] += eValue;
+          // The mutable calls must be in the critical section
+          // so that any calls from omp sections can write to the
+          // output workspace safely
+          outputWS.mutableY(y)[xi] += yValue;
+          outputWS.mutableE(y)[xi] += eValue;
         }
       }
     }
@@ -667,6 +668,9 @@ void rebinToFractionalOutput(const Quadrilateral &inputQ,
     }
     const double weight = ai.weight / inputQArea;
     PARALLEL_CRITICAL(overlap) {
+      // The mutable calls must be in the critical section
+      // so that any calls from omp sections can write to the
+      // output workspace safely
       outputWS.mutableY(ai.wsIndex)[ai.binIndex] += signal * weight;
       outputWS.mutableE(ai.wsIndex)[ai.binIndex] += variance * weight;
       outputWS.dataF(ai.wsIndex)[ai.binIndex] += weight * inputWeight;
