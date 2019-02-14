@@ -68,7 +68,11 @@ struct MANTID_GEOMETRY_DLL Link {
                            //@}
 };
 
-enum TrackDirection { LEAVING = -1, INVALID = 0, ENTERING = 1 };
+enum class TrackDirection { LEAVING = -1, INVALID = 0, ENTERING = 1 };
+
+inline bool operator<(const TrackDirection left, const TrackDirection right) {
+  return static_cast<int>(left) < static_cast<int>(right);
+}
 
 /**
  * Stores a point of intersection along a track. The component intersected
