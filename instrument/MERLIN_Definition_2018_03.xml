@@ -137,10 +137,10 @@
     <component type="monitor">
       <location r="3.25800" t="180.0" p="0.0" />
       <!-- old position was 1.50400-->
-      <location r="1.62800" t="180.0" p="0.0" />
-      <location r="1.62800" t="180.0" p="0.0" />
-      <location r="1.62800" t="180.0" p="0.0" />
-      <location r="1.62800" t="180.0" p="0.0" /> 
+      <location r="1.6300"  t="180.0" p="0.0" />
+      <location r="1.6300"  t="180.0" p="0.0" />
+      <location r="1.6300"  t="180.0" p="0.0" />
+      <location r="1.6300"  t="180.0" p="0.0" /> 
       <location r="4.22700" t="0.000" p="0.0" />
       <location r="4.22000" t="0.000" p="0.0" />
       <location r="4.22000" t="0.000" p="0.0" />
