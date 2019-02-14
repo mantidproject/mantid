@@ -23,11 +23,11 @@ void copyDataRange(MatrixWorkspace_const_sptr inputWorkspace,
                    int yInsertionIndex, int const &xInsertionIndex) {
   for (auto specIndex = specMin; specIndex <= specMax; ++specIndex) {
     std::copy(inputWorkspace->y(specIndex).begin() + xMin,
-              inputWorkspace->y(specIndex).begin() + xMax,
+              inputWorkspace->y(specIndex).begin() + xMax + 1,
               destWorkspace->mutableY(yInsertionIndex).begin() +
                   xInsertionIndex);
     std::copy(inputWorkspace->e(specIndex).begin() + xMin,
-              inputWorkspace->e(specIndex).begin() + xMax,
+              inputWorkspace->e(specIndex).begin() + xMax + 1,
               destWorkspace->mutableE(yInsertionIndex).begin() +
                   xInsertionIndex);
     ++yInsertionIndex;
@@ -119,17 +119,12 @@ std::map<std::string, std::string> CopyDataRange::validateInputs() {
   if (destWorkspaceName.empty())
     errors["DestWorkspace"] = "No destination workspace was provided.";
 
-  if (xMinIndex < 0)
-    errors["XMinIndex"] = "The XMinIndex must be a number above zero.";
-  if (xMaxIndex > inputWorkspace->y(0).size())
+  if (xMaxIndex >= inputWorkspace->y(0).size())
     errors["XMaxIndex"] = "The XMaxIndex is larger than the maximum range in "
                           "the input workspace.";
   if (xMinIndex > xMaxIndex)
     errors["XMinIndex"] = "The XMinIndex must be smaller than XMaxIndex.";
 
-  if (specMinIndex < 0)
-    errors["StartWorkspaceIndex"] =
-        "The StartWorkspaceIndex must be a number above zero.";
   if (specMaxIndex >= inputWorkspace->getNumberHistograms())
     errors["EndWorkspaceIndex"] =
         "The EndWorkspaceIndex is larger than the number of histograms in "

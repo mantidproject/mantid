@@ -19,6 +19,8 @@
 #include "MantidTestHelpers/IndirectFitDataCreationHelper.h"
 
 #include <algorithm>
+#include <iterator>
+#include <vector>
 
 using namespace Mantid::API;
 using namespace Mantid::IndirectFitDataCreationHelper;
@@ -51,6 +53,7 @@ IAlgorithm_sptr setUpAlgorithm(MatrixWorkspace_sptr inputWorkspace,
   copyAlg->setProperty("XMaxIndex", xMax);
   copyAlg->setProperty("InsertionYIndex", yInsertionIndex);
   copyAlg->setProperty("InsertionXIndex", xInsertionIndex);
+  copyAlg->setProperty("OutputWorkspace", outputName);
   return copyAlg;
 }
 
@@ -65,27 +68,41 @@ IAlgorithm_sptr setUpAlgorithm(std::string const &inputName,
                         xMax, yInsertionIndex, xInsertionIndex, outputName);
 }
 
+void populateSpectrum(MatrixWorkspace_sptr workspace,
+                      std::size_t const &spectrum,
+                      std::vector<double> const &yData,
+                      std::vector<double> const &eData) {
+  workspace->mutableY(spectrum) = HistogramY(yData);
+  workspace->mutableE(spectrum) = HistogramE(eData);
+}
+
 void populateWorkspace(MatrixWorkspace_sptr workspace,
                        std::vector<double> const &yData,
                        std::vector<double> const &eData) {
-  for (auto i = 0u; i < workspace->getNumberHistograms(); ++i) {
-    workspace->mutableY(i) = HistogramY(yData);
-    workspace->mutableE(i) = HistogramE(eData);
-  }
+  for (auto index = 0u; index < workspace->getNumberHistograms(); ++index)
+    populateSpectrum(workspace, index, yData, eData);
+}
+
+std::vector<double>
+constructHistogramData(Mantid::MantidVec::const_iterator fromIterator,
+                       Mantid::MantidVec::const_iterator toIterator) {
+  std::vector<double> histogram(toIterator - fromIterator);
+  std::copy(fromIterator, toIterator, histogram.begin());
+  return histogram;
 }
 
 void populateOutputWorkspace(MatrixWorkspace_sptr workspace,
                              std::vector<double> const &yData,
                              std::vector<double> const &eData) {
-  std::vector<double> histogram;
   auto const numberOfBins = yData.size() / workspace->getNumberHistograms();
   for (auto i = 0u; i < workspace->getNumberHistograms(); ++i) {
-    std::copy(yData.begin() + i * numberOfBins,
-              yData.begin() + (i + 1) * numberOfBins, histogram.begin());
-    workspace->mutableY(i) = HistogramY(histogram);
-    std::copy(eData.begin() + i * numberOfBins,
-              eData.begin() + (i + 1) * numberOfBins, histogram.begin());
-    workspace->mutableE(i) = HistogramE(histogram);
+    auto const startIndex = i * numberOfBins;
+    auto const endIndex = (i + 1) * numberOfBins;
+    populateSpectrum(workspace, i,
+                     constructHistogramData(yData.begin() + startIndex,
+                                            yData.begin() + endIndex),
+                     constructHistogramData(eData.begin() + startIndex,
+                                            eData.begin() + endIndex));
   }
 }
 
@@ -102,18 +119,14 @@ ITableWorkspace_sptr compareWorkspaces(MatrixWorkspace_sptr workspace1,
 
 } // namespace
 
-class ReplaceIndirectFitResultBinTest : public CxxTest::TestSuite {
+class CopyDataRangeTest : public CxxTest::TestSuite {
 public:
   /// WorkflowAlgorithms do not appear in the FrameworkManager without this line
-  ReplaceIndirectFitResultBinTest() { FrameworkManager::Instance(); }
+  CopyDataRangeTest() { FrameworkManager::Instance(); }
 
-  static ReplaceIndirectFitResultBinTest *createSuite() {
-    return new ReplaceIndirectFitResultBinTest();
-  }
+  static CopyDataRangeTest *createSuite() { return new CopyDataRangeTest(); }
 
-  static void destroySuite(ReplaceIndirectFitResultBinTest *suite) {
-    delete suite;
-  }
+  static void destroySuite(CopyDataRangeTest *suite) { delete suite; }
 
   void setUp() override {
     m_ads =
@@ -162,69 +175,90 @@ public:
 
     auto const output = getADSMatrixWorkspace(OUTPUT_NAME);
     auto const expectedOutput = createWorkspace(5, 5);
-    //populateOutputWorkspace(
-    //    expectedOutput,
-    //    {2.5, 2.6,  2.7, 2.8, 2.9, 2.5, 2.6,  2.7,  2.8,  2.9,  2.5,  1.2, 1.3,
-    //     1.4, 29.0, 2.5, 1.2, 1.3, 1.4, 29.0, 25.0, 26.0, 27.0, 28.0, 29.0},
-    //    {0.1, 0.2, 0.3, 0.4, 2.9, 0.1, 0.2, 0.3, 0.4, 2.9, 0.1, 0.2, 0.3,
-    //     0.4, 2.9, 0.1, 0.2, 0.3, 0.4, 2.9, 2.5, 2.6, 2.7, 2.8, 2.9});
-    //populateWorkspace(expectedOutput, {25.0, 26.0, 1.3, 1.4, 29.0},
-    //                  {0.1, 0.2, 0.3, 0.4, 2.9});
+    populateOutputWorkspace(
+        expectedOutput, {25.0, 26.0, 27.0, 28.0, 29.0, 25.0, 26.0, 27.0, 28.0,
+                         29.0, 25.0, 26.0, 1.2,  1.3,  1.4,  25.0, 26.0, 1.2,
+                         1.3,  1.4,  25.0, 26.0, 27.0, 28.0, 29.0},
+        {2.5, 2.6, 2.7, 2.8, 2.9, 2.5, 2.6, 2.7, 2.8, 2.9, 2.5, 2.6, 0.2,
+         0.3, 0.4, 2.5, 2.6, 0.2, 0.3, 0.4, 2.5, 2.6, 2.7, 2.8, 2.9});
     TS_ASSERT(!compareWorkspaces(output, expectedOutput));
   }
 
   void
-  test_that_the_algorithm_throws_when_provided_a_singleBinWorkspace_with_more_than_one_bin() {
-    setUpWorkspaces(INPUT_NAME, DESTINATION_NAME, 3, 3, {2.0, 3.0, 4.0},
-                    {1.1, 1.2, 1.3}, {0.1, 0.2, 0.3}, {3.0, 4.0}, {25.0, 26.0},
-                    {2.5, 2.6});
-    auto algorithm = setUpAlgorithm(INPUT_NAME, DESTINATION_NAME, OUTPUT_NAME);
+  test_that_the_algorithm_produces_an_output_workspace_with_the_correct_data_when_transfering_a_block_which_is_a_single_line() {
+    setUpWorkspaces(INPUT_NAME, DESTINATION_NAME);
+    auto algorithm = setUpAlgorithm(INPUT_NAME, DESTINATION_NAME, 2, 2, 0, 4, 0,
+                                    0, OUTPUT_NAME);
+
+    algorithm->execute();
+
+    auto const output = getADSMatrixWorkspace(OUTPUT_NAME);
+    auto const expectedOutput = createWorkspace(5, 5);
+    populateOutputWorkspace(
+        expectedOutput, {1.1,  1.2,  1.3,  1.4,  1.5,  25.0, 26.0, 27.0, 28.0,
+                         29.0, 25.0, 26.0, 27.0, 28.0, 29.0, 25.0, 26.0, 27.0,
+                         28.0, 29.0, 25.0, 26.0, 27.0, 28.0, 29.0},
+        {0.1, 0.2, 0.3, 0.4, 0.5, 2.5, 2.6, 2.7, 2.8, 2.9, 2.5, 2.6, 2.7,
+         2.8, 2.9, 2.5, 2.6, 2.7, 2.8, 2.9, 2.5, 2.6, 2.7, 2.8, 2.9});
+    TS_ASSERT(!compareWorkspaces(output, expectedOutput));
+  }
+
+  void
+  test_that_the_algorithm_throws_when_provided_a_StartWorkspaceIndex_which_is_larger_than_the_EndWorkspaceIndex() {
+    setUpWorkspaces(INPUT_NAME, DESTINATION_NAME);
+
+    auto algorithm = setUpAlgorithm(INPUT_NAME, DESTINATION_NAME, 2, 1, 0, 3, 0,
+                                    0, OUTPUT_NAME);
 
     TS_ASSERT_THROWS(algorithm->execute(), std::runtime_error);
   }
 
   void
-  test_that_the_algorithm_throws_when_provided_an_inputWorkspace_with_only_one_bin() {
-    setUpWorkspaces(INPUT_NAME, DESTINATION_NAME, 3, 3, {3.0}, {1.2}, {0.2},
-                    {3.0}, {25.0}, {2.5});
-    auto algorithm = setUpAlgorithm(INPUT_NAME, DESTINATION_NAME, OUTPUT_NAME);
+  test_that_the_algorithm_throws_when_provided_an_EndWorkspaceIndex_which_is_larger_than_the_number_of_histograms_in_the_input_workspace() {
+    setUpWorkspaces(INPUT_NAME, DESTINATION_NAME);
+
+    auto algorithm = setUpAlgorithm(INPUT_NAME, DESTINATION_NAME, 0, 5, 0, 3, 0,
+                                    0, OUTPUT_NAME);
 
     TS_ASSERT_THROWS(algorithm->execute(), std::runtime_error);
   }
 
   void
-  test_that_the_algorithm_throws_when_provided_two_workspaces_with_a_different_number_of_histograms() {
-    setUpWorkspaces(INPUT_NAME, DESTINATION_NAME, 3, 2, {2.0, 3.0, 4.0},
-                    {1.1, 1.2, 1.3}, {0.1, 0.2, 0.3}, {3.0}, {25.0}, {2.5});
-    auto algorithm = setUpAlgorithm(INPUT_NAME, DESTINATION_NAME, OUTPUT_NAME);
+  test_that_the_algorithm_throws_when_provided_a_xMinIndex_which_is_larger_than_the_xMaxIndex() {
+    setUpWorkspaces(INPUT_NAME, DESTINATION_NAME);
+
+    auto algorithm = setUpAlgorithm(INPUT_NAME, DESTINATION_NAME, 0, 3, 4, 3, 0,
+                                    0, OUTPUT_NAME);
 
     TS_ASSERT_THROWS(algorithm->execute(), std::runtime_error);
   }
 
   void
-  test_that_the_algorithm_throws_when_provided_a_singleBinWorkspace_with_a_name_not_ending_with_Result() {
-    setUpWorkspaces(INPUT_NAME, "Wrong_Name", 3, 3, {2.0, 3.0, 4.0},
-                    {1.1, 1.2, 1.3}, {0.1, 0.2, 0.3}, {3.0}, {25.0}, {2.5});
-    auto algorithm = setUpAlgorithm(INPUT_NAME, "Wrong_Name", OUTPUT_NAME);
+  test_that_the_algorithm_throws_when_provided_an_xMaxIndex_which_is_larger_than_the_number_of_bins_in_the_input_workspace() {
+    setUpWorkspaces(INPUT_NAME, DESTINATION_NAME);
+
+    auto algorithm = setUpAlgorithm(INPUT_NAME, DESTINATION_NAME, 0, 3, 0, 5, 0,
+                                    0, OUTPUT_NAME);
 
     TS_ASSERT_THROWS(algorithm->execute(), std::runtime_error);
   }
 
   void
-  test_that_the_algorithm_throws_when_provided_an_inputWorkspace_with_a_name_not_ending_with_Result() {
-    setUpWorkspaces("Wrong_Name", DESTINATION_NAME, 3, 3, {2.0, 3.0, 4.0},
-                    {1.1, 1.2, 1.3}, {0.1, 0.2, 0.3}, {3.0}, {25.0}, {2.5});
-    auto algorithm =
-        setUpAlgorithm("Wrong_Name", DESTINATION_NAME, OUTPUT_NAME);
+  test_that_the_algorithm_throws_when_provided_a_block_of_data_which_will_not_fit_in_the_destination_workspace_in_the_y_direction() {
+    setUpWorkspaces(INPUT_NAME, DESTINATION_NAME);
+
+    auto algorithm = setUpAlgorithm(INPUT_NAME, DESTINATION_NAME, 0, 3, 0, 3, 4,
+                                    0, OUTPUT_NAME);
 
     TS_ASSERT_THROWS(algorithm->execute(), std::runtime_error);
   }
 
   void
-  test_that_the_algorithm_throws_when_provided_an_empty_string_for_the_output_workspace_namessasdasdasdas() {
-    setUpWorkspaces(INPUT_NAME, DESTINATION_NAME, 3, 3, {2.0, 3.0, 4.0},
-                    {1.1, 1.2, 1.3}, {0.1, 0.2, 0.3}, {1000.0}, {25.0}, {2.5});
-    auto algorithm = setUpAlgorithm(INPUT_NAME, DESTINATION_NAME, OUTPUT_NAME);
+  test_that_the_algorithm_throws_when_provided_a_block_of_data_which_will_not_fit_in_the_destination_workspace_in_the_x_direction() {
+    setUpWorkspaces(INPUT_NAME, DESTINATION_NAME);
+
+    auto algorithm = setUpAlgorithm(INPUT_NAME, DESTINATION_NAME, 0, 3, 0, 3, 0,
+                                    4, OUTPUT_NAME);
 
     TS_ASSERT_THROWS(algorithm->execute(), std::runtime_error);
   }

@@ -758,6 +758,7 @@ set ( TEST_FILES
 	ConvertToPointDataTest.h
 	ConvertUnitsTest.h
 	ConvertUnitsUsingDetectorTableTest.h
+	CopyDataRangeTest.h
 	CopyDetectorMappingTest.h
 	CopyInstrumentParametersTest.h
 	CopyLogsTest.h
@@ -947,7 +948,6 @@ set ( TEST_FILES
 	RemoveWorkspaceHistoryTest.h
 	RenameWorkspaceTest.h
 	RenameWorkspacesTest.h
-	ReplaceIndirectFitResultBinTest.h
 	ReplaceSpecialValuesTest.h
 	ResampleXTest.h
 	ResetNegativesTest.h
