@@ -561,7 +561,7 @@ void LoadPLN::exec(const std::string &hdfFile, const std::string &eventFile) {
 
   // Get the region of interest and filters and save to log
   std::string const maskfile = getPropertyValue(MaskStr);
-  std::string seltubes = getPropertyValue(SelectDetectorTubesStr);
+  std::string const seltubes = getPropertyValue(SelectDetectorTubesStr);
   logManager.addProperty(SelectDetectorTubesStr, seltubes);
   logManager.addProperty(MaskStr, maskfile);
 
