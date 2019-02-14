@@ -146,6 +146,8 @@ class TransformToIqt(PythonAlgorithm):
         """
         Calculates the TransformToIqt parameters and saves in a table workspace.
         """
+        from IndirectCommon import getEfixed
+
         end_prog = 0.3 if self._calculate_errors else 0.9
         workflow_prog = Progress(self, start=0.0, end=end_prog, nreports=8)
         workflow_prog.report('Cropping Workspace')
@@ -180,10 +182,9 @@ class TransformToIqt(PythonAlgorithm):
             workflow_prog.report('IPF resolution obtained')
         except (AttributeError, IndexError):
             workflow_prog.report('Resorting to Default')
-            resolution = 0.0175
-            logger.warning(
-                'Could not get resolution from IPF, using default value: %f' %
-                (resolution))
+            resolution = getEfixed(self._sample) * 0.01
+            logger.warning('Could not get the resolution from the IPF, using 1% of the E Fixed value for the '
+                           'resolution: {0}'.format(resolution))
 
         resolution_bins = int(round((2 * resolution) / self._e_width))
 

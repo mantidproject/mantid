@@ -285,6 +285,7 @@ def CheckAnalysers(in1WS, in2WS):
       @exception ValueError - workspaces have different reflections
     """
     ws1 = s_api.mtd[in1WS]
+    ws1.getInstrument().getName()
     try:
         analyser_1 = ws1.getInstrument().getStringParameter('analyser')[0]
         reflection_1 = ws1.getInstrument().getStringParameter('reflection')[0]
