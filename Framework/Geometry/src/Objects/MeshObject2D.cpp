@@ -395,6 +395,11 @@ std::vector<double> MeshObject2D::getVertices() const {
 
 std::vector<uint32_t> MeshObject2D::getTriangles() const { return m_triangles; }
 
+detail::ShapeInfo::GeometryShape MeshObject2D::shape() const {
+  // should be consistent with MeshObject2D::GetObjectGeom
+  return detail::ShapeInfo::GeometryShape::NOSHAPE;
+}
+
 void MeshObject2D::GetObjectGeom(detail::ShapeInfo::GeometryShape &,
                                  std::vector<Kernel::V3D> &, double &,
                                  double &) const {
