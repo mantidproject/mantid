@@ -15,7 +15,6 @@
 #include "MantidNexus/NexusClasses.h"
 
 #include <boost/filesystem.hpp>
-#include <boost/math/special_functions/round.hpp>
 #include <boost/math/tools/minima.hpp>
 
 #include <Poco/AutoPtr.h>
