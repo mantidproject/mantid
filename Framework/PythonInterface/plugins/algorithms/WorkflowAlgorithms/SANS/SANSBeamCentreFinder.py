@@ -34,7 +34,6 @@ if PYQT4:
         # Plotting functionality should not be imported/used in this case
         IN_MANTIDPLOT = False
 else:
-    import matplotlib.pyplot as plt
     from mantidqt.plotting.functions import plot
 
 
@@ -259,6 +258,7 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
         return graph_handle
 
     def _plot_quartiles_matplotlib(self, output_workspaces, sample_scatter):
+        import matplotlib.pyplot as plt
         title = '{}_beam_centre_finder'.format(sample_scatter)
 
         fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
