@@ -31,11 +31,11 @@ class EncoderFactory(object):
         return None
 
     @classmethod
-    def register_encoder(cls, encoder, optional_cb=None):
+    def register_encoder(cls, encoder, compatible_check=None):
         """
         This adds the passed encoder's class to the available encoders in the Factory
         :param encoder: Class of Encoder; The class of the encoder to be added to the list.
-        :param optional_cb: An optional function reference that will be used instead of comparing the encoder to
+        :param compatible_check: An optional function reference that will be used instead of comparing the encoder to
         potential widget candidates. Function should return True if compatible else False.
         """
-        cls.encoder_list.add((encoder, optional_cb))
+        cls.encoder_list.add((encoder, compatible_check))
