@@ -157,7 +157,7 @@ void mapRangeToIndex(const std::string &line, std::vector<T> &result,
   std::string item;
   size_t index = 0;
   while (std::getline(ss, item, ',')) {
-    auto k = item.find('-');
+    auto const k = item.find('-');
 
     size_t p0, p1;
     if (k != std::string::npos) {
