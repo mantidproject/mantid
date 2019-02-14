@@ -76,6 +76,8 @@ Notes
 
  b. `FileBackEnd` and `TopLevelSplitting` are not applicable and
     should be disabled.
+ c. Indexing adds the minor error to the events coordinate, to check it see log
+    at `Error with using Morton indexes is`.
 
 How to write custom ConvertToMD plugin
 --------------------------------------

@@ -24,6 +24,9 @@ Improvements
 - Mask workspace option added to :ref:`WANDPowderReduction <algm-WANDPowderReduction>`
 - :ref:`Le Bail concept page <Le Bail Fit>` moved from mediawiki
 - Rework of :ref:`powder diffraction calibration <Powder Diffraction Calibration>` documentation
+- :ref:`ConvertToMD <algm-ConvertToMD>` now has `ConverterType = {Default, Indexed}` setting: `Default` keeps the old
+  version of algorithm, `Indexed` provide the new one with better performance and some restrictions
+  (see :ref:`ConvertToMD <algm-ConvertToMD>` Notes)
 
 
 Single Crystal Diffraction

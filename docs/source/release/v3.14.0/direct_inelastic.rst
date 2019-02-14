@@ -30,6 +30,9 @@ Improvements
 
 - :ref:`ComputeIncoherentDOS <algm-ComputeIncoherentDOS>` now supports computation from :math:`S(2\theta,E)` workspace.
 - The upper limit of the empty container scaling factor in :ref:`DirectILLApplySelfShielding <algm-DirectILLApplySelfShielding>` has been removed.
+- :ref:`ConvertToMD <algm-ConvertToMD>` now has `ConverterType = {Default, Indexed}` setting: `Default` keeps the old
+  version of algorithm, `Indexed` provide the new one with better performance and some restrictions
+  (see :ref:`ConvertToMD <algm-ConvertToMD>` Notes)
 
 Bugfixes
 ########
