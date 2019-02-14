@@ -91,6 +91,7 @@ endif ()
     mantidqt/widgets/codeeditor/test/test_execution.py
     mantidqt/widgets/codeeditor/test/test_interpreter.py
     mantidqt/widgets/codeeditor/test/test_multifileinterpreter.py
+    mantidqt/widgets/codeeditor/test/test_multifileinterpreter_view.py
     mantidqt/widgets/workspacewidget/test/test_workspacetreewidget.py
 
     mantidqt/widgets/test/test_jupyterconsole.py
