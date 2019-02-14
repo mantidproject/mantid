@@ -1161,7 +1161,7 @@ void CompareWorkspaces::doTableComparison(
       }
     }
     if (mismatch) {
-      g_log.debug() << "Table data mismatch at column " << i;
+      g_log.debug() << "Table data mismatch at column " << i << std::endl;
       recordMismatch("Table data mismatch");
       mismatch = false;
       if (!checkAllData) {
