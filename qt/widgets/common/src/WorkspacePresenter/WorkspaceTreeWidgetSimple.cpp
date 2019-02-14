@@ -37,8 +37,7 @@ WorkspaceTreeWidgetSimple::WorkspaceTreeWidgetSimple(bool viewOnly,
       m_sampleLogs(new QAction("Sample Logs", this)),
       m_showInstrument(new QAction("Show Instrument", this)),
       m_showData(new QAction("Show Data", this)),
-      m_showAlgorithmHistory(new QAction("Show History", this))
-{
+      m_showAlgorithmHistory(new QAction("Show History", this)) {
 
   // Replace the double click action on the MantidTreeWidget
   m_tree->m_doubleClickAction = [&](QString wsName) {

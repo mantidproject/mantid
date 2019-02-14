@@ -299,11 +299,11 @@ AlgorithmHistoryWindow::AlgorithmHistoryWindow(
   mainLayout->addLayout(buttonLayout);
 }
 
-AlgorithmHistoryWindow::AlgorithmHistoryWindow(
-    QWidget *parent, const QString &workspaceName)
+AlgorithmHistoryWindow::AlgorithmHistoryWindow(QWidget *parent,
+                                               const QString &workspaceName)
     : AlgorithmHistoryWindow(
-        parent, AnalysisDataService::Instance().retrieveWS<const Workspace>(workspaceName.toStdString())) {
-}
+          parent, AnalysisDataService::Instance().retrieveWS<const Workspace>(
+                      workspaceName.toStdString())) {}
 
 AlgorithmHistoryWindow::~AlgorithmHistoryWindow() {
   if (m_Historytree) {
@@ -326,7 +326,7 @@ AlgorithmHistoryWindow::~AlgorithmHistoryWindow() {
 
 // Delete window object on close
 void AlgorithmHistoryWindow::closeEvent(QCloseEvent *) {
-    AlgorithmHistoryWindow::~AlgorithmHistoryWindow();
+  AlgorithmHistoryWindow::~AlgorithmHistoryWindow();
 }
 
 AlgExecSummaryGrpBox *AlgorithmHistoryWindow::createExecSummaryGrpBox() {

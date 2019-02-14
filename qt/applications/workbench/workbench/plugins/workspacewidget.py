@@ -12,10 +12,11 @@ from __future__ import (absolute_import, unicode_literals)
 # system imports
 from functools import partial
 
+# third-party library imports
 import matplotlib.pyplot
 from qtpy.QtWidgets import QMessageBox, QVBoxLayout
 
-# third-party library imports
+# local package imports
 from mantid.api import AnalysisDataService, MatrixWorkspace, ITableWorkspace
 from mantid.kernel import logger
 from mantidqt.plotting.functions import can_overplot, pcolormesh, plot, plot_from_names
@@ -25,8 +26,6 @@ from mantidqt.widgets.workspacedisplay.matrix.presenter import MatrixWorkspaceDi
 from mantidqt.widgets.workspacedisplay.table.presenter import TableWorkspaceDisplay
 from mantidqt.widgets.workspacewidget.algorithmhistorywindow import AlgorithmHistoryWindow
 from mantidqt.widgets.workspacewidget.workspacetreewidget import WorkspaceTreeWidget
-
-# local package imports
 from workbench.plugins.base import PluginWidget
 
 

@@ -148,7 +148,7 @@ public:
   AlgorithmHistoryWindow(QWidget *parent, const QString &workspaceName);
   ~AlgorithmHistoryWindow() override;
 
-  void AlgorithmHistoryWindow::closeEvent(QCloseEvent *) override;
+  void closeEvent(QCloseEvent *) override;
 
 public slots:
   void updateAll(Mantid::API::AlgorithmHistory_const_sptr algHistmakeory);
