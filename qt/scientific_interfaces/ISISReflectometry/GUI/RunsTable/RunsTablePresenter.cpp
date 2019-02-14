@@ -20,6 +20,39 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace { // unnamed
+void clearStateStyling(MantidWidgets::Batch::Cell &cell) {
+  cell.setBackgroundColor("white");
+  cell.setToolTip("");
+}
+
+void applyInvalidStateStyling(MantidWidgets::Batch::Cell &cell) {
+  cell.setBackgroundColor("grey");
+  cell.setToolTip(
+      "Row will not be processed: it either contains invalid cell values, "
+      "or duplicates a reduction in another row");
+}
+
+void applyRunningStateStyling(MantidWidgets::Batch::Cell &cell) {
+  cell.setBackgroundColor("yellow");
+}
+
+void applyCompletedStateStyling(MantidWidgets::Batch::Cell &cell) {
+  cell.setBackgroundColor("green");
+}
+
+void applyErrorStateStyling(MantidWidgets::Batch::Cell &cell,
+                          std::string const &errorMessage) {
+  cell.setBackgroundColor("red");
+  cell.setToolTip(errorMessage);
+}
+
+void applyWarningStateStyling(MantidWidgets::Batch::Cell &cell,
+                            std::string const &errorMessage) {
+  cell.setBackgroundColor("orange");
+  cell.setToolTip(errorMessage);
+}
+} // unnamed
 
 RunsTablePresenter::RunsTablePresenter(
     IRunsTableView *view, std::vector<std::string> const &instruments,
@@ -415,134 +448,56 @@ void RunsTablePresenter::notifyPasteRowsRequested() {
   }
 }
 
-void RunsTablePresenter::clearStateCellStyling(
-    MantidWidgets::Batch::Cell &cell) {
-  cell.setBackgroundColor("white");
-  cell.setToolTip("");
+void RunsTablePresenter::forAllCellsAt(
+    MantidWidgets::Batch::RowLocation const &location,
+    UpdateCellFunc updateFunc) {
+  auto cells = m_view->jobs().cellsAt(location);
+  std::for_each(cells.begin(), cells.end(), updateFunc);
+  m_view->jobs().setCellsAt(location, cells);
 }
 
-void RunsTablePresenter::applyInvalidStateCellStyling(
-    MantidWidgets::Batch::Cell &cell) {
-  cell.setBackgroundColor("grey");
-  cell.setToolTip(
-      "Row will not be processed: it either contains invalid cell values, "
-      "or duplicates a reduction in another row");
-}
-
-void RunsTablePresenter::applyRunningStateCellStyling(
-    MantidWidgets::Batch::Cell &cell) {
-  cell.setBackgroundColor("yellow");
-}
-
-void RunsTablePresenter::applyCompletedStateCellStyling(
-    MantidWidgets::Batch::Cell &cell) {
-  cell.setBackgroundColor("green");
-}
-
-void RunsTablePresenter::applyErrorStateCellStyling(
-    MantidWidgets::Batch::Cell &cell, std::string const &errorMessage) {
-  cell.setBackgroundColor("red");
-  cell.setToolTip(errorMessage);
-}
-
-void RunsTablePresenter::applyWarningStateCellStyling(
-    MantidWidgets::Batch::Cell &cell, std::string const &errorMessage) {
-  cell.setBackgroundColor("orange");
-  cell.setToolTip(errorMessage);
-}
-
-void RunsTablePresenter::clearStateCellStyling(
-    MantidWidgets::Batch::RowLocation const &itemIndex) {
-  auto cells = m_view->jobs().cellsAt(itemIndex);
-  for (size_t column = 0; column < cells.size(); ++column) {
-    clearStateCellStyling(cells[column]);
-  }
-  m_view->jobs().setCellsAt(itemIndex, cells);
-}
-
-void RunsTablePresenter::showCellsAsInvalidStateInView(
-    MantidWidgets::Batch::RowLocation const &itemIndex) {
-  auto cells = m_view->jobs().cellsAt(itemIndex);
-  for (size_t column = 0; column < cells.size(); ++column) {
-    clearStateCellStyling(cells[column]);
-    applyInvalidStateCellStyling(cells[column]);
-  }
-  m_view->jobs().setCellsAt(itemIndex, cells);
-}
-
-void RunsTablePresenter::showCellsAsRunningStateInView(
-    MantidWidgets::Batch::RowLocation const &itemIndex) {
-  auto cells = m_view->jobs().cellsAt(itemIndex);
-  for (size_t column = 0; column < cells.size(); ++column) {
-    clearStateCellStyling(cells[column]);
-    applyRunningStateCellStyling(cells[column]);
-  }
-  m_view->jobs().setCellsAt(itemIndex, cells);
-}
-
-void RunsTablePresenter::showCellsAsCompletedStateInView(
-    MantidWidgets::Batch::RowLocation const &itemIndex) {
-  auto cells = m_view->jobs().cellsAt(itemIndex);
-  for (size_t column = 0; column < cells.size(); ++column) {
-    clearStateCellStyling(cells[column]);
-    applyCompletedStateCellStyling(cells[column]);
-  }
-  m_view->jobs().setCellsAt(itemIndex, cells);
-}
-
-void RunsTablePresenter::showCellsAsErrorStateInView(
-    MantidWidgets::Batch::RowLocation const &itemIndex,
-    std::string const &errorMessage) {
-  auto cells = m_view->jobs().cellsAt(itemIndex);
-  for (size_t column = 0; column < cells.size(); ++column) {
-    clearStateCellStyling(cells[column]);
-    applyErrorStateCellStyling(cells[column], errorMessage);
-  }
-  m_view->jobs().setCellsAt(itemIndex, cells);
-}
-
-void RunsTablePresenter::showCellsAsWarningStateInView(
-    MantidWidgets::Batch::RowLocation const &itemIndex,
-    std::string const &errorMessage) {
-  auto cells = m_view->jobs().cellsAt(itemIndex);
-  for (size_t column = 0; column < cells.size(); ++column) {
-    clearStateCellStyling(cells[column]);
-    applyWarningStateCellStyling(cells[column], errorMessage);
-  }
-  m_view->jobs().setCellsAt(itemIndex, cells);
+void RunsTablePresenter::forAllCellsAt(
+    MantidWidgets::Batch::RowLocation const &location,
+    UpdateCellWithTooltipFunc updateFunc, std::string const &tooltip) {
+  auto cells = m_view->jobs().cellsAt(location);
+  std::for_each(
+      cells.begin(), cells.end(),
+      [&](MantidWidgets::Batch::Cell &cell) { updateFunc(cell, tooltip); });
+  m_view->jobs().setCellsAt(location, cells);
 }
 
 void RunsTablePresenter::notifyRowStateChanged() {
   int groupIndex = 0;
   for (auto &group : m_model.reductionJobs().groups()) {
     auto groupPath = MantidWidgets::Batch::RowPath{groupIndex};
-    clearStateCellStyling(groupPath);
+    forAllCellsAt(groupPath, clearStateStyling);
 
     int rowIndex = 0;
     for (auto &row : group.rows()) {
       auto rowPath = MantidWidgets::Batch::RowPath{groupIndex, rowIndex};
+      forAllCellsAt(rowPath, clearStateStyling);
+
       if (!row) {
-        showCellsAsInvalidStateInView(rowPath);
+        forAllCellsAt(rowPath, applyInvalidStateStyling);
         ++rowIndex;
         continue;
       }
 
       switch (row->state()) {
-      case State::ITEM_NOT_STARTED:
-      case State::ITEM_STARTING: // fall through
-        clearStateCellStyling(rowPath);
+      case State::ITEM_NOT_STARTED: // fall through
+      case State::ITEM_STARTING:
         break;
       case State::ITEM_RUNNING:
-        showCellsAsRunningStateInView(rowPath);
+        forAllCellsAt(rowPath, applyRunningStateStyling);
         break;
       case State::ITEM_COMPLETE:
-        showCellsAsCompletedStateInView(rowPath);
+        forAllCellsAt(rowPath, applyCompletedStateStyling);
         break;
       case State::ITEM_ERROR:
-        showCellsAsErrorStateInView(rowPath, row->message());
+        forAllCellsAt(rowPath, applyErrorStateStyling, row->message());
         break;
       case State::ITEM_WARNING:
-        showCellsAsWarningStateInView(rowPath, row->message());
+        forAllCellsAt(rowPath, applyWarningStateStyling, row->message());
         break;
       };
 

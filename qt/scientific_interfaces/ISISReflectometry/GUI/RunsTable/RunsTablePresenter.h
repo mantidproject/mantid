@@ -116,28 +116,14 @@ private:
                  std::string const &newValue);
   void updateWidgetEnabledState();
 
-  void clearStateCellStyling(MantidWidgets::Batch::Cell &cell);
-  void
-  clearStateCellStyling(MantidWidgets::Batch::RowLocation const &itemIndex);
-  void applyInvalidStateCellStyling(MantidWidgets::Batch::Cell &cell);
-  void applyRunningStateCellStyling(MantidWidgets::Batch::Cell &cell);
-  void applyCompletedStateCellStyling(MantidWidgets::Batch::Cell &cell);
-  void applyErrorStateCellStyling(MantidWidgets::Batch::Cell &cell,
-                                  std::string const &errorMessage);
-  void applyWarningStateCellStyling(MantidWidgets::Batch::Cell &cell,
-                                    std::string const &errorMessage);
-  void showCellsAsInvalidStateInView(
-      MantidWidgets::Batch::RowLocation const &itemIndex);
-  void showCellsAsRunningStateInView(
-      MantidWidgets::Batch::RowLocation const &itemIndex);
-  void showCellsAsCompletedStateInView(
-      MantidWidgets::Batch::RowLocation const &itemIndex);
-  void showCellsAsErrorStateInView(
-      MantidWidgets::Batch::RowLocation const &itemIndex,
-      std::string const &errorMessage);
-  void showCellsAsWarningStateInView(
-      MantidWidgets::Batch::RowLocation const &itemIndex,
-      std::string const &errorMessage);
+  using UpdateCellFunc = void (*)(MantidWidgets::Batch::Cell &cell);
+  using UpdateCellWithTooltipFunc = void (*)(MantidWidgets::Batch::Cell &cell,
+                                             std::string const &tooltip);
+  void forAllCellsAt(MantidWidgets::Batch::RowLocation const &location,
+                     UpdateCellFunc updateFunc);
+  void forAllCellsAt(MantidWidgets::Batch::RowLocation const &location,
+                     UpdateCellWithTooltipFunc updateFunc,
+                     std::string const &tooltip);
 
   bool isProcessing() const;
   bool isAutoreducing() const;
