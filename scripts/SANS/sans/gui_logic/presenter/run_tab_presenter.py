@@ -25,6 +25,7 @@ from mantid.kernel import Logger, ConfigService
 from sans.command_interface.batch_csv_file_parser import BatchCsvParser
 from sans.common.constants import ALL_PERIODS
 from sans.common.enums import (BatchReductionEntry, RangeStepType, SampleShape, FitType, RowState, SANSInstrument)
+from sans.common.general_functions import get_log_plot
 from sans.gui_logic.gui_common import (get_reduction_mode_strings_for_gui, get_string_for_gui_from_instrument,
                                        add_dir_to_datasearch, remove_dir_from_datasearch)
 from sans.gui_logic.models.batch_process_runner import BatchProcessRunner
@@ -480,18 +481,13 @@ class RunTabPresenter(object):
     def _plot_graph(self):
         """
         Plot a graph if continuous output specified.
-        This is currently not available in Workbench
         """
         if self._view.plot_results:
             if PYQT4:
                 if not graph(self.output_graph):
                     newGraph(self.output_graph)
             else:
-                import matplotlib.pyplot as plt
-                fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
-                fig.canvas.set_window_title(self.output_graph)
-                ax.set_xscale('log')
-                ax.set_yscale('log')
+                fig = get_log_plot(window_title=self.output_graph, plot_to_close=self.output_fig)
                 fig.show()
                 self.output_fig = fig
 

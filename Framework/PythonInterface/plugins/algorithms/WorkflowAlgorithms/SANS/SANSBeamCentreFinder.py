@@ -9,19 +9,20 @@
 """ Finds the beam centre for SANS"""
 
 from __future__ import (absolute_import, division, print_function)
+
+from mantid import AnalysisDataService
 from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress)
 from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidator, Logger)
-from sans.common.constants import EMPTY_NAME
-from sans.common.general_functions import create_child_algorithm
-from sans.state.state_base import create_deserialized_sans_state_from_property_manager
-from sans.common.enums import (DetectorType, MaskingQuadrant, FindDirectionEnum)
-from sans.algorithm_detail.crop_helper import get_component_name
-from sans.algorithm_detail.strip_end_nans_and_infs import strip_end_nans
-from sans.common.file_information import get_instrument_paths_for_sans_file
-from sans.common.xml_parsing import get_named_elements_from_ipf_file
-from sans.algorithm_detail.single_execution import perform_can_subtraction
-from mantid import AnalysisDataService
 from mantid.simpleapi import CloneWorkspace, GroupWorkspaces
+from sans.algorithm_detail.crop_helper import get_component_name
+from sans.algorithm_detail.single_execution import perform_can_subtraction
+from sans.algorithm_detail.strip_end_nans_and_infs import strip_end_nans
+from sans.common.constants import EMPTY_NAME
+from sans.common.enums import (DetectorType, MaskingQuadrant, FindDirectionEnum)
+from sans.common.file_information import get_instrument_paths_for_sans_file
+from sans.common.general_functions import create_child_algorithm, get_log_plot
+from sans.common.xml_parsing import get_named_elements_from_ipf_file
+from sans.state.state_base import create_deserialized_sans_state_from_property_manager
 
 from qtpy import PYQT4
 if PYQT4:
@@ -258,14 +259,8 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
         return graph_handle
 
     def _plot_quartiles_matplotlib(self, output_workspaces, sample_scatter):
-        import matplotlib.pyplot as plt
         title = '{}_beam_centre_finder'.format(sample_scatter)
-
-        fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
-        fig.canvas.set_window_title(title)
-        ax.set_title(title)
-        ax.set_xscale('log')
-        ax.set_yscale('log')
+        fig = get_log_plot(window_title=title)
 
         plot_kwargs = {"scalex": True,
                        "scaley": True}
