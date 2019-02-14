@@ -99,6 +99,7 @@ endif ()
 
     mantidqt/widgets/samplelogs/test/test_samplelogs_model.py
     mantidqt/widgets/samplelogs/test/test_samplelogs_presenter.py
+    mantidqt/widgets/samplelogs/test/test_samplelogs_view.py
 
     mantidqt/widgets/observers/test/test_ads_observer.py
     mantidqt/widgets/observers/test/test_observing_presenter.py
