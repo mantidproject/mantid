@@ -13,9 +13,9 @@ from mantidqt.project.decoderfactory import DecoderFactory
 from mantidqt.project.encoderfactory import EncoderFactory
 
 
-def optional_cb(obj):
-        return isinstance(obj, StatusBarView) and isinstance(obj.presenter, TableWorkspaceDisplay)
+def compatible_check_for_encoder(obj):
+    return isinstance(obj, StatusBarView) and isinstance(obj.presenter, TableWorkspaceDisplay)
 
 
 DecoderFactory.register_decoder(TableWorkspaceDisplayDecoder)
-EncoderFactory.register_encoder(TableWorkspaceDisplayEncoder, optional_cb)
+EncoderFactory.register_encoder(TableWorkspaceDisplayEncoder, compatible_check_for_encoder)

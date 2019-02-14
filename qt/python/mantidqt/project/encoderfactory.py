@@ -19,15 +19,15 @@ class EncoderFactory(object):
         :param obj: The object for encoding
         :return: Encoder or None; Returns the Encoder of the obj or None.
         """
-        for encoder in cls.encoder_list:
+        for encoder, compatible_check in cls.encoder_list:
 
             # Perform check if optional_cb is present if it is, then check whether the the optional_cb returns true for
             # this object.
-            if encoder[1] is not None and encoder[1](obj):
-                return encoder[0]()
+            if compatible_check is not None and compatible_check(obj):
+                return encoder()
 
-            if encoder[0].has_tag(obj.__class__.__name__):
-                return encoder[0]()
+            if encoder().has_tag(obj.__class__.__name__):
+                return encoder()
         return None
 
     @classmethod

@@ -16,7 +16,7 @@ _LAST_SAVE_DIRECTORY = None
 
 
 def open_a_file_dialog(parent=None,  default_suffix=None, directory=None, file_filter=None, accept_mode=None,
-                       file_mode=None, show_dirs_only=None):
+                       file_mode=None):
     """
     Open a dialog asking for a file location and name to and return it
     :param parent: QWidget; The parent QWidget of the created dialog
@@ -52,9 +52,6 @@ def open_a_file_dialog(parent=None,  default_suffix=None, directory=None, file_f
 
     if accept_mode is not None:
         dialog.setAcceptMode(accept_mode)
-
-    if show_dirs_only is not None and show_dirs_only:
-        dialog.setOption(QFileDialog.ShowDirsOnly)
 
     # Connect the actual filename setter
     dialog.fileSelected.connect(_set_last_save)
