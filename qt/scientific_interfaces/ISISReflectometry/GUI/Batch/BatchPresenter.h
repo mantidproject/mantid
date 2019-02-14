@@ -7,13 +7,13 @@
 #ifndef MANTID_ISISREFLECTOMETRY_BATCHPRESENTER_H
 #define MANTID_ISISREFLECTOMETRY_BATCHPRESENTER_H
 
-#include "BatchJobRunner.h"
 #include "Common/DllConfig.h"
 #include "GUI/Event/IEventPresenter.h"
 #include "GUI/Experiment/IExperimentPresenter.h"
 #include "GUI/Instrument/IInstrumentPresenter.h"
 #include "GUI/Runs/IRunsPresenter.h"
 #include "GUI/Save/ISavePresenter.h"
+#include "IBatchJobRunner.h"
 #include "IBatchPresenter.h"
 #include "IBatchView.h"
 #include "MantidQtWidgets/Common/WorkspaceObserver.h"
@@ -94,7 +94,7 @@ private:
   std::unique_ptr<ISavePresenter> m_savePresenter;
 
 protected:
-  std::unique_ptr<BatchJobRunner> m_jobRunner;
+  std::unique_ptr<IBatchJobRunner> m_jobRunner;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

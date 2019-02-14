@@ -8,6 +8,7 @@
 #define MANTID_CUSTOMINTERFACES_BATCHJOBRUNNER_H_
 
 #include "Common/DllConfig.h"
+#include "IBatchJobRunner.h"
 #include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "Reduction/Batch.h"
@@ -38,34 +39,36 @@ using BatchJobAlgorithm_sptr = boost::shared_ptr<BatchJobAlgorithm>;
  * on the reduction configuration and handling of state when algorithms
  * complete
  */
-class MANTIDQT_ISISREFLECTOMETRY_DLL BatchJobRunner {
+class MANTIDQT_ISISREFLECTOMETRY_DLL BatchJobRunner : public IBatchJobRunner {
 public:
   explicit BatchJobRunner(Batch batch);
 
-  bool isProcessing() const;
-  bool isAutoreducing() const;
+  bool isProcessing() const override;
+  bool isAutoreducing() const override;
 
-  void resumeReduction();
-  void reductionPaused();
-  void resumeAutoreduction();
-  void autoreductionPaused();
+  void resumeReduction() override;
+  void reductionPaused() override;
+  void resumeAutoreduction() override;
+  void autoreductionPaused() override;
 
-  void setReprocessFailedItems(bool reprocessFailed);
+  void setReprocessFailedItems(bool reprocessFailed) override;
 
-  void algorithmStarted(MantidQt::API::ConfiguredAlgorithm_sptr algorithm);
-  void algorithmComplete(MantidQt::API::ConfiguredAlgorithm_sptr algorithm);
+  void
+  algorithmStarted(MantidQt::API::ConfiguredAlgorithm_sptr algorithm) override;
+  void
+  algorithmComplete(MantidQt::API::ConfiguredAlgorithm_sptr algorithm) override;
   void algorithmError(MantidQt::API::ConfiguredAlgorithm_sptr algorithm,
-                      std::string const &message);
+                      std::string const &message) override;
 
   std::vector<std::string> algorithmOutputWorkspacesToSave(
-      MantidQt::API::ConfiguredAlgorithm_sptr algorithm) const;
+      MantidQt::API::ConfiguredAlgorithm_sptr algorithm) const override;
 
-  void notifyWorkspaceDeleted(std::string const &wsName);
+  void notifyWorkspaceDeleted(std::string const &wsName) override;
   void notifyWorkspaceRenamed(std::string const &oldName,
-                              std::string const &newName);
-  void notifyAllWorkspacesDeleted();
+                              std::string const &newName) override;
+  void notifyAllWorkspacesDeleted() override;
 
-  std::deque<MantidQt::API::ConfiguredAlgorithm_sptr> getAlgorithms();
+  std::deque<MantidQt::API::ConfiguredAlgorithm_sptr> getAlgorithms() override;
 
 private:
   Batch m_batch;

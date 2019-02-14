@@ -1,0 +1,45 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
+#ifndef MANTID_CUSTOMINTERFACES_IBATCHJOBRUNNER_H_
+#define MANTID_CUSTOMINTERFACES_IBATCHJOBRUNNER_H_
+
+#include "Common/DllConfig.h"
+#include "Reduction/Batch.h"
+
+namespace MantidQt {
+namespace CustomInterfaces {
+
+class MANTIDQT_ISISREFLECTOMETRY_DLL IBatchJobRunner {
+public:
+  virtual ~IBatchJobRunner() = default;
+
+  virtual bool isProcessing() const = 0;
+  virtual bool isAutoreducing() const = 0;
+  virtual void resumeReduction() = 0;
+  virtual void reductionPaused() = 0;
+  virtual void resumeAutoreduction() = 0;
+  virtual void autoreductionPaused() = 0;
+  virtual void setReprocessFailedItems(bool reprocessFailed) = 0;
+  virtual void
+  algorithmStarted(MantidQt::API::ConfiguredAlgorithm_sptr algorithm) = 0;
+  virtual void
+  algorithmComplete(MantidQt::API::ConfiguredAlgorithm_sptr algorithm) = 0;
+  virtual void algorithmError(MantidQt::API::ConfiguredAlgorithm_sptr algorithm,
+                              std::string const &message) = 0;
+  virtual std::vector<std::string> algorithmOutputWorkspacesToSave(
+      MantidQt::API::ConfiguredAlgorithm_sptr algorithm) const = 0;
+  virtual void notifyWorkspaceDeleted(std::string const &wsName) = 0;
+  virtual void notifyWorkspaceRenamed(std::string const &oldName,
+                                      std::string const &newName) = 0;
+  virtual void notifyAllWorkspacesDeleted() = 0;
+  virtual std::deque<MantidQt::API::ConfiguredAlgorithm_sptr>
+  getAlgorithms() = 0;
+};
+} // namespace CustomInterfaces
+} // namespace MantidQt
+
+#endif // MANTID_CUSTOMINTERFACES_IBATCHJOBRUNNER_H_

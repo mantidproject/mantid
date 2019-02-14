@@ -9,6 +9,7 @@ set ( BATCH_SRC_FILES
 set ( BATCH_INC_FILES
     IBatchPresenter.h
     IBatchView.h
+    IBatchJobRunner.h
     BatchPresenter.h
     BatchPresenterFactory.h
     BatchView.h

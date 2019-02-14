@@ -90,17 +90,17 @@ public:
     verifyAndClear();
   }
 
-  void testModelUpdatedWhenReductionPaused() {
-    auto presenter = makePresenter();
-    EXPECT_CALL(*m_jobRunner, reductionPaused()).Times(1);
-    presenter.notifyReductionPaused();
-    verifyAndClear();
-  }
-
   void testBatchIsCancelledWhenReductionPaused() {
     auto presenter = makePresenter();
     EXPECT_CALL(m_view, cancelAlgorithmQueue()).Times(1);
     presenter.notifyReductionPaused();
+    verifyAndClear();
+  }
+
+  void testModelUpdatedWhenBatchCancelled() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(*m_jobRunner, reductionPaused()).Times(1);
+    presenter.notifyBatchCancelled();
     verifyAndClear();
   }
 
@@ -122,7 +122,7 @@ public:
   void testModelUpdatedWhenAutoreductionResumed() {
     auto presenter = makePresenter();
     EXPECT_CALL(*m_jobRunner, resumeAutoreduction()).Times(1);
-    presenter.notifyReductionResumed();
+    presenter.notifyAutoreductionResumed();
     verifyAndClear();
   }
 
@@ -143,7 +143,7 @@ public:
   void testModelUpdatedWhenAutoreductionPaused() {
     auto presenter = makePresenter();
     EXPECT_CALL(*m_jobRunner, autoreductionPaused()).Times(1);
-    presenter.notifyReductionPaused();
+    presenter.notifyAutoreductionPaused();
     verifyAndClear();
   }
 
@@ -230,7 +230,7 @@ public:
 
 private:
   NiceMock<MockBatchView> m_view;
-  MockBatchJobRunner *m_jobRunner;
+  NiceMock<MockBatchJobRunner> *m_jobRunner;
   NiceMock<MockRunsPresenter> *m_runsPresenter;
   NiceMock<MockEventPresenter> *m_eventPresenter;
   NiceMock<MockExperimentPresenter> *m_experimentPresenter;
@@ -260,39 +260,11 @@ private:
               std::move(instrumentPresenter), std::move(savePresenter)) {}
   };
 
-  Experiment makeExperiment() {
-    auto polarizationCorrections =
-        PolarizationCorrections(PolarizationCorrectionType::None);
-    auto floodCorrections = FloodCorrections(FloodCorrectionType::Workspace);
-    auto transmissionRunRange = boost::none;
-    auto stitchParameters = std::map<std::string, std::string>();
-    auto perThetaDefaults = std::vector<PerThetaDefaults>();
-    return Experiment(AnalysisMode::PointDetector, ReductionType::Normal,
-                      SummationType::SumInLambda, false, false,
-                      std::move(polarizationCorrections),
-                      std::move(floodCorrections),
-                      std::move(transmissionRunRange),
-                      std::move(stitchParameters), std::move(perThetaDefaults));
-  }
-
-  Instrument makeInstrument() {
-    auto wavelengthRange = RangeInLambda(0.0, 0.0);
-    auto monitorCorrections = MonitorCorrections(
-        0, true, RangeInLambda(0.0, 0.0), RangeInLambda(0.0, 0.0));
-    auto detectorCorrections =
-        DetectorCorrections(false, DetectorCorrectionType::VerticalShift);
-    return Instrument(wavelengthRange, monitorCorrections, detectorCorrections);
-  }
-
   RunsTable makeRunsTable() {
     return RunsTable(m_instruments, m_tolerance, ReductionJobs());
   }
 
   Batch makeModel() {
-    m_experiment = makeExperiment();
-    m_instrument = makeInstrument();
-    m_runsTable = makeRunsTable();
-    m_slicing = Slicing();
     Batch batch(m_experiment, m_instrument, m_runsTable, m_slicing);
     return batch;
   }
@@ -320,20 +292,19 @@ private:
         std::move(eventPresenter), std::move(experimentPresenter),
         std::move(instrumentPresenter), std::move(savePresenter));
     // Replace the constructed job runner with a mock
-    presenter.m_jobRunner.reset(new MockBatchJobRunner(makeModel()));
-    m_jobRunner =
-        static_cast<MockBatchJobRunner *>(presenter.m_jobRunner.get());
+    m_jobRunner = new NiceMock<MockBatchJobRunner>();
+    presenter.m_jobRunner.reset(m_jobRunner);
     return presenter;
   }
 
   void verifyAndClear() {
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_view));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_runsPresenter));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_eventPresenter));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_experimentPresenter));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_instrumentPresenter));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_savePresenter));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_jobRunner));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_runsPresenter));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_eventPresenter));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_experimentPresenter));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_instrumentPresenter));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_savePresenter));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_jobRunner));
   }
 
   void expectReductionResumed() {

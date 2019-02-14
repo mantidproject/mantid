@@ -226,9 +226,9 @@ public:
 
 /**** Job runner ****/
 
-class MockBatchJobRunner : public BatchJobRunner {
+class MockBatchJobRunner : public IBatchJobRunner {
 public:
-  MockBatchJobRunner(Batch model) : BatchJobRunner(model){};
+  MockBatchJobRunner(){};
   MOCK_CONST_METHOD0(isProcessing, bool());
   MOCK_CONST_METHOD0(isAutoreducing, bool());
   MOCK_METHOD0(resumeReduction, void());
@@ -236,6 +236,7 @@ public:
   MOCK_METHOD0(resumeAutoreduction, void());
   MOCK_METHOD0(autoreductionPaused, void());
   MOCK_METHOD1(setReprocessFailedItems, void(bool));
+  MOCK_METHOD1(algorithmStarted, void(MantidQt::API::ConfiguredAlgorithm_sptr));
   MOCK_METHOD1(algorithmComplete,
                void(MantidQt::API::ConfiguredAlgorithm_sptr));
   MOCK_METHOD2(algorithmError, void(MantidQt::API::ConfiguredAlgorithm_sptr,
