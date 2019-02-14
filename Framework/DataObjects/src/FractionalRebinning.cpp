@@ -534,6 +534,12 @@ void rebinToOutput(const Quadrilateral &inputQ,
                    const MatrixWorkspace_const_sptr &inputWS, const size_t i,
                    const size_t j, MatrixWorkspace &outputWS,
                    const std::vector<double> &verticalAxis) {
+  const auto &inY = inputWS->y(i);
+  // Check once whether the signal
+  if (std::isnan(inY[j])) {
+    return;
+  }
+
   const auto &X = outputWS.x(0).rawData();
   size_t qstart(0), qend(verticalAxis.size() - 1), x_start(0),
       x_end(X.size() - 1);
@@ -541,7 +547,6 @@ void rebinToOutput(const Quadrilateral &inputQ,
                              x_end))
     return;
 
-  const auto &inY = inputWS->y(i);
   const auto &inE = inputWS->e(i);
   // It seems to be more efficient to construct this once and clear it before
   // each calculation in the loop
@@ -559,6 +564,7 @@ void rebinToOutput(const Quadrilateral &inputQ,
           continue;
         }
         const double weight = overlapArea / inputQ.area();
+        double yValue = inY[j];
         yValue *= weight;
         double eValue = inE[j];
         if (inputWS->isDistribution()) {
