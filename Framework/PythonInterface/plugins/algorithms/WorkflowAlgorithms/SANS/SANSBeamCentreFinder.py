@@ -28,8 +28,8 @@ from qtpy import PYQT4
 IN_MANTIDPLOT = False
 if PYQT4:
     try:
-        IN_MANTIDPLOT = True
         import mantidplot
+        IN_MANTIDPLOT = True
     except (Exception, Warning):
         pass
 else:
