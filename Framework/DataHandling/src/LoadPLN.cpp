@@ -13,7 +13,6 @@
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/PhysicalConstants.h"
-#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidNexus/NexusClasses.h"
 
