@@ -13,8 +13,8 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/Workspace_fwd.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidMuon/MuonAlgorithmHelper.h"
@@ -26,6 +26,7 @@
 namespace Mantid {
 namespace Algorithms {
 
+using namespace Mantid::DataObjects;
 using namespace Kernel;
 using API::Progress;
 using std::size_t;
@@ -59,7 +60,8 @@ void EstimateMuonAsymmetryFromCounts::init() {
 
   std::vector<int> empty;
   declareProperty(
-      Kernel::make_unique<Kernel::ArrayProperty<int>>("Spectra", empty),
+      Kernel::make_unique<Kernel::ArrayProperty<int>>("Spectra",
+                                                      std::move(empty)),
       "The workspace indices to remove the exponential decay from.");
   declareProperty(
       "StartX", 0.1,
@@ -120,11 +122,10 @@ void EstimateMuonAsymmetryFromCounts::exec() {
   // Create output workspace with same dimensions as input
   API::MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
   if (inputWS != outputWS) {
-    outputWS = API::WorkspaceFactory::Instance().create(inputWS);
+    outputWS = create<API::MatrixWorkspace>(*inputWS);
   }
   bool extraData = getProperty("OutputUnNormData");
-  API::MatrixWorkspace_sptr unnormWS =
-      API::WorkspaceFactory::Instance().create(outputWS);
+  API::MatrixWorkspace_sptr unnormWS = create<API::MatrixWorkspace>(*outputWS);
   double startX = getProperty("StartX");
   double endX = getProperty("EndX");
   const Mantid::API::Run &run = inputWS->run();
@@ -196,7 +197,7 @@ void EstimateMuonAsymmetryFromCounts::exec() {
     outputWS->setHistogram(
         specNum, normaliseCounts(inputWS->histogram(specNum), numGoodFrames));
     if (extraData) {
-      unnormWS->mutableX(specNum) = outputWS->x(specNum);
+      unnormWS->setSharedX(specNum, outputWS->sharedX(specNum));
       unnormWS->mutableY(specNum) = outputWS->y(specNum);
       unnormWS->mutableE(specNum) = outputWS->e(specNum);
     }

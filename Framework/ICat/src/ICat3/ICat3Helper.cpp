@@ -190,18 +190,15 @@ void CICatHelper::saveInvestigationIncludesResponse(
         savetoTableWorkspace((*datafile_citr)->location, t);
 
         // File creation Time.
-        std::string *creationtime = nullptr;
-        if ((*datafile_citr)->datafileCreateTime != nullptr) {
-          time_t crtime = *(*datafile_citr)->datafileCreateTime;
-          char temp[25];
-          strftime(temp, 25, "%Y-%b-%d %H:%M:%S", localtime(&crtime));
-          std::string ftime(temp);
-          creationtime = new std::string;
-          creationtime->assign(ftime);
+        if ((*datafile_citr)->datafileCreateTime) {
+          const static std::string format("%Y-%b-%d %H:%M:%S");
+          std::string creationTime;
+          creationTime.resize(format.size());
+          const time_t crtime = *(*datafile_citr)->datafileCreateTime;
+          strftime(const_cast<char *>(creationTime.data()), creationTime.size(),
+                   format.data(), localtime(&crtime));
+          savetoTableWorkspace(creationTime.data(), t);
         }
-        savetoTableWorkspace(creationtime, t);
-        if (creationtime)
-          delete creationtime;
 
         //
         savetoTableWorkspace((*datafile_citr)->id, t);
@@ -385,8 +382,8 @@ void CICatHelper::doMyDataSearch(API::ITableWorkspace_sptr &ws_sptr) {
   std::string sessionID = m_session->getSessionId();
   request.sessionId = &sessionID;
   // investigation include
-  boost::shared_ptr<ns1__investigationInclude> invstInculde_sptr(
-      new ns1__investigationInclude);
+  boost::shared_ptr<ns1__investigationInclude> invstInculde_sptr =
+      boost::make_shared<ns1__investigationInclude>();
   request.investigationInclude = invstInculde_sptr.get();
   *request.investigationInclude =
       ns1__investigationInclude__INVESTIGATORS_USCORESHIFTS_USCOREAND_USCORESAMPLES;

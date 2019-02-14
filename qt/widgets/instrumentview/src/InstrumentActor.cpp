@@ -12,7 +12,6 @@
 #include "MantidQtWidgets/InstrumentView/OpenGLError.h"
 
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/IMaskWorkspace.h"
@@ -121,7 +120,7 @@ InstrumentActor::InstrumentActor(const QString &wsName, bool autoscaling,
 
   // If the instrument is empty, maybe only having the sample and source
   if (detectorInfo().size() == 0) {
-    QMessageBox::warning(nullptr, "MantidPlot - Warning",
+    QMessageBox::warning(nullptr, "Mantid - Warning",
                          "This instrument appears to contain no detectors",
                          "OK");
   }
@@ -182,8 +181,7 @@ void InstrumentActor::setUpWorkspace(
   resetColors();
 
   // set the ragged flag using a workspace validator
-  auto wsValidator = Mantid::API::CommonBinsValidator();
-  m_ragged = !wsValidator.isValid(sharedWorkspace).empty();
+  m_ragged = !sharedWorkspace->isCommonBins();
 }
 
 void InstrumentActor::setupPhysicalInstrumentIfExists() {
@@ -322,7 +320,7 @@ void InstrumentActor::applyMaskWorkspace() {
       // after-replace notification
       // and updates this instrument actor.
     } catch (...) {
-      QMessageBox::warning(nullptr, "MantidPlot - Warning",
+      QMessageBox::warning(nullptr, "Mantid - Warning",
                            "An error accured when applying the mask.", "OK");
     }
   }
@@ -461,8 +459,9 @@ void InstrumentActor::sumDetectors(const std::vector<size_t> &dets,
                                    std::vector<double> &x,
                                    std::vector<double> &y, size_t size) const {
   Mantid::API::MatrixWorkspace_const_sptr ws = getWorkspace();
-  if (size > ws->blocksize() || size == 0) {
-    size = ws->blocksize();
+  const auto blocksize = ws->blocksize();
+  if (size > blocksize || size == 0) {
+    size = blocksize;
   }
 
   if (m_ragged) {
@@ -487,15 +486,20 @@ void InstrumentActor::sumDetectors(const std::vector<size_t> &dets,
 void InstrumentActor::sumDetectorsUniform(const std::vector<size_t> &dets,
                                           std::vector<double> &x,
                                           std::vector<double> &y) const {
+  auto firstWorkspaceIndex = [this](const std::vector<size_t> &dets) {
+    if (dets.empty())
+      return INVALID_INDEX;
+    for (auto i : dets) {
+      auto const index = getWorkspaceIndex(i);
+      if (index != INVALID_INDEX)
+        return index;
+    }
+    return INVALID_INDEX;
+  };
 
-  bool isDataEmpty = dets.empty();
+  auto const wi = firstWorkspaceIndex(dets);
 
-  auto wi = getWorkspaceIndex(dets[0]);
-
-  if (wi == INVALID_INDEX)
-    isDataEmpty = true;
-
-  if (isDataEmpty) {
+  if (wi == INVALID_INDEX) {
     x.clear();
     y.clear();
     return;
@@ -795,7 +799,7 @@ void InstrumentActor::initMaskHelper() const {
     m_maskWorkspace = extractCurrentMask();
   } catch (...) {
     // don't know what to do here yet ...
-    QMessageBox::warning(nullptr, "MantidPlot - Warning",
+    QMessageBox::warning(nullptr, "Mantid - Warning",
                          "An error occurred when extracting the mask.", "OK");
   }
 }

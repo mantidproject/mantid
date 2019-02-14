@@ -12,7 +12,9 @@
 		<parameter name="l2" type="string">
 			<value val="4.0" />
 		</parameter>
-
+		<parameter name="natural-angle-step" type="float">
+			<value val="0.3724" />
+		</parameter>
 		<!-- formula for Detector efficiency calculation. Algorithm: DetectorEfficiencyCorUser
 			See http://muparser.sourceforge.net/mup_features.html#idDef2 for available
 			operators -->

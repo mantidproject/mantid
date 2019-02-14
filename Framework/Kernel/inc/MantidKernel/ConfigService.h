@@ -16,6 +16,7 @@
 #include <boost/optional/optional.hpp>
 
 #include <map>
+#include <memory>
 #include <set>
 #include <string>
 #include <vector>
@@ -288,9 +289,9 @@ private:
   // Forward declaration of inner class
   template <class T> class WrappedObject;
   /// the POCO file config object
-  WrappedObject<Poco::Util::PropertyFileConfiguration> *m_pConf;
+  std::unique_ptr<WrappedObject<Poco::Util::PropertyFileConfiguration>> m_pConf;
   /// the POCO system Config Object
-  WrappedObject<Poco::Util::SystemConfiguration> *m_pSysConfig;
+  std::unique_ptr<WrappedObject<Poco::Util::SystemConfiguration>> m_pSysConfig;
 
   /// A set of property keys that have been changed
   mutable std::set<std::string> m_changed_keys;

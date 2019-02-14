@@ -60,7 +60,8 @@ set ( EXPORT_FILES
   src/Exports/UsageService.cpp
   src/Exports/Atom.cpp
   src/Exports/StringContainsValidator.cpp
-  src/Exports/PropertyFactory.cpp	
+  src/Exports/PropertyFactory.cpp
+  src/Exports/RebinParamsValidator.cpp
 )
 
 set ( MODULE_DEFINITION ${CMAKE_CURRENT_BINARY_DIR}/kernel.cpp )
@@ -193,13 +194,16 @@ endif ()
 ###########################################################################
 # Installation settings
 ###########################################################################
-install ( TARGETS PythonKernelModule ${SYSTEM_PACKAGE_TARGET} DESTINATION
-          ${BIN_DIR}/mantid/kernel )
+mtd_install_targets( TARGETS PythonKernelModule INSTALL_DIRS ${BIN_DIR}/mantid/kernel ${WORKBENCH_BIN_DIR}/mantid/kernel )
 
 # Pure Python files
-install ( FILES ${PY_FILES} DESTINATION ${BIN_DIR}/mantid/kernel )
+mtd_install_files( FILES ${PY_FILES} INSTALL_DIRS ${BIN_DIR}/mantid/kernel ${WORKBENCH_BIN_DIR}/mantid/kernel)
+
 # packagesetup.py that will overwrite the ones from the built target
-install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/${PACKAGESETUP_PY}.install.py DESTINATION
-          ${BIN_DIR}/mantid/kernel RENAME ${PACKAGESETUP_PY}.py )
-install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/${MPISETUP_PY}.install.py DESTINATION
-          ${BIN_DIR}/mantid/kernel RENAME ${MPISETUP_PY}.py )
+mtd_install_files( FILES ${CMAKE_CURRENT_BINARY_DIR}/${PACKAGESETUP_PY}.install.py 
+                   INSTALL_DIRS ${BIN_DIR}/mantid/kernel ${WORKBENCH_BIN_DIR}/mantid/kernel
+                   RENAME ${PACKAGESETUP_PY}.py )
+
+mtd_install_files(FILES ${CMAKE_CURRENT_BINARY_DIR}/${MPISETUP_PY}.install.py
+                  INSTALL_DIRS ${BIN_DIR}/mantid/kernel ${WORKBENCH_BIN_DIR}/mantid/kernel
+                  RENAME ${MPISETUP_PY}.py)

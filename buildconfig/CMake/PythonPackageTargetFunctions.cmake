@@ -64,7 +64,7 @@ CustomInstallLib = patch_setuptools_command('install_lib')
   )
 
 
-  if ( ${PACKAGE_WORKBENCH} )
+  if ( ${ENABLE_WORKBENCH} )
     # setuptools by default wants to build into a directory called 'build' relative the to the working directory. We have overridden
     # commands in setup.py.in to force the build directory to take place out of source. The install directory is specified here and then
     # --install-scripts=bin --install-lib=lib removes any of the platform/distribution specific install directories so we can have a flat
@@ -72,17 +72,18 @@ CustomInstallLib = patch_setuptools_command('install_lib')
     install(CODE "execute_process(COMMAND ${PYTHON_EXECUTABLE} ${_setup_py} install -O1 --single-version-externally-managed --root=${_setup_py_build_root}/install --install-scripts=bin --install-lib=lib WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})")
 
     # Specify the installation directory based on OS
-    if ( WIN32 )
+    if ( WIN32 OR APPLE)
       # The / after lib tells cmake to copy over the _CONTENTS_ of the lib directory
       # placing the installed files inside the DESTINATION folder. This copies the
       # installed Python package inside the bin directory of Mantid's installation
       set ( _package_source_directory ${_setup_py_build_root}/install/lib/ )
-      set ( _package_install_destination bin )
+      set ( _package_install_destination ${WORKBENCH_BIN_DIR} )
     else ()
       # NOTE the lack of slash at the end - this means the _whole_ lib directory will be moved
       set ( _package_source_directory ${_setup_py_build_root}/install/lib )
       set ( _package_install_destination . )
     endif ()
+
     # Registers the "installed" components with CMake so it will carry them over
     install(DIRECTORY ${_package_source_directory}
             DESTINATION ${_package_install_destination}
@@ -93,8 +94,10 @@ CustomInstallLib = patch_setuptools_command('install_lib')
         # On UNIX systems install the workbench executable directly.
         # The Windows case is handled with a custom startup script installed in WindowsNSIS
         if ( NOT WIN32 )
-          install(PROGRAMS ${_setup_py_build_root}/install/bin/${_executable_name} DESTINATION bin)
+            install(PROGRAMS ${_setup_py_build_root}/install/bin/${pkg_name}
+                DESTINATION ${WORKBENCH_BIN_DIR}
+                RENAME workbench-script)
         endif()
-    endif()
   endif()
+endif()
 endfunction ()

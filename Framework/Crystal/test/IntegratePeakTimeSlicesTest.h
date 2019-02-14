@@ -160,8 +160,8 @@ public:
           }
         }
 
-        wsPtr->mutableY(wsIndex) = dataY;
-        wsPtr->mutableE(wsIndex) = dataE;
+        wsPtr->mutableY(wsIndex) = std::move(dataY);
+        wsPtr->mutableE(wsIndex) = std::move(dataE);
       }
 
     PeaksWorkspace_sptr pks(new PeaksWorkspace());

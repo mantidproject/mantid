@@ -93,7 +93,7 @@ public:
 /// Note that there is limited (if any) interaction going from this model to the
 /// IndirectSpectrumSelectionView, meaning that not many methods are required
 /// for mocking.
-class MockIndirectFittingModel : public IndirectFittingModel {
+class MockIndirectSpectrumSelectionModel : public IndirectFittingModel {
 public:
   /// Public methods
   MOCK_CONST_METHOD2(getExcludeRegion,
@@ -131,9 +131,10 @@ public:
   }
 
   void setUp() override {
-    m_view = new NiceMock<MockIndirectSpectrumSelectionView>();
-    m_model = new NiceMock<MockIndirectFittingModel>();
-    m_presenter = new IndirectSpectrumSelectionPresenter(m_model, m_view);
+    m_view = std::make_unique<NiceMock<MockIndirectSpectrumSelectionView>>();
+    m_model = std::make_unique<NiceMock<MockIndirectSpectrumSelectionModel>>();
+    m_presenter = std::make_unique<IndirectSpectrumSelectionPresenter>(
+        std::move(m_model.get()), std::move(m_view.get()));
 
     SetUpADSWithWorkspace ads("WorkspaceName", createWorkspace(10));
     m_model->addWorkspace("WorkspaceName");
@@ -142,11 +143,12 @@ public:
   void tearDown() override {
     AnalysisDataService::Instance().clear();
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(m_view));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(m_model));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_view.get()));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_model.get()));
 
-    delete m_presenter; /// Note that the m_view destructor is called here
-    delete m_model;
+    m_presenter.reset(); /// The views destructor is called at this point
+    m_model.reset();
+    m_view.release();
   }
 
   ///----------------------------------------------------------------------
@@ -358,9 +360,9 @@ public:
   }
 
 private:
-  MockIndirectSpectrumSelectionView *m_view;
-  MockIndirectFittingModel *m_model;
-  IndirectSpectrumSelectionPresenter *m_presenter;
+  std::unique_ptr<MockIndirectSpectrumSelectionView> m_view;
+  std::unique_ptr<MockIndirectSpectrumSelectionModel> m_model;
+  std::unique_ptr<IndirectSpectrumSelectionPresenter> m_presenter;
 };
 
 #endif

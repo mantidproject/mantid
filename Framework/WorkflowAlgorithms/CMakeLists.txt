@@ -35,7 +35,7 @@ set ( SRC_FILES
 	src/SANSSolidAngleCorrection.cpp
 	src/SetupEQSANSReduction.cpp
 	src/SetupHFIRReduction.cpp
-	src/SetupILLD33Reduction.cpp
+	src/SofTwoThetaTOF.cpp
 	src/StepScan.cpp
 	src/WorkflowAlgorithmHelpers.cpp
 )
@@ -80,18 +80,20 @@ set ( INC_FILES
 	inc/MantidWorkflowAlgorithms/SANSSolidAngleCorrection.h
 	inc/MantidWorkflowAlgorithms/SetupEQSANSReduction.h
 	inc/MantidWorkflowAlgorithms/SetupHFIRReduction.h
-	inc/MantidWorkflowAlgorithms/SetupILLD33Reduction.h
+	inc/MantidWorkflowAlgorithms/SofTwoThetaTOF.h
 	inc/MantidWorkflowAlgorithms/StepScan.h
 	inc/MantidWorkflowAlgorithms/WorkflowAlgorithmHelpers.h
 )
 
 set ( TEST_FILES
+	AlignAndFocusPowderTest.h
 	ExtractQENSMembersTest.h
 	IMuonAsymmetryCalculatorTest.h
 	LoadEventAndCompressTest.h
 	MuonProcessTest.h
 	ProcessIndirectFitParametersTest.h
 	SANSSolidAngleCorrectionTest.h
+	SofTwoThetaTOFTest.h
 	StepScanTest.h
 )
 
@@ -140,4 +142,4 @@ add_subdirectory ( test )
 # Installation settings
 ###########################################################################
 
-install ( TARGETS WorkflowAlgorithms ${SYSTEM_PACKAGE_TARGET} DESTINATION ${PLUGINS_DIR} )
+mtd_install_targets( TARGETS WorkflowAlgorithms INSTALL_DIRS ${PLUGINS_DIR} ${WORKBENCH_PLUGINS_DIR})

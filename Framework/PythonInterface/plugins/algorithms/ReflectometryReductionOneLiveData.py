@@ -48,7 +48,7 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
             'SecondTransmissionRun', 'Params', 'StartOverlap', 'EndOverlap',
             'CorrectionAlgorithm', 'Polynomial', 'C0', 'C1',
             'MomentumTransferMin', 'MomentumTransferStep', 'MomentumTransferMax',
-            'PolarizationAnalysis', 'Pp', 'Ap', 'Rho', 'Alpha', 'Debug', 'OutputWorkspace']
+            'PolarizationAnalysis', 'CPp', 'CAp', 'CRho', 'CAlpha', 'Debug', 'OutputWorkspace']
         self.copyProperties('ReflectometryReductionOneAuto', self._child_properties)
 
     def PyExec(self):

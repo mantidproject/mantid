@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import absolute_import, print_function
 
-from mantid import AlgorithmFactory
+from mantid.api import AlgorithmFactoryImpl
 
 
 class AlgorithmSelectorModel(object):
@@ -54,7 +54,7 @@ class AlgorithmSelectorModel(object):
             Here self.algorithm_key == '_'
 
         """
-        descriptors = AlgorithmFactory.getDescriptors(self.include_hidden)
+        descriptors = AlgorithmFactoryImpl.Instance().getDescriptors(self.include_hidden)
         algorithm_names = []
         data = {}
         for descriptor in descriptors:

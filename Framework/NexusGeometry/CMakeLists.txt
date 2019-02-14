@@ -48,4 +48,5 @@ target_link_libraries( NexusGeometry LINK_PRIVATE ${MANTIDLIBS} ${HDF5_LIBRARIES
 
 # Add the unit tests directory
 add_subdirectory ( test )
-install ( TARGETS NexusGeometry ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR})
+
+mtd_install_targets( TARGETS NexusGeometry INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})

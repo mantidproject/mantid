@@ -124,6 +124,8 @@ DLLExport bool checkValidPair(const std::string &name1,
 /// Check whether a group or pair name is valid
 DLLExport bool checkValidGroupPairName(const std::string &name);
 
+DLLExport bool is_alphanumerical_or_underscore(char character);
+
 DLLExport Mantid::API::MatrixWorkspace_sptr
 sumPeriods(const Mantid::API::WorkspaceGroup_sptr &inputWS,
            const std::vector<int> &periodsToSum);

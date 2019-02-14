@@ -175,8 +175,7 @@ void LoadHKL::exec() {
                  << " calculated from tbar and transmission of 2 peaks\n";
   API::Run &mrun = ws->mutableRun();
   mrun.addProperty<double>("Radius", radius, true);
-  NeutronAtom neutron(static_cast<uint16_t>(EMPTY_DBL()),
-                      static_cast<uint16_t>(0), 0.0, 0.0, smu, 0.0, smu, amu);
+  NeutronAtom neutron(0, 0, 0.0, 0.0, smu, 0.0, smu, amu);
   auto shape =
       boost::shared_ptr<IObject>(ws->sample().getShape().cloneWithMaterial(
           Material("SetInLoadHKL", neutron, 1.0)));

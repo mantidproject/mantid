@@ -240,4 +240,4 @@ add_subdirectory ( test )
 # Installation settings
 ###########################################################################
 
-install ( TARGETS DataObjects ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )
+mtd_install_targets( TARGETS DataObjects INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})

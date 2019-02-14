@@ -72,6 +72,7 @@ set ( SRC_FILES
 	src/LoadSQW2.cpp
 	src/LogarithmMD.cpp
 	src/MDEventWSWrapper.cpp
+	src/MDNorm.cpp
 	src/MDNormDirectSC.cpp
 	src/MDNormSCD.cpp
 	src/MDTransfAxisNames.cpp
@@ -205,6 +206,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/LogarithmMD.h
 	inc/MantidMDAlgorithms/MDEventTreeBuilder.h
 	inc/MantidMDAlgorithms/MDEventWSWrapper.h
+	inc/MantidMDAlgorithms/MDNorm.h
 	inc/MantidMDAlgorithms/MDNormDirectSC.h
 	inc/MantidMDAlgorithms/MDNormSCD.h
 	inc/MantidMDAlgorithms/MDTransfAxisNames.h
@@ -437,4 +439,4 @@ add_subdirectory ( test )
 # Installation settings
 ###########################################################################
 
-install ( TARGETS MDAlgorithms ${SYSTEM_PACKAGE_TARGET} DESTINATION ${PLUGINS_DIR} )
+mtd_install_targets( TARGETS MDAlgorithms INSTALL_DIRS ${PLUGINS_DIR} ${WORKBENCH_PLUGINS_DIR})

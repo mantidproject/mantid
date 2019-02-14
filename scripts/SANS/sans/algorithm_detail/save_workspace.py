@@ -11,6 +11,7 @@ from mantid.dataobjects import EventWorkspace
 from sans.common.general_functions import create_unmanaged_algorithm
 from sans.common.constants import EMPTY_NAME
 from sans.common.enums import SaveType
+# from sans.algorithm_detail.strip_end_nans_and_infs import strip_end_nans
 
 ZERO_ERROR_DEFAULT = 1e6
 
@@ -57,6 +58,7 @@ def get_save_strategy(file_format_bundle, file_name, save_options):
     elif file_format is SaveType.RKH:
         file_name = get_file_name(file_format_bundle, file_name, "", ".txt")
         save_name = "SaveRKH"
+        save_options.update({"Append": False})
     elif file_format is SaveType.CSV:
         file_name = get_file_name(file_format_bundle, file_name, "", ".csv")
         save_name = "SaveCSV"
@@ -101,6 +103,11 @@ def remove_zero_errors_from_workspace(workspace):
     # Make sure we are dealing with a MatrixWorkspace
     if not isinstance(workspace, MatrixWorkspace) or isinstance(workspace,EventWorkspace):
         raise ValueError('Cannot remove zero errors from a workspace which is not a MatrixWorkspace.')
+
+    # Uncomment the next line and tests fail for checking error values should not be zero, and
+    # comparing loaded workspace to calculated workspace. If we want to remove RuntimeWarning for nan
+    # values strip_end_nans should be moved up the workflow
+    # workspace = strip_end_nans(workspace, None)
 
     # Iterate over the workspace and replace the zero values with a large default value
     number_of_spectra = workspace.getNumberHistograms()

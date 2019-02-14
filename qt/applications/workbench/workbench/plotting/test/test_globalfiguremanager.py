@@ -1,6 +1,8 @@
 import unittest
-
-from mock import Mock, call, patch
+try:
+    from unittest import Mock, call, patch
+except ImportError:
+    from mock import Mock, call, patch
 
 from workbench.plotting.globalfiguremanager import FigureAction, GlobalFigureManager, GlobalFigureManagerObserver
 from workbench.plotting.observabledictionary import DictionaryAction
@@ -301,3 +303,7 @@ class TestGlobalFigureManager(unittest.TestCase):
 
     def assertNotCalled(self, mock):
         self.assertEqual(0, mock.call_count)
+
+
+if __name__ == '__main__':
+    unittest.main()

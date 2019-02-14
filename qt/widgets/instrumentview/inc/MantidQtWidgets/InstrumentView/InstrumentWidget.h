@@ -51,6 +51,8 @@ class InstrumentActor;
 class InstrumentWidgetTab;
 class InstrumentWidgetRenderTab;
 class InstrumentWidgetMaskTab;
+class InstrumentWidgetPickTab;
+class InstrumentWidgetTreeTab;
 class CollapsiblePanel;
 class XIntegrationControl;
 class SimpleWidget;
@@ -75,6 +77,9 @@ class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentWidget
       public Mantid::API::AlgorithmObserver,
       public InstrumentWidgetTypes {
   Q_OBJECT
+
+  friend class InstrumentWidgetEncoder;
+  friend class InstrumentWidgetDecoder;
 
 public:
   enum SurfaceType {
@@ -254,6 +259,8 @@ protected:
   QList<InstrumentWidgetTab *> m_tabs;
   InstrumentWidgetRenderTab *m_renderTab;
   InstrumentWidgetMaskTab *m_maskTab;
+  InstrumentWidgetTreeTab *m_treeTab;
+  InstrumentWidgetPickTab *m_pickTab;
   XIntegrationControl *m_xIntegration;
   /// The OpenGL widget to display the instrument
   MantidGLWidget *m_InstrumentDisplay;

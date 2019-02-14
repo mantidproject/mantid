@@ -443,7 +443,7 @@ MatrixWorkspace_sptr create2DDetectorScanWorkspaceWithFullInstrument(
  * @param numBanks :: number of rectangular banks
  * @param numPixels :: each bank will be numPixels*numPixels
  * @param numBins :: each spectrum will have this # of bins
- * @return The EventWorkspace
+ * @return The Workspace2D
  */
 Mantid::DataObjects::Workspace2D_sptr
 create2DWorkspaceWithRectangularInstrument(int numBanks, int numPixels,
@@ -1133,7 +1133,7 @@ createProcessedInelasticWS(const std::vector<double> &L2,
     for (size_t i = 0; i <= numBins; i++) {
       E_transfer.push_back(Emin + static_cast<double>(i) * dE);
     }
-    ws->mutableX(j) = E_transfer;
+    ws->mutableX(j) = std::move(E_transfer);
   }
 
   // set axis, correspondent to the X-values

@@ -56,23 +56,19 @@ const std::string MatrixWorkspace::yDimensionId = "yDimension";
 /// Default constructor
 MatrixWorkspace::MatrixWorkspace(const Parallel::StorageMode storageMode)
     : IMDWorkspace(storageMode), ExperimentInfo(), m_axes(),
-      m_isInitialized(false), m_YUnit(), m_YUnitLabel(),
-      m_isCommonBinsFlagSet(false), m_isCommonBinsFlag(false), m_masks() {}
+      m_isInitialized(false), m_YUnit(), m_YUnitLabel(), m_masks() {}
 
 MatrixWorkspace::MatrixWorkspace(const MatrixWorkspace &other)
-    : IMDWorkspace(other), ExperimentInfo(other) {
+    : IMDWorkspace(other), ExperimentInfo(other),
+      m_isInitialized(other.m_isInitialized), m_YUnit(other.m_YUnit),
+      m_YUnitLabel(other.m_YUnitLabel),
+      m_isCommonBinsFlag(other.m_isCommonBinsFlag), m_masks(other.m_masks),
+      m_indexInfoNeedsUpdate(false) {
   m_indexInfo = Kernel::make_unique<Indexing::IndexInfo>(other.indexInfo());
-  m_indexInfoNeedsUpdate = false;
   m_axes.resize(other.m_axes.size());
   for (size_t i = 0; i < m_axes.size(); ++i)
     m_axes[i] = other.m_axes[i]->clone(this);
-
-  m_isInitialized = other.m_isInitialized;
-  m_YUnit = other.m_YUnit;
-  m_YUnitLabel = other.m_YUnitLabel;
-  m_isCommonBinsFlagSet = other.m_isCommonBinsFlagSet;
-  m_isCommonBinsFlag = other.m_isCommonBinsFlag;
-  m_masks = other.m_masks;
+  m_isCommonBinsFlagValid.store(other.m_isCommonBinsFlagValid.load());
   // TODO: Do we need to init m_monitorWorkspace?
 }
 
@@ -963,10 +959,11 @@ bool MatrixWorkspace::isHistogramData() const {
  *  @return whether the workspace contains common X bins
  */
 bool MatrixWorkspace::isCommonBins() const {
-  if (m_isCommonBinsFlagSet) {
+  std::lock_guard<std::mutex> lock{m_isCommonBinsMutex};
+  const bool isFlagValid{m_isCommonBinsFlagValid.exchange(true)};
+  if (isFlagValid) {
     return m_isCommonBinsFlag;
   }
-  m_isCommonBinsFlagSet = true;
   m_isCommonBinsFlag = true;
   const size_t numHist = this->getNumberHistograms();
   // there being only one or zero histograms is accepted as not being an error
@@ -1204,7 +1201,7 @@ size_t MatrixWorkspace::getMemorySizeForXAxes() const {
  * a DAS bug at SNS around Mar 2011 where the first pulse time is Jan 1, 1990.
  *
  * @return the time of the first pulse
- * @throw runtime_error if the log is not found; or if it is empty.
+ * @throw Exception::NotFoundError if the log is not found; or if it is empty.
  * @throw invalid_argument if the log is not a double TimeSeriesProperty (should
  *be impossible)
  */

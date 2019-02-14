@@ -91,15 +91,15 @@ class UserFileReaderTest(unittest.TestCase):
                            QResolutionId.moderator: ["moderator_rkh_file.txt"],
                            TubeCalibrationFileId.file: ["TUBE_SANS2D_BOTH_31681_25Sept15.nxs"]}
 
-        self.assertTrue(len(expected_values) == len(output))
+        self.assertEqual(len(expected_values), len(output))
         for key, value in list(expected_values.items()):
             self.assertTrue(key in output)
-            self.assertTrue(len(output[key]) == len(value))
+            self.assertEqual(len(output[key]), len(value))
             elements = output[key]
             # Make sure that the different entries are sorted
             UserFileReaderTest._sort_list(elements)
             UserFileReaderTest._sort_list(value)
-            self.assertTrue(elements == value)
+            self.assertEqual(elements, value, "{} is not {}".format(elements, value))
 
         # clean up
         if os.path.exists(user_file_path):

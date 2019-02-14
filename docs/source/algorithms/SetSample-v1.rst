@@ -22,6 +22,10 @@ The 3 arguments to this algorithm ``Environment``, ``Geometry`` and
 dictionaries specifying multiple parameters that relate to the
 respective argument.
 
+.. note:: Contrary to the :ref:`xml forms of defining the geometry
+          <HowToDefineGeometricShape>` which are in metres,
+          :py:obj:`dict` versions are in centimetres.
+
 Environment
 ###########
 

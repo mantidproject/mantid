@@ -84,7 +84,7 @@ void AppendSpectra::exec() {
   bool ValidateInputs = this->getProperty("ValidateInputs");
   if (ValidateInputs) {
     // Check that the input workspaces meet the requirements for this algorithm
-    this->validateInputs(*ws1, *ws2, true);
+    this->checkCompatibility(*ws1, *ws2);
   }
 
   const bool mergeLogs = getProperty("MergeLogs");

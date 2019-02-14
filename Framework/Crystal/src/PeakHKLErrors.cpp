@@ -190,26 +190,31 @@ boost::shared_ptr<Geometry::Instrument>
 PeakHKLErrors::getNewInstrument(PeaksWorkspace_sptr Peaks) const {
   Geometry::Instrument_const_sptr instSave = Peaks->getPeak(0).getInstrument();
   auto pmap = boost::make_shared<Geometry::ParameterMap>();
-  boost::shared_ptr<const Geometry::ParameterMap> pmapSv =
-      instSave->getParameterMap();
 
   if (!instSave) {
     g_log.error(" Peaks workspace does not have an instrument");
     throw std::invalid_argument(" Not all peaks have an instrument");
   }
-  auto instChange = boost::shared_ptr<Geometry::Instrument>();
 
-  if (!instSave->isParametrized()) {
+  if (!hasParameterMap) {
+    pmapSv = instSave->getParameterMap();
+    hasParameterMap = true;
+    if (!instSave->isParametrized()) {
 
-    boost::shared_ptr<Geometry::Instrument> instClone(instSave->clone());
-    auto Pinsta = boost::make_shared<Geometry::Instrument>(instSave, pmap);
+      boost::shared_ptr<Geometry::Instrument> instClone(instSave->clone());
+      auto Pinsta = boost::make_shared<Geometry::Instrument>(instSave, pmap);
 
-    instChange = Pinsta;
-  } else // catch(... )
-  {
-    auto P1 = boost::make_shared<Geometry::Instrument>(
-        instSave->baseInstrument(), pmap);
-    instChange = P1;
+      instChange = Pinsta;
+      IComponent_const_sptr sample = instChange->getSample();
+      sampPos = sample->getRelativePos();
+    } else // catch(... )
+    {
+      auto P1 = boost::make_shared<Geometry::Instrument>(
+          instSave->baseInstrument(), instSave->makeLegacyParameterMap());
+      instChange = P1;
+      IComponent_const_sptr sample = instChange->getSample();
+      sampPos = sample->getRelativePos();
+    }
   }
 
   if (!instChange) {
@@ -219,11 +224,10 @@ PeakHKLErrors::getNewInstrument(PeaksWorkspace_sptr Peaks) const {
   //------------------"clone" orig instruments pmap -------------------
 
   cLone(pmap, instSave, pmapSv);
-  IComponent_const_sptr sample = instChange->getSample();
-  V3D sampPos = sample->getRelativePos();
   V3D sampOffsets(getParameter("SampleXOffset"), getParameter("SampleYOffset"),
                   getParameter("SampleZOffset"));
 
+  IComponent_const_sptr sample = instChange->getSample();
   pmap->addPositionCoordinate(sample.get(), std::string("x"),
                               sampPos.X() + sampOffsets.X());
   pmap->addPositionCoordinate(sample.get(), std::string("y"),
@@ -394,6 +398,10 @@ void PeakHKLErrors::function1D(double *out, const double *xValues,
     } else {
       peak.setGoniometerMatrix(GonRot * peak.getGoniometerMatrix());
     }
+    V3D sampOffsets(getParameter("SampleXOffset"),
+                    getParameter("SampleYOffset"),
+                    getParameter("SampleZOffset"));
+    peak.setSamplePos(peak.getSamplePos() + sampOffsets);
 
     V3D hkl = UBinv * peak.getQSampleFrame();
 
@@ -513,6 +521,10 @@ void PeakHKLErrors::functionDeriv1D(Jacobian *out, const double *xValues,
       chiParamNum = phiParamNum = omegaParamNum = nParams() + 10;
       peak.setGoniometerMatrix(GonRot * peak.getGoniometerMatrix());
     }
+    V3D sampOffsets(getParameter("SampleXOffset"),
+                    getParameter("SampleYOffset"),
+                    getParameter("SampleZOffset"));
+    peak.setSamplePos(peak.getSamplePos() + sampOffsets);
     // NOTE:Use getQLabFrame except for below.
     // For parameters the getGoniometerMatrix should remove GonRot, for derivs
     // wrt GonRot*, wrt chi*,phi*,etc.

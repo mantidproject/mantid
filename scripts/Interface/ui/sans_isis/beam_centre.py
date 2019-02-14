@@ -10,7 +10,7 @@ from abc import ABCMeta, abstractmethod
 
 from PyQt4 import QtGui, QtCore
 from six import with_metaclass
-import ui_beam_centre
+from . import ui_beam_centre
 from mantidqtpython import MantidQt
 from sans.gui_logic.gui_common import get_detector_from_gui_selection, \
     get_detector_strings_for_gui, get_string_for_gui_from_reduction_mode

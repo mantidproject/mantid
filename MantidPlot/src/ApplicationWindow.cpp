@@ -11647,7 +11647,11 @@ void ApplicationWindow::patchPaletteForLinux(QPalette &palette) const {
 
 bool ApplicationWindow::isUnityDesktop() const {
   return QString::fromLocal8Bit(qgetenv("XDG_SESSION_DESKTOP")) == "Unity" ||
-         QString::fromLocal8Bit(qgetenv("XDG_CURRENT_DESKTOP")) == "Unity";
+         QString::fromLocal8Bit(qgetenv("XDG_CURRENT_DESKTOP")) == "Unity" ||
+         QString::fromLocal8Bit(qgetenv("XDG_SESSION_DESKTOP")) ==
+             "ubuntu:GNOME" ||
+         QString::fromLocal8Bit(qgetenv("XDG_CURRENT_DESKTOP")) ==
+             "ubuntu:GNOME";
 }
 
 void ApplicationWindow::setAppColors(const QColor &wc, const QColor &pc,
@@ -16834,10 +16838,7 @@ bool ApplicationWindow::saveProjectRecovery(std::string destination) {
 void ApplicationWindow::checkForProjectRecovery() {
   m_projectRecoveryRunOnStart = true;
 
-  m_projectRecovery.removeOlderCheckpoints();
-
-  // Mantid crashed during writing to this checkpoint so remove it
-  m_projectRecovery.removeLockedCheckpoints();
+  m_projectRecovery.repairCheckpointDirectory();
 
   if (!m_projectRecovery.checkForRecovery()) {
     m_projectRecovery.startProjectSaving();

@@ -9,7 +9,7 @@ import six
 
 import unittest
 import json
-from mantid.api import AlgorithmID, AlgorithmManager
+from mantid.api import AlgorithmID, AlgorithmManager, FrameworkManagerImpl
 from testhelpers import run_algorithm
 
 class AlgorithmTest(unittest.TestCase):
@@ -17,6 +17,7 @@ class AlgorithmTest(unittest.TestCase):
     _load = None
 
     def setUp(self):
+        FrameworkManagerImpl.Instance()
         if self._load is None:
             self.__class__._load = AlgorithmManager.createUnmanaged('Load')
             self._load.initialize()

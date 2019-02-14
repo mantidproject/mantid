@@ -18,7 +18,7 @@ void MSDFitModel::setFitType(const std::string &fitType) {
 
 std::string MSDFitModel::sequentialFitOutputName() const {
   if (isMultiFit())
-    return "MultiMSDFit_" + m_fitType + "_Result";
+    return "MultiMSDFit_" + m_fitType + "_Results";
   return createOutputName("%1%_MSDFit_" + m_fitType + "_s%2%", "_to_", 0);
 }
 
@@ -28,8 +28,8 @@ std::string MSDFitModel::simultaneousFitOutputName() const {
 
 std::string MSDFitModel::singleFitOutputName(std::size_t index,
                                              std::size_t spectrum) const {
-  return createSingleFitOutputName("%1%_MSDFit_" + m_fitType + "_s%2%", index,
-                                   spectrum);
+  return createSingleFitOutputName("%1%_MSDFit_" + m_fitType + "_s%2%_Results",
+                                   index, spectrum);
 }
 
 std::vector<std::string> MSDFitModel::getSpectrumDependentAttributes() const {

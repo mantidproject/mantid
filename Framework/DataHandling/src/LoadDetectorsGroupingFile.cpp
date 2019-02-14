@@ -35,25 +35,41 @@ using namespace Mantid::API;
 namespace Mantid {
 namespace DataHandling {
 
+namespace {
+namespace PropertyNames {
+const std::string INPUT_FILE("InputFile");
+const std::string INPUT_WKSP("InputWorkspace");
+const std::string OUTPUT_WKSP("OutputWorkspace");
+} // namespace PropertyNames
+} // namespace
+
 DECLARE_ALGORITHM(LoadDetectorsGroupingFile)
 
 void LoadDetectorsGroupingFile::init() {
   /// Initialise the properties
 
   const std::vector<std::string> exts{".xml", ".map"};
-  declareProperty(Kernel::make_unique<FileProperty>("InputFile", "",
-                                                    FileProperty::Load, exts),
+  declareProperty(Kernel::make_unique<FileProperty>(
+                      PropertyNames::INPUT_FILE, "", FileProperty::Load, exts),
                   "The XML or Map file with full path.");
 
   declareProperty(
+      make_unique<WorkspaceProperty<>>(PropertyNames::INPUT_WKSP, "",
+                                       Direction::Input,
+                                       PropertyMode::Optional),
+      "Optional: An input workspace with the instrument we want to use. This "
+      "will override what is specified in the grouping file.");
+
+  declareProperty(
       make_unique<WorkspaceProperty<DataObjects::GroupingWorkspace>>(
-          "OutputWorkspace", "", Direction::Output),
-      "The name of the output workspace.");
+          PropertyNames::OUTPUT_WKSP, "", Direction::Output),
+      "The output workspace containing the loaded grouping information.");
 }
 
 /// Run the algorithm
 void LoadDetectorsGroupingFile::exec() {
-  Poco::Path inputFile(static_cast<std::string>(getProperty("InputFile")));
+  Poco::Path inputFile(
+      static_cast<std::string>(getProperty(PropertyNames::INPUT_FILE)));
 
   std::string ext = Poco::toLower(inputFile.getExtension());
 
@@ -71,8 +87,12 @@ void LoadDetectorsGroupingFile::exec() {
     LoadGroupXMLFile loader;
     loader.loadXMLFile(inputFile.toString());
 
-    // Load an instrument, if given
-    if (loader.isGivenInstrumentName()) {
+    MatrixWorkspace_sptr inputWS = getProperty(PropertyNames::INPUT_WKSP);
+    if (inputWS) {
+      // use the instrument from the input workspace
+      m_instrument = inputWS->getInstrument();
+    } else if (loader.isGivenInstrumentName()) {
+      // Load an instrument, if given
       const std::string instrumentName = loader.getInstrumentName();
 
       std::string date;

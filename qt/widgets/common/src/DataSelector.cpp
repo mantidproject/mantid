@@ -17,6 +17,29 @@
 #include <QMimeData>
 #include <QUrl>
 
+using namespace Mantid::API;
+
+namespace {
+
+bool doesExistInADS(std::string const &workspaceName) {
+  return AnalysisDataService::Instance().doesExist(workspaceName);
+}
+
+std::string extractLastOf(const std::string &str,
+                          const std::string &delimiter) {
+  const auto cutIndex = str.rfind(delimiter);
+  if (cutIndex != std::string::npos)
+    return str.substr(cutIndex, str.size() - cutIndex);
+  return str;
+}
+
+std::string loadAlgName(const std::string &filePath) {
+  const auto suffix = extractLastOf(filePath, ".");
+  return suffix == ".dave" ? "LoadDaveGrp" : "Load";
+}
+
+} // namespace
+
 namespace MantidQt {
 namespace MantidWidgets {
 
@@ -108,8 +131,6 @@ bool DataSelector::isWorkspaceSelectorVisible() const {
  * @return :: If the data selector is valid
  */
 bool DataSelector::isValid() {
-  using namespace Mantid::API;
-
   bool isValid = false;
 
   if (isFileSelectorVisible()) {
@@ -120,20 +141,19 @@ bool DataSelector::isValid() {
     if (isValid && m_autoLoad) {
       const QString wsName = getCurrentDataName();
 
-      if (!AnalysisDataService::Instance().doesExist(wsName.toStdString())) {
+      if (!doesExistInADS(wsName.toStdString())) {
         // attempt to reload if we can
         // don't use algorithm runner because we need to know instantly.
         const QString filepath =
             m_uiForm.rfFileInput->getUserInput().toString();
-        const Algorithm_sptr loadAlg =
-            AlgorithmManager::Instance().createUnmanaged("Load");
+        const auto loadAlg = AlgorithmManager::Instance().createUnmanaged(
+            loadAlgName(filepath.toStdString()));
         loadAlg->initialize();
         loadAlg->setProperty("Filename", filepath.toStdString());
         loadAlg->setProperty("OutputWorkspace", wsName.toStdString());
         loadAlg->execute();
 
-        isValid =
-            AnalysisDataService::Instance().doesExist(wsName.toStdString());
+        isValid = doesExistInADS(wsName.toStdString());
 
         if (!isValid) {
           m_uiForm.rfFileInput->setFileProblem("The specified workspace is "
@@ -154,8 +174,6 @@ bool DataSelector::isValid() {
  * @returns A string explaining the error.
  */
 QString DataSelector::getProblem() const {
-  using namespace Mantid::API;
-
   QString problem = "";
   if (isFileSelectorVisible()) {
     problem = m_uiForm.rfFileInput->getFileProblem();
@@ -178,15 +196,14 @@ QString DataSelector::getProblem() const {
  * @param filepath :: The file path to load
  */
 void DataSelector::autoLoadFile(const QString &filepath) {
-  using namespace Mantid::API;
-  QString baseName = getWsNameFromFiles();
+  const auto baseName = getWsNameFromFiles().toStdString();
 
   // create instance of load algorithm
-  const Algorithm_sptr loadAlg =
-      AlgorithmManager::Instance().createUnmanaged("Load");
+  const auto loadAlg = AlgorithmManager::Instance().createUnmanaged(
+      loadAlgName(filepath.toStdString()));
   loadAlg->initialize();
   loadAlg->setProperty("Filename", filepath.toStdString());
-  loadAlg->setProperty("OutputWorkspace", baseName.toStdString());
+  loadAlg->setProperty("OutputWorkspace", baseName);
 
   m_algRunner.startAlgorithm(loadAlg);
 }
@@ -214,9 +231,8 @@ void DataSelector::handleWorkspaceInput() {
   if (m_uiForm.stackedDataSelect->currentIndex() > 0) {
     // Get text of name of workspace to use
     QString filename = m_uiForm.wsWorkspaceInput->currentText();
-    if (filename.isEmpty()) {
+    if (filename.isEmpty())
       return;
-    }
 
     // emit that we got a valid workspace/file to work with
     emit dataReady(filename);
@@ -385,9 +401,10 @@ void DataSelector::dropEvent(QDropEvent *de) {
   const QMimeData *mimeData = de->mimeData();
   auto before_action = de->dropAction();
 
-  if (de->mimeData() && mimeData->text().contains(" = mtd[\"")) {
+  if (de->mimeData() && doesExistInADS(mimeData->text().toStdString())) {
     m_uiForm.wsWorkspaceInput->dropEvent(de);
     if (de->dropAction() == before_action) {
+      setWorkspaceSelectorIndex(mimeData->text());
       m_uiForm.cbInputType->setCurrentIndex(1);
       return;
     }
@@ -398,6 +415,16 @@ void DataSelector::dropEvent(QDropEvent *de) {
   if (de->dropAction() == before_action) {
     m_uiForm.cbInputType->setCurrentIndex(0);
   }
+}
+
+/**
+ * This sets the workspace selector's index to the workspace which was dragged
+ * and dropped onto the data selector
+ * @param workspaceName :: the name of the workspace dragged onto the selector
+ */
+void DataSelector::setWorkspaceSelectorIndex(QString const &workspaceName) {
+  auto const index = m_uiForm.wsWorkspaceInput->findText(workspaceName);
+  m_uiForm.wsWorkspaceInput->setCurrentIndex(index != -1 ? index : 0);
 }
 
 /**

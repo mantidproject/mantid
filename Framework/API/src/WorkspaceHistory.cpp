@@ -93,13 +93,21 @@ void WorkspaceHistory::addHistory(const WorkspaceHistory &otherHistory) {
     this->addHistory(algHistory);
   }
 
-  std::unordered_set<AlgorithmHistory_sptr, AlgorithmHistoryHasher,
-                     AlgorithmHistoryComparator>
-      set;
-  for (auto i : m_algorithms)
-    set.insert(i);
-  m_algorithms.assign(set.begin(), set.end());
-  std::sort(m_algorithms.begin(), m_algorithms.end(), AlgorithmHistorySearch());
+  using UniqueAlgorithmHistories =
+      std::unordered_set<AlgorithmHistory_sptr, AlgorithmHistoryHasher,
+                         AlgorithmHistoryComparator>;
+  // It is faster to default construct a set/unordered_set and insert the
+  // elements than use the range-based constructor directly.
+  // See https://stackoverflow.com/a/24477023:
+  //   "the constructor actually construct a new node for every element, before
+  //   checking its value to determine if it should actually be inserted."
+  UniqueAlgorithmHistories uniqueHistories;
+  for (const auto &algorithmHistory : m_algorithms) {
+    uniqueHistories.insert(algorithmHistory);
+  }
+  m_algorithms.assign(std::begin(uniqueHistories), std::end(uniqueHistories));
+  std::sort(std::begin(m_algorithms), std::end(m_algorithms),
+            AlgorithmHistorySearch());
 }
 
 /// Append an AlgorithmHistory to this WorkspaceHistory
@@ -179,12 +187,8 @@ boost::shared_ptr<IAlgorithm> WorkspaceHistory::lastAlgorithm() const {
  * sub-objects
  */
 void WorkspaceHistory::printSelf(std::ostream &os, const int indent) const {
-
   os << std::string(indent, ' ') << m_environment << '\n';
-
-  AlgorithmHistories::const_iterator it;
   os << std::string(indent, ' ') << "Histories:\n";
-
   for (const auto &algorithm : m_algorithms) {
     os << '\n';
     algorithm->printSelf(os, indent + 2);
