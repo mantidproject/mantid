@@ -616,7 +616,7 @@ void LoadPLN::exec(const std::string &hdfFile, const std::string &eventFile) {
   // if a phase calibration is required then load it as raw doppler time
   // perform the calibration and then convert to TOF
   Types::Core::DateAndTime startTime(m_startRun);
-  auto start_nanosec = startTime.totalNanoseconds();
+  auto const start_nanosec = startTime.totalNanoseconds();
   bool calibrateTOF = getProperty(CalibrateTOFStr);
   double tofCorrection = getProperty(TOFBiasStr);
   if (calibrateTOF) {
