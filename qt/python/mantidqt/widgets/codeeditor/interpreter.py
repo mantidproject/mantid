@@ -125,6 +125,7 @@ class PythonFileInterpreter(QWidget):
 
     def closeEvent(self, event):
         self.deleteLater()
+        self.find_replace_dialog.close()
         super(PythonFileInterpreter, self).closeEvent(event)
 
     def show_find_replace_dialog(self):
@@ -135,9 +136,7 @@ class PythonFileInterpreter(QWidget):
         self.find_replace_dialog.show()
 
     def hide_find_replace_dialog(self):
-        print("Trying to hide f/r dialog")
         if self.find_replace_dialog is not None:
-            print("Hiding f/r dialog")
             self.find_replace_dialog.hide()
 
     @property

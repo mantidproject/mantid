@@ -71,6 +71,10 @@ class EmbeddedFindReplaceDialogView(DialogBase, DialogForm):
         self.regex.stateChanged.connect(self.presenter.clear_search)
         self.wrap_around.stateChanged.connect(self.presenter.clear_search)
 
+    def closeEvent(self, event):
+        self.deleteLater()
+        super(EmbeddedFindReplaceDialogView, self).closeEvent(event)
+
     def get_options(self):
         return FindReplaceOptions(match_case=self.match_case.isChecked(),
                                   words=self.words.isChecked(),

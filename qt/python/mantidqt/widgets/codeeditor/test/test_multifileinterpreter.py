@@ -53,6 +53,21 @@ class MultiPythonFileInterpreterTest(GuiTest, QtWidgetFinder):
         # there will always be 1, because we never allow an empty editor widget
         self.assert_number_of_widgets_matching(".interpreter.PythonFileInterpreter", 1)
 
+    def test_editor_widget_deletes_find_replace_dialog(self):
+        widget = MultiPythonFileInterpreter()
+        self.assertEqual(1, widget.editor_count)
+        widget.append_new_editor()
+        self.assert_number_of_widgets_matching(".interpreter.PythonFileInterpreter", 2)
+        widget.current_editor().show_find_replace_dialog()
+        self.assert_number_of_widgets_matching("Embedded", 1)
+
+        widget.close_tab(1)
+
+        QApplication.processEvents()
+        # there will always be 1, because we never allow an empty editor widget
+        self.assert_number_of_widgets_matching(".interpreter.PythonFileInterpreter", 1)
+        self.assert_number_of_widgets_matching("Embedded", 0)
+
 
 if __name__ == '__main__':
     unittest.main()

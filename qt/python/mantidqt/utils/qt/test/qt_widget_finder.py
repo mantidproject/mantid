@@ -20,6 +20,10 @@ class QtWidgetFinder(object):
                          "Widgets with name '{}' are present in the QApplication. Something has not been deleted: {}".format(
                              name, all))
 
+    def find_qt_toplevel_widget(self, name):
+        all = QApplication.topLevelWidgets()
+        return [x for x in all if name.lower() in str(type(x)).lower()]
+
     def _find_qt_widget_by_name(self, name):
         a = QApplication.allWidgets()
         return [x for x in a if name.lower() in str(type(x)).lower()]

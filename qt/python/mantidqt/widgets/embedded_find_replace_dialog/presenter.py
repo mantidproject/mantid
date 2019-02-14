@@ -5,6 +5,8 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package
+from __future__ import (absolute_import, division, print_function)
+
 from mantid.py3compat import Enum
 from mantidqt.widgets.embedded_find_replace_dialog.view import EmbeddedFindReplaceDialogView
 
@@ -22,6 +24,9 @@ class EmbeddedFindReplaceDialog(object):
         self.visible = False
         self.find_in_progress = False
         self.current_direction = SearchDirection.FORWARD
+
+    def close(self):
+        self.view.close()
 
     def set_text_in_find(self, text):
         self.view.find.setCurrentText(text)
@@ -129,8 +134,7 @@ class EmbeddedFindReplaceDialog(object):
         :param case_sensitive: If case_sensitive is NOT selected, then both strings will be made lowercase
                                Else the strings will be compared as they are without changes
         """
-        return (not case_sensitive and string1.lower() != string2.lower()) \
-            or (case_sensitive and string1 != string2)
+        return (not case_sensitive and string1.lower() != string2.lower()) or (case_sensitive and string1 != string2)
 
     def action_replace_all(self):
         search_string = self.view.find.currentText()

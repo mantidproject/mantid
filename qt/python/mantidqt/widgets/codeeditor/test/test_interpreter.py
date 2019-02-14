@@ -9,15 +9,12 @@
 #
 from __future__ import (absolute_import, unicode_literals)
 
-# std imports
 import unittest
 
-# 3rd party imports
 import six
 
-# local imports
-from mantidqt.widgets.codeeditor.interpreter import PythonFileInterpreter
 from mantidqt.utils.qt.test import GuiTest
+from mantidqt.widgets.codeeditor.interpreter import PythonFileInterpreter
 
 if six.PY2:
     import mock
@@ -65,6 +62,20 @@ class PythonFileInterpreterTest(GuiTest):
             else:
                 self.assertEqual(w.clear_key_binding(key_combo), None,
                                  msg=fail_msg)
+
+    def test_find_replace_dialog(self):
+        w = PythonFileInterpreter()
+
+        # dialog not initialised by default, only when used
+        self.assertIsNone(w.find_replace_dialog)
+
+        w.show_find_replace_dialog()
+        self.assertIsNotNone(w.find_replace_dialog)
+
+        w.hide_find_replace_dialog()
+        # dialog not deleted on hide - just hidden
+        self.assertIsNotNone(w.find_replace_dialog)
+        self.assertFalse(w.find_replace_dialog.visible)
 
 
 if __name__ == '__main__':
