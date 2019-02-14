@@ -52,6 +52,7 @@ public:
 
   void setReprocessFailedItems(bool reprocessFailed);
 
+  void algorithmStarted(MantidQt::API::ConfiguredAlgorithm_sptr algorithm);
   void algorithmFinished(MantidQt::API::ConfiguredAlgorithm_sptr algorithm);
   void algorithmError(MantidQt::API::ConfiguredAlgorithm_sptr algorithm,
                       std::string const &message);

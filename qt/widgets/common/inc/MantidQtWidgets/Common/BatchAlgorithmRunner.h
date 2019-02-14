@@ -70,6 +70,17 @@ private:
   ConfiguredAlgorithm_sptr m_algorithm;
 };
 
+class AlgorithmStartedNotification : public Poco::Notification {
+public:
+  AlgorithmStartedNotification(ConfiguredAlgorithm_sptr algorithm)
+      : Poco::Notification(), m_algorithm(algorithm) {}
+
+  ConfiguredAlgorithm_sptr algorithm() const { return m_algorithm; }
+
+private:
+  ConfiguredAlgorithm_sptr m_algorithm;
+};
+
 class AlgorithmErrorNotification : public Poco::Notification {
 public:
   AlgorithmErrorNotification(ConfiguredAlgorithm_sptr algorithm,
@@ -123,6 +134,7 @@ signals:
   /// Emitted when a batch has finished executing
   void batchComplete(bool error);
   void batchCancelled();
+  void algorithmStarted(MantidQt::API::ConfiguredAlgorithm_sptr algorithm);
   void algorithmComplete(MantidQt::API::ConfiguredAlgorithm_sptr algorithm);
   void algorithmError(MantidQt::API::ConfiguredAlgorithm_sptr algorithm,
                       std::string errorMessage);
@@ -137,6 +149,8 @@ private:
   void handleBatchComplete(const Poco::AutoPtr<BatchCompleteNotification> &pNf);
   void
   handleBatchCancelled(const Poco::AutoPtr<BatchCancelledNotification> &pNf);
+  void handleAlgorithmStarted(
+      const Poco::AutoPtr<AlgorithmStartedNotification> &pNf);
   void handleAlgorithmComplete(
       const Poco::AutoPtr<AlgorithmCompleteNotification> &pNf);
   void
@@ -164,6 +178,8 @@ private:
       m_batchCompleteObserver;
   Poco::NObserver<BatchAlgorithmRunner, BatchCancelledNotification>
       m_batchCancelledObserver;
+  Poco::NObserver<BatchAlgorithmRunner, AlgorithmStartedNotification>
+      m_algorithmStartedObserver;
   Poco::NObserver<BatchAlgorithmRunner, AlgorithmCompleteNotification>
       m_algorithmCompleteObserver;
   Poco::NObserver<BatchAlgorithmRunner, AlgorithmErrorNotification>

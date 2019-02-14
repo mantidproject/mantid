@@ -81,6 +81,10 @@ void BatchView::executeAlgorithmQueue() {
   connect(&m_batchAlgoRunner, SIGNAL(batchCancelled()), this,
           SLOT(onBatchCancelled()));
   connect(&m_batchAlgoRunner,
+          SIGNAL(algorithmStarted(MantidQt::API::ConfiguredAlgorithm_sptr)),
+          this,
+          SLOT(onAlgorithmStarted(MantidQt::API::ConfiguredAlgorithm_sptr)));
+  connect(&m_batchAlgoRunner,
           SIGNAL(algorithmComplete(MantidQt::API::ConfiguredAlgorithm_sptr)),
           this,
           SLOT(onAlgorithmComplete(MantidQt::API::ConfiguredAlgorithm_sptr)));
@@ -100,6 +104,10 @@ void BatchView::onBatchComplete(bool error) {
 }
 
 void BatchView::onBatchCancelled() { m_notifyee->notifyBatchCancelled(); }
+
+void BatchView::onAlgorithmStarted(API::ConfiguredAlgorithm_sptr algorithm) {
+  m_notifyee->notifyAlgorithmStarted(algorithm);
+}
 
 void BatchView::onAlgorithmComplete(API::ConfiguredAlgorithm_sptr algorithm) {
   m_notifyee->notifyAlgorithmFinished(algorithm);

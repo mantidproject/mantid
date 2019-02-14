@@ -366,6 +366,11 @@ std::deque<ConfiguredAlgorithm_sptr> BatchJobRunner::getAlgorithms() {
   return algorithms;
 }
 
+void BatchJobRunner::algorithmStarted(ConfiguredAlgorithm_sptr algorithm) {
+  auto jobAlgorithm = boost::dynamic_pointer_cast<BatchJobAlgorithm>(algorithm);
+  jobAlgorithm->item()->algorithmStarted(algorithm->algorithm());
+}
+
 void BatchJobRunner::algorithmFinished(ConfiguredAlgorithm_sptr algorithm) {
   auto jobAlgorithm = boost::dynamic_pointer_cast<BatchJobAlgorithm>(algorithm);
   jobAlgorithm->item()->algorithmComplete(algorithm->algorithm());

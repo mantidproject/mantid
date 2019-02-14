@@ -45,6 +45,8 @@ public:
   // BatchViewSubscriber overrides
   void notifyBatchFinished(bool error) override;
   void notifyBatchCancelled() override;
+  void notifyAlgorithmStarted(
+      MantidQt::API::ConfiguredAlgorithm_sptr algorithm) override;
   void notifyAlgorithmFinished(
       MantidQt::API::ConfiguredAlgorithm_sptr algorithm) override;
   void notifyAlgorithmError(MantidQt::API::ConfiguredAlgorithm_sptr algorithm,

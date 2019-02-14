@@ -29,6 +29,8 @@ public:
   virtual void notifyBatchFinished(bool error) = 0;
   virtual void notifyBatchCancelled() = 0;
   virtual void
+  notifyAlgorithmStarted(API::ConfiguredAlgorithm_sptr algorithm) = 0;
+  virtual void
   notifyAlgorithmFinished(API::ConfiguredAlgorithm_sptr algorithm) = 0;
   virtual void notifyAlgorithmError(API::ConfiguredAlgorithm_sptr algorithm,
                                     std::string const &message) = 0;

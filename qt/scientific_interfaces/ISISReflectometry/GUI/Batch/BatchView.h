@@ -43,6 +43,7 @@ public:
 private slots:
   void onBatchComplete(bool error);
   void onBatchCancelled();
+  void onAlgorithmStarted(MantidQt::API::ConfiguredAlgorithm_sptr algorithm);
   void onAlgorithmComplete(MantidQt::API::ConfiguredAlgorithm_sptr algorithm);
   void onAlgorithmError(MantidQt::API::ConfiguredAlgorithm_sptr algorithm,
                         std::string errorMessage);

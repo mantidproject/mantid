@@ -101,6 +101,12 @@ void BatchPresenter::notifyBatchCancelled() {
   m_runsPresenter->notifyRowStateChanged();
 }
 
+void BatchPresenter::notifyAlgorithmStarted(
+    ConfiguredAlgorithm_sptr algorithm) {
+  m_jobRunner->algorithmStarted(algorithm);
+  m_runsPresenter->notifyRowStateChanged();
+}
+
 void BatchPresenter::notifyAlgorithmFinished(
     ConfiguredAlgorithm_sptr algorithm) {
   m_jobRunner->algorithmFinished(algorithm);

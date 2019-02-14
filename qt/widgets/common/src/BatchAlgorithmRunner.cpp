@@ -39,6 +39,8 @@ BatchAlgorithmRunner::BatchAlgorithmRunner(QObject *parent)
                               &BatchAlgorithmRunner::handleBatchComplete),
       m_batchCancelledObserver(*this,
                                &BatchAlgorithmRunner::handleBatchCancelled),
+      m_algorithmStartedObserver(*this,
+                                 &BatchAlgorithmRunner::handleAlgorithmStarted),
       m_algorithmCompleteObserver(
           *this, &BatchAlgorithmRunner::handleAlgorithmComplete),
       m_algorithmErrorObserver(*this,
@@ -51,6 +53,7 @@ void BatchAlgorithmRunner::addAllObservers() {
   removeAllObservers();
   m_notificationCenter.addObserver(m_batchCompleteObserver);
   m_notificationCenter.addObserver(m_batchCancelledObserver);
+  m_notificationCenter.addObserver(m_algorithmStartedObserver);
   m_notificationCenter.addObserver(m_algorithmCompleteObserver);
   m_notificationCenter.addObserver(m_algorithmErrorObserver);
 }
@@ -58,6 +61,7 @@ void BatchAlgorithmRunner::addAllObservers() {
 void BatchAlgorithmRunner::removeAllObservers() {
   m_notificationCenter.removeObserver(m_batchCompleteObserver);
   m_notificationCenter.removeObserver(m_batchCancelledObserver);
+  m_notificationCenter.removeObserver(m_algorithmStartedObserver);
   m_notificationCenter.removeObserver(m_algorithmCompleteObserver);
   m_notificationCenter.removeObserver(m_algorithmErrorObserver);
 }
@@ -215,6 +219,8 @@ bool BatchAlgorithmRunner::executeAlgo(ConfiguredAlgorithm_sptr algorithm) {
                         << m_currentAlgorithm->name() << "\n";
 
     // Start algorithm running
+    m_notificationCenter.postNotification(
+        new AlgorithmStartedNotification(algorithm));
     auto result = m_currentAlgorithm->execute();
 
     if (!result) {
@@ -253,8 +259,7 @@ bool BatchAlgorithmRunner::executeAlgo(ConfiguredAlgorithm_sptr algorithm) {
     m_notificationCenter.postNotification(
         new AlgorithmErrorNotification(algorithm, ex.what()));
     return false;
-  }
-  catch (...) {
+  } catch (...) {
     g_log.warning("Unknown error starting next batch algorithm");
     m_notificationCenter.postNotification(new AlgorithmErrorNotification(
         algorithm, "Unknown error starting algorithm"));
@@ -281,6 +286,12 @@ void BatchAlgorithmRunner::handleBatchCancelled(
   UNUSED_ARG(pNf);
   // Notify UI elements
   emit batchCancelled();
+}
+
+void BatchAlgorithmRunner::handleAlgorithmStarted(
+    const Poco::AutoPtr<AlgorithmStartedNotification> &pNf) {
+  // Notify UI elements
+  emit algorithmStarted(pNf->algorithm());
 }
 
 void BatchAlgorithmRunner::handleAlgorithmComplete(
