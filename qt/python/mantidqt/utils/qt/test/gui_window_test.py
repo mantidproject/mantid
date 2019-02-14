@@ -56,6 +56,9 @@ def skipIf(test, reason):
             pass
         if test:
             print('Skip {name}. Reason: {reason}'.format(name=method.__name__, reason=reason), file=sys.stderr)
+            if inspect.isclass(method):
+                method._workbench_test_skip_ = True
+                return method
             return wrapper
         else:
             return method
@@ -155,20 +158,24 @@ def is_test_method(value):
 class GuiWindowTest(TestCase, GuiTestBase):
 
     @classmethod
-    def make_test_wrapper(cls, wrapped_name):
+    def make_test_wrapper(cls, wrapped_name, skip):
         def wrapper(self):
             self.run_test(method=wrapped_name)
+
+        if skip:
+            return lambda self: None
         return wrapper
 
     @classmethod
     def setUpClass(cls):
+        skip = getattr(cls, '_workbench_test_skip_', False)
         cls.test_methods = []
         cls.widget = None
         for test in inspect.getmembers(cls, is_test_method):
             name = test[0]
             wrapped_name = '_' + name
             setattr(cls, wrapped_name, test[1])
-            setattr(cls, name, cls.make_test_wrapper(wrapped_name))
+            setattr(cls, name, cls.make_test_wrapper(wrapped_name, skip))
 
 
 class MultiTestRunner(object):
@@ -184,11 +191,14 @@ class MultiTestRunner(object):
 class WorkbenchGuiTest(GuiWindowTest):
 
     @classmethod
-    def make_test_wrapper(cls, wrapped_name):
+    def make_test_wrapper(cls, wrapped_name, skip):
         def wrapper(self):
             if len(self.test_methods) == 0:
                 self.widget = self.create_widget()
             self.test_methods.append(getattr(self, wrapped_name))
+
+        if skip:
+            return lambda self: None
         return wrapper
 
     @classmethod
