@@ -47,7 +47,8 @@ class subplot(QtWidgets.QWidget):
     signal to update the axis ranges """
 
     def draw_event_callback(self, event):
-        #self.figure.tight_layout()
+        #self.gridspec.tight_layout(self.figure)
+        self.figure.tight_layout()
         for subplot in self.plotObjects.keys():
             self.emit_subplot_range(subplot)
 
@@ -86,7 +87,7 @@ class subplot(QtWidgets.QWidget):
 
     def add_subplot(self, subplotName, number, code=111):
         self.gridspec = GridSpec(number+1, 1)
-        self.plotObjects[subplotName] = self.figure.add_subplot(self.gridspec[number])
+        self.plotObjects[subplotName] = self.figure.add_subplot(self.gridspec[number],label=subplotName)
         self.plotObjects[subplotName].set_title(subplotName)
         self._context.addSubplot(subplotName, self.plotObjects[subplotName])
         print("moo",number, self.plotObjects[subplotName] )
@@ -101,7 +102,7 @@ class subplot(QtWidgets.QWidget):
             print("baaa", self.gridspec[j], name,j)
             tmp = self.gridspec[j].get_position(self.figure)
             self._context.subplots[name]._subplot.set_position(tmp)
-            self._context.subplots[name]._subplot.set_subplotspec([j-1][0])
+            self._context.subplots[name]._subplot.set_subplotspec(self.gridspec[j])
         self.canvas.draw()
 
     def emit_subplot_range(self, subplotName):
