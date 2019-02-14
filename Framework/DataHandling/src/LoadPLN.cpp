@@ -16,7 +16,6 @@
 
 #include <boost/filesystem.hpp>
 
-#include <Poco/AutoPtr.h>
 
 #include <algorithm>
 #include <cmath>
