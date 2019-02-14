@@ -334,9 +334,9 @@ class MuonDataContext(object):
             directory = get_base_data_directory(self, run_as_string) + get_group_data_directory(self, run_as_string)
             name = get_group_data_workspace_name(self, group_name, run_as_string)
 
-            self._groups[group_name]._workspace[run] = MuonWorkspaceWrapper(group_workspace)
+            self._groups[group_name]._workspace[str(run)] = MuonWorkspaceWrapper(group_workspace)
             if show:
-                self._groups[group_name].workspace[run].show(directory + name)
+                self._groups[group_name].workspace[str(run)].show(directory + name)
 
     def show_all_pairs(self):
         for pair_name in self._pairs.keys():
@@ -349,9 +349,9 @@ class MuonDataContext(object):
             directory = get_base_data_directory(self, run_as_string) + get_pair_data_directory(self, run_as_string)
             pair_workspace = calculate_pair_data(self, pair_name, run)
 
-            self._pairs[pair_name].workspace[run] = MuonWorkspaceWrapper(pair_workspace)
+            self._pairs[pair_name].workspace[str(run)] = MuonWorkspaceWrapper(pair_workspace)
             if show:
-                self._pairs[pair_name].workspace[run].show(directory + name)
+                self._pairs[pair_name].workspace[str(run)].show(directory + name)
 
     def calculate_all_groups(self):
         for group_name in self._groups.keys():
