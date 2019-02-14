@@ -22,7 +22,7 @@ class TableWorkspaceDisplayEncoder(TableWorkspaceDisplayAttributes):
     def __init__(self):
         super(TableWorkspaceDisplayEncoder, self).__init__()
 
-    def encode(self, obj, _):
+    def encode(self, obj, _=None):
         obj = obj.presenter.view
         return {"workspace": obj.presenter.model.ws.name(),
                 "markedColumns": self._encode_marked_columns(obj.presenter.model.marked_columns),
@@ -47,7 +47,7 @@ class TableWorkspaceDisplayDecoder(TableWorkspaceDisplayAttributes):
         super(TableWorkspaceDisplayDecoder, self).__init__()
 
     @staticmethod
-    def decode(obj_dic, _):
+    def decode(obj_dic, _=None):
         import matplotlib.pyplot as plt
 
         pres = TableWorkspaceDisplay(ADS.retrieve(obj_dic["workspace"]), name=obj_dic["windowName"], plot=plt)

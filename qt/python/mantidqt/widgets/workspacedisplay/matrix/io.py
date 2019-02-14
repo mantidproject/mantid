@@ -22,7 +22,7 @@ class MatrixWorkspaceDisplayEncoder(MatrixWorkspaceDisplayAttributes):
         super(MatrixWorkspaceDisplayEncoder, self).__init__()
 
     @staticmethod
-    def encode(obj, _):
+    def encode(obj, _=None):
         return {"workspace": obj.presenter.model._ws.name()}
 
     @classmethod
@@ -35,7 +35,7 @@ class MatrixWorkspaceDisplayDecoder(MatrixWorkspaceDisplayAttributes):
         super(MatrixWorkspaceDisplayDecoder, self).__init__()
 
     @staticmethod
-    def decode(obj_dic, _):
+    def decode(obj_dic, _=None):
         import matplotlib.pyplot as plt
 
         pres = MatrixWorkspaceDisplay(ADS.retrieve(obj_dic["workspace"]), plot=plt)
