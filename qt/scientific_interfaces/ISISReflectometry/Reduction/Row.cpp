@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "Row.h"
 #include "Common/Map.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/variant.hpp>
 
@@ -87,11 +88,27 @@ void Row::algorithmStarted(Mantid::API::IAlgorithm_sptr const algorithm) {
   Item::algorithmStarted(algorithm);
 }
 
+void addOutputWorkspaceToADS(Mantid::API::IAlgorithm_sptr const algorithm,
+                             std::string const &propertyName,
+                             std::string const &workspaceName) {
+  if (workspaceName.empty())
+    return;
+
+  Mantid::API::AnalysisDataService::Instance().addOrReplace(
+      workspaceName, algorithm->getProperty(propertyName));
+}
+
 void Row::algorithmComplete(Mantid::API::IAlgorithm_sptr const algorithm) {
   m_reducedWorkspaceNames.setOutputNames(
       algorithm->getPropertyValue("OutputWorkspaceWavelength"),
       algorithm->getPropertyValue("OutputWorkspace"),
       algorithm->getPropertyValue("OutputWorkspaceBinned"));
+  addOutputWorkspaceToADS(algorithm, "OutputWorkspaceWavelength",
+                          m_reducedWorkspaceNames.iVsLambda());
+  addOutputWorkspaceToADS(algorithm, "OutputWorkspace",
+                          m_reducedWorkspaceNames.iVsQ());
+  addOutputWorkspaceToADS(algorithm, "OutputWorkspaceBinned",
+                          m_reducedWorkspaceNames.iVsQBinned());
   Item::algorithmComplete(algorithm);
 }
 
