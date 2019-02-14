@@ -411,7 +411,7 @@ protected:
   void addEventImpl(size_t id, size_t, size_t, double tobs) override {
 
     // get the absolute time for the start of the frame
-    auto offset = m_startTime + frameStart();
+    auto const offset = m_startTime + frameStart();
 
     // adjust the the tof to account for the correction and allocate events
     // that occur before the sample time as slow events from the previous pulse
