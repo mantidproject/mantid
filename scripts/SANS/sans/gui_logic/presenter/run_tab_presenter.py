@@ -48,8 +48,8 @@ from ui.sans_isis.sans_data_processor_gui import SANSDataProcessorGui
 from ui.sans_isis.work_handler import WorkHandler
 
 from qtpy import PYQT4
+IN_MANTIDPLOT = False
 if PYQT4:
-    IN_MANTIDPLOT = False
     try:
         from mantidplot import graph, newGraph
         IN_MANTIDPLOT = True
@@ -483,10 +483,10 @@ class RunTabPresenter(object):
         Plot a graph if continuous output specified.
         """
         if self._view.plot_results:
-            if PYQT4:
+            if IN_MANTIDPLOT:
                 if not graph(self.output_graph):
                     newGraph(self.output_graph)
-            else:
+            elif not PYQT4:
                 fig = get_log_plot(window_title=self.output_graph, plot_to_close=self.output_fig)
                 fig.show()
                 self.output_fig = fig

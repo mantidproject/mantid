@@ -25,15 +25,13 @@ from sans.common.xml_parsing import get_named_elements_from_ipf_file
 from sans.state.state_base import create_deserialized_sans_state_from_property_manager
 
 from qtpy import PYQT4
+IN_MANTIDPLOT = False
 if PYQT4:
     try:
         IN_MANTIDPLOT = True
         import mantidplot
     except (Exception, Warning):
-        # Exception will be raised if running this code in a Qt4 environment
-        # but outside of MantidPlot. E.g. Qt4 unit tests
-        # Plotting functionality should not be imported/used in this case
-        IN_MANTIDPLOT = False
+        pass
 else:
     from mantidqt.plotting.functions import plot
 

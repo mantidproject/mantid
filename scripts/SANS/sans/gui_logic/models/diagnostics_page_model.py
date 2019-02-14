@@ -17,12 +17,13 @@ from sans.gui_logic.models.table_model import TableModel, TableIndexModel
 from sans.gui_logic.presenter.gui_state_director import (GuiStateDirector)
 
 from qtpy import PYQT4
+IN_MANTIDPLOT = False
 if PYQT4:
     try:
         import mantidplot
         IN_MANTIDPLOT = True
     except (Exception, Warning):
-        IN_MANTIDPLOT = False
+        pass
 else:
     from mantidqt.plotting.functions import plot
 
@@ -132,11 +133,9 @@ def generate_output_workspace_name(range, integral, mask, detector, input_worksp
 
 
 def plot_graph(workspace):
-    print("Workspace is: ", workspace)
-    if PYQT4:
-        if IN_MANTIDPLOT:
-            return mantidplot.plotSpectrum(workspace, 0)
-    else:
+    if IN_MANTIDPLOT:
+        return mantidplot.plotSpectrum(workspace, 0)
+    elif not PYQT4:
         if not isinstance(workspace, list):
             workspace = [workspace]
         plot(workspace, wksp_indices=[0])
