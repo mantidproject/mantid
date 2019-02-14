@@ -7,9 +7,10 @@
 import PyQt4.QtGui as QtGui
 import PyQt4.QtCore as QtCore
 
+
 class RunSelectionDialog(QtGui.QDialog):
     def __init__(self, current_runs, parent=None):
-        QtGui.QDialog.__init__(self,parent)
+        QtGui.QDialog.__init__(self, parent)
 
         self.setWindowTitle('Run Selection')
         layout = QtGui.QVBoxLayout(self)
@@ -27,21 +28,19 @@ class RunSelectionDialog(QtGui.QDialog):
         buttons = QtGui.QDialogButtonBox(
             QtGui.QDialogButtonBox.Ok | QtGui.QDialogButtonBox.Cancel,
             QtCore.Qt.Horizontal, self)
-        
+
         buttons.accepted.connect(self.accept)
         buttons.rejected.connect(self.reject)
         layout.addWidget(buttons)
 
         self.setLayout(layout)
-    
+
     def run(self):
         return self.run_selector_combo.currentText()
 
     @staticmethod
-    def get_run(current_runs, parent = None):
+    def get_run(current_runs, parent=None):
         dialog = RunSelectionDialog(current_runs, parent)
         result = dialog.exec_()
         run = dialog.run()
         return (run, result == QtGui.QDialog.Accepted)
-
-
