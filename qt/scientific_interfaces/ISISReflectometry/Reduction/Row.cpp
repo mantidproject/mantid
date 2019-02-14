@@ -81,25 +81,24 @@ Row mergedRow(Row const &rowA, Row const &rowB) {
   return rowA.withExtraRunNumbers(rowB.runNumbers());
 }
 
-void Row::notifyAlgorithmStarted(Mantid::API::IAlgorithm_sptr const algorithm) {
+void Row::algorithmStarted(Mantid::API::IAlgorithm_sptr const algorithm) {
   UNUSED_ARG(algorithm);
   m_reducedWorkspaceNames.resetOutputNames();
-  Item::notifyAlgorithmStarted(algorithm);
+  Item::algorithmStarted(algorithm);
 }
 
-void Row::notifyAlgorithmComplete(
-    Mantid::API::IAlgorithm_sptr const algorithm) {
+void Row::algorithmComplete(Mantid::API::IAlgorithm_sptr const algorithm) {
   m_reducedWorkspaceNames.setOutputNames(
       algorithm->getPropertyValue("OutputWorkspaceWavelength"),
       algorithm->getPropertyValue("OutputWorkspace"),
       algorithm->getPropertyValue("OutputWorkspaceBinned"));
-  Item::notifyAlgorithmComplete(algorithm);
+  Item::algorithmComplete(algorithm);
 }
 
-void Row::notifyAlgorithmError(Mantid::API::IAlgorithm_sptr const algorithm,
-                               std::string const &msg) {
+void Row::algorithmError(Mantid::API::IAlgorithm_sptr const algorithm,
+                         std::string const &msg) {
   m_reducedWorkspaceNames.resetOutputNames();
-  Item::notifyAlgorithmError(algorithm, msg);
+  Item::algorithmError(algorithm, msg);
 }
 
 bool Row::hasOutputWorkspace(std::string const &wsName) const {

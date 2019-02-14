@@ -54,20 +54,18 @@ bool Item::requiresProcessing(bool reprocessFailed) const {
   return false;
 }
 
-void Item::notifyAlgorithmStarted(
-    Mantid::API::IAlgorithm_sptr const algorithm) {
+void Item::algorithmStarted(Mantid::API::IAlgorithm_sptr const algorithm) {
   UNUSED_ARG(algorithm);
   setRunning();
 }
 
-void Item::notifyAlgorithmComplete(
-    Mantid::API::IAlgorithm_sptr const algorithm) {
+void Item::algorithmComplete(Mantid::API::IAlgorithm_sptr const algorithm) {
   UNUSED_ARG(algorithm);
   setSuccess();
 }
 
-void Item::notifyAlgorithmError(Mantid::API::IAlgorithm_sptr const algorithm,
-                                std::string const &msg) {
+void Item::algorithmError(Mantid::API::IAlgorithm_sptr const algorithm,
+                          std::string const &msg) {
   UNUSED_ARG(algorithm);
   setError(msg);
 }
