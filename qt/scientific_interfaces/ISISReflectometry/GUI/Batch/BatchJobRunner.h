@@ -18,7 +18,8 @@ namespace CustomInterfaces {
 
 // Override the configured algorithm to pass to BatchAlgorithmRunner
 // so that we can associate our own data with it
-class BatchJobAlgorithm : public MantidQt::API::ConfiguredAlgorithm {
+class MANTIDQT_ISISREFLECTOMETRY_DLL BatchJobAlgorithm
+    : public MantidQt::API::ConfiguredAlgorithm {
 public:
   BatchJobAlgorithm(
       Mantid::API::IAlgorithm_sptr algorithm,
@@ -70,13 +71,14 @@ public:
 
   std::deque<MantidQt::API::ConfiguredAlgorithm_sptr> getAlgorithms() override;
 
-private:
+protected:
   Batch m_batch;
   bool m_isProcessing;
   bool m_isAutoreducing;
   bool m_reprocessFailed;
   bool m_processAll;
 
+private:
   std::vector<std::string> getWorkspacesToSave(Group const &group) const;
   std::vector<std::string> getWorkspacesToSave(Row const &row) const;
 };
