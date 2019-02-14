@@ -31,7 +31,7 @@ public:
   virtual void
   notifyAlgorithmStarted(API::ConfiguredAlgorithm_sptr algorithm) = 0;
   virtual void
-  notifyAlgorithmFinished(API::ConfiguredAlgorithm_sptr algorithm) = 0;
+  notifyAlgorithmComplete(API::ConfiguredAlgorithm_sptr algorithm) = 0;
   virtual void notifyAlgorithmError(API::ConfiguredAlgorithm_sptr algorithm,
                                     std::string const &message) = 0;
 };

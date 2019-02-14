@@ -236,7 +236,7 @@ public:
   MOCK_METHOD0(resumeAutoreduction, void());
   MOCK_METHOD0(autoreductionPaused, void());
   MOCK_METHOD1(setReprocessFailedItems, void(bool));
-  MOCK_METHOD1(algorithmFinished,
+  MOCK_METHOD1(algorithmComplete,
                void(MantidQt::API::ConfiguredAlgorithm_sptr));
   MOCK_METHOD2(algorithmError, void(MantidQt::API::ConfiguredAlgorithm_sptr,
                                     std::string const &));

@@ -107,9 +107,9 @@ void BatchPresenter::notifyAlgorithmStarted(
   m_runsPresenter->notifyRowStateChanged();
 }
 
-void BatchPresenter::notifyAlgorithmFinished(
+void BatchPresenter::notifyAlgorithmComplete(
     ConfiguredAlgorithm_sptr algorithm) {
-  m_jobRunner->algorithmFinished(algorithm);
+  m_jobRunner->algorithmComplete(algorithm);
   m_runsPresenter->notifyRowStateChanged();
   /// TODO Longer term it would probably be better if algorithms took care
   /// of saving their outputs so we could remove this callback

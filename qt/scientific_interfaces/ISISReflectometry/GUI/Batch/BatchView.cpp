@@ -110,7 +110,7 @@ void BatchView::onAlgorithmStarted(API::ConfiguredAlgorithm_sptr algorithm) {
 }
 
 void BatchView::onAlgorithmComplete(API::ConfiguredAlgorithm_sptr algorithm) {
-  m_notifyee->notifyAlgorithmFinished(algorithm);
+  m_notifyee->notifyAlgorithmComplete(algorithm);
 }
 
 void BatchView::onAlgorithmError(API::ConfiguredAlgorithm_sptr algorithm,
