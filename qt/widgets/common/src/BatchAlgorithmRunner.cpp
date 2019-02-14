@@ -248,6 +248,12 @@ bool BatchAlgorithmRunner::executeAlgo(ConfiguredAlgorithm_sptr algorithm) {
     return false;
   }
   // For anything else that could go wrong
+  catch (std::exception &ex) {
+    g_log.warning("Error starting batch algorithm");
+    m_notificationCenter.postNotification(
+        new AlgorithmErrorNotification(algorithm, ex.what()));
+    return false;
+  }
   catch (...) {
     g_log.warning("Unknown error starting next batch algorithm");
     m_notificationCenter.postNotification(new AlgorithmErrorNotification(

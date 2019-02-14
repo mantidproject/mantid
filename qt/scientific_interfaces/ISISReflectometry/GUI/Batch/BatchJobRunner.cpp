@@ -288,6 +288,7 @@ void getAlgorithmForRow(Row &row, Batch const &model,
                         std::deque<ConfiguredAlgorithm_sptr> &algorithms) {
   auto alg = Mantid::API::AlgorithmManager::Instance().create(
       "ReflectometryISISLoadAndProcess");
+  alg->setChild(true);
 
   auto properties = AlgorithmRuntimeProps();
   updateEventProperties(properties, model.slicing());
