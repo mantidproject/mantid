@@ -16,11 +16,11 @@
 namespace Mantid {
 namespace Geometry {
 
-/** Quadrilateral
-
-    A ConvexPolygon with only 4 vertices. Better performance as no dynamic
-   allocation
-*/
+/**
+ *
+ * A ConvexPolygon with only 4 vertices. Better performance as no dynamic
+ * allocation
+ */
 class DLLExport Quadrilateral : public ConvexPolygon {
 public:
   /// Constructor with the four vertices
@@ -29,12 +29,16 @@ public:
   /// Special constructor for a rectangle
   Quadrilateral(const double lowerX, const double upperX, const double lowerY,
                 const double upperY);
+  Quadrilateral(Quadrilateral &&) = default;
+  Quadrilateral &operator=(Quadrilateral &&) = default;
+  Quadrilateral(const Quadrilateral &) = default;
+  Quadrilateral &operator=(const Quadrilateral &) = default;
   /// Index access.
   const Kernel::V2D &operator[](const size_t index) const override;
   /// Bounds-checked index access
   const Kernel::V2D &at(const size_t index) const override;
   /// Return the number of vertices
-  size_t npoints() const override { return 4; }
+  inline size_t npoints() const override { return 4; }
   /// Is a point inside this polygon
   bool contains(const Kernel::V2D &point) const override;
   /// Is a the given polygon completely encosed by this one
