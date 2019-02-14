@@ -1,5 +1,4 @@
 from __future__ import print_function
-import unittest
 
 from qtpy.QtCore import QPoint
 from qtpy.QtGui import QCursor, QContextMenuEvent
