@@ -14,6 +14,7 @@
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidKernel/Tolerance.h"
+#include <iosfwd>
 #include <list>
 
 namespace Mantid {
@@ -68,11 +69,16 @@ struct MANTID_GEOMETRY_DLL Link {
                            //@}
 };
 
+// calculations should prefer throwing a std::domain_error rather than using
+// INVALID
 enum class TrackDirection { LEAVING = -1, INVALID = 0, ENTERING = 1 };
 
 inline bool operator<(const TrackDirection left, const TrackDirection right) {
   return static_cast<int>(left) < static_cast<int>(right);
 }
+
+MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &os,
+                                             TrackDirection direction);
 
 /**
  * Stores a point of intersection along a track. The component intersected

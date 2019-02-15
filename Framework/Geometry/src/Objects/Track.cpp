@@ -12,6 +12,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <iostream>
 
 namespace Mantid {
 namespace Geometry {
@@ -224,6 +225,23 @@ void Track::buildLink() {
   }
 
   m_surfPoints.clear();
+}
+
+std::ostream &operator<<(std::ostream &os, TrackDirection direction) {
+  switch (direction) {
+  case TrackDirection::ENTERING:
+    os << "ENTERING";
+    break;
+  case TrackDirection::LEAVING:
+    os << "LEAVING";
+    break;
+  case TrackDirection::INVALID:
+    os << "INVALID";
+    break;
+  default:
+    os.setstate(std::ios_base::failbit);
+  }
+  return os;
 }
 
 } // NAMESPACE Geometry

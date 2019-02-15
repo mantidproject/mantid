@@ -179,11 +179,13 @@ bool rayIntersectsTriangle(const Kernel::V3D &start,
 
     // determine entry exit assuming anticlockwise triangle view from outside
     Kernel::V3D normalDirection = edge1.cross_prod(edge2);
-    entryExit = TrackDirection::INVALID;
-    if (normalDirection.scalar_prod(direction) > 0.0) {
+    const auto scalar_prod = normalDirection.scalar_prod(direction);
+    if (scalar_prod > 0.) {
       entryExit = TrackDirection::LEAVING; // exit
-    } else {
+    } else if (scalar_prod < 0.) {
       entryExit = TrackDirection::ENTERING; // entry
+    } else {
+      throw std::domain_error("Track is in same direction as surface");
     }
     return true;
   }

@@ -775,7 +775,8 @@ int CSGObject::interceptSurface(Geometry::Track &UT) const {
     {
       // Is the point and enterance/exit Point
       const TrackDirection flag = calcValidType(*iitr, UT.direction());
-      UT.addPoint(flag, *iitr, *this);
+      if (flag != TrackDirection::INVALID)
+        UT.addPoint(flag, *iitr, *this);
     }
   }
   UT.buildLink();
