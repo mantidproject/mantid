@@ -80,11 +80,11 @@ class ProjectRecoveryModelTest(unittest.TestCase):
 
     def test_recover_selected_checkpoint(self):
         checkpoint = os.listdir(self.pid)[0]
-        self.prm._create_thread_and_manage = mock.MagicMock()
+        self.prm._start_recovery_of_checkpoint = mock.MagicMock()
         self.prm.recover_selected_checkpoint(checkpoint)
 
         self.prm.presenter.change_start_mantid_to_cancel_label.assert_called_once()
-        self.prm._create_thread_and_manage.assert_called_once()
+        self.prm._start_recovery_of_checkpoint.assert_called_once()
 
     def test_open_selected_in_editor(self):
         checkpoint = os.listdir(self.pid)[0]

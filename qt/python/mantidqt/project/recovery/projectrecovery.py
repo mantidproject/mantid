@@ -17,6 +17,7 @@ import shutil
 import psutil
 
 from qtpy.QtCore import QMetaObject, Q_ARG, Qt
+from qtpy.QtWidgets import QApplication
 
 from mantid.kernel import ConfigService, logger, UsageService
 from mantid.api import AnalysisDataService as ADS, WorkspaceGroup
@@ -361,10 +362,10 @@ class ProjectRecovery(object):
         with open(script) as f:
             num_lines = len(f.readlines())
 
-        if self.recovery_presenter.open_selected_in_editor_selected:
-            self._open_script_in_editor_call(Qt.QueuedConnection, script)
-        else:
-            self._open_script_in_editor_call(Qt.BlockingQueuedConnection, script)
+        self._open_script_in_editor_call(Qt.AutoConnection, script)
+
+        # Force program to process events
+        QApplication.processEvents()
 
         self.recovery_presenter.connect_progress_bar_to_recovery_view()
         self.recovery_presenter.set_up_progress_bar(num_lines)
@@ -373,14 +374,19 @@ class ProjectRecovery(object):
         QMetaObject.invokeMethod(self.multi_file_interpreter, "open_file_in_new_tab", connection_type,
                                  Q_ARG(str, script))
 
-    def _run_script_in_open_editor(self):
-        # Make sure the current editor is connected to the recovery thread's error function
-        self.multi_file_interpreter.current_editor().sig_exec_error.connect(
-            self.recovery_presenter.model.recovery_thread.exec_error)
+        # Force program to process events so the invoked method is called
+        QApplication.processEvents()
 
-        # Actually execute he current tab
+    def _run_script_in_open_editor(self):
+        # Make sure that exec_error is connected with sig_exec_error on the multifileinterpreter
+        self.multi_file_interpreter.current_editor().sig_exec_error.connect(self.recovery_presenter.model.exec_error)
+
+        # Actually execute the current tab
         QMetaObject.invokeMethod(self.multi_file_interpreter, "execute_current_async_blocking",
-                                 Qt.BlockingQueuedConnection)
+                                 Qt.AutoConnection)
+
+        # Force program to process events so the invoked method is called
+        QApplication.processEvents()
 
     ######################################################
     #  Checkpoint Repair

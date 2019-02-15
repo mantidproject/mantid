@@ -38,8 +38,6 @@ class ProjectRecoveryModel(QObject):
         self.rows = []
         self.fill_rows()
 
-        self.recovery_thread = None
-
         self.selected_checkpoint = None
 
     def find_number_of_workspaces_in_directory(self, path):
@@ -81,7 +79,7 @@ class ProjectRecoveryModel(QObject):
         self.selected_checkpoint = selected
 
         try:
-            self._create_thread_and_manage(checkpoint)
+            self._start_recovery_of_checkpoint(checkpoint)
         except Exception as e:
             if isinstance(e, KeyboardInterrupt):
                 raise
@@ -171,18 +169,8 @@ class ProjectRecoveryModel(QObject):
         raise RuntimeError("Project Recovery: Passed checkpoint name for update of GUI was incorrect: "
                            + checkpoint_name)
 
-    def _create_thread_and_manage(self, checkpoint):
-        self.recovery_thread = RecoveryThread()
-        self.recovery_thread.project_recovery = self.project_recovery
-        self.recovery_thread.checkpoint = checkpoint
-
-        self.recovery_thread.finished.connect(self.recovery_complete)
-
-        self.recovery_thread.start(QThread.LowPriority)
-
-    @Slot()
-    def recovery_complete(self):
-        self.failed_run = self.recovery_thread.failed_run_in_thread
+    def _start_recovery_of_checkpoint(self, checkpoint):
+        self.project_recovery.load_checkpoint(checkpoint)
 
         # If the run failed update the tried else it wasn't a failure and
         if self.failed_run:
@@ -190,3 +178,7 @@ class ProjectRecoveryModel(QObject):
 
         self.recovery_running = False
         self.presenter.close_view()
+
+    @Slot()
+    def exec_error(self):
+        self.failed_run = True
