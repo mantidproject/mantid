@@ -16,6 +16,7 @@
 #include <QAction>
 #include <QApplication>
 #include <QClipboard>
+#include <QCloseEvent>
 #include <QDateTime>
 #include <QDir>
 #include <QFileDialog>
@@ -325,8 +326,10 @@ AlgorithmHistoryWindow::~AlgorithmHistoryWindow() {
 }
 
 // Delete window object on close
-void AlgorithmHistoryWindow::closeEvent(QCloseEvent *) {
-  AlgorithmHistoryWindow::~AlgorithmHistoryWindow();
+// Without this the windows stay in memory when closed in workbench
+void AlgorithmHistoryWindow::closeEvent(QCloseEvent *ce) {
+  this->deleteLater();
+  ce->accept();
 }
 
 AlgExecSummaryGrpBox *AlgorithmHistoryWindow::createExecSummaryGrpBox() {
