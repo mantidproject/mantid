@@ -131,7 +131,7 @@ flag in the :class:`systemtesting.MantidSystemTest` class.
 
 .. code-block:: python
 
-   self.tolerance_relerr = True
+   self.tolerance_rel_err = True
 
 Disable Some Checks
 -------------------
