@@ -24,7 +24,7 @@ from mantid.api import AnalysisDataService as ADS, WorkspaceGroup
 from mantidqt.project.projectsaver import ProjectSaver
 from mantidqt.project.projectloader import ProjectLoader
 from mantidqt.project.recovery.recoverygui.projectrecoverypresenter import ProjectRecoveryPresenter
-from mantid.simpleapi import OrderWorkspaceHistory, AlgorithmManager
+from mantid.simpleapi import AlgorithmManager
 
 
 SAVING_TIME_KEY = "projectRecovery.secondsBetween"

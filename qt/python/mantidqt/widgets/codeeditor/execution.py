@@ -10,9 +10,7 @@
 from __future__ import (absolute_import, unicode_literals)
 
 # std imports
-import ctypes
 import inspect
-import time
 
 # 3rdparty imports
 from qtpy.QtCore import QObject, Signal
