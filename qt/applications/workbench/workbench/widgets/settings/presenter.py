@@ -44,6 +44,8 @@ class SettingsPresenter(object):
 
     def action_current_row_changed(self, new_pos):
         self.current.hide()
+        # when new settings widgets are added here, this if statement should be
+        # active again, so that the settings window can switch between settings views
         # if 0 == new_pos:
         new_view = self.general_settings.view
         # else:  # 1 == new_pos
