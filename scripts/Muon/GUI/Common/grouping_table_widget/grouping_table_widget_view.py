@@ -47,11 +47,17 @@ class GroupingTableView(QtGui.QWidget):
         self.group_range_label = QtGui.QLabel()
         self.group_range_label.setText('Group Asymmetry Range from:')
         self.group_range_min = QtGui.QLineEdit()
+        self.group_range_min.setEnabled(False)
         self.group_range_use_first_good_data = QtGui.QCheckBox()
-        self.group_range_use_first_good_data.setText('from first good data')
+        self.group_range_use_first_good_data.setText(u"\u03BCs (From data file)")
+
+        self.group_range_use_first_good_data.setChecked(True)
         self.group_range_max = QtGui.QLineEdit()
+        self.group_range_max.setEnabled(False)
+
         self.group_range_use_last_data = QtGui.QCheckBox()
-        self.group_range_use_last_data.setText('from file')
+        self.group_range_use_last_data.setText(u"\u03BCs (From data file)")
+        self.group_range_use_last_data.setChecked(True)
         self.group_range_to_label = QtGui.QLabel()
         self.group_range_to_label.setText('to:')
 
@@ -96,7 +102,6 @@ class GroupingTableView(QtGui.QWidget):
         self.vertical_layout.addWidget(self.grouping_table)
         self.vertical_layout.addLayout(self.horizontal_layout)
         self.vertical_layout.addLayout(self.group_range_layout)
-        # self.vertical_layout.addLayout(self.group_range_layout_max)
 
         self.setLayout(self.vertical_layout)
 
@@ -252,6 +257,18 @@ class GroupingTableView(QtGui.QWidget):
     def on_cell_changed(self, _row, _col):
         if not self._updating:
             self._on_table_data_changed(_row, _col)
+
+    def on_user_changes_min_range_source(self, slot):
+        self.group_range_use_first_good_data.stateChanged.connect(slot)
+
+    def on_user_changes_max_range_source(self, slot):
+        self.group_range_use_last_data.stateChanged.connect(slot)
+
+    def on_user_changes_group_range_min_text_edit(self, slot):
+        self.group_range_min.textChanged.connect(slot)
+
+    def on_user_changes_group_range_max_text_edit(self, slot):
+        self.group_range_max.textChanged.connect(slot)
 
     # ------------------------------------------------------------------------------------------------------------------
     #

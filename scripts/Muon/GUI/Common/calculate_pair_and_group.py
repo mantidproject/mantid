@@ -26,6 +26,15 @@ def calculate_pair_data(context, pair_name, run):
 
     return pair_data
 
+def estimate_group_asymmetry_data(context, group_name, run):
+    processed_data = _run_pre_processing(context, run)
+
+    params = _get_MuonGroupingAsymmetry_parameters(context, group_name, run)
+    params["InputWorkspace"] = processed_data
+    pair_data = algorithm_utils.run_MuonGroupingAsymmetry(params)
+
+    return pair_data
+
 
 def _run_pre_processing(context, run):
     params = _get_pre_processing_params(context, run)
@@ -97,6 +106,25 @@ def _get_MuonGroupingCounts_parameters(context, group_name, run):
 
     return params
 
+
+def _get_MuonGroupingAsymmetry_parameters(context, group_name, run):
+    params = {}
+    try:
+        summed_periods = context.loaded_data(run)["SummedPeriods"]
+        params["SummedPeriods"] = summed_periods
+    except KeyError:
+        params["SummedPeriods"] = "1"
+
+    try:
+        subtracted_periods = context.loaded_data(run)["SubtractedPeriods"]
+        params["SubtractedPeriods"] = subtracted_periods
+    except KeyError:
+        params["SubtractedPeriods"] = ""
+
+    group = context._groups.get(group_name, None)
+    if group:
+        params["GroupName"] = group_name
+        params["Grouping"] = ",".join([str(i) for i in group.detectors])
 
 def _get_MuonPairingAsymmetry_parameters(context, pair_name, run):
     params = {}

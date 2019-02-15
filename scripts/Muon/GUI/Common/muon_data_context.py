@@ -197,6 +197,13 @@ class MuonDataContext(object):
             current_workspaces.append(self._loaded_data.get_data(run=run, instrument=self.instrument)['workspace'])
         return current_workspaces
 
+    @property
+    def first_good_data(self):
+        if self.gui_variables['FirstGoodDataFromFile']:
+            return self.loaded_data(self.current_runs[-1])["FirstGoodData"]
+        else:
+            return self.gui_variables['FirstGoodData']
+
     def add_group(self, group):
         assert isinstance(group, MuonGroup)
         if self.check_group_contains_valid_detectors(group):
