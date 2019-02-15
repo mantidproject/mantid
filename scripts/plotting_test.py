@@ -26,10 +26,13 @@ class plotTestGui(QtGui.QMainWindow):
         self._context = PlottingContext()
         self.test = MultiPlotWidget(self._context, self)
         ws = setUpSubplot()
-        self.test.add_subplot("test", 221)
-        self.test.add_subplot("bob", 222)
-        self.test.add_subplot("moo", 223)
-        self.test.add_subplot("baa", 224)
+        self.test.add_subplot("test")
+        self.test.add_subplot("bob")
+        self.test.add_subplot("moo")
+        self.test.add_subplot("baa")
+        self.test.add_subplot("EXTRA")
+
+
         self.test.plot("test", ws, specNum=26)
         self.test.plot("test", ws, specNum=21)
         self.test.plot("test", ws, specNum=22)
@@ -52,17 +55,34 @@ class plotTestGui(QtGui.QMainWindow):
 
         self.test.add_vline_and_annotate("test", 10, dummy)
         self.test.add_vline_and_annotate("test", 5, dummy2)
-        self.test.add_annotate("bob", dummy3)
-        self.test.add_vline("bob", 1.2, "just a line")
+        #self.test.add_annotate("bob", dummy3)
+        #self.test.add_vline("bob", 1.2, "just a line")
 
         self.test.plot("bob", ws, specNum=1)
+        self.test.plot("EXTRA", ws, specNum=42)
         self.test.plot("moo", ws, specNum=42)
         self.test.plot("baa", ws, specNum=2)
         self.test.set_all_values()
-        self.setCentralWidget(self.test)
+
+        # add button for adding more plots
+        self.n = 0
+        self.ws = ws
+        self.btn =  QtGui.QPushButton("add plot")
+        self.btn.clicked.connect(self.add)
+
+
+        self.grid = QtGui.QSplitter(QtCore.Qt.Vertical)
+        self.grid.addWidget(self.test)
+        self.grid.addWidget(self.btn)
+
+        self.setCentralWidget(self.grid)
 
         self.setWindowTitle("plot test")
 
+    def add(self):
+        self.n +=1
+        self.test.add_subplot(str(self.n))
+        self.test.plot(str(self.n),self.ws,specNum=self.n)
 
 def setUpSubplot():
     ws = mantid.LoadMuonNexus("MUSR00062260", OutputWorkspace="ws")

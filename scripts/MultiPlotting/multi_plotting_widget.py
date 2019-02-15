@@ -38,8 +38,8 @@ class MultiPlotWidget(QtWidgets.QWidget):
 
     """ plotting """
 
-    def add_subplot(self, name, code):
-        self.plots.add_subplot(name, len(self.quickEdit.get_selection()),code)
+    def add_subplot(self, name):
+        self.plots.add_subplot(name, len(self.quickEdit.get_selection()))
 
         self.quickEdit.add_subplot(name)
 

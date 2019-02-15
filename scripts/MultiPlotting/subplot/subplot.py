@@ -4,11 +4,13 @@ from qtpy import QtWidgets, QtCore
 
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.gridspec import GridSpec
 
 from MultiPlotting.navigation_toolbar import myToolbar
 from MultiPlotting.edit_windows.remove_plot_window import RemovePlotWindow
 from MultiPlotting.edit_windows.select_subplot import SelectSubplot
+
+from MultiPlotting.gridspec_engine import gridspecEngine
+
 
 # use this to manage lines and workspaces directly
 
@@ -40,14 +42,14 @@ class subplot(QtWidgets.QWidget):
         grid.addWidget(self.canvas, 1, 0)
         self.setLayout(grid)
 
-        self.gridspec = None#GridSpec(2,2)
+        self.gridspec_engine = gridspecEngine()
+        self.gridspec = None
 
     """ this is called when the zoom
     or pan are used. We want to send a
     signal to update the axis ranges """
 
     def draw_event_callback(self, event):
-        #self.gridspec.tight_layout(self.figure)
         self.figure.tight_layout()
         for subplot in self.plotObjects.keys():
             self.emit_subplot_range(subplot)
@@ -85,14 +87,12 @@ class subplot(QtWidgets.QWidget):
         self._context.addLine(subplotName, workspace, specNum)
         self.canvas.draw()
 
-    def add_subplot(self, subplotName, number, code=111):
-        self.gridspec = GridSpec(number+1, 1)
+    def add_subplot(self, subplotName, number):
+        #self.gridspec = GridSpec(number+1, 1)
+        self.gridspec = self.gridspec_engine.getGridSpec(number+1)
         self.plotObjects[subplotName] = self.figure.add_subplot(self.gridspec[number],label=subplotName)
         self.plotObjects[subplotName].set_title(subplotName)
         self._context.addSubplot(subplotName, self.plotObjects[subplotName])
-        print("moo",number, self.plotObjects[subplotName] )
-        #self.figure.tight_layout()
-        print("hi")
         self.update(number+1)
 
     def update(self,number):
