@@ -100,6 +100,7 @@ private:
   void appendEmptyGroupInView();
   void insertEmptyGroupInModel(int beforeGroup);
   void insertEmptyGroupInView(int beforeGroup);
+  void ensureAtLeastOneGroupExists();
   void insertEmptyRowInModel(int groupIndex, int beforeRow);
   std::vector<std::string>
   cellTextFromViewAt(MantidWidgets::Batch::RowLocation const &location) const;

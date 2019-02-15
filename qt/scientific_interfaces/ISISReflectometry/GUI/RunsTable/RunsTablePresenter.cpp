@@ -101,6 +101,7 @@ void RunsTablePresenter::notifyDeleteRowRequested() {
     if (!containsGroups(selected)) {
       removeRowsAndGroupsFromView(selected);
       removeRowsFromModel(selected);
+      ensureAtLeastOneGroupExists();
       notifyRowStateChanged();
     } else {
       m_view->mustNotSelectGroup();
@@ -116,6 +117,7 @@ void RunsTablePresenter::notifyDeleteGroupRequested() {
     auto groupIndicesOrderedLowToHigh = groupIndexesFromSelection(selected);
     removeGroupsFromModel(groupIndicesOrderedLowToHigh);
     removeGroupsFromView(groupIndicesOrderedLowToHigh);
+    ensureAtLeastOneGroupExists();
     notifyRowStateChanged();
   } else {
     m_view->mustSelectGroupOrRow();
@@ -268,6 +270,34 @@ void RunsTablePresenter::insertEmptyGroupInView(int beforeGroup) {
   applyGroupStylingToRow(location);
 }
 
+void RunsTablePresenter::ensureAtLeastOneGroupExists() {
+  // The JobTreeView leaves an empty item in the table if all rows are
+  // deleted. However, it will be a row rather than a group. I'm not sure
+  // how to get around this so the workaround here is to check if there
+  // is only one item in the table and it's a row, then we replace it with
+  // a group.
+
+  // If we have more than one group/row then it's ok
+  if (m_model.reductionJobs().groups().size() > 1)
+    return;
+  auto const &group = m_model.reductionJobs().groups()[0];
+  if (group.rows().size() > 0)
+    return;
+
+  auto location =
+      MantidWidgets::Batch::RowLocation(MantidWidgets::Batch::RowPath{0});
+  auto cells = m_view->jobs().cellsAt(location);
+
+  // Groups should only have one cell
+  if (cells.size() == 1)
+    return;
+
+  // The model is fine, we just need to update the view. Add a new, proper,
+  // group first, then delete the original one
+  appendEmptyGroupInView();
+  removeRowsAndGroupsFromView({location});
+}
+
 void RunsTablePresenter::notifyExpandAllRequested() {
   m_view->jobs().expandAll();
 }
@@ -417,11 +447,13 @@ void RunsTablePresenter::notifyRemoveRowsRequested(
         &locationsOfRowsToRemove) {
   removeRowsAndGroupsFromModel(locationsOfRowsToRemove);
   removeRowsAndGroupsFromView(locationsOfRowsToRemove);
+  ensureAtLeastOneGroupExists();
 }
 
 void RunsTablePresenter::notifyRemoveAllRowsAndGroupsRequested() {
   removeAllRowsAndGroupsFromModel();
   removeAllRowsAndGroupsFromView();
+  ensureAtLeastOneGroupExists();
 }
 
 void RunsTablePresenter::notifyCopyRowsRequested() {
@@ -437,6 +469,7 @@ void RunsTablePresenter::notifyCutRowsRequested() {
   if (m_clipboard.is_initialized()) {
     m_view->jobs().removeRows(m_view->jobs().selectedRowLocations());
     m_view->jobs().clearSelection();
+    ensureAtLeastOneGroupExists();
   } else {
     m_view->invalidSelectionForCut();
   }
