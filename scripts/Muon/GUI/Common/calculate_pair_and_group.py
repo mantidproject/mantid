@@ -45,6 +45,7 @@ def _run_pre_processing(context, run):
 
 def _get_pre_processing_params(context, run):
     pre_process_params = {}
+
     try:
         if context.gui_variables['FirstGoodDataFromFile']:
             time_min = context.loaded_data(run)["FirstGoodData"]
@@ -55,17 +56,17 @@ def _get_pre_processing_params(context, run):
         pass
 
     try:
-        rebin_args = context.gui_variables["Rebin"]
-        pre_process_params["RebinArgs"] = rebin_args
+        if context.gui_variables['TimeZeroFromFile']:
+            time_offset = 0.0
+        else:
+            time_offset = context.loaded_data(run)["TimeZero"] - context.gui_variables['TimeZero']
+        pre_process_params["TimeOffset"] = time_offset
     except KeyError:
         pass
 
     try:
-        if context.gui_variables['TimeZeroFromFile']:
-            time_offset = context.loaded_data(run)["TimeZero"]
-        else:
-            time_offset = context.gui_variables['TimeZero']
-        pre_process_params["TimeOffset"] = time_offset
+        rebin_args = context.gui_variables["Rebin"]
+        pre_process_params["RebinArgs"] = rebin_args
     except KeyError:
         pass
 
