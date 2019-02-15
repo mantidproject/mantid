@@ -168,8 +168,8 @@ void IndirectFitOutputOptionsPresenter::editResult() {
   m_editResultsDialog = getEditResultsDialog(m_view->parentWidget());
   m_editResultsDialog->setWorkspaceSelectorSuffices({"_Result"});
   m_editResultsDialog->show();
-  connect(m_editResultsDialog.get(), SIGNAL(replaceSingleBin()), this,
-          SLOT(replaceSingleBin()));
+  connect(m_editResultsDialog.get(), SIGNAL(replaceSingleFitResult()), this,
+          SLOT(replaceSingleFitResult()));
   connect(m_editResultsDialog.get(), SIGNAL(closeDialog()), this,
           SLOT(closeEditResultDialog()));
 }
@@ -210,8 +210,8 @@ void IndirectFitOutputOptionsPresenter::setEditingResult(bool editing) {
 }
 
 void IndirectFitOutputOptionsPresenter::closeEditResultDialog() {
-  disconnect(m_editResultsDialog.get(), SIGNAL(replaceSingleBin()), this,
-             SLOT(replaceSingleBin()));
+  disconnect(m_editResultsDialog.get(), SIGNAL(replaceSingleFitResult()), this,
+             SLOT(replaceSingleFitResult()));
   disconnect(m_editResultsDialog.get(), SIGNAL(closeDialog()), this,
              SLOT(closeEditResultDialog()));
   m_editResultsDialog->close();

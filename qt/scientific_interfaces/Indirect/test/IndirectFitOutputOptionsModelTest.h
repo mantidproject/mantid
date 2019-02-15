@@ -296,50 +296,7 @@ public:
                      std::runtime_error);
   }
 
-  void test_that_replaceResultBin_will_not_throw_when_provided_valid_data() {
-    std::string const inputName("Workspace_s0_to_s2_Result");
-    std::string const singleBinName("Workspace_s0_Result");
-    auto const outputName("Output_Result");
-
-    setUpResultWorkspaces(inputName, singleBinName);
-
-    TS_ASSERT_THROWS_NOTHING(
-        m_model->replaceFitResult(inputName, singleBinName, outputName));
-  }
-
-  void
-  test_that_replaceResultBin_will_set_the_result_group_to_a_group_workspace_with_the_correct_number_of_entries() {
-    std::string const inputName("Workspace_s0_to_s2_Result");
-    std::string const singleBinName("Workspace_s0_Result");
-    auto const outputName("Output_Result");
-
-    setUpResultWorkspaces(inputName, singleBinName);
-    m_model->replaceFitResult(inputName, singleBinName, outputName);
-
-    auto const outputWorkspace = m_model->getResultWorkspace();
-    TS_ASSERT(outputWorkspace);
-    TS_ASSERT_EQUALS(outputWorkspace->getNumberOfEntries(), 2);
-  }
-
 private:
-  void setUpResultWorkspaces(std::string const &inputName,
-                             std::string const &singleBinName) {
-    auto const inputWorkspace =
-        createWorkspaceWithBinValues(3, {2.0, 3.0, 4.0}, 3);
-    auto const singleBinWorkspace = createWorkspaceWithBinValues(3, {2.0}, 1);
-    createSingleWorkspaceGroup(inputName, inputWorkspace);
-    createSingleWorkspaceGroup(singleBinName, singleBinWorkspace);
-  }
-
-  void createSingleWorkspaceGroup(std::string const &workspaceName,
-                                  MatrixWorkspace_sptr const &workspace) {
-    m_ads->addOrReplace(workspaceName, workspace);
-
-    auto group = boost::make_shared<WorkspaceGroup>();
-    group->addWorkspace(workspace);
-    m_ads->addOrReplace(workspaceName + "s", group);
-  }
-
   std::unique_ptr<SetUpADSWithWorkspace> m_ads;
   WorkspaceGroup_sptr m_groupWorkspace;
   std::unique_ptr<IndirectFitOutputOptionsModel> m_model;

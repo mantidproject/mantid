@@ -19,6 +19,8 @@ New Algorithms
 - TOF correction for neutrons incorrectly interpreted as slow neutrons in :ref:`BASISPowderDiffraction <algm-BASISPowderDiffraction>`
 - Deprecated algorithm BASISReduction311 has been removed.
 - :ref:`LoadEMU <algm-LoadEMU>` loader for an ANSTO EMU backscattering event file.
+- :ref:`ReplaceIndirectFitResult <algm-ReplaceIndirectFitResult>` will replace the *_Result* fit data found in one workspace with the 
+  single fit data provided within a second workspace.
 
 :ref:`Release 3.14.0 <v3.14.0>`
 
