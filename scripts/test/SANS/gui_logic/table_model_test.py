@@ -8,10 +8,10 @@ from __future__ import (absolute_import, division, print_function)
 
 import unittest
 
-from sans.gui_logic.models.table_model import (TableModel, TableIndexModel, OptionsColumnModel)
+from sans.gui_logic.models.table_model import (TableModel, TableIndexModel, OptionsColumnModel, SampleShapeColumnModel)
 from sans.gui_logic.models.basic_hint_strategy import BasicHintStrategy
-from PyQt4.QtCore import QCoreApplication
-from sans.common.enums import RowState
+from qtpy.QtCore import QCoreApplication
+from sans.common.enums import (RowState, SampleShape)
 try:
     from unittest import mock
 except:
@@ -59,6 +59,62 @@ class TableModelTest(unittest.TestCase):
         args = [0, "", "", "", "", "", "", "", "", "", "", "", "", "", ""]
         kwargs = {'options_column_string': "WavelengthMin=1, WavelengthMax=3, NotRegister2"}
         self.assertRaises(ValueError,  TableIndexModel, *args, **kwargs)
+
+    def test_that_sample_shape_can_be_parsed(self):
+        table_index_model = TableIndexModel('0', "", "", "", "", "", "",
+                                            "", "", "", "", "", "", "", "",
+                                            sample_shape="  flatPlate  ")
+        sample_shape_enum = table_index_model.sample_shape
+        sample_shape_text = table_index_model.sample_shape_string
+
+        self.assertEqual(sample_shape_enum, SampleShape.FlatPlate)
+        self.assertEqual(sample_shape_text, "FlatPlate")
+
+    def test_that_sample_shape_can_be_set_as_enum(self):
+        # If a batch file contains a sample shape, it is a enum: SampleShape.Disc, Cylinder, FlatPlate
+        # So SampleShapeColumnModel must be able to parse this.
+        table_index_model = TableIndexModel('0', "", "", "", "", "", "",
+                                            "", "", "", "", "", "", "", "",
+                                            sample_shape=SampleShape.FlatPlate)
+        sample_shape_enum = table_index_model.sample_shape
+        sample_shape_text = table_index_model.sample_shape_string
+
+        self.assertEqual(sample_shape_enum, SampleShape.FlatPlate)
+        self.assertEqual(sample_shape_text, "FlatPlate")
+
+    def test_that_incorrect_sample_shape_reverts_to_previous_sampleshape(self):
+        try:
+            table_index_model = TableIndexModel('0', "", "", "", "", "", "",
+                                                "", "", "", "", "", "", "", "",
+                                                sample_shape="Disc")
+            table_index_model.sample_shape = "not a sample shape"
+        except Exception as e:
+            self.assertTrue(False, "Did not except incorrect sample shape to raise error")
+        else:
+            self.assertEqual("Disc", table_index_model.sample_shape_string)
+
+    def test_that_empty_string_is_acceptable_sample_shape(self):
+        table_index_model = TableIndexModel('0', "", "", "", "", "", "",
+                                            "", "", "", "", "", "", "", "",
+                                            sample_shape="Disc")
+        table_index_model.sample_shape = ""
+
+        sample_shape_enum = table_index_model.sample_shape
+        sample_shape_text = table_index_model.sample_shape_string
+
+        self.assertEqual(sample_shape_enum, "")
+        self.assertEqual(sample_shape_text, "")
+
+    def test_that_table_model_completes_partial_sample_shape(self):
+        table_index_model = TableIndexModel('0', "", "", "", "", "", "",
+                                            "", "", "", "", "", "", "", "",
+                                            sample_shape="cylind")
+
+        sample_shape_enum = table_index_model.sample_shape
+        sample_shape_text = table_index_model.sample_shape_string
+
+        self.assertEqual(sample_shape_enum, SampleShape.Cylinder)
+        self.assertEqual(sample_shape_text, "Cylinder")
 
     def test_that_querying_nonexistent_row_index_raises_IndexError_exception(self):
         table_model = TableModel()
@@ -220,6 +276,26 @@ class TableModelTest(unittest.TestCase):
                          "", "", "", "a_user_file"]
 
         self.assertEqual(actual_list, expected_list)
+
+    def test_that_get_non_empty_rows_returns_non_empty_rows(self):
+        table_model = TableModel()
+        table_index_model = TableIndexModel("", "", "", "", "", "", "",
+                                            "", "", "", "", "", "")
+        table_model.add_table_entry(0, table_index_model)
+        table_index_model = TableIndexModel('0', "", "", "", "", "", "",
+                                            "", "", "", "", "", "")
+        table_model.add_table_entry(1, table_index_model)
+        table_index_model = TableIndexModel('', "", "", "", "", "", "",
+                                            "", "", "", "5", "", "")
+        table_model.add_table_entry(2, table_index_model)
+        table_index_model = TableIndexModel("", "", "", "", "", "", "",
+                                            "", "", "", "", "", "")
+        table_model.add_table_entry(3, table_index_model)
+
+        non_empty_rows_actual = table_model.get_non_empty_rows([0, 1, 2, 3])
+        non_empty_rows_expected = [1, 2]
+
+        self.assertEqual(non_empty_rows_actual, non_empty_rows_expected)
 
     def _do_test_file_setting(self, func, prop):
         # Test that can set to empty string

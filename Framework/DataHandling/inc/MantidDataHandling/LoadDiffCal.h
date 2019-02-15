@@ -40,6 +40,7 @@ private:
   void init() override;
   void exec() override;
   void getInstrument(H5::H5File &file);
+  void loadGroupingFromAlternateFile();
   void runLoadCalFile();
   void makeGroupingWorkspace(const std::vector<int32_t> &detids,
                              const std::vector<int32_t> &groups);

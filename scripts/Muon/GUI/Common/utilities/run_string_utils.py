@@ -43,6 +43,8 @@ def run_list_to_string(run_list):
     :param run_list: list of integers
     :return: string representation
     """
+    if not isinstance(run_list, list):
+        run_list = [run_list]
     run_list = _remove_duplicates_from_list(run_list)
     run_list = [i for i in run_list if i >= 0]
     run_list.sort()

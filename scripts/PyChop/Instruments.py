@@ -258,7 +258,7 @@ class ChopperSystem(object):
     def getAllowedEi(self, Ei_in=None):
         return set(np.round(self._MulpyRepDriver(Ei_in, calc_res=False)[0], decimals=4))
 
-    def plotMultiRepFrame(self, h_plt=None, Ei_in=None, frequency=None):
+    def plotMultiRepFrame(self, h_plt=None, Ei_in=None, frequency=None, first_rep=False):
         """
         Plots the time-distance diagram into a given Matplotlib axes, i
         for a give focused incident energy (in meV) and chopper frequencies (in Hz).
@@ -294,10 +294,16 @@ class ChopperSystem(object):
         for i in range(len(lines)):
             x0 = (-lines[i][0][1] / lines[i][0][0] - lines[i][1][1] / lines[i][1][0]) / 2.
             x1 = ((modSamDist-lines[i][0][1]) / lines[i][0][0] + (modSamDist-lines[i][1][1]) / lines[i][1][0]) / 2.
-            plt.plot([x0, x1], [0, modSamDist], c='b')
+            if (np.abs(x0) > 500):
+                if first_rep:
+                    continue
+                maincolor = 'm'
+            else:
+                maincolor = 'b'
+            plt.plot([x0, x1], [0, modSamDist], c=maincolor)
             x2 = ((totDist-lines[i][0][1]) / lines[i][0][0] + (totDist-lines[i][1][1]) / lines[i][1][0]) / 2.
-            lineM = totDist / x2
-            plt.plot([x1, x2], [modSamDist, totDist], c='b')
+            lineM = totDist / (x2 - x0)
+            plt.plot([x1, x2], [modSamDist, totDist], c=maincolor)
             newline = [lineM * np.sqrt(1 + self.overlap_ei_frac), modSamDist - lineM * np.sqrt(1 + self.overlap_ei_frac) * x1]
             x3 = (totDist-newline[1]) / (newline[0])
             plt.plot([x1, x3], [modSamDist, totDist], c='r')
@@ -378,7 +384,8 @@ class ChopperSystem(object):
         else:
             Eis, chop_times, lastChopDist, lines, all_times = tuple(self._saved_state[1:])
         if calc_res:
-            res_el, percent, chop_width, mod_width = MulpyRep.calcRes(Eis, chop_times, lastChopDist, self.chop_sam, self.sam_det)
+            res_el, percent, chop_width, mod_width = MulpyRep.calcRes(Eis, chop_times, lastChopDist, self.chop_sam,
+                                                                      self.sam_det, self.guide_width[-1], self.slot_width[-1])
             return res_el, percent, chop_width, mod_width
         else:
             return [Eis, chop_times, lastChopDist, lines, all_times]

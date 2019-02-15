@@ -21,9 +21,11 @@ import traceback
 
 from mantid.api import (FileFinder)
 from mantid.kernel import Logger, ConfigService
+
 from sans.command_interface.batch_csv_file_parser import BatchCsvParser
 from sans.common.constants import ALL_PERIODS
 from sans.common.enums import (BatchReductionEntry, RangeStepType, SampleShape, FitType, RowState, SANSInstrument)
+from sans.common.general_functions import get_log_plot
 from sans.gui_logic.gui_common import (get_reduction_mode_strings_for_gui, get_string_for_gui_from_instrument,
                                        add_dir_to_datasearch, remove_dir_from_datasearch)
 from sans.gui_logic.models.batch_process_runner import BatchProcessRunner
@@ -40,16 +42,19 @@ from sans.gui_logic.presenter.save_other_presenter import SaveOtherPresenter
 from sans.gui_logic.presenter.settings_diagnostic_presenter import (SettingsDiagnosticPresenter)
 from sans.sans_batch import SANSCentreFinder
 from sans.user_file.user_file_reader import UserFileReader
+
 from ui.sans_isis import SANSSaveOtherWindow
 from ui.sans_isis.sans_data_processor_gui import SANSDataProcessorGui
 from ui.sans_isis.work_handler import WorkHandler
 
-try:
-    import mantidplot
-except (Exception, Warning):
-    mantidplot = None
-    # this should happen when this is called from outside Mantidplot and only then,
-    # the result is that attempting to plot will raise an exception
+from qtpy import PYQT4
+IN_MANTIDPLOT = False
+if PYQT4:
+    try:
+        from mantidplot import graph, newGraph
+        IN_MANTIDPLOT = True
+    except ImportError:
+        pass
 
 row_state_to_colour_mapping = {RowState.Unprocessed: '#FFFFFF', RowState.Processed: '#d0f4d0',
                                RowState.Error: '#accbff'}
@@ -160,6 +165,8 @@ class RunTabPresenter(object):
         self.sans_logger = Logger("SANS")
         # Name of graph to output to
         self.output_graph = 'SANS-Latest'
+        # For matplotlib continuous plotting
+        self.output_fig = None
         self.progress = 0
 
         # Models that are being used by the presenter
@@ -282,6 +289,10 @@ class RunTabPresenter(object):
             self._view.set_out_default_user_file()
 
             self._view.set_hinting_line_edit_for_column(
+                self._table_model.column_name_converter.index('sample_shape'),
+                self._table_model.get_sample_shape_hint_strategy())
+
+            self._view.set_hinting_line_edit_for_column(
                 self._table_model.column_name_converter.index('options_column_model'),
                 self._table_model.get_options_hint_strategy())
 
@@ -303,6 +314,8 @@ class RunTabPresenter(object):
                     "The user path {} does not exist. Make sure a valid user file path"
                     " has been specified.".format(user_file_path))
         except RuntimeError as path_error:
+            # This exception block runs if user file does not exist
+            self._view.on_user_file_load_failure()
             self.display_errors(path_error, error_msg + " when finding file.")
         else:
             try:
@@ -314,6 +327,8 @@ class RunTabPresenter(object):
                 user_file_reader = UserFileReader(user_file_path)
                 user_file_items = user_file_reader.read_user_file()
             except (RuntimeError, ValueError) as e:
+                # It is in this exception block that loading fails if the file is invalid (e.g. a csv)
+                self._view.on_user_file_load_failure()
                 self.display_errors(e, error_msg + " when reading file.", use_error_name=True)
             else:
                 try:
@@ -332,13 +347,14 @@ class RunTabPresenter(object):
                         raise RuntimeError("User file did not contain a SANS Instrument.")
 
                 except RuntimeError as instrument_e:
-                    # Only catch the error we know about
-                    # If a new exception is caused, we can now see the stack trace
+                    # This exception block runs if the user file does not contain an parsable instrument
+                    self._view.on_user_file_load_failure()
                     self.display_errors(instrument_e, error_msg + " when reading instrument.")
                 except Exception as other_error:
                     # If we don't catch all exceptions, SANS can fail to open if last loaded
-                    # user file contains an error
+                    # user file contains an error that would not otherwise be caught
                     traceback.print_exc()
+                    self._view.on_user_file_load_failure()
                     self.display_errors(other_error, "Unknown error in loading user file.", use_error_name=True)
 
     def on_batch_file_load(self):
@@ -469,12 +485,16 @@ class RunTabPresenter(object):
 
     def _plot_graph(self):
         """
-        Plot a graph if continuous output specified
+        Plot a graph if continuous output specified.
         """
-        # Create the graph if continuous output is specified
-        if mantidplot:
-            if self._view.plot_results and not mantidplot.graph(self.output_graph):
-                mantidplot.newGraph(self.output_graph)
+        if self._view.plot_results:
+            if IN_MANTIDPLOT:
+                if not graph(self.output_graph):
+                    newGraph(self.output_graph)
+            elif not PYQT4:
+                fig = get_log_plot(window_title=self.output_graph, plot_to_close=self.output_fig)
+                fig.show()
+                self.output_fig = fig
 
     def _set_progress_bar_min_max(self, min, max):
         """
@@ -507,11 +527,13 @@ class RunTabPresenter(object):
             self._set_progress_bar_min_max(self.progress, len(states))
             save_can = self._view.save_can
 
+            # MantidPlot and Workbench have different approaches to plotting
+            output_graph = self.output_graph if PYQT4 else self.output_fig
             self.batch_process_runner.process_states(states,
                                                      self._view.use_optimizations,
                                                      self._view.output_mode,
                                                      self._view.plot_results,
-                                                     self.output_graph,
+                                                     output_graph,
                                                      save_can)
 
         except Exception as e:
@@ -524,6 +546,7 @@ class RunTabPresenter(object):
         Process all entries in the table, regardless of selection.
         """
         all_rows = range(self._table_model.get_number_of_rows())
+        all_rows = self._table_model.get_non_empty_rows(all_rows)
         if all_rows:
             self._process_rows(all_rows)
 
@@ -532,6 +555,7 @@ class RunTabPresenter(object):
         Process selected table entries.
         """
         selected_rows = self._view.get_selected_rows()
+        selected_rows = self._table_model.get_non_empty_rows(selected_rows)
         if selected_rows:
             self._process_rows(selected_rows)
 
@@ -555,6 +579,7 @@ class RunTabPresenter(object):
             self.sans_logger.information("Starting load of batch table.")
 
             selected_rows = self._get_selected_rows()
+            selected_rows = self._table_model.get_non_empty_rows(selected_rows)
             states, errors = self.get_states(row_index=selected_rows)
 
             for row, error in errors.items():

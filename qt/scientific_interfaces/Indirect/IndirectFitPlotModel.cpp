@@ -12,6 +12,7 @@
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/Workspace_fwd.h"
 #include "MantidKernel/make_unique.h"
 
 namespace {
@@ -100,6 +101,11 @@ void setFirstBackground(IFunction_sptr function, double value) {
   firstFunctionWithParameter(function, "Background", "A0")
       ->setParameter("A0", value);
 }
+
+MatrixWorkspace_sptr castToMatrixWorkspace(Workspace_sptr workspace) {
+  return boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
+}
+
 } // namespace
 
 namespace MantidQt {
@@ -242,8 +248,8 @@ MatrixWorkspace_sptr IndirectFitPlotModel::getResultWorkspace() const {
 
   if (location) {
     const auto group = location->result.lock();
-    return boost::dynamic_pointer_cast<MatrixWorkspace>(
-        group->getItem(location->index));
+    if (group)
+      return castToMatrixWorkspace(group->getItem(location->index));
   }
   return nullptr;
 }
