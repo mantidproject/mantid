@@ -249,9 +249,8 @@ class SANSSingleReduction(DistributedDataProcessorAlgorithm):
         if save_can:
             self.set_can_and_sam_on_output(output_bundles)
 
-        if state.adjustment.show_transmission:
-            self.set_transmission_workspaces_on_output(output_transmission_bundles,
-                                                       state.adjustment.calculate_transmission.fit)
+        self.set_transmission_workspaces_on_output(output_transmission_bundles,
+                                                   state.adjustment.calculate_transmission.fit)
 
     def validateInputs(self):
         errors = dict()
