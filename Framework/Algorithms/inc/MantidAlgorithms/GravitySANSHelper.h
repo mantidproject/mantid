@@ -30,6 +30,16 @@ public:
   double calcComponents(const double wavAngstroms, double &xFrac,
                         double &yFrac) const;
 
+  /** Calculates the drop very much faster than running the workspace's
+   * gravitationalDrop function assuming
+   *  the drop is proportional to the wavelength squared
+   *  @param wav :: the wave length in Angstrom
+   *  @return the drop in meters
+   */
+  double gravitationalDrop(const double wav) const {
+    return m_dropPerAngstrom2 * wav * wav;
+  }
+
 private:
   /// coordinates of the sample
   Kernel::V3D m_samplePos;
@@ -49,15 +59,6 @@ private:
   mutable double m_cachedDrop;
 
   const Kernel::V3D &getDetLoc(const double wav) const;
-  /** Calculates the drop very much faster than running the workspace's
-   * gravitationalDrop function assuming
-   *  the drop is proportional to the wavelength squared
-   *  @param wav :: the wave length in Angstrom
-   *  @return the drop in meters
-   */
-  double gravitationalDrop(const double wav) const {
-    return m_dropPerAngstrom2 * wav * wav;
-  }
 
   double gravitationalDrop(const double L2, const double waveLength,
                            const double extraLength) const;

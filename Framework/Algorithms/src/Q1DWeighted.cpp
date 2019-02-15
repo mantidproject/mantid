@@ -5,6 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/Q1DWeighted.h"
+#include "MantidAlgorithms/GravitySANSHelper.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
@@ -164,7 +165,6 @@ void Q1DWeighted::exec() {
       std::vector<std::vector<double>>(nLambda, std::vector<double>(nQ, 0.0)));
 
   const auto &spectrumInfo = inputWS->spectrumInfo();
-  const double l1 = spectrumInfo.l1();
 
   // Set up the progress
   Progress progress(this, 0.0, 1.0, nSpec * nLambda);
@@ -192,11 +192,12 @@ void Q1DWeighted::exec() {
     const auto &YIn = inputWS->y(i);
     const auto &EIn = inputWS->e(i);
 
-    // get the l2 of the pixel
-    const double l2 = spectrumInfo.l2(i);
-
     // get the position of the pixel wrt sample (normally 0,0,0).
     const V3D pos = spectrumInfo.position(i) - samplePos;
+
+    // prepare a gravity helper, this is much faster than calculating
+    // on-the-fly, see the caching in the helper
+    GravitySANSHelper gravityHelper(spectrumInfo, i, 0.0);
 
     // loop over lambda bins
     for (size_t j = 0; j < nLambda; ++j) {
@@ -208,15 +209,9 @@ void Q1DWeighted::exec() {
 
       const double wavelength = (XIn[j] + XIn[j + 1]) / 2.;
 
-      // if we need to correct for gravity
       V3D correction;
       if (correctGravity) {
-        const double tof =
-            UnitConversion::run("Wavelength", "TOF", wavelength, l1, l2, 0.,
-                                DeltaEMode::Elastic, 0.) *
-            1E-6 * l2 / (l1 + l2);
-        const double drop = PhysicalConstants::g * tof * tof / 2.;
-        correction.setY(drop);
+        correction.setY(gravityHelper.gravitationalDrop(wavelength));
       }
 
       // Each pixel might be sub-divided in the number of pixels given as input
