@@ -102,6 +102,9 @@ class LoadRunWidgetPresenter(object):
 
     def handle_run_changed_by_user(self):
         run_string = self._view.get_run_edit_text()
+        if not run_string:
+            return
+
         self.run_list = run_utils.run_string_to_list(run_string)
         file_names = [file_utils.file_path_for_instrument_and_run(self.get_current_instrument(), new_run)
                       for new_run in self.run_list if not self._model._loaded_data_store.get_data(run=[new_run],
