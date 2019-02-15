@@ -945,7 +945,7 @@ std::vector<std::string> ExperimentInfo::getResourceFilenames(
     const std::string now =
         Types::Core::DateAndTime::getCurrentTime().toISO8601String();
     // Recursively call this method, but with all parameters.
-    return ExperimentInfo::resolveDatedResource(prefix, fileFormats,
+    return ExperimentInfo::getResourceFilenames(prefix, fileFormats,
                                                 directoryNames, now);
   }
 
