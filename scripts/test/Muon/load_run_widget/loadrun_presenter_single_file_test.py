@@ -84,7 +84,7 @@ class LoadRunWidgetPresenterTest(unittest.TestCase):
         self.wait_for_thread(self.presenter._load_thread)
 
         self.assertEqual(self.presenter.filenames, ["EMU00001234.nxs"])
-        self.assertEqual(self.presenter.runs, [1234])
+        self.assertEqual(self.presenter.runs, [[1234]])
         self.assertEqual(self.presenter.workspaces, [[1, 2, 3]])
 
     @run_test_with_and_without_threading
@@ -114,7 +114,7 @@ class LoadRunWidgetPresenterTest(unittest.TestCase):
         self.wait_for_thread(self.presenter._load_thread)
 
         self.assertEqual(self.presenter.filenames, ["1234.nxs"])
-        self.assertEqual(self.presenter.runs, [1234])
+        self.assertEqual(self.presenter.runs, [[1234]])
         self.assertEqual(self.presenter.workspaces, [[1]])
 
 

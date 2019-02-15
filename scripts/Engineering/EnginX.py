@@ -29,9 +29,11 @@ def main(vanadium_run, user, focus_run, **kwargs):
         crop_name (string): what to call the cropped bank workspace
         crop_on (string): the bank of spectrum to crop on if cropping
         pre_process_run (bool): set whether or not to pre-process run before focusing
+        params (string): rebin parameters for pre-process
+        time_period (string): time period for pre-process
         grouping_file (string): the path of the grouping file for texture focusing
         directory (string): the path of the directory to save to
-
+        user_struct (bool): whether or not to use the enginx file structure (defaults to true)
     """
     # Set all values at top,
     ceria_run = kwargs.get("ceria_run", "241391")
@@ -64,11 +66,16 @@ def main(vanadium_run, user, focus_run, **kwargs):
     directory = kwargs.get("directory", path)
 
     # path setup
-    user_dir = os.path.join(directory, "User", user)
-    calibration_directory = os.path.join(user_dir, "Calibration")
+    create_user_dir = kwargs.get("user_struct", True)
     calibration_general = os.path.join(directory, "Calibration")
-    focus_directory = os.path.join(user_dir, "Focus")
     focus_general = os.path.join(directory, "Focus")
+    if create_user_dir:
+        user_dir = os.path.join(directory, "User", user)
+        calibration_directory = os.path.join(user_dir, "Calibration")
+        focus_directory = os.path.join(user_dir, "Focus")
+    else:
+        calibration_directory = calibration_general
+        focus_directory = focus_general
 
     # call methods with set parameters
     run(ceria_run, do_cal, do_van, vanadium_run, calibration_directory, calibration_general, cropped, crop_name,
@@ -177,8 +184,8 @@ def create_calibration(ceria_run, van_run, calibration_directory, calibration_ge
                                  calibration_general)
 
 
-def create_calibration_cropped_file(ceria_run, van_run, curve_van, int_van, cal_dir, cal_gen, use_spectrum_number,
-                                    crop_name, spec_nos):
+def create_calibration_cropped_file(ceria_run, van_run, curve_van, int_van, calibration_directory, calibration_general,
+                                    use_spectrum_number, crop_name, spec_nos):
     """
     create and save a cropped calibration file
 
@@ -186,8 +193,8 @@ def create_calibration_cropped_file(ceria_run, van_run, curve_van, int_van, cal_
     @param van_run :: the run number of the vanadium to use
     @param curve_van :: name of the vanadium curves workspace
     @param int_van :: name of the integrated vanadium workspace
-    @param cal_dir :: the user specific calibration directory to save to
-    @param cal_gen :: the general calibration dirrecory
+    @param calibration_directory :: the user specific calibration directory to save to
+    @param calibration_general :: the general calibration dirrecory
     @param use_spectrum_number :: whether or not to crop using spectrum numbers  or banks
     @param crop_name :: name of the output workspace
     @param spec_nos :: the value to crop on, either a spectra number, or a bank
@@ -207,9 +214,10 @@ def create_calibration_cropped_file(ceria_run, van_run, curve_van, int_van, cal_
         difc = [output.DIFC]
         tzero = [output.TZERO]
         difa = [output.DIFA]
-        save_calibration(ceria_run, van_run, cal_dir, cal_gen, "all_banks", [param_tbl_name], tzero, difc)
-        save_calibration(ceria_run, van_run, cal_dir, cal_gen, "bank_{}".format(param_tbl_name), [param_tbl_name],
+        save_calibration(ceria_run, van_run, calibration_directory, calibration_general, "all_banks", [param_tbl_name],
                          tzero, difc)
+        save_calibration(ceria_run, van_run, calibration_directory, calibration_general,
+                         "bank_{}".format(param_tbl_name), [param_tbl_name],  tzero, difc)
     else:
         # work out which bank number to crop on, then calibrate
         if spec_nos.lower() == "north":
@@ -225,13 +233,15 @@ def create_calibration_cropped_file(ceria_run, van_run, curve_van, int_van, cal_
         difc = [output.DIFC]
         tzero = [output.TZERO]
         difa = [output.DIFA]
-        save_calibration(ceria_run, van_run, cal_dir, cal_gen, "all_banks", [spec_nos], tzero, difc)
-        save_calibration(ceria_run, van_run, cal_dir, cal_gen, "bank_{}".format(spec_nos), [spec_nos], tzero, difc)
+        save_calibration(ceria_run, van_run, calibration_directory, calibration_general, "all_banks", [spec_nos], tzero,
+                         difc)
+        save_calibration(ceria_run, van_run, calibration_directory, calibration_general, "bank_{}".format(spec_nos),
+                         [spec_nos], tzero, difc)
     # create the table workspace containing the parameters
     create_params_table(difc, tzero, difa)
 
 
-def create_calibration_files(ceria_run, van_run, curve_van, int_van, cal_dir, cal_gen):
+def create_calibration_files(ceria_run, van_run, curve_van, int_van, calibration_directory, calibration_general):
     """
     create the calibration files for an uncropped run
 
@@ -239,8 +249,8 @@ def create_calibration_files(ceria_run, van_run, curve_van, int_van, cal_dir, ca
     @param van_run :: the run number of the vanadium
     @param curve_van :: the vanadium curves workspace
     @param int_van :: the integrated vanadium workspace
-    @param cal_dir :: the user specific calibration directory to save to
-    @param cal_gen :: the general calibration directory
+    @param calibration_directory :: the user specific calibration directory to save to
+    @param calibration_general :: the general calibration directory
 
     """
     van_curves_ws, van_integrated_ws = load_van_files(curve_van, int_van)
@@ -261,10 +271,12 @@ def create_calibration_files(ceria_run, van_run, curve_van, int_van, cal_dir, ca
         tzeros.append(output.TZERO)
         difa.append(output.DIFA)
         # save out the ones needed for this loop
-        save_calibration(ceria_run, van_run, cal_dir, cal_gen, "bank_{}".format(bank_names[i - 1]), [bank_names[i - 1]],
+        save_calibration(ceria_run, van_run, calibration_directory, calibration_general,
+                         "bank_{}".format(bank_names[i - 1]), [bank_names[i - 1]],
                          [tzeros[i - 1]], [difcs[i - 1]])
     # save out the total version, then create the table of params
-    save_calibration(ceria_run, van_run, cal_dir, cal_gen, "all_banks", bank_names, tzeros, difcs)
+    save_calibration(ceria_run, van_run, calibration_directory, calibration_general, "all_banks", bank_names, tzeros,
+                     difcs)
     create_params_table(difcs, tzeros, difa)
 
 
@@ -281,21 +293,22 @@ def load_van_files(curves_van, ints_van):
     return van_curves_ws, van_integrated_ws
 
 
-def save_calibration(ceria_run, van_run, cal_dir, cal_gen, name, bank_names, zeros, difcs):
+def save_calibration(ceria_run, van_run, calibration_directory, calibration_general, name, bank_names, zeros, difcs):
     """
     save the calibration data
 
     @param ceria_run :: the run number of the ceria
     @param van_run :: the run number of the vanadium
-    @param cal_dir :: the user specific calibration directory to save to
-    @param cal_gen :: the general calibration directory to save to
+    @param calibration_directory :: the user specific calibration directory to save to
+    @param calibration_general :: the general calibration directory to save to
     @param name ::  the name of the banks being saved
     @param bank_names :: the list of banks to save
     @param difcs :: the list of difc values to save
     @param zeros :: the list of tzero values to save
 
     """
-    gsas_iparm_fname = os.path.join(cal_dir, "ENGINX_"+van_run+"_"+ceria_run+"_"+name+".prm")
+
+    gsas_iparm_fname = os.path.join(calibration_directory, "ENGINX_"+van_run+"_"+ceria_run+"_"+name+".prm")
     # work out what template to use
     if name == "all_banks":
         template_file = None
@@ -304,11 +317,15 @@ def save_calibration(ceria_run, van_run, cal_dir, cal_gen, name, bank_names, zer
     else:
         template_file = "template_ENGINX_241391_236516_North_bank.prm"
     # write out the param file to the users directory
+
     Utils.write_ENGINX_GSAS_iparam_file(output_file=gsas_iparm_fname, bank_names=bank_names, difc=difcs, tzero=zeros,
                                         ceria_run=ceria_run, vanadium_run=van_run,
                                         template_file=template_file)
-    # copy the param file to the general directory
-    copy2(gsas_iparm_fname, cal_gen)
+    if not calibration_general == calibration_directory:
+        # copy the param file to the general directory
+        if not os.path.exists(calibration_general):
+            os.makedirs(calibration_general)
+        copy2(gsas_iparm_fname, calibration_general)
 
 
 def create_params_table(difc, tzero, difa):
@@ -371,15 +388,15 @@ def focus(run_no, van_run, calibration_directory, focus_directory, focus_general
                     time_period)
 
 
-def focus_whole(run_number, van_curves, van_int, focus_dir, focus_gen, do_pre_process, params, time_period):
+def focus_whole(run_number, van_curves, van_int, focus_directory, focus_general, do_pre_process, params, time_period):
     """
     focus a whole run with no cropping
 
     @param run_number :: the run nuumber to focus
     @param van_curves :: the path to the vanadium curves file
     @param van_int :: the path to the integrated vanadium file
-    @param focus_dir :: the user specific focus directory to save to
-    @param focus_gen :: the general focus directory to save to
+    @param focus_directory :: the user specific focus directory to save to
+    @param focus_general :: the general focus directory to save to
     @param do_pre_process :: whether or not to pre-process the run before focussing it
     @param params :: the rebin parameters for pre-processing
     @param time_period :: the time period for pre-processing
@@ -393,10 +410,10 @@ def focus_whole(run_number, van_curves, van_int, focus_dir, focus_gen, do_pre_pr
         simple.EnggFocus(InputWorkspace=ws_to_focus, OutputWorkspace=output_ws,
                          VanIntegrationWorkspace=van_integrated_ws, VanCurvesWorkspace=van_curves_ws,
                          Bank=str(i))
-        _save_out(run_number, focus_dir, focus_gen, output_ws, "ENGINX_{}_{}", str(i))
+        _save_out(run_number, focus_directory, focus_general, output_ws, "ENGINX_{}_{}", str(i))
 
 
-def focus_cropped(run_number, van_curves, van_int, focus_dir, focus_gen, do_pre_process, params, time_period, crop_on,
+def focus_cropped(run_number, van_curves, van_int, focus_directory, focus_general, do_pre_process, params, time_period, crop_on,
                   use_spectra):
     """
     focus a partial run, cropping either on banks or on specific spectra
@@ -404,8 +421,8 @@ def focus_cropped(run_number, van_curves, van_int, focus_dir, focus_gen, do_pre_
     @param van_curves :: the path to the vanadium curves file
     @param van_int :: the path to the integrated vanadium file
     @param run_number :: the run nuumber to focus
-    @param focus_dir :: the user specific focus directory to save to
-    @param focus_gen :: the general focus directory to save to
+    @param focus_directory :: the user specific focus directory to save to
+    @param focus_general :: the general focus directory to save to
     @param do_pre_process :: whether or not to pre-process the run before focussing it
     @param params :: the rebin parameters for pre-processing
     @param time_period :: the time period for pre-processing
@@ -425,17 +442,17 @@ def focus_cropped(run_number, van_curves, van_int, focus_dir, focus_gen, do_pre_
         simple.EnggFocus(InputWorkspace=ws_to_focus, OutputWorkspace=output_ws,
                          VanIntegrationWorkspace=van_integrated_ws, VanCurvesWorkspace=van_curves_ws,
                          Bank=bank.get(crop_on))
-        _save_out(run_number, focus_dir, focus_gen, output_ws, "ENGINX_{}_{}", crop_on)
+        _save_out(run_number, focus_directory, focus_general, output_ws, "ENGINX_{}_{}", crop_on)
     else:
         # crop on the spectra passed in, focus and save it out
         output_ws = output_ws.format("", "")
         simple.EnggFocus(InputWorkspace=ws_to_focus, OutputWorkspace=output_ws,
                          VanIntegrationWorkspace=van_integrated_ws,
                          VanCurvesWorkspace=van_curves_ws, SpectrumNumbers=crop_on)
-        _save_out(run_number, focus_dir, focus_gen, output_ws, "ENGINX_{}_bank_{}", "cropped")
+        _save_out(run_number, focus_directory, focus_general, output_ws, "ENGINX_{}_bank_{}", "cropped")
 
 
-def focus_texture_mode(run_number, van_curves, van_int, focus_dir, focus_gen, do_pre_process, params, time_period,
+def focus_texture_mode(run_number, van_curves, van_int, focus_directory, focus_general, do_pre_process, params, time_period,
                        dg_file):
     """
     perform a texture mode focusing using the grouping csv file
@@ -443,8 +460,8 @@ def focus_texture_mode(run_number, van_curves, van_int, focus_dir, focus_gen, do
     @param run_number :: the run nuumber to focus
     @param van_curves :: the path to the vanadium curves file
     @param van_int :: the path to the integrated vanadium file
-    @param focus_dir :: the user specific focus directory to save to
-    @param focus_gen :: the general focus directory to save to
+    @param focus_directory :: the user specific focus directory to save to
+    @param focus_general :: the general focus directory to save to
     @param do_pre_process :: whether or not to pre-process the run before focussing it
     @param params :: the rebin parameters for pre-processing
     @param time_period :: the time period for pre-processing
@@ -468,7 +485,7 @@ def focus_texture_mode(run_number, van_curves, van_int, focus_dir, focus_gen, do
         simple.EnggFocus(InputWorkspace=ws_to_focus, OutputWorkspace=output_ws,
                          VanIntegrationWorkspace=van_integrated_ws, VanCurvesWorkspace=van_curves_ws,
                          SpectrumNumbers=banks.get(bank))
-        _save_out(run_number, focus_dir, focus_gen, output_ws, "ENGINX_{}_texture_{}", bank)
+        _save_out(run_number, focus_directory, focus_general, output_ws, "ENGINX_{}_texture_{}", bank)
 
 
 def _prepare_focus(run_number, van_curves, van_int, do_pre_process, params, time_period):
@@ -491,21 +508,21 @@ def _prepare_focus(run_number, van_curves, van_int, do_pre_process, params, time
     return van_curves_ws, van_integrated_ws, ws_to_focus
 
 
-def _save_out(run_number, focus_dir, focus_gen, output, join_string, bank_id):
+def _save_out(run_number, focus_directory, focus_general, output, join_string, bank_id):
     """
     save out the files required for the focus
 
     @param run_number :: the run number of the focused run
-    @param focus_dir :: the user directory to save to
-    @param focus_gen :: the general folder to copy the saved out files to
+    @param focus_directory :: the user directory to save to
+    @param focus_general :: the general folder to copy the saved out files to
     @param output :: the workspace to save
     @param join_string :: the nameing scheme of the files
     @param bank_id :: the bank being saved
 
     """
     # work out where to save the files
-    filename = os.path.join(focus_dir, join_string.format(run_number, bank_id))
-    hdf5_name = os.path.join(focus_dir, run_number + ".hdf5")
+    filename = os.path.join(focus_directory, join_string.format(run_number, bank_id))
+    hdf5_name = os.path.join(focus_directory, run_number + ".hdf5")
     if not unicode(bank_id).isnumeric():
         bank_id = 0
     # save the files out to the user directory
@@ -515,12 +532,15 @@ def _save_out(run_number, focus_dir, focus_gen, output, join_string, bank_id):
     simple.SaveOpenGenieAscii(InputWorkspace=output, Filename=filename + ".his", OpenGenieFormat="ENGIN-X Format")
     simple.SaveNexus(InputWorkspace=output, Filename=filename + ".nxs")
     simple.ExportSampleLogsToHDF5(InputWorkspace=output, Filename=hdf5_name, Blacklist="bankid")
-    # copy the files to the general directory
-    copy2(filename+".dat", focus_gen)
-    copy2(filename + ".gss", focus_gen)
-    copy2(filename + ".his", focus_gen)
-    copy2(filename + ".nxs", focus_gen)
-    copy2(hdf5_name, focus_gen)
+    if not focus_general == focus_directory:
+        if not os.path.exists(focus_general):
+            os.makedirs(focus_general)
+        # copy the files to the general directory
+        copy2(filename+".dat", focus_general)
+        copy2(filename + ".gss", focus_general)
+        copy2(filename + ".his", focus_general)
+        copy2(filename + ".nxs", focus_general)
+        copy2(hdf5_name, focus_general)
 
 
 def _decomment_csv(csvfile):

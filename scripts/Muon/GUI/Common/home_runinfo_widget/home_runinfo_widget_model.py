@@ -6,14 +6,14 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
-from Muon.GUI.Common.muon_context import MuonContext
+from Muon.GUI.Common.muon_data_context import MuonDataContext
 
 millions_counts_conversion = 1./1e6
 
 
 class HomeRunInfoWidgetModel(object):
 
-    def __init__(self, muon_data=MuonContext()):
+    def __init__(self, muon_data=MuonDataContext()):
         self._data = muon_data
 
     def get_run_number(self):
@@ -44,16 +44,16 @@ class HomeRunInfoWidgetModel(object):
     def get_counts_per_good_frame(self, counts):
         good_frames = self.get_log_value("goodfrm")
 
-        if good_frames is not 'Log not found':
-            return counts/good_frames
+        if good_frames != 'Log not found':
+            return round(counts/float(good_frames), 3)
         else:
             return 'Good frames not defined'
 
     def get_counts_per_good_frame_per_detector(self, counts):
         good_frames = self.get_log_value("goodfrm")
 
-        if good_frames is not 'Log not found':
-            return counts/good_frames/self._data.num_detectors()
+        if good_frames != 'Log not found':
+            return round(counts/float(good_frames)/float(self._data.num_detectors), 3)
         else:
             return 'Good frames not defined'
 
@@ -67,7 +67,7 @@ class HomeRunInfoWidgetModel(object):
         except Exception:
             return "Log not found"
         if temps:
-            return temps.timeAverageValue()
+            return round(temps.timeAverageValue(), 5)
         else:
             return "Log not found"
 
