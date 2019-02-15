@@ -21,6 +21,7 @@ public:
   Item(Item const &rhs);
   Item &operator=(Item const &rhs);
 
+  virtual bool isGroup() const = 0;
   State state() const;
   std::string message() const;
   bool requiresProcessing(bool reprocessFailed) const;

@@ -46,6 +46,8 @@ Row &Row::operator=(Row const &rhs) {
   return *this;
 }
 
+bool Row::isGroup() const { return false; }
+
 std::vector<std::string> const &Row::runNumbers() const { return m_runNumbers; }
 
 TransmissionRunPair const &Row::transmissionWorkspaceNames() const {

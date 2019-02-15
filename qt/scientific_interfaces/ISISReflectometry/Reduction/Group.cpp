@@ -23,6 +23,8 @@ Group::Group(
     std::string name)
     : m_name(std::move(name)), m_rows() {}
 
+bool Group::isGroup() const { return true; }
+
 std::string const &Group::name() const { return m_name; }
 
 bool Group::requiresPostprocessing() const { return m_rows.size() > 1; }

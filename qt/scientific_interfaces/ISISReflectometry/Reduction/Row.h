@@ -32,6 +32,7 @@ public:
 
   Row &operator=(Row const &rhs);
 
+  bool isGroup() const override;
   std::vector<std::string> const &runNumbers() const;
   TransmissionRunPair const &transmissionWorkspaceNames() const;
   double theta() const;

@@ -424,11 +424,12 @@ std::vector<std::string> BatchJobRunner::algorithmOutputWorkspacesToSave(
     IConfiguredAlgorithm_sptr algorithm) const {
   auto jobAlgorithm =
       boost::dynamic_pointer_cast<IBatchJobAlgorithm>(algorithm);
+  auto item = jobAlgorithm->item();
 
-  if (typeid(algorithm).name() == std::string("Row"))
-    return getWorkspacesToSave(dynamic_cast<Row &>(*jobAlgorithm->item()));
-  else if (typeid(algorithm).name() == std::string("Group"))
-    return getWorkspacesToSave(dynamic_cast<Group &>(*jobAlgorithm->item()));
+  if (item->isGroup())
+    return getWorkspacesToSave(dynamic_cast<Group &>(*item));
+  else
+    return getWorkspacesToSave(dynamic_cast<Row &>(*item));
 
   return std::vector<std::string>();
 }

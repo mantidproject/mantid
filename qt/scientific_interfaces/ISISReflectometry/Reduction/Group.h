@@ -22,6 +22,7 @@ public:
   explicit Group(std::string name);
   Group(std::string name, std::vector<boost::optional<Row>> rows);
 
+  bool isGroup() const override;
   std::string const &name() const;
   void setName(std::string const &name);
   bool requiresPostprocessing() const;
