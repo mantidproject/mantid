@@ -174,6 +174,159 @@ public:
     verifyAndClear();
   }
 
+  void testGetWorkspacesToSaveForOnlyRowInGroup() {
+    auto jobRunner = makeJobRunner(makeReductionJobsWithSingleRowGroup());
+    auto &reductionJobs =
+        jobRunner.m_batch.mutableRunsTable().mutableReductionJobs();
+    auto *row = &reductionJobs.mutableGroups()[0].mutableRows()[0].get();
+    row->setOutputNames({"", "IvsQ", "IvsQBin"});
+    auto *item = dynamic_cast<Item *>(row);
+
+    EXPECT_CALL(*m_jobAlgorithm, item()).Times(1).WillOnce(Return(item));
+
+    // For a single row, we save the binned workspace for the row
+    auto workspacesToSave =
+        jobRunner.algorithmOutputWorkspacesToSave(m_jobAlgorithm);
+    TS_ASSERT_EQUALS(workspacesToSave, std::vector<std::string>{"IvsQBin"});
+
+    verifyAndClear();
+  }
+
+  void testGetWorkspacesToSaveForRowInMultiRowGroup() {
+    auto jobRunner = makeJobRunner(makeReductionJobsWithTwoRowGroup());
+    auto &reductionJobs =
+        jobRunner.m_batch.mutableRunsTable().mutableReductionJobs();
+    auto *row = &reductionJobs.mutableGroups()[0].mutableRows()[0].get();
+    row->setOutputNames({"", "IvsQ", "IvsQBin"});
+    auto *item = dynamic_cast<Item *>(row);
+
+    EXPECT_CALL(*m_jobAlgorithm, item()).Times(1).WillOnce(Return(item));
+
+    // For multiple rows, we don't save any workspaces
+    auto workspacesToSave =
+        jobRunner.algorithmOutputWorkspacesToSave(m_jobAlgorithm);
+    TS_ASSERT_EQUALS(workspacesToSave, std::vector<std::string>{});
+
+    verifyAndClear();
+  }
+
+  void testGetWorkspacesToSaveForGroup() {
+    auto jobRunner = makeJobRunner(makeReductionJobsWithTwoRowGroup());
+    auto &reductionJobs =
+        jobRunner.m_batch.mutableRunsTable().mutableReductionJobs();
+    auto *group = &reductionJobs.mutableGroups()[0];
+    group->setOutputNames({
+        "stitched_test",
+    });
+    auto *item = dynamic_cast<Item *>(group);
+
+    EXPECT_CALL(*m_jobAlgorithm, item()).Times(1).WillOnce(Return(item));
+
+    auto workspacesToSave =
+        jobRunner.algorithmOutputWorkspacesToSave(m_jobAlgorithm);
+    TS_ASSERT_EQUALS(workspacesToSave,
+                     std::vector<std::string>{"stitched_test"});
+
+    verifyAndClear();
+  }
+
+  void testDeletedWorkspaceResetsStateForRow() {
+    auto jobRunner = makeJobRunner(makeReductionJobsWithTwoRowGroup());
+    auto &reductionJobs =
+        jobRunner.m_batch.mutableRunsTable().mutableReductionJobs();
+    auto &row = reductionJobs.mutableGroups()[0].mutableRows()[1];
+    row->setSuccess();
+    row->setOutputNames({"", "IvsQ_test", "IvsQBin_test"});
+
+    jobRunner.notifyWorkspaceDeleted("IvsQBin_test");
+    TS_ASSERT_EQUALS(row->state(), State::ITEM_NOT_STARTED);
+    verifyAndClear();
+  }
+
+  void testDeleteWorkspaceResetsStateForGroup() {
+    auto jobRunner = makeJobRunner(makeReductionJobsWithTwoRowGroup());
+    auto &reductionJobs =
+        jobRunner.m_batch.mutableRunsTable().mutableReductionJobs();
+    auto &group = reductionJobs.mutableGroups()[0];
+    group.setSuccess();
+    group.setOutputNames({"stitched_test"});
+
+    jobRunner.notifyWorkspaceDeleted("stitched_test");
+    TS_ASSERT_EQUALS(group.state(), State::ITEM_NOT_STARTED);
+    verifyAndClear();
+  }
+
+  void testRenameWorkspaceDoesNotResetStateForRow() {
+    auto jobRunner = makeJobRunner(makeReductionJobsWithTwoRowGroup());
+    auto &reductionJobs =
+        jobRunner.m_batch.mutableRunsTable().mutableReductionJobs();
+    auto &row = reductionJobs.mutableGroups()[0].mutableRows()[1];
+    row->setSuccess();
+    row->setOutputNames({"", "IvsQ_test", "IvsQBin_test"});
+
+    jobRunner.notifyWorkspaceRenamed("IvsQBin_test", "IvsQBin_new");
+    TS_ASSERT_EQUALS(row->state(), State::ITEM_COMPLETE);
+    verifyAndClear();
+  }
+
+  void testRenameWorkspaceUpdatesCorrectWorkspaceForRow() {
+    auto jobRunner = makeJobRunner(makeReductionJobsWithTwoRowGroup());
+    auto &reductionJobs =
+        jobRunner.m_batch.mutableRunsTable().mutableReductionJobs();
+    auto &row = reductionJobs.mutableGroups()[0].mutableRows()[1];
+    row->setSuccess();
+    row->setOutputNames({"", "IvsQ_test", "IvsQBin_test"});
+
+    jobRunner.notifyWorkspaceRenamed("IvsQBin_test", "IvsQBin_new");
+    TS_ASSERT_EQUALS(row->reducedWorkspaceNames().iVsLambda(), "");
+    TS_ASSERT_EQUALS(row->reducedWorkspaceNames().iVsQ(), "IvsQ_test");
+    TS_ASSERT_EQUALS(row->reducedWorkspaceNames().iVsQBinned(), "IvsQBin_new");
+    verifyAndClear();
+  }
+
+  void testRenameWorkspaceDoesNotResetStateForGroup() {
+    auto jobRunner = makeJobRunner(makeReductionJobsWithTwoRowGroup());
+    auto &reductionJobs =
+        jobRunner.m_batch.mutableRunsTable().mutableReductionJobs();
+    auto &group = reductionJobs.mutableGroups()[0];
+    group.setSuccess();
+    group.setOutputNames({"stitched_test"});
+
+    jobRunner.notifyWorkspaceRenamed("stitched_test", "stitched_new");
+    TS_ASSERT_EQUALS(group.state(), State::ITEM_COMPLETE);
+    verifyAndClear();
+  }
+
+  void testRenameWorkspaceUpdatesPostprocessedNameForGroup() {
+    auto jobRunner = makeJobRunner(makeReductionJobsWithTwoRowGroup());
+    auto &reductionJobs =
+        jobRunner.m_batch.mutableRunsTable().mutableReductionJobs();
+    auto &group = reductionJobs.mutableGroups()[0];
+    group.setSuccess();
+    group.setOutputNames({"stitched_test"});
+
+    jobRunner.notifyWorkspaceRenamed("stitched_test", "stitched_new");
+    TS_ASSERT_EQUALS(group.postprocessedWorkspaceName(), "stitched_new");
+    verifyAndClear();
+  }
+
+  void testDeleteAllWorkspacesResetsStateForRowAndGroup() {
+    auto jobRunner = makeJobRunner(makeReductionJobsWithTwoRowGroup());
+    auto &reductionJobs =
+        jobRunner.m_batch.mutableRunsTable().mutableReductionJobs();
+    auto &row = reductionJobs.mutableGroups()[0].mutableRows()[1];
+    auto &group = reductionJobs.mutableGroups()[0];
+    row->setSuccess();
+    row->setOutputNames({"", "IvsQ_test", "IvsQBin_test"});
+    group.setSuccess();
+    group.setOutputNames({"stitched_test"});
+
+    jobRunner.notifyAllWorkspacesDeleted();
+    TS_ASSERT_EQUALS(row->state(), State::ITEM_NOT_STARTED);
+    TS_ASSERT_EQUALS(group.state(), State::ITEM_NOT_STARTED);
+    verifyAndClear();
+  }
+
 private:
   std::vector<std::string> m_instruments;
   double m_tolerance;
@@ -218,10 +371,32 @@ private:
   Row makeRow(std::string const &run, double theta) {
     return Row({run}, theta, TransmissionRunPair(), RangeInQ(), boost::none,
                ReductionOptionsMap(),
-               ReductionWorkspaces({run}, TransmissionRunPair()));
+               ReductionWorkspaces({"IvsLam", "IvsQ", "IvsQBin"},
+                                   TransmissionRunPair()));
   }
 
-  ReductionJobs makeReductionJobsWithMultiGroups() {
+  ReductionJobs makeReductionJobsWithSingleRowGroup() {
+    auto groups = std::vector<Group>();
+    // Create some rows for the first group
+    auto group1Rows = std::vector<boost::optional<Row>>();
+    group1Rows.emplace_back(makeRow("12345", 0.5));
+    groups.emplace_back(Group("Test group 1", group1Rows));
+    // Create the reduction jobs
+    return ReductionJobs(groups);
+  }
+
+  ReductionJobs makeReductionJobsWithTwoRowGroup() {
+    auto groups = std::vector<Group>();
+    // Create some rows for the first group
+    auto group1Rows = std::vector<boost::optional<Row>>();
+    group1Rows.emplace_back(makeRow("12345", 0.5));
+    group1Rows.emplace_back(makeRow("12346", 0.8));
+    groups.emplace_back(Group("Test group 1", group1Rows));
+    // Create the reduction jobs
+    return ReductionJobs(groups);
+  }
+
+  ReductionJobs makeReductionJobsWithTwoGroups() {
     auto groups = std::vector<Group>();
     // Create some rows for the first group
     auto group1Rows = std::vector<boost::optional<Row>>();

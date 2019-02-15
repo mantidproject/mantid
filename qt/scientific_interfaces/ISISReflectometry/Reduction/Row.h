@@ -41,6 +41,8 @@ public:
   ReductionOptionsMap const &reductionOptions() const;
   ReductionWorkspaces const &reducedWorkspaceNames() const;
 
+  void setOutputNames(std::vector<std::string> const &outputNames) override;
+
   Row withExtraRunNumbers(std::vector<std::string> const &runNumbers) const;
 
   void algorithmStarted() override;

@@ -68,6 +68,14 @@ ReductionWorkspaces const &Row::reducedWorkspaceNames() const {
   return m_reducedWorkspaceNames;
 }
 
+void Row::setOutputNames(std::vector<std::string> const &outputNames) {
+  if (outputNames.size() != 3)
+    throw std::runtime_error("Invalid number of output workspaces for row");
+
+  m_reducedWorkspaceNames.setOutputNames(outputNames[0], outputNames[1],
+                                         outputNames[2]);
+}
+
 Row Row::withExtraRunNumbers(
     std::vector<std::string> const &extraRunNumbers) const {
   auto newRunNumbers = std::vector<std::string>();

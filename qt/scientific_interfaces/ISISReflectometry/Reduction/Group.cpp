@@ -65,6 +65,13 @@ void Group::appendRow(boost::optional<Row> const &row) {
   m_rows.emplace_back(row);
 }
 
+void Group::setOutputNames(std::vector<std::string> const &outputNames) {
+  if (outputNames.size() != 1)
+    throw std::runtime_error("Invalid number of output workspaces for group");
+
+  m_postprocessedWorkspaceName = outputNames[0];
+}
+
 void Group::appendEmptyRow() { m_rows.emplace_back(boost::none); }
 
 void Group::insertRow(boost::optional<Row> const &row, int beforeRowAtIndex) {

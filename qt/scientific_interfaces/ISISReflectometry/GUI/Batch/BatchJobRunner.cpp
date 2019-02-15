@@ -328,6 +328,7 @@ void getAlgorithmsForGroup(Group &group, Batch const &model,
 BatchJobAlgorithm::BatchJobAlgorithm(
     Mantid::API::IAlgorithm_sptr algorithm,
     MantidQt::API::ConfiguredAlgorithm::AlgorithmRuntimeProps properties,
+    // cppcheck-suppress passedByValue
     std::vector<std::string> outputWorkspaceProperties, Item *item)
     : ConfiguredAlgorithm(algorithm, properties), m_item(item),
       m_outputWorkspaceProperties(outputWorkspaceProperties) {}
