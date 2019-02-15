@@ -274,7 +274,7 @@ public:
     auto const singleBinName("Workspace_s0_Result");
     auto const outputName("Output_Result");
 
-    TS_ASSERT_THROWS(m_model->replaceResultBin("", singleBinName, outputName),
+    TS_ASSERT_THROWS(m_model->replaceFitResult("", singleBinName, outputName),
                      std::runtime_error);
   }
 
@@ -283,7 +283,7 @@ public:
     auto const inputName("Workspace_s0_to_s2_Result");
     auto const outputName("Output_Result");
 
-    TS_ASSERT_THROWS(m_model->replaceResultBin(inputName, "", outputName),
+    TS_ASSERT_THROWS(m_model->replaceFitResult(inputName, "", outputName),
                      std::runtime_error);
   }
 
@@ -292,7 +292,7 @@ public:
     auto const inputName("Workspace_s0_to_s2_Result");
     auto const singleBinName("Workspace_s0_Result");
 
-    TS_ASSERT_THROWS(m_model->replaceResultBin(inputName, singleBinName, ""),
+    TS_ASSERT_THROWS(m_model->replaceFitResult(inputName, singleBinName, ""),
                      std::runtime_error);
   }
 
@@ -304,7 +304,7 @@ public:
     setUpResultWorkspaces(inputName, singleBinName);
 
     TS_ASSERT_THROWS_NOTHING(
-        m_model->replaceResultBin(inputName, singleBinName, outputName));
+        m_model->replaceFitResult(inputName, singleBinName, outputName));
   }
 
   void
@@ -314,7 +314,7 @@ public:
     auto const outputName("Output_Result");
 
     setUpResultWorkspaces(inputName, singleBinName);
-    m_model->replaceResultBin(inputName, singleBinName, outputName);
+    m_model->replaceFitResult(inputName, singleBinName, outputName);
 
     auto const outputWorkspace = m_model->getResultWorkspace();
     TS_ASSERT(outputWorkspace);

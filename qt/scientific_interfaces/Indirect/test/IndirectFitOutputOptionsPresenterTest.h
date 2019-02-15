@@ -109,7 +109,7 @@ public:
   MOCK_CONST_METHOD1(isResultGroupSelected,
                      bool(std::string const &selectedGroup));
 
-  MOCK_METHOD3(replaceResultBin, void(std::string const &inputName,
+  MOCK_METHOD3(replaceFitResult, void(std::string const &inputName,
                                       std::string const &singleBinName,
                                       std::string const &outputName));
 };
