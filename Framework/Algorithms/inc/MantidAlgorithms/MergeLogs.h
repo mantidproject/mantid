@@ -27,10 +27,14 @@ public:
   }
   /// Algorithm's category for identification
   const std::string category() const override { return "DataHandling\\Logs"; }
+  /// Cross-check properties with each other
+  std::map<std::string, std::string> validateInputs() override;
 
 private:
   void init() override;
   void exec() override;
+  // Helper to validate TimeSeriesProperty
+  std::string validateTSP(std::string const &propertyName);
 };
 
 } // namespace Algorithms

@@ -342,7 +342,7 @@ std::vector<double> SampleLogsBehaviour::createTolerancesVector(
 std::shared_ptr<Property> SampleLogsBehaviour::addPropertyForTimeSeries(
     const std::string &item, const double value, MatrixWorkspace &ws) {
   std::shared_ptr<Property> returnProp;
-  const std::string unit = ws.getLog(item)->units();
+  const std::string &unit = ws.getLog(item)->units();
   try {
     // See if property exists as a TimeSeriesLog already - merging an output of
     // MergeRuns
@@ -375,7 +375,7 @@ std::shared_ptr<Property> SampleLogsBehaviour::addPropertyForList(
     const std::string &item, const std::string &value, MatrixWorkspace &ws) {
   std::shared_ptr<Property> returnProp;
 
-  const std::string unit = ws.getLog(item)->units();
+  const std::string &unit = ws.getLog(item)->units();
   // See if property exists already - merging an output of the calling algorithm
   returnProp.reset(ws.getLog(item)->clone());
   if (returnProp->type() != "string") {
@@ -419,10 +419,10 @@ bool SampleLogsBehaviour::setNumericValue(const std::string &item,
 void SampleLogsBehaviour::mergeSampleLogs(MatrixWorkspace_sptr addeeWS,
                                           MatrixWorkspace_sptr outWS) {
   for (const auto &item : m_logMap) {
-    const std::string logName = item.first.first;
+    const std::string &logName = item.first.first;
 
     Property *addeeWSProperty = addeeWS->getLog(logName);
-    const std::string logUnit = addeeWS->getLog(logName)->units();
+    const std::string &logUnit = addeeWS->getLog(logName)->units();
 
     double addeeWSNumericValue = 0.;
     double outWSNumericValue = 0.;
