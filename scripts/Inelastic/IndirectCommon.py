@@ -269,6 +269,22 @@ def PadArray(inarray, nfixed):
     return outarray
 
 
+def check_sample_logs_for_log(workspace, log_name):
+    table = s_api.CreateLogPropertyTable(workspace, log_name, EnableLogging=False)
+    log_value = table.cell(0, 0) if table else None
+    s_api.DeleteWorkspace(table, EnableLogging=False)
+    return log_value
+
+
+def is_technique_direct(workspace):
+    return check_sample_logs_for_log(workspace, 'deltaE-mode') == 'Direct'
+
+
+def check_e_fixed_are_equal(workspace1, workspace2):
+    if getEfixed(workspace1) != getEfixed(workspace2):
+        raise ValueError('Workspaces {0} and {1} have a different EFixed.' % (workspace1, workspace2))
+
+
 def CheckAnalysers(in1WS, in2WS):
     """
     Check workspaces have identical analysers and reflections
@@ -285,7 +301,12 @@ def CheckAnalysers(in1WS, in2WS):
       @exception ValueError - workspaces have different reflections
     """
     ws1 = s_api.mtd[in1WS]
-    ws1.getInstrument().getName()
+
+    if is_technique_direct(in1WS) or is_technique_direct(in2WS):
+        logger.warning('Could not find analyser for this workspace because the energy mode is Direct')
+        check_e_fixed_are_equal(in1WS, in2WS)
+        return
+
     try:
         analyser_1 = ws1.getInstrument().getStringParameter('analyser')[0]
         reflection_1 = ws1.getInstrument().getStringParameter('reflection')[0]
