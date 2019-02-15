@@ -507,10 +507,11 @@ class ScalingAxesImage(mimage.AxesImage):
         cropped_data = self.unsampled_data[pymin:pymax, pxmin:pxmax]
         self.set_data(cropped_data, set_unsampled_data = False)
         x0, x1 = _get_extents(pxmin, pxmax, dims[1], self.unsampled_extent[0:2])
-        ax.set_xlim(x0, x1, emit = False)
+        #ax.set_xlim(x0, x1, emit = False)
         y0, y1 = _get_extents(pymin, pymax, dims[0], self.unsampled_extent[2:4])
-        ax.set_ylim(y0, y1, emit = False)
-        self._update_extent((x0, x1, y0, y1))
+        #ax.set_ylim(y0, y1, emit = False)
+        ax.update_datalim(((x0,y0),(x1, y1)))
+        self._update_extent((x0,x1,y0,y1))
 
 
 
