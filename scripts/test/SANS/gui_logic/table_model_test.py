@@ -10,7 +10,7 @@ import unittest
 
 from sans.gui_logic.models.table_model import (TableModel, TableIndexModel, OptionsColumnModel, SampleShapeColumnModel)
 from sans.gui_logic.models.basic_hint_strategy import BasicHintStrategy
-from PyQt4.QtCore import QCoreApplication
+from qtpy.QtCore import QCoreApplication
 from sans.common.enums import (RowState, SampleShape)
 try:
     from unittest import mock

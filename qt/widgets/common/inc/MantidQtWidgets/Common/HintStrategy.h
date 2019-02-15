@@ -22,7 +22,10 @@ public:
   HintStrategy(){};
   virtual ~HintStrategy() = default;
 
-  /** Create a list of hints for auto completion
+  /** Create a list of hints for auto completion.
+    * This is overwritten on the python side.
+    * However, leaving this as abstract method causes SIP issues
+    * in _common.sip
 
       @returns A map of keywords to short descriptions for the keyword.
    */
