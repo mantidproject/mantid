@@ -12,24 +12,16 @@ from __future__ import (absolute_import, division, print_function)
 
 from abc import ABCMeta, abstractmethod
 from inspect import isclass
-
-from six import with_metaclass
-from qtpy.QtWidgets import (QListWidgetItem, QMainWindow, QMessageBox, QFileDialog)  # noqa
+from qtpy.QtWidgets import (QListWidgetItem, QMessageBox, QFileDialog, QMainWindow)  # noqa
 from qtpy.QtCore import (QRegExp, QSettings)  # noqa
 from qtpy.QtGui import (QDoubleValidator, QIcon, QIntValidator, QRegExpValidator)  # noqa
+from six import with_metaclass
 
-from mantid.kernel import (Logger)
-from mantidqtpython import MantidQt
-
-try:
-    from mantidplot import *
-
-    canMantidPlot = True
-except ImportError:
-    canMantidPlot = False
 from reduction_gui.reduction.scripter import execute_script
-
-from . import ui_sans_data_processor_window as ui_sans_data_processor_window
+from mantid.kernel import (Logger)
+from mantidqt import icons
+from mantidqt.utils.qt import load_ui
+from mantidqt.widgets import jobtreeview, manageuserdirectories
 from sans.common.enums import (ReductionDimensionality, OutputMode, SaveType, SANSInstrument,
                                RangeStepType, ReductionMode, FitType)
 from sans.common.file_information import SANSFileInformationFactory
@@ -43,15 +35,26 @@ from sans.gui_logic.models.run_selection import RunSelection
 from sans.gui_logic.models.run_finder import SummableRunFinder
 from sans.gui_logic.models.summation_settings import SummationSettings
 from sans.gui_logic.models.binning_type import BinningType
-
 from sans.gui_logic.presenter.add_runs_presenter import AddRunsPagePresenter
 from sans.gui_logic.presenter.run_selector_presenter import RunSelectorPresenter
 from sans.gui_logic.presenter.summation_settings_presenter import SummationSettingsPresenter
 from ui.sans_isis.work_handler import WorkHandler
 from ui.sans_isis.SANSSaveOtherWindow import SANSSaveOtherDialog
 
+from qtpy import PYQT4
+if PYQT4:
+    IN_MANTIDPLOT = False
+    try:
+        from pymantidplot import proxies
+        IN_MANTIDPLOT = True
+    except ImportError:
+        # We are not in MantidPlot e.g. testing
+        pass
+
 DEFAULT_BIN_SETTINGS = \
     '5.5,45.5,50.0, 50.0,1000.0, 500.0,1500.0, 750.0,99750.0, 255.0,100005.0'
+
+Ui_SansDataProcessorWindow, _ = load_ui(__file__, "sans_data_processor_window.ui")
 
 
 class RunSelectorPresenterFactory(object):
@@ -82,7 +85,7 @@ def _make_run_summation_settings_presenter(summation_settings_view, parent_view)
 # Gui Classes
 # ----------------------------------------------------------------------------------------------------------------------
 class SANSDataProcessorGui(QMainWindow,
-                           ui_sans_data_processor_window.Ui_SansDataProcessorWindow):
+                           Ui_SansDataProcessorWindow):
     data_processor_table = None
     INSTRUMENTS = None
     VARIABLE = "Variable"
@@ -202,12 +205,12 @@ class SANSDataProcessorGui(QMainWindow,
 
         self.instrument = SANSInstrument.NoInstrument
 
-        self.paste_button.setIcon(QIcon(":/paste.png"))
-        self.copy_button.setIcon(QIcon(":/copy.png"))
-        self.cut_button.setIcon(QIcon(":/cut.png"))
-        self.erase_button.setIcon(QIcon(":/erase.png"))
-        self.delete_row_button.setIcon(QIcon(":/delete_row.png"))
-        self.insert_row_button.setIcon(QIcon(":/insert_row.png"))
+        self.paste_button.setIcon(icons.get_icon("fa.paste"))
+        self.copy_button.setIcon(icons.get_icon("fa.copy"))
+        self.cut_button.setIcon(icons.get_icon("fa.cut"))
+        self.erase_button.setIcon(icons.get_icon("fa.eraser"))
+        self.delete_row_button.setIcon(icons.get_icon("fa.trash"))
+        self.insert_row_button.setIcon(icons.get_icon("fa.table"))
 
         self.paste_button.clicked.connect(self._paste_rows_requested)
         self.copy_button.clicked.connect(self._copy_rows_requested)
@@ -265,25 +268,19 @@ class SANSDataProcessorGui(QMainWindow,
         self.tab_choice_list.currentRowChanged.connect(self.set_current_page)
         self.set_current_page(0)
 
-        path = os.path.dirname(__file__)
-        runs_icon_path = os.path.join(path, "icons", "run.png")
-        runs_icon = QIcon(runs_icon_path)
+        runs_icon = icons.get_icon("fa.play-circle-o")
         _ = QListWidgetItem(runs_icon, "Runs", self.tab_choice_list)  # noqa
 
-        settings_icon_path = os.path.join(path, "icons", "settings.png")
-        settings_icon = QIcon(settings_icon_path)
+        settings_icon = icons.get_icon("fa.cog")
         _ = QListWidgetItem(settings_icon, "Settings", self.tab_choice_list)  # noqa
 
-        centre_icon_path = os.path.join(path, "icons", "centre.png")
-        centre_icon = QIcon(centre_icon_path)
+        centre_icon = icons.get_icon("fa.dot-circle-o")
         _ = QListWidgetItem(centre_icon, "Beam Centre", self.tab_choice_list)  # noqa
 
-        add_runs_page_icon_path = os.path.join(path, "icons", "sum.png")
-        add_runs_page_icon = QIcon(add_runs_page_icon_path)
+        add_runs_page_icon = icons.get_icon("fa.plus-circle")
         _ = QListWidgetItem(add_runs_page_icon, "Sum Runs", self.tab_choice_list)  # noqa
 
-        diagnostic_icon_path = os.path.join(path, "icons", "diagnostic.png")
-        diagnostic_icon = QIcon(diagnostic_icon_path)
+        diagnostic_icon = icons.get_icon("fa.question-circle")
         _ = QListWidgetItem(diagnostic_icon, "Diagnostic Page", self.tab_choice_list)  # noqa
 
         # Set the 0th row enabled
@@ -395,7 +392,7 @@ class SANSDataProcessorGui(QMainWindow,
         if self.data_processor_table:
             self.data_processor_table.setParent(None)
 
-        self.data_processor_table = MantidQt.MantidWidgets.Batch.JobTreeView(
+        self.data_processor_table = jobtreeview.JobTreeView(
             ["Sample Scatter", "ssp", "Sample Transmission", "stp", "Sample Direct", "sdp",
              "Can Scatter", "csp",
              "Can Transmission", "ctp", "Can Direct", "cdp", "Output Name", "User File",
@@ -410,7 +407,7 @@ class SANSDataProcessorGui(QMainWindow,
         self._call_settings_listeners(lambda listener: listener.on_row_inserted(0, row_entry))
 
         self.table_signals = \
-            MantidQt.MantidWidgets.Batch.JobTreeViewSignalAdapter(self.data_processor_table, self)
+            jobtreeview.JobTreeViewSignalAdapter(self.data_processor_table, self)
         # The signal adapter subscribes to events from the table
         # and emits signals whenever it is notified.
 
@@ -432,11 +429,11 @@ class SANSDataProcessorGui(QMainWindow,
         border_color = "black"
         border_opacity = 255
         is_editable = True
-        return MantidQt.MantidWidgets.Batch.Cell(text, background_color, border_thickness,
-                                                 border_color, border_opacity, is_editable)
+        return jobtreeview.Cell(text, background_color, border_thickness,
+                                border_color, border_opacity, is_editable)
 
     def row(self, path):
-        return MantidQt.MantidWidgets.Batch.RowLocation(path)
+        return jobtreeview.RowLocation(path)
 
     def _setup_main_tab(self):
         self.user_file_button.clicked.connect(self._on_user_file_load)
@@ -517,7 +514,8 @@ class SANSDataProcessorGui(QMainWindow,
         self._call_settings_listeners(lambda listener: listener.on_compatibility_unchecked())
 
     def _on_help_button_clicked(self):
-        pymantidplot.proxies.showCustomInterfaceHelp('ISIS SANS v2')
+        if PYQT4:
+            proxies.showCustomInterfaceHelp('ISIS SANS v2')
 
     def _on_user_file_load(self):
         """
@@ -778,7 +776,7 @@ class SANSDataProcessorGui(QMainWindow,
         return str(self.mask_file_input_line_edit.text())
 
     def show_directory_manager(self):
-        MantidQt.API.ManageUserDirectories.openUserDirsDialog(self)
+        manageuserdirectories.ManageUserDirectories.openUserDirsDialog(self)
 
     def _on_load_mask_file(self):
         load_file(self.mask_file_input_line_edit, "*.*", self.__generic_settings,
@@ -2071,4 +2069,4 @@ class SANSDataProcessorGui(QMainWindow,
         for child in self.children():
             if isinstance(child, SANSSaveOtherDialog):
                 child.done(0)
-        super(QtGui.QMainWindow, self).closeEvent(event)
+        super(QMainWindow, self).closeEvent(event)

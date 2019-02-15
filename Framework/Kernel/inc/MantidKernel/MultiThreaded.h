@@ -147,7 +147,7 @@ void AtomicOp(std::atomic<T> &f, T d, BinaryOp op) {
     PRAGMA(omp parallel for)
 
 /** Includes code to add OpenMP commands to run the next for loop in parallel.
- *  and declare the varialbes to be firstprivate.
+ *  and declare the variables to be firstprivate.
  *  This includes no checks to see if workspaces are suitable
  *  and therefore should not be used in any loops that access workspace.
  */

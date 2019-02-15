@@ -10,6 +10,8 @@ set ( SRC_FILES
   src/InstrumentTreeModel.cpp
   src/InstrumentTreeWidget.cpp
   src/InstrumentWidget.cpp
+  src/InstrumentWidgetEncoder.cpp
+  src/InstrumentWidgetDecoder.cpp
   src/InstrumentWidgetMaskTab.cpp
   src/InstrumentWidgetPickTab.cpp
   src/InstrumentWidgetRenderTab.cpp
@@ -53,6 +55,7 @@ set ( MOC_FILES
   inc/MantidQtWidgets/InstrumentView/InstrumentTreeModel.h
   inc/MantidQtWidgets/InstrumentView/InstrumentTreeWidget.h
   inc/MantidQtWidgets/InstrumentView/InstrumentWidget.h
+  inc/MantidQtWidgets/InstrumentView/InstrumentWidgetDecoder.h
   inc/MantidQtWidgets/InstrumentView/InstrumentWidgetMaskTab.h
   inc/MantidQtWidgets/InstrumentView/InstrumentWidgetPickTab.h
   inc/MantidQtWidgets/InstrumentView/InstrumentWidgetRenderTab.h
@@ -91,6 +94,8 @@ set ( INC_FILES
   inc/MantidQtWidgets/InstrumentView/InstrumentTreeModel.h
   inc/MantidQtWidgets/InstrumentView/InstrumentTreeWidget.h
   inc/MantidQtWidgets/InstrumentView/InstrumentWidget.h
+  inc/MantidQtWidgets/InstrumentView/InstrumentWidgetEncoder.h
+  inc/MantidQtWidgets/InstrumentView/InstrumentWidgetDecoder.h
   inc/MantidQtWidgets/InstrumentView/InstrumentRenderer.h
   inc/MantidQtWidgets/InstrumentView/InstrumentWidgetMaskTab.h
   inc/MantidQtWidgets/InstrumentView/InstrumentWidgetPickTab.h
@@ -207,4 +212,42 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsInstrumentView
     @loader_path/../Libraries
   LINUX_INSTALL_RPATH
     "\$ORIGIN/../${WORKBENCH_LIB_DIR}"
+)
+
+###########################################################################
+# Testing
+###########################################################################
+set( TEST_FILES
+  test/InstrumentWidgetDecoderTest.h
+  test/InstrumentWidgetEncoderTest.h
+)
+
+mtd_add_qt_tests (TARGET_NAME MantidQtWidgetsInstrumentWidgetTest
+  QT_VERSION 5
+  SRC ${TEST_FILES}
+  INCLUDE_DIRS
+    ../../../Framework/DataObjects/inc
+    ../../../Framework/TestHelpers/inc
+  TEST_HELPER_SRCS
+    ../../../Framework/TestHelpers/src/TearDownWorld.cpp
+    ../../../Framework/TestHelpers/src/ComponentCreationHelper.cpp
+    ../../../Framework/TestHelpers/src/InstrumentCreationHelper.cpp
+    ../../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
+  LINK_LIBS
+    ${CORE_MANTIDLIBS}
+    PythonInterfaceCore
+    DataObjects
+    ${POCO_LIBRARIES}
+    ${Boost_LIBRARIES}
+    ${PYTHON_LIBRARIES}
+    ${GMOCK_LIBRARIES}
+    ${GTEST_LIBRARIES}
+  QT5_LINK_LIBS
+    Qt5::OpenGL
+  MTD_QT_LINK_LIBS
+    MantidQtWidgetsCommon
+    MantidQtWidgetsInstrumentView
+    MantidQtWidgetsMplCpp
+  PARENT_DEPENDENCIES
+    GUITests
 )

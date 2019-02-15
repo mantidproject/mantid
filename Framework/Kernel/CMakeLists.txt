@@ -499,10 +499,6 @@ if ( GCC_COMPILER_VERSION AND GCC_COMPILER_VERSION VERSION_LESS "4.5" )
 endif()
 target_link_libraries ( Kernel LINK_PUBLIC ${NEXUS_LIBRARIES} Eigen3::Eigen LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${GSL_LIBRARIES} ${MANTIDLIBS} ${NETWORK_LIBRARIES} ${JSONCPP_LIBRARIES} ${TBB_LIBRARIES} ${TBB_MALLOC_LIBRARIES})
 
-if (WITH_ASAN)
-  target_link_libraries ( Kernel LINK_PRIVATE -lasan )
-endif ()
-
 if ( WIN32 )
   target_link_libraries ( Kernel LINK_PRIVATE Psapi.lib ) # For memory usage queries
 endif()

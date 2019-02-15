@@ -9,17 +9,14 @@
 #
 from __future__ import (absolute_import, unicode_literals)
 
-# system imports
 import unittest
 
-# third-party library imports
-
-# local imports
 from mantidqt.utils.qt.test import GuiTest
+from mantidqt.utils.qt.test.qt_widget_finder import QtWidgetFinder
 from mantidqt.widgets.codeeditor.multifileinterpreter import MultiPythonFileInterpreter
 
 
-class MultiPythonFileInterpreterTest(GuiTest):
+class MultiPythonFileInterpreterTest(GuiTest, QtWidgetFinder):
 
     def test_default_contains_single_editor(self):
         widget = MultiPythonFileInterpreter()
