@@ -8,12 +8,10 @@
 #define MANTID_GEOMETRY_SHAPEINFO_H_
 
 #include "MantidGeometry/DllConfig.h"
+#include "MantidKernel/V3D.h"
 #include <vector>
 
 namespace Mantid {
-namespace Kernel {
-class V3D;
-}
 namespace Geometry {
 class RectangularDetector;
 class StructuredDetector;
@@ -35,6 +33,38 @@ public:
     CYLINDER,   ///< CYLINDER
     CONE,       ///< CONE
   };
+  struct CuboidGeometry {
+    const Kernel::V3D &leftFrontBottom;
+    const Kernel::V3D &leftFrontTop;
+    const Kernel::V3D &leftBackBottom;
+    const Kernel::V3D &rightFrontBottom;
+  };
+  struct HexahedronGeometry {
+    const Kernel::V3D &leftBackBottom;
+    const Kernel::V3D &leftFrontBottom;
+    const Kernel::V3D &rightFrontBottom;
+    const Kernel::V3D &rightBackBottom;
+    const Kernel::V3D &leftBackTop;
+    const Kernel::V3D &leftFrontTop;
+    const Kernel::V3D &rightFrontTop;
+    const Kernel::V3D &rightBackTop;
+  };
+  struct SphereGeometry {
+    const Kernel::V3D &centre;
+    double radius;
+  };
+  struct CylinderGeometry {
+    const Kernel::V3D &centreOfBottomBase;
+    const Kernel::V3D &axis;
+    double radius;
+    double height;
+  };
+  struct ConeGeometry {
+    const Kernel::V3D &centre;
+    const Kernel::V3D &axis;
+    double radius;
+    double height;
+  };
 
 private:
   std::vector<Kernel::V3D> m_points;
@@ -52,6 +82,11 @@ public:
 
   void getObjectGeometry(GeometryShape &shape, std::vector<Kernel::V3D> &points,
                          double &radius, double &height) const;
+  CuboidGeometry cuboidGeometry() const;
+  HexahedronGeometry hexahedronGeometry() const;
+  SphereGeometry sphereGeometry() const;
+  CylinderGeometry cylinderGeometry() const;
+  ConeGeometry coneGeometry() const;
   /// sets the geometry handler for a cuboid
   void setCuboid(const Kernel::V3D &, const Kernel::V3D &, const Kernel::V3D &,
                  const Kernel::V3D &);

@@ -7,6 +7,7 @@
 #include "MantidGeometry/Rendering/ShapeInfo.h"
 #include "MantidKernel/Tolerance.h"
 #include "MantidKernel/V3D.h"
+#include <cassert>
 #include <cmath>
 
 namespace Mantid {
@@ -32,6 +33,37 @@ void ShapeInfo::getObjectGeometry(ShapeInfo::GeometryShape &shape,
   points = m_points;
   radius = m_radius;
   height = m_height;
+}
+
+ShapeInfo::CuboidGeometry ShapeInfo::cuboidGeometry() const {
+  assert(m_shape == GeometryShape::CUBOID);
+  CuboidGeometry g{m_points[0], m_points[1], m_points[2], m_points[3]};
+  return g;
+}
+
+ShapeInfo::HexahedronGeometry ShapeInfo::hexahedronGeometry() const {
+  assert(m_shape == GeometryShape::HEXAHEDRON);
+  HexahedronGeometry g{m_points[0], m_points[1], m_points[2], m_points[3],
+                       m_points[4], m_points[5], m_points[6], m_points[7]};
+  return g;
+}
+
+ShapeInfo::SphereGeometry ShapeInfo::sphereGeometry() const {
+  assert(m_shape == GeometryShape::SPHERE);
+  SphereGeometry g{m_points.front(), m_radius};
+  return g;
+}
+
+ShapeInfo::CylinderGeometry ShapeInfo::cylinderGeometry() const {
+  assert(m_shape == GeometryShape::CYLINDER);
+  CylinderGeometry g{m_points.front(), m_points.back(), m_radius, m_height};
+  return g;
+}
+
+ShapeInfo::ConeGeometry ShapeInfo::coneGeometry() const {
+  assert(m_shape == GeometryShape::CONE);
+  ConeGeometry g{m_points.front(), m_points.back(), m_radius, m_height};
+  return g;
 }
 
 void ShapeInfo::setCuboid(const V3D &p1, const V3D &p2, const V3D &p3,
