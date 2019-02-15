@@ -15,8 +15,8 @@ from qtpy.QtCore import Qt
 
 from mantid.kernel import logger
 from mantidqt.widgets.observers.ads_observer import WorkspaceDisplayADSObserver
-from mantidqt.widgets.workspacedisplay.data_copier import DataCopier
 from mantidqt.widgets.observers.observing_presenter import ObservingPresenter
+from mantidqt.widgets.workspacedisplay.data_copier import DataCopier
 from mantidqt.widgets.workspacedisplay.status_bar_view import StatusBarView
 from mantidqt.widgets.workspacedisplay.table.error_column import ErrorColumn
 from mantidqt.widgets.workspacedisplay.table.model import TableWorkspaceDisplayModel
@@ -76,7 +76,6 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
         self.load_data(self.view)
 
         # connect to cellChanged signal after the data has been loaded
-        # all consecutive triggers will be from user actions
         self.view.itemChanged.connect(self.handleItemChanged)
 
     def show_view(self):
@@ -93,8 +92,13 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
 
     def replace_workspace(self, workspace_name, workspace):
         if self.model.workspace_equals(workspace_name):
+            # stops triggering itemChanged signal while the data is being reloaded
+            self.view.blockSignals(True)
+
             self.model = TableWorkspaceDisplayModel(workspace)
             self.load_data(self.view)
+            self.view.blockSignals(False)
+            
             self.view.emit_repaint()
 
     def handleItemChanged(self, item):
