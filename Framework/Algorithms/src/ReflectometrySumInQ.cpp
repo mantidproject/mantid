@@ -41,15 +41,15 @@ const static std::string PARTIAL_BINS{"IncludePartialBins"};
 double centreTwoTheta(const double wsIndex,
                       const Mantid::API::SpectrumInfo &spectrumInfo) {
   double twoTheta;
-  const auto index{static_cast<size_t>(wsIndex)};
+  const size_t index{static_cast<size_t>(wsIndex)};
   if (wsIndex == static_cast<double>(index)) {
     twoTheta = spectrumInfo.twoTheta(index);
   } else {
     // Linear interpolation. Straight from Wikipedia.
-    const auto x0{static_cast<double>(index)};
-    const auto x1{static_cast<double>(index + 1)};
-    const auto y0{spectrumInfo.twoTheta(index)};
-    const auto y1{spectrumInfo.twoTheta(index + 1)};
+    const double x0{static_cast<double>(index)};
+    const double x1{static_cast<double>(index + 1)};
+    const double y0{spectrumInfo.twoTheta(index)};
+    const double y1{spectrumInfo.twoTheta(index + 1)};
     twoTheta = (y0 * (x1 - wsIndex) + y1 * (wsIndex - x0)) / (x1 - x0);
   }
   return twoTheta;
@@ -434,9 +434,9 @@ ReflectometrySumInQ::MinMax ReflectometrySumInQ::findWavelengthMinMax(
  * @param inputIdx [in] :: the index of the input histogram
  * @param twoThetaRange [in] :: the 2theta width of the pixel
  * @param refAngles [in] :: the reference 2theta angles
- * @param inputX [in] :: the input spectrum X values
- * @param inputY [in] :: the input spectrum Y values
- * @param inputE [in] :: the input spectrum E values
+ * @param edges [in] :: the input spectrum bin edges
+ * @param counts [in] :: the input spectrum counts
+ * @param stdDevs [in] :: the input spectrum count standard deviations
  * @param IvsLam [in,out] :: the output workspace
  * @param outputE [in,out] :: the projected E values
  */

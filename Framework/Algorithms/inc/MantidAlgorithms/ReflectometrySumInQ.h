@@ -68,9 +68,9 @@ private:
                               const Angles &refAngles);
   void processValue(const int inputIdx, const MinMax &twoThetaRange,
                     const Angles &refAngles,
-                    const HistogramData::BinEdges &inputX,
-                    const HistogramData::Counts &inputY,
-                    const HistogramData::CountStandardDeviations &inputE,
+                    const HistogramData::BinEdges &edges,
+                    const HistogramData::Counts &counts,
+                    const HistogramData::CountStandardDeviations &stdDevs,
                     API::MatrixWorkspace &IvsLam, std::vector<double> &outputE);
   MinMax projectedLambdaRange(const MinMax &wavelengthRange,
                               const MinMax &twoThetaRange,
