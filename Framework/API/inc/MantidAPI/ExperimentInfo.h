@@ -165,10 +165,9 @@ public:
                              std::string &outValidFrom,
                              std::string &outValidTo);
   /// Utility to retrieve a resource file (IDF, Parameters, ..)
-  static std::vector<std::string> getResourceFilenames(const std::string &prefix,
-                                                       const std::vector<std::string> &fileFormats,
-                                                       const std::vector<std::string> &directoryNames,
-                                                       const std::string &date);
+  static std::vector<std::string> getResourceFilenames(
+      const std::string &prefix, const std::vector<std::string> &fileFormats,
+      const std::vector<std::string> &directoryNames, const std::string &date);
   /// Get the IDF using the instrument name and date
   static std::string getInstrumentFilename(const std::string &instrumentName,
                                            const std::string &date = "");

@@ -935,45 +935,49 @@ void ExperimentInfo::getValidFromTo(const std::string &IDFfilename,
 }
 
 /// Utility to retrieve a list of resource files sorted by `from` date
-std::vector<std::string> ExperimentInfo::getResourceFilenames(const std::string &prefix,
-  const std::vector<std::string> &fileFormats, const std::vector<std::string> &directoryNames,
-  const std::string &date) {
+std::vector<std::string> ExperimentInfo::getResourceFilenames(
+    const std::string &prefix, const std::vector<std::string> &fileFormats,
+    const std::vector<std::string> &directoryNames, const std::string &date) {
 
   if (date.empty()) {
     // Just use the current date
     g_log.debug() << "No date specified, using current date and time.\n";
     const std::string now =
-            Types::Core::DateAndTime::getCurrentTime().toISO8601String();
+        Types::Core::DateAndTime::getCurrentTime().toISO8601String();
     // Recursively call this method, but with all parameters.
-    return ExperimentInfo::resolveDatedResource(prefix, fileFormats, directoryNames, now);
+    return ExperimentInfo::resolveDatedResource(prefix, fileFormats,
+                                                directoryNames, now);
   }
 
   // Join all the file formats into a single string
   std::stringstream ss;
   ss << "(";
-  for(size_t i = 0; i < fileFormats.size(); ++i)
-  {
-    if(i != 0)
+  for (size_t i = 0; i < fileFormats.size(); ++i) {
+    if (i != 0)
       ss << "|";
     ss << fileFormats[i];
   }
   ss << ")";
   const std::string allFileFormats = ss.str();
 
-  const boost::regex regex(prefix + ".*\\." + allFileFormats, boost::regex_constants::icase);
+  const boost::regex regex(prefix + ".*\\." + allFileFormats,
+                           boost::regex_constants::icase);
   Poco::DirectoryIterator end_iter;
   DateAndTime d(date);
 
   DateAndTime refDate("1900-01-31 23:59:00"); // used to help determine the most
   // recently starting file, if none match
-  DateAndTime refDateGoodFile("1900-01-31 23:59:00"); // used to help determine the most recently
+  DateAndTime refDateGoodFile(
+      "1900-01-31 23:59:00"); // used to help determine the most recently
 
   // Two files could have the same `from` date so multimap is required.
   // Sort with newer dates placed at the beginning
-  std::multimap<DateAndTime, std::string, std::greater<DateAndTime>> matchingFiles;
+  std::multimap<DateAndTime, std::string, std::greater<DateAndTime>>
+      matchingFiles;
 
   for (const auto &directoryName : directoryNames) {
-    // Iterate over the directories from user ->etc ->install, and find the first beat file
+    // Iterate over the directories from user ->etc ->install, and find the
+    // first beat file
     for (Poco::DirectoryIterator dir_itr(directoryName); dir_itr != end_iter;
          ++dir_itr) {
 
@@ -1002,14 +1006,15 @@ std::vector<std::string> ExperimentInfo::getResourceFilenames(const std::string 
           to.setFromISO8601("2100-01-01T00:00:00");
 
         if (from <= d && d <= to)
-          matchingFiles.insert(std::pair<DateAndTime, std::string>(from, pathName));
+          matchingFiles.insert(
+              std::pair<DateAndTime, std::string>(from, pathName));
       }
     }
   }
 
   // Retrieve the file names only
   std::vector<std::string> pathNames;
-  for(auto elem : matchingFiles)
+  for (auto elem : matchingFiles)
     pathNames.push_back(elem.second);
   return pathNames;
 }
@@ -1051,14 +1056,13 @@ ExperimentInfo::getInstrumentFilename(const std::string &instrumentName,
       Kernel::ConfigService::Instance().getInstrumentDirectories();
 
   // matching files sorted with newest files coming first
-  const std::vector<std::string> matchingFiles = getResourceFilenames(instrument + "_Definition",
-    validFormats, directoryNames, date);
+  const std::vector<std::string> matchingFiles = getResourceFilenames(
+      instrument + "_Definition", validFormats, directoryNames, date);
   std::string instFile;
   if (matchingFiles.size() > 0) {
     instFile = matchingFiles[0];
     g_log.debug() << "Instrument file selected is " << instFile << '\n';
-  }
-  else {
+  } else {
     g_log.debug() << "No instrument file found\n";
   }
   return instFile;

@@ -43,7 +43,8 @@ void export_ExperimentInfo() {
            return_value_policy<RemoveConstSharedPtr>(), args("self"),
            "Returns the :class:`~mantid.geometry.Instrument` for this run.")
       .def("getResourceFilenames", &ExperimentInfo::getResourceFilenames,
-           (arg("self"), arg("prefix"), arg("fileFormats"), arg("directoryNames"), arg("date")),
+           (arg("self"), arg("prefix"), arg("fileFormats"),
+            arg("directoryNames"), arg("date")),
            "Docstring first line"
            "Docstring second line")
       .def("getInstrumentFilename", &ExperimentInfo::getInstrumentFilename,
