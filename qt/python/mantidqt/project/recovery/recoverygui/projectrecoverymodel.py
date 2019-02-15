@@ -11,9 +11,8 @@ import os
 
 from mantid.kernel import ConfigService
 from mantid.api import AnalysisDataService as ADS
-from mantidqt.project.recovery.recoverythread import RecoveryThread
 
-from qtpy.QtCore import QThread, Slot, QObject
+from qtpy.QtCore import Slot, QObject
 
 
 def replace_space_with_t(string):

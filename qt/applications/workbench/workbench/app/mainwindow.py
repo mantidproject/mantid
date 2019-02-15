@@ -440,9 +440,11 @@ class MainWindow(QMainWindow):
             if app is not None:
                 app.closeAllWindows()
 
-            # Kill the project recovery thread and don't restart should a save be in progress
+            # Kill the project recovery thread and don't restart should a save be in progress and clear out current
+            # recovery checkpoint as it is closing properly
             self.project_recovery.stop_recovery_thread()
             self.project_recovery.closing_workbench = True
+            self.project_recovery.remove_current_pid_folder()
 
             event.accept()
         else:

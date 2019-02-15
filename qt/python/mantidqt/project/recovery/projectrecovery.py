@@ -112,7 +112,7 @@ class ProjectRecovery(object):
                 # Fail silently as expected for all folders
                 pass
 
-    def _remove_all_folders_from_dir(self, directory):
+    def _remove_directory_and_directory_trees(self, directory):
         if directory is None or not os.path.exists(directory):
             return
 
@@ -147,6 +147,9 @@ class ProjectRecovery(object):
             return [os.path.join(directory, item) for item in os.listdir(directory)]
         except OSError:
             return []
+
+    def remove_current_pid_folder(self):
+        self._remove_directory_and_directory_trees(self.recovery_directory_pid)
 
     ######################################################
     #  Saving
@@ -399,7 +402,7 @@ class ProjectRecovery(object):
             # Order paths in reverse and remove the last folder from existance
             paths.sort(reverse=True)
             for ii in range(self.maximum_num_checkpoints, len(paths)):
-                self._remove_all_folders_from_dir(paths[ii])
+                self._remove_directory_and_directory_trees(paths[ii])
 
     def clear_all_unused_checkpoints(self, pid_dir=None):
         if pid_dir is None:
@@ -413,7 +416,7 @@ class ProjectRecovery(object):
             path = pid_dir
         if os.path.exists(path):
             try:
-                self._remove_all_folders_from_dir(path)
+                self._remove_directory_and_directory_trees(path)
             except Exception as e:
                 if isinstance(e, KeyboardInterrupt):
                     raise
@@ -430,7 +433,7 @@ class ProjectRecovery(object):
         dirs_to_delete += self._find_checkpoints_which_are_locked(pid_dirs)
 
         for dir in dirs_to_delete:
-            self._remove_all_folders_from_dir(dir)
+            self._remove_directory_and_directory_trees(dir)
 
         # Now the checkpoints have been deleted we may have PID directories with no checkpoints present so delete them
         self._remove_empty_folders_from_dir(self.recovery_directory_hostname)

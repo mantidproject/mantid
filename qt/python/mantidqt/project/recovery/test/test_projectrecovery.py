@@ -99,13 +99,13 @@ class ProjectRecoveryTest(unittest.TestCase):
         self.assertTrue(not os.path.exists(self.working_directory))
 
     def test_remove_all_folders_from_dir_raises_outside_of_mantid_dir(self):
-        self.assertRaises(RuntimeError, self.pr._remove_all_folders_from_dir, self.working_directory)
+        self.assertRaises(RuntimeError, self.pr._remove_directory_and_directory_trees, self.working_directory)
 
     def test_remove_all_folders_from_dir_doesnt_raise_inside_of_mantid_dir(self):
         temp_dir = os.path.join(self.pr.recovery_directory, "tempDir")
         os.mkdir(temp_dir)
 
-        self.pr._remove_all_folders_from_dir(temp_dir)
+        self.pr._remove_directory_and_directory_trees(temp_dir)
 
         self.assertTrue(not os.path.exists(temp_dir))
 
