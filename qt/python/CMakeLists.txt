@@ -135,7 +135,6 @@ endif ()
     mantidqt/project/recovery/recoverygui/test/test_failurerecoveryview.py
     mantidqt/project/recovery/recoverygui/test/test_projectrecoverypresenter.py
     mantidqt/project/recovery/recoverygui/test/test_projectrecoverymodel.py
-  )
 
     mantidqt/widgets/samplelogs/test/test_samplelogs_view.py
  )
