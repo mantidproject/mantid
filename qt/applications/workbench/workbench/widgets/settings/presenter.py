@@ -23,6 +23,7 @@ class SettingsPresenter(object):
     def __init__(self, parent, view=None):
         self.view = view if view else SettingsView(parent, self)
         self.general_settings = GeneralSettings(parent)
+        self.parent = parent
 
         self.current = self.general_settings.view
         self.view.container.addWidget(self.general_settings.view)
@@ -61,3 +62,6 @@ class SettingsPresenter(object):
         if not self.ask_before_close or self.view.ask_before_close():
             ConfigService.saveConfig(ConfigService.getUserFilename())
             self.view.close()
+
+    def refresh_workspaces(self):
+        self.parent.workspacewidget.refresh_workspaces()

@@ -141,3 +141,6 @@ class WorkspaceWidget(PluginWidget):
 
     def _action_double_click_workspace(self, name):
         self._do_show_data([name])
+
+    def refresh_workspaces(self):
+        self.workspacewidget.refreshWorkspaces()

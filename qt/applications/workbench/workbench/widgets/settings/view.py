@@ -28,6 +28,7 @@ class SettingsView(base, form):
         self.sections.currentRowChanged.connect(self.presenter.action_current_row_changed)
 
     def closeEvent(self, event):
+        self.presenter.refresh_workspaces()
         self.deleteLater()
         super(SettingsView, self).closeEvent(event)
 

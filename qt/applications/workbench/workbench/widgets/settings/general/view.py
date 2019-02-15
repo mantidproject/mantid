@@ -13,7 +13,7 @@ from qtpy.QtCore import Qt
 
 from mantidqt.utils.qt import load_ui
 
-general_form, general_base = load_ui(__file__, "section_general.ui")
+general_form, general_base = load_ui(__file__, "ui/section_general.ui")
 
 
 class GeneralSettingsView(general_base, general_form):

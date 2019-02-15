@@ -15,6 +15,12 @@ from workbench.widgets.settings.general.view import GeneralSettingsView
 
 
 class GeneralSettings(object):
+    DEFAULT_INSTRUMENT = "default.instrument"
+    SHOW_INVISIBLE_WORKSPACES = "MantidOptions.InvisibleWorkspaces"
+    PR_NUMBER_OF_CHECKPOINTS = "projectRecovery.numberOfCheckpoints"
+    PR_TIME_BETWEEN_RECOVERY = "projectRecovery.secondsBetween"
+    PR_RECOVERY_ENABLED = "projectRecovery.enabled"
+
     def __init__(self, parent, view=None):
         self.view = view if view else GeneralSettingsView(parent, self)
 
@@ -36,6 +42,11 @@ class GeneralSettings(object):
         self.view.instrument.setCurrentIndex(self.view.instrument.findText(default_instrument))
         self.action_instrument_changed(default_instrument)
         self.view.instrument.currentTextChanged.connect(self.action_instrument_changed)
+
+        self.view.show_invisible_workspaces.setChecked(
+            "true" == ConfigService.getString(self.SHOW_INVISIBLE_WORKSPACES).lower())
+
+        self.view.show_invisible_workspaces.stateChanged.connect(self.action_show_invisible_workspaces)
 
         self.view.project_recovery_enabled.stateChanged.connect(self.action_project_recovery_enabled)
         self.view.time_between_recovery.valueChanged.connect(self.action_time_between_recovery)
@@ -61,18 +72,29 @@ class GeneralSettings(object):
         self.view.prompt_save_on_close.setChecked(CONF.get('project', 'prompt_save_on_close'))
         self.view.prompt_save_editor_modified.setChecked(CONF.get('project', 'prompt_save_editor_modified'))
 
-        self.view.project_recovery_enabled.setChecked(CONF.get('project/recovery', 'enabled'))
-        self.view.time_between_recovery.setValue(int(CONF.get('project/recovery', 'time_between_recovery_checkpoints')))
-        self.view.total_number_checkpoints.setValue(int(CONF.get('project/recovery', 'total_number_of_checkpoints')))
+        # compare lower-case, because MantidPlot will save it as lower case,
+        # but Python will have the bool's first letter capitalised
+        pr_enabled = ("true" == ConfigService.getString(self.PR_RECOVERY_ENABLED).lower())
+        pr_time_between_recovery = int(ConfigService.getString(self.PR_TIME_BETWEEN_RECOVERY))
+        pr_number_checkpoints = int(ConfigService.getString(self.PR_NUMBER_OF_CHECKPOINTS))
+
+        self.view.project_recovery_enabled.setChecked(pr_enabled)
+        self.view.time_between_recovery.setValue(pr_time_between_recovery)
+        self.view.total_number_checkpoints.setValue(pr_number_checkpoints)
 
     def action_project_recovery_enabled(self, state):
-        CONF.set('project/recovery', 'enabled', bool(state))
+        ConfigService.setString(self.PR_RECOVERY_ENABLED, str(bool(state)))
 
     def action_time_between_recovery(self, value):
-        CONF.set('project/recovery', 'time_between_recovery_checkpoints', int(value))
+        ConfigService.setString(self.PR_TIME_BETWEEN_RECOVERY, str(value))
 
     def action_total_number_checkpoints(self, value):
-        CONF.set('project/recovery', 'total_number_of_checkpoints', int(value))
+        ConfigService.setString(self.PR_NUMBER_OF_CHECKPOINTS, str(value))
 
     def action_instrument_changed(self, new_instrument):
-        ConfigService.setString("default.instrument", new_instrument)
+        ConfigService.setString(self.DEFAULT_INSTRUMENT, new_instrument)
+
+    def action_show_invisible_workspaces(self, state):
+        # TODO refresh the workspaces, sip shows a void refreshWorkspaces() function, what do
+        # call it, but how to get ref to refresh workspaces?
+        ConfigService.setString(self.SHOW_INVISIBLE_WORKSPACES, str(bool(state)))
