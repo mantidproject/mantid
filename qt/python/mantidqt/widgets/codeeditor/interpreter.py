@@ -5,26 +5,21 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package
-#
-#
 from __future__ import (absolute_import, unicode_literals)
 
 import os.path
-# std imports
 import sys
 import traceback
 
-# 3rd party imports
-from qtpy.QtCore import QObject, Signal
+from qtpy.QtCore import QObject, Qt, Signal
 from qtpy.QtGui import QColor, QFontMetrics
 from qtpy.QtWidgets import QFileDialog, QMessageBox, QStatusBar, QVBoxLayout, QWidget
 
 from mantidqt.io import open_a_file_dialog
-# local imports
 from mantidqt.widgets.codeeditor.editor import CodeEditor
 from mantidqt.widgets.codeeditor.errorformatter import ErrorFormatter
 from mantidqt.widgets.codeeditor.execution import PythonCodeExecution
-# Status messages
+from mantidqt.widgets.embedded_find_replace_dialog.presenter import EmbeddedFindReplaceDialog
 from workbench.config import CONF
 
 IDLE_STATUS_MSG = "Status: Idle."
@@ -118,17 +113,38 @@ class PythonFileInterpreter(QWidget):
         self.clear_key_binding("Ctrl+/")
 
         self.status = QStatusBar(self)
-        layout = QVBoxLayout()
-        layout.addWidget(self.editor)
-        layout.addWidget(self.status)
-        self.setLayout(layout)
-        layout.setContentsMargins(0, 0, 0, 0)
+        self.layout = QVBoxLayout()
+        self.layout.addWidget(self.editor)
+        self.layout.addWidget(self.status)
+        self.setLayout(self.layout)
+        self.layout.setContentsMargins(0, 0, 0, 0)
         self._setup_editor(content, filename)
+
+        self.setAttribute(Qt.WA_DeleteOnClose, True)
 
         self._presenter = PythonFileInterpreterPresenter(self, PythonCodeExecution(content))
 
         self.editor.modificationChanged.connect(self.sig_editor_modified)
         self.editor.fileNameChanged.connect(self.sig_filename_modified)
+        self.find_replace_dialog = None
+        self.find_replace_dialog_shown = False
+
+    def closeEvent(self, event):
+        self.deleteLater()
+        if self.find_replace_dialog:
+            self.find_replace_dialog.close()
+        super(PythonFileInterpreter, self).closeEvent(event)
+
+    def show_find_replace_dialog(self):
+        if self.find_replace_dialog is None:
+            self.find_replace_dialog = EmbeddedFindReplaceDialog(self, self.editor)
+            self.layout.insertWidget(0, self.find_replace_dialog.view)
+
+        self.find_replace_dialog.show()
+
+    def hide_find_replace_dialog(self):
+        if self.find_replace_dialog is not None:
+            self.find_replace_dialog.hide()
 
     @property
     def filename(self):
@@ -323,8 +339,7 @@ class PythonFileInterpreterPresenter(QObject):
         self._finish(success=True, task_result=task_result)
 
     def _on_exec_error(self, task_error):
-        exc_type, exc_value, exc_stack = task_error.exc_type, task_error.exc_value, \
-                                         task_error.stack
+        exc_type, exc_value, exc_stack = task_error.exc_type, task_error.exc_value, task_error.stack
         exc_stack = traceback.extract_tb(exc_stack)[self.MAX_STACKTRACE_LENGTH:]
         if hasattr(exc_value, 'lineno'):
             lineno = exc_value.lineno + self._code_start_offset
@@ -345,11 +360,9 @@ class PythonFileInterpreterPresenter(QObject):
         self.is_executing = False
 
     def _create_status_msg(self, status, timestamp, elapsed_time):
-        return IDLE_STATUS_MSG + ' ' + \
-               LAST_JOB_MSG_TEMPLATE.format(status, timestamp, elapsed_time)
+        return IDLE_STATUS_MSG + ' ' + LAST_JOB_MSG_TEMPLATE.format(status, timestamp, elapsed_time)
 
     def _on_progress_update(self, lineno):
         """Update progress on the view taking into account if a selection of code is
         running"""
-        self.view.editor.updateProgressMarker(lineno + self._code_start_offset,
-                                              False)
+        self.view.editor.updateProgressMarker(lineno + self._code_start_offset, False)

@@ -45,6 +45,7 @@ Bugfixes
 Interfaces
 ----------
 
+- Several bugs in :ref:`PyChop <PyChop>` have been fixed, including the printing out of multiple Ei reps in the "Show Ascii" dialog, the disappearing axes labels in the Q-E tab, and incorrect energies in the multi-rep calculations. The calculation of the time width for LET has also been corrected for the relative sizes of the disk slots and the guide opening, which is important for "High Flux" mode calculations, where the energy widths were calculated to be narrower than is really the case. Finally the time-distance diagrams have been updated with the option to only show the first frame, and the MARI instrument file has been updated with the measured MARI flux.
 
 New features
 ############

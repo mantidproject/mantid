@@ -72,6 +72,12 @@ class MultiFileEditor(PluginWidget):
         self.abort_action = create_action(
             self, "Abort", on_triggered=self.editors.abort_current)
 
+        # menu action to toggle the find/replace dialog
+        self.toggle_find_replace = create_action(self,
+                                                 'Find/Replace...',
+                                                 on_triggered=self.editors.toggle_find_replace_dialog,
+                                                 shortcut='Ctrl+F')
+
         self.toggle_comment_action = create_action(
             self.editors.current_editor(), "Comment/Uncomment",
             on_triggered=self.editors.toggle_comment_current,
@@ -93,6 +99,8 @@ class MultiFileEditor(PluginWidget):
         # Store actions for adding to menu bar; None will add a separator
         self.editor_actions = [self.run_action,
                                self.abort_action, None,
+                               self.toggle_find_replace,
+                               None,
                                self.toggle_comment_action,
                                self.toggle_whitespace_action, None,
                                self.tabs_to_spaces_action,

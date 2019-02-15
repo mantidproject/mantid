@@ -828,10 +828,6 @@ if(MAKE_VATES)
   target_link_libraries ( MantidPlot LINK_PRIVATE vtkPVClientServerCoreRendering vtkPVServerManagerRendering ${vtkjsoncpp_LIBRARIES})
 endif()
 
-if (WITH_ASAN)
-  target_link_libraries ( MantidPlot LINK_PRIVATE -lasan )
-endif ()
-
 # Plugin dependencies
 add_dependencies( MantidPlot mantidqtpython CompilePyUI )
 

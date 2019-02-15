@@ -310,7 +310,6 @@ class MainWindow(QMainWindow):
 
         # list of custom interfaces that are not qt4/qt5 compatible
         GUI_BLACKLIST = ['ISIS_Reflectometry_Old.py',
-                         'ISIS_SANS_v2_experimental.py',
                          'Frequency_Domain_Analysis.py',
                          'Elemental_Analysis.py']
 
