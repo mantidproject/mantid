@@ -35,6 +35,13 @@ private slots:
   void algorithmComplete(bool error);
   void setInstrumentDefault();
 
+  void runClicked();
+  void setRunEnabled(bool enabled);
+  void updateRunButton(bool enabled = true,
+                       std::string const &enableOutputButtons = "unchanged",
+                       QString const message = "Run",
+                       QString const tooltip = "");
+
 private:
   Ui::ILLEnergyTransfer m_uiForm;
   double m_backScaling = 1.;

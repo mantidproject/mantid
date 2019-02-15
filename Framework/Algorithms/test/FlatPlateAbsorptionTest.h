@@ -18,42 +18,34 @@ using Mantid::API::MatrixWorkspace_sptr;
 
 class FlatPlateAbsorptionTest : public CxxTest::TestSuite {
 public:
-  void testName() { TS_ASSERT_EQUALS(atten.name(), "FlatPlateAbsorption"); }
-
-  void testVersion() { TS_ASSERT_EQUALS(atten.version(), 1); }
+  void testNameAndVersion() {
+    Mantid::Algorithms::FlatPlateAbsorption atten;
+    TS_ASSERT_EQUALS(atten.name(), "FlatPlateAbsorption");
+    TS_ASSERT_EQUALS(atten.version(), 1);
+  }
 
   void testInit() {
+    Mantid::Algorithms::FlatPlateAbsorption atten;
     TS_ASSERT_THROWS_NOTHING(atten.initialize());
     TS_ASSERT(atten.isInitialized());
   }
 
   void testExec() {
-    if (!atten.isInitialized())
-      atten.initialize();
+    MatrixWorkspace_sptr testWS = createTestWorkspace();
 
-    MatrixWorkspace_sptr testWS =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 10);
-    // Needs to have units of wavelength
-    testWS->getAxis(0)->unit() =
-        Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
-
-    TS_ASSERT_THROWS_NOTHING(
-        atten.setProperty<MatrixWorkspace_sptr>("InputWorkspace", testWS));
     std::string outputWS("factors");
-    TS_ASSERT_THROWS_NOTHING(
-        atten.setPropertyValue("OutputWorkspace", outputWS));
+    Mantid::Algorithms::FlatPlateAbsorption atten;
+    configureAbsCommon(atten, testWS, outputWS);
     TS_ASSERT_THROWS_NOTHING(atten.setPropertyValue("SampleHeight", "2.3"));
     TS_ASSERT_THROWS_NOTHING(atten.setPropertyValue("SampleWidth", "1.8"));
     TS_ASSERT_THROWS_NOTHING(atten.setPropertyValue("SampleThickness", "1.5"));
+    // it is not clear what material this is
     TS_ASSERT_THROWS_NOTHING(
         atten.setPropertyValue("AttenuationXSection", "6.52"));
     TS_ASSERT_THROWS_NOTHING(
         atten.setPropertyValue("ScatteringXSection", "19.876"));
     TS_ASSERT_THROWS_NOTHING(
         atten.setPropertyValue("SampleNumberDensity", "0.0093"));
-    TS_ASSERT_THROWS_NOTHING(
-        atten.setPropertyValue("NumberOfWavelengthPoints", "3"));
-    TS_ASSERT_THROWS_NOTHING(atten.setPropertyValue("ExpMethod", "Normal"));
     TS_ASSERT_THROWS_NOTHING(atten.execute());
     TS_ASSERT(atten.isExecuted());
 
@@ -71,9 +63,44 @@ public:
     Mantid::API::AnalysisDataService::Instance().remove(outputWS);
   }
 
+  void testWithoutSample() {
+    // Create a small test workspace
+    MatrixWorkspace_sptr testWS = createTestWorkspace();
+
+    Mantid::Algorithms::FlatPlateAbsorption atten;
+
+    // intentionally skip the sample information
+    configureAbsCommon(atten, testWS, "factors");
+    TS_ASSERT(!atten.isExecuted());
+  }
+
 private:
-  Mantid::Algorithms::FlatPlateAbsorption atten;
-  std::string inputWS;
+  MatrixWorkspace_sptr createTestWorkspace() {
+    // Create a small test workspace
+    MatrixWorkspace_sptr testWS =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 10);
+    // Needs to have units of wavelength
+    testWS->getAxis(0)->unit() =
+        Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
+    return testWS;
+  }
+
+  /// set what is used for all - intentionally skip the sample information
+  void configureAbsCommon(Mantid::Algorithms::FlatPlateAbsorption &alg,
+                          MatrixWorkspace_sptr &inputWS,
+                          const std::string &outputWSname) {
+    if (!alg.isInitialized())
+      alg.initialize();
+    alg.setRethrows(true); // required to get the proper behavior of failed exec
+
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWS));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", outputWSname));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("NumberOfWavelengthPoints", "3"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("ExpMethod", "Normal"));
+  }
 };
 
 #endif /*FLATPLATEABSORPTIONTEST_H_*/

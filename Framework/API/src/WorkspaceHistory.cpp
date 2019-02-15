@@ -187,12 +187,8 @@ boost::shared_ptr<IAlgorithm> WorkspaceHistory::lastAlgorithm() const {
  * sub-objects
  */
 void WorkspaceHistory::printSelf(std::ostream &os, const int indent) const {
-
   os << std::string(indent, ' ') << m_environment << '\n';
-
-  AlgorithmHistories::const_iterator it;
   os << std::string(indent, ' ') << "Histories:\n";
-
   for (const auto &algorithm : m_algorithms) {
     os << '\n';
     algorithm->printSelf(os, indent + 2);

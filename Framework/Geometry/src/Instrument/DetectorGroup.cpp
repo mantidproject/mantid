@@ -11,6 +11,8 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Material.h"
 
+#include <numeric>
+
 namespace Mantid {
 namespace Geometry {
 namespace {
@@ -197,12 +199,11 @@ std::vector<IDetector_const_sptr> DetectorGroup::getDetectors() const {
  * provided in the instrument definition file
  */
 double DetectorGroup::solidAngle(const V3D &observer) const {
-  double result = 0.0;
-  DetCollection::const_iterator it;
-  for (it = m_detectors.begin(); it != m_detectors.end(); ++it) {
-    IDetector_const_sptr det = (*it).second;
-    result += det->solidAngle(observer);
-  }
+  double result =
+      std::accumulate(m_detectors.cbegin(), m_detectors.cend(), 0.0,
+                      [&observer](double angle, const auto &det) {
+                        return angle + det.second->solidAngle(observer);
+                      });
   return result;
 }
 

@@ -218,7 +218,7 @@ class LoadRunWidgetPresenter(object):
             return
         new_run = max(run_list)
 
-        if self._model.current_run and new_run > self._model.current_run:
+        if self._model.current_run and new_run > self._model.current_run[0]:
             self._view.warning_popup("Requested run exceeds the current run for this instrument")
             return
 

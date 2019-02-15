@@ -40,10 +40,12 @@ Bugfixes
 - Fixed a bug in :ref:`DirectILLCollectData <algm-DirectILLCollectData>` which prevented the *OutputIncidentEnergyWorkspace* being generated if *IncidentEnergyCalibration* was turned off.
 - Fixed the detector :math:`2\theta` width calculation in :ref:`SofQWNormalisedPolygon <algm-SofQWNormalisedPolygon>`. The algorithm was computing the angle between the detector center and top point, not the actual :math:`2\theta` width.
 - Fixed a bug in :ref:`Rebin2D <algm-Rebin2D>` which requires that an input workspace had to have fractional area weights for the `UseFractionalArea` option to work. The behaviour is now that if the input workspace does not have fractional areas, and `UseFractionalArea` is true, then fractional area tracking will be used with input fractions set to unity.
+- :ref:`LoadILLTOF <algm-LoadILLTOF>` now properly closes the loaded file.
 
 Interfaces
 ----------
 
+- Several bugs in :ref:`PyChop <PyChop>` have been fixed, including the printing out of multiple Ei reps in the "Show Ascii" dialog, the disappearing axes labels in the Q-E tab, and incorrect energies in the multi-rep calculations. The calculation of the time width for LET has also been corrected for the relative sizes of the disk slots and the guide opening, which is important for "High Flux" mode calculations, where the energy widths were calculated to be narrower than is really the case. Finally the time-distance diagrams have been updated with the option to only show the first frame, and the MARI instrument file has been updated with the measured MARI flux.
 
 New features
 ############

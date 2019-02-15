@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 from PyQt4 import QtGui
@@ -63,7 +69,7 @@ class HomePlotWidgetView(QtGui.QWidget):
                            'subcontrol-origin: margin;'
                            "padding: 0 3px;"
                            'subcontrol-position: top center;'
-                           'padding-top: -10px;'
+                           'padding-top: 0px;'
                            'padding-bottom: 0px;'
                            "padding-right: 10px;"
                            ' color: grey; }')

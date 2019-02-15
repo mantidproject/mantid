@@ -20,12 +20,13 @@ Improvements
 - :ref:`SNAPReduce <algm-SNAPReduce>` now has progress bar and all output workspaces have history
 - :ref:`SNAPReduce <algm-SNAPReduce>` has been completely refactored. It now uses :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` for a large part of its functionality. It has progress bar and all output workspaces have history. It is also more memory efficient by reducing the number of temporary workspaces created.
 - :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>` and :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` now support outputting the unfocussed data and weighted events (with time). This allows for event filtering **after** processing the data.
-- :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` has a significant performance improvement when used with chunking
+- :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` has significant performance improvements when used with chunking and can now use summed cache files.
 - :ref:`LoadWAND <algm-LoadWAND>` has grouping option added and loads faster
 - Mask workspace option added to :ref:`WANDPowderReduction <algm-WANDPowderReduction>`
 - :ref:`Le Bail concept page <Le Bail Fit>` moved from mediawiki
 - Rework of :ref:`powder diffraction calibration <Powder Diffraction Calibration>` documentation
 - New TOPAZ instrument geometry for 2019 run cycle
+- :ref:`LoadDiffCal <algm-LoadDiffCal>` has an additional parameter to allow for a second file specifying a grouping to override the one in the calibration file
 
 
 Single Crystal Diffraction
@@ -44,12 +45,14 @@ Improvements
 - :ref:`StartLiveData <algm-StartLiveData>` will load "live"
   data streaming from TOPAZ new Adara data server.
 - :ref:`IntegratePeaksMD <algm-IntegratePeaksMD>` with Cylinder=True now has improved fits using BackToBackExponential and IkedaCarpenterPV functions.
+- :ref:`SCDCalibratePanels <algm-SCDCalibratePanels>` now attempts to index all the peaks at each iteration instead of only using initially indexed peaks.
 - :ref:`SaveIsawPeaks <algm-SaveIsawPeaks>` now has option to renumber peaks sequentially.
 - SCD Event Data Reduction Diffraction Interface now has option to create MD HKL workspace.
 - :ref:`IntegratePeaksUsingClusters <algm-IntegratePeaksUsingClusters>` will now treat NaN's as background.
 - SCD Event Data Reduction Diffraction Interface now adds goniometer for CORELLI and used proton charge as monitor count if no monitors are in input file.
 - :ref:`SetCrystalLocation <algm-SetCrystalLocation>` is a new algorithm to set the sample location in events workspaces.
 - :ref:`OptimizeCrystalPlacementByRun <algm-OptimizeCrystalPlacementByRun>` is new algorithm to update the sample position for each run in a peaks workspace.
+- :ref:`SingleCrystalDiffuseReduction <algm-SingleCrystalDiffuseReduction>` has been update to use :ref:`MDNorm <algm-MDNorm>` instead of :ref:`MDNormSCD <algm-MDNormSCD>` internally. Additionally more options have been added to apply either a calibration with :ref:`ApplyCalibration <algm-ApplyCalibration>` or to copy an Instrument with :ref:`CopyInstrumentParameters <algm-CopyInstrumentParameters>` (these were also added to :ref:`ConvertMultipleRunsToSingleCrystalMD <algm-ConvertMultipleRunsToSingleCrystalMD>`); options have been added that allow you to specify either a UB matrix file or omega offset separately for each run; by default the SolidAngle and Flux workspaces will not be deleted and will be reused the next time the algorithm is used. Incompatible changes include changing of parameters names for projection, binning and symmetry operations to match :ref:`MDNorm <algm-MDNorm>`; symmetry operations will now use the symmetry of the point group instead of space group and will no longer accept space group number to avoid ambiguity of which point group to use; binning parameter has been changed match :ref:`MDNorm <algm-MDNorm>` where the bin width is specified instead of the number of bins.
 
 Bugfixes
 ########
@@ -79,7 +82,7 @@ Improvements
 - :ref:`PDLoadCharacterizations <algm-PDLoadCharacterizations>` now sets the same run numbers for all rows when using an ``exp.ini`` file.
 - Focus now checks if the vanadium for a run is already loaded before loading it in to prevent reloading the same vanadium multiple times.
 - :ref:`SaveReflections <algm-SaveReflections>` now supports saving indexed modulated peaks in the Jana format.
-
+- `PyStoG <https://pystog.readthedocs.io/en/latest/>`_ has been added as an external project
 
 Bugfixes
 ########
@@ -88,12 +91,16 @@ Bugfixes
 - Normalisation is fixed in :ref:`SumOverlappingTubes <algm-SumOverlappingTubes>`, which was causing very low peak to background ratio for reduced D2B data.
 - sudden drops at either end of spectra in Pearl caused by partial bins are now cropped.
 - The Powder Diffraction GUI now remembers whether linear or logorithmic binning was selected between uses
+- Fixed a bug in :ref:`GenerateGroupingPowder <algm-GenerateGroupingPowder>` which caused detectors without corresponding spectrum to get included in grouping.
+- :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` now does not use cache file when the grouping has changed.
 
-New
-###
+New Algorithms
+##############
 
 - :ref:`HB2AReduce <algm-HB2AReduce>` algorithm reduces HFIR POWDER (HB-2A) data
 - :ref:`LoadGudrunOutput <algm-LoadGudrunOutput>` is a new algorithm that allows users to load the standard Gudrun output files into Mantid.
+- :ref:`PDConvertReciprocalSpace <algm-PDConvertReciprocalSpace>` new algorithm to convert between reciprocal space units.
+- :ref:`PDConvertRealSpace <algm-PDConvertRealSpace>` new algorithm to convert between real space units.
 
 
 Engineering Diffraction

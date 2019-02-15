@@ -44,6 +44,7 @@
 #endif
 #endif
 
+#include <Poco/Path.h>
 #include <QAction>
 #include <QApplication>
 #include <QCheckBox>
@@ -1363,15 +1364,21 @@ std::string InstrumentWidgetMaskTab::saveToProject() const {
  * @return whether a workspace was successfully saved to the project
  */
 bool InstrumentWidgetMaskTab::saveMaskViewToProject(
-    const std::string &name) const {
+    const std::string &name, const std::string &projectPath) const {
   using namespace Mantid::API;
   using namespace Mantid::Kernel;
 
-  QSettings settings;
-  auto workingDir = settings.value("Project/WorkingDirectory", "").toString();
-  auto fileName = workingDir.toStdString() + "/" + name;
-
   try {
+    QString workingDir;
+    QSettings settings;
+    if (projectPath == "") {
+      workingDir = settings.value("Project/WorkingDirectory", "").toString();
+    } else {
+      workingDir = QString::fromStdString(projectPath);
+    }
+    Poco::Path filepath(workingDir.toStdString());
+    auto fileName = filepath.append(name).toString();
+
     // get masked detector workspace from actor
     const auto &actor = m_instrWidget->getInstrumentActor();
     auto outputWS = actor.getMaskMatrixWorkspace();
