@@ -935,7 +935,7 @@ void ExperimentInfo::getValidFromTo(const std::string &IDFfilename,
 }
 
 /// Utility to retrieve a list of resource files sorted by `from` date
-std::vector<std::string> ExperimentInfo::resolveDatedResource(const std::string &prefix,
+std::vector<std::string> ExperimentInfo::getResourceFilenames(const std::string &prefix,
   const std::vector<std::string> &fileFormats, const std::vector<std::string> &directoryNames,
   const std::string &date) {
 
@@ -1051,7 +1051,7 @@ ExperimentInfo::getInstrumentFilename(const std::string &instrumentName,
       Kernel::ConfigService::Instance().getInstrumentDirectories();
 
   // matching files sorted with newest files coming first
-  const std::vector<std::string> matchingFiles = resolveDatedResource(instrument + "_Definition",
+  const std::vector<std::string> matchingFiles = getResourceFilenames(instrument + "_Definition",
     validFormats, directoryNames, date);
   std::string instFile;
   if (matchingFiles.size() > 0) {
