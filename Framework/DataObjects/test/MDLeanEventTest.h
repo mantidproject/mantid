@@ -8,6 +8,7 @@
 #define MANTID_DATAOBJECTS_MDLEANEVENTTEST_H_
 
 #include "MantidDataObjects/MDLeanEvent.h"
+#include "MantidDataObjects/MortonIndex/WideInt.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include <cxxtest/TestSuite.h>
@@ -19,6 +20,7 @@ using namespace Mantid::DataObjects;
 
 class MDLeanEventTest : public CxxTest::TestSuite {
 public:
+  using EventAccessType = DataObjects::EventAccessor;
   void test_Constructors() {
     MDLeanEvent<3> a;
     TS_ASSERT_EQUALS(a.getNumDims(), 3);
@@ -105,6 +107,58 @@ public:
     MDLeanEvent<3> a(2.0, 4.0);
     TS_ASSERT_EQUALS(a.getSignal(), 2.0);
     TS_ASSERT_EQUALS(a.getError(), 2.0);
+  }
+
+  void test_retrieve_coordinates() {
+    constexpr size_t ND(4);
+
+    morton_index::MDSpaceBounds<ND> bounds;
+    // clang-format off
+    bounds <<
+           0.0f, 2.0f,
+        0.0f, 10.0f,
+        3.0f, 7.0f,
+        5.0f, 15.0f;
+    // clang-format on
+
+    morton_index::MDCoordinate<ND> floatCoord;
+    floatCoord << 1.5f, 10.0f, 5.0f, 5.0f;
+
+    MDLeanEvent<ND> event(0.0f, 0.0f, &floatCoord[0]);
+    using EventAccess = MDLeanEvent<ND>::template AccessFor<MDLeanEventTest>;
+
+    EventAccess::convertToIndex(event, bounds);
+    EventAccess::convertToCoordinates(event, bounds);
+
+    TS_ASSERT_EQUALS(event.getCenter(0), 1.5);
+    TS_ASSERT_EQUALS(event.getCenter(1), 10);
+    TS_ASSERT_EQUALS(event.getCenter(2), 5);
+    TS_ASSERT_EQUALS(event.getCenter(3), 5);
+  }
+
+  void test_retrieve_coordinates_3d() {
+    constexpr size_t ND(3);
+
+    morton_index::MDSpaceBounds<ND> bounds;
+    // clang-format off
+    bounds <<
+           0.0f, 2.0f,
+        0.0f, 10.0f,
+        3.0f, 7.0f;
+    // clang-format on
+
+    morton_index::MDCoordinate<ND> floatCoord;
+    floatCoord << 1.5f, 10.0f, 5.0f;
+
+    MDLeanEvent<ND> event(0.0f, 0.0f, &floatCoord[0]);
+    using EventAccess = MDLeanEvent<ND>::template AccessFor<MDLeanEventTest>;
+
+    EventAccess::convertToIndex(event, bounds);
+    EventAccess::convertToCoordinates(event, bounds);
+
+    TS_ASSERT_EQUALS(event.getCenter(0), 1.5);
+    TS_ASSERT_EQUALS(event.getCenter(1), 10);
+    TS_ASSERT_EQUALS(event.getCenter(2), 5);
   }
 };
 

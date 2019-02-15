@@ -28,10 +28,11 @@ path lengths over the volume elements.
 Assumptions
 ###########
 
-Although no assumptions are made about the beam direction or the sample
-position, the cylinder will be constructed with its centre at the sample
-position and it's axis along the y axis (which in the case of most
-instruments is the vertical).
+Although no assumptions are made about the beam direction or the
+sample position, the cylinder will be constructed with its centre at
+the sample position and it's axis along the y axis (which in the case
+of most instruments is the vertical). The sample geometry can also be
+set using :ref:`SetSample <algm-SetSample>`.
 
 Restrictions on the input workspace
 ###################################
@@ -57,21 +58,21 @@ there (e.g. there's no multiple scattering and no concentric cylinders).
 Usage
 -----
 
-**Example - Using a X Section Values**  
+**Example - Using a X Section Values**
 
 .. testcode:: XSectionValues
 
     ws = CreateSampleWorkspace()
     ws = ConvertUnits(ws,"Wavelength")
 
-    wsOut = CylinderAbsorption(ws, AttenuationXSection=5.08, 
-        ScatteringXSection=5.1,SampleNumberDensity=0.07192, 
-        NumberOfWavelengthPoints=5, CylinderSampleHeight=4, 
+    wsOut = CylinderAbsorption(ws, AttenuationXSection=5.08,
+        ScatteringXSection=5.1,SampleNumberDensity=0.07192,
+        NumberOfWavelengthPoints=5, CylinderSampleHeight=4,
         CylinderSampleRadius=0.4, NumberOfSlices=2, NumberOfAnnuli=2)
 
 
     print ("The Absorption correction is calculated to match the input workspace")
-    print ("  over %i bins, ranging from  %.2f to %.2f" % 
+    print ("  over %i bins, ranging from  %.2f to %.2f" %
         (wsOut.blocksize(),
         wsOut.readY(0)[0],
         wsOut.readY(0)[wsOut.blocksize()-1]))
@@ -84,7 +85,7 @@ Output:
       over 100 bins, ranging from  0.77 to 0.37
 
 
-**Example - Using a SetSampleMaterial**  
+**Example - Using a SetSampleMaterial**
 
 .. testcode:: XSectionValues
 
@@ -92,13 +93,13 @@ Output:
     ws = ConvertUnits(ws,"Wavelength")
     SetSampleMaterial(ws,ChemicalFormula='Cd')
 
-    wsOut = CylinderAbsorption(ws, 
-        NumberOfWavelengthPoints=5, CylinderSampleHeight=4, 
+    wsOut = CylinderAbsorption(ws,
+        NumberOfWavelengthPoints=5, CylinderSampleHeight=4,
         CylinderSampleRadius=0.4, NumberOfSlices=2, NumberOfAnnuli=2)
 
 
     print ("The Absorption correction is calculated to match the input workspace")
-    print ("  over %i bins, ranging from  %.2f to %.2f" % 
+    print ("  over %i bins, ranging from  %.2f to %.2f" %
         (wsOut.blocksize(),
         wsOut.readY(0)[0],
         wsOut.readY(0)[wsOut.blocksize()-1]))

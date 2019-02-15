@@ -110,13 +110,16 @@ class MultiPythonFileInterpreter(QWidget):
         # are being prompted to save
         self._tabs.setCurrentIndex(idx)
         if self.current_editor().confirm_close():
+            widget = self._tabs.widget(idx)
+            # note: this does not close the widget, that is why we manually close it
             self._tabs.removeTab(idx)
+            widget.close()
         else:
             return False
 
         # we never want an empty widget
         if self.editor_count == 0:
-            self.append_new_editor(content=self.default_content)
+            self.append_new_editor()
 
         return True
 
@@ -209,6 +212,9 @@ class MultiPythonFileInterpreter(QWidget):
 
     def toggle_comment_current(self):
         self.current_editor().toggle_comment()
+
+    def toggle_find_replace_dialog(self):
+        self.current_editor().show_find_replace_dialog()
 
     def toggle_whitespace_visible_all(self):
         if self.whitespace_visible:

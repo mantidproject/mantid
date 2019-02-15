@@ -106,7 +106,6 @@ ScriptEditor::ScriptEditor(QWidget *parent, QsciLexer *codelexer,
   // Editor properties
   setAutoIndent(true);
   setFocusPolicy(Qt::StrongFocus);
-
   emit undoAvailable(isUndoAvailable());
   emit redoAvailable(isRedoAvailable());
 }
@@ -557,4 +556,35 @@ void ScriptEditor::forwardKeyPressToBase(QKeyEvent *event) {
   }
 #endif
 #endif
+}
+
+void ScriptEditor::replaceAll(const QString &searchString,
+                              const QString &replaceString, bool regex,
+                              bool caseSensitive, bool matchWords, bool wrap,
+                              bool forward) {
+  int line(-1), index(-1), prevLine(-1), prevIndex(-1);
+
+  // Mark this as a set of actions that can be undone as one
+  this->beginUndoAction();
+  bool found = this->findFirst(searchString, regex, caseSensitive, matchWords,
+                               wrap, forward, 0, 0);
+  // If find first fails then there is nothing to replace
+  if (!found) {
+    QMessageBox::information(this, "MantidPlot - Find and Replace",
+                             "No matches found in current document.");
+  }
+
+  while (found) {
+    this->getCursorPosition(&prevLine, &prevIndex);
+    this->replace(replaceString);
+    found = this->findNext();
+    this->getCursorPosition(&line, &index);
+    // if the next match is on the previous line
+    // or if it is on the same line, but closer to the start
+    // it means we have wrapped around the text in the editor
+    if (line < prevLine || (line == prevLine && index <= prevIndex)) {
+      break;
+    }
+  }
+  this->endUndoAction();
 }

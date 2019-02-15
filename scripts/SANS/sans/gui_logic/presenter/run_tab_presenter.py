@@ -25,6 +25,7 @@ from mantid.kernel import Logger, ConfigService
 from sans.command_interface.batch_csv_file_parser import BatchCsvParser
 from sans.common.constants import ALL_PERIODS
 from sans.common.enums import (BatchReductionEntry, RangeStepType, SampleShape, FitType, RowState, SANSInstrument)
+from sans.common.general_functions import get_log_plot
 from sans.gui_logic.gui_common import (get_reduction_mode_strings_for_gui, get_string_for_gui_from_instrument,
                                        add_dir_to_datasearch, remove_dir_from_datasearch)
 from sans.gui_logic.models.batch_process_runner import BatchProcessRunner
@@ -46,12 +47,14 @@ from ui.sans_isis import SANSSaveOtherWindow
 from ui.sans_isis.sans_data_processor_gui import SANSDataProcessorGui
 from ui.sans_isis.work_handler import WorkHandler
 
-try:
-    import mantidplot
-except (Exception, Warning):
-    mantidplot = None
-    # this should happen when this is called from outside Mantidplot and only then,
-    # the result is that attempting to plot will raise an exception
+from qtpy import PYQT4
+IN_MANTIDPLOT = False
+if PYQT4:
+    try:
+        from mantidplot import graph, newGraph
+        IN_MANTIDPLOT = True
+    except ImportError:
+        pass
 
 row_state_to_colour_mapping = {RowState.Unprocessed: '#FFFFFF', RowState.Processed: '#d0f4d0',
                                RowState.Error: '#accbff'}
@@ -162,6 +165,8 @@ class RunTabPresenter(object):
         self.sans_logger = Logger("SANS")
         # Name of graph to output to
         self.output_graph = 'SANS-Latest'
+        # For matplotlib continuous plotting
+        self.output_fig = None
         self.progress = 0
 
         # Models that are being used by the presenter
@@ -480,12 +485,16 @@ class RunTabPresenter(object):
 
     def _plot_graph(self):
         """
-        Plot a graph if continuous output specified
+        Plot a graph if continuous output specified.
         """
-        # Create the graph if continuous output is specified
-        if mantidplot:
-            if self._view.plot_results and not mantidplot.graph(self.output_graph):
-                mantidplot.newGraph(self.output_graph)
+        if self._view.plot_results:
+            if IN_MANTIDPLOT:
+                if not graph(self.output_graph):
+                    newGraph(self.output_graph)
+            elif not PYQT4:
+                fig = get_log_plot(window_title=self.output_graph, plot_to_close=self.output_fig)
+                fig.show()
+                self.output_fig = fig
 
     def _set_progress_bar_min_max(self, min, max):
         """
@@ -518,11 +527,13 @@ class RunTabPresenter(object):
             self._set_progress_bar_min_max(self.progress, len(states))
             save_can = self._view.save_can
 
+            # MantidPlot and Workbench have different approaches to plotting
+            output_graph = self.output_graph if PYQT4 else self.output_fig
             self.batch_process_runner.process_states(states,
                                                      self._view.use_optimizations,
                                                      self._view.output_mode,
                                                      self._view.plot_results,
-                                                     self.output_graph,
+                                                     output_graph,
                                                      save_can)
 
         except Exception as e:
