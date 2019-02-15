@@ -82,9 +82,10 @@ class GroupingTabPresenter(object):
         Calculate alpha for the pair for which "Guess Alpha" button was clicked.
         """
         if len(self._model._data.current_runs) > 1:
-            run_to_use, ok_clicked = RunSelectionDialog.get_run(self._model._data.current_runs, self._view)
+            run, index, ok_clicked = RunSelectionDialog.get_run(self._model._data.current_runs, self._model._data.instrument, self._view)
             if not ok_clicked:
                 return
+            run_to_use = self._model._data.current_runs[index]
         else:
             run_to_use = self._model._data.current_runs[0]
 

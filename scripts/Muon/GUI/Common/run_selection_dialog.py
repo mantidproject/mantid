@@ -9,7 +9,7 @@ import PyQt4.QtCore as QtCore
 
 
 class RunSelectionDialog(QtGui.QDialog):
-    def __init__(self, current_runs, parent=None):
+    def __init__(self, current_runs, instrument, parent=None):
         QtGui.QDialog.__init__(self, parent)
 
         self.setWindowTitle('Run Selection')
@@ -19,7 +19,7 @@ class RunSelectionDialog(QtGui.QDialog):
         self.message.setText('Which run do you wish to use for calculation?')
         layout.addWidget(self.message)
 
-        current_runs_as_string = [str(run) for run in current_runs]
+        current_runs_as_string = [instrument + str(run[0]) for run in current_runs]
         self.run_selector_combo = QtGui.QComboBox()
         self.run_selector_combo.addItems(current_runs_as_string)
 
@@ -38,9 +38,13 @@ class RunSelectionDialog(QtGui.QDialog):
     def run(self):
         return self.run_selector_combo.currentText()
 
+    def index(self):
+        return self.run_selector_combo.currentIndex()
+
     @staticmethod
-    def get_run(current_runs, parent=None):
-        dialog = RunSelectionDialog(current_runs, parent)
+    def get_run(current_runs, instrument, parent=None):
+        dialog = RunSelectionDialog(current_runs, instrument, parent)
         result = dialog.exec_()
         run = dialog.run()
-        return (run, result == QtGui.QDialog.Accepted)
+        index = dialog.index()
+        return (run, index, result == QtGui.QDialog.Accepted)
