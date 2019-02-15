@@ -18,7 +18,7 @@ import json
 from pathlib2 import Path
 
 from mantidqt.project.recovery.projectrecovery import ProjectRecovery, SAVING_TIME_KEY, NO_OF_CHECKPOINTS_KEY, \
-    RECOVERY_ENABLED_KEY, listdir_fullpath
+    RECOVERY_ENABLED_KEY
 from mantid.kernel import ConfigService
 from mantid.simpleapi import CreateSampleWorkspace, GroupWorkspaces
 from mantid.api import AnalysisDataService as ADS
@@ -28,7 +28,7 @@ class FakeEncoder(object):
     tags = ["FakeEncoder"]
 
     @staticmethod
-    def encode(obj, project_path):
+    def encode(_, __):
         return {}
 
 
@@ -141,7 +141,7 @@ class ProjectRecoveryTest(unittest.TestCase):
         os.makedirs(two)
 
         # There is no concern for list order in this equality assertion
-        self.assertItemsEqual([one, two], listdir_fullpath(self.working_directory))
+        self.assertItemsEqual([one, two], self.pr.listdir_fullpath(self.working_directory))
 
     def test_recovery_save_when_nothing_is_present(self):
         self.pr._spin_off_another_time_thread = mock.MagicMock()
@@ -155,7 +155,7 @@ class ProjectRecoveryTest(unittest.TestCase):
         self.pr.recovery_save()
 
         # Check 0.py was made
-        checkpoint = listdir_fullpath(self.pr.recovery_directory_pid)[0]
+        checkpoint = self.pr.listdir_fullpath(self.pr.recovery_directory_pid)[0]
         self.assertTrue(os.path.exists(os.path.join(checkpoint, "0.py")))
         self.assertEqual(self.pr._spin_off_another_time_thread.call_count, 1)
 
@@ -170,7 +170,7 @@ class ProjectRecoveryTest(unittest.TestCase):
         self.pr.recovery_save()
 
         # Check no 0.py was made
-        checkpoint = listdir_fullpath(self.pr.recovery_directory_pid)[0]
+        checkpoint = self.pr.listdir_fullpath(self.pr.recovery_directory_pid)[0]
         self.assertTrue(not os.path.exists(os.path.join(checkpoint, "0.py")))
         self.assertEqual(self.pr._spin_off_another_time_thread.call_count, 1)
 
@@ -190,7 +190,7 @@ class ProjectRecoveryTest(unittest.TestCase):
         self.pr.recovery_save()
 
         # Check 0.py was made
-        checkpoint = listdir_fullpath(self.pr.recovery_directory_pid)[0]
+        checkpoint = self.pr.listdir_fullpath(self.pr.recovery_directory_pid)[0]
         self.assertTrue(os.path.exists(os.path.join(checkpoint, "0.py")))
         self.assertEqual(self.pr._spin_off_another_time_thread.call_count, 1)
 

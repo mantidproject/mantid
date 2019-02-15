@@ -39,7 +39,7 @@ class RecoveryFailureView(QDialog):
         self.presenter.start_mantid_normally()
 
     def set_progress_bar_maximum(self, new_value):
-        self.ui.progressBar.setValue(new_value)
+        self.ui.progressBar.setMaximum(new_value)
 
     def connect_progress_bar(self):
         self.presenter.project_recovery.multi_file_interpreter.current_editor().sig_progress.connect(
