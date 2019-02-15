@@ -9,13 +9,13 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidNexus/NexusClasses.h"
 
 #include <boost/filesystem.hpp>
-
 
 #include <algorithm>
 #include <cmath>
@@ -24,6 +24,8 @@
 
 namespace Mantid {
 namespace DataHandling {
+
+using namespace Kernel;
 
 namespace {
 
@@ -473,6 +475,7 @@ void LoadPLN::init() {
                   "The input filename of the stored data");
 
   declareProperty(PathToBinaryStr, "",
+                  boost::make_shared<Kernel::MandatoryValidator<std::string>>(),
                   "Relative or absolute path to the compressed binary\n"
                   "event file linked to the HDF file, eg /storage/data/");
 
