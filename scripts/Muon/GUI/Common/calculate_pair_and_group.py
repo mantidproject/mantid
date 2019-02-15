@@ -110,6 +110,13 @@ def _get_MuonGroupingCounts_parameters(context, group_name, run):
 
 def _get_MuonGroupingAsymmetry_parameters(context, group_name, run):
     params = {}
+
+    if 'GroupRangeMin' in context.gui_variables:
+        params['AsymmetryTimeMin'] = context.gui_variables['GroupRangeMin']
+
+    if 'GroupRangeMax' in context.gui_variables:
+        params['AsymmetryTimeMax'] = context.gui_variables['GroupRangeMax']
+
     try:
         summed_periods = context.loaded_data(run)["SummedPeriods"]
         params["SummedPeriods"] = summed_periods
@@ -126,6 +133,9 @@ def _get_MuonGroupingAsymmetry_parameters(context, group_name, run):
     if group:
         params["GroupName"] = group_name
         params["Grouping"] = ",".join([str(i) for i in group.detectors])
+
+    return params
+
 
 def _get_MuonPairingAsymmetry_parameters(context, pair_name, run):
     params = {}

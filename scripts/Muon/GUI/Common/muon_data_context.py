@@ -20,9 +20,9 @@ from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string, run_s
 from Muon.GUI.Common.ADSHandler.workspace_naming import (get_raw_data_workspace_name, get_group_data_workspace_name,
                                                          get_pair_data_workspace_name, get_base_data_directory,
                                                          get_raw_data_directory, get_group_data_directory,
-                                                         get_pair_data_directory)
+                                                         get_pair_data_directory, get_group_asymmetry_name)
 
-from Muon.GUI.Common.calculate_pair_and_group import calculate_group_data, calculate_pair_data
+from Muon.GUI.Common.calculate_pair_and_group import calculate_group_data, calculate_pair_data, estimate_group_asymmetry_data
 from Muon.GUI.Common.utilities.muon_file_utils import allowed_instruments
 
 from collections import OrderedDict
@@ -338,12 +338,16 @@ class MuonDataContext(object):
         for run in self.current_runs:
             run_as_string = run_list_to_string(run)
             group_workspace = calculate_group_data(self, group_name, run)
+            group_asymmetry = estimate_group_asymmetry_data(self, group_name, run)
             directory = get_base_data_directory(self, run_as_string) + get_group_data_directory(self, run_as_string)
             name = get_group_data_workspace_name(self, group_name, run_as_string)
+            asym_name = get_group_asymmetry_name(self, group_name, run_as_string)
 
             self._groups[group_name]._workspace[str(run)] = MuonWorkspaceWrapper(group_workspace)
+            self._groups[group_name]._asymmetry_estimate[str(run)] = MuonWorkspaceWrapper(group_asymmetry)
             if show:
                 self._groups[group_name].workspace[str(run)].show(directory + name)
+                self._groups[group_name]._asymmetry_estimate[str(run)].show(directory + asym_name)
 
     def show_all_pairs(self):
         for pair_name in self._pairs.keys():

@@ -154,7 +154,9 @@ class GroupingTablePresenter(object):
 
     def first_good_data_checkbox_changed(self):
         if self._view.group_range_use_first_good_data.isChecked():
-            self._view.group_range_min.setText(str(self._model._data.loaded_data(self._model._data.current_runs[-1])["FirstGoodData"]))
+            if self._model._data.current_runs:
+                self._view.group_range_min.setText(str(self._model._data.loaded_data(self._model._data.current_runs[-1])["FirstGoodData"]))
+            
             self._view.group_range_min.setEnabled(False)
             if 'GroupRangeMin' in self._model._data.gui_variables:
                 self._model._data.gui_variables.pop('GroupRangeMin')
@@ -164,9 +166,11 @@ class GroupingTablePresenter(object):
 
     def from_file_checkbox_changed(self):
         if self._view.group_range_use_last_data.isChecked():
-            self._view.group_range_max.setText(str(round(max(self._model._data.loaded_data(self._model._data.
-                                                                                           current_runs[-1])['OutputWorkspace'][0].
-                                                             workspace.dataX(0)), 3)))
+            if self._model._data.current_runs:
+                self._view.group_range_max.setText(str(round(max(self._model._data.loaded_data(self._model._data.
+                                                                                               current_runs[-1])['OutputWorkspace'][0].
+                                                                 workspace.dataX(0)), 3)))
+
             self._view.group_range_max.setEnabled(False)
             if 'GroupRangeMax' in self._model._data.gui_variables:
                 self._model._data.gui_variables.pop('GroupRangeMax')

@@ -18,6 +18,12 @@ def get_group_data_workspace_name(context, group_name, run):
     else:
         return context._base_run_name(run) + "; Group; " + group_name + "; Counts; #1"
 
+def get_group_asymmetry_name(context, group_name, run):
+    if context.is_multi_period():
+        return context._base_run_name(run) + "; Group; " + group_name + \
+               "; Asymmetry; Periods; " + context.period_string(run) + "; #1"
+    else:
+        return context._base_run_name(run) + "; Group; " + group_name + "; Asymmetry; #1"
 
 def get_pair_data_workspace_name(context, pair_name, run):
     if context.is_multi_period():
