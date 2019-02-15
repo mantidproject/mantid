@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "Row.h"
 #include "Common/Map.h"
-#include "MantidAPI/AnalysisDataService.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/variant.hpp>
 
@@ -82,40 +81,25 @@ Row mergedRow(Row const &rowA, Row const &rowB) {
   return rowA.withExtraRunNumbers(rowB.runNumbers());
 }
 
-void Row::algorithmStarted(Mantid::API::IAlgorithm_sptr const algorithm) {
-  UNUSED_ARG(algorithm);
+void Row::algorithmStarted() {
   m_reducedWorkspaceNames.resetOutputNames();
-  Item::algorithmStarted(algorithm);
+  Item::algorithmStarted();
 }
 
-void addOutputWorkspaceToADS(Mantid::API::IAlgorithm_sptr const algorithm,
-                             std::string const &propertyName,
-                             std::string const &workspaceName) {
-  if (workspaceName.empty())
-    return;
+void Row::algorithmComplete(
+    std::vector<std::string> const &outputWorkspaceNames) {
+  if (outputWorkspaceNames.size() != 3)
+    throw std::runtime_error("Incorrect number of output workspaces");
 
-  Mantid::API::AnalysisDataService::Instance().addOrReplace(
-      workspaceName, algorithm->getProperty(propertyName));
+  m_reducedWorkspaceNames.setOutputNames(outputWorkspaceNames[0],
+                                         outputWorkspaceNames[1],
+                                         outputWorkspaceNames[2]);
+  Item::algorithmComplete(outputWorkspaceNames);
 }
 
-void Row::algorithmComplete(Mantid::API::IAlgorithm_sptr const algorithm) {
-  m_reducedWorkspaceNames.setOutputNames(
-      algorithm->getPropertyValue("OutputWorkspaceWavelength"),
-      algorithm->getPropertyValue("OutputWorkspace"),
-      algorithm->getPropertyValue("OutputWorkspaceBinned"));
-  addOutputWorkspaceToADS(algorithm, "OutputWorkspaceWavelength",
-                          m_reducedWorkspaceNames.iVsLambda());
-  addOutputWorkspaceToADS(algorithm, "OutputWorkspace",
-                          m_reducedWorkspaceNames.iVsQ());
-  addOutputWorkspaceToADS(algorithm, "OutputWorkspaceBinned",
-                          m_reducedWorkspaceNames.iVsQBinned());
-  Item::algorithmComplete(algorithm);
-}
-
-void Row::algorithmError(Mantid::API::IAlgorithm_sptr const algorithm,
-                         std::string const &msg) {
+void Row::algorithmError(std::string const &msg) {
   m_reducedWorkspaceNames.resetOutputNames();
-  Item::algorithmError(algorithm, msg);
+  Item::algorithmError(msg);
 }
 
 bool Row::hasOutputWorkspace(std::string const &wsName) const {

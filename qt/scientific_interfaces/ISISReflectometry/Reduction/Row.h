@@ -42,10 +42,10 @@ public:
 
   Row withExtraRunNumbers(std::vector<std::string> const &runNumbers) const;
 
-  void algorithmStarted(Mantid::API::IAlgorithm_sptr const algorithm) override;
-  void algorithmComplete(Mantid::API::IAlgorithm_sptr const algorithm) override;
-  void algorithmError(Mantid::API::IAlgorithm_sptr const algorithm,
-                      std::string const &msg) override;
+  void algorithmStarted() override;
+  void algorithmComplete(
+      std::vector<std::string> const &outputWorkspaceNames) override;
+  void algorithmError(std::string const &msg) override;
 
   bool hasOutputWorkspace(std::string const &wsName) const;
   void renameOutputWorkspace(std::string const &oldName,

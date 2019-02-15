@@ -34,8 +34,10 @@ public:
   virtual Mantid::API::IAlgorithm_sptr algorithm() const;
   virtual AlgorithmRuntimeProps properties() const;
 
-private:
+protected:
   Mantid::API::IAlgorithm_sptr m_algorithm;
+
+private:
   AlgorithmRuntimeProps m_properties;
 };
 

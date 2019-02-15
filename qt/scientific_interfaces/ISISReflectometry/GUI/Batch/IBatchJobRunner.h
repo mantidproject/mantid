@@ -8,6 +8,7 @@
 #define MANTID_CUSTOMINTERFACES_IBATCHJOBRUNNER_H_
 
 #include "Common/DllConfig.h"
+#include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "Reduction/Batch.h"
 
 namespace MantidQt {

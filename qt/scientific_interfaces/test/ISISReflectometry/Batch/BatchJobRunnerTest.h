@@ -198,8 +198,9 @@ private:
         ConfiguredAlgorithm::AlgorithmRuntimeProps{{"InputRunList", "12345"}};
     // TODO: this ctor not recognised: BatchJobAlgorithm(alg, properties,
     // &item);
-    auto jobAlgorithm =
-        boost::make_shared<BatchJobAlgorithm>(alg, properties, &item);
+    auto jobAlgorithm = boost::make_shared<BatchJobAlgorithm>(
+        alg, properties, std::vector<std::string>{"OutputWS1", "OutputWS2"},
+        &item);
     auto algorithm =
         boost::dynamic_pointer_cast<ConfiguredAlgorithm>(jobAlgorithm);
     return algorithm;

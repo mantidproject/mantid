@@ -54,20 +54,14 @@ bool Item::requiresProcessing(bool reprocessFailed) const {
   return false;
 }
 
-void Item::algorithmStarted(Mantid::API::IAlgorithm_sptr const algorithm) {
-  UNUSED_ARG(algorithm);
-  setRunning();
-}
+void Item::algorithmStarted() { setRunning(); }
 
-void Item::algorithmComplete(Mantid::API::IAlgorithm_sptr const algorithm) {
-  UNUSED_ARG(algorithm);
+void Item::algorithmComplete(
+    std::vector<std::string> const &outputWorkspaceNames) {
+  UNUSED_ARG(outputWorkspaceNames);
   setSuccess();
 }
 
-void Item::algorithmError(Mantid::API::IAlgorithm_sptr const algorithm,
-                          std::string const &msg) {
-  UNUSED_ARG(algorithm);
-  setError(msg);
-}
+void Item::algorithmError(std::string const &msg) { setError(msg); }
 } // namespace CustomInterfaces
 } // namespace MantidQt

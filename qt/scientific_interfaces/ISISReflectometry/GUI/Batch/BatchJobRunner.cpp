@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "BatchJobRunner.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidKernel/Strings.h"
 #include <typeinfo>
@@ -15,6 +16,7 @@ namespace CustomInterfaces {
 
 using API::ConfiguredAlgorithm_sptr;
 using Mantid::API::IAlgorithm_sptr;
+using Mantid::API::Workspace_sptr;
 using AlgorithmRuntimeProps = std::map<std::string, std::string>;
 
 namespace { // unnamed
@@ -286,20 +288,28 @@ void updateEventProperties(AlgorithmRuntimeProps &properties,
 
 void getAlgorithmForRow(Row &row, Batch const &model,
                         std::deque<ConfiguredAlgorithm_sptr> &algorithms) {
+  // Create the algorithm
   auto alg = Mantid::API::AlgorithmManager::Instance().create(
       "ReflectometryISISLoadAndProcess");
   alg->setChild(true);
 
+  // Set up input properties
   auto properties = AlgorithmRuntimeProps();
   updateEventProperties(properties, model.slicing());
   updateExperimentProperties(properties, model.experiment());
   updatePerThetaDefaultProperties(properties,
                                   model.defaultsForTheta(row.theta()));
   updateInstrumentProperties(properties, model.instrument());
-  // updateSaveProperties(properties, model.experiment());
   updateRowProperties(properties, row);
-  auto jobAlgorithm =
-      boost::make_shared<BatchJobAlgorithm>(alg, properties, &row);
+
+  // Store expected output property names. Must be in the correct order for
+  // Row::algorithmComplete
+  std::vector<std::string> outputWorkspaceProperties = {
+      "OutputWorkspaceWavelength", "OutputWorkspace", "OutputWorkspaceBinned"};
+
+  // Add the configured algorithm to the list
+  auto jobAlgorithm = boost::make_shared<BatchJobAlgorithm>(
+      alg, properties, outputWorkspaceProperties, &row);
   algorithms.emplace_back(std::move(jobAlgorithm));
 }
 
@@ -313,15 +323,35 @@ void getAlgorithmsForGroup(Group &group, Batch const &model,
       getAlgorithmForRow(row.get(), model, algorithms);
   }
 }
-} // namespace
+} // unnamed namespace
 
 BatchJobAlgorithm::BatchJobAlgorithm(
     Mantid::API::IAlgorithm_sptr algorithm,
     MantidQt::API::ConfiguredAlgorithm::AlgorithmRuntimeProps properties,
-    Item *item)
-    : ConfiguredAlgorithm(algorithm, properties), m_item(item) {}
+    std::vector<std::string> outputWorkspaceProperties, Item *item)
+    : ConfiguredAlgorithm(algorithm, properties), m_item(item),
+      m_outputWorkspaceProperties(outputWorkspaceProperties) {}
 
 Item *BatchJobAlgorithm::item() { return m_item; }
+
+std::vector<std::string> BatchJobAlgorithm::outputWorkspaceNames() const {
+  auto workspaceNames = std::vector<std::string>();
+  for (auto &property : m_outputWorkspaceProperties) {
+    workspaceNames.emplace_back(m_algorithm->getPropertyValue(property));
+  }
+  return workspaceNames;
+}
+
+std::map<std::string, Workspace_sptr>
+BatchJobAlgorithm::outputWorkspaceNameToWorkspace() const {
+  auto propertyToName = std::map<std::string, Workspace_sptr>();
+  for (auto &property : m_outputWorkspaceProperties) {
+    auto workspaceName = m_algorithm->getPropertyValue(property);
+    if (!workspaceName.empty())
+      propertyToName[workspaceName] = m_algorithm->getProperty(property);
+  }
+  return propertyToName;
+}
 
 BatchJobRunner::BatchJobRunner(Batch batch)
     : m_batch(std::move(batch)), m_isProcessing(false), m_isAutoreducing(false),
@@ -367,24 +397,33 @@ std::deque<ConfiguredAlgorithm_sptr> BatchJobRunner::getAlgorithms() {
 }
 
 void BatchJobRunner::algorithmStarted(ConfiguredAlgorithm_sptr algorithm) {
-  auto jobAlgorithm = boost::dynamic_pointer_cast<BatchJobAlgorithm>(algorithm);
-  jobAlgorithm->item()->algorithmStarted(algorithm->algorithm());
+  auto jobAlgorithm =
+      boost::dynamic_pointer_cast<IBatchJobAlgorithm>(algorithm);
+  jobAlgorithm->item()->algorithmStarted();
 }
 
 void BatchJobRunner::algorithmComplete(ConfiguredAlgorithm_sptr algorithm) {
-  auto jobAlgorithm = boost::dynamic_pointer_cast<BatchJobAlgorithm>(algorithm);
-  jobAlgorithm->item()->algorithmComplete(algorithm->algorithm());
+  auto jobAlgorithm =
+      boost::dynamic_pointer_cast<IBatchJobAlgorithm>(algorithm);
+  jobAlgorithm->item()->algorithmComplete(jobAlgorithm->outputWorkspaceNames());
+
+  for (auto &kvp : jobAlgorithm->outputWorkspaceNameToWorkspace()) {
+    Mantid::API::AnalysisDataService::Instance().addOrReplace(kvp.first,
+                                                              kvp.second);
+  }
 }
 
 void BatchJobRunner::algorithmError(ConfiguredAlgorithm_sptr algorithm,
                                     std::string const &message) {
-  auto jobAlgorithm = boost::dynamic_pointer_cast<BatchJobAlgorithm>(algorithm);
-  jobAlgorithm->item()->algorithmError(algorithm->algorithm(), message);
+  auto jobAlgorithm =
+      boost::dynamic_pointer_cast<IBatchJobAlgorithm>(algorithm);
+  jobAlgorithm->item()->algorithmError(message);
 }
 
 std::vector<std::string> BatchJobRunner::algorithmOutputWorkspacesToSave(
     ConfiguredAlgorithm_sptr algorithm) const {
-  auto jobAlgorithm = boost::dynamic_pointer_cast<BatchJobAlgorithm>(algorithm);
+  auto jobAlgorithm =
+      boost::dynamic_pointer_cast<IBatchJobAlgorithm>(algorithm);
 
   if (typeid(algorithm).name() == std::string("Row"))
     return getWorkspacesToSave(dynamic_cast<Row &>(*jobAlgorithm->item()));

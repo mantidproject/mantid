@@ -9,7 +9,8 @@
 #define MANTID_CUSTOMINTERFACES_ITEM_H_
 #include "Common/DllConfig.h"
 #include "ItemState.h"
-#include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
+#include <string>
+#include <vector>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -28,10 +29,10 @@ public:
   virtual void renameOutputWorkspace(std::string const &oldName,
                                      std::string const &newName) = 0;
 
-  virtual void algorithmStarted(Mantid::API::IAlgorithm_sptr const algorithm);
-  virtual void algorithmComplete(Mantid::API::IAlgorithm_sptr const algorithm);
-  virtual void algorithmError(Mantid::API::IAlgorithm_sptr const algorithm,
-                              std::string const &msg);
+  virtual void algorithmStarted();
+  virtual void
+  algorithmComplete(std::vector<std::string> const &outputWorkspaceNames);
+  virtual void algorithmError(std::string const &msg);
 
 protected:
   ItemState m_itemState;
