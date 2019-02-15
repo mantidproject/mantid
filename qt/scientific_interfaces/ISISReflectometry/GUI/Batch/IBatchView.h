@@ -18,8 +18,8 @@ namespace MantidQt {
 
 namespace API {
 class BatchAlgorithmRunner;
-class ConfiguredAlgorithm;
-using ConfiguredAlgorithm_sptr = boost::shared_ptr<ConfiguredAlgorithm>;
+class IConfiguredAlgorithm;
+using IConfiguredAlgorithm_sptr = boost::shared_ptr<IConfiguredAlgorithm>;
 } // namespace API
 
 namespace CustomInterfaces {
@@ -29,10 +29,10 @@ public:
   virtual void notifyBatchFinished(bool error) = 0;
   virtual void notifyBatchCancelled() = 0;
   virtual void
-  notifyAlgorithmStarted(API::ConfiguredAlgorithm_sptr algorithm) = 0;
+  notifyAlgorithmStarted(API::IConfiguredAlgorithm_sptr algorithm) = 0;
   virtual void
-  notifyAlgorithmComplete(API::ConfiguredAlgorithm_sptr algorithm) = 0;
-  virtual void notifyAlgorithmError(API::ConfiguredAlgorithm_sptr algorithm,
+  notifyAlgorithmComplete(API::IConfiguredAlgorithm_sptr algorithm) = 0;
+  virtual void notifyAlgorithmError(API::IConfiguredAlgorithm_sptr algorithm,
                                     std::string const &message) = 0;
 };
 
@@ -53,7 +53,7 @@ public:
   virtual IInstrumentView *instrument() const = 0;
   virtual void clearAlgorithmQueue() = 0;
   virtual void setAlgorithmQueue(
-      std::deque<MantidQt::API::ConfiguredAlgorithm_sptr> algorithms) = 0;
+      std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> algorithms) = 0;
   virtual void executeAlgorithmQueue() = 0;
   virtual void cancelAlgorithmQueue() = 0;
 };

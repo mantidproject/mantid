@@ -20,7 +20,7 @@ using namespace MantidQt::MantidWidgets::DataProcessor;
 namespace MantidQt {
 namespace CustomInterfaces {
 
-using API::ConfiguredAlgorithm_sptr;
+using API::IConfiguredAlgorithm_sptr;
 using Mantid::API::IAlgorithm_sptr;
 
 // unnamed namespace
@@ -103,13 +103,13 @@ void BatchPresenter::notifyBatchCancelled() {
 }
 
 void BatchPresenter::notifyAlgorithmStarted(
-    ConfiguredAlgorithm_sptr algorithm) {
+    IConfiguredAlgorithm_sptr algorithm) {
   m_jobRunner->algorithmStarted(algorithm);
   m_runsPresenter->notifyRowStateChanged();
 }
 
 void BatchPresenter::notifyAlgorithmComplete(
-    ConfiguredAlgorithm_sptr algorithm) {
+    IConfiguredAlgorithm_sptr algorithm) {
   m_jobRunner->algorithmComplete(algorithm);
   m_runsPresenter->notifyRowStateChanged();
   /// TODO Longer term it would probably be better if algorithms took care
@@ -121,7 +121,7 @@ void BatchPresenter::notifyAlgorithmComplete(
   }
 }
 
-void BatchPresenter::notifyAlgorithmError(ConfiguredAlgorithm_sptr algorithm,
+void BatchPresenter::notifyAlgorithmError(IConfiguredAlgorithm_sptr algorithm,
                                           std::string const &message) {
   m_jobRunner->algorithmError(algorithm, message);
   m_runsPresenter->notifyRowStateChanged();

@@ -23,16 +23,23 @@
 
 namespace MantidQt {
 namespace API {
-class EXPORT_OPT_MANTIDQT_COMMON ConfiguredAlgorithm {
+class EXPORT_OPT_MANTIDQT_COMMON IConfiguredAlgorithm {
 public:
   using AlgorithmRuntimeProps = std::map<std::string, std::string>;
 
+  virtual Mantid::API::IAlgorithm_sptr algorithm() const = 0;
+  virtual AlgorithmRuntimeProps properties() const = 0;
+};
+
+class EXPORT_OPT_MANTIDQT_COMMON ConfiguredAlgorithm
+    : public IConfiguredAlgorithm {
+public:
   ConfiguredAlgorithm(Mantid::API::IAlgorithm_sptr algorithm,
                       AlgorithmRuntimeProps properties);
   virtual ~ConfiguredAlgorithm();
 
-  virtual Mantid::API::IAlgorithm_sptr algorithm() const;
-  virtual AlgorithmRuntimeProps properties() const;
+  Mantid::API::IAlgorithm_sptr algorithm() const override;
+  AlgorithmRuntimeProps properties() const override;
 
 protected:
   Mantid::API::IAlgorithm_sptr m_algorithm;
@@ -41,7 +48,7 @@ private:
   AlgorithmRuntimeProps m_properties;
 };
 
-using ConfiguredAlgorithm_sptr = boost::shared_ptr<ConfiguredAlgorithm>;
+using IConfiguredAlgorithm_sptr = boost::shared_ptr<IConfiguredAlgorithm>;
 
 class BatchCompleteNotification : public Poco::Notification {
 public:
@@ -63,38 +70,38 @@ public:
 
 class AlgorithmCompleteNotification : public Poco::Notification {
 public:
-  AlgorithmCompleteNotification(ConfiguredAlgorithm_sptr algorithm)
+  AlgorithmCompleteNotification(IConfiguredAlgorithm_sptr algorithm)
       : Poco::Notification(), m_algorithm(algorithm) {}
 
-  ConfiguredAlgorithm_sptr algorithm() const { return m_algorithm; }
+  IConfiguredAlgorithm_sptr algorithm() const { return m_algorithm; }
 
 private:
-  ConfiguredAlgorithm_sptr m_algorithm;
+  IConfiguredAlgorithm_sptr m_algorithm;
 };
 
 class AlgorithmStartedNotification : public Poco::Notification {
 public:
-  AlgorithmStartedNotification(ConfiguredAlgorithm_sptr algorithm)
+  AlgorithmStartedNotification(IConfiguredAlgorithm_sptr algorithm)
       : Poco::Notification(), m_algorithm(algorithm) {}
 
-  ConfiguredAlgorithm_sptr algorithm() const { return m_algorithm; }
+  IConfiguredAlgorithm_sptr algorithm() const { return m_algorithm; }
 
 private:
-  ConfiguredAlgorithm_sptr m_algorithm;
+  IConfiguredAlgorithm_sptr m_algorithm;
 };
 
 class AlgorithmErrorNotification : public Poco::Notification {
 public:
-  AlgorithmErrorNotification(ConfiguredAlgorithm_sptr algorithm,
+  AlgorithmErrorNotification(IConfiguredAlgorithm_sptr algorithm,
                              std::string const &errorMessage)
       : Poco::Notification(), m_algorithm(algorithm),
         m_errorMessage(errorMessage) {}
 
-  ConfiguredAlgorithm_sptr algorithm() const { return m_algorithm; }
+  IConfiguredAlgorithm_sptr algorithm() const { return m_algorithm; }
   std::string errorMessage() const { return m_errorMessage; }
 
 private:
-  ConfiguredAlgorithm_sptr m_algorithm;
+  IConfiguredAlgorithm_sptr m_algorithm;
   std::string m_errorMessage;
 };
 
@@ -116,7 +123,7 @@ public:
   /// Adds an algorithm to the execution queue
   void addAlgorithm(Mantid::API::IAlgorithm_sptr algo,
                     AlgorithmRuntimeProps props = AlgorithmRuntimeProps());
-  void setQueue(std::deque<ConfiguredAlgorithm_sptr> algorithm);
+  void setQueue(std::deque<IConfiguredAlgorithm_sptr> algorithm);
   /// Clears all algorithms from queue
   void clearQueue();
   /// Gets size of queue
@@ -136,16 +143,16 @@ signals:
   /// Emitted when a batch has finished executing
   void batchComplete(bool error);
   void batchCancelled();
-  void algorithmStarted(MantidQt::API::ConfiguredAlgorithm_sptr algorithm);
-  void algorithmComplete(MantidQt::API::ConfiguredAlgorithm_sptr algorithm);
-  void algorithmError(MantidQt::API::ConfiguredAlgorithm_sptr algorithm,
+  void algorithmStarted(MantidQt::API::IConfiguredAlgorithm_sptr algorithm);
+  void algorithmComplete(MantidQt::API::IConfiguredAlgorithm_sptr algorithm);
+  void algorithmError(MantidQt::API::IConfiguredAlgorithm_sptr algorithm,
                       std::string errorMessage);
 
 private:
   /// Implementation of algorithm runner
   bool executeBatchAsyncImpl(const Poco::Void &);
   /// Sets up and executes an algorithm
-  bool executeAlgo(ConfiguredAlgorithm_sptr algorithm);
+  bool executeAlgo(IConfiguredAlgorithm_sptr algorithm);
 
   /// Handlers for notifications
   void handleBatchComplete(const Poco::AutoPtr<BatchCompleteNotification> &pNf);
@@ -159,7 +166,7 @@ private:
   handleAlgorithmError(const Poco::AutoPtr<AlgorithmErrorNotification> &pNf);
 
   /// The queue of algorithms to be executed
-  std::deque<ConfiguredAlgorithm_sptr> m_algorithms;
+  std::deque<IConfiguredAlgorithm_sptr> m_algorithms;
 
   /// The current algorithm being executed
   Mantid::API::IAlgorithm_sptr m_currentAlgorithm;

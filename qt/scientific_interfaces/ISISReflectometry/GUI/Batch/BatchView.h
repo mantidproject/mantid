@@ -36,16 +36,16 @@ public:
   IInstrumentView *instrument() const override;
   void clearAlgorithmQueue() override;
   void setAlgorithmQueue(
-      std::deque<MantidQt::API::ConfiguredAlgorithm_sptr> algorithms) override;
+      std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> algorithms) override;
   void executeAlgorithmQueue() override;
   void cancelAlgorithmQueue() override;
 
 private slots:
   void onBatchComplete(bool error);
   void onBatchCancelled();
-  void onAlgorithmStarted(MantidQt::API::ConfiguredAlgorithm_sptr algorithm);
-  void onAlgorithmComplete(MantidQt::API::ConfiguredAlgorithm_sptr algorithm);
-  void onAlgorithmError(MantidQt::API::ConfiguredAlgorithm_sptr algorithm,
+  void onAlgorithmStarted(MantidQt::API::IConfiguredAlgorithm_sptr algorithm);
+  void onAlgorithmComplete(MantidQt::API::IConfiguredAlgorithm_sptr algorithm);
+  void onAlgorithmError(MantidQt::API::IConfiguredAlgorithm_sptr algorithm,
                         std::string errorMessage);
 
 private:

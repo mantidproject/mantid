@@ -26,18 +26,19 @@ public:
   virtual void autoreductionPaused() = 0;
   virtual void setReprocessFailedItems(bool reprocessFailed) = 0;
   virtual void
-  algorithmStarted(MantidQt::API::ConfiguredAlgorithm_sptr algorithm) = 0;
+  algorithmStarted(MantidQt::API::IConfiguredAlgorithm_sptr algorithm) = 0;
   virtual void
-  algorithmComplete(MantidQt::API::ConfiguredAlgorithm_sptr algorithm) = 0;
-  virtual void algorithmError(MantidQt::API::ConfiguredAlgorithm_sptr algorithm,
-                              std::string const &message) = 0;
+  algorithmComplete(MantidQt::API::IConfiguredAlgorithm_sptr algorithm) = 0;
+  virtual void
+  algorithmError(MantidQt::API::IConfiguredAlgorithm_sptr algorithm,
+                 std::string const &message) = 0;
   virtual std::vector<std::string> algorithmOutputWorkspacesToSave(
-      MantidQt::API::ConfiguredAlgorithm_sptr algorithm) const = 0;
+      MantidQt::API::IConfiguredAlgorithm_sptr algorithm) const = 0;
   virtual void notifyWorkspaceDeleted(std::string const &wsName) = 0;
   virtual void notifyWorkspaceRenamed(std::string const &oldName,
                                       std::string const &newName) = 0;
   virtual void notifyAllWorkspacesDeleted() = 0;
-  virtual std::deque<MantidQt::API::ConfiguredAlgorithm_sptr>
+  virtual std::deque<MantidQt::API::IConfiguredAlgorithm_sptr>
   getAlgorithms() = 0;
 };
 } // namespace CustomInterfaces

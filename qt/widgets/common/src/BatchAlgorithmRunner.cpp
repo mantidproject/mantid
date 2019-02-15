@@ -100,7 +100,7 @@ void BatchAlgorithmRunner::addAlgorithm(IAlgorithm_sptr algo,
  * @param algorithms The queue of configured algorithms
  */
 void BatchAlgorithmRunner::setQueue(
-    std::deque<ConfiguredAlgorithm_sptr> algorithms) {
+    std::deque<IConfiguredAlgorithm_sptr> algorithms) {
   g_log.debug() << "Set batch queue to algorithm list:\n";
   for (auto &algorithm : algorithms)
     g_log.debug() << algorithm->algorithm()->name() << "\n";
@@ -206,7 +206,7 @@ bool BatchAlgorithmRunner::executeBatchAsyncImpl(const Poco::Void &) {
  * @param algorithm Algorithm and properties to assign to it
  * @return False if algorithm execution failed
  */
-bool BatchAlgorithmRunner::executeAlgo(ConfiguredAlgorithm_sptr algorithm) {
+bool BatchAlgorithmRunner::executeAlgo(IConfiguredAlgorithm_sptr algorithm) {
   try {
     m_currentAlgorithm = algorithm->algorithm();
 

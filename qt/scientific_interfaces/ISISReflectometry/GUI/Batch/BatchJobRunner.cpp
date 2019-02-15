@@ -14,7 +14,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-using API::ConfiguredAlgorithm_sptr;
+using API::IConfiguredAlgorithm_sptr;
 using Mantid::API::IAlgorithm_sptr;
 using Mantid::API::Workspace_sptr;
 using AlgorithmRuntimeProps = std::map<std::string, std::string>;
@@ -287,7 +287,7 @@ void updateEventProperties(AlgorithmRuntimeProps &properties,
 }
 
 void getAlgorithmForRow(Row &row, Batch const &model,
-                        std::deque<ConfiguredAlgorithm_sptr> &algorithms) {
+                        std::deque<IConfiguredAlgorithm_sptr> &algorithms) {
   // Create the algorithm
   auto alg = Mantid::API::AlgorithmManager::Instance().create(
       "ReflectometryISISLoadAndProcess");
@@ -315,7 +315,7 @@ void getAlgorithmForRow(Row &row, Batch const &model,
 
 void getAlgorithmsForGroup(Group &group, Batch const &model,
                            bool reprocessFailed, bool processAll,
-                           std::deque<ConfiguredAlgorithm_sptr> &algorithms) {
+                           std::deque<IConfiguredAlgorithm_sptr> &algorithms) {
   auto &rows = group.mutableRows();
   for (auto &row : rows) {
     if (row && row->requiresProcessing(reprocessFailed) &&
@@ -385,8 +385,8 @@ void BatchJobRunner::setReprocessFailedItems(bool reprocessFailed) {
   m_reprocessFailed = reprocessFailed;
 }
 
-std::deque<ConfiguredAlgorithm_sptr> BatchJobRunner::getAlgorithms() {
-  auto algorithms = std::deque<ConfiguredAlgorithm_sptr>();
+std::deque<IConfiguredAlgorithm_sptr> BatchJobRunner::getAlgorithms() {
+  auto algorithms = std::deque<IConfiguredAlgorithm_sptr>();
   auto &groups =
       m_batch.mutableRunsTable().mutableReductionJobs().mutableGroups();
   for (auto &group : groups) {
@@ -396,13 +396,13 @@ std::deque<ConfiguredAlgorithm_sptr> BatchJobRunner::getAlgorithms() {
   return algorithms;
 }
 
-void BatchJobRunner::algorithmStarted(ConfiguredAlgorithm_sptr algorithm) {
+void BatchJobRunner::algorithmStarted(IConfiguredAlgorithm_sptr algorithm) {
   auto jobAlgorithm =
       boost::dynamic_pointer_cast<IBatchJobAlgorithm>(algorithm);
   jobAlgorithm->item()->algorithmStarted();
 }
 
-void BatchJobRunner::algorithmComplete(ConfiguredAlgorithm_sptr algorithm) {
+void BatchJobRunner::algorithmComplete(IConfiguredAlgorithm_sptr algorithm) {
   auto jobAlgorithm =
       boost::dynamic_pointer_cast<IBatchJobAlgorithm>(algorithm);
   jobAlgorithm->item()->algorithmComplete(jobAlgorithm->outputWorkspaceNames());
@@ -413,7 +413,7 @@ void BatchJobRunner::algorithmComplete(ConfiguredAlgorithm_sptr algorithm) {
   }
 }
 
-void BatchJobRunner::algorithmError(ConfiguredAlgorithm_sptr algorithm,
+void BatchJobRunner::algorithmError(IConfiguredAlgorithm_sptr algorithm,
                                     std::string const &message) {
   auto jobAlgorithm =
       boost::dynamic_pointer_cast<IBatchJobAlgorithm>(algorithm);
@@ -421,7 +421,7 @@ void BatchJobRunner::algorithmError(ConfiguredAlgorithm_sptr algorithm,
 }
 
 std::vector<std::string> BatchJobRunner::algorithmOutputWorkspacesToSave(
-    ConfiguredAlgorithm_sptr algorithm) const {
+    IConfiguredAlgorithm_sptr algorithm) const {
   auto jobAlgorithm =
       boost::dynamic_pointer_cast<IBatchJobAlgorithm>(algorithm);
 

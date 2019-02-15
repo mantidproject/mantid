@@ -27,6 +27,7 @@
 #include "MantidKernel/ICatalogInfo.h"
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/WarningSuppressions.h"
+#include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/Command.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/OptionsMap.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
@@ -236,20 +237,34 @@ public:
   MOCK_METHOD0(resumeAutoreduction, void());
   MOCK_METHOD0(autoreductionPaused, void());
   MOCK_METHOD1(setReprocessFailedItems, void(bool));
-  MOCK_METHOD1(algorithmStarted, void(MantidQt::API::ConfiguredAlgorithm_sptr));
+  MOCK_METHOD1(algorithmStarted,
+               void(MantidQt::API::IConfiguredAlgorithm_sptr));
   MOCK_METHOD1(algorithmComplete,
-               void(MantidQt::API::ConfiguredAlgorithm_sptr));
-  MOCK_METHOD2(algorithmError, void(MantidQt::API::ConfiguredAlgorithm_sptr,
+               void(MantidQt::API::IConfiguredAlgorithm_sptr));
+  MOCK_METHOD2(algorithmError, void(MantidQt::API::IConfiguredAlgorithm_sptr,
                                     std::string const &));
   MOCK_CONST_METHOD1(
       algorithmOutputWorkspacesToSave,
-      std::vector<std::string>(MantidQt::API::ConfiguredAlgorithm_sptr));
+      std::vector<std::string>(MantidQt::API::IConfiguredAlgorithm_sptr));
   MOCK_METHOD1(notifyWorkspaceDeleted, void(std::string const &));
   MOCK_METHOD2(notifyWorkspaceRenamed,
                void(std::string const &, std::string const &));
   MOCK_METHOD0(notifyAllWorkspacesDeleted, void());
   MOCK_METHOD0(getAlgorithms,
-               std::deque<MantidQt::API::ConfiguredAlgorithm_sptr>());
+               std::deque<MantidQt::API::IConfiguredAlgorithm_sptr>());
+};
+
+class MockBatchJobAlgorithm : public IBatchJobAlgorithm,
+                              public MantidQt::API::IConfiguredAlgorithm {
+public:
+  MockBatchJobAlgorithm() {}
+  MOCK_CONST_METHOD0(algorithm, Mantid::API::IAlgorithm_sptr());
+  MOCK_CONST_METHOD0(
+      properties, MantidQt::API::IConfiguredAlgorithm::AlgorithmRuntimeProps());
+  MOCK_METHOD0(item, Item *());
+  MOCK_CONST_METHOD0(outputWorkspaceNames, std::vector<std::string>());
+  MOCK_CONST_METHOD0(outputWorkspaceNameToWorkspace,
+                     std::map<std::string, Workspace_sptr>());
 };
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE

@@ -9,6 +9,7 @@
 
 #include "../../../ISISReflectometry/GUI/Batch/BatchJobRunner.h"
 #include "../ReflMockObjects.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <cxxtest/TestSuite.h>
@@ -16,8 +17,10 @@
 #include <gtest/gtest.h>
 
 using namespace MantidQt::CustomInterfaces;
-using MantidQt::API::ConfiguredAlgorithm;
-using MantidQt::API::ConfiguredAlgorithm_sptr;
+using Mantid::API::Workspace_sptr;
+using Mantid::DataObjects::Workspace2D_sptr;
+using MantidQt::API::IConfiguredAlgorithm;
+using MantidQt::API::IConfiguredAlgorithm_sptr;
 using WorkspaceCreationHelper::MockAlgorithm;
 
 using testing::AtLeast;
@@ -47,12 +50,15 @@ public:
             MonitorCorrections(0, true, RangeInLambda(0.0, 0.0),
                                RangeInLambda(0.0, 0.0)),
             DetectorCorrections(false, DetectorCorrectionType::VerticalShift)),
-        m_runsTable(m_instruments, m_tolerance, ReductionJobs()), m_slicing() {}
+        m_runsTable(m_instruments, m_tolerance, ReductionJobs()), m_slicing() {
+    m_jobAlgorithm = boost::make_shared<MockBatchJobAlgorithm>();
+  }
 
   void testInitialisedWithNonRunningState() {
     auto jobRunner = makeJobRunner();
     TS_ASSERT_EQUALS(jobRunner.isProcessing(), false);
     TS_ASSERT_EQUALS(jobRunner.isAutoreducing(), false);
+    verifyAndClear();
   }
 
   void testResumeReduction() {
@@ -63,12 +69,14 @@ public:
     TS_ASSERT_EQUALS(jobRunner.isAutoreducing(), false);
     TS_ASSERT_EQUALS(jobRunner.m_reprocessFailed, hasSelection);
     TS_ASSERT_EQUALS(jobRunner.m_processAll, !hasSelection);
+    verifyAndClear();
   }
 
   void testReductionPaused() {
     auto jobRunner = makeJobRunner();
     jobRunner.reductionPaused();
     TS_ASSERT_EQUALS(jobRunner.isProcessing(), false);
+    verifyAndClear();
   }
 
   void testResumeAutoreduction() {
@@ -78,49 +86,92 @@ public:
     TS_ASSERT_EQUALS(jobRunner.isAutoreducing(), true);
     TS_ASSERT_EQUALS(jobRunner.m_reprocessFailed, true);
     TS_ASSERT_EQUALS(jobRunner.m_processAll, true);
+    verifyAndClear();
   }
 
   void testAutoreductionPaused() {
     auto jobRunner = makeJobRunner();
     jobRunner.autoreductionPaused();
     TS_ASSERT_EQUALS(jobRunner.isAutoreducing(), false);
+    verifyAndClear();
   }
 
   void testSetReprocessFailedItems() {
     auto jobRunner = makeJobRunner();
     jobRunner.setReprocessFailedItems(true);
     TS_ASSERT_EQUALS(jobRunner.m_reprocessFailed, true);
+    verifyAndClear();
   }
 
   void testGetAlgorithmsWithEmptyModel() {
     auto jobRunner = makeJobRunner();
     auto const algorithms = jobRunner.getAlgorithms();
-    TS_ASSERT_EQUALS(algorithms, std::deque<ConfiguredAlgorithm_sptr>());
+    TS_ASSERT_EQUALS(algorithms, std::deque<IConfiguredAlgorithm_sptr>());
+    verifyAndClear();
   }
 
   void testGetAlgorithmsWithMultiGroupModel() {
     // TODO add content to model
     auto jobRunner = makeJobRunner();
     auto const algorithms = jobRunner.getAlgorithms();
-    TS_ASSERT_EQUALS(algorithms, std::deque<ConfiguredAlgorithm_sptr>());
+    TS_ASSERT_EQUALS(algorithms, std::deque<IConfiguredAlgorithm_sptr>());
+    verifyAndClear();
   }
 
   void testAlgorithmStarted() {
-    auto reductionJobs = makeReductionJobsWithMultiGroups();
-    auto &row = reductionJobs.mutableGroups()[0].mutableRows()[2];
-    auto jobRunner = makeJobRunner(reductionJobs);
-    auto algorithm = makeAlgorithm(*row);
-    jobRunner.algorithmStarted(algorithm);
-    TS_ASSERT_EQUALS(row->state(), State::ITEM_RUNNING);
+    auto row = makeRow("12345", 0.5);
+    auto &item = dynamic_cast<Item &>(row);
+    auto jobRunner = makeJobRunner();
+
+    EXPECT_CALL(*m_jobAlgorithm, item()).Times(1).WillOnce(Return(&item));
+
+    jobRunner.algorithmStarted(m_jobAlgorithm);
+    TS_ASSERT_EQUALS(row.state(), State::ITEM_RUNNING);
+    TS_ASSERT_EQUALS(row.reducedWorkspaceNames().iVsLambda(), "");
+    TS_ASSERT_EQUALS(row.reducedWorkspaceNames().iVsQ(), "");
+    TS_ASSERT_EQUALS(row.reducedWorkspaceNames().iVsQBinned(), "");
+    verifyAndClear();
   }
 
   void testAlgorithmComplete() {
-    auto reductionJobs = makeReductionJobsWithMultiGroups();
-    auto &row = reductionJobs.mutableGroups()[0].mutableRows()[2];
-    auto jobRunner = makeJobRunner(reductionJobs);
-    auto algorithm = makeAlgorithm(*row);
-    jobRunner.algorithmComplete(algorithm);
-    TS_ASSERT_EQUALS(row->state(), State::ITEM_COMPLETE);
+    auto row = makeRow("12345", 0.5);
+    auto &item = dynamic_cast<Item &>(row);
+    auto jobRunner = makeJobRunner();
+    auto iVsQ = createWorkspace();
+    auto iVsQBin = createWorkspace();
+
+    EXPECT_CALL(*m_jobAlgorithm, item()).Times(1).WillOnce(Return(&item));
+    EXPECT_CALL(*m_jobAlgorithm, outputWorkspaceNames())
+        .Times(1)
+        .WillOnce(Return(std::vector<std::string>{"", "IvsQ", "IvsQBin"}));
+    EXPECT_CALL(*m_jobAlgorithm, outputWorkspaceNameToWorkspace())
+        .Times(1)
+        .WillOnce(Return(std::map<std::string, Workspace_sptr>{
+            {"OutputWorkspace", iVsQ}, {"OutputWorkspaceBinned", iVsQBin}}));
+
+    jobRunner.algorithmComplete(m_jobAlgorithm);
+    TS_ASSERT_EQUALS(row.state(), State::ITEM_COMPLETE);
+    TS_ASSERT_EQUALS(row.reducedWorkspaceNames().iVsLambda(), "");
+    TS_ASSERT_EQUALS(row.reducedWorkspaceNames().iVsQ(), "IvsQ");
+    TS_ASSERT_EQUALS(row.reducedWorkspaceNames().iVsQBinned(), "IvsQBin");
+    verifyAndClear();
+  }
+
+  void testAlgorithmError() {
+    auto row = makeRow("12345", 0.5);
+    auto &item = dynamic_cast<Item &>(row);
+    auto jobRunner = makeJobRunner();
+    auto message = std::string("test error message");
+
+    EXPECT_CALL(*m_jobAlgorithm, item()).Times(1).WillOnce(Return(&item));
+
+    jobRunner.algorithmError(m_jobAlgorithm, message);
+    TS_ASSERT_EQUALS(row.state(), State::ITEM_ERROR);
+    TS_ASSERT_EQUALS(row.message(), message);
+    TS_ASSERT_EQUALS(row.reducedWorkspaceNames().iVsLambda(), "");
+    TS_ASSERT_EQUALS(row.reducedWorkspaceNames().iVsQ(), "");
+    TS_ASSERT_EQUALS(row.reducedWorkspaceNames().iVsQBinned(), "");
+    verifyAndClear();
   }
 
 private:
@@ -130,6 +181,7 @@ private:
   Instrument m_instrument;
   RunsTable m_runsTable;
   Slicing m_slicing;
+  boost::shared_ptr<MockBatchJobAlgorithm> m_jobAlgorithm;
 
   class BatchJobRunnerFriend : public BatchJobRunner {
     friend class BatchJobRunnerTest;
@@ -137,6 +189,10 @@ private:
   public:
     BatchJobRunnerFriend(Batch batch) : BatchJobRunner(batch) {}
   };
+
+  void verifyAndClear() {
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_jobAlgorithm));
+  }
 
   Experiment makeExperiment() {
     return Experiment(AnalysisMode::PointDetector, ReductionType::Normal,
@@ -192,18 +248,9 @@ private:
         Batch(m_experiment, m_instrument, m_runsTable, m_slicing));
   }
 
-  ConfiguredAlgorithm_sptr makeAlgorithm(Item &item) {
-    auto alg = boost::make_shared<MockAlgorithm>();
-    auto properties =
-        ConfiguredAlgorithm::AlgorithmRuntimeProps{{"InputRunList", "12345"}};
-    // TODO: this ctor not recognised: BatchJobAlgorithm(alg, properties,
-    // &item);
-    auto jobAlgorithm = boost::make_shared<BatchJobAlgorithm>(
-        alg, properties, std::vector<std::string>{"OutputWS1", "OutputWS2"},
-        &item);
-    auto algorithm =
-        boost::dynamic_pointer_cast<ConfiguredAlgorithm>(jobAlgorithm);
-    return algorithm;
+  Workspace2D_sptr createWorkspace() {
+    Workspace2D_sptr ws = WorkspaceCreationHelper::create2DWorkspace(10, 10);
+    return ws;
   }
 };
 
