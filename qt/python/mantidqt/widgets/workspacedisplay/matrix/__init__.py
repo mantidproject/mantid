@@ -13,7 +13,7 @@ from mantidqt.project.encoderfactory import EncoderFactory
 from mantidqt.project.decoderfactory import DecoderFactory
 
 
-def compatible_check_for_encoder(obj):
+def compatible_check_for_encoder(obj, _):
     return isinstance(obj, StatusBarView) and isinstance(obj.presenter, MatrixWorkspaceDisplay)
 
 

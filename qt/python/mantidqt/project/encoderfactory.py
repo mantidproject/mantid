@@ -9,6 +9,10 @@
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 
+def default_encoder_compatability_check(obj, encoder_cls):
+    return encoder_cls.has_tag(obj.__class__.__name__)
+
+
 class EncoderFactory(object):
     encoder_list = set([])
 
@@ -19,16 +23,12 @@ class EncoderFactory(object):
         :param obj: The object for encoding
         :return: Encoder or None; Returns the Encoder of the obj or None.
         """
-        for encoder, compatible_check in cls.encoder_list:
-
-            # Perform check if optional_cb is present if it is, then check whether the the optional_cb returns true for
-            # this object.
-            if compatible_check is not None and compatible_check(obj):
-                return encoder()
-
-            if encoder().has_tag(obj.__class__.__name__):
-                return encoder()
-        return None
+        obj_encoders = [encoder for encoder, compatible in cls.encoder_list if compatible(obj, encoder)]
+        if len(obj_encoders) > 1:
+            raise RuntimeError("EncoderFactory: One or more encoder type claims to work with the passed obj: "
+                               + obj.__class__.__name__)
+        elif len(obj_encoders) == 1:
+            return obj_encoders[0]()
 
     @classmethod
     def register_encoder(cls, encoder, compatible_check=None):
@@ -38,4 +38,6 @@ class EncoderFactory(object):
         :param compatible_check: An optional function reference that will be used instead of comparing the encoder to
         potential widget candidates. Function should return True if compatible else False.
         """
+        if compatible_check is None:
+            compatible_check = default_encoder_compatability_check
         cls.encoder_list.add((encoder, compatible_check))
