@@ -300,6 +300,21 @@ void IndirectFitAnalysisTab::loadSettings(const QSettings &settings) {
   m_dataPresenter->loadSettings(settings);
 }
 
+void IndirectFitAnalysisTab::filterDataBySuffices(bool filter) {
+  if (filter) {
+    setSampleWSSuffices(getSampleWSSuffices());
+    setSampleFBSuffices(getSampleFBSuffices());
+    auto const resolutionWSSuffices = getResolutionWSSuffices();
+    auto const resolutionFBSuffices = getResolutionFBSuffices();
+
+    if (!resolutionWSSuffices.isEmpty() && !resolutionFBSuffices.isEmpty()) {
+      setResolutionWSSuffices(resolutionWSSuffices);
+      setResolutionFBSuffices(resolutionFBSuffices);
+    }
+  } else
+    clearAllSuffices();
+}
+
 void IndirectFitAnalysisTab::setSampleWSSuffices(const QStringList &suffices) {
   m_dataPresenter->setSampleWSSuffices(suffices);
 }
@@ -316,6 +331,10 @@ void IndirectFitAnalysisTab::setResolutionWSSuffices(
 void IndirectFitAnalysisTab::setResolutionFBSuffices(
     const QStringList &suffices) {
   m_dataPresenter->setResolutionFBSuffices(suffices);
+}
+
+void IndirectFitAnalysisTab::clearAllSuffices() {
+  m_dataPresenter->clearAllSuffices();
 }
 
 std::size_t IndirectFitAnalysisTab::getSelectedDataIndex() const {

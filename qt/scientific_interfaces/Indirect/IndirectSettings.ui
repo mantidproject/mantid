@@ -35,7 +35,17 @@
         </item>
         <item>
          <property name="text">
+          <string>SNS</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
           <string>ILL</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>MLZ</string>
          </property>
         </item>
        </widget>

@@ -43,6 +43,11 @@ public:
   void
   setFitPropertyBrowser(MantidWidgets::IndirectFitPropertyBrowser *browser);
 
+  virtual QStringList getSampleWSSuffices() const = 0;
+  virtual QStringList getSampleFBSuffices() const = 0;
+  virtual QStringList getResolutionWSSuffices() const = 0;
+  virtual QStringList getResolutionFBSuffices() const = 0;
+
   std::size_t getSelectedDataIndex() const;
   std::size_t getSelectedSpectrum() const;
   bool isRangeCurrentlySelected(std::size_t dataIndex,
@@ -198,6 +203,7 @@ private:
   /// Overidden by child class.
   void setup() override;
   void loadSettings(const QSettings &settings) override;
+  void filterDataBySuffices(bool filter) override;
   virtual void setupFitTab() = 0;
   bool validate() override;
 
@@ -206,6 +212,8 @@ private:
   void connectFitBrowserAndPlotPresenter();
   void connectDataAndSpectrumPresenters();
   void connectDataAndFitBrowserPresenters();
+
+  void clearAllSuffices();
 
   void plotSelectedSpectra(std::vector<SpectrumToPlot> const &spectra);
   void plotSpectrum(std::string const &workspaceName, std::size_t const &index,

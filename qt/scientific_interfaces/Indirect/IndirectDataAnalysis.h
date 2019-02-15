@@ -7,9 +7,7 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_INDIRECTANALYSIS_H_
 #define MANTIDQTCUSTOMINTERFACES_INDIRECTANALYSIS_H_
 
-//----------------------
-// Includes
-//----------------------
+#include "IndirectSettingsDialog.h"
 #include "IndirectTab.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "ui_IndirectDataAnalysis.h"
@@ -73,18 +71,26 @@ private:
 private slots:
   /// Sets the active workspace in the selected tab
   void tabChanged(int index);
+  /// Opens the Indirect settings GUI
+  void settingsClicked();
   /// Called when the user clicks the Py button
   void exportTabPython();
   /// Opens a directory dialog.
   void openDirectoryDialog();
   /// Opens the Mantid Wiki web page of the current tab.
   void help();
+  /// Updates the settings for this interface
+  void updateSettings();
   /// Slot showing a message box to the user
   void showMessageBox(const QString &message);
 
 private:
   /// UI form containing all Qt elements.
   Ui::IndirectDataAnalysis m_uiForm;
+  /// The settings dialog
+  std::unique_ptr<IDA::IndirectSettingsDialog> m_settingsDialog;
+  /// The settings group
+  QString m_settingsGroup;
   /// Integer validator
   QIntValidator *m_valInt;
   /// Double validator

@@ -51,6 +51,15 @@ void IndirectDataAnalysisTab::loadTabSettings(const QSettings &settings) {
 }
 
 /**
+ * Prevents the loading of data with incorrect naming if passed true
+ *
+ * @param filter :: true if you want to allow filtering
+ */
+void IndirectDataAnalysisTab::filterInputData(bool filter) {
+  filterDataBySuffices(filter);
+}
+
+/**
  * Sets the active browser workspace when the tab is changed
  */
 void IndirectDataAnalysisTab::setActiveWorkspace() { setBrowserWorkspace(); }

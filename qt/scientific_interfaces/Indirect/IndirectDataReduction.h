@@ -86,6 +86,9 @@ private slots:
   /// Opens the manage directory dialog
   void openDirectoryDialog();
 
+  /// Updates the settings once they have been decided
+  void updateSettings();
+
   /// Shows a information dialog box
   void showMessageBox(const QString &message);
 

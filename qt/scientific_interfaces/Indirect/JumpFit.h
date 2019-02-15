@@ -25,6 +25,11 @@ public:
 
   void setupFitTab() override;
 
+  QStringList getSampleWSSuffices() const override;
+  QStringList getSampleFBSuffices() const override;
+  QStringList getResolutionWSSuffices() const override;
+  QStringList getResolutionFBSuffices() const override;
+
 protected slots:
   void updateModelFitTypeString();
   void runClicked();

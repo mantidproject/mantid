@@ -43,6 +43,7 @@ public:
   virtual void setSampleFBSuffices(QStringList const &suffices) = 0;
   virtual void setResolutionWSSuffices(QStringList const &suffices) = 0;
   virtual void setResolutionFBSuffices(QStringList const &suffices) = 0;
+  virtual void clearAllSuffices() = 0;
 
   virtual bool isSampleWorkspaceSelectorVisible() const = 0;
   virtual void

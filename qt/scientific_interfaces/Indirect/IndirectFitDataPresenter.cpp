@@ -91,6 +91,10 @@ void IndirectFitDataPresenter::setResolutionFBSuffices(
   m_view->setResolutionFBSuffices(suffices);
 }
 
+void IndirectFitDataPresenter::clearAllSuffices() {
+  m_view->clearAllSuffices();
+}
+
 void IndirectFitDataPresenter::setStartX(double startX, std::size_t dataIndex,
                                          int spectrumIndex) {
   m_tablePresenter->setStartX(startX, dataIndex, spectrumIndex);

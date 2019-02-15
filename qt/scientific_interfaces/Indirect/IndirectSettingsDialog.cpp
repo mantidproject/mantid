@@ -15,6 +15,9 @@ using namespace Mantid::Kernel;
 
 namespace {
 
+QString const SETTINGS_GROUP("IndirectInterfaceSettings");
+QString const FILTER_DATA_NAMES_SETTING("filter-input-by-name");
+
 std::string getSavedFacility() {
   return ConfigService::Instance().getFacility().name();
 }
@@ -32,68 +35,59 @@ namespace CustomInterfaces {
 namespace IDA {
 
 IndirectSettingsDialog::IndirectSettingsDialog(QWidget *parent)
-    : QDialog(parent) { //, m_settingsGroup(settingGroup) {
+    : QDialog(parent) {
   m_uiForm.setupUi(this);
-  //m_uiForm.iicInstrumentConfiguration->setShowInstrumentLabel(true);
-
-  loadProperties();
 
   connect(m_uiForm.pbOk, SIGNAL(clicked()), this, SLOT(okClicked()));
   connect(m_uiForm.pbApply, SIGNAL(clicked()), this, SLOT(applyClicked()));
   connect(m_uiForm.pbCancel, SIGNAL(clicked()), this, SLOT(cancelClicked()));
+
+  loadSettings();
 }
 
 void IndirectSettingsDialog::okClicked() {
-  saveProperties();
+  saveSettings();
   this->close();
 }
 
 void IndirectSettingsDialog::applyClicked() {
   setApplyingChanges(true);
-  saveProperties();
+  saveSettings();
   setApplyingChanges(false);
 }
 
 void IndirectSettingsDialog::cancelClicked() { this->close(); }
 
-void IndirectSettingsDialog::loadProperties() {
+void IndirectSettingsDialog::loadSettings() {
   setSelectedFacility(getSavedFacility());
 
-  // QSettings settings;
-  // settings.beginGroup(m_settingsGroup);
+  QSettings settings;
+  settings.beginGroup(SETTINGS_GROUP);
 
-  // auto const instrumentName = settings.value("instrument-name",
-  // "").toString(); auto const analyserName = settings.value("analyser-name",
-  // "").toString(); auto const reflectionName =
-  // settings.value("reflection-name", "").toString();
+  auto const filter = settings.value(FILTER_DATA_NAMES_SETTING, true).toBool();
 
-  // if (!instrumentName.isEmpty())
-  //  setSelectedInstrument(instrumentName);
-  // if (!analyserName.isEmpty())
-  //  setSelectedAnalyser(analyserName);
-  // if (!reflectionName.isEmpty())
-  //  setSelectedReflection(reflectionName);
+  settings.endGroup();
 
-  // settings.endGroup();
+  setFilterInputByNameChecked(filter);
+
+  emit updateSettings();
 }
 
-void IndirectSettingsDialog::saveProperties() {
+void IndirectSettingsDialog::saveSettings() {
   setSavedFacility(getSelectedFacility().toStdString());
 
-  // QSettings settings;
-  // settings.beginGroup(m_settingsGroup);
+  QSettings settings;
+  settings.beginGroup(SETTINGS_GROUP);
 
-  // settings.setValue("instrument-name", getSelectedInstrument());
-  // settings.setValue("analyser-name", getSelectedAnalyser());
-  // settings.setValue("reflection-name", getSelectedReflection());
+  settings.setValue(FILTER_DATA_NAMES_SETTING, isFilterInputByNameChecked());
 
-  // settings.endGroup();
+  settings.endGroup();
+
+  emit updateSettings();
 }
 
 void IndirectSettingsDialog::setSelectedFacility(std::string const &facility) {
   setSavedFacility(facility);
-  // m_uiForm.iicInstrumentConfiguration->setFacility(
-  //    QString::fromStdString(facility));
   m_uiForm.cbFacility->setCurrentIndex(findFacilityIndex(facility));
 }
 
@@ -103,44 +97,17 @@ int IndirectSettingsDialog::findFacilityIndex(std::string const &text) {
   return index != -1 ? index : 0;
 }
 
-// void IndirectSettingsDialog::setSelectedInstrument(QString const &instrument)
-// {
-//  m_uiForm.iicInstrumentConfiguration->setInstrument(instrument);
-//}
-//
-// void IndirectSettingsDialog::setSelectedAnalyser(QString const &analyser) {
-//  m_uiForm.iicInstrumentConfiguration->setAnalyser(analyser);
-//}
-//
-// void IndirectSettingsDialog::setSelectedReflection(QString const &reflection)
-// {
-//  m_uiForm.iicInstrumentConfiguration->setReflection(reflection);
-//}
-
 QString IndirectSettingsDialog::getSelectedFacility() const {
   return m_uiForm.cbFacility->currentText();
 }
 
-// QString IndirectSettingsDialog::getSelectedInstrument() const {
-//  return m_uiForm.iicInstrumentConfiguration->getInstrumentName();
-//}
-//
-// QString IndirectSettingsDialog::getSelectedAnalyser() const {
-//  return m_uiForm.iicInstrumentConfiguration->getAnalyserName();
-//}
-//
-// QString IndirectSettingsDialog::getSelectedReflection() const {
-//  return m_uiForm.iicInstrumentConfiguration->getReflectionName();
-//}
+void IndirectSettingsDialog::setFilterInputByNameChecked(bool check) {
+  m_uiForm.ckFilterDataNames->setChecked(check);
+}
 
-// void IndirectSettingsDialog::setDisabledInstruments(
-//    QStringList const &instrumentNames) {
-//  m_uiForm.iicInstrumentConfiguration->setDisabledInstruments(instrumentNames);
-//}
-//
-// void IndirectSettingsDialog::updateInstrumentConfiguration() {
-//  m_uiForm.iicInstrumentConfiguration->newInstrumentConfiguration();
-//}
+bool IndirectSettingsDialog::isFilterInputByNameChecked() const {
+  return m_uiForm.ckFilterDataNames->isChecked();
+}
 
 void IndirectSettingsDialog::setApplyingChanges(bool applyingChanges) {
   setApplyText(applyingChanges ? "Applying..." : "Apply");

@@ -25,6 +25,12 @@ using namespace MantidQt::CustomInterfaces;
 namespace {
 Mantid::Kernel::Logger g_log("Iqt");
 
+QStringList const SAMPLE_FILE_EXTENTIONS({"_red.nxs", "_sqw.nxs"});
+QStringList const SAMPLE_WORKSPACE_EXTENTIONS({"_red", "_sqw"});
+QStringList const RESOLUTION_FILE_EXTENTIONS({"_red.nxs", "_sqw.nxs",
+                                              "_res.nxs"});
+QStringList const RESOLUTION_WORKSPACE_EXTENTIONS({"_red", "_sqw", "_res"});
+
 MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) {
   return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
       workspaceName);
@@ -242,6 +248,7 @@ void Iqt::setup() {
           SLOT(setTiledPlotFirstPlot(int)));
   connect(m_uiForm.spTiledPlotLast, SIGNAL(valueChanged(int)), this,
           SLOT(setTiledPlotLastPlot(int)));
+
   connect(m_uiForm.spPreviewSpec, SIGNAL(valueChanged(int)), this,
           SLOT(setSelectedSpectrum(int)));
   connect(m_uiForm.spPreviewSpec, SIGNAL(valueChanged(int)), this,
@@ -541,6 +548,18 @@ void Iqt::loadSettings(const QSettings &settings) {
 }
 
 void Iqt::plotInput() { IndirectDataAnalysisTab::plotInput(m_uiForm.ppPlot); }
+
+void Iqt::filterDataBySuffices(bool filter) {
+  if (filter) {
+    m_uiForm.dsInput->setFBSuffixes(SAMPLE_FILE_EXTENTIONS);
+    m_uiForm.dsInput->setWSSuffixes(SAMPLE_WORKSPACE_EXTENTIONS);
+    m_uiForm.dsResolution->setFBSuffixes(RESOLUTION_FILE_EXTENTIONS);
+    m_uiForm.dsResolution->setWSSuffixes(RESOLUTION_WORKSPACE_EXTENTIONS);
+  } else {
+    m_uiForm.dsInput->clearSuffices();
+    m_uiForm.dsResolution->clearSuffices();
+  }
+}
 
 void Iqt::plotInput(const QString &wsname) {
   disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,

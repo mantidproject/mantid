@@ -50,8 +50,8 @@ IqtFit::IqtFit(QWidget *parent)
 }
 
 void IqtFit::setupFitTab() {
-  setSampleWSSuffices({"_iqt"});
-  setSampleFBSuffices({"_iqt.nxs"});
+  setSampleWSSuffices(getSampleWSSuffices());
+  setSampleFBSuffices(getSampleFBSuffices());
 
   // Create custom function groups
   auto &functionFactory = FunctionFactory::Instance();
@@ -77,6 +77,14 @@ void IqtFit::setupFitTab() {
   connect(this, SIGNAL(customBoolChanged(const QString &, bool)), this,
           SLOT(customBoolUpdated(const QString &, bool)));
 }
+
+QStringList IqtFit::getSampleWSSuffices() const { return {"_iqt"}; }
+
+QStringList IqtFit::getSampleFBSuffices() const { return {"_iqt.nxs"}; }
+
+QStringList IqtFit::getResolutionWSSuffices() const { return {}; }
+
+QStringList IqtFit::getResolutionFBSuffices() const { return {}; }
 
 void IqtFit::fitFunctionChanged() {
   if (numberOfCustomFunctions("StretchExp") > 0) {

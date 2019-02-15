@@ -103,6 +103,7 @@ public:
   void setAlgorithmProperty(const QString &name);
   QStringList getFileExtensions() const;
   void setFileExtensions(const QStringList &extensions);
+  void clearFileExtensions();
   bool extsAsSingleOption() const;
   void extsAsSingleOption(bool value);
   LiveButtonOpts liveButtonState() const;

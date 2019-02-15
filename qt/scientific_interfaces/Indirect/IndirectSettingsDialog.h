@@ -20,24 +20,15 @@ class IndirectSettingsDialog : public QDialog {
   Q_OBJECT
 
 public:
-  explicit IndirectSettingsDialog(
-      QWidget *parent); //, QString const &settingGroup);
+  explicit IndirectSettingsDialog(QWidget *parent);
 
-  void loadProperties();
-  void saveProperties();
-
-  // void updateInstrumentConfiguration();
+  void loadSettings();
+  void saveSettings();
 
   void setSelectedFacility(std::string const &facility);
-  // void setDisabledInstruments(QStringList const &instrumentNames);
-
-  // QString getSelectedInstrument() const;
-  // QString getSelectedAnalyser() const;
-  // QString getSelectedReflection() const;
 
 signals:
-  void instrumentSetupChanged(QString const &, QString const &,
-                              QString const &);
+  void updateSettings();
 
 private slots:
   void okClicked();
@@ -47,11 +38,10 @@ private slots:
 private:
   int findFacilityIndex(std::string const &text);
 
-  // void setSelectedInstrument(QString const &instrument);
-  // void setSelectedAnalyser(QString const &analyser);
-  // void setSelectedReflection(QString const &reflection);
-
   QString getSelectedFacility() const;
+
+  void setFilterInputByNameChecked(bool check);
+  bool isFilterInputByNameChecked() const;
 
   void setApplyingChanges(bool applyingChanges);
   void setApplyText(QString const &text);
@@ -59,7 +49,6 @@ private:
   void setOkEnabled(bool enable);
   void setCancelEnabled(bool enable);
 
-  QString m_settingsGroup;
   Ui::IndirectSettingsDialog m_uiForm;
 };
 

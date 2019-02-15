@@ -53,13 +53,21 @@ void MSDFit::setupFitTab() {
   addComboBoxFunctionGroup("Peters", {peters});
   addComboBoxFunctionGroup("Yi", {yi});
 
-  setSampleWSSuffices({"_eq"});
-  setSampleFBSuffices({"_eq.nxs"});
+  setSampleWSSuffices(getSampleWSSuffices());
+  setSampleFBSuffices(getSampleFBSuffices());
 
   connect(m_uiForm->pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(this, SIGNAL(functionChanged()), this,
           SLOT(updateModelFitTypeString()));
 }
+
+QStringList MSDFit::getSampleWSSuffices() const { return {"_eq"}; }
+
+QStringList MSDFit::getSampleFBSuffices() const { return {"_eq.nxs"}; }
+
+QStringList MSDFit::getResolutionWSSuffices() const { return {}; }
+
+QStringList MSDFit::getResolutionFBSuffices() const { return {}; }
 
 void MSDFit::updateModelFitTypeString() {
   m_msdFittingModel->setFitType(selectedFitType().toStdString());

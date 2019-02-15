@@ -78,7 +78,10 @@ IndirectDataReduction::~IndirectDataReduction() {
   saveSettings();
 }
 
-void IndirectDataReduction::settingsClicked() { m_settingsDialog->show(); }
+void IndirectDataReduction::settingsClicked() {
+  m_settingsDialog->loadSettings();
+  m_settingsDialog->show();
+}
 
 /**
  * On user clicking the "help" button on the interface, directs their request to
@@ -133,6 +136,9 @@ void IndirectDataReduction::initLayout() {
           this,
           SLOT(instrumentSetupChanged(const QString &, const QString &,
                                       const QString &)));
+
+  connect(m_settingsDialog.get(), SIGNAL(updateSettings()), this,
+          SLOT(updateSettings()));
 
   // Update the instrument configuration across the UI
   m_uiForm.iicInstrumentConfiguration->newInstrumentConfiguration();
@@ -197,10 +203,11 @@ IndirectDataReduction::loadInstrumentIfNotExist(
           "instrumentDefinition.directory");
 
   try {
+    auto const dateRange =
+        instrumentName == "BASIS" ? "_20140101-" : ""; /// Needs changing
     std::string parameterFilename =
-        idfDirectory + instrumentName + "_Definition.xml";
-    IAlgorithm_sptr loadAlg =
-        AlgorithmManager::Instance().create("LoadEmptyInstrument");
+        idfDirectory + instrumentName + "_Definition" + dateRange + ".xml";
+    auto loadAlg = AlgorithmManager::Instance().create("LoadEmptyInstrument");
     loadAlg->setChild(true);
     loadAlg->setLogging(false);
     loadAlg->initialize();
@@ -375,6 +382,18 @@ void IndirectDataReduction::handleConfigChange(
     filterUiForFacility(facility);
     m_uiForm.iicInstrumentConfiguration->setFacility(facility);
   }
+}
+
+/**
+ * Updates the settings decided on the Settings Dialog
+ */
+void IndirectDataReduction::updateSettings() {
+  QSettings settings;
+  settings.beginGroup("IndirectInterfaceSettings");
+
+  auto const filter = settings.value("filter-input-by-name", true).toBool();
+
+  settings.endGroup();
 }
 
 /**

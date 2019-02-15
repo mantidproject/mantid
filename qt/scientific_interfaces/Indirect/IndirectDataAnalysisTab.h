@@ -61,6 +61,9 @@ public:
   /// Loads the tab's settings.
   void loadTabSettings(const QSettings &settings);
 
+  /// Prevent loading of data with incorrect naming
+  void filterInputData(bool filter);
+
   /// Sets the active workspace in the selected tab
   void setActiveWorkspace();
 
@@ -150,6 +153,7 @@ private:
   bool validate() override = 0;
   /// Overidden by child class.
   virtual void loadSettings(const QSettings &settings) = 0;
+  virtual void filterDataBySuffices(bool filter) = 0;
   virtual void setBrowserWorkspace() = 0;
 
   /// A pointer to the parent (friend) IndirectDataAnalysis object.

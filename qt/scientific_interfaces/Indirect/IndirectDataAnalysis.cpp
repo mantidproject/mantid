@@ -33,7 +33,11 @@ DECLARE_SUBWINDOW(IndirectDataAnalysis)
  * @param parent :: the parent QWidget.
  */
 IndirectDataAnalysis::IndirectDataAnalysis(QWidget *parent)
-    : UserSubWindow(parent), m_valInt(nullptr), m_valDbl(nullptr),
+    : UserSubWindow(parent),
+      m_settingsDialog(
+          Mantid::Kernel::make_unique<IndirectSettingsDialog>(this)),
+      m_settingsGroup("CustomInterfaces/IndirectAnalysis/"), m_valInt(nullptr),
+      m_valDbl(nullptr),
       m_changeObserver(*this, &IndirectDataAnalysis::handleDirectoryChange) {
   m_uiForm.setupUi(this);
 
@@ -90,9 +94,14 @@ void IndirectDataAnalysis::initLayout() {
           SLOT(tabChanged(int)));
   connect(m_uiForm.pbPythonExport, SIGNAL(clicked()), this,
           SLOT(exportTabPython()));
+  connect(m_uiForm.pbSettings, SIGNAL(clicked()), this,
+          SLOT(settingsClicked()));
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));
   connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this,
           SLOT(openDirectoryDialog()));
+
+  connect(m_settingsDialog.get(), SIGNAL(updateSettings()), this,
+          SLOT(updateSettings()));
 }
 
 /**
@@ -108,18 +117,15 @@ void IndirectDataAnalysis::initLocalPython() {
  * Load the settings saved for this interface.
  */
 void IndirectDataAnalysis::loadSettings() {
+  auto const saveDir = Mantid::Kernel::ConfigService::Instance().getString(
+      "defaultsave.directory");
+
   QSettings settings;
-  QString settingsGroup = "CustomInterfaces/IndirectAnalysis/";
-  QString saveDir = QString::fromStdString(
-      Mantid::Kernel::ConfigService::Instance().getString(
-          "defaultsave.directory"));
+  settings.beginGroup(m_settingsGroup + "ProcessedFiles");
 
-  settings.beginGroup(settingsGroup + "ProcessedFiles");
-  settings.setValue("last_directory", saveDir);
+  settings.setValue("last_directory", QString::fromStdString(saveDir));
 
-  // Load each tab's settings.
-  auto tab = m_tabs.begin();
-  for (; tab != m_tabs.end(); ++tab)
+  for (auto tab = m_tabs.begin(); tab != m_tabs.end(); ++tab)
     tab->second->loadTabSettings(settings);
 
   settings.endGroup();
@@ -142,6 +148,14 @@ void IndirectDataAnalysis::openDirectoryDialog() {
 }
 
 /**
+ * Opens the settings dialog.
+ */
+void IndirectDataAnalysis::settingsClicked() {
+  m_settingsDialog->loadSettings();
+  m_settingsDialog->show();
+}
+
+/**
  * Opens the Mantid Wiki web page of the current tab.
  */
 void IndirectDataAnalysis::help() {
@@ -155,6 +169,21 @@ void IndirectDataAnalysis::help() {
 void IndirectDataAnalysis::exportTabPython() {
   unsigned int currentTab = m_uiForm.twIDATabs->currentIndex();
   m_tabs[currentTab]->exportPythonScript();
+}
+
+/**
+ * Updates the settings decided on the Settings Dialog
+ */
+void IndirectDataAnalysis::updateSettings() {
+  QSettings settings;
+  settings.beginGroup("IndirectInterfaceSettings");
+
+  auto const filter = settings.value("filter-input-by-name", true).toBool();
+
+  settings.endGroup();
+
+  for (auto tab = m_tabs.begin(); tab != m_tabs.end(); ++tab)
+    tab->second->filterInputData(filter);
 }
 
 /**

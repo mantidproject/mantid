@@ -263,6 +263,11 @@ void MWRunFiles::setFileExtensions(const QStringList &extensions) {
 }
 
 /**
+ * Clears the currently allowed file extentions
+ */
+void MWRunFiles::clearFileExtensions() { m_fileExtensions.clear(); }
+
+/**
  * Returns whether the file dialog should display the exts as a single list or
  * as multiple items
  * @return boolean

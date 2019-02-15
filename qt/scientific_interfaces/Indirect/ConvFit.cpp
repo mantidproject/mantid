@@ -55,10 +55,10 @@ void ConvFit::setupFitTab() {
   setDefaultPeakType("Lorentzian");
   setConvolveMembers(true);
 
-  setSampleWSSuffices({"_red", "_sqw"});
-  setSampleFBSuffices({"_red.nxs", "_sqw.nxs", "_sqw.dave"});
-  setResolutionWSSuffices({"_res", "_red", "_sqw"});
-  setResolutionFBSuffices({"_res.nxs", "_red.nxs", "_sqw.nxs", "_sqw.dave"});
+  setSampleWSSuffices(getSampleWSSuffices());
+  setSampleFBSuffices(getSampleFBSuffices());
+  setResolutionWSSuffices(getResolutionWSSuffices());
+  setResolutionFBSuffices(getResolutionFBSuffices());
 
   // Initialise fitTypeStrings
   m_fitStrings["None"] = "";
@@ -117,6 +117,20 @@ void ConvFit::setupFitTab() {
   // Post Plot and Save
   connect(m_uiForm->pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(this, SIGNAL(functionChanged()), this, SLOT(fitFunctionChanged()));
+}
+
+QStringList ConvFit::getSampleWSSuffices() const { return {"_red", "_sqw"}; }
+
+QStringList ConvFit::getSampleFBSuffices() const {
+  return {"_red.nxs", "_sqw.nxs", "_sqw.dave"};
+}
+
+QStringList ConvFit::getResolutionWSSuffices() const {
+  return {"_res", "_red", "_sqw"};
+}
+
+QStringList ConvFit::getResolutionFBSuffices() const {
+  return {"_res.nxs", "_red.nxs", "_sqw.nxs", "_sqw.dave"};
 }
 
 void ConvFit::setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm) {

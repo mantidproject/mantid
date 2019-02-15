@@ -33,6 +33,11 @@ class DLLExport IqtFit : public IndirectFitAnalysisTab {
 public:
   IqtFit(QWidget *parent = nullptr);
 
+  QStringList getSampleWSSuffices() const override;
+  QStringList getSampleFBSuffices() const override;
+  QStringList getResolutionWSSuffices() const override;
+  QStringList getResolutionFBSuffices() const override;
+
 protected slots:
   void setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm) override;
   void fitFunctionChanged();

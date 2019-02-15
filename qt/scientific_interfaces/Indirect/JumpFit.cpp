@@ -60,8 +60,8 @@ void JumpFit::setupFitTab() {
   m_uiForm->svSpectrumView->hideSpectrumSelector();
   m_uiForm->svSpectrumView->hideMaskSpectrumSelector();
 
-  setSampleWSSuffices({"_Result"});
-  setSampleFBSuffices({"_Result.nxs"});
+  setSampleWSSuffices(getSampleWSSuffices());
+  setSampleFBSuffices(getSampleFBSuffices());
 
   addFunctions(getWidthFunctions());
   addFunctions(getEISFFunctions());
@@ -77,6 +77,14 @@ void JumpFit::setupFitTab() {
   connect(this, SIGNAL(updateAvailableFitTypes()), this,
           SLOT(updateAvailableFitTypes()));
 }
+
+QStringList JumpFit::getSampleWSSuffices() const { return {"_Result"}; }
+
+QStringList JumpFit::getSampleFBSuffices() const { return {"_Result.nxs"}; }
+
+QStringList JumpFit::getResolutionWSSuffices() const { return {}; }
+
+QStringList JumpFit::getResolutionFBSuffices() const { return {}; }
 
 void JumpFit::updateAvailableFitTypes() {
   auto const parameter = m_uiForm->cbParameterType->currentText().toStdString();

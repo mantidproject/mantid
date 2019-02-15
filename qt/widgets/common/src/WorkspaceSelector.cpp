@@ -140,6 +140,8 @@ void WorkspaceSelector::setUpperBinLimit(int numberOfBins) {
   m_binLimits.second = numberOfBins;
 }
 
+void WorkspaceSelector::clearSuffices() { m_suffix.clear(); }
+
 QString WorkspaceSelector::getValidatingAlgorithm() const { return m_algName; }
 
 void WorkspaceSelector::setValidatingAlgorithm(const QString &algName) {

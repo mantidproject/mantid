@@ -24,6 +24,7 @@ private:
   void setup() override;
   bool validate() override;
   void loadSettings(const QSettings &settings) override;
+  void filterDataBySuffices(bool filter) override;
   void setBrowserWorkspace() override{};
 
   bool isErrorsEnabled();

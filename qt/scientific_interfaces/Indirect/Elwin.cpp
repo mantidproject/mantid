@@ -23,6 +23,8 @@ using namespace MantidQt::API;
 namespace {
 Mantid::Kernel::Logger g_log("Elwin");
 
+QStringList const INPUT_FILE_EXTENTIONS({"_red.nxs", "_sqw.nxs"});
+
 MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) {
   return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
       workspaceName);
@@ -218,6 +220,8 @@ void Elwin::setup() {
 
   m_dblManager->setValue(m_properties["BackgroundStart"], -0.24);
   m_dblManager->setValue(m_properties["BackgroundEnd"], -0.22);
+
+  filterDataBySuffices(true);
 }
 
 void Elwin::run() {
@@ -441,6 +445,13 @@ bool Elwin::validate() {
 
 void Elwin::loadSettings(const QSettings &settings) {
   m_uiForm.dsInputFiles->readSettings(settings.group());
+}
+
+void Elwin::filterDataBySuffices(bool filter) {
+  if (filter)
+    m_uiForm.dsInputFiles->setFileExtensions(INPUT_FILE_EXTENTIONS);
+  else
+    m_uiForm.dsInputFiles->clearFileExtensions();
 }
 
 void Elwin::setDefaultResolution(Mantid::API::MatrixWorkspace_const_sptr ws,
