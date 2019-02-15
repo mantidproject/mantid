@@ -516,6 +516,10 @@ std::vector<double> MeshObject::getVertices() const {
   return MeshObjectCommon::getVertices(m_vertices);
 }
 
+detail::ShapeInfo::GeometryShape MeshObject::shape() const {
+  return detail::ShapeInfo::GeometryShape::NOSHAPE;
+}
+
 /**
  * get info on standard shapes (none for Mesh Object)
  */

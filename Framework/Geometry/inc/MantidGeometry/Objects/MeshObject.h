@@ -123,6 +123,7 @@ public:
   /// Set Geometry Handler
   void setGeometryHandler(boost::shared_ptr<GeometryHandler> h);
 
+  detail::ShapeInfo::GeometryShape shape() const override;
   void GetObjectGeom(detail::ShapeInfo::GeometryShape &type,
                      std::vector<Kernel::V3D> &vectors, double &myradius,
                      double &myheight) const override;
