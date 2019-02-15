@@ -232,10 +232,10 @@ class TransformToIqt(PythonAlgorithm):
         """
         Run TransformToIqt.
         """
-        from IndirectCommon import CheckHistZero, CheckHistSame, CheckAnalysers
+        from IndirectCommon import CheckHistZero, CheckHistSame, CheckAnalysersOrEFixed
 
         try:
-            CheckAnalysers(self._sample, self._resolution)
+            CheckAnalysersOrEFixed(self._sample, self._resolution)
         except ValueError:
             # A genuine error the shows that the two runs are incompatible
             raise

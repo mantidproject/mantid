@@ -183,7 +183,7 @@ class BayesQuasi(PythonAlgorithm):
         erange = [self._e_min, self._e_max]
 
         setup_prog.report('Checking Analysers')
-        CheckAnalysers(self._samWS, self._resWS)
+        CheckAnalysersOrEFixed(self._samWS, self._resWS)
         setup_prog.report('Obtaining EFixed, theta and Q')
         efix = getEfixed(self._samWS)
         theta, Q = GetThetaQ(self._samWS)
