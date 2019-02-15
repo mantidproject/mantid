@@ -57,16 +57,11 @@ QListView::item {
          <bool>true</bool>
         </property>
         <property name="currentRow">
-         <number>0</number>
+         <number>-1</number>
         </property>
         <item>
          <property name="text">
           <string>General</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Plots</string>
          </property>
         </item>
        </widget>

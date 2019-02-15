@@ -15,14 +15,6 @@ from qtpy.QtWidgets import QMessageBox
 from mantidqt.utils.qt import load_ui
 
 form, base = load_ui(__file__, "ui/main.ui")
-plots_form, plots_base = load_ui(__file__, "ui/section_plots.ui")
-
-
-class PlotsSettingsView(plots_base, plots_form):
-    def __init__(self, parent=None):
-        super(PlotsSettingsView, self).__init__(parent)
-        self.setupUi(self)
-        self.setVisible(False)
 
 
 class SettingsView(base, form):
@@ -34,8 +26,6 @@ class SettingsView(base, form):
         self.presenter = presenter
 
         self.sections.currentRowChanged.connect(self.presenter.action_current_row_changed)
-
-
 
     def closeEvent(self, event):
         self.deleteLater()

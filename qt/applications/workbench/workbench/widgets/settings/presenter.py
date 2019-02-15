@@ -13,7 +13,7 @@ from qtpy.QtCore import Qt
 
 from mantid import ConfigService
 from workbench.widgets.settings.general.presenter import GeneralSettings
-from workbench.widgets.settings.view import PlotsSettingsView, SettingsView
+from workbench.widgets.settings.view import SettingsView
 
 
 class SettingsPresenter(object):
@@ -29,7 +29,6 @@ class SettingsPresenter(object):
 
         self.view.save_settings_button.clicked.connect(self.action_save_settings_button)
 
-        self.plots_settings_view = PlotsSettingsView(self.view)
         self.ask_before_close = False
 
     def show(self, modal=True):
@@ -44,16 +43,15 @@ class SettingsPresenter(object):
 
     def action_current_row_changed(self, new_pos):
         self.current.hide()
-        if 0 == new_pos:
-            new_view = self.general_settings.view
-        else:  # 1 == new_pos
-            new_view = self.plots_settings_view
+        # if 0 == new_pos:
+        new_view = self.general_settings.view
+        # else:  # 1 == new_pos
+        #     new_view = self.plots_settings_view
         # elif 2 == new_pos:
         #     new_view = self.view.plots_settings_view
         #     pass
 
         if self.current != new_view:
-            print("Changing widget.")
             self.view.container.replaceWidget(self.current, new_view)
             self.current = new_view
 
