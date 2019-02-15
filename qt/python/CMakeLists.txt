@@ -124,7 +124,9 @@ endif ()
   set ( PYTHON_WIDGET_QT5_ONLY_TESTS
     mantidqt/widgets/instrumentview/test/test_instrumentview_io.py
     mantidqt/widgets/instrumentview/test/test_instrumentview_view.py
-  )
+
+    mantidqt/widgets/samplelogs/test/test_samplelogs_view.py
+ )
 
   # Tests
   set ( PYUNITTEST_RUN_SERIAL ON )
