@@ -37,6 +37,10 @@ MANTID_GEOMETRY_DLL Kernel::V3D
 inSphere(const detail::ShapeInfo &shapeInfo,
          Kernel::PseudoRandomNumberGenerator &rng);
 
+MANTID_GEOMETRY_DLL boost::optional<Kernel::V3D>
+inGenericShape(const IObject &object, Kernel::PseudoRandomNumberGenerator &rng,
+               size_t maxAttempts);
+
 template <Kernel::V3D (*T)(const detail::ShapeInfo &,
                            Kernel::PseudoRandomNumberGenerator &)>
 MANTID_GEOMETRY_DLL boost::optional<Kernel::V3D>
@@ -45,9 +49,8 @@ bounded(const detail::ShapeInfo &shapeInfo,
         size_t maxAttempts);
 
 MANTID_GEOMETRY_DLL boost::optional<Kernel::V3D>
-boundedInUnknownShape(const IObject &object,
-                      Kernel::PseudoRandomNumberGenerator &rng,
-                      const BoundingBox &box, size_t maxAttempts);
+bounded(const IObject &object, Kernel::PseudoRandomNumberGenerator &rng,
+        const BoundingBox &box, size_t maxAttempts);
 
 /**
  * Return a random point in a known shape restricted by a bounding box.

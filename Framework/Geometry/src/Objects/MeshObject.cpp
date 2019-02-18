@@ -392,7 +392,7 @@ MeshObject::generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
                                   const size_t maxAttempts) const {
 
   const auto point =
-      RandomPoint::boundedInUnknownShape(*this, rng, activeRegion, maxAttempts);
+      RandomPoint::bounded(*this, rng, activeRegion, maxAttempts);
   if (!point) {
     throw std::runtime_error("Object::generatePointInObject() - Unable to "
                              "generate point in object after " +

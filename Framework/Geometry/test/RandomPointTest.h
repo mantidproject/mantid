@@ -9,10 +9,12 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/RandomPoint.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MockRNG.h"
 
+using namespace Mantid::Geometry;
 using namespace Mantid::Geometry::RandomPoint;
 using namespace Mantid::Kernel;
 
@@ -21,8 +23,7 @@ public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
   static RandomPointTest *createSuite() { return new RandomPointTest(); }
-  static void destroySuite( RandomPointTest *suite ) { delete suite; }
-
+  static void destroySuite(RandomPointTest *suite) { delete suite; }
 
   void test_inCuboid() {
     using namespace ::testing;
@@ -41,10 +42,9 @@ public:
         ComponentCreationHelper::createCuboid(xLength, yLength, zLength);
     const auto point = inCuboid(cuboid->shapeInfo(), rng);
     constexpr double tolerance{1e-10};
-    TS_ASSERT_DELTA(xLength - randX * 2. * xLength, point.X(), tolerance);
-    TS_ASSERT_DELTA(-yLength + randY * 2. * yLength, point.Y(), tolerance);
-    TS_ASSERT_DELTA(-zLength + randZ * 2. * zLength, point.Z(), tolerance);
-
+    TS_ASSERT_DELTA(point.X(), xLength - randX * 2. * xLength, tolerance);
+    TS_ASSERT_DELTA(point.Y(), -yLength + randY * 2. * yLength, tolerance);
+    TS_ASSERT_DELTA(point.Z(), -zLength + randZ * 2. * zLength, tolerance);
   }
 
   void test_inCylinder() {
@@ -74,9 +74,9 @@ public:
     const double polarAngle{2. * M_PI * randT};
     const double radialLength{radius * std::sqrt(randR)};
     const double axisLength{height * randZ};
-    TS_ASSERT_DELTA(radialLength * std::cos(polarAngle), point.X(), tolerance);
-    TS_ASSERT_DELTA(radialLength * std::sin(polarAngle), point.Y(), tolerance);
-    TS_ASSERT_DELTA(axisLength, point.Z(), tolerance);
+    TS_ASSERT_DELTA(point.X(), radialLength * std::cos(polarAngle), tolerance);
+    TS_ASSERT_DELTA(point.Y(), radialLength * std::sin(polarAngle), tolerance);
+    TS_ASSERT_DELTA(point.Z(), axisLength, tolerance);
   }
 
   void test_inSphere() {
@@ -97,11 +97,109 @@ public:
     const double azimuthalAngle{2. * M_PI * randT};
     const double polarAngle{std::acos(2. * randF - 1.)};
     const double r{radius * randR};
-    TS_ASSERT_DELTA(r * std::cos(azimuthalAngle) * std::sin(polarAngle),
-                    point.X(), tolerance);
-    TS_ASSERT_DELTA(r * std::sin(azimuthalAngle) * std::sin(polarAngle),
-                    point.Y(), tolerance);
-    TS_ASSERT_DELTA(r * std::cos(polarAngle), point.Z(), tolerance);
+    TS_ASSERT_DELTA(point.X(),
+                    r * std::cos(azimuthalAngle) * std::sin(polarAngle),
+                    tolerance);
+    TS_ASSERT_DELTA(point.Y(),
+                    r * std::sin(azimuthalAngle) * std::sin(polarAngle),
+                    tolerance);
+    TS_ASSERT_DELTA(point.Z(), r * std::cos(polarAngle), tolerance);
+  }
+
+  void test_inGenericShape_max_attempts() {
+    using namespace ::testing;
+    MockRNG rng;
+    Sequence rand;
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(0.1));
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(0.2));
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(0.3));
+    // Random sequence set up so as to give point inside hole
+    auto shell = ComponentCreationHelper::createHollowShell(0.5, 1.0);
+    constexpr size_t maxAttempts{1};
+    const auto point = inGenericShape(*shell, rng, maxAttempts);
+    TS_ASSERT(!point)
+  }
+
+  void test_bounded_in_known_shape() {
+    using namespace ::testing;
+    MockRNG rng;
+    Sequence rand;
+    constexpr double randX{0.51};
+    constexpr double randY{0.49};
+    constexpr double randZ{0.52};
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(randZ));
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(randX));
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(randY));
+    constexpr double xLength{1.};
+    constexpr double yLength{1.};
+    constexpr double zLength{1.};
+    auto cuboid =
+        ComponentCreationHelper::createCuboid(xLength, yLength, zLength);
+    const BoundingBox box(0.1, 0.1, 0.1, -0.1, -0.1, -0.1);
+    constexpr size_t maxAttempts{1};
+    const auto point =
+        bounded<inCuboid>(cuboid->shapeInfo(), rng, box, maxAttempts);
+    TS_ASSERT(point)
+    constexpr double tolerance{1e-10};
+    TS_ASSERT_DELTA(point->X(), xLength - randX * 2. * xLength, tolerance);
+    TS_ASSERT_DELTA(point->Y(), -yLength + randY * 2. * yLength, tolerance);
+    TS_ASSERT_DELTA(point->Z(), -zLength + randZ * 2. * zLength, tolerance);
+  }
+
+  void test_bounded_in_known_shape_max_attemps() {
+    using namespace ::testing;
+    MockRNG rng;
+    Sequence rand;
+    constexpr double randX{0.99};
+    constexpr double randY{0.99};
+    constexpr double randZ{0.99};
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(randZ));
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(randX));
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(randY));
+    constexpr double xLength{1.};
+    constexpr double yLength{1.};
+    constexpr double zLength{1.};
+    auto cuboid =
+        ComponentCreationHelper::createCuboid(xLength, yLength, zLength);
+    const BoundingBox box(0.1, 0.1, 0.1, -0.1, -0.1, -0.1);
+    constexpr size_t maxAttempts{1};
+    const auto point =
+        bounded<inCuboid>(cuboid->shapeInfo(), rng, box, maxAttempts);
+    TS_ASSERT(!point)
+  }
+
+  void test_bounded_in_generic_shape() {
+    using namespace ::testing;
+    MockRNG rng;
+    Sequence rand;
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(0.5));
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(0.5));
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(0.5));
+    // Random sequence set up so as to give point inside hole
+    auto shell = ComponentCreationHelper::createHollowShell(0.5, 1.0);
+    const BoundingBox box(1.0, 0.05, 0.05, 0.9, -0.05, -0.05);
+    constexpr size_t maxAttempts{1};
+    const auto point = bounded(*shell, rng, box, maxAttempts);
+    TS_ASSERT(point)
+    constexpr double tolerance{1e-12};
+    TS_ASSERT_DELTA(point->X(), 0.95, tolerance)
+    TS_ASSERT_DELTA(point->Y(), 0., tolerance)
+    TS_ASSERT_DELTA(point->Z(), 0., tolerance)
+  }
+
+  void test_bounded_in_generic_shape_max_attempts() {
+    using namespace ::testing;
+    MockRNG rng;
+    Sequence rand;
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(0.5));
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(0.5));
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(0.5));
+    // Random sequence set up so as to give point inside hole
+    auto shell = ComponentCreationHelper::createHollowShell(0.5, 1.0);
+    const BoundingBox box(0.1, 0.1, 0.1, -0.1, -0.1, -0.1);
+    constexpr size_t maxAttempts{1};
+    const auto point = bounded(*shell, rng, box, maxAttempts);
+    TS_ASSERT(!point)
   }
 };
 
