@@ -87,7 +87,7 @@ Kernel::V3D inSphere(const detail::ShapeInfo &shapeInfo,
 
 /**
  * Return a random point in a generic shape.
- * @param shapeInfo sphere's shape info
+ * @param object an IObject within which the point is generated
  * @param rng a random number generator
  * @param maxAttempts maximum number of random numbers to use before giving up
  * @return a point

@@ -59,7 +59,7 @@ bounded(const IObject &object, Kernel::PseudoRandomNumberGenerator &rng,
  * functions as the template argument.
  * @param shapeInfo a shape info
  * @param rng a random number generator
- * @param activeRegion a restricting box
+ * @param box a restricting box
  * @param maxAttempts number of attempts
  * @return a point or none if maxAttempts was exceeded
  */
