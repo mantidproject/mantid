@@ -100,27 +100,25 @@ class GeneralSettingsTest(GuiTest):
 
         presenter.action_prompt_save_on_close(True)
 
-        mock_conf.set.assert_called_once_with(GeneralSettings.PROJECT, GeneralSettings.PROMPT_SAVE_ON_CLOSE, True)
+        mock_conf.set.assert_called_once_with(GeneralSettings.PROMPT_SAVE_ON_CLOSE, True)
         mock_conf.set.reset_mock()
 
         presenter.action_prompt_save_on_close(False)
 
-        mock_conf.set.assert_called_once_with(GeneralSettings.PROJECT, GeneralSettings.PROMPT_SAVE_ON_CLOSE, False)
+        mock_conf.set.assert_called_once_with(GeneralSettings.PROMPT_SAVE_ON_CLOSE, False)
 
     @patch("workbench.widgets.settings.general.presenter.CONF")
     def test_action_prompt_save_editor_modified(self, mock_CONF):
         presenter = GeneralSettings(None)
 
-        presenter.action_prompt_save_on_close(True)
+        presenter.action_prompt_save_editor_modified(True)
 
-        mock_CONF.set.assert_called_once_with(GeneralSettings.PROJECT,
-                                              GeneralSettings.PROMPT_SAVE_EDITOR_MODIFIED, True)
+        mock_CONF.set.assert_called_once_with(GeneralSettings.PROMPT_SAVE_EDITOR_MODIFIED, True)
         mock_CONF.set.reset_mock()
 
-        presenter.action_prompt_save_on_close(False)
+        presenter.action_prompt_save_editor_modified(False)
 
-        mock_CONF.set.assert_called_once_with(GeneralSettings.PROJECT,
-                                              GeneralSettings.PROMPT_SAVE_EDITOR_MODIFIED, False)
+        mock_CONF.set.assert_called_once_with(GeneralSettings.PROMPT_SAVE_EDITOR_MODIFIED, False)
 
     @patch("workbench.widgets.settings.general.presenter.CONF")
     @patch("workbench.widgets.settings.general.presenter.ConfigService", new_callable=MockConfigService)
@@ -129,9 +127,9 @@ class GeneralSettingsTest(GuiTest):
         GeneralSettings(None)
 
         # calls().__int__() are the calls to int() on the retrieved value from ConfigService.getString
-        mock_CONF.get.assert_has_calls([call(GeneralSettings.PROJECT, GeneralSettings.PROMPT_SAVE_ON_CLOSE),
+        mock_CONF.get.assert_has_calls([call(GeneralSettings.PROMPT_SAVE_ON_CLOSE),
                                         call().__int__(),
-                                        call(GeneralSettings.PROJECT, GeneralSettings.PROMPT_SAVE_EDITOR_MODIFIED),
+                                        call(GeneralSettings.PROMPT_SAVE_EDITOR_MODIFIED),
                                         call().__int__()])
 
         mock_ConfigService.getString.assert_has_calls([call(GeneralSettings.PR_RECOVERY_ENABLED),
@@ -159,7 +157,7 @@ class GeneralSettingsTest(GuiTest):
         mock_ConfigService.setString.reset_mock()
 
         time = "6000"
-        presenter.action_total_number_checkpoints(time)
+        presenter.action_time_between_recovery(time)
         mock_ConfigService.setString.assert_called_once_with(GeneralSettings.PR_TIME_BETWEEN_RECOVERY, time)
 
     @patch("workbench.widgets.settings.general.presenter.ConfigService", new_callable=MockConfigService)

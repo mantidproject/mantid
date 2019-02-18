@@ -20,9 +20,8 @@ class GeneralSettings(object):
     PR_NUMBER_OF_CHECKPOINTS = "projectRecovery.numberOfCheckpoints"
     PR_TIME_BETWEEN_RECOVERY = "projectRecovery.secondsBetween"
     PR_RECOVERY_ENABLED = "projectRecovery.enabled"
-    PROMPT_SAVE_EDITOR_MODIFIED = 'prompt_save_editor_modified'
-    PROMPT_SAVE_ON_CLOSE = 'prompt_save_on_close'
-    PROJECT = 'project'
+    PROMPT_SAVE_EDITOR_MODIFIED = 'project/prompt_save_editor_modified'
+    PROMPT_SAVE_ON_CLOSE = 'project/prompt_save_on_close'
 
     def __init__(self, parent, view=None):
         self.view = view if view else GeneralSettingsView(parent, self)
@@ -67,14 +66,14 @@ class GeneralSettings(object):
         self.view.prompt_save_editor_modified.stateChanged.connect(self.action_prompt_save_editor_modified)
 
     def action_prompt_save_on_close(self, state):
-        CONF.set(self.PROJECT, self.PROMPT_SAVE_ON_CLOSE, bool(state))
+        CONF.set(self.PROMPT_SAVE_ON_CLOSE, bool(state))
 
     def action_prompt_save_editor_modified(self, state):
-        CONF.set(self.PROJECT, self.PROMPT_SAVE_EDITOR_MODIFIED, bool(state))
+        CONF.set(self.PROMPT_SAVE_EDITOR_MODIFIED, bool(state))
 
     def load_current_setting_values(self):
-        self.view.prompt_save_on_close.setChecked(CONF.get(self.PROJECT, self.PROMPT_SAVE_ON_CLOSE))
-        self.view.prompt_save_editor_modified.setChecked(CONF.get(self.PROJECT, self.PROMPT_SAVE_EDITOR_MODIFIED))
+        self.view.prompt_save_on_close.setChecked(CONF.get(self.PROMPT_SAVE_ON_CLOSE))
+        self.view.prompt_save_editor_modified.setChecked(CONF.get(self.PROMPT_SAVE_EDITOR_MODIFIED))
 
         # compare lower-case, because MantidPlot will save it as lower case,
         # but Python will have the bool's first letter capitalised

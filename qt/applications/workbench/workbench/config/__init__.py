@@ -36,6 +36,10 @@ DEFAULTS = {
     'MainWindow': {
         'size': (1260, 740),
         'position': (10, 10),
+    },
+    'project': {
+        'prompt_save_on_close': True,
+        'prompt_save_editor_modified': True
     }
 }
 
