@@ -30,6 +30,7 @@
 
 #include "MantidGeometry/MDGeometry/MDHistoDimensionBuilder.h"
 
+#include "MantidMDAlgorithms/ConvToMDEventsWSIndexing.h"
 #include "MantidMDAlgorithms/ConvToMDSelector.h"
 #include "MantidMDAlgorithms/MDTransfQ3D.h"
 #include "MantidMDAlgorithms/MDWSTransform.h"
@@ -118,6 +119,15 @@ void ConvertToMD::init() {
                   "will create the specified file in addition to an output "
                   "workspace. The workspace will load data from the file on "
                   "demand in order to reduce memory use.");
+
+  std::vector<std::string> converterType{"Default", "Indexed"};
+
+  auto loadTypeValidator =
+      boost::make_shared<StringListValidator>(converterType);
+  declareProperty("ConverterType", "Default", loadTypeValidator,
+                  "[Default, Indexed], indexed is the experimental type that "
+                  "can speedup the conversion process"
+                  "for the big files using the indexing.");
 }
 //----------------------------------------------------------------------------------------------
 
@@ -128,11 +138,32 @@ int ConvertToMD::version() const { return 1; }
 std::map<std::string, std::string> ConvertToMD::validateInputs() {
   std::map<std::string, std::string> result;
 
+  const std::string treeBuilderType = this->getProperty("ConverterType");
+  const bool topLevelSplittingChecked = this->getProperty("TopLevelSplitting");
+  std::vector<int> split_into = this->getProperty("SplitInto");
   const std::string filename = this->getProperty("Filename");
   const bool fileBackEnd = this->getProperty("FileBackEnd");
 
   if (fileBackEnd && filename.empty()) {
     result["Filename"] = "Filename must be given if FileBackEnd is required.";
+  }
+
+  if (treeBuilderType.find("Indexed") != std::string::npos) {
+    if (fileBackEnd)
+      result["ConverterType"] += "No file back end implemented "
+                                 "for indexed version of algorithm. ";
+
+    if (topLevelSplittingChecked)
+      result["ConverterType"] +=
+          "The usage of top level splitting is "
+          "not possible for indexed version of algorithm. ";
+
+    bool validSplitInfo = ConvToMDEventsWSIndexing::isSplitValid(split_into);
+    if (!validSplitInfo)
+      result["ConverterType"] +=
+          "The split parameter should be the same for"
+          " all dimensions and be equal the power of 2"
+          " (2 ,4, 8, 16,..) for indexed version of algorithm. ";
   }
 
   std::vector<double> minVals = this->getProperty("MinValues");
@@ -250,7 +281,11 @@ void ConvertToMD::exec() {
   // get pointer to appropriate  ConverttToMD plugin from the CovertToMD plugins
   // factory, (will throw if logic is wrong and ChildAlgorithm is not found
   // among existing)
-  ConvToMDSelector AlgoSelector;
+  ConvToMDSelector::ConverterType convType =
+      getPropertyValue("ConverterType") == "Indexed"
+          ? ConvToMDSelector::INDEXED
+          : ConvToMDSelector::DEFAULT;
+  ConvToMDSelector AlgoSelector(convType);
   this->m_Convertor = AlgoSelector.convSelector(m_InWS2D, this->m_Convertor);
 
   bool ignoreZeros = getProperty("IgnoreZeroSignals");

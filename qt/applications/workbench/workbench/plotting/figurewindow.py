@@ -19,7 +19,7 @@ from qtpy.QtWidgets import QMainWindow
 
 # local imports
 from mantidqt.plotting.figuretype import FigureType, figure_type
-from mantidqt.widgets.common.observing_view import ObservingView
+from mantidqt.widgets.observers.observing_view import ObservingView
 
 
 class FigureWindow(QMainWindow, ObservingView):
@@ -50,6 +50,7 @@ class FigureWindow(QMainWindow, ObservingView):
     def closeEvent(self, event):
         self.closing.emit()
         QMainWindow.closeEvent(self, event)
+        self.deleteLater()
 
     def hideEvent(self, event):
         self.visibility_changed.emit()

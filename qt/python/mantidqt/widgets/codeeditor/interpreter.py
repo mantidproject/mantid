@@ -5,27 +5,22 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package
-#
-#
 from __future__ import (absolute_import, unicode_literals)
 
-# std imports
-import sys
 import os.path
+import sys
 import traceback
 
-# 3rd party imports
-from qtpy.QtCore import QObject, Signal
+from qtpy.QtCore import QObject, Qt, Signal
 from qtpy.QtGui import QColor, QFontMetrics
-from qtpy.QtWidgets import QMessageBox, QStatusBar, QVBoxLayout, QWidget, QFileDialog
+from qtpy.QtWidgets import QFileDialog, QMessageBox, QStatusBar, QVBoxLayout, QWidget
 
-# local imports
+from mantidqt.io import open_a_file_dialog
 from mantidqt.widgets.codeeditor.editor import CodeEditor
 from mantidqt.widgets.codeeditor.errorformatter import ErrorFormatter
 from mantidqt.widgets.codeeditor.execution import PythonCodeExecution
-from mantidqt.io import open_a_file_dialog
+from mantidqt.widgets.embedded_find_replace_dialog.presenter import EmbeddedFindReplaceDialog
 
-# Status messages
 IDLE_STATUS_MSG = "Status: Idle."
 LAST_JOB_MSG_TEMPLATE = "Last job completed {} at {} in {:.3f}s"
 RUNNING_STATUS_MSG = "Status: Running"
@@ -112,18 +107,38 @@ class PythonFileInterpreter(QWidget):
         self.clear_key_binding("Ctrl+/")
 
         self.status = QStatusBar(self)
-        layout = QVBoxLayout()
-        layout.addWidget(self.editor)
-        layout.addWidget(self.status)
-        self.setLayout(layout)
-        layout.setContentsMargins(0, 0, 0, 0)
+        self.layout = QVBoxLayout()
+        self.layout.addWidget(self.editor)
+        self.layout.addWidget(self.status)
+        self.setLayout(self.layout)
+        self.layout.setContentsMargins(0, 0, 0, 0)
         self._setup_editor(content, filename)
 
-        self._presenter = PythonFileInterpreterPresenter(self,
-                                                         PythonCodeExecution(content))
+        self.setAttribute(Qt.WA_DeleteOnClose, True)
+
+        self._presenter = PythonFileInterpreterPresenter(self, PythonCodeExecution(content))
 
         self.editor.modificationChanged.connect(self.sig_editor_modified)
         self.editor.fileNameChanged.connect(self.sig_filename_modified)
+        self.find_replace_dialog = None
+        self.find_replace_dialog_shown = False
+
+    def closeEvent(self, event):
+        self.deleteLater()
+        if self.find_replace_dialog:
+            self.find_replace_dialog.close()
+        super(PythonFileInterpreter, self).closeEvent(event)
+
+    def show_find_replace_dialog(self):
+        if self.find_replace_dialog is None:
+            self.find_replace_dialog = EmbeddedFindReplaceDialog(self, self.editor)
+            self.layout.insertWidget(0, self.find_replace_dialog.view)
+
+        self.find_replace_dialog.show()
+
+    def hide_find_replace_dialog(self):
+        if self.find_replace_dialog is not None:
+            self.find_replace_dialog.hide()
 
     @property
     def filename(self):
@@ -157,7 +172,7 @@ class PythonFileInterpreter(QWidget):
         self.status.showMessage(msg)
 
     def replace_tabs_with_spaces(self):
-        self.replace_text(TAB_CHAR, SPACE_CHAR*4)
+        self.replace_text(TAB_CHAR, SPACE_CHAR * TAB_WIDTH)
 
     def replace_text(self, match_text, replace_text):
         if self.editor.selectedText() == '':
@@ -166,7 +181,7 @@ class PythonFileInterpreter(QWidget):
         self.editor.replaceSelectedText(new_text)
 
     def replace_spaces_with_tabs(self):
-        self.replace_text(SPACE_CHAR*4, TAB_CHAR)
+        self.replace_text(SPACE_CHAR * TAB_WIDTH, TAB_CHAR)
 
     def set_whitespace_visible(self):
         self.editor.setWhitespaceVisibility(CodeEditor.WsVisible)
@@ -179,7 +194,7 @@ class PythonFileInterpreter(QWidget):
         self.editor.clearKeyBinding(key_str)
 
     def toggle_comment(self):
-        if self.editor.selectedText() == '':   # If nothing selected, do nothing
+        if self.editor.selectedText() == '':  # If nothing selected, do nothing
             return
 
         # Note selection indices to restore highlighting later
@@ -318,8 +333,7 @@ class PythonFileInterpreterPresenter(QObject):
         self._finish(success=True, task_result=task_result)
 
     def _on_exec_error(self, task_error):
-        exc_type, exc_value, exc_stack = task_error.exc_type, task_error.exc_value, \
-                                         task_error.stack
+        exc_type, exc_value, exc_stack = task_error.exc_type, task_error.exc_value, task_error.stack
         exc_stack = traceback.extract_tb(exc_stack)[self.MAX_STACKTRACE_LENGTH:]
         if hasattr(exc_value, 'lineno'):
             lineno = exc_value.lineno + self._code_start_offset

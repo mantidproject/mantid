@@ -352,6 +352,21 @@ public:
     // Geometry values
     TS_ASSERT_DELTA(loaded.getWidth(), sample.getWidth(), 1e-6);
   }
+
+  void test_nexus_empty_name() {
+    NexusTestHelper th(true);
+    th.createFile("SampleTest.nxs");
+
+    Sample sample;
+
+    sample.saveNexus(th.file, "sample");
+    th.reopenFile();
+
+    Sample loaded;
+    loaded.loadNexus(th.file, "sample");
+
+    TS_ASSERT(loaded.getName().empty());
+  }
 };
 
 #endif /*TESTSAMPLE_H_*/

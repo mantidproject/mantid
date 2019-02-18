@@ -218,12 +218,14 @@ def load_workspace_from_filename(filename,
         load_result["OutputWorkspace"] = [MuonWorkspaceWrapper(ws) for ws in load_result["OutputWorkspace"]]
         run = get_run_from_multi_period_data(workspace)
         load_result["DataDeadTimeTable"] = load_result["DeadTimeTable"][0]
+        load_result["FirstGoodData"] = round(load_result["FirstGoodData"] - load_result['TimeZero'], 2)
     else:
         # single period data
         load_result = _get_algorithm_properties(alg, output_properties)
         load_result["OutputWorkspace"] = [MuonWorkspaceWrapper(load_result["OutputWorkspace"])]
         run = int(workspace.getRunNumber())
         load_result["DataDeadTimeTable"] = load_result["DeadTimeTable"]
+        load_result["FirstGoodData"] = round(load_result["FirstGoodData"] - load_result['TimeZero'], 2)
 
     load_result["DeadTimeTable"] = None
 

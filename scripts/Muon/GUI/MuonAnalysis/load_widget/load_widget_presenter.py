@@ -61,6 +61,8 @@ class LoadWidgetPresenter(object):
         else:
             self.load_file_widget.update_multiple_loading_behaviour(SIMULTANEOUS)
             self.load_run_widget.update_multiple_loading_behaviour(SIMULTANEOUS)
+        self.load_run_widget.handle_run_changed_by_user()
+
 
     def enable_multiple_files(self, enabled=True):
         self.load_run_widget.enable_multiple_files(enabled)

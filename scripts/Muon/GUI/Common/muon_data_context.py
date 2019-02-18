@@ -235,12 +235,12 @@ class MuonDataContext(object):
                 workspace_group.addWorkspace(workspace_wrapper.workspace)
             return workspace_group
         else:
-            return self.current_data["OutputWorkspace"][0].workspace
+            return self._loaded_data.get_data(run=run, instrument=self.instrument)['workspace']['OutputWorkspace'][0].workspace
 
     def period_string(self, run):
         run_list = run_string_to_list(run)
-        summed_periods = self.loaded_data(run)["SummedPeriods"] if 'SummedPeriods' in self.loaded_data(run_list) else [1]
-        subtracted_periods = self.loaded_data(run)["SubtractedPeriods"] if 'SubtractedPeriods' in self.loaded_data(run_list) else []
+        summed_periods = self.loaded_data(run_list)["SummedPeriods"] if 'SummedPeriods' in self.loaded_data(run_list) else [1]
+        subtracted_periods = self.loaded_data(run_list)["SubtractedPeriods"] if 'SubtractedPeriods' in self.loaded_data(run_list) else []
         if subtracted_periods:
             return '+'.join([str(period) for period in summed_periods]) + '-' + '-'.join([str(period) for period in subtracted_periods])
         else:
@@ -334,9 +334,10 @@ class MuonDataContext(object):
             directory = get_base_data_directory(self, run_as_string) + get_group_data_directory(self, run_as_string)
             name = get_group_data_workspace_name(self, group_name, run_as_string)
 
-            self._groups[group_name].workspace = MuonWorkspaceWrapper(group_workspace)
+            self._groups[group_name]._workspace[str(run)] = MuonWorkspaceWrapper(group_workspace)
+
             if show:
-                self._groups[group_name].workspace.show(directory + name)
+                self._groups[group_name].workspace[str(run)].show(directory + name)
 
     def show_all_pairs(self):
         for pair_name in self._pairs.keys():
@@ -349,9 +350,10 @@ class MuonDataContext(object):
             directory = get_base_data_directory(self, run_as_string) + get_pair_data_directory(self, run_as_string)
             pair_workspace = calculate_pair_data(self, pair_name, run)
 
-            self._pairs[pair_name].workspace = MuonWorkspaceWrapper(pair_workspace)
+            self._pairs[pair_name].workspace[str(run)] = MuonWorkspaceWrapper(pair_workspace)
+
             if show:
-                self._pairs[pair_name].workspace.show(directory + name)
+                self._pairs[pair_name].workspace[str(run)].show(directory + name)
 
     def calculate_all_groups(self):
         for group_name in self._groups.keys():

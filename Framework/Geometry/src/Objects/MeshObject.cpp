@@ -75,7 +75,7 @@ bool MeshObject::isValid(const Kernel::V3D &point) const {
 
   Kernel::V3D direction(0.0, 0.0, 1.0); // direction to look for intersections
   std::vector<Kernel::V3D> intersectionPoints;
-  std::vector<int> entryExitFlags;
+  std::vector<TrackDirection> entryExitFlags;
 
   getIntersections(point, direction, intersectionPoints, entryExitFlags);
 
@@ -99,7 +99,7 @@ bool MeshObject::isValid(const Kernel::V3D &point) const {
       nearestPointIndex = i;
     }
   }
-  return (entryExitFlags[nearestPointIndex] == -1);
+  return (entryExitFlags[nearestPointIndex] == TrackDirection::LEAVING);
 }
 
 /**
@@ -121,7 +121,7 @@ bool MeshObject::isOnSide(const Kernel::V3D &point) const {
   // or edge parallel to the first direction or also the second direction.
   for (const auto &direction : directions) {
     std::vector<Kernel::V3D> intersectionPoints;
-    std::vector<int> entryExitFlags;
+    std::vector<TrackDirection> entryExitFlags;
 
     getIntersections(point, direction, intersectionPoints, entryExitFlags);
 
@@ -152,16 +152,16 @@ int MeshObject::interceptSurface(Geometry::Track &UT) const {
   }
 
   std::vector<Kernel::V3D> intersectionPoints;
-  std::vector<int> entryExitFlags;
+  std::vector<TrackDirection> entryExit;
 
   getIntersections(UT.startPoint(), UT.direction(), intersectionPoints,
-                   entryExitFlags);
+                   entryExit);
   if (intersectionPoints.empty())
     return 0; // Quit if no intersections found
 
   // For a 3D mesh, a ray may intersect several segments
   for (size_t i = 0; i < intersectionPoints.size(); ++i) {
-    UT.addPoint(entryExitFlags[i], intersectionPoints[i], *this);
+    UT.addPoint(entryExit[i], intersectionPoints[i], *this);
   }
   UT.buildLink();
 
@@ -175,13 +175,13 @@ int MeshObject::interceptSurface(Geometry::Track &UT) const {
  * @param intersectionPoints :: Intersection points (not sorted)
  * @param entryExitFlags :: +1 ray enters -1 ray exits at corresponding point
  */
-void MeshObject::getIntersections(const Kernel::V3D &start,
-                                  const Kernel::V3D &direction,
-                                  std::vector<Kernel::V3D> &intersectionPoints,
-                                  std::vector<int> &entryExitFlags) const {
+void MeshObject::getIntersections(
+    const Kernel::V3D &start, const Kernel::V3D &direction,
+    std::vector<Kernel::V3D> &intersectionPoints,
+    std::vector<TrackDirection> &entryExitFlags) const {
 
   Kernel::V3D vertex1, vertex2, vertex3, intersection;
-  int entryExit;
+  TrackDirection entryExit;
   for (size_t i = 0; getTriangle(i, vertex1, vertex2, vertex3); ++i) {
     if (MeshObjectCommon::rayIntersectsTriangle(start, direction, vertex1,
                                                 vertex2, vertex3, intersection,
@@ -514,6 +514,10 @@ size_t MeshObject::numberOfVertices() const {
  */
 std::vector<double> MeshObject::getVertices() const {
   return MeshObjectCommon::getVertices(m_vertices);
+}
+
+detail::ShapeInfo::GeometryShape MeshObject::shape() const {
+  return detail::ShapeInfo::GeometryShape::NOSHAPE;
 }
 
 /**
