@@ -25,7 +25,8 @@ public:
   bool isGroup() const override;
   std::string const &name() const;
   void setName(std::string const &name);
-  bool requiresPostprocessing() const;
+  bool hasPostprocessing() const;
+  bool requiresProcessing(bool reprocessFailed) const override;
   std::string postprocessedWorkspaceName() const;
   void setOutputNames(std::vector<std::string> const &outputNames) override;
 

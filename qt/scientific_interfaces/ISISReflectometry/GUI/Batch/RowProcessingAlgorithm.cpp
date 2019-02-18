@@ -5,19 +5,21 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#include "RowProperties.h"
-#include "../../Reduction/Experiment.h"
-#include "../../Reduction/Instrument.h"
+#include "RowProcessingAlgorithm.h"
+#include "../../Reduction/Batch.h"
 #include "../../Reduction/Row.h"
 #include "AlgorithmProperties.h"
+#include "BatchJobAlgorithm.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
 using API::IConfiguredAlgorithm_sptr;
+using AlgorithmRuntimeProps = std::map<std::string, std::string>;
 
-namespace RowProperties {
+namespace { // unnamed namespace
 // These functions update properties in an AlgorithmRuntimeProps for specific
 // properties for the row reduction algorithm
 void updateInputWorkspacesProperties(
@@ -76,7 +78,7 @@ void updatePolarizationCorrectionProperties(
     return;
 
   AlgorithmProperties::update(
-      "PolarisationCorrections",
+      "PolarizationAnalysis",
       PolarizationCorrectionTypeToString(corrections.correctionType()),
       properties);
 
@@ -238,6 +240,39 @@ void updateEventProperties(AlgorithmRuntimeProps &properties,
                            Slicing const &slicing) {
   boost::apply_visitor(UpdateEventPropertiesVisitor(properties), slicing);
 }
-} // namespace RowProperties
+} // unnamed namespace
+
+/** Create a configured algorithm for processing a row. The algorithm
+ * properties are set from the reduction configuration model and the
+ * cell values in the given row.
+ * @param model : the reduction configuration model
+ * @param row : the row from the runs table
+ */
+IConfiguredAlgorithm_sptr createConfiguredAlgorithm(Batch const &model,
+                                                    Row &row) {
+  // Create the algorithm
+  auto alg = Mantid::API::AlgorithmManager::Instance().create(
+      "ReflectometryISISLoadAndProcess");
+  alg->setChild(true);
+
+  // Set the algorithm properties from the model
+  auto properties = AlgorithmRuntimeProps();
+  updateEventProperties(properties, model.slicing());
+  updateExperimentProperties(properties, model.experiment());
+  updatePerThetaDefaultProperties(properties,
+                                  model.defaultsForTheta(row.theta()));
+  updateInstrumentProperties(properties, model.instrument());
+  updateRowProperties(properties, row);
+
+  // Store expected output property names. Must be in the correct order for
+  // Row::algorithmComplete
+  std::vector<std::string> outputWorkspaceProperties = {
+      "OutputWorkspaceWavelength", "OutputWorkspace", "OutputWorkspaceBinned"};
+
+  // Return the configured algorithm
+  auto jobAlgorithm = boost::make_shared<BatchJobAlgorithm>(
+      alg, properties, outputWorkspaceProperties, &row);
+  return jobAlgorithm;
+}
 } // namespace CustomInterfaces
 } // namespace MantidQt

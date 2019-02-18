@@ -64,10 +64,10 @@ private:
   std::vector<std::string> getWorkspacesToSave(Group const &group) const;
   std::vector<std::string> getWorkspacesToSave(Row const &row) const;
 
-  void addAlgorithmsForRowsInGroup(
+  void addAlgorithmsForProcessingRowsInGroup(
       Group &group,
       std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> &algorithms);
-  void addAlgorithmForRow(
+  void addAlgorithmForProcessingRow(
       Row &row,
       std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> &algorithms);
 };

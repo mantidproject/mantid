@@ -27,7 +27,33 @@ bool Group::isGroup() const { return true; }
 
 std::string const &Group::name() const { return m_name; }
 
-bool Group::requiresPostprocessing() const { return m_rows.size() > 1; }
+/** Returns true if postprocessing is applicable for this group, i.e. if it
+ * has multiple rows whose outputs will be stitched
+ */
+bool Group::hasPostprocessing() const { return m_rows.size() > 1; }
+
+/** Returns true if the group requires (and is ready for) postprocessing, i.e.
+ * if it has multiple rows that have be processed successfully and are ready to
+ * be stitched, but have not been stitched yet.
+ * @param reprocessFailed : if true, groups that have failed will be
+ * reprocessed;
+ * otherwise, they will be ignored
+ */
+bool Group::requiresProcessing(bool reprocessFailed) const {
+  if (!hasPostprocessing())
+    return false;
+
+  if (!Item::requiresProcessing(reprocessFailed))
+    return false;
+
+  // Post-processing can only be done if all rows have completed successfully
+  for (auto &row : m_rows) {
+    if (row->state() != State::ITEM_COMPLETE)
+      return false;
+  }
+
+  return true;
+}
 
 std::string Group::postprocessedWorkspaceName() const {
   return m_postprocessedWorkspaceName;

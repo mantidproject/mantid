@@ -4,7 +4,7 @@ set ( BATCH_SRC_FILES
     BatchJobAlgorithm.cpp
     BatchJobRunner.cpp
     AlgorithmProperties.cpp
-    RowProperties.cpp
+    RowProcessingAlgorithm.cpp
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
@@ -20,7 +20,7 @@ set ( BATCH_INC_FILES
     BatchJobAlgorithm.h
     BatchJobRunner.h
     AlgorithmProperties.h
-    RowProperties.h
+    RowProcessingAlgorithm.h
 )
 
 set ( BATCH_MOC_FILES

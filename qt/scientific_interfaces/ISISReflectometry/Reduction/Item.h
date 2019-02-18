@@ -22,7 +22,7 @@ public:
   virtual bool isGroup() const = 0;
   State state() const;
   std::string message() const;
-  bool requiresProcessing(bool reprocessFailed) const;
+  virtual bool requiresProcessing(bool reprocessFailed) const;
 
   virtual void resetState();
   virtual void renameOutputWorkspace(std::string const &oldName,

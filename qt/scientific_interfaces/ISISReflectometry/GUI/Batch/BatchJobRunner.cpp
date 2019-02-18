@@ -6,15 +6,13 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "BatchJobRunner.h"
 #include "BatchJobAlgorithm.h"
-#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "RowProperties.h"
+#include "RowProcessingAlgorithm.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
 using API::IConfiguredAlgorithm_sptr;
-using Mantid::API::Workspace_sptr;
 
 BatchJobRunner::BatchJobRunner(Batch batch)
     : m_batch(std::move(batch)), m_isProcessing(false), m_isAutoreducing(false),
@@ -56,7 +54,7 @@ std::deque<IConfiguredAlgorithm_sptr> BatchJobRunner::getAlgorithms() {
   auto &groups =
       m_batch.mutableRunsTable().mutableReductionJobs().mutableGroups();
   for (auto &group : groups) {
-    addAlgorithmsForRowsInGroup(group, algorithms);
+    addAlgorithmsForProcessingRowsInGroup(group, algorithms);
   }
   return algorithms;
 }
@@ -66,14 +64,15 @@ std::deque<IConfiguredAlgorithm_sptr> BatchJobRunner::getAlgorithms() {
  * @param group : the group to get the row algorithms for
  * @param algorithms : the list of configured algorithms to add this group's
  * rows to
+ * @returns : true if algorithms were added, false if there was nothing to do
  */
-void BatchJobRunner::addAlgorithmsForRowsInGroup(
+void BatchJobRunner::addAlgorithmsForProcessingRowsInGroup(
     Group &group, std::deque<IConfiguredAlgorithm_sptr> &algorithms) {
   auto &rows = group.mutableRows();
   for (auto &row : rows) {
     if (row && row->requiresProcessing(m_reprocessFailed) &&
         (m_processAll || m_batch.isSelected(row.get()))) {
-      addAlgorithmForRow(row.get(), algorithms);
+      addAlgorithmForProcessingRow(row.get(), algorithms);
     }
   }
 }
@@ -81,32 +80,12 @@ void BatchJobRunner::addAlgorithmsForRowsInGroup(
 /** Add the algorithm and related properties for processing a row
  * @param row : the row to get the configured algorithm for
  * @param algorithms : the list of configured algorithms to add this row to
+ * @returns : true if algorithms were added, false if there was nothing to do
  */
-void BatchJobRunner::addAlgorithmForRow(
+void BatchJobRunner::addAlgorithmForProcessingRow(
     Row &row, std::deque<IConfiguredAlgorithm_sptr> &algorithms) {
-  // Create the algorithm
-  auto alg = Mantid::API::AlgorithmManager::Instance().create(
-      "ReflectometryISISLoadAndProcess");
-  alg->setChild(true);
-
-  // Set up input properties
-  auto properties = AlgorithmRuntimeProps();
-  RowProperties::updateEventProperties(properties, m_batch.slicing());
-  RowProperties::updateExperimentProperties(properties, m_batch.experiment());
-  RowProperties::updatePerThetaDefaultProperties(
-      properties, m_batch.defaultsForTheta(row.theta()));
-  RowProperties::updateInstrumentProperties(properties, m_batch.instrument());
-  RowProperties::updateRowProperties(properties, row);
-
-  // Store expected output property names. Must be in the correct order for
-  // Row::algorithmComplete
-  std::vector<std::string> outputWorkspaceProperties = {
-      "OutputWorkspaceWavelength", "OutputWorkspace", "OutputWorkspaceBinned"};
-
-  // Add the configured algorithm to the list
-  auto jobAlgorithm = boost::make_shared<BatchJobAlgorithm>(
-      alg, properties, outputWorkspaceProperties, &row);
-  algorithms.emplace_back(std::move(jobAlgorithm));
+  auto algorithm = createConfiguredAlgorithm(m_batch, row);
+  algorithms.emplace_back(std::move(algorithm));
 }
 
 void BatchJobRunner::algorithmStarted(IConfiguredAlgorithm_sptr algorithm) {
@@ -159,7 +138,7 @@ BatchJobRunner::getWorkspacesToSave(Row const &row) const {
   // in that case users just want to see the postprocessed output instead.
   auto workspaces = std::vector<std::string>();
   auto const group = m_batch.runsTable().reductionJobs().getParentGroup(row);
-  if (group.requiresPostprocessing())
+  if (group.hasPostprocessing())
     return workspaces;
 
   // We currently only save the binned workspace in Q
