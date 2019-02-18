@@ -67,7 +67,6 @@ class GroupingTableView(QtGui.QWidget):
         self.group_range_layout.addWidget(self.group_range_min, 0, 1)
         self.group_range_layout.addWidget(self.group_range_use_first_good_data, 0, 2)
 
-
         self.group_range_layout_max = QtGui.QHBoxLayout()
         self.group_range_layout.addWidget(self.group_range_to_label, 1, 0, QtCore.Qt.AlignRight)
         self.group_range_layout.addWidget(self.group_range_max, 1, 1)

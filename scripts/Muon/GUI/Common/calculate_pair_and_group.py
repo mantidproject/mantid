@@ -26,14 +26,15 @@ def calculate_pair_data(context, pair_name, run):
 
     return pair_data
 
+
 def estimate_group_asymmetry_data(context, group_name, run):
     processed_data = _run_pre_processing(context, run)
 
     params = _get_MuonGroupingAsymmetry_parameters(context, group_name, run)
     params["InputWorkspace"] = processed_data
-    pair_data = algorithm_utils.run_MuonGroupingAsymmetry(params)
+    group_asymmetry = algorithm_utils.run_MuonGroupingAsymmetry(params)
 
-    return pair_data
+    return group_asymmetry
 
 
 def _run_pre_processing(context, run):
