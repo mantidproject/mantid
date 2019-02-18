@@ -44,8 +44,7 @@ double offsetAngleFromCentre(const MatrixWorkspace &ws, const double l2,
   double const specSize = static_cast<double>(nSpec);
   if (linePosition > specSize) {
     std::ostringstream msg;
-    msg << "LinePosition is greater than the maximum workspace index "
-        << nSpec;
+    msg << "LinePosition is greater than the maximum workspace index " << nSpec;
     throw std::runtime_error(msg.str());
   }
   auto const centreIndex = specSize / 2.;
