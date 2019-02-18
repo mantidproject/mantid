@@ -173,7 +173,7 @@ class ProjectRecovery(object):
 
             # Create directory for save location
             recovery_dir = os.path.join(self.recovery_directory_pid,
-                                        datetime.datetime.fromtimestamp(time.time()).strftime('%d-%m-%YT%H:%M:%S'))
+                                        datetime.datetime.fromtimestamp(time.time()).strftime('%d-%m-%YT%H-%M-%S'))
             if not os.path.exists(recovery_dir):
                 os.makedirs(recovery_dir)
 
