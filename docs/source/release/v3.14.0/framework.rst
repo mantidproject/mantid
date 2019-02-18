@@ -120,6 +120,7 @@ Bugfixes
 - Fixed a bug in :ref:`MayersSampleCorrection <algm-MayersSampleCorrection>` when using the multiple scattering correction.
 - Fixed a bug in :ref:`IntegrateMDHistoWorkspace <algm-IntegrateMDHistoWorkspace>` in some cases where NaN's are present outside the integration range.
 - :ref:`SaveNexusProcessed <algm-SaveNexusProcessed>` and :ref:`LoadNexusProcessed <algm-LoadNexusProcessed>` now save and load an empty sample name correctly. Note, that files saved before this change will still load with an empty sample name replaced by a space as before.
+- Fixed a bug in :ref:`IkedaCarpenterPV <func-IkedaCarpenterPV>` where a sign in zv was different from `FullProf NPROF=13 <http://www.ccp14.ac.uk/ccp/web-mirrors/plotr/Tutorials&Documents/TOF_FullProf.pdf>`_
 
 Python
 ------
