@@ -7,7 +7,7 @@
 from __future__ import (absolute_import, division, print_function)
 import mantid.simpleapi as api
 import numpy as np
-from scipy.constants import m_n, h
+from scipy.constants import m_n, h, physical_constants
 import os
 import sys
 from mantid.api import PythonAlgorithm, AlgorithmFactory, WorkspaceProperty, \
@@ -141,7 +141,7 @@ class LoadDNSLegacy(PythonAlgorithm):
 
         # calculate incident energy, since given in the data file is wrong
         velocity = h/(m_n*wavelength*1e-10)   # m/s
-        incident_energy = 0.5*m_n*velocity*velocity/1.602176487e-22  # meV
+        incident_energy = 0.5e+03*m_n*velocity*velocity/physical_constants['electron volt'][0]  # meV
 
         tmp = api.LoadEmptyInstrument(InstrumentName='DNS')
         self.instrument = tmp.getInstrument()
