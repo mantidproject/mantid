@@ -32,7 +32,6 @@ class plotTestGui(QtGui.QMainWindow):
         self.test.add_subplot("baa")
         self.test.add_subplot("EXTRA")
 
-
         self.test.plot("test", ws, specNum=26)
         self.test.plot("test", ws, specNum=21)
         self.test.plot("test", ws, specNum=22)
@@ -69,9 +68,8 @@ class plotTestGui(QtGui.QMainWindow):
         # add button for adding more plots
         self.n = 0
         self.ws = ws
-        self.btn =  QtGui.QPushButton("add plot")
+        self.btn = QtGui.QPushButton("add plot")
         self.btn.clicked.connect(self.add)
-
 
         self.grid = QtGui.QSplitter(QtCore.Qt.Vertical)
         self.grid.addWidget(self.test)
@@ -82,9 +80,10 @@ class plotTestGui(QtGui.QMainWindow):
         self.setWindowTitle("plot test")
 
     def add(self):
-        self.n +=1
+        self.n += 1
         self.test.add_subplot(str(self.n))
-        self.test.plot(str(self.n),self.ws,specNum=self.n)
+        self.test.plot(str(self.n), self.ws, specNum=self.n)
+
 
 def setUpSubplot():
     ws = mantid.LoadMuonNexus("MUSR00062260", OutputWorkspace="ws")

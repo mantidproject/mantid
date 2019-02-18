@@ -9,7 +9,7 @@ from __future__ import absolute_import, print_function
 
 class QuickEditPresenter(object):
 
-    def __init__(self, view ):
+    def __init__(self, view):
         self._view = view
 
     @property
@@ -52,7 +52,7 @@ class QuickEditPresenter(object):
             return
         self._view.set_errors(state)
 
-    def rm_subplot(self,name):
+    def rm_subplot(self, name):
         current = self._view.current_selection()
         to_remove = self._view.find_index(name)
         self._view.rm_subplot(to_remove)

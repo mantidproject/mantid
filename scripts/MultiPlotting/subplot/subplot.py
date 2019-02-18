@@ -19,7 +19,6 @@ class subplot(QtWidgets.QWidget):
     quickEditSignal = QtCore.Signal(object)
     rmSubplotSignal = QtCore.Signal(object)
 
-
     def __init__(self, context):
         super(subplot, self).__init__()
         self._context = context
@@ -42,7 +41,6 @@ class subplot(QtWidgets.QWidget):
         self.plotObjects = {}
         grid.addWidget(self.canvas, 1, 0)
         self.setLayout(grid)
-
 
     """ this is called when the zoom
     or pan are used. We want to send a
@@ -87,9 +85,10 @@ class subplot(QtWidgets.QWidget):
         self.canvas.draw()
 
     def add_subplot(self, subplotName, number):
-        self._context.update_gridspec(number+1)
+        self._context.update_gridspec(number + 1)
         gridspec = self._context.gridspec
-        self.plotObjects[subplotName] = self.figure.add_subplot(gridspec[number],label=subplotName)
+        self.plotObjects[subplotName] = self.figure.add_subplot(
+            gridspec[number], label=subplotName)
         self.plotObjects[subplotName].set_title(subplotName)
         self._context.addSubplot(subplotName, self.plotObjects[subplotName])
         self._update()
@@ -172,7 +171,6 @@ class subplot(QtWidgets.QWidget):
             self._selector_window.setMinimumSize(300, 100)
             self._selector_window.show()
 
-
     def _createSelectWindow(self, names):
         return SelectSubplot(names)
 
@@ -235,4 +233,3 @@ class subplot(QtWidgets.QWidget):
         self._context.update_gridspec(len(list(self.plotObjects.keys())))
         self._update()
         self.rmSubplotSignal.emit(subplotName)
-
