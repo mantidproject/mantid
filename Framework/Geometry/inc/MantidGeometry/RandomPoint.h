@@ -71,7 +71,7 @@ boost::optional<Kernel::V3D> bounded(const detail::ShapeInfo &shapeInfo,
                                      size_t maxAttempts) {
   boost::optional<Kernel::V3D> point;
   for (size_t attempt{0}; attempt < maxAttempts; ++attempt) {
-    const auto pt{randomInShape(shapeInfo, rng)};
+    const Kernel::V3D pt{randomInShape(shapeInfo, rng)};
     if (box.isPointInside(pt)) {
       point = pt;
       break;
