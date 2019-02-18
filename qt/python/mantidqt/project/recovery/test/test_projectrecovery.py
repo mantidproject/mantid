@@ -15,7 +15,6 @@ import time
 import shutil
 import sys
 import json
-from pathlib2 import Path
 
 from mantidqt.project.recovery.projectrecovery import ProjectRecovery, SAVING_TIME_KEY, NO_OF_CHECKPOINTS_KEY, \
     RECOVERY_ENABLED_KEY
@@ -99,7 +98,8 @@ class ProjectRecoveryTest(unittest.TestCase):
         self.assertTrue(os.path.exists(self.working_directory))
 
         # Feed parent to temp directory here, on Linux = '/tmp'
-        self.pr._remove_empty_folders_from_dir(str(Path(self.working_directory).parent))
+        parent_path, _ = os.path.split(self.working_directory)
+        self.pr._remove_empty_folders_from_dir(parent_path)
 
         self.assertTrue(not os.path.exists(self.working_directory))
 
