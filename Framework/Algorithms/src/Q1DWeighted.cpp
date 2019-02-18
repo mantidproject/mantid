@@ -233,7 +233,7 @@ void Q1DWeighted::exec() {
         const double q = 4.0 * M_PI * sinTheta / wavelength;
 
         if (q < qBinEdges.front() || q > qBinEdges.back()) {
-            continue;
+          continue;
         }
 
         // after check above, no need to wrap this in try catch
