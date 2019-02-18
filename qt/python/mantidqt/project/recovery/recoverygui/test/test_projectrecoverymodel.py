@@ -8,9 +8,9 @@
 #
 
 import unittest
-import mock
 import os
 import shutil
+import sys
 import time
 
 from mantidqt.project.recovery.recoverygui.projectrecoverymodel import ProjectRecoveryModel
@@ -18,6 +18,11 @@ from mantidqt.project.recovery.projectrecovery import ProjectRecovery
 from mantid.simpleapi import CreateSampleWorkspace
 from mantid.api import AnalysisDataService as ADS
 from mantid.kernel import ConfigService
+
+if sys.version_info.major >= 3:
+    from unittest import mock
+else:
+    import mock
 
 
 class ProjectRecoveryModelTest(unittest.TestCase):
@@ -83,15 +88,15 @@ class ProjectRecoveryModelTest(unittest.TestCase):
         self.prm._start_recovery_of_checkpoint = mock.MagicMock()
         self.prm.recover_selected_checkpoint(checkpoint)
 
-        self.prm.presenter.change_start_mantid_to_cancel_label.assert_called_once()
-        self.prm._start_recovery_of_checkpoint.assert_called_once()
+        self.assertEqual(1, self.prm.presenter.change_start_mantid_to_cancel_label.call_count)
+        self.assertEqual(1, self.prm._start_recovery_of_checkpoint.call_count)
 
     def test_open_selected_in_editor(self):
         checkpoint = os.listdir(self.pid)[0]
         self.prm.project_recovery.open_checkpoint_in_script_editor = mock.MagicMock()
         self.prm.open_selected_in_editor(checkpoint)
 
-        self.prm.project_recovery.open_checkpoint_in_script_editor.assert_called_once()
+        self.assertEqual(1, self.prm.project_recovery.open_checkpoint_in_script_editor.call_count)
         self.assertEqual(self.prm.project_recovery.open_checkpoint_in_script_editor.call_args,
                          mock.call(os.path.join(self.pid, checkpoint)))
 

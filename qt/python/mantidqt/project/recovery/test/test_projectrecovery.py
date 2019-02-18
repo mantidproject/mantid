@@ -8,12 +8,12 @@
 #
 
 import unittest
-import mock
 import os
 import getpass
 import tempfile
 import time
 import shutil
+import sys
 import json
 from pathlib2 import Path
 
@@ -22,6 +22,11 @@ from mantidqt.project.recovery.projectrecovery import ProjectRecovery, SAVING_TI
 from mantid.kernel import ConfigService
 from mantid.simpleapi import CreateSampleWorkspace, GroupWorkspaces
 from mantid.api import AnalysisDataService as ADS
+
+if sys.version_info.major >= 3:
+    from unittest import mock
+else:
+    import mock
 
 
 class FakeEncoder(object):

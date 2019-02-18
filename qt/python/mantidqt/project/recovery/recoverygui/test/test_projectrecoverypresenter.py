@@ -7,10 +7,15 @@
 #  This file is part of the mantidqt package
 #
 
+import sys
 import unittest
-import mock
 
 from mantidqt.project.recovery.recoverygui.projectrecoverypresenter import ProjectRecoveryPresenter
+
+if sys.version_info.major >= 3:
+    from unittest import mock
+else:
+    import mock
 
 
 def raise_exception():
@@ -19,9 +24,8 @@ def raise_exception():
 
 class ProjectRecoveryPresenterTest(unittest.TestCase):
     def setUp(self):
-        self.prp = ProjectRecoveryPresenter(mock.MagicMock())
+        self.prp = ProjectRecoveryPresenter(mock.MagicMock(), model=mock.MagicMock())
         self.prp.current_view = mock.MagicMock()
-        self.prp.model = mock.MagicMock()
 
     @mock.patch('mantidqt.project.recovery.recoverygui.projectrecoverypresenter.ProjectRecoveryWidgetView')
     def test_start_recovery_view_exception_raised(self, view):
@@ -104,8 +108,8 @@ class ProjectRecoveryPresenterTest(unittest.TestCase):
 
         self.prp.recover_last()
 
-        self.prp.model.decide_last_checkpoint.assert_called_once()
-        self.prp.model.recover_selected_checkpoint.assert_called_once()
+        self.assertEqual(1, self.prp.model.decide_last_checkpoint.call_count)
+        self.assertEqual(1, self.prp.model.recover_selected_checkpoint.call_count)
 
     def test_open_last_in_editor_recovery_started(self):
         self.prp.model.has_recovery_started.return_value = True
@@ -120,8 +124,8 @@ class ProjectRecoveryPresenterTest(unittest.TestCase):
 
         self.prp.open_last_in_editor()
 
-        self.prp.model.decide_last_checkpoint.assert_called_once()
-        self.prp.model.open_selected_in_editor.assert_called_once()
+        self.assertEqual(1, self.prp.model.decide_last_checkpoint.call_count)
+        self.assertEqual(1, self.prp.model.open_selected_in_editor.call_count)
 
     def test_start_mantid_normally_self_not_allow_start_mantid_normally_and_current_view_is_none(self):
         self.prp.current_view = None
@@ -135,9 +139,9 @@ class ProjectRecoveryPresenterTest(unittest.TestCase):
 
         self.prp.start_mantid_normally()
 
-        self.prp.current_view.emit_abort_script.assert_called_once()
+        self.assertEqual(1, self.prp.current_view.emit_abort_script.call_count)
         self.assertTrue(self.prp.start_mantid_normally_called)
-        self.prp.model.start_mantid_normally.assert_called_once()
+        self.assertEqual(1, self.prp.model.start_mantid_normally.call_count)
 
     def test_start_mantid_normally_self_allow_start_mantid_normally(self):
         self.prp.current_view = None
@@ -146,7 +150,7 @@ class ProjectRecoveryPresenterTest(unittest.TestCase):
         self.prp.start_mantid_normally()
 
         self.assertTrue(self.prp.start_mantid_normally_called)
-        self.prp.model.start_mantid_normally.assert_called_once()
+        self.assertEqual(1, self.prp.model.start_mantid_normally.call_count)
 
     def test_recover_selected_checkpoint_recovery_has_started(self):
         self.prp.model.has_recovery_started.return_value = True
@@ -195,7 +199,7 @@ class ProjectRecoveryPresenterTest(unittest.TestCase):
     def test_connect_progress_bar_to_recovery_view(self):
         self.prp.connect_progress_bar_to_recovery_view()
 
-        self.prp.current_view.connect_progress_bar.assert_called_once()
+        self.assertEqual(1, self.prp.current_view.connect_progress_bar.call_count)
 
     def test_change_start_mantid_to_cancel_label(self):
         self.prp.change_start_mantid_to_cancel_label()

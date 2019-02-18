@@ -7,12 +7,17 @@
 #  This file is part of the mantidqt package
 #
 
-import mock
+import sys
 
 from qtpy.QtWidgets import QTableWidgetItem
 
 from mantidqt.utils.qt.test import GuiTest
 from mantidqt.project.recovery.recoverygui.recoveryfailureview import RecoveryFailureView
+
+if sys.version_info.major >= 3:
+    from unittest import mock
+else:
+    import mock
 
 
 class RecoveryFailureViewTest(GuiTest):
@@ -24,7 +29,7 @@ class RecoveryFailureViewTest(GuiTest):
     def test_reject(self):
         self.prw.reject()
 
-        self.prw.presenter.start_mantid_normally.assert_called_once()
+        self.assertEqual(1, self.prw.presenter.start_mantid_normally.call_count)
 
     def test_set_progress_bar_maximum(self):
         self.prw.set_progress_bar_maximum(1)
@@ -63,4 +68,4 @@ class RecoveryFailureViewTest(GuiTest):
     def test_onClickStartMantidNormally(self):
         self.prw.onClickStartMantidNormally()
 
-        self.prw.presenter.start_mantid_normally.assert_called_once()
+        self.assertEqual(1, self.prw.presenter.start_mantid_normally.call_count)

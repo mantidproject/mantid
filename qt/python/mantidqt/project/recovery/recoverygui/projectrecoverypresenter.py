@@ -13,11 +13,11 @@ from mantidqt.project.recovery.recoverygui.recoveryfailureview import RecoveryFa
 
 
 class ProjectRecoveryPresenter(object):
-    def __init__(self, project_recovery):
-        self.project_recovery = project_recovery
-
+    def __init__(self, project_recovery, model=None):
+        self.model = model if model else ProjectRecoveryModel(self.project_recovery, self)
         self.current_view = None
-        self.model = ProjectRecoveryModel(self.project_recovery, self)
+
+        self.project_recovery = project_recovery
 
         self.start_mantid_normally_called = False
         self.allow_start_mantid_normally = True

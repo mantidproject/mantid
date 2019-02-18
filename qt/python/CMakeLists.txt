@@ -132,7 +132,7 @@ endif ()
 
     mantidqt/project/recovery/test/test_projectrecovery.py
     mantidqt/project/recovery/recoverygui/test/test_projectrecoverywidgetview.py
-    mantidqt/project/recovery/recoverygui/test/test_failurerecoveryview.py
+    mantidqt/project/recovery/recoverygui/test/test_recoveryfailureview.py
     mantidqt/project/recovery/recoverygui/test/test_projectrecoverypresenter.py
     mantidqt/project/recovery/recoverygui/test/test_projectrecoverymodel.py
 
