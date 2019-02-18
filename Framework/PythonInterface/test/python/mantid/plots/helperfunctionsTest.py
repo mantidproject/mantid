@@ -526,21 +526,6 @@ class HelperFunctionsTest(unittest.TestCase):
         self.assertTrue(np.array_equal([2.0, 5.0, 8.0, 11.0], y))
         self.assertTrue(np.array_equal([2.0, 5.0, 8.0, 11.0], dy))
 
-    @add_md_workspace_with_data()
-    def test_get_md_data2d_bin_bounds(self, mdws):
-        coord1, coord2, data = funcs.get_md_data2d_bin_bounds(mdws, False)
-        self.assertEqual(11, len(coord1))
-        self.assertEqual(-3, coord1[0])
-        self.assertEqual(3, coord1[-1])
-
-        self.assertEqual(11, len(coord2))
-        self.assertEqual(-10, coord2[0])
-        self.assertEqual(10, coord2[-1])
-
-        self.assertTrue(all(len(d) == 10 for d in data))
-        self.assertEqual(0.0, data[0][0])
-        self.assertEqual(99.0, data[-1][-1])
-
     @add_md_workspace_with_data(dimensions=3)
     def test_get_md_data2d_bin_bounds_raises_AssertionException_too_many_dims(self, mdws):
         self.assertRaises(AssertionError, funcs.get_md_data2d_bin_bounds, mdws, False)

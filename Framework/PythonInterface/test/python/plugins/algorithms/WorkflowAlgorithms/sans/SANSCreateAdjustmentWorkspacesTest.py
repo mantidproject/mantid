@@ -162,7 +162,9 @@ class SANSCreateAdjustmentWorkspacesTest(unittest.TestCase):
             calculated_transmission, unfitted_transmisison = \
                 SANSCreateAdjustmentWorkspacesTest._run_test(serialized_state, sample_data, sample_monitor_data,
                                                              transmission_data, direct_data)
-            raised = False
+        except Exception as e:
+            self.assertFalse(True, "Did not expect an error to be raised. Raised error is: {}".format(str(e)))
+        else:
             # We expect a wavelength adjustment workspace
             self.assertTrue(wavelength_adjustment)
             # We don't expect a pixel adjustment workspace since no files where specified
@@ -170,11 +172,8 @@ class SANSCreateAdjustmentWorkspacesTest(unittest.TestCase):
             # We expect a wavelength and pixel adjustment workspace since we set the flag to true and provided a
             # sample data set
             self.assertTrue(wavelength_and_pixel_adjustment)
-            self.assertFalse(calculated_transmission)
-            self.assertFalse(unfitted_transmisison)
-        except:  # noqa
-            raised = True
-        self.assertFalse(raised)
+            self.assertTrue(calculated_transmission)
+            self.assertTrue(unfitted_transmisison)
 
     def test_that_when_show_transmission_is_true_transmission_runs_are_output(self):
         # Arrange

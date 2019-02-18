@@ -39,6 +39,7 @@ class MultiPythonFileInterpreter(QWidget):
 
         # attributes
         self.default_content = default_content
+        self.prev_session_tabs = None
         self.whitespace_visible = False
 
         # widget setup
@@ -54,6 +55,15 @@ class MultiPythonFileInterpreter(QWidget):
     @property
     def editor_count(self):
         return self._tabs.count()
+
+    @property
+    def tab_filepaths(self):
+        file_paths = []
+        for idx in range(self.editor_count):
+            file_path = self._tabs.widget(idx).filename
+            if file_path:
+                file_paths.append(file_path)
+        return file_paths
 
     def append_new_editor(self, content=None, filename=None):
         if content is None:
@@ -100,13 +110,16 @@ class MultiPythonFileInterpreter(QWidget):
         # are being prompted to save
         self._tabs.setCurrentIndex(idx)
         if self.current_editor().confirm_close():
+            widget = self._tabs.widget(idx)
+            # note: this does not close the widget, that is why we manually close it
             self._tabs.removeTab(idx)
+            widget.close()
         else:
             return False
 
         # we never want an empty widget
         if self.editor_count == 0:
-            self.append_new_editor(content=self.default_content)
+            self.append_new_editor()
 
         return True
 
@@ -171,22 +184,37 @@ class MultiPythonFileInterpreter(QWidget):
             content = code_file.read()
         self.append_new_editor(content=content, filename=filepath)
 
+    def open_files_in_new_tabs(self, filepaths):
+        for filepath in filepaths:
+            self.open_file_in_new_tab(filepath)
+
     def plus_button_clicked(self, _):
         """Add a new tab when the plus button is clicked"""
         self.append_new_editor()
+
+    def restore_session_tabs(self):
+        if self.prev_session_tabs is not None:
+            try:
+                self.open_files_in_new_tabs(self.prev_session_tabs)
+            except IOError:
+                pass
+            self.close_tab(0)  # close default empty script
 
     def save_current_file(self):
         """Save the current file"""
         self.current_editor().save()
 
-    def toggle_comment_current(self):
-        self.current_editor().toggle_comment()
+    def spaces_to_tabs_current(self):
+        self.current_editor().replace_spaces_with_tabs()
 
     def tabs_to_spaces_current(self):
         self.current_editor().replace_tabs_with_spaces()
 
-    def spaces_to_tabs_current(self):
-        self.current_editor().replace_spaces_with_tabs()
+    def toggle_comment_current(self):
+        self.current_editor().toggle_comment()
+
+    def toggle_find_replace_dialog(self):
+        self.current_editor().show_find_replace_dialog()
 
     def toggle_whitespace_visible_all(self):
         if self.whitespace_visible:

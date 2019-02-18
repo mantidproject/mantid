@@ -126,6 +126,13 @@ public:
   }
 
   //-----------------------------------------------------------------------------------
+  /** Return into how many to split along a every dimension
+   *
+   * @return the dimension will be split into this many even boxes,
+   * for every dimension.
+   */
+  const std::vector<size_t> &getSplitIntoAll() const { return m_splitInto; }
+  //-----------------------------------------------------------------------------------
   /** Return into how many to split along a dimension for the top level
    *
    * @return the splits in each dimesion for the top level
@@ -281,6 +288,26 @@ public:
     return ((eventsAdded / numMDBoxes) > m_SplitThreshold);
   }
   //-----------------------------------------------------------------------------------
+
+  void clearBoxesCounter(size_t depth) {
+    std::lock_guard<std::mutex> lock(m_mutexNumMDBoxes);
+    m_numMDBoxes[depth] = 0;
+  }
+
+  void clearGridBoxesCounter(size_t depth) {
+    std::lock_guard<std::mutex> lock(m_mutexNumMDBoxes);
+    m_numMDGridBoxes[depth] = 0;
+  }
+  void incGridBoxesCounter(size_t depth, size_t inc = 1) {
+    std::lock_guard<std::mutex> lock(m_mutexNumMDBoxes);
+    m_numMDGridBoxes[depth] += inc;
+  }
+
+  void incBoxesCounter(size_t depth, size_t inc = 1) {
+    std::lock_guard<std::mutex> lock(m_mutexNumMDBoxes);
+    m_numMDBoxes[depth] += inc;
+  }
+
   /** Call to track the number of MDBoxes are contained in the MDEventWorkspace
    * This should be called when a MDBox gets split into a MDGridBox.
    * The number of MDBoxes at [depth] is reduced by one

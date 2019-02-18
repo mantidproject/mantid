@@ -84,6 +84,10 @@ public:
     return m_shape->generatePointInObject(rng, activeRegion, i);
   }
 
+  detail::ShapeInfo::GeometryShape shape() const override {
+    return m_shape->shape();
+  }
+
   void GetObjectGeom(detail::ShapeInfo::GeometryShape &type,
                      std::vector<Kernel::V3D> &vectors, double &myradius,
                      double &myheight) const override {
