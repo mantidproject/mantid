@@ -29,13 +29,6 @@ using boost::integer::gcd;
 namespace Mantid {
 namespace Kernel {
 
-/// Constructor [Null]
-V3D::V3D() : x(0), y(0), z(0) {}
-
-/// Value constructor
-V3D::V3D(const double xx, const double yy, const double zz)
-    : x(xx), y(yy), z(zz) {}
-
 /**
   Sets the vector position based on spherical coordinates
 
@@ -134,12 +127,6 @@ void V3D::getSpherical(double &R, double &theta, double &phi) const {
 double V3D::norm() const { return sqrt(x * x + y * y + z * z); }
 
 /**
-  Vector length without the sqrt
-  @return vec.length()
-*/
-double V3D::norm2() const { return (x * x + y * y + z * z); }
-
-/**
   Normalises the vector and
   then returns the scalar value of the vector
   @return Norm
@@ -155,24 +142,6 @@ void V3D::round() {
   x = std::round(x);
   y = std::round(y);
   z = std::round(z);
-}
-
-/**
-  Calculates the scalar product
-  @param V :: The second vector to include in the calculation
-  @return The scalar product of the two vectors
-*/
-double V3D::scalar_prod(const V3D &V) const {
-  return (x * V.x + y * V.y + z * V.z);
-}
-
-/**
-  Calculates the cross product. Returns (this * v).
-  @param v :: The second vector to include in the calculation
-  @return The cross product of the two vectors (this * v)
-*/
-V3D V3D::cross_prod(const V3D &v) const {
-  return V3D(y * v.z - z * v.y, z * v.x - x * v.z, x * v.y - y * v.x);
 }
 
 /**
