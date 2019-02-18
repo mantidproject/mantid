@@ -98,7 +98,7 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
             self.model = TableWorkspaceDisplayModel(workspace)
             self.load_data(self.view)
             self.view.blockSignals(False)
-            
+
             self.view.emit_repaint()
 
     def handleItemChanged(self, item):
