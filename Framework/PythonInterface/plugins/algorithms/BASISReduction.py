@@ -453,17 +453,21 @@ class BASISReduction(PythonAlgorithm):
     def _calibrate_data(self, sam_ws, mon_ws):
         sapi.MaskDetectors(Workspace=sam_ws,
                            DetectorList=self._dMask)
-        sapi.ModeratorTzeroLinear(InputWorkspace=sam_ws,
-                                  OutputWorkspace=sam_ws)
         sapi.LoadParameterFile(Workspace=sam_ws,
                                Filename=pjoin(DEFAULT_CONFIG_DIR,
                                               self._reflection['parameter_file']))
+        sapi.ModeratorTzeroLinear(InputWorkspace=sam_ws,
+                                  OutputWorkspace=sam_ws)
         sapi.ConvertUnits(InputWorkspace=sam_ws,
                           OutputWorkspace=sam_ws,
                           Target='Wavelength',
                           EMode='Indirect')
 
         if self._MonNorm:
+            sapi.LoadParameterFile(Workspace=mon_ws,
+                                   Filename=pjoin(DEFAULT_CONFIG_DIR,
+                                                  self._reflection[
+                                                      'parameter_file']))
             sapi.ModeratorTzeroLinear(InputWorkspace=mon_ws,
                                       OutputWorkspace=mon_ws)
             sapi.Rebin(InputWorkspace=mon_ws,

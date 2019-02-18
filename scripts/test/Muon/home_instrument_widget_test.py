@@ -26,7 +26,9 @@ class HomeTabInstrumentPresenterTest(unittest.TestCase):
         self._qapp = mock_widget.mockQapp()
         self.obj = QtGui.QWidget()
         self.context = MuonDataContext()
+        self.context.instrument = 'MUSR'
         self.view = InstrumentWidgetView(self.obj)
+        self.view.set_instrument('MUSR', block=True)
         self.model = InstrumentWidgetModel(self.context)
         self.presenter = InstrumentWidgetPresenter(self.view, self.model)
 
@@ -53,21 +55,15 @@ class HomeTabInstrumentPresenterTest(unittest.TestCase):
 
         self.assertEqual(self.model._data.instrument, 'CHRONUS')
 
-    def test_that_instrument_not_changed_is_user_responds_no(self):
-        self.view.set_instrument('CHRONUS')
-        self.view.instrument_changed_warning = mock.MagicMock(return_value=0)
-        self.view.set_instrument('MUSR')
-
-        self.assertEqual(self.model._data.instrument, 'CHRONUS')
-
     def test_that_subscribers_notified_when_instrument_changed(self):
         observer = Observer()
         observer.update = mock.MagicMock()
-        self.presenter.instrumentNotifier.add_subscriber(observer)
+        self.context.instrumentNotifier.add_subscriber(observer)
 
+        self.view.set_instrument('MUSR', block=True)
         self.view.set_instrument('CHRONUS')
 
-        observer.update.assert_called_once_with(self.presenter.instrumentNotifier, 'CHRONUS')
+        observer.update.assert_called_once_with(self.context.instrumentNotifier, 'CHRONUS')
 
     def test_that_changeing_time_zero_updates_model(self):
         time_zero = 1.23456

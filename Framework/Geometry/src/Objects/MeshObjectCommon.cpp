@@ -130,7 +130,8 @@ bool isOnTriangle(const Kernel::V3D &point, const Kernel::V3D &v1,
 bool rayIntersectsTriangle(const Kernel::V3D &start,
                            const Kernel::V3D &direction, const Kernel::V3D &v1,
                            const Kernel::V3D &v2, const Kernel::V3D &v3,
-                           Kernel::V3D &intersection, int &entryExit) {
+                           Kernel::V3D &intersection,
+                           TrackDirection &entryExit) {
   // Implements Moller Trumbore intersection algorithm
 
   // Eq line x = x0 + tV
@@ -178,10 +179,13 @@ bool rayIntersectsTriangle(const Kernel::V3D &start,
 
     // determine entry exit assuming anticlockwise triangle view from outside
     Kernel::V3D normalDirection = edge1.cross_prod(edge2);
-    if (normalDirection.scalar_prod(direction) > 0.0) {
-      entryExit = -1; // exit
+    const auto scalar_prod = normalDirection.scalar_prod(direction);
+    if (scalar_prod > 0.) {
+      entryExit = TrackDirection::LEAVING; // exit
+    } else if (scalar_prod < 0.) {
+      entryExit = TrackDirection::ENTERING; // entry
     } else {
-      entryExit = 1; // entry
+      throw std::domain_error("Track is in same direction as surface");
     }
     return true;
   }
