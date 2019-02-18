@@ -15,6 +15,7 @@
 #include "MantidDataHandling/MoveInstrumentComponent.h"
 
 #include <cxxtest/TestSuite.h>
+#include <random>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

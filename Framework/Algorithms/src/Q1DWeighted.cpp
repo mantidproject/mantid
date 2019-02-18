@@ -231,59 +231,62 @@ void Q1DWeighted::exec() {
         const V3D position = pos - V3D(subX, subY, 0.0) + correction;
         const double sinTheta = sin(0.5 * position.angle(beamLine));
         const double q = 4.0 * M_PI * sinTheta / wavelength;
-        try {
-          const size_t k = VectorHelper::indexOfValueFromEdges(qBinEdges, q);
-          double w = 1.0;
-          if (errorWeighting) {
-            // When using the error as weight we have:
-            //    w_i = 1/s_i^2   where s_i is the uncertainty on the ith pixel.
-            //
-            //    I(q_i) = (sum over i of I_i * w_i) / (sum over i of w_i)
-            //       where all pixels i contribute to the q_i bin, and I_i is
-            //       the intensity in the ith pixel.
-            //
-            //    delta I(q_i) = 1/sqrt( (sum over i of w_i) )  using simple
-            //    error propagation.
-            double err = 1.0;
-            if (EIn[j] > 0)
-              err = EIn[j];
-            w /= nSubPixels * nSubPixels * err * err;
-          }
-          PARALLEL_CRITICAL(iqnorm) /* Write to shared memory - must protect */
-          {
-            // Fill in the data for full azimuthal integral
-            intensities[0][j][k] += YIn[j] * w;
-            errors[0][j][k] += w * w * EIn[j] * EIn[j];
-            normalisation[0][j][k] += w;
 
-            if (nWedges != 0) {
-              // we do need to loop over all the wedges, since there is no
-              // restriction for those; they can also overlap
-              // that is the same pixel can simultaneously be in many wedges
-              for (size_t iw = 0; iw < nWedges; ++iw) {
-                double centerAngle = static_cast<double>(iw) * M_PI /
-                                     static_cast<double>(nWedges);
-                if (asymmWedges) {
-                  centerAngle *= 2;
-                }
-                centerAngle += deg2rad * wedgeOffset;
-                const V3D subPix = V3D(position.X(), position.Y(), 0.0);
-                const double angle = fabs(
-                    subPix.angle(V3D(cos(centerAngle), sin(centerAngle), 0.0)));
-                if (angle < deg2rad * wedgeAngle * 0.5 ||
-                    (!asymmWedges &&
-                     fabs(M_PI - angle) < deg2rad * wedgeAngle * 0.5)) {
-                  // first index 0 is the full azimuth, need to offset +1
-                  intensities[iw + 1][j][k] += YIn[j] * w;
-                  errors[iw + 1][j][k] += w * w * EIn[j] * EIn[j];
-                  normalisation[iw + 1][j][k] += w;
-                }
+        if (q < qBinEdges.front() || q > qBinEdges.back()) {
+            continue;
+        }
+
+        // after check above, no need to wrap this in try catch
+        const size_t k = VectorHelper::indexOfValueFromEdges(qBinEdges, q);
+
+        double w = 1.0;
+        if (errorWeighting) {
+          // When using the error as weight we have:
+          //    w_i = 1/s_i^2   where s_i is the uncertainty on the ith
+          //    pixel.
+          //
+          //    I(q_i) = (sum over i of I_i * w_i) / (sum over i of w_i)
+          //       where all pixels i contribute to the q_i bin, and I_i is
+          //       the intensity in the ith pixel.
+          //
+          //    delta I(q_i) = 1/sqrt( (sum over i of w_i) )  using simple
+          //    error propagation.
+          double err = 1.0;
+          if (EIn[j] > 0)
+            err = EIn[j];
+          w /= nSubPixels * nSubPixels * err * err;
+        }
+        PARALLEL_CRITICAL(iqnorm) /* Write to shared memory - must protect */
+        {
+          // Fill in the data for full azimuthal integral
+          intensities[0][j][k] += YIn[j] * w;
+          errors[0][j][k] += w * w * EIn[j] * EIn[j];
+          normalisation[0][j][k] += w;
+
+          if (nWedges != 0) {
+            // we do need to loop over all the wedges, since there is no
+            // restriction for those; they can also overlap
+            // that is the same pixel can simultaneously be in many wedges
+            for (size_t iw = 0; iw < nWedges; ++iw) {
+              double centerAngle =
+                  static_cast<double>(iw) * M_PI / static_cast<double>(nWedges);
+              if (asymmWedges) {
+                centerAngle *= 2;
+              }
+              centerAngle += deg2rad * wedgeOffset;
+              const V3D subPix = V3D(position.X(), position.Y(), 0.0);
+              const double angle = fabs(
+                  subPix.angle(V3D(cos(centerAngle), sin(centerAngle), 0.0)));
+              if (angle < deg2rad * wedgeAngle * 0.5 ||
+                  (!asymmWedges &&
+                   fabs(M_PI - angle) < deg2rad * wedgeAngle * 0.5)) {
+                // first index 0 is the full azimuth, need to offset +1
+                intensities[iw + 1][j][k] += YIn[j] * w;
+                errors[iw + 1][j][k] += w * w * EIn[j] * EIn[j];
+                normalisation[iw + 1][j][k] += w;
               }
             }
           }
-        } catch (std::out_of_range) {
-          // if the Q is out of our binning, skip it
-          continue;
         }
       }
       progress.report("Computing I(Q)");
