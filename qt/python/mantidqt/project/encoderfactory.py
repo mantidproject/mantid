@@ -29,6 +29,8 @@ class EncoderFactory(object):
                                + obj.__class__.__name__)
         elif len(obj_encoders) == 1:
             return obj_encoders[0]()
+        else:
+            return None
 
     @classmethod
     def register_encoder(cls, encoder, compatible_check=None):
