@@ -22,12 +22,12 @@ namespace RandomPoint {
 Kernel::V3D inCuboid(const detail::ShapeInfo &shapeInfo,
                      Kernel::PseudoRandomNumberGenerator &rng) {
   const auto geometry = shapeInfo.cuboidGeometry();
-  const auto r1{rng.nextValue()};
-  const auto r2{rng.nextValue()};
-  const auto r3{rng.nextValue()};
-  const auto basis1{geometry.leftFrontTop - geometry.leftFrontBottom};
-  const auto basis2{geometry.leftBackBottom - geometry.leftFrontBottom};
-  const auto basis3{geometry.rightFrontBottom - geometry.leftFrontBottom};
+  const double r1{rng.nextValue()};
+  const double r2{rng.nextValue()};
+  const double r3{rng.nextValue()};
+  const Kernel::V3D basis1{geometry.leftFrontTop - geometry.leftFrontBottom};
+  const Kernel::V3D basis2{geometry.leftBackBottom - geometry.leftFrontBottom};
+  const Kernel::V3D basis3{geometry.rightFrontBottom - geometry.leftFrontBottom};
   return geometry.leftFrontBottom + (basis1 * r1 + basis2 * r2 + basis3 * r3);
 }
 
@@ -41,15 +41,14 @@ Kernel::V3D inCylinder(const detail::ShapeInfo &shapeInfo,
                        Kernel::PseudoRandomNumberGenerator &rng) {
   using boost::math::pow;
   const auto geometry = shapeInfo.cylinderGeometry();
-  const auto r1{rng.nextValue()};
-  const auto r2{rng.nextValue()};
-  const auto r3{rng.nextValue()};
-  const auto polar{2. * M_PI * r1};
+  const double r1{rng.nextValue()};
+  const double r2{rng.nextValue()};
+  const double r3{rng.nextValue()};
+  const double polar{2. * M_PI * r1};
   // The sqrt is needed for a uniform distribution of points.
-  const auto r{geometry.radius * std::sqrt(r2)};
-  const auto z{geometry.height * r3};
-  // TODO check cylinder's basis creation in Rasterize
-  const auto alongAxis{geometry.axis * z};
+  const double r{geometry.radius * std::sqrt(r2)};
+  const double z{geometry.height * r3};
+  const Kernel::V3D alongAxis{geometry.axis * z};
   const Kernel::V3D &basis1{geometry.axis};
   Mantid::Kernel::V3D basis2{1., 0., 0.};
   if (basis1.X() != 0. && basis1.Z() != 0) {
@@ -72,16 +71,16 @@ Kernel::V3D inCylinder(const detail::ShapeInfo &shapeInfo,
 Kernel::V3D inSphere(const detail::ShapeInfo &shapeInfo,
                      Kernel::PseudoRandomNumberGenerator &rng) {
   const auto geometry = shapeInfo.sphereGeometry();
-  const auto r1{rng.nextValue()};
-  const auto r2{rng.nextValue()};
-  const auto r3{rng.nextValue()};
-  const auto azimuthal{2. * M_PI * r1};
+  const double r1{rng.nextValue()};
+  const double r2{rng.nextValue()};
+  const double r3{rng.nextValue()};
+  const double azimuthal{2. * M_PI * r1};
   // The acos is needed for a uniform distribution of points.
-  const auto polar{std::acos(2. * r2 - 1.)};
-  const auto r{r3 * geometry.radius};
-  const auto x{r * std::cos(azimuthal) * std::sin(polar)};
-  const auto y{r * std::sin(azimuthal) * std::sin(polar)};
-  const auto z{r * std::cos(polar)};
+  const double polar{std::acos(2. * r2 - 1.)};
+  const double r{r3 * geometry.radius};
+  const double x{r * std::cos(azimuthal) * std::sin(polar)};
+  const double y{r * std::sin(azimuthal) * std::sin(polar)};
+  const double z{r * std::cos(polar)};
   return geometry.centre + Kernel::V3D{x, y, z};
 }
 
