@@ -90,6 +90,7 @@ Improvements
 - Various clarifications and additional links in the geometry and material documentation pages
 - :ref:`SetSample <algm-SetSample>` and :ref:`SetSampleMaterial <algm-SetSampleMaterial>` now accept materials without ``ChemicalFormula`` or ``AtomicNumber``. In this case, all cross sections and ``SampleNumberDensity`` have to be given.
 - :ref:`Q1DWeighted <algm-Q1DWeighted>` will now discard the masked bins in the input and can optionally account for the gravity drop.
+- :ref:`Q1DWeighted <algm-Q1DWeighted>` is now an order of magnitude faster for TOF SANS data due to reorganization of the code.
 
 Bugfixes
 ########
