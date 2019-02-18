@@ -42,7 +42,7 @@ def check_future_import(content):
     match = re.search(r'(import .*__future__|from __future__  *import)',
                       content)
     if match:
-        line_no = content.count('\n', 0, match.end()) + 1
+        line_no = len(re.findall(r'(\r\n|\n|\r)', content[:match.end()])) + 1
         return line_no
     return False
 
