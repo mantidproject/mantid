@@ -121,7 +121,6 @@ void updateExperimentProperties(AlgorithmRuntimeProps &properties,
   updatePolarizationCorrectionProperties(properties,
                                          experiment.polarizationCorrections());
   updateFloodCorrectionProperties(properties, experiment.floodCorrections());
-  AlgorithmProperties::updateFromMap(properties, experiment.stitchParameters());
 }
 
 void updatePerThetaDefaultProperties(AlgorithmRuntimeProps &properties,
