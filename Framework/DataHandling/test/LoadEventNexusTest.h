@@ -42,7 +42,7 @@ void run_multiprocess_load(const std::string &file, bool precount) {
   Mantid::API::FrameworkManager::Instance();
   LoadEventNexus ld;
   ld.initialize();
-  ld.setPropertyValue("Loadtype", "multiprocess");
+  ld.setPropertyValue("Loadtype", "Multiprocess (experimental)");
   std::string outws_name = "multiprocess";
   ld.setPropertyValue("Filename", file);
   ld.setPropertyValue("OutputWorkspace", outws_name);
@@ -57,7 +57,7 @@ void run_multiprocess_load(const std::string &file, bool precount) {
 
   LoadEventNexus ldRef;
   ldRef.initialize();
-  ldRef.setPropertyValue("Loadtype", "default");
+  ldRef.setPropertyValue("Loadtype", "Default");
   outws_name = "reference";
   ldRef.setPropertyValue("Filename", file);
   ldRef.setPropertyValue("OutputWorkspace", outws_name);
@@ -1009,7 +1009,7 @@ public:
       loader.initialize();
       loader.setPropertyValue("Filename", "SANS2D00022048.nxs");
       loader.setPropertyValue("OutputWorkspace", "ws");
-      loader.setPropertyValue("Loadtype", "multiprocess");
+      loader.setPropertyValue("Loadtype", "Multiprocess (experimental)");
       loader.setPropertyValue("Precount", std::to_string(true));
       TS_ASSERT(loader.execute());
     }
@@ -1020,7 +1020,7 @@ public:
       loader.initialize();
       loader.setPropertyValue("Filename", "SANS2D00022048.nxs");
       loader.setPropertyValue("OutputWorkspace", "ws");
-      loader.setPropertyValue("Loadtype", "multiprocess");
+      loader.setPropertyValue("Loadtype", "Multiprocess (experimental)");
       loader.setPropertyValue("Precount", std::to_string(false));
       TS_ASSERT(loader.execute());
     }
