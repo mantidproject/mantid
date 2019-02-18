@@ -279,7 +279,7 @@ void LoadEventNexus::init() {
   auto loadTypeValidator = boost::make_shared<StringListValidator>(loadType);
   declareProperty("LoadType", "Default", loadTypeValidator,
                   "Set type of loader. 2 options {Default, Multiproceess},"
-                  "'Multiprocess' should work faster for big files and is "
+                  "'Multiprocess' should work faster for big files and it is "
                   "experimental, available only in Linux");
 }
 
