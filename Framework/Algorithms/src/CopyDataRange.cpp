@@ -119,13 +119,13 @@ std::map<std::string, std::string> CopyDataRange::validateInputs() {
   if (destWorkspaceName.empty())
     errors["DestWorkspace"] = "No destination workspace was provided.";
 
-  if (xMaxIndex >= inputWorkspace->y(0).size())
+  if (xMaxIndex >= static_cast<int>(inputWorkspace->y(0).size()))
     errors["XMaxIndex"] = "The XMaxIndex is larger than the maximum range in "
                           "the input workspace.";
   if (xMinIndex > xMaxIndex)
     errors["XMinIndex"] = "The XMinIndex must be smaller than XMaxIndex.";
 
-  if (specMaxIndex >= inputWorkspace->getNumberHistograms())
+  if (specMaxIndex >= static_cast<int>(inputWorkspace->getNumberHistograms()))
     errors["EndWorkspaceIndex"] =
         "The EndWorkspaceIndex is larger than the number of histograms in "
         "the input workspace.";
@@ -133,12 +133,13 @@ std::map<std::string, std::string> CopyDataRange::validateInputs() {
     errors["StartWorkspaceIndex"] =
         "The StartWorkspaceIndex must be smaller than the EndWorkspaceIndex.";
 
-  if (destWorkspace->getNumberHistograms() <
+  if (static_cast<int>(destWorkspace->getNumberHistograms()) <
       yInsertionIndex + specMaxIndex - specMinIndex)
     errors["InsertionYIndex"] =
         "The y data range selected will not fit into the "
         "destination workspace.";
-  if (destWorkspace->y(0).size() < xInsertionIndex + xMaxIndex - xMinIndex)
+  if (static_cast<int>(destWorkspace->y(0).size()) <
+      xInsertionIndex + xMaxIndex - xMinIndex)
     errors["InsertionXIndex"] =
         "The x data range selected will not fit into the "
         "destination workspace.";
