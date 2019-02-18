@@ -34,7 +34,7 @@ WorkspaceTreeWidgetSimple::WorkspaceTreeWidgetSimple(bool viewOnly,
       m_overplotSpectrumWithErrs(
           new QAction("overplot spectrum with errors...", this)),
       m_plotColorfill(new QAction("colorfill", this)),
-      m_sampleLogs(new QAction("Sample Logs", this)),
+      m_sampleLogs(new QAction("Show Sample Logs", this)),
       m_showInstrument(new QAction("Show Instrument", this)),
       m_showData(new QAction("Show Data", this)),
       m_showAlgorithmHistory(new QAction("Show History", this)) {
@@ -106,6 +106,7 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
       menu->addAction(m_showData);
       menu->addAction(m_showAlgorithmHistory);
       menu->addAction(m_showInstrument);
+      menu->addAction(m_sampleLogs);
       m_showInstrument->setEnabled(
           matrixWS->getInstrument() &&
           !matrixWS->getInstrument()->getName().empty());
@@ -117,7 +118,6 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
     }
     menu->addAction(m_rename);
     menu->addAction(m_saveNexus);
-    menu->addAction(m_sampleLogs);
 
     menu->addSeparator();
     menu->addAction(m_delete);
