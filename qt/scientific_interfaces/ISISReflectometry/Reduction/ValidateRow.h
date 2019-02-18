@@ -17,6 +17,11 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
+/** @class RowValidator
+
+    The RowValidator does the work to check whether cells in a row on the runs
+    table are valid
+ */
 class MANTIDQT_ISISREFLECTOMETRY_DLL RowValidator {
 public:
   ValidationResult<Row, std::vector<int>>

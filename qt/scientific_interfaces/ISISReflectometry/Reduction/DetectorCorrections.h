@@ -13,6 +13,11 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
+/** @class DetectorCorrectionType
+
+    The DetectorCorrectionType determines how detectors should be
+    moved prior to redcution
+*/
 enum class DetectorCorrectionType { VerticalShift, RotateAroundSample };
 
 inline std::string
@@ -26,6 +31,10 @@ detectorCorrectionTypeToString(DetectorCorrectionType correctionType) {
   throw std::runtime_error("Unexpected detector correction type");
 }
 
+/** The DetectorCorrections model holds information about whether
+ * and how detectors in a workspace should be moved before being
+ * reduced.
+ */
 class MANTIDQT_ISISREFLECTOMETRY_DLL DetectorCorrections {
 public:
   DetectorCorrections(bool correctPositions,

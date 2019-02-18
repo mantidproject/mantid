@@ -23,6 +23,11 @@ enum class State {
   ITEM_WARNING
 };
 
+/** @class ItemState
+
+    The ItemState class provides information about the processing state of an
+    item (i.e. row or group) the the runs table
+ */
 class MANTIDQT_ISISREFLECTOMETRY_DLL ItemState {
 public:
   ItemState();

@@ -22,6 +22,11 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
+/** @class Experiment
+
+    The Experiment model holds all settings relating to the Experiment Settings
+    tab on the GUI
+ */
 class MANTIDQT_ISISREFLECTOMETRY_DLL Experiment {
 public:
   Experiment(AnalysisMode analysisMode, ReductionType reductionType,

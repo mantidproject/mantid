@@ -17,6 +17,10 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
+/** @class RunsTable
+
+    The RunsTable model holds all information about the table on the Runs tab
+ */
 class MANTIDQT_ISISREFLECTOMETRY_DLL RunsTable {
 public:
   RunsTable(std::vector<std::string> instruments, double thetaTolerance,

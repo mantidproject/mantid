@@ -16,6 +16,13 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
+/** @class PerThetaDefaults
+
+    The PerThetaDefaults model holds information about default experiment
+   settings that should be applied during reduction for runs with a specific
+   angle, theta. If theta is not set, then the settings will be applied to all
+   runs that do not have PerThetaDefaults with a matching theta.
+ */
 class MANTIDQT_ISISREFLECTOMETRY_DLL PerThetaDefaults {
 public:
   PerThetaDefaults(

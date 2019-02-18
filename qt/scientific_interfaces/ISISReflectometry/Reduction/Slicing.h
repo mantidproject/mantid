@@ -86,6 +86,9 @@ MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(InvalidSlicing const &lhs,
 MANTIDQT_ISISREFLECTOMETRY_DLL std::ostream &
 operator<<(std::ostream &os, InvalidSlicing const &slicing);
 
+/** Slicing holds information about the type of event slicing
+ * to be performed on the input workspace before reduction
+ */
 using Slicing =
     boost::variant<boost::blank, InvalidSlicing, UniformSlicingByTime,
                    UniformSlicingByNumberOfSlices, CustomSlicingByList,

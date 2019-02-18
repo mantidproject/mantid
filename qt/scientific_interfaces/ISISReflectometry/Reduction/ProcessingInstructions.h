@@ -12,8 +12,9 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-// For now processing instructions are just a string but we expect them to
-// become more complicated so this can be changed to a class in the future
+/** For now processing instructions are just a string but we expect them to
+    become more complicated so this can be changed to a class in the future
+*/
 using ProcessingInstructions = std::string;
 } // namespace CustomInterfaces
 } // namespace MantidQt

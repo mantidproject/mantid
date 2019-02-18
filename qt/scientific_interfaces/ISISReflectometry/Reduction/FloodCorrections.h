@@ -37,6 +37,11 @@ inline bool floodCorrectionRequiresInputs(FloodCorrectionType correctionType) {
   return (correctionType == FloodCorrectionType::Workspace);
 }
 
+/** @class FloodCorrections
+
+    The FloodCorrections model holds information about what type of flood
+    corrections should be performed in the reduction
+ */
 class MANTIDQT_ISISREFLECTOMETRY_DLL FloodCorrections {
 public:
   FloodCorrections(FloodCorrectionType correctionType,

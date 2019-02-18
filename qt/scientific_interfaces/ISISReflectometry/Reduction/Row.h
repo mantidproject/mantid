@@ -21,6 +21,10 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
+/** @class Row
+
+  The Row model represents a single row in the runs table
+*/
 // Immutability here makes update notification easier.
 class MANTIDQT_ISISREFLECTOMETRY_DLL Row : public Item {
 public:

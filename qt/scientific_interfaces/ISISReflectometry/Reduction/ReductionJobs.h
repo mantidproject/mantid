@@ -16,6 +16,11 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
+/** @class ReductionJobs
+
+    The ReductionJobs model holds information about all jobs to be performed as
+    part of a batch reduction.
+ */
 class MANTIDQT_ISISREFLECTOMETRY_DLL ReductionJobs {
 public:
   ReductionJobs();

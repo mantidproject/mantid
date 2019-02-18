@@ -17,6 +17,10 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
+/** @class Group
+
+    The Group model holds information about a group of rows in the runs table.
+ */
 class MANTIDQT_ISISREFLECTOMETRY_DLL Group : public Item {
 public:
   explicit Group(std::string name);

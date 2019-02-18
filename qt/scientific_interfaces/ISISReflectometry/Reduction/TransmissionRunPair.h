@@ -13,6 +13,12 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+/** @class TransmissionRunPair
+
+    The TransmissionRunPair model holds information about the two possible
+    input transmission workspaces for a reduction. Each workspace may be
+    constructed from multiple runs, which will be summed prior to reduction.
+ */
 class MANTIDQT_ISISREFLECTOMETRY_DLL TransmissionRunPair {
 public:
   TransmissionRunPair();

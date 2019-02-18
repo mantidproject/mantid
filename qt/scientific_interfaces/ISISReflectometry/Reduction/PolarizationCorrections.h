@@ -48,6 +48,11 @@ inline bool polarizationCorrectionRequiresInputs(
           correctionType == PolarizationCorrectionType::PNR);
 }
 
+/** @class PoliarizationCorrections
+
+    The PoliarizationCorrections model holds information about what polarization
+    corrections should be done during reduction
+ */
 class MANTIDQT_ISISREFLECTOMETRY_DLL PolarizationCorrections {
 public:
   PolarizationCorrections(PolarizationCorrectionType correctionType,

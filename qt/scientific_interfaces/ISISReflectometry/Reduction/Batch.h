@@ -16,6 +16,11 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
+/** @class Batch
+
+    The Batch model holds the entire reduction configuration for a batch of
+    runs.
+*/
 class MANTIDQT_ISISREFLECTOMETRY_DLL Batch {
 public:
   Batch(Experiment const &experiment, Instrument const &instrument,

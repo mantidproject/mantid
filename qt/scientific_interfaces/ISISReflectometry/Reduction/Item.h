@@ -15,6 +15,11 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
+/** @class Item
+
+    Item is a generic base class providing common operations and state for rows
+    and groups in the runs table
+ */
 class MANTIDQT_ISISREFLECTOMETRY_DLL Item {
 public:
   Item();

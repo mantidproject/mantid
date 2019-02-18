@@ -10,6 +10,9 @@
 #include <boost/optional.hpp>
 namespace MantidQt {
 namespace CustomInterfaces {
+/** The ReductionType determines what type of reduction is to be performed
+ * by the reduction algorithm
+ */
 enum class ReductionType { DivergentBeam, NonFlatSample, Normal };
 
 inline ReductionType reductionTypeFromString(std::string const &reductionType) {

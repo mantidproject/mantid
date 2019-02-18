@@ -18,6 +18,11 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
+/** @class ReductionWorkspaces
+
+    The ReductionWorkspaces model holds information about all input and output
+    workspaces that are involved in a reduction
+ */
 class MANTIDQT_ISISREFLECTOMETRY_DLL ReductionWorkspaces {
 public:
   ReductionWorkspaces(std::vector<std::string> inputRunNumbers,

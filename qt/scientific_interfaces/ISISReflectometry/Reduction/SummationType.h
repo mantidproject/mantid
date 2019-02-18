@@ -13,6 +13,9 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
+/** SummationType holds information about what type of summation should be
+ * done in the reduction
+ */
 enum class SummationType { SumInLambda, SumInQ };
 
 inline SummationType summationTypeFromString(std::string const &summationType) {
