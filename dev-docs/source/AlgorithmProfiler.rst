@@ -33,7 +33,7 @@ Precise timers are different for Linux and Windows (chrono is not good enough), 
 separately. The suggestion is either to modify files ``Framework/API/inc/MantidAPI/AlgoTimeRegister.h`` and
 ``Framework/API/src/AlgoTimeRegister.cpp`` in manner ``#ifdef __WIN32`` or create the specific files with
 the ``AlgoTimeRegister`` class for Windows and then in ``Framework/API/CMakeLists.txt`` edit the chunk that
-describes option PROFILE_ALGORITHM_LINUX combined with OS defied flags e.g., also in this case
+describes option PROFILE_ALGORITHM_LINUX combined with OS defined flags. In this case
 ``Framework/API/src/AlgorithmExecuteProfile.cpp`` needs to be modified or substituted.
 ``${CMAKE_SYSTEM_NAME} MATCHES "Windows"``. QueryPerformanceCounter supposed to be used on windows,
 instead of clock_gettime.
