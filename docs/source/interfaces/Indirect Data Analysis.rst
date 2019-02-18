@@ -340,7 +340,7 @@ Plot
   Plots the selected parameter stored in the result (or PDF) workspace.
 
 Edit Result
-  Allows you to replace values within your *_Results* workspace using the :ref:`ReplaceIndirectFitResultBin <algm-ReplaceIndirectFitResultBin>`
+  Allows you to replace values within your *_Results* workspace using the :ref:`IndirectReplaceFitResult <algm-IndirectReplaceFitResult>`
   algorithm. See below for more detail.
 
 Save Result
@@ -443,7 +443,7 @@ Plot
   Plots the selected parameter stored in the result (or PDF) workspace.
 
 Edit Result
-  Allows you to replace values within your *_Results* workspace using the :ref:`ReplaceIndirectFitResultBin <algm-ReplaceIndirectFitResultBin>`
+  Allows you to replace values within your *_Results* workspace using the :ref:`IndirectReplaceFitResult <algm-IndirectReplaceFitResult>`
   algorithm. See below for more detail.
 
 Save Result
@@ -637,7 +637,7 @@ Although this normally yields better parameter values for the later spectra, it 
 next spectrum is not 'related' to the previous spectrum. It may be useful to replace this poorly fitted spectrum with the results 
 from a single fit using the 'Edit Result' option. 
 Clicking the 'Edit Result' button will allow you to modify the data within your *_Results* workspace using results 
-produced from a singly fit spectrum. See the algorithm :ref:`ReplaceIndirectFitResultBin <algm-ReplaceIndirectFitResultBin>`.
+produced from a singly fit spectrum. See the algorithm :ref:`IndirectReplaceFitResult <algm-IndirectReplaceFitResult>`.
 
 Clicking the 'Save Result' button will save the result of the fit to your default save location.
 
