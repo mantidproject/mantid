@@ -19,89 +19,95 @@ using Mantid::API::IAlgorithm_sptr;
 using Mantid::API::Workspace_sptr;
 using AlgorithmRuntimeProps = std::map<std::string, std::string>;
 
-namespace { // unnamed
+namespace AlgorithmProperties {
+// These convenience functions convert properties of various types into
+// strings to set the relevant property in an AlgorithmRuntimeProps
 std::string boolToString(bool value) { return value ? "1" : "0"; }
 
-void updateProperty(std::string const &property, std::string const &value,
-                    AlgorithmRuntimeProps &properties) {
+void update(std::string const &property, std::string const &value,
+            AlgorithmRuntimeProps &properties) {
   if (!value.empty())
     properties[property] = value;
 }
 
-void updateProperty(std::string const &property,
-                    boost::optional<std::string> const &value,
-                    AlgorithmRuntimeProps &properties) {
+void update(std::string const &property,
+            boost::optional<std::string> const &value,
+            AlgorithmRuntimeProps &properties) {
   if (value)
-    updateProperty(property, value.get(), properties);
+    update(property, value.get(), properties);
 }
 
 template <typename VALUE_TYPE>
-void updateProperty(std::string const &property,
-                    std::vector<VALUE_TYPE> const &values,
-                    AlgorithmRuntimeProps &properties) {
+void update(std::string const &property, std::vector<VALUE_TYPE> const &values,
+            AlgorithmRuntimeProps &properties) {
   if (values.size() < 1)
     return;
 
   auto value =
       Mantid::Kernel::Strings::simpleJoin(values.cbegin(), values.cend(), ", ");
-  updateProperty(property, value, properties);
+  update(property, value, properties);
 }
 
-void updateProperty(std::string const &property, bool value,
-                    AlgorithmRuntimeProps &properties) {
-  updateProperty(property, boolToString(value), properties);
+void update(std::string const &property, bool value,
+            AlgorithmRuntimeProps &properties) {
+  update(property, boolToString(value), properties);
 }
 
-void updateProperty(std::string const &property, int value,
-                    AlgorithmRuntimeProps &properties) {
-  updateProperty(property, std::to_string(value), properties);
+void update(std::string const &property, int value,
+            AlgorithmRuntimeProps &properties) {
+  update(property, std::to_string(value), properties);
 }
 
-void updateProperty(std::string const &property, size_t value,
-                    AlgorithmRuntimeProps &properties) {
-  updateProperty(property, std::to_string(value), properties);
+void update(std::string const &property, size_t value,
+            AlgorithmRuntimeProps &properties) {
+  update(property, std::to_string(value), properties);
 }
 
-void updateProperty(std::string const &property, double value,
-                    AlgorithmRuntimeProps &properties) {
-  updateProperty(property, std::to_string(value), properties);
+void update(std::string const &property, double value,
+            AlgorithmRuntimeProps &properties) {
+  update(property, std::to_string(value), properties);
 }
 
-void updateProperty(std::string const &property,
-                    boost::optional<double> const &value,
-                    AlgorithmRuntimeProps &properties) {
+void update(std::string const &property, boost::optional<double> const &value,
+            AlgorithmRuntimeProps &properties) {
   if (value)
-    updateProperty(property, value.get(), properties);
+    update(property, value.get(), properties);
 }
 
-void updatePropertiesFromMap(
-    AlgorithmRuntimeProps &properties,
-    std::map<std::string, std::string> const &parameterMap) {
+void updateFromMap(AlgorithmRuntimeProps &properties,
+                   std::map<std::string, std::string> const &parameterMap) {
   for (auto kvp : parameterMap) {
-    updateProperty(kvp.first, kvp.second, properties);
+    update(kvp.first, kvp.second, properties);
   }
 }
+} // namespace AlgorithmProperties
 
+namespace RowProperties {
+// These functions update properties in an AlgorithmRuntimeProps for specific
+// properties for the row reduction algorithm
 void updateInputWorkspacesProperties(
     AlgorithmRuntimeProps &properties,
     std::vector<std::string> const &inputRunNumbers) {
-  updateProperty("InputRunList", inputRunNumbers, properties);
+  AlgorithmProperties::update("InputRunList", inputRunNumbers, properties);
 }
 
 void updateTransmissionWorkspaceProperties(
     AlgorithmRuntimeProps &properties,
     TransmissionRunPair const &transmissionRuns) {
-  updateProperty("FirstTransmissionRunList", transmissionRuns.firstRunList(),
-                 properties);
-  updateProperty("SecondTransmissionRunList", transmissionRuns.secondRunList(),
-                 properties);
+  AlgorithmProperties::update("FirstTransmissionRunList",
+                              transmissionRuns.firstRunList(), properties);
+  AlgorithmProperties::update("SecondTransmissionRunList",
+                              transmissionRuns.secondRunList(), properties);
 }
 
 void updateMomentumTransferProperties(AlgorithmRuntimeProps &properties,
                                       RangeInQ const &rangeInQ) {
-  updateProperty("MomentumTransferMin", rangeInQ.min(), properties);
-  updateProperty("MomentumTransferMax", rangeInQ.max(), properties);
-  updateProperty("MomentumTransferStep", rangeInQ.step(), properties);
+  AlgorithmProperties::update("MomentumTransferMin", rangeInQ.min(),
+                              properties);
+  AlgorithmProperties::update("MomentumTransferMax", rangeInQ.max(),
+                              properties);
+  AlgorithmProperties::update("MomentumTransferStep", rangeInQ.step(),
+                              properties);
 }
 
 void updateRowProperties(AlgorithmRuntimeProps &properties, Row const &row) {
@@ -110,9 +116,9 @@ void updateRowProperties(AlgorithmRuntimeProps &properties, Row const &row) {
   updateTransmissionWorkspaceProperties(
       properties, row.reducedWorkspaceNames().transmissionRuns());
   updateMomentumTransferProperties(properties, row.qRange());
-  updateProperty("ThetaIn", row.theta(), properties);
-  updateProperty("ScaleFactor", row.scaleFactor(), properties);
-  updatePropertiesFromMap(properties, row.reductionOptions());
+  AlgorithmProperties::update("ThetaIn", row.theta(), properties);
+  AlgorithmProperties::update("ScaleFactor", row.scaleFactor(), properties);
+  AlgorithmProperties::updateFromMap(properties, row.reductionOptions());
 }
 
 void updateTransmissionRangeProperties(
@@ -122,10 +128,10 @@ void updateTransmissionRangeProperties(
     return;
 
   if (range->minSet())
-    updateProperty("StartOverlap", range->min(), properties);
+    AlgorithmProperties::update("StartOverlap", range->min(), properties);
 
   if (range->maxSet())
-    updateProperty("EndOverlap", range->max(), properties);
+    AlgorithmProperties::update("EndOverlap", range->max(), properties);
 }
 
 void updatePolarizationCorrectionProperties(
@@ -134,47 +140,51 @@ void updatePolarizationCorrectionProperties(
   if (corrections.correctionType() == PolarizationCorrectionType::None)
     return;
 
-  updateProperty(
+  AlgorithmProperties::update(
       "PolarisationCorrections",
       PolarizationCorrectionTypeToString(corrections.correctionType()),
       properties);
 
   if (corrections.correctionType() == PolarizationCorrectionType::PA ||
       corrections.correctionType() == PolarizationCorrectionType::PNR) {
-    updateProperty("CRho", corrections.cRho(), properties);
-    updateProperty("CAlpha", corrections.cRho(), properties);
-    updateProperty("CAp", corrections.cRho(), properties);
-    updateProperty("CPp", corrections.cRho(), properties);
+    AlgorithmProperties::update("CRho", corrections.cRho(), properties);
+    AlgorithmProperties::update("CAlpha", corrections.cRho(), properties);
+    AlgorithmProperties::update("CAp", corrections.cRho(), properties);
+    AlgorithmProperties::update("CPp", corrections.cRho(), properties);
   }
 }
 
 void updateFloodCorrectionProperties(AlgorithmRuntimeProps &properties,
                                      FloodCorrections const &corrections) {
-  updateProperty("FloodCorrection",
-                 FloodCorrectionTypeToString(corrections.correctionType()),
-                 properties);
+  AlgorithmProperties::update(
+      "FloodCorrection",
+      FloodCorrectionTypeToString(corrections.correctionType()), properties);
 
   if (corrections.correctionType() == FloodCorrectionType::Workspace)
-    updateProperty("FloodWorkspace", corrections.workspace(), properties);
+    AlgorithmProperties::update("FloodWorkspace", corrections.workspace(),
+                                properties);
 }
 
 void updateExperimentProperties(AlgorithmRuntimeProps &properties,
                                 Experiment const &experiment) {
-  updateProperty("AnalysisMode",
-                 analysisModeToString(experiment.analysisMode()), properties);
-  updateProperty("Debug", boolToString(experiment.debug()), properties);
-  updateProperty("SummationType",
-                 summationTypeToString(experiment.summationType()), properties);
-  updateProperty("ReductionType",
-                 reductionTypeToString(experiment.reductionType()), properties);
-  updateProperty("IncludePartialBins",
-                 boolToString(experiment.includePartialBins()), properties);
+  AlgorithmProperties::update("AnalysisMode",
+                              analysisModeToString(experiment.analysisMode()),
+                              properties);
+  AlgorithmProperties::update("Debug", experiment.debug(), properties);
+  AlgorithmProperties::update("SummationType",
+                              summationTypeToString(experiment.summationType()),
+                              properties);
+  AlgorithmProperties::update("ReductionType",
+                              reductionTypeToString(experiment.reductionType()),
+                              properties);
+  AlgorithmProperties::update("IncludePartialBins",
+                              experiment.includePartialBins(), properties);
   updateTransmissionRangeProperties(properties,
                                     experiment.transmissionRunRange());
   updatePolarizationCorrectionProperties(properties,
                                          experiment.polarizationCorrections());
   updateFloodCorrectionProperties(properties, experiment.floodCorrections());
-  updatePropertiesFromMap(properties, experiment.stitchParameters());
+  AlgorithmProperties::updateFromMap(properties, experiment.stitchParameters());
 }
 
 void updatePerThetaDefaultProperties(AlgorithmRuntimeProps &properties,
@@ -185,9 +195,11 @@ void updatePerThetaDefaultProperties(AlgorithmRuntimeProps &properties,
   updateTransmissionWorkspaceProperties(
       properties, perThetaDefaults->transmissionWorkspaceNames());
   updateMomentumTransferProperties(properties, perThetaDefaults->qRange());
-  updateProperty("ScaleFactor", perThetaDefaults->scaleFactor(), properties);
-  updateProperty("ProcessingInstructions",
-                 perThetaDefaults->processingInstructions(), properties);
+  AlgorithmProperties::update("ScaleFactor", perThetaDefaults->scaleFactor(),
+                              properties);
+  AlgorithmProperties::update("ProcessingInstructions",
+                              perThetaDefaults->processingInstructions(),
+                              properties);
 }
 
 void updateWavelengthRangeProperties(
@@ -196,36 +208,40 @@ void updateWavelengthRangeProperties(
   if (!rangeInLambda)
     return;
 
-  updateProperty("WavelengthMin", rangeInLambda->min(), properties);
-  updateProperty("WavelengthMax", rangeInLambda->max(), properties);
+  AlgorithmProperties::update("WavelengthMin", rangeInLambda->min(),
+                              properties);
+  AlgorithmProperties::update("WavelengthMax", rangeInLambda->max(),
+                              properties);
 }
 
 void updateMonitorCorrectionProperties(AlgorithmRuntimeProps &properties,
                                        MonitorCorrections const &monitor) {
-  updateProperty("I0MonitorIndex", monitor.monitorIndex(), properties);
-  updateProperty("NormalizeByIntegratedMonitors", monitor.integrate(),
-                 properties);
+  AlgorithmProperties::update("I0MonitorIndex", monitor.monitorIndex(),
+                              properties);
+  AlgorithmProperties::update("NormalizeByIntegratedMonitors",
+                              monitor.integrate(), properties);
   if (monitor.integralRange() && monitor.integralRange()->minSet())
-    updateProperty("MonitorIntegrationWavelengthMin",
-                   monitor.integralRange()->min(), properties);
+    AlgorithmProperties::update("MonitorIntegrationWavelengthMin",
+                                monitor.integralRange()->min(), properties);
   if (monitor.integralRange() && monitor.integralRange()->maxSet())
-    updateProperty("MonitorIntegrationWavelengthMax",
-                   monitor.integralRange()->max(), properties);
+    AlgorithmProperties::update("MonitorIntegrationWavelengthMax",
+                                monitor.integralRange()->max(), properties);
   if (monitor.backgroundRange() && monitor.backgroundRange()->minSet())
-    updateProperty("MonitorBackgroundWavelengthMin",
-                   monitor.backgroundRange()->min(), properties);
+    AlgorithmProperties::update("MonitorBackgroundWavelengthMin",
+                                monitor.backgroundRange()->min(), properties);
   if (monitor.backgroundRange() && monitor.backgroundRange()->maxSet())
-    updateProperty("MonitorBackgroundWavelengthMax",
-                   monitor.backgroundRange()->max(), properties);
+    AlgorithmProperties::update("MonitorBackgroundWavelengthMax",
+                                monitor.backgroundRange()->max(), properties);
 }
 
 void updateDetectorCorrectionProperties(AlgorithmRuntimeProps &properties,
                                         DetectorCorrections const &detector) {
-  updateProperty("CorrectDetectors", detector.correctPositions(), properties);
+  AlgorithmProperties::update("CorrectDetectors", detector.correctPositions(),
+                              properties);
   if (detector.correctPositions())
-    updateProperty("DetectorCorrectionType",
-                   detectorCorrectionTypeToString(detector.correctionType()),
-                   properties);
+    AlgorithmProperties::update(
+        "DetectorCorrectionType",
+        detectorCorrectionTypeToString(detector.correctionType()), properties);
 }
 
 void updateInstrumentProperties(AlgorithmRuntimeProps &properties,
@@ -249,16 +265,18 @@ public:
   }
   void operator()(UniformSlicingByTime const &slicing) const {
     enableSlicing();
-    updateProperty("TimeInterval", slicing.sliceLengthInSeconds(),
-                   m_properties);
+    AlgorithmProperties::update("TimeInterval", slicing.sliceLengthInSeconds(),
+                                m_properties);
   }
   void operator()(UniformSlicingByNumberOfSlices const &slicing) const {
     enableSlicing();
-    updateProperty("NumberOfSlices", slicing.numberOfSlices(), m_properties);
+    AlgorithmProperties::update("NumberOfSlices", slicing.numberOfSlices(),
+                                m_properties);
   }
   void operator()(CustomSlicingByList const &slicing) const {
     enableSlicing();
-    updateProperty("TimeInterval", slicing.sliceTimes(), m_properties);
+    AlgorithmProperties::update("TimeInterval", slicing.sliceTimes(),
+                                m_properties);
   }
   void operator()(SlicingByEventLog const &slicing) const {
     if (slicing.sliceAtValues().size() < 1)
@@ -268,16 +286,16 @@ public:
                                "implemented; please specify a single "
                                "interval width");
     enableSlicing();
-    updateProperty("LogName", slicing.blockName(), m_properties);
-    updateProperty("LogValueInterval", slicing.sliceAtValues()[0],
-                   m_properties);
+    AlgorithmProperties::update("LogName", slicing.blockName(), m_properties);
+    AlgorithmProperties::update("LogValueInterval", slicing.sliceAtValues()[0],
+                                m_properties);
   }
 
 private:
   AlgorithmRuntimeProps &m_properties;
 
   void enableSlicing() const {
-    updateProperty("SliceWorkspace", true, m_properties);
+    AlgorithmProperties::update("SliceWorkspace", true, m_properties);
   }
 };
 
@@ -285,45 +303,7 @@ void updateEventProperties(AlgorithmRuntimeProps &properties,
                            Slicing const &slicing) {
   boost::apply_visitor(UpdateEventPropertiesVisitor(properties), slicing);
 }
-
-void getAlgorithmForRow(Row &row, Batch const &model,
-                        std::deque<IConfiguredAlgorithm_sptr> &algorithms) {
-  // Create the algorithm
-  auto alg = Mantid::API::AlgorithmManager::Instance().create(
-      "ReflectometryISISLoadAndProcess");
-  alg->setChild(true);
-
-  // Set up input properties
-  auto properties = AlgorithmRuntimeProps();
-  updateEventProperties(properties, model.slicing());
-  updateExperimentProperties(properties, model.experiment());
-  updatePerThetaDefaultProperties(properties,
-                                  model.defaultsForTheta(row.theta()));
-  updateInstrumentProperties(properties, model.instrument());
-  updateRowProperties(properties, row);
-
-  // Store expected output property names. Must be in the correct order for
-  // Row::algorithmComplete
-  std::vector<std::string> outputWorkspaceProperties = {
-      "OutputWorkspaceWavelength", "OutputWorkspace", "OutputWorkspaceBinned"};
-
-  // Add the configured algorithm to the list
-  auto jobAlgorithm = boost::make_shared<BatchJobAlgorithm>(
-      alg, properties, outputWorkspaceProperties, &row);
-  algorithms.emplace_back(std::move(jobAlgorithm));
-}
-
-void getAlgorithmsForGroup(Group &group, Batch const &model,
-                           bool reprocessFailed, bool processAll,
-                           std::deque<IConfiguredAlgorithm_sptr> &algorithms) {
-  auto &rows = group.mutableRows();
-  for (auto &row : rows) {
-    if (row && row->requiresProcessing(reprocessFailed) &&
-        (processAll || model.isSelected(row.get())))
-      getAlgorithmForRow(row.get(), model, algorithms);
-  }
-}
-} // unnamed namespace
+} // namespace RowProperties
 
 BatchJobAlgorithm::BatchJobAlgorithm(
     Mantid::API::IAlgorithm_sptr algorithm,
@@ -386,15 +366,65 @@ void BatchJobRunner::setReprocessFailedItems(bool reprocessFailed) {
   m_reprocessFailed = reprocessFailed;
 }
 
+/** Get algorithms and related properties for processing rows and groups
+ * in the table
+ */
 std::deque<IConfiguredAlgorithm_sptr> BatchJobRunner::getAlgorithms() {
   auto algorithms = std::deque<IConfiguredAlgorithm_sptr>();
   auto &groups =
       m_batch.mutableRunsTable().mutableReductionJobs().mutableGroups();
   for (auto &group : groups) {
-    getAlgorithmsForGroup(group, m_batch, m_reprocessFailed, m_processAll,
-                          algorithms);
+    addAlgorithmsForRowsInGroup(group, algorithms);
   }
   return algorithms;
+}
+
+/** Add the algorithms and related properties for processing all the rows
+ * in a group
+ * @param group : the group to get the row algorithms for
+ * @param algorithms : the list of configured algorithms to add this group's
+ * rows to
+ */
+void BatchJobRunner::addAlgorithmsForRowsInGroup(
+    Group &group, std::deque<IConfiguredAlgorithm_sptr> &algorithms) {
+  auto &rows = group.mutableRows();
+  for (auto &row : rows) {
+    if (row && row->requiresProcessing(m_reprocessFailed) &&
+        (m_processAll || m_batch.isSelected(row.get()))) {
+      addAlgorithmForRow(row.get(), algorithms);
+    }
+  }
+}
+
+/** Add the algorithm and related properties for processing a row
+ * @param row : the row to get the configured algorithm for
+ * @param algorithms : the list of configured algorithms to add this row to
+ */
+void BatchJobRunner::addAlgorithmForRow(
+    Row &row, std::deque<IConfiguredAlgorithm_sptr> &algorithms) {
+  // Create the algorithm
+  auto alg = Mantid::API::AlgorithmManager::Instance().create(
+      "ReflectometryISISLoadAndProcess");
+  alg->setChild(true);
+
+  // Set up input properties
+  auto properties = AlgorithmRuntimeProps();
+  RowProperties::updateEventProperties(properties, m_batch.slicing());
+  RowProperties::updateExperimentProperties(properties, m_batch.experiment());
+  RowProperties::updatePerThetaDefaultProperties(
+      properties, m_batch.defaultsForTheta(row.theta()));
+  RowProperties::updateInstrumentProperties(properties, m_batch.instrument());
+  RowProperties::updateRowProperties(properties, row);
+
+  // Store expected output property names. Must be in the correct order for
+  // Row::algorithmComplete
+  std::vector<std::string> outputWorkspaceProperties = {
+      "OutputWorkspaceWavelength", "OutputWorkspace", "OutputWorkspaceBinned"};
+
+  // Add the configured algorithm to the list
+  auto jobAlgorithm = boost::make_shared<BatchJobAlgorithm>(
+      alg, properties, outputWorkspaceProperties, &row);
+  algorithms.emplace_back(std::move(jobAlgorithm));
 }
 
 void BatchJobRunner::algorithmStarted(IConfiguredAlgorithm_sptr algorithm) {

@@ -95,6 +95,13 @@ protected:
 private:
   std::vector<std::string> getWorkspacesToSave(Group const &group) const;
   std::vector<std::string> getWorkspacesToSave(Row const &row) const;
+
+  void addAlgorithmsForRowsInGroup(
+      Group &group,
+      std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> &algorithms);
+  void addAlgorithmForRow(
+      Row &row,
+      std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> &algorithms);
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
