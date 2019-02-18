@@ -113,6 +113,8 @@ def _get_MuonGroupingAsymmetry_parameters(context, group_name, run):
 
     if 'GroupRangeMin' in context.gui_variables:
         params['AsymmetryTimeMin'] = context.gui_variables['GroupRangeMin']
+    else:
+        params['AsymmetryTimeMin'] = context.loaded_data(run)["FirstGoodData"]
 
     if 'GroupRangeMax' in context.gui_variables:
         params['AsymmetryTimeMax'] = context.gui_variables['GroupRangeMax']

@@ -156,7 +156,7 @@ class GroupingTablePresenter(object):
         if self._view.group_range_use_first_good_data.isChecked():
             if self._model._data.current_runs:
                 self._view.group_range_min.setText(str(self._model._data.loaded_data(self._model._data.current_runs[-1])["FirstGoodData"]))
-            
+
             self._view.group_range_min.setEnabled(False)
             if 'GroupRangeMin' in self._model._data.gui_variables:
                 self._model._data.gui_variables.pop('GroupRangeMin')
