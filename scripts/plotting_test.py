@@ -55,14 +55,16 @@ class plotTestGui(QtGui.QMainWindow):
 
         self.test.add_vline_and_annotate("test", 10, dummy)
         self.test.add_vline_and_annotate("test", 5, dummy2)
-        #self.test.add_annotate("bob", dummy3)
-        #self.test.add_vline("bob", 1.2, "just a line")
+        self.test.add_annotate("bob", dummy3)
+        self.test.add_vline("bob", 1.2, "just a line")
 
         self.test.plot("bob", ws, specNum=1)
         self.test.plot("EXTRA", ws, specNum=42)
         self.test.plot("moo", ws, specNum=42)
         self.test.plot("baa", ws, specNum=2)
         self.test.set_all_values()
+
+        self.test.connectCloseSignal(self.close)
 
         # add button for adding more plots
         self.n = 0

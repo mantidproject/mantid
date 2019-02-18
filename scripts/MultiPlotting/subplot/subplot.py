@@ -9,8 +9,6 @@ from MultiPlotting.navigation_toolbar import myToolbar
 from MultiPlotting.edit_windows.remove_plot_window import RemovePlotWindow
 from MultiPlotting.edit_windows.select_subplot import SelectSubplot
 
-from MultiPlotting.gridspec_engine import gridspecEngine
-
 
 # use this to manage lines and workspaces directly
 
@@ -19,6 +17,8 @@ from MultiPlotting.gridspec_engine import gridspecEngine
 
 class subplot(QtWidgets.QWidget):
     quickEditSignal = QtCore.Signal(object)
+    rmSubplotSignal = QtCore.Signal(object)
+
 
     def __init__(self, context):
         super(subplot, self).__init__()
@@ -37,13 +37,12 @@ class subplot(QtWidgets.QWidget):
         self.toolbar.update()
         grid.addWidget(self.toolbar, 0, 0)
         self.toolbar.setRmConnection(self._rm)
+        self.toolbar.setRmSubplotConnection(self._rm_subplot)
         # add plot
         self.plotObjects = {}
         grid.addWidget(self.canvas, 1, 0)
         self.setLayout(grid)
 
-        self.gridspec_engine = gridspecEngine()
-        self.gridspec = None
 
     """ this is called when the zoom
     or pan are used. We want to send a
@@ -70,7 +69,7 @@ class subplot(QtWidgets.QWidget):
     def plot(self, subplotName, workspace, specNum=1):
         new = False
         if subplotName not in self._context.subplots.keys():
-            self.add_subplot(subplotName)
+            self.add_subplot(subplotName, len(list(self.plotObjects.keys())))
             new = True
         self._add_plotted_line(subplotName, workspace, specNum=specNum)
         if new:
@@ -88,21 +87,15 @@ class subplot(QtWidgets.QWidget):
         self.canvas.draw()
 
     def add_subplot(self, subplotName, number):
-        #self.gridspec = GridSpec(number+1, 1)
-        self.gridspec = self.gridspec_engine.getGridSpec(number+1)
-        self.plotObjects[subplotName] = self.figure.add_subplot(self.gridspec[number],label=subplotName)
+        self._context.update_gridspec(number+1)
+        gridspec = self._context.gridspec
+        self.plotObjects[subplotName] = self.figure.add_subplot(gridspec[number],label=subplotName)
         self.plotObjects[subplotName].set_title(subplotName)
         self._context.addSubplot(subplotName, self.plotObjects[subplotName])
-        self.update(number+1)
+        self._update()
 
-    def update(self,number):
-        keys = list(self._context.subplots.keys())
-        print(keys)
-        for j, name in zip(range(len(keys)), keys):
-            print("baaa", self.gridspec[j], name,j)
-            tmp = self.gridspec[j].get_position(self.figure)
-            self._context.subplots[name]._subplot.set_position(tmp)
-            self._context.subplots[name]._subplot.set_subplotspec(self.gridspec[j])
+    def _update(self):
+        self._context.update_layout(self.figure)
         self.canvas.draw()
 
     def emit_subplot_range(self, subplotName):
@@ -127,6 +120,12 @@ class subplot(QtWidgets.QWidget):
 
     def disconnect_quick_edit_signal(self, slot):
         self.quickEditSignal.disconnect(slot)
+
+    def connect_rm_subplot_signal(self, slot):
+        self.rmSubplotSignal.connect(slot)
+
+    def disconnect_rm_subplot_signal(self, slot):
+        self.rmSubplotSignal.disconnect(slot)
 
     def set_y_autoscale(self, subplotNames, state):
         for subplotName in subplotNames:
@@ -154,6 +153,25 @@ class subplot(QtWidgets.QWidget):
                 self._close_selector_window)
             self._selector_window.setMinimumSize(300, 100)
             self._selector_window.show()
+
+    def _rm_subplot(self):
+        names = list(self._context.subplots.keys())
+        # if the selector is not visable
+        if self._selector_window is not None:
+            self._raise_selector_window()
+        # if no selector and no remove window -> let user pick which subplot to
+        # change
+        else:
+            self._selector_window = self._createSelectWindow(names)
+            self._selector_window.subplotSelectorSignal.connect(
+                self._remove_subplot)
+            self._selector_window.subplotSelectorSignal.connect(
+                self._close_selector_window)
+            self._selector_window.closeEventSignal.connect(
+                self._close_selector_window)
+            self._selector_window.setMinimumSize(300, 100)
+            self._selector_window.show()
+
 
     def _createSelectWindow(self, names):
         return SelectSubplot(names)
@@ -196,8 +214,8 @@ class subplot(QtWidgets.QWidget):
         # if all of the lines have been removed -> delete subplot
         if remove_subplot:
             # add a signal to this method - so we can catch it
-            # close plot window once auto grid done
             self._remove_subplot(self._rm_window.subplot)
+
         self.canvas.draw()
         # if no subplots then close plotting window
         if len(self._context.subplots.keys()) == 0:
@@ -211,4 +229,10 @@ class subplot(QtWidgets.QWidget):
         self._rm_window = None
 
     def _remove_subplot(self, subplotName):
-        return  # need to do once auto grid complete
+        self.figure.delaxes(self.plotObjects[subplotName])
+        del self.plotObjects[subplotName]
+        self._context.delete(subplotName)
+        self._context.update_gridspec(len(list(self.plotObjects.keys())))
+        self._update()
+        self.rmSubplotSignal.emit(subplotName)
+

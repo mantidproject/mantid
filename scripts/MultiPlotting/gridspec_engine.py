@@ -21,7 +21,6 @@ def defaultGridspecGrid(number):
 
 class gridspecEngine(object):
     def __init__(self, grid = defaultGridspecGrid, max_plot = None):
-        self._gridspec = None
         self._max_plot = max_plot
         self.grid = grid
 
@@ -32,4 +31,5 @@ class gridspecEngine(object):
            print("Number of plot has exceeded the maximum number of "+str(self._max_plot))
            return
         current_grid = self.grid(number)
+        print("grid chevck", current_grid)
         return GridSpec(current_grid[0],current_grid[1])

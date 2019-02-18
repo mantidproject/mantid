@@ -5,6 +5,9 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import absolute_import, print_function
+
+from MultiPlotting.gridspec_engine import gridspecEngine
+
 from MultiPlotting.subplot.subplot_context import subplotContext
 
 
@@ -14,11 +17,13 @@ yBounds = "yBounds"
 
 class PlottingContext(object):
 
-    def __init__(self):
+    def __init__(self, gridspec_engine = gridspecEngine()):
         self.context = {}
         self.subplots = {}
         self.context[xBounds] = [0., 0.]
         self.context[yBounds] = [0., 0.]
+        self._gridspec_engine = gridspec_engine
+        self._gridspec = None
 
     def addSubplot(self, name, subplot):
         self.subplots[name] = subplotContext(name, subplot)
@@ -50,3 +55,21 @@ class PlottingContext(object):
 
     def set_yBounds(self, values):
         self.context[yBounds] = values
+
+    def update_gridspec(self,number):
+        self._gridspec = self._gridspec_engine.getGridSpec(number)
+
+    @property
+    def gridspec(self):
+        return self._gridspec
+
+    def update_layout(self,figure):
+        keys = list(self.subplots.keys())
+        print(keys)
+        for counter, name in zip(range(len(keys)), keys):
+            self.subplots[name].update_gridspec(self._gridspec, figure,counter)
+
+    def delete(self,name):
+        print("delete",name)
+        self.subplots[name].delete()
+        del self.subplots[name]
