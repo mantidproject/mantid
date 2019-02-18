@@ -90,8 +90,16 @@ void BatchPresenter::notifyAutoreductionCompleted() {
 
 void BatchPresenter::notifyBatchComplete(bool error) {
   UNUSED_ARG(error);
-  reductionPaused();
+
+  // Make sure views are up to date with any changes in state
   m_runsPresenter->notifyRowStateChanged();
+
+  // Continue processing the next batch of algorithms, if there is more to do
+  if (startNextBatch())
+    return;
+  
+  // Otherwise, we are finished
+  reductionPaused();
 }
 
 void BatchPresenter::notifyBatchCancelled() {
@@ -126,11 +134,24 @@ void BatchPresenter::notifyAlgorithmError(IConfiguredAlgorithm_sptr algorithm,
   m_runsPresenter->notifyRowStateChanged();
 }
 
+/** Start processing the next batch of algorithms.
+ * @returns : true if processing was started, false if there was nothing to do
+ */
+bool BatchPresenter::startNextBatch() {
+  m_view->clearAlgorithmQueue();
+
+  auto algorithms = m_jobRunner->getAlgorithms();
+  if (algorithms.size() < 1)
+    return false;
+
+  m_view->setAlgorithmQueue(std::move(algorithms));
+  m_view->executeAlgorithmQueue();
+  return true;
+}
+
 void BatchPresenter::resumeReduction() {
   reductionResumed();
-  m_view->clearAlgorithmQueue();
-  m_view->setAlgorithmQueue(m_jobRunner->getAlgorithms());
-  m_view->executeAlgorithmQueue();
+  startNextBatch();
 }
 
 void BatchPresenter::reductionResumed() {
@@ -159,9 +180,7 @@ void BatchPresenter::reductionPaused() {
 
 void BatchPresenter::resumeAutoreduction() {
   autoreductionResumed();
-  m_view->clearAlgorithmQueue();
-  m_view->setAlgorithmQueue(m_jobRunner->getAlgorithms());
-  m_view->executeAlgorithmQueue();
+  startNextBatch();
 }
 
 void BatchPresenter::autoreductionResumed() {

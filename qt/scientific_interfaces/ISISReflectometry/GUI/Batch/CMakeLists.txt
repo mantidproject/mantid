@@ -4,6 +4,7 @@ set ( BATCH_SRC_FILES
     BatchJobAlgorithm.cpp
     BatchJobRunner.cpp
     AlgorithmProperties.cpp
+    GroupProcessingAlgorithm.cpp
     RowProcessingAlgorithm.cpp
 )
 
@@ -20,6 +21,7 @@ set ( BATCH_INC_FILES
     BatchJobAlgorithm.h
     BatchJobRunner.h
     AlgorithmProperties.h
+    GroupProcessingAlgorithm.h
     RowProcessingAlgorithm.h
 )
 

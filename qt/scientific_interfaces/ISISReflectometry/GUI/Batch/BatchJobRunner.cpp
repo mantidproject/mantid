@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "BatchJobRunner.h"
 #include "BatchJobAlgorithm.h"
+#include "GroupProcessingAlgorithm.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "RowProcessingAlgorithm.h"
 
@@ -46,17 +47,59 @@ void BatchJobRunner::setReprocessFailedItems(bool reprocessFailed) {
   m_reprocessFailed = reprocessFailed;
 }
 
-/** Get algorithms and related properties for processing rows and groups
- * in the table
+template <typename T> bool BatchJobRunner::isSelected(T const &item) {
+  return m_processAll || m_batch.isSelected(item);
+}
+
+template <typename T>
+bool BatchJobRunner::isSelected(boost::optional<T> const &item) {
+  return m_processAll || (item && m_batch.isSelected(item.get()));
+}
+
+bool BatchJobRunner::hasSelectedRows(Group const &group) {
+  // If the group itself is selected, consider its rows to also be selected
+  if (m_processAll || isSelected(group))
+    return true;
+
+  for (auto const &row : group.rows()) {
+    if (isSelected(row))
+      return true;
+  }
+
+  return false;
+}
+
+/** Get algorithms and related properties for processing a batch of rows and
+ * groups in the table
  */
 std::deque<IConfiguredAlgorithm_sptr> BatchJobRunner::getAlgorithms() {
   auto algorithms = std::deque<IConfiguredAlgorithm_sptr>();
   auto &groups =
       m_batch.mutableRunsTable().mutableReductionJobs().mutableGroups();
   for (auto &group : groups) {
-    addAlgorithmsForProcessingRowsInGroup(group, algorithms);
+    // Process the rows in the group or, if there are no rows to process,
+    // postprocess the group. If that's also done, continue to the next group
+    if (hasSelectedRows(group) && group.requiresProcessing(m_reprocessFailed)) {
+      addAlgorithmsForProcessingRowsInGroup(group, algorithms);
+      return algorithms;
+    } else if (isSelected(group) &&
+               group.requiresPostprocessing(m_reprocessFailed)) {
+      addAlgorithmForPostprocessingGroup(group, algorithms);
+      return algorithms;
+    }
   }
   return algorithms;
+}
+
+/** Add the algorithms and related properties for postprocessing a group
+ * @param group : the group to get the row algorithms for
+ * @param algorithms : the list of configured algorithms to add this group to
+ * @returns : true if algorithms were added, false if there was nothing to do
+ */
+void BatchJobRunner::addAlgorithmForPostprocessingGroup(
+    Group &group, std::deque<IConfiguredAlgorithm_sptr> &algorithms) {
+  auto algorithm = createConfiguredAlgorithm(m_batch, group);
+  algorithms.emplace_back(std::move(algorithm));
 }
 
 /** Add the algorithms and related properties for processing all the rows
@@ -70,10 +113,8 @@ void BatchJobRunner::addAlgorithmsForProcessingRowsInGroup(
     Group &group, std::deque<IConfiguredAlgorithm_sptr> &algorithms) {
   auto &rows = group.mutableRows();
   for (auto &row : rows) {
-    if (row && row->requiresProcessing(m_reprocessFailed) &&
-        (m_processAll || m_batch.isSelected(row.get()))) {
+    if (isSelected(row.get()) && row->requiresProcessing(m_reprocessFailed))
       addAlgorithmForProcessingRow(row.get(), algorithms);
-    }
   }
 }
 

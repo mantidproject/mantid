@@ -74,6 +74,7 @@ public:
   void clearADSHandle() override;
 
 private:
+  bool startNextBatch();
   void resumeReduction();
   void reductionResumed();
   void pauseReduction();

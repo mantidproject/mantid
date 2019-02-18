@@ -32,14 +32,23 @@ std::string const &Group::name() const { return m_name; }
  */
 bool Group::hasPostprocessing() const { return m_rows.size() > 1; }
 
-/** Returns true if the group requires (and is ready for) postprocessing, i.e.
- * if it has multiple rows that have be processed successfully and are ready to
- * be stitched, but have not been stitched yet.
- * @param reprocessFailed : if true, groups that have failed will be
- * reprocessed;
- * otherwise, they will be ignored
+/** Returns true if the group requires processing; that is if its rows require
+ * processing (note the 'processing' here means reduction, not postprocessing)
  */
 bool Group::requiresProcessing(bool reprocessFailed) const {
+  for (auto const &row : m_rows) {
+    if (row->requiresProcessing(reprocessFailed))
+      return true;
+  }
+
+  return false;
+}
+
+/** Returns true if the group is ready to be postprocessed, i.e. if its rows
+ * have all been reduced successfully but the group itself has not already been
+ * postprocessed yet. Returns false if postprocessing is not applicable.
+ */
+bool Group::requiresPostprocessing(bool reprocessFailed) const {
   if (!hasPostprocessing())
     return false;
 

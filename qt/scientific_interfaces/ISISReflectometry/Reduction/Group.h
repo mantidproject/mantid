@@ -31,7 +31,9 @@ public:
   void setName(std::string const &name);
   bool hasPostprocessing() const;
   bool requiresProcessing(bool reprocessFailed) const override;
+  bool requiresPostprocessing(bool reprocessFailed) const;
   std::string postprocessedWorkspaceName() const;
+  std::vector<std::string> workspaceNamesToPostprocess() const;
   void setOutputNames(std::vector<std::string> const &outputNames) override;
 
   void appendEmptyRow();

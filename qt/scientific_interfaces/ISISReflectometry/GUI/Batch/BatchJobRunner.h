@@ -64,6 +64,12 @@ private:
   std::vector<std::string> getWorkspacesToSave(Group const &group) const;
   std::vector<std::string> getWorkspacesToSave(Row const &row) const;
 
+  template <typename T> bool isSelected(T const &item);
+  template <typename T> bool isSelected(boost::optional<T> const &item);
+  bool hasSelectedRows(Group const &group);
+  void addAlgorithmForPostprocessingGroup(
+      Group &group,
+      std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> &algorithms);
   void addAlgorithmsForProcessingRowsInGroup(
       Group &group,
       std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> &algorithms);
