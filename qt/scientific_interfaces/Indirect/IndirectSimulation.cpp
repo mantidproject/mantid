@@ -23,6 +23,8 @@ using namespace MantidQt::CustomInterfaces;
 
 IndirectSimulation::IndirectSimulation(QWidget *parent)
     : UserSubWindow(parent),
+      m_settingsDialog(Mantid::Kernel::make_unique<IDA::IndirectSettingsDialog>(
+          this, "Indirect Simulation")),
       m_changeObserver(*this, &IndirectSimulation::handleDirectoryChange) {}
 
 IndirectSimulation::~IndirectSimulation() {}
@@ -55,8 +57,8 @@ void IndirectSimulation::initLayout() {
 
   loadSettings();
 
-  // Connect statements for the buttons shared between all tabs on the Indirect
-  // Bayes interface
+  connect(m_uiForm.pbSettings, SIGNAL(clicked()), this,
+          SLOT(settingsClicked()));
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(helpClicked()));
   connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this,
           SLOT(manageUserDirectories()));
@@ -107,6 +109,14 @@ void IndirectSimulation::loadSettings() {
   }
 
   settings.endGroup();
+}
+
+/**
+ * Opens the settings dialog
+ */
+void IndirectSimulation::settingsClicked() {
+  m_settingsDialog->loadSettings();
+  m_settingsDialog->show();
 }
 
 /**

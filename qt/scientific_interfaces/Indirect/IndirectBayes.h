@@ -7,10 +7,8 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_INDIRECTBAYES_H_
 #define MANTIDQTCUSTOMINTERFACES_INDIRECTBAYES_H_
 
-//----------------------
-// Includes
-//----------------------
 #include "IndirectBayesTab.h"
+#include "IndirectSettingsDialog.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "ui_IndirectBayes.h"
 
@@ -46,8 +44,8 @@ public: // public constructor, destructor and functions
   void initLayout() override;
 
 private slots:
-  // Run the appropriate action depending based on the selected tab
-
+  /// Opens the Indirect settings GUI
+  void settingsClicked();
   /// Slot for clicking on the hlep button
   void helpClicked();
   /// Slot for clicking on the manage directories button
@@ -64,6 +62,8 @@ private:
   /// Load default interface settings for each tab
   void loadSettings();
 
+  /// The settings dialog
+  std::unique_ptr<IDA::IndirectSettingsDialog> m_settingsDialog;
   /// Map of tabs indexed by position on the window
   std::map<unsigned int, IndirectBayesTab *> m_bayesTabs;
   /// Change Observer for ConfigService (monitors user directories)

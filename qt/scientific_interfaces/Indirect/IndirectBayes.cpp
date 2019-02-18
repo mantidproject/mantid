@@ -22,6 +22,8 @@ using namespace MantidQt::CustomInterfaces;
 
 IndirectBayes::IndirectBayes(QWidget *parent)
     : UserSubWindow(parent),
+      m_settingsDialog(Mantid::Kernel::make_unique<IDA::IndirectSettingsDialog>(
+          this, "Indirect Bayes")),
       m_changeObserver(*this, &IndirectBayes::handleDirectoryChange) {
   m_uiForm.setupUi(this);
 
@@ -47,8 +49,8 @@ IndirectBayes::IndirectBayes(QWidget *parent)
 
   loadSettings();
 
-  // Connect statements for the buttons shared between all tabs on the Indirect
-  // Bayes interface
+  connect(m_uiForm.pbSettings, SIGNAL(clicked()), this,
+          SLOT(settingsClicked()));
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(helpClicked()));
   connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this,
           SLOT(manageUserDirectories()));
@@ -98,6 +100,14 @@ void IndirectBayes::loadSettings() {
   }
 
   settings.endGroup();
+}
+
+/**
+ * Opens the settings dialog
+ */
+void IndirectBayes::settingsClicked() {
+  m_settingsDialog->loadSettings();
+  m_settingsDialog->show();
 }
 
 /**

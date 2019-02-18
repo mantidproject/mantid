@@ -20,7 +20,8 @@ class IndirectSettingsDialog : public QDialog {
   Q_OBJECT
 
 public:
-  explicit IndirectSettingsDialog(QWidget *parent);
+  explicit IndirectSettingsDialog(QWidget *parent,
+                                  QString const &settingsGroup);
 
   void loadSettings();
   void saveSettings();
@@ -31,11 +32,15 @@ signals:
   void updateSettings();
 
 private slots:
+  void updateFilterInputByName(QString const &);
+
   void okClicked();
   void applyClicked();
   void cancelClicked();
 
 private:
+  void setInterfaceGroupBoxTitle(QString const &title);
+
   int findFacilityIndex(std::string const &text);
 
   QString getSelectedFacility() const;
@@ -49,6 +54,7 @@ private:
   void setOkEnabled(bool enable);
   void setCancelEnabled(bool enable);
 
+  QString m_settingsGroup;
   Ui::IndirectSettingsDialog m_uiForm;
 };
 

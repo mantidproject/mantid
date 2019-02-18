@@ -7,9 +7,7 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_INDIRECTDIFFRACTIONREDUCTION_H_
 #define MANTIDQTCUSTOMINTERFACES_INDIRECTDIFFRACTIONREDUCTION_H_
 
-//----------------------
-// Includes
-//----------------------
+#include "IndirectSettingsDialog.h"
 #include "ui_IndirectDiffractionReduction.h"
 
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
@@ -46,6 +44,10 @@ public slots:
   void manualGroupingToggled(int state);
   void algorithmComplete(bool error);
   void deleteGroupingWorkspace();
+
+private slots:
+  /// Opens the Indirect settings GUI
+  void settingsClicked();
 
 private:
   void initLayout() override;
@@ -90,6 +92,8 @@ private:
   void setSaveEnabled(bool enabled);
 
 private:
+  /// The settings dialog
+  std::unique_ptr<IDA::IndirectSettingsDialog> m_settingsDialog;
   Ui::IndirectDiffractionReduction
       m_uiForm; /// The form generated using Qt Designer
   QDoubleValidator *m_valDbl;

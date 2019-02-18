@@ -22,6 +22,8 @@ using namespace MantidQt::CustomInterfaces;
 
 IndirectTools::IndirectTools(QWidget *parent)
     : UserSubWindow(parent),
+      m_settingsDialog(Mantid::Kernel::make_unique<IDA::IndirectSettingsDialog>(
+          this, "Indirect Tools")),
       m_changeObserver(*this, &IndirectTools::handleDirectoryChange) {}
 
 void IndirectTools::initLayout() {
@@ -49,8 +51,8 @@ void IndirectTools::initLayout() {
 
   loadSettings();
 
-  // Connect statements for the buttons shared between all tabs on the Indirect
-  // Bayes interface
+  connect(m_uiForm.pbSettings, SIGNAL(clicked()), this,
+          SLOT(settingsClicked()));
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(helpClicked()));
   connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this,
           SLOT(manageUserDirectories()));
@@ -112,6 +114,14 @@ void IndirectTools::loadSettings() {
 void IndirectTools::runClicked() {
   int tabIndex = m_uiForm.IndirectToolsTabs->currentIndex();
   m_tabs[tabIndex]->runTab();
+}
+
+/**
+ * Opens the settings dialog
+ */
+void IndirectTools::settingsClicked() {
+  m_settingsDialog->loadSettings();
+  m_settingsDialog->show();
 }
 
 /**

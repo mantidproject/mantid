@@ -44,8 +44,10 @@ using MantidQt::API::BatchAlgorithmRunner;
 //----------------------
 /// Constructor
 IndirectDiffractionReduction::IndirectDiffractionReduction(QWidget *parent)
-    : UserSubWindow(parent), m_valDbl(nullptr),
-      m_settingsGroup("CustomInterfaces/DEMON"),
+    : UserSubWindow(parent),
+      m_settingsDialog(Mantid::Kernel::make_unique<IDA::IndirectSettingsDialog>(
+          this, "Indirect Diffraction")),
+      m_valDbl(nullptr), m_settingsGroup("CustomInterfaces/DEMON"),
       m_batchAlgoRunner(new BatchAlgorithmRunner(parent)) {}
 
 /// Destructor
@@ -59,6 +61,8 @@ IndirectDiffractionReduction::~IndirectDiffractionReduction() {
 void IndirectDiffractionReduction::initLayout() {
   m_uiForm.setupUi(this);
 
+  connect(m_uiForm.pbSettings, SIGNAL(clicked()), this,
+          SLOT(settingsClicked()));
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));
   connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this,
           SLOT(openDirectoryDialog()));
@@ -723,6 +727,14 @@ void IndirectDiffractionReduction::openDirectoryDialog() {
   auto ad = new MantidQt::API::ManageUserDirectories(this);
   ad->show();
   ad->setFocus();
+}
+
+/**
+ * Opens the settings dialog
+ */
+void IndirectDiffractionReduction::settingsClicked() {
+  m_settingsDialog->loadSettings();
+  m_settingsDialog->show();
 }
 
 /**

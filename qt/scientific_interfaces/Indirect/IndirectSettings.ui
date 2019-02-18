@@ -57,7 +57,16 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="0">
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="gbInterfaceSettings">
+     <property name="title">
+      <string>Interface Settings</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <item>
        <widget class="QCheckBox" name="ckFilterDataNames">
         <property name="text">
          <string>Filter input data by name</string>

@@ -15,7 +15,6 @@ using namespace Mantid::Kernel;
 
 namespace {
 
-QString const SETTINGS_GROUP("IndirectInterfaceSettings");
 QString const FILTER_DATA_NAMES_SETTING("filter-input-by-name");
 
 std::string getSavedFacility() {
@@ -34,9 +33,14 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-IndirectSettingsDialog::IndirectSettingsDialog(QWidget *parent)
-    : QDialog(parent) {
+IndirectSettingsDialog::IndirectSettingsDialog(QWidget *parent,
+                                               QString const &settingsGroup)
+    : QDialog(parent), m_settingsGroup(settingsGroup) {
   m_uiForm.setupUi(this);
+  setInterfaceGroupBoxTitle(m_settingsGroup);
+
+  connect(m_uiForm.cbFacility, SIGNAL(currentIndexChanged(QString const &)),
+          this, SLOT(updateFilterInputByName(QString const &)));
 
   connect(m_uiForm.pbOk, SIGNAL(clicked()), this, SLOT(okClicked()));
   connect(m_uiForm.pbApply, SIGNAL(clicked()), this, SLOT(applyClicked()));
@@ -62,7 +66,7 @@ void IndirectSettingsDialog::loadSettings() {
   setSelectedFacility(getSavedFacility());
 
   QSettings settings;
-  settings.beginGroup(SETTINGS_GROUP);
+  settings.beginGroup(m_settingsGroup);
 
   auto const filter = settings.value(FILTER_DATA_NAMES_SETTING, true).toBool();
 
@@ -77,13 +81,17 @@ void IndirectSettingsDialog::saveSettings() {
   setSavedFacility(getSelectedFacility().toStdString());
 
   QSettings settings;
-  settings.beginGroup(SETTINGS_GROUP);
+  settings.beginGroup(m_settingsGroup);
 
   settings.setValue(FILTER_DATA_NAMES_SETTING, isFilterInputByNameChecked());
 
   settings.endGroup();
 
   emit updateSettings();
+}
+
+void IndirectSettingsDialog::setInterfaceGroupBoxTitle(QString const &title) {
+  m_uiForm.gbInterfaceSettings->setTitle(title);
 }
 
 void IndirectSettingsDialog::setSelectedFacility(std::string const &facility) {
@@ -99,6 +107,10 @@ int IndirectSettingsDialog::findFacilityIndex(std::string const &text) {
 
 QString IndirectSettingsDialog::getSelectedFacility() const {
   return m_uiForm.cbFacility->currentText();
+}
+
+void IndirectSettingsDialog::updateFilterInputByName(QString const &text) {
+  setFilterInputByNameChecked(text.toStdString() == "ISIS");
 }
 
 void IndirectSettingsDialog::setFilterInputByNameChecked(bool check) {

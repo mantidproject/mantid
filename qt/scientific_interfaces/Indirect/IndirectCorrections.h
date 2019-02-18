@@ -7,9 +7,7 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_INDIRECTCORRECTIONS_H_
 #define MANTIDQTCUSTOMINTERFACES_INDIRECTCORRECTIONS_H_
 
-//----------------------
-// Includes
-//----------------------
+#include "IndirectSettingsDialog.h"
 #include "IndirectTab.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "ui_IndirectCorrections.h"
@@ -76,12 +74,17 @@ private slots:
   void exportTabPython();
   /// Opens a directory dialog.
   void openDirectoryDialog();
+  /// Opens the Indirect settings GUI
+  void settingsClicked();
   /// Opens the Mantid Wiki web page of the current tab.
   void help();
   /// Slot showing a message box to the user
   void showMessageBox(const QString &message);
 
 private:
+  /// The settings dialog
+  std::unique_ptr<IDA::IndirectSettingsDialog> m_settingsDialog;
+
   /// UI form containing all Qt elements.
   Ui::IndirectCorrections m_uiForm;
 

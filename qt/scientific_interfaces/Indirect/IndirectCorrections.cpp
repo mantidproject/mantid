@@ -31,6 +31,8 @@ DECLARE_SUBWINDOW(IndirectCorrections)
  */
 IndirectCorrections::IndirectCorrections(QWidget *parent)
     : UserSubWindow(parent),
+      m_settingsDialog(Mantid::Kernel::make_unique<IDA::IndirectSettingsDialog>(
+          this, "Data Corrections")),
       m_changeObserver(*this, &IndirectCorrections::handleDirectoryChange) {
   m_uiForm.setupUi(this);
 
@@ -89,8 +91,9 @@ void IndirectCorrections::initLayout() {
 
   connect(m_uiForm.pbPythonExport, SIGNAL(clicked()), this,
           SLOT(exportTabPython()));
+  connect(m_uiForm.pbSettings, SIGNAL(clicked()), this,
+          SLOT(settingsClicked()));
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));
-  // connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(run()));
   connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this,
           SLOT(openDirectoryDialog()));
 }
@@ -132,6 +135,14 @@ void IndirectCorrections::openDirectoryDialog() {
   auto ad = new MantidQt::API::ManageUserDirectories(this);
   ad->show();
   ad->setFocus();
+}
+
+/**
+ * Opens the settings dialog
+ */
+void IndirectCorrections::settingsClicked() {
+  m_settingsDialog->loadSettings();
+  m_settingsDialog->show();
 }
 
 /**

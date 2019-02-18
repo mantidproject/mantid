@@ -54,8 +54,8 @@ using namespace MantidQt::CustomInterfaces::IDA;
  */
 IndirectDataReduction::IndirectDataReduction(QWidget *parent)
     : UserSubWindow(parent),
-      m_settingsDialog(
-          Mantid::Kernel::make_unique<IndirectSettingsDialog>(this)),
+      m_settingsDialog(Mantid::Kernel::make_unique<IndirectSettingsDialog>(
+          this, "Data Reduction")),
       m_settingsGroup("CustomInterfaces/IndirectDataReduction"),
       m_algRunner(new MantidQt::API::AlgorithmRunner(this)),
       m_changeObserver(*this, &IndirectDataReduction::handleConfigChange) {
@@ -203,7 +203,7 @@ IndirectDataReduction::loadInstrumentIfNotExist(
           "instrumentDefinition.directory");
 
   try {
-    auto const dateRange = instrumentName == "BASIS" ? "_20140101-" : "";
+    auto const dateRange = instrumentName == "BASIS" ? "_2014-2018" : "";
     std::string parameterFilename =
         idfDirectory + instrumentName + "_Definition" + dateRange + ".xml";
     auto loadAlg = AlgorithmManager::Instance().create("LoadEmptyInstrument");

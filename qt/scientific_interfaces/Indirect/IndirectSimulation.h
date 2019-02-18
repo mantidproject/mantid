@@ -7,9 +7,7 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_INDIRECTSIMULATION_H_
 #define MANTIDQTCUSTOMINTERFACES_INDIRECTSIMULATION_H_
 
-//----------------------
-// Includes
-//----------------------
+#include "IndirectSettingsDialog.h"
 #include "IndirectSimulationTab.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
@@ -47,6 +45,8 @@ public: // public constructor, destructor and functions
   void initLayout() override;
 
 private slots:
+  /// Opens the Indirect settings GUI
+  void settingsClicked();
   /// Slot for clicking on the help button
   void helpClicked();
   /// Slot for clicking on the manage directories button
@@ -63,6 +63,8 @@ private:
   void
   handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf);
 
+  /// The settings dialog
+  std::unique_ptr<IDA::IndirectSettingsDialog> m_settingsDialog;
   /// Map of tabs indexed by position on the window
   std::map<unsigned int, IndirectSimulationTab *> m_simulationTabs;
   /// Change Observer for ConfigService (monitors user directories)

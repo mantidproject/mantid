@@ -34,8 +34,8 @@ DECLARE_SUBWINDOW(IndirectDataAnalysis)
  */
 IndirectDataAnalysis::IndirectDataAnalysis(QWidget *parent)
     : UserSubWindow(parent),
-      m_settingsDialog(
-          Mantid::Kernel::make_unique<IndirectSettingsDialog>(this)),
+      m_settingsDialog(Mantid::Kernel::make_unique<IndirectSettingsDialog>(
+          this, "Data Analysis")),
       m_settingsGroup("CustomInterfaces/IndirectAnalysis/"), m_valInt(nullptr),
       m_valDbl(nullptr),
       m_changeObserver(*this, &IndirectDataAnalysis::handleDirectoryChange) {
