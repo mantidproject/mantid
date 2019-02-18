@@ -362,7 +362,7 @@ set ( INC_FILES
 	inc/MantidAPI/Workspace_fwd.h
 )
 
-option(PROFILE_ALGORITHM_LINUX "Profile algorithm execution on Linux and OSX" OFF)
+option(PROFILE_ALGORITHM_LINUX "Profile algorithm execution on Linux" OFF)
 if(PROFILE_ALGORITHM_LINUX)
 	set(SRC_FILES "${SRC_FILES}" "src/AlgorithmExecuteProfile.cpp" "src/AlgoTimeRegister.cpp")
 	set(INC_FILES "${INC_FILES}" "inc/MantidAPI/AlgoTimeRegister.h")
