@@ -18,7 +18,7 @@ Mantid build
 To build mantid version with profiling functionality enabled run ``cmake`` with the additional option
 ``-DPROFILE_ALGORITHM_LINUX=ON``. Built in such a way mantid creates a dump file ``algotimeregister.out``
 in the running directory. This file contains the time stamps for start and finish of executed algorithms with
-~nanocecond precision in a very simple text format.
+~nanoceconds precision in a very simple text format.
 
 Analysing tool
 ^^^^^^^^^^^^^^
@@ -35,5 +35,5 @@ separately. The suggestion is either to modify files ``Framework/API/inc/MantidA
 the ``AlgoTimeRegister`` class defined for Windows.  In the second case an inclusion of OS specific files should be
 done correctly in ``Framework/API/CMakeLists.txt`  using ``${CMAKE_SYSTEM_NAME} MATCHES "Windows"``,
 ``Framework/API/src/AlgorithmExecuteProfile.cpp`` needs to be modified or substituted according to the type of OS.
-QueryPerformanceCounter supposed to be used on windows, instead of clock_gettime.
+``QueryPerformanceCounter`` supposed to be used on windows, instead of ``clock_gettime``.
 
