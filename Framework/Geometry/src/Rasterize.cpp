@@ -90,7 +90,9 @@ Raster calculateCylinder(const V3D &beamDirection,
     throw std::logic_error("Failed to convert IObject to CSGObject");
   if (!(csgshape->hasValidShape()))
     throw std::logic_error("Shape[IObject] does not have a valid shape");
-
+  if (csgshape->shape() != detail::ShapeInfo::GeometryShape::CYLINDER) {
+    throw std::invalid_argument("Given shape is not a cylinder.");
+  }
   return calculateCylinder(beamDirection, *csgshape, numSlices, numAnnuli);
 }
 
