@@ -266,10 +266,10 @@ void LoadEventNexus::init() {
   declareProperty(
       make_unique<PropertyWithValue<bool>>("LoadLogs", true, Direction::Input),
       "Load the Sample/DAS logs from the file (default True).");
-  std::vector<std::string> loadType{"default"};
+  std::vector<std::string> loadType{"Default"};
 
 #ifndef _WIN32
-  loadType.push_back("multiprocess");
+  loadType.push_back("Multiprocess (experimental)");
 #endif // _WIN32
 
 #ifdef MPI_EXPERIMENTAL
@@ -277,7 +277,7 @@ void LoadEventNexus::init() {
 #endif // MPI_EXPERIMENTAL
 
   auto loadTypeValidator = boost::make_shared<StringListValidator>(loadType);
-  declareProperty("LoadType", "default", loadTypeValidator,
+  declareProperty("LoadType", "Default", loadTypeValidator,
                   "Set type of loader.");
 }
 
@@ -1477,7 +1477,7 @@ LoadEventNexus::defineLoaderType(const bool haveWeights,
                                  const bool oldNeXusFileNames,
                                  const std::string &classType) const {
   auto propVal = getPropertyValue("LoadType");
-  if (propVal == "default")
+  if (propVal == "Default")
     return LoaderType::DEFAULT;
 
   bool noParallelConstrictions = true;
