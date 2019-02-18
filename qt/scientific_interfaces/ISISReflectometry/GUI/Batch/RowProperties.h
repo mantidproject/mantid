@@ -28,9 +28,9 @@ class MonitorCorrections;
 class DetectorCorrections;
 class Row;
 
-namespace RowProperties {
-
 using AlgorithmRuntimeProps = std::map<std::string, std::string>;
+
+namespace RowProperties {
 
 void updateInputWorkspacesProperties(
     AlgorithmRuntimeProps &properties,

@@ -11,7 +11,6 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 using API::IConfiguredAlgorithm_sptr;
-using AlgorithmRuntimeProps = std::map<std::string, std::string>;
 
 namespace AlgorithmProperties {
 // These convenience functions convert properties of various types into

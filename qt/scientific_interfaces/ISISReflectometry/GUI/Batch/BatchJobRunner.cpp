@@ -15,7 +15,6 @@ namespace CustomInterfaces {
 
 using API::IConfiguredAlgorithm_sptr;
 using Mantid::API::Workspace_sptr;
-using AlgorithmRuntimeProps = std::map<std::string, std::string>;
 
 BatchJobRunner::BatchJobRunner(Batch batch)
     : m_batch(std::move(batch)), m_isProcessing(false), m_isAutoreducing(false),

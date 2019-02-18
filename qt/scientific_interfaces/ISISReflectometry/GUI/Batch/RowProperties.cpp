@@ -16,7 +16,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 using API::IConfiguredAlgorithm_sptr;
-using AlgorithmRuntimeProps = std::map<std::string, std::string>;
+
 namespace RowProperties {
 // These functions update properties in an AlgorithmRuntimeProps for specific
 // properties for the row reduction algorithm
