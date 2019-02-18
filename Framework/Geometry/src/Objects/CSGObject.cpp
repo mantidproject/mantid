@@ -2056,8 +2056,7 @@ V3D CSGObject::generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
   // shape, its dimension and orientation.
   const size_t bruteForceAttempts{
       std::min(static_cast<size_t>(5), maxAttempts)};
-  point = RandomPoint::bounded(*this, rng, activeRegion,
-                                             bruteForceAttempts);
+  point = RandomPoint::bounded(*this, rng, activeRegion, bruteForceAttempts);
   if (!point) {
     detail::ShapeInfo::GeometryShape shape;
     std::vector<Kernel::V3D> shapeVectors;
@@ -2078,8 +2077,8 @@ V3D CSGObject::generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
           m_handler->shapeInfo(), rng, activeRegion, maxAttempts);
       break;
     default:
-      point = RandomPoint::bounded(
-          *this, rng, activeRegion, maxAttempts - bruteForceAttempts);
+      point = RandomPoint::bounded(*this, rng, activeRegion,
+                                   maxAttempts - bruteForceAttempts);
       break;
     }
   }
