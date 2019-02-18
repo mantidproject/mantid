@@ -14,56 +14,27 @@
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
-#include "MantidGeometry/Rendering/ShapeInfo.h"
 #include "MantidGeometry/Surfaces/Cylinder.h"
 #include "MantidGeometry/Surfaces/Plane.h"
 #include "MantidGeometry/Surfaces/Sphere.h"
 #include "MantidGeometry/Surfaces/SurfaceFactory.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/MersenneTwister.h"
-#include "MantidKernel/WarningSuppressions.h"
-#include "MantidKernel/make_unique.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MockRNG.h"
 
-#include <algorithm>
-#include <cmath>
-#include <ctime>
 #include <cxxtest/TestSuite.h>
-#include <ostream>
-#include <vector>
 
 #include "boost/make_shared.hpp"
 #include "boost/shared_ptr.hpp"
 
 #include <Poco/DOM/AutoPtr.h>
 #include <Poco/DOM/Document.h>
-#include <gmock/gmock.h>
 
 using namespace Mantid;
 using namespace Geometry;
 using Mantid::Kernel::V3D;
 using detail::ShapeInfo;
-
-namespace {
-// -----------------------------------------------------------------------------
-// Mock Random Number Generator
-// -----------------------------------------------------------------------------
-class MockRNG final : public Mantid::Kernel::PseudoRandomNumberGenerator {
-public:
-  GNU_DIAG_OFF_SUGGEST_OVERRIDE
-  MOCK_METHOD0(nextValue, double());
-  MOCK_METHOD2(nextValue, double(double, double));
-  MOCK_METHOD2(nextInt, int(int, int));
-  MOCK_METHOD0(restart, void());
-  MOCK_METHOD0(save, void());
-  MOCK_METHOD0(restore, void());
-  MOCK_METHOD1(setSeed, void(size_t));
-  MOCK_METHOD2(setRange, void(const double, const double));
-  MOCK_CONST_METHOD0(min, double());
-  MOCK_CONST_METHOD0(max, double());
-  GNU_DIAG_ON_SUGGEST_OVERRIDE
-};
-} // namespace
 
 class CSGObjectTest : public CxxTest::TestSuite {
 
