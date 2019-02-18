@@ -78,6 +78,8 @@ private slots:
   void settingsClicked();
   /// Opens the Mantid Wiki web page of the current tab.
   void help();
+  /// Updates the settings for this interface
+  void updateSettings();
   /// Slot showing a message box to the user
   void showMessageBox(const QString &message);
 

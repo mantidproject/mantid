@@ -43,6 +43,8 @@ private slots:
                        QString const tooltip = "");
 
 private:
+  void setFileExtensionsByName(bool filter) override;
+
   Ui::ILLEnergyTransfer m_uiForm;
   double m_backScaling = 1.;
   double m_backCalibScaling = 1.;

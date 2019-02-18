@@ -25,7 +25,8 @@ namespace CustomInterfaces {
 /** Constructor
  */
 ISISDiagnostics::ISISDiagnostics(IndirectDataReduction *idrUI, QWidget *parent)
-    : IndirectDataReductionTab(idrUI, parent) {
+    : IndirectDataReductionTab(idrUI, parent),
+      m_calibFBExtensions({"_calib.nxs"}), m_calibWSExtensions({"_calib"}) {
   m_uiForm.setupUi(parent);
 
   // Property Tree
@@ -458,6 +459,13 @@ void ISISDiagnostics::sliceAlgDone(bool error) {
   // Ungroup the output workspace
   sliceOutputGroup->removeAll();
   AnalysisDataService::Instance().remove("IndirectDiagnostics_Workspaces");
+}
+
+void ISISDiagnostics::setFileExtensionsByName(bool filter) {
+  m_uiForm.dsCalibration->setFBSuffixes(filter ? m_calibFBExtensions
+                                               : getAllowedExtensions());
+  m_uiForm.dsCalibration->setWSSuffixes(filter ? m_calibWSExtensions
+                                               : getAllowedExtensions());
 }
 
 /**

@@ -13,12 +13,20 @@ IndirectBayesTab::IndirectBayesTab(QWidget *parent)
     : IndirectTab(parent), m_propTree(new QtTreePropertyBrowser()) {
   m_propTree->setFactoryForManager(m_dblManager, m_dblEdFac);
 
-  // Connect double maneger signals
   connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
           SLOT(updateProperties(QtProperty *, double)));
 }
 
 IndirectBayesTab::~IndirectBayesTab() {}
+
+/**
+ * Prevents the loading of data with incorrect naming if passed true
+ *
+ * @param filter :: true if you want to allow filtering
+ */
+void IndirectBayesTab::filterInputData(bool filter) {
+  setFileExtensionsByName(filter);
+}
 
 /**
  * Emits a signal to run a python script using the method in the parent

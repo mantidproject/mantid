@@ -55,7 +55,7 @@ using namespace MantidQt::CustomInterfaces::IDA;
 IndirectDataReduction::IndirectDataReduction(QWidget *parent)
     : UserSubWindow(parent),
       m_settingsDialog(Mantid::Kernel::make_unique<IndirectSettingsDialog>(
-          this, "Data Reduction")),
+          this, "Data Reduction", "filter-input-by-name")),
       m_settingsGroup("CustomInterfaces/IndirectDataReduction"),
       m_algRunner(new MantidQt::API::AlgorithmRunner(this)),
       m_changeObserver(*this, &IndirectDataReduction::handleConfigChange) {
@@ -388,11 +388,14 @@ void IndirectDataReduction::handleConfigChange(
  */
 void IndirectDataReduction::updateSettings() {
   QSettings settings;
-  settings.beginGroup("IndirectInterfaceSettings");
+  settings.beginGroup("Data Reduction");
 
   auto const filter = settings.value("filter-input-by-name", true).toBool();
 
   settings.endGroup();
+
+  for (auto tab = m_tabs.begin(); tab != m_tabs.end(); ++tab)
+    tab->second->filterInputData(filter);
 }
 
 /**

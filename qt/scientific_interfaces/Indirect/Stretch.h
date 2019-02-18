@@ -46,6 +46,8 @@ private slots:
   void previewSpecChanged(int value);
 
 private:
+  void setFileExtensionsByName(bool filter) override;
+
   void populateContourWorkspaceComboBox();
   void displayMessageAndRun(std::string const &saveDirectory);
   int displaySaveDirectoryMessage();
@@ -59,6 +61,10 @@ private:
   void setPlotResultIsPlotting(bool plotting);
   void setPlotContourIsPlotting(bool plotting);
 
+  QStringList m_sampleFBExtensions;
+  QStringList m_sampleWSExtensions;
+  QStringList m_resolutionFBExtensions;
+  QStringList m_resolutionWSExtensions;
   /// Current preview spectrum
   int m_previewSpec;
   // The ui form

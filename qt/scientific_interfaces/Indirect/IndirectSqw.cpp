@@ -41,7 +41,8 @@ namespace CustomInterfaces {
 /** Constructor
  */
 IndirectSqw::IndirectSqw(IndirectDataReduction *idrUI, QWidget *parent)
-    : IndirectDataReductionTab(idrUI, parent) {
+    : IndirectDataReductionTab(idrUI, parent),
+      m_sampleFBExtensions({"_red.nxs"}), m_sampleWSExtensions({"_red"}) {
   m_uiForm.setupUi(parent);
 
   connect(m_uiForm.dsSampleInput, SIGNAL(dataReady(const QString &)), this,
@@ -203,6 +204,13 @@ void IndirectSqw::plotRqwContour() {
   } else {
     emit showMessageBox("Invalid filename.");
   }
+}
+
+void IndirectSqw::setFileExtensionsByName(bool filter) {
+  m_uiForm.dsSampleInput->setFBSuffixes(filter ? m_sampleFBExtensions
+                                               : getAllowedExtensions());
+  m_uiForm.dsSampleInput->setWSSuffixes(filter ? m_sampleWSExtensions
+                                               : getAllowedExtensions());
 }
 
 void IndirectSqw::runClicked() { runTab(); }

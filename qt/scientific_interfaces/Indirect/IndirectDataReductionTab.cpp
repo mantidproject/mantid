@@ -286,5 +286,14 @@ std::map<std::string, double> IndirectDataReductionTab::getRangesFromInstrument(
   return ranges;
 }
 
+/**
+ * Prevents the loading of data with incorrect naming if passed true
+ *
+ * @param filter :: true if you want to allow filtering
+ */
+void IndirectDataReductionTab::filterInputData(bool filter) {
+  setFileExtensionsByName(filter);
+}
+
 } // namespace CustomInterfaces
 } // namespace MantidQt

@@ -47,6 +47,7 @@ private:
   void run() override;
   bool validate() override;
   void loadSettings(const QSettings &settings) override;
+  void setFileExtensionsByName(bool filter) override;
 
   void plotInPreview(const QString &curveName,
                      Mantid::API::MatrixWorkspace_sptr &ws,
@@ -106,6 +107,11 @@ private:
   void setRunIsRunning(bool running);
   void setPlotSpectrumIsPlotting(bool plotting);
   void setPlotContourIsPlotting(bool plotting);
+
+  QStringList m_sampleFBExtensions;
+  QStringList m_sampleWSExtensions;
+  QStringList m_containerFBExtensions;
+  QStringList m_containerWSExtensions;
 
   Ui::ContainerSubtraction m_uiForm;
   std::string m_originalSampleUnits;

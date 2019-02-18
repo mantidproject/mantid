@@ -49,6 +49,8 @@ private slots:
   void plotCurrentPreview();
 
 private:
+  void setFileExtensionsByName(bool filter) override;
+
   void processLogs();
   void addAdditionalLogs(Mantid::API::WorkspaceGroup_sptr resultGroup) const;
   void addAdditionalLogs(Mantid::API::Workspace_sptr resultWorkspace) const;
@@ -67,6 +69,10 @@ private:
   void setRunIsRunning(bool running);
   void setPlotResultIsPlotting(bool plotting);
 
+  QStringList m_vanadiumFBExtensions;
+  QStringList m_vanadiumWSExtensions;
+  QStringList m_resolutionFBExtensions;
+  QStringList m_resolutionWSExtensions;
   /// Current preview spectrum
   int m_previewSpec;
   /// The ui form

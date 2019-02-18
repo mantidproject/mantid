@@ -50,6 +50,8 @@ private slots:
   void helpClicked();
   /// Slot for clicking on the manage directories button
   void manageUserDirectories();
+  /// Updates the settings for this interface
+  void updateSettings();
   /// Slot showing a message box to the user
   void showMessageBox(const QString &message);
 

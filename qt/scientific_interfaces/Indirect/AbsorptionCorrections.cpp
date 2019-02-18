@@ -114,7 +114,11 @@ WorkspaceGroup_sptr convertUnits(WorkspaceGroup_sptr workspaceGroup,
 namespace MantidQt {
 namespace CustomInterfaces {
 AbsorptionCorrections::AbsorptionCorrections(QWidget *parent)
-    : CorrectionsTab(parent), m_sampleDensities(std::make_shared<Densities>()),
+    : CorrectionsTab(parent), m_sampleFBExtensions({"_red.nxs", "_sqw.nxs"}),
+      m_sampleWSExtensions({"_red", "_sqw"}),
+      m_containerFBExtensions({"_red.nxs", "_sqw.nxs"}),
+      m_containerWSExtensions({"_red", "_sqw"}),
+      m_sampleDensities(std::make_shared<Densities>()),
       m_canDensities(std::make_shared<Densities>()) {
   m_uiForm.setupUi(parent);
 
@@ -436,6 +440,17 @@ UserInputValidator AbsorptionCorrections::doValidation() {
 void AbsorptionCorrections::loadSettings(const QSettings &settings) {
   m_uiForm.dsSampleInput->readSettings(settings.group());
   m_uiForm.dsCanInput->readSettings(settings.group());
+}
+
+void AbsorptionCorrections::setFileExtensionsByName(bool filter) {
+  m_uiForm.dsSampleInput->setFBSuffixes(filter ? m_sampleFBExtensions
+                                               : getAllowedExtensions());
+  m_uiForm.dsSampleInput->setWSSuffixes(filter ? m_sampleWSExtensions
+                                               : getAllowedExtensions());
+  m_uiForm.dsCanInput->setFBSuffixes(filter ? m_containerFBExtensions
+                                            : getAllowedExtensions());
+  m_uiForm.dsCanInput->setWSSuffixes(filter ? m_containerWSExtensions
+                                            : getAllowedExtensions());
 }
 
 void AbsorptionCorrections::processWavelengthWorkspace() {

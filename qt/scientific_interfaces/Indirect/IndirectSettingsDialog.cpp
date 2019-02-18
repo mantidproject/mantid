@@ -9,8 +9,6 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 
-#include <QSettings>
-
 using namespace Mantid::Kernel;
 
 namespace {
@@ -34,10 +32,11 @@ namespace CustomInterfaces {
 namespace IDA {
 
 IndirectSettingsDialog::IndirectSettingsDialog(QWidget *parent,
-                                               QString const &settingsGroup)
-    : QDialog(parent), m_settingsGroup(settingsGroup) {
+                                               QString const &settingsGroup,
+                                               QString const &settings)
+    : QDialog(parent), m_settingsGroup(settingsGroup),
+      m_settings(settings.split(",", QString::SkipEmptyParts)) {
   m_uiForm.setupUi(this);
-  setInterfaceGroupBoxTitle(m_settingsGroup);
 
   connect(m_uiForm.cbFacility, SIGNAL(currentIndexChanged(QString const &)),
           this, SLOT(updateFilterInputByName(QString const &)));
@@ -46,7 +45,15 @@ IndirectSettingsDialog::IndirectSettingsDialog(QWidget *parent,
   connect(m_uiForm.pbApply, SIGNAL(clicked()), this, SLOT(applyClicked()));
   connect(m_uiForm.pbCancel, SIGNAL(clicked()), this, SLOT(cancelClicked()));
 
+  initLayout();
   loadSettings();
+}
+
+void IndirectSettingsDialog::initLayout() {
+  setInterfaceSettingsVisible(!m_settings.isEmpty());
+  setInterfaceGroupBoxTitle(m_settingsGroup);
+
+  setFilterInputByNameVisible(m_settings.contains(FILTER_DATA_NAMES_SETTING));
 }
 
 void IndirectSettingsDialog::okClicked() {
@@ -68,13 +75,20 @@ void IndirectSettingsDialog::loadSettings() {
   QSettings settings;
   settings.beginGroup(m_settingsGroup);
 
-  auto const filter = settings.value(FILTER_DATA_NAMES_SETTING, true).toBool();
+  loadFilterInputByNameSetting(settings);
 
   settings.endGroup();
 
-  setFilterInputByNameChecked(filter);
-
   emit updateSettings();
+}
+
+void IndirectSettingsDialog::loadFilterInputByNameSetting(
+    QSettings const &settings) {
+  if (m_settings.contains(FILTER_DATA_NAMES_SETTING)) {
+    auto const filter =
+        settings.value(FILTER_DATA_NAMES_SETTING, true).toBool();
+    setFilterInputByNameChecked(filter);
+  }
 }
 
 void IndirectSettingsDialog::saveSettings() {
@@ -83,11 +97,24 @@ void IndirectSettingsDialog::saveSettings() {
   QSettings settings;
   settings.beginGroup(m_settingsGroup);
 
-  settings.setValue(FILTER_DATA_NAMES_SETTING, isFilterInputByNameChecked());
+  saveSetting(settings, FILTER_DATA_NAMES_SETTING,
+              isFilterInputByNameChecked());
 
   settings.endGroup();
 
   emit updateSettings();
+}
+
+template <typename T>
+void IndirectSettingsDialog::saveSetting(QSettings &settings,
+                                         QString const &settingName,
+                                         T const &value) {
+  if (m_settings.contains(settingName))
+    settings.setValue(settingName, value);
+}
+
+void IndirectSettingsDialog::setInterfaceSettingsVisible(bool visible) {
+  m_uiForm.gbInterfaceSettings->setVisible(visible);
 }
 
 void IndirectSettingsDialog::setInterfaceGroupBoxTitle(QString const &title) {
@@ -111,6 +138,10 @@ QString IndirectSettingsDialog::getSelectedFacility() const {
 
 void IndirectSettingsDialog::updateFilterInputByName(QString const &text) {
   setFilterInputByNameChecked(text.toStdString() == "ISIS");
+}
+
+void IndirectSettingsDialog::setFilterInputByNameVisible(bool visible) {
+  m_uiForm.ckFilterDataNames->setVisible(visible);
 }
 
 void IndirectSettingsDialog::setFilterInputByNameChecked(bool check) {

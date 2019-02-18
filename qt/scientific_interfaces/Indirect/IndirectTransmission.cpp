@@ -115,6 +115,10 @@ void IndirectTransmission::setInstrument(QString const &instrumentName) {
   m_uiForm.dsCanInput->setInstrumentOverride(instrumentName);
 }
 
+void IndirectTransmission::setFileExtensionsByName(bool filter) {
+  UNUSED_ARG(filter);
+}
+
 /**
  * Handle when Run is clicked
  */

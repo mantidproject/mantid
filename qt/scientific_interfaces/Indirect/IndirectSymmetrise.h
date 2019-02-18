@@ -76,6 +76,10 @@ private slots:
   void setPlotIsPlotting(bool plotting);
 
 private:
+  void setFileExtensionsByName(bool filter) override;
+
+  QStringList m_inputFBExtensions;
+  QStringList m_inputWSExtensions;
   Ui::IndirectSymmetrise m_uiForm;
   double m_originalMax;
   double m_originalMin;

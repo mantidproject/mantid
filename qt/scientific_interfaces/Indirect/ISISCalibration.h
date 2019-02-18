@@ -83,6 +83,7 @@ private slots:
 
 private:
   void setDefaultInstDetails(QMap<QString, QString> const &instrumentDetails);
+  void setFileExtensionsByName(bool filter) override;
   void createRESfile(const QString &file);
   void addRuntimeSmoothing(const QString &workspaceName);
   void setRangeLimits(MantidWidgets::RangeSelector *rangeSelector,

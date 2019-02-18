@@ -640,6 +640,10 @@ void ISISCalibration::resCheck(bool state) {
   m_uiForm.ckSmoothResolution->setEnabled(state);
 }
 
+void ISISCalibration::setFileExtensionsByName(bool filter) {
+  UNUSED_ARG(filter);
+}
+
 /**
  * Called when a user starts to type / edit the runs to load.
  */

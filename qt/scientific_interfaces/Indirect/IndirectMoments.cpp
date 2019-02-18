@@ -21,7 +21,8 @@ namespace CustomInterfaces {
 /** Constructor
  */
 IndirectMoments::IndirectMoments(IndirectDataReduction *idrUI, QWidget *parent)
-    : IndirectDataReductionTab(idrUI, parent) {
+    : IndirectDataReductionTab(idrUI, parent),
+      m_inputFBExtensions({"_sqw.nxs"}), m_inputWSExtensions({"_sqw"}) {
   m_uiForm.setupUi(parent);
 
   const unsigned int NUM_DECIMALS = 6;
@@ -212,6 +213,13 @@ void IndirectMoments::momentsAlgComplete(bool error) {
   // Enable plot and save buttons
   m_uiForm.pbPlot->setEnabled(true);
   m_uiForm.pbSave->setEnabled(true);
+}
+
+void IndirectMoments::setFileExtensionsByName(bool filter) {
+  m_uiForm.dsInput->setFBSuffixes(filter ? m_inputFBExtensions
+                                         : getAllowedExtensions());
+  m_uiForm.dsInput->setWSSuffixes(filter ? m_inputWSExtensions
+                                         : getAllowedExtensions());
 }
 
 /**

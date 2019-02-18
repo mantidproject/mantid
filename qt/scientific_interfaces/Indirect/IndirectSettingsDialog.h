@@ -11,6 +11,7 @@
 
 #include <QDialog>
 #include <QObject>
+#include <QSettings>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -20,8 +21,8 @@ class IndirectSettingsDialog : public QDialog {
   Q_OBJECT
 
 public:
-  explicit IndirectSettingsDialog(QWidget *parent,
-                                  QString const &settingsGroup);
+  explicit IndirectSettingsDialog(QWidget *parent, QString const &settingsGroup,
+                                  QString const &settings);
 
   void loadSettings();
   void saveSettings();
@@ -39,12 +40,20 @@ private slots:
   void cancelClicked();
 
 private:
+  void initLayout();
+  void setInterfaceSettingsVisible(bool visible);
   void setInterfaceGroupBoxTitle(QString const &title);
+
+  void loadFilterInputByNameSetting(QSettings const &settings);
+  template <typename T>
+  void saveSetting(QSettings &settings, QString const &settingName,
+                   T const &value);
 
   int findFacilityIndex(std::string const &text);
 
   QString getSelectedFacility() const;
 
+  void setFilterInputByNameVisible(bool visible);
   void setFilterInputByNameChecked(bool check);
   bool isFilterInputByNameChecked() const;
 
@@ -54,6 +63,7 @@ private:
   void setOkEnabled(bool enable);
   void setCancelEnabled(bool enable);
 
+  QStringList m_settings;
   QString m_settingsGroup;
   Ui::IndirectSettingsDialog m_uiForm;
 };

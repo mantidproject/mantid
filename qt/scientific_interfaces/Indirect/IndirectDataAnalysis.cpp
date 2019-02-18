@@ -35,7 +35,7 @@ DECLARE_SUBWINDOW(IndirectDataAnalysis)
 IndirectDataAnalysis::IndirectDataAnalysis(QWidget *parent)
     : UserSubWindow(parent),
       m_settingsDialog(Mantid::Kernel::make_unique<IndirectSettingsDialog>(
-          this, "Data Analysis")),
+          this, "Data Analysis", "filter-input-by-name")),
       m_settingsGroup("CustomInterfaces/IndirectAnalysis/"), m_valInt(nullptr),
       m_valDbl(nullptr),
       m_changeObserver(*this, &IndirectDataAnalysis::handleDirectoryChange) {
@@ -176,7 +176,7 @@ void IndirectDataAnalysis::exportTabPython() {
  */
 void IndirectDataAnalysis::updateSettings() {
   QSettings settings;
-  settings.beginGroup("IndirectInterfaceSettings");
+  settings.beginGroup("Data Analysis");
 
   auto const filter = settings.value("filter-input-by-name", true).toBool();
 

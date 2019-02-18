@@ -23,7 +23,7 @@ using namespace MantidQt::CustomInterfaces;
 IndirectBayes::IndirectBayes(QWidget *parent)
     : UserSubWindow(parent),
       m_settingsDialog(Mantid::Kernel::make_unique<IDA::IndirectSettingsDialog>(
-          this, "Indirect Bayes")),
+          this, "Indirect Bayes", "filter-input-by-name")),
       m_changeObserver(*this, &IndirectBayes::handleDirectoryChange) {
   m_uiForm.setupUi(this);
 
@@ -54,6 +54,9 @@ IndirectBayes::IndirectBayes(QWidget *parent)
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(helpClicked()));
   connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this,
           SLOT(manageUserDirectories()));
+
+  connect(m_settingsDialog.get(), SIGNAL(updateSettings()), this,
+          SLOT(updateSettings()));
 }
 
 void IndirectBayes::initLayout() {}
@@ -128,6 +131,21 @@ void IndirectBayes::manageUserDirectories() {
       new MantidQt::API::ManageUserDirectories(this);
   ad->show();
   ad->setFocus();
+}
+
+/**
+ * Updates the settings decided on the Settings Dialog
+ */
+void IndirectBayes::updateSettings() {
+  QSettings settings;
+  settings.beginGroup("Indirect Bayes");
+
+  auto const filter = settings.value("filter-input-by-name", true).toBool();
+
+  settings.endGroup();
+
+  for (auto tab = m_bayesTabs.begin(); tab != m_bayesTabs.end(); ++tab)
+    tab->second->filterInputData(filter);
 }
 
 /**

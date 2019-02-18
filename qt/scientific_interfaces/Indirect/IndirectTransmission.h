@@ -54,6 +54,7 @@ private slots:
 
 private:
   void setInstrument(QString const &instrumentName);
+  void setFileExtensionsByName(bool filter) override;
 
   Ui::IndirectTransmission m_uiForm;
 };

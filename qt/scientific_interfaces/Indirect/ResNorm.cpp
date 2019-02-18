@@ -36,7 +36,12 @@ ITableWorkspace_sptr getADSTableWorkspace(std::string const &workspaceName) {
 
 namespace MantidQt {
 namespace CustomInterfaces {
-ResNorm::ResNorm(QWidget *parent) : IndirectBayesTab(parent), m_previewSpec(0) {
+ResNorm::ResNorm(QWidget *parent)
+    : IndirectBayesTab(parent),
+      m_vanadiumFBExtensions({"_red.nxs", "_sqw.nxs"}),
+      m_vanadiumWSExtensions({"_red", "_sqw"}),
+      m_resolutionFBExtensions({"_res.nxs"}),
+      m_resolutionWSExtensions({"_res"}), m_previewSpec(0) {
   m_uiForm.setupUi(parent);
 
   // Create range selector
@@ -79,6 +84,17 @@ ResNorm::ResNorm(QWidget *parent) : IndirectBayesTab(parent), m_previewSpec(0) {
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
   connect(m_uiForm.pbPlotCurrent, SIGNAL(clicked()), this,
           SLOT(plotCurrentPreview()));
+}
+
+void ResNorm::setFileExtensionsByName(bool filter) {
+  m_uiForm.dsVanadium->setFBSuffixes(filter ? m_vanadiumFBExtensions
+                                            : getAllowedExtensions());
+  m_uiForm.dsVanadium->setWSSuffixes(filter ? m_vanadiumWSExtensions
+                                            : getAllowedExtensions());
+  m_uiForm.dsResolution->setFBSuffixes(filter ? m_resolutionFBExtensions
+                                              : getAllowedExtensions());
+  m_uiForm.dsResolution->setWSSuffixes(filter ? m_resolutionWSExtensions
+                                              : getAllowedExtensions());
 }
 
 void ResNorm::setup() {}

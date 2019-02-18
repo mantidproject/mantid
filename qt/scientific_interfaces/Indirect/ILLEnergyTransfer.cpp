@@ -323,8 +323,10 @@ void ILLEnergyTransfer::algorithmComplete(bool error) {
       plot();
     }
   }
+}
 
-  // Nothing to do here
+void ILLEnergyTransfer::setFileExtensionsByName(bool filter) {
+  UNUSED_ARG(filter);
 }
 
 /**

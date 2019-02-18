@@ -45,6 +45,7 @@ private:
   void run() override;
   bool validate() override;
   void loadSettings(const QSettings &settings) override;
+  void setFileExtensionsByName(bool filter) override;
 
   std::size_t getOutWsNumberOfSpectra() const;
   Mantid::API::MatrixWorkspace_const_sptr
@@ -67,6 +68,13 @@ private:
   void setRunIsRunning(bool running);
   void setPlotSpectrumIsPlotting(bool plotting);
   void setPlotContourIsPlotting(bool plotting);
+
+  QStringList m_sampleFBExtensions;
+  QStringList m_sampleWSExtensions;
+  QStringList m_containerFBExtensions;
+  QStringList m_containerWSExtensions;
+  QStringList m_correctionsFBExtensions;
+  QStringList m_correctionsWSExtensions;
 
   Ui::ApplyAbsorptionCorrections m_uiForm;
 

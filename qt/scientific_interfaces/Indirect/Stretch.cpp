@@ -34,7 +34,10 @@ MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) {
 namespace MantidQt {
 namespace CustomInterfaces {
 Stretch::Stretch(QWidget *parent)
-    : IndirectBayesTab(parent), m_previewSpec(0), m_save(false) {
+    : IndirectBayesTab(parent), m_sampleFBExtensions({"_red.nxs", "_sqw.nxs"}),
+      m_sampleWSExtensions({"_red", "_sqw"}),
+      m_resolutionFBExtensions({"_res.nxs"}),
+      m_resolutionWSExtensions({"_res"}), m_previewSpec(0), m_save(false) {
   m_uiForm.setupUi(parent);
 
   // Create range selector
@@ -95,6 +98,17 @@ Stretch::Stretch(QWidget *parent)
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveWorkspaces()));
   connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this,
           SLOT(plotCurrentPreview()));
+}
+
+void Stretch::setFileExtensionsByName(bool filter) {
+  m_uiForm.dsSample->setFBSuffixes(filter ? m_sampleFBExtensions
+                                          : getAllowedExtensions());
+  m_uiForm.dsSample->setWSSuffixes(filter ? m_sampleWSExtensions
+                                          : getAllowedExtensions());
+  m_uiForm.dsResolution->setFBSuffixes(filter ? m_resolutionFBExtensions
+                                              : getAllowedExtensions());
+  m_uiForm.dsResolution->setWSSuffixes(filter ? m_resolutionWSExtensions
+                                              : getAllowedExtensions());
 }
 
 void Stretch::setup() {}

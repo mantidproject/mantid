@@ -21,7 +21,11 @@ Mantid::Kernel::Logger g_log("ContainerSubtraction");
 namespace MantidQt {
 namespace CustomInterfaces {
 ContainerSubtraction::ContainerSubtraction(QWidget *parent)
-    : CorrectionsTab(parent), m_spectra(0) {
+    : CorrectionsTab(parent), m_spectra(0),
+      m_sampleFBExtensions({"_red.nxs", "_sqw.nxs", "_elf.nxs"}),
+      m_sampleWSExtensions({"_red", "_sqw", "_elf"}),
+      m_containerFBExtensions({"_red.nxs", "_sqw.nxs", "_elf.nxs"}),
+      m_containerWSExtensions({"_red", "_sqw", "_elf"}) {
   m_uiForm.setupUi(parent);
 
   connect(m_uiForm.dsSample, SIGNAL(dataReady(const QString &)), this,
@@ -211,6 +215,17 @@ bool ContainerSubtraction::validate() {
 void ContainerSubtraction::loadSettings(const QSettings &settings) {
   m_uiForm.dsContainer->readSettings(settings.group());
   m_uiForm.dsSample->readSettings(settings.group());
+}
+
+void ContainerSubtraction::setFileExtensionsByName(bool filter) {
+  m_uiForm.dsSample->setFBSuffixes(filter ? m_sampleFBExtensions
+                                          : getAllowedExtensions());
+  m_uiForm.dsSample->setWSSuffixes(filter ? m_sampleWSExtensions
+                                          : getAllowedExtensions());
+  m_uiForm.dsContainer->setFBSuffixes(filter ? m_containerFBExtensions
+                                             : getAllowedExtensions());
+  m_uiForm.dsContainer->setWSSuffixes(filter ? m_containerWSExtensions
+                                             : getAllowedExtensions());
 }
 
 /**

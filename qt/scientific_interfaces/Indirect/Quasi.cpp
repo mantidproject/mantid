@@ -12,7 +12,12 @@ using namespace Mantid::API;
 
 namespace MantidQt {
 namespace CustomInterfaces {
-Quasi::Quasi(QWidget *parent) : IndirectBayesTab(parent), m_previewSpec(0) {
+
+Quasi::Quasi(QWidget *parent)
+    : IndirectBayesTab(parent), m_sampleFBExtensions({"_red.nxs", "_sqw.nxs"}),
+      m_sampleWSExtensions({"_red", "_sqw"}),
+      m_resolutionFBExtensions({"_red.nxs", "_sqw.nxs", "_res.nxs"}),
+      m_resolutionWSExtensions({"_red", "_sqw", "_res"}), m_previewSpec(0) {
   m_uiForm.setupUi(parent);
 
   // Create range selector
@@ -89,6 +94,17 @@ void Quasi::loadSettings(const QSettings &settings) {
   m_uiForm.dsResolution->readSettings(settings.group());
   m_uiForm.dsResNorm->readSettings(settings.group());
   m_uiForm.mwFixWidthDat->readSettings(settings.group());
+}
+
+void Quasi::setFileExtensionsByName(bool filter) {
+  m_uiForm.dsSample->setFBSuffixes(filter ? m_sampleFBExtensions
+                                          : getAllowedExtensions());
+  m_uiForm.dsSample->setWSSuffixes(filter ? m_sampleWSExtensions
+                                          : getAllowedExtensions());
+  m_uiForm.dsResolution->setFBSuffixes(filter ? m_resolutionFBExtensions
+                                              : getAllowedExtensions());
+  m_uiForm.dsResolution->setWSSuffixes(filter ? m_resolutionWSExtensions
+                                              : getAllowedExtensions());
 }
 
 void Quasi::setup() {}

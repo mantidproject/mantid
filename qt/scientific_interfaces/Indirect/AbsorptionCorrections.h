@@ -50,6 +50,7 @@ private:
   void run() override;
   bool validate() override;
   void loadSettings(const QSettings &settings) override;
+  void setFileExtensionsByName(bool filter) override;
 
   void addSaveWorkspace(std::string const &wsName);
   void addShapeSpecificSampleOptions(Mantid::API::IAlgorithm_sptr alg,
@@ -94,6 +95,11 @@ private:
   void setButtonsEnabled(bool enabled);
   void setRunIsRunning(bool running);
   void setPlotResultIsPlotting(bool plotting);
+
+  QStringList m_sampleFBExtensions;
+  QStringList m_sampleWSExtensions;
+  QStringList m_containerFBExtensions;
+  QStringList m_containerWSExtensions;
 
   Ui::AbsorptionCorrections m_uiForm;
 

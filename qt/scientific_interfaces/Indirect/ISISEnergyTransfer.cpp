@@ -104,7 +104,8 @@ namespace CustomInterfaces {
  */
 ISISEnergyTransfer::ISISEnergyTransfer(IndirectDataReduction *idrUI,
                                        QWidget *parent)
-    : IndirectDataReductionTab(idrUI, parent) {
+    : IndirectDataReductionTab(idrUI, parent),
+      m_calibFBExtensions({"_calib.nxs"}), m_calibWSExtensions({"_calib"}) {
   m_uiForm.setupUi(parent);
 
   // SIGNAL/SLOT CONNECTIONS
@@ -801,6 +802,13 @@ void ISISEnergyTransfer::plotRawComplete(bool error) {
     plotSpectrum(QString::fromStdString(name) + "_grp");
   }
   setPlotTimeIsPlotting(false);
+}
+
+void ISISEnergyTransfer::setFileExtensionsByName(bool filter) {
+  m_uiForm.dsCalibrationFile->setFBSuffixes(filter ? m_calibFBExtensions
+                                                   : getAllowedExtensions());
+  m_uiForm.dsCalibrationFile->setWSSuffixes(filter ? m_calibWSExtensions
+                                                   : getAllowedExtensions());
 }
 
 /**

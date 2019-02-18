@@ -23,7 +23,12 @@ Mantid::Kernel::Logger g_log("ApplyAbsorptionCorrections");
 namespace MantidQt {
 namespace CustomInterfaces {
 ApplyAbsorptionCorrections::ApplyAbsorptionCorrections(QWidget *parent)
-    : CorrectionsTab(parent) {
+    : CorrectionsTab(parent), m_sampleFBExtensions({"_red.nxs", "_sqw.nxs"}),
+      m_sampleWSExtensions({"_red", "_sqw"}),
+      m_containerFBExtensions({"_red.nxs", "_sqw.nxs"}),
+      m_containerWSExtensions({"_red", "_sqw"}),
+      m_correctionsFBExtensions({"_Corrections.nxs"}),
+      m_correctionsWSExtensions({"_Corrections"}) {
   m_spectra = 0;
   m_uiForm.setupUi(parent);
 
@@ -517,6 +522,21 @@ void ApplyAbsorptionCorrections::loadSettings(const QSettings &settings) {
   m_uiForm.dsCorrections->readSettings(settings.group());
   m_uiForm.dsContainer->readSettings(settings.group());
   m_uiForm.dsSample->readSettings(settings.group());
+}
+
+void ApplyAbsorptionCorrections::setFileExtensionsByName(bool filter) {
+  m_uiForm.dsSample->setFBSuffixes(filter ? m_sampleFBExtensions
+                                          : getAllowedExtensions());
+  m_uiForm.dsSample->setWSSuffixes(filter ? m_sampleWSExtensions
+                                          : getAllowedExtensions());
+  m_uiForm.dsContainer->setFBSuffixes(filter ? m_containerFBExtensions
+                                             : getAllowedExtensions());
+  m_uiForm.dsContainer->setWSSuffixes(filter ? m_containerWSExtensions
+                                             : getAllowedExtensions());
+  m_uiForm.dsCorrections->setFBSuffixes(filter ? m_correctionsFBExtensions
+                                               : getAllowedExtensions());
+  m_uiForm.dsCorrections->setWSSuffixes(filter ? m_correctionsWSExtensions
+                                               : getAllowedExtensions());
 }
 
 /**

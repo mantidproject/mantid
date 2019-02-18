@@ -40,7 +40,11 @@ std::string extractFirstOf(std::string const &str,
 namespace MantidQt {
 namespace CustomInterfaces {
 CalculatePaalmanPings::CalculatePaalmanPings(QWidget *parent)
-    : CorrectionsTab(parent), m_sampleDensities(std::make_shared<Densities>()),
+    : CorrectionsTab(parent), m_sampleFBExtensions({"_red.nxs", "_sqw.nxs"}),
+      m_sampleWSExtensions({"_red", "_sqw"}),
+      m_containerFBExtensions({"_red.nxs", "_sqw.nxs"}),
+      m_containerWSExtensions({"_red", "_sqw"}),
+      m_sampleDensities(std::make_shared<Densities>()),
       m_canDensities(std::make_shared<Densities>()) {
   m_uiForm.setupUi(parent);
 
@@ -443,6 +447,17 @@ void CalculatePaalmanPings::postProcessComplete(bool error) {
 void CalculatePaalmanPings::loadSettings(const QSettings &settings) {
   m_uiForm.dsSample->readSettings(settings.group());
   m_uiForm.dsContainer->readSettings(settings.group());
+}
+
+void CalculatePaalmanPings::setFileExtensionsByName(bool filter) {
+  m_uiForm.dsSample->setFBSuffixes(filter ? m_sampleFBExtensions
+                                          : getAllowedExtensions());
+  m_uiForm.dsSample->setWSSuffixes(filter ? m_sampleWSExtensions
+                                          : getAllowedExtensions());
+  m_uiForm.dsContainer->setFBSuffixes(filter ? m_containerFBExtensions
+                                             : getAllowedExtensions());
+  m_uiForm.dsContainer->setWSSuffixes(filter ? m_containerWSExtensions
+                                             : getAllowedExtensions());
 }
 
 /**
