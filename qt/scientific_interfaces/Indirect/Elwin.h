@@ -40,7 +40,7 @@ private:
   void setup() override;
   bool validate() override;
   void loadSettings(const QSettings &settings) override;
-  void filterDataBySuffices(bool filter) override;
+  void setFileExtensionsByName(bool filter) override;
   void setBrowserWorkspace() override{};
   void setDefaultResolution(Mantid::API::MatrixWorkspace_const_sptr ws,
                             const QPair<double, double> &range);
@@ -65,6 +65,7 @@ private:
   void setPlotResultEnabled(const bool &enabled);
   void setSaveResultEnabled(const bool &enabled);
 
+	QStringList m_nameExtensions;
   Ui::Elwin m_uiForm;
   QtTreePropertyBrowser *m_elwTree;
 };

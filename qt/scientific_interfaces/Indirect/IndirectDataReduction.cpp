@@ -203,8 +203,7 @@ IndirectDataReduction::loadInstrumentIfNotExist(
           "instrumentDefinition.directory");
 
   try {
-    auto const dateRange =
-        instrumentName == "BASIS" ? "_20140101-" : ""; /// Needs changing
+    auto const dateRange = instrumentName == "BASIS" ? "_20140101-" : "";
     std::string parameterFilename =
         idfDirectory + instrumentName + "_Definition" + dateRange + ".xml";
     auto loadAlg = AlgorithmManager::Instance().create("LoadEmptyInstrument");

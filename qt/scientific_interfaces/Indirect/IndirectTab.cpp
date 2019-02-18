@@ -46,9 +46,7 @@ void setPropertyIf(Algorithm_sptr algorithm, std::string const &propName,
 
 namespace MantidQt {
 namespace CustomInterfaces {
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
+
 IndirectTab::IndirectTab(QObject *parent)
     : QObject(parent), m_properties(),
       m_dblManager(new QtDoublePropertyManager()),
@@ -137,6 +135,12 @@ void IndirectTab::exportPythonScript() {
   dlg->raise();
   dlg->activateWindow();
 }
+
+/**
+ * Returns the allowed input data file extensions
+ * @return The allowed input data file extensions
+ */
+QStringList IndirectTab::getAllowedExtensions() const { return {".nxs"}; }
 
 /**
  * Run the load algorithm with the supplied filename and spectrum range

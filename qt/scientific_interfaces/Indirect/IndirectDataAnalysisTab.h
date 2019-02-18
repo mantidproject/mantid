@@ -153,7 +153,7 @@ private:
   bool validate() override = 0;
   /// Overidden by child class.
   virtual void loadSettings(const QSettings &settings) = 0;
-  virtual void filterDataBySuffices(bool filter) = 0;
+  virtual void setFileExtensionsByName(bool filter) = 0;
   virtual void setBrowserWorkspace() = 0;
 
   /// A pointer to the parent (friend) IndirectDataAnalysis object.

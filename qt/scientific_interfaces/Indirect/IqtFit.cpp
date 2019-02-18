@@ -34,8 +34,8 @@ namespace CustomInterfaces {
 namespace IDA {
 
 IqtFit::IqtFit(QWidget *parent)
-    : IndirectFitAnalysisTab(new IqtFitModel, parent),
-      m_uiForm(new Ui::IqtFit) {
+    : IndirectFitAnalysisTab(new IqtFitModel, parent), m_uiForm(new Ui::IqtFit),
+      m_sampleFBExtensions({"_iqt.nxs"}), m_sampleWSExtensions({"_iqt"}) {
   m_uiForm->setupUi(parent);
   m_iqtFittingModel = dynamic_cast<IqtFitModel *>(fittingModel());
 
@@ -50,8 +50,8 @@ IqtFit::IqtFit(QWidget *parent)
 }
 
 void IqtFit::setupFitTab() {
-  setSampleWSSuffices(getSampleWSSuffices());
-  setSampleFBSuffices(getSampleFBSuffices());
+  setSampleFBSuffices(m_sampleFBExtensions);
+  setSampleWSSuffices(m_sampleWSExtensions);
 
   // Create custom function groups
   auto &functionFactory = FunctionFactory::Instance();
@@ -78,13 +78,13 @@ void IqtFit::setupFitTab() {
           SLOT(customBoolUpdated(const QString &, bool)));
 }
 
-QStringList IqtFit::getSampleWSSuffices() const { return {"_iqt"}; }
+QStringList IqtFit::getSampleFBSuffices() const { return m_sampleFBExtensions; }
 
-QStringList IqtFit::getSampleFBSuffices() const { return {"_iqt.nxs"}; }
-
-QStringList IqtFit::getResolutionWSSuffices() const { return {}; }
+QStringList IqtFit::getSampleWSSuffices() const { return m_sampleWSExtensions; }
 
 QStringList IqtFit::getResolutionFBSuffices() const { return {}; }
+
+QStringList IqtFit::getResolutionWSSuffices() const { return {}; }
 
 void IqtFit::fitFunctionChanged() {
   if (numberOfCustomFunctions("StretchExp") > 0) {

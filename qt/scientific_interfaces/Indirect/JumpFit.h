@@ -25,10 +25,10 @@ public:
 
   void setupFitTab() override;
 
-  QStringList getSampleWSSuffices() const override;
   QStringList getSampleFBSuffices() const override;
-  QStringList getResolutionWSSuffices() const override;
+  QStringList getSampleWSSuffices() const override;
   QStringList getResolutionFBSuffices() const override;
+  QStringList getResolutionWSSuffices() const override;
 
 protected slots:
   void updateModelFitTypeString();
@@ -44,6 +44,8 @@ private slots:
 private:
   void addFunctions(std::vector<std::string> const &functions);
 
+  QStringList m_sampleFBExtensions;
+  QStringList m_sampleWSExtensions;
   JumpFitModel *m_jumpFittingModel;
   std::unique_ptr<Ui::JumpFit> m_uiForm;
 };

@@ -250,14 +250,6 @@ public:
   }
 
   /**
-   * Clears the suffixes allowed by the file browser and workspace selector
-   */
-  void clearSuffices() {
-    m_uiForm.rfFileInput->clearFileExtensions();
-    m_uiForm.wsWorkspaceInput->clearSuffices();
-  }
-
-  /**
    * Gets the instrument override
    *
    * @return List of instrument override

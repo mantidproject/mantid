@@ -38,7 +38,6 @@ public:
   void setSampleFBSuffices(const QStringList &suffices);
   void setResolutionWSSuffices(const QStringList &suffices);
   void setResolutionFBSuffices(const QStringList &suffices);
-  void clearAllSuffices();
 
   void setStartX(double startX, std::size_t dataIndex, int spectrumIndex);
   void setEndX(double endX, std::size_t dataIndex, int spectrumIndex);

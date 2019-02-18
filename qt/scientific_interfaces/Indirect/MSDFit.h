@@ -38,6 +38,8 @@ protected:
 private:
   void setupFitTab() override;
 
+  QStringList m_sampleFBExtensions;
+  QStringList m_sampleWSExtensions;
   MSDFitModel *m_msdFittingModel;
   std::unique_ptr<Ui::MSDFit> m_uiForm;
 };

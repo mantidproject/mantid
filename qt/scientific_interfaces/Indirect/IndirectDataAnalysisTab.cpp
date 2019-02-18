@@ -56,7 +56,7 @@ void IndirectDataAnalysisTab::loadTabSettings(const QSettings &settings) {
  * @param filter :: true if you want to allow filtering
  */
 void IndirectDataAnalysisTab::filterInputData(bool filter) {
-  filterDataBySuffices(filter);
+  setFileExtensionsByName(filter);
 }
 
 /**

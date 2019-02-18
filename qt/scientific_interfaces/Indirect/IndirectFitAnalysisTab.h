@@ -203,7 +203,7 @@ private:
   /// Overidden by child class.
   void setup() override;
   void loadSettings(const QSettings &settings) override;
-  void filterDataBySuffices(bool filter) override;
+  void setFileExtensionsByName(bool filter) override;
   virtual void setupFitTab() = 0;
   bool validate() override;
 
@@ -212,8 +212,6 @@ private:
   void connectFitBrowserAndPlotPresenter();
   void connectDataAndSpectrumPresenters();
   void connectDataAndFitBrowserPresenters();
-
-  void clearAllSuffices();
 
   void plotSelectedSpectra(std::vector<SpectrumToPlot> const &spectra);
   void plotSpectrum(std::string const &workspaceName, std::size_t const &index,

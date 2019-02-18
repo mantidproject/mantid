@@ -63,6 +63,8 @@ public:
   IndirectTab(QObject *parent = nullptr);
   ~IndirectTab() override;
 
+  QStringList getAllowedExtensions() const;
+
   /// Plot a spectrum plot of a given workspace
   void plotSpectrum(const QString &workspaceName, const int &spectraIndex = 0,
                     const bool &errorBars = false);
