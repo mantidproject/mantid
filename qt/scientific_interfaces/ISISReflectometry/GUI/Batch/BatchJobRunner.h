@@ -17,38 +17,6 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class MANTIDQT_ISISREFLECTOMETRY_DLL IBatchJobAlgorithm {
-public:
-  virtual Item *item() = 0;
-  virtual std::vector<std::string> outputWorkspaceNames() const = 0;
-  virtual std::map<std::string, Mantid::API::Workspace_sptr>
-  outputWorkspaceNameToWorkspace() const = 0;
-};
-
-// Override the configured algorithm to pass to BatchAlgorithmRunner
-// so that we can associate our own data with it
-class MANTIDQT_ISISREFLECTOMETRY_DLL BatchJobAlgorithm
-    : public IBatchJobAlgorithm,
-      public MantidQt::API::ConfiguredAlgorithm {
-public:
-  BatchJobAlgorithm(
-      Mantid::API::IAlgorithm_sptr algorithm,
-      MantidQt::API::ConfiguredAlgorithm::AlgorithmRuntimeProps properties,
-      std::vector<std::string> outputWorkspaceProperties, Item *item);
-
-  Item *item() override;
-  std::vector<std::string> outputWorkspaceNames() const override;
-  std::map<std::string, Mantid::API::Workspace_sptr>
-  outputWorkspaceNameToWorkspace() const override;
-
-private:
-  // The data is an item in the table (i.e. a row or group)
-  Item *m_item;
-  std::vector<std::string> m_outputWorkspaceProperties;
-};
-
-using BatchJobAlgorithm_sptr = boost::shared_ptr<BatchJobAlgorithm>;
-
 /**
  * The BatchJobRunner class manages the running of algorithms based
  * on the reduction configuration and handling of state when algorithms
