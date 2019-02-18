@@ -16,8 +16,6 @@
 #include <QMessageBox>
 #include <QMetaType>
 
-Q_DECLARE_METATYPE(std::string)
-
 namespace MantidQt {
 namespace CustomInterfaces {
 
@@ -28,7 +26,6 @@ BatchView::BatchView(QWidget *parent)
     : QWidget(parent), m_batchAlgoRunner(this) {
   qRegisterMetaType<API::IConfiguredAlgorithm_sptr>(
       "MantidQt::API::IConfiguredAlgorithm_sptr");
-  qRegisterMetaType<std::string>();
   initLayout();
   m_batchAlgoRunner.stopOnFailure(false);
 }
