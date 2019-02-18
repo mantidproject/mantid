@@ -350,7 +350,9 @@ def _raise_if_not_sequence(value, seq_name, element_type=None):
             if not isinstance(x, element_type):
                 raise ValueError("Unexpected type: '{}'".format(x.__class__.__name__))
 
-        map(raise_if_not_type, value)
+        # Map in Python3 is an iterator, so ValueError will not be raised unless the values are yielded.
+        # converting to a list forces yielding
+        list(map(raise_if_not_type, value))
 
 
 def _validate_plot_inputs(workspaces, spectrum_nums, wksp_indices):
