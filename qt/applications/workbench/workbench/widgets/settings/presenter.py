@@ -66,4 +66,8 @@ class SettingsPresenter(object):
             self.view.close()
 
     def refresh_workspaces(self):
+        """
+        Refreshes to workspace so that if the invisible workspaces setting was changed
+        the effect will be reflected in the workspacewidget
+        """
         self.parent.workspacewidget.refresh_workspaces()

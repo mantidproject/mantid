@@ -15,22 +15,26 @@ from workbench.widgets.settings.general.view import GeneralSettingsView
 
 
 class GeneralSettings(object):
-    DEFAULT_INSTRUMENT = "default.instrument"
+    INSTRUMENT = "default.instrument"
     SHOW_INVISIBLE_WORKSPACES = "MantidOptions.InvisibleWorkspaces"
     PR_NUMBER_OF_CHECKPOINTS = "projectRecovery.numberOfCheckpoints"
     PR_TIME_BETWEEN_RECOVERY = "projectRecovery.secondsBetween"
     PR_RECOVERY_ENABLED = "projectRecovery.enabled"
+    PROMPT_SAVE_EDITOR_MODIFIED = 'prompt_save_editor_modified'
+    PROMPT_SAVE_ON_CLOSE = 'prompt_save_on_close'
+    PROJECT = 'project'
 
     def __init__(self, parent, view=None):
         self.view = view if view else GeneralSettingsView(parent, self)
-
-        self.setup_facilities()
-        self.setup_confirmations()
-
         self.load_current_setting_values()
 
-    def setup_facilities(self):
-        facilities = ConfigService.Instance().getFacilityNames()
+        self.setup_facilities_group()
+        self.setup_checkbox_signals()
+
+        self.setup_confirmations()
+
+    def setup_facilities_group(self):
+        facilities = ConfigService.getFacilityNames()
         self.view.facility.addItems(facilities)
 
         default_facility = ConfigService.getFacility().name()
@@ -43,11 +47,11 @@ class GeneralSettings(object):
         self.action_instrument_changed(default_instrument)
         self.view.instrument.currentTextChanged.connect(self.action_instrument_changed)
 
+    def setup_checkbox_signals(self):
         self.view.show_invisible_workspaces.setChecked(
             "true" == ConfigService.getString(self.SHOW_INVISIBLE_WORKSPACES).lower())
 
         self.view.show_invisible_workspaces.stateChanged.connect(self.action_show_invisible_workspaces)
-
         self.view.project_recovery_enabled.stateChanged.connect(self.action_project_recovery_enabled)
         self.view.time_between_recovery.valueChanged.connect(self.action_time_between_recovery)
         self.view.total_number_checkpoints.valueChanged.connect(self.action_total_number_checkpoints)
@@ -56,21 +60,21 @@ class GeneralSettings(object):
         ConfigService.setFacility(new_facility)
         self.view.instrument.clear()
         self.view.instrument.addItems(
-            [instr.name() for instr in ConfigService.Instance().getFacility(new_facility).instruments()])
+            [instr.name() for instr in ConfigService.getFacility(new_facility).instruments()])
 
     def setup_confirmations(self):
         self.view.prompt_save_on_close.stateChanged.connect(self.action_prompt_save_on_close)
         self.view.prompt_save_editor_modified.stateChanged.connect(self.action_prompt_save_editor_modified)
 
     def action_prompt_save_on_close(self, state):
-        CONF.set('project', 'prompt_save_on_close', bool(state))
+        CONF.set(self.PROJECT, self.PROMPT_SAVE_ON_CLOSE, bool(state))
 
     def action_prompt_save_editor_modified(self, state):
-        CONF.set('project', 'prompt_save_editor_modified', bool(state))
+        CONF.set(self.PROJECT, self.PROMPT_SAVE_EDITOR_MODIFIED, bool(state))
 
     def load_current_setting_values(self):
-        self.view.prompt_save_on_close.setChecked(CONF.get('project', 'prompt_save_on_close'))
-        self.view.prompt_save_editor_modified.setChecked(CONF.get('project', 'prompt_save_editor_modified'))
+        self.view.prompt_save_on_close.setChecked(CONF.get(self.PROJECT, self.PROMPT_SAVE_ON_CLOSE))
+        self.view.prompt_save_editor_modified.setChecked(CONF.get(self.PROJECT, self.PROMPT_SAVE_EDITOR_MODIFIED))
 
         # compare lower-case, because MantidPlot will save it as lower case,
         # but Python will have the bool's first letter capitalised
@@ -92,9 +96,7 @@ class GeneralSettings(object):
         ConfigService.setString(self.PR_NUMBER_OF_CHECKPOINTS, str(value))
 
     def action_instrument_changed(self, new_instrument):
-        ConfigService.setString(self.DEFAULT_INSTRUMENT, new_instrument)
+        ConfigService.setString(self.INSTRUMENT, new_instrument)
 
     def action_show_invisible_workspaces(self, state):
-        # TODO refresh the workspaces, sip shows a void refreshWorkspaces() function, what do
-        # call it, but how to get ref to refresh workspaces?
         ConfigService.setString(self.SHOW_INVISIBLE_WORKSPACES, str(bool(state)))
