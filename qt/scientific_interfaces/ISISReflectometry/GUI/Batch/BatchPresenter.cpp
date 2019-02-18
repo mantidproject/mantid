@@ -89,7 +89,7 @@ void BatchPresenter::notifyAutoreductionCompleted() {
   autoreductionCompleted();
 }
 
-void BatchPresenter::notifyBatchFinished(bool error) {
+void BatchPresenter::notifyBatchComplete(bool error) {
   UNUSED_ARG(error);
   reductionPaused();
   m_runsPresenter->notifyRowStateChanged();

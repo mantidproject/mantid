@@ -43,7 +43,7 @@ public:
                  std::unique_ptr<ISavePresenter> savePresenter);
 
   // BatchViewSubscriber overrides
-  void notifyBatchFinished(bool error) override;
+  void notifyBatchComplete(bool error) override;
   void notifyBatchCancelled() override;
   void notifyAlgorithmStarted(
       MantidQt::API::IConfiguredAlgorithm_sptr algorithm) override;

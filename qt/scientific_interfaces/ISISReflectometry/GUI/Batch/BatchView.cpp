@@ -97,7 +97,7 @@ void BatchView::executeAlgorithmQueue() {
 void BatchView::cancelAlgorithmQueue() { m_batchAlgoRunner.cancelBatch(); }
 
 void BatchView::onBatchComplete(bool error) {
-  m_notifyee->notifyBatchFinished(error);
+  m_notifyee->notifyBatchComplete(error);
 }
 
 void BatchView::onBatchCancelled() { m_notifyee->notifyBatchCancelled(); }

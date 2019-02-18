@@ -171,14 +171,14 @@ public:
   void testChildPresentersUpdatedWhenBatchFinished() {
     auto presenter = makePresenter();
     expectReductionPaused();
-    presenter.notifyBatchFinished(false);
+    presenter.notifyBatchComplete(false);
     verifyAndClear();
   }
 
   void testRowStateUpdatedWhenBatchFinished() {
     auto presenter = makePresenter();
     EXPECT_CALL(*m_runsPresenter, notifyRowStateChanged()).Times(1);
-    presenter.notifyBatchFinished(false);
+    presenter.notifyBatchComplete(false);
     verifyAndClear();
   }
 
