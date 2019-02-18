@@ -34,7 +34,7 @@ separately. The suggestion is either to modify files ``Framework/API/inc/MantidA
 ``Framework/API/src/AlgoTimeRegister.cpp`` by including ``#ifdef __WIN32``, or create the specific files with
 the ``AlgoTimeRegister`` class for Windows and then in ``Framework/API/CMakeLists.txt`` edit the chunk that
 describes option PROFILE_ALGORITHM_LINUX combined with OS defined flags. In this case
-``Framework/API/src/AlgorithmExecuteProfile.cpp`` needs to be modified or substituted.
+``Framework/API/src/AlgorithmExecuteProfile.cpp`` also needs to be modified or substituted.
 ``${CMAKE_SYSTEM_NAME} MATCHES "Windows"``. QueryPerformanceCounter supposed to be used on windows,
 instead of clock_gettime.
 
