@@ -11,14 +11,6 @@ namespace CustomInterfaces {
 
 Item::Item() : m_itemState() {}
 
-Item::Item(Item const &rhs) : m_itemState() { UNUSED_ARG(rhs); }
-
-Item &Item::operator=(Item const &rhs) {
-  UNUSED_ARG(rhs);
-  m_itemState = ItemState();
-  return *this;
-}
-
 State Item::state() const { return m_itemState.state(); }
 
 std::string Item::message() const { return m_itemState.message(); }

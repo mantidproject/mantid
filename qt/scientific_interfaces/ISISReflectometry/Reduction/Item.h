@@ -18,8 +18,6 @@ namespace CustomInterfaces {
 class MANTIDQT_ISISREFLECTOMETRY_DLL Item {
 public:
   Item();
-  Item(Item const &rhs);
-  Item &operator=(Item const &rhs);
 
   virtual bool isGroup() const = 0;
   State state() const;
