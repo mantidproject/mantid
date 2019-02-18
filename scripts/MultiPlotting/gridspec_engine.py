@@ -8,7 +8,6 @@ def defaultGridspecGrid(number):
        return [3,1]
 
     root = math.sqrt(number)
-    print (root, root*root)
     if root - math.floor(root) == 0.0:
         return [int(root), int(root)]
 
@@ -31,5 +30,4 @@ class gridspecEngine(object):
            print("Number of plot has exceeded the maximum number of "+str(self._max_plot))
            return
         current_grid = self.grid(number)
-        print("grid chevck", current_grid)
         return GridSpec(current_grid[0],current_grid[1])

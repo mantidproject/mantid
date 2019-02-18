@@ -65,11 +65,9 @@ class PlottingContext(object):
 
     def update_layout(self,figure):
         keys = list(self.subplots.keys())
-        print(keys)
         for counter, name in zip(range(len(keys)), keys):
             self.subplots[name].update_gridspec(self._gridspec, figure,counter)
 
     def delete(self,name):
-        print("delete",name)
         self.subplots[name].delete()
         del self.subplots[name]
