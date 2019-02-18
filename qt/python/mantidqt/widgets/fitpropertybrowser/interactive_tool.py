@@ -231,6 +231,7 @@ class FitInteractiveTool(QObject):
         for i, pm in enumerate(self.peak_markers):
             if pm.peak_id not in peaks_to_keep:
                 peaks_to_remove.append(i)
+        peaks_to_remove.sort(reverse=True)
         for i in peaks_to_remove:
             self.peak_markers[i].remove()
             del self.peak_markers[i]

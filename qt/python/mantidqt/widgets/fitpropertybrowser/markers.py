@@ -91,7 +91,7 @@ class CentreMarker(VerticalMarker):
     deselected_color = 'grey'
 
     def __init__(self, canvas, x, y0, y1):
-        VerticalMarker.__init__(self, canvas, self.selected_color, x, y0, y1)
+        VerticalMarker.__init__(self, canvas, self.deselected_color, x, y0, y1)
         self.is_at_top = False
 
     def _is_at_top(self, y):
@@ -149,7 +149,7 @@ class PeakMarker(QObject):
         self.centre_marker = CentreMarker(canvas, x, y0=y_bottom, y1=y_top)
         self.left_width = WidthMarker(canvas, x - fwhm / 2)
         self.right_width = WidthMarker(canvas, x + fwhm / 2)
-        self.is_selected = True
+        self.is_selected = False
 
     def redraw(self):
         self.centre_marker.redraw()

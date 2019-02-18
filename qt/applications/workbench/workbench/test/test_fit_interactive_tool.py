@@ -616,5 +616,24 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         self.assertEqual(len(self.fit_browser.tool.peak_markers), 0)
         self.w.close()
 
+    def test_clear_two_peaks_no_crash(self):
+        yield self.start()
+        self.fit_browser.loadFunction('name=LinearBackground;name=Gaussian,PeakCentre=1.0,Sigma=0.1;'
+                                      'name=Gaussian,PeakCentre=1.5,Sigma=0.1')
+        yield self.wait_for_true(lambda: self.fit_browser.getPeakHeightOf('f1') > 0)
+        action = find_action_with_text(self.fit_browser, 'Clear Model')
+        trigger_action(action)
+        yield self.wait_for_true(lambda: len(self.fit_browser.tool.peak_markers) == 0)
+        self.assertEqual(len(self.fit_browser.tool.peak_markers), 0)
+        self.w.close()
+
+    def test_peaks_deselected(self):
+        yield self.start()
+        self.fit_browser.loadFunction('name=LinearBackground;name=Gaussian,PeakCentre=1.0,Sigma=0.1;'
+                                      'name=Gaussian,PeakCentre=1.5,Sigma=0.1')
+        yield self.wait_for_true(lambda: self.fit_browser.getPeakHeightOf('f1') > 0)
+        for pm in self.fit_browser.tool.peak_markers:
+            self.assertFalse(pm.is_selected)
+
 
 runTests(TestFitPropertyBrowser)
