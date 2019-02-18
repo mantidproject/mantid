@@ -55,12 +55,10 @@ class BrowseFileWidgetModel(object):
                 failed_files += [(filename, error)]
                 continue
 
-            if ws['OutputWorkspace'][0].workspace.getInstrument().getName() != self._context.instrument:
-                failed_files += [(filename, 'Instrument is not selected instrument')]
-                continue
+            instrument_from_workspace = ws['OutputWorkspace'][0].workspace.getInstrument().getName()
 
             self._loaded_data_store.remove_data(run=[run])
-            self._loaded_data_store.add_data(run=[run], workspace=ws, filename=filename)
+            self._loaded_data_store.add_data(run=[run], workspace=ws, filename=filename, instrument=instrument_from_workspace)
         if failed_files:
             message = load_utils.exception_message_for_failed_files(failed_files)
             raise ValueError(message)

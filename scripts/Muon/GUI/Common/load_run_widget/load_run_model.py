@@ -12,11 +12,12 @@ import Muon.GUI.Common.utilities.load_utils as load_utils
 class LoadRunWidgetModel(object):
     """Stores info on all currently loaded workspaces"""
 
-    def __init__(self, loaded_data_store=MuonLoadData()):
+    def __init__(self, loaded_data_store=MuonLoadData(), context=None):
         # Used with load thread
         self._filenames = []
 
         self._loaded_data_store = loaded_data_store
+        self._context = context
         self._current_run = None
 
     def remove_previous_data(self):
@@ -36,7 +37,7 @@ class LoadRunWidgetModel(object):
                 failed_files += [(filename, error)]
                 continue
             self._loaded_data_store.remove_data(run=[run])
-            self._loaded_data_store.add_data(run=[run], workspace=ws, filename=filename)
+            self._loaded_data_store.add_data(run=[run], workspace=ws, filename=filename, instrument=self._context.instrument)
         if failed_files:
             message = load_utils.exception_message_for_failed_files(failed_files)
             raise ValueError(message)

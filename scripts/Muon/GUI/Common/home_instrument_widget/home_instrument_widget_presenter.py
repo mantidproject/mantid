@@ -9,7 +9,6 @@ from __future__ import (absolute_import, division, print_function)
 from Muon.GUI.Common.home_tab.home_tab_presenter import HomeTabSubWidget
 import Muon.GUI.Common.utilities.load_utils as load_utils
 from Muon.GUI.Common.utilities.muon_file_utils import filter_for_extensions
-from Muon.GUI.Common.observer_pattern import Observable
 
 
 class InstrumentWidgetPresenter(HomeTabSubWidget):
@@ -43,9 +42,6 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
 
         self.handle_loaded_time_zero_checkState_change()
         self.handle_loaded_first_good_data_checkState_change()
-
-        # notifier for instrument changes
-        self.instrumentNotifier = InstrumentWidgetPresenter.InstrumentNotifier(self)
 
     def show(self):
         self._view.show()
@@ -117,20 +113,9 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
     def handle_instrument_changed(self):
         """User changes the selected instrument."""
         instrument = self._view.get_instrument()
-        current_instrument = self._view.cached_instrument
         if instrument != self._model._data.instrument:
-            # prompt user to continue or not
-            user_response = self._view.instrument_changed_warning()
-            if user_response == 1:
-                # User selects "Ok"
-                self._model.clear_data()
-                self.clear_view()
-                self._model._data.instrument = instrument
-                self._view.set_instrument(instrument, block=True)
-                self.instrumentNotifier.notify_subscribers(instrument)
-            else:
-                # User selects "Cancel", reset the instrument selector
-                self._view.set_instrument(current_instrument, block=True)
+            self._model._data.instrument = instrument
+            self._view.set_instrument(instrument, block=True)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Dead Time
@@ -202,15 +187,3 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
         self._model.set_dead_time_to_none()
         self._view.set_dead_time_file_selection(0)
         self.set_dead_time_text_to_default()
-
-    # ------------------------------------------------------------------------------------------------------------------
-    # Observer / Observable
-    # ------------------------------------------------------------------------------------------------------------------
-
-    class InstrumentNotifier(Observable):
-        def __init__(self, outer):
-            Observable.__init__(self)
-            self.outer = outer  # handle to containing class
-
-        def notify_subscribers(self, *args, **kwargs):
-            Observable.notify_subscribers(self, *args)
