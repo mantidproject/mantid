@@ -37,7 +37,6 @@ class FFTPresenter(object):
     def runChanged(self):
         self.getWorkspaceNames()
 
-
     @property
     def widget(self):
         return self.view
@@ -56,12 +55,12 @@ class FFTPresenter(object):
         self.view.addItems(final_options)
 
         if self.load.version == 2:
-           self.view.removeRe("PhaseQuad")
-           self.removePhaseFromIM(final_options)
+            self.view.removeRe("PhaseQuad")
+            self.removePhaseFromIM(final_options)
 
-           self.view.setReTo(name)
+            self.view.setReTo(name)
 
-    def removePhaseFromIM(self,final_options):
+    def removePhaseFromIM(self, final_options):
         for option in final_options:
             if "PhaseQuad" in option:
                 self.view.removeIm(option)
@@ -95,7 +94,7 @@ class FFTPresenter(object):
             return
         # put this on its own thread so not to freeze Mantid
         self.thread = self.createThread()
-        self.thread.threadWrapperSetUp(self.deactivate,self.handleFinished)
+        self.thread.threadWrapperSetUp(self.deactivate, self.handleFinished)
 
         # make some inputs
         inputs = {}
@@ -103,7 +102,8 @@ class FFTPresenter(object):
 
         # for new version 2 of FDA
         if self.load.version == 2:
-            inputs["Run"] = self.getRun(self.view.getInputWS().split(";",1)[0])
+            inputs["Run"] = self.getRun(
+                self.view.getInputWS().split(";", 1)[0])
         # do apodization and padding to real data
 
         preInputs = self.view.initAdvanced()
@@ -116,27 +116,30 @@ class FFTPresenter(object):
             phaseTable["Instrument"] = self.load.getInstrument()
             phaseTable["InputWorkspace"] = "MuonAnalysis"
             if self.load.version == 2:
-                phaseTable["InputWorkspace"] = self.clean(self.view.getInputWS()) 
+                phaseTable["InputWorkspace"] = self.clean(
+                    self.view.getInputWS())
 
             inputs["phaseTable"] = phaseTable
             self.view.RePhaseAdvanced(preInputs)
         else:
             self.view.ReAdvanced(preInputs)
-            if self.view.isRaw() and self.load.version ==1:
+            if self.view.isRaw() and self.load.version == 1:
                 self.view.addRaw(preInputs, "InputWorkspace")
-            if self.load.version ==2:
-                preInputs["InputWorkspace"] = self.clean(self.view.getInputWS())
+            if self.load.version == 2:
+                preInputs["InputWorkspace"] = self.clean(
+                    self.view.getInputWS())
         inputs["preRe"] = preInputs
 
         # do apodization and padding to complex data
         if self.view.isComplex() and "PhaseQuad" not in self.view.getWS():
             ImPreInputs = self.view.initAdvanced()
             self.view.ImAdvanced(ImPreInputs)
-            if self.view.isRaw() and self.load.version ==1:
+            if self.view.isRaw() and self.load.version == 1:
                 self.view.addRaw(ImPreInputs, "InputWorkspace")
 
-            if self.load.version ==2:
-                ImPreInputs["InputWorkspace"] = self.clean(self.view.getInputImWS())
+            if self.load.version == 2:
+                ImPreInputs["InputWorkspace"] = self.clean(
+                    self.view.getInputImWS())
 
             inputs["preIm"] = ImPreInputs
 
@@ -146,12 +149,14 @@ class FFTPresenter(object):
             self.view.getFFTRePhase(FFTInputs)
             if self.view.isComplex():
                 self.view.getFFTImPhase(FFTInputs)
-            if self.load.version ==2:
-                FFTInputs["OutputWorkspace"] = self.getRun(self.view.getInputWS())+";PhaseQuad;FFT"
+            if self.load.version == 2:
+                FFTInputs["OutputWorkspace"] = self.getRun(
+                    self.view.getInputWS()) + ";PhaseQuad;FFT"
         else:
-            if self.load.version ==2:
-                FFTInputs["OutputWorkspace"] = self.getRun(self.view.getInputWS())+";FFT"
-            if self.view.isRaw() and self.load.version ==1:
+            if self.load.version == 2:
+                FFTInputs["OutputWorkspace"] = self.getRun(
+                    self.view.getInputWS()) + ";FFT"
+            if self.view.isRaw() and self.load.version == 1:
                 self.view.addRaw(FFTInputs, "OutputWorkspace")
         inputs["FFT"] = FFTInputs
         try:
@@ -170,7 +175,8 @@ class FFTPresenter(object):
     def get_FFT_input(self):
         FFTInputs = {}
         if self.load.version == 2:
-            FFTInputs = self.view.initFFTInput(self.clean(self.view.getInputWS()))
+            FFTInputs = self.view.initFFTInput(
+                self.clean(self.view.getInputWS()))
         else:
             FFTInputs = self.view.initFFTInput()
 
@@ -182,10 +188,10 @@ class FFTPresenter(object):
             self.view.addFFTComplex(FFTInputs)
         return FFTInputs
 
-    def clean(self,name):
+    def clean(self, name):
         if "PhaseQuad" in name:
-           return self.getRun(name)+"_raw_data"
+            return self.getRun(name) + "_raw_data"
         return name
 
     def getRun(self, name):
-        return name.split(" (PhaseQuad)",1)[0]
+        return name.split(" (PhaseQuad)", 1)[0]

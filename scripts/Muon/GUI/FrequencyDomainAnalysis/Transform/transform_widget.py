@@ -11,16 +11,17 @@ from Muon.GUI.FrequencyDomainAnalysis.Transform.transform_view import TransformV
 from Muon.GUI.FrequencyDomainAnalysis.FFT.fft_widget import FFTWidget
 from Muon.GUI.FrequencyDomainAnalysis.MaxEnt.maxent_widget import MaxEntWidget
 from Muon.GUI.FrequencyDomainAnalysis.TransformSelection.transform_selection_widget import TransformSelectionWidget
-from Muon.GUI.Common.observer_pattern import Observer, Observable
+from Muon.GUI.Common.observer_pattern import Observer
 
 from PyQt4 import QtGui
 
 
 class TransformWidget(QtGui.QWidget):
+
     def __init__(self, load, parent=None):
-        super(TransformWidget,self).__init__(parent)
-        self._fft = FFTWidget(load=load,parent=self)
-        self._maxent = MaxEntWidget(load=load,parent=self)
+        super(TransformWidget, self).__init__(parent)
+        self._fft = FFTWidget(load=load, parent=self)
+        self._maxent = MaxEntWidget(load=load, parent=self)
         self._selector = TransformSelectionWidget(parent=self)
         self.LoadObserver = LoadObserver(self)
         self.instrumentObserver = instrumentObserver(self)
@@ -28,7 +29,7 @@ class TransformWidget(QtGui.QWidget):
 
         groupedViews = self.getViews()
 
-        self._view = TransformView(self._selector.widget, groupedViews,parent)
+        self._view = TransformView(self._selector.widget, groupedViews, parent)
 
         self._selector.setSelectionConnection(self.updateDisplay)
 
@@ -39,12 +40,12 @@ class TransformWidget(QtGui.QWidget):
     def mockWidget(self, mockView):
         self._view = mockView
 
-    def closeEvent(self,event):
+    def closeEvent(self, event):
         self._selector.closeEvent(event)
         self._fft.closeEvent(event)
         self._maxent.closeEvent(event)
 
-    def updateDisplay(self,method):
+    def updateDisplay(self, method):
         self._view.hideAll()
         self._view.showMethod(method)
 
@@ -65,6 +66,7 @@ class TransformWidget(QtGui.QWidget):
         # may have new groups/pairs for multiple runs
         self._fft.runChanged()
 
+
 class LoadObserver(Observer):
 
     def __init__(self, outer):
@@ -74,6 +76,7 @@ class LoadObserver(Observer):
     def update(self, observable, arg):
         self.outer.handle_new_data_loaded()
 
+
 class instrumentObserver(Observer):
 
     def __init__(self, outer):
@@ -82,6 +85,7 @@ class instrumentObserver(Observer):
 
     def update(self, observable, arg):
         self.outer.handle_new_instrument()
+
 
 class GroupPairObserver(Observer):
 

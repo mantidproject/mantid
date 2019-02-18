@@ -147,24 +147,24 @@ class FFTView(QtGui.QWidget):
         self.Im_ws.addItems(options)
         self.phaseQuadChanged()
 
-    def removeIm(self,pattern):
-       index = self.Im_ws.findText(pattern)
-       self.Im_ws.removeItem(index)
+    def removeIm(self, pattern):
+        index = self.Im_ws.findText(pattern)
+        self.Im_ws.removeItem(index)
 
-    def removeRe(self,pattern):
-       index = self.ws.findText(pattern)
-       self.ws.removeItem(index)
+    def removeRe(self, pattern):
+        index = self.ws.findText(pattern)
+        self.ws.removeItem(index)
 
-    def setReTo(self,name):
+    def setReTo(self, name):
         index = self.ws.findText(name)
         if index == -1:
-           return
+            return
         self.ws.setCurrentIndex(index)
 
-    def setImTo(self,name):
+    def setImTo(self, name):
         index = self.Im_ws.findText(name)
         if index == -1:
-           return
+            return
         self.Im_ws.setCurrentIndex(index)
 
     # connect signals
@@ -220,8 +220,8 @@ class FFTView(QtGui.QWidget):
             'InputWorkspace'] = "__ReTmp__"  #
         inputs['Real'] = 0  # always zero
         out = str(self.ws.currentText()).replace(";", "; ")
-        if run  ==None:
-           run = self.getRunName()
+        if run is None:
+            run = self.getRunName()
         inputs['OutputWorkspace'] = run + ";" + out + ";FFT"
         inputs["AcceptXRoundingErrors"] = True
         return inputs

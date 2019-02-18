@@ -14,6 +14,7 @@ import mantid.simpleapi as mantid
 
 raw_data = "_raw_data"
 
+
 class MaxEntPresenter(object):
 
     """
@@ -48,7 +49,7 @@ class MaxEntPresenter(object):
         final_options = self.load.getGroupedWorkspaceNames()
         run = self.load.getRunName()
 
-        #backwards compatable
+        # backwards compatable
         if self.load.version == 1:
             self.view.setRun(run)
         else:
@@ -106,7 +107,7 @@ class MaxEntPresenter(object):
 
                 if self.load.version == 2:
                     phaseTable["InputWorkspace"] += raw_data
- 
+
                 elif "MuonAnalysisGrouped" not in phaseTable["InputWorkspace"]:
                     phaseTable["InputWorkspace"] = "MuonAnalysis"
 
@@ -136,7 +137,7 @@ class MaxEntPresenter(object):
         inputs = {}
         self.view.addOutputPhases(inputs)
         name = inputs['OutputPhaseTable']
-        if self.load.version ==2:
+        if self.load.version == 2:
             name = name[1:]
         current_list = self.view.getPhaseTableOptions()
         if self.phaseTableAdded(name) and name not in current_list:
@@ -169,9 +170,14 @@ class MaxEntPresenter(object):
             self.cleanOutputsForVersion2(inputs)
         return inputs
 
-    def cleanOutputsForVersion2(self,inputs):
-        inputs["InputWorkspace"] = self.view.getInputWS()+raw_data
-        keys = ["OutputWorkspace","OutputPhaseTable","OutputDeadTimeTable","PhaseConvergenceTable","ReconstructedSpectra"]
+    def cleanOutputsForVersion2(self, inputs):
+        inputs["InputWorkspace"] = self.view.getInputWS() + raw_data
+        keys = [
+            "OutputWorkspace",
+            "OutputPhaseTable",
+            "OutputDeadTimeTable",
+            "PhaseConvergenceTable",
+            "ReconstructedSpectra"]
         for output in keys:
             if output in inputs:
                 inputs[output] = inputs[output][1:]

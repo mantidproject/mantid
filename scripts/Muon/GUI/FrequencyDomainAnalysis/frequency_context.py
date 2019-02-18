@@ -10,7 +10,9 @@ import mantid.simpleapi as mantid
 
 import Muon.GUI.Common.ADSHandler.workspace_naming as wsName
 
+
 class FrequencyContext(object):
+
     """
     A simple class for identifing the current run
     and it can return the name, run and instrument.
@@ -45,11 +47,12 @@ class FrequencyContext(object):
         print(self.context.current_runs)
         run_numbers = self.context.current_runs
         instrument = str(self.context.instrument)
-        ws = [instrument+str(run_number[0])+"_raw_data" for run_number in run_numbers]
+        ws = [instrument + str(run_number[0]) +
+              "_raw_data" for run_number in run_numbers]
         for name in ws:
             data = mantid.AnalysisDataService.retrieve(name)
             if self.N_points < len(data.readX(0)):
-               self.N_points = len(data.readX(0))
+                self.N_points = len(data.readX(0))
 
         return self.N_points
 
@@ -89,14 +92,18 @@ class FrequencyContext(object):
         run_numbers = self.context.current_runs
         final_options = []
         for run in run_numbers:
-            final_options.append(self.context.instrument+str(run[0])+" (PhaseQuad)")
+            final_options.append(
+                self.context.instrument + str(run[0]) + " (PhaseQuad)")
             for name in pair_names:
-                final_options.append(wsName.get_pair_data_workspace_name(self.context,str(name),str(run[0])))
+                final_options.append(
+                    wsName.get_pair_data_workspace_name(self.context,
+                                                        str(name),
+                                                        str(run[0])))
         return final_options
 
     # Get the groups/pairs for active WS
     def getGroupedWorkspaceNames(self):
         run_numbers = self.context.current_runs
         instrument = str(self.context.instrument)
-        runs = [instrument+str(run_number[0]) for run_number in run_numbers]
+        runs = [instrument + str(run_number[0]) for run_number in run_numbers]
         return runs

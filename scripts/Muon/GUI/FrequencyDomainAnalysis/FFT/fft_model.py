@@ -63,7 +63,7 @@ class FFTWrapper(object):
 
         if self.preRe is not None:
             self.model.preAlg(self.preRe)
-        
+
         if self.preIm is not None:
             self.model.preAlg(self.preIm)
 
