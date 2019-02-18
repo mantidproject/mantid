@@ -303,8 +303,8 @@ class MantidSystemTest(unittest.TestCase):
         checker.setPropertyValue("Workspace1", valNames[0])
         checker.setPropertyValue("Workspace2", valNames[1])
         checker.setProperty("Tolerance", float(self.tolerance))
-        if hasattr(self, 'tolerance_is_reller') and self.tolerance_is_reller:
-            checker.setProperty("ToleranceRelerr", True)
+        if hasattr(self, 'tolerance_is_rel_err') and self.tolerance_is_rel_err:
+            checker.setProperty("ToleranceRelErr", True)
         for d in self.disableChecking:
             checker.setProperty("Check"+d, False)
         checker.execute()
