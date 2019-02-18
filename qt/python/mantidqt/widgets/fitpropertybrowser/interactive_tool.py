@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from qtpy.QtCore import QObject, Signal, Slot
 from qtpy.QtGui import QCursor
 from qtpy.QtWidgets import QApplication, QMenu, QInputDialog
