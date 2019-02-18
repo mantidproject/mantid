@@ -21,7 +21,6 @@ from mantid import config
 from os.path import join as pjoin
 
 TEMPERATURE_SENSOR = 'SensorA'
-DEFAULT_RANGE = [6.24, 6.30]
 DEFAULT_MASK_GROUP_DIR = '/SNS/BSS/shared/autoreduce/new_masks_08_12_2015'
 DEFAULT_CONFIG_DIR = config['instrumentDefinition.directory']
 
@@ -34,7 +33,8 @@ REFLECTIONS_DICT = {'silicon111': {'name': 'silicon111',
                                    'mask_file': 'BASIS_Mask_default_111.xml',
                                    'parameter_file': 'BASIS_silicon_111_Parameters.xml',
                                    'default_energy': 2.0826,  # meV
-                                   'vanadium_bins': [-0.0034, 0.068, 0.0034]
+                                   'vanadium_bins': [-0.0034, 0.068, 0.0034],
+                                   'vanadium_wav_range': [6.20, 6.33]
                                    },
                     'silicon311': {'name': 'silicon311',
                                    'energy_bins': [-740, 1.6, 740],
@@ -43,7 +43,8 @@ REFLECTIONS_DICT = {'silicon111': {'name': 'silicon111',
                                    'mask_file': 'BASIS_Mask_default_311.xml',
                                    'parameter_file': 'BASIS_silicon_311_Parameters.xml',
                                    'default_energy': 7.6368,  # meV
-                                   'vanadium_bins': [-0.015, 0.030, 0.015]
+                                   'vanadium_bins': [-0.015, 0.030, 0.015],
+                                   'vanadium_wav_range': [3.263, 3.295]
                                    }
                     }
 
@@ -171,13 +172,6 @@ class BASISReduction(PythonAlgorithm):
         self.setPropertySettings('NormRunNumbers', ifDivideByVanadium)
         self.setPropertyGroup('NormRunNumbers', titleDivideByVanadium)
         arrVal = FloatArrayLengthValidator(2)
-        self.declareProperty(FloatArrayProperty('NormWavelengthRange',
-                                                DEFAULT_RANGE,
-                                                arrVal,
-                                                direction=Direction.Input),
-                             'Wavelength range for normalization')
-        self.setPropertySettings('NormWavelengthRange', ifDivideByVanadium)
-        self.setPropertyGroup('NormWavelengthRange', titleDivideByVanadium)
 
         # Properties setting the saving of NSXPE file
         title_nxspe = 'Save to NXSPE'
@@ -269,7 +263,7 @@ class BASISReduction(PythonAlgorithm):
             norm_set = self._get_runs(norm_runs, doIndiv=False)[0]
             normWs = self._sum_and_calibrate(norm_set, extra_extension='_norm')
 
-            normRange = self.getProperty('NormWavelengthRange').value
+            normRange = self._reflection['vanadium_wav_range']
             bin_width = normRange[1] - normRange[0]
             # This rebin integrates counts onto a histogram of a single bin
             if self._normalizationType == 'by detector ID':
@@ -278,7 +272,7 @@ class BASISReduction(PythonAlgorithm):
                            OutputWorkspace=normWs,
                            Params=self._normRange)
                 self._normWs = normWs
-            # FindDetectorsOutsideLimits to be substituted by MedianDetectorTest
+            # Detectors outside limits are substituted by MedianDetectorTest
             sapi.FindDetectorsOutsideLimits(InputWorkspace=normWs,
                                             LowThreshold=1.0*bin_width,
                                             # no count events outside ranges
@@ -453,9 +447,8 @@ class BASISReduction(PythonAlgorithm):
     def _calibrate_data(self, sam_ws, mon_ws):
         sapi.MaskDetectors(Workspace=sam_ws,
                            DetectorList=self._dMask)
-        sapi.LoadParameterFile(Workspace=sam_ws,
-                               Filename=pjoin(DEFAULT_CONFIG_DIR,
-                                              self._reflection['parameter_file']))
+        p_f = pjoin(DEFAULT_CONFIG_DIR, self._reflection['parameter_file'])
+        sapi.LoadParameterFile(Workspace=sam_ws, Filename=p_f)
         sapi.ModeratorTzeroLinear(InputWorkspace=sam_ws,
                                   OutputWorkspace=sam_ws)
         sapi.ConvertUnits(InputWorkspace=sam_ws,
@@ -464,10 +457,8 @@ class BASISReduction(PythonAlgorithm):
                           EMode='Indirect')
 
         if self._MonNorm:
-            sapi.LoadParameterFile(Workspace=mon_ws,
-                                   Filename=pjoin(DEFAULT_CONFIG_DIR,
-                                                  self._reflection[
-                                                      'parameter_file']))
+            p_f = pjoin(DEFAULT_CONFIG_DIR, self._reflection['parameter_file'])
+            sapi.LoadParameterFile(Workspace=mon_ws, Filename=p_f)
             sapi.ModeratorTzeroLinear(InputWorkspace=mon_ws,
                                       OutputWorkspace=mon_ws)
             sapi.Rebin(InputWorkspace=mon_ws,
