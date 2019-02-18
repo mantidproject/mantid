@@ -13,6 +13,9 @@ from .mouse_state_machine import StateMachine
 
 
 class FitInteractiveTool(QObject):
+    """
+    Peak editing tool. Peaks can be added by clicking on the plot. Peak parameters can be edited with the mouse.
+    """
 
     fit_start_x_moved = Signal(float)
     fit_end_x_moved = Signal(float)
@@ -26,6 +29,13 @@ class FitInteractiveTool(QObject):
     default_background = 'LinearBackground'
 
     def __init__(self, canvas, toolbar_state_checker, current_peak_type):
+        """
+        Create an instance of FitInteractiveTool.
+        :param canvas: A MPL canvas to draw on.
+        :param toolbar_state_checker: A helper object that checks the state of the plot toolbar. It is necessary to
+            disable this tool's editing when zoom/pan is enabled by the user.
+        :param current_peak_type: A name of a peak fit function to create by default.
+        """
         super(FitInteractiveTool, self).__init__()
         self.canvas = canvas
         self.toolbar_state_checker = toolbar_state_checker
@@ -33,32 +43,46 @@ class FitInteractiveTool(QObject):
         self.ax = ax
         xlim = ax.get_xlim()
         dx = (xlim[1] - xlim[0]) / 20.
+        # The fitting range: [StartX, EndX]
         start_x = xlim[0] + dx
         end_x = xlim[1] - dx
+        # The two interactive markers drawn on the canvas as vertical lines that represent the fitting range.
         self.fit_start_x = VerticalMarker(canvas, 'green', start_x)
         self.fit_end_x = VerticalMarker(canvas, 'green', end_x)
-
         self.fit_start_x.x_moved.connect(self.fit_start_x_moved)
         self.fit_end_x.x_moved.connect(self.fit_end_x_moved)
 
+        # A list of interactive peak markers
         self.peak_markers = []
+        # A reference to the currently selected peak marker
         self.selected_peak = None
-        self.peak_names = []
-        self.current_peak_type = current_peak_type
+        # A width to set to newly created peaks
         self.fwhm = dx
+        # The name of the currently selected peak
+        self.current_peak_type = current_peak_type
+        # A cache for peak function names to use in the add function dialog
+        self.peak_names = []
+        # A cache for background function names to use in the add function dialog
         self.background_names = []
+        # A cache for names of function that are neither peaks or backgrounds to use in the add function dialog
         self.other_names = []
 
+        # Connect MPL events to callbacks and store connection ids in a cache
         self._cids = []
         self._cids.append(canvas.mpl_connect('draw_event', self.draw_callback))
         self._cids.append(canvas.mpl_connect('motion_notify_event', self.motion_notify_callback))
         self._cids.append(canvas.mpl_connect('button_press_event', self.button_press_callback))
         self._cids.append(canvas.mpl_connect('button_release_event', self.button_release_callback))
 
+        # The mouse state machine that handles responses to the mouse events.
         self.mouse_state = StateMachine(self)
-        self._override_cursor = False
+        # Cache the current override cursor
+        self._override_cursor = None
 
     def disconnect(self):
+        """
+        Disconnect the tool from everything
+        """
         QObject.disconnect(self)
         for cid in self._cids:
             self.canvas.mpl_disconnect(cid)
@@ -66,6 +90,10 @@ class FitInteractiveTool(QObject):
         self.fit_end_x.remove()
 
     def draw_callback(self, event):
+        """
+        This is called at every canvas draw. Redraw the markers.
+        :param event: Unused
+        """
         if self.fit_start_x.x > self.fit_end_x.x:
             x = self.fit_start_x.x
             self.fit_start_x.x = self.fit_end_x.x
@@ -76,6 +104,13 @@ class FitInteractiveTool(QObject):
             pm.redraw()
 
     def get_override_cursor(self, x, y):
+        """
+        Check if the point (x, y) is withing range of an editable marker and return a QCursor to hint what type
+        of mouse interaction is expected.
+        :param x: The x mouse position
+        :param y: The y mouse position
+        :return: A QCursor or None
+        """
         cursor = self.fit_start_x.override_cursor(x, y)
         if cursor is None:
             cursor = self.fit_end_x.override_cursor(x, y)
@@ -88,25 +123,48 @@ class FitInteractiveTool(QObject):
 
     @property
     def override_cursor(self):
+        """
+        Get the current override cursor
+        """
         return self._override_cursor
 
     @override_cursor.setter
     def override_cursor(self, cursor):
+        """
+        Set new override cursor.
+        :param cursor: New cursor.
+        """
         self._override_cursor = cursor
         QApplication.restoreOverrideCursor()
         if cursor is not None:
             QApplication.setOverrideCursor(cursor)
 
     def motion_notify_callback(self, event):
+        """
+        This is called when the mouse moves across the canvas
+        :param event: An event object with information on the current mouse position
+        """
         self.mouse_state.motion_notify_callback(event)
 
     def button_press_callback(self, event):
+        """
+        This is called when a mouse button is pressed inside the canvas
+        :param event: An event object with information on the current mouse position
+        """
         self.mouse_state.button_press_callback(event)
 
     def button_release_callback(self, event):
+        """
+        This is called when a mouse button is released inside the canvas
+        :param event: An event object with information on the current mouse position
+        """
         self.mouse_state.button_release_callback(event)
 
     def move_markers(self, event):
+        """
+        Move markers that need moving.
+        :param event: A MPL mouse event.
+        """
         x, y = event.xdata, event.ydata
         if x is None or y is None:
             return
@@ -119,6 +177,10 @@ class FitInteractiveTool(QObject):
             self.canvas.draw()
 
     def start_move_markers(self, event):
+        """
+        Start moving markers under the mouse.
+        :param event: A MPL mouse event.
+        """
         x = event.xdata
         y = event.ydata
         if x is None or y is None:
@@ -135,22 +197,37 @@ class FitInteractiveTool(QObject):
             self.canvas.draw()
 
     def stop_move_markers(self, event):
+        """
+        Stop moving all markers.
+        """
         self.fit_start_x.mouse_move_stop()
         self.fit_end_x.mouse_move_stop()
         for pm in self.peak_markers:
             pm.mouse_move_stop()
 
     def move_start_x(self, x):
+        """
+        Move the StartX marker to a new horizontal position.
+        :param x: A new x value in data coordinates.
+        """
         if x is not None:
             self.fit_start_x.x = x
             self.canvas.draw()
 
     def move_end_x(self, x):
+        """
+        Move the EndX marker to a new horizontal position.
+        :param x: A new x value in data coordinates.
+        """
         if x is not None:
             self.fit_end_x.x = x
             self.canvas.draw()
 
     def _make_peak_id(self):
+        """
+        Generate a new peak id. Ids of deleted markers can be reused.
+        :return: An integer id that is unique among self.peak_markers.
+        """
         ids = set([pm.peak_id for pm in self.peak_markers])
         n = 0
         for i in range(len(ids)):
@@ -162,9 +239,17 @@ class FitInteractiveTool(QObject):
         return n + 1
 
     def add_default_peak(self):
+        """
+        A QAction callback. Start adding a new peak. The tool will expect the user to click on the canvas to
+        where the peak should be placed.
+        """
         self.mouse_state.transition_to('add_peak')
 
     def add_peak_dialog(self):
+        """
+        A QAction callback. Start a dialog to choose a peak function name. After that the tool will expect the user
+        to click on the canvas to where the peak should be placed.
+        """
         selected_name = QInputDialog.getItem(self.canvas, 'Fit', 'Select peak function', self.peak_names,
                                              self.peak_names.index(self.current_peak_type), False)
         if selected_name[1]:
@@ -172,6 +257,10 @@ class FitInteractiveTool(QObject):
             self.mouse_state.transition_to('add_peak')
 
     def add_background_dialog(self):
+        """
+        A QAction callback. Start a dialog to choose a background function name. The new function is added to the
+        browser.
+        """
         current_index = self.background_names.index(self.default_background)
         if current_index < 0:
             current_index = 0
@@ -181,11 +270,23 @@ class FitInteractiveTool(QObject):
             self.add_background_requested.emit(selected_name[0])
 
     def add_other_dialog(self):
+        """
+        A QAction callback. Start a dialog to choose a name of a function except a peak or a background. The new
+        function is added to the browser.
+        """
         selected_name = QInputDialog.getItem(self.canvas, 'Fit', 'Select function', self.other_names, 0, False)
         if selected_name[1]:
             self.add_other_requested.emit(selected_name[0])
 
     def add_peak_marker(self, x, y_top, y_bottom=0.0, fwhm=None):
+        """
+        Add a new peak marker. No signal is sent to the fit browser.
+        :param x: The peak centre.
+        :param y_top: The y coordinate of the top of the peak.
+        :param y_bottom: The y coordinate of the bottom of the peak (background level).
+        :param fwhm: A full width at half maximum. If None use the value of the FWHM of the last edited peak.
+        :return: An instance of PeakMarker.
+        """
         if fwhm is None:
             fwhm = self.fwhm
         peak_id = self._make_peak_id()
@@ -196,18 +297,35 @@ class FitInteractiveTool(QObject):
         return peak
 
     def add_peak(self, x, y_top, y_bottom=0.0):
+        """
+        Add a new peak marker and send a signal to the fit browser to add a new peak function.
+        :param x: The peak centre.
+        :param y_top: The y coordinate of the top of the peak.
+        :param y_bottom: The y coordinate of the bottom of the peak (background level).
+        """
         peak = self.add_peak_marker(x, y_top, y_bottom)
         self.select_peak(peak)
         self.canvas.draw()
         self.peak_added.emit(peak.peak_id, x, peak.height(), peak.fwhm())
 
     def update_peak(self, peak_id, centre, height, fwhm):
+        """
+        Update a peak marker.
+        :param peak_id: An id of the marker to update.
+        :param centre: A new peak centre.
+        :param height: A new peak height.
+        :param fwhm: A new peak width.
+        """
         for pm in self.peak_markers:
             if pm.peak_id == peak_id:
                 pm.update_peak(centre, height, fwhm)
         self.canvas.draw()
 
     def select_peak(self, peak):
+        """
+        Make a peak marker selected. Deselect all others.
+        :param peak: An instance of PeakMarker to select.
+        """
         self.selected_peak = None
         for pm in self.peak_markers:
             if peak == pm:
@@ -217,16 +335,33 @@ class FitInteractiveTool(QObject):
                 pm.deselect()
 
     def _get_default_height(self):
+        """
+        Calculate the value of the default peak height to set to peaks added by the user to the fit property browser
+        directly.
+        """
         ylim = self.ax.get_ylim()
         return (ylim[0] + ylim[1]) / 2
 
     def get_peak_list(self):
+        """
+        get a list of peak parameters as tuples of (id, centre, height, fwhm).
+        """
         plist = []
         for pm in self.peak_markers:
             plist.append((pm.peak_id, pm.centre(), pm.height(), pm.fwhm()))
         return plist
 
     def update_peak_markers(self, peaks_to_keep, peaks_to_add):
+        """
+        Update the peak marker list.
+        :param peaks_to_keep: A list of ids of the peaks that should be kept. Markers with ids not found in this list
+            will be removed.
+        :param peaks_to_add: Parameters of peaks to add as a list of tuples (prefix, centre, height, fwhm).
+        :return: A tuple of: first item: {map of peak id -> prefix},
+                             second item: a list of (prefix, centre, height, fwhm) for those added peaks that had
+                                          their parameters changed and need to be updated in the fit browser.
+                                          Parameters are changed if the added peak has zero height or width.
+        """
         peaks_to_remove = []
         for i, pm in enumerate(self.peak_markers):
             if pm.peak_id not in peaks_to_keep:
@@ -254,13 +389,31 @@ class FitInteractiveTool(QObject):
 
     @Slot(int, float)
     def peak_fwhm_changed_slot(self, peak_id, fwhm):
+        """
+        Respond to a peak marker changing its width.
+        :param peak_id: Marker's peak id.
+        :param fwhm: A new fwhm value.
+        """
         self.fwhm = fwhm
         self.peak_fwhm_changed.emit(peak_id, fwhm)
 
     def get_transform(self):
+        """
+        Get the MPL transform object used to draw the markers. Used by the unit tests.
+        """
         return self.fit_start_x.patch.get_transform()
 
     def show_context_menu(self, peak_names, current_peak_type, background_names, other_names):
+        """
+        Show the context menu.
+        :param peak_names: A list of registered fit function peak names to be offered to choose from by the "Add a peak"
+            dialog.
+        :param current_peak_type:
+        :param background_names: A list of registered background fit functions to be offered to choose from by the
+            "Add a background" dialog.
+        :param other_names:  A list of other registered fit functions to be offered to choose from by the
+            "Add other function" dialog.
+        """
         self.peak_names = peak_names
         self.current_peak_type = current_peak_type
         self.background_names = background_names

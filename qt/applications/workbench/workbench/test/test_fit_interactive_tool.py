@@ -553,8 +553,8 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         h = self.fit_browser.getPeakHeightOf('f1')
         w = self.fit_browser.getPeakFwhmOf('f1')
         self.assertTrue(self.fit_browser.tool.get_override_cursor(c, h - 0.01) is not None)
-        self.assertTrue(self.fit_browser.tool.get_override_cursor(c - w / 2, h) is not None)
-        self.assertTrue(self.fit_browser.tool.get_override_cursor(c + w / 2, h) is not None)
+        self.assertTrue(self.fit_browser.tool.get_override_cursor(c - w / 2, h) is None)
+        self.assertTrue(self.fit_browser.tool.get_override_cursor(c + w / 2, h) is None)
         self.w.close()
 
     def test_load_function_with_peaks_creates_markers(self):
@@ -568,8 +568,8 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         self.assertAlmostEqual(h, 4.28, 1)
         self.assertAlmostEqual(w, 0.235, 1)
         self.assertTrue(self.fit_browser.tool.get_override_cursor(c, h - 0.01) is not None)
-        self.assertTrue(self.fit_browser.tool.get_override_cursor(c - w / 2, h) is not None)
-        self.assertTrue(self.fit_browser.tool.get_override_cursor(c + w / 2, h) is not None)
+        self.assertTrue(self.fit_browser.tool.get_override_cursor(c - w / 2, h) is None)
+        self.assertTrue(self.fit_browser.tool.get_override_cursor(c + w / 2, h) is None)
         self.w.close()
 
     def test_reload_function_with_peaks_updates_markers(self):
@@ -585,8 +585,8 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         self.assertAlmostEqual(h, 4.1)
         self.assertAlmostEqual(w, 0.471, 1)
         self.assertTrue(self.fit_browser.tool.get_override_cursor(c, h - 0.01) is not None)
-        self.assertTrue(self.fit_browser.tool.get_override_cursor(c - w / 2, h) is not None)
-        self.assertTrue(self.fit_browser.tool.get_override_cursor(c + w / 2, h) is not None)
+        self.assertTrue(self.fit_browser.tool.get_override_cursor(c - w / 2, h) is None)
+        self.assertTrue(self.fit_browser.tool.get_override_cursor(c + w / 2, h) is None)
         self.w.close()
 
     def test_load_different_function_updates_markers(self):
@@ -602,8 +602,8 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         self.assertAlmostEqual(h, 4.1)
         self.assertAlmostEqual(w, 0.471, 1)
         self.assertTrue(self.fit_browser.tool.get_override_cursor(c, h - 0.01) is not None)
-        self.assertTrue(self.fit_browser.tool.get_override_cursor(c - w / 2, h) is not None)
-        self.assertTrue(self.fit_browser.tool.get_override_cursor(c + w / 2, h) is not None)
+        self.assertTrue(self.fit_browser.tool.get_override_cursor(c - w / 2, h) is None)
+        self.assertTrue(self.fit_browser.tool.get_override_cursor(c + w / 2, h) is None)
         self.w.close()
 
     def test_clear_function_updates_markers(self):
@@ -634,6 +634,7 @@ class TestFitPropertyBrowser(WorkbenchGuiTest):
         yield self.wait_for_true(lambda: self.fit_browser.getPeakHeightOf('f1') > 0)
         for pm in self.fit_browser.tool.peak_markers:
             self.assertFalse(pm.is_selected)
+        self.w.close()
 
 
 runTests(TestFitPropertyBrowser)

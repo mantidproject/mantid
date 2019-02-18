@@ -31,18 +31,30 @@ class FitPropertyBrowserBase(BaseBrowser):
 
 
 class FitPropertyBrowser(FitPropertyBrowserBase):
+    """
+    A wrapper around C++ FitPropertyBrowser with added graphical peak editing tool.
+    """
 
     closing = Signal()
 
     def __init__(self, canvas, toolbar_state_checker, parent=None):
         super(FitPropertyBrowser, self).__init__(parent)
         self.init()
+        self.setFeatures(self.DockWidgetMovable)
         self.canvas = canvas
+        # The toolbar state checker to be passed to the peak editing tool
         self.toolbar_state_checker = toolbar_state_checker
+        # The peak editing tool
         self.tool = None
+        # Pyplot lines for the fit result curves
         self.fit_result_lines = []
+        # Pyplot line for the guess curve
         self.guess_line = None
+        # Map the indices of the markers in the peak editing tool to the peak function prefixes (in the form f0.f1...)
         self.peak_ids = {}
+        self._connect_signals()
+
+    def _connect_signals(self):
         self.startXChanged.connect(self.move_start_x)
         self.endXChanged.connect(self.move_end_x)
         self.algorithmFinished.connect(self.fitting_done_slot)
@@ -50,13 +62,18 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         self.removeFitCurves.connect(self.clear_fit_result_lines_slot, Qt.QueuedConnection)
         self.plotGuess.connect(self.plot_guess_slot, Qt.QueuedConnection)
         self.functionChanged.connect(self.function_changed_slot, Qt.QueuedConnection)
-        self.setFeatures(self.DockWidgetMovable)
 
     def closeEvent(self, event):
+        """
+        Emit self.closing signal used by figure manager to put the menu buttons in correct states
+        """
         self.closing.emit()
         BaseBrowser.closeEvent(self, event)
 
     def show(self):
+        """
+        Override the base class method. Initialise the peak editing tool.
+        """
         allowed_spectra = {}
         pattern = re.compile('(.+?): spec (\d+)')
         for label in [lin.get_label() for lin in self.get_lines()]:
@@ -83,6 +100,9 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         self.canvas.draw()
 
     def hide(self):
+        """
+        Override the base class method. Hide the peak editing tool.
+        """
         if self.tool is not None:
             self.tool.fit_start_x_moved.disconnect()
             self.tool.fit_end_x_moved.disconnect()
@@ -93,14 +113,25 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         self.setPeakToolOn(False)
 
     def move_start_x(self, xd):
+        """
+        Let the tool know that StartX has changed.
+        :param xd: New value of StartX
+        """
         if self.tool is not None:
             self.tool.move_start_x(xd)
 
     def move_end_x(self, xd):
+        """
+        Let the tool know that EndX has changed.
+        :param xd: New value of EndX
+        """
         if self.tool is not None:
             self.tool.move_end_x(xd)
 
     def clear_fit_result_lines(self):
+        """
+        Delete the fit curves.
+        """
         for lin in self.fit_result_lines:
             try:
                 lin.remove()
@@ -111,17 +142,29 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         self.update_legend()
 
     def get_lines(self):
+        """
+        Get all lines in the connected plot.
+        """
         return self.get_axes().get_lines()
 
     def get_axes(self):
+        """
+        Get the pyplot's Axes object.
+        """
         return self.canvas.figure.get_axes()[0]
 
     def update_legend(self):
+        """
+        This needs to be called to update plot's legend after removing lines.
+        """
         axes = self.get_axes()
         if axes.legend_ is not None:
             axes.legend()
 
     def plot_guess(self):
+        """
+        Plot the guess curve.
+        """
         from mantidqt.plotting.functions import plot
         fun = self.getFittingFunction()
         ws_name = self.workspaceName()
@@ -130,7 +173,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         ws_index = self.workspaceIndex()
         out_ws_name = '{}_guess'.format(ws_name)
 
-        alg = AlgorithmManager.create('EvaluateFunction')
+        alg = AlgorithmManager.createUnmanaged('EvaluateFunction')
         alg.setChild(True)
         alg.initialize()
         alg.setProperty('Function', fun)
@@ -148,6 +191,9 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         self.canvas.draw()
 
     def remove_guess(self):
+        """
+        Remove the guess curve from the plot.
+        """
         if self.guess_line is None:
             return
         self.guess_line.remove()
@@ -157,6 +203,9 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         self.canvas.draw()
 
     def update_guess(self):
+        """
+        Update the guess curve.
+        """
         if self.guess_line is None:
             return
         self.remove_guess()
@@ -164,12 +213,19 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
 
     @Slot()
     def clear_fit_result_lines_slot(self):
+        """
+        Clear the fit lines.
+        """
         self.clear_fit_result_lines()
         if self.tool is not None:
             self.canvas.draw()
 
     @Slot(str)
     def fitting_done_slot(self, name):
+        """
+        This is called after Fit finishes to update the fit curves.
+        :param name: The name of Fit's output workspace.
+        """
         from mantidqt.plotting.functions import plot
         ws = mtd[name]
         self.clear_fit_result_lines()
@@ -181,6 +237,14 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
 
     @Slot(int, float, float, float)
     def peak_added_slot(self, peak_id, centre, height, fwhm):
+        """
+        Respond to a signal from the peak editing tool that a peak is added.
+        Add a peak function to the browser.
+        :param peak_id: An index of a peak marker in the peak editing tool.
+        :param centre: Peak centre
+        :param height: Peak height (peak maximum)
+        :param fwhm: Peak's full width at half maximum
+        """
         fun = self.addFunction(self.defaultPeakType())
         self.setPeakCentreOf(fun, centre)
         self.setPeakHeightOf(fun, height)
@@ -189,6 +253,12 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
 
     @Slot(int, float, float)
     def peak_moved_slot(self, peak_id, centre, height):
+        """
+        Respond to the peak editing tool moving peak's top to a new position.
+        :param peak_id: Peak's index/id
+        :param centre: New peak centre
+        :param height: New peak height
+        """
         fun = self.peak_ids[peak_id]
         self.setPeakCentreOf(fun, centre)
         self.setPeakHeightOf(fun, height)
@@ -196,12 +266,21 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
 
     @Slot(int, float)
     def peak_fwhm_changed_slot(self, peak_id, fwhm):
+        """
+        Respond to the peak editing tool changing peak's width.
+        :param peak_id: Peak's index/id
+        :param fwhm: New peak full width at half maximum.
+        """
         fun = self.peak_ids[peak_id]
         self.setPeakFwhmOf(fun, fwhm)
         self.update_guess()
 
     @Slot(str)
     def peak_changed_slot(self, fun):
+        """
+        Update the peak marker in the peak editing tool after peak's parameters change in the browser.
+        :param fun: A prefix of the function that changed.
+        """
         for peak_id, prefix in self.peak_ids.items():
             if prefix == fun:
                 self.tool.update_peak(peak_id, self.getPeakCentreOf(prefix),
@@ -211,10 +290,17 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
 
     @Slot(str)
     def add_function_slot(self, fun_name):
+        """
+        Respond to a signal from the peak editing tool to add a new function.
+        :param fun_name: A registered name of a fit function
+        """
         self.addFunction(fun_name)
 
     @Slot()
     def show_canvas_context_menu(self):
+        """
+        Show plot's context menu
+        """
         if self.tool is not None:
             self.tool.show_context_menu(peak_names=self.registeredPeaks(),
                                         current_peak_type=self.defaultPeakType(),
@@ -223,6 +309,9 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
 
     @Slot()
     def plot_guess_slot(self):
+        """
+        Toggle the guess plot.
+        """
         if self.guess_line is None:
             self.plot_guess()
         else:
@@ -230,6 +319,10 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
 
     @Slot()
     def function_changed_slot(self):
+        """
+        Update the peak editing tool after function structure has changed in the browser: functions added
+        and/or removed.
+        """
         peaks_to_add = []
         peaks = {v: k for k, v in self.peak_ids.items()}
         for prefix in self.getPeakPrefixes():
