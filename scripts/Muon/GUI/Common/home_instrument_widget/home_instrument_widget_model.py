@@ -23,6 +23,7 @@ class InstrumentWidgetModel(object):
 
     def __init__(self, muon_data=MuonDataContext()):
         self._data = muon_data
+        self._data.gui_variables['RebinType'] = 'None'
 
     def clear_data(self):
         """When e.g. instrument changed"""
@@ -71,10 +72,13 @@ class InstrumentWidgetModel(object):
         return self._data.dead_time_table
 
     def add_fixed_binning(self, fixed_bin_size):
-        self._data.gui_variables["Rebin"] = str(fixed_bin_size)
+        self._data.gui_variables["RebinFixed"] = str(fixed_bin_size)
 
     def add_variable_binning(self, rebin_params):
-        self._data.gui_variables["Rebin"] = str(rebin_params)
+        self._data.gui_variables["RebinVariable"] = str(rebin_params)
+
+    def update_binning_type(self, rebin_type):
+        self._data.gui_variables['RebinType'] = rebin_type
 
     # ------------------------------------------------------------------------------------------------------------------
     # Dead Time

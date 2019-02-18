@@ -38,6 +38,8 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
         self._view.on_dead_time_from_file_selected(self.handle_dead_time_from_table_workspace_selected)
         self._view.on_dead_time_file_option_changed(self.handle_dead_time_table_workspace_selector_changed)
 
+        self._view.on_rebin_type_changed(self.handle_rebin_type_changed)
+
         self._view.on_instrument_changed(self.handle_instrument_changed)
 
         self.handle_loaded_time_zero_checkState_change()
@@ -105,6 +107,10 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
     def handle_variable_rebin_changed(self):
         variable_bin_size = self._view.get_variable_bin_text()
         self._model.add_variable_binning(variable_bin_size)
+
+    def handle_rebin_type_changed(self):
+        rebin_type = self._view.rebin_selector.currentText()
+        self._model.update_binning_type(rebin_type)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Instrument

@@ -470,10 +470,14 @@ class InstrumentWidgetView(QtGui.QWidget):
         self.rebin_steps_label.setText("Steps : ")
 
         self.rebin_steps_edit = QtGui.QLineEdit(self)
+        int_validator = QtGui.QIntValidator()
+        self.rebin_steps_edit.setValidator(int_validator)
 
         self.rebin_variable_label = QtGui.QLabel(self)
         self.rebin_variable_label.setText("Bin Boundaries : ")
         self.rebin_variable_edit = QtGui.QLineEdit(self)
+        variable_validator = QtGui.QRegExpValidator(QtCore.QRegExp('^[0-9]+(,[0-9]+)*$'))
+        self.rebin_variable_edit.setValidator(variable_validator)
 
         self.rebin_help_button = QtGui.QPushButton(self)
         size_policy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
@@ -538,6 +542,9 @@ class InstrumentWidgetView(QtGui.QWidget):
 
     def on_variable_rebin_edit_changed(self, slot):
         self.rebin_variable_edit.editingFinished.connect(slot)
+
+    def on_rebin_type_changed(self, slot):
+        self.rebin_selector.currentIndexChanged.connect(slot)
 
     def get_fixed_bin_text(self):
         return self.rebin_steps_edit.text()

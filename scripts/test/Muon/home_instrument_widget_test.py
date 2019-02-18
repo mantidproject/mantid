@@ -121,15 +121,43 @@ class HomeTabInstrumentPresenterTest(unittest.TestCase):
         self.view.rebin_steps_edit.setText('50')
         self.view.rebin_steps_edit.editingFinished.emit()
 
-        self.assertEqual(self.model._data.gui_variables['Rebin'], '50')
+        self.assertEqual(self.model._data.gui_variables['RebinFixed'], '50')
 
     def test_that_changeing_variable_rebin_updates_fixed_binning_in_model(self):
         self.view.rebin_variable_edit.setText('1,5,8,150')
         self.view.rebin_variable_edit.editingFinished.emit()
 
-        self.assertEqual(self.model._data.gui_variables['Rebin'], '1,5,8,150')
+        self.assertEqual(self.model._data.gui_variables['RebinVariable'], '1,5,8,150')
 
-    # TODO Need to add validation to rebin input strings once I've worked out what they should be
+    def test_that_steps_only_accepts_a_single_integer(self):
+        self.view.rebin_steps_edit.insert('1,0.1,70')
+        self.view.rebin_steps_edit.editingFinished.emit()
+
+        self.assertEqual(self.view.rebin_steps_edit.text(), '')
+        self.assertEqual(self.model._data.gui_variables['RebinFixed'], '')
+
+    def test_that_variable_rebin_only_accepts_a_valid_rebin_string(self):
+        self.view.rebin_variable_edit.insert('1-0.1-80')
+        self.view.rebin_variable_edit.editingFinished.emit()
+
+        self.assertEqual(self.view.rebin_variable_edit.text(), '')
+        self.assertEqual(self.model._data.gui_variables['RebinVariable'], '')
+
+    def test_that_rebin_type_starts_as_none(self):
+        self.assertEqual(self.model._data.gui_variables['RebinType'], 'None')
+
+    def test_that_updating_rebin_combobox_updates_context(self):
+        self.view.rebin_selector.setCurrentIndex(1)
+
+        self.assertEqual(self.model._data.gui_variables['RebinType'], 'Fixed')
+
+        self.view.rebin_selector.setCurrentIndex(2)
+
+        self.assertEqual(self.model._data.gui_variables['RebinType'], 'Variable')
+
+        self.view.rebin_selector.setCurrentIndex(0)
+
+        self.assertEqual(self.model._data.gui_variables['RebinType'], 'None')
 
     def test_that_on_dead_time_unselected_deadtime_model_set_to_none(self):
         self.view.deadtime_selector.setCurrentIndex(1)
