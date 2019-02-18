@@ -24,7 +24,7 @@ bool BatchJobRunner::isProcessing() const { return m_isProcessing; }
 
 bool BatchJobRunner::isAutoreducing() const { return m_isAutoreducing; }
 
-void BatchJobRunner::resumeReduction() {
+void BatchJobRunner::reductionResumed() {
   m_isProcessing = true;
   // If the user has manually selected failed rows, reprocess them; otherwise
   // skip them
@@ -35,7 +35,7 @@ void BatchJobRunner::resumeReduction() {
 
 void BatchJobRunner::reductionPaused() { m_isProcessing = false; }
 
-void BatchJobRunner::resumeAutoreduction() {
+void BatchJobRunner::autoreductionResumed() {
   m_isAutoreducing = true;
   m_isProcessing = true;
   m_reprocessFailed = true;

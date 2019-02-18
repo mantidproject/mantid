@@ -29,9 +29,9 @@ public:
   bool isProcessing() const override;
   bool isAutoreducing() const override;
 
-  void resumeReduction() override;
+  void reductionResumed() override;
   void reductionPaused() override;
-  void resumeAutoreduction() override;
+  void autoreductionResumed() override;
   void autoreductionPaused() override;
 
   void setReprocessFailedItems(bool reprocessFailed) override;

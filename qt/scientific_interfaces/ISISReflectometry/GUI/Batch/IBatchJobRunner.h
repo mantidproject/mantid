@@ -20,9 +20,9 @@ public:
 
   virtual bool isProcessing() const = 0;
   virtual bool isAutoreducing() const = 0;
-  virtual void resumeReduction() = 0;
+  virtual void reductionResumed() = 0;
   virtual void reductionPaused() = 0;
-  virtual void resumeAutoreduction() = 0;
+  virtual void autoreductionResumed() = 0;
   virtual void autoreductionPaused() = 0;
   virtual void setReprocessFailedItems(bool reprocessFailed) = 0;
   virtual void

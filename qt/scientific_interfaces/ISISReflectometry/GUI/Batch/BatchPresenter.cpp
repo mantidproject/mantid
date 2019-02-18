@@ -128,14 +128,15 @@ void BatchPresenter::notifyAlgorithmError(IConfiguredAlgorithm_sptr algorithm,
 }
 
 void BatchPresenter::resumeReduction() {
-  m_jobRunner->resumeReduction();
+  reductionResumed();
   m_view->clearAlgorithmQueue();
   m_view->setAlgorithmQueue(m_jobRunner->getAlgorithms());
   m_view->executeAlgorithmQueue();
-  reductionResumed();
 }
 
 void BatchPresenter::reductionResumed() {
+  // Update the model
+  m_jobRunner->reductionResumed();
   // Notify child presenters
   m_savePresenter->reductionResumed();
   m_eventPresenter->reductionResumed();
@@ -158,14 +159,15 @@ void BatchPresenter::reductionPaused() {
 }
 
 void BatchPresenter::resumeAutoreduction() {
-  m_jobRunner->resumeAutoreduction();
+  autoreductionResumed();
   m_view->clearAlgorithmQueue();
   m_view->setAlgorithmQueue(m_jobRunner->getAlgorithms());
   m_view->executeAlgorithmQueue();
-  autoreductionResumed();
 }
 
 void BatchPresenter::autoreductionResumed() {
+  // Update the model
+  m_jobRunner->autoreductionResumed();
   // Notify child presenters
   m_savePresenter->autoreductionResumed();
   m_eventPresenter->autoreductionResumed();

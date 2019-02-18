@@ -61,9 +61,9 @@ public:
     verifyAndClear();
   }
 
-  void testResumeReduction() {
+  void testReductionResumed() {
     auto jobRunner = makeJobRunner();
-    jobRunner.resumeReduction();
+    jobRunner.reductionResumed();
     auto const hasSelection = false;
     TS_ASSERT_EQUALS(jobRunner.isProcessing(), true);
     TS_ASSERT_EQUALS(jobRunner.isAutoreducing(), false);
@@ -79,9 +79,9 @@ public:
     verifyAndClear();
   }
 
-  void testResumeAutoreduction() {
+  void testAutoreductionResumed() {
     auto jobRunner = makeJobRunner();
-    jobRunner.resumeAutoreduction();
+    jobRunner.autoreductionResumed();
     TS_ASSERT_EQUALS(jobRunner.isProcessing(), true);
     TS_ASSERT_EQUALS(jobRunner.isAutoreducing(), true);
     TS_ASSERT_EQUALS(jobRunner.m_reprocessFailed, true);

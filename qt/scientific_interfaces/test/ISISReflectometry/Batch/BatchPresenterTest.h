@@ -71,7 +71,7 @@ public:
 
   void testModelUpdatedWhenReductionResumed() {
     auto presenter = makePresenter();
-    EXPECT_CALL(*m_jobRunner, resumeReduction()).Times(1);
+    EXPECT_CALL(*m_jobRunner, reductionResumed()).Times(1);
     presenter.notifyReductionResumed();
     verifyAndClear();
   }
@@ -121,7 +121,7 @@ public:
 
   void testModelUpdatedWhenAutoreductionResumed() {
     auto presenter = makePresenter();
-    EXPECT_CALL(*m_jobRunner, resumeAutoreduction()).Times(1);
+    EXPECT_CALL(*m_jobRunner, autoreductionResumed()).Times(1);
     presenter.notifyAutoreductionResumed();
     verifyAndClear();
   }

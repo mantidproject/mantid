@@ -233,9 +233,9 @@ public:
   MockBatchJobRunner(){};
   MOCK_CONST_METHOD0(isProcessing, bool());
   MOCK_CONST_METHOD0(isAutoreducing, bool());
-  MOCK_METHOD0(resumeReduction, void());
+  MOCK_METHOD0(reductionResumed, void());
   MOCK_METHOD0(reductionPaused, void());
-  MOCK_METHOD0(resumeAutoreduction, void());
+  MOCK_METHOD0(autoreductionResumed, void());
   MOCK_METHOD0(autoreductionPaused, void());
   MOCK_METHOD1(setReprocessFailedItems, void(bool));
   MOCK_METHOD1(algorithmStarted,
