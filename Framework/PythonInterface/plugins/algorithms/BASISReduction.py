@@ -26,27 +26,36 @@ DEFAULT_CONFIG_DIR = config['instrumentDefinition.directory']
 
 # BASIS allows two possible reflections, with associated default properties
 # pylint: disable=line-too-long
-REFLECTIONS_DICT = {'silicon111': {'name': 'silicon111',
-                                   'energy_bins': [-150, 0.4, 500],  # micro-eV
-                                   'q_bins': [0.3, 0.2, 1.9],  # inverse Angst
-                                   'banks': 'bank1,bank3,bank4',
-                                   'mask_file': 'BASIS_Mask_default_111.xml',
-                                   'parameter_file': 'BASIS_silicon_111_Parameters.xml',
-                                   'default_energy': 2.0826,  # meV
-                                   'vanadium_bins': [-0.0034, 0.068, 0.0034],
-                                   'vanadium_wav_range': [6.20, 6.33]
-                                   },
-                    'silicon311': {'name': 'silicon311',
-                                   'energy_bins': [-740, 1.6, 740],
-                                   'q_bins': [0.5, 0.2, 3.7],
-                                   'banks': 'bank2',
-                                   'mask_file': 'BASIS_Mask_default_311.xml',
-                                   'parameter_file': 'BASIS_silicon_311_Parameters.xml',
-                                   'default_energy': 7.6368,  # meV
-                                   'vanadium_bins': [-0.015, 0.030, 0.015],
-                                   'vanadium_wav_range': [3.263, 3.295]
-                                   }
-                    }
+REFLECTIONS_DICT = {
+    'silicon111': {'name': 'silicon111',
+                   'energy_bins': [-150, 0.4, 500],  # micro-eV
+                   'q_bins': [0.3, 0.2, 1.9],  # inverse Angst
+                   'banks': 'bank1,bank3,bank4',
+                   'mask_file': 'BASIS_Mask_default_111.xml',
+                   'parameter_file': 'BASIS_silicon_111_Parameters.xml',
+                   'default_energy': 2.0826,  # meV
+                   'vanadium_bins': [-0.0034, 0.068, 0.0034],
+                   'vanadium_wav_range': [6.20, 6.33]},
+    'silicon333': {'name': 'silicon333',
+                   'energy_bins': [-1500, 3.2, 5000],
+                   'q_bins': [0.9, 0.2, 5.7],
+                   'banks': 'bank1,bank3,bank4',
+                   'mask_file': 'BASIS_Mask_default_111.xml',
+                   'parameter_file': 'BASIS_silicon_333_Parameters.xml',
+                   'instrument_definition_file': 'BASIS_Definition_Si333.xml',
+                   'default_energy': 18.7434,
+                   'vanadium_bins': [-0.0333, 0.0666, 0.0333],
+                   'vanadium_wav_range': [2.080, 2.108]},
+    'silicon311': {'name': 'silicon311',
+                   'energy_bins': [-740, 1.6, 740],
+                   'q_bins': [0.5, 0.2, 3.7],
+                   'banks': 'bank2',
+                   'mask_file': 'BASIS_Mask_default_311.xml',
+                   'parameter_file': 'BASIS_silicon_311_Parameters.xml',
+                   'default_energy': 7.6368,  # meV
+                   'vanadium_bins': [-0.015, 0.030, 0.015],
+                   'vanadium_wav_range': [3.263, 3.295]}
+}
 
 # pylint: disable=too-many-instance-attributes
 
