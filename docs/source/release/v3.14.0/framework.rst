@@ -119,6 +119,7 @@ Bugfixes
 - Fixed the `CheckSample` option of algorithm :ref:`CompareWorkspaces <algm-CompareWorkspaces>`: it crashed Mantid when comparing the run's sample logs. The algorithm's debug logging will now tell explicitly about the first entry which caused the log mismatch.
 - Fixed a bug in :ref:`MayersSampleCorrection <algm-MayersSampleCorrection>` when using the multiple scattering correction.
 - Fixed a bug in :ref:`IntegrateMDHistoWorkspace <algm-IntegrateMDHistoWorkspace>` in some cases where NaN's are present outside the integration range.
+- :ref:`SaveNexusProcessed <algm-SaveNexusProcessed>` and :ref:`LoadNexusProcessed <algm-LoadNexusProcessed>` now save and load an empty sample name correctly. Note, that files saved before this change will still load with an empty sample name replaced by a space as before.
 
 Python
 ------
