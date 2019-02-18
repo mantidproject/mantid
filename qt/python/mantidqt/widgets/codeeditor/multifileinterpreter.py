@@ -178,16 +178,17 @@ class MultiPythonFileInterpreter(QWidget):
         self._tabs.setTabText(idx_cur, title)
         self._tabs.setTabToolTip(idx_cur, tooltip)
 
-    def open_file_in_new_tab(self, filepath):
+    def open_file_in_new_tab(self, filepath, startup=False):
         """Open the existing file in a new tab in the editor
 
         :param filepath: A path to an existing file
+        :param startup: Flag for if function is being called on startup
         """
         with open(filepath, 'r') as code_file:
             content = code_file.read()
 
         self.append_new_editor(content=content, filename=filepath)
-        if mantid_api_import_needed(content) is True:
+        if startup is False and mantid_api_import_needed(content) is True:
             add_mantid_api_import(self.current_editor().editor, content)
 
     def open_files_in_new_tabs(self, filepaths):
