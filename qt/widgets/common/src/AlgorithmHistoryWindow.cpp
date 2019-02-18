@@ -204,7 +204,7 @@ AlgorithmHistoryWindow::AlgorithmHistoryWindow(
   setWindowTitle(tr("Algorithm History"));
   setMinimumHeight(500);
   setMinimumWidth(750);
-  setGeometry(50, 150, 540, 380);
+  resize(540, 380);
 
 #ifdef Q_OS_MAC
   // Work around to ensure that floating windows remain on top of the main
