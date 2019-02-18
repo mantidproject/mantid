@@ -180,7 +180,6 @@ class BASISReduction(PythonAlgorithm):
         self.declareProperty('NormRunNumbers', '', 'Normalization run numbers')
         self.setPropertySettings('NormRunNumbers', ifDivideByVanadium)
         self.setPropertyGroup('NormRunNumbers', titleDivideByVanadium)
-        arrVal = FloatArrayLengthValidator(2)
 
         # Properties setting the saving of NSXPE file
         title_nxspe = 'Save to NXSPE'
