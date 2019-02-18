@@ -479,17 +479,6 @@ class InstrumentWidgetView(QtGui.QWidget):
         variable_validator = QtGui.QRegExpValidator(QtCore.QRegExp('^[0-9]+(,[0-9]+)*$'))
         self.rebin_variable_edit.setValidator(variable_validator)
 
-        self.rebin_help_button = QtGui.QPushButton(self)
-        size_policy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
-        size_policy.setHorizontalStretch(0)
-        size_policy.setVerticalStretch(0)
-        size_policy.setHeightForWidth(self.rebin_help_button.sizePolicy().hasHeightForWidth())
-        self.rebin_help_button.setSizePolicy(size_policy)
-        self.rebin_help_button.setMinimumSize(QtCore.QSize(40, 40))
-        self.rebin_help_button.setMaximumSize(QtCore.QSize(40, 40))
-        self.rebin_help_button.setObjectName("rebinHelpButton")
-        self.rebin_help_button.setText("?")
-
         self.horizontal_layout_5 = QtGui.QHBoxLayout()
         self.horizontal_layout_5.setObjectName("horizontalLayout3")
         self.horizontal_layout_5.addSpacing(10)
@@ -503,7 +492,6 @@ class InstrumentWidgetView(QtGui.QWidget):
         self.horizontal_layout_5.addWidget(self.rebin_variable_edit)
         self.horizontal_layout_5.addStretch(0)
         self.horizontal_layout_5.addSpacing(10)
-        self.horizontal_layout_5.addWidget(self.rebin_help_button)
 
         self.rebin_steps_label.hide()
         self.rebin_steps_edit.hide()
