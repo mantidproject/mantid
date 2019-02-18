@@ -8,6 +8,7 @@
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidGeometry/Objects/Track.h"
+#include <array>
 
 namespace Mantid {
 namespace Geometry {
