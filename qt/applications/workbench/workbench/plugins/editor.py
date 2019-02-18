@@ -71,7 +71,7 @@ class MultiFileEditor(PluginWidget):
         # attributes
         self.run_action = create_action(
             self, "Run",
-            on_triggered=self.editors.execute_current,
+            on_triggered=self.editors.execute_current_async,
             shortcut=("Ctrl+Return", "Ctrl+Enter"),
             shortcut_context=Qt.ApplicationShortcut)
 
