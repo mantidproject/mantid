@@ -15,8 +15,7 @@ from mantid.api import (mtd, PythonAlgorithm, AlgorithmFactory, FileProperty,
                         FileAction, AnalysisDataService)
 from mantid.kernel import (IntArrayProperty, StringListValidator,
                            FloatArrayProperty, EnabledWhenProperty,
-                           FloatArrayLengthValidator, Direction,
-                           PropertyCriterion)
+                           Direction, PropertyCriterion)
 from mantid import config
 from os.path import join as pjoin
 
