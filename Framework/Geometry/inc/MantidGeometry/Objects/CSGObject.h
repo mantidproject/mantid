@@ -227,10 +227,6 @@ private:
   /// Returns the volume.
   double singleShotMonteCarloVolume(const int shotSize,
                                     const size_t seed) const;
-  boost::optional<Kernel::V3D>
-  randomPointInNoShapeObject(Kernel::PseudoRandomNumberGenerator &rng,
-                             const BoundingBox &activeRegion,
-                             const size_t maxAttempts) const;
   /// Top rule [ Geometric scope of object]
   std::unique_ptr<Rule> TopRule;
   /// Object's bounding box

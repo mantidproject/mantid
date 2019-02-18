@@ -8,6 +8,7 @@
 
 #include "MantidGeometry/Objects/Rules.h"
 #include "MantidGeometry/Objects/Track.h"
+#include "MantidGeometry/RandomPoint.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidGeometry/Rendering/ShapeInfo.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheReader.h"
@@ -32,7 +33,6 @@
 #include <boost/accumulators/statistics/mean.hpp>
 #include <boost/accumulators/statistics/stats.hpp>
 #include <boost/make_shared.hpp>
-#include <boost/math/special_functions/pow.hpp>
 
 #include <array>
 #include <deque>
@@ -42,151 +42,6 @@
 
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
-
-namespace {
-/**
- * Return a random point in a cuboid shape.
- * @param shapeInfo cuboid's shape info
- * @param rng a random number generate
- * @return a random point inside the cuboid
- */
-V3D randomPointInCuboid(const detail::ShapeInfo &shapeInfo,
-                        PseudoRandomNumberGenerator &rng) {
-  const auto geometry = shapeInfo.cuboidGeometry();
-  const auto r1{rng.nextValue()};
-  const auto r2{rng.nextValue()};
-  const auto r3{rng.nextValue()};
-  const auto basis1{geometry.leftFrontTop - geometry.leftFrontBottom};
-  const auto basis2{geometry.leftBackBottom - geometry.leftFrontBottom};
-  const auto basis3{geometry.rightFrontBottom - geometry.leftFrontBottom};
-  return geometry.leftFrontBottom + (basis1 * r1 + basis2 * r2 + basis3 * r3);
-}
-
-/**
- * Return a random point constrained within a cuboid and active region.
- * @param shapeInfo cuboid's shape info
- * @param rng a random number generator
- * @param activeRegion a restricting bounding box
- * @param maxAttempts number of attempts to find the point
- * @return a point or none if maxAttempts was exceeded
- */
-boost::optional<V3D>
-randomPointInCuboid(const detail::ShapeInfo &shapeInfo,
-                    PseudoRandomNumberGenerator &rng,
-                    const Mantid::Geometry::BoundingBox &activeRegion,
-                    const size_t maxAttempts) {
-  boost::optional<V3D> point{boost::none};
-  for (size_t attempt{0}; attempt < maxAttempts; ++attempt) {
-    const auto pt{randomPointInCuboid(shapeInfo, rng)};
-    if (activeRegion.isPointInside(pt)) {
-      point = pt;
-      break;
-    }
-  }
-  return point;
-}
-
-/**
- * Return a random point in sphere.
- * @param shapeInfo sphere's shape info
- * @param rng a random number generator
- * @return a point
- */
-V3D randomPointInSphere(const detail::ShapeInfo &shapeInfo,
-                        PseudoRandomNumberGenerator &rng) {
-  const auto geometry = shapeInfo.sphereGeometry();
-  const auto r1{rng.nextValue()};
-  const auto r2{rng.nextValue()};
-  const auto r3{rng.nextValue()};
-  const auto azimuthal{2. * M_PI * r1};
-  // The acos is needed for a uniform distribution of points.
-  const auto polar{std::acos(2. * r2 - 1.)};
-  const auto r{r3 * geometry.radius};
-  const auto x{r * std::cos(azimuthal) * std::sin(polar)};
-  const auto y{r * std::sin(azimuthal) * std::sin(polar)};
-  const auto z{r * std::cos(polar)};
-  return geometry.centre + V3D{x, y, z};
-}
-
-/**
- * Return a random number within the intersection of a box and a sphere.
- * @param shapeInfo sphere's shape info
- * @param rng a random number generator
- * @param activeRegion a restricting box
- * @param maxAttempts number of attempts to find the point
- * @return a point or none if maxAttempts was exceeded
- */
-boost::optional<V3D>
-randomPointInSphere(const detail::ShapeInfo &shapeInfo,
-                    PseudoRandomNumberGenerator &rng,
-                    const Mantid::Geometry::BoundingBox &activeRegion,
-                    const size_t maxAttempts) {
-  boost::optional<V3D> point;
-  for (size_t attempt{0}; attempt < maxAttempts; ++attempt) {
-    const auto pt{randomPointInSphere(shapeInfo, rng)};
-    if (activeRegion.isPointInside(pt)) {
-      point = pt;
-      break;
-    }
-  }
-  return point;
-}
-
-/**
- * Return a random point in cylinder.
- * @param shapeInfo cylinder's shape info
- * @param rng a random number generator
- * @return a point
- */
-V3D randomPointInCylinder(const detail::ShapeInfo &shapeInfo,
-                          PseudoRandomNumberGenerator &rng) {
-  using boost::math::pow;
-  const auto geometry = shapeInfo.cylinderGeometry();
-  const auto r1{rng.nextValue()};
-  const auto r2{rng.nextValue()};
-  const auto r3{rng.nextValue()};
-  const auto polar{2. * M_PI * r1};
-  // The sqrt is needed for a uniform distribution of points.
-  const auto r{geometry.radius * std::sqrt(r2)};
-  const auto z{geometry.height * r3};
-  const auto alongAxis{geometry.axis * z};
-  const V3D &basis1{geometry.axis};
-  Mantid::Kernel::V3D basis2{1., 0., 0.};
-  if (basis1.X() != 0. && basis1.Z() != 0) {
-    const auto inverseXZSumSq = 1. / (pow<2>(basis1.X()) + pow<2>(basis1.Z()));
-    basis2.setX(std::sqrt(1. - pow<2>(basis1.X()) * inverseXZSumSq));
-    basis2.setZ(basis1.X() * std::sqrt(inverseXZSumSq));
-  }
-  const V3D basis3{basis1.cross_prod(basis2)};
-  const V3D localPoint{
-      ((basis2 * std::cos(polar) + basis3 * std::sin(polar)) * r) + alongAxis};
-  return geometry.centreOfBottomBase + localPoint;
-}
-
-/**
- * Return a random point in cylinder restricted by a bounding box.
- * @param shapeInfo cylinder's shape info
- * @param rng a random number generator
- * @param activeRegion a restricting box
- * @param maxAttempts number of attempts
- * @return a point or none if maxAttempts was exceeded
- */
-boost::optional<V3D>
-randomPointInCylinder(const detail::ShapeInfo &shapeInfo,
-                      PseudoRandomNumberGenerator &rng,
-                      const Mantid::Geometry::BoundingBox &activeRegion,
-                      const size_t maxAttempts) {
-  boost::optional<V3D> point;
-  for (size_t attempt{0}; attempt < maxAttempts; ++attempt) {
-    const auto pt{randomPointInCylinder(shapeInfo, rng)};
-    if (activeRegion.isPointInside(pt)) {
-      point = pt;
-      break;
-    }
-  }
-  return point;
-}
-} // namespace
 
 namespace Mantid {
 namespace Geometry {
@@ -1785,31 +1640,6 @@ double CSGObject::singleShotMonteCarloVolume(const int shotSize,
 }
 
 /**
- * Return a random point within a generic shape and an active region
- * @param rng a random number generator
- * @param activeRegion a box restricting the point's volume
- * @param maxAttempts number of attempts to find a suitable point
- * @return a point or none if maxAttempts was exceeded
- */
-boost::optional<V3D>
-CSGObject::randomPointInNoShapeObject(PseudoRandomNumberGenerator &rng,
-                                      const BoundingBox &activeRegion,
-                                      const size_t maxAttempts) const {
-  boost::optional<V3D> point{boost::none};
-  for (size_t attempts{0}; attempts < maxAttempts; ++attempts) {
-    const double r1 = rng.nextValue();
-    const double r2 = rng.nextValue();
-    const double r3 = rng.nextValue();
-    auto pt = activeRegion.generatePointInside(r1, r2, r3);
-    if (this->isValid(pt)) {
-      point = pt;
-      break;
-    }
-  };
-  return point;
-}
-
-/**
  * Returns an axis-aligned bounding box that will fit the shape
  * @returns A reference to a bounding box for this shape.
  */
@@ -2181,22 +2011,22 @@ V3D CSGObject::generatePointInObject(PseudoRandomNumberGenerator &rng,
   // shape, its dimension and orientation.
   const size_t bruteForceAttempts{
       std::min(static_cast<size_t>(5), maxAttempts)};
-  auto maybePoint{randomPointInNoShapeObject(rng, bbox, bruteForceAttempts)};
+  auto maybePoint{RandomPoint::boundedInUnknownShape(*this, rng, bbox, bruteForceAttempts)};
   if (maybePoint) {
     point = *maybePoint;
   } else {
     switch (shape()) {
     case detail::ShapeInfo::GeometryShape::CUBOID:
-      point = randomPointInCuboid(m_handler->shapeInfo(), rng);
-      break;
-    case detail::ShapeInfo::GeometryShape::SPHERE:
-      point = randomPointInSphere(m_handler->shapeInfo(), rng);
+      point = RandomPoint::inCuboid(m_handler->shapeInfo(), rng);
       break;
     case detail::ShapeInfo::GeometryShape::CYLINDER:
-      point = randomPointInCylinder(m_handler->shapeInfo(), rng);
+      point = RandomPoint::inCylinder(m_handler->shapeInfo(), rng);
+      break;
+    case detail::ShapeInfo::GeometryShape::SPHERE:
+      point = RandomPoint::inSphere(m_handler->shapeInfo(), rng);
       break;
     default:
-      maybePoint = randomPointInNoShapeObject(rng, bbox,
+      maybePoint = RandomPoint::boundedInUnknownShape(*this, rng, bbox,
                                               maxAttempts - bruteForceAttempts);
       if (!maybePoint) {
         throw std::runtime_error("Unable to generate point in object after " +
@@ -2231,7 +2061,7 @@ V3D CSGObject::generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
   // shape, its dimension and orientation.
   const size_t bruteForceAttempts{
       std::min(static_cast<size_t>(5), maxAttempts)};
-  point = randomPointInNoShapeObject(rng, activeRegion, bruteForceAttempts);
+  point = RandomPoint::boundedInUnknownShape(*this, rng, activeRegion, bruteForceAttempts);
   if (!point) {
     detail::ShapeInfo::GeometryShape shape;
     std::vector<Kernel::V3D> shapeVectors;
@@ -2240,19 +2070,19 @@ V3D CSGObject::generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
     GetObjectGeom(shape, shapeVectors, radius, height);
     switch (shape) {
     case detail::ShapeInfo::GeometryShape::CUBOID:
-      point = randomPointInCuboid(m_handler->shapeInfo(), rng, activeRegion,
-                                  maxAttempts);
-      break;
-    case detail::ShapeInfo::GeometryShape::SPHERE:
-      point = randomPointInSphere(m_handler->shapeInfo(), rng, activeRegion,
+      point = RandomPoint::bounded<RandomPoint::inCuboid>(m_handler->shapeInfo(), rng, activeRegion,
                                   maxAttempts);
       break;
     case detail::ShapeInfo::GeometryShape::CYLINDER:
-      point = randomPointInCylinder(m_handler->shapeInfo(), rng, activeRegion,
+      point = RandomPoint::bounded<RandomPoint::inCylinder>(m_handler->shapeInfo(), rng, activeRegion,
                                     maxAttempts);
       break;
+    case detail::ShapeInfo::GeometryShape::SPHERE:
+      point = RandomPoint::bounded<RandomPoint::inSphere>(m_handler->shapeInfo(), rng, activeRegion,
+                                  maxAttempts);
+      break;
     default:
-      point = randomPointInNoShapeObject(rng, activeRegion,
+      point = RandomPoint::boundedInUnknownShape(*this, rng, activeRegion,
                                          maxAttempts - bruteForceAttempts);
       break;
     }

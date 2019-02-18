@@ -1,0 +1,84 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
+#ifndef MANTID_GEOMETRY_RANDOMPOINT_H_
+#define MANTID_GEOMETRY_RANDOMPOINT_H_
+
+#include "MantidGeometry/DllConfig.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
+#include "MantidKernel/V3D.h"
+
+#include <boost/optional.hpp>
+
+namespace Mantid {
+namespace Kernel {
+class PseudoRandomNumberGenerator;
+}
+namespace Geometry {
+namespace detail {
+class ShapeInfo;
+}
+class BoundingBox;
+class IObject;
+namespace RandomPoint {
+
+MANTID_GEOMETRY_DLL Kernel::V3D
+inCuboid(const detail::ShapeInfo &shapeInfo,
+         Kernel::PseudoRandomNumberGenerator &rng);
+
+MANTID_GEOMETRY_DLL Kernel::V3D
+inCylinder(const detail::ShapeInfo &shapeInfo,
+           Kernel::PseudoRandomNumberGenerator &rng);
+
+MANTID_GEOMETRY_DLL Kernel::V3D
+inSphere(const detail::ShapeInfo &shapeInfo,
+         Kernel::PseudoRandomNumberGenerator &rng);
+
+template <Kernel::V3D (*T)(const detail::ShapeInfo &,
+                           Kernel::PseudoRandomNumberGenerator &)>
+MANTID_GEOMETRY_DLL boost::optional<Kernel::V3D>
+bounded(const detail::ShapeInfo &shapeInfo,
+        Kernel::PseudoRandomNumberGenerator &rng, const BoundingBox &box,
+        size_t maxAttempts);
+
+MANTID_GEOMETRY_DLL boost::optional<Kernel::V3D>
+boundedInUnknownShape(const IObject &object,
+                      Kernel::PseudoRandomNumberGenerator &rng,
+                      const BoundingBox &box, size_t maxAttempts);
+
+/**
+ * Return a random point in a known shape restricted by a bounding box.
+ *
+ * This could be called with one of the `inCylinder`, `inSphere`,...
+ * functions as the template argument.
+ * @param shapeInfo a shape info
+ * @param rng a random number generator
+ * @param activeRegion a restricting box
+ * @param maxAttempts number of attempts
+ * @return a point or none if maxAttempts was exceeded
+ */
+template <Kernel::V3D (*randomInShape)(const detail::ShapeInfo &,
+                                       Kernel::PseudoRandomNumberGenerator &)>
+boost::optional<Kernel::V3D> bounded(const detail::ShapeInfo &shapeInfo,
+                                     Kernel::PseudoRandomNumberGenerator &rng,
+                                     const BoundingBox &box,
+                                     size_t maxAttempts) {
+  boost::optional<Kernel::V3D> point;
+  for (size_t attempt{0}; attempt < maxAttempts; ++attempt) {
+    const auto pt{randomInShape(shapeInfo, rng)};
+    if (box.isPointInside(pt)) {
+      point = pt;
+      break;
+    }
+  }
+  return point;
+}
+
+} // namespace RandomPoint
+} // namespace Geometry
+} // namespace Mantid
+
+#endif /* MANTID_GEOMETRY_RANDOMPOINT_H_ */

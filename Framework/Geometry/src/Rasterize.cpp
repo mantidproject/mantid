@@ -34,6 +34,7 @@ struct CylinderParameters {
   V3D symmetryaxis;
 };
 
+// TODO: we now have this functionality in ShapeInfo!
 CylinderParameters getCylinderParameters(const CSGObject &shape) {
   // fundamental checks for any object
   if (!shape.hasValidShape())
