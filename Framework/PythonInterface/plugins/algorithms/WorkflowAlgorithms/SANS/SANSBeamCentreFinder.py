@@ -33,7 +33,7 @@ if PYQT4:
     except (Exception, Warning):
         pass
 else:
-    from mantidqt.plotting.functions import get_plot_fig, plot
+    from mantidqt.plotting.functions import plot
 
 
 class SANSBeamCentreFinder(DataProcessorAlgorithm):
@@ -260,7 +260,6 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
         title = '{}_beam_centre_finder'.format(sample_scatter)
         ax_properties = {'xscale': 'log',
                          'yscale': 'log'}
-        fig, _ = get_plot_fig(ax_properties=ax_properties, window_title=title)
 
         plot_kwargs = {"scalex": True,
                        "scaley": True}
@@ -268,7 +267,8 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
         if not isinstance(output_workspaces, list):
             output_workspaces = [output_workspaces]
 
-        plot(output_workspaces, wksp_indices=[0], fig=fig, overplot=True, plot_kwargs=plot_kwargs)
+        plot(output_workspaces, wksp_indices=[0], ax_properties=ax_properties, overplot=True,
+             plot_kwargs=plot_kwargs, window_title=title)
 
     def _get_cloned_workspace(self, workspace_name):
         workspace = self.getProperty(workspace_name).value
