@@ -26,8 +26,8 @@ class MatrixWorkspaceDisplayViewTest(GuiTest, QtWidgetFinder):
         QApplication.processEvents()
 
         self.assertEqual(None, p.ads_observer)
-        self.find_qt_widget("work")
-        self.assert_no_widgets()
+        self.assert_widget_not_present("work")
+        self.assert_no_toplevel_widgets()
 
     def test_window_force_deleted_correctly(self):
         ws = CreateSampleWorkspace()
@@ -42,5 +42,5 @@ class MatrixWorkspaceDisplayViewTest(GuiTest, QtWidgetFinder):
         QApplication.processEvents()
 
         self.assertEqual(None, p.ads_observer)
-        self.find_qt_widget("work")
-        self.assert_no_widgets()
+        self.assert_widget_not_present("work")
+        self.assert_no_toplevel_widgets()

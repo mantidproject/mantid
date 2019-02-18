@@ -22,4 +22,4 @@ class SampleLogsViewTest(GuiTest, QtWidgetFinder):
 
         QApplication.processEvents()
 
-        self.assert_no_widgets()
+        self.assert_no_toplevel_widgets()

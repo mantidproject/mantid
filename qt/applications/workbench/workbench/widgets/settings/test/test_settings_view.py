@@ -7,14 +7,48 @@
 #  This file is part of the mantidqt package
 from __future__ import absolute_import, unicode_literals
 
+from mock import MagicMock
+from qtpy.QtWidgets import QApplication, QWidget
+
 from mantidqt.utils.qt.test import GuiTest
+from mantidqt.utils.qt.test.qt_widget_finder import QtWidgetFinder
+from workbench.widgets.settings.presenter import SettingsPresenter
 
 
-class SettingsViewTest(GuiTest):
+class MockWorkspaceWidget(QWidget):
+    """
+    This widget implements the ContextManager interface, when used
+    in a `with MockWorkspaceWidget() as widget` statement it will
+    mark delete itself on exiting the context.
+    """
+
+    def __init__(self):
+        super(MockWorkspaceWidget, self).__init__(None)
+        self.workspacewidget = MagicMock()
+
+    def closeEvent(self, event):
+        self.deleteLater()
+        super(MockWorkspaceWidget, self).closeEvent(event)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, type, value, traceback):
+        """
+        On Exit triggers the closeEvent for the widget
+        """
+        self.close()
+
+
+class SettingsViewTest(GuiTest, QtWidgetFinder):
     def test_deletes_on_close(self):
-        # TODO test that main window is deleted on close
-        self.fail()
+        with MockWorkspaceWidget() as temp_widget:
+            widget = SettingsPresenter(temp_widget)
+            self.assert_window_created()
+            self.assert_widget_exists("GeneralSettings", expected_count=1)
 
-    def test_deletes_children_on_close(self):
-        # TODO test that other tabs are deleted on close
-        self.fail()
+            widget.view.close()
+
+        QApplication.processEvents()
+
+        self.assert_no_toplevel_widgets()
