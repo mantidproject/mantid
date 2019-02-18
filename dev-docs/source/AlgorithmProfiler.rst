@@ -18,7 +18,7 @@ Mantid build
 To build mantid version with profiling functionality enabled run ``cmake`` with the additional option
 ``-DPROFILE_ALGORITHM_LINUX=ON``. Built in such a way mantid creates a dump file ``algotimeregister.out``
 in the running directory. This file contains the time stamps for start and finish of executed algorithms with
-~nanoceconds precision in a very simple text format.
+~nanosecond precision in a very simple text format.
 
 Analysing tool
 ^^^^^^^^^^^^^^
