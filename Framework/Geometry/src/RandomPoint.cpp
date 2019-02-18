@@ -95,7 +95,7 @@ Kernel::V3D inSphere(const detail::ShapeInfo &shapeInfo,
 boost::optional<Kernel::V3D>
 inGenericShape(const IObject &object, Kernel::PseudoRandomNumberGenerator &rng,
                size_t maxAttempts) {
-  bounded(object, rng, object.getBoundingBox(), maxAttempts);
+  return bounded(object, rng, object.getBoundingBox(), maxAttempts);
 }
 
 /**

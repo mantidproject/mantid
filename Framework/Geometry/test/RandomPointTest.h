@@ -106,6 +106,24 @@ public:
     TS_ASSERT_DELTA(point.Z(), r * std::cos(polarAngle), tolerance);
   }
 
+  void test_inGenericShape() {
+    using namespace ::testing;
+    MockRNG rng;
+    Sequence rand;
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(0.9));
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(0.5));
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(0.5));
+    // Random sequence set up so as to give point inside hole
+    auto shell = ComponentCreationHelper::createHollowShell(0.5, 1.0);
+    constexpr size_t maxAttempts{1};
+    const auto point = inGenericShape(*shell, rng, maxAttempts);
+    TS_ASSERT(point)
+    constexpr double tolerance{1e-12};
+    TS_ASSERT_DELTA(point->X(), (0.9 - 0.5) / 0.5, tolerance)
+    TS_ASSERT_DELTA(point->Y(), 0., tolerance)
+    TS_ASSERT_DELTA(point->Z(), 0., tolerance)
+  }
+
   void test_inGenericShape_max_attempts() {
     using namespace ::testing;
     MockRNG rng;
