@@ -846,7 +846,7 @@
 </facility>
 
 <!-- ANSTO -->
-<facility name="ANSTO" FileExtensions=".nxs,.tar">
+<facility name="ANSTO" FileExtensions=".nxs,.tar,.hdf">
   <timezone>Australia/Sydney</timezone>
 
   <instrument name="Bilby">
@@ -858,6 +858,11 @@
     <technique>Reactor Indirect Geometry Spectroscopy</technique>
   </instrument>
 
+  <instrument name="PELICAN">
+    <technique>Neutron Spectroscopy</technique>
+    <technique>Inelastic Neutron Scattering</technique>
+  </instrument>
+  
 </facility>
 
 <!-- HZB -->
