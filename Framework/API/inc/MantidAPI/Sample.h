@@ -13,7 +13,6 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidKernel/V3D.h"
-#include <vector>
 
 namespace Mantid {
 //-----------------------------------------------------------------------------
@@ -69,7 +68,7 @@ public:
   /// Get a reference to the sample's environment
   const Geometry::SampleEnvironment &getEnvironment() const;
   /// Set the environment used to contain the sample
-  void setEnvironment(Geometry::SampleEnvironment *env);
+  void setEnvironment(std::unique_ptr<Geometry::SampleEnvironment> env);
   //@}
 
   /** @name Access the sample's lattice structure and orientation */
@@ -127,7 +126,7 @@ private:
   /// An owned pointer to the SampleEnvironment object
   boost::shared_ptr<Geometry::SampleEnvironment> m_environment;
   /// Pointer to the OrientedLattice of the sample, NULL if not set.
-  Geometry::OrientedLattice *m_lattice;
+  std::unique_ptr<Geometry::OrientedLattice> m_lattice;
 
   /// CrystalStructure of the sample
   std::unique_ptr<Geometry::CrystalStructure> m_crystalStructure;

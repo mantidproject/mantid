@@ -43,6 +43,10 @@ If *Normalisation* is set to :literal:`'Normalisation Monitor'`, the data is div
 
 Afterwards, the intensities are multiplied by a factor defined by the 'scaling_after_monitor_normalisation' entry in instrument parameters, if present.
 
+.. note::
+
+    If the sample log entry ``monitor.monsum`` (``monitor1.monsum`` on IN6) is less than 100, monitor normalisation will be disabled and the data normalised to time.
+
 Normalisation to time
 ^^^^^^^^^^^^^^^^^^^^^
 
@@ -74,6 +78,10 @@ The incident energy and the nominal TOF channel are needed to adjust the TOF axi
 The incident energy written in the data files of IN4 and IN6 and accessible via the `Ei` sample log may be inaccurate. To ensure a correct value is used for the TOF axis adjustment, the value can be calibrated using :ref:`GetEiMonDet <algm-GetEiMonDet>`. The operation is controlled by *IncidentEnergyCalibration*. Elastic peak positions are needed for the calculation which can be supplied by *EPPWorkspace*, otherwise :ref:`FindEPP <algm-FindEPP>` is used.
 
 The calibrated energy can be retrieved as a single-value workspace using the *OutputIncidentEnergyWorkspace* property. This workspace can be passed to further calls to :ref:`DirectILLCollectData <algm-DirectILLCollectData>` to force a common `Ei` and thus a common TOF axis between the datasets. This is needed for, e.g., empty container subtraction.
+
+.. note::
+
+    Incident energy calibration will be disabled if the sample log entry ``monitor.monsum`` (``monitor1.monsum`` on IN6) is less than 100.
 
 TOF axis adjustment
 ^^^^^^^^^^^^^^^^^^^

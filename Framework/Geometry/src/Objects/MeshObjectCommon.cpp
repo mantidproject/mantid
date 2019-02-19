@@ -130,7 +130,8 @@ bool isOnTriangle(const Kernel::V3D &point, const Kernel::V3D &v1,
 bool rayIntersectsTriangle(const Kernel::V3D &start,
                            const Kernel::V3D &direction, const Kernel::V3D &v1,
                            const Kernel::V3D &v2, const Kernel::V3D &v3,
-                           Kernel::V3D &intersection, int &entryExit) {
+                           Kernel::V3D &intersection,
+                           TrackDirection &entryExit) {
   // Implements Moller Trumbore intersection algorithm
 
   // Eq line x = x0 + tV
@@ -178,10 +179,13 @@ bool rayIntersectsTriangle(const Kernel::V3D &start,
 
     // determine entry exit assuming anticlockwise triangle view from outside
     Kernel::V3D normalDirection = edge1.cross_prod(edge2);
-    if (normalDirection.scalar_prod(direction) > 0.0) {
-      entryExit = -1; // exit
+    const auto scalar_prod = normalDirection.scalar_prod(direction);
+    if (scalar_prod > 0.) {
+      entryExit = TrackDirection::LEAVING; // exit
+    } else if (scalar_prod < 0.) {
+      entryExit = TrackDirection::ENTERING; // entry
     } else {
-      entryExit = 1; // entry
+      throw std::domain_error("Track is in same direction as surface");
     }
     return true;
   }
@@ -190,28 +194,11 @@ bool rayIntersectsTriangle(const Kernel::V3D &start,
 }
 
 void checkVertexLimit(size_t nVertices) {
-  if (nVertices > std::numeric_limits<uint16_t>::max()) {
+  if (nVertices >= std::numeric_limits<uint32_t>::max()) {
     throw std::invalid_argument(
         "Too many vertices (" + std::to_string(nVertices) +
-        "). MeshObject cannot have more than 65535 vertices.");
+        "). MeshObject cannot have more than 2^32 vertices.");
   }
-}
-
-/**
- * Converts triangle indices from unit16 to unit32
- * @param input
- * @return indices as unit32 vector
- */
-std::vector<uint32_t> getTriangles_uint32(const std::vector<uint16_t> &input) {
-  std::vector<uint32_t> faces;
-  size_t nFaceCorners = input.size();
-  if (nFaceCorners > 0) {
-    faces.resize(static_cast<std::size_t>(nFaceCorners));
-    for (size_t i = 0; i < nFaceCorners; ++i) {
-      faces[i] = static_cast<int>(input[i]);
-    }
-  }
-  return faces;
 }
 
 /**

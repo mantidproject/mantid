@@ -62,15 +62,14 @@ public:
   test_That_An_Environment_Can_Be_Set_And_The_Same_Environment_Is_Returned() {
     Sample sample;
     const std::string envName("TestKit");
-    SampleEnvironment *kit =
-        new SampleEnvironment(envName, boost::make_shared<const Container>(""));
+    auto kit = std::make_unique<SampleEnvironment>(
+        envName, boost::make_shared<const Container>(""));
     kit->add(boost::make_shared<const CSGObject>());
 
-    TS_ASSERT_THROWS_NOTHING(sample.setEnvironment(kit));
+    TS_ASSERT_THROWS_NOTHING(sample.setEnvironment(std::move(kit)));
 
     const SampleEnvironment &sampleKit = sample.getEnvironment();
     // Test that this references the correct object
-    TS_ASSERT_EQUALS(&sampleKit, kit);
     TS_ASSERT_EQUALS(sampleKit.name(), envName);
     TS_ASSERT_EQUALS(sampleKit.nelements(), 2);
   }
@@ -352,6 +351,21 @@ public:
         dynamic_cast<const CSGObject &>(sample.getShape()).getShapeXML());
     // Geometry values
     TS_ASSERT_DELTA(loaded.getWidth(), sample.getWidth(), 1e-6);
+  }
+
+  void test_nexus_empty_name() {
+    NexusTestHelper th(true);
+    th.createFile("SampleTest.nxs");
+
+    Sample sample;
+
+    sample.saveNexus(th.file, "sample");
+    th.reopenFile();
+
+    Sample loaded;
+    loaded.loadNexus(th.file, "sample");
+
+    TS_ASSERT(loaded.getName().empty());
   }
 };
 

@@ -10,9 +10,11 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectraAxisValidator.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidHistogramData/Histogram.h"
+#include "MantidHistogramData/HistogramBuilder.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
@@ -32,6 +34,8 @@ DECLARE_ALGORITHM(ConvertSpectrumAxis2)
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;
+using namespace DataObjects;
+using namespace HistogramData;
 
 void ConvertSpectrumAxis2::init() {
   // Validator for Input Workspace
@@ -225,8 +229,12 @@ MatrixWorkspace_sptr ConvertSpectrumAxis2::createOutputWorkspace(
   NumericAxis *newAxis = nullptr;
   if (m_toOrder) {
     // Can not re-use the input one because the spectra are re-ordered.
-    outputWorkspace = WorkspaceFactory::Instance().create(
-        inputWS, m_indexMap.size(), inputWS->x(0).size(), inputWS->y(0).size());
+    HistogramBuilder builder;
+    builder.setX(inputWS->x(0).size());
+    builder.setY(inputWS->y(0).size());
+    builder.setDistribution(inputWS->isDistribution());
+    outputWorkspace =
+        create<MatrixWorkspace>(*inputWS, m_indexMap.size(), builder.build());
     std::vector<double> axis;
     axis.reserve(m_indexMap.size());
     for (const auto &it : m_indexMap) {

@@ -499,10 +499,6 @@ if ( GCC_COMPILER_VERSION AND GCC_COMPILER_VERSION VERSION_LESS "4.5" )
 endif()
 target_link_libraries ( Kernel LINK_PUBLIC ${NEXUS_LIBRARIES} Eigen3::Eigen LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${GSL_LIBRARIES} ${MANTIDLIBS} ${NETWORK_LIBRARIES} ${JSONCPP_LIBRARIES} ${TBB_LIBRARIES} ${TBB_MALLOC_LIBRARIES})
 
-if (WITH_ASAN)
-  target_link_libraries ( Kernel LINK_PRIVATE -lasan )
-endif ()
-
 if ( WIN32 )
   target_link_libraries ( Kernel LINK_PRIVATE Psapi.lib ) # For memory usage queries
 endif()
@@ -607,7 +603,7 @@ configure_file ( ../Properties/Mantid.properties.template
 if(MSVC)
   file(GENERATE
      OUTPUT
-     ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>/Mantid.properties
+     ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/$<CONFIG>/Mantid.properties
      INPUT
      ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.config
   )
@@ -624,7 +620,7 @@ endif()
 # Installation settings
 ###########################################################################
 
-install ( TARGETS Kernel ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )
+mtd_install_targets( TARGETS Kernel INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})
 
 # Create the properties file for the installer
 set ( MANTID_ROOT_BUILD ${MANTID_ROOT} )
@@ -680,5 +676,7 @@ configure_file ( ../Properties/Mantid.properties.template
                  ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.install
 )
 install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.install
-          DESTINATION ${BIN_DIR} RENAME Mantid.properties
-)
+          DESTINATION ${BIN_DIR} RENAME Mantid.properties )
+
+install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.install
+          DESTINATION ${WORKBENCH_BIN_DIR} RENAME Mantid.properties )

@@ -13,13 +13,15 @@ and masked SANS workspace.
 from __future__ import (absolute_import, division, print_function)
 
 from abc import ABCMeta, abstractmethod
-
-from PyQt4 import QtGui
+from qtpy import QtWidgets
 from six import with_metaclass
-from . import ui_masking_table
+
+from mantidqt.utils.qt import load_ui
+
+Ui_MaskingTable, _ = load_ui(__file__, "masking_table.ui")
 
 
-class MaskingTable(QtGui.QWidget, ui_masking_table.Ui_MaskingTable):
+class MaskingTable(QtWidgets.QWidget, Ui_MaskingTable):
     class MaskingTableListener(with_metaclass(ABCMeta, object)):
         """
         Defines the elements which a presenter can listen to for the masking table
@@ -42,7 +44,7 @@ class MaskingTable(QtGui.QWidget, ui_masking_table.Ui_MaskingTable):
         # Hook up signal and slots
         self.connect_signals()
         self._masking_tab_listeners = []
-        self.masking_table.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
+        self.masking_table.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
 
     def add_listener(self, listener):
         if not isinstance(listener, MaskingTable.MaskingTableListener):
@@ -101,9 +103,9 @@ class MaskingTable(QtGui.QWidget, ui_masking_table.Ui_MaskingTable):
 
         # Populate the rows
         for row, table_entry in enumerate(table_entries):
-            entry_type = QtGui.QTableWidgetItem(table_entry.first)
-            entry_detector = QtGui.QTableWidgetItem(table_entry.second)
-            entry_detail = QtGui.QTableWidgetItem(table_entry.third)
+            entry_type = QtWidgets.QTableWidgetItem(table_entry.first)
+            entry_detector = QtWidgets.QTableWidgetItem(table_entry.second)
+            entry_detail = QtWidgets.QTableWidgetItem(table_entry.third)
 
             self.masking_table.setItem(row, 0, entry_type)
             self.masking_table.setItem(row, 1, entry_detector)

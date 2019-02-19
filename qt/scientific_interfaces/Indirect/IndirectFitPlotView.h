@@ -10,11 +10,8 @@
 #include "ui_IndirectFitPreviewPlot.h"
 
 #include "DllConfig.h"
-#include "MantidAPI/MatrixWorkspace.h"
-
 #include "IIndirectFitPlotView.h"
-
-#include "MantidQtWidgets/Common/MantidWidget.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -22,6 +19,7 @@ namespace IDA {
 
 class MANTIDQT_INDIRECT_DLL IndirectFitPlotView : public IIndirectFitPlotView {
   Q_OBJECT
+
 public:
   IndirectFitPlotView(QWidget *parent = nullptr);
   virtual ~IndirectFitPlotView() override;
@@ -59,10 +57,12 @@ public:
   void removeFromTopPreview(const QString &name) override;
   void removeFromBottomPreview(const QString &name) override;
 
-  void enableFitSingleSpectrum(bool enable) override;
   void enablePlotGuess(bool enable) override;
   void enableSpectrumSelection(bool enable) override;
   void enableFitRangeSelection(bool enable) override;
+
+  void setFitSingleSpectrumText(QString const &text) override;
+  void setFitSingleSpectrumEnabled(bool enable) override;
 
   void setBackgroundLevel(double value) override;
 

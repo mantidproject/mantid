@@ -216,6 +216,7 @@ set ( SRC_FILES
 	src/PDDetermineCharacterizations.cpp
 	src/PDFFourierTransform.cpp
 	src/PaddingAndApodization.cpp
+	src/ParallaxCorrection.cpp
 	src/Pause.cpp
 	src/PerformIndexOperations.cpp
 	src/Plus.cpp
@@ -556,6 +557,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/PDDetermineCharacterizations.h
 	inc/MantidAlgorithms/PDFFourierTransform.h
 	inc/MantidAlgorithms/PaddingAndApodization.h
+	inc/MantidAlgorithms/ParallaxCorrection.h
 	inc/MantidAlgorithms/Pause.h
 	inc/MantidAlgorithms/PerformIndexOperations.h
 	inc/MantidAlgorithms/Plus.h
@@ -699,6 +701,7 @@ set ( TEST_FILES
 	AppendSpectraTest.h
 	ApplyCalibrationTest.h
 	ApplyDetailedBalanceTest.h
+	ApplyFloodWorkspaceTest.h
 	ApplyTransmissionCorrectionTest.h
 	AverageLogDataTest.h
 	Bin2DPowderDiffractionTest.h
@@ -899,6 +902,7 @@ set ( TEST_FILES
 	PDDetermineCharacterizationsTest.h
 	PDFFourierTransformTest.h
 	PaddingAndApodizationTest.h
+	ParallaxCorrectionTest.h
 	PauseTest.h
 	PerformIndexOperationsTest.h
 	PlusTest.h
@@ -944,6 +948,7 @@ set ( TEST_FILES
 	ResizeRectangularDetectorTest.h
 	RingProfileTest.h
 	RunCombinationHelperTest.h
+	SampleLogsBehaviourTest.h
 	SANSCollimationLengthEstimatorTest.h
 	SassenaFFTTest.h
 	ScaleTest.h
@@ -1038,4 +1043,4 @@ add_subdirectory ( test )
 # Installation settings
 ###########################################################################
 
-install ( TARGETS Algorithms ${SYSTEM_PACKAGE_TARGET} DESTINATION ${PLUGINS_DIR} )
+mtd_install_targets( TARGETS Algorithms INSTALL_DIRS ${PLUGINS_DIR} ${WORKBENCH_PLUGINS_DIR})

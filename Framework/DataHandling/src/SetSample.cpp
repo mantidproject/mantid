@@ -11,6 +11,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidGeometry/Instrument/SampleEnvironmentFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
@@ -303,8 +304,7 @@ const Geometry::SampleEnvironment *SetSample::setSampleEnvironment(
   SampleEnvironmentFactory factory(std::move(finder));
   auto sampleEnviron =
       factory.create(facilityName, instrumentName, envName, canName);
-  workspace->mutableSample().setEnvironment(sampleEnviron.release());
-
+  workspace->mutableSample().setEnvironment(std::move(sampleEnviron));
   return &(workspace->sample().getEnvironment());
 }
 
@@ -396,10 +396,12 @@ SetSample::tryCreateXMLFromArgsOnly(const Kernel::PropertyManager &args,
         args, refFrame,
         boost::algorithm::equals(shape, ShapeArgs::HOLLOW_CYLINDER));
   } else {
-    throw std::invalid_argument(
-        "Unknown 'Shape' argument provided in "
-        "'Geometry'. Allowed "
-        "values=FlatPlate,CSG,Cylinder,HollowCylinder.");
+    std::stringstream msg;
+    msg << "Unknown 'Shape' argument '" << shape
+        << "' provided in 'Geometry' property. Allowed values are "
+        << ShapeArgs::CSG << ", " << ShapeArgs::FLAT_PLATE << ", "
+        << ShapeArgs::CYLINDER << ", " << ShapeArgs::HOLLOW_CYLINDER;
+    throw std::invalid_argument(msg.str());
   }
   if (g_log.is(Logger::Priority::PRIO_DEBUG)) {
     g_log.debug("XML shape definition:\n" + result + '\n');

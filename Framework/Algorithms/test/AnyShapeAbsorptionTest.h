@@ -127,8 +127,7 @@ public:
     TS_ASSERT(cyl.isExecuted());
 
     // Using the output of the CylinderAbsorption algorithm is convenient
-    // because
-    // it adds the sample object to the workspace
+    // because it adds the sample object to the workspace
     TS_ASSERT_THROWS_NOTHING(atten2.setPropertyValue("InputWorkspace", cylWS));
     std::string outputWS("factors");
     TS_ASSERT_THROWS_NOTHING(
@@ -156,9 +155,9 @@ public:
     TS_ASSERT_DELTA(y0[4] / cylws->readY(0)[4], 1.0, 0.02);
     TS_ASSERT_DELTA(y0[7] / cylws->readY(0)[7], 1.0, 0.02);
     // Check a few actual numbers as well
-    TS_ASSERT_DELTA(y0.front(), 0.7300, 0.0001);
-    TS_ASSERT_DELTA(y0.back(), 0.2238, 0.0001);
-    TS_ASSERT_DELTA(y0[5], 0.3749, 0.0001);
+    TS_ASSERT_DELTA(y0.front(), 0.7266, 0.0001);
+    TS_ASSERT_DELTA(y0.back(), 0.2164, 0.0001);
+    TS_ASSERT_DELTA(y0[5], 0.3680, 0.0001);
 
     // Now test with a gauge volume used.
     // Create a small cylinder to be the gauge volume
@@ -197,6 +196,55 @@ public:
     Mantid::API::AnalysisDataService::Instance().remove(cylWS);
     Mantid::API::AnalysisDataService::Instance().remove(outputWS);
     Mantid::API::AnalysisDataService::Instance().remove("gauge");
+  }
+
+  void testTinyVolume() {
+    if (!atten.isInitialized())
+      atten.initialize();
+
+    // Create a small test workspace
+    MatrixWorkspace_sptr testWS =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1, 10);
+    // Needs to have units of wavelength
+    testWS->getAxis(0)->unit() =
+        Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
+
+    Mantid::Algorithms::FlatPlateAbsorption flat;
+    flat.initialize();
+    TS_ASSERT_THROWS_NOTHING(
+        flat.setProperty<MatrixWorkspace_sptr>("InputWorkspace", testWS));
+    std::string flatWS("flat");
+    TS_ASSERT_THROWS_NOTHING(flat.setPropertyValue("OutputWorkspace", flatWS));
+    TS_ASSERT_THROWS_NOTHING(
+        flat.setPropertyValue("AttenuationXSection", "5.08"));
+    TS_ASSERT_THROWS_NOTHING(
+        flat.setPropertyValue("ScatteringXSection", "5.1"));
+    TS_ASSERT_THROWS_NOTHING(
+        flat.setPropertyValue("SampleNumberDensity", "0.07192"));
+    TS_ASSERT_THROWS_NOTHING(flat.setPropertyValue("SampleHeight", "2.3"));
+    TS_ASSERT_THROWS_NOTHING(flat.setPropertyValue("SampleWidth", "1.8"));
+    // too thin to work in any shapes gauge volume creation
+    TS_ASSERT_THROWS_NOTHING(flat.setPropertyValue("SampleThickness", ".1"));
+    TS_ASSERT_THROWS_NOTHING(flat.execute());
+    TS_ASSERT(flat.isExecuted());
+
+    // Using the output of the FlatPlateAbsorption algorithm is convenient
+    // because it adds the sample object to the workspace
+    TS_ASSERT_THROWS_NOTHING(atten.setPropertyValue("InputWorkspace", flatWS));
+    std::string outputWS("factors");
+    TS_ASSERT_THROWS_NOTHING(
+        atten.setPropertyValue("OutputWorkspace", outputWS));
+    TS_ASSERT_THROWS_NOTHING(
+        atten.setPropertyValue("AttenuationXSection", "5.08"));
+    TS_ASSERT_THROWS_NOTHING(
+        atten.setPropertyValue("ScatteringXSection", "5.1"));
+    TS_ASSERT_THROWS_NOTHING(
+        atten.setPropertyValue("SampleNumberDensity", "0.07192"));
+    atten.setRethrows(true); // needed for the next check to work
+    TS_ASSERT_THROWS(atten.execute(), std::runtime_error);
+    TS_ASSERT(!atten.isExecuted());
+
+    Mantid::API::AnalysisDataService::Instance().remove(flatWS);
   }
 
 private:

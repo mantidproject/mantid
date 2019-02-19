@@ -493,9 +493,9 @@ def parse_event_slice_setting(string_to_parse):
         line = re.sub(range_marker_pattern, "", line)
         value = float(line)
         if is_lower_bound:
-            return [value, -1]
+            return [value, -1.]
         else:
-            return [-1, value]
+            return [-1., value]
 
     # Check if the input actually exists.
     if not string_to_parse:
@@ -1021,3 +1021,21 @@ def get_bank_for_spectrum_number(spectrum_number, instrument):
         if 36873 <= spectrum_number <= 73736:
             detector = DetectorType.HAB
     return detector
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+# Plotting
+# ----------------------------------------------------------------------------------------------------------------------
+
+def get_log_plot(window_title=None, plot_to_close=None):
+    import matplotlib.pyplot as plt
+    if plot_to_close is not None:
+        # We have existing plots, so close them first
+        plt.close(plot_to_close)
+
+    fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
+    if window_title is not None:
+        fig.canvas.set_window_title(window_title)
+    ax.set_xscale('log')
+    ax.set_yscale('log')
+    return fig

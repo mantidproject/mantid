@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=F0401
 from __future__ import (absolute_import, division, print_function)
 
@@ -35,7 +41,8 @@ def add_directory_structure(dirs):
         if i == 0:
             previous_dir = directory
             continue
-        mtd[previous_dir].add(directory)
+        if not mtd[previous_dir].__contains__(directory):
+            mtd[previous_dir].add(directory)
         previous_dir = directory
 
 
@@ -111,7 +118,7 @@ class MuonWorkspaceWrapper(object):
             self._workspace = value
         else:
             raise AttributeError("Attempting to set object of type {}, must be"
-                                 "a Mantid Workspace type")
+                                 " a Mantid Workspace type".format(type(value)))
 
     def show(self, name):
         """
@@ -119,7 +126,7 @@ class MuonWorkspaceWrapper(object):
         name = dirs/../dirs/workspace_name
         """
         if not self.is_hidden:
-            self.hide()
+            return
 
         if len(name) > 0 and self.is_hidden:
             self.name = str(name)
@@ -149,8 +156,7 @@ class MuonWorkspaceWrapper(object):
             self._workspace_name = ""
             self._directory_structure = ""
         else:
-            raise RuntimeWarning(
-                "Cannot remove workspace from ADS with name : {}".format(self._workspace_name))
+            pass
 
     def add_directory_structure(self):
         """

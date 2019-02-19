@@ -774,8 +774,9 @@ int CSGObject::interceptSurface(Geometry::Track &UT) const {
     if (*ditr > 0.0) // only interested in forward going points
     {
       // Is the point and enterance/exit Point
-      const int flag = calcValidType(*iitr, UT.direction());
-      UT.addPoint(flag, *iitr, *this);
+      const TrackDirection flag = calcValidType(*iitr, UT.direction());
+      if (flag != TrackDirection::INVALID)
+        UT.addPoint(flag, *iitr, *this);
     }
   }
   UT.buildLink();
@@ -791,16 +792,17 @@ int CSGObject::interceptSurface(Geometry::Track &UT) const {
  * @retval 1 :: Entry point
  * @retval -1 :: Exit Point
  */
-int CSGObject::calcValidType(const Kernel::V3D &point,
-                             const Kernel::V3D &uVec) const {
+TrackDirection CSGObject::calcValidType(const Kernel::V3D &point,
+                                        const Kernel::V3D &uVec) const {
   const Kernel::V3D shift(uVec * Kernel::Tolerance * 25.0);
   const Kernel::V3D testA(point - shift);
   const Kernel::V3D testB(point + shift);
   const int flagA = isValid(testA);
   const int flagB = isValid(testB);
   if (!(flagA ^ flagB))
-    return 0;
-  return (flagA) ? -1 : 1;
+    return Geometry::TrackDirection::INVALID;
+  return (flagA) ? Geometry::TrackDirection::LEAVING
+                 : Geometry::TrackDirection::ENTERING;
 }
 
 /**
@@ -915,7 +917,7 @@ double CSGObject::rayTraceSolidAngle(const Kernel::V3D &observer) const {
         }
       }
     }
-    // this break (only used in no BB defined) may be wrong if object has hole
+    // this break (only used if no BB defined) may be wrong if object has hole
     // in middle
     if (!useBB && countPhi == 0)
       break;
@@ -1131,7 +1133,7 @@ double CSGObject::triangleSolidAngle(const V3D &observer,
     //
     // No special case, do the ray trace.
     //
-    return rayTraceSolidAngle(observer); // so is this
+    return rayTraceSolidAngle(observer);
   }
   const auto &vertices = this->getTriangleVertices();
   const auto &faces = this->getTriangleFaces();
@@ -1151,7 +1153,6 @@ double CSGObject::triangleSolidAngle(const V3D &observer,
       sangle += sa;
     else
       sneg += sa;
-    //    std::cout << vp1 << vp2 << vp2;
   }
   return (0.5 * (sangle - sneg));
 }
@@ -2169,6 +2170,22 @@ const std::vector<uint32_t> &CSGObject::getTriangleFaces() const {
   if (m_handler == nullptr)
     return empty;
   return m_handler->getTriangleFaces();
+}
+
+detail::ShapeInfo::GeometryShape CSGObject::shape() const {
+  if (m_handler && m_handler->hasShapeInfo()) {
+    return m_handler->shapeInfo().shape();
+  } else {
+    return detail::ShapeInfo::GeometryShape::NOSHAPE;
+  }
+}
+
+const detail::ShapeInfo &CSGObject::shapeInfo() const {
+  if (m_handler && m_handler->hasShapeInfo()) {
+    return m_handler->shapeInfo();
+  } else {
+    throw std::logic_error("CSGObject has no ShapeInfo to return");
+  }
 }
 
 /**

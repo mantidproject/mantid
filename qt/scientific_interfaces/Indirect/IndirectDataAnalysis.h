@@ -71,6 +71,8 @@ private:
   handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf);
 
 private slots:
+  /// Sets the active workspace in the selected tab
+  void tabChanged(int index);
   /// Called when the user clicks the Py button
   void exportTabPython();
   /// Opens a directory dialog.

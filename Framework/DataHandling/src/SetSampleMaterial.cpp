@@ -49,7 +49,7 @@ void SetSampleMaterial::init() {
                   "The chemical formula, see examples in documentation");
   declareProperty("AtomicNumber", 0, "The atomic number");
   declareProperty("MassNumber", 0,
-                  "Mass number if ion (use 0 for default mass sensity)");
+                  "Mass number if ion (use 0 for default mass number)");
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   declareProperty("SampleNumberDensity", EMPTY_DBL(), mustBePositive,
@@ -62,13 +62,13 @@ void SetSampleMaterial::init() {
                   "Unit cell volume in Angstoms^3. Will be calculated from the "
                   "OrientedLattice if not supplied.");
   declareProperty("CoherentXSection", EMPTY_DBL(), mustBePositive,
-                  "Optional:  This coherent cross-section for the sample "
+                  "This coherent cross-section for the sample "
                   "material in barns will be used instead of tabulated");
   declareProperty("IncoherentXSection", EMPTY_DBL(), mustBePositive,
-                  "Optional:  This incoherent cross-section for the sample "
+                  "This incoherent cross-section for the sample "
                   "material in barns will be used instead of tabulated");
   declareProperty("AttenuationXSection", EMPTY_DBL(), mustBePositive,
-                  "Optional:  This absorption cross-section for the sample "
+                  "This absorption cross-section for the sample "
                   "material in barns will be used instead of tabulated");
   declareProperty("ScatteringXSection", EMPTY_DBL(), mustBePositive,
                   "Optional:  This total scattering cross-section (coherent + "
@@ -115,6 +115,10 @@ std::map<std::string, std::string> SetSampleMaterial::validateInputs() {
   params.zParameter = getProperty("ZParameter");
   params.unitCellVolume = getProperty("UnitCellVolume");
   params.sampleMassDensity = getProperty("SampleMassDensity");
+  params.coherentXSection = getProperty("CoherentXSection");
+  params.incoherentXSection = getProperty("IncoherentXSection");
+  params.attenuationXSection = getProperty("AttenuationXSection");
+  params.scatteringXSection = getProperty("ScatteringXSection");
   auto result = ReadMaterial::validateInputs(params);
 
   return result;
@@ -152,18 +156,15 @@ void SetSampleMaterial::exec() {
   // an ExperimentInfo object has a sample
   ExperimentInfo_sptr expInfo =
       boost::dynamic_pointer_cast<ExperimentInfo>(workspace);
-  if (!bool(expInfo)) {
+  if (!expInfo) {
     throw std::runtime_error("InputWorkspace does not have a sample object");
   }
 
   ReadMaterial reader;
-  params.coherentXSection = getProperty("CoherentXSection");
-  params.incoherentXSection = getProperty("IncoherentXSection");
-  params.attenuationXSection = getProperty("AttenuationXSection");
-  params.scatteringXSection = getProperty("ScatteringXSection");
   reader.setMaterialParameters(params);
 
-  double rho = getProperty("SampleNumberDensity"); // in atoms / Angstroms^3
+  const double rho =
+      getProperty("SampleNumberDensity"); // in atoms / Angstroms^3
 
   // get the scattering information - this will override table values
   // create the material

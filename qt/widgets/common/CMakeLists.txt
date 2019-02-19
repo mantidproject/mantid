@@ -14,10 +14,13 @@ set ( QT5_SRC_FILES
   src/FindFilesThreadPoolManager.cpp
   src/FindFilesWorker.cpp
   src/FindReplaceDialog.cpp
+  src/FitPropertyBrowser.cpp
   src/FlowLayout.cpp
   src/FunctionBrowser.cpp
   src/GenericDialog.cpp
   src/HelpWindow.cpp
+  src/Hint.cpp
+  src/HintingLineEdit.cpp
   # todo: move this to the instrument view library when the slice
   # viewer library is removed
   src/InputController.cpp
@@ -35,18 +38,22 @@ set ( QT5_SRC_FILES
   src/MantidWSIndexDialog.cpp
   src/Message.cpp
   src/MessageDisplay.cpp
+  src/MultifitSetupDialog.cpp
   src/MWRunFiles.cpp
   src/OptionsPropertyWidget.cpp
   src/pixmaps.cpp
   src/PluginLibraries.cpp
   src/ProcessingAlgoWidget.cpp
+  src/PropertyHandler.cpp
   src/PropertyWidget.cpp
   src/PropertyWidgetFactory.cpp
   src/PythonRunner.cpp
   src/QtSignalChannel.cpp
   src/RenameParDialog.cpp
   src/ScriptEditor.cpp
+  src/SequentialFitDialog.cpp
   src/SelectFunctionDialog.cpp
+  src/SelectWorkspacesDialog.cpp
   src/TextPropertyWidget.cpp
   src/UserFunctionDialog.cpp
   src/UserSubWindow.cpp
@@ -59,6 +66,23 @@ set ( QT5_SRC_FILES
   src/WorkspacePresenter/WorkspaceTreeWidget.cpp
   src/WorkspacePresenter/WorkspaceTreeWidgetSimple.cpp
   src/WorkspaceSelector.cpp
+
+  src/Batch/RowLocation.cpp
+  src/Batch/RowLocationAdapter.cpp
+  src/Batch/RowPredicate.cpp
+  src/Batch/Row.cpp
+  src/Batch/Cell.cpp
+  src/Batch/CellStandardItem.cpp
+  src/Batch/ExtractSubtrees.cpp
+  src/Batch/FindSubtreeRoots.cpp
+  src/Batch/JobTreeView.cpp
+  src/Batch/JobTreeViewSignalAdapter.cpp
+  src/Batch/QtStandardItemTreeAdapter.cpp
+  src/Batch/FilteredTreeModel.cpp
+  src/Batch/QtBasicNavigation.cpp
+  src/Batch/QtTreeCursorNavigation.cpp
+  src/Batch/CellDelegate.cpp
+  src/Batch/BuildSubtreeItems.cpp
 
   src/QtPropertyBrowser/DoubleDialogEditor.cpp
   src/QtPropertyBrowser/DoubleEditorFactory.cpp
@@ -91,8 +115,11 @@ set ( QT5_MOC_FILES
   inc/MantidQtWidgets/Common/FindFilesThreadPoolManagerMockObjects.h
   inc/MantidQtWidgets/Common/FindFilesWorker.h
   inc/MantidQtWidgets/Common/FindReplaceDialog.h
+  inc/MantidQtWidgets/Common/FitPropertyBrowser.h
   inc/MantidQtWidgets/Common/FunctionBrowser.h
   inc/MantidQtWidgets/Common/GenericDialog.h
+  inc/MantidQtWidgets/Common/Hint.h
+  inc/MantidQtWidgets/Common/HintingLineEdit.h
   inc/MantidQtWidgets/Common/InputController.h
   inc/MantidQtWidgets/Common/InterfaceManager.h
   inc/MantidQtWidgets/Common/LineEditWithClear.h
@@ -104,15 +131,19 @@ set ( QT5_MOC_FILES
   inc/MantidQtWidgets/Common/MantidWidget.h
   inc/MantidQtWidgets/Common/MantidWSIndexDialog.h
   inc/MantidQtWidgets/Common/MessageDisplay.h
+  inc/MantidQtWidgets/Common/MultifitSetupDialog.h
   inc/MantidQtWidgets/Common/MWRunFiles.h
   inc/MantidQtWidgets/Common/OptionsPropertyWidget.h
   inc/MantidQtWidgets/Common/ProcessingAlgoWidget.h
+  inc/MantidQtWidgets/Common/PropertyHandler.h
   inc/MantidQtWidgets/Common/PropertyWidget.h
   inc/MantidQtWidgets/Common/PythonRunner.h
   inc/MantidQtWidgets/Common/QtSignalChannel.h
   inc/MantidQtWidgets/Common/RenameParDialog.h
   inc/MantidQtWidgets/Common/ScriptEditor.h
+  inc/MantidQtWidgets/Common/SequentialFitDialog.h
   inc/MantidQtWidgets/Common/SelectFunctionDialog.h
+  inc/MantidQtWidgets/Common/SelectWorkspacesDialog.h
   inc/MantidQtWidgets/Common/TextPropertyWidget.h
   inc/MantidQtWidgets/Common/UserFunctionDialog.h
   inc/MantidQtWidgets/Common/UserSubWindow.h
@@ -122,6 +153,9 @@ set ( QT5_MOC_FILES
   inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidget.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidgetSimple.h
   inc/MantidQtWidgets/Common/WorkspaceSelector.h
+
+  inc/MantidQtWidgets/Common/Batch/JobTreeView.h
+  inc/MantidQtWidgets/Common/Batch/JobTreeViewSignalAdapter.h
   
   inc/MantidQtWidgets/Common/QtPropertyBrowser/ButtonEditorFactory.h
   inc/MantidQtWidgets/Common/QtPropertyBrowser/DoubleDialogEditor.h
@@ -157,9 +191,26 @@ set ( QT5_INC_FILES
   inc/MantidQtWidgets/Common/InterfaceFactory.h
   inc/MantidQtWidgets/Common/MantidDesktopServices.h
   inc/MantidQtWidgets/Common/MantidTreeWidgetItem.h
+  inc/MantidQtWidgets/Common/MultifitSetupDialog.h
   inc/MantidQtWidgets/Common/pixmaps.h
   inc/MantidQtWidgets/Common/PropertyWidgetFactory.h
+  inc/MantidQtWidgets/Common/SequentialFitDialog.h
   inc/MantidQtWidgets/Common/WidgetScrollbarDecorator.h
+  inc/MantidQtWidgets/Common/Batch/QtStandardItemTreeAdapter.h
+  inc/MantidQtWidgets/Common/Batch/QtBasicNavigation.h
+  inc/MantidQtWidgets/Common/Batch/QtTreeCursorNavigation.h
+  inc/MantidQtWidgets/Common/Batch/StrictQModelIndices.h
+  inc/MantidQtWidgets/Common/Batch/FilteredTreeModel.h
+  inc/MantidQtWidgets/Common/Batch/RowLocation.h
+  inc/MantidQtWidgets/Common/Batch/RowPredicate.h
+  inc/MantidQtWidgets/Common/Batch/RowLocationAdapter.h
+  inc/MantidQtWidgets/Common/Batch/Row.h
+  inc/MantidQtWidgets/Common/Batch/Cell.h
+  inc/MantidQtWidgets/Common/Batch/CellStandardItem.h
+  inc/MantidQtWidgets/Common/Batch/CellDelegate.h
+  inc/MantidQtWidgets/Common/Batch/ExtractSubtrees.h
+  inc/MantidQtWidgets/Common/Batch/FindSubtreeRoots.h
+  inc/MantidQtWidgets/Common/Batch/BuildSubtreeItems.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/ADSAdapter.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/IWorkspaceDockView.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/IWorkspaceDockView.h
@@ -172,9 +223,11 @@ set ( QT5_INC_FILES
 set ( QT5_UI_FILES
   inc/MantidQtWidgets/Common/DataSelector.ui
   inc/MantidQtWidgets/Common/ManageUserDirectories.ui
+  inc/MantidQtWidgets/Common/MultifitSetupDialog.ui
   inc/MantidQtWidgets/Common/MWRunFiles.ui
   inc/MantidQtWidgets/Common/ProcessingAlgoWidget.ui
   inc/MantidQtWidgets/Common/RenameParDialog.ui
+  inc/MantidQtWidgets/Common/SequentialFitDialog.ui
   inc/MantidQtWidgets/Common/SelectFunctionDialog.ui
   inc/MantidQtWidgets/Common/UserFunctionDialog.ui
 )
@@ -730,11 +783,12 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsCommon
     Qt5::Qscintilla
   INSTALL_DIR
     ${LIB_DIR}
+    ${WORKBENCH_LIB_DIR}
   OSX_INSTALL_RPATH
     @loader_path/../MacOS
     @loader_path/../Libraries
   LINUX_INSTALL_RPATH
-    "\$ORIGIN/../${LIB_DIR}"
+    "\$ORIGIN/../${WORKBENCH_LIB_DIR}"
 )
 
 ###########################################################################

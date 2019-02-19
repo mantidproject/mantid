@@ -12,6 +12,7 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/V3D.h"
 #include "MantidPythonInterface/core/NDArray.h"
+#include "MantidPythonInterface/core/VersionCompat.h"
 #include "MantidPythonInterface/kernel/Converters/CloneToNumpy.h"
 #include "MantidPythonInterface/kernel/Converters/NDArrayToVector.h"
 #include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
@@ -26,6 +27,7 @@
 #include <boost/python/dict.hpp>
 #include <boost/python/list.hpp>
 #include <boost/python/make_constructor.hpp>
+
 #include <cstring>
 #include <vector>
 
@@ -64,8 +66,8 @@ namespace {
 
 /// Boost macro for "looping" over builtin types
 #define BUILTIN_TYPES                                                          \
-  BOOST_PP_TUPLE_TO_LIST(                                                      \
-      7, (double, std::string, int, uint32_t, int64_t, float, uint64_t))
+  BOOST_PP_TUPLE_TO_LIST(8, (double, std::string, int, size_t, uint32_t,       \
+                             int64_t, float, uint64_t))
 #define USER_TYPES BOOST_PP_TUPLE_TO_LIST(1, (Mantid::Kernel::V3D))
 #define ARRAY_TYPES                                                            \
   BOOST_PP_TUPLE_TO_LIST(2, (std::vector<int>, std::vector<double>))
@@ -297,6 +299,25 @@ PyObject *row(ITableWorkspace &self, int row) {
 }
 
 /**
+ * Return the C++ types for all columns
+ * @param self A reference to the TableWorkspace python object that we were
+ * called on
+ */
+boost::python::list columnTypes(ITableWorkspace &self) {
+  int numCols = static_cast<int>(self.columnCount());
+
+  boost::python::list types;
+
+  for (int col = 0; col < numCols; col++) {
+    const auto column = self.getColumn(col);
+    const auto &type = column->type();
+    types.append(type);
+  }
+
+  return types;
+}
+
+/**
  * Adds a new row in the table, where the items are given in a dictionary
  * object mapping {column name:value}. It must contain a key-value entry for
  * every column in the row, otherwise the insert will fail.
@@ -450,12 +471,16 @@ PyObject *cell(ITableWorkspace &self, const object &value, int row_or_col) {
  * column if value is an index
  */
 void setCell(ITableWorkspace &self, const object &col_or_row,
-             const int row_or_col, const object &value) {
+             const int row_or_col, const object &value,
+             const bool &notify_replace) {
   Mantid::API::Column_sptr column;
   int row(-1);
   getCellLoc(self, col_or_row, row_or_col, column, row);
   setValue(column, row, value);
-  self.modified();
+
+  if (notify_replace) {
+    self.modified();
+  }
 }
 } // namespace
 
@@ -629,6 +654,9 @@ void export_ITableWorkspace() {
       .def("row", &row, (arg("self"), arg("row")),
            "Return all values of a specific row as a dict.")
 
+      .def("columnTypes", &columnTypes, arg("self"),
+           "Return the types of the columns as a list")
+
       // FromSequence must come first since it takes an object parameter
       // Otherwise, FromDict will never be called as object accepts anything
       .def("addRow", &addRowFromSequence, (arg("self"), arg("row_items_seq")),
@@ -646,10 +674,11 @@ void export_ITableWorkspace() {
 
       .def("setCell", &setCell,
            (arg("self"), arg("row_or_column"), arg("column_or_row"),
-            arg("value")),
+            arg("value"), arg("notify_replace") = true),
            "Sets the value of a given cell. If the row_or_column argument is a "
            "number then it is interpreted as a row otherwise it "
-           "is interpreted as a column name.")
+           "is interpreted as a column name. If notify replace is false, then "
+           "the replace workspace event is not triggered.")
 
       .def("toDict", &toDict, (arg("self")),
            "Gets the values of this workspace as a dictionary. The keys of the "

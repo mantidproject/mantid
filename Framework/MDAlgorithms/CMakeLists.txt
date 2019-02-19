@@ -19,6 +19,7 @@ set ( SRC_FILES
 	src/CompareMDWorkspaces.cpp
 	src/ConvToMDBase.cpp
 	src/ConvToMDEventsWS.cpp
+	src/ConvToMDEventsWSIndexing.cpp
 	src/ConvToMDHistoWS.cpp
 	src/ConvToMDSelector.cpp
 	src/ConvertCWPDMDToSpectra.cpp
@@ -71,6 +72,7 @@ set ( SRC_FILES
 	src/LoadSQW2.cpp
 	src/LogarithmMD.cpp
 	src/MDEventWSWrapper.cpp
+	src/MDNorm.cpp
 	src/MDNormDirectSC.cpp
 	src/MDNormSCD.cpp
 	src/MDTransfAxisNames.cpp
@@ -150,6 +152,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/CompactMD.h
 	inc/MantidMDAlgorithms/CompareMDWorkspaces.h
 	inc/MantidMDAlgorithms/ConvToMDBase.h
+	inc/MantidMDAlgorithms/ConvToMDEventsWSIndexing.h
 	inc/MantidMDAlgorithms/ConvertCWPDMDToSpectra.h
 	inc/MantidMDAlgorithms/ConvertCWSDExpToMomentum.h
 	inc/MantidMDAlgorithms/ConvertCWSDMDtoHKL.h
@@ -201,7 +204,9 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/LoadSQW.h
 	inc/MantidMDAlgorithms/LoadSQW2.h
 	inc/MantidMDAlgorithms/LogarithmMD.h
+	inc/MantidMDAlgorithms/MDEventTreeBuilder.h
 	inc/MantidMDAlgorithms/MDEventWSWrapper.h
+	inc/MantidMDAlgorithms/MDNorm.h
 	inc/MantidMDAlgorithms/MDNormDirectSC.h
 	inc/MantidMDAlgorithms/MDNormSCD.h
 	inc/MantidMDAlgorithms/MDTransfAxisNames.h
@@ -281,6 +286,7 @@ set ( TEST_FILES
 	CloneMDWorkspaceTest.h
 	CompactMDTest.h
 	CompareMDWorkspacesTest.h
+	ConvToMDEventsWSIndexingTest.h
 	ConvertCWPDMDToSpectraTest.h
 	ConvertCWSDExpToMomentumTest.h
 	ConvertCWSDMDtoHKLTest.h
@@ -409,6 +415,10 @@ add_library ( MDAlgorithms ${SRC_FILES} ${INC_FILES})
 set_target_properties ( MDAlgorithms PROPERTIES OUTPUT_NAME MantidMDAlgorithms
     COMPILE_DEFINITIONS IN_MANTID_MDALGORITHMS
 )
+#set /bigobj for vc due to intensive templating
+if ( MSVC )
+	set_target_properties ( MDAlgorithms PROPERTIES COMPILE_FLAGS "/bigobj" )
+endif ()
 
 if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties(MDAlgorithms PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")
@@ -429,4 +439,4 @@ add_subdirectory ( test )
 # Installation settings
 ###########################################################################
 
-install ( TARGETS MDAlgorithms ${SYSTEM_PACKAGE_TARGET} DESTINATION ${PLUGINS_DIR} )
+mtd_install_targets( TARGETS MDAlgorithms INSTALL_DIRS ${PLUGINS_DIR} ${WORKBENCH_PLUGINS_DIR})

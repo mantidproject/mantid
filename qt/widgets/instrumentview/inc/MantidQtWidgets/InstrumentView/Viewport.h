@@ -175,6 +175,9 @@ protected:
   double m_yTrans;
   /// Translation in z direction
   mutable double m_zTrans;
+
+  friend class InstrumentWidgetEncoder;
+  friend class InstrumentWidgetDecoder;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt

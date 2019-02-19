@@ -245,8 +245,8 @@ class ComputeIncoherentDOSTest(unittest.TestCase):
         g1 = self.compute(qs[0:2], energyBins)
         g2 = self.compute(qs[1:3], energyBins)
         g3 = self.compute(qs[2:4], energyBins)
-        g = g1 + g2 + g3
-        gE = np.sqrt(g1**2 + g2**2 + g3**2)
+        g = (g1 + g2 + g3) / 3
+        gE = np.sqrt(g1**2 + g2**2 + g3**2) / 3
         np.testing.assert_equal(dos_Xs, energyBins)
         for i in range(len(dos_Ys)):
             self.assertAlmostEquals(dos_Ys[i], g[i])

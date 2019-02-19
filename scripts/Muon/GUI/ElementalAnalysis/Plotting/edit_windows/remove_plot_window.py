@@ -2,7 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 
 from qtpy import QtCore, QtWidgets
 
-from Muon.GUI.Common import table_utils
+from Muon.GUI.Common.utilities import table_utils
 
 
 class RemovePlotWindowView(QtWidgets.QDialog):

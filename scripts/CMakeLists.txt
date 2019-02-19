@@ -18,6 +18,9 @@ set_property ( TARGET CompileUIErrorReporter PROPERTY FOLDER "CompilePyUI" )
 # External GUIs
 add_subdirectory ( ExternalInterfaces )
 
+# External projects
+include ( PyStoG )
+
 # --------------------------------------------------------------------
 # .pth files
 # --------------------------------------------------------------------
@@ -48,8 +51,9 @@ foreach ( _dir ${_pth_dirs} )
   list ( APPEND _pth_list_dev "${CMAKE_SOURCE_DIR}/scripts/${_dir}" )
   list ( APPEND _pth_list_install "${_scripts_rel_path}/${_dir}" )
 endforeach()
+list ( APPEND _pth_list_dev ${CMAKE_CURRENT_BINARY_DIR} )
 list ( APPEND _pth_list_dev ${MSLICE_DEV} )
-list ( APPEND _pth_list_install "${_scripts_rel_path}/Externalinterfaces" )
+list ( APPEND _pth_list_install "${_scripts_rel_path}/ExternalInterfaces" )
 
 # development copy
 set ( _scripts_pth_src "${CMAKE_CURRENT_BINARY_DIR}/mantid-scripts.pth.src" )
@@ -69,7 +73,11 @@ add_dependencies ( PythonInterface ScriptsDotPth )
 set ( _scripts_pth_install "${CMAKE_CURRENT_BINARY_DIR}/mantid-scripts.pth.install" )
 string ( REPLACE ";" "\n" _pth_list_install "${_pth_list_install}" )
 file ( WRITE ${_scripts_pth_install} "${_pth_list_install}\n" )
+
 install ( FILES ${_scripts_pth_install} DESTINATION ${BIN_DIR}
+  RENAME mantid-scripts.pth
+)
+install ( FILES ${_scripts_pth_install} DESTINATION ${WORKBENCH_BIN_DIR}
   RENAME mantid-scripts.pth
 )
 
@@ -98,8 +106,9 @@ set ( TEST_PY_FILES
       test/DirectEnergyConversionTest.py
       test/DirectPropertyManagerTest.py
       test/DirectReductionHelpersTest.py
-      test/ErrorReporterPresenterTest.py
+      test/ErrorReportPresenterTest.py
       test/IndirectCommonTests.py
+      test/InelasticDirectDetpackmapTest.py
       test/ISISDirecInelasticConfigTest.py
       test/PyChopTest.py
       test/pythonTSVTest.py
@@ -131,6 +140,7 @@ set ( TEST_PYQT4_FILES
 # Additional tests
 add_subdirectory(test/directtools)
 add_subdirectory(test/isis_powder)
+add_subdirectory(test/MultiPlotting)
 add_subdirectory(test/Muon)
 add_subdirectory(test/SANS)
 add_subdirectory(test/TOFTOF)

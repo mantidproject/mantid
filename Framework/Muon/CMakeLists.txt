@@ -16,6 +16,7 @@ set ( SRC_FILES
         src/MuonGroupingCounts.cpp
         src/MuonGroupingAsymmetry.cpp
         src/MuonPreProcess.cpp
+        src/MuonPairingAsymmetry.cpp
         src/PhaseQuadMuon.cpp
         src/PlotAsymmetryByLogValue.cpp
         src/RemoveExpDecay.cpp
@@ -38,6 +39,7 @@ set ( INC_FILES
         inc/MantidMuon/MuonAsymmetryHelper.h
         inc/MantidMuon/MuonGroupDetectors.h
         inc/MantidMuon/MuonGroupingCounts.h
+        inc/MantidMuon/MuonPairingAsymmetry.h
         inc/MantidMuon/MuonGroupingAsymmetry.h
         inc/MantidMuon/MuonPreProcess.h
         inc/MantidMuon/PhaseQuadMuon.h
@@ -60,6 +62,7 @@ set ( TEST_FILES
         MuonAlgorithmHelperTest.h
         EstimateMuonAsymmetryFromCountsTest.h
         MuonGroupDetectorsTest.h
+        MuonPairingAsymmetryTest.h
         MuonGroupingCountsTest.h
         MuonGroupingAsymmetryTest.h
         MuonPreProcessTest.h
@@ -104,4 +107,4 @@ add_subdirectory ( test )
 # Installation settings
 ###########################################################################
 
-install ( TARGETS Muon ${SYSTEM_PACKAGE_TARGET} DESTINATION ${PLUGINS_DIR} )
+mtd_install_targets( TARGETS Muon INSTALL_DIRS ${PLUGINS_DIR} ${WORKBENCH_PLUGINS_DIR})

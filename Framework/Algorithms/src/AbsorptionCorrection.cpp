@@ -5,11 +5,12 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/AbsorptionCorrection.h"
+#include "MantidAPI/HistoWorkspace.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
@@ -32,6 +33,7 @@ using namespace Geometry;
 using HistogramData::interpolateLinearInplace;
 using namespace Kernel;
 using namespace Mantid::PhysicalConstants;
+using namespace Mantid::DataObjects;
 
 AbsorptionCorrection::AbsorptionCorrection()
     : API::Algorithm(), m_inputWS(), m_sampleObject(nullptr), m_L1s(),
@@ -109,8 +111,7 @@ void AbsorptionCorrection::exec() {
   retrieveBaseProperties();
 
   // Create the output workspace
-  MatrixWorkspace_sptr correctionFactors =
-      WorkspaceFactory::Instance().create(m_inputWS);
+  MatrixWorkspace_sptr correctionFactors = create<HistoWorkspace>(*m_inputWS);
   correctionFactors->setDistribution(
       true);                       // The output of this is a distribution
   correctionFactors->setYUnit(""); // Need to explicitly set YUnit to nothing
@@ -132,21 +133,18 @@ void AbsorptionCorrection::exec() {
 
   std::ostringstream message;
   message << "Numerical integration performed every " << m_xStep
-          << " wavelength points\n";
+          << " wavelength points";
   g_log.information(message.str());
   message.str("");
 
   // Calculate the cached values of L1 and element volumes.
   initialiseCachedDistances();
-  // If sample not at origin, shift cached positions.
-  const auto &spectrumInfo = m_inputWS->spectrumInfo();
-  const V3D samplePos = spectrumInfo.samplePosition();
-  if (samplePos != V3D(0, 0, 0)) {
-    for (auto &elementPosition : m_elementPositions) {
-      elementPosition += samplePos;
-    }
+  if (m_L1s.empty()) {
+    throw std::runtime_error(
+        "Failed to define any initial scattering gauge volume for geometry");
   }
 
+  const auto &spectrumInfo = m_inputWS->spectrumInfo();
   Progress prog(this, 0.0, 1.0, numHists);
   // Loop over the spectra
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS, *correctionFactors))

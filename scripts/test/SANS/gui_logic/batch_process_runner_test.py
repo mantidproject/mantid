@@ -9,7 +9,7 @@ from sans.gui_logic.models.batch_process_runner import BatchProcessRunner
 import unittest
 import sys
 from sans.common.enums import (OutputMode)
-from PyQt4.QtCore import QThreadPool
+from qtpy.QtCore import QThreadPool
 
 if sys.version_info.major > 2:
     from unittest import mock
@@ -29,6 +29,10 @@ class BatchProcessRunnerTest(unittest.TestCase):
         self.addCleanup(batch_patcher.stop)
         self.batch_mock = batch_patcher.start()
         self.batch_mock.return_value = self.sans_batch_instance
+
+        load_patcher = mock.patch('sans.gui_logic.models.batch_process_runner.load_workspaces_from_states')
+        self.addCleanup(load_patcher.stop)
+        self.load_mock = load_patcher.start()
 
         self.batch_process_runner = BatchProcessRunner(self.notify_progress, self.notify_done, self.notify_error)
         self.states = {0: mock.MagicMock(), 1: mock.MagicMock(), 2: mock.MagicMock()}
@@ -62,6 +66,33 @@ class BatchProcessRunnerTest(unittest.TestCase):
         self.sans_batch_instance.side_effect = Exception('failure')
 
         self.batch_process_runner.process_states(self.states, False, OutputMode.Both, False, '')
+        QThreadPool.globalInstance().waitForDone()
+
+        self.assertEqual(self.batch_process_runner.row_failed_signal.emit.call_count, 3)
+        self.batch_process_runner.row_failed_signal.emit.assert_any_call(0, 'failure')
+        self.batch_process_runner.row_failed_signal.emit.assert_any_call(1, 'failure')
+        self.batch_process_runner.row_failed_signal.emit.assert_any_call(2, 'failure')
+        self.assertEqual(self.batch_process_runner.row_processed_signal.emit.call_count, 0)
+
+    def test_that_load_workspaces_emits_row_processed_signal_after_each_row(self):
+        self.batch_process_runner.row_processed_signal = mock.MagicMock()
+        self.batch_process_runner.row_failed_signal = mock.MagicMock()
+
+        self.batch_process_runner.load_workspaces(self.states)
+        QThreadPool.globalInstance().waitForDone()
+
+        self.assertEqual(self.batch_process_runner.row_processed_signal.emit.call_count, 3)
+        self.batch_process_runner.row_processed_signal.emit.assert_any_call(0, [], [])
+        self.batch_process_runner.row_processed_signal.emit.assert_any_call(1, [], [])
+        self.batch_process_runner.row_processed_signal.emit.assert_any_call(2, [], [])
+        self.assertEqual(self.batch_process_runner.row_failed_signal.emit.call_count, 0)
+
+    def test_that_load_workspaces_emits_row_failed_signal_after_each_failed_row(self):
+        self.batch_process_runner.row_processed_signal = mock.MagicMock()
+        self.batch_process_runner.row_failed_signal = mock.MagicMock()
+        self.load_mock.side_effect = Exception('failure')
+
+        self.batch_process_runner.load_workspaces(self.states)
         QThreadPool.globalInstance().waitForDone()
 
         self.assertEqual(self.batch_process_runner.row_failed_signal.emit.call_count, 3)
