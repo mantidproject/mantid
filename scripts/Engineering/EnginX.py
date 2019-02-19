@@ -15,6 +15,10 @@ try:
     import mantidplot
 except (Exception, Warning):
     mantidplot = None
+try:
+    from mantidqt.plotting import functions as functions
+except(Exception, Warning):
+    functions = None
 
 
 def main(vanadium_run, user, focus_run, **kwargs):
@@ -173,6 +177,13 @@ def plot_vanadium():
             if i == 2:
                 curve_plot_bank_2 = mantidplot.plotSpectrum(van_curves_ws, [3, 4, 5]).activeLayer()
                 curve_plot_bank_2.setTitle("Engg Vanadium Curves Bank 2")
+
+    # Workbench plotting
+    elif functions:
+        fig1 = functions.plot([van_curves_ws], wksp_indices=[0, 1, 2])
+        fig1.canvas.set_window_title("Engg Vanadium Curves Bank 1")
+        fig2 = functions.plot([van_curves_ws], wksp_indices=[3, 4, 5])
+        fig2.canvas.set_window_title("Engg Vanadium Curves Bank 2")
 
 
 def create_calibration(ceria_run, van_run, calibration_directory, calibration_general, cropped, crop_name, crop_on):
