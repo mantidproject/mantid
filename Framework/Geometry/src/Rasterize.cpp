@@ -39,9 +39,9 @@ struct CylinderParameters {
 // perpendicular to have as the second axis
 V3D createPerpendicular(const V3D &symmetryAxis) {
   const std::array<double, 3> scalars = {
-      fabs(symmetryAxis.scalar_prod(X_AXIS)),
-      fabs(symmetryAxis.scalar_prod(Y_AXIS)),
-      fabs(symmetryAxis.scalar_prod(Z_AXIS))};
+      {fabs(symmetryAxis.scalar_prod(X_AXIS)),
+       fabs(symmetryAxis.scalar_prod(Y_AXIS)),
+       fabs(symmetryAxis.scalar_prod(Z_AXIS))}};
   // check against the cardinal axes
   if (scalars[0] == 0.)
     return symmetryAxis.cross_prod(X_AXIS);
