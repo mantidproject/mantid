@@ -116,3 +116,6 @@ class SaveLoadNexusProcessedNoDetectorsSpectraNumbersTest(SaveLoadNexusProcessed
 
     def savedFilename(self):
         return 'tmp_saveload_nexusprocessed_nodetectorsspectranumbers'
+
+    def validate(self):
+        return self.compareWorkspaces()
