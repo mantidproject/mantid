@@ -32,9 +32,6 @@ public:
       TransmissionRunPair tranmissionRuns, RangeInQ qRange,
       boost::optional<double> scaleFactor, ReductionOptionsMap reductionOptions,
       ReductionWorkspaces reducedWorkspaceNames);
-  Row(Row const &rhs);
-
-  Row &operator=(Row const &rhs);
 
   bool isGroup() const override;
   std::vector<std::string> const &runNumbers() const;

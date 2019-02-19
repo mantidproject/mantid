@@ -27,25 +27,6 @@ Row::Row( // cppcheck-suppress passedByValue
   std::sort(m_runNumbers.begin(), m_runNumbers.end());
 }
 
-Row::Row(Row const &rhs)
-    : Item(rhs), m_runNumbers(rhs.runNumbers()), m_theta(rhs.theta()),
-      m_qRange(rhs.qRange()), m_scaleFactor(rhs.scaleFactor()),
-      m_transmissionRuns(rhs.transmissionWorkspaceNames()),
-      m_reducedWorkspaceNames(rhs.reducedWorkspaceNames()),
-      m_reductionOptions(rhs.reductionOptions()) {}
-
-Row &Row::operator=(Row const &rhs) {
-  m_runNumbers = rhs.runNumbers();
-  m_theta = rhs.theta();
-  m_qRange = rhs.qRange();
-  m_scaleFactor = rhs.scaleFactor();
-  m_transmissionRuns = rhs.transmissionWorkspaceNames();
-  m_reducedWorkspaceNames = rhs.reducedWorkspaceNames();
-  m_reductionOptions = rhs.reductionOptions();
-  m_itemState = ItemState();
-  return *this;
-}
-
 bool Row::isGroup() const { return false; }
 
 std::vector<std::string> const &Row::runNumbers() const { return m_runNumbers; }
