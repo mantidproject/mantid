@@ -74,7 +74,8 @@ def _get_pre_processing_params(context, run, rebin):
 
         try:
             if context.gui_variables['RebinType'] == 'Fixed' and context.gui_variables["RebinFixed"]:
-                x_data = context._loaded_data.get_data(run=run, instrument=context.instrument)['workspace']['OutputWorkspace'][0].workspace.dataX(0)
+                x_data = context._loaded_data.get_data(run=run, instrument=context.instrument
+                                                       )['workspace']['OutputWorkspace'][0].workspace.dataX(0)
                 original_step = x_data[1] - x_data[0]
                 pre_process_params["RebinArgs"] = float(context.gui_variables["RebinFixed"]) * original_step
         except KeyError:
