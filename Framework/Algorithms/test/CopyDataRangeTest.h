@@ -16,21 +16,34 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidHistogramData/HistogramE.h"
 #include "MantidHistogramData/HistogramY.h"
-#include "MantidTestHelpers/IndirectFitDataCreationHelper.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <algorithm>
 #include <iterator>
 #include <vector>
 
 using namespace Mantid::API;
-using namespace Mantid::IndirectFitDataCreationHelper;
 using namespace Mantid::HistogramData;
+using namespace WorkspaceCreationHelper;
 
 namespace {
 
 std::string const INPUT_NAME("Input_Workspace");
 std::string const DESTINATION_NAME("Destination_Workspace");
 auto const OUTPUT_NAME("Output_Workspace");
+
+struct SetUpADSWithWorkspace {
+
+  template <typename T>
+  SetUpADSWithWorkspace(std::string const &inputWSName, T const &workspace) {
+    AnalysisDataService::Instance().addOrReplace(inputWSName, workspace);
+  }
+
+  template <typename T>
+  void addOrReplace(std::string const &workspaceName, T const &workspace) {
+    AnalysisDataService::Instance().addOrReplace(workspaceName, workspace);
+  }
+};
 
 MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) {
   return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
@@ -49,8 +62,8 @@ IAlgorithm_sptr setUpAlgorithm(MatrixWorkspace_sptr inputWorkspace,
   copyAlg->setProperty("DestWorkspace", destWorkspace);
   copyAlg->setProperty("StartWorkspaceIndex", specMin);
   copyAlg->setProperty("EndWorkspaceIndex", specMax);
-  copyAlg->setProperty("XMinIndex", xMin);
-  copyAlg->setProperty("XMaxIndex", xMax);
+  copyAlg->setProperty("XMin", xMin);
+  copyAlg->setProperty("XMax", xMax);
   copyAlg->setProperty("InsertionYIndex", yInsertionIndex);
   copyAlg->setProperty("InsertionXIndex", xInsertionIndex);
   copyAlg->setProperty("OutputWorkspace", outputName);
@@ -121,16 +134,13 @@ ITableWorkspace_sptr compareWorkspaces(MatrixWorkspace_sptr workspace1,
 
 class CopyDataRangeTest : public CxxTest::TestSuite {
 public:
-  /// WorkflowAlgorithms do not appear in the FrameworkManager without this line
-  CopyDataRangeTest() { FrameworkManager::Instance(); }
-
   static CopyDataRangeTest *createSuite() { return new CopyDataRangeTest(); }
 
   static void destroySuite(CopyDataRangeTest *suite) { delete suite; }
 
   void setUp() override {
-    m_ads =
-        std::make_unique<SetUpADSWithWorkspace>("Name", createWorkspace(3, 4));
+    m_ads = std::make_unique<SetUpADSWithWorkspace>("Name",
+                                                    create2DWorkspace(3, 4));
   }
 
   void tearDown() override {
@@ -155,7 +165,7 @@ public:
     algorithm->execute();
 
     auto const output = getADSMatrixWorkspace(OUTPUT_NAME);
-    auto const expectedOutput = createWorkspace(5, 5);
+    auto const expectedOutput = create2DWorkspace(5, 5);
     populateOutputWorkspace(
         expectedOutput,
         {1.1, 1.2,  1.3, 1.4, 29.0, 1.1, 1.2,  1.3,  1.4,  29.0, 1.1,  1.2, 1.3,
@@ -174,7 +184,7 @@ public:
     algorithm->execute();
 
     auto const output = getADSMatrixWorkspace(OUTPUT_NAME);
-    auto const expectedOutput = createWorkspace(5, 5);
+    auto const expectedOutput = create2DWorkspace(5, 5);
     populateOutputWorkspace(
         expectedOutput, {25.0, 26.0, 27.0, 28.0, 29.0, 25.0, 26.0, 27.0, 28.0,
                          29.0, 25.0, 26.0, 1.2,  1.3,  1.4,  25.0, 26.0, 1.2,
@@ -193,7 +203,7 @@ public:
     algorithm->execute();
 
     auto const output = getADSMatrixWorkspace(OUTPUT_NAME);
-    auto const expectedOutput = createWorkspace(5, 5);
+    auto const expectedOutput = create2DWorkspace(5, 5);
     populateOutputWorkspace(
         expectedOutput, {1.1,  1.2,  1.3,  1.4,  1.5,  25.0, 26.0, 27.0, 28.0,
                          29.0, 25.0, 26.0, 27.0, 28.0, 29.0, 25.0, 26.0, 27.0,
@@ -273,9 +283,9 @@ private:
       std::vector<double> const &destYValues = {25.0, 26.0, 27.0, 28.0, 29.0},
       std::vector<double> const &destEValues = {2.5, 2.6, 2.7, 2.8, 2.9}) {
     auto const inputWorkspace =
-        createWorkspace(inputNumberOfSpectra, inputNumberOfBins);
+        create2DWorkspace(inputNumberOfSpectra, inputNumberOfBins);
     auto const destWorkspace =
-        createWorkspace(destNumberOfSpectra, destNumberOfBins);
+        create2DWorkspace(destNumberOfSpectra, destNumberOfBins);
 
     populateWorkspace(inputWorkspace, inputYValues, inputEValues);
     populateWorkspace(destWorkspace, destYValues, destEValues);

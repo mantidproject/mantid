@@ -290,11 +290,8 @@ bool WorkspaceSelector::hasValidSuffix(const QString &name) const {
 bool WorkspaceSelector::hasValidNumberOfBins(
     Mantid::API::Workspace_sptr object) const {
   if (m_binLimits.first != 0 || m_binLimits.second != -1) {
-    auto const group =
-        boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(object);
-    if (group == nullptr) {
-      auto const workspace =
-          boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(object);
+    if (auto const workspace =
+            boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(object)) {
       auto const numberOfBins = static_cast<int>(workspace->y(0).size());
       if (m_binLimits.second != -1)
         return numberOfBins >= m_binLimits.first &&

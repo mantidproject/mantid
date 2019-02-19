@@ -77,10 +77,10 @@ void CopyDataRange::init() {
   declareProperty("EndWorkspaceIndex", EMPTY_INT(), positiveInt,
                   "The index denoting the end of the spectra range.");
 
-  declareProperty("XMinIndex", 0, positiveInt,
+  declareProperty("XMin", 0, positiveInt,
                   "The index denoting the start of the x range.");
 
-  declareProperty("XMaxIndex", EMPTY_INT(), positiveInt,
+  declareProperty("XMax", EMPTY_INT(), positiveInt,
                   "The index denoting the end of the x range.");
 
   declareProperty("InsertionYIndex", 0, positiveInt,
@@ -99,31 +99,22 @@ void CopyDataRange::init() {
 std::map<std::string, std::string> CopyDataRange::validateInputs() {
   std::map<std::string, std::string> errors;
 
-  auto const inputWorkspaceName = getPropertyValue("InputWorkspace");
   MatrixWorkspace_sptr inputWorkspace = getProperty("InputWorkspace");
-  auto const destWorkspaceName = getPropertyValue("DestWorkspace");
   MatrixWorkspace_sptr destWorkspace = getProperty("DestWorkspace");
-  auto const outputWorkspaceName = getPropertyValue("OutputWorkspace");
 
   int const specMinIndex = getProperty("StartWorkspaceIndex");
   int const specMaxIndex = getProperty("EndWorkspaceIndex");
-  int const xMinIndex = getProperty("XMinIndex");
-  int const xMaxIndex = getProperty("XMaxIndex");
+  int const xMinIndex = getProperty("XMin");
+  int const xMaxIndex = getProperty("XMax");
 
   int const yInsertionIndex = getProperty("InsertionYIndex");
   int const xInsertionIndex = getProperty("InsertionXIndex");
 
-  if (inputWorkspaceName.empty())
-    errors["InputWorkspace"] = "No input workspace was provided.";
-
-  if (destWorkspaceName.empty())
-    errors["DestWorkspace"] = "No destination workspace was provided.";
-
   if (xMaxIndex >= static_cast<int>(inputWorkspace->y(0).size()))
-    errors["XMaxIndex"] = "The XMaxIndex is larger than the maximum range in "
-                          "the input workspace.";
+    errors["XMax"] =
+        "XMax is larger than the maximum range in the input workspace.";
   if (xMinIndex > xMaxIndex)
-    errors["XMinIndex"] = "The XMinIndex must be smaller than XMaxIndex.";
+    errors["XMin"] = "XMin must be smaller than XMax.";
 
   if (specMaxIndex >= static_cast<int>(inputWorkspace->getNumberHistograms()))
     errors["EndWorkspaceIndex"] =
@@ -144,9 +135,6 @@ std::map<std::string, std::string> CopyDataRange::validateInputs() {
         "The x data range selected will not fit into the "
         "destination workspace.";
 
-  if (outputWorkspaceName.empty())
-    errors["OutputWorkspace"] = "No OutputWorkspace name was provided.";
-
   return errors;
 }
 
@@ -155,27 +143,19 @@ void CopyDataRange::exec() {
   MatrixWorkspace_const_sptr destWorkspace = getProperty("DestWorkspace");
   int const specMinIndex = getProperty("StartWorkspaceIndex");
   int const specMaxIndex = getProperty("EndWorkspaceIndex");
-  int const xMinIndex = getProperty("XMinIndex");
-  int const xMaxIndex = getProperty("XMaxIndex");
+  int const xMinIndex = getProperty("XMin");
+  int const xMaxIndex = getProperty("XMax");
   int const yInsertionIndex = getProperty("InsertionYIndex");
   int const xInsertionIndex = getProperty("InsertionXIndex");
+  MatrixWorkspace_sptr outputWorkspace = getProperty("OutputWorkspace");
 
-  auto outputWorkspace = cloneWorkspace(destWorkspace->getName());
+  if (destWorkspace != outputWorkspace)
+    outputWorkspace = destWorkspace->clone();
+
   copyDataRange(inputWorkspace, outputWorkspace, specMinIndex, specMaxIndex,
                 xMinIndex, xMaxIndex, yInsertionIndex, xInsertionIndex);
 
   setProperty("OutputWorkspace", outputWorkspace);
-}
-
-MatrixWorkspace_sptr
-CopyDataRange::cloneWorkspace(std::string const &inputName) {
-  auto cloneAlg = createChildAlgorithm("CloneWorkspace", -1.0, -1.0, false);
-  cloneAlg->initialize();
-  cloneAlg->setProperty("InputWorkspace", inputName);
-  cloneAlg->setProperty("OutputWorkspace", "__cloned");
-  cloneAlg->executeAsChildAlg();
-  Workspace_sptr outputWorkspace = cloneAlg->getProperty("OutputWorkspace");
-  return boost::dynamic_pointer_cast<MatrixWorkspace>(outputWorkspace);
 }
 
 } // namespace Algorithms

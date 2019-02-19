@@ -172,8 +172,8 @@ class IndirectReplaceFitResult(PythonAlgorithm):
         copy_algorithm.setAlwaysStoreInADS(True)
 
         args = {"InputWorkspace": self._single_fit_workspace, "DestWorkspace": self._input_workspace,
-                "StartWorkspaceIndex": 0, "EndWorkspaceIndex": self._end_row, "XMinIndex": self._column_index,
-                "XMaxIndex": self._column_index, "InsertionYIndex": 0, "InsertionXIndex": self._insertion_x_index,
+                "StartWorkspaceIndex": 0, "EndWorkspaceIndex": self._end_row, "XMin": self._column_index,
+                "XMax": self._column_index, "InsertionYIndex": 0, "InsertionXIndex": self._insertion_x_index,
                 "OutputWorkspace": self._output_workspace}
 
         for key, value in args.items():
