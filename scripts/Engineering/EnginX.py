@@ -11,6 +11,10 @@ import os
 import csv
 from platform import system
 from shutil import copy2
+try:
+    import mantidplot
+except (Exception, Warning):
+    mantidplot = None
 
 
 def main(vanadium_run, user, focus_run, **kwargs):
@@ -153,6 +157,22 @@ def create_vanadium(van_run, calibration_directory):
     simple.SaveNexus("eng_vanadium_integration", van_int_file)
     simple.SaveNexus("eng_vanadium_curves", van_curves_file)
     simple.DeleteWorkspace(van_name)
+    plot_vanadium()
+
+
+def plot_vanadium():
+    van_curve_twin_ws = "__eng_vanadium_curves_twin"
+    if simple.AnalysisDataService.doesExist(van_curve_twin_ws):
+        simple.DeleteWorkspace(van_curve_twin_ws)
+    van_curves_ws = simple.CloneWorkspace(InputWorkspace="eng_vanadium_curves", OutputWorkspace=van_curve_twin_ws)
+    if mantidplot:
+        for i in range(1, 3):
+            if i == 1:
+                curve_plot_bank_1 = mantidplot.plotSpectrum(van_curves_ws, [0, 1, 2]).activeLayer()
+                curve_plot_bank_1.setTitle("Engg Vanadium Curves Bank 1")
+            if i == 2:
+                curve_plot_bank_2 = mantidplot.plotSpectrum(van_curves_ws, [3, 4, 5]).activeLayer()
+                curve_plot_bank_2.setTitle("Engg Vanadium Curves Bank 2")
 
 
 def create_calibration(ceria_run, van_run, calibration_directory, calibration_general, cropped, crop_name, crop_on):
