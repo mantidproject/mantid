@@ -28,7 +28,7 @@ from sans.common.file_information import SANSFileInformationFactory
 from sans.gui_logic.gui_common import (get_reduction_mode_from_gui_selection,
                                        get_reduction_mode_strings_for_gui,
                                        get_string_for_gui_from_reduction_mode, GENERIC_SETTINGS,
-                                       load_file, load_default_file, set_setting,
+                                       load_file, load_default_file, load_property, set_setting,
                                        get_instrument_from_gui_selection)
 from sans.gui_logic.models.run_summation import RunSummation
 from sans.gui_logic.models.run_selection import RunSelection
@@ -196,6 +196,7 @@ class SANSDataProcessorGui(QMainWindow,
         self.__path_key = "sans_path"
         self.__user_file_key = "user_file"
         self.__mask_file_input_path_key = "mask_files"
+        self.__output_mode_key = "output_mode"
 
         # Logger
         self.gui_logger = Logger("SANS GUI LOGGER")
@@ -311,6 +312,11 @@ class SANSDataProcessorGui(QMainWindow,
         self.export_table_button.clicked.connect(self._export_table_clicked)
 
         self.help_button.clicked.connect(self._on_help_button_clicked)
+
+        # Output mode radio buttons
+        self.output_mode_memory_radio_button.clicked.connect(self._on_output_mode_clicked)
+        self.output_mode_file_radio_button.clicked.connect(self._on_output_mode_clicked)
+        self.output_mode_both_radio_button.clicked.connect(self._on_output_mode_clicked)
 
         # --------------------------------------------------------------------------------------------------------------
         # Settings tabs
@@ -521,6 +527,17 @@ class SANSDataProcessorGui(QMainWindow,
         if PYQT4:
             proxies.showCustomInterfaceHelp('ISIS SANS v2')
 
+    def _on_output_mode_clicked(self):
+        if self.output_mode_memory_radio_button.isChecked():
+            output_mode = "PublishToADS"
+        elif self.output_mode_file_radio_button.isChecked():
+            output_mode = "SaveToFile"
+        elif self.output_mode_both_radio_button.isChecked():
+            output_mode = "Both"
+        else:
+            output_mode = None
+        set_setting(self.__generic_settings, self.__output_mode_key, output_mode)
+
     def _on_user_file_load(self):
         """
         Load the user file
@@ -547,6 +564,22 @@ class SANSDataProcessorGui(QMainWindow,
 
         if self.get_user_file_path() != "":
             self._call_settings_listeners(lambda listener: listener.on_user_file_load())
+
+    def set_out_default_output_mode(self):
+        try:
+            default_output_mode = OutputMode.from_string(load_property(self.__generic_settings, self.__output_mode_key))
+        except RuntimeError:
+            pass
+        else:
+            self._check_output_mode(default_output_mode)
+
+    def _check_output_mode(self, value):
+        if value is OutputMode.PublishToADS:
+            self.output_mode_memory_radio_button.setChecked(True)
+        elif value is OutputMode.SaveToFile:
+            self.output_mode_file_radio_button.setChecked(True)
+        elif value is OutputMode.Both:
+            self.output_mode_both_radio_button.setChecked(True)
 
     def _on_batch_file_load(self):
         """
@@ -981,12 +1014,11 @@ class SANSDataProcessorGui(QMainWindow,
 
     @output_mode.setter
     def output_mode(self, value):
-        if value is OutputMode.PublishToADS:
-            self.output_mode_memory_radio_button.setChecked(True)
-        elif value is OutputMode.SaveToFile:
-            self.output_mode_file_radio_button.setChecked(True)
-        elif value is OutputMode.Both:
-            self.output_mode_both_radio_button.setCheck(True)
+        self._check_output_mode(value)
+        try:
+            set_setting(self.__generic_settings, self.__output_mode_key, OutputMode.to_string(value))
+        except RuntimeError:
+            pass
 
     @property
     def compatibility_mode(self):

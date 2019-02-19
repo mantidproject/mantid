@@ -288,6 +288,7 @@ class RunTabPresenter(object):
             self._view.set_out_file_directory(ConfigService.Instance().getString("defaultsave.directory"))
 
             self._view.set_out_default_user_file()
+            self._view.set_out_default_output_mode()
 
             self._view.set_hinting_line_edit_for_column(
                 self._table_model.column_name_converter.index('sample_shape'),

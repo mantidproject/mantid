@@ -1046,7 +1046,7 @@ QGroupBox::title {
                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Settings for the monitor normalization.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                     </property>
                     <property name="title">
-                     <string>Monitor Scattering</string>
+                     <string>Scattering</string>
                     </property>
                     <layout class="QGridLayout" name="gridLayout_8">
                      <item row="0" column="0">
