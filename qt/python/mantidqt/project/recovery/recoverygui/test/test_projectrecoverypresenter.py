@@ -55,15 +55,17 @@ class ProjectRecoveryPresenterTest(unittest.TestCase):
 
         self.assertTrue(not self.prp.start_recovery_view())
 
+    @mock.patch('mantidqt.project.recovery.recoverygui.projectrecoverypresenter.ProjectRecoveryModel')
     @mock.patch('mantidqt.project.recovery.recoverygui.projectrecoverypresenter.RecoveryFailureView')
-    def test_start_recovery_failure_start_mantid_normally_called(self, _):
+    def test_start_recovery_failure_start_mantid_normally_called(self, _, __):
         self.prp.current_view = None
         self.prp.start_mantid_normally_called = True
 
         self.assertTrue(not self.prp.start_recovery_failure())
 
+    @mock.patch('mantidqt.project.recovery.recoverygui.projectrecoverypresenter.ProjectRecoveryModel')
     @mock.patch('mantidqt.project.recovery.recoverygui.projectrecoverypresenter.RecoveryFailureView')
-    def test_start_recovery_failure_exception_raised(self, view):
+    def test_start_recovery_failure_exception_raised(self, view, _):
         self.prp.current_view = None
         view.side_effect = raise_exception
 

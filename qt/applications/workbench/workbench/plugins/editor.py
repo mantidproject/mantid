@@ -112,7 +112,7 @@ class MultiFileEditor(PluginWidget):
                                self.tabs_to_spaces_action,
                                self.spaces_to_tabs_action, None]
 
-    def execute_current(self):
+    def execute_current_async(self):
         '''This is used by MainWindow to execute a file after opening it'''
         return self.editors.execute_current_async()
 
