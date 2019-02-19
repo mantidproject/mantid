@@ -54,8 +54,9 @@ using namespace MantidQt::CustomInterfaces::IDA;
  */
 IndirectDataReduction::IndirectDataReduction(QWidget *parent)
     : UserSubWindow(parent),
-      m_settingsDialog(Mantid::Kernel::make_unique<IndirectSettingsDialog>(
-          this, "Data Reduction", "filter-input-by-name")),
+      m_settingsPresenter(
+          Mantid::Kernel::make_unique<IndirectSettingsPresenter>(
+              this, "Data Reduction", "filter-input-by-name")),
       m_settingsGroup("CustomInterfaces/IndirectDataReduction"),
       m_algRunner(new MantidQt::API::AlgorithmRunner(this)),
       m_changeObserver(*this, &IndirectDataReduction::handleConfigChange) {
@@ -79,8 +80,8 @@ IndirectDataReduction::~IndirectDataReduction() {
 }
 
 void IndirectDataReduction::settingsClicked() {
-  m_settingsDialog->loadSettings();
-  m_settingsDialog->show();
+  m_settingsPresenter->loadSettings();
+  m_settingsPresenter->showDialog();
 }
 
 /**
@@ -137,8 +138,8 @@ void IndirectDataReduction::initLayout() {
           SLOT(instrumentSetupChanged(const QString &, const QString &,
                                       const QString &)));
 
-  connect(m_settingsDialog.get(), SIGNAL(updateSettings()), this,
-          SLOT(updateSettings()));
+  connect(m_settingsPresenter.get(), SIGNAL(applySettings()), this,
+          SLOT(applySettings()));
 
   // Update the instrument configuration across the UI
   m_uiForm.iicInstrumentConfiguration->newInstrumentConfiguration();
@@ -386,7 +387,7 @@ void IndirectDataReduction::handleConfigChange(
 /**
  * Updates the settings decided on the Settings Dialog
  */
-void IndirectDataReduction::updateSettings() {
+void IndirectDataReduction::applySettings() {
   QSettings settings;
   settings.beginGroup("Data Reduction");
 

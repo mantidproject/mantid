@@ -8,7 +8,7 @@
 #define MANTIDQTCUSTOMINTERFACES_INDIRECTBAYES_H_
 
 #include "IndirectBayesTab.h"
-#include "IndirectSettingsDialog.h"
+#include "IndirectSettingsPresenter.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "ui_IndirectBayes.h"
 
@@ -50,8 +50,8 @@ private slots:
   void helpClicked();
   /// Slot for clicking on the manage directories button
   void manageUserDirectories();
-  /// Updates the settings for this interface
-  void updateSettings();
+  /// Applies the settings for this interface
+  void applySettings();
   /// Slot showing a message box to the user
   void showMessageBox(const QString &message);
 
@@ -65,7 +65,7 @@ private:
   void loadSettings();
 
   /// The settings dialog
-  std::unique_ptr<IDA::IndirectSettingsDialog> m_settingsDialog;
+  std::unique_ptr<IDA::IndirectSettingsPresenter> m_settingsPresenter;
   /// Map of tabs indexed by position on the window
   std::map<unsigned int, IndirectBayesTab *> m_bayesTabs;
   /// Change Observer for ConfigService (monitors user directories)

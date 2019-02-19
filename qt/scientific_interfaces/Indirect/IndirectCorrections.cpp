@@ -31,8 +31,9 @@ DECLARE_SUBWINDOW(IndirectCorrections)
  */
 IndirectCorrections::IndirectCorrections(QWidget *parent)
     : UserSubWindow(parent),
-      m_settingsDialog(Mantid::Kernel::make_unique<IDA::IndirectSettingsDialog>(
-          this, "Data Corrections", "filter-input-by-name")),
+      m_settingsPresenter(
+          Mantid::Kernel::make_unique<IDA::IndirectSettingsPresenter>(
+              this, "Data Corrections", "filter-input-by-name")),
       m_changeObserver(*this, &IndirectCorrections::handleDirectoryChange) {
   m_uiForm.setupUi(this);
 
@@ -97,8 +98,8 @@ void IndirectCorrections::initLayout() {
   connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this,
           SLOT(openDirectoryDialog()));
 
-  connect(m_settingsDialog.get(), SIGNAL(updateSettings()), this,
-          SLOT(updateSettings()));
+  connect(m_settingsPresenter.get(), SIGNAL(applySettings()), this,
+          SLOT(applySettings()));
 }
 
 /**
@@ -144,8 +145,8 @@ void IndirectCorrections::openDirectoryDialog() {
  * Opens the settings dialog
  */
 void IndirectCorrections::settingsClicked() {
-  m_settingsDialog->loadSettings();
-  m_settingsDialog->show();
+  m_settingsPresenter->loadSettings();
+  m_settingsPresenter->showDialog();
 }
 
 /**
@@ -167,7 +168,7 @@ void IndirectCorrections::exportTabPython() {
 /**
  * Updates the settings decided on the Settings Dialog
  */
-void IndirectCorrections::updateSettings() {
+void IndirectCorrections::applySettings() {
   QSettings settings;
   settings.beginGroup("Data Corrections");
 

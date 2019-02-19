@@ -23,7 +23,7 @@ using namespace MantidQt::CustomInterfaces;
 
 IndirectSimulation::IndirectSimulation(QWidget *parent)
     : UserSubWindow(parent),
-      m_settingsDialog(Mantid::Kernel::make_unique<IDA::IndirectSettingsDialog>(
+      m_settingsPresenter(Mantid::Kernel::make_unique<IDA::IndirectSettingsPresenter>(
           this, "Indirect Simulation", "")),
       m_changeObserver(*this, &IndirectSimulation::handleDirectoryChange) {}
 
@@ -115,8 +115,8 @@ void IndirectSimulation::loadSettings() {
  * Opens the settings dialog
  */
 void IndirectSimulation::settingsClicked() {
-  m_settingsDialog->loadSettings();
-  m_settingsDialog->show();
+  m_settingsPresenter->loadSettings();
+  m_settingsPresenter->showDialog();
 }
 
 /**

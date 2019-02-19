@@ -67,9 +67,9 @@
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
-       <widget class="QCheckBox" name="ckFilterDataNames">
+       <widget class="QCheckBox" name="ckRestrictInputDataNames">
         <property name="text">
-         <string>Filter input data by name</string>
+         <string>Restrict allowed input files by name</string>
         </property>
         <property name="checked">
          <bool>true</bool>

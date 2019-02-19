@@ -7,7 +7,7 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_INDIRECTANALYSIS_H_
 #define MANTIDQTCUSTOMINTERFACES_INDIRECTANALYSIS_H_
 
-#include "IndirectSettingsDialog.h"
+#include "IndirectSettingsPresenter.h"
 #include "IndirectTab.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "ui_IndirectDataAnalysis.h"
@@ -79,8 +79,8 @@ private slots:
   void openDirectoryDialog();
   /// Opens the Mantid Wiki web page of the current tab.
   void help();
-  /// Updates the settings for this interface
-  void updateSettings();
+  /// Applies the settings for this interface
+  void applySettings();
   /// Slot showing a message box to the user
   void showMessageBox(const QString &message);
 
@@ -88,7 +88,7 @@ private:
   /// UI form containing all Qt elements.
   Ui::IndirectDataAnalysis m_uiForm;
   /// The settings dialog
-  std::unique_ptr<IDA::IndirectSettingsDialog> m_settingsDialog;
+  std::unique_ptr<IDA::IndirectSettingsPresenter> m_settingsPresenter;
   /// The settings group
   QString m_settingsGroup;
   /// Integer validator

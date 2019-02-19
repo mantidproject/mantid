@@ -34,8 +34,9 @@ DECLARE_SUBWINDOW(IndirectDataAnalysis)
  */
 IndirectDataAnalysis::IndirectDataAnalysis(QWidget *parent)
     : UserSubWindow(parent),
-      m_settingsDialog(Mantid::Kernel::make_unique<IndirectSettingsDialog>(
-          this, "Data Analysis", "filter-input-by-name")),
+      m_settingsPresenter(
+          Mantid::Kernel::make_unique<IndirectSettingsPresenter>(
+              this, "Data Analysis", "filter-input-by-name")),
       m_settingsGroup("CustomInterfaces/IndirectAnalysis/"), m_valInt(nullptr),
       m_valDbl(nullptr),
       m_changeObserver(*this, &IndirectDataAnalysis::handleDirectoryChange) {
@@ -100,8 +101,8 @@ void IndirectDataAnalysis::initLayout() {
   connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this,
           SLOT(openDirectoryDialog()));
 
-  connect(m_settingsDialog.get(), SIGNAL(updateSettings()), this,
-          SLOT(updateSettings()));
+  connect(m_settingsPresenter.get(), SIGNAL(applySettings()), this,
+          SLOT(applySettings()));
 }
 
 /**
@@ -151,8 +152,8 @@ void IndirectDataAnalysis::openDirectoryDialog() {
  * Opens the settings dialog.
  */
 void IndirectDataAnalysis::settingsClicked() {
-  m_settingsDialog->loadSettings();
-  m_settingsDialog->show();
+  m_settingsPresenter->loadSettings();
+  m_settingsPresenter->showDialog();
 }
 
 /**
@@ -174,7 +175,7 @@ void IndirectDataAnalysis::exportTabPython() {
 /**
  * Updates the settings decided on the Settings Dialog
  */
-void IndirectDataAnalysis::updateSettings() {
+void IndirectDataAnalysis::applySettings() {
   QSettings settings;
   settings.beginGroup("Data Analysis");
 

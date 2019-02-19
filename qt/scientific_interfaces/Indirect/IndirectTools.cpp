@@ -22,8 +22,9 @@ using namespace MantidQt::CustomInterfaces;
 
 IndirectTools::IndirectTools(QWidget *parent)
     : UserSubWindow(parent),
-      m_settingsDialog(Mantid::Kernel::make_unique<IDA::IndirectSettingsDialog>(
-          this, "Indirect Tools", "")),
+      m_settingsPresenter(
+          Mantid::Kernel::make_unique<IDA::IndirectSettingsPresenter>(
+              this, "Indirect Tools", "")),
       m_changeObserver(*this, &IndirectTools::handleDirectoryChange) {}
 
 void IndirectTools::initLayout() {
@@ -120,8 +121,8 @@ void IndirectTools::runClicked() {
  * Opens the settings dialog
  */
 void IndirectTools::settingsClicked() {
-  m_settingsDialog->loadSettings();
-  m_settingsDialog->show();
+  m_settingsPresenter->loadSettings();
+  m_settingsPresenter->showDialog();
 }
 
 /**
