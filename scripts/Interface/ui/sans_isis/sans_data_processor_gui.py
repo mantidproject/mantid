@@ -73,8 +73,12 @@ class RunSelectorPresenterFactory(object):
                                     parent_view)
 
 
-def _make_run_summation_settings_presenter(summation_settings_view, parent_view):
-    summation_settings = SummationSettings(BinningType.Custom)
+def _make_run_summation_settings_presenter(summation_settings_view, parent_view, instrument):
+    if instrument != "LOQ":
+        binning_type = BinningType.SaveAsEventData
+    else:
+        binning_type = BinningType.Custom
+    summation_settings = SummationSettings(binning_type)
     summation_settings.bin_settings = DEFAULT_BIN_SETTINGS
     return SummationSettingsPresenter(summation_settings,
                                       summation_settings_view,

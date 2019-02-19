@@ -4,8 +4,8 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-from sans.gui_logic.models.binning_type import BinningType
 from mantid.kernel import ConfigService
+from sans.gui_logic.models.binning_type import BinningType
 
 
 class OverlayEventWorkspaces(object):
@@ -80,11 +80,11 @@ class BinningFromMonitors(object):
 
 class SummationSettings(object):
     def __init__(self, initial_type):
-        self._binning_from_monitors = BinningFromMonitors()
-        self._save_as_event_data = SaveAsEventData()
-        self._custom_binning = CustomBinning()
-        self._settings = self._settings_from_type(initial_type)
         self._save_directory = ConfigService.getString('defaultsave.directory')
+        self._type_factory_dict = {BinningType.SaveAsEventData: SaveAsEventData(),
+                                   BinningType.Custom: CustomBinning(),
+                                   BinningType.FromMonitors: BinningFromMonitors()}
+        self._settings, self._type = self._settings_from_type(initial_type)
 
     def instrument(self):
         return ConfigService.getString('default.instrument')
@@ -98,7 +98,7 @@ class SummationSettings(object):
         self._save_directory = directory
 
     def set_histogram_binning_type(self, type):
-        self._settings = self._settings_from_type(type)
+        self._settings, self._type = self._settings_from_type(type)
 
     def has_bin_settings(self):
         return self._settings.has_bin_settings()
@@ -137,7 +137,17 @@ class SummationSettings(object):
     def bin_settings(self, bin_settings):
         self._settings.bin_settings = bin_settings
 
+    def get_index_from_type(self):
+        if self._type == BinningType.Custom:
+            return 0
+        elif self._type == BinningType.FromMonitors:
+            return 1
+        elif self._type == BinningType.SaveAsEventData:
+            return 2
+
     def _settings_from_type(self, type):
-        return {BinningType.SaveAsEventData: self._save_as_event_data,
-                BinningType.Custom: self._custom_binning,
-                BinningType.FromMonitors: self._binning_from_monitors}[type]
+        try:
+            return self._type_factory_dict[type], type
+        except KeyError:
+            # default
+            return self._type_factory_dict[BinningType.Custom], BinningType.Custom

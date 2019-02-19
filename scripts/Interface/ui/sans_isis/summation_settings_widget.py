@@ -74,6 +74,7 @@ class SummationSettingsWidget(QtWidgets.QWidget, Ui_SummationSettingsWidget):
         self.preserveEventsChanged.emit(state != 0)
 
     def draw_settings(self, settings):
+        self._draw_binning_type(settings)
         self._draw_bin_settings(settings)
         self._draw_additional_time_shifts(settings)
         self._draw_overlay_event_workspaces(settings)
@@ -94,6 +95,11 @@ class SummationSettingsWidget(QtWidgets.QWidget, Ui_SummationSettingsWidget):
             set_checked_without_signal(
                 self.overlayEventWorkspacesCheckbox, False)
             self.overlayEventWorkspacesCheckbox.setVisible(False)
+
+    def _draw_binning_type(self, settings):
+        index = settings.get_index_from_type()
+        if index:
+            self.binningType.setCurrentIndex(index)
 
     def _draw_bin_settings(self, settings):
         if settings.has_bin_settings():

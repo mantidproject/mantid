@@ -81,7 +81,7 @@ class AddRunsPagePresenter(object):
                                         self._handle_selection_changed, view)
         self._summation_settings_presenter = \
             make_run_summation_presenter(view.summation_settings_view(),
-                                         view)
+                                         view, ConfigService.Instance().getString("default.instrument"))
 
         self._connect_to_view(view)
 
