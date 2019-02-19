@@ -12,6 +12,7 @@
 //----------------------------------------------------------------------
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Objects/IObject.h"
+#include "MantidGeometry/Objects/Track.h"
 #include "MantidGeometry/Rendering/ShapeInfo.h"
 
 #include "BoundingBox.h"
@@ -109,7 +110,8 @@ public:
   bool isValid(const std::map<int, int> &)
       const; ///< Check if a set of surfaces are valid.
   bool isOnSide(const Kernel::V3D &) const override;
-  int calcValidType(const Kernel::V3D &Pt, const Kernel::V3D &uVec) const;
+  Mantid::Geometry::TrackDirection calcValidType(const Kernel::V3D &Pt,
+                                                 const Kernel::V3D &uVec) const;
 
   std::vector<int> getSurfaceIndex() const;
   /// Get the list of surfaces (const version)
@@ -180,6 +182,8 @@ public:
   void setVtkGeometryCacheWriter(boost::shared_ptr<vtkGeometryCacheWriter>);
   /// set vtkGeometryCache reader
   void setVtkGeometryCacheReader(boost::shared_ptr<vtkGeometryCacheReader>);
+  detail::ShapeInfo::GeometryShape shape() const override;
+  const detail::ShapeInfo &shapeInfo() const;
   void GetObjectGeom(detail::ShapeInfo::GeometryShape &type,
                      std::vector<Kernel::V3D> &vectors, double &myradius,
                      double &myheight) const override;

@@ -12,6 +12,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <iostream>
 
 namespace Mantid {
 namespace Geometry {
@@ -107,16 +108,16 @@ void Track::removeCojoins() {
  * Objective is to merge in partial information about the beginning and end of
  * the tracks.
  * The points are kept in order
- * @param directionFlag :: A flag indicating if the direction of travel is
+ * @param direction :: A flag indicating if the direction of travel is
  * entering/leaving
  * an object. +1 is entering, -1 is leaving.
  * @param endPoint :: Point of intersection
  * @param obj :: A reference to the object that was intersected
  * @param compID :: ID of the component that this link is about (Default=NULL)
  */
-void Track::addPoint(const int directionFlag, const V3D &endPoint,
+void Track::addPoint(const TrackDirection direction, const V3D &endPoint,
                      const IObject &obj, const ComponentID compID) {
-  IntersectionPoint newPoint(directionFlag, endPoint,
+  IntersectionPoint newPoint(direction, endPoint,
                              endPoint.distance(m_startPoint), obj, compID);
   auto lowestPtr =
       std::lower_bound(m_surfPoints.begin(), m_surfPoints.end(), newPoint);
@@ -170,9 +171,9 @@ void Track::buildLink() {
   // First point is not necessarily in an object
   // Process first point:
   while (ac != m_surfPoints.end() &&
-         ac->directionFlag != 1) // stepping from an object.
+         ac->direction != TrackDirection::ENTERING) // stepping from an object.
   {
-    if (ac->directionFlag == -1) {
+    if (ac->direction == TrackDirection::LEAVING) {
       addLink(m_startPoint, ac->endPoint, ac->distFromStart, *ac->object,
               ac->componentID); // from the void
       workPt = ac->endPoint;
@@ -194,7 +195,8 @@ void Track::buildLink() {
   workPt = ac->endPoint;
   while (bc != m_surfPoints.end()) // Since bc > ac
   {
-    if (ac->directionFlag == 1 && bc->directionFlag == -1) {
+    if (ac->direction == TrackDirection::ENTERING &&
+        bc->direction == TrackDirection::LEAVING) {
       // Touching surface / identical surface
       if (fabs(ac->distFromStart - bc->distFromStart) > Tolerance) {
         // track leave ac into bc.
@@ -223,6 +225,23 @@ void Track::buildLink() {
   }
 
   m_surfPoints.clear();
+}
+
+std::ostream &operator<<(std::ostream &os, TrackDirection direction) {
+  switch (direction) {
+  case TrackDirection::ENTERING:
+    os << "ENTERING";
+    break;
+  case TrackDirection::LEAVING:
+    os << "LEAVING";
+    break;
+  case TrackDirection::INVALID:
+    os << "INVALID";
+    break;
+  default:
+    os.setstate(std::ios_base::failbit);
+  }
+  return os;
 }
 
 } // NAMESPACE Geometry

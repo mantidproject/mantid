@@ -189,6 +189,22 @@ GUI Development
 :doc:`QtDesignerForPython`
    Describes how to use the Qt designer to produce GUI views.
 
+=========
+Workbench
+=========
+
+The workbench is the new PyQt-based GUI that will be the primary interface for
+interacting with the mantid framework. The plotting is provided by
+`matplotlib <https://matplotlib.org/>`_. It will eventually replace MantidPlot.
+
+.. toctree::
+   :hidden:
+
+   Workbench/index
+
+:doc:`Workbench Documentation <Workbench/index>`
+   The Index of the workbench specific files.
+
 ===================
 Component Overviews
 ===================
@@ -209,6 +225,5 @@ Component Overviews
    PythonVSCppAlgorithms
    RemoteJobSubmissionAPI
    Widgets/Plotting
-   Workbench
    WritingAnAlgorithm
    WritingCustomConvertToMDTransformation

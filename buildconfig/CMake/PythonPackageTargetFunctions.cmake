@@ -64,7 +64,7 @@ CustomInstallLib = patch_setuptools_command('install_lib')
   )
 
 
-  if ( ${PACKAGE_WORKBENCH} )
+  if ( ${ENABLE_WORKBENCH} )
     # setuptools by default wants to build into a directory called 'build' relative the to the working directory. We have overridden
     # commands in setup.py.in to force the build directory to take place out of source. The install directory is specified here and then
     # --install-scripts=bin --install-lib=lib removes any of the platform/distribution specific install directories so we can have a flat

@@ -283,6 +283,9 @@ private:
   std::unique_ptr<Mantid::Geometry::ComponentInfo> m_physicalComponentInfo;
   std::unique_ptr<Mantid::Geometry::DetectorInfo> m_physicalDetectorInfo;
   std::unique_ptr<InstrumentRenderer> m_renderer;
+
+  friend class InstrumentWidgetEncoder;
+  friend class InstrumentWidgetDecoder;
 };
 
 } // namespace MantidWidgets

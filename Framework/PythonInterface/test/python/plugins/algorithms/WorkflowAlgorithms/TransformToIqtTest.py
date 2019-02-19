@@ -46,7 +46,7 @@ class TransformToIqtTest(unittest.TestCase):
                                      ResolutionWorkspace=can,
                                      BinReductionFactor=10)
 
-        self.assertTrue(CompareWorkspaces(params, self._param_table)[0])
+        self.assertTrue(CompareWorkspaces(params, self._param_table, 1e-8)[0])
 
 
     def test_with_resolution_reduction(self):
@@ -61,7 +61,7 @@ class TransformToIqtTest(unittest.TestCase):
                                      ResolutionWorkspace=resolution,
                                      BinReductionFactor=10)
 
-        self.assertTrue(CompareWorkspaces(params, self._param_table)[0])
+        self.assertTrue(CompareWorkspaces(params, self._param_table, 1e-8)[0])
 
 
 if __name__ == '__main__':

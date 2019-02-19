@@ -26,7 +26,7 @@ class MuonGroup(object):
         self._group_name = group_name
         self._detector_ids = None
         self.detectors = detector_ids
-        self._workspace = None
+        self._workspace = {}
 
     @property
     def workspace(self):

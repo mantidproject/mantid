@@ -59,6 +59,7 @@ plugins.setup_library_paths()
 
 from workbench.config import APPNAME, CONF, ORG_DOMAIN, ORGANIZATION  # noqa
 from workbench.plotting.globalfiguremanager import GlobalFigureManager  # noqa
+from workbench.app.windowfinder import find_all_windows_that_are_savable  # noqa
 
 
 # -----------------------------------------------------------------------------
@@ -214,7 +215,7 @@ class MainWindow(QMainWindow):
         self.widgets.append(self.workspacewidget)
 
         # Set up the project object
-        self.project = Project(GlobalFigureManager)
+        self.project = Project(GlobalFigureManager, find_all_windows_that_are_savable)
 
         # uses default configuration as necessary
         self.readSettings(CONF)
@@ -305,7 +306,6 @@ class MainWindow(QMainWindow):
 
         # list of custom interfaces that are not qt4/qt5 compatible
         GUI_BLACKLIST = ['ISIS_Reflectometry_Old.py',
-                         'ISIS_SANS_v2_experimental.py',
                          'Frequency_Domain_Analysis.py',
                          'Elemental_Analysis.py']
 
@@ -424,7 +424,6 @@ class MainWindow(QMainWindow):
         # Close editors
         if self.editor.app_closing():
             self.writeSettings(CONF)  # write current window information to global settings object
-
             # Close all open plots
             # We don't want this at module scope here
             import matplotlib.pyplot as plt  # noqa

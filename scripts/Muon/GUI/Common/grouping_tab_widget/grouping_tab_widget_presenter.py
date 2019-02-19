@@ -6,7 +6,9 @@ import Muon.GUI.Common.utilities.muon_file_utils as file_utils
 import Muon.GUI.Common.utilities.xml_utils as xml_utils
 import Muon.GUI.Common.utilities.algorithm_utils as algorithm_utils
 from Muon.GUI.Common import thread_model
+from Muon.GUI.Common.run_selection_dialog import RunSelectionDialog
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapper
+from mantid.api import AnalysisDataService
 
 
 class GroupingTabPresenter(object):
@@ -48,8 +50,6 @@ class GroupingTabPresenter(object):
         self.guessAlphaObserver = GroupingTabPresenter.GuessAlphaObserver(self)
         self.pairing_table_widget.guessAlphaNotifier.add_subscriber(self.guessAlphaObserver)
 
-        self.update_thread = self.create_update_thread()
-
     def show(self):
         self._view.show()
 
@@ -81,10 +81,20 @@ class GroupingTabPresenter(object):
         """
         Calculate alpha for the pair for which "Guess Alpha" button was clicked.
         """
-        ws1 = self._model.get_group_workspace(group1_name)
-        ws2 = self._model.get_group_workspace(group2_name)
+        if len(self._model._data.current_runs) > 1:
+            run, index, ok_clicked = RunSelectionDialog.get_run(self._model._data.current_runs, self._model._data.instrument, self._view)
+            if not ok_clicked:
+                return
+            run_to_use = self._model._data.current_runs[index]
+        else:
+            run_to_use = self._model._data.current_runs[0]
+
+        ws1 = self._model.get_group_workspace(group1_name, run_to_use)
+        ws2 = self._model.get_group_workspace(group2_name, run_to_use)
 
         ws = algorithm_utils.run_AppendSpectra(ws1, ws2)
+
+        AnalysisDataService.addOrReplace('workspace used in calc', ws)
 
         new_alpha = algorithm_utils.run_AlphaCalc({"InputWorkspace": ws,
                                                    "ForwardSpectra": [0],
@@ -133,6 +143,7 @@ class GroupingTabPresenter(object):
         self._model.show_all_groups_and_pairs()
 
     def handle_update_all_clicked(self):
+        self.update_thread = self.create_update_thread()
         self.update_thread.threadWrapperSetUp(self.disable_editing,
                                               self.enable_editing,
                                               self._view.display_warning_box)
@@ -155,12 +166,7 @@ class GroupingTabPresenter(object):
         self.groupingNotifier.notify_subscribers()
 
     def handle_new_data_loaded(self):
-        self._model._data.update_current_data()
-
         if self._model.is_data_loaded():
-            self._model._data.show_raw_data()
-            self._model._data.show_all_groups()
-            self._model._data.show_all_pairs()
             self.grouping_table_widget.update_view_from_model()
             self.pairing_table_widget.update_view_from_model()
             self.update_description_text()

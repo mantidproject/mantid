@@ -29,7 +29,7 @@ class SANS2DMinimalBatchReductionTest_V2(systemtesting.MantidSystemTest):
     def __init__(self):
         super(SANS2DMinimalBatchReductionTest_V2, self).__init__()
         config['default.instrument'] = 'SANS2D'
-        self.tolerance_is_reller = True
+        self.tolerance_is_rel_err = True
         self.tolerance = 1.0e-2
 
     def runTest(self):
@@ -49,7 +49,7 @@ class SANS2DMinimalSingleReductionTest_V2(systemtesting.MantidSystemTest):
     def __init__(self):
         super(SANS2DMinimalSingleReductionTest_V2, self).__init__()
         config['default.instrument'] = 'SANS2D'
-        self.tolerance_is_reller = True
+        self.tolerance_is_rel_err = True
         self.tolerance = 1.0e-2
 
     def runTest(self):
@@ -74,7 +74,7 @@ class SANS2DSearchCentreGUI_V2(systemtesting.MantidSystemTest):
     def __init__(self):
         super(SANS2DSearchCentreGUI_V2, self).__init__()
         config['default.instrument'] = 'SANS2D'
-        self.tolerance_is_reller = True
+        self.tolerance_is_rel_err = True
         self.tolerance = 1.0e-2
 
     def runTest(self):

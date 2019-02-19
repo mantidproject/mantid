@@ -18,12 +18,12 @@ from qtpy.QtWidgets import QMessageBox, QVBoxLayout
 # third-party library imports
 from mantid.api import AnalysisDataService
 from mantid.kernel import logger
-from mantidqt.widgets.instrumentview.presenter import InstrumentViewPresenter
-from mantidqt.widgets.matrixworkspacedisplay.presenter import MatrixWorkspaceDisplay
-from mantidqt.widgets.samplelogs.presenter import SampleLogs
-from mantidqt.widgets.tableworkspacedisplay.presenter import TableWorkspaceDisplay
-from mantidqt.widgets.workspacewidget.workspacetreewidget import WorkspaceTreeWidget
 from mantidqt.plotting.functions import can_overplot, pcolormesh, plot, plot_from_names
+from mantidqt.widgets.instrumentview.presenter import InstrumentViewPresenter
+from mantidqt.widgets.samplelogs.presenter import SampleLogs
+from mantidqt.widgets.workspacedisplay.matrix.presenter import MatrixWorkspaceDisplay
+from mantidqt.widgets.workspacedisplay.table.presenter import TableWorkspaceDisplay
+from mantidqt.widgets.workspacewidget.workspacetreewidget import WorkspaceTreeWidget
 # local package imports
 from workbench.plugins.base import PluginWidget
 
@@ -120,7 +120,7 @@ class WorkspaceWidget(PluginWidget):
         """
         for ws in self._ads.retrieveWorkspaces(names, unrollGroups=True):
             presenter = InstrumentViewPresenter(ws, parent=self)
-            presenter.view.show()
+            presenter.show_view()
 
     def _do_show_data(self, names):
         for ws in self._ads.retrieveWorkspaces(names, unrollGroups=True):
@@ -129,12 +129,12 @@ class WorkspaceWidget(PluginWidget):
                 # the plot function is being injected in the presenter
                 # this is done so that the plotting library is mockable in testing
                 presenter = MatrixWorkspaceDisplay(ws, plot=plot, parent=self)
-                presenter.view.show()
+                presenter.show_view()
             except ValueError:
                 try:
                     TableWorkspaceDisplay.supports(ws)
                     presenter = TableWorkspaceDisplay(ws, plot=matplotlib.pyplot, parent=self)
-                    presenter.view.show()
+                    presenter.show_view()
                 except ValueError:
                     logger.error(
                         "Could not open workspace: {0} with neither MatrixWorkspaceDisplay nor TableWorkspaceDisplay.")
