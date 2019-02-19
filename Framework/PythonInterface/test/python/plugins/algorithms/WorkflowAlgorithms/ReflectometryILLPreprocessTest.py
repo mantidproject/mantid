@@ -14,7 +14,6 @@ import numpy.testing
 from testhelpers import (assertRaisesNothing, create_algorithm, illhelpers)
 import unittest
 import ReflectometryILL_common as common
-import numpy
 
 
 class ReflectometryILLPreprocessTest(unittest.TestCase):
@@ -382,7 +381,7 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         outWS = alg.getProperty('OutputWorkspace').value
         self.assertEquals(outWS.getRun().getProperty(common.SampleLogs.LINE_POSITION).value, 10.23)
         self.assertEquals(outWS.getRun().getProperty(common.SampleLogs.FOREGROUND_CENTRE).value, 10)
-        self.assertEquals(outWS.getRun().getProperty(common.SampleLogs.TWO_THETA).value, 40.66)
+        self.assertEquals(outWS.getRun().getProperty(common.SampleLogs.TWO_THETA).value, 1.5885926485061646)
         self.assertEquals(outWS.getAxis(0).getUnit().caption(), 'Wavelength')
         self.assertEquals(mtd.getObjectNames(), [])
 
@@ -426,13 +425,14 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
                                             TwoTheta=60.0,
                                             LinePosition=101.2)
         self.assertEquals(direct.run().getProperty(common.SampleLogs.LINE_POSITION).value, 101.2)
-        self.assertEquals(direct.run().getProperty(common.SampleLogs.TWO_THETA).value, 60.0)
+        # We expect here a default detector rotation angle
+        self.assertEquals(direct.run().getProperty(common.SampleLogs.TWO_THETA).value, 1.5885926485061646)
         self.assertEquals(direct.getAxis(0).getUnit().caption(), 'Wavelength')
         reflected = ReflectometryILLPreprocess(Run='ILL/D17/317370',
                                                TwoTheta=80.0,
                                                DirectLineWorkspace=direct)
         self.assertEquals(reflected.run().getProperty(common.SampleLogs.LINE_POSITION).value, 201.6745481268582)
-        self.assertEquals(reflected.run().getProperty(common.SampleLogs.TWO_THETA).value, 80.0)
+        self.assertEquals(reflected.run().getProperty(common.SampleLogs.TWO_THETA).value, 3.182191848754883)
         self.assertEquals(reflected.run().getProperty(common.SampleLogs.TWO_THETA).units, 'degree')
         self.assertEquals(reflected.getAxis(0).getUnit().caption(), 'Wavelength')
 

@@ -428,10 +428,6 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         run.addProperty(common.SampleLogs.FOREGROUND_START, int(startIndex), True)
         run.addProperty(common.SampleLogs.FOREGROUND_CENTRE, int(beamPosIndex), True)
         run.addProperty(common.SampleLogs.FOREGROUND_END, int(endIndex), True)
-        # Need to add reduction.two_theta if user given since loader will not do this
-        if not self.getProperty(Prop.TWO_THETA).isDefault:
-            twoTheta = self.getProperty(Prop.TWO_THETA).value
-            run.addProperty(common.SampleLogs.TWO_THETA, float(twoTheta), 'degree', True)
 
     def _moveDetector(self, ws, linePosition):
         """Perform detector position correction for direct and reflected beams."""
@@ -448,6 +444,8 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
             'DetectorFacesSample': True
         }
         if not self.getProperty(Prop.TWO_THETA).isDefault:
+            # We should use user angle
+            args['TwoTheta'] = self.getProperty(Prop.TWO_THETA).value
             # We need to subtract an offsetAngle from user given TwoTheta
             args['LinePosition'] = linePosition
         elif self.getProperty(Prop.DIRECT_LINE_WORKSPACE).isDefault:

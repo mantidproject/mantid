@@ -31,7 +31,6 @@ The algorithm adds the following sample log entries to the *OutputWorkspace*:
 * reduction.foreground.last_workspace_index
 * reduction.foreground.first_workspace_index
 * reduction.line_position : the peak position (workspace index) used to define the :math:`2\theta` angles (detector positions)
-* reduction.two_theta : the two theta :math:`2\theta` scattering angle in degrees
 
 The workflow diagram below gives an overview of the algorithm:
 

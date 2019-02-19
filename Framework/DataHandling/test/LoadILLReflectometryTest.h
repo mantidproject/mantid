@@ -55,8 +55,8 @@ private:
     TS_ASSERT_EQUALS(output->getSpectrum(0).getDetectorIDs(),
                      std::set<Mantid::detid_t>{0})
     // sample log entry must exist
-    TS_ASSERT(output->run().hasProperty("reduction.two_theta"))
-    TS_ASSERT_EQUALS(output->run().getProperty("reduction.two_theta")->units(),
+    TS_ASSERT(output->run().hasProperty("loader.two_theta"))
+    TS_ASSERT_EQUALS(output->run().getProperty("loader.two_theta")->units(),
                      "degree")
   }
 

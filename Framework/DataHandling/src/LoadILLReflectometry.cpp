@@ -280,7 +280,7 @@ void LoadILLReflectometry::exec() {
   placeSlits();
   // When other components are in-place
   convertTofToWavelength();
-  // Add sample logs reduction.two_theta and Facility
+  // Add sample logs loader.two_theta and Facility
   addSampleLogs();
   // Set the output workspace property
   setProperty("OutputWorkspace", m_localWorkspace);
@@ -716,10 +716,10 @@ double LoadILLReflectometry::reflectometryPeak() {
 /// Add sample logs reduction.two_theta and Facility
 void LoadILLReflectometry::addSampleLogs() {
   // Add two theta to the sample logs
-  m_localWorkspace->mutableRun().addProperty("reduction.two_theta",
+  m_localWorkspace->mutableRun().addProperty("loader.two_theta",
                                              m_detectorAngle);
   m_localWorkspace->mutableRun()
-      .getProperty("reduction.two_theta")
+      .getProperty("loader.two_theta")
       ->setUnits("degree");
   // Add Facility to the sample logs
   m_localWorkspace->mutableRun().addProperty("Facility", std::string("ILL"));
@@ -741,7 +741,6 @@ double LoadILLReflectometry::detectorRotation() {
     p.peakCentre = peakCentre;
     setProperty("OutputBeamPosition", createPeakPositionTable(p));
   }
-  double detectorAngle{0.0};
   if (!isDefault("BraggAngle")) {
     if (posTable) {
       g_log.notice()
@@ -751,21 +750,22 @@ double LoadILLReflectometry::detectorRotation() {
     const double offset =
         offsetAngle(peakCentre, PIXEL_CENTER, m_detectorDistance);
     m_log.debug() << "Beam offset angle: " << offset << '\n';
-    detectorAngle = 2. * userAngle - offset;
+    return 2. * userAngle - offset;
   } else if (!posTable) {
     const double deflection = collimationAngle();
     if (deflection != 0) {
       g_log.debug() << "Using incident deflection angle (degrees): "
                     << deflection << '\n';
     }
-    detectorAngle = m_detectorAngle + deflection;
-  } else {
-    const auto dbPeak = parseBeamPositionTable(*posTable);
-    const double dbOffset =
-        offsetAngle(dbPeak.peakCentre, PIXEL_CENTER, dbPeak.detectorDistance);
-    m_log.debug() << "Direct beam offset angle: " << dbOffset << '\n';
-    detectorAngle = m_detectorAngle - dbPeak.detectorAngle - dbOffset;
+    return m_detectorAngle + deflection;
   }
+  const auto dbPeak = parseBeamPositionTable(*posTable);
+  const double dbOffset =
+      offsetAngle(dbPeak.peakCentre, PIXEL_CENTER, dbPeak.detectorDistance);
+  m_log.debug() << "Direct beam offset angle: " << dbOffset << '\n';
+  const double detectorAngle =
+      m_detectorAngle - dbPeak.detectorAngle - dbOffset;
+
   m_log.debug() << "Direct beam calibrated detector angle (degrees): "
                 << detectorAngle << '\n';
   return detectorAngle;
