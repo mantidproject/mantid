@@ -37,33 +37,28 @@ void ShapeInfo::getObjectGeometry(ShapeInfo::GeometryShape &shape,
 
 ShapeInfo::CuboidGeometry ShapeInfo::cuboidGeometry() const {
   assert(m_shape == GeometryShape::CUBOID);
-  CuboidGeometry g{m_points[0], m_points[1], m_points[2], m_points[3]};
-  return g;
+  return {m_points[0], m_points[1], m_points[2], m_points[3]};
 }
 
 ShapeInfo::HexahedronGeometry ShapeInfo::hexahedronGeometry() const {
   assert(m_shape == GeometryShape::HEXAHEDRON);
-  HexahedronGeometry g{m_points[0], m_points[1], m_points[2], m_points[3],
-                       m_points[4], m_points[5], m_points[6], m_points[7]};
-  return g;
+  return {m_points[0], m_points[1], m_points[2], m_points[3],
+          m_points[4], m_points[5], m_points[6], m_points[7]};
 }
 
 ShapeInfo::SphereGeometry ShapeInfo::sphereGeometry() const {
   assert(m_shape == GeometryShape::SPHERE);
-  SphereGeometry g{m_points.front(), m_radius};
-  return g;
+  return {m_points.front(), m_radius};
 }
 
 ShapeInfo::CylinderGeometry ShapeInfo::cylinderGeometry() const {
   assert(m_shape == GeometryShape::CYLINDER);
-  CylinderGeometry g{m_points.front(), m_points.back(), m_radius, m_height};
-  return g;
+  return {m_points.front(), m_points.back(), m_radius, m_height};
 }
 
 ShapeInfo::ConeGeometry ShapeInfo::coneGeometry() const {
   assert(m_shape == GeometryShape::CONE);
-  ConeGeometry g{m_points.front(), m_points.back(), m_radius, m_height};
-  return g;
+  return {m_points.front(), m_points.back(), m_radius, m_height};
 }
 
 void ShapeInfo::setCuboid(const V3D &p1, const V3D &p2, const V3D &p3,
