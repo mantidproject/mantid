@@ -19,8 +19,7 @@ M is a time measure for the data collection, :math:`att_{empty\_beam}` is attenu
 :math:`\Omega(R)` is solid angle, :math:`Det_{flood}` is a detector response function,
 :math:`T_{corr}` is the sample transmission, and :math:`d_{sam}` is the sample thickness.
 
-Details are described in the paper
-[Sokolova, A., Christoforidis, J., Eltobaji, A., Barnes, J., Darmann, F., Whitten, A. E. & de Campo, L. (2016). Neutron News 27, 9-13]
+Details are described in the paper [#Sokolova]_.
 The core algorithms the BilbySANSDataProcessor is utilising are :ref:`Q1D <algm-Q1D>` and :ref:`TOFSANSResolutionByPixel <algm-TOFSANSResolutionByPixel>`.
 Please refer to those pages for details of the input parameters.
 The unit of the output workspace is 1/cm. Absolute scale calibration done relatively to the empty beam transmission measurements.
@@ -56,7 +55,8 @@ The steps to make the Bilby data reduction work are listed below:
 References
 ----------
 
-Sokolova, A., Christoforidis, J., Eltobaji, A., Barnes, J., Darmann, F., Whitten, A. E. & de Campo, L. (2016). Neutron News 27, 9-13
+.. [#Sokolova] A. Sokolova, A. E. Whitten, L. de Campo, J. Christoforidis, A. Eltobaji, J. Barnes, F. Darmann and A. Berry (2019). Journal of Applied Crystallography Volume 52 (1)
+          `doi: 10.1107/S1600576718018009 <https://doi.org/10.1107/S1600576718018009>`_
 
 .. sourcelink::
 
