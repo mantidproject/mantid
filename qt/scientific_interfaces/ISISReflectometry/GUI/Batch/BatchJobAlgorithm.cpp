@@ -37,8 +37,11 @@ BatchJobAlgorithm::outputWorkspaceNameToWorkspace() const {
   auto propertyToName = std::map<std::string, Workspace_sptr>();
   for (auto &property : m_outputWorkspaceProperties) {
     auto workspaceName = m_algorithm->getPropertyValue(property);
-    if (!workspaceName.empty())
-      propertyToName[workspaceName] = m_algorithm->getProperty(property);
+    if (!workspaceName.empty()) {
+      Workspace_sptr workspace = m_algorithm->getProperty(property);
+      if (workspace)
+        propertyToName[workspaceName] = workspace;
+    }
   }
   return propertyToName;
 }
