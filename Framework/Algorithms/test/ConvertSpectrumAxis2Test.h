@@ -468,6 +468,22 @@ public:
       TS_ASSERT_DELTA((*axis)(i), double(i % 10), 1E-10);
     }
   }
+
+  void test_eventWS() {
+    const std::string outputWS("outWS");
+    const std::string target("theta");
+    auto testWS =
+        WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(500, 3);
+    Mantid::Algorithms::ConvertSpectrumAxis2 conv;
+    conv.initialize();
+
+    TS_ASSERT_THROWS_NOTHING(conv.setProperty("InputWorkspace", testWS));
+    TS_ASSERT_THROWS_NOTHING(
+        conv.setPropertyValue("OutputWorkspace", outputWS));
+    TS_ASSERT_THROWS_NOTHING(conv.setPropertyValue("Target", target));
+    TS_ASSERT_THROWS_NOTHING(conv.execute());
+    TS_ASSERT(conv.isExecuted());
+  }
 };
 
 class ConvertSpectrumAxis2TestPerformance : public CxxTest::TestSuite {
