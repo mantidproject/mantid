@@ -379,11 +379,11 @@ def _validate_workspace_names(workspaces):
     :return: A list of workspaces
     """
     try:
-        _raise_if_not_sequence(workspaces, 'workspaces', MatrixWorkspace)
+        _raise_if_not_sequence(workspaces, 'workspaces', str)
     except ValueError:
-        return AnalysisDataService.Instance().retrieveWorkspaces(workspaces, unrollGroups=True)
-    else:
         return workspaces
+    else:
+        return AnalysisDataService.Instance().retrieveWorkspaces(workspaces, unrollGroups=True)
 
 
 def _validate_pcolormesh_inputs(workspaces):
