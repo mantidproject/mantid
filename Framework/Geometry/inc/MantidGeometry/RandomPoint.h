@@ -43,10 +43,10 @@ inGenericShape(const IObject &object, Kernel::PseudoRandomNumberGenerator &rng,
 
 template <Kernel::V3D (*T)(const detail::ShapeInfo &,
                            Kernel::PseudoRandomNumberGenerator &)>
-MANTID_GEOMETRY_DLL boost::optional<Kernel::V3D>
-bounded(const detail::ShapeInfo &shapeInfo,
-        Kernel::PseudoRandomNumberGenerator &rng, const BoundingBox &box,
-        size_t maxAttempts);
+boost::optional<Kernel::V3D> bounded(const detail::ShapeInfo &shapeInfo,
+                                     Kernel::PseudoRandomNumberGenerator &rng,
+                                     const BoundingBox &box,
+                                     size_t maxAttempts);
 
 MANTID_GEOMETRY_DLL boost::optional<Kernel::V3D>
 bounded(const IObject &object, Kernel::PseudoRandomNumberGenerator &rng,
