@@ -2006,7 +2006,8 @@ V3D CSGObject::generatePointInObject(PseudoRandomNumberGenerator &rng,
   // shape, its dimension and orientation.
   const size_t bruteForceAttempts{
       std::min(static_cast<size_t>(5), maxAttempts)};
-  boost::optional<V3D> maybePoint{RandomPoint::inGenericShape(*this, rng, bruteForceAttempts)};
+  boost::optional<V3D> maybePoint{
+      RandomPoint::inGenericShape(*this, rng, bruteForceAttempts)};
   if (maybePoint) {
     point = *maybePoint;
   } else {

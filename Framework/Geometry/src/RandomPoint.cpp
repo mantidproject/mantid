@@ -27,7 +27,8 @@ Kernel::V3D inCuboid(const detail::ShapeInfo &shapeInfo,
   const double r3{rng.nextValue()};
   const Kernel::V3D basis1{geometry.leftFrontTop - geometry.leftFrontBottom};
   const Kernel::V3D basis2{geometry.leftBackBottom - geometry.leftFrontBottom};
-  const Kernel::V3D basis3{geometry.rightFrontBottom - geometry.leftFrontBottom};
+  const Kernel::V3D basis3{geometry.rightFrontBottom -
+                           geometry.leftFrontBottom};
   return geometry.leftFrontBottom + (basis1 * r1 + basis2 * r2 + basis3 * r3);
 }
 
