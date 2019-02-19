@@ -24,8 +24,12 @@ from sans.common.general_functions import create_child_algorithm, get_log_plot
 from sans.common.xml_parsing import get_named_elements_from_ipf_file
 from sans.state.state_base import create_deserialized_sans_state_from_property_manager
 
-from qtpy import PYQT4
+PYQT4 = False
 IN_MANTIDPLOT = False
+try:
+    from qtpy import PYQT4
+except ImportError:
+    pass  # it is already false
 if PYQT4:
     try:
         import mantidplot
