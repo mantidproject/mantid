@@ -411,8 +411,8 @@ def _get_indices(new_lim, dim, extent):
     """
     pmin = int(numpy.floor(float(dim) / (extent[1] - extent[0]) * (new_lim[0] - extent[0])))
     pmax = int(numpy.ceil(float(dim) / (extent[1] - extent[0]) * (new_lim[1] - extent[0])))
-    pmin = max(0, pmin)
-    pmax = min(pmax, dim)
+    pmin = numpy.clip(pmin,0, dim)
+    pmax = numpy.clip(pmax, 0, dim)
     if pmax == pmin:
         if pmax + 1 < dim:
             pmax = pmax + 1
@@ -477,24 +477,6 @@ class ScalingAxesImage(mimage.AxesImage):
         super(ScalingAxesImage, self).set_data(self.sampled_data)
 
 
-    def _update_extent(self, extent):
-        """
-        extent is data axes (left, right, bottom, top) for making image plots
-
-        reimplements AxesImage::set_extent to avoid recursively calling `xlim_updated` or `ylim_updated`
-        """
-        self._extent = xmin, xmax, ymin, ymax = extent
-        corners = (xmin, ymin), (xmax, ymax)
-        self.axes.update_datalim(corners)
-        # sticky_edges added in v2.0
-        # https://github.com/matplotlib/matplotlib/pull/7476
-        from distutils.version import LooseVersion
-        if LooseVersion(matplotlib.__version__) >= LooseVersion('2.0.0'):
-            self.sticky_edges.x[:] = [xmin, xmax]
-            self.sticky_edges.y[:] = [ymin, ymax]
-        self.stale = True
-
-
     def _limits_changed(self, ax):
         """
         Callback to resample the original data when zooming in.
@@ -507,11 +489,8 @@ class ScalingAxesImage(mimage.AxesImage):
         cropped_data = self.unsampled_data[pymin:pymax, pxmin:pxmax]
         self.set_data(cropped_data, set_unsampled_data = False)
         x0, x1 = _get_extents(pxmin, pxmax, dims[1], self.unsampled_extent[0:2])
-        #ax.set_xlim(x0, x1, emit = False)
         y0, y1 = _get_extents(pymin, pymax, dims[0], self.unsampled_extent[2:4])
-        #ax.set_ylim(y0, y1, emit = False)
         ax.update_datalim(((x0,y0),(x1, y1)))
-        self._update_extent((x0,x1,y0,y1))
 
 
 
