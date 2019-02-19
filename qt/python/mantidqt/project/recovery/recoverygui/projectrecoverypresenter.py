@@ -9,8 +9,6 @@
 
 from __future__ import (absolute_import, unicode_literals)
 
-from qtpy.QtCore import Qt
-
 from mantidqt.project.recovery.recoverygui.projectrecoverymodel import ProjectRecoveryModel
 from mantidqt.project.recovery.recoverygui.projectrecoverywidgetview import ProjectRecoveryWidgetView
 from mantidqt.project.recovery.recoverygui.recoveryfailureview import RecoveryFailureView
