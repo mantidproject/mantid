@@ -20,9 +20,9 @@ class SettingsPresenter(object):
     ASK_BEFORE_CLOSE_TITLE = "Confirm exit"
     ASK_BEFORE_CLOSE_MESSAGE = "Are you sure you want to exit without applying the settings?"
 
-    def __init__(self, parent, view=None):
+    def __init__(self, parent, view=None, general_settings=None):
         self.view = view if view else SettingsView(parent, self)
-        self.general_settings = GeneralSettings(parent)
+        self.general_settings = general_settings if general_settings else GeneralSettings(parent)
         self.parent = parent
 
         self.current = self.general_settings.view

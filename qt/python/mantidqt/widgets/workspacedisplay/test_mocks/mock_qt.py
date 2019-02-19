@@ -109,3 +109,9 @@ class MockQClipboard(object):
     def __init__(self):
         self.setText = Mock()
         self.Clipboard = 3
+
+
+class MockQButton(object):
+    def __init__(self):
+        self.mock_clicked_signal = MockQtSignal()
+        self.clicked = Mock(return_value=self.mock_clicked_signal)
