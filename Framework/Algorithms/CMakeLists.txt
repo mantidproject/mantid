@@ -211,6 +211,7 @@ set ( SRC_FILES
 	src/NormaliseByDetector.cpp
 	src/NormaliseToMonitor.cpp
 	src/NormaliseToUnity.cpp
+	src/OffspecBackgroundSubtraction.cpp
 	src/OneMinusExponentialCor.cpp
 	src/PDCalibration.cpp
 	src/PDDetermineCharacterizations.cpp
@@ -552,6 +553,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/NormaliseByDetector.h
 	inc/MantidAlgorithms/NormaliseToMonitor.h
 	inc/MantidAlgorithms/NormaliseToUnity.h
+	inc/MantidAlgorithms/OffspecBackgroundSubtraction.h
 	inc/MantidAlgorithms/OneMinusExponentialCor.h
 	inc/MantidAlgorithms/PDCalibration.h
 	inc/MantidAlgorithms/PDDetermineCharacterizations.h
@@ -897,6 +899,7 @@ set ( TEST_FILES
 	NormaliseByCurrentTest.h
 	NormaliseByDetectorTest.h
 	NormaliseToMonitorTest.h
+	OffspecBackgroundSubtractionTest.h
 	OneMinusExponentialCorTest.h
 	PDCalibrationTest.h
 	PDDetermineCharacterizationsTest.h
