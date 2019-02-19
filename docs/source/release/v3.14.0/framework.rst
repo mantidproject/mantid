@@ -95,6 +95,8 @@ Improvements
 - Various clarifications and additional links in the geometry and material documentation pages
 - :ref:`SetSample <algm-SetSample>` and :ref:`SetSampleMaterial <algm-SetSampleMaterial>` now accept materials without ``ChemicalFormula`` or ``AtomicNumber``. In this case, all cross sections and ``SampleNumberDensity`` have to be given.
 - :ref:`LoadEventNexus <algm-LoadEventNexus>` experimental option `LoadType` = `{Default, Multiprocess}` is added, `Multiprocess` should work faster for big files and it is experimental, available only in Linux.
+- Various clarifications and additional links in the geometry and material documentation pages.
+- The history generated from a call to :ref:`SetSample <algm-SetSample>` can now be re-executed without error.
 
 Bugfixes
 ########
