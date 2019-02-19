@@ -97,6 +97,7 @@ Improvements
 - :ref:`LoadEventNexus <algm-LoadEventNexus>` experimental option `LoadType` = `{Default, Multiprocess}` is added, `Multiprocess` should work faster for big files and it is experimental, available only in Linux.
 - Various clarifications and additional links in the geometry and material documentation pages.
 - The history generated from a call to :ref:`SetSample <algm-SetSample>` can now be re-executed without error.
+- :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` no more fails with 'Unable to generate point in object' errors if the sample shape is cuboid, cylinder or sphere.
 
 Bugfixes
 ########
