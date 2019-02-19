@@ -7,20 +7,22 @@
 #  This file is part of the mantidqt package
 #
 
-import unittest
-import os
+from __future__ import (absolute_import, unicode_literals)
+
 import getpass
-import tempfile
-import time
+import json
+import os
 import shutil
 import sys
-import json
+import tempfile
+import time
+import unittest
 
-from mantidqt.project.recovery.projectrecovery import ProjectRecovery, SAVING_TIME_KEY, NO_OF_CHECKPOINTS_KEY, \
-    RECOVERY_ENABLED_KEY
+from mantid.api import AnalysisDataService as ADS
 from mantid.kernel import ConfigService
 from mantid.simpleapi import CreateSampleWorkspace, GroupWorkspaces
-from mantid.api import AnalysisDataService as ADS
+from mantidqt.project.recovery.projectrecovery import ProjectRecovery, SAVING_TIME_KEY, NO_OF_CHECKPOINTS_KEY, \
+    RECOVERY_ENABLED_KEY
 
 if sys.version_info.major >= 3:
     from unittest import mock
@@ -66,8 +68,8 @@ class ProjectRecoveryTest(unittest.TestCase):
 
         # Test config service values
         self.assertEqual(self.pr.time_between_saves, int(ConfigService[SAVING_TIME_KEY]))
-        self.assertEqual(self.pr.maximum_num_checkpoints, ConfigService[NO_OF_CHECKPOINTS_KEY])
-        self.assertEqual(self.pr.recovery_enabled, ConfigService[RECOVERY_ENABLED_KEY])
+        self.assertEqual(self.pr.maximum_num_checkpoints, int(ConfigService[NO_OF_CHECKPOINTS_KEY]))
+        self.assertEqual(self.pr.recovery_enabled, ("true" == ConfigService[RECOVERY_ENABLED_KEY].lower()))
 
     def test_start_recovery_thread_if_thread_on_is_true(self):
         self.pr._timer_thread = mock.MagicMock()
@@ -136,7 +138,7 @@ class ProjectRecoveryTest(unittest.TestCase):
         time.sleep(0.01)
         os.makedirs(two)
 
-        result = self.pr.get_pid_folder_to_be_used_to_load_a_checkpoint_from()
+        result = self.pr.get_pid_folder_to_load_a_checkpoint_from()
         self.assertEqual(one, result)
 
     def test_list_dir_full_path(self):
@@ -283,8 +285,8 @@ class ProjectRecoveryTest(unittest.TestCase):
 
     @mock.patch('mantidqt.project.recovery.projectrecovery.ProjectRecoveryPresenter')
     def test_attempt_recovery_and_recovery_passes(self, presenter):
-        presenter.return_value.start_recovery_view.return_value = False
-        presenter.return_value.start_recovery_failure.return_value = False
+        presenter.return_value.start_recovery_view.return_value = True
+        presenter.return_value.start_recovery_failure.return_value = True
         self.pr.clear_all_unused_checkpoints = mock.MagicMock()
         self.pr.start_recovery_thread = mock.MagicMock()
 
@@ -297,8 +299,8 @@ class ProjectRecoveryTest(unittest.TestCase):
 
     @mock.patch('mantidqt.project.recovery.projectrecovery.ProjectRecoveryPresenter')
     def test_attempt_recovery_and_recovery_fails_first_time_but_is_successful_on_failure_view(self, presenter):
-        presenter.return_value.start_recovery_view.return_value = True
-        presenter.return_value.start_recovery_failure.return_value = False
+        presenter.return_value.start_recovery_view.return_value = False
+        presenter.return_value.start_recovery_failure.return_value = True
         self.pr.clear_all_unused_checkpoints = mock.MagicMock()
         self.pr.start_recovery_thread = mock.MagicMock()
 

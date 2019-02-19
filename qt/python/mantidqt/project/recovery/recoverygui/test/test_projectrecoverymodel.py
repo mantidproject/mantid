@@ -7,17 +7,19 @@
 #  This file is part of the mantidqt package
 #
 
-import unittest
+from __future__ import (absolute_import, unicode_literals)
+
 import os
 import shutil
 import sys
 import time
+import unittest
 
-from mantidqt.project.recovery.recoverygui.projectrecoverymodel import ProjectRecoveryModel
-from mantidqt.project.recovery.projectrecovery import ProjectRecovery
-from mantid.simpleapi import CreateSampleWorkspace
 from mantid.api import AnalysisDataService as ADS
 from mantid.kernel import ConfigService
+from mantid.simpleapi import CreateSampleWorkspace
+from mantidqt.project.recovery.projectrecovery import ProjectRecovery, NO_OF_CHECKPOINTS_KEY
+from mantidqt.project.recovery.recoverygui.projectrecoverymodel import ProjectRecoveryModel
 
 if sys.version_info.major >= 3:
     from unittest import mock
@@ -27,7 +29,7 @@ else:
 
 class ProjectRecoveryModelTest(unittest.TestCase):
     def setUp(self):
-        self.pr = ProjectRecovery(mock.MagicMock(), mock.MagicMock(), mock.MagicMock())
+        self.pr = ProjectRecovery(globalfiguremanager=None, window_finder=mock.MagicMock(), multifileinterpreter=None)
 
         # Set up some checkpoints
         self.setup_some_checkpoints()
@@ -61,7 +63,6 @@ class ProjectRecoveryModelTest(unittest.TestCase):
         # Expect 0 as just checkpoints
         self.assertEqual(self.prm.find_number_of_workspaces_in_directory(self.pid), 0)
 
-        # Expect 1 as only one checkpoint needed
         self.assertTrue(os.path.exists(self.pid))
         list_dir = os.listdir(self.pid)
         list_dir.sort()
@@ -111,7 +112,8 @@ class ProjectRecoveryModelTest(unittest.TestCase):
         self.assertEqual(checkpoints[-1], os.path.basename(last_checkpoint))
 
     def test_fill_rows(self):
-        # Wait a second so we can have two rows with different names
+        # wait a second so that we can add a second checkpoint with a different name, because the checkpoints differ at
+        # most by a second.
         time.sleep(1)
 
         CreateSampleWorkspace(OutputWorkspace="6")
@@ -123,11 +125,11 @@ class ProjectRecoveryModelTest(unittest.TestCase):
         checkpoints.sort()
 
         self.assertEqual(["", "", ""], self.prm.rows[2])
-        self.assertEqual([checkpoints[0], "5", "No"], self.prm.rows[1])
-        self.assertEqual([checkpoints[1], "6", "No"], self.prm.rows[0])
+        self.assertEqual([checkpoints[0].replace("T", " "), "5", "No"], self.prm.rows[1])
+        self.assertEqual([checkpoints[1].replace("T", " "), "6", "No"], self.prm.rows[0])
 
     def test_get_number_of_checkpoints(self):
-        self.assertEqual(int(ConfigService.getString("projectRecovery.numberOfCheckpoints")),
+        self.assertEqual(int(ConfigService.getString(NO_OF_CHECKPOINTS_KEY)),
                          self.prm.get_number_of_checkpoints())
 
     def test_update_checkpoint_tried(self):

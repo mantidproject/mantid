@@ -7,18 +7,24 @@
 #  This file is part of the mantidqt package
 #
 
-import unittest
-
 import matplotlib
-matplotlib.use('AGG')
+import sys
+import tempfile
+import unittest
+from os.path import isdir
+from shutil import rmtree
 
-from os.path import isdir  # noqa
-from shutil import rmtree  # noqa
-import tempfile  # noqa
+matplotlib.use('AGG')
 
 from mantid.api import AnalysisDataService as ADS  # noqa
 from mantid.simpleapi import CreateSampleWorkspace  # noqa
 from mantidqt.project import projectloader, projectsaver  # noqa
+
+
+if sys.version_info.major >= 3:
+    from unittest import mock
+else:
+    import mock
 
 
 project_file_ext = ".mtdproj"
@@ -54,6 +60,14 @@ class ProjectLoaderTest(unittest.TestCase):
         ws1_name = "ws1"
         ADS.addOrReplace(ws1_name, CreateSampleWorkspace(OutputWorkspace=ws1_name))
         self.assertTrue(projectloader._confirm_all_workspaces_loaded(workspaces_to_confirm=[ws1_name]))
+
+    def test_workspace_loader_load_workspaces_not_called_when_load_workspaces_is_false(self):
+        loader = projectloader.ProjectLoader('.recfile')
+
+        loader.workspace_loader = mock.MagicMock()
+
+        loader.load_project(working_directory, load_workspaces=False)
+        self.assertEqual(0, loader.workspace_loader.load_workspaces.call_count)
 
 
 class ProjectReaderTest(unittest.TestCase):

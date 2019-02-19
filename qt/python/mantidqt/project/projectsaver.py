@@ -38,7 +38,7 @@ class ProjectSaver(object):
             return
 
         # Check this isn't saving a blank project file
-        if workspace_to_save is None and plots_to_save is None and interfaces_to_save is None:
+        if (workspace_to_save is None and plots_to_save is None and interfaces_to_save is None) and save_workspaces:
             logger.warning("Can not save an empty project")
             return
 

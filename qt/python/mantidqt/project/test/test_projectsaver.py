@@ -6,20 +6,23 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package
 #
-import unittest
-import tempfile
-
-import os
 import json
-from shutil import rmtree
-
 import matplotlib.backend_bases
 import matplotlib.figure
+import os
+import sys
+import tempfile
+import unittest
+from shutil import rmtree
 
 from mantid.api import AnalysisDataService as ADS
 from mantid.simpleapi import CreateSampleWorkspace
 from mantidqt.project import projectsaver
 
+if sys.version_info.major >= 3:
+    from unittest import mock
+else:
+    import mock
 
 project_file_ext = ".mtdproj"
 working_directory = tempfile.mkdtemp()
@@ -138,6 +141,18 @@ class ProjectSaverTest(unittest.TestCase):
         f = open(file_name, "r")
         file_dict = json.load(f)
         self.assertDictEqual(plots_dict, file_dict["plots"][0])
+
+    @mock.patch('mantidqt.project.projectsaver.ProjectWriter')
+    def test_save_workspaces_path_when_false(self, pwriter):
+        CreateSampleWorkspace(OutputWorkspace='ws1')
+        file_ext = '.recfile'
+        saver = projectsaver.ProjectSaver(file_ext)
+
+        saver.save_project(directory=working_directory, save_workspaces=False)
+
+        self.assertEqual(pwriter.call_args, mock.call(interfaces_to_save=[], plots_to_save=[],
+                                                      project_file_ext=file_ext, save_location=working_directory,
+                                                      workspace_names=['ws1']))
 
 
 class ProjectWriterTest(unittest.TestCase):

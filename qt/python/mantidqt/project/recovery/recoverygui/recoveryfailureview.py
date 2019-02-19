@@ -7,15 +7,20 @@
 #  This file is part of the mantidqt package
 #
 
-from qtpy.QtWidgets import QDialog, QHeaderView, QTableWidgetItem
+from __future__ import (absolute_import, unicode_literals)
+
 from qtpy.QtCore import Signal, Slot, Qt
-from mantidqt.utils.qt import load_ui
+from qtpy.QtWidgets import QDialog, QHeaderView, QTableWidgetItem
+
 from mantid.kernel import logger
+from mantidqt.utils.qt import load_ui
 
 
 class RecoveryFailureView(QDialog):
-    def __init__(self, presenter):
-        super(RecoveryFailureView, self).__init__()
+    abort_project_recovery_script = Signal()
+
+    def __init__(self, presenter, parent=None):
+        super(RecoveryFailureView, self).__init__(parent=parent)
         self.ui = load_ui(__file__, "RecoveryFailure.ui", baseinstance=self)
         self.ui.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.ui.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
@@ -52,12 +57,6 @@ class RecoveryFailureView(QDialog):
 
     def change_start_mantid_button(self, string):
         self.ui.pushButton_3.setText(string)
-
-    ######################################################
-    #  Signals
-    ######################################################
-
-    abort_project_recovery_script = Signal()
 
     ######################################################
     #  Slots

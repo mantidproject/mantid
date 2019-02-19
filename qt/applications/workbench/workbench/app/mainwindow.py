@@ -220,7 +220,8 @@ class MainWindow(QMainWindow):
         self.project = Project(GlobalFigureManager, find_all_windows_that_are_savable)
         self.project_recovery = ProjectRecovery(globalfiguremanager=GlobalFigureManager,
                                                 multifileinterpreter=self.editor.editors,
-                                                window_finder=find_all_windows_that_are_savable)
+                                                window_finder=find_all_windows_that_are_savable,
+                                                main_window=self)
 
         # uses default configuration as necessary
         self.readSettings(CONF)

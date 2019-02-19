@@ -7,25 +7,25 @@
 #  This file is part of the mantidqt package
 #
 
-import os
-import getpass
-from threading import Timer
-import time
-import datetime
-from glob import glob
-import shutil
-import psutil
+from __future__ import (absolute_import, unicode_literals)
 
+import datetime
+import getpass
+import os
+import psutil
+import shutil
+import time
+from glob import glob
 from qtpy.QtCore import QMetaObject, Q_ARG, Qt
 from qtpy.QtWidgets import QApplication
+from threading import Timer
 
-from mantid.kernel import ConfigService, logger, UsageService
 from mantid.api import AnalysisDataService as ADS, WorkspaceGroup
-from mantidqt.project.projectsaver import ProjectSaver
-from mantidqt.project.projectloader import ProjectLoader
-from mantidqt.project.recovery.recoverygui.projectrecoverypresenter import ProjectRecoveryPresenter
+from mantid.kernel import ConfigService, logger, UsageService
 from mantid.simpleapi import AlgorithmManager
-
+from mantidqt.project.projectloader import ProjectLoader
+from mantidqt.project.projectsaver import ProjectSaver
+from mantidqt.project.recovery.recoverygui.projectrecoverypresenter import ProjectRecoveryPresenter
 
 SAVING_TIME_KEY = "projectRecovery.secondsBetween"
 NO_OF_CHECKPOINTS_KEY = "projectRecovery.numberOfCheckpoints"
@@ -33,26 +33,31 @@ RECOVERY_ENABLED_KEY = "projectRecovery.enabled"
 
 
 class ProjectRecovery(object):
-    def __init__(self, globalfiguremanager, window_finder, multifileinterpreter):
-        self.recovery_directory = os.path.join(ConfigService.getAppDataDirectory(), "workbench-recovery")
+    recovery_ordered_recovery_file_name = "ordered_recovery.py"
+    recovery_workbench_recovery_name = "workbench-recovery"
+    recovery_file_ext = ".recfile"
+
+    def __init__(self, globalfiguremanager, window_finder, multifileinterpreter, main_window=None):
+        self.recovery_directory = os.path.join(ConfigService.getAppDataDirectory(),
+                                               self.recovery_workbench_recovery_name)
         self.recovery_directory_hostname = os.path.join(self.recovery_directory, getpass.getuser())
         self.recovery_directory_pid = os.path.join(self.recovery_directory_hostname, str(os.getpid()))
 
         self.recovery_order_workspace_history_file = os.path.join(ConfigService.getAppDataDirectory(),
-                                                                  "ordered_recovery.py")
+                                                                  self.recovery_ordered_recovery_file_name)
 
-        self.recovery_enabled = ConfigService[RECOVERY_ENABLED_KEY]
-        self.maximum_num_checkpoints = ConfigService[NO_OF_CHECKPOINTS_KEY]
+        self.recovery_enabled = ("true" == ConfigService[RECOVERY_ENABLED_KEY].lower())
+        self.maximum_num_checkpoints = int(ConfigService[NO_OF_CHECKPOINTS_KEY])
         self.time_between_saves = int(ConfigService[SAVING_TIME_KEY])  # seconds
 
         self._timer_thread = Timer(self.time_between_saves, self.recovery_save)
 
-        self.recovery_file_ext = ".recfile"
         self.lock_file_name = "projectrecovery.lock"
 
         self.gfm = globalfiguremanager
         self.interface_finding_func = window_finder
         self.multi_file_interpreter = multifileinterpreter
+        self.main_window = main_window
 
         # To ignore an algorithm in project recovery please put it's name here. e.g. MonitorLiveData is ignored because
         # StartLiveData is the only one that is needed to restart this workspace.
@@ -127,7 +132,7 @@ class ProjectRecovery(object):
         paths.sort(key=lambda x: os.path.getmtime(x))
         return paths
 
-    def get_pid_folder_to_be_used_to_load_a_checkpoint_from(self):
+    def get_pid_folder_to_load_a_checkpoint_from(self):
         # Get all pids and order them
         paths = self.listdir_fullpath(self.recovery_directory_hostname)
         paths = self.sort_by_last_modified(paths)
@@ -173,7 +178,7 @@ class ProjectRecovery(object):
 
             # Create directory for save location
             recovery_dir = os.path.join(self.recovery_directory_pid,
-                                        datetime.datetime.fromtimestamp(time.time()).strftime('%d-%m-%YT%H-%M-%S'))
+                                        datetime.datetime.now().strftime('%d-%m-%YT%H-%M-%S'))
             if not os.path.exists(recovery_dir):
                 os.makedirs(recovery_dir)
 
@@ -307,13 +312,13 @@ class ProjectRecovery(object):
     def attempt_recovery(self):
         self.recovery_presenter = ProjectRecoveryPresenter(self)
 
-        failure = self.recovery_presenter.start_recovery_view()
+        success = self.recovery_presenter.start_recovery_view(parent=self.main_window)
 
-        if failure:
-            while failure:
-                failure = self.recovery_presenter.start_recovery_failure()
+        if not success:
+            while not success:
+                success = self.recovery_presenter.start_recovery_failure(parent=self.main_window)
 
-        pid_dir = self.get_pid_folder_to_be_used_to_load_a_checkpoint_from()
+        pid_dir = self.get_pid_folder_to_load_a_checkpoint_from()
         # Restart project recovery as we stay synchronous
         self.clear_all_unused_checkpoints(pid_dir)
         self.start_recovery_thread()
@@ -381,7 +386,8 @@ class ProjectRecovery(object):
         QApplication.processEvents()
 
     def _run_script_in_open_editor(self):
-        # Make sure that exec_error is connected with sig_exec_error on the multifileinterpreter
+        # Make sure that exec_error is connected with sig_exec_error on the multifileinterpreter,
+        # to flag the checkpoint as failed to load if an error occurs.
         self.multi_file_interpreter.current_editor().sig_exec_error.connect(self.recovery_presenter.model.exec_error)
 
         # Actually execute the current tab

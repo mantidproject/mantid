@@ -7,6 +7,10 @@
 #  This file is part of the mantidqt package
 #
 
+from __future__ import (absolute_import, unicode_literals)
+
+from qtpy.QtCore import Qt
+
 from mantidqt.project.recovery.recoverygui.projectrecoverymodel import ProjectRecoveryModel
 from mantidqt.project.recovery.recoverygui.projectrecoverywidgetview import ProjectRecoveryWidgetView
 from mantidqt.project.recovery.recoverygui.recoveryfailureview import RecoveryFailureView
@@ -14,7 +18,7 @@ from mantidqt.project.recovery.recoverygui.recoveryfailureview import RecoveryFa
 
 class ProjectRecoveryPresenter(object):
     def __init__(self, project_recovery, model=None):
-        self.model = model if model else ProjectRecoveryModel(self.project_recovery, self)
+        self.model = model if model else ProjectRecoveryModel(project_recovery, self)
         self.current_view = None
 
         self.project_recovery = project_recovery
@@ -23,30 +27,38 @@ class ProjectRecoveryPresenter(object):
         self.allow_start_mantid_normally = True
         self.open_selected_in_editor_selected = False
 
-    def start_recovery_view(self):
+    def start_recovery_view(self, parent=None):
+        """
+        This function will start the recovery view and should be invoked if a recovery needs to be attempted
+        :return: False if it was a failure, True if it was a successful recovery or starting mantid normally.
+        """
         # Only start this view if there is nothing as current_view
         if self.current_view is not None:
             raise RuntimeError("Project Recovery: A view is already open")
 
         try:
-            self.current_view = ProjectRecoveryWidgetView(self)
+            self.current_view = ProjectRecoveryWidgetView(self, parent)
             self.current_view.exec_()
         except Exception as e:
             if isinstance(e, KeyboardInterrupt):
                 raise
-            return True
-
-        # If start mantid normally we want to cancel
-        if self.start_mantid_normally_called:
             return False
 
-        # If run has failed and recovery is not running
-        if self.model.get_failed_run():
+        # If start mantid normally has been clicked we want to cancel recovery attempts
+        if self.start_mantid_normally_called:
             return True
 
-        return False
+        # If run has failed and recovery is not running then start the recovery GUI
+        if self.model.has_failed_run:
+            return False
 
-    def start_recovery_failure(self):
+        return True
+
+    def start_recovery_failure(self, parent=None):
+        """
+        This function will start the recovery failure view and should be invoked upon a failure to recover
+        :return: False if it was a failure, True if it was a successful recovery or starting mantid normally.
+        """
         if self.current_view is not None:
             raise RuntimeError("Project Recovery: A view is already open")
 
@@ -56,22 +68,22 @@ class ProjectRecoveryPresenter(object):
         self._set_checkpoint_tried_values_from_rows(rows)
 
         try:
-            self.current_view = RecoveryFailureView(self)
+            self.current_view = RecoveryFailureView(self, parent)
             self.current_view.exec_()
         except Exception as e:
             if isinstance(e, KeyboardInterrupt):
                 raise
-            return True
-
-        # If start mantid normally we want to cancel
-        if self.start_mantid_normally_called:
             return False
 
-        # If run has failed and recovery is not running
-        if self.model.get_failed_run():
+        # If start mantid normally has been clicked we want to cancel recovery attempts
+        if self.start_mantid_normally_called:
             return True
 
-        return False
+        # If run has failed and recovery is not running then start the recovery GUI
+        if self.model.has_failed_run:
+            return False
+
+        return True
 
     def _set_checkpoint_tried_values_from_rows(self, rows):
         for ii in range(0, self.get_number_of_checkpoints()):
@@ -85,34 +97,38 @@ class ProjectRecoveryPresenter(object):
             return row
 
     def recover_last(self):
-        if self.model.has_recovery_started():
+        if self.model.is_recovery_running:
             return
         checkpoint_to_recover = self.model.decide_last_checkpoint()
         self.model.recover_selected_checkpoint(checkpoint_to_recover)
 
     def open_last_in_editor(self):
-        if self.model.has_recovery_started():
+        if self.model.is_recovery_running:
             return
         checkpoint_to_recover = self.model.decide_last_checkpoint()
         self.model.open_selected_in_editor(checkpoint_to_recover)
 
     def start_mantid_normally(self):
-        # If a recovery has been started then
+        # If mantid has started a recovery this will be False, thus meaning it is the "Cancel" button which will in turn
+        # abort the script and then "Start mantid normally"
         if not self.allow_start_mantid_normally:
+            # If current_view is none then we can't run the following code so return, it could clear up checkpoints that
+            # shouldn't be cleared
             if self.current_view is None:
                 return
-            self.current_view.emit_abort_script()
+            else:
+                self.current_view.emit_abort_script()
 
         self.start_mantid_normally_called = True
         self.model.start_mantid_normally()
 
     def recover_selected_checkpoint(self, selected):
-        if self.model.has_recovery_started():
+        if self.model.is_recovery_running:
             return
         self.model.recover_selected_checkpoint(selected)
 
     def open_selected_checkpoint_in_editor(self, selected):
-        if self.model.has_recovery_started():
+        if self.model.is_recovery_running:
             return
         self.open_selected_in_editor_selected = True
         self.model.open_selected_in_editor(selected)

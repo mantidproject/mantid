@@ -7,12 +7,13 @@
 #  This file is part of the mantidqt package
 #
 
-import sys
+from __future__ import (absolute_import, unicode_literals)
 
+import sys
 from qtpy.QtWidgets import QTableWidgetItem
 
-from mantidqt.utils.qt.test import GuiTest
 from mantidqt.project.recovery.recoverygui.recoveryfailureview import RecoveryFailureView
+from mantidqt.utils.qt.test import GuiTest
 
 if sys.version_info.major >= 3:
     from unittest import mock

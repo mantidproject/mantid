@@ -7,15 +7,20 @@
 #  This file is part of the mantidqt package
 #
 
-from qtpy.QtWidgets import QDialog, QHeaderView, QTableWidgetItem
+from __future__ import (absolute_import, unicode_literals)
+
 from qtpy.QtCore import Signal, Slot, Qt
-from mantidqt.utils.qt import load_ui
+from qtpy.QtWidgets import QDialog, QHeaderView, QTableWidgetItem
+
 from mantid.kernel import logger
+from mantidqt.utils.qt import load_ui
 
 
 class ProjectRecoveryWidgetView(QDialog):
-    def __init__(self, presenter):
-        super(ProjectRecoveryWidgetView, self).__init__()
+    abort_project_recovery_script = Signal()
+
+    def __init__(self, presenter, parent=None):
+        super(ProjectRecoveryWidgetView, self).__init__(parent=parent)
         self.ui = load_ui(__file__, "ProjectRecoveryWidget.ui", baseinstance=self)
         self.presenter = presenter
 
@@ -52,14 +57,9 @@ class ProjectRecoveryWidgetView(QDialog):
         self.ui.tableWidget.setItem(0, 1, QTableWidgetItem(row[1]))
 
     ######################################################
-    #  Signals
-    ######################################################
-
-    abort_project_recovery_script = Signal()
-
-    ######################################################
     #  Slots
     ######################################################
+
     @Slot(int)
     def update_progress_bar(self, new_value):
         self.ui.progressBar.setValue(new_value)

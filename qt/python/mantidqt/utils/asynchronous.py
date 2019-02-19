@@ -72,7 +72,8 @@ class BlockingAsyncTask(AsyncTask):
     def __init__(self, target, args=(), kwargs=None, success_cb=None, error_cb=None, blocking_cb=None,
                  period_secs=0.05):
         """Run the target in a separate thread and block the calling thread
-        until execution is complete.
+        until execution is complete,the calling thread is blocked, except that
+        the blocking_cb will be executed in every period in it.
 
         :param target: A Python callable object
         :param args: Arguments to pass to the callable
