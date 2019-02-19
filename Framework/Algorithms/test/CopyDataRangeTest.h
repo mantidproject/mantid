@@ -14,6 +14,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/NumericAxis.h"
 #include "MantidHistogramData/HistogramE.h"
 #include "MantidHistogramData/HistogramY.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -31,6 +32,27 @@ namespace {
 std::string const INPUT_NAME("Input_Workspace");
 std::string const DESTINATION_NAME("Destination_Workspace");
 auto const OUTPUT_NAME("Output_Workspace");
+
+NumericAxis *getNumericAxis(int const &numberOfLabels,
+                            std::vector<double> const &values) {
+  auto axis = new NumericAxis(numberOfLabels);
+  for (auto index = 0; index < numberOfLabels; ++index)
+    axis->setValue(index, values[index]);
+  return axis;
+}
+
+MatrixWorkspace_sptr
+createWorkspaceWithBinValues(int const &numberOfSpectra,
+                             std::vector<double> const &values,
+                             int const &numberOfBins) {
+  if (static_cast<std::size_t>(numberOfBins) == values.size()) {
+    auto workspace = create2DWorkspace(numberOfSpectra, numberOfBins);
+    workspace->replaceAxis(0, getNumericAxis(numberOfBins, values));
+    return workspace;
+  } else
+    throw std::runtime_error(
+        "The number of bins is not equal to the number of labels");
+}
 
 struct SetUpADSWithWorkspace {
 
@@ -53,7 +75,7 @@ MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) {
 IAlgorithm_sptr setUpAlgorithm(MatrixWorkspace_sptr inputWorkspace,
                                MatrixWorkspace_sptr destWorkspace,
                                int const &specMin, int const &specMax,
-                               int const &xMin, int const &xMax,
+                               double const &xMin, double const &xMax,
                                int const &yInsertionIndex,
                                int const &xInsertionIndex,
                                std::string const &outputName) {
@@ -72,8 +94,8 @@ IAlgorithm_sptr setUpAlgorithm(MatrixWorkspace_sptr inputWorkspace,
 
 IAlgorithm_sptr setUpAlgorithm(std::string const &inputName,
                                std::string const &destName, int const &specMin,
-                               int const &specMax, int const &xMin,
-                               int const &xMax, int const &yInsertionIndex,
+                               int const &specMax, double const &xMin,
+                               double const &xMax, int const &yInsertionIndex,
                                int const &xInsertionIndex,
                                std::string const &outputName) {
   return setUpAlgorithm(getADSMatrixWorkspace(inputName),
@@ -150,8 +172,8 @@ public:
 
   void test_that_the_algorithm_does_not_throw_when_given_valid_properties() {
     setUpWorkspaces(INPUT_NAME, DESTINATION_NAME);
-    auto algorithm = setUpAlgorithm(INPUT_NAME, DESTINATION_NAME, 0, 3, 0, 3, 0,
-                                    0, OUTPUT_NAME);
+    auto algorithm = setUpAlgorithm(INPUT_NAME, DESTINATION_NAME, 0, 3, 2.1,
+                                    2.4, 0, 0, OUTPUT_NAME);
 
     TS_ASSERT_THROWS_NOTHING(algorithm->execute());
   }
@@ -159,13 +181,14 @@ public:
   void
   test_that_the_algorithm_produces_an_output_workspace_with_the_correct_data() {
     setUpWorkspaces(INPUT_NAME, DESTINATION_NAME);
-    auto algorithm = setUpAlgorithm(INPUT_NAME, DESTINATION_NAME, 0, 3, 0, 3, 0,
-                                    0, OUTPUT_NAME);
+    auto algorithm = setUpAlgorithm(INPUT_NAME, DESTINATION_NAME, 0, 3, 2.1,
+                                    2.4, 0, 0, OUTPUT_NAME);
 
     algorithm->execute();
 
     auto const output = getADSMatrixWorkspace(OUTPUT_NAME);
-    auto const expectedOutput = create2DWorkspace(5, 5);
+    auto const expectedOutput =
+        createWorkspaceWithBinValues(5, {2.1, 2.2, 2.3, 2.4, 2.5}, 5);
     populateOutputWorkspace(
         expectedOutput,
         {1.1, 1.2,  1.3, 1.4, 29.0, 1.1, 1.2,  1.3,  1.4,  29.0, 1.1,  1.2, 1.3,
@@ -178,13 +201,14 @@ public:
   void
   test_that_the_algorithm_produces_an_output_workspace_with_the_correct_data_when_the_start_indices_are_not_zero() {
     setUpWorkspaces(INPUT_NAME, DESTINATION_NAME);
-    auto algorithm = setUpAlgorithm(INPUT_NAME, DESTINATION_NAME, 2, 3, 1, 3, 2,
-                                    2, OUTPUT_NAME);
+    auto algorithm = setUpAlgorithm(INPUT_NAME, DESTINATION_NAME, 2, 3, 2.2,
+                                    2.4, 2, 2, OUTPUT_NAME);
 
     algorithm->execute();
 
     auto const output = getADSMatrixWorkspace(OUTPUT_NAME);
-    auto const expectedOutput = create2DWorkspace(5, 5);
+    auto const expectedOutput =
+        createWorkspaceWithBinValues(5, {2.1, 2.2, 2.3, 2.4, 2.5}, 5);
     populateOutputWorkspace(
         expectedOutput, {25.0, 26.0, 27.0, 28.0, 29.0, 25.0, 26.0, 27.0, 28.0,
                          29.0, 25.0, 26.0, 1.2,  1.3,  1.4,  25.0, 26.0, 1.2,
@@ -197,13 +221,14 @@ public:
   void
   test_that_the_algorithm_produces_an_output_workspace_with_the_correct_data_when_transfering_a_block_which_is_a_single_line() {
     setUpWorkspaces(INPUT_NAME, DESTINATION_NAME);
-    auto algorithm = setUpAlgorithm(INPUT_NAME, DESTINATION_NAME, 2, 2, 0, 4, 0,
-                                    0, OUTPUT_NAME);
+    auto algorithm = setUpAlgorithm(INPUT_NAME, DESTINATION_NAME, 2, 2, 2.1,
+                                    2.5, 0, 0, OUTPUT_NAME);
 
     algorithm->execute();
 
     auto const output = getADSMatrixWorkspace(OUTPUT_NAME);
-    auto const expectedOutput = create2DWorkspace(5, 5);
+    auto const expectedOutput =
+        createWorkspaceWithBinValues(5, {2.1, 2.2, 2.3, 2.4, 2.5}, 5);
     populateOutputWorkspace(
         expectedOutput, {1.1,  1.2,  1.3,  1.4,  1.5,  25.0, 26.0, 27.0, 28.0,
                          29.0, 25.0, 26.0, 27.0, 28.0, 29.0, 25.0, 26.0, 27.0,
@@ -214,11 +239,31 @@ public:
   }
 
   void
+  test_that_the_algorithm_changes_the_input_workspace_with_the_correct_data_when_the_output_and_destination_workspaces_are_the_same() {
+    setUpWorkspaces(INPUT_NAME, DESTINATION_NAME);
+    auto algorithm = setUpAlgorithm(INPUT_NAME, DESTINATION_NAME, 0, 3, 2.1,
+                                    2.4, 0, 0, DESTINATION_NAME);
+
+    algorithm->execute();
+
+    auto const output = getADSMatrixWorkspace(DESTINATION_NAME);
+    auto const expectedOutput =
+        createWorkspaceWithBinValues(5, {2.1, 2.2, 2.3, 2.4, 2.5}, 5);
+    populateOutputWorkspace(
+        expectedOutput,
+        {1.1, 1.2,  1.3, 1.4, 29.0, 1.1, 1.2,  1.3,  1.4,  29.0, 1.1,  1.2, 1.3,
+         1.4, 29.0, 1.1, 1.2, 1.3,  1.4, 29.0, 25.0, 26.0, 27.0, 28.0, 29.0},
+        {0.1, 0.2, 0.3, 0.4, 2.9, 0.1, 0.2, 0.3, 0.4, 2.9, 0.1, 0.2, 0.3,
+         0.4, 2.9, 0.1, 0.2, 0.3, 0.4, 2.9, 2.5, 2.6, 2.7, 2.8, 2.9});
+    TS_ASSERT(!compareWorkspaces(output, expectedOutput));
+  }
+
+  void
   test_that_the_algorithm_throws_when_provided_a_StartWorkspaceIndex_which_is_larger_than_the_EndWorkspaceIndex() {
     setUpWorkspaces(INPUT_NAME, DESTINATION_NAME);
 
-    auto algorithm = setUpAlgorithm(INPUT_NAME, DESTINATION_NAME, 2, 1, 0, 3, 0,
-                                    0, OUTPUT_NAME);
+    auto algorithm = setUpAlgorithm(INPUT_NAME, DESTINATION_NAME, 2, 1, 2.1,
+                                    2.4, 0, 0, OUTPUT_NAME);
 
     TS_ASSERT_THROWS(algorithm->execute(), std::runtime_error);
   }
@@ -227,28 +272,18 @@ public:
   test_that_the_algorithm_throws_when_provided_an_EndWorkspaceIndex_which_is_larger_than_the_number_of_histograms_in_the_input_workspace() {
     setUpWorkspaces(INPUT_NAME, DESTINATION_NAME);
 
-    auto algorithm = setUpAlgorithm(INPUT_NAME, DESTINATION_NAME, 0, 5, 0, 3, 0,
-                                    0, OUTPUT_NAME);
+    auto algorithm = setUpAlgorithm(INPUT_NAME, DESTINATION_NAME, 0, 5, 2.1,
+                                    2.4, 0, 0, OUTPUT_NAME);
 
     TS_ASSERT_THROWS(algorithm->execute(), std::runtime_error);
   }
 
   void
-  test_that_the_algorithm_throws_when_provided_a_xMinIndex_which_is_larger_than_the_xMaxIndex() {
+  test_that_the_algorithm_throws_when_provided_a_xMin_which_comes_later_on_than_larger_than_xMax() {
     setUpWorkspaces(INPUT_NAME, DESTINATION_NAME);
 
-    auto algorithm = setUpAlgorithm(INPUT_NAME, DESTINATION_NAME, 0, 3, 4, 3, 0,
-                                    0, OUTPUT_NAME);
-
-    TS_ASSERT_THROWS(algorithm->execute(), std::runtime_error);
-  }
-
-  void
-  test_that_the_algorithm_throws_when_provided_an_xMaxIndex_which_is_larger_than_the_number_of_bins_in_the_input_workspace() {
-    setUpWorkspaces(INPUT_NAME, DESTINATION_NAME);
-
-    auto algorithm = setUpAlgorithm(INPUT_NAME, DESTINATION_NAME, 0, 3, 0, 5, 0,
-                                    0, OUTPUT_NAME);
+    auto algorithm = setUpAlgorithm(INPUT_NAME, DESTINATION_NAME, 0, 3, 2.4,
+                                    2.1, 0, 0, OUTPUT_NAME);
 
     TS_ASSERT_THROWS(algorithm->execute(), std::runtime_error);
   }
@@ -257,8 +292,8 @@ public:
   test_that_the_algorithm_throws_when_provided_a_block_of_data_which_will_not_fit_in_the_destination_workspace_in_the_y_direction() {
     setUpWorkspaces(INPUT_NAME, DESTINATION_NAME);
 
-    auto algorithm = setUpAlgorithm(INPUT_NAME, DESTINATION_NAME, 0, 3, 0, 3, 4,
-                                    0, OUTPUT_NAME);
+    auto algorithm = setUpAlgorithm(INPUT_NAME, DESTINATION_NAME, 0, 3, 2.1,
+                                    2.4, 4, 0, OUTPUT_NAME);
 
     TS_ASSERT_THROWS(algorithm->execute(), std::runtime_error);
   }
@@ -267,8 +302,8 @@ public:
   test_that_the_algorithm_throws_when_provided_a_block_of_data_which_will_not_fit_in_the_destination_workspace_in_the_x_direction() {
     setUpWorkspaces(INPUT_NAME, DESTINATION_NAME);
 
-    auto algorithm = setUpAlgorithm(INPUT_NAME, DESTINATION_NAME, 0, 3, 0, 3, 0,
-                                    4, OUTPUT_NAME);
+    auto algorithm = setUpAlgorithm(INPUT_NAME, DESTINATION_NAME, 0, 3, 2.1,
+                                    2.4, 0, 4, OUTPUT_NAME);
 
     TS_ASSERT_THROWS(algorithm->execute(), std::runtime_error);
   }
@@ -279,13 +314,15 @@ private:
       int inputNumberOfSpectra = 5, int destNumberOfSpectra = 5,
       int inputNumberOfBins = 5, int destNumberOfBins = 5,
       std::vector<double> const &inputYValues = {1.1, 1.2, 1.3, 1.4, 1.5},
+      std::vector<double> const &inputXValues = {2.1, 2.2, 2.3, 2.4, 2.5},
       std::vector<double> const &inputEValues = {0.1, 0.2, 0.3, 0.4, 0.5},
       std::vector<double> const &destYValues = {25.0, 26.0, 27.0, 28.0, 29.0},
+      std::vector<double> const &destXValues = {2.1, 2.2, 2.3, 2.4, 2.5},
       std::vector<double> const &destEValues = {2.5, 2.6, 2.7, 2.8, 2.9}) {
-    auto const inputWorkspace =
-        create2DWorkspace(inputNumberOfSpectra, inputNumberOfBins);
-    auto const destWorkspace =
-        create2DWorkspace(destNumberOfSpectra, destNumberOfBins);
+    auto const inputWorkspace = createWorkspaceWithBinValues(
+        inputNumberOfSpectra, inputXValues, inputNumberOfBins);
+    auto const destWorkspace = createWorkspaceWithBinValues(
+        destNumberOfSpectra, destXValues, destNumberOfBins);
 
     populateWorkspace(inputWorkspace, inputYValues, inputEValues);
     populateWorkspace(destWorkspace, destYValues, destEValues);

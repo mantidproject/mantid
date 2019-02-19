@@ -68,7 +68,7 @@ class IndirectReplaceFitResult(PythonAlgorithm):
     _output_workspace = None
 
     _end_row = None
-    _column_index = None
+    _bin_value = None
     _insertion_x_index = None
 
     _result_group = None
@@ -152,7 +152,7 @@ class IndirectReplaceFitResult(PythonAlgorithm):
         self._output_workspace = self.getPropertyValue('OutputWorkspace')
 
         self._end_row = get_ads_workspace(self._single_fit_workspace).getNumberHistograms() - 1
-        self._column_index = len(get_ads_workspace(self._single_fit_workspace).readY(0)) - 1
+        self._bin_value = get_ads_workspace(self._single_fit_workspace).readX(0)[0]
         self._insertion_x_index = get_x_insertion_index(get_ads_workspace(self._input_workspace),
                                                         get_ads_workspace(self._single_fit_workspace))
 
@@ -172,8 +172,8 @@ class IndirectReplaceFitResult(PythonAlgorithm):
         copy_algorithm.setAlwaysStoreInADS(True)
 
         args = {"InputWorkspace": self._single_fit_workspace, "DestWorkspace": self._input_workspace,
-                "StartWorkspaceIndex": 0, "EndWorkspaceIndex": self._end_row, "XMin": self._column_index,
-                "XMax": self._column_index, "InsertionYIndex": 0, "InsertionXIndex": self._insertion_x_index,
+                "StartWorkspaceIndex": 0, "EndWorkspaceIndex": self._end_row, "XMin": self._bin_value,
+                "XMax": self._bin_value, "InsertionYIndex": 0, "InsertionXIndex": self._insertion_x_index,
                 "OutputWorkspace": self._output_workspace}
 
         for key, value in args.items():
