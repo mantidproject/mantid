@@ -21,7 +21,6 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 using API::IConfiguredAlgorithm_sptr;
-using Mantid::API::IAlgorithm_sptr;
 
 // unnamed namespace
 namespace {
