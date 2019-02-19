@@ -40,8 +40,11 @@ public:
   Q_INVOKABLE void setFunction(const QString &funStr);
   /// Get the number of datasets to fit to
   Q_INVOKABLE int getNumberOfDatasets() const;
+  /// Get the string for a single-domain function currently displayed in the function browser
+  Q_INVOKABLE QString getSingleFunctionStr() const;
+
+  /// Get the global multi-domain function. Even if there is only 1 dataset.
   Mantid::API::MultiDomainFunction_sptr getFittingFunction() const;
-  //Mantid::API::IFunction_sptr compositeFunction() const;
   /// Get the minimizer
   std::string minimizer(bool withProperties = false) const;
   /// Get the max number of iterations

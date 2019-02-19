@@ -117,7 +117,7 @@ private slots:
   void plotSelectedSpectra();
   void editLocalParameterValues(const QString &parName);
 
-  void respondToChangeOfSpectraRange(size_t);
+  void respondToChangeOfSpectraRange(std::size_t);
   void respondToSingleResolutionLoaded();
   void respondToDataChanged();
   void respondToSingleDataViewSelected();

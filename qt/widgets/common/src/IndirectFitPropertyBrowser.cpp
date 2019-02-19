@@ -104,6 +104,11 @@ IndirectFitPropertyBrowser::getFittingFunction() const {
   }
 }
 
+QString IndirectFitPropertyBrowser::getSingleFunctionStr() const
+{
+  return m_functionBrowser->getFunctionString();
+}
+
 //IFunction_sptr IndirectFitPropertyBrowser::compositeFunction() const {
 //  return getFittingFunction();
 //}

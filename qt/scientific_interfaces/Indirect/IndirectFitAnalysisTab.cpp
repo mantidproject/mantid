@@ -116,7 +116,7 @@ void IndirectFitAnalysisTab::connectPlotPresenter() {
   connect(m_plotPresenter.get(), SIGNAL(endXChanged(double)), this,
           SLOT(setDataTableEndX(double)));
   connect(m_plotPresenter.get(), SIGNAL(selectedFitDataChanged(std::size_t)),
-    this, SLOT(respondToSelectedFitDataChanged(size_t)));
+    this, SLOT(respondToSelectedFitDataChanged(std::size_t)));
   connect(m_plotPresenter.get(), SIGNAL(noFitDataSelected()),
     this, SLOT(respondToNoFitDataSelected()));
   connect(m_plotPresenter.get(), SIGNAL(plotSpectrumChanged(std::size_t)), this,
@@ -128,8 +128,8 @@ void IndirectFitAnalysisTab::connectPlotPresenter() {
 }
 
 void IndirectFitAnalysisTab::connectSpectrumPresenter() {
-  connect(m_spectrumPresenter.get(), SIGNAL(spectraChanged(size_t)),
-    this, SLOT(respondToChangeOfSpectraRange(size_t)));
+  connect(m_spectrumPresenter.get(), SIGNAL(spectraChanged(std::size_t)),
+    this, SLOT(respondToChangeOfSpectraRange(std::size_t)));
 
 
   connect(m_spectrumPresenter.get(), SIGNAL(maskChanged(const std::string &)),
