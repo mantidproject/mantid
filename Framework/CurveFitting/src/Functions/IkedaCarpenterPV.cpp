@@ -408,10 +408,6 @@ double IkedaCarpenterPV::intensity() const {
   API::IntegrationResult result =
       integrator.integrate(*this, interval.first, interval.second);
 
-  if (!result.success) {
-    return 0.0;
-  }
-
   return result.result;
 }
 
