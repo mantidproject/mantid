@@ -17,6 +17,11 @@ Description
 This algorithm loads a DNS legacy data file into a :ref:`Workspace2D <Workspace2D>`. The loader rotates the detector bank
 in the position given in the data file.
 
+.. note::
+
+   If the data file contains wrong neutron wavelength, the correct wavelength (in Angstrom) can be specified in the **Wavelength** field.
+   Leave it 0 if you are not sure. In this case wavelength will be read from the data file.
+
 **Output**
 
 - For diffraction mode data (only one time channel) output is the :ref:`Workspace2D <Workspace2D>` with the X-axis in the wavelength units.
@@ -121,7 +126,7 @@ Usage
    The elastic channel number is: 65.
 
 
-**Example 3 - Load DNS TOF mode .d_dat file and specify the elastic channel:**
+**Example 3 - Load DNS TOF mode .d_dat file and specify the elastic channel and wavelength:**
 
 .. testcode:: LoadDNSLegacyEx3
 
@@ -129,7 +134,7 @@ Usage
    datafile = 'dnstof.d_dat'
 
    # Load dataset
-   ws = LoadDNSLegacy(datafile, ElasticChannel=65, Normalization='no')
+   ws = LoadDNSLegacy(datafile, ElasticChannel=65, Normalization='no', Wavelength=4.2)
 
    # let's check that the elastic peak is at the right position
    from scipy.constants import m_n, h
