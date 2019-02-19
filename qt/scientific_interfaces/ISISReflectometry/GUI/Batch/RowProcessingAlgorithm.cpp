@@ -255,7 +255,7 @@ IConfiguredAlgorithm_sptr createConfiguredAlgorithm(Batch const &model,
   alg->setChild(true);
 
   // Set the algorithm properties from the model
-  auto properties = AlgorithmRuntimeProps();
+  auto properties = createAlgorithmRuntimeProps(model, row);
   updateEventProperties(properties, model.slicing());
   updateExperimentProperties(properties, model.experiment());
   updatePerThetaDefaultProperties(properties,
@@ -272,6 +272,18 @@ IConfiguredAlgorithm_sptr createConfiguredAlgorithm(Batch const &model,
   auto jobAlgorithm = boost::make_shared<BatchJobAlgorithm>(
       alg, properties, outputWorkspaceProperties, &row);
   return jobAlgorithm;
+}
+
+AlgorithmRuntimeProps createAlgorithmRuntimeProps(Batch const &model,
+                                                  Row const &row) {
+  auto properties = AlgorithmRuntimeProps();
+  updateEventProperties(properties, model.slicing());
+  updateExperimentProperties(properties, model.experiment());
+  updatePerThetaDefaultProperties(properties,
+                                  model.defaultsForTheta(row.theta()));
+  updateInstrumentProperties(properties, model.instrument());
+  updateRowProperties(properties, row);
+  return properties;
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt
