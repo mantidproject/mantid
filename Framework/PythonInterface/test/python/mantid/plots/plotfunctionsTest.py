@@ -135,11 +135,9 @@ class PlotFunctionsTest(unittest.TestCase):
         self.assertAlmostEqual(8.0, ax.get_ylim()[1])
 
     def test_update_colorplot_datalimits_for_pcolormesh(self):
-        pass
         self._do_update_colorplot_datalimits(funcs.pcolormesh)
 
     def test_update_colorplot_datalimits_for_pcolor(self):
-        pass
         self._do_update_colorplot_datalimits(funcs.pcolor)
 
     def test_update_colorplot_datalimits_for_imshow(self):

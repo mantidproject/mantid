@@ -411,7 +411,7 @@ def _get_indices(new_lim, dim, extent):
     """
     pmin = int(numpy.floor(float(dim) / (extent[1] - extent[0]) * (new_lim[0] - extent[0])))
     pmax = int(numpy.ceil(float(dim) / (extent[1] - extent[0]) * (new_lim[1] - extent[0])))
-    pmin = numpy.clip(pmin,0, dim)
+    pmin = numpy.clip(pmin, 0, dim)
     pmax = numpy.clip(pmax, 0, dim)
     if pmax == pmin:
         if pmax + 1 < dim:
