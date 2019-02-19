@@ -39,7 +39,7 @@ REFLECTIONS_DICT = {
                    'energy_bins': [-1500, 3.2, 5000],
                    'q_bins': [0.9, 0.2, 5.7],
                    'banks': 'bank1,bank3,bank4',
-                   'mask_file': 'BASIS_Mask_default_111.xml',
+                   'mask_file': 'BASIS_Mask_default_333.xml',
                    'parameter_file': 'BASIS_silicon_333_Parameters.xml',
                    'instrument_definition_file': 'BASIS_Definition_Si333.xml',
                    'default_energy': 18.7434,
