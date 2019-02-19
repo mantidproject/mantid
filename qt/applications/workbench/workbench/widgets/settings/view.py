@@ -14,7 +14,7 @@ from qtpy.QtWidgets import QMessageBox
 
 from mantidqt.utils.qt import load_ui
 
-form, base = load_ui(__file__, "ui/main.ui")
+form, base = load_ui(__file__, "main.ui")
 
 
 class SettingsView(base, form):
