@@ -1631,13 +1631,13 @@ public:
 
     IFunction_sptr out = fit.getProperty("Function");
     // test that all parameters are non-negative
-    TS_ASSERT_DELTA(out->getParameter("I"), 3140.1444, 1.0);
+    TS_ASSERT_DELTA(out->getParameter("I"), 3140.1444, 40.0);
     TS_ASSERT_DELTA(out->getParameter("Alpha1"), 1.4276, 0.005);
-    TS_ASSERT_DELTA(out->getParameter("Beta0"), 39.0084, 0.02);
-    TS_ASSERT_DELTA(out->getParameter("Kappa"), 45.8482, 0.005);
-    TS_ASSERT_DELTA(out->getParameter("SigmaSquared"), 100.921, 0.1);
+    TS_ASSERT_DELTA(out->getParameter("Beta0"), 40.0000, 6.03);
+    TS_ASSERT_DELTA(out->getParameter("Kappa"), 45.8482, 0.2);
+    TS_ASSERT_DELTA(out->getParameter("SigmaSquared"), 100.921, 1.0);
     TS_ASSERT_DELTA(out->getParameter("Gamma"), 0.05, 0.05);
-    TS_ASSERT_DELTA(out->getParameter("X0"), 50.102, 0.1);
+    TS_ASSERT_DELTA(out->getParameter("X0"), 50.0, 0.2);
   }
 
   void test_Function_IkedaCarpenterPV_FullInstrument_DeltaE() {
