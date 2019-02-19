@@ -20,7 +20,7 @@ from sans.algorithm_detail.strip_end_nans_and_infs import strip_end_nans
 from sans.common.constants import EMPTY_NAME
 from sans.common.enums import (DetectorType, MaskingQuadrant, FindDirectionEnum)
 from sans.common.file_information import get_instrument_paths_for_sans_file
-from sans.common.general_functions import create_child_algorithm, get_log_plot
+from sans.common.general_functions import create_child_algorithm
 from sans.common.xml_parsing import get_named_elements_from_ipf_file
 from sans.state.state_base import create_deserialized_sans_state_from_property_manager
 
@@ -258,7 +258,8 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
 
     def _plot_quartiles_matplotlib(self, output_workspaces, sample_scatter):
         title = '{}_beam_centre_finder'.format(sample_scatter)
-        fig = get_log_plot(window_title=title)
+        ax_properties = {'xscale': 'log',
+                         'yscale': 'log'}
 
         plot_kwargs = {"scalex": True,
                        "scaley": True}
@@ -266,10 +267,8 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
         if not isinstance(output_workspaces, list):
             output_workspaces = [output_workspaces]
 
-        # Send the workspaces to matplotlib plotting function, not the workspace names
-        workspaces = AnalysisDataService.Instance().retrieveWorkspaces(output_workspaces, unrollGroups=True)
-
-        plot(workspaces, wksp_indices=[0], fig=fig, overplot=True, plot_kwargs=plot_kwargs)
+        plot(output_workspaces, wksp_indices=[0], ax_properties=ax_properties, overplot=True,
+             plot_kwargs=plot_kwargs, window_title=title)
 
     def _get_cloned_workspace(self, workspace_name):
         workspace = self.getProperty(workspace_name).value
