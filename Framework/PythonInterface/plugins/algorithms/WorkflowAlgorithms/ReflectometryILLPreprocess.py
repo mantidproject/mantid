@@ -357,16 +357,11 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         inputFiles = inputFiles.replace(',', '+')
         if inputFiles:
             mergedWSName = self._names.withSuffix('merged')
-            linePosition = 127.5
-            if not self.getProperty(Prop.LINE_POSITION_INPUT).isDefault:
-                linePosition = self.getProperty(Prop.LINE_POSITION_INPUT).value
             loadOption = {
                 'XUnit': 'TimeOfFlight',
-                'BeamCentre': linePosition
+                'BeamCentre': 127.5,
+                'BraggAngle': 0.0
             }
-            if not self.getProperty(Prop.TWO_THETA).isDefault:
-                theta = self.getProperty(Prop.TWO_THETA).value / 2.
-                loadOption.update({'BraggAngle': theta})
             # MergeRunsOptions are defined by the parameter files and will not be modified here!
             ws = LoadAndMerge(
                 Filename=inputFiles,
@@ -420,7 +415,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         return ws, linePosition
 
     def _addSampleLogInfo(self, ws, linePosition):
-        """Add foreground indices to the sample logs, names start with reduction."""
+        """Add foreground indices and two theta to the sample logs, names start with reduction."""
         run = ws.run()
         # Add foreground start and end workspace indices to the sample logs of ws.
         hws = self._foregroundWidths()
@@ -433,29 +428,35 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         run.addProperty(common.SampleLogs.FOREGROUND_START, int(startIndex), True)
         run.addProperty(common.SampleLogs.FOREGROUND_CENTRE, int(beamPosIndex), True)
         run.addProperty(common.SampleLogs.FOREGROUND_END, int(endIndex), True)
+        # Need to add reduction.two_theta if user given since loader will not do this
+        if not self.getProperty(Prop.TWO_THETA).isDefault:
+            twoTheta = self.getProperty(Prop.TWO_THETA).value
+            run.addProperty(common.SampleLogs.TWO_THETA, float(twoTheta), 'degree', True)
 
     def _moveDetector(self, ws, linePosition):
         """Perform detector position correction for direct and reflected beams."""
-        if self.getProperty(Prop.INPUT_WS).isDefault and \
-                not self.getProperty(Prop.LINE_POSITION_INPUT).isDefault and \
-                not self.getProperty(Prop.TWO_THETA).isDefault:
-            return ws
         detectorMovedWSName = self._names.withSuffix('detectors_moved')
+        twoTheta = ws.run().getProperty(common.SampleLogs.TWO_THETA).value
         args = {
             'InputWorkspace': ws,
             'OutputWorkspace': detectorMovedWSName,
-            'TwoTheta': ws.run().getLogData(common.SampleLogs.TWO_THETA).value,
+            'TwoTheta': twoTheta,
             'EnableLogging': self._subalgLogging,
             'DetectorComponentName': 'detector',
             'PixelSize': common.pixelSize(self._instrumentName),
             'DetectorCorrectionType': 'RotateAroundSample',
-            'DetectorFacesSample': True,
-            'LinePosition': linePosition
+            'DetectorFacesSample': True
         }
-        directLineWS = self.getProperty(Prop.DIRECT_LINE_WORKSPACE).value
-        if not self.getProperty(Prop.DIRECT_LINE_WORKSPACE).isDefault:
+        if not self.getProperty(Prop.TWO_THETA).isDefault:
+            # We need to subtract an offsetAngle from user given TwoTheta
+            args['LinePosition'] = linePosition
+        elif self.getProperty(Prop.DIRECT_LINE_WORKSPACE).isDefault:
+            logs = ws.run()
+            args['TwoTheta'] = twoTheta + common.deflectionAngle(logs)
+        else:
+            directLineWS = self.getProperty(Prop.DIRECT_LINE_WORKSPACE).value
             args['DirectLineWorkspace'] = directLineWS
-            args['DirectLinePosition'] = directLineWS.run().getLogData(common.SampleLogs.LINE_POSITION).value
+            args['DirectLinePosition'] = directLineWS.run().getProperty(common.SampleLogs.LINE_POSITION).value
         detectorMovedWS = SpecularReflectionPositionCorrect(**args)
         self._cleanup.cleanup(ws)
         return detectorMovedWS

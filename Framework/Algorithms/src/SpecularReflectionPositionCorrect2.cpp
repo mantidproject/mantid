@@ -178,6 +178,10 @@ SpecularReflectionPositionCorrect2::validateInputs() {
 void SpecularReflectionPositionCorrect2::exec() {
 
   MatrixWorkspace_const_sptr inWS = this->getProperty("InputWorkspace");
+  MatrixWorkspace_sptr outWS = this->getProperty("OutputWorkspace");
+  if (outWS != inWS) {
+    outWS = inWS->clone();
+  }
 
   // Sample
   const V3D samplePosition = declareSamplePosition(*inWS);
@@ -204,7 +208,6 @@ void SpecularReflectionPositionCorrect2::exec() {
                                    alongDir, beamOffsetOld)
           : twoThetaFromProperties(*inWS, l2);
 
-  MatrixWorkspace_sptr outWS = inWS->clone();
   correctDetectorPosition(outWS, detectorName, detectorID, twoThetaInRad,
                           correctionType, *referenceFrame, samplePosition,
                           sampleToDetector, beamOffsetOld);
@@ -336,13 +339,15 @@ Kernel::V3D SpecularReflectionPositionCorrect2::declareDetectorPosition(
  */
 V3D SpecularReflectionPositionCorrect2::declareSamplePosition(
     const MatrixWorkspace &ws) {
+  V3D position;
   const std::string sampleName = getProperty("SampleComponentName");
   const auto inst = ws.getInstrument();
   IComponent_const_sptr sample = inst->getComponentByName(sampleName);
   if (sample)
-    return sample->getPos();
+    position = sample->getPos();
   else
-    return ws.spectrumInfo().samplePosition();
+    position = ws.spectrumInfo().samplePosition();
+  return position;
 }
 
 /**

@@ -100,6 +100,15 @@ def pixelSize(instrumentName):
     return 0.001195 if instrumentName == 'D17' else 0.0012
 
 
+def deflectionAngle(sampleLogs):
+    """Return the deflection angle in degree."""
+    if sampleLogs.hasProperty('CollAngle.actual_coll_angle'):
+        # Must be FIGARO
+        return sampleLogs.getProperty('CollAngle.actual_coll_angle').value
+    else:
+        return 0.0
+
+
 def slitSizeLogEntry(instrumentName, slitNumber):
     """Return the sample log entry which contains the slit size for the given slit"""
     if slitNumber not in [1, 2]:

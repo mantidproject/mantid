@@ -280,6 +280,8 @@ void LoadILLReflectometry::exec() {
   placeSlits();
   // When other components are in-place
   convertTofToWavelength();
+  // Add sample logs reduction.two_theta and Facility
+  addSampleLogs();
   // Set the output workspace property
   setProperty("OutputWorkspace", m_localWorkspace);
 } // exec
@@ -335,6 +337,7 @@ void LoadILLReflectometry::initNames(NeXus::NXEntry &entry) {
     m_chopper2Name = "Chopper2";
   } else if (m_instrument == Supported::FIGARO) {
     m_detectorAngleName = "VirtualAxis.DAN_actual_angle";
+    m_sampleAngleName = "CollAngle.actual_coll_angle";
     m_offsetFrom = "CollAngle";
     // FIGARO: find out which of the four choppers are used
     NXFloat firstChopper =
@@ -399,7 +402,6 @@ void LoadILLReflectometry::initWorkspace(
     m_localWorkspace->getAxis(0)->unit() =
         UnitFactory::Instance().create("TOF");
   m_localWorkspace->setYUnitLabel("Counts");
-  m_localWorkspace->mutableRun().addProperty("Facility", std::string("ILL"));
 }
 
 /**
@@ -711,6 +713,18 @@ double LoadILLReflectometry::reflectometryPeak() {
   return centre;
 }
 
+/// Add sample logs reduction.two_theta and Facility
+void LoadILLReflectometry::addSampleLogs() {
+  // Add two theta to the sample logs
+  m_localWorkspace->mutableRun().addProperty("reduction.two_theta",
+                                             m_detectorAngle);
+  m_localWorkspace->mutableRun()
+      .getProperty("reduction.two_theta")
+      ->setUnits("degree");
+  // Add Facility to the sample logs
+  m_localWorkspace->mutableRun().addProperty("Facility", std::string("ILL"));
+}
+
 /** Compute the detector rotation angle around origin and optionally set the
  *  OutputBeamPosition property.
  *  @return a rotation angle
@@ -727,7 +741,6 @@ double LoadILLReflectometry::detectorRotation() {
     p.peakCentre = peakCentre;
     setProperty("OutputBeamPosition", createPeakPositionTable(p));
   }
-  double twoTheta{m_detectorAngle};
   double detectorAngle{0.0};
   if (!isDefault("BraggAngle")) {
     if (posTable) {
@@ -735,18 +748,17 @@ double LoadILLReflectometry::detectorRotation() {
           << "Ignoring DirectBeamPosition, using BraggAngle instead.";
     }
     const double userAngle = getProperty("BraggAngle");
-    twoTheta = 2. * userAngle;
     const double offset =
         offsetAngle(peakCentre, PIXEL_CENTER, m_detectorDistance);
     m_log.debug() << "Beam offset angle: " << offset << '\n';
-    detectorAngle = twoTheta - offset;
+    detectorAngle = 2. * userAngle - offset;
   } else if (!posTable) {
     const double deflection = collimationAngle();
     if (deflection != 0) {
       g_log.debug() << "Using incident deflection angle (degrees): "
                     << deflection << '\n';
     }
-    detectorAngle = twoTheta + deflection;
+    detectorAngle = m_detectorAngle + deflection;
   } else {
     const auto dbPeak = parseBeamPositionTable(*posTable);
     const double dbOffset =
@@ -756,11 +768,6 @@ double LoadILLReflectometry::detectorRotation() {
   }
   m_log.debug() << "Direct beam calibrated detector angle (degrees): "
                 << detectorAngle << '\n';
-  // Add two theta to the sample logs
-  m_localWorkspace->mutableRun().addProperty("reduction.two_theta", twoTheta);
-  m_localWorkspace->mutableRun()
-      .getProperty("reduction.two_theta")
-      ->setUnits("degree");
   return detectorAngle;
 }
 
@@ -823,7 +830,7 @@ void LoadILLReflectometry::placeSlits() {
   double slit1ToSample{0.0};
   double slit2ToSample{0.0};
   if (m_instrument == Supported::FIGARO) {
-    const double deflectionAngle = doubleFromRun("CollAngle.actual_coll_angle");
+    const double deflectionAngle = doubleFromRun(m_sampleAngleName);
     const double offset = m_sampleZOffset / std::cos(degToRad(deflectionAngle));
     // For the moment, the position information for S3 is missing in the
     // NeXus files of FIGARO. Using a hard-coded distance; should be fixed
@@ -858,9 +865,8 @@ void LoadILLReflectometry::placeSource() {
 
 /// Return the incident neutron deflection angle.
 double LoadILLReflectometry::collimationAngle() const {
-  return m_instrument == Supported::FIGARO
-             ? doubleFromRun("CollAngle.actual_coll_angle")
-             : 0.;
+  return m_instrument == Supported::FIGARO ? doubleFromRun(m_sampleAngleName)
+                                           : 0.;
 }
 
 /// Return the detector center angle.
@@ -913,7 +919,7 @@ double LoadILLReflectometry::sampleDetectorDistance() const {
   const double beamY = detectorY + pixelOffset * std::cos(degToRad(detAngle));
   const double sht1 = mmToMeter(doubleFromRun("SHT1.value"));
   const double beamZ = detectorZ - pixelOffset * std::sin(degToRad(detAngle));
-  const double deflectionAngle = doubleFromRun("CollAngle.actual_coll_angle");
+  const double deflectionAngle = doubleFromRun(m_sampleAngleName);
   return std::hypot(beamY - sht1, beamZ) -
          m_sampleZOffset / std::cos(degToRad(deflectionAngle));
 }
@@ -943,7 +949,7 @@ double LoadILLReflectometry::sourceSampleDistance() const {
   } else {
     const double chopperDist =
         mmToMeter(doubleFromRun("ChopperSetting.chopperpair_sample_distance"));
-    const double deflectionAngle = doubleFromRun("CollAngle.actual_coll_angle");
+    const double deflectionAngle = doubleFromRun(m_sampleAngleName);
     return chopperDist + m_sampleZOffset / std::cos(degToRad(deflectionAngle));
   }
 }
