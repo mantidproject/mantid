@@ -30,7 +30,7 @@ Usage
 
    # Copy some of the data from the input workspace over to the destination workspace
    output = CopyDataRange(InputWorkspace=demo_ws1, DestWorkspace=demo_ws2, StartWorkspaceIndex=0, EndWorkspaceIndex=0,
-                          XMinIndex=0, XMaxIndex=1, InsertionYIndex=0, InsertionXIndex=0)
+                          XMin=1, XMax=2, InsertionYIndex=0, InsertionXIndex=0)
 
    # Display the output workpace data
    print("Output x data: {0}".format(output.readX(0)))

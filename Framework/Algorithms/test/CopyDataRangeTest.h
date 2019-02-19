@@ -54,19 +54,6 @@ createWorkspaceWithBinValues(int const &numberOfSpectra,
         "The number of bins is not equal to the number of labels");
 }
 
-struct SetUpADSWithWorkspace {
-
-  template <typename T>
-  SetUpADSWithWorkspace(std::string const &inputWSName, T const &workspace) {
-    AnalysisDataService::Instance().addOrReplace(inputWSName, workspace);
-  }
-
-  template <typename T>
-  void addOrReplace(std::string const &workspaceName, T const &workspace) {
-    AnalysisDataService::Instance().addOrReplace(workspaceName, workspace);
-  }
-};
-
 MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) {
   return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
       workspaceName);
@@ -160,18 +147,11 @@ public:
 
   static void destroySuite(CopyDataRangeTest *suite) { delete suite; }
 
-  void setUp() override {
-    m_ads = std::make_unique<SetUpADSWithWorkspace>("Name",
-                                                    create2DWorkspace(3, 4));
-  }
+  void setUp() override { setUpWorkspaces(INPUT_NAME, DESTINATION_NAME); }
 
-  void tearDown() override {
-    AnalysisDataService::Instance().clear();
-    m_ads.reset();
-  }
+  void tearDown() override { AnalysisDataService::Instance().clear(); }
 
   void test_that_the_algorithm_does_not_throw_when_given_valid_properties() {
-    setUpWorkspaces(INPUT_NAME, DESTINATION_NAME);
     auto algorithm = setUpAlgorithm(INPUT_NAME, DESTINATION_NAME, 0, 3, 2.1,
                                     2.4, 0, 0, OUTPUT_NAME);
 
@@ -180,7 +160,6 @@ public:
 
   void
   test_that_the_algorithm_produces_an_output_workspace_with_the_correct_data() {
-    setUpWorkspaces(INPUT_NAME, DESTINATION_NAME);
     auto algorithm = setUpAlgorithm(INPUT_NAME, DESTINATION_NAME, 0, 3, 2.1,
                                     2.4, 0, 0, OUTPUT_NAME);
 
@@ -200,7 +179,6 @@ public:
 
   void
   test_that_the_algorithm_produces_an_output_workspace_with_the_correct_data_when_the_start_indices_are_not_zero() {
-    setUpWorkspaces(INPUT_NAME, DESTINATION_NAME);
     auto algorithm = setUpAlgorithm(INPUT_NAME, DESTINATION_NAME, 2, 3, 2.2,
                                     2.4, 2, 2, OUTPUT_NAME);
 
@@ -220,7 +198,6 @@ public:
 
   void
   test_that_the_algorithm_produces_an_output_workspace_with_the_correct_data_when_transfering_a_block_which_is_a_single_line() {
-    setUpWorkspaces(INPUT_NAME, DESTINATION_NAME);
     auto algorithm = setUpAlgorithm(INPUT_NAME, DESTINATION_NAME, 2, 2, 2.1,
                                     2.5, 0, 0, OUTPUT_NAME);
 
@@ -240,7 +217,6 @@ public:
 
   void
   test_that_the_algorithm_changes_the_input_workspace_with_the_correct_data_when_the_output_and_destination_workspaces_are_the_same() {
-    setUpWorkspaces(INPUT_NAME, DESTINATION_NAME);
     auto algorithm = setUpAlgorithm(INPUT_NAME, DESTINATION_NAME, 0, 3, 2.1,
                                     2.4, 0, 0, DESTINATION_NAME);
 
@@ -260,51 +236,36 @@ public:
 
   void
   test_that_the_algorithm_throws_when_provided_a_StartWorkspaceIndex_which_is_larger_than_the_EndWorkspaceIndex() {
-    setUpWorkspaces(INPUT_NAME, DESTINATION_NAME);
-
     auto algorithm = setUpAlgorithm(INPUT_NAME, DESTINATION_NAME, 2, 1, 2.1,
                                     2.4, 0, 0, OUTPUT_NAME);
-
     TS_ASSERT_THROWS(algorithm->execute(), std::runtime_error);
   }
 
   void
   test_that_the_algorithm_throws_when_provided_an_EndWorkspaceIndex_which_is_larger_than_the_number_of_histograms_in_the_input_workspace() {
-    setUpWorkspaces(INPUT_NAME, DESTINATION_NAME);
-
     auto algorithm = setUpAlgorithm(INPUT_NAME, DESTINATION_NAME, 0, 5, 2.1,
                                     2.4, 0, 0, OUTPUT_NAME);
-
     TS_ASSERT_THROWS(algorithm->execute(), std::runtime_error);
   }
 
   void
   test_that_the_algorithm_throws_when_provided_a_xMin_which_comes_later_on_than_larger_than_xMax() {
-    setUpWorkspaces(INPUT_NAME, DESTINATION_NAME);
-
     auto algorithm = setUpAlgorithm(INPUT_NAME, DESTINATION_NAME, 0, 3, 2.4,
                                     2.1, 0, 0, OUTPUT_NAME);
-
     TS_ASSERT_THROWS(algorithm->execute(), std::runtime_error);
   }
 
   void
   test_that_the_algorithm_throws_when_provided_a_block_of_data_which_will_not_fit_in_the_destination_workspace_in_the_y_direction() {
-    setUpWorkspaces(INPUT_NAME, DESTINATION_NAME);
-
     auto algorithm = setUpAlgorithm(INPUT_NAME, DESTINATION_NAME, 0, 3, 2.1,
                                     2.4, 4, 0, OUTPUT_NAME);
-
     TS_ASSERT_THROWS(algorithm->execute(), std::runtime_error);
   }
 
   void
   test_that_the_algorithm_throws_when_provided_a_block_of_data_which_will_not_fit_in_the_destination_workspace_in_the_x_direction() {
-    setUpWorkspaces(INPUT_NAME, DESTINATION_NAME);
-
     auto algorithm = setUpAlgorithm(INPUT_NAME, DESTINATION_NAME, 0, 3, 2.1,
                                     2.4, 0, 4, OUTPUT_NAME);
-
     TS_ASSERT_THROWS(algorithm->execute(), std::runtime_error);
   }
 
@@ -327,11 +288,9 @@ private:
     populateWorkspace(inputWorkspace, inputYValues, inputEValues);
     populateWorkspace(destWorkspace, destYValues, destEValues);
 
-    m_ads->addOrReplace(inputName, inputWorkspace);
-    m_ads->addOrReplace(destName, destWorkspace);
+    AnalysisDataService::Instance().addOrReplace(inputName, inputWorkspace);
+    AnalysisDataService::Instance().addOrReplace(destName, destWorkspace);
   }
-
-  std::unique_ptr<SetUpADSWithWorkspace> m_ads;
 };
 
 #endif /* MANTID_COPYDATARANGETEST_H_ */

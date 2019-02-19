@@ -60,8 +60,10 @@ void copyDataRange(MatrixWorkspace_const_sptr inputWorkspace,
                    MatrixWorkspace_sptr destWorkspace, int const &specMin,
                    int const &specMax, double const &xMin, double const &xMax,
                    int yInsertionIndex, int const &xInsertionIndex) {
-  int const xMinIndex = getBinIndexOfValue(inputWorkspace, xMin);
-  int const xMaxIndex = getBinIndexOfValue(inputWorkspace, xMax);
+  int const xMinIndex =
+      static_cast<int>(getBinIndexOfValue(inputWorkspace, xMin));
+  int const xMaxIndex =
+      static_cast<int>(getBinIndexOfValue(inputWorkspace, xMax));
   copyDataRange(inputWorkspace, destWorkspace, specMin, specMax, xMinIndex,
                 xMaxIndex, yInsertionIndex, xInsertionIndex);
 }
