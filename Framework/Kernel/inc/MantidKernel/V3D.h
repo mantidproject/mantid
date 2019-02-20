@@ -28,10 +28,11 @@ Class for 3D vectors.
 @author Laurent C Chapon, ISIS, RAL
 @date 09/10/2007
 */
-class MANTID_KERNEL_DLL V3D {
+class MANTID_KERNEL_DLL V3D final {
 public:
-  V3D();
-  V3D(const double, const double, const double);
+  constexpr V3D() noexcept : x(0.), y(0.), z(0.) {}
+  constexpr V3D(double xx, double yy, double zz) noexcept
+      : x(xx), y(yy), z(zz) {}
 
   /// Convenience method for sorting list of V3D objects based on magnitude
   static bool CompareMagnitude(const Kernel::V3D &v1, const Kernel::V3D &v2);
@@ -50,10 +51,8 @@ public:
      @param v :: Vector to add
      @return *this+v;
   */
-  V3D operator+(const V3D &v) const {
-    V3D out(*this);
-    out += v;
-    return out;
+  constexpr V3D operator+(const V3D &v) const noexcept {
+    return V3D(x + v.x, y + v.y, z + v.z);
   }
 
   /**
@@ -61,10 +60,8 @@ public:
     @param v :: Vector to sub.
     @return *this-v;
   */
-  V3D operator-(const V3D &v) const {
-    V3D out(*this);
-    out -= v;
-    return out;
+  constexpr V3D operator-(const V3D &v) const noexcept {
+    return V3D(x - v.x, y - v.y, z - v.z);
   }
 
   /**
@@ -72,10 +69,8 @@ public:
     @param v :: Vector to sub.
     @return *this * v;
   */
-  V3D operator*(const V3D &v) const {
-    V3D out(*this);
-    out *= v;
-    return out;
+  constexpr V3D operator*(const V3D &v) const noexcept {
+    return V3D(x * v.x, y * v.y, z * v.z);
   }
 
   /**
@@ -83,10 +78,8 @@ public:
     @param v :: Vector to divide
     @return *this * v;
   */
-  V3D operator/(const V3D &v) const {
-    V3D out(*this);
-    out /= v;
-    return out;
+  constexpr V3D operator/(const V3D &v) const noexcept {
+    return V3D(x / v.x, y / v.y, z / v.z);
   }
 
   /**
@@ -94,7 +87,7 @@ public:
     @param v :: Vector to add.
     @return *this+=v;
   */
-  V3D &operator+=(const V3D &v) {
+  V3D &operator+=(const V3D &v) noexcept {
     x += v.x;
     y += v.y;
     z += v.z;
@@ -106,7 +99,7 @@ public:
     @param v :: Vector to sub.
     @return *this-v;
   */
-  V3D &operator-=(const V3D &v) {
+  V3D &operator-=(const V3D &v) noexcept {
     x -= v.x;
     y -= v.y;
     z -= v.z;
@@ -118,7 +111,7 @@ public:
     @param v :: Vector to multiply
     @return *this*=v;
   */
-  V3D &operator*=(const V3D &v) {
+  V3D &operator*=(const V3D &v) noexcept {
     x *= v.x;
     y *= v.y;
     z *= v.z;
@@ -130,7 +123,7 @@ public:
     @param v :: Vector to divide
     @return *this*=v;
   */
-  V3D &operator/=(const V3D &v) {
+  V3D &operator/=(const V3D &v) noexcept {
     x /= v.x;
     y /= v.y;
     z /= v.z;
@@ -142,10 +135,8 @@ public:
     @param D :: value to scale
     @return this * D
    */
-  V3D operator*(const double D) const {
-    V3D out(*this);
-    out *= D;
-    return out;
+  constexpr V3D operator*(const double D) const noexcept {
+    return V3D(x * D, y * D, z * D);
   }
 
   /**
@@ -153,10 +144,8 @@ public:
     @param D :: value to scale
     @return this / D
   */
-  V3D operator/(const double D) const {
-    V3D out(*this);
-    out /= D;
-    return out;
+  constexpr V3D operator/(const double D) const noexcept {
+    return V3D(x / D, y / D, z / D);
   }
 
   /**
@@ -164,7 +153,7 @@ public:
     @param D :: value to scale
     @return this *= D
   */
-  V3D &operator*=(const double D) {
+  V3D &operator*=(const double D) noexcept {
     x *= D;
     y *= D;
     z *= D;
@@ -177,7 +166,7 @@ public:
     @return this /= D
     \todo ADD TOLERANCE
   */
-  V3D &operator/=(const double D) {
+  V3D &operator/=(const double D) noexcept {
     if (D != 0.0) {
       x /= D;
       y /= D;
@@ -190,7 +179,7 @@ public:
     Negation
    * @return a vector with same magnitude but in opposite direction
    */
-  V3D operator-() const { return V3D(-x, -y, -z); }
+  constexpr V3D operator-() const noexcept { return V3D(-x, -y, -z); }
 
   /**
     Equals operator with tolerance factor
@@ -213,7 +202,7 @@ public:
     compare
     @return true if V is greater
    */
-  bool operator<(const V3D &V) const {
+  constexpr bool operator<(const V3D &V) const noexcept {
     if (x != V.x)
       return x < V.x;
     if (y != V.y)
@@ -222,7 +211,9 @@ public:
   }
 
   /// Comparison operator greater than.
-  bool operator>(const V3D &rhs) const { return rhs < *this; }
+  constexpr bool operator>(const V3D &rhs) const noexcept {
+    return rhs < *this;
+  }
 
   /**
     Sets the vector position from a triplet of doubles x,y,z
@@ -230,7 +221,7 @@ public:
     @param yy :: The Y coordinate
     @param zz :: The Z coordinate
   */
-  void operator()(const double xx, const double yy, const double zz) {
+  void operator()(const double xx, const double yy, const double zz) noexcept {
     x = xx;
     y = yy;
     z = zz;
@@ -247,23 +238,23 @@ public:
     Set is x position
     @param xx :: The X coordinate
   */
-  void setX(const double xx) { x = xx; }
+  void setX(const double xx) noexcept { x = xx; }
 
   /**
     Set is y position
     @param yy :: The Y coordinate
   */
-  void setY(const double yy) { y = yy; }
+  void setY(const double yy) noexcept { y = yy; }
 
   /**
     Set is z position
     @param zz :: The Z coordinate
   */
-  void setZ(const double zz) { z = zz; }
+  void setZ(const double zz) noexcept { z = zz; }
 
-  const double &X() const { return x; } ///< Get x
-  const double &Y() const { return y; } ///< Get y
-  const double &Z() const { return z; } ///< Get z
+  const double &X() const noexcept { return x; } ///< Get x
+  const double &Y() const noexcept { return y; } ///< Get y
+  const double &Z() const noexcept { return z; } ///< Get z
 
   /**
     Returns the axis value based in the index provided
@@ -310,14 +301,26 @@ public:
   /// Make a normalized vector (return norm value)
   double normalize(); // Vec3D::makeUnit
   double norm() const;
-  double norm2() const;
+  /**
+    Vector length without the sqrt
+    @return vec.length()
+  */
+  constexpr double norm2() const noexcept { return x * x + y * y + z * z; }
   /// transform vector into form, used to describe directions in
   /// crystallogaphical coodinate system
   double toMillerIndexes(double eps = 1.e-3);
-  /// Scalar product
-  double scalar_prod(const V3D &) const;
+  /**
+    Calculates the cross product. Returns (this * v).
+    @param v :: The second vector to include in the calculation
+    @return The cross product of the two vectors (this * v)
+  */
+  constexpr double scalar_prod(const V3D &v) const noexcept {
+    return x * v.x + y * v.y + z * v.z;
+  }
   /// Cross product (this * argument)
-  V3D cross_prod(const V3D &) const;
+  constexpr V3D cross_prod(const V3D &v) const noexcept {
+    return V3D(y * v.z - z * v.y, z * v.x - x * v.z, x * v.y - y * v.x);
+  }
   /// Distance (R) between two points defined as vectors
   double distance(const V3D &) const;
   /// Zenith (theta) angle between this and another vector

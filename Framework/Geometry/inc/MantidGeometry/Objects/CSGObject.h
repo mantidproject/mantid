@@ -11,11 +11,12 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidGeometry/DllConfig.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidGeometry/Rendering/ShapeInfo.h"
 
-#include "BoundingBox.h"
+#include <boost/optional.hpp>
 #include <map>
 #include <memory>
 
@@ -59,7 +60,7 @@ public:
   /// Assignment operator
   CSGObject &operator=(const CSGObject &);
   /// Destructor
-  virtual ~CSGObject();
+  ~CSGObject() override;
   /// Clone
   IObject *clone() const override { return new CSGObject(*this); }
 
@@ -228,7 +229,6 @@ private:
   /// Returns the volume.
   double singleShotMonteCarloVolume(const int shotSize,
                                     const size_t seed) const;
-
   /// Top rule [ Geometric scope of object]
   std::unique_ptr<Rule> TopRule;
   /// Object's bounding box
