@@ -313,6 +313,8 @@ class SANSILLReduction(PythonAlgorithm):
                     if self._mode != 'TOF':
                         beam_x = beam_ws.getRun().getLogData('BeamCenterX').value
                         beam_y = beam_ws.getRun().getLogData('BeamCenterY').value
+                        AddSampleLog(Workspace=ws, LogName='BeamCenterX', LogText=str(beam_x), LogType='Number')
+                        AddSampleLog(Workspace=ws, LogName='BeamCenterY', LogText=str(beam_y), LogType='Number')
                         MoveInstrumentComponent(Workspace=ws, X=-beam_x, Y=-beam_y, ComponentName='detector')
                     if not self._check_distances_match(mtd[ws], beam_ws):
                         self.log().warning('Different detector distances found for empty beam and sample runs!')

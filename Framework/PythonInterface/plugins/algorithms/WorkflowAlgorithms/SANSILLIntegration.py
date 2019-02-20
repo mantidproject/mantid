@@ -170,7 +170,7 @@ class SANSILLIntegration(PythonAlgorithm):
             self._integrate_iqxy()
         self.setProperty('OutputWorkspace', self._output_ws)
 
-    def _get_iq_binning(self, q_min, q_max, pixel_size, wavelength, l2, binning_factor):
+    def _get_iq_binning(self, q_min, q_max, pixel_size, wavelength, l2, binning_factor, offset):
         """
         Returns the OutputBinning string to be used in Q1DWeighted
         """
@@ -185,7 +185,7 @@ class SANSILLIntegration(PythonAlgorithm):
                 q_binning = self._mildner_carpenter_q_binning(q_min, q_max, binning_factor)
             else:
                 if wavelength != 0:
-                    q_binning = self._pixel_q_binning(q_min, q_max, pixel_size * binning_factor, wavelength, l2)
+                    q_binning = self._pixel_q_binning(q_min, q_max, pixel_size * binning_factor, wavelength, l2, offset)
                 else:
                     q_binning = self._tof_default_q_binning(q_min, q_max)
         elif len(binning) == 1:
@@ -195,7 +195,7 @@ class SANSILLIntegration(PythonAlgorithm):
                 q_binning = self._mildner_carpenter_q_binning(binning[0], binning[1], binning_factor)
             else:
                 if wavelength != 0:
-                    q_binning = self._pixel_q_binning(binning[0], binning[1], pixel_size * binning_factor, wavelength, l2)
+                    q_binning = self._pixel_q_binning(binning[0], binning[1], pixel_size * binning_factor, wavelength, l2, offset)
                 else:
                     q_binning = self._tof_default_q_binning(binning[0], binning[1])
         else:
@@ -208,7 +208,7 @@ class SANSILLIntegration(PythonAlgorithm):
         """
         return [q_min, -0.05, q_max]
 
-    def _pixel_q_binning(self, q_min, q_max, pixel_size, wavelength, l2):
+    def _pixel_q_binning(self, q_min, q_max, pixel_size, wavelength, l2, offset):
         """
         Returns q binning based on the size of a single pixel within the range of q_min and q_max
         Size is the largest size, i.e. max(height, width)
@@ -217,7 +217,7 @@ class SANSILLIntegration(PythonAlgorithm):
         q = 0.
         pixels = 1
         while (q < q_max):
-            two_theta = np.arctan(pixel_size * pixels / l2)
+            two_theta = np.arctan((pixel_size * pixels + offset) / l2)
             q = 4 * np.pi * np.sin(two_theta / 2) / wavelength
             bins.append(q)
             pixels += 1
@@ -317,7 +317,8 @@ class SANSILLIntegration(PythonAlgorithm):
         if run.hasProperty('wavelength'):
             wavelength = run.getLogData('wavelength').value
         l2 = run.getLogData('l2').value
-        q_binning = self._get_iq_binning(q_min, q_max, pixel_size, wavelength, l2, binning_factor)
+        beamY = run.getLogData('BeamCenterY').value
+        q_binning = self._get_iq_binning(q_min, q_max, pixel_size, wavelength, l2, binning_factor, -beamY)
         n_wedges = self.getProperty('NumberOfWedges').value
         pixel_division = self.getProperty('NPixelDivision').value
         gravity = wavelength == 0.
