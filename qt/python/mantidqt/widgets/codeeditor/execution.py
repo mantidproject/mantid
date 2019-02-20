@@ -9,18 +9,15 @@
 #
 from __future__ import (absolute_import, unicode_literals)
 
-# std imports
 import ctypes
 import inspect
 import time
 
-# 3rdparty imports
 from qtpy.QtCore import QObject, Signal
 from six import PY2, iteritems
 
-# local imports
-from mantidqt.widgets.codeeditor.inputsplitter import InputSplitter
 from mantidqt.utils.asynchronous import AsyncTask
+from mantidqt.widgets.codeeditor.inputsplitter import InputSplitter
 
 if PY2:
     from inspect import getargspec as getfullargspec
@@ -151,14 +148,14 @@ class PythonCodeExecution(QObject):
         :raises: Any error that the code generates
         """
         filename = '<string>' if filename is None else filename
-        compile(code_str, filename, mode='exec')
+        compile(code_str, filename, mode='exec', dont_inherit=True)
 
         sig_progress = self.sig_exec_progress
         for block in code_blocks(code_str):
             sig_progress.emit(block.lineno)
             # compile so we can set the filename
-            code_obj = compile(block.code_str, filename, mode='exec')
-            exec(code_obj, self.globals_ns, self.globals_ns)
+            code_obj = compile(block.code_str, filename, mode='exec', dont_inherit=True)
+            exec (code_obj, self.globals_ns, self.globals_ns)
 
     def generate_calltips(self):
         """
@@ -230,4 +227,4 @@ def code_blocks(code_str):
             # consistent each executed block needs to have the statements
             # on the same line as they are in the real code so we prepend
             # blank lines to make this so
-            isp.push('\n'*lineno_cur)
+            isp.push('\n' * lineno_cur)
