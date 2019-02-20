@@ -364,6 +364,14 @@ directories.each do |directory|
   addPythonLibrary(module_dir,"Contents/MacOS/")
 end
 
+# we need to pack new version of six from pip
+six_file = "#{pip_site_packages}/six.py"
+if !File.exist?(six_file)
+  p "Failed to copy six from pip site-packages!"
+  exit 1
+end
+copyFile(six_file)
+
 # Some versions of mpltool_kits are missing their __init__ file
 mpltoolkit_init = "Contents/MacOS/mpl_toolkits/__init__.py"
 if !File.exist?(mpltoolkit_init)
