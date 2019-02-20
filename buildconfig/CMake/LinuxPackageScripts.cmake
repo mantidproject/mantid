@@ -255,7 +255,7 @@ else ()
 endif ()
 
 # used by mantidplot and mantidworkbench
-set ( LOCAL_PYPATH "\${INSTALLDIR}/lib:\${INSTALLDIR}/plugins" )
+set ( LOCAL_PYPATH "\${INSTALLDIR}/bin:\${INSTALLDIR}/lib:\${INSTALLDIR}/plugins" )
 set ( SCRIPTSDIR "\${INSTALLDIR}/scripts")
 
 if (ENABLE_MANTIDPLOT)

@@ -7,12 +7,12 @@
 #include "MantidGeometry/Objects/MeshObject.h"
 #include "MantidGeometry/Objects/MeshObjectCommon.h"
 #include "MantidGeometry/Objects/Track.h"
+#include "MantidGeometry/RandomPoint.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheReader.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheWriter.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Material.h"
-#include "MantidKernel/PseudoRandomNumberGenerator.h"
 #include "MantidKernel/make_unique.h"
 
 #include <boost/make_shared.hpp>
@@ -390,20 +390,15 @@ Kernel::V3D
 MeshObject::generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
                                   const BoundingBox &activeRegion,
                                   const size_t maxAttempts) const {
-  size_t attempts(0);
-  while (attempts < maxAttempts) {
-    const double r1 = rng.nextValue();
-    const double r2 = rng.nextValue();
-    const double r3 = rng.nextValue();
-    auto pt = activeRegion.generatePointInside(r1, r2, r3);
-    if (this->isValid(pt))
-      return pt;
-    else
-      ++attempts;
-  };
-  throw std::runtime_error("Object::generatePointInObject() - Unable to "
-                           "generate point in object after " +
-                           std::to_string(maxAttempts) + " attempts");
+
+  const auto point =
+      RandomPoint::bounded(*this, rng, activeRegion, maxAttempts);
+  if (!point) {
+    throw std::runtime_error("Object::generatePointInObject() - Unable to "
+                             "generate point in object after " +
+                             std::to_string(maxAttempts) + " attempts");
+  }
+  return *point;
 }
 
 /**

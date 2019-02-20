@@ -24,7 +24,7 @@ from sans.common.enums import BatchReductionEntry, SANSInstrument
 from sans.gui_logic.models.table_model import TableModel, TableIndexModel
 from sans.test_helper.file_information_mock import SANSFileInformationMock
 
-if sys.version_info.major == 3:
+if sys.version_info.major >= 3:
     from unittest import mock
 else:
     import mock

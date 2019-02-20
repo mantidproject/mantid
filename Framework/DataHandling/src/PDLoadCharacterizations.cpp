@@ -397,6 +397,7 @@ void PDLoadCharacterizations::readCharInfo(std::ifstream &file,
       continue;
     if (line.substr(0, 1) == "#")
       continue;
+    g_log.debug(line);
     // parse the line
     std::vector<std::string> splitted;
     boost::split(splitted, line, boost::is_any_of("\t "),
@@ -539,10 +540,12 @@ void PDLoadCharacterizations::readVersion1(const std::string &filename,
   for (Strings::getLine(file, line); !file.eof();
        Strings::getLine(file, line)) {
     linenum += 1;
+    line = Strings::strip(line);
     if (line.empty())
       continue;
     if (line.substr(0, 1) == "#")
       continue;
+    g_log.debug(line);
 
     boost::smatch result;
     // all instances of table headers
