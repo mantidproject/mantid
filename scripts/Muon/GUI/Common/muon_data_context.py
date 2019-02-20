@@ -334,7 +334,7 @@ class MuonDataContext(object):
         for group_name in self._groups.keys():
             self.show_group_data(group_name)
 
-        if self.gui_variables['RebinType'] != 'None':
+        if self.do_rebin():
             for group_name in self._groups.keys():
                 self.show_group_data(group_name, rebin=True)
 
@@ -364,7 +364,7 @@ class MuonDataContext(object):
         for pair_name in self._pairs.keys():
             self.show_pair_data(pair_name)
 
-        if self.gui_variables['RebinType'] != 'None':
+        if self.do_rebin():
             for pair_name in self._pairs.keys():
                 self.show_pair_data(pair_name, rebin=True)
 
@@ -404,6 +404,12 @@ class MuonDataContext(object):
             return False
         else:
             return True
+
+    def do_rebin(self):
+        return (self.gui_variables['RebinType'] == 'Fixed' and
+                'RebinFixed' in self.gui_variables and self.gui_variables['RebinFixed']) or\
+               (self.gui_variables['RebinType'] == 'Variable' and
+                'RebinVariable' in self.gui_variables and self.gui_variables['RebinVariable'])
 
     class InstrumentNotifier(Observable):
         def __init__(self, outer):

@@ -33,6 +33,7 @@ class MuonDataContextTest(unittest.TestCase):
     def setUp(self):
         self.loaded_data = MuonLoadData()
         self.context = MuonDataContext(self.loaded_data)
+        self.context.instrument = 'EMU'
 
         filepath = FileFinder.findRuns('EMU00019489.nxs')[0]
 

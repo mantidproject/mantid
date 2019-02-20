@@ -77,6 +77,12 @@ class InstrumentWidgetModel(object):
     def add_variable_binning(self, rebin_params):
         self._data.gui_variables["RebinVariable"] = str(rebin_params)
 
+    def get_variable_binning(self):
+        if 'RebinVariable' in self._data.gui_variables:
+            return self._data.gui_variables['RebinVariable']
+        else:
+            return ''
+
     def update_binning_type(self, rebin_type):
         self._data.gui_variables['RebinType'] = rebin_type
 
@@ -110,3 +116,38 @@ class InstrumentWidgetModel(object):
         self._data.gui_variables['DeadTimeSource'] = 'FromADS'
         dtc = api.AnalysisDataService.retrieve(str(name))
         self._data.gui_variables["DeadTimeTable"] = dtc
+
+    def validate_variable_rebin_string(self, variable_rebin_string):
+        variable_rebin_list = variable_rebin_string.split(',')
+        try:
+            variable_rebin_list = [float(x) for x in variable_rebin_list]
+        except ValueError:
+            return (False, 'Rebin entries must be floats')
+
+        if len(variable_rebin_list) == 0:
+            return (False, 'Rebin list must be non-empty')
+
+        if len(variable_rebin_list) == 1:
+            return (True, '')
+
+        if len(variable_rebin_list) == 2:
+            if variable_rebin_list[1] > variable_rebin_list[0]:
+                return (True, '')
+            else:
+                return (False, 'End of range must be greater than start of range')
+
+        while len(variable_rebin_list) >= 3:
+            # We don't do any additional checking of logarithmic binning so just return true in this instance
+            if variable_rebin_list[1] <= 0:
+                return (True, '')
+
+            if (variable_rebin_list[2] - variable_rebin_list[0])%variable_rebin_list[1] != 0:
+                return (False, 'Step and bin boundaries must line up')
+
+            variable_rebin_list = variable_rebin_list[2:]
+
+        if len(variable_rebin_list) == 1:
+            return (True, '')
+        else:
+            return (False, 'Variable rebin string must have 2 or an odd number of entires')
+

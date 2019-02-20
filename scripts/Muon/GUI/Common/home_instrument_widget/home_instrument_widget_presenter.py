@@ -106,7 +106,12 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
 
     def handle_variable_rebin_changed(self):
         variable_bin_size = self._view.get_variable_bin_text()
-        self._model.add_variable_binning(variable_bin_size)
+        valid, message = self._model.validate_variable_rebin_string(variable_bin_size)
+        if not valid:
+            self._view.rebin_variable_edit.setText(self._model.get_variable_binning())
+            self._view.warning_popup(message)
+        else:
+            self._model.add_variable_binning(variable_bin_size)
 
     def handle_rebin_type_changed(self):
         rebin_type = self._view.rebin_selector.currentText()

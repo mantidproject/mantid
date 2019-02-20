@@ -123,11 +123,11 @@ class HomeTabInstrumentPresenterTest(unittest.TestCase):
 
         self.assertEqual(self.model._data.gui_variables['RebinFixed'], '50')
 
-    def test_that_changeing_variable_rebin_updates_fixed_binning_in_model(self):
-        self.view.rebin_variable_edit.setText('1,5,8,150')
+    def test_that_changeing_variable_rebin_updates_variable_binning_in_model(self):
+        self.view.rebin_variable_edit.setText('1,5,21')
         self.view.rebin_variable_edit.editingFinished.emit()
 
-        self.assertEqual(self.model._data.gui_variables['RebinVariable'], '1,5,8,150')
+        self.assertEqual(self.model._data.gui_variables['RebinVariable'], '1,5,21')
 
     def test_that_steps_only_accepts_a_single_integer(self):
         self.view.rebin_steps_edit.insert('1,0.1,70')
@@ -141,7 +141,6 @@ class HomeTabInstrumentPresenterTest(unittest.TestCase):
         self.view.rebin_variable_edit.editingFinished.emit()
 
         self.assertEqual(self.view.rebin_variable_edit.text(), '')
-        self.assertEqual(self.model._data.gui_variables['RebinVariable'], '')
 
     def test_that_rebin_type_starts_as_none(self):
         self.assertEqual(self.model._data.gui_variables['RebinType'], 'None')
@@ -264,6 +263,47 @@ class HomeTabInstrumentPresenterTest(unittest.TestCase):
         self.view.warning_popup.assert_not_called()
         self.assertEqual(self.view.deadtime_file_selector.currentText(), 'dead_time_table_name')
         self.assertEqual(handle_table_changed_mock.call_count, 3)
+
+    def test_validate_variable_rebin_string_allows_single_number(self):
+        result, message = self.model.validate_variable_rebin_string('0.034')
+
+        self.assertTrue(result)
+
+    def test_validate_variable_rebin_string_does_not_allow_empty(self):
+        result, message = self.model.validate_variable_rebin_string('')
+
+        self.assertFalse(result)
+
+    def test_validate_variable_rebin_string_does_not_allow_non_numbers(self):
+        result, message = self.model.validate_variable_rebin_string('abc')
+
+        self.assertFalse(result)
+
+    def test_validate_variable_rebin_string_requires_second_number_of_two_to_be_greater(self):
+        result, message = self.model.validate_variable_rebin_string('4,2')
+
+        self.assertFalse(result)
+
+        result, message = self.model.validate_variable_rebin_string('2,4')
+
+        self.assertTrue(result)
+
+    def test_validate_variable_rebin_string_of_length_greater_than_three_must_have_bins_line_up(self):
+        result, messag = self.model.validate_variable_rebin_string('1,5,21')
+
+        self.assertTrue(result)
+
+        result, message = self.model.validate_variable_rebin_string('1,5,20')
+
+        self.assertFalse(result)
+
+        result, message = self.model.validate_variable_rebin_string('1,5,21,4')
+
+        self.assertFalse(result)
+
+        result, message = self.model.validate_variable_rebin_string('1,-5,19')
+
+        self.assertTrue(result)
 
 
 if __name__ == '__main__':
