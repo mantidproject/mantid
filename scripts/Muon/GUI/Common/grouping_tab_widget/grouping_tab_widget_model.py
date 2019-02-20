@@ -18,16 +18,16 @@ class GroupingTabModel(object):
     def __init__(self, data=MuonDataContext()):
         self._data = data
 
-    def get_group_workspace(self, group_name):
+    def get_group_workspace(self, group_name, run):
         """
         Return the workspace associated to group_name, creating one if
         it doesn't already exist (e.g. if group added to table but no update yet triggered).
         """
         try:
-            workspace = self._data.groups[group_name].workspace.workspace
+            workspace = self._data.groups[group_name].workspace[str(run)].workspace
         except AttributeError:
             self._data.show_group_data(group_name, show=False)
-            workspace = self._data.groups[group_name].workspace.workspace
+            workspace = self._data.groups[group_name].workspace[str(run)].workspace
         return workspace
 
     @property

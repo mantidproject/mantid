@@ -158,10 +158,9 @@ void WorkspaceNearestNeighbours::build(const int noNeighbours) {
   auto annTree = std::make_unique<ANNkd_tree>(dataPoints, nspectra, 3);
   pointNo = 0;
   // Run the nearest neighbour search on each detector, reusing the arrays
-  std::vector<ANNidx> nnIndexList;
-  nnIndexList.reserve(m_noNeighbours);
-  std::vector<ANNdist> nnDistList;
-  nnDistList.reserve(m_noNeighbours);
+  // Set size initially to avoid array index error when testing in debug mode
+  std::vector<ANNidx> nnIndexList(m_noNeighbours);
+  std::vector<ANNdist> nnDistList(m_noNeighbours);
 
   for (const auto idx : indices) {
     ANNpoint scaledPos = dataPoints[pointNo];

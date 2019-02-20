@@ -51,6 +51,7 @@
 	src/LoadDspacemap.cpp
 	src/LoadEmptyInstrument.cpp
 	src/LoadEMU.cpp
+	src/LoadPLN.cpp
 	src/LoadEventNexus.cpp
 	src/LoadEventNexusIndexSetup.cpp
 	src/LoadEventPreNexus2.cpp
@@ -249,6 +250,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadDspacemap.h
 	inc/MantidDataHandling/LoadEmptyInstrument.h
 	inc/MantidDataHandling/LoadEMU.h
+	inc/MantidDataHandling/LoadPLN.h
 	inc/MantidDataHandling/LoadEventNexus.h
 	inc/MantidDataHandling/LoadEventNexusIndexSetup.h
 	inc/MantidDataHandling/LoadEventPreNexus2.h
@@ -477,6 +479,7 @@ set ( TEST_FILES
 	LoadNexusTest.h
 	LoadPDFgetNFileTest.h
 	LoadParameterFileTest.h
+	LoadPLNTest.h
 	LoadPreNexusMonitorsTest.h
 	LoadPreNexusTest.h
 	LoadPSIMuonBinTest.h
