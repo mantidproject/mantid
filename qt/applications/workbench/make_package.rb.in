@@ -178,6 +178,7 @@ search_patterns.each do |pattern|
 end
 
 #We'll use macdeployqt to fix qt dependencies.
+# Remove the qt4 libraries in the mantidqt package
 Qt_Executables = "-executable=Contents/MacOS/#{File.basename(qscintilla2_lib)} "
 Qt_Executables << "-executable=Contents/MacOS/mantidqt/_commonqt5.so "
 Qt_Executables << "-executable=Contents/MacOS/mantidqt/widgets/instrumentview/_instrumentviewqt5.so "
