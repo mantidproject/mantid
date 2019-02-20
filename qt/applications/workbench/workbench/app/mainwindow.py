@@ -10,22 +10,16 @@
 """
 Defines the QMainWindow of the application and the main() entry point.
 """
-from __future__ import (absolute_import, division,
-                        print_function, unicode_literals)
+from __future__ import (absolute_import, division, print_function, unicode_literals)
 
-# std imports
-import argparse  # for command line options
+import argparse
 import atexit
 import importlib
 import os
 import sys
 
 from mantid.api import FrameworkManagerImpl
-# third party imports
 from mantid.kernel import (ConfigService, UsageService, logger, version_str as mantid_version_str)
-# -----------------------------------------------------------------------------
-# Constants
-# -----------------------------------------------------------------------------
 from workbench.widgets.settings.presenter import SettingsPresenter
 
 SYSCHECK_INTERVAL = 50
@@ -33,9 +27,6 @@ ORIGINAL_SYS_EXIT = sys.exit
 ORIGINAL_STDOUT = sys.stdout
 ORIGINAL_STDERR = sys.stderr
 
-# -----------------------------------------------------------------------------
-# Requirements
-# -----------------------------------------------------------------------------
 from workbench import requirements  # noqa
 
 requirements.check_qt()
