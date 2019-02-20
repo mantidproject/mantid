@@ -150,4 +150,3 @@ class InstrumentWidgetModel(object):
             return (True, '')
         else:
             return (False, 'Variable rebin string must have 2 or an odd number of entires')
-
