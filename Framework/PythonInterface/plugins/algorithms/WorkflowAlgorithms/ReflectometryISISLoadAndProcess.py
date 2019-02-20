@@ -146,8 +146,8 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             'MonitorBackgroundWavelengthMin', 'MonitorBackgroundWavelengthMax',
             'MonitorIntegrationWavelengthMin', 'MonitorIntegrationWavelengthMax',
             'NormalizeByIntegratedMonitors', 'Params', 'StartOverlap', 'EndOverlap',
-            'CorrectionAlgorithm', 'Polynomial', 'C0', 'C1',
-            'MomentumTransferMin', 'MomentumTransferStep', 'MomentumTransferMax',
+            'TransmissionProcessingInstructions', 'CorrectionAlgorithm', 'Polynomial', 'C0', 'C1',
+            'MomentumTransferMin', 'MomentumTransferStep', 'MomentumTransferMax', 'ScaleFactor',
             'PolarizationAnalysis', 'CPp', 'CAp', 'CRho', 'CAlpha', 'FloodCorrection',
             'FloodWorkspace', 'Debug']
         self.copyProperties('ReflectometryReductionOneAuto', self._reduction_properties)
