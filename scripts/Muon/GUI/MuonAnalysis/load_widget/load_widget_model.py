@@ -24,6 +24,7 @@ class LoadWidgetModel(object):
 
     def clear_data(self):
         self._loaded_data_store.clear()
+        self._context.current_runs = []
 
     def is_filename_loaded(self, filename):
         return self._loaded_data_store.contains(filename=filename)
