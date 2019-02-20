@@ -84,9 +84,9 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         for i in range(outWS.getNumberHistograms()):
             ys = outWS.readY(i)
             if i != 49:
-                numpy.testing.assert_equal(ys, numpy.full(ysSize, 0.0))
+                numpy.testing.assert_equal(ys, [0.0] * ysSize)
             else:
-                numpy.testing.assert_almost_equal(ys, numpy.full(ysSize, 10.0))
+                numpy.testing.assert_almost_equal(ys, [10.0] * ysSize)
         self.assertEquals(mtd.getObjectNames(), ['ReflectometryILLPreprocess_test_ws'])
 
     def _backgroundSubtraction(self, subtractionType):
@@ -113,9 +113,9 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         for i in range(outWS.getNumberHistograms()):
             ys = outWS.readY(i)
             if i != 49:
-                numpy.testing.assert_almost_equal(ys, numpy.full(ysSize, 0.0))
+                numpy.testing.assert_almost_equal(ys, [0.0] * ysSize)
             else:
-                numpy.testing.assert_almost_equal(ys, numpy.full(ysSize, 10.0))
+                numpy.testing.assert_almost_equal(ys, [10.0] * ysSize)
         self.assertEquals(mtd.getObjectNames(), ['ReflectometryILLPreprocess_test_ws'])
 
     def testLinearFlatBackgroundSubtraction(self):
@@ -199,17 +199,17 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         for i in range(outWS.getNumberHistograms()):
             ys = outWS.readY(i)
             if i in lowerBkgIndices:
-                numpy.testing.assert_equal(ys, numpy.full(ysSize, 0.0))
+                numpy.testing.assert_equal(ys, [0.0] * ysSize)
             elif i in lowerExclusionIndices:
-                numpy.testing.assert_equal(ys, numpy.full(ysSize, -1005.0))
+                numpy.testing.assert_equal(ys, [-1005.0] * ysSize)
             elif i in foregroundIndices:
-                numpy.testing.assert_equal(ys, numpy.full(ysSize, 995.0))
+                numpy.testing.assert_equal(ys, [995.0] * ysSize)
             elif i in upperExclusionIndices:
-                numpy.testing.assert_equal(ys, numpy.full(ysSize, -1005.0))
+                numpy.testing.assert_equal(ys, [-1005.0] * ysSize)
             elif i in upperBkgIndices:
-                numpy.testing.assert_equal(ys, numpy.full(ysSize, 0.0))
+                numpy.testing.assert_equal(ys, [0.0] * ysSize)
             else:
-                numpy.testing.assert_equal(ys, numpy.full(ysSize, -5.0))
+                numpy.testing.assert_equal(ys, [-5.0] * ysSize)
         self.assertEquals(mtd.getObjectNames(), ['ReflectometryILLPreprocess_test_ws'])
 
     def testAsymmetricForegroundRanges(self):
@@ -276,7 +276,7 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         ysSize = outWS.blocksize()
         for i in range(outWS.getNumberHistograms()):
             ys = outWS.readY(i)
-            numpy.testing.assert_equal(ys, numpy.full(ysSize, 1.0))
+            numpy.testing.assert_equal(ys, [1.0] * ysSize)
         self.assertEquals(mtd.getObjectNames(), ['ReflectometryILLPreprocess_test_ws'])
 
     def testCleanupOFF(self):

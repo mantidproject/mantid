@@ -122,6 +122,8 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
 
         ws = self._moveDetector(ws, linePosition)
 
+        ws = self._reflectedBeamCalibration(ws)
+
         ws = self._waterCalibration(ws)
 
         ws = self._normaliseToSlits(ws)
@@ -415,9 +417,8 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         return ws, linePosition
 
     def _addSampleLogInfo(self, ws, linePosition):
-        """Add foreground indices and two theta to the sample logs, names start with reduction."""
+        """Add foreground indices (start, center, end), names start with reduction."""
         run = ws.run()
-        # Add foreground start and end workspace indices to the sample logs of ws.
         hws = self._foregroundWidths()
         beamPosIndex = int(numpy.rint(linePosition))
         sign = self._workspaceIndexDirection(ws)
@@ -448,16 +449,33 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
             args['TwoTheta'] = self.getProperty(Prop.TWO_THETA).value
             # We need to subtract an offsetAngle from user given TwoTheta
             args['LinePosition'] = linePosition
-        elif self.getProperty(Prop.DIRECT_LINE_WORKSPACE).isDefault:
+        else:
             logs = ws.run()
             args['TwoTheta'] = twoTheta + common.deflectionAngle(logs)
-        else:
-            directLineWS = self.getProperty(Prop.DIRECT_LINE_WORKSPACE).value
-            args['DirectLineWorkspace'] = directLineWS
-            args['DirectLinePosition'] = directLineWS.run().getProperty(common.SampleLogs.LINE_POSITION).value
         detectorMovedWS = SpecularReflectionPositionCorrect(**args)
         self._cleanup.cleanup(ws)
         return detectorMovedWS
+
+    def _reflectedBeamCalibration(self, ws):
+        """Perform detector position correction for reflected beams."""
+        if self.getProperty(Prop.DIRECT_LINE_WORKSPACE).isDefault:
+            return ws
+        calibratedWSName = self._names.withSuffix('reflected_beam_calibration')
+        directLineWS = self.getProperty(Prop.DIRECT_LINE_WORKSPACE).value
+        directLine = directLineWS.run().getProperty(common.SampleLogs.LINE_POSITION).value
+        calibratedWS = SpecularReflectionPositionCorrect(
+            InputWorkspace=ws,
+            OutputWorkspace=calibratedWSName,
+            EnableLogging=self._subalgLogging,
+            DetectorComponentName='detector',
+            DirectLineWorkspace=directLineWS,
+            DirectLinePosition=directLine,
+            PixelSize=common.pixelSize(self._instrumentName),
+            DetectorCorrectionType='RotateAroundSample',
+            DetectorFacesSample=True
+        )
+        self._cleanup.cleanup(ws)
+        return calibratedWS
 
     def _normaliseToFlux(self, detWS, monWS):
         """Normalise ws to monitor counts or counting time."""
