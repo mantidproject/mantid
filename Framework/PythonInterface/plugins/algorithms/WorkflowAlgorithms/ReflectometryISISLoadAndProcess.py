@@ -11,8 +11,7 @@ from __future__ import (absolute_import, division, print_function)
 from mantid.api import (AlgorithmFactory, AnalysisDataService, DataProcessorAlgorithm,
                         PropertyMode, WorkspaceGroup, WorkspaceProperty)
 
-from mantid.simpleapi import (AddSampleLog, LoadEventNexus, LoadNexus, MergeRuns,
-                              RenameWorkspace)
+from mantid.simpleapi import (LoadEventNexus, LoadNexus, MergeRuns, RenameWorkspace)
 
 from mantid.kernel import (CompositeValidator, Direction, EnabledWhenProperty,
                            IntBoundedValidator, Property, PropertyCriterion,
