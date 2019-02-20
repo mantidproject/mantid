@@ -375,10 +375,12 @@ class InstrumentWidgetView(QtGui.QWidget):
         self._on_dead_time_from_file_selected = slot
 
     def populate_dead_time_combo(self, names):
+        self.deadtime_file_selector.blockSignals(True)
         self.deadtime_file_selector.clear()
         self.deadtime_file_selector.addItem("None")
         for name in names:
             self.deadtime_file_selector.addItem(name)
+        self.deadtime_file_selector.blockSignals(False)
 
     def get_dead_time_file_selection(self):
         return self.deadtime_file_selector.currentText()

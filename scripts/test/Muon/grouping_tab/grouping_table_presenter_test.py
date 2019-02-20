@@ -2,7 +2,7 @@ import unittest
 import sys
 import six
 from PyQt4 import QtGui
-from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_model import GroupingTableModel
+from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_model import GroupingTabModel
 from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_view import GroupingTableView
 from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_presenter import GroupingTablePresenter
 from Muon.GUI.Common.muon_group import MuonGroup
@@ -25,7 +25,7 @@ class GroupingTablePresenterTest(unittest.TestCase):
         self.obj = QtGui.QWidget()
 
         self.data = MuonDataContext()
-        self.model = GroupingTableModel(data=self.data)
+        self.model = GroupingTabModel(data=self.data)
         self.view = GroupingTableView(parent=self.obj)
         self.presenter = GroupingTablePresenter(self.view, self.model)
 

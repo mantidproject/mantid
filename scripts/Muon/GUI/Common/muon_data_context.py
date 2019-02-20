@@ -115,6 +115,7 @@ class MuonDataContext(object):
             in allowed_instruments else 'EMU'
 
         self.instrumentNotifier = MuonDataContext.InstrumentNotifier(self)
+        self.gui_variables_notifier = MuonDataContext.GuiVariablesNotifier(self)
 
     def is_data_loaded(self):
         return self._loaded_data.num_items() > 0
@@ -405,7 +406,19 @@ class MuonDataContext(object):
         else:
             return True
 
+    def add_or_replace_gui_variables(self, **kwargs):
+        self._gui_variables.update(kwargs)
+        self.gui_variables_notifier.notify_subscribers()
+
     class InstrumentNotifier(Observable):
+        def __init__(self, outer):
+            Observable.__init__(self)
+            self.outer = outer  # handle to containing class
+
+        def notify_subscribers(self, *args, **kwargs):
+            Observable.notify_subscribers(self, *args)
+
+    class GuiVariablesNotifier(Observable):
         def __init__(self, outer):
             Observable.__init__(self)
             self.outer = outer  # handle to containing class

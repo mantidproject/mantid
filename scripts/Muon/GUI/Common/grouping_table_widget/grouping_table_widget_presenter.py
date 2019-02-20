@@ -148,38 +148,41 @@ class GroupingTablePresenter(object):
         for group in self._model.groups:
             self.add_group_to_view(group)
 
-        self.from_file_checkbox_changed()
-        self.first_good_data_checkbox_changed()
+        if self._view.group_range_use_last_data.isChecked():
+            self._view.group_range_max.setText(str(self._model.get_last_data_from_file()))
+
+        if self._view.group_range_use_first_good_data.isChecked():
+            self._view.group_range_min.setText(str(self._model.get_first_good_data_from_file()))
+
         self._view.enable_updates()
 
     def first_good_data_checkbox_changed(self):
         if self._view.group_range_use_first_good_data.isChecked():
-            if self._model._data.current_runs:
-                self._view.group_range_min.setText(str(self._model._data.loaded_data(self._model._data.current_runs[-1])["FirstGoodData"]))
+            self._view.group_range_min.setText(str(self._model.get_first_good_data_from_file()))
 
             self._view.group_range_min.setEnabled(False)
             if 'GroupRangeMin' in self._model._data.gui_variables:
                 self._model._data.gui_variables.pop('GroupRangeMin')
+                self._model._data.add_or_replace_gui_variables()
         else:
             self._view.group_range_min.setEnabled(True)
-            self._model._data.gui_variables['GroupRangeMin'] = float(self._view.group_range_min.text())
+            self._model._data.add_or_replace_gui_variables(GroupRangeMin=float(self._view.group_range_min.text()))
 
     def from_file_checkbox_changed(self):
         if self._view.group_range_use_last_data.isChecked():
-            if self._model._data.current_runs:
-                self._view.group_range_max.setText(str(round(max(self._model._data.loaded_data(self._model._data.
-                                                                                               current_runs[-1])['OutputWorkspace'][0].
-                                                                 workspace.dataX(0)), 3)))
+            self._view.group_range_max.setText(str(self._model.get_last_data_from_file()))
 
             self._view.group_range_max.setEnabled(False)
             if 'GroupRangeMax' in self._model._data.gui_variables:
                 self._model._data.gui_variables.pop('GroupRangeMax')
+                self._model._data.add_or_replace_gui_variables()
+
         else:
             self._view.group_range_max.setEnabled(True)
-            self._model._data.gui_variables['GroupRangeMax'] = float(self._view.group_range_max.text())
+            self._model._data.add_or_replace_gui_variables(GroupRangeMax=float(self._view.group_range_max.text()))
 
     def handle_group_range_min_updated(self):
-        self._model._data.gui_variables['GroupRangeMin'] = self._view.group_range_min.text()
+        self._model._data.add_or_replace_gui_variables(GroupRangeMin=float(self._view.group_range_min.text()))
 
     def handle_group_range_max_updated(self):
-        self._model._data.gui_variables['GroupRangeMax'] = self._view.group_range_max.text()
+        self._model._data.add_or_replace_gui_variables(GroupRangeMax=float(self._view.group_range_max.text()))
