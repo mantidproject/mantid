@@ -20,16 +20,15 @@ namespace {
 using namespace MantidQt::CustomInterfaces::IDA;
 using namespace Mantid::Kernel::Strings;
 
-struct SetViewSpectra : boost::static_visitor<> {
+struct SetViewSpectra {
   explicit SetViewSpectra(IndirectSpectrumSelectionView *view) : m_view(view) {}
 
-  void operator()(const std::pair<std::size_t, std::size_t> &spectra) const {
-    m_view->displaySpectra(static_cast<int>(spectra.first),
-                           static_cast<int>(spectra.second));
-  }
-
-  void operator()(const DiscontinuousSpectra<std::size_t> &spectra) const {
-    m_view->displaySpectra(spectra.getString());
+  void operator()(const Spectra &spectra) const {
+    if (spectra.isContinuous()) {
+      m_view->displaySpectra(spectra.getMinMax());
+    } else {
+      m_view->displaySpectra(spectra.getString());
+    }
   }
 
 private:
@@ -138,6 +137,7 @@ IndirectSpectrumSelectionPresenter::IndirectSpectrumSelectionPresenter(
           SLOT(displayBinMask()));
   connect(m_view.get(), SIGNAL(maskChanged(const std::string &)), this,
           SIGNAL(maskChanged(const std::string &)));
+  connect(m_view.get(), SIGNAL(spectraSelectionWidgetChanged(int)), this, SLOT(initSpectraSelectionWidget(int)));
 
   m_view->setSpectraRegex(Regexes::SPECTRA_LIST);
   m_view->setMaskBinsRegex(Regexes::MASK_LIST);
@@ -155,6 +155,17 @@ void IndirectSpectrumSelectionPresenter::enableView() {
   m_view->setEnabled(true);
 }
 
+void IndirectSpectrumSelectionPresenter::initSpectraSelectionWidget(int index)
+{
+  auto spectra = m_model->getSpectra(m_activeIndex);
+  if (index == 0) {
+    m_view->displaySpectra(spectra.getMinMax());
+  }  else {
+    m_view->displaySpectra(spectra.getString());
+  }
+
+}
+
 void IndirectSpectrumSelectionPresenter::setActiveIndexToZero() {
   setActiveModelIndex(0);
 }
@@ -164,7 +175,7 @@ void IndirectSpectrumSelectionPresenter::updateSpectra() {
   if (workspace) {
     setSpectraRange(0, workspace->getNumberHistograms() - 1);
     const auto spectra = m_model->getSpectra(m_activeIndex);
-    boost::apply_visitor(SetViewSpectra(m_view.get()), spectra);
+    SetViewSpectra(m_view.get())(spectra);
     enableView();
   } else {
     m_view->clear();
@@ -202,13 +213,13 @@ void IndirectSpectrumSelectionPresenter::setModelSpectra(
 void IndirectSpectrumSelectionPresenter::updateSpectraList(
     std::string const &spectraList) {
   setModelSpectra(
-      DiscontinuousSpectra<std::size_t>(createSpectraString(spectraList)));
+      Spectra(createSpectraString(spectraList)));
   emit spectraChanged(m_activeIndex);
 }
 
 void IndirectSpectrumSelectionPresenter::updateSpectraRange(
     std::size_t minimum, std::size_t maximum) {
-  setModelSpectra(std::make_pair(minimum, maximum));
+  setModelSpectra(Spectra(minimum, maximum));
   emit spectraChanged(m_activeIndex);
 }
 

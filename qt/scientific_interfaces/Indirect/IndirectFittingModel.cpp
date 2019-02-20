@@ -264,17 +264,6 @@ void cleanTemporaries(
     cleanTemporaries(prefix + std::to_string(i + 1), fittingData[i]);
 }
 
-//CompositeFunction_sptr createMultiDomainFunction(IFunction_sptr function,
-//                                                 std::size_t numberOfDomains) {
-//  auto multiDomainFunction = boost::make_shared<MultiDomainFunction>();
-//
-//  for (auto i = 0u; i < numberOfDomains; ++i) {
-//    multiDomainFunction->addFunction(function);
-//    multiDomainFunction->setDomainIndex(i, i);
-//  }
-//  return multiDomainFunction;
-//}
-
 IFunction_sptr extractFirstInnerFunction(IFunction_sptr function) {
   if (const auto multiDomain =
           boost::dynamic_pointer_cast<MultiDomainFunction>(function)) {
@@ -349,7 +338,7 @@ IndirectFittingModel::getWorkspace(std::size_t index) const {
 Spectra IndirectFittingModel::getSpectra(std::size_t index) const {
   if (index < m_fittingData.size())
     return m_fittingData[index]->spectra();
-  return DiscontinuousSpectra<std::size_t>("");
+  return Spectra("");
 }
 
 std::pair<double, double>
@@ -457,7 +446,7 @@ void IndirectFittingModel::setFittingData(PrivateFittingData &&fittingData) {
 
 void IndirectFittingModel::setSpectra(const std::string &spectra,
                                       std::size_t dataIndex) {
-  setSpectra(DiscontinuousSpectra<std::size_t>(spectra), dataIndex);
+  setSpectra(Spectra(spectra), dataIndex);
 }
 
 void IndirectFittingModel::setSpectra(Spectra &&spectra,
@@ -499,7 +488,7 @@ void IndirectFittingModel::addWorkspace(const std::string &workspaceName) {
   auto workspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
       workspaceName);
   addWorkspace(workspace,
-               std::make_pair(0u, workspace->getNumberHistograms() - 1));
+               Spectra(0u, workspace->getNumberHistograms() - 1));
 }
 
 void IndirectFittingModel::addWorkspace(const std::string &workspaceName,
@@ -510,7 +499,7 @@ void IndirectFittingModel::addWorkspace(const std::string &workspaceName,
   if (workspaceName.empty() || !doesExistInADS(workspaceName))
     throw std::runtime_error("A valid sample file needs to be selected.");
 
-  addWorkspace(workspaceName, DiscontinuousSpectra<std::size_t>(spectra));
+  addWorkspace(workspaceName, Spectra(spectra));
 }
 
 void IndirectFittingModel::addWorkspace(const std::string &workspaceName,

@@ -47,6 +47,8 @@ IndirectSpectrumSelectionView::IndirectSpectrumSelectionView(QWidget *parent)
           SLOT(emitSpectraChanged(int)));
   connect(m_selector->cbSelectionMode, SIGNAL(currentIndexChanged(int)), this,
           SLOT(clearMaskString()));
+
+  connect(m_selector->swSpectraSelection, SIGNAL(currentChanged(int)), this, SIGNAL(spectraSelectionWidgetChanged(int)));
 }
 
 IndirectSpectrumSelectionView::~IndirectSpectrumSelectionView() {}
@@ -81,9 +83,9 @@ void IndirectSpectrumSelectionView::displaySpectra(
       static_cast<int>(SpectrumSelectionMode::STRING));
 }
 
-void IndirectSpectrumSelectionView::displaySpectra(int minimum, int maximum) {
-  setMinimumSpectrum(minimum);
-  setMaximumSpectrum(maximum);
+void IndirectSpectrumSelectionView::displaySpectra(std::pair<size_t, size_t> minmax) {
+  setMinimumSpectrum(minmax.first);
+  setMaximumSpectrum(minmax.second);
   m_selector->cbSelectionMode->setCurrentIndex(
       static_cast<int>(SpectrumSelectionMode::RANGE));
 }

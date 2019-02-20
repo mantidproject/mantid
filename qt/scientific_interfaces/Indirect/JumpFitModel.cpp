@@ -56,7 +56,7 @@ findAxisLabels(MatrixWorkspace const *workspace, Predicate const &predicate) {
 }
 
 Spectra createSpectra(std::size_t spectrum) {
-  return std::make_pair(spectrum, spectrum);
+  return Spectra(spectrum, spectrum);
 }
 
 std::string getHWHMName(const std::string &resultName) {

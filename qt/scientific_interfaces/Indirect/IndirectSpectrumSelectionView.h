@@ -39,7 +39,7 @@ public:
   virtual std::string maskString() const;
 
   virtual void displaySpectra(const std::string &spectraString);
-  virtual void displaySpectra(int minimum, int maximum);
+  virtual void displaySpectra(std::pair<size_t, size_t> minmax);
 
   virtual void setSpectraRange(int minimum, int maximum);
 
@@ -76,6 +76,7 @@ public slots:
 signals:
   void selectedSpectraChanged(const std::string &);
   void selectedSpectraChanged(std::size_t, std::size_t);
+  void spectraSelectionWidgetChanged(int);
   void maskSpectrumChanged(int);
   void maskChanged(const std::string &);
 
