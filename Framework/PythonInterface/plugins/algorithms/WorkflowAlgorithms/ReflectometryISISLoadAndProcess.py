@@ -11,7 +11,7 @@ from __future__ import (absolute_import, division, print_function)
 from mantid.api import (AlgorithmFactory, AnalysisDataService, DataProcessorAlgorithm,
                         PropertyMode, WorkspaceGroup, WorkspaceProperty)
 
-from mantid.simpleapi import (AddSampleLog, LoadEventNexus, LoadNexus, Plus,
+from mantid.simpleapi import (AddSampleLog, LoadEventNexus, LoadNexus, MergeRuns,
                               RenameWorkspace)
 
 from mantid.kernel import (CompositeValidator, Direction, EnabledWhenProperty,
@@ -104,9 +104,9 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         secondTransRuns = self.getProperty(Prop.SECOND_TRANS_RUNS).value
         secondTransWorkspaces = self._getInputWorkspaces(secondTransRuns, True)
         # Combine multiple input runs, if required
-        input_workspace = self._sumWorkspaces(inputRuns, inputWorkspaces, False)
-        first_trans_workspace = self._sumWorkspaces(firstTransRuns, firstTransWorkspaces, True)
-        second_trans_workspace = self._sumWorkspaces(secondTransRuns, secondTransWorkspaces, True)
+        input_workspace = self._sumWorkspaces(inputWorkspaces, False)
+        first_trans_workspace = self._sumWorkspaces(firstTransWorkspaces, True)
+        second_trans_workspace = self._sumWorkspaces(secondTransWorkspaces, True)
         # Slice the input workspace, if required
         input_workspace = self._sliceWorkspace(input_workspace)
         # Perform the reduction
@@ -259,7 +259,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         workspace_name = self._renameWorkspaceBasedOnRunNumber(workspace_name, isTrans)
         return workspace_name
 
-    def _sumWorkspaces(self, runs, workspaces, isTrans):
+    def _sumWorkspaces(self, workspaces, isTrans):
         """If there are multiple input workspaces, sum them and return the result. Otherwise
         just return the single input workspace, or None if the list is empty."""
         if len(workspaces) < 1:
@@ -270,10 +270,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         concatenated_names = "+".join(workspaces_without_prefixes)
         summed = self._prefixedName(concatenated_names, isTrans)
         self.log().information('Summing workspaces' + " ".join(workspaces) + ' into ' + summed)
-        lhs = workspaces[0]
-        for rhs in workspaces[1:]:
-            Plus(LHSWorkspace=lhs, RHSWorkspace=rhs, OutputWorkspace = summed)
-            lhs = summed
+        MergeRuns(InputWorkspaces=", ".join(workspaces), OutputWorkspace=summed)
         # The reduction algorithm sets the output workspace names from the run number,
         # which by default is just the first run. Set it to the concatenated name,
         # e.g. 13461+13462

@@ -168,7 +168,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         outputs = ['IvsQ_13461+13462', 'IvsQ_binned_13461+13462', 'TOF_13461', 'TOF_13462',
                     'TOF_13461+13462']
         self._assert_run_algorithm_succeeds(args, outputs)
-        history = ['Plus', 'AddSampleLog', 'ReflectometryReductionOneAuto']
+        history = ['MergeRuns', 'ReflectometryReductionOneAuto']
         self._check_history(mtd['IvsQ_binned_13461+13462'], history)
 
     def test_trans_run_is_not_reloaded_if_in_ADS(self):
@@ -284,7 +284,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         outputs = ['IvsQ_13460', 'IvsQ_binned_13460', 'TOF_13460', 'TRANS_13463', 'TRANS_13464',
                     'TRANS_13463+13464']
         self._assert_run_algorithm_succeeds(args, outputs)
-        history = ['Plus', 'AddSampleLog', 'ReflectometryReductionOneAuto']
+        history = ['MergeRuns', 'ReflectometryReductionOneAuto']
         self._check_history(mtd['IvsQ_binned_13460'], history)
 
     def test_slicing_is_disallowed_if_summing_input_runs(self):
