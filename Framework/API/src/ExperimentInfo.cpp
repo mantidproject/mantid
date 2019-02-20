@@ -934,7 +934,19 @@ void ExperimentInfo::getValidFromTo(const std::string &IDFfilename,
   }
 }
 
-/// Utility to retrieve a list of resource files sorted by `from` date
+/** Compile a list of files in compliance with name pattern-matching, file format,
+ * and date-stamp constraints
+ *
+ * Ideally, the valid-from and valid-to of any valid file should encapsulate
+ * argument date. If this is not possible, then the file with the most recent
+ * valid-from stamp is selected.
+ *
+ * @param prefix :: the name of a valid file must begin with this pattern
+ * @param fileFormats :: the extension of a valid file must be one of these formats
+ * @param directoryNames :: search only in these directories
+ * @param date :: the valid-from and valid-to of a valid file should encapsulate this date
+ * @return list of absolute paths for each valid file
+ */
 std::vector<std::string> ExperimentInfo::getResourceFilenames(
     const std::string &prefix, const std::vector<std::string> &fileFormats,
     const std::vector<std::string> &directoryNames, const std::string &date) {
@@ -974,7 +986,8 @@ std::vector<std::string> ExperimentInfo::getResourceFilenames(
   // Sort with newer dates placed at the beginning
   std::multimap<DateAndTime, std::string, std::greater<DateAndTime>>
       matchingFiles;
-
+  bool foundFile = false;
+  std::string mostRecentFile;  // path to the file with most recent "valid-from"
   for (const auto &directoryName : directoryNames) {
     // Iterate over the directories from user ->etc ->install, and find the
     // first beat file
@@ -1005,17 +1018,29 @@ std::vector<std::string> ExperimentInfo::getResourceFilenames(
         else
           to.setFromISO8601("2100-01-01T00:00:00");
 
-        if (from <= d && d <= to)
-          matchingFiles.insert(
-              std::pair<DateAndTime, std::string>(from, pathName));
+        if (from <= d && d <= to) {
+          foundFile = true;
+          matchingFiles.insert(std::pair<DateAndTime, std::string>(from, pathName));
+
+        }
+        // Consider the most recent file in the absence of matching files
+        if (!foundFile && (from >= refDate)) {
+            refDate = from;
+            mostRecentFile = pathName;
+        }
       }
     }
   }
 
   // Retrieve the file names only
   std::vector<std::string> pathNames;
-  for (auto elem : matchingFiles)
-    pathNames.push_back(elem.second);
+  if (matchingFiles.size() > 0) {
+    for (auto elem : matchingFiles)
+      pathNames.push_back(elem.second);
+  }
+  else {
+    pathNames.push_back(mostRecentFile);
+  }
   return pathNames;
 }
 
