@@ -277,7 +277,8 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         # The reduction algorithm sets the output workspace names from the run number,
         # which by default is just the first run. Set it to the concatenated name,
         # e.g. 13461+13462
-        _setRunNumberForWorkspace(summed, concatenated_names)
+        ws = AnalysisDataService.retrieve(summed)
+        ws.run().addProperty('run_number', concatenated_names, True)
         return summed
 
     def _slicingEnabled(self):
@@ -377,12 +378,6 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         if value:
             self.setPropertyValue(property_name, value)
             self.setProperty(property_name, child_alg.getProperty(property_name).value)
-
-
-def _setRunNumberForWorkspace(workspace_name, run_number):
-    """Set the run number in the sample log for the given workspace"""
-    AddSampleLog(Workspace=workspace_name, LogName='run_number', LogText=str(run_number),
-                 LogType='String')
 
 
 def _throwIfNotValidReflectometryEventWorkspace(workspace_name):
