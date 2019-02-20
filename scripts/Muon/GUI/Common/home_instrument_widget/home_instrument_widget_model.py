@@ -110,4 +110,3 @@ class InstrumentWidgetModel(object):
         self._data.gui_variables['DeadTimeSource'] = 'FromADS'
         dtc = api.AnalysisDataService.retrieve(str(name))
         self._data.add_or_replace_gui_variables(DeadTimeTable=dtc)
-
