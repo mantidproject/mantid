@@ -247,7 +247,7 @@ public:
   }
 
   void test_SetValueFromJson_Accepts_ArrayValues() {
-    const std::array<int, 3> testValues{1, 2, 3};
+    const std::array<int, 3> testValues{{1, 2, 3}};
     Json::Value arrayValue{Json::arrayValue};
     for (const auto &elem : testValues) {
       arrayValue.append(elem);
