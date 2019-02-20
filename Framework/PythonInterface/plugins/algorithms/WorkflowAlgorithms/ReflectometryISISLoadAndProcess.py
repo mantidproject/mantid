@@ -186,7 +186,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         """Return true if the given workspace exists in the ADS and is
         a valid reflectometry event workspace."""
         valid = True
-        if not _isEventWorkspace(workspace_name):
+        if not _hasWorkspaceID(workspace_name, "EventWorkspace"):
             self.log().information('Workspace ' + workspace_name +
                                    ' exists but is not an event workspace')
             valid = False
@@ -202,7 +202,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         """Return true if the given workspace exists in the ADS and is
         a valid reflectometry histogram workspace."""
         valid = True
-        if not _isWorkspace2D(workspace_name):
+        if not _hasWorkspaceID(workspace_name, "Workspace2D"):
             self.log().information('Workspace ' + workspace_name +
                                    ' exists but is not a Workspace2D')
             valid = False
@@ -406,20 +406,12 @@ def _getRunNumberAsString(workspace_name):
         raise RuntimeError('Could not find run number for workspace ' + workspace_name)
 
 
-def _isEventWorkspace(workspace_name):
+def _hasWorkspaceID(workspace_name, workspace_id):
     workspace = AnalysisDataService.retrieve(workspace_name)
     if isinstance(workspace, WorkspaceGroup):
-        return workspace[0].id() == "EventWorkspace"
+        return workspace[0].id() == workspace_id
     else:
-        return workspace.id() == "EventWorkspace"
-
-
-def _isWorkspace2D(workspace_name):
-    workspace = AnalysisDataService.retrieve(workspace_name)
-    if isinstance(workspace, WorkspaceGroup):
-        return workspace[0].id() == "Workspace2D"
-    else:
-        return workspace.id() == "Workspace2D"
+        return workspace.id() == workspace_id
 
 
 def _removeWorkspace(workspace_name):
