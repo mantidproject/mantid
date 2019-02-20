@@ -25,7 +25,6 @@ from mantid.kernel import Logger, ConfigService
 from sans.command_interface.batch_csv_file_parser import BatchCsvParser
 from sans.common.constants import ALL_PERIODS
 from sans.common.enums import (BatchReductionEntry, RangeStepType, SampleShape, FitType, RowState, SANSInstrument)
-from sans.common.general_functions import get_log_plot
 from sans.gui_logic.gui_common import (get_reduction_mode_strings_for_gui, get_string_for_gui_from_instrument,
                                        add_dir_to_datasearch, remove_dir_from_datasearch)
 from sans.gui_logic.models.batch_process_runner import BatchProcessRunner
@@ -55,6 +54,8 @@ if PYQT4:
         IN_MANTIDPLOT = True
     except ImportError:
         pass
+else:
+    from mantidqt.plotting.functions import get_plot_fig
 
 row_state_to_colour_mapping = {RowState.Unprocessed: '#FFFFFF', RowState.Processed: '#d0f4d0',
                                RowState.Error: '#accbff'}
@@ -492,7 +493,9 @@ class RunTabPresenter(object):
                 if not graph(self.output_graph):
                     newGraph(self.output_graph)
             elif not PYQT4:
-                fig = get_log_plot(window_title=self.output_graph, plot_to_close=self.output_fig)
+                ax_properties = {'yscale': 'log',
+                                 'xscale': 'log'}
+                fig, _ = get_plot_fig(ax_properties=ax_properties, window_title=self.output_graph)
                 fig.show()
                 self.output_fig = fig
 

@@ -1148,22 +1148,30 @@ void CompareWorkspaces::doTableComparison(
   }
 
   const bool checkAllData = getProperty("CheckAllData");
+  const bool relErr = getProperty("ToleranceRelErr");
+  const double tolerance = getProperty("Tolerance");
+  bool mismatch = false;
+  for (size_t i = 0; i < numCols; ++i) {
+    const auto c1 = tws1->getColumn(i);
+    const auto c2 = tws2->getColumn(i);
 
-  for (size_t i = 0; i < numRows; ++i) {
-    const TableRow r1 =
-        boost::const_pointer_cast<ITableWorkspace>(tws1)->getRow(i);
-    const TableRow r2 =
-        boost::const_pointer_cast<ITableWorkspace>(tws2)->getRow(i);
-    // Easiest, if not the fastest, way to compare is via strings
-    std::stringstream r1s, r2s;
-    r1s << r1;
-    r2s << r2;
-    if (r1s.str() != r2s.str()) {
-      g_log.debug() << "Table data mismatch at row " << i << " (" << r1s.str()
-                    << " vs " << r2s.str() << ")\n";
+    if (relErr) {
+      if (!c1->equalsRelErr(*c2, tolerance)) {
+        mismatch = true;
+      }
+    } else {
+
+      if (!c1->equals(*c2, tolerance)) {
+        mismatch = true;
+      }
+    }
+    if (mismatch) {
+      g_log.debug() << "Table data mismatch at column " << i << "\n";
       recordMismatch("Table data mismatch");
-      if (!checkAllData)
+      mismatch = false;
+      if (!checkAllData) {
         return;
+      }
     }
   } // loop over columns
 }

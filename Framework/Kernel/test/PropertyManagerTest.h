@@ -67,16 +67,18 @@ public:
 
 class PropertyManagerTest : public CxxTest::TestSuite {
 public:
+  static PropertyManagerTest *createSuite() { return new PropertyManagerTest; }
+
+  static void destroySuite(PropertyManagerTest *suite) { return delete suite; }
+
+public:
   void setUp() override {
-    manager = new PropertyManagerHelper;
-    std::unique_ptr<Property> p =
-        Mantid::Kernel::make_unique<PropertyWithValue<int>>("aProp", 1);
+    manager = std::make_unique<PropertyManagerHelper>();
+    auto p = Mantid::Kernel::make_unique<PropertyWithValue<int>>("aProp", 1);
     manager->declareProperty(std::move(p));
     manager->declareProperty("anotherProp", 1.11);
     manager->declareProperty("yetAnotherProp", "itsValue");
   }
-
-  void tearDown() override { delete manager; }
 
   void testConstructor() {
     PropertyManagerHelper mgr;
@@ -215,12 +217,31 @@ public:
     TS_ASSERT_THROWS(mgr.declareProperty("", "aValue"), std::invalid_argument);
   }
 
+  void testDeclareOrReplaceProperty() {
+    PropertyManagerHelper mgr;
+    mgr.declareProperty("StringProp", "theValue");
+    mgr.declareProperty("IntProp", 5);
+    mgr.declareProperty("DoubleProp", 2);
+
+    TS_ASSERT_THROWS_NOTHING(mgr.declareOrReplaceProperty(
+        std::make_unique<MockNonSerializableProperty>("IntProp", 2)));
+    // it should be replace in the same position
+    const auto &properties = mgr.getProperties();
+    auto intPropIter =
+        std::find_if(std::begin(properties), std::end(properties),
+                     [](Property *p) { return p->name() == "IntProp"; });
+    TS_ASSERT_EQUALS(1, std::distance(std::begin(properties), intPropIter));
+    auto typedProp = dynamic_cast<MockNonSerializableProperty *>(*intPropIter);
+    TSM_ASSERT("Expected a int type property", typedProp);
+    TS_ASSERT_EQUALS(2, (*typedProp)());
+  }
+
   void testSetProperties() {
     PropertyManagerHelper mgr;
     mgr.declareProperty("APROP", 1);
     mgr.declareProperty("anotherProp", 1.0);
 
-    std::string jsonString = "{\"APROP\":\"15\",\"anotherProp\":\"1.3\"}\n";
+    std::string jsonString = R"({"APROP":"15","anotherProp":"1.3"}\n)";
     TS_ASSERT_THROWS_NOTHING(mgr.setProperties(jsonString));
     TS_ASSERT_EQUALS(mgr.getPropertyValue("APROP"), "15");
     TS_ASSERT_EQUALS(mgr.getPropertyValue("anotherProp"), "1.3");
@@ -231,7 +252,7 @@ public:
     mgr.declareProperty("APROP", "1");
     mgr.declareProperty("anotherProp", "1");
     std::string jsonString =
-        "{\"APROP\":\"equation=12+3\",\"anotherProp\":\"1.3,2.5\"}\n";
+        R"({"APROP":"equation=12+3","anotherProp":"1.3,2.5"}\n)";
     TS_ASSERT_THROWS_NOTHING(mgr.setProperties(jsonString));
     TS_ASSERT_EQUALS(mgr.getPropertyValue("APROP"), "equation=12+3");
     TS_ASSERT_EQUALS(mgr.getPropertyValue("anotherProp"), "1.3,2.5");
@@ -242,8 +263,8 @@ public:
     mgr.declareProperty("APROP", "1");
     mgr.declareProperty("anotherProp", "1");
 
-    std::string jsonString =
-        "{\"APROP\":\"equation = 12 + 3\",\"anotherProp\":\"-1.3, +2.5\"}\n";
+    const std::string jsonString =
+        R"({"APROP":"equation = 12 + 3","anotherProp":"-1.3, +2.5"}\n)";
     TS_ASSERT_THROWS_NOTHING(mgr.setProperties(jsonString));
     TS_ASSERT_EQUALS(mgr.getPropertyValue("APROP"), "equation = 12 + 3");
     TS_ASSERT_EQUALS(mgr.getPropertyValue("anotherProp"), "-1.3, +2.5");
@@ -254,9 +275,24 @@ public:
     mgr.declareProperty(
         Mantid::Kernel::make_unique<ArrayProperty<double>>("ArrayProp"));
 
-    std::string jsonString = R"({"ArrayProp":"10,12,23"})";
+    const std::string jsonString = R"({"ArrayProp":"10,12,23"})";
     TS_ASSERT_THROWS_NOTHING(mgr.setProperties(jsonString));
     TS_ASSERT_EQUALS(mgr.getPropertyValue("ArrayProp"), "10,12,23");
+  }
+
+  void testSetPropertiesWithoutPriorDeclare() {
+    PropertyManagerHelper mgr;
+
+    const std::string jsonString =
+        R"({"APROP":"equation=12+3","anotherProp":"1.3,2.5"})";
+    std::unordered_set<std::string> ignored;
+    const bool createMissing{true};
+    TS_ASSERT_THROWS_NOTHING(
+        mgr.setProperties(jsonString, ignored, createMissing));
+    TS_ASSERT_EQUALS("equation=12+3",
+                     static_cast<std::string>(mgr.getProperty("APROP")));
+    TS_ASSERT_EQUALS("1.3,2.5",
+                     static_cast<std::string>(mgr.getProperty("anotherProp")));
   }
 
   void testSetPropertyValue() {
@@ -414,10 +450,10 @@ public:
             "Semaphor", Mantid::Kernel::ePropertyCriterion::IS_DEFAULT));
 
     TSM_ASSERT_EQUALS("Show the default", mgr.asString(true),
-                      "{\"Crossing\":\"42\",\"Semaphor\":\"1\"}\n");
+                      "{\"Crossing\":42,\"Semaphor\":true}\n");
     mgr.setProperty("Semaphor", false);
     TSM_ASSERT_EQUALS("Hide not enabled", mgr.asString(true),
-                      "{\"Semaphor\":\"0\"}\n");
+                      "{\"Semaphor\":false}\n");
   }
 
   void test_asString() {
@@ -433,7 +469,7 @@ public:
     TSM_ASSERT_EQUALS("value was not empty", value.size(), 0);
 
     TSM_ASSERT_EQUALS("Show the default", mgr.asString(true),
-                      "{\"Prop1\":\"10\",\"Prop2\":\"15\"}\n");
+                      "{\"Prop1\":10,\"Prop2\":15}\n");
 
     TSM_ASSERT("value was not valid JSON",
                reader.parse(mgr.asString(true), value));
@@ -442,7 +478,7 @@ public:
     mgr.setProperty("Prop1", 123);
     mgr.setProperty("Prop2", 456);
     TSM_ASSERT_EQUALS("Change the values", mgr.asString(false),
-                      "{\"Prop1\":\"123\",\"Prop2\":\"456\"}\n");
+                      "{\"Prop1\":123,\"Prop2\":456}\n");
 
     TSM_ASSERT("value was not valid JSON",
                reader.parse(mgr.asString(false), value));
@@ -463,15 +499,15 @@ public:
     TSM_ASSERT_EQUALS("value was not empty", value.size(), 0);
 
     TSM_ASSERT_EQUALS("Show the default", mgr.asString(true),
-                      "{\"ArrayProp\":\"\"}\n");
+                      "{\"ArrayProp\":[]}\n");
 
     TSM_ASSERT("value was not valid JSON",
                reader.parse(mgr.asString(true), value));
 
-    mgr.setProperty("ArrayProp", "10,12,23");
+    mgr.setProperty("ArrayProp", "10.1,12.5,23.5");
 
     TSM_ASSERT_EQUALS("Change the values", mgr.asString(false),
-                      "{\"ArrayProp\":\"10,12,23\"}\n");
+                      "{\"ArrayProp\":[10.1,12.5,23.5]}\n");
 
     TSM_ASSERT("value was not valid JSON",
                reader.parse(mgr.asString(false), value));
@@ -601,7 +637,7 @@ public:
   }
 
 private:
-  PropertyManagerHelper *manager;
+  std::unique_ptr<PropertyManagerHelper> manager;
 };
 
 //-------------------------------------------------------------------------------------------------

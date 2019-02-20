@@ -131,7 +131,7 @@ public:
     TS_ASSERT(sphere);
     TS_ASSERT_THROWS(
         Rasterize::calculateCylinder(V3D(0., 0., 1.), sphere, 3, 3),
-        std::logic_error);
+        std::invalid_argument);
   }
 
   void test_calculateArbitraryOnCylinder() {
