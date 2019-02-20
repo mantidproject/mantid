@@ -13,12 +13,12 @@ from __future__ import (absolute_import, unicode_literals)
 import os.path as osp
 
 # 3rd party imports
-from qtpy.QtCore import Qt
-from qtpy.QtWidgets import (QTabWidget, QToolButton, QVBoxLayout, QWidget)
+from qtpy.QtWidgets import (QVBoxLayout, QWidget)
 
 # local imports
 from mantidqt.widgets.codeeditor.interpreter import PythonFileInterpreter
 from mantidqt.widgets.codeeditor.scriptcompatibility import (add_mantid_api_import, mantid_api_import_needed)
+from mantidqt.widgets.codeeditor.tab_widget.codeeditor_tab_presenter import CodeEditorTabPresenter
 
 NEW_TAB_TITLE = 'New'
 MODIFIED_MARKER = '*'
@@ -44,9 +44,9 @@ class MultiPythonFileInterpreter(QWidget):
         self.whitespace_visible = False
 
         # widget setup
-        self._tabs = self.create_tabwidget()
+        self._tabs = CodeEditorTabPresenter(self)
         layout = QVBoxLayout()
-        layout.addWidget(self._tabs)
+        layout.addWidget(self._tabs.view)
         self.setLayout(layout)
         layout.setContentsMargins(0, 0, 0, 0)
 
@@ -75,7 +75,12 @@ class MultiPythonFileInterpreter(QWidget):
     def append_new_editor(self, content=None, filename=None):
         if content is None:
             content = self.default_content
+<<<<<<< HEAD
         interpreter = PythonFileInterpreter(content, filename=filename, parent=self)
+=======
+        interpreter = PythonFileInterpreter(content, filename=filename,
+                                            parent=self._tabs.view)
+>>>>>>> Moved tabs into MVP, added working impl, re #24812
         if self.whitespace_visible:
             interpreter.set_whitespace_visible()
 
@@ -128,19 +133,6 @@ class MultiPythonFileInterpreter(QWidget):
             self.append_new_editor()
 
         return True
-
-    def create_tabwidget(self):
-        """Create a new QTabWidget with a button to add new tabs"""
-        tabs = QTabWidget(self)
-        tabs.setMovable(True)
-        tabs.setTabsClosable(True)
-        # create a button to add new tabs
-        plus_btn = QToolButton(tabs)
-        plus_btn.setText('+')
-        plus_btn.clicked.connect(self.plus_button_clicked)
-        tabs.setCornerWidget(plus_btn, Qt.TopLeftCorner)
-        tabs.tabCloseRequested.connect(self.close_tab)
-        return tabs
 
     def current_editor(self):
         return self._tabs.currentWidget()
