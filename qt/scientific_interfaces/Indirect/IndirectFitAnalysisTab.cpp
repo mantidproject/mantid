@@ -891,7 +891,7 @@ void IndirectFitAnalysisTab::plotSelectedSpectra() {
 void IndirectFitAnalysisTab::plotSelectedSpectra(
     std::vector<SpectrumToPlot> const &spectra) {
   for (auto const &spectrum : spectra)
-    plotSpectrum(spectrum.first, spectrum.second, true);
+    plotSpectrum(spectrum.first, spectrum.second);
   m_outOptionsPresenter->clearSpectraToPlot();
 }
 
@@ -902,10 +902,9 @@ void IndirectFitAnalysisTab::plotSelectedSpectra(
  * @errorBars :: true if you want error bars to be plotted
  */
 void IndirectFitAnalysisTab::plotSpectrum(std::string const &workspaceName,
-                                          std::size_t const &index,
-                                          bool errorBars) {
+                                          std::size_t const &index) {
   IndirectTab::plotSpectrum(QString::fromStdString(workspaceName),
-                            static_cast<int>(index), errorBars);
+                            static_cast<int>(index));
 }
 
 /**

@@ -68,6 +68,10 @@ void IndirectSettingsView::setRestrictInputByNameVisible(bool visible) {
   m_uiForm.ckRestrictInputDataNames->setVisible(visible);
 }
 
+void IndirectSettingsView::setPlotErrorBarsVisible(bool visible) {
+  m_uiForm.ckPlotErrorBars->setVisible(visible);
+}
+
 void IndirectSettingsView::setSelectedFacility(QString const &text) {
   auto const index = m_uiForm.cbFacility->findText(text);
   m_uiForm.cbFacility->setCurrentIndex(index != -1 ? index : 0);
@@ -83,6 +87,14 @@ void IndirectSettingsView::setRestrictInputByNameChecked(bool check) {
 
 bool IndirectSettingsView::isRestrictInputByNameChecked() const {
   return m_uiForm.ckRestrictInputDataNames->isChecked();
+}
+
+void IndirectSettingsView::setPlotErrorBarsChecked(bool check) {
+  m_uiForm.ckPlotErrorBars->setChecked(check);
+}
+
+bool IndirectSettingsView::isPlotErrorBarsChecked() const {
+  return m_uiForm.ckPlotErrorBars->isChecked();
 }
 
 void IndirectSettingsView::setSetting(QString const &settingsGroup,

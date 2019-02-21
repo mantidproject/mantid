@@ -64,6 +64,9 @@ public:
   /// Prevent loading of data with incorrect naming
   void filterInputData(bool filter);
 
+  /// Allows the user to turn the plotting of error bars off and on
+  void setPlotErrorBars(bool errorBars);
+
   /// Sets the active workspace in the selected tab
   void setActiveWorkspace();
 

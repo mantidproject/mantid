@@ -54,7 +54,7 @@ IndirectTab::IndirectTab(QObject *parent)
       m_grpManager(new QtGroupPropertyManager()),
       m_dblEdFac(new DoubleEditorFactory()), m_pythonRunner(),
       m_tabStartTime(DateAndTime::getCurrentTime()),
-      m_tabEndTime(DateAndTime::maximum()) {
+      m_tabEndTime(DateAndTime::maximum()), m_plotErrorBars(false) {
   m_parentWidget = dynamic_cast<QWidget *>(parent);
 
   m_batchAlgoRunner = new MantidQt::API::BatchAlgorithmRunner(m_parentWidget);
@@ -231,6 +231,15 @@ QString IndirectTab::getWorkspaceBasename(const QString &wsName) {
 }
 
 /**
+ * Allows the user to turn the plotting of error bars off and on
+ *
+ * @param errorBars :: true if you want output plots to have error bars
+ */
+void IndirectTab::setPlotErrorBars(bool errorBars) {
+  m_plotErrorBars = errorBars;
+}
+
+/**
  * Plots different spectra from multiple workspaces on the same plot
  *
  * This uses the plotSpectrum function from the Python API.
@@ -274,9 +283,9 @@ void IndirectTab::plotMultipleSpectra(
  * @param spectraIndex Index of spectrum from each workspace to plot
  */
 void IndirectTab::plotSpectrum(const QStringList &workspaceNames,
-                               const int &spectraIndex, const bool &errorBars) {
+                               const int &spectraIndex) {
   if (!workspaceNames.isEmpty()) {
-    const QString errors = errorBars ? "True" : "False";
+    const QString errors = m_plotErrorBars ? "True" : "False";
 
     QString pyInput = "from mantidplot import plotSpectrum\n";
     pyInput += "plotSpectrum(['";
@@ -298,11 +307,11 @@ void IndirectTab::plotSpectrum(const QStringList &workspaceNames,
  * @param errorBars Is true if you want to plot the error bars
  */
 void IndirectTab::plotSpectrum(const QString &workspaceName,
-                               const int &spectraIndex, const bool &errorBars) {
+                               const int &spectraIndex) {
   if (!workspaceName.isEmpty()) {
     QStringList workspaceNames;
     workspaceNames << workspaceName;
-    plotSpectrum(workspaceNames, spectraIndex, errorBars);
+    plotSpectrum(workspaceNames, spectraIndex);
   }
 }
 
@@ -320,6 +329,7 @@ void IndirectTab::plotSpectrum(const QStringList &workspaceNames, int specStart,
                                int specEnd) {
   if (workspaceNames.isEmpty())
     return;
+  QString const errors = m_plotErrorBars ? "True" : "False";
 
   QString pyInput = "from mantidplot import plotSpectrum\n";
 
@@ -329,7 +339,7 @@ void IndirectTab::plotSpectrum(const QStringList &workspaceNames, int specStart,
   pyInput += QString::number(specStart);
   pyInput += ",";
   pyInput += QString::number(specEnd + 1);
-  pyInput += ")))\n";
+  pyInput += ")), error_bars=" + errors + ")\n";
 
   m_pythonRunner.runPythonCode(pyInput);
 }
@@ -365,12 +375,11 @@ void IndirectTab::plotSpectrum(const QString &workspaceName, int specStart,
  */
 void IndirectTab::plotSpectra(const QStringList &workspaceNames,
                               const std::vector<int> &wsIndices) {
-  if (workspaceNames.isEmpty()) {
+  if (workspaceNames.isEmpty() || wsIndices.empty())
     return;
-  }
-  if (wsIndices.empty()) {
-    return;
-  }
+
+  QString const errors = m_plotErrorBars ? "True" : "False";
+
   QString pyInput = "from mantidplot import plotSpectrum\n";
 
   pyInput += "plotSpectrum(['";
@@ -381,7 +390,8 @@ void IndirectTab::plotSpectra(const QStringList &workspaceNames,
     pyInput += " ,";
     pyInput += QString::number(wsIndices[i]);
   }
-  pyInput += "])\n";
+  pyInput += "]";
+  pyInput += ", error_bars=" + errors + ")\n";
   m_pythonRunner.runPythonCode(pyInput);
 }
 
@@ -403,6 +413,26 @@ void IndirectTab::plotSpectra(const QString &workspaceName,
   QStringList workspaceNames;
   workspaceNames << workspaceName;
   plotSpectra(workspaceNames, wsIndices);
+}
+
+void IndirectTab::plotTiled(std::string const &workspaceName,
+                            std::size_t const &fromIndex,
+                            std::size_t const &toIndex) {
+  auto const numberOfPlots = toIndex - fromIndex + 1;
+  if (numberOfPlots != 0) {
+    QString pyInput = "from mantidplot import newTiledWindow\n";
+    pyInput += "newTiledWindow(sources=[";
+    for (auto index = fromIndex; index <= toIndex; ++index) {
+      if (index > fromIndex)
+        pyInput += ",";
+
+      std::string const pyInStr =
+          "(['" + workspaceName + "'], " + std::to_string(index) + ")";
+      pyInput += QString::fromStdString(pyInStr);
+    }
+    pyInput += QString::fromStdString("])\n");
+    m_pythonRunner.runPythonCode(pyInput);
+  }
 }
 
 /**
@@ -438,13 +468,15 @@ void IndirectTab::plotTimeBin(const QStringList &workspaceNames, int binIndex) {
   if (workspaceNames.isEmpty())
     return;
 
+  QString const errors = m_plotErrorBars ? "True" : "False";
+
   QString pyInput = "from mantidplot import plotTimeBin\n";
 
   pyInput += "plotTimeBin(['";
   pyInput += workspaceNames.join("','");
   pyInput += "'], ";
   pyInput += QString::number(binIndex);
-  pyInput += ")\n";
+	pyInput += ", error_bars=" + errors + ")\n";
 
   m_pythonRunner.runPythonCode(pyInput);
 }

@@ -60,6 +60,15 @@ void IndirectDataAnalysisTab::filterInputData(bool filter) {
 }
 
 /**
+ * Allows the user to turn the plotting of error bars off and on
+ *
+ * @param errorBars :: true if you want output plots to have error bars
+ */
+void IndirectDataAnalysisTab::setPlotErrorBars(bool errorBars) {
+  IndirectTab::setPlotErrorBars(errorBars);
+}
+
+/**
  * Sets the active browser workspace when the tab is changed
  */
 void IndirectDataAnalysisTab::setActiveWorkspace() { setBrowserWorkspace(); }

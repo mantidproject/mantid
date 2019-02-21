@@ -393,22 +393,10 @@ void Iqt::plotTiled() {
       getXMinValue(outWs, static_cast<std::size_t>(firstTiledPlot));
   cropWorkspace(tiledPlotWsName, tiledPlotWsName, cropValue);
 
-  // Plot tiledwindow
-  std::size_t const numberOfPlots = lastTiledPlot - firstTiledPlot + 1;
-  if (numberOfPlots != 0) {
-    QString pyInput = "from mantidplot import newTiledWindow\n";
-    pyInput += "newTiledWindow(sources=[";
-    for (auto index = firstTiledPlot; index <= lastTiledPlot; ++index) {
-      if (index > firstTiledPlot) {
-        pyInput += ",";
-      }
-      std::string const pyInStr =
-          "(['" + tiledPlotWsName + "'], " + std::to_string(index) + ")";
-      pyInput += QString::fromStdString(pyInStr);
-    }
-    pyInput += "])\n";
-    runPythonCode(pyInput);
-  }
+  auto const tiledPlotWs = getADSMatrixWorkspace(tiledPlotWsName);
+
+  IndirectTab::plotTiled(tiledPlotWsName, firstTiledPlot, lastTiledPlot);
+
   setTiledPlotIsPlotting(false);
 }
 

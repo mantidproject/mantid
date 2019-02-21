@@ -36,7 +36,7 @@ IndirectDataAnalysis::IndirectDataAnalysis(QWidget *parent)
     : UserSubWindow(parent),
       m_settingsPresenter(
           Mantid::Kernel::make_unique<IndirectSettingsPresenter>(
-              this, "Data Analysis", "filter-input-by-name")),
+              this, "Data Analysis", "restrict-input-by-name,plot-error-bars")),
       m_settingsGroup("CustomInterfaces/IndirectAnalysis/"), m_valInt(nullptr),
       m_valDbl(nullptr),
       m_changeObserver(*this, &IndirectDataAnalysis::handleDirectoryChange) {
@@ -176,15 +176,15 @@ void IndirectDataAnalysis::exportTabPython() {
  * Updates the settings decided on the Settings Dialog
  */
 void IndirectDataAnalysis::applySettings() {
-  QSettings settings;
-  settings.beginGroup("Data Analysis");
+  auto const restrict =
+      m_settingsPresenter->getSetting("restrict-input-by-name").toBool();
+  auto const errorBars =
+      m_settingsPresenter->getSetting("plot-error-bars").toBool();
 
-  auto const filter = settings.value("filter-input-by-name", true).toBool();
-
-  settings.endGroup();
-
-  for (auto tab = m_tabs.begin(); tab != m_tabs.end(); ++tab)
-    tab->second->filterInputData(filter);
+  for (auto tab = m_tabs.begin(); tab != m_tabs.end(); ++tab) {
+    tab->second->filterInputData(restrict);
+    tab->second->setPlotErrorBars(errorBars);
+  }
 }
 
 /**

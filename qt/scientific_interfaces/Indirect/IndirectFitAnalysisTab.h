@@ -214,8 +214,7 @@ private:
   void connectDataAndFitBrowserPresenters();
 
   void plotSelectedSpectra(std::vector<SpectrumToPlot> const &spectra);
-  void plotSpectrum(std::string const &workspaceName, std::size_t const &index,
-                    bool errorBars);
+  void plotSpectrum(std::string const &workspaceName, std::size_t const &index);
 
   std::string getOutputBasename() const;
   Mantid::API::WorkspaceGroup_sptr getResultWorkspace() const;

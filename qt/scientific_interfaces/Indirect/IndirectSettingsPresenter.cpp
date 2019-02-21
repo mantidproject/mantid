@@ -23,7 +23,7 @@ IndirectSettingsPresenter::IndirectSettingsPresenter(
 
   connect(m_view.get(), SIGNAL(okClicked()), this,
           SLOT(applyAndCloseSettings()));
-  connect(m_view.get(), SIGNAL(applyClicked()), this, SLOT(applySettings()));
+  connect(m_view.get(), SIGNAL(applyClicked()), this, SLOT(applyChanges()));
   connect(m_view.get(), SIGNAL(cancelClicked()), this, SLOT(closeDialog()));
 
   initLayout();
@@ -38,7 +38,9 @@ void IndirectSettingsPresenter::initLayout() {
       QString::fromStdString(m_model->getSettingsGroup()));
 
   m_view->setRestrictInputByNameVisible(
-      m_model->isSettingAvailable("filter-input-by-name"));
+      m_model->isSettingAvailable("restrict-input-by-name"));
+  m_view->setPlotErrorBarsVisible(
+      m_model->isSettingAvailable("plot-error-bars"));
 }
 
 void IndirectSettingsPresenter::applyAndCloseSettings() {
@@ -46,7 +48,7 @@ void IndirectSettingsPresenter::applyAndCloseSettings() {
   closeDialog();
 }
 
-void IndirectSettingsPresenter::applySettings() {
+void IndirectSettingsPresenter::applyChanges() {
   setApplyingChanges(true);
   saveSettings();
   setApplyingChanges(false);
@@ -57,26 +59,33 @@ void IndirectSettingsPresenter::closeDialog() { m_view->close(); }
 void IndirectSettingsPresenter::loadSettings() {
   m_view->setSelectedFacility(QString::fromStdString(m_model->getFacility()));
 
-  if (m_model->isSettingAvailable("filter-input-by-name"))
-    loadRestrictInputSetting(m_model->getSettingsGroup());
+  if (m_model->isSettingAvailable("restrict-input-by-name"))
+    m_view->setRestrictInputByNameChecked(
+        getSetting("restrict-input-by-name").toBool());
+
+  if (m_model->isSettingAvailable("plot-error-bars"))
+    m_view->setPlotErrorBarsChecked(getSetting("plot-error-bars").toBool());
 
   emit applySettings();
 }
 
-void IndirectSettingsPresenter::loadRestrictInputSetting(
-    std::string const &settingsGroup) {
-  auto const filter = m_view->getSetting(QString::fromStdString(settingsGroup),
-                                         "filter-input-by-name");
-  m_view->setRestrictInputByNameChecked(filter.toBool());
+QVariant IndirectSettingsPresenter::getSetting(std::string const &settingName) {
+  return m_view->getSetting(QString::fromStdString(m_model->getSettingsGroup()),
+                            QString::fromStdString(settingName));
 }
 
 void IndirectSettingsPresenter::saveSettings() {
+  auto const group = QString::fromStdString(m_model->getSettingsGroup());
+
   m_model->setFacility(m_view->getSelectedFacility().toStdString());
 
-  if (m_model->isSettingAvailable("filter-input-by-name"))
-    m_view->setSetting(QString::fromStdString(m_model->getSettingsGroup()),
-                       "filter-input-by-name",
+  if (m_model->isSettingAvailable("restrict-input-by-name"))
+    m_view->setSetting(group, "restrict-input-by-name",
                        m_view->isRestrictInputByNameChecked());
+
+  if (m_model->isSettingAvailable("plot-error-bars"))
+    m_view->setSetting(group, "plot-error-bars",
+                       m_view->isPlotErrorBarsChecked());
 
   emit applySettings();
 }

@@ -27,12 +27,16 @@ public:
   void setInterfaceGroupBoxTitle(QString const &title);
 
   void setRestrictInputByNameVisible(bool visible);
+  void setPlotErrorBarsVisible(bool visible);
 
   void setSelectedFacility(QString const &text);
   QString getSelectedFacility() const;
 
   void setRestrictInputByNameChecked(bool check);
   bool isRestrictInputByNameChecked() const;
+
+  void setPlotErrorBarsChecked(bool check);
+  bool isPlotErrorBarsChecked() const;
 
   void setSetting(QString const &settingsGroup, QString const &settingName,
                   bool const &value);

@@ -33,7 +33,7 @@ IndirectCorrections::IndirectCorrections(QWidget *parent)
     : UserSubWindow(parent),
       m_settingsPresenter(
           Mantid::Kernel::make_unique<IDA::IndirectSettingsPresenter>(
-              this, "Data Corrections", "filter-input-by-name")),
+              this, "Data Corrections", "restrict-input-by-name")),
       m_changeObserver(*this, &IndirectCorrections::handleDirectoryChange) {
   m_uiForm.setupUi(this);
 
@@ -169,15 +169,11 @@ void IndirectCorrections::exportTabPython() {
  * Updates the settings decided on the Settings Dialog
  */
 void IndirectCorrections::applySettings() {
-  QSettings settings;
-  settings.beginGroup("Data Corrections");
-
-  auto const filter = settings.value("filter-input-by-name", true).toBool();
-
-  settings.endGroup();
+  auto const restrict =
+      m_settingsPresenter->getSetting("restrict-input-by-name").toBool();
 
   for (auto tab = m_tabs.begin(); tab != m_tabs.end(); ++tab)
-    tab->second->filterInputData(filter);
+    tab->second->filterInputData(restrict);
 }
 
 /**

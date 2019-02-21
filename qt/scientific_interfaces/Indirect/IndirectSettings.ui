@@ -76,6 +76,16 @@
         </property>
        </widget>
       </item>
+      <item>
+       <widget class="QCheckBox" name="ckPlotErrorBars">
+        <property name="text">
+         <string>Plot error bars for output data</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>

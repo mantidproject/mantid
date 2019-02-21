@@ -56,7 +56,8 @@ IndirectDataReduction::IndirectDataReduction(QWidget *parent)
     : UserSubWindow(parent),
       m_settingsPresenter(
           Mantid::Kernel::make_unique<IndirectSettingsPresenter>(
-              this, "Data Reduction", "filter-input-by-name")),
+              this, "Data Reduction",
+              "restrict-input-by-name,plot-error-bars")),
       m_settingsGroup("CustomInterfaces/IndirectDataReduction"),
       m_algRunner(new MantidQt::API::AlgorithmRunner(this)),
       m_changeObserver(*this, &IndirectDataReduction::handleConfigChange) {
@@ -388,15 +389,15 @@ void IndirectDataReduction::handleConfigChange(
  * Updates the settings decided on the Settings Dialog
  */
 void IndirectDataReduction::applySettings() {
-  QSettings settings;
-  settings.beginGroup("Data Reduction");
+  auto const restrict =
+      m_settingsPresenter->getSetting("restrict-input-by-name").toBool();
+  auto const errorBars =
+      m_settingsPresenter->getSetting("plot-error-bars").toBool();
 
-  auto const filter = settings.value("filter-input-by-name", true).toBool();
-
-  settings.endGroup();
-
-  for (auto tab = m_tabs.begin(); tab != m_tabs.end(); ++tab)
-    tab->second->filterInputData(filter);
+  for (auto tab = m_tabs.begin(); tab != m_tabs.end(); ++tab) {
+    tab->second->filterInputData(restrict);
+    tab->second->setPlotErrorBars(errorBars);
+  }
 }
 
 /**

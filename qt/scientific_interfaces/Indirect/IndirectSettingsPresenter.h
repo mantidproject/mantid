@@ -27,18 +27,19 @@ public:
   void showDialog();
   void loadSettings();
 
+  QVariant getSetting(std::string const &settingName);
+
 signals:
   void applySettings();
 
 private slots:
   void updateRestrictInputByName(std::string const &text);
   void applyAndCloseSettings();
-  void applySettings();
+  void applyChanges();
   void closeDialog();
 
 private:
   void initLayout();
-  void loadRestrictInputSetting(std::string const &settingsGroup);
   void saveSettings();
 
   void setApplyingChanges(bool applyingChanges);

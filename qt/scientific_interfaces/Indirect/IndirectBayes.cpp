@@ -24,7 +24,7 @@ IndirectBayes::IndirectBayes(QWidget *parent)
     : UserSubWindow(parent),
       m_settingsPresenter(
           Mantid::Kernel::make_unique<IDA::IndirectSettingsPresenter>(
-              this, "Indirect Bayes", "filter-input-by-name")),
+              this, "Indirect Bayes", "restrict-input-by-name")),
       m_changeObserver(*this, &IndirectBayes::handleDirectoryChange) {
   m_uiForm.setupUi(this);
 
@@ -138,15 +138,11 @@ void IndirectBayes::manageUserDirectories() {
  * Updates the settings decided on the Settings Dialog
  */
 void IndirectBayes::applySettings() {
-  QSettings settings;
-  settings.beginGroup("Indirect Bayes");
-
-  auto const filter = settings.value("filter-input-by-name", true).toBool();
-
-  settings.endGroup();
+  auto const restrict =
+      m_settingsPresenter->getSetting("restrict-input-by-name").toBool();
 
   for (auto tab = m_bayesTabs.begin(); tab != m_bayesTabs.end(); ++tab)
-    tab->second->filterInputData(filter);
+    tab->second->filterInputData(restrict);
 }
 
 /**
