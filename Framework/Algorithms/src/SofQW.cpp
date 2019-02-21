@@ -112,9 +112,9 @@ void SofQW::createCommonInputProperties(API::Algorithm &alg) {
       Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
           "DetectorTwoThetaRanges", "", Direction::Input,
           PropertyMode::Optional),
-      "A table workspace containing a 'Detector ID' column as "
-      "well as 'Min two theta' and 'Max two theta' columns listing "
-      "the detector's min and max scattering angles in radians.");
+      "A table workspace use by SofQWNormalisedPolygon containing a 'Detector "
+      "ID' column as well as 'Min two theta' and 'Max two theta' columns "
+      "listing the detector's min and max scattering angles in radians.");
 }
 
 void SofQW::exec() {
