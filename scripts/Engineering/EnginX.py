@@ -193,32 +193,30 @@ def calibration_ws(difc, tzero, specNo, name):
 
         if not plot_spec_num:
             name = i
+        output = "Engg difc Zero Peaks Bank {}".format(name)
         simple.AppendSpectra(InputWorkspace1="ws1", InputWorkspace2="ws2",
-                             OutputWorkspace="engg_difc_zero_peaks_bank_{}".format(name))
+                             OutputWorkspace=output)
+        plot_calibration(output)
     simple.DeleteWorkspace("ws1")
     simple.DeleteWorkspace("ws2")
 
 
-def plot_calibration():
-    van_curve_twin_ws = "__eng_vanadium_curves_twin"
-    if simple.AnalysisDataService.doesExist(van_curve_twin_ws):
-        simple.DeleteWorkspace(van_curve_twin_ws)
-    van_curves_ws = simple.CloneWorkspace(InputWorkspace="eng_vanadium_curves", OutputWorkspace=van_curve_twin_ws)
+def plot_calibration(name):
+    twin_cal = "__{}_twin".format(name)
+    if simple.AnalysisDataService.doesExist(twin_cal):
+        simple.DeleteWorkspace(twin_cal)
+    cal_ws = simple.CloneWorkspace(InputWorkspace=name, OutputWorkspace=twin_cal)
     if mantidplot:
-        for i in range(1, 3):
-            if i == 1:
-                curve_plot_bank_1 = mantidplot.plotSpectrum(van_curves_ws, [0, 1, 2]).activeLayer()
-                curve_plot_bank_1.setTitle("Engg Vanadium Curves Bank 1")
-            if i == 2:
-                curve_plot_bank_2 = mantidplot.plotSpectrum(van_curves_ws, [3, 4, 5]).activeLayer()
-                curve_plot_bank_2.setTitle("Engg Vanadium Curves Bank 2")
-
+        difc_zero_plot = mantidplot.plotSpectrum(cal_ws, [0, 1]).activeLayer()
+        difc_zero_plot.setTitle(name)
+        difc_zero_plot.setCurveTitle(0, "Peaks Fitted")
+        difc_zero_plot.setCurveTitle(1, "DifC/TZero Fitted Straight Line")
+        DifcZeroPlot.setAxisTitle(Layer.Bottom, "Expected Peaks Centre(dSpacing, A))"
+        DifcZeroPlot.setCurveLineStyle(0, QtCore.Qt.DotLine)
     # Workbench plotting
     elif functions:
-        fig1 = functions.plot([van_curves_ws], wksp_indices=[0, 1, 2])
-        fig1.canvas.set_window_title("Engg Vanadium Curves Bank 1")
-        fig2 = functions.plot([van_curves_ws], wksp_indices=[3, 4, 5])
-        fig2.canvas.set_window_title("Engg Vanadium Curves Bank 2")
+        fig1 = functions.plot([cal_ws], wksp_indices=[0, 1])
+        fig1.canvas.set_window_title(name)
 
 
 def create_calibration(ceria_run, van_run, calibration_directory, calibration_general, cropped, crop_name, crop_on):
