@@ -57,6 +57,9 @@ public:
   /// Prevent loading of data with incorrect naming
   void filterInputData(bool filter);
 
+  /// Allows the user to turn the plotting of error bars off and on
+  void setPlotErrorBars(bool errorBars);
+
 protected slots:
   /// Slot to update the guides when the range properties change
   virtual void updateProperties(QtProperty *prop, double val) = 0;

@@ -24,7 +24,8 @@ IndirectBayes::IndirectBayes(QWidget *parent)
     : UserSubWindow(parent),
       m_settingsPresenter(
           Mantid::Kernel::make_unique<IDA::IndirectSettingsPresenter>(
-              this, "Indirect Bayes", "restrict-input-by-name")),
+              this, "Indirect Bayes",
+              "restrict-input-by-name,plot-error-bars")),
       m_changeObserver(*this, &IndirectBayes::handleDirectoryChange) {
   m_uiForm.setupUi(this);
 
@@ -140,9 +141,13 @@ void IndirectBayes::manageUserDirectories() {
 void IndirectBayes::applySettings() {
   auto const restrict =
       m_settingsPresenter->getSetting("restrict-input-by-name").toBool();
+  auto const errorBars =
+      m_settingsPresenter->getSetting("plot-error-bars").toBool();
 
-  for (auto tab = m_bayesTabs.begin(); tab != m_bayesTabs.end(); ++tab)
+  for (auto tab = m_bayesTabs.begin(); tab != m_bayesTabs.end(); ++tab) {
     tab->second->filterInputData(restrict);
+    tab->second->setPlotErrorBars(errorBars);
+  }
 }
 
 /**

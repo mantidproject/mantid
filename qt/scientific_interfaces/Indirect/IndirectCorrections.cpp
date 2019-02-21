@@ -33,7 +33,8 @@ IndirectCorrections::IndirectCorrections(QWidget *parent)
     : UserSubWindow(parent),
       m_settingsPresenter(
           Mantid::Kernel::make_unique<IDA::IndirectSettingsPresenter>(
-              this, "Data Corrections", "restrict-input-by-name")),
+              this, "Data Corrections",
+              "restrict-input-by-name,plot-error-bars")),
       m_changeObserver(*this, &IndirectCorrections::handleDirectoryChange) {
   m_uiForm.setupUi(this);
 
@@ -171,9 +172,13 @@ void IndirectCorrections::exportTabPython() {
 void IndirectCorrections::applySettings() {
   auto const restrict =
       m_settingsPresenter->getSetting("restrict-input-by-name").toBool();
+  auto const errorBars =
+      m_settingsPresenter->getSetting("plot-error-bars").toBool();
 
-  for (auto tab = m_tabs.begin(); tab != m_tabs.end(); ++tab)
+  for (auto tab = m_tabs.begin(); tab != m_tabs.end(); ++tab) {
     tab->second->filterInputData(restrict);
+    tab->second->setPlotErrorBars(errorBars);
+  }
 }
 
 /**
