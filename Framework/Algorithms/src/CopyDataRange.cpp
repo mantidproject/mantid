@@ -18,26 +18,6 @@ using namespace Mantid::HistogramData;
 
 namespace {
 
-std::size_t getBinIndexOfValue(NumericAxis const *axis, double value) {
-  for (auto index = 0u; index < axis->length(); ++index)
-    if (axis->getValue(index) == value)
-      return index;
-
-  throw std::runtime_error(
-      "The corresponding bin in the input workspace could not be found.");
-}
-
-std::size_t getBinIndexOfValue(MatrixWorkspace_const_sptr workspace,
-                               double value) {
-  auto const axis = workspace->getAxis(0);
-  if (axis->isNumeric()) {
-    auto const *numericAxis = dynamic_cast<NumericAxis *>(axis);
-    return getBinIndexOfValue(numericAxis, value);
-  } else
-    throw std::runtime_error(
-        "The input workspace does not have a numeric x axis.");
-}
-
 void copyDataRange(MatrixWorkspace_const_sptr inputWorkspace,
                    MatrixWorkspace_sptr destWorkspace, int const &specMin,
                    int const &specMax, int const &xMinIndex,
@@ -60,10 +40,9 @@ void copyDataRange(MatrixWorkspace_const_sptr inputWorkspace,
                    MatrixWorkspace_sptr destWorkspace, int const &specMin,
                    int const &specMax, double const &xMin, double const &xMax,
                    int yInsertionIndex, int const &xInsertionIndex) {
-  int const xMinIndex =
-      static_cast<int>(getBinIndexOfValue(inputWorkspace, xMin));
-  int const xMaxIndex =
-      static_cast<int>(getBinIndexOfValue(inputWorkspace, xMax));
+  int const xMinIndex = static_cast<int>(inputWorkspace->binIndexOf(xMin));
+  int const xMaxIndex = static_cast<int>(inputWorkspace->binIndexOf(xMax));
+
   copyDataRange(inputWorkspace, destWorkspace, specMin, specMax, xMinIndex,
                 xMaxIndex, yInsertionIndex, xInsertionIndex);
 }
@@ -105,9 +84,7 @@ void CopyDataRange::init() {
 
   auto const positiveInt = boost::make_shared<Kernel::BoundedValidator<int>>();
   positiveInt->setLower(0);
-  auto const positiveDbl =
-      boost::make_shared<Kernel::BoundedValidator<double>>();
-  positiveDbl->setLower(0.0);
+  auto const anyDouble = boost::make_shared<Kernel::BoundedValidator<double>>();
 
   declareProperty("StartWorkspaceIndex", 0, positiveInt,
                   "The index denoting the start of the spectra range.");
@@ -115,10 +92,10 @@ void CopyDataRange::init() {
   declareProperty("EndWorkspaceIndex", EMPTY_INT(), positiveInt,
                   "The index denoting the end of the spectra range.");
 
-  declareProperty("XMin", EMPTY_DBL(), positiveDbl,
+  declareProperty("XMin", EMPTY_DBL(), anyDouble,
                   "An X value that is within the first (lowest X value) bin");
 
-  declareProperty("XMax", EMPTY_DBL(), positiveDbl,
+  declareProperty("XMax", EMPTY_DBL(), anyDouble,
                   "An X value that is in the highest X value bin");
 
   declareProperty("InsertionYIndex", 0, positiveInt,
@@ -148,33 +125,35 @@ std::map<std::string, std::string> CopyDataRange::validateInputs() {
   int const yInsertionIndex = getProperty("InsertionYIndex");
   int const xInsertionIndex = getProperty("InsertionXIndex");
 
-  if (getBinIndexOfValue(inputWorkspace, xMax) >= inputWorkspace->y(0).size())
-    errors["XMax"] =
-        "XMax is larger than the maximum range in the input workspace.";
-  if (getBinIndexOfValue(inputWorkspace, xMin) >
-      getBinIndexOfValue(inputWorkspace, xMax))
-    errors["XMin"] = "XMin must come after XMax.";
+  try {
+    auto const xMinIndex = inputWorkspace->binIndexOf(xMin);
+    auto const xMaxIndex = inputWorkspace->binIndexOf(xMax);
+
+    if (xMinIndex > xMaxIndex)
+      errors["XMin"] = "XMin must come after XMax.";
+
+    if (destWorkspace->y(0).size() <
+        static_cast<std::size_t>(xInsertionIndex) + xMaxIndex - xMinIndex)
+      errors["InsertionXIndex"] = "The x data range selected will not fit into "
+                                  "the destination workspace.";
+
+  } catch (std::exception const &ex) {
+    errors["XMin"] = ex.what();
+    errors["XMax"] = ex.what();
+  }
 
   if (specMaxIndex >= static_cast<int>(inputWorkspace->getNumberHistograms()))
     errors["EndWorkspaceIndex"] =
-        "The EndWorkspaceIndex is larger than the number of histograms in "
-        "the input workspace.";
+        "The EndWorkspaceIndex is larger than the number of histograms in the "
+        "input workspace.";
   if (specMinIndex > specMaxIndex)
     errors["StartWorkspaceIndex"] =
         "The StartWorkspaceIndex must be smaller than the EndWorkspaceIndex.";
 
   if (static_cast<int>(destWorkspace->getNumberHistograms()) <
       yInsertionIndex + specMaxIndex - specMinIndex)
-    errors["InsertionYIndex"] =
-        "The y data range selected will not fit into the "
-        "destination workspace.";
-  if (destWorkspace->y(0).size() <
-      static_cast<std::size_t>(xInsertionIndex) +
-          getBinIndexOfValue(inputWorkspace, xMax) -
-          getBinIndexOfValue(inputWorkspace, xMin))
-    errors["InsertionXIndex"] =
-        "The x data range selected will not fit into the "
-        "destination workspace.";
+    errors["InsertionYIndex"] = "The y data range selected will not fit into "
+                                "the destination workspace.";
 
   return errors;
 }
