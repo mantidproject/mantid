@@ -400,9 +400,11 @@ void SofQWNormalisedPolygon::exec() {
       const V2D ur(dE_jp1, m_EmodeProperties.q(dE_jp1, thetaUpper, det));
       const V2D ul(dE_j, m_EmodeProperties.q(dE_j, thetaUpper, det));
       if (g_log.is(Logger::Priority::PRIO_DEBUG)) {
-        logStream << "Spectrum=" << specNo << ", lower theta=" << thetaLower
-                  << ", upper theta=" << thetaUpper << ". QE polygon: ll=" << ll
-                  << ", lr=" << lr << ", ur=" << ur << ", ul=" << ul << "\n";
+        logStream << "Spectrum=" << specNo
+                  << ", lower theta=" << thetaLower * rad2deg
+                  << ", upper theta=" << thetaUpper * rad2deg
+                  << ". QE polygon: ll=" << ll << ", lr=" << lr << ", ur=" << ur
+                  << ", ul=" << ul << "\n";
       }
 
       Quadrilateral inputQ = Quadrilateral(ll, lr, ur, ul);
