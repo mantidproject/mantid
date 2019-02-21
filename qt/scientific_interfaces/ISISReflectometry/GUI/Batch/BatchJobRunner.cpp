@@ -51,18 +51,13 @@ template <typename T> bool BatchJobRunner::isSelected(T const &item) {
   return m_processAll || m_batch.isSelected(item);
 }
 
-template <typename T>
-bool BatchJobRunner::isSelected(boost::optional<T> const &item) {
-  return m_processAll || (item && m_batch.isSelected(item.get()));
-}
-
 bool BatchJobRunner::hasSelectedRows(Group const &group) {
   // If the group itself is selected, consider its rows to also be selected
   if (m_processAll || isSelected(group))
     return true;
 
   for (auto const &row : group.rows()) {
-    if (isSelected(row))
+    if (row && isSelected(row.get()))
       return true;
   }
 
@@ -113,7 +108,8 @@ void BatchJobRunner::addAlgorithmsForProcessingRowsInGroup(
     Group &group, std::deque<IConfiguredAlgorithm_sptr> &algorithms) {
   auto &rows = group.mutableRows();
   for (auto &row : rows) {
-    if (isSelected(row.get()) && row->requiresProcessing(m_reprocessFailed))
+    if (row && isSelected(row.get()) &&
+        row->requiresProcessing(m_reprocessFailed))
       addAlgorithmForProcessingRow(row.get(), algorithms);
   }
 }

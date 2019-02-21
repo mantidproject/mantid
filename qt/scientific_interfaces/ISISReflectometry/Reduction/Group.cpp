@@ -49,14 +49,18 @@ bool Group::requiresProcessing(bool reprocessFailed) const {
  * postprocessed yet. Returns false if postprocessing is not applicable.
  */
 bool Group::requiresPostprocessing(bool reprocessFailed) const {
+  // Check if postprocessing is applicable
   if (!hasPostprocessing())
     return false;
 
+  // Check if it's already been done
   if (!Item::requiresProcessing(reprocessFailed))
     return false;
 
+  // If any of the rows are invalid or not completed successfully, then we're
+  // not ready to postprocess
   for (auto const &row : m_rows) {
-    if (row->state() != State::ITEM_COMPLETE)
+    if (!row || row->state() != State::ITEM_COMPLETE)
       return false;
   }
 
@@ -120,7 +124,10 @@ void Group::insertRow(boost::optional<Row> const &row, int beforeRowAtIndex) {
   m_rows.insert(m_rows.begin() + beforeRowAtIndex, row);
 }
 
-void Group::removeRow(int rowIndex) { m_rows.erase(m_rows.begin() + rowIndex); }
+void Group::removeRow(int rowIndex) {
+  Item::resetState();
+  m_rows.erase(m_rows.begin() + rowIndex);
+}
 
 void Group::updateRow(int rowIndex, boost::optional<Row> const &row) {
   Item::resetState();

@@ -65,7 +65,6 @@ private:
   std::vector<std::string> getWorkspacesToSave(Row const &row) const;
 
   template <typename T> bool isSelected(T const &item);
-  template <typename T> bool isSelected(boost::optional<T> const &item);
   bool hasSelectedRows(Group const &group);
   void addAlgorithmForPostprocessingGroup(
       Group &group,
