@@ -7,6 +7,7 @@
 #include "MantidMDAlgorithms/IntegrateFlux.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -58,8 +59,9 @@ const std::string IntegrateFlux::summary() const {
  */
 void IntegrateFlux::init() {
   declareProperty(Kernel::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
-                  "An input workspace.");
+                      "InputWorkspace", "", Direction::Input,
+                      boost::make_shared<API::WorkspaceUnitValidator>("Momentum")),
+                  "An input workspace. Must have units of Momentum");
   auto validator = boost::make_shared<Kernel::BoundedValidator<int>>();
   validator->setLower(2);
   declareProperty("NPoints", 1000, validator,
