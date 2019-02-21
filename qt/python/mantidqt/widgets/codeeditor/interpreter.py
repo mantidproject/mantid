@@ -110,10 +110,10 @@ class PythonFileInterpreter(QWidget):
 
         self.status = QStatusBar(self)
         self.layout = QVBoxLayout()
+        self.layout.setContentsMargins(0, 0, 0, 0)
         self.layout.addWidget(self.editor)
         self.layout.addWidget(self.status)
         self.setLayout(self.layout)
-        self.layout.setContentsMargins(0, 0, 0, 0)
         self._setup_editor(content, filename)
 
         self.setAttribute(Qt.WA_DeleteOnClose, True)

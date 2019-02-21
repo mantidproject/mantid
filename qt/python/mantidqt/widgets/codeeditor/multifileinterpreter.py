@@ -18,7 +18,7 @@ from qtpy.QtWidgets import QVBoxLayout, QWidget
 # local imports
 from mantidqt.widgets.codeeditor.interpreter import PythonFileInterpreter
 from mantidqt.widgets.codeeditor.scriptcompatibility import add_mantid_api_import, mantid_api_import_needed
-from mantidqt.widgets.codeeditor.tab_widget.codeeditor_tab_presenter import CodeEditorTabPresenter
+from mantidqt.widgets.codeeditor.tab_widget.codeeditor_tab_view import CodeEditorTabWidget
 
 NEW_TAB_TITLE = 'New'
 MODIFIED_MARKER = '*'
@@ -44,9 +44,9 @@ class MultiPythonFileInterpreter(QWidget):
         self.whitespace_visible = False
 
         # widget setup
-        self._tabs = CodeEditorTabPresenter(self)
-        layout = QVBoxLayout()
-        layout.addWidget(self._tabs.view)
+        layout = QVBoxLayout(self)
+        self._tabs = CodeEditorTabWidget(self)
+        layout.addWidget(self._tabs)
         self.setLayout(layout)
         layout.setContentsMargins(0, 0, 0, 0)
 
@@ -75,12 +75,8 @@ class MultiPythonFileInterpreter(QWidget):
     def append_new_editor(self, content=None, filename=None):
         if content is None:
             content = self.default_content
-<<<<<<< HEAD
+
         interpreter = PythonFileInterpreter(content, filename=filename, parent=self)
-=======
-        interpreter = PythonFileInterpreter(content, filename=filename,
-                                            parent=self._tabs.view)
->>>>>>> Moved tabs into MVP, added working impl, re #24812
         if self.whitespace_visible:
             interpreter.set_whitespace_visible()
 
