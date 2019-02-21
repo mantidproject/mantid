@@ -8,9 +8,22 @@
 from __future__ import absolute_import
 
 import os
+import subprocess
+import sys
 
 from mantid.kernel import logger
 from mantidqt.widgets.codeeditor.tab_widget.codeeditor_tab_view import CodeEditorTabWidget
+
+
+class ShowInExplorer(object):
+    @staticmethod
+    def open_directory(path):
+        if sys.platform == "win32":
+            os.startfile(os.path.dirname(path))
+        elif sys.platform == 'darwin':
+            subprocess.check_call(['open', '--', path])
+        elif sys.platform == 'linux2':
+            subprocess.check_call(['xdg-open', '--', path])
 
 
 class CodeEditorTabPresenter(object):
@@ -18,9 +31,9 @@ class CodeEditorTabPresenter(object):
         self.view = view if view else CodeEditorTabWidget(self, multifileinterpreter)
 
     def action_show_in_explorer(self):
-        filename = self.view.widget(self.view.last_tab_clicked).editor.fileName()
-        if "" != filename:
-            os.startfile(os.path.dirname(filename))
+        dirname = self.view.widget(self.view.last_tab_clicked).editor.fileName()
+        if "" != dirname:
+            ShowInExplorer.open_directory(dirname)
         else:
             logger.notice("Selected tab is not saved to a file, and cannot be shown in explorer.")
 

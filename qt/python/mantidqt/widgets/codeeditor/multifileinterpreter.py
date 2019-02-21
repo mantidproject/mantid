@@ -13,11 +13,11 @@ from __future__ import (absolute_import, unicode_literals)
 import os.path as osp
 
 # 3rd party imports
-from qtpy.QtWidgets import (QVBoxLayout, QWidget)
+from qtpy.QtWidgets import QVBoxLayout, QWidget
 
 # local imports
 from mantidqt.widgets.codeeditor.interpreter import PythonFileInterpreter
-from mantidqt.widgets.codeeditor.scriptcompatibility import (add_mantid_api_import, mantid_api_import_needed)
+from mantidqt.widgets.codeeditor.scriptcompatibility import add_mantid_api_import, mantid_api_import_needed
 from mantidqt.widgets.codeeditor.tab_widget.codeeditor_tab_presenter import CodeEditorTabPresenter
 
 NEW_TAB_TITLE = 'New'
