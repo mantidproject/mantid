@@ -161,10 +161,45 @@ def create_vanadium(van_run, calibration_directory):
     simple.SaveNexus("eng_vanadium_integration", van_int_file)
     simple.SaveNexus("eng_vanadium_curves", van_curves_file)
     simple.DeleteWorkspace(van_name)
-    plot_vanadium()
 
 
-def plot_vanadium():
+def calibration_ws(difc, tzero, specNo, name):
+    plot_spec_num = False
+    if specNo.lower() == "north":
+        banks = [1]
+    elif specNo.lower() == "south":
+        banks = [2]
+    elif not specNo == "":
+        banks = [1]
+        plot_spec_num = True
+    else:
+        banks = [1, 2]
+    for i in banks:
+        if not plot_spec_num:
+            bank_ws = simple.AnalysisDataService.retrieve("engg_calibration_bank_{}".format(i))
+        else:
+            bank_ws = simple.AnalysisDataService.retrieve(name)
+        x_val = []
+        y_val = []
+        y2_val = []
+        for irow in range(0, bank_ws.rowCount()):
+            x_val.append(bank_ws.cell(irow, 0))
+            y_val.append(bank_ws.cell(irow, 5))
+
+            y2_val.append(x_val[irow] * difc[i-1] + tzero[i-1])
+        simple.CreateWorkspace(OutputWorkspace="ws1", DataX=x_val, DataY=y_val,
+                               UnitX="Expected Peaks Centre(dSpacing, A)", YUnitLabel="Fitted Peaks Centre(TOF, us)")
+        simple.CreateWorkspace(OutputWorkspace="ws2", DataX=x_val, DataY=y2_val)
+
+        if not plot_spec_num:
+            name = i
+        simple.AppendSpectra(InputWorkspace1="ws1", InputWorkspace2="ws2",
+                             OutputWorkspace="engg_difc_zero_peaks_bank_{}".format(name))
+    simple.DeleteWorkspace("ws1")
+    simple.DeleteWorkspace("ws2")
+
+
+def plot_calibration():
     van_curve_twin_ws = "__eng_vanadium_curves_twin"
     if simple.AnalysisDataService.doesExist(van_curve_twin_ws):
         simple.DeleteWorkspace(van_curve_twin_ws)
@@ -270,6 +305,7 @@ def create_calibration_cropped_file(ceria_run, van_run, curve_van, int_van, cali
                          [spec_nos], tzero, difc)
     # create the table workspace containing the parameters
     create_params_table(difc, tzero, difa)
+    calibration_ws(difc, tzero, spec_nos, param_tbl_name)
 
 
 def create_calibration_files(ceria_run, van_run, curve_van, int_van, calibration_directory, calibration_general):
@@ -309,6 +345,7 @@ def create_calibration_files(ceria_run, van_run, curve_van, int_van, calibration
     save_calibration(ceria_run, van_run, calibration_directory, calibration_general, "all_banks", bank_names, tzeros,
                      difcs)
     create_params_table(difcs, tzeros, difa)
+    calibration_ws(difcs, tzeros, "", None)
 
 
 def load_van_files(curves_van, ints_van):
