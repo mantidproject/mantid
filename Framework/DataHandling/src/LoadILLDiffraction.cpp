@@ -596,7 +596,7 @@ void LoadILLDiffraction::fillDataScanMetaData(const NXDouble &scan) {
         property->addValue(absoluteTimes[j],
                            scan(static_cast<int>(i), static_cast<int>(j)));
       }
-      mutableRun.addLogData(std::move(property));
+      mutableRun.addLogData(std::move(property), true);
     }
   }
 }
