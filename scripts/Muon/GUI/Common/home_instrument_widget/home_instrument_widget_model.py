@@ -9,7 +9,7 @@ from __future__ import (absolute_import, division, print_function)
 from Muon.GUI.Common.muon_data_context import MuonDataContext
 from mantid.api import ITableWorkspace
 from mantid import api
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 
 
 class InstrumentWidgetModel(object):
@@ -122,7 +122,7 @@ class InstrumentWidgetModel(object):
         variable_rebin_list = variable_rebin_string.split(',')
         try:
             variable_rebin_list = [Decimal(x) for x in variable_rebin_list]
-        except ValueError:
+        except (ValueError, InvalidOperation):
             return (False, 'Rebin entries must be numbers')
 
         if len(variable_rebin_list) == 0:
