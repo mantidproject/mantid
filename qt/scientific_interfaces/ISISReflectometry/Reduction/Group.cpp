@@ -37,7 +37,7 @@ bool Group::hasPostprocessing() const { return m_rows.size() > 1; }
  */
 bool Group::requiresProcessing(bool reprocessFailed) const {
   for (auto const &row : m_rows) {
-    if (row->requiresProcessing(reprocessFailed))
+    if (row && row->requiresProcessing(reprocessFailed))
       return true;
   }
 
@@ -55,9 +55,8 @@ bool Group::requiresPostprocessing(bool reprocessFailed) const {
   if (!Item::requiresProcessing(reprocessFailed))
     return false;
 
-  // Post-processing can only be done if all rows have completed successfully
-  for (auto &row : m_rows) {
-    if (row && row->state() != State::ITEM_COMPLETE)
+  for (auto const &row : m_rows) {
+    if (row->state() != State::ITEM_COMPLETE)
       return false;
   }
 
@@ -98,6 +97,7 @@ std::vector<boost::optional<Row>> const &Group::rows() const { return m_rows; }
 std::vector<boost::optional<Row>> &Group::mutableRows() { return m_rows; }
 
 void Group::appendRow(boost::optional<Row> const &row) {
+  Item::resetState();
   m_rows.emplace_back(row);
 }
 
@@ -110,15 +110,20 @@ void Group::setOutputNames(std::vector<std::string> const &outputNames) {
 
 void Group::resetOutputNames() { m_postprocessedWorkspaceName = ""; }
 
-void Group::appendEmptyRow() { m_rows.emplace_back(boost::none); }
+void Group::appendEmptyRow() {
+  Item::resetState();
+  m_rows.emplace_back(boost::none);
+}
 
 void Group::insertRow(boost::optional<Row> const &row, int beforeRowAtIndex) {
+  Item::resetState();
   m_rows.insert(m_rows.begin() + beforeRowAtIndex, row);
 }
 
 void Group::removeRow(int rowIndex) { m_rows.erase(m_rows.begin() + rowIndex); }
 
 void Group::updateRow(int rowIndex, boost::optional<Row> const &row) {
+  Item::resetState();
   m_rows[rowIndex] = row;
 }
 
