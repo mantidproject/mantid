@@ -27,13 +27,13 @@ Data reduction
     - Click ``Display Mask``
     - This should give an instrument view with a circle at the centre
 #. In the ``Settings`` tab:
-    - Go to ``Q, Wavelength, Detector Limits``
+    - Go to ``Q, Wavelength, Detector Limits`` sub-tab
     - Change the ``Phi Limit`` from 0 to 45 and uncheck ``use mirror sector``
-    - Go to ``Mask``
+    - Go to ``Mask`` sub-tab
     - Click ``Display Mask``
     - This should give an instrument view where only angles 0-45 are unmasked
     - Change the settings back to -90 - 90 and reselect ``use mirror sector``
-    - In ``General, Scale, Event Slice, Sample`` tab, set the `Reduction Mode`` to ``All``
+    - In ``General, Scale, Event Slice, Sample`` sub-tab, set the `Reduction Mode`` to ``All``
 #. In the ``Runs`` tab
     - Click ``Process All``
     - After some seconds the rows should turn green
@@ -53,7 +53,7 @@ Data reduction
     - Check that the ``Insert``, ``Delete``, ``Copy``, ``Paste``, ``Cut`` and ``Erase`` icons work as expected
     - Delete all rows and re-load the batch file as previously
 #. In the ``Settings`` tab
-    - Set ``Reduction Mode`` to ``Merged``
+    - In the ``General, Scale, Event Slice, Sample`` sub-tab, set ``Reduction Mode`` to ``Merged``
     - Return to the ``Runs`` tab
     - Ensure ``Plot results`` is checked
     - Click ``Process All``
