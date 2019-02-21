@@ -149,7 +149,7 @@ class ProjectRecoveryTest(unittest.TestCase):
         os.makedirs(two)
 
         # There is no concern for list order in this equality assertion
-        if sys.version_info.major <= 3:
+        if sys.version_info.major < 3:
             # Python 2.7 way of doing it
             self.assertItemsEqual([one, two], self.pr.listdir_fullpath(self.working_directory))
         else:

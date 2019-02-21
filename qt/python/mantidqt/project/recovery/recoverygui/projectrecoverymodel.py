@@ -10,6 +10,7 @@
 from __future__ import (absolute_import, unicode_literals)
 
 import os
+import sys
 from qtpy.QtCore import Slot, QObject
 
 from mantid.api import AnalysisDataService as ADS
@@ -43,7 +44,8 @@ class ProjectRecoveryModel(QObject):
         return total_counted
 
     def get_row(self, checkpoint):
-        if isinstance(checkpoint, str) or isinstance(checkpoint, unicode):
+        # Only check unicode if it's python2
+        if isinstance(checkpoint, str) or (sys.version_info.major < 3 and isinstance(checkpoint, unicode)):
             # Assume if there is a T then it is a checkpoint and it needs to be replaced with a space
             checkpoint = checkpoint.replace("T", " ")
             for index in self.rows:
@@ -53,7 +55,7 @@ class ProjectRecoveryModel(QObject):
         elif isinstance(checkpoint, int):
             return self.rows[checkpoint]
         else:
-            raise AttributeError("Passed checkpoint is not a valid instance for finding a row")
+            raise AttributeError("Project Recovery Model: Passed checkpoint is not a valid instance for finding a row")
 
     def start_mantid_normally(self):
         self.presenter.close_view()
