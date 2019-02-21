@@ -484,6 +484,8 @@ public:
     conv.setPropertyValue("Target", target);
     conv.execute();
     TS_ASSERT(conv.isExecuted());
+    const MatrixWorkspace_sptr output = conv.getProperty("OutputWorkspace");
+    TS_ASSERT_EQUALS(output->getAxis(1)->unit()->unitID(),"Degrees");
   }
 };
 
