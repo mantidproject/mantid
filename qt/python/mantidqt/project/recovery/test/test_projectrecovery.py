@@ -446,12 +446,12 @@ class ProjectRecoveryTest(unittest.TestCase):
 
     def _repair_checkpoints_assertions(self, checkpoint1, checkpoint2, pid, pid2):
         # None of the checkpoints should exist after the call. Thus the PID folder should be deleted and thus ignored.
-        directory_removal_calls = [mock.call(u'/home/sam/.mantid/workbench-recovery/sam/200000'),
-                                   mock.call(u'/home/sam/.mantid/workbench-recovery/sam/1000000/check1')]
+        directory_removal_calls = [mock.call(os.path.join(self.pr.recovery_directory_hostname, '200000')),
+                                   mock.call(os.path.join(self.pr.recovery_directory_hostname, "1000000", "check1"))]
 
         self.pr._remove_directory_and_directory_trees.assert_has_calls(directory_removal_calls)
 
-        empty_file_calls = [mock.call(u'/home/sam/.mantid/workbench-recovery/sam')]
+        empty_file_calls = [mock.call(self.pr.recovery_directory_hostname)]
         self.pr._remove_empty_folders_from_dir.assert_has_calls(empty_file_calls)
 
         self.assertTrue(os.path.exists(checkpoint1))
