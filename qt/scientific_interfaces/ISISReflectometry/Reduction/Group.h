@@ -45,6 +45,7 @@ public:
   bool allRowsAreValid() const;
 
   void resetState() override;
+  void resetSkipped();
   void renameOutputWorkspace(std::string const &oldName,
                              std::string const &newName) override;
 

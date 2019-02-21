@@ -32,6 +32,7 @@ public:
   void removeGroup(int index);
   void removeAllGroups();
   void resetState();
+  void resetSkippedItems();
 
   std::vector<Group> &mutableGroups();
   std::vector<Group> const &groups() const;

@@ -30,6 +30,7 @@ void BatchJobRunner::reductionResumed() {
   m_reprocessFailed = m_batch.hasSelection();
   // If there are no selected rows, process everything
   m_processAll = !m_batch.hasSelection();
+  m_batch.resetSkippedItems();
 }
 
 void BatchJobRunner::reductionPaused() { m_isProcessing = false; }
@@ -39,6 +40,7 @@ void BatchJobRunner::autoreductionResumed() {
   m_isProcessing = true;
   m_reprocessFailed = true;
   m_processAll = true;
+  m_batch.resetSkippedItems();
 }
 
 void BatchJobRunner::autoreductionPaused() { m_isAutoreducing = false; }
@@ -150,8 +152,12 @@ void BatchJobRunner::algorithmError(IConfiguredAlgorithm_sptr algorithm,
                                     std::string const &message) {
   auto jobAlgorithm =
       boost::dynamic_pointer_cast<IBatchJobAlgorithm>(algorithm);
-  jobAlgorithm->item()->resetOutputNames();
-  jobAlgorithm->item()->setError(message);
+  auto *item = jobAlgorithm->item();
+  item->resetOutputNames();
+  item->setError(message);
+  // Mark the item as skipped so we don't reprocess it in the current round of
+  // reductions.
+  item->setSkipped(true);
 }
 
 std::vector<std::string> BatchJobRunner::algorithmOutputWorkspacesToSave(

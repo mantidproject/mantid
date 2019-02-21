@@ -32,6 +32,8 @@ PerThetaDefaults const *Batch::defaultsForTheta(double thetaAngle) const {
 
 void Batch::resetState() { m_runsTable.resetState(); }
 
+void Batch::resetSkippedItems() { m_runsTable.resetSkippedItems(); }
+
 boost::optional<Item &>
 Batch::getItemWithOutputWorkspaceOrNone(std::string const &wsName) {
   return m_runsTable.getItemWithOutputWorkspaceOrNone(wsName);

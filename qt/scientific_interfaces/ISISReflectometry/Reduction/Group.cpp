@@ -89,6 +89,13 @@ void Group::resetState() {
       row->resetState();
 }
 
+void Group::resetSkipped() {
+  Item::setSkipped(false);
+  for (auto &row : m_rows)
+    if (row)
+      row->setSkipped(false);
+}
+
 bool Group::allRowsAreValid() const {
   return std::all_of(m_rows.cbegin(), m_rows.cend(),
                      [](boost::optional<Row> const &row) -> bool {
