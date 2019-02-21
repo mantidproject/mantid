@@ -42,6 +42,7 @@ set ( TEST_PY_FILES
   OSIRISDiffractionReductionTest.py
   PowderDiffILLReductionTest.py
   PowderDiffILLDetScanReductionTest.py
+  ReflectometryILLAutoReductionTest.py
   ReflectometryILLConvertToQTest.py
   ReflectometryILLPolarizationCorTest.py
   ReflectometryILLPreprocessTest.py

@@ -116,6 +116,10 @@ class SubalgLogging(object):
 
 class ReflectometryILLAutoReduction(DataProcessorAlgorithm):
 
+    def __init__(self):
+        """Initialize an instance of the algorithm"""
+        DataProcessorAlgorithm.__init__(self)
+
     def category(self):
         """Return the categories of the algrithm."""
         return 'ILL\\Reflectometry;Workflow\\Reflectometry'
@@ -381,7 +385,7 @@ class ReflectometryILLAutoReduction(DataProcessorAlgorithm):
             FileProperty(
                 Prop.EFFICIENCY_FILE,
                 defaultValue='',
-                action=FileAction.Load
+                action=FileAction.OptionalLoad
             ),
             doc='A file containing the polarization efficiency factors.'
         )
@@ -389,14 +393,14 @@ class ReflectometryILLAutoReduction(DataProcessorAlgorithm):
         self.declareProperty(
             IntArrayProperty(
                 Prop.START_OVERLAPS,
-                defaultValue=Property.EMPTY_INT
+                values=[]
             ),
             doc='Start overlaps for stitched workspaces (number of input workspaces minus one).'
         )
         self.declareProperty(
             IntArrayProperty(
                 Prop.END_OVERLAPS,
-                defaultValue=Property.EMPTY_INT
+                values=[]
             ),
             doc='End overlaps for stitched workspaces (number of input workspaces minus one).'
         )
@@ -427,26 +431,21 @@ class ReflectometryILLAutoReduction(DataProcessorAlgorithm):
         rb = self.getProperty(Prop.RB).value
         db = self.getProperty(Prop.DB).value
 
-        # Background direct beam
-        self.lowWidthDirect = self.getProperty(Prop.LOW_BKG_WIDTH_DIRECT)
-        self.lowOffsetDirect = self.getProperty(Prop.LOW_BKG_OFFSET_DIRECT)
-        self.highWidthsDirect = self.getProperty(Prop.HIGH_BKG_WIDTH_DIRECT)
-        self.highOffsetDirect = self.getProperty(Prop.HIGH_BKG_OFFSET_DIRECT)
         # Background reflected beam
         self.lowWidthReflected = self.getProperty(Prop.LOW_BKG_WIDTH_REFLECTED)
         self.lowOffsetReflected = self.getProperty(Prop.LOW_BKG_OFFSET_REFLECTED)
         self.highWidthsReflected = self.getProperty(Prop.HIGH_BKG_WIDTH_REFLECTED)
         self.highOffsetReflected = self.getProperty(Prop.HIGH_BKG_OFFSET_REFLECTED)
-        # Foreground direct beam
-        self.foregroundDirect = self.getProperty(Prop.FOREGROUND_INDICES_DIRECT)
         # Foreground reflected beam
         self.foregroundReflected = self.getProperty(Prop.FOREGROUND_INDICES_REFLECTED)
-        self.halfWidthsDirect = self.getProperty(Prop.FOREGROUND_HALF_WIDTH_DIRECT)
         self.halfWidthsReflected = self.getProperty(Prop.FOREGROUND_HALF_WIDTH_REFLECTED)
 
         self.wavelengthRange = self.getProperty(Prop.WAVELENGTH_RANGE)
 
         self.polarizationEffFile = self.getProperty(Prop.EFFICIENCY_FILE)
+
+        self.twoTheta = self.getProperty(Prop.TWO_THETA)
+        self.linePosition = self.getProperty(Prop.LINE_POSITION)
 
         for angle in range(len(rb)):
             # Direct beam already in ADS?
@@ -455,26 +454,26 @@ class ReflectometryILLAutoReduction(DataProcessorAlgorithm):
                 # Direct beam pre-processing
                 directBeam = ReflectometryILLPreprocess(
                     Run=db[angle],
-                    LinePosition=self.getProperty(Prop.LINE_POSITION),
-                    TwoTheta=self.getProperty(Prop.TWO_THETA),
+                    LinePosition=self.linePosition,
+                    TwoTheta=self.twoTheta,
                     OutputWorkspace='direct-{}'.format(db[angle]),
-                    ForegroundHalfWidth=self.halfWidthsDirect,
-                    SlitNormalisation=SlitNorm.ON,
+                    ForegroundHalfWidth=self.getProperty(Prop.FOREGROUND_HALF_WIDTH_DIRECT),
+                    SlitNormalisation=self.getProperty(Prop.SLIT_NORM),
                     SubalgorithmLogging=self._subalgLogging,
                     Cleanup=self._cleanup,
-                    LowAngleBkgOffset=self.lowOffsetDirect,
-                    LowAngleBkgWidth=self.lowWidthDirect,
-                    HighAngleBkgOffset=self.highOffsetDirect,
-                    HighAngleBkgWidth=self.highWidthsDirect
+                    LowAngleBkgOffset=self.getProperty(Prop.LOW_BKG_OFFSET_DIRECT),
+                    LowAngleBkgWidth=self.getProperty(Prop.LOW_BKG_WIDTH_DIRECT),
+                    HighAngleBkgOffset=self.getProperty(Prop.HIGH_BKG_OFFSET_DIRECT),
+                    HighAngleBkgWidth=self.getProperty(Prop.HIGH_BKG_WIDTH_DIRECT)
                 )
-                # Get Bragg angle and beam centre for reflected beam pre-processing
-                twoTheta = directBeam.run().getProperty(common.TWO_THETA).value
-                linePosition = directBeam.run().getProperty(common.LINE_POSITION).value
+                # Get direct line position for reflected beam pre-processing
+                #directLinePosition = directBeam.run().getProperty(common.LINE_POSITION).value
+                directLinePosition = 0.5
                 # Direct sum foreground
                 ReflectometryILLSumForeground(
                     InputWorkspace='direct-{}'.format(db[angle]),
                     OutputWorkspace='direct-{}-foreground'.format(db[angle]),
-                    Foreground=self.foregroundDirect,
+                    Foreground=self.getProperty(Prop.FOREGROUND_INDICES_DIRECT),
                     SummationType=self._sumType,
                     WavelengthRange=self.wavelengthRange,
                     SubalgorithmLogging=self._subalgLogging,
@@ -501,7 +500,7 @@ class ReflectometryILLAutoReduction(DataProcessorAlgorithm):
                         LinePostion=linePosition,
                         TwoTheta=twoTheta,
                         ForegroundHalfWidth=self.halfWidthsReflected,
-                        SlitNormalisation=SlitNorm.ON,
+                        SlitNormalisation=self.getProperty(Prop.SLIT_NORM),
                         SubalgorithmLogging=self._subalgLogging,
                         Cleanup=self._cleanup,
                         LowAngleBkgOffset=self.lowOffsetReflected,
