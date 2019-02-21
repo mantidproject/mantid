@@ -9,6 +9,7 @@ from __future__ import (absolute_import, division, print_function)
 from Muon.GUI.Common.muon_data_context import MuonDataContext
 from mantid.api import ITableWorkspace
 from mantid import api
+from decimal import Decimal
 
 
 class InstrumentWidgetModel(object):
@@ -120,9 +121,9 @@ class InstrumentWidgetModel(object):
     def validate_variable_rebin_string(self, variable_rebin_string):
         variable_rebin_list = variable_rebin_string.split(',')
         try:
-            variable_rebin_list = [float(x) for x in variable_rebin_list]
+            variable_rebin_list = [Decimal(x) for x in variable_rebin_list]
         except ValueError:
-            return (False, 'Rebin entries must be floats')
+            return (False, 'Rebin entries must be numbers')
 
         if len(variable_rebin_list) == 0:
             return (False, 'Rebin list must be non-empty')

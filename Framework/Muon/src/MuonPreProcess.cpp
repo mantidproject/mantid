@@ -240,7 +240,7 @@ MuonPreProcess::applyRebinning(MatrixWorkspace_sptr ws,
     IAlgorithm_sptr rebin = createChildAlgorithm("Rebin");
     rebin->setProperty("InputWorkspace", ws);
     rebin->setProperty("Params", rebinArgs);
-    rebin->setProperty("FullBinsOnly", true);
+    rebin->setProperty("FullBinsOnly", false);
     rebin->execute();
     return rebin->getProperty("OutputWorkspace");
   } else {
