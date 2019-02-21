@@ -160,7 +160,7 @@ class WISHDiffractionFocussingAnalysisTest(systemtesting.MantidSystemTest):
         self.assertEqual(self.table.rowCount(), 8)
         self.assertEqual(len(self.output_names), 8)
         self.tolerance = 1e-4
-        self.tolerance_is_reller = True
+        self.tolerance_is_rel_err = True
         return self.table.name(), "WISHDiffractionFocussingResult.nxs"
 
 
