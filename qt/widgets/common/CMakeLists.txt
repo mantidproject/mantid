@@ -32,6 +32,7 @@ set(QT5_SRC_FILES
     src/ManageUserDirectories.cpp
     src/MantidDesktopServices.cpp
     src/MantidHelpInterface.cpp
+    src/MantidHelpWindow.cpp
     src/MantidTreeModel.cpp
     src/MantidTreeWidget.cpp
     src/MantidTreeWidgetItem.cpp
@@ -44,6 +45,7 @@ set(QT5_SRC_FILES
     src/OptionsPropertyWidget.cpp
     src/pixmaps.cpp
     src/PluginLibraries.cpp
+    src/pqHelpWindow.cxx
     src/ProcessingAlgoWidget.cpp
     src/PropertyHandler.cpp
     src/PropertyWidget.cpp
@@ -133,6 +135,7 @@ set(QT5_MOC_FILES
   inc/MantidQtWidgets/Common/ListPropertyWidget.h
   inc/MantidQtWidgets/Common/ManageUserDirectories.h
   inc/MantidQtWidgets/Common/MantidHelpInterface.h
+  inc/MantidQtWidgets/Common/MantidHelpWindow.h
   inc/MantidQtWidgets/Common/MantidTreeModel.h
   inc/MantidQtWidgets/Common/MantidTreeWidget.h
   inc/MantidQtWidgets/Common/MantidWidget.h
@@ -141,6 +144,7 @@ set(QT5_MOC_FILES
   inc/MantidQtWidgets/Common/MultifitSetupDialog.h
   inc/MantidQtWidgets/Common/MWRunFiles.h
   inc/MantidQtWidgets/Common/OptionsPropertyWidget.h
+  inc/MantidQtWidgets/Common/pqHelpWindow.h
   inc/MantidQtWidgets/Common/ProcessingAlgoWidget.h
   inc/MantidQtWidgets/Common/PropertyHandler.h
   inc/MantidQtWidgets/Common/PropertyWidget.h
@@ -235,6 +239,7 @@ set(QT5_UI_FILES
     inc/MantidQtWidgets/Common/ManageUserDirectories.ui
     inc/MantidQtWidgets/Common/MultifitSetupDialog.ui
     inc/MantidQtWidgets/Common/MWRunFiles.ui
+    inc/MantidQtWidgets/Common/MantidHelpWindow.h
     inc/MantidQtWidgets/Common/ProcessingAlgoWidget.ui
     inc/MantidQtWidgets/Common/RenameParDialog.ui
     inc/MantidQtWidgets/Common/SequentialFitDialog.ui
