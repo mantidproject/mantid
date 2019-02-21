@@ -118,8 +118,7 @@ class SyncWithCallbackTask(AsyncTask):
             time.sleep(self.period_secs)
             self.blocking_cb()
 
-        exc_value = self.recv.exc_value
-        if exc_value is not None and not isinstance(exc_value, KeyboardInterrupt):
+        if self.recv.exc_value is not None:
             raise self.recv.exc_value
         else:
             return self.recv.output
