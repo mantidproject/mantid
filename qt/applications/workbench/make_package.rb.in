@@ -346,7 +346,7 @@ h5py_patterns.each do |pattern|
   end
 end
 
-files = ["gnureadline.so","cycler.py","readline.py","pyparsing.py","mistune.py"]
+files = ["gnureadline.so","cycler.py","readline.py","pyparsing.py","mistune.py","six.py"]
 files.each do |file|
   copyFile("#{pip_site_packages}/#{file}")
 end
