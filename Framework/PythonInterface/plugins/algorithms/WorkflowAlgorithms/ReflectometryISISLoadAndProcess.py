@@ -171,52 +171,33 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         else:
             return self._tofPrefix + name
 
-    def _workspaceExists(self, workspace_name):
-        """Return true if the given workspace exists in the ADS
-        and is a valid reflectometry workspace for the requested reduction."""
-        if AnalysisDataService.doesExist(workspace_name):
-            self.log().information('Workspace ' + workspace_name + ' exists')
-            return True
-        else:
-            self.log().information('Workspace ' + workspace_name + ' does not exist')
+    def _isValidWorkspace(self, workspace_name, workspace_id):
+        """Returns true, if the workspace of name workspace_name is a valid
+        reflectometry workspace of type workspace_id and deletes the workspace
+        otherwise"""
+        if not _hasWorkspaceID(workspace_name, workspace_id):
+            self.log().information('Workspace ' + workspace_name + ' exists but is not a ' + workspace_id)
+            _removeWorkspace(workspace_name)
             return False
 
-    def _isValidEventWorkspace(self, workspace_name):
-        """Return true if the given workspace exists in the ADS and is
-        a valid reflectometry event workspace."""
-        valid = True
-        if not _hasWorkspaceID(workspace_name, "EventWorkspace"):
-            self.log().information('Workspace ' + workspace_name +
-                                   ' exists but is not an event workspace')
-            valid = False
-        # Check that the monitors workspace is also loaded
-        if not AnalysisDataService.doesExist(_monitorWorkspace(workspace_name)):
-            self.log().information('Workspace ' + workspace_name + ' exists but ' +
-                                   workspace_name + '_monitors does not')
-            valid = False
-        _removeWorkspaceIfNotValid(workspace_name, valid)
-        return valid
-
-    def _isValidHistogramWorkspace(self, workspace_name):
-        """Return true if the given workspace exists in the ADS and is
-        a valid reflectometry histogram workspace."""
-        valid = True
-        if not _hasWorkspaceID(workspace_name, "Workspace2D"):
-            self.log().information('Workspace ' + workspace_name +
-                                   ' exists but is not a Workspace2D')
-            valid = False
-        _removeWorkspaceIfNotValid(workspace_name, valid)
-        return valid
+        # For event workspaces, the monitors workspace must also exist, otherwise it's not valid
+        if workspace_id == "EventWorkspace":
+            if not AnalysisDataService.doesExist(_monitorWorkspace(workspace_name)):
+                self.log().information('Monitors workspace ' + workspace_name + '_monitors does not exist')
+                _removeWorkspace(workspace_name)
+                return False
+        return True
 
     def _workspaceExistsAndIsValid(self, workspace_name, isTrans):
-        """Return true if the given workspace exists in the ADS and is valid"""
-        if not self._workspaceExists(workspace_name):
+        """Return true, if the given workspace exists in the ADS and is valid"""
+        if not AnalysisDataService.doesExist(workspace_name):
+            self.log().information('Workspace ' + workspace_name + ' does not exist')
             return False
-        # Check existing workspace is of correct type and delete it if not
+        self.log().information('Workspace ' + workspace_name + ' exists')
         if not isTrans and self._slicingEnabled():
-            return self._isValidEventWorkspace(workspace_name)
+            return self._isValidWorkspace(workspace_name, "EventWorkspace")
         else:
-            return self._isValidHistogramWorkspace(workspace_name)
+            return self._isValidWorkspace(workspace_name, "Workspace2D")
 
     def _getRunFromADSOrNone(self, run, isTrans):
         """Given a run name, return the name of the equivalent workspace in the ADS (
@@ -403,6 +384,7 @@ def _getRunNumberAsString(workspace_name):
 
 
 def _hasWorkspaceID(workspace_name, workspace_id):
+    """Check that a workspace has the given type"""
     workspace = AnalysisDataService.retrieve(workspace_name)
     if isinstance(workspace, WorkspaceGroup):
         return workspace[0].id() == workspace_id
@@ -411,21 +393,16 @@ def _hasWorkspaceID(workspace_name, workspace_id):
 
 
 def _removeWorkspace(workspace_name):
-    workspace = AnalysisDataService.retrieve(workspace_name)
-    if isinstance(workspace, WorkspaceGroup):
-        # Remove child workspaces first
-        while workspace.getNumberOfEntries():
-            AnalysisDataService.remove(workspace[0].name())
-    AnalysisDataService.remove(workspace_name)
-
-
-def _removeWorkspaceIfNotValid(workspace_name, valid):
-    """If valid is false, remove the given workspace and its related
-    monitor workspace, if it has one"""
-    if valid:
-        return
+    """Remove the workspace with the given name, including any child workspaces if it
+    is a group. If a corresponding monitors workspace exists, remove that too."""
     if AnalysisDataService.doesExist(workspace_name):
-        _removeWorkspace(workspace_name)
+        workspace = AnalysisDataService.retrieve(workspace_name)
+        if isinstance(workspace, WorkspaceGroup):
+            # Remove child workspaces first
+            while workspace.getNumberOfEntries():
+                _removeWorkspace(workspace[0].name())
+        AnalysisDataService.remove(workspace_name)
+    # If a corresponding monitors workspace also exists, remove that too
     if AnalysisDataService.doesExist(_monitorWorkspace(workspace_name)):
         _removeWorkspace(_monitorWorkspace(workspace_name))
 
