@@ -31,6 +31,10 @@ class ProjectRecoveryModelTest(unittest.TestCase):
     def setUp(self):
         self.pr = ProjectRecovery(globalfiguremanager=None, window_finder=mock.MagicMock(), multifileinterpreter=None)
 
+        # Make absolutely sure that the workbench-recovery directory is cleared.
+        if os.path.exists(self.pr.recovery_directory):
+            shutil.rmtree(self.pr.recovery_directory)
+
         # Set up some checkpoints
         self.setup_some_checkpoints()
 

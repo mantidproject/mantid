@@ -16,7 +16,7 @@ import unittest
 # 3rdparty imports
 
 # local imports
-from mantidqt.utils.asynchronous import AsyncTask, BlockingAsyncTask
+from mantidqt.utils.asynchronous import AsyncTask, SyncWithCallbackTask
 
 
 class AsyncTaskTest(unittest.TestCase):
@@ -154,7 +154,7 @@ class AsyncTaskTest(unittest.TestCase):
         self.assertRaises(TypeError, AsyncTask, object())
 
 
-class BlockingAsyncTaskTest(unittest.TestCase):
+class SyncWithCallbackTaskTest(unittest.TestCase):
 
     # ---------------------------------------------------------------
     # Success cases
@@ -163,18 +163,18 @@ class BlockingAsyncTaskTest(unittest.TestCase):
         def foo():
             return 42
 
-        task = BlockingAsyncTask(foo)
+        task = SyncWithCallbackTask(foo)
 
-        self.assertEqual(42, task.begin())
+        self.assertEqual(42, task.start())
 
     def test_successful_positional_args_operation(self):
         def foo(shift):
             return 42 + shift
 
         shift = 2
-        task = BlockingAsyncTask(foo, args=(shift,))
+        task = SyncWithCallbackTask(foo, args=(shift,))
 
-        self.assertEqual(42 + shift, task.begin())
+        self.assertEqual(42 + shift, task.start())
 
     def test_successful_args_and_kwargs_operation(self):
         def foo(scale, shift):
@@ -182,16 +182,16 @@ class BlockingAsyncTaskTest(unittest.TestCase):
 
         scale, shift = 2, 4
 
-        task = BlockingAsyncTask(foo, args=(scale,), kwargs={'shift': shift})
-        self.assertEqual(scale*42 + shift, task.begin())
+        task = SyncWithCallbackTask(foo, args=(scale,), kwargs={'shift': shift})
+        self.assertEqual(scale * 42 + shift, task.start())
 
     def test_unsuccessful_args_and_kwargs_operation_raises_exception(self):
         def foo(scale, shift):
             raise RuntimeError("Bad operation")
 
         scale, shift = 2, 4
-        task = BlockingAsyncTask(foo, args=(scale,), kwargs={'shift': shift})
-        self.assertRaises(RuntimeError, task.begin())
+        task = SyncWithCallbackTask(foo, args=(scale,), kwargs={'shift': shift})
+        self.assertRaises(RuntimeError, task.start())
 
 
 if __name__ == "__main__":

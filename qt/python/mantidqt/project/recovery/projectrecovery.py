@@ -59,8 +59,9 @@ class ProjectRecovery(object):
         self.multi_file_interpreter = multifileinterpreter
         self.main_window = main_window
 
-        # To ignore an algorithm in project recovery please put it's name here. e.g. MonitorLiveData is ignored because
-        # StartLiveData is the only one that is needed to restart this workspace.
+        # To ignore an algorithm in project recovery please put it's name here, this is done to stop these algorithm
+        # calls from being saved. e.g. MonitorLiveData is ignored because StartLiveData is the only one that is needed
+        # to restart this workspace.
         self.algs_to_ignore = ["MonitorLiveData", "EnggSaveGSASIIFitResultsToHDF5",
                                "EnggSaveSinglePeakFitResultsToHDF5", "ExampleSaveAscii", "SANSSave", "SaveANSTOAscii",
                                "SaveAscii", "SaveBankScatteringAngles", "SaveCSV", "SaveCalFile", "SaveCanSAS1D",
@@ -405,7 +406,7 @@ class ProjectRecovery(object):
         paths = self.listdir_fullpath(self.recovery_directory_pid)
 
         if len(paths) > self.maximum_num_checkpoints:
-            # Order paths in reverse and remove the last folder from existance
+            # Order paths in reverse and remove the last folder
             paths.sort(reverse=True)
             for ii in range(self.maximum_num_checkpoints, len(paths)):
                 self._remove_directory_and_directory_trees(paths[ii])
@@ -431,6 +432,9 @@ class ProjectRecovery(object):
                     pass
 
     def repair_checkpoints(self):
+        """
+        Will remove all locked, older than a month, and empty checkpoints
+        """
         pid_dirs = self.listdir_fullpath(self.recovery_directory_hostname)
 
         dirs_to_delete = []
@@ -444,15 +448,18 @@ class ProjectRecovery(object):
         # Now the checkpoints have been deleted we may have PID directories with no checkpoints present so delete them
         self._remove_empty_folders_from_dir(self.recovery_directory_hostname)
 
-    @staticmethod
-    def _find_checkpoints_older_than_a_month(pid_dirs):
+    def _find_checkpoints_older_than_a_month(self, pid_dirs):
         old_pids = []
         for pid_dir in pid_dirs:
-            last_modified = os.path.getmtime(pid_dir)
-            # If pid folder hasn't been touched in 30 days delete it
-            if last_modified < time.time() - (30*86400):
+            # If pid folder hasn't been touched in a month delete it
+            if self._is_file_older_than_month(pid_dir):
                 old_pids.append(pid_dir)
         return old_pids
+
+    @staticmethod
+    def _is_file_older_than_month(filepath):
+        last_modified = os.path.getmtime(filepath)
+        return last_modified < time.time() - 2592000  # (30 days * 86400 seconds)
 
     def _find_checkpoints_which_are_locked(self, pid_dirs):
         locked_checkpoints = []

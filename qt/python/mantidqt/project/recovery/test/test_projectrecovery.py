@@ -26,6 +26,7 @@ from mantidqt.project.recovery.projectrecovery import ProjectRecovery, SAVING_TI
 
 if sys.version_info.major >= 3:
     from unittest import mock
+    unicode = str
 else:
     import mock
 
@@ -119,9 +120,9 @@ class ProjectRecoveryTest(unittest.TestCase):
     def test_sort_paths_by_last_modified(self):
         # Make sure there is actually a different modified time on the files by using sleeps
         first = tempfile.mkdtemp()
-        time.sleep(0.01)
+        time.sleep(0.5)
         second = tempfile.mkdtemp()
-        time.sleep(0.01)
+        time.sleep(0.5)
         third = tempfile.mkdtemp()
         paths = [second, third, first]
         paths = self.pr.sort_by_last_modified(paths)
@@ -386,4 +387,112 @@ class ProjectRecoveryTest(unittest.TestCase):
         self.assertEqual(self.pr.recovery_presenter.set_up_progress_bar.call_count, 1)
         self.assertEqual(self.pr.recovery_presenter.set_up_progress_bar.call_args, mock.call(0))
 
-    # todo: Test checkpoint repair
+    def test_remove_oldest_checkpoints(self):
+        self.pr.recovery_directory_pid = self.working_directory
+        self.pr._remove_directory_and_directory_trees = mock.MagicMock()
+
+        for ii in range(0, self.pr.maximum_num_checkpoints+1):
+            os.mkdir(os.path.join(self.working_directory, "dir"+str(ii)))
+            time.sleep(0.01)
+
+        self.pr.remove_oldest_checkpoints()
+
+        # Now should have had a call made to delete working_directory + dir0
+        self.pr._remove_directory_and_directory_trees.assert_called_with(os.path.join(self.working_directory, "dir0"))
+
+    def test_clear_all_unused_checkpoints_called_with_none_and_only_one_user(self):
+        self.pr._remove_directory_and_directory_trees = mock.MagicMock()
+        os.makedirs(self.pr.recovery_directory_hostname)
+
+        self.pr.clear_all_unused_checkpoints()
+
+        self.pr._remove_directory_and_directory_trees.assert_called_with(self.pr.recovery_directory_hostname)
+
+    def test_clear_all_unused_checkpoints_called_with_none_and_multiple_users(self):
+        self.pr._remove_directory_and_directory_trees = mock.MagicMock()
+        os.makedirs(self.pr.recovery_directory_hostname)
+        user = os.path.join(self.pr.recovery_directory, "dimitar")
+        if os.path.exists(user):
+            shutil.rmtree(user)
+        os.makedirs(user)
+
+        self.pr.clear_all_unused_checkpoints()
+
+        self.pr._remove_directory_and_directory_trees.assert_called_with(self.pr.recovery_directory_hostname)
+
+    def test_clear_all_unused_checkpoints_called_with_not_none(self):
+        self.pr._remove_directory_and_directory_trees = mock.MagicMock()
+        os.makedirs(self.pr.recovery_directory_hostname)
+
+        self.pr.clear_all_unused_checkpoints(pid_dir=self.pr.recovery_directory_hostname)
+
+        self.pr._remove_directory_and_directory_trees.assert_called_with(self.pr.recovery_directory_hostname)
+
+    def _repair_checkpoint_checkpoints_setup(self, checkpoint1, checkpoint2, pid, pid2):
+        if os.path.exists(pid):
+            shutil.rmtree(pid)
+        os.makedirs(pid)
+        os.makedirs(checkpoint1)
+        if os.path.exists(pid2):
+            shutil.rmtree(pid2)
+        os.makedirs(pid2)
+        os.makedirs(checkpoint2)
+
+        # Add a lock file to checkpoint 1
+        open(os.path.join(checkpoint1, self.pr.lock_file_name), 'a').close()
+
+        # Add one workspace to the checkpoint and change modified dates to older than a month
+        os.utime(pid2, (1, 1))
+
+    def _repair_checkpoints_assertions(self, checkpoint1, checkpoint2, pid, pid2):
+        # None of the checkpoints should exist after the call. Thus the PID folder should be deleted and thus ignored.
+        directory_removal_calls = [mock.call(u'/home/sam/.mantid/workbench-recovery/sam/200000'),
+                                   mock.call(u'/home/sam/.mantid/workbench-recovery/sam/1000000/check1')]
+
+        self.pr._remove_directory_and_directory_trees.assert_has_calls(directory_removal_calls)
+
+        empty_file_calls = [mock.call(u'/home/sam/.mantid/workbench-recovery/sam')]
+        self.pr._remove_empty_folders_from_dir.assert_has_calls(empty_file_calls)
+
+        self.assertTrue(os.path.exists(checkpoint1))
+        self.assertTrue(os.path.exists(pid2))
+        self.assertTrue(os.path.exists(checkpoint2))
+        self.assertTrue(os.path.exists(pid))
+
+    def test_repair_checkpoints(self):
+        pid = os.path.join(self.pr.recovery_directory_hostname, "1000000")
+        checkpoint1 = os.path.join(pid, "check1")
+        pid2 = os.path.join(self.pr.recovery_directory_hostname, "200000")
+        checkpoint2 = os.path.join(pid, "check3")
+        self._repair_checkpoint_checkpoints_setup(checkpoint1, checkpoint2, pid, pid2)
+        self.pr._remove_directory_and_directory_trees = mock.MagicMock()
+        self.pr._remove_empty_folders_from_dir = mock.MagicMock()
+
+        self.pr.repair_checkpoints()
+
+        self._repair_checkpoints_assertions(checkpoint1, checkpoint2, pid, pid2)
+
+        self.pr._remove_empty_folders_from_dir(self.pr.recovery_directory_hostname)
+
+    def test_find_checkpoints_older_than_a_month(self):
+        pid = os.path.join(self.pr.recovery_directory_hostname, "1000000")
+        if os.path.exists(pid):
+            shutil.rmtree(pid)
+
+        os.makedirs(pid)
+        os.utime(pid, (1, 1))
+
+        self.assertEqual([pid], self.pr._find_checkpoints_older_than_a_month([pid]))
+
+    def test_find_checkpoints_which_are_locked(self):
+        pid = os.path.join(self.pr.recovery_directory_hostname, "1000000")
+        if os.path.exists(pid):
+            shutil.rmtree(pid)
+        checkpoint1 = os.path.join(pid, "check1")
+
+        os.makedirs(pid)
+        os.makedirs(checkpoint1)
+        # Add a lock file to checkpoint 1
+        open(os.path.join(checkpoint1, self.pr.lock_file_name), 'a').close()
+
+        self.assertEqual([checkpoint1], self.pr._find_checkpoints_which_are_locked([pid]))

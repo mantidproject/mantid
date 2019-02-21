@@ -16,7 +16,7 @@ from qtpy.QtCore import QObject, Signal
 from qtpy.QtWidgets import QApplication
 from six import PY2, iteritems
 
-from mantidqt.utils.asynchronous import AsyncTask, BlockingAsyncTask
+from mantidqt.utils.asynchronous import AsyncTask, SyncWithCallbackTask
 from mantidqt.widgets.codeeditor.inputsplitter import InputSplitter
 
 if PY2:
@@ -137,10 +137,10 @@ class PythonCodeExecution(QObject):
             self._task = task
             return task
         else:
-            self._task = BlockingAsyncTask(self.execute, args=(code_str, filename),
-                                           success_cb=self._on_success, error_cb=self._on_error,
-                                           blocking_cb=QApplication.processEvents)
-            return self._task.begin()
+            self._task = SyncWithCallbackTask(self.execute, args=(code_str, filename),
+                                              success_cb=self._on_success, error_cb=self._on_error,
+                                              blocking_cb=QApplication.processEvents)
+            return self._task.start()
 
     def execute(self, code_str, filename=None):
         """Execute the given code on the calling thread
