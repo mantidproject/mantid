@@ -20,18 +20,18 @@ class ProjectSaver(object):
     def __init__(self, project_file_ext):
         self.project_file_ext = project_file_ext
 
-    def save_project(self, directory, workspace_to_save=None, plots_to_save=None, interfaces_to_save=None):
+    def save_project(self, file_name, workspace_to_save=None, plots_to_save=None, interfaces_to_save=None):
         """
         The method that will actually save the project and call relevant savers for workspaces, plots, interfaces etc.
-        :param directory: String; The directory of the
+        :param file_name: String; The file_name of the
         :param workspace_to_save: List; of Strings that will have workspace names in it, if None will save all
         :param plots_to_save: List; of matplotlib.figure objects to save to the project file.
         :param interfaces_to_save: List of Lists of Window and Encoder; the interfaces to save and the encoders to use
         :return: None; If the method cannot be completed.
         """
-        # Check if the directory doesn't exist
-        if directory is None:
-            logger.warning("Can not save to empty directory")
+        # Check if the file_name doesn't exist
+        if file_name is None or os.path.isdir(file_name):
+            logger.warning("Please select a valid file name")
             return
 
         # Check this isn't saving a blank project file
@@ -39,7 +39,8 @@ class ProjectSaver(object):
             logger.warning("Can not save an empty project")
             return
 
-        # Save workspaces to that location
+        # Save workspaces to that project file's directory.
+        directory = os.path.dirname(file_name)
         workspace_saver = WorkspaceSaver(directory=directory)
         workspace_saver.save_workspaces(workspaces_to_save=workspace_to_save)
 
@@ -54,7 +55,7 @@ class ProjectSaver(object):
             # Add to the dictionary encoded data with the key as the first tag in the list on the encoder attributes
             try:
                 tag = encoder.tags[0]
-                encoded_dict = encoder.encode(interface, directory)
+                encoded_dict = encoder.encode(interface, file_name)
                 encoded_dict["tag"] = tag
                 interfaces.append(encoded_dict)
             except Exception as e:
@@ -67,7 +68,7 @@ class ProjectSaver(object):
         writer = ProjectWriter(workspace_names=workspace_saver.get_output_list(),
                                plots_to_save=plots_to_save_list,
                                interfaces_to_save=interfaces,
-                               save_location=directory,
+                               save_location=file_name,
                                project_file_ext=self.project_file_ext)
         writer.write_out()
 
@@ -75,7 +76,7 @@ class ProjectSaver(object):
 class ProjectWriter(object):
     def __init__(self, save_location, workspace_names, project_file_ext, plots_to_save, interfaces_to_save):
         self.workspace_names = workspace_names
-        self.directory = save_location
+        self.file_name = save_location
         self.project_file_ext = project_file_ext
         self.plots_to_save = plots_to_save
         self.interfaces_to_save = interfaces_to_save
@@ -89,11 +90,10 @@ class ProjectWriter(object):
                         "interfaces": self.interfaces_to_save}
 
         # Open file and save the string to it alongside the workspace_names
-        if not os.path.isdir(self.directory):
-            os.makedirs(self.directory)
-        file_path = os.path.join(self.directory, (os.path.basename(self.directory) + self.project_file_ext))
+        if self.project_file_ext not in os.path.basename(self.file_name):
+            self.file_name = self.file_name + self.project_file_ext
         try:
-            with open(file_path, "w+") as f:
+            with open(self.file_name, "w+") as f:
                 dump(obj=to_save_dict, fp=f)
         except Exception as e:
             # Catch any exception and log it
