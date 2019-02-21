@@ -508,40 +508,43 @@ void RunsTablePresenter::forAllCellsAt(
   m_view->jobs().setCellsAt(location, cells);
 }
 
+void RunsTablePresenter::setRowStylingForItem(
+    MantidWidgets::Batch::RowPath const &rowPath, Item const &item) {
+  forAllCellsAt(rowPath, clearStateStyling);
+
+  switch (item.state()) {
+  case State::ITEM_NOT_STARTED: // fall through
+  case State::ITEM_STARTING:
+    break;
+  case State::ITEM_RUNNING:
+    forAllCellsAt(rowPath, applyRunningStateStyling);
+    break;
+  case State::ITEM_COMPLETE:
+    forAllCellsAt(rowPath, applyCompletedStateStyling);
+    break;
+  case State::ITEM_ERROR:
+    forAllCellsAt(rowPath, applyErrorStateStyling, item.message());
+    break;
+  case State::ITEM_WARNING:
+    forAllCellsAt(rowPath, applyWarningStateStyling, item.message());
+    break;
+  };
+}
+
 void RunsTablePresenter::notifyRowStateChanged() {
   int groupIndex = 0;
   for (auto &group : m_model.reductionJobs().groups()) {
     auto groupPath = MantidWidgets::Batch::RowPath{groupIndex};
-    forAllCellsAt(groupPath, clearStateStyling);
+    setRowStylingForItem(groupPath, group);
 
     int rowIndex = 0;
     for (auto &row : group.rows()) {
       auto rowPath = MantidWidgets::Batch::RowPath{groupIndex, rowIndex};
-      forAllCellsAt(rowPath, clearStateStyling);
 
-      if (!row) {
+      if (!row)
         forAllCellsAt(rowPath, applyInvalidStateStyling);
-        ++rowIndex;
-        continue;
-      }
-
-      switch (row->state()) {
-      case State::ITEM_NOT_STARTED: // fall through
-      case State::ITEM_STARTING:
-        break;
-      case State::ITEM_RUNNING:
-        forAllCellsAt(rowPath, applyRunningStateStyling);
-        break;
-      case State::ITEM_COMPLETE:
-        forAllCellsAt(rowPath, applyCompletedStateStyling);
-        break;
-      case State::ITEM_ERROR:
-        forAllCellsAt(rowPath, applyErrorStateStyling, row->message());
-        break;
-      case State::ITEM_WARNING:
-        forAllCellsAt(rowPath, applyWarningStateStyling, row->message());
-        break;
-      };
+      else
+        setRowStylingForItem(rowPath, *row);
 
       ++rowIndex;
     }
