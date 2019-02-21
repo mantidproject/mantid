@@ -9,7 +9,6 @@
 #
 from __future__ import (absolute_import, unicode_literals)
 
-import ctypes
 import inspect
 
 from qtpy.QtCore import QObject, Signal
