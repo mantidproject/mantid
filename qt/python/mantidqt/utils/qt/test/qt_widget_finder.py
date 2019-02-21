@@ -40,9 +40,24 @@ class QtWidgetFinder(object):
 
     def assert_no_toplevel_widgets(self):
         a = QApplication.topLevelWidgets()
-        self.assertEqual(0, len(a), "Widgets are present in the QApplication: {}".format(a))
+        self.assertEqual(len(a), 0, "Widgets are present in the QApplication: {}".format(a))
 
     def assert_number_of_widgets_matching(self, name, number):
         all = self.find_qt_widget_by_name(name)
-
         self.assertEqual(number, len(all), "Widgets are present in the QApplication: {}".format(all))
+
+    def find_widgets_of_type(self, type_name):
+        top_widgets = QApplication.topLevelWidgets()
+        return [x for x in top_widgets if type_name.lower() in str(type(x)).lower()]
+
+    def assert_widget_type_exists(self, type_name):
+        widget_list = self.find_widgets_of_type(type_name)
+        self.assertLess(0, len(widget_list),
+                        msg="No widgets of type '{}' found in QApplication."
+                            "".format(type_name))
+
+    def assert_widget_type_doesnt_exist(self, type_name):
+        widget_list = self.find_widgets_of_type(type_name)
+        self.assertEqual(0, len(widget_list),
+                         msg="{} widgets of type '{}' found in QApplication."
+                             "".format(len(widget_list), type_name))
