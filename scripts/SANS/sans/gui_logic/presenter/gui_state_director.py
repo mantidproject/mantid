@@ -124,3 +124,12 @@ class GuiStateDirector(object):
 
         if "MergeShift" in options.keys():
             state_gui_model.merge_shift = options["MergeShift"]
+
+        if "PhiMin" in options.keys():
+            state_gui_model.phi_limit_min = options["PhiMin"]
+
+        if "PhiMax" in options.keys():
+            state_gui_model.phi_limit_max = options["PhiMax"]
+
+        if "UseMirror" in options.keys():
+            state_gui_model.phi_limit_use_mirror = options["UseMirror"]

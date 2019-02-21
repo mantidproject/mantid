@@ -371,15 +371,20 @@ class OptionsColumnModel(object):
 
     @staticmethod
     def _get_permissible_properties():
-        return {"WavelengthMin":float, "WavelengthMax": float, "EventSlices": str, "MergeScale": float,
-                "MergeShift": float}
+        return {"WavelengthMin": float, "WavelengthMax": float, "EventSlices": str, "MergeScale": float,
+                "MergeShift": float, "PhiMin": float, "PhiMax": float, "UseMirror": options_column_bool}
 
     @staticmethod
     def get_hint_strategy():
         return BasicHintStrategy({"WavelengthMin": 'The min value of the wavelength when converting from TOF.',
                                   "WavelengthMax": 'The max value of the wavelength when converting from TOF.',
-                                  "MergeScale": 'The scale applied to the HAB when mergeing',
-                                  "MergeShift": 'The shift applied to the HAB when mergeing',
+                                  "PhiMin": 'The min angle of the detector to accept.'
+                                            ' Anti-clockwise from horizontal.',
+                                  "PhiMax": 'The max angle of the detector to accept.'
+                                            ' Anti-clockwise from horizontal.',
+                                  "UseMirror": 'True or False. Whether or not to accept phi angle in opposing quadrant',
+                                  "MergeScale": 'The scale applied to the HAB when merging',
+                                  "MergeShift": 'The shift applied to the HAB when merging',
                                   "EventSlices": 'The event slices to reduce.'
                                   ' The format is the same as for the event slices'
                                   ' box in settings, however if a comma separated list is given '
@@ -487,3 +492,20 @@ class SampleShapeColumnModel(object):
 
     def __ne__(self, other):
         return self.__dict__ != other.__dict__
+
+
+def options_column_bool(string):
+    """
+    Evaluate input string as a bool. Used for UseMirror in Options column,
+    as evaluating bool("False") returns True (any string is Truthy).
+    :param string: User input string to be evaluated as False or True
+    :return: True or False
+    """
+    truthy_strings = ("true", "1", "yes", "t", "y")  # t short for true, y short for yes
+    falsy_strings = ("false", "0", "no", "f", "n")
+    if string.lower() in truthy_strings:
+        return True
+    elif string.lower() in falsy_strings:
+        return False
+    else:
+        raise ValueError("Could not evaluate {} as a boolean value. It should be True or False.".format(string))

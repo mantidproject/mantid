@@ -129,6 +129,9 @@ endif ()
 
     mantidqt/widgets/instrumentview/test/test_instrumentview_io.py
     mantidqt/widgets/instrumentview/test/test_instrumentview_view.py
+    
+    mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_io.py
+    mantidqt/widgets/workspacedisplay/matrix/test/test_matrixworkspacedisplay_io.py
 
     mantidqt/project/recovery/test/test_projectrecovery.py
     mantidqt/project/recovery/recoverygui/test/test_projectrecoverywidgetview.py

@@ -68,7 +68,6 @@ class MultiFileEditor(PluginWidget):
         self.abort_action = create_action(self, "Abort",
                                           on_triggered=self.editors.abort_current)
 
-        # attributes
         self.run_action = create_action(
             self, "Run",
             on_triggered=self.editors.execute_current_async,
@@ -117,7 +116,7 @@ class MultiFileEditor(PluginWidget):
         return self.editors.execute_current_async()
 
     def restore_session_tabs(self, session_tabs):
-        self.open_files_in_new_tabs(session_tabs)
+        self.open_files_in_new_tabs(session_tabs, startup=True)
         self.editors.close_tab(0)  # close default empty tab
 
     # ----------- Plugin API --------------------
@@ -169,13 +168,13 @@ class MultiFileEditor(PluginWidget):
 
     # ----------- Plugin Behaviour --------------------
 
-    def open_file_in_new_tab(self, filepath):
-        return self.editors.open_file_in_new_tab(filepath)
+    def open_file_in_new_tab(self, filepath, startup=False):
+        return self.editors.open_file_in_new_tab(filepath, startup)
 
-    def open_files_in_new_tabs(self, filepaths):
+    def open_files_in_new_tabs(self, filepaths, startup=False):
         for filepath in filepaths:
             try:
-                self.open_file_in_new_tab(filepath)
+                self.open_file_in_new_tab(filepath, startup)
             except IOError as io_error:
                 logger.warning("Could not load file:\n  {}"
                                "".format(io_error))
