@@ -87,6 +87,19 @@ class ConfigUserTest(TestCase):
     def test_set_raises_error_with_invalid_option_type(self):
         self.assertRaises(TypeError, self.cfg.set, 'section', 1, 1)
 
+    def test_lowercase_bool_loaded_correctly(self):
+        defaults = {
+            'main': {
+                'a_default_key': 100,
+                'lowercase_bool_option': 'false',
+                'lowercase_bool_option2': 'true'
+            },
+        }
+        cfg = UserConfig(ConfigUserTest.__name__, ConfigUserTest.__name__, defaults)
+
+        self.assertEqual(False, cfg.get('main/lowercase_bool_option'))
+        self.assertEqual(True, cfg.get('main/lowercase_bool_option2'))
+
 
 if __name__ == '__main__':
     main()
