@@ -10,6 +10,7 @@
 from __future__ import (absolute_import, unicode_literals)
 
 import unittest
+
 try:
     from unittest import mock
 except ImportError:
@@ -27,18 +28,18 @@ PERMISSION_BOX_FUNC = ('mantidqt.widgets.codeeditor.scriptcompatibility.'
 class MultiPythonFileInterpreterTest(GuiTest, QtWidgetFinder):
 
     def test_default_contains_single_editor(self):
-        widget = MultiPythonFileInterpreter()
+        widget = MultiPythonFileInterpreter(None)
         self.assertEqual(1, widget.editor_count)
 
     def test_add_editor(self):
-        widget = MultiPythonFileInterpreter()
+        widget = MultiPythonFileInterpreter(None)
         self.assertEqual(1, widget.editor_count)
         widget.append_new_editor()
         self.assertEqual(2, widget.editor_count)
 
     def test_open_file_in_new_tab_import_added(self):
         test_string = "Test file\nLoad()"
-        widget = MultiPythonFileInterpreter()
+        widget = MultiPythonFileInterpreter(None)
         mock_open_func = mock.mock_open(read_data=test_string)
         with mock.patch(widget.__module__ + '.open', mock_open_func, create=True):
             with mock.patch(PERMISSION_BOX_FUNC, lambda: True):
@@ -50,7 +51,7 @@ class MultiPythonFileInterpreterTest(GuiTest, QtWidgetFinder):
 
     def test_open_file_in_new_tab_no_import_added(self):
         test_string = "Test file\n"
-        widget = MultiPythonFileInterpreter()
+        widget = MultiPythonFileInterpreter(None)
         mock_open_func = mock.mock_open(read_data=test_string)
         with mock.patch(widget.__module__ + '.open', mock_open_func, create=True):
             with mock.patch(PERMISSION_BOX_FUNC, lambda: True):

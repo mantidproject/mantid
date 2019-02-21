@@ -25,26 +25,26 @@ else:
 class PythonFileInterpreterTest(GuiTest):
 
     def test_construction(self):
-        w = PythonFileInterpreter()
+        w = PythonFileInterpreter(None)
         self.assertTrue("Status: Idle", w.status.currentMessage())
 
     def test_empty_code_does_nothing_on_exec(self):
-        w = PythonFileInterpreter()
+        w = PythonFileInterpreter(None)
         w._presenter.model.execute_async = mock.MagicMock()
         w.execute_async()
         w._presenter.model.execute_async.assert_not_called()
         self.assertTrue("Status: Idle", w.status.currentMessage())
 
     def test_constructor_populates_editor_with_content(self):
-        w = PythonFileInterpreter(content='# my funky code')
+        w = PythonFileInterpreter(None, content='# my funky code')
         self.assertEqual('# my funky code', w.editor.text())
 
     def test_constructor_respects_filename(self):
-        w = PythonFileInterpreter(filename='test.py')
+        w = PythonFileInterpreter(None, filename='test.py')
         self.assertEqual('test.py', w.filename)
 
     def test_successful_execution(self):
-        w = PythonFileInterpreter()
+        w = PythonFileInterpreter(None)
         w.editor.setText("x = 1 + 2")
         w.execute_async()
         self.assertTrue("Status: Idle", w.status.currentMessage())
@@ -52,7 +52,7 @@ class PythonFileInterpreterTest(GuiTest):
     def test_clear_key_binding(self):
         test_cases = {'Ctrl+A': None, 'Shift+A': ValueError,
                       'Ctrl+AAA': ValueError, 'Ctrl+Shift+A': ValueError}
-        w = PythonFileInterpreter()
+        w = PythonFileInterpreter(None)
         for key_combo, expected_result in test_cases.items():
             fail_msg = ("Failed on case '{}' with expected result '{}'"
                         "".format(key_combo, expected_result))

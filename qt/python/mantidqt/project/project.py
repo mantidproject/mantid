@@ -16,17 +16,17 @@ from mantid.api import AnalysisDataService, AnalysisDataServiceObserver
 from mantidqt.io import open_a_file_dialog
 from mantidqt.project.projectloader import ProjectLoader
 from mantidqt.project.projectsaver import ProjectSaver
-from workbench.config import CONF
 
 
 class Project(AnalysisDataServiceObserver):
-    def __init__(self, globalfiguremanager_instance, interface_populating_function):
+    def __init__(self, globalfiguremanager_instance, interface_populating_function, config):
         """
         :param globalfiguremanager_instance: The global figure manager instance used in this project.
         :param interface_populating_function: The interface populating function which returns a list of lists of windows
          and encoders
         """
         super(Project, self).__init__()
+        self.config = config
         # Has the project been saved, to Access this call .saved
         self.__saved = True
 
@@ -161,7 +161,7 @@ class Project(AnalysisDataServiceObserver):
         return False
 
     def _offer_save_message_box(self, parent):
-        if CONF.get('project', 'prompt_save_on_close'):
+        if self.config.get('project', 'prompt_save_on_close'):
             return QMessageBox.question(parent, 'Unsaved Project',
                                         "The project is currently unsaved. Would you like to "
                                         "save before closing?",

@@ -190,7 +190,7 @@ class MainWindow(QMainWindow):
 
         self.set_splash("Loading code editing widget")
         from workbench.plugins.editor import MultiFileEditor
-        self.editor = MultiFileEditor(self)
+        self.editor = MultiFileEditor(self, CONF)
         self.editor.register_plugin()
         self.widgets.append(self.editor)
 

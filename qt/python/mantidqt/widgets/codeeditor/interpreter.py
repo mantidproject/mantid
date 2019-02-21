@@ -20,7 +20,6 @@ from mantidqt.widgets.codeeditor.editor import CodeEditor
 from mantidqt.widgets.codeeditor.errorformatter import ErrorFormatter
 from mantidqt.widgets.codeeditor.execution import PythonCodeExecution
 from mantidqt.widgets.embedded_find_replace_dialog.presenter import EmbeddedFindReplaceDialog
-from workbench.config import CONF
 
 IDLE_STATUS_MSG = "Status: Idle."
 LAST_JOB_MSG_TEMPLATE = "Last job completed {} at {} in {:.3f}s"
@@ -35,8 +34,9 @@ SPACE_CHAR = " "
 
 class EditorIO(object):
 
-    def __init__(self, editor):
+    def __init__(self, editor, config):
         self.editor = editor
+        self.config = config
 
     def ask_for_filename(self):
         filename = open_a_file_dialog(parent=self.editor, default_suffix=".py", file_filter="Python Files (*.py)",
@@ -56,7 +56,7 @@ class EditorIO(object):
         if confirm:
             # if a confirmation is wanted, but the user has specified to NOT ask for confirmation
             # then return the same answer as clicking `No` on the message box
-            if not CONF.get('project', 'prompt_save_editor_modified'):
+            if not self.config.get('project', 'prompt_save_editor_modified'):
                 button = QMessageBox.No
             else:
                 button = QMessageBox.question(self.editor, "",
@@ -97,7 +97,7 @@ class PythonFileInterpreter(QWidget):
     sig_editor_modified = Signal(bool)
     sig_filename_modified = Signal(str)
 
-    def __init__(self, content=None, filename=None,
+    def __init__(self, config, content=None, filename=None,
                  parent=None):
         """
         :param content: An optional string of content to pass to the editor
@@ -108,6 +108,7 @@ class PythonFileInterpreter(QWidget):
 
         # layout
         self.editor = CodeEditor("AlternateCSPythonLexer", self)
+        self.config = config
 
         # Clear QsciScintilla key bindings that may override PyQt's bindings
         self.clear_key_binding("Ctrl+/")
@@ -166,7 +167,7 @@ class PythonFileInterpreter(QWidget):
 
     def save(self, confirm=False):
         if self.editor.isModified():
-            io = EditorIO(self.editor)
+            io = EditorIO(self.editor, self.config)
             return io.save_if_required(confirm)
         else:
             return True

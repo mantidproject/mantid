@@ -18,7 +18,7 @@ from mantidqt.widgets.codeeditor.multifileinterpreter import MultiPythonFileInte
 
 class MultiPythonFileInterpreterDeletionTest(GuiTest, QtWidgetFinder):
     def test_editor_widget_not_leaked(self):
-        widget = MultiPythonFileInterpreter()
+        widget = MultiPythonFileInterpreter(None)
         self.assertEqual(1, widget.editor_count)
         widget.append_new_editor()
         self.assertEqual(2, widget.editor_count)
@@ -41,7 +41,7 @@ class MultiPythonFileInterpreterDeletionTest(GuiTest, QtWidgetFinder):
         self.assert_number_of_widgets_matching(".interpreter.PythonFileInterpreter", 1)
 
     def test_editor_widget_deletes_find_replace_dialog(self):
-        widget = MultiPythonFileInterpreter()
+        widget = MultiPythonFileInterpreter(None)
         self.assertEqual(1, widget.editor_count)
         widget.append_new_editor()
         self.assert_number_of_widgets_matching(".interpreter.PythonFileInterpreter", 2)
@@ -56,7 +56,7 @@ class MultiPythonFileInterpreterDeletionTest(GuiTest, QtWidgetFinder):
         self.assert_number_of_widgets_matching("Embedded", 0)
 
     def test_editor_widget_doesnt_create_find_replace_unless_requested(self):
-        widget = MultiPythonFileInterpreter()
+        widget = MultiPythonFileInterpreter(None)
         self.assertEqual(1, widget.editor_count)
         widget.append_new_editor()
         self.assert_number_of_widgets_matching(".interpreter.PythonFileInterpreter", 2)

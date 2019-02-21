@@ -46,11 +46,11 @@ TAB_SETTINGS_KEY = "Editors/SessionTabs"
 class MultiFileEditor(PluginWidget):
     """Provides a tab widget for editing multiple files"""
 
-    def __init__(self, parent):
+    def __init__(self, parent, config):
         super(MultiFileEditor, self).__init__(parent)
 
         # layout
-        self.editors = MultiPythonFileInterpreter(default_content=DEFAULT_CONTENT,
+        self.editors = MultiPythonFileInterpreter(config, default_content=DEFAULT_CONTENT,
                                                   parent=self)
         layout = QVBoxLayout()
         layout.addWidget(self.editors)
