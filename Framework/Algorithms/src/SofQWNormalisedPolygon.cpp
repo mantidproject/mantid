@@ -19,6 +19,7 @@
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -60,25 +61,21 @@ double twoThetaFromLocalPoint(const Mantid::Geometry::DetectorInfo &detInfo,
  * @param detInfoIndex an index to the detector info
  * @param samplePos position of the sample
  * @param beamDir a unit vector pointing in the beam direction
- * @param shapeVectors vectors describing a cuboid shape
+ * @param geometry a geometry object describing the cuboid
  * @return a pair (min(2theta), max(2theta)), units radians
  */
 std::pair<double, double> cuboidTwoThetaRange(
     const Mantid::Geometry::DetectorInfo &detInfo, const size_t detInfoIndex,
     const Mantid::Kernel::V3D &samplePos, const Mantid::Kernel::V3D &beamDir,
-    const std::vector<Mantid::Kernel::V3D> &shapeVectors) {
-  // Convention from ShapeFactory::createGeometryHandler()
-  const auto &leftFrontBottom = shapeVectors[0];
-  const auto &leftFrontTop = shapeVectors[1];
-  const auto &leftBackBottom = shapeVectors[2];
-  const auto &rightFrontBottom = shapeVectors[3];
-  const auto back = leftBackBottom - leftFrontBottom;
-  const auto up = leftFrontTop - leftFrontBottom;
-  const auto right = rightFrontBottom - leftFrontBottom;
+    const Mantid::Geometry::detail::ShapeInfo::CuboidGeometry &geometry) {
+  const auto back = geometry.leftBackBottom - geometry.leftFrontBottom;
+  const auto up = geometry.leftFrontTop - geometry.leftFrontBottom;
+  const auto right = geometry.rightFrontBottom - geometry.leftFrontBottom;
   const std::array<Mantid::Kernel::V3D, 8> capRing{
-      {leftFrontBottom, leftFrontBottom + back * 0.5, leftBackBottom,
-       leftBackBottom + up * 0.5, leftBackBottom + up,
-       leftFrontTop + back * 0.5, leftFrontTop, leftFrontBottom + up * 0.5}};
+      {geometry.leftFrontBottom, geometry.leftFrontBottom + back * 0.5,
+       geometry.leftBackBottom, geometry.leftBackBottom + up * 0.5,
+       geometry.leftBackBottom + up, geometry.leftFrontTop + back * 0.5,
+       geometry.leftFrontTop, geometry.leftFrontBottom + up * 0.5}};
   double minTwoTheta{std::numeric_limits<double>::max()};
   double maxTwoTheta{std::numeric_limits<double>::lowest()};
   for (int width = 0; width < 2; ++width) {
@@ -112,28 +109,22 @@ std::pair<double, double> cuboidTwoThetaRange(
  * @param detInfoIndex an index to the detector info, not detector ID
  * @param samplePos position of the sample
  * @param beamDir a unit vector pointing in the beam direction
- * @param shapeVectors vectors describing a cuboid shape
- * @param radius cylinder radius
- * @param height cylinder height
+ * @param geometry a geometry object describing the cylinder
  * @return a pair (min(2theta), max(2theta)), units radians
  */
 
 std::pair<double, double> cylinderTwoThetaRange(
     const Mantid::Geometry::DetectorInfo &detInfo, const size_t detInfoIndex,
     const Mantid::Kernel::V3D &samplePos, const Mantid::Kernel::V3D &beamDir,
-    const std::vector<Mantid::Kernel::V3D> &shapeVectors, const double radius,
-    const double height) {
-  // Convention from ShapeFactory::createGeometryHandler()
-  const auto &centerOfBottom = shapeVectors[0];
-  const auto &longAxisDir = shapeVectors[1];
+    const Mantid::Geometry::detail::ShapeInfo::CylinderGeometry &geometry) {
   Mantid::Kernel::V3D basis1{1., 0., 0.};
-  if (longAxisDir.X() != 0. && longAxisDir.Z() != 0) {
+  if (geometry.axis.X() != 0. && geometry.axis.Z() != 0) {
     const auto inverseXZSumSq =
-        1. / (pow<2>(longAxisDir.X()) + pow<2>(longAxisDir.Z()));
-    basis1.setX(std::sqrt(1. - pow<2>(longAxisDir.X()) * inverseXZSumSq));
-    basis1.setY(longAxisDir.X() * std::sqrt(inverseXZSumSq));
+        1. / (pow<2>(geometry.axis.X()) + pow<2>(geometry.axis.Z()));
+    basis1.setX(std::sqrt(1. - pow<2>(geometry.axis.X()) * inverseXZSumSq));
+    basis1.setY(geometry.axis.X() * std::sqrt(inverseXZSumSq));
   }
-  const Mantid::Kernel::V3D basis2 = longAxisDir.cross_prod(basis1);
+  const Mantid::Kernel::V3D basis2 = geometry.axis.cross_prod(basis1);
   const std::array<double, 8> angles{{0., 0.25 * M_PI, 0.5 * M_PI, 0.75 * M_PI,
                                       M_PI, 1.25 * M_PI, 1.5 * M_PI,
                                       1.75 * M_PI}};
@@ -141,11 +132,12 @@ std::pair<double, double> cylinderTwoThetaRange(
   double maxTwoTheta{std::numeric_limits<double>::lowest()};
   for (size_t i = 0; i < angles.size(); ++i) {
     const auto basePoint =
-        centerOfBottom +
-        (basis1 * std::cos(angles[i]) + basis2 * std::sin(angles[i])) * radius;
+        geometry.centreOfBottomBase +
+        (basis1 * std::cos(angles[i]) + basis2 * std::sin(angles[i])) *
+            geometry.radius;
     for (int i = 0; i < 3; ++i) {
-      const auto point =
-          basePoint + longAxisDir * (0.5 * height * static_cast<double>(i));
+      const auto point = basePoint + geometry.axis * (0.5 * geometry.height *
+                                                      static_cast<double>(i));
       const auto current = twoThetaFromLocalPoint(
           detInfo, detInfoIndex, samplePos, beamDir, std::move(point));
       minTwoTheta = std::min(minTwoTheta, current);
@@ -221,18 +213,18 @@ minMaxTwoTheta(const Mantid::Geometry::DetectorInfo &detInfo,
                const size_t detInfoIndex, const Mantid::Kernel::V3D &samplePos,
                const Mantid::Kernel::V3D &beamDir) {
   const auto shape = detInfo.detector(detInfoIndex).shape();
-  Mantid::Geometry::detail::ShapeInfo::GeometryShape geometry;
-  std::vector<Mantid::Kernel::V3D> shapeVectors;
-  double radius;
-  double height;
-  shape->GetObjectGeom(geometry, shapeVectors, radius, height);
-  switch (geometry) {
-  case Mantid::Geometry::detail::ShapeInfo::GeometryShape::CUBOID:
-    return cuboidTwoThetaRange(detInfo, detInfoIndex, samplePos, beamDir,
-                               shapeVectors);
+  const Mantid::Geometry::CSGObject *csgShape;
+  switch (shape->shape()) {
   case Mantid::Geometry::detail::ShapeInfo::GeometryShape::CYLINDER:
+    csgShape = dynamic_cast<const Mantid::Geometry::CSGObject *>(shape.get());
+    assert(csgShape);
     return cylinderTwoThetaRange(detInfo, detInfoIndex, samplePos, beamDir,
-                                 shapeVectors, radius, height);
+                                 csgShape->shapeInfo().cylinderGeometry());
+  case Mantid::Geometry::detail::ShapeInfo::GeometryShape::CUBOID:
+    csgShape = dynamic_cast<const Mantid::Geometry::CSGObject *>(shape.get());
+    assert(csgShape);
+    return cuboidTwoThetaRange(detInfo, detInfoIndex, samplePos, beamDir,
+                               csgShape->shapeInfo().cuboidGeometry());
   default:
     return generalTwoThetaRange(detInfo, detInfoIndex, samplePos, beamDir);
   }
