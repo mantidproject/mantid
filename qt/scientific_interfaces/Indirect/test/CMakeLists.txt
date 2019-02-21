@@ -1,4 +1,5 @@
 # Testing
+###########################################################################
 set(TEST_FILES
     ConvFitDataPresenterTest.h
     ConvFitModelTest.h
@@ -11,6 +12,8 @@ set(TEST_FILES
     IndirectFitPlotModelTest.h
     IndirectFitPlotPresenterTest.h
     IndirectFittingModelTest.h
+    IndirectSettingsModelTest.h
+    IndirectSettingsPresenterTest.h
     IndirectSpectrumSelectionPresenterTest.h
     IqtFitModelTest.h
     JumpFitDataPresenterTest.h

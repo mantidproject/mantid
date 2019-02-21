@@ -34,7 +34,8 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-IndirectSettingsView::IndirectSettingsView(QWidget *parent) : QDialog(parent) {
+IndirectSettingsView::IndirectSettingsView(QWidget *parent)
+    : IIndirectSettingsView(parent) {
   m_uiForm.setupUi(this);
 
   connect(m_uiForm.cbFacility, SIGNAL(currentIndexChanged(QString const &)),

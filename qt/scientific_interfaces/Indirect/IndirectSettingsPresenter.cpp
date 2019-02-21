@@ -13,11 +13,19 @@ namespace IDA {
 IndirectSettingsPresenter::IndirectSettingsPresenter(
     QWidget *parent, std::string const &settingsGroup,
     std::string const &availableSettings)
-    : QObject(nullptr),
-      m_view(Mantid::Kernel::make_unique<IndirectSettingsView>(parent)),
-      m_model(Mantid::Kernel::make_unique<IndirectSettingsModel>(
-          settingsGroup, availableSettings)) {
+    : QObject(nullptr), m_model(std::make_unique<IndirectSettingsModel>(
+                            settingsGroup, availableSettings)),
+      m_view(std::make_unique<IndirectSettingsView>(parent)) {
+  setUpPresenter();
+}
 
+IndirectSettingsPresenter::IndirectSettingsPresenter(
+    IndirectSettingsModel *model, IIndirectSettingsView *view)
+    : QObject(nullptr), m_model(model), m_view(view) {
+  setUpPresenter();
+}
+
+void IndirectSettingsPresenter::setUpPresenter() {
   connect(m_view.get(), SIGNAL(updateRestrictInputByName(std::string const &)),
           this, SLOT(updateRestrictInputByName(std::string const &)));
 

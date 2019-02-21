@@ -91,6 +91,7 @@ set ( INC_FILES
 	IIndirectFitOutputOptionsModel.h
 	IIndirectFitOutputOptionsView.h
 	IIndirectFitPlotView.h
+	IIndirectSettingsView.h
 	ILLEnergyTransfer.h
 	ISISCalibration.h
 	ISISDiagnostics.h
@@ -167,6 +168,7 @@ set(MOC_FILES
     IIndirectFitDataView.h
     IIndirectFitOutputOptionsView.h
     IIndirectFitPlotView.h
+    IIndirectSettingsView.h
     ILLEnergyTransfer.h
     IndirectAddWorkspaceDialog.h
     IndirectBayes.h

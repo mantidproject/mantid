@@ -7,22 +7,27 @@
 #ifndef MANTID_CUSTOMINTERFACES_INDIRECTSETTINGSPRESENTER_H_
 #define MANTID_CUSTOMINTERFACES_INDIRECTSETTINGSPRESENTER_H_
 
-#include "IndirectSettingsModel.h"
+#include "DllConfig.h"
 #include "IndirectSettingsView.h"
+#include "IndirectSettingsModel.h"
 
 #include <QObject>
+#include <QVariant>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class IndirectSettingsPresenter : public QObject {
+class MANTIDQT_INDIRECT_DLL IndirectSettingsPresenter : public QObject {
   Q_OBJECT
 
 public:
   explicit IndirectSettingsPresenter(QWidget *parent,
                                      std::string const &settingsGroup,
                                      std::string const &availableSettings);
+  explicit IndirectSettingsPresenter(IndirectSettingsModel *model,
+                                     IIndirectSettingsView *view);
+  //~IndirectSettingsPresenter() override{};
 
   void showDialog();
   void loadSettings();
@@ -39,12 +44,13 @@ private slots:
   void closeDialog();
 
 private:
+  void setUpPresenter();
   void initLayout();
   void saveSettings();
 
   void setApplyingChanges(bool applyingChanges);
 
-  std::unique_ptr<IndirectSettingsView> m_view;
+  std::unique_ptr<IIndirectSettingsView> m_view;
   std::unique_ptr<IndirectSettingsModel> m_model;
 };
 

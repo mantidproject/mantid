@@ -9,49 +9,48 @@
 
 #include "ui_IndirectSettings.h"
 
-#include <QDialog>
+#include "IIndirectSettingsView.h"
+
+#include "DllConfig.h"
+
 #include <QObject>
-#include <QVariant>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class IndirectSettingsView : public QDialog {
+class MANTIDQT_INDIRECT_DLL IndirectSettingsView
+    : public IIndirectSettingsView {
   Q_OBJECT
 
 public:
-  explicit IndirectSettingsView(QWidget *parent);
+  explicit IndirectSettingsView(QWidget *parent = nullptr);
+  //virtual ~IndirectSettingsView() override = default;
 
-  void setInterfaceSettingsVisible(bool visible);
-  void setInterfaceGroupBoxTitle(QString const &title);
+  void setInterfaceSettingsVisible(bool visible) override;
+  void setInterfaceGroupBoxTitle(QString const &title) override;
 
-  void setRestrictInputByNameVisible(bool visible);
-  void setPlotErrorBarsVisible(bool visible);
+  void setRestrictInputByNameVisible(bool visible) override;
+  void setPlotErrorBarsVisible(bool visible) override;
 
-  void setSelectedFacility(QString const &text);
-  QString getSelectedFacility() const;
+  void setSelectedFacility(QString const &text) override;
+  QString getSelectedFacility() const override;
 
-  void setRestrictInputByNameChecked(bool check);
-  bool isRestrictInputByNameChecked() const;
+  void setRestrictInputByNameChecked(bool check) override;
+  bool isRestrictInputByNameChecked() const override;
 
-  void setPlotErrorBarsChecked(bool check);
-  bool isPlotErrorBarsChecked() const;
+  void setPlotErrorBarsChecked(bool check) override;
+  bool isPlotErrorBarsChecked() const override;
 
   void setSetting(QString const &settingsGroup, QString const &settingName,
-                  bool const &value);
-  QVariant getSetting(QString const &settingsGroup, QString const &settingName);
+                  bool const &value) override;
+  QVariant getSetting(QString const &settingsGroup,
+                      QString const &settingName) override;
 
-  void setApplyText(QString const &text);
-  void setApplyEnabled(bool enable);
-  void setOkEnabled(bool enable);
-  void setCancelEnabled(bool enable);
-
-signals:
-  void updateRestrictInputByName(std::string const &text);
-  void okClicked();
-  void applyClicked();
-  void cancelClicked();
+  void setApplyText(QString const &text) override;
+  void setApplyEnabled(bool enable) override;
+  void setOkEnabled(bool enable) override;
+  void setCancelEnabled(bool enable) override;
 
 private slots:
   void emitUpdateRestrictInputByName(QString const &text);

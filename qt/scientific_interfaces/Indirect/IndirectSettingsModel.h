@@ -7,22 +7,27 @@
 #ifndef MANTID_CUSTOMINTERFACES_INDIRECTSETTINGSMODEL_H_
 #define MANTID_CUSTOMINTERFACES_INDIRECTSETTINGSMODEL_H_
 
+#include "DllConfig.h"
+
+#include <vector>
+
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class IndirectSettingsModel {
+class MANTIDQT_INDIRECT_DLL IndirectSettingsModel {
 public:
-  IndirectSettingsModel(std::string const &settingsGroup,
-                        std::string const &availableSettings);
+  IndirectSettingsModel(std::string const &settingsGroup = "Settings",
+                        std::string const &availableSettings = "");
+  //virtual ~IndirectSettingsModel();
 
-  std::string getSettingsGroup() const;
+  virtual std::string getSettingsGroup() const;
 
-  bool hasInterfaceSettings() const;
-  bool isSettingAvailable(std::string const &settingName) const;
+  virtual bool hasInterfaceSettings() const;
+  virtual bool isSettingAvailable(std::string const &settingName) const;
 
-  void setFacility(std::string const &facility);
-  std::string getFacility() const;
+  virtual void setFacility(std::string const &facility);
+  virtual std::string getFacility() const;
 
 private:
   std::vector<std::string> m_settingsAvailable;
