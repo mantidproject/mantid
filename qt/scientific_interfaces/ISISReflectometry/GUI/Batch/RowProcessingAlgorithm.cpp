@@ -5,19 +5,21 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#include "RowProperties.h"
-#include "../../Reduction/Experiment.h"
-#include "../../Reduction/Instrument.h"
+#include "RowProcessingAlgorithm.h"
+#include "../../Reduction/Batch.h"
 #include "../../Reduction/Row.h"
 #include "AlgorithmProperties.h"
+#include "BatchJobAlgorithm.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
 using API::IConfiguredAlgorithm_sptr;
+using AlgorithmRuntimeProps = std::map<std::string, std::string>;
 
-namespace RowProperties {
+namespace { // unnamed namespace
 // These functions update properties in an AlgorithmRuntimeProps for specific
 // properties for the row reduction algorithm
 void updateInputWorkspacesProperties(
@@ -76,7 +78,7 @@ void updatePolarizationCorrectionProperties(
     return;
 
   AlgorithmProperties::update(
-      "PolarisationCorrections",
+      "PolarizationAnalysis",
       PolarizationCorrectionTypeToString(corrections.correctionType()),
       properties);
 
@@ -119,7 +121,6 @@ void updateExperimentProperties(AlgorithmRuntimeProps &properties,
   updatePolarizationCorrectionProperties(properties,
                                          experiment.polarizationCorrections());
   updateFloodCorrectionProperties(properties, experiment.floodCorrections());
-  AlgorithmProperties::updateFromMap(properties, experiment.stitchParameters());
 }
 
 void updatePerThetaDefaultProperties(AlgorithmRuntimeProps &properties,
