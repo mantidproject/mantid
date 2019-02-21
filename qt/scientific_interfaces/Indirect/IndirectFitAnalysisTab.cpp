@@ -688,6 +688,8 @@ void IndirectFitAnalysisTab::respondToChangeOfSpectraRange(size_t i)
   m_plotPresenter->updateSelectedDataName();
   m_plotPresenter->updateAvailableSpectra();
   m_dataPresenter->updateSpectraInTable(i);
+  m_fitPropertyBrowser->updateFunctionBrowserData(m_fittingModel->getNumberOfDatasets());
+  setModelFitFunction();
 }
 
 void IndirectFitAnalysisTab::respondToSingleResolutionLoaded()

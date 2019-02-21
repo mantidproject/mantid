@@ -2184,6 +2184,8 @@ void FunctionBrowser::addDatasets(int n) {
 void FunctionBrowser::editLocalParameter(const QString &parName,
                                          const QStringList &wsNames,
                                          const std::vector<size_t> &wsIndices) {
+  assert(wsNames.size() == wsIndices.size());
+  assert(wsNames.size() == getNumberOfDatasets());
   EditLocalParameterDialog dialog(parentWidget(), this, parName, wsNames, wsIndices);
   if (dialog.exec() == QDialog::Accepted) {
     auto values = dialog.getValues();
