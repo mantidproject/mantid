@@ -6,13 +6,17 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/ReflectometryWorkflowBase2.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/IncreasingAxisValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAlgorithms/BoostOptionalToAlgorithmProperty.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidIndexing/IndexInfo.h"
+#include "MantidKernel/ArrayLengthValidator.h"
+#include "MantidKernel/ArrayOrderedPairsValidator.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
@@ -248,6 +252,67 @@ void ReflectometryWorkflowBase2::initDebugProperties() {
                   "purposes.");
   declareProperty("Debug", false,
                   "Whether to enable the output of extra workspaces.");
+}
+
+/** Initialize properties for offspec background subtraction
+ */
+void ReflectometryWorkflowBase2::initOffspecBgdProperties() {
+  declareProperty(make_unique<PropertyWithValue<bool>>("CalculateOffspec", true,
+                                                       Direction::Input),
+                  "Whether to calculate the Offspec background");
+  
+  // bottom background range
+  declareProperty(make_unique<ArrayProperty<size_t>>(
+                      "BottomBackgroundRanges", Direction::Input),
+                  "A list of the bottom background ranges.");
+  // top background range
+  declareProperty(make_unique<ArrayProperty<size_t>>(
+                      "TopBackgroundRanges", Direction::Input),
+                  "A list of the top background ranges.");
+}
+
+/** Initialize properties for ILL background subtraction
+ */
+void ReflectometryWorkflowBase2::initILLBgdProperties() {
+  auto increasingAxis = boost::make_shared<IncreasingAxisValidator>();
+  auto nonnegativeInt = boost::make_shared<BoundedValidator<int>>();
+  nonnegativeInt->setLower(0);
+  declareProperty(make_unique<PropertyWithValue<bool>>("CalculateILL", true,
+                                                       Direction::Input),
+                  "Whether to calculate the ILL background");
+  auto orderedPairs =
+      boost::make_shared<ArrayOrderedPairsValidator<double>>();
+  declareProperty("Degree", 0, nonnegativeInt,
+                  "Degree of the fitted polynomial.");
+  declareProperty(make_unique<ArrayProperty<double>>(
+                      "XRanges", std::vector<double>(), orderedPairs),
+                  "A list of fitting ranges given as pairs of X values.");
+  std::array<std::string, 2> costFuncOpts{
+      {"Least squares", "Unweighted least squares"}};
+  declareProperty(
+      "CostFunction", "Least squares",
+      boost::make_shared<ListValidator<std::string>>(costFuncOpts),
+      "The cost function to be passed to the Fit algorithm.");
+}
+
+/** Initialize properties for SNS background subtraction
+ */
+void ReflectometryWorkflowBase2::initSNSBgdProperties() {
+  auto lengthArray = boost::make_shared<ArrayLengthValidator<int>>(2);
+  declareProperty(make_unique<PropertyWithValue<bool>>("CalculateSNS", true,
+                                                       Direction::Input),
+                  "Whether to calculate the SNS background");
+  declareProperty(make_unique<ArrayProperty<int>>(
+                                   "PeakRange", lengthArray),
+                               "Pixel range defining the reflectivity peak");
+  declareProperty(make_unique<ArrayProperty<int>>(
+                      "BackgroundRange", lengthArray),
+                  "Pixel range defining the outer range of the background "
+                  "on each side of the peak");
+  declareProperty(make_unique<ArrayProperty<int>>(
+          "LowResolutionRange", lengthArray),
+              "Pixel range defining the low-resolution axis to integrate over");
+  declareProperty(make_unique<PropertyWithValue<bool>>("SumPeak", false),"If True, the resulting peak will be summed");
 }
 
 /** Validate reduction properties, if given

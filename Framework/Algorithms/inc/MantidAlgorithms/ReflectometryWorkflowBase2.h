@@ -39,6 +39,12 @@ protected:
   void initMomentumTransferProperties();
   /// Initialize properties for diagnostics
   void initDebugProperties();
+  /// Initialize properties for offspec background subtraction
+  void initOffspecBgdProperties();
+  /// Initialize properties for ILL background subtraction
+  void initILLBgdProperties();
+  /// Initialize properties for SNS background subtraction
+  void initSNSBgdProperties();
   /// Validate reduction-type properties
   std::map<std::string, std::string> validateReductionProperties() const;
   /// Validate direct beam properties
