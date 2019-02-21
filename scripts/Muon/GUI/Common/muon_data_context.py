@@ -244,7 +244,6 @@ class MuonDataContext(object):
             return self._loaded_data.get_data(run=run, instrument=self.instrument)['workspace']['OutputWorkspace'][0].workspace
 
     def period_string(self, run):
-        run_list = run_string_to_list(run)
         summed_periods = self.gui_variables["SummedPeriods"] if 'SummedPeriods' in self.gui_variables else [1]
         subtracted_periods = self.gui_variables["SubtractedPeriods"] if 'SubtractedPeriods' in self.gui_variables else []
         if subtracted_periods:

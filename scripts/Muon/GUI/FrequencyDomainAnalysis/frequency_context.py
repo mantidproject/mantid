@@ -7,7 +7,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 import mantid.simpleapi as mantid
-from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string, run_string_to_list
+from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
 
 import Muon.GUI.Common.ADSHandler.workspace_naming as wsName
 
@@ -35,14 +35,6 @@ class FrequencyContext(object):
 
     def setUp(self, tmpWS):
         pass
-        # get everything from the ADS
-        # return
-        # self.options = mantid.AnalysisDataService.getObjectNames()
-        # self.options = [item.replace(" ", "") for item in self.options]
-        # self.N_points = len(tmpWS.readX(0))
-        # self.instrument = tmpWS.getInstrument().getName()
-        #
-        # self.runName = self.instrument + str(tmpWS.getRunNumber()).zfill(8)
 
     # get methods
     def getNPoints(self):
