@@ -118,6 +118,7 @@ Bugfixes
 - Fixed a bug in `AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` for using the passed on CompressTolerance and CompressWallClockTolerance in the child `CompressEvents <algm-CompressEvents>` algorithm instead of just in the child `AlignAndFocusPowder <algm-AlignAndFocusPowder>` algorithm.
 - `ConvertToMD <algm-ConvertToMD>` now uses the time-average value for logs when using them as ``OtherDimensions``
 - The input validator is fixed in :ref:`MostLikelyMean <algm-MostLikelyMean>` avoiding a segmentation fault.
+- The inputs of the algorithm :ref:`MergeLogs <algm-MergeLogs>` are improved and a segmentation fault will not happen, if logs are not time series. The merging is now compliant with Mantid wide time series merging for example when adding workspaces.
 - Fixed a bug in `AlignAndFocusPowder <algm-AlignAndFocusPowder>` where a histogram input workspace did not clone propertly to the output workspace and properly masking a grouping workspace passed to `DiffractionFocussing <algm-DiffractionFocussing>`. Also adds initial unit tests for `AlignAndFocusPowder <algm-AlignAndFocusPowder>`.
 - Fixed a bug in :ref:`ExtractSpectra <algm-ExtractSpectra>` which was causing a wrong last value in the output's vertical axis if the axis type was ``BinEdgeAxis``.
 - Fixed an issue in :ref:`Rebin2D <algm-Rebin2D>` where `NaN` values would result if there were zero-area bins in the input workspace.
