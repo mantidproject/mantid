@@ -132,25 +132,30 @@ void BatchJobRunner::addAlgorithmForProcessingRow(
 void BatchJobRunner::algorithmStarted(IConfiguredAlgorithm_sptr algorithm) {
   auto jobAlgorithm =
       boost::dynamic_pointer_cast<IBatchJobAlgorithm>(algorithm);
-  jobAlgorithm->item()->algorithmStarted();
+  jobAlgorithm->item()->resetOutputNames();
+  jobAlgorithm->item()->setRunning();
 }
 
 void BatchJobRunner::algorithmComplete(IConfiguredAlgorithm_sptr algorithm) {
   auto jobAlgorithm =
       boost::dynamic_pointer_cast<IBatchJobAlgorithm>(algorithm);
-  jobAlgorithm->item()->algorithmComplete(jobAlgorithm->outputWorkspaceNames());
 
+  // The workspaces are not in the ADS by default, so add them
   for (auto &kvp : jobAlgorithm->outputWorkspaceNameToWorkspace()) {
     Mantid::API::AnalysisDataService::Instance().addOrReplace(kvp.first,
                                                               kvp.second);
   }
+
+  jobAlgorithm->item()->setOutputNames(jobAlgorithm->outputWorkspaceNames());
+  jobAlgorithm->item()->setSuccess();
 }
 
 void BatchJobRunner::algorithmError(IConfiguredAlgorithm_sptr algorithm,
                                     std::string const &message) {
   auto jobAlgorithm =
       boost::dynamic_pointer_cast<IBatchJobAlgorithm>(algorithm);
-  jobAlgorithm->item()->algorithmError(message);
+  jobAlgorithm->item()->resetOutputNames();
+  jobAlgorithm->item()->setError(message);
 }
 
 std::vector<std::string> BatchJobRunner::algorithmOutputWorkspacesToSave(

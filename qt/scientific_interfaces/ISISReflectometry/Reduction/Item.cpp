@@ -45,15 +45,5 @@ bool Item::requiresProcessing(bool reprocessFailed) const {
   }
   return false;
 }
-
-void Item::algorithmStarted() { setRunning(); }
-
-void Item::algorithmComplete(
-    std::vector<std::string> const &outputWorkspaceNames) {
-  UNUSED_ARG(outputWorkspaceNames);
-  setSuccess();
-}
-
-void Item::algorithmError(std::string const &msg) { setError(msg); }
 } // namespace CustomInterfaces
 } // namespace MantidQt

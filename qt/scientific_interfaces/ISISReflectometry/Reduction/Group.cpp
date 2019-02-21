@@ -108,6 +108,8 @@ void Group::setOutputNames(std::vector<std::string> const &outputNames) {
   m_postprocessedWorkspaceName = outputNames[0];
 }
 
+void Group::resetOutputNames() { m_postprocessedWorkspaceName = ""; }
+
 void Group::appendEmptyRow() { m_rows.emplace_back(boost::none); }
 
 void Group::insertRow(boost::optional<Row> const &row, int beforeRowAtIndex) {

@@ -35,6 +35,7 @@ public:
   std::string postprocessedWorkspaceName() const;
   std::vector<std::string> workspaceNamesToPostprocess() const;
   void setOutputNames(std::vector<std::string> const &outputNames) override;
+  void resetOutputNames() override;
 
   void appendEmptyRow();
   void appendRow(boost::optional<Row> const &row);

@@ -34,11 +34,7 @@ public:
                                      std::string const &newName) = 0;
 
   virtual void setOutputNames(std::vector<std::string> const &outputNames) = 0;
-
-  virtual void algorithmStarted();
-  virtual void
-  algorithmComplete(std::vector<std::string> const &outputWorkspaceNames);
-  virtual void algorithmError(std::string const &msg);
+  virtual void resetOutputNames() = 0;
 
   void setProgress(double p, std::string const &msg);
   void setStarting();
