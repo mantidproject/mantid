@@ -90,13 +90,13 @@ def _get_pre_processing_params(context, run):
 def _get_MuonGroupingCounts_parameters(context, group_name, run):
     params = {}
     try:
-        summed_periods = context.loaded_data(run)["SummedPeriods"]
+        summed_periods = context.gui_variables["SummedPeriods"]
         params["SummedPeriods"] = summed_periods
     except KeyError:
         params["SummedPeriods"] = "1"
 
     try:
-        subtracted_periods = context.loaded_data(run)["SubtractedPeriods"]
+        subtracted_periods = context.gui_variables["SubtractedPeriods"]
         params["SubtractedPeriods"] = subtracted_periods
     except KeyError:
         params["SubtractedPeriods"] = ""
@@ -121,13 +121,13 @@ def _get_MuonGroupingAsymmetry_parameters(context, group_name, run):
         params['AsymmetryTimeMax'] = context.gui_variables['GroupRangeMax']
 
     try:
-        summed_periods = context.loaded_data(run)["SummedPeriods"]
+        summed_periods = context.gui_variables["SummedPeriods"]
         params["SummedPeriods"] = summed_periods
     except KeyError:
         params["SummedPeriods"] = "1"
 
     try:
-        subtracted_periods = context.loaded_data(run)["SubtractedPeriods"]
+        subtracted_periods = context.gui_variables["SubtractedPeriods"]
         params["SubtractedPeriods"] = subtracted_periods
     except KeyError:
         params["SubtractedPeriods"] = ""
@@ -143,13 +143,13 @@ def _get_MuonGroupingAsymmetry_parameters(context, group_name, run):
 def _get_MuonPairingAsymmetry_parameters(context, pair_name, run):
     params = {}
     try:
-        summed_periods = context.loaded_data(run)["SummedPeriods"]
+        summed_periods = context.gui_variables["SummedPeriods"]
         params["SummedPeriods"] = summed_periods
     except KeyError:
         params["SummedPeriods"] = "1"
 
     try:
-        subtracted_periods = context.loaded_data(run)["SubtractedPeriods"]
+        subtracted_periods = context.gui_variables["SubtractedPeriods"]
         params["SubtractedPeriods"] = subtracted_periods
     except KeyError:
         params["SubtractedPeriods"] = ""

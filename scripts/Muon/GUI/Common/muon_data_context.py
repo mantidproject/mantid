@@ -14,7 +14,6 @@ from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapp
 from Muon.GUI.Common.muon_group import MuonGroup
 from Muon.GUI.Common.muon_pair import MuonPair
 from Muon.GUI.Common.muon_load_data import MuonLoadData
-from Muon.GUI.Common.utilities.muon_file_utils import format_run_for_file
 from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string, run_string_to_list
 
 from Muon.GUI.Common.ADSHandler.workspace_naming import (get_raw_data_workspace_name, get_group_data_workspace_name,
@@ -246,8 +245,8 @@ class MuonDataContext(object):
 
     def period_string(self, run):
         run_list = run_string_to_list(run)
-        summed_periods = self.loaded_data(run_list)["SummedPeriods"] if 'SummedPeriods' in self.loaded_data(run_list) else [1]
-        subtracted_periods = self.loaded_data(run_list)["SubtractedPeriods"] if 'SubtractedPeriods' in self.loaded_data(run_list) else []
+        summed_periods = self.gui_variables["SummedPeriods"] if 'SummedPeriods' in self.gui_variables else [1]
+        subtracted_periods = self.gui_variables["SubtractedPeriods"] if 'SubtractedPeriods' in self.gui_variables else []
         if subtracted_periods:
             return '+'.join([str(period) for period in summed_periods]) + '-' + '-'.join([str(period) for period in subtracted_periods])
         else:
@@ -306,7 +305,7 @@ class MuonDataContext(object):
         if not run:
             run = self.run
         if isinstance(run, int):
-            return str(self.instrument) + format_run_for_file(run)
+            return str(self.instrument) + str(run)
         else:
             return str(self.instrument) + run
 
@@ -323,7 +322,7 @@ class MuonDataContext(object):
             if len(loaded_workspace) > 1:
                 # Multi-period data
                 for i, single_ws in enumerate(loaded_workspace):
-                    name = directory + get_raw_data_workspace_name(self, run_string) + "_period_" + str(i)
+                    name = directory + get_raw_data_workspace_name(self, run_string, period=str(i))
                     single_ws.show(name)
             else:
                 # Single period data
