@@ -9,26 +9,35 @@
 """ Finds the beam centre for SANS"""
 
 from __future__ import (absolute_import, division, print_function)
+
+from mantid import AnalysisDataService
 from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress)
 from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidator, Logger)
-from sans.common.constants import EMPTY_NAME
-from sans.common.general_functions import create_child_algorithm
-from sans.state.state_base import create_deserialized_sans_state_from_property_manager
-from sans.common.enums import (DetectorType, MaskingQuadrant, FindDirectionEnum)
-from sans.algorithm_detail.crop_helper import get_component_name
-from sans.algorithm_detail.strip_end_nans_and_infs import strip_end_nans
-from sans.common.file_information import get_instrument_paths_for_sans_file
-from sans.common.xml_parsing import get_named_elements_from_ipf_file
-from sans.algorithm_detail.single_execution import perform_can_subtraction
-from mantid import AnalysisDataService
 from mantid.simpleapi import CloneWorkspace, GroupWorkspaces
+from sans.algorithm_detail.crop_helper import get_component_name
+from sans.algorithm_detail.single_execution import perform_can_subtraction
+from sans.algorithm_detail.strip_end_nans_and_infs import strip_end_nans
+from sans.common.constants import EMPTY_NAME
+from sans.common.enums import (DetectorType, MaskingQuadrant, FindDirectionEnum)
+from sans.common.file_information import get_instrument_paths_for_sans_file
+from sans.common.general_functions import create_child_algorithm
+from sans.common.xml_parsing import get_named_elements_from_ipf_file
+from sans.state.state_base import create_deserialized_sans_state_from_property_manager
 
+PYQT4 = False
+IN_MANTIDPLOT = False
 try:
-    import mantidplot
-except (Exception, Warning):
-    mantidplot = None
-# this should happen when this is called from outside Mantidplot and only then,
-# the result is that attempting to plot will raise an exception
+    from qtpy import PYQT4
+except ImportError:
+    pass  # it is already false
+if PYQT4:
+    try:
+        import mantidplot
+        IN_MANTIDPLOT = True
+    except (Exception, Warning):
+        pass
+else:
+    from mantidqt.plotting.functions import plot
 
 
 class SANSBeamCentreFinder(DataProcessorAlgorithm):
@@ -183,7 +192,7 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
                 for key in sample_quartiles:
                     sample_quartiles[key] = perform_can_subtraction(sample_quartiles[key], can_quartiles[key], self)
 
-            if mantidplot:
+            if not PYQT4 or IN_MANTIDPLOT:
                 output_workspaces = self._publish_to_ADS(sample_quartiles)
                 if verbose:
                     self._rename_and_group_workspaces(j, output_workspaces)
@@ -195,7 +204,9 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
             if(j == 0):
                 logger.notice("Itr {0}: ( {1}, {2} )  SX={3:.5g}  SY={4:.5g}".
                               format(j, self.scale_1 * centre1, self.scale_2 * centre2, residueLR[j], residueTB[j]))
-                if mantidplot:
+                if not PYQT4:
+                    self._plot_quartiles_matplotlib(output_workspaces, state.data.sample_scatter)
+                elif IN_MANTIDPLOT:
                     self._plot_quartiles(output_workspaces, state.data.sample_scatter)
 
             else:
@@ -248,6 +259,20 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
         graph_handle.activeLayer().setTitle(title)
         graph_handle.setName(title)
         return graph_handle
+
+    def _plot_quartiles_matplotlib(self, output_workspaces, sample_scatter):
+        title = '{}_beam_centre_finder'.format(sample_scatter)
+        ax_properties = {'xscale': 'log',
+                         'yscale': 'log'}
+
+        plot_kwargs = {"scalex": True,
+                       "scaley": True}
+
+        if not isinstance(output_workspaces, list):
+            output_workspaces = [output_workspaces]
+
+        plot(output_workspaces, wksp_indices=[0], ax_properties=ax_properties, overplot=True,
+             plot_kwargs=plot_kwargs, window_title=title)
 
     def _get_cloned_workspace(self, workspace_name):
         workspace = self.getProperty(workspace_name).value

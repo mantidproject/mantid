@@ -325,11 +325,6 @@ void SofQWNormalisedPolygon::init() {
  */
 void SofQWNormalisedPolygon::exec() {
   MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
-  // Do the full check for common binning
-  if (!WorkspaceHelpers::commonBoundaries(*inputWS)) {
-    throw std::invalid_argument(
-        "The input workspace must have common binning across all spectra");
-  }
 
   // Compute input caches
   m_EmodeProperties.initCachedValues(*inputWS, this);
@@ -545,6 +540,12 @@ void SofQWNormalisedPolygon::initAngularCachesPSD(
 
   for (size_t i = 0; i < nHistos; ++i) {
     m_progress->report("Calculating detector angular widths");
+
+    // If no detector found, skip onto the next spectrum
+    if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i)) {
+      continue;
+    }
+
     const specnum_t inSpec = workspace.getSpectrum(i).getSpectrumNo();
     const SpectraDistanceMap neighbours =
         neighbourInfo.getNeighboursExact(inSpec);

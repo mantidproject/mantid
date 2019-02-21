@@ -244,7 +244,7 @@ int MeshObject2D::interceptSurface(Geometry::Track &ut) const {
   // fails
   if (t >= 0) {
     Kernel::V3D intersection;
-    int entryExit;
+    TrackDirection entryExit;
     for (size_t i = 0; i < m_vertices.size(); i += 3) {
       if (MeshObjectCommon::rayIntersectsTriangle(
               ut.startPoint(), ut.direction(), m_vertices[i], m_vertices[i + 1],
@@ -394,6 +394,11 @@ std::vector<double> MeshObject2D::getVertices() const {
 }
 
 std::vector<uint32_t> MeshObject2D::getTriangles() const { return m_triangles; }
+
+detail::ShapeInfo::GeometryShape MeshObject2D::shape() const {
+  // should be consistent with MeshObject2D::GetObjectGeom
+  return detail::ShapeInfo::GeometryShape::NOSHAPE;
+}
 
 void MeshObject2D::GetObjectGeom(detail::ShapeInfo::GeometryShape &,
                                  std::vector<Kernel::V3D> &, double &,

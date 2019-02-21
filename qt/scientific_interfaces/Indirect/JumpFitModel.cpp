@@ -262,7 +262,8 @@ std::string JumpFitModel::getFitParameterName(std::size_t dataIndex,
 void JumpFitModel::setActiveWidth(std::size_t widthIndex,
                                   std::size_t dataIndex) {
   const auto parametersIt = findJumpFitParameters(dataIndex);
-  if (parametersIt != m_jumpParameters.end()) {
+  if (parametersIt != m_jumpParameters.end() &&
+      parametersIt->second.widthSpectra.size() > widthIndex) {
     const auto &widthSpectra = parametersIt->second.widthSpectra;
     setSpectra(createSpectra(widthSpectra[widthIndex]), dataIndex);
   } else
@@ -271,7 +272,8 @@ void JumpFitModel::setActiveWidth(std::size_t widthIndex,
 
 void JumpFitModel::setActiveEISF(std::size_t eisfIndex, std::size_t dataIndex) {
   const auto parametersIt = findJumpFitParameters(dataIndex);
-  if (parametersIt != m_jumpParameters.end()) {
+  if (parametersIt != m_jumpParameters.end() &&
+      parametersIt->second.eisfSpectra.size() > eisfIndex) {
     const auto &eisfSpectra = parametersIt->second.eisfSpectra;
     setSpectra(createSpectra(eisfSpectra[eisfIndex]), dataIndex);
   } else
@@ -324,7 +326,8 @@ boost::optional<std::size_t>
 JumpFitModel::getWidthSpectrum(std::size_t widthIndex,
                                std::size_t dataIndex) const {
   const auto parameters = findJumpFitParameters(dataIndex);
-  if (parameters != m_jumpParameters.end())
+  if (parameters != m_jumpParameters.end() &&
+      parameters->second.widthSpectra.size() > widthIndex)
     return parameters->second.widthSpectra[widthIndex];
   return boost::none;
 }
@@ -333,7 +336,8 @@ boost::optional<std::size_t>
 JumpFitModel::getEISFSpectrum(std::size_t eisfIndex,
                               std::size_t dataIndex) const {
   const auto parameters = findJumpFitParameters(dataIndex);
-  if (parameters != m_jumpParameters.end())
+  if (parameters != m_jumpParameters.end() &&
+      parameters->second.eisfSpectra.size() > eisfIndex)
     return parameters->second.eisfSpectra[eisfIndex];
   return boost::none;
 }
@@ -348,8 +352,10 @@ std::string JumpFitModel::simultaneousFitOutputName() const {
   return sequentialFitOutputName();
 }
 
-std::string JumpFitModel::singleFitOutputName(std::size_t, std::size_t) const {
-  return sequentialFitOutputName();
+std::string JumpFitModel::singleFitOutputName(std::size_t index,
+                                              std::size_t spectrum) const {
+  return createSingleFitOutputName("%1%_FofQFit_" + m_fitType + "_s%2%_Results",
+                                   index, spectrum);
 }
 
 std::string JumpFitModel::getResultXAxisUnit() const { return ""; }

@@ -41,7 +41,8 @@ def add_directory_structure(dirs):
         if i == 0:
             previous_dir = directory
             continue
-        mtd[previous_dir].add(directory)
+        if not mtd[previous_dir].__contains__(directory):
+            mtd[previous_dir].add(directory)
         previous_dir = directory
 
 
@@ -125,7 +126,7 @@ class MuonWorkspaceWrapper(object):
         name = dirs/../dirs/workspace_name
         """
         if not self.is_hidden:
-            self.hide()
+            return
 
         if len(name) > 0 and self.is_hidden:
             self.name = str(name)

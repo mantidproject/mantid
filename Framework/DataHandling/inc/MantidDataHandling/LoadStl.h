@@ -45,6 +45,7 @@ public:
   LoadStl(std::string filename) : m_filename(filename), m_setMaterial(false) {}
   LoadStl(std::string filename, ReadMaterial::MaterialParameters params)
       : m_filename(filename), m_setMaterial(true), m_params(params) {}
+  virtual ~LoadStl() = default;
   virtual std::unique_ptr<Geometry::MeshObject> readStl() = 0;
 
 protected:

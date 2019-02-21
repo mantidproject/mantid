@@ -46,12 +46,16 @@ from ui.sans_isis import SANSSaveOtherWindow
 from ui.sans_isis.sans_data_processor_gui import SANSDataProcessorGui
 from ui.sans_isis.work_handler import WorkHandler
 
-try:
-    import mantidplot
-except (Exception, Warning):
-    mantidplot = None
-    # this should happen when this is called from outside Mantidplot and only then,
-    # the result is that attempting to plot will raise an exception
+from qtpy import PYQT4
+IN_MANTIDPLOT = False
+if PYQT4:
+    try:
+        from mantidplot import graph, newGraph
+        IN_MANTIDPLOT = True
+    except ImportError:
+        pass
+else:
+    from mantidqt.plotting.functions import get_plot_fig
 
 row_state_to_colour_mapping = {RowState.Unprocessed: '#FFFFFF', RowState.Processed: '#d0f4d0',
                                RowState.Error: '#accbff'}
@@ -162,6 +166,8 @@ class RunTabPresenter(object):
         self.sans_logger = Logger("SANS")
         # Name of graph to output to
         self.output_graph = 'SANS-Latest'
+        # For matplotlib continuous plotting
+        self.output_fig = None
         self.progress = 0
 
         # Models that are being used by the presenter
@@ -309,6 +315,8 @@ class RunTabPresenter(object):
                     "The user path {} does not exist. Make sure a valid user file path"
                     " has been specified.".format(user_file_path))
         except RuntimeError as path_error:
+            # This exception block runs if user file does not exist
+            self._view.on_user_file_load_failure()
             self.display_errors(path_error, error_msg + " when finding file.")
         else:
             try:
@@ -320,6 +328,8 @@ class RunTabPresenter(object):
                 user_file_reader = UserFileReader(user_file_path)
                 user_file_items = user_file_reader.read_user_file()
             except (RuntimeError, ValueError) as e:
+                # It is in this exception block that loading fails if the file is invalid (e.g. a csv)
+                self._view.on_user_file_load_failure()
                 self.display_errors(e, error_msg + " when reading file.", use_error_name=True)
             else:
                 try:
@@ -338,13 +348,14 @@ class RunTabPresenter(object):
                         raise RuntimeError("User file did not contain a SANS Instrument.")
 
                 except RuntimeError as instrument_e:
-                    # Only catch the error we know about
-                    # If a new exception is caused, we can now see the stack trace
+                    # This exception block runs if the user file does not contain an parsable instrument
+                    self._view.on_user_file_load_failure()
                     self.display_errors(instrument_e, error_msg + " when reading instrument.")
                 except Exception as other_error:
                     # If we don't catch all exceptions, SANS can fail to open if last loaded
-                    # user file contains an error
+                    # user file contains an error that would not otherwise be caught
                     traceback.print_exc()
+                    self._view.on_user_file_load_failure()
                     self.display_errors(other_error, "Unknown error in loading user file.", use_error_name=True)
 
     def on_batch_file_load(self):
@@ -475,12 +486,18 @@ class RunTabPresenter(object):
 
     def _plot_graph(self):
         """
-        Plot a graph if continuous output specified
+        Plot a graph if continuous output specified.
         """
-        # Create the graph if continuous output is specified
-        if mantidplot:
-            if self._view.plot_results and not mantidplot.graph(self.output_graph):
-                mantidplot.newGraph(self.output_graph)
+        if self._view.plot_results:
+            if IN_MANTIDPLOT:
+                if not graph(self.output_graph):
+                    newGraph(self.output_graph)
+            elif not PYQT4:
+                ax_properties = {'yscale': 'log',
+                                 'xscale': 'log'}
+                fig, _ = get_plot_fig(ax_properties=ax_properties, window_title=self.output_graph)
+                fig.show()
+                self.output_fig = fig
 
     def _set_progress_bar_min_max(self, min, max):
         """
@@ -513,11 +530,13 @@ class RunTabPresenter(object):
             self._set_progress_bar_min_max(self.progress, len(states))
             save_can = self._view.save_can
 
+            # MantidPlot and Workbench have different approaches to plotting
+            output_graph = self.output_graph if PYQT4 else self.output_fig
             self.batch_process_runner.process_states(states,
                                                      self._view.use_optimizations,
                                                      self._view.output_mode,
                                                      self._view.plot_results,
-                                                     self.output_graph,
+                                                     output_graph,
                                                      save_can)
 
         except Exception as e:

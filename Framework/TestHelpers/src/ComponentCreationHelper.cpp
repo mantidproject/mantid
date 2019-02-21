@@ -32,6 +32,7 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/V2D.h"
 #include "MantidKernel/make_unique.h"
 
 #include <Poco/Path.h>
@@ -39,6 +40,7 @@
 
 using namespace Mantid::Geometry;
 using Mantid::Kernel::Quat;
+using Mantid::Kernel::V2D;
 using Mantid::Kernel::V3D;
 
 namespace ComponentCreationHelper {
@@ -121,10 +123,10 @@ boost::shared_ptr<CSGObject> createSphere(double radius, const V3D &centre,
 //----------------------------------------------------------------------------------------------
 /** Create a cuboid shape for your pixels */
 boost::shared_ptr<CSGObject>
-createCuboid(double x_side_length, double y_side_length, double z_side_length) {
-  double szX = x_side_length;
-  double szY = (y_side_length == -1.0 ? szX : y_side_length);
-  double szZ = (z_side_length == -1.0 ? szX : z_side_length);
+createCuboid(double xHalfLength, double yHalfLength, double zHalfLength) {
+  const double szX = xHalfLength;
+  const double szY = (yHalfLength == -1.0 ? szX : yHalfLength);
+  const double szZ = (zHalfLength == -1.0 ? szX : zHalfLength);
   std::ostringstream xmlShapeStream;
   xmlShapeStream << " <cuboid id=\"detector-shape\"> "
                  << "<left-front-bottom-point x=\"" << szX << "\" y=\"" << -szY
@@ -135,6 +137,50 @@ createCuboid(double x_side_length, double y_side_length, double z_side_length) {
                  << "\" z=\"" << -szZ << "\"  /> "
                  << "<right-front-bottom-point  x=\"" << szX << "\" y=\"" << szY
                  << "\" z=\"" << -szZ << "\"  /> "
+                 << "</cuboid>";
+
+  std::string xmlCuboidShape(xmlShapeStream.str());
+  ShapeFactory shapeCreator;
+  auto cuboidShape = shapeCreator.createShape(xmlCuboidShape);
+  return cuboidShape;
+}
+
+/**
+ * Create a cuboid shape rotated around (0, 0, 1) axis and centered at the
+ * origin.
+ * @param xHalfLength thickness
+ * @param yHalfLength width
+ * @param zHalfLength height
+ * @param angle rotation angle in radians
+ * @return a pointer to the cuboid shape
+ */
+boost::shared_ptr<CSGObject> createCuboid(double xHalfLength,
+                                          double yHalfLength,
+                                          double zHalfLength, double angle) {
+  const V2D leftFront{xHalfLength, -yHalfLength};
+  const V2D leftBack{-xHalfLength, -yHalfLength};
+  const V2D rightFront{xHalfLength, yHalfLength};
+  const double sn{std::sin(angle)};
+  const double cs{std::cos(angle)};
+  const V2D rotatedLF{leftFront.X() * cs - leftFront.Y() * sn,
+                      leftFront.X() * sn + leftFront.Y() * cs};
+  const V2D rotatedLB{leftBack.X() * cs - leftBack.Y() * sn,
+                      leftBack.X() * sn + leftBack.Y() * cs};
+  const V2D rotatedRF{rightFront.X() * cs - rightFront.Y() * sn,
+                      rightFront.X() * sn + rightFront.Y() * cs};
+  std::ostringstream xmlShapeStream;
+  xmlShapeStream << " <cuboid id=\"detector-shape\"> "
+                 << "<left-front-bottom-point x=\"" << rotatedLF.X()
+                 << "\" y=\"" << rotatedLF.Y() << "\" z=\"" << -zHalfLength
+                 << "\"  /> "
+                 << "<left-front-top-point  x=\"" << rotatedLF.X() << "\" y=\""
+                 << rotatedLF.Y() << "\" z=\"" << zHalfLength << "\"  /> "
+                 << "<left-back-bottom-point  x=\"" << rotatedLB.X()
+                 << "\" y=\"" << rotatedLB.Y() << "\" z=\"" << -zHalfLength
+                 << "\"  /> "
+                 << "<right-front-bottom-point  x=\"" << rotatedRF.X()
+                 << "\" y=\"" << rotatedRF.Y() << "\" z=\"" << -zHalfLength
+                 << "\"  /> "
                  << "</cuboid>";
 
   std::string xmlCuboidShape(xmlShapeStream.str());

@@ -31,11 +31,16 @@ Improved
 * Added a "process all" and "process selected" button to the batch table in place of "process" button.
 * Added a load button to load selected workspaces without processing.
 * Added save_can option to output unsubtracted can and sample workspaces.
+* Added transmission sample and can data to XML and H5 files when provided.
+* Added transmission sample/can to unsubtracted sample/can XML and H5 files when "Save Can" option selected.
+* Can set PhiMin, PhiMax, and UseMirror mask options from the options column in the table
 * Autocomplete for Sample shape column in the table.
 * Can separate items in variable q binning with commas or spaces. E.g. L/Q 0.0, 0.02 0.3 0.05, 0.8
 * Can export table as a csv, which can be re-loaded as a batch file.
 * File path to batch file will be added to your directories automatically upon loading
+* If loading of user file fails, user file field will remain empty to make it clear it has not be loaded successfully.
 * Workspaces are centred upon loading.
+* All limit strings in the user file (L/ ) are now space-separable to allow for uniform structure in the user file. For backwards compatibility, any string which was comma separable remains comma separable as well.
 
 Bug fixes
 #########
@@ -51,6 +56,7 @@ Bug fixes
 * Fixed error message when trying to load or process table with empty rows.
 * Removed option to process in non-compatibility mode to avoid calculation issues.
 * Default name for added runs has correct number of digits.
+* RKH files no longer append to existing files, but overwrite instead.
 
 Improvements
 ############

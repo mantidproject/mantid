@@ -149,7 +149,7 @@ DEFAULT_OUTPUTS = ["OutputWorkspace",
                    "FirstGoodData",
                    "MainFieldDirection"]
 # List of default values for the DEFAULT_OUTPUTS list
-DEFAULT_OUTPUT_VALUES = [__default_workspace(),
+DEFAULT_OUTPUT_VALUES = [[__default_workspace()],
                          None,  # api.WorkspaceFactoryImpl.Instance().createTable("TableWorkspace"),
                          api.WorkspaceFactoryImpl.Instance().createTable("TableWorkspace"),
                          0.0,
@@ -213,13 +213,16 @@ def load_workspace_from_filename(filename,
         load_result = _get_algorithm_properties(alg, output_properties)
         load_result["OutputWorkspace"] = [MuonWorkspaceWrapper(ws) for ws in load_result["OutputWorkspace"]]
         run = get_run_from_multi_period_data(workspace)
+        load_result["DataDeadTimeTable"] = load_result["DeadTimeTable"][0]
+        load_result["FirstGoodData"] = round(load_result["FirstGoodData"] - load_result['TimeZero'], 2)
     else:
         # single period data
         load_result = _get_algorithm_properties(alg, output_properties)
         load_result["OutputWorkspace"] = [MuonWorkspaceWrapper(load_result["OutputWorkspace"])]
         run = int(workspace.getRunNumber())
+        load_result["DataDeadTimeTable"] = load_result["DeadTimeTable"]
+        load_result["FirstGoodData"] = round(load_result["FirstGoodData"] - load_result['TimeZero'], 2)
 
-    load_result["DataDeadTimeTable"] = load_result["DeadTimeTable"]
     load_result["DeadTimeTable"] = None
 
     filename = alg.getProperty("Filename").value
@@ -255,27 +258,24 @@ def get_table_workspace_names_from_ADS():
 
 
 def combine_loaded_runs(model, run_list):
-    return_ws = model._loaded_data_store.get_data(run=run_list[0])["workspace"]
+    return_ws = model._loaded_data_store.get_data(run=[run_list[0]])["workspace"]
     running_total = []
 
     for index, workspace in enumerate(return_ws["OutputWorkspace"]):
         running_total.append(workspace.workspace)
 
         for run in run_list[1:]:
-            ws = model._loaded_data_store.get_data(run=run)["workspace"]["OutputWorkspace"][index].workspace
+            ws = model._loaded_data_store.get_data(run=[run])["workspace"]["OutputWorkspace"][index].workspace
             running_total[index] = algorithm_utils.run_Plus({
                 "LHSWorkspace": running_total[index],
                 "RHSWorkspace": ws,
                 "AllowDifferentNumberSpectra": False}
             )
-            # remove the single loaded filename
-
-    for run in run_list:
-        model._loaded_data_store.remove_data(run=run)
 
     return_ws["OutputWorkspace"] = [MuonWorkspaceWrapper(running_total_period) for running_total_period in running_total]
+    model._loaded_data_store.remove_data(run=flatten_run_list(run_list), instrument=model._context.instrument)
     model._loaded_data_store.add_data(run=flatten_run_list(run_list), workspace=return_ws,
-                                      filename="Co-added")
+                                      filename="Co-added", instrument=model._context.instrument)
 
 
 def flatten_run_list(run_list):
@@ -293,4 +293,7 @@ def flatten_run_list(run_list):
 
 
 def exception_message_for_failed_files(failed_file_list):
-    return "Could not load the following files : \n - " + "\n - ".join(failed_file_list)
+    message = "Could not load the following files : \n "
+    for failure in failed_file_list:
+        message += '{} ; {}'.format(os.path.split(failure[0])[-1], failure[1])
+    return message

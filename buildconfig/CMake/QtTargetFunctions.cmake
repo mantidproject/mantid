@@ -255,7 +255,7 @@ endfunction()
 #  - install_target_type The type of target that should be installed. See https://cmake.org/cmake/help/latest/command/install.html?highlight=install
 #  - install_dir A relative directory to install_prefix
 function (mtd_install_qt_library qt_version target install_target_type install_dir )
-    if ( qt_version EQUAL 4 OR (qt_version EQUAL 5 AND ${PACKAGE_WORKBENCH}) )
+    if ( qt_version EQUAL 4 OR (qt_version EQUAL 5 AND ${ENABLE_WORKBENCH}) )
       install ( TARGETS ${target} ${install_target_type} DESTINATION ${install_dir} )
     endif ()
 endfunction ()
