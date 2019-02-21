@@ -191,7 +191,7 @@ class SyncWithCallbackTaskTest(unittest.TestCase):
 
         scale, shift = 2, 4
         task = SyncWithCallbackTask(foo, args=(scale,), kwargs={'shift': shift})
-        self.assertRaises(RuntimeError, task.start())
+        self.assertRaises(RuntimeError, task.start)
 
 
 if __name__ == "__main__":
