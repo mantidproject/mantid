@@ -206,7 +206,7 @@ class MainWindow(QMainWindow):
         self.widgets.append(self.workspacewidget)
 
         # Set up the project object
-        self.project = Project(GlobalFigureManager, find_all_windows_that_are_savable)
+        self.project = Project(GlobalFigureManager, find_all_windows_that_are_savable, CONF)
 
         # uses default configuration as necessary
         self.readSettings(CONF)
