@@ -65,7 +65,7 @@ IConfiguredAlgorithm_sptr createConfiguredAlgorithm(Batch const &model,
                                                     Group &group) {
   // Create the algorithm
   auto alg = Mantid::API::AlgorithmManager::Instance().create("Stitch1DMany");
-  alg->setChild(true);
+  alg->setRethrows(true);
 
   // Set the algorithm properties from the model
   auto properties = createAlgorithmRuntimeProps(model, group);
