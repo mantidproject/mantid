@@ -7,8 +7,8 @@
 #  This file is part of the mantidqt package
 from __future__ import absolute_import
 
-from qtpy.QtCore import Qt
-from qtpy.QtWidgets import QAction, QMenu, QMenuBar, QTabBar, QTabWidget, QToolButton
+from qtpy.QtCore import QPoint, Qt
+from qtpy.QtWidgets import QAction, QMenu, QTabBar, QTabWidget, QToolButton
 
 from mantidqt.icons import get_icon
 from mantidqt.utils.qt import add_actions, create_action
@@ -75,13 +75,16 @@ class CodeEditorTabWidget(QTabWidget):
         """
         Setup the actions for the Options menu. These are handled by the MultiFileInterpreter
         """
-        menu_bar = QMenuBar(self)
-        menu_bar.setStyleSheet("""border: 1px solid #adadad; background-color: #e1e1e1;""")
+        # menu_bar = QMenuBar(self)
+        # menu_bar.setStyleSheet("""border: 1px solid #adadad; background-color: #e1e1e1;""")
+        options_button = QToolButton(self)
+        self.setCornerWidget(options_button, Qt.TopRightCorner)
+        options_button.setIcon(get_icon("fa.cog"))
+        # options_button.setText("Options")
         options_menu = QMenu("Options", self)
-        options_menu.setIcon(get_icon("fa.cog"))
-        menu_bar.addMenu(options_menu)
-
-        self.setCornerWidget(menu_bar, Qt.TopRightCorner)
+        # menu_bar.addMenu(options_menu)
+        options_button.clicked.connect(lambda: options_menu.popup(
+            self.mapToGlobal(options_button.pos() + QPoint(0, options_button.rect().bottom()))))
 
         self.tabCloseRequested.connect(parent.close_tab)
 
