@@ -71,15 +71,17 @@ class ProjectTest(unittest.TestCase):
 
     def test_save_as_saves_project_successfully(self):
         working_file = os.path.join(tempfile.mkdtemp(), "temp" + ".mtdproj")
+        working_directory = os.path.dirname(working_file)
         self.project._save_file_dialog = mock.MagicMock(return_value=working_file)
         CreateSampleWorkspace(OutputWorkspace="ws1")
 
         self.project.save_as()
 
         self.assertEqual(self.project._save_file_dialog.call_count, 1)
-        self.assertTrue(os.path.isdir(working_file))
-        file_list = os.listdir(working_file)
-        self.assertTrue(os.path.basename(working_file) + ".mtdproj" in file_list)
+        self.assertTrue(os.path.isfile(working_file))
+        self.assertTrue(os.path.isdir(working_directory))
+        file_list = os.listdir(working_directory)
+        self.assertTrue(os.path.basename(working_file) in file_list)
         self.assertTrue("ws1.nxs" in file_list)
 
     def test_load_calls_loads_successfully(self):
