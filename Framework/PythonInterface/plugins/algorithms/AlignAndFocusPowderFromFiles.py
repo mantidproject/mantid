@@ -176,11 +176,12 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
     def __determineCharacterizations(self, filename, wkspname):
         useCharac = bool(self.charac is not None)
         loadFile = not mtd.doesExist(wkspname)
+        useCal = (not self.getProperty('CalFileName').isDefault) or (not self.getProperty('CalFileName').isDefault)
 
         # input workspace is only needed to find a row in the characterizations table
         tempname = None
         if loadFile:
-            if useCharac:
+            if useCharac or useCal:
                 tempname = '__%s_temp' % wkspname
                 # set the loader for this file
                 loader = self.__createLoader(filename, tempname)
@@ -209,7 +210,7 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
 
         PDDetermineCharacterizations(**args)
 
-        if loadFile and useCharac:
+        if loadFile and (useCharac or useCal):
             DeleteWorkspace(Workspace=tempname)
 
     def __getCacheName(self, wkspname, additional_props=None):
@@ -432,6 +433,8 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
 
         # load and update
         if loadCalibration or loadGrouping or loadMask:
+            if not wksp:
+                raise RuntimeError('Trying to load calibration without a donor workspace')
             LoadDiffCal(InputWorkspace=wksp,
                         Filename=self.getPropertyValue('CalFileName'),
                         GroupFilename=self.getPropertyValue('GroupFilename'),
