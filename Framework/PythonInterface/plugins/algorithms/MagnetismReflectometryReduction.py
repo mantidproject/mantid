@@ -505,10 +505,10 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         data_e = q_rebin.dataE(0)
 
         # Values < 1e-12 and values where the error is greater than the value are replaced by 0+-1
-        for i in range(len(data_y)):
-            if data_y[i] < 1e-12 or data_e[i]>data_y[i]:
-                data_y[i]=0.0
-                data_e[i]=1.0
+        #for i in range(len(data_y)):
+        #    if data_y[i] < 1e-12 or data_e[i]>data_y[i]:
+        #        data_y[i]=0.0
+        #        data_e[i]=1.0
 
         # Sanity check
         if sum(data_y) == 0:
