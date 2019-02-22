@@ -123,7 +123,9 @@ public:
     auto &item = dynamic_cast<Item &>(row);
     auto jobRunner = makeJobRunner();
 
-    EXPECT_CALL(*m_jobAlgorithm, item()).Times(1).WillOnce(Return(&item));
+    EXPECT_CALL(*m_jobAlgorithm, item())
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(&item));
 
     jobRunner.algorithmStarted(m_jobAlgorithm);
     TS_ASSERT_EQUALS(row.state(), State::ITEM_RUNNING);
@@ -140,7 +142,9 @@ public:
     auto iVsQ = createWorkspace();
     auto iVsQBin = createWorkspace();
 
-    EXPECT_CALL(*m_jobAlgorithm, item()).Times(1).WillOnce(Return(&item));
+    EXPECT_CALL(*m_jobAlgorithm, item())
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(&item));
     EXPECT_CALL(*m_jobAlgorithm, outputWorkspaceNames())
         .Times(1)
         .WillOnce(Return(std::vector<std::string>{"", "IvsQ", "IvsQBin"}));
@@ -163,7 +167,9 @@ public:
     auto jobRunner = makeJobRunner();
     auto message = std::string("test error message");
 
-    EXPECT_CALL(*m_jobAlgorithm, item()).Times(1).WillOnce(Return(&item));
+    EXPECT_CALL(*m_jobAlgorithm, item())
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(&item));
 
     jobRunner.algorithmError(m_jobAlgorithm, message);
     TS_ASSERT_EQUALS(row.state(), State::ITEM_ERROR);
@@ -182,7 +188,9 @@ public:
     row->setOutputNames({"", "IvsQ", "IvsQBin"});
     auto *item = dynamic_cast<Item *>(row);
 
-    EXPECT_CALL(*m_jobAlgorithm, item()).Times(1).WillOnce(Return(item));
+    EXPECT_CALL(*m_jobAlgorithm, item())
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(item));
 
     // For a single row, we save the binned workspace for the row
     auto workspacesToSave =
@@ -200,7 +208,9 @@ public:
     row->setOutputNames({"", "IvsQ", "IvsQBin"});
     auto *item = dynamic_cast<Item *>(row);
 
-    EXPECT_CALL(*m_jobAlgorithm, item()).Times(1).WillOnce(Return(item));
+    EXPECT_CALL(*m_jobAlgorithm, item())
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(item));
 
     // For multiple rows, we don't save any workspaces
     auto workspacesToSave =
@@ -220,7 +230,9 @@ public:
     });
     auto *item = dynamic_cast<Item *>(group);
 
-    EXPECT_CALL(*m_jobAlgorithm, item()).Times(1).WillOnce(Return(item));
+    EXPECT_CALL(*m_jobAlgorithm, item())
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(item));
 
     auto workspacesToSave =
         jobRunner.algorithmOutputWorkspacesToSave(m_jobAlgorithm);
