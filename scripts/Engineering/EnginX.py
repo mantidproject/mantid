@@ -5,21 +5,17 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
-import mantid.simpleapi as simple
-import Engineering.EnggUtils as Utils
-import os
+
 import csv
+import matplotlib.pyplot as plt
+import numpy as np
+import os
 from platform import system
 from shutil import copy2
-try:
-    import mantidplot
-    from PyQt4 import QtGui, QtCore
-except (Exception, Warning):
-    mantidplot = None
-try:
-    from mantidqt.plotting import functions as functions
-except(Exception, Warning):
-    functions = None
+
+import mantid.plots
+import Engineering.EnggUtils as Utils
+import mantid.simpleapi as simple
 
 
 def main(vanadium_run, user, focus_run, **kwargs):
@@ -194,26 +190,38 @@ def calibration_ws(difc, tzero, specNo, name):
 
         if not plot_spec_num:
             name = i
-        output = "Engg difc Zero Peaks Bank {}".format(name)
-        simple.AppendSpectra(InputWorkspace1="ws1", InputWorkspace2="ws2",
-                             OutputWorkspace=output)
-        plot_calibration(output)
+        output_name = "Engg difc Zero Peaks Bank {}".format(name)
+        output = simple.AppendSpectra(InputWorkspace1="ws1", InputWorkspace2="ws2",
+                                      OutputWorkspace=output_name)
+        plot_calibration(output, output_name)
     simple.DeleteWorkspace("ws1")
     simple.DeleteWorkspace("ws2")
 
 
-def plot_calibration(name):
-    if mantidplot:
-        difc_zero_plot = mantidplot.plotSpectrum(name, [0, 1]).activeLayer()
-        difc_zero_plot.setTitle(name)
-        difc_zero_plot.setCurveTitle(0, "Peaks Fitted")
-        difc_zero_plot.setCurveTitle(1, "DifC/TZero Fitted Straight Line")
-        difc_zero_plot.setAxisTitle(2, "Expected Peaks Centre(dSpacing, A)")
-        difc_zero_plot.setCurveLineStyle(0, QtCore.Qt.DotLine)
-    # Workbench plotting
-    elif functions:
-        fig1 = functions.plot([name], wksp_indices=[0, 1])
-        fig1.canvas.set_window_title(name)
+def plot_calibration(workspace, name):
+    fig, ax = plt.subplots(subplot_kw={"projection": "mantid"})
+    fig.canvas.set_window_title(name)
+
+    # plot lines based off of old gui plot
+    ax.plot(workspace, wkspIndex=0, label="Peaks Fitted", linestyle=":", color="black", marker='o', markersize=2,
+            linewidth=1.5)
+    ax.plot(workspace, wkspIndex=1, label="Expected Peaks Centre(dspacing, A)", color="orange", marker='o',
+            markersize=2)
+
+    # set the plot and axes titles
+    ax.set_title(name, fontweight="bold")
+    ax.set_xlabel("Expected Peaks Centre(dspacing, A)", fontweight="bold")
+    ax.set_ylabel("Fitted Peaks Centre(TOF, us)", fontweight="bold")
+
+    # set the ticks on the axes
+    ax.set_xticks(np.arange(0.5, 3.6, step=0.1), True)
+    ax.set_xticks(np.arange(0.5, 4, step=0.5))
+
+    ax.set_yticks(np.arange(1e4, 7e4, step=1e4))
+    ax.set_yticks(np.arange(1e4, 6.2e4, step=0.2e4), True)
+
+    ax.legend()
+    fig.show()
 
 
 def create_calibration(ceria_run, van_run, calibration_directory, calibration_general, cropped, crop_name, crop_on):
