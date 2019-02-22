@@ -18,7 +18,8 @@ from mantidqt.widgets.codeeditor.multifileinterpreter import MultiPythonFileInte
 
 class MultiPythonFileInterpreterDeletionTest(GuiTest, QtWidgetFinder):
     def tearDown(self):
-        [widget.close() for widget in self.find_qt_widget_by_name("interpreter.Python")]
+        for widget in self.find_qt_widget_by_name("interpreter.Python"):
+            widget.close()
         QApplication.processEvents()
 
     def test_editor_widget_not_leaked(self):
