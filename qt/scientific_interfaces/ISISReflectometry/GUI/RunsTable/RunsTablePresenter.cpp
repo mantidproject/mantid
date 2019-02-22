@@ -103,6 +103,7 @@ void RunsTablePresenter::notifyDeleteRowRequested() {
       removeRowsFromModel(selected);
       ensureAtLeastOneGroupExists();
       notifyRowStateChanged();
+      notifySelectionChanged();
     } else {
       m_view->mustNotSelectGroup();
     }
@@ -119,6 +120,7 @@ void RunsTablePresenter::notifyDeleteGroupRequested() {
     removeGroupsFromView(groupIndicesOrderedLowToHigh);
     ensureAtLeastOneGroupExists();
     notifyRowStateChanged();
+    notifySelectionChanged();
   } else {
     m_view->mustSelectGroupOrRow();
   }
@@ -448,12 +450,14 @@ void RunsTablePresenter::notifyRemoveRowsRequested(
   removeRowsAndGroupsFromModel(locationsOfRowsToRemove);
   removeRowsAndGroupsFromView(locationsOfRowsToRemove);
   ensureAtLeastOneGroupExists();
+  notifySelectionChanged();
 }
 
 void RunsTablePresenter::notifyRemoveAllRowsAndGroupsRequested() {
   removeAllRowsAndGroupsFromModel();
   removeAllRowsAndGroupsFromView();
   ensureAtLeastOneGroupExists();
+  notifySelectionChanged();
 }
 
 void RunsTablePresenter::notifyCopyRowsRequested() {
@@ -470,6 +474,7 @@ void RunsTablePresenter::notifyCutRowsRequested() {
     m_view->jobs().removeRows(m_view->jobs().selectedRowLocations());
     m_view->jobs().clearSelection();
     ensureAtLeastOneGroupExists();
+    notifySelectionChanged();
   } else {
     m_view->invalidSelectionForCut();
   }
@@ -485,6 +490,7 @@ void RunsTablePresenter::notifyPasteRowsRequested() {
       m_view->jobs().appendSubtreesAt(MantidWidgets::Batch::RowLocation(),
                                       m_clipboard.get());
     notifyRowStateChanged();
+    notifySelectionChanged();
   } else {
     m_view->invalidSelectionForPaste();
   }
