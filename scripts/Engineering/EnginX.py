@@ -369,21 +369,21 @@ def create_difc_zero_workspace(difc, tzero, crop_on, name):
     """
     plot_spec_num = False
     # check what banks to use
-    if crop_on.lower() == "north":
-        banks = [1]
-    elif crop_on.lower() == "south":
-        banks = [2]
-    elif not crop_on == "":
-        banks = [1]
-        plot_spec_num = True
-    else:
+    banks = [1]
+    correction = 0
+    if crop_on == "":
         banks = [1, 2]
+    elif crop_on.lower() == "south":
+        correction = 1
+    elif not crop_on == "":
+        plot_spec_num = True
 
     # loop through used banks
     for i in banks:
+        actual_i = correction+i
         # retrieve required workspace
         if not plot_spec_num:
-            bank_ws = simple.AnalysisDataService.retrieve("engg_calibration_bank_{}".format(i))
+            bank_ws = simple.AnalysisDataService.retrieve("engg_calibration_bank_{}".format(actual_i))
         else:
             bank_ws = simple.AnalysisDataService.retrieve(name)
 
@@ -394,7 +394,6 @@ def create_difc_zero_workspace(difc, tzero, crop_on, name):
         for irow in range(0, bank_ws.rowCount()):
             x_val.append(bank_ws.cell(irow, 0))
             y_val.append(bank_ws.cell(irow, 5))
-
             y2_val.append(x_val[irow] * difc[i - 1] + tzero[i - 1])
 
         # create workspaces to temporary hold the data
@@ -405,7 +404,7 @@ def create_difc_zero_workspace(difc, tzero, crop_on, name):
 
         # get correct name for output
         if not plot_spec_num:
-            name = i
+            name = actual_i
         output_name = "Engg difc Zero Peaks Bank {}".format(name)
 
         # use the two workspaces to creat the output
