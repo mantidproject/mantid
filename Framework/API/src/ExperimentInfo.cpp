@@ -80,7 +80,7 @@ public:
 class myContentHandler : public Poco::XML::ContentHandler {
   void startElement(const XMLString &, const XMLString &localName,
                     const XMLString &, const Attributes &attrList) override {
-    if (localName == "instrument") {
+    if (localName == "instrument" || localName == "parameter-file") {
       throw DummyException(
           static_cast<std::string>(attrList.getValue("", "valid-from")),
           static_cast<std::string>(attrList.getValue("", "valid-to")));
