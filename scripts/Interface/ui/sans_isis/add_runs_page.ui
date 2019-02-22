@@ -91,6 +91,9 @@
         </item>
         <item>
          <widget class="QPushButton" name="saveDirectoryButton">
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select a directory to save summed runs into. This directory is different to Mantid's default save directory.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
           <property name="text">
            <string>Select Save Directory</string>
           </property>
