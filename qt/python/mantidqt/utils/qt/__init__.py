@@ -51,7 +51,11 @@ def import_qt(modulename, package, attr=None):
         try:
             lib = import_module(modulename + LIB_SUFFIX, package)
         except ImportError:
-            lib = import_module(modulename.lstrip('.') + LIB_SUFFIX)
+            try:
+                lib = import_module(modulename.lstrip('.') + LIB_SUFFIX)
+            except ImportError:
+                raise ImportError('No module named {} or {}'.format(modulename + LIB_SUFFIX,
+                                                                    modulename.lstrip('.') + LIB_SUFFIX))
     else:
         lib = import_module(modulename + LIB_SUFFIX)
 
