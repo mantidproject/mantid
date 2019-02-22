@@ -492,7 +492,7 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
 
         # find caches and sum them. return files without cache - cannot be used with UnfocussedWorkspace
         if self.useCaching:
-            notcached = self.__findAndLoadCachefiles(self._filenames, finalname)
+            notcached = self.__findAndLoadCachefiles(self._filenames, finalname, firstTime=True)
         else:
             notcached = self._filenames[:]  # make a copy
         self.log().notice('Files to process: {}'.format(notcached,))
@@ -535,7 +535,7 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
 
         return True
 
-    def __findAndLoadCachefiles(self, filenames, finalname):
+    def __findAndLoadCachefiles(self, filenames, finalname, firstTime):
         """find caches and load them using a greedy algorithm
 
         Find cache for the longest partial sum of the given filenames.
@@ -552,7 +552,7 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
                 summed_cache_file = self.__getGroupCacheName(fileSubset)
                 wkspname = self.__getGroupWkspName(fileSubset)
                 if self.__loadCacheFile(summed_cache_file, wkspname):
-                    self.__accumulate(wkspname, finalname, '', '')
+                    self.__accumulate(wkspname, finalname, '', '', firstTime)
                     found = True
                     break
             if found:
@@ -562,7 +562,7 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
             return filenames
         remained = filenames[:start] + filenames[end+1:]
         if remained:
-            return self.__findAndLoadCachefiles(remained, finalname)
+            return self.__findAndLoadCachefiles(remained, finalname, False)
         return []
 
     def __wkspNameFromFile(self, filename):
