@@ -421,7 +421,7 @@ WorkspaceTreeWidget::SaveFileType WorkspaceTreeWidget::getSaveFileType() const {
 }
 
 void WorkspaceTreeWidget::saveWorkspace(const std::string &wsName,
-                                        const SaveFileType type) {
+                                        SaveFileType type) {
   QHash<QString, QString> presets;
   if (!wsName.empty()) {
     presets["InputWorkspace"] = QString::fromStdString(wsName);
