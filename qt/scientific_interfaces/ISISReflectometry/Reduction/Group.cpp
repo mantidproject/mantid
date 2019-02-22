@@ -48,7 +48,7 @@ bool Group::requiresProcessing(bool reprocessFailed) const {
 
   // Post-processing can only be done if all rows have completed successfully
   for (auto &row : m_rows) {
-    if (row->state() != State::ITEM_COMPLETE)
+    if (row && row->state() != State::ITEM_COMPLETE)
       return false;
   }
 
@@ -73,7 +73,8 @@ void Group::setName(std::string const &name) { m_name = name; }
 void Group::resetState() {
   Item::resetState();
   for (auto &row : m_rows)
-    row->resetState();
+    if (row)
+      row->resetState();
 }
 
 bool Group::allRowsAreValid() const {
