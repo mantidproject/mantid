@@ -7,7 +7,6 @@
 import os
 
 from mantid.kernel import ConfigService, ConfigPropertyObserver
-from mantid.simpleapi import config
 
 from sans.common.enums import SANSInstrument
 from sans.gui_logic.gui_common import GENERIC_SETTINGS, load_property, set_setting
