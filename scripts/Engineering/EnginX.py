@@ -13,6 +13,7 @@ from platform import system
 from shutil import copy2
 try:
     import mantidplot
+    from PyQt4 import QtGui, QtCore
 except (Exception, Warning):
     mantidplot = None
 try:
@@ -202,20 +203,16 @@ def calibration_ws(difc, tzero, specNo, name):
 
 
 def plot_calibration(name):
-    twin_cal = "__{}_twin".format(name)
-    if simple.AnalysisDataService.doesExist(twin_cal):
-        simple.DeleteWorkspace(twin_cal)
-    cal_ws = simple.CloneWorkspace(InputWorkspace=name, OutputWorkspace=twin_cal)
     if mantidplot:
-        difc_zero_plot = mantidplot.plotSpectrum(cal_ws, [0, 1]).activeLayer()
+        difc_zero_plot = mantidplot.plotSpectrum(name, [0, 1]).activeLayer()
         difc_zero_plot.setTitle(name)
         difc_zero_plot.setCurveTitle(0, "Peaks Fitted")
         difc_zero_plot.setCurveTitle(1, "DifC/TZero Fitted Straight Line")
-        DifcZeroPlot.setAxisTitle(Layer.Bottom, "Expected Peaks Centre(dSpacing, A))"
-        DifcZeroPlot.setCurveLineStyle(0, QtCore.Qt.DotLine)
+        difc_zero_plot.setAxisTitle(2, "Expected Peaks Centre(dSpacing, A)")
+        difc_zero_plot.setCurveLineStyle(0, QtCore.Qt.DotLine)
     # Workbench plotting
     elif functions:
-        fig1 = functions.plot([cal_ws], wksp_indices=[0, 1])
+        fig1 = functions.plot([name], wksp_indices=[0, 1])
         fig1.canvas.set_window_title(name)
 
 
