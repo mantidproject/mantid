@@ -8,8 +8,8 @@
 #define MANTID_CUSTOMINTERFACES_INDIRECTSETTINGSPRESENTER_H_
 
 #include "DllConfig.h"
-#include "IndirectSettingsView.h"
 #include "IndirectSettingsModel.h"
+#include "IndirectSettingsView.h"
 
 #include <QObject>
 #include <QVariant>
@@ -27,7 +27,6 @@ public:
                                      std::string const &availableSettings);
   explicit IndirectSettingsPresenter(IndirectSettingsModel *model,
                                      IIndirectSettingsView *view);
-  //~IndirectSettingsPresenter() override{};
 
   void showDialog();
   void loadSettings();

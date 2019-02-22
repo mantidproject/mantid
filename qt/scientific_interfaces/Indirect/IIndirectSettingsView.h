@@ -21,7 +21,7 @@ class MANTIDQT_INDIRECT_DLL IIndirectSettingsView : public QDialog {
 
 public:
   IIndirectSettingsView(QWidget *parent = nullptr) : QDialog(parent){};
-  //virtual ~IIndirectSettingsView(){};
+  virtual ~IIndirectSettingsView(){};
 
   virtual void setInterfaceSettingsVisible(bool visible) = 0;
   virtual void setInterfaceGroupBoxTitle(QString const &title) = 0;

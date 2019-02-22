@@ -25,7 +25,7 @@ class MANTIDQT_INDIRECT_DLL IndirectSettingsView
 
 public:
   explicit IndirectSettingsView(QWidget *parent = nullptr);
-  //virtual ~IndirectSettingsView() override = default;
+  virtual ~IndirectSettingsView() override = default;
 
   void setInterfaceSettingsVisible(bool visible) override;
   void setInterfaceGroupBoxTitle(QString const &title) override;

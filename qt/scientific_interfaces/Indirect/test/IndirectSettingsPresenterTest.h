@@ -86,15 +86,14 @@ public:
   }
 
   void setUp() override {
-    m_view = std::make_unique<NiceMock<MockIIndirectSettingsView>>();
-    m_model = std::make_unique<NiceMock<MockIndirectSettingsModel>>();
-    m_presenter = std::make_unique<IndirectSettingsPresenter>(
-        std::move(m_model.get()), std::move(m_view.get()));
+    m_view = new NiceMock<MockIIndirectSettingsView>();
+    m_model = new NiceMock<MockIndirectSettingsModel>();
+    m_presenter = std::make_unique<IndirectSettingsPresenter>(m_model, m_view);
   }
 
   void tearDown() override {
-    TS_ASSERT(Mock::VerifyAndClearExpectations(m_view.get()));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(m_model.get()));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_view));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_model));
 
     m_presenter.reset(); /// The view and model are destructed here
   }
@@ -106,8 +105,8 @@ public:
   void test_that_the_model_has_been_instantiated_correctly() {}
 
 private:
-  std::unique_ptr<MockIIndirectSettingsView> m_view;
-  std::unique_ptr<MockIndirectSettingsModel> m_model;
+  MockIIndirectSettingsView *m_view;
+  MockIndirectSettingsModel *m_model;
   std::unique_ptr<IndirectSettingsPresenter> m_presenter;
 };
 

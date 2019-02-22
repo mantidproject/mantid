@@ -19,7 +19,7 @@ class MANTIDQT_INDIRECT_DLL IndirectSettingsModel {
 public:
   IndirectSettingsModel(std::string const &settingsGroup = "Settings",
                         std::string const &availableSettings = "");
-  //virtual ~IndirectSettingsModel();
+  virtual ~IndirectSettingsModel() = default;
 
   virtual std::string getSettingsGroup() const;
 
