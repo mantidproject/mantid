@@ -37,7 +37,6 @@ class RunSummation(object):
         save_as_event = self._should_save_as_event_workspaces(settings)
 
         file_name = base_file_name + '.nxs'
-        print(file_name)
         monitors_file_name = base_file_name + '_monitors.nxs'
 
         SANSadd2.add_runs(
