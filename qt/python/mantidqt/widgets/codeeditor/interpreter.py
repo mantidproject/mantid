@@ -34,9 +34,9 @@ SPACE_CHAR = " "
 
 class EditorIO(object):
 
-    def __init__(self, editor, config):
+    def __init__(self, editor, confirm_on_exit=True):
         self.editor = editor
-        self.config = config
+        self.confirm_on_exit = confirm_on_exit
 
     def ask_for_filename(self):
         filename = open_a_file_dialog(parent=self.editor, default_suffix=".py", file_filter="Python Files (*.py)",
@@ -54,15 +54,10 @@ class EditorIO(object):
         the operation should be cancelled
         """
         if confirm:
-            # if a confirmation is wanted, but the user has specified to NOT ask for confirmation
-            # then return the same answer as clicking `No` on the message box
-            if not self.config.get('project', 'prompt_save_editor_modified'):
-                button = QMessageBox.No
-            else:
-                button = QMessageBox.question(self.editor, "",
-                                              "Save changes to document before closing?",
-                                              buttons=(QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel),
-                                              defaultButton=QMessageBox.Cancel)
+            button = QMessageBox.question(self.editor, "",
+                                          "Save changes to document before closing?",
+                                          buttons=(QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel),
+                                          defaultButton=QMessageBox.Cancel)
             if button == QMessageBox.Yes:
                 return self.write()
             elif button == QMessageBox.No:
@@ -71,7 +66,8 @@ class EditorIO(object):
                 # Cancelled
                 return False
         else:
-            return self.write()
+            # pretend the user clicked No on the dialog
+            return True
 
     def write(self):
         filename = self.editor.fileName()
@@ -97,18 +93,17 @@ class PythonFileInterpreter(QWidget):
     sig_editor_modified = Signal(bool)
     sig_filename_modified = Signal(str)
 
-    def __init__(self, config, content=None, filename=None,
-                 parent=None):
+    def __init__(self, content=None, filename=None, parent=None):
         """
         :param content: An optional string of content to pass to the editor
         :param filename: The file path where the content was read.
         :param parent: An optional parent QWidget
         """
         super(PythonFileInterpreter, self).__init__(parent)
+        self.parent = parent
 
         # layout
         self.editor = CodeEditor("AlternateCSPythonLexer", self)
-        self.config = config
 
         # Clear QsciScintilla key bindings that may override PyQt's bindings
         self.clear_key_binding("Ctrl+/")
@@ -157,7 +152,7 @@ class PythonFileInterpreter(QWidget):
 
         :return: True if closing was considered successful, false otherwise
         """
-        return self.save(confirm=True)
+        return self.save(confirm=self.parent.confirm_on_save)
 
     def abort(self):
         self._presenter.req_abort()
@@ -167,7 +162,7 @@ class PythonFileInterpreter(QWidget):
 
     def save(self, confirm=False):
         if self.editor.isModified():
-            io = EditorIO(self.editor, self.config)
+            io = EditorIO(self.editor)
             return io.save_if_required(confirm)
         else:
             return True

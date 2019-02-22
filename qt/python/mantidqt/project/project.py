@@ -19,14 +19,13 @@ from mantidqt.project.projectsaver import ProjectSaver
 
 
 class Project(AnalysisDataServiceObserver):
-    def __init__(self, globalfiguremanager_instance, interface_populating_function, config):
+    def __init__(self, globalfiguremanager_instance, interface_populating_function):
         """
         :param globalfiguremanager_instance: The global figure manager instance used in this project.
         :param interface_populating_function: The interface populating function which returns a list of lists of windows
          and encoders
         """
         super(Project, self).__init__()
-        self.config = config
         # Has the project been saved, to Access this call .saved
         self.__saved = True
 
@@ -41,6 +40,11 @@ class Project(AnalysisDataServiceObserver):
         self.plot_gfm.add_observer(self)
 
         self.interface_populating_function = interface_populating_function
+
+        self.prompt_save_on_close = True
+
+    def load_settings_from_config(self, config):
+        self.prompt_save_on_close = config.get('project', 'prompt_save_on_close')
 
     def __get_saved(self):
         return self.__saved
@@ -161,7 +165,7 @@ class Project(AnalysisDataServiceObserver):
         return False
 
     def _offer_save_message_box(self, parent):
-        if self.config.get('project', 'prompt_save_on_close'):
+        if self.prompt_save_on_close:
             return QMessageBox.question(parent, 'Unsaved Project',
                                         "The project is currently unsaved. Would you like to "
                                         "save before closing?",

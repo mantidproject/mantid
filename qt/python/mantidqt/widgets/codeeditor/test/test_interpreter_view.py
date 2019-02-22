@@ -16,7 +16,7 @@ from mantidqt.widgets.codeeditor.interpreter import PythonFileInterpreter
 
 class PythonFileInterpreterViewTest(GuiTest, QtWidgetFinder):
     def test_find_replace_dialog(self):
-        w = PythonFileInterpreter(None)
+        w = PythonFileInterpreter()
 
         # dialog not initialised by default, only when used
         self.assertIsNone(w.find_replace_dialog)

@@ -35,12 +35,11 @@ def _tab_title_and_toolip(filename):
 class MultiPythonFileInterpreter(QWidget):
     """Provides a tabbed widget for editing multiple files"""
 
-    def __init__(self, config, default_content=None, parent=None):
+    def __init__(self, default_content=None, parent=None):
         super(MultiPythonFileInterpreter, self).__init__(parent)
 
         # attributes
         self.default_content = default_content
-        self.config = config
         self.prev_session_tabs = None
         self.whitespace_visible = False
 
@@ -53,6 +52,12 @@ class MultiPythonFileInterpreter(QWidget):
 
         # add a single editor by default
         self.append_new_editor()
+
+        # setting defaults
+        self.confirm_on_save = True
+
+    def load_settings_from_config(self, config):
+        self.confirm_on_save = config.get('project', 'prompt_save_editor_modified')
 
     @property
     def editor_count(self):
@@ -70,8 +75,7 @@ class MultiPythonFileInterpreter(QWidget):
     def append_new_editor(self, content=None, filename=None):
         if content is None:
             content = self.default_content
-        interpreter = PythonFileInterpreter(self.config, content, filename=filename,
-                                            parent=self._tabs)
+        interpreter = PythonFileInterpreter(content, filename=filename, parent=self)
         if self.whitespace_visible:
             interpreter.set_whitespace_visible()
 

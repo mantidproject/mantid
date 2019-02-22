@@ -46,12 +46,12 @@ TAB_SETTINGS_KEY = "Editors/SessionTabs"
 class MultiFileEditor(PluginWidget):
     """Provides a tab widget for editing multiple files"""
 
-    def __init__(self, parent, config):
+    def __init__(self, parent):
         super(MultiFileEditor, self).__init__(parent)
 
         # layout
-        self.editors = MultiPythonFileInterpreter(config, default_content=DEFAULT_CONTENT,
-                                                  parent=self)
+        self.editors = MultiPythonFileInterpreter(default_content=DEFAULT_CONTENT, parent=self)
+
         layout = QVBoxLayout()
         layout.addWidget(self.editors)
         layout.setContentsMargins(0, 0, 0, 0)
@@ -104,6 +104,9 @@ class MultiFileEditor(PluginWidget):
                                self.toggle_whitespace_action, None,
                                self.tabs_to_spaces_action,
                                self.spaces_to_tabs_action, None]
+
+    def load_settings_from_config(self, config):
+        self.editors.load_settings_from_config(config)
 
     def execute_current(self):
         '''This is used by MainWindow to execute a file after opening it'''

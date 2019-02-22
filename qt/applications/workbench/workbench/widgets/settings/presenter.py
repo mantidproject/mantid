@@ -63,6 +63,7 @@ class SettingsPresenter(object):
     def action_save_settings_button(self):
         if not self.ask_before_close or self.view.ask_before_close():
             ConfigService.saveConfig(ConfigService.getUserFilename())
+            self.parent.config_updated()
             self.view.close()
 
     def refresh_workspaces(self):

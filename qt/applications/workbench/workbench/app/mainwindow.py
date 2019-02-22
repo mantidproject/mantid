@@ -190,7 +190,7 @@ class MainWindow(QMainWindow):
 
         self.set_splash("Loading code editing widget")
         from workbench.plugins.editor import MultiFileEditor
-        self.editor = MultiFileEditor(self, CONF)
+        self.editor = MultiFileEditor(self)
         self.editor.register_plugin()
         self.widgets.append(self.editor)
 
@@ -206,10 +206,11 @@ class MainWindow(QMainWindow):
         self.widgets.append(self.workspacewidget)
 
         # Set up the project object
-        self.project = Project(GlobalFigureManager, find_all_windows_that_are_savable, CONF)
+        self.project = Project(GlobalFigureManager, find_all_windows_that_are_savable)
 
         # uses default configuration as necessary
         self.readSettings(CONF)
+        self.widget_config_updated()
 
         self.setup_layout()
         self.create_actions()
@@ -463,6 +464,13 @@ class MainWindow(QMainWindow):
     def open_settings_window(self):
         settings = SettingsPresenter(self)
         settings.show()
+
+    def config_updated(self):
+        """
+        Updates the widgets that depend on settings from the Workbench Config.
+        """
+        self.editor.load_settings_from_config(CONF)
+        self.project.load_settings_from_config(CONF)
 
     def readSettings(self, settings):
         qapp = QApplication.instance()
