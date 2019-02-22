@@ -30,6 +30,9 @@ class FFTPresenter(object):
         self.view.buttonSignal.connect(self.handleButton)
         self.view.phaseCheckSignal.connect(self.phaseCheck)
 
+        if self.load.version == 2:
+            self.view.setup_raw_checkbox_changed(self.handle_use_raw_data_changed)
+
     def cancel(self):
         if self.thread is not None:
             self.thread.cancel()
@@ -51,7 +54,10 @@ class FFTPresenter(object):
 
     def getWorkspaceNames(self):
         name = self.view.getInputWS()
-        final_options = self.load.getWorkspaceNames()
+        if self.load.version == 2:
+            final_options = self.load.getWorkspaceNames(self.view.isRaw())
+        else:
+            final_options = self.load.getWorkspaceNames()
         self.view.addItems(final_options)
 
         if self.load.version == 2:
@@ -59,6 +65,14 @@ class FFTPresenter(object):
             self.removePhaseFromIM(final_options)
 
             self.view.setReTo(name)
+
+    def handle_use_raw_data_changed(self):
+        if not self.view.isRaw() and not self.load.context.do_rebin():
+            self.view.set_raw_checkbox_state(True)
+            self.view.warning_popup('No rebin options specified')
+            return
+
+        self.getWorkspaceNames()
 
     def removePhaseFromIM(self, final_options):
         for option in final_options:

@@ -78,7 +78,7 @@ class FrequencyContext(object):
 
     # Get the groups/pairs for active WS
     # ignore raw files
-    def getWorkspaceNames(self):
+    def getWorkspaceNames(self, use_raw):
         pair_names = list(self.context.pair_names)
         group_names = list(self.context.group_names)
         run_numbers = self.context.current_runs
@@ -90,9 +90,9 @@ class FrequencyContext(object):
                 final_options.append(
                     wsName.get_pair_data_workspace_name(self.context,
                                                         str(name),
-                                                        run_list_to_string(run)))
+                                                        run_list_to_string(run), not use_raw))
             for group_name in group_names:
-                final_options.append(wsName.get_group_asymmetry_name(self.context, str(group_name), run_list_to_string(run)))
+                final_options.append(wsName.get_group_asymmetry_name(self.context, str(group_name), run_list_to_string(run), not use_raw))
         return final_options
 
     # Get the groups/pairs for active WS
