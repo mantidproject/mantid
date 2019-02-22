@@ -140,9 +140,6 @@ void IndirectFitAnalysisTab::connectFitPropertyBrowser() {
   connect(m_fitPropertyBrowser,
           SIGNAL(localParameterEditRequested(const QString &)), this,
           SLOT(editLocalParameterValues(const QString &)));
-  connect(m_fitPropertyBrowser,
-          SIGNAL(parameterChanged(const Mantid::API::IFunction *)),
-          this, SLOT(respondToFunctionChanged()));
   connect(m_fitPropertyBrowser, SIGNAL(functionChanged()),
           this, SLOT(respondToFunctionChanged()));
 }
