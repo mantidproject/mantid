@@ -114,8 +114,8 @@ public:
   Mantid::API::WorkspaceGroup_sptr getResultWorkspace() const;
   Mantid::API::WorkspaceGroup_sptr getResultGroup() const;
   virtual Mantid::API::IAlgorithm_sptr getFittingAlgorithm() const;
-  Mantid::API::IAlgorithm_sptr getSingleFit(std::size_t dataIndex,
-                                            std::size_t spectrum) const;
+  Mantid::API::IAlgorithm_sptr getSingleFit(std::size_t dataIndex, std::size_t spectrum) const;
+  Mantid::API::IFunction_sptr getSingleFunction(std::size_t dataIndex, std::size_t spectrum) const;
   std::string getOutputBasename() const;
 
   void cleanFailedRun(Mantid::API::IAlgorithm_sptr fittingAlgorithm);

@@ -113,7 +113,6 @@ protected slots:
   void updateResultOptions();
 
 private slots:
-  void updatePlotGuess();
   void plotSelectedSpectra();
   void editLocalParameterValues(const QString &parName);
 
@@ -129,6 +128,7 @@ private slots:
   void respondToPlotSpectrumChanged(std::size_t);
   void respondToFwhmChanged(double);
   void respondToBackgroundChanged(double);
+  void respondToFunctionChanged();
 
 private:
   /// Overidden by child class.

@@ -130,8 +130,6 @@ void IndirectFitAnalysisTab::connectPlotPresenter() {
 void IndirectFitAnalysisTab::connectSpectrumPresenter() {
   connect(m_spectrumPresenter.get(), SIGNAL(spectraChanged(std::size_t)),
     this, SLOT(respondToChangeOfSpectraRange(std::size_t)));
-
-
   connect(m_spectrumPresenter.get(), SIGNAL(maskChanged(const std::string &)),
     this, SLOT(setDataTableExclude(const std::string &)));
 }
@@ -142,24 +140,11 @@ void IndirectFitAnalysisTab::connectFitPropertyBrowser() {
   connect(m_fitPropertyBrowser,
           SIGNAL(localParameterEditRequested(const QString &)), this,
           SLOT(editLocalParameterValues(const QString &)));
-  //connect(m_fitPropertyBrowser, SIGNAL(updatePlotSpectrum(int)),
-  //        m_plotPresenter.get(), SLOT(updatePlotSpectrum(int)));
-
-
-  //connect(m_fitPropertyBrowser,
-  //        SIGNAL(parameterChanged(const Mantid::API::IFunction *)),
-  //        m_plotPresenter.get(), SLOT(updateRangeSelectors()));
-  //connect(m_fitPropertyBrowser,
-  //        SIGNAL(parameterChanged(const Mantid::API::IFunction *)),
-  //        m_plotPresenter.get(), SLOT(updateGuess()));
-
-  //connect(m_fitPropertyBrowser, SIGNAL(functionChanged()),
-  //        m_plotPresenter.get(), SLOT(updatePlots()));
-  //connect(m_fitPropertyBrowser, SIGNAL(functionChanged()),
-  //        m_plotPresenter.get(), SLOT(updateGuess()));
-
-  //connect(m_fitPropertyBrowser, SIGNAL(plotGuess()), m_plotPresenter.get(),
-  //        SLOT(enablePlotGuessInSeparateWindow()));
+  connect(m_fitPropertyBrowser,
+          SIGNAL(parameterChanged(const Mantid::API::IFunction *)),
+          this, SLOT(respondToFunctionChanged()));
+  connect(m_fitPropertyBrowser, SIGNAL(functionChanged()),
+          this, SLOT(respondToFunctionChanged()));
 }
 
 void IndirectFitAnalysisTab::setFitDataPresenter(
@@ -291,6 +276,7 @@ void IndirectFitAnalysisTab::tableStartXChanged(double startX,
                                                 std::size_t spectrum) {
   if (isRangeCurrentlySelected(dataIndex, spectrum)) {
     m_plotPresenter->setStartX(startX);
+    m_plotPresenter->updateGuess();
     m_fittingModel->setStartX(startX, m_plotPresenter->getSelectedDataIndex(), m_plotPresenter->getSelectedSpectrumIndex());
   }
 }
@@ -300,6 +286,7 @@ void IndirectFitAnalysisTab::tableEndXChanged(double endX,
                                               std::size_t spectrum) {
   if (isRangeCurrentlySelected(dataIndex, spectrum)) {
     m_plotPresenter->setEndX(endX);
+    m_plotPresenter->updateGuess();
     m_fittingModel->setEndX(endX, m_plotPresenter->getSelectedDataIndex(), m_plotPresenter->getSelectedSpectrumIndex());
   }
 }
@@ -419,15 +406,6 @@ void IndirectFitAnalysisTab::updateFitBrowserParameterValues() {
       m_fitPropertyBrowser->updateMultiDatasetParameters(*fun);
     }
   }
-}
-
-/**
- * Enables Plot Guess in the FitPropertyBrowser if a sample workspace is loaded
- */
-void IndirectFitAnalysisTab::updatePlotGuess() {
-  auto const sampleWorkspace =
-      m_fittingModel->getWorkspace(getSelectedDataIndex());
-  m_fitPropertyBrowser->updatePlotGuess(sampleWorkspace);
 }
 
 /**
@@ -755,6 +733,12 @@ void IndirectFitAnalysisTab::respondToFwhmChanged(double)
 void IndirectFitAnalysisTab::respondToBackgroundChanged(double)
 {
   updateFitBrowserParameterValues();
+  m_plotPresenter->updateGuess();
+}
+
+void IndirectFitAnalysisTab::respondToFunctionChanged()
+{
+  m_plotPresenter->updatePlots();
   m_plotPresenter->updateGuess();
 }
 

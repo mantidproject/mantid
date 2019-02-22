@@ -761,7 +761,7 @@ IndirectFittingModel::getFittingAlgorithm(FittingMode mode) const {
     }
     return createSequentialFit(getFittingFunction()->getFunction(0));
   } else
-    return createSimultaneousFit(getMultiDomainFunction());
+    return createSimultaneousFit(getFittingFunction());
 }
 
 IAlgorithm_sptr IndirectFittingModel::getSingleFit(std::size_t dataIndex,
@@ -783,6 +783,16 @@ IAlgorithm_sptr IndirectFittingModel::getSingleFit(std::size_t dataIndex,
   fitAlgorithm->setProperty("OutputWorkspace",
                             singleFitOutputName(dataIndex, spectrum));
   return fitAlgorithm;
+}
+
+Mantid::API::IFunction_sptr IndirectFittingModel::getSingleFunction(std::size_t dataIndex, std::size_t spectrum) const
+{
+  auto function = getFittingFunction();
+  assert(function->getNumberDomains() == getNumberOfDatasets());
+  if (function->getNumberDomains() == 0) {
+    throw std::runtime_error("Cannot set up a fit: is the function defined?");
+  }
+  return function->getFunction(dataIndex);
 }
 
 Mantid::API::IAlgorithm_sptr

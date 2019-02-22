@@ -251,7 +251,7 @@ MatrixWorkspace_sptr IndirectFitPlotModel::getResultWorkspace() const {
 MatrixWorkspace_sptr IndirectFitPlotModel::getGuessWorkspace() const {
   const auto range = getRange();
   return createGuessWorkspace(
-      getWorkspace(), m_fittingModel->getFittingFunction(),
+      getWorkspace(), m_fittingModel->getSingleFunction(m_activeIndex, m_activeSpectrum),
       boost::numeric_cast<int>(m_activeSpectrum), range.first, range.second);
 }
 

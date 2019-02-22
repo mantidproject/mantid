@@ -57,6 +57,7 @@ void IndirectFitPropertyBrowser::initFunctionBrowser() {
   m_functionBrowser->setObjectName("functionBrowser");
   connect(m_functionBrowser, SIGNAL(functionStructureChanged()), this,
           SIGNAL(functionChanged()));
+  connect(m_functionBrowser, SIGNAL(parameterChanged(const QString &, const QString &)), this, SIGNAL(functionChanged()));
   connect(m_functionBrowser, SIGNAL(tiesChanged()), this, SIGNAL(functionChanged()));
   connect(m_functionBrowser, SIGNAL(constraintsChanged()), this, SIGNAL(functionChanged()));
   connect(m_functionBrowser, SIGNAL(globalsChanged()), this, SIGNAL(functionChanged()));
@@ -188,7 +189,8 @@ void IndirectFitPropertyBrowser::updatePlotGuess(
 
 
 void IndirectFitPropertyBrowser::setWorkspaceIndex(int i) {
-  m_functionBrowser->setCurrentDataset(i);
+  if (m_functionBrowser->getNumberOfDatasets() > 0)
+    m_functionBrowser->setCurrentDataset(i);
 }
 
 int IndirectFitPropertyBrowser::workspaceIndex() const { return m_functionBrowser->getCurrentDataset(); }
