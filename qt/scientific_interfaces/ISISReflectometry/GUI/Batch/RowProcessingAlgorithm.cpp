@@ -252,7 +252,7 @@ IConfiguredAlgorithm_sptr createConfiguredAlgorithm(Batch const &model,
   // Create the algorithm
   auto alg = Mantid::API::AlgorithmManager::Instance().create(
       "ReflectometryISISLoadAndProcess");
-  alg->setChild(true);
+  alg->setRethrows(true);
 
   // Set the algorithm properties from the model
   auto properties = createAlgorithmRuntimeProps(model, row);
