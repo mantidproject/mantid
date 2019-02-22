@@ -256,12 +256,6 @@ IConfiguredAlgorithm_sptr createConfiguredAlgorithm(Batch const &model,
 
   // Set the algorithm properties from the model
   auto properties = createAlgorithmRuntimeProps(model, row);
-  updateEventProperties(properties, model.slicing());
-  updateExperimentProperties(properties, model.experiment());
-  updatePerThetaDefaultProperties(properties,
-                                  model.defaultsForTheta(row.theta()));
-  updateInstrumentProperties(properties, model.instrument());
-  updateRowProperties(properties, row);
 
   // Store expected output property names. Must be in the correct order for
   // Row::algorithmComplete
