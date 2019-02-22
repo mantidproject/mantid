@@ -807,8 +807,8 @@ void ProjectRecovery::repairCheckpointDirectory() {
 
   for (auto c : vectorToDelete) {
     // Remove c recursively
-    const auto sanityCheckPath(getRecoveryFolderCheck());
-    if (sanityCheckPath == Poco::Path(c).popDirectory().toString()) {
+    const Poco::Path sanityCheckPath(getRecoveryFolderCheck());
+    if (sanityCheckPath.toString() == Poco::Path(c).popDirectory().toString()) {
       Poco::File(c).remove(true);
     }
   }
