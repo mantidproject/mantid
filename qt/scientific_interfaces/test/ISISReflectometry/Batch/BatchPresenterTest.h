@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 
 using namespace MantidQt::CustomInterfaces;
+using MantidQt::API::IConfiguredAlgorithm_sptr;
 using testing::AtLeast;
 using testing::Mock;
 using testing::NiceMock;
@@ -45,7 +46,9 @@ public:
             MonitorCorrections(0, true, RangeInLambda(0.0, 0.0),
                                RangeInLambda(0.0, 0.0)),
             DetectorCorrections(false, DetectorCorrectionType::VerticalShift)),
-        m_runsTable(m_instruments, 0.1, ReductionJobs()), m_slicing() {}
+        m_runsTable(m_instruments, 0.1, ReductionJobs()),
+        m_slicing(), m_mockAlgorithmsList{
+                         boost::make_shared<MockBatchJobAlgorithm>()} {}
 
   void testPresenterSubscribesToView() {
     EXPECT_CALL(m_view, subscribe(_)).Times(1);
@@ -168,8 +171,18 @@ public:
     verifyAndClear();
   }
 
-  void testChildPresentersUpdatedWhenBatchFinished() {
+  void testNextBatchIsStartedWhenBatchFinished() {
     auto presenter = makePresenter();
+    expectBatchIsExecuted();
+    presenter.notifyBatchComplete(false);
+    verifyAndClear();
+  }
+
+  void testChildPresentersUpdatedWhenBatchFinishedAndNothingLeftToProcess() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(*m_jobRunner, getAlgorithms())
+        .Times(1)
+        .WillOnce(Return(std::deque<IConfiguredAlgorithm_sptr>()));
     expectReductionPaused();
     presenter.notifyBatchComplete(false);
     verifyAndClear();
@@ -242,6 +255,7 @@ private:
   Instrument m_instrument;
   RunsTable m_runsTable;
   Slicing m_slicing;
+  std::deque<IConfiguredAlgorithm_sptr> m_mockAlgorithmsList;
 
   class BatchPresenterFriend : public BatchPresenter {
     friend class BatchPresenterTest;
@@ -294,6 +308,8 @@ private:
     // Replace the constructed job runner with a mock
     m_jobRunner = new NiceMock<MockBatchJobRunner>();
     presenter.m_jobRunner.reset(m_jobRunner);
+    ON_CALL(*m_jobRunner, getAlgorithms())
+        .WillByDefault(Return(m_mockAlgorithmsList));
     return presenter;
   }
 
@@ -342,7 +358,7 @@ private:
   void expectBatchIsExecuted() {
     EXPECT_CALL(*m_jobRunner, getAlgorithms()).Times(1);
     EXPECT_CALL(m_view, clearAlgorithmQueue()).Times(1);
-    EXPECT_CALL(m_view, setAlgorithmQueue(_)).Times(1);
+    EXPECT_CALL(m_view, setAlgorithmQueue(m_mockAlgorithmsList)).Times(1);
     EXPECT_CALL(m_view, executeAlgorithmQueue()).Times(1);
   }
 };
