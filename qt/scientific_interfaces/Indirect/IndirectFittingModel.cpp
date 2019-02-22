@@ -451,16 +451,19 @@ void IndirectFittingModel::setSpectra(const std::string &spectra,
 
 void IndirectFittingModel::setSpectra(Spectra &&spectra,
                                       std::size_t dataIndex) {
+  if (m_fittingData.empty()) return;
   m_fittingData[dataIndex]->setSpectra(std::forward<Spectra>(spectra));
 }
 
 void IndirectFittingModel::setSpectra(const Spectra &spectra,
                                       std::size_t dataIndex) {
+  if (m_fittingData.empty()) return;
   m_fittingData[dataIndex]->setSpectra(spectra);
 }
 
 void IndirectFittingModel::setStartX(double startX, std::size_t dataIndex,
                                      std::size_t spectrum) {
+  if (m_fittingData.empty()) return;
   if (FittingMode::SEQUENTIAL == m_fittingMode)
     m_fittingData.front()->setStartX(startX, 0);
   else
@@ -469,6 +472,7 @@ void IndirectFittingModel::setStartX(double startX, std::size_t dataIndex,
 
 void IndirectFittingModel::setEndX(double endX, std::size_t dataIndex,
                                    std::size_t spectrum) {
+  if (m_fittingData.empty()) return;
   if (FittingMode::SEQUENTIAL == m_fittingMode)
     m_fittingData.front()->setEndX(endX, 0);
   else
@@ -478,6 +482,7 @@ void IndirectFittingModel::setEndX(double endX, std::size_t dataIndex,
 void IndirectFittingModel::setExcludeRegion(const std::string &exclude,
                                             std::size_t dataIndex,
                                             std::size_t spectrum) {
+  if (m_fittingData.empty()) return;
   if (FittingMode::SEQUENTIAL == m_fittingMode)
     m_fittingData.front()->setExcludeRegionString(exclude, 0);
   else

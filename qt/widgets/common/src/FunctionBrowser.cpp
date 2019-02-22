@@ -1684,6 +1684,7 @@ void FunctionBrowser::fixParameter() {
     return;
   QString tie = QString::number(getParameter(prop));
   addTieProperty(prop, tie);
+  emit tiesChanged();
 }
 
 /// Get a tie property attached to a parameter property
@@ -1719,6 +1720,7 @@ void FunctionBrowser::removeTie() {
       localValues[m_currentDataset].fixed = false;
     }
   }
+  emit tiesChanged();
 }
 
 /**
@@ -1743,6 +1745,7 @@ void FunctionBrowser::addTie() {
                             "Syntax errors found in tie: " + tie);
     }
   }
+  emit tiesChanged();
 }
 
 /**
@@ -1787,6 +1790,7 @@ void FunctionBrowser::addConstraints() {
   if (!isParameter(prop))
     return;
   addConstraintProperties(prop, "0<" + prop->propertyName() + "<0");
+  emit constraintsChanged();
 }
 
 /**
@@ -1803,6 +1807,7 @@ void FunctionBrowser::addConstraints10() {
   addConstraintProperties(prop, QString::number(val * 0.9) + "<" +
                                     prop->propertyName() + "<" +
                                     QString::number(val * 1.1));
+  emit constraintsChanged();
 }
 
 /**
@@ -1819,6 +1824,7 @@ void FunctionBrowser::addConstraints50() {
   addConstraintProperties(prop, QString::number(val * 0.5) + "<" +
                                     prop->propertyName() + "<" +
                                     QString::number(val * 1.5));
+  emit constraintsChanged();
 }
 
 /**
@@ -1845,6 +1851,7 @@ void FunctionBrowser::removeConstraints() {
       }
     }
   }
+  emit constraintsChanged();
 }
 
 /**
@@ -1866,6 +1873,7 @@ void FunctionBrowser::removeConstraint() {
     localValue.upperBound = "";
   }
   removeProperty(prop);
+  emit constraintsChanged();
 }
 
 void FunctionBrowser::updateCurrentFunctionIndex() {
@@ -1991,6 +1999,7 @@ void FunctionBrowser::tieChanged(QtProperty *prop) {
         paramValue.tie = tie;
         break;
       }
+      emit tiesChanged();
     }
   }
 }
@@ -2013,6 +2022,7 @@ void FunctionBrowser::constraintChanged(QtProperty *prop) {
         }
         break;
       }
+      emit constraintsChanged();
     }
   }
 }

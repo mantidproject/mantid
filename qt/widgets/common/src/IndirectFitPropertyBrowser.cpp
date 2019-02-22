@@ -57,6 +57,9 @@ void IndirectFitPropertyBrowser::initFunctionBrowser() {
   m_functionBrowser->setObjectName("functionBrowser");
   connect(m_functionBrowser, SIGNAL(functionStructureChanged()), this,
           SIGNAL(functionChanged()));
+  connect(m_functionBrowser, SIGNAL(tiesChanged()), this, SIGNAL(functionChanged()));
+  connect(m_functionBrowser, SIGNAL(constraintsChanged()), this, SIGNAL(functionChanged()));
+  connect(m_functionBrowser, SIGNAL(globalsChanged()), this, SIGNAL(functionChanged()));
   connect(m_functionBrowser,
           SIGNAL(localParameterButtonClicked(const QString &)), this,
           SIGNAL(localParameterEditRequested(const QString &)));
@@ -92,13 +95,17 @@ void IndirectFitPropertyBrowser::setFunction(const QString &funStr) {
 MultiDomainFunction_sptr
 IndirectFitPropertyBrowser::getFittingFunction() const {
   try {
-    if (m_functionBrowser->getNumberOfDatasets() == 0) {
+    if (m_functionBrowser->getNumberOfDatasets() > 0) {
+      return boost::dynamic_pointer_cast<MultiDomainFunction>(m_functionBrowser->getGlobalFunction());
+    } else {
         auto multiDomainFunction = boost::make_shared<MultiDomainFunction>();
-        multiDomainFunction->addFunction(m_functionBrowser->getFunction());
-        multiDomainFunction->setDomainIndex(0, 0);
+        auto singleFunction = m_functionBrowser->getFunction();
+        if (singleFunction) {
+          multiDomainFunction->addFunction(singleFunction);
+          multiDomainFunction->setDomainIndex(0, 0);
+        }
         return multiDomainFunction;
     }
-    return boost::dynamic_pointer_cast<MultiDomainFunction>(m_functionBrowser->getGlobalFunction());
   } catch (std::invalid_argument) {
     return boost::make_shared<MultiDomainFunction>();
   }
@@ -108,10 +115,6 @@ QString IndirectFitPropertyBrowser::getSingleFunctionStr() const
 {
   return m_functionBrowser->getFunctionString();
 }
-
-//IFunction_sptr IndirectFitPropertyBrowser::compositeFunction() const {
-//  return getFittingFunction();
-//}
 
 std::string IndirectFitPropertyBrowser::minimizer(bool withProperties) const {
   return m_fitOptionsBrowser->getProperty("Minimizer").toStdString();
@@ -198,6 +201,7 @@ void IndirectFitPropertyBrowser::editLocalParameter(
     const QString &parName, const QStringList &wsNames,
     const std::vector<size_t> &wsIndices) {
   m_functionBrowser->editLocalParameter(parName, wsNames, wsIndices);
+  emit functionChanged();
 }
 
 void IndirectFitPropertyBrowser::setFitEnabled(bool enable) {

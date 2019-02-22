@@ -182,6 +182,8 @@ signals:
 
   void functionStructureChanged() override;
   void globalsChanged();
+  void constraintsChanged();
+  void tiesChanged();
 
 public slots:
 
