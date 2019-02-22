@@ -37,6 +37,7 @@ class RunSummation(object):
         save_as_event = self._should_save_as_event_workspaces(settings)
 
         file_name = base_file_name + '.nxs'
+        print(file_name)
         monitors_file_name = base_file_name + '_monitors.nxs'
 
         SANSadd2.add_runs(
@@ -48,7 +49,8 @@ class RunSummation(object):
             saveAsEvent=save_as_event,
             time_shifts=additional_time_shifts,
             outFile=file_name,
-            outFile_monitors=monitors_file_name)
+            outFile_monitors=monitors_file_name,
+            save_directory=settings.save_directory)
 
     def _run_selection_as_path_list(self, run_selection):
         return [run.file_path() for run in run_selection]

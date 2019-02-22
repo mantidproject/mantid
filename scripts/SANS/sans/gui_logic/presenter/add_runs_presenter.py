@@ -6,8 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import os
 
-from mantid import config
 from mantid.kernel import ConfigService, ConfigPropertyObserver
+from mantid.simpleapi import config
 
 from sans.common.enums import SANSInstrument
 from sans.gui_logic.gui_common import GENERIC_SETTINGS, load_property, set_setting
@@ -58,7 +58,7 @@ class AddRunsFilenameManager(object):
 
     def _get_leading_zeroes(self, run_number):
         run_number_int = int(run_number)
-        total_digits_for_inst = config.getInstrument(self.instrument_string).zeroPadding(run_number_int)
+        total_digits_for_inst = ConfigService.getInstrument(self.instrument_string).zeroPadding(run_number_int)
         zeros_to_add = total_digits_for_inst - len(run_number)
         return zeros_to_add * "0"
 
@@ -99,8 +99,8 @@ class AddRunsPagePresenter(object):
         view.outFileChanged.connect(self._handle_out_file_changed)
         view.saveDirectoryClicked.connect(self._handle_output_directory_changed)
 
-        self._summation_settings_presenter.settings().save_directory = self._get_default_output_directory()
-        self._view.set_out_file_directory(self._summation_settings_presenter.settings().save_directory)
+        self.save_directory = self._get_default_output_directory()
+        self._view.set_out_file_directory(self.save_directory)
 
     def _make_base_file_name_from_selection(self, run_selection):
         filename_manager = self._get_filename_manager()
@@ -143,14 +143,15 @@ class AddRunsPagePresenter(object):
         return settings.save_directory != ''
 
     def _handle_output_directory_changed(self):
-        directory = self._display_save_directory_box("Save sum runs",
-                                                     self._summation_settings_presenter.settings().save_directory)
+        directory = self._display_save_directory_box("Save sum runs", self.save_directory)
         self._update_output_directory(directory)
-        self._view.set_out_file_directory(self._summation_settings_presenter.settings().save_directory)
+        self._view.set_out_file_directory(self.save_directory)
 
     def _handle_sum(self):
         run_selection = self._run_selector_presenter.run_selection()
         settings = self._summation_settings_presenter.settings()
+        settings.save_directory = self.save_directory
+
         if self._output_directory_is_not_empty(settings):
             self._view.disable_sum()
             self._sum_runs(run_selection,
@@ -179,7 +180,9 @@ class AddRunsPagePresenter(object):
         :param directory: a string - a directory path
         :return: Nothing
         """
-        if directory is None:
-            return
-        set_setting(self.__generic_settings, self.__output_directory_key, directory)
-        self._summation_settings_presenter.settings().save_directory = directory
+        if directory == "":
+            return None
+        else:
+            directory = os.path.join(directory, '')  # Add an OS specific trailing slash if it doesn't already exist
+            set_setting(self.__generic_settings, self.__output_directory_key, directory)
+            self.save_directory = directory
