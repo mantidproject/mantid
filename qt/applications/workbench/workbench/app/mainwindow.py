@@ -210,7 +210,7 @@ class MainWindow(QMainWindow):
 
         # uses default configuration as necessary
         self.readSettings(CONF)
-        self.widget_config_updated()
+        self.config_updated()
 
         self.setup_layout()
         self.create_actions()
