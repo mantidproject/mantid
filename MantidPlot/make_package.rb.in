@@ -364,7 +364,7 @@ end
 directories = ["sphinx","sphinx_bootstrap_theme","IPython","zmq","pygments","backports", "qtawesome", "qtpy",
                "certifi","tornado","markupsafe","matplotlib","mpl_toolkits", "jinja2","jsonschema","functools32",
                "ptyprocess","CifFile","yaml","requests","networkx","PIL","dateutil","pytz",
-               "pywt","skimage"]
+               "skimage"]
 directories.each do |directory|
   module_dir = "#{pip_site_packages}/#{directory}"
   if !File.exist?(module_dir)
