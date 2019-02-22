@@ -76,11 +76,11 @@ class ProjectRecovery(object):
                                "SaveReflCustomAscii", "SaveReflThreeColumnAscii", "SaveReflections",
                                "SaveReflectometryAscii", "SaveSESANS", "SaveSPE", "SaveTBL", "SaveToSNSHistogramNexus",
                                "SaveVTK", "SaveVulcanGSS", "SaveYDA", "SaveZODS"]
-        # To ignore a property you need to first put the algorithm name in the first part of the vector for which you
-        # want to ignore the property for then the property name in the second part of the vector 0 and 1 as indexes
-        # respectively. This uses string representation to pass to the C++ algorithm. The outer delimiter is `,`
+        # If you want to ignore an algorithms' property, then add to the string below in the format:
+        # "AlgorithmName + PropertyName". The final string should look like "a + b , c + d, ...".
+        # This uses string representation to pass to the C++ algorithm. The outer delimiter is `,`
         # and the inner delimiter is `+` for the list of lists. e.g. [[a, b],[c, d]] = "a + b , c + d".
-        self.alg_properties_to_ignore = "StartLiveData + PropertyName"
+        self.alg_properties_to_ignore = "StartLiveData + MonitorLiveData"
 
         # The recovery GUI's presenter is set when needed
         self.recovery_presenter = None
