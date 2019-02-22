@@ -20,8 +20,20 @@ using API::IConfiguredAlgorithm_sptr;
 using AlgorithmRuntimeProps = std::map<std::string, std::string>;
 namespace { // unnamed namespace
 
+std::string removePrefix(std::string const &value, std::string const &prefix) {
+  // Just return the original value if it doesn't contain the prefix
+  if (value.size() <= prefix.size() || value.substr(0, prefix.size()) != prefix)
+    return value;
+
+  return value.substr(prefix.size());
+}
+
 void updateWorkspaceProperties(AlgorithmRuntimeProps &properties,
                                Group const &group) {
+  // There must be more than workspace to stitch
+  if (group.rows().size() < 2)
+    throw std::runtime_error("Must have at least two workspaces for stitching");
+
   // Get the list of input workspaces from the output of each row
   auto workspaces = std::vector<std::string>();
   std::transform(group.rows().cbegin(), group.rows().cend(),
@@ -33,13 +45,12 @@ void updateWorkspaceProperties(AlgorithmRuntimeProps &properties,
 
   // The stitched name is the row output names concatenated but without the
   // individual IvsQ prefixes. Just add one IvsQ prefix at the start.
-  auto const prefix = std::string("IvsQ");
-  auto outputName = prefix;
+  auto outputName = std::string("IvsQ");
+  auto const prefix = std::string("IvsQ_");
+  auto const separator = std::string("_");
   for (auto const &workspace : workspaces) {
-    if (workspace.size() <= prefix.size() + 1)
-      throw std::runtime_error("Unexpected output workspace name format: " +
-                               workspace);
-    outputName += "_" + workspace.substr(prefix.size() + 1);
+    auto name = removePrefix(workspace, prefix);
+    outputName += separator + name;
   }
   AlgorithmProperties::update("OutputWorkspace", outputName, properties);
 }
@@ -57,10 +68,7 @@ IConfiguredAlgorithm_sptr createConfiguredAlgorithm(Batch const &model,
   alg->setChild(true);
 
   // Set the algorithm properties from the model
-  auto properties = AlgorithmRuntimeProps();
-  updateWorkspaceProperties(properties, group);
-  AlgorithmProperties::updateFromMap(properties,
-                                     model.experiment().stitchParameters());
+  auto properties = createAlgorithmRuntimeProps(model, group);
 
   // Store expected output property name
   std::vector<std::string> outputWorkspaceProperties = {"OutputWorkspace"};
@@ -69,6 +77,15 @@ IConfiguredAlgorithm_sptr createConfiguredAlgorithm(Batch const &model,
   auto jobAlgorithm = boost::make_shared<BatchJobAlgorithm>(
       alg, properties, outputWorkspaceProperties, &group);
   return jobAlgorithm;
+}
+
+AlgorithmRuntimeProps createAlgorithmRuntimeProps(Batch const &model,
+                                                  Group const &group) {
+  auto properties = AlgorithmRuntimeProps();
+  updateWorkspaceProperties(properties, group);
+  AlgorithmProperties::updateFromMap(properties,
+                                     model.experiment().stitchParameters());
+  return properties;
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt
