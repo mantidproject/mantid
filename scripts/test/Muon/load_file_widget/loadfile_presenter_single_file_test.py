@@ -85,7 +85,6 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
         self.view.warning_popup = mock.Mock()
 
         self.presenter = BrowseFileWidgetPresenter(self.view, self.model)
-        self.presenter.enable_multiple_files(False)
 
         patcher = mock.patch('Muon.GUI.Common.load_file_widget.model.load_utils')
         self.addCleanup(patcher.stop)
@@ -163,61 +162,6 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
         self.load_utils_patcher.load_workspace_from_filename.assert_called_once_with("file.nxs")
         self.assertEqual(self.view.disable_load_buttons.call_count, 1)
         self.assertEqual(self.view.enable_load_buttons.call_count, 1)
-
-    @run_test_with_and_without_threading
-    def test_files_not_loaded_into_model_if_multiple_files_selected_from_browse_in_single_file_mode(self):
-        workspace_1 = self.create_fake_workspace(1)
-        workspace_2 = self.create_fake_workspace(2)
-        self.mock_model_to_load_workspaces([workspace_1, workspace_2], [1234, 1235], ["C:/dir1/file1.nxs", "C:/dir2/file2.nxs"])
-        self.mock_browse_button_to_return_files(["C:/dir1/file1.nxs", "C:/dir2/file2.nxs"])
-        self.model.execute = mock.Mock()
-
-        self.presenter.on_browse_button_clicked()
-        self.wait_for_thread(self.presenter._load_thread)
-
-        self.assertEqual(self.model.execute.call_count, 0)
-        self.assertEqual(self.view.disable_load_buttons.call_count, 0)
-        self.assertEqual(self.view.enable_load_buttons.call_count, 0)
-
-    @run_test_with_and_without_threading
-    def test_files_not_loaded_into_model_if_multiple_files_entered_by_user_in_single_file_mode(self):
-        workspace_1 = self.create_fake_workspace(1)
-        workspace_2 = self.create_fake_workspace(2)
-        self.mock_user_input_text("C:/dir1/file1.nxs;C:/dir2/file2.nxs")
-        self.mock_model_to_load_workspaces([workspace_1, workspace_2], [1234, 1235], ["C:/dir1/file1.nxs", "C:/dir2/file2.nxs"])
-        self.model.execute = mock.Mock()
-
-        self.presenter.handle_file_changed_by_user()
-        self.wait_for_thread(self.presenter._load_thread)
-
-        self.assertEqual(self.model.execute.call_count, 0)
-        self.assertEqual(self.view.disable_load_buttons.call_count, 0)
-        self.assertEqual(self.view.enable_load_buttons.call_count, 0)
-
-    @run_test_with_and_without_threading
-    def test_warning_shown_if_multiple_files_selected_from_browse_in_single_file_mode(self):
-        workspace_1 = self.create_fake_workspace(1)
-        workspace_2 = self.create_fake_workspace(2)
-        self.mock_browse_button_to_return_files(["C:/dir1/file1.nxs", "C:/dir2/file2.nxs"])
-        self.mock_model_to_load_workspaces([workspace_1, workspace_2], [1234, 1235], ["C:/dir1/file1.nxs", "C:/dir2/file2.nxs"])
-
-        self.presenter.on_browse_button_clicked()
-        self.wait_for_thread(self.presenter._load_thread)
-
-        self.assertEqual(self.view.warning_popup.call_count, 1)
-
-    @run_test_with_and_without_threading
-    def test_warning_shown_if_multiple_files_entered_by_user_in_single_file_mode(self):
-        workspace_1 = self.create_fake_workspace(1)
-        workspace_2 = self.create_fake_workspace(2)
-
-        self.mock_user_input_text("C:/dir1/file1.nxs;C:/dir2/file2.nxs")
-        self.mock_model_to_load_workspaces([workspace_1, workspace_2], [1234, 1235], ["C:/dir1/file1.nxs;C:/dir2/file2.nxs"])
-
-        self.presenter.handle_file_changed_by_user()
-        self.wait_for_thread(self.presenter._load_thread)
-
-        self.assertEqual(self.view.warning_popup.call_count, 1)
 
     @run_test_with_and_without_threading
     def test_single_file_from_browse_loaded_into_model_and_view_in_single_file_mode(self):

@@ -83,8 +83,10 @@ public:
 
     TS_ASSERT_EQUALS(A.startPoint(), V3D(-5.0, -5.0, 0.0));
     TS_ASSERT_EQUALS(A.direction(), V3D(1.0, 0.0, 0.0));
-    A.addPoint(1, V3D(-5.0, -2.0, 0.0), shape); // Entry at -5,-2,0
-    A.addPoint(-1, V3D(-5.0, 2.0, 0.0), shape); // Exit point at -5,2,0
+    A.addPoint(TrackDirection::ENTERING, V3D(-5.0, -2.0, 0.0),
+               shape); // Entry at -5,-2,0
+    A.addPoint(TrackDirection::LEAVING, V3D(-5.0, 2.0, 0.0),
+               shape); // Exit point at -5,2,0
     A.buildLink();
     // Check track length
     int index = 0;

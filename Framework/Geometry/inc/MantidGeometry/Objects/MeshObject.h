@@ -13,6 +13,7 @@
 #include "BoundingBox.h"
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Objects/IObject.h"
+#include "MantidGeometry/Objects/Track.h"
 #include "MantidGeometry/Rendering/ShapeInfo.h"
 #include "MantidKernel/Material.h"
 #include <map>
@@ -141,9 +142,10 @@ public:
 private:
   void initialize();
   /// Get intersections
-  void getIntersections(const Kernel::V3D &start, const Kernel::V3D &direction,
-                        std::vector<Kernel::V3D> &intersectionPoints,
-                        std::vector<int> &entryExitFlags) const;
+  void getIntersections(
+      const Kernel::V3D &start, const Kernel::V3D &direction,
+      std::vector<Kernel::V3D> &intersectionPoints,
+      std::vector<Mantid::Geometry::TrackDirection> &entryExitFlags) const;
 
   /// Get triangle
   bool getTriangle(const size_t index, Kernel::V3D &v1, Kernel::V3D &v2,

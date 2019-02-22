@@ -5,27 +5,29 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/Exception.h"
-#include "MantidKernel/Strings.h"
 #include "MantidKernel/PropertyHistory.h"
+#include "MantidKernel/Strings.h"
+
+#include <json/value.h>
 
 namespace Mantid {
 namespace API {
 
 /** Constructor.
-*  Sets the property and workspace names but initializes the workspace pointer
-* to null.
-*  @param name :: The name to assign to the property
-*  @param wsName :: The name of the workspace
-*  @param direction :: Whether this is a Direction::Input, Direction::Output
-* or Direction::InOut (Input & Output) workspace
-*  @param validator :: The (optional) validator to use for this property
-*  @throw std::out_of_range if the direction argument is not a member of the
-* Direction enum (i.e. 0-2)
-*/
+ *  Sets the property and workspace names but initializes the workspace pointer
+ * to null.
+ *  @param name :: The name to assign to the property
+ *  @param wsName :: The name of the workspace
+ *  @param direction :: Whether this is a Direction::Input, Direction::Output
+ * or Direction::InOut (Input & Output) workspace
+ *  @param validator :: The (optional) validator to use for this property
+ *  @throw std::out_of_range if the direction argument is not a member of the
+ * Direction enum (i.e. 0-2)
+ */
 template <typename TYPE>
 WorkspaceProperty<TYPE>::WorkspaceProperty(const std::string &name,
                                            const std::string &wsName,
@@ -37,17 +39,17 @@ WorkspaceProperty<TYPE>::WorkspaceProperty(const std::string &name,
       m_optional(PropertyMode::Mandatory), m_locking(LockMode::Lock) {}
 
 /** Constructor.
-*  Sets the property and workspace names but initializes the workspace pointer
-* to null.
-*  @param name :: The name to assign to the property
-*  @param wsName :: The name of the workspace
-*  @param direction :: Whether this is a Direction::Input, Direction::Output
-* or Direction::InOut (Input & Output) workspace
-*  @param optional :: If true then the property is optional
-*  @param validator :: The (optional) validator to use for this property
-*  @throw std::out_of_range if the direction argument is not a member of the
-* Direction enum (i.e. 0-2)
-*/
+ *  Sets the property and workspace names but initializes the workspace pointer
+ * to null.
+ *  @param name :: The name to assign to the property
+ *  @param wsName :: The name of the workspace
+ *  @param direction :: Whether this is a Direction::Input, Direction::Output
+ * or Direction::InOut (Input & Output) workspace
+ *  @param optional :: If true then the property is optional
+ *  @param validator :: The (optional) validator to use for this property
+ *  @throw std::out_of_range if the direction argument is not a member of the
+ * Direction enum (i.e. 0-2)
+ */
 template <typename TYPE>
 WorkspaceProperty<TYPE>::WorkspaceProperty(const std::string &name,
                                            const std::string &wsName,
@@ -60,21 +62,21 @@ WorkspaceProperty<TYPE>::WorkspaceProperty(const std::string &name,
       m_locking(LockMode::Lock) {}
 
 /** Constructor.
-*  Sets the property and workspace names but initializes the workspace pointer
-* to null.
-*  @param name :: The name to assign to the property
-*  @param wsName :: The name of the workspace
-*  @param direction :: Whether this is a Direction::Input, Direction::Output
-* or Direction::InOut (Input & Output) workspace
-*  @param optional :: A boolean indicating whether the property is mandatory
-* or not. Only matters
-*                     for input properties
-*  @param locking :: A boolean indicating whether the workspace should read or
-*                    write-locked when an algorithm begins. Default=true.
-*  @param validator :: The (optional) validator to use for this property
-*  @throw std::out_of_range if the direction argument is not a member of the
-* Direction enum (i.e. 0-2)
-*/
+ *  Sets the property and workspace names but initializes the workspace pointer
+ * to null.
+ *  @param name :: The name to assign to the property
+ *  @param wsName :: The name of the workspace
+ *  @param direction :: Whether this is a Direction::Input, Direction::Output
+ * or Direction::InOut (Input & Output) workspace
+ *  @param optional :: A boolean indicating whether the property is mandatory
+ * or not. Only matters
+ *                     for input properties
+ *  @param locking :: A boolean indicating whether the workspace should read or
+ *                    write-locked when an algorithm begins. Default=true.
+ *  @param validator :: The (optional) validator to use for this property
+ *  @throw std::out_of_range if the direction argument is not a member of the
+ * Direction enum (i.e. 0-2)
+ */
 template <typename TYPE>
 WorkspaceProperty<TYPE>::WorkspaceProperty(const std::string &name,
                                            const std::string &wsName,
@@ -140,10 +142,18 @@ WorkspaceProperty<TYPE> *WorkspaceProperty<TYPE>::clone() const {
 }
 
 /** Get the name of the workspace
-*  @return The workspace's name
-*/
+ *  @return The workspace's name
+ */
 template <typename TYPE> std::string WorkspaceProperty<TYPE>::value() const {
   return m_workspaceName;
+}
+
+/**
+ * @returns The name of the workspace encode as a Json::Value
+ */
+template <typename TYPE>
+Json::Value WorkspaceProperty<TYPE>::valueAsJson() const {
+  return Json::Value(value());
 }
 
 /** Returns true if the workspace is in the ADS or there is none.
@@ -155,18 +165,19 @@ bool WorkspaceProperty<TYPE>::isValueSerializable() const {
 }
 
 /** Get the value the property was initialised with -its default value
-*  @return The default value
-*/
+ *  @return The default value
+ */
 template <typename TYPE>
 std::string WorkspaceProperty<TYPE>::getDefault() const {
   return m_initialWSName;
 }
 
 /** Set the name of the workspace.
-*  Also tries to retrieve it from the AnalysisDataService.
-*  @param value :: The new name for the workspace
-*  @return
-*/
+ * Also tries to retrieve it from the AnalysisDataService.
+ * @param value :: The new name for the workspace
+ * @return An empty string indicating success otherwise a string containing the
+ * error
+ */
 template <typename TYPE>
 std::string WorkspaceProperty<TYPE>::setValue(const std::string &value) {
   m_workspaceName = value;
@@ -175,6 +186,23 @@ std::string WorkspaceProperty<TYPE>::setValue(const std::string &value) {
   }
   retrieveWorkspaceFromADS();
   return isValid();
+}
+
+/**
+ * Set the name of the workspace from a Json::Value object
+ * Also tries to retrieve it from the AnalysisDataService.
+ * @param value :: The new name for the workspace
+ * @return An empty string indicating success otherwise a string containing the
+ * error
+ */
+template <typename TYPE>
+std::string
+WorkspaceProperty<TYPE>::setValueFromJson(const Json::Value &value) {
+  try {
+    return setValue(value.asString());
+  } catch (std::exception &exc) {
+    return exc.what();
+  }
 }
 
 /** Set a value from a data item
@@ -198,12 +226,12 @@ std::string WorkspaceProperty<TYPE>::setDataItem(
 }
 
 /** Checks whether the entered workspace is valid.
-*  To be valid, in addition to satisfying the conditions of any validators,
-*  an output property must not have an empty name and an input one must point
-* to
-*  a workspace of the correct type.
-*  @returns A user level description of the problem or "" if it is valid.
-*/
+ *  To be valid, in addition to satisfying the conditions of any validators,
+ *  an output property must not have an empty name and an input one must point
+ * to
+ *  a workspace of the correct type.
+ *  @returns A user level description of the problem or "" if it is valid.
+ */
 template <typename TYPE> std::string WorkspaceProperty<TYPE>::isValid() const {
   // start with the no error condition
   std::string error;
@@ -264,9 +292,9 @@ template <typename TYPE> std::string WorkspaceProperty<TYPE>::isValid() const {
 }
 
 /** Indicates if the object is still pointing to the same workspace
-*  @return true if the value is the same as the initial value or false
-* otherwise
-*/
+ *  @return true if the value is the same as the initial value or false
+ * otherwise
+ */
 template <typename TYPE> bool WorkspaceProperty<TYPE>::isDefault() const {
   if (m_initialWSName.empty()) {
     return m_workspaceName.empty() && !this->m_value;
@@ -338,9 +366,9 @@ const Kernel::PropertyHistory WorkspaceProperty<TYPE>::createHistory() const {
 }
 
 /** If this is an output workspace, store it into the AnalysisDataService
-*  @return True if the workspace is an output workspace and has been stored
-*  @throw std::runtime_error if unable to store the workspace successfully
-*/
+ *  @return True if the workspace is an output workspace and has been stored
+ *  @throw std::runtime_error if unable to store the workspace successfully
+ */
 template <typename TYPE> bool WorkspaceProperty<TYPE>::store() {
   bool result = false;
   if (!this->operator()() && isOptional())
@@ -376,10 +404,10 @@ void WorkspaceProperty<TYPE>::setIsMasterRank(bool isMasterRank) {
 }
 
 /** Checks whether the entered workspace group is valid.
-*  To be valid *all* members of the group have to be valid.
-*  @param wsGroup :: the WorkspaceGroup of which to check the validity
-*  @returns A user level description of the problem or "" if it is valid.
-*/
+ *  To be valid *all* members of the group have to be valid.
+ *  @param wsGroup :: the WorkspaceGroup of which to check the validity
+ *  @returns A user level description of the problem or "" if it is valid.
+ */
 template <typename TYPE>
 std::string WorkspaceProperty<TYPE>::isValidGroup(
     boost::shared_ptr<WorkspaceGroup> wsGroup) const {
@@ -395,9 +423,10 @@ std::string WorkspaceProperty<TYPE>::isValidGroup(
 
     // Table Workspaces are ignored
     if ("TableWorkspace" == memberWs->id()) {
-      error = "Workspace " + memberWsName + " is of type TableWorkspace and "
-                                            "will therefore be ignored as "
-                                            "part of the GroupedWorkspace.";
+      error = "Workspace " + memberWsName +
+              " is of type TableWorkspace and "
+              "will therefore be ignored as "
+              "part of the GroupedWorkspace.";
 
       g_log.debug() << error << '\n';
     } else {
@@ -427,10 +456,10 @@ std::string WorkspaceProperty<TYPE>::isValidGroup(
 }
 
 /** Checks whether the entered output workspace is valid.
-*  To be valid the only thing it needs is a name that is allowed by the ADS,
-* @see AnalysisDataServiceImpl
-*  @returns A user level description of the problem or "" if it is valid.
-*/
+ *  To be valid the only thing it needs is a name that is allowed by the ADS,
+ * @see AnalysisDataServiceImpl
+ *  @returns A user level description of the problem or "" if it is valid.
+ */
 template <typename TYPE>
 std::string WorkspaceProperty<TYPE>::isValidOutputWs() const {
   std::string error;
@@ -448,10 +477,10 @@ std::string WorkspaceProperty<TYPE>::isValidOutputWs() const {
 }
 
 /** Checks whether the entered workspace (that by this point we've found is
-* not in the ADS)
-*  is actually an optional workspace and so still valid.
-*  @returns A user level description of the problem or "" if it is valid.
-*/
+ * not in the ADS)
+ *  is actually an optional workspace and so still valid.
+ *  @returns A user level description of the problem or "" if it is valid.
+ */
 template <typename TYPE>
 std::string WorkspaceProperty<TYPE>::isOptionalWs() const {
   std::string error;
@@ -477,8 +506,8 @@ template <typename TYPE> void WorkspaceProperty<TYPE>::clear() {
 }
 
 /** Attempts to retreive the data from the ADS
-*  if the data is not foung the internal pointer is set to null.
-*/
+ *  if the data is not foung the internal pointer is set to null.
+ */
 template <typename TYPE>
 void WorkspaceProperty<TYPE>::retrieveWorkspaceFromADS() {
   // Try and get the workspace from the ADS, but don't worry if we can't

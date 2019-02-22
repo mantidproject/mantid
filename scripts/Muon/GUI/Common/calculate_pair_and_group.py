@@ -27,6 +27,16 @@ def calculate_pair_data(context, pair_name, run):
     return pair_data
 
 
+def estimate_group_asymmetry_data(context, group_name, run):
+    processed_data = _run_pre_processing(context, run)
+
+    params = _get_MuonGroupingAsymmetry_parameters(context, group_name, run)
+    params["InputWorkspace"] = processed_data
+    group_asymmetry = algorithm_utils.run_MuonGroupingAsymmetry(params)
+
+    return group_asymmetry
+
+
 def _run_pre_processing(context, run):
     params = _get_pre_processing_params(context, run)
     params["InputWorkspace"] = context.loaded_workspace_as_group(run)
@@ -36,6 +46,7 @@ def _run_pre_processing(context, run):
 
 def _get_pre_processing_params(context, run):
     pre_process_params = {}
+
     try:
         if context.gui_variables['FirstGoodDataFromFile']:
             time_min = context.loaded_data(run)["FirstGoodData"]
@@ -46,17 +57,17 @@ def _get_pre_processing_params(context, run):
         pass
 
     try:
-        rebin_args = context.gui_variables["Rebin"]
-        pre_process_params["RebinArgs"] = rebin_args
+        if context.gui_variables['TimeZeroFromFile']:
+            time_offset = 0.0
+        else:
+            time_offset = context.loaded_data(run)["TimeZero"] - context.gui_variables['TimeZero']
+        pre_process_params["TimeOffset"] = time_offset
     except KeyError:
         pass
 
     try:
-        if context.gui_variables['TimeZeroFromFile']:
-            time_offset = context.loaded_data(run)["TimeZero"]
-        else:
-            time_offset = context.gui_variables['TimeZero']
-        pre_process_params["TimeOffset"] = time_offset
+        rebin_args = context.gui_variables["Rebin"]
+        pre_process_params["RebinArgs"] = rebin_args
     except KeyError:
         pass
 
@@ -78,6 +89,37 @@ def _get_pre_processing_params(context, run):
 
 def _get_MuonGroupingCounts_parameters(context, group_name, run):
     params = {}
+    try:
+        summed_periods = context.loaded_data(run)["SummedPeriods"]
+        params["SummedPeriods"] = summed_periods
+    except KeyError:
+        params["SummedPeriods"] = "1"
+
+    try:
+        subtracted_periods = context.loaded_data(run)["SubtractedPeriods"]
+        params["SubtractedPeriods"] = subtracted_periods
+    except KeyError:
+        params["SubtractedPeriods"] = ""
+
+    group = context._groups.get(group_name, None)
+    if group:
+        params["GroupName"] = group_name
+        params["Grouping"] = ",".join([str(i) for i in group.detectors])
+
+    return params
+
+
+def _get_MuonGroupingAsymmetry_parameters(context, group_name, run):
+    params = {}
+
+    if 'GroupRangeMin' in context.gui_variables:
+        params['AsymmetryTimeMin'] = context.gui_variables['GroupRangeMin']
+    else:
+        params['AsymmetryTimeMin'] = context.loaded_data(run)["FirstGoodData"]
+
+    if 'GroupRangeMax' in context.gui_variables:
+        params['AsymmetryTimeMax'] = context.gui_variables['GroupRangeMax']
+
     try:
         summed_periods = context.loaded_data(run)["SummedPeriods"]
         params["SummedPeriods"] = summed_periods

@@ -8,6 +8,7 @@
 
 #include "MantidGeometry/Objects/Rules.h"
 #include "MantidGeometry/Objects/Track.h"
+#include "MantidGeometry/RandomPoint.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidGeometry/Rendering/ShapeInfo.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheReader.h"
@@ -39,12 +40,11 @@
 #include <random>
 #include <stack>
 
+using namespace Mantid::Geometry;
+using namespace Mantid::Kernel;
+
 namespace Mantid {
 namespace Geometry {
-
-using Kernel::Material;
-using Kernel::Quat;
-using Kernel::V3D;
 
 /**
  *  Default constuctor
@@ -774,8 +774,9 @@ int CSGObject::interceptSurface(Geometry::Track &UT) const {
     if (*ditr > 0.0) // only interested in forward going points
     {
       // Is the point and enterance/exit Point
-      const int flag = calcValidType(*iitr, UT.direction());
-      UT.addPoint(flag, *iitr, *this);
+      const TrackDirection flag = calcValidType(*iitr, UT.direction());
+      if (flag != TrackDirection::INVALID)
+        UT.addPoint(flag, *iitr, *this);
     }
   }
   UT.buildLink();
@@ -791,16 +792,17 @@ int CSGObject::interceptSurface(Geometry::Track &UT) const {
  * @retval 1 :: Entry point
  * @retval -1 :: Exit Point
  */
-int CSGObject::calcValidType(const Kernel::V3D &point,
-                             const Kernel::V3D &uVec) const {
+TrackDirection CSGObject::calcValidType(const Kernel::V3D &point,
+                                        const Kernel::V3D &uVec) const {
   const Kernel::V3D shift(uVec * Kernel::Tolerance * 25.0);
   const Kernel::V3D testA(point - shift);
   const Kernel::V3D testB(point + shift);
   const int flagA = isValid(testA);
   const int flagB = isValid(testB);
   if (!(flagA ^ flagB))
-    return 0;
-  return (flagA) ? -1 : 1;
+    return Geometry::TrackDirection::INVALID;
+  return (flagA) ? Geometry::TrackDirection::LEAVING
+                 : Geometry::TrackDirection::ENTERING;
 }
 
 /**
@@ -1984,7 +1986,9 @@ int CSGObject::getPointInObject(Kernel::V3D &point) const {
 }
 
 /**
- * Generate a random point within the object. The method simply generates a
+ * Generate a random point within the object.
+ * For certain simple shapes, the point is generated directly inside the
+ * shape. In the general case, the method simply generates a
  * point within the bounding box and tests if this is a valid point within
  * the object: if so the point is return otherwise a new point is selected.
  * @param rng  A reference to a PseudoRandomNumberGenerator where
@@ -1992,14 +1996,45 @@ int CSGObject::getPointInObject(Kernel::V3D &point) const {
  * @param maxAttempts The maximum number of attempts at generating a point
  * @return The generated point
  */
-V3D CSGObject::generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
+V3D CSGObject::generatePointInObject(PseudoRandomNumberGenerator &rng,
                                      const size_t maxAttempts) const {
-  const auto &bbox = getBoundingBox();
-  if (bbox.isNull()) {
-    throw std::runtime_error("Object::generatePointInObject() - Invalid "
-                             "bounding box. Cannot generate new point.");
+  V3D point;
+  // If the shape fills its bounding box well enough then the most efficient
+  // way to get the point is just brute force. We'll try that first with
+  // just a few attempts.
+  // Increasing the brute force attemps speeds up the shapes that fill
+  // the bounding box but slows down shapes that leave lots of void
+  // within the box. So there is a sweet spot which depends on the actual
+  // shape, its dimension and orientation.
+  const size_t bruteForceAttempts{
+      std::min(static_cast<size_t>(5), maxAttempts)};
+  boost::optional<V3D> maybePoint{
+      RandomPoint::inGenericShape(*this, rng, bruteForceAttempts)};
+  if (maybePoint) {
+    point = *maybePoint;
+  } else {
+    switch (shape()) {
+    case detail::ShapeInfo::GeometryShape::CUBOID:
+      point = RandomPoint::inCuboid(m_handler->shapeInfo(), rng);
+      break;
+    case detail::ShapeInfo::GeometryShape::CYLINDER:
+      point = RandomPoint::inCylinder(m_handler->shapeInfo(), rng);
+      break;
+    case detail::ShapeInfo::GeometryShape::SPHERE:
+      point = RandomPoint::inSphere(m_handler->shapeInfo(), rng);
+      break;
+    default:
+      maybePoint = RandomPoint::inGenericShape(
+          *this, rng, maxAttempts - bruteForceAttempts);
+      if (!maybePoint) {
+        throw std::runtime_error("Unable to generate point in object after " +
+                                 std::to_string(maxAttempts) + " attempts");
+      }
+      point = *maybePoint;
+      break;
+    }
   }
-  return generatePointInObject(rng, bbox, maxAttempts);
+  return point;
 }
 
 /**
@@ -2015,20 +2050,46 @@ V3D CSGObject::generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
 V3D CSGObject::generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
                                      const BoundingBox &activeRegion,
                                      const size_t maxAttempts) const {
-  size_t attempts(0);
-  while (attempts < maxAttempts) {
-    const double r1 = rng.nextValue();
-    const double r2 = rng.nextValue();
-    const double r3 = rng.nextValue();
-    auto pt = activeRegion.generatePointInside(r1, r2, r3);
-    if (this->isValid(pt))
-      return pt;
-    else
-      ++attempts;
-  };
-  throw std::runtime_error("Object::generatePointInObject() - Unable to "
-                           "generate point in object after " +
-                           std::to_string(maxAttempts) + " attempts");
+  boost::optional<V3D> point{boost::none};
+  // We'll first try brute force. If the shape fills its bounding box
+  // well enough, this should be the fastest method.
+  // Increasing the brute force attemps speeds up the shapes that fill
+  // the bounding box well but slows down shapes that leave lots of void
+  // within the box. So there is a sweet spot which depends on the actual
+  // shape, its dimension and orientation.
+  const size_t bruteForceAttempts{
+      std::min(static_cast<size_t>(5), maxAttempts)};
+  point = RandomPoint::bounded(*this, rng, activeRegion, bruteForceAttempts);
+  if (!point) {
+    detail::ShapeInfo::GeometryShape shape;
+    std::vector<Kernel::V3D> shapeVectors;
+    double radius;
+    double height;
+    GetObjectGeom(shape, shapeVectors, radius, height);
+    switch (shape) {
+    case detail::ShapeInfo::GeometryShape::CUBOID:
+      point = RandomPoint::bounded<RandomPoint::inCuboid>(
+          m_handler->shapeInfo(), rng, activeRegion, maxAttempts);
+      break;
+    case detail::ShapeInfo::GeometryShape::CYLINDER:
+      point = RandomPoint::bounded<RandomPoint::inCylinder>(
+          m_handler->shapeInfo(), rng, activeRegion, maxAttempts);
+      break;
+    case detail::ShapeInfo::GeometryShape::SPHERE:
+      point = RandomPoint::bounded<RandomPoint::inSphere>(
+          m_handler->shapeInfo(), rng, activeRegion, maxAttempts);
+      break;
+    default:
+      point = RandomPoint::bounded(*this, rng, activeRegion,
+                                   maxAttempts - bruteForceAttempts);
+      break;
+    }
+  }
+  if (!point) {
+    throw std::runtime_error("Unable to generate point in object after " +
+                             std::to_string(maxAttempts) + " attempts");
+  }
+  return *point;
 }
 
 /**

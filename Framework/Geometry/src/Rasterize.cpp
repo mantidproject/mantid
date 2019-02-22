@@ -8,6 +8,7 @@
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidGeometry/Objects/Track.h"
+#include <array>
 
 namespace Mantid {
 namespace Geometry {
@@ -23,9 +24,9 @@ void Raster::reserve(size_t numVolumeElements) {
 
 namespace { // anonymous
 
-const V3D X_AXIS{1, 0, 0};
-const V3D Y_AXIS{0, 1, 0};
-const V3D Z_AXIS{0, 0, 1};
+constexpr static V3D X_AXIS{1, 0, 0};
+constexpr static V3D Y_AXIS{0, 1, 0};
+constexpr static V3D Z_AXIS{0, 0, 1};
 
 struct CylinderParameters {
   double radius;
@@ -34,32 +35,13 @@ struct CylinderParameters {
   V3D symmetryaxis;
 };
 
-CylinderParameters getCylinderParameters(const CSGObject &shape) {
-  // fundamental checks for any object
-  if (!shape.hasValidShape())
-    throw std::logic_error("Shape[CSGObject] does not have a valid shape");
-  if (shape.shape() != Geometry::detail::ShapeInfo::GeometryShape::CYLINDER)
-    throw std::logic_error("Shape[CSGObject] is not a cylinder");
-
-  const auto &shapeInfo = shape.shapeInfo();
-
-  CylinderParameters params;
-  params.radius = shapeInfo.radius();
-  params.height = shapeInfo.height();
-
-  const std::vector<V3D> points = shapeInfo.points();
-  params.centerBottomBase = points[0];
-  params.symmetryaxis = points[1];
-
-  return params;
-}
-
 // since cylinders are symmetric around the main axis, choose a random
 // perpendicular to have as the second axis
 V3D createPerpendicular(const V3D &symmetryAxis) {
-  const std::vector<double> scalars = {fabs(symmetryAxis.scalar_prod(X_AXIS)),
-                                       fabs(symmetryAxis.scalar_prod(Y_AXIS)),
-                                       fabs(symmetryAxis.scalar_prod(Z_AXIS))};
+  const std::array<double, 3> scalars = {
+      {fabs(symmetryAxis.scalar_prod(X_AXIS)),
+       fabs(symmetryAxis.scalar_prod(Y_AXIS)),
+       fabs(symmetryAxis.scalar_prod(Z_AXIS))}};
   // check against the cardinal axes
   if (scalars[0] == 0.)
     return symmetryAxis.cross_prod(X_AXIS);
@@ -108,7 +90,9 @@ Raster calculateCylinder(const V3D &beamDirection,
     throw std::logic_error("Failed to convert IObject to CSGObject");
   if (!(csgshape->hasValidShape()))
     throw std::logic_error("Shape[IObject] does not have a valid shape");
-
+  if (csgshape->shape() != detail::ShapeInfo::GeometryShape::CYLINDER) {
+    throw std::invalid_argument("Given shape is not a cylinder.");
+  }
   return calculateCylinder(beamDirection, *csgshape, numSlices, numAnnuli);
 }
 
@@ -125,7 +109,7 @@ Raster calculate(const V3D &beamDirection, const CSGObject &shape,
     throw std::runtime_error("Tried to section shape into zero size elements");
 
   if (shape.shape() == Geometry::detail::ShapeInfo::GeometryShape::CYLINDER) {
-    const auto params = getCylinderParameters(shape);
+    const auto params = shape.shapeInfo().cylinderGeometry();
     const size_t numSlice = std::max<size_t>(
         1, static_cast<size_t>(params.height / cubeSizeInMetre));
     const size_t numAnnuli = std::max<size_t>(
@@ -212,10 +196,9 @@ Raster calculateCylinder(const V3D &beamDirection, const CSGObject &shape,
     throw std::runtime_error("Tried to section cylinder into zero annuli");
 
   // get the geometry for the volume elements
-  auto params = getCylinderParameters(shape);
-  V3D center =
-      (params.symmetryaxis * .5 * params.height) + params.centerBottomBase;
-  params.symmetryaxis.normalize();
+  const auto params = shape.shapeInfo().cylinderGeometry();
+  const V3D center =
+      (params.axis * .5 * params.height) + params.centreOfBottomBase;
 
   const double sliceThickness{params.height / static_cast<double>(numSlices)};
   const double deltaR{params.radius / static_cast<double>(numAnnuli)};
@@ -233,9 +216,10 @@ Raster calculateCylinder(const V3D &beamDirection, const CSGObject &shape,
 
   // Assume that z' = axis. Then select whatever has the smallest dot product
   // with axis to be the x' direction
-  V3D z_prime = params.symmetryaxis; // copy to make code easier to read
-  V3D x_prime = createPerpendicular(z_prime);
-  V3D y_prime = z_prime.cross_prod(x_prime);
+  V3D z_prime = params.axis;
+  z_prime.normalize();
+  const V3D x_prime = createPerpendicular(z_prime);
+  const V3D y_prime = z_prime.cross_prod(x_prime);
 
   // loop over the elements of the shape and create everything
   // loop over slices

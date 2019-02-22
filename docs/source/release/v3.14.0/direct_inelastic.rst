@@ -19,6 +19,7 @@ New Algorithms
 - Added a new algorithm to ILL's reduction workflow: :ref:`DirectILLTubeBackground <algm-DirectILLTubeBackground>` which can be used to calculate the time-independent backgrounds for instruments with PSD detectors such as IN5.
 - The new algorithm :ref:`SofTwoThetaTOF <algm-SofTwoThetaTOF>` can be used to convert a workspace from (spectrum number, TOF) units to (:math:`2\theta`, TOF) averaging the intensities over constant scattering angles.
 - The new algorithm :ref:`MDNorm <algm-MDNorm>` can be used to calculate cross section for single crystal direct inelastic measurements.
+- :ref:`LoadPLN <algm-LoadPLN>` loader for an ANSTO PELICAN event file.
 
 Improvements
 ############
@@ -36,6 +37,7 @@ Improvements
   version of algorithm, `Indexed` provide the new one with better performance and some restrictions
   (see :ref:`ConvertToMD <algm-ConvertToMD>` Notes)
 - :ref:`DirectILLCollectData <algm-DirectILLCollectData>` now automatically disables incident energy calibration and normalises to time instead of monitor counts if the monitor counts are deemed too low.
+- The new property in :ref:`DirectILLReduction <algm-DirectILLReduction>`, ``EnergyRebinning``, allows mixing automatic bin widths with user specified ones when rebinning the energy transfer axis.
 
 
 Bugfixes
@@ -62,7 +64,7 @@ Improvements
 
 - New instrument geometry for CNCS
 - Improved ``Save``-section of the TOFTOF reduction dialog.
-- Behavior of the :ref:`LoadDNSLegacy <algm-LoadDNSLegacy>` for TOF data has been changed: the algorithm does not try to guess elastic channel any more, but asks for the user input.
+- Behavior of the :ref:`LoadDNSLegacy <algm-LoadDNSLegacy>` for TOF data has been changed: the algorithm does not try to guess elastic channel any more, but asks for the user input. Neutron wavelength can optionaly be specified as user input.
 - :ref:`LoadDNSSCD <algm-LoadDNSSCD>` has been improved to be able to load TOF data.
 - :ref:`MDNormDirectSC <algm-MDNormDirectSC>` now can handle merged MD workspaces.
 

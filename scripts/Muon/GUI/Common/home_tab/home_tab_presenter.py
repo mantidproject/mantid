@@ -76,7 +76,6 @@ class HomeTabPresenter(object):
             self.outer = outer
 
         def update(self, observable, arg):
-            self.outer.update_current_data()
             self.outer.update_all_widgets()
             self.outer.show_all_data()
 

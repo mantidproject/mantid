@@ -11,16 +11,20 @@
 
 #include "MantidKernel/Property.h"
 #include "MantidKernel/PropertyHistory.h"
+#include <json/value.h>
 
 using namespace Mantid::Kernel;
 
 // Helper class
 class PropertyHelper : public Property {
 public:
-  PropertyHelper() : Property("Test", typeid(int)) {}
+  PropertyHelper(const std::string &name = "Test")
+      : Property(name, typeid(int)) {}
   PropertyHelper *clone() const override { return new PropertyHelper(*this); }
   std::string value() const override { return "Nothing"; }
+  Json::Value valueAsJson() const override { return Json::Value(); }
   std::string setValue(const std::string &) override { return ""; }
+  std::string setValueFromJson(const Json::Value &) override { return ""; }
   std::string setValueFromProperty(const Property &) override { return ""; }
   std::string setDataItem(const boost::shared_ptr<DataItem>) override {
     return "";
@@ -37,17 +41,18 @@ public:
   static PropertyTest *createSuite() { return new PropertyTest(); }
   static void destroySuite(PropertyTest *suite) { delete suite; }
 
-  PropertyTest() { p = new PropertyHelper; }
-
-  ~PropertyTest() override { delete p; }
+  PropertyTest() { p = std::make_unique<PropertyHelper>(); }
 
   void testName() { TS_ASSERT(!p->name().compare("Test")); }
 
+  void testEmptyNameNotPermitted() {
+    TS_ASSERT_THROWS(PropertyHelper(""), std::invalid_argument);
+  }
+
   void testDocumentation() {
-    Property *pp = new PropertyHelper;
+    auto pp = std::make_unique<PropertyHelper>();
     TS_ASSERT(pp->documentation().empty());
     TS_ASSERT(pp->briefDocumentation().empty());
-    delete pp;
   }
 
   void testType_info() { TS_ASSERT(typeid(int) == *p->type_info()); }
@@ -97,26 +102,24 @@ public:
   }
 
   void testUnits() {
-    Property *p2 = new PropertyHelper;
+    auto p2 = std::make_unique<PropertyHelper>();
     // No unit at first
     TS_ASSERT_EQUALS(p2->units(), "");
     p2->setUnits("furlongs/fortnight");
     TS_ASSERT_EQUALS(p2->units(), "furlongs/fortnight");
-    delete p2;
   }
 
   void testRemember() {
-    Property *p3 = new PropertyHelper;
+    auto p3 = std::make_unique<PropertyHelper>();
     TS_ASSERT(p3->remember());
     p3->setRemember(false);
     TS_ASSERT(!p3->remember());
     p3->setRemember(true);
     TS_ASSERT(p3->remember());
-    delete p3;
   }
 
 private:
-  Property *p;
+  std::unique_ptr<Property> p;
 };
 
 #endif /*PROPERTYTEST_H_*/

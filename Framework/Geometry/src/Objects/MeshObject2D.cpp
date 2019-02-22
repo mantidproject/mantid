@@ -244,7 +244,7 @@ int MeshObject2D::interceptSurface(Geometry::Track &ut) const {
   // fails
   if (t >= 0) {
     Kernel::V3D intersection;
-    int entryExit;
+    TrackDirection entryExit;
     for (size_t i = 0; i < m_vertices.size(); i += 3) {
       if (MeshObjectCommon::rayIntersectsTriangle(
               ut.startPoint(), ut.direction(), m_vertices[i], m_vertices[i + 1],

@@ -4,22 +4,15 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_MERGELOGS_H_
-#define MANTID_DATAHANDLING_MERGELOGS_H_
+#ifndef MANTID_ALGORITHMS_MERGELOGS_H_
+#define MANTID_ALGORITHMS_MERGELOGS_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/Property.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/TimeSeriesProperty.h"
 
 namespace Mantid {
-namespace DataHandling {
+namespace Algorithms {
 
-/** Merge2WorkspaceLogs : TODO: DESCRIPTION
-
-  @date 2011-12-15
-*/
-class DLLExport Merge2WorkspaceLogs : public API::Algorithm {
+class DLLExport MergeLogs : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "MergeLogs"; };
@@ -27,7 +20,6 @@ public:
   const std::string summary() const override {
     return "Merge 2 TimeSeries logs in a given Workspace.";
   }
-
   /// Algorithm's version for identification
   int version() const override { return 1; };
   const std::vector<std::string> seeAlso() const override {
@@ -35,22 +27,17 @@ public:
   }
   /// Algorithm's category for identification
   const std::string category() const override { return "DataHandling\\Logs"; }
+  /// Cross-check properties with each other
+  std::map<std::string, std::string> validateInputs() override;
 
 private:
   void init() override;
-
   void exec() override;
-
-  void mergeLogs(std::string ilogname1, std::string ilogname2,
-                 std::string ologname, bool resetlogvalue, double logvalue1,
-                 double logvalue2);
-
-  Kernel::TimeSeriesProperty<double> *getTimeSeriesLog(std::string logname);
-
-  API::MatrixWorkspace_sptr matrixWS;
+  // Helper to validate TimeSeriesProperty
+  std::string validateTSP(std::string const &propertyName);
 };
 
-} // namespace DataHandling
+} // namespace Algorithms
 } // namespace Mantid
 
-#endif /* MANTID_DATAHANDLING_MERGELOGS_H_ */
+#endif /* MANTID_ALGORITHMS_MERGELOGS_H_ */
