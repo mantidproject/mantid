@@ -165,7 +165,7 @@ class AddRunsPagePresenter(object):
 
     def _get_default_output_directory(self):
         directory = load_property(self.__generic_settings, self.__output_directory_key)
-        if not directory:
+        if directory == "":
             return ConfigService.Instance().getString("defaultsave.directory")
         else:
             return directory
