@@ -345,6 +345,7 @@ class MuonDataContext(object):
 
             self._groups[group_name]._workspace[str(run)] = MuonWorkspaceWrapper(group_workspace)
             self._groups[group_name]._asymmetry_estimate[str(run)] = MuonWorkspaceWrapper(group_asymmetry)
+
             if show:
                 self._groups[group_name].workspace[str(run)].show(directory + name)
                 self._groups[group_name]._asymmetry_estimate[str(run)].show(directory + asym_name)
@@ -361,6 +362,7 @@ class MuonDataContext(object):
             pair_workspace = calculate_pair_data(self, pair_name, run)
 
             self._pairs[pair_name].workspace[str(run)] = MuonWorkspaceWrapper(pair_workspace)
+
             if show:
                 self._pairs[pair_name].workspace[str(run)].show(directory + name)
 
