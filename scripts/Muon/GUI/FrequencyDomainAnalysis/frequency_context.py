@@ -7,6 +7,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 import mantid.simpleapi as mantid
+from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
 
 import Muon.GUI.Common.ADSHandler.workspace_naming as wsName
 
@@ -33,22 +34,12 @@ class FrequencyContext(object):
         return 2
 
     def setUp(self, tmpWS):
-        # get everything from the ADS
-        return
-        self.options = mantid.AnalysisDataService.getObjectNames()
-        self.options = [item.replace(" ", "") for item in self.options]
-        self.N_points = len(tmpWS.readX(0))
-        self.instrument = tmpWS.getInstrument().getName()
-
-        self.runName = self.instrument + str(tmpWS.getRunNumber()).zfill(8)
+        pass
 
     # get methods
     def getNPoints(self):
-        print(self.context.current_runs)
         run_numbers = self.context.current_runs
-        instrument = str(self.context.instrument)
-        ws = [instrument + str(run_number[0]) +
-              "_raw_data" for run_number in run_numbers]
+        ws = [wsName.get_raw_data_workspace_name(self.context, run_list_to_string(run_number)) for run_number in run_numbers]
         for name in ws:
             data = mantid.AnalysisDataService.retrieve(name)
             if self.N_points < len(data.readX(0)):
@@ -89,21 +80,24 @@ class FrequencyContext(object):
     # ignore raw files
     def getWorkspaceNames(self):
         pair_names = list(self.context.pair_names)
+        group_names = list(self.context.group_names)
         run_numbers = self.context.current_runs
         final_options = []
         for run in run_numbers:
             final_options.append(
-                self.context.instrument + str(run[0]) + " (PhaseQuad)")
+                self.context.instrument + run_list_to_string(run) + " (PhaseQuad)")
             for name in pair_names:
                 final_options.append(
                     wsName.get_pair_data_workspace_name(self.context,
                                                         str(name),
-                                                        str(run[0])))
+                                                        run_list_to_string(run)))
+            for group_name in group_names:
+                final_options.append(wsName.get_group_asymmetry_name(self.context, str(group_name), run_list_to_string(run)))
         return final_options
 
     # Get the groups/pairs for active WS
     def getGroupedWorkspaceNames(self):
         run_numbers = self.context.current_runs
         instrument = str(self.context.instrument)
-        runs = [instrument + str(run_number[0]) for run_number in run_numbers]
+        runs = [instrument + run_list_to_string(run_number) for run_number in run_numbers]
         return runs
