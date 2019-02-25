@@ -37,6 +37,7 @@ Improvements
   version of algorithm, `Indexed` provide the new one with better performance and some restrictions
   (see :ref:`ConvertToMD <algm-ConvertToMD>` Notes)
 - :ref:`DirectILLCollectData <algm-DirectILLCollectData>` now automatically disables incident energy calibration and normalises to time instead of monitor counts if the monitor counts are deemed too low.
+- The new property in :ref:`DirectILLReduction <algm-DirectILLReduction>`, ``EnergyRebinning``, allows mixing automatic bin widths with user specified ones when rebinning the energy transfer axis.
 
 
 Bugfixes

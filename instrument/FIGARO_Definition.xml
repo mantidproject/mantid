@@ -29,6 +29,8 @@
        Q-range, up   0.0045 - 0.42 A-1
        Q-range, down 0.0045 - 0.27 A-1
 
+       The workspace index and spectrum numbers start by 0 since spectrum numbers will be visualized and workspaces inidces will be reported.
+
        For more information, please visit
        https://www.ill.eu/instruments-support/instruments-groups/instruments/figaro/characteristics/
        -->
@@ -89,7 +91,7 @@
   <type name="slit3"/>
   <!--DETECTORS-->
   <!--64 tubes form the detector-->
-  <component idfillbyfirst="x" idstart="1" idstepbyrow="1" type="detector">
+  <component idfillbyfirst="x" idstart="0" idstepbyrow="1" type="detector">
     <location x="0.0" y="0.0" z="1.0"/>
   </component>
   <!--PIXEL, EACH PIXEL IS A DETECTOR-->

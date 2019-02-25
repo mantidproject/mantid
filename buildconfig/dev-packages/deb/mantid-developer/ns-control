@@ -3,7 +3,7 @@ Priority: optional
 Standards-Version: 3.9.2
 
 Package: mantid-developer
-Version: 1.3.9
+Version: 1.4.0
 Maintainer: Mantid Project <mantid-tech@mantidproject.org>
 Priority: optional
 Architecture: all
@@ -36,6 +36,7 @@ Depends: git,
   qttools5-dev-tools,
   libqt5webkit5-dev,
   libqt5x11extras5-dev,
+  libqt5opengl5-dev,
   libqt5scintilla2-dev,
   libpython-dev,
   python-setuptools,

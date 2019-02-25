@@ -26,4 +26,6 @@ endforeach()
 
 install ( FILES ${QT5_PLUGIN_DIR}/platforms/qwindows.dll DESTINATION plugins/qt5/platforms )
 install ( FILES ${QT5_PLUGIN_DIR}/sqldrivers/qsqlite.dll DESTINATION plugins/qt5/sqldrivers )
+install ( FILES ${QT5_PLUGIN_DIR}/styles/qwindowsvistastyle.dll DESTINATION plugins/qt5/styles )
+
 install ( FILES ${QT5_INSTALL_PREFIX}/lib/qscintilla2_qt5.dll DESTINATION bin )

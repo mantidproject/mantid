@@ -5,27 +5,29 @@ digraph ReflectometryILLPreprocess {
   subgraph params {
     $param_style
     background        [label="Background options:\nLow/HighAngleBkgOffset\nLow/HighAngleBkgWidth"]
-    beamCentre        [label="BeamCentre"]
-    braggAngle        [label="BraggAngle"]
+    linePosition      [label="LinePosition"]
+    twoTheta          [label="TwoTheta"]
     run               [label="Run"]
-    inputBeamPosition [label="DirectBeamPositionWorkspace"]
+    inputBeamPosition [label="Sample log reduction.line_position"]
+    inputDirect       [label="DirectLineWorkspace"]
     inputWorkspace    [label="InputWorkspace"]
-    fgHWidth          [label="ForegroundHalfWidth"]
-    outBeamPos        [label="OutputBeamPositionWorkspace"]
     output            [label="OutputWorkspace"]
     waterReference    [label="WaterWorkspace"]
   }
 
   subgraph algorithms {
     $algorithm_style
-    toWavelength [label="Convert from TOF\n to wavelength"]
-    extractMonitors [label="ExtractMonitors"]
-    fluxNorm        [label="Divide by duration/\nmonitor counts"]
-    load  [label="Load and merge runs"]
-    addSampleLogs [label="Add foreground info\nto sample logs"]
-    waterNorm [label="Divide by\nwater reference"]
-    slitNorm [label="Divide by\nslit opening area"]
-    subtractBkg [label="Subtract background"]
+    toWavelength          [label="Convert from TOF\n to wavelength"]
+    extractMonitors       [label="ExtractMonitors"]
+    moveDetectors         [label="SpecularReflectionPositionCorrect"]
+    determinePeakPosition [label="FindReflectometryLines"]
+    fluxNorm              [label="Divide by duration/\nmonitor counts"]
+    load                  [label="LoadAndMerge"]
+    addSampleLogs         [label="AddSampleLog"]
+    addSampleLogTwoTheta  [label="AddSampleLog"]
+    waterNorm             [label="Divide by\nwater reference"]
+    slitNorm              [label="Divide by\nslit opening area"]
+    subtractBkg           [label="Subtract background"]
   }
 
   subgraph decisions {
@@ -37,36 +39,26 @@ digraph ReflectometryILLPreprocess {
   whichInput -> inputWorkspace [label="Use workspace"]
   whichInput -> load [label="Read from disk"]
 
-  load -> outBeamPos
-
-  run -> load
-  beamCentre -> load [label="Override beam centre\nfrom loader"]
-  braggAngle -> load [label="Override angles in .nxs"]
-  inputBeamPosition -> load
-
-  load -> extractMonitors
-  inputWorkspace -> extractMonitors
-
-  load -> addSampleLogs [label="Beam centre"]
-  extractMonitors -> addSampleLogs
-  fgHWidth -> addSampleLogs
-
-  addSampleLogs -> waterNorm [label="WaterWorkspace available"]
-  waterReference -> waterNorm [label="Rebin"]
-
-  waterNorm -> isSlitNorm
-
-  addSampleLogs -> isSlitNorm
-
-  isSlitNorm -> slitNorm [label="Slit Normalisation ON"]
-
-  isSlitNorm -> fluxNorm [label="Slit Normalisation OFF"]
-  slitNorm -> fluxNorm
-
-  fluxNorm -> subtractBkg
-  background -> subtractBkg
-
-  subtractBkg -> toWavelength
-
-  toWavelength -> output
+  run                   -> load
+  twoTheta              -> load [label="Override angles in .nxs"]
+  load                  -> extractMonitors
+  inputWorkspace        -> extractMonitors
+  linePosition          -> determinePeakPosition
+  extractMonitors       -> determinePeakPosition
+  inputBeamPosition     -> determinePeakPosition [label="From InputWorkspace"]
+  inputDirect           -> moveDetectors [label="In case of reflected beam calibration"]
+  determinePeakPosition -> moveDetectors
+  twoTheta              -> moveDetectors [label="If user input,\nloader took already care\nof the correct detector position"]
+  moveDetectors         -> addSampleLogs
+  addSampleLogs         -> waterNorm [label="WaterWorkspace available"]
+  waterReference        -> waterNorm [label="Rebin"]
+  waterNorm             -> isSlitNorm
+  moveDetectors         -> isSlitNorm
+  isSlitNorm            -> slitNorm [label="Slit Normalisation ON"]
+  isSlitNorm            -> fluxNorm [label="Slit Normalisation OFF"]
+  slitNorm              -> fluxNorm
+  fluxNorm              -> subtractBkg
+  background            -> subtractBkg
+  subtractBkg           -> toWavelength
+  toWavelength          -> output
 }

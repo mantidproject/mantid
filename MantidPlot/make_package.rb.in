@@ -237,9 +237,13 @@ search_patterns.each do |pattern|
   end
 end
 
-#We'll use macdeployqt to fix qt dependencies.
+# We'll use macdeployqt to fix qt dependencies.
+# Remove the qt5 libraries in the mantidqt package
+#`rm Contents/MacOS/mantidqt/_commonqt5.so`
+#`rm Contents/MacOS/mantidqt/widgets/instrumentview/_instrumentviewqt5.so`
 Qt_Executables = "-executable=Contents/MacOS/mantidqtpython.so -executable=Contents/MacOS/libqwtplot3d.dylib -executable=Contents/MacOS/libqwt.dylib "
-Qt_Executables << "-executable=Contents/MacOS/#{findQScintilla2(lib_dir)}"
+Qt_Executables << "-executable=Contents/MacOS/#{findQScintilla2(lib_dir)} "
+Qt_Executables << "-executable=Contents/MacOS/mantidqt/_commonqt4.so "
 
 if( "@MAKE_VATES@" == "ON" )
   list = ["Contents/Libraries/vtkParaViewWebCorePython.so",
@@ -346,12 +350,21 @@ end
 
 #Copy over python libraries not included with OSX.
 #currently missing epics
+python_exe = `which python`
 system_python_extras = "/System/Library/Frameworks/Python.framework/Versions/2.7/Extras/lib/python"
-pip_site_packages = "/Library/Python/2.7/site-packages"
+homebrew_pip_site_packages = "/usr/local/lib/python2.7/site-packages"
+if python_exe.start_with?("/usr/local")
+  pip_site_packages = homebrew_pip_site_packages
+elsif python_exe.start_with?("/usr/bin")
+  pip_site_packages = "/Library/Python/2.7/site-packages"
+else
+  p "Unknown python distribution at #{python_exe}"
+end
+
 directories = ["sphinx","sphinx_bootstrap_theme","IPython","zmq","pygments","backports", "qtawesome", "qtpy",
                "certifi","tornado","markupsafe","matplotlib","mpl_toolkits", "jinja2","jsonschema","functools32",
                "ptyprocess","CifFile","yaml","requests","networkx","PIL","dateutil","pytz",
-               "pywt","skimage"]
+               "skimage"]
 directories.each do |directory|
   module_dir = "#{pip_site_packages}/#{directory}"
   if !File.exist?(module_dir)
@@ -371,6 +384,13 @@ if !File.exist?(mpltoolkit_init)
   `touch #{mpltoolkit_init}`
 end
 
+files = ["gnureadline.so","cycler.py","readline.py","pyparsing.py","mistune.py","decorator.py","kiwisolver.so","subprocess32.py","six.py"]
+files.each do |file|
+  copyFile("#{pip_site_packages}/#{file}")
+end
+
+# mistune.so isn't present in v0.7
+copyOptionalFile("#{pip_site_packages}/mistune.so")
 
 if( "@MAKE_VATES@" == "ON" )
   addPythonLibrariesInDirectory("#{ParaView_dir}/lib/site-packages","Contents/Python/")
@@ -379,7 +399,7 @@ end
 # ---------------------------------------------
 # H5Py section
 # ---------------------------------------------
-h5py_path = "/usr/local/lib/python2.7/site-packages"
+h5py_path = homebrew_pip_site_packages
 h5py_directories = ["h5py"]
 h5py_directories.each do |directory|
   addPythonLibrary("#{h5py_path}/#{directory}","Contents/MacOS/")
@@ -408,14 +428,6 @@ h5py_patterns.each do |pattern|
     end
   end
 end
-
-files = ["gnureadline.so","cycler.py","readline.py","pyparsing.py","mistune.py","decorator.py","kiwisolver.so","subprocess32.py"]
-files.each do |file|
-  copyFile("#{pip_site_packages}/#{file}")
-end
-
-# mistune.so isn't present in v0.7
-copyOptionalFile("#{pip_site_packages}/mistune.so")
 
 `mkdir Contents/MacOS/bin`
 `cp /usr/local/bin/ipython@PYTHON_VERSION_MAJOR@ Contents/MacOS/bin/`
