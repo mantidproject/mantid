@@ -410,7 +410,7 @@ class MuonDataContext(object):
                 'RebinFixed' in self.gui_variables and self.gui_variables['RebinFixed']) or\
                (self.gui_variables['RebinType'] == 'Variable' and
                 'RebinVariable' in self.gui_variables and self.gui_variables['RebinVariable'])
-    
+
     def add_or_replace_gui_variables(self, **kwargs):
         self._gui_variables.update(kwargs)
         self.gui_variables_notifier.notify_subscribers()

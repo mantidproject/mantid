@@ -2,6 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 
 from PyQt4 import QtGui
 import Muon.GUI.Common.message_box as message_box
+from qtpy import PYQT4
 
 # determine whether the interface is opened from within Mantid or not
 # (outside of Mantid we cannot use the "Manage user directories" functionality)
@@ -11,7 +12,6 @@ try:
 except:
     STANDALONE_EXEC = False
 
-from qtpy import PYQT4
 if PYQT4:
     IN_MANTIDPLOT = False
     try:
