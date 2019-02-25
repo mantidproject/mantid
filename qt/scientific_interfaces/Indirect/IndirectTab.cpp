@@ -476,7 +476,7 @@ void IndirectTab::plotTimeBin(const QStringList &workspaceNames, int binIndex) {
   pyInput += workspaceNames.join("','");
   pyInput += "'], ";
   pyInput += QString::number(binIndex);
-	pyInput += ", error_bars=" + errors + ")\n";
+  pyInput += ", error_bars=" + errors + ")\n";
 
   m_pythonRunner.runPythonCode(pyInput);
 }

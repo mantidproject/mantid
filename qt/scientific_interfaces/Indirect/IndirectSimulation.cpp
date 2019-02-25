@@ -23,8 +23,9 @@ using namespace MantidQt::CustomInterfaces;
 
 IndirectSimulation::IndirectSimulation(QWidget *parent)
     : UserSubWindow(parent),
-      m_settingsPresenter(Mantid::Kernel::make_unique<IDA::IndirectSettingsPresenter>(
-          this, "Indirect Simulation", "")),
+      m_settingsPresenter(
+          Mantid::Kernel::make_unique<IDA::IndirectSettingsPresenter>(
+              this, "Indirect Simulation", "")),
       m_changeObserver(*this, &IndirectSimulation::handleDirectoryChange) {}
 
 IndirectSimulation::~IndirectSimulation() {}
