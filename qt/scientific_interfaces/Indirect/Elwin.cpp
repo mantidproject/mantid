@@ -117,8 +117,8 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 Elwin::Elwin(QWidget *parent)
-    : IndirectDataAnalysisTab(parent), m_elwTree(nullptr),
-      m_nameExtensions({"_red.nxs", "_sqw.nxs"}) {
+    : IndirectDataAnalysisTab(parent),
+      m_nameExtensions({"_red.nxs", "_sqw.nxs"}), m_elwTree(nullptr) {
   m_uiForm.setupUi(parent);
 }
 

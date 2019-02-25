@@ -41,8 +41,8 @@ namespace IDA {
 
 JumpFit::JumpFit(QWidget *parent)
     : IndirectFitAnalysisTab(new JumpFitModel, parent),
-      m_uiForm(new Ui::JumpFit), m_sampleFBExtensions({"_Result.nxs"}),
-      m_sampleWSExtensions({"_Result"}) {
+      m_sampleFBExtensions({"_Result.nxs"}), m_sampleWSExtensions({"_Result"}),
+      m_uiForm(new Ui::JumpFit) {
   m_uiForm->setupUi(parent);
 
   m_jumpFittingModel = dynamic_cast<JumpFitModel *>(fittingModel());

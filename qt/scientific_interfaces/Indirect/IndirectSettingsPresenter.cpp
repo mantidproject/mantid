@@ -16,6 +16,7 @@ IndirectSettingsPresenter::IndirectSettingsPresenter(
     : QObject(nullptr), m_model(std::make_unique<IndirectSettingsModel>(
                             settingsGroup, availableSettings)),
       m_view(std::make_unique<IndirectSettingsView>(parent)) {
+  m_view->setWindowTitle(QString::fromStdString(settingsGroup) + " Settings");
   setUpPresenter();
 }
 

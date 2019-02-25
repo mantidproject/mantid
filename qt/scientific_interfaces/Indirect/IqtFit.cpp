@@ -34,8 +34,9 @@ namespace CustomInterfaces {
 namespace IDA {
 
 IqtFit::IqtFit(QWidget *parent)
-    : IndirectFitAnalysisTab(new IqtFitModel, parent), m_uiForm(new Ui::IqtFit),
-      m_sampleFBExtensions({"_iqt.nxs"}), m_sampleWSExtensions({"_iqt"}) {
+    : IndirectFitAnalysisTab(new IqtFitModel, parent),
+      m_sampleFBExtensions({"_iqt.nxs"}), m_sampleWSExtensions({"_iqt"}),
+      m_uiForm(new Ui::IqtFit) {
   m_uiForm->setupUi(parent);
   m_iqtFittingModel = dynamic_cast<IqtFitModel *>(fittingModel());
 

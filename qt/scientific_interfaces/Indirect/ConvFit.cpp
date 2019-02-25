@@ -37,12 +37,12 @@ namespace IDA {
 
 ConvFit::ConvFit(QWidget *parent)
     : IndirectFitAnalysisTab(new ConvFitModel, parent),
-      m_uiForm(new Ui::ConvFit),
       m_sampleFBExtensions({"_red.nxs", "_sqw.nxs", "_sqw.dave"}),
       m_sampleWSExtensions({"_red", "_sqw"}),
       m_resolutionFBExtensions(
           {"_res.nxs", "_red.nxs", "_sqw.nxs", "_sqw.dave"}),
-      m_resolutionWSExtensions({"_res", "_red", "_sqw"}) {
+      m_resolutionWSExtensions({"_res", "_red", "_sqw"}),
+      m_uiForm(new Ui::ConvFit) {
   m_uiForm->setupUi(parent);
   m_convFittingModel = dynamic_cast<ConvFitModel *>(fittingModel());
 

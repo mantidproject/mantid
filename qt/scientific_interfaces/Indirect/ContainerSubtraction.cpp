@@ -21,11 +21,11 @@ Mantid::Kernel::Logger g_log("ContainerSubtraction");
 namespace MantidQt {
 namespace CustomInterfaces {
 ContainerSubtraction::ContainerSubtraction(QWidget *parent)
-    : CorrectionsTab(parent), m_spectra(0),
+    : CorrectionsTab(parent),
       m_sampleFBExtensions({"_red.nxs", "_sqw.nxs", "_elf.nxs"}),
       m_sampleWSExtensions({"_red", "_sqw", "_elf"}),
       m_containerFBExtensions({"_red.nxs", "_sqw.nxs", "_elf.nxs"}),
-      m_containerWSExtensions({"_red", "_sqw", "_elf"}) {
+      m_containerWSExtensions({"_red", "_sqw", "_elf"}), m_spectra(0) {
   m_uiForm.setupUi(parent);
 
   connect(m_uiForm.dsSample, SIGNAL(dataReady(const QString &)), this,

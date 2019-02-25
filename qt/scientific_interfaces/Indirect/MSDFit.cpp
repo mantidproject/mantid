@@ -29,8 +29,9 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 MSDFit::MSDFit(QWidget *parent)
-    : IndirectFitAnalysisTab(new MSDFitModel, parent), m_uiForm(new Ui::MSDFit),
-      m_sampleFBExtensions({"_eq.nxs"}), m_sampleWSExtensions({"_eq"}) {
+    : IndirectFitAnalysisTab(new MSDFitModel, parent),
+      m_sampleFBExtensions({"_eq.nxs"}), m_sampleWSExtensions({"_eq"}),
+      m_uiForm(new Ui::MSDFit) {
   m_uiForm->setupUi(parent);
 
   m_msdFittingModel = dynamic_cast<MSDFitModel *>(fittingModel());
