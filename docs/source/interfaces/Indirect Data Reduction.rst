@@ -38,6 +38,10 @@ Reflection
 Action Buttons
 ~~~~~~~~~~~~~~
 
+Settings
+  Opens the settings GUI which allows you to change the default facility. It also allows you to turn off 
+  the restriction of input data by name and the plotting of error bars.
+
 ?
   Opens this help page.
 

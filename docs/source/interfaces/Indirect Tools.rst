@@ -16,6 +16,9 @@ other interfaces.
 Action Buttons
 ~~~~~~~~~~~~~~
 
+Settings
+  Opens the settings GUI which allows you to change the default facility.
+
 ?
   Opens this help page.
 

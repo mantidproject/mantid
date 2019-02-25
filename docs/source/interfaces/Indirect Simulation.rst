@@ -16,6 +16,9 @@ This interface contains loaders for data created by various simulation software.
 Action Buttons
 ~~~~~~~~~~~~~~
 
+Settings
+  Opens the settings GUI which allows you to change the default facility.
+
 ?
   Opens this help page.
 
