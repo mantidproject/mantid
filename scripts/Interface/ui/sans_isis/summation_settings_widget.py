@@ -10,7 +10,8 @@ from qtpy import QtWidgets
 from qtpy.QtCore import Signal
 
 from mantidqt.utils.qt import load_ui
-from sans.gui_logic.models.binning_type import BinningType
+from sans.common.enums import BinningType
+#from sans.gui_logic.models.binning_type import BinningType
 
 Ui_SummationSettingsWidget, _ = load_ui(__file__, "summation_settings_widget.ui")
 
@@ -69,8 +70,7 @@ class SummationSettingsWidget(QtWidgets.QWidget, Ui_SummationSettingsWidget):
             return 2
 
     def _handle_binning_type_changed(self, index):
-        binning_type = self._binning_type_index_to_type(index)
-        self.binningTypeChanged.emit(binning_type)
+        self.binningTypeChanged.emit(index)
 
     def _handle_binning_options_line_edit_changed(self):
         # Since the text box is shared we don't
