@@ -10,11 +10,15 @@
 from __future__ import (absolute_import, unicode_literals)
 
 import os
-import sys
+import six
+
 from qtpy.QtCore import Slot, QObject
 
 from mantid.api import AnalysisDataService as ADS
 from mantid.kernel import ConfigService
+
+
+DEFAULT_NUM_CHECKPOINTS = 5
 
 
 class ProjectRecoveryModel(QObject):
@@ -44,8 +48,7 @@ class ProjectRecoveryModel(QObject):
         return total_counted
 
     def get_row(self, checkpoint):
-        # Only check unicode if it's python2
-        if isinstance(checkpoint, str) or (sys.version_info.major < 3 and isinstance(checkpoint, unicode)):
+        if isinstance(checkpoint, six.string_types):
             # Assume if there is a T then it is a checkpoint and it needs to be replaced with a space
             checkpoint = checkpoint.replace("T", " ")
             for index in self.rows:
@@ -144,7 +147,7 @@ class ProjectRecoveryModel(QObject):
             if isinstance(e, KeyboardInterrupt):
                 raise
             # Fail silently and return 5 (the default)
-            return 5
+            return DEFAULT_NUM_CHECKPOINTS
 
     def _fill_row(self, path, checkpoint_name):
         num_of_ws = str(self.find_number_of_workspaces_in_directory(path))

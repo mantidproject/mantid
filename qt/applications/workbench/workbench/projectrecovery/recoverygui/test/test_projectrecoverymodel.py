@@ -18,8 +18,8 @@ import unittest
 from mantid.api import AnalysisDataService as ADS
 from mantid.kernel import ConfigService
 from mantid.simpleapi import CreateSampleWorkspace
-from mantidqt.project.recovery.projectrecovery import ProjectRecovery, NO_OF_CHECKPOINTS_KEY
-from mantidqt.project.recovery.recoverygui.projectrecoverymodel import ProjectRecoveryModel
+from workbench.projectrecovery import ProjectRecovery, NO_OF_CHECKPOINTS_KEY
+from workbench.projectrecovery.recoverygui.projectrecoverymodel import ProjectRecoveryModel
 
 if sys.version_info.major >= 3:
     from unittest import mock
@@ -29,7 +29,7 @@ else:
 
 class ProjectRecoveryModelTest(unittest.TestCase):
     def setUp(self):
-        self.pr = ProjectRecovery(globalfiguremanager=None, window_finder=mock.MagicMock(), multifileinterpreter=None)
+        self.pr = ProjectRecovery(multifileinterpreter=None)
 
         # Make absolutely sure that the workbench-recovery directory is cleared.
         if os.path.exists(self.pr.recovery_directory):
@@ -55,12 +55,13 @@ class ProjectRecoveryModelTest(unittest.TestCase):
         self.pid = os.path.join(directory, "3000000")
         if not os.path.exists(self.pid):
             os.makedirs(self.pid)
-        self.pr.recovery_directory_pid = self.pid
+        self.pr._recovery_directory_pid = self.pid
 
         # Add 5 workspaces
         for ii in range(0, 5):
             CreateSampleWorkspace(OutputWorkspace=str(ii))
 
+        self.pr.saver._spin_off_another_time_thread = mock.MagicMock()
         self.pr.recovery_save()
 
     def test_find_number_of_workspaces_in_directory(self):

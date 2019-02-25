@@ -26,7 +26,7 @@ except ImportError:
     from IPython.qt.inprocess import QtInProcessKernelManager
 
 # local imports
-from mantidqt.utils.asynchronous import SyncWithCallbackTask
+from mantidqt.utils.asynchronous import BlockingAsyncTaskWithCallback
 
 
 class InProcessJupyterConsole(RichJupyterWidget):
@@ -98,7 +98,7 @@ def async_wrapper(orig_run_code, shell_instance):
             args = (code_obj, result)
         else:
             args = (code_obj,)
-        task = SyncWithCallbackTask(target=orig_run_code, args=args, blocking_cb=QApplication.processEvents)
+        task = BlockingAsyncTaskWithCallback(target=orig_run_code, args=args, blocking_cb=QApplication.processEvents)
         return task.start()
 
     return types.MethodType(async_run_code, shell_instance)

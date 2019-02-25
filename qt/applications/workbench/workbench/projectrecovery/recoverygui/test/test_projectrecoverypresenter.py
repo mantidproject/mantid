@@ -12,7 +12,7 @@ from __future__ import (absolute_import, unicode_literals)
 import sys
 import unittest
 
-from mantidqt.project.recovery.recoverygui.projectrecoverypresenter import ProjectRecoveryPresenter
+from workbench.projectrecovery.recoverygui.projectrecoverypresenter import ProjectRecoveryPresenter
 
 if sys.version_info.major >= 3:
     from unittest import mock
@@ -20,10 +20,10 @@ else:
     import mock
 
 
-PATCH_PROJECT_RECOVERY_VIEW = 'mantidqt.project.recovery.recoverygui.projectrecoverypresenter.ProjectRecoveryWidgetView'
-PATCH_PROJECT_RECOVERY_MODEL = 'mantidqt.project.recovery.recoverygui.projectrecoverypresenter.ProjectRecoveryModel'
+PATCH_PROJECT_RECOVERY_VIEW = 'workbench.projectrecovery.recoverygui.projectrecoverypresenter.ProjectRecoveryWidgetView'
+PATCH_PROJECT_RECOVERY_MODEL = 'workbench.projectrecovery.recoverygui.projectrecoverypresenter.ProjectRecoveryModel'
 PATCH_PROJECT_RECOVERY_FAILURE_VIEW = \
-    'mantidqt.project.recovery.recoverygui.projectrecoverypresenter.RecoveryFailureView'
+    'workbench.projectrecovery.recoverygui.projectrecoverypresenter.RecoveryFailureView'
 
 
 def raise_exception():

@@ -22,14 +22,15 @@ class ProjectSaver(object):
         self.project_file_ext = project_file_ext
 
     def save_project(self, directory, workspace_to_save=None, plots_to_save=None, interfaces_to_save=None,
-                     save_workspaces=True):
+                     project_recovery=True):
         """
         The method that will actually save the project and call relevant savers for workspaces, plots, interfaces etc.
         :param directory: String; The directory of the
         :param workspace_to_save: List; of Strings that will have workspace names in it, if None will save all
         :param plots_to_save: List; of matplotlib.figure objects to save to the project file.
         :param interfaces_to_save: List of Lists of Window and Encoder; the interfaces to save and the encoders to use
-        :param save_workspaces: whether or not you want the program to also save the workspaces with the project file
+        :param project_recovery: Bool; If the behaviour of Project Save should be altered to function correctly inside
+        of project recovery
         :return: None; If the method cannot be completed.
         """
         # Check if the directory doesn't exist
@@ -38,12 +39,12 @@ class ProjectSaver(object):
             return
 
         # Check this isn't saving a blank project file
-        if (workspace_to_save is None and plots_to_save is None and interfaces_to_save is None) and save_workspaces:
+        if (workspace_to_save is None and plots_to_save is None and interfaces_to_save is None) and project_recovery:
             logger.warning("Can not save an empty project")
             return
 
         # Save workspaces to that location
-        if save_workspaces:
+        if project_recovery:
             workspace_saver = WorkspaceSaver(directory=directory)
             workspace_saver.save_workspaces(workspaces_to_save=workspace_to_save)
             saved_workspaces = workspace_saver.get_output_list()
@@ -58,7 +59,7 @@ class ProjectSaver(object):
         if interfaces_to_save is None:
             interfaces_to_save = []
 
-        interfaces = self.save_interfaces(directory=directory, interfaces_to_save=interfaces_to_save)
+        interfaces = self._return_interfaces_dicts(directory=directory, interfaces_to_save=interfaces_to_save)
 
         # Pass dicts to Project Writer
         writer = ProjectWriter(workspace_names=saved_workspaces,
@@ -69,7 +70,7 @@ class ProjectSaver(object):
         writer.write_out()
 
     @staticmethod
-    def save_interfaces(directory, interfaces_to_save):
+    def _return_interfaces_dicts(directory, interfaces_to_save):
         interfaces = []
         for interface, encoder in interfaces_to_save:
             # Add to the dictionary encoded data with the key as the first tag in the list on the encoder attributes

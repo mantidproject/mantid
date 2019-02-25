@@ -53,7 +53,7 @@ from mantidqt.widgets.codeeditor.execution import PythonCodeExecution  # noqa
 from mantidqt.utils.qt import (add_actions, create_action, plugins,
                                widget_updates_disabled)  # noqa
 from mantidqt.project.project import Project  # noqa
-from mantidqt.project.recovery.projectrecovery import ProjectRecovery  # noqa
+from workbench.projectrecovery import ProjectRecovery  # noqa
 
 # Pre-application setup
 plugins.setup_library_paths()

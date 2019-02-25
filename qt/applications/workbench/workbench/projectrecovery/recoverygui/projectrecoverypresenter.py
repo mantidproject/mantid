@@ -9,9 +9,9 @@
 
 from __future__ import (absolute_import, unicode_literals)
 
-from mantidqt.project.recovery.recoverygui.projectrecoverymodel import ProjectRecoveryModel
-from mantidqt.project.recovery.recoverygui.projectrecoverywidgetview import ProjectRecoveryWidgetView
-from mantidqt.project.recovery.recoverygui.recoveryfailureview import RecoveryFailureView
+from workbench.projectrecovery.recoverygui.projectrecoverymodel import ProjectRecoveryModel
+from workbench.projectrecovery.recoverygui.projectrecoverywidgetview import ProjectRecoveryWidgetView
+from workbench.projectrecovery.recoverygui.recoveryfailureview import RecoveryFailureView
 
 
 class ProjectRecoveryPresenter(object):

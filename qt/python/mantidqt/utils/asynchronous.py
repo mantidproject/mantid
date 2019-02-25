@@ -68,7 +68,7 @@ class AsyncTask(threading.Thread):
         time.sleep(0.1)
 
 
-class SyncWithCallbackTask(AsyncTask):
+class BlockingAsyncTaskWithCallback(AsyncTask):
     def __init__(self, target, args=(), kwargs=None, success_cb=None, error_cb=None, blocking_cb=None,
                  period_secs=0.05):
         """Run the target in a separate thread and block the calling thread
@@ -84,7 +84,7 @@ class SyncWithCallbackTask(AsyncTask):
         the task is still alive. This will be the minimum time between calls to blocking_cb.
         :returns: An AsyncTaskResult object
         """
-        super(SyncWithCallbackTask, self).__init__(target)
+        super(BlockingAsyncTaskWithCallback, self).__init__(target)
 
         self.period_secs = period_secs
 

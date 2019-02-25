@@ -16,7 +16,7 @@ import unittest
 # 3rdparty imports
 
 # local imports
-from mantidqt.utils.asynchronous import AsyncTask, SyncWithCallbackTask
+from mantidqt.utils.asynchronous import AsyncTask, BlockingAsyncTaskWithCallback
 
 
 class AsyncTaskTest(unittest.TestCase):
@@ -154,7 +154,7 @@ class AsyncTaskTest(unittest.TestCase):
         self.assertRaises(TypeError, AsyncTask, object())
 
 
-class SyncWithCallbackTaskTest(unittest.TestCase):
+class BlockingAsyncTaskWithCallbackTest(unittest.TestCase):
 
     # ---------------------------------------------------------------
     # Success cases
@@ -163,7 +163,7 @@ class SyncWithCallbackTaskTest(unittest.TestCase):
         def foo():
             return 42
 
-        task = SyncWithCallbackTask(foo)
+        task = BlockingAsyncTaskWithCallback(foo)
 
         self.assertEqual(42, task.start())
 
@@ -172,7 +172,7 @@ class SyncWithCallbackTaskTest(unittest.TestCase):
             return 42 + shift
 
         shift = 2
-        task = SyncWithCallbackTask(foo, args=(shift,))
+        task = BlockingAsyncTaskWithCallback(foo, args=(shift,))
 
         self.assertEqual(42 + shift, task.start())
 
@@ -182,7 +182,7 @@ class SyncWithCallbackTaskTest(unittest.TestCase):
 
         scale, shift = 2, 4
 
-        task = SyncWithCallbackTask(foo, args=(scale,), kwargs={'shift': shift})
+        task = BlockingAsyncTaskWithCallback(foo, args=(scale,), kwargs={'shift': shift})
         self.assertEqual(scale * 42 + shift, task.start())
 
     def test_unsuccessful_args_and_kwargs_operation_raises_exception(self):
@@ -190,7 +190,7 @@ class SyncWithCallbackTaskTest(unittest.TestCase):
             raise RuntimeError("Bad operation")
 
         scale, shift = 2, 4
-        task = SyncWithCallbackTask(foo, args=(scale,), kwargs={'shift': shift})
+        task = BlockingAsyncTaskWithCallback(foo, args=(scale,), kwargs={'shift': shift})
         self.assertRaises(RuntimeError, task.start)
 
 

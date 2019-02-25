@@ -10,9 +10,8 @@
 from __future__ import (absolute_import, unicode_literals)
 
 import sys
-from qtpy.QtWidgets import QTableWidgetItem
 
-from mantidqt.project.recovery.recoverygui.recoveryfailureview import RecoveryFailureView
+from workbench.projectrecovery.recoverygui.projectrecoverywidgetview import ProjectRecoveryWidgetView
 from mantidqt.utils.qt.test import GuiTest
 
 if sys.version_info.major >= 3:
@@ -21,10 +20,9 @@ else:
     import mock
 
 
-class RecoveryFailureViewTest(GuiTest):
+class ProjectRecoveryWidgetViewTest(GuiTest):
     def setUp(self):
-        self.prw = RecoveryFailureView(mock.MagicMock())
-
+        self.prw = ProjectRecoveryWidgetView(mock.MagicMock())
         self.prw.ui = mock.MagicMock()
 
     def test_reject(self):
@@ -40,7 +38,7 @@ class RecoveryFailureViewTest(GuiTest):
     def test_change_start_mantid_button(self):
         self.prw.change_start_mantid_button("123")
 
-        self.prw.ui.pushButton_3.setText.assert_called_with("123")
+        self.prw.ui.startmantidButton.setText.assert_called_with("123")
 
     def test_update_progress_bar(self):
         self.prw.update_progress_bar(1)
@@ -50,21 +48,12 @@ class RecoveryFailureViewTest(GuiTest):
     def test_onClickLastCheckpoint(self):
         self.prw.onClickLastCheckpoint()
 
-        self.prw.presenter.recover_last()
+        self.assertEqual(1, self.prw.presenter.recover_last.call_count)
 
-    def test_onClickSelectedCheckpoint(self):
-        self.prw.ui.tableWidget.selectedItems.return_value = \
-            [QTableWidgetItem("1"), QTableWidgetItem("2"), QTableWidgetItem("No")]
-        self.prw.onClickSelectedCheckpoint()
+    def test_onClickOpenLastInScriptWindow(self):
+        self.prw.onClickOpenLastInScriptWindow()
 
-        self.prw.presenter.recover_selected_checkpoint.assert_called_with("1")
-
-    def test_onClickOpenSelectedInScriptWindow(self):
-        self.prw.ui.tableWidget.selectedItems.return_value = \
-            [QTableWidgetItem("1"), QTableWidgetItem("2"), QTableWidgetItem("No")]
-        self.prw.onClickOpenSelectedInScriptWindow()
-
-        self.prw.presenter.open_selected_checkpoint_in_editor.assert_called_with("1")
+        self.assertEqual(1, self.prw.presenter.open_last_in_editor.call_count)
 
     def test_onClickStartMantidNormally(self):
         self.prw.onClickStartMantidNormally()

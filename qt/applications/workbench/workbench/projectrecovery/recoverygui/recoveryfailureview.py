@@ -33,7 +33,7 @@ class RecoveryFailureView(QDialog):
         self._add_data_to_table()
 
     def _add_data_to_table(self):
-        # This table's size was generated for 5 which is the default but will take the
+        # This table's size was generated for 5 which is the default but will take the value given by the presenter
         number_of_rows = self.presenter.get_number_of_checkpoints()
         for ii in range(0, number_of_rows):
             row = self.presenter.get_row(ii)
