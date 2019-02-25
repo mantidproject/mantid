@@ -17,7 +17,7 @@ from glob import glob
 
 import psutil
 
-from mantid.kernel import ConfigService, logger
+from mantid.kernel import ConfigService
 from workbench.projectrecovery.projectrecoveryloader import ProjectRecoveryLoader
 from workbench.projectrecovery.projectrecoverysaver import ProjectRecoverySaver
 
