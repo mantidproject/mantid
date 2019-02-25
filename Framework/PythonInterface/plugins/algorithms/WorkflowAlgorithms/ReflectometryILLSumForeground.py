@@ -79,13 +79,12 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
         sumType = self._sumType()
         if sumType == SumType.IN_LAMBDA:
             ws = self._sumForegroundInLambda(ws)
-            self._addSumTypeToLogs(ws, SumType.IN_LAMBDA)
             if processReflected:
                 ws = self._rebinToDirect(ws)
         else:
             ws = self._divideByDirect(ws)
             ws = self._sumForegroundInQ(ws)
-            self._addSumTypeToLogs(ws, SumType.IN_Q)
+        ws.run().addProperty(common.SampleLogs.SUM_TYPE, sumType, True)
         ws = self._applyWavelengthRange(ws)
 
         self._finalize(ws)
@@ -197,15 +196,6 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
             FirstSlitSizeSampleLog=firstSlitSizeLog,
             SecondSlitName='slit3',
             SecondSlitSizeSampleLog=secondSlitSizeLog,
-            EnableLogging=self._subalgLogging)
-
-    def _addSumTypeToLogs(self, ws, sumType):
-        """Add a sum type entry to sample logs."""
-        AddSampleLog(
-            Workspace=ws,
-            LogName=common.SampleLogs.SUM_TYPE,
-            LogText=sumType,
-            LogType='String',
             EnableLogging=self._subalgLogging)
 
     def _applyWavelengthRange(self, ws):
