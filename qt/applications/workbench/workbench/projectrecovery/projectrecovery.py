@@ -14,7 +14,6 @@ import shutil
 import socket
 import time
 from glob import glob
-from threading import Timer
 
 import psutil
 
@@ -90,18 +89,10 @@ class ProjectRecovery(object):
     ######################################################
 
     def start_recovery_thread(self):
-        if not self.recovery_enabled:
-            logger.debug("Project Recovery: Recovery thread not started as recovery is disabled")
-            return
-
-        if not self.thread_on:
-            self._timer_thread.start()
-            self.thread_on = True
+        self.saver.start_recovery_thread()
 
     def stop_recovery_thread(self):
-        if self._timer_thread is not None:
-            self._timer_thread.cancel()
-            self.thread_on = False
+        self.saver.stop_recovery_thread()
 
     def _remove_empty_folders_from_dir(self, directory):
         folders = glob(os.path.join(directory, "*", ""))

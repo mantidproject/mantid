@@ -161,3 +161,19 @@ class ProjectRecoverySaverTest(unittest.TestCase):
             dictionary = json.load(f)
             self.assertEqual(len(dictionary["interfaces"]), 1)
             self.assertEqual(len(dictionary["workspaces"]), 1)
+
+    def test_start_recovery_thread_if_thread_on_is_false(self):
+        self.pr_saver._timer_thread = mock.MagicMock()
+        self.pr_saver.thread_on = False
+        self.pr_saver.recovery_enabled = True
+
+        self.pr_saver.start_recovery_thread()
+
+        self.assertEqual(self.pr_saver._timer_thread.start.call_count, 1)
+
+    def test_stop_recovery_thread(self):
+        self.pr_saver._timer_thread = mock.MagicMock()
+
+        self.pr_saver.stop_recovery_thread()
+
+        self.assertEqual(self.pr_saver._timer_thread.cancel.call_count, 1)

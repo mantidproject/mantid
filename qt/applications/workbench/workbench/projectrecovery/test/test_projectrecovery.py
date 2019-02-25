@@ -19,7 +19,7 @@ import unittest
 
 from mantid.api import AnalysisDataService as ADS
 from mantid.kernel import ConfigService
-from workbench.projectrecovery import ProjectRecovery, SAVING_TIME_KEY, NO_OF_CHECKPOINTS_KEY, \
+from workbench.projectrecovery.projectrecovery import ProjectRecovery, SAVING_TIME_KEY, NO_OF_CHECKPOINTS_KEY, \
     RECOVERY_ENABLED_KEY
 
 if sys.version_info.major >= 3:
@@ -68,22 +68,6 @@ class ProjectRecoveryTest(unittest.TestCase):
         self.pr.start_recovery_thread()
 
         self.assertEqual(self.pr._timer_thread.start.call_count, 0)
-
-    def test_start_recovery_thread_if_thread_on_is_false(self):
-        self.pr._timer_thread = mock.MagicMock()
-        self.pr.thread_on = False
-        self.pr.recovery_enabled = True
-
-        self.pr.start_recovery_thread()
-
-        self.assertEqual(self.pr._timer_thread.start.call_count, 1)
-
-    def test_stop_recovery_thread(self):
-        self.pr._timer_thread = mock.MagicMock()
-
-        self.pr.stop_recovery_thread()
-
-        self.assertEqual(self.pr._timer_thread.cancel.call_count, 1)
 
     def test_remove_empty_dir(self):
         if not os.path.exists(self.pr.recovery_directory):
