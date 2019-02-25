@@ -12,7 +12,7 @@ from __future__ import absolute_import
 from collections import Counter, namedtuple
 
 import qtpy
-from mock import Mock, patch, call
+from mantid.py3compat.mock import Mock, patch, call
 import unittest
 
 from qtpy.QtCore import Qt

@@ -11,8 +11,7 @@ from __future__ import (absolute_import, division, print_function)
 
 import unittest
 
-from mock import Mock
-
+from mantid.py3compat.mock import Mock
 from mantid.simpleapi import CreateSampleWorkspace
 from mantidqt.utils.testing.mocks.mock_mantid import MockWorkspace
 from mantidqt.widgets.workspacedisplay.matrix.model import MatrixWorkspaceDisplayModel

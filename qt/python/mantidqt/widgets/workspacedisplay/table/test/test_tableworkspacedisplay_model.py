@@ -12,9 +12,8 @@ from __future__ import (absolute_import, division, print_function)
 import functools
 import unittest
 
-from mock import Mock
-
 from mantid.kernel import V3D
+from mantid.py3compat.mock import Mock
 from mantidqt.utils.testing.mocks.mock_mantid import MockWorkspace
 from mantidqt.widgets.workspacedisplay.table.model import TableWorkspaceDisplayModel
 

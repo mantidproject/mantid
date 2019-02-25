@@ -7,7 +7,7 @@
 #  This file is part of the mantid workbench.
 from __future__ import (absolute_import, division, print_function)
 
-from mock import Mock
+from mantid.py3compat.mock import Mock
 
 AXIS_INDEX_FOR_HORIZONTAL = 0
 AXIS_INDEX_FOR_VERTICAL = 1
