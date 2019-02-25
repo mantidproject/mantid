@@ -344,6 +344,7 @@ class MuonDataContext(object):
             group_workspace = calculate_group_data(self, group_name, run, rebin)
             group_asymmetry = estimate_group_asymmetry_data(self, group_name, run, rebin)
             directory = get_base_data_directory(self, run_as_string) + get_group_data_directory(self, run_as_string)
+
             name = get_group_data_workspace_name(self, group_name, run_as_string, rebin)
             asym_name = get_group_asymmetry_name(self, group_name, run_as_string, rebin)
 
