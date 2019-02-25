@@ -11,6 +11,8 @@
 #include "IndirectSettingsModel.h"
 #include "IndirectSettingsView.h"
 
+#include <memory>
+
 #include <QObject>
 #include <QVariant>
 
