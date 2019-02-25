@@ -28,6 +28,7 @@ class MuonDataContextTest(unittest.TestCase):
         self.gui_variable_observer = Observer()
         self.gui_variable_observer.update = mock.MagicMock()
         self.context.gui_variables_notifier.add_subscriber(self.gui_variable_observer)
+        self.context.instrument = 'EMU'
 
         filepath = FileFinder.findRuns('EMU00019489.nxs')[0]
 

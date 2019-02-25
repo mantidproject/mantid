@@ -987,7 +987,7 @@ bool InstrumentWidget::overlay(const QString &wsName) {
   auto mask = boost::dynamic_pointer_cast<IMaskWorkspace>(workspace);
 
   if (!pws && !table && !mask) {
-    QMessageBox::warning(this, "MantidPlot - Warning",
+    QMessageBox::warning(this, "Mantid - Warning",
                          "Work space called '" + wsName +
                              "' is not suitable."
                              " Please select another workspace. ");
@@ -1201,9 +1201,9 @@ void InstrumentWidget::createTabs(QSettings &settings) {
   m_renderTab->loadSettings(settings);
 
   // Pick controls
-  InstrumentWidgetPickTab *pickTab = new InstrumentWidgetPickTab(this);
-  mControlsTab->addTab(pickTab, QString("Pick"));
-  pickTab->loadSettings(settings);
+  m_pickTab = new InstrumentWidgetPickTab(this);
+  mControlsTab->addTab(m_pickTab, QString("Pick"));
+  m_pickTab->loadSettings(settings);
 
   // Mask controls
   m_maskTab = new InstrumentWidgetMaskTab(this);
@@ -1215,14 +1215,14 @@ void InstrumentWidget::createTabs(QSettings &settings) {
   m_maskTab->loadSettings(settings);
 
   // Instrument tree controls
-  InstrumentWidgetTreeTab *treeTab = new InstrumentWidgetTreeTab(this);
-  mControlsTab->addTab(treeTab, QString("Instrument"));
-  treeTab->loadSettings(settings);
+  m_treeTab = new InstrumentWidgetTreeTab(this);
+  mControlsTab->addTab(m_treeTab, QString("Instrument"));
+  m_treeTab->loadSettings(settings);
 
   connect(mControlsTab, SIGNAL(currentChanged(int)), this,
           SLOT(tabChanged(int)));
 
-  m_tabs << m_renderTab << pickTab << m_maskTab << treeTab;
+  m_tabs << m_renderTab << m_pickTab << m_maskTab << m_treeTab;
 }
 
 /**
@@ -1364,7 +1364,7 @@ Workspace_sptr InstrumentWidget::getWorkspaceFromADS(const std::string &name) {
   try {
     workspace = AnalysisDataService::Instance().retrieve(name);
   } catch (std::runtime_error) {
-    QMessageBox::warning(this, "MantidPlot - Warning",
+    QMessageBox::warning(this, "Mantid - Warning",
                          "No workspace called '" +
                              QString::fromStdString(name) + "' found. ");
     return nullptr;
@@ -1381,7 +1381,7 @@ boost::shared_ptr<UnwrappedSurface> InstrumentWidget::getUnwrappedSurface() {
   auto surface = boost::dynamic_pointer_cast<UnwrappedSurface>(getSurface());
   if (!surface) {
     QMessageBox::warning(
-        this, "MantidPlot - Warning",
+        this, "Mantid - Warning",
         "Please change to an unwrapped view to overlay a workspace.");
     return nullptr;
   }

@@ -39,7 +39,15 @@
   <parameter name="reflection" type="string">
     <value val="311" />
   </parameter>
-  
+
+  <!-- Moderator Tzero/LambdaZero Parameters  -->
+  <parameter name="Moderator.TimeZero.Gradient">
+    <value val="11.967"/>
+  </parameter>
+  <parameter name="Moderator.TimeZero.Intercept">
+    <value val="-5.0"/>
+  </parameter>
+
 </component-link>
 
 <component-link name="silicon">

@@ -338,6 +338,7 @@ private:
     alg->setPropertyValue("Instrument", "CNCS");
     alg->setPropertyValue("BinParams", "0,10,100");
     alg->setProperty("OutputWorkspace", wsName);
+    alg->setPropertyValue("UnitX", "Momentum");
     alg->execute();
 
     alg = Mantid::API::AlgorithmManager::Instance().create(
@@ -357,6 +358,8 @@ private:
   void createInputWorkspaceHistogram(const std::string &wsName) {
     auto ws = Mantid::API::WorkspaceFactory::Instance().create("Workspace2D", 4,
                                                                101, 100);
+    auto axis = ws->getAxis(0);
+    axis->setUnit("Momentum");
     auto &x = ws->dataX(0);
     x[0] = 0.0;
     for (auto i = x.begin() + 1; i != x.end(); ++i) {
@@ -376,6 +379,8 @@ private:
   void createInputWorkspaceHistogramNonUniform(const std::string &wsName) {
     auto ws = Mantid::API::WorkspaceFactory::Instance().create("Workspace2D", 4,
                                                                101, 100);
+    auto axis = ws->getAxis(0);
+    axis->setUnit("Momentum");
     auto &x = ws->dataX(0);
     x[0] = 0.0;
     for (auto i = x.begin() + 1; i != x.end(); ++i) {
@@ -396,6 +401,8 @@ private:
   void createInputWorkspaceDistribution(const std::string &wsName) {
     auto ws = Mantid::API::WorkspaceFactory::Instance().create("Workspace2D", 4,
                                                                101, 100);
+    auto axis = ws->getAxis(0);
+    axis->setUnit("Momentum");
     auto &x = ws->dataX(0);
     x[0] = 0.0;
     for (auto i = x.begin() + 1; i != x.end(); ++i) {
@@ -417,6 +424,8 @@ private:
   void createInputWorkspacePointData(const std::string &wsName) {
     auto ws = Mantid::API::WorkspaceFactory::Instance().create("Workspace2D", 4,
                                                                100, 100);
+    auto axis = ws->getAxis(0);
+    axis->setUnit("Momentum");
     auto &x = ws->dataX(0);
     x[0] = 0.0;
     for (auto i = x.begin() + 1; i != x.end(); ++i) {
@@ -436,6 +445,8 @@ private:
   void createInputWorkspacePointDataNonUniform(const std::string &wsName) {
     auto ws = Mantid::API::WorkspaceFactory::Instance().create("Workspace2D", 4,
                                                                100, 100);
+    auto axis = ws->getAxis(0);
+    axis->setUnit("Momentum");
     auto &x = ws->dataX(0);
     x[0] = 0.0;
     for (auto i = x.begin() + 1; i != x.end(); ++i) {

@@ -472,13 +472,21 @@ class InstrumentWidgetView(QtGui.QWidget):
         self.rebin_steps_label.setText("Steps : ")
 
         self.rebin_steps_edit = QtGui.QLineEdit(self)
-        int_validator = QtGui.QIntValidator()
+        int_validator = QtGui.QDoubleValidator()
         self.rebin_steps_edit.setValidator(int_validator)
+        self.rebin_steps_edit.setToolTip('Value to scale current bin width by.')
 
         self.rebin_variable_label = QtGui.QLabel(self)
         self.rebin_variable_label.setText("Bin Boundaries : ")
         self.rebin_variable_edit = QtGui.QLineEdit(self)
-        variable_validator = QtGui.QRegExpValidator(QtCore.QRegExp('^[0-9]+(,[0-9]+)*$'))
+        self.rebin_variable_edit.setToolTip('A comma separated list of first bin boundary, width, last bin boundary.\n'
+                                            'Optionally this can be followed by a comma and more widths and last boundary pairs.\n'
+                                            'Optionally this can also be a single number, which is the bin width.\n'
+                                            'Negative width values indicate logarithmic binning.\n\n'
+                                            'For example:\n'
+                                            '2,-0.035,10: from 2 rebin in Logarithmic bins of 0.035 up to 10;\n'
+                                            '0,100,10000,200,20000: from 0 rebin in steps of 100 to 10,000 then steps of 200 to 20,000')
+        variable_validator = QtGui.QRegExpValidator(QtCore.QRegExp('^(\s*-?\d+(\.\d+)?)(\s*,\s*-?\d+(\.\d+)?)*$'))
         self.rebin_variable_edit.setValidator(variable_validator)
 
         self.horizontal_layout_5 = QtGui.QHBoxLayout()
