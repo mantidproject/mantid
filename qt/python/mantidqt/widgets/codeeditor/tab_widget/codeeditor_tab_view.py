@@ -8,7 +8,8 @@
 from __future__ import absolute_import
 
 from qtpy.QtCore import Qt
-from qtpy.QtWidgets import QAction, QMenu, QPushButton, QSizePolicy, QTabBar, QTabWidget
+from qtpy.QtGui import QColor
+from qtpy.QtWidgets import QAction, QHBoxLayout, QMenu, QPushButton, QSizePolicy, QTabWidget, QWidget
 
 from mantidqt.icons import get_icon
 from mantidqt.utils.qt import add_actions, create_action
@@ -33,17 +34,13 @@ class CodeEditorTabWidget(QTabWidget):
 
         # find the QTabBar inside the QTabWidget to disable drawing the base,
         # which prevents stacking multiple borders between the tabs and the code widget
-        tab_bar = self.findChild(QTabBar, "qt_tabwidget_tabbar")
-        tab_bar.setDrawBase(False)
+        # tab_bar = self.findChild(QTabBar, "qt_tabwidget_tabbar")
+        # tab_bar.setDrawBase(False)
 
         # create a button to add new tabs
         plus_btn = QPushButton(self)
         plus_btn.clicked.connect(parent.plus_button_clicked)
-        # plus_btn.resize(30, plus_btn.height())
-        # plus_btn.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
         plus_btn.setIcon(get_icon("fa.plus"))
-        # plus_btn.setIconSize(QSize(20, 20))
-        # plus_btn.setText("+")
         self.setCornerWidget(plus_btn, Qt.TopLeftCorner)
 
     def setup_tabs_context_menu(self, parent):
@@ -64,15 +61,29 @@ class CodeEditorTabWidget(QTabWidget):
         """
         Setup the actions for the Options menu. These are handled by the MultiFileInterpreter
         """
+        wadget = QWidget(self)
+        hbox = QHBoxLayout(wadget)
+        hbox.setContentsMargins(0, 0, 0, 0)
+        hbox.setSpacing(0)
+        wadget.setLayout(hbox)
+        self.setCornerWidget(wadget, Qt.TopRightCorner)
 
-        options_button = QPushButton(self)
-        self.setCornerWidget(options_button, Qt.TopRightCorner)
+        run_button = QPushButton(wadget)
+        run_button.setIcon(get_icon("fa.play", color=QColor(73, 156, 84)))
+        run_button.clicked.connect(parent.execute_current)
+        hbox.addWidget(run_button)
+
+        abort_button = QPushButton(wadget)
+        abort_button.setIcon(get_icon("fa.square", color=QColor(230, 84, 80)))
+        abort_button.clicked.connect(parent.abort_current)
+        hbox.addWidget(abort_button)
+
+        options_button = QPushButton(wadget)
         options_button.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
-        # options_button.setIcon(get_icon("fa.cog"))
         options_button.setText("Options")
         options_menu = QMenu("", self)
         options_button.setMenu(options_menu)
-        # options_button.resize(40, options_button.height())
+        hbox.addWidget(options_button)
 
         self.tabCloseRequested.connect(parent.close_tab)
 
@@ -126,4 +137,3 @@ class CodeEditorTabWidget(QTabWidget):
 
     def tab_was_clicked(self, tab_index):
         self.last_tab_clicked = tab_index
-        print("Last tab clicked:", self.last_tab_clicked)
