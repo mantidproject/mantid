@@ -74,6 +74,7 @@ class Prop(object):
     LOW_BKG_WIDTH_REFLECTED = 'LowAngleBkgWidthReflected'
     MANUAL_SCALE_FACTORS = 'ManualScaleFactors'
     RB = 'ReflectedRun'
+    SCALE_FACTOR = 'ScaleFactor'
     SLIT_NORM = 'SlitNormalisation'
     START_WS_INDEX = 'FitStartWorkspaceIndex'
     START_OVERLAPS = 'StartOverlaps'
