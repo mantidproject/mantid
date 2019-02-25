@@ -9,23 +9,25 @@
 #
 from __future__ import (absolute_import, unicode_literals)
 
-# std imports
 import ctypes
 import inspect
 import time
 
-# 3rdparty imports
 from qtpy.QtCore import QObject, Signal
 from six import PY2, iteritems
 
-# local imports
-from mantidqt.widgets.codeeditor.inputsplitter import InputSplitter
 from mantidqt.utils.asynchronous import AsyncTask
+from mantidqt.widgets.codeeditor.inputsplitter import InputSplitter
 
 if PY2:
     from inspect import getargspec as getfullargspec
 else:
     from inspect import getfullargspec
+
+
+EMPTY_FILENAME_ID = '<string>'
+FILE_ATTR = '__file__'
+COMPILE_MODE = 'exec'
 
 
 def get_function_spec(func):
@@ -124,7 +126,7 @@ class PythonCodeExecution(QObject):
                                                    ctypes.py_object(KeyboardInterrupt))
         time.sleep(0.1)
 
-    def execute_async(self, code_str, filename=''):
+    def execute_async(self, code_str, filename=None):
         """
         Execute the given code string on a separate thread. This function
         returns as soon as the new thread starts
@@ -150,15 +152,20 @@ class PythonCodeExecution(QObject):
         is used
         :raises: Any error that the code generates
         """
-        filename = '<string>' if filename is None else filename
-        compile(code_str, filename, mode='exec')
+        if filename:
+            self.globals_ns[FILE_ATTR] = filename
+        else:
+            filename = EMPTY_FILENAME_ID
+        compile(code_str, filename, mode=COMPILE_MODE,
+                dont_inherit=True)
 
         sig_progress = self.sig_exec_progress
         for block in code_blocks(code_str):
             sig_progress.emit(block.lineno)
             # compile so we can set the filename
-            code_obj = compile(block.code_str, filename, mode='exec')
-            exec(code_obj, self.globals_ns, self.globals_ns)
+            code_obj = compile(block.code_str, filename, mode=COMPILE_MODE,
+                               dont_inherit=True)
+            exec (code_obj, self.globals_ns, self.globals_ns)
 
     def generate_calltips(self):
         """
@@ -230,4 +237,4 @@ def code_blocks(code_str):
             # consistent each executed block needs to have the statements
             # on the same line as they are in the real code so we prepend
             # blank lines to make this so
-            isp.push('\n'*lineno_cur)
+            isp.push('\n' * lineno_cur)

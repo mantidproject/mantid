@@ -39,6 +39,8 @@ import numpy as np
 """
 # Accepted extensions for drag-and-drop to editor
 ACCEPTED_FILE_EXTENSIONS = ['.py', '.pyw']
+# QSettings key for session tabs
+TAB_SETTINGS_KEY = "Editors/SessionTabs"
 
 
 class MultiFileEditor(PluginWidget):
@@ -58,6 +60,8 @@ class MultiFileEditor(PluginWidget):
         self.setAcceptDrops(True)
 
         # attributes
+        self.tabs_open_on_closing = None
+
         self.run_action = create_action(
             self, "Run",
             on_triggered=self.editors.execute_current,
@@ -66,6 +70,12 @@ class MultiFileEditor(PluginWidget):
 
         self.abort_action = create_action(
             self, "Abort", on_triggered=self.editors.abort_current)
+
+        # menu action to toggle the find/replace dialog
+        self.toggle_find_replace = create_action(self,
+                                                 'Find/Replace...',
+                                                 on_triggered=self.editors.toggle_find_replace_dialog,
+                                                 shortcut='Ctrl+F')
 
         self.toggle_comment_action = create_action(
             self.editors.current_editor(), "Comment/Uncomment",
@@ -88,6 +98,8 @@ class MultiFileEditor(PluginWidget):
         # Store actions for adding to menu bar; None will add a separator
         self.editor_actions = [self.run_action,
                                self.abort_action, None,
+                               self.toggle_find_replace,
+                               None,
                                self.toggle_comment_action,
                                self.toggle_whitespace_action, None,
                                self.tabs_to_spaces_action,
@@ -97,6 +109,10 @@ class MultiFileEditor(PluginWidget):
         '''This is used by MainWindow to execute a file after opening it'''
         return self.editors.execute_current()
 
+    def restore_session_tabs(self, session_tabs):
+        self.open_files_in_new_tabs(session_tabs, startup=True)
+        self.editors.close_tab(0)  # close default empty tab
+
     # ----------- Plugin API --------------------
 
     def app_closing(self):
@@ -104,6 +120,7 @@ class MultiFileEditor(PluginWidget):
         Tries to close all editors
         :return: True if editors can be closed, false if cancelled
         """
+        self.tabs_open_on_closing = self.editors.tab_filepaths
         return self.editors.close_all()
 
     def dragEnterEvent(self, event):
@@ -123,16 +140,20 @@ class MultiFileEditor(PluginWidget):
                     self.open_file_in_new_tab(filepath)
                 except IOError as io_error:
                     logger.warning("Could not load file:\n  '{}'"
-                                   "".format(str(io_error)))
+                                   "".format(io_error))
 
     def get_plugin_title(self):
         return "Editor"
 
-    def readSettings(self, _):
-        pass
+    def readSettings(self, settings):
+        try:
+            prev_session_tabs = settings.get(TAB_SETTINGS_KEY)
+        except KeyError:
+            return
+        self.restore_session_tabs(prev_session_tabs)
 
-    def writeSettings(self, _):
-        pass
+    def writeSettings(self, settings):
+        settings.set(TAB_SETTINGS_KEY, self.tabs_open_on_closing)
 
     def register_plugin(self):
         self.main.add_dockwidget(self)
@@ -141,8 +162,16 @@ class MultiFileEditor(PluginWidget):
 
     # ----------- Plugin Behaviour --------------------
 
-    def open_file_in_new_tab(self, filepath):
-        return self.editors.open_file_in_new_tab(filepath)
+    def open_file_in_new_tab(self, filepath, startup=False):
+        return self.editors.open_file_in_new_tab(filepath, startup)
+
+    def open_files_in_new_tabs(self, filepaths, startup=False):
+        for filepath in filepaths:
+            try:
+                self.open_file_in_new_tab(filepath, startup)
+            except IOError as io_error:
+                logger.warning("Could not load file:\n  {}"
+                               "".format(io_error))
 
     def save_current_file(self):
         self.editors.save_current_file()

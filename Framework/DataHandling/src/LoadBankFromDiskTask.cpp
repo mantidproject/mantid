@@ -9,7 +9,9 @@
 #include "MantidDataHandling/DefaultEventLoader.h"
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataHandling/ProcessBankData.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/make_unique.h"
+#include "MantidNexus/NexusIOHelper.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -85,19 +87,11 @@ void LoadBankFromDiskTask::loadPulseTimes(::NeXus::File &file) {
 std::vector<uint64_t>
 LoadBankFromDiskTask::loadEventIndex(::NeXus::File &file) {
   // Get the event_index (a list of size of # of pulses giving the index in
-  // the event list for that pulse)
-  file.openData("event_index");
-  // Must be uint64
-  std::vector<uint64_t> event_index;
-  if (file.getInfo().type == ::NeXus::UINT64)
-    file.getData(event_index);
-  else {
-    m_loader.alg->getLogger().warning()
-        << "Entry " << entry_name
-        << "'s event_index field is not UINT64! It will be skipped.\n";
-    m_loadError = true;
-  }
-  file.closeData();
+  // the event list for that pulse) as a uint64 vector.
+  // The Nexus standard does not specify if this is to be 32-bit or 64-bit
+  // integers, so we use the NeXusIOHelper to do the conversion on the fly.
+  auto event_index =
+      NeXus::NeXusIOHelper::readNexusVector<uint64_t>(file, "event_index");
 
   // Look for the sign that the bank is empty
   if (event_index.size() == 1) {
@@ -262,10 +256,12 @@ std::unique_ptr<float[]> LoadBankFromDiskTask::loadTof(::NeXus::File &file) {
       Mantid::Kernel::make_unique<float[]>(m_loadSize[0]);
 
   // Get the list of event_time_of_flight's
+  std::string key, tof_unit;
   if (!m_oldNexusFileNames)
-    file.openData("event_time_offset");
+    key = "event_time_offset";
   else
-    file.openData("event_time_of_flight");
+    key = "event_time_of_flight";
+  file.openData(key);
 
   // Check that the required space is there in the file.
   ::NeXus::Info tof_info = file.getInfo();
@@ -278,8 +274,18 @@ std::unique_ptr<float[]> LoadBankFromDiskTask::loadTof(::NeXus::File &file) {
     m_loadError = true;
   }
 
-  file.getSlab(event_time_of_flight.get(), m_loadStart, m_loadSize);
+  // The Nexus standard does not specify if event_time_offset should be float or
+  // integer, so we use the NeXusIOHelper to perform the conversion to float on
+  // the fly. If the data field already contains floats, the conversion is
+  // skipped.
+  auto vec = NeXus::NeXusIOHelper::readNexusSlab<float>(file, key, m_loadStart,
+                                                        m_loadSize);
+  file.getAttr("units", tof_unit);
   file.closeData();
+  // Convert Tof to microseconds
+  Kernel::Units::timeConversionVector(vec, tof_unit, "microseconds");
+  std::copy(vec.begin(), vec.end(), event_time_of_flight.get());
+
   return event_time_of_flight;
 }
 

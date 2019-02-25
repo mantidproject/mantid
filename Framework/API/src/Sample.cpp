@@ -4,9 +4,6 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/Sample.h"
 #include "MantidGeometry/Crystal/CrystalStructure.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
@@ -288,7 +285,7 @@ std::size_t Sample::size() const { return m_samples.size() + 1; }
  * @param childSample The child sample to be added
  */
 void Sample::addSample(boost::shared_ptr<Sample> childSample) {
-  m_samples.push_back(childSample);
+  m_samples.emplace_back(childSample);
 }
 
 //--------------------------------------------------------------------------------------------
@@ -299,6 +296,9 @@ void Sample::addSample(boost::shared_ptr<Sample> childSample) {
 void Sample::saveNexus(::NeXus::File *file, const std::string &group) const {
   file->makeGroup(group, "NXsample", true);
   file->putAttr("name", m_name);
+  if (m_name.empty()) {
+    file->putAttr("name_empty", 1);
+  }
   file->putAttr("version", 1);
   std::string shapeXML("");
   if (auto csgObject =
@@ -358,6 +358,13 @@ int Sample::loadNexus(::NeXus::File *file, const std::string &group) {
   if (version > 0) {
     // Name is an attribute
     file->getAttr("name", m_name);
+    if (file->hasAttr("name_empty")) {
+      int isEmpty;
+      file->getAttr("name_empty", isEmpty);
+      if (isEmpty) {
+        m_name.clear();
+      }
+    }
 
     // Shape (from XML)
     std::string shape_xml;

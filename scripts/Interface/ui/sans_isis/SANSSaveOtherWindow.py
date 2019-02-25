@@ -4,21 +4,28 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-from . import ui_save_other_dialog as ui_save_other_dialog
-from PyQt4 import QtGui, QtCore
+from qtpy import QtCore, QtWidgets
+
+from mantidqt.utils.qt import load_ui
+from mantidqt.widgets.workspacewidget import workspacetreewidget
 from sans.common.enums import SaveType
-from mantidqtpython import MantidQt
 
-try:
-    from mantidplot import pymantidplot
-    canMantidPlot = True
-except ImportError:
-    canMantidPlot = False
+from qtpy import PYQT4
+if PYQT4:
+    IN_MANTIDPLOT = False
+    try:
+        from pymantidplot import proxies
+        IN_MANTIDPLOT = True
+    except ImportError:
+        pass
 
 
-class SANSSaveOtherDialog(QtGui.QDialog, ui_save_other_dialog.Ui_SaveOtherDialog):
+Ui_SaveOtherDialog, _ = load_ui(__file__, "save_other_dialog.ui")
+
+
+class SANSSaveOtherDialog(QtWidgets.QDialog, Ui_SaveOtherDialog):
     def __init__(self, parent_widget=None):
-        super(QtGui.QDialog, self).__init__(parent=parent_widget)
+        super(QtWidgets.QDialog, self).__init__(parent=parent_widget)
         self.subscribers = []
         self.setup_view()
 
@@ -31,7 +38,7 @@ class SANSSaveOtherDialog(QtGui.QDialog, ui_save_other_dialog.Ui_SaveOtherDialog
         self.cancel_button.pressed.connect(self.on_cancel_clicked)
         self.directory_lineEdit.textChanged.connect(self.on_directory_changed)
         self.nxcansas_checkBox.setChecked(True)
-        self.ads_widget = MantidQt.MantidWidgets.WorkspaceTreeWidgetSimple(True, self)
+        self.ads_widget = workspacetreewidget.WorkspaceTreeWidget(True, self)
         self.ads_widget.treeSelectionChanged.connect(self.on_item_selection_changed)
         self.ads_widget.refreshWorkspaces()
         self.ads_widget.installEventFilter(self)
@@ -41,7 +48,7 @@ class SANSSaveOtherDialog(QtGui.QDialog, ui_save_other_dialog.Ui_SaveOtherDialog
     def eventFilter(self, source, event):
         if event.type() == QtCore.QEvent.KeyPress:
             return True
-        return QtGui.QWidget.eventFilter(self, source, event)
+        return QtWidgets.QWidget.eventFilter(self, source, event)
 
     def subscribe(self, subscriber):
         self.subscribers.append(subscriber)
@@ -85,15 +92,16 @@ class SANSSaveOtherDialog(QtGui.QDialog, ui_save_other_dialog.Ui_SaveOtherDialog
         return save_types
 
     def launch_file_browser(self, current_directory):
-        filename = QtGui.QFileDialog.getExistingDirectory(self, 'Select Directory', current_directory,
-                                                          QtGui.QFileDialog.ShowDirsOnly)
+        filename = QtWidgets.QFileDialog.getExistingDirectory(self, 'Select Directory', current_directory,
+                                                              QtWidgets.QFileDialog.ShowDirsOnly)
         return filename
 
     def rename_filebox(self, name):
         self.filename_label.setText(name)
 
     def _on_help_button_clicked(self):
-        pymantidplot.proxies.showCustomInterfaceHelp('sans_save_other')
+        if PYQT4:
+            proxies.showCustomInterfaceHelp('sans_save_other')
 
     @property
     def progress_bar_minimum(self):

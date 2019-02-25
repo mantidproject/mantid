@@ -25,11 +25,20 @@ namespace MDAlgorithms {
 
 class DLLExport ConvToMDSelector {
 public:
+  enum ConverterType { DEFAULT, INDEXED };
+  /**
+   *
+   * @param tp :: type of converter (indexed or default)
+   */
+  ConvToMDSelector(ConverterType tp = DEFAULT);
   /// function which selects the convertor depending on workspace type and
   /// (possibly, in a future) some workspace properties
   boost::shared_ptr<ConvToMDBase>
   convSelector(API::MatrixWorkspace_sptr inputWS,
                boost::shared_ptr<ConvToMDBase> &currentSolver) const;
+
+private:
+  ConverterType converterType;
 };
 } // namespace MDAlgorithms
 } // namespace Mantid

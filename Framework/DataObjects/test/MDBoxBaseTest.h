@@ -55,6 +55,10 @@ public:
   /// Clear all contained data
   void clear() override {}
 
+  // Not to be pure virtual
+  void getBoxes(std::vector<API::IMDNode *> &,
+                const std::function<bool(API::IMDNode *)> &) override {}
+
   uint64_t getNPoints() const override {
     return 0;
     // return this->getFileSize();

@@ -131,7 +131,7 @@ Artist Axes::text(double x, double y, QString text,
   auto args =
       Python::NewRef(Py_BuildValue("(ffs)", x, y, text.toLatin1().constData()));
   auto kwargs = Python::NewRef(
-      Py_BuildValue("(ss)", "horizontalalignment", horizontalAlignment));
+      Py_BuildValue("{ss}", "horizontalalignment", horizontalAlignment));
   return Artist(pyobj().attr("text")(*args, **kwargs));
 }
 

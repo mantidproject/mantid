@@ -9,7 +9,6 @@ from __future__ import (absolute_import, division, print_function)
 from Muon.GUI.Common.home_tab.home_tab_presenter import HomeTabSubWidget
 import Muon.GUI.Common.utilities.load_utils as load_utils
 from Muon.GUI.Common.utilities.muon_file_utils import filter_for_extensions
-from Muon.GUI.Common.observer_pattern import Observable
 
 
 class InstrumentWidgetPresenter(HomeTabSubWidget):
@@ -39,13 +38,12 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
         self._view.on_dead_time_from_file_selected(self.handle_dead_time_from_table_workspace_selected)
         self._view.on_dead_time_file_option_changed(self.handle_dead_time_table_workspace_selector_changed)
 
+        self._view.on_rebin_type_changed(self.handle_rebin_type_changed)
+
         self._view.on_instrument_changed(self.handle_instrument_changed)
 
         self.handle_loaded_time_zero_checkState_change()
         self.handle_loaded_first_good_data_checkState_change()
-
-        # notifier for instrument changes
-        self.instrumentNotifier = InstrumentWidgetPresenter.InstrumentNotifier(self)
 
     def show(self):
         self._view.show()
@@ -108,7 +106,16 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
 
     def handle_variable_rebin_changed(self):
         variable_bin_size = self._view.get_variable_bin_text()
-        self._model.add_variable_binning(variable_bin_size)
+        valid, message = self._model.validate_variable_rebin_string(variable_bin_size)
+        if not valid:
+            self._view.rebin_variable_edit.setText(self._model.get_variable_binning())
+            self._view.warning_popup(message)
+        else:
+            self._model.add_variable_binning(variable_bin_size)
+
+    def handle_rebin_type_changed(self):
+        rebin_type = self._view.rebin_selector.currentText()
+        self._model.update_binning_type(rebin_type)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Instrument
@@ -117,20 +124,9 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
     def handle_instrument_changed(self):
         """User changes the selected instrument."""
         instrument = self._view.get_instrument()
-        current_instrument = self._view.cached_instrument
         if instrument != self._model._data.instrument:
-            # prompt user to continue or not
-            user_response = self._view.instrument_changed_warning()
-            if user_response == 1:
-                # User selects "Ok"
-                self._model.clear_data()
-                self.clear_view()
-                self._model._data.instrument = instrument
-                self._view.set_instrument(instrument, block=True)
-                self.instrumentNotifier.notify_subscribers(instrument)
-            else:
-                # User selects "Cancel", reset the instrument selector
-                self._view.set_instrument(current_instrument, block=True)
+            self._model._data.instrument = instrument
+            self._view.set_instrument(instrument, block=True)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Dead Time
@@ -202,15 +198,3 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
         self._model.set_dead_time_to_none()
         self._view.set_dead_time_file_selection(0)
         self.set_dead_time_text_to_default()
-
-    # ------------------------------------------------------------------------------------------------------------------
-    # Observer / Observable
-    # ------------------------------------------------------------------------------------------------------------------
-
-    class InstrumentNotifier(Observable):
-        def __init__(self, outer):
-            Observable.__init__(self)
-            self.outer = outer  # handle to containing class
-
-        def notify_subscribers(self, *args, **kwargs):
-            Observable.notify_subscribers(self, *args)

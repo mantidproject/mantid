@@ -12,6 +12,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/DataProcessorAlgorithm.h"
 #include "MantidAPI/ScriptBuilder.h"
+#include "MantidKernel/PropertyManagerProperty.h"
 #include "MantidTestHelpers/FakeObjects.h"
 
 using namespace Mantid::API;
@@ -28,6 +29,11 @@ std::string getAlgTimestamp(Mantid::API::HistoryView &historyView,
 } // namespace
 
 class ScriptBuilderTest : public CxxTest::TestSuite {
+public:
+  static ScriptBuilderTest *createSuite() { return new ScriptBuilderTest; }
+
+  static void destroySuite(ScriptBuilderTest *suite) { return delete suite; }
+
   /// Use a fake algorithm object instead of a dependency on a real one.
   class SubAlgorithm : public Algorithm {
   public:
@@ -60,8 +66,6 @@ class ScriptBuilderTest : public CxxTest::TestSuite {
   // DataProcessorAlgorithms
   class BasicAlgorithm : public Algorithm {
   public:
-    BasicAlgorithm() : Algorithm() {}
-    ~BasicAlgorithm() override {}
     const std::string name() const override { return "BasicAlgorithm"; }
     int version() const override { return 1; }
     const std::string category() const override { return "Cat;Leopard;Mink"; }
@@ -88,6 +92,30 @@ class ScriptBuilderTest : public CxxTest::TestSuite {
       alg->setProperty("PropertyA", "I Don't exist!");
       alg->execute();
       setProperty("PropertyC", "I have been set!");
+    }
+  };
+
+  // Algorithm has an input in the form of a PropertyManager
+  class PropertyManagerInputAlgorithm : public Algorithm {
+  public:
+    const std::string name() const override {
+      return "PropertyManagerInputAlgorithm";
+    }
+    int version() const override { return 1; }
+    const std::string category() const override { return "Cat;Leopard;Mink"; }
+    const std::string summary() const override {
+      return "PropertyManagerInputAlgorithm";
+    }
+    void init() override {
+      declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          "InputWorkspace", "", Direction::Input));
+      declareProperty(
+          std::make_unique<PropertyManagerProperty>("Dict", Direction::Input));
+      declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          "OutputWorkspace", "", Direction::Output));
+    }
+    void exec() override {
+      setProperty("OutputWorkspace", boost::make_shared<WorkspaceTester>());
     }
   };
 
@@ -236,27 +264,27 @@ class ScriptBuilderTest : public CxxTest::TestSuite {
     }
   };
 
-private:
-public:
-  void setUp() override {
-    Mantid::API::AlgorithmFactory::Instance().subscribe<TopLevelAlgorithm>();
-    Mantid::API::AlgorithmFactory::Instance().subscribe<NestedAlgorithm>();
-    Mantid::API::AlgorithmFactory::Instance().subscribe<BasicAlgorithm>();
-    Mantid::API::AlgorithmFactory::Instance().subscribe<SubAlgorithm>();
-    Mantid::API::AlgorithmFactory::Instance().subscribe<NewlineAlgorithm>();
-    Mantid::API::AlgorithmFactory::Instance()
-        .subscribe<AlgorithmWithDynamicProperty>();
+  ScriptBuilderTest()
+      : m_algFactory(AlgorithmFactory::Instance()),
+        m_ads(AnalysisDataService::Instance()),
+        m_testWS(boost::make_shared<WorkspaceTester>()) {
+    m_algFactory.subscribe<TopLevelAlgorithm>();
+    m_algFactory.subscribe<NestedAlgorithm>();
+    m_algFactory.subscribe<BasicAlgorithm>();
+    m_algFactory.subscribe<PropertyManagerInputAlgorithm>();
+    m_algFactory.subscribe<SubAlgorithm>();
+    m_algFactory.subscribe<NewlineAlgorithm>();
+    m_algFactory.subscribe<AlgorithmWithDynamicProperty>();
+    m_ads.addOrReplace("test_input_workspace", m_testWS);
   }
-
-  void tearDown() override {
-    Mantid::API::AlgorithmFactory::Instance().unsubscribe("TopLevelAlgorithm",
-                                                          1);
-    Mantid::API::AlgorithmFactory::Instance().unsubscribe("NestedAlgorithm", 1);
-    Mantid::API::AlgorithmFactory::Instance().unsubscribe("BasicAlgorithm", 1);
-    Mantid::API::AlgorithmFactory::Instance().unsubscribe("SubAlgorithm", 1);
-    Mantid::API::AlgorithmFactory::Instance().unsubscribe(
-        "AlgorithmWithDynamicProperty", 1);
-    Mantid::API::AlgorithmFactory::Instance().unsubscribe("Foo\n\rBar", 1);
+  ~ScriptBuilderTest() {
+    m_algFactory.unsubscribe("TopLevelAlgorithm", 1);
+    m_algFactory.unsubscribe("NestedAlgorithm", 1);
+    m_algFactory.unsubscribe("BasicAlgorithm", 1);
+    m_algFactory.unsubscribe("PropertyManagerInputAlgorithm", 1);
+    m_algFactory.unsubscribe("SubAlgorithm", 1);
+    m_algFactory.unsubscribe("AlgorithmWithDynamicProperty", 1);
+    m_algFactory.unsubscribe("Foo\n\rBar", 1);
   }
 
   void test_Build_Simple() {
@@ -264,19 +292,14 @@ public:
                             "workspace', "
                             "OutputWorkspace='test_output_workspace')",
                             ""};
-    boost::shared_ptr<WorkspaceTester> input =
-        boost::make_shared<WorkspaceTester>();
-    AnalysisDataService::Instance().addOrReplace("test_input_workspace", input);
-
-    auto alg = AlgorithmFactory::Instance().create("TopLevelAlgorithm", 1);
+    auto alg = m_algFactory.create("TopLevelAlgorithm", 1);
     alg->initialize();
     alg->setRethrows(true);
-    alg->setProperty("InputWorkspace", input);
+    alg->setProperty("InputWorkspace", m_testWS);
     alg->setPropertyValue("OutputWorkspace", "test_output_workspace");
     alg->execute();
 
-    auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        "test_output_workspace");
+    auto ws = m_ads.retrieveWS<MatrixWorkspace>("test_output_workspace");
     auto wsHist = ws->getHistory();
 
     ScriptBuilder builder(wsHist.createView());
@@ -290,8 +313,34 @@ public:
       TS_ASSERT_EQUALS(*it, result[i])
     }
 
-    AnalysisDataService::Instance().remove("test_output_workspace");
-    AnalysisDataService::Instance().remove("test_input_workspace");
+    m_ads.remove("test_output_workspace");
+  }
+
+  void test_Build_With_PropertyManagerProperty() {
+    auto alg = m_algFactory.create("PropertyManagerInputAlgorithm", 1);
+    auto propMgr = boost::make_shared<PropertyManager>();
+    alg->initialize();
+    alg->setRethrows(true);
+    alg->setProperty("InputWorkspace", m_testWS);
+    propMgr->declareProperty("Int", 1);
+    propMgr->declareProperty("String", "option");
+    alg->setProperty("Dict", propMgr);
+    const std::string outputName("test_Build_With_PropertyManagerProperty_Out");
+    alg->setProperty("OutputWorkspace", outputName);
+    alg->execute();
+
+    auto outputWS = m_ads.retrieve(outputName);
+    const auto &wsHist = outputWS->history();
+    ScriptBuilder builder(wsHist.createView());
+    const auto generatedText = builder.build();
+    const auto expectedText =
+        "PropertyManagerInputAlgorithm(InputWorkspace='test_input_workspace', "
+        "Dict='{\"Int\":1,\"String\":\"option\"}', "
+        "OutputWorkspace='test_Build_With_PropertyManagerProperty_Out')\n";
+
+    TS_ASSERT_EQUALS(expectedText, generatedText)
+
+    m_ads.remove(outputName);
   }
 
   void test_newline_chars_removed() {
@@ -300,19 +349,14 @@ public:
                             " OutputWorkspace='test_output_workspace')",
                             ""};
 
-    boost::shared_ptr<WorkspaceTester> input =
-        boost::make_shared<WorkspaceTester>();
-    AnalysisDataService::Instance().addOrReplace("test_input_workspace", input);
-
-    auto alg = AlgorithmFactory::Instance().create("Foo\n\rBar", 1);
+    auto alg = m_algFactory.create("Foo\n\rBar", 1);
     alg->initialize();
     alg->setRethrows(true);
-    alg->setProperty("InputWorkspace", input);
+    alg->setProperty("InputWorkspace", m_testWS);
     alg->setPropertyValue("OutputWorkspace", "test_output_workspace");
     alg->execute();
 
-    auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        "test_output_workspace");
+    auto ws = m_ads.retrieveWS<MatrixWorkspace>("test_output_workspace");
     auto wsHist = ws->getHistory();
 
     ScriptBuilder builder(wsHist.createView());
@@ -326,24 +370,18 @@ public:
       TS_ASSERT_EQUALS(*it, result[i])
     }
 
-    AnalysisDataService::Instance().remove("test_output_workspace");
-    AnalysisDataService::Instance().remove("test_input_workspace");
+    m_ads.remove("test_output_workspace");
   }
 
   void test_Build_Simple_Timestamped() {
-    boost::shared_ptr<WorkspaceTester> input =
-        boost::make_shared<WorkspaceTester>();
-    AnalysisDataService::Instance().addOrReplace("test_input_workspace", input);
-
-    auto alg = AlgorithmFactory::Instance().create("TopLevelAlgorithm", 1);
+    auto alg = m_algFactory.create("TopLevelAlgorithm", 1);
     alg->initialize();
     alg->setRethrows(true);
-    alg->setProperty("InputWorkspace", input);
+    alg->setProperty("InputWorkspace", m_testWS);
     alg->setPropertyValue("OutputWorkspace", "test_output_workspace");
     alg->execute();
 
-    auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        "test_output_workspace");
+    auto ws = m_ads.retrieveWS<MatrixWorkspace>("test_output_workspace");
 
     const auto wsHistView = ws->getHistory().createView();
     auto executionTime = getAlgTimestamp(*wsHistView, 0);
@@ -368,8 +406,7 @@ public:
       TS_ASSERT_EQUALS(*it, result[i])
     }
 
-    AnalysisDataService::Instance().remove("test_output_workspace");
-    AnalysisDataService::Instance().remove("test_input_workspace");
+    m_ads.remove("test_output_workspace");
   }
 
   void test_Build_Unrolled() {
@@ -391,20 +428,14 @@ public:
         "",
         "",
     };
-
-    boost::shared_ptr<WorkspaceTester> input =
-        boost::make_shared<WorkspaceTester>();
-    AnalysisDataService::Instance().addOrReplace("test_input_workspace", input);
-
-    auto alg = AlgorithmFactory::Instance().create("TopLevelAlgorithm", 1);
+    auto alg = m_algFactory.create("TopLevelAlgorithm", 1);
     alg->initialize();
     alg->setRethrows(true);
-    alg->setProperty("InputWorkspace", input);
+    alg->setProperty("InputWorkspace", m_testWS);
     alg->setPropertyValue("OutputWorkspace", "test_output_workspace");
     alg->execute();
 
-    auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        "test_output_workspace");
+    auto ws = m_ads.retrieveWS<MatrixWorkspace>("test_output_workspace");
     auto wsHist = ws->getHistory();
     auto view = wsHist.createView();
 
@@ -420,8 +451,7 @@ public:
       TS_ASSERT_EQUALS(*it, result[i])
     }
 
-    AnalysisDataService::Instance().remove("test_output_workspace");
-    AnalysisDataService::Instance().remove("test_input_workspace");
+    m_ads.remove("test_output_workspace");
   }
 
   void test_Partially_Unrolled() {
@@ -444,15 +474,10 @@ public:
         "",
         "",
     };
-
-    boost::shared_ptr<WorkspaceTester> input =
-        boost::make_shared<WorkspaceTester>();
-    AnalysisDataService::Instance().addOrReplace("test_input_workspace", input);
-
-    auto alg = AlgorithmFactory::Instance().create("TopLevelAlgorithm", 1);
+    auto alg = m_algFactory.create("TopLevelAlgorithm", 1);
     alg->initialize();
     alg->setRethrows(true);
-    alg->setProperty("InputWorkspace", input);
+    alg->setProperty("InputWorkspace", m_testWS);
     alg->setPropertyValue("OutputWorkspace", "test_output_workspace");
     alg->execute();
 
@@ -462,8 +487,7 @@ public:
     alg->setPropertyValue("OutputWorkspace", "test_output_workspace");
     alg->execute();
 
-    auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        "test_output_workspace");
+    auto ws = m_ads.retrieveWS<MatrixWorkspace>("test_output_workspace");
     auto wsHist = ws->getHistory();
     auto view = wsHist.createView();
 
@@ -482,8 +506,7 @@ public:
       TS_ASSERT_EQUALS(*it, result[i])
     }
 
-    AnalysisDataService::Instance().remove("test_output_workspace");
-    AnalysisDataService::Instance().remove("test_input_workspace");
+    m_ads.remove("test_output_workspace");
   }
 
   void test_Build_Simple_with_backslash() {
@@ -493,20 +516,18 @@ public:
                             "workspace', "
                             "OutputWorkspace='test_output_workspace')",
                             ""};
-    boost::shared_ptr<WorkspaceTester> input =
+    boost::shared_ptr<WorkspaceTester> backSlashName =
         boost::make_shared<WorkspaceTester>();
-    AnalysisDataService::Instance().addOrReplace("test_inp\\ut_workspace",
-                                                 input);
+    m_ads.addOrReplace("test_inp\\ut_workspace", backSlashName);
 
-    auto alg = AlgorithmFactory::Instance().create("TopLevelAlgorithm", 1);
+    auto alg = m_algFactory.create("TopLevelAlgorithm", 1);
     alg->initialize();
     alg->setRethrows(true);
-    alg->setProperty("InputWorkspace", input);
+    alg->setProperty("InputWorkspace", backSlashName);
     alg->setPropertyValue("OutputWorkspace", "test_output_workspace");
     alg->execute();
 
-    auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        "test_output_workspace");
+    auto ws = m_ads.retrieveWS<MatrixWorkspace>("test_output_workspace");
     auto wsHist = ws->getHistory();
 
     ScriptBuilder builder(wsHist.createView());
@@ -520,8 +541,8 @@ public:
       TS_ASSERT_EQUALS(*it, result[i])
     }
 
-    AnalysisDataService::Instance().remove("test_output_workspace");
-    AnalysisDataService::Instance().remove("test_inp\\ut_workspace");
+    m_ads.remove("test_output_workspace");
+    m_ads.remove("test_inp\\ut_workspace");
   }
 
   void test_Build_Dynamic_Property() {
@@ -530,23 +551,18 @@ public:
         "AlgorithmWithDynamicProperty(InputWorkspace='test_input_workspace', "
         "OutputWorkspace='test_output_workspace', PropertyA='A', "
         "PropertyB='B', DynamicInputProperty='C')\n";
-    boost::shared_ptr<WorkspaceTester> input =
-        boost::make_shared<WorkspaceTester>();
-    AnalysisDataService::Instance().addOrReplace("test_input_workspace", input);
 
-    auto alg =
-        AlgorithmFactory::Instance().create("AlgorithmWithDynamicProperty", 1);
+    auto alg = m_algFactory.create("AlgorithmWithDynamicProperty", 1);
     alg->initialize();
     alg->setRethrows(true);
-    alg->setProperty("InputWorkspace", input);
+    alg->setProperty("InputWorkspace", m_testWS);
     alg->setProperty("PropertyA", "A");
     alg->setProperty("PropertyB", "B");
     alg->setProperty("DynamicInputProperty", "C");
     alg->setPropertyValue("OutputWorkspace", "test_output_workspace");
     alg->execute();
 
-    auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        "test_output_workspace");
+    auto ws = m_ads.retrieveWS<MatrixWorkspace>("test_output_workspace");
     auto wsHist = ws->getHistory();
 
     // check the dynamic property is in the history records
@@ -566,9 +582,13 @@ public:
     // The dynamic property should not be in the script.
     TS_ASSERT_EQUALS(scriptText, result);
 
-    AnalysisDataService::Instance().remove("test_output_workspace");
-    AnalysisDataService::Instance().remove("test_input_workspace");
+    m_ads.remove("test_output_workspace");
   }
+
+private:
+  AlgorithmFactoryImpl &m_algFactory;
+  AnalysisDataServiceImpl &m_ads;
+  MatrixWorkspace_sptr m_testWS;
 };
 
 #endif // MANTID_SCRIPTBUILDERTEST_H_

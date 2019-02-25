@@ -11,6 +11,7 @@ from Muon.GUI.Common.load_run_widget.load_run_model import LoadRunWidgetModel
 from Muon.GUI.Common.load_run_widget.load_run_view import LoadRunWidgetView
 from Muon.GUI.Common.load_run_widget.load_run_presenter import LoadRunWidgetPresenter
 from Muon.GUI.Common import mock_widget
+from Muon.GUI.Common.muon_data_context import MuonDataContext
 from Muon.GUI.Common.muon_load_data import MuonLoadData
 
 import unittest
@@ -44,12 +45,12 @@ class LoadRunWidgetIncrementDecrementSingleFileModeTest(unittest.TestCase):
         self.obj = QtGui.QWidget()
 
         self.data = MuonLoadData()
+        self.context = MuonDataContext(self.data)
         self.view = LoadRunWidgetView(parent=self.obj)
-        self.model = LoadRunWidgetModel(self.data)
+        self.model = LoadRunWidgetModel(self.data, self.context)
         self.presenter = LoadRunWidgetPresenter(self.view, self.model)
 
         self.view.warning_popup = mock.Mock()
-        self.presenter.enable_multiple_files(False)
         self.presenter.set_current_instrument("EMU")
 
         patcher = mock.patch('Muon.GUI.Common.load_run_widget.load_run_model.load_utils')
@@ -116,7 +117,7 @@ class LoadRunWidgetIncrementDecrementSingleFileModeTest(unittest.TestCase):
         self.assertEqual(os.path.basename(filename), new_filename)
 
     @run_test_with_and_without_threading
-    def test_that_decrement_run_loads_the_data_correctly_by_overwriting_previous_run(self):
+    def test_that_decrement_run_loads_the_data_correctly(self):
         new_run = self._loaded_run - 1
         new_filename = "EMU00001233.nxs"
         self.load_utils_patcher.load_workspace_from_filename = mock.Mock(return_value=([1], new_run, new_filename))
@@ -124,14 +125,14 @@ class LoadRunWidgetIncrementDecrementSingleFileModeTest(unittest.TestCase):
         self.presenter.handle_decrement_run()
         self.wait_for_thread(self.presenter._load_thread)
 
-        self.assertEqual(self.presenter.filenames, [new_filename])
-        self.assertEqual(self.presenter.runs, [[new_run]])
-        self.assertEqual(self.presenter.workspaces, [[1]])
+        self.assertEqual(self.presenter.filenames, [self._loaded_filename, new_filename])
+        self.assertEqual(self.presenter.runs, [[self._loaded_run], [new_run]])
+        self.assertEqual(self.presenter.workspaces, [self._loaded_workspace, [1]])
 
-        self.assertEqual(self.view.get_run_edit_text(), str(new_run))
+        self.assertEqual(self.view.get_run_edit_text(), '1233-1234')
 
     @run_test_with_and_without_threading
-    def test_that_increment_run_loads_the_data_correctly_by_overwriting_previous_run(self):
+    def test_that_increment_run_loads_the_data_correctly(self):
         new_run = self._loaded_run + 1
         new_filename = "EMU00001235.nxs"
         self.load_utils_patcher.load_workspace_from_filename = mock.Mock(return_value=([1], new_run, new_filename))
@@ -139,11 +140,11 @@ class LoadRunWidgetIncrementDecrementSingleFileModeTest(unittest.TestCase):
         self.presenter.handle_increment_run()
         self.wait_for_thread(self.presenter._load_thread)
 
-        self.assertEqual(self.presenter.filenames, [new_filename])
-        self.assertEqual(self.presenter.runs, [[new_run]])
-        self.assertEqual(self.presenter.workspaces, [[1]])
+        self.assertEqual(self.presenter.filenames, [self._loaded_filename, new_filename])
+        self.assertEqual(self.presenter.runs, [[self._loaded_run], [new_run]])
+        self.assertEqual(self.presenter.workspaces, [self._loaded_workspace, [1]])
 
-        self.assertEqual(self.view.get_run_edit_text(), str(new_run))
+        self.assertEqual(self.view.get_run_edit_text(), '1234-1235')
 
     @run_test_with_and_without_threading
     def test_that_if_decrement_run_fails_the_data_are_returned_to_previous_state(self):

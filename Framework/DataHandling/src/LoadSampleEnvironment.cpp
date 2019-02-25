@@ -40,8 +40,6 @@ using namespace Geometry;
 
 void LoadSampleEnvironment::init() {
   auto wsValidator = boost::make_shared<API::InstrumentValidator>();
-  ;
-
   // input workspace
   declareProperty(make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),

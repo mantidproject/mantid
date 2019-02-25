@@ -47,6 +47,7 @@ ALG_BAD_PARAMS = {
                               "MaxPositionChange_meters"),
     "SetSampleMaterial(v1)":("bAverage", "bSquaredAverage"),
     "SetUB(v1)":("a", "b", "c", "alpha", "beta", "gamma", "u", "v"),
+    "LinkedUBs(v1)":("a", "b", "c", "alpha", "beta", "gamma"),
     "ViewBOA(v1)":("CD-Distance"),
     "PoldiCreatePeaksFromCell(v1)":("a", "b", "c", "alpha", "beta", "gamma"),
     "CreateMD(v1)" : ("u", "v"),
