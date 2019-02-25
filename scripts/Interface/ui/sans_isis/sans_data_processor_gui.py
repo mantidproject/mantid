@@ -337,6 +337,10 @@ class SANSDataProcessorGui(QMainWindow,
             self._on_q_1d_step_type_has_changed)
         self._on_q_1d_step_type_has_changed()
 
+        self.q_xy_step_type_combo_box.currentIndexChanged.connect(
+            self._on_q_xy_step_type_has_changed)
+        self._on_q_xy_step_type_has_changed()
+
         # Set the q resolution aperture shape settings
         self.q_resolution_shape_combo_box.currentIndexChanged.connect(
             self._on_q_resolution_shape_has_changed)
@@ -691,6 +695,11 @@ class SANSDataProcessorGui(QMainWindow,
 
             step_label = u'dQ/Q' if u'Log' in selection else u'Step [\u00c5^-1]'
             self.q_step_label.setText(step_label)
+
+    def _on_q_xy_step_type_has_changed(self):
+        selection = self.q_xy_step_type_combo_box.currentText()
+        step_label = u'dQ/Q' if u'Log' in selection else u'Step [\u00c5^-1]'
+        self.q_xy_step_label.setText(step_label)
 
     def set_q_resolution_shape_to_rectangular(self, is_rectangular):
         index = 1 if is_rectangular else 0
@@ -1598,6 +1607,13 @@ class SANSDataProcessorGui(QMainWindow,
         else:
             self.update_gui_combo_box(value=value, expected_type=RangeStepType,
                                       combo_box="q_xy_step_type_combo_box")
+
+            if isinstance(value, list):
+                gui_element = self.q_xy_step_type_combo_box
+                gui_element.clear()
+                for element in value:
+                    self._add_list_element_to_combo_box(gui_element=gui_element, element=element,
+                                                        expected_type=RangeStepType)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Gravity
