@@ -1423,7 +1423,7 @@ last-modified="2019-01-07 16:03:24">
   <component type="detectors">
     <location />
   </component>
-  <!-- Detector tube shape. Cuboids 32 x 16 mm, 300 mm long -->
+  <!-- Detector tube shape. Cuboids 31 x 16 mm, 300 mm long -->
   <type is="detector" name="tube">
     <cuboid id="pixel-shape">
       <left-front-bottom-point y="-0.150" x="-0.0155" z="0.008" />
