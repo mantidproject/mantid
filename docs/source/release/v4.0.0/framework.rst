@@ -167,6 +167,7 @@ Improvements
 - It is now possible to build custom materials with :class:`mantid.kernel.MaterialBuilder` without setting a formula or atomic number. In this case, all cross sections and number density have to be given.
 - Python plotting now handles `twinx` and `twiny` axes for workspaces.
 - :py:obj:`mantid.kernel.MaterialBuilder` now supports number densities in formula units per cubic Ångström.
+- IPython on Windows has been upgraded to v5.8.0. This is the last version that supports Python 2.
 
 Bugfixes
 ########
