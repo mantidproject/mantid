@@ -11,6 +11,16 @@ try:
 except:
     STANDALONE_EXEC = False
 
+from qtpy import PYQT4
+if PYQT4:
+    IN_MANTIDPLOT = False
+    try:
+        from pymantidplot import proxies
+        IN_MANTIDPLOT = True
+    except ImportError:
+        # We are not in MantidPlot e.g. testing
+        pass
+
 
 class HelpWidgetView(QtGui.QWidget):
 
@@ -62,3 +72,7 @@ class HelpWidgetView(QtGui.QWidget):
             MantidQt.API.ManageUserDirectories.openUserDirsDialog(self)
         else:
             self.warning_popup("Cannot open user directories dailog outside MantidPlot.")
+
+    def _on_help_button_clicked(self):
+        if PYQT4:
+            proxies.showCustomInterfaceHelp('Frequency Domain Analysis 2')
