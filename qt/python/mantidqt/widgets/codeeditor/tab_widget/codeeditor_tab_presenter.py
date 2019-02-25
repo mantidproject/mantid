@@ -22,7 +22,12 @@ class ShowInExplorer(object):
         elif sys.platform == 'darwin':
             subprocess.check_call(['open', '--', path])
         elif sys.platform == 'linux2':
-            subprocess.check_call(['xdg-open', '--', path])
+            call_params = ['xdg-open', path]
+            try:
+                subprocess.check_call(call_params)
+            except subprocess.CalledProcessError as ex:
+                logger.notice("Could not manage to open the folder in explorer.")
+                logger.debug("Error encountered: {}".format(ex))
 
 
 class CodeEditorTabPresenter(object):
