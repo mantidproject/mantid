@@ -24,7 +24,7 @@ from sans.common.enums import BatchReductionEntry, SANSInstrument
 from sans.gui_logic.models.table_model import TableModel, TableIndexModel
 from sans.test_helper.file_information_mock import SANSFileInformationMock
 
-if sys.version_info.major == 3:
+if sys.version_info.major >= 3:
     from unittest import mock
 else:
     import mock
@@ -50,6 +50,10 @@ BATCH_FILE_TEST_CONTENT_4 = [{BatchReductionEntry.SampleScatter: 'SANS2D00022024
                               BatchReductionEntry.SampleDirect: 'SANS2D00022048',
                               BatchReductionEntry.Output: 'test_file'},
                              {BatchReductionEntry.SampleScatter: 'SANS2D00022024', BatchReductionEntry.Output: 'test_file2'}]
+
+
+def get_non_empty_row_mock(value):
+    return value
 
 
 class MultiPeriodMock(object):
@@ -863,12 +867,32 @@ class RunTabPresenterTest(unittest.TestCase):
         
         presenter.set_view(view)
         presenter._table_model.reset_row_state = mock.MagicMock()
+        presenter._table_model.get_non_empty_rows = mock.MagicMock(side_effect=get_non_empty_row_mock)
 
         presenter.on_process_selected_clicked()
         self.assertEqual(
             presenter._table_model.reset_row_state.call_count, 3,
             "Expected reset_row_state to have been called 3 times. Called {} times.".format(
                 presenter._table_model.reset_row_state.call_count))
+
+    def test_that_process_selected_ignores_all_empty_rows(self):
+        presenter = RunTabPresenter(SANSFacility.ISIS)
+        view = mock.MagicMock()
+        view.get_selected_rows = mock.MagicMock(return_value=[0, 1])
+        presenter.set_view(view)
+
+        table_model = TableModel()
+        row_entry0 = [''] * 16
+        row_entry1 = ['74040', '', '74040', '', '74040', '', '74040', '', '74040', '', '74040', '', 'test_reduction',
+                      'user_file', '1.2', '']
+        table_model.add_table_entry(0, TableIndexModel(*row_entry0))
+        table_model.add_table_entry(1, TableIndexModel(*row_entry1))
+
+        presenter._table_model = table_model
+        presenter._process_rows = mock.MagicMock()
+
+        presenter.on_process_selected_clicked()
+        presenter._process_rows.assert_called_with([1])
         
     def test_that_process_all_ignores_selected_rows(self):
         presenter = RunTabPresenter(SANSFacility.ISIS)
@@ -878,12 +902,29 @@ class RunTabPresenterTest(unittest.TestCase):
         presenter._table_model.get_number_of_rows = mock.MagicMock(return_value=7)
         presenter.set_view(view)
         presenter._table_model.reset_row_state = mock.MagicMock()
+        presenter._table_model.get_non_empty_rows = mock.MagicMock(side_effect=get_non_empty_row_mock)
         
         presenter.on_process_all_clicked()
         self.assertEqual(
             presenter._table_model.reset_row_state.call_count, 7,
             "Expected reset_row_state to have been called 7 times. Called {} times.".format(
                 presenter._table_model.reset_row_state.call_count))
+
+    def test_that_process_all_ignores_empty_rows(self):
+        presenter = RunTabPresenter(SANSFacility.ISIS)
+
+        table_model = TableModel()
+        row_entry0 = [''] * 16
+        row_entry1 = ['74040', '', '74040', '', '74040', '', '74040', '', '74040', '', '74040', '', 'test_reduction',
+                      'user_file', '1.2', '']
+        table_model.add_table_entry(0, TableIndexModel(*row_entry0))
+        table_model.add_table_entry(1, TableIndexModel(*row_entry1))
+
+        presenter._table_model = table_model
+        presenter._process_rows = mock.MagicMock()
+
+        presenter.on_process_all_clicked()
+        presenter._process_rows.assert_called_with([1])
 
     def test_that_table_not_exported_if_table_is_empty(self):
         presenter = RunTabPresenter(SANSFacility.ISIS)

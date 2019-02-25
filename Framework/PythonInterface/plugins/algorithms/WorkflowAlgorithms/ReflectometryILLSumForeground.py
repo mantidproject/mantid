@@ -21,7 +21,7 @@ import ReflectometryILL_common as common
 
 class Prop:
     CLEANUP = 'Cleanup'
-    DIRECT_WS = 'DirectBeamWorkspace'
+    DIRECT_WS = 'DirectLineWorkspace'
     DIRECT_FOREGROUND_WS = 'DirectForegroundWorkspace'
     FOREGROUND_INDICES = 'Foreground'
     INPUT_WS = 'InputWorkspace'
@@ -189,7 +189,7 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
         ReflectometryBeamStatistics(
             ReflectedBeamWorkspace=ws,
             ReflectedForeground=reflectedForeground,
-            DirectBeamWorkspace=directWS,
+            DirectLineWorkspace=directWS,
             DirectForeground=directForeground,
             PixelSize=pixelSize,
             DetectorResolution=detResolution,

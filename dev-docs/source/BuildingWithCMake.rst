@@ -81,7 +81,7 @@ From the CMake gui
 * Wait a while....
 * You will be presented with a list of options in red that can in principle be changed. You probably don't want to change anything, except perhaps checking "MAKE_VATES" if you want to build that.
 * Click "Configure" again and wait....
-* Finally, click "Generate". This will create the build files, e.g. there will be a ``Mantid.sln`` in the directory you selected as your build directory.
+* Finally, click "Generate". This will create the build files, e.g. for a Visual Studio build there will be a ``Mantid.sln`` in the directory you selected as your build directory.
 
 Data Files Location
 -------------------
@@ -118,7 +118,7 @@ Building the installer package
 
 * For Windows only, you first need to install NSIS, available at: http://nsis.sourceforge.net/Download. Ensure that the install directory is added to the PATH. You should be able to type ``makensis /?`` in a command prompt.
 * Run CMake with "ENABLE_CPACK" enabled. If using the GUI you need to click the "Advanced" checkbox to see this option.
-* You will now have a build target called "PACKAGE" available to create the installer package.
+* You will now have a build target called `package` available to create the installer package.
 
 Caveats and Known Issues
 ########################

@@ -101,11 +101,6 @@ void SofQWNormalisedPolygon::init() {
  */
 void SofQWNormalisedPolygon::exec() {
   MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
-  // Do the full check for common binning
-  if (!WorkspaceHelpers::commonBoundaries(*inputWS)) {
-    throw std::invalid_argument(
-        "The input workspace must have common binning across all spectra");
-  }
 
   // Compute input caches
   m_EmodeProperties.initCachedValues(*inputWS, this);
@@ -123,7 +118,7 @@ void SofQWNormalisedPolygon::exec() {
 
   // Progress reports & cancellation
   const size_t nreports(nHistos * nEnergyBins);
-  m_progress = boost::make_shared<API::Progress>(this, 0.0, 1.0, nreports);
+  m_progress = std::make_unique<API::Progress>(this, 0.0, 1.0, nreports);
 
   std::vector<double> par =
       inputWS->getInstrument()->getNumberParameter("detector-neighbour-offset");
@@ -157,7 +152,6 @@ void SofQWNormalisedPolygon::exec() {
 
     // Compute polygon points
     const double thetaHalfWidth = 0.5 * thetaWidth;
-
     const double thetaLower = theta - thetaHalfWidth;
     const double thetaUpper = theta + thetaHalfWidth;
 
@@ -171,7 +165,6 @@ void SofQWNormalisedPolygon::exec() {
       const double dE_jp1 = X[j + 1];
 
       const double lrQ = m_EmodeProperties.q(dE_jp1, thetaLower, det);
-
       const V2D ll(dE_j, m_EmodeProperties.q(dE_j, thetaLower, det));
       const V2D lr(dE_jp1, lrQ);
       const V2D ur(dE_jp1, m_EmodeProperties.q(dE_jp1, thetaUpper, det));
@@ -182,10 +175,10 @@ void SofQWNormalisedPolygon::exec() {
                   << ", lr=" << lr << ", ur=" << ur << ", ul=" << ul << "\n";
       }
 
-      Quadrilateral inputQ = Quadrilateral(ll, lr, ur, ul);
-
-      FractionalRebinning::rebinToFractionalOutput(inputQ, inputWS, i, j,
-                                                   *outputWS, m_Qout);
+      using FractionalRebinning::rebinToFractionalOutput;
+      rebinToFractionalOutput(Quadrilateral(std::move(ll), std::move(lr),
+                                            std::move(ur), std::move(ul)),
+                              inputWS, i, j, *outputWS, m_Qout);
 
       // Find which q bin this point lies in
       const MantidVec::difference_type qIndex =
@@ -210,7 +203,7 @@ void SofQWNormalisedPolygon::exec() {
   PARALLEL_CHECK_INTERUPT_REGION
 
   outputWS->finalize();
-  FractionalRebinning::normaliseOutput(outputWS, inputWS, m_progress);
+  FractionalRebinning::normaliseOutput(outputWS, inputWS, m_progress.get());
 
   // Set the output spectrum-detector mapping
   auto outputIndices = outputWS->indexInfo();
@@ -320,6 +313,12 @@ void SofQWNormalisedPolygon::initAngularCachesPSD(
 
   for (size_t i = 0; i < nHistos; ++i) {
     m_progress->report("Calculating detector angular widths");
+
+    // If no detector found, skip onto the next spectrum
+    if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i)) {
+      continue;
+    }
+
     const specnum_t inSpec = workspace.getSpectrum(i).getSpectrumNo();
     const SpectraDistanceMap neighbours =
         neighbourInfo.getNeighboursExact(inSpec);

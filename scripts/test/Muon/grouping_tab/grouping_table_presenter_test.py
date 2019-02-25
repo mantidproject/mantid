@@ -295,6 +295,58 @@ class GroupingTablePresenterTest(unittest.TestCase):
 
         self.assertEqual(self.view.get_table_item_text(0, 2), "1")
 
+    def test_modifying_detector_ids_to_non_existent_detector_fails(self):
+        self.presenter.handle_add_group_button_clicked()
+        self.view.grouping_table.item(0, 1).setText("1000")
+
+        self.view.warning_popup.assert_called_once_with('Invalid detector list.')
+
+    def test_modifying_detector_ids_to_negative_detectors_fails(self):
+        self.presenter.handle_add_group_button_clicked()
+        self.view.grouping_table.item(0, 1).setText("-10-10")
+
+        self.view.warning_popup.assert_called_once_with('Invalid detector list.')
+
+    def test_range_boxes_start_out_disabled(self):
+        self.assertFalse(self.view.group_range_min.isEnabled())
+        self.assertFalse(self.view.group_range_max.isEnabled())
+
+    def test_enabling_range_min_editing_creates_context_variable(self):
+        number = '1.12'
+        self.view.group_range_min.setText(number)
+        self.view.group_range_use_first_good_data.setChecked(False)
+
+        self.assertEqual(self.data.gui_variables['GroupRangeMin'], float(number))
+
+    def test_disabling_range_min_editing_removes_context_variable(self):
+        number = '1.12'
+        self.view.group_range_min.setText(number)
+        self.view.group_range_use_first_good_data.setChecked(False)
+
+        self.assertEqual(self.data.gui_variables['GroupRangeMin'], float(number))
+
+        self.view.group_range_use_first_good_data.setChecked(True)
+
+        self.assertFalse('GroupRangeMin' in self.data.gui_variables)
+
+    def test_enabling_range_max_editing_creates_context_variable(self):
+        number = '1.12'
+        self.view.group_range_max.setText(number)
+        self.view.group_range_use_last_data.setChecked(False)
+
+        self.assertEqual(self.data.gui_variables['GroupRangeMax'], float(number))
+
+    def test_disabling_range_max_editing_removes_context_variable(self):
+        number = '1.12'
+        self.view.group_range_max.setText(number)
+        self.view.group_range_use_last_data.setChecked(False)
+
+        self.assertEqual(self.data.gui_variables['GroupRangeMax'], float(number))
+
+        self.view.group_range_use_last_data.setChecked(True)
+
+        self.assertFalse('GroupRangeMax' in self.data.gui_variables)
+
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)

@@ -246,7 +246,7 @@ void MuonPairingAsymmetry::validateManualGroups(
         "A valid grouping must be supplied (e.g. \"1,2,3,4,5\").";
   }
 
-  if (std::is_permutation(group1.begin(), group1.end(), group2.begin())) {
+  if (group1 == group2) {
     errors["Group1"] = "The two groups must be different.";
   }
 

@@ -5,8 +5,10 @@ namespace Mantid {
 namespace IndirectFitDataCreationHelper {
 using namespace Mantid::API;
 
-MatrixWorkspace_sptr createWorkspace(int const &numberOfSpectra) {
-  return WorkspaceCreationHelper::create2DWorkspace(numberOfSpectra, 10);
+MatrixWorkspace_sptr createWorkspace(int const &numberOfSpectra,
+                                     int const &numberOfBins) {
+  return WorkspaceCreationHelper::create2DWorkspace(numberOfSpectra,
+                                                    numberOfBins);
 }
 
 MatrixWorkspace_sptr createInstrumentWorkspace(int const &xLength,
@@ -17,14 +19,37 @@ MatrixWorkspace_sptr createInstrumentWorkspace(int const &xLength,
 
 MatrixWorkspace_sptr
 createWorkspaceWithTextAxis(int const &numberOfSpectra,
-                            std::vector<std::string> const &labels) {
+                            std::vector<std::string> const &labels,
+                            int const &numberOfBins) {
   if (static_cast<std::size_t>(numberOfSpectra) == labels.size()) {
-    auto workspace = createWorkspace(numberOfSpectra);
+    auto workspace = createWorkspace(numberOfSpectra, numberOfBins);
     workspace->replaceAxis(1, getTextAxis(numberOfSpectra, labels));
     return workspace;
   } else
     throw std::runtime_error(
         "The number of spectra is not equal to the number of labels");
+}
+
+WorkspaceGroup_sptr createGroupWorkspace(std::size_t const &numberOfWorkspaces,
+                                         int const &numberOfSpectra,
+                                         int const &numberOfBins) {
+  auto groupWorkspace = boost::make_shared<WorkspaceGroup>();
+  for (auto i = 0u; i < numberOfWorkspaces; ++i)
+    groupWorkspace->addWorkspace(
+        createWorkspace(numberOfSpectra, numberOfBins));
+  return groupWorkspace;
+}
+
+WorkspaceGroup_sptr
+createGroupWorkspaceWithTextAxes(std::size_t const &numberOfWorkspaces,
+                                 std::vector<std::string> const &labels,
+                                 int const &numberOfSpectra,
+                                 int const &numberOfBins) {
+  auto groupWorkspace = boost::make_shared<WorkspaceGroup>();
+  for (auto i = 0u; i < numberOfWorkspaces; ++i)
+    groupWorkspace->addWorkspace(
+        createWorkspaceWithTextAxis(numberOfSpectra, labels, numberOfBins));
+  return groupWorkspace;
 }
 
 TextAxis *getTextAxis(int const &numberOfSpectra,

@@ -170,7 +170,6 @@ endif ()
 
 set ( MANTID_SRCS  src/Mantid/AlgorithmDockWidget.cpp
 				   src/Mantid/AlgorithmMonitor.cpp
-                   src/Mantid/AlgorithmHistoryWindow.cpp
                    src/Mantid/ErrorBarSettings.cpp
                    src/Mantid/FirstTimeSetup.cpp
                    src/Mantid/FitParameterTie.cpp
@@ -368,7 +367,6 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
 )
 
 set ( MANTID_HDRS  src/Mantid/AlgorithmMonitor.h
-                   src/Mantid/AlgorithmHistoryWindow.h
                    src/Mantid/ErrorBarSettings.h
                    src/Mantid/FirstTimeSetup.h
                    src/Mantid/FitParameterTie.h
@@ -592,7 +590,6 @@ set ( QTIPLOT_MOC_FILES src/ApplicationWindow.h
 
 set ( MANTID_MOC_FILES src/Mantid/AlgorithmDockWidget.h
 					   src/Mantid/AlgorithmMonitor.h
-                       src/Mantid/AlgorithmHistoryWindow.h
                        src/Mantid/ErrorBarSettings.h
                        src/Mantid/FirstTimeSetup.h
                        src/Mantid/IFunctionWrapper.h
@@ -827,10 +824,6 @@ if(MAKE_VATES)
   target_include_directories( MantidPlot SYSTEM PRIVATE ${PARAVIEW_INCLUDE_DIRS} )
   target_link_libraries ( MantidPlot LINK_PRIVATE vtkPVClientServerCoreRendering vtkPVServerManagerRendering ${vtkjsoncpp_LIBRARIES})
 endif()
-
-if (WITH_ASAN)
-  target_link_libraries ( MantidPlot LINK_PRIVATE -lasan )
-endif ()
 
 # Plugin dependencies
 add_dependencies( MantidPlot mantidqtpython CompilePyUI )

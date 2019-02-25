@@ -2,6 +2,7 @@
 #define MANTID_GEOMETRY_MESHOBJECTCOMMON_H_
 
 #include "MantidGeometry/DllConfig.h"
+#include "MantidGeometry/Objects/Track.h"
 #include "MantidKernel/V3D.h"
 #include <vector>
 
@@ -44,7 +45,7 @@ MANTID_GEOMETRY_DLL bool
 rayIntersectsTriangle(const Kernel::V3D &start, const Kernel::V3D &direction,
                       const Kernel::V3D &v1, const Kernel::V3D &v2,
                       const Kernel::V3D &v3, Kernel::V3D &intersection,
-                      int &entryExit);
+                      TrackDirection &entryExit);
 
 MANTID_GEOMETRY_DLL void checkVertexLimit(size_t nVertices);
 MANTID_GEOMETRY_DLL const BoundingBox &

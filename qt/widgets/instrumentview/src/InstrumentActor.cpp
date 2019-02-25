@@ -12,7 +12,6 @@
 #include "MantidQtWidgets/InstrumentView/OpenGLError.h"
 
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/IMaskWorkspace.h"
@@ -121,7 +120,7 @@ InstrumentActor::InstrumentActor(const QString &wsName, bool autoscaling,
 
   // If the instrument is empty, maybe only having the sample and source
   if (detectorInfo().size() == 0) {
-    QMessageBox::warning(nullptr, "MantidPlot - Warning",
+    QMessageBox::warning(nullptr, "Mantid - Warning",
                          "This instrument appears to contain no detectors",
                          "OK");
   }
@@ -182,8 +181,7 @@ void InstrumentActor::setUpWorkspace(
   resetColors();
 
   // set the ragged flag using a workspace validator
-  auto wsValidator = Mantid::API::CommonBinsValidator();
-  m_ragged = !wsValidator.isValid(sharedWorkspace).empty();
+  m_ragged = !sharedWorkspace->isCommonBins();
 }
 
 void InstrumentActor::setupPhysicalInstrumentIfExists() {
@@ -322,7 +320,7 @@ void InstrumentActor::applyMaskWorkspace() {
       // after-replace notification
       // and updates this instrument actor.
     } catch (...) {
-      QMessageBox::warning(nullptr, "MantidPlot - Warning",
+      QMessageBox::warning(nullptr, "Mantid - Warning",
                            "An error accured when applying the mask.", "OK");
     }
   }
@@ -460,6 +458,13 @@ double InstrumentActor::getIntegratedCounts(size_t index) const {
 void InstrumentActor::sumDetectors(const std::vector<size_t> &dets,
                                    std::vector<double> &x,
                                    std::vector<double> &y, size_t size) const {
+  // don't bother if no detectors are supplied
+  if (dets.empty() || size == 0) {
+    x.clear();
+    y.clear();
+    return;
+  }
+
   Mantid::API::MatrixWorkspace_const_sptr ws = getWorkspace();
   const auto blocksize = ws->blocksize();
   if (size > blocksize || size == 0) {
@@ -488,15 +493,20 @@ void InstrumentActor::sumDetectors(const std::vector<size_t> &dets,
 void InstrumentActor::sumDetectorsUniform(const std::vector<size_t> &dets,
                                           std::vector<double> &x,
                                           std::vector<double> &y) const {
+  auto firstWorkspaceIndex = [this](const std::vector<size_t> &dets) {
+    if (dets.empty())
+      return INVALID_INDEX;
+    for (auto i : dets) {
+      auto const index = getWorkspaceIndex(i);
+      if (index != INVALID_INDEX)
+        return index;
+    }
+    return INVALID_INDEX;
+  };
 
-  bool isDataEmpty = dets.empty();
+  auto const wi = firstWorkspaceIndex(dets);
 
-  auto wi = getWorkspaceIndex(dets[0]);
-
-  if (wi == INVALID_INDEX)
-    isDataEmpty = true;
-
-  if (isDataEmpty) {
+  if (wi == INVALID_INDEX) {
     x.clear();
     y.clear();
     return;
@@ -504,7 +514,6 @@ void InstrumentActor::sumDetectorsUniform(const std::vector<size_t> &dets,
 
   // find the bins inside the integration range
   size_t imin, imax;
-
   getBinMinMaxIndex(wi, imin, imax);
 
   Mantid::API::MatrixWorkspace_const_sptr ws = getWorkspace();
@@ -512,8 +521,8 @@ void InstrumentActor::sumDetectorsUniform(const std::vector<size_t> &dets,
   x.assign(XPoints.begin() + imin, XPoints.begin() + imax);
   y.resize(x.size(), 0);
   // sum the spectra
-  for (auto det : dets) {
-    auto index = getWorkspaceIndex(det);
+  for (const auto det : dets) {
+    const auto index = getWorkspaceIndex(det);
     if (index == INVALID_INDEX)
       continue;
     const auto &Y = ws->y(index);
@@ -537,12 +546,6 @@ void InstrumentActor::sumDetectorsRagged(const std::vector<size_t> &dets,
                                          std::vector<double> &x,
                                          std::vector<double> &y,
                                          size_t size) const {
-  if (dets.empty() || size == 0) {
-    x.clear();
-    y.clear();
-    return;
-  }
-
   Mantid::API::MatrixWorkspace_const_sptr ws = getWorkspace();
   //  create a workspace to hold the data from the selected detectors
   Mantid::API::MatrixWorkspace_sptr dws =
@@ -554,8 +557,8 @@ void InstrumentActor::sumDetectorsRagged(const std::vector<size_t> &dets,
 
   size_t nSpec = 0; // number of actual spectra to add
   // fill in the temp workspace with the data from the detectors
-  for (auto det : dets) {
-    auto index = getWorkspaceIndex(det);
+  for (const auto det : dets) {
+    const auto index = getWorkspaceIndex(det);
     if (index == INVALID_INDEX)
       continue;
     dws->setHistogram(nSpec, ws->histogram(index));
@@ -796,7 +799,7 @@ void InstrumentActor::initMaskHelper() const {
     m_maskWorkspace = extractCurrentMask();
   } catch (...) {
     // don't know what to do here yet ...
-    QMessageBox::warning(nullptr, "MantidPlot - Warning",
+    QMessageBox::warning(nullptr, "Mantid - Warning",
                          "An error occurred when extracting the mask.", "OK");
   }
 }

@@ -8,7 +8,6 @@
 #define LOADEVENTNEXUSTEST_H_
 
 #include "MantidAPI/AlgorithmManager.h"
-
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
@@ -22,6 +21,7 @@
 #include "MantidIndexing/SpectrumNumber.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidNexusGeometry/Hdf5Version.h"
 #include "MantidParallel/Collectives.h"
 #include "MantidParallel/Communicator.h"
 #include "MantidTestHelpers/ParallelAlgorithmCreation.h"
@@ -37,6 +37,58 @@ using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
 using Mantid::Types::Core::DateAndTime;
 using Mantid::Types::Event::TofEvent;
+
+void run_multiprocess_load(const std::string &file, bool precount) {
+  Mantid::API::FrameworkManager::Instance();
+  LoadEventNexus ld;
+  ld.initialize();
+  ld.setPropertyValue("Loadtype", "Multiprocess (experimental)");
+  std::string outws_name = "multiprocess";
+  ld.setPropertyValue("Filename", file);
+  ld.setPropertyValue("OutputWorkspace", outws_name);
+  ld.setPropertyValue("Precount", std::to_string(precount));
+  ld.setProperty<bool>("LoadLogs", false); // Time-saver
+  TS_ASSERT_THROWS_NOTHING(ld.execute());
+  TS_ASSERT(ld.isExecuted())
+
+  EventWorkspace_sptr ws =
+      AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outws_name);
+  TS_ASSERT(ws);
+
+  LoadEventNexus ldRef;
+  ldRef.initialize();
+  ldRef.setPropertyValue("Loadtype", "Default");
+  outws_name = "reference";
+  ldRef.setPropertyValue("Filename", file);
+  ldRef.setPropertyValue("OutputWorkspace", outws_name);
+  ldRef.setPropertyValue("Precount", "1");
+  ldRef.setProperty<bool>("LoadLogs", false); // Time-saver
+  TS_ASSERT_THROWS_NOTHING(ldRef.execute());
+  TS_ASSERT(ldRef.isExecuted())
+
+  EventWorkspace_sptr wsRef =
+      AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outws_name);
+  TS_ASSERT(wsRef);
+
+  TSM_ASSERT_EQUALS("Different spectrum number in reference ws.",
+                    wsRef->getNumberHistograms(), ws->getNumberHistograms());
+  if (wsRef->getNumberHistograms() != ws->getNumberHistograms())
+    return;
+  for (size_t i = 0; i < wsRef->getNumberHistograms(); ++i) {
+    auto &eventList = ws->getSpectrum(i).getEvents();
+    auto &eventListRef = wsRef->getSpectrum(i).getEvents();
+    TSM_ASSERT_EQUALS("Different events number in reference spectra",
+                      eventList.size(), eventListRef.size());
+    if (eventList.size() != eventListRef.size())
+      return;
+    for (size_t j = 0; j < eventListRef.size(); ++j) {
+      TSM_ASSERT_EQUALS("Events are not equal", eventList[j].tof(),
+                        eventListRef[j].tof());
+      TSM_ASSERT_EQUALS("Events are not equal", eventList[j].pulseTime(),
+                        eventListRef[j].pulseTime());
+    }
+  }
+}
 
 namespace {
 boost::shared_ptr<const EventWorkspace>
@@ -167,6 +219,29 @@ public:
                      (150 * 150) + 2) // Two monitors
   }
 
+  void test_load_event_nexus_v20_ess_integration_2018() {
+    // Only perform this test if the version of hdf5 supports vlen strings
+    if (NexusGeometry::Hdf5Version::checkVariableLengthStringSupport()) {
+      const std::string file = "V20_ESSIntegration_2018-12-13_0942.nxs";
+      LoadEventNexus alg;
+      alg.setChild(true);
+      alg.setRethrows(true);
+      alg.initialize();
+      alg.setProperty("Filename", file);
+      alg.setProperty("OutputWorkspace", "dummy_for_child");
+      alg.execute();
+      Workspace_sptr ws = alg.getProperty("OutputWorkspace");
+      auto eventWS = boost::dynamic_pointer_cast<EventWorkspace>(ws);
+      TS_ASSERT(eventWS);
+
+      TS_ASSERT_EQUALS(eventWS->getNumberEvents(), 43277);
+      TS_ASSERT_EQUALS(eventWS->detectorInfo().size(),
+                       (300 * 300) + 2) // Two monitors
+      TS_ASSERT_DELTA(eventWS->getTofMin(), 9.815, 1.0e-3);
+      TS_ASSERT_DELTA(eventWS->getTofMax(), 130748.563, 1.0e-3);
+    }
+  }
+
   void test_load_event_nexus_sans2d_ess() {
     const std::string file = "SANS2D_ESS_example.nxs";
     LoadEventNexus alg;
@@ -194,7 +269,45 @@ public:
     TS_ASSERT_EQUALS(eventWS->indexInfo().spectrumNumber(2), 3);
   }
 
+#ifdef _WIN32
+  bool windows = true;
+#else
+  bool windows = false;
+#endif // _WIN32
+  void test_multiprocess_loader_precount() {
+    if (!windows) {
+      run_multiprocess_load("SANS2D00022048.nxs", true);
+      run_multiprocess_load("LARMOR00003368.nxs", true);
+    }
+  }
+
+  void test_multiprocess_loader_producer_consumer() {
+    if (!windows) {
+      run_multiprocess_load("SANS2D00022048.nxs", false);
+      run_multiprocess_load("LARMOR00003368.nxs", false);
+    }
+  }
+
   void test_SingleBank_PixelsOnlyInThatBank() { doTestSingleBank(true, false); }
+
+  void test_load_event_nexus_ornl_eqsans() {
+    // This file has a 2D entry/sample/name
+    const std::string file = "EQSANS_89157.nxs.h5";
+    LoadEventNexus alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("Filename", file);
+    alg.setProperty("MetaDataOnly", true);
+    alg.setProperty("OutputWorkspace", "dummy_for_child");
+    alg.execute();
+    Workspace_sptr ws = alg.getProperty("OutputWorkspace");
+    auto eventWS = boost::dynamic_pointer_cast<EventWorkspace>(ws);
+    TS_ASSERT(eventWS);
+    const double duration =
+        eventWS->mutableRun().getPropertyValueAsType<double>("duration");
+    TS_ASSERT_DELTA(duration, 7200.012, 0.01);
+  }
 
   void test_Normal_vs_Precount() {
     Mantid::API::FrameworkManager::Instance();
@@ -908,6 +1021,33 @@ private:
 
 class LoadEventNexusTestPerformance : public CxxTest::TestSuite {
 public:
+#ifdef _WIN32
+  bool windows = true;
+#else
+  bool windows = false;
+#endif // _WIN32
+  void testMultiprocessLoadPrecount() {
+    if (!windows) {
+      LoadEventNexus loader;
+      loader.initialize();
+      loader.setPropertyValue("Filename", "SANS2D00022048.nxs");
+      loader.setPropertyValue("OutputWorkspace", "ws");
+      loader.setPropertyValue("Loadtype", "Multiprocess (experimental)");
+      loader.setPropertyValue("Precount", std::to_string(true));
+      TS_ASSERT(loader.execute());
+    }
+  }
+  void testMultiprocessLoadProducerConsumer() {
+    if (!windows) {
+      LoadEventNexus loader;
+      loader.initialize();
+      loader.setPropertyValue("Filename", "SANS2D00022048.nxs");
+      loader.setPropertyValue("OutputWorkspace", "ws");
+      loader.setPropertyValue("Loadtype", "Multiprocess (experimental)");
+      loader.setPropertyValue("Precount", std::to_string(false));
+      TS_ASSERT(loader.execute());
+    }
+  }
   void testDefaultLoad() {
     LoadEventNexus loader;
     loader.initialize();

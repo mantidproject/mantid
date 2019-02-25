@@ -12,6 +12,7 @@ from Muon.GUI.Common.load_run_widget.load_run_view import LoadRunWidgetView
 from Muon.GUI.Common.load_run_widget.load_run_presenter import LoadRunWidgetPresenter
 
 from Muon.GUI.Common import mock_widget
+from Muon.GUI.Common.muon_data_context import MuonDataContext
 from Muon.GUI.Common.muon_load_data import MuonLoadData
 
 import unittest
@@ -44,11 +45,12 @@ class LoadRunWidgetPresenterTest(unittest.TestCase):
         # Store an empty widget to parent all the views, and ensure they are deleted correctly
         self.obj = QtGui.QWidget()
 
+        self.context = MuonDataContext()
+        self.context.instrument = 'EMU'
         self.data = MuonLoadData()
         self.view = LoadRunWidgetView(parent=self.obj)
-        self.model = LoadRunWidgetModel(self.data)
+        self.model = LoadRunWidgetModel(self.data, self.context)
         self.presenter = LoadRunWidgetPresenter(self.view, self.model)
-        self.presenter.enable_multiple_files(False)
         self.presenter.set_current_instrument("EMU")
 
         patcher = mock.patch('Muon.GUI.Common.load_run_widget.load_run_model.load_utils')
@@ -84,12 +86,11 @@ class LoadRunWidgetPresenterTest(unittest.TestCase):
         self.wait_for_thread(self.presenter._load_thread)
 
         self.assertEqual(self.presenter.filenames, ["EMU00001234.nxs"])
-        self.assertEqual(self.presenter.runs, [1234])
+        self.assertEqual(self.presenter.runs, [[1234]])
         self.assertEqual(self.presenter.workspaces, [[1, 2, 3]])
 
     @run_test_with_and_without_threading
     def test_warning_message_displayed_if_user_enters_multiple_files_in_single_file_mode(self):
-        self.presenter.enable_multiple_files(False)
         self.view.warning_popup = mock.Mock()
         self.view.set_run_edit_text("1234,1235,1236")
 
@@ -97,25 +98,6 @@ class LoadRunWidgetPresenterTest(unittest.TestCase):
         self.wait_for_thread(self.presenter._load_thread)
 
         self.assertEqual(self.view.warning_popup.call_count, 1)
-
-    @run_test_with_and_without_threading
-    def test_data_reverts_to_previous_entry_if_user_enters_multiple_files_in_single_file_mode(self):
-        self.presenter.enable_multiple_files(False)
-
-        # Load some data
-        self.mock_loading_via_user_input_run([1], "1234.nxs", 1234)
-        self.presenter.handle_run_changed_by_user()
-        self.wait_for_thread(self.presenter._load_thread)
-
-        self.view.warning_popup = mock.Mock()
-        self.view.set_run_edit_text("1234,1235,1236")
-
-        self.presenter.handle_run_changed_by_user()
-        self.wait_for_thread(self.presenter._load_thread)
-
-        self.assertEqual(self.presenter.filenames, ["1234.nxs"])
-        self.assertEqual(self.presenter.runs, [1234])
-        self.assertEqual(self.presenter.workspaces, [[1]])
 
 
 if __name__ == '__main__':

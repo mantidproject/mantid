@@ -28,7 +28,8 @@ import numpy as np
 
 # local imports
 from mantidqt.plotting.functions import (can_overplot, current_figure_or_none, figure_title,
-                                         plot, plot_from_names, pcolormesh_from_names)
+                                         manage_workspace_names, plot, plot_from_names,
+                                         pcolormesh_from_names)
 
 
 # Avoid importing the whole of mantid for a single mock of the workspace class
@@ -38,6 +39,11 @@ class FakeWorkspace(object):
 
     def name(self):
         return self._name
+
+
+@manage_workspace_names
+def workspace_names_dummy_func(workspaces):
+    return workspaces
 
 
 class FunctionsTest(TestCase):
@@ -84,6 +90,19 @@ class FunctionsTest(TestCase):
     def test_figure_title_with_empty_list_raises_assertion(self):
         with self.assertRaises(AssertionError):
             figure_title([], 5)
+
+    def test_that_plot_can_accept_workspace_names(self):
+        ws_name1 = "some_workspace"
+        AnalysisDataService.Instance().addOrReplace(ws_name1, self._test_ws)
+
+        try:
+            result_workspaces = workspace_names_dummy_func([ws_name1])
+        except ValueError:
+            self.assertFalse(True, "Passing workspace names should not raise a value error.")
+        else:
+            # The list of workspace names we pass in should have been converted
+            # to a list of workspaces
+            self.assertNotEqual(result_workspaces, [ws_name1])
 
     @mock.patch('mantidqt.plotting.functions.get_spectra_selection')
     @mock.patch('mantidqt.plotting.functions.plot')
@@ -164,6 +183,11 @@ class FunctionsTest(TestCase):
         AnalysisDataService.Instance().addOrReplace(table_name, table)
         result = pcolormesh_from_names([table_name])
         self.assertTrue(result is None)
+
+    def test_that_manage_workspace_names_raises_on_mix_of_workspaces_and_names(self):
+        ws = ["some_workspace", self._test_ws]
+        AnalysisDataService.Instance().addOrReplace("some_workspace", self._test_ws)
+        self.assertRaises(TypeError, workspace_names_dummy_func(ws))
 
     # ------------- Private -------------------
     def _do_plot_from_names_test(self, get_spectra_selection_mock, expected_labels,

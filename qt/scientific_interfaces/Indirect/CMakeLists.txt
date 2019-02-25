@@ -30,6 +30,9 @@ set ( SRC_FILES
 	IndirectFitDataPresenter.cpp
 	IndirectFitDataView.cpp
 	IndirectFitOutput.cpp
+	IndirectFitOutputOptionsModel.cpp
+	IndirectFitOutputOptionsPresenter.cpp
+	IndirectFitOutputOptionsView.cpp
 	IndirectFitPlotModel.cpp
 	IndirectFitPlotPresenter.cpp
 	IndirectFitPlotView.cpp
@@ -82,6 +85,8 @@ set ( INC_FILES
 	Elwin.h
 	IAddWorkspaceDialog.h
 	IIndirectFitDataView.h
+	IIndirectFitOutputOptionsModel.h
+	IIndirectFitOutputOptionsView.h
 	IIndirectFitPlotView.h
 	ILLEnergyTransfer.h
 	ISISCalibration.h
@@ -102,6 +107,9 @@ set ( INC_FILES
 	IndirectFitDataPresenter.h
 	IndirectFitDataView.h
 	IndirectFitOutput.h
+	IndirectFitOutputOptionsModel.h
+	IndirectFitOutputOptionsPresenter.h
+	IndirectFitOutputOptionsView.h
 	IndirectFitPlotModel.h
 	IndirectFitPlotPresenter.h
 	IndirectFitPlotView.h
@@ -151,6 +159,8 @@ set ( MOC_FILES
     Elwin.h
     IAddWorkspaceDialog.h
     IIndirectFitDataView.h
+    IIndirectFitOutputOptionsModel.h
+    IIndirectFitOutputOptionsView.h
     IIndirectFitPlotView.h
     ILLEnergyTransfer.h
     IndirectAddWorkspaceDialog.h
@@ -166,6 +176,8 @@ set ( MOC_FILES
     IndirectFitAnalysisTab.h
     IndirectFitDataPresenter.h
     IndirectFitDataView.h
+    IndirectFitOutputOptionsPresenter.h
+    IndirectFitOutputOptionsView.h
     IndirectFitPlotPresenter.h
     IndirectFitPlotView.h
     IndirectLoadILL.h
@@ -216,6 +228,7 @@ set ( UI_FILES
    IndirectDataReduction.ui
    IndirectDiffractionReduction.ui
    IndirectFitDataView.ui
+   IndirectFitOutputOptions.ui
    IndirectFitPreviewPlot.ui
    IndirectLoadILL.ui
    IndirectMolDyn.ui
