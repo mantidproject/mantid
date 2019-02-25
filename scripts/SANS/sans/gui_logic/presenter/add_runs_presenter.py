@@ -165,7 +165,7 @@ class AddRunsPagePresenter(object):
 
     def _get_default_output_directory(self):
         directory = load_property(self.__generic_settings, self.__output_directory_key)
-        if directory == "":
+        if not directory:
             return ConfigService.Instance().getString("defaultsave.directory")
         else:
             return directory
@@ -179,9 +179,7 @@ class AddRunsPagePresenter(object):
         :param directory: a string - a directory path
         :return: Nothing
         """
-        if directory == "":
-            return None
-        else:
+        if directory:
             directory = os.path.join(directory, '')  # Add an OS specific trailing slash if it doesn't already exist
             set_setting(self.__generic_settings, self.__output_directory_key, directory)
             self.save_directory = directory
