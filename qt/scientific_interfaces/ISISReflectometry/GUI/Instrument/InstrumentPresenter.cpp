@@ -6,6 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "InstrumentPresenter.h"
 #include "GUI/Batch/IBatchPresenter.h"
+#include "InstrumentOptionDefaults.h"
+#include "MantidGeometry/Instrument_fwd.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -33,6 +35,11 @@ void InstrumentPresenter::acceptMainPresenter(IBatchPresenter *mainPresenter) {
 
 void InstrumentPresenter::notifySettingsChanged() {
   updateModelFromView();
+  m_mainPresenter->notifySettingsChanged();
+}
+
+void InstrumentPresenter::notifyGetDefaults() {
+  // updateViewFromModel();
   m_mainPresenter->notifySettingsChanged();
 }
 
@@ -64,9 +71,12 @@ void InstrumentPresenter::autoreductionPaused() { updateWidgetEnabledState(); }
 
 void InstrumentPresenter::autoreductionResumed() { updateWidgetEnabledState(); }
 
-void InstrumentPresenter::instrumentChanged(std::string const &instrumentName) {
+void InstrumentPresenter::instrumentChanged(
+    std::string const &instrumentName,
+    Mantid::Geometry::Instrument_const_sptr instrument) {
   UNUSED_ARG(instrumentName);
-  // TODO: set defaults for the given instrument
+  auto instrumentDefaults = InstrumentOptionDefaults(instrument);
+  m_model = instrumentDefaults();
 }
 
 boost::optional<RangeInLambda> InstrumentPresenter::wavelengthRangeFromView() {

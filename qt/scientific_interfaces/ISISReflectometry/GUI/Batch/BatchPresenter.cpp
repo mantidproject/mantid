@@ -12,6 +12,10 @@
 #include "GUI/Runs/IRunsPresenter.h"
 #include "GUI/Save/ISavePresenter.h"
 #include "IBatchView.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/IAlgorithm_fwd.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 
@@ -21,6 +25,9 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 using API::IConfiguredAlgorithm_sptr;
+using Mantid::API::AlgorithmManager;
+using Mantid::API::IAlgorithm_sptr;
+using Mantid::API::MatrixWorkspace_sptr;
 
 // unnamed namespace
 namespace {
@@ -227,8 +234,22 @@ void BatchPresenter::instrumentChanged(const std::string &instrumentName) {
   Mantid::Kernel::ConfigService::Instance().setString("default.instrument",
                                                       instrumentName);
   g_log.information() << "Instrument changed to " << instrumentName;
-  m_runsPresenter->instrumentChanged(instrumentName);
-  m_instrumentPresenter->instrumentChanged(instrumentName);
+
+  // Load a workspace for this instrument so we can get the actual instrument
+  IAlgorithm_sptr loadAlg =
+      AlgorithmManager::Instance().create("LoadEmptyInstrument");
+  loadAlg->setChild(true);
+  loadAlg->initialize();
+  loadAlg->setProperty("InstrumentName", instrumentName);
+  loadAlg->setProperty("OutputWorkspace",
+                       "__Reflectometry_GUI_Empty_Instrument");
+  loadAlg->execute();
+  MatrixWorkspace_sptr instWorkspace = loadAlg->getProperty("OutputWorkspace");
+  auto instrument = instWorkspace->getInstrument();
+
+  m_runsPresenter->instrumentChanged(instrumentName, instrument);
+  m_experimentPresenter->instrumentChanged(instrumentName, instrument);
+  m_instrumentPresenter->instrumentChanged(instrumentName, instrument);
 }
 
 void BatchPresenter::settingsChanged() { m_runsPresenter->settingsChanged(); }

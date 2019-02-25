@@ -24,6 +24,7 @@ contains no QT specific functionality as that should be handled by a subclass.
 class MANTIDQT_ISISREFLECTOMETRY_DLL InstrumentViewSubscriber {
 public:
   virtual void notifySettingsChanged() = 0;
+  virtual void notifyGetDefaults() = 0;
 };
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL IInstrumentView {

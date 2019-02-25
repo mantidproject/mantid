@@ -7,6 +7,7 @@
 #ifndef MANTID_ISISREFLECTOMETRY_IREFLRUNSPRESENTER_H
 #define MANTID_ISISREFLECTOMETRY_IREFLRUNSPRESENTER_H
 
+#include "MantidGeometry/Instrument_fwd.h"
 #include "Reduction/RunsTable.h"
 #include <string>
 
@@ -36,7 +37,9 @@ public:
   virtual void reductionResumed() = 0;
   virtual void autoreductionPaused() = 0;
   virtual void autoreductionResumed() = 0;
-  virtual void instrumentChanged(std::string const &instrumentName) = 0;
+  virtual void
+  instrumentChanged(std::string const &instrumentName,
+                    Mantid::Geometry::Instrument_const_sptr instrument) = 0;
   virtual void settingsChanged() = 0;
 
   virtual bool isProcessing() const = 0;

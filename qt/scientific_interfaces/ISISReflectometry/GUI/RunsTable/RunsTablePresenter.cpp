@@ -209,7 +209,10 @@ void RunsTablePresenter::autoreductionResumed() { reductionResumed(); }
 
 void RunsTablePresenter::autoreductionPaused() { reductionPaused(); }
 
-void RunsTablePresenter::instrumentChanged(std::string const &instrumentName) {
+void RunsTablePresenter::instrumentChanged(
+    std::string const &instrumentName,
+    Mantid::Geometry::Instrument_const_sptr instrument) {
+  UNUSED_ARG(instrument);
   m_view->setInstrumentName(instrumentName);
 }
 

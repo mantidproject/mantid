@@ -11,6 +11,7 @@
 #include "Common/DllConfig.h"
 #include "IInstrumentPresenter.h"
 #include "IInstrumentView.h"
+#include "MantidGeometry/Instrument_fwd.h"
 #include <boost/optional.hpp>
 
 namespace MantidQt {
@@ -34,10 +35,13 @@ public:
   void reductionResumed() override;
   void autoreductionPaused() override;
   void autoreductionResumed() override;
-  void instrumentChanged(std::string const &instrumentName) override;
+  void instrumentChanged(
+      std::string const &instrumentName,
+      Mantid::Geometry::Instrument_const_sptr instrument) override;
 
   // InstrumentViewSubscriber overrides
   void notifySettingsChanged() override;
+  void notifyGetDefaults() override;
 
 private:
   IInstrumentView *m_view;

@@ -5,38 +5,75 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "InstrumentOptionDefaults.h"
-#include "Common/ValueOr.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include "Reduction/Instrument.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
-bool operator==(InstrumentOptionDefaults const &lhs,
-                InstrumentOptionDefaults const &rhs) {
-  return lhs.NormalizeByIntegratedMonitors ==
-             rhs.NormalizeByIntegratedMonitors &&
-         lhs.MonitorIntegralMin == rhs.MonitorIntegralMin &&
-         lhs.MonitorIntegralMax == rhs.MonitorIntegralMax &&
-         lhs.MonitorBackgroundMin == rhs.MonitorBackgroundMin &&
-         lhs.LambdaMin == rhs.LambdaMin && lhs.LambdaMax == rhs.LambdaMax &&
-         lhs.I0MonitorIndex == rhs.I0MonitorIndex &&
-         lhs.DetectorCorrectionType == rhs.DetectorCorrectionType;
+
+InstrumentOptionDefaults::InstrumentOptionDefaults(
+    Mantid::Geometry::Instrument_const_sptr instrument)
+    : m_instrument(instrument) {
+  // Get the algorithm for which we'll take defaults if available
+  m_algorithm = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
+      "ReflectometryReductionOneAuto");
+  m_algorithm->initialize();
 }
 
-std::ostream &operator<<(std::ostream &os,
-                         InstrumentOptionDefaults const &defaults) {
-  os << "InstrumentOptionDefaults: { NormalizeByIntegratedMonitors: "
-     << (defaults.NormalizeByIntegratedMonitors ? "true" : "false")
-     << ",\n MonitorIntegralMin: " << defaults.MonitorIntegralMin
-     << ",\n MonitorIntegralMax: " << defaults.MonitorIntegralMax
-     << ",\n MonitorBackgroundMin: " << defaults.MonitorBackgroundMin
-     << ",\n MonitorBackgroundMax: " << defaults.MonitorBackgroundMax
-     << ",\n LambdaMin: " << defaults.LambdaMin
-     << ",\n LambdaMax: " << defaults.LambdaMax
-     << ",\n I0MonitorIndex: " << defaults.I0MonitorIndex
-     << ",\n CorrectDetectors: "
-     << (defaults.CorrectDetectors ? "true" : "false");
-  os << ",\n DetectorCorrectionType: '" << defaults.DetectorCorrectionType
-     << "' }" << std::endl;
-  return os;
+int InstrumentOptionDefaults::getIntOrZero(
+    std::string const &propertyName, std::string const &parameterName) const {
+  return getValueOrDefault<int>(propertyName, parameterName, 0);
+}
+
+double InstrumentOptionDefaults::getDoubleOrZero(
+    std::string const &propertyName, std::string const &parameterName) const {
+  return getValueOrDefault<double>(propertyName, parameterName, 0.0);
+}
+
+bool InstrumentOptionDefaults::getBoolOrFalse(
+    std::string const &propertyName, std::string const &parameterName) const {
+  return getValueOrDefault<bool>(propertyName, parameterName, false);
+}
+
+std::string InstrumentOptionDefaults::getStringOrDefault(
+    std::string const &propertyName, std::string const &parameterName,
+    std::string const &defaultValue) const {
+  return getValueOrDefault<std::string>(propertyName, parameterName,
+                                        defaultValue);
+}
+
+std::string
+InstrumentOptionDefaults::getString(std::string const &propertyName,
+                                    std::string const &parameterName) const {
+  return getValue<std::string>(propertyName, parameterName);
+}
+
+Instrument InstrumentOptionDefaults::operator()() const {
+
+  auto wavelengthRange =
+      RangeInLambda(getValue<double>("WavelengthMin", "LambdaMin"),
+                    getValue<double>("WavelengthMax", "LambdaMax"));
+
+  auto monitorIndex = getIntOrZero("I0MonitorIndex", "I0MonitorIndex");
+  auto integrate = getBoolOrFalse("NormalizeByIntegratedMonitors",
+                                  "NormalizeByIntegratedMonitors");
+  auto backgroundRange = RangeInLambda(
+      getDoubleOrZero("MonitorBackgroundWavelengthMin", "MonitorBackgroundMin"),
+      getDoubleOrZero("MonitorBackgroundWavelengthMax",
+                      "MonitorBackgroundMax"));
+  auto integralRange = RangeInLambda(
+      getDoubleOrZero("MonitorIntegrationWavelengthMin", "MonitorIntegralMin"),
+      getDoubleOrZero("MonitorIntegrationWavelengthMax", "MonitorIntegralMax"));
+  auto monitorCorrections = MonitorCorrections(monitorIndex, integrate,
+                                               backgroundRange, integralRange);
+
+  auto detectorCorrectionString = getStringOrDefault(
+      "DetectorCorrectionType", "DetectorCorrectionType", "VerticalShift");
+  auto detectorCorrections = DetectorCorrections(
+      getBoolOrFalse("CorrectDetectors", "CorrectDetectors"),
+      detectorCorrectionTypeFromString(detectorCorrectionString));
+
+  return Instrument(wavelengthRange, monitorCorrections, detectorCorrections);
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt

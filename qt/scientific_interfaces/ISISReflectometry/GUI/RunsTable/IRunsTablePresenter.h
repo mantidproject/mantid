@@ -8,6 +8,7 @@
 #define MANTID_ISISREFLECTOMETRY_IREFLRUNSTABLEPRESENTER_H
 
 #include "GUI/Batch/IBatchPresenter.h"
+#include "MantidGeometry/Instrument_fwd.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/OptionsMap.h"
 
 namespace MantidQt {
@@ -37,7 +38,9 @@ public:
   virtual void reductionResumed() = 0;
   virtual void autoreductionPaused() = 0;
   virtual void autoreductionResumed() = 0;
-  virtual void instrumentChanged(std::string const &instrumentName) = 0;
+  virtual void
+  instrumentChanged(std::string const &instrumentName,
+                    Mantid::Geometry::Instrument_const_sptr instrument) = 0;
   virtual void settingsChanged() = 0;
 };
 } // namespace CustomInterfaces

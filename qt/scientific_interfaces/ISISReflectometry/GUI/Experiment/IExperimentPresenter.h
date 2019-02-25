@@ -8,11 +8,14 @@
 #define MANTID_ISISREFLECTOMETRY_IEXPERIMENTPRESENTER_H
 
 #include "GUI/Batch/IBatchPresenter.h"
+#include "MantidGeometry/Instrument_fwd.h"
 #include "Reduction/Experiment.h"
 #include <string>
 
 namespace MantidQt {
 namespace CustomInterfaces {
+class Instrument_const_sptr;
+
 class IExperimentPresenter {
 public:
   virtual ~IExperimentPresenter() = default;
@@ -23,6 +26,9 @@ public:
   virtual void reductionResumed() = 0;
   virtual void autoreductionPaused() = 0;
   virtual void autoreductionResumed() = 0;
+  virtual void
+  instrumentChanged(std::string const &instrumentName,
+                    Mantid::Geometry::Instrument_const_sptr instrument) = 0;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

@@ -7,34 +7,65 @@
 #ifndef MANTID_ISISREFLECTOMETRY_INSTRUMENTOPTIONDEFAULTS_H
 #define MANTID_ISISREFLECTOMETRY_INSTRUMENTOPTIONDEFAULTS_H
 #include "Common/DllConfig.h"
-#include "MantidGeometry/Instrument.h"
-#include <boost/optional.hpp>
-#include <boost/variant.hpp>
-#include <ostream>
+#include "MantidAPI/BoostOptionalToAlgorithmProperty.h"
+#include "MantidGeometry/Instrument_fwd.h"
+#include "Reduction/Instrument.h"
 #include <string>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
-struct MANTIDQT_ISISREFLECTOMETRY_DLL InstrumentOptionDefaults {
-  bool NormalizeByIntegratedMonitors;
-  double MonitorIntegralMin;
-  double MonitorIntegralMax;
-  double MonitorBackgroundMin;
-  double MonitorBackgroundMax;
-  double LambdaMin;
-  double LambdaMax;
-  boost::variant<int, double> I0MonitorIndex;
-  bool CorrectDetectors;
-  std::string DetectorCorrectionType;
+/** @class InstrumentOptionDefaults
+
+    A class to create an Instrument model with defaults from the parameters file
+    or algorithm defaults for a given instrument
+*/
+class InstrumentOptionDefaults {
+public:
+  InstrumentOptionDefaults(Mantid::Geometry::Instrument_const_sptr instrument);
+  Instrument operator()() const;
+
+private:
+  Mantid::API::Algorithm_sptr m_algorithm;
+  Mantid::Geometry::Instrument_const_sptr m_instrument;
+
+  template <typename T>
+  T getValueOrDefault(std::string const &propertyName,
+                      std::string const &parameterName, T defaultValue) const;
+  template <typename T>
+  T getValue(std::string const &propertyName,
+             std::string const &parameterName) const;
+
+  int getIntOrZero(std::string const &propertyName,
+                   std::string const &parameterName) const;
+  double getDoubleOrZero(std::string const &propertyName,
+                         std::string const &parameterName) const;
+  bool getBoolOrFalse(std::string const &propertyName,
+                      std::string const &parameterName) const;
+  std::string getStringOrDefault(std::string const &propertyName,
+                                 std::string const &parameterName,
+                                 std::string const &defaultValue) const;
+  std::string getString(std::string const &propertyName,
+                        std::string const &parameterName) const;
 };
 
-MANTIDQT_ISISREFLECTOMETRY_DLL bool
-operator==(InstrumentOptionDefaults const &lhs,
-           InstrumentOptionDefaults const &rhs);
+template <typename T>
+T InstrumentOptionDefaults::getValueOrDefault(std::string const &propertyName,
+                                              std::string const &parameterName,
+                                              T defaultValue) const {
+  auto maybeValue = Mantid::API::checkForOptionalInstrumentDefault<T>(
+      m_algorithm.get(), propertyName, m_instrument, parameterName);
+  if (maybeValue.is_initialized())
+    return maybeValue.get();
+  return defaultValue;
+}
 
-MANTIDQT_ISISREFLECTOMETRY_DLL std::ostream &
-operator<<(std::ostream &os, InstrumentOptionDefaults const &defaults);
+template <typename T>
+T InstrumentOptionDefaults::getValue(std::string const &propertyName,
+                                     std::string const &parameterName) const {
+  return Mantid::API::checkForMandatoryInstrumentDefault<T>(
+      m_algorithm.get(), propertyName, m_instrument, parameterName);
+}
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_ISISREFLECTOMETRY_INSTRUMENTOPTIONDEFAULTS_H

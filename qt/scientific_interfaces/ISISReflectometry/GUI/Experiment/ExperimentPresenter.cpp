@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ExperimentPresenter.h"
 #include "GUI/Batch/IBatchPresenter.h"
+#include "MantidGeometry/Instrument_fwd.h"
 #include "PerThetaDefaultsTableValidator.h"
 #include "Reduction/ParseReflectometryStrings.h"
 #include "Reduction/ValidatePerThetaDefaults.h"
@@ -91,6 +92,13 @@ void ExperimentPresenter::reductionResumed() { updateWidgetEnabledState(); }
 void ExperimentPresenter::autoreductionPaused() { updateWidgetEnabledState(); }
 
 void ExperimentPresenter::autoreductionResumed() { updateWidgetEnabledState(); }
+
+void ExperimentPresenter::instrumentChanged(
+    std::string const &instrumentName,
+    Mantid::Geometry::Instrument_const_sptr instrument) {
+  UNUSED_ARG(instrumentName);
+  // TODO: set defaults for the given instrument
+}
 
 PolarizationCorrections ExperimentPresenter::polarizationCorrectionsFromView() {
   auto const correctionType = polarizationCorrectionTypeFromString(

@@ -31,6 +31,15 @@ detectorCorrectionTypeToString(DetectorCorrectionType correctionType) {
   throw std::runtime_error("Unexpected detector correction type");
 }
 
+inline DetectorCorrectionType
+detectorCorrectionTypeFromString(std::string const &correctionType) {
+  if (correctionType == "VerticalShift")
+    return DetectorCorrectionType::VerticalShift;
+  if (correctionType == "RotateAroundSample")
+    return DetectorCorrectionType::RotateAroundSample;
+  throw std::runtime_error("Unexpected detector correction type");
+}
+
 /** The DetectorCorrections model holds information about whether
  * and how detectors in a workspace should be moved before being
  * reduced.
