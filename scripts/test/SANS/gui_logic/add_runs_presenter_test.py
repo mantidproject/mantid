@@ -243,6 +243,7 @@ class SummationConfigurationTest(SelectionMockingTestCase):
         return self._just_use(self._summation_settings_presenter)
 
     def test_passes_correct_config_when_summation_requested(self):
+        ConfigService["defaultsave.directory"] = "someDir/"
         run_summation = mock.Mock()
 
         self.presenter = self._make_presenter(
@@ -259,8 +260,7 @@ class SummationConfigurationTest(SelectionMockingTestCase):
                                          'LOQ00003-add')
 
     def test_shows_error_when_empty_default_directory(self):
-        old_default_save = ConfigService["defaultsave.directory"]
-        ConfigService["defaultsave.directory"] = ''
+        ConfigService["defaultsave.directory"] = ""
         summation_settings_model = self._summation_settings_with_save_directory('')
         self._summation_settings_presenter.settings.return_value = summation_settings_model
         self.presenter = self._make_presenter(
@@ -270,7 +270,6 @@ class SummationConfigurationTest(SelectionMockingTestCase):
 
         self.view.sum.emit()
         assert_called(self.view.no_save_directory)
-        ConfigService["defaultsave.directory"] = old_default_save
 
 
 class BaseFileNameTest(SelectionMockingTestCase):
@@ -278,6 +277,10 @@ class BaseFileNameTest(SelectionMockingTestCase):
         self.setUpMockChildPresentersWithDefaultSummationSettings()
         self.view = self._make_mock_view()
         self.parent_view = self._make_mock_parent_view()
+        ConfigService["defaultsave.directory"] = "someDir/"
+
+    def tearDown(self):
+        ConfigService["defaultsave.directory"] = ""
 
     def _make_presenter(self,
                         run_summation):
