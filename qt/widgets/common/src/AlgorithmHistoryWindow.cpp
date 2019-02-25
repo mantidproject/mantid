@@ -4,17 +4,19 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "AlgorithmHistoryWindow.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Strings.h"
 
+#include "MantidQtWidgets/Common/AlgorithmHistoryWindow.h"
 #include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
 
 #include <QAction>
 #include <QApplication>
 #include <QClipboard>
+#include <QCloseEvent>
 #include <QDateTime>
 #include <QDir>
 #include <QFileDialog>
@@ -195,14 +197,14 @@ AlgEnvHistoryGrpBox::~AlgEnvHistoryGrpBox() {
 
 AlgorithmHistoryWindow::AlgorithmHistoryWindow(
     QWidget *parent, const boost::shared_ptr<const Workspace> wsptr)
-    : MantidDialog(parent), m_algHist(wsptr->getHistory()),
+    : QDialog(parent), m_algHist(wsptr->getHistory()),
       m_histPropWindow(nullptr), m_execSumGrpBox(nullptr),
       m_envHistGrpBox(nullptr), m_wsName(wsptr->getName().c_str()),
       m_view(wsptr->getHistory().createView()) {
   setWindowTitle(tr("Algorithm History"));
   setMinimumHeight(500);
   setMinimumWidth(750);
-  setGeometry(50, 150, 540, 380);
+  resize(540, 380);
 
 #ifdef Q_OS_MAC
   // Work around to ensure that floating windows remain on top of the main
@@ -298,6 +300,12 @@ AlgorithmHistoryWindow::AlgorithmHistoryWindow(
   mainLayout->addLayout(buttonLayout);
 }
 
+AlgorithmHistoryWindow::AlgorithmHistoryWindow(QWidget *parent,
+                                               const QString &workspaceName)
+    : AlgorithmHistoryWindow(
+          parent, AnalysisDataService::Instance().retrieveWS<const Workspace>(
+                      workspaceName.toStdString())) {}
+
 AlgorithmHistoryWindow::~AlgorithmHistoryWindow() {
   if (m_Historytree) {
     delete m_Historytree;
@@ -315,6 +323,13 @@ AlgorithmHistoryWindow::~AlgorithmHistoryWindow() {
     delete m_envHistGrpBox;
     m_envHistGrpBox = nullptr;
   }
+}
+
+// Delete window object on close
+// Without this the windows stay in memory when closed in workbench
+void AlgorithmHistoryWindow::closeEvent(QCloseEvent *ce) {
+  this->deleteLater();
+  ce->accept();
 }
 
 AlgExecSummaryGrpBox *AlgorithmHistoryWindow::createExecSummaryGrpBox() {

@@ -18,7 +18,6 @@ enum class WorkspaceDimensionality { oneD, twoD, other };
 
 // NXcanSAS Tag Definitions
 const std::string sasUnitAttr = "units";
-const std::string sasUncertaintyAttr = "uncertainty";
 const std::string sasSignal = "signal";
 const std::string sasSeparator = ",";
 const std::string sasAngstrom = "A";
@@ -27,6 +26,15 @@ const std::string sasIntensity = "1/cm";
 const std::string sasMomentumTransfer = "1/A";
 const std::string sasNxclass = "NX_class";
 const std::string sasCanSASclass = "canSAS_class";
+
+/**
+ * Standards state that "uncertainties" should be used, however different
+ * facilities interpret the standards differently.
+ * At time of writing, 01/19, both "uncertainty" and "uncertainties" are needed
+ * so that Mantid NXcanSAS output is compatible with all other NXcanSAS files.
+ **/
+const std::string sasUncertaintyAttr = "uncertainty";
+const std::string sasUncertaintiesAttr = "uncertainties";
 
 // SASentry
 const std::string sasEntryClassAttr = "SASentry";
@@ -46,8 +54,10 @@ const std::string nxDataClassAttr = "NXdata";
 const std::string sasDataGroupName = "sasdata";
 const std::string sasDataIAxesAttr = "I_axes";
 const std::string sasDataIUncertaintyAttr = "I_uncertainty";
+const std::string sasDataIUncertaintiesAttr = "I_uncertainties";
 const std::string sasDataQIndicesAttr = "Q_indices";
 const std::string sasDataQUncertaintyAttr = "Q_uncertainty";
+const std::string sasDataQUncertaintiesAttr = "Q_uncertainties";
 const std::string sasDataMaskIndicesAttr = "Mask_indices";
 
 const std::string sasDataQ = "Q";
@@ -110,6 +120,7 @@ const std::string nxTransmissionSpectrumClassAttr = "NXdata";
 const std::string sasTransmissionSpectrumGroupName = "sastransmission_spectrum";
 const std::string sasTransmissionSpectrumTIndices = "T_indices";
 const std::string sasTransmissionSpectrumTUncertainty = "T_uncertainty";
+const std::string sasTransmissionSpectrumTUncertainties = "T_uncertainties";
 const std::string sasTransmissionSpectrumNameAttr = "name";
 const std::string sasTransmissionSpectrumNameSampleAttrValue = "sample";
 const std::string sasTransmissionSpectrumNameCanAttrValue = "can";

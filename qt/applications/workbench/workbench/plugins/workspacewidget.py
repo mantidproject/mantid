@@ -12,19 +12,20 @@ from __future__ import (absolute_import, unicode_literals)
 # system imports
 from functools import partial
 
+# third-party library imports
 import matplotlib.pyplot
 from qtpy.QtWidgets import QMessageBox, QVBoxLayout
 
-# third-party library imports
-from mantid.api import AnalysisDataService
+# local package imports
+from mantid.api import AnalysisDataService, MatrixWorkspace, ITableWorkspace
 from mantid.kernel import logger
 from mantidqt.plotting.functions import can_overplot, pcolormesh, plot, plot_from_names
 from mantidqt.widgets.instrumentview.presenter import InstrumentViewPresenter
 from mantidqt.widgets.samplelogs.presenter import SampleLogs
 from mantidqt.widgets.workspacedisplay.matrix.presenter import MatrixWorkspaceDisplay
 from mantidqt.widgets.workspacedisplay.table.presenter import TableWorkspaceDisplay
+from mantidqt.widgets.workspacewidget.algorithmhistorywindow import AlgorithmHistoryWindow
 from mantidqt.widgets.workspacewidget.workspacetreewidget import WorkspaceTreeWidget
-# local package imports
 from workbench.plugins.base import PluginWidget
 
 
@@ -55,6 +56,7 @@ class WorkspaceWidget(PluginWidget):
         self.workspacewidget.sampleLogsClicked.connect(self._do_sample_logs)
         self.workspacewidget.showDataClicked.connect(self._do_show_data)
         self.workspacewidget.showInstrumentClicked.connect(self._do_show_instrument)
+        self.workspacewidget.showAlgorithmHistoryClicked.connect(self._do_show_algorithm_history)
 
         self.workspacewidget.workspaceDoubleClicked.connect(self._action_double_click_workspace)
 
@@ -137,7 +139,19 @@ class WorkspaceWidget(PluginWidget):
                     presenter.show_view()
                 except ValueError:
                     logger.error(
-                        "Could not open workspace: {0} with neither MatrixWorkspaceDisplay nor TableWorkspaceDisplay.")
+                        "Could not open workspace: {0} with neither "
+                        "MatrixWorkspaceDisplay nor TableWorkspaceDisplay."
+                        "".format(ws.name()))
+
+    def _do_show_algorithm_history(self, names):
+        for name in names:
+            if any(isinstance(self._ads.retrieve(name), ws_type)
+                   for ws_type in [MatrixWorkspace, ITableWorkspace]):
+                AlgorithmHistoryWindow(self, name).show()
+            else:
+                logger.warning("Could not open history of '{}'. "
+                               "Not a MatrixWorkspace or ITableWorkspace"
+                               "".format(name))
 
     def _action_double_click_workspace(self, name):
         self._do_show_data([name])

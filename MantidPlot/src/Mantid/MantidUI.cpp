@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidUI.h"
 #include "AlgorithmDockWidget.h"
-#include "AlgorithmHistoryWindow.h"
 #include "AlgorithmMonitor.h"
 #include "ImportWorkspaceDlg.h"
 #include "MantidMDCurve.h"
@@ -48,6 +47,7 @@
 
 #include "InstrumentWidget/InstrumentWindow.h"
 
+#include "MantidQtWidgets/Common/AlgorithmHistoryWindow.h"
 #include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
 #include "MantidQtWidgets/Common/InterfaceManager.h"
 #include "MantidQtWidgets/Common/PlotAxis.h"
