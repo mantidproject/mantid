@@ -393,8 +393,8 @@ void SofQWNormalisedPolygon::exec() {
       }
 
       using FractionalRebinning::rebinToFractionalOutput;
-      rebinToFractionalOutput(Quadrilateral(ll, lr, ur, ul),
-                              inputWS, i, j, *outputWS, m_Qout);
+      rebinToFractionalOutput(Quadrilateral(ll, lr, ur, ul), inputWS, i, j,
+                              *outputWS, m_Qout);
 
       // Find which q bin this point lies in
       const MantidVec::difference_type qIndex =
