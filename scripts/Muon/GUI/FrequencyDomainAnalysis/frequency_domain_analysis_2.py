@@ -80,7 +80,7 @@ class FrequencyAnalysisGui(QtGui.QMainWindow):
         central_widget.setLayout(vertical_layout)
 
         self.setCentralWidget(central_widget)
-        self.setWindowTitle("Frequency Domain Analysis version 2.0")
+        self.setWindowTitle("Frequency Domain Analysis")
 
         self.home_tab.group_widget.pairAlphaNotifier.add_subscriber(
             self.grouping_tab_widget.group_tab_presenter.loadObserver)

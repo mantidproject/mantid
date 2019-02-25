@@ -157,7 +157,6 @@ class HomeTabInstrumentPresenterTest(unittest.TestCase):
         self.view.rebin_variable_edit.editingFinished.emit()
 
         self.assertEqual(self.view.rebin_variable_edit.text(), '')
-        self.gui_variable_observer.update.assert_called_once_with(self.context.gui_variables_notifier, None)
 
     def test_that_rebin_type_starts_as_none(self):
         self.assertEqual(self.model._data.gui_variables['RebinType'], 'None')
