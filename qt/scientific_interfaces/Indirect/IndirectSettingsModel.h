@@ -9,6 +9,7 @@
 
 #include "DllConfig.h"
 
+#include <string>
 #include <vector>
 
 namespace MantidQt {
