@@ -128,13 +128,13 @@ std::map<std::string, std::string> CopyDataRange::validateInputs() {
   int const xInsertionIndex = getProperty("InsertionXIndex");
 
   try {
-    auto const xMinIndex = inputWorkspace->binIndexOf(xMin);
-    auto const xMaxIndex = inputWorkspace->binIndexOf(xMax);
+    auto const xMinIndex = inputWorkspace->binIndexOf(xMin, 0, 0.000001);
+    auto const xMaxIndex = inputWorkspace->binIndexOf(xMax, 0, 0.000001);
 
     if (xMinIndex > xMaxIndex)
       errors["XMin"] = "XMin must come after XMax.";
 
-    if (destWorkspace->y(0).size() <
+    if (destWorkspace->y(0).size() <=
         static_cast<std::size_t>(xInsertionIndex) + xMaxIndex - xMinIndex)
       errors["InsertionXIndex"] = "The x data range selected will not fit into "
                                   "the destination workspace.";
@@ -152,7 +152,7 @@ std::map<std::string, std::string> CopyDataRange::validateInputs() {
     errors["StartWorkspaceIndex"] =
         "The StartWorkspaceIndex must be smaller than the EndWorkspaceIndex.";
 
-  if (static_cast<int>(destWorkspace->getNumberHistograms()) <
+  if (static_cast<int>(destWorkspace->getNumberHistograms()) <=
       yInsertionIndex + specMaxIndex - specMinIndex)
     errors["InsertionYIndex"] = "The y data range selected will not fit into "
                                 "the destination workspace.";

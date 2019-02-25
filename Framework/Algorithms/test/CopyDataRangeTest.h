@@ -14,8 +14,8 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/NumericAxis.h"
 #include "MantidHistogramData/HistogramE.h"
+#include "MantidHistogramData/HistogramX.h"
 #include "MantidHistogramData/HistogramY.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
@@ -32,27 +32,6 @@ namespace {
 std::string const INPUT_NAME("Input_Workspace");
 std::string const DESTINATION_NAME("Destination_Workspace");
 auto const OUTPUT_NAME("Output_Workspace");
-
-NumericAxis *getNumericAxis(int const &numberOfLabels,
-                            std::vector<double> const &values) {
-  auto axis = new NumericAxis(numberOfLabels);
-  for (auto index = 0; index < numberOfLabels; ++index)
-    axis->setValue(index, values[index]);
-  return axis;
-}
-
-MatrixWorkspace_sptr
-createWorkspaceWithBinValues(int const &numberOfSpectra,
-                             std::vector<double> const &values,
-                             int const &numberOfBins) {
-  if (static_cast<std::size_t>(numberOfBins) == values.size()) {
-    auto workspace = create2DWorkspace(numberOfSpectra, numberOfBins);
-    workspace->replaceAxis(0, getNumericAxis(numberOfBins, values));
-    return workspace;
-  } else
-    throw std::runtime_error(
-        "The number of bins is not equal to the number of labels");
-}
 
 MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) {
   return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
@@ -93,16 +72,19 @@ IAlgorithm_sptr setUpAlgorithm(std::string const &inputName,
 void populateSpectrum(MatrixWorkspace_sptr workspace,
                       std::size_t const &spectrum,
                       std::vector<double> const &yData,
+                      std::vector<double> const &xData,
                       std::vector<double> const &eData) {
   workspace->mutableY(spectrum) = HistogramY(yData);
+  workspace->mutableX(spectrum) = HistogramX(xData);
   workspace->mutableE(spectrum) = HistogramE(eData);
 }
 
 void populateWorkspace(MatrixWorkspace_sptr workspace,
                        std::vector<double> const &yData,
+                       std::vector<double> const &xData,
                        std::vector<double> const &eData) {
   for (auto index = 0u; index < workspace->getNumberHistograms(); ++index)
-    populateSpectrum(workspace, index, yData, eData);
+    populateSpectrum(workspace, index, yData, xData, eData);
 }
 
 std::vector<double>
@@ -116,6 +98,7 @@ constructHistogramData(Mantid::MantidVec::const_iterator fromIterator,
 void populateOutputWorkspace(MatrixWorkspace_sptr workspace,
                              std::vector<double> const &yData,
                              std::vector<double> const &eData) {
+  std::vector<double> const xData = {2.1, 2.2, 2.3, 2.4, 2.5, 2.6};
   auto const numberOfBins = yData.size() / workspace->getNumberHistograms();
   for (auto i = 0u; i < workspace->getNumberHistograms(); ++i) {
     auto const startIndex = i * numberOfBins;
@@ -123,6 +106,7 @@ void populateOutputWorkspace(MatrixWorkspace_sptr workspace,
     populateSpectrum(workspace, i,
                      constructHistogramData(yData.begin() + startIndex,
                                             yData.begin() + endIndex),
+                     xData,
                      constructHistogramData(eData.begin() + startIndex,
                                             eData.begin() + endIndex));
   }
@@ -161,13 +145,13 @@ public:
   void
   test_that_the_algorithm_produces_an_output_workspace_with_the_correct_data() {
     auto algorithm = setUpAlgorithm(INPUT_NAME, DESTINATION_NAME, 0, 3, 2.1,
-                                    2.4, 0, 0, OUTPUT_NAME);
+                                    2.41, 0, 0, OUTPUT_NAME);
 
     algorithm->execute();
 
     auto const output = getADSMatrixWorkspace(OUTPUT_NAME);
-    auto const expectedOutput =
-        createWorkspaceWithBinValues(5, {2.1, 2.2, 2.3, 2.4, 2.5}, 5);
+    auto const expectedOutput = create2DWorkspace(5, 5);
+
     populateOutputWorkspace(
         expectedOutput,
         {1.1, 1.2,  1.3, 1.4, 29.0, 1.1, 1.2,  1.3,  1.4,  29.0, 1.1,  1.2, 1.3,
@@ -179,14 +163,14 @@ public:
 
   void
   test_that_the_algorithm_produces_an_output_workspace_with_the_correct_data_when_the_start_indices_are_not_zero() {
-    auto algorithm = setUpAlgorithm(INPUT_NAME, DESTINATION_NAME, 2, 3, 2.2,
-                                    2.4, 2, 2, OUTPUT_NAME);
+    auto algorithm = setUpAlgorithm(INPUT_NAME, DESTINATION_NAME, 2, 3, 2.21,
+                                    2.41, 2, 2, OUTPUT_NAME);
 
     algorithm->execute();
 
     auto const output = getADSMatrixWorkspace(OUTPUT_NAME);
-    auto const expectedOutput =
-        createWorkspaceWithBinValues(5, {2.1, 2.2, 2.3, 2.4, 2.5}, 5);
+    auto const expectedOutput = create2DWorkspace(5, 5);
+
     populateOutputWorkspace(
         expectedOutput, {25.0, 26.0, 27.0, 28.0, 29.0, 25.0, 26.0, 27.0, 28.0,
                          29.0, 25.0, 26.0, 1.2,  1.3,  1.4,  25.0, 26.0, 1.2,
@@ -198,14 +182,13 @@ public:
 
   void
   test_that_the_algorithm_produces_an_output_workspace_with_the_correct_data_when_transfering_a_block_which_is_a_single_line() {
-    auto algorithm = setUpAlgorithm(INPUT_NAME, DESTINATION_NAME, 2, 2, 2.1,
-                                    2.5, 0, 0, OUTPUT_NAME);
+    auto algorithm = setUpAlgorithm(INPUT_NAME, DESTINATION_NAME, 2, 2, 2.11,
+                                    2.51, 0, 0, OUTPUT_NAME);
 
     algorithm->execute();
 
     auto const output = getADSMatrixWorkspace(OUTPUT_NAME);
-    auto const expectedOutput =
-        createWorkspaceWithBinValues(5, {2.1, 2.2, 2.3, 2.4, 2.5}, 5);
+    auto const expectedOutput = create2DWorkspace(5, 5);
     populateOutputWorkspace(
         expectedOutput, {1.1,  1.2,  1.3,  1.4,  1.5,  25.0, 26.0, 27.0, 28.0,
                          29.0, 25.0, 26.0, 27.0, 28.0, 29.0, 25.0, 26.0, 27.0,
@@ -217,14 +200,14 @@ public:
 
   void
   test_that_the_algorithm_changes_the_input_workspace_with_the_correct_data_when_the_output_and_destination_workspaces_are_the_same() {
-    auto algorithm = setUpAlgorithm(INPUT_NAME, DESTINATION_NAME, 0, 3, 2.1,
-                                    2.4, 0, 0, DESTINATION_NAME);
+    auto algorithm = setUpAlgorithm(INPUT_NAME, DESTINATION_NAME, 0, 3, 2.11,
+                                    2.41, 0, 0, DESTINATION_NAME);
 
     algorithm->execute();
 
     auto const output = getADSMatrixWorkspace(DESTINATION_NAME);
-    auto const expectedOutput =
-        createWorkspaceWithBinValues(5, {2.1, 2.2, 2.3, 2.4, 2.5}, 5);
+    auto const expectedOutput = create2DWorkspace(5, 5);
+
     populateOutputWorkspace(
         expectedOutput,
         {1.1, 1.2,  1.3, 1.4, 29.0, 1.1, 1.2,  1.3,  1.4,  29.0, 1.1,  1.2, 1.3,
@@ -275,18 +258,18 @@ private:
       int inputNumberOfSpectra = 5, int destNumberOfSpectra = 5,
       int inputNumberOfBins = 5, int destNumberOfBins = 5,
       std::vector<double> const &inputYValues = {1.1, 1.2, 1.3, 1.4, 1.5},
-      std::vector<double> const &inputXValues = {2.1, 2.2, 2.3, 2.4, 2.5},
+      std::vector<double> const &inputXValues = {2.1, 2.2, 2.3, 2.4, 2.5, 2.6},
       std::vector<double> const &inputEValues = {0.1, 0.2, 0.3, 0.4, 0.5},
       std::vector<double> const &destYValues = {25.0, 26.0, 27.0, 28.0, 29.0},
-      std::vector<double> const &destXValues = {2.1, 2.2, 2.3, 2.4, 2.5},
+      std::vector<double> const &destXValues = {2.1, 2.2, 2.3, 2.4, 2.5, 2.6},
       std::vector<double> const &destEValues = {2.5, 2.6, 2.7, 2.8, 2.9}) {
-    auto const inputWorkspace = createWorkspaceWithBinValues(
-        inputNumberOfSpectra, inputXValues, inputNumberOfBins);
-    auto const destWorkspace = createWorkspaceWithBinValues(
-        destNumberOfSpectra, destXValues, destNumberOfBins);
+    auto const inputWorkspace =
+        create2DWorkspace(inputNumberOfSpectra, inputNumberOfBins);
+    auto const destWorkspace =
+        create2DWorkspace(destNumberOfSpectra, destNumberOfBins);
 
-    populateWorkspace(inputWorkspace, inputYValues, inputEValues);
-    populateWorkspace(destWorkspace, destYValues, destEValues);
+    populateWorkspace(inputWorkspace, inputYValues, inputXValues, inputEValues);
+    populateWorkspace(destWorkspace, destYValues, destXValues, destEValues);
 
     AnalysisDataService::Instance().addOrReplace(inputName, inputWorkspace);
     AnalysisDataService::Instance().addOrReplace(destName, destWorkspace);
