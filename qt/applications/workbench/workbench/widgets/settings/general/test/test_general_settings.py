@@ -7,12 +7,7 @@
 #  This file is part of the mantidqt package
 from __future__ import absolute_import, unicode_literals
 
-import sys
-
-if sys.version_info.major >= 3:
-    from unittest.mock import call, patch
-else:
-    from mock import call, patch
+from mock import call, patch
 
 from mantidqt.utils.qt.testing import GuiTest
 from mantidqt.utils.testing.strict_mock import StrictMock
