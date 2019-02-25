@@ -16,9 +16,9 @@ from mock import Mock, call
 from qtpy import QtCore
 from qtpy.QtCore import Qt
 
-from mantidqt.widgets.workspacedisplay.test_mocks.mock_mantid import AXIS_INDEX_FOR_HORIZONTAL, AXIS_INDEX_FOR_VERTICAL, \
+from mantidqt.utils.testing.mocks import AXIS_INDEX_FOR_HORIZONTAL, AXIS_INDEX_FOR_VERTICAL, \
     MockMantidAxis, MockMantidSymbol, MockMantidUnit, MockSpectrum, MockWorkspace
-from mantidqt.widgets.workspacedisplay.test_mocks.mock_qt import MockQModelIndex
+from mantidqt.utils.testing.mocks.mock_qt import MockQModelIndex
 from mantidqt.widgets.workspacedisplay.matrix.table_view_model import MatrixWorkspaceTableViewModel, \
     MatrixWorkspaceTableViewModelType
 

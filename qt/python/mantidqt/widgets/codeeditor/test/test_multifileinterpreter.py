@@ -16,8 +16,8 @@ try:
 except ImportError:
     import mock
 
-from mantidqt.utils.qt.test import GuiTest
-from mantidqt.utils.qt.test.qt_widget_finder import QtWidgetFinder
+from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
 from mantidqt.widgets.codeeditor.multifileinterpreter import MultiPythonFileInterpreter
 
 MANTID_API_IMPORT = "from mantid.simpleapi import *\n"

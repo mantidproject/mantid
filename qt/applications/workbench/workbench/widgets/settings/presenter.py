@@ -5,8 +5,6 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package
-#
-#
 from __future__ import (absolute_import, unicode_literals)
 
 from qtpy.QtCore import Qt
@@ -42,17 +40,16 @@ class SettingsPresenter(object):
     def hide(self):
         self.view.hide()
 
-    def action_current_row_changed(self, new_pos):
+    def action_section_changed(self, new_section_pos):
+        """
+        Selects the widget shown in the settings based on which section position is clicked.
+
+        :param new_section_pos: The position of the section in the list widget
+        """
         self.current.hide()
-        # when new settings widgets are added here, this if statement should be
-        # active again, so that the settings window can switch between settings views
-        # if 0 == new_pos:
+
+        # TODO When new setting widgets are added, the settings window should switch between setting views here
         new_view = self.general_settings.view
-        # else:  # 1 == new_pos
-        #     new_view = self.plots_settings_view
-        # elif 2 == new_pos:
-        #     new_view = self.view.plots_settings_view
-        #     pass
 
         if self.current != new_view:
             self.view.container.replaceWidget(self.current, new_view)

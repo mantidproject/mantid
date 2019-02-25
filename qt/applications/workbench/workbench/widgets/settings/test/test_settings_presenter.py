@@ -9,41 +9,41 @@ from __future__ import absolute_import, unicode_literals
 
 from unittest import TestCase
 
-from mock import Mock
-from qtpy.QtWidgets import QWidget
-
-from mantidqt.widgets.workspacedisplay.test_mocks.mock_qt import MockQButton
+from mantidqt.utils.testing.mocks.mock_qt import MockQButton, MockQWidget
+from mantidqt.utils.testing.strict_mock import StrictPropertyMock
 from workbench.widgets.settings.presenter import SettingsPresenter
 
 
 class FakeMVP(object):
     def __init__(self):
-        self.view = Mock()
+        self.view = MockQWidget()
 
 
 class MockSettingsView(object):
     def __init__(self):
-        self.mock_container = Mock(QWidget)
-        self.container = Mock(return_value=self.mock_container)
-        self.mock_current = Mock(QWidget)
-        self.current = self.mock_current
+        self.mock_container = MockQWidget()
+        self.mock_current = MockQWidget()
+        self.container = StrictPropertyMock(return_value=self.mock_container)
+        self.current = StrictPropertyMock(return_value=self.mock_current)
         self.general_settings = FakeMVP()
 
         self.save_settings_button = MockQButton()
 
 
 class SettingsPresenterTest(TestCase):
+    def test_default_view_shown(self):
+        mock_view = MockSettingsView()
+        SettingsPresenter(None, view=mock_view, general_settings=mock_view.general_settings)
+
+        mock_view.container.addWidget.assert_called_once_with(mock_view.general_settings.view)
+
     def test_action_current_row_changed(self):
         mock_view = MockSettingsView()
         p = SettingsPresenter(None, view=mock_view, general_settings=mock_view.general_settings)
 
-        p.action_current_row_changed(0)
-
-        # mock_view.container.replaceWidget.assert_called_once_with(mock_view.mock_current,
-        #                                                           mock_view.general_settings.view)
+        p.action_section_changed(0)
 
         # Currently this is not called, because we only have 1 view.
-        # When more views are added this test WILL BREAK, and should instead use
-        # the commented out code above to check that the replaceWidget function
-        # is being called properly
+        # When more views are added this test WILL BREAK, and should be adapted
+        # to check if the views are being switched correctly
         self.assertEqual(0, mock_view.container.replaceWidget.call_count)

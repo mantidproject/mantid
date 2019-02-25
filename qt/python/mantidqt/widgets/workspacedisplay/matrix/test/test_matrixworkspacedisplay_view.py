@@ -8,9 +8,9 @@
 from qtpy.QtWidgets import QApplication
 
 from mantid.simpleapi import CreateSampleWorkspace
-from mantidqt.utils.qt.test import GuiTest
+from mantidqt.utils.qt.testing import GuiTest
 from mantidqt.widgets.workspacedisplay.matrix.presenter import MatrixWorkspaceDisplay
-from mantidqt.utils.qt.test.qt_widget_finder import QtWidgetFinder
+from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
 
 
 class MatrixWorkspaceDisplayViewTest(GuiTest, QtWidgetFinder):

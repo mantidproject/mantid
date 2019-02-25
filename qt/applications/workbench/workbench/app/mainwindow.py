@@ -258,8 +258,7 @@ class MainWindow(QMainWindow):
         action_manage_directories = create_action(self, "Manage User Directories",
                                                   on_triggered=self.open_manage_directories)
 
-        action_settings = create_action(self, "Settings", shortcut="Ctrl+Alt+S",
-                                        on_triggered=self.open_settings_window)
+        action_settings = create_action(self, "Settings", on_triggered=self.open_settings_window)
 
         action_quit = create_action(self, "&Quit", on_triggered=self.close,
                                     shortcut="Ctrl+Q",

@@ -10,8 +10,8 @@ from __future__ import absolute_import, unicode_literals
 from qtpy.QtWidgets import QApplication
 
 from mantid.simpleapi import CreateSampleWorkspace, LoadInstrument
-from mantidqt.utils.qt.test import GuiTest
-from mantidqt.utils.qt.test.qt_widget_finder import QtWidgetFinder
+from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
 from mantidqt.widgets.instrumentview.presenter import InstrumentViewPresenter
 
 

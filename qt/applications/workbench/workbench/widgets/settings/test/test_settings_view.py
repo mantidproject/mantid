@@ -7,11 +7,14 @@
 #  This file is part of the mantidqt package
 from __future__ import absolute_import, unicode_literals
 
-from mock import MagicMock
+if sys.version_info.major >= 3:
+    from unittest.mock import MagicMock
+else:
+    from mock import MagicMock
 from qtpy.QtWidgets import QApplication, QWidget
 
-from mantidqt.utils.qt.test import GuiTest
-from mantidqt.utils.qt.test.qt_widget_finder import QtWidgetFinder
+from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
 from workbench.widgets.settings.presenter import SettingsPresenter
 
 

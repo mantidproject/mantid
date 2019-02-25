@@ -21,9 +21,9 @@ from mantidqt.widgets.workspacedisplay.table.plot_type import PlotType
 from mantidqt.widgets.workspacedisplay.table.presenter import TableWorkspaceDisplay
 from mantidqt.widgets.workspacedisplay.table.view import TableWorkspaceDisplayView
 from mantidqt.widgets.workspacedisplay.table.workbench_table_widget_item import WorkbenchTableWidgetItem
-from mantidqt.widgets.workspacedisplay.test_mocks.mock_mantid import MockWorkspace
-from mantidqt.widgets.workspacedisplay.test_mocks.mock_plotlib import MockAx, MockPlotLib
-from mantidqt.widgets.workspacedisplay.test_mocks.mock_qt import MockQModelIndex, MockQSelectionModel
+from mantidqt.utils.testing.mocks import MockWorkspace
+from mantidqt.utils.testing.mocks.mock_plotlib import MockAx, MockPlotLib
+from mantidqt.utils.testing.mocks.mock_qt import MockQModelIndex, MockQSelectionModel
 
 
 class MockQTable:

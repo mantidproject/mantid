@@ -11,7 +11,7 @@ from mock import Mock
 
 from mantidqt.widgets.observers.observing_presenter import ObservingPresenter
 from mantidqt.widgets.observers.observing_view import ObservingView
-from mantidqt.widgets.workspacedisplay.test_mocks.mock_qt import MockQtSignal
+from mantidqt.utils.testing.mocks.mock_qt import MockQtSignal
 
 
 class MockObservingView(ObservingView):

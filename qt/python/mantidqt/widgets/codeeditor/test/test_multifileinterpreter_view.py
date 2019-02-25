@@ -11,8 +11,8 @@ from __future__ import (absolute_import, unicode_literals)
 
 from qtpy.QtWidgets import QApplication
 
-from mantidqt.utils.qt.test import GuiTest
-from mantidqt.utils.qt.test.qt_widget_finder import QtWidgetFinder
+from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
 from mantidqt.widgets.codeeditor.multifileinterpreter import MultiPythonFileInterpreter
 
 

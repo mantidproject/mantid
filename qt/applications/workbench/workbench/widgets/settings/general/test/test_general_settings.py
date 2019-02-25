@@ -7,57 +7,66 @@
 #  This file is part of the mantidqt package
 from __future__ import absolute_import, unicode_literals
 
-from mock import Mock, call, patch
+import sys
 
-from mantidqt.utils.qt.test import GuiTest
+if sys.version_info.major >= 3:
+    from unittest.mock import call, patch
+else:
+    from mock import call, patch
+
+from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.testing.strict_mock import StrictMock
 from workbench.widgets.settings.general.presenter import GeneralSettings
 
 
 class MockInstrument(object):
     def __init__(self, idx):
-        self.name = Mock(return_value="instr{}".format(idx))
+        self.name = StrictMock(return_value="instr{}".format(idx))
 
 
 class MockFacility(object):
+    MOCK_NAME = "MockFacility"
     all_instruments = [MockInstrument(0), MockInstrument(1)]
 
-    name = Mock(return_value="MockFacility")
-    instruments = Mock(return_value=all_instruments)
+    def __init__(self):
+        self.name = StrictMock(return_value=self.MOCK_NAME)
+        self.instruments = StrictMock(return_value=self.all_instruments)
 
 
 class MockConfigService(object):
     all_facilities = ["facility1", "facility2"]
 
-    mock_facility = MockFacility()
-    mock_instrument = MockFacility()
-
-    getFacilityNames = Mock(return_value=all_facilities)
-    getFacility = Mock(return_value=mock_facility)
-    getInstrument = Mock(return_value=mock_instrument)
-    getString = Mock(return_value="1")
-
-    setFacility = Mock()
-    setString = Mock()
+    def __init__(self):
+        self.mock_facility = MockFacility()
+        self.mock_instrument = MockFacility()
+        self.getFacilityNames = StrictMock(return_value=self.all_facilities)
+        self.getFacility = StrictMock(return_value=self.mock_facility)
+        self.getInstrument = StrictMock(return_value=self.mock_instrument)
+        self.getString = StrictMock(return_value="1")
+        self.setFacility = StrictMock()
+        self.setString = StrictMock()
 
 
 class GeneralSettingsTest(GuiTest):
+    CONFIG_SERVICE_CLASSPATH = "workbench.widgets.settings.general.presenter.ConfigService"
+    WORKBENCH_CONF_CLASSPATH = "workbench.widgets.settings.general.presenter.CONF"
 
     def assert_connected_once(self, owner, signal):
         self.assertEqual(1, owner.receivers(signal))
 
-    @patch("workbench.widgets.settings.general.presenter.ConfigService", new_callable=MockConfigService)
+    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
     def test_setup_facilities(self, mock_ConfigService):
         presenter = GeneralSettings(None)
-        mock_ConfigService.setFacility.asset_called_once_with()
-        mock_ConfigService.getFacility.asset_called_once_with()
-        mock_ConfigService.mock_facility.name.asset_called_once_with()
+        mock_ConfigService.setFacility.assert_called_once_with(MockFacility.MOCK_NAME)
+        self.assertEqual(2, mock_ConfigService.getFacility.call_count)
+        mock_ConfigService.mock_facility.name.assert_called_once_with()
         self.assert_connected_once(presenter.view.facility, presenter.view.facility.currentTextChanged)
 
-        mock_ConfigService.getInstrument.asset_called_once_with()
-        mock_ConfigService.mock_instrument.name.asset_called_once_with()
+        mock_ConfigService.getInstrument.assert_called_once_with()
+        mock_ConfigService.mock_instrument.name.assert_called_once_with()
         self.assert_connected_once(presenter.view.instrument, presenter.view.instrument.currentTextChanged)
 
-    @patch("workbench.widgets.settings.general.presenter.ConfigService", new_callable=MockConfigService)
+    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
     def test_setup_checkbox_signals(self, _):
         presenter = GeneralSettings(None)
 
@@ -73,14 +82,15 @@ class GeneralSettingsTest(GuiTest):
         self.assert_connected_once(presenter.view.total_number_checkpoints,
                                    presenter.view.total_number_checkpoints.valueChanged)
 
-    @patch("workbench.widgets.settings.general.presenter.ConfigService", new_callable=MockConfigService)
+    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
     def test_action_facility_changed(self, mock_ConfigService):
         presenter = GeneralSettings(None)
+        mock_ConfigService.setFacility.reset_mock()
 
         new_facility = "WWW"
         presenter.action_facility_changed(new_facility)
 
-        mock_ConfigService.setFacility.asset_called_once_with(new_facility)
+        mock_ConfigService.setFacility.assert_called_once_with(new_facility)
 
         self.assertEqual(2, presenter.view.instrument.count())
 
@@ -94,7 +104,7 @@ class GeneralSettingsTest(GuiTest):
         self.assert_connected_once(presenter.view.prompt_save_editor_modified,
                                    presenter.view.prompt_save_editor_modified.stateChanged)
 
-    @patch("workbench.widgets.settings.general.presenter.CONF")
+    @patch(WORKBENCH_CONF_CLASSPATH)
     def test_action_prompt_save_on_close(self, mock_conf):
         presenter = GeneralSettings(None)
 
@@ -107,7 +117,7 @@ class GeneralSettingsTest(GuiTest):
 
         mock_conf.set.assert_called_once_with(GeneralSettings.PROMPT_SAVE_ON_CLOSE, False)
 
-    @patch("workbench.widgets.settings.general.presenter.CONF")
+    @patch(WORKBENCH_CONF_CLASSPATH)
     def test_action_prompt_save_editor_modified(self, mock_CONF):
         presenter = GeneralSettings(None)
 
@@ -120,8 +130,8 @@ class GeneralSettingsTest(GuiTest):
 
         mock_CONF.set.assert_called_once_with(GeneralSettings.PROMPT_SAVE_EDITOR_MODIFIED, False)
 
-    @patch("workbench.widgets.settings.general.presenter.CONF")
-    @patch("workbench.widgets.settings.general.presenter.ConfigService", new_callable=MockConfigService)
+    @patch(WORKBENCH_CONF_CLASSPATH)
+    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
     def test_load_current_setting_values(self, mock_ConfigService, mock_CONF):
         # load current setting is called automatically in the constructor
         GeneralSettings(None)
@@ -136,7 +146,7 @@ class GeneralSettingsTest(GuiTest):
                                                        call(GeneralSettings.PR_TIME_BETWEEN_RECOVERY),
                                                        call(GeneralSettings.PR_NUMBER_OF_CHECKPOINTS)])
 
-    @patch("workbench.widgets.settings.general.presenter.ConfigService", new_callable=MockConfigService)
+    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
     def test_action_project_recovery_enabled(self, mock_ConfigService):
         presenter = GeneralSettings(None)
         # reset any effects from the constructor
@@ -150,7 +160,7 @@ class GeneralSettingsTest(GuiTest):
         presenter.action_project_recovery_enabled(False)
         mock_ConfigService.setString.assert_called_once_with(GeneralSettings.PR_RECOVERY_ENABLED, "False")
 
-    @patch("workbench.widgets.settings.general.presenter.ConfigService", new_callable=MockConfigService)
+    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
     def test_action_time_between_recovery(self, mock_ConfigService):
         presenter = GeneralSettings(None)
         # reset any effects from the constructor
@@ -160,7 +170,7 @@ class GeneralSettingsTest(GuiTest):
         presenter.action_time_between_recovery(time)
         mock_ConfigService.setString.assert_called_once_with(GeneralSettings.PR_TIME_BETWEEN_RECOVERY, time)
 
-    @patch("workbench.widgets.settings.general.presenter.ConfigService", new_callable=MockConfigService)
+    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
     def test_action_total_number_checkpoints(self, mock_ConfigService):
         presenter = GeneralSettings(None)
         # reset any effects from the constructor
@@ -170,7 +180,7 @@ class GeneralSettingsTest(GuiTest):
         presenter.action_total_number_checkpoints(num_checkpoints)
         mock_ConfigService.setString.assert_called_once_with(GeneralSettings.PR_NUMBER_OF_CHECKPOINTS, num_checkpoints)
 
-    @patch("workbench.widgets.settings.general.presenter.ConfigService", new_callable=MockConfigService)
+    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
     def test_action_instrument_changed(self, mock_ConfigService):
         presenter = GeneralSettings(None)
         # reset any effects from the constructor
@@ -180,7 +190,7 @@ class GeneralSettingsTest(GuiTest):
         presenter.action_instrument_changed(new_instr)
         mock_ConfigService.setString.assert_called_once_with(GeneralSettings.INSTRUMENT, new_instr)
 
-    @patch("workbench.widgets.settings.general.presenter.ConfigService", new_callable=MockConfigService)
+    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
     def test_action_show_invisible_workspaces(self, mock_ConfigService):
         presenter = GeneralSettings(None)
         # reset any effects from the constructor
