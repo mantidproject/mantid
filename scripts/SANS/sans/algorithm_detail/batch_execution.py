@@ -149,10 +149,6 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
     elif output_mode is OutputMode.Both:
         save_to_file(reduction_packages, save_can)
 
-    if output_mode is not OutputMode.SaveToFile and not state.adjustment.show_transmission:
-        # Remove transmission workspaces from ADS only
-        delete_reduced_workspaces(reduction_packages, include_non_transmission=False)
-
     # -----------------------------------------------------------------------
     # Clean up other workspaces if the optimizations have not been turned on.
     # -----------------------------------------------------------------------
