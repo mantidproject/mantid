@@ -7,8 +7,8 @@
 #  This file is part of the mantidqt package
 from __future__ import absolute_import
 
-from qtpy.QtCore import QPoint, Qt
-from qtpy.QtWidgets import QAction, QMenu, QTabBar, QTabWidget, QToolButton
+from qtpy.QtCore import Qt
+from qtpy.QtWidgets import QAction, QMenu, QPushButton, QSizePolicy, QTabBar, QTabWidget
 
 from mantidqt.icons import get_icon
 from mantidqt.utils.qt import add_actions, create_action
@@ -28,21 +28,6 @@ class CodeEditorTabWidget(QTabWidget):
 
         self.last_tab_clicked = 0
 
-        # self.setStyleSheet("""
-        #  QTabBar::tab{
-        #  padding: 3px 0 3px 0;
-        #  }
-        # """)
-        # QTabWidget::pane { /* The tab widget frame */
-        #     border-top: 2px solid #C2C7CB;
-        #     position: absolute;
-        #     top: 0.5em;
-        # }
-        # QTabWidget::tab-bar {
-        #     left: 5px; /* move to the right by 5px */
-        # }
-        # """)
-
         self.setup_tabs_context_menu(parent)
         self.setup_options_actions(parent)
 
@@ -52,9 +37,13 @@ class CodeEditorTabWidget(QTabWidget):
         tab_bar.setDrawBase(False)
 
         # create a button to add new tabs
-        plus_btn = QToolButton(self)
+        plus_btn = QPushButton(self)
         plus_btn.clicked.connect(parent.plus_button_clicked)
+        # plus_btn.resize(30, plus_btn.height())
+        # plus_btn.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
         plus_btn.setIcon(get_icon("fa.plus"))
+        # plus_btn.setIconSize(QSize(20, 20))
+        # plus_btn.setText("+")
         self.setCornerWidget(plus_btn, Qt.TopLeftCorner)
 
     def setup_tabs_context_menu(self, parent):
@@ -75,16 +64,15 @@ class CodeEditorTabWidget(QTabWidget):
         """
         Setup the actions for the Options menu. These are handled by the MultiFileInterpreter
         """
-        # menu_bar = QMenuBar(self)
-        # menu_bar.setStyleSheet("""border: 1px solid #adadad; background-color: #e1e1e1;""")
-        options_button = QToolButton(self)
+
+        options_button = QPushButton(self)
         self.setCornerWidget(options_button, Qt.TopRightCorner)
-        options_button.setIcon(get_icon("fa.cog"))
-        # options_button.setText("Options")
-        options_menu = QMenu("Options", self)
-        # menu_bar.addMenu(options_menu)
-        options_button.clicked.connect(lambda: options_menu.popup(
-            self.mapToGlobal(options_button.pos() + QPoint(0, options_button.rect().bottom()))))
+        options_button.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
+        # options_button.setIcon(get_icon("fa.cog"))
+        options_button.setText("Options")
+        options_menu = QMenu("", self)
+        options_button.setMenu(options_menu)
+        # options_button.resize(40, options_button.height())
 
         self.tabCloseRequested.connect(parent.close_tab)
 
@@ -95,13 +83,11 @@ class CodeEditorTabWidget(QTabWidget):
         abort_action = create_action(self, "Abort", on_triggered=parent.abort_current)
 
         # menu action to toggle the find/replace dialog
-        toggle_find_replace = create_action(self, 'Find/Replace...',
-                                            on_triggered=parent.toggle_find_replace_dialog,
+        toggle_find_replace = create_action(self, 'Find/Replace...', on_triggered=parent.toggle_find_replace_dialog,
                                             shortcut='Ctrl+F')
 
         toggle_comment_action = create_action(self, "Comment/Uncomment", on_triggered=parent.toggle_comment_current,
-                                              shortcut="Ctrl+/",
-                                              shortcut_context=Qt.ApplicationShortcut)
+                                              shortcut="Ctrl+/", shortcut_context=Qt.ApplicationShortcut)
 
         tabs_to_spaces_action = create_action(self, 'Tabs to Spaces', on_triggered=parent.tabs_to_spaces_current)
 
@@ -129,6 +115,10 @@ class CodeEditorTabWidget(QTabWidget):
         super(CodeEditorTabWidget, self).closeEvent(event)
 
     def mousePressEvent(self, event):
+        # the user did not click on a tab at all, stop all further mouseEvents processing
+        if self.last_tab_clicked < 0:
+            return
+
         if Qt.MiddleButton == event.button():
             self.tabCloseRequested.emit(self.last_tab_clicked)
 
@@ -136,3 +126,4 @@ class CodeEditorTabWidget(QTabWidget):
 
     def tab_was_clicked(self, tab_index):
         self.last_tab_clicked = tab_index
+        print("Last tab clicked:", self.last_tab_clicked)
