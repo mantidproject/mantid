@@ -22,8 +22,14 @@ def _isSofQW(workspace):
     return unit1 != unit2 and unit1 in validUnits and unit2 in validUnits
 
 
+def _singlehistogramordie(workspace):
+    """Raise an exception if workspace has more than one histogram."""
+    if workspace.getNumberHistograms() > 1:
+        raise RuntimeError("The workspace '{}' has more than one histogram.".format(workspace))
+
+
 def _styleordie(style):
-    """Raise exception if style is not a valid style string."""
+    """Raise an exception if style is not a valid style string."""
     if not isinstance(style, str):
         raise RuntimeError("The 'style' argument '{}' is not a valid string.".format(str(style)))
     if 'm' not in style and 'l' not in style:

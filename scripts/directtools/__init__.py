@@ -205,13 +205,8 @@ def _normwslist(workspaces):
     return [_normws(ws) for ws in unnormWss]
 
 
-def _plottingtime():
-    """Return a string presenting the plotting time."""
-    return time.strftime('%d.%m.%Y %H:%M:%S')
-
-
-def _plotfirsthistograms(workspaces, labels, style, xscale, yscale):
-    """Plot the first histograms from given workspaces."""
+def _plotsinglehistogram(workspaces, labels, style, xscale, yscale):
+    """Plot single histogram workspaces."""
     workspaces = _normwslist(workspaces)
     if not isinstance(labels, collections.Iterable) or isinstance(labels, str):
         if labels is None:
@@ -228,13 +223,18 @@ def _plotfirsthistograms(workspaces, labels, style, xscale, yscale):
     for ws, label in zip(workspaces, labels):
         if 'm' in style:
             markerStyle, markerIndex = _choosemarker(markers, markerIndex)
-        axes.errorbar(ws, specNum=0, linestyle=lineStyle, marker=markerStyle, label=label, distribution=True)
+        axes.errorbar(ws, wkspIndex=0, linestyle=lineStyle, marker=markerStyle, label=label, distribution=True)
     axes.set_xscale(xscale)
     axes.set_yscale(yscale)
     if axes.get_yscale() == 'linear':
         _horizontallineatzero(axes)
     _chooseylabel(workspaces[0], axes)
     return figure, axes
+
+
+def _plottingtime():
+    """Return a string presenting the plotting time."""
+    return time.strftime('%d.%m.%Y %H:%M:%S')
 
 
 def _mantidsubplotsetup():
@@ -615,7 +615,7 @@ def plotcuts(direction, workspaces, cuts, widths, quantity, unit, style='l', kee
                     markerStyle, markerIndex = _choosemarker(markers, markerIndex)
                 realCutCentre, realCutWidth = _cutcentreandwidth(line)
                 label = _label(ws, realCutCentre, realCutWidth, len(workspaces) == 1, len(cuts) == 1, len(widths) == 1, quantity, unit)
-                axes.errorbar(line, specNum=0, linestyle=lineStyle, marker=markerStyle, label=label, distribution=True)
+                axes.errorbar(line, wkspIndex=0, linestyle=lineStyle, marker=markerStyle, label=label, distribution=True)
     axes.set_xscale(xscale)
     axes.set_yscale(yscale)
     if axes.get_yscale() == 'linear':
@@ -627,7 +627,7 @@ def plotcuts(direction, workspaces, cuts, widths, quantity, unit, style='l', kee
 def plotDOS(workspaces, labels=None, style='l', xscale='linear', yscale='linear'):
     """Plot density of state workspaces.
 
-    Plots the first histograms from given DOS workspaces.
+    Plots the given DOS workspaces.
 
     :param workspaces: a single workspace or a list thereof
     :type workspaces: str, :class:`mantid.api.MatrixWorkspace` or a :class:`list` thereof
@@ -644,11 +644,12 @@ def plotDOS(workspaces, labels=None, style='l', xscale='linear', yscale='linear'
     _validate._styleordie(style)
     workspaces = _normwslist(workspaces)
     for ws in workspaces:
+        _validate._singlehistogramordie(ws)
         if not _validate._isDOS(ws):
-            logger.warning("The workspace '{}' does not look like proper DOS data. Trying to plot nonetheless.")
+            logger.warning("The workspace '{}' does not look like proper DOS data. Trying to plot nonetheless.".format(ws))
     if labels is None:
         labels = [_workspacelabel(ws) for ws in workspaces]
-    figure, axes = _plotfirsthistograms(workspaces, labels, style, xscale, yscale)
+    figure, axes = _plotsinglehistogram(workspaces, labels, style, xscale, yscale)
     _dostitle(workspaces, figure)
     if len(workspaces) > 1:
         axes.legend()
@@ -658,7 +659,7 @@ def plotDOS(workspaces, labels=None, style='l', xscale='linear', yscale='linear'
 def plotprofiles(workspaces, labels=None, style='l', xscale='linear', yscale='linear'):
     """Plot line profile workspaces.
 
-    Plots the first histograms from given cut workspaces.
+    Plots the given single histogram cut workspaces.
 
     :param workspaces: a single workspace or a list thereof
     :type workspaces: str, :class:`mantid.api.MatrixWorkspace` or a :class:`list` thereof
@@ -674,7 +675,9 @@ def plotprofiles(workspaces, labels=None, style='l', xscale='linear', yscale='li
     """
     _validate._styleordie(style)
     workspaces = _normwslist(workspaces)
-    figure, axes = _plotfirsthistograms(workspaces, labels, style, xscale, yscale)
+    for ws in workspaces:
+        _validate._singlehistogramordie(ws)
+    figure, axes = _plotsinglehistogram(workspaces, labels, style, xscale, yscale)
     xUnit = workspaces[0].getAxis(0).getUnit().unitID()
     if xUnit == 'DeltaE':
         _finalizeprofileQ(workspaces, axes)
