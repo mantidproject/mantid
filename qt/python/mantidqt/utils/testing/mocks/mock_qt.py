@@ -7,7 +7,7 @@
 #  This file is part of the mantid workbench.
 from __future__ import (absolute_import, division, print_function)
 
-from mock import Mock
+from mantid.py3compat.mock import Mock
 
 from mantidqt.utils.testing.strict_mock import StrictMock
 from mantidqt.widgets.workspacedisplay.matrix.table_view_model import MatrixWorkspaceTableViewModelType

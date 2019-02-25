@@ -7,7 +7,7 @@
 #  This file is part of the mantidqt package
 from __future__ import absolute_import, unicode_literals
 
-from mock import call, patch
+from mantid.py3compat.mock import patch
 
 from mantidqt.utils.qt.testing import GuiTest
 from mantidqt.utils.testing.strict_mock import StrictMock

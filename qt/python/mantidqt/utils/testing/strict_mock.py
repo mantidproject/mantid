@@ -7,14 +7,7 @@
 #  This file is part of the mantidqt package
 from __future__ import absolute_import
 
-import sys
-
-if sys.version_info.major >= 3:
-    # Python 3 and above
-    from unittest.mock import Mock, PropertyMock
-else:
-    # Python 2
-    from mock import Mock, PropertyMock
+from mantid.py3compat.mock import Mock, PropertyMock
 
 
 class StrictMock(Mock):
