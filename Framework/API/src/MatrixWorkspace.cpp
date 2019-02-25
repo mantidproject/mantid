@@ -1241,10 +1241,12 @@ Types::Core::DateAndTime MatrixWorkspace::getLastPulseTime() const {
  * Returns the bin index of the given X value
  * @param xValue :: The X value to search for
  * @param index :: The index within the workspace to search within (default = 0)
+ * @param tolerance :: The tolerance to accept between the passed xValue and the
+ *                     stored value (default = 0.0)
  * @returns An index to the bin containing X
  */
-size_t MatrixWorkspace::binIndexOf(const double xValue,
-                                   const std::size_t index) const {
+size_t MatrixWorkspace::binIndexOf(const double xValue, const std::size_t index,
+                                   const double tolerance) const {
   if (index >= getNumberHistograms()) {
     throw std::out_of_range(
         "MatrixWorkspace::binIndexOf - Index out of range.");
@@ -1260,28 +1262,54 @@ size_t MatrixWorkspace::binIndexOf(const double xValue,
     throw std::out_of_range("MatrixWorkspace::binIndexOf - X value greater"
                             " than highest in current range.");
   }
-  size_t hops;
+
+  // Check if the workspace is a histogram workspace (len(x) = len(y) + 1 for a
+  // histogram workspace)
+  auto const ySize = this->y(index).size();
+  auto const xSize = xValues.size();
+  bool const isHistogram = xSize == ySize + 1;
+
+  std::size_t hops;
   if (ascendingOrder) {
-    auto lowit = std::lower_bound(xValues.cbegin(), xValues.cend(), xValue);
+    auto lowerIter =
+        std::lower_bound(xValues.cbegin(), xValues.cend(), xValue - tolerance);
+    auto const upperIter =
+        std::lower_bound(xValues.cbegin(), xValues.cend(), xValue + tolerance);
+
     // If we are pointing at the first value then that means we still want to be
     // in the first bin
-    if (lowit == xValues.cbegin()) {
-      ++lowit;
-    }
-    hops = std::distance(xValues.cbegin(), lowit);
+    if (isHistogram && lowerIter == xValues.cbegin())
+      ++lowerIter;
+    else if (!isHistogram && lowerIter == xValues.cend())
+      --lowerIter;
+
+    hops = std::distance(xValues.cbegin(), lowerIter);
+
+    // If the tolerance makes no difference in the chosen iterator
+    if (!isHistogram && tolerance != 0.0 && lowerIter == upperIter)
+      --hops;
   } else {
-    auto lowit = std::upper_bound(xValues.crbegin(), xValues.crend(), xValue);
-    if (lowit == xValues.crend()) {
-      --lowit;
-    } else if (lowit == xValues.crbegin()) {
-      ++lowit;
-    }
-    hops = xValues.size() - std::distance(xValues.crbegin(), lowit);
+    auto lowerIter = std::upper_bound(xValues.crbegin(), xValues.crend(),
+                                      xValue + tolerance);
+    auto const upperIter = std::upper_bound(xValues.crbegin(), xValues.crend(),
+                                            xValue - tolerance);
+
+    if (isHistogram && lowerIter == xValues.crend())
+      --lowerIter;
+    else if (lowerIter == xValues.crbegin())
+      ++lowerIter;
+
+    hops = xValues.size() - std::distance(xValues.crbegin(), lowerIter);
+
+    // If the tolerance makes no difference in the chosen iterator
+    if (!isHistogram && tolerance != 0.0 && lowerIter == upperIter)
+      --hops;
   }
   // The bin index is offset by one from the number of hops between iterators as
-  // they start at zero
-  return hops - 1;
-}
+  // they start at zero (for a histogram workspace)
+
+  return isHistogram ? hops - 1 : hops;
+} // namespace API
 
 uint64_t MatrixWorkspace::getNPoints() const {
   return static_cast<uint64_t>(this->size());

@@ -144,7 +144,8 @@ public:
   Types::Core::DateAndTime getLastPulseTime() const;
 
   /// Returns the bin index for a given X value of a given workspace index
-  size_t binIndexOf(const double xValue, const std::size_t = 0) const;
+  size_t binIndexOf(const double xValue, const std::size_t = 0,
+                    const double tolerance = 0.0) const;
 
   //----------------------------------------------------------------------
   // DATA ACCESSORS

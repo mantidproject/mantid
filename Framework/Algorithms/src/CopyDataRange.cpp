@@ -7,7 +7,7 @@
 #include "MantidAlgorithms/CopyDataRange.h"
 
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/BoundedValidator.h"
 
 #include <algorithm>
@@ -40,8 +40,10 @@ void copyDataRange(MatrixWorkspace_const_sptr inputWorkspace,
                    MatrixWorkspace_sptr destWorkspace, int const &specMin,
                    int const &specMax, double const &xMin, double const &xMax,
                    int yInsertionIndex, int const &xInsertionIndex) {
-  int const xMinIndex = static_cast<int>(inputWorkspace->binIndexOf(xMin));
-  int const xMaxIndex = static_cast<int>(inputWorkspace->binIndexOf(xMax));
+  int const xMinIndex =
+      static_cast<int>(inputWorkspace->binIndexOf(xMin, 0, 0.000001));
+  int const xMaxIndex =
+      static_cast<int>(inputWorkspace->binIndexOf(xMax, 0, 0.000001));
 
   copyDataRange(inputWorkspace, destWorkspace, specMin, specMax, xMinIndex,
                 xMaxIndex, yInsertionIndex, xInsertionIndex);

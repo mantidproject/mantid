@@ -8,7 +8,6 @@
 #define MANTID_ALGORITHMS_COPYDATARANGE_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/System.h"
 
 namespace Mantid {

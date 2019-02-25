@@ -1732,7 +1732,114 @@ public:
     checkDetectorSignedTwoTheta(Geometry::X, {{1., -1., -1., 1.}});
   }
 
+  void
+  test_that_binIndexOf_returns_the_correct_index_for_a_histogram_workspace_when_the_x_bins_are_in_ascending_order() {
+    std::vector<double> const xValues{1.0, 2.0, 3.0, 4.0};
+    auto const workspace = getWorkspaceWithPopulatedX(1, 4, 3, xValues);
+
+    TS_ASSERT_EQUALS(workspace.binIndexOf(3.0), 1);
+  }
+
+  void
+  test_that_binIndexOf_returns_the_correct_index_for_a_histogram_workspace_when_the_x_bins_are_in_descending_order() {
+    std::vector<double> const xValues{4.0, 3.0, 2.0, 1.0};
+    auto const workspace = getWorkspaceWithPopulatedX(1, 4, 3, xValues);
+
+    TS_ASSERT_EQUALS(workspace.binIndexOf(3.0), 0);
+  }
+
+  void
+  test_that_binIndexOf_returns_the_correct_index_for_a_nonHistogram_workspace_when_the_x_bins_are_in_ascending_order() {
+    std::vector<double> const xValues{1.0, 2.0, 3.0, 4.0};
+    auto const workspace = getWorkspaceWithPopulatedX(1, 4, 4, xValues);
+
+    TS_ASSERT_EQUALS(workspace.binIndexOf(3.0), 2);
+  }
+
+  void
+  test_that_binIndexOf_returns_the_correct_index_for_a_nonHistogram_workspace_when_the_x_bins_are_in_descending_order() {
+    std::vector<double> const xValues{4.0, 3.0, 2.0, 1.0};
+    auto const workspace = getWorkspaceWithPopulatedX(1, 4, 4, xValues);
+
+    TS_ASSERT_EQUALS(workspace.binIndexOf(3.0), 1);
+  }
+
+  void
+  test_that_binIndexOf_returns_the_ascending_index_for_a_nonHistogram_workspace_when_passed_an_x_value_within_a_tolerance() {
+    std::vector<double> const xValues{1.0, 1.9997, 3.0, 4.0};
+    auto const workspace = getWorkspaceWithPopulatedX(1, 4, 4, xValues);
+
+    TS_ASSERT_EQUALS(workspace.binIndexOf(2.0, 0, 0.0005), 1);
+  }
+
+  void
+  test_that_binIndexOf_returns_the_ascending_index_for_a_nonHistogram_workspace_when_passed_an_x_value_within_a_tolerance2() {
+    std::vector<double> const xValues{1.0, 1.9997, 3.0, 4.0};
+    auto const workspace = getWorkspaceWithPopulatedX(1, 4, 4, xValues);
+
+    TS_ASSERT_EQUALS(workspace.binIndexOf(1.9995, 0, 0.0005), 1);
+  }
+
+  void
+  test_that_binIndexOf_returns_the_ascending_index_for_a_nonHistogram_workspace_when_passed_an_x_value_just_outside_a_tolerance() {
+    std::vector<double> const xValues{1.0, 1.9997, 3.0, 4.0};
+    auto const workspace = getWorkspaceWithPopulatedX(1, 4, 4, xValues);
+
+    TS_ASSERT_EQUALS(workspace.binIndexOf(2.0, 0, 0.0002), 1);
+  }
+
+  void
+  test_that_binIndexOf_returns_the_ascending_index_for_a_nonHistogram_workspace_when_passed_an_x_value_just_outside_a_tolerance2() {
+    std::vector<double> const xValues{1.0, 1.9997, 3.0, 4.0};
+    auto const workspace = getWorkspaceWithPopulatedX(1, 4, 4, xValues);
+
+    TS_ASSERT_EQUALS(workspace.binIndexOf(1.9992, 0, 0.0002), 0);
+  }
+
+  void
+  test_that_binIndexOf_returns_the_descending_index_for_a_nonHistogram_workspace_when_passed_an_x_value_within_a_tolerance() {
+    std::vector<double> const xValues{4.0, 3.0, 1.9997, 1.0};
+    auto const workspace = getWorkspaceWithPopulatedX(1, 4, 4, xValues);
+
+    TS_ASSERT_EQUALS(workspace.binIndexOf(1.9994, 0, 0.0005), 2);
+  }
+
+  void
+  test_that_binIndexOf_returns_the_descending_index_for_a_nonHistogram_workspace_when_passed_an_x_value_within_a_tolerance2() {
+    std::vector<double> const xValues{4.0, 3.0, 1.9997, 1.0};
+    auto const workspace = getWorkspaceWithPopulatedX(1, 4, 4, xValues);
+
+    TS_ASSERT_EQUALS(workspace.binIndexOf(1.9999, 0, 0.0005), 2);
+  }
+
+  void
+  test_that_binIndexOf_returns_the_descending_index_for_a_nonHistogram_workspace_when_passed_an_x_value_just_outside_a_tolerance() {
+    std::vector<double> const xValues{4.0, 3.0, 1.9997, 1.0};
+    auto const workspace = getWorkspaceWithPopulatedX(1, 4, 4, xValues);
+
+    TS_ASSERT_EQUALS(workspace.binIndexOf(1.9994, 0, 0.0002), 2);
+  }
+
+  void
+  test_that_binIndexOf_returns_the_descending_index_for_a_nonHistogram_workspace_when_passed_an_x_value_just_outside_a_tolerance2() {
+    std::vector<double> const xValues{4.0, 3.0, 1.9997, 1.0};
+    auto const workspace = getWorkspaceWithPopulatedX(1, 4, 4, xValues);
+
+    TS_ASSERT_EQUALS(workspace.binIndexOf(2.0, 0, 0.0002), 1);
+  }
+
 private:
+  WorkspaceTester getWorkspaceWithPopulatedX(
+      std::size_t const &nVectors, std::size_t const &xLength,
+      std::size_t const &yLength, std::vector<double> const &xValues) {
+    WorkspaceTester workspace;
+    workspace.initialize(nVectors, xLength, yLength);
+    auto &X = workspace.dataX(0);
+
+    std::copy(xValues.begin(), xValues.end(), X.begin());
+    return workspace;
+  }
+
   void checkDetectorSignedTwoTheta(const Geometry::PointingAlong thetaSignAxis,
                                    const std::array<double, 4> &signs) {
     constexpr size_t numDets{4};
