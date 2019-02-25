@@ -15,7 +15,10 @@ State Item::state() const { return m_itemState.state(); }
 
 std::string Item::message() const { return m_itemState.message(); }
 
-void Item::resetState() { m_itemState.reset(); }
+void Item::resetState() {
+  resetOutputNames();
+  m_itemState.reset();
+}
 
 void Item::setSkipped(bool skipped) { m_skipped = skipped; }
 

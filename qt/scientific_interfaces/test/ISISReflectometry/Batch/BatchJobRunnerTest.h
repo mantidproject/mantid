@@ -255,6 +255,21 @@ public:
     verifyAndClear();
   }
 
+  void testDeletedWorkspaceResetsOutputNamesForRow() {
+    auto jobRunner = makeJobRunner(makeReductionJobsWithTwoRowGroup());
+    auto &reductionJobs =
+        jobRunner.m_batch.mutableRunsTable().mutableReductionJobs();
+    auto &row = reductionJobs.mutableGroups()[0].mutableRows()[1];
+    row->setSuccess();
+    row->setOutputNames({"", "IvsQ_test", "IvsQBin_test"});
+
+    jobRunner.notifyWorkspaceDeleted("IvsQBin_test");
+    TS_ASSERT_EQUALS(row->reducedWorkspaceNames().iVsLambda(), "");
+    TS_ASSERT_EQUALS(row->reducedWorkspaceNames().iVsQ(), "");
+    TS_ASSERT_EQUALS(row->reducedWorkspaceNames().iVsQBinned(), "");
+    verifyAndClear();
+  }
+
   void testDeleteWorkspaceResetsStateForGroup() {
     auto jobRunner = makeJobRunner(makeReductionJobsWithTwoRowGroup());
     auto &reductionJobs =
@@ -265,6 +280,19 @@ public:
 
     jobRunner.notifyWorkspaceDeleted("stitched_test");
     TS_ASSERT_EQUALS(group.state(), State::ITEM_NOT_STARTED);
+    verifyAndClear();
+  }
+
+  void testDeleteWorkspaceResetsOutputNamesForGroup() {
+    auto jobRunner = makeJobRunner(makeReductionJobsWithTwoRowGroup());
+    auto &reductionJobs =
+        jobRunner.m_batch.mutableRunsTable().mutableReductionJobs();
+    auto &group = reductionJobs.mutableGroups()[0];
+    group.setSuccess();
+    group.setOutputNames({"stitched_test"});
+
+    jobRunner.notifyWorkspaceDeleted("stitched_test");
+    TS_ASSERT_EQUALS(group.postprocessedWorkspaceName(), "");
     verifyAndClear();
   }
 
@@ -336,6 +364,25 @@ public:
     jobRunner.notifyAllWorkspacesDeleted();
     TS_ASSERT_EQUALS(row->state(), State::ITEM_NOT_STARTED);
     TS_ASSERT_EQUALS(group.state(), State::ITEM_NOT_STARTED);
+    verifyAndClear();
+  }
+
+  void testDeleteAllWorkspacesResetsOutputNamesForRowAndGroup() {
+    auto jobRunner = makeJobRunner(makeReductionJobsWithTwoRowGroup());
+    auto &reductionJobs =
+        jobRunner.m_batch.mutableRunsTable().mutableReductionJobs();
+    auto &row = reductionJobs.mutableGroups()[0].mutableRows()[1];
+    auto &group = reductionJobs.mutableGroups()[0];
+    row->setSuccess();
+    row->setOutputNames({"", "IvsQ_test", "IvsQBin_test"});
+    group.setSuccess();
+    group.setOutputNames({"stitched_test"});
+
+    jobRunner.notifyAllWorkspacesDeleted();
+    TS_ASSERT_EQUALS(row->reducedWorkspaceNames().iVsLambda(), "");
+    TS_ASSERT_EQUALS(row->reducedWorkspaceNames().iVsQ(), "");
+    TS_ASSERT_EQUALS(row->reducedWorkspaceNames().iVsQBinned(), "");
+    TS_ASSERT_EQUALS(group.postprocessedWorkspaceName(), "");
     verifyAndClear();
   }
 
