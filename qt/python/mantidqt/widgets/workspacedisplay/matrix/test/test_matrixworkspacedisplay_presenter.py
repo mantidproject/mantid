@@ -14,14 +14,13 @@ import unittest
 from mock import Mock, patch
 from qtpy.QtWidgets import QStatusBar
 
+from mantidqt.utils.testing.mocks.mock_mantid import MockWorkspace
+from mantidqt.utils.testing.mocks.mock_matrixworkspacedisplay import MockMatrixWorkspaceDisplayView
+from mantidqt.utils.testing.mocks.mock_qt import MockQModelIndex, MockQTableView
 from mantidqt.widgets.workspacedisplay.matrix.model import MatrixWorkspaceDisplayModel
 from mantidqt.widgets.workspacedisplay.matrix.presenter import MatrixWorkspaceDisplay
 from mantidqt.widgets.workspacedisplay.matrix.table_view_model import MatrixWorkspaceTableViewModelType
 from mantidqt.widgets.workspacedisplay.status_bar_view import StatusBarView
-from mantidqt.utils.testing.mocks import MockWorkspace
-from mantidqt.utils.testing.mocks import \
-    MockMatrixWorkspaceDisplayView
-from mantidqt.utils.testing.mocks.mock_qt import MockQModelIndex, MockQTableView
 
 
 def with_mock_presenter(func):

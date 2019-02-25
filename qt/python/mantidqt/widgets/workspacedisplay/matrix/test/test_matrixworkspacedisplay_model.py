@@ -14,7 +14,7 @@ import unittest
 from mock import Mock
 
 from mantid.simpleapi import CreateSampleWorkspace
-from mantidqt.utils.testing.mocks import MockWorkspace
+from mantidqt.utils.testing.mocks.mock_mantid import MockWorkspace
 from mantidqt.widgets.workspacedisplay.matrix.model import MatrixWorkspaceDisplayModel
 from mantidqt.widgets.workspacedisplay.matrix.table_view_model import MatrixWorkspaceTableViewModelType
 

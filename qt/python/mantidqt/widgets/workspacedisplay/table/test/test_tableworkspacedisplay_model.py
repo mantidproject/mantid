@@ -15,7 +15,7 @@ import unittest
 from mock import Mock
 
 from mantid.kernel import V3D
-from mantidqt.utils.testing.mocks import MockWorkspace
+from mantidqt.utils.testing.mocks.mock_mantid import MockWorkspace
 from mantidqt.widgets.workspacedisplay.table.model import TableWorkspaceDisplayModel
 
 

@@ -49,10 +49,10 @@ class MockSpectrumInfo:
 
 
 class MockSpectrum:
-    TEST_SPECTRUM_NO = 123123
+    SPECTRUM_NO = 123123
 
     def __init__(self):
-        self.getSpectrumNo = Mock(return_value=self.TEST_SPECTRUM_NO)
+        self.getSpectrumNo = Mock(return_value=self.SPECTRUM_NO)
 
 
 class MockWorkspace:

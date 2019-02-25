@@ -9,7 +9,7 @@ from __future__ import (absolute_import, division, print_function)
 
 import unittest
 
-from mantidqt.utils.testing.mocks import MockObservingView
+from mantidqt.utils.testing.mocks.mock_observing import MockObservingView
 from mantidqt.utils.testing.mocks.mock_qt import MockQtEvent
 
 

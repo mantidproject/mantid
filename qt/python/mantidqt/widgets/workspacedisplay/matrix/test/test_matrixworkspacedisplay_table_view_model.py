@@ -16,8 +16,8 @@ from mock import Mock, call
 from qtpy import QtCore
 from qtpy.QtCore import Qt
 
-from mantidqt.utils.testing.mocks import AXIS_INDEX_FOR_HORIZONTAL, AXIS_INDEX_FOR_VERTICAL, \
-    MockMantidAxis, MockMantidSymbol, MockMantidUnit, MockSpectrum, MockWorkspace
+from mantidqt.utils.testing.mocks.mock_mantid import AXIS_INDEX_FOR_HORIZONTAL, AXIS_INDEX_FOR_VERTICAL, MockMantidAxis, \
+    MockMantidSymbol, MockMantidUnit, MockSpectrum, MockWorkspace
 from mantidqt.utils.testing.mocks.mock_qt import MockQModelIndex
 from mantidqt.widgets.workspacedisplay.matrix.table_view_model import MatrixWorkspaceTableViewModel, \
     MatrixWorkspaceTableViewModelType
@@ -383,7 +383,7 @@ class MatrixWorkspaceDisplayTableViewModelTest(unittest.TestCase):
         ws.mock_spectrum.getSpectrumNo.assert_called_once_with()
 
         expected_output = MatrixWorkspaceTableViewModel.VERTICAL_HEADER_TOOLTIP_STRING.format(mock_section,
-                                                                                              MockSpectrum.TEST_SPECTRUM_NO)
+                                                                                              MockSpectrum.SPECTRUM_NO)
         self.assertEqual(expected_output, output)
 
     def test_headerData_horizontal_header_display_role_for_X_values(self):
@@ -475,9 +475,10 @@ class MatrixWorkspaceDisplayTableViewModelTest(unittest.TestCase):
         ws.mock_axis.mock_unit.caption.assert_called_once_with()
         ws.mock_axis.mock_unit.mock_symbol.utf8.assert_called_once_with()
 
-        expected_output = MatrixWorkspaceTableViewModel \
-            .HORIZONTAL_HEADER_TOOLTIP_STRING \
-            .format(mock_section, MockMantidUnit.TEST_CAPTION, expected_bin_centre, MockMantidSymbol.TEST_UTF8)
+        expected_output = MatrixWorkspaceTableViewModel.HORIZONTAL_HEADER_TOOLTIP_STRING.format(mock_section,
+                                                                                                MockMantidUnit.TEST_CAPTION,
+                                                                                                expected_bin_centre,
+                                                                                                MockMantidSymbol.TEST_UTF8)
         self.assertEqual(expected_output, output)
 
     def test_not_common_bins_horizontal_display_role(self):
