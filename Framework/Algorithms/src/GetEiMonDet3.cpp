@@ -25,7 +25,7 @@
 
 namespace {
 /** A private namespace holding the property names of
- *  GetEiMonDet algorithm, version 2.
+ *  GetEiMonDet algorithm, version 3.
  */
 namespace Prop {
 /// Name of the detector workspace property
@@ -261,10 +261,10 @@ GetEiMonDet3::groupSpectra(API::MatrixWorkspace_sptr &ws,
  */
 double GetEiMonDet3::minimumTOF(const API::MatrixWorkspace &ws,
                                 const double sampleToDetectorDistance) {
-  const double minEnergy = getProperty(Prop::MAX_ENERGY);
+  const double maxEnergy = getProperty(Prop::MAX_ENERGY);
   const auto &spectrumInfo = ws.spectrumInfo();
   return Kernel::UnitConversion::run(
-      "Energy", "TOF", minEnergy, spectrumInfo.l1(), sampleToDetectorDistance,
+      "Energy", "TOF", maxEnergy, spectrumInfo.l1(), sampleToDetectorDistance,
       0., Kernel::DeltaEMode::Direct, 0.);
 }
 
