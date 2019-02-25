@@ -14,7 +14,7 @@ from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapp
 from Muon.GUI.Common.muon_group import MuonGroup
 from Muon.GUI.Common.muon_pair import MuonPair
 from Muon.GUI.Common.muon_load_data import MuonLoadData
-from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string, run_string_to_list
+from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
 
 from Muon.GUI.Common.ADSHandler.workspace_naming import (get_raw_data_workspace_name, get_group_data_workspace_name,
                                                          get_pair_data_workspace_name, get_base_data_directory,
