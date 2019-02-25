@@ -921,7 +921,7 @@ class RunTabPresenter(object):
                 "There does not seem to be data for a row {}.".format(row_index))
             return None
 
-        if row_index in list(states.keys()):
+        if row_index in states:
             if states:
                 return states[row_index]
         return None
