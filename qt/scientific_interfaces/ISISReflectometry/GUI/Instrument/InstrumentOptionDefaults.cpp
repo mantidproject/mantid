@@ -73,7 +73,8 @@ Instrument InstrumentOptionDefaults::operator()() const {
       getBoolOrFalse("CorrectDetectors", "CorrectDetectors"),
       detectorCorrectionTypeFromString(detectorCorrectionString));
 
-  return Instrument(wavelengthRange, monitorCorrections, detectorCorrections);
+  return Instrument(std::move(wavelengthRange), std::move(monitorCorrections),
+                    std::move(detectorCorrections));
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt

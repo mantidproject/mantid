@@ -11,9 +11,9 @@ namespace CustomInterfaces {
 Instrument::Instrument(boost::optional<RangeInLambda> wavelengthRange,
                        MonitorCorrections monitorCorrections,
                        DetectorCorrections detectorCorrections)
-    : m_wavelengthRange(wavelengthRange),
-      m_monitorCorrections(monitorCorrections),
-      m_detectorCorrections(detectorCorrections) {}
+    : m_wavelengthRange(std::move(wavelengthRange)),
+      m_monitorCorrections(std::move(monitorCorrections)),
+      m_detectorCorrections(std::move(detectorCorrections)) {}
 
 boost::optional<RangeInLambda> const &Instrument::wavelengthRange() const {
   return m_wavelengthRange;

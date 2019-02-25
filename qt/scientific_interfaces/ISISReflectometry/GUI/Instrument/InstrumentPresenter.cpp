@@ -77,6 +77,7 @@ void InstrumentPresenter::instrumentChanged(
   UNUSED_ARG(instrumentName);
   auto instrumentDefaults = InstrumentOptionDefaults(instrument);
   m_model = instrumentDefaults();
+  updateViewFromModel();
 }
 
 boost::optional<RangeInLambda> InstrumentPresenter::wavelengthRangeFromView() {
@@ -151,6 +152,32 @@ void InstrumentPresenter::updateModelFromView() {
   auto const detectorCorrections = detectorCorrectionsFromView();
   m_model =
       Instrument(wavelengthRange, monitorCorrections, detectorCorrections);
+}
+
+void InstrumentPresenter::updateViewFromModel() {
+  // Disconnect notifications about settings updates otherwise we'll end
+  // up updating the model from the view after the first change
+  m_view->disconnectInstrumentSettingsWidgets();
+
+  if (m_model.wavelengthRange()) {
+    m_view->setLambdaMin(m_model.wavelengthRange()->min());
+    m_view->setLambdaMax(m_model.wavelengthRange()->max());
+  }
+  m_view->setIntegrateMonitors(m_model.integratedMonitors());
+  if (m_model.monitorIntegralRange()) {
+    m_view->setMonitorIntegralMin(m_model.monitorIntegralRange()->min());
+    m_view->setMonitorIntegralMax(m_model.monitorIntegralRange()->max());
+  }
+  if (m_model.monitorBackgroundRange()) {
+    m_view->setMonitorBackgroundMin(m_model.monitorBackgroundRange()->min());
+    m_view->setMonitorBackgroundMax(m_model.monitorBackgroundRange()->max());
+  }
+  m_view->setCorrectDetectors(m_model.correctDetectors());
+  m_view->setDetectorCorrectionType(
+      detectorCorrectionTypeToString(m_model.detectorCorrectionType()));
+
+  // Reconnect settings change notifications
+  m_view->connectInstrumentSettingsWidgets();
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt

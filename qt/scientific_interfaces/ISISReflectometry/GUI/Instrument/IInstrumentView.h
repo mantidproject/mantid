@@ -32,27 +32,39 @@ public:
   virtual ~IInstrumentView() = default;
 
   virtual void subscribe(InstrumentViewSubscriber *notifyee) = 0;
+  virtual void connectInstrumentSettingsWidgets() = 0;
+  virtual void disconnectInstrumentSettingsWidgets() = 0;
 
   virtual int getMonitorIndex() const = 0;
+  virtual void setMonitorIndex(int value) = 0;
   virtual bool getIntegrateMonitors() const = 0;
+  virtual void setIntegrateMonitors(bool value) = 0;
 
   virtual double getLambdaMin() const = 0;
+  virtual void setLambdaMin(double value) = 0;
   virtual double getLambdaMax() const = 0;
+  virtual void setLambdaMax(double value) = 0;
   virtual void showLambdaRangeInvalid() = 0;
   virtual void showLambdaRangeValid() = 0;
 
   virtual double getMonitorBackgroundMin() const = 0;
+  virtual void setMonitorBackgroundMin(double value) = 0;
   virtual double getMonitorBackgroundMax() const = 0;
+  virtual void setMonitorBackgroundMax(double value) = 0;
   virtual void showMonitorBackgroundRangeInvalid() = 0;
   virtual void showMonitorBackgroundRangeValid() = 0;
 
   virtual double getMonitorIntegralMin() const = 0;
+  virtual void setMonitorIntegralMin(double value) = 0;
   virtual double getMonitorIntegralMax() const = 0;
+  virtual void setMonitorIntegralMax(double value) = 0;
   virtual void showMonitorIntegralRangeInvalid() = 0;
   virtual void showMonitorIntegralRangeValid() = 0;
 
   virtual bool getCorrectDetectors() const = 0;
+  virtual void setCorrectDetectors(bool value) = 0;
   virtual std::string getDetectorCorrectionType() const = 0;
+  virtual void setDetectorCorrectionType(std::string const &value) = 0;
 
   virtual void disableAll() = 0;
   virtual void enableAll() = 0;
