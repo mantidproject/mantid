@@ -65,8 +65,8 @@ void export_ExperimentInfo() {
            "the file with the most recent valid-from stamp is selected\n\n"
            "prefix:         the name of a valid file must begin with this "
            "pattern\n"
-           "fileFormats:    valid file extensions\n"
-           "directoryNames: search only in these directories\n"
+           "fileFormats:    list of valid file extensions\n"
+           "directoryNames: list of directories to be searched\n"
            "date :          valid-from and valid-to of a valid file "
            "encapsulate date\n"
            "\nreturns : list of absolute paths for each valid file")
