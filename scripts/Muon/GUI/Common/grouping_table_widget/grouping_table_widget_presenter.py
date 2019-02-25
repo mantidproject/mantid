@@ -159,6 +159,7 @@ class GroupingTablePresenter(object):
 
             self._view.group_range_min.setEnabled(False)
             if 'GroupRangeMin' in self._model._data.gui_variables:
+                # Remove variable from model if value from file is to be used
                 self._model._data.gui_variables.pop('GroupRangeMin')
         else:
             self._view.group_range_min.setEnabled(True)
@@ -173,6 +174,7 @@ class GroupingTablePresenter(object):
 
             self._view.group_range_max.setEnabled(False)
             if 'GroupRangeMax' in self._model._data.gui_variables:
+                # Remove variable from model if value from file is to be used
                 self._model._data.gui_variables.pop('GroupRangeMax')
         else:
             self._view.group_range_max.setEnabled(True)

@@ -48,9 +48,9 @@ Kernel::V2D PolygonEdge::point(const double fraction) const {
  * @returns The type of the point
  */
 PointClassification classify(const V2D &pt, const PolygonEdge &edge) {
-  V2D p2 = pt;
+  const V2D p2 = pt;
   const V2D &a = edge.direction();
-  V2D b = p2 - edge.start();
+  const V2D b = p2 - edge.start();
   double sa = a.X() * b.Y() - b.X() * a.Y();
   if (sa > 0.0) {
     return OnLeft;

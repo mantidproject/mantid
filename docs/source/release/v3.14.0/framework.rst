@@ -89,6 +89,7 @@ Improvements
   version of algorithm, `Indexed` provide the new one with better performance and some restrictions
   (see :ref:`ConvertToMD <algm-ConvertToMD>` Notes)
 - :ref:`FitPeaks <algm-FitPeaks>` can output parameters' uncertainty (fitting error) in an optional workspace.
+- :ref:`SaveNXcanSAS <algm-SaveNXcanSAS>` now has "uncertainties" parameter as well as "uncertainty". They point to the same data, but move file output inline with standards whilst keeping compatibility with old output.
 - The documentation in :ref:`EventFiltering` and :ref:`FilterEvents <algm-FilterEvents>` have been extensively rewritten to aid in understanding what the code does.
 - All of the numerical integration based absorption corrections which use :ref:`AbsorptionCorrection <algm-AbsorptionCorrection>` will generate an exception when they fail to generate a gauge volume. Previously, they would silently generate a correction workspace that was all not-a-number (``NAN``). If the sample shape is a cylinder it will use the specialized code for rasterizing it.
 - :ref:`CylinderAbsorption <algm-CylinderAbsorption>` now will check the workspace's sample object for geometry
@@ -117,6 +118,7 @@ Bugfixes
 - Fixed a bug in `AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` for using the passed on CompressTolerance and CompressWallClockTolerance in the child `CompressEvents <algm-CompressEvents>` algorithm instead of just in the child `AlignAndFocusPowder <algm-AlignAndFocusPowder>` algorithm.
 - `ConvertToMD <algm-ConvertToMD>` now uses the time-average value for logs when using them as ``OtherDimensions``
 - The input validator is fixed in :ref:`MostLikelyMean <algm-MostLikelyMean>` avoiding a segmentation fault.
+- The inputs of the algorithm :ref:`MergeLogs <algm-MergeLogs>` are improved and a segmentation fault will not happen, if logs are not time series. The merging is now compliant with Mantid wide time series merging for example when adding workspaces.
 - Fixed a bug in `AlignAndFocusPowder <algm-AlignAndFocusPowder>` where a histogram input workspace did not clone propertly to the output workspace and properly masking a grouping workspace passed to `DiffractionFocussing <algm-DiffractionFocussing>`. Also adds initial unit tests for `AlignAndFocusPowder <algm-AlignAndFocusPowder>`.
 - Fixed a bug in :ref:`ExtractSpectra <algm-ExtractSpectra>` which was causing a wrong last value in the output's vertical axis if the axis type was ``BinEdgeAxis``.
 - Fixed an issue in :ref:`Rebin2D <algm-Rebin2D>` where `NaN` values would result if there were zero-area bins in the input workspace.
