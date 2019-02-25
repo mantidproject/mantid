@@ -10,7 +10,6 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectraAxisValidator.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
@@ -235,7 +234,7 @@ MatrixWorkspace_sptr ConvertSpectrumAxis2::createOutputWorkspace(
     builder.setY(inputWS->y(0).size());
     builder.setDistribution(inputWS->isDistribution());
     outputWorkspace =
-        create<HistoWorkspace>(*inputWS, m_indexMap.size(), builder.build());
+        create<MatrixWorkspace>(*inputWS, m_indexMap.size(), builder.build());
     std::vector<double> axis;
     axis.reserve(m_indexMap.size());
     for (const auto &it : m_indexMap) {
