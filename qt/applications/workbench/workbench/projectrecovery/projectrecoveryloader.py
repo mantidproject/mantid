@@ -27,6 +27,10 @@ class ProjectRecoveryLoader(object):
         self.recovery_presenter = None
 
     def attempt_recovery(self):
+        """
+        Attempt to recover by launching the GUI relevant to project recovery and repeating with failure if failure
+        occurs.
+        """
         self.recovery_presenter = ProjectRecoveryPresenter(self)
 
         success = self.recovery_presenter.start_recovery_view(parent=self.main_window)
@@ -54,10 +58,18 @@ class ProjectRecoveryLoader(object):
         self._load_project_interfaces(directory)
 
     def open_checkpoint_in_script_editor(self, checkpoint):
+        """
+        Open the passed checkpoint in the script editor
+        :param checkpoint: String; path to the checkpoint file
+        """
         self._compile_recovery_script(directory=checkpoint)
         self._open_script_in_editor(self.pr.recovery_order_workspace_history_file)
 
     def _load_project_interfaces(self, directory):
+        """
+        Load the passed project interfaces in the given directory, using the project mantidqt package
+        :param directory: String; Path to the directory in which the saved file is present
+        """
         project_loader = ProjectLoader(self.pr.recovery_file_ext)
         # This method will only load interfaces/plots if all workspaces that are expected have been loaded successfully
         if not project_loader.load_project(directory=directory, load_workspaces=False):
@@ -65,6 +77,10 @@ class ProjectRecoveryLoader(object):
                          "lost workspaces are not opened")
 
     def _regen_workspaces(self, directory):
+        """
+        Make all the calls that are required to start the regeneration of the workspaces from the stored scripts
+        :param directory: String; Path to the directory in which resides the workspace.py files
+        """
         self._compile_recovery_script(directory)
 
         # Open it in the editor and run it
@@ -72,6 +88,10 @@ class ProjectRecoveryLoader(object):
         self._run_script_in_open_editor()
 
     def _compile_recovery_script(self, directory):
+        """
+        Compile the recovery script in the ~./mantid or %APPDATA%/mantidproject/mantid folder based on your OS
+        :param directory: String; The directory in which the Workspace.py files exists
+        """
         alg_name = "OrderWorkspaceHistory"
         alg = AlgorithmManager.createUnmanaged(alg_name, 1)
         alg.initialize()
@@ -83,6 +103,10 @@ class ProjectRecoveryLoader(object):
         alg.execute()
 
     def _open_script_in_editor(self, script):
+        """
+        Open the passed script in the Workbench script editor
+        :param script: String; Path to the script
+        """
         # Get number of lines
         with open(script) as f:
             num_lines = len(f.readlines())
@@ -96,6 +120,11 @@ class ProjectRecoveryLoader(object):
         self.recovery_presenter.set_up_progress_bar(num_lines)
 
     def _open_script_in_editor_call(self, script):
+        """
+        Open script in editor method invokation to guarantee it occurring on the correct thread.
+        :param script: String; Path to the script
+        :return:
+        """
         QMetaObject.invokeMethod(self.multi_file_interpreter, "open_file_in_new_tab", Qt.AutoConnection,
                                  Q_ARG(str, script))
 
@@ -103,6 +132,9 @@ class ProjectRecoveryLoader(object):
         QApplication.processEvents()
 
     def _run_script_in_open_editor(self):
+        """
+        Run the currently open script that is in the editor
+        """
         # Make sure that exec_error is connected with sig_exec_error on the multifileinterpreter,
         # to flag the checkpoint as failed to load if an error occurs.
         self.multi_file_interpreter.current_editor().sig_exec_error.connect(self.recovery_presenter.model.exec_error)

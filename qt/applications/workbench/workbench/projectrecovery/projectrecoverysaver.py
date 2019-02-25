@@ -52,6 +52,9 @@ class ProjectRecoverySaver(object):
         self._timer_thread = Timer(self.pr.time_between_saves, self.recovery_save)
 
     def recovery_save(self):
+        """
+        The function to save a recovery checkpoint
+        """
         # Set that recovery thread is not running anymore
         self.pr.thread_on = False
 
@@ -99,10 +102,17 @@ class ProjectRecoverySaver(object):
             self._spin_off_another_time_thread()
 
     def _spin_off_another_time_thread(self):
+        """
+        Spins off another timer thread, by creating a new Timer thread object and starting it
+        """
         self._timer_thread = Timer(self.pr.time_between_saves, self.recovery_save)
         self._timer_thread.start()
 
     def _save_workspaces(self, directory):
+        """
+        Save all workspaces present in the ADS to the given directory
+        :param directory: String; Path to where to save the workspaces
+        """
         # Get all present workspaces
         ws_list = ADS.getObjectNames()
 
@@ -135,13 +145,27 @@ class ProjectRecoverySaver(object):
 
     @staticmethod
     def _empty_group_workspace(ws):
+        """
+        Check if the workspace is an empty group workspace
+        :param ws: Workspace; Workspace to check
+        :return: True if is an empty group workspace
+        """
         if isinstance(ws, WorkspaceGroup) and len(ws.getNames()) == 0:
             return True
+        else:
+            return False
 
     def _save_project(self, directory, interfaces_list=None):
+        """
+        Save the project minus the workspaces
+        :param directory: String; The directory to save the project to.
+        :param interfaces_list: List of Lists of QObject and Encoder;
+        """
         project_saver = ProjectSaver(project_file_ext=self.pr.recovery_file_ext)
 
+        # Find all the plots from the global figuremanager
         plots = self.gfm.figs
+
         if interfaces_list is None:
             interfaces_list = find_all_windows_that_are_savable()
 
@@ -149,15 +173,26 @@ class ProjectRecoverySaver(object):
                                    interfaces_to_save=interfaces_list, project_recovery=False)
 
     def _add_lock_file(self, directory):
+        """
+        Adds a lock file to the directory
+        :param directory: String; Path to the directory
+        """
         # Create the file
         open(os.path.join(directory, self.pr.lock_file_name), 'a').close()
 
     def _remove_lock_file(self, directory):
+        """
+        Removes a lock file from the directory
+        :param directory: String; Path to the directory
+        """
         lock_file = os.path.join(directory, self.pr.lock_file_name)
         if os.path.exists(lock_file):
             os.remove(lock_file)
 
     def start_recovery_thread(self):
+        """
+        Starts the recovery thread if it is not already running
+        """
         if not self.pr.recovery_enabled:
             logger.debug("Project Recovery: Recovery thread not started as recovery is disabled")
             return
@@ -167,6 +202,9 @@ class ProjectRecoverySaver(object):
             self.pr.thread_on = True
 
     def stop_recovery_thread(self):
+        """
+        Cancels the recovery thread if it is running
+        """
         if self._timer_thread is not None:
             self._timer_thread.cancel()
             self.pr.thread_on = False

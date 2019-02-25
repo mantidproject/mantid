@@ -64,6 +64,7 @@ class ProjectRecoveryWidgetView(QDialog):
     def update_progress_bar(self, new_value):
         self.ui.progressBar.setValue(new_value)
 
+    # Camel case methods present due to Slot naming in the relevant .ui file
     @Slot()
     def onClickLastCheckpoint(self):
         self.presenter.recover_last()
