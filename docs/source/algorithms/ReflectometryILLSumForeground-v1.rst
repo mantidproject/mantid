@@ -9,7 +9,7 @@
 Description
 -----------
 
-This algorithm is typically the second step in the reflectometry reduction workflow. It consumes the output of :ref:`ReflectometryILLPreprocess <algm-ReflectometryILLPreprocess>`, producing a workspace with a single single spectrum.
+This algorithm is typically the second step in the reflectometry reduction workflow. It consumes the output of :ref:`ReflectometryILLPreprocess <algm-ReflectometryILLPreprocess>`, producing a workspace with a single spectrum.
 
 The reflectivity output of this algorithm can be forwarded to :ref:`ReflectometryILLConvertToQ <algm-ReflectometryILLConvertToQ>` or, in case of polarization analysis, :ref:`ReflectometryILLPolarizationCor <algm-ReflectometryILLPolarizationCor>`.
 
@@ -17,7 +17,7 @@ The following diagram gives an overview of the algorithm:
 
 .. diagram:: ReflectometryILLSumForeground-v1_wkflw.dot
 
-The algorihtm runs :ref:`ReflectometryBeamStatistics <algm-ReflectometryBeamStatistics>` when processing the reflected beam. This adds some sample log entries to *OutputWorkspace* and *DirectBeamWorkspace*. See the :ref:`algorithm's documentation <algm-ReflectometryBeamStatistics>` for more details.
+The algorihtm runs :ref:`ReflectometryBeamStatistics <algm-ReflectometryBeamStatistics>` when processing the reflected beam. This adds some sample log entries to *OutputWorkspace* and *DirectLineWorkspace*. See the :ref:`algorithm's documentation <algm-ReflectometryBeamStatistics>` for more details.
 
 Summation type
 ##############
@@ -61,22 +61,21 @@ Usage
    # Direct beam
    direct = ReflectometryILLPreprocess(
        Run='ILL/D17/317369.nxs',
-       OutputBeamPositionWorkspace='direct_beam_pos',  # For reflected angle calibration.
        **settings
    )
    # We need the summed direct beam for the reflectivity
-   directFgd = ReflectometryILLSumForeground(direct.OutputWorkspace)
-   
+   directFgd = ReflectometryILLSumForeground(direct)
+
    # Reflected beam
    reflected = ReflectometryILLPreprocess(
        Run='ILL/D17/317370.nxs',
-       DirectBeamPositionWorkspace='direct_beam_pos',
+       DirectLineWorkspace=direct,
        **settings
    )
    reflectivity = ReflectometryILLSumForeground(
        InputWorkspace=reflected,
        DirectForegroundWorkspace=directFgd,
-       DirectBeamWorkspace=direct.OutputWorkspace,
+       DirectLineWorkspace=direct,
        WavelengthRange=[2, 15],
    )
    
@@ -110,22 +109,22 @@ Output:
    # Direct beam
    direct = ReflectometryILLPreprocess(
        Run='ILL/D17/317369.nxs',
-       OutputBeamPositionWorkspace='direct_beam_pos',  # For reflected angle calibration.
        **settings
    )
+
    # We need the summed direct beam for the reflectivity
-   directFgd = ReflectometryILLSumForeground(direct.OutputWorkspace)
+   directFgd = ReflectometryILLSumForeground(direct)
    
    # Reflected beam
    reflected = ReflectometryILLPreprocess(
        Run='ILL/D17/317370.nxs',
-       DirectBeamPositionWorkspace='direct_beam_pos',
+       DirectLineWorkspace=direct,
        **settings
    )
    reflectivity = ReflectometryILLSumForeground(
        InputWorkspace=reflected,
        DirectForegroundWorkspace=directFgd,
-       DirectBeamWorkspace=direct.OutputWorkspace,
+       DirectLineWorkspace=direct,
        SummationType='SumInQ',
        WavelengthRange=[0., 14.]
    )

@@ -25,6 +25,11 @@ else:
     from inspect import getfullargspec
 
 
+EMPTY_FILENAME_ID = '<string>'
+FILE_ATTR = '__file__'
+COMPILE_MODE = 'exec'
+
+
 def get_function_spec(func):
     """Get the python function signature for the given function object. First
     the args are inspected followed by varargs, which are set by some modules,
@@ -121,7 +126,7 @@ class PythonCodeExecution(QObject):
                                                    ctypes.py_object(KeyboardInterrupt))
         time.sleep(0.1)
 
-    def execute_async(self, code_str, filename=''):
+    def execute_async(self, code_str, filename=None):
         """
         Execute the given code string on a separate thread. This function
         returns as soon as the new thread starts
@@ -147,14 +152,19 @@ class PythonCodeExecution(QObject):
         is used
         :raises: Any error that the code generates
         """
-        filename = '<string>' if filename is None else filename
-        compile(code_str, filename, mode='exec', dont_inherit=True)
+        if filename:
+            self.globals_ns[FILE_ATTR] = filename
+        else:
+            filename = EMPTY_FILENAME_ID
+        compile(code_str, filename, mode=COMPILE_MODE,
+                dont_inherit=True)
 
         sig_progress = self.sig_exec_progress
         for block in code_blocks(code_str):
             sig_progress.emit(block.lineno)
             # compile so we can set the filename
-            code_obj = compile(block.code_str, filename, mode='exec', dont_inherit=True)
+            code_obj = compile(block.code_str, filename, mode=COMPILE_MODE,
+                               dont_inherit=True)
             exec (code_obj, self.globals_ns, self.globals_ns)
 
     def generate_calltips(self):

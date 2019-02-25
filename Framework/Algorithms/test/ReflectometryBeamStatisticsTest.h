@@ -73,7 +73,7 @@ public:
         alg.setProperty("ReflectedBeamWorkspace", reflectedWS))
     TS_ASSERT_THROWS_NOTHING(
         alg.setProperty("ReflectedForeground", reflectedForeground))
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("DirectBeamWorkspace", directWS))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("DirectLineWorkspace", directWS))
     TS_ASSERT_THROWS_NOTHING(
         alg.setProperty("DirectForeground", directForeground))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("PixelSize", PIXEL_SIZE))
@@ -181,7 +181,7 @@ private:
         alg.setProperty("ReflectedBeamWorkspace", reflectedWS))
     TS_ASSERT_THROWS_NOTHING(
         alg.setProperty("ReflectedForeground", reflectedForeground))
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("DirectBeamWorkspace", directWS))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("DirectLineWorkspace", directWS))
     TS_ASSERT_THROWS_NOTHING(
         alg.setProperty("DirectForeground", directForeground))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("PixelSize", PIXEL_SIZE))

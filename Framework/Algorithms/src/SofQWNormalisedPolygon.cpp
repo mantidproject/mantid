@@ -334,7 +334,7 @@ void SofQWNormalisedPolygon::exec() {
 
   // Progress reports & cancellation
   const size_t nreports(nHistos * nEnergyBins);
-  m_progress = boost::make_shared<API::Progress>(this, 0.0, 1.0, nreports);
+  m_progress = std::make_unique<API::Progress>(this, 0.0, 1.0, nreports);
 
   // Index theta cache
   TableWorkspace_sptr twoThetaTable = getProperty("DetectorTwoThetaRanges");
@@ -357,9 +357,7 @@ void SofQWNormalisedPolygon::exec() {
   const auto &spectrumInfo = inputWS->spectrumInfo();
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
-  for (int64_t i = 0; i < static_cast<int64_t>(nHistos);
-       ++i) // signed for openmp
-  {
+  for (int64_t i = 0; i < static_cast<int64_t>(nHistos); ++i) {
     PARALLEL_START_INTERUPT_REGION
 
     if (spectrumInfo.isMasked(i) || spectrumInfo.isMonitor(i)) {
@@ -394,10 +392,9 @@ void SofQWNormalisedPolygon::exec() {
                   << ", ul=" << ul << "\n";
       }
 
-      Quadrilateral inputQ = Quadrilateral(ll, lr, ur, ul);
-
-      FractionalRebinning::rebinToFractionalOutput(inputQ, inputWS, i, j,
-                                                   *outputWS, m_Qout);
+      using FractionalRebinning::rebinToFractionalOutput;
+      rebinToFractionalOutput(Quadrilateral(ll, lr, ur, ul),
+                              inputWS, i, j, *outputWS, m_Qout);
 
       // Find which q bin this point lies in
       const MantidVec::difference_type qIndex =
@@ -422,7 +419,7 @@ void SofQWNormalisedPolygon::exec() {
   PARALLEL_CHECK_INTERUPT_REGION
 
   outputWS->finalize();
-  FractionalRebinning::normaliseOutput(outputWS, inputWS, m_progress);
+  FractionalRebinning::normaliseOutput(outputWS, inputWS, m_progress.get());
 
   // Set the output spectrum-detector mapping
   auto outputIndices = outputWS->indexInfo();
