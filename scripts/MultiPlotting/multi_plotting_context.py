@@ -9,6 +9,7 @@ from __future__ import absolute_import, print_function
 from MultiPlotting.gridspec_engine import gridspecEngine
 
 from MultiPlotting.subplot.subplot_context import subplotContext
+import mantid.simpleapi as mantid
 
 
 xBounds = "xBounds"
@@ -30,19 +31,35 @@ class PlottingContext(object):
 
     def addLine(self, subplotName, workspace, specNum):
         try:
-            if len(workspace) > 1:
+            if type(workspace) ==str:
+                ws = mantid.AnalysisDataService.retrieve(workspace)
+                self.subplots[subplotName].addLine(ws, specNum)
+
+            elif len(workspace) > 1:
                 self.subplots[subplotName].addLine(
                     workspace.OutputWorkspace, specNum)
             else:
                 self.subplots[subplotName].addLine(workspace, specNum)
         except:
-            print("cannot plot workspace")
+            print("cannot plot workspace", workspace)
 
     def add_annotate(self, subplotName, label):
         self.subplots[subplotName].add_annotate(label)
 
     def add_vline(self, subplotName, xvalue, name):
         self.subplots[subplotName].add_vline(xvalue, name)
+
+    def removeLabel(self, subplotName, name):
+        try:
+            self.subplots[subplotName].removeLabel(name)
+        except:
+             print("Could not remove label "+ name)
+
+    def removeVLine(self, subplotName, name):
+        try:
+            self.subplots[subplotName].removeVLine(name)
+        except:
+             print("Could not remove line "+ name)
 
     def get_xBounds(self):
         return self.context[xBounds]
@@ -53,7 +70,7 @@ class PlottingContext(object):
     def set_xBounds(self, values):
         self.context[xBounds] = values
 
-    def set_yBounds(self, values):
+    def set_yBounds(self, values): 
         self.context[yBounds] = values
 
     def update_gridspec(self,number):

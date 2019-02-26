@@ -83,8 +83,10 @@ class QuickEditView(QtWidgets.QWidget):
     def connect_y_range_changed(self, slot):
         self.y_axis_changer.on_bound_changed(slot)
 
-    def set_plot_y_range(self, range):
-        self.y_axis_changer.set_bounds(range)
+    def set_plot_y_range(self, y_range):
+        #if y_range[0] == -138.55:
+        #   raise RuntimeError 
+        self.y_axis_changer.set_bounds(y_range)
 
     def get_y_bounds(self):
         return self.y_axis_changer.get_bounds()

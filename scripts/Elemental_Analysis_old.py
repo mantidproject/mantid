@@ -35,10 +35,10 @@ from Muon.GUI.ElementalAnalysis.PeriodicTable.PeakSelector.peak_selector_view im
 import mantid.simpleapi as mantid
 
 
-class ElementalAnalysisGui(QtGui.QMainWindow):
+class ElementalAnalysisGuiOld(QtGui.QMainWindow):
 
     def __init__(self, parent=None):
-        super(ElementalAnalysisGui, self).__init__(parent)
+        super(ElementalAnalysisGuiOld, self).__init__(parent)
         self.menu = self.menuBar()
         self.menu.addAction("File")
         edit_menu = self.menu.addMenu("Edit")
@@ -86,7 +86,7 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
 
         self.setCentralWidget(QtGui.QWidget(self))
         self.centralWidget().setLayout(self.box)
-        self.setWindowTitle("Elemental Analysis")
+        self.setWindowTitle("Elemental Analysis Old")
 
         self.element_widgets = {}
         self.element_data = {}
@@ -367,7 +367,7 @@ def qapp():
 
 app = qapp()
 try:
-    window = ElementalAnalysisGui()
+    window = ElementalAnalysisGuiOld()
     window.show()
     app.exec_()
 except RuntimeError as error:
