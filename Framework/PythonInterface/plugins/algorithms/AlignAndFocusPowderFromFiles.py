@@ -141,37 +141,25 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
         return loader
 
     def __getAlignAndFocusArgs(self):
-        args = {}
+        # always put these in since they are loaded in __setupCalibration
+        # this requires that function to be called before this one
+        args = {CAL_WKSP:self.__calWksp,
+                GRP_WKSP:self.__grpWksp,
+                MASK_WKSP:self.__mskWksp}
+
         for name in PROPS_FOR_ALIGN:
             prop = self.getProperty(name)
             name_list = ['PreserveEvents', 'CompressTolerance',
                          'CompressWallClockTolerance', 'CompressStartTime']
+
             if name in name_list or not prop.isDefault:
                 if 'Workspace' in name:
                     args[name] = prop.valueAsStr
+                elif name in [CAL_FILE, GROUP_FILE]:
+                    pass  # these were loaded into workspaces already
                 else:
                     args[name] = prop.value
         return args
-
-    def __updateAlignAndFocusArgs(self, wkspname):
-        self.log().debug('__updateAlignAndFocusArgs(%s)' % wkspname)
-        # if the files are missing, there is nothing to do
-        if (CAL_FILE not in self.kwargs) and (GROUP_FILE not in self.kwargs):
-            self.log().debug('--> Nothing to do')
-            return
-        self.log().debug('--> Updating')
-
-        # delete the files from the list of kwargs
-        if CAL_FILE in self.kwargs:
-            del self.kwargs[CAL_FILE]
-        if CAL_FILE in self.kwargs:
-            del self.kwargs[GROUP_FILE]
-
-        # use the canonical names if they weren't specifed
-        for key, ext in zip((CAL_WKSP, GRP_WKSP, MASK_WKSP),
-                            ('_cal', '_group', '_mask')):
-            if key not in self.kwargs:
-                self.kwargs[key] = self.instr + ext
 
     def __determineCharacterizations(self, filename, wkspname):
         useCharac = bool(self.charac is not None)
@@ -337,6 +325,9 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
                              Target='TOF', EMode='Elastic')
             prog_start += prog_per_chunk_step
 
+            if self.kwargs is None:
+                raise RuntimeError('Somehow arguments for "AlignAndFocusPowder" aren\'t set')
+
             AlignAndFocusPowder(InputWorkspace=chunkname, OutputWorkspace=chunkname, UnfocussedWorkspace=unfocusname_chunk,
                                 startProgress=prog_start, endProgress=prog_start+2.*prog_per_chunk_step,
                                 **self.kwargs)
@@ -397,9 +388,6 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
             return  # nothing to do
         self.haveDeterminedCalibration = True
 
-        self.__calWksp = ''
-        self.__grpWksp = ''
-        self.__mskWksp = ''
         # first see if the workspaces have been specified
         # check that the canonical names don't already exist as a backup
         if not self.getProperty('CalibrationWorkspace').isDefault:
@@ -424,6 +412,7 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
 
         # check that anything was specified
         if self.getProperty('CalFileName').isDefault and self.getProperty('GroupFilename').isDefault:
+            self.kwargs = self.__getAlignAndFocusArgs()
             return
 
         # decide what to load
@@ -451,6 +440,7 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
         if loadMask:
             self.__mskWksp = self.instr + '_mask'
             self.setPropertyValue('MaskWorkspace', self.instr + '_mask')
+        self.kwargs = self.__getAlignAndFocusArgs()
 
     def PyExec(self):
         self._filenames = sorted(self.__getLinearizedFilenames('Filename'))
@@ -462,6 +452,10 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
         self.absorption = self.getProperty('AbsorptionWorkspace').value
         self.charac = self.getProperty('Characterizations').value
         self.useCaching = len(self.getProperty('CacheDir').value) > 0
+        self.__calWksp = ''
+        self.__grpWksp = ''
+        self.__mskWksp = ''
+        self.kwargs = None
         finalname = self.getPropertyValue('OutputWorkspace')
 
         # accumulate the unfocused workspace if it was requested
@@ -478,9 +472,6 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
 
         assert len(self._filenames), "No files specified"
         self.prog_per_file = 1./float(len(self._filenames))  # for better progress reporting
-
-        # these are also passed into the child-algorithms
-        self.kwargs = self.__getAlignAndFocusArgs()
 
         # initialization for caching mechanism
         if self.useCaching:
