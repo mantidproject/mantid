@@ -70,7 +70,7 @@ std::string getRecoveryFolderOutput() {
   static std::string pid = std::to_string(Process::getProcessID());
 
   static std::string recoverFolder =
-      appData + "/recovery/" + hostname + '/' + pid + '/';
+      appData + "recovery/" + hostname + '/' + pid + '/';
   return recoverFolder;
 }
 
@@ -80,7 +80,7 @@ std::string getRecoveryFolderCheck() {
       Mantid::Kernel::ConfigService::Instance().getAppDataDir();
   static std::string hostname = Poco::Environment::nodeName();
 
-  static std::string recoverFolder = appData + "/recovery/" + hostname + '/';
+  static std::string recoverFolder = appData + "recovery/" + hostname + '/';
   return recoverFolder;
 }
 
@@ -807,8 +807,8 @@ void ProjectRecovery::repairCheckpointDirectory() {
 
   for (auto c : vectorToDelete) {
     // Remove c recursively
-    const auto sanityCheckPath(getRecoveryFolderCheck());
-    if (sanityCheckPath == Poco::Path(c).popDirectory().toString()) {
+    const Poco::Path sanityCheckPath(getRecoveryFolderCheck());
+    if (sanityCheckPath.toString() == Poco::Path(c).popDirectory().toString()) {
       Poco::File(c).remove(true);
     }
   }
