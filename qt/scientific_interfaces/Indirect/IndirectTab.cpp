@@ -53,8 +53,8 @@ IndirectTab::IndirectTab(QObject *parent)
       m_blnManager(new QtBoolPropertyManager()),
       m_grpManager(new QtGroupPropertyManager()),
       m_dblEdFac(new DoubleEditorFactory()), m_pythonRunner(),
-      m_tabStartTime(DateAndTime::getCurrentTime()),
-      m_tabEndTime(DateAndTime::maximum()), m_plotErrorBars(false) {
+      m_plotErrorBars(false), m_tabStartTime(DateAndTime::getCurrentTime()),
+      m_tabEndTime(DateAndTime::maximum()) {
   m_parentWidget = dynamic_cast<QWidget *>(parent);
 
   m_batchAlgoRunner = new MantidQt::API::BatchAlgorithmRunner(m_parentWidget);

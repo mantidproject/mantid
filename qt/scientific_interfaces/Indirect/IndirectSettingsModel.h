@@ -31,8 +31,8 @@ public:
   virtual std::string getFacility() const;
 
 private:
-  std::vector<std::string> m_settingsAvailable;
   std::string m_settingsGroup;
+  std::vector<std::string> m_settingsAvailable;
 };
 
 } // namespace IDA

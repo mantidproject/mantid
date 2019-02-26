@@ -51,8 +51,8 @@ private:
 
   void setApplyingChanges(bool applyingChanges);
 
-  std::unique_ptr<IIndirectSettingsView> m_view;
   std::unique_ptr<IndirectSettingsModel> m_model;
+  std::unique_ptr<IIndirectSettingsView> m_view;
 };
 
 } // namespace IDA
