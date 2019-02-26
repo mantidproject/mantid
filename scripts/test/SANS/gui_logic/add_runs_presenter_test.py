@@ -6,24 +6,26 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 import sys
-from ui.sans_isis.add_runs_page import AddRunsPage
-from ui.sans_isis.sans_data_processor_gui import SANSDataProcessorGui
+
 from mantid.kernel import ConfigService
-from sans.gui_logic.presenter.add_runs_presenter import AddRunsPagePresenter, AddRunsFilenameManager
+from sans.common.enums import SANSInstrument
 from sans.gui_logic.models.run_summation import RunSummation
 from sans.gui_logic.models.run_file import SummableRunFile
 from sans.gui_logic.models.run_selection import RunSelection
 from sans.gui_logic.models.summation_settings import SummationSettings
-from sans.gui_logic.presenter.summation_settings_presenter import SummationSettingsPresenter
+from sans.gui_logic.presenter.add_runs_presenter import AddRunsPagePresenter, AddRunsFilenameManager
 from sans.gui_logic.presenter.run_selector_presenter import RunSelectorPresenter
+from sans.gui_logic.presenter.summation_settings_presenter import SummationSettingsPresenter
+from ui.sans_isis.add_runs_page import AddRunsPage
+from ui.sans_isis.sans_data_processor_gui import SANSDataProcessorGui
 from fake_signal import FakeSignal
 from assert_called import assert_called
-from sans.common.enums import SANSInstrument
 
 if sys.version_info.major == 2:
     import mock
 else:
     from unittest import mock
+
 
 class MockedOutAddRunsFilenameManager(AddRunsFilenameManager):
     def __init__(self):
@@ -43,6 +45,7 @@ class AddRunsPagePresenterTestCase(unittest.TestCase):
         mock_view = mock.create_autospec(AddRunsPage, spec_set=True)
         mock_view.sum = FakeSignal()
         mock_view.outFileChanged = FakeSignal()
+        mock_view.saveDirectoryClicked = FakeSignal()
         return mock_view
 
     def _make_mock_parent_view(self):
@@ -99,7 +102,7 @@ class AddRunsPagePresenterTestCase(unittest.TestCase):
 
     def _summation_settings_with_save_directory(self, directory):
         mock_summation_settings = mock.create_autospec(SummationSettings, spec_set=True)
-        mock_summation_settings.save_directory.return_value = directory
+        mock_summation_settings.save_directory = directory
         return mock_summation_settings
 
 
@@ -191,7 +194,7 @@ class SummationSettingsViewEnablednessTest(SelectionMockingTestCase):
         return self._just_use(self._summation_settings_presenter)
 
     def _make_presenter(self):
-        presenter =  AddRunsPagePresenter(mock.Mock(),
+        presenter = AddRunsPagePresenter(mock.Mock(),
                                          self._capture_on_change_callback(self.run_selector_presenter),
                                          self._just_use_summation_settings_presenter(),
                                          self._view,
@@ -240,6 +243,7 @@ class SummationConfigurationTest(SelectionMockingTestCase):
         return self._just_use(self._summation_settings_presenter)
 
     def test_passes_correct_config_when_summation_requested(self):
+        ConfigService["defaultsave.directory"] = "someDir/"
         run_summation = mock.Mock()
 
         self.presenter = self._make_presenter(
@@ -256,6 +260,7 @@ class SummationConfigurationTest(SelectionMockingTestCase):
                                          'LOQ00003-add')
 
     def test_shows_error_when_empty_default_directory(self):
+        ConfigService["defaultsave.directory"] = ""
         summation_settings_model = self._summation_settings_with_save_directory('')
         self._summation_settings_presenter.settings.return_value = summation_settings_model
         self.presenter = self._make_presenter(
@@ -272,6 +277,10 @@ class BaseFileNameTest(SelectionMockingTestCase):
         self.setUpMockChildPresentersWithDefaultSummationSettings()
         self.view = self._make_mock_view()
         self.parent_view = self._make_mock_parent_view()
+        ConfigService["defaultsave.directory"] = "someDir/"
+
+    def tearDown(self):
+        ConfigService["defaultsave.directory"] = ""
 
     def _make_presenter(self,
                         run_summation):
@@ -293,6 +302,7 @@ class BaseFileNameTest(SelectionMockingTestCase):
 
     def _base_file_name_arg(self, run_summation_mock):
         first_call = 0
+        print(run_summation_mock.call_args)
         return run_summation_mock.call_args[first_call][2]
 
     def _retrieve_generated_name_for(self, run_paths):
