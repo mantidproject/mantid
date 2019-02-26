@@ -29,6 +29,10 @@ else:
     import mock
 
 
+def is_macOS():
+    return sys.platform == "darwin"
+
+
 class ProjectRecoveryTest(unittest.TestCase):
     def setUp(self):
         self.multifileinterpreter = mock.MagicMock()
@@ -99,7 +103,7 @@ class ProjectRecoveryTest(unittest.TestCase):
 
         self.assertTrue(not os.path.exists(temp_dir))
 
-    @unittest.skipIf(sys.platform("darwin"), "Can be unreliable on macOS and is a test of logic not OS capability")
+    @unittest.skipIf(is_macOS(), "Can be unreliable on macOS and is a test of logic not OS capability")
     def test_sort_paths_by_last_modified(self):
         # Make sure there is actually a different modified time on the files by using sleeps
         first = tempfile.mkdtemp()

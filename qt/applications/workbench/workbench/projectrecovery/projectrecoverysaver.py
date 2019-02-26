@@ -13,9 +13,8 @@ import datetime
 import os
 from threading import Timer
 
-from mantid.api import AnalysisDataService as ADS, WorkspaceGroup
+from mantid.api import AnalysisDataService as ADS, WorkspaceGroup, AlgorithmManager
 from mantid.kernel import logger, UsageService
-from mantid.simpleapi import AlgorithmManager
 from mantidqt.project.projectsaver import ProjectSaver
 from workbench.app.windowfinder import find_all_windows_that_are_savable
 

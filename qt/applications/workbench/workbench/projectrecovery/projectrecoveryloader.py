@@ -11,8 +11,8 @@ from __future__ import (absolute_import, unicode_literals)
 
 from qtpy.QtWidgets import QApplication
 
+from mantid.api import AlgorithmManager
 from mantid.kernel import logger
-from mantid.simpleapi import AlgorithmManager
 from mantidqt.project.projectloader import ProjectLoader
 from workbench.projectrecovery.recoverygui.projectrecoverypresenter import ProjectRecoveryPresenter
 
