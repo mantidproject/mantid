@@ -441,8 +441,8 @@ void LoadIsawDetCal::doRotation(V3D rX, V3D rY, ComponentInfo &componentInfo,
   rY.normalize();
 
   // These are the original axes
-  const V3D oX(1., 0., 0.);
-  const V3D oY(0., 1., 0.);
+  constexpr V3D oX(1., 0., 0.);
+  constexpr V3D oY(0., 1., 0.);
 
   // Axis that rotates X
   V3D ax1 = oX.cross_prod(rX);
