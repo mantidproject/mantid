@@ -67,6 +67,7 @@ New Algorithms
 - :ref:`ParallaxCorrection <algm-ParallaxCorrection>` will perform a geometric correction for the so-called parallax effect in tube based SANS detectors.
 - :ref:`CalculateEfficiencyCorrection <algm-CalculateEfficiencyCorrection>` will calculate a detection efficiency correction with multiple and flexible inputs for calculation.
 - :ref:`LinkedUBs <algm-LinkedUBs>` is an algorithm that ensures continuity of indexing across single crystal runs, as well as indirectly performing a U matrix correction for mis-centered samples or cases where there is error in the gonio angles. Results in a seperate UB for each run when used on a whole dataset.
+- :ref:`CalculateFlux <algm-CalculateFlux>` is an algorithm that calculates wavelength dependent incident flux using an empty beam measurement for SANS instruments at reactor sources.
 
 Improvements
 ############
