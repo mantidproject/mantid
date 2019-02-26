@@ -260,10 +260,10 @@ class MatchPeaks(PythonAlgorithm):
             peak_plus_error = abs(fit["PeakCentreError"]) + abs(fit["PeakCentre"])
 
             if peak_plus_error > x_values[0] and peak_plus_error < x_values[-1]:
-                peak_plus_error_bin = mtd[self._input_ws].binIndexOf(peak_plus_error)
+                peak_plus_error_bin = mtd[self._input_ws].yIndexOfX(peak_plus_error)
                 if abs(peak_plus_error_bin - mid_bin) < tolerance and fit["FitStatus"] == 'success':
                     # fit succeeded, and fitted peak is within acceptance range, take it
-                    peak_bin[i] = mtd[self._input_ws].binIndexOf(fit["PeakCentre"])
+                    peak_bin[i] = mtd[self._input_ws].yIndexOfX(fit["PeakCentre"])
                     logger.debug('Fit successfull, peak inside tolerance')
                 elif abs(max_pos - mid_bin) < tolerance:
                     # fit not reliable, take the maximum if within acceptance
