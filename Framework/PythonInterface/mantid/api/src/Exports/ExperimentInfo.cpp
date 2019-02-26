@@ -67,7 +67,8 @@ void export_ExperimentInfo() {
            "pattern\n"
            "fileFormats:    list of valid file extensions\n"
            "directoryNames: list of directories to be searched\n"
-           "date :          valid-from and valid-to of a valid file "
+           "date :          valid-from and valid-to dates of a valid file\n"
+           "                (e.g '1900-01-31 23:59:00')\n"
            "encapsulate date\n"
            "\nreturns : list of absolute paths for each valid file")
       .staticmethod("getResourceFilenames")
@@ -79,7 +80,7 @@ void export_ExperimentInfo() {
       .def("sample", &ExperimentInfo::sample,
            return_value_policy<reference_existing_object>(), args("self"),
            "Return the :class:`~mantid.api.Sample` object. This cannot be "
-           "modified, use mutableSample to modify.")
+           "modified, use mutableSample to modify.")l
 
       .def("mutableSample", &ExperimentInfo::mutableSample,
            return_value_policy<reference_existing_object>(), args("self"),
