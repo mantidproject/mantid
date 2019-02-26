@@ -584,7 +584,7 @@ public:
     m_rotx[2][2] = cos(theta);
     m_rotx[2][1] = sin(theta);
 
-    m_sampleSize = 100000000;
+    m_sampleSize = 1000000000;
   }
 
   void testRotate() {
