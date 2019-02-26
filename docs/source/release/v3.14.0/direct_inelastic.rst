@@ -20,6 +20,7 @@ New Algorithms
 - The new algorithm :ref:`SofTwoThetaTOF <algm-SofTwoThetaTOF>` can be used to convert a workspace from (spectrum number, TOF) units to (:math:`2\theta`, TOF) averaging the intensities over constant scattering angles.
 - The new algorithm :ref:`MDNorm <algm-MDNorm>` can be used to calculate cross section for single crystal direct inelastic measurements.
 - :ref:`LoadPLN <algm-LoadPLN>` loader for an ANSTO PELICAN event file.
+- Version 3 of :ref:`algm-GetEiMonDet` is now available. The upgraded version now fits a Gaussian to summed detector data making the energy calculation more robust. Version 2 has been deprecated and will be removed in a future release.
 
 Improvements
 ############
