@@ -10,14 +10,17 @@ import unittest
 from mantid.simpleapi import CalculateFlux, CreateSampleWorkspace, FindDetectorsInShape, mtd
 import numpy as np
 
+
 class CalculateFluxTest(unittest.TestCase):
 
     pixels_in_shape = 0
 
     def setUp(self):
         ws = CreateSampleWorkspace(XUnit="Wavelength", NumBanks=1, Function="One Peak")
-        shape = FindDetectorsInShape(Workspace="ws",
-                                     ShapeXML='<infinite-cylinder id="asbsolute_scale"><centre x="0.0" y="0.0" z="0.0" /> <axis x="0.0" y="0.0" z="1.0" /><radius val="0.05" /></infinite-cylinder>')
+        shape = FindDetectorsInShape(Workspace=ws,
+                                     ShapeXML='<infinite-cylinder id="asbsolute_scale">'
+                                              '<centre x="0.0" y="0.0" z="0.0" /> <axis x="0.0" y="0.0" z="1.0" />'
+                                              '<radius val="0.05" /></infinite-cylinder>')
         self.pixels_in_shape = len(shape)
 
     def tearDown(self):
