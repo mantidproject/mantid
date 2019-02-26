@@ -12,7 +12,7 @@ import unittest
 import matplotlib
 matplotlib.use('AGG')
 
-from os.path import isdir  # noqa
+from os.path import isdir, join  # noqa
 from shutil import rmtree  # noqa
 import tempfile  # noqa
 
@@ -23,6 +23,7 @@ from mantidqt.project import projectloader, projectsaver  # noqa
 
 project_file_ext = ".mtdproj"
 working_directory = tempfile.mkdtemp()
+working_project_file = join(working_directory, "temp" + project_file_ext)
 
 
 class ProjectLoaderTest(unittest.TestCase):
@@ -30,7 +31,7 @@ class ProjectLoaderTest(unittest.TestCase):
         ws1_name = "ws1"
         ADS.addOrReplace(ws1_name, CreateSampleWorkspace(OutputWorkspace=ws1_name))
         project_saver = projectsaver.ProjectSaver(project_file_ext)
-        project_saver.save_project(workspace_to_save=[ws1_name], directory=working_directory)
+        project_saver.save_project(workspace_to_save=[ws1_name], file_name=working_project_file)
 
     def tearDown(self):
         ADS.clear()
@@ -46,7 +47,7 @@ class ProjectLoaderTest(unittest.TestCase):
     def test_project_loading(self):
         project_loader = projectloader.ProjectLoader(project_file_ext)
 
-        self.assertTrue(project_loader.load_project(working_directory))
+        self.assertTrue(project_loader.load_project(working_project_file))
 
         self.assertEqual(ADS.getObjectNames(), ["ws1"])
 
@@ -61,7 +62,7 @@ class ProjectReaderTest(unittest.TestCase):
         ws1_name = "ws1"
         ADS.addOrReplace(ws1_name, CreateSampleWorkspace(OutputWorkspace=ws1_name))
         project_saver = projectsaver.ProjectSaver(project_file_ext)
-        project_saver.save_project(workspace_to_save=[ws1_name], directory=working_directory)
+        project_saver.save_project(workspace_to_save=[ws1_name], file_name=working_project_file)
 
     def tearDown(self):
         ADS.clear()
@@ -70,7 +71,7 @@ class ProjectReaderTest(unittest.TestCase):
 
     def test_project_reading(self):
         project_reader = projectloader.ProjectReader(project_file_ext)
-        project_reader.read_project(working_directory)
+        project_reader.read_project(working_project_file)
         self.assertEqual(["ws1"], project_reader.workspace_names)
 
 
