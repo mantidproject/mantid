@@ -94,6 +94,8 @@ class MuonAnalysisGui(QtGui.QMainWindow):
 
         self.load_widget.load_widget.loadNotifier.add_subscriber(self.grouping_tab_widget.group_tab_presenter.loadObserver)
 
+        self.context.message_notifier.add_subscriber(self.grouping_tab_widget.group_tab_presenter.message_observer)
+
     def setup_tabs(self):
         """
         Set up the tabbing structure; the tabs work similarly to conventional

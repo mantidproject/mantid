@@ -7,21 +7,13 @@
 import sys
 from Muon.GUI.Common.muon_load_data import MuonLoadData
 from Muon.GUI.Common.utilities.load_utils import load_workspace_from_filename
-
-from Muon.GUI.Common.home_grouping_widget.home_grouping_widget_model import HomeGroupingWidgetModel
-from Muon.GUI.Common.home_grouping_widget.home_grouping_widget_presenter import HomeGroupingWidgetPresenter
-from Muon.GUI.Common.home_grouping_widget.home_grouping_widget_view import HomeGroupingWidgetView
 from Muon.GUI.Common.muon_data_context import MuonDataContext
 from mantid.api import AnalysisDataService
-from Muon.GUI.Common import mock_widget
 import unittest
-from PyQt4 import QtGui
-from Muon.GUI.Common.observer_pattern import Observer
-from mantid.api import FileFinder
-from mantid import ConfigService
-import Muon.GUI.Common.utilities.load_utils as load_utils
-from Muon.GUI.Common.muon_pair import MuonPair
 
+from mantid.api import FileFinder
+
+import copy
 
 if sys.version_info.major < 2:
     from unittest import mock
@@ -86,6 +78,27 @@ class MuonDataContextTest(unittest.TestCase):
 
 
         self.assertEqual(AnalysisDataService.getObjectNames(), expected_workspaces)
+
+    def test_setting_current_data_with_a_different_field_sends_message_signal(self):
+        self.context.current_data['MainFieldDirection'] = 'transverse'
+        self.context.message_notifier.notify_subscribers = mock.MagicMock()
+
+        self.context.update_current_data()
+
+        self.context.message_notifier.notify_subscribers.assert_called_once_with('MainFieldDirection has changed between'
+                                                                                 ' data sets, click default to reset grouping if required')
+
+    def test_that_setting_current_runs_with_mixture_of_transverse_and_longitudanal_runs_raises_warning(self):
+        loaded_data = copy.copy(self.context.current_data)
+        self.context.message_notifier.notify_subscribers = mock.MagicMock()
+        loaded_data['MainFieldDirection'] = 'transverse'
+
+        self.loaded_data.add_data(workspace=loaded_data, run=[1], filename='filename', instrument='EMU')
+
+        self.context.current_runs = [[19489], [1]]
+
+        self.context.message_notifier.notify_subscribers.assert_called_once_with(
+            'MainFieldDirection changes within current run set')
 
 
 if __name__ == '__main__':
