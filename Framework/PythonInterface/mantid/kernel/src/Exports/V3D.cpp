@@ -100,12 +100,9 @@ void export_V3D() {
       .def_pickle(V3DPickleSuite())
       .def(init<double, double, double>(
           "Construct a V3D with X,Y,Z coordinates"))
-      .def("X", &V3D::X, arg("self"),
-           "Returns the X coordinate")
-      .def("Y", &V3D::Y, arg("self"),
-           "Returns the Y coordinate")
-      .def("Z", &V3D::Z, arg("self"),
-           "Returns the Z coordinate")
+      .def("X", &V3D::X, arg("self"), "Returns the X coordinate")
+      .def("Y", &V3D::Y, arg("self"), "Returns the Y coordinate")
+      .def("Z", &V3D::Z, arg("self"), "Returns the Z coordinate")
       .def("getX", &V3D::X, arg("self"),
            "Returns the X coordinate") // Traditional name
       .def("getY", &V3D::Y, arg("self"),
