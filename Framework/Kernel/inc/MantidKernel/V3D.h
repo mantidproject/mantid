@@ -265,7 +265,7 @@ public:
 
   /**
     Returns the axis value based in the index provided
-    @param Index :: 0=x, 1=y, 2=z
+    @param index :: 0=x, 1=y, 2=z
     @return a double value of the requested axis
   */
   double &operator[](const size_t index) {
