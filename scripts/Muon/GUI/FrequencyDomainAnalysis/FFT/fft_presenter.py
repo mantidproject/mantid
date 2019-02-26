@@ -117,7 +117,7 @@ class FFTPresenter(object):
         # for new version 2 of FDA
         if self.load.version == 2:
             inputs["Run"] = self.getRun(
-                self.view.getInputWS().split(";", 1)[0])
+                self.view.getInputWS().split(";", 1)[0].split("_", 1)[0])
         # do apodization and padding to real data
 
         preInputs = self.view.initAdvanced()
@@ -203,8 +203,10 @@ class FFTPresenter(object):
         return FFTInputs
 
     def clean(self, name):
-        if "PhaseQuad" in name:
+        if "PhaseQuad" in name and not self.load.version == 2:
             return self.getRun(name) + "_raw_data"
+        elif "PhaseQuad" in name:
+            return self.getRun(name)
         return name
 
     def getRun(self, name):

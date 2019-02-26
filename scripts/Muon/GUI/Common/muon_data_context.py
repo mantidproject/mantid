@@ -244,7 +244,7 @@ class MuonDataContext(object):
         else:
             return self._loaded_data.get_data(run=run, instrument=self.instrument)['workspace']['OutputWorkspace'][0].workspace
 
-    def period_string(self, run):
+    def period_string(self, run=None):
         summed_periods = self.gui_variables["SummedPeriods"] if 'SummedPeriods' in self.gui_variables else [1]
         subtracted_periods = self.gui_variables["SubtractedPeriods"] if 'SubtractedPeriods' in self.gui_variables else []
         if subtracted_periods:
@@ -260,6 +260,9 @@ class MuonDataContext(object):
             # default to 1
             n_det = 1
         return n_det
+
+    def num_periods(self, run):
+        return len(self._loaded_data.get_data(run=run, instrument=self.instrument)['workspace']['OutputWorkspace'])
 
     @property
     def main_field_direction(self):
@@ -322,7 +325,7 @@ class MuonDataContext(object):
             if len(loaded_workspace) > 1:
                 # Multi-period data
                 for i, single_ws in enumerate(loaded_workspace):
-                    name = directory + get_raw_data_workspace_name(self, run_string, period=str(i))
+                    name = directory + get_raw_data_workspace_name(self, run_string, period=str(i + 1))
                     single_ws.show(name)
             else:
                 # Single period data
