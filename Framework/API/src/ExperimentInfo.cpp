@@ -1041,7 +1041,7 @@ std::vector<std::string> ExperimentInfo::getResourceFilenames(
     for (auto elem : matchingFiles)
       pathNames.emplace_back(std::move(elem.second));
   } else {
-    pathNames.emplace_back(std::movemostRecentFile));
+    pathNames.emplace_back(std::move(mostRecentFile));
   }
 
   return pathNames;
