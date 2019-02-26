@@ -73,7 +73,7 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
         self.declareProperty(WorkspaceProperty('CalibrationWorkspace', '',
                                                direction=Direction.Input,
                                                optional=PropertyMode.Optional),
-                             doc='Workspace contining calibration data')
+                             doc='Workspace containing calibration data')
 
         # Instrument configuration properties
         self.declareProperty(name='Instrument', defaultValue='',
@@ -94,7 +94,7 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
                                               validator=IntArrayMandatoryValidator()),
                              doc='Comma separated range of spectra number to use.')
         self.declareProperty(FloatArrayProperty(name='BackgroundRange'),
-                             doc='Range of background to subtact from raw data in time of flight.')
+                             doc='Range of background to subtract from raw data in time of flight.')
         self.declareProperty(name='RebinString', defaultValue='',
                              doc='Rebin string parameters.')
         self.declareProperty(name='DetailedBalance', defaultValue=Property.EMPTY_DBL,

@@ -308,10 +308,8 @@ QString ISISEnergyTransfer::validateDetectorGrouping() const {
 
 void ISISEnergyTransfer::run() {
   auto reductionAlg =
-      AlgorithmManager::Instance().create("ISISIndirectEnergyTransfer");
+      AlgorithmManager::Instance().create("ISISIndirectEnergyTransferWrapper");
   reductionAlg->initialize();
-  //reductionAlg->setChild(true);
-  //reductionAlg->setAlwaysStoreInADS(true);
   BatchAlgorithmRunner::AlgorithmRuntimeProps reductionRuntimeProps;
 
   QString instName = getInstrumentConfiguration()->getInstrumentName();
