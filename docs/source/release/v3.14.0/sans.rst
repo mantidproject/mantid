@@ -43,6 +43,7 @@ Improved
 * All limit strings in the user file (L/ ) are now space-separable to allow for uniform structure in the user file. For backwards compatibility, any string which was comma separable remains comma separable as well.
 * Added a sum runs directory selection button. This is separate from default save directory and only determines where summed runs are saved.
 * The gui will remember which output mode (Memory, File, Both) you last used and set that as your default when on the SANS interface.
+* The gui will check *save can* by default if it was checked when the gui was last used.
 * Default adding mode is set to Event for all instruments except for LOQ, which defaults to Custom.
 
 Bug fixes

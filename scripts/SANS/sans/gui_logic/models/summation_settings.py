@@ -113,6 +113,10 @@ class SummationSettings(object):
         return isinstance(self._settings, SaveAsEventData)
 
     @property
+    def type(self):
+        return self._type
+
+    @property
     def additional_time_shifts(self):
         return self._settings.additional_time_shifts
 
@@ -136,14 +140,6 @@ class SummationSettings(object):
     @bin_settings.setter
     def bin_settings(self, bin_settings):
         self._settings.bin_settings = bin_settings
-
-    def get_index_from_type(self):
-        if self._type == BinningType.Custom:
-            return 0
-        elif self._type == BinningType.FromMonitors:
-            return 1
-        elif self._type == BinningType.SaveAsEventData:
-            return 2
 
     def _settings_from_type(self, type):
         try:

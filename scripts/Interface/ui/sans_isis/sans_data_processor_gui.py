@@ -197,6 +197,7 @@ class SANSDataProcessorGui(QMainWindow,
         self.__user_file_key = "user_file"
         self.__mask_file_input_path_key = "mask_files"
         self.__output_mode_key = "output_mode"
+        self.__save_can_key = "save_can"
 
         # Logger
         self.gui_logger = Logger("SANS GUI LOGGER")
@@ -225,6 +226,8 @@ class SANSDataProcessorGui(QMainWindow,
         self.delete_row_button.clicked.connect(self._remove_rows_requested_from_button)
         self.insert_row_button.clicked.connect(self._on_insert_button_pressed)
         self.save_other_pushButton.clicked.connect(self._on_save_other_button_pressed)
+
+        self.save_can_checkBox.clicked.connect(self._on_save_can_clicked)
 
         # Attach validators
         self._attach_validators()
@@ -538,6 +541,10 @@ class SANSDataProcessorGui(QMainWindow,
             output_mode = None
         set_setting(self.__generic_settings, self.__output_mode_key, output_mode)
 
+    def _on_save_can_clicked(self, value):
+        self.save_can_checkBox.setChecked(value)
+        set_setting(self.__generic_settings, self.__save_can_key, value)
+
     def _on_user_file_load(self):
         """
         Load the user file
@@ -580,6 +587,14 @@ class SANSDataProcessorGui(QMainWindow,
             self.output_mode_file_radio_button.setChecked(True)
         elif value is OutputMode.Both:
             self.output_mode_both_radio_button.setChecked(True)
+
+    def set_out_default_save_can(self):
+        try:
+            default_save_can = load_property(self.__generic_settings, self.__save_can_key, type=bool)
+        except RuntimeError:
+            pass
+        else:
+            self._on_save_can_clicked(default_save_can)
 
     def _on_batch_file_load(self):
         """
@@ -954,7 +969,7 @@ class SANSDataProcessorGui(QMainWindow,
 
     @save_can.setter
     def save_can(self, value):
-        self.save_can_checkBox.setChecked(value)
+        self._on_save_can_clicked.setChecked(value)
 
     @property
     def progress_bar_minimum(self):
