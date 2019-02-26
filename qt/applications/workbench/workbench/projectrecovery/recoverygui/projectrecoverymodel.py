@@ -82,6 +82,10 @@ class ProjectRecoveryModel(QObject):
         Recover the passed checkpoint
         :param selected: String; Checkpoint name to be recovered
         """
+        # If this is a valid file then it should only be the checkpoint here
+        if os.path.exists(selected):
+            selected = os.path.basename(selected)
+
         self.is_recovery_running = True
         self.presenter.change_start_mantid_to_cancel_label()
 
@@ -98,8 +102,10 @@ class ProjectRecoveryModel(QObject):
         except Exception as e:
             if isinstance(e, KeyboardInterrupt):
                 raise
-            # Fail "Silently" by setting failed run to true
+            # Fail "Silently" by setting failed run to true, setting checkpoint to tried and closing the view.
             self.has_failed_run = True
+            self._update_checkpoint_tried(selected)
+            self.presenter.close_view()
 
     def open_selected_in_editor(self, selected):
         """

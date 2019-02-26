@@ -40,11 +40,12 @@ class ProjectRecoveryWidgetView(QDialog):
         self.ui.progressBar.setMaximum(new_value)
 
     def connect_progress_bar(self):
-        self.presenter.project_recovery.multi_file_interpreter.current_editor().sig_progress.connect(
+        self.presenter.project_recovery.loader.multi_file_interpreter.current_editor().sig_progress.connect(
             self.update_progress_bar)
 
     def emit_abort_script(self):
-        self.abort_project_recovery_script.connect(self.presenter.project_recovery.multi_file_interpreter.abort_all)
+        self.abort_project_recovery_script.connect(
+            self.presenter.project_recovery.loader.multi_file_interpreter.abort_all)
         logger.error("Project Recovery: Cancelling recovery")
         self.abort_project_recovery_script.emit()
 

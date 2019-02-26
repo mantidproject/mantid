@@ -53,7 +53,6 @@ from mantidqt.widgets.codeeditor.execution import PythonCodeExecution  # noqa
 from mantidqt.utils.qt import (add_actions, create_action, plugins,
                                widget_updates_disabled)  # noqa
 from mantidqt.project.project import Project  # noqa
-from workbench.projectrecovery import ProjectRecovery  # noqa
 
 # Pre-application setup
 plugins.setup_library_paths()
@@ -61,6 +60,7 @@ plugins.setup_library_paths()
 from workbench.config import APPNAME, CONF, ORG_DOMAIN, ORGANIZATION  # noqa
 from workbench.plotting.globalfiguremanager import GlobalFigureManager  # noqa
 from workbench.app.windowfinder import find_all_windows_that_are_savable  # noqa
+from workbench.projectrecovery.projectrecovery import ProjectRecovery  # noqa
 
 
 # -----------------------------------------------------------------------------
@@ -220,7 +220,6 @@ class MainWindow(QMainWindow):
         self.project = Project(GlobalFigureManager, find_all_windows_that_are_savable)
         self.project_recovery = ProjectRecovery(globalfiguremanager=GlobalFigureManager,
                                                 multifileinterpreter=self.editor.editors,
-                                                window_finder=find_all_windows_that_are_savable,
                                                 main_window=self)
 
         # uses default configuration as necessary

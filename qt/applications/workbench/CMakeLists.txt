@@ -26,6 +26,14 @@ set ( TEST_FILES
   workbench/widgets/plotselector/test/test_plotselector_model.py
   workbench/widgets/plotselector/test/test_plotselector_presenter.py
   workbench/widgets/plotselector/test/test_plotselector_view.py
+
+  workbench/projectrecovery/test/test_projectrecovery.py
+  workbench/projectrecovery/test/test_projectrecoveryloader.py
+  workbench/projectrecovery/test/test_projectrecoverysaver.py
+  workbench/projectrecovery/recoverygui/test/test_projectrecoverymodel.py
+  workbench/projectrecovery/recoverygui/test/test_projectrecoverypresenter.py
+  workbench/projectrecovery/recoverygui/test/test_projectrecoverywidgetview.py
+  workbench/projectrecovery/recoverygui/test/test_recoveryfailureview.py
 )
 
 set ( PYUNITTEST_RUN_SERIAL ON )

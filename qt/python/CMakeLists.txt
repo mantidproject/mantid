@@ -133,12 +133,6 @@ endif ()
     mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_io.py
     mantidqt/widgets/workspacedisplay/matrix/test/test_matrixworkspacedisplay_io.py
 
-    mantidqt/project/recovery/test/test_projectrecovery.py
-    mantidqt/project/recovery/recoverygui/test/test_projectrecoverywidgetview.py
-    mantidqt/project/recovery/recoverygui/test/test_recoveryfailureview.py
-    mantidqt/project/recovery/recoverygui/test/test_projectrecoverypresenter.py
-    mantidqt/project/recovery/recoverygui/test/test_projectrecoverymodel.py
-
     mantidqt/widgets/samplelogs/test/test_samplelogs_view.py
  )
 

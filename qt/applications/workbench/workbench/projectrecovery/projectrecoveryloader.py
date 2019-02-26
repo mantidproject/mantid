@@ -31,7 +31,7 @@ class ProjectRecoveryLoader(object):
         Attempt to recover by launching the GUI relevant to project recovery and repeating with failure if failure
         occurs.
         """
-        self.recovery_presenter = ProjectRecoveryPresenter(self)
+        self.recovery_presenter = ProjectRecoveryPresenter(self.pr)
 
         success = self.recovery_presenter.start_recovery_view(parent=self.main_window)
 
@@ -125,11 +125,7 @@ class ProjectRecoveryLoader(object):
         :param script: String; Path to the script
         :return:
         """
-        QMetaObject.invokeMethod(self.multi_file_interpreter, "open_file_in_new_tab", Qt.AutoConnection,
-                                 Q_ARG(str, script))
-
-        # Force program to process events so the invoked method is called
-        QApplication.processEvents()
+        self.multi_file_interpreter.open_file_in_new_tab(script)
 
     def _run_script_in_open_editor(self):
         """
@@ -140,8 +136,8 @@ class ProjectRecoveryLoader(object):
         self.multi_file_interpreter.current_editor().sig_exec_error.connect(self.recovery_presenter.model.exec_error)
 
         # Actually execute the current tab
-        QMetaObject.invokeMethod(self.multi_file_interpreter, "execute_current_async_blocking",
-                                 Qt.AutoConnection)
-
-        # Force program to process events so the invoked method is called
-        QApplication.processEvents()
+        # try:
+        self.multi_file_interpreter.execute_current_async_blocking()
+        # except Exception as e:
+        #     logger.warning("Project Recovery: Exception: " + str(e) +
+        #                    ". Occurred during the execution of recovery script")
