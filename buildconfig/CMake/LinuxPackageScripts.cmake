@@ -205,7 +205,7 @@ if [ -n \"\$1\" ] && [ \"\$1\" = \"--debug\" ]; then
     GDB=\"gdb --args\"
 fi" )
 
-set ( ERROR_CMD "ErrorReporter/error_dialog_app.py --exitcode=\$? --directory=\$INSTALLDIR/bin" )
+set ( ERROR_CMD "ErrorReporter/error_dialog_app.py --exitcode=\$?" )
 
 # Local dev version
 if ( MAKE_VATES )
@@ -255,7 +255,7 @@ else ()
 endif ()
 
 # used by mantidplot and mantidworkbench
-set ( LOCAL_PYPATH "\${INSTALLDIR}/lib:\${INSTALLDIR}/plugins" )
+set ( LOCAL_PYPATH "\${INSTALLDIR}/bin:\${INSTALLDIR}/lib:\${INSTALLDIR}/plugins" )
 set ( SCRIPTSDIR "\${INSTALLDIR}/scripts")
 
 if (ENABLE_MANTIDPLOT)
@@ -265,7 +265,7 @@ if (ENABLE_MANTIDPLOT)
   install ( PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidplot.sh.install
             DESTINATION ${BIN_DIR} RENAME launch_mantidplot.sh )
 endif ()
-if (PACKAGE_WORKBENCH) # will eventually switch to ENABLE_WORKBENCH
+if (ENABLE_WORKBENCH)
   set ( MANTIDWORKBENCH_EXEC workbench-script ) # what the actual thing is called
   configure_file ( ${CMAKE_MODULE_PATH}/Packaging/launch_mantidworkbench.sh.in
                    ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidworkbench.sh.install @ONLY )

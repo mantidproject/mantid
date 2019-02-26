@@ -336,7 +336,7 @@ void UnwrappedSurface::getMaskedDetectors(
     return;
   for (size_t i = 0; i < m_unwrappedDetectors.size(); ++i) {
     const UnwrappedDetector &udet = m_unwrappedDetectors[i];
-    if (m_maskShapes.isMasked(udet.u, udet.v)) {
+    if (!udet.empty() && m_maskShapes.isMasked(udet.u, udet.v)) {
       detIndices.push_back(udet.detIndex);
     }
   }

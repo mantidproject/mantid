@@ -8,6 +8,7 @@
 
 // PropertyWithValue Definition
 #include "MantidKernel/PropertyWithValue.tcc"
+
 namespace Mantid {
 namespace Kernel {
 /** Constructor
@@ -109,6 +110,7 @@ template class ArrayProperty<int32_t>;
 template class DLLExport ArrayProperty<uint32_t>;
 template class DLLExport ArrayProperty<int64_t>;
 template class DLLExport ArrayProperty<uint64_t>;
+template class DLLExport ArrayProperty<bool>;
 template class DLLExport ArrayProperty<float>;
 template class DLLExport ArrayProperty<double>;
 template class DLLExport ArrayProperty<std::string>;

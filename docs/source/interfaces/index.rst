@@ -7,9 +7,9 @@
 
 .. _interfaces contents:
 
-============
- Interfaces
-============
+===========
+Interfaces
+===========
 
 .. toctree::
    :hidden:

@@ -436,17 +436,17 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
                            OutputWorkspace=self.instr + '_cal')
             self.setProperty('CalibrationWorkspace', self.__calWksp)
         elif mtd.doesExist(self.instr + '_cal'):
-            self.__calWksp = mtd[self.instr + '_cal']
+            self.__calWksp = self.instr + '_cal'
 
         if not self.getProperty('GroupingWorkspace').isDefault:
             self.__grpWksp = self.getPropertyValue('GroupingWorkspace')
         elif mtd.doesExist(self.instr + '_group'):
-            self.__grpWksp = mtd[self.instr + '_group']
+            self.__grpWksp = self.instr + '_group'
 
         if not self.getProperty('MaskWorkspace').isDefault:
             self.__mskWksp = self.getPropertyValue('MaskWorkspace')
         elif mtd.doesExist(self.instr + '_mask'):
-            self.__mskWksp = mtd[self.instr + '_mask']
+            self.__mskWksp = self.instr + '_mask'
 
         # check that anything was specified
         if self.getProperty('CalFileName').isDefault and self.getProperty('GroupFilename').isDefault:

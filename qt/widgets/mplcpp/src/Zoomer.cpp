@@ -18,12 +18,14 @@ const char *TOOLBAR_MODE_ATTR = "mode";
 const char *TOOLBAR_MODE_ZOOM = "zoom rect";
 
 /// Return the matplotlib NavigationToolbar type appropriate
-/// for our backend
+/// for our backend. It is returned hidden
 Python::Object mplNavigationToolbar(FigureCanvasQt *canvas) {
   auto backend = backendModule();
   bool showCoordinates(false);
-  return Python::Object(backend.attr(TOOLBAR_CLS)(
+  auto obj = Python::Object(backend.attr(TOOLBAR_CLS)(
       canvas->pyobj(), canvas->pyobj(), showCoordinates));
+  obj.attr("hide")();
+  return obj;
 }
 
 } // namespace

@@ -23,15 +23,6 @@ ref_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(DIRS[0]))
 root_directory = os.path.join(DIRS[0], "ENGINX")
 cal_directory = os.path.join(root_directory, "cal")
 focus_directory = os.path.join(root_directory, "focus")
-param_deltas = [0.1, 0.1, 1, 2]
-cal_deltas = [0.1, 90000, 0.8, 52000, 1, 0.1, 4, 3, 250, 9, 800, 1.5, 10, 0.5, 5, 0.5]
-
-
-def _skip_test():
-    """Helper function to determine if we run the test"""
-    import platform
-    # Issue with comparing values in tables on other platforms
-    return "linux" not in platform.platform().lower()
 
 
 class CreateVanadiumTest(systemtesting.MantidSystemTest):
@@ -50,14 +41,13 @@ class CreateVanadiumTest(systemtesting.MantidSystemTest):
 
 class CreateCalibrationWholeTest(systemtesting.MantidSystemTest):
 
-    def skipTests(self):
-        return _skip_test()
-
     def runTest(self):
         os.makedirs(cal_directory)
         main(vanadium_run="236516", user="test", focus_run=None, do_cal=True, directory=cal_directory)
 
     def validate(self):
+        self.tolerance_is_rel_err = True
+        self.tolerance = 1e-2
         if _current_os_has_gsl_lvl2():
             return("engg_calibration_bank_1", "engggui_calibration_bank_1.nxs",
                    "engg_calibration_bank_2", "engggui_calibration_bank_2.nxs",
@@ -74,15 +64,14 @@ class CreateCalibrationWholeTest(systemtesting.MantidSystemTest):
 
 class CreateCalibrationCroppedTest(systemtesting.MantidSystemTest):
 
-    def skipTests(self):
-        return _skip_test()
-
     def runTest(self):
         os.makedirs(cal_directory)
         main(vanadium_run="236516", user="test", focus_run=None, do_cal=True, directory=cal_directory,
              crop_type="spectra", crop_on="1-20")
 
     def validate(self):
+        self.tolerance_is_rel_err = True
+        self.tolerance = 1e-2
         if _current_os_has_gsl_lvl2():
             return ("cropped", "engggui_calibration_bank_cropped.nxs",
                     "engg_calibration_banks_parameters", "engggui_calibration_bank_cropped_parameters.nxs")
@@ -96,15 +85,14 @@ class CreateCalibrationCroppedTest(systemtesting.MantidSystemTest):
 
 class CreateCalibrationBankTest(systemtesting.MantidSystemTest):
 
-    def skipTests(self):
-        return _skip_test()
-
     def runTest(self):
         os.makedirs(cal_directory)
         main(vanadium_run="236516", user="test", focus_run=None, do_cal=True, directory=cal_directory,
              crop_type="banks", crop_on="South")
 
     def validate(self):
+        self.tolerance_is_rel_err = True
+        self.tolerance = 1e-2
         if _current_os_has_gsl_lvl2():
             return("engg_calibration_bank_2", "engggui_calibration_bank_2.nxs",
                    "engg_calibration_banks_parameters", "engggui_calibration_bank_south_parameters.nxs")
@@ -132,6 +120,7 @@ class FocusBothBanks(systemtesting.MantidSystemTest):
 
 
 class FocusCropped(systemtesting.MantidSystemTest):
+
     def runTest(self):
         os.makedirs(focus_directory)
         main(vanadium_run="236516", user="test", focus_run="299080", directory=focus_directory,

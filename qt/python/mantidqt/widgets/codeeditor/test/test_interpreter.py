@@ -1,6 +1,6 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
@@ -9,15 +9,12 @@
 #
 from __future__ import (absolute_import, unicode_literals)
 
-# std imports
 import unittest
 
-# 3rd party imports
 import six
 
-# local imports
-from mantidqt.widgets.codeeditor.interpreter import PythonFileInterpreter
 from mantidqt.utils.qt.test import GuiTest
+from mantidqt.widgets.codeeditor.interpreter import PythonFileInterpreter
 
 if six.PY2:
     import mock
