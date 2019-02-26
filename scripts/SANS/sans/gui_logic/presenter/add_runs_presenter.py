@@ -142,7 +142,7 @@ class AddRunsPagePresenter(object):
         return settings.save_directory != ''
 
     def _handle_output_directory_changed(self):
-        directory = self._display_save_directory_box("Save sum runs", self.save_directory)
+        directory = self._view.display_save_directory_box("Save sum runs", self.save_directory)
         self._update_output_directory(directory)
         self._view.set_out_file_directory(self.save_directory)
 
@@ -158,10 +158,6 @@ class AddRunsPagePresenter(object):
                            self._sum_base_file_name(run_selection))
         else:
             self._view.no_save_directory()
-
-    def _display_save_directory_box(self, title, default_path):
-        filename = self._view.display_save_directory_box(title, default_path)
-        return filename
 
     def _get_default_output_directory(self):
         directory = load_property(self.__generic_settings, self.__output_directory_key)
