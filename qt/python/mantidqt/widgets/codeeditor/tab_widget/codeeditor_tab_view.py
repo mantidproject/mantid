@@ -59,31 +59,31 @@ class CodeEditorTabWidget(QTabWidget):
 
     def setup_options_actions(self, parent):
         """
-        Setup the actions for the Options menu. These are handled by the MultiFileInterpreter
+        Setup the actions for the Options menu. The actions are handled by the parent widget
         """
-        wadget = QWidget(self)
-        hbox = QHBoxLayout(wadget)
-        hbox.setContentsMargins(0, 0, 0, 0)
-        hbox.setSpacing(0)
-        wadget.setLayout(hbox)
-        self.setCornerWidget(wadget, Qt.TopRightCorner)
+        container_widget = QWidget(self)
+        layout = QHBoxLayout(container_widget)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
+        container_widget.setLayout(layout)
+        self.setCornerWidget(container_widget, Qt.TopRightCorner)
 
-        run_button = QPushButton(wadget)
+        run_button = QPushButton(container_widget)
         run_button.setIcon(get_icon("fa.play", color=QColor(73, 156, 84)))
         run_button.clicked.connect(parent.execute_current)
-        hbox.addWidget(run_button)
+        layout.addWidget(run_button)
 
-        abort_button = QPushButton(wadget)
+        abort_button = QPushButton(container_widget)
         abort_button.setIcon(get_icon("fa.square", color=QColor(230, 84, 80)))
         abort_button.clicked.connect(parent.abort_current)
-        hbox.addWidget(abort_button)
+        layout.addWidget(abort_button)
 
-        options_button = QPushButton(wadget)
+        options_button = QPushButton(container_widget)
         options_button.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
         options_button.setText("Options")
         options_menu = QMenu("", self)
         options_button.setMenu(options_menu)
-        hbox.addWidget(options_button)
+        layout.addWidget(options_button)
 
         self.tabCloseRequested.connect(parent.close_tab)
 
