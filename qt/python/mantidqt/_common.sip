@@ -115,7 +115,7 @@ public:
   };
 
 public:
-  ScriptEditor(const QString & language,
+  ScriptEditor(const QString &lexer, const QFont &font = QFont(),
                QWidget *parent /TransferThis/ = 0) throw(std::invalid_argument);
 
   QString fileName() const;

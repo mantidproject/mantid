@@ -35,7 +35,13 @@ def _tab_title_and_toolip(filename):
 class MultiPythonFileInterpreter(QWidget):
     """Provides a tabbed widget for editing multiple files"""
 
-    def __init__(self, default_content=None, parent=None):
+    def __init__(self, font=None, default_content=None, parent=None):
+        """
+
+        :param font: An optional font to override the default editor font
+        :param default_content: str, if provided this will populate any new editor that is created
+        :param parent: An optional parent widget
+        """
         super(MultiPythonFileInterpreter, self).__init__(parent)
 
         # attributes
@@ -51,7 +57,7 @@ class MultiPythonFileInterpreter(QWidget):
         layout.setContentsMargins(0, 0, 0, 0)
 
         # add a single editor by default
-        self.append_new_editor()
+        self.append_new_editor(font=font)
 
         # setting defaults
         self.confirm_on_save = True
@@ -72,10 +78,20 @@ class MultiPythonFileInterpreter(QWidget):
                 file_paths.append(file_path)
         return file_paths
 
-    def append_new_editor(self, content=None, filename=None):
+    def append_new_editor(self, font=None, content=None, filename=None):
+        """
+        Appends a new editor the tabbed widget
+        :param font: A reference to the font to be used by the editor
+        :param content: An optional string containing content to be placed
+        into the editor on opening. If None then self.default_content is used
+        :param filename: An optional string containing the filename of the editor
+        if applicable.
+        :return:
+        """
         if content is None:
             content = self.default_content
-        interpreter = PythonFileInterpreter(content, filename=filename, parent=self)
+        interpreter = PythonFileInterpreter(font, content, filename=filename,
+                                            parent=self)
         if self.whitespace_visible:
             interpreter.set_whitespace_visible()
 

@@ -12,7 +12,7 @@ import sys
 import traceback
 
 from qtpy.QtCore import QObject, Qt, Signal
-from qtpy.QtGui import QColor, QFontMetrics
+from qtpy.QtGui import QColor, QFont, QFontMetrics
 from qtpy.QtWidgets import QFileDialog, QMessageBox, QStatusBar, QVBoxLayout, QWidget
 
 from mantidqt.io import open_a_file_dialog
@@ -93,8 +93,10 @@ class PythonFileInterpreter(QWidget):
     sig_editor_modified = Signal(bool)
     sig_filename_modified = Signal(str)
 
-    def __init__(self, content=None, filename=None, parent=None):
+    def __init__(self, font=None, content=None, filename=None,
+                 parent=None):
         """
+        :param font: A reference to the font to be used by the editor. If not supplied use the system default
         :param content: An optional string of content to pass to the editor
         :param filename: The file path where the content was read.
         :param parent: An optional parent QWidget
@@ -103,11 +105,10 @@ class PythonFileInterpreter(QWidget):
         self.parent = parent
 
         # layout
-        self.editor = CodeEditor("AlternateCSPythonLexer", self)
-
-        # Clear QsciScintilla key bindings that may override PyQt's bindings
-        self.clear_key_binding("Ctrl+/")
-
+        font = font if font is not None else QFont()
+        self.editor = CodeEditor("AlternateCSPython", font, self)
+        self.find_replace_dialog = None
+        self.find_replace_dialog_shown = False
         self.status = QStatusBar(self)
         self.layout = QVBoxLayout()
         self.layout.addWidget(self.editor)
@@ -116,14 +117,12 @@ class PythonFileInterpreter(QWidget):
         self.layout.setContentsMargins(0, 0, 0, 0)
         self._setup_editor(content, filename)
 
-        self.setAttribute(Qt.WA_DeleteOnClose, True)
-
         self._presenter = PythonFileInterpreterPresenter(self, PythonCodeExecution(content))
 
         self.editor.modificationChanged.connect(self.sig_editor_modified)
         self.editor.fileNameChanged.connect(self.sig_filename_modified)
-        self.find_replace_dialog = None
-        self.find_replace_dialog_shown = False
+
+        self.setAttribute(Qt.WA_DeleteOnClose, True)
 
     def closeEvent(self, event):
         self.deleteLater()
@@ -191,10 +190,6 @@ class PythonFileInterpreter(QWidget):
     def set_whitespace_invisible(self):
         self.editor.setWhitespaceVisibility(CodeEditor.WsInvisible)
 
-    def clear_key_binding(self, key_str):
-        """Clear a keyboard shortcut bound to a Scintilla command"""
-        self.editor.clearKeyBinding(key_str)
-
     def toggle_comment(self):
         if self.editor.selectedText() == '':  # If nothing selected, do nothing
             return
@@ -225,28 +220,12 @@ class PythonFileInterpreter(QWidget):
         # Restore highlighting
         self.editor.setSelection(*selection_idxs)
 
-    def _comment_lines(self, lines):
-        for i in range(len(lines)):
-            lines[i] = '# ' + lines[i]
-        return lines
-
-    def _uncomment_lines(self, lines):
-        for i in range(len(lines)):
-            uncommented_line = lines[i].replace('# ', '', 1)
-            if uncommented_line == lines[i]:
-                uncommented_line = lines[i].replace('#', '', 1)
-            lines[i] = uncommented_line
-        return lines
-
-    def _are_comments(self, code_lines):
-        for line in code_lines:
-            if line.strip():
-                if not line.strip().startswith('#'):
-                    return False
-        return True
-
     def _setup_editor(self, default_content, filename):
         editor = self.editor
+
+        # Clear default QsciScintilla key bindings that we want to allow
+        # to be users of this class
+        self.clear_key_binding("Ctrl+/")
 
         # use tabs not spaces for indentation
         editor.setIndentationsUseTabs(False)
@@ -270,6 +249,31 @@ class PythonFileInterpreter(QWidget):
         editor.setModified(False)
 
         editor.enableAutoCompletion(CodeEditor.AcsAll)
+
+    def clear_key_binding(self, key_str):
+        """Clear a keyboard shortcut bound to a Scintilla command"""
+        self.editor.clearKeyBinding(key_str)
+
+    # "private" api
+    def _comment_lines(self, lines):
+        for i in range(len(lines)):
+            lines[i] = '# ' + lines[i]
+        return lines
+
+    def _uncomment_lines(self, lines):
+        for i in range(len(lines)):
+            uncommented_line = lines[i].replace('# ', '', 1)
+            if uncommented_line == lines[i]:
+                uncommented_line = lines[i].replace('#', '', 1)
+            lines[i] = uncommented_line
+        return lines
+
+    def _are_comments(self, code_lines):
+        for line in code_lines:
+            if line.strip():
+                if not line.strip().startswith('#'):
+                    return False
+        return True
 
 
 class PythonFileInterpreterPresenter(QObject):
