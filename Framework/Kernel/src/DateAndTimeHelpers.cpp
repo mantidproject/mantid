@@ -112,6 +112,8 @@ averageSorted(const std::vector<Types::Core::DateAndTime> &times,
   if (times.size() != weights.size())
     throw std::invalid_argument(
         "time and weight vectors must be the same length");
+  if (times.size() == 1)
+    return times.front();
 
   double totalWeight = std::accumulate(weights.begin(), weights.end(), 0.);
 
