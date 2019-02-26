@@ -4,7 +4,7 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-#  This file is part of the mantidqt package
+#  This file is part of the mantid workbench
 #
 #
 from __future__ import absolute_import, unicode_literals
@@ -15,6 +15,14 @@ from workbench.widgets.settings.general.view import GeneralSettingsView
 
 
 class GeneralSettings(object):
+    """
+    Presenter of the General settings section. It handles all changes to options
+    within the section, and updates the ConfigService and workbench CONF accordingly.
+
+    If new options are added to the General settings, their events when changed should
+    be handled here.
+    """
+
     INSTRUMENT = "default.instrument"
     SHOW_INVISIBLE_WORKSPACES = "MantidOptions.InvisibleWorkspaces"
     PR_NUMBER_OF_CHECKPOINTS = "projectRecovery.numberOfCheckpoints"
