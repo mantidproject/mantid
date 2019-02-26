@@ -487,9 +487,10 @@ public:
     TS_ASSERT(conv.isExecuted());
     const MatrixWorkspace_sptr output = conv.getProperty("OutputWorkspace");
     TS_ASSERT_EQUALS(output->getAxis(1)->unit()->unitID(), "Degrees");
-    
+
     Mantid::DataObjects::EventWorkspace_sptr eventWS =
-        boost::dynamic_pointer_cast<Mantid::DataObjects::EventWorkspace>(output);
+        boost::dynamic_pointer_cast<Mantid::DataObjects::EventWorkspace>(
+            output);
     TS_ASSERT(eventWS);
   }
 };
