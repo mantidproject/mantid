@@ -90,6 +90,7 @@ set ( SRC_FILES
 	src/PropertyManagerProperty.cpp
 	src/PropertyNexus.cpp
 	src/PropertyWithValue.cpp
+	src/PropertyWithValueJSON.cpp
 	src/ProxyInfo.cpp
 	src/PseudoRandomNumberGenerator.cpp
 	src/Quat.cpp
@@ -163,7 +164,7 @@ set ( INC_FILES
 	inc/MantidKernel/ConfigService.h
 	inc/MantidKernel/ConfigObserver.h
 	inc/MantidKernel/ConfigPropertyObserver.h
-        inc/MantidKernel/DateAndTime.h
+	inc/MantidKernel/DateAndTime.h
 	inc/MantidKernel/DataItem.h
 	inc/MantidKernel/DataService.h
 	inc/MantidKernel/DateAndTimeHelpers.h
@@ -242,7 +243,7 @@ set ( INC_FILES
 	inc/MantidKernel/NetworkProxy.h
 	inc/MantidKernel/NeutronAtom.h
 	inc/MantidKernel/NexusDescriptor.h
-        inc/MantidKernel/normal_distribution.h
+	inc/MantidKernel/normal_distribution.h
 	inc/MantidKernel/NullValidator.h
 	inc/MantidKernel/OptionalBool.h
 	inc/MantidKernel/ParaViewVersion.h
@@ -260,6 +261,7 @@ set ( INC_FILES
 	inc/MantidKernel/PropertyManager_fwd.h
 	inc/MantidKernel/PropertyNexus.h
 	inc/MantidKernel/PropertyWithValue.h
+	inc/MantidKernel/PropertyWithValueJSON.h
 	inc/MantidKernel/ProxyInfo.h
 	inc/MantidKernel/PseudoRandomNumberGenerator.h
 	inc/MantidKernel/QuasiRandomNumberSequence.h
@@ -410,6 +412,7 @@ set ( TEST_FILES
 	PropertyNexusTest.h
 	PropertyTest.h
 	PropertyWithValueTest.h
+  PropertyWithValueJSONTest.h
 	ProxyInfoTest.h
 	QuatTest.h
 	ReadLockTest.h
@@ -497,8 +500,9 @@ set_property ( TARGET Kernel PROPERTY FOLDER "MantidFramework" )
 if ( GCC_COMPILER_VERSION AND GCC_COMPILER_VERSION VERSION_LESS "4.5" )
  target_link_libraries ( Kernel LINK_PRIVATE stdc++ )
 endif()
-target_link_libraries ( Kernel LINK_PUBLIC ${NEXUS_LIBRARIES} Eigen3::Eigen LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${GSL_LIBRARIES} ${MANTIDLIBS} ${NETWORK_LIBRARIES} ${JSONCPP_LIBRARIES} ${TBB_LIBRARIES} ${TBB_MALLOC_LIBRARIES})
-
+target_link_libraries ( Kernel
+  LINK_PUBLIC ${NEXUS_LIBRARIES} Eigen3::Eigen ${JSONCPP_LIBRARIES} ${TBB_LIBRARIES} ${TBB_MALLOC_LIBRARIES}
+  LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${GSL_LIBRARIES} ${MANTIDLIBS} ${NETWORK_LIBRARIES} )
 if ( WIN32 )
   target_link_libraries ( Kernel LINK_PRIVATE Psapi.lib ) # For memory usage queries
 endif()

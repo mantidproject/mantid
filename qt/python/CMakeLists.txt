@@ -104,6 +104,8 @@ endif ()
     mantidqt/widgets/observers/test/test_observing_presenter.py
     mantidqt/widgets/observers/test/test_observing_view.py
 
+    mantidqt/widgets/embedded_find_replace_dialog/test/test_embedded_find_replace_dialog_presenter.py
+
     mantidqt/widgets/workspacedisplay/test/test_data_copier.py
     mantidqt/widgets/workspacedisplay/test/test_user_notifier.py
 
@@ -122,9 +124,17 @@ endif ()
 
   # ctest target for widgets that only get tested in qt5, because they are only used in the workbench
   set ( PYTHON_WIDGET_QT5_ONLY_TESTS
+    mantidqt/widgets/codeeditor/test/test_interpreter_view.py
+    mantidqt/widgets/codeeditor/test/test_multifileinterpreter_view.py
+
     mantidqt/widgets/instrumentview/test/test_instrumentview_io.py
     mantidqt/widgets/instrumentview/test/test_instrumentview_view.py
-  )
+    
+    mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_io.py
+    mantidqt/widgets/workspacedisplay/matrix/test/test_matrixworkspacedisplay_io.py
+
+    mantidqt/widgets/samplelogs/test/test_samplelogs_view.py
+ )
 
   # Tests
   set ( PYUNITTEST_RUN_SERIAL ON )

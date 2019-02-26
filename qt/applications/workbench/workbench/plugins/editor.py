@@ -62,7 +62,6 @@ class MultiFileEditor(PluginWidget):
         # attributes
         self.tabs_open_on_closing = None
 
-        # attributes
         self.run_action = create_action(
             self, "Run",
             on_triggered=self.editors.execute_current,
@@ -71,6 +70,12 @@ class MultiFileEditor(PluginWidget):
 
         self.abort_action = create_action(
             self, "Abort", on_triggered=self.editors.abort_current)
+
+        # menu action to toggle the find/replace dialog
+        self.toggle_find_replace = create_action(self,
+                                                 'Find/Replace...',
+                                                 on_triggered=self.editors.toggle_find_replace_dialog,
+                                                 shortcut='Ctrl+F')
 
         self.toggle_comment_action = create_action(
             self.editors.current_editor(), "Comment/Uncomment",
@@ -93,6 +98,8 @@ class MultiFileEditor(PluginWidget):
         # Store actions for adding to menu bar; None will add a separator
         self.editor_actions = [self.run_action,
                                self.abort_action, None,
+                               self.toggle_find_replace,
+                               None,
                                self.toggle_comment_action,
                                self.toggle_whitespace_action, None,
                                self.tabs_to_spaces_action,
@@ -103,7 +110,7 @@ class MultiFileEditor(PluginWidget):
         return self.editors.execute_current()
 
     def restore_session_tabs(self, session_tabs):
-        self.open_files_in_new_tabs(session_tabs)
+        self.open_files_in_new_tabs(session_tabs, startup=True)
         self.editors.close_tab(0)  # close default empty tab
 
     # ----------- Plugin API --------------------
@@ -155,13 +162,13 @@ class MultiFileEditor(PluginWidget):
 
     # ----------- Plugin Behaviour --------------------
 
-    def open_file_in_new_tab(self, filepath):
-        return self.editors.open_file_in_new_tab(filepath)
+    def open_file_in_new_tab(self, filepath, startup=False):
+        return self.editors.open_file_in_new_tab(filepath, startup)
 
-    def open_files_in_new_tabs(self, filepaths):
+    def open_files_in_new_tabs(self, filepaths, startup=False):
         for filepath in filepaths:
             try:
-                self.open_file_in_new_tab(filepath)
+                self.open_file_in_new_tab(filepath, startup)
             except IOError as io_error:
                 logger.warning("Could not load file:\n  {}"
                                "".format(io_error))

@@ -76,6 +76,7 @@ public:
                         const BoundingBox &activeRegion,
                         const size_t) const = 0;
 
+  virtual detail::ShapeInfo::GeometryShape shape() const = 0;
   virtual void GetObjectGeom(detail::ShapeInfo::GeometryShape &type,
                              std::vector<Kernel::V3D> &vectors,
                              double &myradius, double &myheight) const = 0;

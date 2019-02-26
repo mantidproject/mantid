@@ -30,6 +30,8 @@ endif()
 set ( MSLICE_DEV ${_mslice_external_root}/src/mslice PARENT_SCOPE )
 
 # Installation
-# MSLICE_DEV is only set in PARENT_SCOPE!
-install ( DIRECTORY ${_mslice_external_root}/src/mslice/mslice/
-          DESTINATION ${INBUNDLE}scripts/ExternalInterfaces/mslice )
+# MSLICE_DEV is only set in PARENT_SCOPE! so don't use it here
+foreach ( _bundle ${BUNDLES} )
+  install ( DIRECTORY ${_mslice_external_root}/src/mslice/mslice/
+            DESTINATION ${_bundle}scripts/ExternalInterfaces/mslice )
+endforeach()

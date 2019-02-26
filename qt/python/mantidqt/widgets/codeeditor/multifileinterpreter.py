@@ -18,6 +18,9 @@ from qtpy.QtWidgets import (QTabWidget, QToolButton, QVBoxLayout, QWidget)
 
 # local imports
 from mantidqt.widgets.codeeditor.interpreter import PythonFileInterpreter
+from mantidqt.widgets.codeeditor.scriptcompatibility import (mantid_api_import_needed,
+                                                             add_mantid_api_import)
+
 
 NEW_TAB_TITLE = 'New'
 MODIFIED_MARKER = '*'
@@ -110,13 +113,16 @@ class MultiPythonFileInterpreter(QWidget):
         # are being prompted to save
         self._tabs.setCurrentIndex(idx)
         if self.current_editor().confirm_close():
+            widget = self._tabs.widget(idx)
+            # note: this does not close the widget, that is why we manually close it
             self._tabs.removeTab(idx)
+            widget.close()
         else:
             return False
 
         # we never want an empty widget
         if self.editor_count == 0:
-            self.append_new_editor(content=self.default_content)
+            self.append_new_editor()
 
         return True
 
@@ -172,14 +178,18 @@ class MultiPythonFileInterpreter(QWidget):
         self._tabs.setTabText(idx_cur, title)
         self._tabs.setTabToolTip(idx_cur, tooltip)
 
-    def open_file_in_new_tab(self, filepath):
+    def open_file_in_new_tab(self, filepath, startup=False):
         """Open the existing file in a new tab in the editor
 
         :param filepath: A path to an existing file
+        :param startup: Flag for if function is being called on startup
         """
         with open(filepath, 'r') as code_file:
             content = code_file.read()
+
         self.append_new_editor(content=content, filename=filepath)
+        if startup is False and mantid_api_import_needed(content) is True:
+            add_mantid_api_import(self.current_editor().editor, content)
 
     def open_files_in_new_tabs(self, filepaths):
         for filepath in filepaths:
@@ -209,6 +219,9 @@ class MultiPythonFileInterpreter(QWidget):
 
     def toggle_comment_current(self):
         self.current_editor().toggle_comment()
+
+    def toggle_find_replace_dialog(self):
+        self.current_editor().show_find_replace_dialog()
 
     def toggle_whitespace_visible_all(self):
         if self.whitespace_visible:

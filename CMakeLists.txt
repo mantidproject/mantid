@@ -30,11 +30,7 @@ set ( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin )
 set ( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin )
 
 set ( ENABLE_MANTIDPLOT ON CACHE BOOL "Enable Qt4-based gui & components" )
-set ( ENABLE_WORKBENCH OFF CACHE BOOL "Enable Qt5-based gui & components" )
-set ( PACKAGE_WORKBENCH OFF CACHE BOOL "If packaging is enabled then include the Qt-5 workbench in the package" )
-if ( PACKAGE_WORKBENCH AND NOT ENABLE_WORKBENCH )
-  message ( FATAL_ERROR "Packaging workbench requested but workbench build is disabled!" )
-endif ()
+set ( ENABLE_WORKBENCH ON CACHE BOOL "Enable Qt5-based gui & components" )
 
 set ( CPACK_INSTALL_CMAKE_PROJECTS "${CMAKE_BINARY_DIR}" "Mantid" "ALL" "/" )
 
