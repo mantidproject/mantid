@@ -13,8 +13,6 @@ namespace CustomInterfaces {
 using API::IConfiguredAlgorithm_sptr;
 
 namespace AlgorithmProperties {
-// These convenience functions convert properties of various types into
-// strings to set the relevant property in an AlgorithmRuntimeProps
 std::string boolToString(bool value) { return value ? "1" : "0"; }
 
 void update(std::string const &property, std::string const &value,

@@ -20,7 +20,7 @@ BatchJobAlgorithm::BatchJobAlgorithm(
     // cppcheck-suppress passedByValue
     std::vector<std::string> outputWorkspaceProperties, Item *item)
     : ConfiguredAlgorithm(algorithm, properties), m_item(item),
-      m_outputWorkspaceProperties(outputWorkspaceProperties) {}
+      m_outputWorkspaceProperties(std::move(outputWorkspaceProperties)) {}
 
 Item *BatchJobAlgorithm::item() { return m_item; }
 

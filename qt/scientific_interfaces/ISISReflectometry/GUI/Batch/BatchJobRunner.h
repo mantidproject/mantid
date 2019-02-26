@@ -18,9 +18,8 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 /**
- * The BatchJobRunner class manages the running of algorithms based
- * on the reduction configuration and handling of state when algorithms
- * complete
+ * The BatchJobRunner class sets up algorithms to run based on the reduction
+ * configuration, and handles updating state when algorithms complete
  */
 class MANTIDQT_ISISREFLECTOMETRY_DLL BatchJobRunner : public IBatchJobRunner {
 public:
