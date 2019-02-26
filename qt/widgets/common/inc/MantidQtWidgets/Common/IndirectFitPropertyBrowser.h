@@ -10,6 +10,7 @@
 #include "MantidQtWidgets/Common/DllOption.h"
 #include "MantidAPI/IFunction_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
 
 #include <QDockWidget>
 
@@ -62,6 +63,7 @@ public:
 
   void updateParameters(const Mantid::API::IFunction &fun);
   void updateMultiDatasetParameters(const Mantid::API::IFunction &fun);
+  void updateMultiDatasetParameters(const Mantid::API::IFunction & fun, const Mantid::API::ITableWorkspace &params);
   QString selectedFitType() const;
   void setConvolveMembers(bool convolveMembers);
   void setFitEnabled(bool enable);

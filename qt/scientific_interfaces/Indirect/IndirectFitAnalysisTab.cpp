@@ -398,7 +398,9 @@ void IndirectFitAnalysisTab::updateFitBrowserParameterValues() {
     MantidQt::API::SignalBlocker<QObject> blocker(m_fitPropertyBrowser);
     IFunction_sptr fun = m_fittingAlgorithm->getProperty("Function");
     if (m_fittingModel->getFittingMode() == FittingMode::SEQUENTIAL) {
-      m_fitPropertyBrowser->updateParameters(*fun);
+      auto const paramWsName = m_fittingAlgorithm->getPropertyValue("OutputParameterWorkspace");
+      auto paramWs = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(paramWsName);
+      m_fitPropertyBrowser->updateMultiDatasetParameters(*fun, *paramWs);
     } else {
       m_fitPropertyBrowser->updateMultiDatasetParameters(*fun);
     }

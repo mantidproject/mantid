@@ -8,6 +8,7 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -151,6 +152,34 @@ void IndirectFitPropertyBrowser::updateParameters(
 
 void IndirectFitPropertyBrowser::updateMultiDatasetParameters(const Mantid::API::IFunction & fun) {
   m_functionBrowser->updateMultiDatasetParameters(fun);
+}
+
+void IndirectFitPropertyBrowser::updateMultiDatasetParameters(const Mantid::API::IFunction & fun, const Mantid::API::ITableWorkspace & paramTable)
+{
+  auto const nRows = paramTable.rowCount();
+  if (nRows == 0) return;
+
+  auto const globalParameterNames = m_functionBrowser->getGlobalParameters();
+  for (auto &&name : globalParameterNames) {
+    auto valueColumn = paramTable.getColumn(name.toStdString());
+    auto errorColumn = paramTable.getColumn((name + "_Err").toStdString());
+    m_functionBrowser->setParameter(name, valueColumn->toDouble(0));
+    m_functionBrowser->setParamError(name, errorColumn->toDouble(0));
+  }
+
+  auto const localParameterNames = m_functionBrowser->getLocalParameters();
+  for (auto &&name : localParameterNames) {
+    auto valueColumn = paramTable.getColumn(name.toStdString());
+    auto errorColumn = paramTable.getColumn((name + "_Err").toStdString());
+    if (nRows > 1) {
+      for (size_t i = 0; i < nRows; ++i) {
+        m_functionBrowser->setLocalParameterValue(name, static_cast<int>(i), valueColumn->toDouble(i), errorColumn->toDouble(i));
+      }
+    } else {
+      auto const i = m_functionBrowser->getCurrentDataset();
+      m_functionBrowser->setLocalParameterValue(name, static_cast<int>(i), valueColumn->toDouble(0), errorColumn->toDouble(0));
+    }
+  }
 }
 
 /**
