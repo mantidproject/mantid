@@ -408,7 +408,7 @@ class MuonDataContext(object):
             return True
 
     def add_or_replace_gui_variables(self, **kwargs):
-        if all([key in self._gui_variables and self._gui_variables[key] == kwargs[key] for key in kwargs.keys()]):
+        if all([key in self._gui_variables and self._gui_variables[key] == kwargs[key] for key in kwargs.keys()]) and kwargs:
             return
         self._gui_variables.update(kwargs)
         self.gui_variables_notifier.notify_subscribers()
