@@ -29,8 +29,7 @@ class gridspecEngine(object):
     def getGridSpec(self, number):
         if number <= 0:
             return
-        if  self._max_plot is not None:
-            if number > self._max_plot:
+        if self._max_plot is not None and number > self._max_plot:
                 print(
                     "Number of plot has exceeded the maximum number of " + str(self._max_plot))
                 return
