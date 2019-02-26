@@ -64,7 +64,12 @@ class GeneralSettings(object):
         self.view.total_number_checkpoints.valueChanged.connect(self.action_total_number_checkpoints)
 
     def action_facility_changed(self, new_facility):
+        """
+        When the facility is changed, refreshes all available instruments that can be selected in the dropdown.
+        :param new_facility: The name of the new facility that was selected
+        """
         ConfigService.setFacility(new_facility)
+        # refresh the instrument selection to contain instruments about the selected facility only
         self.view.instrument.clear()
         self.view.instrument.addItems(
             [instr.name() for instr in ConfigService.getFacility(new_facility).instruments()])
