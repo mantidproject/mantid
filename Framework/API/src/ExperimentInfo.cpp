@@ -1036,12 +1036,14 @@ std::vector<std::string> ExperimentInfo::getResourceFilenames(
 
   // Retrieve the file names only
   std::vector<std::string> pathNames;
-  if (matchingFiles.size() > 0) {
+  if (!matchingFiles.empty()) {
+    pathNames.reserve(matchingFiles.size());
     for (auto elem : matchingFiles)
-      pathNames.push_back(elem.second);
+      pathNames.emplace_back(std::move(elem.second));
   } else {
-    pathNames.push_back(mostRecentFile);
+    pathNames.emplace_back(std::movemostRecentFile));
   }
+
   return pathNames;
 }
 
@@ -1074,7 +1076,7 @@ ExperimentInfo::getInstrumentFilename(const std::string &instrumentName,
   g_log.debug() << "Looking for instrument file for " << instrumentName
                 << " that is valid on '" << date << "'\n";
   // Lookup the instrument (long) name
-  std::string instrument(
+  const std::string instrument(
       Kernel::ConfigService::Instance().getInstrument(instrumentName).name());
 
   // Get the instrument directories for instrument file search
@@ -1085,7 +1087,7 @@ ExperimentInfo::getInstrumentFilename(const std::string &instrumentName,
   const std::vector<std::string> matchingFiles = getResourceFilenames(
       instrument + "_Definition", validFormats, directoryNames, date);
   std::string instFile;
-  if (matchingFiles.size() > 0) {
+  if (!matchingFiles.empty()) {
     instFile = matchingFiles[0];
     g_log.debug() << "Instrument file selected is " << instFile << '\n';
   } else {
