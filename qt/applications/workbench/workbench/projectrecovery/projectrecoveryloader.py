@@ -136,8 +136,4 @@ class ProjectRecoveryLoader(object):
         self.multi_file_interpreter.current_editor().sig_exec_error.connect(self.recovery_presenter.model.exec_error)
 
         # Actually execute the current tab
-        # try:
         self.multi_file_interpreter.execute_current_async_blocking()
-        # except Exception as e:
-        #     logger.warning("Project Recovery: Exception: " + str(e) +
-        #                    ". Occurred during the execution of recovery script")
