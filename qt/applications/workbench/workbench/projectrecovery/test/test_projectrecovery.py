@@ -83,7 +83,10 @@ class ProjectRecoveryTest(unittest.TestCase):
         self.assertTrue(not os.path.exists(empty))
 
     def test_remove_empty_dir_throws_outside_of_workbench_directory(self):
-        self.assertRaises(RuntimeError, self.pr._remove_empty_folders_from_dir(self.working_directory))
+        path = os.path.join(self.working_directory, "test.txt")
+        open(path, 'a').close()
+
+        self.assertRaises(RuntimeError, self.pr._remove_empty_folders_from_dir(path))
 
     def test_remove_all_folders_from_dir_raises_outside_of_mantid_dir(self):
         self.assertRaises(RuntimeError, self.pr._remove_directory_and_directory_trees, self.working_directory)
@@ -96,6 +99,7 @@ class ProjectRecoveryTest(unittest.TestCase):
 
         self.assertTrue(not os.path.exists(temp_dir))
 
+    @unittest.skipIf(sys.platform("darwin"), "Can be unreliable on macOS and is a test of logic not OS capability")
     def test_sort_paths_by_last_modified(self):
         # Make sure there is actually a different modified time on the files by using sleeps
         first = tempfile.mkdtemp()
