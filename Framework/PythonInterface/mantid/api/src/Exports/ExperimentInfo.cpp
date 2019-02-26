@@ -80,7 +80,7 @@ void export_ExperimentInfo() {
       .def("sample", &ExperimentInfo::sample,
            return_value_policy<reference_existing_object>(), args("self"),
            "Return the :class:`~mantid.api.Sample` object. This cannot be "
-           "modified, use mutableSample to modify.")l
+           "modified, use mutableSample to modify.")
 
       .def("mutableSample", &ExperimentInfo::mutableSample,
            return_value_policy<reference_existing_object>(), args("self"),
