@@ -9,7 +9,6 @@
 
 from __future__ import (absolute_import, unicode_literals)
 
-from qtpy.QtCore import QMetaObject, Q_ARG, Qt
 from qtpy.QtWidgets import QApplication
 
 from mantid.kernel import logger
