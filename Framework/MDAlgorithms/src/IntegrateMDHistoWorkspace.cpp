@@ -235,10 +235,12 @@ void performWeightedSum(MDHistoWorkspaceIterator const *const iterator,
                         double &sumSQErrors, double &sumNEvents) {
   if (!iterator->getIsMasked()) {
     const double weight = box.fraction(iterator->getBoxExtents());
-    sumSignal += weight * iterator->getSignal();
-    const double error = iterator->getError();
-    sumSQErrors += weight * (error * error);
-    sumNEvents += weight * double(iterator->getNumEventsFraction());
+    if (weight != 0) {
+      sumSignal += weight * iterator->getSignal();
+      const double error = iterator->getError();
+      sumSQErrors += weight * (error * error);
+      sumNEvents += weight * double(iterator->getNumEventsFraction());
+    }
   }
 }
 

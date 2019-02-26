@@ -9,6 +9,7 @@ from Muon.GUI.Common.load_run_widget.load_run_model import LoadRunWidgetModel
 from Muon.GUI.Common.load_run_widget.load_run_view import LoadRunWidgetView
 from Muon.GUI.Common.load_run_widget.load_run_presenter import LoadRunWidgetPresenter
 from Muon.GUI.Common import mock_widget
+from Muon.GUI.Common.muon_data_context import MuonDataContext
 
 from Muon.GUI.Common.muon_load_data import MuonLoadData
 import Muon.GUI.Common.utilities.muon_file_utils as fileUtils
@@ -21,7 +22,6 @@ else:
     import mock
 
 from PyQt4 import QtGui
-from PyQt4.QtGui import QApplication
 
 
 class LoadRunWidgetLoadCurrentRunTest(unittest.TestCase):
@@ -47,9 +47,11 @@ class LoadRunWidgetLoadCurrentRunTest(unittest.TestCase):
         # Store an empty widget to parent all the views, and ensure they are deleted correctly
         self.obj = QtGui.QWidget()
 
+        self.context = MuonDataContext()
+        self.context.instrument = 'EMU'
         self.data = MuonLoadData()
         self.view = LoadRunWidgetView(parent=self.obj)
-        self.model = LoadRunWidgetModel(self.data)
+        self.model = LoadRunWidgetModel(self.data, self.context)
         self.presenter = LoadRunWidgetPresenter(self.view, self.model)
 
         self.model.load_workspace_from_filename = mock.Mock(return_value=([1, 2, 3], "currentRun.nxs", 1234))
@@ -83,14 +85,15 @@ class LoadRunWidgetLoadCurrentRunTest(unittest.TestCase):
         self.assertEqual(self.presenter.runs, [[1234]])
         self.assertEqual(self.presenter.workspaces, [[1, 2, 3]])
 
-        self.assertEqual(self.model.current_run, [1234])
+        self.assertEqual(self.model._context.current_runs, [[1234]])
 
     @run_test_with_and_without_threading
     def test_load_current_run_correctly_displays_run_if_load_successful(self):
         self.load_utils_patcher.load_workspace_from_filename = mock.Mock(return_value=([1], 1234, "1234.nxs"))
         self.presenter.handle_load_current_run()
         self.wait_for_thread(self.presenter._load_thread)
-        self.assertEqual(self.view.get_run_edit_text(), "[1234] (CURRENT RUN)")
+
+        self.assertEqual(self.view.get_run_edit_text(), '1234')
 
     def test_load_current_run_displays_error_message_if_fails_to_load(self):
         self.load_utils_patcher.load_workspace_from_filename = mock.Mock(side_effect=self.load_failure)
@@ -128,7 +131,7 @@ class LoadRunWidgetLoadCurrentRunTest(unittest.TestCase):
         self.presenter.handle_load_current_run()
         self.wait_for_thread(self.presenter._load_thread)
 
-        self.assertEqual(self.view.get_run_edit_text(), "[9999] (CURRENT RUN)")
+        self.assertEqual(self.view.get_run_edit_text(), "9999")
         self.assertEqual(self.presenter.filenames, ["9999.nxs"])
         self.assertEqual(self.presenter.runs, [[9999]])
         self.assertEqual(self.presenter.workspaces, [[2]])

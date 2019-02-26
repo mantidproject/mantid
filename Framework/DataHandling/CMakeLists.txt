@@ -51,6 +51,7 @@
 	src/LoadDspacemap.cpp
 	src/LoadEmptyInstrument.cpp
 	src/LoadEMU.cpp
+	src/LoadPLN.cpp
 	src/LoadEventNexus.cpp
 	src/LoadEventNexusIndexSetup.cpp
 	src/LoadEventPreNexus2.cpp
@@ -127,7 +128,6 @@
 	src/MaskDetectors.cpp
 	src/MaskDetectorsInShape.cpp
 	src/MaskSpectra.cpp
-	src/MergeLogs.cpp
 	src/ModifyDetectorDotDatFile.cpp
 	src/MoveInstrumentComponent.cpp
 	src/NexusTester.cpp
@@ -249,6 +249,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadDspacemap.h
 	inc/MantidDataHandling/LoadEmptyInstrument.h
 	inc/MantidDataHandling/LoadEMU.h
+	inc/MantidDataHandling/LoadPLN.h
 	inc/MantidDataHandling/LoadEventNexus.h
 	inc/MantidDataHandling/LoadEventNexusIndexSetup.h
 	inc/MantidDataHandling/LoadEventPreNexus2.h
@@ -320,7 +321,6 @@ set ( INC_FILES
 	inc/MantidDataHandling/MaskDetectors.h
 	inc/MantidDataHandling/MaskDetectorsInShape.h
 	inc/MantidDataHandling/MaskSpectra.h
-	inc/MantidDataHandling/MergeLogs.h
 	inc/MantidDataHandling/ModifyDetectorDotDatFile.h
 	inc/MantidDataHandling/MoveInstrumentComponent.h
 	inc/MantidDataHandling/NXcanSASDefinitions.h
@@ -477,6 +477,7 @@ set ( TEST_FILES
 	LoadNexusTest.h
 	LoadPDFgetNFileTest.h
 	LoadParameterFileTest.h
+	LoadPLNTest.h
 	LoadPreNexusMonitorsTest.h
 	LoadPreNexusTest.h
 	LoadPSIMuonBinTest.h
@@ -508,7 +509,6 @@ set ( TEST_FILES
 	MaskDetectorsInShapeTest.h
 	MaskDetectorsTest.h
 	MaskSpectraTest.h
-	MergeLogsTest.h
 	ModifyDetectorDotDatFileTest.h
 	MoveInstrumentComponentTest.h
 	NexusTesterTest.h

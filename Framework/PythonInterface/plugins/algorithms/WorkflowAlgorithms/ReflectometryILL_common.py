@@ -8,6 +8,7 @@
 
 from __future__ import (absolute_import, division, print_function)
 
+from mantid.kernel import UnitConversion, DeltaEModeType
 from mantid.simpleapi import (CreateWorkspace, DeleteWorkspace, mtd, Multiply)
 import scipy.constants as constants
 
@@ -32,7 +33,10 @@ def chopperOpeningAngle(sampleLogs, instrumentName):
         if chopper1Phase > 360.:
             # CH1.phase on FIGARO is set to an arbitrary value (999.9)
             chopper1Phase = 0.
-        openoffset = sampleLogs.getProperty('CollAngle.openOffset').value
+        if sampleLogs.hasProperty('CollAngle.open_offset'):
+            openoffset = sampleLogs.getProperty('CollAngle.open_offset').value
+        else:
+            openoffset = sampleLogs.getProperty('CollAngle.openOffset').value
         return 45. - (chopper2Phase - chopper1Phase) - openoffset
 
 
@@ -96,12 +100,26 @@ def pixelSize(instrumentName):
     return 0.001195 if instrumentName == 'D17' else 0.0012
 
 
+def deflectionAngle(sampleLogs):
+    """Return the deflection angle in degree."""
+    if sampleLogs.hasProperty('CollAngle.actual_coll_angle'):
+        # Must be FIGARO
+        return sampleLogs.getProperty('CollAngle.actual_coll_angle').value
+    else:
+        return 0.0
+
+
 def slitSizeLogEntry(instrumentName, slitNumber):
     """Return the sample log entry which contains the slit size for the given slit"""
     if slitNumber not in [1, 2]:
         raise RuntimeError('Slit number out of range.')
     entry = 'VirtualSlitAxis.s{}w_actual_width' if instrumentName == 'D17' else 'VirtualSlitAxis.S{}H_actual_height'
     return entry.format(slitNumber + 1)
+
+
+def inTOF(value, l1, l2):
+    """Return the number (tof) converted to wavelength"""
+    return UnitConversion.run('Wavelength', 'TOF', value, l1, l2, 0., DeltaEModeType.Elastic, 0.)
 
 
 def instrumentName(ws):
@@ -113,10 +131,12 @@ def instrumentName(ws):
 
 
 class SampleLogs:
-    FOREGROUND_CENTRE = 'foreground.centre_workspace_index'
-    FOREGROUND_END = 'foreground.last_workspace_index'
-    FOREGROUND_START = 'foreground.first_workspace_index'
-    SUM_TYPE = 'foreground.summation_type'
+    FOREGROUND_CENTRE = 'reduction.foreground.centre_workspace_index'
+    FOREGROUND_END = 'reduction.foreground.last_workspace_index'
+    FOREGROUND_START = 'reduction.foreground.first_workspace_index'
+    LINE_POSITION = 'reduction.line_position'
+    SUM_TYPE = 'reduction.foreground.summation_type'
+    TWO_THETA = 'loader.two_theta'
 
 
 class WSCleanup:

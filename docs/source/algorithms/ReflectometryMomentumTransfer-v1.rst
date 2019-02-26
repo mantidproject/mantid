@@ -59,7 +59,7 @@ Usage
    ReflectometryBeamStatistics(
        reflectedWS,
        ReflectedForeground=[198, 204, 209],
-       DirectBeamWorkspace=directWS,
+       DirectLineWorkspace=directWS,
        DirectForeground=[190, 200, 210],
        PixelSize=0.001195,
        DetectorResolution=0.0022,

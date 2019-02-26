@@ -58,27 +58,36 @@ public:
   // Function to declare properties (i.e. store them)
   void declareProperty(std::unique_ptr<Property> p,
                        const std::string &doc = "") override;
+  using IPropertyManager::declareProperty;
+  void declareOrReplaceProperty(std::unique_ptr<Property> p,
+                                const std::string &doc = "") override;
 
-  // Sets all the declared properties from
+  // Sets all the declare properties
   void setProperties(const std::string &propertiesJson,
                      const std::unordered_set<std::string> &ignoreProperties =
-                         std::unordered_set<std::string>()) override;
+                         std::unordered_set<std::string>(),
+                     bool createMissing = false) override;
   void setProperties(const std::string &propertiesJson,
                      IPropertyManager *targetPropertyManager,
-                     const std::unordered_set<std::string> &ignoreProperties);
+                     const std::unordered_set<std::string> &ignoreProperties,
+                     bool createMissing = false);
   void setProperties(const ::Json::Value &jsonValue,
                      const std::unordered_set<std::string> &ignoreProperties =
-                         std::unordered_set<std::string>()) override;
+                         std::unordered_set<std::string>(),
+                     bool createMissing = false) override;
   void setProperties(const ::Json::Value &jsonValue,
                      IPropertyManager *targetPropertyManager,
                      const std::unordered_set<std::string> &ignoreProperties =
-                         std::unordered_set<std::string>());
+                         std::unordered_set<std::string>(),
+                     bool createMissing = false);
   void setPropertiesWithString(
       const std::string &propertiesString,
       const std::unordered_set<std::string> &ignoreProperties =
           std::unordered_set<std::string>()) override;
   void setPropertyValue(const std::string &name,
                         const std::string &value) override;
+  void setPropertyValueFromJson(const std::string &name,
+                                const Json::Value &value) override;
   void setPropertyOrdinal(const int &index, const std::string &value) override;
 
   bool existsProperty(const std::string &name) const override;
@@ -101,8 +110,6 @@ public:
   ::Json::Value asJson(bool withDefaultValues = false) const override;
 
 protected:
-  using IPropertyManager::declareProperty;
-
   friend class PropertyManagerOwner;
 
   Property *getPointerToProperty(const std::string &name) const override;
@@ -110,8 +117,6 @@ protected:
   Property *getPointerToPropertyOrNull(const std::string &name) const;
 
 private:
-  /// Transform the given string to a key for the property index
-  const std::string createKey(const std::string &text) const;
   void setPropertiesWithSimpleString(
       const std::string &propertiesString,
       const std::unordered_set<std::string> &ignoreProperties);
@@ -129,6 +134,9 @@ private:
 
 /// Typedef for a shared pointer to a PropertyManager
 using PropertyManager_sptr = boost::shared_ptr<PropertyManager>;
+
+/// Return the value of the PropertyManager as a Json::Value
+MANTID_KERNEL_DLL ::Json::Value encodeAsJson(const PropertyManager &propMgr);
 
 } // namespace Kernel
 } // namespace Mantid
