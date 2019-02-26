@@ -273,7 +273,8 @@ class ILL_D33_Test(systemtesting.MantidSystemTest):
         SANSILLReduction(Run='027885', ProcessAs='Absorber', OutputWorkspace='Cd')
 
         # Process the empty beam for sample
-        SANSILLReduction(Run='027916', ProcessAs='Beam', BeamRadius = 1., AbsorberInputWorkspace='Cd', OutputWorkspace='Db', FluxOutputWorkspace='flux')
+        SANSILLReduction(Run='027916', ProcessAs='Beam', BeamRadius = 1., AbsorberInputWorkspace='Cd',
+                         OutputWorkspace='Db', FluxOutputWorkspace='flux')
 
         # Process the empty beam for sample transmission
         SANSILLReduction(Run='027858', ProcessAs='Beam', AbsorberInputWorkspace='Cd', OutputWorkspace='Dbtr')

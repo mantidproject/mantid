@@ -4,9 +4,8 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-
 from __future__ import (absolute_import, division, print_function)
-from mantid.api import PythonAlgorithm, MatrixWorkspaceProperty, PropertyMode, MatrixWorkspace, WorkspaceUnitValidator, HistogramValidator, InstrumentValidator
+from mantid.api import PythonAlgorithm, MatrixWorkspaceProperty, WorkspaceUnitValidator, HistogramValidator, InstrumentValidator
 from mantid.simpleapi import *
 from mantid.kernel import Direction, FloatBoundedValidator, CompositeValidator
 import numpy as np
@@ -51,7 +50,8 @@ class CalculateFlux(PythonAlgorithm):
         params = [min, width, max]
         rebinned = Rebin(InputWorkspace=input_ws, StoreInADS=False, Params=params)
         radius = self.getProperty('BeamRadius').value
-        shapeXML = '<infinite-cylinder id="flux"><centre x="0.0" y="0.0" z="0.0"/><axis x="0.0" y="0.0" z="1.0"/><radius val="{0}"/></infinite-cylinder>'.format(radius)
+        shapeXML = '<infinite-cylinder id="flux"><centre x="0.0" y="0.0" z="0.0"/><axis x="0.0" y="0.0" z="1.0"/>' \
+                   '<radius val="{0}"/></infinite-cylinder>'.format(radius)
         det_list = FindDetectorsInShape(Workspace=rebinned, ShapeXML=shapeXML)
         output_ws = GroupDetectors(InputWorkspace=rebinned, DetectorList=det_list,
                                    OutputWorkspace=self.getPropertyValue('OutputWorkspace'))

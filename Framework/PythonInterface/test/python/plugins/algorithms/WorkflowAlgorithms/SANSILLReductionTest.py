@@ -92,12 +92,6 @@ class SANSILLReductionTest(unittest.TestCase):
 
     def test_container_tof(self):
         # D33 VTOF
-        SANSILLReduction(Run='093409', ProcessAs='Container', OutputWorkspace='can')
-        self._check_output(mtd['can'], True, 30, 256*256)
-        self._check_process_flag(mtd['can'], 'Container')
-
-    def test_container_tof(self):
-        # D33 VTOF
         # this is actually a sample run, not water, but is fine for this test
         SANSILLReduction(Run='093410', ProcessAs='Reference', OutputWorkspace='ref')
         self._check_output(mtd['ref'], True, 30, 256*256)
