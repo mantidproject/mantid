@@ -126,8 +126,6 @@ class GroupingTabPresenter(object):
         self.pairing_table_widget.update_view_from_model()
         self.update_description_text(description)
 
-        # self.groupingNotifier.notify_subscribers()
-
     def disable_editing(self):
         self._view.set_buttons_enabled(False)
         self.grouping_table_widget.disable_editing()
@@ -158,15 +156,11 @@ class GroupingTabPresenter(object):
         self.pairing_table_widget.update_view_from_model()
         self.update_description_text()
 
-        # self.groupingNotifier.notify_subscribers()
-
     def on_clear_requested(self):
         self._model.clear()
         self.grouping_table_widget.update_view_from_model()
         self.pairing_table_widget.update_view_from_model()
         self.update_description_text()
-
-        # self.groupingNotifier.notify_subscribers()
 
     def handle_new_data_loaded(self):
         if self._model.is_data_loaded():
