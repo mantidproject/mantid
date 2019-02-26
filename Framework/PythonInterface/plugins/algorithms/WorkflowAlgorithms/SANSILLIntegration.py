@@ -317,7 +317,9 @@ class SANSILLIntegration(PythonAlgorithm):
         if run.hasProperty('wavelength'):
             wavelength = run.getLogData('wavelength').value
         l2 = run.getLogData('l2').value
-        beamY = run.getLogData('BeamCenterY').value
+        beamY = 0.
+        if run.hasProperty('BeamCenterY'):
+            beamY = run.getLogData('BeamCenterY').value
         q_binning = self._get_iq_binning(q_min, q_max, pixel_size, wavelength, l2, binning_factor, -beamY)
         n_wedges = self.getProperty('NumberOfWedges').value
         pixel_division = self.getProperty('NPixelDivision').value

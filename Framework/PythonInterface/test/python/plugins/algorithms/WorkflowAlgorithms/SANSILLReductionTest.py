@@ -83,18 +83,6 @@ class SANSILLReductionTest(unittest.TestCase):
         self.assertAlmostEqual(run.getLogData('BeamCenterY').value, 0.0009, delta=1e-4)
         self._check_output(mtd['flux'], False, 30, 256*256)
         self._check_process_flag(mtd['flux'], 'Beam')
-        self.assertAlmostEqual(mtd['flux'].readY(0)[0], 0.309, delta=1e-3)
-        self.assertAlmostEqual(mtd['flux'].readE(0)[0], 0.05, delta=1e-2)
-        self.assertAlmostEqual(mtd['flux'].readY(1)[0], 0.309, delta=1e-3)
-        self.assertAlmostEqual(mtd['flux'].readE(1)[0], 0.05, delta=1e-2)
-        self.assertAlmostEqual(mtd['flux'].readY(117)[0], 0.309, delta=1e-3)
-        self.assertAlmostEqual(mtd['flux'].readE(117)[0], 0.05, delta=1e-2)
-        self.assertAlmostEqual(mtd['flux'].readY(0)[9], 2891, delta=1)
-        self.assertAlmostEqual(mtd['flux'].readE(0)[9], 4.928, delta=1e-3)
-        self.assertAlmostEqual(mtd['flux'].readY(917)[9], 2891, delta=1)
-        self.assertAlmostEqual(mtd['flux'].readE(917)[9], 4.928, delta=1e-3)
-        self.assertAlmostEqual(mtd['flux'].readY(2516)[9], 2891, delta=1)
-        self.assertAlmostEqual(mtd['flux'].readE(2516)[9], 4.928, delta=1e-3)
 
     def test_transmission_tof(self):
         # D33 VTOF
