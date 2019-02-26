@@ -13,12 +13,10 @@ from __future__ import (absolute_import, unicode_literals)
 import os.path as osp
 
 # third-party library imports
-from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QVBoxLayout
 
 # local package imports
 from mantid.kernel import logger
-from mantidqt.utils.qt import add_actions, create_action
 from mantidqt.widgets.codeeditor.multifileinterpreter import MultiPythonFileInterpreter
 from workbench.plugins.base import PluginWidget
 
@@ -62,50 +60,7 @@ class MultiFileEditor(PluginWidget):
 
         # attributes
         self.tabs_open_on_closing = None
-        #
-        # self.run_action = create_action(
-        #     self, "Run",
-        #     on_triggered=self.editors.execute_current,
-        #     shortcut=("Ctrl+Return", "Ctrl+Enter"),
-        #     shortcut_context=Qt.ApplicationShortcut)
-        #
-        # self.abort_action = create_action(
-        #     self, "Abort", on_triggered=self.editors.abort_current)
-        #
-        # # menu action to toggle the find/replace dialog
-        # self.toggle_find_replace = create_action(self,
-        #                                          'Find/Replace...',
-        #                                          on_triggered=self.editors.toggle_find_replace_dialog,
-        #                                          shortcut='Ctrl+F')
-        #
-        # self.toggle_comment_action = create_action(
-        #     self.editors.current_editor(), "Comment/Uncomment",
-        #     on_triggered=self.editors.toggle_comment_current,
-        #     shortcut="Ctrl+/",
-        #     shortcut_context=Qt.ApplicationShortcut)
-        #
-        # self.tabs_to_spaces_action = create_action(
-        #     self, 'Tabs to Spaces',
-        #     on_triggered=self.editors.tabs_to_spaces_current)
-        #
-        # self.spaces_to_tabs_action = create_action(
-        #     self, 'Spaces to Tabs',
-        #     on_triggered=self.editors.spaces_to_tabs_current)
-        #
-        # self.toggle_whitespace_action = create_action(
-        #     self, 'Toggle Whitespace Visible',
-        #     on_triggered=self.editors.toggle_whitespace_visible_all)
-        #
-        # # Store actions for adding to menu bar; None will add a separator
-        # self.editor_actions = [self.run_action,
-        #                        self.abort_action, None,
-        #                        self.toggle_find_replace,
-        #                        None,
-        #                        self.toggle_comment_action,
-        #                        self.toggle_whitespace_action, None,
-        #                        self.tabs_to_spaces_action,
-        #                        self.spaces_to_tabs_action, None]
-
+        
     def load_settings_from_config(self, config):
         self.editors.load_settings_from_config(config)
 

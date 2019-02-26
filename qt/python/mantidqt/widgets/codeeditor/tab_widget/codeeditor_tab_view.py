@@ -17,6 +17,12 @@ from mantidqt.widgets.codeeditor.tab_widget.codeeditor_tab_presenter import Code
 
 
 class CodeEditorTabWidget(QTabWidget):
+    ABORT_BUTTON_OBJECT_NAME = "abort-button"
+    NEW_EDITOR_PLUS_BTN_OBJECT_NAME = "plus-button"
+    OPTIONS_BUTTON_OBJECT_NAME = "options-button"
+    RUN_BUTTON_OBJECT_NAME = "run-button"
+    SHOW_IN_EXPLORER_ACTION_OBJECT_NAME = "show-in-explorer-action"
+
     def __init__(self, parent=None, presenter=None):
         self.presenter = presenter if presenter else CodeEditorTabPresenter(self)
         super(CodeEditorTabWidget, self).__init__(parent)
@@ -32,16 +38,12 @@ class CodeEditorTabWidget(QTabWidget):
         self.setup_tabs_context_menu(parent)
         self.setup_options_actions(parent)
 
-        # find the QTabBar inside the QTabWidget to disable drawing the base,
-        # which prevents stacking multiple borders between the tabs and the code widget
-        # tab_bar = self.findChild(QTabBar, "qt_tabwidget_tabbar")
-        # tab_bar.setDrawBase(False)
-
         # create a button to add new tabs
-        plus_btn = QPushButton(self)
-        plus_btn.clicked.connect(parent.plus_button_clicked)
-        plus_btn.setIcon(get_icon("fa.plus"))
-        self.setCornerWidget(plus_btn, Qt.TopLeftCorner)
+        plus_button = QPushButton(self)
+        plus_button.setObjectName(self.NEW_EDITOR_PLUS_BTN_OBJECT_NAME)
+        plus_button.clicked.connect(parent.plus_button_clicked)
+        plus_button.setIcon(get_icon("fa.plus"))
+        self.setCornerWidget(plus_button, Qt.TopLeftCorner)
 
     def setup_tabs_context_menu(self, parent):
         """
@@ -50,6 +52,7 @@ class CodeEditorTabWidget(QTabWidget):
         self.tabBarClicked.connect(self.tab_was_clicked)
 
         show_in_explorer = QAction("Show in Explorer", self)
+        show_in_explorer.setObjectName(self.SHOW_IN_EXPLORER_ACTION_OBJECT_NAME)
         show_in_explorer.triggered.connect(self.presenter.action_show_in_explorer)
 
         separator = QAction(self)
@@ -69,16 +72,19 @@ class CodeEditorTabWidget(QTabWidget):
         self.setCornerWidget(container_widget, Qt.TopRightCorner)
 
         run_button = QPushButton(container_widget)
+        run_button.setObjectName(self.RUN_BUTTON_OBJECT_NAME)
         run_button.setIcon(get_icon("fa.play", color=QColor(73, 156, 84)))
         run_button.clicked.connect(parent.execute_current)
         layout.addWidget(run_button)
 
         abort_button = QPushButton(container_widget)
+        abort_button.setObjectName(self.ABORT_BUTTON_OBJECT_NAME)
         abort_button.setIcon(get_icon("fa.square", color=QColor(230, 84, 80)))
         abort_button.clicked.connect(parent.abort_current)
         layout.addWidget(abort_button)
 
         options_button = QPushButton(container_widget)
+        options_button.setObjectName(self.OPTIONS_BUTTON_OBJECT_NAME)
         options_button.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
         options_button.setText("Options")
         options_menu = QMenu("", self)

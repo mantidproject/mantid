@@ -44,7 +44,7 @@ class SettingsViewTest(GuiTest, QtWidgetFinder):
     def test_deletes_on_close(self):
         with MockWorkspaceWidget() as temp_widget:
             widget = SettingsPresenter(temp_widget)
-            self.assert_window_created()
+            self.assert_widget_created()
             self.assert_widget_exists("GeneralSettings", expected_count=1)
 
             widget.view.close()

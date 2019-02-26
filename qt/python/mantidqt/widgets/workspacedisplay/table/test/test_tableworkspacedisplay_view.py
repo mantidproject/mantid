@@ -19,7 +19,7 @@ class TableWorkspaceDisplayViewTest(GuiTest, QtWidgetFinder):
         ws = CreateEmptyTableWorkspace()
 
         p = TableWorkspaceDisplay(ws)
-        self.assert_window_created()
+        self.assert_widget_created()
         p.close(ws.name())
 
         QApplication.processEvents()
@@ -32,7 +32,7 @@ class TableWorkspaceDisplayViewTest(GuiTest, QtWidgetFinder):
         ws = CreateEmptyTableWorkspace()
 
         p = TableWorkspaceDisplay(ws)
-        self.assert_window_created()
+        self.assert_widget_created()
         p.force_close()
 
         QApplication.processEvents()

@@ -13,6 +13,7 @@ from __future__ import (absolute_import, unicode_literals)
 import os.path as osp
 
 # 3rd party imports
+from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QVBoxLayout, QWidget
 
 # local imports
@@ -42,6 +43,7 @@ class MultiPythonFileInterpreter(QWidget):
         self.default_content = default_content
         self.prev_session_tabs = None
         self.whitespace_visible = False
+        self.setAttribute(Qt.WA_DeleteOnClose, True)
 
         # widget setup
         layout = QVBoxLayout(self)
@@ -55,6 +57,10 @@ class MultiPythonFileInterpreter(QWidget):
 
         # setting defaults
         self.confirm_on_save = True
+
+    def closeEvent(self, event):
+        self.deleteLater()
+        super(MultiPythonFileInterpreter, self).closeEvent(event)
 
     def load_settings_from_config(self, config):
         self.confirm_on_save = config.get('project', 'prompt_save_editor_modified')
