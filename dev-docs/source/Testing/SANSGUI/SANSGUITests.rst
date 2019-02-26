@@ -26,26 +26,34 @@ Data reduction
     - Go to ``Mask``
     - Click ``Display Mask``
     - This should give an instrument view with a circle at the centre
+#. In the ``Settings`` tab:
+    - Go to ``Q, Wavelength, Detector Limits`` sub-tab
+    - Change the ``Phi Limit`` from 0 to 45 and uncheck ``use mirror sector``
+    - Go to ``Mask`` sub-tab
+    - Click ``Display Mask``
+    - This should give an instrument view where only angles 0-45 are unmasked
+    - Change the settings back to -90 - 90 and reselect ``use mirror sector``
+    - In ``General, Scale, Event Slice, Sample`` sub-tab, set the `Reduction Mode`` to ``All``
 #. In the ``Runs`` tab
     - Click ``Process All``
     - After some seconds the rows should turn green
-    - In the Main window there should be a series of new workspaces; 3 group workspaces and 4 2D workspaces
-    - Change the first column of the first row to 74045; click process
+    - In the Main window there should be a series of new workspaces; 4 group workspaces and 4 2D workspaces
+    - Change the first column of the first row to 74045; click process selected
     - The row should turn blue; hovering over the row should give an error message
     - Change the first column of the first row back to 74044
     - Change the ``Reduction`` button to 2D
     - Check the ``Plot Results`` box
     - Click ``Process All``
-    - A plot window will open; initially empty, then with a red line
+    - A plot window will open; initially empty, then with a line
     - Change ``Reduction`` back to 1D
     - Click ``Process All``
-    - In the plot you should end up with a red and a black line plotted
+    - In the plot you should end up with multiple lines plotted
     - Check the ``Multi-period`` box
-    - 6 additional rows should appear in the table
-    - Check that the ``Add``, ``Delete``, ``Copy``, ``Paste``, ``Cut`` and ``Erase`` icons work as expected
+    - 6 additional columns should appear in the table
+    - Check that the ``Insert``, ``Delete``, ``Copy``, ``Paste``, ``Cut`` and ``Erase`` icons work as expected
     - Delete all rows and re-load the batch file as previously
 #. In the ``Settings`` tab
-    - Set ``Reduction Type`` to ``Merged``
+    - In the ``General, Scale, Event Slice, Sample`` sub-tab, set ``Reduction Mode`` to ``Merged``
     - Return to the ``Runs`` tab
     - Ensure ``Plot results`` is checked
     - Click ``Process All``
@@ -59,7 +67,7 @@ Data reduction
         - Enter ``74044, 74019`` in the top line
         - Click ``Add`` at the side
         - Enter ``LOQ74044-add`` as Output file
-        - Ensure that the ``Output directory`` is in you r managed paths
+        - Ensure that the ``Output directory`` is in your managed paths
         - Click ``Sum`` at the bottom
         - Go back to the ``Runs`` tab
         - Remove all rows
@@ -74,4 +82,5 @@ Data reduction
     - Check the ``Apply Mask`` boxes and click the buttons again
     - They should produce new, slightly different plots
 #. In the ``Runs`` tab
-    - Check all variables and inputs for tool tips by hovering over them
+    - Check that all table, process, and load buttons have clear tooltips by hovering over them
+    - Check that ``Zero Error Free`, ``Use Optimizations``, and ``Plot Results`` have clear tooltips

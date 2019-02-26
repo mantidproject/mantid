@@ -232,9 +232,8 @@ class SANSReductionCore(DistributedDataProcessorAlgorithm):
         if sum_of_norms:
             self.setProperty("SumOfNormFactors", sum_of_norms)
 
-        if state.adjustment.show_transmission:
-            self.setProperty("CalculatedTransmissionWorkspace", calculated_transmission_workspace)
-            self.setProperty("UnfittedTransmissionWorkspace", unfitted_transmission_workspace)
+        self.setProperty("CalculatedTransmissionWorkspace", calculated_transmission_workspace)
+        self.setProperty("UnfittedTransmissionWorkspace", unfitted_transmission_workspace)
 
     def _get_cropped_workspace(self, component):
         scatter_workspace = self.getProperty("ScatterWorkspace").value

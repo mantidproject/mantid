@@ -6,11 +6,13 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
-from PyQt4 import QtGui
-from PyQt4.QtCore import pyqtSignal
+from qtpy import QtWidgets
+from qtpy.QtCore import Signal
 
-from . import ui_summation_settings_widget
+from mantidqt.utils.qt import load_ui
 from sans.gui_logic.models.binning_type import BinningType
+
+Ui_SummationSettingsWidget, _ = load_ui(__file__, "summation_settings_widget.ui")
 
 
 def set_checked_without_signal(checkable, should_be_checked):
@@ -19,12 +21,12 @@ def set_checked_without_signal(checkable, should_be_checked):
     checkable.blockSignals(False)
 
 
-class SummationSettingsWidget(QtGui.QWidget, ui_summation_settings_widget.Ui_SummationSettingsWidget):
-    binningTypeChanged = pyqtSignal(int)
-    preserveEventsChanged = pyqtSignal(bool)
-    binSettingsChanged = pyqtSignal()
-    additionalTimeShiftsChanged = pyqtSignal()
-    sum = pyqtSignal()
+class SummationSettingsWidget(QtWidgets.QWidget, Ui_SummationSettingsWidget):
+    binningTypeChanged = Signal(int)
+    preserveEventsChanged = Signal(bool)
+    binSettingsChanged = Signal()
+    additionalTimeShiftsChanged = Signal()
+    sum = Signal()
 
     def __init__(self, parent=None):
         super(SummationSettingsWidget, self).__init__(parent)
@@ -32,7 +34,7 @@ class SummationSettingsWidget(QtGui.QWidget, ui_summation_settings_widget.Ui_Sum
         self._connect_signals()
 
     def setupUi(self, other):
-        ui_summation_settings_widget.Ui_SummationSettingsWidget.setupUi(self, other)
+        Ui_SummationSettingsWidget.setupUi(self, other)
         self._setupBinningTypes()
 
     def _setupBinningTypes(self):

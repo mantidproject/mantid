@@ -338,6 +338,14 @@ if ( CMAKE_COMPILER_IS_GNUCXX )
 endif()
 
 ###########################################################################
+# Bundles setting used for install commands if not set by something else
+# e.g. Darwin
+###########################################################################
+if ( NOT BUNDLES )
+  set ( BUNDLES "./" )
+endif()
+
+###########################################################################
 # Set a flag to indicate that this script has been called
 ###########################################################################
 

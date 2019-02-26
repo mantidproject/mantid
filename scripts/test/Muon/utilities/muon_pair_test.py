@@ -57,21 +57,22 @@ class MuonPairTest(unittest.TestCase):
 
     def test_that_can_only_set_workspace_if_MuonWorkspace_object(self):
         pair = MuonPair(pair_name="pair1")
-        self.assertIsNone(pair.workspace)
+        self.assertEqual(pair.workspace, {})
         dataX = [0, 1, 2, 3, 4, 5]
         dataY = [10, 20, 30, 20, 10]
         input_workspace = CreateWorkspace(dataX, dataY)
 
-        pair.workspace = MuonWorkspaceWrapper(input_workspace)
-        self.assertIsNotNone(pair.workspace)
+        workspace_wrapper = MuonWorkspaceWrapper(input_workspace)
+        pair.workspace = workspace_wrapper
+        self.assertEqual(pair.workspace, workspace_wrapper)
 
     def test_that_AttributeError_thrown_if_setting_workspace_to_non_MuonWorkspace_object(self):
         pair = MuonPair(pair_name="pair1")
 
-        self.assertIsNone(pair.workspace)
+        self.assertEqual(pair.workspace, {})
         with self.assertRaises(AttributeError):
             pair.workspace = [1, 2, 3]
-        self.assertIsNone(pair.workspace)
+        self.assertEqual(pair.workspace, {})
 
     def test_that_can_set_and_get_float_value_for_alpha(self):
         pair = MuonPair(pair_name="pair1")

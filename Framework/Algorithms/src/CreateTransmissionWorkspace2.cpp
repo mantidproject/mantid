@@ -147,6 +147,8 @@ void CreateTransmissionWorkspace2::exec() {
     stitch->setPropertyValue("StartOverlap", getPropertyValue("StartOverlap"));
     stitch->setPropertyValue("EndOverlap", getPropertyValue("EndOverlap"));
     stitch->setPropertyValue("Params", getPropertyValue("Params"));
+    stitch->setProperty("ScaleRHSWorkspace",
+                        getPropertyValue("ScaleRHSWorkspace"));
     stitch->execute();
     outWS = stitch->getProperty("OutputWorkspace");
   } else {

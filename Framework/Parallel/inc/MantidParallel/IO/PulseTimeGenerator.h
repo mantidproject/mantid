@@ -97,6 +97,7 @@ public:
       m_pulseTime = getPulseTime(m_timeZeroOffset, m_timeZero[m_pulse]);
     }
     ++m_event;
+
     return m_pulseTime;
   }
 

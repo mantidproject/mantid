@@ -45,12 +45,10 @@ public:
                     Kernel::IValidator_sptr validator =
                         Kernel::IValidator_sptr(new Kernel::NullValidator),
                     unsigned int direction = Kernel::Direction::Input);
-  /// Copy constructor
-  AlgorithmProperty(const AlgorithmProperty &rhs);
-  // Unhide base class members (at minimum, avoids Intel compiler warning)
+  // Unhide base class member that would be hidden by implicitly declared
+  // assignment operator
   using Kernel::PropertyWithValue<HeldType>::operator=;
-  /// Copy-Assignment operator
-  AlgorithmProperty &operator=(const AlgorithmProperty &rhs);
+
   /// 'Virtual copy constructor'
   inline AlgorithmProperty *clone() const override {
     return new AlgorithmProperty(*this);
@@ -64,17 +62,20 @@ public:
   }
   /// Return the algorithm as string
   std::string value() const override;
+  /// Create a Json::Value from the algorithm value
+  Json::Value valueAsJson() const override;
   /// Get the default
   std::string getDefault() const override;
-  /// Sets the value of the algorithm
+  /// Sets the value of the algorithm from a string representation
   std::string setValue(const std::string &value) override;
+  /// Sets the value of the algorithm from a Json representation
+  std::string setValueFromJson(const Json::Value &value) override;
 
 private:
-  /// Default constructor
-  AlgorithmProperty();
+  std::string setBaseValue(const HeldType &algm);
 
-  /// The string used to create the underlying algorithm
-  std::string m_algStr;
+  // Cached string as value() can be called frequently
+  std::string m_algmStr;
 };
 
 #ifdef _WIN32

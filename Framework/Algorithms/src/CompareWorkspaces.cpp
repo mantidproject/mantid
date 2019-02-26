@@ -652,12 +652,12 @@ bool CompareWorkspaces::checkData(API::MatrixWorkspace_const_sptr ws1,
     if (resultBool || checkAllData) // Avoid checking unnecessarily
     {
       // Get references to the current spectrum
-      const MantidVec &X1 = ws1->readX(i);
-      const MantidVec &Y1 = ws1->readY(i);
-      const MantidVec &E1 = ws1->readE(i);
-      const MantidVec &X2 = ws2->readX(i);
-      const MantidVec &Y2 = ws2->readY(i);
-      const MantidVec &E2 = ws2->readE(i);
+      const auto &X1 = ws1->x(i);
+      const auto &Y1 = ws1->y(i);
+      const auto &E1 = ws1->e(i);
+      const auto &X2 = ws2->x(i);
+      const auto &Y2 = ws2->y(i);
+      const auto &E2 = ws2->e(i);
 
       for (int j = 0; j < static_cast<int>(numBins); ++j) {
         bool err;
@@ -904,9 +904,11 @@ bool CompareWorkspaces::checkMasking(API::MatrixWorkspace_const_sptr ws1,
 /// @retval false The samples does not match
 bool CompareWorkspaces::checkSample(const API::Sample &sample1,
                                     const API::Sample &sample2) {
-  if (sample1.getName() != sample2.getName()) {
-    g_log.debug() << "WS1 sample name: \"" << sample1.getName() << "\"\n";
-    g_log.debug() << "WS2 sample name: \"" << sample2.getName() << "\"\n";
+  std::string const name1 = sample1.getName();
+  std::string const name2 = sample2.getName();
+  if (name1 != name2) {
+    g_log.debug("WS1 sample name: " + name1);
+    g_log.debug("WS2 sample name: " + name2);
     recordMismatch("Sample name mismatch");
     return false;
   }
@@ -943,32 +945,33 @@ bool CompareWorkspaces::checkRunProperties(const API::Run &run1,
     return false;
   }
 
-  const std::vector<Kernel::Property *> &ws1logs = run1.getLogData();
-  const std::vector<Kernel::Property *> &ws2logs = run2.getLogData();
+  std::vector<Kernel::Property *> ws1logs = run1.getLogData();
+  std::vector<Kernel::Property *> ws2logs = run2.getLogData();
   // Check that the number of separate logs is the same
   if (ws1logs.size() != ws2logs.size()) {
     g_log.debug() << "WS1 number of logs: " << ws1logs.size() << "\n";
     g_log.debug() << "WS2 number of logs: " << ws2logs.size() << "\n";
     recordMismatch("Different numbers of logs");
     return false;
-  }
-
-  // Now loop over the individual logs
-  bool matched(true);
-  int64_t length(static_cast<int64_t>(ws1logs.size()));
-  PARALLEL_FOR_IF(true)
-  for (int64_t i = 0; i < length; ++i) {
-    PARALLEL_START_INTERUPT_REGION
-    if (matched) {
+  } else {
+    // Sort logs by name before one-by-one comparison
+    auto compareNames = [](Kernel::Property *p1, Kernel::Property *p2) {
+      return p1->name() < p2->name();
+    };
+    std::sort(ws1logs.begin(), ws1logs.end(), compareNames);
+    std::sort(ws2logs.begin(), ws2logs.end(), compareNames);
+    for (size_t i = 0; i < ws1logs.size(); ++i) {
       if (*(ws1logs[i]) != *(ws2logs[i])) {
-        matched = false;
+        if (g_log.is(Logger::Priority::PRIO_DEBUG)) {
+          g_log.debug("WS1 log entry mismatch: " + ws1logs[i]->name());
+          g_log.debug("WS2 log entry mismatch: " + ws2logs[i]->name());
+        }
         recordMismatch("Log mismatch");
+        return false;
       }
     }
-    PARALLEL_END_INTERUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
-  return matched;
+  return true;
 }
 
 //------------------------------------------------------------------------------------------------
@@ -1145,22 +1148,30 @@ void CompareWorkspaces::doTableComparison(
   }
 
   const bool checkAllData = getProperty("CheckAllData");
+  const bool relErr = getProperty("ToleranceRelErr");
+  const double tolerance = getProperty("Tolerance");
+  bool mismatch = false;
+  for (size_t i = 0; i < numCols; ++i) {
+    const auto c1 = tws1->getColumn(i);
+    const auto c2 = tws2->getColumn(i);
 
-  for (size_t i = 0; i < numRows; ++i) {
-    const TableRow r1 =
-        boost::const_pointer_cast<ITableWorkspace>(tws1)->getRow(i);
-    const TableRow r2 =
-        boost::const_pointer_cast<ITableWorkspace>(tws2)->getRow(i);
-    // Easiest, if not the fastest, way to compare is via strings
-    std::stringstream r1s, r2s;
-    r1s << r1;
-    r2s << r2;
-    if (r1s.str() != r2s.str()) {
-      g_log.debug() << "Table data mismatch at row " << i << " (" << r1s.str()
-                    << " vs " << r2s.str() << ")\n";
+    if (relErr) {
+      if (!c1->equalsRelErr(*c2, tolerance)) {
+        mismatch = true;
+      }
+    } else {
+
+      if (!c1->equals(*c2, tolerance)) {
+        mismatch = true;
+      }
+    }
+    if (mismatch) {
+      g_log.debug() << "Table data mismatch at column " << i << "\n";
       recordMismatch("Table data mismatch");
-      if (!checkAllData)
+      mismatch = false;
+      if (!checkAllData) {
         return;
+      }
     }
   } // loop over columns
 }
