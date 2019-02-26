@@ -38,13 +38,14 @@ Improvements
   (see :ref:`ConvertToMD <algm-ConvertToMD>` Notes)
 - :ref:`DirectILLCollectData <algm-DirectILLCollectData>` now automatically disables incident energy calibration and normalises to time instead of monitor counts if the monitor counts are deemed too low.
 - The new property in :ref:`DirectILLReduction <algm-DirectILLReduction>`, ``EnergyRebinning``, allows mixing automatic bin widths with user specified ones when rebinning the energy transfer axis.
+- The ``SofQW`` algorithms have a new property ``DetectorTwoThetaRanges`` which can be used to supply detector scattering angle coverage information for :ref:`SofQWNormalisedPolygon <algm-SofQWNormalisedPolygon>`.
 
 
 Bugfixes
 ########
 
 - Fixed a bug in :ref:`DirectILLCollectData <algm-DirectILLCollectData>` which prevented the *OutputIncidentEnergyWorkspace* being generated if *IncidentEnergyCalibration* was turned off.
-- Fixed the detector :math:`2\theta` width calculation in :ref:`SofQWNormalisedPolygon <algm-SofQWNormalisedPolygon>`. The algorithm was computing the angle between the detector center and top point, not the actual :math:`2\theta` width.
+- Fixed the detector :math:`2\theta` coverage calculation in :ref:`SofQWNormalisedPolygon <algm-SofQWNormalisedPolygon>`. The algorithm was computing the angle between the detector center and top point, not the actual minimum and maximum :math:`2\theta`. The width is now calculated accurately for cylinder and cuboid shapes. For other shapes, an approximative method is used.
 - Fixed a bug in :ref:`Rebin2D <algm-Rebin2D>` which requires that an input workspace had to have fractional area weights for the `UseFractionalArea` option to work. The behaviour is now that if the input workspace does not have fractional areas, and `UseFractionalArea` is true, then fractional area tracking will be used with input fractions set to unity.
 - :ref:`LoadILLTOF <algm-LoadILLTOF>` now properly closes the loaded file.
 

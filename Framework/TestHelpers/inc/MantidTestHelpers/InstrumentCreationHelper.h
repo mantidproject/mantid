@@ -20,6 +20,19 @@ namespace InstrumentCreationHelper {
 void addFullInstrumentToWorkspace(Mantid::API::MatrixWorkspace &workspace,
                                   bool includeMonitors, bool startYNegative,
                                   const std::string &instrumentName);
-}
+Mantid::Geometry::ObjComponent *
+addComponent(Mantid::Geometry::Instrument_sptr &instrument,
+             const Mantid::Kernel::V3D &position, const std::string &name);
+void addSample(Mantid::Geometry::Instrument_sptr &instrument,
+               const Mantid::Kernel::V3D &position, const std::string &name);
+void addSource(Mantid::Geometry::Instrument_sptr &instrument,
+               const Mantid::Kernel::V3D &position, const std::string &name);
+void addMonitor(Mantid::Geometry::Instrument_sptr &instrument,
+                const Mantid::Kernel::V3D &position, const int ID,
+                const std::string &name);
+void addDetector(Mantid::Geometry::Instrument_sptr &instrument,
+                 const Mantid::Kernel::V3D &position, const int ID,
+                 const std::string &name);
+} // namespace InstrumentCreationHelper
 
 #endif /* INSTRUMENTCREATIONHELPER_H_ */
