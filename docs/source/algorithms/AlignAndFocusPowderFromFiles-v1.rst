@@ -58,3 +58,4 @@ Algorithms used by this are:
 .. categories::
 
 .. sourcelink::
+   :py: Framework/PythonInterface/plugins/algorithms/AlignAndFocusPowderFromFiles.py
