@@ -41,9 +41,9 @@ void copyDataRange(MatrixWorkspace_const_sptr inputWorkspace,
                    int const &specMax, double const &xMin, double const &xMax,
                    int yInsertionIndex, int const &xInsertionIndex) {
   int const xMinIndex =
-      static_cast<int>(inputWorkspace->binIndexOf(xMin, 0, 0.000001));
+      static_cast<int>(inputWorkspace->yIndexOfX(xMin, 0, 0.000001));
   int const xMaxIndex =
-      static_cast<int>(inputWorkspace->binIndexOf(xMax, 0, 0.000001));
+      static_cast<int>(inputWorkspace->yIndexOfX(xMax, 0, 0.000001));
 
   copyDataRange(inputWorkspace, destWorkspace, specMin, specMax, xMinIndex,
                 xMaxIndex, yInsertionIndex, xInsertionIndex);
@@ -128,8 +128,8 @@ std::map<std::string, std::string> CopyDataRange::validateInputs() {
   int const xInsertionIndex = getProperty("InsertionXIndex");
 
   try {
-    auto const xMinIndex = inputWorkspace->binIndexOf(xMin, 0, 0.000001);
-    auto const xMaxIndex = inputWorkspace->binIndexOf(xMax, 0, 0.000001);
+    auto const xMinIndex = inputWorkspace->yIndexOfX(xMin, 0, 0.000001);
+    auto const xMaxIndex = inputWorkspace->yIndexOfX(xMax, 0, 0.000001);
 
     if (xMinIndex > xMaxIndex)
       errors["XMin"] = "XMin must come after XMax.";
