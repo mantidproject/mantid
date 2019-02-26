@@ -4,14 +4,14 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=invalid-name,too-many-instance-attributes,too-many-branches,no-init,deprecated-module
+# pylint: disable=invalid-name,too-many-instance-attributes,too-many-branches,no-init,deprecated-module
 from __future__ import (absolute_import, division, print_function)
 
 from mantid.kernel import (Direction, FloatArrayProperty, FloatBoundedValidator, IntArrayMandatoryValidator,
                            IntArrayProperty, Property, StringArrayProperty, StringListValidator)
 from mantid.api import (AlgorithmFactory, AnalysisDataService, DataProcessorAlgorithm,  FileAction, FileProperty,
                         PropertyMode, WorkspaceGroupProperty, WorkspaceProperty)
-#from mantid.simpleapi import *
+from mantid.simpleapi import ISISIndirectEnergyTransfer
 from mantid import logger
 
 
@@ -173,9 +173,8 @@ class ISISIndirectEnergyTransferWrapper(DataProcessorAlgorithm):
 
     def _reduce_data(self):
         reduction_algorithm = self.createChildAlgorithm(name='ISISIndirectEnergyTransfer', startProgress=0.1,
-                                                        endProgress=1.0, enableLogging=True)
-        reduction_algorithm.setChild(True)
-        reduction_algorithm.setAlwaysStoreInADS(True)
+                                                        endProgress=1.0, enableLogging=False)
+        reduction_algorithm.enableHistoryRecordingForChild(False)
 
         args = {"InputFiles": self._data_files, "SumFiles": self._sum_files, "LoadLogFiles": self._sum_files,
                 "CalibrationWorkspace": self._calibration_workspace, "Instrument": self._instrument_name,

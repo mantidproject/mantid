@@ -20,6 +20,10 @@ using MantidQt::API::BatchAlgorithmRunner;
 
 namespace {
 
+bool doesExistInADS(std::string const &workspaceName) {
+  return AnalysisDataService::Instance().doesExist(workspaceName);
+}
+
 WorkspaceGroup_sptr getADSWorkspaceGroup(std::string const &workspaceName) {
   return AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
       workspaceName);
@@ -412,24 +416,26 @@ void ISISEnergyTransfer::algorithmComplete(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
              SLOT(algorithmComplete(bool)));
 
-  auto const outputGroup =
-      getADSWorkspaceGroup("IndirectEnergyTransfer_Workspaces");
-  if (!error && !outputGroup->isEmpty()) {
-    m_pythonExportWsName = outputGroup->getNames()[0];
-    m_outputWorkspaces = outputGroup->getNames();
+  auto const outputName("IndirectEnergyTransfer_Workspaces");
 
-    ungroupWorkspace(outputGroup->getName());
+  if (!error && doesExistInADS(outputName)) {
+    if (auto const outputGroup = getADSWorkspaceGroup(outputName)) {
+      m_outputWorkspaces = outputGroup->getNames();
+      m_pythonExportWsName = m_outputWorkspaces[0];
 
-    // Enable plotting and saving
-    m_uiForm.pbPlot->setEnabled(true);
-    m_uiForm.cbPlotType->setEnabled(true);
-    m_uiForm.pbSave->setEnabled(true);
-    m_uiForm.ckSaveAclimax->setEnabled(true);
-    m_uiForm.ckSaveASCII->setEnabled(true);
-    m_uiForm.ckSaveDaveGrp->setEnabled(true);
-    m_uiForm.ckSaveNexus->setEnabled(true);
-    m_uiForm.ckSaveNXSPE->setEnabled(true);
-    m_uiForm.ckSaveSPE->setEnabled(true);
+      ungroupWorkspace(outputGroup->getName());
+
+      // Enable plotting and saving
+      m_uiForm.pbPlot->setEnabled(true);
+      m_uiForm.cbPlotType->setEnabled(true);
+      m_uiForm.pbSave->setEnabled(true);
+      m_uiForm.ckSaveAclimax->setEnabled(true);
+      m_uiForm.ckSaveASCII->setEnabled(true);
+      m_uiForm.ckSaveDaveGrp->setEnabled(true);
+      m_uiForm.ckSaveNexus->setEnabled(true);
+      m_uiForm.ckSaveNXSPE->setEnabled(true);
+      m_uiForm.ckSaveSPE->setEnabled(true);
+    }
   }
 }
 
