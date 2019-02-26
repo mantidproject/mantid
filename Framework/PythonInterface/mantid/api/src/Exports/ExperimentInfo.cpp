@@ -67,10 +67,9 @@ void export_ExperimentInfo() {
            "pattern\n"
            "fileFormats:    list of valid file extensions\n"
            "directoryNames: list of directories to be searched\n"
-           "date :          valid-from and valid-to dates of a valid file\n"
-           "                (e.g '1900-01-31 23:59:00')\n"
-           "encapsulate date\n"
-           "\nreturns : list of absolute paths for each valid file")
+           "date :          the 'valid-from' and 'valid-to 'dates of a valid\n"
+           "file will encapsulate this date (e.g '1900-01-31 23:59:00')\n"
+           "\nreturns : list of absolute paths for each valid file\n")
       .staticmethod("getResourceFilenames")
       .def("getInstrumentFilename", &ExperimentInfo::getInstrumentFilename,
            getInstrumentFilename_Overload(
