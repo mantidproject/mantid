@@ -18,6 +18,7 @@ import Muon.GUI.Common.utilities.algorithm_utils as algorithm_utils
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 import copy
 
+
 class LoadUtils(object):
     """
     A simple class for identifing the current run
