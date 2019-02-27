@@ -26,7 +26,7 @@ and it should not break any existing tests.
 from __future__ import (absolute_import, division, print_function)
 
 
-from mock import Mock
+from mantid.py3compat.mock import Mock
 
 
 class MockAx:
