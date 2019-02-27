@@ -16,7 +16,6 @@ import weakref
 # 3rdparty imports
 from qtpy.QtCore import QEvent, Qt, Signal, Slot
 from qtpy.QtWidgets import QMainWindow
-from qtpy.QtGui import QContextMenuEvent
 
 # local imports
 from mantidqt.plotting.figuretype import FigureType, figure_type
