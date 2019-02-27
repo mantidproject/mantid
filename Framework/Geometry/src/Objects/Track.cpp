@@ -32,7 +32,8 @@ Track::Track() : m_startPoint(), m_unitVector(0., 0., 1.) {}
 Track::Track(const V3D &startPt, const V3D &unitVector)
     : m_startPoint(startPt), m_unitVector(unitVector) {
   if (!unitVector.unitVector()) {
-    throw std::invalid_argument("Failed to construct track: direction is not a unit vector.");
+    throw std::invalid_argument(
+        "Failed to construct track: direction is not a unit vector.");
   }
 }
 
@@ -43,7 +44,8 @@ Track::Track(const V3D &startPt, const V3D &unitVector)
  */
 void Track::reset(const V3D &startPoint, const V3D &direction) {
   if (!direction.unitVector()) {
-    throw std::invalid_argument("Failed to reset track: direction is not a unit vector.");
+    throw std::invalid_argument(
+        "Failed to reset track: direction is not a unit vector.");
   }
   m_startPoint = startPoint;
   m_unitVector = direction;

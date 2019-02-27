@@ -156,23 +156,23 @@ public:
     // Mix
     V3D dir(1., 1., 0);
     dir.normalize();
-    TS_ASSERT_EQUALS(
-        bbox.doesLineIntersect(Track(V3D(-5.0, -1.0, 0.0), dir)),
-        true);
-    dir = {1., 1., 1.,};
+    TS_ASSERT_EQUALS(bbox.doesLineIntersect(Track(V3D(-5.0, -1.0, 0.0), dir)),
+                     true);
+    dir = {
+        1.,
+        1.,
+        1.,
+    };
     dir.normalize();
-    TS_ASSERT_EQUALS(bbox.doesLineIntersect(
-                         Track(V3D(-5.0, -1.0, -0.5), dir)),
+    TS_ASSERT_EQUALS(bbox.doesLineIntersect(Track(V3D(-5.0, -1.0, -0.5), dir)),
                      true);
     dir = {-1., -0.4, 0.};
     dir.normalize();
-    TS_ASSERT_EQUALS(bbox.doesLineIntersect(
-                         Track(V3D(10.0, 10.0, 0.0), dir)),
+    TS_ASSERT_EQUALS(bbox.doesLineIntersect(Track(V3D(10.0, 10.0, 0.0), dir)),
                      false);
     dir = {1., 1., 0.};
     dir.normalize();
-    TS_ASSERT_EQUALS(bbox.doesLineIntersect(
-                         Track(V3D(-10.0, -10.0, 0.0), dir)),
+    TS_ASSERT_EQUALS(bbox.doesLineIntersect(Track(V3D(-10.0, -10.0, 0.0), dir)),
                      true); // Hits box at edge
   }
 
