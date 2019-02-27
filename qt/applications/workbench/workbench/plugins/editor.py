@@ -60,7 +60,7 @@ class MultiFileEditor(PluginWidget):
 
         # attributes
         self.tabs_open_on_closing = None
-        
+
     def load_settings_from_config(self, config):
         self.editors.load_settings_from_config(config)
 
@@ -116,8 +116,6 @@ class MultiFileEditor(PluginWidget):
 
     def register_plugin(self):
         self.main.add_dockwidget(self)
-        # menus
-        # add_actions(self.main.editor_menu, self.editor_actions)
 
     # ----------- Plugin Behaviour --------------------
 

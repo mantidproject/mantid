@@ -148,7 +148,6 @@ class MainWindow(QMainWindow):
         # Menus
         self.file_menu = None
         self.file_menu_actions = None
-        # self.editor_menu = None
         self.view_menu = None
         self.view_menu_actions = None
         self.interfaces_menu = None
@@ -233,7 +232,6 @@ class MainWindow(QMainWindow):
 
     def create_menus(self):
         self.file_menu = self.menuBar().addMenu("&File")
-        # self.editor_menu = self.menuBar().addMenu("&Editor")
         self.view_menu = self.menuBar().addMenu("&View")
         self.interfaces_menu = self.menuBar().addMenu('&Interfaces')
 
