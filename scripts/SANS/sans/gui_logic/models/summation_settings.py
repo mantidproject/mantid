@@ -84,12 +84,18 @@ class SummationSettings(object):
         self._save_as_event_data = SaveAsEventData()
         self._custom_binning = CustomBinning()
         self._settings = self._settings_from_type(initial_type)
+        self._save_directory = ConfigService.getString('defaultsave.directory')
 
     def instrument(self):
         return ConfigService.getString('default.instrument')
 
+    @property
     def save_directory(self):
-        return ConfigService.getString('defaultsave.directory')
+        return self._save_directory
+
+    @save_directory.setter
+    def save_directory(self, directory):
+        self._save_directory = directory
 
     def set_histogram_binning_type(self, type):
         self._settings = self._settings_from_type(type)

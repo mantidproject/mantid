@@ -41,6 +41,7 @@ Improved
 * If loading of user file fails, user file field will remain empty to make it clear it has not be loaded successfully.
 * Workspaces are centred upon loading.
 * All limit strings in the user file (L/ ) are now space-separable to allow for uniform structure in the user file. For backwards compatibility, any string which was comma separable remains comma separable as well.
+* Added a sum runs directory selection button. This is separate from default save directory and only determines where summed runs are saved.
 
 Bug fixes
 #########
