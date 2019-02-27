@@ -88,7 +88,7 @@ add_executable(EventParallelLoader ${SRC_FILES} ${INC_FILES})
 add_dependencies(EventParallelLoader Kernel)
 #set the name of generated executable
 set_target_properties(EventParallelLoader PROPERTIES OUTPUT_NAME MantidNexusParallelLoader
-		COMPILE_DEFINITIONS IN_MANTID_PARALLEL)
+  COMPILE_DEFINITIONS IN_MANTID_PARALLEL)
 
 if (OSX_VERSION VERSION_GREATER 10.8)
 	set_target_properties(EventParallelLoader PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")

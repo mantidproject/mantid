@@ -334,35 +334,56 @@ class MuonDataContext(object):
         for group_name in self._groups.keys():
             self.show_group_data(group_name)
 
-    def show_group_data(self, group_name, show=True):
+        if self.do_rebin():
+            for group_name in self._groups.keys():
+                self.show_group_data(group_name, rebin=True)
+
+    def show_group_data(self, group_name, show=True, rebin=False):
         for run in self.current_runs:
             run_as_string = run_list_to_string(run)
-            group_workspace = calculate_group_data(self, group_name, run)
-            group_asymmetry = estimate_group_asymmetry_data(self, group_name, run)
+            group_workspace = calculate_group_data(self, group_name, run, rebin)
+            group_asymmetry = estimate_group_asymmetry_data(self, group_name, run, rebin)
             directory = get_base_data_directory(self, run_as_string) + get_group_data_directory(self, run_as_string)
-            name = get_group_data_workspace_name(self, group_name, run_as_string)
-            asym_name = get_group_asymmetry_name(self, group_name, run_as_string)
 
-            self._groups[group_name]._workspace[str(run)] = MuonWorkspaceWrapper(group_workspace)
-            self._groups[group_name]._asymmetry_estimate[str(run)] = MuonWorkspaceWrapper(group_asymmetry)
-            if show:
-                self._groups[group_name].workspace[str(run)].show(directory + name)
-                self._groups[group_name]._asymmetry_estimate[str(run)].show(directory + asym_name)
+            name = get_group_data_workspace_name(self, group_name, run_as_string, rebin)
+            asym_name = get_group_asymmetry_name(self, group_name, run_as_string, rebin)
+
+            if not rebin:
+                self._groups[group_name]._workspace[str(run)] = MuonWorkspaceWrapper(group_workspace)
+                self._groups[group_name]._asymmetry_estimate[str(run)] = MuonWorkspaceWrapper(group_asymmetry)
+                if show:
+                    self._groups[group_name].workspace[str(run)].show(directory + name)
+                    self._groups[group_name]._asymmetry_estimate[str(run)].show(directory + asym_name)
+            else:
+                self._groups[group_name]._workspace_rebin[str(run)] = MuonWorkspaceWrapper(group_workspace)
+                self._groups[group_name]._asymmetry_estimate_rebin[str(run)] = MuonWorkspaceWrapper(group_asymmetry)
+                if show:
+                    self._groups[group_name]._workspace_rebin[str(run)].show(directory + name)
+                    self._groups[group_name]._asymmetry_estimate_rebin[str(run)].show(directory + asym_name)
 
     def show_all_pairs(self):
         for pair_name in self._pairs.keys():
             self.show_pair_data(pair_name)
 
-    def show_pair_data(self, pair_name, show=True):
+        if self.do_rebin():
+            for pair_name in self._pairs.keys():
+                self.show_pair_data(pair_name, rebin=True)
+
+    def show_pair_data(self, pair_name, show=True, rebin=False):
         for run in self.current_runs:
             run_as_string = run_list_to_string(run)
-            name = get_pair_data_workspace_name(self, pair_name, run_as_string)
+            name = get_pair_data_workspace_name(self, pair_name, run_as_string, rebin)
             directory = get_base_data_directory(self, run_as_string) + get_pair_data_directory(self, run_as_string)
-            pair_workspace = calculate_pair_data(self, pair_name, run)
+            pair_workspace = calculate_pair_data(self, pair_name, run, rebin)
 
-            self._pairs[pair_name].workspace[str(run)] = MuonWorkspaceWrapper(pair_workspace)
-            if show:
-                self._pairs[pair_name].workspace[str(run)].show(directory + name)
+            if not rebin:
+                self._pairs[pair_name].workspace[str(run)] = MuonWorkspaceWrapper(pair_workspace)
+                if show:
+                    self._pairs[pair_name].workspace[str(run)].show(directory + name)
+            else:
+                self._pairs[pair_name].workspace_rebin[str(run)] = MuonWorkspaceWrapper(pair_workspace)
+                if show:
+                    self._pairs[pair_name].workspace_rebin[str(run)].show(directory + name)
 
     def calculate_all_groups(self):
         for group_name in self._groups.keys():
@@ -384,6 +405,12 @@ class MuonDataContext(object):
             return False
         else:
             return True
+
+    def do_rebin(self):
+        return (self.gui_variables['RebinType'] == 'Fixed' and
+                'RebinFixed' in self.gui_variables and self.gui_variables['RebinFixed']) or\
+               (self.gui_variables['RebinType'] == 'Variable' and
+                'RebinVariable' in self.gui_variables and self.gui_variables['RebinVariable'])
 
     class InstrumentNotifier(Observable):
         def __init__(self, outer):

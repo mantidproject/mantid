@@ -17,17 +17,17 @@ spectrum pertains). For each detector the value of **momentum transfer**
 (:math:`Q`) is calculated, and the counts for detectors and each input 
 **energy transfer** bin are added to the appropriate output :math:`(Q ;\Delta E)` bin.
 
-
-The momentum transfer (:math:`Q`-values) obtained for each detector are calculated
-for the detector center, so the binning algorithm uses center-point binning.
-Use :ref:`algm-SofQWPolygon` and :ref:`algm-SofQWNormalisedPolygon` for more complex and precise (but slower)
+The momentum transfer (:math:`Q`-values) obtained for each detector are 
+calculated for the detector center, so the binning algorithm uses center-point 
+binning. This algorithm does not use the `DetectorTwoThetaRanges` optional input 
+property for the :math:`Q` calculation. Use :ref:`algm-SofQWPolygon` and 
+:ref:`algm-SofQWNormalisedPolygon` for more complex and precise (but slower) 
 binning strategies.
 
 The energy binning will not be changed by this algorithm, so the input
 workspace should already have the desired bins (though this axis can be
 rebinned afterwards if desired). The EMode and EFixed parameters are
 used for the calculation of :math:`Q`.
-
 
 If the input workspace is a distribution (i.e. **counts/meV** ) then the
 output workspace will similarly be divided by the bin width in both
