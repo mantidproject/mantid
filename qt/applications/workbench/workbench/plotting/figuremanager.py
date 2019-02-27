@@ -14,10 +14,11 @@ from functools import wraps
 # 3rdparty imports
 import matplotlib
 from matplotlib._pylab_helpers import Gcf
-from matplotlib.backend_bases import FigureManagerBase
+from matplotlib.backend_bases import FigureManagerBase, MouseEvent
 from matplotlib.backends.backend_qt5agg import (FigureCanvasQTAgg)  # noqa
-from qtpy.QtCore import QObject, Qt
+from qtpy.QtCore import QObject, Qt, QPoint
 from qtpy.QtWidgets import QApplication, QLabel
+from qtpy.QtGui import QContextMenuEvent
 from six import text_type
 
 # local imports
@@ -325,9 +326,22 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
 
     # ------------------------ Interaction events --------------------
     def on_button_press(self, event):
+        class MouseButton:
+            # Based on the matplotlib MouseEvent click buttons
+            right_click = 3
+            middle_click = 2
+            left_click = 1
+
+        # If right-click then emit a QContextMenuEvent
+        if isinstance(event, MouseEvent) and event.button == MouseButton.right_click:
+            q_event = QContextMenuEvent(QContextMenuEvent.Mouse, QPoint(event.x, event.y))
+            q_event.canvas = True
+            self.window.event(q_event)
+
         if not event.dblclick:
             # shortcut
             return
+
         # We assume this is used for editing axis information e.g. labels
         # which are outside of the axes so event.inaxes is no use.
         canvas = self.canvas

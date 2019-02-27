@@ -48,6 +48,10 @@ class FigureWindow(QMainWindow, ObservingView):
     def event(self, event):
         if event.type() == QEvent.WindowActivate:
             self.activated.emit()
+        elif event.type() == QEvent.ContextMenu:
+            is_canvas = getattr(event, "canvas", None)
+            if is_canvas is not None:
+                self.show_context_menu.emit()
         return QMainWindow.event(self, event)
 
     def closeEvent(self, event):
@@ -86,11 +90,11 @@ class FigureWindow(QMainWindow, ObservingView):
         self._plot_on_here(event.mimeData().text().split('\n'))
         QMainWindow.dropEvent(self, event)
 
-    def eventFilter(self, obj, event):
-        if weakref.proxy(obj) == self._canvas:
-            if isinstance(event, QContextMenuEvent):
-                self.show_context_menu.emit()
-        return QMainWindow.eventFilter(self, obj, event)
+    # def eventFilter(self, obj, event):
+    #     if weakref.proxy(obj) == self._canvas:
+    #         if isinstance(event, QContextMenuEvent):
+    #             self.show_context_menu.emit()
+    #     return QMainWindow.eventFilter(self, obj, event)
 
     # private api
 
