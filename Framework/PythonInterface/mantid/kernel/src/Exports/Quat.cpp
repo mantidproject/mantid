@@ -77,8 +77,7 @@ void export_Quat() {
       .def("__eq__", &Quat::operator==,(arg("self"), arg("other")))
       .def("__ne__", &Quat::operator!=,(arg("self"), arg("other")))
       .def("__getitem__",
-           (const double &(Quat::*)(int)const) & Quat::operator[],
-           return_value_policy<copy_const_reference>(),
+           (double (Quat::*)(int)const) & Quat::operator[],
            (arg("self"), arg("index")))
       .def("__str__", &Quat::toString, arg("self"));
   //.def(boost::python::self_ns::str(self));

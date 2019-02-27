@@ -120,6 +120,7 @@ public:
     Instrument_sptr testInst = setupInstrument();
     InstrumentRayTracer tracker(testInst);
     V3D testDir(0.010, 0.0, 15.004);
+    testDir.normalize();
     tracker.trace(testDir);
     Links results = tracker.getResults();
     TS_ASSERT_EQUALS(results.size(), 1);
@@ -156,9 +157,13 @@ public:
    */
   void doTestRectangularDetector(std::string message, Instrument_sptr inst,
                                  V3D testDir, int expectX, int expectY) {
-    //    std::cout << message << '\n';
     InstrumentRayTracer tracker(inst);
-    testDir.normalize(); // Force to be unit vector
+    const auto norm = testDir.norm();
+    if (norm == 0.) {
+      TS_ASSERT_THROWS_ANYTHING(tracker.traceFromSample(testDir));
+      return;
+    }
+    testDir /= norm;
     tracker.traceFromSample(testDir);
 
     Links results = tracker.getResults();

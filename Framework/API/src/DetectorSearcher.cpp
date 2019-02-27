@@ -75,7 +75,12 @@ void DetectorSearcher::createDetectorCache() {
     auto pos = m_detInfo.position(pointNo);
     pos.normalize();
     auto E1 = (pos - beam) * -m_crystallography_convention;
-    E1.normalize();
+    const auto norm = E1.norm();
+    if (norm == 0.) {
+      E1 = V3D(up) * -m_crystallography_convention;
+    } else {
+      E1 /= norm;
+    }
 
     Eigen::Vector3d point(E1[0], E1[1], E1[2]);
 
