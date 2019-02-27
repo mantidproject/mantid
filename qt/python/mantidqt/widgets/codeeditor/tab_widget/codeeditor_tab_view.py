@@ -15,6 +15,10 @@ from mantidqt.icons import get_icon
 from mantidqt.utils.qt import add_actions, create_action
 from mantidqt.widgets.codeeditor.tab_widget.codeeditor_tab_presenter import CodeEditorTabPresenter
 
+ABORT_BUTTON_RED_COLOR = QColor(230, 84, 80)
+
+PLAY_BUTTON_GREEN_COLOR = QColor(73, 156, 84)
+
 
 class CodeEditorTabWidget(QTabWidget):
     ABORT_BUTTON_OBJECT_NAME = "abort-button"
@@ -73,13 +77,13 @@ class CodeEditorTabWidget(QTabWidget):
 
         run_button = QPushButton(container_widget)
         run_button.setObjectName(self.RUN_BUTTON_OBJECT_NAME)
-        run_button.setIcon(get_icon("fa.play", color=QColor(73, 156, 84)))
+        run_button.setIcon(get_icon("fa.play", color=PLAY_BUTTON_GREEN_COLOR))
         run_button.clicked.connect(parent.execute_current)
         layout.addWidget(run_button)
 
         abort_button = QPushButton(container_widget)
         abort_button.setObjectName(self.ABORT_BUTTON_OBJECT_NAME)
-        abort_button.setIcon(get_icon("fa.square", color=QColor(230, 84, 80)))
+        abort_button.setIcon(get_icon("fa.square", color=ABORT_BUTTON_RED_COLOR))
         abort_button.clicked.connect(parent.abort_current)
         layout.addWidget(abort_button)
 

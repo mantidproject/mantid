@@ -206,7 +206,7 @@ class MultiPythonFileInterpreter(QWidget):
 
     def save_current_file(self):
         """Save the current file"""
-        self.current_editor().save()
+        self.current_editor().save(prompt_for_confirmation=self.confirm_on_save, force_save=True)
 
     def spaces_to_tabs_current(self):
         self.current_editor().replace_spaces_with_tabs()
