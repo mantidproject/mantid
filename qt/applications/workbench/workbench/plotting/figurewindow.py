@@ -90,12 +90,6 @@ class FigureWindow(QMainWindow, ObservingView):
         self._plot_on_here(event.mimeData().text().split('\n'))
         QMainWindow.dropEvent(self, event)
 
-    # def eventFilter(self, obj, event):
-    #     if weakref.proxy(obj) == self._canvas:
-    #         if isinstance(event, QContextMenuEvent):
-    #             self.show_context_menu.emit()
-    #     return QMainWindow.eventFilter(self, obj, event)
-
     # private api
 
     def _plot_on_here(self, names):
