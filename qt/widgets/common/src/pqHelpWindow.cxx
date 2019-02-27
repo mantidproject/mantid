@@ -241,12 +241,12 @@ pqHelpWindow::pqHelpWindow(QHelpEngine *engine, QWidget *parentObject,
 
   this->setTabPosition(Qt::AllDockWidgetAreas, QTabWidget::North);
 
-  // get contents and index added
-  this->tabifyDockWidget(ui.contentsDock, ui.indexDock);
+  // hide empty contents dock
+  ui.contentsDock->hide();
+
+  // create index and search dock tabs
   this->tabifyDockWidget(ui.indexDock, ui.searchDock);
-  ui.contentsDock->setWidget(this->m_helpEngine->contentWidget());
   ui.indexDock->setWidget(this->m_helpEngine->indexWidget());
-  ui.contentsDock->raise();
 
   // setup the search tab
   QWidget *searchPane = new QWidget(this);
