@@ -34,7 +34,6 @@ class FigureWindow(QMainWindow, ObservingView):
         QMainWindow.__init__(self, parent=parent)
         # attributes
         self._canvas = weakref.proxy(canvas)
-        canvas.installEventFilter(self)
         self.setAttribute(Qt.WA_DeleteOnClose, True)
 
         self.close_signal.connect(self._run_close)
