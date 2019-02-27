@@ -222,7 +222,7 @@ class MuonDataContext(object):
     def update_current_data(self):
         # Update the current data; resetting the groups and pairs to their default values
         if self._loaded_data.num_items() > 0:
-            self._current_data = self._loaded_data.get_latest_data()
+            self._current_data = self._loaded_data.get_data(run=self.current_runs[0], instrument=self.instrument)
             self.main_field_direction = self.current_data['MainFieldDirection']
             if not self.groups:
                 self.set_groups_and_pairs_to_default()

@@ -110,8 +110,10 @@ class LoadRunWidgetPresenter(object):
                       for new_run in self.run_list if not self._model._loaded_data_store.get_data(run=[new_run],
                                                                                                   instrument=
                                                                                                   self._model._context.instrument)]
-
-        self.load_runs(file_names)
+        if file_names:
+            self.load_runs(file_names)
+        else:
+            self.on_loading_finished()
     # ------------------------------------------------------------------------------------------------------------------
     # Loading from current run button
     # ------------------------------------------------------------------------------------------------------------------
