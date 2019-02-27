@@ -168,7 +168,8 @@ class ProjectRecoverySaver(object):
         if interfaces_list is None:
             interfaces_list = find_all_windows_that_are_savable()
 
-        project_saver.save_project(directory, workspace_to_save=None, plots_to_save=plots,
+        file_name = os.path.join(directory, (os.path.basename(directory) + self.pr.recovery_file_ext))
+        project_saver.save_project(file_name=file_name, workspace_to_save=None, plots_to_save=plots,
                                    interfaces_to_save=interfaces_list, project_recovery=False)
 
     def _add_lock_file(self, directory):

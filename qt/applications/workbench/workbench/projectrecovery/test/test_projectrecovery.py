@@ -117,6 +117,8 @@ class ProjectRecoveryTest(unittest.TestCase):
         self.assertListEqual(paths, [first, second, third])
 
     def test_get_pid_folder_to_be_used_to_load_a_checkpoint_from(self):
+        self.pr._make_process_from_pid = mock.MagicMock()
+        self.pr._is_mantid_workbench_process = mock.MagicMock(return_value=True)
         # Needs to be a high number outside of possible pids
         one = os.path.join(self.pr.recovery_directory_hostname, "10000000")
         two = os.path.join(self.pr.recovery_directory_hostname, "20000000")

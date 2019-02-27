@@ -9,6 +9,8 @@
 
 from __future__ import (absolute_import, unicode_literals)
 
+import os
+
 from qtpy.QtWidgets import QApplication
 
 from mantid.api import AlgorithmManager
@@ -71,7 +73,8 @@ class ProjectRecoveryLoader(object):
         """
         project_loader = ProjectLoader(self.pr.recovery_file_ext)
         # This method will only load interfaces/plots if all workspaces that are expected have been loaded successfully
-        if not project_loader.load_project(directory=directory, load_workspaces=False):
+        file_name = os.path.join(directory, (os.path.basename(directory) + self.pr.recovery_file_ext))
+        if not project_loader.load_project(file_name=file_name, load_workspaces=False):
             logger.error("Project Recovery: Not all workspaces were recovered successfully, any interfaces requiring "
                          "lost workspaces are not opened")
 

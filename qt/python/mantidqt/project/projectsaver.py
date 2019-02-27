@@ -34,7 +34,7 @@ class ProjectSaver(object):
         :return: None; If the method cannot be completed.
         """
         # Check if the file_name doesn't exist
-        if file_name is None or os.path.isdir(file_name):
+        if file_name is None:
             logger.warning("Please select a valid file name")
             return
 
@@ -60,18 +60,18 @@ class ProjectSaver(object):
         if interfaces_to_save is None:
             interfaces_to_save = []
 
-        interfaces = self._return_interfaces_dicts(directory=directory, interfaces_to_save=interfaces_to_save)
+        interfaces = self._return_interfaces_dicts(file_name=file_name, interfaces_to_save=interfaces_to_save)
 
         # Pass dicts to Project Writer
         writer = ProjectWriter(workspace_names=saved_workspaces,
                                plots_to_save=plots_to_save_list,
                                interfaces_to_save=interfaces,
-                               save_location=directory,
+                               save_location=file_name,
                                project_file_ext=self.project_file_ext)
         writer.write_out()
 
     @staticmethod
-    def _return_interfaces_dicts(directory, interfaces_to_save):
+    def _return_interfaces_dicts(file_name, interfaces_to_save):
         interfaces = []
         for interface, encoder in interfaces_to_save:
             # Add to the dictionary encoded data with the key as the first tag in the list on the encoder attributes

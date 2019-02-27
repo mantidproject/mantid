@@ -38,6 +38,8 @@ class ProjectRecoveryModelTest(unittest.TestCase):
         # Set up some checkpoints
         self.setup_some_checkpoints()
 
+        self.pr._make_process_from_pid = mock.MagicMock()
+        self.pr._is_mantid_workbench_process = mock.MagicMock(return_value=True)
         self.prm = ProjectRecoveryModel(self.pr, mock.MagicMock())
 
     def tearDown(self):

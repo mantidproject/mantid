@@ -163,8 +163,13 @@ class ProjectRecovery(object):
             pids.append(int(os.path.basename(path)))
 
         for pid in pids:
-            if not psutil.pid_exists(pid):
+            if not psutil.pid_exists(pid) and \
+                    self._is_mantid_workbench_process(self._make_process_from_pid(pid=pid).cmdline()):
                 return os.path.join(self.recovery_directory_hostname, str(pid))
+
+    @staticmethod
+    def _make_process_from_pid(pid):
+        return psutil.Process(pid=pid)
 
     @staticmethod
     def listdir_fullpath(directory):
@@ -218,8 +223,7 @@ class ProjectRecovery(object):
             # fail silently and return false
             return False
 
-    @staticmethod
-    def _number_of_other_workbench_processes():
+    def _number_of_other_workbench_processes(self):
         """
         Finds the number of other workbench processes currently present on the pc
         :return: Int; The number of other workbench processes
@@ -227,10 +231,8 @@ class ProjectRecovery(object):
         total_mantids = 0
         for proc in psutil.process_iter():
             try:
-                for line in proc.cmdline():
-                    process_name = os.path.basename(os.path.normpath(line))
-                    if process_name in EXECUTABLE_NAMES:
-                        total_mantids += 1
+                if self._is_mantid_workbench_process(proc.cmdline()):
+                    total_mantids += 1
             except IndexError:
                 # Ignore these errors as it's checking the cmdline which causes this on process with no args
                 pass
@@ -238,6 +240,13 @@ class ProjectRecovery(object):
         # One of these will be the mantid process running the information
         return total_mantids - 1
 
+    @staticmethod
+    def _is_mantid_workbench_process(cmdline):
+        for line in cmdline:
+            process_name = os.path.basename(os.path.normpath(line))
+            if process_name in EXECUTABLE_NAMES:
+                return True
+        return False
     ######################################################
     #  Loading
     ######################################################
