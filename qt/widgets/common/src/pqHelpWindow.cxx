@@ -286,7 +286,7 @@ pqHelpWindow::pqHelpWindow(QHelpEngine *engine, QWidget *parentObject,
       "qthelp", new QtHelpUrlHandler(engine));
   m_browser = new QWebEngineView(this);
   m_browser->setPage(new DelegatingWebPage(m_browser));
-  connect(m_browser->page(), SIGNAL(linkClicked(QUrl)), this,
+  connect(m_browser, SIGNAL(linkClicked(QUrl)), this,
           SLOT(showPage(QUrl)));
   // set up the status bar
   connect(m_browser->page(), SIGNAL(linkHovered(QString)), this,

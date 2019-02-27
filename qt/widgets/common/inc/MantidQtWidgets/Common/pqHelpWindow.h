@@ -56,7 +56,6 @@ public:
                                QWebEnginePage::NavigationType type,
                                bool) override {
     if (type == QWebEnginePage::NavigationTypeLinkClicked) {
-
       emit linkClicked(url);
     }
     return true;

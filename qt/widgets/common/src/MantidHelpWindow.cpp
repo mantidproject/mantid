@@ -55,7 +55,7 @@ const QString BASE_URL("qthelp://org.mantidproject/doc/");
 const QString DEFAULT_URL(BASE_URL + "index.html");
 
 /// Base url for all of the wiki links
-const QString WIKI_BASE_URL("http://mantidproject.org/");
+const QString WIKI_BASE_URL("https://www.mantidproject.org/");
 /// Url to display if nothing else is suggested.
 const QString WIKI_DEFAULT_URL(WIKI_BASE_URL + "MantidPlot");
 

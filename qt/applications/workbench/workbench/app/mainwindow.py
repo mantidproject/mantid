@@ -41,11 +41,12 @@ requirements.check_qt()
 # -----------------------------------------------------------------------------
 # Qt
 # -----------------------------------------------------------------------------
-from qtpy.QtCore import (QEventLoop, Qt, QCoreApplication, QPoint, QSize)  # noqa
-from qtpy.QtGui import (QColor, QGuiApplication, QIcon, QPixmap)  # noqa
+from qtpy.QtCore import (QEventLoop, Qt, QCoreApplication, QPoint, QSize, QUrl)  # noqa
+from qtpy.QtGui import (QColor, QGuiApplication, QIcon, QPixmap, QDesktopServices)  # noqa
 from qtpy.QtWidgets import (QApplication, QDesktopWidget, QFileDialog,
                             QMainWindow, QSplashScreen)  # noqa
 from mantidqt.algorithminputhistory import AlgorithmInputHistory  # noqa
+from mantidqt.interfacemanager import InterfaceManager  # noqa
 from mantidqt.widgets.manageuserdirectories import ManageUserDirectories  # noqa
 from mantidqt.widgets.codeeditor.execution import PythonCodeExecution  # noqa
 from mantidqt.utils.qt import (add_actions, create_action, plugins,
@@ -148,6 +149,7 @@ class MainWindow(QMainWindow):
         self.editor = None
         self.algorithm_selector = None
         self.plot_selector = None
+        self.interface_manager = None
         self.widgets = []
 
         # Widget layout map: required for use in Qt.connection
@@ -159,6 +161,8 @@ class MainWindow(QMainWindow):
         self.view_menu = None
         self.view_menu_actions = None
         self.interfaces_menu = None
+        self.help_menu = None
+        self.help_menu_actions = None
 
         # Allow splash screen text to be overridden in set_splash
         self.splash = SPLASH
@@ -214,6 +218,9 @@ class MainWindow(QMainWindow):
         self.widgets.append(self.workspacewidget)
 
         # Set up the project and recovery objects
+        self.interface_manager = InterfaceManager()
+
+        # Set up the project object
         self.project = Project(GlobalFigureManager, find_all_windows_that_are_savable)
         self.project_recovery = ProjectRecovery(globalfiguremanager=GlobalFigureManager,
                                                 multifileinterpreter=self.editor.editors,
@@ -251,46 +258,64 @@ class MainWindow(QMainWindow):
         self.file_menu = self.menuBar().addMenu("&File")
         self.view_menu = self.menuBar().addMenu("&View")
         self.interfaces_menu = self.menuBar().addMenu('&Interfaces')
+        self.help_menu = self.menuBar().addMenu('&Help')
 
     def create_actions(self):
         # --- general application menu options --
         # file menu
-        action_open = create_action(self, "Open Script",
-                                    on_triggered=self.open_file,
-                                    shortcut="Ctrl+O",
-                                    shortcut_context=Qt.ApplicationShortcut)
-        action_load_project = create_action(self, "Open Project",
-                                            on_triggered=self.load_project)
-        action_save_script = create_action(self, "Save Script",
-                                           on_triggered=self.save_script,
-                                           shortcut="Ctrl+S",
-                                           shortcut_context=Qt.ApplicationShortcut)
-        action_save_script_as = create_action(self, "Save Script as...",
-                                              on_triggered=self.save_script_as)
-        action_save_project = create_action(self, "Save Project",
-                                            on_triggered=self.save_project)
-        action_save_project_as = create_action(self, "Save Project as...",
-                                               on_triggered=self.save_project_as)
-
-        action_manage_directories = create_action(self, "Manage User Directories",
-                                                  on_triggered=self.open_manage_directories)
-
-        action_settings = create_action(self, "Settings", on_triggered=self.open_settings_window)
-
-        action_quit = create_action(self, "&Quit", on_triggered=self.close,
-                                    shortcut="Ctrl+Q",
-                                    shortcut_context=Qt.ApplicationShortcut)
+        action_open = create_action(
+            self, "Open Script", on_triggered=self.open_file,
+            shortcut="Ctrl+O", shortcut_context=Qt.ApplicationShortcut)
+        action_load_project = create_action(
+            self, "Open Project", on_triggered=self.load_project)
+        action_save_script = create_action(
+            self, "Save Script", on_triggered=self.save_script,
+            shortcut="Ctrl+S", shortcut_context=Qt.ApplicationShortcut)
+        action_save_script_as = create_action(
+            self, "Save Script as...", on_triggered=self.save_script_as)
+        action_save_project = create_action(
+            self, "Save Project", on_triggered=self.save_project)
+        action_save_project_as = create_action(
+            self, "Save Project as...", on_triggered=self.save_project_as)
+        action_manage_directories = create_action(
+            self, "Manage User Directories",
+            on_triggered=self.open_manage_directories)
+        action_settings = create_action(
+            self, "Settings", on_triggered=self.open_settings_window)
+        action_quit = create_action(
+            self, "&Quit", on_triggered=self.close, shortcut="Ctrl+Q",
+            shortcut_context=Qt.ApplicationShortcut)
         self.file_menu_actions = [action_open, action_load_project, None,
                                   action_save_script, action_save_script_as,
                                   action_save_project, action_save_project_as,
                                   None, action_settings, None,
                                   action_manage_directories, None, action_quit]
         # view menu
-        action_restore_default = create_action(self, "Restore Default Layout",
-                                               on_triggered=self.prep_window_for_reset,
-                                               shortcut="Shift+F10",
-                                               shortcut_context=Qt.ApplicationShortcut)
+        action_restore_default = create_action(
+            self, "Restore Default Layout",
+            on_triggered=self.prep_window_for_reset,
+            shortcut="Shift+F10", shortcut_context=Qt.ApplicationShortcut)
+
         self.view_menu_actions = [action_restore_default, None] + self.create_widget_actions()
+
+        # help menu
+        action_mantid_help = create_action(
+            self, "Mantid Help", on_triggered=self.open_mantid_help,
+            shortcut='F1', shortcut_context=Qt.ApplicationShortcut)
+        action_algorithm_descriptions = create_action(
+            self, 'Algorithm Descriptions',
+            on_triggered=self.open_algorithm_descriptions_help)
+        action_mantid_concepts = create_action(
+            self, "Mantid Concepts", on_triggered=self.open_mantid_concepts_help)
+        action_mantid_homepage = create_action(
+            self, "Mantid Homepage", on_triggered=self.open_mantid_homepage)
+        action_mantid_forum = create_action(
+            self, "Mantid Forum", on_triggered=self.open_mantid_forum)
+
+        self.help_menu_actions = [
+            action_mantid_help, action_mantid_concepts,
+            action_algorithm_descriptions, None,
+            action_mantid_homepage, action_mantid_forum]
 
     def create_widget_actions(self):
         """
@@ -308,6 +333,7 @@ class MainWindow(QMainWindow):
         # Link to menus
         add_actions(self.file_menu, self.file_menu_actions)
         add_actions(self.view_menu, self.view_menu_actions)
+        add_actions(self.help_menu, self.help_menu_actions)
 
     def launch_custom_gui(self, filename):
         executioner = PythonCodeExecution()
@@ -499,6 +525,21 @@ class MainWindow(QMainWindow):
         """
         self.editor.load_settings_from_config(CONF)
         self.project.load_settings_from_config(CONF)
+
+    def open_algorithm_descriptions_help(self):
+        self.interface_manager.showAlgorithmHelp('')
+
+    def open_mantid_concepts_help(self):
+        self.interface_manager.showConceptHelp('')
+
+    def open_mantid_help(self):
+        self.interface_manager.showHelpPage('')
+
+    def open_mantid_homepage(self):
+        QDesktopServices.openUrl(QUrl('https://www.mantidproject.org'))
+
+    def open_mantid_forum(self):
+        QDesktopServices.openUrl(QUrl('https://forum.mantidproject.org/'))
 
     def readSettings(self, settings):
         qapp = QApplication.instance()
