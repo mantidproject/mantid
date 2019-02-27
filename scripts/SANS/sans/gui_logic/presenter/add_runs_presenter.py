@@ -127,10 +127,18 @@ class AddRunsPagePresenter(object):
             self._view.set_out_file_name(self._generated_output_file_name)
 
     def _update_histogram_binning(self, run_selection):
+        """
         if has_any_event_data(run_selection):
             self._view.enable_summation_settings()
         else:
             self._view.disable_summation_settings()
+        """
+        # Previously we have only enabled the summation settings
+        # if runs contain event data.
+        # We are now setting the summation settings
+        # to enabled by default while we confirm if this
+        # is behaviour the users want
+        self._view.enable_summation_settings()
 
     def _handle_selection_changed(self, run_selection):
         self._refresh_view(run_selection)
