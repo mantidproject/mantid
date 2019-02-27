@@ -10,7 +10,7 @@ from mantid.simpleapi import *
 from mantid.api import WorkspaceFactory
 import numpy as np
 import os
-import timing
+import time
 
 
 def do_cleanup(cacheDir):
@@ -116,7 +116,7 @@ class UseCache(systemtesting.MantidSystemTest):
 
         duration = {}
         for name in (self.wksp_make, self.wksp_use):
-            timing.start()
+            time_start = time.time()
             AlignAndFocusPowderFromFiles(Filename=self.data_file, OutputWorkspace=name,
                                          CacheDir=self.cacheDir,
                                          GroupingWorkspace='PG3_group', CalibrationWorkspace='PG3_cal',
@@ -124,8 +124,7 @@ class UseCache(systemtesting.MantidSystemTest):
                                          Params=-.0002, CompressTolerance=0.01,
                                          PrimaryFlightPath=60, SpectrumIDs='1', L2='3.18', Polar='90', Azimuthal='0',
                                          ReductionProperties='__snspowderreduction_inner')
-            timing.finish()
-            duration[name] = timing.seconds()
+            duration[name] = time_start - time.time()
             NormaliseByCurrent(InputWorkspace=name, OutputWorkspace=name)
             ConvertUnits(InputWorkspace=name, OutputWorkspace=name, Target='dSpacing')
 
