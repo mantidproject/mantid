@@ -1,6 +1,6 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
@@ -35,8 +35,9 @@ SPACE_CHAR = " "
 
 class EditorIO(object):
 
-    def __init__(self, editor):
+    def __init__(self, editor, confirm_on_exit=True):
         self.editor = editor
+        self.confirm_on_exit = confirm_on_exit
 
     def ask_for_filename(self):
         filename = open_a_file_dialog(parent=self.editor, default_suffix=".py", file_filter="Python Files (*.py)",
@@ -66,7 +67,8 @@ class EditorIO(object):
                 # Cancelled
                 return False
         else:
-            return self.write()
+            # pretend the user clicked No on the dialog
+            return True
 
     def write(self):
         filename = self.editor.fileName()
@@ -95,14 +97,14 @@ class PythonFileInterpreter(QWidget):
     sig_exec_error = Signal(object)
     sig_exec_success = Signal(object)
 
-    def __init__(self, content=None, filename=None,
-                 parent=None):
+    def __init__(self, content=None, filename=None, parent=None):
         """
         :param content: An optional string of content to pass to the editor
         :param filename: The file path where the content was read.
         :param parent: An optional parent QWidget
         """
         super(PythonFileInterpreter, self).__init__(parent)
+        self.parent = parent
 
         # layout
         self.editor = CodeEditor("AlternateCSPythonLexer", self)
@@ -159,7 +161,7 @@ class PythonFileInterpreter(QWidget):
 
         :return: True if closing was considered successful, false otherwise
         """
-        return self.save(confirm=True)
+        return self.save(confirm=self.parent.confirm_on_save)
 
     def abort(self):
         self._presenter.req_abort()
@@ -373,11 +375,9 @@ class PythonFileInterpreterPresenter(QObject):
         self.is_executing = False
 
     def _create_status_msg(self, status, timestamp, elapsed_time):
-        return IDLE_STATUS_MSG + ' ' + \
-               LAST_JOB_MSG_TEMPLATE.format(status, timestamp, elapsed_time)
+        return IDLE_STATUS_MSG + ' ' + LAST_JOB_MSG_TEMPLATE.format(status, timestamp, elapsed_time)
 
     def _on_progress_update(self, lineno):
         """Update progress on the view taking into account if a selection of code is
         running"""
-        self.view.editor.updateProgressMarker(lineno + self._code_start_offset,
-                                              False)
+        self.view.editor.updateProgressMarker(lineno + self._code_start_offset, False)

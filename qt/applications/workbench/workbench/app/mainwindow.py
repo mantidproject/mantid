@@ -10,32 +10,23 @@
 """
 Defines the QMainWindow of the application and the main() entry point.
 """
-from __future__ import (absolute_import, division,
-                        print_function, unicode_literals)
+from __future__ import (absolute_import, division, print_function, unicode_literals)
 
-# std imports
-import argparse  # for command line options
+import argparse
 import atexit
 import importlib
 import os
 import sys
 
-# third party imports
-from mantid.kernel import (ConfigService, logger, UsageService,
-                           version_str as mantid_version_str)
 from mantid.api import FrameworkManagerImpl
+from mantid.kernel import (ConfigService, UsageService, logger, version_str as mantid_version_str)
+from workbench.widgets.settings.presenter import SettingsPresenter
 
-# -----------------------------------------------------------------------------
-# Constants
-# -----------------------------------------------------------------------------
 SYSCHECK_INTERVAL = 50
 ORIGINAL_SYS_EXIT = sys.exit
 ORIGINAL_STDOUT = sys.stdout
 ORIGINAL_STDERR = sys.stderr
 
-# -----------------------------------------------------------------------------
-# Requirements
-# -----------------------------------------------------------------------------
 from workbench import requirements  # noqa
 
 requirements.check_qt()
@@ -224,6 +215,7 @@ class MainWindow(QMainWindow):
 
         # uses default configuration as necessary
         self.readSettings(CONF)
+        self.config_updated()
 
         self.setup_layout()
         self.create_actions()
@@ -271,11 +263,14 @@ class MainWindow(QMainWindow):
         action_manage_directories = create_action(self, "Manage User Directories",
                                                   on_triggered=self.open_manage_directories)
 
+        action_settings = create_action(self, "Settings", on_triggered=self.open_settings_window)
+
         action_quit = create_action(self, "&Quit", on_triggered=self.close,
                                     shortcut="Ctrl+Q",
                                     shortcut_context=Qt.ApplicationShortcut)
         self.file_menu_actions = [action_open, action_load_project, None, action_save_script, action_save_project,
-                                  action_save_project_as, None, action_manage_directories, None, action_quit]
+                                  action_save_project_as, None, action_settings, None, action_manage_directories, None,
+                                  action_quit]
         # view menu
         action_restore_default = create_action(self, "Restore Default Layout",
                                                on_triggered=self.prep_window_for_reset,
@@ -428,7 +423,10 @@ class MainWindow(QMainWindow):
 
         # Close editors
         if self.editor.app_closing():
-            self.writeSettings(CONF)  # write current window information to global settings object
+            # write out any changes to the mantid config file
+            ConfigService.saveConfig(ConfigService.getUserFilename())
+            # write current window information to global settings object
+            self.writeSettings(CONF)
             # Close all open plots
             # We don't want this at module scope here
             import matplotlib.pyplot as plt  # noqa
@@ -472,6 +470,17 @@ class MainWindow(QMainWindow):
 
     def open_manage_directories(self):
         ManageUserDirectories(self).exec_()
+
+    def open_settings_window(self):
+        settings = SettingsPresenter(self)
+        settings.show()
+
+    def config_updated(self):
+        """
+        Updates the widgets that depend on settings from the Workbench Config.
+        """
+        self.editor.load_settings_from_config(CONF)
+        self.project.load_settings_from_config(CONF)
 
     def readSettings(self, settings):
         qapp = QApplication.instance()

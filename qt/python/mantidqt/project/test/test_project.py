@@ -8,15 +8,15 @@
 #
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
-import unittest
+import os
 import sys
 import tempfile
-import os
+import unittest
 
 from qtpy.QtWidgets import QMessageBox
 
-from mantid.simpleapi import CreateSampleWorkspace, GroupWorkspaces, RenameWorkspace, UnGroupWorkspace
 from mantid.api import AnalysisDataService as ADS
+from mantid.simpleapi import CreateSampleWorkspace, GroupWorkspaces, RenameWorkspace, UnGroupWorkspace
 from mantidqt.project.project import Project
 
 if sys.version_info.major >= 3:

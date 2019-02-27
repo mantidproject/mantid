@@ -18,9 +18,7 @@ from qtpy.QtWidgets import (QTabWidget, QToolButton, QVBoxLayout, QWidget)
 
 # local imports
 from mantidqt.widgets.codeeditor.interpreter import PythonFileInterpreter
-from mantidqt.widgets.codeeditor.scriptcompatibility import (mantid_api_import_needed,
-                                                             add_mantid_api_import)
-
+from mantidqt.widgets.codeeditor.scriptcompatibility import (add_mantid_api_import, mantid_api_import_needed)
 
 NEW_TAB_TITLE = 'New'
 MODIFIED_MARKER = '*'
@@ -55,6 +53,12 @@ class MultiPythonFileInterpreter(QWidget):
         # add a single editor by default
         self.append_new_editor()
 
+        # setting defaults
+        self.confirm_on_save = True
+
+    def load_settings_from_config(self, config):
+        self.confirm_on_save = config.get('project', 'prompt_save_editor_modified')
+
     @property
     def editor_count(self):
         return self._tabs.count()
@@ -71,8 +75,7 @@ class MultiPythonFileInterpreter(QWidget):
     def append_new_editor(self, content=None, filename=None):
         if content is None:
             content = self.default_content
-        interpreter = PythonFileInterpreter(content, filename=filename,
-                                            parent=self._tabs)
+        interpreter = PythonFileInterpreter(content, filename=filename, parent=self)
         if self.whitespace_visible:
             interpreter.set_whitespace_visible()
 
