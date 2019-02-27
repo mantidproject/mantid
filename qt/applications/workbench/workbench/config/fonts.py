@@ -34,9 +34,9 @@ def is_ubuntu():
 
 
 # Plain-text fonts
-MONOSPACE = ['Monospace', 'DejaVu Sans Mono', 'Consolas',
-             'Bitstream Vera Sans Mono', 'Andale Mono', 'Liberation Mono',
-             'Courier New', 'Courier', 'monospace', 'Fixed', 'Terminal']
+MONOSPACE = ['Consolas', 'Monospace', 'DejaVu Sans Mono', 'Bitstream Vera Sans Mono',
+             'Andale Mono', 'Liberation Mono', 'Courier New',
+             'Courier', 'monospace', 'Fixed', 'Terminal']
 
 
 # Define reasonable point sizes on various OSes
