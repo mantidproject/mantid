@@ -318,7 +318,7 @@ class ProjectRecovery(object):
 
     def repair_checkpoints(self):
         """
-        Will remove all locked, older than a month, and empty checkpoints
+        Will remove all unfinished (have a lock file), older than a month, and empty checkpoints
         """
         pid_dirs = self.listdir_fullpath(self.recovery_directory_hostname)
 

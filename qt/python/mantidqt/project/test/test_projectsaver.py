@@ -146,10 +146,10 @@ class ProjectSaverTest(unittest.TestCase):
         file_ext = '.recfile'
         saver = projectsaver.ProjectSaver(file_ext)
 
-        saver.save_project(directory=working_directory, project_recovery=False)
+        saver.save_project(file_name=working_project_file, project_recovery=False)
 
         self.assertEqual(pwriter.call_args, mock.call(interfaces_to_save=[], plots_to_save=[],
-                                                      project_file_ext=file_ext, save_location=working_directory,
+                                                      project_file_ext=file_ext, save_location=working_project_file,
                                                       workspace_names=['ws1']))
 
 

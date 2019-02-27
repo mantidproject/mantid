@@ -586,10 +586,8 @@ def start_workbench(app, command_line_options):
             main_window.close()
             return 0
 
-    # Before checking for recovery checkpoints we need to make sure the recovery files are "correct" and not bugged
+    # Project Recovey on startup
     main_window.project_recovery.repair_checkpoints()
-    # Let's get going with project recovery checks and spawning of GUIs
-    # Project recovery will handle starting it's own thread
     if main_window.project_recovery.check_for_recover_checkpoint():
         main_window.project_recovery.attempt_recovery()
     else:
