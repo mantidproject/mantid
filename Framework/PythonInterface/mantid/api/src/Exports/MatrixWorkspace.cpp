@@ -64,8 +64,8 @@ GNU_DIAG_OFF("conversion")
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(MatrixWorkspace_yIndexOfXOverloads,
                                        MatrixWorkspace::yIndexOfX, 1, 3)
 // Overloads for binIndexOfDeprecated function which has 1 optional argument
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(
-    MatrixWorkspace_binIndexOfDeprecatedOverloads, binIndexOfDeprecated, 1, 2)
+BOOST_PYTHON_FUNCTION_OVERLOADS(binIndexOfDeprecatedOverloads,
+                                binIndexOfDeprecated, 1, 2)
 GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("unused-local-typedef")
 
@@ -300,7 +300,7 @@ void export_MatrixWorkspace() {
            ":class:`~mantid.api.MatrixWorkspace.getRun` "
            "instead)")
       .def("binIndexOf", &binIndexOfDeprecated,
-           MatrixWorkspace_binIndexOfDeprecatedOverloads(
+           binIndexOfDeprecatedOverloads(
                (arg("self"), arg("xvalue"), arg("workspaceIndex")),
                "Returns the index of the bin containing the given xvalue "
                "(deprecated, use "
