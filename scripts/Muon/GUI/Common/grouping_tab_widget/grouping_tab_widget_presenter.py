@@ -184,11 +184,9 @@ class GroupingTabPresenter(object):
 
     def group_table_changed(self):
         pass
-        # self.groupingNotifier.notify_subscribers()
 
     def pair_table_changed(self):
         pass
-        # self.groupingNotifier.notify_subscribers()
 
     class LoadObserver(Observer):
 
