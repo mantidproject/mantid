@@ -26,9 +26,6 @@ focus_directory = os.path.join(root_directory, "focus")
 
 class CreateVanadiumTest(systemtesting.MantidSystemTest):
 
-    def skipTests(self):
-        return True
-
     def runTest(self):
         os.makedirs(cal_directory)
         main(vanadium_run="236516", user="test", focus_run=None, force_vanadium=True, directory=cal_directory)
