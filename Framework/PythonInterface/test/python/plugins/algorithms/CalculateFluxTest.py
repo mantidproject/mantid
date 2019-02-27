@@ -33,9 +33,11 @@ class CalculateFluxTest(unittest.TestCase):
         self.assertEqual(mtd["flux"].getNumberHistograms(), 1)
         self.assertEqual(mtd["flux"].blocksize(), mtd["ws"].blocksize())
         self.assertEqual(mtd["flux"].getAxis(0).getUnit().unitID(), "Wavelength")
-        expected = np.full([100], self.pixels_in_shape * 0.3)
-        expected[50] = self.pixels_in_shape * 10.3
-        np.testing.assert_almost_equal(mtd["flux"].readY(0), expected, decimal=3)
+        expectation = np.empty(100)
+        expectation.fill(self.pixels_in_shape * 0.3)
+        expectation[50] = self.pixels_in_shape * 10.3
+        reality = mtd["flux"].readY(0)
+        np.testing.assert_almost_equal(reality, expectation, decimal=6)
 
 if __name__ == "__main__":
     unittest.main()
