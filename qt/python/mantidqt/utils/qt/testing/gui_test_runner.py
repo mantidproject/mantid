@@ -16,7 +16,7 @@ import traceback
 from qtpy.QtCore import QTimer, QMetaObject, Qt
 from qtpy.QtWidgets import QWidget
 
-from mantidqt.utils.qt.test.application import get_application
+from mantidqt.utils.qt.testing.application import get_application
 
 
 def split_qualified_name(qualified_name):

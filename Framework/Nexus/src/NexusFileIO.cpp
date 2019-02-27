@@ -172,16 +172,18 @@ void NexusFileIO::closeNexusFile() {
 /**  Write Nexus mantid workspace header fields for the
  NXentry/IXmantid/NXprocessed field.
  The URLs are not correct as they do not exist presently, but follow the format
- for other
- Nexus specs.
+ for other Nexus specs.
  @param title :: title field.
  @param wsName :: workspace name.
+ @return zero on success, a non-zero value on failure.
  */
 int NexusFileIO::writeNexusProcessedHeader(const std::string &title,
                                            const std::string &wsName) const {
 
-  std::string className = "Mantid Processed Workspace";
+  const std::string className = "Mantid Processed Workspace";
   std::vector<std::string> attributes, avalues;
+  attributes.reserve(2);
+  avalues.reserve(2);
   if (!writeNxValue<std::string>("title", title, NX_CHAR, attributes, avalues))
     return (3);
 
@@ -193,7 +195,7 @@ int NexusFileIO::writeNexusProcessedHeader(const std::string &title,
   }
 
   attributes.emplace_back("URL");
-  avalues.push_back(
+  avalues.emplace_back(
       "http://www.nexusformat.org/instruments/xml/NXprocessed.xml");
   attributes.emplace_back("Version");
   avalues.emplace_back("1.0");

@@ -9,8 +9,8 @@
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import os
+
 from qtpy.QtWidgets import QFileDialog, QMessageBox
-from qtpy.QtGui import QIcon  # noqa
 
 from mantid.api import AnalysisDataService, AnalysisDataServiceObserver
 from mantidqt.io import open_a_file_dialog
@@ -40,6 +40,11 @@ class Project(AnalysisDataServiceObserver):
         self.plot_gfm.add_observer(self)
 
         self.interface_populating_function = interface_populating_function
+
+        self.prompt_save_on_close = True
+
+    def load_settings_from_config(self, config):
+        self.prompt_save_on_close = config.get('project', 'prompt_save_on_close')
 
     def __get_saved(self):
         return self.__saved
@@ -157,11 +162,15 @@ class Project(AnalysisDataServiceObserver):
         # if yes or no return false
         return False
 
-    @staticmethod
-    def _offer_save_message_box(parent):
-        return QMessageBox.question(parent, 'Unsaved Project', "The project is currently unsaved would you like to "
-                                    "save before closing?", QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel,
-                                    QMessageBox.Yes)
+    def _offer_save_message_box(self, parent):
+        if self.prompt_save_on_close:
+            return QMessageBox.question(parent, 'Unsaved Project',
+                                        "The project is currently unsaved. Would you like to "
+                                        "save before closing?",
+                                        QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel,
+                                        QMessageBox.Yes)
+        else:
+            return QMessageBox.No
 
     def modified_project(self):
         self.__saved = False

@@ -11,12 +11,17 @@ from __future__ import (absolute_import, unicode_literals)
 
 from qtpy.QtWidgets import QApplication
 
-from mantidqt.utils.qt.test import GuiTest
-from mantidqt.utils.qt.test.qt_widget_finder import QtWidgetFinder
+from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
 from mantidqt.widgets.codeeditor.multifileinterpreter import MultiPythonFileInterpreter
 
 
 class MultiPythonFileInterpreterDeletionTest(GuiTest, QtWidgetFinder):
+    def tearDown(self):
+        for widget in self.find_qt_widget_by_name("interpreter.Python"):
+            widget.close()
+        QApplication.processEvents()
+
     def test_editor_widget_not_leaked(self):
         widget = MultiPythonFileInterpreter()
         self.assertEqual(1, widget.editor_count)
