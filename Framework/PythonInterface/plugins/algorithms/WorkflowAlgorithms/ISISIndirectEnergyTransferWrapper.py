@@ -11,8 +11,6 @@ from mantid.kernel import (Direction, FloatArrayProperty, FloatBoundedValidator,
                            IntArrayProperty, Property, StringArrayProperty, StringListValidator)
 from mantid.api import (AlgorithmFactory, AnalysisDataService, DataProcessorAlgorithm,  FileAction, FileProperty,
                         PropertyMode, WorkspaceGroupProperty, WorkspaceProperty)
-from mantid.simpleapi import ISISIndirectEnergyTransfer
-from mantid import logger
 
 
 def exists_in_ads(workspace_name):

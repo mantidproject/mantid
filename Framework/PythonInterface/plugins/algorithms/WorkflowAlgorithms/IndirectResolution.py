@@ -69,6 +69,7 @@ class IndirectResolution(DataProcessorAlgorithm):
 
         iet_alg = self.createChildAlgorithm(name='ISISIndirectEnergyTransfer', startProgress=0.0,
                                             endProgress=0.7, enableLogging=True)
+        iet_alg.enableHistoryRecordingForChild(False)
         iet_alg.setProperty('Instrument', self._instrument)
         iet_alg.setProperty('Analyser', self._analyser)
         iet_alg.setProperty('Reflection', self._reflection)
