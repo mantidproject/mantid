@@ -163,8 +163,8 @@ class ProjectRecovery(object):
             pids.append(int(os.path.basename(path)))
 
         for pid in pids:
-            if not psutil.pid_exists(pid) and \
-                    self._is_mantid_workbench_process(self._make_process_from_pid(pid=pid).cmdline()):
+            if not psutil.pid_exists(pid) or \
+                    not self._is_mantid_workbench_process(self._make_process_from_pid(pid=pid).cmdline()):
                 return os.path.join(self.recovery_directory_hostname, str(pid))
 
     @staticmethod

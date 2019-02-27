@@ -66,18 +66,18 @@ class ProjectLoader(object):
 
             # Load interfaces
             if self.project_reader.interface_list is not None:
-                self.load_interfaces(directory)
+                self.load_interfaces(file_name)
 
         return workspace_success
 
-    def load_interfaces(self, directory):
+    def load_interfaces(self, file_name):
         for interface in self.project_reader.interface_list:
             # Find decoder
             decoder = self.decoder_factory.find_decoder(interface["tag"])
 
             # Decode and Show the interface
             try:
-                decoded_interface = decoder.decode(interface, directory)
+                decoded_interface = decoder.decode(interface, file_name)
                 decoded_interface.show()
             except Exception as e:
                 # Catch any exception and log it for the encoder
