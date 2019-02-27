@@ -205,7 +205,7 @@ std::size_t binIndexOfDeprecated(MatrixWorkspace &self, const double xValue,
 
 // Overloads for binIndexOfDeprecated function which has 1 optional argument
 BOOST_PYTHON_FUNCTION_OVERLOADS(binIndexOfDeprecatedOverloads,
-                                binIndexOfDeprecated, 1, 2)
+                                binIndexOfDeprecated, 2, 3)
 
 /**
  * This is an anonymous wrapper around the homonym method of MatrixWorkspace.
