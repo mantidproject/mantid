@@ -124,7 +124,7 @@ class UseCache(systemtesting.MantidSystemTest):
                                          Params=-.0002, CompressTolerance=0.01,
                                          PrimaryFlightPath=60, SpectrumIDs='1', L2='3.18', Polar='90', Azimuthal='0',
                                          ReductionProperties='__snspowderreduction_inner')
-            duration[name] = time_start - time.time()
+            duration[name] = time.time() - time_start
             NormaliseByCurrent(InputWorkspace=name, OutputWorkspace=name)
             ConvertUnits(InputWorkspace=name, OutputWorkspace=name, Target='dSpacing')
 
@@ -219,13 +219,14 @@ class AbsorptionCompare(systemtesting.MantidSystemTest):
         PDDetermineCharacterizations(InputWorkspace=self.wksp_mem, Characterizations='characterizations',
                                      ReductionProperties='__snspowderreduction_inner')
 
-        # calculate the absorption
+        # set-up the absorption calculation
         num_wl_bins = 200
+        prop_manager = PropertyManagerDataService.retrieve('__snspowderreduction_inner')
+        wl_min, wl_max = prop_manager['wavelength_min'].value, prop_manager['wavelength_max'].value  # 0.05, 2.20
         absorptionWS = WorkspaceFactory.create(mtd[self.wksp_mem],
                                                NVectors=mtd[self.wksp_mem].getNumberHistograms(), XLength=num_wl_bins+1,
                                                YLength=num_wl_bins)
-        # TODO get the range from the reduction properties
-        xaxis = np.arange(0., float(num_wl_bins + 1)) * (2.20 - 0.05) / (num_wl_bins) + 0.05
+        xaxis = np.arange(0., float(num_wl_bins + 1)) * (wl_max - wl_min) / (num_wl_bins) + wl_min
         for i in range(absorptionWS.getNumberHistograms()):
             absorptionWS.setX(i, xaxis)
         absorptionWS.getAxis(0).setUnit('Wavelength')
@@ -234,6 +235,7 @@ class AbsorptionCompare(systemtesting.MantidSystemTest):
                   Material={'ChemicalFormula': 'V', 'SampleNumberDensity': 0.0721},
                   Geometry={'Shape': 'Cylinder', 'Height': 6.97, 'Radius': (0.63 / 2), 'Center': [0., 0., 0.]})
         self.assertEqual(absorptionWS.getNumberBins(), num_wl_bins)
+        # calculate the absorption
         CylinderAbsorption(InputWorkspace='V_abs', OutputWorkspace='V_abs',
                            NumberOfSlices=20, NumberOfAnnuli=3)
 
