@@ -12,7 +12,7 @@ from __future__ import (absolute_import, unicode_literals)
 import sys
 
 from workbench.projectrecovery.recoverygui.projectrecoverywidgetview import ProjectRecoveryWidgetView
-from mantidqt.utils.qt.test import GuiTest
+from mantidqt.utils.qt.testing import GuiTest
 
 if sys.version_info.major >= 3:
     from unittest import mock
