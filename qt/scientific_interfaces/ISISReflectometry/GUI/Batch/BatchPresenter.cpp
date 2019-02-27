@@ -63,7 +63,7 @@ BatchPresenter::BatchPresenter(
   m_runsPresenter->acceptMainPresenter(this);
 
   observePostDelete();
-  observeAfterReplace();
+  observeRename();
   observeADSClear();
 }
 
