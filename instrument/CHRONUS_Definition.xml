@@ -21,7 +21,15 @@
     </reference-frame>
   </defaults>
 
-  
+  <!-- Muon default grouping files -->
+
+  <parameter name="Default grouping file - Transverse" type="string">
+    <value val="Grouping/CHRONUS_Detector_Grouping_TF.xml"/>
+  </parameter>
+  <parameter name="Default grouping file - Longitudinal" type="string">
+    <value val="Grouping/CHRONUS_Detector_Grouping_LF.xml"/>
+  </parameter>
+
   <!-- BRIEF DESCRIPTION OF CHRONUS INSTRUMENT: 
       First version provided by Stephen Cottrell / Francis Pratt
   -->

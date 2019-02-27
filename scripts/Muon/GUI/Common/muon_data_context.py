@@ -34,7 +34,7 @@ from Muon.GUI.Common.observer_pattern import Observable
 
 def get_default_grouping(workspace, instrument, main_field_direction):
     parameter_name = "Default grouping file"
-    if instrument == "MUSR":
+    if instrument == "MUSR" or instrument == 'CHRONUS':
         parameter_name += " - " + main_field_direction
     try:
         if isinstance(workspace, WorkspaceGroup):
@@ -183,7 +183,7 @@ class MuonDataContext(object):
     @current_runs.setter
     def current_runs(self, value):
         if not self.check_run_list_are_all_same_field(value):
-            self.message_notifier.notify_subscribers('MainFieldDirection changes within current run set')
+            self.message_notifier.notify_subscribers(self.create_multiple_field_directions_error_message(value))
         self._current_runs = value
 
     @property
@@ -428,9 +428,26 @@ class MuonDataContext(object):
         if not run_list:
             return True
 
-        first_field = self._loaded_data.get_data(run=run_list[0], instrument=self.instrument)['workspace']['MainFieldDirection']
-        return all(first_field==self._loaded_data.get_data(run=run, instrument=self.instrument)['workspace']['MainFieldDirection']
+        first_field = self._loaded_data.get_main_field_direction(run=run_list[0], instrument=self.instrument)
+        return all(first_field==self._loaded_data.get_main_field_direction(run=run, instrument=self.instrument)
                    for run in run_list)
+
+    def create_multiple_field_directions_error_message(self, run_list):
+        transverse = []
+        longitudinal = []
+        for run in run_list:
+            field_direction = self._loaded_data.get_main_field_direction(run=run, instrument=self.instrument)
+            if field_direction.lower() == 'transverse':
+                transverse += run
+            elif field_direction.lower() == 'longitudinal':
+                longitudinal += run
+            else:
+                return 'Unrecognised field direction {} for run {}'.format(field_direction, run)
+
+        message = 'MainFieldDirection changes within current run set:\n'
+        message += 'transverse field runs {}\n'.format(run_list_to_string(transverse))
+        message += 'longitudinal field runs {}\n'.format(run_list_to_string(longitudinal))
+        return message
 
     class InstrumentNotifier(Observable):
         def __init__(self, outer):

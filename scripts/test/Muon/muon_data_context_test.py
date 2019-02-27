@@ -98,7 +98,7 @@ class MuonDataContextTest(unittest.TestCase):
         self.context.current_runs = [[19489], [1]]
 
         self.context.message_notifier.notify_subscribers.assert_called_once_with(
-            'MainFieldDirection changes within current run set')
+            'MainFieldDirection changes within current run set:\ntransverse field runs 1\nlongitudinal field runs 19489\n')
 
 
 if __name__ == '__main__':
