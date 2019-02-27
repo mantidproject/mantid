@@ -16,9 +16,8 @@ import matplotlib
 from matplotlib._pylab_helpers import Gcf
 from matplotlib.backend_bases import FigureManagerBase, MouseEvent
 from matplotlib.backends.backend_qt5agg import (FigureCanvasQTAgg)  # noqa
-from qtpy.QtCore import QObject, Qt, QPoint
+from qtpy.QtCore import QObject, Qt
 from qtpy.QtWidgets import QApplication, QLabel
-from qtpy.QtGui import QContextMenuEvent
 from six import text_type
 
 # local imports
@@ -334,9 +333,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
 
         # If right-click then emit a QContextMenuEvent
         if isinstance(event, MouseEvent) and event.button == MouseButton.right_click:
-            q_event = QContextMenuEvent(QContextMenuEvent.Mouse, QPoint(event.x, event.y))
-            q_event.canvas = True
-            self.window.event(q_event)
+            self.window.show_context_menu.emit()
 
         if not event.dblclick:
             # shortcut
