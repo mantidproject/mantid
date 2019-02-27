@@ -23,7 +23,7 @@ parseRunNumbersOrWhitespace(std::string const &runNumberString) {
           boost::escaped_list_separator<char>("\\", ",+", "\"'"));
 
   for (auto const &runNumberCandidate : runNumberCandidates) {
-    auto maybeRunNumber = parseRunNumberOrWhitespace(runNumberCandidate);
+    auto const maybeRunNumber = parseRunNumberOrWhitespace(runNumberCandidate);
     if (maybeRunNumber.is_initialized()) {
       runNumbers.emplace_back(maybeRunNumber.get());
     } else {
