@@ -1,6 +1,7 @@
 set ( PY_FILES
   __init__.py
   enum.py
+  mock.py
 )
 
 

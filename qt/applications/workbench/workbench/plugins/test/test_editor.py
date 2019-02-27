@@ -10,13 +10,14 @@
 
 import os
 import unittest
+
 try:
     from unittest import mock
 except ImportError:
     import mock
 from qtpy.QtWidgets import QMainWindow
 
-from mantidqt.utils.qt.test import GuiTest
+from mantidqt.utils.qt.testing import GuiTest
 from workbench.plugins.editor import MultiFileEditor
 
 

@@ -13,7 +13,7 @@ from __future__ import (absolute_import)
 import unittest
 
 # third-party library imports
-from mantidqt.utils.qt.test import GuiTest
+from mantidqt.utils.qt.testing import GuiTest
 from qtpy.QtWidgets import QMainWindow
 
 # local package imports

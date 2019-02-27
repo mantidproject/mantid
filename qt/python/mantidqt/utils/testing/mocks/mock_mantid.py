@@ -7,7 +7,7 @@
 #  This file is part of the mantid workbench.
 from __future__ import (absolute_import, division, print_function)
 
-from mock import Mock
+from mantid.py3compat.mock import Mock
 
 AXIS_INDEX_FOR_HORIZONTAL = 0
 AXIS_INDEX_FOR_VERTICAL = 1
@@ -49,10 +49,10 @@ class MockSpectrumInfo:
 
 
 class MockSpectrum:
-    TEST_SPECTRUM_NO = 123123
+    SPECTRUM_NO = 123123
 
     def __init__(self):
-        self.getSpectrumNo = Mock(return_value=self.TEST_SPECTRUM_NO)
+        self.getSpectrumNo = Mock(return_value=self.SPECTRUM_NO)
 
 
 class MockWorkspace:

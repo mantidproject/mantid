@@ -10,7 +10,7 @@ from qtpy.QtCore import QPoint
 from qtpy.QtGui import QCursor, QContextMenuEvent
 
 from mantid.simpleapi import *
-from mantidqt.utils.qt.test.gui_window_test import *
+from mantidqt.utils.qt.testing.gui_window_test import *
 
 from mantidqt.plotting.functions import plot, pcolormesh
 from workbench.plotting.globalfiguremanager import GlobalFigureManager
