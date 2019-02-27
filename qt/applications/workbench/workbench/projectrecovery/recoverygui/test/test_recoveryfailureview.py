@@ -13,7 +13,7 @@ import sys
 from qtpy.QtWidgets import QTableWidgetItem
 
 from workbench.projectrecovery.recoverygui.recoveryfailureview import RecoveryFailureView
-from mantidqt.utils.qt.test import GuiTest
+from mantidqt.utils.qt.testing import GuiTest
 
 if sys.version_info.major >= 3:
     from unittest import mock
