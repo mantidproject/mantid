@@ -6,19 +6,10 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import os
 
-from mantid.kernel import ConfigService, ConfigPropertyObserver
-
+from mantid.kernel import ConfigService
 from sans.common.enums import SANSInstrument
-from sans.gui_logic.gui_common import GENERIC_SETTINGS, load_property, set_setting
-
-
-class OutputDirectoryObserver(ConfigPropertyObserver):
-    def __init__(self, callback):
-        super(OutputDirectoryObserver, self).__init__("defaultsave.directory")
-        self.callback = callback
-
-    def onPropertyValueChanged(self, new_value, old_value):
-        self.callback(new_value)
+from sans.gui_logic.gui_common import GENERIC_SETTINGS, load_property, SANSGuiPropertiesHandler, set_setting
+from sans.gui_logic.models.run_selection import has_any_event_data
 
 
 class AddRunsFilenameManager(object):
@@ -69,8 +60,6 @@ class AddRunsPagePresenter(object):
                  view,
                  parent_view):
 
-        self.__generic_settings = GENERIC_SETTINGS
-        self.__output_directory_key = "add_runs_output_directory"
         self._view = view
         self._parent_view = parent_view
         self._sum_runs = sum_runs
@@ -82,7 +71,11 @@ class AddRunsPagePresenter(object):
             make_run_summation_presenter(view.summation_settings_view(),
                                          view, ConfigService.Instance().getString("default.instrument"))
 
+        self.save_directory = ""
         self._connect_to_view(view)
+
+        self.gui_properties_handler = SANSGuiPropertiesHandler({"add_runs_output_directory": (self.set_output_directory,
+                                                                                            str)})
 
     def _get_filename_manager(self):
         # Separate call so AddRunsFilesnameManager can be mocked out.
@@ -96,9 +89,6 @@ class AddRunsPagePresenter(object):
         view.sum.connect(self._handle_sum)
         view.outFileChanged.connect(self._handle_out_file_changed)
         view.saveDirectoryClicked.connect(self._handle_output_directory_changed)
-
-        self.save_directory = self._get_default_output_directory()
-        self._view.set_out_file_directory(self.save_directory)
 
     def _make_base_file_name_from_selection(self, run_selection):
         filename_manager = self._get_filename_manager()
@@ -134,13 +124,15 @@ class AddRunsPagePresenter(object):
     def _handle_out_file_changed(self):
         self._use_generated_file_name = False
 
-    def _output_directory_is_not_empty(self, settings):
+    @staticmethod
+    def _output_directory_is_not_empty(settings):
         return settings.save_directory != ''
 
     def _handle_output_directory_changed(self):
         directory = self._view.display_save_directory_box("Save sum runs", self.save_directory)
-        self._update_output_directory(directory)
-        self._view.set_out_file_directory(self.save_directory)
+        directory = os.path.join(directory, '')  # Add an OS specific trailing slash if it doesn't already exist
+        self.gui_properties_handler.update_default("add_runs_output_directory", directory)
+        self.set_output_directory(directory)
 
     def _handle_sum(self):
         run_selection = self._run_selector_presenter.run_selection()
@@ -155,23 +147,8 @@ class AddRunsPagePresenter(object):
         else:
             self._view.no_save_directory()
 
-    def _get_default_output_directory(self):
-        directory = load_property(self.__generic_settings, self.__output_directory_key)
+    def set_output_directory(self, directory):
         if not directory:
-            return ConfigService.Instance().getString("defaultsave.directory")
-        else:
-            return directory
-
-    def _update_output_directory(self, directory):
-        """
-        Get the output directory. This method is called after a directory dialog box has been navigated.
-        If we do not pass in a directory e.g. directory dialog cancelled
-        then do nothing.
-        Otherwise update our settings
-        :param directory: a string - a directory path
-        :return: Nothing
-        """
-        if directory:
-            directory = os.path.join(directory, '')  # Add an OS specific trailing slash if it doesn't already exist
-            set_setting(self.__generic_settings, self.__output_directory_key, directory)
-            self.save_directory = directory
+            directory = ConfigService.Instance().getString("defaultsave.directory")
+        self.save_directory = directory
+        self._view.set_out_file_directory(directory)

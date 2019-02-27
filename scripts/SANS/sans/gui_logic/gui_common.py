@@ -125,7 +125,7 @@ def get_reduction_selection(instrument):
 
 def get_string_for_gui_from_reduction_mode(reduction_mode, instrument):
     reduction_selection = get_reduction_selection(instrument)
-    if reduction_selection and reduction_mode in list(reduction_selection.keys()):
+    if reduction_selection and reduction_mode in reduction_selection:
         return reduction_selection[reduction_mode]
     else:
         return None
@@ -134,7 +134,7 @@ def get_string_for_gui_from_reduction_mode(reduction_mode, instrument):
 def get_string_for_gui_from_instrument(instrument):
     instrument_selection = {SANSInstrument.SANS2D: 'SANS2D', SANSInstrument.LOQ: 'LOQ', SANSInstrument.LARMOR: 'LARMOR'
                             , SANSInstrument.ZOOM: 'ZOOM'}
-    if instrument in list(instrument_selection.keys()):
+    if instrument in instrument_selection:
         return instrument_selection[instrument]
     else:
         return None
@@ -244,3 +244,49 @@ def add_dir_to_datasearch(batch_file_path, current_directories):
 def remove_dir_from_datasearch(batch_file_path, directories):
     new_dirs = ";".join([path for path in directories.split(";") if path != batch_file_path])
     return new_dirs
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+# GUI Property Defaults
+# ----------------------------------------------------------------------------------------------------------------------
+class SANSGuiPropertiesHandler(object):
+    """
+    This class handles the setting and getting
+    of SANSDataProcessorGUI default properties.
+    """
+    def __init__(self, keys, line_edits=None, logger=None):
+        """
+        Initialise a properties handler for a particular pyqt view.
+        :param keys: A dict where keys are q_settings_key and values are a tuple of (update_function, type)
+                    where update function is method in the view to be called when loading a property and type
+                    is the data type of the property
+        :param line_edits: A dict where keys are the q_settings_key and values are a view's line edits to be updated
+        :param logger: optional Mantid logger for the view.
+        """
+        self.__generic_settings = GENERIC_SETTINGS
+
+        self.keys = keys
+        self.line_edits = line_edits
+        self.logger = logger
+
+        self._set_out_defaults()
+
+    def _set_out_defaults(self):
+        for property_key, (load_func, property_type) in self.keys.items():
+            args = []
+            if self.line_edits is not None and property_type == "line_edit":
+                load_default_file(self.line_edits[property_key], self.__generic_settings, property_key)
+            else:
+                try:
+                    property_value = load_property(self.__generic_settings, property_key)
+                    args.append(property_value)
+                except RuntimeError:
+                    pass
+            load_func(*args)
+
+    def update_default(self, gui_property, value):
+        if gui_property in self.keys:
+            set_setting(self.__generic_settings, gui_property, value)
+        elif self.logger:
+            self.logger.notice("Trying to set property {} for which a default property "
+                               "does not exist".format(gui_property))

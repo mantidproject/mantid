@@ -20,20 +20,19 @@ import time
 import traceback
 
 from mantid.api import (FileFinder)
-from mantid.kernel import Logger, ConfigService
+from mantid.kernel import Logger, ConfigService, ConfigPropertyObserver
 
 from sans.command_interface.batch_csv_file_parser import BatchCsvParser
 from sans.common.constants import ALL_PERIODS
 from sans.common.enums import (BatchReductionEntry, RangeStepType, SampleShape, FitType, RowState, SANSInstrument)
 from sans.gui_logic.gui_common import (get_reduction_mode_strings_for_gui, get_string_for_gui_from_instrument,
-                                       add_dir_to_datasearch, remove_dir_from_datasearch)
+                                       add_dir_to_datasearch, remove_dir_from_datasearch, SANSGuiPropertiesHandler)
 from sans.gui_logic.models.batch_process_runner import BatchProcessRunner
 from sans.gui_logic.models.beam_centre_model import BeamCentreModel
 from sans.gui_logic.models.create_state import create_states
 from sans.gui_logic.models.diagnostics_page_model import run_integral, create_state
 from sans.gui_logic.models.state_gui_model import StateGuiModel
 from sans.gui_logic.models.table_model import TableModel, TableIndexModel
-from sans.gui_logic.presenter.add_runs_presenter import OutputDirectoryObserver as SaveDirectoryObserver
 from sans.gui_logic.presenter.beam_centre_presenter import BeamCentrePresenter
 from sans.gui_logic.presenter.diagnostic_presenter import DiagnosticsPagePresenter
 from sans.gui_logic.presenter.masking_table_presenter import (MaskingTablePresenter)
@@ -77,6 +76,15 @@ def log_times(func):
         return result
 
     return run
+
+
+class SaveDirectoryObserver(ConfigPropertyObserver):
+    def __init__(self, callback):
+        super(SaveDirectoryObserver, self).__init__("defaultsave.directory")
+        self.callback = callback
+
+    def onPropertyValueChanged(self, new_value, old_value):
+        self.callback(new_value)
 
 
 class RunTabPresenter(object):
@@ -301,6 +309,12 @@ class RunTabPresenter(object):
             self._view.set_hinting_line_edit_for_column(
                 self._table_model.column_name_converter.index('options_column_model'),
                 self._table_model.get_options_hint_strategy())
+
+            self._view.gui_properties_handler = SANSGuiPropertiesHandler({"user_file": (self._view.set_out_default_user_file,
+                                                                                        "line_edit")},
+                                                                         line_edits={"user_file":
+                                                                                     self._view.user_file_line_edit},
+                                                                         logger=self._view.gui_logger)
 
     def on_user_file_load(self):
         """

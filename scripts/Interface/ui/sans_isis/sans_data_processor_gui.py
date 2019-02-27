@@ -583,8 +583,6 @@ class SANSDataProcessorGui(QMainWindow,
         """
         Load a default user file, called on view set-up
         """
-        load_default_file(self.user_file_line_edit, self.__generic_settings, self.__user_file_key)
-
         if self.get_user_file_path() != "":
             self._call_settings_listeners(lambda listener: listener.on_user_file_load())
 
