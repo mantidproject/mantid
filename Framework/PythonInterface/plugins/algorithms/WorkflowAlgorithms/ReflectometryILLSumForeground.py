@@ -13,7 +13,7 @@ from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, MatrixWorkspac
 from mantid.kernel import (CompositeValidator, Direction, FloatArrayBoundedValidator, FloatArrayProperty,
                            IntArrayBoundedValidator, IntArrayLengthValidator, IntArrayProperty, Property,
                            StringListValidator)
-from mantid.simpleapi import (AddSampleLog, CropWorkspace, Divide, ExtractSingleSpectrum, RebinToWorkspace,
+from mantid.simpleapi import (CropWorkspace, Divide, ExtractSingleSpectrum, RebinToWorkspace,
                               ReflectometryBeamStatistics, ReflectometrySumInQ)
 import numpy
 import ReflectometryILL_common as common
