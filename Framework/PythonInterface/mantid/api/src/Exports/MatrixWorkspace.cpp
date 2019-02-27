@@ -63,9 +63,6 @@ GNU_DIAG_OFF("conversion")
 // Overloads for yIndexOfX function which has 2 optional argument
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(MatrixWorkspace_yIndexOfXOverloads,
                                        MatrixWorkspace::yIndexOfX, 1, 3)
-// Overloads for binIndexOfDeprecated function which has 1 optional argument
-BOOST_PYTHON_FUNCTION_OVERLOADS(binIndexOfDeprecatedOverloads,
-                                binIndexOfDeprecated, 1, 2)
 GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("unused-local-typedef")
 
@@ -205,6 +202,10 @@ std::size_t binIndexOfDeprecated(MatrixWorkspace &self, const double xValue,
              "``binIndexOf`` is deprecated, use ``yIndexOfX`` instead.");
   return self.yIndexOfX(xValue, index);
 }
+
+// Overloads for binIndexOfDeprecated function which has 1 optional argument
+BOOST_PYTHON_FUNCTION_OVERLOADS(binIndexOfDeprecatedOverloads,
+                                binIndexOfDeprecated, 1, 2)
 
 /**
  * This is an anonymous wrapper around the homonym method of MatrixWorkspace.
