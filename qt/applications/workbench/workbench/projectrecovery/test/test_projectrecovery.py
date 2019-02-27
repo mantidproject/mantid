@@ -87,10 +87,8 @@ class ProjectRecoveryTest(unittest.TestCase):
         self.assertTrue(not os.path.exists(empty))
 
     def test_remove_empty_dir_throws_outside_of_workbench_directory(self):
-        path = os.path.join(self.working_directory, "test.txt")
-        open(path, 'a').close()
-
-        self.assertRaises(RuntimeError, self.pr._remove_empty_folders_from_dir(path))
+        os.mkdir(os.path.join(self.working_directory, "temp"))
+        self.assertRaises(RuntimeError, self.pr._remove_empty_folders_from_dir, self.working_directory)
 
     def test_remove_all_folders_from_dir_raises_outside_of_mantid_dir(self):
         self.assertRaises(RuntimeError, self.pr._remove_directory_and_directory_trees, self.working_directory)
