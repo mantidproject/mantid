@@ -88,6 +88,7 @@ Bugfixes
 - The :ref:`HallRoss <func-Hall-Ross>` fit function was updated to have :math:`\hbar` in its formula. The 
   :ref:`TeixeiraWater <func-TeixeiraWater>` and :ref:`ChudleyElliot <func-ChudleyElliot>` fit functions 
   now have a functionDeriv1D method.
+- A bug causing the output *_Results* workspace from a single fit to have an incorrect name has been fixed.
 
 
 Data Corrections Interface
@@ -119,6 +120,14 @@ Improvements
   are now disabled while a tab is running or plotting.
 - It is now possible to choose which spectrum to Plot Output for in the S(Q,w) Tab.
 
+Bugfixes
+########
+- A bug where the output reduced files had large file sizes depending on the size of the batch being reduced from 
+  the :ref:`ISISIndirectEnergyTransfer <algm-ISISIndirectEnergyTransfer>` algorithm on the ISISEnergyTransfer has been 
+  fixed. The :ref:`ISISIndirectEnergyTransferWrapper <algm-ISISIndirectEnergyTransferWrapper>` algorithm should be used instead
+  in order to avoid these large file sizes.
+- A bug where using a cropped calibration file (from a previous run) on the ISISEnergyTransfer interface would cause an 
+  error has been fixed.
 
 Bayes Interface
 ---------------
