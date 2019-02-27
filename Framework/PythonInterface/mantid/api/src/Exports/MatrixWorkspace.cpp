@@ -203,9 +203,13 @@ std::size_t binIndexOfDeprecated(MatrixWorkspace &self, const double xValue,
   return self.yIndexOfX(xValue, index);
 }
 
+// Ignore -Wconversion warnings coming from boost::python
+// Seen with GCC 7.1.1 and Boost 1.63.0
+GNU_DIAG_OFF("conversion")
 // Overloads for binIndexOfDeprecated function which has 1 optional argument
 BOOST_PYTHON_FUNCTION_OVERLOADS(binIndexOfDeprecatedOverloads,
                                 binIndexOfDeprecated, 2, 3)
+GNU_DIAG_ON("conversion")
 
 /**
  * This is an anonymous wrapper around the homonym method of MatrixWorkspace.
