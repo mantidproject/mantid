@@ -37,7 +37,7 @@ def lambda_tuple_unpacking(lam):
     return f_inner
 
 
-def run_list_to_string(run_list):
+def run_list_to_string(run_list, max_value = True):
     """
     Converts a list of runs into a formatted string using a delimiter/range separator
     :param run_list: list of integers
@@ -48,7 +48,7 @@ def run_list_to_string(run_list):
     run_list = _remove_duplicates_from_list(run_list)
     run_list = [i for i in run_list if i >= 0]
     run_list.sort()
-    if len(run_list) > max_run_list_size:
+    if max_value and len(run_list) > max_run_list_size:
         raise IndexError("Too many runs ({}) must be <{}".format(len(run_list), max_run_list_size))
 
     range_list = []
