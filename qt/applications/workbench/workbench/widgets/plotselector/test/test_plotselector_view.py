@@ -9,7 +9,7 @@
 #
 from __future__ import absolute_import, division, print_function
 
-from mantidqt.utils.qt.test import GuiTest
+from mantidqt.utils.qt.testing import GuiTest
 from qtpy.QtCore import Qt
 from qtpy.QtGui import QIcon
 from qtpy.QtTest import QTest

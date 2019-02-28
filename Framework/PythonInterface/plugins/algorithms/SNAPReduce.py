@@ -10,7 +10,7 @@ from mantid.kernel import Direction, FloatArrayProperty, IntArrayBoundedValidato
     IntArrayProperty, StringListValidator
 from mantid.api import AlgorithmFactory, DataProcessorAlgorithm, FileAction, FileProperty, \
     MultipleFileProperty, Progress, PropertyMode, WorkspaceProperty
-from mantid.simpleapi import AlignAndFocusPowder, CloneWorkspace, \
+from mantid.simpleapi import AlignAndFocusPowder, AlignAndFocusPowderFromFiles, CloneWorkspace, \
     ConvertUnits, CreateGroupingWorkspace, DeleteWorkspace, Divide, EditInstrumentGeometry, \
     GetIPTS, Load, LoadDiffCal, LoadEventNexus, LoadMask, LoadIsawDetCal, LoadNexusProcessed, \
     NormaliseByCurrent, PreprocessDetectorsToMD, Rebin, ReplaceSpecialValues, SaveAscii, \
@@ -149,7 +149,7 @@ class SNAPReduce(DataProcessorAlgorithm):
 
         nor_corr = ["None", "From Workspace",
                     "From Processed Nexus", "Extracted from Data"]
-        self.declareProperty("Normalization", "None", StringListValidator(nor_corr),
+        self.declareProperty("Normalization", nor_corr[0], StringListValidator(nor_corr),
                              "If needed what type of input to use as normalization, Extracted from "
                              + "Data uses a background determination that is peak independent.This "
                              + "implemantation can be tested in algorithm SNAP Peak Clipping Background")
@@ -172,15 +172,19 @@ class SNAPReduce(DataProcessorAlgorithm):
                              + "current IPTS with the same Instrumnet configuration")
 
         grouping = ["All", "Column", "Banks", "Modules", "2_4 Grouping"]
-        self.declareProperty("GroupDetectorsBy", "All", StringListValidator(grouping),
+        self.declareProperty("GroupDetectorsBy", grouping[0], StringListValidator(grouping),
                              "Detector groups to use for future focussing: "
                              + "All detectors as one group, Groups (East,West for "
                              + "SNAP), Columns for SNAP, detector banks")
 
         mode = ["Set-Up", "Production"]
-        self.declareProperty("ProcessingMode", "Production", StringListValidator(mode),
+        self.declareProperty("ProcessingMode", mode[1], StringListValidator(mode),
                              "Set-Up Mode is used for establishing correct parameters. Production "
                              + "Mode only Normalized workspace is kept for each run.")
+
+        final_units = ['dSpacing', 'MomentumTransfer', 'Wavelength']
+        self.declareProperty("FinalUnits", final_units[0], StringListValidator(final_units),
+                             "Units to convert the data to at the end of processing")
 
         self.declareProperty(name="OptionalPrefix", defaultValue="",
                              direction=Direction.Input,
@@ -196,6 +200,9 @@ class SNAPReduce(DataProcessorAlgorithm):
 
     def validateInputs(self):
         issues = dict()
+
+        if self.getProperty('LiveData').value:
+            issues['LiveData'] = 'Live data is not currently supported'
 
         # cross check masking
         masking = self.getProperty("Masking").value
@@ -351,6 +358,7 @@ class SNAPReduce(DataProcessorAlgorithm):
         in_Runs = self.getProperty("RunNumbers").value
         maskWSname = self._getMaskWSname()
         progress = Progress(self, 0., .25, 3)
+        finalUnits = self.getPropertyValue("FinalUnits")
 
         # default arguments for AlignAndFocusPowder
         alignAndFocusArgs = {'TMax': 50000,
@@ -403,8 +411,6 @@ class SNAPReduce(DataProcessorAlgorithm):
         # --------------------------- REDUCE DATA -----------------------------
 
         Tag = 'SNAP'
-        if self.getProperty("LiveData").value:
-            Tag = 'Live'
 
         progStart = .25
         progDelta = (1.-progStart)/len(in_Runs)
@@ -418,32 +424,40 @@ class SNAPReduce(DataProcessorAlgorithm):
                 new_Tag += '_' + prefix
             basename = '%s_%s_%s' % (new_Tag, runnumber, group)
 
-            if self.getProperty("LiveData").value:
-                raise RuntimeError('Live data is not currently supported')
-            else:
-                Load(Filename='SNAP' + str(runnumber), OutputWorkspace=basename + '_red', startProgress=progStart,
-                     endProgress=progStart + .25 * progDelta)
-                progStart += .25 * progDelta
-            redWS = basename + '_red'
-
-            # overwrite geometry with detcal files
-            if calib == 'DetCal File':
-                LoadIsawDetCal(InputWorkspace=redWS, Filename=detcalFile)
-
             # create unfocussed data if in set-up mode
             if Process_Mode == "Set-Up":
                 unfocussedWksp = '{}_{}_d'.format(new_Tag, runnumber)
             else:
                 unfocussedWksp = ''
 
-            AlignAndFocusPowder(InputWorkspace=redWS, OutputWorkspace=redWS,
-                                MaskWorkspace=maskWSname,  # can be empty string
-                                GroupingWorkspace=group,
-                                UnfocussedWorkspace=unfocussedWksp,  # can be empty string
-                                startProgress=progStart,
-                                endProgress=progStart + .5 * progDelta,
-                                **alignAndFocusArgs)
-            progStart += .5 * progDelta
+            redWS = basename + '_red'
+
+            if calib == 'DetCal File':
+                # have to load and override the instrument here
+                Load(Filename='SNAP' + str(runnumber), OutputWorkspace=redWS, startProgress=progStart,
+                     endProgress=progStart + .25 * progDelta)
+                progStart += .25 * progDelta
+
+                LoadIsawDetCal(InputWorkspace=redWS, Filename=detcalFile)
+
+                AlignAndFocusPowder(InputWorkspace=redWS, OutputWorkspace=redWS,
+                                    MaskWorkspace=maskWSname,  # can be empty string
+                                    GroupingWorkspace=group,
+                                    UnfocussedWorkspace=unfocussedWksp,  # can be empty string
+                                    startProgress=progStart,
+                                    endProgress=progStart + .5 * progDelta,
+                                    **alignAndFocusArgs)
+                progStart += .5 * progDelta
+            else:
+                # pass all of the work to the child algorithm
+                AlignAndFocusPowderFromFiles(Filename='SNAP' + str(runnumber), OutputWorkspace=redWS,
+                                             MaxChunkSize=16,  # GiB
+                                             MaskWorkspace=maskWSname,  # can be empty string
+                                             GroupingWorkspace=group,
+                                             UnfocussedWorkspace=unfocussedWksp,  # can be empty string
+                                             startProgress=progStart,
+                                             endProgress=progStart + .5 * progDelta,
+                                             **alignAndFocusArgs)
 
             # the rest takes up .25 percent of the run processing
             progress = Progress(self, progStart, progStart+.25*progDelta, 2)
@@ -501,9 +515,10 @@ class SNAPReduce(DataProcessorAlgorithm):
             self._save(saveDir, basename, outputWksp)
 
             # set workspace as an output so it gets history
+            ConvertUnits(InputWorkspace=str(outputWksp), OutputWorkspace=str(outputWksp), Target=finalUnits,
+                         EMode='Elastic')
             propertyName = 'OutputWorkspace_'+str(outputWksp)
-            self.declareProperty(WorkspaceProperty(
-                propertyName, outputWksp, Direction.Output))
+            self.declareProperty(WorkspaceProperty(propertyName, outputWksp, Direction.Output))
             self.setProperty(propertyName, outputWksp)
 
             # declare some things as extra outputs in set-up

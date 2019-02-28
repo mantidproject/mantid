@@ -68,7 +68,16 @@ Notes
    mode.
 #. A good guess on the limits can be obtained from the
    :ref:`algm-ConvertToMDMinMaxLocal` algorithm.
-   
+#. Switching the attribute `ConverterType = {Default, Indexed}` from `Default`
+   to `Indexed` increases performance especially for bigger files, but has some
+   restrictions:
+
+ a. `SplitInto` should be the power of two,e.g. 2, 4, 8, 16 etc.,
+
+ b. `FileBackEnd` and `TopLevelSplitting` are not applicable and
+    should be disabled.
+ c. Indexing adds the minor error to the events coordinate, to check it see log
+    at `Error with using Morton indexes is`.
 
 How to write custom ConvertToMD plugin
 --------------------------------------
@@ -120,7 +129,7 @@ Usage examples
 
 .. testoutput:: ExConvertToMDNoQ
 
-   Resulting MD workspace has 801 events and 3 dimensions
+   Resulting MD workspace has 802 events and 3 dimensions
    --------------------------------------------
 
 **Example - Convert Set of Event Workspaces (Horace scan) to 4D MD workspace, direct mode:**
@@ -277,6 +286,30 @@ This example produces 3-dimensional dataset, with a temperature axis.
    Target ws  WS_3D  not found in analysis data service
 
    Resulting MD workspace contains 605880 events and 3 dimensions
+
+**Example - Convert to Q-space, indexed version:**
+
+.. code-block:: python
+   :linenos:
+
+   #.. testcode:: ExConvertToMD|Q|
+
+   # load test workspace
+   TOPAZ_3132_event = Load(Filename=r'TOPAZ_3132_event.nxs', ConverterType='Indexed')
+
+   # build peak workspace necessary for IntegrateEllipsoids algorithm to work
+   TOPAZ_3132_md = ConvertToMD(InputWorkspace=TOPAZ_3132_event,QDimensions='Q3D',dEAnalysisMode='Elastic',Q3DFrames='Q_sample',LorentzCorrection='1',\
+   MinValues='-25,-25,-25',MaxValues='25,25,25',SplitInto='4',SplitThreshold='50',MaxRecursionDepth='13',MinRecursionDepth='7')
+
+   # produce some test output
+   print("Resulting MD workspace contains {0} events and {1} dimensions".format(TOPAZ_3132_md.getNEvents(),TOPAZ_3132_md.getNumDims()))
+
+**Output:**
+
+.. testoutput:: ExConvertToMD|Q|
+
+   Resulting MD workspace contains 15329354 events and 3 dimensions
+
 
 .. categories::
 

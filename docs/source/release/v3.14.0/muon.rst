@@ -14,6 +14,7 @@ Improvements
 - TF Asymmetry mode now displays the chi squared value at the top of the browser.
 - ALC interface now sorts the data into ascending order.
 - Muon Analysis now includes number of event per frame and number of events per frame per detector in the run info box on the home tab.
+- Frequency Domain Analysis now lets the user select the phase table in MaxEnt mode.
 
 Bugfixes
 ########
@@ -21,6 +22,7 @@ Bugfixes
 - When turning TF Asymmetry mode off it no longer resets the global options.
 - Results table will produce correct values for co-added runs.
 - The x limits on the settings tab will now correct themselves if bad values are entered. 
+- The `load current run` button now works for CHRONUS in muon analysis.
 
 Algorithms
 ----------

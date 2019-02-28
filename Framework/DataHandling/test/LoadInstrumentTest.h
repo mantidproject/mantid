@@ -850,7 +850,7 @@ public:
 
   void test_WISH() { doTest("WISH_Definition.xml", 1); }
 
-  void test_BASIS() { doTest("BASIS_Definition_0-20130119.xml", 5); }
+  void test_BASIS() { doTest("BASIS_Definition_0-2013.xml", 5); }
 
   void test_CNCS() { doTest("CNCS_Definition.xml", 5); }
 

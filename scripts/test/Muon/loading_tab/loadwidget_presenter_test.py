@@ -44,16 +44,16 @@ class LoadRunWidgetPresenterTest(unittest.TestCase):
         self.obj = QtGui.QWidget()
 
         self.data = MuonLoadData()
-        self.context = MuonDataContext()
+        self.context = MuonDataContext(self.data)
         self.context.instrument = 'EMU'
         self.load_file_view = BrowseFileWidgetView(self.obj)
         self.load_run_view = LoadRunWidgetView(self.obj)
         self.load_file_model = BrowseFileWidgetModel(self.data, self.context)
-        self.load_run_model = LoadRunWidgetModel(self.data)
+        self.load_run_model = LoadRunWidgetModel(self.data, self.context)
 
         self.presenter = LoadWidgetPresenter(
             LoadWidgetView(parent=self.obj, load_file_view=self.load_file_view, load_run_view=self.load_run_view),
-            LoadWidgetModel(self.data))
+            LoadWidgetModel(self.data, self.context))
         self.presenter.set_load_file_widget(BrowseFileWidgetPresenter(self.load_file_view, self.load_file_model))
         self.presenter.set_load_run_widget(LoadRunWidgetPresenter(self.load_run_view, self.load_run_model))
 

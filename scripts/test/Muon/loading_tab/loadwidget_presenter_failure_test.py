@@ -65,14 +65,14 @@ class LoadRunWidgetPresenterLoadFailTest(unittest.TestCase):
         self.load_run_mock = self.load_run_patcher.start()
 
         self.data = MuonLoadData()
-        self.context = MuonDataContext()
+        self.context = MuonDataContext(self.data)
         self.context.instrument = 'EMU'
         self.load_file_view = BrowseFileWidgetView(self.obj)
         self.load_run_view = LoadRunWidgetView(self.obj)
         self.load_file_model = BrowseFileWidgetModel(self.data, self.context)
-        self.load_run_model = LoadRunWidgetModel(self.data)
+        self.load_run_model = LoadRunWidgetModel(self.data, self.context)
 
-        self.model = LoadWidgetModel(self.data)
+        self.model = LoadWidgetModel(self.data, self.context)
         self.view = LoadWidgetView(parent=self.obj, load_run_view=self.load_run_view,
                                    load_file_view=self.load_file_view)
 
@@ -173,7 +173,7 @@ class LoadRunWidgetPresenterLoadFailTest(unittest.TestCase):
         self.assertEqual(self.presenter.load_run_widget._view.warning_popup.call_count, 1)
 
     def test_that_if_load_fails_from_user_run_entry_that_warning_is_displayed(self):
-        self.presenter.load_run_widget._view.run_edit.setText('1234')
+        self.presenter.load_run_widget._view.run_edit.setText('1239')
         self.presenter.load_run_widget.handle_run_changed_by_user()
         self.wait_for_thread(self.presenter.load_run_widget._load_thread)
 

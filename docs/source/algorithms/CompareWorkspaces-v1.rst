@@ -30,6 +30,8 @@ detected. The second and third columns are the names of the workspaces that
 were being compared when the mismatch message was issues. If all the input 
 workspaces matched, the message workspace will be empty.
 
+Please note that details about the comparisons will be only available when the log level is set to debug.
+
 
 Usage
 -----

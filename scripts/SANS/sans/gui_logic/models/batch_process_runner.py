@@ -4,7 +4,7 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-from PyQt4.QtCore import pyqtSlot, QThreadPool, pyqtSignal, QObject
+from qtpy.QtCore import Slot, QThreadPool, Signal, QObject
 from sans.sans_batch import SANSBatchReduction
 from sans.algorithm_detail.batch_execution import load_workspaces_from_states
 from ui.sans_isis.worker import Worker
@@ -12,8 +12,8 @@ from sans.common.enums import ISISReductionMode
 
 
 class BatchProcessRunner(QObject):
-    row_processed_signal = pyqtSignal(int, list, list)
-    row_failed_signal = pyqtSignal(int, str)
+    row_processed_signal = Signal(int, list, list)
+    row_failed_signal = Signal(int, str)
 
     def __init__(self, notify_progress, notify_done, notify_error):
         super(BatchProcessRunner, self).__init__()
@@ -23,13 +23,13 @@ class BatchProcessRunner(QObject):
         self.batch_processor = SANSBatchReduction()
         self._worker = None
 
-    @pyqtSlot()
+    @Slot()
     def on_finished(self):
         result = self._worker.result if self._worker else None
         self._worker = None
         self.notify_done(result)
 
-    @pyqtSlot()
+    @Slot()
     def on_error(self, error):
         self._worker = None
 

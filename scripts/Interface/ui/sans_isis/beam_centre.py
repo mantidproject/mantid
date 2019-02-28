@@ -7,13 +7,13 @@
 from __future__ import (absolute_import, division, print_function)
 
 from abc import ABCMeta, abstractmethod
-
-from PyQt4 import QtGui, QtCore
+from qtpy import QtGui, QtCore, QtWidgets
 from six import with_metaclass
-from . import ui_beam_centre
-from mantidqtpython import MantidQt
+
+from mantidqt.utils.qt import load_ui
+from mantidqt.widgets import messagedisplay
 from sans.gui_logic.gui_common import get_detector_from_gui_selection, \
-    get_detector_strings_for_gui, get_string_for_gui_from_reduction_mode
+     get_detector_strings_for_gui, get_string_for_gui_from_reduction_mode
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -21,8 +21,10 @@ except AttributeError:
     def _fromUtf8(s):
         return s
 
+Ui_BeamCentre, _ = load_ui(__file__, "beam_centre.ui")
 
-class BeamCentre(QtGui.QWidget, ui_beam_centre.Ui_BeamCentre):
+
+class BeamCentre(QtWidgets.QWidget, Ui_BeamCentre):
     class BeamCentreListener(with_metaclass(ABCMeta, object)):
         """
         Defines the elements which a presenter can listen to for the beam centre finder
@@ -52,7 +54,7 @@ class BeamCentre(QtGui.QWidget, ui_beam_centre.Ui_BeamCentre):
         self.Q_to.hide()
 
     def _setup_log_widget(self):
-        self.log_widget = MantidQt.MantidWidgets.MessageDisplay(self.groupBox_2)
+        self.log_widget = messagedisplay.MessageDisplay(self.groupBox_2)
         self.log_widget.setMinimumSize(QtCore.QSize(491, 371))
         self.log_widget.setObjectName(_fromUtf8("log_widget"))
         self.gridLayout.addWidget(self.log_widget, 0, 1, 4, 1)

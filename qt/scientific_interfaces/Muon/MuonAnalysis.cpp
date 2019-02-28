@@ -749,7 +749,7 @@ void MuonAnalysis::runLoadCurrent() {
 
   if (instname == "EMU" || instname == "HIFI" || instname == "MUSR" ||
       instname == "CHRONUS" || instname == "ARGUS") {
-    const QString instDirectory = instname == "CHRONUS" ? "NDW1030" : instname;
+    const QString instDirectory = instname;
     std::string autosavePointsTo = "";
     const std::string autosaveFile =
         "\\\\" + instDirectory.toStdString() + "\\data\\autosave.run";
