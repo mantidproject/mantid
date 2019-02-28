@@ -313,6 +313,13 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
                 FilterBadPulses(InputWorkspace=chunkname, OutputWorkspace=chunkname,
                                 LowerCutoff=self.filterBadPulses,
                                 startProgress=prog_start, endProgress=prog_start+prog_per_chunk_step)
+                if mtd[chunkname].getNumberEvents() == 0:
+                    msg = 'FilterBadPulses removed all events from '
+                    if len(chunks) == 1:
+                        raise RuntimeError(msg + filename)
+                    else:
+                        raise RuntimeError(msg + 'chunk {} of {} in {}'.format(j, len(chunks), filename))
+
             prog_start += prog_per_chunk_step
 
             # absorption correction workspace
