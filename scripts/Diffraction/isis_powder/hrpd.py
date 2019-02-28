@@ -6,6 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
+import os
+
 from isis_powder.abstract_inst import AbstractInst
 from isis_powder.routines import absorb_corrections, common, instrument_settings
 from isis_powder.hrpd_routines import hrpd_advanced_config, hrpd_algs, hrpd_param_mapping
@@ -59,6 +61,48 @@ class HRPD(AbstractInst):
     def mask_prompt_pulses_if_necessary(self, ws_list):
         for ws in ws_list:
             self._mask_prompt_pulses(ws)
+
+    def should_subtract_empty_inst(self):
+        return self._inst_settings.subtract_empty_inst
+
+    def create_solid_angle_corrections(self, vanadium, run_details):
+        """
+        Creates the solid angle corrections from a vanadium run, only applicable on HRPD otherwise return None
+        :param vanadium: The vanadium used to create this
+        :param run_details: the run details of to use
+        """
+        if not self._inst_settings.do_solid_angle:
+            return None
+        solid_angle = mantid.SolidAngle(InputWorkspace=vanadium)
+        scale = mantid.CreateSingleValuedWorkspace(DataValue='100')
+        correction = mantid.Multiply(LHSWorkspace=solid_angle, RHSWorkspace=scale)
+        eff = mantid.Divide(LHSWorkspace=vanadium, RHSWorkspace=correction)
+        eff = mantid.ConvertUnits(InputWorkspace=eff, Target='Wavelength')
+        eff = mantid.Integration(InputWorkspace=eff, RangeLower='1.3999999999999999', RangeUpper='3')
+        correction = mantid.Multiply(LHSWorkspace=correction, RHSWorkspace=eff)
+        scale = mantid.CreateSingleValuedWorkspace(DataValue='100000')
+        correction = mantid.Divide(LHSWorkspace=correction, RHSWorkspace=scale)
+        name = common.generate_splined_name(run_details.run_number,[])
+        path = run_details.van_paths
+        name = "sac"+name
+        mantid.SaveNexus(InputWorkspace=correction,Filename=os.path.join(path, name))
+        common.remove_intermediate_workspace(solid_angle)
+        common.remove_intermediate_workspace(scale)
+        common.remove_intermediate_workspace(eff)
+        common.remove_intermediate_workspace(correction)
+
+    def get_solid_angle_corrections(self, vanadium, run_details):
+        if not self._inst_settings.do_solid_angle:
+            return None
+        name = common.generate_splined_name(vanadium, [])
+        path = run_details.van_paths
+        name = "sac" + name
+        try:
+            solid_angle = mantid.Load(Filename=os.path.join(path,name))
+            return solid_angle
+        except ValueError:
+            raise RuntimeError("Could not find " + os.path.join(path, name)+" please run create_vanadium with "
+                                                                            "\"do_solid_angle_corrections=True\"")
 
     def _apply_absorb_corrections(self, run_details, ws_to_correct):
         if self._is_vanadium:
