@@ -27,6 +27,8 @@ def create_van(instrument, run_details, absorb):
                                                                input_batching=INPUT_BATCHING.Summed)
     input_van_ws = input_van_ws_list[0]  # As we asked for a summed ws there should only be one returned
 
+    instrument.create_solid_angle_corrections(input_van_ws, run_details)
+
     corrected_van_ws = common.subtract_summed_runs(ws_to_correct=input_van_ws,
                                                    empty_sample_ws_string=run_details.empty_runs,
                                                    instrument=instrument)
@@ -43,6 +45,9 @@ def create_van(instrument, run_details, absorb):
 
     aligned_ws = mantid.AlignDetectors(InputWorkspace=corrected_van_ws,
                                        CalibrationFile=run_details.offset_file_path)
+    solid_angle = instrument.get_solid_angle_corrections(run_details.run_number, run_details)
+    if solid_angle:
+        aligned_ws = mantid.Divide(LHSWorkspace=aligned_ws,RHSWorkspace=solid_angle)
     focused_vanadium = mantid.DiffractionFocussing(InputWorkspace=aligned_ws,
                                                    GroupingFileName=run_details.grouping_file_path)
 
