@@ -6,16 +6,15 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
-from mantid.simpleapi import (config, DeleteWorkspace, DirectILLApplySelfShielding, DirectILLCollectData, DirectILLDiagnostics,
-                              DirectILLIntegrateVanadium, DirectILLReduction, DirectILLSelfShielding, DirectILLTubeBackground,
-                              SetSample, Subtract)
+from mantid.simpleapi import (config, CropWorkspace, DeleteWorkspace, DirectILLApplySelfShielding, DirectILLCollectData,
+                              DirectILLDiagnostics, DirectILLIntegrateVanadium, DirectILLReduction, DirectILLSelfShielding,
+                              DirectILLTubeBackground, SetSample, Subtract)
 import systemtesting
 
 
 class IN4(systemtesting.MantidSystemTest):
-    # Sample in reference is not empty string but contains a single space: ' '.
-    disableChecking = ['Sample']
-    tolerance = 1e-5
+    tolerance = 1e-6
+    tolerance_rel_err = True
 
     def runTest(self):
         config['default.facility'] = 'ILL'
@@ -69,15 +68,21 @@ class IN4(systemtesting.MantidSystemTest):
             OutputWorkspace='SofQW',
             IntegratedVanadiumWorkspace='integrated',
             DiagnosticsWorkspace='diagnostics')
+        CropWorkspace(
+            InputWorkspace='SofQW',
+            OutputWorkspace='cropped',
+            XMin=1.,
+            XMax=2.75,
+            StartWorkspaceIndex=83,
+            EndWorkspaceIndex=222)
 
     def validate(self):
-        return ['SofQW', 'ILL_IN4_SofQW.nxs']
+        return ['cropped', 'ILL_IN4_SofQW.nxs']
 
 
 class IN5(systemtesting.MantidSystemTest):
-    # Sample in reference is not empty string but contains a single space: ' '.
-    disableChecking = ['Sample']
-    tolerance = 1e-5
+    tolerance = 1e-6
+    tolerance_rel_err = True
 
     def runTest(self):
         config['default.facility'] = 'ILL'
@@ -124,12 +129,22 @@ class IN5(systemtesting.MantidSystemTest):
             OutputWorkspace='SofQW',
             IntegratedVanadiumWorkspace='integrated',
             DiagnosticsWorkspace='diagnostics')
+        CropWorkspace(
+            InputWorkspace='SofQW',
+            OutputWorkspace='cropped',
+            XMin=0.5,
+            XMax=2.1,
+            StartWorkspaceIndex=375,
+            EndWorkspaceIndex=720)
 
     def validate(self):
-        return ['SofQW', 'ILL_IN5_SofQW.nxs']
+        return ['cropped', 'ILL_IN5_SofQW.nxs']
 
 
 class IN6(systemtesting.MantidSystemTest):
+    tolerance = 1e-6
+    tolerance_rel_err = True
+
     def runTest(self):
         config['default.facility'] = 'ILL'
         config['default.instrument'] = 'IN6'
@@ -156,6 +171,13 @@ class IN6(systemtesting.MantidSystemTest):
             IntegratedVanadiumWorkspace='integrated',
             EnergyRebinningParams='-100, 0.01, 4.',
             DiagnosticsWorkspace='diagnostics')
+        CropWorkspace(
+            InputWorkspace='SofQW',
+            OutputWorkspace='cropped',
+            XMin=0.7,
+            XMax=2.1,
+            StartWorkspaceIndex=9588,
+            EndWorkspaceIndex=10280)
 
     def validate(self):
-        return ['SofQW', 'ILL_IN6_SofQW.nxs']
+        return ['cropped', 'ILL_IN6_SofQW.nxs']
