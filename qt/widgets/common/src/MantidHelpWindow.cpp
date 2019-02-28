@@ -108,7 +108,8 @@ MantidHelpWindow::MantidHelpWindow(QWidget *parent, Qt::WindowFlags flags)
 
     // create a new help window
     g_helpWindow = new pqHelpWindow(helpEngine, parent, flags);
-    g_helpWindow->setWindowTitle(QString("MantidPlot - help"));
+    g_helpWindow->setWindowTitle(QString("Mantid - Help"));
+    g_helpWindow->setWindowIcon(QIcon(":/images/MantidIcon.ico"));
 
     // show the home page on startup
     auto registeredDocs = helpEngine->registeredDocumentations();

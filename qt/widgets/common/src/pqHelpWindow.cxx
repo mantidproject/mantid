@@ -335,11 +335,16 @@ void pqHelpWindow::showPage(const QString &url) {
 //-----------------------------------------------------------------------------
 void pqHelpWindow::showPage(const QUrl &url) {
   if (url.scheme() == "qthelp") {
-    if (this->m_helpEngine->findFile(url).isValid())
+    if (this->m_helpEngine->findFile(url).isValid()) {
       this->m_browser->setUrl(url);
-    else
+      if (m_browser->history()->count() > 0) {
+        m_backward->setEnabled(true);
+      }
+      m_forward->setEnabled(false);
+    } else {
       errorMissingPage(url);
-    this->updateNavButtons();
+    }
+    //this->updateNavButtons();
   } else {
     using MantidQt::API::MantidDesktopServices;
     MantidDesktopServices::openUrl(url);
