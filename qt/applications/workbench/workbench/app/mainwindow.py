@@ -217,14 +217,12 @@ class MainWindow(QMainWindow):
         self.workspacewidget.register_plugin()
         self.widgets.append(self.workspacewidget)
 
-        # Set up the project and recovery objects
-        self.interface_manager = InterfaceManager()
-
-        # Set up the project object
+        # Set up the project, recovery and interface manager objects
         self.project = Project(GlobalFigureManager, find_all_windows_that_are_savable)
         self.project_recovery = ProjectRecovery(globalfiguremanager=GlobalFigureManager,
                                                 multifileinterpreter=self.editor.editors,
                                                 main_window=self)
+        self.interface_manager = InterfaceManager()
 
         # uses default configuration as necessary
         self.readSettings(CONF)

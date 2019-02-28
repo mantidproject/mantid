@@ -84,8 +84,8 @@ public:
 public slots:
   /// Requests showing of a particular page. The url must begin with "qthelp:"
   /// scheme when referring to pages from the help files.
-  virtual void showPage(const QString &url);
-  virtual void showPage(const QUrl &url);
+  virtual void showPage(const QString &url, bool linkClicked = false);
+  virtual void showPage(const QUrl &url, bool linkClicked = false);
   /// Show a page linked to by another page in the help window
   virtual void showLinkedPage(const QUrl &url);
 

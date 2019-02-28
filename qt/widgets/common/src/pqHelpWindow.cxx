@@ -42,8 +42,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QNetworkProxy>
 #include <QNetworkReply>
 #include <QPointer>
-#include <QPrinter>
 #include <QPrintDialog>
+#include <QPrinter>
 #include <QPushButton>
 #include <QTextBrowser>
 #include <QTextStream>
@@ -241,9 +241,6 @@ pqHelpWindow::pqHelpWindow(QHelpEngine *engine, QWidget *parentObject,
 
   this->setTabPosition(Qt::AllDockWidgetAreas, QTabWidget::North);
 
-  // hide empty contents dock
-  ui.contentsDock->hide();
-
   // create index and search dock tabs
   this->tabifyDockWidget(ui.indexDock, ui.searchDock);
   ui.indexDock->setWidget(this->m_helpEngine->indexWidget());
@@ -328,23 +325,26 @@ void pqHelpWindow::errorMissingPage(const QUrl &url) {
 }
 
 //-----------------------------------------------------------------------------
-void pqHelpWindow::showPage(const QString &url) {
-  this->showPage(QUrl::fromUserInput(url));
+void pqHelpWindow::showPage(const QString &url, bool linkClicked) {
+  this->showPage(QUrl::fromUserInput(url), linkClicked);
 }
 
 //-----------------------------------------------------------------------------
-void pqHelpWindow::showPage(const QUrl &url) {
+void pqHelpWindow::showPage(const QUrl &url, bool linkClicked) {
   if (url.scheme() == "qthelp") {
     if (this->m_helpEngine->findFile(url).isValid()) {
-      this->m_browser->setUrl(url);
-      if (m_browser->history()->count() > 0) {
+      if (linkClicked) {
         m_backward->setEnabled(true);
+      } else {
+        this->m_browser->setUrl(url);
+        if (m_browser->history()->count() > 0) {
+          m_backward->setEnabled(true);
+        }
       }
       m_forward->setEnabled(false);
     } else {
       errorMissingPage(url);
     }
-    //this->updateNavButtons();
   } else {
     using MantidQt::API::MantidDesktopServices;
     MantidDesktopServices::openUrl(url);
@@ -353,17 +353,7 @@ void pqHelpWindow::showPage(const QUrl &url) {
 
 //-----------------------------------------------------------------------------
 void pqHelpWindow::showLinkedPage(const QUrl &url) {
-  if (url.scheme() == "qthelp") {
-    if (this->m_helpEngine->findFile(url).isValid()) {
-      m_backward->setEnabled(true);
-      m_forward->setEnabled(false);
-    } else {
-      errorMissingPage(url);
-    }
-  } else {
-    using MantidQt::API::MantidDesktopServices;
-    MantidDesktopServices::openUrl(url);
-  }
+  this->showPage(url, true);
 }
 
 //-----------------------------------------------------------------------------
