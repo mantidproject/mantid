@@ -13,8 +13,7 @@
 #include "IRunsTableView.h"
 #include "JobsViewUpdater.h"
 #include "MantidQtWidgets/Common/Batch/IJobTreeView.h"
-#include "Reduction/Group.h"
-#include "Reduction/ReductionJobs.h"
+#include "Reduction/RunsTable.h"
 #include <memory>
 
 namespace MantidQt {
@@ -32,7 +31,8 @@ public:
 
   // IRunsTablePresenter overrides
   void acceptMainPresenter(IRunsPresenter *mainPresenter) override;
-  ReductionJobs const &reductionJobs() const override;
+  RunsTable const &runsTable() const override;
+  RunsTable &mutableRunsTable() override;
   void mergeAdditionalJobs(ReductionJobs const &jobs) override;
   void instrumentChanged(std::string const &instrumentName) override;
   void settingsChanged() override;
@@ -57,6 +57,7 @@ public:
   void notifyCellTextChanged(
       MantidQt::MantidWidgets::Batch::RowLocation const &itemIndex, int column,
       std::string const &oldValue, std::string const &newValue) override;
+  void notifySelectionChanged() override;
   void notifyRowInserted(MantidQt::MantidWidgets::Batch::RowLocation const
                              &newRowLocation) override;
   void notifyRemoveRowsRequested(
@@ -66,6 +67,7 @@ public:
   void notifyCopyRowsRequested() override;
   void notifyPasteRowsRequested() override;
   void notifyFilterReset() override;
+  void notifyRowStateChanged() override;
 
 private:
   void
@@ -98,6 +100,7 @@ private:
   void appendEmptyGroupInView();
   void insertEmptyGroupInModel(int beforeGroup);
   void insertEmptyGroupInView(int beforeGroup);
+  void ensureAtLeastOneGroupExists();
   void insertEmptyRowInModel(int groupIndex, int beforeRow);
   std::vector<std::string>
   cellTextFromViewAt(MantidWidgets::Batch::RowLocation const &location) const;
@@ -112,16 +115,26 @@ private:
   updateRowField(MantidQt::MantidWidgets::Batch::RowLocation const &itemIndex,
                  int column, std::string const &oldValue,
                  std::string const &newValue);
-  void updateWidgetEnabledState(bool isProcessing);
+  void updateWidgetEnabledState();
+
+  using UpdateCellFunc = void (*)(MantidWidgets::Batch::Cell &cell);
+  using UpdateCellWithTooltipFunc = void (*)(MantidWidgets::Batch::Cell &cell,
+                                             std::string const &tooltip);
+  void forAllCellsAt(MantidWidgets::Batch::RowLocation const &location,
+                     UpdateCellFunc updateFunc);
+  void forAllCellsAt(MantidWidgets::Batch::RowLocation const &location,
+                     UpdateCellWithTooltipFunc updateFunc,
+                     std::string const &tooltip);
+
+  bool isProcessing() const;
+  bool isAutoreducing() const;
 
   static auto constexpr DEPTH_LIMIT = 2;
 
   IRunsTableView *m_view;
-  std::vector<std::string> m_instruments;
+  RunsTable m_model;
   boost::optional<std::vector<MantidQt::MantidWidgets::Batch::Subtree>>
       m_clipboard;
-  ReductionJobs m_model;
-  double m_thetaTolerance;
   JobsViewUpdater m_jobViewUpdater;
   IRunsPresenter *m_mainPresenter;
 };

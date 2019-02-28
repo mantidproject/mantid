@@ -23,10 +23,26 @@ floodCorrectionTypeFromString(std::string const &correctionType) {
     throw std::runtime_error("Unexpected flood correction type.");
 }
 
+inline std::string
+FloodCorrectionTypeToString(FloodCorrectionType correctionType) {
+  switch (correctionType) {
+  case FloodCorrectionType::Workspace:
+    return "Workspace";
+  case FloodCorrectionType::ParameterFile:
+    return "ParameterFile";
+  }
+  throw std::runtime_error("Unexpected flood correction type.");
+}
+
 inline bool floodCorrectionRequiresInputs(FloodCorrectionType correctionType) {
   return (correctionType == FloodCorrectionType::Workspace);
 }
 
+/** @class FloodCorrections
+
+    The FloodCorrections model holds information about what type of flood
+    corrections should be performed in the reduction
+ */
 class MANTIDQT_ISISREFLECTOMETRY_DLL FloodCorrections {
 public:
   FloodCorrections(FloodCorrectionType correctionType,

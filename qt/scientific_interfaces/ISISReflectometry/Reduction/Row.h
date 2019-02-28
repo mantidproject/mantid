@@ -8,6 +8,7 @@
 #ifndef MANTID_CUSTOMINTERFACES_RUN_H_
 #define MANTID_CUSTOMINTERFACES_RUN_H_
 #include "Common/DllConfig.h"
+#include "Item.h"
 #include "RangeInQ.h"
 #include "ReductionOptionsMap.h"
 #include "ReductionWorkspaces.h"
@@ -20,30 +21,46 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
+/** @class Row
+
+  The Row model represents a single row in the runs table
+*/
 // Immutability here makes update notification easier.
-class MANTIDQT_ISISREFLECTOMETRY_DLL Row {
+class MANTIDQT_ISISREFLECTOMETRY_DLL Row : public Item {
 public:
   Row(std::vector<std::string> number, double theta,
-      std::pair<std::string, std::string> tranmissionRuns, RangeInQ qRange,
+      TransmissionRunPair tranmissionRuns, RangeInQ qRange,
       boost::optional<double> scaleFactor, ReductionOptionsMap reductionOptions,
       ReductionWorkspaces reducedWorkspaceNames);
 
+  bool isGroup() const override;
   std::vector<std::string> const &runNumbers() const;
-  std::pair<std::string, std::string> const &transmissionWorkspaceNames() const;
+  TransmissionRunPair const &transmissionWorkspaceNames() const;
   double theta() const;
   RangeInQ const &qRange() const;
   boost::optional<double> scaleFactor() const;
   ReductionOptionsMap const &reductionOptions() const;
   ReductionWorkspaces const &reducedWorkspaceNames() const;
 
+  void setOutputNames(std::vector<std::string> const &outputNames) override;
+
   Row withExtraRunNumbers(std::vector<std::string> const &runNumbers) const;
+
+  void algorithmStarted() override;
+  void algorithmComplete(
+      std::vector<std::string> const &outputWorkspaceNames) override;
+  void algorithmError(std::string const &msg) override;
+
+  bool hasOutputWorkspace(std::string const &wsName) const;
+  void renameOutputWorkspace(std::string const &oldName,
+                             std::string const &newName) override;
 
 private:
   std::vector<std::string> m_runNumbers;
   double m_theta;
   RangeInQ m_qRange;
   boost::optional<double> m_scaleFactor;
-  std::pair<std::string, std::string> m_transmissionRuns;
+  TransmissionRunPair m_transmissionRuns;
   ReductionWorkspaces m_reducedWorkspaceNames;
   ReductionOptionsMap m_reductionOptions;
 };

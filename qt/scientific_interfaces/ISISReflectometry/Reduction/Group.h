@@ -8,6 +8,7 @@
 #ifndef MANTID_CUSTOMINTERFACES_GROUP_H_
 #define MANTID_CUSTOMINTERFACES_GROUP_H_
 #include "Common/DllConfig.h"
+#include "Item.h"
 #include "Row.h"
 #include <boost/optional.hpp>
 #include <string>
@@ -16,14 +17,22 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class MANTIDQT_ISISREFLECTOMETRY_DLL Group {
+/** @class Group
+
+    The Group model holds information about a group of rows in the runs table.
+ */
+class MANTIDQT_ISISREFLECTOMETRY_DLL Group : public Item {
 public:
   explicit Group(std::string name);
   Group(std::string name, std::vector<boost::optional<Row>> rows);
 
+  bool isGroup() const override;
   std::string const &name() const;
   void setName(std::string const &name);
+  bool hasPostprocessing() const;
+  bool requiresProcessing(bool reprocessFailed) const override;
   std::string postprocessedWorkspaceName() const;
+  void setOutputNames(std::vector<std::string> const &outputNames) override;
 
   void appendEmptyRow();
   void appendRow(boost::optional<Row> const &row);
@@ -32,14 +41,23 @@ public:
   void updateRow(int rowIndex, boost::optional<Row> const &row);
   bool allRowsAreValid() const;
 
+  void resetState() override;
+  void renameOutputWorkspace(std::string const &oldName,
+                             std::string const &newName) override;
+
   boost::optional<int> indexOfRowWithTheta(double angle,
                                            double tolerance) const;
 
   boost::optional<Row> const &operator[](int rowIndex) const;
   std::vector<boost::optional<Row>> const &rows() const;
+  std::vector<boost::optional<Row>> &mutableRows();
+
+  boost::optional<Item &>
+  getItemWithOutputWorkspaceOrNone(std::string const &wsName);
 
 private:
   std::string m_name;
+  std::string m_postprocessedWorkspaceName;
   std::vector<boost::optional<Row>> m_rows;
 };
 

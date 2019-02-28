@@ -10,6 +10,9 @@
 #include <boost/optional.hpp>
 namespace MantidQt {
 namespace CustomInterfaces {
+/** The ReductionType determines what type of reduction is to be performed
+ * by the reduction algorithm
+ */
 enum class ReductionType { DivergentBeam, NonFlatSample, Normal };
 
 inline ReductionType reductionTypeFromString(std::string const &reductionType) {
@@ -21,6 +24,18 @@ inline ReductionType reductionTypeFromString(std::string const &reductionType) {
     return ReductionType::NonFlatSample;
   else
     throw std::runtime_error("Unexpected reduction type.");
+}
+
+inline std::string reductionTypeToString(ReductionType reductionType) {
+  switch (reductionType) {
+  case ReductionType::DivergentBeam:
+    return "DivergentBeam";
+  case ReductionType::NonFlatSample:
+    return "NonFlatSample";
+  case ReductionType::Normal:
+    return "Normal";
+  }
+  throw std::runtime_error("Unexpected reduction type");
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt

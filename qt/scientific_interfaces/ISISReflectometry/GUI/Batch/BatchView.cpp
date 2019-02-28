@@ -9,14 +9,26 @@
 #include "GUI/Runs/RunsView.h"
 #include "GUI/Save/SaveView.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/IAlgorithm.h"
 #include "MantidKernel/make_unique.h"
+#include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 
 #include <QMessageBox>
+#include <QMetaType>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
-BatchView::BatchView(QWidget *parent) : QWidget(parent) { initLayout(); }
+using API::BatchAlgorithmRunner;
+using Mantid::API::IAlgorithm_sptr;
+
+BatchView::BatchView(QWidget *parent)
+    : QWidget(parent), m_batchAlgoRunner(this) {
+  qRegisterMetaType<API::IConfiguredAlgorithm_sptr>(
+      "MantidQt::API::IConfiguredAlgorithm_sptr");
+  initLayout();
+  m_batchAlgoRunner.stopOnFailure(false);
+}
 
 void BatchView::subscribe(BatchViewSubscriber *notifyee) {
   m_notifyee = notifyee;
@@ -53,6 +65,56 @@ IEventView *BatchView::eventHandling() const { return m_eventHandling.get(); }
 
 ISaveView *BatchView::save() const { return m_save.get(); }
 
+void BatchView::clearAlgorithmQueue() { m_batchAlgoRunner.clearQueue(); }
+
+void BatchView::setAlgorithmQueue(
+    std::deque<API::IConfiguredAlgorithm_sptr> algorithms) {
+  m_batchAlgoRunner.setQueue(algorithms);
+}
+
+void BatchView::executeAlgorithmQueue() {
+  connect(&m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+          SLOT(onBatchComplete(bool)));
+  connect(&m_batchAlgoRunner, SIGNAL(batchCancelled()), this,
+          SLOT(onBatchCancelled()));
+  connect(&m_batchAlgoRunner,
+          SIGNAL(algorithmStarted(MantidQt::API::IConfiguredAlgorithm_sptr)),
+          this,
+          SLOT(onAlgorithmStarted(MantidQt::API::IConfiguredAlgorithm_sptr)));
+  connect(&m_batchAlgoRunner,
+          SIGNAL(algorithmComplete(MantidQt::API::IConfiguredAlgorithm_sptr)),
+          this,
+          SLOT(onAlgorithmComplete(MantidQt::API::IConfiguredAlgorithm_sptr)));
+  connect(&m_batchAlgoRunner,
+          SIGNAL(algorithmError(MantidQt::API::IConfiguredAlgorithm_sptr,
+                                std::string)),
+          this,
+          SLOT(onAlgorithmError(MantidQt::API::IConfiguredAlgorithm_sptr,
+                                std::string)));
+  m_batchAlgoRunner.executeBatchAsync();
+}
+
+void BatchView::cancelAlgorithmQueue() { m_batchAlgoRunner.cancelBatch(); }
+
+void BatchView::onBatchComplete(bool error) {
+  m_notifyee->notifyBatchComplete(error);
+}
+
+void BatchView::onBatchCancelled() { m_notifyee->notifyBatchCancelled(); }
+
+void BatchView::onAlgorithmStarted(API::IConfiguredAlgorithm_sptr algorithm) {
+  m_notifyee->notifyAlgorithmStarted(algorithm);
+}
+
+void BatchView::onAlgorithmComplete(API::IConfiguredAlgorithm_sptr algorithm) {
+  m_notifyee->notifyAlgorithmComplete(algorithm);
+}
+
+void BatchView::onAlgorithmError(API::IConfiguredAlgorithm_sptr algorithm,
+                                 std::string message) {
+  m_notifyee->notifyAlgorithmError(algorithm, message);
+}
+
 std::unique_ptr<RunsView> BatchView::createRunsTab() {
   auto instruments = std::vector<std::string>(
       {{"INTER", "SURF", "CRISP", "POLREF", "OFFSPEC"}});
@@ -64,7 +126,7 @@ std::unique_ptr<EventView> BatchView::createEventTab() {
   return Mantid::Kernel::make_unique<EventView>(this);
 }
 
-Mantid::API::IAlgorithm_sptr BatchView::createReductionAlg() {
+IAlgorithm_sptr BatchView::createReductionAlg() {
   return Mantid::API::AlgorithmManager::Instance().create(
       "ReflectometryReductionOneAuto");
 }

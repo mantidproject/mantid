@@ -35,6 +35,7 @@ public:
   MOCK_METHOD4(notifyCellTextChanged,
                void(MantidQt::MantidWidgets::Batch::RowLocation const &, int,
                     std::string const &, std::string const &));
+  MOCK_METHOD0(notifySelectionChanged, void());
   MOCK_METHOD1(notifyRowInserted,
                void(MantidQt::MantidWidgets::Batch::RowLocation const &));
   MOCK_METHOD1(
@@ -47,6 +48,7 @@ public:
 
   MOCK_METHOD1(mergeAdditionalJobs, void(ReductionJobs const &));
   MOCK_CONST_METHOD0(reductionJobs, ReductionJobs const &());
+  MOCK_METHOD0(reductionJobs, ReductionJobs &());
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

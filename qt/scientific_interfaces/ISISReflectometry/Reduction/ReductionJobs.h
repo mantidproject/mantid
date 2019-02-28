@@ -8,6 +8,7 @@
 #ifndef MANTID_CUSTOMINTERFACES_REDUCTIONJOBS_H_
 #define MANTID_CUSTOMINTERFACES_REDUCTIONJOBS_H_
 #include "Common/DllConfig.h"
+#include "MantidQtWidgets/Common/Batch/RowLocation.h"
 #include <boost/optional.hpp>
 
 #include "Group.h"
@@ -15,6 +16,11 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
+/** @class ReductionJobs
+
+    The ReductionJobs model holds information about all jobs to be performed as
+    part of a batch reduction.
+ */
 class MANTIDQT_ISISREFLECTOMETRY_DLL ReductionJobs {
 public:
   ReductionJobs();
@@ -25,11 +31,18 @@ public:
   boost::optional<int> indexOfGroupWithName(std::string const &groupName);
   void removeGroup(int index);
   void removeAllGroups();
+  void resetState();
 
-  std::vector<Group> &groups();
+  std::vector<Group> &mutableGroups();
   std::vector<Group> const &groups() const;
   Group const &operator[](int index) const;
   std::string nextEmptyGroupName();
+
+  MantidWidgets::Batch::RowPath getPath(Group const &group) const;
+  MantidWidgets::Batch::RowPath getPath(Row const &row) const;
+  Group const &getParentGroup(Row const &row) const;
+  boost::optional<Item &>
+  getItemWithOutputWorkspaceOrNone(std::string const &wsName);
 
 private:
   std::vector<Group> m_groups;
@@ -62,7 +75,7 @@ void mergeJobsInto(ReductionJobs &intoHere, ReductionJobs const &fromHere,
     auto maybeGroupIndex = intoHere.indexOfGroupWithName(group.name());
     if (maybeGroupIndex.is_initialized()) {
       auto indexToUpdateAt = maybeGroupIndex.get();
-      auto &intoGroup = intoHere.groups()[indexToUpdateAt];
+      auto &intoGroup = intoHere.mutableGroups()[indexToUpdateAt];
       mergeRowsInto(intoGroup, group, indexToUpdateAt, thetaTolerance,
                     listener);
     } else {

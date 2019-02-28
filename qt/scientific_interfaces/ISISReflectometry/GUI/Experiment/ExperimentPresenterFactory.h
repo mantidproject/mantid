@@ -30,14 +30,14 @@ private:
   double m_thetaTolerance;
 
   Experiment makeModel() {
-    // TODO get defaults from algorithm
+    // TODO inject model instead of creating it here
     auto polarizationCorrections =
         PolarizationCorrections(PolarizationCorrectionType::None);
     auto floodCorrections(FloodCorrectionType::Workspace);
     auto stitchParameters = std::map<std::string, std::string>();
     auto perThetaDefaults = std::vector<PerThetaDefaults>(
-        {PerThetaDefaults(boost::none, std::pair<std::string, std::string>(),
-                          RangeInQ(), boost::none, ProcessingInstructions())});
+        {PerThetaDefaults(boost::none, TransmissionRunPair(), RangeInQ(),
+                          boost::none, ProcessingInstructions())});
     return Experiment(AnalysisMode::PointDetector, ReductionType::Normal,
                       SummationType::SumInLambda, false, false,
                       std::move(polarizationCorrections),

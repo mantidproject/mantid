@@ -1,13 +1,18 @@
 set ( REDUCTION_SRC_FILES
     Group.cpp
+    Item.cpp
+    ItemState.cpp
     RangeInQ.cpp
     ReductionWorkspaces.cpp
     Row.cpp
+    RowLocation.cpp
     ReductionJobs.cpp
     ValidateRow.cpp
     Slicing.cpp
     ParseReflectometryStrings.cpp
+    TransmissionRunPair.cpp
 
+    Batch.cpp
     DetectorCorrections.cpp
     Experiment.cpp
     FloodCorrections.cpp
@@ -15,6 +20,7 @@ set ( REDUCTION_SRC_FILES
     MonitorCorrections.cpp
     PolarizationCorrections.cpp
     RangeInLambda.cpp
+    RunsTable.cpp
     PerThetaDefaults.cpp
     ValidatePerThetaDefaults.cpp
 )
@@ -23,17 +29,22 @@ set ( REDUCTION_SRC_FILES
 # IMPORTANT: Include files are required in the MOC_FILES set. Scroll down to find it.
 set ( REDUCTION_INC_FILES
     Group.h
+    Item.h
+    ItemState.h
     RangeInQ.h
     ReductionJobs.h
     ReductionWorkspaces.h
     Row.h
+    RowLocation.h
     Slicing.h
     ValidateRow.h
     ParseReflectometryStrings.h
     ProcessingInstructions.h
+    TransmissionRunPair.h
     ValidatePerThetaDefaults.h
 
     AnalysisMode.h
+    Batch.h
     DetectorCorrections.h
     Experiment.h
     FloodCorrections.h
@@ -42,6 +53,7 @@ set ( REDUCTION_INC_FILES
     PolarizationCorrections.h
     RangeInLambda.h
     ReductionType.h
+    RunsTable.h
     PerThetaDefaults.h
     SummationType.h
 )

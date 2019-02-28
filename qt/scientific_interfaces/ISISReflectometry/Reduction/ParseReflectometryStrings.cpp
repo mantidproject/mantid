@@ -13,6 +13,28 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
+namespace { // unnamed
+boost::optional<std::vector<std::string>>
+parseRunNumbersOrWhitespace(std::string const &runNumberString) {
+  auto runNumbers = std::vector<std::string>();
+  auto runNumberCandidates =
+      boost::tokenizer<boost::escaped_list_separator<char>>(
+          runNumberString,
+          boost::escaped_list_separator<char>("\\", ",+", "\"'"));
+
+  for (auto const &runNumberCandidate : runNumberCandidates) {
+    auto const maybeRunNumber = parseRunNumberOrWhitespace(runNumberCandidate);
+    if (maybeRunNumber.is_initialized()) {
+      runNumbers.emplace_back(maybeRunNumber.get());
+    } else {
+      return boost::none;
+    }
+  }
+
+  return runNumbers;
+}
+} // unnamed namespace
+
 boost::optional<std::string>
 parseRunNumber(std::string const &runNumberString) {
   auto asInt = parseNonNegativeInt(std::move(runNumberString));
@@ -145,12 +167,12 @@ parseRunNumbers(std::string const &runNumberString) {
     return runNumbers;
 }
 
-boost::variant<std::pair<std::string, std::string>, std::vector<int>>
+boost::variant<TransmissionRunPair, std::vector<int>>
 parseTransmissionRuns(std::string const &firstTransmissionRun,
                       std::string const &secondTransmissionRun) {
   auto errorColumns = std::vector<int>();
-  auto first = parseRunNumberOrWhitespace(firstTransmissionRun);
-  auto second = parseRunNumberOrWhitespace(secondTransmissionRun);
+  auto first = parseRunNumbersOrWhitespace(firstTransmissionRun);
+  auto second = parseRunNumbersOrWhitespace(secondTransmissionRun);
 
   if (allInitialized(first, second)) {
     if (first.get().empty() && !second.get().empty()) {

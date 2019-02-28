@@ -8,6 +8,7 @@
 #define MANTID_ISISREFLECTOMETRY_IREFLEVENTPRESENTER_H
 
 #include "GUI/Batch/IBatchPresenter.h"
+#include "Reduction/Slicing.h"
 #include <string>
 
 namespace MantidQt {
@@ -27,6 +28,7 @@ public:
   virtual void reductionResumed() = 0;
   virtual void autoreductionPaused() = 0;
   virtual void autoreductionResumed() = 0;
+  virtual Slicing const &slicing() const = 0;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

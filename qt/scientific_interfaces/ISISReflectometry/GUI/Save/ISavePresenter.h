@@ -23,14 +23,9 @@ public:
   virtual ~ISavePresenter() = default;
 
   virtual void acceptMainPresenter(IBatchPresenter *mainPresenter) = 0;
-
-  virtual void reductionCompletedForGroup(
-      MantidWidgets::DataProcessor::GroupData const &group,
-      std::string const &workspaceName) = 0;
-
   virtual void
-  reductionCompletedForRow(MantidWidgets::DataProcessor::GroupData const &group,
-                           std::string const &workspaceName) = 0;
+  saveWorkspaces(std::vector<std::string> const &workspaceNames) = 0;
+  virtual bool shouldAutosave() const = 0;
 
   /// Tell the presenter something happened
   virtual void reductionPaused() = 0;

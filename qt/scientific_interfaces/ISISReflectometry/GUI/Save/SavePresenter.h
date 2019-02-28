@@ -30,7 +30,16 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL SavePresenter : public ISavePresenter,
 public:
   SavePresenter(ISaveView *view, std::unique_ptr<IAsciiSaver> saver);
 
+  // ISavePresenter overrides
   void acceptMainPresenter(IBatchPresenter *mainPresenter) override;
+  void saveWorkspaces(std::vector<std::string> const &workspaceNames) override;
+  bool shouldAutosave() const override;
+  void reductionPaused() override;
+  void reductionResumed() override;
+  void autoreductionPaused() override;
+  void autoreductionResumed() override;
+
+  // SaveViewSubscriber overrides
   void notifyPopulateWorkspaceList() override;
   void notifyFilterWorkspaceList() override;
   void notifyPopulateParametersList() override;
@@ -39,17 +48,6 @@ public:
   void notifyAutosaveDisabled() override;
   void notifyAutosaveEnabled() override;
   void notifySavePathChanged() override;
-
-  void reductionCompletedForGroup(
-      MantidWidgets::DataProcessor::GroupData const &group,
-      std::string const &workspaceName) override;
-  void
-  reductionCompletedForRow(MantidWidgets::DataProcessor::GroupData const &group,
-                           std::string const &workspaceName) override;
-  void reductionPaused() override;
-  void reductionResumed() override;
-  void autoreductionPaused() override;
-  void autoreductionResumed() override;
 
 private:
   IBatchPresenter *m_mainPresenter;
@@ -70,7 +68,6 @@ private:
   /// Save selected workspaces to a directory
   void saveSelectedWorkspaces();
   /// Save specified workspaces to a directory
-  void saveWorkspaces(std::vector<std::string> const &workspaceNames);
   void saveWorkspaces(std::vector<std::string> const &workspaceNames,
                       std::vector<std::string> const &logParameters);
   /// Obtains all available workspace names
@@ -79,7 +76,9 @@ private:
   FileFormatOptions getSaveParametersFromView() const;
   void enableAutosave();
   void disableAutosave();
-  bool shouldAutosave() const;
+  void updateWidgetEnabledState() const;
+  bool isProcessing() const;
+  bool isAutoreducing() const;
 
   /// The view
   ISaveView *m_view;

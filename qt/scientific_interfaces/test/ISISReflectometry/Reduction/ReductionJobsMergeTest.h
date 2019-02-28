@@ -38,15 +38,13 @@ public:
   Row rowWithAngle(double angle) { return rowWithNameAndAngle("1012", angle); }
 
   Row rowWithNameAndAngle(std::string const &name, double angle) {
-    auto wsNames =
-        ReductionWorkspaces({"TOF_" + name}, {"", ""}, "", "IvsLam_" + name,
-                            "IvsQ_" + name, "IvsQ_binned_" + name);
+    auto wsNames = ReductionWorkspaces({"TOF_" + name}, TransmissionRunPair{});
     return Row({name}, angle, {"", ""}, RangeInQ(), boost::none, {}, wsNames);
   }
 
   Row rowWithNamesAndAngle(std::vector<std::string> const &names,
                            double angle) {
-    auto wsNames = ReductionWorkspaces(names, {"", ""}, "", "", "", "");
+    auto wsNames = ReductionWorkspaces(names, TransmissionRunPair{});
     return Row(names, angle, {"", ""}, RangeInQ(), boost::none, {}, wsNames);
   }
 

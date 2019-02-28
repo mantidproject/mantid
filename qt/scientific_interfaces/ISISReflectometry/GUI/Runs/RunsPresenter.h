@@ -69,11 +69,15 @@ public:
 
   // IRunsPresenter overrides
   void acceptMainPresenter(IBatchPresenter *mainPresenter) override;
+  RunsTable const &runsTable() const override;
+  RunsTable &mutableRunsTable() override;
   bool isProcessing() const override;
   bool isAutoreducing() const override;
   void notifyInstrumentChanged(std::string const &instrumentName) override;
   void notifyReductionResumed() override;
   void notifyReductionPaused() override;
+  void notifyRowStateChanged() override;
+
   void reductionPaused() override;
   void reductionResumed() override;
   void autoreductionResumed() override;

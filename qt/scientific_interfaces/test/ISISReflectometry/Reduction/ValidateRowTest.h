@@ -138,6 +138,13 @@ public:
                      parseRunNumbers("000102+111102+010").get());
   }
 
+  void testParsesMultipleRunNumbersSeparatedByComma() {
+    TS_ASSERT_EQUALS(std::vector<std::string>({"100", "1002"}),
+                     parseRunNumbers("100,1002").get());
+    TS_ASSERT_EQUALS(std::vector<std::string>({"102", "111102", "10"}),
+                     parseRunNumbers("000102+111102+010").get());
+  }
+
   void testFailsForNoRunNumbers() {
     TS_ASSERT_EQUALS(boost::none, parseRunNumbers(""));
     TS_ASSERT_EQUALS(boost::none, parseRunNumbers("   "));
@@ -172,23 +179,42 @@ public:
   }
 
   void testParsesFirstTransmissionRun() {
-    auto const expected = std::pair<std::string, std::string>("1000", "");
+    auto const expected =
+        TransmissionRunPair({"1000"}, std::vector<std::string>());
     auto const result =
         boost::get<TransmissionRunPair>(parseTransmissionRuns("1000", ""));
     TS_ASSERT_EQUALS(expected, result);
   }
 
   void testParsesTwoTransmissionRuns() {
-    auto const expected = std::pair<std::string, std::string>("1000", "2010");
+    auto const expected = TransmissionRunPair("1000", "2010");
     auto const result =
         boost::get<TransmissionRunPair>(parseTransmissionRuns("1000", "2010"));
     TS_ASSERT_EQUALS(expected, result);
   }
 
   void testParsesNoTransmissionRuns() {
-    auto const expected = TransmissionRunPair("", "");
+    auto const expected = TransmissionRunPair();
     auto const result =
         boost::get<TransmissionRunPair>(parseTransmissionRuns("", ""));
+    TS_ASSERT_EQUALS(expected, result);
+  }
+
+  void testParsesMultipleTransmissionRunNumbersSeparatedByPlus() {
+    auto const expected =
+        TransmissionRunPair(std::vector<std::string>{"100", "1002"},
+                            std::vector<std::string>{"2200", "2255"});
+    auto const result = boost::get<TransmissionRunPair>(
+        parseTransmissionRuns("100+1002", "2200 + 2255"));
+    TS_ASSERT_EQUALS(expected, result);
+  }
+
+  void testParsesMultipleTransmissionRunNumbersSeparatedByComma() {
+    auto const expected =
+        TransmissionRunPair(std::vector<std::string>{"100", "1002"},
+                            std::vector<std::string>{"2200", "2255"});
+    auto const result = boost::get<TransmissionRunPair>(
+        parseTransmissionRuns("100,1002", "2200, 2255"));
     TS_ASSERT_EQUALS(expected, result);
   }
 
@@ -211,9 +237,9 @@ public:
   }
 
   void testFailsForInvalidFirstAndSecondTransmissionRun() {
-    TS_ASSERT_EQUALS(
-        std::vector<int>({0, 1}),
-        boost::get<std::vector<int>>(parseTransmissionRuns("1,000", "10ABSC")));
+    TS_ASSERT_EQUALS(std::vector<int>({0, 1}),
+                     boost::get<std::vector<int>>(
+                         parseTransmissionRuns("1bad000", "10ABSC")));
   }
 };
 #endif // MANTID_CUSTOMINTERFACES_VALIDATEROWTEST_H_

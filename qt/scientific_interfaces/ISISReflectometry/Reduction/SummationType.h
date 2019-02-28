@@ -13,6 +13,9 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
+/** SummationType holds information about what type of summation should be
+ * done in the reduction
+ */
 enum class SummationType { SumInLambda, SumInQ };
 
 inline SummationType summationTypeFromString(std::string const &summationType) {
@@ -22,6 +25,16 @@ inline SummationType summationTypeFromString(std::string const &summationType) {
     return SummationType::SumInQ;
   else
     throw std::runtime_error("Unexpected summation type.");
+}
+
+inline std::string summationTypeToString(SummationType summationType) {
+  switch (summationType) {
+  case SummationType::SumInLambda:
+    return "SumInLambda";
+  case SummationType::SumInQ:
+    return "SumInQ";
+  }
+  throw std::runtime_error("Unexpected summation type");
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt

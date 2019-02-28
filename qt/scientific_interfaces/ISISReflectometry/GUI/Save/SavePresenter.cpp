@@ -49,33 +49,46 @@ void SavePresenter::notifySaveSelectedWorkspaces() { saveSelectedWorkspaces(); }
 
 void SavePresenter::notifySuggestSaveDir() { suggestSaveDir(); }
 
-void SavePresenter::notifyAutosaveDisabled() {
-  disableAutosave();
-  m_mainPresenter->notifySettingsChanged();
-}
+void SavePresenter::notifyAutosaveDisabled() { disableAutosave(); }
 
-void SavePresenter::notifyAutosaveEnabled() {
-  enableAutosave();
-  m_mainPresenter->notifySettingsChanged();
-}
+void SavePresenter::notifyAutosaveEnabled() { enableAutosave(); }
 
 void SavePresenter::notifySavePathChanged() { onSavePathChanged(); }
 
+bool SavePresenter::isProcessing() const {
+  return m_mainPresenter->isProcessing();
+}
+
+bool SavePresenter::isAutoreducing() const {
+  return m_mainPresenter->isAutoreducing();
+}
+
+/** Tells the view to update the enabled/disabled state of all relevant
+ * widgets based on whether processing is in progress or not.
+ */
+void SavePresenter::updateWidgetEnabledState() const {
+  if (isProcessing() || isAutoreducing()) {
+    m_view->disableAutosaveControls();
+    if (shouldAutosave())
+      m_view->disableFileFormatAndLocationControls();
+    else
+      m_view->enableFileFormatAndLocationControls();
+  } else {
+    m_view->enableAutosaveControls();
+    m_view->enableFileFormatAndLocationControls();
+  }
+}
+
 void SavePresenter::reductionPaused() {
   populateWorkspaceList();
-  m_view->enableAutosaveControls();
-  m_view->enableFileFormatAndLocationControls();
+  updateWidgetEnabledState();
 }
 
-void SavePresenter::reductionResumed() {
-  m_view->disableAutosaveControls();
-  if (shouldAutosave())
-    m_view->disableFileFormatAndLocationControls();
-}
+void SavePresenter::reductionResumed() { updateWidgetEnabledState(); }
 
-void SavePresenter::autoreductionPaused() { reductionPaused(); }
+void SavePresenter::autoreductionPaused() { updateWidgetEnabledState(); }
 
-void SavePresenter::autoreductionResumed() { reductionResumed(); }
+void SavePresenter::autoreductionResumed() { updateWidgetEnabledState(); }
 
 void SavePresenter::enableAutosave() {
   if (isValidSaveDirectory(m_view->getSavePath())) {
@@ -95,32 +108,6 @@ void SavePresenter::onSavePathChanged() {
 }
 
 bool SavePresenter::shouldAutosave() const { return m_shouldAutosave; }
-
-void SavePresenter::reductionCompletedForGroup(
-    MantidWidgets::DataProcessor::GroupData const &group,
-    std::string const &workspaceName) {
-  UNUSED_ARG(group);
-  if (shouldAutosave()) {
-    try {
-      saveWorkspaces(std::vector<std::string>({workspaceName}));
-    } catch (InvalidWorkspaceName &) {
-      // ignore workspaces that don't exist
-    }
-  }
-}
-
-void SavePresenter::reductionCompletedForRow(
-    MantidWidgets::DataProcessor::GroupData const &group,
-    std::string const &workspaceName) {
-  if (!MantidWidgets::DataProcessor::canPostprocess(group) &&
-      shouldAutosave()) {
-    try {
-      saveWorkspaces(std::vector<std::string>({workspaceName}));
-    } catch (InvalidWorkspaceName &) {
-      // ignore workspaces that don't exist
-    }
-  }
-}
 
 /** Fills the 'List of Workspaces' widget with the names of all available
  * workspaces

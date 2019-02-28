@@ -13,8 +13,10 @@
 #include "GUI/Instrument/IInstrumentPresenter.h"
 #include "GUI/Runs/IRunsPresenter.h"
 #include "GUI/Save/ISavePresenter.h"
+#include "IBatchJobRunner.h"
 #include "IBatchPresenter.h"
 #include "IBatchView.h"
+#include "MantidQtWidgets/Common/WorkspaceObserver.h"
 #include <memory>
 
 namespace MantidQt {
@@ -24,30 +26,35 @@ class IBatchView;
 
 /** @class BatchPresenter
 
-BatchPresenter is the concrete main window presenter implementing the
-functionality defined by the interface IBatchPresenter.
+    BatchPresenter is the concrete main window presenter implementing the
+    functionality defined by the interface IBatchPresenter.
 */
 class MANTIDQT_ISISREFLECTOMETRY_DLL BatchPresenter
     : public IBatchPresenter,
-      public BatchViewSubscriber {
+      public BatchViewSubscriber,
+      public MantidQt::API::WorkspaceObserver {
 public:
   /// Constructor
-  BatchPresenter(IBatchView *view,
+  BatchPresenter(IBatchView *view, Batch model,
                  std::unique_ptr<IRunsPresenter> runsPresenter,
                  std::unique_ptr<IEventPresenter> eventPresenter,
                  std::unique_ptr<IExperimentPresenter> experimentPresenter,
                  std::unique_ptr<IInstrumentPresenter> instrumentPresenter,
                  std::unique_ptr<ISavePresenter> savePresenter);
 
+  // BatchViewSubscriber overrides
+  void notifyBatchComplete(bool error) override;
+  void notifyBatchCancelled() override;
+  void notifyAlgorithmStarted(
+      MantidQt::API::IConfiguredAlgorithm_sptr algorithm) override;
+  void notifyAlgorithmComplete(
+      MantidQt::API::IConfiguredAlgorithm_sptr algorithm) override;
+  void notifyAlgorithmError(MantidQt::API::IConfiguredAlgorithm_sptr algorithm,
+                            std::string const &message) override;
+
   // IBatchPresenter overrides
   void notifyReductionPaused() override;
   void notifyReductionResumed() override;
-  void notifyReductionCompletedForGroup(
-      MantidWidgets::DataProcessor::GroupData const &group,
-      std::string const &workspaceName) override;
-  void notifyReductionCompletedForRow(
-      MantidWidgets::DataProcessor::GroupData const &group,
-      std::string const &workspaceName) override;
   void notifyAutoreductionResumed() override;
   void notifyAutoreductionPaused() override;
   void notifyAutoreductionCompleted() override;
@@ -60,35 +67,34 @@ public:
   bool isProcessing() const override;
   bool isAutoreducing() const override;
 
+  // WorkspaceObserver overrides
+  void postDeleteHandle(const std::string &wsName) override;
+  void renameHandle(const std::string &oldName,
+                    const std::string &newName) override;
+  void clearADSHandle() override;
+
 private:
+  void resumeReduction();
   void reductionResumed();
+  void pauseReduction();
   void reductionPaused();
-  void reductionCompletedForGroup(
-      MantidWidgets::DataProcessor::GroupData const &group,
-      std::string const &workspaceName);
-  void
-  reductionCompletedForRow(MantidWidgets::DataProcessor::GroupData const &group,
-                           std::string const &workspaceName);
+  void resumeAutoreduction();
   void autoreductionResumed();
+  void pauseAutoreduction();
   void autoreductionPaused();
   void autoreductionCompleted();
   void instrumentChanged(const std::string &instName);
   void settingsChanged();
-  // The view we are handling (currently unused)
-  /*IBatchView *m_view;*/
-  /// The presenter of tab 'Runs'
+
+  IBatchView *m_view;
   std::unique_ptr<IRunsPresenter> m_runsPresenter;
-  /// The presenter of tab 'Event Handling'
   std::unique_ptr<IEventPresenter> m_eventPresenter;
-  /// The presenter of tab 'Settings'
   std::unique_ptr<IExperimentPresenter> m_experimentPresenter;
   std::unique_ptr<IInstrumentPresenter> m_instrumentPresenter;
-  /// The presenter of tab 'Save ASCII'
   std::unique_ptr<ISavePresenter> m_savePresenter;
-  /// True if currently reducing runs
-  bool m_isProcessing;
-  /// True if autoprocessing is currently running (i.e. polling for new runs)
-  bool m_isAutoreducing;
+
+protected:
+  std::unique_ptr<IBatchJobRunner> m_jobRunner;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

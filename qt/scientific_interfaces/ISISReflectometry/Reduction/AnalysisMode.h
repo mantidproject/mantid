@@ -20,6 +20,16 @@ inline AnalysisMode analysisModeFromString(std::string const &analysisMode) {
   else
     throw std::runtime_error("Unexpected analysis mode.");
 }
+
+inline std::string analysisModeToString(AnalysisMode analysisMode) {
+  switch (analysisMode) {
+  case AnalysisMode::PointDetector:
+    return "PointDetectorAnalysis";
+  case AnalysisMode::MultiDetector:
+    return "MultiDetectorAnalysis";
+  }
+  throw std::runtime_error("Unexpected analysis mode");
+}
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_ANALYSISMODE_H_

@@ -17,6 +17,11 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
+/** @class PerThetaDefaultsValidator
+
+    The PerThetaDefaultsValidator does the work to validate whether entries in
+    the per-theta defaults table on the ExperimentSettings tab are valid.
+ */
 class MANTIDQT_ISISREFLECTOMETRY_DLL PerThetaDefaultsValidator {
 public:
   static auto constexpr INPUT_FIELD_COUNT = 8;

@@ -9,21 +9,28 @@
 #include "Common/DllConfig.h"
 #include "ProcessingInstructions.h"
 #include "RangeInQ.h"
+#include "TransmissionRunPair.h"
 #include <boost/optional.hpp>
 #include <string>
 #include <vector>
 namespace MantidQt {
 namespace CustomInterfaces {
 
+/** @class PerThetaDefaults
+
+    The PerThetaDefaults model holds information about default experiment
+   settings that should be applied during reduction for runs with a specific
+   angle, theta. If theta is not set, then the settings will be applied to all
+   runs that do not have PerThetaDefaults with a matching theta.
+ */
 class MANTIDQT_ISISREFLECTOMETRY_DLL PerThetaDefaults {
 public:
   PerThetaDefaults(
-      boost::optional<double> theta,
-      std::pair<std::string, std::string> tranmissionRuns, RangeInQ qRange,
-      boost::optional<double> scaleFactor,
+      boost::optional<double> theta, TransmissionRunPair tranmissionRuns,
+      RangeInQ qRange, boost::optional<double> scaleFactor,
       boost::optional<ProcessingInstructions> processingInstructions);
 
-  std::pair<std::string, std::string> const &transmissionWorkspaceNames() const;
+  TransmissionRunPair const &transmissionWorkspaceNames() const;
   bool isWildcard() const;
   boost::optional<double> thetaOrWildcard() const;
   RangeInQ const &qRange() const;
@@ -32,7 +39,7 @@ public:
 
 private:
   boost::optional<double> m_theta;
-  std::pair<std::string, std::string> m_transmissionRuns;
+  TransmissionRunPair m_transmissionRuns;
   RangeInQ m_qRange;
   boost::optional<double> m_scaleFactor;
   boost::optional<ProcessingInstructions> m_processingInstructions;

@@ -38,13 +38,31 @@ void InstrumentPresenter::notifySettingsChanged() {
 
 Instrument const &InstrumentPresenter::instrument() const { return m_model; }
 
-void InstrumentPresenter::reductionPaused() { m_view->enableAll(); }
+bool InstrumentPresenter::isProcessing() const {
+  return m_mainPresenter->isProcessing();
+}
 
-void InstrumentPresenter::reductionResumed() { m_view->disableAll(); }
+bool InstrumentPresenter::isAutoreducing() const {
+  return m_mainPresenter->isAutoreducing();
+}
 
-void InstrumentPresenter::autoreductionPaused() { reductionPaused(); }
+/** Tells the view to update the enabled/disabled state of all relevant
+ * widgets based on whether processing is in progress or not.
+ */
+void InstrumentPresenter::updateWidgetEnabledState() const {
+  if (isProcessing() || isAutoreducing())
+    m_view->disableAll();
+  else
+    m_view->enableAll();
+}
 
-void InstrumentPresenter::autoreductionResumed() { reductionResumed(); }
+void InstrumentPresenter::reductionPaused() { updateWidgetEnabledState(); }
+
+void InstrumentPresenter::reductionResumed() { updateWidgetEnabledState(); }
+
+void InstrumentPresenter::autoreductionPaused() { updateWidgetEnabledState(); }
+
+void InstrumentPresenter::autoreductionResumed() { updateWidgetEnabledState(); }
 
 void InstrumentPresenter::instrumentChanged(std::string const &instrumentName) {
   UNUSED_ARG(instrumentName);

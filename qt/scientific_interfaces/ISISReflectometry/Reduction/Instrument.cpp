@@ -19,12 +19,20 @@ boost::optional<RangeInLambda> const &Instrument::wavelengthRange() const {
   return m_wavelengthRange;
 }
 
-bool Instrument::integratedMonitors() const {
-  return m_monitorCorrections.integrate();
+MonitorCorrections const &Instrument::monitorCorrections() const {
+  return m_monitorCorrections;
+}
+
+DetectorCorrections const &Instrument::detectorCorrections() const {
+  return m_detectorCorrections;
 }
 
 size_t Instrument::monitorIndex() const {
   return m_monitorCorrections.monitorIndex();
+}
+
+bool Instrument::integratedMonitors() const {
+  return m_monitorCorrections.integrate();
 }
 
 boost::optional<RangeInLambda> Instrument::monitorIntegralRange() const {

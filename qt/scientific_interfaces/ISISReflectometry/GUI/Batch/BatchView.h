@@ -13,11 +13,12 @@
 #include "GUI/Runs/RunsView.h"
 #include "GUI/Save/SaveView.h"
 #include "IBatchView.h"
-#include "MantidAPI/IAlgorithm.h"
+#include "MantidAPI/IAlgorithm_fwd.h"
+#include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "ui_BatchWidget.h"
-#include <memory>
 
 #include <QCloseEvent>
+#include <memory>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -33,6 +34,19 @@ public:
   ISaveView *save() const override;
   IExperimentView *experiment() const override;
   IInstrumentView *instrument() const override;
+  void clearAlgorithmQueue() override;
+  void setAlgorithmQueue(
+      std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> algorithms) override;
+  void executeAlgorithmQueue() override;
+  void cancelAlgorithmQueue() override;
+
+private slots:
+  void onBatchComplete(bool error);
+  void onBatchCancelled();
+  void onAlgorithmStarted(MantidQt::API::IConfiguredAlgorithm_sptr algorithm);
+  void onAlgorithmComplete(MantidQt::API::IConfiguredAlgorithm_sptr algorithm);
+  void onAlgorithmError(MantidQt::API::IConfiguredAlgorithm_sptr algorithm,
+                        std::string errorMessage);
 
 private:
   void initLayout();
@@ -49,6 +63,7 @@ private:
   std::unique_ptr<SaveView> m_save;
   std::unique_ptr<ExperimentView> m_experiment;
   std::unique_ptr<InstrumentView> m_instrument;
+  API::BatchAlgorithmRunner m_batchAlgoRunner;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

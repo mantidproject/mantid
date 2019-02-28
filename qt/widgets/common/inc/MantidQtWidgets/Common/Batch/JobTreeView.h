@@ -112,6 +112,8 @@ protected:
 
 protected slots:
   void commitData(QWidget *) override;
+  void selectionChanged(const QItemSelection &selected,
+                        const QItemSelection &deselected) override;
 
 private:
   // The view property values for an uneditable, unselectable cell.

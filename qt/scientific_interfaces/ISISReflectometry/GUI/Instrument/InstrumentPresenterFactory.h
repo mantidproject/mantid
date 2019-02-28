@@ -25,7 +25,7 @@ public:
   }
 
 private:
-  // TODO get defaults from algorithm
+  // TODO inject model rather than creating it here
   Instrument makeModel() {
     auto wavelengthRange = RangeInLambda(0.0, 0.0);
     auto monitorCorrections = MonitorCorrections(

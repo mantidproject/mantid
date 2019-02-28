@@ -17,7 +17,7 @@ Group &findOrMakeGroupWithName(ReductionJobs &jobs,
                                std::string const &groupName) {
   auto maybeGroupIndex = jobs.indexOfGroupWithName(groupName);
   if (maybeGroupIndex.is_initialized())
-    return jobs.groups()[maybeGroupIndex.get()];
+    return jobs.mutableGroups()[maybeGroupIndex.get()];
   else
     return jobs.appendGroup(Group(groupName));
 } // unnamed
@@ -66,7 +66,12 @@ void ReductionJobs::removeAllGroups() {
   ensureAtLeastOneGroupExists(*this);
 }
 
-std::vector<Group> &ReductionJobs::groups() { return m_groups; }
+void ReductionJobs::resetState() {
+  for (auto &group : m_groups)
+    group.resetState();
+}
+
+std::vector<Group> &ReductionJobs::mutableGroups() { return m_groups; }
 
 std::vector<Group> const &ReductionJobs::groups() const { return m_groups; }
 
@@ -93,7 +98,7 @@ void removeGroup(ReductionJobs &jobs, int groupIndex) {
 void removeAllRowsAndGroups(ReductionJobs &jobs) { jobs.removeAllGroups(); }
 
 void appendEmptyRow(ReductionJobs &jobs, int groupIndex) {
-  jobs.groups()[groupIndex].appendEmptyRow();
+  jobs.mutableGroups()[groupIndex].appendEmptyRow();
 }
 
 void appendEmptyGroup(ReductionJobs &jobs) {
@@ -105,15 +110,15 @@ void insertEmptyGroup(ReductionJobs &jobs, int beforeGroup) {
 }
 
 void insertEmptyRow(ReductionJobs &jobs, int groupIndex, int beforeRow) {
-  jobs.groups()[groupIndex].insertRow(boost::none, beforeRow);
+  jobs.mutableGroups()[groupIndex].insertRow(boost::none, beforeRow);
 }
 
 void updateRow(ReductionJobs &jobs, int groupIndex, int rowIndex,
                boost::optional<Row> const &newValue) {
   if (newValue.is_initialized()) {
-    jobs.groups()[groupIndex].updateRow(rowIndex, newValue);
+    jobs.mutableGroups()[groupIndex].updateRow(rowIndex, newValue);
   } else {
-    jobs.groups()[groupIndex].updateRow(rowIndex, boost::none);
+    jobs.mutableGroups()[groupIndex].updateRow(rowIndex, boost::none);
   }
 }
 
@@ -132,12 +137,12 @@ void mergeRowIntoGroup(ReductionJobs &jobs, Row const &row,
 }
 
 void removeRow(ReductionJobs &jobs, int groupIndex, int rowIndex) {
-  jobs.groups()[groupIndex].removeRow(rowIndex);
+  jobs.mutableGroups()[groupIndex].removeRow(rowIndex);
 }
 
 bool setGroupName(ReductionJobs &jobs, int groupIndex,
                   std::string const &newValue) {
-  auto &group = jobs.groups()[groupIndex];
+  auto &group = jobs.mutableGroups()[groupIndex];
   if (group.name() != newValue) {
     if (newValue.empty() || !jobs.hasGroupWithName(newValue)) {
       group.setName(newValue);
@@ -154,6 +159,72 @@ std::string groupName(ReductionJobs const &jobs, int groupIndex) {
 
 Group const &ReductionJobs::operator[](int index) const {
   return m_groups[index];
+}
+
+MantidWidgets::Batch::RowPath ReductionJobs::getPath(Group const &group) const {
+  // Find this group in the groups list
+  auto groupIter = std::find_if(m_groups.cbegin(), m_groups.cend(),
+                                [&group](Group const &currentGroup) -> bool {
+                                  return &currentGroup == &group;
+                                });
+  // Calling this function with a group that's not in the list is an error
+  if (groupIter == m_groups.cend()) {
+    throw std::runtime_error(
+        std::string(
+            "Internal error: could not find table location for group ") +
+        group.name());
+  }
+  // Found the group so return its index as the path
+  auto const groupIndex = static_cast<int>(groupIter - m_groups.cbegin());
+  return {groupIndex};
+}
+
+MantidWidgets::Batch::RowPath ReductionJobs::getPath(Row const &row) const {
+  auto groupIndex = 0;
+  for (auto const &group : m_groups) {
+    // See if the row is in this group
+    auto const &rows = group.rows();
+    auto rowIter =
+        std::find_if(rows.cbegin(), rows.cend(),
+                     [&row](boost::optional<Row> const &currentRow) -> bool {
+                       return currentRow && &currentRow.get() == &row;
+                     });
+    if (rowIter == rows.cend()) {
+      // Try the next group
+      ++groupIndex;
+      continue;
+    }
+
+    // Found the row, so return its group and row indices as the path
+    auto const rowIndex = static_cast<int>(rowIter - rows.cbegin());
+    return {groupIndex, rowIndex};
+  }
+
+  throw std::runtime_error(
+      "Internal error: could not find table location for row");
+}
+
+Group const &ReductionJobs::getParentGroup(Row const &row) const {
+  auto const path = getPath(row);
+  if (path.size() < 1)
+    throw std::runtime_error(
+        "Internal error: could not find parent group for row");
+  auto const groupIndex = path[0];
+  return m_groups[groupIndex];
+}
+
+boost::optional<Item &>
+ReductionJobs::getItemWithOutputWorkspaceOrNone(std::string const &wsName) {
+  for (auto &group : m_groups) {
+    // Return this group if it has the output we're looking for
+    if (group.postprocessedWorkspaceName() == wsName)
+      return group;
+    // If it has a child row with this workspace output, return it
+    auto maybeRow = group.getItemWithOutputWorkspaceOrNone(wsName);
+    if (maybeRow)
+      return boost::optional<Item &>(maybeRow.get());
+  }
+  return boost::none;
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt

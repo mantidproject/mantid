@@ -1,6 +1,10 @@
 set ( BATCH_SRC_FILES
     BatchPresenter.cpp
     BatchView.cpp
+    BatchJobAlgorithm.cpp
+    BatchJobRunner.cpp
+    AlgorithmProperties.cpp
+    RowProcessingAlgorithm.cpp
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
@@ -8,9 +12,15 @@ set ( BATCH_SRC_FILES
 set ( BATCH_INC_FILES
     IBatchPresenter.h
     IBatchView.h
+    IBatchJobAlgorithm.h
+    IBatchJobRunner.h
     BatchPresenter.h
     BatchPresenterFactory.h
     BatchView.h
+    BatchJobAlgorithm.h
+    BatchJobRunner.h
+    AlgorithmProperties.h
+    RowProcessingAlgorithm.h
 )
 
 set ( BATCH_MOC_FILES

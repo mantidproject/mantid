@@ -25,9 +25,8 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL InstrumentPresenter
     : public InstrumentViewSubscriber,
       public IInstrumentPresenter {
 public:
-  // TODO Inject the Instrument model into the constructor.
   InstrumentPresenter(IInstrumentView *view, Instrument instrument);
-  Instrument const &instrument() const;
+  Instrument const &instrument() const override;
 
   // IInstrumentPresenver overrides
   void acceptMainPresenter(IBatchPresenter *mainPresenter) override;
@@ -52,6 +51,9 @@ private:
   DetectorCorrectionType detectorCorrectionTypeFromView();
   DetectorCorrections detectorCorrectionsFromView();
   void updateModelFromView();
+  void updateWidgetEnabledState() const;
+  bool isProcessing() const;
+  bool isAutoreducing() const;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

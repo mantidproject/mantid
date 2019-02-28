@@ -9,6 +9,7 @@
 #define MANTID_CUSTOMINTERFACES_REDUCTIONWORKSPACES_H_
 
 #include "Common/DllConfig.h"
+#include "TransmissionRunPair.h"
 #include <boost/algorithm/string/join.hpp>
 #include <boost/optional.hpp>
 #include <string>
@@ -17,25 +18,31 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
+/** @class ReductionWorkspaces
+
+    The ReductionWorkspaces model holds information about all input and output
+    workspaces that are involved in a reduction
+ */
 class MANTIDQT_ISISREFLECTOMETRY_DLL ReductionWorkspaces {
 public:
-  ReductionWorkspaces(std::vector<std::string> timeOfFlight,
-                      std::pair<std::string, std::string> transmissionRuns,
-                      std::string combinedTransmissionRuns,
-                      std::string iVsLambda, std::string iVsQ,
-                      std::string iVsQBinned);
+  ReductionWorkspaces(std::vector<std::string> inputRunNumbers,
+                      TransmissionRunPair transmissionRuns);
 
-  std::vector<std::string> const &timeOfFlight() const;
-  std::pair<std::string, std::string> const &transmissionRuns() const;
-  std::string const &combinedTransmissionRuns() const;
+  std::vector<std::string> const &inputRunNumbers() const;
+  TransmissionRunPair const &transmissionRuns() const;
   std::string const &iVsLambda() const;
   std::string const &iVsQ() const;
   std::string const &iVsQBinned() const;
 
+  void setOutputNames(std::string iVsLambda, std::string iVsQ,
+                      std::string iVsQBinned);
+  void resetOutputNames();
+  bool hasOutputName(std::string const &wsName) const;
+  void renameOutput(std::string const &oldName, std::string const &newName);
+
 private:
-  std::vector<std::string> m_timeOfFlight;
-  std::pair<std::string, std::string> m_transmissionRuns;
-  std::string m_combinedTransmissionRuns;
+  std::vector<std::string> m_inputRunNumbers;
+  TransmissionRunPair m_transmissionRuns;
   std::string m_iVsLambda;
   std::string m_iVsQ;
   std::string m_iVsQBinned;
@@ -46,15 +53,12 @@ MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(ReductionWorkspaces const &lhs,
 MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(ReductionWorkspaces const &lhs,
                                                ReductionWorkspaces const &rhs);
 
-std::pair<std::string, std::string> transmissionWorkspaceNames(
-    std::pair<std::string, std::string> const &transmissionRuns);
-
-std::string transmissionWorkspacesCombined(
-    std::pair<std::string, std::string> const &transmissionRuns);
+TransmissionRunPair
+transmissionWorkspaceNames(TransmissionRunPair const &transmissionRuns);
 
 MANTIDQT_ISISREFLECTOMETRY_DLL ReductionWorkspaces
-workspaceNames(std::vector<std::string> const &summedRunNumbers,
-               std::pair<std::string, std::string> const &transmissionRuns);
+workspaceNames(std::vector<std::string> const &inputRunNumbers,
+               TransmissionRunPair const &transmissionRuns);
 
 MANTIDQT_ISISREFLECTOMETRY_DLL std::string postprocessedWorkspaceName(
     std::vector<std::vector<std::string> const *> const &summedRunNumbers);

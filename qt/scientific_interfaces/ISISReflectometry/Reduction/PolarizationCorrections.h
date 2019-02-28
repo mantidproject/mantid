@@ -28,12 +28,32 @@ polarizationCorrectionTypeFromString(std::string const &correctionType) {
     throw std::runtime_error("Unexpected polarization correction type.");
 }
 
+inline std::string
+PolarizationCorrectionTypeToString(PolarizationCorrectionType correctionType) {
+  switch (correctionType) {
+  case PolarizationCorrectionType::None:
+    return "None";
+  case PolarizationCorrectionType::PA:
+    return "PA";
+  case PolarizationCorrectionType::PNR:
+    return "PNR";
+  case PolarizationCorrectionType::ParameterFile:
+    return "ParameterFile";
+  }
+  throw std::runtime_error("Unexpected polarization correction type.");
+}
+
 inline bool polarizationCorrectionRequiresInputs(
     PolarizationCorrectionType correctionType) {
   return (correctionType == PolarizationCorrectionType::PA ||
           correctionType == PolarizationCorrectionType::PNR);
 }
 
+/** @class PoliarizationCorrections
+
+    The PoliarizationCorrections model holds information about what polarization
+    corrections should be done during reduction
+ */
 class MANTIDQT_ISISREFLECTOMETRY_DLL PolarizationCorrections {
 public:
   PolarizationCorrections(PolarizationCorrectionType correctionType,

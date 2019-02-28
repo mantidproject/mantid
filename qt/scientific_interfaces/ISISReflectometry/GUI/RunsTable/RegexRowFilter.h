@@ -12,7 +12,7 @@
 #include "MantidQtWidgets/Common/Batch/IJobTreeView.h"
 #include "MantidQtWidgets/Common/Batch/RowPredicate.h"
 #include "Reduction/ReductionJobs.h"
-#include "RowLocation.h"
+#include "Reduction/RowLocation.h"
 #include <boost/regex.hpp>
 #include <memory>
 

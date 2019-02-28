@@ -15,6 +15,11 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
+/** @class Instrument
+
+    The Instrument model holds all information relating to settings on the
+    Instrument Settings tab on the GUI
+ */
 class MANTIDQT_ISISREFLECTOMETRY_DLL Instrument {
 public:
   Instrument(boost::optional<RangeInLambda> wavelengthRange,
@@ -23,6 +28,9 @@ public:
 
   boost::optional<RangeInLambda> const &wavelengthRange() const;
   bool integratedMonitors() const;
+  MonitorCorrections const &monitorCorrections() const;
+  DetectorCorrections const &detectorCorrections() const;
+
   size_t monitorIndex() const;
   boost::optional<RangeInLambda> monitorIntegralRange() const;
   boost::optional<RangeInLambda> monitorBackgroundRange() const;

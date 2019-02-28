@@ -233,7 +233,7 @@ public:
 
   void testParseTransmissionRunsFirstOnly() {
     auto result = parseTransmissionRuns("13463", "");
-    TransmissionRunPair expected = {"13463", ""};
+    TransmissionRunPair expected = {{"13463"}, std::vector<std::string>()};
     TS_ASSERT_EQUALS(result.which(), VALUE);
     TS_ASSERT_EQUALS(boost::get<TransmissionRunPair>(result), expected);
   }

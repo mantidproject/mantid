@@ -114,6 +114,14 @@ void RunsPresenter::acceptMainPresenter(IBatchPresenter *mainPresenter) {
   // presenter.
 }
 
+RunsTable const &RunsPresenter::runsTable() const {
+  return tablePresenter()->runsTable();
+}
+
+RunsTable &RunsPresenter::mutableRunsTable() {
+  return tablePresenter()->mutableRunsTable();
+}
+
 /**
    Used by the view to tell the presenter something has changed
 */
@@ -164,6 +172,10 @@ void RunsPresenter::notifyStartMonitor() { startMonitor(); }
 void RunsPresenter::notifyStopMonitor() { stopMonitor(); }
 
 void RunsPresenter::notifyStartMonitorComplete() { startMonitorComplete(); }
+
+void RunsPresenter::notifyRowStateChanged() {
+  tablePresenter()->notifyRowStateChanged();
+}
 
 void RunsPresenter::reductionResumed() {
   updateWidgetEnabledState();
@@ -427,7 +439,7 @@ void RunsPresenter::transfer(const std::set<int> &rowsToTransfer,
   UNUSED_ARG(matchType);
   if (validateRowsToTransfer(rowsToTransfer)) {
     auto progress = setupProgressBar(rowsToTransfer);
-    auto jobs = tablePresenter()->reductionJobs();
+    auto jobs = runsTable().reductionJobs();
 
     for (auto rowIndex : rowsToTransfer) {
       auto &result = m_searchModel->getRowData(rowIndex);

@@ -7,6 +7,7 @@
 #ifndef MANTID_ISISREFLECTOMETRY_IINSTRUMENTPRESENTER_H
 #define MANTID_ISISREFLECTOMETRY_IINSTRUMENTPRESENTER_H
 
+#include "Reduction/Instrument.h"
 #include <string>
 
 namespace MantidQt {
@@ -24,6 +25,7 @@ public:
   virtual ~IInstrumentPresenter() = default;
 
   virtual void acceptMainPresenter(IBatchPresenter *mainPresenter) = 0;
+  virtual Instrument const &instrument() const = 0;
   virtual void reductionPaused() = 0;
   virtual void reductionResumed() = 0;
   virtual void autoreductionPaused() = 0;

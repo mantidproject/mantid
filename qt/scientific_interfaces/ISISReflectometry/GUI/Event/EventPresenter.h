@@ -41,7 +41,7 @@ public:
   notifyLogSliceBreakpointsChanged(std::string logValueBreakpoints) override;
   void notifyLogBlockNameChanged(std::string blockName) override;
 
-  Slicing const &slicing() const;
+  Slicing const &slicing() const override;
 
 private:
   IBatchPresenter *m_mainPresenter;
@@ -51,6 +51,9 @@ private:
   void setCustomSlicingFromView();
   void setLogValueSlicingFromView();
   void setSlicingFromView();
+  void updateWidgetEnabledState() const;
+  bool isProcessing() const;
+  bool isAutoreducing() const;
   /// The view we are managing
   IEventView *m_view;
   SliceType m_sliceType;

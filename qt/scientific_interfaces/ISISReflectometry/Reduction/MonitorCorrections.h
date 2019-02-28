@@ -12,6 +12,11 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
+/** @class MonitorCorrections
+
+    The MonitorCorrections model holds information about which monitor
+    normalisations should be applied in reduction
+ */
 class MANTIDQT_ISISREFLECTOMETRY_DLL MonitorCorrections {
 public:
   MonitorCorrections(size_t monitorIndex, bool integrate,

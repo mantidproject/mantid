@@ -5,6 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "BatchPresenter.h"
+#include "BatchJobRunner.h"
 #include "GUI/Event/IEventPresenter.h"
 #include "GUI/Experiment/IExperimentPresenter.h"
 #include "GUI/Instrument/IInstrumentPresenter.h"
@@ -19,6 +20,8 @@ using namespace MantidQt::MantidWidgets::DataProcessor;
 namespace MantidQt {
 namespace CustomInterfaces {
 
+using API::IConfiguredAlgorithm_sptr;
+
 // unnamed namespace
 namespace {
 Mantid::Kernel::Logger g_log("Reflectometry GUI");
@@ -26,6 +29,7 @@ Mantid::Kernel::Logger g_log("Reflectometry GUI");
 
 /** Constructor
  * @param view :: [input] The view we are managing
+ * @param model :: [input] The reduction configuration model
  * @param runsPresenter :: [input] A pointer to the 'Runs' tab presenter
  * @param eventPresenter :: [input] A pointer to the 'Event Handling' tab
  * presenter
@@ -36,19 +40,20 @@ Mantid::Kernel::Logger g_log("Reflectometry GUI");
  * @param savePresenter :: [input] A pointer to the 'Save ASCII' tab presenter
  */
 BatchPresenter::BatchPresenter(
-    IBatchView *view, std::unique_ptr<IRunsPresenter> runsPresenter,
+    IBatchView *view, Batch model,
+    std::unique_ptr<IRunsPresenter> runsPresenter,
     std::unique_ptr<IEventPresenter> eventPresenter,
     std::unique_ptr<IExperimentPresenter> experimentPresenter,
     std::unique_ptr<IInstrumentPresenter> instrumentPresenter,
     std::unique_ptr<ISavePresenter> savePresenter)
-    : /*m_view(view),*/ m_runsPresenter(std::move(runsPresenter)),
+    : m_view(view), m_runsPresenter(std::move(runsPresenter)),
       m_eventPresenter(std::move(eventPresenter)),
       m_experimentPresenter(std::move(experimentPresenter)),
       m_instrumentPresenter(std::move(instrumentPresenter)),
-      m_savePresenter(std::move(savePresenter)), m_isProcessing(false),
-      m_isAutoreducing(false) {
+      m_savePresenter(std::move(savePresenter)),
+      m_jobRunner(new BatchJobRunner(std::move(model))) {
 
-  view->subscribe(this);
+  m_view->subscribe(this);
 
   // Tell the tab presenters that this is going to be the main presenter
   m_savePresenter->acceptMainPresenter(this);
@@ -56,6 +61,10 @@ BatchPresenter::BatchPresenter(
   m_experimentPresenter->acceptMainPresenter(this);
   m_instrumentPresenter->acceptMainPresenter(this);
   m_runsPresenter->acceptMainPresenter(this);
+
+  observePostDelete();
+  observeRename();
+  observeADSClear();
 }
 
 bool BatchPresenter::requestClose() const { return true; }
@@ -67,30 +76,67 @@ void BatchPresenter::notifyInstrumentChanged(
 
 void BatchPresenter::notifySettingsChanged() { settingsChanged(); }
 
-void BatchPresenter::notifyReductionResumed() { reductionResumed(); }
+void BatchPresenter::notifyReductionResumed() { resumeReduction(); }
 
-void BatchPresenter::notifyReductionPaused() { reductionPaused(); }
+void BatchPresenter::notifyReductionPaused() { pauseReduction(); }
 
-void BatchPresenter::notifyReductionCompletedForGroup(
-    GroupData const &group, std::string const &workspaceName) {
-  reductionCompletedForGroup(group, workspaceName);
-}
+void BatchPresenter::notifyAutoreductionResumed() { resumeAutoreduction(); }
 
-void BatchPresenter::notifyReductionCompletedForRow(
-    GroupData const &group, std::string const &workspaceName) {
-  reductionCompletedForRow(group, workspaceName);
-}
-
-void BatchPresenter::notifyAutoreductionResumed() { autoreductionResumed(); }
-
-void BatchPresenter::notifyAutoreductionPaused() { autoreductionPaused(); }
+void BatchPresenter::notifyAutoreductionPaused() { pauseAutoreduction(); }
 
 void BatchPresenter::notifyAutoreductionCompleted() {
   autoreductionCompleted();
 }
 
+void BatchPresenter::notifyBatchComplete(bool error) {
+  UNUSED_ARG(error);
+  reductionPaused();
+  m_runsPresenter->notifyRowStateChanged();
+}
+
+void BatchPresenter::notifyBatchCancelled() {
+  reductionPaused();
+  // We also stop autoreduction if the user has cancelled
+  autoreductionPaused();
+  m_runsPresenter->notifyRowStateChanged();
+}
+
+void BatchPresenter::notifyAlgorithmStarted(
+    IConfiguredAlgorithm_sptr algorithm) {
+  m_jobRunner->algorithmStarted(algorithm);
+  m_runsPresenter->notifyRowStateChanged();
+}
+
+void BatchPresenter::notifyAlgorithmComplete(
+    IConfiguredAlgorithm_sptr algorithm) {
+  m_jobRunner->algorithmComplete(algorithm);
+  m_runsPresenter->notifyRowStateChanged();
+  /// TODO Longer term it would probably be better if algorithms took care
+  /// of saving their outputs so we could remove this callback
+  if (m_savePresenter->shouldAutosave()) {
+    auto const workspaces =
+        m_jobRunner->algorithmOutputWorkspacesToSave(algorithm);
+    m_savePresenter->saveWorkspaces(workspaces);
+  }
+}
+
+void BatchPresenter::notifyAlgorithmError(IConfiguredAlgorithm_sptr algorithm,
+                                          std::string const &message) {
+  m_jobRunner->algorithmError(algorithm, message);
+  m_runsPresenter->notifyRowStateChanged();
+}
+
+void BatchPresenter::resumeReduction() {
+  reductionResumed();
+  m_view->clearAlgorithmQueue();
+  m_view->setAlgorithmQueue(m_jobRunner->getAlgorithms());
+  m_view->executeAlgorithmQueue();
+}
+
 void BatchPresenter::reductionResumed() {
-  m_isProcessing = true;
+  // Update the model
+  m_jobRunner->reductionResumed();
+  // Notify child presenters
   m_savePresenter->reductionResumed();
   m_eventPresenter->reductionResumed();
   m_experimentPresenter->reductionResumed();
@@ -98,30 +144,30 @@ void BatchPresenter::reductionResumed() {
   m_runsPresenter->reductionResumed();
 }
 
+void BatchPresenter::pauseReduction() { m_view->cancelAlgorithmQueue(); }
+
 void BatchPresenter::reductionPaused() {
-  m_isProcessing = false;
+  // Update the model
+  m_jobRunner->reductionPaused();
+  // Notify child presenters
   m_savePresenter->reductionPaused();
   m_eventPresenter->reductionPaused();
   m_experimentPresenter->reductionPaused();
   m_instrumentPresenter->reductionPaused();
   m_runsPresenter->reductionPaused();
-
-  // Also stop autoreduction
-  autoreductionPaused();
 }
 
-void BatchPresenter::reductionCompletedForGroup(
-    GroupData const &group, std::string const &workspaceName) {
-  m_savePresenter->reductionCompletedForGroup(group, workspaceName);
-}
-
-void BatchPresenter::reductionCompletedForRow(
-    GroupData const &group, std::string const &workspaceName) {
-  m_savePresenter->reductionCompletedForRow(group, workspaceName);
+void BatchPresenter::resumeAutoreduction() {
+  autoreductionResumed();
+  m_view->clearAlgorithmQueue();
+  m_view->setAlgorithmQueue(m_jobRunner->getAlgorithms());
+  m_view->executeAlgorithmQueue();
 }
 
 void BatchPresenter::autoreductionResumed() {
-  m_isAutoreducing = true;
+  // Update the model
+  m_jobRunner->autoreductionResumed();
+  // Notify child presenters
   m_savePresenter->autoreductionResumed();
   m_eventPresenter->autoreductionResumed();
   m_experimentPresenter->autoreductionResumed();
@@ -129,8 +175,16 @@ void BatchPresenter::autoreductionResumed() {
   m_runsPresenter->autoreductionResumed();
 }
 
+void BatchPresenter::pauseAutoreduction() {
+  // Update the model
+  m_jobRunner->autoreductionPaused();
+  // Stop all processing
+  pauseReduction();
+  autoreductionPaused();
+}
+
 void BatchPresenter::autoreductionPaused() {
-  m_isAutoreducing = false;
+  // Notify child presenters
   m_savePresenter->autoreductionPaused();
   m_eventPresenter->autoreductionPaused();
   m_experimentPresenter->autoreductionPaused();
@@ -168,16 +222,36 @@ bool BatchPresenter::hasPerAngleOptions() const {
 }
 
 /**
-Checks whether or not data is currently being processed in this batch
-* @return : Bool on whether data is being processed
-*/
-bool BatchPresenter::isProcessing() const { return m_isProcessing; }
+   Checks whether or not data is currently being processed in this batch
+   * @return : Bool on whether data is being processed
+   */
+bool BatchPresenter::isProcessing() const {
+  return m_jobRunner->isProcessing();
+}
 
 /**
-Checks whether or not autoprocessing is currently running in this batch
-* i.e. whether we are polling for new runs
-* @return : Bool on whether data is being processed
-*/
-bool BatchPresenter::isAutoreducing() const { return m_isAutoreducing; }
+   Checks whether or not autoprocessing is currently running in this batch
+   * i.e. whether we are polling for new runs
+   * @return : Bool on whether data is being processed
+   */
+bool BatchPresenter::isAutoreducing() const {
+  return m_jobRunner->isAutoreducing();
+}
+
+void BatchPresenter::postDeleteHandle(const std::string &wsName) {
+  m_jobRunner->notifyWorkspaceDeleted(wsName);
+  m_runsPresenter->notifyRowStateChanged();
+}
+
+void BatchPresenter::renameHandle(const std::string &oldName,
+                                  const std::string &newName) {
+  m_jobRunner->notifyWorkspaceRenamed(oldName, newName);
+  m_runsPresenter->notifyRowStateChanged();
+}
+
+void BatchPresenter::clearADSHandle() {
+  m_jobRunner->notifyAllWorkspacesDeleted();
+  m_runsPresenter->notifyRowStateChanged();
+}
 } // namespace CustomInterfaces
 } // namespace MantidQt

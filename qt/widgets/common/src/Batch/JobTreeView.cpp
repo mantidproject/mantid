@@ -53,6 +53,12 @@ void JobTreeView::commitData(QWidget *editor) {
   }
 }
 
+void JobTreeView::selectionChanged(const QItemSelection &selected,
+                                   const QItemSelection &deselected) {
+  QTreeView::selectionChanged(selected, deselected);
+  m_notifyee->notifySelectionChanged();
+}
+
 void JobTreeView::filterRowsBy(std::unique_ptr<RowPredicate> predicate) {
   m_filteredModel.setPredicate(std::move(predicate));
   expandAll();

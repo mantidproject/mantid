@@ -8,6 +8,7 @@
 #define MANTID_ISISREFLECTOMETRY_IEXPERIMENTPRESENTER_H
 
 #include "GUI/Batch/IBatchPresenter.h"
+#include "Reduction/Experiment.h"
 #include <string>
 
 namespace MantidQt {
@@ -17,6 +18,7 @@ public:
   virtual ~IExperimentPresenter() = default;
 
   virtual void acceptMainPresenter(IBatchPresenter *mainPresenter) = 0;
+  virtual Experiment const &experiment() const = 0;
   virtual void reductionPaused() = 0;
   virtual void reductionResumed() = 0;
   virtual void autoreductionPaused() = 0;
