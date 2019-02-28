@@ -202,7 +202,7 @@ class SummationSettingsViewEnablednessTest(SelectionMockingTestCase):
         presenter._get_filename_manager = mock.Mock(return_value=MockedOutAddRunsFilenameManager())
         return presenter
 
-    def test_disables_summation_settings_when_no_event_data(self):
+    def xtest_disables_summation_settings_when_no_event_data(self):
         runs = self._make_mock_run_selection([self._histogram_run,
                                               self._histogram_run])
         self._on_model_updated(runs)

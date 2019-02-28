@@ -10,7 +10,6 @@ from mantid.kernel import ConfigService, ConfigPropertyObserver
 
 from sans.common.enums import SANSInstrument
 from sans.gui_logic.gui_common import GENERIC_SETTINGS, load_property, set_setting
-from sans.gui_logic.models.run_selection import has_any_event_data
 
 
 class OutputDirectoryObserver(ConfigPropertyObserver):
@@ -81,7 +80,7 @@ class AddRunsPagePresenter(object):
                                         self._handle_selection_changed, view)
         self._summation_settings_presenter = \
             make_run_summation_presenter(view.summation_settings_view(),
-                                         view)
+                                         view, ConfigService.Instance().getString("default.instrument"))
 
         self._connect_to_view(view)
 
@@ -127,10 +126,7 @@ class AddRunsPagePresenter(object):
             self._view.set_out_file_name(self._generated_output_file_name)
 
     def _update_histogram_binning(self, run_selection):
-        if has_any_event_data(run_selection):
-            self._view.enable_summation_settings()
-        else:
-            self._view.disable_summation_settings()
+        self._view.enable_summation_settings()
 
     def _handle_selection_changed(self, run_selection):
         self._refresh_view(run_selection)
