@@ -40,7 +40,7 @@ Improvements
 - :ref:`DirectILLCollectData <algm-DirectILLCollectData>` now automatically disables incident energy calibration and normalises to time instead of monitor counts if the monitor counts are deemed too low.
 - The new property in :ref:`DirectILLReduction <algm-DirectILLReduction>`, ``EnergyRebinning``, allows mixing automatic bin widths with user specified ones when rebinning the energy transfer axis.
 - The ``SofQW`` algorithms have a new property ``DetectorTwoThetaRanges`` which can be used to supply detector scattering angle coverage information for :ref:`SofQWNormalisedPolygon <algm-SofQWNormalisedPolygon>`.
-
+- The built-in version of MSlice has been updated to include the full CLI, generating scripts from plots and waterfall plotting.
 
 Bugfixes
 ########

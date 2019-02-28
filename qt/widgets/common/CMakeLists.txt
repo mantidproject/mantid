@@ -215,8 +215,8 @@ set ( QT5_INC_FILES
   inc/MantidQtWidgets/Common/Batch/BuildSubtreeItems.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/ADSAdapter.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/IWorkspaceDockView.h
-  inc/MantidQtWidgets/Common/WorkspacePresenter/IWorkspaceDockView.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/ViewNotifiable.h
+  inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceDockMockObjects.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspacePresenter.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceProvider.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceProviderNotifiable.h

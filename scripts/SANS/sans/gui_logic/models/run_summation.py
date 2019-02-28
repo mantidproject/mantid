@@ -48,7 +48,8 @@ class RunSummation(object):
             saveAsEvent=save_as_event,
             time_shifts=additional_time_shifts,
             outFile=file_name,
-            outFile_monitors=monitors_file_name)
+            outFile_monitors=monitors_file_name,
+            save_directory=settings.save_directory)
 
     def _run_selection_as_path_list(self, run_selection):
         return [run.file_path() for run in run_selection]

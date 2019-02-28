@@ -313,8 +313,12 @@ public:
     void init();
     SIP_PYOBJECT getFittingFunction() const;
 %MethodCode
-    auto f = sipCpp->getFittingFunction();
-    sipRes = FROM_CSTRING(f->asString().c_str());
+    try {
+      auto f = sipCpp->getFittingFunction();
+      sipRes = FROM_CSTRING(f->asString().c_str());
+    } catch (std::out_of_range&) {
+      sipRes = FROM_CSTRING("");
+    }
 %End
     int sizeOfFunctionsGroup() const;
     void loadFunction(QString funStr);
@@ -328,10 +332,56 @@ public:
     QStringList getWorkspaceNames();
     void fit();
     void addAllowedSpectra(const QString &wsName, const QList<int> &wsIndices);
+    void setTextPlotGuess(const QString);
+
+    SIP_PYOBJECT defaultPeakType() const;
+%MethodCode
+    auto f = sipCpp->defaultPeakType();
+    sipRes = FROM_CSTRING(f.c_str());
+%End
+    void setDefaultPeakType(SIP_PYOBJECT);
+%MethodCode
+    sipCpp->setDefaultPeakType(TO_CSTRING(a0));
+%End
+    QStringList registeredPeaks() const;
+    QStringList registeredBackgrounds() const;
+    QStringList registeredOthers() const;
+    QStringList getPeakPrefixes() const;
+    QString addFunction(QString);
+    double getPeakCentreOf(QString);
+    void setPeakCentreOf(QString, double);
+    double getPeakHeightOf(QString);
+    void setPeakHeightOf(QString, double);
+    double getPeakFwhmOf(QString);
+    void setPeakFwhmOf(QString, double);
+
+    SIP_PYOBJECT workspaceName() const;
+%MethodCode
+    auto f = sipCpp->workspaceName();
+    sipRes = FROM_CSTRING(f.c_str());
+%End
+
+    SIP_PYOBJECT outputName() const;
+%MethodCode
+    auto f = sipCpp->outputName();
+    sipRes = FROM_CSTRING(f.c_str());
+%End
+
+    void setOutputName(SIP_PYOBJECT);
+%MethodCode
+    sipCpp->setOutputName(TO_CSTRING(a0));
+%End
+
+    void setPeakToolOn(bool on);
+
 signals:
+    void functionChanged();
     void startXChanged(double);
     void endXChanged(double);
-    void fittingDone(const QString &);
+    void changedParameterOf(const QString &prefix);
+    void algorithmFinished(const QString &);
+    void removeFitCurves();
+    void plotGuess();
 };
 
 // ---------------------------------

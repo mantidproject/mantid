@@ -22,6 +22,7 @@ Bugfixes
 - When turning TF Asymmetry mode off it no longer resets the global options.
 - Results table will produce correct values for co-added runs.
 - The x limits on the settings tab will now correct themselves if bad values are entered. 
+- The `load current run` button now works for CHRONUS in muon analysis.
 
 Algorithms
 ----------

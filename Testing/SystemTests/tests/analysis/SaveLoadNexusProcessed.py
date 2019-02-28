@@ -106,3 +106,16 @@ class SaveLoadNexusProcessedEmptySampleNameTest(SaveLoadNexusProcessedTestBase):
 
     def validate(self):
         return self.compareWorkspaces()
+
+
+class SaveLoadNexusProcessedNoDetectorsSpectraNumbersTest(SaveLoadNexusProcessedTestBase):
+
+    def createTestWorkspace(self):
+        ws = CreateWorkspace([0.], [-1., -2., -3.], NSpec=3, StoreInADS=False)
+        ExtractSingleSpectrum(ws, 1, OutputWorkspace=self.test_ws_name)
+
+    def savedFilename(self):
+        return 'tmp_saveload_nexusprocessed_nodetectorsspectranumbers'
+
+    def validate(self):
+        return self.compareWorkspaces()

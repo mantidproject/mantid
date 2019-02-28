@@ -27,10 +27,9 @@ Logging
 
 Nexus Geometry Loading
 ----------------------
-:ref:`LoadEmptyInstrument <algm-LoadEmptyInstrument>` will now load instrument geometry from hdf5 `NeXus <https://www.nexusformat.org/>`_ format files. Files consistent with the standard following the introduction of `NXoff_geometry <http://download.nexusformat.org/sphinx/classes/base_classes/NXoff_geometry.html>`_ and `NXcylindrical_geometry <http://download.nexusformat.org/sphinx/classes/base_classes/NXcylindrical_geometry.html>`_ will be used to build the entire in-memory instrument geometry within Mantid. This IDF-free route is primarily envisioned for the ESS. While dependent on the instrument, we are overall seeing significant improvements in instrument load times over loading from equivalent IDF based implementations. :ref:`LoadInstrument <algm-LoadInstrument>` also supports the nexus geometry format in the same was as LoadEmptyInstrument.
-
-The changes above have also been encorporated directly into :ref:`LoadEventNexus <algm-LoadEventNexus>`, so it is possible to store data and geometry together for the first time in a NeXus compliant format for Mantid. These changes have made it possible to load experimental ESS event data files directly into Mantid.
-
+- :ref:`LoadEmptyInstrument <algm-LoadEmptyInstrument>` will now load instrument geometry from hdf5 `NeXus <https://www.nexusformat.org/>`_ format files. Files consistent with the standard following the introduction of `NXoff_geometry <http://download.nexusformat.org/sphinx/classes/base_classes/NXoff_geometry.html>`_ and `NXcylindrical_geometry <http://download.nexusformat.org/sphinx/classes/base_classes/NXcylindrical_geometry.html>`_ will be used to build the entire in-memory instrument geometry within Mantid. This IDF-free route is primarily envisioned for the ESS. While dependent on the instrument, we are overall seeing significant improvements in instrument load times over loading from equivalent IDF based implementations. :ref:`LoadInstrument <algm-LoadInstrument>` also supports the nexus geometry format in the same was as LoadEmptyInstrument.
+- The changes above have also been encorporated directly into :ref:`LoadEventNexus <algm-LoadEventNexus>`, so it is possible to store data and geometry together for the first time in a NeXus compliant format for Mantid. These changes have made it possible to load experimental ESS event data files directly into Mantid.
+- New helper function `ExperimentInfo.getResourceFilenames` returns a list of instrument definition files and/or parameter files in accordance to a query time stamp.
 
 Archive Searching
 -----------------
@@ -127,6 +126,7 @@ Bugfixes
 - Fixed a bug in :ref:`MayersSampleCorrection <algm-MayersSampleCorrection>` when using the multiple scattering correction.
 - Fixed a bug in :ref:`IntegrateMDHistoWorkspace <algm-IntegrateMDHistoWorkspace>` in some cases where NaN's are present outside the integration range.
 - :ref:`SaveNexusProcessed <algm-SaveNexusProcessed>` and :ref:`LoadNexusProcessed <algm-LoadNexusProcessed>` now save and load an empty sample name correctly. Note, that files saved before this change will still load with an empty sample name replaced by a space as before.
+- :ref:`SaveNexusProcessed <algm-SaveNexusProcessed>` now save and load spectrum numbers even when histograms have no detectors.
 
 Python
 ------
