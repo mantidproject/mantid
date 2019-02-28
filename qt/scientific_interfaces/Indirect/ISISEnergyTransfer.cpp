@@ -621,8 +621,7 @@ std::string ISISEnergyTransfer::getDetectorGroupingString() const {
 
 /**
  * Converts the checkbox selection to a comma delimited list of save formats for
- *the
- * ISISIndirectEnergyTransfer algorithm.
+ * the ISISIndirectEnergyTransferWrapper algorithm.
  *
  * @return A vector of save formats
  */
