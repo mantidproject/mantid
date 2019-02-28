@@ -51,6 +51,7 @@ plugins.setup_library_paths()
 from workbench.config import APPNAME, CONF, ORG_DOMAIN, ORGANIZATION  # noqa
 from workbench.plotting.globalfiguremanager import GlobalFigureManager  # noqa
 from workbench.app.windowfinder import find_all_windows_that_are_savable  # noqa
+from workbench.projectrecovery.projectrecovery import ProjectRecovery  # noqa
 
 
 # -----------------------------------------------------------------------------
@@ -161,6 +162,7 @@ class MainWindow(QMainWindow):
 
         # Project
         self.project = None
+        self.project_recovery = None
 
     def setup(self):
         # menus must be done first so they can be filled by the
@@ -205,8 +207,11 @@ class MainWindow(QMainWindow):
         self.workspacewidget.register_plugin()
         self.widgets.append(self.workspacewidget)
 
-        # Set up the project object
+        # Set up the project and recovery objects
         self.project = Project(GlobalFigureManager, find_all_windows_that_are_savable)
+        self.project_recovery = ProjectRecovery(globalfiguremanager=GlobalFigureManager,
+                                                multifileinterpreter=self.editor.editors,
+                                                main_window=self)
 
         # uses default configuration as necessary
         self.readSettings(CONF)
@@ -431,6 +436,12 @@ class MainWindow(QMainWindow):
             if app is not None:
                 app.closeAllWindows()
 
+            # Kill the project recovery thread and don't restart should a save be in progress and clear out current
+            # recovery checkpoint as it is closing properly
+            self.project_recovery.stop_recovery_thread()
+            self.project_recovery.closing_workbench = True
+            self.project_recovery.remove_current_pid_folder()
+
             event.accept()
         else:
             # Cancel was pressed when closing an editor
@@ -578,11 +589,18 @@ def start_workbench(app, command_line_options):
     if command_line_options.script is not None:
         main_window.editor.open_file_in_new_tab(command_line_options.script)
         if command_line_options.execute:
-            main_window.editor.execute_current()  # TODO use the result as an exit code
+            main_window.editor.execute_current_async()  # TODO use the result as an exit code
 
         if command_line_options.quit:
             main_window.close()
             return 0
+
+    # Project Recovey on startup
+    main_window.project_recovery.repair_checkpoints()
+    if main_window.project_recovery.check_for_recover_checkpoint():
+        main_window.project_recovery.attempt_recovery()
+    else:
+        main_window.project_recovery.start_recovery_thread()
 
     # lift-off!
     return app.exec_()
