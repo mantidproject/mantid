@@ -9,7 +9,6 @@
 
 #include <MantidAPI/IAlgorithm_fwd.h>
 #include <MantidAPI/Workspace_fwd.h>
-#include <QString>
 #include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
 #include <map>
