@@ -43,9 +43,9 @@ class ProjectSaver(object):
             logger.warning("Can not save an empty project")
             return
 
+        directory = os.path.dirname(file_name)
         # Save workspaces to that location
         if project_recovery:
-            directory = os.path.dirname(file_name)
             workspace_saver = WorkspaceSaver(directory=directory)
             workspace_saver.save_workspaces(workspaces_to_save=workspace_to_save)
             saved_workspaces = workspace_saver.get_output_list()
@@ -60,7 +60,7 @@ class ProjectSaver(object):
         if interfaces_to_save is None:
             interfaces_to_save = []
 
-        interfaces = self._return_interfaces_dicts(file_name=file_name, interfaces_to_save=interfaces_to_save)
+        interfaces = self._return_interfaces_dicts(directory=directory, interfaces_to_save=interfaces_to_save)
 
         # Pass dicts to Project Writer
         writer = ProjectWriter(workspace_names=saved_workspaces,
@@ -71,13 +71,13 @@ class ProjectSaver(object):
         writer.write_out()
 
     @staticmethod
-    def _return_interfaces_dicts(file_name, interfaces_to_save):
+    def _return_interfaces_dicts(directory, interfaces_to_save):
         interfaces = []
         for interface, encoder in interfaces_to_save:
             # Add to the dictionary encoded data with the key as the first tag in the list on the encoder attributes
             try:
                 tag = encoder.tags[0]
-                encoded_dict = encoder.encode(interface, file_name)
+                encoded_dict = encoder.encode(interface, directory)
                 encoded_dict["tag"] = tag
                 interfaces.append(encoded_dict)
             except Exception as e:
