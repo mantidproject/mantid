@@ -80,8 +80,8 @@ void EQSANSCorrectFrame::exec() {
     if (events.empty())
       continue; // no events recorded in this spectrum
     std::vector<TofEvent> clean_events;
-    double newTOF;
     for (auto event : events) {
+      double newTOF;
       // shift times to the correct frame
       newTOF = event.tof() + framesOffsetTime;
       // TOF values smaller than that of the fastest neutrons have been
