@@ -197,10 +197,12 @@ DetectorSearcher::DetectorSearchResult DetectorSearcher::handleTubeGap(
       gapDir[i] = gap;
 
       auto beam1 = detectorDir + gapDir;
+      beam1.normalize();
       const auto result1 = checkInteceptWithNeighbours(beam1, neighbours);
       const auto hit1 = std::get<0>(result1);
 
       auto beam2 = detectorDir - gapDir;
+      beam2.normalize();
       const auto result2 = checkInteceptWithNeighbours(beam2, neighbours);
       const auto hit2 = std::get<0>(result2);
 
