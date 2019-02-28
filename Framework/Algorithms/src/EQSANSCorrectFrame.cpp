@@ -11,7 +11,6 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Events.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/EmptyValues.h
 
 #include <vector>
@@ -20,7 +19,7 @@ namespace Mantid {
 namespace Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(EQSANSTofStructure)
+DECLARE_ALGORITHM(EQSANSCorrectFrame)
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -29,7 +28,7 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using Types::Event::TofEvent;
 
-void EQSANSTofStructure::init() {
+void EQSANSCorrectFrame::init() {
     declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(
             "InputWorkspace", "", Direction::Input,
             boost::make_shared<WorkspaceUnitValidator>("TOF")),
@@ -48,7 +47,7 @@ void EQSANSTofStructure::init() {
                     Direction::Input);
 }
 
-void EQSANSTofStructure::exec() {
+void EQSANSCorrectFrame::exec() {
     processAlgProperties();
     EventWorkspace_sptr inputWS = getProperty("InputWorkspace");
     const size_t numHists = inputWS->getNumberHistograms();
