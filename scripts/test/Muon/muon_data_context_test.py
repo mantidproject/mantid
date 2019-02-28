@@ -10,8 +10,9 @@ from Muon.GUI.Common.utilities.load_utils import load_workspace_from_filename
 from Muon.GUI.Common.muon_data_context import MuonDataContext
 from mantid.api import AnalysisDataService
 import unittest
-
+from Muon.GUI.Common.observer_pattern import Observer
 from mantid.api import FileFinder
+
 
 import copy
 
@@ -26,6 +27,9 @@ class MuonDataContextTest(unittest.TestCase):
         self.loaded_data = MuonLoadData()
         self.context = MuonDataContext(self.loaded_data)
         self.context.instrument = 'EMU'
+        self.gui_variable_observer = Observer()
+        self.gui_variable_observer.update = mock.MagicMock()
+        self.context.gui_variables_notifier.add_subscriber(self.gui_variable_observer)
 
         filepath = FileFinder.findRuns('EMU00019489.nxs')[0]
 
@@ -99,6 +103,11 @@ class MuonDataContextTest(unittest.TestCase):
 
         self.context.message_notifier.notify_subscribers.assert_called_once_with(
             'MainFieldDirection changes within current run set:\ntransverse field runs 1\nlongitudinal field runs 19489\n')
+
+    def test_when_gui_variables_is_modified_notifies_observer(self):
+        self.context.add_or_replace_gui_variables(RebinType='Fixed')
+
+        self.gui_variable_observer.update.assert_called_once_with(self.context.gui_variables_notifier, None)
 
 
 if __name__ == '__main__':

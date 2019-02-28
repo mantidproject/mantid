@@ -50,6 +50,7 @@ class GroupingTabPresenter(object):
         self.guessAlphaObserver = GroupingTabPresenter.GuessAlphaObserver(self)
         self.pairing_table_widget.guessAlphaNotifier.add_subscriber(self.guessAlphaObserver)
         self.message_observer = GroupingTabPresenter.MessageObserver(self)
+        self.gui_variables_observer = GroupingTabPresenter.GuiVariablesChangedObserver(self)
 
     def show(self):
         self._view.show()
@@ -103,7 +104,6 @@ class GroupingTabPresenter(object):
         self._model.update_pair_alpha(pair_name, new_alpha)
         self.pairing_table_widget.update_view_from_model()
 
-        self.groupingNotifier.notify_subscribers()
         self.handle_update_all_clicked()
 
     def handle_load_grouping_from_file(self):
@@ -128,8 +128,6 @@ class GroupingTabPresenter(object):
         self.pairing_table_widget.update_view_from_model()
         self.update_description_text(description)
 
-        self.groupingNotifier.notify_subscribers()
-
     def disable_editing(self):
         self._view.set_buttons_enabled(False)
         self.grouping_table_widget.disable_editing()
@@ -146,9 +144,13 @@ class GroupingTabPresenter(object):
     def handle_update_all_clicked(self):
         self.update_thread = self.create_update_thread()
         self.update_thread.threadWrapperSetUp(self.disable_editing,
-                                              self.enable_editing,
+                                              self.handle_update_finished,
                                               self._view.display_warning_box)
         self.update_thread.start()
+
+    def handle_update_finished(self):
+        self.enable_editing()
+        self.groupingNotifier.notify_subscribers()
 
     def handle_default_grouping_button_clicked(self):
         self._model.reset_groups_and_pairs_to_default()
@@ -156,15 +158,11 @@ class GroupingTabPresenter(object):
         self.pairing_table_widget.update_view_from_model()
         self.update_description_text()
 
-        self.groupingNotifier.notify_subscribers()
-
     def on_clear_requested(self):
         self._model.clear()
         self.grouping_table_widget.update_view_from_model()
         self.pairing_table_widget.update_view_from_model()
         self.update_description_text()
-
-        self.groupingNotifier.notify_subscribers()
 
     def handle_new_data_loaded(self):
         if self._model.is_data_loaded():
@@ -187,10 +185,10 @@ class GroupingTabPresenter(object):
     # ------------------------------------------------------------------------------------------------------------------
 
     def group_table_changed(self):
-        self.groupingNotifier.notify_subscribers()
+        pass
 
     def pair_table_changed(self):
-        self.groupingNotifier.notify_subscribers()
+        pass
 
     class LoadObserver(Observer):
 
@@ -218,6 +216,14 @@ class GroupingTabPresenter(object):
 
         def update(self, observable, arg):
             self.outer.handle_guess_alpha(arg[0], arg[1], arg[2])
+
+    class GuiVariablesChangedObserver(Observer):
+        def __init__(self, outer):
+            Observer.__init__(self)
+            self.outer = outer
+
+        def update(self, observable, arg):
+            self.outer.handle_update_all_clicked()
 
     class GroupingNotifier(Observable):
 

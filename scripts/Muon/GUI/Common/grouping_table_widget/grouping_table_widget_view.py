@@ -264,10 +264,10 @@ class GroupingTableView(QtGui.QWidget):
         self.group_range_use_last_data.stateChanged.connect(slot)
 
     def on_user_changes_group_range_min_text_edit(self, slot):
-        self.group_range_min.textChanged.connect(slot)
+        self.group_range_min.editingFinished.connect(slot)
 
     def on_user_changes_group_range_max_text_edit(self, slot):
-        self.group_range_max.textChanged.connect(slot)
+        self.group_range_max.editingFinished.connect(slot)
 
     # ------------------------------------------------------------------------------------------------------------------
     #
