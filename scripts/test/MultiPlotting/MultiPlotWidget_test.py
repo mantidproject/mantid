@@ -8,10 +8,10 @@ import unittest
 
 from Muon.GUI.Common import mock_widget
 
-from MultiPlotting.multiPlotting_widget import MultiPlotWidget
+from MultiPlotting.multi_plotting_widget import MultiPlotWidget
 from MultiPlotting.QuickEdit.quickEdit_widget import QuickEditWidget
-from MultiPlotting.subplot.subPlot import subPlot
-from MultiPlotting.multiPlotting_context import PlottingContext
+from MultiPlotting.subplot.subplot import subplot
+from MultiPlotting.multi_plotting_context import PlottingContext
 
 
 try:
@@ -53,13 +53,12 @@ class MultiPlotWidgetTest(unittest.TestCase):
         self.widget = MultiPlotWidget(context)
  
     def test_add_subplot(self):
-        #with mock.patch("MultiPlotting.subplot.subPlot_context.subPlotContext.addLine") as patch:
         with mock.patch("MultiPlotting.QuickEdit.quickEdit_widget.QuickEditWidget.add_subplot") as qe_patch:
-            self.widget.add_subplot("test",111)
+            self.widget.add_subplot("test")
             self.assertEquals(qe_patch.call_count,1)
 
     def test_plot(self):
-        with mock.patch("MultiPlotting.subplot.subPlot.subPlot.plot") as patch:
+        with mock.patch("MultiPlotting.subplot.subplot.subplot.plot") as patch:
              ws = mock.MagicMock()
              subplotName = "test"
              specNum = 4
@@ -79,6 +78,17 @@ class MultiPlotWidgetTest(unittest.TestCase):
         self.widget.set_all_values()
         self.widget._x_range_changed.assert_called_with([-1,20])
         self.widget._y_range_changed.assert_called_with([0,50])
+
+    def test_updateQuickEditNoMatch(self):
+        self.widget._context.subplots = data()
+        # mocks as we only want to test logic
+        self.widget.quickEdit.get_selection = mock.MagicMock(return_value = data())
+        self.widget.quickEdit.rm_subplot = mock.Mock()
+        self.widget.quickEdit._if_empty_close = mock.Mock()
+
+        self.widget._update_quick_edit("no match")
+        self.assertEquals(self.widget.quickEdit.rm_subplot.call_count, 1)
+        
 
     def test_updateQuickEdit1Match(self):
         self.widget._context.subplots = data()

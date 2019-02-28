@@ -30,7 +30,7 @@ This algorithm computes quantities needed by :ref:`ReflectometryMomentumTransfer
 ``beam_stats.second_slit_angular_spread``
    :math:`=0.68 x_{slit2} / (d_{slit2} + l_2)`, where :math:`x_{slit2}` is the size of the second slit, :math:`d_{slit2}` is the second slit-to-sample distance and :math:`l_2` is the sample-to-reflected foreground centre distance.
 
-Additionally, ``beam_stats.beam_rms_variation`` is cached to the sample logs of *DirectBeamWorkspace* removing the need to recalculate the quantity every time the same direct beam passed to this algorithm.
+Additionally, ``beam_stats.beam_rms_variation`` is cached to the sample logs of *DirectLineWorkspace* removing the need to recalculate the quantity every time the same direct beam passed to this algorithm.
 
 Usage
 -----
@@ -49,7 +49,7 @@ Usage
    ReflectometryBeamStatistics(
        ReflectedBeamWorkspace=ref,
        ReflectedForeground=[199, 202, 205],
-       DirectBeamWorkspace=dir,
+       DirectLineWorkspace=dir,
        DirectForeground=[200, 202, 205],
        PixelSize=0.001195,
        DetectorResolution=0.00022,

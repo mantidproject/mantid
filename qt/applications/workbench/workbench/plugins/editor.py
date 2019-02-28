@@ -10,13 +10,16 @@
 from __future__ import (absolute_import, unicode_literals)
 
 # system imports
+import os.path as osp
+
+# third-party library imports
 from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QVBoxLayout
 
-# third-party library imports
+# local package imports
+from mantid.kernel import logger
 from mantidqt.utils.qt import add_actions, create_action
 from mantidqt.widgets.codeeditor.multifileinterpreter import MultiPythonFileInterpreter
-# local package imports
 from workbench.plugins.base import PluginWidget
 
 # from mantidqt.utils.qt import toQSettings when readSettings/writeSettings are implemented
@@ -34,6 +37,10 @@ import matplotlib.pyplot as plt
 
 import numpy as np
 """
+# Accepted extensions for drag-and-drop to editor
+ACCEPTED_FILE_EXTENSIONS = ['.py', '.pyw']
+# QSettings key for session tabs
+TAB_SETTINGS_KEY = "Editors/SessionTabs"
 
 
 class MultiFileEditor(PluginWidget):
@@ -43,26 +50,71 @@ class MultiFileEditor(PluginWidget):
         super(MultiFileEditor, self).__init__(parent)
 
         # layout
-        self.editors = MultiPythonFileInterpreter(default_content=DEFAULT_CONTENT,
-                                                  parent=self)
+        self.editors = MultiPythonFileInterpreter(default_content=DEFAULT_CONTENT, parent=self)
+
         layout = QVBoxLayout()
         layout.addWidget(self.editors)
         layout.setContentsMargins(0, 0, 0, 0)
         self.setLayout(layout)
 
+        self.setAcceptDrops(True)
+
         # attributes
+        self.tabs_open_on_closing = None
         self.run_action = create_action(self, "Run",
-                                        on_triggered=self.editors.execute_current,
+                                        on_triggered=self.editors.execute_current_async,
                                         shortcut=("Ctrl+Return", "Ctrl+Enter"),
                                         shortcut_context=Qt.ApplicationShortcut)
         self.abort_action = create_action(self, "Abort",
                                           on_triggered=self.editors.abort_current)
 
-        self.editor_actions = [self.run_action, self.abort_action]
+        self.abort_action = create_action(
+            self, "Abort", on_triggered=self.editors.abort_current)
 
-    def execute_current(self):
+        # menu action to toggle the find/replace dialog
+        self.toggle_find_replace = create_action(self,
+                                                 'Find/Replace...',
+                                                 on_triggered=self.editors.toggle_find_replace_dialog,
+                                                 shortcut='Ctrl+F')
+
+        self.toggle_comment_action = create_action(
+            self.editors.current_editor(), "Comment/Uncomment",
+            on_triggered=self.editors.toggle_comment_current,
+            shortcut="Ctrl+/",
+            shortcut_context=Qt.ApplicationShortcut)
+
+        self.tabs_to_spaces_action = create_action(
+            self, 'Tabs to Spaces',
+            on_triggered=self.editors.tabs_to_spaces_current)
+
+        self.spaces_to_tabs_action = create_action(
+            self, 'Spaces to Tabs',
+            on_triggered=self.editors.spaces_to_tabs_current)
+
+        self.toggle_whitespace_action = create_action(
+            self, 'Toggle Whitespace Visible',
+            on_triggered=self.editors.toggle_whitespace_visible_all)
+
+        # Store actions for adding to menu bar; None will add a separator
+        self.editor_actions = [self.run_action,
+                               self.abort_action, None,
+                               self.toggle_find_replace,
+                               None,
+                               self.toggle_comment_action,
+                               self.toggle_whitespace_action, None,
+                               self.tabs_to_spaces_action,
+                               self.spaces_to_tabs_action, None]
+
+    def load_settings_from_config(self, config):
+        self.editors.load_settings_from_config(config)
+
+    def execute_current_async(self):
         '''This is used by MainWindow to execute a file after opening it'''
-        return self.editors.execute_current()
+        return self.editors.execute_current_async()
+
+    def restore_session_tabs(self, session_tabs):
+        self.open_files_in_new_tabs(session_tabs, startup=True)
+        self.editors.close_tab(0)  # close default empty tab
 
     # ----------- Plugin API --------------------
 
@@ -71,16 +123,40 @@ class MultiFileEditor(PluginWidget):
         Tries to close all editors
         :return: True if editors can be closed, false if cancelled
         """
+        self.tabs_open_on_closing = self.editors.tab_filepaths
         return self.editors.close_all()
+
+    def dragEnterEvent(self, event):
+        data = event.mimeData()
+        if data.hasText() and data.hasUrls():
+            filepaths = [url.toLocalFile() for url in data.urls()]
+            for filepath in filepaths:
+                if osp.splitext(filepath)[1] in ACCEPTED_FILE_EXTENSIONS:
+                    event.acceptProposedAction()
+
+    def dropEvent(self, event):
+        data = event.mimeData()
+        for url in data.urls():
+            filepath = url.toLocalFile()
+            if osp.splitext(filepath)[1] in ACCEPTED_FILE_EXTENSIONS:
+                try:
+                    self.open_file_in_new_tab(filepath)
+                except IOError as io_error:
+                    logger.warning("Could not load file:\n  '{}'"
+                                   "".format(io_error))
 
     def get_plugin_title(self):
         return "Editor"
 
-    def readSettings(self, _):
-        pass
+    def readSettings(self, settings):
+        try:
+            prev_session_tabs = settings.get(TAB_SETTINGS_KEY)
+        except KeyError:
+            return
+        self.restore_session_tabs(prev_session_tabs)
 
-    def writeSettings(self, _):
-        pass
+    def writeSettings(self, settings):
+        settings.set(TAB_SETTINGS_KEY, self.tabs_open_on_closing)
 
     def register_plugin(self):
         self.main.add_dockwidget(self)
@@ -89,8 +165,16 @@ class MultiFileEditor(PluginWidget):
 
     # ----------- Plugin Behaviour --------------------
 
-    def open_file_in_new_tab(self, filepath):
-        return self.editors.open_file_in_new_tab(filepath)
+    def open_file_in_new_tab(self, filepath, startup=False):
+        return self.editors.open_file_in_new_tab(filepath, startup)
+
+    def open_files_in_new_tabs(self, filepaths, startup=False):
+        for filepath in filepaths:
+            try:
+                self.open_file_in_new_tab(filepath, startup)
+            except IOError as io_error:
+                logger.warning("Could not load file:\n  {}"
+                               "".format(io_error))
 
     def save_current_file(self):
         self.editors.save_current_file()

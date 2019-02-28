@@ -14,33 +14,12 @@
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MockRNG.h"
 
 #include <boost/make_shared.hpp>
 #include <cxxtest/TestSuite.h>
-#include <gmock/gmock.h>
 
 using Mantid::Geometry::SampleEnvironment;
-
-namespace {
-// -----------------------------------------------------------------------------
-// Mock Random Number Generator
-// -----------------------------------------------------------------------------
-class MockRNG final : public Mantid::Kernel::PseudoRandomNumberGenerator {
-public:
-  GNU_DIAG_OFF_SUGGEST_OVERRIDE
-  MOCK_METHOD0(nextValue, double());
-  MOCK_METHOD2(nextValue, double(double, double));
-  MOCK_METHOD2(nextInt, int(int, int));
-  MOCK_METHOD0(restart, void());
-  MOCK_METHOD0(save, void());
-  MOCK_METHOD0(restore, void());
-  MOCK_METHOD1(setSeed, void(size_t));
-  MOCK_METHOD2(setRange, void(const double, const double));
-  MOCK_CONST_METHOD0(min, double());
-  MOCK_CONST_METHOD0(max, double());
-  GNU_DIAG_ON_SUGGEST_OVERRIDE
-};
-} // namespace
 
 class SampleEnvironmentTest : public CxxTest::TestSuite {
 public:

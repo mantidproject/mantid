@@ -31,8 +31,10 @@ public:
   }
 
   std::string value() const override;
+  Json::Value valueAsJson() const override;
   std::string getDefault() const override;
   std::string setValue(const std::string &strValue) override;
+  std::string setValueFromJson(const Json::Value &value) override;
 
 private:
   std::string m_dataServiceKey;

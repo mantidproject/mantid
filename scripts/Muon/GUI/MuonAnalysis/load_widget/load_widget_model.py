@@ -15,14 +15,16 @@ class LoadWidgetModel(object):
     (both the nun numbers, filenames and workspaces) as well as loading new runs using a separate loading thread.
     """
 
-    def __init__(self, loaded_data_store=MuonLoadData()):
+    def __init__(self, loaded_data_store=MuonLoadData(), muon_context=None):
         self._loaded_data_store = loaded_data_store
+        self._context = muon_context
 
     def add_muon_data(self, filename, workspace, run):
         self._loaded_data_store.add_data(run=run, filename=filename, workspace=workspace)
 
     def clear_data(self):
         self._loaded_data_store.clear()
+        self._context.current_runs = []
 
     def is_filename_loaded(self, filename):
         return self._loaded_data_store.contains(filename=filename)
@@ -32,12 +34,12 @@ class LoadWidgetModel(object):
 
     @property
     def workspaces(self):
-        return self._loaded_data_store.get_parameter("workspace")
+        return self._context.current_workspaces
 
     @property
     def runs(self):
-        return self._loaded_data_store.get_parameter("run")
+        return self._context.current_runs
 
     @property
     def filenames(self):
-        return self._loaded_data_store.get_parameter("filename")
+        return self._context.current_filenames

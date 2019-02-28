@@ -79,9 +79,9 @@ class ISIS_ReductionWebLike(systemtesting.MantidSystemTest):
         # tolerance defined outside of init
 #pylint: disable=W0201
         self.tolerance = 1e-6
-        # tolerance_is_reller defined outside of init
+        # tolerance_is_rel_err defined outside of init
 #pylint: disable=W0201
-        self.tolerance_is_reller=True
+        self.tolerance_is_rel_err = True
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Instrument')
         self.disableChecking.append('Sample')

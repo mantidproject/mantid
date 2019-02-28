@@ -4,13 +4,15 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=no-init,invalid-name
+# pylint: disable=no-init,invalid-name
 '''
 @author Spencer Howells, ISIS
 @date December 05, 2013
 '''
 from __future__ import (absolute_import, division, print_function)
+
 import numpy as np
+
 from mantid.api import IFunction1D, FunctionFactory
 from scipy import constants
 
@@ -31,9 +33,21 @@ class TeixeiraWater(IFunction1D):
     def function1D(self, xvals):
         tau = self.getParameterValue("Tau")
         length = self.getParameterValue("L")
-        q2l2 = np.square(length * np.array(xvals))
-        return (self.hbar/tau) * q2l2 / (6 + q2l2)
+        xvals = np.array(xvals)
+
+        with np.errstate(divide='ignore'):
+            hwhm = self.hbar * np.square(xvals * length) / (tau * (6 + np.square(xvals * length)))
+        return hwhm
+
+    def functionDeriv1D(self, xvals, jacobian):
+        tau = self.getParameterValue("Tau")
+        length = self.getParameterValue("L")
+
+        for i, x in enumerate(xvals, start=0):
+            hwhm = self.hbar * np.square(x * length) / (tau * (6 + np.square(x * length)))
+            jacobian.set(i, 0, -hwhm / tau)
+            jacobian.set(i, 1, 2 * hwhm * (1.0 - hwhm * tau) / length)
 
 
-# Required to have Mantid recognise the new function.
+# Required to have Mantid recognise the new function
 FunctionFactory.subscribe(TeixeiraWater)

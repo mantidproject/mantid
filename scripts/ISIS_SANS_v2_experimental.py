@@ -8,9 +8,9 @@
 """
     Script used to start the Test Interface from MantidPlot
 """
-from ui.sans_isis import sans_data_processor_gui
-from sans.gui_logic.presenter.run_tab_presenter import RunTabPresenter
 from sans.common.enums import SANSFacility
+from sans.gui_logic.presenter.run_tab_presenter import RunTabPresenter
+from ui.sans_isis import sans_data_processor_gui
 
 # -----------------------------------------------
 # Create presenter

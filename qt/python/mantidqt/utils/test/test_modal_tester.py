@@ -15,7 +15,7 @@ import unittest
 
 from qtpy.QtWidgets import QInputDialog
 
-from mantidqt.utils.qt.test import GuiTest, ModalTester
+from mantidqt.utils.qt.testing import GuiTest, ModalTester
 
 
 class TestModalTester(GuiTest):

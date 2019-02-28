@@ -8,6 +8,7 @@
 #include "MantidKernel/IPropertyManager.h"
 
 // PropertyWithValue implementation
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/PropertyWithValue.tcc"
 
 namespace Mantid {

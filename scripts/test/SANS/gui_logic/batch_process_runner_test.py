@@ -9,7 +9,7 @@ from sans.gui_logic.models.batch_process_runner import BatchProcessRunner
 import unittest
 import sys
 from sans.common.enums import (OutputMode)
-from PyQt4.QtCore import QThreadPool
+from qtpy.QtCore import QThreadPool
 
 if sys.version_info.major > 2:
     from unittest import mock

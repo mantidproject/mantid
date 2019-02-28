@@ -31,7 +31,7 @@ class SANS2DMinimalBatchReductionSlicedTest_V2(systemtesting.MantidSystemTest):
 
     def validate(self):
         self.tolerance = 0.02
-        self.tolerance_is_reller=True
+        self.tolerance_is_rel_err = True
         self.disableChecking.append('Instrument')
         try:
             return str(AnalysisDataService['trans_test_rear'][0]), 'SANSReductionGUI.nxs'
@@ -57,7 +57,7 @@ class SANS2DMinimalSingleReductionSlicedTest_V2(systemtesting.MantidSystemTest):
 
     def validate(self):
         self.tolerance = 0.02
-        self.tolerance_is_reller=True
+        self.tolerance_is_rel_err = True
         self.disableChecking.append('Instrument')
         return str(AnalysisDataService['trans_test_rear'][0]), 'SANSReductionGUI.nxs'
 

@@ -151,7 +151,7 @@ install ( FILES ${PROJECT_BINARY_DIR}/mantidpython.bat.install DESTINATION bin R
 # correct Python from Mantid's installation directory
 install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/buildconfig/CMake/Packaging/launch_workbench.pyw DESTINATION bin )
 
-if ( ENABLE_WORKBENCH AND PACKAGE_WORKBENCH )
+if ( ENABLE_WORKBENCH )
   find_program(_powershell_available NAMES "powershell")
   # Name of the workbench executable without any extensions
   set(_workbench_base_name launch_workbench)
@@ -225,7 +225,7 @@ set (CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "
 
 # if the workbench is being packaged we want to add the shortcut commands for the installation
 # this is done via appending the relevant commands to the already declared variables
-if ( PACKAGE_WORKBENCH )
+if ( ENABLE_WORKBENCH )
   install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/images/${WINDOWS_NSIS_MANTIDWORKBENCH_ICON_NAME}.ico DESTINATION bin )
   set ( MANTIDWORKBENCH_LINK_NAME "MantidWorkbench${WINDOWS_CAPITALIZED_PACKAGE_SUFFIX}.lnk" )
   message(STATUS "Adding icons for Workbench as it is being packaged in the installation.")

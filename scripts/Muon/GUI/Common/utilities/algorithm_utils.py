@@ -18,9 +18,6 @@ def run_MuonPreProcess(parameter_dict):
     the input dictionary of {proeprty_name:property_value} pairs.
     Returns the calculated workspace.
     """
-    muon_logger.notice("Pre-process : " + str({key: val for key, val in parameter_dict.items() if key != "InputWorkspace"}))
-    if "DeadTimeTable" in parameter_dict.keys():
-        muon_logger.notice("DTC : " + str(type(parameter_dict["DeadTimeTable"]), parameter_dict["DeadTimeTable"].toDict()))
     alg = mantid.AlgorithmManager.create("MuonPreProcess")
     alg.initialize()
     alg.setAlwaysStoreInADS(False)
@@ -52,6 +49,21 @@ def run_MuonPairingAsymmetry(parameter_dict):
     Returns the calculated workspace.
     """
     alg = mantid.AlgorithmManager.create("MuonPairingAsymmetry")
+    alg.initialize()
+    alg.setAlwaysStoreInADS(False)
+    alg.setProperty("OutputWorkspace", "__notUsed")
+    alg.setProperties(parameter_dict)
+    alg.execute()
+    return alg.getProperty("OutputWorkspace").value
+
+
+def run_MuonGroupingAsymmetry(parameter_dict):
+    """
+    Apply the MuonGroupingCounts algorithm with the properties supplied through
+    the input dictionary of {proeprty_name:property_value} pairs.
+    Returns the calculated workspace.
+    """
+    alg = mantid.AlgorithmManager.create("MuonGroupingAsymmetry")
     alg.initialize()
     alg.setAlwaysStoreInADS(False)
     alg.setProperty("OutputWorkspace", "__notUsed")

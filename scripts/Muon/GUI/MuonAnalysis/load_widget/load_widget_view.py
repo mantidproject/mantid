@@ -18,7 +18,6 @@ class LoadWidgetView(QtGui.QWidget):
         self.load_file_widget = load_file_view
 
         self.setup_interface_layout()
-        self.set_connections()
 
     def setup_interface_layout(self):
 
@@ -29,18 +28,11 @@ class LoadWidgetView(QtGui.QWidget):
 
         self.multiple_loading_label = QtGui.QLabel(self)
         self.multiple_loading_label.setObjectName("multiple_loading_label")
-        self.multiple_loading_label.setText("Multiple loading : ")
+        self.multiple_loading_label.setText("Co-Add : ")
 
         self.multiple_loading_check = QtGui.QCheckBox(self)
-        self.multiple_loading_check.setToolTip("Enable/disable loading multiple runs at once")
+        self.multiple_loading_check.setToolTip("Enable/disable co-adding selected runs")
         self.multiple_loading_check.setChecked(False)
-
-        self.load_behaviour_combo = QtGui.QComboBox(self)
-        self.load_behaviour_combo.setObjectName("load_behaviour_combo")
-        self.load_behaviour_combo.addItem("Co-Add")
-        self.load_behaviour_combo.addItem("Simultaneous")
-        self.load_behaviour_combo.setToolTip("The behaviour of the loaded data in multiple file mode")
-        self.load_behaviour_combo.setEnabled(False)
 
         # Set the layout of the tools at the bottom of the widget
         self.horizontal_layout = QtGui.QHBoxLayout()
@@ -49,7 +41,6 @@ class LoadWidgetView(QtGui.QWidget):
         self.horizontal_layout.addStretch(0)
         self.horizontal_layout.addWidget(self.multiple_loading_label)
         self.horizontal_layout.addWidget(self.multiple_loading_check)
-        self.horizontal_layout.addWidget(self.load_behaviour_combo)
 
         self.horizontal_layout.setContentsMargins(0, 0, 0, 0)
         self.horizontal_layout.setMargin(0)
@@ -62,8 +53,6 @@ class LoadWidgetView(QtGui.QWidget):
         self.vertical_layout.addWidget(self.load_file_widget)
         self.vertical_layout.addWidget(self.tool_widget)
 
-        self.vertical_layout.addStretch(1)
-
         self.group = QtGui.QGroupBox("Loading")
         self.group.setFlat(False)
         self.setStyleSheet("QGroupBox {border: 1px solid grey;border-radius: 10px;margin-top: 1ex; margin-right: 0ex}"
@@ -71,7 +60,7 @@ class LoadWidgetView(QtGui.QWidget):
                            'subcontrol-origin: margin;'
                            "padding: 0 3px;"
                            'subcontrol-position: top center;'
-                           'padding-top: -10px;'
+                           'padding-top: 0px;'
                            'padding-bottom: 0px;'
                            "padding-right: 10px;"
                            ' color: grey; }')
@@ -81,26 +70,11 @@ class LoadWidgetView(QtGui.QWidget):
         self.widget_layout.addWidget(self.group)
         self.setLayout(self.widget_layout)
 
-    def get_multiple_loading_combo_text(self):
-        return str(self.load_behaviour_combo.currentText())
-
-    def set_connections(self):
-        self.on_multiple_loading_check_changed(self.change_multiple_loading_state)
-
-    def on_multiple_loading_check_changed(self, slot):
-        self.multiple_loading_check.stateChanged.connect(slot)
-
     def on_multiple_load_type_changed(self, slot):
-        self.load_behaviour_combo.currentIndexChanged.connect(slot)
+        self.multiple_loading_check.stateChanged.connect(slot)
 
     def get_multiple_loading_state(self):
         return self.multiple_loading_check.isChecked()
-
-    def change_multiple_loading_state(self):
-        if self.get_multiple_loading_state():
-            self.load_behaviour_combo.setEnabled(True)
-        else:
-            self.load_behaviour_combo.setEnabled(False)
 
     def on_subwidget_loading_started(self, slot):
         self.load_run_widget.loadingStarted.connect(slot)

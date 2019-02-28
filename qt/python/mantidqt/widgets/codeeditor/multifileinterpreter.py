@@ -13,11 +13,12 @@ from __future__ import (absolute_import, unicode_literals)
 import os.path as osp
 
 # 3rd party imports
-from qtpy.QtCore import Qt
+from qtpy.QtCore import Qt, Slot
 from qtpy.QtWidgets import (QTabWidget, QToolButton, QVBoxLayout, QWidget)
 
 # local imports
 from mantidqt.widgets.codeeditor.interpreter import PythonFileInterpreter
+from mantidqt.widgets.codeeditor.scriptcompatibility import (add_mantid_api_import, mantid_api_import_needed)
 
 NEW_TAB_TITLE = 'New'
 MODIFIED_MARKER = '*'
@@ -39,6 +40,8 @@ class MultiPythonFileInterpreter(QWidget):
 
         # attributes
         self.default_content = default_content
+        self.prev_session_tabs = None
+        self.whitespace_visible = False
 
         # widget setup
         self._tabs = self.create_tabwidget()
@@ -50,15 +53,32 @@ class MultiPythonFileInterpreter(QWidget):
         # add a single editor by default
         self.append_new_editor()
 
+        # setting defaults
+        self.confirm_on_save = True
+
+    def load_settings_from_config(self, config):
+        self.confirm_on_save = config.get('project', 'prompt_save_editor_modified')
+
     @property
     def editor_count(self):
         return self._tabs.count()
 
+    @property
+    def tab_filepaths(self):
+        file_paths = []
+        for idx in range(self.editor_count):
+            file_path = self._tabs.widget(idx).filename
+            if file_path:
+                file_paths.append(file_path)
+        return file_paths
+
     def append_new_editor(self, content=None, filename=None):
         if content is None:
             content = self.default_content
-        interpreter = PythonFileInterpreter(content, filename=filename,
-                                            parent=self._tabs)
+        interpreter = PythonFileInterpreter(content, filename=filename, parent=self)
+        if self.whitespace_visible:
+            interpreter.set_whitespace_visible()
+
         # monitor future modifications
         interpreter.sig_editor_modified.connect(self.mark_current_tab_modified)
         interpreter.sig_filename_modified.connect(self.on_filename_modified)
@@ -72,6 +92,13 @@ class MultiPythonFileInterpreter(QWidget):
     def abort_current(self):
         """Request that that the current execution be cancelled"""
         self.current_editor().abort()
+
+    @Slot()
+    def abort_all(self):
+        """Request that all executing tabs are cancelled"""
+        for ii in range(0, len(self._tabs)):
+            editor = self.editor_at(ii)
+            editor.abort()
 
     def close_all(self):
         """
@@ -96,13 +123,16 @@ class MultiPythonFileInterpreter(QWidget):
         # are being prompted to save
         self._tabs.setCurrentIndex(idx)
         if self.current_editor().confirm_close():
+            widget = self._tabs.widget(idx)
+            # note: this does not close the widget, that is why we manually close it
             self._tabs.removeTab(idx)
+            widget.close()
         else:
             return False
 
         # we never want an empty widget
         if self.editor_count == 0:
-            self.append_new_editor(content=self.default_content)
+            self.append_new_editor()
 
         return True
 
@@ -126,10 +156,17 @@ class MultiPythonFileInterpreter(QWidget):
         """Return the editor at the given index. Must be in range"""
         return self._tabs.widget(idx)
 
-    def execute_current(self):
+    def execute_current_async(self):
         """Execute content of the current file. If a selection is active
-        then only this portion of code is executed"""
+        then only this portion of code is executed, this is completed asynchronously"""
         self.current_editor().execute_async()
+
+    @Slot()
+    def execute_current_async_blocking(self):
+        """Execute content of the current file. If a selection is active
+            then only this portion of code is executed, completed asynchronously
+            which blocks calling thread. """
+        self.current_editor().execute_async_blocking()
 
     def mark_current_tab_modified(self, modified):
         """Update the current tab title to indicate that the
@@ -158,19 +195,58 @@ class MultiPythonFileInterpreter(QWidget):
         self._tabs.setTabText(idx_cur, title)
         self._tabs.setTabToolTip(idx_cur, tooltip)
 
-    def open_file_in_new_tab(self, filepath):
+    @Slot(str)
+    def open_file_in_new_tab(self, filepath, startup=False):
         """Open the existing file in a new tab in the editor
 
         :param filepath: A path to an existing file
+        :param startup: Flag for if function is being called on startup
         """
         with open(filepath, 'r') as code_file:
             content = code_file.read()
+
         self.append_new_editor(content=content, filename=filepath)
+        if startup is False and mantid_api_import_needed(content) is True:
+            add_mantid_api_import(self.current_editor().editor, content)
+
+    def open_files_in_new_tabs(self, filepaths):
+        for filepath in filepaths:
+            self.open_file_in_new_tab(filepath)
 
     def plus_button_clicked(self, _):
         """Add a new tab when the plus button is clicked"""
         self.append_new_editor()
 
+    def restore_session_tabs(self):
+        if self.prev_session_tabs is not None:
+            try:
+                self.open_files_in_new_tabs(self.prev_session_tabs)
+            except IOError:
+                pass
+            self.close_tab(0)  # close default empty script
+
     def save_current_file(self):
         """Save the current file"""
         self.current_editor().save()
+
+    def spaces_to_tabs_current(self):
+        self.current_editor().replace_spaces_with_tabs()
+
+    def tabs_to_spaces_current(self):
+        self.current_editor().replace_tabs_with_spaces()
+
+    def toggle_comment_current(self):
+        self.current_editor().toggle_comment()
+
+    def toggle_find_replace_dialog(self):
+        self.current_editor().show_find_replace_dialog()
+
+    def toggle_whitespace_visible_all(self):
+        if self.whitespace_visible:
+            for idx in range(self.editor_count):
+                self.editor_at(idx).set_whitespace_invisible()
+            self.whitespace_visible = False
+        else:
+            for idx in range(self.editor_count):
+                self.editor_at(idx).set_whitespace_visible()
+            self.whitespace_visible = True

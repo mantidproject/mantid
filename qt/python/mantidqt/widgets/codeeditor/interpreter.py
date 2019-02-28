@@ -1,44 +1,43 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package
-#
-#
 from __future__ import (absolute_import, unicode_literals)
 
-# std imports
-import sys
 import os.path
+import sys
 import traceback
 
-# 3rd party imports
-from qtpy.QtCore import QObject, Signal
+from qtpy.QtCore import QObject, Qt, Signal
 from qtpy.QtGui import QColor, QFontMetrics
-from qtpy.QtWidgets import QMessageBox, QStatusBar, QVBoxLayout, QWidget, QFileDialog
+from qtpy.QtWidgets import QFileDialog, QMessageBox, QStatusBar, QVBoxLayout, QWidget
 
-# local imports
+from mantidqt.io import open_a_file_dialog
 from mantidqt.widgets.codeeditor.editor import CodeEditor
 from mantidqt.widgets.codeeditor.errorformatter import ErrorFormatter
 from mantidqt.widgets.codeeditor.execution import PythonCodeExecution
-from mantidqt.io import open_a_file_dialog
+from mantidqt.widgets.embedded_find_replace_dialog.presenter import EmbeddedFindReplaceDialog
 
-# Status messages
 IDLE_STATUS_MSG = "Status: Idle."
 LAST_JOB_MSG_TEMPLATE = "Last job completed {} at {} in {:.3f}s"
 RUNNING_STATUS_MSG = "Status: Running"
+ABORTED_STATUS_MSG = "Status: Aborted"
 
 # Editor
 CURRENTLINE_BKGD_COLOR = QColor(247, 236, 248)
 TAB_WIDTH = 4
+TAB_CHAR = '\t'
+SPACE_CHAR = " "
 
 
 class EditorIO(object):
 
-    def __init__(self, editor):
+    def __init__(self, editor, confirm_on_exit=True):
         self.editor = editor
+        self.confirm_on_exit = confirm_on_exit
 
     def ask_for_filename(self):
         filename = open_a_file_dialog(parent=self.editor, default_suffix=".py", file_filter="Python Files (*.py)",
@@ -68,7 +67,8 @@ class EditorIO(object):
                 # Cancelled
                 return False
         else:
-            return self.write()
+            # pretend the user clicked No on the dialog
+            return True
 
     def write(self):
         filename = self.editor.fileName()
@@ -93,31 +93,63 @@ class EditorIO(object):
 class PythonFileInterpreter(QWidget):
     sig_editor_modified = Signal(bool)
     sig_filename_modified = Signal(str)
+    sig_progress = Signal(int)
+    sig_exec_error = Signal(object)
+    sig_exec_success = Signal(object)
 
-    def __init__(self, content=None, filename=None,
-                 parent=None):
+    def __init__(self, content=None, filename=None, parent=None):
         """
         :param content: An optional string of content to pass to the editor
         :param filename: The file path where the content was read.
         :param parent: An optional parent QWidget
         """
         super(PythonFileInterpreter, self).__init__(parent)
+        self.parent = parent
 
         # layout
         self.editor = CodeEditor("AlternateCSPythonLexer", self)
+
+        # Clear QsciScintilla key bindings that may override PyQt's bindings
+        self.clear_key_binding("Ctrl+/")
+
         self.status = QStatusBar(self)
-        layout = QVBoxLayout()
-        layout.addWidget(self.editor)
-        layout.addWidget(self.status)
-        self.setLayout(layout)
-        layout.setContentsMargins(0, 0, 0, 0)
+        self.layout = QVBoxLayout()
+        self.layout.addWidget(self.editor)
+        self.layout.addWidget(self.status)
+        self.setLayout(self.layout)
+        self.layout.setContentsMargins(0, 0, 0, 0)
         self._setup_editor(content, filename)
 
-        self._presenter = PythonFileInterpreterPresenter(self,
-                                                         PythonCodeExecution(content))
+        self.setAttribute(Qt.WA_DeleteOnClose, True)
+
+        self._presenter = PythonFileInterpreterPresenter(self, PythonCodeExecution(content))
 
         self.editor.modificationChanged.connect(self.sig_editor_modified)
         self.editor.fileNameChanged.connect(self.sig_filename_modified)
+        self.find_replace_dialog = None
+        self.find_replace_dialog_shown = False
+
+    def closeEvent(self, event):
+        self.deleteLater()
+        if self.find_replace_dialog:
+            self.find_replace_dialog.close()
+        super(PythonFileInterpreter, self).closeEvent(event)
+
+    def show_find_replace_dialog(self):
+        if self.find_replace_dialog is None:
+            self.find_replace_dialog = EmbeddedFindReplaceDialog(self, self.editor)
+            self.layout.insertWidget(0, self.find_replace_dialog.view)
+
+        self.find_replace_dialog.show()
+
+    def hide_find_replace_dialog(self):
+        if self.find_replace_dialog is not None:
+            self.find_replace_dialog.hide()
+
+        # Connect the model signals to the view's signals so they can be accessed from outside the MVP
+        self._presenter.model.sig_exec_progress.connect(self.sig_progress)
+        self._presenter.model.sig_exec_error.connect(self.sig_exec_error)
+        self._presenter.model.sig_exec_success.connect(self.sig_exec_success)
 
     @property
     def filename(self):
@@ -129,13 +161,16 @@ class PythonFileInterpreter(QWidget):
 
         :return: True if closing was considered successful, false otherwise
         """
-        return self.save(confirm=True)
+        return self.save(confirm=self.parent.confirm_on_save)
 
     def abort(self):
         self._presenter.req_abort()
 
     def execute_async(self):
         self._presenter.req_execute_async()
+
+    def execute_async_blocking(self):
+        self._presenter.req_execute_async_blocking()
 
     def save(self, confirm=False):
         if self.editor.isModified():
@@ -149,6 +184,78 @@ class PythonFileInterpreter(QWidget):
 
     def set_status_message(self, msg):
         self.status.showMessage(msg)
+
+    def replace_tabs_with_spaces(self):
+        self.replace_text(TAB_CHAR, SPACE_CHAR * TAB_WIDTH)
+
+    def replace_text(self, match_text, replace_text):
+        if self.editor.selectedText() == '':
+            self.editor.selectAll()
+        new_text = self.editor.selectedText().replace(match_text, replace_text)
+        self.editor.replaceSelectedText(new_text)
+
+    def replace_spaces_with_tabs(self):
+        self.replace_text(SPACE_CHAR * TAB_WIDTH, TAB_CHAR)
+
+    def set_whitespace_visible(self):
+        self.editor.setWhitespaceVisibility(CodeEditor.WsVisible)
+
+    def set_whitespace_invisible(self):
+        self.editor.setWhitespaceVisibility(CodeEditor.WsInvisible)
+
+    def clear_key_binding(self, key_str):
+        """Clear a keyboard shortcut bound to a Scintilla command"""
+        self.editor.clearKeyBinding(key_str)
+
+    def toggle_comment(self):
+        if self.editor.selectedText() == '':  # If nothing selected, do nothing
+            return
+
+        # Note selection indices to restore highlighting later
+        selection_idxs = list(self.editor.getSelection())
+
+        # Expand selection from first character on start line to end char on last line
+        line_end_pos = len(self.editor.text().split('\n')[selection_idxs[2]].rstrip())
+        line_selection_idxs = [selection_idxs[0], 0,
+                               selection_idxs[2], line_end_pos]
+        self.editor.setSelection(*line_selection_idxs)
+        selected_lines = self.editor.selectedText().split('\n')
+
+        if self._are_comments(selected_lines) is True:
+            toggled_lines = self._uncomment_lines(selected_lines)
+            # Track deleted characters to keep highlighting consistent
+            selection_idxs[1] -= 2
+            selection_idxs[-1] -= 2
+        else:
+            toggled_lines = self._comment_lines(selected_lines)
+            selection_idxs[1] += 2
+            selection_idxs[-1] += 2
+
+        # Replace lines with commented/uncommented lines
+        self.editor.replaceSelectedText('\n'.join(toggled_lines))
+
+        # Restore highlighting
+        self.editor.setSelection(*selection_idxs)
+
+    def _comment_lines(self, lines):
+        for i in range(len(lines)):
+            lines[i] = '# ' + lines[i]
+        return lines
+
+    def _uncomment_lines(self, lines):
+        for i in range(len(lines)):
+            uncommented_line = lines[i].replace('# ', '', 1)
+            if uncommented_line == lines[i]:
+                uncommented_line = lines[i].replace('#', '', 1)
+            lines[i] = uncommented_line
+        return lines
+
+    def _are_comments(self, code_lines):
+        for line in code_lines:
+            if line.strip():
+                if not line.strip().startswith('#'):
+                    return False
+        return True
 
     def _setup_editor(self, default_content, filename):
         editor = self.editor
@@ -213,8 +320,15 @@ class PythonFileInterpreterPresenter(QObject):
     def req_abort(self):
         if self.is_executing:
             self.model.abort()
+            self.view.set_status_message(ABORTED_STATUS_MSG)
 
     def req_execute_async(self):
+        self._req_execute_impl(blocking=False)
+
+    def req_execute_async_blocking(self):
+        self._req_execute_impl(blocking=True)
+
+    def _req_execute_impl(self, blocking):
         if self.is_executing:
             return
         code_str, self._code_start_offset = self._get_code_for_execution()
@@ -223,7 +337,7 @@ class PythonFileInterpreterPresenter(QObject):
         self.is_executing = True
         self.view.set_editor_readonly(True)
         self.view.set_status_message(RUNNING_STATUS_MSG)
-        return self.model.execute_async(code_str, self.view.filename)
+        return self.model.execute_async(code_str, self.view.filename, blocking)
 
     def _get_code_for_execution(self):
         editor = self.view.editor
@@ -240,8 +354,7 @@ class PythonFileInterpreterPresenter(QObject):
         self._finish(success=True, task_result=task_result)
 
     def _on_exec_error(self, task_error):
-        exc_type, exc_value, exc_stack = task_error.exc_type, task_error.exc_value, \
-                                         task_error.stack
+        exc_type, exc_value, exc_stack = task_error.exc_type, task_error.exc_value, task_error.stack
         exc_stack = traceback.extract_tb(exc_stack)[self.MAX_STACKTRACE_LENGTH:]
         if hasattr(exc_value, 'lineno'):
             lineno = exc_value.lineno + self._code_start_offset
@@ -262,11 +375,9 @@ class PythonFileInterpreterPresenter(QObject):
         self.is_executing = False
 
     def _create_status_msg(self, status, timestamp, elapsed_time):
-        return IDLE_STATUS_MSG + ' ' + \
-               LAST_JOB_MSG_TEMPLATE.format(status, timestamp, elapsed_time)
+        return IDLE_STATUS_MSG + ' ' + LAST_JOB_MSG_TEMPLATE.format(status, timestamp, elapsed_time)
 
     def _on_progress_update(self, lineno):
         """Update progress on the view taking into account if a selection of code is
         running"""
-        self.view.editor.updateProgressMarker(lineno + self._code_start_offset,
-                                              False)
+        self.view.editor.updateProgressMarker(lineno + self._code_start_offset, False)

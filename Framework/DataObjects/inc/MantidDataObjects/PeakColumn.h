@@ -67,6 +67,16 @@ public:
   /// Assign from double
   void fromDouble(size_t i, double value) override;
 
+  /// Reference to the data.
+  const std::vector<Peak> &data() const { return m_peaks; }
+
+  bool equals(const Column &otherColumn, double tolerance) const override {
+    (void)otherColumn;
+    (void)tolerance;
+    throw std::runtime_error(
+        "equals not implemented, to compare use CompareWorkspace");
+  }
+
 protected:
   /// Sets the new column size.
   void resize(size_t count) override;

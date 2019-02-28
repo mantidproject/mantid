@@ -43,7 +43,7 @@ class SaveLoadNexusProcessedTestBase(with_metaclass(ABCMeta, systemtesting.Manti
         LoadNexusProcessed(Filename=self.filename, OutputWorkspace=self.loaded_ws_name)
 
     def compareWorkspaces(self):
-        result = CompareWorkspaces(self.test_ws_name, self.loaded_ws_name, CheckInstrument=False)
+        result = CompareWorkspaces(self.test_ws_name, self.loaded_ws_name, CheckInstrument=False, CheckSample=True)
         return result[0]
 
     def validate(self):
@@ -90,4 +90,32 @@ class SaveLoadNexusProcessedMaskWorkspaceTest(SaveLoadNexusProcessedTestBase):
     def validate(self):
         loaded_ws = AnalysisDataService.Instance()[self.loaded_ws_name]
         self.assertTrue(isinstance(loaded_ws, MaskWorkspace))
+        return self.compareWorkspaces()
+
+
+class SaveLoadNexusProcessedEmptySampleNameTest(SaveLoadNexusProcessedTestBase):
+
+    def createTestWorkspace(self):
+        CreateSampleWorkspace(OutputWorkspace=self.test_ws_name,
+                              BankPixelWidth=1, XMax=15.,
+                              BinWidth=15., NumBanks=1)
+        assert(mtd[self.test_ws_name].sample().getName() == '')
+
+    def savedFilename(self):
+        return 'tmp_saveload_nexusprocessed_emptysamplename'
+
+    def validate(self):
+        return self.compareWorkspaces()
+
+
+class SaveLoadNexusProcessedNoDetectorsSpectraNumbersTest(SaveLoadNexusProcessedTestBase):
+
+    def createTestWorkspace(self):
+        ws = CreateWorkspace([0.], [-1., -2., -3.], NSpec=3, StoreInADS=False)
+        ExtractSingleSpectrum(ws, 1, OutputWorkspace=self.test_ws_name)
+
+    def savedFilename(self):
+        return 'tmp_saveload_nexusprocessed_nodetectorsspectranumbers'
+
+    def validate(self):
         return self.compareWorkspaces()

@@ -156,11 +156,11 @@ class GroupingTabPresenterTest(unittest.TestCase):
             self.assertEqual(mock_save.call_args[0][-1], "grouping.xml")
 
     def test_update_all_calculates_groups_and_pairs(self):
-        self.presenter.update_thread = mock.MagicMock()
+        self.presenter.create_update_thread = mock.MagicMock(return_value=mock.MagicMock())
         self.view.update_button.clicked.emit(True)
 
         self.presenter.update_thread.threadWrapperSetUp.assert_called_once_with(self.presenter.disable_editing,
-                                                                                self.presenter.enable_editing,
+                                                                                self.presenter.handle_update_finished,
                                                                                 self.view.display_warning_box)
         self.presenter.update_thread.start.assert_called_once_with()
 

@@ -47,7 +47,6 @@ class UserConfig(object):
                 self.qsettings.setValue(key, default_settings[key])
 
         # fixup the values of booleans - they do not evaluate correctly when read from the config file
-        # TODO come up with a unit test for this
         for key in self.all_keys():
             try:
                 value = self.get(key)

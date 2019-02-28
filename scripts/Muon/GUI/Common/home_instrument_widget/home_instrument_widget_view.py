@@ -5,13 +5,13 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 # -*- coding: utf8 -*-
+
 from __future__ import (absolute_import, division, print_function)
 
 from PyQt4 import QtGui, QtCore
 from PyQt4.QtCore import pyqtSignal as Signal
-
-from Muon.GUI.Common.muon_file_utils import allowed_instruments
-from Muon.GUI.Common.run_string_utils import valid_float_regex
+from Muon.GUI.Common.utilities.muon_file_utils import allowed_instruments
+from Muon.GUI.Common.utilities.run_string_utils import valid_float_regex
 from Muon.GUI.Common.message_box import warning
 
 
@@ -27,7 +27,6 @@ class InstrumentWidgetView(QtGui.QWidget):
         self._cached_instrument = ["None", "None"]
 
         self.setup_interface()
-        self.apply_to_all_hidden(True)
         self.dead_time_file_loader_hidden(True)
         self.dead_time_other_file_hidden(True)
 
@@ -39,8 +38,8 @@ class InstrumentWidgetView(QtGui.QWidget):
         self._on_dead_time_from_data_selected = None
         self._on_dead_time_from_other_file_selected = lambda: 0
 
-        self.firstgooddata_checkbox.setChecked(1)
-        self.timezero_checkbox.setChecked(1)
+        self.firstgooddata_checkbox.setChecked(True)
+        self.timezero_checkbox.setChecked(True)
         self.time_zero_edit_enabled(True)
         self.first_good_data_edit_enabled(True)
 
@@ -56,26 +55,6 @@ class InstrumentWidgetView(QtGui.QWidget):
             lambda: self._on_first_good_data_changed() if not self.is_first_good_data_checked() else None)
         self.deadtime_file_selector.currentIndexChanged.connect(self.on_dead_time_file_combo_changed)
 
-    def apply_to_all_hidden(self, hidden=True):
-        if hidden:
-            self.apply_all_label.hide()
-            self.apply_all_checkbox.hide()
-        if not hidden:
-            self.apply_all_label.setVisible(True)
-            self.apply_all_checkbox.setVisible(True)
-
-    def setup_filter_row(self):
-        self.apply_all_label = QtGui.QLabel(self)
-        self.apply_all_label.setObjectName("applyAllLabel")
-        self.apply_all_label.setText("Apply to all loaded data ")
-
-        self.apply_all_checkbox = QtGui.QCheckBox(self)
-
-        self.horizontal_layout_6 = QtGui.QHBoxLayout()
-        self.horizontal_layout_6.setObjectName("horizontalLayout6")
-        self.horizontal_layout_6.addWidget(self.apply_all_label)
-        self.horizontal_layout_6.addWidget(self.apply_all_checkbox)
-
     def setup_interface(self):
         self.setObjectName("InstrumentWidget")
 
@@ -84,7 +63,6 @@ class InstrumentWidgetView(QtGui.QWidget):
         self.setup_first_good_data_row()
         self.setup_dead_time_row()
         self.setup_rebin_row()
-        self.setup_filter_row()
 
         self.group = QtGui.QGroupBox("Run Pre-processing Parameters")
         self.group.setFlat(False)
@@ -93,7 +71,7 @@ class InstrumentWidgetView(QtGui.QWidget):
                            'subcontrol-origin: margin;'
                            "padding: 0 3px;"
                            'subcontrol-position: top center;'
-                           'padding-top: -10px;'
+                           'padding-top: 0px;'
                            'padding-bottom: 0px;'
                            "padding-right: 10px;"
                            ' color: grey; }')
@@ -102,8 +80,7 @@ class InstrumentWidgetView(QtGui.QWidget):
 
         self.group2 = QtGui.QGroupBox("Rebin")
         self.group2.setFlat(False)
-        self.vertical_layout2 = QtGui.QVBoxLayout()
-        self.vertical_layout2.addItem(self.horizontal_layout_5)
+
         self.group2.setLayout(self.horizontal_layout_5)
 
         self.widget_layout = QtGui.QVBoxLayout(self)
@@ -131,8 +108,8 @@ class InstrumentWidgetView(QtGui.QWidget):
         self.dead_time_file_loader_hidden(True)
 
     def set_checkboxes_to_defualt(self):
-        self.timezero_checkbox.setChecked(1)
-        self.firstgooddata_checkbox.setChecked(1)
+        self.timezero_checkbox.setChecked(True)
+        self.firstgooddata_checkbox.setChecked(True)
 
     def warning_popup(self, message):
         warning(message, parent=self)
@@ -168,7 +145,7 @@ class InstrumentWidgetView(QtGui.QWidget):
         self.layout.addWidget(self.instrument_selector, 0, 1)
 
     def get_instrument(self):
-        return self.instrument_selector.currentText()
+        return str(self.instrument_selector.currentText())
 
     def set_instrument(self, instrument, block=False):
         index = self.instrument_selector.findText(instrument)
@@ -219,7 +196,7 @@ class InstrumentWidgetView(QtGui.QWidget):
 
         self.timezero_unit_label = QtGui.QLabel(self)
         self.timezero_unit_label.setObjectName("timeZeroUnitLabel")
-        self.timezero_unit_label.setText(u" µs (From data file ")
+        self.timezero_unit_label.setText(u"\u03BCs (From data file ")
 
         self.timezero_checkbox = QtGui.QCheckBox(self)
         self.timezero_checkbox.setObjectName("timeZeroCheckbox")
@@ -251,7 +228,7 @@ class InstrumentWidgetView(QtGui.QWidget):
         self.timezero_edit.setEnabled(not enabled)
 
     def is_time_zero_checked(self):
-        return self.timezero_checkbox.checkState()
+        return self.timezero_checkbox.isChecked()
 
     def on_time_zero_changed(self, slot):
         self._on_time_zero_changed = slot
@@ -260,10 +237,10 @@ class InstrumentWidgetView(QtGui.QWidget):
         self.timezero_checkbox.stateChanged.connect(slot)
 
     def time_zero_state(self):
-        return self.timezero_checkbox.checkState()
+        return self.timezero_checkbox.isChecked()
 
     def on_time_zero_checkbox_state_change(self):
-        self.time_zero_edit_enabled(self.timezero_checkbox.checkState())
+        self.time_zero_edit_enabled(self.timezero_checkbox.isChecked())
 
     # ------------------------------------------------------------------------------------------------------------------
     # First good data
@@ -283,7 +260,7 @@ class InstrumentWidgetView(QtGui.QWidget):
 
         self.firstgooddata_unit_label = QtGui.QLabel(self)
         self.firstgooddata_unit_label.setObjectName("firstgooddataUnitLabel")
-        self.firstgooddata_unit_label.setText(u" U+03BCs (From data file ")
+        self.firstgooddata_unit_label.setText(u" \u03BCs (From data file ")
 
         self.firstgooddata_checkbox = QtGui.QCheckBox(self)
         self.firstgooddata_checkbox.setObjectName("firstgooddataCheckbox")
@@ -493,21 +470,22 @@ class InstrumentWidgetView(QtGui.QWidget):
         self.rebin_steps_label.setText("Steps : ")
 
         self.rebin_steps_edit = QtGui.QLineEdit(self)
+        int_validator = QtGui.QDoubleValidator()
+        self.rebin_steps_edit.setValidator(int_validator)
+        self.rebin_steps_edit.setToolTip('Value to scale current bin width by.')
 
         self.rebin_variable_label = QtGui.QLabel(self)
         self.rebin_variable_label.setText("Bin Boundaries : ")
         self.rebin_variable_edit = QtGui.QLineEdit(self)
-
-        self.rebin_help_button = QtGui.QPushButton(self)
-        size_policy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
-        size_policy.setHorizontalStretch(0)
-        size_policy.setVerticalStretch(0)
-        size_policy.setHeightForWidth(self.rebin_help_button.sizePolicy().hasHeightForWidth())
-        self.rebin_help_button.setSizePolicy(size_policy)
-        self.rebin_help_button.setMinimumSize(QtCore.QSize(40, 40))
-        self.rebin_help_button.setMaximumSize(QtCore.QSize(40, 40))
-        self.rebin_help_button.setObjectName("rebinHelpButton")
-        self.rebin_help_button.setText("?")
+        self.rebin_variable_edit.setToolTip('A comma separated list of first bin boundary, width, last bin boundary.\n'
+                                            'Optionally this can be followed by a comma and more widths and last boundary pairs.\n'
+                                            'Optionally this can also be a single number, which is the bin width.\n'
+                                            'Negative width values indicate logarithmic binning.\n\n'
+                                            'For example:\n'
+                                            '2,-0.035,10: from 2 rebin in Logarithmic bins of 0.035 up to 10;\n'
+                                            '0,100,10000,200,20000: from 0 rebin in steps of 100 to 10,000 then steps of 200 to 20,000')
+        variable_validator = QtGui.QRegExpValidator(QtCore.QRegExp('^(\s*-?\d+(\.\d+)?)(\s*,\s*-?\d+(\.\d+)?)*$'))
+        self.rebin_variable_edit.setValidator(variable_validator)
 
         self.horizontal_layout_5 = QtGui.QHBoxLayout()
         self.horizontal_layout_5.setObjectName("horizontalLayout3")
@@ -522,7 +500,6 @@ class InstrumentWidgetView(QtGui.QWidget):
         self.horizontal_layout_5.addWidget(self.rebin_variable_edit)
         self.horizontal_layout_5.addStretch(0)
         self.horizontal_layout_5.addSpacing(10)
-        self.horizontal_layout_5.addWidget(self.rebin_help_button)
 
         self.rebin_steps_label.hide()
         self.rebin_steps_edit.hide()
@@ -561,6 +538,9 @@ class InstrumentWidgetView(QtGui.QWidget):
 
     def on_variable_rebin_edit_changed(self, slot):
         self.rebin_variable_edit.editingFinished.connect(slot)
+
+    def on_rebin_type_changed(self, slot):
+        self.rebin_selector.currentIndexChanged.connect(slot)
 
     def get_fixed_bin_text(self):
         return self.rebin_steps_edit.text()
