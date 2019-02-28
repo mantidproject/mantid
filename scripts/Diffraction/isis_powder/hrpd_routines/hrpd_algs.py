@@ -54,7 +54,7 @@ def calculate_slab_absorb_corrections(ws_to_correct, sample_details_obj):
         material_json["ScatteringXSection"] = material.scattering_cross_section
 
     mantid.SetSample(InputWorkspace=ws_to_correct, Geometry=geometry_json, Material=material_json)
-
+    print(str(material_json))
     previous_units = ws_to_correct.getAxis(0).getUnit().unitID()
     ws_units = common_enums.WORKSPACE_UNITS
 
@@ -63,7 +63,8 @@ def calculate_slab_absorb_corrections(ws_to_correct, sample_details_obj):
         ws_to_correct = mantid.ConvertUnits(InputWorkspace=ws_to_correct, OutputWorkspace=ws_to_correct,
                                             Target=ws_units.wavelength)
 
-    absorb_factors = mantid.HRPDSlabCanAbsorption(InputWorkspace=ws_to_correct)
+    absorb_factors = mantid.HRPDSlabCanAbsorption(InputWorkspace=ws_to_correct,
+                                                  Thickness=str(sample_details_obj.thickness()))
     ws_to_correct = mantid.Divide(LHSWorkspace=ws_to_correct, RHSWorkspace=absorb_factors,
                                   OutputWorkspace=ws_to_correct)
     mantid.DeleteWorkspace(Workspace=absorb_factors)
