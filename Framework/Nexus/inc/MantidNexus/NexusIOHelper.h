@@ -137,8 +137,8 @@ template <typename T>
 std::vector<T> readNexusVector(::NeXus::File &file, std::string entry = "") {
   auto info_and_close = checkIfOpenAndGetInfo(file, entry);
   auto dims = (info_and_close.first).dims;
-  auto total_size =
-      std::accumulate(dims.begin(), dims.end(), 1, std::multiplies<>());
+  auto total_size = std::accumulate(dims.begin(), dims.end(), int64_t{1},
+                                    std::multiplies<>());
   RUN_NEXUSIOHELPER_FUNCTION((info_and_close.first).type, readNexusAnyVector,
                              file, total_size, info_and_close.second);
 }

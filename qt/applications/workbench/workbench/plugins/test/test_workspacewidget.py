@@ -18,8 +18,8 @@ from qtpy.QtWidgets import QMainWindow, QApplication
 
 from mantid.simpleapi import (CreateEmptyTableWorkspace, CreateWorkspace,
                               GroupWorkspaces)
-from mantidqt.utils.qt.test import GuiTest
-from mantidqt.utils.qt.test.qt_widget_finder import QtWidgetFinder
+from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
 from workbench.plugins.workspacewidget import WorkspaceWidget
 
 

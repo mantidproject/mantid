@@ -11,17 +11,16 @@ from __future__ import (absolute_import, division, print_function)
 
 import unittest
 
-from mock import Mock, patch
 from qtpy.QtWidgets import QStatusBar
 
+from mantid.py3compat.mock import Mock, patch
+from mantidqt.utils.testing.mocks.mock_mantid import MockWorkspace
+from mantidqt.utils.testing.mocks.mock_matrixworkspacedisplay import MockMatrixWorkspaceDisplayView
+from mantidqt.utils.testing.mocks.mock_qt import MockQModelIndex, MockQTableView
 from mantidqt.widgets.workspacedisplay.matrix.model import MatrixWorkspaceDisplayModel
 from mantidqt.widgets.workspacedisplay.matrix.presenter import MatrixWorkspaceDisplay
 from mantidqt.widgets.workspacedisplay.matrix.table_view_model import MatrixWorkspaceTableViewModelType
 from mantidqt.widgets.workspacedisplay.status_bar_view import StatusBarView
-from mantidqt.widgets.workspacedisplay.test_mocks.mock_mantid import MockWorkspace
-from mantidqt.widgets.workspacedisplay.test_mocks.mock_matrixworkspacedisplay import \
-    MockMatrixWorkspaceDisplayView
-from mantidqt.widgets.workspacedisplay.test_mocks.mock_qt import MockQModelIndex, MockQTableView
 
 
 def with_mock_presenter(func):

@@ -46,7 +46,7 @@ class CreateCalibrationWholeTest(systemtesting.MantidSystemTest):
 
     def validate(self):
         self.tolerance_is_rel_err = True
-        self.tolerance = 1e-2
+        self.tolerance = 5e-2
 
         # this is neccesary due to appendspectra creating spectrum numbers of 0
         self.disableChecking.append('SpectraMap')

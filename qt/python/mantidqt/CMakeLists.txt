@@ -50,7 +50,7 @@ mtd_add_sip_module (
     ${Boost_LIBRARIES}
     API
   INSTALL_DIR
-    ${WORKBENCH_LIB_DIR}/mantidqt
+    ${LIB_DIR}/mantidqt
   LINUX_INSTALL_RPATH
     "\$ORIGIN/.."
   OSX_INSTALL_RPATH
@@ -79,7 +79,7 @@ mtd_add_sip_module (
     MantidQtWidgetsCommonQt5
     Qt5::Core
     Qt5::Gui
-Qt5::Widgets
+    Qt5::Widgets
     Qt5::Qscintilla
     ${Boost_LIBRARIES}
     API
