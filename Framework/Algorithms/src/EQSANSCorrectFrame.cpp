@@ -11,7 +11,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Events.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidKernel/EmptyValues.h
+#include "MantidKernel/EmptyValues.h"
 
 #include <vector>
 
