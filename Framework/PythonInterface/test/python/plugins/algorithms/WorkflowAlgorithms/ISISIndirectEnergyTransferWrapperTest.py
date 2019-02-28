@@ -8,348 +8,305 @@
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
-from mantid.simpleapi import *
-from mantid.api import *
+from mantid.simpleapi import (CreateSimulationWorkspace, CreateWorkspace, CompareWorkspaces, DeleteWorkspace,
+                              ISISIndirectEnergyTransferWrapper)
+from mantid.api import WorkspaceGroup
 
 import numpy as np
 
 
-def _generate_calibration_workspace(instrument, ws_name='__fake_calib'):
-    inst = CreateSimulationWorkspace(Instrument=instrument,
-                                     BinParams='0,1,2')
-    n_hist = inst.getNumberHistograms()
+def _generate_calibration_workspace(instrument, ws_name='__calib'):
+    simulation_workspace = CreateSimulationWorkspace(Instrument=instrument,
+                                                     BinParams='0,1,2')
+    number_of_histograms = simulation_workspace.getNumberHistograms()
 
-    fake_calib = CreateWorkspace(OutputWorkspace=ws_name,
-                                 DataX=np.ones(1),
-                                 DataY=np.ones(n_hist),
-                                 NSpec=n_hist,
-                                 ParentWorkspace=inst)
+    calib_workspace = CreateWorkspace(OutputWorkspace=ws_name,
+                                      DataX=np.ones(1),
+                                      DataY=np.ones(number_of_histograms),
+                                      NSpec=number_of_histograms,
+                                      ParentWorkspace=simulation_workspace)
 
-    DeleteWorkspace(inst)
+    DeleteWorkspace(simulation_workspace)
 
-    return fake_calib
+    return calib_workspace
 
 
 class ISISIndirectEnergyTransferWrapperTest(unittest.TestCase):
 
-    def test_basic_reduction(self):
-        """
-        Sanity test to ensure the most basic reduction actually completes.
-        """
-
-        wks = ISISIndirectEnergyTransferWrapper(InputFiles=['IRS26176.RAW'],
-                                                Instrument='IRIS',
-                                                Analyser='graphite',
-                                                Reflection='002',
-                                                SpectraRange=[3, 53])
-
-        self.assertTrue(isinstance(wks, WorkspaceGroup), 'Result workspace should be a workspace group.')
-        self.assertEqual(wks.getNames()[0], 'iris26176_graphite002_red')
-
-        red_ws = wks.getItem(0)
-        self.assertEqual(red_ws.getNumberHistograms(), 51)
-        self.assertEqual(red_ws.getAxis(0).getUnit().unitID(), 'DeltaE')
-
-
-    def test_reduction_with_range(self):
-        """
-        Sanity test to ensure a reduction with a spectra range completes.
-        """
-
-        wks = ISISIndirectEnergyTransferWrapper(InputFiles=['IRS26176.RAW'],
-                                                Instrument='IRIS',
-                                                Analyser='graphite',
-                                                Reflection='002',
-                                                SpectraRange=[35, 40])
-
-        self.assertTrue(isinstance(wks, WorkspaceGroup), 'Result workspace should be a workspace group.')
-        self.assertEqual(wks.getNames()[0], 'iris26176_graphite002_red')
-
-        red_ws = wks.getItem(0)
-        self.assertEqual(red_ws.getNumberHistograms(), 6)
-
-
-    def test_grouping_all(self):
-        """
-        Tests setting the grouping policy to all.
-        """
-
-        wks = ISISIndirectEnergyTransferWrapper(InputFiles=['IRS26176.RAW'],
-                                                Instrument='IRIS',
-                                                Analyser='graphite',
-                                                Reflection='002',
-                                                SpectraRange=[3, 53],
-                                                GroupingMethod='All')
-
-        self.assertTrue(isinstance(wks, WorkspaceGroup), 'Result workspace should be a workspace group.')
-        self.assertEqual(wks.getNames()[0], 'iris26176_graphite002_red')
-
-        red_ws = wks.getItem(0)
-        self.assertEqual(red_ws.getNumberHistograms(), 1)
-
-
-    def test_grouping_individual(self):
-        """
-        Tests setting the grouping policy to individual.
-        """
-
-        wks = ISISIndirectEnergyTransferWrapper(InputFiles=['IRS26176.RAW'],
-                                                Instrument='IRIS',
-                                                Analyser='graphite',
-                                                Reflection='002',
-                                                SpectraRange=[3, 53],
-                                                GroupingMethod='Individual')
-
-        self.assertTrue(isinstance(wks, WorkspaceGroup), 'Result workspace should be a workspace group.')
-        self.assertEqual(wks.getNames()[0], 'iris26176_graphite002_red')
-
-        red_ws = wks.getItem(0)
-        self.assertEqual(red_ws.getNumberHistograms(), 51)
-
-
-    def test_reduction_with_background_subtraction(self):
-        """
-        Tests running a reduction with a background subtraction.
-        """
-
-        wks = ISISIndirectEnergyTransferWrapper(InputFiles=['IRS26176.RAW'],
-                                                Instrument='IRIS',
-                                                Analyser='graphite',
-                                                Reflection='002',
-                                                SpectraRange=[3, 53],
-                                                BackgroundRange=[70000, 75000])
-
-        self.assertTrue(isinstance(wks, WorkspaceGroup), 'Result workspace should be a workspace group.')
-        self.assertEqual(wks.getNames()[0], 'iris26176_graphite002_red')
-
-
-    def test_reduction_with_output_unit(self):
-        """
-        Tests creating reduction in different X units.
-        """
-
-        wks = ISISIndirectEnergyTransferWrapper(InputFiles=['IRS26176.RAW'],
-                                                Instrument='IRIS',
-                                                Analyser='graphite',
-                                                Reflection='002',
-                                                SpectraRange=[3, 53],
-                                                UnitX='DeltaE_inWavenumber')
-
-        self.assertTrue(isinstance(wks, WorkspaceGroup), 'Result workspace should be a workspace group.')
-        self.assertEqual(wks.getNames()[0], 'iris26176_graphite002_red')
-
-        red_ws = wks.getItem(0)
-        self.assertEqual(red_ws.getNumberHistograms(), 51)
-        self.assertEqual(red_ws.getAxis(0).getUnit().unitID(), 'DeltaE_inWavenumber')
-
-
-    def test_reduction_with_detailed_balance(self):
-        """
-        Sanity test to ensure a reduction using detailed balance option
-        completes.
-        """
-
-        wks = ISISIndirectEnergyTransferWrapper(InputFiles=['IRS26176.RAW'],
-                                                Instrument='IRIS',
-                                                Analyser='graphite',
-                                                Reflection='002',
-                                                SpectraRange=[3, 53],
-                                                DetailedBalance='300')
-
-        self.assertTrue(isinstance(wks, WorkspaceGroup), 'Result workspace should be a workspace group.')
-        self.assertEqual(wks.getNames()[0], 'iris26176_graphite002_red')
-
-        red_ws = wks.getItem(0)
-        self.assertEqual(red_ws.getNumberHistograms(), 51)
-
-
-    def test_reduction_with_map_file(self):
-        """
-        Sanity test to ensure a reduction using a mapping/grouping file
-        completes.
-        """
-
-        wks = ISISIndirectEnergyTransferWrapper(InputFiles=['OSI97919.raw'],
-                                                Instrument='OSIRIS',
-                                                Analyser='graphite',
-                                                Reflection='002',
-                                                SpectraRange=[963, 1004],
-                                                GroupingMethod='File',
-                                                MapFile='osi_002_14Groups.map')
-
-        self.assertTrue(isinstance(wks, WorkspaceGroup), 'Result workspace should be a workspace group.')
-        self.assertEqual(wks.getNames()[0], 'osiris97919_graphite002_red')
-
-        red_ws = wks.getItem(0)
-        self.assertEqual(red_ws.getNumberHistograms(), 14)
-
-
-    def test_reduction_with_calibration(self):
-        """
-        Sanity test to ensure a reduction using a calibration workspace
-        completes.
-        """
-
-        wks = ISISIndirectEnergyTransferWrapper(InputFiles=['IRS26176.RAW'],
-                                                Instrument='IRIS',
-                                                Analyser='graphite',
-                                                Reflection='002',
-                                                SpectraRange=[3, 53],
-                                                CalibrationWorkspace=_generate_calibration_workspace('IRIS'))
-
-        self.assertTrue(isinstance(wks, WorkspaceGroup), 'Result workspace should be a workspace group.')
-        self.assertEqual(wks.getNames()[0], 'iris26176_graphite002_red')
-
-        red_ws = wks.getItem(0)
-        self.assertEqual(red_ws.getNumberHistograms(), 51)
-
-
-    def test_reduction_with_calibration_and_range(self):
-        """
-        Sanity test to ensure a reduction using a calibration workspace
-        completes.
-        """
-
-        wks = ISISIndirectEnergyTransferWrapper(InputFiles=['IRS26176.RAW'],
-                                                Instrument='IRIS',
-                                                Analyser='graphite',
-                                                Reflection='002',
-                                                SpectraRange=[35, 40],
-                                                CalibrationWorkspace=_generate_calibration_workspace('IRIS'))
-
-        self.assertTrue(isinstance(wks, WorkspaceGroup), 'Result workspace should be a workspace group.')
-        self.assertEqual(wks.getNames()[0], 'iris26176_graphite002_red')
-
-        red_ws = wks.getItem(0)
-        self.assertEqual(red_ws.getNumberHistograms(), 6)
-
-
-    def test_multi_files(self):
-        """
-        Test reducing multiple files.
-        """
-
-        wks = ISISIndirectEnergyTransferWrapper(InputFiles=['IRS26176.RAW', 'IRS26173.RAW'],
-                                                Instrument='IRIS',
-                                                Analyser='graphite',
-                                                Reflection='002',
-                                                SpectraRange=[3, 53])
-
-        self.assertTrue(isinstance(wks, WorkspaceGroup), 'Result workspace should be a workspace group.')
-        self.assertEqual(len(wks), 2)
-        self.assertEqual(wks.getNames()[0], 'iris26176_graphite002_red')
-        self.assertEqual(wks.getNames()[1], 'iris26173_graphite002_red')
-
-
-    def test_sum_files(self):
-        """
-        Test summing multiple runs.
-        """
-
-        wks = ISISIndirectEnergyTransferWrapper(InputFiles=['IRS26176.RAW', 'IRS26173.RAW'],
-                                                SumFIles=True,
-                                                Instrument='IRIS',
-                                                Analyser='graphite',
-                                                Reflection='002',
-                                                SpectraRange=[3, 53])
-
-        self.assertTrue(isinstance(wks, WorkspaceGroup), 'Result workspace should be a workspace group.')
-        self.assertEqual(len(wks), 1)
-        self.assertEqual(wks.getNames()[0], 'iris26176_multi_graphite002_red')
-
-        red_ws = wks[0]
-        self.assertTrue('multi_run_numbers' in red_ws.getRun())
-        self.assertEqual(red_ws.getRun().get('multi_run_numbers').value, '26176,26173')
-
-
-    def test_instrument_validation_failure(self):
-        """
-        Tests that an invalid instrument configuration causes the validation to
-        fail.
-        """
-
-        self.assertRaises(RuntimeError,
-                          ISISIndirectEnergyTransferWrapper,
-                          OutputWorkspace='__ISISIndirectEnergyTransferTest_ws',
-                          InputFiles=['IRS26176.RAW'],
-                          Instrument='IRIS',
-                          Analyser='graphite',
-                          Reflection='006',
-                          SpectraRange=[3, 53])
-
-
-    def test_group_workspace_validation_failure(self):
-        """
-        Tests that validation fails when Workspace is selected as the
-        GroupingMethod but no workspace is provided.
-        """
-
-        self.assertRaises(RuntimeError,
-                          ISISIndirectEnergyTransferWrapper,
-                          OutputWorkspace='__ISISIndirectEnergyTransferTest_ws',
-                          InputFiles=['IRS26176.RAW'],
-                          Instrument='IRIS',
-                          Analyser='graphite',
-                          Reflection='002',
-                          SpectraRange=[3, 53],
-                          GroupingMethod='Workspace')
-
-
-    def test_reduction_with_manual_efixed(self):
-        """
-        Sanity test to ensure a reduction with a manual Efixed value completes.
-        """
-
-        wks = ISISIndirectEnergyTransferWrapper(InputFiles=['IRS26176.RAW'],
-                                                Instrument='IRIS',
-                                                Analyser='graphite',
-                                                Reflection='002',
-                                                SpectraRange=[3, 53],
-                                                Efixed=1.9)
-
-        self.assertTrue(isinstance(wks, WorkspaceGroup), 'Result workspace should be a workspace group.')
-        self.assertEqual(wks.getNames()[0], 'iris26176_graphite002_red')
-
-        red_ws = wks.getItem(0)
-        self.assertEqual(red_ws.getNumberHistograms(), 51)
-
-
-    def test_reduction_with_manual_efixed_same_as_default(self):
-        """
-        Sanity test to ensure that manually setting the default Efixed value
-        gives the same results as not providing it.
-        """
-
-        ref = ISISIndirectEnergyTransferWrapper(InputFiles=['IRS26176.RAW'],
-                                                Instrument='IRIS',
-                                                Analyser='graphite',
-                                                Reflection='002',
-                                                SpectraRange=[3, 53])
-
-        wks = ISISIndirectEnergyTransferWrapper(InputFiles=['IRS26176.RAW'],
-                                                Instrument='IRIS',
-                                                Analyser='graphite',
-                                                Reflection='002',
-                                                SpectraRange=[3, 53],
-                                                Efixed=1.845)
-
-        self.assertTrue(CompareWorkspaces(ref, wks)[0])
-
-
-    def test_reduction_with_can_scale(self):
-        """
-        Sanity check tio ensure a reduction with can scale value completes.
-        """
-
-        wks = ISISIndirectEnergyTransferWrapper(InputFiles=['IRS26176.RAW'],
-                                                Instrument='IRIS',
-                                                Analyser='graphite',
-                                                Reflection='002',
-                                                SpectraRange=[3, 53],
-                                                ScaleFactor=0.5)
-
-        red_ws = wks.getItem(0)
-        self.assertEqual(red_ws.getNumberHistograms(), 51)
+    def test_that_a_basic_reduction_will_result_in_an_output_group_containing_a_workspace_with_the_correct_name(self):
+        workspace = ISISIndirectEnergyTransferWrapper(InputFiles=['IRS26176.RAW'],
+                                                      Instrument='IRIS',
+                                                      Analyser='graphite',
+                                                      Reflection='002',
+                                                      SpectraRange=[3, 53])
+
+        self.assertTrue(isinstance(workspace, WorkspaceGroup), 'Result workspace should be a workspace group.')
+        self.assertEqual(workspace.getNames()[0], 'iris26176_graphite002_red')
+
+    def test_that_a_basic_reduction_will_produce_a_workspace_with_the_correct_number_of_histograms(self):
+        workspace = ISISIndirectEnergyTransferWrapper(InputFiles=['IRS26176.RAW'],
+                                                      Instrument='IRIS',
+                                                      Analyser='graphite',
+                                                      Reflection='002',
+                                                      SpectraRange=[3, 53])
+
+        red_workspace = workspace.getItem(0)
+        self.assertEqual(red_workspace.getNumberHistograms(), 51)
+
+    def test_that_a_basic_reduction_will_produce_a_workspace_with_the_correct_x_axis_units(self):
+        workspace = ISISIndirectEnergyTransferWrapper(InputFiles=['IRS26176.RAW'],
+                                                      Instrument='IRIS',
+                                                      Analyser='graphite',
+                                                      Reflection='002',
+                                                      SpectraRange=[3, 53])
+
+        red_workspace = workspace.getItem(0)
+        self.assertEqual(red_workspace.getAxis(0).getUnit().unitID(), 'DeltaE')
+
+    def test_that_a_reduction_performed_with_a_spectra_range_will_result_in_an_output_group(self):
+        workspace = ISISIndirectEnergyTransferWrapper(InputFiles=['IRS26176.RAW'],
+                                                      Instrument='IRIS',
+                                                      Analyser='graphite',
+                                                      Reflection='002',
+                                                      SpectraRange=[35, 40])
+
+        self.assertTrue(isinstance(workspace, WorkspaceGroup), 'Result workspace should be a workspace group.')
+        self.assertEqual(workspace.getNames()[0], 'iris26176_graphite002_red')
+
+    def test_that_a_reduction_performed_with_a_spectra_range_will_result_in_a_workspace_with_a_correct_number_of_histograms(self):
+        workspace = ISISIndirectEnergyTransferWrapper(InputFiles=['IRS26176.RAW'],
+                                                      Instrument='IRIS',
+                                                      Analyser='graphite',
+                                                      Reflection='002',
+                                                      SpectraRange=[35, 40])
+
+        red_workspace = workspace.getItem(0)
+        self.assertEqual(red_workspace.getNumberHistograms(), 6)
+
+    def test_that_a_reduction_performed_with_a_grouping_method_of_all_will_produce_a_workspace_with_the_correct_number_of_histograms(self):
+        workspace = ISISIndirectEnergyTransferWrapper(InputFiles=['IRS26176.RAW'],
+                                                      Instrument='IRIS',
+                                                      Analyser='graphite',
+                                                      Reflection='002',
+                                                      SpectraRange=[3, 53],
+                                                      GroupingMethod='All')
+
+        red_workspace = workspace.getItem(0)
+        self.assertEqual(red_workspace.getNumberHistograms(), 1)
+
+    def test_that_a_reduction_performed_with_a_grouping_method_of_individual_will_produce_a_workspace_with_the_correct_number_of_histograms(self):
+        workspace = ISISIndirectEnergyTransferWrapper(InputFiles=['IRS26176.RAW'],
+                                                      Instrument='IRIS',
+                                                      Analyser='graphite',
+                                                      Reflection='002',
+                                                      SpectraRange=[3, 53],
+                                                      GroupingMethod='Individual')
+
+        red_workspace = workspace.getItem(0)
+        self.assertEqual(red_workspace.getNumberHistograms(), 51)
+
+    def test_that_a_reduction_with_a_background_subtraction_will_produce_an_output_group_containing_a_workspace_with_the_correct_name(self):
+        workspace = ISISIndirectEnergyTransferWrapper(InputFiles=['IRS26176.RAW'],
+                                                      Instrument='IRIS',
+                                                      Analyser='graphite',
+                                                      Reflection='002',
+                                                      SpectraRange=[3, 53],
+                                                      BackgroundRange=[70000, 75000])
+
+        self.assertTrue(isinstance(workspace, WorkspaceGroup), 'Result workspace should be a workspace group.')
+        self.assertEqual(workspace.getNames()[0], 'iris26176_graphite002_red')
+
+    def test_that_a_reduction_which_is_given_an_output_unit_will_produce_a_workspace_with_the_correct_units(self):
+        workspace = ISISIndirectEnergyTransferWrapper(InputFiles=['IRS26176.RAW'],
+                                                      Instrument='IRIS',
+                                                      Analyser='graphite',
+                                                      Reflection='002',
+                                                      SpectraRange=[3, 53],
+                                                      UnitX='DeltaE_inWavenumber')
+
+        red_workspace = workspace.getItem(0)
+        self.assertEqual(red_workspace.getNumberHistograms(), 51)
+        self.assertEqual(red_workspace.getAxis(0).getUnit().unitID(), 'DeltaE_inWavenumber')
+
+    def test_that_a_reduction_with_a_detailed_balance_produces_an_output_workspace_with_the_correct_naming_and_number_of_histograms(self):
+        workspace = ISISIndirectEnergyTransferWrapper(InputFiles=['IRS26176.RAW'],
+                                                      Instrument='IRIS',
+                                                      Analyser='graphite',
+                                                      Reflection='002',
+                                                      SpectraRange=[3, 53],
+                                                      DetailedBalance='300')
+
+        self.assertTrue(isinstance(workspace, WorkspaceGroup), 'Result workspace should be a workspace group.')
+        self.assertEqual(workspace.getNames()[0], 'iris26176_graphite002_red')
+
+        red_workspace = workspace.getItem(0)
+        self.assertEqual(red_workspace.getNumberHistograms(), 51)
+
+    def test_that_a_reduction_using_a_map_file_will_produce_a_workspace_with_the_correct_number_of_histograms(self):
+        workspace = ISISIndirectEnergyTransferWrapper(InputFiles=['OSI97919.raw'],
+                                                      Instrument='OSIRIS',
+                                                      Analyser='graphite',
+                                                      Reflection='002',
+                                                      SpectraRange=[963, 1004],
+                                                      GroupingMethod='File',
+                                                      MapFile='osi_002_14Groups.map')
+
+        self.assertTrue(isinstance(workspace, WorkspaceGroup), 'Result workspace should be a workspace group.')
+        self.assertEqual(workspace.getNames()[0], 'osiris97919_graphite002_red')
+
+        red_workspace = workspace.getItem(0)
+        self.assertEqual(red_workspace.getNumberHistograms(), 14)
+
+    def test_that_a_reduction_using_a_calibration_workspace_will_produce_a_workspace_with_the_correct_number_of_histograms(self):
+        workspace = ISISIndirectEnergyTransferWrapper(InputFiles=['IRS26176.RAW'],
+                                                      Instrument='IRIS',
+                                                      Analyser='graphite',
+                                                      Reflection='002',
+                                                      SpectraRange=[3, 53],
+                                                      CalibrationWorkspace=_generate_calibration_workspace('IRIS'))
+
+        self.assertTrue(isinstance(workspace, WorkspaceGroup), 'Result workspace should be a workspace group.')
+        self.assertEqual(workspace.getNames()[0], 'iris26176_graphite002_red')
+
+        red_workspace = workspace.getItem(0)
+        self.assertEqual(red_workspace.getNumberHistograms(), 51)
+
+    def test_that_a_reduction_with_a_calibration_workspace_and_range_will_produce_a_workspace_with_the_correct_number_of_histograms(self):
+        workspace = ISISIndirectEnergyTransferWrapper(InputFiles=['IRS26176.RAW'],
+                                                      Instrument='IRIS',
+                                                      Analyser='graphite',
+                                                      Reflection='002',
+                                                      SpectraRange=[35, 40],
+                                                      CalibrationWorkspace=_generate_calibration_workspace('IRIS'))
+
+        self.assertTrue(isinstance(workspace, WorkspaceGroup), 'Result workspace should be a workspace group.')
+        self.assertEqual(workspace.getNames()[0], 'iris26176_graphite002_red')
+
+        red_workspace = workspace.getItem(0)
+        self.assertEqual(red_workspace.getNumberHistograms(), 6)
+
+    def test_that_a_multi_file_reduction_will_produce_multiple_reduced_workspaces_with_the_correct_names(self):
+        workspace = ISISIndirectEnergyTransferWrapper(InputFiles=['IRS26176.RAW', 'IRS26173.RAW'],
+                                                      Instrument='IRIS',
+                                                      Analyser='graphite',
+                                                      Reflection='002',
+                                                      SpectraRange=[3, 53])
+
+        self.assertTrue(isinstance(workspace, WorkspaceGroup), 'Result workspace should be a workspace group.')
+        self.assertEqual(len(workspace), 2)
+        self.assertEqual(workspace.getNames()[0], 'iris26176_graphite002_red')
+        self.assertEqual(workspace.getNames()[1], 'iris26173_graphite002_red')
+
+    def test_a_reduction_with_multiple_files_when_summing_each_of_the_runs_will_produce_a_workspace_with_the_correct_name(self):
+        workspace = ISISIndirectEnergyTransferWrapper(InputFiles=['IRS26176.RAW', 'IRS26173.RAW'],
+                                                      SumFIles=True,
+                                                      Instrument='IRIS',
+                                                      Analyser='graphite',
+                                                      Reflection='002',
+                                                      SpectraRange=[3, 53])
+
+        self.assertTrue(isinstance(workspace, WorkspaceGroup), 'Result workspace should be a workspace group.')
+        self.assertEqual(len(workspace), 1)
+        self.assertEqual(workspace.getNames()[0], 'iris26176_multi_graphite002_red')
+
+    def test_a_reduction_with_multiple_files_when_summing_each_of_the_runs_will_produce_a_workspace_with_the_correct_run_numbers(self):
+        workspace = ISISIndirectEnergyTransferWrapper(InputFiles=['IRS26176.RAW', 'IRS26173.RAW'],
+                                                      SumFIles=True,
+                                                      Instrument='IRIS',
+                                                      Analyser='graphite',
+                                                      Reflection='002',
+                                                      SpectraRange=[3, 53])
+
+        red_workspace = workspace[0]
+        self.assertTrue('multi_run_numbers' in red_workspace.getRun())
+        self.assertEqual(red_workspace.getRun().get('multi_run_numbers').value, '26176,26173')
+
+    def test_that_a_runtime_error_is_raised_when_there_is_an_instrument_validation_failure(self):
+        with self.assertRaises(RuntimeError):
+            ISISIndirectEnergyTransferWrapper(InputFiles=['IRS26176.RAW'],
+                                              Instrument='IRIS',
+                                              Analyser='graphite',
+                                              Reflection='006',
+                                              SpectraRange=[3, 53],
+                                              OutputWorkspace='__ISISIndirectEnergyTransferTest_ws')
+
+    def test_that_a_runtime_error_is_raised_when_the_grouping_method_is_Workspace_but_no_workspace_is_provided(self):
+        with self.assertRaises(RuntimeError):
+            ISISIndirectEnergyTransferWrapper(InputFiles=['IRS26176.RAW'],
+                                              Instrument='IRIS',
+                                              Analyser='graphite',
+                                              Reflection='002',
+                                              SpectraRange=[3, 53],
+                                              GroupingMethod='Workspace',
+                                              OutputWorkspace='__ISISIndirectEnergyTransferTest_ws')
+
+    def test_that_a_reduction_with_a_manual_efixed_will_return_a_workspace_with_the_correct_naming_and_number_of_histograms(self):
+        workspace = ISISIndirectEnergyTransferWrapper(InputFiles=['IRS26176.RAW'],
+                                                      Instrument='IRIS',
+                                                      Analyser='graphite',
+                                                      Reflection='002',
+                                                      SpectraRange=[3, 53],
+                                                      Efixed=1.9)
+
+        self.assertTrue(isinstance(workspace, WorkspaceGroup), 'Result workspace should be a workspace group.')
+        self.assertEqual(workspace.getNames()[0], 'iris26176_graphite002_red')
+
+        red_workspace = workspace.getItem(0)
+        self.assertEqual(red_workspace.getNumberHistograms(), 51)
+
+    def test_that_a_reduction_with_a_manual_efixed_which_is_the_same_as_the_default_will_produce_an_identical_workspace(self):
+        reference = ISISIndirectEnergyTransferWrapper(InputFiles=['IRS26176.RAW'],
+                                                      Instrument='IRIS',
+                                                      Analyser='graphite',
+                                                      Reflection='002',
+                                                      SpectraRange=[3, 53])
+
+        workspace = ISISIndirectEnergyTransferWrapper(InputFiles=['IRS26176.RAW'],
+                                                      Instrument='IRIS',
+                                                      Analyser='graphite',
+                                                      Reflection='002',
+                                                      SpectraRange=[3, 53],
+                                                      Efixed=1.845)
+
+        self.assertTrue(CompareWorkspaces(reference, workspace)[0])
+
+    def test_that_a_reduction_with_scale_factor_will_produce_a_workspace_with_the_correct_number_of_histograms(self):
+        workspace = ISISIndirectEnergyTransferWrapper(InputFiles=['IRS26176.RAW'],
+                                                      Instrument='IRIS',
+                                                      Analyser='graphite',
+                                                      Reflection='002',
+                                                      SpectraRange=[3, 53],
+                                                      ScaleFactor=0.5)
+
+        red_workspace = workspace.getItem(0)
+        self.assertEqual(red_workspace.getNumberHistograms(), 51)
+
+    def test_that_the_history_contains_only_one_parent_algorithm_which_has_the_correct_name(self):
+        workspace = ISISIndirectEnergyTransferWrapper(InputFiles=['IRS26176.RAW'],
+                                                      Instrument='IRIS',
+                                                      Analyser='graphite',
+                                                      Reflection='002',
+                                                      SpectraRange=[3, 53])
+
+        history = workspace.getItem(0).getHistory()
+        algorithm_names = [alg.name() for alg in history]
+
+        self.assertEqual(len(algorithm_names), 1)
+        self.assertEqual(algorithm_names[0], 'ISISIndirectEnergyTransferWrapper')
+
+    def test_that_the_history_of_ISISIndirectEnergyTransferWrapper_has_no_child_algorithms(self):
+        workspace = ISISIndirectEnergyTransferWrapper(InputFiles=['IRS26176.RAW'],
+                                                      Instrument='IRIS',
+                                                      Analyser='graphite',
+                                                      Reflection='002',
+                                                      SpectraRange=[3, 53])
+
+        history = workspace.getItem(0).getHistory()
+
+        child_histories = history.getAlgorithmHistory(0).getChildHistories()
+        algorithm_names = [alg.name() for alg in child_histories]
+
+        self.assertFalse(algorithm_names)
 
 
 if __name__ == '__main__':
