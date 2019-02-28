@@ -57,6 +57,10 @@ public:
                                bool) override {
     if (type == QWebEnginePage::NavigationTypeLinkClicked) {
       emit linkClicked(url);
+      if (url.scheme() == "http" || url.scheme() == "https") {
+        // We don't want to open web links in the help window
+        return false;
+      }
     }
     return true;
   }
@@ -82,6 +86,8 @@ public slots:
   /// scheme when referring to pages from the help files.
   virtual void showPage(const QString &url);
   virtual void showPage(const QUrl &url);
+  /// Show a page linked to by another page in the help window
+  virtual void showLinkedPage(const QUrl &url);
 
   /// Tries to locate a file name index.html in the given namespace and then
   /// shows that page.
