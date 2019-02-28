@@ -1456,7 +1456,9 @@ const MantidVec &EventList::dataE() const {
 
 namespace {
 inline double calcNorm(const double errorSquared) {
-  if (errorSquared == 0. || errorSquared == 1.)
+  if (errorSquared == 0.)
+    return 0;
+  else if (errorSquared == 1.)
     return 1.;
   else
     return 1. / std::sqrt(errorSquared);
