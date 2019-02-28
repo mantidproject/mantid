@@ -61,12 +61,12 @@ class MultiFileEditor(PluginWidget):
 
         # attributes
         self.tabs_open_on_closing = None
-
-        self.run_action = create_action(
-            self, "Run",
-            on_triggered=self.editors.execute_current,
-            shortcut=("Ctrl+Return", "Ctrl+Enter"),
-            shortcut_context=Qt.ApplicationShortcut)
+        self.run_action = create_action(self, "Run",
+                                        on_triggered=self.editors.execute_current_async,
+                                        shortcut=("Ctrl+Return", "Ctrl+Enter"),
+                                        shortcut_context=Qt.ApplicationShortcut)
+        self.abort_action = create_action(self, "Abort",
+                                          on_triggered=self.editors.abort_current)
 
         self.abort_action = create_action(
             self, "Abort", on_triggered=self.editors.abort_current)
@@ -108,9 +108,9 @@ class MultiFileEditor(PluginWidget):
     def load_settings_from_config(self, config):
         self.editors.load_settings_from_config(config)
 
-    def execute_current(self):
+    def execute_current_async(self):
         '''This is used by MainWindow to execute a file after opening it'''
-        return self.editors.execute_current()
+        return self.editors.execute_current_async()
 
     def restore_session_tabs(self, session_tabs):
         self.open_files_in_new_tabs(session_tabs, startup=True)

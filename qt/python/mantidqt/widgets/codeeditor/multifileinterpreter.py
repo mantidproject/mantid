@@ -13,7 +13,7 @@ from __future__ import (absolute_import, unicode_literals)
 import os.path as osp
 
 # 3rd party imports
-from qtpy.QtCore import Qt
+from qtpy.QtCore import Qt, Slot
 from qtpy.QtWidgets import (QTabWidget, QToolButton, QVBoxLayout, QWidget)
 
 # local imports
@@ -93,6 +93,13 @@ class MultiPythonFileInterpreter(QWidget):
         """Request that that the current execution be cancelled"""
         self.current_editor().abort()
 
+    @Slot()
+    def abort_all(self):
+        """Request that all executing tabs are cancelled"""
+        for ii in range(0, len(self._tabs)):
+            editor = self.editor_at(ii)
+            editor.abort()
+
     def close_all(self):
         """
         Close all tabs
@@ -149,10 +156,17 @@ class MultiPythonFileInterpreter(QWidget):
         """Return the editor at the given index. Must be in range"""
         return self._tabs.widget(idx)
 
-    def execute_current(self):
+    def execute_current_async(self):
         """Execute content of the current file. If a selection is active
-        then only this portion of code is executed"""
+        then only this portion of code is executed, this is completed asynchronously"""
         self.current_editor().execute_async()
+
+    @Slot()
+    def execute_current_async_blocking(self):
+        """Execute content of the current file. If a selection is active
+            then only this portion of code is executed, completed asynchronously
+            which blocks calling thread. """
+        self.current_editor().execute_async_blocking()
 
     def mark_current_tab_modified(self, modified):
         """Update the current tab title to indicate that the
@@ -181,6 +195,7 @@ class MultiPythonFileInterpreter(QWidget):
         self._tabs.setTabText(idx_cur, title)
         self._tabs.setTabToolTip(idx_cur, tooltip)
 
+    @Slot(str)
     def open_file_in_new_tab(self, filepath, startup=False):
         """Open the existing file in a new tab in the editor
 

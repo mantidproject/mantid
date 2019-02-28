@@ -11,6 +11,7 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 from json import dump
 import os
 
+from mantid.api import AnalysisDataService as ADS
 from mantidqt.project.workspacesaver import WorkspaceSaver
 from mantidqt.project.plotssaver import PlotsSaver
 from mantid import logger
@@ -20,29 +21,37 @@ class ProjectSaver(object):
     def __init__(self, project_file_ext):
         self.project_file_ext = project_file_ext
 
-    def save_project(self, file_name, workspace_to_save=None, plots_to_save=None, interfaces_to_save=None):
+    def save_project(self, file_name, workspace_to_save=None, plots_to_save=None, interfaces_to_save=None,
+                     project_recovery=True):
         """
         The method that will actually save the project and call relevant savers for workspaces, plots, interfaces etc.
         :param file_name: String; The file_name of the
         :param workspace_to_save: List; of Strings that will have workspace names in it, if None will save all
         :param plots_to_save: List; of matplotlib.figure objects to save to the project file.
         :param interfaces_to_save: List of Lists of Window and Encoder; the interfaces to save and the encoders to use
+        :param project_recovery: Bool; If the behaviour of Project Save should be altered to function correctly inside
+        of project recovery
         :return: None; If the method cannot be completed.
         """
         # Check if the file_name doesn't exist
-        if file_name is None or os.path.isdir(file_name):
+        if file_name is None:
             logger.warning("Please select a valid file name")
             return
 
         # Check this isn't saving a blank project file
-        if workspace_to_save is None and plots_to_save is None and interfaces_to_save is None:
+        if (workspace_to_save is None and plots_to_save is None and interfaces_to_save is None) and project_recovery:
             logger.warning("Can not save an empty project")
             return
 
-        # Save workspaces to that project file's directory.
-        directory = os.path.dirname(file_name)
-        workspace_saver = WorkspaceSaver(directory=directory)
-        workspace_saver.save_workspaces(workspaces_to_save=workspace_to_save)
+        # Save workspaces to that location
+        if project_recovery:
+            directory = os.path.dirname(file_name)
+            workspace_saver = WorkspaceSaver(directory=directory)
+            workspace_saver.save_workspaces(workspaces_to_save=workspace_to_save)
+            saved_workspaces = workspace_saver.get_output_list()
+        else:
+            # Assume that this is project recovery so pass a list of workspace names
+            saved_workspaces = ADS.getObjectNames()
 
         # Generate plots
         plots_to_save_list = PlotsSaver().save_plots(plots_to_save)
@@ -50,6 +59,19 @@ class ProjectSaver(object):
         # Save interfaces
         if interfaces_to_save is None:
             interfaces_to_save = []
+
+        interfaces = self._return_interfaces_dicts(file_name=file_name, interfaces_to_save=interfaces_to_save)
+
+        # Pass dicts to Project Writer
+        writer = ProjectWriter(workspace_names=saved_workspaces,
+                               plots_to_save=plots_to_save_list,
+                               interfaces_to_save=interfaces,
+                               save_location=file_name,
+                               project_file_ext=self.project_file_ext)
+        writer.write_out()
+
+    @staticmethod
+    def _return_interfaces_dicts(file_name, interfaces_to_save):
         interfaces = []
         for interface, encoder in interfaces_to_save:
             # Add to the dictionary encoded data with the key as the first tag in the list on the encoder attributes
@@ -64,13 +86,7 @@ class ProjectSaver(object):
                     raise
                 logger.warning("Project Saver: An interface could not be saver error: " + str(e))
 
-        # Pass dicts to Project Writer
-        writer = ProjectWriter(workspace_names=workspace_saver.get_output_list(),
-                               plots_to_save=plots_to_save_list,
-                               interfaces_to_save=interfaces,
-                               save_location=file_name,
-                               project_file_ext=self.project_file_ext)
-        writer.write_out()
+        return interfaces
 
 
 class ProjectWriter(object):

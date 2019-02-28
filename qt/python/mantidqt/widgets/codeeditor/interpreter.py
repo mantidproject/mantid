@@ -24,6 +24,7 @@ from mantidqt.widgets.embedded_find_replace_dialog.presenter import EmbeddedFind
 IDLE_STATUS_MSG = "Status: Idle."
 LAST_JOB_MSG_TEMPLATE = "Last job completed {} at {} in {:.3f}s"
 RUNNING_STATUS_MSG = "Status: Running"
+ABORTED_STATUS_MSG = "Status: Aborted"
 
 # Editor
 CURRENTLINE_BKGD_COLOR = QColor(247, 236, 248)
@@ -92,6 +93,9 @@ class EditorIO(object):
 class PythonFileInterpreter(QWidget):
     sig_editor_modified = Signal(bool)
     sig_filename_modified = Signal(str)
+    sig_progress = Signal(int)
+    sig_exec_error = Signal(object)
+    sig_exec_success = Signal(object)
 
     def __init__(self, content=None, filename=None, parent=None):
         """
@@ -142,6 +146,11 @@ class PythonFileInterpreter(QWidget):
         if self.find_replace_dialog is not None:
             self.find_replace_dialog.hide()
 
+        # Connect the model signals to the view's signals so they can be accessed from outside the MVP
+        self._presenter.model.sig_exec_progress.connect(self.sig_progress)
+        self._presenter.model.sig_exec_error.connect(self.sig_exec_error)
+        self._presenter.model.sig_exec_success.connect(self.sig_exec_success)
+
     @property
     def filename(self):
         return self.editor.fileName()
@@ -159,6 +168,9 @@ class PythonFileInterpreter(QWidget):
 
     def execute_async(self):
         self._presenter.req_execute_async()
+
+    def execute_async_blocking(self):
+        self._presenter.req_execute_async_blocking()
 
     def save(self, confirm=False):
         if self.editor.isModified():
@@ -308,8 +320,15 @@ class PythonFileInterpreterPresenter(QObject):
     def req_abort(self):
         if self.is_executing:
             self.model.abort()
+            self.view.set_status_message(ABORTED_STATUS_MSG)
 
     def req_execute_async(self):
+        self._req_execute_impl(blocking=False)
+
+    def req_execute_async_blocking(self):
+        self._req_execute_impl(blocking=True)
+
+    def _req_execute_impl(self, blocking):
         if self.is_executing:
             return
         code_str, self._code_start_offset = self._get_code_for_execution()
@@ -318,7 +337,7 @@ class PythonFileInterpreterPresenter(QObject):
         self.is_executing = True
         self.view.set_editor_readonly(True)
         self.view.set_status_message(RUNNING_STATUS_MSG)
-        return self.model.execute_async(code_str, self.view.filename)
+        return self.model.execute_async(code_str, self.view.filename, blocking)
 
     def _get_code_for_execution(self):
         editor = self.view.editor
