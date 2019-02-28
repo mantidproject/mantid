@@ -228,12 +228,24 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         """
         from mantidqt.plotting.functions import plot
         ws = mtd[name]
+
+        # Keep local copy of the original lines
+        original_lines = self.get_lines()
+
         self.clear_fit_result_lines()
         plot([ws], wksp_indices=[1, 2], fig=self.canvas.figure, overplot=True)
         name += ':'
         for lin in self.get_lines():
             if lin.get_label().startswith(name):
                 self.fit_result_lines.append(lin)
+
+        # Add properties back to the lines
+        new_lines = self.get_lines()
+        for ii, old_line in enumerate(original_lines):
+            new_lines[ii].update_from(old_line)
+
+        # Now update the legend to make sure it changes to the old properties
+        self.get_axes().legend()
 
     @Slot(int, float, float, float)
     def peak_added_slot(self, peak_id, centre, height, fwhm):
