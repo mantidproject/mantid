@@ -44,6 +44,10 @@ void ExperimentPresenter::notifyRestoreDefaultsRequested() {
 
 void ExperimentPresenter::notifySummationTypeChanged() {
   notifySettingsChanged();
+  updateSummationTypeEnabledState();
+}
+
+void ExperimentPresenter::updateSummationTypeEnabledState() {
   if (m_model.summationType() == SummationType::SumInQ) {
     m_view->enableReductionType();
     m_view->enableIncludePartialBins();
@@ -85,20 +89,25 @@ bool ExperimentPresenter::isAutoreducing() const {
 /** Tells the view to update the enabled/disabled state of all relevant
  * widgets based on whether processing is in progress or not.
  */
-void ExperimentPresenter::updateWidgetEnabledState() const {
-  if (isProcessing() || isAutoreducing())
+void ExperimentPresenter::updateDisplayState() {
+  if (isProcessing() || isAutoreducing()) {
     m_view->disableAll();
-  else
-    m_view->enableAll();
+    return;
+  }
+
+  m_view->enableAll();
+  updateSummationTypeEnabledState();
+  updatePolarizationCorrectionEnabledState();
+  updateFloodCorrectionEnabledState();
 }
 
-void ExperimentPresenter::reductionPaused() { updateWidgetEnabledState(); }
+void ExperimentPresenter::reductionPaused() { updateDisplayState(); }
 
-void ExperimentPresenter::reductionResumed() { updateWidgetEnabledState(); }
+void ExperimentPresenter::reductionResumed() { updateDisplayState(); }
 
-void ExperimentPresenter::autoreductionPaused() { updateWidgetEnabledState(); }
+void ExperimentPresenter::autoreductionPaused() { updateDisplayState(); }
 
-void ExperimentPresenter::autoreductionResumed() { updateWidgetEnabledState(); }
+void ExperimentPresenter::autoreductionResumed() { updateDisplayState(); }
 
 void ExperimentPresenter::instrumentChanged(
     std::string const &instrumentName,
@@ -123,6 +132,14 @@ PolarizationCorrections ExperimentPresenter::polarizationCorrectionsFromView() {
   return PolarizationCorrections(correctionType);
 }
 
+void ExperimentPresenter::updatePolarizationCorrectionEnabledState() {
+  if (polarizationCorrectionRequiresInputs(
+          m_model.polarizationCorrections().correctionType()))
+    m_view->enablePolarizationCorrectionInputs();
+  else
+    m_view->disablePolarizationCorrectionInputs();
+}
+
 FloodCorrections ExperimentPresenter::floodCorrectionsFromView() {
   auto const correctionType =
       floodCorrectionTypeFromString(m_view->getFloodCorrectionType());
@@ -134,6 +151,14 @@ FloodCorrections ExperimentPresenter::floodCorrectionsFromView() {
 
   m_view->disableFloodCorrectionInputs();
   return FloodCorrections(correctionType);
+}
+
+void ExperimentPresenter::updateFloodCorrectionEnabledState() {
+  if (floodCorrectionRequiresInputs(
+          m_model.floodCorrections().correctionType()))
+    m_view->enableFloodCorrectionInputs();
+  else
+    m_view->disableFloodCorrectionInputs();
 }
 
 boost::optional<RangeInLambda>
@@ -194,8 +219,10 @@ ExperimentValidationResult ExperimentPresenter::validateExperimentFromView() {
 
 ExperimentValidationResult ExperimentPresenter::updateModelFromView() {
   auto validationResult = validateExperimentFromView();
-  if (validationResult.isValid())
+  if (validationResult.isValid()) {
     m_model = validationResult.assertValid();
+    updateDisplayState();
+  }
   return validationResult;
 }
 
@@ -239,6 +266,8 @@ void ExperimentPresenter::updateViewFromModel() {
       floodCorrectionTypeToString(m_model.floodCorrections().correctionType()));
   if (m_model.floodCorrections().workspace())
     m_view->setFloodWorkspace(m_model.floodCorrections().workspace().get());
+
+  updateDisplayState();
 
   // Reconnect settings change notifications
   m_view->connectExperimentSettingsWidgets();

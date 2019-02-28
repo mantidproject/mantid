@@ -81,7 +81,11 @@ private:
   void
   showPerThetaTableErrors(PerThetaDefaultsTableValidationError const &errors);
 
-  void updateWidgetEnabledState() const;
+  void updateDisplayState();
+  void updateSummationTypeEnabledState();
+  void updatePolarizationCorrectionEnabledState();
+  void updateFloodCorrectionEnabledState();
+
   bool isProcessing() const;
   bool isAutoreducing() const;
 

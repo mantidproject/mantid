@@ -176,6 +176,11 @@ void InstrumentPresenter::updateViewFromModel() {
   m_view->setDetectorCorrectionType(
       detectorCorrectionTypeToString(m_model.detectorCorrectionType()));
 
+  if (m_model.detectorCorrections().correctPositions())
+    m_view->enableDetectorCorrectionType();
+  else
+    m_view->disableDetectorCorrectionType();
+
   // Reconnect settings change notifications
   m_view->connectInstrumentSettingsWidgets();
 }
