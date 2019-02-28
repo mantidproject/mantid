@@ -302,7 +302,7 @@ end
 directories = ["sphinx","sphinx_bootstrap_theme","IPython","zmq","pygments","backports", "qtawesome", "qtpy",
                "certifi","tornado","markupsafe","matplotlib","mpl_toolkits", "jinja2","jsonschema","functools32",
                "ptyprocess","CifFile","yaml","requests","networkx","PIL","dateutil","pytz",
-               "skimage"]
+               "skimage","psutil"]
 directories.each do |directory|
   module_dir = "#{pip_site_packages}/#{directory}"
   if !File.exist?(module_dir)
@@ -314,6 +314,10 @@ directories.each do |directory|
   end
   addPythonLibrary(module_dir,"Contents/MacOS/")
 end
+
+# older versions of psutil had _psutil shared libraries outside of the package
+copyOptionalFile("#{pip_site_packages}/_psutil_osx.so")
+copyOptionalFile("#{pip_site_packages}/_psutil_posix.so")
 
 # Some versions of mpltool_kits are missing their __init__ file
 mpltoolkit_init = "Contents/MacOS/mpl_toolkits/__init__.py"

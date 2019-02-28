@@ -209,7 +209,7 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
             plot_kwargs[kw] = num
             plot_fn(ws, **plot_kwargs)
 
-    ax.legend()
+    ax.legend().draggable()
     if not overplot:
         title = workspaces[0].name()
         ax.set_title(title)
