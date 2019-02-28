@@ -39,7 +39,9 @@ IndirectBayes::IndirectBayes(QWidget *parent)
                       new Quasi(m_uiForm.indirectBayesTabs->widget(QUASI)));
   m_bayesTabs.emplace(STRETCH,
                       new Stretch(m_uiForm.indirectBayesTabs->widget(STRETCH)));
+}
 
+void IndirectBayes::initLayout() {
   // Connect each tab to the actions available in this GUI
   std::map<unsigned int, IndirectBayesTab *>::iterator iter;
   for (iter = m_bayesTabs.begin(); iter != m_bayesTabs.end(); ++iter) {
@@ -59,9 +61,10 @@ IndirectBayes::IndirectBayes(QWidget *parent)
 
   connect(m_settingsPresenter.get(), SIGNAL(applySettings()), this,
           SLOT(applySettings()));
-}
 
-void IndirectBayes::initLayout() {}
+  // Needed to initially apply the settings loaded on the settings GUI
+  applySettings();
+}
 
 /**
  * @param :: the detected close event

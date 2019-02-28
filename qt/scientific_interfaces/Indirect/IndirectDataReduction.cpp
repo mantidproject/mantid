@@ -142,6 +142,9 @@ void IndirectDataReduction::initLayout() {
   connect(m_settingsPresenter.get(), SIGNAL(applySettings()), this,
           SLOT(applySettings()));
 
+  // Needed to initially apply the settings loaded on the settings GUI
+  applySettings();
+
   // Update the instrument configuration across the UI
   m_uiForm.iicInstrumentConfiguration->newInstrumentConfiguration();
 

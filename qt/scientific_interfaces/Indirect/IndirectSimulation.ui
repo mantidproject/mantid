@@ -57,8 +57,8 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="../../../images/images.qrc">
-          <normaloff>:/win/running_process.png</normaloff>:/win/running_process.png</iconset>
+         <iconset resource="../../../MantidPlot/icons/icons.qrc">
+          <normaloff>:/configure.png</normaloff>:/configure.png</iconset>
         </property>
        </widget>
       </item>
@@ -110,7 +110,7 @@
   </widget>
  </widget>
  <resources>
-  <include location="../../../images/images.qrc"/>
+  <include location="../../../MantidPlot/icons/icons.qrc"/>
  </resources>
  <connections/>
 </ui>
