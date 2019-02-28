@@ -241,8 +241,8 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
 
         # Add properties back to the lines
         new_lines = self.get_lines()
-        for ii, old_line in enumerate(original_lines):
-            new_lines[ii].update_from(old_line)
+        for new_line, old_line in zip(new_lines, original_lines):
+            new_line.update_from(old_line)
 
         # Now update the legend to make sure it changes to the old properties
         self.get_axes().legend()
