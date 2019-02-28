@@ -52,6 +52,7 @@ public:
   Experiment const &experiment() const override;
 
   void notifySettingsChanged() override;
+  void notifyRestoreDefaultsRequested() override;
   void notifySummationTypeChanged() override;
   void notifyNewPerAngleDefaultsRequested() override;
   void notifyRemovePerAngleDefaultsRequested(int index) override;

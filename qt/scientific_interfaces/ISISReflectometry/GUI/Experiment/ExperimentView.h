@@ -111,6 +111,7 @@ public:
 
 public slots:
   /// Adds another row to the per-angle options table
+  void onRestoreDefaultsRequested();
   void onSummationTypeChanged(int reductionTypeIndex);
   void onNewPerThetaDefaultsRowRequested();
   void onRemovePerThetaDefaultsRequested();

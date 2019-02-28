@@ -52,7 +52,7 @@ void InstrumentView::initLayout() {
   m_ui.lamMinEdit->setSpecialValueText("Unset");
   m_ui.lamMaxEdit->setSpecialValueText("Unset");
   connect(m_ui.getInstDefaultsButton, SIGNAL(clicked()), this,
-          SLOT(onGetDefaultsClicked()));
+          SLOT(onRestoreDefaultsRequested()));
 }
 
 void InstrumentView::connectSettingsChange(QLineEdit &edit) {
@@ -107,7 +107,9 @@ void InstrumentView::onSettingsChanged() {
   m_notifyee->notifySettingsChanged();
 }
 
-void InstrumentView::onGetDefaultsClicked() { m_notifyee->notifyGetDefaults(); }
+void InstrumentView::onRestoreDefaultsRequested() {
+  m_notifyee->notifyRestoreDefaultsRequested();
+}
 
 void InstrumentView::disableAll() { m_ui.instSettingsGroup->setEnabled(false); }
 

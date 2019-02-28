@@ -93,8 +93,8 @@ void ExperimentView::initLayout() {
   m_ui.startOverlapEdit->setSpecialValueText("Unset");
   m_ui.endOverlapEdit->setSpecialValueText("Unset");
 
-  // connect(m_ui.getExpDefaultsButton, SIGNAL(clicked()), this,
-  //         SLOT(requestExpDefaults()));
+  connect(m_ui.getExpDefaultsButton, SIGNAL(clicked()), this,
+          SLOT(onRestoreDefaultsRequested()));
   connect(m_ui.summationTypeComboBox, SIGNAL(currentIndexChanged(int)), this,
           SLOT(onSummationTypeChanged(int)));
   connect(m_ui.addPerAngleOptionsButton, SIGNAL(clicked()), this,
@@ -117,8 +117,9 @@ void ExperimentView::initializeTableRow(QTableWidget &table, int row,
                                         std::array<std::string, 8> rowValues) {
   m_ui.optionsTable->blockSignals(true);
   for (auto column = 0; column < table.columnCount(); ++column)
-    table.setItem(row, column, new QTableWidgetItem(
-                                   QString::fromStdString(rowValues[column])));
+    table.setItem(
+        row, column,
+        new QTableWidgetItem(QString::fromStdString(rowValues[column])));
   m_ui.optionsTable->blockSignals(false);
 }
 
@@ -282,6 +283,10 @@ void ExperimentView::disconnectExperimentSettingsWidgets() {
   disconnectSettingsChange(*m_ui.floodCorComboBox);
   disconnectSettingsChange(*m_ui.floodWorkspaceWsSelector);
   disconnectSettingsChange(*m_ui.debugCheckBox);
+}
+
+void ExperimentView::onRestoreDefaultsRequested() {
+  m_notifyee->notifyRestoreDefaultsRequested();
 }
 
 void ExperimentView::onSummationTypeChanged(int reductionTypeIndex) {

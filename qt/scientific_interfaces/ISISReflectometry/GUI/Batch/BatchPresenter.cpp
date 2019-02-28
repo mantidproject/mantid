@@ -15,7 +15,6 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 
@@ -57,7 +56,7 @@ BatchPresenter::BatchPresenter(
       m_eventPresenter(std::move(eventPresenter)),
       m_experimentPresenter(std::move(experimentPresenter)),
       m_instrumentPresenter(std::move(instrumentPresenter)),
-      m_savePresenter(std::move(savePresenter)),
+      m_savePresenter(std::move(savePresenter)), m_instrument(),
       m_jobRunner(new BatchJobRunner(std::move(model))) {
 
   m_view->subscribe(this);
@@ -245,11 +244,15 @@ void BatchPresenter::instrumentChanged(const std::string &instrumentName) {
                        "__Reflectometry_GUI_Empty_Instrument");
   loadAlg->execute();
   MatrixWorkspace_sptr instWorkspace = loadAlg->getProperty("OutputWorkspace");
-  auto instrument = instWorkspace->getInstrument();
+  m_instrument = instWorkspace->getInstrument();
 
-  m_runsPresenter->instrumentChanged(instrumentName, instrument);
-  m_experimentPresenter->instrumentChanged(instrumentName, instrument);
-  m_instrumentPresenter->instrumentChanged(instrumentName, instrument);
+  m_runsPresenter->instrumentChanged(instrumentName, m_instrument);
+  m_experimentPresenter->instrumentChanged(instrumentName, m_instrument);
+  m_instrumentPresenter->instrumentChanged(instrumentName, m_instrument);
+}
+
+Mantid::Geometry::Instrument_const_sptr BatchPresenter::instrument() const {
+  return m_instrument;
 }
 
 void BatchPresenter::settingsChanged() { m_runsPresenter->settingsChanged(); }

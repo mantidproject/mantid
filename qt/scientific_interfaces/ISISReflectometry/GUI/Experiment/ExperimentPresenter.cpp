@@ -36,6 +36,12 @@ void ExperimentPresenter::notifySettingsChanged() {
   m_mainPresenter->notifySettingsChanged();
 }
 
+void ExperimentPresenter::notifyRestoreDefaultsRequested() {
+  m_model = experimentDefaults(m_mainPresenter->instrument());
+  updateViewFromModel();
+  m_mainPresenter->notifySettingsChanged();
+}
+
 void ExperimentPresenter::notifySummationTypeChanged() {
   notifySettingsChanged();
   if (m_model.summationType() == SummationType::SumInQ) {

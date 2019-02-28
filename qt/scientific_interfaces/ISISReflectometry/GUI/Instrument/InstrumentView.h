@@ -68,7 +68,7 @@ public:
 
 public slots:
   void onSettingsChanged();
-  void onGetDefaultsClicked();
+  void onRestoreDefaultsRequested();
 
 private:
   QString messageFor(

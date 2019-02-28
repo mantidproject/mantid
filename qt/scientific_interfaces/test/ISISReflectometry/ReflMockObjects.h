@@ -90,6 +90,7 @@ public:
   MOCK_CONST_METHOD0(isProcessing, bool());
   MOCK_CONST_METHOD0(isAutoreducing, bool());
   MOCK_CONST_METHOD0(requestClose, bool());
+  MOCK_CONST_METHOD0(instrument, Mantid::Geometry::Instrument_const_sptr());
 };
 
 class MockRunsPresenter : public IRunsPresenter {

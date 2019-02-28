@@ -38,8 +38,9 @@ void InstrumentPresenter::notifySettingsChanged() {
   m_mainPresenter->notifySettingsChanged();
 }
 
-void InstrumentPresenter::notifyGetDefaults() {
-  // updateViewFromModel();
+void InstrumentPresenter::notifyRestoreDefaultsRequested() {
+  m_model = instrumentDefaults(m_mainPresenter->instrument());
+  updateViewFromModel();
   m_mainPresenter->notifySettingsChanged();
 }
 

@@ -41,7 +41,7 @@ public:
 
   // InstrumentViewSubscriber overrides
   void notifySettingsChanged() override;
-  void notifyGetDefaults() override;
+  void notifyRestoreDefaultsRequested() override;
 
 private:
   IInstrumentView *m_view;
