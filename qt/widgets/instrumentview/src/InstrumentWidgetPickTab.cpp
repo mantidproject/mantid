@@ -1814,11 +1814,11 @@ void DetectorPlotController::addPeak(double x, double y) {
  * Zoom out back to the natural home of the mini plot
  */
 void DetectorPlotController::zoomOutOnPlot() {
-  #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-    // Do nothing if in Qt4 or below.
-  #else
-    m_plot->zoomOutOnPlot();
-  #endif
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+// Do nothing if in Qt4 or below.
+#else
+  m_plot->zoomOutOnPlot();
+#endif
 }
 } // namespace MantidWidgets
 } // namespace MantidQt
