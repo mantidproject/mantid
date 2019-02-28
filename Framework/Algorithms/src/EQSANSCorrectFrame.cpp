@@ -58,9 +58,12 @@ void EQSANSCorrectFrame::exec() {
   const double minTOF = getProperty("MinTOF");
   const double minTOF_delayed = minTOF + pulsePeriod;
   const double frameWidth = getProperty("FrameWidth");
-  const size_t nFrames = std::static_cast<size_t>(minTOF / frame_width);
-  const double frames_offset_time =
-      frame_width * std::static_cast<double>(nFrames);
+  // Find how many frame widths elapsed from the time the neutrons of the
+  // lead pulse were emitted and the time the neutrons arrived to the
+  // detector bank. This time must be added to the stored TOF values
+  const size_t nFrames = std::static_cast<size_t>(minTOF / frameWidth);
+  const double framesOffsetTime =
+      frameWidth * std::static_cast<double>(nFrames);
   const bool isFrameSkipping = getProperty("FrameSkipping");
   const auto &spectrumInfo = inputWS->spectrumInfo();
 
@@ -80,7 +83,7 @@ void EQSANSCorrectFrame::exec() {
     double newTOF;
     for (auto event : events) {
       // shift times to the correct frame
-      newTOF = event.tof() + frames_offset_time;
+      newTOF = event.tof() + framesOffsetTime;
       // TOF values smaller than that of the fastest neutrons have been
       // 'folded' by the data acquisition system. They must be shifted
       if (newTOF < minTOF)
