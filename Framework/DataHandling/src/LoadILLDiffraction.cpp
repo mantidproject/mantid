@@ -440,8 +440,11 @@ void LoadILLDiffraction::calculateRelativeRotations(
   double firstTubeRotationAngle =
       firstTubePosition.angle(V3D(0, 0, 1)) * RAD_TO_DEG;
 
+  // note that for D20 we have to subtract the offset here
+  // unlike in the static detector case, because in the transform
+  // below, we take (angle - firstTubeRotatingAngle)
   if (m_instName == "D20") {
-    firstTubeRotationAngle += m_offsetTheta;
+    firstTubeRotationAngle -= m_offsetTheta;
   } else if (m_instName == "D2B") {
     firstTubeRotationAngle = -firstTubeRotationAngle;
     std::transform(tubeRotations.begin(), tubeRotations.end(),
