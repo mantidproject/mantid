@@ -52,5 +52,25 @@ bool operator==(PerThetaDefaults const &lhs, PerThetaDefaults const &rhs) {
 bool operator!=(PerThetaDefaults const &lhs, PerThetaDefaults const &rhs) {
   return !(lhs == rhs);
 }
+
+std::array<std::string, 8>
+perThetaDefaultsToArray(PerThetaDefaults const &perThetaDefaults) {
+  auto result = std::array<std::string, 8>();
+  if (perThetaDefaults.thetaOrWildcard())
+    result[0] = std::to_string(*perThetaDefaults.thetaOrWildcard());
+  result[1] = perThetaDefaults.transmissionWorkspaceNames().firstRunList();
+  result[2] = perThetaDefaults.transmissionWorkspaceNames().secondRunList();
+  if (perThetaDefaults.qRange().min())
+    result[3] = std::to_string(*perThetaDefaults.qRange().min());
+  if (perThetaDefaults.qRange().step())
+    result[4] = std::to_string(*perThetaDefaults.qRange().step());
+  if (perThetaDefaults.qRange().max())
+    result[5] = std::to_string(*perThetaDefaults.qRange().max());
+  if (perThetaDefaults.scaleFactor())
+    result[6] = std::to_string(*perThetaDefaults.scaleFactor());
+  if (perThetaDefaults.processingInstructions())
+    result[7] = *perThetaDefaults.processingInstructions();
+  return result;
+}
 } // namespace CustomInterfaces
 } // namespace MantidQt

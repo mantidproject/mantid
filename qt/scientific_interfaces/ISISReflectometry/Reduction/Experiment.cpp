@@ -54,6 +54,14 @@ std::vector<PerThetaDefaults> const &Experiment::perThetaDefaults() const {
   return m_perThetaDefaults;
 }
 
+std::vector<std::array<std::string, 8>>
+Experiment::perThetaDefaultsArray() const {
+  auto result = std::vector<std::array<std::string, 8>>();
+  for (auto const &perThetaDefaults : m_perThetaDefaults)
+    result.push_back(perThetaDefaultsToArray(perThetaDefaults));
+  return result;
+}
+
 PerThetaDefaults const *Experiment::defaultsForTheta(double thetaAngle,
                                                      double tolerance) const {
   auto nonWildcardMatch = std::find_if(
@@ -66,16 +74,20 @@ PerThetaDefaults const *Experiment::defaultsForTheta(double thetaAngle,
   if (nonWildcardMatch != m_perThetaDefaults.cend()) {
     return &(*nonWildcardMatch);
   } else {
-    auto wildcardMatch =
-        std::find_if(m_perThetaDefaults.cbegin(), m_perThetaDefaults.cend(),
-                     [](PerThetaDefaults const &candidate) -> bool {
-                       return candidate.isWildcard();
-                     });
-    if (wildcardMatch != m_perThetaDefaults.cend()) {
-      return &(*wildcardMatch);
-    } else {
-      return nullptr;
-    }
+    return wildcardDefaults();
+  }
+}
+
+PerThetaDefaults const *Experiment::wildcardDefaults() const {
+  auto wildcardMatch =
+      std::find_if(m_perThetaDefaults.cbegin(), m_perThetaDefaults.cend(),
+                   [](PerThetaDefaults const &candidate) -> bool {
+                     return candidate.isWildcard();
+                   });
+  if (wildcardMatch != m_perThetaDefaults.cend()) {
+    return &(*wildcardMatch);
+  } else {
+    return nullptr;
   }
 }
 } // namespace CustomInterfaces

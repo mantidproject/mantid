@@ -29,7 +29,7 @@ polarizationCorrectionTypeFromString(std::string const &correctionType) {
 }
 
 inline std::string
-PolarizationCorrectionTypeToString(PolarizationCorrectionType correctionType) {
+polarizationCorrectionTypeToString(PolarizationCorrectionType correctionType) {
   switch (correctionType) {
   case PolarizationCorrectionType::None:
     return "None";

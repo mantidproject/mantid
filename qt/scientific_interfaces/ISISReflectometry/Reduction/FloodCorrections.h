@@ -24,7 +24,7 @@ floodCorrectionTypeFromString(std::string const &correctionType) {
 }
 
 inline std::string
-FloodCorrectionTypeToString(FloodCorrectionType correctionType) {
+floodCorrectionTypeToString(FloodCorrectionType correctionType) {
   switch (correctionType) {
   case FloodCorrectionType::Workspace:
     return "Workspace";

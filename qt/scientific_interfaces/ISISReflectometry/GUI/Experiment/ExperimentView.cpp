@@ -113,6 +113,15 @@ void ExperimentView::initializeTableRow(QTableWidget &table, int row) {
   m_ui.optionsTable->blockSignals(false);
 }
 
+void ExperimentView::initializeTableRow(QTableWidget &table, int row,
+                                        std::array<std::string, 8> rowValues) {
+  m_ui.optionsTable->blockSignals(true);
+  for (auto column = 0; column < table.columnCount(); ++column)
+    table.setItem(row, column, new QTableWidgetItem(
+                                   QString::fromStdString(rowValues[column])));
+  m_ui.optionsTable->blockSignals(false);
+}
+
 void ExperimentView::initOptionsTable() {
   auto table = m_ui.optionsTable;
 
@@ -156,13 +165,37 @@ void ExperimentView::connectSettingsChange(QCheckBox &edit) {
   connect(&edit, SIGNAL(stateChanged(int)), this, SLOT(onSettingsChanged()));
 }
 
-void ExperimentView::onSettingsChanged() {
-  m_notifyee->notifySettingsChanged();
-}
-
 void ExperimentView::connectSettingsChange(QTableWidget &edit) {
   connect(&edit, SIGNAL(cellChanged(int, int)), this,
           SLOT(onPerAngleDefaultsChanged(int, int)));
+}
+
+void ExperimentView::disconnectSettingsChange(QLineEdit &edit) {
+  disconnect(&edit, SIGNAL(textChanged(QString const &)), this,
+             SLOT(onSettingsChanged()));
+}
+
+void ExperimentView::disconnectSettingsChange(QDoubleSpinBox &edit) {
+  disconnect(&edit, SIGNAL(valueChanged(QString const &)), this,
+             SLOT(onSettingsChanged()));
+}
+
+void ExperimentView::disconnectSettingsChange(QComboBox &edit) {
+  disconnect(&edit, SIGNAL(currentIndexChanged(int)), this,
+             SLOT(onSettingsChanged()));
+}
+
+void ExperimentView::disconnectSettingsChange(QCheckBox &edit) {
+  disconnect(&edit, SIGNAL(stateChanged(int)), this, SLOT(onSettingsChanged()));
+}
+
+void ExperimentView::disconnectSettingsChange(QTableWidget &edit) {
+  disconnect(&edit, SIGNAL(cellChanged(int, int)), this,
+             SLOT(onPerAngleDefaultsChanged(int, int)));
+}
+
+void ExperimentView::onSettingsChanged() {
+  m_notifyee->notifySettingsChanged();
 }
 
 void ExperimentView::setEnabledStateForAllWidgets(bool enabled) {
@@ -211,6 +244,44 @@ void ExperimentView::registerExperimentSettingsWidgets(
   registerSettingWidget(*m_ui.floodCorComboBox, "FloodCorrection", alg);
   registerSettingWidget(*m_ui.floodWorkspaceWsSelector, "FloodWorkspace", alg);
   registerSettingWidget(*m_ui.debugCheckBox, "Debug", alg);
+}
+
+void ExperimentView::connectExperimentSettingsWidgets() {
+  connectSettingsChange(*m_ui.optionsTable);
+  connectSettingsChange(*m_ui.analysisModeComboBox);
+  connectSettingsChange(*m_ui.startOverlapEdit);
+  connectSettingsChange(*m_ui.endOverlapEdit);
+  connectSettingsChange(*m_ui.polCorrComboBox);
+  connectSettingsChange(*m_ui.CRhoEdit);
+  connectSettingsChange(*m_ui.CAlphaEdit);
+  connectSettingsChange(*m_ui.CApEdit);
+  connectSettingsChange(*m_ui.CPpEdit);
+  connectSettingsChange(stitchOptionsLineEdit());
+  connectSettingsChange(*m_ui.reductionTypeComboBox);
+  connectSettingsChange(*m_ui.summationTypeComboBox);
+  connectSettingsChange(*m_ui.includePartialBinsCheckBox);
+  connectSettingsChange(*m_ui.floodCorComboBox);
+  connectSettingsChange(*m_ui.floodWorkspaceWsSelector);
+  connectSettingsChange(*m_ui.debugCheckBox);
+}
+
+void ExperimentView::disconnectExperimentSettingsWidgets() {
+  disconnectSettingsChange(*m_ui.optionsTable);
+  disconnectSettingsChange(*m_ui.analysisModeComboBox);
+  disconnectSettingsChange(*m_ui.startOverlapEdit);
+  disconnectSettingsChange(*m_ui.endOverlapEdit);
+  disconnectSettingsChange(*m_ui.polCorrComboBox);
+  disconnectSettingsChange(*m_ui.CRhoEdit);
+  disconnectSettingsChange(*m_ui.CAlphaEdit);
+  disconnectSettingsChange(*m_ui.CApEdit);
+  disconnectSettingsChange(*m_ui.CPpEdit);
+  disconnectSettingsChange(stitchOptionsLineEdit());
+  disconnectSettingsChange(*m_ui.reductionTypeComboBox);
+  disconnectSettingsChange(*m_ui.summationTypeComboBox);
+  disconnectSettingsChange(*m_ui.includePartialBinsCheckBox);
+  disconnectSettingsChange(*m_ui.floodCorComboBox);
+  disconnectSettingsChange(*m_ui.floodWorkspaceWsSelector);
+  disconnectSettingsChange(*m_ui.debugCheckBox);
 }
 
 void ExperimentView::onSummationTypeChanged(int reductionTypeIndex) {
@@ -580,6 +651,19 @@ ExperimentView::getPerAngleOptions() const {
   return rows;
 }
 GNU_DIAG_ON("missing-braces")
+
+void ExperimentView::setPerAngleOptions(
+    std::vector<std::array<std::string, 8>> rows) {
+  auto &table = *m_ui.optionsTable;
+  table.blockSignals(true);
+  auto numberOfRows = static_cast<int>(rows.size());
+  table.setRowCount(numberOfRows);
+  for (auto row = 0; row < numberOfRows; ++row) {
+    initializeTableRow(table, row, rows[row]);
+  }
+  table.resizeColumnsToContents();
+  table.blockSignals(false);
+}
 
 void ExperimentView::showPerAngleOptionsAsInvalid(int row, int column) {
   m_ui.optionsTable->blockSignals(true);

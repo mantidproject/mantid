@@ -28,6 +28,8 @@ public:
   ExperimentView(Mantid::API::IAlgorithm_sptr algorithmForTooltips,
                  QWidget *parent = nullptr);
   void subscribe(ExperimentViewSubscriber *notifyee) override;
+  void connectExperimentSettingsWidgets() override;
+  void disconnectExperimentSettingsWidgets() override;
 
   void
   createStitchHints(const std::vector<MantidWidgets::Hint> &hints) override;
@@ -52,6 +54,8 @@ public:
   void setDebugOption(bool enable) override;
 
   std::vector<std::array<std::string, 8>> getPerAngleOptions() const override;
+  void
+      setPerAngleOptions(std::vector<std::array<std::string, 8>> rows) override;
   void showPerAngleOptionsAsInvalid(int row, int column) override;
   void showPerAngleOptionsAsValid(int row) override;
   void showPerAngleThetasNonUnique(double thetaTolerance) override;
@@ -116,6 +120,8 @@ public slots:
 private:
   void initializeTableItems(QTableWidget &table);
   void initializeTableRow(QTableWidget &table, int row);
+  void initializeTableRow(QTableWidget &table, int row,
+                          std::array<std::string, 8> rowValues);
   QString messageFor(
       std::vector<MissingInstrumentParameterValue> const &missingValues) const;
   QString messageFor(const InstrumentParameterTypeMissmatch &typeError) const;
@@ -138,6 +144,11 @@ private:
   void connectSettingsChange(QCheckBox &edit);
   void connectSettingsChange(QTableWidget &edit);
   void connectSettingsChange(QDoubleSpinBox &edit);
+  void disconnectSettingsChange(QLineEdit &edit);
+  void disconnectSettingsChange(QComboBox &edit);
+  void disconnectSettingsChange(QCheckBox &edit);
+  void disconnectSettingsChange(QTableWidget &edit);
+  void disconnectSettingsChange(QDoubleSpinBox &edit);
   QLineEdit &stitchOptionsLineEdit() const;
   void setSelected(QComboBox &box, std::string const &str);
   void setText(QLineEdit &lineEdit, int value);

@@ -30,6 +30,8 @@ public:
         .WillByDefault(testing::Return(false));
   }
   MOCK_METHOD1(subscribe, void(ExperimentViewSubscriber *));
+  MOCK_METHOD0(connectExperimentSettingsWidgets, void());
+  MOCK_METHOD0(disconnectExperimentSettingsWidgets, void());
   MOCK_METHOD1(createStitchHints,
                void(const std::vector<MantidWidgets::Hint> &));
   MOCK_CONST_METHOD0(getAnalysisMode, std::string());
@@ -48,6 +50,8 @@ public:
   MOCK_METHOD1(setDebugOption, void(bool));
   MOCK_CONST_METHOD0(getPerAngleOptions,
                      std::vector<std::array<std::string, 8>>());
+  MOCK_METHOD1(setPerAngleOptions,
+               void(std::vector<std::array<std::string, 8>>));
   MOCK_METHOD2(showPerAngleOptionsAsInvalid, void(int row, int column));
   MOCK_METHOD1(showPerAngleOptionsAsValid, void(int row));
   MOCK_METHOD0(showAllPerAngleOptionsAsValid, void());

@@ -47,9 +47,11 @@ public:
   boost::optional<RangeInLambda> transmissionRunRange() const;
   std::map<std::string, std::string> stitchParameters() const;
   std::vector<PerThetaDefaults> const &perThetaDefaults() const;
+  std::vector<std::array<std::string, 8>> perThetaDefaultsArray() const;
 
   PerThetaDefaults const *defaultsForTheta(double thetaAngle,
                                            double tolerance) const;
+  PerThetaDefaults const *wildcardDefaults() const;
 
 private:
   AnalysisMode m_analysisMode;

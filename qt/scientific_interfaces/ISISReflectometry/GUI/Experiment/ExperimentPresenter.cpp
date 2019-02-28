@@ -5,6 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ExperimentPresenter.h"
+#include "ExperimentOptionDefaults.h"
 #include "GUI/Batch/IBatchPresenter.h"
 #include "MantidGeometry/Instrument_fwd.h"
 #include "PerThetaDefaultsTableValidator.h"
@@ -97,7 +98,8 @@ void ExperimentPresenter::instrumentChanged(
     std::string const &instrumentName,
     Mantid::Geometry::Instrument_const_sptr instrument) {
   UNUSED_ARG(instrumentName);
-  // TODO: set defaults for the given instrument
+  m_model = experimentDefaults(instrument);
+  updateViewFromModel();
 }
 
 PolarizationCorrections ExperimentPresenter::polarizationCorrectionsFromView() {
@@ -208,6 +210,32 @@ void ExperimentPresenter::showValidationResult(
     auto errors = result.assertError();
     showPerThetaTableErrors(errors.perThetaValidationErrors());
   }
+}
+
+void ExperimentPresenter::updateViewFromModel() {
+  // Disconnect notifications about settings updates otherwise we'll end
+  // up updating the model from the view after the first change
+  m_view->disconnectExperimentSettingsWidgets();
+
+  m_view->setAnalysisMode(analysisModeToString(m_model.analysisMode()));
+  m_view->setReductionType(reductionTypeToString(m_model.reductionType()));
+  m_view->setSummationType(summationTypeToString(m_model.summationType()));
+  m_view->setIncludePartialBins(m_model.includePartialBins());
+  m_view->setDebugOption(m_model.debug());
+  m_view->setPerAngleOptions(m_model.perThetaDefaultsArray());
+  if (m_model.transmissionRunRange()) {
+    m_view->setTransmissionStartOverlap(m_model.transmissionRunRange()->min());
+    m_view->setTransmissionEndOverlap(m_model.transmissionRunRange()->max());
+  }
+  m_view->setPolarizationCorrectionType(polarizationCorrectionTypeToString(
+      m_model.polarizationCorrections().correctionType()));
+  m_view->setFloodCorrectionType(
+      floodCorrectionTypeToString(m_model.floodCorrections().correctionType()));
+  if (m_model.floodCorrections().workspace())
+    m_view->setFloodWorkspace(m_model.floodCorrections().workspace().get());
+
+  // Reconnect settings change notifications
+  m_view->connectExperimentSettingsWidgets();
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt

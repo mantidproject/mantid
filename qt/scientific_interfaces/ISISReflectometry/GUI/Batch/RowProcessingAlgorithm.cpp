@@ -79,7 +79,7 @@ void updatePolarizationCorrectionProperties(
 
   AlgorithmProperties::update(
       "PolarizationAnalysis",
-      PolarizationCorrectionTypeToString(corrections.correctionType()),
+      polarizationCorrectionTypeToString(corrections.correctionType()),
       properties);
 
   if (corrections.correctionType() == PolarizationCorrectionType::PA ||
@@ -95,7 +95,7 @@ void updateFloodCorrectionProperties(AlgorithmRuntimeProps &properties,
                                      FloodCorrections const &corrections) {
   AlgorithmProperties::update(
       "FloodCorrection",
-      FloodCorrectionTypeToString(corrections.correctionType()), properties);
+      floodCorrectionTypeToString(corrections.correctionType()), properties);
 
   if (corrections.correctionType() == FloodCorrectionType::Workspace)
     AlgorithmProperties::update("FloodWorkspace", corrections.workspace(),

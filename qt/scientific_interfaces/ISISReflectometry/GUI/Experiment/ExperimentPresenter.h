@@ -74,6 +74,7 @@ private:
   std::map<std::string, std::string> stitchParametersFromView();
 
   ExperimentValidationResult updateModelFromView();
+  void updateViewFromModel();
 
   void showValidationResult(ExperimentValidationResult const &result);
   void
