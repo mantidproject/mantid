@@ -75,8 +75,7 @@ void InstrumentPresenter::instrumentChanged(
     std::string const &instrumentName,
     Mantid::Geometry::Instrument_const_sptr instrument) {
   UNUSED_ARG(instrumentName);
-  auto instrumentDefaults = InstrumentOptionDefaults(instrument);
-  m_model = instrumentDefaults();
+  m_model = instrumentDefaults(instrument);
   updateViewFromModel();
 }
 
