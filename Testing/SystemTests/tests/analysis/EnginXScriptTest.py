@@ -47,7 +47,7 @@ class CreateCalibrationWholeTest(systemtesting.MantidSystemTest):
 
     def validate(self):
         self.tolerance_is_rel_err = True
-        self.tolerance = 1e-2
+        self.tolerance = 5e-2
         if _current_os_has_gsl_lvl2():
             return("engg_calibration_bank_1", "engggui_calibration_bank_1.nxs",
                    "engg_calibration_bank_2", "engggui_calibration_bank_2.nxs",

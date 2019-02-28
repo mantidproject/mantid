@@ -7,11 +7,11 @@
 #  This file is part of the mantid workbench.
 from __future__ import (absolute_import, division, print_function)
 
-from mock import Mock
+from mantid.py3compat.mock import Mock
 
 from mantidqt.widgets.observers.observing_presenter import ObservingPresenter
 from mantidqt.widgets.observers.observing_view import ObservingView
-from mantidqt.widgets.workspacedisplay.test_mocks.mock_qt import MockQtSignal
+from mantidqt.utils.testing.mocks.mock_qt import MockQtSignal
 
 
 class MockObservingView(ObservingView):

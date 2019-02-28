@@ -121,9 +121,9 @@ class FrequencyAnalysisGui(QtGui.QMainWindow):
         web browsers.
         """
         self.tabs = DetachableTabWidget(self)
-        self.tabs.addTab(self.home_tab.home_tab_view, 'Home')
-        self.tabs.addTab(self.grouping_tab_widget.group_tab_view, 'Grouping')
-        self.tabs.addTab(self.transform.widget, 'Transform')
+        self.tabs.addTabWithOrder(self.home_tab.home_tab_view, 'Home')
+        self.tabs.addTabWithOrder(self.grouping_tab_widget.group_tab_view, 'Grouping')
+        self.tabs.addTabWithOrder(self.transform.widget, 'Transform')
 
     def closeEvent(self, event):
         self.tabs.closeEvent(event)
