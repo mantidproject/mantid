@@ -82,6 +82,7 @@ If :ref:`do_absorb_corrections_hrpd_isis-powder-diffraction-ref` is set to
 The following parameter may optionally be passed:
 
 - :ref:`mode_hrpd_isis-powder-diffraction-ref`
+- :ref:`do_solid_angle_corrections_hrpd_isis-powder-diffraction-ref`
 
 Example
 =======
@@ -117,7 +118,8 @@ The following parameters may optionally be passed:
 - :ref:`mode_hrpd_isis-powder-diffraction-ref`
 - :ref:`sample_empty_hrpd_isis-powder-diffraction-ref`
 - :ref:`suffix_hrpd_isis-powder-diffraction-ref`
-  
+- :ref:`subtract_empty_instrument_hrpd_isis-powder-diffraction-ref`
+- :ref:`do_solid_angle_corrections_hrpd_isis-powder-diffraction-ref`
 If :ref:`do_absorb_corrections_hrpd_isis-powder-diffraction-ref` is set to
 **True** the following parameter is required in addition to the above:
 
@@ -433,6 +435,38 @@ Example Input:
 .. code-block:: python
 
   hrpd_example.focus(suffix="-corr", ...)
+
+.. _subtract_empty_instrument_hrpd_isis-powder-diffraction-ref:
+
+subtract_empty_instrument
+^^^^^^^^^^^^^^^^^^^^^^^^^
+*Optional*
+
+Indicates whether or not to subtract an empty run decided by the
+- :ref:`calibration_mapping_file_hrpd_isis-powder-diffraction-ref`, defaults to false.
+
+Example Input
+
+..code-block:: python
+
+  hrpd_example.focus(subtract_empty_instrument=True, ...)
+
+.. _do_solid_angle_corrections_hrpd_isis-powder-diffraction-ref:
+
+do_solid_angle_corrections
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+*optional*
+
+Indicates whether or not to run solid angle corrections,
+on a vanadium this creaes the correction file as well as dividing by it,
+on focus this attempts to load in the correction file and then divides by it.
+
+Example Input
+
+..code-block:: python
+
+  hrpd_example.create_vanadium(do_solid_angle_corrections=True, ...)  
+  hrpd_example.focus(do_solid_angle_corrections=True, ...)  
 
 .. _user_name_hrpd_isis-powder-diffraction-ref:
 
