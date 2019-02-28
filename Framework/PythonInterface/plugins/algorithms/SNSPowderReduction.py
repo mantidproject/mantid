@@ -165,10 +165,6 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         self.declareProperty("PushDataPositive", "None",
                              StringListValidator(["None", "ResetToZero", "AddMinimum"]),
                              "Add a constant to the data that makes it positive over the whole range.")
-        self.declareProperty('ReloadIfWorkspaceExists', True,
-                             'Load the event file again if a workspace with default name exists in ADS. '
-                             'if this is specified as True.  Otherwise, skip loading to save time. '
-                             'User should be cautious to use this option as False.')
         arrvalidatorBack = IntArrayBoundedValidator()
         arrvalidatorBack.setLower(-1)
         self.declareProperty(IntArrayProperty("BackgroundNumber", values=[0], validator=arrvalidatorBack),
@@ -342,17 +338,13 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
                     focuspos['Azimuthal'] = phis
         # ENDIF
 
-        # get the user-option whether an existing event workspace will be reloaded or not
-        reload_event_file = self.getProperty('ReloadIfWorkspaceExists').value
-
         if self.getProperty("Sum").value and len(samRuns) > 1:
             self.log().information('Ignoring value of "Sum" property')
             # Sum input sample runs and then do reduction
             if self._splittersWS is not None:
                 raise NotImplementedError("Summing spectra and filtering events are not supported simultaneously.")
 
-            sam_ws_name = self._focusAndSum(samRuns, reload_if_loaded=reload_event_file,
-                                            preserveEvents=preserveEvents)
+            sam_ws_name = self._focusAndSum(samRuns, preserveEvents=preserveEvents)
             assert isinstance(sam_ws_name, str), 'Returned from _focusAndSum() must be a string but not' \
                                                  '%s. ' % str(type(sam_ws_name))
 
@@ -366,12 +358,10 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
                 self._info = None
                 if sample_time_filter_wall[0] == 0. and sample_time_filter_wall[-1] == 0. \
                         and self._splittersWS is None:
-                    returned = self._focusAndSum([sam_run_number], reload_if_loaded=reload_event_file,
-                                                 preserveEvents=preserveEvents)
+                    returned = self._focusAndSum([sam_run_number], preserveEvents=preserveEvents)
                 else:
                     returned = self._focusChunks(sam_run_number, sample_time_filter_wall,
                                                  splitwksp=self._splittersWS,
-                                                 reload_if_loaded=reload_event_file,
                                                  preserveEvents=preserveEvents)
 
                 if isinstance(returned, list):
@@ -549,7 +539,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         self._focusPos['Azimuthal'] = results[6]
 
     #pylint: disable=too-many-branches
-    def _load_event_data(self, filename, filter_wall=None, out_ws_name=None, reload_if_loaded=True, **chunk):
+    def _load_event_data(self, filename, filter_wall=None, out_ws_name=None, **chunk):
         """ Load data optionally by chunk strategy
         Purpose:
             Load a complete or partial run, filter bad pulses.
@@ -564,7 +554,6 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         :param filename:
         :param filter_wall:
         :param out_ws_name: name of output workspace specified by user. it will override the automatic name
-        :param reload_if_loaded:
         :param chunk:
         :return:
         """
@@ -750,7 +739,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         return outName
 
     #pylint: disable=too-many-arguments
-    def _focusAndSum(self, filenames, preserveEvents=True, reload_if_loaded=True, final_name=None):
+    def _focusAndSum(self, filenames, preserveEvents=True, final_name=None):
         """Load, sum, and focus data in chunks
         Purpose:
             Load, sum and focus data in chunks;
@@ -802,8 +791,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
 
     #pylint: disable=too-many-arguments,too-many-locals,too-many-branches
     def _focusChunks(self, filename, filter_wall=(0.,0.),  # noqa
-                     splitwksp=None, preserveEvents=True,
-                     reload_if_loaded=True):  # noqa
+                     splitwksp=None, preserveEvents=True):
         """
         Load, (optional) split and focus data in chunks
         @param filename: integer for run number
@@ -837,7 +825,6 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
             # Load chunk, i.e., partial data into Mantid
             raw_ws_name_chunk = self._load_event_data(filename, filter_wall,
                                                       out_ws_name=None,
-                                                      reload_if_loaded=reload_if_loaded,
                                                       **chunk)
 
             if self._info is None:
