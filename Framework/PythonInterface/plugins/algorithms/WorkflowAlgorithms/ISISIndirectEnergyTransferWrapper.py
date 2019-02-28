@@ -35,33 +35,11 @@ def elements_or_none(elements):
 
 class ISISIndirectEnergyTransferWrapper(DataProcessorAlgorithm):
 
-    _data_files = None
-    _sum_files = None
-    _load_logs = None
-    _calibration_workspace = None
-
-    _instrument_name = None
-    _analyser = None
-    _reflection = None
-    _efixed = None
-
-    _spectra_range = None
-    _background_range = None
-    _rebin_string = None
-    _detailed_balance = None
-    _scale_factor = None
-    _fold_multiple_frames = None
-
-    _grouping_method = None
-    _grouping_workspace = None
-    _grouping_string = None
-    _grouping_map_file = None
-
-    _output_x_units = None
-    _output_workspace = None
-
     def category(self):
         return 'Workflow\\Inelastic;Inelastic\\Indirect'
+
+    def seeAlso(self):
+        return ["ISISIndirectEnergyTransfer"]
 
     def summary(self):
         return 'Runs an energy transfer reduction for an inelastic indirect geometry instrument. It is a wrapper for ' \
