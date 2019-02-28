@@ -75,4 +75,4 @@ class HelpWidgetView(QtGui.QWidget):
 
     def _on_help_button_clicked(self):
         if PYQT4:
-            proxies.showCustomInterfaceHelp('Frequency Domain Analysis 2')
+            proxies.showCustomInterfaceHelp('Frequency Domain Analysis')

@@ -11,7 +11,7 @@ Interface
 New
 ###
 - Elemental Analysis added to Muon Interfaces: Includes a selectable Periodic Table.
-- Frequency Domain Analysis 2 added. See the documentation here :ref:`Frequency Domain Analysis 2 <Frequency_Domain_Analysis_2-ref>`
+- Frequency Domain Analysis 2 added. See the documentation here :ref:`Frequency Domain Analysis <Frequency_Domain_Analysis_2-ref>`
 
 Improvements
 ############
