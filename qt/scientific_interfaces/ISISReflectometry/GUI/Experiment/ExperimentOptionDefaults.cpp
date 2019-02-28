@@ -5,56 +5,71 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ExperimentOptionDefaults.h"
-#include "Common/ValueOr.h"
+#include "Common/OptionDefaults.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include "Reduction/Experiment.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
-bool operator==(const ExperimentOptionDefaults &lhs,
-                const ExperimentOptionDefaults &rhs) {
-  return lhs.AnalysisMode == rhs.AnalysisMode &&
-         lhs.PolarizationAnalysis == rhs.PolarizationAnalysis &&
-         lhs.CRho == rhs.CRho && lhs.CAlpha == rhs.CAlpha &&
-         lhs.CAp == rhs.CAp && lhs.CPp == rhs.CPp &&
-         lhs.TransRunStartOverlap == rhs.TransRunStartOverlap &&
-         lhs.TransRunEndOverlap == rhs.TransRunEndOverlap &&
-         lhs.MomentumTransferMin == rhs.MomentumTransferMin &&
-         lhs.MomentumTransferMax == rhs.MomentumTransferMax &&
-         lhs.MomentumTransferStep == rhs.MomentumTransferStep &&
-         lhs.ScaleFactor == rhs.ScaleFactor &&
-         lhs.ProcessingInstructions == rhs.ProcessingInstructions &&
-         lhs.ReductionType == rhs.ReductionType &&
-         lhs.IncludePartialBins == rhs.IncludePartialBins &&
-         lhs.SummationType == rhs.SummationType &&
-         lhs.StitchParams == rhs.StitchParams;
-}
+Experiment
+experimentDefaults(Mantid::Geometry::Instrument_const_sptr instrument) {
+  auto defaults = OptionDefaults(instrument);
 
-std::ostream &operator<<(std::ostream &os,
-                         ExperimentOptionDefaults const &defaults) {
-  os << "ExperimentOptionDefaults: { AnalysisMode: '" << defaults.AnalysisMode
-     << ", \nPolarizationAnalysis: '" << defaults.PolarizationAnalysis
-     << "',\nRho: '" << defaults.CRho << "',\nAlpha: '" << defaults.CAlpha
-     << "',\nAp: '" << defaults.CAp << "', \nPp: '" << defaults.CPp
-     << "',\nSummationType: '" << defaults.SummationType
-     << "', \nReductionType: '" << defaults.ReductionType
-     << "', \nIncludePartialBins: '" << defaults.IncludePartialBins;
-  if (defaults.TransRunStartOverlap)
-    os << "',\nTransRunStartOverlap: " << defaults.TransRunStartOverlap.get();
-  if (defaults.TransRunEndOverlap)
-    os << ",\nTransRunEndOverlap: " << defaults.TransRunEndOverlap.get();
-  if (defaults.MomentumTransferMin)
-    os << ",\nMomentumTransferMin: " << defaults.MomentumTransferMin.get();
-  if (defaults.MomentumTransferMax)
-    os << ",\nMomentumTransferMax: " << defaults.MomentumTransferMax.get();
-  if (defaults.MomentumTransferStep)
-    os << ",\nMomentumTransferStep: " << defaults.MomentumTransferStep.get();
-  if (defaults.ScaleFactor)
-    os << ",\nScaleFactor: " << defaults.ScaleFactor.get();
-  if (defaults.ProcessingInstructions)
-    os << ",\nScaleFactor: " << defaults.ProcessingInstructions.get();
-  if (defaults.StitchParams)
-    os << ", \nStitchParams: '" << defaults.StitchParams.get();
-  os << "' }" << std::endl;
-  return os;
+  auto analysisMode = analysisModeFromString(defaults.getStringOrDefault(
+      "AnalysisMode", "AnalysisMode", "PointDetectorAnalysis"));
+  auto reductionType = reductionTypeFromString(
+      defaults.getStringOrDefault("ReductionType", "ReductionType", "Normal"));
+  auto summationType = summationTypeFromString(defaults.getStringOrDefault(
+      "SummationType", "SummationType", "SumInLambda"));
+  auto includePartialBins =
+      defaults.getBoolOrFalse("IncludePartialBins", "IncludePartialBins");
+  auto debug = defaults.getBoolOrFalse("Debug", "Debug");
+
+  auto polarizationCorrectionType =
+      polarizationCorrectionTypeFromString(defaults.getStringOrDefault(
+          "PolarizationAnalysis", "PolarizationAnalysis", "None"));
+  auto polarizationCorrections =
+      PolarizationCorrections(polarizationCorrectionType);
+
+  auto floodCorrectionType =
+      floodCorrectionTypeFromString(defaults.getStringOrDefault(
+          "FloodCorrection", "FloodCorrection", "Workspace"));
+  auto floodWorkspace = defaults.getOptionalValue<std::string>(
+      "FloodWorkspace", "FloodWorkspace");
+  auto floodCorrections = FloodCorrections(floodCorrectionType, floodWorkspace);
+
+  auto transmissionRunRange = RangeInLambda(
+      defaults.getDoubleOrZero("StartOverlap", "TransRunStartOverlap"),
+      defaults.getDoubleOrZero("EndOverlap", "TransRunEndOverlap"));
+
+  // We currently don't specify stitch parameters in the parameters file
+  // although we
+  auto stitchParameters = std::map<std::string, std::string>();
+
+  // For per-theta defaults, we can only specify defaults for the wildcard row
+  // i.e.
+  // where theta is empty. It probably doesn't make sense to specify
+  // tranmsission runs
+  // so leave that empty.
+  auto theta = boost::none;
+  auto transmissionRuns = TransmissionRunPair();
+  auto qRange = RangeInQ(
+      defaults.getOptionalValue<double>("MomentumTransferMin", "QMin"),
+      defaults.getOptionalValue<double>("MomentumTransferStep", "dQ/Q"),
+      defaults.getOptionalValue<double>("MomentumTransferMax", "QMax"));
+  auto scaleFactor =
+      defaults.getOptionalValue<double>("ScaleFactor", "ScaleFactor");
+  auto processingInstructions = defaults.getOptionalValue<std::string>(
+      "ProcessingInstructions", "ProcessingInstructions");
+  auto perThetaDefaults = std::vector<PerThetaDefaults>();
+  perThetaDefaults.emplace_back(theta, transmissionRuns, qRange, scaleFactor,
+                                processingInstructions);
+
+  return Experiment(
+      analysisMode, reductionType, summationType, includePartialBins, debug,
+      std::move(polarizationCorrections), std::move(floodCorrections),
+      std::move(transmissionRunRange), std::move(stitchParameters),
+      std::move(perThetaDefaults));
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt

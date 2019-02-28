@@ -26,6 +26,9 @@ public:
   T getValueOrDefault(std::string const &propertyName,
                       std::string const &parameterName, T defaultValue) const;
   template <typename T>
+  boost::optional<T> getOptionalValue(std::string const &propertyName,
+                                      std::string const &parameterName) const;
+  template <typename T>
   T getValue(std::string const &propertyName,
              std::string const &parameterName) const;
 
@@ -55,6 +58,14 @@ T OptionDefaults::getValueOrDefault(std::string const &propertyName,
   if (maybeValue.is_initialized())
     return maybeValue.get();
   return defaultValue;
+}
+
+template <typename T>
+boost::optional<T>
+OptionDefaults::getOptionalValue(std::string const &propertyName,
+                                 std::string const &parameterName) const {
+  return Mantid::API::checkForOptionalInstrumentDefault<T>(
+      m_algorithm.get(), propertyName, m_instrument, parameterName);
 }
 
 template <typename T>
