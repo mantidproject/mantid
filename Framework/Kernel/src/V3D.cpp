@@ -30,7 +30,7 @@ namespace {
  * As crystallographical coordinate sytem is based on 3 integers, eps is used
  * as accuracy to convert into integers
  */
-double nearInt(double val, double eps, double mult) {
+double nearInt(double val, double eps, double mult) noexcept {
   if (val > 0) {
     if (val < 1) {
       mult /= val;
@@ -56,20 +56,9 @@ namespace Kernel {
   @param phi :: The phi value (in degrees) = the azimuthal angle, where 0 points
   along +X and rotates counter-clockwise in the XY plane
 */
-void V3D::spherical(const double R, const double theta, const double phi) {
+void V3D::spherical(const double R, const double theta, const double phi) noexcept {
   constexpr double deg2rad = M_PI / 180.0;
-  m_pt[2] = R * cos(theta * deg2rad);
-  const double ct = sin(theta * deg2rad);
-  m_pt[0] = R * ct * cos(phi * deg2rad);
-  m_pt[1] = R * ct * sin(phi * deg2rad);
-
-  // Setting this way can lead to very small values of x & y that should really
-  // be zero.
-  // This can cause confusion for the atan2 function used in getSpherical.
-  if (std::abs(m_pt[0]) < Tolerance)
-    m_pt[0] = 0.0;
-  if (std::abs(m_pt[1]) < Tolerance)
-    m_pt[1] = 0.0;
+  spherical_rad(R, theta * deg2rad, phi * deg2rad);
 }
 
 /**
@@ -81,7 +70,7 @@ void V3D::spherical(const double R, const double theta, const double phi) {
   and rotates counter-clockwise in the XY plane
 */
 void V3D::spherical_rad(const double R, const double polar,
-                        const double azimuth) {
+                        const double azimuth) noexcept {
   m_pt[2] = R * cos(polar);
   const double ct = R * sin(polar);
   m_pt[0] = ct * cos(azimuth);
@@ -107,7 +96,7 @@ void V3D::spherical_rad(const double R, const double polar,
 */
 
 void V3D::azimuth_polar_SNS(const double R, const double azimuth,
-                            const double polar) {
+                            const double polar) noexcept {
   m_pt[1] = R * cos(polar);
   const double ct = R * sin(polar);
   m_pt[0] = ct * cos(azimuth);
@@ -129,7 +118,7 @@ void V3D::azimuth_polar_SNS(const double R, const double azimuth,
  *  @param theta :: Returns the theta angle in degrees
  *  @param phi ::   Returns the phi (azimuthal) angle in degrees
  */
-void V3D::getSpherical(double &R, double &theta, double &phi) const {
+void V3D::getSpherical(double &R, double &theta, double &phi) const noexcept {
   constexpr double rad2deg = 180.0 / M_PI;
   R = norm();
   theta = 0.0;
@@ -137,12 +126,6 @@ void V3D::getSpherical(double &R, double &theta, double &phi) const {
     theta = acos(m_pt[2] / R) * rad2deg;
   phi = atan2(m_pt[1], m_pt[0]) * rad2deg;
 }
-
-/**
-  Vector length
-  @return vec.length()
-*/
-double V3D::norm() const { return sqrt(norm2()); }
 
 /**
   Normalises the vector and returns its original length
@@ -158,7 +141,7 @@ double V3D::normalize() {
 }
 
 /** Round each component to the nearest integer */
-void V3D::round() {
+void V3D::round() noexcept {
   for (auto &p : m_pt) {
     p = std::round(p);
   }
@@ -168,7 +151,7 @@ void V3D::round() {
  *  @param v :: The other vector
  *  @return The azimuthal angle in radians (0 < theta < pi)
  */
-double V3D::zenith(const V3D &v) const {
+double V3D::zenith(const V3D &v) const noexcept {
   const double R = distance(v);
   if (R != 0.0) {
     const double zOffset = m_pt[2] - v.m_pt[2];
@@ -184,7 +167,13 @@ double V3D::zenith(const V3D &v) const {
  *  @return The angle between the vectors in radians (0 < theta < pi)
  */
 double V3D::angle(const V3D &v) const {
-  const double ratio = this->scalar_prod(v) / (this->norm() * v.norm());
+  const double n1 = norm();
+  const double n2 = v.norm();
+  if (n1 == 0. || n2 == 0.) {
+    throw std::runtime_error(
+        "Cannot calculate an angle when one of the vectors has zero length.");
+  }
+  const double ratio = this->scalar_prod(v) / (n1 * n2);
 
   if (ratio >= 1.0)       // NOTE: Due to rounding errors, if v is
     return 0.0;           //       is nearly the same as "this" or
@@ -194,7 +183,6 @@ double V3D::angle(const V3D &v) const {
   return acos(ratio);
 }
 
-int V3D::reBase(const V3D &A, const V3D &B, const V3D &C)
 /**
    Re-express this point as components of A,B,C.
    Assuming that A,B,C form a basis set (which does not have to be
@@ -205,7 +193,7 @@ int V3D::reBase(const V3D &A, const V3D &B, const V3D &C)
    @retval -1 :: The points do not form a basis set.
    @retval 0  :: Vec3D has successfully been re-expressed.
 */
-{
+int V3D::reBase(const V3D &A, const V3D &B, const V3D &C) noexcept {
   Matrix<double> T(3, 3);
   for (int i = 0; i < 3; i++) {
     T[i][0] = A[i];
@@ -213,7 +201,7 @@ int V3D::reBase(const V3D &A, const V3D &B, const V3D &C)
     T[i][2] = C[i];
   }
   const double det = T.Invert();
-  if (fabs(det) < 1e-13) // failed
+  if (std::abs(det) < 1e-13) // failed
     return -1;
   rotate(T);
   return 0;
@@ -223,7 +211,7 @@ int V3D::reBase(const V3D &A, const V3D &B, const V3D &C)
   Rotate a point by a matrix
   @param A :: Rotation matrix (needs to be >= 3x3)
 */
-void V3D::rotate(const Kernel::Matrix<double> &A) {
+void V3D::rotate(const Kernel::Matrix<double> &A) noexcept {
   const double xold(m_pt[0]), yold(m_pt[1]), zold(m_pt[2]);
   for (size_t i = 0; i < m_pt.size(); ++i) {
     m_pt[i] = A[i][0] * xold + A[i][1] * yold + A[i][2] * zold;
@@ -234,9 +222,9 @@ void V3D::rotate(const Kernel::Matrix<double> &A) {
   Determines if this,B,C are collinear
   @param Bv :: Vector to test
   @param Cv :: Vector to test
-  @return false is no colinear and true if they are (within Ptolerance)
+  @return false if no colinear and true if they are (within Tolerance)
 */
-bool V3D::coLinear(const V3D &Bv, const V3D &Cv) const {
+bool V3D::coLinear(const V3D &Bv, const V3D &Cv) const noexcept {
   const V3D &Av = *this;
   const V3D Tmp((Bv - Av).cross_prod(Cv - Av));
   return Tmp.norm() <= Tolerance;
@@ -245,11 +233,9 @@ bool V3D::coLinear(const V3D &Bv, const V3D &Cv) const {
 /**
   Checks the size of the vector
   @param tolerance :: size of the biggest zero vector allowed.
-  @retval 1 : the vector squared components
-  magnitude are less than tolerance
-  @retval 0 :: Vector bigger than tolerance
+  @return true if the vector's elements are less in magnitude than tolerance
 */
-bool V3D::nullVector(const double tolerance) const {
+bool V3D::nullVector(const double tolerance) const noexcept {
   for (const double p : m_pt) {
     if (std::abs(p) > tolerance) {
       return false;
@@ -264,7 +250,6 @@ bool V3D::unitVector(const double tolerance) const noexcept {
   return std::abs(l - 1.) < tolerance;
 }
 
-
 /**
    Calculates the index of the primary direction (if there is one)
    @param tolerance :: Tolerance accepted
@@ -273,7 +258,7 @@ bool V3D::unitVector(const double tolerance) const noexcept {
    indecates the direction to the +ve side )
    @retval 0 :: No master direction
 */
-int V3D::masterDir(const double tolerance) const {
+int V3D::masterDir(const double tolerance) const noexcept {
   // Calc max dist
   double max = m_pt[0] * m_pt[0];
   double other = max;
@@ -307,7 +292,7 @@ int V3D::masterDir(const double tolerance) const {
  * @param vectors :: list of 2 vectors
  * @return list of 3 vectors
  */
-std::vector<V3D> V3D::makeVectorsOrthogonal(std::vector<V3D> &vectors) {
+std::vector<V3D> V3D::makeVectorsOrthogonal(const std::vector<V3D> &vectors) {
   if (vectors.size() != 2)
     throw std::invalid_argument(
         "makeVectorsOrthogonal() only works with 2 vectors");
@@ -318,6 +303,7 @@ std::vector<V3D> V3D::makeVectorsOrthogonal(std::vector<V3D> &vectors) {
   v1.normalize();
 
   std::vector<V3D> out;
+  out.reserve(3);
   out.push_back(v0);
 
   // Make a rotation 90 degrees from 0 to 1
@@ -454,9 +440,9 @@ double V3D::toMillerIndexes(double eps) {
 
   // assuming eps is in 1.e-x form
 
-  double ax = std::fabs(m_pt[0]);
-  double ay = std::fabs(m_pt[1]);
-  double az = std::fabs(m_pt[2]);
+  double ax = std::abs(m_pt[0]);
+  double ay = std::abs(m_pt[1]);
+  double az = std::abs(m_pt[2]);
 
   double amax = (ax > ay) ? ax : ay;
   amax = (az > amax) ? az : amax;
@@ -514,6 +500,10 @@ bool V3D::compareMagnitude(const V3D &v1, const V3D &v2) {
 V3D V3D::directionAngles(bool inDegrees) const {
   const double conversionFactor = inDegrees ? 180. / M_PI : 1.0;
   const double divisor = this->norm();
+  if (divisor == 0.) {
+    throw std::runtime_error(
+        "Cannot calculate direction angles for zero length vector");
+  }
   return V3D(conversionFactor * acos(m_pt[0] / divisor),
              conversionFactor * acos(m_pt[1] / divisor),
              conversionFactor * acos(m_pt[2] / divisor));

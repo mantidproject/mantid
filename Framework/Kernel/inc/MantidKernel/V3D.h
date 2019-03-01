@@ -185,18 +185,18 @@ public:
     @param v :: V3D for comparison
     @return true if the items are equal
   */
-  bool operator==(const V3D &v) const {
+  constexpr bool operator==(const V3D &v) const {
     using namespace std;
-    return !(fabs(m_pt[0] - v.m_pt[0]) > Tolerance ||
-             fabs(m_pt[1] - v.m_pt[1]) > Tolerance ||
-             fabs(m_pt[2] - v.m_pt[2]) > Tolerance);
+    return !(std::abs(m_pt[0] - v.m_pt[0]) > Tolerance ||
+             std::abs(m_pt[1] - v.m_pt[1]) > Tolerance ||
+             std::abs(m_pt[2] - v.m_pt[2]) > Tolerance);
   }
 
   /** Not equals operator with tolerance factor.
    *  @param other :: The V3D to compare against
    *  @returns True if the vectors are different
    */
-  bool operator!=(const V3D &other) const { return !(this->operator==(other)); }
+  constexpr bool operator!=(const V3D &other) const { return !(this->operator==(other)); }
 
   /**
     compare
@@ -227,10 +227,10 @@ public:
 
   // Access
   // Setting x, y and z values
-  void spherical(const double R, const double theta, const double phi);
-  void spherical_rad(const double R, const double polar, const double azimuth);
+  void spherical(const double R, const double theta, const double phi) noexcept;
+  void spherical_rad(const double R, const double polar, const double azimuth) noexcept;
   void azimuth_polar_SNS(const double R, const double azimuth,
-                         const double polar);
+                         const double polar) noexcept;
   /**
     Set is x position
     @param xx :: The X coordinate
@@ -258,7 +258,7 @@ public:
     @param index :: 0=x, 1=y, 2=z
     @return a double value of the requested axis
   */
-  constexpr double operator[](const size_t index) const {
+  constexpr double operator[](const size_t index) const noexcept {
     assert(index < m_pt.size());
     return m_pt[index];
   }
@@ -268,19 +268,19 @@ public:
     @param index :: 0=x, 1=y, 2=z
     @return a double value of the requested axis
   */
-  double &operator[](const size_t index) {
+  double &operator[](const size_t index) noexcept {
     assert(index < m_pt.size());
     return m_pt[index];
   }
 
-  void getSpherical(double &R, double &theta, double &phi) const;
+  void getSpherical(double &R, double &theta, double &phi) const noexcept;
 
-  void rotate(const Matrix<double> &);
+  void rotate(const Matrix<double> &) noexcept;
 
-  void round();
+  void round() noexcept;
   /// Make a normalized vector (return norm value)
   double normalize();
-  double norm() const;
+  double norm() const noexcept { return sqrt(norm2()); }
   /// Vector length squared
   constexpr double norm2() const noexcept {
     return m_pt[0] * m_pt[0] + m_pt[1] * m_pt[1] + m_pt[2] * m_pt[2];
@@ -307,16 +307,17 @@ public:
     @param v :: The second vector to include in the calculation
     @return The distance between the two vectors
   */
-  double distance(const V3D &v) const { return (*this - v).norm(); }
+  double distance(const V3D &v) const noexcept { return (*this - v).norm(); }
   /// Zenith (theta) angle between this and another vector
-  double zenith(const V3D &) const;
+  double zenith(const V3D &) const noexcept;
   /// Angle between this and another vector
   double angle(const V3D &) const;
   /// Direction angles
   V3D directionAngles(bool inDegrees = true) const;
 
   // Make 2 vectors into 3 orthogonal vectors
-  static std::vector<V3D> makeVectorsOrthogonal(std::vector<V3D> &vectors);
+  static std::vector<V3D>
+  makeVectorsOrthogonal(const std::vector<V3D> &vectors);
 
   // Send to a stream
   void printSelf(std::ostream &) const;
@@ -327,15 +328,17 @@ public:
   void fromString(const std::string &str);
 
   /// Calculate the volume of a cube X*Y*Z
-  double volume() const { return fabs(m_pt[0] * m_pt[1] * m_pt[2]); }
+  double volume() const noexcept {
+    return std::abs(m_pt[0] * m_pt[1] * m_pt[2]);
+  }
   /// rebase to new basis vector
-  int reBase(const V3D &, const V3D &, const V3D &);
+  int reBase(const V3D &, const V3D &, const V3D &) noexcept;
   /// Determine if there is a master direction
-  int masterDir(const double Tol = 1e-3) const;
+  int masterDir(const double Tol = 1e-3) const noexcept;
   /// Determine if the point is null
-  bool nullVector(const double tolerance = 1e-3) const;
+  bool nullVector(const double tolerance = 1e-3) const noexcept;
   bool unitVector(const double tolerance = Kernel::Tolerance) const noexcept;
-  bool coLinear(const V3D &, const V3D &) const;
+  bool coLinear(const V3D &, const V3D &) const noexcept;
 
   void saveNexus(::NeXus::File *file, const std::string &name) const;
   void loadNexus(::NeXus::File *file, const std::string &name);
