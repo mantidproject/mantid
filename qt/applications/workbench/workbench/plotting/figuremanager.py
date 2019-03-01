@@ -10,8 +10,7 @@
 """Provides our custom figure manager to wrap the canvas, window and our custom toolbar"""
 from __future__ import  (absolute_import, unicode_literals)
 
-from collections import OrderedDict
-from functools import partial, wraps
+from functools import wraps
 import sys
 
 # 3rdparty imports
@@ -22,7 +21,7 @@ from mantidqt.plotting.figuretype import FigureType, figure_type
 from mantidqt.widgets.fitpropertybrowser import FitPropertyBrowser
 import matplotlib
 from matplotlib._pylab_helpers import Gcf
-from matplotlib.backend_bases import FigureManagerBase, MouseEvent
+from matplotlib.backend_bases import FigureManagerBase
 from matplotlib.backends.backend_qt5agg import (FigureCanvasQTAgg)  # noqa
 from qtpy.QtCore import QObject, Qt
 from qtpy.QtWidgets import QApplication, QLabel
@@ -320,6 +319,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         class so that it can be wrapped in a QAppThreadCall.
         """
         Gcf.figure_visibility_changed(self.num)
+
 
 # -----------------------------------------------------------------------------
 # Figure control
