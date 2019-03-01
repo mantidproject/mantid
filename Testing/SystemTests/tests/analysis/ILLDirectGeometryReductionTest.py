@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
+from mantid import mtd
 from mantid.simpleapi import (config, CropWorkspace, DeleteWorkspace, DirectILLApplySelfShielding, DirectILLCollectData,
                               DirectILLDiagnostics, DirectILLIntegrateVanadium, DirectILLReduction, DirectILLSelfShielding,
                               DirectILLTubeBackground, SetSample, Subtract)
@@ -182,6 +183,16 @@ class IN6(systemtesting.MantidSystemTest):
             XMax=2.1,
             StartWorkspaceIndex=9588,
             EndWorkspaceIndex=10280)
+        # GetEiMonDet produces slightly different results on different system. We better
+        # check the calibrated energy logs here and set them to fixed values to
+        # enable CompareWorkspaces to do its job. This hack could be removed later if
+        # CompareWorkspaces supported tolerances for sample log comparison.
+        ws = mtd['cropped']
+        run = ws.mutableRun()
+        self.assertAlmostEqual(run.getProperty('Ei').value, 4.72233, places=4)
+        run.addProperty('Ei', 4.72, True)
+        self.assertAlmostEqual(run.getProperty('wavelength').value, 4.16207, places=4)
+        run.addProperty('wavelength', 4.16, True)
 
     def validate(self):
         return ['cropped', 'ILL_IN6_SofQW.nxs']
