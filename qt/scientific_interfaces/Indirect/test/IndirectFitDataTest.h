@@ -27,7 +27,7 @@ namespace {
 std::unique_ptr<IndirectFitData>
 getIndirectFitData(int const &numberOfSpectra) {
   auto const workspace = createWorkspace(numberOfSpectra);
-  Spectra const spec = std::make_pair(0u, workspace->getNumberHistograms() - 1);
+  Spectra const spec = Spectra(0u, workspace->getNumberHistograms() - 1);
   IndirectFitData data(workspace, spec);
   return std::make_unique<IndirectFitData>(data);
 }
@@ -47,7 +47,7 @@ public:
   void test_data_is_instantiated() {
     auto const workspace = createWorkspace(1);
     Spectra const spec =
-        std::make_pair(0u, workspace->getNumberHistograms() - 1);
+      Spectra(0u, workspace->getNumberHistograms() - 1);
 
     workspace->setTitle("Test Title");
     IndirectFitData const data(workspace, spec);
@@ -58,8 +58,8 @@ public:
   }
 
   void test_that_DiscontinuousSpectra_is_set_up_correctly() {
-    DiscontinuousSpectra<std::size_t> const spectra =
-        DiscontinuousSpectra<std::size_t>("0-5,8,10");
+    Spectra const spectra =
+        Spectra("0-5,8,10");
 
     std::string const spectraString = "0-5,8,10";
     std::vector<std::size_t> const spectraVec{0, 1, 2, 3, 4, 5, 8, 10};
@@ -74,11 +74,10 @@ public:
     auto data = getIndirectFitData(11);
 
     std::string const inputString = "8,0-7,6,10";
-    Spectra const spectra = DiscontinuousSpectra<std::size_t>("0-8,10");
+    Spectra const spectra = Spectra("0-8,10");
     data->setSpectra(inputString);
 
-    TS_ASSERT(
-        boost::apply_visitor(AreSpectraEqual(), data->spectra(), spectra));
+    TS_ASSERT_EQUALS(data->spectra(), spectra);
   }
 
   void
@@ -86,11 +85,10 @@ public:
     auto data = getIndirectFitData(11);
 
     std::string const inputString = "1,2,4-3,10";
-    Spectra const spectra = DiscontinuousSpectra<std::size_t>("1-4,10");
+    Spectra const spectra = Spectra("1-4,10");
     data->setSpectra(inputString);
 
-    TS_ASSERT(
-        boost::apply_visitor(AreSpectraEqual(), data->spectra(), spectra));
+    TS_ASSERT_EQUALS(data->spectra(), spectra);
   }
 
   void
@@ -98,11 +96,10 @@ public:
     auto data = getIndirectFitData(11);
 
     std::string const inputString = "  8,10,  7";
-    Spectra const spectra = DiscontinuousSpectra<std::size_t>("7-8,10");
+    Spectra const spectra = Spectra("7-8,10");
     data->setSpectra(inputString);
 
-    TS_ASSERT(
-        boost::apply_visitor(AreSpectraEqual(), data->spectra(), spectra));
+    TS_ASSERT_EQUALS(data->spectra(), spectra);
   }
 
   void test_data_is_stored_in_the_ADS() {
@@ -160,7 +157,7 @@ public:
   void
   test_that_true_is_returned_from_zeroSpectra_if_data_contains_empty_workspace() {
     auto workspace = boost::make_shared<Workspace2D>();
-    Spectra const spec = std::make_pair(0u, 0u);
+    Spectra const spec = Spectra(0u, 0u);
     IndirectFitData const data(workspace, spec);
 
     TS_ASSERT_EQUALS(data.zeroSpectra(), true);
@@ -169,7 +166,7 @@ public:
   void
   test_that_true_is_returned_from_zeroSpectra_if_data_contains_empty_spectra() {
     auto const workspace = createWorkspace(1);
-    DiscontinuousSpectra<std::size_t> const spec("");
+    Spectra const spec("");
     IndirectFitData const data(workspace, spec);
 
     TS_ASSERT_EQUALS(data.zeroSpectra(), true);
@@ -263,10 +260,10 @@ public:
     auto data = getIndirectFitData(10);
 
     std::vector<Spectra> const spectraPairs{
-        std::make_pair(0u, 11u), std::make_pair(0u, 1000000000000000000u),
-        std::make_pair(10u, 10u)};
+      Spectra(0u, 11u), Spectra(0u, 1000u),
+      Spectra(10u, 10u)};
     std::vector<std::string> const spectraStrings{
-        "10", "100000000000000000000000000000", "1,5,10", "1,2,3,4,5,6,22"};
+        "10", "1000", "1,5,10", "1,2,3,4,5,6,22"};
 
     for (auto i = 0u; i < spectraPairs.size(); ++i)
       TS_ASSERT_THROWS(data->setSpectra(spectraPairs[i]), std::runtime_error);
@@ -278,7 +275,7 @@ public:
     auto data = getIndirectFitData(10);
 
     std::vector<Spectra> const spectraPairs{
-        std::make_pair(0u, 9u), std::make_pair(4u, 4u), std::make_pair(7u, 4u)};
+      Spectra(0u, 9u), Spectra(4u, 4u), Spectra(7u, 4u)};
     std::vector<std::string> const spectraStrings{"0", "9", "0,9,6,4,5",
                                                   "1,2,3,4,5,6"};
 
@@ -374,13 +371,12 @@ public:
     auto data1 = getIndirectFitData(10);
     auto data2 = getIndirectFitData(10);
 
-    data1->setSpectra(std::make_pair(0u, 4u));
-    data2->setSpectra(std::make_pair(5u, 9u));
+    data1->setSpectra(Spectra(0u, 4u));
+    data2->setSpectra(Spectra(5u, 9u));
     auto const combinedData = data2->combine(*data1);
-    Spectra const spec(std::make_pair(0u, 9u));
+    Spectra const spec(Spectra(0u, 9u));
 
-    TS_ASSERT(
-        boost::apply_visitor(AreSpectraEqual(), combinedData.spectra(), spec));
+    TS_ASSERT_EQUALS(combinedData.spectra(), spec);
   }
 
   void
@@ -388,13 +384,12 @@ public:
     auto data1 = getIndirectFitData(10);
     auto data2 = getIndirectFitData(10);
 
-    data1->setSpectra(std::make_pair(0u, 4u));
-    data2->setSpectra(std::make_pair(8u, 9u));
+    data1->setSpectra(Spectra(0u, 4u));
+    data2->setSpectra(Spectra(8u, 9u));
     auto const combinedData = data2->combine(*data1);
-    Spectra const spec(DiscontinuousSpectra<std::size_t>("0-4,8-9"));
+    Spectra const spec(Spectra("0-4,8-9"));
 
-    TS_ASSERT(
-        boost::apply_visitor(AreSpectraEqual(), combinedData.spectra(), spec));
+    TS_ASSERT_EQUALS(combinedData.spectra(), spec);
   }
 
   void
@@ -402,13 +397,12 @@ public:
     auto data1 = getIndirectFitData(10);
     auto data2 = getIndirectFitData(10);
 
-    data1->setSpectra(std::make_pair(0u, 8u));
-    data2->setSpectra(std::make_pair(4u, 9u));
+    data1->setSpectra(Spectra(0u, 8u));
+    data2->setSpectra(Spectra(4u, 9u));
     auto const combinedData = data2->combine(*data1);
-    Spectra const spec(DiscontinuousSpectra<std::size_t>("0-9"));
+    Spectra const spec(Spectra("0-9"));
 
-    TS_ASSERT(
-        boost::apply_visitor(AreSpectraEqual(), combinedData.spectra(), spec));
+    TS_ASSERT_EQUALS(combinedData.spectra(), spec);
   }
 
   void
@@ -416,13 +410,12 @@ public:
     auto data1 = getIndirectFitData(10);
     auto data2 = getIndirectFitData(10);
 
-    data1->setSpectra(DiscontinuousSpectra<std::size_t>("0-4"));
-    data2->setSpectra(DiscontinuousSpectra<std::size_t>("5-9"));
+    data1->setSpectra(Spectra("0-4"));
+    data2->setSpectra(Spectra("5-9"));
     auto const combinedData = data2->combine(*data1);
-    Spectra const spec(DiscontinuousSpectra<std::size_t>("0-9"));
+    Spectra const spec(Spectra("0-9"));
 
-    TS_ASSERT(
-        boost::apply_visitor(AreSpectraEqual(), combinedData.spectra(), spec));
+    TS_ASSERT_EQUALS(combinedData.spectra(), spec);
   }
 
   void
@@ -430,13 +423,12 @@ public:
     auto data1 = getIndirectFitData(10);
     auto data2 = getIndirectFitData(10);
 
-    data1->setSpectra(DiscontinuousSpectra<std::size_t>("0-7"));
-    data2->setSpectra(DiscontinuousSpectra<std::size_t>("2-9"));
+    data1->setSpectra(Spectra("0-7"));
+    data2->setSpectra(Spectra("2-9"));
     auto const combinedData = data2->combine(*data1);
-    Spectra const spec(DiscontinuousSpectra<std::size_t>("0-9"));
+    Spectra const spec(Spectra("0-9"));
 
-    TS_ASSERT(
-        boost::apply_visitor(AreSpectraEqual(), combinedData.spectra(), spec));
+    TS_ASSERT_EQUALS(combinedData.spectra(), spec);
   }
 
   void
@@ -444,13 +436,12 @@ public:
     auto data1 = getIndirectFitData(10);
     auto data2 = getIndirectFitData(10);
 
-    data1->setSpectra(DiscontinuousSpectra<std::size_t>("0-4"));
-    data2->setSpectra(std::make_pair(5u, 9u));
+    data1->setSpectra(Spectra("0-4"));
+    data2->setSpectra(Spectra(5u, 9u));
     auto const combinedData = data2->combine(*data1);
-    Spectra const spec(DiscontinuousSpectra<std::size_t>("0-9"));
+    Spectra const spec(Spectra("0-9"));
 
-    TS_ASSERT(
-        boost::apply_visitor(AreSpectraEqual(), combinedData.spectra(), spec));
+    TS_ASSERT_EQUALS(combinedData.spectra(), spec);
   }
 
   void
@@ -458,13 +449,12 @@ public:
     auto data1 = getIndirectFitData(10);
     auto data2 = getIndirectFitData(10);
 
-    data1->setSpectra(DiscontinuousSpectra<std::size_t>("0-7"));
-    data2->setSpectra(std::make_pair(4u, 9u));
+    data1->setSpectra(Spectra("0-7"));
+    data2->setSpectra(Spectra(4u, 9u));
     auto const combinedData = data2->combine(*data1);
-    Spectra const spec(DiscontinuousSpectra<std::size_t>("0-9"));
+    Spectra const spec(Spectra("0-9"));
 
-    TS_ASSERT(
-        boost::apply_visitor(AreSpectraEqual(), combinedData.spectra(), spec));
+    TS_ASSERT_EQUALS(combinedData.spectra(), spec);
   }
 };
 

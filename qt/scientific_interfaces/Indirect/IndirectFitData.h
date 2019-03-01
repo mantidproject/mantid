@@ -50,7 +50,11 @@ public:
       }
     }
   }
-  Spectra(size_t minimum, size_t maximum) : m_vec(maximum - minimum + 1) {
+  Spectra(size_t minimum, size_t maximum) {
+    if (maximum < minimum) {
+      std::swap(minimum, maximum);
+    }
+    m_vec.resize(maximum - minimum + 1);
     std::iota(m_vec.begin(), m_vec.end(), minimum);
   }
   Spectra(const Spectra &vec)
