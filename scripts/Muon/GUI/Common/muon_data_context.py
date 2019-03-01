@@ -420,10 +420,6 @@ class MuonDataContext(object):
                (self.gui_variables['RebinType'] == 'Variable' and
                 'RebinVariable' in self.gui_variables and self.gui_variables['RebinVariable'])
 
-    def add_or_replace_gui_variables(self, **kwargs):
-        self._gui_variables.update(kwargs)
-        self.gui_variables_notifier.notify_subscribers()
-
     class InstrumentNotifier(Observable):
         def __init__(self, outer):
             Observable.__init__(self)
