@@ -541,14 +541,13 @@ def imshow(axes, workspace, *args, **kwargs):
 
             num_edges = int(numpy.ceil((max_value - min_value)/delta))
             x = numpy.linspace(min_value, max_value, num=num_edges)
-            x_centers = (x[1:] + x[:-1]) / 2.
-            y = workspace.getAxis(1).extractValues()
-            z = numpy.empty([num_hist, num_edges - 1],dtype=numpy.float64)
+            x_centers = mantid.plots.helperfunctions.points_from_boundaries(x)
+            y = mantid.plots.helperfunctions.boundaries_from_points(workspace.getAxis(1).extractValues())
+            z = numpy.empty([num_hist, num_edges - 1], dtype=numpy.float64)
             for i in range(num_hist):
                 centers, ztmp, _, _ = mantid.plots.helperfunctions.get_spectrum(workspace, i, distribution=distribution, withDy=False, withDx=False)
                 f = interp1d(centers, ztmp, bounds_error=False, fill_value=numpy.nan)
                 z[i] = f(x_centers)
-            kwargs['extent'] = [x[0],x[-1],y[0]-0.5,y[-1]+0.5]
         else:
             (x, y, z) = get_matrix_2d_data(workspace, distribution, histogram2D=True)
 
@@ -559,8 +558,12 @@ def imshow(axes, workspace, *args, **kwargs):
         y_spacing_equal = numpy.alltrue(diffs == diffs[0])
         if not x_spacing_equal or not y_spacing_equal:
             raise Exception('Unevenly spaced bins are not supported by imshow')
-    if 'extent' not in kwargs:
-        kwargs['extent'] = [x[0, 0], x[0, -1], y[0, 0], y[-1, 0]]
+        if 'extent' not in kwargs:
+            kwargs['extent'] = [x[0, 0], x[0, -1], y[0, 0], y[-1, 0]]
+    else:
+        if 'extent' not in kwargs:
+            kwargs['extent'] = [x[0],x[-1],y[0],y[-1]]
+
     return _imshow(axes, z, *args, **kwargs)
 
 
