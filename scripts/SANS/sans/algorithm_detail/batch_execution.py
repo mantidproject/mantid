@@ -7,6 +7,7 @@
 from __future__ import (absolute_import, division, print_function)
 from copy import deepcopy
 from mantid.api import AnalysisDataService, WorkspaceGroup
+from mantid.kernel import Logger
 from sans.common.general_functions import (create_managed_non_child_algorithm, create_unmanaged_algorithm,
                                            get_output_name, get_base_name_from_multi_period_name, get_transmission_output_name)
 from sans.common.enums import (SANSDataType, SaveType, OutputMode, ISISReductionMode, DataType)
@@ -1134,8 +1135,20 @@ def get_all_names_to_save(reduction_packages, save_can):
 
         transmission = reduction_package.unfitted_transmission
         transmission_can = reduction_package.unfitted_transmission_can
-        trans_name = '' if not transmission else transmission.name()
-        transCan_name = '' if not transmission_can else transmission_can.name()
+        try:
+            # Does not always work for event slice data as transmission
+            # workspaces can get deleted.
+            # This is a temporary fix to allow file saving with
+            # event sliced data.
+            trans_name = '' if not transmission else transmission.name()
+        except Exception:
+            trans_name = ''
+            Logger("SANS").notice("Transmission run not found. Not saving to file.")
+        try:
+            transCan_name = '' if not transmission_can else transmission_can.name()
+        except Exception:
+            transCan_name = ''
+            Logger("SANS").notice("Can transmission run not found. Not saving to file.")
 
         if save_can:
             if reduced_merged:
