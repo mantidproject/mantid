@@ -14,11 +14,12 @@ import os.path as osp
 
 # 3rd party imports
 from qtpy.QtCore import Qt, Slot
-from qtpy.QtWidgets import (QTabWidget, QToolButton, QVBoxLayout, QWidget)
+from qtpy.QtWidgets import QVBoxLayout, QWidget
 
 # local imports
 from mantidqt.widgets.codeeditor.interpreter import PythonFileInterpreter
-from mantidqt.widgets.codeeditor.scriptcompatibility import (add_mantid_api_import, mantid_api_import_needed)
+from mantidqt.widgets.codeeditor.scriptcompatibility import add_mantid_api_import, mantid_api_import_needed
+from mantidqt.widgets.codeeditor.tab_widget.codeeditor_tab_view import CodeEditorTabWidget
 
 NEW_TAB_TITLE = 'New'
 MODIFIED_MARKER = '*'
@@ -48,10 +49,11 @@ class MultiPythonFileInterpreter(QWidget):
         self.default_content = default_content
         self.prev_session_tabs = None
         self.whitespace_visible = False
+        self.setAttribute(Qt.WA_DeleteOnClose, True)
 
         # widget setup
-        self._tabs = self.create_tabwidget()
-        layout = QVBoxLayout()
+        layout = QVBoxLayout(self)
+        self._tabs = CodeEditorTabWidget(self)
         layout.addWidget(self._tabs)
         self.setLayout(layout)
         layout.setContentsMargins(0, 0, 0, 0)
@@ -61,6 +63,10 @@ class MultiPythonFileInterpreter(QWidget):
 
         # setting defaults
         self.confirm_on_save = True
+
+    def closeEvent(self, event):
+        self.deleteLater()
+        super(MultiPythonFileInterpreter, self).closeEvent(event)
 
     def load_settings_from_config(self, config):
         self.confirm_on_save = config.get('project', 'prompt_save_editor_modified')
@@ -90,6 +96,7 @@ class MultiPythonFileInterpreter(QWidget):
         """
         if content is None:
             content = self.default_content
+
         interpreter = PythonFileInterpreter(font, content, filename=filename,
                                             parent=self)
         if self.whitespace_visible:
@@ -151,19 +158,6 @@ class MultiPythonFileInterpreter(QWidget):
             self.append_new_editor()
 
         return True
-
-    def create_tabwidget(self):
-        """Create a new QTabWidget with a button to add new tabs"""
-        tabs = QTabWidget(self)
-        tabs.setMovable(True)
-        tabs.setTabsClosable(True)
-        # create a button to add new tabs
-        plus_btn = QToolButton(tabs)
-        plus_btn.setText('+')
-        plus_btn.clicked.connect(self.plus_button_clicked)
-        tabs.setCornerWidget(plus_btn, Qt.TopLeftCorner)
-        tabs.tabCloseRequested.connect(self.close_tab)
-        return tabs
 
     def current_editor(self):
         return self._tabs.currentWidget()
@@ -243,7 +237,7 @@ class MultiPythonFileInterpreter(QWidget):
 
     def save_current_file(self):
         """Save the current file"""
-        self.current_editor().save()
+        self.current_editor().save(force_save=True)
 
     def spaces_to_tabs_current(self):
         self.current_editor().replace_spaces_with_tabs()

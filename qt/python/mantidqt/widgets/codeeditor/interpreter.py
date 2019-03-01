@@ -47,14 +47,22 @@ class EditorIO(object):
             filename = None
         return filename
 
-    def save_if_required(self, confirm=True):
-        """Asks the user if the contents should be saved.
+    def save_if_required(self, prompt_for_confirm=True, force_save=False):
+        """
+        Save the editor's contents to a file. The function has the following options:
+        - if prompt_for_confirmation is True -> then show the yes/no dialog
+        - if force_save is True, and prompt_for_confirmation is False -> then save the file anyway
+        - if prompt_for_confirmation and force_save are both False -> then do NOT save the file, discard all changes
 
-        :param confirm: If True then show a confirmation dialog first to check we should save
+        :param prompt_for_confirmation: If this is True, then the user will be prompted with a yes/no dialog to
+                                        decide whether to save or discard the file.
+                                        If this parameter is True, force_save will be ignored!
+        :param force_save: If this is True, then if the user is NOT being prompted, the file will be saved anyway!
+                           This is used for the File > Save Script (Ctrl + S) action.
         :returns: True if either saving was successful or no save was requested. Returns False if
         the operation should be cancelled
         """
-        if confirm:
+        if prompt_for_confirm:
             button = QMessageBox.question(self.editor, "",
                                           "Save changes to document before closing?",
                                           buttons=(QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel),
@@ -66,6 +74,8 @@ class EditorIO(object):
             else:
                 # Cancelled
                 return False
+        elif force_save:
+            return self.write()
         else:
             # pretend the user clicked No on the dialog
             return True
@@ -115,10 +125,10 @@ class PythonFileInterpreter(QWidget):
         self.find_replace_dialog_shown = False
         self.status = QStatusBar(self)
         self.layout = QVBoxLayout()
+        self.layout.setContentsMargins(0, 0, 0, 0)
         self.layout.addWidget(self.editor)
         self.layout.addWidget(self.status)
         self.setLayout(self.layout)
-        self.layout.setContentsMargins(0, 0, 0, 0)
         self._setup_editor(content, filename)
 
         self._presenter = PythonFileInterpreterPresenter(self, PythonCodeExecution(content))
@@ -160,7 +170,7 @@ class PythonFileInterpreter(QWidget):
 
         :return: True if closing was considered successful, false otherwise
         """
-        return self.save(confirm=self.parent.confirm_on_save)
+        return self.save(prompt_for_confirmation=self.parent.confirm_on_save)
 
     def abort(self):
         self._presenter.req_abort()
@@ -171,10 +181,10 @@ class PythonFileInterpreter(QWidget):
     def execute_async_blocking(self):
         self._presenter.req_execute_async_blocking()
 
-    def save(self, confirm=False):
+    def save(self, prompt_for_confirmation=False, force_save=False):
         if self.editor.isModified():
             io = EditorIO(self.editor)
-            return io.save_if_required(confirm)
+            return io.save_if_required(prompt_for_confirmation, force_save)
         else:
             return True
 
