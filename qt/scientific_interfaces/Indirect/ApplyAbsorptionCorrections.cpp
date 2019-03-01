@@ -525,18 +525,18 @@ void ApplyAbsorptionCorrections::loadSettings(const QSettings &settings) {
 }
 
 void ApplyAbsorptionCorrections::setFileExtensionsByName(bool filter) {
+  QStringList const noSuffixes{""};
   m_uiForm.dsSample->setFBSuffixes(filter ? m_sampleFBExtensions
                                           : getAllowedExtensions());
-  m_uiForm.dsSample->setWSSuffixes(filter ? m_sampleWSExtensions
-                                          : getAllowedExtensions());
+  m_uiForm.dsSample->setWSSuffixes(filter ? m_sampleWSExtensions : noSuffixes);
   m_uiForm.dsContainer->setFBSuffixes(filter ? m_containerFBExtensions
                                              : getAllowedExtensions());
   m_uiForm.dsContainer->setWSSuffixes(filter ? m_containerWSExtensions
-                                             : getAllowedExtensions());
+                                             : noSuffixes);
   m_uiForm.dsCorrections->setFBSuffixes(filter ? m_correctionsFBExtensions
                                                : getAllowedExtensions());
   m_uiForm.dsCorrections->setWSSuffixes(filter ? m_correctionsWSExtensions
-                                               : getAllowedExtensions());
+                                               : noSuffixes);
 }
 
 /**

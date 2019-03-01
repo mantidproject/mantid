@@ -443,14 +443,15 @@ void AbsorptionCorrections::loadSettings(const QSettings &settings) {
 }
 
 void AbsorptionCorrections::setFileExtensionsByName(bool filter) {
+  QStringList const noSuffixes{""};
   m_uiForm.dsSampleInput->setFBSuffixes(filter ? m_sampleFBExtensions
                                                : getAllowedExtensions());
   m_uiForm.dsSampleInput->setWSSuffixes(filter ? m_sampleWSExtensions
-                                               : getAllowedExtensions());
+                                               : noSuffixes);
   m_uiForm.dsCanInput->setFBSuffixes(filter ? m_containerFBExtensions
                                             : getAllowedExtensions());
   m_uiForm.dsCanInput->setWSSuffixes(filter ? m_containerWSExtensions
-                                            : getAllowedExtensions());
+                                            : noSuffixes);
 }
 
 void AbsorptionCorrections::processWavelengthWorkspace() {

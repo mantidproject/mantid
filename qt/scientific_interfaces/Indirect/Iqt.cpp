@@ -532,14 +532,14 @@ void Iqt::loadSettings(const QSettings &settings) {
 void Iqt::plotInput() { IndirectDataAnalysisTab::plotInput(m_uiForm.ppPlot); }
 
 void Iqt::setFileExtensionsByName(bool filter) {
+  QStringList const noSuffixes{""};
   m_uiForm.dsInput->setFBSuffixes(filter ? m_sampleFBExtensions
                                          : getAllowedExtensions());
-  m_uiForm.dsInput->setWSSuffixes(filter ? m_sampleWSExtensions
-                                         : getAllowedExtensions());
+  m_uiForm.dsInput->setWSSuffixes(filter ? m_sampleWSExtensions : noSuffixes);
   m_uiForm.dsResolution->setFBSuffixes(filter ? m_resolutionFBExtensions
                                               : getAllowedExtensions());
   m_uiForm.dsResolution->setWSSuffixes(filter ? m_resolutionWSExtensions
-                                              : getAllowedExtensions());
+                                              : noSuffixes);
 }
 
 void Iqt::plotInput(const QString &wsname) {

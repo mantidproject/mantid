@@ -805,10 +805,11 @@ void ISISEnergyTransfer::plotRawComplete(bool error) {
 }
 
 void ISISEnergyTransfer::setFileExtensionsByName(bool filter) {
+  QStringList const noSuffixes{""};
   m_uiForm.dsCalibrationFile->setFBSuffixes(filter ? m_calibFBExtensions
                                                    : getAllowedExtensions());
   m_uiForm.dsCalibrationFile->setWSSuffixes(filter ? m_calibWSExtensions
-                                                   : getAllowedExtensions());
+                                                   : noSuffixes);
 }
 
 /**

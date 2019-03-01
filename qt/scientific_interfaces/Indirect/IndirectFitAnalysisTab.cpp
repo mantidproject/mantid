@@ -301,13 +301,13 @@ void IndirectFitAnalysisTab::loadSettings(const QSettings &settings) {
 }
 
 void IndirectFitAnalysisTab::setFileExtensionsByName(bool filter) {
-  setSampleWSSuffices(filter ? getSampleWSSuffices() : getAllowedExtensions());
+  QStringList const noSuffixes{""};
+  setSampleWSSuffices(filter ? getSampleWSSuffices() : noSuffixes);
   setSampleFBSuffices(filter ? getSampleFBSuffices() : getAllowedExtensions());
 
   auto const resolutionWSSuffices = getResolutionWSSuffices();
   if (!resolutionWSSuffices.empty()) {
-    setResolutionWSSuffices(filter ? resolutionWSSuffices
-                                   : getAllowedExtensions());
+    setResolutionWSSuffices(filter ? resolutionWSSuffices : noSuffixes);
     setResolutionFBSuffices(filter ? getResolutionFBSuffices()
                                    : getAllowedExtensions());
   }

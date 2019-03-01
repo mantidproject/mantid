@@ -87,14 +87,15 @@ ResNorm::ResNorm(QWidget *parent)
 }
 
 void ResNorm::setFileExtensionsByName(bool filter) {
+  QStringList const noSuffixes{""};
   m_uiForm.dsVanadium->setFBSuffixes(filter ? m_vanadiumFBExtensions
                                             : getAllowedExtensions());
   m_uiForm.dsVanadium->setWSSuffixes(filter ? m_vanadiumWSExtensions
-                                            : getAllowedExtensions());
+                                            : noSuffixes);
   m_uiForm.dsResolution->setFBSuffixes(filter ? m_resolutionFBExtensions
                                               : getAllowedExtensions());
   m_uiForm.dsResolution->setWSSuffixes(filter ? m_resolutionWSExtensions
-                                              : getAllowedExtensions());
+                                              : noSuffixes);
 }
 
 void ResNorm::setup() {}

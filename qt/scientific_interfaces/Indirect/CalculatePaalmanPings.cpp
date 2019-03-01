@@ -450,14 +450,14 @@ void CalculatePaalmanPings::loadSettings(const QSettings &settings) {
 }
 
 void CalculatePaalmanPings::setFileExtensionsByName(bool filter) {
+  QStringList const noSuffixes{""};
   m_uiForm.dsSample->setFBSuffixes(filter ? m_sampleFBExtensions
                                           : getAllowedExtensions());
-  m_uiForm.dsSample->setWSSuffixes(filter ? m_sampleWSExtensions
-                                          : getAllowedExtensions());
+  m_uiForm.dsSample->setWSSuffixes(filter ? m_sampleWSExtensions : noSuffixes);
   m_uiForm.dsContainer->setFBSuffixes(filter ? m_containerFBExtensions
                                              : getAllowedExtensions());
   m_uiForm.dsContainer->setWSSuffixes(filter ? m_containerWSExtensions
-                                             : getAllowedExtensions());
+                                             : noSuffixes);
 }
 
 /**

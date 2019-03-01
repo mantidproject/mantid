@@ -462,10 +462,11 @@ void ISISDiagnostics::sliceAlgDone(bool error) {
 }
 
 void ISISDiagnostics::setFileExtensionsByName(bool filter) {
+  QStringList const noSuffices{""};
   m_uiForm.dsCalibration->setFBSuffixes(filter ? m_calibFBExtensions
                                                : getAllowedExtensions());
   m_uiForm.dsCalibration->setWSSuffixes(filter ? m_calibWSExtensions
-                                               : getAllowedExtensions());
+                                               : noSuffices);
 }
 
 /**
