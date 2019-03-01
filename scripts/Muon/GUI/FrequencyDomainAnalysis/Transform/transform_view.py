@@ -30,7 +30,7 @@ class TransformView(QtGui.QWidget):
         self.setLayout(self.Layout)
         self.hideAll()
         methods = list(self.methods.keys())
-        self.show(methods[0])
+        self.showMethod(methods[0])
 
     def getLayout(self):
         return self.grid
@@ -42,7 +42,7 @@ class TransformView(QtGui.QWidget):
         for key in self.methods:
             self.methods[key].hide()
 
-    def show(self, name):
+    def showMethod(self, name):
         self.methods[name].show()
 
     def getView(self, name):

@@ -68,6 +68,7 @@ public:
   Kernel::V3D generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
                                     const BoundingBox &activeRegion,
                                     const size_t) const override;
+  detail::ShapeInfo::GeometryShape shape() const override;
   void GetObjectGeom(detail::ShapeInfo::GeometryShape &type,
                      std::vector<Kernel::V3D> &vectors, double &myradius,
                      double &myheight) const override;

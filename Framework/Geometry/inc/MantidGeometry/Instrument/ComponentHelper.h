@@ -25,8 +25,7 @@ class ParameterMap;
 
 /**
   A set of helper functions for dealing with components, i.e. movement, rotation
-  that require
-  interaction with the ParamterMap.
+  that require interaction with the ParameterMap.
 */
 namespace ComponentHelper {
 /**

@@ -54,7 +54,8 @@ public:
   };
 
 public:
-  ScriptEditor(const QString &lexerName, QWidget *parent = nullptr);
+  ScriptEditor(const QString &lexerName, const QFont &font = QFont(),
+               QWidget *parent = nullptr);
   ScriptEditor(QWidget *parent = nullptr, QsciLexer *lexer = nullptr,
                const QString &settingsGroup = "");
   /// Destructor
@@ -101,6 +102,11 @@ public:
 
   /// Return a pointer to the object responsible for code completion
   inline QsciAPIs *scintillaAPI() const { return m_completer; }
+
+  /// Replace all occurences of a string
+  void replaceAll(const QString &search, const QString &replace, bool regex,
+                  bool caseSensitive, bool matchWords, bool wrap,
+                  bool forward = true);
 
 public slots:
   /// Save the script, opening a dialog

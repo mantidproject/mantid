@@ -35,8 +35,8 @@ class ISISDirectInelasticReduction(with_metaclass(ABCMeta, systemtesting.MantidS
         - sample_rmm: A float value for the sample rmm or None
         - hard_mask: An hard mask file or None
     """
-    tolerance=0.
-    tolerance_is_reller=True
+    tolerance = 0.
+    tolerance_is_rel_err = True
 
     @abstractmethod
     def get_reference_file(self):
@@ -56,7 +56,7 @@ class ISISDirectInelasticReduction(with_metaclass(ABCMeta, systemtesting.MantidS
     def validate(self):
         """Returns the name of the workspace & file to compare"""
         self.tolerance = 1e-6
-        self.tolerance_is_reller=True
+        self.tolerance_is_rel_err = True
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Instrument')
         self.disableChecking.append('Sample')
@@ -465,7 +465,7 @@ class MERLINReduction(ISISDirectInelasticReduction):
 
     def validate(self):
         self.tolerance = 1e-6
-        self.tolerance_is_reller=True
+        self.tolerance_is_rel_err = True
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Instrument')
         result = self.get_result_workspace()
@@ -478,7 +478,7 @@ class MERLINReduction(ISISDirectInelasticReduction):
 
 class LETReduction(systemtesting.MantidSystemTest):
     tolerance = 1e-6
-    tolerance_is_reller=True
+    tolerance_is_rel_err=True
 
     def requiredMemoryMB(self):
         """Far too slow for managed workspaces. They're tested in other places. Requires 2Gb"""
@@ -500,7 +500,7 @@ class LETReduction(systemtesting.MantidSystemTest):
 
     def validate(self):
         self.tolerance = 1e-6
-        self.tolerance_is_reller=True
+        self.tolerance_is_rel_err = True
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Instrument')
 
@@ -512,7 +512,7 @@ class LETReductionEvent2015Multirep(systemtesting.MantidSystemTest):
     written in a hope that most of the stuff find here will eventually find its way into main reduction routines
     """
     tolerance = 1e-6
-    tolerance_is_reller=True
+    tolerance_is_rel_err = True
 
     def requiredMemoryMB(self):
         """Far too slow for managed workspaces. They're tested in other places. Requires 20Gb"""
@@ -539,7 +539,7 @@ class LETReductionEvent2015Multirep(systemtesting.MantidSystemTest):
 
     def validate(self):
         self.tolerance = 1e-6
-        self.tolerance_is_reller=False
+        self.tolerance_is_rel_err = False
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Instrument')
 

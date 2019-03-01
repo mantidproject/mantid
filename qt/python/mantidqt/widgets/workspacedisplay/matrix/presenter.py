@@ -62,7 +62,7 @@ class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
     def replace_workspace(self, workspace_name, workspace):
         if self.model.workspace_equals(workspace_name):
             self.model = MatrixWorkspaceDisplayModel(workspace)
-            self.view.get_active_tab().viewport().update()
+            self.setup_tables()
 
     @classmethod
     def supports(cls, ws):

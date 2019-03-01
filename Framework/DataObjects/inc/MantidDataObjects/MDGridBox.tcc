@@ -51,7 +51,7 @@ TMDE(MDGridBox)::MDGridBox(
 
 /** convenience Constructor, taking the shared pointer and extracting const
  * pointer from it
-  * @param bc :: shared poineter to the BoxController, owned by workspace
+  * @param bc :: shared pointer to the BoxController, owned by workspace
   * @param depth :: recursive split depth
   * @param extentsVector :: size of the box
 */
@@ -63,6 +63,7 @@ TMDE(MDGridBox)::MDGridBox(
       numBoxes(0), m_Children(), diagonalSquared(0.f), nPoints(0) {
   initGridBox();
 }
+
 /// common part of MDGridBox contstructor;
 template <typename MDE, size_t nd> size_t MDGridBox<MDE, nd>::initGridBox() {
   if (!this->m_BoxController)
@@ -387,7 +388,33 @@ TMDE(void MDGridBox)::refreshCache(Kernel::ThreadScheduler *ts) {
     throw std::runtime_error("Not implemented");
   }
 }
+//-----------------------------------------------------------------------------------------------
+/**
+ * Calculates caches for grid box recursively,
+ * assuming leafs have computed values.
+ * Calculates caches for MDGridBoxes based on
+ * children caches, does nothing with MDBoxes
+ */
+TMDE(void MDGridBox)::calculateGridCaches() {
+  // Clear your total
+  nPoints = 0;
+  this->m_signal = 0;
+  this->m_errorSquared = 0;
+  this->m_totalWeight = 0;
 
+
+  for (MDBoxBase<MDE, nd> *ibox : m_Children) {
+
+    // does nothing for MDBox
+    ibox->calculateGridCaches();
+
+    // Add up what's in there
+    nPoints += ibox->getNPoints();
+    this->m_signal += ibox->getSignal();
+    this->m_errorSquared += ibox->getErrorSquared();
+    this->m_totalWeight += ibox->getTotalWeight();
+  }
+}
 //-----------------------------------------------------------------------------------------------
 /** Allocate and return a vector with a copy of all events contained
  */
@@ -615,7 +642,20 @@ TMDE(void MDGridBox)::getBoxes(std::vector<API::IMDNode *> &outBoxes,
       outBoxes.push_back(this);
   }
 }
-
+//-----------------------------------------------------------------------------------------------
+/** Return all boxes contained within.
+ *
+ * @param outBoxes :: vector to fill
+ * @param cond :: condition to check
+ *(leaves on the tree)
+ */
+TMDE(void MDGridBox)::getBoxes(std::vector<API::IMDNode *>& outBoxes, const std::function<bool(API::IMDNode *)> &cond) {
+  if(cond(this))
+    outBoxes.emplace_back(this);
+  for(API::IMDNode * child: m_Children){
+    child->getBoxes(outBoxes, cond);
+  }
+}
 //-----------------------------------------------------------------------------------------------
 /** Returns the lowest-level box at the given coordinates
  * @param coords :: nd-sized array of the coordinate of the point to look at

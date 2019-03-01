@@ -10,10 +10,11 @@ set ( DATAPROCESSOR_INC ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/DataProcess
 set ( INSTRUMENT_VIEW_INC ${WIDGETS_DIR}/instrumentview/inc )
 set ( SLICEVIEWER_INC ${WIDGETS_DIR}/sliceviewer/inc )
 set ( REFVIEWER_INC ${WIDGETS_DIR}/refdetectorview/inc )
+set ( COMMON_SIP_DIR ../common_sip )
 set ( HEADER_DEPENDS
-  SIPVector.h
-  string.sip
-  vector.sip
+  ${COMMON_SIP_DIR}/SIPVector.h
+  ${COMMON_SIP_DIR}/string.sip
+  ${COMMON_SIP_DIR}/vector.sip
   ../../../Framework/PythonInterface/core/inc/MantidPythonInterface/core/VersionCompat.h
 
   ${FACTORY_INC}/MantidQtWidgets/Factory/WidgetFactory.h
@@ -92,6 +93,7 @@ mtd_add_sip_module (
   HEADER_DEPS ${HEADER_DEPENDS}
   INCLUDE_DIRS
     ${CMAKE_CURRENT_LIST_DIR}
+    ${COMMON_SIP_DIR}
     ${PYTHON_INCLUDE_PATH}
     ../../../Framework/PythonInterface/core/inc
   PYQT_VERSION 4

@@ -13,14 +13,14 @@ from mantidqt.widgets.instrumentview.io import InstrumentViewEncoder
 from mantidqt.widgets.instrumentview.presenter import InstrumentViewPresenter
 from mantid.simpleapi import CreateSampleWorkspace
 from mantid.api import AnalysisDataService as ADS
-from mantidqt.utils.qt.test import GuiTest
+from mantidqt.utils.qt.testing import GuiTest
 
 
 class EncoderFactoryTest(GuiTest):
     def setUp(self):
         EncoderFactory.register_encoder(InstrumentViewEncoder)
         CreateSampleWorkspace(OutputWorkspace="ws")
-        self.instrument_view = InstrumentViewPresenter(ADS.retrieve("ws")).view
+        self.instrument_view = InstrumentViewPresenter(ADS.retrieve("ws")).container
 
     def test_find_encoder_can_find_an_encoder(self):
         self.assertNotEqual(None, EncoderFactory.find_encoder(self.instrument_view))

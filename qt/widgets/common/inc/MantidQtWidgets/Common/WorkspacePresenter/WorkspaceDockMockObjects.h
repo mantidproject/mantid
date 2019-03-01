@@ -51,7 +51,8 @@ public:
                void(IWorkspaceDockView::SortCriteria criteria,
                     IWorkspaceDockView::SortDirection direction));
   MOCK_CONST_METHOD0(getSaveFileType, SaveFileType());
-  MOCK_METHOD1(saveWorkspace, void(SaveFileType type));
+  MOCK_METHOD2(saveWorkspace,
+               void(const std::string &wsName, SaveFileType type));
   MOCK_METHOD1(saveWorkspaces, void(const StringList &wsNames));
   MOCK_METHOD1(
       updateTree,

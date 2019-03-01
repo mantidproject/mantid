@@ -520,6 +520,8 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::transmissionCorrection(
     alg->setPropertyValue("Params", getPropertyValue("Params"));
     alg->setPropertyValue("StartOverlap", getPropertyValue("StartOverlap"));
     alg->setPropertyValue("EndOverlap", getPropertyValue("EndOverlap"));
+    alg->setProperty("ScaleRHSWorkspace",
+                     getPropertyValue("ScaleRHSWorkspace"));
     alg->setPropertyValue("I0MonitorIndex", getPropertyValue("I0MonitorIndex"));
     alg->setPropertyValue("WavelengthMin", getPropertyValue("WavelengthMin"));
     alg->setPropertyValue("WavelengthMax", getPropertyValue("WavelengthMax"));

@@ -28,11 +28,6 @@ class HelpWidgetPresenterTest(unittest.TestCase):
     def tearDown(self):
         self.view = None
 
-    def test_that_when_help_button_clicked_correct_message_shown(self):
-        self.view.help_button.clicked.emit(True)
-
-        self.view.warning_popup.assert_called_once_with("Help is not currently implemented!")
-
     @mock.patch('Muon.GUI.Common.help_widget.help_widget_view.MantidQt')
     def test_that_manage_directories_button_clicked_opens_directory_manager(self, mantidqt_mock):
         self.view.manage_user_dir_button.clicked.emit(True)

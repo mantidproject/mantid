@@ -10,53 +10,14 @@
 from __future__ import (absolute_import, unicode_literals)
 
 # system imports
+import ctypes
 import sys
 import threading
 import time
 from traceback import extract_tb
 
 
-def blocking_async_task(target, args=(), kwargs=None, blocking_cb=None,
-                        period_secs=0.05):
-    """Run the target in a separate thread and block the calling thread
-    until execution is complete.
-
-    :param target: A Python callable object
-    :param args: Arguments to pass to the callable
-    :param kwargs: Keyword arguments to pass to the callable
-    :param blocking_cb: An optional callback to process while waiting for the task
-    to finish
-    :param period_secs: Sleep for this many seconds at the start of each loop that checks
-    the task is still alive. This will be the minimum time between calls to blocking_cb.
-    :returns: An AsyncTaskResult object
-    """
-    blocking_cb = blocking_cb if blocking_cb is not None else lambda: None
-
-    class Receiver(object):
-        output, exc_value = None, None
-
-        def on_success(self, result):
-            self.output = result.output
-
-        def on_error(self, result):
-            self.exc_value = result.exc_value
-
-    recv = Receiver()
-    task = AsyncTask(target, args, kwargs, success_cb=recv.on_success,
-                     error_cb=recv.on_error)
-    task.start()
-    while task.is_alive():
-        time.sleep(period_secs)
-        blocking_cb()
-
-    if recv.exc_value is not None:
-        raise recv.exc_value
-    else:
-        return recv.output
-
-
 class AsyncTask(threading.Thread):
-
     def __init__(self, target, args=(), kwargs=None,
                  success_cb=None, error_cb=None,
                  finished_cb=None):
@@ -64,8 +25,6 @@ class AsyncTask(threading.Thread):
 
         :param target: A Python callable object
         :param args: Arguments to pass to the callable
-        :param stack_chop: If an error is raised then chop this many entries
-        from the top of traceback stack.
         :param kwargs: Keyword arguments to pass to the callable
         :param success_cb: Optional callback called when operation was successful
         :param error_cb: Optional callback called when operation was not successful
@@ -99,6 +58,78 @@ class AsyncTask(threading.Thread):
             self.success_cb(AsyncTaskSuccess(elapsed(time_start), out))
 
         self.finished_cb()
+
+    def abort(self):
+        """Cancel an asynchronous execution"""
+        # Implementation is based on
+        # https://stackoverflow.com/questions/5019436/python-how-to-terminate-a-blocking-thread
+        ctypes.pythonapi.PyThreadState_SetAsyncExc(ctypes.c_long(self.ident),
+                                                   ctypes.py_object(KeyboardInterrupt))
+        time.sleep(0.1)
+
+
+class BlockingAsyncTaskWithCallback(AsyncTask):
+    def __init__(self, target, args=(), kwargs=None, success_cb=None, error_cb=None, blocking_cb=None,
+                 period_secs=0.05):
+        """Run the target in a separate thread and block the calling thread
+        until execution is complete,the calling thread is blocked, except that
+        the blocking_cb will be executed in every period in it.
+
+        :param target: A Python callable object
+        :param args: Arguments to pass to the callable
+        :param kwargs: Keyword arguments to pass to the callable
+        :param blocking_cb: An optional callback to process while waiting for the task
+        to finish
+        :param period_secs: Sleep for this many seconds at the start of each loop that checks
+        the task is still alive. This will be the minimum time between calls to blocking_cb.
+        :returns: An AsyncTaskResult object
+        """
+        super(BlockingAsyncTaskWithCallback, self).__init__(target)
+
+        self.period_secs = period_secs
+
+        def create_callback(cb):
+            return cb if cb is not None else lambda: None
+
+        self.blocking_cb = create_callback(blocking_cb)
+        self.success_cb = create_callback(success_cb)
+        self.error_cb = create_callback(error_cb)
+
+        class Receiver(object):
+            output, exc_value = None, None
+
+            def on_success(self, result):
+                self.output = result.output
+                if success_cb is not None:
+                    success_cb(result)
+
+            def on_error(self, result):
+                self.exc_value = result.exc_value
+                if error_cb is not None:
+                    error_cb(result)
+
+        self.recv = Receiver()
+        self.task = AsyncTask(target, args, kwargs, success_cb=self.recv.on_success, error_cb=self.recv.on_error)
+
+    def start(self):
+        """:returns: An AsyncTaskResult object"""
+        self.task.start()
+        while self.task.is_alive():
+            time.sleep(self.period_secs)
+            self.blocking_cb()
+
+        if self.recv.exc_value is not None:
+            raise self.recv.exc_value
+        else:
+            return self.recv.output
+
+    def abort(self):
+        """Cancel an asynchronous execution"""
+        # Implementation is based on
+        # https://stackoverflow.com/questions/5019436/python-how-to-terminate-a-blocking-thread
+        ctypes.pythonapi.PyThreadState_SetAsyncExc(ctypes.c_long(self.task.ident),
+                                                   ctypes.py_object(KeyboardInterrupt))
+        time.sleep(0.1)
 
 
 class AsyncTaskResult(object):
