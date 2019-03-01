@@ -41,6 +41,9 @@ class QuickEditWidget(object):
     def add_subplot(self, name):
         self._presenter.add_subplot(name)
 
+    def rm_subplot(self,name):
+        self._presenter.rm_subplot(name)
+
     def get_selection(self):
         name = self._presenter.widget.current_selection()
         if name == "All":

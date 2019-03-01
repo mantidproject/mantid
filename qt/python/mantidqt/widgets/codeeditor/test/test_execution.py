@@ -72,6 +72,18 @@ class PythonCodeExecutionTest(GuiTest):
         user_globals = self._verify_async_execution_successful(code)
         self.assertEqual(100, user_globals['_local'])
 
+    def test_filename_sets__file__attr(self):
+        executor = PythonCodeExecution()
+        test_filename = 'script.py'
+        executor.execute('x=1', filename=test_filename)
+        self.assertTrue('__file__' in executor.globals_ns)
+        self.assertEqual(test_filename, executor.globals_ns['__file__'])
+
+    def test_empty_filename_does_not_set__file__attr(self):
+        executor = PythonCodeExecution()
+        executor.execute('x=1')
+        self.assertTrue('__file__' not in executor.globals_ns)
+
     def test_execute_async_calls_success_signal_on_completion(self):
         code = "x=1+2"
         executor, recv = self._run_async_code(code)

@@ -13,7 +13,7 @@ from __future__ import (absolute_import, unicode_literals)
 import os.path as osp
 
 # 3rd party imports
-from qtpy.QtCore import Qt
+from qtpy.QtCore import Qt, Slot
 from qtpy.QtWidgets import QVBoxLayout, QWidget
 
 # local imports
@@ -36,7 +36,13 @@ def _tab_title_and_toolip(filename):
 class MultiPythonFileInterpreter(QWidget):
     """Provides a tabbed widget for editing multiple files"""
 
-    def __init__(self, default_content=None, parent=None):
+    def __init__(self, font=None, default_content=None, parent=None):
+        """
+
+        :param font: An optional font to override the default editor font
+        :param default_content: str, if provided this will populate any new editor that is created
+        :param parent: An optional parent widget
+        """
         super(MultiPythonFileInterpreter, self).__init__(parent)
 
         # attributes
@@ -53,7 +59,7 @@ class MultiPythonFileInterpreter(QWidget):
         layout.setContentsMargins(0, 0, 0, 0)
 
         # add a single editor by default
-        self.append_new_editor()
+        self.append_new_editor(font=font)
 
         # setting defaults
         self.confirm_on_save = True
@@ -78,11 +84,21 @@ class MultiPythonFileInterpreter(QWidget):
                 file_paths.append(file_path)
         return file_paths
 
-    def append_new_editor(self, content=None, filename=None):
+    def append_new_editor(self, font=None, content=None, filename=None):
+        """
+        Appends a new editor the tabbed widget
+        :param font: A reference to the font to be used by the editor
+        :param content: An optional string containing content to be placed
+        into the editor on opening. If None then self.default_content is used
+        :param filename: An optional string containing the filename of the editor
+        if applicable.
+        :return:
+        """
         if content is None:
             content = self.default_content
 
-        interpreter = PythonFileInterpreter(content, filename=filename, parent=self)
+        interpreter = PythonFileInterpreter(font, content, filename=filename,
+                                            parent=self)
         if self.whitespace_visible:
             interpreter.set_whitespace_visible()
 
@@ -99,6 +115,13 @@ class MultiPythonFileInterpreter(QWidget):
     def abort_current(self):
         """Request that that the current execution be cancelled"""
         self.current_editor().abort()
+
+    @Slot()
+    def abort_all(self):
+        """Request that all executing tabs are cancelled"""
+        for ii in range(0, len(self._tabs)):
+            editor = self.editor_at(ii)
+            editor.abort()
 
     def close_all(self):
         """
@@ -143,10 +166,17 @@ class MultiPythonFileInterpreter(QWidget):
         """Return the editor at the given index. Must be in range"""
         return self._tabs.widget(idx)
 
-    def execute_current(self):
+    def execute_current_async(self):
         """Execute content of the current file. If a selection is active
-        then only this portion of code is executed"""
+        then only this portion of code is executed, this is completed asynchronously"""
         self.current_editor().execute_async()
+
+    @Slot()
+    def execute_current_async_blocking(self):
+        """Execute content of the current file. If a selection is active
+            then only this portion of code is executed, completed asynchronously
+            which blocks calling thread. """
+        self.current_editor().execute_async_blocking()
 
     def mark_current_tab_modified(self, modified):
         """Update the current tab title to indicate that the
@@ -175,6 +205,7 @@ class MultiPythonFileInterpreter(QWidget):
         self._tabs.setTabText(idx_cur, title)
         self._tabs.setTabToolTip(idx_cur, tooltip)
 
+    @Slot(str)
     def open_file_in_new_tab(self, filepath, startup=False):
         """Open the existing file in a new tab in the editor
 

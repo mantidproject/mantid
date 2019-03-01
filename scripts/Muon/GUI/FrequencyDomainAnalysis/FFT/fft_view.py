@@ -11,6 +11,7 @@ from PyQt4 import QtCore, QtGui
 import mantid.simpleapi as mantid
 
 from Muon.GUI.Common.utilities import table_utils
+from Muon.GUI.Common.message_box import warning
 
 
 class FFTView(QtGui.QWidget):
@@ -147,6 +148,26 @@ class FFTView(QtGui.QWidget):
         self.Im_ws.addItems(options)
         self.phaseQuadChanged()
 
+    def removeIm(self, pattern):
+        index = self.Im_ws.findText(pattern)
+        self.Im_ws.removeItem(index)
+
+    def removeRe(self, pattern):
+        index = self.ws.findText(pattern)
+        self.ws.removeItem(index)
+
+    def setReTo(self, name):
+        index = self.ws.findText(name)
+        if index == -1:
+            return
+        self.ws.setCurrentIndex(index)
+
+    def setImTo(self, name):
+        index = self.Im_ws.findText(name)
+        if index == -1:
+            return
+        self.Im_ws.setCurrentIndex(index)
+
     # connect signals
     def phaseCheck(self):
         self.phaseCheckSignal.emit()
@@ -157,6 +178,12 @@ class FFTView(QtGui.QWidget):
     def buttonClick(self):
         self.buttonSignal.emit()
 
+    def getInputWS(self):
+        return self.ws.currentText()
+
+    def getInputImWS(self):
+        return self.Im_ws.currentText()
+
     # responses to commands
     def activateButton(self):
         self.button.setEnabled(True)
@@ -165,7 +192,7 @@ class FFTView(QtGui.QWidget):
         self.button.setEnabled(False)
 
     def setPhaseBox(self):
-        self.FFTTable.setRowHidden(8, self.getWS() != "PhaseQuad")
+        self.FFTTable.setRowHidden(8, "PhaseQuad" not in self.getWS())
 
     def changed(self, box, row):
         self.FFTTable.setRowHidden(row, box.checkState() == QtCore.Qt.Checked)
@@ -175,10 +202,10 @@ class FFTView(QtGui.QWidget):
 
     def phaseQuadChanged(self):
         # show axis
-        self.FFTTable.setRowHidden(6, self.getWS() != "PhaseQuad")
-        self.FFTTable.setRowHidden(7, self.getWS() != "PhaseQuad")
+        self.FFTTable.setRowHidden(6, "PhaseQuad" not in self.getWS())
+        self.FFTTable.setRowHidden(7, "PhaseQuad" not in self.getWS())
         # hide complex ws
-        self.FFTTable.setRowHidden(2, self.getWS() == "PhaseQuad")
+        self.FFTTable.setRowHidden(2, "PhaseQuad" in self.getWS())
 
     # these are for getting inputs
     def getRunName(self):
@@ -188,13 +215,15 @@ class FFTView(QtGui.QWidget):
             tmpWS = mantid.AnalysisDataService.retrieve("MuonAnalysis")
         return tmpWS.getInstrument().getName() + str(tmpWS.getRunNumber()).zfill(8)
 
-    def initFFTInput(self):
+    def initFFTInput(self, run=None):
         inputs = {}
         inputs[
-            'InputWorkspace'] = "__ReTmp__"  # str( self.ws.currentText()).replace(";","; ")
+            'InputWorkspace'] = "__ReTmp__"  #
         inputs['Real'] = 0  # always zero
         out = str(self.ws.currentText()).replace(";", "; ")
-        inputs['OutputWorkspace'] = self.getRunName() + ";" + out + ";FFT"
+        if run is None:
+            run = self.getRunName()
+        inputs['OutputWorkspace'] = run + ";" + out + ";FFT"
         inputs["AcceptXRoundingErrors"] = True
         return inputs
 
@@ -254,6 +283,20 @@ class FFTView(QtGui.QWidget):
     def isRaw(self):
         return self.Raw_box.checkState() == QtCore.Qt.Checked
 
+    def set_raw_checkbox_state(self, state):
+        if state:
+            self.Raw_box.setCheckState(QtCore.Qt.Checked)
+        else:
+            self.Raw_box.setCheckState(QtCore.Qt.Unchecked)
+
+    def setup_raw_checkbox_changed(self, slot):
+        self.FFTTable.itemChanged.connect(self.raw_checkbox_changed)
+        self.signal_raw_option_changed = slot
+
+    def raw_checkbox_changed(self, table_item):
+        if table_item == self.Raw_box:
+            self.signal_raw_option_changed()
+
     def getImBoxRow(self):
         return self.Im_box_row
 
@@ -277,3 +320,6 @@ class FFTView(QtGui.QWidget):
 
     def isPhaseBoxShown(self):
         return self.FFTTable.isRowHidden(8)
+
+    def warning_popup(self, message):
+        warning(message, parent=self)

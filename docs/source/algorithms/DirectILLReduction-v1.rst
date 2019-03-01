@@ -43,9 +43,26 @@ The material properties should be set for *InputWorkspace* and *IntegratedVanadi
 (Re)binning in energy and momentum transfer
 ###########################################
 
-After conversion from time-of-flight to energy transfer, the binning may differ from spectrum to spectrum if the sample to detector distances are unequal. The :ref:`SofQWNormalisedPolygon <algm-SofQWNormalisedPolygon>` algorithm cannot work with such ragged workspaces and thus rebinning is necessary. The rebinning can be specified by the *EnergyRebinningParams* property. This is directly passed to :ref:`Rebin <algm-Rebin>` as the *Params* property. If *EnergyRebinningParams* is not specified, an automatic rebinning scheme is used:
-- Find the spectrum with smallest bin border. Copy binning from this spectrum for negative energy transfers.
-- For positive energy transfers, use the median bin width at zero energy transfer.
+After conversion from time-of-flight to energy transfer, the binning may differ from spectrum to spectrum if the sample to detector distances are unequal. The :ref:`SofQWNormalisedPolygon <algm-SofQWNormalisedPolygon>` algorithm cannot work with such ragged workspaces and thus rebinning in energy transfer is necessary. By default, the algorithm uses automatic rebinning:
+- For negative energy transfers, copy binning from the spectrum which covers the largest negative energy transfer range.
+- For positive energy transfers, use the median bin width over all spectra at zero energy transfer.
+
+The automatic rebinning can be overriden by the *EnergyRebinningParams* or *EnergyRebinning* properties. *EnergyRebinningParams* is directly passed to :ref:`Rebin <algm-Rebin>` as the *Params* property. On the other hand, *EnergyRebinning* allows for mixture of automatic and user specified rebinning. Its syntax is a comma separated list of letters `a` for automatic binning and numbers for ranges and user-specified bin widths. Here are some examples:
+
+`'a'`
+    Rebin the entire energy transfer axis automatically. Same as the defalt behavior.
+
+`'-4, a, 8'`
+    Rebin the energy transfer axis from -4 to 8 meV automatically.
+
+`'a, -1, 0.01, 1, a'`
+    Rebin everything automatically except from -1 to 1 meV, where the bin width is set to 0.01 meV.
+
+`'a, -5, 0.1, -1, 0.01, 1'`
+    Automatic rebinning from minimum energy transfer up to -5 meV, after which use user defined binning: between -5 and -1 meV the bin width is 0.1 mev, while between -1 and 1 meV, it is 0.01.
+
+`'-10, a, -1, 0.01, 1, a, 4'`
+    Start the energy transfer axis at -10 meV, use automatic binning up to -1 meV. Between -1 and 1 meV use bin width of 0.01 meV. Use automatic binning again from 1 to 4 meV.
 
 *QBinningParams* are passed to :ref:`SofQWNormalisedPolygon <algm-SofQWNormalisedPolygon>` and have the same format as *EnergyRebinningParamas*. If the property is not specified, :math:`q` is binned to a value that depends on the :math:`2\theta` separation of the detectors and the wavelength.
 

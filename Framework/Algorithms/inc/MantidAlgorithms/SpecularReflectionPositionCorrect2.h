@@ -34,7 +34,7 @@ public:
   /// Version
   int version() const override;
   const std::vector<std::string> seeAlso() const override {
-    return {"SpecularReflectionCalculateTheta, FindReflectometryLines"};
+    return {"SpecularReflectionCalculateTheta", "FindReflectometryLines"};
   }
   /// Category
   const std::string category() const override;

@@ -49,10 +49,10 @@ public:
   BnId();
   BnId(const size_t, unsigned int);
 
-  int operator==(const BnId &) const; ///< Equals operator for tri-state object
-  int operator<(const BnId &) const;  ///< operator> for tri-state object
-  int operator>(const BnId &) const;  ///< operator> for tri-state object
-  int operator[](int const) const;    ///< Access operator
+  bool operator==(const BnId &) const; ///< Equals operator for tri-state object
+  bool operator<(const BnId &) const;  ///< operator> for tri-state object
+  bool operator>(const BnId &) const;  ///< operator> for tri-state object
+  int operator[](int const) const;     ///< Access operator
   int operator++(int); ///< addition operator (returns !carry flag)
   int operator++();    ///< addition operator (returns !carry flag)
   int operator--(int); ///< subtraction operator (returns !carry flag)

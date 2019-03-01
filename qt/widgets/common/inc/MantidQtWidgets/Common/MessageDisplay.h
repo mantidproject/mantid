@@ -53,6 +53,8 @@ public:
 public:
   /// Default constructor with optional parent
   MessageDisplay(QWidget *parent = nullptr);
+  /// Constructor accepting a QFont
+  MessageDisplay(const QFont &font, QWidget *parent = nullptr);
   MessageDisplay(const MessageDisplay &) = delete;
   MessageDisplay &operator=(const MessageDisplay &) = delete;
   /// Destructor
@@ -117,7 +119,7 @@ private:
   /// Initialize the text formats
   void initFormats();
   /// Set the properties of the text display
-  void setupTextArea();
+  void setupTextArea(const QFont &font);
   /// Return format for given log level
   QTextCharFormat format(const Message::Priority priority) const;
 

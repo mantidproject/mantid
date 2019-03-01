@@ -44,16 +44,18 @@ namespace {
  * Return a new instance of a lexer based on the given language
  * @param lexerName A string defining the language. Currently hardcoded to
  * Python.
+ * @param font A font used for the AlternateCSPythonLexer
  * @return A new QsciLexer instance
  */
-QsciLexer *createLexerFromName(const QString &lexerName) {
+QsciLexer *createLexerFromName(const QString &lexerName, const QFont &font) {
   if (lexerName == "Python") {
     return new QsciLexerPython;
-  } else if (lexerName == "AlternateCSPythonLexer") {
-    return new AlternateCSPythonLexer;
+  } else if (lexerName == "AlternateCSPython") {
+    return new AlternateCSPythonLexer(font);
   } else {
-    throw std::invalid_argument("createLexerFromLanguage: Unsupported "
-                                "name. Supported names=Python, ");
+    throw std::invalid_argument(
+        "createLexerFromLanguage: Unsupported "
+        "name. Supported names=Python, AlternateCSPython");
   }
 }
 } // namespace
@@ -70,10 +72,12 @@ QColor ScriptEditor::g_error_colour = QColor("red");
  * Construction based on a string defining the langauge used
  * for syntax highlighting
  * @param lexerName A string choosing the name of a lexer
+ * @param font A reference to the initial font to be used in the editor
  * @param parent Parent widget
  */
-ScriptEditor::ScriptEditor(const QString &lexerName, QWidget *parent)
-    : ScriptEditor(parent, createLexerFromName(lexerName)) {}
+ScriptEditor::ScriptEditor(const QString &lexerName, const QFont &font,
+                           QWidget *parent)
+    : ScriptEditor(parent, createLexerFromName(lexerName, font)) {}
 
 /**
  * Constructor

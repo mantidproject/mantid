@@ -68,7 +68,7 @@ class MultiPythonFileInterpreterDeletionTest(GuiTest, QtWidgetFinder):
         self.assert_no_toplevel_widgets()
 
     def test_editor_widget_doesnt_create_find_replace_unless_requested(self):
-        widget = MultiPythonFileInterpreter(None)
+        widget = MultiPythonFileInterpreter()
         self.assertEqual(1, widget.editor_count)
         widget.append_new_editor()
         self.assert_number_of_widgets_matching(".interpreter.PythonFileInterpreter", 2)

@@ -490,6 +490,15 @@ private:
     TSM_ASSERT("Should not have a Q_uncertainty attribute",
                missingQUncertaintyAttribute);
 
+    bool missingQUncertaintiesAttribute = false;
+    try {
+      data.openAttribute(sasDataQUncertaintiesAttr);
+    } catch (H5::AttributeIException &) {
+      missingQUncertaintiesAttribute = true;
+    }
+    TSM_ASSERT("Should not have a Q_uncertainties attribute",
+               missingQUncertaintiesAttribute);
+
     // Check that Qdev data set does not exist
     bool missingQDevDataSet = false;
     try {
@@ -511,16 +520,26 @@ private:
     }
     TSM_ASSERT("Data set should not have an uncertainty",
                missingQUncertaintyOnQDataSet);
+
+    bool missingQUncertaintiesOnQDataSet = false;
+    try {
+      auto qDataSet = data.openDataSet(sasDataQ);
+      auto uncertainties = qDataSet.openAttribute(sasUncertaintiesAttr);
+    } catch (H5::AttributeIException &) {
+      missingQUncertaintiesOnQDataSet = true;
+    }
+    TSM_ASSERT("Data set should not have uncertainties",
+               missingQUncertaintiesOnQDataSet);
   }
 
   void do_assert_data(H5::Group &data, int size, double value, double error,
                       double xmin, double xmax, double xerror, bool hasDx) {
     auto numAttributes = data.getNumAttrs();
     if (hasDx) {
-      TSM_ASSERT_EQUALS("Should have 7 attribute", 7, numAttributes);
+      TSM_ASSERT_EQUALS("Should have 9 attributes", 9, numAttributes);
     } else {
       TSM_ASSERT_EQUALS(
-          "Should have 6 attribute, since Q_uncertainty is not present", 6,
+          "Should have 7 attributes, since Q_uncertainty is not present", 7,
           numAttributes);
     }
 
@@ -545,6 +564,13 @@ private:
         data, sasDataIUncertaintyAttr);
     TSM_ASSERT_EQUALS("Should be just Idev", errorAttribute, sasDataIdev);
 
+    // I_uncertainties attribute
+    auto errorAlternativeAttribute =
+        Mantid::DataHandling::H5Util::readAttributeAsString(
+            data, sasDataIUncertaintiesAttr);
+    TSM_ASSERT_EQUALS("Should be just Idev", errorAlternativeAttribute,
+                      sasDataIdev);
+
     // Q_indices attribute
     auto qAttribute =
         Mantid::DataHandling::H5Util::readNumArrayAttributeCoerce<int>(
@@ -567,6 +593,13 @@ private:
     TSM_ASSERT_EQUALS("Should be just Idev", uncertaintyIAttribute,
                       sasDataIdev);
 
+    // I data set uncertainties attribute
+    auto uncertaintiesIAttribute =
+        Mantid::DataHandling::H5Util::readAttributeAsString(
+            intensityDataSet, sasUncertaintiesAttr);
+    TSM_ASSERT_EQUALS("Should be just Idev", uncertaintiesIAttribute,
+                      sasDataIdev);
+
     // I dev data set
     auto errorDataSet = data.openDataSet(sasDataIdev);
     do_assert_1D_vector_with_same_entries(errorDataSet, error, size);
@@ -585,6 +618,13 @@ private:
       TSM_ASSERT_EQUALS("Should be just Qdev", uncertaintyQAttribute,
                         sasDataQdev);
 
+      // Q data set uncertainties attribute
+      auto uncertaintiesQAttribute =
+          Mantid::DataHandling::H5Util::readAttributeAsString(
+              qDataSet, sasUncertaintiesAttr);
+      TSM_ASSERT_EQUALS("Should be just Qdev", uncertaintiesQAttribute,
+                        sasDataQdev);
+
       // Q error data set
       auto xErrorDataSet = data.openDataSet(sasDataQdev);
       do_assert_1D_vector_with_same_entries(xErrorDataSet, xerror, size);
@@ -594,6 +634,13 @@ private:
           Mantid::DataHandling::H5Util::readAttributeAsString(
               data, sasDataQUncertaintyAttr);
       TSM_ASSERT_EQUALS("Should be just Qdev", qErrorAttribute, sasDataQdev);
+
+      // Q_uncertainties attribute on the SASdata group
+      auto qErrorAlternativeAttribute =
+          Mantid::DataHandling::H5Util::readAttributeAsString(
+              data, sasDataQUncertaintiesAttr);
+      TSM_ASSERT_EQUALS("Should be just Qdev", qErrorAlternativeAttribute,
+                        sasDataQdev);
     } else {
       do_assert_that_Q_dev_information_is_not_present(data);
     }
@@ -602,7 +649,7 @@ private:
   void do_assert_2D_data(H5::Group &data) {
     auto numAttributes = data.getNumAttrs();
     TSM_ASSERT_EQUALS(
-        "Should have 6 attributes, since Q_uncertainty is not present", 6,
+        "Should have 7 attributes, since Q_uncertainty is not present", 7,
         numAttributes);
 
     // canSAS_class and NX_class attribute
@@ -626,6 +673,13 @@ private:
     auto errorAttribute = Mantid::DataHandling::H5Util::readAttributeAsString(
         data, sasDataIUncertaintyAttr);
     TSM_ASSERT_EQUALS("Should be just Idev", errorAttribute, sasDataIdev);
+
+    // I_uncertainties attribute
+    auto errorAlternativeAttribute =
+        Mantid::DataHandling::H5Util::readAttributeAsString(
+            data, sasDataIUncertaintiesAttr);
+    TSM_ASSERT_EQUALS("Should be just Idev", errorAlternativeAttribute,
+                      sasDataIdev);
 
     // Q_indices attribute
     auto qAttribute =
@@ -680,6 +734,13 @@ private:
         Mantid::DataHandling::H5Util::readAttributeAsString(
             transmission, sasTransmissionSpectrumTUncertainty);
     TSM_ASSERT_EQUALS("Should be Tdev", tUncertaintyIndicesAttribute,
+                      sasTransmissionSpectrumTdev);
+
+    // T uncertainties attribute
+    auto tUncertaintiesIndicesAttribute =
+        Mantid::DataHandling::H5Util::readAttributeAsString(
+            transmission, sasTransmissionSpectrumTUncertainties);
+    TSM_ASSERT_EQUALS("Should be Tdev", tUncertaintiesIndicesAttribute,
                       sasTransmissionSpectrumTdev);
 
     // Signal attribute

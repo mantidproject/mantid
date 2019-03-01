@@ -18,7 +18,8 @@ from qtpy.QtWidgets import QVBoxLayout
 # local package imports
 from mantid.kernel import logger
 from mantidqt.widgets.codeeditor.multifileinterpreter import MultiPythonFileInterpreter
-from workbench.plugins.base import PluginWidget
+from ..config.fonts import text_font
+from ..plugins.base import PluginWidget
 
 # from mantidqt.utils.qt import toQSettings when readSettings/writeSettings are implemented
 
@@ -49,8 +50,10 @@ class MultiFileEditor(PluginWidget):
     def __init__(self, parent):
         super(MultiFileEditor, self).__init__(parent)
 
-        self.editors = MultiPythonFileInterpreter(default_content=DEFAULT_CONTENT, parent=self)
-
+        # layout
+        self.editors = MultiPythonFileInterpreter(font=text_font(),
+                                                  default_content=DEFAULT_CONTENT,
+                                                  parent=self)
         layout = QVBoxLayout()
         layout.addWidget(self.editors)
         layout.setContentsMargins(0, 0, 0, 0)
@@ -64,9 +67,9 @@ class MultiFileEditor(PluginWidget):
     def load_settings_from_config(self, config):
         self.editors.load_settings_from_config(config)
 
-    def execute_current(self):
+    def execute_current_async(self):
         '''This is used by MainWindow to execute a file after opening it'''
-        return self.editors.execute_current()
+        return self.editors.execute_current_async()
 
     def restore_session_tabs(self, session_tabs):
         self.open_files_in_new_tabs(session_tabs, startup=True)
