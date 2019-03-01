@@ -17,6 +17,15 @@ from mantid.kernel import *
 from mantid import config
 
 
+def contains_invalid_number_range(list_of_ranges):
+    for element in list_of_ranges:
+        if "-" in element:
+            range_limits = element.split("-")
+            if int(range_limits[0]) >= int(range_limits[1]):
+                return True
+    return False
+
+
 class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
     _workspace_names = None
     _cal_file = None
@@ -113,8 +122,12 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
 
         # Validate input files
         input_files = self.getProperty('InputFiles').value
+
         if len(input_files) == 0:
             issues['InputFiles'] = 'InputFiles must contain at least one filename'
+
+        if contains_invalid_number_range(input_files):
+            issues['InputFiles'] = 'Run number ranges must go from low to high'
 
         # Validate detector range
         detector_range = self.getProperty('SpectraRange').value
