@@ -78,7 +78,7 @@ class CodeEditorTabWidget(QTabWidget):
         run_button = QPushButton(container_widget)
         run_button.setObjectName(self.RUN_BUTTON_OBJECT_NAME)
         run_button.setIcon(get_icon("fa.play", color=PLAY_BUTTON_GREEN_COLOR))
-        run_button.clicked.connect(parent.execute_current)
+        run_button.clicked.connect(parent.execute_current_async)
         layout.addWidget(run_button)
 
         abort_button = QPushButton(container_widget)
