@@ -135,14 +135,14 @@ class subplot(QtWidgets.QWidget):
     def connect_quick_edit_signal(self, slot):
         self.quickEditSignal.connect(slot)
 
-    def disconnect_quick_edit_signal(self, slot):
-        self.quickEditSignal.disconnect(slot)
+    def disconnect_quick_edit_signal(self):
+        self.quickEditSignal.disconnect()
 
     def connect_rm_subplot_signal(self, slot):
         self.rmSubplotSignal.connect(slot)
 
-    def disconnect_rm_subplot_signal(self, slot):
-        self.rmSubplotSignal.disconnect(slot)
+    def disconnect_rm_subplot_signal(self):
+        self.rmSubplotSignal.disconnect()
 
     def set_y_autoscale(self, subplotNames, state):
         for subplotName in subplotNames:

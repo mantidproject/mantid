@@ -10,22 +10,23 @@ from qtpy import QtWidgets, QtCore
 from copy import deepcopy
 from MultiPlotting.subplot.subplot import subplot
 from MultiPlotting.QuickEdit.quickEdit_widget import QuickEditWidget
+from MultiPlotting.multi_plotting_context import *
 
 
 class MultiPlotWindow(QtWidgets.QMainWindow):
     windowClosedSignal = QtCore.Signal()
-    def __init__(self, multi_plot_widget, window_title = "plotting"):
+    def __init__(self, window_title = "plotting"):
         super(MultiPlotWindow, self).__init__()
-        self.multi_plot = multi_plot_widget
+        self.plot_context = PlottingContext()
+        self.multi_plot = MultiPlotWidget(self.plot_context, self)
         self.setCentralWidget(self.multi_plot)
         self.setWindowTitle(window_title)
-
 
     def set_window_title(self,window_title):
         self.setWindowTitle(window_title)
 
-
     def closeEvent(self, event):
+        self.multi_plot.removeSubplotDisonnect()
         self.windowClosedSignal.emit()
 
 class MultiPlotWidget(QtWidgets.QWidget):
@@ -119,6 +120,12 @@ class MultiPlotWidget(QtWidgets.QWidget):
 
     def removeSubplotConnection(self,slot):
         self.plots.connect_rm_subplot_signal(slot)
+
+    def disconnectCloseSignal(selft):
+        self.closeSignal.disconnect()
+
+    def removeSubplotDisonnect(self):
+        self.plots.disconnect_rm_subplot_signal()
 
     """ update GUI """
 

@@ -10,18 +10,20 @@ from Muon.GUI.ElementalAnalysis.elemental_analysis import ElementalAnalysisGui
 
 
 
-def qapp():
-    if QtGui.QApplication.instance():
-        _app = QtGui.QApplication.instance()
-    else:
-        _app = QtGui.QApplication(sys.argv)
-    return _app
+def main():
+    try:
+        global ElementalAnalysis
+        if not ElementalAnalysis.isHidden():
+            ElementalAnalysis.setWindowState(ElementalAnalysis.windowState() & ~QtCore.Qt.WindowMinimized | QtCore.Qt.WindowActive)
+            ElementalAnalysis.activateWindow()
+        else:
+            ElementalAnalysis = ElementalAnalysisGui()
+            ElementalAnalysis.show()
+    except:
+        ElementalAnalysis = ElementalAnalysisGui()
+        ElementalAnalysis.show()
+    return ElementalAnalysis
 
+if __name__ == '__main__':
+    ElementalAnalysis = main()
 
-app = qapp()
-try:
-    window = ElementalAnalysisGui()
-    window.show()
-    app.exec_()
-except RuntimeError as error:
-    message_box.warning(str(error))
