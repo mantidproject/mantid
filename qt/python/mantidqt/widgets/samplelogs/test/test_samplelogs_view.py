@@ -10,8 +10,8 @@ from qtpy.QtWidgets import QApplication
 import matplotlib as mpl
 mpl.use('Agg')  # noqa
 from mantid.simpleapi import CreateSampleWorkspace
-from mantidqt.utils.qt.test import GuiTest
-from mantidqt.utils.qt.test.qt_widget_finder import QtWidgetFinder
+from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
 from mantidqt.widgets.samplelogs.presenter import SampleLogs
 
 
@@ -24,4 +24,4 @@ class SampleLogsViewTest(GuiTest, QtWidgetFinder):
 
         QApplication.processEvents()
 
-        self.assert_no_widgets()
+        self.assert_no_toplevel_widgets()

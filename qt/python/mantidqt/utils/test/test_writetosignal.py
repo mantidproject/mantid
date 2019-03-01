@@ -14,7 +14,7 @@ import unittest
 import sys
 from qtpy.QtCore import QCoreApplication, QObject
 
-from mantidqt.utils.qt.test import GuiTest
+from mantidqt.utils.qt.testing import GuiTest
 from mantidqt.utils.writetosignal import WriteToSignal
 
 if sys.version_info.major == 2:

@@ -34,10 +34,10 @@ public:
 
   T operator[](const int A) const;
   T &operator[](const int A);
-  int operator<(const Triple<T> &) const;
-  int operator>(const Triple<T> &) const;
-  int operator==(const Triple<T> &) const;
-  int operator!=(const Triple<T> &) const;
+  bool operator<(const Triple<T> &) const;
+  bool operator>(const Triple<T> &) const;
+  bool operator==(const Triple<T> &) const;
+  bool operator!=(const Triple<T> &) const;
 };
 
 /**
@@ -64,10 +64,10 @@ public:
   DTriple<F, S, T> &operator=(const DTriple<F, S, T> &);
   ~DTriple();
 
-  int operator<(const DTriple<F, S, T> &) const;
-  int operator>(const DTriple<F, S, T> &) const;
-  int operator==(const DTriple<F, S, T> &) const;
-  int operator!=(const DTriple<F, S, T> &) const;
+  bool operator<(const DTriple<F, S, T> &) const;
+  bool operator>(const DTriple<F, S, T> &) const;
+  bool operator==(const DTriple<F, S, T> &) const;
+  bool operator!=(const DTriple<F, S, T> &) const;
 };
 } // NAMESPACE Mantid
 #endif

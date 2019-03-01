@@ -27,6 +27,7 @@ class FigureWindow(QMainWindow, ObservingView):
     activated = Signal()
     closing = Signal()
     visibility_changed = Signal()
+    show_context_menu = Signal()
     close_signal = Signal()
 
     def __init__(self, canvas, parent=None):

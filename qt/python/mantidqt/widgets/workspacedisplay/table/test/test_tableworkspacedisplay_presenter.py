@@ -11,9 +11,12 @@ from __future__ import (absolute_import, division, print_function)
 
 import unittest
 
-from mock import Mock, call, patch
 from qtpy.QtWidgets import QStatusBar
 
+from mantid.py3compat.mock import Mock, call, patch
+from mantidqt.utils.testing.mocks.mock_mantid import MockWorkspace
+from mantidqt.utils.testing.mocks.mock_plotlib import MockAx, MockPlotLib
+from mantidqt.utils.testing.mocks.mock_qt import MockQModelIndex, MockQSelectionModel
 from mantidqt.widgets.workspacedisplay.status_bar_view import StatusBarView
 from mantidqt.widgets.workspacedisplay.table.error_column import ErrorColumn
 from mantidqt.widgets.workspacedisplay.table.model import TableWorkspaceDisplayModel
@@ -21,9 +24,6 @@ from mantidqt.widgets.workspacedisplay.table.plot_type import PlotType
 from mantidqt.widgets.workspacedisplay.table.presenter import TableWorkspaceDisplay
 from mantidqt.widgets.workspacedisplay.table.view import TableWorkspaceDisplayView
 from mantidqt.widgets.workspacedisplay.table.workbench_table_widget_item import WorkbenchTableWidgetItem
-from mantidqt.widgets.workspacedisplay.test_mocks.mock_mantid import MockWorkspace
-from mantidqt.widgets.workspacedisplay.test_mocks.mock_plotlib import MockAx, MockPlotLib
-from mantidqt.widgets.workspacedisplay.test_mocks.mock_qt import MockQModelIndex, MockQSelectionModel
 
 
 class MockQTable:

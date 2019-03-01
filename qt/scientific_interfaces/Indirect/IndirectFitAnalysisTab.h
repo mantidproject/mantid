@@ -134,6 +134,7 @@ protected:
 
   virtual void setRunIsRunning(bool running) = 0;
   virtual void setRunEnabled(bool enable) = 0;
+  void setEditResultVisible(bool visible);
 
 signals:
   void functionChanged();

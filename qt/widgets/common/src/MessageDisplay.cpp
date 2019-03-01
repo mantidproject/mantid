@@ -73,9 +73,18 @@ void MessageDisplay::writeSettings(QSettings &storage) const {
 }
 
 /**
+ * Construct a MessageDisplay with the default font
  * @param parent An optional parent widget
  */
 MessageDisplay::MessageDisplay(QWidget *parent)
+    : MessageDisplay(QFont(), parent) {}
+
+/**
+ * Construct a MessageDisplay using the given font
+ * @param font A reference to a font object
+ * @param parent An optional parent widget
+ */
+MessageDisplay::MessageDisplay(const QFont &font, QWidget *parent)
     : QWidget(parent), m_logChannel(new QtSignalChannel),
       m_textDisplay(new QPlainTextEdit(this)), m_formats(),
       m_loglevels(new QActionGroup(this)),
@@ -87,7 +96,7 @@ MessageDisplay::MessageDisplay(QWidget *parent)
       m_debug(new QAction(tr("&Debug"), this)) {
   initActions();
   initFormats();
-  setupTextArea();
+  setupTextArea(font);
 }
 
 /**
@@ -383,8 +392,10 @@ void MessageDisplay::initFormats() {
 /**
  * Set the properties of the text display, i.e read-only
  * and make it occupy the whole widget
+ * @param font A reference to the font for the text area
  */
-void MessageDisplay::setupTextArea() {
+void MessageDisplay::setupTextArea(const QFont &font) {
+  m_textDisplay->setFont(font);
   m_textDisplay->setReadOnly(true);
   m_textDisplay->ensureCursorVisible();
   setMaximumLineCount(DEFAULT_LINE_COUNT_MAX);

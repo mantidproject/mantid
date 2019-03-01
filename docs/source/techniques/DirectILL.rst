@@ -110,7 +110,7 @@ Output:
 
 .. testoutput:: BasicIN4Reduction
 
-    S(Q,W): Q range: 0.0...9.08A; W range -93.6...7.55meV
+    S(Q,W): Q range: 0.0...9.18A; W range -96.3...7.62meV
 
 The basic reduction for IN5 differs slightly with regards to the diagnostics step. In this case, the "raw" workspace is not needed, and it is not necessary to pass the EPP workspace to :ref:`algm-DirectILLDiagnostics`:
 
@@ -340,7 +340,7 @@ Output:
 
 .. testoutput:: SelfShieldingReduction
 
-    S(Q,W): Q range: 0.0...9.08A; W range -93.6...7.55meV
+    S(Q,W): Q range: 0.0...9.18A; W range -96.3...7.62meV
 
 Workspace compatibility
 =======================
@@ -377,7 +377,7 @@ Output:
 
 .. testoutput:: SampleContainerCompatibility
 
-    Sample's TOF axis starts at 974.8mus, container's at 974.8mus
+    Sample's TOF axis starts at 966.8mus, container's at 966.8mus
 
 Container subtraction
 =====================
@@ -487,7 +487,7 @@ Output:
 
 .. testoutput:: ContainerSubtraction
 
-    S(Q,W): Q range: 0.0...9.08A; W range -93.6...7.55meV
+    S(Q,W): Q range: 0.0...9.18A; W range -96.3...7.62meV
 
 Interpolation of container data to different temperatures
 ---------------------------------------------------------
@@ -690,7 +690,7 @@ Output:
 
 .. testoutput:: FullExample
 
-    SofQW_1.5K: Q range: 0.0...9.08A; W range -93.6...7.55meV
-    SofQW_50K: Q range: 0.0...9.08A; W range -93.6...7.55meV
+    SofQW_1.5K: Q range: 0.0...9.18A; W range -96.3...7.62meV
+    SofQW_50K: Q range: 0.0...9.18A; W range -96.3...7.62meV
 
 .. categories:: Techniques

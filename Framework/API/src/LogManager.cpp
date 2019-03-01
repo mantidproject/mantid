@@ -321,8 +321,7 @@ size_t LogManager::getMemorySize() const {
 
 /**
  * Returns a property as a time series property. It will throw if it is not
- * valid or the
- * property does not exist
+ * valid or the property does not exist
  * @param name The name of a time-series property
  * @return A pointer to the time-series property
  */

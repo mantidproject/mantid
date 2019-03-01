@@ -38,7 +38,7 @@ RotaryCounter::RotaryCounter(const int S, const int N)
     RC[i] = i;
 }
 
-int RotaryCounter::operator==(const RotaryCounter &A) const
+bool RotaryCounter::operator==(const RotaryCounter &A) const
 /**
   Chec to find if Counters identical in ALL respects
   @param A :: Counter to compare
@@ -47,17 +47,17 @@ int RotaryCounter::operator==(const RotaryCounter &A) const
 */
 {
   if (RC.size() != A.RC.size())
-    return 0;
+    return false;
 
   for (size_t i = 0; i < RC.size(); i++) {
     if (RC[i] != A.RC[i]) {
-      return 0;
+      return false;
     }
   }
-  return 1;
+  return true;
 }
 
-int RotaryCounter::operator>(const RotaryCounter &A) const
+bool RotaryCounter::operator>(const RotaryCounter &A) const
 /**
   Determines the precidence of the RotaryCounters
   Operator works on the 0 to high index
@@ -74,12 +74,12 @@ int RotaryCounter::operator>(const RotaryCounter &A) const
     }
   }
   if (theirSize != ourSize) {
-    return static_cast<int>(ourSize > theirSize);
+    return ourSize > theirSize;
   }
-  return 0;
+  return false;
 }
 
-int RotaryCounter::operator<(const RotaryCounter &A) const
+bool RotaryCounter::operator<(const RotaryCounter &A) const
 /**
   Determines the precidence of the RotaryCounters
   Operator works on the 0 to high index
@@ -97,7 +97,7 @@ int RotaryCounter::operator<(const RotaryCounter &A) const
   }
   if (theirSize != ourSize)
     return ourSize < theirSize;
-  return 0;
+  return false;
 }
 
 int RotaryCounter::operator++(int a)

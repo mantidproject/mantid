@@ -13,6 +13,7 @@
 #include "MantidKernel/ChecksumHelper.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/make_unique.h"
+#include "MantidNexusGeometry/Hdf5Version.h"
 #include "MantidNexusGeometry/InstrumentBuilder.h"
 #include "MantidNexusGeometry/NexusShapeFactory.h"
 #include "MantidNexusGeometry/TubeHelpers.h"
@@ -153,10 +154,24 @@ std::string get1DStringDataset(const std::string &dataset, const Group &group) {
   // Open data set
   DataSet data = group.openDataSet(dataset);
   auto dataType = data.getDataType();
-  auto nCharacters = dataType.getSize();
-  std::vector<char> value(nCharacters);
-  data.read(value.data(), dataType, data.getSpace());
-  return std::string(value.begin(), value.end());
+  // Use a different read method if the string is of variable length type
+  if (dataType.isVariableStr()) {
+    H5std_string buffer;
+    // Need to check for old versions of hdf5
+    if (Hdf5Version::checkVariableLengthStringSupport()) {
+      data.read(buffer, dataType, data.getSpace());
+    } else {
+      throw std::runtime_error("NexusGeometryParser::get1DStringDataset: Only "
+                               "versions 1.8.16 + of hdf5 support the variable "
+                               "string feature");
+    }
+    return buffer;
+  } else {
+    auto nCharacters = dataType.getSize();
+    std::vector<char> value(nCharacters);
+    data.read(value.data(), dataType, data.getSpace());
+    return std::string(value.begin(), value.end());
+  }
 }
 
 /** Open subgroups of parent group
@@ -755,7 +770,7 @@ std::string NexusGeometryParser::getMangledName(const std::string &fileName,
   std::string mangledName = instName;
   if (!fileName.empty()) {
     std::string checksum =
-        Mantid::Kernel::ChecksumHelper::sha1FromFile(fileName, false);
+        Mantid::Kernel::ChecksumHelper::sha1FromString(fileName);
     mangledName += checksum;
   }
   return mangledName;

@@ -25,6 +25,8 @@ IndirectFitOutputOptionsView::IndirectFitOutputOptionsView(QWidget *parent)
           SLOT(emitPlotClicked()));
   connect(m_outputOptions->pbSave, SIGNAL(clicked()), this,
           SLOT(emitSaveClicked()));
+  connect(m_outputOptions->pbEditResult, SIGNAL(clicked()), this,
+          SLOT(emitEditResultClicked()));
 }
 
 IndirectFitOutputOptionsView::~IndirectFitOutputOptionsView() {}
@@ -37,6 +39,10 @@ void IndirectFitOutputOptionsView::emitGroupWorkspaceChanged(
 void IndirectFitOutputOptionsView::emitPlotClicked() { emit plotClicked(); }
 
 void IndirectFitOutputOptionsView::emitSaveClicked() { emit saveClicked(); }
+
+void IndirectFitOutputOptionsView::emitEditResultClicked() {
+  emit editResultClicked();
+}
 
 void IndirectFitOutputOptionsView::setGroupWorkspaceComboBoxVisible(
     bool visible) {
@@ -110,8 +116,16 @@ void IndirectFitOutputOptionsView::setPlotEnabled(bool enable) {
   m_outputOptions->cbPlotType->setEnabled(enable);
 }
 
+void IndirectFitOutputOptionsView::setEditResultEnabled(bool enable) {
+  m_outputOptions->pbEditResult->setEnabled(enable);
+}
+
 void IndirectFitOutputOptionsView::setSaveEnabled(bool enable) {
   m_outputOptions->pbSave->setEnabled(enable);
+}
+
+void IndirectFitOutputOptionsView::setEditResultVisible(bool visible) {
+  m_outputOptions->pbEditResult->setVisible(visible);
 }
 
 void IndirectFitOutputOptionsView::displayWarning(std::string const &message) {
