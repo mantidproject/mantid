@@ -32,11 +32,15 @@ class FakeGlobalFigureManager(object):
         pass
 
 
+def fake_window_finding_function():
+    return []
+
+
 class ProjectTest(unittest.TestCase):
     def setUp(self):
         self.fgfm = FakeGlobalFigureManager()
         self.fgfm.figs = []
-        self.project = Project(self.fgfm)
+        self.project = Project(self.fgfm, fake_window_finding_function)
 
     def tearDown(self):
         ADS.clear()

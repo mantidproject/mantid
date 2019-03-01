@@ -1,5 +1,6 @@
 set ( QT5_SRC_FILES
   src/AlgorithmDialog.cpp
+  src/AlgorithmHistoryWindow.cpp
   src/AlgorithmInputHistory.cpp
   src/AlgorithmPropertiesWidget.cpp
   src/AlgorithmRunner.cpp
@@ -19,6 +20,8 @@ set ( QT5_SRC_FILES
   src/FunctionBrowser.cpp
   src/GenericDialog.cpp
   src/HelpWindow.cpp
+  src/Hint.cpp
+  src/HintingLineEdit.cpp
   # todo: move this to the instrument view library when the slice
   # viewer library is removed
   src/InputController.cpp
@@ -65,6 +68,23 @@ set ( QT5_SRC_FILES
   src/WorkspacePresenter/WorkspaceTreeWidgetSimple.cpp
   src/WorkspaceSelector.cpp
 
+  src/Batch/RowLocation.cpp
+  src/Batch/RowLocationAdapter.cpp
+  src/Batch/RowPredicate.cpp
+  src/Batch/Row.cpp
+  src/Batch/Cell.cpp
+  src/Batch/CellStandardItem.cpp
+  src/Batch/ExtractSubtrees.cpp
+  src/Batch/FindSubtreeRoots.cpp
+  src/Batch/JobTreeView.cpp
+  src/Batch/JobTreeViewSignalAdapter.cpp
+  src/Batch/QtStandardItemTreeAdapter.cpp
+  src/Batch/FilteredTreeModel.cpp
+  src/Batch/QtBasicNavigation.cpp
+  src/Batch/QtTreeCursorNavigation.cpp
+  src/Batch/CellDelegate.cpp
+  src/Batch/BuildSubtreeItems.cpp
+
   src/QtPropertyBrowser/DoubleDialogEditor.cpp
   src/QtPropertyBrowser/DoubleEditorFactory.cpp
   src/QtPropertyBrowser/FilenameDialogEditor.cpp
@@ -85,6 +105,7 @@ set ( QT5_SRC_FILES
   
 set ( QT5_MOC_FILES
   inc/MantidQtWidgets/Common/AlgorithmDialog.h
+  inc/MantidQtWidgets/Common/AlgorithmHistoryWindow.h
   inc/MantidQtWidgets/Common/AlgorithmPropertiesWidget.h
   inc/MantidQtWidgets/Common/AlgorithmRunner.h
   inc/MantidQtWidgets/Common/AlgorithmSelectorWidget.h
@@ -99,6 +120,8 @@ set ( QT5_MOC_FILES
   inc/MantidQtWidgets/Common/FitPropertyBrowser.h
   inc/MantidQtWidgets/Common/FunctionBrowser.h
   inc/MantidQtWidgets/Common/GenericDialog.h
+  inc/MantidQtWidgets/Common/Hint.h
+  inc/MantidQtWidgets/Common/HintingLineEdit.h
   inc/MantidQtWidgets/Common/InputController.h
   inc/MantidQtWidgets/Common/InterfaceManager.h
   inc/MantidQtWidgets/Common/LineEditWithClear.h
@@ -132,6 +155,9 @@ set ( QT5_MOC_FILES
   inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidget.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidgetSimple.h
   inc/MantidQtWidgets/Common/WorkspaceSelector.h
+
+  inc/MantidQtWidgets/Common/Batch/JobTreeView.h
+  inc/MantidQtWidgets/Common/Batch/JobTreeViewSignalAdapter.h
   
   inc/MantidQtWidgets/Common/QtPropertyBrowser/ButtonEditorFactory.h
   inc/MantidQtWidgets/Common/QtPropertyBrowser/DoubleDialogEditor.h
@@ -172,6 +198,21 @@ set ( QT5_INC_FILES
   inc/MantidQtWidgets/Common/PropertyWidgetFactory.h
   inc/MantidQtWidgets/Common/SequentialFitDialog.h
   inc/MantidQtWidgets/Common/WidgetScrollbarDecorator.h
+  inc/MantidQtWidgets/Common/Batch/QtStandardItemTreeAdapter.h
+  inc/MantidQtWidgets/Common/Batch/QtBasicNavigation.h
+  inc/MantidQtWidgets/Common/Batch/QtTreeCursorNavigation.h
+  inc/MantidQtWidgets/Common/Batch/StrictQModelIndices.h
+  inc/MantidQtWidgets/Common/Batch/FilteredTreeModel.h
+  inc/MantidQtWidgets/Common/Batch/RowLocation.h
+  inc/MantidQtWidgets/Common/Batch/RowPredicate.h
+  inc/MantidQtWidgets/Common/Batch/RowLocationAdapter.h
+  inc/MantidQtWidgets/Common/Batch/Row.h
+  inc/MantidQtWidgets/Common/Batch/Cell.h
+  inc/MantidQtWidgets/Common/Batch/CellStandardItem.h
+  inc/MantidQtWidgets/Common/Batch/CellDelegate.h
+  inc/MantidQtWidgets/Common/Batch/ExtractSubtrees.h
+  inc/MantidQtWidgets/Common/Batch/FindSubtreeRoots.h
+  inc/MantidQtWidgets/Common/Batch/BuildSubtreeItems.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/ADSAdapter.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/IWorkspaceDockView.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/IWorkspaceDockView.h
@@ -195,6 +236,7 @@ set ( QT5_UI_FILES
 
 set ( SRC_FILES
   src/AlgorithmDialog.cpp
+  src/AlgorithmHistoryWindow.cpp
   src/AlgorithmInputHistory.cpp
   src/AlgorithmPropertiesWidget.cpp
   src/AlgorithmRunner.cpp
@@ -360,6 +402,7 @@ set ( SRC_FILES
 
 set ( MOC_FILES
   inc/MantidQtWidgets/Common/AlgorithmDialog.h
+  inc/MantidQtWidgets/Common/AlgorithmHistoryWindow.h
   inc/MantidQtWidgets/Common/AlgorithmRunner.h
   inc/MantidQtWidgets/Common/AlgorithmPropertiesWidget.h
   inc/MantidQtWidgets/Common/BatchAlgorithmRunner.h
@@ -470,6 +513,7 @@ set ( MOC_FILES
 # Include files aren't required, but this makes them appear in Visual Studio
 set ( INC_FILES
 	${MOC_FILES}
+  inc/MantidQtWidgets/Common/AlgorithmHistoryWindow.h
   inc/MantidQtWidgets/Common/AlgorithmInputHistory.h
   inc/MantidQtWidgets/Common/AlgorithmRunner.h
   inc/MantidQtWidgets/Common/AlternateCSPythonLexer.h

@@ -160,8 +160,17 @@ if ( TCMALLOC_FOUND )
   string( REGEX REPLACE "([0-9]+)\.[0-9]+\.[0-9]+$" "\\1" TCMALLOC_RUNTIME_LIB ${TCMALLOC_RUNTIME_LIB} )
 endif ()
 
-# definitions to preload tcmalloc
-set ( TCMALLOC_DEFINITIONS
+# definitions to preload tcmalloc but not if we are using address sanitizer as this confuses things
+if ( WITH_ASAN )
+  set ( TCMALLOC_DEFINITIONS
+"
+LOCAL_PRELOAD=\${LD_PRELOAD}
+TCM_RELEASE=\${TCMALLOC_RELEASE_RATE}
+TCM_REPORT=\${TCMALLOC_LARGE_ALLOC_REPORT_THRESHOLD}"
+)
+else ()
+  # Do not indent the string below as it messes up the formatting in the final script
+  set ( TCMALLOC_DEFINITIONS
 "# Define parameters for tcmalloc
 LOCAL_PRELOAD=${TCMALLOC_RUNTIME_LIB}
 if [ -n \"\${LD_PRELOAD}\" ]; then
@@ -186,6 +195,7 @@ if [ -z \"\${TCMALLOC_LARGE_ALLOC_REPORT_THRESHOLD}\" ]; then
 else
     TCM_REPORT=\${TCMALLOC_LARGE_ALLOC_REPORT_THRESHOLD}
 fi" )
+endif()
 
 # chunk of code for launching gdb
 set ( GDB_DEFINITIONS
@@ -195,7 +205,7 @@ if [ -n \"\$1\" ] && [ \"\$1\" = \"--debug\" ]; then
     GDB=\"gdb --args\"
 fi" )
 
-set ( ERROR_CMD "ErrorReporter/error_dialog_app.py --exitcode=\$? --directory=\$INSTALLDIR/bin" )
+set ( ERROR_CMD "ErrorReporter/error_dialog_app.py --exitcode=\$?" )
 
 # Local dev version
 if ( MAKE_VATES )
@@ -245,7 +255,7 @@ else ()
 endif ()
 
 # used by mantidplot and mantidworkbench
-set ( LOCAL_PYPATH "\${INSTALLDIR}/lib:\${INSTALLDIR}/plugins" )
+set ( LOCAL_PYPATH "\${INSTALLDIR}/bin:\${INSTALLDIR}/lib:\${INSTALLDIR}/plugins" )
 set ( SCRIPTSDIR "\${INSTALLDIR}/scripts")
 
 if (ENABLE_MANTIDPLOT)
@@ -255,7 +265,7 @@ if (ENABLE_MANTIDPLOT)
   install ( PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidplot.sh.install
             DESTINATION ${BIN_DIR} RENAME launch_mantidplot.sh )
 endif ()
-if (PACKAGE_WORKBENCH) # will eventually switch to ENABLE_WORKBENCH
+if (ENABLE_WORKBENCH)
   set ( MANTIDWORKBENCH_EXEC workbench-script ) # what the actual thing is called
   configure_file ( ${CMAKE_MODULE_PATH}/Packaging/launch_mantidworkbench.sh.in
                    ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidworkbench.sh.install @ONLY )

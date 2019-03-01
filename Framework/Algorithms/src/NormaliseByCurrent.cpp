@@ -78,15 +78,16 @@ double NormaliseByCurrent::extractCharge(
     } else {
       throw Exception::NotFoundError(
           "Proton charge log (proton_charge_by_period) not found for this "
-          "multiperiod data workspace",
+          "multiperiod data workspace (" +
+              inputWS->getName() + ")",
           "proton_charge_by_period");
     }
 
     if (charge == 0) {
       throw std::domain_error("The proton charge found for period number " +
                               std::to_string(periodNumber) +
-                              " in the input workspace "
-                              "run information is zero. When applying "
+                              " in the input workspace (" + inputWS->getName() +
+                              ") run information is zero. When applying "
                               "NormaliseByCurrent on multiperiod data, a "
                               "non-zero value is required for every period in "
                               "the proton_charge_by_period log.");
@@ -100,13 +101,15 @@ double NormaliseByCurrent::extractCharge(
       charge = inputWS->run().getProtonCharge();
     } catch (Exception::NotFoundError &) {
       g_log.error() << "The proton charge is not set for the run attached to "
-                       "this workspace\n";
+                       "the workspace(" +
+                           inputWS->getName() + ")\n";
       throw;
     }
 
     if (charge == 0) {
-      throw std::domain_error("The proton charge found in the input workspace "
-                              "run information is zero");
+      throw std::domain_error(
+          "The proton charge found in the input workspace (" +
+          inputWS->getName() + ") run information is zero");
     }
   }
   return charge;

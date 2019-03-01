@@ -20,13 +20,13 @@ BatchJobAlgorithm::BatchJobAlgorithm(
     // cppcheck-suppress passedByValue
     std::vector<std::string> outputWorkspaceProperties, Item *item)
     : ConfiguredAlgorithm(algorithm, properties), m_item(item),
-      m_outputWorkspaceProperties(outputWorkspaceProperties) {}
+      m_outputWorkspaceProperties(std::move(outputWorkspaceProperties)) {}
 
 Item *BatchJobAlgorithm::item() { return m_item; }
 
 std::vector<std::string> BatchJobAlgorithm::outputWorkspaceNames() const {
   auto workspaceNames = std::vector<std::string>();
-  for (auto &property : m_outputWorkspaceProperties) {
+  for (auto const &property : m_outputWorkspaceProperties) {
     workspaceNames.emplace_back(m_algorithm->getPropertyValue(property));
   }
   return workspaceNames;
@@ -35,7 +35,7 @@ std::vector<std::string> BatchJobAlgorithm::outputWorkspaceNames() const {
 std::map<std::string, Workspace_sptr>
 BatchJobAlgorithm::outputWorkspaceNameToWorkspace() const {
   auto propertyToName = std::map<std::string, Workspace_sptr>();
-  for (auto &property : m_outputWorkspaceProperties) {
+  for (auto const &property : m_outputWorkspaceProperties) {
     auto workspaceName = m_algorithm->getPropertyValue(property);
     if (!workspaceName.empty()) {
       Workspace_sptr workspace = m_algorithm->getProperty(property);

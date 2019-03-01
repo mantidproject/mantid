@@ -30,16 +30,17 @@ polarizationCorrectionTypeFromString(std::string const &correctionType) {
 
 inline std::string
 PolarizationCorrectionTypeToString(PolarizationCorrectionType correctionType) {
-  if (correctionType == PolarizationCorrectionType::None)
+  switch (correctionType) {
+  case PolarizationCorrectionType::None:
     return "None";
-  else if (correctionType == PolarizationCorrectionType::PA)
+  case PolarizationCorrectionType::PA:
     return "PA";
-  else if (correctionType == PolarizationCorrectionType::PNR)
+  case PolarizationCorrectionType::PNR:
     return "PNR";
-  else if (correctionType == PolarizationCorrectionType::ParameterFile)
+  case PolarizationCorrectionType::ParameterFile:
     return "ParameterFile";
-  else
-    throw std::runtime_error("Unexpected polarization correction type.");
+  }
+  throw std::runtime_error("Unexpected polarization correction type.");
 }
 
 inline bool polarizationCorrectionRequiresInputs(

@@ -26,7 +26,10 @@ class MuonGroup(object):
         self._group_name = group_name
         self._detector_ids = None
         self.detectors = detector_ids
-        self._workspace = None
+        self._workspace = {}
+        self._asymmetry_estimate = {}
+        self._workspace_rebin = {}
+        self._asymmetry_estimate_rebin = {}
 
     @property
     def workspace(self):

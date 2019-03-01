@@ -25,12 +25,13 @@ floodCorrectionTypeFromString(std::string const &correctionType) {
 
 inline std::string
 FloodCorrectionTypeToString(FloodCorrectionType correctionType) {
-  if (correctionType == FloodCorrectionType::Workspace)
+  switch (correctionType) {
+  case FloodCorrectionType::Workspace:
     return "Workspace";
-  else if (correctionType == FloodCorrectionType::ParameterFile)
+  case FloodCorrectionType::ParameterFile:
     return "ParameterFile";
-  else
-    throw std::runtime_error("Unexpected flood correction type.");
+  }
+  throw std::runtime_error("Unexpected flood correction type.");
 }
 
 inline bool floodCorrectionRequiresInputs(FloodCorrectionType correctionType) {

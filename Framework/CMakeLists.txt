@@ -166,17 +166,11 @@ add_custom_target( Framework DEPENDS ${FRAMEWORK_LIBS} )
 ###########################################################################
 
 # Create instrument directory
-if(APPLE)
-    set(_BUNDLES ${INBUNDLE} MantidWorkbench.app/)
-else()
-    set(_BUNDLES "./")
-endif()
-
-foreach ( _bundle ${_BUNDLES} )
+foreach ( _bundle ${BUNDLES} )
     install ( DIRECTORY ../instrument/ DESTINATION ${_bundle}instrument
         PATTERN "*UNIT_TESTING*" EXCLUDE
         PATTERN ".gitignore" EXCLUDE
-        )
+    )
     # Ships .py files but only ship compiled pyd files for supported platforms.
     if ( WIN32 ) # General windows environment
         if ( CMAKE_SIZEOF_VOID_P EQUAL 8 ) # Recommended way of detecting 64- vs 32-bit build

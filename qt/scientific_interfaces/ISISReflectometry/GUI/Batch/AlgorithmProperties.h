@@ -19,6 +19,9 @@ namespace AlgorithmProperties {
 
 using AlgorithmRuntimeProps = std::map<std::string, std::string>;
 
+// These convenience functions convert properties of various types into
+// strings to set the relevant property in an AlgorithmRuntimeProps
+
 void update(std::string const &property, std::string const &value,
             AlgorithmRuntimeProps &properties);
 void update(std::string const &property,

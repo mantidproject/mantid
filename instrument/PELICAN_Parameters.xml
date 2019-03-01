@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument = "PELICAN" valid-from = "1901-01-01T00:00:00">
+
+  <component-link name = "PELICAN">
+    
+    <parameter name="DetectorMap" type="string">
+      <value val="199-0,207-200" />
+    </parameter>
+
+  </component-link>
+
+</parameter-file>

@@ -11,11 +11,14 @@
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
+#include "MantidKernel/V3D.h"
+#include <array>
+#include <cmath>
 #include <iosfwd>
+#include <limits>
 
 namespace Mantid {
 namespace Kernel {
-class V3D;
 
 /**
 Implements a 2-dimensional vector embedded in a 3D space, i.e.
@@ -29,71 +32,139 @@ public:
   /**
    * Default constructor. It puts the vector at the origin
    */
-  inline V2D() : m_x(0.0), m_y(0.0) {}
+  inline V2D() noexcept : m_pt{{0.0, 0.0}} {}
   /**
    * Constructor taking an x and y value.
    */
-  inline V2D(double x, double y) : m_x(x), m_y(y) {}
+  inline V2D(double x, double y) noexcept : m_pt{{x, y}} {}
+
   /**
    * X position
    * @returns The X position
    */
-  inline const double &X() const { return m_x; }
+  inline double X() const { return m_pt[0]; }
   /**
    * Y position
    * @returns The Y position
    */
-  inline const double &Y() const { return m_y; }
-  /// Index access.
-  const double &operator[](const size_t index) const;
+  inline double Y() const { return m_pt[1]; }
+
+  /**
+   * X position (non-const reference)
+   * @returns The X position
+   */
+  inline double &X() { return m_pt[0]; }
+  /**
+   * Y position (non-const)
+   * @returns The Y position
+   */
+  inline double &Y() { return m_pt[1]; }
+
+  /// Unchecked index access.
+  inline const double &operator[](const size_t index) const {
+    return m_pt[index];
+  }
 
   ///@name Arithmetic operations
   ///@{
   /// Sum this and the rhs
-  V2D operator+(const V2D &rhs) const;
+  inline V2D operator+(const V2D &rhs) const {
+    return V2D(X() + rhs.X(), Y() + rhs.Y());
+  }
   /// Increment this vector by rhs
-  V2D &operator+=(const V2D &rhs);
-  /// Subtract this and the rhs
-  V2D operator-(const V2D &rhs) const;
+  inline V2D &operator+=(const V2D &rhs) {
+    X() += rhs.X();
+    Y() += rhs.Y();
+    return *this;
+  }
+  /// Subtract rhs
+  inline V2D operator-(const V2D &rhs) const {
+    return V2D(X() - rhs.X(), Y() - rhs.Y());
+  }
   /// Decrement this by rhs
-  V2D &operator-=(const V2D &rhs);
+  inline V2D &operator-=(const V2D &rhs) {
+    X() -= rhs.X();
+    Y() -= rhs.Y();
+    return *this;
+  }
   /// Scale and return
-  V2D operator*(const double factor) const;
+  inline V2D operator*(const double factor) const {
+    return V2D(X() * factor, Y() * factor);
+  }
   /// Scale this
-  V2D &operator*=(const double factor);
+  V2D &operator*=(const double factor) {
+    X() *= factor;
+    Y() *= factor;
+    return *this;
+  }
   /// Negate
-  V2D operator-() const noexcept;
+  inline V2D operator-() const noexcept { return V2D{-X(), -Y()}; }
 
   ///@}
 
   ///@name Comparison operators
   ///@{
-  /// Equality operator
-  bool operator==(const V2D &rhs) const;
-  /// Inequality operator
-  bool operator!=(const V2D &rhs) const;
+  /**
+   * Equality operator including a tolerance
+   * @param rhs :: The rhs object
+   * @returns True if they are considered equal false otherwise
+   */
+  inline bool operator==(const V2D &rhs) const {
+    return (std::fabs(X() - rhs.X()) < std::numeric_limits<double>::epsilon() &&
+            std::fabs(Y() - rhs.Y()) < std::numeric_limits<double>::epsilon());
+  }
+  /**
+   * Inequality operator including a tolerance
+   * @param rhs :: The rhs object
+   * @returns True if they are not considered equal false otherwise
+   */
+  inline bool operator!=(const V2D &rhs) const { return !(rhs == *this); }
   ///@}
 
   /// Make a normalized vector (return norm value)
   double normalize();
-  /// Compute the norm
-  double norm() const;
-  /// Compute the square of the norm
-  double norm2() const;
-  // Scalar product
-  double scalar_prod(const V2D &other) const;
-  // Cross product
-  V3D cross_prod(const V2D &other) const;
-  /// Distance (R) between two points defined as vectors
-  double distance(const V2D &other) const;
+  /**
+   * Compute the norm
+   * @returns The norm of the vector
+   */
+  inline double norm() const { return std::sqrt(norm2()); }
+
+  /**
+   * Compute the square of the norm
+   * @returns The square of the norm
+   */
+  inline double norm2() const { return X() * X() + Y() * Y(); }
+
+  /**
+   * Compute the scalar product with another vector
+   * @param other :: A second vector
+   */
+  inline double scalar_prod(const V2D &other) const {
+    return X() * other.X() + Y() * other.Y();
+  }
+
+  /**
+   * Cross product
+   */
+  inline V3D cross_prod(const V2D &other) const {
+    return V3D(0.0, 0.0, X() * other.Y() - Y() * other.X());
+  }
+
+  /**
+   * Distance (R) between two points defined as vectors
+   * @param other :: A second vector
+   * @returns The distance between the two points
+   */
+  inline double distance(const V2D &other) const {
+    return V2D(X() - other.X(), Y() - other.Y()).norm();
+  }
+
   // Angle between this and another vector
   double angle(const V2D &other) const;
 
 private:
-  /// X values
-  double m_x;
-  /// Y values
-  double m_y;
+  // X,Y
+  std::array<double, 2> m_pt;
 };
 
 // Overload operator <<
