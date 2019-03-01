@@ -97,7 +97,7 @@ class CodeEditorTabWidget(QTabWidget):
 
         self.tabCloseRequested.connect(parent.close_tab)
 
-        run_action = create_action(self, "Run", on_triggered=parent.execute_current,
+        run_action = create_action(self, "Run", on_triggered=parent.execute_current_async,
                                    shortcut=("Ctrl+Return", "Ctrl+Enter"),
                                    shortcut_context=Qt.ApplicationShortcut)
 
