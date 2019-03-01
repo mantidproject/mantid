@@ -78,7 +78,6 @@ public:
   void setSuffixes(const QStringList &suffix);
   void setLowerBinLimit(int numberOfBins);
   void setUpperBinLimit(int numberOfBins);
-  void clearSuffices();
   QString getValidatingAlgorithm() const;
   void setValidatingAlgorithm(const QString &algName);
   bool isValid() const;
