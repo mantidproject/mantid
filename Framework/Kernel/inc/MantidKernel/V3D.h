@@ -35,7 +35,7 @@ class MANTID_KERNEL_DLL V3D final {
 public:
   constexpr V3D() noexcept : m_pt({{0., 0., 0.}}) {}
   constexpr V3D(double xx, double yy, double zz) noexcept
-      : m_pt({xx, yy, zz}) {}
+      : m_pt({{xx, yy, zz}}) {}
 
   /// Convenience method for sorting list of V3D objects based on magnitude
   static bool compareMagnitude(const Kernel::V3D &v1, const Kernel::V3D &v2);
@@ -185,8 +185,7 @@ public:
     @param v :: V3D for comparison
     @return true if the items are equal
   */
-  constexpr bool operator==(const V3D &v) const {
-    using namespace std;
+  bool operator==(const V3D &v) const noexcept {
     return !(std::abs(m_pt[0] - v.m_pt[0]) > Tolerance ||
              std::abs(m_pt[1] - v.m_pt[1]) > Tolerance ||
              std::abs(m_pt[2] - v.m_pt[2]) > Tolerance);
@@ -196,7 +195,7 @@ public:
    *  @param other :: The V3D to compare against
    *  @returns True if the vectors are different
    */
-  constexpr bool operator!=(const V3D &other) const {
+  bool operator!=(const V3D &other) const noexcept {
     return !(this->operator==(other));
   }
 
