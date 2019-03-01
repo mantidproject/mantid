@@ -39,27 +39,8 @@ namespace Geometry {
 
 
  @author Andrei Savici, SNS, ORNL
+
  @date 2011-03-23
- Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
- National Laboratory & European Spallation Source
-
- This file is part of Mantid.
-
- Mantid is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 3 of the License, or
- (at your option) any later version.
-
- Mantid is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License
- along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
- File change history is stored at: <https://github.com/mantidproject/mantid>.
- Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 class MANTID_GEOMETRY_DLL UnitCell {
 public:
@@ -128,8 +109,6 @@ public:
 
   const Kernel::V3D getModVec(int j) const;
   const Kernel::V3D getVecErr(int j) const;
-  //            const Kernel::V3D &getModVec2() const;
-  //            const Kernel::V3D &getModVec3() const;
   const Kernel::DblMatrix &getModHKL() const;
   double getdh(int j) const;
   double getdk(int j) const;
@@ -140,13 +119,6 @@ public:
   double getdlerr(int j) const;
   int getMaxOrder() const;
   bool getCrossTerm() const;
-
-  //            double getdh2() const;
-  //            double getdk2() const;
-  //            double getdl2() const;
-  //            double getdh3() const;
-  //            double getdk3() const;
-  //            double getdl3() const;
 
   void set(double _a, double _b, double _c, double _alpha, double _beta,
            double _gamma, const int angleunit = angDegrees);
@@ -239,7 +211,6 @@ protected:
   void calculateGstar();
   void calculateReciprocalLattice();
   void calculateB();
-  //            void calculateModVec();
 
   virtual void recalculate();
 };

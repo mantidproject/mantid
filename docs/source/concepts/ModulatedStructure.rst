@@ -169,7 +169,7 @@ three:
 
 .. math::
 
-   {\begin{pmatrix}
+   \begin{pmatrix}
    x_{i} \\
    y_{i} \\
    z_{i} \\
@@ -186,11 +186,11 @@ three:
    n_{i} \\
    p_{i} \\
    \end{matrix} \\
-   \end{pmatrix}}
+   \end{pmatrix}
 
 .. math::
 
-   {\begin{pmatrix}
+   \begin{pmatrix}
    x_{i} \\
    y_{i} \\
    z_{i} \\
@@ -211,7 +211,7 @@ three:
    n_{i} \\
    p_{i} \\
    \end{matrix} \\
-   \end{pmatrix}}
+   \end{pmatrix}
 
 .. math::
 
