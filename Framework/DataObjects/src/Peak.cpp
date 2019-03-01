@@ -449,7 +449,7 @@ double Peak::getDSpacing() const {
   double two_theta;
   try {
     two_theta = detDir.angle(beamDir);
-  }  catch (std::runtime_error &) {
+  } catch (std::runtime_error &) {
     two_theta = 0.;
   }
 

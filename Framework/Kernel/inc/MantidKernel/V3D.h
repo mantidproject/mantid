@@ -196,7 +196,9 @@ public:
    *  @param other :: The V3D to compare against
    *  @returns True if the vectors are different
    */
-  constexpr bool operator!=(const V3D &other) const { return !(this->operator==(other)); }
+  constexpr bool operator!=(const V3D &other) const {
+    return !(this->operator==(other));
+  }
 
   /**
     compare
@@ -228,7 +230,8 @@ public:
   // Access
   // Setting x, y and z values
   void spherical(const double R, const double theta, const double phi) noexcept;
-  void spherical_rad(const double R, const double polar, const double azimuth) noexcept;
+  void spherical_rad(const double R, const double polar,
+                     const double azimuth) noexcept;
   void azimuth_polar_SNS(const double R, const double azimuth,
                          const double polar) noexcept;
   /**

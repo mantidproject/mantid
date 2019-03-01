@@ -56,7 +56,8 @@ namespace Kernel {
   @param phi :: The phi value (in degrees) = the azimuthal angle, where 0 points
   along +X and rotates counter-clockwise in the XY plane
 */
-void V3D::spherical(const double R, const double theta, const double phi) noexcept {
+void V3D::spherical(const double R, const double theta,
+                    const double phi) noexcept {
   constexpr double deg2rad = M_PI / 180.0;
   spherical_rad(R, theta * deg2rad, phi * deg2rad);
 }
