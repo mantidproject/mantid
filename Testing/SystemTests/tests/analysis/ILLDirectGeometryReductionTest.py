@@ -13,7 +13,7 @@ import systemtesting
 
 
 class IN4(systemtesting.MantidSystemTest):
-    tolerance = 1e-6
+    tolerance = 1e-5
     tolerance_rel_err = True
 
     def runTest(self):
@@ -75,13 +75,17 @@ class IN4(systemtesting.MantidSystemTest):
             XMax=2.75,
             StartWorkspaceIndex=83,
             EndWorkspaceIndex=222)
+        # The 'run_title' property has been deliberately erased from the test numor.
+        # We need to add it manually because Save/LoadNexus will do the same for
+        # the reference file.
+        mtd['cropped'].mutableRun().addProperty('run_title', '', True)
 
     def validate(self):
         return ['cropped', 'ILL_IN4_SofQW.nxs']
 
 
 class IN5(systemtesting.MantidSystemTest):
-    tolerance = 1e-6
+    tolerance = 1e-2
     tolerance_rel_err = True
 
     def runTest(self):
