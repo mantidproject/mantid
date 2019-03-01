@@ -204,6 +204,8 @@ private:
   void setup() override;
   void loadSettings(const QSettings &settings) override;
   void setFileExtensionsByName(bool filter) override;
+  void setSampleSuffices(bool filter);
+  void setResolutionSuffices(bool filter);
   virtual void setupFitTab() = 0;
   bool validate() override;
 

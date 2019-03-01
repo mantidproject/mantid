@@ -301,16 +301,26 @@ void IndirectFitAnalysisTab::loadSettings(const QSettings &settings) {
 }
 
 void IndirectFitAnalysisTab::setFileExtensionsByName(bool filter) {
+  setSampleSuffices(filter);
+  if (!getResolutionWSSuffices().empty())
+    setResolutionSuffices(filter);
+}
+
+void IndirectFitAnalysisTab::setSampleSuffices(bool filter) {
   QStringList const noSuffixes{""};
   setSampleWSSuffices(filter ? getSampleWSSuffices() : noSuffixes);
   setSampleFBSuffices(filter ? getSampleFBSuffices() : getAllowedExtensions());
+  m_dataPresenter->setMultiInputSampleWSSuffixes();
+  m_dataPresenter->setMultiInputSampleFBSuffixes();
+}
 
-  auto const resolutionWSSuffices = getResolutionWSSuffices();
-  if (!resolutionWSSuffices.empty()) {
-    setResolutionWSSuffices(filter ? resolutionWSSuffices : noSuffixes);
-    setResolutionFBSuffices(filter ? getResolutionFBSuffices()
-                                   : getAllowedExtensions());
-  }
+void IndirectFitAnalysisTab::setResolutionSuffices(bool filter) {
+  QStringList const noSuffixes{""};
+  setResolutionWSSuffices(filter ? getResolutionWSSuffices() : noSuffixes);
+  setResolutionFBSuffices(filter ? getResolutionFBSuffices()
+                                 : getAllowedExtensions());
+  m_dataPresenter->setMultiInputResolutionWSSuffixes();
+  m_dataPresenter->setMultiInputResolutionFBSuffixes();
 }
 
 void IndirectFitAnalysisTab::setSampleWSSuffices(const QStringList &suffices) {
