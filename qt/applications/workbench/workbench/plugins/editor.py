@@ -13,14 +13,15 @@ from __future__ import (absolute_import, unicode_literals)
 import os.path as osp
 
 # third-party library imports
+from mantid.kernel import logger
+from mantidqt.utils.qt import add_actions, create_action
+from mantidqt.widgets.codeeditor.multifileinterpreter import MultiPythonFileInterpreter
 from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QVBoxLayout
 
 # local package imports
-from mantid.kernel import logger
-from mantidqt.utils.qt import add_actions, create_action
-from mantidqt.widgets.codeeditor.multifileinterpreter import MultiPythonFileInterpreter
-from workbench.plugins.base import PluginWidget
+from ..config.fonts import text_font
+from ..plugins.base import PluginWidget
 
 # from mantidqt.utils.qt import toQSettings when readSettings/writeSettings are implemented
 
@@ -50,8 +51,9 @@ class MultiFileEditor(PluginWidget):
         super(MultiFileEditor, self).__init__(parent)
 
         # layout
-        self.editors = MultiPythonFileInterpreter(default_content=DEFAULT_CONTENT, parent=self)
-
+        self.editors = MultiPythonFileInterpreter(font=text_font(),
+                                                  default_content=DEFAULT_CONTENT,
+                                                  parent=self)
         layout = QVBoxLayout()
         layout.addWidget(self.editors)
         layout.setContentsMargins(0, 0, 0, 0)

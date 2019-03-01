@@ -191,11 +191,14 @@ const DblMatrix &OrientedLattice::setUFromVectors(const V3D &u, const V3D &v) {
     throw std::invalid_argument("|B.v|~0");
   buVec.normalize(); // 1st unit vector, along Bu
   V3D bwVec = buVec.cross_prod(bvVec);
-  if (bwVec.normalize() < 1e-5)
-    throw std::invalid_argument(
-        "u and v are parallel"); // 3rd unit vector, perpendicular to Bu,Bv
-  bvVec = bwVec.cross_prod(
-      buVec); // 2nd unit vector, perpendicular to Bu, in the Bu,Bv plane
+  const auto norm = bwVec.norm();
+  if (norm < 1e-5) {
+    // 3rd unit vector, perpendicular to Bu,Bv
+    throw std::invalid_argument("u and v are parallel");
+  }
+  bwVec /= norm;
+  // 2nd unit vector, perpendicular to Bu, in the Bu,Bv plane
+  bvVec = bwVec.cross_prod(buVec);
   DblMatrix tau(3, 3), lab(3, 3), U(3, 3);
   /*lab      = U tau
   / 0 1 0 \     /bu[0] bv[0] bw[0]\

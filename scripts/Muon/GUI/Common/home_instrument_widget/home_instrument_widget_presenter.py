@@ -49,10 +49,21 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
         self._view.show()
 
     def update_view_from_model(self):
-        self.handle_loaded_first_good_data_checkState_change()
-        self.handle_loaded_time_zero_checkState_change()
+        if self._view.first_good_data_state():
+            first_good_data = self._model.get_file_first_good_data()
+            self._view.set_first_good_data(first_good_data)
+        else:
+            first_good_data = self._model.get_user_first_good_data()
+            self._view.set_first_good_data(first_good_data)
+
+        if self._view.time_zero_state():
+            time_zero = self._model.get_file_time_zero()
+            self._view.set_time_zero(time_zero)
+        else:
+            time_zero = self._model.get_user_time_zero()
+            self._view.set_time_zero(time_zero)
+
         self._view.set_instrument(self._model._data.instrument)
-        self._view.on_dead_time_combo_changed(self._view.deadtime_selector.currentIndex())
 
     def clear_view(self):
         self._view.set_time_zero(0.0)

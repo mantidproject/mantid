@@ -24,7 +24,9 @@ from numpy.version import version as np_version
 from qtpy.QtWidgets import QVBoxLayout
 
 # local package imports
-from workbench.plugins.base import PluginWidget
+from ..config.fonts import text_font
+from ..plugins.base import PluginWidget
+
 # from mantidqt.utils.qt import toQSettings when readSettings/writeSettings are implemented
 
 DEFAULT_BANNER_PARTS = [
@@ -53,8 +55,9 @@ class JupyterConsole(PluginWidget):
         super(JupyterConsole, self).__init__(parent)
 
         # layout
-        self.console = InProcessJupyterConsole(self, banner=BANNER,
-                                               startup_code=STARTUP_CODE)
+        font = text_font()
+        self.console = InProcessJupyterConsole(self, banner=BANNER, startup_code=STARTUP_CODE,
+                                               font_family=font.family(), font_size=font.pointSize())
         layout = QVBoxLayout()
         layout.addWidget(self.console)
         self.setLayout(layout)
