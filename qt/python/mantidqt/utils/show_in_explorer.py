@@ -17,20 +17,20 @@ from mantid.kernel import logger
 class ShowInExplorer(object):
     @staticmethod
     def open_directory(path):
-        if sys.platform == "win32":
-            os.startfile(path)
-        elif sys.platform == 'darwin':
-            subprocess.check_call(['open', '--', path])
-        elif sys.platform == 'linux2':
-            call_params = ['xdg-open', path]
-            try:
+        try:
+            if sys.platform == "win32":
+                os.startfile(path)
+            elif sys.platform == 'darwin':
+                subprocess.check_call(['open', '--', path])
+            elif sys.platform == 'linux2':
+                call_params = ['xdg-open', path]
                 subprocess.check_call(call_params)
-            except Exception as ex:
-                # it is hard to narrow down this exception, as too many things can go wrong:
-                # - subprocess.CalledProcessError if the process has an error
-                # - OSError if the command cannot be found (on Linux)
-                # - Possible MemoryError and other things
-                # However, catching this general exception makes sure that there will not be a crash
-                # regardless of what the error is
-                logger.notice("Could not open the folder in explorer.")
-                logger.debug("Error encountered: {}".format(ex))
+        except Exception as ex:
+            # it is hard to narrow down the type of exception, as too many things can go wrong:
+            # - subprocess.CalledProcessError if the process has an error
+            # - OSError if the command cannot be found (on Linux)
+            # - WindowsError is the directory does not exist
+            # However, catching this general exception makes sure that there will not be a crash
+            # regardless of what the error is
+            logger.notice("Could not open the folder in explorer.")
+            logger.debug("Error encountered: {}".format(ex))
