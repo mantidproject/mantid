@@ -114,6 +114,7 @@ class MuonDataContext(object):
             in allowed_instruments else 'EMU'
 
         self.instrumentNotifier = MuonDataContext.InstrumentNotifier(self)
+        self.gui_variables_notifier = MuonDataContext.GuiVariablesNotifier(self)
 
     def is_data_loaded(self):
         return self._loaded_data.num_items() > 0
@@ -243,7 +244,7 @@ class MuonDataContext(object):
         else:
             return self._loaded_data.get_data(run=run, instrument=self.instrument)['workspace']['OutputWorkspace'][0].workspace
 
-    def period_string(self, run):
+    def period_string(self, run=None):
         summed_periods = self.gui_variables["SummedPeriods"] if 'SummedPeriods' in self.gui_variables else [1]
         subtracted_periods = self.gui_variables["SubtractedPeriods"] if 'SubtractedPeriods' in self.gui_variables else []
         if subtracted_periods:
@@ -259,6 +260,9 @@ class MuonDataContext(object):
             # default to 1
             n_det = 1
         return n_det
+
+    def num_periods(self, run):
+        return len(self._loaded_data.get_data(run=run, instrument=self.instrument)['workspace']['OutputWorkspace'])
 
     @property
     def main_field_direction(self):
@@ -321,7 +325,7 @@ class MuonDataContext(object):
             if len(loaded_workspace) > 1:
                 # Multi-period data
                 for i, single_ws in enumerate(loaded_workspace):
-                    name = directory + get_raw_data_workspace_name(self, run_string, period=str(i))
+                    name = directory + get_raw_data_workspace_name(self, run_string, period=str(i + 1))
                     single_ws.show(name)
             else:
                 # Single period data
@@ -410,7 +414,19 @@ class MuonDataContext(object):
                (self.gui_variables['RebinType'] == 'Variable' and
                 'RebinVariable' in self.gui_variables and self.gui_variables['RebinVariable'])
 
+    def add_or_replace_gui_variables(self, **kwargs):
+        self._gui_variables.update(kwargs)
+        self.gui_variables_notifier.notify_subscribers()
+
     class InstrumentNotifier(Observable):
+        def __init__(self, outer):
+            Observable.__init__(self)
+            self.outer = outer  # handle to containing class
+
+        def notify_subscribers(self, *args, **kwargs):
+            Observable.notify_subscribers(self, *args)
+
+    class GuiVariablesNotifier(Observable):
         def __init__(self, outer):
             Observable.__init__(self)
             self.outer = outer  # handle to containing class

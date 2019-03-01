@@ -1,5 +1,5 @@
 ============
-MuSR Changes
+Muon Changes
 ============
 
 .. contents:: Table of Contents
@@ -8,9 +8,13 @@ MuSR Changes
 Interface
 ---------
 
+New
+###
+- Elemental Analysis added to Muon Interfaces: Includes a selectable Periodic Table.
+- Frequency Domain Analysis 2 added. See the documentation here :ref:`Frequency Domain Analysis <Frequency_Domain_Analysis_2-ref>`
+
 Improvements
 ############
-- Elemental Analysis added to Muon Interfaces: Includes a selectable Periodic Table.
 - TF Asymmetry mode now displays the chi squared value at the top of the browser.
 - ALC interface now sorts the data into ascending order.
 - Muon Analysis now includes number of event per frame and number of events per frame per detector in the run info box on the home tab.
@@ -40,7 +44,8 @@ Improvements
 
 Bugfixes
 ########
-- :ref: `EstimateMuonAsymmetryFromCounts <algm-EstimateMuonAsymmetryFromCounts>` had a bug that meant the first good bin was excluded from calculating the normalization.   
+
+- :ref:`EstimateMuonAsymmetryFromCounts <algm-EstimateMuonAsymmetryFromCounts>` had a bug that meant the first good bin was excluded from calculating the normalization.
 
 
 :ref:`Release 3.14.0 <v3.14.0>`

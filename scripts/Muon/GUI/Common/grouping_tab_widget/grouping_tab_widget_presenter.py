@@ -49,6 +49,7 @@ class GroupingTabPresenter(object):
 
         self.guessAlphaObserver = GroupingTabPresenter.GuessAlphaObserver(self)
         self.pairing_table_widget.guessAlphaNotifier.add_subscriber(self.guessAlphaObserver)
+        self.gui_variables_observer = GroupingTabPresenter.GuiVariablesChangedObserver(self)
 
     def show(self):
         self._view.show()
@@ -214,6 +215,14 @@ class GroupingTabPresenter(object):
 
         def update(self, observable, arg):
             self.outer.handle_guess_alpha(arg[0], arg[1], arg[2])
+
+    class GuiVariablesChangedObserver(Observer):
+        def __init__(self, outer):
+            Observer.__init__(self)
+            self.outer = outer
+
+        def update(self, observable, arg):
+            self.outer.handle_update_all_clicked()
 
     class GroupingNotifier(Observable):
 
