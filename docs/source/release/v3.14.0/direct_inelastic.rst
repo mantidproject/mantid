@@ -29,7 +29,7 @@ Improvements
 - Changes to :ref:`ComputeCalibrationCoefVan <algm-ComputeCalibrationCoefVan>`:
 
   - It is now possible to turn off the Debye-Waller correction
-  - The temperature sample log entry can be given in an instrument parameter ``temperature_sample_log``.
+  - The temperature sample log entry can be given in an instrument parameter ``temperature_sample_log``
   - The temperature sample log can now be a time series.
 
 - :ref:`ComputeIncoherentDOS <algm-ComputeIncoherentDOS>` now supports computation from :math:`S(2\theta,E)` workspace.
@@ -40,7 +40,7 @@ Improvements
 - :ref:`DirectILLCollectData <algm-DirectILLCollectData>` now automatically disables incident energy calibration and normalises to time instead of monitor counts if the monitor counts are deemed too low.
 - The new property in :ref:`DirectILLReduction <algm-DirectILLReduction>`, ``EnergyRebinning``, allows mixing automatic bin widths with user specified ones when rebinning the energy transfer axis.
 - The ``SofQW`` algorithms have a new property ``DetectorTwoThetaRanges`` which can be used to supply detector scattering angle coverage information for :ref:`SofQWNormalisedPolygon <algm-SofQWNormalisedPolygon>`.
-
+- The built-in version of MSlice has been updated to include the full CLI, generating scripts from plots and waterfall plotting.
 
 Bugfixes
 ########
@@ -77,7 +77,12 @@ Python
 Improved
 ########
 
-- The ``directtools`` plotting and utility module has been updated with improved automatic E ranges, cut labels and other visuals. All functions now should also be applicable to non-ILL data as well.
+- The ``directtools`` plotting and utility module has been updated:
+
+  - Added a new function :func:`directtools.plotDOS` to support plotting the density-of-states
+  - Improved the automatic E ranges, cut labels and other visuals
+  - All functions should be applicable to non-ILL data
+  - ``defaultrcParams`` was renamed to ``defaultrcparams`` to be consistent with the rest of the functions
 
 Instrument definitions
 ----------------------

@@ -153,8 +153,8 @@ public:
     @return this *= D
   */
   V3D &operator*=(const double D) noexcept {
-    for (size_t i = 0; i < m_pt.size(); ++i) {
-      m_pt[i] *= D;
+    for (auto &pt : m_pt) {
+      pt *= D;
     }
     return *this;
   }
@@ -166,8 +166,8 @@ public:
     \todo ADD TOLERANCE
   */
   V3D &operator/=(const double D) noexcept {
-    for (size_t i = 0; i < m_pt.size(); ++i) {
-      m_pt[i] /= D;
+    for (auto &pt : m_pt) {
+      pt /= D;
     }
     return *this;
   }
@@ -334,6 +334,7 @@ public:
   int masterDir(const double Tol = 1e-3) const;
   /// Determine if the point is null
   bool nullVector(const double tolerance = 1e-3) const;
+  bool unitVector(const double tolerance = Kernel::Tolerance) const noexcept;
   bool coLinear(const V3D &, const V3D &) const;
 
   void saveNexus(::NeXus::File *file, const std::string &name) const;

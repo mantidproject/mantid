@@ -393,7 +393,7 @@ class BASISReduction(PythonAlgorithm):
         #  represents a set of runs
         rlvals = rlist.split(';')
         for rlval in rlvals:
-            iap = IntArrayProperty('', rlval)  # split the substring
+            iap = IntArrayProperty('_get_runs_iap', rlval)  # substring split
             if doIndiv:
                 run_list.extend([[x] for x in iap.value])
             else:

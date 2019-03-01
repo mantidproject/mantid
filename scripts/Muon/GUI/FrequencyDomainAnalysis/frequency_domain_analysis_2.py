@@ -80,7 +80,7 @@ class FrequencyAnalysisGui(QtGui.QMainWindow):
         central_widget.setLayout(vertical_layout)
 
         self.setCentralWidget(central_widget)
-        self.setWindowTitle("Frequency Domain Analysis version 2.0")
+        self.setWindowTitle("Frequency Domain Analysis")
 
         self.home_tab.group_widget.pairAlphaNotifier.add_subscriber(
             self.grouping_tab_widget.group_tab_presenter.loadObserver)
@@ -112,15 +112,17 @@ class FrequencyAnalysisGui(QtGui.QMainWindow):
         self.context.instrumentNotifier.add_subscriber(
             self.transform.instrumentObserver)
 
+        self.context.gui_variables_notifier.add_subscriber(self.grouping_tab_widget.group_tab_presenter.gui_variables_observer)
+
     def setup_tabs(self):
         """
         Set up the tabbing structure; the tabs work similarly to conventional
         web browsers.
         """
         self.tabs = DetachableTabWidget(self)
-        self.tabs.addTab(self.home_tab.home_tab_view, 'Home')
-        self.tabs.addTab(self.grouping_tab_widget.group_tab_view, 'Grouping')
-        self.tabs.addTab(self.transform.widget, 'Transform')
+        self.tabs.addTabWithOrder(self.home_tab.home_tab_view, 'Home')
+        self.tabs.addTabWithOrder(self.grouping_tab_widget.group_tab_view, 'Grouping')
+        self.tabs.addTabWithOrder(self.transform.widget, 'Transform')
 
     def closeEvent(self, event):
         self.tabs.closeEvent(event)

@@ -8,9 +8,9 @@
 import sys
 import unittest
 
-from mock import patch
+from mantid.py3compat.mock import patch
 
-from mantidqt.widgets.workspacedisplay.test_mocks.mock_qt import MockQStatusBar
+from mantidqt.utils.testing.mocks.mock_qt import MockQStatusBar
 from mantidqt.widgets.workspacedisplay.user_notifier import UserNotifier
 
 

@@ -150,6 +150,9 @@ double V3D::norm() const { return sqrt(norm2()); }
 */
 double V3D::normalize() {
   const double ND(norm());
+  if (ND == 0) {
+    throw std::runtime_error("Unable to normalize a zero length vector.");
+  }
   this->operator/=(ND);
   return ND;
 }
@@ -255,6 +258,12 @@ bool V3D::nullVector(const double tolerance) const {
   // Getting to this point means a null vector
   return true;
 }
+
+bool V3D::unitVector(const double tolerance) const noexcept {
+  const auto l = norm();
+  return std::abs(l - 1.) < tolerance;
+}
+
 
 /**
    Calculates the index of the primary direction (if there is one)

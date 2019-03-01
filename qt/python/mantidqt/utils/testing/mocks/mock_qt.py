@@ -7,8 +7,8 @@
 #  This file is part of the mantid workbench.
 from __future__ import (absolute_import, division, print_function)
 
-from mock import Mock
-
+from mantid.py3compat.mock import Mock
+from mantidqt.utils.testing.strict_mock import StrictMock
 from mantidqt.widgets.workspacedisplay.matrix.table_view_model import MatrixWorkspaceTableViewModelType
 
 
@@ -109,3 +109,17 @@ class MockQClipboard(object):
     def __init__(self):
         self.setText = Mock()
         self.Clipboard = 3
+
+
+class MockQButton(object):
+    def __init__(self):
+        self.mock_clicked_signal = MockQtSignal()
+        self.clicked = Mock(return_value=self.mock_clicked_signal)
+
+
+class MockQWidget(object):
+    def __init__(self):
+        self.addWidget = StrictMock()
+        self.replaceWidget = StrictMock()
+        self.hide = StrictMock()
+        self.show = StrictMock()

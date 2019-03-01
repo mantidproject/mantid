@@ -13,14 +13,15 @@ from __future__ import (absolute_import, unicode_literals)
 import os.path as osp
 
 # third-party library imports
+from mantid.kernel import logger
+from mantidqt.utils.qt import add_actions, create_action
+from mantidqt.widgets.codeeditor.multifileinterpreter import MultiPythonFileInterpreter
 from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QVBoxLayout
 
 # local package imports
-from mantid.kernel import logger
-from mantidqt.utils.qt import add_actions, create_action
-from mantidqt.widgets.codeeditor.multifileinterpreter import MultiPythonFileInterpreter
-from workbench.plugins.base import PluginWidget
+from ..config.fonts import text_font
+from ..plugins.base import PluginWidget
 
 # from mantidqt.utils.qt import toQSettings when readSettings/writeSettings are implemented
 
@@ -50,7 +51,8 @@ class MultiFileEditor(PluginWidget):
         super(MultiFileEditor, self).__init__(parent)
 
         # layout
-        self.editors = MultiPythonFileInterpreter(default_content=DEFAULT_CONTENT,
+        self.editors = MultiPythonFileInterpreter(font=text_font(),
+                                                  default_content=DEFAULT_CONTENT,
                                                   parent=self)
         layout = QVBoxLayout()
         layout.addWidget(self.editors)
@@ -61,12 +63,12 @@ class MultiFileEditor(PluginWidget):
 
         # attributes
         self.tabs_open_on_closing = None
-
-        self.run_action = create_action(
-            self, "Run",
-            on_triggered=self.editors.execute_current,
-            shortcut=("Ctrl+Return", "Ctrl+Enter"),
-            shortcut_context=Qt.ApplicationShortcut)
+        self.run_action = create_action(self, "Run",
+                                        on_triggered=self.editors.execute_current_async,
+                                        shortcut=("Ctrl+Return", "Ctrl+Enter"),
+                                        shortcut_context=Qt.ApplicationShortcut)
+        self.abort_action = create_action(self, "Abort",
+                                          on_triggered=self.editors.abort_current)
 
         self.abort_action = create_action(
             self, "Abort", on_triggered=self.editors.abort_current)
@@ -105,9 +107,12 @@ class MultiFileEditor(PluginWidget):
                                self.tabs_to_spaces_action,
                                self.spaces_to_tabs_action, None]
 
-    def execute_current(self):
+    def load_settings_from_config(self, config):
+        self.editors.load_settings_from_config(config)
+
+    def execute_current_async(self):
         '''This is used by MainWindow to execute a file after opening it'''
-        return self.editors.execute_current()
+        return self.editors.execute_current_async()
 
     def restore_session_tabs(self, session_tabs):
         self.open_files_in_new_tabs(session_tabs, startup=True)

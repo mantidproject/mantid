@@ -32,6 +32,7 @@ class TransformWidget(QtGui.QWidget):
         self._view = TransformView(self._selector.widget, groupedViews, parent)
 
         self._selector.setSelectionConnection(self.updateDisplay)
+        self.updateDisplay('FFT')
 
     @property
     def widget(self):

@@ -96,6 +96,7 @@ class HomeGroupingWidgetPresenter(HomeTabSubWidget):
 
         self._model.update_summed_periods(summed)
         self._model.update_subtracted_periods(subtracted)
+        self._model._data.add_or_replace_gui_variables()
 
         self.update_period_edits()
 
