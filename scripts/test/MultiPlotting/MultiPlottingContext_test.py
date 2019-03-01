@@ -57,5 +57,22 @@ class MultiPlottingContextTest(unittest.TestCase):
             patch.assert_called_with(mockWS,specNum)
 
 
+    def test_updateLayout(self):
+        # add mocks
+        figure = mock.Mock()
+        self.subplot = mock.create_autospec(subplotContext)
+        names = ["one","two","three"]
+        for name in names:
+            self.context.addSubplot(name, mock.Mock())
+
+        gridspec = mock.Mock()
+        self.context._gridspec = gridspec
+        with mock.patch("MultiPlotting.subplot.subplot_context.subplotContext.update_gridspec") as patch:
+            self.context.update_layout(figure)
+            self.assertEquals(patch.call_count,3)
+            # only last iteration survives
+            patch.assert_called_with(gridspec,figure,2)
+
+
 if __name__ == "__main__":
     unittest.main()

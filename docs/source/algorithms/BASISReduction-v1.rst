@@ -51,27 +51,35 @@ of comparison between deuterated and hydrogenated samples.
 Reflection Selector
 ===================
 
-Currently two types of reflection are possible, associated with the two analyzers of BASIS.
-There are typical values for the properties of each reflection:
+Currently three types of reflection are possible, associated with the
+silicon analyzers of BASIS. These are typical binning values for each
+reflection:
 
-+------------+----------------+------------------------+
-| Reflection |  Energy bins   | Momentum transfer bins |
-|            |   (micro-eV)   |   (inverse Angstroms)  |
-+============+================+========================+
-| silicon111 | -150, 0.4, 500 |      0.3, 0.2, 1.9     |
-+------------+----------------+------------------------+
-| silicon311 | -740, 1.6, 740 |      0.5, 0.2, 3.7     |
-+------------+----------------+------------------------+
++------------+-----------------+------------------------+
+| Reflection |   Energy bins   | Momentum transfer bins |
+|            |    (micro-eV)   |   (inverse Angstroms)  |
++============+=================+========================+
+| silicon111 |  -150, 0.4, 500 |      0.3, 0.2, 1.9     |
++------------+-----------------+------------------------+
+| silicon311 |  -740, 1.6, 740 |      0.5, 0.2, 3.7     |
++------------+-----------------+------------------------+
+| silicon333 | -1500, 3.2 1500 |      0.5, 0.2, 3.7     |
++------------+-----------------+------------------------+
 
 Also the following default mask files are associated to each reflection:
 
 +-----------+----------------------------+
-|Reflection | Mask file                  |
+|Reflection |         Mask file          |
 +===========+============================+
 |silicon111 | BASIS_Mask_default_111.xml |
 +-----------+----------------------------+
 |silicon311 | BASIS_Mask_default_311.xml |
 +-----------+----------------------------+
+|silicon333 | BASIS_Mask_default_333.xml |
++-----------+----------------------------+
+
+Note: masks for reflections 111 and 333 are actually the same since both
+reflections take place at the same silicon crystal analyzers.
 
 These mask files can be found in the SNS filesystem
 (**/SNS/BSS/shared/autoreduce/new_masks_08_12_2015/**)

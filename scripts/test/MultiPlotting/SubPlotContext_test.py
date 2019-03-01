@@ -136,7 +136,10 @@ class SubPlotContextTest(unittest.TestCase):
         self.context._vLines = {
             "two": mock.MagicMock(), "four": mock.MagicMock()}
         result = self.context.vlines
-        self.assertEquals(["three", "two", "four"], result)
+        expect = ["two", "three","four"] 
+        for key in expect:
+            self.assertIn(key, result)
+        self.assertEquals(len(result), len(expect))
 
 if __name__ == "__main__":
     unittest.main()

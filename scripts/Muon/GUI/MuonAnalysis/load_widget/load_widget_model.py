@@ -24,6 +24,7 @@ class LoadWidgetModel(object):
 
     def clear_data(self):
         self._loaded_data_store.clear()
+        self._context.current_runs = []
 
     def is_filename_loaded(self, filename):
         return self._loaded_data_store.contains(filename=filename)
@@ -33,12 +34,12 @@ class LoadWidgetModel(object):
 
     @property
     def workspaces(self):
-        return self._loaded_data_store.get_parameter("workspace")
+        return self._context.current_workspaces
 
     @property
     def runs(self):
-        return self._loaded_data_store.get_parameter("run")
+        return self._context.current_runs
 
     @property
     def filenames(self):
-        return self._loaded_data_store.get_parameter("filename")
+        return self._context.current_filenames

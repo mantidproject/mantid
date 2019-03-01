@@ -37,6 +37,13 @@ class SANSSave(DataProcessorAlgorithm):
                              doc="The name of the file which needs to be stored. Note that "
                                  "the actual file type is selected below.")
 
+        self.declareProperty(MatrixWorkspaceProperty("Transmission", defaultValue='',
+                                                     optional=PropertyMode.Optional, direction=Direction.Input),
+                             doc='The sample transmission workspace. Optional.')
+        self.declareProperty(MatrixWorkspaceProperty("TransmissionCan", defaultValue='',
+                                                     optional=PropertyMode.Optional, direction=Direction.Input),
+                             doc='The can transmission workspace. Optional.')
+
         self.declareProperty("Nexus", False, direction=Direction.Input,
                              doc="Save as nexus format. "
                                  "Note that if file formats of the same type, e.g. .xml are chosen, then the "
@@ -78,13 +85,23 @@ class SANSSave(DataProcessorAlgorithm):
         file_name = self.getProperty("Filename").value
         workspace = self.getProperty("InputWorkspace").value
 
+        transmission = self.getProperty("Transmission").value
+        transmission_can = self.getProperty("TransmissionCan").value
+
         if use_zero_error_free:
             workspace = get_zero_error_free_workspace(workspace)
+            if transmission:
+                transmission = get_zero_error_free_workspace(transmission)
+            if transmission_can:
+                transmission_can = get_zero_error_free_workspace(transmission_can)
+        transmission_workspaces = {"Transmission": transmission,
+                                   "TransmissionCan": transmission_can}
+
         progress = Progress(self, start=0.0, end=1.0, nreports=len(file_formats) + 1)
         for file_format in file_formats:
             progress_message = "Saving to {0}.".format(SaveType.to_string(file_format.file_format))
             progress.report(progress_message)
-            save_to_file(workspace, file_format, file_name)
+            save_to_file(workspace, file_format, file_name, transmission_workspaces)
         progress.report("Finished saving workspace to files.")
 
     def validateInputs(self):

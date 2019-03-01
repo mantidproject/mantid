@@ -160,7 +160,7 @@ class GroupingTabPresenterTest(unittest.TestCase):
         self.view.update_button.clicked.emit(True)
 
         self.presenter.update_thread.threadWrapperSetUp.assert_called_once_with(self.presenter.disable_editing,
-                                                                                self.presenter.enable_editing,
+                                                                                self.presenter.handle_update_finished,
                                                                                 self.view.display_warning_box)
         self.presenter.update_thread.start.assert_called_once_with()
 

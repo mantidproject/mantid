@@ -57,6 +57,21 @@ def run_MuonPairingAsymmetry(parameter_dict):
     return alg.getProperty("OutputWorkspace").value
 
 
+def run_MuonGroupingAsymmetry(parameter_dict):
+    """
+    Apply the MuonGroupingCounts algorithm with the properties supplied through
+    the input dictionary of {proeprty_name:property_value} pairs.
+    Returns the calculated workspace.
+    """
+    alg = mantid.AlgorithmManager.create("MuonGroupingAsymmetry")
+    alg.initialize()
+    alg.setAlwaysStoreInADS(False)
+    alg.setProperty("OutputWorkspace", "__notUsed")
+    alg.setProperties(parameter_dict)
+    alg.execute()
+    return alg.getProperty("OutputWorkspace").value
+
+
 def run_AppendSpectra(ws1, ws2):
     """
     Apply the AppendSpectra algorithm to two given workspaces (no checks made).

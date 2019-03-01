@@ -96,7 +96,7 @@ MiniPlotMpl::MiniPlotMpl(QWidget *parent)
   // Mouse events cause zooming by default. See mouseReleaseEvent
   // for exceptions
   m_zoomer.enableZoom(true);
-  connect(m_homeBtn, SIGNAL(clicked()), this, SLOT(onHomeClicked()));
+  connect(m_homeBtn, SIGNAL(clicked()), this, SLOT(zoomOutOnPlot()));
 }
 
 /**
@@ -340,7 +340,7 @@ bool MiniPlotMpl::handleMouseReleaseEvent(QMouseEvent *evt) {
 /**
  * Wire to the home button click
  */
-void MiniPlotMpl::onHomeClicked() { m_zoomer.zoomOut(); }
+void MiniPlotMpl::zoomOutOnPlot() { m_zoomer.zoomOut(); }
 
 } // namespace MantidWidgets
 } // namespace MantidQt

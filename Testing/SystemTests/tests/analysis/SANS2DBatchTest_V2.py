@@ -71,7 +71,7 @@ class SANS2DNewSettingsCarriedAcrossInBatchModeTest_V2(systemtesting.MantidSyste
             os.remove(path2)
 
     def validate(self):
-        self.tolerance_is_reller = True
+        self.tolerance_is_rel_err = True
         self.tolerance = 1.0e-2
         self.disableChecking.append('Instrument')
         return "iteration_2", "SANS2DNewSettingsCarriedAcross.nxs"
@@ -105,7 +105,7 @@ class SANS2DTUBESBatchWithZeroErrorCorrectionTest_V2(systemtesting.MantidSystemT
         Load(Filename=self._final_output, OutputWorkspace=self._final_workspace)
 
     def validate(self):
-        self.tolerance_is_reller = True
+        self.tolerance_is_rel_err = True
         self.tolerance = 1.0e-2
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Instrument')

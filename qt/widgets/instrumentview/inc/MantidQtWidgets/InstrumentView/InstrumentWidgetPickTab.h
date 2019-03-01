@@ -179,6 +179,9 @@ private:
   // Temporary caches for values from settings
   int m_tubeXUnitsCache;
   int m_plotTypeCache;
+
+  friend class InstrumentWidgetEncoder;
+  friend class InstrumentWidgetDecoder;
 };
 
 /**
@@ -251,6 +254,8 @@ public:
   QString getTubeXUnitsName() const;
   QString getTubeXUnitsUnits() const;
   QString getPlotCaption() const;
+
+  void zoomOutOnPlot();
 
 private slots:
 

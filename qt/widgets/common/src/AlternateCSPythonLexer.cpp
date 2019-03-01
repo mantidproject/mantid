@@ -5,7 +5,13 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/AlternateCSPythonLexer.h"
-#include <QApplication>
+
+/**
+ * Construct a lexer with a font to be used for all text styles
+ * @param font A font to used for the text
+ */
+AlternateCSPythonLexer::AlternateCSPythonLexer(const QFont &font)
+    : QsciLexerPython(), m_font(font) {}
 
 /**
  * Returns the foreground colour of the text for a style.
@@ -61,11 +67,11 @@ QColor AlternateCSPythonLexer::defaultColor(int style) const {
 }
 
 /**
- *  Returns the font of the text for a style.
- * @param style An enum defining the type of element encountered
+ * Returns the font of the text.
+ * @param style Unused.
  * @return A QFont for this element type
  */
 QFont AlternateCSPythonLexer::defaultFont(int style) const {
   Q_UNUSED(style);
-  return QApplication::font();
+  return m_font;
 }

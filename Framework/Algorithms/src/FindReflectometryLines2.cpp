@@ -101,7 +101,7 @@ void FindReflectometryLines2::init() {
       Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           Prop::OUTPUT_WS, "", Kernel::Direction::Output,
           API::PropertyMode::Optional),
-      "A workspaced containing the fractional workspace index of "
+      "A workspace containing the fractional workspace index of "
       "the line centre.");
   declareProperty(Prop::LINE_CENTRE, EMPTY_DBL(),
                   "The fractional workspace index of the line centre",

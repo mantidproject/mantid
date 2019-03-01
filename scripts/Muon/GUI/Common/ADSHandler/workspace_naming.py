@@ -7,23 +7,55 @@
 from __future__ import (absolute_import, division, print_function)
 
 
-def get_raw_data_workspace_name(context, run):
-    return context._base_run_name(run) + "_raw_data"
-
-
-def get_group_data_workspace_name(context, group_name, run):
+def get_raw_data_workspace_name(context, run, period='1'):
     if context.is_multi_period():
-        return context._base_run_name(run) + "; Group; " + group_name + \
-               "; Counts; Periods; " + context.period_string + "; #1"
+        return context._base_run_name(run) + "_raw_data" + "_period_" + period
     else:
-        return context._base_run_name(run) + "; Group; " + group_name + "; Counts; #1"
+        return context._base_run_name(run) + "_raw_data"
 
 
-def get_pair_data_workspace_name(context, pair_name, run):
+def get_group_data_workspace_name(context, group_name, run, rebin):
     if context.is_multi_period():
-        return context._base_run_name(run) + "; Pair Asym; " + pair_name + "; Periods; " + context.period_string + "; #1"
+        name = context._base_run_name(run) + "; Group; " + group_name + \
+               "; Counts; Periods; " + context.period_string(run) + ";"
     else:
-        return context._base_run_name(run) + "; Pair Asym; " + pair_name + "; #1"
+        name = context._base_run_name(run) + "; Group; " + group_name + "; Counts;"
+
+    if rebin:
+        name += ' Rebin;'
+
+    name += ' #1'
+
+    return name
+
+
+def get_group_asymmetry_name(context, group_name, run, rebin):
+    if context.is_multi_period():
+        name =  context._base_run_name(run) + "; Group; " + group_name + \
+               "; Asymmetry; Periods; " + context.period_string(run) + ";"
+    else:
+        name = context._base_run_name(run) + "; Group; " + group_name + "; Asymmetry;"
+
+    if rebin:
+        name += ' Rebin;'
+
+    name += ' #1'
+
+    return name
+
+
+def get_pair_data_workspace_name(context, pair_name, run, rebin):
+    if context.is_multi_period():
+        name = context._base_run_name(run) + "; Pair Asym; " + pair_name + "; Periods; " + context.period_string(run) + ";"
+    else:
+        name = context._base_run_name(run) + "; Pair Asym; " + pair_name + ";"
+
+    if rebin:
+        name += ' Rebin;'
+
+    name += ' #1'
+
+    return name
 
 
 def get_base_data_directory(context, run):
@@ -40,22 +72,22 @@ def get_raw_data_directory(context, run):
         return context._base_run_name(run) + " Raw Data/"
 
 
-def get_cached_data_directory(context):
+def get_cached_data_directory(context, run):
     if context.is_multi_period():
-        return context._base_run_name() + " Period " + context.period_string + "; Cached/"
+        return context._base_run_name() + " Period " + context.period_string(run) + "; Cached/"
     else:
         return context._base_run_name() + " Cached/"
 
 
 def get_group_data_directory(context, run):
     if context.is_multi_period():
-        return context._base_run_name(run) + " Period " + context.period_string + "; Groups/"
+        return context._base_run_name(run) + " Period " + context.period_string(run) + "; Groups/"
     else:
         return context._base_run_name(run) + " Groups/"
 
 
 def get_pair_data_directory(context, run):
     if context.is_multi_period():
-        return context._base_run_name(run) + " Period " + context.period_string + "; Pairs/"
+        return context._base_run_name(run) + " Period " + context.period_string(run) + "; Pairs/"
     else:
         return context._base_run_name(run) + " Pairs/"

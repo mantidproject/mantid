@@ -16,7 +16,7 @@ from mantid.kernel import Direction, FloatArrayProperty
 from mantidqt.dialogs.algorithmdialog import AlgorithmDialog
 from mantidqt.dialogs.genericdialog import GenericDialog
 from mantidqt.interfacemanager import InterfaceManager
-from mantidqt.utils.qt.test import GuiTest
+from mantidqt.utils.qt.testing import GuiTest
 
 
 class AlgorithmDialogMockAlgorithm(PythonAlgorithm):
