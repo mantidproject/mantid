@@ -13,7 +13,7 @@ import unittest
 
 import six
 
-from mantidqt.utils.qt.test import GuiTest
+from mantidqt.utils.qt.testing import GuiTest
 from mantidqt.widgets.codeeditor.interpreter import PythonFileInterpreter
 
 if six.PY2:

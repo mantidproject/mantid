@@ -171,6 +171,11 @@ std::pair<double, double>
 SofQCommon::qBinHintsDirect(const API::MatrixWorkspace &ws, const double minE,
                             const double maxE) const {
   using namespace Mantid::PhysicalConstants;
+  if (maxE > m_efixed) {
+    throw std::invalid_argument("Cannot compute Q binning range: maximum "
+                                "energy transfer is greater than the incident "
+                                "energy.");
+  }
   auto minTwoTheta = std::numeric_limits<double>::max();
   auto maxTwoTheta = std::numeric_limits<double>::lowest();
   const auto &spectrumInfo = ws.spectrumInfo();
@@ -179,12 +184,8 @@ SofQCommon::qBinHintsDirect(const API::MatrixWorkspace &ws, const double minE,
       continue;
     }
     const auto twoTheta = spectrumInfo.twoTheta(i);
-    if (twoTheta < minTwoTheta) {
-      minTwoTheta = twoTheta;
-    }
-    if (twoTheta > maxTwoTheta) {
-      maxTwoTheta = twoTheta;
-    }
+    minTwoTheta = std::min(minTwoTheta, twoTheta);
+    maxTwoTheta = std::max(maxTwoTheta, twoTheta);
   }
   if (minTwoTheta == std::numeric_limits<double>::max()) {
     throw std::runtime_error("Could not determine Q binning: workspace does "
@@ -224,13 +225,15 @@ SofQCommon::qBinHintsIndirect(const API::MatrixWorkspace &ws, const double minE,
     const auto &det = detectorInfo.detector(i);
     const auto Q1 = indirectQ(minE, twoTheta, &det);
     const auto Q2 = indirectQ(maxE, twoTheta, &det);
+    if (!std::isfinite(Q1) || !std::isfinite(Q2)) {
+      throw std::invalid_argument(
+          "Cannot compute Q binning range: non-finite "
+          "Q found for detector ID " +
+          std::to_string(detectorInfo.detectorIDs()[i]));
+    }
     const auto minmaxQ = std::minmax(Q1, Q2);
-    if (minmaxQ.first < minQ) {
-      minQ = minmaxQ.first;
-    }
-    if (minmaxQ.second > maxQ) {
-      maxQ = minmaxQ.second;
-    }
+    minQ = std::min(minQ, minmaxQ.first);
+    maxQ = std::max(maxQ, minmaxQ.second);
   }
   if (minQ == std::numeric_limits<double>::max()) {
     throw std::runtime_error("Could not determine Q binning: workspace does "

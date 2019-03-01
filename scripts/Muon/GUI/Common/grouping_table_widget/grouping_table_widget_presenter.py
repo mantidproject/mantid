@@ -58,7 +58,7 @@ class GroupingTablePresenter(object):
         return True
 
     def validate_detector_ids(self, text):
-        if re.match(run_utils.run_string_regex, text) and max(run_utils.run_string_to_list(text)) <= self._model._data.num_detectors:
+        if re.match(run_utils.run_string_regex, text) and max(run_utils.run_string_to_list(text, False)) <= self._model._data.num_detectors:
             return True
         self._view.warning_popup("Invalid detector list.")
         return False
@@ -89,7 +89,7 @@ class GroupingTablePresenter(object):
     def add_group_to_view(self, group):
         self._view.disable_updates()
         assert isinstance(group, MuonGroup)
-        entry = [str(group.name), run_utils.run_list_to_string(group.detectors), str(group.n_detectors)]
+        entry = [str(group.name), run_utils.run_list_to_string(group.detectors,False), str(group.n_detectors)]
         self._view.add_entry_to_table(entry)
         self._view.enable_updates()
 
@@ -137,7 +137,7 @@ class GroupingTablePresenter(object):
         table = self._view.get_table_contents()
         self._model.clear_groups()
         for entry in table:
-            detector_list = run_utils.run_string_to_list(str(entry[1]))
+            detector_list = run_utils.run_string_to_list(str(entry[1]),False)
             group = MuonGroup(group_name=str(entry[0]), detector_ids=detector_list)
             self._model.add_group(group)
 

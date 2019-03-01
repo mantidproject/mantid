@@ -7,8 +7,11 @@
 from __future__ import (absolute_import, division, print_function)
 
 
-def get_raw_data_workspace_name(context, run):
-    return context._base_run_name(run) + "_raw_data"
+def get_raw_data_workspace_name(context, run, period='1'):
+    if context.is_multi_period():
+        return context._base_run_name(run) + "_raw_data" + "_period_" + period
+    else:
+        return context._base_run_name(run) + "_raw_data"
 
 
 def get_group_data_workspace_name(context, group_name, run, rebin):

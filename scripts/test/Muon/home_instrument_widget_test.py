@@ -142,6 +142,7 @@ class HomeTabInstrumentPresenterTest(unittest.TestCase):
         self.view.rebin_variable_edit.editingFinished.emit()
 
         self.assertEqual(self.model._data.gui_variables['RebinVariable'], '1,5,21')
+        self.gui_variable_observer.update.assert_called_once_with(self.context.gui_variables_notifier, None)
 
     def test_that_steps_only_accepts_a_single_integer(self):
         self.view.rebin_steps_edit.insert('1,0.1,70')
