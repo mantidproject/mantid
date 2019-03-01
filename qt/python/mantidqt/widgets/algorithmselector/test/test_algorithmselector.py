@@ -12,14 +12,14 @@ from __future__ import absolute_import
 from collections import Counter, namedtuple
 
 import qtpy
-from mock import Mock, patch, call
+from mantid.py3compat.mock import Mock, patch, call
 import unittest
 
 from qtpy.QtCore import Qt
 from qtpy.QtTest import QTest
 
 from mantid.api import AlgorithmFactoryImpl
-from mantidqt.utils.qt.test import select_item_in_combo_box, select_item_in_tree, GuiTest
+from mantidqt.utils.qt.testing import select_item_in_combo_box, select_item_in_tree, GuiTest
 from mantidqt.widgets.algorithmselector.model import AlgorithmSelectorModel
 from mantidqt.widgets.algorithmselector.widget import AlgorithmSelectorWidget
 

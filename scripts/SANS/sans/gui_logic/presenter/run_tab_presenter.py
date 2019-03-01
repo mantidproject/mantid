@@ -25,7 +25,6 @@ from mantid.kernel import Logger, ConfigService
 from sans.command_interface.batch_csv_file_parser import BatchCsvParser
 from sans.common.constants import ALL_PERIODS
 from sans.common.enums import (BatchReductionEntry, RangeStepType, SampleShape, FitType, RowState, SANSInstrument)
-from sans.common.general_functions import get_log_plot
 from sans.gui_logic.gui_common import (get_reduction_mode_strings_for_gui, get_string_for_gui_from_instrument,
                                        add_dir_to_datasearch, remove_dir_from_datasearch)
 from sans.gui_logic.models.batch_process_runner import BatchProcessRunner
@@ -55,6 +54,8 @@ if PYQT4:
         IN_MANTIDPLOT = True
     except ImportError:
         pass
+else:
+    from mantidqt.plotting.functions import get_plot_fig
 
 row_state_to_colour_mapping = {RowState.Unprocessed: '#FFFFFF', RowState.Processed: '#d0f4d0',
                                RowState.Error: '#accbff'}
@@ -233,7 +234,8 @@ class RunTabPresenter(object):
         # Set the q range
         self._view.q_1d_step_type = [RangeStepType.to_string(RangeStepType.Lin),
                                      RangeStepType.to_string(RangeStepType.Log)]
-        self._view.q_xy_step_type = [RangeStepType.to_string(RangeStepType.Lin)]
+        self._view.q_xy_step_type = [RangeStepType.to_string(RangeStepType.Lin),
+                                     RangeStepType.to_string(RangeStepType.Log)]
 
         # Set the fit options
         fit_types = [FitType.to_string(FitType.Linear),
@@ -287,6 +289,8 @@ class RunTabPresenter(object):
             self._view.set_out_file_directory(ConfigService.Instance().getString("defaultsave.directory"))
 
             self._view.set_out_default_user_file()
+            self._view.set_out_default_output_mode()
+            self._view.set_out_default_save_can()
 
             self._view.set_hinting_line_edit_for_column(
                 self._table_model.column_name_converter.index('sample_shape'),
@@ -492,7 +496,9 @@ class RunTabPresenter(object):
                 if not graph(self.output_graph):
                     newGraph(self.output_graph)
             elif not PYQT4:
-                fig = get_log_plot(window_title=self.output_graph, plot_to_close=self.output_fig)
+                ax_properties = {'yscale': 'log',
+                                 'xscale': 'log'}
+                fig, _ = get_plot_fig(ax_properties=ax_properties, window_title=self.output_graph)
                 fig.show()
                 self.output_fig = fig
 

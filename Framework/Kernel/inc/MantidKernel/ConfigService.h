@@ -316,8 +316,6 @@ private:
   std::vector<std::string> m_UserSearchDirs;
   /// Store a list of instrument directory paths
   std::vector<std::string> m_InstrumentDirs;
-  /// A map of facilities to instruments
-  std::map<std::string, std::vector<std::string>> m_instr_prefixes;
 
   /// The list of available facilities
   std::vector<FacilityInfo *> m_facilities;

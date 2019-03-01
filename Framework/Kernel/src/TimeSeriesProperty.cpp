@@ -10,6 +10,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/TimeSplitter.h"
 #include "MantidKernel/make_unique.h"
+#include <json/value.h>
 #include <nexus/NeXusFile.hpp>
 
 #include <boost/regex.hpp>
@@ -235,7 +236,7 @@ bool TimeSeriesProperty<TYPE>::operator!=(const Property &right) const {
  * Set name of the property
  */
 template <typename TYPE>
-void TimeSeriesProperty<TYPE>::setName(const std::string name) {
+void TimeSeriesProperty<TYPE>::setName(const std::string &name) {
   m_name = name;
 }
 
@@ -1444,6 +1445,18 @@ std::string TimeSeriesProperty<TYPE>::setValue(const std::string &) {
 }
 
 /**
+ * Set the property from a Json value. Throws a NotImplementedError
+ *  @throw Exception::NotImplementedError Not yet implemented
+ * @return Nothing in this case
+ */
+template <typename TYPE>
+std::string TimeSeriesProperty<TYPE>::setValueFromJson(const Json::Value &) {
+  throw Exception::NotImplementedError("TimeSeriesProperty<TYPE>::setValue - "
+                                       "Cannot extract TimeSeries from a "
+                                       "Json::Value");
+}
+
+/**
  * @throw Exception::NotImplementedError Not yet implemented
  * @return Nothing in this case
  */
@@ -2438,6 +2451,16 @@ void TimeSeriesProperty<TYPE>::saveProperty(::NeXus::File *file) {
   saveTimeVector(file);
   file->closeGroup();
 }
+
+/**
+ * @returns the value as a Json object. The string representation is
+ * used as the underlying type
+ */
+template <typename TYPE>
+Json::Value TimeSeriesProperty<TYPE>::valueAsJson() const {
+  return Json::Value(value());
+}
+
 /** Calculate constant step histogram of the time series data.
  * @param tMin    -- minimal time to include in histogram
  * @param tMax    -- maximal time to constrain the histogram data

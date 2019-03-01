@@ -152,11 +152,10 @@ class MuonWorkspaceWrapper(object):
         if mtd.doesExist(self._workspace_name):
             self._workspace = mtd[self._workspace_name]
             mtd.remove(self._workspace_name)
-            self._is_in_ads = False
-            self._workspace_name = ""
-            self._directory_structure = ""
-        else:
-            pass
+
+        self._is_in_ads = False
+        self._workspace_name = ""
+        self._directory_structure = ""
 
     def add_directory_structure(self):
         """

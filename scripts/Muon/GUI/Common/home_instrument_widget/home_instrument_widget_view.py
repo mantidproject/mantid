@@ -375,10 +375,12 @@ class InstrumentWidgetView(QtGui.QWidget):
         self._on_dead_time_from_file_selected = slot
 
     def populate_dead_time_combo(self, names):
+        self.deadtime_file_selector.blockSignals(True)
         self.deadtime_file_selector.clear()
         self.deadtime_file_selector.addItem("None")
         for name in names:
             self.deadtime_file_selector.addItem(name)
+        self.deadtime_file_selector.blockSignals(False)
 
     def get_dead_time_file_selection(self):
         return self.deadtime_file_selector.currentText()
@@ -470,21 +472,22 @@ class InstrumentWidgetView(QtGui.QWidget):
         self.rebin_steps_label.setText("Steps : ")
 
         self.rebin_steps_edit = QtGui.QLineEdit(self)
+        int_validator = QtGui.QDoubleValidator()
+        self.rebin_steps_edit.setValidator(int_validator)
+        self.rebin_steps_edit.setToolTip('Value to scale current bin width by.')
 
         self.rebin_variable_label = QtGui.QLabel(self)
         self.rebin_variable_label.setText("Bin Boundaries : ")
         self.rebin_variable_edit = QtGui.QLineEdit(self)
-
-        self.rebin_help_button = QtGui.QPushButton(self)
-        size_policy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
-        size_policy.setHorizontalStretch(0)
-        size_policy.setVerticalStretch(0)
-        size_policy.setHeightForWidth(self.rebin_help_button.sizePolicy().hasHeightForWidth())
-        self.rebin_help_button.setSizePolicy(size_policy)
-        self.rebin_help_button.setMinimumSize(QtCore.QSize(40, 40))
-        self.rebin_help_button.setMaximumSize(QtCore.QSize(40, 40))
-        self.rebin_help_button.setObjectName("rebinHelpButton")
-        self.rebin_help_button.setText("?")
+        self.rebin_variable_edit.setToolTip('A comma separated list of first bin boundary, width, last bin boundary.\n'
+                                            'Optionally this can be followed by a comma and more widths and last boundary pairs.\n'
+                                            'Optionally this can also be a single number, which is the bin width.\n'
+                                            'Negative width values indicate logarithmic binning.\n\n'
+                                            'For example:\n'
+                                            '2,-0.035,10: from 2 rebin in Logarithmic bins of 0.035 up to 10;\n'
+                                            '0,100,10000,200,20000: from 0 rebin in steps of 100 to 10,000 then steps of 200 to 20,000')
+        variable_validator = QtGui.QRegExpValidator(QtCore.QRegExp('^(\s*-?\d+(\.\d+)?)(\s*,\s*-?\d+(\.\d+)?)*$'))
+        self.rebin_variable_edit.setValidator(variable_validator)
 
         self.horizontal_layout_5 = QtGui.QHBoxLayout()
         self.horizontal_layout_5.setObjectName("horizontalLayout3")
@@ -499,7 +502,6 @@ class InstrumentWidgetView(QtGui.QWidget):
         self.horizontal_layout_5.addWidget(self.rebin_variable_edit)
         self.horizontal_layout_5.addStretch(0)
         self.horizontal_layout_5.addSpacing(10)
-        self.horizontal_layout_5.addWidget(self.rebin_help_button)
 
         self.rebin_steps_label.hide()
         self.rebin_steps_edit.hide()
@@ -538,6 +540,9 @@ class InstrumentWidgetView(QtGui.QWidget):
 
     def on_variable_rebin_edit_changed(self, slot):
         self.rebin_variable_edit.editingFinished.connect(slot)
+
+    def on_rebin_type_changed(self, slot):
+        self.rebin_selector.currentIndexChanged.connect(slot)
 
     def get_fixed_bin_text(self):
         return self.rebin_steps_edit.text()

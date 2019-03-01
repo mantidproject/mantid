@@ -67,6 +67,7 @@ class FFTModelTest(unittest.TestCase):
         inputs["FFT"]=empty
         empty["newTable"]=True
         empty["axis"]="x"
+        empty["InputWorkspace"]="MuonAnalysis"
         empty["Instrument"]="MUSR"
         inputs["phaseTable"]=empty
         self.wrapper.loadData(inputs)
@@ -86,6 +87,7 @@ class FFTModelTest(unittest.TestCase):
         empty["newTable"]=False
         empty["axis"]="x"
         empty["Instrument"]="MUSR"
+        empty["InputWorkspace"]="MuonAnalysis"
         inputs["phaseTable"]=empty
         self.wrapper.loadData(inputs)
         self.wrapper.execute()

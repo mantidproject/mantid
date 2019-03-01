@@ -32,6 +32,10 @@ class LoadUtils(object):
         else:
             raise RuntimeError("No data loaded. \n Please load data using Muon Analysis")
 
+    @property
+    def version(self):
+        return 1
+
     def setUp(self, tmpWS):
         # get everything from the ADS
         self.options = mantid.AnalysisDataService.getObjectNames()
@@ -273,6 +277,7 @@ def combine_loaded_runs(model, run_list):
             )
 
     return_ws["OutputWorkspace"] = [MuonWorkspaceWrapper(running_total_period) for running_total_period in running_total]
+    model._loaded_data_store.remove_data(run=flatten_run_list(run_list), instrument=model._context.instrument)
     model._loaded_data_store.add_data(run=flatten_run_list(run_list), workspace=return_ws,
                                       filename="Co-added", instrument=model._context.instrument)
 

@@ -21,7 +21,7 @@ from qtpy.QtGui import QIcon
 from qtpy.QtWidgets import QDialog, QDialogButtonBox
 
 # local imports
-from mantidqt.utils.qt.test import GuiTest
+from mantidqt.utils.qt.testing import GuiTest
 from mantidqt.dialogs.spectraselectordialog import (get_spectra_selection, parse_selection_str,
                                                     SpectraSelectionDialog)
 
