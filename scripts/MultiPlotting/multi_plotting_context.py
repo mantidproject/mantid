@@ -18,7 +18,7 @@ yBounds = "yBounds"
 
 class PlottingContext(object):
 
-    def __init__(self, gridspec_engine = gridspecEngine()):
+    def __init__(self, gridspec_engine=gridspecEngine()):
         self.context = {}
         self.subplots = {}
         self.context[xBounds] = [0., 0.]
@@ -31,7 +31,7 @@ class PlottingContext(object):
 
     def addLine(self, subplotName, workspace, specNum):
         try:
-            if type(workspace) ==str:
+            if isinstance(workspace, str):
                 ws = mantid.AnalysisDataService.retrieve(workspace)
                 self.subplots[subplotName].addLine(ws, specNum)
 
@@ -53,13 +53,13 @@ class PlottingContext(object):
         try:
             self.subplots[subplotName].removeLabel(name)
         except:
-             print("Could not remove label "+ name)
+            print("Could not remove label " + name)
 
     def removeVLine(self, subplotName, name):
         try:
             self.subplots[subplotName].removeVLine(name)
         except:
-             print("Could not remove line "+ name)
+            print("Could not remove line " + name)
 
     def get_xBounds(self):
         return self.context[xBounds]
@@ -70,21 +70,22 @@ class PlottingContext(object):
     def set_xBounds(self, values):
         self.context[xBounds] = values
 
-    def set_yBounds(self, values): 
+    def set_yBounds(self, values):
         self.context[yBounds] = values
 
-    def update_gridspec(self,number):
+    def update_gridspec(self, number):
         self._gridspec = self._gridspec_engine.getGridSpec(number)
 
     @property
     def gridspec(self):
         return self._gridspec
 
-    def update_layout(self,figure):
+    def update_layout(self, figure):
         keys = list(self.subplots.keys())
         for counter, name in zip(range(len(keys)), keys):
-            self.subplots[name].update_gridspec(self._gridspec, figure,counter)
+            self.subplots[name].update_gridspec(
+                self._gridspec, figure, counter)
 
-    def delete(self,name):
+    def delete(self, name):
         self.subplots[name].delete()
         del self.subplots[name]

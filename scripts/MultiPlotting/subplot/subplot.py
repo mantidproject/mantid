@@ -58,7 +58,6 @@ class subplot(QtWidgets.QWidget):
         self._context.add_annotate(subplotName, label)
         self.canvas.draw()
 
-
     def add_vline(self, subplotName, xvalue, name):
         if subplotName not in self._context.subplots.keys():
             print("Unknown subplot selected " + subplotName)
@@ -72,7 +71,6 @@ class subplot(QtWidgets.QWidget):
             return
         self._context.removeLabel(subplotName, name)
         self.canvas.draw()
-
 
     def rm_vline(self, subplotName, name):
         if subplotName not in self._context.subplots.keys():

@@ -170,7 +170,7 @@ class subplotContext(object):
 
     def removeVLine(self, name):
         if name not in self._vLines:
-           return
+            return
         line = self._vLines[name]
         line.remove()
         del self._vLines[name]
@@ -178,14 +178,14 @@ class subplotContext(object):
     def removeLabel(self, name):
         self._remove_label_object(name)
         if name not in self._labels:
-           return
+            return
         label = self._labels[name]
         label.remove()
         del self._labels[name]
 
-    def _remove_label_object(self,name):
+    def _remove_label_object(self, name):
         if name not in self._labelObjects:
-           return
+            return
         del self._labelObjects[name]
 
     def delete(self):

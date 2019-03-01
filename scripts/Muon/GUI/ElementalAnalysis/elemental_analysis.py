@@ -7,11 +7,7 @@
 from __future__ import absolute_import, print_function
 
 from PyQt4 import QtGui
-
-import sys
 from copy import deepcopy
-
-from itertools import cycle
 
 from six import iteritems
 
@@ -19,11 +15,9 @@ from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_presenter import Pe
 from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_view import PeriodicTableView
 from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_model import PeriodicTableModel
 
-from MultiPlotting.multi_plotting_widget import MultiPlotWidget, MultiPlotWindow
-from MultiPlotting.multi_plotting_context import *
+from MultiPlotting.multi_plotting_widget import MultiPlotWindow
 from MultiPlotting.label import Label
 
-from Muon.GUI.Common import message_box
 from Muon.GUI.ElementalAnalysis.LoadWidget.load_model import LoadModel, CoLoadModel
 from Muon.GUI.Common.load_widget.load_view import LoadView
 from Muon.GUI.Common.load_widget.load_presenter import LoadPresenter
@@ -38,12 +32,13 @@ from Muon.GUI.ElementalAnalysis.PeriodicTable.PeakSelector.peak_selector_view im
 
 import mantid.simpleapi as mantid
 
-offset = 0.9       
+offset = 0.9
 
-def gen_name(element,name):
+
+def gen_name(element, name):
     if element in name:
-       return name
-    return element+ " " + name
+        return name
+    return element + " " + name
 
 
 class ElementalAnalysisGui(QtGui.QMainWindow):
@@ -112,11 +107,11 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
 
     def closeEvent(self, event):
         if self.plot_window is not None:
-           self.plot_window.closeEvent(event)
+            self.plot_window.closeEvent(event)
         super(ElementalAnalysisGui, self).closeEvent(event)
 
    # general functions
-    def _gen_label(self,name,x_value_in,element = None): 
+    def _gen_label(self, name, x_value_in, element=None):
         if element is None:
             return
         # check x value is a float
@@ -128,25 +123,26 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
         if name not in self.element_lines[element]:
             self.element_lines[element].append(name)
         # make sure the names are strings and x values are numbers
-        return Label(str(name),float(x_value),False,offset,True,rotation=-90,protected=True)
+        return Label(str(name), float(x_value), False, offset, True, rotation=-90, protected=True)
 
-    def _plot_line(self,name,x_value_in,element = None):
-        label = self._gen_label(name,x_value_in,element)
+    def _plot_line(self, name, x_value_in, element=None):
+        label = self._gen_label(name, x_value_in, element)
         if self.plot_window is None:
-           return
+            return
         for subplot in self.plotting.get_subplots():
-            self.plotting.add_vline_and_annotate(subplot, float(x_value_in), label)
+            self.plotting.add_vline_and_annotate(
+                subplot, float(x_value_in), label)
 
-    def _plot_line_once(self,subplot, x_value,label):
+    def _plot_line_once(self, subplot, x_value, label):
         self.plotting.add_vline_and_annotate(subplot, float(x_value), label)
 
-    def _rm_line(self,name):
+    def _rm_line(self, name):
         if self.plot_window is None:
-           return
+            return
         for subplot in self.plotting.get_subplots():
-            self.plotting.rm_vline_and_annotate(subplot,name)
+            self.plotting.rm_vline_and_annotate(subplot, name)
 
-    #setup element pop up
+    # setup element pop up
     def _generate_element_widgets(self):
         self.element_widgets = {}
         for element in self.ptable.peak_data:
@@ -172,64 +168,64 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
         else:
             self._remove_element_lines(item.symbol)
 
-    def _add_element_lines(self, element, data =None):
+    def _add_element_lines(self, element, data=None):
         if data is None:
             data = self.element_widgets[element].get_checked()
         if element not in self.element_lines:
             self.element_lines[element] = []
         for name, x_value in iteritems(data):
-                full_name = gen_name(element,name)
-                self._plot_line(full_name,x_value, element)
+            full_name = gen_name(element, name)
+            self._plot_line(full_name, x_value, element)
 
-    def _remove_element_lines(self,element):
+    def _remove_element_lines(self, element):
         if element not in self.element_lines:
-           return
+            return
         names = deepcopy(self.element_lines[element])
         for name in names:
             try:
                 self.element_lines[element].remove(name)
                 self._rm_line(name)
             except:
-                 continue
+                continue
 
     # loading
     def load_run(self, detector, run):
         name = "{}; Detector {}".format(run, detector[-1])
         if self.plot_window is None:
-           self.plot_window = MultiPlotWindow(str(run))
-           self.plotting = self.plot_window.multi_plot
-           self.add_detector_to_plot(detector,name)
-           self.plotting.set_all_values()
-           self.plotting.removeSubplotConnection(self.subplotRemoved)
-           self.plot_window.show() 
-           # untick detectors if plot window is closed
-           self.plot_window.windowClosedSignal.connect(self._unset_detectors)
-        else:
-            self.add_detector_to_plot(detector ,name)
+            self.plot_window = MultiPlotWindow(str(run))
+            self.plotting = self.plot_window.multi_plot
+            self.add_detector_to_plot(detector, name)
+            self.plotting.set_all_values()
+            self.plotting.removeSubplotConnection(self.subplotRemoved)
             self.plot_window.show()
-            self.plot_window.raise_()    
+            # untick detectors if plot window is closed
+            self.plot_window.windowClosedSignal.connect(self._unset_detectors)
+        else:
+            self.add_detector_to_plot(detector, name)
+            self.plot_window.show()
+            self.plot_window.raise_()
 
     def loading_finished(self):
         last_run = self.load_widget.last_loaded_run()
         if last_run is None:
             return
-        to_plot = deepcopy([det.isChecked() for det in self.detectors.detectors])
-        if self.plot_window is None and any(to_plot) == False:
+        to_plot = deepcopy([det.isChecked()
+                           for det in self.detectors.detectors])
+        if self.plot_window is None and any(to_plot) is False:
             return
         # generate plots - if new run clear old plot(s) and replace it
         if self.plot_window is None:
             for name in self.detectors.getNames():
-                self.detectors.setStateQuietly(name,False)   
+                self.detectors.setStateQuietly(name, False)
         else:
             for plot in self.plotting.get_subplots():
                 self.plotting.remove_subplot(plot)
         for j in range(len(to_plot)):
             if to_plot[j]:
                 self.detectors.detectors[j].setChecked(True)
-     
-    # detectors 
-    def add_detector_to_plot(self, detector,name):
-        subplot = self.plotting.add_subplot(detector)
+
+    # detectors
+    def add_detector_to_plot(self, detector, name):
         for ws in mantid.mtd[name]:
             self.plotting.plot(detector, ws.getName())
         # add current selection of lines
@@ -237,22 +233,22 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
             self.add_peak_data(element.symbol, detector)
 
     def _unset_detectors(self):
-         self.plot_window.windowClosedSignal.disconnect()
-         self.plot_window = None
-         for name in self.detectors.getNames():
-             self.detectors.setStateQuietly(name,False)       
+        self.plot_window.windowClosedSignal.disconnect()
+        self.plot_window = None
+        for name in self.detectors.getNames():
+            self.detectors.setStateQuietly(name, False)
 
     # plotting
-    def add_peak_data(self, element, subplot,data=None):
+    def add_peak_data(self, element, subplot, data=None):
         # if already selected add to just new plot
         if data is None:
             data = self.element_widgets[element].get_checked()
         for name, x_value in iteritems(data):
-                full_name = gen_name(element,name)
-                label = self._gen_label(full_name,x_value,element)
-                self._plot_line_once(subplot,float(x_value),label)
+            full_name = gen_name(element, name)
+            label = self._gen_label(full_name, x_value, element)
+            self._plot_line_once(subplot, float(x_value), label)
 
-    def _update_peak_data(self,element,data = None):
+    def _update_peak_data(self, element, data=None):
         if self.ptable.is_selected(element):
             # remove all of the lines for the element
             self._remove_element_lines(element)
@@ -268,7 +264,7 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
         if last_run is not None:
             self.load_run(detector, last_run)
             if self.peaks.electron.isChecked():
-               self.add_peak_data("e-", detector,data=self.electron_peaks)
+                self.add_peak_data("e-", detector, data=self.electron_peaks)
 
     def del_plot(self, checkbox):
         if self.load_widget.last_loaded_run() is not None:
@@ -285,7 +281,6 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
             self.plot_window.close()
             self.plot_window = None
 
-
     # sets data file for periodic table
     def select_data_file(self):
         filename = QtGui.QFileDialog.getOpenFileName()
@@ -301,8 +296,10 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
     # general checked data
     def checked_data(self, element, selection, state):
         for checkbox in selection:
-            checkbox.setChecked(state)##
-        self._update_peak_data(element,self.element_widgets[element].get_checked() )
+            checkbox.setChecked(state)
+        self._update_peak_data(
+            element,
+            self.element_widgets[element].get_checked())
 
     # electron Peaks
     def _get_electron_peaks(self):
@@ -310,11 +307,11 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
         electron_dict = {}
         electron_peaks = self.ptable.peak_data["Electrons"].copy()
         for peak, intensity in iteritems(electron_peaks):
-            electron_dict[str(peak) ] = peak
+            electron_dict[str(peak)] = peak
         return electron_dict
 
     def electrons_checked(self):
-        self._add_element_lines("e-",self.electron_peaks)
+        self._add_element_lines("e-", self.electron_peaks)
 
     def electrons_unchecked(self):
         self._remove_element_lines("e-")
@@ -322,28 +319,26 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
     # gamma Peaks
     def gammas_checked(self):
         for element, selector in iteritems(self.element_widgets):
-            self.checked_data(element,selector.gamma_checkboxes,True)
+            self.checked_data(element, selector.gamma_checkboxes, True)
 
     def gammas_unchecked(self):
         for element, selector in iteritems(self.element_widgets):
-            self.checked_data(element,selector.gamma_checkboxes,False)
+            self.checked_data(element, selector.gamma_checkboxes, False)
 
-    #major peaks
+    # major peaks
     def major_peaks_checked(self):
         for element, selector in iteritems(self.element_widgets):
-            self.checked_data(element,selector.primary_checkboxes,True)
+            self.checked_data(element, selector.primary_checkboxes, True)
 
     def major_peaks_unchecked(self):
         for element, selector in iteritems(self.element_widgets):
-            self.checked_data(element,selector.primary_checkboxes,False)
+            self.checked_data(element, selector.primary_checkboxes, False)
 
-    #minor peaks
+    # minor peaks
     def minor_peaks_checked(self):
         for element, selector in iteritems(self.element_widgets):
-            self.checked_data(element,selector.secondary_checkboxes,True)
+            self.checked_data(element, selector.secondary_checkboxes, True)
 
     def minor_peaks_unchecked(self):
         for element, selector in iteritems(self.element_widgets):
-            self.checked_data(element,selector.secondary_checkboxes,False)
-
-
+            self.checked_data(element, selector.secondary_checkboxes, False)
