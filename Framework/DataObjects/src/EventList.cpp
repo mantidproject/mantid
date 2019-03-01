@@ -1506,9 +1506,12 @@ EventList::compressEventsHelper(const std::vector<T> &events,
       totalTof += it->m_tof * norm;
     } else {
       // We exceeded the tolerance
-      if (num > 0) {
-        // Create a new event with the average TOF and summed weights and
-        // squared errors.
+      // Create a new event with the average TOF and summed weights and
+      // squared errors.
+      if (num == 1) {
+        // last time-of-flight is the only one contributing
+        out.emplace_back(lastTof, weight, errorSquared);
+      } else if (num > 1) {
         out.emplace_back(totalTof / normalization, weight, errorSquared);
       }
       // Start a new combined object
@@ -1522,10 +1525,12 @@ EventList::compressEventsHelper(const std::vector<T> &events,
     }
   }
 
-  // Put the last event in there too.
-  if (num > 0) {
-    // Create a new event with the average TOF and summed weights and squared
-    // errors.
+  // Put the last event in there too with the average TOF and summed weights and
+  // squared errors.
+  if (num == 1) {
+    // last time-of-flight is the only one contributing
+    out.emplace_back(lastTof, weight, errorSquared);
+  } else if (num > 1) {
     out.emplace_back(totalTof / normalization, weight, errorSquared);
   }
 
@@ -1692,11 +1697,15 @@ inline void EventList::compressFatEventsHelper(
       // We exceeded the tolerance
       if (!pulsetimes.empty()) {
         // Create a new event with the average TOF and summed weights and
-        // squared errors.
-        out.emplace_back(totalTof / tofNormalization,
-                         Kernel::DateAndTimeHelpers::averageSorted(
-                             pulsetimes, pulsetimeWeights),
-                         weight, errorSquared);
+        // squared errors. 1 event used doesn't need to average
+        if (pulsetimes.size() == 1) {
+          out.emplace_back(lastTof, pulsetimes.front(), weight, errorSquared);
+        } else {
+          out.emplace_back(totalTof / tofNormalization,
+                           Kernel::DateAndTimeHelpers::averageSorted(
+                               pulsetimes, pulsetimeWeights),
+                           weight, errorSquared);
+        }
       }
       // Start a new combined object
       double norm = calcNorm(it->errorSquared());
@@ -1715,12 +1724,16 @@ inline void EventList::compressFatEventsHelper(
 
   // Put the last event in there too.
   if (!pulsetimes.empty()) {
-    // Create a new event with the average TOF and summed weights and squared
-    // errors.
-    out.emplace_back(
-        totalTof / tofNormalization,
-        Kernel::DateAndTimeHelpers::averageSorted(pulsetimes, pulsetimeWeights),
-        weight, errorSquared);
+    // Create a new event with the average TOF and summed weights and
+    // squared errors. 1 event used doesn't need to average
+    if (pulsetimes.size() == 1) {
+      out.emplace_back(lastTof, pulsetimes.front(), weight, errorSquared);
+    } else {
+      out.emplace_back(totalTof / tofNormalization,
+                       Kernel::DateAndTimeHelpers::averageSorted(
+                           pulsetimes, pulsetimeWeights),
+                       weight, errorSquared);
+    }
   }
 
   // If you have over-allocated by more than 5%, reduce the size.
