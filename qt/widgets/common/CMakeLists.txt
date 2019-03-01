@@ -734,67 +734,71 @@ if ( ENABLE_WORKBENCH )
   find_package ( QScintillaQt5 REQUIRED )
 endif()
 
-mtd_add_qt_library (TARGET_NAME MantidQtWidgetsCommon
-  QT_VERSION 4
-  SRC ${SRC_FILES}
-  MOC ${MOC_FILES}
-  NOMOC ${INC_FILES}
-  UI ${UI_FILES}
-  DEFS
-    IN_MANTIDQT_COMMON
-    QSCINTILLA_DLL
-  QT4_DEFS
-    USE_QTWEBKIT
-  INCLUDE_DIRS
-    inc
-  LINK_LIBS
-    ${TARGET_LIBRARIES}
-  QT4_LINK_LIBS
-    Qt4::QtHelp
-    Qt4::QtNetwork
-    Qt4::QtWebKit
-    Qt4::Qscintilla
-  INSTALL_DIR
-    ${LIB_DIR}
-  OSX_INSTALL_RPATH
-    @loader_path/../MacOS
-    @loader_path/../Libraries
-  LINUX_INSTALL_RPATH
-    "\$ORIGIN/../${LIB_DIR}"
-)
+if ( ENABLE_MANTIDPLOT )
+  mtd_add_qt_library (TARGET_NAME MantidQtWidgetsCommon
+    QT_VERSION 4
+    SRC ${SRC_FILES}
+    MOC ${MOC_FILES}
+    NOMOC ${INC_FILES}
+    UI ${UI_FILES}
+    DEFS
+      IN_MANTIDQT_COMMON
+      QSCINTILLA_DLL
+    QT4_DEFS
+      USE_QTWEBKIT
+    INCLUDE_DIRS
+      inc
+    LINK_LIBS
+      ${TARGET_LIBRARIES}
+    QT4_LINK_LIBS
+      Qt4::QtHelp
+      Qt4::QtNetwork
+      Qt4::QtWebKit
+      Qt4::Qscintilla
+    INSTALL_DIR
+      ${LIB_DIR}
+    OSX_INSTALL_RPATH
+      @loader_path/../MacOS
+      @loader_path/../Libraries
+    LINUX_INSTALL_RPATH
+      "\$ORIGIN/../${LIB_DIR}"
+  )
+endif()
 
-mtd_add_qt_library (TARGET_NAME MantidQtWidgetsCommon
-  QT_VERSION 5
-  SRC ${QT5_SRC_FILES}
-  MOC ${QT5_MOC_FILES}
-  NOMOC ${QT5_INC_FILES}
-  UI ${QT5_UI_FILES}
-  DEFS
-    IN_MANTIDQT_COMMON
-    QSCINTILLA_DLL
-  QT5_DEFS
-    ${_webengine_def}
-  INCLUDE_DIRS
-    inc
-    ${PYTHON_INCLUDE_PATH}
-  LINK_LIBS
-    ${TARGET_LIBRARIES}
-  QT5_LINK_LIBS
-    Qt5::Concurrent
-    Qt5::Help
-    Qt5::Network
-    Qt5::PrintSupport
-    ${_webwidgets_tgt}
-    Qt5::Qscintilla
-  INSTALL_DIR
-    ${LIB_DIR}
-    ${WORKBENCH_LIB_DIR}
-  OSX_INSTALL_RPATH
-    @loader_path/../MacOS
-    @loader_path/../Libraries
-  LINUX_INSTALL_RPATH
-    "\$ORIGIN/../${WORKBENCH_LIB_DIR}"
-)
+if ( ENABLE_WORKBENCH )
+  mtd_add_qt_library (TARGET_NAME MantidQtWidgetsCommon
+    QT_VERSION 5
+    SRC ${QT5_SRC_FILES}
+    MOC ${QT5_MOC_FILES}
+    NOMOC ${QT5_INC_FILES}
+    UI ${QT5_UI_FILES}
+    DEFS
+      IN_MANTIDQT_COMMON
+      QSCINTILLA_DLL
+    QT5_DEFS
+      ${_webengine_def}
+    INCLUDE_DIRS
+      inc
+      ${PYTHON_INCLUDE_PATH}
+    LINK_LIBS
+      ${TARGET_LIBRARIES}
+    QT5_LINK_LIBS
+      Qt5::Concurrent
+      Qt5::Help
+      Qt5::Network
+      Qt5::PrintSupport
+      ${_webwidgets_tgt}
+      Qt5::Qscintilla
+    INSTALL_DIR
+      ${LIB_DIR}
+      ${WORKBENCH_LIB_DIR}
+    OSX_INSTALL_RPATH
+      @loader_path/../MacOS
+      @loader_path/../Libraries
+    LINUX_INSTALL_RPATH
+      "\$ORIGIN/../${WORKBENCH_LIB_DIR}"
+  )
+endif()
 
 ###########################################################################
 # Testing
@@ -839,29 +843,31 @@ set( TEST_FILES
   test/WorkspacePresenter/WorkspacePresenterTest.h
 )
 
-mtd_add_qt_tests (TARGET_NAME MantidQtWidgetsCommonTest
-  QT_VERSION 4
-  SRC ${TEST_FILES}
-  INCLUDE_DIRS
-    ../../../Framework/TestHelpers/inc
-    ../../../Framework/DataObjects/inc
-    ../../../Framework/Crystal/inc
-  TEST_HELPER_SRCS
-    ../../../Framework/TestHelpers/src/TearDownWorld.cpp
-    ../../../Framework/TestHelpers/src/ComponentCreationHelper.cpp
-    ../../../Framework/TestHelpers/src/DataProcessorTestHelper.cpp
-    ../../../Framework/TestHelpers/src/InstrumentCreationHelper.cpp
-    ../../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
-  LINK_LIBS
-    ${TARGET_LIBRARIES}
-    DataObjects
-    ${GMOCK_LIBRARIES}
-    ${GTEST_LIBRARIES}
-  MTD_QT_LINK_LIBS
-    MantidQtWidgetsCommon
-  PARENT_DEPENDENCIES
-    GUITests
-)
+if ( ENABLE_MANTIDPLOT )
+  mtd_add_qt_tests (TARGET_NAME MantidQtWidgetsCommonTest
+    QT_VERSION 4
+    SRC ${TEST_FILES}
+    INCLUDE_DIRS
+      ../../../Framework/TestHelpers/inc
+      ../../../Framework/DataObjects/inc
+      ../../../Framework/Crystal/inc
+    TEST_HELPER_SRCS
+      ../../../Framework/TestHelpers/src/TearDownWorld.cpp
+      ../../../Framework/TestHelpers/src/ComponentCreationHelper.cpp
+      ../../../Framework/TestHelpers/src/DataProcessorTestHelper.cpp
+      ../../../Framework/TestHelpers/src/InstrumentCreationHelper.cpp
+      ../../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
+    LINK_LIBS
+      ${TARGET_LIBRARIES}
+      DataObjects
+      ${GMOCK_LIBRARIES}
+      ${GTEST_LIBRARIES}
+    MTD_QT_LINK_LIBS
+      MantidQtWidgetsCommon
+    PARENT_DEPENDENCIES
+      GUITests
+  )
+endif()
 
 set( QT5_TEST_FILES
   test/BatchAlgorithmRunnerTest.h
@@ -873,28 +879,30 @@ set( QT5_TEST_FILES
   test/WorkspacePresenter/WorkspacePresenterTest.h
 )
 
-mtd_add_qt_tests (TARGET_NAME MantidQtWidgetsCommonTest
-  QT_VERSION 5
-  SRC ${QT5_TEST_FILES}
-  INCLUDE_DIRS
-    ../../../Framework/TestHelpers/inc
-    ../../../Framework/DataObjects/inc
-    ../../../Framework/Crystal/inc
-  TEST_HELPER_SRCS
-    ../../../Framework/TestHelpers/src/TearDownWorld.cpp
-    ../../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
-    ../../../Framework/TestHelpers/src/ComponentCreationHelper.cpp
-    ../../../Framework/TestHelpers/src/InstrumentCreationHelper.cpp
-  LINK_LIBS
-    ${TARGET_LIBRARIES}
-    DataObjects
-    ${GMOCK_LIBRARIES}
-    ${GTEST_LIBRARIES}
-  MTD_QT_LINK_LIBS
-    MantidQtWidgetsCommon
-  PARENT_DEPENDENCIES
-    GUITests
-)
+if ( ENABLE_WORKBENCH )
+  mtd_add_qt_tests (TARGET_NAME MantidQtWidgetsCommonTest
+    QT_VERSION 5
+    SRC ${QT5_TEST_FILES}
+    INCLUDE_DIRS
+      ../../../Framework/TestHelpers/inc
+      ../../../Framework/DataObjects/inc
+      ../../../Framework/Crystal/inc
+    TEST_HELPER_SRCS
+      ../../../Framework/TestHelpers/src/TearDownWorld.cpp
+      ../../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
+      ../../../Framework/TestHelpers/src/ComponentCreationHelper.cpp
+      ../../../Framework/TestHelpers/src/InstrumentCreationHelper.cpp
+    LINK_LIBS
+      ${TARGET_LIBRARIES}
+      DataObjects
+      ${GMOCK_LIBRARIES}
+      ${GTEST_LIBRARIES}
+    MTD_QT_LINK_LIBS
+      MantidQtWidgetsCommon
+    PARENT_DEPENDENCIES
+      GUITests
+  )
+endif()
 
 
 ###########################################################################
@@ -904,10 +912,19 @@ mtd_add_qt_tests (TARGET_NAME MantidQtWidgetsCommonTest
 # This file is NOT packaged. See installers/WinInstaller for the package
 # version.
 ###########################################################################
-if ( WIN32 )
+if ( WIN32 AND ENABLE_MANTIDPLOT)
   set ( QT_CONF qt.conf )
   configure_file ( qt.conf.template ${CMAKE_CURRENT_BINARY_DIR}/${QT_CONF} @ONLY )
   add_custom_command ( TARGET MantidQtWidgetsCommonQt4 POST_BUILD
+                       COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different
+                               ${CMAKE_CURRENT_BINARY_DIR}/${QT_CONF}
+                               ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/${QT_CONF} )
+endif()
+
+if ( WIN32 AND ENABLE_WORKBENCH)
+  set ( QT_CONF qt.conf )
+  configure_file ( qt.conf.template ${CMAKE_CURRENT_BINARY_DIR}/${QT_CONF} @ONLY )
+  add_custom_command ( TARGET MantidQtWidgetsCommonQt5 POST_BUILD
                        COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different
                                ${CMAKE_CURRENT_BINARY_DIR}/${QT_CONF}
                                ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/${QT_CONF} )
