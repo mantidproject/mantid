@@ -238,6 +238,10 @@ public:
     TS_ASSERT_EQUALS(b[1], 1.0 / sqrt(3.0));
     TS_ASSERT_EQUALS(b[2], 1.0 / sqrt(3.0));
   }
+  void testNormalizeZeroLengthVectorThrows() {
+    V3D zeroLength;
+    TS_ASSERT_THROWS_ANYTHING(zeroLength.normalize());
+  }
   void testScalarProduct() {
     a(1.0, 2.0, 1.0);
     b(1.0, -2.0, -1.0);
@@ -397,6 +401,20 @@ public:
     TS_ASSERT(a == V3D(-1.0, -2.0, -4.0));
   }
 
+  void test_nullVector() {
+    constexpr V3D null;
+    TS_ASSERT(null.nullVector());
+    constexpr V3D nonNull(0.1, 0., 0.);
+    TS_ASSERT(!nonNull.nullVector())
+  }
+  void test_unitVector() {
+    constexpr V3D null;
+    TS_ASSERT(!null.unitVector())
+    constexpr V3D unit(1.0, 0., 0.);
+    TS_ASSERT(unit.unitVector())
+    constexpr V3D longVector(0.5, -0.5, 0.5);
+    TS_ASSERT(!longVector.unitVector())
+  }
   void test_toString() {
     V3D a(1, 2, 3);
     TS_ASSERT_EQUALS(a.toString(), "1 2 3");
@@ -516,14 +534,6 @@ public:
     TS_ASSERT_DELTA(-9, a8[0], 1.e-2);
     TS_ASSERT_DELTA(1, a8[1], 1.e-2);
     TS_ASSERT_DELTA(-18, a8[2], 1.e-2);
-
-    /*    V3D a9(-3,5,-6);
-     a9.normalize();
-     TS_ASSERT_THROWS_NOTHING(a9.toMillerIndexes(0.1));
-
-     TS_ASSERT_DELTA(-3,a9[0],1.e-3);
-     TS_ASSERT_DELTA( 5,a9[1],1.e-3);
-     TS_ASSERT_DELTA(-6,a9[2],1.e-3);*/
   }
 
   void test_directionAngles_cubic_default() {

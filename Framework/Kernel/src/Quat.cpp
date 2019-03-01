@@ -213,27 +213,31 @@ void Quat::operator()(const V3D &rX, const V3D &rY, const V3D &rZ) {
   (void)rZ; // Avoid compiler warning
 
   // These are the original axes
-  V3D oX = V3D(1., 0., 0.);
-  V3D oY = V3D(0., 1., 0.);
+  constexpr V3D oX = V3D(1., 0., 0.);
+  constexpr V3D oY = V3D(0., 1., 0.);
 
   // Axis that rotates X
-  V3D ax1 = oX.cross_prod(rX);
-  // Rotation angle from oX to rX
-  double angle1 = oX.angle(rX);
-
+  const V3D ax1 = oX.cross_prod(rX);
   // Create the first quaternion
-  Quat Q1(angle1 * 180.0 / M_PI, ax1);
-
+  Quat Q1;
+  if (!ax1.nullVector()) {
+    // Rotation angle from oX to rX
+    const double angle1 = oX.angle(rX);
+    Q1.setAngleAxis(angle1 * 180.0 / M_PI, ax1);
+  }
   // Now we rotate the original Y using Q1
   V3D roY = oY;
   Q1.rotate(roY);
   // Find the axis that rotates oYr onto rY
-  V3D ax2 = roY.cross_prod(rY);
-  double angle2 = roY.angle(rY);
-  Quat Q2(angle2 * 180.0 / M_PI, ax2);
+  const V3D ax2 = roY.cross_prod(rY);
+  Quat Q2;
+  if (!ax2.nullVector()) {
+    const double angle2 = roY.angle(rY);
+    Q2.setAngleAxis(angle2 * 180.0 / M_PI, ax2);
+  }
 
   // Final = those two rotations in succession; Q1 is done first.
-  Quat final = Q2 * Q1;
+  const Quat final = Q2 * Q1;
 
   // Set it
   this->operator()(final);
@@ -581,7 +585,7 @@ void Quat::setQuat(const Kernel::DblMatrix &rMat) {
  * @param Index :: the index of the value required 0=w, 1=a, 2=b, 3=c
  * @returns a double of the value requested
  */
-const double &Quat::operator[](const int Index) const {
+double Quat::operator[](const int Index) const {
   switch (Index) {
   case 0:
     return w;
