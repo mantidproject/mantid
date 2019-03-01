@@ -7,33 +7,33 @@
 #ifndef INDIRECTFITPROPERTYBROWSER_H_
 #define INDIRECTFITPROPERTYBROWSER_H_
 
-#include "MantidQtWidgets/Common/DllOption.h"
+#include "DllConfig.h"
 #include "MantidAPI/IFunction_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 
 #include <QDockWidget>
-
 #include <QSet>
 
 #include <boost/optional.hpp>
-
 #include <unordered_map>
 
 namespace MantidQt {
 namespace MantidWidgets {
+  class FunctionBrowser;
+  class FitOptionsBrowser;
+}
+namespace CustomInterfaces {
+namespace IDA {
 
-class FunctionBrowser;
-class FitOptionsBrowser;
-
-class EXPORT_OPT_MANTIDQT_COMMON IndirectFitPropertyBrowser
-    : public QDockWidget {
+class MANTIDQT_INDIRECT_DLL IndirectFitPropertyBrowser
+  : public QDockWidget {
   Q_OBJECT
 
 public:
   /// Constructor.
   IndirectFitPropertyBrowser(QWidget *parent = nullptr,
-                             QObject *mantidui = nullptr);
+    QObject *mantidui = nullptr);
   /// Initialise the layout.
   void init();
 
@@ -71,7 +71,7 @@ public:
   int workspaceIndex() const;
   void updateFunctionBrowserData(size_t nData);
   void editLocalParameter(const QString &parName, const QStringList &wsNames,
-                          const std::vector<size_t> &wsIndices);
+    const std::vector<size_t> &wsIndices);
   void updatePlotGuess(Mantid::API::MatrixWorkspace_const_sptr sampleWorkspace);
 
 public slots:
@@ -94,12 +94,13 @@ signals:
 private:
   void initFunctionBrowser();
   void iniFitOptionsBrowser();
-  
-  FunctionBrowser *m_functionBrowser;
-  FitOptionsBrowser *m_fitOptionsBrowser;
+
+  MantidWidgets::FunctionBrowser *m_functionBrowser;
+  MantidWidgets::FitOptionsBrowser *m_fitOptionsBrowser;
 };
 
-} // namespace MantidWidgets
+} // namespace IDA
+} // namespace CustomInterfaces
 } // namespace MantidQt
 
 #endif /*INDIRECTFITPROPERTYBROWSER_H_*/

@@ -4,7 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidQtWidgets/Common/IndirectFitPropertyBrowser.h"
+#include "IndirectFitPropertyBrowser.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -35,9 +35,11 @@
 #include <iostream>
 
 using namespace Mantid::API;
+using namespace MantidQt::MantidWidgets;
 
 namespace MantidQt {
-namespace MantidWidgets {
+namespace CustomInterfaces {
+namespace IDA {
 
 /**
  * Constructor
@@ -82,6 +84,7 @@ void IndirectFitPropertyBrowser::init() {
   auto layout = new QVBoxLayout(w);
   layout->setContentsMargins(0, 0, 0, 0);
   auto splitter = new QSplitter(Qt::Vertical);
+  layout->addWidget(new QPushButton("Hello"));
   layout->addWidget(splitter);
 
   splitter->addWidget(m_functionBrowser);
@@ -270,5 +273,6 @@ void IndirectFitPropertyBrowser::updateFitType() {
   }
 }
 
-} // namespace MantidWidgets
+} // IDA
+} // namespace CustomInterfaces
 } // namespace MantidQt
