@@ -266,8 +266,12 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
         # check for a cachefilename
         cachefile = self.__getCacheName(self.__wkspNameFromFile(filename))
         if (not createUnfocused) and self.useCaching and os.path.exists(cachefile):
-            if self.__loadCacheFile(cachefile, wkspname):
-                return wkspname, ''
+            try:
+                if self.__loadCacheFile(cachefile, wkspname):
+                    return wkspname, ''
+            except RuntimeError as e:
+                # log as a warning and carry on as though the cache file didn't exist
+                self.log().warning('Failed to load cache file "{}": {}'.format(cachefile, e))
 
         unfocusname_chunk = ''
         canSkipLoadingLogs = False
@@ -542,10 +546,14 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
                 fileSubset = filenames[start:end+1]
                 summed_cache_file = self.__getGroupCacheName(fileSubset)
                 wkspname = self.__getGroupWkspName(fileSubset)
-                if self.__loadCacheFile(summed_cache_file, wkspname):
-                    self.__accumulate(wkspname, finalname, '', '', firstTime)
-                    found = True
-                    break
+                try:
+                    if self.__loadCacheFile(summed_cache_file, wkspname):
+                        self.__accumulate(wkspname, finalname, '', '', firstTime)
+                        found = True
+                        break
+                except RuntimeError as e:
+                    # log as a warning and carry on as though the cache file didn't exist
+                    self.log().warning('Failed to load cache file "{}": {}'.format(summed_cache_file, e))
             if found:
                 break
             continue
