@@ -1141,12 +1141,12 @@ def get_all_names_to_save(reduction_packages, save_can):
             # This is a temporary fix to allow file saving with
             # event sliced data.
             trans_name = '' if not transmission else transmission.name()
-        except Exception:
+        except RuntimeError:
             trans_name = ''
             Logger("SANS").notice("Transmission run not found. Not saving to file.")
         try:
             transCan_name = '' if not transmission_can else transmission_can.name()
-        except Exception:
+        except RuntimeError:
             transCan_name = ''
             Logger("SANS").notice("Can transmission run not found. Not saving to file.")
 
