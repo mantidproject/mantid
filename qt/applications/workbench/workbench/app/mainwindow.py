@@ -20,7 +20,12 @@ import sys
 
 from mantid.api import FrameworkManagerImpl
 from mantid.kernel import (ConfigService, UsageService, logger, version_str as mantid_version_str)
+from workbench.app.exception_handler import exception_logger
 from workbench.widgets.settings.presenter import SettingsPresenter
+
+# -----------------------------------------------------------------------------
+# Constants
+# -----------------------------------------------------------------------------
 
 SYSCHECK_INTERVAL = 50
 ORIGINAL_SYS_EXIT = sys.exit
@@ -562,6 +567,9 @@ def start_workbench(app, command_line_options):
     """Given an application instance create the MainWindow,
     show it and start the main event loop
     """
+
+    sys.excepthook = exception_logger
+
     # The ordering here is very delicate. Test thoroughly when
     # changing anything!
     main_window = MainWindow()
