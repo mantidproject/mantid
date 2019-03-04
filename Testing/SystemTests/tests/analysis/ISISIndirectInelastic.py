@@ -81,7 +81,6 @@ from mantid.simpleapi import *
 
 # For debugging only.
 from mantid.api import FileFinder
-import distro
 from six import with_metaclass
 
 
@@ -894,7 +893,6 @@ class IRISIqtAndIqtFit(ISISIndirectInelasticIqtAndIqtFit):
         ref_files = ['II.IRISFury.nxs']
         # gsl v2 gives a slightly different result than v1
         # we could do with a better check than this
-
         if currentOSHasGSLv2():
             ref_files += ['II.IRISFuryFitSeq_gslv2.nxs']
         else:
