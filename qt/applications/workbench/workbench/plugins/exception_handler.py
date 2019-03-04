@@ -16,8 +16,9 @@ from mantid.kernel import logger
 
 def exception_logger(main_window, exc_type, exc_value, exc_traceback):
     """
-    Captures ALL EXCEPTIONS IN PYTHON. Prevents the Workbench to crash silently, instead it logs the
-    error on ERROR level.
+    Captures ALL EXCEPTIONS.
+    Prevents the Workbench to crash silently, instead it logs the error on ERROR level.
+
     :param main_window: A reference to the main window, that will be used to close it in case of the user
                         choosing to terminate the execution.
     :param exc_type: The type of the exception
