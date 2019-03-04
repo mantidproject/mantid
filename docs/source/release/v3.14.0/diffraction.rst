@@ -30,7 +30,7 @@ Improvements
   (see :ref:`ConvertToMD <algm-ConvertToMD>` Notes).
 - New TOPAZ instrument geometry for 2019 run cycle
 - :ref:`LoadDiffCal <algm-LoadDiffCal>` has an additional parameter to allow for a second file specifying a grouping to override the one in the calibration file
-- :ref:`LoadILLDiffraction <algm-LoadILLDiffraction>` will now correctly resolve for the scan type and drive the detector to the offset corrected 2theta0 for D20 detector scans.
+- :ref:`LoadILLDiffraction <algm-LoadILLDiffraction>` will now correctly resolve for the scan type and drive the detector to the offset corrected :math:'2theta_0' for D20 detector scans.
 - :ref:`PowderDiffILLDetScanReduction <algm-PowderDiffILLDetScanReduction>` will never merge the detector scans at the raw level even if they are supplied with + operator; it will process them separately and merge at the end.
 
 Single Crystal Diffraction

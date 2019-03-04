@@ -245,13 +245,13 @@ public:
     TS_ASSERT(outputWS)
 
     const auto detectorInfo = outputWS->detectorInfo();
-    const auto &indexOfFirstDet = detectorInfo.indexOf(1);
+    const auto indexOfFirstDet = detectorInfo.indexOf(1);
     const V3D position =
         detectorInfo.position(std::make_pair(indexOfFirstDet, 0));
     double r, theta, phi;
     position.getSpherical(r, theta, phi);
     TS_ASSERT_DELTA(theta, 5.825, 0.001);
-    TS_ASSERT(position.X() < 0.);
+    TS_ASSERT_LESS_THAN(position.X(), 0.);
   }
 
   void test_D20_multifile() {
