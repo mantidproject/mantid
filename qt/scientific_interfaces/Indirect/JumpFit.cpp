@@ -53,6 +53,8 @@ JumpFit::JumpFit(QWidget *parent)
   setSpectrumSelectionView(m_uiForm->svSpectrumView);
   setOutputOptionsView(m_uiForm->ovOutputOptionsView);
   setFitPropertyBrowser(m_uiForm->fitPropertyBrowser);
+
+  setEditResultVisible(false);
 }
 
 void JumpFit::setupFitTab() {

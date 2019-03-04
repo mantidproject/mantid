@@ -47,6 +47,8 @@ ConvFit::ConvFit(QWidget *parent)
   setSpectrumSelectionView(m_uiForm->svSpectrumView);
   setOutputOptionsView(m_uiForm->ovOutputOptionsView);
   setFitPropertyBrowser(m_uiForm->fitPropertyBrowser);
+
+  setEditResultVisible(true);
 }
 
 void ConvFit::setupFitTab() {

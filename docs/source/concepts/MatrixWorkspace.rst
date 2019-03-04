@@ -100,9 +100,9 @@ Matrix Workspace Properties
 
   # To find out the number of bins along the x-axis use blocksize()
   print("number of bins = {0}".format(ws.blocksize()))
-  # To find out the bin containing a value use binIndexOf()
-  print("bin index containing 502.2 for a histogram (0 by default) = {0}".format(ws.binIndexOf(502.2)))
-  print("bin index containing 997.1 for histogram 272 = {0}".format(ws.binIndexOf(997.1,272)))
+  # To find out the bin containing a value use yIndexOfX()
+  print("bin index containing 502.2 for a histogram (0 by default) = {0}".format(ws.yIndexOfX(502.2)))
+  print("bin index containing 997.1 for histogram 272 = {0}".format(ws.yIndexOfX(997.1,272)))
 
   # To find a workspace index from a spectrum number
   print("workspace index for histogram 272 = {0}".format(ws.getIndexFromSpectrumNumber(272)))
