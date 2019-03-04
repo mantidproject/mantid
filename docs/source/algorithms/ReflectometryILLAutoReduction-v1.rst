@@ -11,8 +11,8 @@ Description
 
 This is the reduction work-flow algorithm for the ILL reflectometers D17 and FIGARO.
 A various number of corresponding direct and reflected angles can be processed.
+Some input properties like the background indices except either a single entry for all angles, i.e. number of reflected or direct beams, or an entry for each corresponding angle.
 Please note, however, to not delete direct beam work-spaces for efficient re-use for further reductions.
-The information transfer between direct beam and reflected beam work-spaces is realized via sample log information exchange, see :ref:`ReflectometryILLPreProcess <algm-ReflectometryILLPreProcess>` for more information.
 
 Work-flow
 ---------
