@@ -7,7 +7,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 
-def get_raw_data_workspace_name(context, run, period='0'):
+def get_raw_data_workspace_name(context, run, period='1'):
     if context.is_multi_period():
         return context._base_run_name(run) + "_raw_data" + "_period_" + period
     else:

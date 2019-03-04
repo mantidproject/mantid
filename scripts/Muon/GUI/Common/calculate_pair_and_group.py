@@ -99,16 +99,16 @@ def _get_pre_processing_params(context, run, rebin):
 
 def _get_MuonGroupingCounts_parameters(context, group_name, run):
     params = {}
-    try:
+    if context.is_multi_period() and 'SummedPeriods' in context.gui_variables:
         summed_periods = context.gui_variables["SummedPeriods"]
         params["SummedPeriods"] = summed_periods
-    except KeyError:
+    else:
         params["SummedPeriods"] = "1"
 
-    try:
+    if context.is_multi_period() and 'SubtractedPeriods' in context.gui_variables:
         subtracted_periods = context.gui_variables["SubtractedPeriods"]
         params["SubtractedPeriods"] = subtracted_periods
-    except KeyError:
+    else:
         params["SubtractedPeriods"] = ""
 
     group = context._groups.get(group_name, None)
@@ -130,16 +130,16 @@ def _get_MuonGroupingAsymmetry_parameters(context, group_name, run):
     if 'GroupRangeMax' in context.gui_variables:
         params['AsymmetryTimeMax'] = context.gui_variables['GroupRangeMax']
 
-    try:
+    if context.is_multi_period() and 'SummedPeriods' in context.gui_variables:
         summed_periods = context.gui_variables["SummedPeriods"]
         params["SummedPeriods"] = summed_periods
-    except KeyError:
+    else:
         params["SummedPeriods"] = "1"
 
-    try:
+    if context.is_multi_period() and 'SubtractedPeriods' in context.gui_variables:
         subtracted_periods = context.gui_variables["SubtractedPeriods"]
         params["SubtractedPeriods"] = subtracted_periods
-    except KeyError:
+    else:
         params["SubtractedPeriods"] = ""
 
     group = context._groups.get(group_name, None)
@@ -152,16 +152,16 @@ def _get_MuonGroupingAsymmetry_parameters(context, group_name, run):
 
 def _get_MuonPairingAsymmetry_parameters(context, pair_name, run):
     params = {}
-    try:
+    if context.is_multi_period() and 'SummedPeriods' in context.gui_variables:
         summed_periods = context.gui_variables["SummedPeriods"]
         params["SummedPeriods"] = summed_periods
-    except KeyError:
+    else:
         params["SummedPeriods"] = "1"
 
-    try:
+    if context.is_multi_period() and 'SubtractedPeriods' in context.gui_variables:
         subtracted_periods = context.gui_variables["SubtractedPeriods"]
         params["SubtractedPeriods"] = subtracted_periods
-    except KeyError:
+    else:
         params["SubtractedPeriods"] = ""
 
     pair = context._pairs.get(pair_name, None)

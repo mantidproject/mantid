@@ -17,6 +17,19 @@ from mantid.kernel import *
 from mantid import config
 
 
+def is_range_ascending(range_string, delimiter):
+    range_limits = tuple(map(int, range_string.split(delimiter)))
+    return range_limits[0] < range_limits[1]
+
+
+def contains_non_ascending_range(strings, delimiter):
+    range_strings = list(filter(lambda x: delimiter in x, strings))
+    for range_string in range_strings:
+        if not is_range_ascending(range_string, delimiter):
+            return True
+    return False
+
+
 class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
     _workspace_names = None
     _cal_file = None
@@ -113,8 +126,12 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
 
         # Validate input files
         input_files = self.getProperty('InputFiles').value
+
         if len(input_files) == 0:
             issues['InputFiles'] = 'InputFiles must contain at least one filename'
+
+        if contains_non_ascending_range(input_files, '-'):
+            issues['InputFiles'] = 'Run number ranges must go from low to high'
 
         # Validate detector range
         detector_range = self.getProperty('SpectraRange').value

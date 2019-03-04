@@ -10,7 +10,9 @@
 #include <cxxtest/TestSuite.h>
 
 #include "IndirectFitOutputOptionsModel.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidTestHelpers/IndirectFitDataCreationHelper.h"
 
@@ -68,12 +70,17 @@ public:
   }
 
   void setUp() override {
+    m_ads =
+        std::make_unique<SetUpADSWithWorkspace>("Name", createWorkspace(3, 4));
+
     m_groupWorkspace = createGroupWorkspaceWithTextAxes(
         NUMBER_OF_WORKSPACES, getThreeAxisLabels(), NUMBER_OF_SPECTRA);
     m_model = std::make_unique<IndirectFitOutputOptionsModel>();
   }
 
   void tearDown() override {
+    AnalysisDataService::Instance().clear();
+
     m_groupWorkspace.reset();
     m_model.reset();
   }
@@ -262,7 +269,35 @@ public:
     TS_ASSERT(!m_model->isResultGroupSelected("PDF Group"));
   }
 
+  void
+  test_that_replaceResultBin_will_throw_when_provided_an_empty_inputWorkspace_name() {
+    auto const singleBinName("Workspace_s0_Result");
+    auto const outputName("Output_Result");
+
+    TS_ASSERT_THROWS(m_model->replaceFitResult("", singleBinName, outputName),
+                     std::runtime_error);
+  }
+
+  void
+  test_that_replaceResultBin_will_throw_when_provided_an_empty_singleBinWorkspace_name() {
+    auto const inputName("Workspace_s0_to_s2_Result");
+    auto const outputName("Output_Result");
+
+    TS_ASSERT_THROWS(m_model->replaceFitResult(inputName, "", outputName),
+                     std::runtime_error);
+  }
+
+  void
+  test_that_replaceResultBin_will_throw_when_provided_an_empty_outputWorkspace_name() {
+    auto const inputName("Workspace_s0_to_s2_Result");
+    auto const singleBinName("Workspace_s0_Result");
+
+    TS_ASSERT_THROWS(m_model->replaceFitResult(inputName, singleBinName, ""),
+                     std::runtime_error);
+  }
+
 private:
+  std::unique_ptr<SetUpADSWithWorkspace> m_ads;
   WorkspaceGroup_sptr m_groupWorkspace;
   std::unique_ptr<IndirectFitOutputOptionsModel> m_model;
 };

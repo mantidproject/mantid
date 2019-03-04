@@ -122,3 +122,15 @@ class GroupingTabModel(object):
 
     def is_data_loaded(self):
         return self._data.is_data_loaded()
+
+    def get_last_data_from_file(self):
+        if self._data.current_runs:
+            return round(max(self._data.loaded_data(self._data.current_runs[-1])['OutputWorkspace'][0].workspace.dataX(0)), 3)
+        else:
+            return 0.0
+
+    def get_first_good_data_from_file(self):
+        if self._data.current_runs:
+            return self._data.loaded_data(self._data.current_runs[-1])["FirstGoodData"]
+        else:
+            return 0.0

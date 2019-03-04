@@ -22,4 +22,4 @@ Below is an example of using the **KafkaEventListener** from a python script in 
                     RunTransitionBehavior='Restart', OutputWorkspace='testout')
 
 
-:ref:`Release 3.14.0 <v3.14.0>`
+:ref:`Release 4.0.0 <v4.0.0>`
