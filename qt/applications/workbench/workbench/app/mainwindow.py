@@ -572,6 +572,8 @@ def start_workbench(app, command_line_options):
     # The ordering here is very delicate. Test thoroughly when
     # changing anything!
     main_window = MainWindow()
+    # decorates the excepthook callback with the reference to the main window
+    # this is used in case the user wants to terminate the workbench from the error window shown
     sys.excepthook = partial(exception_logger, main_window)
 
     # Load matplotlib as early as possible and set our defaults
