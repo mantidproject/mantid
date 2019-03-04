@@ -570,8 +570,7 @@ Change Matplotlib Defaults
 
 It is possible to alter the default appearance of Matplotlib plots, e.g. linewidths, label sizes,
 colour cycles etc. This is most readily achieved by setting the ``rcParams`` at the start of a 
-Mantid Workbench session. The example below shows a plot with the default colour cycle and 
-line width, followed be resetting the parameters with ``rcParams``. An example with many of the 
+Mantid Workbench session. The example below shows a plot with the default line width, followed be resetting the parameters with ``rcParams``. An example with many of the 
 editable parameters is available at `the Matplotlib site <https://matplotlib.org/users/customizing.html>`_.
 
 .. plot::
@@ -592,8 +591,6 @@ editable parameters is available at `the Matplotlib site <https://matplotlib.org
     ## Reset the parameters
 
     import matplotlib as mpl
-    from cycler import cycler
-    mpl.rcParams['axes.color_cycle'] = cycler(color='cmyk')
     mpl.rcParams['lines.linewidth'] = 2.0
     mpl.rcParams['axes.grid'] = True
     mpl.rcParams['axes.facecolor'] = (0.95, 0.95, 0.95)
