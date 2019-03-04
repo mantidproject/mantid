@@ -264,10 +264,10 @@ class GroupingTableView(QtGui.QWidget):
         self.group_range_use_last_data.stateChanged.connect(slot)
 
     def on_user_changes_group_range_min_text_edit(self, slot):
-        self.group_range_min.textChanged.connect(slot)
+        self.group_range_min.editingFinished.connect(slot)
 
     def on_user_changes_group_range_max_text_edit(self, slot):
-        self.group_range_max.textChanged.connect(slot)
+        self.group_range_max.editingFinished.connect(slot)
 
     # ------------------------------------------------------------------------------------------------------------------
     #
@@ -309,6 +309,7 @@ class GroupingTableView(QtGui.QWidget):
         self._disabled = True
         self._disable_buttons()
         self._disable_all_table_items()
+        self._disable_group_ranges()
         self.enable_updates()
 
     def enable_editing(self):
@@ -316,7 +317,24 @@ class GroupingTableView(QtGui.QWidget):
         self._disabled = False
         self._enable_buttons()
         self._enable_all_table_items()
+        self._enable_group_ranges()
         self.enable_updates()
+
+    def _enable_group_ranges(self):
+        self.group_range_use_first_good_data.setEnabled(True)
+        self.group_range_use_last_data.setEnabled(True)
+
+        if not self.group_range_use_first_good_data.isChecked():
+            self.group_range_min.setEnabled(True)
+
+        if not self.group_range_use_last_data.isChecked():
+            self.group_range_max.setEnabled(True)
+
+    def _disable_group_ranges(self):
+        self.group_range_use_first_good_data.setEnabled(False)
+        self.group_range_use_last_data.setEnabled(False)
+        self.group_range_min.setEnabled(False)
+        self.group_range_max.setEnabled(False)
 
     def _enable_buttons(self):
         self.add_group_button.setEnabled(True)

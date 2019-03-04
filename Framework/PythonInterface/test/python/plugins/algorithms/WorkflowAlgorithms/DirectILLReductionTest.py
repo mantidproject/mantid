@@ -121,6 +121,44 @@ class DirectILLReductionTest(unittest.TestCase):
         xs = ws.readX(0)
         numpy.testing.assert_almost_equal(xs, numpy.arange(E0, E1 + 0.01, dE))
 
+    def testHybridERebinningSingleUserRange(self):
+        outWSName = 'outWS'
+        E0 = -2.
+        dE = 0.13
+        E1 = E0 + 40 * dE
+        algProperties = {
+            'InputWorkspace': self._TEST_WS_NAME,
+            'OutputWorkspace': outWSName,
+            'EnergyRebinning': '{},{},{}'.format(E0, dE, E1),
+            'Transposing': 'Transposing OFF',
+            'rethrow': True
+        }
+        run_algorithm('DirectILLReduction', **algProperties)
+        self.assertTrue(mtd.doesExist(outWSName))
+        ws = mtd[outWSName]
+        self.assertEqual(ws.getAxis(0).getUnit().unitID(), 'DeltaE')
+        xs = ws.readX(0)
+        numpy.testing.assert_almost_equal(xs, numpy.arange(E0, E1 + 0.01, dE))
+
+    def testHybridERebinningUserConstrainedAutoRange(self):
+        outWSName = 'outWS'
+        E0 = -0.23
+        E1 = 0.32
+        algProperties = {
+            'InputWorkspace': self._TEST_WS_NAME,
+            'OutputWorkspace': outWSName,
+            'EnergyRebinning': '{},a,{}'.format(E0, E1),
+            'Transposing': 'Transposing OFF',
+            'rethrow': True
+        }
+        run_algorithm('DirectILLReduction', **algProperties)
+        self.assertTrue(mtd.doesExist(outWSName))
+        ws = mtd[outWSName]
+        self.assertEqual(ws.getAxis(0).getUnit().unitID(), 'DeltaE')
+        xs = ws.readX(0)
+        self.assertEqual(xs[0], E0)
+        self.assertEqual(xs[-1], E1)
+
     def testQRebinning(self):
         outWSName = 'outWS'
         Q0 = 2.3

@@ -28,6 +28,7 @@ set ( TEST_PY_FILES
   IndirectILLEnergyTransferTest.py
   IndirectILLReductionFWSTest.py
   IndirectILLReductionQENSTest.py
+  IndirectReplaceFitResultTest.py
   IndirectResolutionTest.py
   IndirectSampleChangerTest.py
   IndirectTransmissionMonitorTest.py
@@ -46,6 +47,7 @@ set ( TEST_PY_FILES
   ReflectometryILLPolarizationCorTest.py
   ReflectometryILLPreprocessTest.py
   ReflectometryILLSumForegroundTest.py
+  ReflectometryISISLoadAndProcessTest.py
   ResNorm2Test.py
   SANSDarkRunBackgroundCorrectionTest.py
   SANSFitShiftScaleTest.py

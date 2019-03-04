@@ -59,7 +59,7 @@ class FFTWrapper(object):
         if self.phaseTable is not None:
             if self.phaseTable["newTable"]:
                 self.model.makePhaseQuadTable(self.phaseTable)
-            self.model.PhaseQuad()
+            self.model.PhaseQuad(self.phaseTable["InputWorkspace"])
 
         if self.preRe is not None:
             self.model.preAlg(self.preRe)
@@ -143,7 +143,7 @@ class FFTModel(object):
         self.alg.setProperty("FirstGoodData", inputs["FirstGoodData"])
         self.alg.setProperty("LastGoodData", inputs["LastGoodData"])
 
-        self.alg.setProperty("InputWorkspace", "MuonAnalysis")
+        self.alg.setProperty("InputWorkspace", inputs["InputWorkspace"])
         self.alg.setProperty("DetectorTable", "PhaseTable")
         self.alg.setProperty("DataFitted", "fits")
 
@@ -153,7 +153,7 @@ class FFTModel(object):
             self.alg.getProperty("DetectorTable").value)
         self.alg = None
 
-    def PhaseQuad(self):
+    def PhaseQuad(self, inputWS):
         """
         do the phaseQuad algorithm
         groups data into a single set
@@ -163,7 +163,7 @@ class FFTModel(object):
         self.alg.setChild(False)
         self.alg.setRethrows(True)
 
-        self.alg.setProperty("InputWorkspace", "MuonAnalysis")
+        self.alg.setProperty("InputWorkspace", inputWS)
         self.alg.setProperty("PhaseTable", "PhaseTable")
         self.alg.setProperty("OutputWorkspace", "__phaseQuad__")
         self.alg.execute()

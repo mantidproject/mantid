@@ -189,10 +189,10 @@ public:
     Cylinder A;
     A.setSurface("cx 5");
 
-    TS_ASSERT_EQUALS(A.surfaceNormal(V3D(10, 0, 0)), V3D(0, 0, 0));
+    TS_ASSERT_THROWS_ANYTHING(A.surfaceNormal(V3D(10, 0, 0)));
     TS_ASSERT_EQUALS(A.surfaceNormal(V3D(0, 10, 0)), V3D(0, 1, 0));
     TS_ASSERT_EQUALS(A.surfaceNormal(V3D(0, 0, 10)), V3D(0, 0, 1));
-    TS_ASSERT_EQUALS(A.surfaceNormal(V3D(-10, 0, 0)), V3D(0, 0, 0));
+    TS_ASSERT_THROWS_ANYTHING(A.surfaceNormal(V3D(-10, 0, 0)));
     TS_ASSERT_EQUALS(A.surfaceNormal(V3D(0, -10, 0)), V3D(0, -1, 0));
     TS_ASSERT_EQUALS(A.surfaceNormal(V3D(0, 0, -10)), V3D(0, 0, -1));
 

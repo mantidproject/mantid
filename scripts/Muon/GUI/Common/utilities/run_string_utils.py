@@ -37,7 +37,7 @@ def lambda_tuple_unpacking(lam):
     return f_inner
 
 
-def run_list_to_string(run_list):
+def run_list_to_string(run_list, max_value = True):
     """
     Converts a list of runs into a formatted string using a delimiter/range separator
     :param run_list: list of integers
@@ -48,7 +48,7 @@ def run_list_to_string(run_list):
     run_list = _remove_duplicates_from_list(run_list)
     run_list = [i for i in run_list if i >= 0]
     run_list.sort()
-    if len(run_list) > max_run_list_size:
+    if max_value and len(run_list) > max_run_list_size:
         raise IndexError("Too many runs ({}) must be <{}".format(len(run_list), max_run_list_size))
 
     range_list = []
@@ -76,11 +76,12 @@ def validate_run_string(run_string):
     return False
 
 
-def run_string_to_list(run_string):
+def run_string_to_list(run_string, max_value = True):
     """
     Does the opposite of run_list_to_string(), taking a string representation of a series of runs
     and producing an ordered list of unique runs. Calls validate_run_string().
     :param run_string: string, a series of runs
+    :max_value: if to use the max number of runs
     :return: list of integers
     """
     if not validate_run_string(run_string):
@@ -103,7 +104,7 @@ def run_string_to_list(run_string):
 
             range_max = int(range_max)
             range_min = int(range_min)
-            if (range_max - range_min) > max_run_list_size:
+            if max_value and (range_max - range_min) > max_run_list_size:
                 raise IndexError(
                     "Too many runs ({}) must be <{}".format(range_max - range_min, max_run_list_size))
             else:

@@ -14,7 +14,7 @@ from functools import wraps
 # 3rdparty imports
 import matplotlib
 from matplotlib._pylab_helpers import Gcf
-from matplotlib.backend_bases import FigureManagerBase
+from matplotlib.backend_bases import FigureManagerBase, MouseEvent
 from matplotlib.backends.backend_qt5agg import (FigureCanvasQTAgg)  # noqa
 from qtpy.QtCore import QObject, Qt
 from qtpy.QtWidgets import QApplication, QLabel
@@ -28,7 +28,7 @@ from mantidqt.widgets.fitpropertybrowser import FitPropertyBrowser
 from workbench.plotting.figurewindow import FigureWindow
 from workbench.plotting.propertiesdialog import LabelEditor, XAxisEditor, YAxisEditor
 from workbench.plotting.qappthreadcall import QAppThreadCall
-from workbench.plotting.toolbar import WorkbenchNavigationToolbar
+from workbench.plotting.toolbar import WorkbenchNavigationToolbar, ToolbarStateChecker
 
 
 def _catch_exceptions(func):
@@ -182,8 +182,9 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         height = cs.height() + self._status_and_tool_height
         self.window.resize(cs.width(), height)
 
-        self.fit_browser = FitPropertyBrowser(canvas)
+        self.fit_browser = FitPropertyBrowser(canvas, ToolbarStateChecker(self.toolbar))
         self.fit_browser.closing.connect(self.handle_fit_browser_close)
+        self.window.show_context_menu.connect(self.fit_browser.show_canvas_context_menu, Qt.QueuedConnection)
         self.window.setCentralWidget(canvas)
         self.window.addDockWidget(Qt.LeftDockWidgetArea, self.fit_browser)
         self.fit_browser.hide()
@@ -324,9 +325,20 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
 
     # ------------------------ Interaction events --------------------
     def on_button_press(self, event):
+        class MouseButton:
+            # Based on the matplotlib MouseEvent click buttons
+            right_click = 3
+            middle_click = 2
+            left_click = 1
+
+        # If right-click then emit a QContextMenuEvent
+        if isinstance(event, MouseEvent) and event.button == MouseButton.right_click:
+            self.window.show_context_menu.emit()
+
         if not event.dblclick:
             # shortcut
             return
+
         # We assume this is used for editing axis information e.g. labels
         # which are outside of the axes so event.inaxes is no use.
         canvas = self.canvas

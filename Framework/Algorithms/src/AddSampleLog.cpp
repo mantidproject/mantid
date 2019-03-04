@@ -177,7 +177,6 @@ void AddSampleLog::addSingleValueProperty(Run &theRun,
       g_log.error() << "Error interpreting string '" << propValue
                     << "' as NumberType Int.";
       throw std::runtime_error("Invalie integer input");
-      // intVal = 0;
     }
     theRun.addLogData(new PropertyWithValue<int>(propName, intVal));
   } else {
@@ -188,7 +187,6 @@ void AddSampleLog::addSingleValueProperty(Run &theRun,
       g_log.error() << "Error interpreting string '" << propValue
                     << "' as NumberType Double.";
       throw std::runtime_error("Invalid double input.");
-      // dblVal = 0.;
     }
     theRun.addLogData(new PropertyWithValue<double>(propName, dblVal));
     g_log.information() << "added property " << propName << " with value "
