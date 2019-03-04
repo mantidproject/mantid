@@ -83,4 +83,4 @@ Improvements
 - ORNL HFIR SANS instruments have new geometries. The monitors have now a shape associated to them. Detector will move to the right position based on log values.
 
 
-:ref:`Release 3.14.0 <v3.14.0>`
+:ref:`Release 4.0.0 <v4.0.0>`
