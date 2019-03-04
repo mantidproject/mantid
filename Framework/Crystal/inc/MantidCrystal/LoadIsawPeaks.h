@@ -93,7 +93,6 @@ private:
   boost::shared_ptr<const Geometry::IComponent> getCachedBankByName(
       std::string bankname,
       const boost::shared_ptr<const Geometry::Instrument> &inst);
-
 };
 
 } // namespace Crystal

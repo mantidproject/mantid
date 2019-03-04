@@ -9,8 +9,10 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidCrystal/CalibrationHelpers.h"
+#include "MantidCrystal/FindUBUsingIndexedPeaks.h"
 #include "MantidCrystal/SCDCalibratePanels.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
@@ -19,8 +21,6 @@
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Unit.h"
-#include "MantidCrystal/FindUBUsingIndexedPeaks.h"
-#include "MantidAPI/Sample.h"
 #include <boost/algorithm/string/trim.hpp>
 
 using Mantid::Kernel::Strings::getWord;
@@ -549,19 +549,19 @@ void LoadIsawPeaks::appendFile(PeaksWorkspace_sptr outWS,
     alg2.setProperty("PeaksWorkspace", outWS);
     alg2.execute();
 
-   if (outWS->mutableSample().hasOrientedLattice()) {
-    OrientedLattice o_lattice = outWS->mutableSample().getOrientedLattice();
-  auto &peaks = outWS->getPeaks();
-  for (auto &peak : peaks) {
+    if (outWS->mutableSample().hasOrientedLattice()) {
+      OrientedLattice o_lattice = outWS->mutableSample().getOrientedLattice();
+      auto &peaks = outWS->getPeaks();
+      for (auto &peak : peaks) {
 
-    V3D hkl = peak.getHKL();
-    V3D mnp = peak.getIntMNP();
-    for (int i = 0; i <= 2; i++)
-      hkl +=  o_lattice.getModVec(i) * mnp[i];
-    peak.setHKL(hkl);
- }
- }
- }
+        V3D hkl = peak.getHKL();
+        V3D mnp = peak.getIntMNP();
+        for (int i = 0; i <= 2; i++)
+          hkl += o_lattice.getModVec(i) * mnp[i];
+        peak.setHKL(hkl);
+      }
+    }
+  }
 }
 
 //-----------------------------------------------------------------------------------------------
