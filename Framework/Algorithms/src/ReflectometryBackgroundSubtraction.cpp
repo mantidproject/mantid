@@ -15,7 +15,6 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/EnabledWhenProperty.h"
-#include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
 
 using namespace Mantid::API;
