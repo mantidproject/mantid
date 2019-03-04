@@ -357,6 +357,7 @@ public:
                     1e-3) const; ///< Determine if there is a master direction
   bool
   nullVector(const double Tol = 1e-3) const; ///< Determine if the point is null
+  bool unitVector(const double tolerance = Kernel::Tolerance) const noexcept;
   bool coLinear(const V3D &, const V3D &) const;
 
   void saveNexus(::NeXus::File *file, const std::string &name) const;

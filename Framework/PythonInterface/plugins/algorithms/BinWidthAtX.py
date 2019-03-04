@@ -82,7 +82,7 @@ class BinWidthAtX(PythonAlgorithm):
                     self._PROP_X_VALUE +
                     ' = {0} out of range for workspace index {1}'
                     .format(x, wsIndex))
-            binIndex = inputWs.binIndexOf(x, wsIndex)
+            binIndex = inputWs.yIndexOfX(x, wsIndex)
             dx = xs[binIndex + 1] - xs[binIndex]
             widths[wsIndex] = dx
         binWidth = numpy.mean(widths)

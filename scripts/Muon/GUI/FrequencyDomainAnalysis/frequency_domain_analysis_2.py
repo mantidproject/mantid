@@ -80,7 +80,7 @@ class FrequencyAnalysisGui(QtGui.QMainWindow):
         central_widget.setLayout(vertical_layout)
 
         self.setCentralWidget(central_widget)
-        self.setWindowTitle("Frequency Domain Analysis version 2.0")
+        self.setWindowTitle("Frequency Domain Analysis")
 
         self.home_tab.group_widget.pairAlphaNotifier.add_subscriber(
             self.grouping_tab_widget.group_tab_presenter.loadObserver)
@@ -111,6 +111,12 @@ class FrequencyAnalysisGui(QtGui.QMainWindow):
 
         self.context.instrumentNotifier.add_subscriber(
             self.transform.instrumentObserver)
+
+        self.context.gui_variables_notifier.add_subscriber(self.grouping_tab_widget.group_tab_presenter.gui_variables_observer)
+
+        self.grouping_tab_widget.group_tab_presenter.enable_editing_notifier.add_subscriber(self.home_tab.home_tab_widget.enable_observer)
+
+        self.grouping_tab_widget.group_tab_presenter.disable_editing_notifier.add_subscriber(self.home_tab.home_tab_widget.disable_observer)
 
     def setup_tabs(self):
         """

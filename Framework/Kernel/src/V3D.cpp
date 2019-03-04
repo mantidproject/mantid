@@ -133,6 +133,9 @@ double V3D::norm() const { return sqrt(x * x + y * y + z * z); }
 */
 double V3D::normalize() {
   const double ND(norm());
+  if (ND == 0) {
+    throw std::runtime_error("Unable to normalize a zero length vector.");
+  }
   this->operator/=(ND);
   return ND;
 }
@@ -252,6 +255,11 @@ bool V3D::nullVector(const double Tol) const
 
   // Getting to this point means a null vector
   return true;
+}
+
+bool V3D::unitVector(const double tolerance) const noexcept {
+  const auto l = norm();
+  return std::abs(l - 1.) < tolerance;
 }
 
 int V3D::masterDir(const double Tol) const

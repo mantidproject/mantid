@@ -149,7 +149,6 @@ class MainWindow(QMainWindow):
         # Menus
         self.file_menu = None
         self.file_menu_actions = None
-        self.editor_menu = None
         self.view_menu = None
         self.view_menu_actions = None
         self.interfaces_menu = None
@@ -238,7 +237,6 @@ class MainWindow(QMainWindow):
 
     def create_menus(self):
         self.file_menu = self.menuBar().addMenu("&File")
-        self.editor_menu = self.menuBar().addMenu("&Editor")
         self.view_menu = self.menuBar().addMenu("&View")
         self.interfaces_menu = self.menuBar().addMenu('&Interfaces')
 
@@ -306,7 +304,8 @@ class MainWindow(QMainWindow):
 
         # list of custom interfaces that are not qt4/qt5 compatible
         GUI_BLACKLIST = ['ISIS_Reflectometry_Old.py',
-                         'Frequency_Domain_Analysis.py',
+                         'Frequency_Domain_Analysis_Old.py',
+                         'Frequency_Domain_Analysis.py'
                          'Elemental_Analysis.py']
 
         # detect the python interfaces

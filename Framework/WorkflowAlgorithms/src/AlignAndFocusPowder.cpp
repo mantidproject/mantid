@@ -203,6 +203,11 @@ std::map<std::string, std::string> AlignAndFocusPowder::validateInputs() {
     }
   }
 
+  m_inputW = getProperty("InputWorkspace");
+  m_inputEW = boost::dynamic_pointer_cast<EventWorkspace>(m_inputW);
+  if (m_inputEW && m_inputEW->getNumberEvents() <= 0)
+    result["InputWorkspace"] = "Cannot process empty event workspace";
+
   return result;
 }
 
