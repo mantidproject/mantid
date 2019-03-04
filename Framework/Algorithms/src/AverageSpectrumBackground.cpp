@@ -118,7 +118,7 @@ void AverageSpectrumBackground::exec() {
     topBgd =
         groupBackgroundDetectors(inputWS, getSpectraFromRange(topBgdRange));
   }
-  
+
   size_t totalBkgRange;
   API::MatrixWorkspace_sptr bgd;
   if (topBgdRange.empty()) {
