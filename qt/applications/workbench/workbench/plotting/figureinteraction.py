@@ -1,6 +1,6 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
@@ -157,6 +157,12 @@ class FigureInteraction(object):
         :param scale_types: A 2-tuple of strings giving matplotlib axes scale types
         """
         for axes in self.canvas.figure.get_axes():
+            # Recompute the limits of the data. If the scale is set to log
+            # on either axis, Fit enabled & then disabled, then the axes are
+            # not rescaled properly because the vertical marker artists were
+            # included in the last computation of the data limits and
+            # set_xscale/set_yscale only autoscale the view
+            axes.relim()
             axes.set_xscale(scale_types[0])
             axes.set_yscale(scale_types[1])
 
