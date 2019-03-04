@@ -83,7 +83,7 @@ find ${default_save_directory} -name "*-mismatch*" -delete
 
 # Run
 NTHREADS=${BUILD_THREADS:?}
-MAXTHREADS=8
+MAXTHREADS=12
 if [ ${NTHREADS} -gt ${MAXTHREADS} ]; then
   NTHREADS=${MAXTHREADS}
 fi
