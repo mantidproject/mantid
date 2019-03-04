@@ -166,7 +166,7 @@ const Geometry::IDetector &SpectrumInfo::getDetector(const size_t index) const {
     throw Kernel::Exception::NotFoundError("MatrixWorkspace::getDetector(): No "
                                            "detectors for this workspace "
                                            "index.",
-                                           "");
+                                           std::to_string(index));
   } else {
     // Else need to construct a DetectorGroup and use that
     std::vector<boost::shared_ptr<const Geometry::IDetector>> det_ptrs;
@@ -185,7 +185,8 @@ const SpectrumDefinition &
 SpectrumInfo::checkAndGetSpectrumDefinition(const size_t index) const {
   if (spectrumDefinition(index).size() == 0)
     throw Kernel::Exception::NotFoundError(
-        "SpectrumInfo: No detectors for this workspace index.", "");
+        "SpectrumInfo: No detectors for this workspace index.",
+        std::to_string(index));
   return spectrumDefinition(index);
 }
 

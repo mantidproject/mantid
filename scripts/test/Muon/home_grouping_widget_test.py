@@ -32,6 +32,7 @@ class HomeTabGroupingPresenterTest(unittest.TestCase):
         self.obj = QtGui.QWidget()
         ConfigService['default.instrument'] = 'MUSR'
         self.context = MuonDataContext()
+        self.context.gui_variables['RebinType'] = 'None'
         self.view = HomeGroupingWidgetView(self.obj)
         self.model = HomeGroupingWidgetModel(self.context)
         self.presenter = HomeGroupingWidgetPresenter(self.view, self.model)

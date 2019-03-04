@@ -125,28 +125,28 @@ class IndirectCommonTests(unittest.TestCase):
         actual_result = indirect_common.PadArray(data, 10)
         self.assert_lists_match(expected_result, actual_result)
 
-    def test_CheckAnalysers(self):
+    def test_CheckAnalysersOrEFixed(self):
         ws1 = self.make_dummy_QENS_workspace(output_name="ws1")
         ws2 = self.make_dummy_QENS_workspace(output_name="ws2")
 
-        self.assert_does_not_raise(ValueError, indirect_common.CheckAnalysers, ws1, ws2)
+        self.assert_does_not_raise(ValueError, indirect_common.CheckAnalysersOrEFixed, ws1, ws2)
 
-    def test_CheckAnalysers_fails_on_analyser_mismatch(self):
+    def test_CheckAnalysersOrEFixed_fails_on_analyser_mismatch(self):
         ws1 = self.make_dummy_QENS_workspace(output_name="ws1", analyser='graphite')
         ws2 = self.make_dummy_QENS_workspace(output_name="ws2", analyser='fmica')
 
-        self.assertRaises(ValueError, indirect_common.CheckAnalysers, ws1, ws2)
+        self.assertRaises(ValueError, indirect_common.CheckAnalysersOrEFixed, ws1, ws2)
 
-    def test_CheckAnalysers_fails_on_reflection_mismatch(self):
+    def test_CheckAnalysersOrEFixed_fails_on_reflection_mismatch(self):
         ws1 = self.make_dummy_QENS_workspace(output_name="ws1", reflection='002')
         ws2 = self.make_dummy_QENS_workspace(output_name="ws2", reflection='004')
 
-        self.assertRaises(ValueError, indirect_common.CheckAnalysers, ws1, ws2)
+        self.assertRaises(ValueError, indirect_common.CheckAnalysersOrEFixed, ws1, ws2)
 
-    def test_CheckAnalysers_raises_runtimeError_with_no_inst_data(self):
+    def test_CheckAnalysersOrEFixed_raises_runtimeError_with_no_inst_data(self):
         ws1 = self.make_dummy_workspace_without_instrument('test_ws1')
         ws2 = self.make_dummy_workspace_without_instrument('test_ws2')
-        self.assertRaises(RuntimeError, indirect_common.CheckAnalysers, ws1, ws2)
+        self.assertRaises(RuntimeError, indirect_common.CheckAnalysersOrEFixed, ws1, ws2)
 
     def test_CheckHistZero(self):
         ws = self.make_dummy_QENS_workspace()

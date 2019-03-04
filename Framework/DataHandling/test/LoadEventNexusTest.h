@@ -8,7 +8,6 @@
 #define LOADEVENTNEXUSTEST_H_
 
 #include "MantidAPI/AlgorithmManager.h"
-
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
@@ -22,6 +21,7 @@
 #include "MantidIndexing/SpectrumNumber.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidNexusGeometry/Hdf5Version.h"
 #include "MantidParallel/Collectives.h"
 #include "MantidParallel/Communicator.h"
 #include "MantidTestHelpers/ParallelAlgorithmCreation.h"
@@ -217,6 +217,29 @@ public:
     TS_ASSERT_EQUALS(eventWS->getNumberEvents(), 1439);
     TS_ASSERT_EQUALS(eventWS->detectorInfo().size(),
                      (150 * 150) + 2) // Two monitors
+  }
+
+  void test_load_event_nexus_v20_ess_integration_2018() {
+    // Only perform this test if the version of hdf5 supports vlen strings
+    if (NexusGeometry::Hdf5Version::checkVariableLengthStringSupport()) {
+      const std::string file = "V20_ESSIntegration_2018-12-13_0942.nxs";
+      LoadEventNexus alg;
+      alg.setChild(true);
+      alg.setRethrows(true);
+      alg.initialize();
+      alg.setProperty("Filename", file);
+      alg.setProperty("OutputWorkspace", "dummy_for_child");
+      alg.execute();
+      Workspace_sptr ws = alg.getProperty("OutputWorkspace");
+      auto eventWS = boost::dynamic_pointer_cast<EventWorkspace>(ws);
+      TS_ASSERT(eventWS);
+
+      TS_ASSERT_EQUALS(eventWS->getNumberEvents(), 43277);
+      TS_ASSERT_EQUALS(eventWS->detectorInfo().size(),
+                       (300 * 300) + 2) // Two monitors
+      TS_ASSERT_DELTA(eventWS->getTofMin(), 9.815, 1.0e-3);
+      TS_ASSERT_DELTA(eventWS->getTofMax(), 130748.563, 1.0e-3);
+    }
   }
 
   void test_load_event_nexus_sans2d_ess() {

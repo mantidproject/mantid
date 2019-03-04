@@ -217,7 +217,7 @@ public:
 
   /** @name IAlgorithm methods */
   void initialize() override;
-  bool execute() override;
+  bool execute() override final;
   void executeAsChildAlg() override;
   std::map<std::string, std::string> validateInputs() override;
   bool isInitialized() const override;
@@ -419,6 +419,8 @@ private:
   void linkHistoryWithLastChild();
 
   void logAlgorithmInfo() const;
+
+  bool executeInternal();
 
   bool executeAsyncImpl(const Poco::Void &i);
 

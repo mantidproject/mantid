@@ -92,7 +92,8 @@ class MaxEntModel(object):
 
         for name, value in iteritems(inputs):
             self.alg.setProperty(name, value)
-        if inputs["InputWorkspace"] != "MuonAnalysis":
+        # check for version 1
+        if inputs["InputWorkspace"] != "MuonAnalysis" and "MuonAnalysisGrouped" in inputs["InputWorkspace"]:
             raise ValueError(
                 "Cannot currently generate phase table from this data using CalMuonDetectorPhases")
         self.alg.execute()
@@ -103,6 +104,7 @@ class MaxEntModel(object):
         self.alg = None
 
     def addOutput(self, inputs, alg, name):
+
         if name in inputs:
             mantid.AnalysisDataService.addOrReplace(
                 inputs[name],
@@ -113,7 +115,6 @@ class MaxEntModel(object):
             group = mantid.AnalysisDataService.retrieve(self.run)
         else:
             mantid.GroupWorkspaces(OutputWorkspace=self.run)
-
         group.add(inputs[name])
 
     def cancel(self):

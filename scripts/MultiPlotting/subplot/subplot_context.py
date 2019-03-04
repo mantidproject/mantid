@@ -21,6 +21,11 @@ class subplotContext(object):
         self._labelObjects = {}
         self._labels = {}
 
+    def update_gridspec(self, gridspec, figure, j):
+        tmp = gridspec[j].get_position(figure)
+        self._subplot.set_position(tmp)
+        self._subplot.set_subplotspec(gridspec[j])
+
     def add_vline(self, xvalue, name):
         self._vLines[name] = self._subplot.axvline(xvalue, 0, 1)
 

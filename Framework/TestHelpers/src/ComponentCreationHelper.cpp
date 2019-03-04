@@ -17,6 +17,7 @@
 // Includes
 //------------------------------------------------------------------------------
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/Detector.h"
@@ -34,10 +35,8 @@
 #include "MantidKernel/V2D.h"
 #include "MantidKernel/make_unique.h"
 
-#include "MantidGeometry/IDetector.h"
 #include <Poco/Path.h>
 #include <boost/make_shared.hpp>
-#include <boost/shared_array.hpp>
 
 using namespace Mantid::Geometry;
 using Mantid::Kernel::Quat;
@@ -208,15 +207,6 @@ boost::shared_ptr<CompAssembly> createTestAssemblyOfFourCylinders() {
   }
 
   return bank;
-}
-
-/**
- * Create an object component that has a defined shape
- */
-ObjComponent *createSingleObjectComponent() {
-  auto pixelShape = ComponentCreationHelper::createCappedCylinder(
-      0.5, 1.5, V3D(0.0, 0.0, 0.0), V3D(0., 1.0, 0.), "tube");
-  return new ObjComponent("pixel", pixelShape);
 }
 
 /**
@@ -427,7 +417,7 @@ createCylInstrumentWithVerticalOffsetsSpecified(
   return instrument;
 }
 
-/** create instrument with cylindrical detecotrs located in specific positions
+/** create instrument with cylindrical detectors located in specific positions
  *
  *
  */
@@ -540,11 +530,10 @@ void addRectangularBank(Instrument &testInstrument, int idStart, int pixels,
 //----------------------------------------------------------------------------------------------
 /**
  * Create an test instrument with n panels of rectangular detectors,
- *pixels*pixels in size,
- * a source and spherical sample shape.
+ * pixels*pixels in size, a source and spherical sample shape.
  *
  * Banks' lower-left corner is at position (0,0,5*banknum) and they go up to
- *(pixels*0.008, pixels*0.008, Z)
+ * (pixels*0.008, pixels*0.008, Z)
  * Pixels are 4 mm wide.
  *
  * @param num_banks :: number of rectangular banks to create
@@ -576,8 +565,7 @@ Instrument_sptr createTestInstrumentRectangular(int num_banks, int pixels,
 //----------------------------------------------------------------------------------------------
 /**
  * Create an test instrument with n panels of rectangular detectors,
- *pixels*pixels in size,
- * a source and spherical sample shape.
+ * pixels*pixels in size, a source and spherical sample shape.
  *
  * Banks are centered at (1*banknum, 0, 0) and are facing 0,0.
  * Pixels are 4 mm wide.
@@ -632,8 +620,8 @@ Instrument_sptr createTestInstrumentRectangular2(int num_banks, int pixels,
 
 /**
  * createOneDetectorInstrument, creates the most simple possible definition of
- *an instrument in which we can extract a valid L1 and L2 distance for unit
- *calculations.
+ * an instrument in which we can extract a valid L1 and L2 distance for unit
+ * calculations.
  *
  * Beam direction is along X,
  * Up direction is Y

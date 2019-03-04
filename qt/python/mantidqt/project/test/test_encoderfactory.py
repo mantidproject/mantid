@@ -13,7 +13,7 @@ from mantidqt.widgets.instrumentview.io import InstrumentViewEncoder
 from mantidqt.widgets.instrumentview.presenter import InstrumentViewPresenter
 from mantid.simpleapi import CreateSampleWorkspace
 from mantid.api import AnalysisDataService as ADS
-from mantidqt.utils.qt.test import GuiTest
+from mantidqt.utils.qt.testing import GuiTest
 
 
 class EncoderFactoryTest(GuiTest):

@@ -7,7 +7,7 @@
 #  This file is part of the mantid workbench.
 #
 
-from mantidqt.utils.qt.test import GuiTest
+from mantidqt.utils.qt.testing import GuiTest
 from mantid.simpleapi import CreateSampleWorkspace
 from mantidqt.widgets.workspacedisplay.matrix.io import MatrixWorkspaceDisplayDecoder, MatrixWorkspaceDisplayEncoder
 from mantidqt.widgets.workspacedisplay.matrix import StatusBarView, MatrixWorkspaceDisplay

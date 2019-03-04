@@ -248,6 +248,7 @@ class ISISIndirectDiffractionReductionTest(unittest.TestCase):
         self.assertEqual(red_ws.getNumberHistograms(), 196)
 
     # ------------------------------------------Failure cases------------------------------------------
+
     def test_reduction_with_cal_file_osiris_diffonly_fails(self):
         """
         Test to ensure cal file can not be used in diffonly mode
@@ -269,6 +270,20 @@ class ISISIndirectDiffractionReductionTest(unittest.TestCase):
                           CalFile='osi_041_RES10.cal',
                           OutputWorkspace='wks',
                           SpectraRange=[105, 112])
+
+    def test_that_reduction_fails_if_provided_a_range_of_run_numbers_which_goes_from_high_to_low(self):
+        with self.assertRaises(RuntimeError):
+            ISISIndirectDiffractionReduction(InputFiles=['137793-137796', '137813-814'],
+                                             Instrument='OSIRIS',
+                                             Mode='diffspec',
+                                             SpectraRange=[105, 112])
+
+    def test_that_reduction_fails_if_provided_a_range_of_run_numbers_which_is_not_a_range(self):
+        with self.assertRaises(RuntimeError):
+            ISISIndirectDiffractionReduction(InputFiles=['137793-137796', '137813-137813'],
+                                             Instrument='OSIRIS',
+                                             Mode='diffspec',
+                                             SpectraRange=[105, 112])
 
 
 if __name__ == '__main__':

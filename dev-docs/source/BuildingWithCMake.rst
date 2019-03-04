@@ -81,7 +81,7 @@ From the CMake gui
 * Wait a while....
 * You will be presented with a list of options in red that can in principle be changed. You probably don't want to change anything, except perhaps checking "MAKE_VATES" if you want to build that.
 * Click "Configure" again and wait....
-* Finally, click "Generate". This will create the build files, e.g. there will be a ``Mantid.sln`` in the directory you selected as your build directory.
+* Finally, click "Generate". This will create the build files, e.g. for a Visual Studio build there will be a ``Mantid.sln`` in the directory you selected as your build directory.
 
 Data Files Location
 -------------------
