@@ -154,7 +154,10 @@ void export_Material() {
            "Total Scattering Length Squared <b^2> for the given wavelength in "
            "fm^2")
 
-      .def("chemicalFormula", &chemicalFormula, arg("self"), "Chemical Formula")
+      .def("chemicalFormula", &chemicalFormula, arg("self"),
+           "Chemical formula as a tuple of two lists: the first one contains "
+           "the Atom object the second their multiplicities within the "
+           "formula.")
       .def("relativeMolecularMass", &relativeMolecularMass, arg("self"),
            "Relative Molecular Mass");
 }
