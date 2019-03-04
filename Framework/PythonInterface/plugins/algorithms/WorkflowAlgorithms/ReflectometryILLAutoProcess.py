@@ -18,18 +18,19 @@ from mantid.api import (
     FileProperty,
     MatrixWorkspaceProperty,
     MultipleFileProperty,
-    PropertyMode,
-    WorkspaceUnitValidator
+    Progress
 )
 from mantid.kernel import (
     CompositeValidator,
     Direction,
-    FloatArrayProperty,
     FloatArrayBoundedValidator,
+    FloatArrayProperty,
     IntArrayLengthValidator,
     IntArrayBoundedValidator,
     IntArrayProperty,
     Property,
+    StringArrayLengthValidator,
+    StringArrayProperty,
     StringListValidator
 )
 from mantid.simpleapi import (
@@ -42,49 +43,48 @@ from mantid.simpleapi import (
     Scale,
     Stitch1DMany
 )
-import h5py
 import ReflectometryILL_common as common
-import re
+from ReflectometryILLPreprocess import BkgMethod, Prop, SubalgLogging
+from ReflectometryILLSumForeground import SumType
+import numpy
 
 
-class Prop(object):
+class PropAutoProcess(object):
     ANGLE_OPTION = 'AngleOption'
-    BKG_METHOD_DIRECT = 'FlatBackgroundDirect'
-    BKG_METHOD_REFLECTED = 'FlatBackgroundReflected'
-    CLEANUP = 'Cleanup'
+    BKG_METHOD_DIRECT = 'DirectFlatBackground'
+    BRAGG_ANGLE = 'BraggAngle'
     DB = 'DirectRun'
     EFFICIENCY_FILE = 'EfficiencyFile'
-    END_WS_INDEX = 'FitEndWorkspaceIndex'
+    END_WS_INDEX_DIRECT = 'DirectFitEndWorkspaceIndex'
+    END_WS_INDEX_REFLECTED = 'FitEndWorkspaceIndex'
     END_OVERLAPS = 'EndOverlaps'
-    FLUX_NORM_METHOD = 'FluxNormalisation'
-    FLUX_NORM_METHOD_DIRECT = 'FluxNormalisationDirect'
-    FOREGROUND_HALF_WIDTH_DIRECT = 'ForegroundHalfWidthDirect'
-    FOREGROUND_HALF_WIDTH_REFLECTED = 'ForegroundHalfWidthReflected'
-    FOREGROUND_INDICES_DIRECT = 'ForegroundDirect'
-    FOREGROUND_INDICES_REFLECTED = 'ForegroundReflected'
-    HIGH_BKG_OFFSET_DIRECT = 'HighAngleBkgOffsetDirect'
-    HIGH_BKG_OFFSET_REFLECTED = 'HighAngleBkgOffsetReflected'
-    HIGH_BKG_WIDTH_DIRECT = 'HighAngleBkgWidthDirect'
-    HIGH_BKG_WIDTH_REFLECTED = 'HighAngleBkgWidthReflected'
-    LINE_POSITION = 'LinePosition'
-    LOW_BKG_OFFSET_DIRECT = 'LowAngleBkgOffsetDirect'
-    LOW_BKG_OFFSET_REFLECTED = 'LowAngleBkgOffsetReflected'
-    LOW_BKG_WIDTH_DIRECT = 'LowAngleBkgWidthDirect'
-    LOW_BKG_WIDTH_REFLECTED = 'LowAngleBkgWidthReflected'
+    HIGH_FOREGROUND_HALF_WIDTH = 'HighAngleForegroundHalfWidth'
+    HIGH_FOREGROUND_HALF_WIDTH_DIRECT = 'DirectHighAngleForegroundHalfWidth'
+    GROUPING_FRACTION = 'GroupingQFraction'
+    HIGH_BKG_OFFSET_DIRECT = 'DirectHighAngleBkgOffset'
+    HIGH_BKG_OFFSET_REFLECTED = 'HighAngleBkgOffset'
+    HIGH_BKG_WIDTH_DIRECT = 'DirectHighAngleBkgWidth'
+    HIGH_BKG_WIDTH_REFLECTED = 'HighAngleBkgWidth'
+    LOW_BKG_OFFSET_DIRECT = 'DirectLowAngleBkgOffset'
+    LOW_BKG_OFFSET_REFLECTED = 'LowAngleBkgOffset'
+    LOW_BKG_WIDTH_DIRECT = 'DirectLowAngleBkgWidth'
+    LOW_BKG_WIDTH_REFLECTED = 'LowAngleBkgWidth'
+    LOW_FOREGROUND_HALF_WIDTH = 'LowAngleForegroundHalfWidth'
+    LOW_FOREGROUND_HALF_WIDTH_DIRECT = 'DirectLowAngleForegroundHalfWidth'
     MANUAL_SCALE_FACTORS = 'ManualScaleFactors'
-    RB = 'ReflectedRun'
+    RB = 'Run'
     SCALE_FACTOR = 'ScaleFactor'
-    SLIT_NORM = 'SlitNormalisation'
-    START_WS_INDEX = 'FitStartWorkspaceIndex'
+    START_WS_INDEX_DIRECT = 'DirectFitStartWorkspaceIndex'
+    START_WS_INDEX_REFLECTED = 'FitStartWorkspaceIndex'
     START_OVERLAPS = 'StartOverlaps'
-    SUBALG_LOGGING = 'SubalgorithmLogging'
-    OUTPUT_WS = 'OutputWorkspace'
-    TWO_THETA = 'TwoTheta'
+    SUM_TYPE = 'SummationType'
     USE_MANUAL_SCALE_FACTORS = 'UseManualScaleFactors'
-    WATER_REFERENCE = 'WaterWorkspace'
-    WAVELENGTH_RANGE = 'WavelengthRange'
-    XMAX = 'RangeUpper'
-    XMIN = 'RangeLower'
+    WAVELENGTH_UPPER = 'WavelengthUpper'
+    WAVELENGTH_LOWER = 'WavelengthLower'
+    XMAX_DIRECT = 'DirectFitWavelengthUpper'
+    XMAX_REFLECTED = 'FitWavelengthUpper'
+    XMIN_DIRECT = 'DirectFitWavelengthLower'
+    XMIN_REFLECTED = 'FitWavelengthLower'
 
 
 class Angle(object):
@@ -92,29 +92,11 @@ class Angle(object):
     DAN = 'Detector angle'
 
 
-class BkgMethod(object):
-    CONSTANT = 'Background Constant Fit'
-    LINEAR = 'Background Linear Fit'
-    OFF = 'Background OFF'
+class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
 
-
-class FluxNormMethod(object):
-    MONITOR = 'Normalise To Monitor'
-    TIME = 'Normalise To Time'
-    OFF = 'Normalisation OFF'
-
-
-class SlitNorm(object):
-    OFF = 'Slit Normalisation OFF'
-    ON = 'Slit Normalisation ON'
-
-
-class SubalgLogging(object):
-    OFF = 'Logging OFF'
-    ON = 'Logging ON'
-
-
-class ReflectometryILLAutoReduction(DataProcessorAlgorithm):
+    def __init__(self):
+        """Initialize an instance of the algorithm."""
+        DataProcessorAlgorithm.__init__(self)
 
     def category(self):
         """Return the categories of the algrithm."""
@@ -122,7 +104,7 @@ class ReflectometryILLAutoReduction(DataProcessorAlgorithm):
 
     def name(self):
         """Return the name of the algorithm."""
-        return 'ReflectometryILLAutoReduction'
+        return 'ReflectometryILLAutoProcess'
 
     def summary(self):
         """Return a summary of the algorithm."""
@@ -143,35 +125,37 @@ class ReflectometryILLAutoReduction(DataProcessorAlgorithm):
 
     def PyInit(self):
         """Initialize the input and output properties of the algorithm."""
-        nonnegativeInt = IntBoundedValidator(lower=0)
-        wsIndexRange = IntBoundedValidator(lower=0, upper=255)
-        nonnegativeIntArray = IntArrayBoundedValidator()
-        nonnegativeIntArray.setLower(0)
-        maxTwoNonnegativeInts = CompositeValidator()
-        maxTwoNonnegativeInts.add(IntArrayLengthValidator(lenmin=0, lenmax=2))
-        maxTwoNonnegativeInts.add(nonnegativeIntArray)
-        threeNonnegativeInts = CompositeValidator()
-        threeNonnegativeInts.add(IntArrayLengthValidator(3))
         nonnegativeInts = IntArrayBoundedValidator()
         nonnegativeInts.setLower(0)
+        threeNonnegativeInts = CompositeValidator()
+        threeNonnegativeInts.add(IntArrayLengthValidator(3))
         threeNonnegativeInts.add(nonnegativeInts)
+        maxTwoNonnegativeInts = CompositeValidator()
+        maxTwoNonnegativeInts.add(IntArrayLengthValidator(lenmin=0, lenmax=2))
+        maxTwoNonnegativeInts.add(nonnegativeInts)
         nonnegativeFloatArray = FloatArrayBoundedValidator()
         nonnegativeFloatArray.setLower(0.)
-        # Purely ReflectometryILLAutoReduction
+        stringArrayValidator = StringArrayLengthValidator()
+        stringArrayValidator.setLengthMin(1)
+
+        listOrSingleNumber = ': provide either a list or a single value for each angle.'
+
         self.declareProperty(
             MultipleFileProperty(
-                Prop.RB,
-                action=FileAction.OptionalLoad,
+                PropAutoProcess.RB,
+                action=FileAction.Load,
                 extensions=['nxs']
             ),
             doc='A list of reflected run numbers/files.')
+        self.setPropertyGroup(PropAutoProcess.RB, '')
         self.declareProperty(
             MultipleFileProperty(
-                Prop.DB,
-                action=FileAction.OptionalLoad,
+                PropAutoProcess.DB,
+                action=FileAction.Load,
                 extensions=['nxs']
             ),
             doc='A list of direct run numbers/files.')
+        self.setPropertyGroup(PropAutoProcess.DB, '')
         self.declareProperty(
             MatrixWorkspaceProperty(
                 Prop.OUTPUT_WS,
@@ -179,439 +163,588 @@ class ReflectometryILLAutoReduction(DataProcessorAlgorithm):
                 direction=Direction.Output
             ),
             doc='The output workspace (momentum transfer), single histogram.')
+        self.setPropertyGroup(Prop.OUTPUT_WS, '')
         self.declareProperty(
-            Prop.ANGLE_OPTION,
-            defaultValue=Angle.SAN,
-            validator=StringListValidator(
-                [Angle.SAN, Angle.DAN]
-            ),
-            doc='Angle option used for detector positioning.'
-        )
-        # For ReflectometryILLPreprocess
-        self.declareProperty(
-            Prop.TWO_THETA,
-            defaultValue=Property.EMPTY_DBL,
-            doc='A user-defined scattering angle 2 theta (unit degrees).'
-        )
-        self.declareProperty(
-            name=Prop.LINE_POSITION,
-            defaultValue=Property.EMPTY_DBL,
-            doc='A workspace index corresponding to the beam centre between 0.0 and 255.0.'
-        )
-        self.declareProperty(
-            Prop.SUBALG_LOGGING,
-            defaultValue=SubalgLogging.OFF,
-            validator=StringListValidator([SubalgLogging.OFF, SubalgLogging.ON]),
-            doc='Enable or disable child algorithm logging.'
-        )
-        self.declareProperty(
-            Prop.CLEANUP,
-            defaultValue=common.WSCleanup.ON,
-            validator=StringListValidator(
-                [common.WSCleanup.ON, common.WSCleanup.OFF]
-            ),
-            doc='Enable or disable intermediate workspace cleanup.'
-        )
-        self.declareProperty(
-            MatrixWorkspaceProperty(
-                Prop.WATER_REFERENCE,
-                defaultValue='',
+            StringArrayProperty(
+                PropAutoProcess.ANGLE_OPTION,
+                values=[Angle.DAN],
+                validator=stringArrayValidator,
                 direction=Direction.Input,
-                validator=WorkspaceUnitValidator("TOF"),
-                optional=PropertyMode.Optional
             ),
-            doc='A (water) calibration workspace (unit TOF).')
-        self.declareProperty(
-            Prop.SLIT_NORM,
-            defaultValue=SlitNorm.OFF,
-            validator=StringListValidator([SlitNorm.OFF, SlitNorm.ON]),
-            doc='Enable or disable slit normalisation.'
+            doc='Angle option used for detector positioning{}'.format(listOrSingleNumber)
         )
+        self.setPropertyGroup(PropAutoProcess.ANGLE_OPTION, '')
+        preProcessGen = 'ReflectometryILLPreprocess, common properties'
         self.declareProperty(
-            Prop.FLUX_NORM_METHOD,
-            defaultValue=FluxNormMethod.TIME,
-            validator=StringListValidator(
-                [FluxNormMethod.TIME,FluxNormMethod.MONITOR,FluxNormMethod.OFF]
+            FloatArrayProperty(
+                PropAutoProcess.BRAGG_ANGLE,
+                values=[Property.EMPTY_DBL]
             ),
-            doc='Neutron flux normalisation method.'
+            doc='A user-defined Bragg angle in degree{}'.format(listOrSingleNumber)
         )
+        self.setPropertyGroup(PropAutoProcess.BRAGG_ANGLE, preProcessGen)
+        self.declareProperty(
+            FloatArrayProperty(
+                Prop.LINE_POSITION,
+                values=[Property.EMPTY_DBL]
+            ),
+            doc='A fractional workspace index corresponding to the beam centre between 0 and 255 {}'.
+                format(listOrSingleNumber)
+        )
+        self.copyProperties(
+            'ReflectometryILLPreprocess',
+            [
+                Prop.SUBALG_LOGGING,
+                Prop.CLEANUP,
+                Prop.WATER_REFERENCE,
+                Prop.SLIT_NORM,
+                Prop.FLUX_NORM_METHOD
+            ]
+        )
+        self.setPropertyGroup(Prop.LINE_POSITION, preProcessGen)
+        self.setPropertyGroup(Prop.SUBALG_LOGGING, preProcessGen)
+        self.setPropertyGroup(Prop.CLEANUP, preProcessGen)
+        self.setPropertyGroup(Prop.WATER_REFERENCE, preProcessGen)
+        self.setPropertyGroup(Prop.SLIT_NORM, preProcessGen)
+        self.setPropertyGroup(Prop.FLUX_NORM_METHOD, preProcessGen)
+        preProcessDirect = 'ReflectometryILLPreprocess for direct runs'
         self.declareProperty(
             IntArrayProperty(
-                Prop.FOREGROUND_HALF_WIDTH_DIRECT,
-                validator=maxTwoNonnegativeInts
+                PropAutoProcess.LOW_FOREGROUND_HALF_WIDTH_DIRECT,
+                values=[0],
+                validator=nonnegativeInts
             ),
-            doc='Number of foreground pixels at lower and higher angles from the centre pixel.'
+            doc='Number of foreground pixels at lower angles from the centre pixel.'
         )
+        self.setPropertyGroup(PropAutoProcess.LOW_FOREGROUND_HALF_WIDTH_DIRECT, preProcessDirect)
         self.declareProperty(
             IntArrayProperty(
-                Prop.FOREGROUND_INDICES_DIRECT,
-                values=[Property.EMPTY_INT, Property.EMPTY_INT, Property.EMPTY_INT],
-                validator=threeNonnegativeInts
+                PropAutoProcess.HIGH_FOREGROUND_HALF_WIDTH_DIRECT,
+                values=[0],
+                validator=nonnegativeInts
             ),
-            doc='A three element array of foreground start, centre and end workspace indices.')
+            doc='Number of foreground pixels at higher angles from the centre pixel.'
+        )
+        self.setPropertyGroup(PropAutoProcess.HIGH_FOREGROUND_HALF_WIDTH_DIRECT, preProcessDirect)
         self.declareProperty(
-            Prop.BKG_METHOD_DIRECT,
+            PropAutoProcess.BKG_METHOD_DIRECT,
             defaultValue=BkgMethod.CONSTANT,
             validator=StringListValidator(
-                [BkgMethod.CONSTANT,BkgMethod.LINEAR,BkgMethod.OFF]
+                [BkgMethod.CONSTANT,
+                 BkgMethod.LINEAR,
+                 BkgMethod.OFF]
             ),
             doc='Flat background calculation method for background subtraction.'
         )
-        self.declareProperty(
-            Prop.LOW_BKG_OFFSET_DIRECT,
-            defaultValue=7,
-            validator=nonnegativeInt,
-            doc='Distance of flat background region towards smaller detector angles from the ' +
-                'foreground centre, in pixels.'
-        )
-        self.declareProperty(
-            Prop.LOW_BKG_WIDTH_DIRECT,
-            defaultValue=5,
-            validator=nonnegativeInt,
-            doc='Width of flat background region towards smaller detector angles from the ' +
-                'foreground centre, in pixels.'
-        )
-        self.declareProperty(
-            Prop.HIGH_BKG_OFFSET_DIRECT,
-            defaultValue=7,
-            validator=nonnegativeInt,
-            doc='Distance of flat background region towards larger detector angles from the ' +
-                'foreground centre, in pixels.'
-        )
-        self.declareProperty(
-            Prop.HIGH_BKG_WIDTH_DIRECT,
-            defaultValue=5,
-            validator=nonnegativeInt,
-            doc='Width of flat background region towards larger detector angles from the ' +
-                'foreground centre, in pixels.'
-        )
-        self.declareProperty(
-            Prop.FLUX_NORM_METHOD_DIRECT,
-            defaultValue=FluxNormMethod.TIME,
-            validator=StringListValidator(
-                [FluxNormMethod.TIME,FluxNormMethod.MONITOR,FluxNormMethod.OFF]
-            ),
-            doc='Neutron flux normalisation method.'
-        )
+        self.setPropertyGroup(PropAutoProcess.BKG_METHOD_DIRECT, preProcessDirect)
         self.declareProperty(
             IntArrayProperty(
-                Prop.FOREGROUND_HALF_WIDTH_REFLECTED,
-                validator=maxTwoNonnegativeInts
+                PropAutoProcess.LOW_BKG_OFFSET_DIRECT,
+                values=[7],
+                validator=nonnegativeInts,
             ),
-            doc='Number of foreground pixels at lower and higher angles from the centre pixel.'
+            doc='Distance of flat background region towards smaller detector angles from the ' +
+                'foreground centre, in pixels{}'.format(listOrSingleNumber)
         )
+        self.setPropertyGroup(PropAutoProcess.LOW_BKG_OFFSET_DIRECT, preProcessDirect)
         self.declareProperty(
             IntArrayProperty(
-                Prop.FOREGROUND_INDICES_REFLECTED,
-                values=[Property.EMPTY_INT, Property.EMPTY_INT, Property.EMPTY_INT],
-                validator=threeNonnegativeInts
+                PropAutoProcess.LOW_BKG_WIDTH_DIRECT,
+                values=[5],
+                validator=nonnegativeInts,
             ),
-            doc='A three element array of foreground start, centre and end workspace indices.'
-        )
-        self.declareProperty(
-            Prop.BKG_METHOD_REFLECTED,
-            defaultValue=BkgMethod.CONSTANT,
-            validator=StringListValidator(
-                [BkgMethod.CONSTANT,BkgMethod.LINEAR,BkgMethod.OFF]
-            ),
-            doc='Flat background calculation method for background subtraction.'
-        )
-        self.declareProperty(
-            Prop.LOW_BKG_OFFSET_REFLECTED,
-            defaultValue=7,
-            validator=nonnegativeInt,
-            doc='Distance of flat background region towards smaller detector angles from the ' +
-                'foreground centre, in pixels.'
-        )
-        self.declareProperty(
-            Prop.LOW_BKG_WIDTH_REFLECTED,
-            defaultValue=5,
-            validator=nonnegativeInt,
             doc='Width of flat background region towards smaller detector angles from the ' +
-                'foreground centre, in pixels.'
+                'foreground centre, in pixels{}'.format(listOrSingleNumber)
         )
+        self.setPropertyGroup(PropAutoProcess.LOW_BKG_WIDTH_DIRECT, preProcessDirect)
         self.declareProperty(
-            Prop.HIGH_BKG_OFFSET_REFLECTED,
-            defaultValue=7,
-            validator=nonnegativeInt,
+            IntArrayProperty(
+                PropAutoProcess.HIGH_BKG_OFFSET_DIRECT,
+                values=[7],
+                validator=nonnegativeInts,
+            ),
             doc='Distance of flat background region towards larger detector angles from the ' +
-                'foreground centre, in pixels.'
+                'foreground centre, in pixels{}'.format(listOrSingleNumber)
         )
+        self.setPropertyGroup(PropAutoProcess.HIGH_BKG_OFFSET_DIRECT, preProcessDirect)
         self.declareProperty(
-            Prop.HIGH_BKG_WIDTH_REFLECTED,
-            defaultValue=5,
-            validator=nonnegativeInt,
+            IntArrayProperty(
+                PropAutoProcess.HIGH_BKG_WIDTH_DIRECT,
+                values=[5],
+                validator=nonnegativeInts,
+            ),
             doc='Width of flat background region towards larger detector angles from the ' +
-                'foreground centre, in pixels.'
+                'foreground centre, in pixels{}'.format(listOrSingleNumber)
         )
-        # For ReflectometryILLPreprocess (FindReflectometryLines)
+        self.setPropertyGroup(PropAutoProcess.HIGH_BKG_WIDTH_DIRECT, preProcessDirect)
         self.declareProperty(
-            Prop.START_WS_INDEX,
-            validator=wsIndexRange,
-            defaultValue=0,
-            doc='Start histogram index used for peak fitting.'
+            IntArrayProperty(
+                PropAutoProcess.START_WS_INDEX_DIRECT,
+                values=[0],
+                validator=nonnegativeInts,
+            ),
+            doc='Start histogram index used for peak fitting{}'.format(listOrSingleNumber)
         )
+        self.setPropertyGroup(PropAutoProcess.START_WS_INDEX_DIRECT, preProcessDirect)
         self.declareProperty(
-            Prop.END_WS_INDEX,
-            validator=wsIndexRange,
-            defaultValue=255,
-            doc='Last histogram index used for peak fitting.'
+            IntArrayProperty(
+                PropAutoProcess.END_WS_INDEX_DIRECT,
+                values=[255],
+                validator=nonnegativeInts,
+            ),
+            doc='Last histogram index used for peak fitting{}'.format(listOrSingleNumber)
         )
+        self.setPropertyGroup(PropAutoProcess.END_WS_INDEX_DIRECT, preProcessDirect)
         self.declareProperty(
-            Prop.XMIN,
+            PropAutoProcess.XMIN_DIRECT,
             defaultValue=Property.EMPTY_DBL,
             doc='Minimum x value (unit wavelength) used for peak fitting.'
         )
+        self.setPropertyGroup(PropAutoProcess.XMIN_DIRECT, preProcessDirect)
         self.declareProperty(
-            Prop.XMAX,
+            PropAutoProcess.XMAX_DIRECT,
             defaultValue=Property.EMPTY_DBL,
             doc='Maximum x value (unit wavelength) used for peak fitting.'
         )
+        self.setPropertyGroup(PropAutoProcess.XMAX_DIRECT, preProcessDirect)
+        preProcessReflected = 'ReflectometryILLPreprocess for reflected runs'
+        self.copyProperties(
+            'ReflectometryILLPreprocess',
+            [
+                Prop.BKG_METHOD
+            ]
+        )
+        self.setPropertyGroup(Prop.BKG_METHOD, preProcessReflected)
+        self.declareProperty(
+            IntArrayProperty(
+                PropAutoProcess.LOW_FOREGROUND_HALF_WIDTH,
+                values=[0],
+                validator=nonnegativeInts,
+            ),
+            doc='Number of foreground pixels at lower angles from the centre pixel.'
+        )
+        self.setPropertyGroup(PropAutoProcess.LOW_FOREGROUND_HALF_WIDTH, preProcessReflected)
+        self.declareProperty(
+            IntArrayProperty(
+                PropAutoProcess.HIGH_FOREGROUND_HALF_WIDTH,
+                values=[0],
+                validator=nonnegativeInts,
+            ),
+            doc='Number of foreground pixels at higher angles from the centre pixel.'
+        )
+        self.setPropertyGroup(PropAutoProcess.HIGH_FOREGROUND_HALF_WIDTH, preProcessReflected)
+        self.declareProperty(
+            IntArrayProperty(
+                PropAutoProcess.LOW_BKG_OFFSET_REFLECTED,
+                values=[7],
+                validator=nonnegativeInts,
+            ),
+            doc='Distance of flat background region towards smaller detector angles from the ' +
+                'foreground centre, in pixels.'
+        )
+        self.setPropertyGroup(PropAutoProcess.LOW_BKG_OFFSET_REFLECTED, preProcessReflected)
+        self.declareProperty(
+            IntArrayProperty(
+                PropAutoProcess.LOW_BKG_WIDTH_REFLECTED,
+                values=[5],
+                validator=nonnegativeInts,
+            ),
+            doc='Width of flat background region towards smaller detector angles from the ' +
+                'foreground centre, in pixels{}'.format(listOrSingleNumber)
+        )
+        self.setPropertyGroup(PropAutoProcess.LOW_BKG_WIDTH_REFLECTED, preProcessReflected)
+        self.declareProperty(
+            IntArrayProperty(
+                PropAutoProcess.HIGH_BKG_OFFSET_REFLECTED,
+                values=[7],
+                validator=nonnegativeInts,
+            ),
+            doc='Distance of flat background region towards larger detector angles from the ' +
+                'foreground centre, in pixels{}'.format(listOrSingleNumber)
+        )
+        self.setPropertyGroup(PropAutoProcess.HIGH_BKG_OFFSET_REFLECTED, preProcessReflected)
+        self.declareProperty(
+            IntArrayProperty(
+                PropAutoProcess.HIGH_BKG_WIDTH_REFLECTED,
+                values=[5],
+                validator=nonnegativeInts,
+            ),
+            doc='Width of flat background region towards larger detector angles from the ' +
+                'foreground centre, in pixels.'
+        )
+        self.setPropertyGroup(PropAutoProcess.HIGH_BKG_WIDTH_REFLECTED, preProcessReflected)
+        self.declareProperty(
+            IntArrayProperty(
+                PropAutoProcess.START_WS_INDEX_REFLECTED,
+                values=[0],
+                validator=nonnegativeInts,
+            ),
+            doc='Start histogram index used for peak fitting{}'.format(listOrSingleNumber)
+        )
+        self.setPropertyGroup(PropAutoProcess.START_WS_INDEX_REFLECTED, preProcessReflected)
+        self.declareProperty(
+            IntArrayProperty(
+                PropAutoProcess.END_WS_INDEX_REFLECTED,
+                values=[255],
+                validator=nonnegativeInts,
+            ),
+            doc='Last histogram index used for peak fitting{}'.format(listOrSingleNumber)
+        )
+        self.setPropertyGroup(PropAutoProcess.END_WS_INDEX_REFLECTED, preProcessReflected)
+        self.declareProperty(
+            FloatArrayProperty(
+                PropAutoProcess.XMIN_REFLECTED,
+                values=[Property.EMPTY_DBL],
+                validator=nonnegativeFloatArray,
+            ),
+            doc='Minimum x value (unit wavelength) used for peak fitting{}'.format(listOrSingleNumber)
+        )
+        self.setPropertyGroup(PropAutoProcess.XMIN_REFLECTED, preProcessReflected)
+        self.declareProperty(
+            FloatArrayProperty(
+                PropAutoProcess.XMAX_REFLECTED,
+                values=[Property.EMPTY_DBL],
+                validator=nonnegativeFloatArray,
+            ),
+            doc='Maximum x value (unit wavelength) used for peak fitting{}'.format(listOrSingleNumber)
+        )
+        self.setPropertyGroup(PropAutoProcess.XMAX_REFLECTED, preProcessReflected)
         # For ReflectometryILLSumForeground
         self.declareProperty(
             FloatArrayProperty(
-                Prop.WAVELENGTH_RANGE,
+                PropAutoProcess.WAVELENGTH_LOWER,
                 values=[0.],
                 validator=nonnegativeFloatArray
             ),
-            doc='The wavelength bounds.'
+            doc='The lower wavelength bound (Angstrom){}'.format(listOrSingleNumber)
         )
-        # For ReflectometryILLPolarisationCorr
+        self.declareProperty(
+            FloatArrayProperty(
+                PropAutoProcess.WAVELENGTH_UPPER,
+                values=[35.],
+                validator=nonnegativeFloatArray
+            ),
+            doc='The upper wavelength bound (Angstrom){}'.format(listOrSingleNumber)
+        )
+        self.declareProperty(
+            StringArrayProperty(
+                PropAutoProcess.SUM_TYPE,
+                values=[SumType.IN_LAMBDA],
+                validator=stringArrayValidator,
+                direction=Direction.Input,
+            ),
+            doc='Type of summation to perform{}'.format(listOrSingleNumber)
+        )
+        # For ReflectometryILLPolarizationCorr -> action is now OptionalLoad
         self.declareProperty(
             FileProperty(
-                Prop.EFFICIENCY_FILE,
+                PropAutoProcess.EFFICIENCY_FILE,
                 defaultValue='',
-                action=FileAction.Load
+                action=FileAction.OptionalLoad
             ),
             doc='A file containing the polarization efficiency factors.'
         )
+        # For ReflectometryILLConvertToQ
+        self.declareProperty(
+            FloatArrayProperty(
+                PropAutoProcess.GROUPING_FRACTION,
+                values=[Property.EMPTY_DBL],
+                validator=nonnegativeFloatArray,
+            ),
+            doc='If set, group the output by steps of this fraction multiplied by Q resolution'
+        )
         # For Stitch1DMany
-        self.declareProperty(
-            IntArrayProperty(
-                Prop.START_OVERLAPS,
-                defaultValue=Property.EMPTY_INT
-            ),
-            doc='Start overlaps for stitched workspaces (number of input workspaces minus one).'
+        self.copyProperties(
+            'Stitch1DMany',
+            [
+                PropAutoProcess.START_OVERLAPS,
+                PropAutoProcess.END_OVERLAPS,
+                PropAutoProcess.USE_MANUAL_SCALE_FACTORS,
+                PropAutoProcess.MANUAL_SCALE_FACTORS
+            ]
         )
+        # Final scale factor
         self.declareProperty(
-            IntArrayProperty(
-                Prop.END_OVERLAPS,
-                defaultValue=Property.EMPTY_INT
-            ),
-            doc='End overlaps for stitched workspaces (number of input workspaces minus one).'
+            PropAutoProcess.SCALE_FACTOR,
+            defaultValue=1.0,
+            doc='Scale factor.'
         )
-        self.declareProperty(
-            Prop.USE_MANUAL_SCALE_FACTORS,
-            defaultValue=False,
-            doc='True to use provided values for the scale factor.'
-        )
-        self.declareProperty(
-            Prop.MANUAL_SCALE_FACTORS,
-            defaultValue=Property.EMPTY_DBL,
-            doc='Either a single scale factor which will be applied to all input workspaces or ' +
-                'individual scale factors (number of input workspaces minus one).'
-        )
+
+    def validateInputs(self):
+        """Return a dictionary containing issues found in properties."""
+        issues = dict()
+        DB = self.getProperty(PropAutoProcess.DB).value
+        RB = self.getProperty(PropAutoProcess.RB).value
+        if len(DB) != len(RB):
+            issues[PropAutoProcess.RB] = "The same number of direct runs and reflected runs must be given."
+        return issues
+
+    def getValue(self, propertyName, angle):
+        """Return the value of the property at given angle."""
+        value = self.getProperty(propertyName).value
+        if len(value) == 1:
+            return value[0]
+        elif angle <= len(value):
+            return value[angle]
+        else:
+            raise RuntimeError(
+                'The number of entries for {} must correspond to the number of reflected beams'.format(propertyName)
+            )
+
+    def twoThetaFromSampleAngle(self, run):
+        """Return the two theta angle in degrees of the sample angle."""
+        import h5py
+        # Need to still check whether the unit is degree
+        if isinstance(run, list):
+            run = run[0]
+        with h5py.File(run, "r") as nexus:
+            if nexus.get('entry0/instrument/SAN') is not None:
+                return 2. * float(numpy.array(nexus.get('entry0/instrument/SAN/value'), dtype='float'))
+            elif nexus.get('entry0/instrument/san') is not None:
+                return 2. * float(numpy.array(nexus.get('entry0/instrument/san/value'), dtype='float'))
+            else:
+                raise RuntimeError('Cannot retrieve sample angle from Nexus file {}.'.format(run))
+
+    def mtdName(self, runName):
+        """Return a name suitable to put in the ADS"""
+        nameForADS = ''
+        if not isinstance(runName, list):
+            return runName[-10:-4]
+        else:
+            for name in runName:
+                nameForADS += name[-10:-4]
+        return nameForADS
+
+    def angleOrMergeRuns(self, run):
+        """Return the string that will be passed to load the files, i.e. determine if angle is treated or runs get
+        merged."""
+        beamInput = run
+        if isinstance(run, list):
+            return '+'.join(beamInput)
+        return beamInput
+
+    def twoTheta(self, run, angle):
+        """Return the TwoTheta scattering angle depending on user input options."""
+        if numpy.isclose(self.getValue(PropAutoProcess.BRAGG_ANGLE, angle), Property.EMPTY_DBL):
+            if self.getValue(PropAutoProcess.ANGLE_OPTION, angle) == Angle.DAN:
+                self.log().notice('Using DAN angle')
+                return Property.EMPTY_DBL
+            elif self.getValue(PropAutoProcess.ANGLE_OPTION, angle) == Angle.SAN:
+                twoT = self.twoThetaFromSampleAngle(run)
+                self.log().notice('Using SAN angle: {} degree'.format(twoT / 2.))
+                return twoT
+            else:
+                raise RuntimeError('{} must be {} or {}.'.format(PropAutoProcess.ANGLE_OPTION, Angle.SAN, Angle.DAN))
+        else:
+            twoT = 2. * self.getValue(PropAutoProcess.BRAGG_ANGLE, angle)
+            self.log().notice('Using Bragg angle : {} degree'.format(twoT / 2.))
+            return twoT
+
+    def isPolarized(self):
+        """Return True, if a polarization file is given and False otherwise."""
+        if self.getProperty(PropAutoProcess.EFFICIENCY_FILE).value == "":
+            return False
+        else:
+            return True
 
     def PyExec(self):
         """Execute the algorithm."""
-        self._subalgLogging = self.getProperty(Prop.SUBALG_LOGGING).value == SubalgLogging.ON
-        cleanupMode = self.getProperty(Prop.CLEANUP).value
-        self._cleanup = common.WSCleanup(cleanupMode, self._subalgLogging)
-        self.wsPrefix = self.getPropertyValue(Prop.OUTPUT_WS)
-        self._names = common.WSNameSource(self.wsPrefix, cleanupMode)
+        subalgLogging = self.getProperty(Prop.SUBALG_LOGGING).value
+        cleanup = self.getProperty(Prop.CLEANUP).value
+        autoCleanup = common.WSCleanup(cleanup, subalgLogging == SubalgLogging.ON)
+        wsPrefix = self.getPropertyValue(Prop.OUTPUT_WS)
+        names = common.WSNameSource(wsPrefix, cleanup)
 
-        #angleOption = self.getProperty(Prop.ANGLE_OPTION).value
-        #if san: read angle from NeXus file, multiply by two and use as TWO_THETA input -> new NeXus, same name
-        # with h5py.File(Prop., "r") as f:
-
-        rb = self.getProperty(Prop.RB).value
-        db = self.getProperty(Prop.DB).value
-
-        # Background direct beam
-        self.lowWidthDirect = self.getProperty(Prop.LOW_BKG_WIDTH_DIRECT)
-        self.lowOffsetDirect = self.getProperty(Prop.LOW_BKG_OFFSET_DIRECT)
-        self.highWidthsDirect = self.getProperty(Prop.HIGH_BKG_WIDTH_DIRECT)
-        self.highOffsetDirect = self.getProperty(Prop.HIGH_BKG_OFFSET_DIRECT)
-        # Background reflected beam
-        self.lowWidthReflected = self.getProperty(Prop.LOW_BKG_WIDTH_REFLECTED)
-        self.lowOffsetReflected = self.getProperty(Prop.LOW_BKG_OFFSET_REFLECTED)
-        self.highWidthsReflected = self.getProperty(Prop.HIGH_BKG_WIDTH_REFLECTED)
-        self.highOffsetReflected = self.getProperty(Prop.HIGH_BKG_OFFSET_REFLECTED)
-        # Foreground direct beam
-        self.foregroundDirect = self.getProperty(Prop.FOREGROUND_INDICES_DIRECT)
-        # Foreground reflected beam
-        self.foregroundReflected = self.getProperty(Prop.FOREGROUND_INDICES_REFLECTED)
-        self.halfWidthsDirect = self.getProperty(Prop.FOREGROUND_HALF_WIDTH_DIRECT)
-        self.halfWidthsReflected = self.getProperty(Prop.FOREGROUND_HALF_WIDTH_REFLECTED)
-
-        self.wavelengthRange = self.getProperty(Prop.WAVELENGTH_RANGE)
-
-        self.polarizationEffFile = self.getProperty(Prop.EFFICIENCY_FILE)
+        rb = self.getProperty(PropAutoProcess.RB).value
+        workflowProgress = Progress(self, start=0.0, end=1.0, nreports=len(rb))
+        db = self.getProperty(PropAutoProcess.DB).value
+        slitNorm = self.getProperty(Prop.SLIT_NORM).value
+        toStitch = []
 
         for angle in range(len(rb)):
+
+            twoTheta = self.twoTheta(rb[angle], angle)
+            if numpy.isclose(self.getValue(Prop.LINE_POSITION, angle), Property.EMPTY_DBL):
+                linePosition = Property.EMPTY_DBL
+            else:
+                linePosition = float(self.getValue(Prop.LINE_POSITION, angle))
+
+            runDB = self.mtdName(db[angle])
+            runRB = self.mtdName(rb[angle])
+
+            halfWidthsReflected = [int(self.getValue(PropAutoProcess.LOW_FOREGROUND_HALF_WIDTH, angle)),
+                                   int(self.getValue(PropAutoProcess.HIGH_FOREGROUND_HALF_WIDTH, angle))]
+            halfWidthsDirect = [int(self.getValue(PropAutoProcess.LOW_FOREGROUND_HALF_WIDTH_DIRECT, angle)),
+                                int(self.getValue(PropAutoProcess.HIGH_FOREGROUND_HALF_WIDTH_DIRECT, angle))]
+            wavelengthRange = [float(self.getValue(PropAutoProcess.WAVELENGTH_LOWER, angle)),
+                               float(self.getValue(PropAutoProcess.WAVELENGTH_UPPER, angle))]
+
+            directBeamInput = self.angleOrMergeRuns(db[angle])
+            reflectedBeamInput = self.angleOrMergeRuns(rb[angle])
+
+            directBeamName = 'direct-{}-angle-{}'.format(runDB, angle)
+            directForegroundName = 'direct-{}-angle-{}-foreground'.format(runDB, angle)
             # Direct beam already in ADS?
             workspaces = mtd.getObjectNames()
-            if not 'direct-{}'.format(db[angle]) in workspaces:
+            if directBeamName not in workspaces:
+                self.log().notice('Direct beam {} not cached in AnalysisDataService.'.format(directBeamName))
                 # Direct beam pre-processing
-                directBeam = ReflectometryILLPreprocess(
-                    Run=db[angle],
-                    LinePosition=self.getProperty(Prop.LINE_POSITION),
-                    TwoTheta=self.getProperty(Prop.TWO_THETA),
-                    OutputWorkspace='direct-{}'.format(db[angle]),
-                    ForegroundHalfWidth=self.halfWidthsDirect,
-                    SlitNormalisation=SlitNorm.ON,
-                    SubalgorithmLogging=self._subalgLogging,
-                    Cleanup=self._cleanup,
-                    LowAngleBkgOffset=self.lowOffsetDirect,
-                    LowAngleBkgWidth=self.lowWidthDirect,
-                    HighAngleBkgOffset=self.highOffsetDirect,
-                    HighAngleBkgWidth=self.highWidthsDirect
+                ReflectometryILLPreprocess(
+                    Run=directBeamInput,
+                    OutputWorkspace=directBeamName,
+                    ForegroundHalfWidth=halfWidthsDirect,
+                    SlitNormalisation=slitNorm,
+                    FluxNormalisation=self.getProperty(Prop.FLUX_NORM_METHOD).value,
+                    LowAngleBkgOffset=int(self.getValue(PropAutoProcess.LOW_BKG_OFFSET_DIRECT, angle)),
+                    LowAngleBkgWidth=int(self.getValue(PropAutoProcess.LOW_BKG_WIDTH_DIRECT, angle)),
+                    HighAngleBkgOffset=int(self.getValue(PropAutoProcess.HIGH_BKG_OFFSET_DIRECT, angle)),
+                    HighAngleBkgWidth=int(self.getValue(PropAutoProcess.HIGH_BKG_WIDTH_DIRECT, angle)),
+                    FitStartWorkspaceIndex=int(self.getValue(PropAutoProcess.START_WS_INDEX_DIRECT, angle)),
+                    FitEndWorkspaceIndex=int(self.getValue(PropAutoProcess.END_WS_INDEX_DIRECT, angle)),
+                    SubalgorithmLogging=subalgLogging,
+                    Cleanup=cleanup,
                 )
-                # Get Bragg angle and beam centre for reflected beam pre-processing
-                twoTheta = directBeam.run().getProperty(common.TWO_THETA).value
-                linePosition = directBeam.run().getProperty(common.LINE_POSITION).value
+                autoCleanup.protect(directBeamName)
                 # Direct sum foreground
                 ReflectometryILLSumForeground(
-                    InputWorkspace='direct-{}'.format(db[angle]),
-                    OutputWorkspace='direct-{}-foreground'.format(db[angle]),
-                    Foreground=self.foregroundDirect,
-                    SummationType=self._sumType,
-                    WavelengthRange=self.wavelengthRange,
-                    SubalgorithmLogging=self._subalgLogging,
-                    Cleanup=self._cleanup
+                    InputWorkspace=directBeamName,
+                    OutputWorkspace=directForegroundName,
+                    SummationType=SumType.IN_LAMBDA,
+                    WavelengthRange=wavelengthRange,
+                    SubalgorithmLogging=subalgLogging,
+                    Cleanup=cleanup,
                 )
+                autoCleanup.protect(directForegroundName)
                 # Direct beam polarization correction
                 if self.isPolarized():
                     ReflectometryILLPolarizationCor(
-                        InputWorkspaces='direct-{}-foreground'.format(db[angle]),
-                        OutputWorkspace='direct-{}-polcor'.format(self._direct),
-                        EfficiencyFile=self.polarizationEffFile,
-                        SubalgorithmLogging=self._subalgLogging,
-                        Cleanup=self._cleanup
+                        InputWorkspaces=directForegroundName,
+                        OutputWorkspace='direct-{}-angle-{}-polcor'.format(runDB, angle),
+                        EfficiencyFile=self.getProperty(PropAutoProcess.EFFICIENCY_FILE).value,
+                        SubalgorithmLogging=subalgLogging,
+                        Cleanup=cleanup,
                     )
             # Reflected beam
-            self._workspaceNamesForQConversion = ''
             if not self.isPolarized():
-                self.rbName = rb[0]
-                for i in range(1, len(rb)):
-                    self.rbName = '+'.join(rb[i])
-                    ReflectometryILLPreprocess(
-                        Run=rb,
-                        OutputWorkspace='{}'.format(self.rbName),
-                        LinePostion=linePosition,
-                        TwoTheta=twoTheta,
-                        ForegroundHalfWidth=self.halfWidthsReflected,
-                        SlitNormalisation=SlitNorm.ON,
-                        SubalgorithmLogging=self._subalgLogging,
-                        Cleanup=self._cleanup,
-                        LowAngleBkgOffset=self.lowOffsetReflected,
-                        LowAngleBkgWidth=self.lowWidthReflected,
-                        HighAngleBkgOffset=self.highOffsetReflected,
-                        HighAngleBkgWidth=self.highWidthsReflected
-                    )
-                # Reflected sum foreground
-                self._workspaceNamesForQConversion = 'reflected-{}-foreground'.format(self.rbName)
-                ReflectometryILLSumForeground(
-                    InputWorkspace='{}'.format(self.rbName),
-                    OutputWorkspace=self._workspaceNamesForQConversion,
-                    Foreground=self.foregroundReflected,
-                    SummationType=self._sumType,
-                    DirectForegroundWorkspace='direct-{}-foreground'.format(db[angle]),
-                    DirectLineWorkspace='direct-{}'.format(db[angle]),
-                    WavelengthRange=self.wavelengthRange,
-                    SubalgorithmLogging=self._subalgLogging,
-                    Cleanup=self._cleanup
+                ReflectometryILLPreprocess(
+                    Run=reflectedBeamInput,
+                    OutputWorkspace='reflected-{}'.format(runRB),
+                    TwoTheta=twoTheta,
+                    LinePosition=linePosition,
+                    DirectLineWorkspace=directBeamName,
+                    ForegroundHalfWidth=halfWidthsReflected,
+                    SlitNormalisation=slitNorm,
+                    FluxNormalisation=self.getProperty(Prop.FLUX_NORM_METHOD).value,
+                    LowAngleBkgOffset=int(self.getValue(PropAutoProcess.LOW_BKG_OFFSET_REFLECTED, angle)),
+                    LowAngleBkgWidth=int(self.getValue(PropAutoProcess.LOW_BKG_WIDTH_REFLECTED, angle)),
+                    HighAngleBkgOffset=int(self.getValue(PropAutoProcess.HIGH_BKG_OFFSET_REFLECTED, angle)),
+                    HighAngleBkgWidth=int(self.getValue(PropAutoProcess.HIGH_BKG_WIDTH_REFLECTED, angle)),
+                    FitStartWorkspaceIndex=int(self.getValue(PropAutoProcess.START_WS_INDEX_REFLECTED, angle)),
+                    FitEndWorkspaceIndex=int(self.getValue(PropAutoProcess.END_WS_INDEX_REFLECTED, angle)),
+                    SubalgorithmLogging=subalgLogging,
+                    Cleanup=cleanup,
                 )
+                # Reflected sum foreground
+                workspaceNamesForQConversion = 'reflected-{}-foreground'.format(runRB)
+                ReflectometryILLSumForeground(
+                    InputWorkspace='reflected-{}'.format(runRB),
+                    OutputWorkspace=workspaceNamesForQConversion,
+                    SummationType=self.getValue(PropAutoProcess.SUM_TYPE, angle),
+                    DirectForegroundWorkspace=directForegroundName,
+                    DirectLineWorkspace=directBeamName,
+                    WavelengthRange=wavelengthRange,
+                    SubalgorithmLogging=subalgLogging,
+                    Cleanup=cleanup,
+                )
+                autoCleanup.cleanupLater('reflected-{}'.format(runRB))
+                autoCleanup.cleanupLater('reflected-{}-foreground'.format(runRB))
             else:
-                for run in rb[angle]:
+                for run in reflectedBeamInput:
                     ReflectometryILLPreprocess(
                         Run=run,
-                        OutputWorkspace='{}'.format(run),
-                        LinePosition=linePosition,
                         TwoTheta=twoTheta,
-                        ForegroundHalfWidth=self.halfWidthsReflected,
-                        SlitNormalisation=SlitNorm.ON,
-                        SubalgorithmLogging=self._subalgLogging,
-                        Cleanup=self._cleanup,
-                        LowAngleBkgOffset=self.lowOffsetReflected,
-                        LowAngleBkgWidth=self.lowWidthReflected,
-                        HighAngleBkgOffset=self.highOffsetReflected,
-                        HighAngleBkgWidth=self.highWidthsReflected
+                        LinePosition=linePosition,
+                        OutputWorkspace='{}'.format(run),
+                        DirectLineWorkspace=directBeamName,
+                        ForegroundHalfWidth=halfWidthsReflected,
+                        SlitNormalisation=slitNorm,
+                        LowAngleBkgOffset=int(self.getValue(PropAutoProcess.LOW_BKG_OFFSET_REFLECTED, angle)),
+                        LowAngleBkgWidth=int(self.getValue(PropAutoProcess.LOW_BKG_WIDTH_REFLECTED, angle)),
+                        HighAngleBkgOffset=int(self.getValue(PropAutoProcess.HIGH_BKG_OFFSET_REFLECTED, angle)),
+                        HighAngleBkgWidth=int(self.getValue(PropAutoProcess.HIGH_BKG_WIDTH_REFLECTED, angle)),
+                        FitStartWorkspaceIndex=int(self.getValue(PropAutoProcess.START_WS_INDEX_REFLECTED, angle)),
+                        FitEndWorkspaceIndex=int(self.getValue(PropAutoProcess.END_WS_INDEX_REFLECTED, angle)),
+                        SubalgorithmLogging=subalgLogging,
+                        Cleanup=cleanup,
                     )
                     # Reflected sum foreground
                     ReflectometryILLSumForeground(
                         InputWorkspace='{}'.format(run),
                         OutputWorkspace='reflected-{}-foreground'.format(run),
-                        Foreground=self.foregroundReflected,
-                        SummationType=self._sumType,
-                        DirectForegroundWorkspace='direct-{}-foreground'.format(db[angle]),
-                        DirectLineWorkspace='direct-{}'.format(db[angle]),
-                        WavelengthRange=self.wavelengthRange,
-                        SubalgorithmLogging=self._subalgLogging,
-                        Cleanup=self._cleanup
+                        SummationType=self.getValue(PropAutoProcess.SUM_TYPE, angle),
+                        DirectForegroundWorkspace=directForegroundName,
+                        DirectLineWorkspace=directBeamName,
+                        WavelengthRange=wavelengthRange,
+                        SubalgorithmLogging=subalgLogging,
+                        Cleanup=cleanup,
                     )
+                    autoCleanup.cleanupLater('{}'.format(run))
+                    autoCleanup.cleanupLater('reflected-{}-foreground'.format(run))
                 # Reflected polarization correction
-                inputWorkspaces = 'reflected-{}-foreground'.format(rb[0])
-                if len(rb[angle]) > 1:
+                inputWorkspaces = 'reflected-{}-foreground'.format(runRB)
+                if len(reflectedBeamInput) > 1:
                     for r in self._reflecteds:
                         inputWorkspaces = ',{}'.join(rb)
                         inputWorkspaces += ',' + 'reflected-{}-foreground'.format(r)
                 ReflectometryILLPolarizationCor(
                     InputWorkspaces=inputWorkspaces,
                     OutputWorkspace='reflected-polcor'.format(),
-                    EfficiencyFile=self.polarizationEffFile,
-                    SubalgorithmLogging=self._subalgLogging,
-                    Cleanup=self._cleanup
+                    EfficiencyFile=self.getProperty(PropAutoProcess.EFFICIENCY_FILE).value,
+                    SubalgorithmLogging=subalgLogging,
+                    Cleanup=cleanup,
                 )
                 polCorGroup = mtd['reflected-polcor']
-                self._workspaceNamesForQConversion = polCorGroup.getNames()
+                workspaceNamesForQConversion = polCorGroup.getNames()
             # Conversion to Q
-            for wsName in self._workspaceNamesForQConversion:
-                ReflectometryILLConvertToQ(
-                    InputWorkspace=wsName,
-                    OutputWorkspace='{}-reflectivity'.format(wsName),
-                    DirectForegroundWorkspace='direct-{}-foreground'.format(self._direct),
-                    GroupingQFraction=self._groupingQFraction,
-                    SubalgorithmLogging=self._subalgLogging,
-                    Cleanup=self.cleanup
-                )
-        # If more than one angle, stitch them
-        argsStitch = {'OutputWorkspace': '{}'.format(self.wsPrefix)}
-        # List all {}-reflectivity workspaces
-        toStitch = [name for name in mtd.getObjectNames() if re.findall('-reflectivity', -13, -1)]
-        inputWorkspaces = ''
-        separator = ''
-        suffix = ''
-        for names in toStitch:
-            for name in names:
-                inputWorkspaces += separator + name
-                separator = ','
-                suffix = [suffix in ['_--', '_-+', '_+-', '_++'] if suffix in name else '']
-        if len(toStitch) > 1:
-            argsStitch.update({'InputWorkspaces': inputWorkspaces})
-            argsStitch.update({Prop.START_OVERLAPS: self.getProperty(Prop.START_OVERLAPS).value})
-            argsStitch.update({Prop.END_OVERLAPS: self.getProperty(Prop.END_OVERLAPS).value})
-            argsStitch.update({Prop.USE_MANUAL_SCALE_FACTOR: self.getProperty(Prop.USE_MANUAL_SCALE_FACTOR).value})
-            argsStitch.update({Prop.MANUAL_SCALE_FACTOR: self.getProperty(Prop.MANUAL_SCALE_FACTOR)})
-            Stitch1DMany(**argsStitch)
+            outWS = 'Angle-{}'.format(angle)
+            ReflectometryILLConvertToQ(
+                InputWorkspace=workspaceNamesForQConversion,
+                OutputWorkspace=outWS,
+                DirectForegroundWorkspace=directForegroundName,
+                GroupingQFraction=float(self.getValue(PropAutoProcess.GROUPING_FRACTION, angle)),
+                SubalgorithmLogging=subalgLogging,
+                Cleanup=cleanup,
+            )
+            toStitch.append(outWS)
+            autoCleanup.cleanupLater(outWS)
+            workflowProgress.report()
+
+        wsPrefix = self.getPropertyValue(Prop.OUTPUT_WS)
+        if len(rb) > 1:
+            ','.join(toStitch)
+            # Stitch could list sample log infos of reduction.two_theta , reduction.line_position, ...
+            Stitch1DMany(
+                InputWorkspaces=toStitch,
+                OutputWorkspace='{}'.format(wsPrefix),
+                StartOverlaps=self.getProperty(PropAutoProcess.START_OVERLAPS).value,
+                EndOverlaps=self.getProperty(PropAutoProcess.END_OVERLAPS).value,
+                UseManualScaleFactors=self.getProperty(PropAutoProcess.USE_MANUAL_SCALE_FACTORS).value,
+                ManualScaleFactors=self.getProperty(PropAutoProcess.MANUAL_SCALE_FACTORS).value,
+            )
+            autoCleanup.cleanupLater(toStitch)
         else:
             RenameWorkspace(
                 InputWorkspace='{}'.format(toStitch[0]),
-                OutputWorkspace='{}'.format(self.wsPrefix) + suffix
+                OutputWorkspace='{}'.format(wsPrefix),
             )
-        if self.scaling != 1.:
+        scaleFactor = self.getProperty(PropAutoProcess.SCALE_FACTOR).value
+        if scaleFactor != 1.:
             Scale(
-                InputWorkspace='{}'.format(self.wsPrefix) + suffix,
-                OutputWorkspace='{}'.format(self.wsPrefix) + suffix,
-                Factor=self.scaling
+                InputWorkspace='{}'.format(wsPrefix),
+                OutputWorkspace='{}'.format(wsPrefix),
+                Factor=scaleFactor,
             )
-        self._finalize(ws)
+        self.setProperty(Prop.OUTPUT_WS, wsPrefix)
+        autoCleanup.finalCleanup()
 
-    def validateInputs(self):
-        """Return a dictionary containing issues found in properties."""
-        issues = dict()
-        if len(self.getProperty(Prop.DB).value) != len(self.getProperty(Prop.RB).value):
-            issues[Prop.RB] = "The number of reflected runs must be equal to the number of direct runs."
-        return issues
-
-AlgorithmFactory.subscribe(ReflectometryILLAutoReduction)
+AlgorithmFactory.subscribe(ReflectometryILLAutoProcess)
