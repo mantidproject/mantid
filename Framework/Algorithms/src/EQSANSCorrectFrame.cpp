@@ -21,12 +21,13 @@ namespace Algorithms {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(EQSANSCorrectFrame)
 
-using namespace Mantid;
-using namespace Mantid::Kernel;
-using namespace Mantid::API;
-using namespace Mantid::DataObjects;
-using namespace Mantid::Geometry;
+using namespace Kernel;
+using namespace API;
+using namespace DataObjects;
+using namespace Geometry;
 using Types::Event::TofEvent;
+
+EQSANSCorrectFrame::EQSANSCorrectFrame() : API::Algorithm() {}
 
 void EQSANSCorrectFrame::init() {
   declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(
@@ -49,7 +50,6 @@ void EQSANSCorrectFrame::init() {
 }
 
 void EQSANSCorrectFrame::exec() {
-  processAlgProperties();
   EventWorkspace_sptr inputWS = getProperty("InputWorkspace");
   const size_t numHists = inputWS->getNumberHistograms();
   Progress progress(this, 0.0, 1.0, numHists);
@@ -61,9 +61,9 @@ void EQSANSCorrectFrame::exec() {
   // Find how many frame widths elapsed from the time the neutrons of the
   // lead pulse were emitted and the time the neutrons arrived to the
   // detector bank. This time must be added to the stored TOF values
-  const size_t nFrames = std::static_cast<size_t>(minTOF / frameWidth);
+  const size_t nFrames = static_cast<size_t>(minTOF / frameWidth);
   const double framesOffsetTime =
-      frameWidth * std::static_cast<double>(nFrames);
+      frameWidth * static_cast<double>(nFrames);
   const bool isFrameSkipping = getProperty("FrameSkipping");
   const auto &spectrumInfo = inputWS->spectrumInfo();
 
@@ -91,7 +91,7 @@ void EQSANSCorrectFrame::exec() {
       // Events from the skipped pulse are delayed by one pulse period
       if (isFrameSkipping && newTOF > minTOF_delayed)
         newTOF += pulsePeriod;
-      clean_events.emplace_back(newtof, event.pulseTime());
+      clean_events.emplace_back(newTOF, event.pulseTime());
     }
     events.clear();
     events.reserve(clean_events.size());
