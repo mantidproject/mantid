@@ -22,7 +22,7 @@ New Algorithms
 - :ref:`IndirectReplaceFitResult <algm-IndirectReplaceFitResult>` will replace the *_Result* fit data found in one workspace with the 
   single fit data provided within a second workspace.
 
-:ref:`Release 3.14.0 <v3.14.0>`
+:ref:`Release 4.0.0 <v4.0.0>`
 
 Data Analysis Interface
 -----------------------
