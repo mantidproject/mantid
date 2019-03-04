@@ -572,7 +572,7 @@ It is possible to alter the default appearance of Matplotlib plots, e.g. linewid
 colour cycles etc. This is most readily achieved by setting the ``rcParams`` at the start of a 
 Mantid Workbench session. The example below shows a plot with the default colour cycle and 
 line width, followed be resetting the parameters with ``rcParams``. An example with many of the 
-editable parameters is avialable at `the Matplotlib site <https://matplotlib.org/users/customizing.html>`_.
+editable parameters is available at `the Matplotlib site <https://matplotlib.org/users/customizing.html>`_.
 
 .. plot::
    :include-source:
@@ -593,7 +593,7 @@ editable parameters is avialable at `the Matplotlib site <https://matplotlib.org
 
     import matplotlib as mpl
     from cycler import cycler
-    mpl.rcParams['axes.prop_cycle'] = cycler(color='cmyk')
+    mpl.rcParams['axes.color_cycle'] = cycler(color='cmyk')
     mpl.rcParams['lines.linewidth'] = 2.0
     mpl.rcParams['axes.grid'] = True
     mpl.rcParams['axes.facecolor'] = (0.95, 0.95, 0.95)
