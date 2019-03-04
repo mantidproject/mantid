@@ -153,7 +153,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted());
     MatrixWorkspace_sptr ws = alg.getProperty("OutputWorkspace");
-    const auto &material{ws->sample().getEnvironment().container()->material()};
+    const auto &material =
+        ws->sample().getEnvironment().container()->material();
     TS_ASSERT_DELTA(material.numberDensity(), 0.23 * (2. + 3.), 1e-12);
   }
 
