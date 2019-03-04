@@ -22,10 +22,8 @@ public:
   const std::string category() const override;
   const std::string summary() const override;
 
-  void ReflectometryBackgroundSubtraction::calculateAverageSpectrumBackground(
-      API::MatrixWorkspace_sptr inputWS);
-  void ReflectometryBackgroundSubtraction::calculatePolynomialBackground(
-      API::MatrixWorkspace_sptr inputWS);
+  void calculateAverageSpectrumBackground(API::MatrixWorkspace_sptr inputWS);
+  void calculatePolynomialBackground(API::MatrixWorkspace_sptr inputWS);
 
 private:
   /** Overridden Algorithm methods **/

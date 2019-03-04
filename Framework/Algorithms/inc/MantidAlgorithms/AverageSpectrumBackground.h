@@ -25,11 +25,11 @@ public:
 private:
   // Sums spectra bin by bin in the given range using the child algorithm
   // GroupDetectors.
-  API::MatrixWorkspace_sptr AverageSpectrumBackground::groupBackgroundDetectors(
-      API::MatrixWorkspace_sptr inputWS, const std::vector<size_t> indexList);
+  API::MatrixWorkspace_sptr
+  groupBackgroundDetectors(API::MatrixWorkspace_sptr inputWS,
+                           const std::vector<size_t> indexList);
 
-  std::vector<size_t> AverageSpectrumBackground::getSpectraFromRange(
-      const std::vector<size_t> range);
+  std::vector<size_t> getSpectraFromRange(const std::vector<size_t> range);
 
   /** Overridden Algorithm methods **/
 
