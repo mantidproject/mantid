@@ -155,16 +155,14 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
 
     def PyInit(self):
         """Initialize the input and output properties of the algorithm."""
-        nonnegativeIntArray = IntArrayBoundedValidator()
-        nonnegativeIntArray.setLower(0)
-        maxTwoNonnegativeInts = CompositeValidator()
-        maxTwoNonnegativeInts.add(IntArrayLengthValidator(lenmin=0, lenmax=2))
-        maxTwoNonnegativeInts.add(nonnegativeIntArray)
-        threeNonnegativeInts = CompositeValidator()
-        threeNonnegativeInts.add(IntArrayLengthValidator(3))
         nonnegativeInts = IntArrayBoundedValidator()
         nonnegativeInts.setLower(0)
+        threeNonnegativeInts = CompositeValidator()
+        threeNonnegativeInts.add(IntArrayLengthValidator(3))
         threeNonnegativeInts.add(nonnegativeInts)
+        maxTwoNonnegativeInts = CompositeValidator()
+        maxTwoNonnegativeInts.add(IntArrayLengthValidator(lenmin=0, lenmax=2))
+        maxTwoNonnegativeInts.add(nonnegativeInts)
         nonnegativeFloatArray = FloatArrayBoundedValidator()
         nonnegativeFloatArray.setLower(0.)
 
@@ -499,11 +497,11 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
 
     def PyExec(self):
         """Execute the algorithm."""
-        self._subalgLogging = self.getProperty(Prop.SUBALG_LOGGING).value
-        self._cleanup = self.getProperty(Prop.CLEANUP).value
+        self._subalgLogging = self.getPropertyValue(Prop.SUBALG_LOGGING)
+        self._cleanup = self.getPropertyValue(Prop.CLEANUP)
         self.wsPrefix = self.getPropertyValue(Prop.OUTPUT_WS)
 
-        angleOption = self.getProperty(Prop.ANGLE_OPTION).value
+        angleOption = self.getPropertyValue(Prop.ANGLE_OPTION)
 
         rb = self.getProperty(Prop.RB).value
         db = self.getProperty(Prop.DB).value
