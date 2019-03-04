@@ -17,10 +17,11 @@ import atexit
 import importlib
 import os
 import sys
+from functools import partial
 
 from mantid.api import FrameworkManagerImpl
 from mantid.kernel import (ConfigService, UsageService, logger, version_str as mantid_version_str)
-from workbench.app.exception_handler import exception_logger
+from workbench.plugins.exception_handler import exception_logger
 from workbench.widgets.settings.presenter import SettingsPresenter
 
 # -----------------------------------------------------------------------------
@@ -568,11 +569,10 @@ def start_workbench(app, command_line_options):
     show it and start the main event loop
     """
 
-    sys.excepthook = exception_logger
-
     # The ordering here is very delicate. Test thoroughly when
     # changing anything!
     main_window = MainWindow()
+    sys.excepthook = partial(exception_logger, main_window)
 
     # Load matplotlib as early as possible and set our defaults
     # Setup our custom backend and monkey patch in custom current figure manager

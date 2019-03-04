@@ -5,19 +5,28 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package
-from __future__ import absolute_import
+from __future__ import absolute_import, absolute_import
 
 import traceback
 
+from ErrorReporter.error_report_presenter import ErrorReporterPresenter
+from ErrorReporter.errorreport import CrashReportPage
 from mantid.kernel import logger
 
 
-def exception_logger(exc_type, exc_value, exc_traceback):
+def exception_logger(main_window, exc_type, exc_value, exc_traceback):
     """
     Captures ALL EXCEPTIONS IN PYTHON. Prevents the Workbench to crash silently, instead it logs the
     error on ERROR level.
+    :param main_window: A reference to the main window, that will be used to close it in case of the user
+                        choosing to terminate the execution.
     :param exc_type: The type of the exception
     :param exc_value: Value of the exception, typically contains the error message.
     :param exc_traceback: Stack trace of the exception.
     """
     logger.error("".join(traceback.format_exception(exc_type, exc_value, exc_traceback)))
+    page = CrashReportPage(show_continue_terminate=True)
+    presenter = ErrorReporterPresenter(page, '')
+    presenter.show_view_blocking()
+    if not page.continue_working:
+        main_window.close()
