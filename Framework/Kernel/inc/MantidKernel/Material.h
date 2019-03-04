@@ -39,10 +39,10 @@ namespace Kernel {
   </UL>
 
 */
-class MANTID_KERNEL_DLL Material {
+class MANTID_KERNEL_DLL Material final {
 public:
   /// Structure to hold the information for a parsed chemical formula
-  struct FormulaUnit {
+  struct FormulaUnit final {
     boost::shared_ptr<PhysicalConstants::Atom> atom;
     double multiplicity;
     FormulaUnit(const boost::shared_ptr<PhysicalConstants::Atom> &atom,

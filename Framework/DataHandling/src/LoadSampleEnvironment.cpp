@@ -40,7 +40,7 @@ using namespace API;
 using namespace Geometry;
 
 void LoadSampleEnvironment::init() {
-  auto wsValidator = boost::make_shared<API::InstrumentValidator>();
+  auto wsValidator = boost::make_shared<InstrumentValidator>();
   // input workspace
   declareProperty(make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
@@ -144,9 +144,9 @@ void LoadSampleEnvironment::init() {
                                             "SetMaterial", IS_NOT_DEFAULT));
   setPropertySettings("SampleMassDensity", make_unique<EnabledWhenProperty>(
                                                "SetMaterial", IS_NOT_DEFAULT));
-  setPropertySettings("NumberDensityUnit",
-                      make_unique<Kernel::EnabledWhenProperty>(
-                          "SampleNumberDensity", Kernel::IS_NOT_DEFAULT));
+  setPropertySettings(
+      "NumberDensityUnit",
+      make_unique<EnabledWhenProperty>("SampleNumberDensity", IS_NOT_DEFAULT));
 
   std::string specificValuesGrp("Override Cross Section Values");
   setPropertyGroup("CoherentXSection", specificValuesGrp);
@@ -233,7 +233,7 @@ void LoadSampleEnvironment::exec() {
   } else if (asciiStlReader->isAsciiSTL(filename)) {
     environmentMesh = asciiStlReader->readStl();
   } else {
-    throw Kernel::Exception::ParseError(
+    throw Exception::ParseError(
         "Could not read file, did not match either STL Format", filename, 0);
   }
   environmentMesh = translate(environmentMesh);
@@ -242,14 +242,13 @@ void LoadSampleEnvironment::exec() {
   std::string name = getProperty("EnvironmentName");
   const bool add = getProperty("Add");
   Sample &sample = outputWS->mutableSample();
-  std::unique_ptr<Geometry::SampleEnvironment> environment = nullptr;
+  std::unique_ptr<SampleEnvironment> environment = nullptr;
   if (add) {
-    environment =
-        std::make_unique<Geometry::SampleEnvironment>(sample.getEnvironment());
+    environment = std::make_unique<SampleEnvironment>(sample.getEnvironment());
     environment->add(environmentMesh);
   } else {
     auto can = boost::make_shared<Container>(environmentMesh);
-    environment = std::make_unique<Geometry::SampleEnvironment>(name, can);
+    environment = std::make_unique<SampleEnvironment>(name, can);
   }
   // Put Environment into sample.
 
@@ -299,8 +298,8 @@ boost::shared_ptr<MeshObject> LoadSampleEnvironment::translate(
       throw std::invalid_argument(
           "Invalid Translation vector, must have exactly 3 dimensions");
     }
-    Kernel::V3D translate = Kernel::V3D(
-        translationVector[0], translationVector[1], translationVector[2]);
+    V3D translate =
+        V3D(translationVector[0], translationVector[1], translationVector[2]);
     environmentMesh->translate(translate);
   }
   return environmentMesh;
@@ -324,7 +323,7 @@ LoadSampleEnvironment::rotate(boost::shared_ptr<MeshObject> environmentMesh) {
           "Invalid Rotation Matrix, must have exactly 9 values, not: " +
           std::to_string(rotationMatrix.size()));
     }
-    Kernel::Matrix<double> rotation = Kernel::Matrix<double>(rotationMatrix);
+    Matrix<double> rotation = Matrix<double>(rotationMatrix);
     double determinant = rotation.determinant();
     if (!(std::abs(determinant) == 1.0)) {
       throw std::invalid_argument("Invalid Rotation Matrix");

@@ -49,7 +49,7 @@ class vtkGeometryCacheWriter;
 A Constructive Solid Geometry (CSG) object, implemented
 as a collection of Rules and surface objects
 */
-class MANTID_GEOMETRY_DLL CSGObject : public IObject {
+class MANTID_GEOMETRY_DLL CSGObject final : public IObject {
 public:
   /// Default constructor
   CSGObject();
