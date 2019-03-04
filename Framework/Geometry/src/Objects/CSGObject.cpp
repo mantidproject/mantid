@@ -115,11 +115,11 @@ void CSGObject::setMaterial(const Kernel::Material &material) {
 /**
  * @return The Material that the object is composed from
  */
-const Kernel::Material CSGObject::material() const {
-  if (m_material)
-    return *m_material;
-  else
-    return Material();
+const Kernel::Material &CSGObject::material() const {
+  if (!m_material) {
+    m_material = Kernel::make_unique<Material>();
+  }
+  return *m_material;
 }
 
 /**

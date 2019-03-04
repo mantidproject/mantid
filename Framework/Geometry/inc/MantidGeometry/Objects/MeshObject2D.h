@@ -74,7 +74,7 @@ public:
                      double &myheight) const override;
   void draw() const override;
   void initDraw() const override;
-  const Kernel::Material material() const override;
+  const Kernel::Material &material() const override;
   const std::string &id() const override;
   boost::shared_ptr<GeometryHandler> getGeometryHandler() const override;
   /// Id as static
