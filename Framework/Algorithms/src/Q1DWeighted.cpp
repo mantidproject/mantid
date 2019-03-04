@@ -16,6 +16,7 @@
 #include "MantidAlgorithms/GravitySANSHelper.h"
 #include "MantidDataObjects/Histogram1D.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
@@ -154,17 +155,13 @@ void Q1DWeighted::exec() {
       nWedges + 1,
       std::vector<std::vector<double>>(nLambda, std::vector<double>(nQ, 0.0)));
 
-  // the same for the errors
-  std::vector<std::vector<std::vector<double>>> errors(
-      nWedges + 1,
-      std::vector<std::vector<double>>(nLambda, std::vector<double>(nQ, 0.0)));
-
-  // the same dimensions for the normalisation weights
-  std::vector<std::vector<std::vector<double>>> normalisation(
-      nWedges + 1,
-      std::vector<std::vector<double>>(nLambda, std::vector<double>(nQ, 0.0)));
+  // the same for the errors and normalisation counts
+  decltype(intensities) errors(intensities);
+  decltype(intensities) normalisation(intensities);
 
   const auto &spectrumInfo = inputWS->spectrumInfo();
+  const auto up =
+      inputWS->getInstrument()->getReferenceFrame()->vecPointingUp();
 
   // Set up the progress
   Progress progress(this, 0.0, 1.0, nSpec * nLambda);
@@ -211,7 +208,7 @@ void Q1DWeighted::exec() {
 
       V3D correction;
       if (correctGravity) {
-        correction.setY(gravityHelper.gravitationalDrop(wavelength));
+        correction = up * gravityHelper.gravitationalDrop(wavelength);
       }
 
       // Each pixel might be sub-divided in the number of pixels given as input
