@@ -37,11 +37,10 @@ public:
            "run once on every data set.";
   }
 
-  /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Corrects the TOF of raw EQSANS data. This algorithm needs to be "
-           "run once on every data set.";
-  }
+  /// Algorithm's version
+  int version() const override { return (1); }
+  /// Algorithm's category for identification
+  const std::string category() const override { return "SANS"; }
 
 private:
   /// Initialisation code
