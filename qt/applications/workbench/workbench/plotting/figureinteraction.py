@@ -29,9 +29,9 @@ from .propertiesdialog import LabelEditor, XAxisEditor, YAxisEditor
 # Map canvas context-menu string labels to a pair of matplotlib scale-type strings
 AXES_SCALE_MENU_OPTS = OrderedDict([
     ("Lin x/Lin y", ("linear", "linear")),
-    ("Log x/Log y", ("symlog", "symlog")),
-    ("Lin x/Log y", ("linear", "symlog")),
-    ("Log x/Lin y", ("symlog", "linear"))]
+    ("Log x/Log y", ("log", "log")),
+    ("Lin x/Log y", ("linear", "log")),
+    ("Log x/Lin y", ("log", "linear"))]
 )
 
 
