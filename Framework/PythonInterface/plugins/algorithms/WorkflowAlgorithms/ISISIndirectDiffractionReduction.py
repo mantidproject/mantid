@@ -17,12 +17,16 @@ from mantid.kernel import *
 from mantid import config
 
 
-def contains_invalid_number_range(list_of_ranges):
-    for element in list_of_ranges:
-        if "-" in element:
-            range_limits = element.split("-")
-            if int(range_limits[0]) >= int(range_limits[1]):
-                return True
+def is_range_ascending(range_string, delimiter):
+    range_limits = tuple(map(int, range_string.split(delimiter)))
+    return range_limits[0] < range_limits[1]
+
+
+def contains_non_ascending_range(strings, delimiter):
+    range_strings = list(filter(lambda x: delimiter in x, strings))
+    for range_string in range_strings:
+        if not is_range_ascending(range_string, delimiter):
+            return True
     return False
 
 
@@ -126,7 +130,7 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
         if len(input_files) == 0:
             issues['InputFiles'] = 'InputFiles must contain at least one filename'
 
-        if contains_invalid_number_range(input_files):
+        if contains_non_ascending_range(input_files, '-'):
             issues['InputFiles'] = 'Run number ranges must go from low to high'
 
         # Validate detector range
