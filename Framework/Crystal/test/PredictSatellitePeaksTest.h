@@ -77,7 +77,7 @@ public:
     PeaksWorkspace_sptr SatellitePeaks = alg.getProperty("SatellitePeaks");
     TS_ASSERT(SatellitePeaks);
 
-    TS_ASSERT_EQUALS(SatellitePeaks->getNumberPeaks(), 37);
+    TS_ASSERT_EQUALS(SatellitePeaks->getNumberPeaks(), 40);
 
     auto &peak0 = SatellitePeaks->getPeak(4);
     TS_ASSERT_DELTA(peak0.getH(), 1.49, .01);
