@@ -203,6 +203,7 @@ std::size_t binIndexOfDeprecated(MatrixWorkspace &self, const double xValue,
   return self.yIndexOfX(xValue, index);
 }
 
+GNU_DIAG_OFF("unused-local-typedef")
 // Ignore -Wconversion warnings coming from boost::python
 // Seen with GCC 7.1.1 and Boost 1.63.0
 GNU_DIAG_OFF("conversion")
@@ -210,6 +211,7 @@ GNU_DIAG_OFF("conversion")
 BOOST_PYTHON_FUNCTION_OVERLOADS(binIndexOfDeprecatedOverloads,
                                 binIndexOfDeprecated, 2, 3)
 GNU_DIAG_ON("conversion")
+GNU_DIAG_ON("unused-local-typedef")
 
 /**
  * This is an anonymous wrapper around the homonym method of MatrixWorkspace.
