@@ -118,7 +118,7 @@ void AverageSpectrumBackground::exec() {
     topBgd =
         groupBackgroundDetectors(inputWS, getSpectraFromRange(topBgdRange));
   }
-
+  
   size_t totalBkgRange;
   API::MatrixWorkspace_sptr bgd;
   if (topBgdRange.empty()) {
@@ -134,7 +134,8 @@ void AverageSpectrumBackground::exec() {
   }
 
   // find the average of the background
-  API::MatrixWorkspace_sptr averageBgd = divide(bgd, totalBkgRange);
+  API::MatrixWorkspace_sptr averageBgd =
+      divide(bgd, static_cast<double>(totalBkgRange));
 
   auto subtract = createChildAlgorithm("Minus");
   subtract->setProperty("LHSWorkspace", inputWS);
