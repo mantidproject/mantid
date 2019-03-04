@@ -74,8 +74,9 @@ Run Files
   by a comma (,) or a range can be specified by using a dash (-).
 
 Sum Files
-  If selected the data from each raw file will be summed and from then on
-  treated as a single run.
+  If selected the data from each raw file will be summed and then averaged. From then on it is
+  treated as a single run. Note that averaging at this stage is different to averaging the output
+  results from multiple individual runs.
 
 Load Log Files
   If selected the sample logs will be loaded from each of the run files.
