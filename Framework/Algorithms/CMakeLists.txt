@@ -814,8 +814,9 @@ set ( TEST_FILES
 	DirectILLTubeBackgroundTest.h
 	DivideTest.h
 	EditInstrumentGeometryTest.h
-	ElasticWindowTest.h
-	EQSANSUnfoldFrameTest.h
+  ElasticWindowTest.h
+  EQSANSCorrectFrameTest.h
+  EQSANSUnfoldFrameTest.h
 	EstimateDivergenceTest.h
 	EstimateResolutionDiffractionTest.h
 	ExponentialCorrectionTest.h
