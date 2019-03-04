@@ -5,8 +5,8 @@
 /**************************************************************************/
 
 %Include qwttypes.sip
-%Include vector.sip
-%Include string.sip
+%Include ../common_sip/vector.sip
+%Include ../common_sip/string.sip
 
 %ModuleHeaderCode
 #include "MantidPythonInterface/core/VersionCompat.h"

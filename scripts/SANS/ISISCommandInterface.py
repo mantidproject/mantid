@@ -35,11 +35,11 @@ except (Exception, Warning):
     # the result is that attempting to plot will raise an exception
 
 try:
-    from PyQt4.QtGui import qApp
+    from qtpy.QtWidgets import qApp
 
     def appwidgets():
         return qApp.allWidgets()
-except ImportError:
+except (ImportError, RuntimeError):
     def appwidgets():
         return []
 

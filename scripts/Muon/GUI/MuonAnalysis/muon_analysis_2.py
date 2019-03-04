@@ -81,18 +81,20 @@ class MuonAnalysisGui(QtGui.QMainWindow):
 
         self.grouping_tab_widget.group_tab_presenter.groupingNotifier.add_subscriber(self.home_tab.home_tab_widget.groupingObserver)
 
-        self.home_tab.instrument_widget.instrumentNotifier.add_subscriber(
+        self.context.instrumentNotifier.add_subscriber(
             self.home_tab.home_tab_widget.instrumentObserver)
 
-        self.home_tab.instrument_widget.instrumentNotifier.add_subscriber(
+        self.context.instrumentNotifier.add_subscriber(
             self.load_widget.load_widget.instrumentObserver)
 
-        self.home_tab.instrument_widget.instrumentNotifier.add_subscriber(
+        self.context.instrumentNotifier.add_subscriber(
             self.grouping_tab_widget.group_tab_presenter.instrumentObserver)
 
         self.load_widget.load_widget.loadNotifier.add_subscriber(self.home_tab.home_tab_widget.loadObserver)
 
         self.load_widget.load_widget.loadNotifier.add_subscriber(self.grouping_tab_widget.group_tab_presenter.loadObserver)
+
+        self.context.gui_variables_notifier.add_subscriber(self.grouping_tab_widget.group_tab_presenter.gui_variables_observer)
 
     def setup_tabs(self):
         """
@@ -100,8 +102,8 @@ class MuonAnalysisGui(QtGui.QMainWindow):
         web browsers.
         """
         self.tabs = DetachableTabWidget(self)
-        self.tabs.addTab(self.home_tab.home_tab_view, 'Home')
-        self.tabs.addTab(self.grouping_tab_widget.group_tab_view, 'Grouping')
+        self.tabs.addTabWithOrder(self.home_tab.home_tab_view, 'Home')
+        self.tabs.addTabWithOrder(self.grouping_tab_widget.group_tab_view, 'Grouping')
 
     def closeEvent(self, event):
         self.tabs.closeEvent(event)

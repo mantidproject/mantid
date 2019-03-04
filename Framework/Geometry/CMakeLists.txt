@@ -114,6 +114,8 @@ set ( SRC_FILES
 	src/Objects/Rules.cpp
 	src/Objects/ShapeFactory.cpp
 	src/Objects/Track.cpp
+	src/RandomPoint.cpp
+	src/Rasterize.cpp
 	src/Rendering/GeometryHandler.cpp
 	src/Rendering/GeometryTriangulator.cpp
 	src/Rendering/RenderingHelpers.cpp
@@ -276,6 +278,8 @@ set ( INC_FILES
 	inc/MantidGeometry/Objects/Rules.h
 	inc/MantidGeometry/Objects/ShapeFactory.h
 	inc/MantidGeometry/Objects/Track.h
+	inc/MantidGeometry/RandomPoint.h
+	inc/MantidGeometry/Rasterize.h
 	inc/MantidGeometry/Rendering/GeometryHandler.h
 	inc/MantidGeometry/Rendering/GeometryTriangulator.h
 	inc/MantidGeometry/Rendering/OpenGL_Headers.h
@@ -392,6 +396,8 @@ set ( TEST_FILES
 	QLabTest.h
 	QSampleTest.h
 	QuadrilateralTest.h
+	RandomPointTest.h
+	RasterizeTest.h
 	RectangularDetectorTest.h
 	ReducedCellTest.h
 	ReferenceFrameTest.h

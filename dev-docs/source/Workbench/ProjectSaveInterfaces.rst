@@ -28,6 +28,8 @@ A good example of the way to save and load an interface in python is from the Ta
 
 The way the Encoder and Decoder factory works are different, the EncoderFactory will grab the class name of the object passed to it and check if any of it's known Encoders have a "tag" with that name in it. The DecoderFactory will check against a "tag" which is saved in the dictionary but is dynamically grabbed from the tags list of the Encoder that encoded the interface, at the time of saving and a developer will not need to save this tag.
 
+There is a slightly more advanced version of registering an Encoder with the EncoderFactory (This isn't required by DecoderFactory due to the implementation). Alongside adding a tag equal to the class name of the Encoded variable, you can pass a function that will return True if the encoder can encode the passed object. A good example for these is the MatrixWorkspaceDisplay and TableWorkspaceDisplay as they have a containing object which is the same. This allows seperate encoders and decoders for technically the same object, with different refferences.
+
 The basic template for an io file:
 
 .. code-block:: python

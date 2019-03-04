@@ -162,7 +162,7 @@ Output:
     Number of histograms in 'raw': 397, and in 'preprocessed': 396
     Wavelength from sample logs: 3.06A
     'raw' wavelength at channel 150: 1.63A (incorrect!)
-    'preprocessed' wavelength at channel 150: 3.05A
+    'preprocessed' wavelength at channel 150: 3.04A
 
 .. categories::
 

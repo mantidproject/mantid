@@ -13,6 +13,7 @@ from MultiPlotting.QuickEdit.quickEdit_widget import QuickEditWidget
 
 
 class MultiPlotWidget(QtWidgets.QWidget):
+    closeSignal = QtCore.Signal()
 
     def __init__(self, context, parent=None):
         super(MultiPlotWidget, self).__init__()
@@ -29,7 +30,7 @@ class MultiPlotWidget(QtWidgets.QWidget):
         # add some dummy plot
         self.plots = subplot(self._context)
         self.plots.connect_quick_edit_signal(self._update_quick_edit)
-
+        self.plots.connect_rm_subplot_signal(self._update_quick_edit)
         # create GUI layout
         splitter.addWidget(self.plots)
         splitter.addWidget(self.quickEdit.widget)
@@ -38,21 +39,22 @@ class MultiPlotWidget(QtWidgets.QWidget):
 
     """ plotting """
 
-    def add_subplot(self, name, code):
-        self.plots.add_subplot(name, code)
+    def add_subplot(self, name):
+        self.plots.add_subplot(name, len(self.quickEdit.get_selection()))
+
         self.quickEdit.add_subplot(name)
 
     def plot(self, subplotName, ws, specNum=1):
         self.plots.plot(subplotName, ws, specNum=specNum)
 
-    def add_vline_and_annotate(self,subplotName, xvalue, label ):
+    def add_vline_and_annotate(self, subplotName, xvalue, label):
         self.add_annotate(subplotName, label)
         self.add_vline(subplotName, xvalue, label.text)
 
-    def add_annotate(self,subplotName,label):
-        self.plots.add_annotate(subplotName,label)
+    def add_annotate(self, subplotName, label):
+        self.plots.add_annotate(subplotName, label)
 
-    def add_vline(self,subplotName, xvalue,name):
+    def add_vline(self, subplotName, xvalue, name):
         self.plots.add_vline(subplotName, xvalue, name)
 
     # gets inital values for quickEdit
@@ -80,10 +82,22 @@ class MultiPlotWidget(QtWidgets.QWidget):
         self.quickEdit.set_errors(errors)
         self._change_errors(errors, names)
 
+    def connectCloseSignal(self, slot):
+        self.closeSignal.connect(slot)
+
     """ update GUI """
+
+    def _if_empty_close(self):
+        if not self._context.subplots:
+            self.closeSignal.emit()
+            self.close
 
     def _update_quick_edit(self, subplotName):
         names = self.quickEdit.get_selection()
+        if subplotName not in self._context.subplots.keys():
+            self.quickEdit.rm_subplot(subplotName)
+            self._if_empty_close()
+            return
         xrange = self._context.subplots[subplotName].xbounds
         yrange = self._context.subplots[subplotName].ybounds
         if len(names) == 0:

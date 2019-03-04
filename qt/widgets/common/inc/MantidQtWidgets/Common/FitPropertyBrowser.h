@@ -225,6 +225,11 @@ public:
     emit parameterChanged(f);
   }
 
+  // send parameterChanged signal
+  void sendParameterChanged(const QString &prefix) {
+    emit changedParameterOf(prefix);
+  }
+
   /// Creates and adds the autobackground
   void addAutoBackground();
   bool isAutoBack() const { return m_autoBackground != nullptr; }
@@ -268,7 +273,20 @@ public:
   // Methods intended for testing only
 
   int sizeOfFunctionsGroup() const;
+
+  // Methods intended for interfacing with the workbench fitting tools
+
   void addAllowedSpectra(const QString &wsName, const QList<int> &wsIndices);
+  QString addFunction(const QString &fnName);
+  PropertyHandler *getPeakHandler(const QString &prefix);
+  void setPeakCentreOf(const QString &prefix, double value);
+  double getPeakCentreOf(const QString &prefix);
+  void setPeakHeightOf(const QString &prefix, double value);
+  double getPeakHeightOf(const QString &prefix);
+  void setPeakFwhmOf(const QString &prefix, double value);
+  double getPeakFwhmOf(const QString &prefix);
+  QStringList getPeakPrefixes() const;
+
 public slots:
   virtual void fit();
   virtual void sequentialFit();
@@ -297,6 +315,7 @@ signals:
   void endXChanged(double);
   void xRangeChanged(double, double);
   void parameterChanged(const Mantid::API::IFunction *);
+  void changedParameterOf(const QString &prefix);
   void functionCleared();
   void plotGuess();
   void plotCurrentGuess();

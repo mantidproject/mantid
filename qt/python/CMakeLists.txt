@@ -91,9 +91,7 @@ endif ()
     mantidqt/widgets/codeeditor/test/test_execution.py
     mantidqt/widgets/codeeditor/test/test_interpreter.py
     mantidqt/widgets/codeeditor/test/test_multifileinterpreter.py
-    mantidqt/widgets/workspacewidget/test/test_workspacetreewidget.py
 
-    mantidqt/widgets/test/test_jupyterconsole.py
     mantidqt/widgets/test/test_messagedisplay.py
     mantidqt/widgets/test/test_fitpropertybrowser.py
 
@@ -103,6 +101,8 @@ endif ()
     mantidqt/widgets/observers/test/test_ads_observer.py
     mantidqt/widgets/observers/test/test_observing_presenter.py
     mantidqt/widgets/observers/test/test_observing_view.py
+
+    mantidqt/widgets/embedded_find_replace_dialog/test/test_embedded_find_replace_dialog_presenter.py
 
     mantidqt/widgets/workspacedisplay/test/test_data_copier.py
     mantidqt/widgets/workspacedisplay/test/test_user_notifier.py
@@ -122,9 +122,21 @@ endif ()
 
   # ctest target for widgets that only get tested in qt5, because they are only used in the workbench
   set ( PYTHON_WIDGET_QT5_ONLY_TESTS
+    mantidqt/widgets/codeeditor/test/test_interpreter_view.py
+    mantidqt/widgets/codeeditor/test/test_multifileinterpreter_view.py
+
     mantidqt/widgets/instrumentview/test/test_instrumentview_io.py
     mantidqt/widgets/instrumentview/test/test_instrumentview_view.py
-  )
+
+    mantidqt/widgets/samplelogs/test/test_samplelogs_view.py
+
+    mantidqt/widgets/test/test_jupyterconsole.py
+
+    mantidqt/widgets/workspacedisplay/matrix/test/test_matrixworkspacedisplay_io.py
+    mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_io.py
+
+    mantidqt/widgets/workspacewidget/test/test_workspacetreewidget.py
+ )
 
   # Tests
   set ( PYUNITTEST_RUN_SERIAL ON )
@@ -132,14 +144,6 @@ endif ()
   pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR}
     mantidqt_qt5 ${PYTHON_TEST_FILES} ${PYTHON_WIDGET_QT5_ONLY_TESTS}
   )
-  # The jupyterconsole test segfaults on Python 3 and Qt 4
-  # despite the code functioning in a normal usage.
-  # Leave it out as it's a very basic test and the Qt5
-  # tests should catch any problems anyway
-  list ( REMOVE_ITEM PYTHON_TEST_FILES mantidqt/widgets/test/test_jupyterconsole.py )
-  # The workspacewidget test randomly sefaults on exit with Qt4. It will not be used
-  # in a Qt 4 context so remove the test
-  list ( REMOVE_ITEM PYTHON_TEST_FILES mantidqt/widgets/workspacewidget/test/test_workspacetreewidget.py )
   set ( PYUNITTEST_QT_API pyqt )
   pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR}
     mantidqt_qt4 ${PYTHON_TEST_FILES}

@@ -7,6 +7,7 @@
 #include "MantidGeometry/Rendering/ShapeInfo.h"
 #include "MantidKernel/Tolerance.h"
 #include "MantidKernel/V3D.h"
+#include <cassert>
 #include <cmath>
 
 namespace Mantid {
@@ -25,13 +26,39 @@ double ShapeInfo::height() const { return m_height; }
 
 ShapeInfo::GeometryShape ShapeInfo::shape() const { return m_shape; }
 
-void ShapeInfo::getObjectGeometry(ShapeInfo::GeometryShape &myshape,
+void ShapeInfo::getObjectGeometry(ShapeInfo::GeometryShape &shape,
                                   std::vector<Kernel::V3D> &points,
-                                  double &myradius, double &myheight) const {
-  myshape = m_shape;
+                                  double &radius, double &height) const {
+  shape = m_shape;
   points = m_points;
-  myradius = m_radius;
-  myheight = m_height;
+  radius = m_radius;
+  height = m_height;
+}
+
+ShapeInfo::CuboidGeometry ShapeInfo::cuboidGeometry() const {
+  assert(m_shape == GeometryShape::CUBOID);
+  return {m_points[0], m_points[1], m_points[2], m_points[3]};
+}
+
+ShapeInfo::HexahedronGeometry ShapeInfo::hexahedronGeometry() const {
+  assert(m_shape == GeometryShape::HEXAHEDRON);
+  return {m_points[0], m_points[1], m_points[2], m_points[3],
+          m_points[4], m_points[5], m_points[6], m_points[7]};
+}
+
+ShapeInfo::SphereGeometry ShapeInfo::sphereGeometry() const {
+  assert(m_shape == GeometryShape::SPHERE);
+  return {m_points.front(), m_radius};
+}
+
+ShapeInfo::CylinderGeometry ShapeInfo::cylinderGeometry() const {
+  assert(m_shape == GeometryShape::CYLINDER);
+  return {m_points.front(), m_points.back(), m_radius, m_height};
+}
+
+ShapeInfo::ConeGeometry ShapeInfo::coneGeometry() const {
+  assert(m_shape == GeometryShape::CONE);
+  return {m_points.front(), m_points.back(), m_radius, m_height};
 }
 
 void ShapeInfo::setCuboid(const V3D &p1, const V3D &p2, const V3D &p3,
@@ -51,25 +78,28 @@ void ShapeInfo::setHexahedron(const V3D &p1, const V3D &p2, const V3D &p3,
   m_height = 0;
 }
 
-void ShapeInfo::setSphere(const V3D &c, double r) {
+void ShapeInfo::setSphere(const V3D &center, double radius) {
   m_shape = GeometryShape::SPHERE;
-  m_points.assign({c});
-  m_radius = r;
+  m_points.assign({center});
+  m_radius = radius;
   m_height = 0;
 }
 
-void ShapeInfo::setCylinder(const V3D &c, const V3D &a, double r, double h) {
+void ShapeInfo::setCylinder(const V3D &centerBottomBase,
+                            const V3D &symmetryAxis, double radius,
+                            double height) {
   m_shape = GeometryShape::CYLINDER;
-  m_points.assign({c, a});
-  m_radius = r;
-  m_height = h;
+  m_points.assign({centerBottomBase, symmetryAxis});
+  m_radius = radius;
+  m_height = height;
 }
 
-void ShapeInfo::setCone(const V3D &c, const V3D &a, double r, double h) {
+void ShapeInfo::setCone(const V3D &center, const V3D &symmetryAxis,
+                        double radius, double height) {
   m_shape = GeometryShape::CONE;
-  m_points.assign({c, a});
-  m_radius = r;
-  m_height = h;
+  m_points.assign({center, symmetryAxis});
+  m_radius = radius;
+  m_height = height;
 }
 
 bool ShapeInfo::operator==(const ShapeInfo &other) {

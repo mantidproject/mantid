@@ -44,16 +44,18 @@ namespace {
  * Return a new instance of a lexer based on the given language
  * @param lexerName A string defining the language. Currently hardcoded to
  * Python.
+ * @param font A font used for the AlternateCSPythonLexer
  * @return A new QsciLexer instance
  */
-QsciLexer *createLexerFromName(const QString &lexerName) {
+QsciLexer *createLexerFromName(const QString &lexerName, const QFont &font) {
   if (lexerName == "Python") {
     return new QsciLexerPython;
-  } else if (lexerName == "AlternateCSPythonLexer") {
-    return new AlternateCSPythonLexer;
+  } else if (lexerName == "AlternateCSPython") {
+    return new AlternateCSPythonLexer(font);
   } else {
-    throw std::invalid_argument("createLexerFromLanguage: Unsupported "
-                                "name. Supported names=Python, ");
+    throw std::invalid_argument(
+        "createLexerFromLanguage: Unsupported "
+        "name. Supported names=Python, AlternateCSPython");
   }
 }
 } // namespace
@@ -70,10 +72,12 @@ QColor ScriptEditor::g_error_colour = QColor("red");
  * Construction based on a string defining the langauge used
  * for syntax highlighting
  * @param lexerName A string choosing the name of a lexer
+ * @param font A reference to the initial font to be used in the editor
  * @param parent Parent widget
  */
-ScriptEditor::ScriptEditor(const QString &lexerName, QWidget *parent)
-    : ScriptEditor(parent, createLexerFromName(lexerName)) {}
+ScriptEditor::ScriptEditor(const QString &lexerName, const QFont &font,
+                           QWidget *parent)
+    : ScriptEditor(parent, createLexerFromName(lexerName, font)) {}
 
 /**
  * Constructor
@@ -106,7 +110,6 @@ ScriptEditor::ScriptEditor(QWidget *parent, QsciLexer *codelexer,
   // Editor properties
   setAutoIndent(true);
   setFocusPolicy(Qt::StrongFocus);
-
   emit undoAvailable(isUndoAvailable());
   emit redoAvailable(isRedoAvailable());
 }
@@ -557,4 +560,35 @@ void ScriptEditor::forwardKeyPressToBase(QKeyEvent *event) {
   }
 #endif
 #endif
+}
+
+void ScriptEditor::replaceAll(const QString &searchString,
+                              const QString &replaceString, bool regex,
+                              bool caseSensitive, bool matchWords, bool wrap,
+                              bool forward) {
+  int line(-1), index(-1), prevLine(-1), prevIndex(-1);
+
+  // Mark this as a set of actions that can be undone as one
+  this->beginUndoAction();
+  bool found = this->findFirst(searchString, regex, caseSensitive, matchWords,
+                               wrap, forward, 0, 0);
+  // If find first fails then there is nothing to replace
+  if (!found) {
+    QMessageBox::information(this, "MantidPlot - Find and Replace",
+                             "No matches found in current document.");
+  }
+
+  while (found) {
+    this->getCursorPosition(&prevLine, &prevIndex);
+    this->replace(replaceString);
+    found = this->findNext();
+    this->getCursorPosition(&line, &index);
+    // if the next match is on the previous line
+    // or if it is on the same line, but closer to the start
+    // it means we have wrapped around the text in the editor
+    if (line < prevLine || (line == prevLine && index <= prevIndex)) {
+      break;
+    }
+  }
+  this->endUndoAction();
 }

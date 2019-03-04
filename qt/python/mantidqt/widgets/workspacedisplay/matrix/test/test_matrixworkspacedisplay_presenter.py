@@ -11,17 +11,16 @@ from __future__ import (absolute_import, division, print_function)
 
 import unittest
 
-from mock import Mock, patch
 from qtpy.QtWidgets import QStatusBar
 
+from mantid.py3compat.mock import Mock, patch
+from mantidqt.utils.testing.mocks.mock_mantid import MockWorkspace
+from mantidqt.utils.testing.mocks.mock_matrixworkspacedisplay import MockMatrixWorkspaceDisplayView
+from mantidqt.utils.testing.mocks.mock_qt import MockQModelIndex, MockQTableView
 from mantidqt.widgets.workspacedisplay.matrix.model import MatrixWorkspaceDisplayModel
 from mantidqt.widgets.workspacedisplay.matrix.presenter import MatrixWorkspaceDisplay
 from mantidqt.widgets.workspacedisplay.matrix.table_view_model import MatrixWorkspaceTableViewModelType
 from mantidqt.widgets.workspacedisplay.status_bar_view import StatusBarView
-from mantidqt.widgets.workspacedisplay.test_mocks.mock_mantid import MockWorkspace
-from mantidqt.widgets.workspacedisplay.test_mocks.mock_matrixworkspacedisplay import \
-    MockMatrixWorkspaceDisplayView
-from mantidqt.widgets.workspacedisplay.test_mocks.mock_qt import MockQModelIndex, MockQTableView
 
 
 def with_mock_presenter(func):
@@ -361,13 +360,12 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
 
     @with_mock_presenter
     def test_replace(self, ws, view, presenter):
-        # patch this out after the constructor of the presenter has finished,
-        # so that we reset any calls it might have made
+        view.set_model.reset_mock()
+
         presenter.replace_workspace(ws.TEST_NAME, ws)
 
-        view.get_active_tab.assert_called_once_with()
-        view.mock_tab.viewport.assert_called_once_with()
-        view.mock_tab.mock_viewport.update.assert_called_once_with()
+        self.assertEqual(3, view.set_context_menu_actions.call_count)
+        self.assertEqual(1, view.set_model.call_count)
 
 
 if __name__ == '__main__':

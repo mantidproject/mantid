@@ -13,6 +13,11 @@ The input workspaces are expected to have some specific sample logs, namely ``in
 Examples
 ########
 
+Examples of some key functionality of :mod:`directtools` is presented below. For a full reference of all available function and classes, see the Reference_ section below.
+
+`plotSofQW`
+~~~~~~~~~~~
+
 The default parameters for :func:`directtools.plotSofQW` give a view of the :math:`S(Q,E)` workspace around the elastic peak with sensible limits for the axes and intensity:
 
 .. plot::
@@ -44,6 +49,9 @@ The :math:`Q`, :math:`E` and intensity limits can be changed using the optional 
 
    fig, axes = dt.plotSofQW('SofQW', QMax=QMax, EMin=EMin, VMax=VMax)
    #fig.show()
+
+Cuts in :math:`S(Q,E)`
+~~~~~~~~~~~~~~~~~~~~~~
 
 An important aspect of examining the :math:`S(Q,E)` workspace is to plot cuts at constant :math:`Q` and :math:`E`. This can be done by :func:`directtools.plotconstQ` and :func:`directtools.plotconstE`:
 
@@ -108,6 +116,27 @@ If a line profile already exists, it can be plotted using :func:`directtools.plo
    axes.legend()
    #fig.show()
 
+Plotting density of states
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The density of states data calculated by :ref:`ComputeIncoherentDOS <algm-ComputeIncoherentDOS>` can be plotted by the :func:`directtools.plotDOS` function. The function accepts a single workspace or a list of workspaces as its arguments. The example below shows a comparison of densities of states calculated from :math:`S(Q,E)` and :math:`S(2\theta,E)`:
+
+.. plot::
+   :include-source:
+
+   import directtools as dt
+   from mantid.simpleapi import *
+
+   DirectILLCollectData(Run='ILL/IN4/084447.nxs', OutputWorkspace='data')
+   DirectILLReduction(InputWorkspace='data', OutputWorkspace='SofQW', OutputSofThetaEnergyWorkspace='SofTW')
+   dosFromStw = ComputeIncoherentDOS('SofTW')
+   dosFromSqw = ComputeIncoherentDOS('SofQW')
+   fig, axes = dt.plotDOS([dosFromStw, dosFromSqw], labels=[r'from $S(2\theta, E)$', r'from $S(Q,E)$'])
+   #fig.show()
+
+Convenience tools
+~~~~~~~~~~~~~~~~~
+
 :class:`directtools.SampleLogs` is a convenience class to import the sample logs of a workspace into a 'struct' like object in Python:
 
 .. testcode:: SampleLogsEx
@@ -135,19 +164,20 @@ Output:
    84447
 
 Reference
-=========
+#########
 
 Classes
-#######
+~~~~~~~
 
 .. autoclass:: directtools.SampleLogs
    :members: __init__
 
 Functions
-#########
+~~~~~~~~~
 
 .. automodule:: directtools
-   :members: box2D, defaultrcParams, dynamicsusceptibility, nanminmax, plotconstE,
-             plotconstQ, plotcuts, plotprofiles, plotSofQW, subplots, validQ, wsreport
+   :members: box2D, defaultrcparams, dynamicsusceptibility, nanminmax, plotconstE,
+             plotconstQ, plotcuts, plotprofiles, plotDOS, plotSofQW, subplots, validQ,
+             wsreport
 
 .. categories:: Techniques
