@@ -14,8 +14,6 @@ import systemtesting
 
 
 class IN4(systemtesting.MantidSystemTest):
-    tolerance = 1e-5
-    tolerance_rel_err = True
 
     def runTest(self):
         config['default.facility'] = 'ILL'
@@ -82,13 +80,12 @@ class IN4(systemtesting.MantidSystemTest):
         mtd['cropped'].mutableRun().addProperty('run_title', '', True)
 
     def validate(self):
+        self.tolerance_is_rel_err = True
+        self.tolerance = 1.0e-5
         return ['cropped', 'ILL_IN4_SofQW.nxs']
 
 
 class IN5(systemtesting.MantidSystemTest):
-    tolerance = 1e-2
-    tolerance_rel_err = True
-
     def runTest(self):
         config['default.facility'] = 'ILL'
         config['default.instrument'] = 'IN5'
@@ -143,13 +140,12 @@ class IN5(systemtesting.MantidSystemTest):
             EndWorkspaceIndex=720)
 
     def validate(self):
+        self.tolerance = 1e-2
+        self.tolerance_rel_err = True
         return ['cropped', 'ILL_IN5_SofQW.nxs']
 
 
 class IN6(systemtesting.MantidSystemTest):
-    tolerance = 1e-6
-    tolerance_rel_err = True
-
     def runTest(self):
         config['default.facility'] = 'ILL'
         config['default.instrument'] = 'IN6'
@@ -195,4 +191,6 @@ class IN6(systemtesting.MantidSystemTest):
         run.addProperty('wavelength', 4.16, True)
 
     def validate(self):
+        self.tolerance = 1e-2
+        self.tolerance_rel_err = True
         return ['cropped', 'ILL_IN6_SofQW.nxs']
