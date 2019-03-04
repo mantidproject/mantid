@@ -9,7 +9,7 @@ Error Reporter Changes
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
 
-:ref:`Release 3.14.0 <v3.14.0>`
+:ref:`Release 4.0.0 <v4.0.0>`
 
 New Features
 ============

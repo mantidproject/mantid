@@ -131,4 +131,4 @@ New
 
 - Scripts added that produce the same results as the ISIS engineering gui (supports ENGINX and IMAT), this is to allow use with ISIS autoreduction.
 
-:ref:`Release 3.14.0 <v3.14.0>`
+:ref:`Release 4.0.0 <v4.0.0>`
