@@ -15,6 +15,7 @@ set ( SRC_FILES
 	src/ApplyFloodWorkspace.cpp
 	src/ApplyTransmissionCorrection.cpp
 	src/AverageLogData.cpp
+	src/AverageSpectrumBackground.cpp
 	src/Bin2DPowderDiffraction.cpp
 	src/BinaryOperateMasks.cpp
 	src/BinaryOperation.cpp
@@ -211,7 +212,6 @@ set ( SRC_FILES
 	src/NormaliseByDetector.cpp
 	src/NormaliseToMonitor.cpp
 	src/NormaliseToUnity.cpp
-	src/OffspecBackgroundSubtraction.cpp
 	src/OneMinusExponentialCor.cpp
 	src/PDCalibration.cpp
 	src/PDDetermineCharacterizations.cpp
@@ -245,6 +245,7 @@ set ( SRC_FILES
 	src/RebinToWorkspace.cpp
 	src/Rebunch.cpp
 	src/RecordPythonScript.cpp
+	src/ReflectometryBackgroundSubtraction.cpp
 	src/ReflectometryBeamStatistics.cpp
 	src/ReflectometryMomentumTransfer.cpp
 	src/ReflectometryReductionOne2.cpp
@@ -352,6 +353,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ApplyFloodWorkspace.h
 	inc/MantidAlgorithms/ApplyTransmissionCorrection.h
 	inc/MantidAlgorithms/AverageLogData.h
+	inc/MantidAlgorithms/AverageSpectrumBackground.h
 	inc/MantidAlgorithms/Bin2DPowderDiffraction.h
 	inc/MantidAlgorithms/BinaryOperateMasks.h
 	inc/MantidAlgorithms/BinaryOperation.h
@@ -553,7 +555,6 @@ set ( INC_FILES
 	inc/MantidAlgorithms/NormaliseByDetector.h
 	inc/MantidAlgorithms/NormaliseToMonitor.h
 	inc/MantidAlgorithms/NormaliseToUnity.h
-	inc/MantidAlgorithms/OffspecBackgroundSubtraction.h
 	inc/MantidAlgorithms/OneMinusExponentialCor.h
 	inc/MantidAlgorithms/PDCalibration.h
 	inc/MantidAlgorithms/PDDetermineCharacterizations.h
@@ -587,6 +588,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/RebinToWorkspace.h
 	inc/MantidAlgorithms/Rebunch.h
 	inc/MantidAlgorithms/RecordPythonScript.h
+	inc/MantidAlgorithms/ReflectometryBackgroundSubtraction.h
 	inc/MantidAlgorithms/ReflectometryBeamStatistics.h
 	inc/MantidAlgorithms/ReflectometryMomentumTransfer.h
 	inc/MantidAlgorithms/ReflectometryReductionOne2.h
@@ -706,6 +708,7 @@ set ( TEST_FILES
 	ApplyFloodWorkspaceTest.h
 	ApplyTransmissionCorrectionTest.h
 	AverageLogDataTest.h
+	AverageSpectrumBackgroundTest.h
 	Bin2DPowderDiffractionTest.h
 	BinaryOperateMasksTest.h
 	BinaryOperationTest.h
@@ -899,7 +902,6 @@ set ( TEST_FILES
 	NormaliseByCurrentTest.h
 	NormaliseByDetectorTest.h
 	NormaliseToMonitorTest.h
-	OffspecBackgroundSubtractionTest.h
 	OneMinusExponentialCorTest.h
 	PDCalibrationTest.h
 	PDDetermineCharacterizationsTest.h
@@ -931,6 +933,7 @@ set ( TEST_FILES
 	RebinToWorkspaceTest.h
 	RebunchTest.h
 	RectangularBeamProfileTest.h
+	ReflectometryBackgroundSubtractionTest.h
 	ReflectometryBeamStatisticsTest.h
 	ReflectometryMomentumTransferTest.h
 	ReflectometryReductionOne2Test.h

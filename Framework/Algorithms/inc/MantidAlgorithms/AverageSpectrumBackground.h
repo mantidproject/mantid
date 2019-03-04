@@ -1,22 +1,21 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_OFFSPECBACKGROUNDSUBTRACTION_H_
-#define MANTID_ALGORITHMS_OFFSPECBACKGROUNDSUBTRACTION_H_
+#ifndef MANTID_ALGORITHMS_AVERAGESPECTRUMBACKGROUND_H_
+#define MANTID_ALGORITHMS_AVERAGESPECTRUMBACKGROUND_H_
 
-#include "MantidAlgorithms/ReflectometryWorkflowBase2.h"
-
+#include "MantidAPI/DataProcessorAlgorithm.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 
 namespace Mantid {
 namespace Algorithms {
 
-/** OffspecBackgroundSubtraction : TODO: DESCRIPTION
+/** AverageSpectrumBackground : TODO: DESCRIPTION
  */
-class DLLExport OffspecBackgroundSubtraction
-    : public ReflectometryWorkflowBase2 {
+class DLLExport AverageSpectrumBackground : public API::DataProcessorAlgorithm {
 public:
   const std::string name() const override;
   int version() const override;
@@ -26,9 +25,12 @@ public:
 private:
   
   //Sums spectra bin by bin in the given range using the child algorithm GroupDetectors.
-  API::MatrixWorkspace_sptr
+  API::MatrixWorkspace_sptr AverageSpectrumBackground::
   groupBackgroundDetectors(API::MatrixWorkspace_sptr inputWS,
-                                const std::vector<size_t> indexList);
+                           const std::vector<size_t> indexList);
+
+  std::vector<size_t> AverageSpectrumBackground::getSpectraFromRange(
+      const std::vector<size_t> range);
 
   /** Overridden Algorithm methods **/
 
@@ -42,4 +44,4 @@ private:
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif /* MANTID_ALGORITHMS_OFFSPECBACKGROUNDSUBTRACTION_H_ */
+#endif /* MANTID_ALGORITHMS_AVERAGESPECTRUMBACKGROUND_H_ */

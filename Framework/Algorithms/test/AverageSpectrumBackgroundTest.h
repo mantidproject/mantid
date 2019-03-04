@@ -1,36 +1,38 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_OFFSPECBACKGROUNDSUBTRACTIONTEST_H_
-#define MANTID_ALGORITHMS_OFFSPECBACKGROUNDSUBTRACTIONTEST_H_
+#ifndef MANTID_ALGORITHMS_AVERAGESPECTRUMBACKGROUNDTEST_H_
+#define MANTID_ALGORITHMS_AVERAGESPECTRUMBACKGROUNDTEST_H_
 
+#include "MantidAPI/DataProcessorAlgorithm.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidAlgorithms/OffspecBackgroundSubtraction.h"
+#include "MantidAlgorithms/AverageSpectrumBackground.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include <cxxtest/TestSuite.h>
 
 #include <algorithm>
+#include <cxxtest/TestSuite.h>
 
-using Mantid::Algorithms::OffspecBackgroundSubtraction;
+using Mantid::Algorithms::AverageSpectrumBackground;
+using namespace Mantid::API;
 
-class OffspecBackgroundSubtractionTest : public CxxTest::TestSuite {
+class AverageSpectrumBackgroundTest : public CxxTest::TestSuite {
 private:
   MatrixWorkspace_sptr m_workspaceWithValues;
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static OffspecBackgroundSubtractionTest *createSuite() {
-    return new OffspecBackgroundSubtractionTest();
+  static AverageSpectrumBackgroundTest *createSuite() {
+    return new AverageSpectrumBackgroundTest();
   }
-  static void destroySuite(OffspecBackgroundSubtractionTest *suite) {
+  static void destroySuite(AverageSpectrumBackgroundTest *suite) {
     delete suite;
   }
 
-  OffspecBackgroundSubtractionTest() {
+  AverageSpectrumBackgroundTest() {
     FrameworkManager::Instance();
     // A workspace with 6 spectra, 3 bins
     // All Y values are equal to 2.0
@@ -39,7 +41,7 @@ public:
   }
 
   void test_Init() {
-    OffspecBackgroundSubtraction alg;
+    AverageSpectrumBackground alg;
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
@@ -60,8 +62,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         alg->setProperty("InputWorkspace", m_workspaceWithValues))
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("OutputWorkspace", "outputWS"))
-    TS_ASSERT_THROWS_NOTHING(alg->setProperty("BottomBackgroundRanges", "0"))
-    TS_ASSERT_THROWS_NOTHING(alg->setProperty("TopBackgroundRanges", "5"))
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("BottomBackgroundRange", "1,2"))
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("TopBackgroundRange", "4,5"))
     TS_ASSERT(alg->execute())
   }
 
@@ -71,8 +73,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         alg->setProperty("InputWorkspace", m_workspaceWithValues))
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("OutputWorkspace", "outputWS"))
-    TS_ASSERT_THROWS_NOTHING(alg->setProperty("BottomBackgroundRanges", "1"))
-    TS_ASSERT_THROWS_NOTHING(alg->setProperty("TopBackgroundRanges", "5"))
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("BottomBackgroundRange", "1,2"))
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("TopBackgroundRange", "4,5"))
     TS_ASSERT(alg->execute())
 
     MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
@@ -85,8 +87,8 @@ public:
       const auto &bkgXs = outWS->x(histI);
       auto counts = outWS->counts(histI);
       for (size_t binI = 0; binI < counts.size(); ++binI) {
-        // Y values are inputY - (5+1)/2
-        TS_ASSERT_EQUALS(bkgYs[binI], ys[binI] - 3.0)
+        // Y values are inputY - (4+1)/2
+        TS_ASSERT_EQUALS(bkgYs[binI], ys[binI] - 2.5)
         TS_ASSERT_EQUALS(bkgXs[binI], xs[binI])
       }
     }
@@ -98,8 +100,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         alg->setProperty("InputWorkspace", m_workspaceWithValues))
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("OutputWorkspace", "outputWS"))
-    TS_ASSERT_THROWS_NOTHING(alg->setProperty("BottomBackgroundRanges", "0,1"))
-    TS_ASSERT_THROWS_NOTHING(alg->setProperty("TopBackgroundRanges", "4,5"))
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("BottomBackgroundRange", "0,2"))
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("TopBackgroundRange", "3,5"))
     TS_ASSERT(alg->execute())
 
     MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
@@ -112,8 +114,8 @@ public:
       const auto &bkgXs = outWS->x(histI);
       auto counts = outWS->counts(histI);
       for (size_t binI = 0; binI < counts.size(); ++binI) {
-        // Y values are inputY - (0+1+4+5)/4
-        TS_ASSERT_EQUALS(bkgYs[binI], ys[binI] - 2.5)
+        // Y values are inputY - (0+1+3+4)/4
+        TS_ASSERT_EQUALS(bkgYs[binI], ys[binI] - 2.0)
         TS_ASSERT_EQUALS(bkgXs[binI], xs[binI])
       }
     }
@@ -125,7 +127,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         alg->setProperty("InputWorkspace", m_workspaceWithValues))
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("OutputWorkspace", "outputWS"))
-    TS_ASSERT_THROWS_NOTHING(alg->setProperty("BottomBackgroundRanges", "1"))
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("BottomBackgroundRange", "1,2"))
     TS_ASSERT(alg->execute())
 
     MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
@@ -151,7 +153,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         alg->setProperty("InputWorkspace", m_workspaceWithValues))
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("OutputWorkspace", "outputWS"))
-    TS_ASSERT_THROWS_NOTHING(alg->setProperty("TopBackgroundRanges", "4"))
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("TopBackgroundRange", "4,5"))
     TS_ASSERT(alg->execute())
 
     MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
@@ -171,38 +173,32 @@ public:
     }
   }
 
-  void test_executionWithRangeOutOfOrder() {
-    // // Test the algorithm is executed with just the top background ranges
-    // set
+  void test_executionBadBottomRanges() {
+    // Test the algorithm returns an error when more than 2 numbers are given for a range
+    auto alg = setupAlgorithm();
+    TS_ASSERT_THROWS_NOTHING(
+        alg->setProperty("InputWorkspace", m_workspaceWithValues))
+	TS_ASSERT_THROWS_NOTHING(alg->setProperty("OutputWorkspace", "outputWS"))
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("BottomBackgroundRange", "1,2,3"))
+    TS_ASSERT_THROWS_ANYTHING(alg->execute())
+  }
+
+
+   void test_executionBadTopRanges() {
+    // Test the algorithm returns an error when more than 2 numbers are given
+    // for a range
     auto alg = setupAlgorithm();
     TS_ASSERT_THROWS_NOTHING(
         alg->setProperty("InputWorkspace", m_workspaceWithValues))
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("OutputWorkspace", "outputWS"))
-    TS_ASSERT_THROWS_NOTHING(alg->setProperty("BottomBackgroundRanges", "1,0"))
-    TS_ASSERT_THROWS_NOTHING(alg->setProperty("TopBackgroundRanges", "5,4,3"))
-    TS_ASSERT(alg->execute())
-
-    MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
-    TS_ASSERT(outWS)
-    auto nHist = outWS->getNumberHistograms();
-    for (size_t histI = 0; histI < nHist; ++histI) {
-      const auto &xs = m_workspaceWithValues->x(histI);
-      const auto &ys = m_workspaceWithValues->y(histI);
-      const auto &bkgYs = outWS->y(histI);
-      const auto &bkgXs = outWS->x(histI);
-      auto counts = outWS->counts(histI);
-      for (size_t binI = 0; binI < counts.size(); ++binI) {
-        // Y values are inputY - (1+0+5+4+3)/5
-        TS_ASSERT_EQUALS(bkgYs[binI], ys[binI] - 13.0/5.0)
-        TS_ASSERT_EQUALS(bkgXs[binI], xs[binI])
-      }
-    }
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("TopBackgroundRange", "1,2,3"))
+    TS_ASSERT_THROWS_ANYTHING(alg->execute())
   }
 
+
 private:
-  static boost::shared_ptr<OffspecBackgroundSubtraction>
-  setupAlgorithm() {
-    auto alg = boost::make_shared<OffspecBackgroundSubtraction>();
+  static boost::shared_ptr<AverageSpectrumBackground> setupAlgorithm() {
+    auto alg = boost::make_shared<AverageSpectrumBackground>();
     alg->initialize();
     alg->setChild(true);
     alg->setRethrows(true);
@@ -210,4 +206,4 @@ private:
   }
 };
 
-#endif /* MANTID_ALGORITHMS_OFFSPECBACKGROUNDSUBTRACTIONTEST_H_ */
+#endif /* MANTID_ALGORITHMS_AVERAGESPECTRUMBACKGROUNDTEST_H_ */
