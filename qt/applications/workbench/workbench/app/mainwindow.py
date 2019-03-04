@@ -474,7 +474,7 @@ class MainWindow(QMainWindow):
         self.project.load()
 
     def open_manage_directories(self):
-        ManageUserDirectories(self).exec_()
+        ManageUserDirectories(self, True).exec_()
 
     def open_settings_window(self):
         settings = SettingsPresenter(self)
