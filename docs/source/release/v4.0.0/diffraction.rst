@@ -20,7 +20,7 @@ Improvements
 - :ref:`SNAPReduce <algm-SNAPReduce>` now has progress bar and all output workspaces have history
 - :ref:`SNAPReduce <algm-SNAPReduce>` has been completely refactored. It now uses :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` for a large part of its functionality. It has progress bar and all output workspaces have history. It is also more memory efficient by reducing the number of temporary workspaces created.
 - :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>` and :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` now support outputting the unfocussed data and weighted events (with time). This allows for event filtering **after** processing the data.
-- :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` has significant performance improvements when used with chunking and can now use summed cache files.
+- :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` has significant performance improvements when used with chunking and can now use summed cache files. Failing to load a cache file will now produce a warning, rather than exception, and the algorithm will continue without the file.
 - :ref:`LoadWAND <algm-LoadWAND>` has grouping option added and loads faster
 - Mask workspace option added to :ref:`WANDPowderReduction <algm-WANDPowderReduction>`
 - :ref:`Le Bail concept page <Le Bail Fit>` moved from mediawiki
@@ -113,4 +113,4 @@ New
 
 - Scripts added that produce the same results as the ISIS engineering gui (supports ENGINX and IMAT), this is to allow use with ISIS autoreduction.
 
-:ref:`Release 3.14.0 <v3.14.0>`
+:ref:`Release 4.0.0 <v4.0.0>`

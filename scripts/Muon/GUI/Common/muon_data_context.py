@@ -408,15 +408,17 @@ class MuonDataContext(object):
         else:
             return True
 
+    def add_or_replace_gui_variables(self, **kwargs):
+        if all([key in self._gui_variables and self._gui_variables[key] == kwargs[key] for key in kwargs.keys()]) and kwargs:
+            return
+        self._gui_variables.update(kwargs)
+        self.gui_variables_notifier.notify_subscribers()
+
     def do_rebin(self):
         return (self.gui_variables['RebinType'] == 'Fixed' and
                 'RebinFixed' in self.gui_variables and self.gui_variables['RebinFixed']) or\
                (self.gui_variables['RebinType'] == 'Variable' and
                 'RebinVariable' in self.gui_variables and self.gui_variables['RebinVariable'])
-
-    def add_or_replace_gui_variables(self, **kwargs):
-        self._gui_variables.update(kwargs)
-        self.gui_variables_notifier.notify_subscribers()
 
     class InstrumentNotifier(Observable):
         def __init__(self, outer):

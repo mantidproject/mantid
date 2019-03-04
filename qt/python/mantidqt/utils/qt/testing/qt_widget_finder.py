@@ -35,7 +35,7 @@ class QtWidgetFinder(object):
                          "Widgets with name '{}' are present in the QApplication. Something has not been deleted: {}".format(
                              name, all))
 
-    def assert_window_created(self):
+    def assert_widget_created(self):
         self.assertGreater(len(QApplication.topLevelWidgets()), 0)
 
     def assert_no_toplevel_widgets(self):

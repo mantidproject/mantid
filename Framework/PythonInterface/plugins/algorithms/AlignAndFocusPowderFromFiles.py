@@ -125,9 +125,10 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
                 linearizedRuns.append(item)
         return linearizedRuns
 
-    def __createLoader(self, filename, wkspname, progstart=None, progstop=None):
+    def __createLoader(self, filename, wkspname, progstart=None, progstop=None, skipLoadingLogs=False, **kwargs):
         # load a chunk - this is a bit crazy long because we need to get an output property from `Load` when it
         # is run and the algorithm history doesn't exist until the parent algorithm (this) has finished
+        # the kwargs are extra things to be supplied to the loader
         if progstart is None or progstop is None:
             loader = self.createChildAlgorithm(self.__loaderName)
         else:
@@ -138,14 +139,23 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
         loader.initialize()
         loader.setPropertyValue('Filename', filename)
         loader.setPropertyValue('OutputWorkspace', wkspname)
+        if skipLoadingLogs:
+            if self.__loaderName != 'LoadEventNexus':
+                raise RuntimeError('Cannot set LoadLogs=False in {}'.format(self.__loaderName))
+            loader.setProperty('LoadLogs', False)
+        for key, value in kwargs.items():
+            if isinstance(value, str):
+                loader.setPropertyValue(key, value)
+            else:
+                loader.setProperty(key, value)
         return loader
 
     def __getAlignAndFocusArgs(self):
         # always put these in since they are loaded in __setupCalibration
         # this requires that function to be called before this one
-        args = {CAL_WKSP:self.__calWksp,
-                GRP_WKSP:self.__grpWksp,
-                MASK_WKSP:self.__mskWksp}
+        args = {CAL_WKSP:  self.__calWksp,
+                GRP_WKSP:  self.__grpWksp,
+                MASK_WKSP: self.__mskWksp}
 
         for name in PROPS_FOR_ALIGN:
             prop = self.getProperty(name)
@@ -172,8 +182,8 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
             if useCharac or useCal:
                 tempname = '__%s_temp' % wkspname
                 # set the loader for this file
-                loader = self.__createLoader(filename, tempname)
-                loader.setProperty('MetaDataOnly', True)  # this is only supported by LoadEventNexus
+                # MetaDataOnly=True is only supported by LoadEventNexus
+                loader = self.__createLoader(filename, tempname, MetaDataOnly=True)
                 loader.execute()
 
                 # get the underlying loader name if we used the generic one
@@ -266,8 +276,12 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
         # check for a cachefilename
         cachefile = self.__getCacheName(self.__wkspNameFromFile(filename))
         if (not createUnfocused) and self.useCaching and os.path.exists(cachefile):
-            if self.__loadCacheFile(cachefile, wkspname):
-                return wkspname, ''
+            try:
+                if self.__loadCacheFile(cachefile, wkspname):
+                    return wkspname, ''
+            except RuntimeError as e:
+                # log as a warning and carry on as though the cache file didn't exist
+                self.log().warning('Failed to load cache file "{}": {}'.format(cachefile, e))
 
         unfocusname_chunk = ''
         canSkipLoadingLogs = False
@@ -275,33 +289,35 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
         # inner loop is over chunks
         for (j, chunk) in enumerate(chunks):
             prog_start = file_prog_start + float(j) * float(numSteps - 1) * prog_per_chunk_step
-            chunkname = '{}_c{:d}'.format(wkspname, j)
-            if unfocusname :  # only create unfocus chunk if needed
-                unfocusname_chunk = '{}_c{:d}'.format(unfocusname, j)
+
+            # if reading all at once, put the data into the final name directly
+            if len(chunks) == 1:
+                chunkname = wkspname
+                unfocusname_chunk = unfocusname
+            else:
+                chunkname = '{}_c{:d}'.format(wkspname, j)
+                if unfocusname:  # only create unfocus chunk if needed
+                    unfocusname_chunk = '{}_c{:d}'.format(unfocusname, j)
 
             # load a chunk - this is a bit crazy long because we need to get an output property from `Load` when it
             # is run and the algorithm history doesn't exist until the parent algorithm (this) has finished
             loader = self.__createLoader(filename, chunkname,
-                                         progstart=prog_start, progstop=prog_start + prog_per_chunk_step)
-            if canSkipLoadingLogs:
-                loader.setProperty('LoadLogs', False)
-            for key, value in chunk.items():
-                if isinstance(value, str):
-                    loader.setPropertyValue(key, value)
-                else:
-                    loader.setProperty(key, value)
+                                         skipLoadingLogs=(len(chunks) > 1 and canSkipLoadingLogs),
+                                         progstart=prog_start, progstop=prog_start + prog_per_chunk_step,
+                                         **chunk)
             loader.execute()
             if j == 0:
                 self.__setupCalibration(chunkname)
 
             # copy the necessary logs onto the workspace
-            if canSkipLoadingLogs:
+            if len(chunks) > 1 and canSkipLoadingLogs:
                 CopyLogs(InputWorkspace=wkspname, OutputWorkspace=chunkname, MergeStrategy='WipeExisting')
 
             # get the underlying loader name if we used the generic one
             if self.__loaderName == 'Load':
                 self.__loaderName = loader.getPropertyValue('LoaderName')
-            # only LoadEventNexus can turn off loading logs, but FilterBadPulses requires them to be loaded from the file
+            # only LoadEventNexus can turn off loading logs, but FilterBadPulses
+            # requires them to be loaded from the file
             canSkipLoadingLogs = self.__loaderName == 'LoadEventNexus' and self.filterBadPulses <= 0.
 
             if determineCharacterizations and j == 0:
@@ -313,6 +329,13 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
                 FilterBadPulses(InputWorkspace=chunkname, OutputWorkspace=chunkname,
                                 LowerCutoff=self.filterBadPulses,
                                 startProgress=prog_start, endProgress=prog_start+prog_per_chunk_step)
+                if mtd[chunkname].getNumberEvents() == 0:
+                    msg = 'FilterBadPulses removed all events from '
+                    if len(chunks) == 1:
+                        raise RuntimeError(msg + filename)
+                    else:
+                        raise RuntimeError(msg + 'chunk {} of {} in {}'.format(j, len(chunks), filename))
+
             prog_start += prog_per_chunk_step
 
             # absorption correction workspace
@@ -328,12 +351,14 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
             if self.kwargs is None:
                 raise RuntimeError('Somehow arguments for "AlignAndFocusPowder" aren\'t set')
 
-            AlignAndFocusPowder(InputWorkspace=chunkname, OutputWorkspace=chunkname, UnfocussedWorkspace=unfocusname_chunk,
+            AlignAndFocusPowder(InputWorkspace=chunkname,
+                                OutputWorkspace=chunkname, UnfocussedWorkspace=unfocusname_chunk,
                                 startProgress=prog_start, endProgress=prog_start+2.*prog_per_chunk_step,
                                 **self.kwargs)
             prog_start += 2. * prog_per_chunk_step  # AlignAndFocusPowder counts for two steps
 
-            self.__accumulate(chunkname, wkspname, unfocusname_chunk, unfocusname, j == 0, removelogs=canSkipLoadingLogs)
+            self.__accumulate(chunkname, wkspname, unfocusname_chunk, unfocusname, j == 0,
+                              removelogs=canSkipLoadingLogs)
         # end of inner loop
 
         # write out the cachefile for the main reduced data independent of whether
@@ -355,6 +380,8 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
         # the first call to accumulate to a specific target should be a simple rename
         self.log().debug('__accumulate({}, {}, {}, {}, {})'.format(chunkname, sumname, chunkunfocusname,
                                                                    sumuunfocusname, firstrun))
+        if chunkname == sumname:
+            return  # there is nothing to be done
 
         if not firstrun:
             # if the sum workspace doesn't already exist, just rename
@@ -486,7 +513,7 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
             notcached = self.__findAndLoadCachefiles(self._filenames, finalname, firstTime=True)
         else:
             notcached = self._filenames[:]  # make a copy
-        self.log().notice('Files to process: {}'.format(notcached,))
+        self.log().notice('Files to process: {}'.format(notcached))
 
         # process not-cached files
         if notcached:
@@ -542,10 +569,14 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
                 fileSubset = filenames[start:end+1]
                 summed_cache_file = self.__getGroupCacheName(fileSubset)
                 wkspname = self.__getGroupWkspName(fileSubset)
-                if self.__loadCacheFile(summed_cache_file, wkspname):
-                    self.__accumulate(wkspname, finalname, '', '', firstTime)
-                    found = True
-                    break
+                try:
+                    if self.__loadCacheFile(summed_cache_file, wkspname):
+                        self.__accumulate(wkspname, finalname, '', '', firstTime)
+                        found = True
+                        break
+                except RuntimeError as e:
+                    # log as a warning and carry on as though the cache file didn't exist
+                    self.log().warning('Failed to load cache file "{}": {}'.format(summed_cache_file, e))
             if found:
                 break
             continue
@@ -591,14 +622,16 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
                 partialsum_unfocusname = partialsum_wkspname + '_unfocused'
             else:
                 partialsum_unfocusname = ''
-            self.__accumulate(wkspname, partialsum_wkspname, unfocusname, partialsum_unfocusname, (not hasAccumulated) or i == 0)
+            self.__accumulate(wkspname, partialsum_wkspname, unfocusname, partialsum_unfocusname,
+                              (not hasAccumulated) or i == 0)
             hasAccumulated = True
             if i == grain_end - 1:
                 if self.useCaching and len(grain) > 1:
                     # save partial cache
                     self.__saveSummedGroupToCache(grain, partialsum_wkspname)
                 # accumulate into final sum
-                self.__accumulate(partialsum_wkspname, finalname, partialsum_unfocusname, finalunfocusname, (not hasAccumulated) or i==0)
+                self.__accumulate(partialsum_wkspname, finalname, partialsum_unfocusname, finalunfocusname,
+                                  (not hasAccumulated) or i == 0)
 
     def __saveSummedGroupToCache(self, group, wkspname):
         cache_file = self.__getGroupCacheName(group)
