@@ -108,9 +108,9 @@ void ReflectometryBackgroundSubtraction::init() {
                       boost::make_shared<CommonBinsValidator>()),
                   "An input workspace.");
 
-  std::vector<std::string> backgroundTypes = {"Per Spectra Average",
+  std::vector<std::string> backgroundTypes = {"Per Detector Average",
                                               "Polynomial"};
-  declareProperty("TypeOfBackgroundSubtraction", "Per Spectra Average",
+  declareProperty("TypeOfBackgroundSubtraction", "Per Detector Average",
                   boost::make_shared<StringListValidator>(backgroundTypes),
                   "The type of background reduction to perform.",
                   Direction::Input);
@@ -129,11 +129,11 @@ void ReflectometryBackgroundSubtraction::init() {
   setPropertySettings(
       "BottomBackgroundRange",
       make_unique<EnabledWhenProperty>("TypeOfBackgroundSubtraction",
-                                       IS_EQUAL_TO, "Per Spectra Average"));
+                                       IS_EQUAL_TO, "Per Detector Average"));
   setPropertySettings(
       "TopBackgroundRange",
       make_unique<EnabledWhenProperty>("TypeOfBackgroundSubtraction",
-                                       IS_EQUAL_TO, "Per Spectra Average"));
+                                       IS_EQUAL_TO, "Per Detector Average"));
 
   auto increasingAxis = boost::make_shared<IncreasingAxisValidator>();
   auto nonnegativeInt = boost::make_shared<BoundedValidator<int>>();
@@ -184,7 +184,7 @@ void ReflectometryBackgroundSubtraction::exec() {
     setPropertyValue("OutputWorkspace", wsName + "_Background");
   }
 
-  if (backgroundType == "Per Spectra Average") {
+  if (backgroundType == "Per Detector Average") {
     calculateAverageSpectrumBackground(inputWS);
   }
 

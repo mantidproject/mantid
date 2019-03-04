@@ -42,7 +42,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         alg->setProperty("InputWorkspace", m_multiDetectorWSWithPeak))
     TS_ASSERT_THROWS_NOTHING(
-        alg->setProperty("TypeOfBackgroundSubtraction", "Per Spectra Average"))
+        alg->setProperty("TypeOfBackgroundSubtraction", "Per Detector Average"))
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("BottomBackgroundRange", "0,2"))
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("TopBackgroundRange", "3,4"))
     TS_ASSERT(alg->execute())
@@ -62,7 +62,7 @@ public:
   void test_outputPerSpectraAverage() {
     auto alg = setupAlgorithm();
     alg->setProperty("InputWorkspace", m_multiDetectorWSWithPeak);
-    alg->setProperty("TypeOfBackgroundSubtraction", "Per Spectra Average");
+    alg->setProperty("TypeOfBackgroundSubtraction", "Per Detector Average");
     alg->setProperty("BottomBackgroundRange", "0,2");
     alg->setProperty("TopBackgroundRange", "3,4");
     alg->execute();
