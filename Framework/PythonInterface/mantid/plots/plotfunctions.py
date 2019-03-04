@@ -528,30 +528,11 @@ def imshow(axes, workspace, *args, **kwargs):
         (uneven_bins, kwargs) = get_data_uneven_flag(workspace, **kwargs)
         (distribution, kwargs) = get_distribution(workspace, **kwargs)
         if uneven_bins:
-            num_hist = workspace.getNumberHistograms()
-            delta = numpy.finfo(numpy.float64).max
-            min_value = numpy.finfo(numpy.float64).max
-            max_value = numpy.finfo(numpy.float64).min
-            for i in range(num_hist):
-                xtmp = workspace.readX(i)
-                min_value = min(min_value, xtmp.min())
-                max_value = max(max_value, xtmp.max())
-                diff = xtmp[1:] - xtmp[:-1]
-                delta = min(delta, diff.min())
-
-            num_edges = int(numpy.ceil((max_value - min_value)/delta))
-            x = numpy.linspace(min_value, max_value, num=num_edges)
-            x_centers = mantid.plots.helperfunctions.points_from_boundaries(x)
-            y = mantid.plots.helperfunctions.boundaries_from_points(workspace.getAxis(1).extractValues())
-            z = numpy.empty([num_hist, num_edges - 1], dtype=numpy.float64)
-            for i in range(num_hist):
-                centers, ztmp, _, _ = mantid.plots.helperfunctions.get_spectrum(workspace, i, distribution=distribution, withDy=False, withDx=False)
-                f = interp1d(centers, ztmp, bounds_error=False, fill_value=numpy.nan)
-                z[i] = f(x_centers)
+            (x, y, z) = get_matrix_2d_ragged(workspace, distribution)
         else:
             (x, y, z) = get_matrix_2d_data(workspace, distribution, histogram2D=True)
 
-    if x.ndim == 2 and xy.ndim == 2:
+    if x.ndim == 2 and y.ndim == 2:
         diffs = numpy.diff(x, axis=1)
         x_spacing_equal = numpy.alltrue(diffs == diffs[0])
         diffs = numpy.diff(y, axis=0)
