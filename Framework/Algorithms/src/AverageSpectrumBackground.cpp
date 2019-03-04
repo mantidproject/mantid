@@ -66,24 +66,24 @@ std::vector<size_t> AverageSpectrumBackground::getSpectraFromRange(
 void AverageSpectrumBackground::init() {
 
   // Input workspace
-  declareProperty(Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-                      "InputWorkspace", "", Kernel::Direction::Input,
-                      boost::make_shared<API::CommonBinsValidator>()),
-                  "An input workspace.");
+  declareProperty(
+      Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+          "InputWorkspace", "", Kernel::Direction::Input,
+          boost::make_shared<API::CommonBinsValidator>()),
+      "An input workspace.");
 
   // bottom background range
-  declareProperty(
-      Kernel::make_unique<Kernel::ArrayProperty<size_t>>(
-          "BottomBackgroundRange", std::vector<size_t>()),
+  declareProperty(Kernel::make_unique<Kernel::ArrayProperty<size_t>>(
+                      "BottomBackgroundRange", std::vector<size_t>()),
                   "A list of the bottom background ranges.");
   // top background range
   declareProperty(Kernel::make_unique<Kernel::ArrayProperty<size_t>>(
-          "TopBackgroundRange", std::vector<size_t>()),
+                      "TopBackgroundRange", std::vector<size_t>()),
                   "A list of the top background ranges.");
 
   // Output workspace
-  declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Kernel::Direction::Output),
+  declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
+                      "OutputWorkspace", "", Kernel::Direction::Output),
                   "A Workspace with the background removed.");
 }
 
@@ -109,12 +109,14 @@ void AverageSpectrumBackground::exec() {
   API::MatrixWorkspace_sptr bottomBgd, topBgd;
   // groups the bottom background into a single spectra workspace
   if (!bottomBgdRange.empty()) {
-    bottomBgd = groupBackgroundDetectors(inputWS, getSpectraFromRange(bottomBgdRange));
+    bottomBgd =
+        groupBackgroundDetectors(inputWS, getSpectraFromRange(bottomBgdRange));
   }
 
   // groups the top background into a single spectra workspace
   if (!topBgdRange.empty()) {
-    topBgd = groupBackgroundDetectors(inputWS, getSpectraFromRange(topBgdRange));
+    topBgd =
+        groupBackgroundDetectors(inputWS, getSpectraFromRange(topBgdRange));
   }
 
   size_t totalBkgRange;
@@ -133,7 +135,7 @@ void AverageSpectrumBackground::exec() {
 
   // find the average of the background
   API::MatrixWorkspace_sptr averageBgd = divide(bgd, totalBkgRange);
-  
+
   auto subtract = createChildAlgorithm("Minus");
   subtract->setProperty("LHSWorkspace", inputWS);
   subtract->setProperty("RHSWorkspace", averageBgd);

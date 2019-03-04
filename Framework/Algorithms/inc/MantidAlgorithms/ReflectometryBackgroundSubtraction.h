@@ -13,7 +13,7 @@ namespace Mantid {
 namespace Algorithms {
 
 /** ReflectometryBackgroundSubtraction : TODO: DESCRIPTION
-*/
+ */
 class DLLExport ReflectometryBackgroundSubtraction
     : public API::DataProcessorAlgorithm {
 public:

@@ -23,11 +23,10 @@ public:
   const std::string summary() const override;
 
 private:
-  
-  //Sums spectra bin by bin in the given range using the child algorithm GroupDetectors.
-  API::MatrixWorkspace_sptr AverageSpectrumBackground::
-  groupBackgroundDetectors(API::MatrixWorkspace_sptr inputWS,
-                           const std::vector<size_t> indexList);
+  // Sums spectra bin by bin in the given range using the child algorithm
+  // GroupDetectors.
+  API::MatrixWorkspace_sptr AverageSpectrumBackground::groupBackgroundDetectors(
+      API::MatrixWorkspace_sptr inputWS, const std::vector<size_t> indexList);
 
   std::vector<size_t> AverageSpectrumBackground::getSpectraFromRange(
       const std::vector<size_t> range);
@@ -38,7 +37,6 @@ private:
   void init() override;
   // Execute the algorithm
   void exec() override;
-
 };
 
 } // namespace Algorithms

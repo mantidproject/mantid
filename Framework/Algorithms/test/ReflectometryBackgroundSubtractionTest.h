@@ -68,10 +68,9 @@ public:
     alg->execute();
     MatrixWorkspace_sptr outputWS = alg->getProperty("OutputWorkspace");
 
-
     const auto &output_counts = outputWS->counts(0);
     for (auto itr = output_counts.begin(); itr != output_counts.end(); ++itr) {
-		TS_ASSERT_DELTA(0.0, *itr, 0.0001)
+      TS_ASSERT_DELTA(0.0, *itr, 0.0001)
     }
   }
 
@@ -86,7 +85,7 @@ public:
 
     const auto &output_counts = outputWS->counts(0);
     for (auto itr = output_counts.begin(); itr != output_counts.end(); ++itr) {
-        TS_ASSERT_DELTA(0.0, *itr, 0.0001)
+      TS_ASSERT_DELTA(0.0, *itr, 0.0001)
     }
   }
 

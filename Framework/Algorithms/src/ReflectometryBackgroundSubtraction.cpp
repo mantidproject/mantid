@@ -7,16 +7,16 @@
 
 #include "MantidAlgorithms/ReflectometryBackgroundSubtraction.h"
 #include "MantidAPI/CommonBinsValidator.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidKernel/DynamicFactory.h"
-#include "MantidKernel/EnabledWhenProperty.h" 
-#include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/IncreasingAxisValidator.h"
-#include "MantidKernel/ArrayOrderedPairsValidator.h"
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/ListValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ArrayLengthValidator.h"
+#include "MantidKernel/ArrayOrderedPairsValidator.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/ListValidator.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -52,9 +52,9 @@ void ReflectometryBackgroundSubtraction::calculateAverageSpectrumBackground(
   alg->initialize();
   alg->setProperty("InputWorkspace", inputWS);
   alg->setProperty("BottomBackgroundRange",
-                       getPropertyValue("BottomBackgroundRange"));
+                   getPropertyValue("BottomBackgroundRange"));
   alg->setProperty("TopBackgroundRange",
-                       getPropertyValue("TopBackgroundRange"));
+                   getPropertyValue("TopBackgroundRange"));
   alg->execute();
   API::MatrixWorkspace_sptr output = alg->getProperty("OutputWorkspace");
   setProperty("OutputWorkspace", output);
@@ -109,11 +109,12 @@ void ReflectometryBackgroundSubtraction::init() {
                       boost::make_shared<CommonBinsValidator>()),
                   "An input workspace.");
 
-  std::vector<std::string> backgroundTypes = {"Per Spectra Average", "Polynomial"}; 
+  std::vector<std::string> backgroundTypes = {"Per Spectra Average",
+                                              "Polynomial"};
   declareProperty("TypeOfBackgroundSubtraction", "Per Spectra Average",
                   boost::make_shared<StringListValidator>(backgroundTypes),
-                  "The type of background reduction to perform.", Direction::Input);
-   
+                  "The type of background reduction to perform.",
+                  Direction::Input);
 
   declareProperty(make_unique<ArrayProperty<size_t>>("BottomBackgroundRange",
                                                      Direction::Input),
@@ -124,13 +125,16 @@ void ReflectometryBackgroundSubtraction::init() {
 
   setPropertyGroup("BottomBackgroundRange",
                    "Average Per Spectra Background Subtraction");
-  setPropertyGroup("TopBackgroundRange", "Average Per Spectra Background Subtraction");
-  setPropertySettings("BottomBackgroundRange",
-				   make_unique<EnabledWhenProperty>("TypeOfBackgroundSubtraction", IS_EQUAL_TO, "Per Spectra Average"));
-  setPropertySettings("TopBackgroundRange",
-                      make_unique<EnabledWhenProperty>(
-                          "TypeOfBackgroundSubtraction", IS_EQUAL_TO, "Per Spectra Average"));
-
+  setPropertyGroup("TopBackgroundRange",
+                   "Average Per Spectra Background Subtraction");
+  setPropertySettings(
+      "BottomBackgroundRange",
+      make_unique<EnabledWhenProperty>("TypeOfBackgroundSubtraction",
+                                       IS_EQUAL_TO, "Per Spectra Average"));
+  setPropertySettings(
+      "TopBackgroundRange",
+      make_unique<EnabledWhenProperty>("TypeOfBackgroundSubtraction",
+                                       IS_EQUAL_TO, "Per Spectra Average"));
 
   auto increasingAxis = boost::make_shared<IncreasingAxisValidator>();
   auto nonnegativeInt = boost::make_shared<BoundedValidator<int>>();
@@ -146,27 +150,26 @@ void ReflectometryBackgroundSubtraction::init() {
   declareProperty("CostFunction", "Least squares",
                   boost::make_shared<ListValidator<std::string>>(costFuncOpts),
                   "The cost function to be passed to the Fit algorithm.");
- 
+
   setPropertyGroup("DegreeOfPolynomial", "Polynomial Background Subtraction");
   setPropertyGroup("XRanges", "Polynomial Background Subtraction");
   setPropertyGroup("CostFunction", "Polynomial Background Subtraction");
 
-  setPropertySettings("DegreeOfPolynomial",
-                      make_unique<EnabledWhenProperty>(
-                          "TypeOfBackgroundSubtraction", IS_EQUAL_TO, "Polynomial"));
-  setPropertySettings("XRanges",
-                      make_unique<EnabledWhenProperty>("TypeOfBackgroundSubtraction",
-                                                       IS_EQUAL_TO, "Polynomial"));
-  setPropertySettings("CostFunction",
-                      make_unique<EnabledWhenProperty>("TypeOfBackgroundSubtraction",
-                                                       IS_EQUAL_TO, "Polynomial"));
+  setPropertySettings("DegreeOfPolynomial", make_unique<EnabledWhenProperty>(
+                                                "TypeOfBackgroundSubtraction",
+                                                IS_EQUAL_TO, "Polynomial"));
+  setPropertySettings(
+      "XRanges", make_unique<EnabledWhenProperty>("TypeOfBackgroundSubtraction",
+                                                  IS_EQUAL_TO, "Polynomial"));
+  setPropertySettings("CostFunction", make_unique<EnabledWhenProperty>(
+                                          "TypeOfBackgroundSubtraction",
+                                          IS_EQUAL_TO, "Polynomial"));
 
-    // Output workspace
+  // Output workspace
   declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                    Direction::Output,
                                                    PropertyMode::Optional),
                   "A Workspace with the background removed.");
-
 }
 
 //----------------------------------------------------------------------------------------------
@@ -180,7 +183,7 @@ void ReflectometryBackgroundSubtraction::exec() {
   std::string const wsName = inputWS->getName();
   if (isDefault("OutputWorkspace")) {
     setPropertyValue("OutputWorkspace", wsName + "_Background");
-  }  
+  }
 
   if (backgroundType == "Per Spectra Average") {
     calculateAverageSpectrumBackground(inputWS);

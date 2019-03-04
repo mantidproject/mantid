@@ -174,17 +174,17 @@ public:
   }
 
   void test_executionBadBottomRanges() {
-    // Test the algorithm returns an error when more than 2 numbers are given for a range
+    // Test the algorithm returns an error when more than 2 numbers are given
+    // for a range
     auto alg = setupAlgorithm();
     TS_ASSERT_THROWS_NOTHING(
         alg->setProperty("InputWorkspace", m_workspaceWithValues))
-	TS_ASSERT_THROWS_NOTHING(alg->setProperty("OutputWorkspace", "outputWS"))
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("OutputWorkspace", "outputWS"))
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("BottomBackgroundRange", "1,2,3"))
     TS_ASSERT_THROWS_ANYTHING(alg->execute())
   }
 
-
-   void test_executionBadTopRanges() {
+  void test_executionBadTopRanges() {
     // Test the algorithm returns an error when more than 2 numbers are given
     // for a range
     auto alg = setupAlgorithm();
@@ -194,7 +194,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("TopBackgroundRange", "1,2,3"))
     TS_ASSERT_THROWS_ANYTHING(alg->execute())
   }
-
 
 private:
   static boost::shared_ptr<AverageSpectrumBackground> setupAlgorithm() {
