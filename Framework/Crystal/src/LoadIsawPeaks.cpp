@@ -19,6 +19,8 @@
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Unit.h"
+#include "MantidCrystal/FindUBUsingIndexedPeaks.h"
+#include "MantidAPI/Sample.h"
 #include <boost/algorithm/string/trim.hpp>
 
 using Mantid::Kernel::Strings::getWord;
@@ -249,26 +251,6 @@ std::string LoadIsawPeaks::readHeader(PeaksWorkspace_sptr outWS,
     }
   }
   return s;
-}
-
-//-----------------------------------------------------------------------------------------------
-/** Read offsets and add as property
- *
- * @param in :: input file stream
- * @param Peaks :: peaks workspace
- * @param m_offset :: vectors of offsets
- * @param label :: label for property
- * @param qSign :: For inelastic this is 1; for crystallography this is -1
- * @return void
- */
-void LoadIsawPeaks::getOffsets(std::ifstream &in,
-                               DataObjects::PeaksWorkspace_sptr Peaks,
-                               std::vector<double> &m_offset,
-                               std::string &label, double &qSign) {
-  for (int i = 0; i < 3; i++) {
-    m_offset[i] = qSign * std::stod(getWord(in, false), nullptr);
-  }
-  Peaks->mutableRun().addProperty<std::vector<double>>(label, m_offset, true);
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -560,6 +542,26 @@ void LoadIsawPeaks::appendFile(PeaksWorkspace_sptr outWS,
 
     prog.report(in.tellg());
   }
+  if (m_isModulatedStructure) {
+    FindUBUsingIndexedPeaks alg2;
+    alg2.initialize();
+    alg2.setPropertyValue("ToleranceForSatellite", "0.05");
+    alg2.setProperty("PeaksWorkspace", outWS);
+    alg2.execute();
+
+   if (outWS->mutableSample().hasOrientedLattice()) {
+    OrientedLattice o_lattice = outWS->mutableSample().getOrientedLattice();
+  auto &peaks = outWS->getPeaks();
+  for (auto &peak : peaks) {
+
+    V3D hkl = peak.getHKL();
+    V3D mnp = peak.getIntMNP();
+    for (int i = 0; i <= 2; i++)
+      hkl +=  o_lattice.getModVec(i) * mnp[i];
+    peak.setHKL(hkl);
+ }
+ }
+ }
 }
 
 //-----------------------------------------------------------------------------------------------
