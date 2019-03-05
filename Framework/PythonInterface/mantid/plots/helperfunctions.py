@@ -311,7 +311,7 @@ def common_x(arr):
     """
     return numpy.all(arr == arr[0, :], axis=(1, 0))
 
-def get_matrix_2d_ragged(workspace, distribution):
+def get_matrix_2d_ragged(workspace, distribution, histogram2D=False):
     num_hist = workspace.getNumberHistograms()
     delta = numpy.finfo(numpy.float64).max
     min_value = numpy.finfo(numpy.float64).max

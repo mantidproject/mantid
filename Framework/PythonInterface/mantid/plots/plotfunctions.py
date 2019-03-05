@@ -528,7 +528,7 @@ def imshow(axes, workspace, *args, **kwargs):
         (uneven_bins, kwargs) = get_data_uneven_flag(workspace, **kwargs)
         (distribution, kwargs) = get_distribution(workspace, **kwargs)
         if uneven_bins:
-            (x, y, z) = get_matrix_2d_ragged(workspace, distribution)
+            (x, y, z) = get_matrix_2d_ragged(workspace, distribution, histogram2d=True)
         else:
             (x, y, z) = get_matrix_2d_data(workspace, distribution, histogram2D=True)
 
