@@ -109,7 +109,6 @@ def run(ceria_run, do_cal, do_van, van_run, calibration_directory, calibration_g
 
     # check whether creating a vanadium is required or requested
     if (not os.path.isfile(_get_van_names(van_run, calibration_directory)[0])) or do_van:
-        print("create vanadium")
         create_vanadium(van_run, calibration_directory)
 
     # find the file names of calibration files that would be created by this run
@@ -123,7 +122,6 @@ def run(ceria_run, do_cal, do_van, van_run, calibration_directory, calibration_g
     # if the calibration files that this run would create are not present, or the user has requested it, create the
     # calibration files
     if not all(expected_cals_present) or do_cal:
-        print("create calibration")
         create_calibration(ceria_run, van_run, calibration_directory, calibration_general, cropped, crop_name, crop_on)
 
     # if a focus is requested, run the focus
