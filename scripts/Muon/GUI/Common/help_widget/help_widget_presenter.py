@@ -14,7 +14,7 @@ class HelpWidgetPresenter(object):
         self._view.show_directory_manager()
 
     def handle_help_button_clicked(self):
-        self._view.warning_popup("Help is not currently implemented!")
+        self._view._on_help_button_clicked()
 
 
 class HelpWidget(object):

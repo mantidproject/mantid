@@ -8,7 +8,6 @@ import Muon.GUI.Common.utilities.algorithm_utils as algorithm_utils
 from Muon.GUI.Common import thread_model
 from Muon.GUI.Common.run_selection_dialog import RunSelectionDialog
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapper
-from mantid.api import AnalysisDataService
 
 
 class GroupingTabPresenter(object):
@@ -46,9 +45,12 @@ class GroupingTabPresenter(object):
         self.groupingNotifier = GroupingTabPresenter.GroupingNotifier(self)
         self.grouping_table_widget.on_data_changed(self.group_table_changed)
         self.pairing_table_widget.on_data_changed(self.pair_table_changed)
+        self.enable_editing_notifier = GroupingTabPresenter.EnableEditingNotifier(self)
+        self.disable_editing_notifier = GroupingTabPresenter.DisableEditingNotifier(self)
 
         self.guessAlphaObserver = GroupingTabPresenter.GuessAlphaObserver(self)
         self.pairing_table_widget.guessAlphaNotifier.add_subscriber(self.guessAlphaObserver)
+        self.gui_variables_observer = GroupingTabPresenter.GuiVariablesChangedObserver(self)
 
     def show(self):
         self._view.show()
@@ -89,16 +91,19 @@ class GroupingTabPresenter(object):
         else:
             run_to_use = self._model._data.current_runs[0]
 
-        ws1 = self._model.get_group_workspace(group1_name, run_to_use)
-        ws2 = self._model.get_group_workspace(group2_name, run_to_use)
+        try:
+            ws1 = self._model.get_group_workspace(group1_name, run_to_use)
+            ws2 = self._model.get_group_workspace(group2_name, run_to_use)
+        except KeyError:
+            self._view.display_warning_box('Group workspace not found, try updating all and then recalculating.')
+            return
 
         ws = algorithm_utils.run_AppendSpectra(ws1, ws2)
-
-        AnalysisDataService.addOrReplace('workspace used in calc', ws)
 
         new_alpha = algorithm_utils.run_AlphaCalc({"InputWorkspace": ws,
                                                    "ForwardSpectra": [0],
                                                    "BackwardSpectra": [1]})
+
         self._model.update_pair_alpha(pair_name, new_alpha)
         self.pairing_table_widget.update_view_from_model()
 
@@ -130,11 +135,13 @@ class GroupingTabPresenter(object):
         self._view.set_buttons_enabled(False)
         self.grouping_table_widget.disable_editing()
         self.pairing_table_widget.disable_editing()
+        self.disable_editing_notifier.notify_subscribers()
 
     def enable_editing(self, result=None):
         self._view.set_buttons_enabled(True)
         self.grouping_table_widget.enable_editing()
         self.pairing_table_widget.enable_editing()
+        self.enable_editing_notifier.notify_subscribers()
 
     def calculate_all_data(self):
         self._model.show_all_groups_and_pairs()
@@ -178,6 +185,7 @@ class GroupingTabPresenter(object):
     def create_update_thread(self):
         self._update_model = ThreadModelWrapper(self.calculate_all_data)
         return thread_model.ThreadModel(self._update_model)
+
     # ------------------------------------------------------------------------------------------------------------------
     # Observer / Observable
     # ------------------------------------------------------------------------------------------------------------------
@@ -215,7 +223,33 @@ class GroupingTabPresenter(object):
         def update(self, observable, arg):
             self.outer.handle_guess_alpha(arg[0], arg[1], arg[2])
 
+    class GuiVariablesChangedObserver(Observer):
+        def __init__(self, outer):
+            Observer.__init__(self)
+            self.outer = outer
+
+        def update(self, observable, arg):
+            self.outer.handle_update_all_clicked()
+
     class GroupingNotifier(Observable):
+
+        def __init__(self, outer):
+            Observable.__init__(self)
+            self.outer = outer  # handle to containing class
+
+        def notify_subscribers(self, *args, **kwargs):
+            Observable.notify_subscribers(self, *args, **kwargs)
+
+    class DisableEditingNotifier(Observable):
+
+        def __init__(self, outer):
+            Observable.__init__(self)
+            self.outer = outer  # handle to containing class
+
+        def notify_subscribers(self, *args, **kwargs):
+            Observable.notify_subscribers(self, *args, **kwargs)
+
+    class EnableEditingNotifier(Observable):
 
         def __init__(self, outer):
             Observable.__init__(self)

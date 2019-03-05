@@ -121,5 +121,6 @@ class MockQWidget(object):
     def __init__(self):
         self.addWidget = StrictMock()
         self.replaceWidget = StrictMock()
+        self.widget = StrictMock()
         self.hide = StrictMock()
         self.show = StrictMock()

@@ -18,10 +18,10 @@ class MatrixWorkspaceDisplayViewTest(GuiTest, QtWidgetFinder):
         ws = CreateSampleWorkspace()
 
         p = MatrixWorkspaceDisplay(ws)
-        self.assert_window_created()
+        self.assert_widget_created()
         p.close(ws.name())
 
-        self.assert_window_created()
+        self.assert_widget_created()
 
         QApplication.processEvents()
 
@@ -33,11 +33,11 @@ class MatrixWorkspaceDisplayViewTest(GuiTest, QtWidgetFinder):
         ws = CreateSampleWorkspace()
 
         p = MatrixWorkspaceDisplay(ws)
-        self.assert_window_created()
+        self.assert_widget_created()
 
         p.force_close()
 
-        self.assert_window_created()
+        self.assert_widget_created()
 
         QApplication.processEvents()
 

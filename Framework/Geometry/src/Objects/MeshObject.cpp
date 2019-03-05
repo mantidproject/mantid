@@ -48,7 +48,7 @@ void MeshObject::initialize() {
 /**
  * @return The Material that the object is composed from
  */
-const Kernel::Material MeshObject::material() const { return m_material; }
+const Kernel::Material &MeshObject::material() const { return m_material; }
 
 /**
  * Returns whether this object has a valid shape

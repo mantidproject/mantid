@@ -12,6 +12,7 @@ import numpy as np
 import os
 from platform import system
 from shutil import copy2
+from six import u
 
 import mantid.plots # noqa
 import Engineering.EnggUtils as Utils
@@ -624,7 +625,7 @@ def _save_out(run_number, focus_directory, focus_general, output, join_string, b
     # work out where to save the files
     filename = os.path.join(focus_directory, join_string.format(run_number, bank_id))
     hdf5_name = os.path.join(focus_directory, run_number + ".hdf5")
-    if not unicode(bank_id).isnumeric():
+    if not u(bank_id).isnumeric():
         bank_id = 0
     # save the files out to the user directory
     simple.SaveFocusedXYE(InputWorkspace=output, Filename=filename + ".dat", SplitFiles=False,

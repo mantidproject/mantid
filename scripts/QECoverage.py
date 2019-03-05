@@ -9,6 +9,7 @@
 from __future__ import (absolute_import, division, print_function)
 from gui_helper import get_qapplication, show_interface_help
 import numpy as np
+import os
 import mantid
 from qtpy import QtWidgets
 from MPLwidgets import *

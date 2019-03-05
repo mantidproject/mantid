@@ -8,27 +8,29 @@
 #
 #
 """Provides our custom figure manager to wrap the canvas, window and our custom toolbar"""
-import sys
+from __future__ import  (absolute_import, unicode_literals)
+
 from functools import wraps
+import sys
 
 # 3rdparty imports
+from mantid.api import AnalysisDataServiceObserver
+from mantid.plots import MantidAxes
+from mantid.py3compat import text_type
+from mantidqt.plotting.figuretype import FigureType, figure_type
+from mantidqt.widgets.fitpropertybrowser import FitPropertyBrowser
 import matplotlib
 from matplotlib._pylab_helpers import Gcf
 from matplotlib.backend_bases import FigureManagerBase
 from matplotlib.backends.backend_qt5agg import (FigureCanvasQTAgg)  # noqa
 from qtpy.QtCore import QObject, Qt
 from qtpy.QtWidgets import QApplication, QLabel
-from six import text_type
 
 # local imports
-from mantid.api import AnalysisDataServiceObserver
-from mantid.plots import MantidAxes
-from mantidqt.plotting.figuretype import FigureType, figure_type
-from mantidqt.widgets.fitpropertybrowser import FitPropertyBrowser
-from workbench.plotting.figurewindow import FigureWindow
-from workbench.plotting.propertiesdialog import LabelEditor, XAxisEditor, YAxisEditor
-from workbench.plotting.qappthreadcall import QAppThreadCall
-from workbench.plotting.toolbar import WorkbenchNavigationToolbar
+from .figureinteraction import FigureInteraction
+from .figurewindow import FigureWindow
+from .qappthreadcall import QAppThreadCall
+from .toolbar import WorkbenchNavigationToolbar, ToolbarStateChecker
 
 
 def _catch_exceptions(func):
@@ -122,7 +124,6 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         The qt.QMainWindow
 
     """
-
     def __init__(self, canvas, num):
         QObject.__init__(self)
         FigureManagerBase.__init__(self, canvas, num)
@@ -182,7 +183,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         height = cs.height() + self._status_and_tool_height
         self.window.resize(cs.width(), height)
 
-        self.fit_browser = FitPropertyBrowser(canvas)
+        self.fit_browser = FitPropertyBrowser(canvas, ToolbarStateChecker(self.toolbar))
         self.fit_browser.closing.connect(self.handle_fit_browser_close)
         self.window.setCentralWidget(canvas)
         self.window.addDockWidget(Qt.LeftDockWidgetArea, self.fit_browser)
@@ -196,12 +197,10 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             # This will be called whenever the current axes is changed
             if self.toolbar is not None:
                 self.toolbar.update()
-
         canvas.figure.add_axobserver(notify_axes_change)
 
         # Register canvas observers
-        self._cids = []
-        self._cids.append(self.canvas.mpl_connect('button_press_event', self.on_button_press))
+        self._fig_interation = FigureInteraction(self)
         self._ads_observer = FigureManagerADSObserver(self)
 
         self.window.raise_()
@@ -257,8 +256,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             self.toolbar.destroy()
         self._ads_observer.observeAll(False)
         del self._ads_observer
-        for id in self._cids:
-            self.canvas.mpl_disconnect(id)
+        self._fig_interation.disconnect()
         self.window.close()
 
         try:
@@ -321,33 +319,6 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         class so that it can be wrapped in a QAppThreadCall.
         """
         Gcf.figure_visibility_changed(self.num)
-
-    # ------------------------ Interaction events --------------------
-    def on_button_press(self, event):
-        if not event.dblclick:
-            # shortcut
-            return
-        # We assume this is used for editing axis information e.g. labels
-        # which are outside of the axes so event.inaxes is no use.
-        canvas = self.canvas
-        figure = canvas.figure
-        axes = figure.get_axes()
-
-        def move_and_show(editor):
-            editor.move(event.x, figure.bbox.height - event.y + self.window.y())
-            editor.exec_()
-
-        for ax in axes:
-            if ax.title.contains(event)[0]:
-                move_and_show(LabelEditor(canvas, ax.title))
-            elif ax.xaxis.label.contains(event)[0]:
-                move_and_show(LabelEditor(canvas, ax.xaxis.label))
-            elif ax.yaxis.label.contains(event)[0]:
-                move_and_show(LabelEditor(canvas, ax.yaxis.label))
-            elif ax.xaxis.contains(event)[0]:
-                move_and_show(XAxisEditor(canvas, ax))
-            elif ax.yaxis.contains(event)[0]:
-                move_and_show(YAxisEditor(canvas, ax))
 
 
 # -----------------------------------------------------------------------------

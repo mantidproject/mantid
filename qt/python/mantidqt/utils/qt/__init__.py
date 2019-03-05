@@ -50,8 +50,14 @@ def import_qt(modulename, package, attr=None):
     if modulename.startswith('.'):
         try:
             lib = import_module(modulename + LIB_SUFFIX, package)
-        except ImportError:
-            lib = import_module(modulename.lstrip('.') + LIB_SUFFIX)
+        except ImportError as e1:
+            try:
+                lib = import_module(modulename.lstrip('.') + LIB_SUFFIX)
+            except ImportError as e2:
+                msg = 'import of "{}" failed with "{}"'
+                msg = 'First ' + msg.format(modulename + LIB_SUFFIX, e1) \
+                    + '. Second ' + msg.format(modulename.lstrip('.') + LIB_SUFFIX, e2)
+                raise ImportError(msg)
     else:
         lib = import_module(modulename + LIB_SUFFIX)
 
