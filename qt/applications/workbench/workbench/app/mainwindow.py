@@ -24,7 +24,7 @@ from mantid.kernel import (ConfigService, UsageService, logger, version_str as m
 from workbench.plugins.exception_handler import exception_logger
 from workbench.widgets.settings.presenter import SettingsPresenter
 
-# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------exception_handler.py
 # Constants
 # -----------------------------------------------------------------------------
 
