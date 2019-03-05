@@ -16,27 +16,26 @@ from __future__ import (absolute_import, division, print_function)
 import os
 if os.environ.get('MANTID_FRAMEWORK_CONDA_SYSTEMTEST'):
     # conda build of mantid-framework sometimes require importing matplotlib before mantid
-    import matplotlib
+    import matplotlib  # noqa
 # =========================================================
-from six import PY3
-import datetime
-import difflib
-import imp
-import inspect
-from mantid.api import FileFinder
-from mantid.api import FrameworkManager
-from mantid.kernel import config, MemoryStats
-from mantid.simpleapi import AlgorithmManager, Load, SaveNexus
-import numpy
-import platform
-import re
-import shutil
-import subprocess
-import shutil
-import sys
-import tempfile
-import time
-import unittest
+from six import PY3  # noqa: E402
+import datetime  # noqa: E402
+import difflib  # noqa: E402
+import imp  # noqa: E402
+import inspect  # noqa: E402
+from mantid.api import FileFinder  # noqa: E402
+from mantid.api import FrameworkManager  # noqa: E402
+from mantid.kernel import config, MemoryStats  # noqa: E402
+from mantid.simpleapi import AlgorithmManager, Load, SaveNexus  # noqa: E402
+import numpy  # noqa: E402
+import platform  # noqa: E402
+import re  # noqa: E402
+import shutil  # noqa: E402
+import subprocess  # noqa: E402
+import sys  # noqa: E402
+import tempfile  # noqa: E402
+import time  # noqa: E402
+import unittest  # noqa: E402
 
 
 # Path to this file
@@ -516,9 +515,9 @@ class ResultReporter(object):
                 console_output += '{:.<{}} ({}: {}s)'.format(result.name+" ", self._maximum_name_length+2,
                                                              result.status, time_taken)
             if ((self._output_on_failure
-                and (result.status != 'success')
-                and (result.status != 'skipped'))
-                or (not self._quiet)):
+                    and (result.status != 'success')
+                    and (result.status != 'skipped'))
+                    or (not self._quiet)):
                 nstars = 80
                 console_output += '\n' + ('*' * nstars) + '\n'
                 print_list = ['test_name', 'filename', 'test_date', 'host_name', 'environment',
@@ -793,8 +792,7 @@ class TestManager(object):
 
         self._tests = list_of_tests
 
-    def generateMasterTestList(self):
-
+    def generateMasterTestList(self):  # noqa: C901
         # If given option is a directory
         if os.path.isdir(self._testDir) == True:
             test_dir = os.path.abspath(self._testDir).replace('\\', '/')
@@ -1244,8 +1242,8 @@ def testThreadsLoop(testDir, saveDir, dataDir, options, tests_dict,
         if local_test_list:
 
             if (not options.quiet):
-                print("##### Thread %2i will execute module: [%3i] %s (%i tests)" \
-                       % (process_number, imodule, modname, len(local_test_list)))
+                print("##### Thread %2i will execute module: [%3i] %s (%i tests)"
+                      % (process_number, imodule, modname, len(local_test_list)))
                 sys.stdout.flush()
 
             # Create a TestManager, giving it a pre-compiled list_of_tests
@@ -1271,8 +1269,8 @@ def testThreadsLoop(testDir, saveDir, dataDir, options, tests_dict,
             # Update the test results in the array shared across cores
             res_array[process_number] += mgr._skippedTests
             res_array[process_number + options.ncores] += mgr._failedTests
-            res_array[process_number + 2*options.ncores] = min(int(reporter.reportStatus()),\
-                res_array[process_number + 2*options.ncores])
+            res_array[process_number + 2*options.ncores] = min(int(reporter.reportStatus()),
+                                                               res_array[process_number + 2*options.ncores])
 
             # Delete the TestManager
             del mgr
