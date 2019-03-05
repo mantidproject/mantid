@@ -56,15 +56,49 @@ void EQSANSCorrectFrame::exec() {
 
   const double pulsePeriod = getProperty("PulsePeriod");
   const double minTOF = getProperty("MinTOF");
-  const double minTOF_delayed = minTOF + pulsePeriod;
   const double frameWidth = getProperty("FrameWidth");
-  // Find how many frame widths elapsed from the time the neutrons of the
-  // lead pulse were emitted and the time the neutrons arrived to the
-  // detector bank. This time must be added to the stored TOF values
-  const size_t nFrames = static_cast<size_t>(minTOF / frameWidth);
-  const double framesOffsetTime = frameWidth * static_cast<double>(nFrames);
   const bool isFrameSkipping = getProperty("FrameSkipping");
   const auto &spectrumInfo = inputWS->spectrumInfo();
+
+
+  // Creates a function that correct TOF values
+  struct correctTofFactory {
+
+    explicit correctTofFactory(double pulsePeriod, double minTOF,
+                         double frameWidth, bool isFrameSkipping) :
+      m_pulsePeriod(pulsePeriod), m_minTOF(minTOF), m_frameWidth(frameWidth),
+      m_isFrameSkipping(isFrameSkipping){
+        // Find how many frame widths elapsed from the time the neutrons of the
+        // lead pulse were emitted and the time the neutrons arrived to the
+        // detector bank. This time must be added to the stored TOF values
+        const size_t nf = static_cast<size_t>(minTOF / frameWidth);
+        m_framesOffsetTime = frameWidth * static_cast<double>(nf);
+        m_minTOF_delayed = minTOF + pulsePeriod;
+      }
+
+    double operator()(const double tof) const {
+      // shift times to the correct frame
+      double newTOF = tof + m_framesOffsetTime;
+      // TOF values smaller than that of the fastest neutrons have been
+      // 'folded' by the data acquisition system. They must be shifted
+      if (newTOF < m_minTOF)
+        newTOF += m_frameWidth;
+      // Events from the skipped pulse are delayed by one pulse period
+      if (m_isFrameSkipping && newTOF > m_minTOF_delayed)
+        newTOF += m_pulsePeriod;
+      return newTOF;
+    }
+
+    double m_pulsePeriod;
+    double m_minTOF;
+    double m_frameWidth;
+    bool m_isFrameSkipping;
+    double m_framesOffsetTime;
+    double m_minTOF_delayed;
+  };
+
+  auto correctTof = correctTofFactory(pulsePeriod, minTOF,
+                                      frameWidth, isFrameSkipping);
 
   // Loop through the spectra and apply correction
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS))
@@ -75,27 +109,10 @@ void EQSANSCorrectFrame::exec() {
                       << " has no detector assigned to it - discarding\n";
       continue;
     }
-    std::vector<TofEvent> &events = inputWS->getSpectrum(ispec).getEvents();
-    if (events.empty())
-      continue; // no events recorded in this spectrum
-    std::vector<TofEvent> clean_events;
-    for (auto event : events) {
-      double newTOF;
-      // shift times to the correct frame
-      newTOF = event.tof() + framesOffsetTime;
-      // TOF values smaller than that of the fastest neutrons have been
-      // 'folded' by the data acquisition system. They must be shifted
-      if (newTOF < minTOF)
-        newTOF += frameWidth;
-      // Events from the skipped pulse are delayed by one pulse period
-      if (isFrameSkipping && newTOF > minTOF_delayed)
-        newTOF += pulsePeriod;
-      clean_events.emplace_back(newTOF, event.pulseTime());
-    }
-    events.clear();
-    events.reserve(clean_events.size());
-    std::copy(clean_events.begin(), clean_events.end(),
-              std::back_inserter(events));
+    EventList &evlist = inputWS->getSpectrum(ispec);
+    if (evlist.getNumberEvents() == 0)
+        continue; // no events recorded in this spectrum
+    evlist.convertTof(correctTof);
     progress.report("Correct TOF frame");
     PARALLEL_END_INTERUPT_REGION
   }
