@@ -46,6 +46,7 @@ Bug fixes
 - :ref:`algm-ReflectometryReductionOneAuto` No longer sums all of a transmission run's workspaces and instead will use the first run only
 - In :ref:`algm-ReflectometryReductionOneAuto` an issue where if you gave only one of either MomentumTransferMax or MomentumTransferMin were specified it would be ignored, this has been fixed.
 - Reverted property names for polarization correction coefficients in :ref:`ReflectometryReductionOneAuto <algm-ReflectometryReductionOneAuto-v2>` for backwards compatibility.
+- Fixed the ``BeamCenter`` property of :ref:`ReflectometrySumInQ <algm-ReflectometrySumInQ>` to actually be a fractional workspace index.
 
 Liquids Reflectometer
 ---------------------
@@ -76,4 +77,4 @@ Bug fixes
 
 - The SaveASCII tab from the interface was unable to save in some places on Windows and that has now been fixed.
 
-:ref:`Release 3.14.0 <v3.14.0>`
+:ref:`Release 4.0.0 <v4.0.0>`

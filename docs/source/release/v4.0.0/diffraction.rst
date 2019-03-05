@@ -20,7 +20,7 @@ Improvements
 - :ref:`SNAPReduce <algm-SNAPReduce>` now has progress bar and all output workspaces have history
 - :ref:`SNAPReduce <algm-SNAPReduce>` has been completely refactored. It now uses :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` for a large part of its functionality. It has progress bar and all output workspaces have history. It is also more memory efficient by reducing the number of temporary workspaces created.
 - :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>` and :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` now support outputting the unfocussed data and weighted events (with time). This allows for event filtering **after** processing the data.
-- :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` has significant performance improvements when used with chunking and can now use summed cache files.
+- :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` has significant performance improvements when used with chunking and can now use summed cache files. Failing to load a cache file will now produce a warning, rather than exception, and the algorithm will continue without the file.
 - :ref:`LoadWAND <algm-LoadWAND>` has grouping option added and loads faster
 - Mask workspace option added to :ref:`WANDPowderReduction <algm-WANDPowderReduction>`
 - :ref:`Le Bail concept page <Le Bail Fit>` moved from mediawiki
@@ -30,6 +30,8 @@ Improvements
   (see :ref:`ConvertToMD <algm-ConvertToMD>` Notes).
 - New TOPAZ instrument geometry for 2019 run cycle
 - :ref:`LoadDiffCal <algm-LoadDiffCal>` has an additional parameter to allow for a second file specifying a grouping to override the one in the calibration file
+- :ref:`LoadILLDiffraction <algm-LoadILLDiffraction>` will now correctly resolve for the scan type and drive the detector to the offset corrected :math:`2theta_0` for D20 detector scans.
+- :ref:`PowderDiffILLDetScanReduction <algm-PowderDiffILLDetScanReduction>` will never merge the detector scans at the raw level even if they are supplied with + operator; it will process them separately and merge at the end.
 
 Single Crystal Diffraction
 --------------------------
@@ -111,6 +113,7 @@ Engineering Diffraction
 New
 ###
 
-- Scripts added that produce the same results as the ISIS engineering gui (supports ENGINX and IMAT), this is to allow use with ISIS autoreduction. The script plots calibration automatically, like the GUI.
+- Scripts added that produce the same results as the ISIS engineering gui (supports ENGINX and IMAT), this is to allow use with ISIS autoreduction. 
+The script plots calibration automatically, like the GUI.
 
-:ref:`Release 3.14.0 <v3.14.0>`
+:ref:`Release 4.0.0 <v4.0.0>`

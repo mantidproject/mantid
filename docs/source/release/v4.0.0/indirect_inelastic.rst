@@ -19,11 +19,20 @@ New Algorithms
 - TOF correction for neutrons incorrectly interpreted as slow neutrons in :ref:`BASISPowderDiffraction <algm-BASISPowderDiffraction>`
 - Deprecated algorithm BASISReduction311 has been removed.
 - :ref:`LoadEMU <algm-LoadEMU>` loader for an ANSTO EMU backscattering event file.
+- :ref:`IndirectReplaceFitResult <algm-IndirectReplaceFitResult>` will replace the *_Result* fit data found in one workspace with the 
+  single fit data provided within a second workspace.
 
-:ref:`Release 3.14.0 <v3.14.0>`
+:ref:`Release 4.0.0 <v4.0.0>`
 
 Data Analysis Interface
 -----------------------
+
+New Features
+############
+- IqtFit and ConvFit have a new option to edit the *_Results* workspace. This option allows the selection of two *_Result* 
+  workspaces (one containing the results of a sequential fit for multiple spectra (1), and the other containing the results of a fit 
+  for a single spectrum(2)). The algorithm :ref:`IndirectReplaceFitResult <algm-IndirectReplaceFitResult>` will replace the 
+  relevant data found in workspace (1) with the data found in workspace (2).
 
 Improvements
 ############
