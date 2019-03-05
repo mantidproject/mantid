@@ -81,6 +81,7 @@ from mantid.simpleapi import *
 
 # For debugging only.
 from mantid.api import FileFinder
+import platform
 from six import with_metaclass
 
 

@@ -127,12 +127,6 @@ std::vector<Column_const_sptr> extractColumns(ITableWorkspace const *table,
   return columns;
 }
 
-void populateChiSquaredErrorsWithZeros(std::vector<double> &e,
-                                       std::size_t const &difference) {
-  for (auto i = 0u; i < difference; ++i)
-    e.emplace_back(0.0);
-}
-
 struct TableToMatrixWorkspaceConverter {
   template <typename YFilter, typename EFilter>
   TableToMatrixWorkspaceConverter(ITableWorkspace const *table,
@@ -158,7 +152,7 @@ struct TableToMatrixWorkspaceConverter {
                                      std::back_inserter(e));
 
     if (includeChiSquared)
-      populateChiSquaredErrorsWithZeros(e, y.size() - e.size());
+      std::fill_n(std::back_inserter(e), y.size() - e.size(), 0.0);
 
     return createWorkspace(x, y, e, static_cast<int>(m_yColumns.size()),
                            m_yAxis, unitX);
