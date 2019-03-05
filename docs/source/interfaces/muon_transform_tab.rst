@@ -19,7 +19,7 @@ for adding padding and apodization functions to the data.
 If the workspace contains the word ``PhaseQuad`` it will run the :ref:`PhaseQuad <algm-PhaseQuad>` algorithm on the selected run when ``Calculate`` is pressed. If no phase table is available then
 the one will be generated and the result will be stored as ``PhaseTable``.
 
-The ``Calculate`` button will execute the :ref:`Padding and Apodization <algm-PaddingAndApodization>`  and then :ref:`FFT <algm-FFT>` algortihms. The output workspace will be added to
+The ``Calculate`` button will execute the :ref:`Padding and Apodization <algm-PaddingAndApodization>`  and then :ref:`FFT <algm-FFT>` algorithms. The output workspace will be added to
 appropriate grouped workspace.
 
 
@@ -31,7 +31,7 @@ the basic quantitites used during the calculation. If the ``Use Phase Table`` ch
 selected from the drop down menu. When the ``Calculate MaxEnt`` button is pressed, :ref:`CalMuonDetectorPhases <algm-CalMuonDetectorPhases>` is ran first if the phase table is to be ``Constructed``.
 
 The advanced property table contains variables for users that would
-like more control overt the calculation.
+like more control over the calculation.
 
 For large calculations the interface can be slow, therefore the Calculate button is disabled until the current calculation is complete.
 
