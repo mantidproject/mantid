@@ -91,10 +91,8 @@ class CodeEditorTabWidget(QTabWidget):
         options_button.setObjectName(self.OPTIONS_BUTTON_OBJECT_NAME)
         options_button.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
         options_button.setText("Options")
-        muhbar = QMenuBar(self)
 
         options_menu = QMenu("", self)
-        muhbar.addMenu(options_menu)
         options_button.setMenu(options_menu)
         layout.addWidget(options_button)
 
@@ -102,6 +100,11 @@ class CodeEditorTabWidget(QTabWidget):
 
         run_action = create_action(self, "Run", on_triggered=parent.execute_current_async,
                                    shortcut=("Ctrl+Enter", "Ctrl+Return"),
+                                   shortcut_context=Qt.ApplicationShortcut,
+                                   shortcut_visible_in_context_menu=True)
+
+        run_all_action = create_action(self, "Run All", on_triggered=parent.execute_async,
+                                   shortcut=("Ctrl+Shift+Enter", "Ctrl+Shift+Return"),
                                    shortcut_context=Qt.ApplicationShortcut,
                                    shortcut_visible_in_context_menu=True)
 
@@ -127,6 +130,7 @@ class CodeEditorTabWidget(QTabWidget):
 
         # Store actions for adding to menu bar; None will add a separator
         editor_actions = [run_action,
+                          run_all_action,
                           abort_action,
                           None,
                           toggle_find_replace,
