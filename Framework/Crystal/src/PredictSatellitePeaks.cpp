@@ -153,12 +153,20 @@ void PredictSatellitePeaks::exec() {
 
   OrientedLattice lattice = sample.getOrientedLattice();
 
-  if (getProperty("GetModVectorsFromUB")) {
+  bool fromUB = getProperty("GetModVectorsFromUB");
+  if (fromUB) {
     offsets1 = lattice.getModVec(0);
     offsets2 = lattice.getModVec(1);
     offsets3 = lattice.getModVec(2);
     if (maxOrder == 0)
       maxOrder = lattice.getMaxOrder();
+    crossTerms = lattice.getCrossTerm();
+  } else {
+    lattice.setModVec1(offsets1);
+    lattice.setModVec2(offsets2);
+    lattice.setModVec3(offsets3);
+    lattice.setMaxOrder(maxOrder);
+    lattice.setCrossTerm(crossTerms);
   }
 
   const auto instrument = Peaks->getInstrument();
@@ -252,12 +260,20 @@ void PredictSatellitePeaks::exec_peaks() {
 
   OrientedLattice lattice = sample.getOrientedLattice();
 
-  if (getProperty("GetModVectorsFromUB")) {
+  bool fromUB = getProperty("GetModVectorsFromUB");
+  if (fromUB) {
     offsets1 = lattice.getModVec(0);
     offsets2 = lattice.getModVec(1);
     offsets3 = lattice.getModVec(2);
     if (maxOrder == 0)
       maxOrder = lattice.getMaxOrder();
+    crossTerms = lattice.getCrossTerm();
+  } else {
+    lattice.setModVec1(offsets1);
+    lattice.setModVec2(offsets2);
+    lattice.setModVec3(offsets3);
+    lattice.setMaxOrder(maxOrder);
+    lattice.setCrossTerm(crossTerms);
   }
 
   bool includePeaksInRange = false;

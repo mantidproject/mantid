@@ -131,6 +131,12 @@ void IndexPeaksWithSatellites::exec() {
     if (maxOrder == 0)
       maxOrder = o_lattice.getMaxOrder();
     CT = o_lattice.getCrossTerm();
+  } else {
+    o_lattice.setModVec1(offsets1);
+    o_lattice.setModVec2(offsets2);
+    o_lattice.setModVec3(offsets3);
+    o_lattice.setMaxOrder(maxOrder);
+    o_lattice.setCrossTerm(CT);
   }
 
   const Matrix<double> &UB = o_lattice.getUB();
