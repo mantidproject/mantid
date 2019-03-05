@@ -1,11 +1,11 @@
 #ifndef MANTID_ALGORITHMS_EQSANSCORRECTFRAMETEST_H_
 #define MANTID_ALGORITHMS_EQSANSCORRECTFRAMETEST_H_
 
+#include "MantidAPI/Axis.h"
 #include "MantidAlgorithms/EQSANSCorrectFrame.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Events.h"
-#include "MantidAPI/Axis.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid;
@@ -31,19 +31,19 @@ public:
   // constructor
   EQSANSCorrectFrameTest()
       : m_pulseWidth(1.E6 / 60), m_frameWidth(2.E6 / 60), m_minTOF(4.1E6 / 60),
-        m_frameSkipping(true), m_bankSize(2){
+        m_frameSkipping(true), m_bankSize(2) {
 
     // bank contains m_bankSize^2 pixels
     const int numBanks = 1;
     m_ews = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(
-                numBanks, m_bankSize);
+        numBanks, m_bankSize);
     m_ews->getAxis(0)->setUnit("TOF");
 
     // insert one event in each pixel
     std::vector<double> tofs = {0.05, 0.15, 1.05, 1.15};
     const double pulseWidth(m_pulseWidth);
     std::transform(tofs.begin(), tofs.end(), tofs.begin(),
-                   [&pulseWidth](double tof) {return tof * pulseWidth;});
+                   [&pulseWidth](double tof) { return tof * pulseWidth; });
     const int numPixels(m_bankSize * m_bankSize);
     for (int i = 0; i < numPixels; i++) {
       EventList &evlist = m_ews->getSpectrum(i);
@@ -69,9 +69,9 @@ public:
     std::vector<double> tofs = {7.05, 4.15, 5.05, 6.15};
     const double pulseWidth(m_pulseWidth);
     std::transform(tofs.begin(), tofs.end(), tofs.begin(),
-                   [&pulseWidth](double tof) {return tof * pulseWidth;});
+                   [&pulseWidth](double tof) { return tof * pulseWidth; });
     const int numPixels(m_bankSize * m_bankSize);
-    for (int i=0; i<numPixels; i++) {
+    for (int i = 0; i < numPixels; i++) {
       std::vector<TofEvent> &events = m_ews->getSpectrum(i).getEvents();
       TS_ASSERT_EQUALS(events.size(), 1);
       TS_ASSERT_DELTA(events[0].tof(), tofs[i], 1.0E-03 * m_pulseWidth);
@@ -88,4 +88,4 @@ private:
   void cleanup() { return; }
 };
 
-#endif  // MANTID_ALGORITHMS_EQSANSCORRECTFRAMETEST_H_
+#endif // MANTID_ALGORITHMS_EQSANSCORRECTFRAMETEST_H_

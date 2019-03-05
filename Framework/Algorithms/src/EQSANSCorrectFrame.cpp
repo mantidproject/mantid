@@ -60,21 +60,20 @@ void EQSANSCorrectFrame::exec() {
   const bool isFrameSkipping = getProperty("FrameSkipping");
   const auto &spectrumInfo = inputWS->spectrumInfo();
 
-
   // Creates a function that correct TOF values
   struct correctTofFactory {
 
     explicit correctTofFactory(double pulsePeriod, double minTOF,
-                         double frameWidth, bool isFrameSkipping) :
-      m_pulsePeriod(pulsePeriod), m_minTOF(minTOF), m_frameWidth(frameWidth),
-      m_isFrameSkipping(isFrameSkipping){
-        // Find how many frame widths elapsed from the time the neutrons of the
-        // lead pulse were emitted and the time the neutrons arrived to the
-        // detector bank. This time must be added to the stored TOF values
-        const size_t nf = static_cast<size_t>(minTOF / frameWidth);
-        m_framesOffsetTime = frameWidth * static_cast<double>(nf);
-        m_minTOF_delayed = minTOF + pulsePeriod;
-      }
+                               double frameWidth, bool isFrameSkipping)
+        : m_pulsePeriod(pulsePeriod), m_minTOF(minTOF),
+          m_frameWidth(frameWidth), m_isFrameSkipping(isFrameSkipping) {
+      // Find how many frame widths elapsed from the time the neutrons of the
+      // lead pulse were emitted and the time the neutrons arrived to the
+      // detector bank. This time must be added to the stored TOF values
+      const size_t nf = static_cast<size_t>(minTOF / frameWidth);
+      m_framesOffsetTime = frameWidth * static_cast<double>(nf);
+      m_minTOF_delayed = minTOF + pulsePeriod;
+    }
 
     double operator()(const double tof) const {
       // shift times to the correct frame
@@ -97,8 +96,8 @@ void EQSANSCorrectFrame::exec() {
     double m_minTOF_delayed;
   };
 
-  auto correctTof = correctTofFactory(pulsePeriod, minTOF,
-                                      frameWidth, isFrameSkipping);
+  auto correctTof =
+      correctTofFactory(pulsePeriod, minTOF, frameWidth, isFrameSkipping);
 
   // Loop through the spectra and apply correction
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS))
@@ -111,7 +110,7 @@ void EQSANSCorrectFrame::exec() {
     }
     EventList &evlist = inputWS->getSpectrum(ispec);
     if (evlist.getNumberEvents() == 0)
-        continue; // no events recorded in this spectrum
+      continue; // no events recorded in this spectrum
     evlist.convertTof(correctTof);
     progress.report("Correct TOF frame");
     PARALLEL_END_INTERUPT_REGION
