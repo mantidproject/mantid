@@ -20,6 +20,11 @@ The following changes have been made _only_ on Windows, bringing it in line with
 - The Mantid Nightly build will now be installed in a different directory by default, to avoid overwriting the release Mantid installation.
 - The Mantid Nightly build desktop and start menu shortcuts will have the "Nightly" suffix appended, to distinguish from the release Mantid installation.
 
+Documentation
+-------------
+- The entry pages for he Mantid documentation have been improved, both the welcome page, and the Algorithms reference section.
+- The algorithms references section is now based around the algorithm categories, rather than the complete alphabetical list, although the full list is still available for those that remember it with fond memories.
+
 Project Recovery
 ----------------
 New

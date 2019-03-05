@@ -1072,6 +1072,7 @@ We recommend you use ISIS Reflectometry instead, If this is not possible contact
 
                     alg = AlgorithmManager.create("ReflectometryReductionOneAuto")
                     alg.initialize()
+                    alg.setProperty("Debug", True)
                     alg.setProperty("InputWorkspace", ws[i])
                     if group_trans_ws:
                         alg.setProperty("FirstTransmissionRun", group_trans_ws)
@@ -1105,6 +1106,7 @@ We recommend you use ISIS Reflectometry instead, If this is not possible contact
             else:
                 alg = AlgorithmManager.create("ReflectometryReductionOneAuto")
                 alg.initialize()
+                alg.setProperty("Debug", True)
                 alg.setProperty("InputWorkspace", ws)
                 if transmission_ws:
                     alg.setProperty("FirstTransmissionRun", transmission_ws)
