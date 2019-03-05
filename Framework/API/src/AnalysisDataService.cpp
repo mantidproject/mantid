@@ -151,7 +151,11 @@ void AnalysisDataServiceImpl::addOrReplace(
     }
     // add member workspace if needed
     if (!wsName.empty()) {
-      addOrReplace(wsName, ws);
+      // If the member of the workspace already exists then don't add it
+      // (Can cause infinete recursion and crash)
+      if (!this->doesExist(wsName)) {
+        addOrReplace(wsName, ws);
+      }
     }
   }
 }
@@ -164,9 +168,19 @@ void AnalysisDataServiceImpl::addOrReplace(
  */
 void AnalysisDataServiceImpl::rename(const std::string &oldName,
                                      const std::string &newName) {
+  auto ws = retrieve(oldName);
+
+  if (ws->isGroup() && doesExist(newName)) {
+    auto wsGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(ws);
+    if (wsGroup->isInGroup(*retrieve(newName))) {
+      throw std::runtime_error(
+          "Cannot rename a group to a name of it's member");
+    }
+  }
+
   Kernel::DataService<API::Workspace>::rename(oldName, newName);
   // Attach the new name to the workspace
-  auto ws = retrieve(newName);
+  ws = retrieve(newName);
   ws->setName(newName);
 }
 
