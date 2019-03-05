@@ -35,7 +35,7 @@ class ExceptionHandlerTest(unittest.TestCase):
         self.assertEqual(1, mock_WorkbenchErrorMessageBox.call_count)
         mock_errorbox.exec_.assert_called_once_with()
 
-    @patch('workbench.plugins.exception_handler.CrashReportPage', spec={'continue_working': True})
+    @patch('workbench.plugins.exception_handler.CrashReportPage')
     @patch('workbench.plugins.exception_handler.logger')
     def test_exception_logged(self, mock_logger, mock_CrashReportPage):
         UsageService.setEnabled(True)
