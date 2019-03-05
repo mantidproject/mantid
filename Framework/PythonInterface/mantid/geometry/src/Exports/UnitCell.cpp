@@ -7,8 +7,8 @@
 #include "MantidGeometry/Crystal/UnitCell.h"
 #include "MantidPythonInterface/kernel/Converters/MatrixToNDArray.h"
 #include "MantidPythonInterface/kernel/Converters/PyObjectToMatrix.h"
-#include "MantidPythonInterface/kernel/Policies/MatrixToNumpy.h"
 #include "MantidPythonInterface/kernel/Converters/PyObjectToV3D.h"
+#include "MantidPythonInterface/kernel/Policies/MatrixToNumpy.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/enum.hpp>
@@ -344,8 +344,10 @@ void export_UnitCell() {
            "Returns the inverse of the :math:`B` matrix for this unit cell."
            "This will return a :class:`numpy.ndarray` with shape ``(3,3)``. "
            "See also :func:`~mantid.geometry.UnitCell.getB`.")
-      .def("getModHKL", &UnitCell::getModHKL, arg("self"), return_readonly_numpy(),
-           "Returns the :math:`ModHKL` matrix for this unit cell. This will be in a "
+      .def("getModHKL", &UnitCell::getModHKL, arg("self"),
+           return_readonly_numpy(),
+           "Returns the :math:`ModHKL` matrix for this unit cell. This will be "
+           "in a "
            "right-handed coordinate system and using the Busing-Levy "
            "convention. This will return a :class:`numpy.ndarray` with shape "
            "``(3,3)``.")

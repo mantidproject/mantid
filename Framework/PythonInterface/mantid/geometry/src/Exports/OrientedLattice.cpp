@@ -110,14 +110,16 @@ void export_OrientedLattice() {
            ":class:`numpy.ndarray` with shape ``(3,3)``. ")
       .def("getModUB", &OrientedLattice::getModUB, arg("self"),
            return_readonly_numpy(),
-           "Returns the :math:`ModUB` matrix for this oriented lattice. This will "
+           "Returns the :math:`ModUB` matrix for this oriented lattice. This "
+           "will "
            "return "
            "a :class:`numpy.ndarray` with shape ``(3,3)``.")
-      .def("setModUB", &setModUB, (arg("self"), arg("newModUB")),
-           "Set the :math:`ModUB` matrix. This methiod will calculate first the "
-           "lattice parameters, then the :math:`B` matrix, and then :math:`U`. "
-           "This method expects a "
-           ":class:`numpy.ndarray` with shape ``(3,3)``. ")
+      .def(
+          "setModUB", &setModUB, (arg("self"), arg("newModUB")),
+          "Set the :math:`ModUB` matrix. This methiod will calculate first the "
+          "lattice parameters, then the :math:`B` matrix, and then :math:`U`. "
+          "This method expects a "
+          ":class:`numpy.ndarray` with shape ``(3,3)``. ")
       .def("setUFromVectors", &setUFromVectors,
            (arg("self"), arg("u"), arg("v")),
            "Set the :math:`U` rotation matrix using two vectors to define a "
