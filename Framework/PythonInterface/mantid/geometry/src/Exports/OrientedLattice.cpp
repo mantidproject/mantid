@@ -32,6 +32,12 @@ void setUB(OrientedLattice &self, const object &data) {
 }
 
 /// Set the U matrix from 2 Python objects representing a V3D type. This can be
+/// Set the U vector via a numpy array
+void setModUB(OrientedLattice &self, const object &data) {
+  self.setModUB(Converters::PyObjectToMatrix(data)());
+}
+
+/// Set the U matrix from 2 Python objects representing a V3D type. This can be
 /// a V3D object, a list
 /// or a numpy array. If the arrays are used they must be of length 3
 void setUFromVectors(OrientedLattice &self, const object &vec1,
@@ -99,6 +105,16 @@ void export_OrientedLattice() {
            "a :class:`numpy.ndarray` with shape ``(3,3)``.")
       .def("setUB", &setUB, (arg("self"), arg("newUB")),
            "Set the :math:`UB` matrix. This methiod will calculate first the "
+           "lattice parameters, then the :math:`B` matrix, and then :math:`U`. "
+           "This method expects a "
+           ":class:`numpy.ndarray` with shape ``(3,3)``. ")
+      .def("getModUB", &OrientedLattice::getModUB, arg("self"),
+           return_readonly_numpy(),
+           "Returns the :math:`ModUB` matrix for this oriented lattice. This will "
+           "return "
+           "a :class:`numpy.ndarray` with shape ``(3,3)``.")
+      .def("setModUB", &setModUB, (arg("self"), arg("newModUB")),
+           "Set the :math:`ModUB` matrix. This methiod will calculate first the "
            "lattice parameters, then the :math:`B` matrix, and then :math:`U`. "
            "This method expects a "
            ":class:`numpy.ndarray` with shape ``(3,3)``. ")

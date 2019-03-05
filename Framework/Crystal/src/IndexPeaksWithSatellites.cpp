@@ -243,7 +243,7 @@ void IndexPeaksWithSatellites::exec() {
       g_log.notice() << "Maximum Order: " << o_lattice.getMaxOrder() << '\n';
 
       if (o_lattice.getMaxOrder() ==
-          0) // If data not modulated, recalculate fractional HKL
+          0 && maxOrder == 0) // If data not modulated, recalculate fractional HKL
       {
         if (!round_hkls) // If user wants fractional hkls, recalculate them
         {
