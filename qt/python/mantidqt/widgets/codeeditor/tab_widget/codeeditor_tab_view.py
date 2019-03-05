@@ -9,7 +9,7 @@ from __future__ import absolute_import
 
 from qtpy.QtCore import Qt
 from qtpy.QtGui import QColor
-from qtpy.QtWidgets import QAction, QHBoxLayout, QMenu, QMenuBar, QPushButton, QSizePolicy, QTabWidget, QWidget
+from qtpy.QtWidgets import QAction, QHBoxLayout, QMenu, QPushButton, QSizePolicy, QTabWidget, QWidget
 
 from mantidqt.icons import get_icon
 from mantidqt.utils.qt import add_actions, create_action
@@ -104,9 +104,9 @@ class CodeEditorTabWidget(QTabWidget):
                                    shortcut_visible_in_context_menu=True)
 
         run_all_action = create_action(self, "Run All", on_triggered=parent.execute_async,
-                                   shortcut=("Ctrl+Shift+Enter", "Ctrl+Shift+Return"),
-                                   shortcut_context=Qt.ApplicationShortcut,
-                                   shortcut_visible_in_context_menu=True)
+                                       shortcut=("Ctrl+Shift+Enter", "Ctrl+Shift+Return"),
+                                       shortcut_context=Qt.ApplicationShortcut,
+                                       shortcut_visible_in_context_menu=True)
 
         abort_action = create_action(self, "Abort", on_triggered=parent.abort_current)
 
