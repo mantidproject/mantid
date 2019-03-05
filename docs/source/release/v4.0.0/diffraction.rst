@@ -103,8 +103,8 @@ New Algorithms
 
 - :ref:`HB2AReduce <algm-HB2AReduce>` algorithm reduces HFIR POWDER (HB-2A) data
 - :ref:`LoadGudrunOutput <algm-LoadGudrunOutput>` is a new algorithm that allows users to load the standard Gudrun output files into Mantid.
-- :ref:`PDConvertReciprocalSpace <algm-PDConvertReciprocalSpace>` new algorithm to convert between reciprocal space units.
-- :ref:`PDConvertRealSpace <algm-PDConvertRealSpace>` new algorithm to convert between real space units.
+- New algorithm :ref:`PDConvertReciprocalSpace <algm-PDConvertReciprocalSpace>` to convert between reciprocal space units.
+- New algorithm :ref:`PDConvertRealSpace <algm-PDConvertRealSpace>` to convert between real space units.
 
 
 Engineering Diffraction
