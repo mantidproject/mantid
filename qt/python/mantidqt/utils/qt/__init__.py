@@ -121,7 +121,7 @@ def widget_updates_disabled(widget):
 
 
 def create_action(parent, text, on_triggered=None, shortcut=None,
-                  shortcut_context=None, icon_name=None):
+                  shortcut_context=None, icon_name=None, shortcut_visible_in_context_menu=None):
     """Create a QAction based on the give properties
 
     :param parent: The parent object
@@ -131,6 +131,9 @@ def create_action(parent, text, on_triggered=None, shortcut=None,
     :param shortcut_context: An optional context for the supplied shortcut.
     Only applies if a shortcut has been given
     :param icon_name: The name of the qt awesome uri for an icon.
+    :param shortcut_visible_in_context_menu: Qt 5.10 decided that all QMenus that are NOT inside a QMenuBar
+                                             are context menus, and are styled as such. By default keyboard shortcuts
+                                             are NOT shown on context menus. Set this to True to show them.
     :return: A new QAction object
     """
     action = QAction(text, parent)
@@ -147,6 +150,9 @@ def create_action(parent, text, on_triggered=None, shortcut=None,
             action.setShortcutContext(shortcut_context)
     if icon_name is not None:
         action.setIcon(get_icon(icon_name))
+
+    if shortcut_visible_in_context_menu:
+        action.setShortcutVisibleInContextMenu(shortcut_visible_in_context_menu)
 
     return action
 
