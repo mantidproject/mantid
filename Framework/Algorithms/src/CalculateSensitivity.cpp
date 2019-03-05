@@ -67,7 +67,7 @@ void CalculateSensitivity::exec() {
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
 
   // Files from EQSANS must be integrated in Lambda before using this algorithm
-  assert(inputWS.blocksize() == 1); // Sanity check
+  assert(inputWS->blocksize() == 1); // Sanity check
 
   MatrixWorkspace_sptr outputWS = inputWS->clone();
   setProperty("OutputWorkspace", outputWS);
