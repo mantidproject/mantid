@@ -62,8 +62,7 @@ void EQSANSCorrectFrame::exec() {
   // lead pulse were emitted and the time the neutrons arrived to the
   // detector bank. This time must be added to the stored TOF values
   const size_t nFrames = static_cast<size_t>(minTOF / frameWidth);
-  const double framesOffsetTime =
-      frameWidth * static_cast<double>(nFrames);
+  const double framesOffsetTime = frameWidth * static_cast<double>(nFrames);
   const bool isFrameSkipping = getProperty("FrameSkipping");
   const auto &spectrumInfo = inputWS->spectrumInfo();
 
