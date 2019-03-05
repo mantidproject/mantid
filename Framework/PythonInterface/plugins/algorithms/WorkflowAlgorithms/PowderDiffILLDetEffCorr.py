@@ -527,9 +527,10 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
                 DeleteWorkspace(ratio_ws)
 
                 if str(factor) == 'nan' or str(factor) == 'inf' or factor == 0.:
-                    self.log().warning('Factor is ' + str(factor) + ' for pixel #' + str(det))
+                    # pixel numbers start from 1
+                    self.log().warning('Factor is ' + str(factor) + ' for pixel #' + str(det + 1))
                 else:
-                    self.log().debug('Factor derived for detector pixel #' + str(det) + ' is ' + str(factor))
+                    self.log().debug('Factor derived for detector pixel #' + str(det + 1) + ' is ' + str(factor))
                     mtd[constants_ws].dataY(det)[0] = factor
 
                 self._update_reference(ws, cropped_ws, ref_ws, factor)
