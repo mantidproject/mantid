@@ -37,8 +37,9 @@ def do_cleanup():
             os.remove(absfile)
     for direc in ['d_spacing', 'gsas', 'fullprof', 'nexus']:
         direc = os.path.join(savedir, direc)
-        if os.listdir(direc) == []:
-            os.rmdir(direc)
+        if os.path.exists(direc):
+            if os.listdir(direc) == []:
+                os.rmdir(direc)
 
     return True
 
