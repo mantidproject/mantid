@@ -209,13 +209,15 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
                     index_max = self._calibration_ws.getIndexFromSpectrumNumber(int(self._spectra_range[1]))
 
                     CropWorkspace(InputWorkspace=self._calibration_ws,
-                                  OutputWorkspace=self._calibration_ws,
+                                  OutputWorkspace='__cropped_calib',
                                   StartWorkspaceIndex=index_min,
                                   EndWorkspaceIndex=index_max)
 
                     Divide(LHSWorkspace=ws_name,
-                           RHSWorkspace=self._calibration_ws,
+                           RHSWorkspace='__cropped_calib',
                            OutputWorkspace=ws_name)
+
+                    DeleteWorkspace('__cropped_calib')
 
                 # Scale detector data by monitor intensities
                 scale_detectors(ws_name, 'Indirect')

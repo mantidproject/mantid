@@ -66,6 +66,7 @@ New Algorithms
 - :ref:`ParallaxCorrection <algm-ParallaxCorrection>` will perform a geometric correction for the so-called parallax effect in tube based SANS detectors.
 - :ref:`CalculateEfficiencyCorrection <algm-CalculateEfficiencyCorrection>` will calculate a detection efficiency correction with multiple and flexible inputs for calculation.
 - :ref:`LinkedUBs <algm-LinkedUBs>` is an algorithm that ensures continuity of indexing across single crystal runs, as well as indirectly performing a U matrix correction for mis-centered samples or cases where there is error in the gonio angles. Results in a seperate UB for each run when used on a whole dataset.
+- :ref:`CopyDataRange <algm-CopyDataRange>` will replace a block of data in a destination workspace with a continuous block of data from an input workspace.
 
 Improvements
 ############
@@ -94,6 +95,7 @@ Improvements
 - :ref:`CylinderAbsorption <algm-CylinderAbsorption>` now will check the workspace's sample object for geometry
 - Various clarifications and additional links in the geometry and material documentation pages
 - :ref:`SetSample <algm-SetSample>` and :ref:`SetSampleMaterial <algm-SetSampleMaterial>` now accept materials without ``ChemicalFormula`` or ``AtomicNumber``. In this case, all cross sections and ``SampleNumberDensity`` have to be given.
+- :ref:`SetSampleMaterial <algm-SetSampleMaterial>` and :ref:`LoadSampleEnvironment <algm-LoadSampleEnvironment>` accept number densities as formula units per cubic Ångström in addition to atoms per cubic Ångström.
 - :ref:`LoadEventNexus <algm-LoadEventNexus>` experimental option `LoadType` = `{Default, Multiprocess}` is added, `Multiprocess` should work faster for big files and it is experimental, available only in Linux.
 - Various clarifications and additional links in the geometry and material documentation pages.
 - The history generated from a call to :ref:`SetSample <algm-SetSample>` can now be re-executed without error.
@@ -165,9 +167,10 @@ Improvements
 - :py:meth:`mantid.api.ITableWorkspace.columnTypes` now returns human readable strings for non-primitive column types.
 - It is now possible to build custom materials with :class:`mantid.kernel.MaterialBuilder` without setting a formula or atomic number. In this case, all cross sections and number density have to be given.
 - Python plotting now handles `twinx` and `twiny` axes for workspaces.
+- :py:obj:`mantid.kernel.MaterialBuilder` now supports number densities in formula units per cubic Ånström.
 
 Bugfixes
 ########
 
 
-:ref:`Release 3.14.0 <v3.14.0>`
+:ref:`Release 4.0.0 <v4.0.0>`

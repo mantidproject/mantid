@@ -165,7 +165,7 @@ class MatchPeaksTest(unittest.TestCase):
         self.assertTrue(alg_test.isExecuted())
         shifted = AnalysisDataService.retrieve('output')
         fit_table = FindEPP(shifted)
-        self.assertEqual(35, shifted.binIndexOf(fit_table.row(0)["PeakCentre"]))
+        self.assertEqual(35, shifted.yIndexOfX(fit_table.row(0)["PeakCentre"]))
         self.assertEqual(35, np.argmax(shifted.readY(2)))
         self._workspace_properties(shifted)
         DeleteWorkspace(shifted)
@@ -229,7 +229,7 @@ class MatchPeaksTest(unittest.TestCase):
         shifted = AnalysisDataService.retrieve('output')
         bin_range_table = AnalysisDataService.retrieve('bin_range')
         fit_table = FindEPP(shifted)
-        self.assertEqual(42, shifted.binIndexOf(fit_table.row(0)["PeakCentre"]))
+        self.assertEqual(42, shifted.yIndexOfX(fit_table.row(0)["PeakCentre"]))
         self.assertEqual(42, np.argmax(shifted.readY(2)))
         # Bin range
         self.assertEqual(10, bin_range_table.row(0)["MinBin"])
@@ -255,7 +255,7 @@ class MatchPeaksTest(unittest.TestCase):
         shifted = AnalysisDataService.retrieve('output')
         bin_range_table = AnalysisDataService.retrieve('bin_range')
         fit_table = FindEPP(shifted)
-        self.assertEqual(32-7, shifted.binIndexOf(fit_table.row(0)["PeakCentre"]))
+        self.assertEqual(32-7, shifted.yIndexOfX(fit_table.row(0)["PeakCentre"]))
         self.assertEqual(40-7, np.argmax(shifted.readY(2)))
         # Bin range
         self.assertEqual(0, bin_range_table.row(0)["MinBin"])
@@ -279,7 +279,7 @@ class MatchPeaksTest(unittest.TestCase):
         shifted = AnalysisDataService.retrieve('output')
         bin_range_table = AnalysisDataService.retrieve('bin_range')
         fit_table = FindEPP(shifted)
-        self.assertEqual(32+17, shifted.binIndexOf(fit_table.row(0)["PeakCentre"]))
+        self.assertEqual(32+17, shifted.yIndexOfX(fit_table.row(0)["PeakCentre"]))
         self.assertEqual(40+17, np.argmax(shifted.readY(2)))
         # Bin range
         self.assertEqual(17, bin_range_table.row(0)["MinBin"])

@@ -128,7 +128,7 @@ void CreateEPP::exec() {
     outputWS->getRef<double>(ColumnNames::SIGMA_ERR, i) = 0;
     double height = 0;
     try {
-      const auto elasticIndex = inputWS->binIndexOf(elasticTOF, i);
+      const auto elasticIndex = inputWS->yIndexOfX(elasticTOF, i);
       height = inputWS->y(i)[elasticIndex];
     } catch (std::out_of_range &) {
       std::ostringstream sout;

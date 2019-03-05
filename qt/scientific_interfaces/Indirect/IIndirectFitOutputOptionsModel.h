@@ -48,6 +48,10 @@ public:
 
   virtual bool
   isResultGroupSelected(std::string const &selectedGroup) const = 0;
+
+  virtual void replaceFitResult(std::string const &inputName,
+                                std::string const &singleFitName,
+                                std::string const &outputName) = 0;
 };
 
 } // namespace IDA

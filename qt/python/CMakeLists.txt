@@ -90,7 +90,6 @@ endif ()
     mantidqt/widgets/codeeditor/test/test_errorformatter.py
     mantidqt/widgets/codeeditor/test/test_execution.py
     mantidqt/widgets/codeeditor/test/test_interpreter.py
-    mantidqt/widgets/codeeditor/test/test_multifileinterpreter.py
 
     mantidqt/widgets/test/test_messagedisplay.py
     mantidqt/widgets/test/test_fitpropertybrowser.py
@@ -123,7 +122,11 @@ endif ()
   # ctest target for widgets that only get tested in qt5, because they are only used in the workbench
   set ( PYTHON_WIDGET_QT5_ONLY_TESTS
     mantidqt/widgets/codeeditor/test/test_interpreter_view.py
+    mantidqt/widgets/codeeditor/test/test_multifileinterpreter.py
     mantidqt/widgets/codeeditor/test/test_multifileinterpreter_view.py
+
+    mantidqt/widgets/codeeditor/tab_widget/test/test_codeeditor_tab_presenter.py
+    mantidqt/widgets/codeeditor/tab_widget/test/test_codeeditor_tab_view.py
 
     mantidqt/widgets/instrumentview/test/test_instrumentview_io.py
     mantidqt/widgets/instrumentview/test/test_instrumentview_view.py

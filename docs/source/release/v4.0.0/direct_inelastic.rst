@@ -96,5 +96,5 @@ Improved
 
 - IN5: pixel radius and height are now more realistic and the detector ID of the monitor is now 100000 instead of 0.
 
-:ref:`Release 3.14.0 <v3.14.0>`
+:ref:`Release 4.0.0 <v4.0.0>`
 

@@ -19,7 +19,7 @@ class SampleLogsViewTest(GuiTest, QtWidgetFinder):
     def test_deleted_on_close(self):
         ws = CreateSampleWorkspace()
         pres = SampleLogs(ws)
-        self.assert_window_created()
+        self.assert_widget_created()
         pres.view.close()
 
         QApplication.processEvents()

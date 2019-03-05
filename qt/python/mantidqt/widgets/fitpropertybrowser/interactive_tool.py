@@ -4,9 +4,10 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+from __future__ import (absolute_import, unicode_literals)
+
 from qtpy.QtCore import QObject, Signal, Slot
-from qtpy.QtGui import QCursor
-from qtpy.QtWidgets import QApplication, QMenu, QInputDialog
+from qtpy.QtWidgets import QApplication,  QInputDialog
 
 from .markers import VerticalMarker, PeakMarker
 from .mouse_state_machine import StateMachine
@@ -403,9 +404,12 @@ class FitInteractiveTool(QObject):
         """
         return self.fit_start_x.patch.get_transform()
 
-    def show_context_menu(self, peak_names, current_peak_type, background_names, other_names):
+    def add_to_menu(self, menu, peak_names, current_peak_type, background_names,
+                    other_names):
         """
-        Show the context menu.
+        Adds the fit tool menu actions to the given menu and returns the menu
+
+        :param menu: A reference to a menu that will accept the actions
         :param peak_names: A list of registered fit function peak names to be offered to choose from by the "Add a peak"
             dialog.
         :param current_peak_type:
@@ -413,15 +417,16 @@ class FitInteractiveTool(QObject):
             "Add a background" dialog.
         :param other_names:  A list of other registered fit functions to be offered to choose from by the
             "Add other function" dialog.
+        :returns: The menu reference passed in
         """
         self.peak_names = peak_names
         self.current_peak_type = current_peak_type
         self.background_names = background_names
         self.other_names = other_names
         if not self.toolbar_state_checker.is_tool_active():
-            menu = QMenu()
             menu.addAction("Add peak", self.add_default_peak)
             menu.addAction("Select peak type", self.add_peak_dialog)
             menu.addAction("Add background", self.add_background_dialog)
             menu.addAction("Add other function", self.add_other_dialog)
-            menu.exec_(QCursor.pos())
+
+        return menu
