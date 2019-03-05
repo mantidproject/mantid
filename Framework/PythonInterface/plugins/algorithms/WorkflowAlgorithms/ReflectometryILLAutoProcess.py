@@ -56,8 +56,8 @@ class PropAutoProcess(object):
     END_WS_INDEX_DIRECT = 'DirectFitEndWorkspaceIndex'
     END_WS_INDEX_REFLECTED = 'FitEndWorkspaceIndex'
     END_OVERLAPS = 'EndOverlaps'
-    FOREGROUND_HALF_WIDTH_DIRECT = 'DirectForegroundHalfWidth'
-    FOREGROUND_HALF_WIDTH = 'ForegroundHalfWidth'
+    HIGH_FOREGROUND_HALF_WIDTH = 'HighAngleForegroundHalfWidth'
+    HIGH_FOREGROUND_HALF_WIDTH_DIRECT = 'DirectHighAngleForegroundHalfWidth'
     GROUPING_FRACTION = 'GroupingQFraction'
     HIGH_BKG_OFFSET_DIRECT = 'DirectHighAngleBkgOffset'
     HIGH_BKG_OFFSET_REFLECTED = 'HighAngleBkgOffset'
@@ -67,6 +67,8 @@ class PropAutoProcess(object):
     LOW_BKG_OFFSET_REFLECTED = 'LowAngleBkgOffset'
     LOW_BKG_WIDTH_DIRECT = 'DirectLowAngleBkgWidth'
     LOW_BKG_WIDTH_REFLECTED = 'LowAngleBkgWidth'
+    LOW_FOREGROUND_HALF_WIDTH = 'LowAngleForegroundHalfWidth'
+    LOW_FOREGROUND_HALF_WIDTH_DIRECT = 'DirectLowAngleForegroundHalfWidth'
     MANUAL_SCALE_FACTORS = 'ManualScaleFactors'
     RB = 'Run'
     SCALE_FACTOR = 'ScaleFactor'
@@ -192,12 +194,22 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         preProcessDirect = 'ReflectometryILLPreprocess for direct runs'
         self.declareProperty(
             IntArrayProperty(
-                PropAutoProcess.FOREGROUND_HALF_WIDTH_DIRECT,
-                validator=maxTwoNonnegativeInts
+                PropAutoProcess.LOW_FOREGROUND_HALF_WIDTH_DIRECT,
+                values=[0],
+                validator=nonnegativeInts
             ),
-            doc='Number of foreground pixels at lower and higher angles from the centre pixel.'
+            doc='Number of foreground pixels at lower angles from the centre pixel.'
         )
-        self.setPropertyGroup(PropAutoProcess.FOREGROUND_HALF_WIDTH_DIRECT, preProcessDirect)
+        self.setPropertyGroup(PropAutoProcess.LOW_FOREGROUND_HALF_WIDTH_DIRECT, preProcessDirect)
+        self.declareProperty(
+            IntArrayProperty(
+                PropAutoProcess.HIGH_FOREGROUND_HALF_WIDTH_DIRECT,
+                values=[0],
+                validator=nonnegativeInts
+            ),
+            doc='Number of foreground pixels at higher angles from the centre pixel.'
+        )
+        self.setPropertyGroup(PropAutoProcess.HIGH_FOREGROUND_HALF_WIDTH_DIRECT, preProcessDirect)
         self.declareProperty(
             PropAutoProcess.BKG_METHOD_DIRECT,
             defaultValue=BkgMethod.CONSTANT,
@@ -250,8 +262,8 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         self.declareProperty(
             IntArrayProperty(
                 PropAutoProcess.START_WS_INDEX_DIRECT,
-                validator=nonnegativeInts,
                 values=[0],
+                validator=nonnegativeInts,
             ),
             doc='Start histogram index used for peak fitting{}'.format(listOrSingleNumber)
         )
@@ -259,8 +271,8 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         self.declareProperty(
             IntArrayProperty(
                 PropAutoProcess.END_WS_INDEX_DIRECT,
-                validator=nonnegativeInts,
                 values=[255],
+                validator=nonnegativeInts,
             ),
             doc='Last histogram index used for peak fitting{}'.format(listOrSingleNumber)
         )
@@ -281,12 +293,28 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         self.copyProperties(
             'ReflectometryILLPreprocess',
             [
-                Prop.FOREGROUND_HALF_WIDTH,
                 Prop.BKG_METHOD
             ]
         )
-        self.setPropertyGroup(Prop.FOREGROUND_HALF_WIDTH, preProcessReflected)
         self.setPropertyGroup(Prop.BKG_METHOD, preProcessReflected)
+        self.declareProperty(
+            IntArrayProperty(
+                PropAutoProcess.LOW_FOREGROUND_HALF_WIDTH,
+                values=[0],
+                validator=nonnegativeInts,
+            ),
+            doc='Number of foreground pixels at lower angles from the centre pixel.'
+        )
+        self.setPropertyGroup(PropAutoProcess.LOW_FOREGROUND_HALF_WIDTH, preProcessReflected)
+        self.declareProperty(
+            IntArrayProperty(
+                PropAutoProcess.HIGH_FOREGROUND_HALF_WIDTH,
+                values=[0],
+                validator=nonnegativeInts,
+            ),
+            doc='Number of foreground pixels at higher angles from the centre pixel.'
+        )
+        self.setPropertyGroup(PropAutoProcess.HIGH_FOREGROUND_HALF_WIDTH, preProcessReflected)
         self.declareProperty(
             IntArrayProperty(
                 PropAutoProcess.LOW_BKG_OFFSET_REFLECTED,
@@ -330,8 +358,8 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         self.declareProperty(
             IntArrayProperty(
                 PropAutoProcess.START_WS_INDEX_REFLECTED,
-                validator=nonnegativeInts,
                 values=[0],
+                validator=nonnegativeInts,
             ),
             doc='Start histogram index used for peak fitting{}'.format(listOrSingleNumber)
         )
@@ -339,8 +367,8 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         self.declareProperty(
             IntArrayProperty(
                 PropAutoProcess.END_WS_INDEX_REFLECTED,
-                validator=nonnegativeInts,
                 values=[255],
+                validator=nonnegativeInts,
             ),
             doc='Last histogram index used for peak fitting{}'.format(listOrSingleNumber)
         )
@@ -383,9 +411,9 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         self.declareProperty(
             StringArrayProperty(
                 PropAutoProcess.SUM_TYPE,
+                values=[SumType.IN_LAMBDA],
                 validator=stringArrayValidator,
                 direction=Direction.Input,
-                values=[SumType.IN_LAMBDA]
             ),
             doc='Type of summation to perform.'
         )
@@ -437,18 +465,10 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
 
     def getValue(self, propertyName, angle):
         value = self.getProperty(propertyName).value
-        if not self.getProperty(propertyName).isDefault:
-            return value[angle]
-        else:
+        if len(value) == 1:
             return value[0]
-
-    def getString(self, propertyName, angle):
-        stringVal = self.getPropertyValue(propertyName)
-        allStrings = stringVal.split(',')
-        if len(allStrings) == 1:
-            return allStrings[0]
-        elif angle <= len(allStrings):
-            return allStrings[angle]
+        elif angle <= len(value):
+            return value[angle]
         else:
             raise RuntimeError(
                 'The number of entries for {} must correspond to the number of reflected beams'.format(Prop.SUM_TYPE)
@@ -467,9 +487,6 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
 
         self._progress = Progress(self, start=0.0, end=1.0, nreports=len(rb))
 
-        self.halfWidthsReflected = self.getProperty(Prop.FOREGROUND_HALF_WIDTH).value
-        self.wavelengthRange = [float(self.getProperty(PropAutoProcess.WAVELENGTH_LOWER).value),
-                                float(self.getProperty(PropAutoProcess.WAVELENGTH_UPPER).value)]
         self.polarizationEffFile = self.getProperty(PropAutoProcess.EFFICIENCY_FILE).value
         self.twoTheta = self.getProperty(Prop.TWO_THETA).value
         self.linePosition = self.getProperty(Prop.LINE_POSITION).value
@@ -497,7 +514,13 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
 
             runDB = format(db[angle][-10:-4])
             runRB = format(rb[angle][-10:-4])
-            sumType = self.getString(PropAutoProcess.SUM_TYPE, angle)
+            sumType = self.getValue(PropAutoProcess.SUM_TYPE, angle)
+            halfWidthsReflected = [int(self.getValue(PropAutoProcess.LOW_FOREGROUND_HALF_WIDTH, angle)),
+                                   int(self.getValue(PropAutoProcess.HIGH_FOREGROUND_HALF_WIDTH, angle))]
+            halfWidthsDirect = [int(self.getValue(PropAutoProcess.LOW_FOREGROUND_HALF_WIDTH_DIRECT, angle)),
+                                int(self.getValue(PropAutoProcess.HIGH_FOREGROUND_HALF_WIDTH_DIRECT, angle))]
+            wavelengthRange = [float(self.getValue(PropAutoProcess.WAVELENGTH_LOWER, angle)),
+                               float(self.getValue(PropAutoProcess.WAVELENGTH_UPPER, angle))]
             # Direct beam already in ADS?
             workspaces = mtd.getObjectNames()
             if not 'direct-{}'.format(db[angle]) in workspaces:
@@ -507,7 +530,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
                     LinePosition=self.linePosition,
                     TwoTheta=self.twoTheta,
                     OutputWorkspace='direct-{}'.format(runDB),
-                    ForegroundHalfWidth=self.getProperty(PropAutoProcess.FOREGROUND_HALF_WIDTH_DIRECT).value,
+                    ForegroundHalfWidth=halfWidthsDirect,
                     SlitNormalisation=self.slitNorm,
                     FluxNormalisation=self.getProperty(Prop.FLUX_NORM_METHOD).value,
                     LowAngleBkgOffset=int(self.getValue(PropAutoProcess.LOW_BKG_OFFSET_DIRECT, angle)),
@@ -523,8 +546,8 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
                 ReflectometryILLSumForeground(
                     InputWorkspace='direct-{}'.format(runDB),
                     OutputWorkspace='direct-{}-foreground'.format(runDB),
-                    SummationType=sumType,
-                    WavelengthRange=self.wavelengthRange,
+                    SummationType=SumType.IN_LAMBDA,
+                    WavelengthRange=wavelengthRange,
                     SubalgorithmLogging=self._subalgLogging,
                     Cleanup=self._cleanup,
                 )
@@ -546,7 +569,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
                     LinePosition=self.linePosition,
                     TwoTheta=self.twoTheta,
                     DirectLineWorkspace='direct-{}'.format(runDB),
-                    ForegroundHalfWidth=self.halfWidthsReflected,
+                    ForegroundHalfWidth=halfWidthsReflected,
                     SlitNormalisation=self.slitNorm,
                     FluxNormalisation=self.getProperty(Prop.FLUX_NORM_METHOD).value,
                     LowAngleBkgOffset=int(self.getValue(PropAutoProcess.LOW_BKG_OFFSET_REFLECTED, angle)),
@@ -563,11 +586,10 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
                 ReflectometryILLSumForeground(
                     InputWorkspace='reflected-{}'.format(runRB),
                     OutputWorkspace=self._workspaceNamesForQConversion,
-                    #Foreground=self.foregroundReflected,
                     SummationType=sumType,
                     DirectForegroundWorkspace='direct-{}-foreground'.format(runDB),
                     DirectLineWorkspace='direct-{}'.format(runDB),
-                    WavelengthRange=self.wavelengthRange,
+                    WavelengthRange=wavelengthRange,
                     SubalgorithmLogging=self._subalgLogging,
                     Cleanup=self._cleanup,
                 )
@@ -578,7 +600,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
                         LinePosition=self.linePosition,
                         TwoTheta=self.twoTheta,
                         DirectLineWorkspace='direct-{}'.format(runDB),
-                        ForegroundHalfWidth=self.halfWidthsReflected,
+                        ForegroundHalfWidth=halfWidthsReflected,
                         SlitNormalisation=self.slitNorm,
                         LowAngleBkgOffset=self.lowOffsetReflected,
                         LowAngleBkgWidth=self.lowWidthReflected,
@@ -591,11 +613,10 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
                     ReflectometryILLSumForeground(
                         InputWorkspace='{}'.format(run),
                         OutputWorkspace='reflected-{}-foreground'.format(run),
-                        Foreground=self.foregroundReflected,
                         SummationType=sumType,
                         DirectForegroundWorkspace='direct-{}-foreground'.format(runDB),
                         DirectLineWorkspace='direct-{}'.format(runDB),
-                        WavelengthRange=self.wavelengthRange,
+                        WavelengthRange=wavelengthRange,
                         SubalgorithmLogging=self._subalgLogging,
                         Cleanup=self._cleanup,
                     )
