@@ -5,6 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IqtFit.h"
+#include "IqtTemplateBrowser.h"
 
 #include "../General/UserInputValidator.h"
 
@@ -44,6 +45,7 @@ IqtFit::IqtFit(QWidget *parent)
   setPlotView(m_uiForm->pvFitPlotView);
   setSpectrumSelectionView(m_uiForm->svSpectrumView);
   setOutputOptionsView(m_uiForm->ovOutputOptionsView);
+  m_uiForm->fitPropertyBrowser->setFunctionTemplateBrowser(new IqtTemplateBrowser);
   setFitPropertyBrowser(m_uiForm->fitPropertyBrowser);
 }
 

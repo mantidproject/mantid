@@ -135,8 +135,6 @@ void IndirectFitAnalysisTab::connectSpectrumPresenter() {
 }
 
 void IndirectFitAnalysisTab::connectFitPropertyBrowser() {
-  connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
-    SLOT(setModelFitFunction()));
   connect(m_fitPropertyBrowser,
           SIGNAL(localParameterEditRequested(const QString &)), this,
           SLOT(editLocalParameterValues(const QString &)));
@@ -737,6 +735,7 @@ void IndirectFitAnalysisTab::respondToBackgroundChanged(double)
 
 void IndirectFitAnalysisTab::respondToFunctionChanged()
 {
+  setModelFitFunction();
   m_plotPresenter->updatePlots();
   m_plotPresenter->updateGuess();
 }

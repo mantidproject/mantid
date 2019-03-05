@@ -153,11 +153,11 @@ private:
   void setPDFWorkspace(std::string const &workspaceName);
 
   std::unique_ptr<IndirectFittingModel> m_fittingModel;
-  IndirectFitPropertyBrowser *m_fitPropertyBrowser;
   std::unique_ptr<IndirectFitDataPresenter> m_dataPresenter;
   std::unique_ptr<IndirectFitPlotPresenter> m_plotPresenter;
   std::unique_ptr<IndirectSpectrumSelectionPresenter> m_spectrumPresenter;
   std::unique_ptr<IndirectFitOutputOptionsPresenter> m_outOptionsPresenter;
+  IndirectFitPropertyBrowser *m_fitPropertyBrowser;
 
   Mantid::API::IAlgorithm_sptr m_fittingAlgorithm;
 };

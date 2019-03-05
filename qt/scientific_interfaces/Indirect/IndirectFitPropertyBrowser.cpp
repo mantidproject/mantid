@@ -5,6 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectFitPropertyBrowser.h"
+#include "FunctionTemplateBrowser.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -12,25 +13,23 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidQtWidgets/Common/SignalBlocker.h"
 
+#include "MantidQtWidgets/Common/SignalBlocker.h"
 #include "MantidQtWidgets/Common/FitOptionsBrowser.h"
 #include "MantidQtWidgets/Common/FunctionBrowser.h"
 
 #include <QAction>
-#include <QFormLayout>
-#include <QMessageBox>
-#include <QSettings>
-
-#include <QLabel>
-#include <QPushButton>
-#include <QSplitter>
-#include <QVBoxLayout>
-
-#include <QMenu>
-#include <QSignalMapper>
-
 #include <QCheckBox>
+#include <QFormLayout>
+#include <QLabel>
+#include <QMenu>
+#include <QMessageBox>
+#include <QPushButton>
+#include <QSettings>
+#include <QSignalMapper>
+#include <QSplitter>
+#include <QStackedWidget>
+#include <QVBoxLayout>
 
 #include <iostream>
 
@@ -46,9 +45,8 @@ namespace IDA {
  * @param parent :: The parent widget - must be an ApplicationWindow
  * @param mantidui :: The UI form for MantidPlot
  */
-IndirectFitPropertyBrowser::IndirectFitPropertyBrowser(QWidget *parent,
-                                                       QObject *mantidui)
-    : QDockWidget(parent)
+IndirectFitPropertyBrowser::IndirectFitPropertyBrowser(QWidget *parent)
+    : QDockWidget(parent), m_templateBrowser(nullptr), m_functionWidget(nullptr)
 {
   setFeatures(QDockWidget::DockWidgetFloatable |
               QDockWidget::DockWidgetMovable);
@@ -58,6 +56,9 @@ IndirectFitPropertyBrowser::IndirectFitPropertyBrowser(QWidget *parent,
 void IndirectFitPropertyBrowser::initFunctionBrowser() {
   m_functionBrowser = new FunctionBrowser(nullptr, true);
   m_functionBrowser->setObjectName("functionBrowser");
+  // Process internally
+  connect(m_functionBrowser, SIGNAL(globalsChanged()), this, SLOT(updateFitType()));
+  // Re-emit
   connect(m_functionBrowser, SIGNAL(functionStructureChanged()), this,
           SIGNAL(functionChanged()));
   connect(m_functionBrowser, SIGNAL(parameterChanged(const QString &, const QString &)), this, SIGNAL(functionChanged()));
@@ -67,10 +68,9 @@ void IndirectFitPropertyBrowser::initFunctionBrowser() {
   connect(m_functionBrowser,
           SIGNAL(localParameterButtonClicked(const QString &)), this,
           SIGNAL(localParameterEditRequested(const QString &)));
-  connect(m_functionBrowser, SIGNAL(globalsChanged()), this, SLOT(updateFitType()));
 }
 
-void IndirectFitPropertyBrowser::iniFitOptionsBrowser() {
+void IndirectFitPropertyBrowser::initFitOptionsBrowser() {
   m_fitOptionsBrowser = new FitOptionsBrowser(nullptr, FitOptionsBrowser::SimultaneousAndSequential);
   m_fitOptionsBrowser->setObjectName("fitOptionsBrowser");
   m_fitOptionsBrowser->setCurrentFittingType(FitOptionsBrowser::Sequential);
@@ -78,19 +78,35 @@ void IndirectFitPropertyBrowser::iniFitOptionsBrowser() {
 
 void IndirectFitPropertyBrowser::init() {
   initFunctionBrowser();
-  iniFitOptionsBrowser();
+  initFitOptionsBrowser();
+
 
   auto w = new QWidget(this);
-  auto layout = new QVBoxLayout(w);
-  layout->setContentsMargins(0, 0, 0, 0);
+  m_mainLayout = new QVBoxLayout(w);
+  m_mainLayout->setContentsMargins(0, 0, 0, 0);
+  m_functionWidget = new QStackedWidget(this);
+  if (m_templateBrowser) {
+    m_functionWidget->insertWidget(0, m_templateBrowser);
+    auto browserSwitcher = new QCheckBox("See full function");
+    browserSwitcher->setObjectName("browserSwitcher");
+    connect(browserSwitcher, SIGNAL(clicked(bool)), this, SLOT(showFullFunctionBrowser(bool)));
+    m_mainLayout->insertWidget(0, browserSwitcher);
+  }
+  m_functionWidget->addWidget(m_functionBrowser);
   auto splitter = new QSplitter(Qt::Vertical);
-  layout->addWidget(new QPushButton("Hello"));
-  layout->addWidget(splitter);
-
-  splitter->addWidget(m_functionBrowser);
+  m_mainLayout->addWidget(splitter);
+  splitter->addWidget(m_functionWidget);
   splitter->addWidget(m_fitOptionsBrowser);
-  w->setLayout(layout);
+  w->setLayout(m_mainLayout);
   setWidget(w);
+}
+
+void IndirectFitPropertyBrowser::setFunctionTemplateBrowser(FunctionTemplateBrowser * templateBrowser)
+{
+  if (m_templateBrowser) {
+    throw std::logic_error("Template browser already set.");
+  }
+  m_templateBrowser = templateBrowser;
 }
 
 void IndirectFitPropertyBrowser::setFunction(const QString &funStr) {
@@ -271,6 +287,11 @@ void IndirectFitPropertyBrowser::updateFitType() {
   } else {
     m_fitOptionsBrowser->setCurrentFittingType(FitOptionsBrowser::Simultaneous);
   }
+}
+
+void IndirectFitPropertyBrowser::showFullFunctionBrowser(bool on){
+  auto const index = on ? 1 : 0;
+  m_functionWidget->setCurrentIndex(index);
 }
 
 } // IDA

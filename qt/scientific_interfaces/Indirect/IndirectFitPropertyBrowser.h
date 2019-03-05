@@ -13,10 +13,12 @@
 #include "MantidAPI/ITableWorkspace_fwd.h"
 
 #include <QDockWidget>
-#include <QSet>
 
 #include <boost/optional.hpp>
 #include <unordered_map>
+
+class QVBoxLayout;
+class QStackedWidget;
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -26,16 +28,19 @@ namespace MantidWidgets {
 namespace CustomInterfaces {
 namespace IDA {
 
+class FunctionTemplateBrowser;
+
 class MANTIDQT_INDIRECT_DLL IndirectFitPropertyBrowser
   : public QDockWidget {
   Q_OBJECT
 
 public:
   /// Constructor.
-  IndirectFitPropertyBrowser(QWidget *parent = nullptr,
-    QObject *mantidui = nullptr);
+  IndirectFitPropertyBrowser(QWidget *parent = nullptr);
   /// Initialise the layout.
   void init();
+  /// Set the browser for the function template
+  void setFunctionTemplateBrowser(FunctionTemplateBrowser *templateBrowser);
 
   /// Set the function to the browser
   Q_INVOKABLE void setFunction(const QString &funStr);
@@ -82,6 +87,7 @@ protected slots:
   void clear();
   void browserVisibilityChanged(bool isVisible);
   void updateFitType();
+  void showFullFunctionBrowser(bool on);
 
 signals:
   void functionChanged();
@@ -93,10 +99,14 @@ signals:
 
 private:
   void initFunctionBrowser();
-  void iniFitOptionsBrowser();
+  void initFitOptionsBrowser();
 
+  QVBoxLayout *m_mainLayout;
   MantidWidgets::FunctionBrowser *m_functionBrowser;
   MantidWidgets::FitOptionsBrowser *m_fitOptionsBrowser;
+  FunctionTemplateBrowser *m_templateBrowser;
+  QStackedWidget *m_functionWidget;
+
 };
 
 } // namespace IDA
