@@ -62,6 +62,7 @@ Bug fixes
 * Removed option to process in non-compatibility mode to avoid calculation issues.
 * Default name for added runs has correct number of digits.
 * RKH files no longer append to existing files, but overwrite instead.
+* Reductions with event slices can save output files. However, transmission workspaces are not included in these files.
 
 Improvements
 ############
