@@ -43,7 +43,7 @@ from reduction.find_data import find_data
 __version__ = '1.0'
 
 
-def validate_loader(func):
+def validate_loader(func): # noqa
     def validated_f(reducer, algorithm, *args, **kwargs):
         if issubclass(algorithm.__class__, ReductionStep) or algorithm is None:
             # If we have a ReductionStep object, just use it.
@@ -181,7 +181,7 @@ def validate_loader(func):
     return validated_f
 
 
-def validate_step(func):
+def validate_step(func): # noqa
     """
         Decorator for Reducer methods that need a ReductionStep
         object as its first argument.
