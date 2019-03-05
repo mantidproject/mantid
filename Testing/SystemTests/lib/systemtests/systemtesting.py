@@ -646,12 +646,21 @@ if {exclude_in_pr}:
     systest.excludeInPullRequests = lambda: False
 """.format(test_framework=TESTING_FRAMEWORK_DIR, test_dir=self._test_dir, test_modname=self._modname,
            test_cls=self._test_cls_name, exclude_in_pr=self._exclude_in_pr_builds)
+        # Execution code
         if (not clean):
-            code += "systest.execute()\n" + \
-                    "exitcode = systest.returnValidationCode({})\n".format(TestRunner.VALIDATION_FAIL_CODE)
+            exec_line = "systest.execute()"
+            exitcode_line = "exitcode = systest.returnValidationCode({})".format(TestRunner.VALIDATION_FAIL_CODE)
         else:
-            code += "exitcode = 0\n"
-        code += "systest.cleanup()\nsys.exit(exitcode)\n"
+            exec_line = ""
+            exitcode_line = "exitcode = 0"
+        code += """
+try:
+    {exec_line}
+    {exitcode_line}
+finally:
+    systest.cleanup()
+sys.exit(exitcode)
+""".format(exec_line=exec_line, exitcode_line=exitcode_line)
         return code
 
 
