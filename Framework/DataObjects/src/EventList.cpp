@@ -3429,9 +3429,14 @@ void EventList::multiplyHistogramHelper(std::vector<T> &events,
                                         const MantidVec &X, const MantidVec &Y,
                                         const MantidVec &E) {
   // Validate inputs
-  if ((X.size() < 2) || (Y.size() != E.size()) || (X.size() != 1 + Y.size()))
-    throw std::invalid_argument("EventList::multiply() was given invalid size "
-                                "or inconsistent histogram arrays.");
+  if ((X.size() < 2) || (Y.size() != E.size()) || (X.size() != 1 + Y.size())) {
+    std::stringstream msg;
+    msg << "EventList::multiply() was given invalid size or "
+           "inconsistent histogram arrays: X["
+        << X.size() << "] "
+        << "Y[" << Y.size() << " E[" << E.size() << "]";
+    throw std::invalid_argument(msg.str());
+  }
 
   size_t x_size = X.size();
 
@@ -3552,9 +3557,14 @@ void EventList::divideHistogramHelper(std::vector<T> &events,
                                       const MantidVec &X, const MantidVec &Y,
                                       const MantidVec &E) {
   // Validate inputs
-  if ((X.size() < 2) || (Y.size() != E.size()) || (X.size() != 1 + Y.size()))
-    throw std::invalid_argument("EventList::divide() was given invalid size or "
-                                "inconsistent histogram arrays.");
+  if ((X.size() < 2) || (Y.size() != E.size()) || (X.size() != 1 + Y.size())) {
+    std::stringstream msg;
+    msg << "EventList::divide() was given invalid size or "
+           "inconsistent histogram arrays: X["
+        << X.size() << "] "
+        << "Y[" << Y.size() << " E[" << E.size() << "]";
+    throw std::invalid_argument(msg.str());
+  }
 
   size_t x_size = X.size();
 
