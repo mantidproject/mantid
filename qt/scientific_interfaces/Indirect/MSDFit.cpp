@@ -61,6 +61,8 @@ void MSDFit::setupFitTab() {
           SLOT(updateModelFitTypeString()));
 }
 
+void MSDFit::updateAvailableFitTypes() {}
+
 void MSDFit::updateModelFitTypeString() {
   m_msdFittingModel->setFitType(selectedFitType().toStdString());
 }

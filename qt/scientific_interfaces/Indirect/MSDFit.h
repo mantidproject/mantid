@@ -30,6 +30,9 @@ protected:
   void setRunIsRunning(bool running) override;
   void setRunEnabled(bool enable) override;
 
+private slots:
+  void updateAvailableFitTypes();
+
 private:
   void setupFitTab() override;
 

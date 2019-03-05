@@ -33,6 +33,9 @@ protected:
   void setRunIsRunning(bool running) override;
   void setRunEnabled(bool enable) override;
 
+private slots:
+  void updateAvailableFitTypes();
+
 private:
   void setupFitTab() override;
   void setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm) override;

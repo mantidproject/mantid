@@ -26,8 +26,8 @@ public:
                        QComboBox *cbParameterType, QComboBox *cbParameter,
                        QLabel *lbParameterType, QLabel *lbParameter);
 
-signals:
-  void updateAvailableFitTypes();
+//signals:
+//  void updateAvailableFitTypes();
 
 private slots:
   void hideParameterComboBoxes();

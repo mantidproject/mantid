@@ -43,6 +43,9 @@ protected:
   void setRunIsRunning(bool running) override;
   void setRunEnabled(bool enable) override;
 
+private slots:
+  void updateAvailableFitTypes();
+
 private:
   void setConstrainIntensitiesEnabled(bool enabled);
   std::string fitTypeString() const;

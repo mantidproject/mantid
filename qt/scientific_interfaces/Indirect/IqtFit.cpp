@@ -126,6 +126,8 @@ void IqtFit::setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm) {
   IndirectFitAnalysisTab::setupFit(fitAlgorithm);
 }
 
+void IqtFit::updateAvailableFitTypes() {}
+
 void IqtFit::runClicked() { runTab(); }
 
 void IqtFit::setRunIsRunning(bool running) {
