@@ -80,17 +80,17 @@ public:
   /** @name Point access */
   //@{
   /// Return the minimum value of X
-  inline const double &xMin() const { return m_minPoint.X(); }
+  inline double xMin() const { return m_minPoint.X(); }
   /// Return the maximum value of X
-  inline const double &xMax() const { return m_maxPoint.X(); }
+  inline double xMax() const { return m_maxPoint.X(); }
   /// Return the minimum value of Y
-  inline const double &yMin() const { return m_minPoint.Y(); }
+  inline double yMin() const { return m_minPoint.Y(); }
   /// Return the maximum value of Y
-  inline const double &yMax() const { return m_maxPoint.Y(); }
+  inline double yMax() const { return m_maxPoint.Y(); }
   /// Return the minimum value of Z
-  inline const double &zMin() const { return m_minPoint.Z(); }
+  inline double zMin() const { return m_minPoint.Z(); }
   /// Return the maximum value of Z
-  inline const double &zMax() const { return m_maxPoint.Z(); }
+  inline double zMax() const { return m_maxPoint.Z(); }
   /// Returns the min point of the box
   inline const Kernel::V3D &minPoint() const { return m_minPoint; }
   /// Returns the min point of the box
