@@ -102,7 +102,7 @@ OutputWorkspace
 For **D20**, the output is a single-column workspace containing the calibration factors for each cell.
 For **D2B**, it is a 2D workspace (x axis is the tube index, spectrum axis is the pixel index in the tube).
 The output should be normally saved with
-:ref:`SaveNexusProcessed <algm-SaveNexusProcessed>` to be later used in :ref:`PowderDiffILLReduction <algm-PowderDiffILLReduction>` and :ref:`PowderDiffILLDetScanReduction <algm-PowderDiffILLDetScanReduction>`.
+:ref:`SaveNexusProcessed <algm-SaveNexusProcessed>` to be later used in :ref:`PowderILLParameterScan <algm-PowderILLParameterScan>` and :ref:`PowderILLDetectorScan <algm-PowderILLDetectorScan>`.
 
 OutputResponseWorkspace
 -----------------------
@@ -164,8 +164,8 @@ D20 Workflow
 
    import matplotlib.pyplot as plt
    from mantid import plots
-   from mantid.simpleapi import PowderDiffILLDetEffCorr
-   PowderDiffILLDetEffCorr(CalibrationRun='967076.nxs', DerivationMethod='SequentialSummedReference1D', OutputWorkspace='calib')
+   from mantid.simpleapi import PowderILLEfficiency
+   PowderILLEfficiency(CalibrationRun='967076.nxs', DerivationMethod='SequentialSummedReference1D', OutputWorkspace='calib')
    Transpose(InputWorkspace='calib', OutputWorkspace='calib')
    fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})
    ax.plot(mtd['calib'],'-')

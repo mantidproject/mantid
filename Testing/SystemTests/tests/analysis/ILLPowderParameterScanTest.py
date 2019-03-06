@@ -7,14 +7,14 @@
 from __future__ import (absolute_import, division, print_function)
 
 import systemtesting
-from mantid.simpleapi import PowderDiffILLReduction
+from mantid.simpleapi import PowderILLParameterScan
 from mantid import config, mtd
 
 
-class ILLPowderDiffReductionTest(systemtesting.MantidSystemTest):
+class ILLPowderParameterScanTest(systemtesting.MantidSystemTest):
 
     def __init__(self):
-        super(ILLPowderDiffReductionTest, self).__init__()
+        super(ILLPowderParameterScanTest, self).__init__()
         self.setUp()
 
     def setUp(self):
@@ -29,7 +29,7 @@ class ILLPowderDiffReductionTest(systemtesting.MantidSystemTest):
         mtd.clear()
 
     def runTest(self):
-        PowderDiffILLReduction(Run='967087,967088',OutputWorkspace='reduced')
+        PowderILLParameterScan(Run='967087,967088',OutputWorkspace='reduced')
 
     def validate(self):
         self.tolerance = 0.0001

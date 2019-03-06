@@ -1,5 +1,5 @@
-digraph PowderDiffILLReduction {
-  label="PowderDiffILLReduction flowchart"
+digraph PowderILLParameterScan {
+  label="PowderILLParameterScan flowchart"
   $global_style
 
   subgraph values {
