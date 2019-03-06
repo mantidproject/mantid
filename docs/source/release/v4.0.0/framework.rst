@@ -108,12 +108,12 @@ Bugfixes
 - Fixed a crash in :ref:`MaskDetectors <algm-MaskDetectors>` when a non-existent component was given in ``ComponentList``.
 - The output workspace now keeps the units of the input workspace for all sample log entries of algorithms :ref:`MergeRuns <algm-MergeRuns>` and :ref:`ConjoinXRuns <algm-ConjoinXRuns>`.
 - History for algorithms that took groups sometimes would get incorrect history causing history to be incomplete, so now full group history is saved for all items belonging to the group.
-- Fixed a bug in `SetGoniometer <algm-SetGoniometer>` where it would use the mean log value rather than the time series average value for goniometer angles.
-- Fixed a bug in `AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` for using the passed on CompressTolerance and CompressWallClockTolerance in the child `CompressEvents <algm-CompressEvents>` algorithm instead of just in the child `AlignAndFocusPowder <algm-AlignAndFocusPowder>` algorithm.
-- `ConvertToMD <algm-ConvertToMD>` now uses the time-average value for logs when using them as ``OtherDimensions``.
+- Fixed a bug in :ref:`SetGoniometer <algm-SetGoniometer>` where it would use the mean log value rather than the time series average value for goniometer angles.
+- Fixed a bug in :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` for using the passed on CompressTolerance and CompressWallClockTolerance in the child :ref:`CompressEvents <algm-CompressEvents>` algorithm instead of just in the child :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>` algorithm.
+- :ref:`ConvertToMD <algm-ConvertToMD>` now uses the time-average value for logs when using them as ``OtherDimensions``.
 - The input validator is fixed in :ref:`MostLikelyMean <algm-MostLikelyMean>` avoiding a segmentation fault.
 - The inputs of the algorithm :ref:`MergeLogs <algm-MergeLogs>` are improved and a segmentation fault will not happen, if logs are not time series. The merging is now compliant with Mantid wide time series merging for example when adding workspaces.
-- Fixed a bug in `AlignAndFocusPowder <algm-AlignAndFocusPowder>` where a histogram input workspace did not clone propertly to the output workspace and properly masking a grouping workspace passed to `DiffractionFocussing <algm-DiffractionFocussing>`. Also adds initial unit tests for `AlignAndFocusPowder <algm-AlignAndFocusPowder>`.
+- Fixed a bug in :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>` where a histogram input workspace did not clone propertly to the output workspace and properly masking a grouping workspace passed to :ref:`DiffractionFocussing <algm-DiffractionFocussing>`. Also adds initial unit tests for :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>`.
 - Fixed a bug in :ref:`ExtractSpectra <algm-ExtractSpectra>` which was causing a wrong last value in the output's vertical axis if the axis type was ``BinEdgeAxis``.
 - Fixed an issue in :ref:`Rebin2D <algm-Rebin2D>` where `NaN` values would result if there were zero-area bins in the input workspace.
 - Fixed the `CheckSample` option of algorithm :ref:`CompareWorkspaces <algm-CompareWorkspaces>`: it crashed Mantid when comparing the run's sample logs. The algorithm's debug logging will now tell explicitly about the first entry which caused the log mismatch.
@@ -152,7 +152,7 @@ New
    UsageService.setApplicationName('myapp')
    FrameworkManager.Instance()
 
-- `FileFinder.findRuns` now optionally accepts a list of file extensions to search, called ``exts`, and an boolean flag ``useExtsOnly``. If this flag is True, FileFinder will search for the passed in extensions ONLY. If it is False, it will search for passed in extensions and then facility extensions.
+- :class:`FileFinder.findRuns` now optionally accepts a list of file extensions to search, called ``exts``, and a boolean flag ``useExtsOnly``. If this flag is True, FileFinder will search for the passed in extensions ONLY. If it is False, it will search for passed in extensions and then facility extensions.
 
 Improvements
 ############
