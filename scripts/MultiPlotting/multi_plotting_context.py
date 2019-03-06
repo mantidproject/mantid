@@ -41,7 +41,7 @@ class PlottingContext(object):
             else:
                 self.subplots[subplotName].addLine(workspace, specNum)
         except:
-            print("cannot plot workspace", workspace)
+            return
 
     def add_annotate(self, subplotName, label):
         self.subplots[subplotName].add_annotate(label)
@@ -53,13 +53,13 @@ class PlottingContext(object):
         try:
             self.subplots[subplotName].removeLabel(name)
         except:
-            print("Could not remove label " + name)
+            return
 
     def removeVLine(self, subplotName, name):
         try:
             self.subplots[subplotName].removeVLine(name)
         except:
-            print("Could not remove line " + name)
+            return
 
     def get_xBounds(self):
         return self.context[xBounds]

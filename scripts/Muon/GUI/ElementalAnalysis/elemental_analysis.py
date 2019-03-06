@@ -226,6 +226,7 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
 
     # detectors
     def add_detector_to_plot(self, detector, name):
+        self.plotting.add_subplot(detector)
         for ws in mantid.mtd[name]:
             self.plotting.plot(detector, ws.getName())
         # add current selection of lines
