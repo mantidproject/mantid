@@ -49,7 +49,7 @@ class vtkGeometryCacheWriter;
 A Constructive Solid Geometry (CSG) object, implemented
 as a collection of Rules and surface objects
 */
-class MANTID_GEOMETRY_DLL CSGObject : public IObject {
+class MANTID_GEOMETRY_DLL CSGObject final : public IObject {
 public:
   /// Default constructor
   CSGObject();
@@ -84,7 +84,7 @@ public:
   int getName() const override { return ObjNum; } ///< Get Name
 
   void setMaterial(const Kernel::Material &material);
-  const Kernel::Material material() const override;
+  const Kernel::Material &material() const override;
 
   /// Return whether this object has a valid shape
   bool hasValidShape() const override;
@@ -265,7 +265,7 @@ private:
   /// Optional string identifier
   std::string m_id;
   /// material composition
-  std::unique_ptr<Kernel::Material> m_material;
+  mutable std::unique_ptr<Kernel::Material> m_material;
   /// Whether or not the object geometry is finite
   bool m_isFiniteGeometry = true;
 

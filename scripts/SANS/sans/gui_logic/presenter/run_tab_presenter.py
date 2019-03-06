@@ -234,7 +234,8 @@ class RunTabPresenter(object):
         # Set the q range
         self._view.q_1d_step_type = [RangeStepType.to_string(RangeStepType.Lin),
                                      RangeStepType.to_string(RangeStepType.Log)]
-        self._view.q_xy_step_type = [RangeStepType.to_string(RangeStepType.Lin)]
+        self._view.q_xy_step_type = [RangeStepType.to_string(RangeStepType.Lin),
+                                     RangeStepType.to_string(RangeStepType.Log)]
 
         # Set the fit options
         fit_types = [FitType.to_string(FitType.Linear),

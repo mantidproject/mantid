@@ -14,5 +14,4 @@ from __future__ import (absolute_import, unicode_literals)
 # local imports
 from mantidqt.utils.qt import import_qt
 
-# Import single-file editor from C++ wrapping
-CodeEditor = import_qt('.._common', 'mantidqt.widgets', 'ScriptEditor')
+CodeEditor = import_qt('..._common', 'mantidqt.widgets.codeeditor', 'ScriptEditor')

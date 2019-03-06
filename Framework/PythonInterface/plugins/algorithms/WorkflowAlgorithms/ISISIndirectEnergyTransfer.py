@@ -4,7 +4,7 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=invalid-name,too-many-instance-attributes,too-many-branches,no-init,deprecated-module
+# pylint: disable=invalid-name,too-many-instance-attributes,too-many-branches,no-init,deprecated-module
 from __future__ import (absolute_import, division, print_function)
 
 from mantid.kernel import *
@@ -73,7 +73,7 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
         self.declareProperty(WorkspaceProperty('CalibrationWorkspace', '',
                                                direction=Direction.Input,
                                                optional=PropertyMode.Optional),
-                             doc='Workspace contining calibration data')
+                             doc='Workspace containing calibration data')
 
         # Instrument configuration properties
         self.declareProperty(name='Instrument', defaultValue='',
@@ -94,7 +94,7 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
                                               validator=IntArrayMandatoryValidator()),
                              doc='Comma separated range of spectra number to use.')
         self.declareProperty(FloatArrayProperty(name='BackgroundRange'),
-                             doc='Range of background to subtact from raw data in time of flight.')
+                             doc='Range of background to subtract from raw data in time of flight.')
         self.declareProperty(name='RebinString', defaultValue='',
                              doc='Rebin string parameters.')
         self.declareProperty(name='DetailedBalance', defaultValue=Property.EMPTY_DBL,
@@ -209,13 +209,15 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
                     index_max = self._calibration_ws.getIndexFromSpectrumNumber(int(self._spectra_range[1]))
 
                     CropWorkspace(InputWorkspace=self._calibration_ws,
-                                  OutputWorkspace=self._calibration_ws,
+                                  OutputWorkspace='__cropped_calib',
                                   StartWorkspaceIndex=index_min,
                                   EndWorkspaceIndex=index_max)
 
                     Divide(LHSWorkspace=ws_name,
-                           RHSWorkspace=self._calibration_ws,
+                           RHSWorkspace='__cropped_calib',
                            OutputWorkspace=ws_name)
+
+                    DeleteWorkspace('__cropped_calib')
 
                 # Scale detector data by monitor intensities
                 scale_detectors(ws_name, 'Indirect')

@@ -79,6 +79,7 @@ class MessageDisplay : QWidget, Configurable {
 
 public:
   MessageDisplay(QWidget *parent = 0);
+  MessageDisplay(const QFont &font, QWidget *parent = 0);
   void attachLoggingChannel(int logLevel = -1);
 
   void appendFatal(const QString &text);
@@ -115,7 +116,7 @@ public:
   };
 
 public:
-  ScriptEditor(const QString & language,
+  ScriptEditor(const QString &lexer, const QFont &font = QFont(),
                QWidget *parent /TransferThis/ = 0) throw(std::invalid_argument);
 
   QString fileName() const;

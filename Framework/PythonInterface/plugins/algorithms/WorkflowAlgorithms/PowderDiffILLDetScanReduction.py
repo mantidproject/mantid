@@ -174,7 +174,10 @@ class PowderDiffILLDetScanReduction(DataProcessorAlgorithm):
 
         self._progress = Progress(self, start=0.0, end=1.0, nreports=6)
         self._progress.report('Loading data')
-        input_workspace = LoadAndMerge(Filename=self.getPropertyValue('Run'),
+        # Do not merge the runs yet, since it will break the calibration
+        # Load and calibrate separately, then SumOverlappingTubes will merge correctly
+        # Besides + here does not make sense, and it will also slow down D2B a lot
+        input_workspace = LoadAndMerge(Filename=self.getPropertyValue('Run').replace('+', ','),
                                        LoaderName='LoadILLDiffraction',
                                        LoaderOptions={'DataType': data_type, 'AlignTubes': align_tubes})
         # We might already have a group, but group just in case

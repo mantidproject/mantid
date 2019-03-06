@@ -7,20 +7,12 @@
 import sys
 from Muon.GUI.Common.muon_load_data import MuonLoadData
 from Muon.GUI.Common.utilities.load_utils import load_workspace_from_filename
-
-from Muon.GUI.Common.home_grouping_widget.home_grouping_widget_model import HomeGroupingWidgetModel
-from Muon.GUI.Common.home_grouping_widget.home_grouping_widget_presenter import HomeGroupingWidgetPresenter
-from Muon.GUI.Common.home_grouping_widget.home_grouping_widget_view import HomeGroupingWidgetView
 from Muon.GUI.Common.muon_data_context import MuonDataContext
 from mantid.api import AnalysisDataService
-from Muon.GUI.Common import mock_widget
 import unittest
-from PyQt4 import QtGui
 from Muon.GUI.Common.observer_pattern import Observer
 from mantid.api import FileFinder
-from mantid import ConfigService
-import Muon.GUI.Common.utilities.load_utils as load_utils
-from Muon.GUI.Common.muon_pair import MuonPair
+
 
 
 if sys.version_info.major < 2:
@@ -33,7 +25,13 @@ class MuonDataContextTest(unittest.TestCase):
     def setUp(self):
         self.loaded_data = MuonLoadData()
         self.context = MuonDataContext(self.loaded_data)
+        self.gui_variable_observer = Observer()
+        self.gui_variable_observer.update = mock.MagicMock()
+        self.context.gui_variables_notifier.add_subscriber(self.gui_variable_observer)
         self.context.instrument = 'EMU'
+        self.gui_variable_observer = Observer()
+        self.gui_variable_observer.update = mock.MagicMock()
+        self.context.gui_variables_notifier.add_subscriber(self.gui_variable_observer)
 
         filepath = FileFinder.findRuns('EMU00019489.nxs')[0]
 
@@ -87,6 +85,10 @@ class MuonDataContextTest(unittest.TestCase):
 
         self.assertEqual(AnalysisDataService.getObjectNames(), expected_workspaces)
 
+    def test_when_gui_variables_is_modified_notifies_observer(self):
+        self.context.add_or_replace_gui_variables(RebinType='Fixed')
+
+        self.gui_variable_observer.update.assert_called_once_with(self.context.gui_variables_notifier, None)
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)

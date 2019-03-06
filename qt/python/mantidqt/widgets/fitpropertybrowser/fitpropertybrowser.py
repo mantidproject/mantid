@@ -211,6 +211,19 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         self.remove_guess()
         self.plot_guess()
 
+    def add_to_menu(self, menu):
+        """
+        Add the relevant actions to a menu
+        :param menu: A menu to hold the actions
+        :return: The menu passed to us
+        """
+        if self.tool is not None:
+            self.tool.add_to_menu(menu, peak_names=self.registeredPeaks(),
+                                  current_peak_type=self.defaultPeakType(),
+                                  background_names=self.registeredBackgrounds(),
+                                  other_names=self.registeredOthers())
+        return menu
+
     @Slot()
     def clear_fit_result_lines_slot(self):
         """
@@ -228,12 +241,24 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         """
         from mantidqt.plotting.functions import plot
         ws = mtd[name]
+
+        # Keep local copy of the original lines
+        original_lines = self.get_lines()
+
         self.clear_fit_result_lines()
         plot([ws], wksp_indices=[1, 2], fig=self.canvas.figure, overplot=True)
         name += ':'
         for lin in self.get_lines():
             if lin.get_label().startswith(name):
                 self.fit_result_lines.append(lin)
+
+        # Add properties back to the lines
+        new_lines = self.get_lines()
+        for new_line, old_line in zip(new_lines, original_lines):
+            new_line.update_from(old_line)
+
+        # Now update the legend to make sure it changes to the old properties
+        self.get_axes().legend()
 
     @Slot(int, float, float, float)
     def peak_added_slot(self, peak_id, centre, height, fwhm):
@@ -295,17 +320,6 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         :param fun_name: A registered name of a fit function
         """
         self.addFunction(fun_name)
-
-    @Slot()
-    def show_canvas_context_menu(self):
-        """
-        Show plot's context menu
-        """
-        if self.tool is not None:
-            self.tool.show_context_menu(peak_names=self.registeredPeaks(),
-                                        current_peak_type=self.defaultPeakType(),
-                                        background_names=self.registeredBackgrounds(),
-                                        other_names=self.registeredOthers())
 
     @Slot()
     def plot_guess_slot(self):
