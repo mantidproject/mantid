@@ -249,6 +249,7 @@ class GroupingTabPresenter(object):
 
         def update(self, observable, arg):
             self.outer._view.display_warning_box(arg)
+
     class DisableEditingNotifier(Observable):
 
         def __init__(self, outer):

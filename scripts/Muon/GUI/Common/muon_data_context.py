@@ -457,10 +457,6 @@ class MuonDataContext(object):
         message += 'longitudinal field runs {}\n'.format(run_list_to_string(longitudinal))
         return message
 
-    def add_or_replace_gui_variables(self, **kwargs):
-        self._gui_variables.update(kwargs)
-        self.gui_variables_notifier.notify_subscribers()
-
     class InstrumentNotifier(Observable):
         def __init__(self, outer):
             Observable.__init__(self)
