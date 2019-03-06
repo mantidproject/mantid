@@ -48,6 +48,7 @@ public:
                     const std::size_t &verticalIndex = 0) const override;
   /// Set the value at the specified index
   void setValue(const std::size_t &index, const double &value) override;
+  void setValue(const std::size_t &index, const std::string &value) override;
   size_t indexOfValue(const double value) const override;
 
   bool operator==(const Axis &) const override;

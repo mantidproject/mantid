@@ -67,6 +67,9 @@ void TextAxis::setValue(const std::size_t &index, const double &value) {
   UNUSED_ARG(value)
   throw std::domain_error("setValue method cannot be used on a TextAxis.");
 }
+void TextAxis::setValue(const std::size_t &index, const std::string &value) {
+  this->setLabel(index, value);
+}
 /**
  * Returns the value that has been passed to it as a size_t
  */

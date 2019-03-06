@@ -26,8 +26,8 @@
 #include <numpy/arrayobject.h>
 
 using namespace Mantid::API;
-using Mantid::Kernel::Unit_sptr;
 using Mantid::specnum_t;
+using Mantid::Kernel::Unit_sptr;
 using namespace boost::python;
 
 GET_POINTER_SPECIALIZATION(Axis)
@@ -116,9 +116,14 @@ void export_Axis() {
       .def("setUnit", &Axis::setUnit, (arg("self"), arg("unit_name")),
            return_value_policy<copy_const_reference>(),
            "Set the unit for this axis by name.")
-      .def("setValue", &Axis::setValue,
-           (arg("self"), arg("index"), arg("value")),
-           "Set a value at the given index")
+      .def<void (Axis::*)(const std::size_t &, const double &)>(
+          "setValue", &Axis::setValue,
+          (arg("self"), arg("index"), arg("value")),
+          "Set a value at the given index")
+      .def<void (Axis::*)(const std::size_t &, const std::string &)>(
+          "setValue", &Axis::setValue,
+          (arg("self"), arg("index"), arg("value")),
+          "Set a value at the given index")
       .def("getMin", &Axis::getMin, arg("self"),
            "Get min value specified on the axis")
       .def("getMax", &Axis::getMax, arg("self"),

@@ -66,5 +66,12 @@ specnum_t Axis::spectraNo(const std::size_t &index) const {
   throw std::domain_error("Cannot call spectraNo() on a non-spectra axis.");
 }
 
+void Axis::setValue(const std::size_t &index, const std::string &value) {
+  UNUSED_ARG(index)
+  UNUSED_ARG(value)
+  throw std::domain_error(
+      "setValue method cannot be used with a string on this class.");
+}
+
 } // namespace API
 } // namespace Mantid
