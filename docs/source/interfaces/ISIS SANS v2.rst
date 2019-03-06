@@ -16,7 +16,7 @@ Interface Overview
 This interface is used to reduce ISIS SANS data for SANS2D, LOQ,LARMOR and ZOOM.
 The interface can be accessed from the main menu of MantidPlot, in *Interfaces → SANS → ISIS SANS*.
 This interface is intended as a gradual replacement for the old ISIS SANS
-interface. As of version 3.14 this interface was renamed from *ISIS SANS v2 experimental* to *ISIS SANS*, and the
+interface. As of version 4.0 this interface was renamed from *ISIS SANS v2 experimental* to *ISIS SANS*, and the
 previous SANS interface was deprecated. This change signifies that this interface provides all major functionality and
 will be the only ISIS SANS interface subject to active development.
 
