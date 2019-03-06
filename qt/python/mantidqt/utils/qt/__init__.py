@@ -26,7 +26,7 @@ from qtpy.uic import loadUi, loadUiType
 from ...icons import get_icon
 
 LIB_SUFFIX = 'qt' + QT_VERSION[0]
-QT_VERSION_INT = (int(x) for x in QT_VERSION.split("."))
+QT_VERSION_INT = [int(x) for x in QT_VERSION.split(".")]
 
 
 def import_qt(modulename, package, attr=None):
@@ -154,7 +154,7 @@ def create_action(parent, text, on_triggered=None, shortcut=None,
         action.setIcon(get_icon(icon_name))
 
     # shortcuts in context menus option is only available after Qt 5.10
-    if 5 == QT_VERSION_INT[0] and 10 >= QT_VERSION_INT[1] and shortcut_visible_in_context_menu:
+    if 5 == QT_VERSION_INT[0] and 10 <= QT_VERSION_INT[1] and shortcut_visible_in_context_menu:
         action.setShortcutVisibleInContextMenu(shortcut_visible_in_context_menu)
 
     return action
