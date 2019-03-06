@@ -71,8 +71,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         self.declareProperty(MultipleFileProperty(name="RunNumber",
                                                   extensions=EXTENSIONS_NXS),
                              "Event file")
-        validator = IntArrayBoundedValidator()
-        validator.setLower(0)
+        validator = IntArrayBoundedValidator(lower=0)
         self.declareProperty(IntArrayProperty("Background", values=[0], direction=Direction.Input,
                                               validator=validator))
         self.declareProperty("XPixelSum", 1,
@@ -91,8 +90,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                              "Maximum absolute value of offsets; default is 1")
         self.declareProperty("CrossCorrelation", True,
                              "CrossCorrelation if True; minimize using many peaks if False.")
-        validator = FloatArrayBoundedValidator()
-        validator.setLower(0.)
+        validator = FloatArrayBoundedValidator(lower=0.)
         self.declareProperty(FloatArrayProperty("PeakPositions", []),
                              "Comma delimited d-space positions of reference peaks.  Use 1-3 for Cross Correlation.  "+
                              "Unlimited for many peaks option.")

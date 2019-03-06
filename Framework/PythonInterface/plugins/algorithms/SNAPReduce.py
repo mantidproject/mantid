@@ -113,8 +113,7 @@ class SNAPReduce(DataProcessorAlgorithm):
         return "Diffraction\\Reduction"
 
     def PyInit(self):
-        validator = IntArrayBoundedValidator()
-        validator.setLower(0)
+        validator = IntArrayBoundedValidator(lower=0)
         self.declareProperty(IntArrayProperty("RunNumbers", values=[0], direction=Direction.Input,
                                               validator=validator),
                              "Run numbers to process, comma separated")

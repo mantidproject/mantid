@@ -35,8 +35,7 @@ class DetectorFloodWeighting(DataProcessorAlgorithm):
                                                      validator=WorkspaceUnitValidator("Wavelength")),
                              doc='Flood weighting measurement')
 
-        validator = FloatArrayBoundedValidator()
-        validator.setLower(0.)
+        validator = FloatArrayBoundedValidator(lower=0.)
         self.declareProperty(FloatArrayProperty('Bands', [], direction=Direction.Input, validator=validator),
                              doc='Wavelength bands to use. Single pair min to max.')
 

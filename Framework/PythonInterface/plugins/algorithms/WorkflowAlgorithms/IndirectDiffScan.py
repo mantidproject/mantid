@@ -60,8 +60,7 @@ class IndirectDiffScan(DataProcessorAlgorithm):
                              validator=StringListValidator(['IRIS', 'OSIRIS']),
                              doc='Instrument used during run.')
 
-        int_arr_valid = IntArrayBoundedValidator()
-        int_arr_valid.setLower(0)
+        int_arr_valid = IntArrayBoundedValidator(lower=0)
 
         self.declareProperty(IntArrayProperty(name='SpectraRange', values=[0, 1],
                                               validator=int_arr_valid),

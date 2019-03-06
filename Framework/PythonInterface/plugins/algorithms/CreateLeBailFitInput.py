@@ -47,8 +47,7 @@ class CreateLeBailFitInput(PythonAlgorithm):
         self.declareProperty("GenerateBraggReflections", False,
                              "Generate Bragg reflections other than reading a Fullprof .irf file. ")
 
-        arrvalidator = IntArrayBoundedValidator()
-        arrvalidator.setLower(0)
+        arrvalidator = IntArrayBoundedValidator(lower=0)
         self.declareProperty(IntArrayProperty("MaxHKL", values=[12, 12, 12], validator=arrvalidator,
                                               direction=Direction.Input), "Maximum reflection (HKL) to generate")
 

@@ -41,8 +41,7 @@ class SANSDarkRunBackgroundCorrection(PythonAlgorithm):
         self.declareProperty("ApplyToDetectors", True, "If True then we apply the correction to the detector pixels")
         self.declareProperty("ApplyToMonitors", False, "If True then we apply the correction to the monitors")
 
-        arrvalidator = IntArrayBoundedValidator()
-        arrvalidator.setLower(0)
+        arrvalidator = IntArrayBoundedValidator(lower=0)
         self.declareProperty(IntArrayProperty("SelectedMonitors", values=[],
                                               validator=arrvalidator,
                                               direction=Direction.Input),
