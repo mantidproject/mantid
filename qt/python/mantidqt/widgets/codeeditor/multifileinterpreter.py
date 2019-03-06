@@ -133,15 +133,16 @@ class MultiPythonFileInterpreter(QWidget):
         :return: True if all tabs are closed, False if cancelled
         """
         for idx in reversed(range(self.editor_count)):
-            if not self.close_tab(idx):
+            if not self.close_tab(idx, allow_zero_tabs=True):
                 return False
 
         return True
 
-    def close_tab(self, idx):
+    def close_tab(self, idx, allow_zero_tabs=False):
         """
         Close the tab at the given index.
         :param idx: The tab index
+        :param allow_zero_tabs: If True then closing the last tab does not add a new empty tab.
         :return: True if tab is to be closed, False if cancelled
         """
         if idx >= self.editor_count:
@@ -157,8 +158,7 @@ class MultiPythonFileInterpreter(QWidget):
         else:
             return False
 
-        # we never want an empty widget
-        if self.editor_count == 0:
+        if (not allow_zero_tabs) and self.editor_count == 0:
             self.append_new_editor()
 
         return True
