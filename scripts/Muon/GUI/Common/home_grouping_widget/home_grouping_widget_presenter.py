@@ -94,9 +94,7 @@ class HomeGroupingWidgetPresenter(HomeTabSubWidget):
         summed = [p for p in summed if (p <= n_periods) and p > 0]
         subtracted = [p for p in subtracted if (p <= n_periods) and p > 0]
 
-        self._model.update_summed_periods(summed)
-        self._model.update_subtracted_periods(subtracted)
-        self._model._data.add_or_replace_gui_variables()
+        self._model.update_periods(summed, subtracted)
 
         self.update_period_edits()
 
