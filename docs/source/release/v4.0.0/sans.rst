@@ -46,6 +46,7 @@ Improved
 * The gui will remember which output mode (Memory, File, Both) you last used and set that as your default when on the SANS interface.
 * The gui will check *save can* by default if it was checked when the gui was last used.
 * Default adding mode is set to Event for all instruments except for LOQ, which defaults to Custom.
+* Removed the show transmission check box. Transmission workspaces are always added to output files regardless of output mode, and are always added to ADS if "memory" or "both" output mode is selected.
 
 Bug fixes
 #########
