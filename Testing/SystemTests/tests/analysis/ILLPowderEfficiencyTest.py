@@ -7,14 +7,14 @@
 from __future__ import (absolute_import, division, print_function)
 
 import systemtesting
-from mantid.simpleapi import PowderDiffILLDetEffCorr, GroupWorkspaces
+from mantid.simpleapi import PowderILLEfficiency, GroupWorkspaces
 from mantid import config, mtd
 
 
-class ILLPowderDiffDetEffCorrTest(systemtesting.MantidSystemTest):
+class ILLPowderEfficiencyTest(systemtesting.MantidSystemTest):
 
     def __init__(self):
-        super(ILLPowderDiffDetEffCorrTest, self).__init__()
+        super(ILLPowderEfficiencyTest, self).__init__()
         self.setUp()
 
     def setUp(self):
@@ -30,9 +30,9 @@ class ILLPowderDiffDetEffCorrTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
 
-        PowderDiffILLDetEffCorr(CalibrationRun='967076.nxs',
-                                OutputWorkspace='calib',
-                                OutputResponseWorkspace='response')
+        PowderILLEfficiency(CalibrationRun='967076.nxs',
+                            OutputWorkspace='calib',
+                            OutputResponseWorkspace='response')
         GroupWorkspaces(InputWorkspaces=['calib','response'], OutputWorkspace='group')
 
     def validate(self):
