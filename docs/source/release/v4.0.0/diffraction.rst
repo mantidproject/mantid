@@ -15,8 +15,8 @@ Improvements
 
 - SNAP instrument geometry updated to include downstream monitor.
 - :ref:`LoadILLDiffraction <algm-LoadILLDiffraction>` will not flip the even-numbered tubes when using the calibrated data, since they are flipped already in the nexus files.
-- :ref:`PowderDiffILLDetScanReduction <algm-PowderDiffILLDetScanReduction>` will scale the counts by 1M, when normalisation to monitor is requested, and it will also offer to enable/disable the tube alignment, and offer tube by tube reduction.
-- :ref:`PowderDiffILLDetEffCorr <algm-PowderDiffILLDetEffCorr>` now offers to use the raw or calibrated data blocks in the nexus files.
+- :ref:`PowderILLDetectorScan <algm-PowderILLDetectorScan>` will scale the counts by 1M, when normalisation to monitor is requested, and it will also offer to enable/disable the tube alignment, and offer tube by tube reduction.
+- :ref:`PowderILLEfficiency <algm-PowderILLEfficiency>` now offers to use the raw or calibrated data blocks in the nexus files.
 - :ref:`SNAPReduce <algm-SNAPReduce>` now has progress bar and all output workspaces have history
 - :ref:`SNAPReduce <algm-SNAPReduce>` has been completely refactored. It now uses :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` for a large part of its functionality. It has progress bar and all output workspaces have history. It is also more memory efficient by reducing the number of temporary workspaces created.
 - :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>` and :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` now support outputting the unfocussed data and weighted events (with time). This allows for event filtering **after** processing the data.
@@ -31,7 +31,7 @@ Improvements
 - New TOPAZ instrument geometry for 2019 run cycle
 - :ref:`LoadDiffCal <algm-LoadDiffCal>` has an additional parameter to allow for a second file specifying a grouping to override the one in the calibration file
 - :ref:`LoadILLDiffraction <algm-LoadILLDiffraction>` will now correctly resolve for the scan type and drive the detector to the offset corrected :math:`2theta_0` for D20 detector scans.
-- :ref:`PowderDiffILLDetScanReduction <algm-PowderDiffILLDetScanReduction>` will never merge the detector scans at the raw level even if they are supplied with + operator; it will process them separately and merge at the end.
+- :ref:`PowderILLDetectorScan <algm-PowderILLDetectorScan>` will never merge the detector scans at the raw level even if they are supplied with + operator; it will process them separately and merge at the end.
 
 Single Crystal Diffraction
 --------------------------
@@ -106,6 +106,13 @@ New Algorithms
 - :ref:`PDConvertReciprocalSpace <algm-PDConvertReciprocalSpace>` new algorithm to convert between reciprocal space units.
 - :ref:`PDConvertRealSpace <algm-PDConvertRealSpace>` new algorithm to convert between real space units.
 
+
+Renamed Algorithms
+##################
+
+- **PowderDiffILLReduction** is renamed to :ref:`PowderILLParameterScan <algm-PowderILLParameterScan>`
+- **PowderDiffILLDetEffCorr** is renamed to :ref:`PowderILLEfficiency <algm-PowderILLEfficiency>`
+- **PowderDiffILLDetScanReduction** is renamed to :ref:`PowderILLDetectorScan <algm-PowderILLDetectorScan>`
 
 Engineering Diffraction
 -----------------------
