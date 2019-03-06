@@ -38,7 +38,11 @@ Improvements
   version of algorithm, `Indexed` provide the new one with better performance and some restrictions
   (see :ref:`ConvertToMD <algm-ConvertToMD>` Notes)
 - :ref:`DirectILLCollectData <algm-DirectILLCollectData>` now automatically disables incident energy calibration and normalises to time instead of monitor counts if the monitor counts are deemed too low.
-- The new property in :ref:`DirectILLReduction <algm-DirectILLReduction>`, ``EnergyRebinning``, allows mixing automatic bin widths with user specified ones when rebinning the energy transfer axis.
+- There are two new properties in ref:`DirectILLReduction <algm-DirectILLReduction>`:
+
+  - ``EnergyRebinning`` allows mixing automatic bin widths with user specified ones when rebinning the energy transfer axis.
+  - ``GroupingAngleStep`` allows one to specify a :math:`2\theta` step for detector grouping. By default, a step of 0.01 degrees or the value of ``natural-angle-step`` instrument parameter is used.
+
 - The ``SofQW`` algorithms have a new property ``DetectorTwoThetaRanges`` which can be used to supply detector scattering angle coverage information for :ref:`SofQWNormalisedPolygon <algm-SofQWNormalisedPolygon>`.
 - The built-in version of MSlice has been updated to include the full CLI, generating scripts from plots and waterfall plotting.
 
