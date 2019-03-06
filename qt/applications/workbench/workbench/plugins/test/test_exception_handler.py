@@ -1,10 +1,11 @@
+#
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import absolute_import
+from __future__ import absolute_import, unicode_literals
 
 import unittest
 
@@ -28,8 +29,7 @@ class ExceptionHandlerTest(unittest.TestCase):
         mock_errorbox = MockQWidget()
         mock_WorkbenchErrorMessageBox.return_value = mock_errorbox
 
-        mock_message = "Something's gone bananas!"
-        exception_logger(widget, ValueError, mock_message, "")
+        exception_logger(widget, ValueError, None, None)
 
         self.assertEqual(1, mock_logger.error.call_count)
         self.assertEqual(1, mock_WorkbenchErrorMessageBox.call_count)
@@ -42,8 +42,7 @@ class ExceptionHandlerTest(unittest.TestCase):
 
         widget = MockQWidget()
 
-        mock_message = "Something's gone bananas!"
-        exception_logger(widget, ValueError, mock_message, "")
+        exception_logger(widget, ValueError, None, None)
 
         self.assertEqual(1, mock_logger.error.call_count)
         mock_CrashReportPage.assert_called_once_with(show_continue_terminate=True)
