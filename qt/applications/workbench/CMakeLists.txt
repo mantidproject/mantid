@@ -23,6 +23,11 @@ set ( TEST_FILES
   workbench/plotting/test/test_figuremanager.py
   workbench/plotting/test/test_globalfiguremanager.py
 
+  workbench/plugins/test/test_editor.py
+  workbench/plugins/test/test_exception_handler.py
+  workbench/plugins/test/test_jupyterconsole.py
+  workbench/plugins/test/test_workspacewidget.py
+
   workbench/widgets/plotselector/test/test_plotselector_model.py
   workbench/widgets/plotselector/test/test_plotselector_presenter.py
   workbench/widgets/plotselector/test/test_plotselector_view.py
