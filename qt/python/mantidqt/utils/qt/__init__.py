@@ -26,6 +26,7 @@ from qtpy.uic import loadUi, loadUiType
 from ...icons import get_icon
 
 LIB_SUFFIX = 'qt' + QT_VERSION[0]
+QT_VERSION_INT = (int(x) for x in QT_VERSION.split("."))
 
 
 def import_qt(modulename, package, attr=None):
@@ -153,7 +154,7 @@ def create_action(parent, text, on_triggered=None, shortcut=None,
         action.setIcon(get_icon(icon_name))
 
     # shortcuts in context menus option is only available after Qt 5.10
-    if compare_qt_version(5, 10, comp=operator.ge) and shortcut_visible_in_context_menu:
+    if 5 == QT_VERSION_INT[0] and 10 >= QT_VERSION_INT[1] and shortcut_visible_in_context_menu:
         action.setShortcutVisibleInContextMenu(shortcut_visible_in_context_menu)
 
     return action
@@ -185,17 +186,3 @@ def toQSettings(settings):
         return settings.qsettings
     else:  # must be a QSettings already
         return settings
-
-
-def compare_qt_version(major, minor=None, comp=operator.eq):
-    """
-    Compare the version of qt using the comparator. The comparator is only used for the minor version.
-
-    :param major: The major version of Qt. This is always checked for equality.
-    :param minor: The minor version of Qt. This is optional, and will be checked using the provided comparator.
-    :param comp: Comparator for the minor version, defaults to equals.
-    """
-    qt_major, qt_minor, qt_patch = (int(x) for x in QT_VERSION.split("."))
-    major_comp = major == qt_major
-    minor_comp = comp(minor, qt_minor) if minor else None
-    return major_comp and minor_comp
