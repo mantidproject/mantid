@@ -136,6 +136,8 @@ class MuonDataContext(object):
     def instrument(self, value):
         ConfigService['default.instrument'] = value
         self._instrument = value
+        self.main_field_direction = ''
+        self.set_groups_and_pairs_to_default()
         self.instrumentNotifier.notify_subscribers(self._instrument)
 
     @property
@@ -275,7 +277,7 @@ class MuonDataContext(object):
 
     @main_field_direction.setter
     def main_field_direction(self, value):
-            if value != self._main_field_direction and self._main_field_direction:
+            if value and value != self._main_field_direction and self._main_field_direction:
                 self.message_notifier.notify_subscribers('MainFieldDirection has changed between'
                                                          ' data sets, click default to reset grouping if required')
             self._main_field_direction = value
