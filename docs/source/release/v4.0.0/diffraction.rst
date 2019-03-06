@@ -98,6 +98,14 @@ Bugfixes
 - Fixed a bug in :ref:`GenerateGroupingPowder <algm-GenerateGroupingPowder>` which caused detectors without corresponding spectrum to get included in grouping.
 - :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` now does not use cache file when the grouping has changed.
 
+New Algorithms
+##############
+
+- :ref:`HB2AReduce <algm-HB2AReduce>` algorithm reduces HFIR POWDER (HB-2A) data
+- :ref:`LoadGudrunOutput <algm-LoadGudrunOutput>` is a new algorithm that allows users to load the standard Gudrun output files into Mantid.
+- New algorithm :ref:`PDConvertReciprocalSpace <algm-PDConvertReciprocalSpace>` to convert between reciprocal space units.
+- New algorithm :ref:`PDConvertRealSpace <algm-PDConvertRealSpace>` to convert between real space units.
+
 Engineering Diffraction
 -----------------------
 
