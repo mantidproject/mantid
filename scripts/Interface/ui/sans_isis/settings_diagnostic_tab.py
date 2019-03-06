@@ -131,7 +131,7 @@ class SettingsDiagnosticTab(QtWidgets.QWidget, Ui_SettingsDiagnosticTab):
     def fill_tree_widget(self, item, value):
         item.setExpanded(True)
         if type(value) is dict:
-            for key, val in sorted(value.iteritems()):
+            for key, val in sorted(value.items()):
                 if key in self.excluded:
                     continue
                 child = QtWidgets.QTreeWidgetItem()
