@@ -28,12 +28,8 @@ class ReflectometryILLAutoProcessTest(unittest.TestCase):
         }
         alg = create_algorithm('ReflectometryILLAutoProcess', **args)
         assertRaisesNothing(self, alg.execute)
-        self.assertEquals(mtd.getObjectNames(),
-                          ['direct-317369',
-                           'direct-317369-foreground',
-                           'outWS',
-                           'reflected-317370',
-                           'reflected-317370-foreground'])
+        print(mtd.getObjectNames())
+        self.assertEquals(mtd.getObjectNames(), ['outWS'])
         mtd.clear()
 
     def testSingleAngleMultipleFiles(self):
@@ -46,12 +42,8 @@ class ReflectometryILLAutoProcessTest(unittest.TestCase):
         }
         alg = create_algorithm('ReflectometryILLAutoProcess', **args)
         assertRaisesNothing(self, alg.execute)
-        self.assertEquals(mtd.getObjectNames(),
-                          ['direct-317370',
-                           'direct-317370-foreground',
-                           'outWS',
-                           'reflected-317369',
-                           'reflected-317369-foreground'])
+        print(mtd.getObjectNames())
+        self.assertEquals(mtd.getObjectNames(), ['outWS'])
         mtd.clear()
 
     def testMultipleAngles(self):
