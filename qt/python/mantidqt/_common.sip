@@ -299,7 +299,7 @@ class ManageUserDirectories : QDialog {
 #include "MantidQtWidgets/Common/ManageUserDirectories.h"
 %End
 public:
-  ManageUserDirectories(QWidget *parent /TransferThis/ = nullptr, bool keepPythonExtensions = false);
+  ManageUserDirectories(QWidget *parent /TransferThis/ = nullptr);
   static void openUserDirsDialog(QWidget *parent);
 };
 

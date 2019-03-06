@@ -14,15 +14,11 @@
 
 using namespace MantidQt::API;
 
-ManageUserDirectories::ManageUserDirectories(QWidget *parent,
-                                             bool keepPythonExtensions)
+ManageUserDirectories::ManageUserDirectories(QWidget *parent)
     : QDialog(parent) {
   setAttribute(Qt::WA_DeleteOnClose);
   m_uiForm.setupUi(this);
   initLayout();
-  if (!keepPythonExtensions) {
-    m_uiForm.tabWidget->removeTab(m_uiForm.tabWidget->count() - 1);
-  }
 }
 
 ManageUserDirectories::~ManageUserDirectories() {}
