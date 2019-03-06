@@ -47,6 +47,7 @@ class MultiPythonFileInterpreter(QWidget):
 
         # attributes
         self.default_content = default_content
+        self.default_font = font
         self.prev_session_tabs = None
         self.whitespace_visible = False
         self.setAttribute(Qt.WA_DeleteOnClose, True)
@@ -59,7 +60,7 @@ class MultiPythonFileInterpreter(QWidget):
         layout.setContentsMargins(0, 0, 0, 0)
 
         # add a single editor by default
-        self.append_new_editor(font=font)
+        self.append_new_editor()
 
         # setting defaults
         self.confirm_on_save = True
@@ -87,7 +88,8 @@ class MultiPythonFileInterpreter(QWidget):
     def append_new_editor(self, font=None, content=None, filename=None):
         """
         Appends a new editor the tabbed widget
-        :param font: A reference to the font to be used by the editor
+        :param font: A reference to the font to be used by the editor. If None is given
+        then self.default_font is used
         :param content: An optional string containing content to be placed
         into the editor on opening. If None then self.default_content is used
         :param filename: An optional string containing the filename of the editor
@@ -96,6 +98,8 @@ class MultiPythonFileInterpreter(QWidget):
         """
         if content is None:
             content = self.default_content
+        if font is None:
+            font = self.default_font
 
         interpreter = PythonFileInterpreter(font, content, filename=filename,
                                             parent=self)
