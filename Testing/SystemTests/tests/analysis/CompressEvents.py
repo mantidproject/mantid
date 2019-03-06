@@ -42,6 +42,6 @@ class CompressEventsTesting(systemtesting.MantidSystemTest):
                 compressfull = integral.readY(0)[0]
 
                 if not (totalEvents == compress10s == compress1h == compressfull):
-                    # TODO use new style formatting
-                    msg = '%s - total=%f 10s=%f 1h=%f full=%f' % (name, totalEvents, compress10s, compress1h, compressfull)
+                    msg = '{} total={:.0f} 10s={:.0f} 1h={:.0f} full={:.0f}'.format(name, totalEvents, compress10s,
+                                                                                    compress1h, compressfull)
                     raise RuntimeError(msg)

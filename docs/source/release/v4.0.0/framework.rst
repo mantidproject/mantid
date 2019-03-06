@@ -66,7 +66,8 @@ New Algorithms
 Improvements
 ############
 
-- :ref:`AppendSpectra <algm-AppendSpectra>` can now append multiple times the same event workspace.
+- :ref:`CompressEvents <algm-CompressEvents>` now correctly sets the weighted events x-value (i.e. time-of-flight)
+- :ref:`AppendSpectra <algm-AppendSpectra>` can append now multiple times the same event workspace.
 - :ref:`ConjoinXRuns <algm-ConjoinXRuns>` can merge sample logs according to the parameter file independently from :ref:`MergeRuns <algm-MergeRuns>`. All parameter names must have the prefix ``conjoin_`` appended by the corresponding default parameter names (which are used by :ref:`MergeRuns <algm-MergeRuns>`).
 - :ref:`CropToComponent <algm-CropToComponent>` now supports scanning workspaces.
 - :ref:`SumOverlappingTubes <algm-SumOverlappingTubes>` will produce histogram data, and will not split the counts between bins by default.
