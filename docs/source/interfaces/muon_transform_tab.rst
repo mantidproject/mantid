@@ -33,7 +33,7 @@ selected from the drop down menu. When the ``Calculate MaxEnt`` button is presse
 The advanced property table contains variables for users that would
 like more control over the calculation.
 
-For large calculations the interface can be slow, therefore the Calculate button is disabled until the current calculation is complete.
+For large calculations the interface can be slow, therefore the ``Calculate`` button is disabled until the current calculation is complete.
 
 .. image::  ../images/frequency_domain_analysis_2_transform_maxent.png
    :align: center
