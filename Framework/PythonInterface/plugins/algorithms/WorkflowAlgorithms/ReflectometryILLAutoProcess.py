@@ -13,6 +13,7 @@ from __future__ import (
 )
 from mantid.api import (
     AlgorithmFactory,
+    AnalysisDataService,
     DataProcessorAlgorithm,
     FileAction,
     FileProperty,
