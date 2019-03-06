@@ -8,12 +8,13 @@
 
 from __future__ import (absolute_import, division, print_function)
 
-from mantid.api import mtd
+from mantid.simpleapi import mtd
 from testhelpers import (assertRaisesNothing, create_algorithm)
 import unittest
 
 
 class ReflectometryILLAutoProcessTest(unittest.TestCase):
+
     def tearDown(self):
         mtd.clear()
 
@@ -33,6 +34,24 @@ class ReflectometryILLAutoProcessTest(unittest.TestCase):
                            'outWS',
                            'reflected-317370',
                            'reflected-317370-foreground'])
+        mtd.clear()
+
+    def testSingleAngleMultipleFiles(self):
+        args = {
+            'Run': 'ILL/D17/317370+ILL/D17/317369',
+            'DirectRun': 'ILL/D17/317369.nxs+ILL/D17/317370.nxs',
+            'OutputWorkspace': 'outWS',
+            'rethrow': True,
+            'child': True
+        }
+        alg = create_algorithm('ReflectometryILLAutoProcess', **args)
+        assertRaisesNothing(self, alg.execute)
+        self.assertEquals(mtd.getObjectNames(),
+                          ['direct-317370',
+                           'direct-317370-foreground',
+                           'outWS',
+                           'reflected-317369',
+                           'reflected-317369-foreground'])
         mtd.clear()
 
     def testMultipleAngles(self):
@@ -59,8 +78,6 @@ class ReflectometryILLAutoProcessTest(unittest.TestCase):
             'child': True
         }
         alg = create_algorithm('ReflectometryILLAutoProcess', **args)
-        # ReflectometryILLConvertToQ - [Warning] Invalid value for DirectForegroundWorkspace: Binning
-        # does not match with InputWorkspace.
         assertRaisesNothing(self, alg.execute)
         mtd.clear()
 
@@ -69,7 +86,6 @@ class ReflectometryILLAutoProcessTest(unittest.TestCase):
             'Run': 'ILL/D17/317370.nxs',
             'DirectRun': 'ILL/D17/317369.nxs',
             'OutputWorkspace': 'outWS',
-            #'TwoTheta': 30.2,
             'AngleOption': 'Sample angle',
             'rethrow': True,
             'child': True

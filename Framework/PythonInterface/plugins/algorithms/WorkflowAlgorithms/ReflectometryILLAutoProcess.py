@@ -15,9 +15,9 @@ from mantid.api import (
     AlgorithmFactory,
     DataProcessorAlgorithm,
     FileAction,
+    FileFinder,
     FileProperty,
     MatrixWorkspaceProperty,
-    MultipleFileProperty,
     Progress
 )
 from mantid.kernel import (
@@ -29,8 +29,9 @@ from mantid.kernel import (
     IntArrayBoundedValidator,
     IntArrayProperty,
     Property,
-    StringArrayProperty,
     StringArrayLengthValidator,
+    StringArrayMandatoryValidator,
+    StringArrayProperty,
     StringListValidator
 )
 from mantid.simpleapi import (
@@ -102,7 +103,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
 
     def name(self):
         """Return the name of the algorithm."""
-        return 'ReflectometryILLAutoReduction'
+        return 'ReflectometryILLAutoProcess'
 
     def summary(self):
         """Return a summary of the algorithm."""
@@ -135,22 +136,25 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         nonnegativeFloatArray.setLower(0.)
         stringArrayValidator = StringArrayLengthValidator()
         stringArrayValidator.setLengthMin(1)
+        mandatoryRuns = CompositeValidator()
+        mandatoryRuns.add(StringArrayMandatoryValidator())
+        mandatoryRuns.add(stringArrayValidator)
 
         listOrSingleNumber = ': provide either a list or a single value for each angle.'
 
         self.declareProperty(
-            MultipleFileProperty(
+            StringArrayProperty(
                 PropAutoProcess.RB,
-                action=FileAction.OptionalLoad,
-                extensions=['nxs']
+                values=[],
+                validator=mandatoryRuns,
             ),
             doc='A list of reflected run numbers/files.')
         self.setPropertyGroup(PropAutoProcess.RB, '')
         self.declareProperty(
-            MultipleFileProperty(
+            StringArrayProperty(
                 PropAutoProcess.DB,
-                action=FileAction.OptionalLoad,
-                extensions=['nxs']
+                values=[],
+                validator=mandatoryRuns,
             ),
             doc='A list of direct run numbers/files.')
         self.setPropertyGroup(PropAutoProcess.DB, '')
@@ -455,11 +459,9 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
     def validateInputs(self):
         """Return a dictionary containing issues found in properties."""
         issues = dict()
-        numberDirectRuns = len(self.getProperty(PropAutoProcess.DB).value)
-        numberReflectedRuns = len(self.getProperty(PropAutoProcess.RB).value)
-        if numberDirectRuns == 0 and numberReflectedRuns == 0:
-            issues[PropAutoProcess.RB] = "Nothing to do."
-        if numberDirectRuns != numberReflectedRuns:
+        directRuns = self.getProperty(PropAutoProcess.DB).value
+        reflectedRuns = self.getProperty(PropAutoProcess.RB).value
+        if len(directRuns) != len(reflectedRuns):
             issues[PropAutoProcess.RB] = "The same number of direct runs and reflected runs must be given."
         return issues
 
@@ -479,7 +481,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         """Return the two theta angle in degrees of the sample angle."""
         import h5py
         # Need to check whether the unit is degree
-        with h5py.File(run, "r") as nexus:
+        with h5py.File(FileFinder.getFullPath(run), "r") as nexus:
             if nexus.get('entry0/instrument/SAN') is not None:
                 return 2. * float(numpy.array(nexus.get('entry0/instrument/SAN/value'), dtype='float'))
             elif nexus.get('entry0/instrument/san') is not None:
@@ -513,8 +515,14 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
             if angleOption == Angle.SAN and self.getProperty(Prop.TWO_THETA).isDefault:
                 twoTheta = self.twoThetaFromSampleAngle(rb[angle])
 
-            runDB = format(db[angle][-10:-4])
-            runRB = format(rb[angle][-10:-4])
+            if db[angle].endswith('.nxs'):
+                runDB = format(db[angle][-10:-4])
+            else:
+                runDB = format(db[angle][-6:])
+            if rb[angle].endswith('.nxs'):
+                runRB = format(rb[angle][-10:-4])
+            else:
+                runRB = format(rb[angle][-6:])
             sumType = self.getValue(PropAutoProcess.SUM_TYPE, angle)
             halfWidthsReflected = [int(self.getValue(PropAutoProcess.LOW_FOREGROUND_HALF_WIDTH, angle)),
                                    int(self.getValue(PropAutoProcess.HIGH_FOREGROUND_HALF_WIDTH, angle))]
