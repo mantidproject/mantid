@@ -25,10 +25,10 @@ namespace Kernel {
     @date 28/11/2007
 */
 template <class TYPE>
-class DLLExport BoundedValidator : public TypedValidator<TYPE> {
+class DLLExport BoundedValidator final : public TypedValidator<TYPE> {
 public:
   /// No-arg Constructor
-  BoundedValidator()
+  BoundedValidator() noexcept
       : TypedValidator<TYPE>(), m_hasLowerBound(false), m_hasUpperBound(false),
         m_lowerExclusive(false), m_upperExclusive(false), m_lowerBound(TYPE()),
         m_upperBound(TYPE()) {}
@@ -39,65 +39,69 @@ public:
    * @param exclusive :: make bounds exclusive (default inclusive)
    */
   BoundedValidator(const TYPE lowerBound, const TYPE upperBound,
-                   bool exclusive = false)
+                   bool exclusive = false) noexcept
       : TypedValidator<TYPE>(), m_hasLowerBound(true), m_hasUpperBound(true),
         m_lowerExclusive(exclusive), m_upperExclusive(exclusive),
         m_lowerBound(lowerBound), m_upperBound(upperBound) {}
 
   /// Return if it has a lower bound
-  bool hasLower() const { return m_hasLowerBound; }
+  bool hasLower() const noexcept { return m_hasLowerBound; }
   /// Return if it has a lower bound
-  bool hasUpper() const { return m_hasUpperBound; }
+  bool hasUpper() const noexcept { return m_hasUpperBound; }
   /// Return the lower bound value
-  const TYPE &lower() const { return m_lowerBound; }
+  TYPE lower() const noexcept { return m_lowerBound; }
   /// Return the upper bound value
-  const TYPE &upper() const { return m_upperBound; }
+  TYPE upper() const noexcept { return m_upperBound; }
   /// Check if lower bound is exclusive
-  bool isLowerExclusive() const { return m_lowerExclusive; }
+  bool isLowerExclusive() const noexcept { return m_lowerExclusive; }
   /// Check if upper bound is exclusive
-  bool isUpperExclusive() const { return m_upperExclusive; }
+  bool isUpperExclusive() const noexcept { return m_upperExclusive; }
   /// Set the lower bound to be exclusive
-  void setLowerExclusive(const bool exclusive) { m_lowerExclusive = exclusive; }
+  void setLowerExclusive(const bool exclusive) noexcept {
+    m_lowerExclusive = exclusive;
+  }
   /// Set the upper bound to be exclusive
-  void setUpperExclusive(const bool exclusive) { m_upperExclusive = exclusive; }
+  void setUpperExclusive(const bool exclusive) noexcept {
+    m_upperExclusive = exclusive;
+  }
 
   /// Set both the upper and lower bounds to be exclusive
-  void setExclusive(const bool exclusive) {
+  void setExclusive(const bool exclusive) noexcept {
     setLowerExclusive(exclusive);
     setUpperExclusive(exclusive);
   }
 
   /// Set lower bound value
-  void setLower(const TYPE &value) {
+  void setLower(const TYPE &value) noexcept {
     m_hasLowerBound = true;
     m_lowerBound = value;
   }
 
   /// Set upper bound value
-  void setUpper(const TYPE &value) {
+  void setUpper(const TYPE &value) noexcept {
     m_hasUpperBound = true;
     m_upperBound = value;
   }
 
   /// Clear lower bound value
-  void clearLower() {
+  void clearLower() noexcept {
     m_hasLowerBound = false;
     m_lowerBound = TYPE();
   }
   /// Clear upper bound value
-  void clearUpper() {
+  void clearUpper() noexcept {
     m_hasUpperBound = false;
     m_upperBound = TYPE();
   }
 
   /// Set both bounds (lower and upper) at the same time
-  void setBounds(const TYPE &lower, const TYPE &upper) {
+  void setBounds(const TYPE &lower, const TYPE &upper) noexcept {
     setLower(lower);
     setUpper(upper);
   }
 
   /// Clear both bounds (lower and upper) at the same time
-  void clearBounds() {
+  void clearBounds() noexcept {
     clearLower();
     clearUpper();
   }
