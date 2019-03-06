@@ -11,6 +11,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -67,6 +68,10 @@ public:
   const std::string category() const override { return "SANS"; }
 
 private:
+  /// Create an output workspace
+  API::MatrixWorkspace_sptr
+  createOutputWorkspace(API::MatrixWorkspace_const_sptr, const size_t);
+
   /// Initialisation code
   void init() override;
   /// Execution code

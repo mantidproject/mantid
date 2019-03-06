@@ -89,6 +89,8 @@ Improvements
 - :ref:`CylinderAbsorption <algm-CylinderAbsorption>` now will check the workspace's sample object for geometry.
 - Various clarifications and additional links in the geometry and material documentation pages.
 - :ref:`SetSample <algm-SetSample>` and :ref:`SetSampleMaterial <algm-SetSampleMaterial>` now accept materials without ``ChemicalFormula`` or ``AtomicNumber``. In this case, all cross sections and ``SampleNumberDensity`` have to be given.
+- :ref:`Q1DWeighted <algm-Q1DWeighted>` will now discard the masked bins in the input and can optionally account for the gravity drop.
+- :ref:`Q1DWeighted <algm-Q1DWeighted>` is now an order of magnitude faster for TOF SANS data due to reorganization of the code.
 - :ref:`SetSampleMaterial <algm-SetSampleMaterial>` and :ref:`LoadSampleEnvironment <algm-LoadSampleEnvironment>` accept number densities as formula units per cubic Ångström in addition to atoms per cubic Ångström.
 - :ref:`LoadEventNexus <algm-LoadEventNexus>` experimental option `LoadType` = `{Default, Multiprocess}` is added, `Multiprocess` should work faster for big files and it is experimental, available only in Linux.
 - The history generated from a call to :ref:`SetSample <algm-SetSample>` can now be re-executed without error.
