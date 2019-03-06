@@ -161,8 +161,6 @@ std::string ConvFit::fitTypeString() const {
   return fitType;
 }
 
-void ConvFit::updateAvailableFitTypes() {}
-
 void ConvFit::runClicked() { runTab(); }
 
 void ConvFit::setRunIsRunning(bool running) {
