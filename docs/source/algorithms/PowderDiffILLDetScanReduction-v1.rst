@@ -16,9 +16,8 @@ Input Runs
 ----------
 
 Provide the list of the input runs, that is the runs corresponding to a single detector scan, following the syntax in
-:py:obj:`MultipleFileProperty <mantid.api.MultipleFileProperty>`. For specifying multiple runs it is best to use ``:``
-as the separator - e.g. ``508093:508095``. Using ``-`` is also possible, this will call
-:ref:`MergeRuns <algm-MergeRuns>`, but there is a performance penalty for this.
+:py:obj:`MultipleFileProperty <mantid.api.MultipleFileProperty>`. Note that for this algorithm ``508093:508095``
+and ``508093-508095`` would be equivalent; in either case it will load and process the runs separately and then finally merge them with :ref:`SumOverlappingTubes <algm-SumOverlappingTubes>`.
 
 Calibration
 -----------

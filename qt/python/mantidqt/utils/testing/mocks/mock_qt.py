@@ -124,3 +124,5 @@ class MockQWidget(object):
         self.widget = StrictMock()
         self.hide = StrictMock()
         self.show = StrictMock()
+        self.close = StrictMock()
+        self.exec_ = StrictMock()

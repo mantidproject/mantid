@@ -56,7 +56,7 @@ def import_qt(modulename, package, attr=None):
             except ImportError as e2:
                 msg = 'import of "{}" failed with "{}"'
                 msg = 'First ' + msg.format(modulename + LIB_SUFFIX, e1) \
-                    + '. Second ' + msg.format(modulename.lstrip('.') + LIB_SUFFIX, e2)
+                      + '. Second ' + msg.format(modulename.lstrip('.') + LIB_SUFFIX, e2)
                 raise ImportError(msg)
     else:
         lib = import_module(modulename + LIB_SUFFIX)
@@ -80,7 +80,8 @@ def load_ui(caller_filename, ui_relfilename, baseinstance=None):
     :param baseinstance: An instance of a widget to pass to uic.loadUi
     that becomes the base class rather than a new widget being created.
     :return: A new instance of the form class if baseinstance is given, otherwise
-    return the form class
+    return a tuple that contains the Ui_Form and an instance: (Ui_Form, Instance).
+    If inheriting, inherit the form, then the instance - class MyClass(Ui_Form, Instance)
     """
     filepath = osp.join(osp.dirname(caller_filename), ui_relfilename)
     if not osp.exists(filepath):

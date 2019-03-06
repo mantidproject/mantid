@@ -88,7 +88,7 @@ class LoadRunWidgetPresenterTest(unittest.TestCase):
         instrument_mock.getName.return_value = 'EMU'
         workspace_mock.workspace.getInstrument.return_value = instrument_mock
 
-        return {'OutputWorkspace': [workspace_mock]}
+        return {'OutputWorkspace': [workspace_mock], 'MainFieldDirection': 'transverse'}
 
     def mock_loading_from_browse(self, workspace, filename, run):
         self.load_file_view.show_file_browser_and_return_selection = mock.Mock(

@@ -94,6 +94,7 @@ class MuonAnalysisGui(QtGui.QMainWindow):
 
         self.load_widget.load_widget.loadNotifier.add_subscriber(self.grouping_tab_widget.group_tab_presenter.loadObserver)
 
+        self.context.message_notifier.add_subscriber(self.grouping_tab_widget.group_tab_presenter.message_observer)
         self.context.gui_variables_notifier.add_subscriber(self.grouping_tab_widget.group_tab_presenter.gui_variables_observer)
 
         self.grouping_tab_widget.group_tab_presenter.enable_editing_notifier.add_subscriber(self.home_tab.home_tab_widget.enable_observer)
