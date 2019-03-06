@@ -464,6 +464,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         return issues
 
     def getValue(self, propertyName, angle):
+        """Return the value of the property at given angle."""
         value = self.getProperty(propertyName).value
         if len(value) == 1:
             return value[0]
@@ -473,6 +474,18 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
             raise RuntimeError(
                 'The number of entries for {} must correspond to the number of reflected beams'.format(Prop.SUM_TYPE)
             )
+
+    def twoThetaFromSampleAngle(self, run):
+        """Return the two theta angle in degrees of the sample angle."""
+        import h5py
+        # Need to check whether the unit is degree
+        with h5py.File(run, "r") as nexus:
+            if nexus.get('entry0/instrument/SAN') is not None:
+                return 2. * float(numpy.array(nexus.get('entry0/instrument/SAN/value'), dtype='float'))
+            elif nexus.get('entry0/instrument/san') is not None:
+                return 2. * float(numpy.array(nexus.get('entry0/instrument/san/value'), dtype='float'))
+            else:
+                raise RuntimeError('Cannot retrieve sample angle from Nexus file {}.'.format(run))
 
     def PyExec(self):
         """Execute the algorithm."""
@@ -487,30 +500,18 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
 
         self._progress = Progress(self, start=0.0, end=1.0, nreports=len(rb))
 
-        self.polarizationEffFile = self.getProperty(PropAutoProcess.EFFICIENCY_FILE).value
-        self.twoTheta = self.getProperty(Prop.TWO_THETA).value
-        self.linePosition = self.getProperty(Prop.LINE_POSITION).value
-        self.slitNorm = self.getProperty(Prop.SLIT_NORM).value
-        if self.polarizationEffFile == "":
-            self.isPolarized = False
+        twoTheta = self.getProperty(Prop.TWO_THETA).value
+        linePosition = self.getProperty(Prop.LINE_POSITION).value
+        slitNorm = self.getProperty(Prop.SLIT_NORM).value
+        if self.getProperty(PropAutoProcess.EFFICIENCY_FILE).value == "":
+            isPolarized = False
         else:
-            self.isPolarized = True
-        self.scaling = self.getProperty(PropAutoProcess.SCALE_FACTOR).value
+            isPolarized = True
         toStitch = []
 
         for angle in range(len(rb)):
             if angleOption == Angle.SAN and self.getProperty(Prop.TWO_THETA).isDefault:
-                import h5py
-                with h5py.File(rb[angle], "r") as nexus:
-                    # Need to check whether the unit is degree
-                    try:
-                        san = numpy.array(nexus.get('entry0/instrument/SAN'), dtype='float')
-                    except:
-                        try:
-                            san = numpy.array(nexus.get('entry0/instrument/san'), dtype='float')
-                        except:
-                            raise RuntimeError('Cannot find sample angle entry in file {}.'.format(rb[angle]))
-                    self.twoTheta = 2. * san
+                twoTheta = self.twoThetaFromSampleAngle(rb[angle])
 
             runDB = format(db[angle][-10:-4])
             runRB = format(rb[angle][-10:-4])
@@ -527,11 +528,11 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
                 # Direct beam pre-processing
                 ReflectometryILLPreprocess(
                     Run=db[angle],
-                    LinePosition=self.linePosition,
-                    TwoTheta=self.twoTheta,
+                    LinePosition=linePosition,
+                    TwoTheta=twoTheta,
                     OutputWorkspace='direct-{}'.format(runDB),
                     ForegroundHalfWidth=halfWidthsDirect,
-                    SlitNormalisation=self.slitNorm,
+                    SlitNormalisation=slitNorm,
                     FluxNormalisation=self.getProperty(Prop.FLUX_NORM_METHOD).value,
                     LowAngleBkgOffset=int(self.getValue(PropAutoProcess.LOW_BKG_OFFSET_DIRECT, angle)),
                     LowAngleBkgWidth=int(self.getValue(PropAutoProcess.LOW_BKG_WIDTH_DIRECT, angle)),
@@ -552,7 +553,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
                     Cleanup=self._cleanup,
                 )
                 # Direct beam polarization correction
-                if self.isPolarized:
+                if isPolarized:
                     ReflectometryILLPolarizationCor(
                         InputWorkspaces='direct-{}-foreground'.format(runDB),
                         OutputWorkspace='direct-{}-polcor'.format(runDB),
@@ -562,15 +563,15 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
                     )
             # Reflected beam
             self._workspaceNamesForQConversion = ''
-            if not self.isPolarized:
+            if not isPolarized:
                 ReflectometryILLPreprocess(
                     Run=rb[angle],
                     OutputWorkspace='reflected-{}'.format(runRB),
-                    LinePosition=self.linePosition,
-                    TwoTheta=self.twoTheta,
+                    LinePosition=linePosition,
+                    TwoTheta=twoTheta,
                     DirectLineWorkspace='direct-{}'.format(runDB),
                     ForegroundHalfWidth=halfWidthsReflected,
-                    SlitNormalisation=self.slitNorm,
+                    SlitNormalisation=slitNorm,
                     FluxNormalisation=self.getProperty(Prop.FLUX_NORM_METHOD).value,
                     LowAngleBkgOffset=int(self.getValue(PropAutoProcess.LOW_BKG_OFFSET_REFLECTED, angle)),
                     LowAngleBkgWidth=int(self.getValue(PropAutoProcess.LOW_BKG_WIDTH_REFLECTED, angle)),
@@ -597,8 +598,8 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
                 for run in rb[angle]:
                     ReflectometryILLPreprocess(
                         Run=run,
-                        LinePosition=self.linePosition,
-                        TwoTheta=self.twoTheta,
+                        LinePosition=linePosition,
+                        TwoTheta=twoTheta,
                         DirectLineWorkspace='direct-{}'.format(runDB),
                         ForegroundHalfWidth=halfWidthsReflected,
                         SlitNormalisation=self.slitNorm,
@@ -663,7 +664,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
                 InputWorkspace='{}'.format(toStitch[0]),
                 OutputWorkspace='{}'.format(self.wsPrefix),
             )
-        if self.scaling != 1.:
+        if self.getProperty(PropAutoProcess.SCALE_FACTOR).value != 1.:
             Scale(
                 InputWorkspace='{}'.format(self.wsPrefix),
                 OutputWorkspace='{}'.format(self.wsPrefix),

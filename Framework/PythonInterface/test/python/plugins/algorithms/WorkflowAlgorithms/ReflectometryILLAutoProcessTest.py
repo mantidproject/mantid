@@ -49,19 +49,33 @@ class ReflectometryILLAutoProcessTest(unittest.TestCase):
         self.assertTrue(self, mtd.doesExist('outWS'))
         mtd.clear()
 
+    def testTwoThetaInput(self):
+        args = {
+            'Run': 'ILL/D17/317370.nxs',
+            'DirectRun': 'ILL/D17/317369.nxs',
+            'OutputWorkspace': 'outWS',
+            'TwoTheta': 30.2,
+            'rethrow': True,
+            'child': True
+        }
+        alg = create_algorithm('ReflectometryILLAutoProcess', **args)
+        # ReflectometryILLConvertToQ - [Warning] Invalid value for DirectForegroundWorkspace: Binning
+        # does not match with InputWorkspace.
+        assertRaisesNothing(self, alg.execute)
+        mtd.clear()
+
     def testSampleAngle(self):
         args = {
             'Run': 'ILL/D17/317370.nxs',
             'DirectRun': 'ILL/D17/317369.nxs',
             'OutputWorkspace': 'outWS',
+            #'TwoTheta': 30.2,
             'AngleOption': 'Sample angle',
             'rethrow': True,
             'child': True
         }
-        create_algorithm('ReflectometryILLAutoProcess', **args)
-        # ReflectometryILLConvertToQ - [Warning] Invalid value for DirectForegroundWorkspace: Binning
-        # does not match with InputWorkspace.
-        #assertRaisesNothing(self, alg.execute)
+        alg = create_algorithm('ReflectometryILLAutoProcess', **args)
+        assertRaisesNothing(self, alg.execute)
         mtd.clear()
 
     def testDefaultValues(self):
