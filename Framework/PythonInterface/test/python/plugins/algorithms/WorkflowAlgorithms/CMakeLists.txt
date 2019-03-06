@@ -36,6 +36,7 @@ set ( TEST_PY_FILES
   IqtFitSequentialTest.py
   ISISIndirectDiffractionReductionTest.py
   ISISIndirectEnergyTransferTest.py
+  ISISIndirectEnergyTransferWrapperTest.py
   LoadWANDTest.py
   MDNormSCDPreprocessIncoherentTest.py
   MolDynTest.py
