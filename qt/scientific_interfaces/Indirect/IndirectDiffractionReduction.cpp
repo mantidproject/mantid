@@ -646,6 +646,8 @@ void IndirectDiffractionReduction::instrumentSelected(
   m_uiForm.rfSampleFiles->setInstrumentOverride(instrumentName);
   m_uiForm.rfCanFiles->setInstrumentOverride(instrumentName);
   m_uiForm.rfVanadiumFile->setInstrumentOverride(instrumentName);
+  m_uiForm.rfCalFile_only->setInstrumentOverride(instrumentName);
+  m_uiForm.rfVanFile_only->setInstrumentOverride(instrumentName);
 
   MatrixWorkspace_sptr instWorkspace = loadInstrument(
       instrumentName.toStdString(), reflectionName.toStdString());

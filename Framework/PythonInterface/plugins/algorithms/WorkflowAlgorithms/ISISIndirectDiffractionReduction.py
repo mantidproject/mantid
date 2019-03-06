@@ -48,6 +48,7 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
     _ipf_filename = None
     _sum_files = None
     _vanadium_ws = None
+    _replace_zeros_name = '_replace_zeros'
 
     # ------------------------------------------------------------------------------
 
@@ -257,10 +258,20 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
                                          WorkspaceToMatch=ws_name,
                                          OutputWorkspace=van_ws_name)
 
+                    # Replaces zeros with 0.1 before dividing
+                    logger.information('Replacing zeros in {0} with 0.1.'.format(van_ws_name))
+
+                    ReplaceSpecialValues(InputWorkspace=van_ws_name,
+                                         SmallNumberThreshold=0.0000001,
+                                         SmallNumberValue=0.1,
+                                         OutputWorkspace=self._replace_zeros_name)
+
                     Divide(LHSWorkspace=ws_name,
-                           RHSWorkspace=van_ws_name,
+                           RHSWorkspace=self._replace_zeros_name,
                            OutputWorkspace=ws_name,
                            AllowDifferentNumberSpectra=True)
+
+                    DeleteWorkspace(self._replace_zeros_name)
 
                 # Process monitor
                 if not unwrap_monitor(ws_name):

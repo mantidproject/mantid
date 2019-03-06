@@ -258,8 +258,9 @@ bool SortXAxis::determineIfHistogramIsValid(
     // check whether each data value is in the correct order.
     if (!isItSorted(std::greater<double>(), inputWorkspace)) {
       if (!isItSorted(std::less<double>(), inputWorkspace)) {
-        throw std::runtime_error("Data entered looks like a histogram, but is "
-                                 "not a valid histogram");
+        throw std::runtime_error(
+            "The data entered contains an invalid histogram: histogram has an "
+            "unordered x-axis.");
       }
     }
     return true;
