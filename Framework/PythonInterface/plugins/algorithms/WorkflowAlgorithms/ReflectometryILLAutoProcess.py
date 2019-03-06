@@ -16,9 +16,9 @@ from mantid.api import (
     AnalysisDataService,
     DataProcessorAlgorithm,
     FileAction,
-    FileFinder,
     FileProperty,
     MatrixWorkspaceProperty,
+    MultipleFileProperty,
     Progress
 )
 from mantid.kernel import (
@@ -31,7 +31,6 @@ from mantid.kernel import (
     IntArrayProperty,
     Property,
     StringArrayLengthValidator,
-    StringArrayMandatoryValidator,
     StringArrayProperty,
     StringListValidator
 )
@@ -138,25 +137,22 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         nonnegativeFloatArray.setLower(0.)
         stringArrayValidator = StringArrayLengthValidator()
         stringArrayValidator.setLengthMin(1)
-        mandatoryRuns = CompositeValidator()
-        mandatoryRuns.add(StringArrayMandatoryValidator())
-        mandatoryRuns.add(stringArrayValidator)
 
         listOrSingleNumber = ': provide either a list or a single value for each angle.'
 
         self.declareProperty(
-            StringArrayProperty(
+            MultipleFileProperty(
                 PropAutoProcess.RB,
-                values=[],
-                validator=mandatoryRuns,
+                action=FileAction.Load,
+                extensions=['nxs']
             ),
             doc='A list of reflected run numbers/files.')
         self.setPropertyGroup(PropAutoProcess.RB, '')
         self.declareProperty(
-            StringArrayProperty(
+            MultipleFileProperty(
                 PropAutoProcess.DB,
-                values=[],
-                validator=mandatoryRuns,
+                action=FileAction.Load,
+                extensions=['nxs']
             ),
             doc='A list of direct run numbers/files.')
         self.setPropertyGroup(PropAutoProcess.DB, '')
@@ -169,12 +165,11 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
             doc='The output workspace (momentum transfer), single histogram.')
         self.setPropertyGroup(Prop.OUTPUT_WS, '')
         self.declareProperty(
-            PropAutoProcess.ANGLE_OPTION,
-            defaultValue=Angle.DAN,
-            validator=StringListValidator(
-                [Angle.SAN, Angle.DAN]
+            StringArrayProperty(
+                PropAutoProcess.ANGLE_OPTION,
+                values=[Angle.DAN]
             ),
-            doc='Angle option used for detector positioning.'
+            doc='Angle option used for detector positioning{}'.format(listOrSingleNumber)
         )
         self.setPropertyGroup(PropAutoProcess.ANGLE_OPTION, '')
         preProcessGen = 'ReflectometryILLPreprocess, common properties'
@@ -463,7 +458,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         issues = dict()
         directRuns = self.getProperty(PropAutoProcess.DB).value
         reflectedRuns = self.getProperty(PropAutoProcess.RB).value
-        if len(directRuns) != len(reflectedRuns):
+        if len(directRuns[0]) != len(reflectedRuns[0]):
             issues[PropAutoProcess.RB] = "The same number of direct runs and reflected runs must be given."
         return issues
 
@@ -483,7 +478,9 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         """Return the two theta angle in degrees of the sample angle."""
         import h5py
         # Need to check whether the unit is degree
-        with h5py.File(FileFinder.getFullPath(run), "r") as nexus:
+        if isinstance(run, list):
+            run = run[0]  # not sure
+        with h5py.File(run, "r") as nexus:
             if nexus.get('entry0/instrument/SAN') is not None:
                 return 2. * float(numpy.array(nexus.get('entry0/instrument/SAN/value'), dtype='float'))
             elif nexus.get('entry0/instrument/san') is not None:
@@ -494,12 +491,20 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
     def mtdName(self, runName):
         """Return a name suitable to put in the ADS"""
         nameForADS = ''
-        for name in runName.split('+'):
-            if name.endswith('.nxs'):
-                nameForADS += runName[-10:-4]
-            else:
-                nameForADS += runName[-6:]
+        if not isinstance(runName, list):
+            return runName[-10:-4]
+        else:
+            for name in runName:
+                nameForADS += name[-10:-4]
         return nameForADS
+
+    def angleOrMergeRuns(self, run):
+        """Return the string that will be passed to load the files, i.e. determine if angle is treated or runs get
+        merged."""
+        beamInput = run
+        if isinstance(run, list):
+            return '+'.join(beamInput)
+        return beamInput
 
     def finalize(self):
         """Remove all intermediate workspace, if required."""
@@ -528,7 +533,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         toStitch = []
 
         for angle in range(len(rb)):
-            if self.getPropertyValue(PropAutoProcess.ANGLE_OPTION) == Angle.SAN and \
+            if self.getValue(PropAutoProcess.ANGLE_OPTION, angle) == Angle.SAN and \
                     self.getProperty(Prop.TWO_THETA).isDefault:
                 twoTheta = self.twoThetaFromSampleAngle(rb[angle])
 
@@ -544,10 +549,14 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
                                float(self.getValue(PropAutoProcess.WAVELENGTH_UPPER, angle))]
             # Direct beam already in ADS?
             workspaces = mtd.getObjectNames()
-            if not 'direct-{}'.format(db[angle]) in workspaces:
+
+            directBeamInput = self.angleOrMergeRuns(db[angle])
+            reflectedBeamInput = self.angleOrMergeRuns(rb[angle])
+
+            if not 'direct-{}'.format(runDB) in workspaces:
                 # Direct beam pre-processing
                 ReflectometryILLPreprocess(
-                    Run=db[angle],
+                    Run=directBeamInput,
                     LinePosition=linePosition,
                     TwoTheta=twoTheta,
                     OutputWorkspace='__direct-{}'.format(runDB),
@@ -584,7 +593,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
             # Reflected beam
             if not isPolarized:
                 ReflectometryILLPreprocess(
-                    Run=rb[angle],
+                    Run=reflectedBeamInput,
                     OutputWorkspace='__reflected-{}'.format(runRB),
                     LinePosition=linePosition,
                     TwoTheta=twoTheta,
@@ -614,7 +623,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
                     Cleanup=cleanup,
                 )
             else:
-                for run in rb[angle]:
+                for run in reflectedBeamInput:
                     ReflectometryILLPreprocess(
                         Run=run,
                         LinePosition=linePosition,
@@ -642,7 +651,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
                     )
                 # Reflected polarization correction
                 inputWorkspaces = '__reflected-{}-foreground'.format(runRB)
-                if len(rb[angle]) > 1:
+                if len(reflectedBeamInput) > 1:
                     for r in self._reflecteds:
                         inputWorkspaces = ',{}'.join(rb)
                         inputWorkspaces += ',' + '__reflected-{}-foreground'.format(r)
