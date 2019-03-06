@@ -131,12 +131,12 @@ Usage
    
    orig = mtd['up']
    corr = mtd['corrected_++']
-   index = orig.binIndexOf(15.)
+   index = orig.yIndexOfX(15.)
    ratio_up = corr.readY(0)[index] / orig.readY(0)[index]
    print("Ratio of corrected and original 'up' intensity at 15A: {:.4}".format(ratio_up))
    orig = mtd['down']
    corr = mtd['corrected_--']
-   index = orig.binIndexOf(15.)
+   index = orig.yIndexOfX(15.)
    ratio_down = corr.readY(0)[index] / orig.readY(0)[index]
    print("Ratio of corrected and original 'down' intensity at 15A: {:.4}".format(ratio_down))
 

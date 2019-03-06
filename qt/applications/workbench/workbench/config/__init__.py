@@ -18,9 +18,12 @@ and use it to access the settings
 """
 from __future__ import (absolute_import, unicode_literals)
 
+# third-party imports
 from qtpy.QtCore import QSettings
 
-from workbench.config.user import UserConfig
+# local imports
+from .user import UserConfig
+
 
 # -----------------------------------------------------------------------------
 # Constants

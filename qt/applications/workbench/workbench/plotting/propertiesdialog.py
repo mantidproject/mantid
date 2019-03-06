@@ -12,6 +12,7 @@ from __future__ import (absolute_import, unicode_literals)
 # std imports
 
 # 3rdparty imports
+from mantidqt.plotting.figuretype import FigureType, figure_type
 from mantidqt.utils.qt import load_ui
 from qtpy.QtGui import QDoubleValidator
 from qtpy.QtWidgets import QDialog
@@ -112,6 +113,9 @@ class AxisEditor(PropertiesEditorBase):
         # Ensure that only floats can be entered
         self.ui.editor_min.setValidator(QDoubleValidator())
         self.ui.editor_max.setValidator(QDoubleValidator())
+        if figure_type(canvas.figure) == FigureType.Image:
+            self.ui.logBox.hide()
+            self.ui.gridBox.hide()
 
         self.axes = axes
         self.axis_id = axis_id

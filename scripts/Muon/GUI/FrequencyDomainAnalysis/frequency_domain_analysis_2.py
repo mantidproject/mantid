@@ -115,6 +115,10 @@ class FrequencyAnalysisGui(QtGui.QMainWindow):
         self.context.message_notifier.add_subscriber(self.grouping_tab_widget.group_tab_presenter.message_observer)
         self.context.gui_variables_notifier.add_subscriber(self.grouping_tab_widget.group_tab_presenter.gui_variables_observer)
 
+        self.grouping_tab_widget.group_tab_presenter.enable_editing_notifier.add_subscriber(self.home_tab.home_tab_widget.enable_observer)
+
+        self.grouping_tab_widget.group_tab_presenter.disable_editing_notifier.add_subscriber(self.home_tab.home_tab_widget.disable_observer)
+
     def setup_tabs(self):
         """
         Set up the tabbing structure; the tabs work similarly to conventional

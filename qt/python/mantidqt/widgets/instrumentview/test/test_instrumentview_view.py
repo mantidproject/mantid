@@ -21,7 +21,7 @@ class InstrumentViewTest(GuiTest, QtWidgetFinder):
         LoadInstrument(ws, InstrumentName='MARI', RewriteSpectraMap=False)
 
         p = InstrumentViewPresenter(ws)
-        self.assert_window_created()
+        self.assert_widget_created()
 
         p.close(ws.name())
 
@@ -35,7 +35,7 @@ class InstrumentViewTest(GuiTest, QtWidgetFinder):
         LoadInstrument(ws, InstrumentName='MARI', RewriteSpectraMap=False)
 
         p = InstrumentViewPresenter(ws)
-        self.assert_window_created()
+        self.assert_widget_created()
 
         p.force_close()
 

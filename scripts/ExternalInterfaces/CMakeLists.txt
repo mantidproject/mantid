@@ -6,7 +6,7 @@ set ( _mslice_external_root ${CMAKE_CURRENT_BINARY_DIR}/mslice )
 ExternalProject_Add ( mslice
   PREFIX ${_mslice_external_root}
   GIT_REPOSITORY "https://github.com/mantidproject/mslice.git"
-  GIT_TAG 9f97c5d380eba8000ed8ad08bb9f5e8f5f91f425
+  GIT_TAG 55f3f9b09da398e5d74f54f8f16ed84e41e7084c
   EXCLUDE_FROM_ALL 1
 
   CONFIGURE_COMMAND ""

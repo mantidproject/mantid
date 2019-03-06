@@ -75,7 +75,7 @@ public:
 
   int getName() const override { return 0; }
 
-  const Kernel::Material material() const override;
+  const Kernel::Material &material() const override;
 
   /// Return whether this object has a valid shape
   bool hasValidShape() const override;

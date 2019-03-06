@@ -1,0 +1,1 @@
+Algorithms in this category are planned for removal in future releases, alternatives are in the algorithm pages.

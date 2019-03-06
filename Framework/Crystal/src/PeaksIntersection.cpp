@@ -99,7 +99,21 @@ void PeaksIntersection::executePeaksIntersection(const bool checkPeakExtents) {
   for (int i = 0; i < numberOfFaces; ++i) {
     VecV3D face = faces[i];
     normals[i] = (face[1] - face[0]).cross_prod((face[2] - face[0]));
-    normals[i].normalize();
+    const auto norm = normals[i].norm();
+    if (norm == 0) {
+      // Try to build a normal still perpendicular to the faces.
+      const auto v = face[1] - face[0];
+      const auto r = std::hypot(v.X(), v.Y());
+      if (r == 0.) {
+        normals[i] = V3D(1., 0., 0.);
+      } else {
+        const auto x = v.Y() / r;
+        const auto y = std::sqrt(1 - x * x);
+        normals[i] = V3D(x, y, 0.);
+      }
+    } else {
+      normals[i] /= norm;
+    }
   }
 
   Mantid::DataObjects::TableWorkspace_sptr outputWorkspace =

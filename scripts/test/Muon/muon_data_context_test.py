@@ -26,6 +26,9 @@ class MuonDataContextTest(unittest.TestCase):
     def setUp(self):
         self.loaded_data = MuonLoadData()
         self.context = MuonDataContext(self.loaded_data)
+        self.gui_variable_observer = Observer()
+        self.gui_variable_observer.update = mock.MagicMock()
+        self.context.gui_variables_notifier.add_subscriber(self.gui_variable_observer)
         self.context.instrument = 'EMU'
         self.gui_variable_observer = Observer()
         self.gui_variable_observer.update = mock.MagicMock()
