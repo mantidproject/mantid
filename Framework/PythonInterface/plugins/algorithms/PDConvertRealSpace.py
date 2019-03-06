@@ -60,7 +60,13 @@ class PDConvertRealSpace(PythonAlgorithm):
     def validateInputs(self):
         result = dict()
         input_ws = self.getProperty('InputWorkspace').value
-        if not input_ws.sample().getMaterial():
+        if input_ws.sample().getMaterial():
+            if input_ws.sample().getMaterial().cohScatterLengthSqrd() == 0.:
+                from_quantity = self.getProperty('From').value
+                to_quantity = self.getProperty('To').value
+                if from_quantity == GKr and to_quantity in [Gr, gr]:
+                    result['To'] = 'Require non-zero coherent scattering length'
+        else:
             result['InputWorkspace'] = 'Please run SetSample or SetSampleMaterial'
         return result
 

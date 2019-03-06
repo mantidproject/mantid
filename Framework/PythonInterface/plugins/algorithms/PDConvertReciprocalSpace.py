@@ -71,9 +71,16 @@ class PDConvertReciprocalSpace(PythonAlgorithm):
                 requireMaterial = False
             elif from_quantity == FQ and to_quantity == SQ:
                 requireMaterial = False
-            if requireMaterial and not input_ws.sample().getMaterial():
-                result['InputWorkspace'] = 'Please run SetSample or SetSampleMaterial'
-
+            if requireMaterial:
+                if not input_ws.sample().getMaterial():
+                    result['InputWorkspace'] = 'Please run SetSample or SetSampleMaterial'
+                else:
+                    cohScattSqrd = input_ws.sample().getMaterial().cohScatterLengthSqrd()
+                    if cohScattSqrd == 0.:
+                        if from_quantity in [SQ, FQ] and to_quantity in [DCS, FKQ]:
+                            result['To'] = 'Require non-zero coherent scattering length'
+                        if to_quantity in [SQ, FQ] and from_quantity in [DCS, FKQ]:
+                            result['From'] = 'Require non-zero coherent scattering length'
         return result
 
     def PyExec(self):
