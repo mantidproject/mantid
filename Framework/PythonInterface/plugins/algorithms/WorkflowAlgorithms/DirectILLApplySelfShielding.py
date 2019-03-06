@@ -9,30 +9,26 @@
 from __future__ import (absolute_import, division, print_function)
 
 import DirectILL_common as common
+import ILL_utilities as utils
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, InstrumentValidator, MatrixWorkspaceProperty,
                         Progress, PropertyMode,  WorkspaceProperty, WorkspaceUnitValidator)
 from mantid.kernel import (CompositeValidator, Direction, FloatBoundedValidator, StringListValidator)
-from mantid.simpleapi import (CloneWorkspace, CreateSingleValuedWorkspace, Divide, Minus, Multiply)
+from mantid.simpleapi import (CloneWorkspace, Divide, Minus, Scale)
 
 
 def _subtractEC(ws, ecWS, ecScaling, wsNames, wsCleanup, algorithmLogging):
     """Subtract empty container."""
     # out = in - ecScaling * EC
-    scalingWSName = wsNames.withSuffix('ecScaling')
-    scalingWS = CreateSingleValuedWorkspace(OutputWorkspace=scalingWSName,
-                                            DataValue=ecScaling,
-                                            EnableLogging=algorithmLogging)
     scaledECWSName = wsNames.withSuffix('scaled_EC')
-    scaledECWS = Multiply(LHSWorkspace=ecWS,
-                          RHSWorkspace=scalingWS,
-                          OutputWorkspace=scaledECWSName,
-                          EnableLogging=algorithmLogging)
+    scaledECWS = Scale(InputWorkspace=ecWS,
+                       Factor=ecScaling,
+                       OutputWorkspace=scaledECWSName,
+                       EnableLogging=algorithmLogging)
     ecSubtractedWSName = wsNames.withSuffix('EC_subtracted')
     ecSubtractedWS = Minus(LHSWorkspace=ws,
                            RHSWorkspace=scaledECWS,
                            OutputWorkspace=ecSubtractedWSName,
                            EnableLogging=algorithmLogging)
-    wsCleanup.cleanup(scalingWS)
     wsCleanup.cleanup(scaledECWS)
     return ecSubtractedWS
 
@@ -66,27 +62,25 @@ class DirectILLApplySelfShielding(DataProcessorAlgorithm):
     def PyExec(self):
         """Executes the data reduction workflow."""
         progress = Progress(self, 0.0, 1.0, 4)
-        subalgLogging = False
-        if self.getProperty(common.PROP_SUBALG_LOGGING).value == common.SUBALG_LOGGING_ON:
-            subalgLogging = True
+        self._subalgLogging = self.getProperty(common.PROP_SUBALG_LOGGING).value == common.SUBALG_LOGGING_ON
         wsNamePrefix = self.getProperty(common.PROP_OUTPUT_WS).valueAsStr
         cleanupMode = self.getProperty(common.PROP_CLEANUP_MODE).value
-        wsNames = common.NameSource(wsNamePrefix, cleanupMode)
-        wsCleanup = common.IntermediateWSCleanup(cleanupMode, subalgLogging)
+        self._names = utils.NameSource(wsNamePrefix, cleanupMode)
+        self._cleanup = utils.Cleanup(cleanupMode, self._subalgLogging)
 
         progress.report('Loading inputs')
-        mainWS = self._inputWS(wsCleanup)
+        mainWS = self._inputWS()
 
         progress.report('Applying self shielding corrections')
-        mainWS, applied = self._applyCorrections(mainWS, wsNames, wsCleanup, subalgLogging)
+        mainWS, applied = self._applyCorrections(mainWS)
 
         progress.report('Subtracting EC')
-        mainWS, subtracted = self._subtractEC(mainWS, wsNames, wsCleanup, subalgLogging)
+        mainWS, subtracted = self._subtractEC(mainWS)
 
         if not applied and not subtracted:
-            mainWS = self._cloneOnly(mainWS, wsNames, wsCleanup, subalgLogging)
+            mainWS = self._cloneOnly(mainWS)
 
-        self._finalize(mainWS, wsCleanup)
+        self._finalize(mainWS)
         progress.report('Done')
 
     def PyInit(self):
@@ -108,10 +102,10 @@ class DirectILLApplySelfShielding(DataProcessorAlgorithm):
                                                direction=Direction.Output),
                              doc='The corrected workspace.')
         self.declareProperty(name=common.PROP_CLEANUP_MODE,
-                             defaultValue=common.CLEANUP_ON,
+                             defaultValue=utils.Cleanup.ON,
                              validator=StringListValidator([
-                                 common.CLEANUP_ON,
-                                 common.CLEANUP_OFF]),
+                                 utils.Cleanup.ON,
+                                 utils.Cleanup.OFF]),
                              direction=Direction.Input,
                              doc='What to do with intermediate workspaces.')
         self.declareProperty(name=common.PROP_SUBALG_LOGGING,
@@ -142,45 +136,46 @@ class DirectILLApplySelfShielding(DataProcessorAlgorithm):
             optional=PropertyMode.Optional),
             doc='A workspace containing the self shielding correction factors.')
 
-    def _cloneOnly(self, mainWS, wsNames, wsCleanup, subalgLogging):
-        cloneWSName = wsNames.withSuffix('cloned_only')
+    def _cloneOnly(self, mainWS):
+        cloneWSName = self._names.withSuffix('cloned_only')
         cloneWS = CloneWorkspace(InputWorkspace=mainWS,
-                                 OutputWorkspace=cloneWSName)
+                                 OutputWorkspace=cloneWSName,
+                                 EnableLogging=self._subalgLogging)
         return cloneWS
 
-    def _applyCorrections(self, mainWS, wsNames, wsCleanup, subalgLogging):
+    def _applyCorrections(self, mainWS):
         """Applies self shielding corrections to a workspace, if corrections exist."""
         if self.getProperty(common.PROP_SELF_SHIELDING_CORRECTION_WS).isDefault:
             return mainWS, False
         correctionWS = self.getProperty(common.PROP_SELF_SHIELDING_CORRECTION_WS).value
-        correctedWSName = wsNames.withSuffix('self_shielding_corrected')
+        correctedWSName = self._names.withSuffix('self_shielding_corrected')
         correctedWS = Divide(LHSWorkspace=mainWS,
                              RHSWorkspace=correctionWS,
                              OutputWorkspace=correctedWSName,
-                             EnableLogging=subalgLogging)
-        wsCleanup.cleanup(mainWS)
+                             EnableLogging=self._subalgLogging)
+        self._cleanup.cleanup(mainWS)
         return correctedWS, True
 
-    def _finalize(self, outWS, wsCleanup):
+    def _finalize(self, outWS):
         """Do final cleanup and set the output property."""
         self.setProperty(common.PROP_OUTPUT_WS, outWS)
-        wsCleanup.cleanup(outWS)
-        wsCleanup.finalCleanup()
+        self._cleanup.cleanup(outWS)
+        self._cleanup.finalCleanup()
 
-    def _inputWS(self, wsCleanup):
+    def _inputWS(self):
         """Return the raw input workspace."""
         mainWS = self.getProperty(common.PROP_INPUT_WS).value
-        wsCleanup.protect(mainWS)
+        self._cleanup.protect(mainWS)
         return mainWS
 
-    def _subtractEC(self, mainWS, wsNames, wsCleanup, subalgLogging):
+    def _subtractEC(self, mainWS):
         """Subtract the empty container workspace without self-shielding corrections."""
         if self.getProperty(common.PROP_EC_WS).isDefault:
             return mainWS, False
         ecWS = self.getProperty(common.PROP_EC_WS).value
         ecScaling = self.getProperty(common.PROP_EC_SCALING).value
-        subtractedWS = _subtractEC(mainWS, ecWS, ecScaling, wsNames, wsCleanup, subalgLogging)
-        wsCleanup.cleanup(mainWS)
+        subtractedWS = _subtractEC(mainWS, ecWS, ecScaling, self._names, self._cleanup, self._subalgLogging)
+        self._cleanup.cleanup(mainWS)
         return subtractedWS, True
 
 
