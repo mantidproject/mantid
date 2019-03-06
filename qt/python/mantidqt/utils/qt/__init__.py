@@ -15,6 +15,7 @@ from __future__ import absolute_import
 import os.path as osp
 from contextlib import contextmanager
 from importlib import import_module
+import operator
 
 # 3rd-party modules
 from qtpy import QT_VERSION
@@ -151,7 +152,8 @@ def create_action(parent, text, on_triggered=None, shortcut=None,
     if icon_name is not None:
         action.setIcon(get_icon(icon_name))
 
-    if shortcut_visible_in_context_menu:
+    # shortcuts in context menus option is only available after Qt 5.10
+    if compare_qt_version(5, 10, comp=operator.ge) and shortcut_visible_in_context_menu:
         action.setShortcutVisibleInContextMenu(shortcut_visible_in_context_menu)
 
     return action
@@ -183,3 +185,17 @@ def toQSettings(settings):
         return settings.qsettings
     else:  # must be a QSettings already
         return settings
+
+
+def compare_qt_version(major, minor=None, comp=operator.eq):
+    """
+    Compare the version of qt using the comparator. The comparator is only used for the minor version.
+
+    :param major: The major version of Qt. This is always checked for equality.
+    :param minor: The minor version of Qt. This is optional, and will be checked using the provided comparator.
+    :param comp: Comparator for the minor version, defaults to equals.
+    """
+    qt_major, qt_minor, qt_patch = (int(x) for x in QT_VERSION.split("."))
+    major_comp = major == qt_major
+    minor_comp = comp(minor, qt_minor) if minor else None
+    return major_comp and minor_comp
