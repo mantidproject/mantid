@@ -413,15 +413,6 @@ class StateGuiModelTest(unittest.TestCase):
         self.assertTrue(state_gui_model.transmission_can_wavelength_min == 1.3)
         self.assertTrue(state_gui_model.transmission_can_wavelength_max == 10.3)
 
-    def test_that_default_show_transmission_is_true(self):
-        state_gui_model = StateGuiModel({"test": [1]})
-        self.assertTrue(state_gui_model.show_transmission)
-
-    def test_that_can_set_show_transmission(self):
-        state_gui_model = StateGuiModel({"test": [1]})
-        state_gui_model.show_transmission = True
-        self.assertTrue(state_gui_model.show_transmission)
-
     # ==================================================================================================================
     # ==================================================================================================================
     # Q TAB

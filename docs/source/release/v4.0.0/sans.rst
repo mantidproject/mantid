@@ -45,6 +45,7 @@ Improved
 * The gui will remember which output mode (Memory, File, Both) you last used and set that as your default when on the SANS interface.
 * The gui will check *save can* by default if it was checked when the gui was last used.
 * Default adding mode is set to Event for all instruments except for LOQ, which defaults to Custom.
+* Removed the show transmission check box. Transmission workspaces are always added to output files regardless of output mode, and are always added to ADS if "memory" or "both" output mode is selected.
 * The old ISIS SANS interface has been renamed *ISIS SANS (Deprecated)* to signify that it is not under active development.
 * The v2 experimental interface has been renamed *ISIS SANS* to signify that it is the main interface and is under active development.
 
@@ -63,6 +64,7 @@ Bug fixes
 * Removed option to process in non-compatibility mode to avoid calculation issues.
 * Default name for added runs has correct number of digits.
 * RKH files no longer append to existing files, but overwrite instead.
+* Reductions with event slices can save output files. However, transmission workspaces are not included in these files.
 
 Improvements
 ############

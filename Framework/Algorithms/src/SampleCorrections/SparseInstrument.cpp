@@ -204,7 +204,7 @@ createSparseWS(const API::MatrixWorkspace &modelWS,
   instrument->setReferenceFrame(
       boost::make_shared<Geometry::ReferenceFrame>(*refFrame));
   // The sparse instrument is build around origin.
-  const Kernel::V3D samplePos{0.0, 0.0, 0.0};
+  constexpr Kernel::V3D samplePos{0.0, 0.0, 0.0};
   auto sample = Kernel::make_unique<Geometry::ObjComponent>("sample", nullptr,
                                                             instrument.get());
   sample->setPos(samplePos);
