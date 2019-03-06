@@ -318,20 +318,34 @@ def get_matrix_2d_ragged(workspace, distribution, histogram2D=False):
     max_value = numpy.finfo(numpy.float64).min
     for i in range(num_hist):
         xtmp = workspace.readX(i)
+        if workspace.isHistogramData():
+            # input x is edges
+            xtmp = mantid.plots.helperfunctions.points_from_boundaries(xtmp)
+        else:
+            # input x is centers
+            pass
         min_value = min(min_value, xtmp.min())
         max_value = max(max_value, xtmp.max())
         diff = xtmp[1:] - xtmp[:-1]
         delta = min(delta, diff.min())
-
-    num_edges = int(numpy.ceil((max_value - min_value)/delta))
-    x = numpy.linspace(min_value, max_value, num=num_edges)
-    x_centers = mantid.plots.helperfunctions.points_from_boundaries(x)
+    #print('min:',min_value)
+    #print('max:',max_value)
+    #print('delta:',delta)
+    num_edges = int(numpy.ceil((max_value - min_value)/delta)) 
+    x_centers = numpy.linspace(min_value, max_value, num=num_edges)
     y = mantid.plots.helperfunctions.boundaries_from_points(workspace.getAxis(1).extractValues())
-    z = numpy.empty([num_hist, num_edges - 1], dtype=numpy.float64)
+    #print('x:',x)
+    #print('y:',y)
+    #print('histo?',workspace.isHistogramData())
+    z = numpy.empty([num_hist, num_edges], dtype=numpy.float64)
     for i in range(num_hist):
         centers, ztmp, _, _ = mantid.plots.helperfunctions.get_spectrum(workspace, i, distribution=distribution, withDy=False, withDx=False)
         f = interp1d(centers, ztmp, bounds_error=False, fill_value=numpy.nan)
         z[i] = f(x_centers)
+    if histogram2D:
+        x = mantid.plots.helperfunctions.boundaries_from_points(x_centers)
+    else:
+        x = x_centers
     return x,y,z
 
 
