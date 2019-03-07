@@ -147,7 +147,7 @@ void LoadSwans::placeDetectorInSpace() {
   helper.moveComponent(m_ws, componentName, newpos);
 
   // Apply a local rotation to stay perpendicular to the beam
-  const V3D axis(0.0, 1.0, 0.0);
+  constexpr V3D axis(0.0, 1.0, 0.0);
   Quat rotation(angle, axis);
   helper.rotateComponent(m_ws, componentName, rotation);
 }

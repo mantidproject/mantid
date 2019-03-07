@@ -77,19 +77,14 @@ class Project(AnalysisDataServiceObserver):
             # Cancel close dialogs
             return
 
-        overwriting = False
         # If the selected path is a project directory ask if overwrite is required?
         if os.path.exists(os.path.join(path, (os.path.basename(path) + self.project_file_ext))):
             answer = self._offer_overwriting_gui()
             if answer == QMessageBox.No:
                 return
             elif answer == QMessageBox.Yes:
-                overwriting = True
-
-        if not overwriting and os.path.exists(path) and os.listdir(path) != []:
-            QMessageBox.warning(None, "Empty directory or project required!",
-                                "Please choose either an new directory or an already saved project", QMessageBox.Ok)
-            return
+                # Just continue on
+                pass
 
         # todo: get a list of workspaces but to be implemented on GUI implementation
         self.last_project_location = path
