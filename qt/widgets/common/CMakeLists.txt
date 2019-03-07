@@ -734,71 +734,67 @@ if ( ENABLE_WORKBENCH )
   find_package ( QScintillaQt5 REQUIRED )
 endif()
 
-if ( ENABLE_MANTIDPLOT )
-  mtd_add_qt_library (TARGET_NAME MantidQtWidgetsCommon
-    QT_VERSION 4
-    SRC ${SRC_FILES}
-    MOC ${MOC_FILES}
-    NOMOC ${INC_FILES}
-    UI ${UI_FILES}
-    DEFS
-      IN_MANTIDQT_COMMON
-      QSCINTILLA_DLL
-    QT4_DEFS
-      USE_QTWEBKIT
-    INCLUDE_DIRS
-      inc
-    LINK_LIBS
-      ${TARGET_LIBRARIES}
-    QT4_LINK_LIBS
-      Qt4::QtHelp
-      Qt4::QtNetwork
-      Qt4::QtWebKit
-      Qt4::Qscintilla
-    INSTALL_DIR
-      ${LIB_DIR}
-    OSX_INSTALL_RPATH
-      @loader_path/../MacOS
-      @loader_path/../Libraries
-    LINUX_INSTALL_RPATH
-      "\$ORIGIN/../${LIB_DIR}"
-  )
-endif()
+mtd_add_qt_library (TARGET_NAME MantidQtWidgetsCommon
+  QT_VERSION 4
+  SRC ${SRC_FILES}
+  MOC ${MOC_FILES}
+  NOMOC ${INC_FILES}
+  UI ${UI_FILES}
+  DEFS
+    IN_MANTIDQT_COMMON
+    QSCINTILLA_DLL
+  QT4_DEFS
+    USE_QTWEBKIT
+  INCLUDE_DIRS
+    inc
+  LINK_LIBS
+    ${TARGET_LIBRARIES}
+  QT4_LINK_LIBS
+    Qt4::QtHelp
+    Qt4::QtNetwork
+    Qt4::QtWebKit
+    Qt4::Qscintilla
+  INSTALL_DIR
+    ${LIB_DIR}
+  OSX_INSTALL_RPATH
+    @loader_path/../MacOS
+    @loader_path/../Libraries
+  LINUX_INSTALL_RPATH
+    "\$ORIGIN/../${LIB_DIR}"
+)
 
-if ( ENABLE_WORKBENCH )
-  mtd_add_qt_library (TARGET_NAME MantidQtWidgetsCommon
-    QT_VERSION 5
-    SRC ${QT5_SRC_FILES}
-    MOC ${QT5_MOC_FILES}
-    NOMOC ${QT5_INC_FILES}
-    UI ${QT5_UI_FILES}
-    DEFS
-      IN_MANTIDQT_COMMON
-      QSCINTILLA_DLL
-    QT5_DEFS
-      ${_webengine_def}
-    INCLUDE_DIRS
-      inc
-      ${PYTHON_INCLUDE_PATH}
-    LINK_LIBS
-      ${TARGET_LIBRARIES}
-    QT5_LINK_LIBS
-      Qt5::Concurrent
-      Qt5::Help
-      Qt5::Network
-      Qt5::PrintSupport
-      ${_webwidgets_tgt}
-      Qt5::Qscintilla
-    INSTALL_DIR
-      ${LIB_DIR}
-      ${WORKBENCH_LIB_DIR}
-    OSX_INSTALL_RPATH
-      @loader_path/../MacOS
-      @loader_path/../Libraries
-    LINUX_INSTALL_RPATH
-      "\$ORIGIN/../${WORKBENCH_LIB_DIR}"
-  )
-endif()
+mtd_add_qt_library (TARGET_NAME MantidQtWidgetsCommon
+  QT_VERSION 5
+  SRC ${QT5_SRC_FILES}
+  MOC ${QT5_MOC_FILES}
+  NOMOC ${QT5_INC_FILES}
+  UI ${QT5_UI_FILES}
+  DEFS
+    IN_MANTIDQT_COMMON
+    QSCINTILLA_DLL
+  QT5_DEFS
+    ${_webengine_def}
+  INCLUDE_DIRS
+    inc
+    ${PYTHON_INCLUDE_PATH}
+  LINK_LIBS
+    ${TARGET_LIBRARIES}
+  QT5_LINK_LIBS
+    Qt5::Concurrent
+    Qt5::Help
+    Qt5::Network
+    Qt5::PrintSupport
+    ${_webwidgets_tgt}
+    Qt5::Qscintilla
+  INSTALL_DIR
+    ${LIB_DIR}
+    ${WORKBENCH_LIB_DIR}
+  OSX_INSTALL_RPATH
+    @loader_path/../MacOS
+    @loader_path/../Libraries
+  LINUX_INSTALL_RPATH
+    "\$ORIGIN/../${WORKBENCH_LIB_DIR}"
+)
 
 ###########################################################################
 # Testing
