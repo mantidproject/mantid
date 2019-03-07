@@ -127,6 +127,9 @@ Bugfixes
 - A bug where using a cropped calibration file (from a previous run) on the ISISEnergyTransfer interface would cause an 
   error has been fixed.
 - A bug where specifying a custom detector grouping for OSIRIS was not working has been fixed.
+- A bug caused by incorrect masked detectors during a reduction of an individual runs has been fixed. This could sometimes cause 
+  unexpected peaks in the output plots.
+
 
 Bayes Interface
 ---------------
