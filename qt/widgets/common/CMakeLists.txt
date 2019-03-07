@@ -1,10 +1,11 @@
 set ( QT5_SRC_FILES
-  src/AlgorithmProgress/AlgorithmProgressWidget.cpp
-  src/AlgorithmProgress/AlgorithmProgressPresenter.cpp
-  src/AlgorithmProgress/AlgorithmProgressPresenterBase.cpp
-  src/AlgorithmProgress/AlgorithmProgressModel.cpp
   src/AlgorithmProgress/AlgorithmProgressDialogPresenter.cpp
   src/AlgorithmProgress/AlgorithmProgressDialogWidget.cpp
+  src/AlgorithmProgress/AlgorithmProgressModel.cpp
+  src/AlgorithmProgress/AlgorithmProgressPresenter.cpp
+  src/AlgorithmProgress/AlgorithmProgressPresenterBase.cpp
+  src/AlgorithmProgress/AlgorithmProgressObserver.cpp
+  src/AlgorithmProgress/AlgorithmProgressWidget.cpp
 
   src/AlgorithmDialog.cpp
   src/AlgorithmHistoryWindow.cpp
@@ -113,12 +114,11 @@ set ( QT5_SRC_FILES
 set ( QT5_MOC_FILES
   inc/MantidQtWidgets/Common/QuickAlgorithmProgress.h
 
-  inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressWidget.h
-  inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressPresenter.h
-  inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressPresenterBase.h
-  inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressModel.h
   inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressDialogPresenter.h
   inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressDialogWidget.h
+  inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressPresenter.h
+  inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressPresenterBase.h
+  inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressWidget.h
 
   inc/MantidQtWidgets/Common/AlgorithmDialog.h
   inc/MantidQtWidgets/Common/AlgorithmHistoryWindow.h
@@ -236,6 +236,9 @@ set ( QT5_INC_FILES
   inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspacePresenter.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceProvider.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceProviderNotifiable.h
+
+  inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressObserver.h
+  inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressModel.h
 )
 
 set ( QT5_UI_FILES
@@ -251,12 +254,13 @@ set ( QT5_UI_FILES
 )
 
 set ( SRC_FILES
-  src/AlgorithmProgress/AlgorithmProgressWidget.cpp
-  src/AlgorithmProgress/AlgorithmProgressPresenter.cpp
-  src/AlgorithmProgress/AlgorithmProgressPresenterBase.cpp
-  src/AlgorithmProgress/AlgorithmProgressModel.cpp
   src/AlgorithmProgress/AlgorithmProgressDialogPresenter.cpp
   src/AlgorithmProgress/AlgorithmProgressDialogWidget.cpp
+  src/AlgorithmProgress/AlgorithmProgressModel.cpp
+  src/AlgorithmProgress/AlgorithmProgressPresenter.cpp
+  src/AlgorithmProgress/AlgorithmProgressPresenterBase.cpp
+  src/AlgorithmProgress/AlgorithmProgressObserver.cpp
+  src/AlgorithmProgress/AlgorithmProgressWidget.cpp
 
   src/AlgorithmDialog.cpp
   src/AlgorithmHistoryWindow.cpp
@@ -426,12 +430,11 @@ set ( SRC_FILES
 set ( MOC_FILES
   inc/MantidQtWidgets/Common/QuickAlgorithmProgress.h
 
-  inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressWidget.h
-  inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressPresenter.h
-  inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressPresenterBase.h
-  inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressModel.h
   inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressDialogPresenter.h
   inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressDialogWidget.h
+  inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressPresenter.h
+  inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressPresenterBase.h
+  inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressWidget.h
 
   inc/MantidQtWidgets/Common/AlgorithmDialog.h
   inc/MantidQtWidgets/Common/AlgorithmHistoryWindow.h
@@ -686,6 +689,9 @@ set ( INC_FILES
   inc/MantidQtWidgets/Common/Batch/ExtractSubtrees.h
   inc/MantidQtWidgets/Common/Batch/FindSubtreeRoots.h
   inc/MantidQtWidgets/Common/Batch/BuildSubtreeItems.h
+
+  inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressObserver.h
+  inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressModel.h
 )
 
 set ( UI_FILES
