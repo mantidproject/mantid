@@ -5,11 +5,6 @@ Diffraction Changes
 .. contents:: Table of Contents
    :local:
 
-.. warning:: **Developers:** Sort changes under appropriate heading
-    putting new features at the top of the section, followed by
-    improvements, followed by bug fixes.
-
-
 Improvements
 ############
 
@@ -21,12 +16,12 @@ Improvements
 - :ref:`SNAPReduce <algm-SNAPReduce>` has been completely refactored. It now uses :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` for a large part of its functionality. It has progress bar and all output workspaces have history. It is also more memory efficient by reducing the number of temporary workspaces created.
 - :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>` and :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` now support outputting the unfocussed data and weighted events (with time). This allows for event filtering **after** processing the data.
 - :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` has significant performance improvements when used with chunking and can now use summed cache files. Failing to load a cache file will now produce a warning, rather than exception, and the algorithm will continue without the file.
-- :ref:`LoadWAND <algm-LoadWAND>` has grouping option added and loads faster
-- Mask workspace option added to :ref:`WANDPowderReduction <algm-WANDPowderReduction>`
-- :ref:`Le Bail concept page <Le Bail Fit>` moved from mediawiki
-- Rework of :ref:`powder diffraction calibration <Powder Diffraction Calibration>` documentation
+- :ref:`LoadWAND <algm-LoadWAND>` has grouping option added and loads faster.
+- Mask workspace option added to :ref:`WANDPowderReduction <algm-WANDPowderReduction>`.
+- :ref:`Le Bail concept page <Le Bail Fit>` moved from mediawiki.
+- Rework of :ref:`powder diffraction calibration <Powder Diffraction Calibration>` documentation.
 - :ref:`ConvertToMD <algm-ConvertToMD>` now has `ConverterType = {Default, Indexed}` setting: `Default` keeps the old
-  version of algorithm, `Indexed` provide the new one with better performance and some restrictions
+  version of the algorithm, `Indexed` provide the new one with better performance and some restrictions
   (see :ref:`ConvertToMD <algm-ConvertToMD>` Notes).
 - New TOPAZ instrument geometry for 2019 run cycle
 - :ref:`LoadDiffCal <algm-LoadDiffCal>` has an additional parameter to allow for a second file specifying a grouping to override the one in the calibration file
@@ -62,39 +57,45 @@ Bugfixes
 ########
 
 - :ref:`CentroidPeaksMD <algm-CentroidPeaksMD>` now updates peak bin counts.
-
 - :ref:`FindPeaksMD <algm-FindPeaksMD>` now finds peaks correctly with the crystallography convention setting and reduction with crystallography convention is tested with a system test.
 - :ref:`SaveIsawPeaks <algm-SaveIsawPeaks>` does not have duplicate peak numbers when saving PeaksWorkspaces with more than one RunNumber.
 - :ref:`LoadIsawPeaks <algm-LoadIsawPeaks>` now loads the calibration from the peaks file correctly.
-
 - :ref:`OptimizeCrystalPlacement <algm-OptimizeCrystalPlacement>` now updates the sample location used by peaks.  Previously, the sample was effectively left unmoved. Default for indexing tolerance was lowered to 0.15 and can now be called more than once without error.
 
 Powder Diffraction
 ------------------
 
+New Algorithms
+##############
+
+- :ref:`HB2AReduce <algm-HB2AReduce>` algorithm reduces HFIR POWDER (HB-2A) data.
+- :ref:`LoadGudrunOutput <algm-LoadGudrunOutput>` is a new algorithm that allows users to load the standard Gudrun output files into Mantid.
+- :ref:`PDConvertReciprocalSpace <algm-PDConvertReciprocalSpace>` new algorithm to convert between reciprocal space units.
+- :ref:`PDConvertRealSpace <algm-PDConvertRealSpace>` new algorithm to convert between real space units.
+
 Improvements
 ############
 
 - Focusing in texture mode for Gem now properly saves .gda files.
-- Focusing on Gem now crops values that would be divided by very small or zero vanadium values
+- Focusing on Gem now crops values that would be divided by very small or zero vanadium values.
 - Removed save_angles flag for Gem , as it was set by the texture mode.
 - Added save_all flag to Gem that is set to true by default, setting it to false disables the saving of .NXS files.
-- Added subtract_empty_instrument flag to Gem that is true by default, setting it to false disables subrtracting the empty.
+- Added subtract_empty_instrument flag to Gem that is true by default, setting it to false disables subtracting the empty.
 - Changed spline coefficient so that the default for long_mode on and long_mode off can be set separately.
 - Focus on Pearl now has a focused_bin_widths parameter in pearl_advanced_config.py to allow setting default rebin values.
 - Focus on Pearl now saves out xye_tof files.
 - :ref:`PDLoadCharacterizations <algm-PDLoadCharacterizations>` now sets the same run numbers for all rows when using an ``exp.ini`` file.
 - Focus now checks if the vanadium for a run is already loaded before loading it in to prevent reloading the same vanadium multiple times.
 - :ref:`SaveReflections <algm-SaveReflections>` now supports saving indexed modulated peaks in the Jana format.
-- `PyStoG <https://pystog.readthedocs.io/en/latest/>`_ has been added as an external project
+- `PyStoG <https://pystog.readthedocs.io/en/latest/>`_ has been added as an external project.
 
 Bugfixes
 ########
 
 - multiple_scattering flag is now optional for Polaris focus when absorb_correction is true.
 - Normalisation is fixed in :ref:`SumOverlappingTubes <algm-SumOverlappingTubes>`, which was causing very low peak to background ratio for reduced D2B data.
-- sudden drops at either end of spectra in Pearl caused by partial bins are now cropped.
-- The Powder Diffraction GUI now remembers whether linear or logorithmic binning was selected between uses
+- Sudden drops at either end of spectra in Pearl caused by partial bins are now cropped.
+- The Powder Diffraction GUI now remembers whether linear or logarithmic binning was selected between uses.
 - Fixed a bug in :ref:`GenerateGroupingPowder <algm-GenerateGroupingPowder>` which caused detectors without corresponding spectrum to get included in grouping.
 - :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` now does not use cache file when the grouping has changed.
 
@@ -103,9 +104,8 @@ New Algorithms
 
 - :ref:`HB2AReduce <algm-HB2AReduce>` algorithm reduces HFIR POWDER (HB-2A) data
 - :ref:`LoadGudrunOutput <algm-LoadGudrunOutput>` is a new algorithm that allows users to load the standard Gudrun output files into Mantid.
-- :ref:`PDConvertReciprocalSpace <algm-PDConvertReciprocalSpace>` new algorithm to convert between reciprocal space units.
-- :ref:`PDConvertRealSpace <algm-PDConvertRealSpace>` new algorithm to convert between real space units.
-
+- New algorithm :ref:`PDConvertReciprocalSpace <algm-PDConvertReciprocalSpace>` to convert between reciprocal space units.
+- New algorithm :ref:`PDConvertRealSpace <algm-PDConvertRealSpace>` to convert between real space units.
 
 Renamed Algorithms
 ##################
@@ -120,6 +120,6 @@ Engineering Diffraction
 New
 ###
 
-- Scripts added that produce the same results as the ISIS engineering gui (supports ENGINX and IMAT), this is to allow use with ISIS autoreduction.
+- Scripts added that produce the same results as the ISIS engineering GUI (supports ENGINX and IMAT), this is to allow use with ISIS autoreduction.
 
 :ref:`Release 4.0.0 <v4.0.0>`

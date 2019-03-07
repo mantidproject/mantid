@@ -6,20 +6,20 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, print_function)
 
-from qtpy import QtGui, QtCore, QtWidgets
+from qtpy import QtCore, QtGui, QtWidgets
 from qtpy.QtCore import Signal
 
 try:
-    from ErrorReporter import resources_qt5 # noqa
+    from ErrorReporter import resources_qt5  # noqa
 except (ImportError, RuntimeError):
-    from ErrorReporter import resources_qt4 # noqa
+    from ErrorReporter import resources_qt4  # noqa
 
 from mantidqt.utils.qt import load_ui
 
-ErrorReportUI, ErrorReportUIBase = load_ui(__file__, 'errorreport.ui')
+ErrorReportUIBase, ErrorReportUI = load_ui(__file__, 'errorreport.ui')
 
 
-class CrashReportPage(QtWidgets.QWidget, ErrorReportUI):
+class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
     action = Signal(bool, int, str, str, str)
     quit_signal = Signal()
 
@@ -43,10 +43,10 @@ class CrashReportPage(QtWidgets.QWidget, ErrorReportUI):
         self.input_free_text.textChanged.connect(self.set_button_status)
         self.input_free_text.textChanged.connect(self.set_plain_text_edit_field)
 
-#  The options on what to do after closing the window (exit/continue)
-        self.radioButtonContinue.setChecked(True)     # Set continue to be checked by default
+        #  The options on what to do after closing the window (exit/continue)
+        self.radioButtonContinue.setChecked(True)  # Set continue to be checked by default
 
-#  These are the options along the bottom
+        #  These are the options along the bottom
         self.fullShareButton.clicked.connect(self.fullShare)
         self.nonIDShareButton.clicked.connect(self.nonIDShare)
         self.noShareButton.clicked.connect(self.noShare)
@@ -54,7 +54,7 @@ class CrashReportPage(QtWidgets.QWidget, ErrorReportUI):
         self.setWindowFlags(QtCore.Qt.CustomizeWindowHint | QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowStaysOnTopHint)
         self.setWindowModality(QtCore.Qt.ApplicationModal)
 
-    def quit (self):
+    def quit(self):
         self.quit_signal.emit()
 
     def fullShare(self):

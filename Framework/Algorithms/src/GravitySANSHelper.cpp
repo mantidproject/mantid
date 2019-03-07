@@ -89,7 +89,7 @@ double GravitySANSHelper::calcSinTheta() const {
   return sqrt(0.5 - halfcosTheta);
 }
 
-/**Calculates the distance a neutron coming from the sample will have deviated
+/** Calculates the distance a neutron coming from the sample will have deviated
  * from a
  *  straight tragetory before hitting a detector. If calling this function many
  * times
