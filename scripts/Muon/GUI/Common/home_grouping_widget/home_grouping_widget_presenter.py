@@ -80,6 +80,8 @@ class HomeGroupingWidgetPresenter(HomeTabSubWidget):
         self._view.set_subtracted_periods(",".join([str(p) for p in subtracted_periods]))
 
     def handle_periods_changed(self):
+        self._view.summed_period_edit.blockSignals(True)
+        self._view.subtracted_period_edit.blockSignals(True)
         summed = self.string_to_list(self._view.get_summed_periods())
         subtracted = self.string_to_list(self._view.get_subtracted_periods())
 
@@ -97,6 +99,8 @@ class HomeGroupingWidgetPresenter(HomeTabSubWidget):
         self._model.update_periods(summed, subtracted)
 
         self.update_period_edits()
+        self._view.summed_period_edit.blockSignals(False)
+        self._view.subtracted_period_edit.blockSignals(False)
 
     class PairAlphaNotifier(Observable):
 
