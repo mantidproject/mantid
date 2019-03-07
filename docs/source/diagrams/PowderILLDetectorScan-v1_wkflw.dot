@@ -1,4 +1,4 @@
-digraph PowderDiffILLDetScanReduction {
+digraph PowderILLDetectorScan {
   $global_style
 
   subgraph values {
