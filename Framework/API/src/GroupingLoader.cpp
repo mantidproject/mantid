@@ -50,8 +50,9 @@ boost::shared_ptr<Grouping> GroupingLoader::getGroupingFromIDF() const {
   std::string parameterName = "Default grouping file";
   auto loadedGrouping = boost::make_shared<Grouping>();
 
-  // Special case for MUSR, because it has two possible groupings
-  if (m_instrument->getName() == "MUSR") {
+  // Special case for MUSR or CHRONUS, because it has two possible groupings
+  if (m_instrument->getName() == "MUSR" ||
+      m_instrument->getName() == "CHRONUS") {
     parameterName.append(" - " + m_mainFieldDirection);
   }
 

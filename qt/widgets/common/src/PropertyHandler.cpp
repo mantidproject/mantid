@@ -645,6 +645,7 @@ bool PropertyHandler::setParameter(QtProperty *prop) {
     double parValue = m_browser->m_parameterManager->value(prop);
     m_fun->setParameter(parName, parValue);
     m_browser->sendParameterChanged(m_fun.get());
+    m_browser->sendParameterChanged(functionPrefix());
     return true;
   }
   if (m_cf) {

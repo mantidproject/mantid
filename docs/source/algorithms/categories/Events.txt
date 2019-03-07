@@ -1,0 +1,1 @@
+Algorithms for manipulating event based data, including filtering, compressing and sorting event workspaces.

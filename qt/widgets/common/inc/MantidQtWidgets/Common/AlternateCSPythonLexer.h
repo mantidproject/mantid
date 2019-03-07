@@ -10,12 +10,18 @@
 #include <Qsci/qscilexerpython.h>
 
 /**
- * Defines a Pytho lexer with a different colour scheme
+ * Defines a Python lexer with a alternative colour scheme
+ * to the standard one provided by QsciLexerPython.
  */
 class AlternateCSPythonLexer : public QsciLexerPython {
 public:
+  AlternateCSPythonLexer(const QFont &font);
+
   QColor defaultColor(int style) const override;
   QFont defaultFont(int style) const override;
+
+private:
+  QFont m_font;
 };
 
 #endif // MANTIDQT_WIDGETS_ALTERNATECSPYTHONLEXER_H

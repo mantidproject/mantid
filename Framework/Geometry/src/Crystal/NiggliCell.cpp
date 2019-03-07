@@ -219,7 +219,7 @@ bool NiggliCell::MakeNiggliUB(const DblMatrix &UB, DblMatrix &newUB) {
   }
   // next sort the list of linear combinations
   // in order of increasing length
-  std::sort(directions.begin(), directions.end(), V3D::CompareMagnitude);
+  std::sort(directions.begin(), directions.end(), V3D::compareMagnitude);
 
   // next form a list of possible UB matrices
   // using sides from the list of linear

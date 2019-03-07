@@ -25,7 +25,7 @@ class WorkspaceLoaderTest(unittest.TestCase):
         self.project_ext = ".mtdproj"
         ADS.addOrReplace(self.ws1_name, CreateSampleWorkspace(OutputWorkspace=self.ws1_name))
         project_saver = projectsaver.ProjectSaver(self.project_ext)
-        project_saver.save_project(workspace_to_save=[self.ws1_name], directory=self.working_directory)
+        project_saver.save_project(workspace_to_save=[self.ws1_name], file_name=self.working_directory)
 
     def tearDown(self):
         ADS.clear()

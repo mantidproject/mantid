@@ -9,10 +9,10 @@ from __future__ import (absolute_import, division, print_function)
 
 from unittest import TestCase
 
-from mock import Mock, patch
+from mantid.py3compat.mock import Mock, patch
 
 from mantidqt.widgets.embedded_find_replace_dialog.presenter import EmbeddedFindReplaceDialog, SearchDirection
-from mantidqt.widgets.embedded_find_replace_dialog.test.mock_codeeditor import MockCodeEditor
+from mantidqt.utils.testing.mocks.mock_codeeditor import MockCodeEditor
 from mantidqt.widgets.embedded_find_replace_dialog.view import EmbeddedFindReplaceDialogView, FindReplaceOptions
 
 

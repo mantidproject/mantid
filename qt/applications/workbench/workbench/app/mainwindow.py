@@ -10,32 +10,29 @@
 """
 Defines the QMainWindow of the application and the main() entry point.
 """
-from __future__ import (absolute_import, division,
-                        print_function, unicode_literals)
+from __future__ import (absolute_import, division, print_function, unicode_literals)
 
-# std imports
-import argparse  # for command line options
+import argparse
 import atexit
 import importlib
 import os
 import sys
+from functools import partial
 
-# third party imports
-from mantid.kernel import (ConfigService, logger, UsageService,
-                           version_str as mantid_version_str)
 from mantid.api import FrameworkManagerImpl
+from mantid.kernel import (ConfigService, UsageService, logger, version_str as mantid_version_str)
+from workbench.plugins.exception_handler import exception_logger
+from workbench.widgets.settings.presenter import SettingsPresenter
 
-# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------exception_handler.py
 # Constants
 # -----------------------------------------------------------------------------
+
 SYSCHECK_INTERVAL = 50
 ORIGINAL_SYS_EXIT = sys.exit
 ORIGINAL_STDOUT = sys.stdout
 ORIGINAL_STDERR = sys.stderr
 
-# -----------------------------------------------------------------------------
-# Requirements
-# -----------------------------------------------------------------------------
 from workbench import requirements  # noqa
 
 requirements.check_qt()
@@ -60,6 +57,7 @@ plugins.setup_library_paths()
 from workbench.config import APPNAME, CONF, ORG_DOMAIN, ORGANIZATION  # noqa
 from workbench.plotting.globalfiguremanager import GlobalFigureManager  # noqa
 from workbench.app.windowfinder import find_all_windows_that_are_savable  # noqa
+from workbench.projectrecovery.projectrecovery import ProjectRecovery  # noqa
 
 
 # -----------------------------------------------------------------------------
@@ -157,7 +155,6 @@ class MainWindow(QMainWindow):
         # Menus
         self.file_menu = None
         self.file_menu_actions = None
-        self.editor_menu = None
         self.view_menu = None
         self.view_menu_actions = None
         self.interfaces_menu = None
@@ -170,6 +167,7 @@ class MainWindow(QMainWindow):
 
         # Project
         self.project = None
+        self.project_recovery = None
 
     def setup(self):
         # menus must be done first so they can be filled by the
@@ -214,11 +212,15 @@ class MainWindow(QMainWindow):
         self.workspacewidget.register_plugin()
         self.widgets.append(self.workspacewidget)
 
-        # Set up the project object
+        # Set up the project and recovery objects
         self.project = Project(GlobalFigureManager, find_all_windows_that_are_savable)
+        self.project_recovery = ProjectRecovery(globalfiguremanager=GlobalFigureManager,
+                                                multifileinterpreter=self.editor.editors,
+                                                main_window=self)
 
         # uses default configuration as necessary
         self.readSettings(CONF)
+        self.config_updated()
 
         self.setup_layout()
         self.create_actions()
@@ -241,7 +243,6 @@ class MainWindow(QMainWindow):
 
     def create_menus(self):
         self.file_menu = self.menuBar().addMenu("&File")
-        self.editor_menu = self.menuBar().addMenu("&Editor")
         self.view_menu = self.menuBar().addMenu("&View")
         self.interfaces_menu = self.menuBar().addMenu('&Interfaces')
 
@@ -266,11 +267,14 @@ class MainWindow(QMainWindow):
         action_manage_directories = create_action(self, "Manage User Directories",
                                                   on_triggered=self.open_manage_directories)
 
+        action_settings = create_action(self, "Settings", on_triggered=self.open_settings_window)
+
         action_quit = create_action(self, "&Quit", on_triggered=self.close,
                                     shortcut="Ctrl+Q",
                                     shortcut_context=Qt.ApplicationShortcut)
         self.file_menu_actions = [action_open, action_load_project, None, action_save_script, action_save_project,
-                                  action_save_project_as, None, action_manage_directories, None, action_quit]
+                                  action_save_project_as, None, action_settings, None, action_manage_directories, None,
+                                  action_quit]
         # view menu
         action_restore_default = create_action(self, "Restore Default Layout",
                                                on_triggered=self.prep_window_for_reset,
@@ -306,7 +310,8 @@ class MainWindow(QMainWindow):
 
         # list of custom interfaces that are not qt4/qt5 compatible
         GUI_BLACKLIST = ['ISIS_Reflectometry_Old.py',
-                         'Frequency_Domain_Analysis.py',
+                         'Frequency_Domain_Analysis_Old.py',
+                         'Frequency_Domain_Analysis.py'
                          'Elemental_Analysis.py']
 
         # detect the python interfaces
@@ -423,7 +428,10 @@ class MainWindow(QMainWindow):
 
         # Close editors
         if self.editor.app_closing():
-            self.writeSettings(CONF)  # write current window information to global settings object
+            # write out any changes to the mantid config file
+            ConfigService.saveConfig(ConfigService.getUserFilename())
+            # write current window information to global settings object
+            self.writeSettings(CONF)
             # Close all open plots
             # We don't want this at module scope here
             import matplotlib.pyplot as plt  # noqa
@@ -432,6 +440,12 @@ class MainWindow(QMainWindow):
             app = QApplication.instance()
             if app is not None:
                 app.closeAllWindows()
+
+            # Kill the project recovery thread and don't restart should a save be in progress and clear out current
+            # recovery checkpoint as it is closing properly
+            self.project_recovery.stop_recovery_thread()
+            self.project_recovery.closing_workbench = True
+            self.project_recovery.remove_current_pid_folder()
 
             event.accept()
         else:
@@ -461,6 +475,17 @@ class MainWindow(QMainWindow):
 
     def open_manage_directories(self):
         ManageUserDirectories(self).exec_()
+
+    def open_settings_window(self):
+        settings = SettingsPresenter(self)
+        settings.show()
+
+    def config_updated(self):
+        """
+        Updates the widgets that depend on settings from the Workbench Config.
+        """
+        self.editor.load_settings_from_config(CONF)
+        self.project.load_settings_from_config(CONF)
 
     def readSettings(self, settings):
         qapp = QApplication.instance()
@@ -543,9 +568,13 @@ def start_workbench(app, command_line_options):
     """Given an application instance create the MainWindow,
     show it and start the main event loop
     """
+
     # The ordering here is very delicate. Test thoroughly when
     # changing anything!
     main_window = MainWindow()
+    # decorates the excepthook callback with the reference to the main window
+    # this is used in case the user wants to terminate the workbench from the error window shown
+    sys.excepthook = partial(exception_logger, main_window)
 
     # Load matplotlib as early as possible and set our defaults
     # Setup our custom backend and monkey patch in custom current figure manager
@@ -569,11 +598,18 @@ def start_workbench(app, command_line_options):
     if command_line_options.script is not None:
         main_window.editor.open_file_in_new_tab(command_line_options.script)
         if command_line_options.execute:
-            main_window.editor.execute_current()  # TODO use the result as an exit code
+            main_window.editor.execute_current_async()  # TODO use the result as an exit code
 
         if command_line_options.quit:
             main_window.close()
             return 0
+
+    # Project Recovey on startup
+    main_window.project_recovery.repair_checkpoints()
+    if main_window.project_recovery.check_for_recover_checkpoint():
+        main_window.project_recovery.attempt_recovery()
+    else:
+        main_window.project_recovery.start_recovery_thread()
 
     # lift-off!
     return app.exec_()

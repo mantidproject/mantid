@@ -66,7 +66,7 @@ class LoadRunWidgetIncrementDecrementSingleFileModeTest(unittest.TestCase):
     def load_single_run(self):
         self._loaded_run = 1234
         self._loaded_filename = "EMU00001234.nxs"
-        self._loaded_workspace = [1, 2, 3]
+        self._loaded_workspace = {'MainFieldDirection': 'transverse'}
 
         self.load_utils_patcher.load_workspace_from_filename = mock.Mock(
             return_value=(self._loaded_workspace, self._loaded_run, self._loaded_filename))
@@ -120,14 +120,14 @@ class LoadRunWidgetIncrementDecrementSingleFileModeTest(unittest.TestCase):
     def test_that_decrement_run_loads_the_data_correctly(self):
         new_run = self._loaded_run - 1
         new_filename = "EMU00001233.nxs"
-        self.load_utils_patcher.load_workspace_from_filename = mock.Mock(return_value=([1], new_run, new_filename))
+        self.load_utils_patcher.load_workspace_from_filename = mock.Mock(return_value=({'MainFieldDirection': 'transverse'}, new_run, new_filename))
 
         self.presenter.handle_decrement_run()
         self.wait_for_thread(self.presenter._load_thread)
 
         self.assertEqual(self.presenter.filenames, [self._loaded_filename, new_filename])
         self.assertEqual(self.presenter.runs, [[self._loaded_run], [new_run]])
-        self.assertEqual(self.presenter.workspaces, [self._loaded_workspace, [1]])
+        self.assertEqual(self.presenter.workspaces, [self._loaded_workspace, {'MainFieldDirection': 'transverse'}])
 
         self.assertEqual(self.view.get_run_edit_text(), '1233-1234')
 
@@ -135,14 +135,14 @@ class LoadRunWidgetIncrementDecrementSingleFileModeTest(unittest.TestCase):
     def test_that_increment_run_loads_the_data_correctly(self):
         new_run = self._loaded_run + 1
         new_filename = "EMU00001235.nxs"
-        self.load_utils_patcher.load_workspace_from_filename = mock.Mock(return_value=([1], new_run, new_filename))
+        self.load_utils_patcher.load_workspace_from_filename = mock.Mock(return_value=({'MainFieldDirection': 'transverse'}, new_run, new_filename))
 
         self.presenter.handle_increment_run()
         self.wait_for_thread(self.presenter._load_thread)
 
         self.assertEqual(self.presenter.filenames, [self._loaded_filename, new_filename])
         self.assertEqual(self.presenter.runs, [[self._loaded_run], [new_run]])
-        self.assertEqual(self.presenter.workspaces, [self._loaded_workspace, [1]])
+        self.assertEqual(self.presenter.workspaces, [self._loaded_workspace, {'MainFieldDirection': 'transverse'}])
 
         self.assertEqual(self.view.get_run_edit_text(), '1234-1235')
 

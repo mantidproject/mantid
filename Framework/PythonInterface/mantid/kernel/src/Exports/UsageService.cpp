@@ -67,6 +67,8 @@ void export_UsageService() {
       .def("registerFeatureUsage", &UsageServiceImpl::registerFeatureUsage,
            (arg("self"), arg("type"), arg("name"), arg("internal")),
            "Registers the use of a feature in Mantid.")
+      .def("getStartTime", &UsageServiceImpl::getStartTime, (arg("self")),
+           "Returns the time at which Mantid was started")
       .def("Instance", instance,
            return_value_policy<reference_existing_object>(),
            "Returns a reference to the UsageService")

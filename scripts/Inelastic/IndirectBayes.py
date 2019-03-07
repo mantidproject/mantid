@@ -86,7 +86,7 @@ def ResNormRun(vname,rname,erange,nbin,Plot='None',Save=False):
 
     array_len = 4096                                    # length of Fortran array
     CheckXrange(erange,'Energy')
-    CheckAnalysers(vname,rname)
+    CheckAnalysersOrEFixed(vname,rname)
     nvan,ntc = CheckHistZero(vname)
     theta = GetThetaQ(vname)[0]
     efix = getEfixed(vname)

@@ -53,6 +53,8 @@ void export_DateAndTime() {
            "Since 1990-01-01T00:00")
       .def("totalNanoseconds", &DateAndTime::totalNanoseconds, arg("self"),
            "Since 1990-01-01T00:00")
+      .def("toISO8601String", &DateAndTime::toISO8601String, arg("self"),
+           "Converts the time into ISO8601Standard and returns the string")
       .def("setToMinimum", &DateAndTime::setToMinimum, arg("self"))
       .def("to_datetime64", &Mantid::PythonInterface::Converters::to_datetime64,
            arg("self"),
