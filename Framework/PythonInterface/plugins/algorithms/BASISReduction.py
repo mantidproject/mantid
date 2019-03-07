@@ -28,29 +28,29 @@ DEFAULT_CONFIG_DIR = config['instrumentDefinition.directory']
 # pylint: disable=line-too-long
 REFLECTIONS_DICT = {
     'silicon_111': {'name': 'silicon_111',
-                   'energy_bins': [-150, 0.4, 500],  # micro-eV
-                   'q_bins': [0.3, 0.2, 1.9],  # inverse Angst
-                   'banks': 'bank1,bank3,bank4',
-                   'mask_file': 'BASIS_Mask_default_111.xml',
-                   'default_energy': 2.0826,  # meV
-                   'vanadium_bins': [-0.0034, 0.068, 0.0034],
-                   'vanadium_wav_range': [6.20, 6.33]},
+                    'energy_bins': [-150, 0.4, 500],  # micro-eV
+                    'q_bins': [0.3, 0.2, 1.9],  # inverse Angst
+                    'banks': 'bank1,bank3,bank4',
+                    'mask_file': 'BASIS_Mask_default_111.xml',
+                    'default_energy': 2.0826,  # meV
+                    'vanadium_bins': [-0.0034, 0.068, 0.0034],
+                    'vanadium_wav_range': [6.20, 6.33]},
     'silicon_333': {'name': 'silicon_333',
-                   'energy_bins': [-1500, 3.2, 5000],
-                   'q_bins': [0.9, 0.2, 5.7],
-                   'banks': 'bank1,bank3,bank4',
-                   'mask_file': 'BASIS_Mask_default_333.xml',
-                   'default_energy': 18.7434,
-                   'vanadium_bins': [-0.0333, 0.0666, 0.0333],
-                   'vanadium_wav_range': [2.080, 2.108]},
+                    'energy_bins': [-1500, 3.2, 5000],
+                    'q_bins': [0.9, 0.2, 5.7],
+                    'banks': 'bank1,bank3,bank4',
+                    'mask_file': 'BASIS_Mask_default_333.xml',
+                    'default_energy': 18.7434,
+                    'vanadium_bins': [-0.0333, 0.0666, 0.0333],
+                    'vanadium_wav_range': [2.080, 2.108]},
     'silicon_311': {'name': 'silicon_311',
-                   'energy_bins': [-740, 1.6, 740],
-                   'q_bins': [0.5, 0.2, 3.7],
-                   'banks': 'bank2',
-                   'mask_file': 'BASIS_Mask_default_311.xml',
-                   'default_energy': 7.6368,  # meV
-                   'vanadium_bins': [-0.015, 0.030, 0.015],
-                   'vanadium_wav_range': [3.263, 3.295]}
+                    'energy_bins': [-740, 1.6, 740],
+                    'q_bins': [0.5, 0.2, 3.7],
+                    'banks': 'bank2',
+                    'mask_file': 'BASIS_Mask_default_311.xml',
+                    'default_energy': 7.6368,  # meV
+                    'vanadium_bins': [-0.015, 0.030, 0.015],
+                    'vanadium_wav_range': [3.263, 3.295]}
 }
 
 # pylint: disable=too-many-instance-attributes
@@ -683,6 +683,7 @@ class BASISReduction(PythonAlgorithm):
         mtd[ws_name].getRun().addProperty('reflParmFile',
                                           os.path.basename(parm_file), True)
         return parm_file
+
 
 # Register algorithm with Mantid.
 AlgorithmFactory.subscribe(BASISReduction)
