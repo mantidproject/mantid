@@ -10,7 +10,7 @@ from __future__ import (absolute_import, division, print_function)
 
 from mantid.simpleapi import mtd
 from testhelpers import (assertRaisesNothing, create_algorithm)
-import numpy
+#import numpy
 import unittest
 
 
@@ -97,7 +97,7 @@ class ReflectometryILLAutoProcessTest(unittest.TestCase):
         }
         alg = create_algorithm('ReflectometryILLAutoProcess', **args)
         assertRaisesNothing(self, alg.execute)
-        out = mtd['outWS']
+        #out = mtd['outWS']
         #self.assertEquals(out.spectrumInfo().signedTwoTheta(0), 2.*30.2*numpy.pi/180.)
         mtd.clear()
 
