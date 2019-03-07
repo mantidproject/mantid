@@ -114,4 +114,9 @@ New
 
 - Scripts added that produce the same results as the ISIS engineering GUI (supports ENGINX and IMAT), this is to allow use with ISIS autoreduction.
 
+Bugfixes
+########
+
+- Fixed a crash in the gui caused by running a calibration without setting a calibration directory.
+
 :ref:`Release 4.0.0 <v4.0.0>`
