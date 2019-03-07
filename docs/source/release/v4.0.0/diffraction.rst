@@ -27,33 +27,19 @@ Improvements
 - :ref:`LoadILLDiffraction <algm-LoadILLDiffraction>` will now correctly resolve for the scan type and drive the detector to the offset corrected :math:`2theta_0` for D20 detector scans.
 - :ref:`PowderDiffILLDetScanReduction <algm-PowderDiffILLDetScanReduction>` will never merge the detector scans at the raw level even if they are supplied with + operator; it will process them separately and merge at the end.
 
-Bugfixes
-########
-- multiple_scattering flag is now optional for Polaris focus when absorb_correction is true
-
 Single Crystal Diffraction
 --------------------------
 
 New Algorithms
 ##############
 
-- New algorithm :ref:`PredictSatellitePeaks <algm-PredictSatellitePeaks>` to predict satellite peaks using modulation vectors and maximum order of satellite from PeaksWorkspace or range of wavelength and DSpacing.
-
-- New algorithm :ref:`IndexPeaksWithSatellites <algm-IndexPeaksWithSatellites>` to index peaks with satellites and set modulation vectors and maximum order of satellite from input values.
-
 - The new algorithm :ref:`MDNorm <algm-MDNorm>` can be used to calculate cross section for single crystal diffraction measurements.
 
 Improvements
 ############
-- :ref:`IntegrateEllipsoids <algm-IntegrateEllipsoids>` will integrate peaks using the indexed peaks, modulation vectors and maximum order of satellite from PeaksWorkspace
-
-- :ref:`LoadIsawPeaks <algm-LoadIsawPeaks>` will load satellite peaks using the order of each satellite by the hkl of the nuclear peak and the mnp of the satellite peak.
-
-- :ref:`SaveIsawPeaks <algm-SaveIsawPeaks>` will save satellite peaks using the order of each satellite by the hkl of the nuclear peak and the mnp of the satellite peak.
 
 - :ref:`IntegratePeaksProfileFitting <algm-IntegratePeaksProfileFitting>` now supports MaNDi, TOPAZ, and CORELLI. Other instruments can easily be added as well.  In addition, the algorithm can now automatically generate a strong peaks library is one is not provided.  Peakshapes will be learned to improve initial guesses as the strong peak library is generated.
 - :ref:`MDNormSCD <algm-MDNormSCD>` now can handle merged MD workspaces.
-
 - :ref:`StartLiveData <algm-StartLiveData>` will load "live"
   data streaming from TOPAZ new Adara data server.
 - :ref:`IntegratePeaksMD <algm-IntegratePeaksMD>` with Cylinder=True now has improved fits using BackToBackExponential and IkedaCarpenterPV functions.
@@ -65,10 +51,6 @@ Improvements
 - :ref:`SetCrystalLocation <algm-SetCrystalLocation>` is a new algorithm to set the sample location in events workspaces.
 - :ref:`OptimizeCrystalPlacementByRun <algm-OptimizeCrystalPlacementByRun>` is new algorithm to update the sample position for each run in a peaks workspace.
 - :ref:`SingleCrystalDiffuseReduction <algm-SingleCrystalDiffuseReduction>` has been update to use :ref:`MDNorm <algm-MDNorm>` instead of :ref:`MDNormSCD <algm-MDNormSCD>` internally. Additionally more options have been added to apply either a calibration with :ref:`ApplyCalibration <algm-ApplyCalibration>` or to copy an Instrument with :ref:`CopyInstrumentParameters <algm-CopyInstrumentParameters>` (these were also added to :ref:`ConvertMultipleRunsToSingleCrystalMD <algm-ConvertMultipleRunsToSingleCrystalMD>`); options have been added that allow you to specify either a UB matrix file or omega offset separately for each run; by default the SolidAngle and Flux workspaces will not be deleted and will be reused the next time the algorithm is used. Incompatible changes include changing of parameters names for projection, binning and symmetry operations to match :ref:`MDNorm <algm-MDNorm>`; symmetry operations will now use the symmetry of the point group instead of space group and will no longer accept space group number to avoid ambiguity of which point group to use; binning parameter has been changed match :ref:`MDNorm <algm-MDNorm>` where the bin width is specified instead of the number of bins.
-
-- :ref:`IndexPeaks <algm-IndexPeaks>` now will also index satellite peaks using modulation vectors and maximum order of satellite from PeaksWorkspace.
-
-- :ref:`FindUBUsingIndexedPeaks <algm-FindUBUsingIndexedPeaks>` finds UB matrix using the indexed peaks, modulation vectors and maximum order of satellite from PeaksWorkspace.
 
 Bugfixes
 ########
