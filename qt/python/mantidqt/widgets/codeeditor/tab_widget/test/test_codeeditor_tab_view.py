@@ -23,6 +23,7 @@ class MockMultiFileInterpreter(QWidget):
         self.abort_current = StrictMock()
         self.close_tab = StrictMock()
         self.execute_current_async = StrictMock()
+        self.execute_async = StrictMock()
         self.abort_current = StrictMock()
         self.toggle_find_replace_dialog = StrictMock()
         self.toggle_comment_current = StrictMock()
