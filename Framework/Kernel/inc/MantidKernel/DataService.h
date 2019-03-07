@@ -287,7 +287,7 @@ public:
     lock.unlock();
     notificationCenter.postNotification(new PreDeleteNotification(name, data));
     data.reset(); // DataService now has no references to the object
-    g_log.information("Data Object '" + name + "' deleted from data service.");
+    g_log.debug("Data Object '" + name + "' deleted from data service.");
     notificationCenter.postNotification(new PostDeleteNotification(name));
   }
 

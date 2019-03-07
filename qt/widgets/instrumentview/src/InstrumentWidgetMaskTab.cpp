@@ -1387,7 +1387,8 @@ bool InstrumentWidgetMaskTab::saveMaskViewToProject(
       return false; // no mask workspace was found
 
     // save mask to file inside project folder
-    auto alg = AlgorithmManager::Instance().create("SaveMask", -1);
+    auto alg = AlgorithmManager::Instance().createUnmanaged("SaveMask", -1);
+    alg->setChild(true);
     alg->setProperty("InputWorkspace",
                      boost::dynamic_pointer_cast<Workspace>(outputWS));
     alg->setPropertyValue("OutputFile", fileName);
