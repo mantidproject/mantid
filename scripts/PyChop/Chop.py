@@ -469,4 +469,4 @@ def sam0(sx, sy, sz, isam):
 
 # Sample type: 0==flat plate, 1==ellipse, 2==annulus, 3==sphere, 4==solid cylinder
 sample_shape_scaling_factors = collections.defaultdict(lambda: 1./12)
-sample_shape_scaling_factors[2] = np.pi/16.
+sample_shape_scaling_factors[2] = 1./8
