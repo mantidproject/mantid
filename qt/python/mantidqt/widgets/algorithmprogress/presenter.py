@@ -6,6 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import absolute_import, print_function
 
+from qtpy.QtCore import Qt
+
 from .model import AlgorithmProgressModel
 from .presenter_base import AlgorithmProgressPresenterBase
 
@@ -20,6 +22,8 @@ class AlgorithmProgressPresenter(AlgorithmProgressPresenterBase):
         self.model = AlgorithmProgressModel()
         self.model.add_presenter(self)
         self.algorithm = None
+        self.need_update_gui.connect(self.update_gui, Qt.QueuedConnection)
+        self.need_update_progress_bar.connect(self.set_progress_bar, Qt.QueuedConnection)
 
     def update_progress_bar(self, algorithm, progress, message):
         """

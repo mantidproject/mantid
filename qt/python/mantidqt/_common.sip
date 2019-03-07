@@ -91,6 +91,16 @@ public:
   void setSource(const QString &source);
 };
 
+
+class QuickAlgorithmProgress : QWidget {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/QuickAlgorithmProgress.h"
+%End
+
+public:
+    QuickAlgorithmProgress(QWidget *parent /TransferThis/ = 0);
+};
+
 class ScriptEditor : QWidget {
 %TypeHeaderCode
 #include "MantidQtWidgets/Common/ScriptEditor.h"
