@@ -133,7 +133,7 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
     def PyExec(self):
         from IndirectReductionCommon import (load_files,
                                              get_multi_frame_rebin,
-                                             identify_bad_detectors,
+                                             get_detectors_to_mask,
                                              unwrap_monitor,
                                              process_monitor_efficiency,
                                              scale_monitor,
@@ -169,7 +169,7 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
             rebin_string_2, num_bins = get_multi_frame_rebin(c_ws_name,
                                                              self._rebin_string)
 
-            masked_detectors = identify_bad_detectors(workspaces[0])
+            masked_detectors = get_detectors_to_mask(workspaces)
 
             # Process workspaces
             for ws_name in workspaces:

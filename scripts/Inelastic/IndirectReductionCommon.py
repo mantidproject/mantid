@@ -391,6 +391,16 @@ def sum_chopped_runs(workspace_names):
 # -------------------------------------------------------------------------------
 
 
+def get_detectors_to_mask(workspace_names):
+    masked_detectors = []
+    for workspace_name in workspace_names:
+        for bad_detector in identify_bad_detectors(workspace_name):
+            if bad_detector not in masked_detectors:
+                masked_detectors.append(bad_detector)
+
+    return sorted(masked_detectors)
+
+
 def identify_bad_detectors(workspace_name):
     """
     Identify detectors which should be masked
