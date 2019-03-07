@@ -15,6 +15,8 @@ Installation
 ------------
 Changes
 #######
+- Can now build workbench without Qt4 installed via `-DENABLE_MANTIDPLOT=FALSE -DENABLE_WORKBENCH=TRUE` CMake flags.
+
 The following changes have been made _only_ on Windows, bringing it in line with Mantid's installation naming on Linux.
 
 - The Mantid Nightly build will now be installed in a different directory by default, to avoid overwriting the release Mantid installation.
