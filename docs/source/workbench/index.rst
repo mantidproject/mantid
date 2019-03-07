@@ -43,12 +43,12 @@ Legend
 .. role:: dark-red
 .. role:: pink
 
-- :light-red:`Workspace Tree Widget` (Page)
-- :green:`Algorithm List Widget` (Page)
-- :dark-blue:`Multi-Tab Integrated Editor` (Page)
-- :dark-cyan:`Results Log/Message` (Page)
-- :purple:`Window Options` (Page)
-- :black:`Plot List Widget` (Page)
-- :dark-red:`IPython Console` (Page)
+- :light-red:`Workspace Tree Widget` (:ref:`WorkbenchWorkspaceWidget`)
+- :green:`Algorithm List Widget` (:ref:`WorkbenchAlgorithmList`)
+- :dark-blue:`Multi-Tab Integrated Editor` (:ref:`WorkbenchMultiTabInterpreter`)
+- :dark-cyan:`Results Log/Message` (:ref:`WorkbenchResultsLog`)
+- :purple:`Window Options` (:ref:`WorkbenchWindowOptions`)
+- :black:`Plot List Widget` (:ref:`WorkbenchPlotListWidget`)
+- :dark-red:`IPython Console` (:ref:`WorkbenchIPythonConsole`)
 - :pink:`Plot Window` (:ref:`WorkbenchPlotWindow`)
 
