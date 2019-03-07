@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "EnggDiffractionPresenter.h"
 #include "EnggDiffractionPresWorker.h"
-#include "EnggDiffractionViewQtGUI.h"
 #include "EnggVanadiumCorrectionsModel.h"
 #include "IEnggDiffractionView.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -28,9 +27,6 @@
 #include <Poco/Path.h>
 
 #include <QThread>
-
-// Delete these
-#include <QMetaObject>
 
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
