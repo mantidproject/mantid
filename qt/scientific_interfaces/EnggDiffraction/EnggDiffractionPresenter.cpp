@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "EnggDiffractionPresenter.h"
 #include "EnggDiffractionPresWorker.h"
+#include "EnggDiffractionViewQtGUI.h"
 #include "EnggVanadiumCorrectionsModel.h"
 #include "IEnggDiffractionView.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -27,6 +28,9 @@
 #include <Poco/Path.h>
 
 #include <QThread>
+
+// Delete these
+#include <QMetaObject>
 
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
@@ -1068,9 +1072,9 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
                                        const std::string &outFilename,
                                        const std::string &specNos) {
   if (cs.m_inputDirCalib.empty()) {
-    m_view->userWarning("No calibration directory selected",
-                        "Please select a calibration directory in Settings. "
-                        "This will be used to cache Vanadium calibration data");
+    g_log.warning("No calibration directory selected. Please select a "
+                  "calibration directory in Settings. This will be used to "
+                  "cache Vanadium calibration data");
     m_calibFinishedOK = false;
     return;
   }
