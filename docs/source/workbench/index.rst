@@ -4,6 +4,12 @@
 Workbench
 =========
 
+.. image:: ../images/Workbench/Workbench.png
+    :height: 225
+    :width: 400
+    :alt: Workbench
+    :align: right
+
 TO BE RE-WRITTEN BY NICK OR MARTYN
 Mantid Workbench is the newest major release of Mantid. The big changes in this release is that Workbench will be
 released alongside, MantidPlot. Workbench is a completely new GUI, built from the ground up, it should be more stable
@@ -17,38 +23,54 @@ Most of what users currently use in Mantid Plot is or will be incorporated into 
 limited to, user group interfaces, scripting window (fully integrated into the main window), workspace display,
 algorithm widgets, and plotting.
 
+
+Workbench Windows
+-----------------
+One of the immediate things that is noticeable about workbench, is all the windows integrated into the main window.
+These can be dragged away and out of the main window docks. Examples can be found here:
+:ref:`WorkbenchDraggableWindows`.
+
+Workspace Toolbox
+-----------------
+
+# Investigate using class directives to force this to line up properly
+
+.. image:: ../images/Workbench/Workspaces/WorkspaceWidget.png
+    :height: 200
+    :width: 150
+    :alt: Workspace Toolbox
+    :align: left
+
+The :ref:`WorkbenchWorkspaceToolbox` is a key part of workbench and if a you are familiar with MantidPlot it function
+very similarly. From here you can see all of the :ref:`Workspace`s currently available to the User. Here you can load,
+save, group, delete, sort, plot, and more a breakdown of these features can be found here:
+:ref:`WorkbenchWorkspaceToolbox`.
+
+Algorithm Toolbox
+-----------------
+
+Script Window
+-------------
+
+Message Window
+--------------
+
+Main Window Menu
+----------------
+
+Plot Toolbox
+------------
+
+IPython Console
+---------------
+
+Plot Window
+-----------
+
+Overall Workbench Diagram
+--------------------------
+
+Here is a diagram that shows where different parts of the workbench are on the default layout.
+
 .. image:: ../images/Workbench/WorkbenchDiagram.png
-
-Legend
-------
-.. raw:: html
-
-    <style>
-        .light-red {color:#FF0000}
-        .green {color:#00CC00}
-        .dark-blue {color:#0000FF}
-        .dark-cyan {color:#009999}
-        .purple {color:#7F00FF}
-        .black {color:#000000}
-        .dark-red {color:#990000}
-        .pink {color:#FF99FF}
-    </style>
-
-.. role:: light-red
-.. role:: green
-.. role:: dark-blue
-.. role:: dark-cyan
-.. role:: purple
-.. role:: black
-.. role:: dark-red
-.. role:: pink
-
-- :light-red:`Workspace Tree Widget` (:ref:`WorkbenchWorkspaceWidget`)
-- :green:`Algorithm List Widget` (:ref:`WorkbenchAlgorithmList`)
-- :dark-blue:`Multi-Tab Integrated Editor` (:ref:`WorkbenchMultiTabInterpreter`)
-- :dark-cyan:`Results Log/Message` (:ref:`WorkbenchResultsLog`)
-- :purple:`Window Options` (:ref:`WorkbenchWindowOptions`)
-- :black:`Plot List Widget` (:ref:`WorkbenchPlotListWidget`)
-- :dark-red:`IPython Console` (:ref:`WorkbenchIPythonConsole`)
-- :pink:`Plot Window` (:ref:`WorkbenchPlotWindow`)
 

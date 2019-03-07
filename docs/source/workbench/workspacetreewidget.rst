@@ -1,4 +1,4 @@
-.. _WorkbenchWorkspaceWidget:
+.. _WorkbenchWorkspaceToolbox:
 
 ================
 Workspace Widget
