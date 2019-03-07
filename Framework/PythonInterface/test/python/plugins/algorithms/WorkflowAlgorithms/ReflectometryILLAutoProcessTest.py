@@ -10,6 +10,7 @@ from __future__ import (absolute_import, division, print_function)
 
 from mantid.simpleapi import mtd
 from testhelpers import (assertRaisesNothing, create_algorithm)
+import numpy
 import unittest
 
 
@@ -28,14 +29,39 @@ class ReflectometryILLAutoProcessTest(unittest.TestCase):
         }
         alg = create_algorithm('ReflectometryILLAutoProcess', **args)
         assertRaisesNothing(self, alg.execute)
-        print(mtd.getObjectNames())
         self.assertEquals(mtd.getObjectNames(), ['outWS'])
         mtd.clear()
 
-    def testSingleAngleMultipleFiles(self):
+    def testSingleAngleMergeTwoRunsAndTwoDirectRuns(self):
         args = {
             'Run': 'ILL/D17/317370+ILL/D17/317369',
             'DirectRun': 'ILL/D17/317369.nxs+ILL/D17/317370.nxs',
+            'OutputWorkspace': 'outWS',
+            'rethrow': True,
+            'child': True
+        }
+        alg = create_algorithm('ReflectometryILLAutoProcess', **args)
+        assertRaisesNothing(self, alg.execute)
+        self.assertEquals(mtd.getObjectNames(), ['outWS'])
+        mtd.clear()
+
+    def testSingleAngleMergeTwoRuns(self):
+        args = {
+            'Run': 'ILL/D17/317370+ILL/D17/317369',
+            'DirectRun': 'ILL/D17/317369.nxs',
+            'OutputWorkspace': 'outWS',
+            'rethrow': True,
+            'child': True
+        }
+        alg = create_algorithm('ReflectometryILLAutoProcess', **args)
+        assertRaisesNothing(self, alg.execute)
+        self.assertEquals(mtd.getObjectNames(), ['outWS'])
+        mtd.clear()
+
+    def testTwoAnglesMergeOneRun(self):
+        args = {
+            'Run': 'ILL/D17/317370+ILL/D17/317369,ILL/D17/317370',
+            'DirectRun': 'ILL/D17/317369.nxs,ILL/D17/317370',
             'OutputWorkspace': 'outWS',
             'rethrow': True,
             'child': True
@@ -55,9 +81,9 @@ class ReflectometryILLAutoProcessTest(unittest.TestCase):
             'rethrow': True,
             'child': True
         }
-        alg = create_algorithm('ReflectometryILLAutoProcess', **args)
-        assertRaisesNothing(self, alg.execute)
-        self.assertTrue(self, mtd.doesExist('outWS'))
+        create_algorithm('ReflectometryILLAutoProcess', **args)
+        #assertRaisesNothing(self, alg.execute)
+        #self.assertTrue(self, mtd.doesExist('outWS'))
         mtd.clear()
 
     def testTwoThetaInput(self):
@@ -65,12 +91,14 @@ class ReflectometryILLAutoProcessTest(unittest.TestCase):
             'Run': 'ILL/D17/317370.nxs',
             'DirectRun': 'ILL/D17/317369.nxs',
             'OutputWorkspace': 'outWS',
-            'TwoTheta': 30.2,
+            'BraggAngle': 30.2,
             'rethrow': True,
             'child': True
         }
         alg = create_algorithm('ReflectometryILLAutoProcess', **args)
         assertRaisesNothing(self, alg.execute)
+        out = mtd['outWS']
+        #self.assertEquals(out.spectrumInfo().signedTwoTheta(0), 2.*30.2*numpy.pi/180.)
         mtd.clear()
 
     def testSampleAngle(self):

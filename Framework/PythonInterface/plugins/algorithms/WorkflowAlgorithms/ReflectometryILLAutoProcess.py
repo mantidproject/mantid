@@ -53,6 +53,7 @@ import numpy
 class PropAutoProcess(object):
     ANGLE_OPTION = 'AngleOption'
     BKG_METHOD_DIRECT = 'DirectFlatBackground'
+    BRAGG_ANGLE = 'BraggAngle'
     DB = 'DirectRun'
     EFFICIENCY_FILE = 'EfficiencyFile'
     END_WS_INDEX_DIRECT = 'DirectFitEndWorkspaceIndex'
@@ -173,10 +174,17 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         )
         self.setPropertyGroup(PropAutoProcess.ANGLE_OPTION, '')
         preProcessGen = 'ReflectometryILLPreprocess, common properties'
+        self.declareProperty(
+            FloatArrayProperty(
+                PropAutoProcess.BRAGG_ANGLE,
+                values=[Property.EMPTY_DBL]
+            ),
+            doc='A user-defined Bragg angle{}'.format(listOrSingleNumber)
+        )
+        self.setPropertyGroup(PropAutoProcess.BRAGG_ANGLE, preProcessGen)
         self.copyProperties(
             'ReflectometryILLPreprocess',
             [
-                Prop.TWO_THETA,
                 Prop.LINE_POSITION,
                 Prop.SUBALG_LOGGING,
                 Prop.CLEANUP,
@@ -185,7 +193,6 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
                 Prop.FLUX_NORM_METHOD
             ]
         )
-        self.setPropertyGroup(Prop.TWO_THETA, preProcessGen)
         self.setPropertyGroup(Prop.LINE_POSITION, preProcessGen)
         self.setPropertyGroup(Prop.SUBALG_LOGGING, preProcessGen)
         self.setPropertyGroup(Prop.CLEANUP, preProcessGen)
@@ -456,9 +463,9 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
     def validateInputs(self):
         """Return a dictionary containing issues found in properties."""
         issues = dict()
-        directRuns = self.getProperty(PropAutoProcess.DB).value
-        reflectedRuns = self.getProperty(PropAutoProcess.RB).value
-        if len(directRuns[0]) != len(reflectedRuns[0]):
+        DB = self.getProperty(PropAutoProcess.DB).value
+        RB = self.getProperty(PropAutoProcess.RB).value
+        if len(DB) != len(RB):
             issues[PropAutoProcess.RB] = "The same number of direct runs and reflected runs must be given."
         return issues
 
@@ -471,15 +478,15 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
             return value[angle]
         else:
             raise RuntimeError(
-                'The number of entries for {} must correspond to the number of reflected beams'.format(Prop.SUM_TYPE)
+                'The number of entries for {} must correspond to the number of reflected beams'.format(propertyName)
             )
 
     def twoThetaFromSampleAngle(self, run):
         """Return the two theta angle in degrees of the sample angle."""
         import h5py
-        # Need to check whether the unit is degree
+        # Need to still check whether the unit is degree
         if isinstance(run, list):
-            run = run[0]  # not sure
+            run = run[0]
         with h5py.File(run, "r") as nexus:
             if nexus.get('entry0/instrument/SAN') is not None:
                 return 2. * float(numpy.array(nexus.get('entry0/instrument/SAN/value'), dtype='float'))
@@ -506,6 +513,20 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
             return '+'.join(beamInput)
         return beamInput
 
+    def twoTheta(self, run, angle):
+        """Return the TwoTheta scattering angle depending on user input options."""
+        if self.getProperty(PropAutoProcess.BRAGG_ANGLE).isDefault:
+            if self.getValue(PropAutoProcess.ANGLE_OPTION, angle) == Angle.SAN:
+                twoT = self.twoThetaFromSampleAngle(run)
+                self.log().notice('Using SAN angle: {} degree'.format(twoT / 2.))
+                return twoT
+            else:
+                twoT = 2. * self.getValue(PropAutoProcess.BRAGG_ANGLE, angle)
+                self.log().notice('Using Bragg angle : {} degree'.format(twoT / 2.))
+                return twoT
+        else:
+            return Property.EMPTY_DBL
+
     def finalize(self):
         """Remove all intermediate workspace, if required."""
         if self.getPropertyValue(Prop.CLEANUP) == common.WSCleanup.ON:
@@ -521,9 +542,8 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         rb = self.getProperty(PropAutoProcess.RB).value
         db = self.getProperty(PropAutoProcess.DB).value
 
-        self._progress = Progress(self, start=0.0, end=1.0, nreports=len(rb))
+        workflowProgress = Progress(self, start=0.0, end=1.0, nreports=len(rb))
 
-        twoTheta = self.getProperty(Prop.TWO_THETA).value
         linePosition = self.getProperty(Prop.LINE_POSITION).value
         slitNorm = self.getProperty(Prop.SLIT_NORM).value
         if self.getProperty(PropAutoProcess.EFFICIENCY_FILE).value == "":
@@ -533,9 +553,8 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         toStitch = []
 
         for angle in range(len(rb)):
-            if self.getValue(PropAutoProcess.ANGLE_OPTION, angle) == Angle.SAN and \
-                    self.getProperty(Prop.TWO_THETA).isDefault:
-                twoTheta = self.twoThetaFromSampleAngle(rb[angle])
+
+            twoTheta = self.twoTheta(rb[angle], angle)
 
             runDB = self.mtdName(db[angle])
             runRB = self.mtdName(rb[angle])
@@ -547,18 +566,17 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
                                 int(self.getValue(PropAutoProcess.HIGH_FOREGROUND_HALF_WIDTH_DIRECT, angle))]
             wavelengthRange = [float(self.getValue(PropAutoProcess.WAVELENGTH_LOWER, angle)),
                                float(self.getValue(PropAutoProcess.WAVELENGTH_UPPER, angle))]
-            # Direct beam already in ADS?
-            workspaces = mtd.getObjectNames()
 
             directBeamInput = self.angleOrMergeRuns(db[angle])
             reflectedBeamInput = self.angleOrMergeRuns(rb[angle])
 
-            if not 'direct-{}'.format(runDB) in workspaces:
+            # Direct beam already in ADS?
+            workspaces = mtd.getObjectNames()
+            if '__direct-{}'.format(runDB) not in workspaces:
+                self.log().notice('Direct beam __direct-{} not cached in AnalysisDataService.'.format(runDB))
                 # Direct beam pre-processing
                 ReflectometryILLPreprocess(
                     Run=directBeamInput,
-                    LinePosition=linePosition,
-                    TwoTheta=twoTheta,
                     OutputWorkspace='__direct-{}'.format(runDB),
                     ForegroundHalfWidth=halfWidthsDirect,
                     SlitNormalisation=slitNorm,
@@ -595,8 +613,8 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
                 ReflectometryILLPreprocess(
                     Run=reflectedBeamInput,
                     OutputWorkspace='__reflected-{}'.format(runRB),
-                    LinePosition=linePosition,
                     TwoTheta=twoTheta,
+                    LinePosition=linePosition,
                     DirectLineWorkspace='__direct-{}'.format(runDB),
                     ForegroundHalfWidth=halfWidthsReflected,
                     SlitNormalisation=slitNorm,
@@ -626,8 +644,8 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
                 for run in reflectedBeamInput:
                     ReflectometryILLPreprocess(
                         Run=run,
-                        LinePosition=linePosition,
                         TwoTheta=twoTheta,
+                        OutputWorkspace='__{}'.format(run),
                         DirectLineWorkspace='__direct-{}'.format(runDB),
                         ForegroundHalfWidth=halfWidthsReflected,
                         SlitNormalisation=self.slitNorm,
@@ -675,7 +693,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
                 Cleanup=cleanup,
             )
             toStitch.append(outWS)
-            self._progress.report()
+            workflowProgress.report()
 
         wsPrefix = self.getPropertyValue(Prop.OUTPUT_WS)
         if len(rb) > 1:
@@ -693,11 +711,12 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
                 InputWorkspace='{}'.format(toStitch[0]),
                 OutputWorkspace='{}'.format(wsPrefix),
             )
-        if self.getProperty(PropAutoProcess.SCALE_FACTOR).value != 1.:
+        scaleFactor = self.getProperty(PropAutoProcess.SCALE_FACTOR).value
+        if scaleFactor != 1.:
             Scale(
                 InputWorkspace='{}'.format(wsPrefix),
                 OutputWorkspace='{}'.format(wsPrefix),
-                Factor=self.scaling,
+                Factor=scaleFactor,
             )
         self.setProperty(Prop.OUTPUT_WS, wsPrefix)
         self.finalize()
