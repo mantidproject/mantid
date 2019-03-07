@@ -342,7 +342,7 @@ public:
       }
     }
     lock.unlock();
-    g_log.information("Data Object '" + oldName + "' renamed to '" + newName +
+    g_log.debug("Data Object '" + oldName + "' renamed to '" + newName +
                       "'");
     notificationCenter.postNotification(
         new RenameNotification(oldName, newName));
