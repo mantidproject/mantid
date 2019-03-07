@@ -11,7 +11,8 @@ from mantid.api import mtd, AlgorithmFactory, DistributedDataProcessorAlgorithm,
 from mantid.kernel import Direction
 from mantid.simpleapi import AlignAndFocusPowder, CompressEvents, ConvertDiffCal, ConvertUnits, CopyLogs, \
     CreateCacheFilename, DeleteWorkspace, DetermineChunking, Divide, EditInstrumentGeometry, FilterBadPulses, \
-    LoadDiffCal, LoadNexusProcessed, PDDetermineCharacterizations, Plus, RemoveLogs, RenameWorkspace, SaveNexusProcessed
+    LoadDiffCal, LoadNexusProcessed, PDDetermineCharacterizations, Plus, RebinToWorkspace, RemoveLogs, \
+    RenameWorkspace, SaveNexusProcessed
 import os
 import numpy as np
 
@@ -258,7 +259,7 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
         newprop = 'files_to_sum={}'.format(filenames_str)
         return self.__getCacheName('summed_'+wsname, additional_props=[newprop])
 
-    def __processFile(self, filename, file_prog_start, determineCharacterizations, createUnfocused):
+    def __processFile(self, filename, file_prog_start, determineCharacterizations, createUnfocused):  # noqa: C902
         chunks = determineChunking(filename, self.chunkSize)
         numSteps = 6  # for better progress reporting - 6 steps per chunk
         if createUnfocused:
@@ -342,8 +343,16 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
             if self.absorption is not None and len(str(self.absorption)) > 0:
                 ConvertUnits(InputWorkspace=chunkname, OutputWorkspace=chunkname,
                              Target='Wavelength', EMode='Elastic')
-                Divide(LHSWorkspace=chunkname, RHSWorkspace=self.absorption, OutputWorkspace=chunkname,
+                # rebin the absorption correction to match the binning of the inputs if in histogram mode
+                # EventWorkspace will compare the wavelength of each individual event
+                absWksp = self.absorption
+                if mtd[chunkname].id() != 'EventWorkspace':
+                    absWksp = '__absWkspRebinned'
+                    RebinToWorkspace(WorkspaceToRebin=self.absorption, WorkspaceToMatch=chunkname, OutputWorkspace=absWksp)
+                Divide(LHSWorkspace=chunkname, RHSWorkspace=absWksp, OutputWorkspace=chunkname,
                        startProgress=prog_start, endProgress=prog_start+prog_per_chunk_step)
+                if absWksp != self.absorption:  # clean up
+                    DeleteWorkspace(Workspace=absWksp)
                 ConvertUnits(InputWorkspace=chunkname, OutputWorkspace=chunkname,
                              Target='TOF', EMode='Elastic')
             prog_start += prog_per_chunk_step

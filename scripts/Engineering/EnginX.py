@@ -114,8 +114,7 @@ def run(ceria_run, do_cal, do_van, van_run, calibration_directory, calibration_g
     """
 
     # check whether creating a vanadium is required or requested
-    vanadium = _gen_filename(van_run)
-    if not os.path.isfile(vanadium) or do_van:
+    if (not os.path.isfile(_get_van_names(van_run, calibration_directory)[0])) or do_van:
         create_vanadium(van_run, calibration_directory)
 
     # find the file names of calibration files that would be created by this run
