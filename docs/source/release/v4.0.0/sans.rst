@@ -5,6 +5,9 @@ SANS Changes
 .. contents:: Table of Contents
    :local:
 
+Algorithms
+----------
+
 New
 ###
 * Added manual saving functionality to the new GUI.
