@@ -259,6 +259,7 @@ class WorkspaceTreeWidget : QWidget {
 public:
   WorkspaceTreeWidget(MantidDisplayBase *mdb /Transfer/, bool viewOnly=false,
                       QWidget *parent /TransferThis/ = nullptr);
+  std::vector<std::string> getSelectedWorkspaceNames() const;
 };
 
 // Implementation to override context menu

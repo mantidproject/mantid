@@ -165,7 +165,6 @@ class SANSReductionCoreTest(unittest.TestCase):
 
         # Construct the final state
         state = user_file_director.construct()
-        state.adjustment.show_transmission = True
 
         # Load the sample workspaces
         workspace, workspace_monitor, transmission_workspace, direct_workspace = self._load_workspace(state)

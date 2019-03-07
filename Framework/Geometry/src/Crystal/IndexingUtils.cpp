@@ -132,7 +132,7 @@ double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
     // default mid index, or use the index
     // specified by the base_peak parameter
     if (base_index < 0 || base_index >= static_cast<int>(q_vectors.size())) {
-      std::sort(shifted_qs.begin(), shifted_qs.end(), V3D::CompareMagnitude);
+      std::sort(shifted_qs.begin(), shifted_qs.end(), V3D::compareMagnitude);
     } else {
       mid_ind = base_index;
     }
@@ -150,7 +150,7 @@ double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
       sorted_qs.push_back(q_vector);
   }
 
-  std::sort(sorted_qs.begin(), sorted_qs.end(), V3D::CompareMagnitude);
+  std::sort(sorted_qs.begin(), sorted_qs.end(), V3D::compareMagnitude);
 
   if (num_initial > sorted_qs.size())
     num_initial = sorted_qs.size();
@@ -329,7 +329,7 @@ double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
     // default mid index, or use the index
     // specified by the base_peak parameter
     if (base_index < 0 || base_index >= static_cast<int>(q_vectors.size())) {
-      std::sort(shifted_qs.begin(), shifted_qs.end(), V3D::CompareMagnitude);
+      std::sort(shifted_qs.begin(), shifted_qs.end(), V3D::compareMagnitude);
     } else {
       mid_ind = base_index;
     }
@@ -347,7 +347,7 @@ double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
       sorted_qs.push_back(q_vector);
   }
 
-  std::sort(sorted_qs.begin(), sorted_qs.end(), V3D::CompareMagnitude);
+  std::sort(sorted_qs.begin(), sorted_qs.end(), V3D::compareMagnitude);
 
   if (num_initial > sorted_qs.size())
     num_initial = sorted_qs.size();
@@ -366,7 +366,7 @@ double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
         "Find_UB(): Could not find at least three possible lattice directions");
   }
 
-  std::sort(directions.begin(), directions.end(), V3D::CompareMagnitude);
+  std::sort(directions.begin(), directions.end(), V3D::compareMagnitude);
 
   if (!FormUB_From_abc_Vectors(UB, directions, 0, min_d, max_d)) {
     throw std::runtime_error(
@@ -516,7 +516,7 @@ double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
         "Find_UB(): Could not find enough a,b,c vectors");
   }
 
-  std::sort(directions.begin(), directions.end(), V3D::CompareMagnitude);
+  std::sort(directions.begin(), directions.end(), V3D::compareMagnitude);
 
   double min_vol = min_d * min_d * min_d / 4.0;
 
@@ -1646,7 +1646,7 @@ size_t IndexingUtils::FFTScanFor_Directions(std::vector<V3D> &directions,
       temp_dirs.push_back(current_dir);
   }
 
-  std::sort(temp_dirs.begin(), temp_dirs.end(), V3D::CompareMagnitude);
+  std::sort(temp_dirs.begin(), temp_dirs.end(), V3D::compareMagnitude);
 
   // discard duplicates:
   double len_tol = 0.1; // 10% tolerance for lengths

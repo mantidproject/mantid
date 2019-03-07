@@ -328,14 +328,14 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
         """Sum the foreground region into a single histogram using the coherent method."""
         foreground = self._foregroundIndices(ws)
         sumIndices = [i for i in range(foreground[0], foreground[2] + 1)]
-        beamPosIndex = foreground[1]
+        linePosition = ws.run().getProperty(common.SampleLogs.LINE_POSITION).value
         isFlatSample = not ws.run().getProperty('beam_stats.bent_sample').value
         sumWSName = self._names.withSuffix('summed_in_Q')
         sumWS = ReflectometrySumInQ(
             InputWorkspace=ws,
             OutputWorkspace=sumWSName,
             InputWorkspaceIndexSet=sumIndices,
-            BeamCentre=beamPosIndex,
+            BeamCentre=linePosition,
             FlatSample=isFlatSample,
             EnableLogging=self._subalgLogging)
         self._cleanup.cleanup(ws)

@@ -10,6 +10,8 @@ from Muon.GUI.Common.home_runinfo_widget.home_runinfo_widget_view import HomeRun
 from Muon.GUI.Common.home_runinfo_widget.home_runinfo_widget_presenter import HomeRunInfoWidgetPresenter
 from Muon.GUI.Common.home_runinfo_widget.home_runinfo_widget_model import HomeRunInfoWidgetModel
 from Muon.GUI.Common.muon_data_context import MuonDataContext
+from Muon.GUI.Common.muon_load_data import MuonLoadData
+
 from Muon.GUI.Common import mock_widget
 from mantid.api import FileFinder
 import Muon.GUI.Common.utilities.load_utils as load_utils
@@ -27,7 +29,9 @@ class HomeTabRunInfoPresenterTest(unittest.TestCase):
     def setUp(self):
         self._qapp = mock_widget.mockQapp()
         self.obj = QtGui.QWidget()
-        self.context = MuonDataContext()
+        self.loaded_data = MuonLoadData()
+        self.context = MuonDataContext(self.loaded_data)
+        self.context.instrument = 'MUSR'
         self.view = HomeRunInfoWidgetView(self.obj)
         self.model = HomeRunInfoWidgetModel(self.context)
         self.presenter = HomeRunInfoWidgetPresenter(self.view, self.model)
@@ -41,7 +45,8 @@ class HomeTabRunInfoPresenterTest(unittest.TestCase):
         file_path = FileFinder.findRuns('MUSR00022725.nxs')[0]
         ws, run, filename = load_utils.load_workspace_from_filename(file_path)
         self.context._loaded_data.remove_data(run=run)
-        self.context._loaded_data.add_data(run=run, workspace=ws, filename=filename)
+        self.context._loaded_data.add_data(run=[run], workspace=ws, filename=filename, instrument='MUSR')
+        self.context.current_runs = [[22725]]
         self.context.update_current_data()
         test_pair = MuonPair('test_pair', 'top', 'bottom', alpha=0.75)
         self.context.add_pair(pair=test_pair)

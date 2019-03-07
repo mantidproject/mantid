@@ -89,7 +89,8 @@ ReadMaterial::validateInputs(const MaterialParameters &params) {
 void ReadMaterial::setMaterialParameters(const MaterialParameters &params) {
   setMaterial(params.chemicalSymbol, params.atomicNumber, params.massNumber);
   setNumberDensity(params.sampleMassDensity, params.sampleNumberDensity,
-                   params.zParameter, params.unitCellVolume);
+                   params.numberDensityUnit, params.zParameter,
+                   params.unitCellVolume);
   setScatteringInfo(params.coherentXSection, params.incoherentXSection,
                     params.attenuationXSection, params.scatteringXSection);
 }
@@ -113,9 +114,10 @@ void ReadMaterial::setMaterial(const std::string chemicalSymbol,
   }
 }
 
-void ReadMaterial::setNumberDensity(const double rho_m, const double rho,
-                                    const double zParameter,
-                                    const double unitCellVolume) {
+void ReadMaterial::setNumberDensity(
+    const double rho_m, const double rho,
+    Kernel::MaterialBuilder::NumberDensityUnit rhoUnit, const double zParameter,
+    const double unitCellVolume) {
   if (!isEmpty(rho_m))
     builder.setMassDensity(rho_m);
   if (isEmpty(rho)) {
@@ -125,6 +127,7 @@ void ReadMaterial::setNumberDensity(const double rho_m, const double rho,
     }
   } else {
     builder.setNumberDensity(rho);
+    builder.setNumberDensityUnit(rhoUnit);
   }
 }
 

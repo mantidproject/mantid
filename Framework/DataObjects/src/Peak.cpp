@@ -455,7 +455,12 @@ double Peak::getDSpacing() const {
   V3D beamDir = samplePos - sourcePos;
   V3D detDir = detPos - samplePos;
 
-  double two_theta = detDir.angle(beamDir);
+  double two_theta;
+  try {
+    two_theta = detDir.angle(beamDir);
+  } catch (std::runtime_error &) {
+    two_theta = 0.;
+  }
 
   // In general case (2*pi/d)^2=k_i^2+k_f^2-2*k_i*k_f*cos(two_theta)
   // E_i,f=k_i,f^2*hbar^2/(2 m)
