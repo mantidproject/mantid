@@ -116,6 +116,8 @@ void EQSANSCorrectFrame::exec() {
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
+  // Set bin boundaries to absolute minimum and maximum
+  inputWS->resetAllXToSingleBin();
 }
 
 } // namespace Algorithms
