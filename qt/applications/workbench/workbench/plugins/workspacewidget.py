@@ -130,7 +130,7 @@ class WorkspaceWidget(PluginWidget):
                                    "'{}':\n{}.\n".format(ws.name(), exception))
             else:
                 logger.warning("Could not show instrument for workspace '{}':"
-                               "\nNo instrument view available.\n"
+                               "\nNo instrument available.\n"
                                "".format(ws.name()))
 
     def _do_show_data(self, names):
