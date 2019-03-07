@@ -70,7 +70,8 @@ public:
 private:
   /// Create an output workspace
   API::MatrixWorkspace_sptr
-  createOutputWorkspace(API::MatrixWorkspace_const_sptr, const size_t);
+  createOutputWorkspace(API::MatrixWorkspace_const_sptr, const size_t,
+                        const std::vector<double> &);
 
   /// Initialisation code
   void init() override;

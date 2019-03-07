@@ -254,30 +254,31 @@ void Q1DWeighted::exec() {
             err = EIn[j];
           w /= nSubPixels * nSubPixels * err * err;
         }
-        PARALLEL_CRITICAL(iqnorm) /* Write to shared memory - must protect */
-        {
+        PARALLEL_CRITICAL(iqnorm) {
           // Fill in the data for full azimuthal integral
           intensities[0][j][k] += YIn[j] * w;
           errors[0][j][k] += w * w * EIn[j] * EIn[j];
           normalisation[0][j][k] += w;
+        }
 
-          if (nWedges != 0) {
-            // we do need to loop over all the wedges, since there is no
-            // restriction for those; they can also overlap
-            // that is the same pixel can simultaneously be in many wedges
-            for (size_t iw = 0; iw < nWedges; ++iw) {
-              double centerAngle =
-                  static_cast<double>(iw) * M_PI / static_cast<double>(nWedges);
-              if (asymmWedges) {
-                centerAngle *= 2;
-              }
-              centerAngle += deg2rad * wedgeOffset;
-              const V3D subPix = V3D(position.X(), position.Y(), 0.0);
-              const double angle = fabs(
-                  subPix.angle(V3D(cos(centerAngle), sin(centerAngle), 0.0)));
-              if (angle < deg2rad * wedgeAngle * 0.5 ||
-                  (!asymmWedges &&
-                   fabs(M_PI - angle) < deg2rad * wedgeAngle * 0.5)) {
+        if (nWedges != 0) {
+          // we do need to loop over all the wedges, since there is no
+          // restriction for those; they can also overlap
+          // that is the same pixel can simultaneously be in many wedges
+          for (size_t iw = 0; iw < nWedges; ++iw) {
+            double centerAngle =
+                static_cast<double>(iw) * M_PI / static_cast<double>(nWedges);
+            if (asymmWedges) {
+              centerAngle *= 2;
+            }
+            centerAngle += deg2rad * wedgeOffset;
+            const V3D subPix = V3D(position.X(), position.Y(), 0.0);
+            const double angle = fabs(
+                subPix.angle(V3D(cos(centerAngle), sin(centerAngle), 0.0)));
+            if (angle < deg2rad * wedgeAngle * 0.5 ||
+                (!asymmWedges &&
+                 fabs(M_PI - angle) < deg2rad * wedgeAngle * 0.5)) {
+              PARALLEL_CRITICAL(iqnorm_wedges) {
                 // first index 0 is the full azimuth, need to offset +1
                 intensities[iw + 1][j][k] += YIn[j] * w;
                 errors[iw + 1][j][k] += w * w * EIn[j] * EIn[j];
@@ -293,72 +294,24 @@ void Q1DWeighted::exec() {
   }
   PARALLEL_CHECK_INTERUPT_REGION
 
-  MatrixWorkspace_sptr outputWS = createOutputWorkspace(inputWS, nQ);
-
-  // Set the X vector for the output workspace
-  outputWS->setBinEdges(0, qBinEdges);
-  auto &YOut = outputWS->mutableY(0);
-  auto &EOut = outputWS->mutableE(0);
-
-  std::vector<double> normLambda(nQ, 0.0);
-
-  for (size_t il = 0; il < nLambda; ++il) {
-    for (size_t iq = 0; iq < nQ; ++iq) {
-      const double norm = normalisation[0][il][iq];
-      if (norm != 0.) {
-        YOut[iq] += intensities[0][il][iq] / norm;
-        EOut[iq] += errors[0][il][iq] / (norm * norm);
-        normLambda[iq] += 1.;
-      }
-    }
-  }
-
-  for (size_t i = 0; i < nQ; ++i) {
-    YOut[i] /= normLambda[i];
-    EOut[i] = sqrt(EOut[i]) / normLambda[i];
-  }
-
+  MatrixWorkspace_sptr outputWS = createOutputWorkspace(inputWS, nQ, qBinEdges);
   setProperty("OutputWorkspace", outputWS);
 
+  // Create workspace group that holds output workspaces for wedges
+  auto wsgroup = boost::make_shared<WorkspaceGroup>();
+
   if (nWedges != 0) {
-
-    // Create workspace group that holds output workspaces
-    auto wsgroup = boost::make_shared<WorkspaceGroup>();
-
     // Create wedge workspaces
     for (size_t iw = 0; iw < nWedges; ++iw) {
       const double centerAngle = static_cast<double>(iw) * wedgeFullAngle /
                                      static_cast<double>(nWedges) +
                                  wedgeOffset;
-      MatrixWorkspace_sptr wedgeWs = createOutputWorkspace(inputWS, nQ);
-      wedgeWs->setBinEdges(0, qBinEdges);
+      MatrixWorkspace_sptr wedgeWs =
+          createOutputWorkspace(inputWS, nQ, qBinEdges);
       wedgeWs->mutableRun().addProperty("wedge_angle", centerAngle, "degrees",
                                         true);
-
-      auto &YOut = wedgeWs->mutableY(0);
-      auto &EOut = wedgeWs->mutableE(0);
-
-      std::vector<double> normLambda(nQ, 0.0);
-
-      for (size_t il = 0; il < nLambda; ++il) {
-        for (size_t iq = 0; iq < nQ; ++iq) {
-          const double norm = normalisation[iw + 1][il][iq];
-          if (norm != 0.) {
-            YOut[iq] += intensities[iw + 1][il][iq] / norm;
-            EOut[iq] += errors[iw + 1][il][iq] / (norm * norm);
-            normLambda[iq] += 1.;
-          }
-        }
-      }
-
-      for (size_t i = 0; i < nQ; ++i) {
-        YOut[i] /= normLambda[i];
-        EOut[i] = sqrt(EOut[i]) / normLambda[i];
-      }
-
       wsgroup->addWorkspace(wedgeWs);
     }
-
     // set the output property
     std::string outputWSGroupName = getPropertyValue("WedgeWorkspace");
     if (outputWSGroupName.empty()) {
@@ -368,16 +321,56 @@ void Q1DWeighted::exec() {
     }
     setProperty("WedgeWorkspace", wsgroup);
   }
+
+  for (size_t iout = 0; iout < nWedges + 1; ++iout) {
+
+    auto ws = (iout == 0) ? outputWS
+                          : boost::dynamic_pointer_cast<MatrixWorkspace>(
+                                wsgroup->getItem(iout - 1));
+    auto &YOut = ws->mutableY(0);
+    auto &EOut = ws->mutableE(0);
+
+    std::vector<double> normLambda(nQ, 0.0);
+
+    for (size_t il = 0; il < nLambda; ++il) {
+      PARALLEL_FOR_IF(Kernel::threadSafe(*ws))
+      for (int iq = 0; iq < static_cast<int>(nQ); ++iq) {
+        PARALLEL_START_INTERUPT_REGION
+        const double norm = normalisation[iout][il][iq];
+        if (norm != 0.) {
+          YOut[iq] += intensities[iout][il][iq] / norm;
+          EOut[iq] += errors[iout][il][iq] / (norm * norm);
+          normLambda[iq] += 1.;
+        }
+        PARALLEL_END_INTERUPT_REGION
+      }
+      PARALLEL_CHECK_INTERUPT_REGION
+    }
+
+    for (size_t i = 0; i < nQ; ++i) {
+      YOut[i] /= normLambda[i];
+      EOut[i] = sqrt(EOut[i]) / normLambda[i];
+    }
+  }
 }
 
+/**
+ * @brief Q1DWeighted::createOutputWorkspace
+ * @param parent : the parent workspace
+ * @param nBins : number of bins in the histograms
+ * @param binEdges : bin edges
+ * @return output I(Q) workspace
+ */
 MatrixWorkspace_sptr
 Q1DWeighted::createOutputWorkspace(MatrixWorkspace_const_sptr parent,
-                                   const size_t nBins) {
+                                   const size_t nBins,
+                                   const std::vector<double> &binEdges) {
 
   MatrixWorkspace_sptr outputWS =
       WorkspaceFactory::Instance().create(parent, 1, nBins + 1, nBins);
   outputWS->getAxis(0)->unit() =
       UnitFactory::Instance().create("MomentumTransfer");
+  outputWS->setBinEdges(0, binEdges);
   outputWS->setYUnitLabel("1/cm");
   outputWS->setDistribution(true);
   return outputWS;
