@@ -52,6 +52,8 @@ class GroupingTabPresenter(object):
         self.pairing_table_widget.guessAlphaNotifier.add_subscriber(self.guessAlphaObserver)
         self.message_observer = GroupingTabPresenter.MessageObserver(self)
         self.gui_variables_observer = GroupingTabPresenter.GuiVariablesChangedObserver(self)
+        self.enable_observer = GroupingTabPresenter.EnableObserver(self)
+        self.disable_observer = GroupingTabPresenter.DisableObserver(self)
 
     def show(self):
         self._view.show()
@@ -249,6 +251,22 @@ class GroupingTabPresenter(object):
 
         def update(self, observable, arg):
             self.outer._view.display_warning_box(arg)
+
+    class EnableObserver(Observer):
+        def __init__(self, outer):
+            Observer.__init__(self)
+            self.outer = outer
+
+        def update(self, observable, arg):
+            self.outer.enable_editing()
+
+    class DisableObserver(Observer):
+        def __init__(self, outer):
+            Observer.__init__(self)
+            self.outer = outer
+
+        def update(self, observable, arg):
+            self.outer.disable_editing()
 
     class DisableEditingNotifier(Observable):
 
