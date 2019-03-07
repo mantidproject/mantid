@@ -208,7 +208,7 @@ fi" )
 set ( ERROR_CMD "ErrorReporter/error_dialog_app.py --exitcode=\$?" )
 
 ##### Local dev version
-set ( PYTHON_ARGS "-Wd" )  # turn on debugging
+set ( PYTHON_ARGS "-Wdefault::DeprecationWarning" )
 if ( MAKE_VATES )
   set ( PARAVIEW_PYTHON_PATHS ":${ParaView_DIR}/lib:${ParaView_DIR}/lib/site-packages" )
 else ()
