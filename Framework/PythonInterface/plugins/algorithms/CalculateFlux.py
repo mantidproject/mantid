@@ -43,11 +43,11 @@ class CalculateFlux(PythonAlgorithm):
     def PyExec(self):
         input_ws = self.getProperty('InputWorkspace').value
         wavelengths = input_ws.extractX().flatten()
-        min = np.min(wavelengths)
-        max = np.max(wavelengths)
+        min_wavelength = np.min(wavelengths)
+        max_wavelength = np.max(wavelengths)
         blocksize = input_ws.blocksize()
-        width = (max-min) / blocksize
-        params = [min, width, max]
+        width = (max_wavelength-min_wavelength) / blocksize
+        params = [min_wavelength, width, max_wavelength]
         rebinned = Rebin(InputWorkspace=input_ws, StoreInADS=False, Params=params)
         radius = self.getProperty('BeamRadius').value
         shapeXML = '<infinite-cylinder id="flux"><centre x="0.0" y="0.0" z="0.0"/><axis x="0.0" y="0.0" z="1.0"/>' \

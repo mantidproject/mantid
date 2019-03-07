@@ -118,10 +118,12 @@ void Q1DWeighted::exec() {
                         binParams, qBinEdges)) -
                     1;
 
+  const auto &spectrumInfo = inputWS->spectrumInfo();
+
   // number of spectra in the input
   const size_t nSpec = inputWS->getNumberHistograms();
-  const V3D sourcePos = inputWS->getInstrument()->getSource()->getPos();
-  const V3D samplePos = inputWS->getInstrument()->getSample()->getPos();
+  const V3D sourcePos = spectrumInfo.sourcePosition();
+  const V3D samplePos = spectrumInfo.samplePosition();
   // Beam line axis, to compute scattering angle
   const V3D beamLine = samplePos - sourcePos;
 
@@ -142,7 +144,7 @@ void Q1DWeighted::exec() {
 
   // get the number of wavelength bins in the input, note that the input is a
   // histogram
-  const size_t nLambda = inputWS->readX(0).size() - 1;
+  const size_t nLambda = inputWS->readY(0).size();
 
   // we store everything in 3D arrays
   // index 1 : is for the wedges + the one for the full integration,
@@ -159,7 +161,6 @@ void Q1DWeighted::exec() {
   decltype(intensities) errors(intensities);
   decltype(intensities) normalisation(intensities);
 
-  const auto &spectrumInfo = inputWS->spectrumInfo();
   const auto up =
       inputWS->getInstrument()->getReferenceFrame()->vecPointingUp();
 
@@ -303,7 +304,7 @@ void Q1DWeighted::exec() {
 
   for (size_t il = 0; il < nLambda; ++il) {
     for (size_t iq = 0; iq < nQ; ++iq) {
-      const double &norm = normalisation[0][il][iq];
+      const double norm = normalisation[0][il][iq];
       if (norm != 0.) {
         YOut[iq] += intensities[0][il][iq] / norm;
         EOut[iq] += errors[0][il][iq] / (norm * norm);
@@ -341,7 +342,7 @@ void Q1DWeighted::exec() {
 
       for (size_t il = 0; il < nLambda; ++il) {
         for (size_t iq = 0; iq < nQ; ++iq) {
-          const double &norm = normalisation[iw + 1][il][iq];
+          const double norm = normalisation[iw + 1][il][iq];
           if (norm != 0.) {
             YOut[iq] += intensities[iw + 1][il][iq] / norm;
             EOut[iq] += errors[iw + 1][il][iq] / (norm * norm);

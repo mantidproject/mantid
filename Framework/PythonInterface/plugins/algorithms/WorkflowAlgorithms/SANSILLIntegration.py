@@ -153,7 +153,9 @@ class SANSILLIntegration(PythonAlgorithm):
         self.setPropertyGroup('IQxQyLogBinning', 'I(Qx,Qy) Options')
 
         self.declareProperty(name='BinMaskingCriteria', defaultValue='',
-                             doc='Choose to mask bins (TOF mode); for example to discard high and low lambda ranges.')
+                             doc='Criteria to mask bins, used for TOF mode,'
+                                 ' for example to discard high and low lambda ranges;'
+                                 'see MaskBinsIf algorithm for details.')
 
     def PyExec(self):
         self._input_ws = self.getPropertyValue('InputWorkspace')
