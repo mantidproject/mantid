@@ -680,24 +680,18 @@ void ISISEnergyTransfer::plotRaw() {
   auto extension = rawFile.right(rawFile.length() - pos);
   QFileInfo rawFileInfo(rawFile);
   std::string name = rawFileInfo.baseName().toStdString();
+  auto const instName =
+      getInstrumentConfiguration()->getInstrumentName().toStdString();
 
   IAlgorithm_sptr loadAlg = AlgorithmManager::Instance().create("Load");
   loadAlg->initialize();
   loadAlg->setProperty("Filename", rawFile.toStdString());
   loadAlg->setProperty("OutputWorkspace", name);
-  loadAlg->setProperty("LoadLogFiles", false);
-  if (extension.compare(".nxs") == 0) {
-    int64_t detectorMin =
-        static_cast<int64_t>(m_uiForm.spPlotTimeSpecMin->value());
-    int64_t detectorMax =
-        static_cast<int64_t>(m_uiForm.spPlotTimeSpecMax->value());
-    loadAlg->setProperty("SpectrumMin", detectorMin);
-    loadAlg->setProperty("SpectrumMax", detectorMax);
-  } else {
+  if (instName != "TOSCA") {
+    loadAlg->setProperty("LoadLogFiles", false);
     loadAlg->setProperty("SpectrumMin", detectorMin);
     loadAlg->setProperty("SpectrumMax", detectorMax);
   }
-
   loadAlg->execute();
 
   if (m_uiForm.ckBackgroundRemoval->isChecked()) {
