@@ -916,12 +916,3 @@ if ( WIN32 AND ENABLE_MANTIDPLOT)
                                ${CMAKE_CURRENT_BINARY_DIR}/${QT_CONF}
                                ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/${QT_CONF} )
 endif()
-
-if ( WIN32 AND ENABLE_WORKBENCH)
-  set ( QT_CONF qt.conf )
-  configure_file ( qt.conf.template ${CMAKE_CURRENT_BINARY_DIR}/${QT_CONF} @ONLY )
-  add_custom_command ( TARGET MantidQtWidgetsCommonQt5 POST_BUILD
-                       COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different
-                               ${CMAKE_CURRENT_BINARY_DIR}/${QT_CONF}
-                               ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/${QT_CONF} )
-endif()
