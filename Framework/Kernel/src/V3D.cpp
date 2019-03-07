@@ -529,14 +529,17 @@ int V3D::maxCoeff() {
   Calculates the absolute value.
   @return The absolute value
 */
-V3D V3D::absoluteValue() const { return V3D(fabs(m_pt[0]), fabs(m_pt[1]), fabs(m_pt[2])); }
+V3D V3D::absoluteValue() const {
+  return V3D(fabs(m_pt[0]), fabs(m_pt[1]), fabs(m_pt[2]));
+}
 
 /**
   Calculates the error of the HKL to compare with tolerance
   @return The error
 */
 double V3D::hklError() const {
-  return fabs(m_pt[0] - std::round(m_pt[0])) + fabs(m_pt[1] - std::round(m_pt[1])) +
+  return fabs(m_pt[0] - std::round(m_pt[0])) +
+         fabs(m_pt[1] - std::round(m_pt[1])) +
          fabs(m_pt[2] - std::round(m_pt[2]));
 }
 
