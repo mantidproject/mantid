@@ -25,8 +25,9 @@ from scipy.interpolate import interp1d
 import mantid.api
 import mantid.kernel
 from mantid.plots.helperfunctions import get_axes_labels, get_bins, get_data_uneven_flag, get_distribution, \
-    get_matrix_2d_data, get_md_data1d, get_md_data2d_bin_bounds, get_md_data2d_bin_centers, get_normalization, \
-    get_sample_log, get_spectrum, get_uneven_data, get_wksp_index_dist_and_label
+    get_matrix_2d_ragged, get_matrix_2d_data, get_md_data1d, get_md_data2d_bin_bounds, \
+    get_md_data2d_bin_centers, get_normalization, get_sample_log, get_spectrum, get_uneven_data, \
+    get_wksp_index_dist_and_label
 
 # Used for initializing searches of max, min values
 _LARGEST, _SMALLEST = float(sys.maxsize), -sys.maxsize
