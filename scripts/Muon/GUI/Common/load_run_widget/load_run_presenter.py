@@ -110,8 +110,10 @@ class LoadRunWidgetPresenter(object):
                       for new_run in self.run_list if not self._model._loaded_data_store.get_data(run=[new_run],
                                                                                                   instrument=
                                                                                                   self._model._context.instrument)]
-
-        self.load_runs(file_names)
+        if file_names:
+            self.load_runs(file_names)
+        else:
+            self.on_loading_finished()
     # ------------------------------------------------------------------------------------------------------------------
     # Loading from current run button
     # ------------------------------------------------------------------------------------------------------------------
@@ -226,14 +228,14 @@ class LoadRunWidgetPresenter(object):
             self.run_list = [self._model._loaded_data_store.get_latest_data()['run']][0]
             self._model.current_run = self.run_list
 
+        run_list = [[run] for run in self.run_list if self._model._loaded_data_store.get_data(run=[run])]
+        self._model._context.current_runs = run_list
+
         if self._load_multiple_runs and self._multiple_file_mode == "Co-Add":
             run_list_to_add = [run for run in self.run_list if self._model._loaded_data_store.get_data(run=[run])]
             run_list = [[run for run in self.run_list if self._model._loaded_data_store.get_data(run=[run])]]
             load_utils.combine_loaded_runs(self._model, run_list_to_add)
-        else:
-            run_list = [[run] for run in self.run_list if self._model._loaded_data_store.get_data(run=[run])]
-
-        self._model._context.current_runs = run_list
+            self._model._context.current_runs = run_list
 
         self.update_view_from_model(run_list)
         self._view.notify_loading_finished()

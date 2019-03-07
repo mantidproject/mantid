@@ -8,11 +8,19 @@
 #include "MantidAPI/Run.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/DataService.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "Poco/NumberParser.h"
+
+#include <boost/lexical_cast.hpp>
+#include <boost/make_shared.hpp>
+#include <boost/regex.hpp>
+#include <boost/shared_array.hpp>
+#include <boost/shared_ptr.hpp>
 
 namespace Mantid {
 namespace WorkflowAlgorithms {
@@ -91,36 +99,48 @@ void getDefaultBeamCenter(API::MatrixWorkspace_sptr dataWS, double &pixel_x,
   getPixelFromCoordinate(0.0, 0.0, dataWS, pixel_x, pixel_y);
 }
 
+/*
+ * Get the source to sample distance (ssd)
+ * If "Header/source_distance exists", ssd is this
+ * otherwise get the guides distance (based on the number of guides used),
+ * defined in instrument parameters file as "aperture-distances"
+ * and sums "Header/sample_aperture_to_flange"
+ */
 double getSourceToSampleDistance(API::MatrixWorkspace_sptr dataWS) {
-  const int nguides =
-      dataWS->run().getPropertyValueAsType<int>("number-of-guides");
 
-  std::vector<std::string> pars =
-      dataWS->getInstrument()->getStringParameter("aperture-distances");
-  if (pars.empty())
-    throw Kernel::Exception::InstrumentDefinitionError(
-        "Unable to find [aperture-distances] instrument parameter");
+  double sourceToSampleDistance;
 
-  double SSD = 0;
-  Mantid::Kernel::StringTokenizer tok(
-      pars[0], ",", Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
-  if (tok.count() > 0 && tok.count() < 10 && nguides >= 0 && nguides < 9) {
-    const std::string distance_as_string = tok[8 - nguides];
-    if (!Poco::NumberParser::tryParseFloat(distance_as_string, SSD))
+  std::vector<double> parsDouble =
+      dataWS->getInstrument()->getNumberParameter("Header_source_distance");
+  if (!parsDouble.empty()) {
+    // First let's try to get source_distance first:
+    sourceToSampleDistance = parsDouble[0] *= 1000; // convert to mm
+  } else {
+    const int nGuides =
+        dataWS->run().getPropertyValueAsType<int>("Motor_Positions_nguides");
+    // aperture-distances: array from the instrument parameters
+    std::vector<std::string> parsString =
+        dataWS->getInstrument()->getStringParameter("aperture-distances");
+    if (parsString.empty())
       throw Kernel::Exception::InstrumentDefinitionError(
-          "Bad value for source-to-sample distance");
-  } else
-    throw Kernel::Exception::InstrumentDefinitionError(
-        "Unable to get source-to-sample distance");
+          "Unable to find [aperture-distances] instrument parameter");
+    std::string guidesDistances = parsString[0];
 
-  // Check for an offset
-  if (dataWS->getInstrument()->hasParameter("source-distance-offset")) {
-    const double offset =
-        readInstrumentParameter("source-distance-offset", dataWS);
-    SSD += offset;
+    std::vector<std::string> guidesDistancesSplit;
+    boost::split(guidesDistancesSplit, guidesDistances,
+                 boost::is_any_of("\t ,"), boost::token_compress_on);
+    sourceToSampleDistance =
+        boost::lexical_cast<double>(guidesDistancesSplit[nGuides]);
+
+    double sourceToSampleDistanceOffset =
+        dataWS->run().getPropertyValueAsType<double>(
+            "Header_sample_aperture_to_flange");
+
+    sourceToSampleDistance -= sourceToSampleDistanceOffset;
   }
-  return SSD;
+  return sourceToSampleDistance;
 }
+
 } // namespace HFIRInstrument
 } // namespace WorkflowAlgorithms
 } // namespace Mantid

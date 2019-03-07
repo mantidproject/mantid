@@ -167,9 +167,19 @@ class MultiPythonFileInterpreter(QWidget):
         return self._tabs.widget(idx)
 
     def execute_current_async(self):
-        """Execute content of the current file. If a selection is active
-        then only this portion of code is executed, this is completed asynchronously"""
+        """
+        Execute content of the current file. If a selection is active
+        then only this portion of code is executed, this is completed asynchronously
+        """
         self.current_editor().execute_async()
+
+    def execute_async(self):
+        """
+        Execute ALL the content in the current file.
+        Selection is ignored.
+        This is completed asynchronously.
+        """
+        self.current_editor().execute_async(ignore_selection=True)
 
     @Slot()
     def execute_current_async_blocking(self):

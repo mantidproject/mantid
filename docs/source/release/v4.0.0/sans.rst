@@ -35,7 +35,6 @@ Improved
 * Added transmission sample/can to unsubtracted sample/can XML and H5 files when "Save Can" option selected.
 * Can set PhiMin, PhiMax, and UseMirror mask options from the options column in the table
 * Autocomplete for Sample shape column in the table.
-* Can separate items in variable q binning with commas or spaces. E.g. L/Q 0.0, 0.02 0.3 0.05, 0.8
 * Can export table as a csv, which can be re-loaded as a batch file.
 * File path to batch file will be added to your directories automatically upon loading.
 * If loading of user file fails, user file field will remain empty to make it clear it has not be loaded successfully.
@@ -46,6 +45,9 @@ Improved
 * The gui will remember which output mode (Memory, File, Both) you last used and set that as your default when on the SANS interface.
 * The gui will check *save can* by default if it was checked when the gui was last used.
 * Default adding mode is set to Event for all instruments except for LOQ, which defaults to Custom.
+* Removed the show transmission check box. Transmission workspaces are always added to output files regardless of output mode, and are always added to ADS if "memory" or "both" output mode is selected.
+* The old ISIS SANS interface has been renamed *ISIS SANS (Deprecated)* to signify that it is not under active development.
+* The v2 experimental interface has been renamed *ISIS SANS* to signify that it is the main interface and is under active development.
 
 Bug fixes
 #########
