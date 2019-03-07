@@ -10,6 +10,10 @@ from __future__ import (absolute_import, division, print_function)
 
 from mantid.simpleapi import mtd
 from testhelpers import (assertRaisesNothing, create_algorithm)
+<<<<<<< 522c2795220a09d8d4b6c923905b8c0a7f15b685
+=======
+#import numpy
+>>>>>>> Flake 8 warnings Refs 24555
 import unittest
 
 
@@ -79,6 +83,11 @@ class ReflectometryILLAutoProcessTest(unittest.TestCase):
         }
         alg = create_algorithm('ReflectometryILLAutoProcess', **args)
         assertRaisesNothing(self, alg.execute)
+<<<<<<< 522c2795220a09d8d4b6c923905b8c0a7f15b685
+=======
+        #out = mtd['outWS']
+        #self.assertEquals(out.spectrumInfo().signedTwoTheta(0), 2.*30.2*numpy.pi/180.)
+>>>>>>> Flake 8 warnings Refs 24555
         mtd.clear()
 
     def testSampleAngle(self):
