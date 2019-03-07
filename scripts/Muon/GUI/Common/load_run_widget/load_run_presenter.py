@@ -12,6 +12,7 @@ from Muon.GUI.Common import thread_model
 import Muon.GUI.Common.utilities.run_string_utils as run_utils
 import Muon.GUI.Common.utilities.muon_file_utils as file_utils
 import Muon.GUI.Common.utilities.load_utils as load_utils
+from Muon.GUI.Common.observer_pattern import Observable
 
 
 class LoadRunWidgetPresenter(object):
@@ -30,6 +31,8 @@ class LoadRunWidgetPresenter(object):
         self.run_list = []
 
         self._set_connections()
+        self.enable_notifier = self.EnableEditingNotifier(self)
+        self.disable_notifier = self.DisableEditingNotifier(self)
 
     def _set_connections(self):
         self._view.on_load_current_run_clicked(self.handle_load_current_run)
@@ -101,6 +104,7 @@ class LoadRunWidgetPresenter(object):
     # ------------------------------------------------------------------------------------------------------------------
 
     def handle_run_changed_by_user(self):
+        self.disable_notifier.notify_subscribers()
         run_string = self._view.get_run_edit_text()
         if not run_string:
             return
@@ -185,6 +189,7 @@ class LoadRunWidgetPresenter(object):
         return run_list
 
     def load_runs(self, filenames):
+        self.disable_notifier.notify_subscribers()
         self.handle_loading(filenames, self._use_threading)
 
     def handle_loading(self, filenames, threaded=True):
@@ -240,3 +245,22 @@ class LoadRunWidgetPresenter(object):
         self.update_view_from_model(run_list)
         self._view.notify_loading_finished()
         self.enable_loading()
+        self.enable_notifier.notify_subscribers()
+
+    class DisableEditingNotifier(Observable):
+
+        def __init__(self, outer):
+            Observable.__init__(self)
+            self.outer = outer  # handle to containing class
+
+        def notify_subscribers(self, *args, **kwargs):
+            Observable.notify_subscribers(self, *args, **kwargs)
+
+    class EnableEditingNotifier(Observable):
+
+        def __init__(self, outer):
+            Observable.__init__(self)
+            self.outer = outer  # handle to containing class
+
+        def notify_subscribers(self, *args, **kwargs):
+            Observable.notify_subscribers(self, *args, **kwargs)
