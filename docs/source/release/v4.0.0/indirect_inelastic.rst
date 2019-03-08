@@ -129,6 +129,8 @@ Bugfixes
 - A bug where specifying a custom detector grouping for OSIRIS was not working has been fixed.
 - A bug caused by incorrect masked detectors during a reduction of an individual runs has been fixed. This could sometimes cause 
   unexpected peaks in the output plots.
+- A bug caused by incorrect masked detectors during a reduction for a summed run has been fixed. This would cause the summed runs 
+  intensity to be higher than that of the individual runs with the same run numbers.
 
 
 Bayes Interface
