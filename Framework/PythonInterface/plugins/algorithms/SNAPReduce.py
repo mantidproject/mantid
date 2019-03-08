@@ -492,9 +492,9 @@ class SNAPReduce(DataProcessorAlgorithm):
             # put together output names
             new_Tag = Tag
             if len(prefix) > 0:
-                new_Tag += '_' + prefix
+                new_Tag = prefix + '_' + new_Tag
             basename = '%s_%s_%s' % (new_Tag, runnumber, self.alignAndFocusArgs['GroupingWorkspace'])
-
+            self.log().warning('{}:{}:{}'.format(i, new_Tag, basename))
             redWS, unfocussedWksp = self._alignAndFocus('SNAP_{}'.format(runnumber),
                                                         basename + '_red',
                                                         detCalFilename=detcalFile,
@@ -570,8 +570,8 @@ class SNAPReduce(DataProcessorAlgorithm):
 
             # declare some things as extra outputs in set-up
             if Process_Mode != "Production":
-                prefix = 'OutputWorkspace_{:d}_'.format(i)
-                propNames = [prefix + it for it in ['d', 'norm', 'normalizer']]
+                propprefix = 'OutputWorkspace_{:d}_'.format(i)
+                propNames = [propprefix + it for it in ['d', 'norm', 'normalizer']]
                 wkspNames = ['%s_%s_d' % (new_Tag, runnumber),
                              basename + '_red',
                              '%s_%s_normalizer' % (new_Tag, runnumber)]
