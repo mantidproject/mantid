@@ -839,31 +839,29 @@ set( TEST_FILES
   test/WorkspacePresenter/WorkspacePresenterTest.h
 )
 
-if ( ENABLE_MANTIDPLOT )
-  mtd_add_qt_tests (TARGET_NAME MantidQtWidgetsCommonTest
-    QT_VERSION 4
-    SRC ${TEST_FILES}
-    INCLUDE_DIRS
-      ../../../Framework/TestHelpers/inc
-      ../../../Framework/DataObjects/inc
-      ../../../Framework/Crystal/inc
-    TEST_HELPER_SRCS
-      ../../../Framework/TestHelpers/src/TearDownWorld.cpp
-      ../../../Framework/TestHelpers/src/ComponentCreationHelper.cpp
-      ../../../Framework/TestHelpers/src/DataProcessorTestHelper.cpp
-      ../../../Framework/TestHelpers/src/InstrumentCreationHelper.cpp
-      ../../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
-    LINK_LIBS
-      ${TARGET_LIBRARIES}
-      DataObjects
-      ${GMOCK_LIBRARIES}
-      ${GTEST_LIBRARIES}
-    MTD_QT_LINK_LIBS
-      MantidQtWidgetsCommon
-    PARENT_DEPENDENCIES
-      GUITests
-  )
-endif()
+mtd_add_qt_tests (TARGET_NAME MantidQtWidgetsCommonTest
+  QT_VERSION 4
+  SRC ${TEST_FILES}
+  INCLUDE_DIRS
+    ../../../Framework/TestHelpers/inc
+    ../../../Framework/DataObjects/inc
+    ../../../Framework/Crystal/inc
+  TEST_HELPER_SRCS
+    ../../../Framework/TestHelpers/src/TearDownWorld.cpp
+    ../../../Framework/TestHelpers/src/ComponentCreationHelper.cpp
+    ../../../Framework/TestHelpers/src/DataProcessorTestHelper.cpp
+    ../../../Framework/TestHelpers/src/InstrumentCreationHelper.cpp
+    ../../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
+  LINK_LIBS
+    ${TARGET_LIBRARIES}
+    DataObjects
+    ${GMOCK_LIBRARIES}
+    ${GTEST_LIBRARIES}
+  MTD_QT_LINK_LIBS
+    MantidQtWidgetsCommon
+  PARENT_DEPENDENCIES
+    GUITests
+)
 
 set( QT5_TEST_FILES
   test/BatchAlgorithmRunnerTest.h
@@ -875,30 +873,28 @@ set( QT5_TEST_FILES
   test/WorkspacePresenter/WorkspacePresenterTest.h
 )
 
-if ( ENABLE_WORKBENCH )
-  mtd_add_qt_tests (TARGET_NAME MantidQtWidgetsCommonTest
-    QT_VERSION 5
-    SRC ${QT5_TEST_FILES}
-    INCLUDE_DIRS
-      ../../../Framework/TestHelpers/inc
-      ../../../Framework/DataObjects/inc
-      ../../../Framework/Crystal/inc
-    TEST_HELPER_SRCS
-      ../../../Framework/TestHelpers/src/TearDownWorld.cpp
-      ../../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
-      ../../../Framework/TestHelpers/src/ComponentCreationHelper.cpp
-      ../../../Framework/TestHelpers/src/InstrumentCreationHelper.cpp
-    LINK_LIBS
-      ${TARGET_LIBRARIES}
-      DataObjects
-      ${GMOCK_LIBRARIES}
-      ${GTEST_LIBRARIES}
-    MTD_QT_LINK_LIBS
-      MantidQtWidgetsCommon
-    PARENT_DEPENDENCIES
-      GUITests
-  )
-endif()
+mtd_add_qt_tests (TARGET_NAME MantidQtWidgetsCommonTest
+  QT_VERSION 5
+  SRC ${QT5_TEST_FILES}
+  INCLUDE_DIRS
+    ../../../Framework/TestHelpers/inc
+    ../../../Framework/DataObjects/inc
+    ../../../Framework/Crystal/inc
+  TEST_HELPER_SRCS
+    ../../../Framework/TestHelpers/src/TearDownWorld.cpp
+    ../../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
+    ../../../Framework/TestHelpers/src/ComponentCreationHelper.cpp
+    ../../../Framework/TestHelpers/src/InstrumentCreationHelper.cpp
+  LINK_LIBS
+    ${TARGET_LIBRARIES}
+    DataObjects
+    ${GMOCK_LIBRARIES}
+    ${GTEST_LIBRARIES}
+  MTD_QT_LINK_LIBS
+    MantidQtWidgetsCommon
+  PARENT_DEPENDENCIES
+    GUITests
+)
 
 
 ###########################################################################
