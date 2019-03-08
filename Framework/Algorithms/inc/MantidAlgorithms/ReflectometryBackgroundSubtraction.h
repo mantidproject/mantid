@@ -8,6 +8,8 @@
 #define MANTID_ALGORITHMS_REFLECTOMETRYBACKGROUNDSUBTRACTION_H_
 
 #include "MantidAPI/DataProcessorAlgorithm.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/CommonBinsValidator.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -22,16 +24,25 @@ public:
   const std::string category() const override;
   const std::string summary() const override;
 
-  void calculateAverageSpectrumBackground(API::MatrixWorkspace_sptr inputWS);
-  void calculatePolynomialBackground(API::MatrixWorkspace_sptr inputWS);
-
 private:
+
+  void
+  calculateAverageSpectrumBackground(API::MatrixWorkspace_sptr inputWS,
+                                          std::vector<specnum_t> spectraList);
+  void calculatePolynomialBackground(API::MatrixWorkspace_sptr inputWS,
+                                     std::vector<double> spectrumRanges);
+  std::vector<double> findSpectrumRanges(API::MatrixWorkspace_sptr inputWS,
+                                         std::vector<specnum_t> spectraList);
+
   /** Overridden Algorithm methods **/
 
   // Initialize the algorithm
   void init() override;
   // Execute the algorithm
   void exec() override;
+  //validate the inputs
+  std::map<std::string, std::string>
+  ReflectometryBackgroundSubtraction::validateInputs() override;
 };
 
 } // namespace Algorithms

@@ -16,12 +16,17 @@
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidAPI/Algorithm.tcc"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
 namespace Mantid {
 namespace Algorithms {
+
+// Register the algorithm into the AlgorithmFactory
+DECLARE_ALGORITHM(ReflectometryBackgroundSubtraction)
 
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string ReflectometryBackgroundSubtraction::name() const {
@@ -41,29 +46,55 @@ const std::string ReflectometryBackgroundSubtraction::summary() const {
   return "";
 }
 
-// Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(ReflectometryBackgroundSubtraction)
-
 void ReflectometryBackgroundSubtraction::calculateAverageSpectrumBackground(
-    API::MatrixWorkspace_sptr inputWS) {
+    API::MatrixWorkspace_sptr inputWS, std::vector<specnum_t> spectraList) {
 
-  auto alg = createChildAlgorithm("AverageSpectrumBackground");
-  alg->initialize();
+auto alg = this->createChildAlgorithm("GroupDetectors");
   alg->setProperty("InputWorkspace", inputWS);
-  alg->setProperty("BottomBackgroundRange",
-                   getPropertyValue("BottomBackgroundRange"));
-  alg->setProperty("TopBackgroundRange",
-                   getPropertyValue("TopBackgroundRange"));
+  alg->setProperty("SpectraList", spectraList);
+  alg->setProperty("Behaviour", "Average");
   alg->execute();
-  API::MatrixWorkspace_sptr output = alg->getProperty("OutputWorkspace");
-  setProperty("OutputWorkspace", output);
+  API::MatrixWorkspace_sptr outputWS = alg->getProperty("OutputWorkspace");
+
+  bool subtract = getProperty("SubtractBackground");
+  if (subtract == true) {
+    auto subtract = createChildAlgorithm("Minus");
+    subtract->setProperty("LHSWorkspace", inputWS);
+    subtract->setProperty("RHSWorkspace", outputWS);
+    subtract->setProperty("AllowDifferentNumberSpectra", true);
+    subtract->execute();
+    outputWS = subtract->getProperty("OutputWorkspace");
+  }
+
+  setProperty("OutputWorkspace", outputWS);
+}
+
+std::vector<double> ReflectometryBackgroundSubtraction::findSpectrumRanges(
+    API::MatrixWorkspace_sptr inputWS, std::vector<specnum_t> spectraList) {
+	
+  std::vector<double> spectrumRanges;
+  spectrumRanges.push_back(spectraList[0]);
+  auto prevSpec = spectrumRanges[0];
+   for (auto index = 1; index < spectraList.size() -1; ++index) {
+      auto spec = spectraList[index+1];
+      auto range = spec - prevSpec;
+	  //check if start of new range
+      if (range > 1) {
+        spectrumRanges.push_back(prevSpec);
+        spectrumRanges.push_back(spec); 
+	  }  
+	  prevSpec = spec;
+	  }
+   spectrumRanges.push_back(spectraList.back());
+  return spectrumRanges;
 }
 
 void ReflectometryBackgroundSubtraction::calculatePolynomialBackground(
-    API::MatrixWorkspace_sptr inputWS) {
+    API::MatrixWorkspace_sptr inputWS, std::vector<double> spectrumRanges) {
   // if the input workspace is an event workspace it must be converted to a
   // Matrix workspace as cannot transpose a event workspace
   // if it is already a MatrixWorkspace this does nothing
+  
   auto convert = createChildAlgorithm("ConvertToMatrixWorkspace");
   convert->setProperty("InputWorkspace", inputWS);
   convert->execute();
@@ -81,7 +112,7 @@ void ReflectometryBackgroundSubtraction::calculatePolynomialBackground(
   poly->initialize();
   poly->setProperty("InputWorkspace", transposedWS);
   poly->setProperty("Degree", getPropertyValue("DegreeOfPolynomial"));
-  poly->setProperty("XRanges", getPropertyValue("XRanges"));
+  poly->setProperty("XRanges", spectrumRanges); 
   poly->setProperty("CostFunction", getPropertyValue("CostFunction"));
   poly->execute();
   API::MatrixWorkspace_sptr bgd = poly->getProperty("OutputWorkspace");
@@ -89,12 +120,17 @@ void ReflectometryBackgroundSubtraction::calculatePolynomialBackground(
   // transpose again to get the background
   transpose->setProperty("InputWorkspace", bgd);
   transpose->execute();
-  API::MatrixWorkspace_sptr transposedBgd =
+  API::MatrixWorkspace_sptr outputWS =
       transpose->getProperty("OutputWorkspace");
 
   // subtract the background from the input workspace
-  auto output = minus(inputWS, transposedBgd);
-  setProperty("OutputWorkspace", output);
+  bool subtract = getProperty("SubtractBackground");
+  if (subtract == true) {
+    outputWS = minus(inputWS, outputWS);
+  }
+
+setProperty("OutputWorkspace", outputWS);
+  
 }
 
 //----------------------------------------------------------------------------------------------
@@ -103,94 +139,99 @@ void ReflectometryBackgroundSubtraction::calculatePolynomialBackground(
 void ReflectometryBackgroundSubtraction::init() {
 
   // Input workspace
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input,
-                      boost::make_shared<CommonBinsValidator>()),
-                  "An input workspace.");
+  declareWorkspaceInputProperties<API::MatrixWorkspace,
+                                  API::IndexType::SpectrumNum |
+                                      API::IndexType::WorkspaceIndex>(
+      "InputWorkspace", "An input workspace",
+      boost::make_shared<API::CommonBinsValidator>());
 
   std::vector<std::string> backgroundTypes = {"Per Detector Average",
                                               "Polynomial"};
-  declareProperty("TypeOfBackgroundSubtraction", "Per Detector Average",
+  declareProperty("SubtractionMethod", "Per Detector Average",
                   boost::make_shared<StringListValidator>(backgroundTypes),
                   "The type of background reduction to perform.",
                   Direction::Input);
 
-  declareProperty(make_unique<ArrayProperty<size_t>>("BottomBackgroundRange",
-                                                     Direction::Input),
-                  "A list of the bottom background ranges.");
-  declareProperty(make_unique<ArrayProperty<size_t>>("TopBackgroundRange",
-                                                     Direction::Input),
-                  "A list of the top background ranges.");
-
-  setPropertyGroup("BottomBackgroundRange",
-                   "Average Per Spectra Background Subtraction");
-  setPropertyGroup("TopBackgroundRange",
-                   "Average Per Spectra Background Subtraction");
-  setPropertySettings(
-      "BottomBackgroundRange",
-      make_unique<EnabledWhenProperty>("TypeOfBackgroundSubtraction",
-                                       IS_EQUAL_TO, "Per Detector Average"));
-  setPropertySettings(
-      "TopBackgroundRange",
-      make_unique<EnabledWhenProperty>("TypeOfBackgroundSubtraction",
-                                       IS_EQUAL_TO, "Per Detector Average"));
-
-  auto increasingAxis = boost::make_shared<IncreasingAxisValidator>();
   auto nonnegativeInt = boost::make_shared<BoundedValidator<int>>();
   nonnegativeInt->setLower(0);
-  auto orderedPairs = boost::make_shared<ArrayOrderedPairsValidator<double>>();
   declareProperty("DegreeOfPolynomial", 0, nonnegativeInt,
                   "Degree of the fitted polynomial.");
-  declareProperty(make_unique<ArrayProperty<double>>(
-                      "XRanges", std::vector<double>(), orderedPairs),
-                  "A list of fitting ranges given as pairs of X values.");
   std::array<std::string, 2> costFuncOpts{
       {"Least squares", "Unweighted least squares"}};
   declareProperty("CostFunction", "Least squares",
                   boost::make_shared<ListValidator<std::string>>(costFuncOpts),
                   "The cost function to be passed to the Fit algorithm.");
 
-  setPropertyGroup("DegreeOfPolynomial", "Polynomial Background Subtraction");
-  setPropertyGroup("XRanges", "Polynomial Background Subtraction");
-  setPropertyGroup("CostFunction", "Polynomial Background Subtraction");
-
   setPropertySettings("DegreeOfPolynomial", make_unique<EnabledWhenProperty>(
-                                                "TypeOfBackgroundSubtraction",
+                                                "SubtractionMethod",
                                                 IS_EQUAL_TO, "Polynomial"));
-  setPropertySettings(
-      "XRanges", make_unique<EnabledWhenProperty>("TypeOfBackgroundSubtraction",
-                                                  IS_EQUAL_TO, "Polynomial"));
   setPropertySettings("CostFunction", make_unique<EnabledWhenProperty>(
-                                          "TypeOfBackgroundSubtraction",
+                                          "SubtractionMethod",
                                           IS_EQUAL_TO, "Polynomial"));
+
+  declareProperty(make_unique<PropertyWithValue<bool>>("SubtractBackground",
+                                                       true, Direction::Input),
+                  "If true then the background is subtracted from the InputWorkspace before output");
 
   // Output workspace
   declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                    Direction::Output,
                                                    PropertyMode::Optional),
-                  "A Workspace with the background removed.");
+                  "The output Workspace containing either the background or the InputWorkspace with the background removed.");
 }
 
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void ReflectometryBackgroundSubtraction::exec() {
-  API::MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
-  std::string backgroundType = getProperty("TypeOfBackgroundSubtraction");
+  API::MatrixWorkspace_sptr inputWS;
+  Indexing::SpectrumIndexSet indexSet;
+  std::tie(inputWS, indexSet) =
+      getWorkspaceAndIndices<API::MatrixWorkspace>("InputWorkspace");
+  const std::string backgroundType = getProperty("SubtractionMethod");
 
-  // Set default name for output workspaces
-  std::string const wsName = inputWS->getName();
+  // Set default outputWorkspace name to be inputWorkspace Name
+  const std::string wsName = inputWS->getName();
   if (isDefault("OutputWorkspace")) {
-    setPropertyValue("OutputWorkspace", wsName + "_Background");
+    setPropertyValue("OutputWorkspace" , wsName);
+  }
+
+  std::vector<specnum_t> spectraList;
+  for (auto index : indexSet) {
+    auto &spec = inputWS->getSpectrum(index);
+    spectraList.push_back(spec.getSpectrumNo());
   }
 
   if (backgroundType == "Per Detector Average") {
-    calculateAverageSpectrumBackground(inputWS);
+    calculateAverageSpectrumBackground(inputWS, spectraList);
   }
 
+  
   if (backgroundType == "Polynomial") {
-    calculatePolynomialBackground(inputWS);
+    auto spectrumRanges = findSpectrumRanges(inputWS, spectraList);
+    calculatePolynomialBackground(inputWS, spectrumRanges);
   }
 }
+
+std::map<std::string, std::string>
+ReflectometryBackgroundSubtraction::validateInputs() {
+
+  std::map<std::string, std::string> errors;
+
+  API::MatrixWorkspace_const_sptr inputWS;
+  Indexing::SpectrumIndexSet indexSet;
+  std::tie(inputWS, indexSet) =
+      getWorkspaceAndIndices<API::MatrixWorkspace>("InputWorkspace");
+  const std::string backgroundType = getProperty("SubtractionMethod");
+
+  if (inputWS) {
+    if (backgroundType == "Polynomial" && indexSet.size() == 1) {
+      errors["InputWorkspaceIndexSet"] =
+          "Input workspace index set must contain a more than one spectra for polynomial background subtraction";
+    }
+  }
+  return errors;
+  }
 } // namespace Algorithms
 } // namespace Mantid
+
