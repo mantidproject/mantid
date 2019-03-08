@@ -329,10 +329,10 @@ bool ALCDataLoadingPresenter::checkCustomGrouping() {
     auto detectors = Mantid::Kernel::Strings::parseRange(
         isCustomGroupingValid(m_view->getForwardGrouping(), groupingOK));
     const auto backward = Mantid::Kernel::Strings::parseRange(
-        isCustomGroupingValid(m_view->getBackwardGrouping(),groupingOK));
-    if(!groupingOK){
+        isCustomGroupingValid(m_view->getBackwardGrouping(), groupingOK));
+    if (!groupingOK) {
       return groupingOK;
-	}
+    }
     detectors.insert(detectors.end(), backward.begin(), backward.end());
     for (const int det : detectors) {
       if (det < 0 || det > static_cast<int>(m_numDetectors)) {
@@ -352,8 +352,9 @@ bool ALCDataLoadingPresenter::checkCustomGrouping() {
  */
 std::string
 ALCDataLoadingPresenter::isCustomGroupingValid(const std::string &group,
-                                            bool &isValid) { 
-  if (!std::isdigit(group[0]) || std::any_of(std::begin(group), std::end(group), ::isalpha)) {
+                                               bool &isValid) {
+  if (!std::isdigit(group[0]) ||
+      std::any_of(std::begin(group), std::end(group), ::isalpha)) {
     isValid = false;
     return "";
   }

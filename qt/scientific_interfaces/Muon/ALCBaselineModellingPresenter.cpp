@@ -171,7 +171,7 @@ void ALCBaselineModellingPresenter::updateDataCurve() {
                        QwtHelper::curveErrorsFromWs(data, 0));
   // Delete all section selectors
   int noRows = m_view->noOfSectionRows() - 1;
-  for (int j = noRows; j>-1; --j) {
+  for (int j = noRows; j > -1; --j) {
     removeSection(j);
   }
 }
