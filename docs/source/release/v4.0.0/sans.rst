@@ -66,11 +66,6 @@ Bug fixes
 * RKH files no longer append to existing files, but overwrite instead.
 * Reductions with event slices can save output files. However, transmission workspaces are not included in these files.
 
-Improvements
-############
-
-- :ref:`Q1DWeighted <algm-Q1DWeighted>` now supports the option of asymmetric wedges for unisotropic scatterer.
-
 Removed
 #######
 
