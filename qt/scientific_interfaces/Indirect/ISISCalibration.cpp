@@ -757,8 +757,8 @@ ISISCalibration::resolutionAlgorithm(const QString &inputFiles) const {
 
 IAlgorithm_sptr ISISCalibration::energyTransferReductionAlgorithm(
     const QString &inputFiles) const {
-  IAlgorithm_sptr reductionAlg =
-      AlgorithmManager::Instance().create("ISISIndirectEnergyTransfer");
+  auto reductionAlg =
+      AlgorithmManager::Instance().create("ISISIndirectEnergyTransferWrapper");
   reductionAlg->initialize();
   reductionAlg->setProperty(
       "Instrument",

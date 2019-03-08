@@ -8,10 +8,10 @@ from __future__ import (absolute_import, print_function)
 
 import os
 
-from mantid.kernel import ErrorReporter, UsageService, ConfigService
-from mantid.kernel import Logger
-from ErrorReporter.retrieve_recovery_files import zip_recovery_directory
 import requests
+
+from ErrorReporter.retrieve_recovery_files import zip_recovery_directory
+from mantid.kernel import ConfigService, ErrorReporter, Logger, UsageService
 
 
 class ErrorReporterPresenter(object):
@@ -40,8 +40,8 @@ class ErrorReporterPresenter(object):
         except Exception as exc:
             self.error_log.information("Error creating recovery archive: {}. No recovery information will be sent")
             recovery_archive, file_hash = None, ""
-        status = self._send_report_to_server(share_identifiable=True, uptime=uptime, name=name, email=email, file_hash=file_hash,
-                                             text_box=text_box)
+        status = self._send_report_to_server(share_identifiable=True, uptime=uptime, name=name, email=email,
+                                             file_hash=file_hash, text_box=text_box)
         self.error_log.notice("Sent full information")
         if status == 201 and recovery_archive:
             self._upload_recovery_file(recovery_archive=recovery_archive)
@@ -100,3 +100,6 @@ class ErrorReporterPresenter(object):
 
     def show_view(self):
         self._view.show()
+
+    def show_view_blocking(self):
+        self._view.exec_()

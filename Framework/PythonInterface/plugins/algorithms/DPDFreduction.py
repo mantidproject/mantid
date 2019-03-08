@@ -123,7 +123,7 @@ class DPDFreduction(api.PythonAlgorithm):
         return issues
 
     #pylint: disable=too-many-locals, too-many-branches
-    def PyExec(self):
+    def PyExec(self): # noqa
         self._runs = self.getProperty('RunNumbers').value
         self._vanfile = self.getProperty('Vanadium').value
         self._ecruns = self.getProperty('EmptyCanRunNumbers').value

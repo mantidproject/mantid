@@ -7,7 +7,7 @@
 #  This file is part of the mantidqt package
 #
 #
-from __future__ import (absolute_import, unicode_literals)
+from __future__ import absolute_import
 
 import inspect
 
@@ -22,7 +22,6 @@ if PY2:
     from inspect import getargspec as getfullargspec
 else:
     from inspect import getfullargspec
-
 
 EMPTY_FILENAME_ID = '<string>'
 FILE_ATTR = '__file__'
@@ -159,15 +158,13 @@ class PythonCodeExecution(QObject):
             self.globals_ns[FILE_ATTR] = filename
         else:
             filename = EMPTY_FILENAME_ID
-        compile(code_str, filename, mode=COMPILE_MODE,
-                dont_inherit=True)
+        compile(code_str, filename, mode=COMPILE_MODE, dont_inherit=True)
 
         sig_progress = self.sig_exec_progress
         for block in code_blocks(code_str):
             sig_progress.emit(block.lineno)
             # compile so we can set the filename
-            code_obj = compile(block.code_str, filename, mode=COMPILE_MODE,
-                               dont_inherit=True)
+            code_obj = compile(block.code_str, filename, mode=COMPILE_MODE, dont_inherit=True)
             exec (code_obj, self.globals_ns, self.globals_ns)
 
     def generate_calltips(self):
