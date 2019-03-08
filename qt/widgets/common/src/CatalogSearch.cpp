@@ -582,7 +582,7 @@ void CatalogSearch::correctedToolTip(std::string text, QLabel *label) {
       QString::fromStdString("<span style=\"color: black;\">"+text+"</span>"));
   #else
   label->setToolTip(
-      QString::fromStdString("<span style=\"color: white;\">"+toolTip+"</span>"));
+      QString::fromStdString("<span style=\"color: white;\">"+text+"</span>"));
 #endif
 
 }
