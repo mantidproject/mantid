@@ -5,15 +5,12 @@ Indirect Inelastic Changes
 .. contents:: Table of Contents
    :local:
 
-.. warning:: **Developers:** Sort changes under appropriate heading
-    putting new features at the top of the section, followed by
-    improvements, followed by bug fixes.
-
 Algorithms
 ----------
 
 New Algorithms
 ##############
+
 - :ref:`BASISCrystalDiffraction <algm-BASISCrystalDiffraction>` replaces :ref:`BASISDiffraction <algm-BASISDiffraction>`, now deprecated.
 - :ref:`BASISPowderDiffraction <algm-BASISPowderDiffraction>` obtains scattered elastic intensity versus momentum transfer and versus scattering angle.
 - TOF correction for neutrons incorrectly interpreted as slow neutrons in :ref:`BASISPowderDiffraction <algm-BASISPowderDiffraction>`
@@ -29,6 +26,7 @@ Data Analysis Interface
 
 New Features
 ############
+
 - IqtFit and ConvFit have a new option to edit the *_Results* workspace. This option allows the selection of two *_Result* 
   workspaces (one containing the results of a sequential fit for multiple spectra (1), and the other containing the results of a fit 
   for a single spectrum(2)). The algorithm :ref:`IndirectReplaceFitResult <algm-IndirectReplaceFitResult>` will replace the 
@@ -88,6 +86,7 @@ Bugfixes
 - The :ref:`HallRoss <func-Hall-Ross>` fit function was updated to have :math:`\hbar` in its formula. The 
   :ref:`TeixeiraWater <func-TeixeiraWater>` and :ref:`ChudleyElliot <func-ChudleyElliot>` fit functions 
   now have a functionDeriv1D method.
+- A bug causing the output *_Results* workspace from a single fit to have an incorrect name has been fixed.
 
 
 Data Corrections Interface
@@ -119,12 +118,21 @@ Improvements
   are now disabled while a tab is running or plotting.
 - It is now possible to choose which spectrum to Plot Output for in the S(Q,w) Tab.
 
+Bugfixes
+########
+- A bug where the output reduced files had large file sizes depending on the size of the batch being reduced from 
+  the :ref:`ISISIndirectEnergyTransfer <algm-ISISIndirectEnergyTransfer>` algorithm on the ISISEnergyTransfer interface has been 
+  fixed. The :ref:`ISISIndirectEnergyTransferWrapper <algm-ISISIndirectEnergyTransferWrapper>` algorithm should be used instead
+  in order to avoid these large file sizes.
+- A bug where using a cropped calibration file (from a previous run) on the ISISEnergyTransfer interface would cause an 
+  error has been fixed.
 
 Bayes Interface
 ---------------
 
 New Features
 ############
+
 - It is now possible to produce a contour plot from the output on the Stretch Tab.
 
 Improvements
@@ -152,7 +160,7 @@ Improvements
 ############
 
 - The Run button is now above the output options.
-- The Run, Plot and Save buttons are now disabled while running and plotting is taking place.
+- The Run, Plot, and Save buttons are now disabled while running and plotting is taking place.
 
 
 Diffraction Interface
@@ -162,7 +170,7 @@ Improvements
 ############
 
 - The Run button is now above the output options.
-- The Run, Plot and Save buttons are now disabled while running and plotting is taking place.
+- The Run, Plot, and Save buttons are now disabled while running and plotting is taking place.
 
 
 Tools Interface
