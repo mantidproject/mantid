@@ -40,7 +40,7 @@ public:
   AlgorithmProgressModel();
 
   /// Add a new presenter that is displaying a progress bar
-  void addPresenter(const AlgorithmProgressPresenterBase *presenter);
+  void addPresenter(AlgorithmProgressPresenterBase *presenter);
   void removePresenter(const AlgorithmProgressPresenterBase *presenter);
   /// Update the progress bar in all live presenters
   void updatePresenters();

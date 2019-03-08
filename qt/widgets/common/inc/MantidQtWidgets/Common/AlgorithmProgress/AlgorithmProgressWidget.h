@@ -10,8 +10,8 @@
 // Includes
 //----------------------------------
 #include "MantidAPI/AlgorithmObserver.h"
-#include "MantidQtWidgets/Common/DllOption.h"
 
+#include "MantidQtWidgets/Common/DllOption.h"
 #include "MantidQtWidgets/Common/Message.h"
 
 #include "AlgorithmProgressPresenter.h"
@@ -28,12 +28,7 @@ class EXPORT_OPT_MANTIDQT_COMMON AlgorithmProgressWidget : public QWidget {
 public:
   AlgorithmProgressWidget(QWidget *parent = nullptr);
 
- 
   QProgressBar *pb;
-public slots:
-  void setProgressBarValue(double progress);
-signals:
-  void updateProgressBar(double progress);
 
 private:
   QHBoxLayout *layout;

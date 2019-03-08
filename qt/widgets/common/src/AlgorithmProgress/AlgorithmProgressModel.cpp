@@ -10,87 +10,107 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
-AlgorithmProgressModel::AlgorithmProgressModel()
-    : AlgorithmObserver(),
-      presenters{std::vector<AlgorithmProgressPresenterBase *>()},
-      observers{std::vector<std::unique_ptr<ProgressObserver>>()} {
-  // Start capturing the triggers from ALL algorithms starting
-  // this allows us to attach an observer to the algorithm to track the
-  // start, progress, finish and errors.
-  observeStarting();
-}
-void AlgorithmProgressModel::addPresenter(
-    const AlgorithmProgressPresenterBase *newPresenter) {
-  presenters.emplace_back(newPresenter);
-}
+    AlgorithmProgressModel::AlgorithmProgressModel()
+        : AlgorithmObserver()
+        , presenters { std::vector<AlgorithmProgressPresenterBase*>() }
+        , observers { std::vector<std::unique_ptr<ProgressObserver>>() }
+    {
+        // Start capturing the triggers from ALL algorithms starting
+        // this allows us to attach an observer to the algorithm to track the
+        // start, progress, finish and errors.
+        observeStarting();
+    }
+    void AlgorithmProgressModel::addPresenter(
+        AlgorithmProgressPresenterBase* newPresenter)
+    {
+        presenters.emplace_back(newPresenter);
+    }
 
-void AlgorithmProgressModel::updatePresenters() {
-  for (auto &presenter : presenters) {
-    presenter->update();
-  }
-}
-void AlgorithmProgressModel::removePresenter(
-    const AlgorithmProgressPresenterBase *presenter) {
-  const auto it = std::find(presenters.begin(), presenters.end(), presenter);
-  if (it != presenters.end()) {
-    presenters.erase(it);
-  }
-}
-void AlgorithmProgressModel::removeObserver(ProgressObserver *observer) {
-  const auto it = std::find(observers.begin(), observers.end(), observer);
-  if (it != observers.end()) {
-    // TODO check if this is freed after the erase from the vector
-    observer->stopObservingCurrent();
-    observers.erase(it);
-    updatePresenters();
-  }
-}
-void AlgorithmProgressModel::updateProgress(Mantid::API::IAlgorithm_sptr alg,
-                                            const double p,
-                                            const std::string &msg) {
-  for (auto &presenter : presenters) {
-    presenter->updateProgressBar(alg, p, msg);
-  }
-}
+    void AlgorithmProgressModel::updatePresenters()
+    {
+        for (auto& presenter : presenters) {
+            presenter->updateGui();
+        }
+    }
+    void AlgorithmProgressModel::removePresenter(
+        const AlgorithmProgressPresenterBase* presenter)
+    {
+        const auto it = std::find(presenters.begin(), presenters.end(), presenter);
+        if (it != presenters.end()) {
+            presenters.erase(it);
+        }
+    }
+    void AlgorithmProgressModel::removeObserver(ProgressObserver* observer)
+    {
+        // find the observer that is being removed in the list of observers,
+        // a custom comparison is used to compare the pointer inside the unique ptr
+        const auto it = std::find_if(
+            observers.begin(), observers.end(),
+            [&observer](const std::unique_ptr<ProgressObserver>& currentObserver) {
+                return currentObserver.get() == observer;
+            });
 
-void AlgorithmProgressModel::startingHandle(Mantid::API::IAlgorithm_sptr alg) {
-  auto po = std::make_unique<ProgressObserver>(this, alg);
-  po->observeProgress(alg);
-  po->observeFinish(alg);
-  po->observeError(alg);
-  // give ownership to the vector, when the observer
-  // is removed from it, it will be freed
-  observers.emplace_back(std::move(po));
-  updatePresenters();
-}
+        if (it != observers.end()) {
+            observer->stopObservingCurrentAlgorithm();
+            observers.erase(it);
+            updatePresenters();
+        }
+    }
+    void AlgorithmProgressModel::updateProgress(Mantid::API::IAlgorithm_sptr alg,
+        const double progress,
+        const std::string& msg)
+    {
+        for (auto& presenter : presenters) {
+            presenter->updateProgressBar(alg, progress, msg);
+        }
+    }
 
-std::vector<Mantid::API::IAlgorithm_sptr>
-AlgorithmProgressModel::runningAlgorithms() const {
-  auto vec{std::vector<Mantid::API::IAlgorithm_sptr>()};
-  vec.reserve(observers.size());
+    void AlgorithmProgressModel::startingHandle(Mantid::API::IAlgorithm_sptr alg)
+    {
+        auto po = std::make_unique<ProgressObserver>(this, alg);
+        po->observeProgress(alg);
+        po->observeFinish(alg);
+        po->observeError(alg);
+        // give ownership to the vector, when the observer
+        // is removed from it, it will be freed
+        observers.emplace_back(std::move(po));
+        updatePresenters();
+    }
 
-  for (const auto &obs : observers) {
-    vec.emplace_back(obs->currentAlgorithm());
-  }
+    std::vector<Mantid::API::IAlgorithm_sptr>
+    AlgorithmProgressModel::runningAlgorithms() const
+    {
+        auto vec { std::vector<Mantid::API::IAlgorithm_sptr>() };
+        vec.reserve(observers.size());
 
-  return vec;
-}
+        for (const auto& obs : observers) {
+            vec.emplace_back(obs->currentAlgorithm());
+        }
 
-Mantid::API::IAlgorithm_sptr
-AlgorithmProgressModel::latestRunningAlgorithm() const {
-  return observers.back()->currentAlgorithm();
-}
+        return vec;
+    }
 
-std::vector<RunningAlgorithmData>
-AlgorithmProgressModel::runningAlgorithmsData() const {
-  auto vec{std::vector<RunningAlgorithmData>()};
-  vec.reserve(observers.size());
+    Mantid::API::IAlgorithm_sptr
+    AlgorithmProgressModel::latestRunningAlgorithm() const
+    {
+        if (!observers.empty()) {
+            return observers.back()->currentAlgorithm();
+        } else {
+            return nullptr;
+        }
+    }
 
-  for (const auto &obs : observers) {
-    vec.emplace_back(RunningAlgorithmData{obs->name(), obs->currentAlgorithm(),
-                                          obs->properties()});
-  }
-  return vec;
-}
+    std::vector<RunningAlgorithmData>
+    AlgorithmProgressModel::runningAlgorithmsData() const
+    {
+        auto vec { std::vector<RunningAlgorithmData>() };
+        vec.reserve(observers.size());
+
+        for (const auto& obs : observers) {
+            vec.emplace_back(RunningAlgorithmData { obs->name(), obs->currentAlgorithm(),
+                obs->properties() });
+        }
+        return vec;
+    }
 } // namespace MantidWidgets
 } // namespace MantidQt

@@ -254,14 +254,6 @@ set ( QT5_UI_FILES
 )
 
 set ( SRC_FILES
-  src/AlgorithmProgress/AlgorithmProgressDialogPresenter.cpp
-  src/AlgorithmProgress/AlgorithmProgressDialogWidget.cpp
-  src/AlgorithmProgress/AlgorithmProgressModel.cpp
-  src/AlgorithmProgress/AlgorithmProgressPresenter.cpp
-  src/AlgorithmProgress/AlgorithmProgressPresenterBase.cpp
-  src/AlgorithmProgress/AlgorithmProgressObserver.cpp
-  src/AlgorithmProgress/AlgorithmProgressWidget.cpp
-
   src/AlgorithmDialog.cpp
   src/AlgorithmHistoryWindow.cpp
   src/AlgorithmInputHistory.cpp
@@ -428,14 +420,6 @@ set ( SRC_FILES
 )
 
 set ( MOC_FILES
-  inc/MantidQtWidgets/Common/QuickAlgorithmProgress.h
-
-  inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressDialogPresenter.h
-  inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressDialogWidget.h
-  inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressPresenter.h
-  inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressPresenterBase.h
-  inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressWidget.h
-
   inc/MantidQtWidgets/Common/AlgorithmDialog.h
   inc/MantidQtWidgets/Common/AlgorithmHistoryWindow.h
   inc/MantidQtWidgets/Common/AlgorithmRunner.h
@@ -689,9 +673,6 @@ set ( INC_FILES
   inc/MantidQtWidgets/Common/Batch/ExtractSubtrees.h
   inc/MantidQtWidgets/Common/Batch/FindSubtreeRoots.h
   inc/MantidQtWidgets/Common/Batch/BuildSubtreeItems.h
-
-  inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressObserver.h
-  inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressModel.h
 )
 
 set ( UI_FILES

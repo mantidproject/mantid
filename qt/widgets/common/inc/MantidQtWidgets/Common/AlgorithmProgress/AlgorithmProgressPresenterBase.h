@@ -8,7 +8,7 @@
 #define ALGORITHMPROGRESSPRESENTERBASE_H
 
 #include "MantidAPI/IAlgorithm_fwd.h"
-#include <QObject>
+#include <QWidget>
 #include <string>
 
 namespace Mantid {
@@ -23,10 +23,10 @@ namespace MantidQt {
 namespace MantidWidgets {
 
 class ProgressObserverData;
-class AlgorithmProgressPresenterBase : public QObject {
+class AlgorithmProgressPresenterBase : public QWidget {
   Q_OBJECT
 public:
-  AlgorithmProgressPresenterBase();
+  AlgorithmProgressPresenterBase(QWidget *parent);
   virtual void updateProgressBar(Mantid::API::IAlgorithm_sptr alg, double p,
                                  const std::string &msg) = 0;
 
@@ -35,7 +35,7 @@ public slots:
                       const std::string &message);
   /// Emit an update signal to update the GUI in the Qt thread
   /// as this update is called from the AlgorithmObserver thread
-  void update();
+  void updateGui();
 
   /// Update the GUI that the presenter is currently using
   virtual void setCurrentAlgorithm() = 0;
