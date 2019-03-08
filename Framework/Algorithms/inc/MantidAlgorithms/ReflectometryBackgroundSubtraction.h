@@ -39,8 +39,7 @@ private:
   // Execute the algorithm
   void exec() override;
   // validate the inputs
-  std::map<std::string, std::string>
-  ReflectometryBackgroundSubtraction::validateInputs() override;
+  std::map<std::string, std::string> validateInputs() override;
 };
 
 } // namespace Algorithms
