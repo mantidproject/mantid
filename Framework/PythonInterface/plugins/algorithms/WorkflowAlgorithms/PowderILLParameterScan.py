@@ -14,7 +14,7 @@ from mantid.api import PythonAlgorithm, MultipleFileProperty, FileProperty, \
 from mantid.simpleapi import *
 
 
-class PowderDiffILLReduction(PythonAlgorithm):
+class PowderILLParameterScan(PythonAlgorithm):
 
     _calibration_file = None
     _roc_file = None
@@ -43,10 +43,10 @@ class PowderDiffILLReduction(PythonAlgorithm):
         return 'Performs powder diffraction data reduction for ILL instrument D20.'
 
     def seeAlso(self):
-        return [ "PowderDiffILLDetScanReduction","PowderDiffILLDetEffCorr" ]
+        return [ "PowderILLDetectorScan","PowderILLEfficiency" ]
 
     def name(self):
-        return "PowderDiffILLReduction"
+        return "PowderILLParameterScan"
 
     def validateInputs(self):
         issues = dict()
@@ -342,4 +342,4 @@ class PowderDiffILLReduction(PythonAlgorithm):
         RenameWorkspace(InputWorkspace=grouped, OutputWorkspace=ws)
 
 # Register the algorithm with Mantid
-AlgorithmFactory.subscribe(PowderDiffILLReduction)
+AlgorithmFactory.subscribe(PowderILLParameterScan)

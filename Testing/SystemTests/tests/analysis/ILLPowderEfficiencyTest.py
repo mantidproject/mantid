@@ -7,14 +7,14 @@
 from __future__ import (absolute_import, division, print_function)
 
 import systemtesting
-from mantid.simpleapi import PowderDiffILLReduction
+from mantid.simpleapi import PowderILLEfficiency, GroupWorkspaces
 from mantid import config, mtd
 
 
-class ILLPowderDiffReductionTest(systemtesting.MantidSystemTest):
+class ILLPowderEfficiencyTest(systemtesting.MantidSystemTest):
 
     def __init__(self):
-        super(ILLPowderDiffReductionTest, self).__init__()
+        super(ILLPowderEfficiencyTest, self).__init__()
         self.setUp()
 
     def setUp(self):
@@ -23,16 +23,18 @@ class ILLPowderDiffReductionTest(systemtesting.MantidSystemTest):
         config.appendDataSearchSubDir('ILL/D20/')
 
     def requiredFiles(self):
-        return ['967087.nxs', '967088.nxs']
+        return ['967076.nxs']
 
     def tearDown(self):
         mtd.clear()
 
     def runTest(self):
-        PowderDiffILLReduction(Run='967087,967088',OutputWorkspace='reduced')
+
+        PowderILLEfficiency(CalibrationRun='967076.nxs',
+                            OutputWorkspace='calib',
+                            OutputResponseWorkspace='response')
+        GroupWorkspaces(InputWorkspaces=['calib','response'], OutputWorkspace='group')
 
     def validate(self):
         self.tolerance = 0.0001
-        # something goes wrong with DetInfo when saving loading nexus processed
-        self.disableChecking.append("Instrument")
-        return ['reduced', 'ILL_D20_red_def.nxs']
+        return ['group', 'ILL_D20_calib_def.nxs']

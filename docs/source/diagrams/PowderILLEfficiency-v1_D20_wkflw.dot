@@ -1,4 +1,4 @@
-digraph PowderDiffILLDetEffCorr {
+digraph PowderILLEfficiency {
   label="SequentialSummedReference1D Flowchart"
   $global_style
 

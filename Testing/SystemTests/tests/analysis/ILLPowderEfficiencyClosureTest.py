@@ -9,16 +9,16 @@ from __future__ import (absolute_import, division, print_function)
 from tempfile import gettempdir
 from os import path, remove
 import systemtesting
-from mantid.simpleapi import PowderDiffILLDetEffCorr, SaveNexusProcessed
+from mantid.simpleapi import PowderILLEfficiency, SaveNexusProcessed
 from mantid import config, mtd
 
 
-class ILLPowderDiffDetEffCorrClosureTest(systemtesting.MantidSystemTest):
+class ILLPowderEfficiencyClosureTest(systemtesting.MantidSystemTest):
 
     _m_tmp_file = None
 
     def __init__(self):
-        super(ILLPowderDiffDetEffCorrClosureTest, self).__init__()
+        super(ILLPowderEfficiencyClosureTest, self).__init__()
         self.setUp()
 
     def setUp(self):
@@ -36,11 +36,11 @@ class ILLPowderDiffDetEffCorrClosureTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
 
-        PowderDiffILLDetEffCorr(CalibrationRun='967076.nxs', OutputWorkspace='calib')
+        PowderILLEfficiency(CalibrationRun='967076.nxs', OutputWorkspace='calib')
 
         SaveNexusProcessed(InputWorkspace='calib', Filename=self._m_tmp_file)
 
-        PowderDiffILLDetEffCorr(CalibrationRun='967076.nxs', CalibrationFile=self._m_tmp_file, OutputWorkspace='calib-2nd')
+        PowderILLEfficiency(CalibrationRun='967076.nxs', CalibrationFile=self._m_tmp_file, OutputWorkspace='calib-2nd')
 
         for i in range(mtd['calib-2nd'].getNumberHistograms()):
             self.assertDelta(mtd['calib-2nd'].readY(i), 1., 1E-3)

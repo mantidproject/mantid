@@ -258,7 +258,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
             new_line.update_from(old_line)
 
         # Now update the legend to make sure it changes to the old properties
-        self.get_axes().legend()
+        self.get_axes().legend().draggable()
 
     @Slot(int, float, float, float)
     def peak_added_slot(self, peak_id, centre, height, fwhm):

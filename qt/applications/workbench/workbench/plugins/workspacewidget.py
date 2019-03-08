@@ -121,8 +121,17 @@ class WorkspaceWidget(PluginWidget):
         :param names: A list of workspace names
         """
         for ws in self._ads.retrieveWorkspaces(names, unrollGroups=True):
-            presenter = InstrumentViewPresenter(ws, parent=self)
-            presenter.show_view()
+            if ws.getInstrument().getName():
+                try:
+                    presenter = InstrumentViewPresenter(ws, parent=self)
+                    presenter.show_view()
+                except Exception as exception:
+                    logger.warning("Could not show instrument for workspace "
+                                   "'{}':\n{}.\n".format(ws.name(), exception))
+            else:
+                logger.warning("Could not show instrument for workspace '{}':"
+                               "\nNo instrument available.\n"
+                               "".format(ws.name()))
 
     def _do_show_data(self, names):
         for ws in self._ads.retrieveWorkspaces(names, unrollGroups=True):
