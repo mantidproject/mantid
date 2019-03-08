@@ -56,7 +56,7 @@ class AlgorithmProgressDialogPresenter(AlgorithmProgressPresenterBase):
         """
         Update the gui asynchronously.
         """
-        self.need_update_gui.emit()
+        self.update_watched_algorithm.emit()
 
     def close(self):
         """

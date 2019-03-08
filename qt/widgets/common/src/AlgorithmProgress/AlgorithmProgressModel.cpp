@@ -71,6 +71,7 @@ namespace MantidWidgets {
         po->observeProgress(alg);
         po->observeFinish(alg);
         po->observeError(alg);
+        std::cout << "Algorithms starting: " << alg->name() << '\n';
         // give ownership to the vector, when the observer
         // is removed from it, it will be freed
         observers.emplace_back(std::move(po));
@@ -98,19 +99,6 @@ namespace MantidWidgets {
         } else {
             return nullptr;
         }
-    }
-
-    std::vector<RunningAlgorithmData>
-    AlgorithmProgressModel::runningAlgorithmsData() const
-    {
-        auto vec { std::vector<RunningAlgorithmData>() };
-        vec.reserve(observers.size());
-
-        for (const auto& obs : observers) {
-            vec.emplace_back(RunningAlgorithmData { obs->name(), obs->currentAlgorithm(),
-                obs->properties() });
-        }
-        return vec;
     }
 } // namespace MantidWidgets
 } // namespace MantidQt

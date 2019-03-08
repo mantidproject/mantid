@@ -13,6 +13,7 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
+
     class AlgorithmProgressModel;
 
     class ProgressObserver : public Mantid::API::AlgorithmObserver {
@@ -24,18 +25,17 @@ namespace MantidWidgets {
         ProgressObserver(AlgorithmProgressModel* model,
             Mantid::API::IAlgorithm_sptr alg);
 
-        auto name() const { return m_alg->name(); }
-
-        auto properties() const { return m_alg->getProperties(); }
-
         void finishHandle(const Mantid::API::IAlgorithm* alg) override;
-        void progressHandle(const Mantid::API::IAlgorithm* alg, double p,
-            const std::string& msg) override;
+        void progressHandle(const Mantid::API::IAlgorithm* alg, double progress,
+            const std::string& message) override;
         void errorHandle(const Mantid::API::IAlgorithm* alg,
             const std::string& what) override;
 
         void stopObservingCurrentAlgorithm();
         Mantid::API::IAlgorithm_sptr currentAlgorithm() const;
+
+        const std::string algName;
+        const std::vector<Mantid::Kernel::Property*> algProperties;
 
     private:
         AlgorithmProgressModel* m_model;
@@ -43,8 +43,6 @@ namespace MantidWidgets {
         /// The algorithm that is being observed.
         /// This object does NOT own the algorithm.
         Mantid::API::IAlgorithm_sptr m_alg;
-        double progress { 0 };
-        std::string message { "}" };
     };
 } // namespace MantidWidgets
 } // namespace MantidQt

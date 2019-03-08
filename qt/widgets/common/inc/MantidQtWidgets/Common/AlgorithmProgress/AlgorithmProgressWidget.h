@@ -14,29 +14,35 @@
 #include "MantidQtWidgets/Common/DllOption.h"
 #include "MantidQtWidgets/Common/Message.h"
 
-#include "AlgorithmProgressPresenter.h"
+#include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressDialogWidget.h"
+#include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressPresenter.h"
 #include <QHBoxLayout>
-#include <QProgressBar>
 #include <QPushButton>
 #include <QWidget>
+#include <memory>
 
+class QProgressBar;
 namespace MantidQt {
 namespace MantidWidgets {
+    class EXPORT_OPT_MANTIDQT_COMMON AlgorithmProgressWidget : public QWidget {
+        Q_OBJECT
+    public:
+        AlgorithmProgressWidget(QWidget* parent = nullptr);
 
-class EXPORT_OPT_MANTIDQT_COMMON AlgorithmProgressWidget : public QWidget {
-  Q_OBJECT
-public:
-  AlgorithmProgressWidget(QWidget *parent = nullptr);
+        QProgressBar* pb;
+        void deleteDetailsDialog();
 
-  QProgressBar *pb;
+    public slots:
+        void showDetailsDialog();
 
-private:
-  QHBoxLayout *layout;
-  QPushButton *m_detailsButton;
-  Mantid::API::IAlgorithm_const_sptr alggggggggggg;
+    private:
+        QHBoxLayout* layout;
+        QPushButton* m_detailsButton;
+        Mantid::API::IAlgorithm_const_sptr alggggggggggg;
 
-  std::unique_ptr<AlgorithmProgressPresenter> presenter;
-};
+        std::unique_ptr<AlgorithmProgressDialogWidget> details;
+        std::unique_ptr<AlgorithmProgressPresenter> presenter;
+    };
 
 } // namespace MantidWidgets
 } // namespace MantidQt
