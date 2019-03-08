@@ -9,9 +9,13 @@
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidAPI/Algorithm.tcc"
 
 namespace Mantid {
 namespace Algorithms {
+
+// Register the algorithm into the AlgorithmFactory
+DECLARE_ALGORITHM(AverageSpectrumBackground)
 
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string AverageSpectrumBackground::name() const {
@@ -29,57 +33,17 @@ const std::string AverageSpectrumBackground::category() const {
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string AverageSpectrumBackground::summary() const { return ""; }
 
-// Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(AverageSpectrumBackground)
-
-/** Sums spectra bin by bin in the given range using the child algorithm
- * GroupDetectors. Note that KeepUngroupedSpectra is set to false.
- * @param inputWS:: The Workspace2D to take as input
- * @param indexList:: An array of workspace indices to combine
- * @return :: A workspace containing a single spectra and DectectorGroups
- */
-API::MatrixWorkspace_sptr AverageSpectrumBackground::groupBackgroundDetectors(
-    API::MatrixWorkspace_sptr inputWS, const std::vector<size_t> indexList) {
-
-  auto alg = this->createChildAlgorithm("GroupDetectors");
-  alg->setProperty("InputWorkspace", inputWS);
-  alg->setProperty("WorkspaceIndexList", indexList);
-  alg->setProperty("KeepUngroupedSpectra", false);
-  alg->execute();
-  return alg->getProperty("OutputWorkspace");
-}
-
-std::vector<size_t> AverageSpectrumBackground::getSpectraFromRange(
-    const std::vector<size_t> range) {
-  const auto start = range[0];
-  const auto end = range[1];
-  std::vector<size_t> spectra;
-  for (auto itr = start; itr < end; ++itr) {
-    spectra.push_back(itr);
-  }
-  return spectra;
-}
-
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void AverageSpectrumBackground::init() {
 
   // Input workspace
-  declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-          "InputWorkspace", "", Kernel::Direction::Input,
-          boost::make_shared<API::CommonBinsValidator>()),
-      "An input workspace.");
-
-  // bottom background range
-  declareProperty(Kernel::make_unique<Kernel::ArrayProperty<size_t>>(
-                      "BottomBackgroundRange", std::vector<size_t>()),
-                  "A list of the bottom background ranges.");
-  // top background range
-  declareProperty(Kernel::make_unique<Kernel::ArrayProperty<size_t>>(
-                      "TopBackgroundRange", std::vector<size_t>()),
-                  "A list of the top background ranges.");
+  declareWorkspaceInputProperties<API::MatrixWorkspace,
+                                  API::IndexType::SpectrumNum |
+                                      API::IndexType::WorkspaceIndex>(
+      "InputWorkspace", "An input workspace",
+      boost::make_shared<API::CommonBinsValidator>());
 
   // Output workspace
   declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
@@ -91,51 +55,24 @@ void AverageSpectrumBackground::init() {
 /** Execute the algorithm.
  */
 void AverageSpectrumBackground::exec() {
-  API::MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
-  std::vector<size_t> bottomBgdRange = getProperty("BottomBackgroundRange");
-  std::vector<size_t> topBgdRange = getProperty("TopBackgroundRange");
 
-  if (bottomBgdRange.empty() && topBgdRange.empty())
-    throw std::invalid_argument("At least one background range is required");
-  if (bottomBgdRange.size() != 2 && !bottomBgdRange.empty())
-    throw std::invalid_argument("BottomBackgroundRange must have length 2");
-  if (topBgdRange.size() != 2 && !topBgdRange.empty())
-    throw std::invalid_argument("TopBackgroundRange must have length 2");
-  if ((!bottomBgdRange.empty() && bottomBgdRange[1] - bottomBgdRange[0] == 0) ||
-      (!topBgdRange.empty() && topBgdRange[1] - topBgdRange[0] == 0)) {
-    throw std::invalid_argument("Cannot have a range of length 0");
+  API::MatrixWorkspace_sptr inputWS;
+  Indexing::SpectrumIndexSet indexSet;
+  std::tie(inputWS, indexSet) =
+      getWorkspaceAndIndices<API::MatrixWorkspace>("InputWorkspace");
+
+  std::vector<specnum_t> spectraList;
+  for (auto index : indexSet) {
+    auto &spec = inputWS->getSpectrum(index);
+    spectraList.push_back(spec.getSpectrumNo());
   }
 
-  API::MatrixWorkspace_sptr bottomBgd, topBgd;
-  // groups the bottom background into a single spectra workspace
-  if (!bottomBgdRange.empty()) {
-    bottomBgd =
-        groupBackgroundDetectors(inputWS, getSpectraFromRange(bottomBgdRange));
-  }
-
-  // groups the top background into a single spectra workspace
-  if (!topBgdRange.empty()) {
-    topBgd =
-        groupBackgroundDetectors(inputWS, getSpectraFromRange(topBgdRange));
-  }
-
-  size_t totalBkgRange;
-  API::MatrixWorkspace_sptr bgd;
-  if (topBgdRange.empty()) {
-    bgd = bottomBgd;
-    totalBkgRange = bottomBgdRange[1] - bottomBgdRange[0];
-  } else if (bottomBgdRange.empty()) {
-    bgd = topBgd;
-    totalBkgRange = topBgdRange[1] - topBgdRange[0];
-  } else {
-    bgd = plus(bottomBgd, topBgd);
-    totalBkgRange = (bottomBgdRange[1] - bottomBgdRange[0]) +
-                    (topBgdRange[1] - topBgdRange[0]);
-  }
-
-  // find the average of the background
-  API::MatrixWorkspace_sptr averageBgd =
-      divide(bgd, static_cast<double>(totalBkgRange));
+  auto alg = this->createChildAlgorithm("GroupDetectors");
+  alg->setProperty("InputWorkspace", inputWS);
+  alg->setProperty("SpectraList", spectraList);
+  alg->setProperty("Behaviour", "Average");
+  alg->execute();
+  API::MatrixWorkspace_sptr averageBgd = alg->getProperty("OutputWorkspace");
 
   auto subtract = createChildAlgorithm("Minus");
   subtract->setProperty("LHSWorkspace", inputWS);

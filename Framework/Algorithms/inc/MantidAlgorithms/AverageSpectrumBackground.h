@@ -37,6 +37,7 @@ private:
   void init() override;
   // Execute the algorithm
   void exec() override;
+
 };
 
 } // namespace Algorithms
