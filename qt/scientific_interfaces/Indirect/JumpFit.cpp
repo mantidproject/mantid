@@ -75,6 +75,8 @@ void JumpFit::setupFitTab() {
           SLOT(updateModelFitTypeString()));
   connect(m_uiForm->cbParameterType, SIGNAL(currentIndexChanged(int)), this,
           SLOT(updateAvailableFitTypes()));
+  connect(this, SIGNAL(updateAvailableFitTypes()), this,
+          SLOT(updateAvailableFitTypes()));
 }
 
 void JumpFit::updateAvailableFitTypes() {

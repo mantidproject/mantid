@@ -49,6 +49,9 @@ class LoadWidgetPresenter(object):
         self.instrumentObserver = LoadWidgetPresenter.InstrumentObserver(self)
         self.loadNotifier = LoadWidgetPresenter.LoadNotifier(self)
 
+        self.disable_observer = LoadWidgetPresenter.DisableObserver(self)
+        self.enable_observer = LoadWidgetPresenter.EnableObserver(self)
+
     def set_load_run_widget(self, widget):
         self.load_run_widget = widget
         self.load_run_widget.update_view_from_model([])
@@ -145,3 +148,19 @@ class LoadWidgetPresenter(object):
         def update(self, observable, arg):
             print("update called : ", arg)
             self.outer.update_new_instrument(arg)
+
+    class EnableObserver(Observer):
+        def __init__(self, outer):
+            Observer.__init__(self)
+            self.outer = outer
+
+        def update(self, observable, arg):
+            self.outer.enable_loading()
+
+    class DisableObserver(Observer):
+        def __init__(self, outer):
+            Observer.__init__(self)
+            self.outer = outer
+
+        def update(self, observable, arg):
+            self.outer.disable_loading()

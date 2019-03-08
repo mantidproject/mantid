@@ -27,7 +27,7 @@ Outputs
 
 The algorithm will transform the time-of-flight and spectrum numbers of *InputWorkspace* into :math:`S(q,\omega)` at its output. For :math:`2\theta` to :math:`q` transformation, :ref:`SofQWNormalisedPolygon <algm-SofQWNormalisedPolygon>` is used. By default, the output is transposed by :ref:`Transpose <algm-Transpose>`. This behavior can be turned off by the *Transpose* property.
 
-The optional :math:`S(2\theta,\omega)` output can be enabled by the *OutputSofThetaEnergyWorkspace*.
+The optional :math:`S(2\theta,\omega)` output can be enabled by the *OutputSofThetaEnergyWorkspace*. This is the processed data right after detector grouping and before the transformation to :math:`S(q,\omega)`.
 
 Normalisation to absolute units
 ###############################
@@ -64,7 +64,7 @@ The automatic rebinning can be overriden by the *EnergyRebinningParams* or *Ener
 `'-10, a, -1, 0.01, 1, a, 4'`
     Start the energy transfer axis at -10 meV, use automatic binning up to -1 meV. Between -1 and 1 meV use bin width of 0.01 meV. Use automatic binning again from 1 to 4 meV.
 
-*QBinningParams* are passed to :ref:`SofQWNormalisedPolygon <algm-SofQWNormalisedPolygon>` and have the same format as *EnergyRebinningParamas*. If the property is not specified, :math:`q` is binned to a value that depends on the :math:`2\theta` separation of the detectors and the wavelength.
+*QBinningParams* are passed to :ref:`SofQWNormalisedPolygon <algm-SofQWNormalisedPolygon>` and have the same format as *EnergyRebinningParamas*. If the property is not specified, :math:`q` is binned to a value that depends on the wavelength and the :math:`2\theta` separation of the grouped detectors. By default, the detectors are grouped to 0.01 degree wide bins in :math:`2\theta` or to the value of the ``natural-angle-step`` instrument parameter. The default behavior can be overriden by the *GroupingAngleStep* property.
 
 Transposing output
 ##################

@@ -60,7 +60,7 @@ public:
   /** @name Material properties.*/
   //@{
   /// Return the material (convenience method)
-  const Kernel::Material getMaterial() const;
+  const Kernel::Material &getMaterial() const;
   //@}
 
   /** @name Access the environment information */

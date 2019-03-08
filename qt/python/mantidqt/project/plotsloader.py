@@ -236,6 +236,9 @@ class PlotsLoader(object):
             return
         ax.legend().set_visible(legend["visible"])
 
+        # Ensure that legend is draggable
+        ax.get_legend().draggable()
+
     def update_properties(self, ax, properties):
         ax.set_position(properties["bounds"])
         ax.set_navigate(properties["dynamic"])

@@ -11,6 +11,7 @@ import os
 import csv
 from platform import system
 from shutil import copy2
+from six import u
 
 
 def main(vanadium_run, user, focus_run, **kwargs):
@@ -108,8 +109,7 @@ def run(ceria_run, do_cal, do_van, van_run, calibration_directory, calibration_g
     """
 
     # check whether creating a vanadium is required or requested
-    vanadium = _gen_filename(van_run)
-    if not os.path.isfile(vanadium) or do_van:
+    if (not os.path.isfile(_get_van_names(van_run, calibration_directory)[0])) or do_van:
         create_vanadium(van_run, calibration_directory)
 
     # find the file names of calibration files that would be created by this run
@@ -523,7 +523,7 @@ def _save_out(run_number, focus_directory, focus_general, output, join_string, b
     # work out where to save the files
     filename = os.path.join(focus_directory, join_string.format(run_number, bank_id))
     hdf5_name = os.path.join(focus_directory, run_number + ".hdf5")
-    if not unicode(bank_id).isnumeric():
+    if not u(bank_id).isnumeric():
         bank_id = 0
     # save the files out to the user directory
     simple.SaveFocusedXYE(InputWorkspace=output, Filename=filename + ".dat", SplitFiles=False,

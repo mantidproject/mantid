@@ -14,6 +14,7 @@ from Muon.GUI.Common.observer_pattern import Observer
 from mantid.api import FileFinder
 
 
+import copy
 
 if sys.version_info.major < 2:
     from unittest import mock
@@ -85,10 +86,32 @@ class MuonDataContextTest(unittest.TestCase):
 
         self.assertEqual(AnalysisDataService.getObjectNames(), expected_workspaces)
 
+    def test_setting_current_data_with_a_different_field_sends_message_signal(self):
+        self.context.current_data['MainFieldDirection'] = 'transverse'
+        self.context.message_notifier.notify_subscribers = mock.MagicMock()
+
+        self.context.update_current_data()
+
+        self.context.message_notifier.notify_subscribers.assert_called_once_with('MainFieldDirection has changed between'
+                                                                                 ' data sets, click default to reset grouping if required')
+
+    def test_that_setting_current_runs_with_mixture_of_transverse_and_longitudanal_runs_raises_warning(self):
+        loaded_data = copy.copy(self.context.current_data)
+        self.context.message_notifier.notify_subscribers = mock.MagicMock()
+        loaded_data['MainFieldDirection'] = 'transverse'
+
+        self.loaded_data.add_data(workspace=loaded_data, run=[1], filename='filename', instrument='EMU')
+
+        self.context.current_runs = [[19489], [1]]
+
+        self.context.message_notifier.notify_subscribers.assert_called_once_with(
+            'MainFieldDirection changes within current run set:\ntransverse field runs 1\nlongitudinal field runs 19489\n')
+
     def test_when_gui_variables_is_modified_notifies_observer(self):
         self.context.add_or_replace_gui_variables(RebinType='Fixed')
 
         self.gui_variable_observer.update.assert_called_once_with(self.context.gui_variables_notifier, None)
+
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)
