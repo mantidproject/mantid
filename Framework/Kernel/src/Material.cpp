@@ -51,7 +51,7 @@ inline double scatteringXS(const double realLength, const double imagLength) {
     return .04 * M_PI * lengthSqrd;
   }
 }
-} // anonymous
+} // namespace
 
 Mantid::Kernel::Material::FormulaUnit::FormulaUnit(
     const boost::shared_ptr<PhysicalConstants::Atom> &atom,
@@ -230,9 +230,9 @@ double Material::absorbXSection(const double lambda) const {
         std::accumulate(std::begin(m_chemicalFormula),
                         std::end(m_chemicalFormula), 0.,
                         [](double subtotal, const FormulaUnit &right) {
-          return subtotal +
-                 right.atom->neutron.abs_scatt_xs * right.multiplicity;
-        }) /
+                          return subtotal + right.atom->neutron.abs_scatt_xs *
+                                                right.multiplicity;
+                        }) /
         m_atomTotal;
   }
 

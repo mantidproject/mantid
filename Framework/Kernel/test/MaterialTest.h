@@ -9,8 +9,8 @@
 
 #include <cmath>
 #include <cxxtest/TestSuite.h>
-#include <stdexcept>
 #include <iostream>
+#include <stdexcept>
 
 #include "MantidKernel/Atom.h"
 #include "MantidKernel/Material.h"
@@ -82,8 +82,10 @@ public:
 
     // check everything against another wavelength, only affects absorption
     const double lambda(2.1);
-    TS_ASSERT_DELTA(material.cohScatterXSection(lambda), material.cohScatterXSection(), 1e-04);
-    TS_ASSERT_DELTA(material.incohScatterXSection(lambda), material.incohScatterXSection(), 1e-04);
+    TS_ASSERT_DELTA(material.cohScatterXSection(lambda),
+                    material.cohScatterXSection(), 1e-04);
+    TS_ASSERT_DELTA(material.incohScatterXSection(lambda),
+                    material.incohScatterXSection(), 1e-04);
     TS_ASSERT_DELTA(material.absorbXSection(lambda), 5.93, 1e-02);
   }
 
@@ -98,8 +100,8 @@ public:
     // check everything with (default) reference wavelength
     checkMatching(material, atom);
     const double totLength = material.totalScatterLength();
-    TS_ASSERT_DELTA(.04 * M_PI * totLength * totLength, material.totalScatterXSection(), 1.e-4);
-
+    TS_ASSERT_DELTA(.04 * M_PI * totLength * totLength,
+                    material.totalScatterXSection(), 1.e-4);
   }
 
   // "null scatterer" has only incoherent scattering
