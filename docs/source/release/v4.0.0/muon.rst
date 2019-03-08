@@ -15,6 +15,7 @@ New
 
 Improvements
 ############
+- Elemental Analysis added to Muon Interfaces: Includes a selectable Periodic Table. There are two versions (Elemental Analysis and Elemental Analysis Old) and the difference is the plotting used.
 - TF Asymmetry mode now displays the chi squared value at the top of the browser.
 - ALC interface now sorts the data into ascending order.
 - Muon Analysis now includes number of event per frame and number of events per frame per detector in the run info box on the home tab.

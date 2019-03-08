@@ -259,7 +259,7 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
         newprop = 'files_to_sum={}'.format(filenames_str)
         return self.__getCacheName('summed_'+wsname, additional_props=[newprop])
 
-    def __processFile(self, filename, file_prog_start, determineCharacterizations, createUnfocused):
+    def __processFile(self, filename, file_prog_start, determineCharacterizations, createUnfocused):  # noqa: C902
         chunks = determineChunking(filename, self.chunkSize)
         numSteps = 6  # for better progress reporting - 6 steps per chunk
         if createUnfocused:

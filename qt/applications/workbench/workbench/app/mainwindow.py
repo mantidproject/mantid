@@ -17,10 +17,16 @@ import atexit
 import importlib
 import os
 import sys
+from functools import partial
 
 from mantid.api import FrameworkManagerImpl
 from mantid.kernel import (ConfigService, UsageService, logger, version_str as mantid_version_str)
+from workbench.plugins.exception_handler import exception_logger
 from workbench.widgets.settings.presenter import SettingsPresenter
+
+# -----------------------------------------------------------------------------exception_handler.py
+# Constants
+# -----------------------------------------------------------------------------
 
 SYSCHECK_INTERVAL = 50
 ORIGINAL_SYS_EXIT = sys.exit
@@ -305,7 +311,7 @@ class MainWindow(QMainWindow):
         # list of custom interfaces that are not qt4/qt5 compatible
         GUI_BLACKLIST = ['ISIS_Reflectometry_Old.py',
                          'Frequency_Domain_Analysis_Old.py',
-                         'Frequency_Domain_Analysis.py'
+                         'Frequency_Domain_Analysis.py',
                          'Elemental_Analysis.py']
 
         # detect the python interfaces
@@ -562,9 +568,13 @@ def start_workbench(app, command_line_options):
     """Given an application instance create the MainWindow,
     show it and start the main event loop
     """
+
     # The ordering here is very delicate. Test thoroughly when
     # changing anything!
     main_window = MainWindow()
+    # decorates the excepthook callback with the reference to the main window
+    # this is used in case the user wants to terminate the workbench from the error window shown
+    sys.excepthook = partial(exception_logger, main_window)
 
     # Load matplotlib as early as possible and set our defaults
     # Setup our custom backend and monkey patch in custom current figure manager

@@ -140,6 +140,7 @@ signals:
   void functionChanged();
   void parameterChanged(const Mantid::API::IFunction *);
   void customBoolChanged(const QString &key, bool value);
+  void updateAvailableFitTypes();
 
 protected slots:
 

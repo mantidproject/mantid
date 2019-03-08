@@ -1,4 +1,4 @@
-digraph PowderDiffILLDetEffCorr {
+digraph PowderILLEfficiency {
   label="GlobalSummedReference2D Flowchart"
   $global_style
 
