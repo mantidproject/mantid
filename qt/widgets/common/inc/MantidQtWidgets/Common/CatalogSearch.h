@@ -197,6 +197,9 @@ private:
   QString m_downloadSaveDir;
   /// The current page the user is on in the results window. Used for paging.
   int m_currentPageNumber;
+
+  void correctedToolTip(std::string toolTip, QLabel *label);
+
 };
 } // namespace MantidWidgets
 } // namespace MantidQt
