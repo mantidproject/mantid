@@ -11,7 +11,7 @@ from mantid.kernel import (Direction, EnabledWhenProperty, PropertyCriterion, Pr
 from mantid.geometry import SpaceGroupFactory
 from mantid import logger
 import numpy as np
-from scipy import ndimage, signal
+from scipy import ndimage, signal as ssignal
 
 
 class DeltaPDF3D(PythonAlgorithm):
@@ -39,12 +39,12 @@ class DeltaPDF3D(PythonAlgorithm):
                                                direction=Direction.Output),
                              "Output Workspace")
 
-        self.declareProperty("Method", 'Punch and fill', StringListValidator(['None', 'Punch and fill', 'KAREN']), "Bragg peak removal method")
+        self.declareProperty("Method", 'KAREN', StringListValidator(['None', 'Punch and fill', 'KAREN']), "Bragg peak removal method")
         self.declareProperty("WindowFunction", 'Blackman', StringListValidator(['None', 'Gaussian', 'Blackman', 'Tukey', 'Kaiser']), "Apply a window function to the data")
         self.declareProperty("WindowParameter", defaultValue=0.5, validator=FloatBoundedValidator(0.), doc="Parameter for window function, depends on window type, see algorithm docs")
 
         # Punch and fill
-        condition = EnabledWhenProperty("Method", PropertyCriterion.IsNotDefault)
+        condition = EnabledWhenProperty("Method", PropertyCriterion.IsEqualTo, 'Punch and fill')
         self.declareProperty("Shape", "sphere", doc="Shape to punch out reflections",
                              validator=StringListValidator(['sphere', 'cube']))
         self.setPropertySettings("Shape", condition)
@@ -104,7 +104,7 @@ class DeltaPDF3D(PythonAlgorithm):
 
         for d in range(inWS.getNumDims()):
             dim = inWS.getDimension(d)
-            if not np.isclose(dim.getMaximum(), -dim.getMinimum()):
+            if not np.isclose(dim.getMaximum(), -dim.getMinimum(), atol=1e-5):
                 issues['InputWorkspace'] = 'dimensions must be centered on zero'
 
         if self.getProperty("Convolution").value and self.getProperty("Method").value == 'Punch and fill':
@@ -348,8 +348,10 @@ class DeltaPDF3D(PythonAlgorithm):
     def _gaussian_window(self, width, sigma):
         """
         Generates a gaussian window
+
+        sigma is based on the dat being in a range 0 to 1
         """
-        return signal.gaussian(width[0], sigma*width[0]).reshape((-1,1,1)) * signal.gaussian(width[1], sigma*width[1]).reshape((-1,1)) * signal.gaussian(width[2], sigma*width[2])
+        return ssignal.gaussian(width[0], sigma*width[0]).reshape((-1,1,1)) * ssignal.gaussian(width[1], sigma*width[1]).reshape((-1,1)) * ssignal.gaussian(width[2], sigma*width[2])
 
     def _blackman_window(self, width):
         """
@@ -360,8 +362,13 @@ class DeltaPDF3D(PythonAlgorithm):
     def _tukey_window(self, width, alpha):
         """
         Generates a tukey window
+
+        0 <= alpha <=1
+
+        alpha = 0 becomes rectangular
+        alpha = 1 becomes a Hann window
         """
-        return signal.tukey(width[0], alpha).reshape((-1,1,1)) * signal.tukey(width[1], alpha).reshape((-1,1)) * signal.tukey(width[2], alpha)
+        return ssignal.tukey(width[0], alpha).reshape((-1,1,1)) * ssignal.tukey(width[1], alpha).reshape((-1,1)) * ssignal.tukey(width[2], alpha)
 
     def _kaiser_window(self, width, beta):
         """
