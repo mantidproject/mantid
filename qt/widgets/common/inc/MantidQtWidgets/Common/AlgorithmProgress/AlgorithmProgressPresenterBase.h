@@ -13,7 +13,7 @@
 
 namespace Mantid {
 namespace API {
-class IAlgorithm;
+    class IAlgorithm;
 }
 } // namespace Mantid
 
@@ -22,30 +22,36 @@ class QProgressBar;
 namespace MantidQt {
 namespace MantidWidgets {
 
-class ProgressObserverData;
-class AlgorithmProgressPresenterBase : public QWidget {
-  Q_OBJECT
-public:
-  AlgorithmProgressPresenterBase(QWidget *parent);
-  virtual void updateProgressBar(Mantid::API::IAlgorithm_sptr alg, double p,
-                                 const std::string &msg) = 0;
+    class ProgressObserverData;
+    class AlgorithmProgressPresenterBase : public QWidget {
+        Q_OBJECT
+    public:
+        AlgorithmProgressPresenterBase(QWidget* parent);
 
-public slots:
-  void setProgressBar(QProgressBar *progressBar, double progress,
-                      const std::string &message);
-  /// Emit an update signal to update the GUI in the Qt thread
-  /// as this update is called from the AlgorithmObserver thread
-  void updateGui();
+        /// Called from the ProgressObserver whenever an algorithm emits new progress
+        /// This function should update relevant GUI elements to display the algorithm's progress
+        virtual void updateProgressBar(Mantid::API::IAlgorithm_sptr algorithm, double progress,
+            const std::string& message)
+            = 0;
 
-  /// Update the GUI that the presenter is currently using
-  virtual void setCurrentAlgorithm() = 0;
-signals:
-  // When there has been a change in the observers, this signal
-  // will trigger an update of the current algorithm being watched
-  void updateWatchedAlgorithm();
+    public slots:
+        /// Update the GUI that the presenter is currently using
+        virtual void setCurrentAlgorithm() = 0;
 
-  void progressBarNeedsUpdating(QProgressBar *, double, const std::string &);
-};
+        /// Sets the parameter progress bar to show the progress and message
+        void setProgressBar(QProgressBar* progressBar, double progress,
+            const std::string& message);
+        /// Emit an update signal to update the GUI in the Qt thread
+        /// as this update is called from the AlgorithmObserver thread
+        void updateGui();
+
+    signals:
+        // When there has been a change in the observers, this signal
+        // will trigger an update of the current algorithm being watched
+        void updateWatchedAlgorithm();
+
+        void progressBarNeedsUpdating(QProgressBar*, double, const std::string&);
+    };
 } // namespace MantidWidgets
 } // namespace MantidQt
 

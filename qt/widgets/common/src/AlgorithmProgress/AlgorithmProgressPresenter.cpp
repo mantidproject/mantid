@@ -26,11 +26,10 @@ namespace MantidWidgets {
     }
 
     void AlgorithmProgressPresenter::updateProgressBar(
-        Mantid::API::IAlgorithm_sptr alg,
-        const double progress,
+        Mantid::API::IAlgorithm_sptr algorithm, const double progress,
         const std::string& message)
     {
-        if (alg == this->algorithm) {
+        if (algorithm == this->algorithm) {
             emit progressBarNeedsUpdating(view->pb, progress, message);
         }
     }

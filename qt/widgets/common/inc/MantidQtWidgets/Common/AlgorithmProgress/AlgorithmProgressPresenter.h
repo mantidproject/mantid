@@ -12,26 +12,29 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
-class AlgorithmProgressWidget;
+    class AlgorithmProgressWidget;
 
-class AlgorithmProgressPresenter : public AlgorithmProgressPresenterBase {
-  Q_OBJECT
+    class AlgorithmProgressPresenter : public AlgorithmProgressPresenterBase {
+        Q_OBJECT
 
-public:
-  AlgorithmProgressPresenter(QWidget *parent, AlgorithmProgressWidget *);
+    public:
+        AlgorithmProgressPresenter(QWidget* parent, AlgorithmProgressWidget*);
 
-  void setCurrentAlgorithm() override;
-  void updateProgressBar(Mantid::API::IAlgorithm_sptr, const double p,
-                         const std::string &msg) override;
+        void setCurrentAlgorithm() override;
 
-private:
-  // The creator of the view also owns the view (Python), not this presenter.
-  AlgorithmProgressWidget *view;
-  AlgorithmProgressModel model;
+        /// Updates the visible progress bar on the workbench
+        void updateProgressBar(Mantid::API::IAlgorithm_sptr algorithm, double progress,
+            const std::string& message) override;
 
-  // The algorithm for which a progress bar is currently being controlled
-  Mantid::API::IAlgorithm_sptr algorithm;
-};
+        // TODO model & algorithm are common between all presenters
+        AlgorithmProgressModel model;
+
+    private:
+        // The algorithm for which a progress bar is currently being controlled
+        Mantid::API::IAlgorithm_sptr algorithm;
+        // The creator of the view also owns the view (Python), not this presenter.
+        AlgorithmProgressWidget* view;
+    };
 } // namespace MantidWidgets
 } // namespace MantidQt
 

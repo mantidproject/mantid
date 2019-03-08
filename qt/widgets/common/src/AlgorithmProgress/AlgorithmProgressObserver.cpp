@@ -14,7 +14,9 @@ namespace MantidWidgets {
 
     ProgressObserver::ProgressObserver(AlgorithmProgressModel* model,
         Mantid::API::IAlgorithm_sptr alg)
-        : m_model(model)
+        : algName(alg->name())
+        , algProperties(alg->getProperties())
+        , m_model(model)
         , m_alg(alg)
     {
     }
@@ -25,11 +27,8 @@ namespace MantidWidgets {
     }
 
     void ProgressObserver::progressHandle(const Mantid::API::IAlgorithm* alg,
-        const double p, const std::string& msg)
+        const double progress, const std::string& message)
     {
-        progress = p;
-        message = msg;
-
         m_model->updateProgress(m_alg, progress, message);
     }
 

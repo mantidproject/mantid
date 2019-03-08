@@ -22,7 +22,7 @@ class AlgorithmProgressPresenter(AlgorithmProgressPresenterBase):
         self.model = AlgorithmProgressModel()
         self.model.add_presenter(self)
         self.algorithm = None
-        self.need_update_gui.connect(self.update_gui, Qt.QueuedConnection)
+        self.update_watched_algorithm.connect(self.set_current_algorithm, Qt.QueuedConnection)
         self.need_update_progress_bar.connect(self.set_progress_bar, Qt.QueuedConnection)
 
     def update_progress_bar(self, algorithm, progress, message):
@@ -39,7 +39,7 @@ class AlgorithmProgressPresenter(AlgorithmProgressPresenterBase):
                 message = str(message)
             self.need_update_progress_bar.emit(self.view.progress_bar, float(progress), message)
 
-    def update_gui(self):
+    def set_current_algorithm(self):
         """
         Update the gui.
         """
@@ -57,4 +57,4 @@ class AlgorithmProgressPresenter(AlgorithmProgressPresenterBase):
         """
         Update the gui asynchronously.
         """
-        self.need_update_gui.emit()
+        self.update_watched_algorithm.emit()
