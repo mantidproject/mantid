@@ -193,6 +193,10 @@ class IN6(systemtesting.MantidSystemTest):
         run.addProperty('Ei', 4.72, True)
         self.assertAlmostEqual(run.getProperty('wavelength').value, 4.16207, places=4)
         run.addProperty('wavelength', 4.16, True)
+        # The 'run_title' property has been deliberately erased from the test numor.
+        # We need to add it manually because Save/LoadNexus will do the same for
+        # the reference file.
+        mtd['cropped'].mutableRun().addProperty('run_title', '', True)
 
     def validate(self):
         self.tolerance = 1e-2
