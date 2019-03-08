@@ -619,8 +619,8 @@ def tricontour(axes, workspace, *args, **kwargs):
                           the normalization is mantid.api.MDNormalization.NumEventsNormalization
 
     See :meth:`matplotlib.axes.Axes.tricontour` for more information.
-'''
-if isinstance(workspace, mantid.dataobjects.MDHistoWorkspace):
+    '''
+    if isinstance(workspace, mantid.dataobjects.MDHistoWorkspace):
         (normalization, kwargs) = get_normalization(workspace, **kwargs)
         (x_temp, y_temp, z) = get_md_data2d_bin_centers(workspace, normalization)
         (x, y) = numpy.meshgrid(x_temp, y_temp)
