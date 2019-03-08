@@ -716,9 +716,11 @@ bool LoadEventNexus::loadInstrument(const std::string &nexusfilename,
                                     const std::string &top_entry_name,
                                     Algorithm *alg) {
 
-  bool loadNexusInstrumentXML = alg->getProperty("LoadNexusInstrumentXML");
-  bool foundInstrument = false;
+  bool loadNexusInstrumentXML = true;
+  if (alg->existsProperty("LoadNexusInstrumentXML"))
+    loadNexusInstrumentXML = alg->getProperty("LoadNexusInstrumentXML");
 
+  bool foundInstrument = false;
   if (loadNexusInstrumentXML)
     foundInstrument = runLoadIDFFromNexus<T>(nexusfilename, localWorkspace,
                                              top_entry_name, alg);
