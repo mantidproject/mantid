@@ -189,7 +189,7 @@ class GroupingTablePresenter(object):
         if range_min_new < self._model._data.gui_variables['GroupRangeMax']:
             self._model._data.add_or_replace_gui_variables(GroupRangeMin=range_min_new)
         else:
-            self._view.group_range_min.setText(self._model._data.gui_variables['GroupRangeMin'])
+            self._view.group_range_min.setText(str(self._model._data.gui_variables['GroupRangeMin']))
             self._view.warning_popup('Minimum of group asymmetry range must be less than maximum')
 
     def handle_group_range_max_updated(self):
@@ -197,5 +197,5 @@ class GroupingTablePresenter(object):
         if range_max_new > self._model._data.gui_variables['GroupRangeMin']:
             self._model._data.add_or_replace_gui_variables(GroupRangeMax=float(self._view.group_range_max.text()))
         else:
-            self._view.group_range_max.setText(self._model._data.gui_variables['GroupRangeMax'])
+            self._view.group_range_max.setText(str(self._model._data.gui_variables['GroupRangeMax']))
             self._view.warning_popup('Maximum of group asymmetry range must be less than minimum')
