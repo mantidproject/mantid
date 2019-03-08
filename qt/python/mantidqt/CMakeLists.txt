@@ -30,66 +30,68 @@ list ( APPEND common_link_libs
 )
 
 # Wrapper module linked against Qt4
-mtd_add_sip_module (
-  MODULE_NAME _commonqt4
-  TARGET_NAME mantidqt_commonqt4
-  SIP_SRCS _common.sip
-  HEADER_DEPS ${_header_depends}
-  PYQT_VERSION 4
-  INCLUDE_DIRS
-    ${CMAKE_CURRENT_LIST_DIR}
-    ${COMMON_SIP_DIR}
-    ${PYTHON_INCLUDE_PATH}
-    ${CMAKE_SOURCE_DIR}/Framework/PythonInterface/core/inc
-  LINK_LIBS
-    ${common_link_libs}
-    MantidQtWidgetsCommonQt4
-    Qt4::QtCore
-    Qt4::QtGui
-    Qt4::Qscintilla
-    ${Boost_LIBRARIES}
-    API
-  INSTALL_DIR
-    ${LIB_DIR}/mantidqt
-  LINUX_INSTALL_RPATH
-    "\$ORIGIN/.."
-  OSX_INSTALL_RPATH
-    "@loader_path/.."
-  FOLDER Qt4
-)
-
-if ( ENABLE_WORKBENCH )
-  find_package ( QScintillaQt5 REQUIRED )
+if ( ENABLE_MANTIDPLOT )
+  mtd_add_sip_module (
+    MODULE_NAME _commonqt4
+    TARGET_NAME mantidqt_commonqt4
+    SIP_SRCS _common.sip
+    HEADER_DEPS ${_header_depends}
+    PYQT_VERSION 4
+    INCLUDE_DIRS
+      ${CMAKE_CURRENT_LIST_DIR}
+      ${COMMON_SIP_DIR}
+      ${PYTHON_INCLUDE_PATH}
+      ${CMAKE_SOURCE_DIR}/Framework/PythonInterface/core/inc
+    LINK_LIBS
+      ${common_link_libs}
+      MantidQtWidgetsCommonQt4
+      Qt4::QtCore
+      Qt4::QtGui
+      Qt4::Qscintilla
+      ${Boost_LIBRARIES}
+      API
+    INSTALL_DIR
+      ${LIB_DIR}/mantidqt
+    LINUX_INSTALL_RPATH
+      "\$ORIGIN/.."
+    OSX_INSTALL_RPATH
+      "@loader_path/.."
+    FOLDER Qt4
+  )
 endif()
 
 # Wrapper module linked against Qt5
-mtd_add_sip_module (
-  MODULE_NAME _commonqt5
-  TARGET_NAME mantidqt_commonqt5
-  SIP_SRCS _common.sip
-  HEADER_DEPS ${_header_depends}
-  PYQT_VERSION 5
-  INCLUDE_DIRS
-    ${CMAKE_CURRENT_LIST_DIR}
-    ${COMMON_SIP_DIR}
-    ${PYTHON_INCLUDE_PATH}
-    ${CMAKE_SOURCE_DIR}/Framework/PythonInterface/core/inc
-  LINK_LIBS
-    ${common_link_libs}
-    MantidQtWidgetsCommonQt5
-    Qt5::Core
-    Qt5::Gui
-    Qt5::Widgets
-    Qt5::Qscintilla
-    ${Boost_LIBRARIES}
-    API
-  INSTALL_DIR
-    ${WORKBENCH_LIB_DIR}/mantidqt
-  LINUX_INSTALL_RPATH
-    "\$ORIGIN/.."
-  OSX_INSTALL_RPATH
-    "@loader_path/.." 
-  FOLDER Qt5
-)
+if ( ENABLE_WORKBENCH )
+  find_package ( QScintillaQt5 REQUIRED )
+
+  mtd_add_sip_module (
+    MODULE_NAME _commonqt5
+    TARGET_NAME mantidqt_commonqt5
+    SIP_SRCS _common.sip
+    HEADER_DEPS ${_header_depends}
+    PYQT_VERSION 5
+    INCLUDE_DIRS
+      ${CMAKE_CURRENT_LIST_DIR}
+      ${COMMON_SIP_DIR}
+      ${PYTHON_INCLUDE_PATH}
+      ${CMAKE_SOURCE_DIR}/Framework/PythonInterface/core/inc
+    LINK_LIBS
+      ${common_link_libs}
+      MantidQtWidgetsCommonQt5
+      Qt5::Core
+      Qt5::Gui
+      Qt5::Widgets
+      Qt5::Qscintilla
+      ${Boost_LIBRARIES}
+      API
+    INSTALL_DIR
+      ${WORKBENCH_LIB_DIR}/mantidqt
+    LINUX_INSTALL_RPATH
+      "\$ORIGIN/.."
+    OSX_INSTALL_RPATH
+      "@loader_path/.." 
+    FOLDER Qt5
+  )
+endif()
 
 add_subdirectory ( widgets/instrumentview )
