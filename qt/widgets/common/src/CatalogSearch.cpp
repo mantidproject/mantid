@@ -577,14 +577,13 @@ bool CatalogSearch::validateDates() {
 }
 
 void CatalogSearch::correctedToolTip(std::string text, QLabel *label) {
-  #ifdef Q_OS_WIN
-  label->setToolTip(
-      QString::fromStdString("<span style=\"color: black;\">"+text+"</span>"));
-  #else
-  label->setToolTip(
-      QString::fromStdString("<span style=\"color: white;\">"+text+"</span>"));
+#ifdef Q_OS_WIN
+  label->setToolTip(QString::fromStdString("<span style=\"color: black;\">" +
+                                           text + "</span>"));
+#else
+  label->setToolTip(QString::fromStdString("<span style=\"color: white;\">" +
+                                           text + "</span>"));
 #endif
-
 }
 
 /**
