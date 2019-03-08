@@ -52,8 +52,9 @@ Changes
 
 .. toctree::
    :hidden:
+   :glob:
 
-   *.rst
+   *
 
 - :doc:`Framework <framework>`
 - :doc:`General UI & Usability <ui>`
