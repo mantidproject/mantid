@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import Load
-from mantid.api import WorkspaceGroup, AlgorithmManager
+from mantid.api import AnalysisDataService, WorkspaceGroup, AlgorithmManager
 from mantid import mtd, logger, config
 
 import os
@@ -90,7 +90,8 @@ def load_file_ranges(file_ranges, ipf_filename, spec_min, spec_max, sum_files=Tr
     return workspace_names, chopped_data
 
 
-def load_files(data_files, ipf_filename, spec_min, spec_max, sum_files=False, load_logs=True, load_opts=None):
+def load_files(data_files, ipf_filename, spec_min, spec_max, sum_files=False, load_logs=True, load_opts=None,
+               find_masked_detectors=False):
     """
     Loads a set of files and extracts just the spectra we care about (i.e. detector range and monitor).
 
@@ -101,10 +102,13 @@ def load_files(data_files, ipf_filename, spec_min, spec_max, sum_files=False, lo
     @param sum_files Sum loaded files
     @param load_logs Load log files when loading runs
     @param load_opts Additional options to be passed to load algorithm
+    @param find_masked_detectors True if you want to find the masked detectors for the data files (summed)
 
     @return List of loaded workspace names and flag indicating chopped data
     """
     workspace_names, chopped_data = _load_files(data_files, ipf_filename, spec_min, spec_max, load_logs, load_opts)
+
+    masked_detectors = get_detectors_to_mask_from_groups(workspace_names) if find_masked_detectors else None
 
     # Sum files if needed
     if sum_files and len(data_files) > 1:
@@ -115,7 +119,7 @@ def load_files(data_files, ipf_filename, spec_min, spec_max, sum_files=False, lo
 
     logger.information('Summed workspace names: %s' % (str(workspace_names)))
 
-    return workspace_names, chopped_data
+    return workspace_names, chopped_data, masked_detectors
 
 
 def _load_files(file_specifiers, ipf_filename, spec_min, spec_max, load_logs=True, load_opts=None):
@@ -389,6 +393,19 @@ def sum_chopped_runs(workspace_names):
 
 
 # -------------------------------------------------------------------------------
+
+
+def get_detectors_to_mask_from_groups(group_names):
+    workspace_names = []
+    for group_name in group_names:
+        workspace = AnalysisDataService.retrieve(group_name)
+        if isinstance(workspace, WorkspaceGroup):
+            for name in workspace.getNames():
+                workspace_names.append(name)
+        else:
+            workspace_names.append(group_name)
+
+    return get_detectors_to_mask(workspace_names)
 
 
 def get_detectors_to_mask(workspace_names):

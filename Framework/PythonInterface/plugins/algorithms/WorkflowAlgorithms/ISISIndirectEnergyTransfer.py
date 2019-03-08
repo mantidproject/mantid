@@ -146,12 +146,12 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
         self._setup()
         load_prog = Progress(self, start=0.0, end=0.10, nreports=2)
         load_prog.report('loading files')
-        self._workspace_names, self._chopped_data = load_files(self._data_files,
-                                                               self._ipf_filename,
-                                                               self._spectra_range[0],
-                                                               self._spectra_range[1],
-                                                               self._sum_files,
-                                                               self._load_logs)
+        self._workspace_names, self._chopped_data, masked_detectors = load_files(self._data_files,
+                                                                                 self._ipf_filename,
+                                                                                 self._spectra_range[0],
+                                                                                 self._spectra_range[1],
+                                                                                 self._sum_files,
+                                                                                 self._load_logs, None, self._sum_files)
         load_prog.report('files loaded')
 
         process_prog = Progress(self, start=0.1, end=0.9, nreports=len(self._workspace_names))
@@ -169,7 +169,8 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
             rebin_string_2, num_bins = get_multi_frame_rebin(c_ws_name,
                                                              self._rebin_string)
 
-            masked_detectors = get_detectors_to_mask(workspaces)
+            if not self._sum_files:
+                masked_detectors = get_detectors_to_mask(workspaces)
 
             # Process workspaces
             for ws_name in workspaces:
