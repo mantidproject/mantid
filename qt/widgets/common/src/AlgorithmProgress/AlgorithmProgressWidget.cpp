@@ -10,28 +10,19 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
-AlgorithmProgressWidget::AlgorithmProgressWidget(QWidget *parent)
-    : QWidget(parent), presenter{
-                           std::make_unique<AlgorithmProgressPresenter>(this)} {
+    AlgorithmProgressWidget::AlgorithmProgressWidget(QWidget* parent)
+        : QWidget(parent)
+        , presenter { std::make_unique<AlgorithmProgressPresenter>(parent, this) }
+    {
+        setAttribute(Qt::WA_DeleteOnClose);
 
-  m_detailsButton = new QPushButton("Details");
-  layout = new QHBoxLayout(this);
-  pb = new QProgressBar(this);
-  pb->setAlignment(Qt::AlignHCenter);
-  layout->addWidget(pb);
-  layout->addStretch();
-  layout->addWidget(m_detailsButton);
-  this->setLayout(layout);
-
-  // Connect the signal to update the progress bar, this signal can be
-  // triggered from any thread and will correctly update the progress bar
-  // that is inside the Qt GUI thread
-  connect(this, SIGNAL(updateProgressBar(double)), this,
-          SLOT(setProgressBarValue(double)));
-}
-void AlgorithmProgressWidget::setProgressBarValue(const double progress) {
-  pb->setValue(progress * 100);
-}
-
+        m_detailsButton = new QPushButton("Details");
+        layout = new QHBoxLayout(this);
+        pb = new QProgressBar(this);
+        pb->setAlignment(Qt::AlignHCenter);
+        layout->addWidget(pb);
+        layout->addWidget(m_detailsButton);
+        this->setLayout(layout);
+    }
 } // namespace MantidWidgets
 } // namespace MantidQt

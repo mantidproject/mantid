@@ -8,6 +8,7 @@
 #define ALGORITHMPROGRESSPRESENTER_H
 #include "AlgorithmProgressModel.h"
 #include "AlgorithmProgressPresenterBase.h"
+#include <QWidget>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -17,7 +18,7 @@ class AlgorithmProgressPresenter : public AlgorithmProgressPresenterBase {
   Q_OBJECT
 
 public:
-  AlgorithmProgressPresenter(AlgorithmProgressWidget *);
+  AlgorithmProgressPresenter(QWidget *parent, AlgorithmProgressWidget *);
 
   void setCurrentAlgorithm() override;
   void updateProgressBar(Mantid::API::IAlgorithm_sptr, const double p,

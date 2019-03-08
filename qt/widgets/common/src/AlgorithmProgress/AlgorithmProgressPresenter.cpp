@@ -10,26 +10,30 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
-AlgorithmProgressPresenter::AlgorithmProgressPresenter(
-    AlgorithmProgressWidget *view)
-    : view(view), model{AlgorithmProgressModel()} {}
-
-void AlgorithmProgressPresenter::setCurrentAlgorithm() {
-  algorithm = model.latestRunningAlgorithm();
-}
-
-void AlgorithmProgressPresenter::updateProgressBar(Mantid::API::IAlgorithm_sptr alg,
-                                                   const double progress,
-                                                   const std::string &msg) {
-  if (alg == this->algorithm) {
-    auto message = std::string{""};
-    if (!msg.empty()) {
-      message = msg;
+    AlgorithmProgressPresenter::AlgorithmProgressPresenter(
+        QWidget* parent,
+        AlgorithmProgressWidget* view)
+        : AlgorithmProgressPresenterBase(parent)
+        , view(view)
+        , model { AlgorithmProgressModel() }
+    {
+        model.addPresenter(this);
     }
 
-    emit progressBarNeedsUpdating(view->pb, progress, msg);
-  }
-}
+    void AlgorithmProgressPresenter::setCurrentAlgorithm()
+    {
+        algorithm = model.latestRunningAlgorithm();
+    }
+
+    void AlgorithmProgressPresenter::updateProgressBar(
+        Mantid::API::IAlgorithm_sptr alg,
+        const double progress,
+        const std::string& message)
+    {
+        if (alg == this->algorithm) {
+            emit progressBarNeedsUpdating(view->pb, progress, message);
+        }
+    }
 
 } // namespace MantidWidgets
 } // namespace MantidQt
