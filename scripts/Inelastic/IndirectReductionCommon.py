@@ -593,7 +593,7 @@ def get_group_from_string(grouping_string):
 
 
 def create_group_from_string(group_detectors, grouping_string):
-    group_detectors.setProperty("WorkspaceIndexList", get_group_from_string(grouping_string))
+    group_detectors.setProperty("SpectraList", get_group_from_string(grouping_string))
     group_detectors.setProperty("OutputWorkspace", "__temp")
     group_detectors.execute()
     return group_detectors.getProperty("OutputWorkspace").value
