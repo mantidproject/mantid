@@ -48,7 +48,7 @@ def _plus_friendly(ws1, ws2, out):
     Plus(LHSWorkspace=ws1, RHSWorkspace=ws2, OutputWorkspace=out)
 
 
-class PowderDiffILLDetEffCorr(PythonAlgorithm):
+class PowderILLEfficiency(PythonAlgorithm):
 
     _out_name = None            # the name of the output workspace
     _input_files = None         # input files (numor), must be detector scans (to list for D2B, to merge for D20)
@@ -85,10 +85,10 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
                "monochromatic powder diffraction instruments D20 and D2B at ILL."
 
     def seeAlso(self):
-        return [ "ApplyDetectorScanEffCorr","PowderDiffILLReduction" ]
+        return [ "PowderILLDetectorScan", "PowderILLParameterScan" ]
 
     def name(self):
-        return "PowderDiffILLDetEffCorr"
+        return "PowderILLEfficiency"
 
     def PyInit(self):
         self.declareProperty(MultipleFileProperty('CalibrationRun', action=FileAction.Load, extensions=['nxs']),
@@ -810,4 +810,4 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
             self.setProperty('OutputResponseWorkspace', self._out_response)
 
 #Register the algorithm with Mantid
-AlgorithmFactory.subscribe(PowderDiffILLDetEffCorr)
+AlgorithmFactory.subscribe(PowderILLEfficiency)

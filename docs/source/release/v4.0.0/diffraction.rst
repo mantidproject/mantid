@@ -10,9 +10,10 @@ Improvements
 
 - SNAP instrument geometry updated to include downstream monitor.
 - :ref:`LoadILLDiffraction <algm-LoadILLDiffraction>` will not flip the even-numbered tubes when using the calibrated data, since they are flipped already in the nexus files.
-- :ref:`PowderDiffILLDetScanReduction <algm-PowderDiffILLDetScanReduction>` will scale the counts by 1M, when normalisation to monitor is requested. It will also offer to enable/disable the tube alignment, and offer tube by tube reduction.
-- :ref:`PowderDiffILLDetEffCorr <algm-PowderDiffILLDetEffCorr>` now offers to use the raw or calibrated data blocks in the nexus files.
-- :ref:`SNAPReduce <algm-SNAPReduce>` has been completely refactored and has been given extra parameters. It now uses :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` for a large part of its functionality. There is also an optional background run number that will be subtracted. It has progress bar and all output workspaces have history. It is also more memory efficient by reducing the number of temporary workspaces created.
+- :ref:`PowderILLDetectorScan <algm-PowderILLDetectorScan>` will scale the counts by 1M, when normalisation to monitor is requested, and it will also offer to enable/disable the tube alignment, and offer tube by tube reduction.
+- :ref:`PowderILLEfficiency <algm-PowderILLEfficiency>` now offers to use the raw or calibrated data blocks in the nexus files.
+- :ref:`SNAPReduce <algm-SNAPReduce>` now has progress bar and all output workspaces have history
+- :ref:`SNAPReduce <algm-SNAPReduce>` has been completely refactored. It now uses :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` for a large part of its functionality. It has progress bar and all output workspaces have history. It is also more memory efficient by reducing the number of temporary workspaces created.
 - :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>` and :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` now support outputting the unfocussed data and weighted events (with time). This allows for event filtering **after** processing the data.
 - :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` has significant performance improvements when used with chunking and can now use summed cache files. Failing to load a cache file will now produce a warning, rather than exception, and the algorithm will continue without the file.
 - :ref:`LoadWAND <algm-LoadWAND>` has grouping option added and loads faster.
@@ -25,7 +26,7 @@ Improvements
 - New TOPAZ instrument geometry for 2019 run cycle
 - :ref:`LoadDiffCal <algm-LoadDiffCal>` has an additional parameter to allow for a second file specifying a grouping to override the one in the calibration file
 - :ref:`LoadILLDiffraction <algm-LoadILLDiffraction>` will now correctly resolve for the scan type and drive the detector to the offset corrected :math:`2theta_0` for D20 detector scans.
-- :ref:`PowderDiffILLDetScanReduction <algm-PowderDiffILLDetScanReduction>` will never merge the detector scans at the raw level even if they are supplied with + operator; it will process them separately and merge at the end.
+- :ref:`PowderILLDetectorScan <algm-PowderILLDetectorScan>` will never merge the detector scans at the raw level even if they are supplied with + operator; it will process them separately and merge at the end.
 
 Single Crystal Diffraction
 --------------------------
@@ -87,6 +88,7 @@ Improvements
 - Focus now checks if the vanadium for a run is already loaded before loading it in to prevent reloading the same vanadium multiple times.
 - :ref:`SaveReflections <algm-SaveReflections>` now supports saving indexed modulated peaks in the Jana format.
 - `PyStoG <https://pystog.readthedocs.io/en/latest/>`_ has been added as an external project.
+- :ref:`SNSPowderReduction <algm-SNSPowderReduction>` has been refactored to process the vanadium data in chunks. It has also been modified to calculate the vanadium correction for multiple wavelengths
 
 Bugfixes
 ########
@@ -105,6 +107,13 @@ New Algorithms
 - :ref:`LoadGudrunOutput <algm-LoadGudrunOutput>` is a new algorithm that allows users to load the standard Gudrun output files into Mantid.
 - New algorithm :ref:`PDConvertReciprocalSpace <algm-PDConvertReciprocalSpace>` to convert between reciprocal space units.
 - New algorithm :ref:`PDConvertRealSpace <algm-PDConvertRealSpace>` to convert between real space units.
+
+Renamed Algorithms
+##################
+
+- **PowderDiffILLReduction** is renamed to :ref:`PowderILLParameterScan <algm-PowderILLParameterScan>`
+- **PowderDiffILLDetEffCorr** is renamed to :ref:`PowderILLEfficiency <algm-PowderILLEfficiency>`
+- **PowderDiffILLDetScanReduction** is renamed to :ref:`PowderILLDetectorScan <algm-PowderILLDetectorScan>`
 
 Engineering Diffraction
 -----------------------

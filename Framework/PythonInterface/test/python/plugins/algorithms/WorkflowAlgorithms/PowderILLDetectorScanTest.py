@@ -8,12 +8,12 @@ from __future__ import (absolute_import, division, print_function)
 
 import unittest
 from mantid.api import MatrixWorkspace, WorkspaceGroup
-from mantid.simpleapi import PowderDiffILLDetScanReduction, config, mtd
+from mantid.simpleapi import PowderILLDetectorScan, config, mtd
 
 
 # This is just a light test for the default options.
 # More options are covered by system tests, since it takes too long for a unit test.
-class PowderDiffILLDetScanReductionTest(unittest.TestCase):
+class PowderILLDetectorScanTest(unittest.TestCase):
 
     def setUp(self):
         config['default.facility'] = 'ILL'
@@ -24,7 +24,7 @@ class PowderDiffILLDetScanReductionTest(unittest.TestCase):
         mtd.clear()
 
     def test_default_options_d2b(self):
-        red = PowderDiffILLDetScanReduction(Run='508093')
+        red = PowderILLDetectorScan(Run='508093')
         self.assertTrue(red)
         self.assertTrue(isinstance(red, WorkspaceGroup))
         self.assertEquals(red.getNumberOfEntries(), 1)

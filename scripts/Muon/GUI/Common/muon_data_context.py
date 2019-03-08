@@ -105,7 +105,7 @@ class MuonDataContext(object):
         self._pairs = OrderedDict()
 
         self._loaded_data = load_data
-        self._gui_variables = {}
+        self._gui_variables = {'SummedPeriods': [1], 'SubtractedPeriods': []}
         self._current_data = {"workspace": load_utils.empty_loaded_data()}  # self.get_result(False)
 
         self._current_runs = []

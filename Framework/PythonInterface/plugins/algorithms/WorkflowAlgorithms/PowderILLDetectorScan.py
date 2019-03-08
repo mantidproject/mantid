@@ -12,7 +12,7 @@ from mantid.api import DataProcessorAlgorithm, MultipleFileProperty, Progress, W
 from mantid.simpleapi import *
 
 
-class PowderDiffILLDetScanReduction(DataProcessorAlgorithm):
+class PowderILLDetectorScan(DataProcessorAlgorithm):
     _progress = None
     _height_range = ''
     _mirror = None
@@ -27,10 +27,10 @@ class PowderDiffILLDetScanReduction(DataProcessorAlgorithm):
         return 'Performs powder diffraction data reduction for D2B and D20 (when doing a detector scan).'
 
     def seeAlso(self):
-        return [ "PowderDiffILLReduction", "PowderDiffILLDetEffCorr" ]
+        return [ "PowderILLParameterScan", "PowderILLEfficiency" ]
 
     def name(self):
-        return "PowderDiffILLDetScanReduction"
+        return "PowderILLDetectorScan"
 
     def validateInputs(self):
         issues = dict()
@@ -263,4 +263,4 @@ class PowderDiffILLDetScanReduction(DataProcessorAlgorithm):
         self.setProperty('OutputWorkspace', self._out_ws_name)
 
 # Register the algorithm with Mantid
-AlgorithmFactory.subscribe(PowderDiffILLDetScanReduction)
+AlgorithmFactory.subscribe(PowderILLDetectorScan)
