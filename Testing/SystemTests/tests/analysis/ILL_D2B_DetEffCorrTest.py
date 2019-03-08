@@ -7,7 +7,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 import systemtesting
-from mantid.simpleapi import PowderDiffILLDetEffCorr, GroupWorkspaces
+from mantid.simpleapi import PowderILLEfficiency, GroupWorkspaces
 from mantid import config, mtd
 import numpy as np
 
@@ -30,11 +30,11 @@ class ILL_D2B_DetEffCorrTest(systemtesting.MantidSystemTest):
         mtd.clear()
 
     def testAutoMasking(self):
-        PowderDiffILLDetEffCorr(CalibrationRun='532008,532009',
-                                DerivationMethod='GlobalSummedReference2D',
-                                ExcludedRange=[-5,10],
-                                OutputWorkspace='masked',
-                                MaskCriterion=[0.3,3])
+        PowderILLEfficiency(CalibrationRun='532008,532009',
+                            DerivationMethod='GlobalSummedReference2D',
+                            ExcludedRange=[-5,10],
+                            OutputWorkspace='masked',
+                            MaskCriterion=[0.3,3])
         data = mtd['masked'].extractY().flatten()
         data = data[np.nonzero(data)]
         coeff_max = data.max()
@@ -46,11 +46,11 @@ class ILL_D2B_DetEffCorrTest(systemtesting.MantidSystemTest):
 
         self.testAutoMasking()
 
-        PowderDiffILLDetEffCorr(CalibrationRun='532008,532009',
-                                DerivationMethod='GlobalSummedReference2D',
-                                ExcludedRange=[-5,10],
-                                OutputWorkspace='calib',
-                                OutputResponseWorkspace='response')
+        PowderILLEfficiency(CalibrationRun='532008,532009',
+                            DerivationMethod='GlobalSummedReference2D',
+                            ExcludedRange=[-5,10],
+                            OutputWorkspace='calib',
+                            OutputResponseWorkspace='response')
         GroupWorkspaces(InputWorkspaces=['calib','response'], OutputWorkspace='group')
 
     def validate(self):
