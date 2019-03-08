@@ -260,7 +260,7 @@ class GroupingTablePresenterTest(unittest.TestCase):
     def test_that_if_not_entering_numbers_into_detector_IDs_the_changes_are_rejected(self):
         self.add_three_groups_to_table()
 
-        invalid_id_lists = ["fwd", "a", "A", "!", "_", "(1)", "11a22"]
+        invalid_id_lists = ["fwd", "a", "A", "!", "_", "(1)", "11a22", '0']
 
         call_count = 0
         for invalid_ids in invalid_id_lists:
