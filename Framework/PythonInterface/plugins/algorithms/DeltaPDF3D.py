@@ -40,8 +40,10 @@ class DeltaPDF3D(PythonAlgorithm):
                              "Output Workspace")
 
         self.declareProperty("Method", 'KAREN', StringListValidator(['None', 'Punch and fill', 'KAREN']), "Bragg peak removal method")
-        self.declareProperty("WindowFunction", 'Blackman', StringListValidator(['None', 'Gaussian', 'Blackman', 'Tukey', 'Kaiser']), "Apply a window function to the data")
-        self.declareProperty("WindowParameter", defaultValue=0.5, validator=FloatBoundedValidator(0.), doc="Parameter for window function, depends on window type, see algorithm docs")
+        self.declareProperty("WindowFunction", 'Blackman', StringListValidator(['None', 'Gaussian', 'Blackman', 'Tukey', 'Kaiser']),
+                             "Apply a window function to the data")
+        self.declareProperty("WindowParameter", defaultValue=0.5, validator=FloatBoundedValidator(0.),
+                             doc="Parameter for window function, depends on window type, see algorithm docs")
 
         # Punch and fill
         condition = EnabledWhenProperty("Method", PropertyCriterion.IsEqualTo, 'Punch and fill')
@@ -133,6 +135,12 @@ class DeltaPDF3D(PythonAlgorithm):
         sphereMax = self.getProperty("SphereMax").value
         if len(sphereMax) != 1 and len(sphereMax) != 3:
             issues["SphereMax"] = 'Must provide 1 or 3 diameters'
+
+        if self.getProperty("WindowFunction").value == 'Tukey':
+            try:
+                ssignal.tukey
+            except AttributeError:
+                issues["WindowFunction"] = 'Tukey window requires scipy >= 0.16.0'
 
         return issues
 
@@ -351,7 +359,9 @@ class DeltaPDF3D(PythonAlgorithm):
 
         sigma is based on the dat being in a range 0 to 1
         """
-        return ssignal.gaussian(width[0], sigma*width[0]).reshape((-1,1,1)) * ssignal.gaussian(width[1], sigma*width[1]).reshape((-1,1)) * ssignal.gaussian(width[2], sigma*width[2])
+        return (ssignal.gaussian(width[0], sigma*width[0]).reshape((-1,1,1)) *
+                ssignal.gaussian(width[1], sigma*width[1]).reshape((-1,1)) *
+                ssignal.gaussian(width[2], sigma*width[2]))
 
     def _blackman_window(self, width):
         """
@@ -368,7 +378,9 @@ class DeltaPDF3D(PythonAlgorithm):
         alpha = 0 becomes rectangular
         alpha = 1 becomes a Hann window
         """
-        return ssignal.tukey(width[0], alpha).reshape((-1,1,1)) * ssignal.tukey(width[1], alpha).reshape((-1,1)) * ssignal.tukey(width[2], alpha)
+        return (ssignal.tukey(width[0], alpha).reshape((-1,1,1)) *
+                ssignal.tukey(width[1], alpha).reshape((-1,1)) *
+                ssignal.tukey(width[2], alpha))
 
     def _kaiser_window(self, width, beta):
         """

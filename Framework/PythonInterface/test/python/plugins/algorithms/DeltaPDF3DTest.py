@@ -9,6 +9,7 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 from mantid.simpleapi import DeltaPDF3D, CreateMDWorkspace, FakeMDEventData, BinMD, mtd
 import numpy as np
+from scipy import signal
 
 
 class DeltaPDF3DTest(unittest.TestCase):
@@ -154,6 +155,7 @@ class DeltaPDF3DTest(unittest.TestCase):
         self.assertAlmostEqual(fft.signalAt(1866), -83.109989976) # [1,0,0]
         self.assertAlmostEqual(fft.signalAt(2232), 81.957445912) # [1,1,0]
 
+    @unittest.skipIf(not hasattr(signal,'tukey'), 'Window function not available with this version of scipy')
     def test_2D_KAREN_tukey(self):
         DeltaPDF3D(InputWorkspace='DeltaPDF3DTest_MDH_2',OutputWorkspace='fft',
                    Method='KAREN',WindowFunction='Tukey',KARENWidth=3)
