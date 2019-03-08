@@ -15,7 +15,6 @@ set ( SRC_FILES
 	src/ApplyFloodWorkspace.cpp
 	src/ApplyTransmissionCorrection.cpp
 	src/AverageLogData.cpp
-	src/AverageSpectrumBackground.cpp
 	src/Bin2DPowderDiffraction.cpp
 	src/BinaryOperateMasks.cpp
 	src/BinaryOperation.cpp
@@ -353,7 +352,6 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ApplyFloodWorkspace.h
 	inc/MantidAlgorithms/ApplyTransmissionCorrection.h
 	inc/MantidAlgorithms/AverageLogData.h
-	inc/MantidAlgorithms/AverageSpectrumBackground.h
 	inc/MantidAlgorithms/Bin2DPowderDiffraction.h
 	inc/MantidAlgorithms/BinaryOperateMasks.h
 	inc/MantidAlgorithms/BinaryOperation.h
@@ -708,7 +706,6 @@ set ( TEST_FILES
 	ApplyFloodWorkspaceTest.h
 	ApplyTransmissionCorrectionTest.h
 	AverageLogDataTest.h
-	AverageSpectrumBackgroundTest.h
 	Bin2DPowderDiffractionTest.h
 	BinaryOperateMasksTest.h
 	BinaryOperationTest.h
