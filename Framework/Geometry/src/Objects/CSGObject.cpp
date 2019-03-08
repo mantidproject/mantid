@@ -2102,7 +2102,6 @@ int CSGObject::searchForObject(Kernel::V3D &point) const {
   // Method - check if point in object, if not search directions along
   // principle axes using interceptSurface
   //
-  Kernel::V3D testPt;
   if (isValid(point))
     return 1;
   for (const auto &dir :
