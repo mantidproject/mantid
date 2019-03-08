@@ -178,8 +178,8 @@ The factor :math:`\frac{1}{12}` comes from the variance of a uniform distributio
 
 .. math:: \int^{\frac{1}{2}}_{-\frac{1}{2}} x^2 dx = \frac{1}{12}
 
-.. figure:: sample-annulus-variation.png
-   :alt: /images/Pychop-annulus-shape.png
+.. figure:: /images/Pychop-annulus-shape.png
+   :alt: sample-annulus-variation.png
    :align: right
    :width: 300
 
