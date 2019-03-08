@@ -53,15 +53,27 @@ class subplot(QtWidgets.QWidget):
 
     def add_annotate(self, subplotName, label):
         if subplotName not in self._context.subplots.keys():
-            print("Unknown subplot selected " + subplotName)
             return
         self._context.add_annotate(subplotName, label)
+        self.canvas.draw()
 
     def add_vline(self, subplotName, xvalue, name):
         if subplotName not in self._context.subplots.keys():
-            print("Unknown subplot selected " + subplotName)
             return
         self._context.add_vline(subplotName, xvalue, name)
+        self.canvas.draw()
+
+    def rm_annotate(self, subplotName, name):
+        if subplotName not in self._context.subplots.keys():
+            return
+        self._context.removeLabel(subplotName, name)
+        self.canvas.draw()
+
+    def rm_vline(self, subplotName, name):
+        if subplotName not in self._context.subplots.keys():
+            return
+        self._context.removeVLine(subplotName, name)
+        self.canvas.draw()
 
     # plot a workspace, if a new subplot create it.
     def plot(self, subplotName, workspace, specNum=1):
@@ -108,23 +120,23 @@ class subplot(QtWidgets.QWidget):
             self._context.subplots[subplotName].redraw_annotations()
             self.canvas.draw()
 
-    def set_plot_y_range(self, subplotNames, range):
+    def set_plot_y_range(self, subplotNames, y_range):
         for subplotName in subplotNames:
-            self.plotObjects[subplotName].set_ylim(range)
+            self.plotObjects[subplotName].set_ylim(y_range)
             self._context.subplots[subplotName].redraw_annotations()
             self.canvas.draw()
 
     def connect_quick_edit_signal(self, slot):
         self.quickEditSignal.connect(slot)
 
-    def disconnect_quick_edit_signal(self, slot):
-        self.quickEditSignal.disconnect(slot)
+    def disconnect_quick_edit_signal(self):
+        self.quickEditSignal.disconnect()
 
     def connect_rm_subplot_signal(self, slot):
         self.rmSubplotSignal.connect(slot)
 
-    def disconnect_rm_subplot_signal(self, slot):
-        self.rmSubplotSignal.disconnect(slot)
+    def disconnect_rm_subplot_signal(self):
+        self.rmSubplotSignal.disconnect()
 
     def set_y_autoscale(self, subplotNames, state):
         for subplotName in subplotNames:
