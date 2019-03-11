@@ -1,5 +1,9 @@
 .. _workbench:
 
+=========
+Workbench
+=========
+
 .. toctree::
    :hidden:
    :glob:
@@ -11,10 +15,9 @@
    plotwindow.rst
    scriptwindow.rst
    workspacetreewidget.rst
-
-=========
-Workbench
-=========
+   whatisinworkbench.rst
+   ipythonconsole.rst
+   smallerfeatures.rst
 
 .. image:: ../images/Workbench/Workbench.png
     :height: 225
@@ -22,60 +25,25 @@ Workbench
     :alt: Workbench
     :align: right
 
-
 Mantid Workbench is the newest user interface for Mantid. The Workbench will be
-included alongside MantidPlot for several releases before replacing it completely. The Workbench has been built from the ground up to be easier to use, more stable, support automatic testing and allow future development and changes to be completed much faster than they were in MantidPlot.  In addition it is built on more up to date toolkits that will allow us to keep developing the workbench long after MantidPlot is no longer available.
+included alongside MantidPlot for several releases before replacing it completely. The Workbench has been built from the
+ground up to be easier to use, more stable, support automatic testing and allow future development and changes to be
+completed much faster than they were in MantidPlot.  In addition it is built on more up to date toolkits that will
+allow us to keep developing the workbench long after MantidPlot is no longer available.
 
-===========================
-What is there in Workbench?
-===========================
+**What is in Workbench?**
+    * :ref:`WhatIsInWorkbench`
+    * :ref:`WorkbenchSmallerFeatures`
 
-Most of what users currently use in Mantid Plot is or will be incorporated into workbench. This includes but is not
-limited to, user group interfaces, scripting window (fully integrated into the main window), workspace display,
-algorithm widgets, and plotting.
-
-
-Workbench Windows
------------------
-One of the immediate things that is noticeable about workbench, is all the windows integrated into the main window.
-These can be dragged away and out of the main window docks. Any part of the workbench found with the example icon on it
-can be dragged out of the main window, to somewhere else.
-
-Example:
-
-.. image:: ../images/Workbench/WindowDraggableIcon.png
-    :height: 50
-    :width: 50
-    :alt: Workbench draggable icon
-
-Workspace Toolbox
------------------
-
-.. image:: ../images/Workbench/Workspaces/WorkspaceWidget.png
-    :height: 200
-    :width: 150
-    :alt: Workspace Toolbox
-    :align: center
-
-The :ref:`WorkbenchWorkspaceToolbox` is a key part of workbench and if a you are familiar with MantidPlot it function
-very similarly. From here you can see all of the workspaces currently available to the User. Here you can load,
-save, group, delete, sort, plot, and more a breakdown of these features can be found here:
-:ref:`WorkbenchWorkspaceToolbox`
-
-
-Algorithm Toolbox
------------------
-
-.. image:: ../images/Workbench/AlgorithmWidget.png
-    :height: 200
-    :width: 150
-    :alt: Algorithm Toolbox
-    :align: center
-
-The :ref:`WorkbenchAlgorithmToolbox` is another key part of the workbench, once again if you are familiar with
-MantidPlot it functions very similarly. From here you can access and run all of the algorithms that Mantid Workbench has
-to offer to it's users. To find algorithms there are two options for navigation, if you know the name then doing a
-search in the search bar, the other option is selecting it's category and navigating utilising the menu.
+**Workbench Features**
+    * :ref:`WorkbenchWorkspaceToolbox`
+    * :ref:`WorkbenchAlgorithmToolbox`
+    * :ref:`WorkbenchScriptWindow`
+    * :ref:`WorkbenchMessagesWindow`
+    * :ref:`WorkbenchMainWindowMenu`
+    * :ref:`WorkbenchPlotsToolbox`
+    * :ref:`WorkbenchIPythonConsole`
+    * :ref:`WorkbenchPlotWindow`
 
 Script Window
 -------------
@@ -117,15 +85,6 @@ much like the workspace toolbox. It has the option to hide, remove, and edit the
 this can be done from the buttons on top of the toolbox which will allow you to perform operations on multiple plots
 at once, showing, hiding and more with the click of a button. More here: :ref:`WorkbenchPlotsToolbox`
 
-IPython Console
----------------
-
-.. image:: ../images/Workbench/IPythonWidget.png
-
-This is a python interpreter which has access to the Mantid API and can interface with the rest of the workbench.
-Therefore, it is possible to interact with the algorithms, workspaces and plots from the Workbench, it allows you to
-manipulate things much like the script window can but in an interpreter style.
-
 Plot Window
 -----------
 
@@ -134,11 +93,4 @@ Plot Window
 This is the window in which all plots will be shown in. There are many things that are possible from this window with
 regards to adjusting the the plot, saving/exporting and fitting. This topic really deserves it's own pages and thus
 further descriptions can be found here: :ref:`WorkbenchPlotWindow`
-
-Overall Workbench Diagram
---------------------------
-
-Here is a diagram that shows where different parts of the workbench are on the default layout.
-
-.. image:: ../images/Workbench/WorkbenchDiagram.png
 
