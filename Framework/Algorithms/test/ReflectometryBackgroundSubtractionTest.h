@@ -11,6 +11,7 @@
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAlgorithms/ReflectometryBackgroundSubtraction.h"
+#include "MantidTestHelpers/ReflectometryHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::Algorithms::ReflectometryBackgroundSubtraction;
@@ -32,19 +33,29 @@ public:
 
   ReflectometryBackgroundSubtractionTest() {
     FrameworkManager::Instance();
-    // A multi detector ws
-    m_multiDetectorWSWithPeak = WorkspaceCreationHelper::
-        create2DWorkspaceWithReflectometryInstrumentMultiDetector();
-  }
 
+    // A multi detector ws with a peak in the 3rd spectra (values equal to 5)
+    // and background of 2.0
+
+    m_multiDetectorWSWithPeak = WorkspaceCreationHelper::
+        create2DWorkspaceWithReflectometryInstrumentMultiDetector(
+            0.0, 0.0, Mantid::Kernel::V3D(0, 0, 0),
+            Mantid::Kernel::V3D(0, 0, 1), 0.5, 1.0,
+            Mantid::Kernel::V3D(0, 0, 0), Mantid::Kernel::V3D(14, 0, 0),
+            Mantid::Kernel::V3D(15, 0, 0),
+            Mantid::Kernel::V3D(20, (20 - 15), 0), 7, 3, 10);
+
+    const std::vector<double> yValues = {5, 5, 5, 5, 5, 5, 5};
+    for (auto i = 0; i < m_multiDetectorWSWithPeak->y(5).size(); ++i) {
+      m_multiDetectorWSWithPeak->mutableY(3)[i] = yValues[i];
+    }
+  }
   void test_executionPerSpectraAverage() {
     auto alg = setupAlgorithm();
     TS_ASSERT_THROWS_NOTHING(
         alg->setProperty("InputWorkspace", m_multiDetectorWSWithPeak))
     TS_ASSERT_THROWS_NOTHING(
-        alg->setProperty("TypeOfBackgroundSubtraction", "Per Detector Average"))
-    TS_ASSERT_THROWS_NOTHING(alg->setProperty("BottomBackgroundRange", "0,2"))
-    TS_ASSERT_THROWS_NOTHING(alg->setProperty("TopBackgroundRange", "3,4"))
+        alg->setProperty("SubtractionMethod", "Per Detector Average"))
     TS_ASSERT(alg->execute())
   }
 
@@ -53,61 +64,117 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         alg->setProperty("InputWorkspace", m_multiDetectorWSWithPeak))
     TS_ASSERT_THROWS_NOTHING(
-        alg->setProperty("TypeOfBackgroundSubtraction", "Polynomial"))
-    TS_ASSERT_THROWS_NOTHING(alg->setProperty("DegreeOfPolynomial", "0"))
-    TS_ASSERT_THROWS_NOTHING(alg->setProperty("XRanges", "0,1.5,2.5,3"))
+        alg->setProperty("SubtractionMethod", "Polynomial"))
     TS_ASSERT(alg->execute())
   }
 
-  void test_outputPerSpectraAverage() {
+  void test_PerSpectraAverageOutput() {
+	//test output of perSpectraAverage method
+	//InputWorkspaceIndexSet set to spectra containing background
+	//output should be 0 for all counts except at peak where values should be 3.0
     auto alg = setupAlgorithm();
     alg->setProperty("InputWorkspace", m_multiDetectorWSWithPeak);
-    alg->setProperty("TypeOfBackgroundSubtraction", "Per Detector Average");
-    alg->setProperty("BottomBackgroundRange", "0,2");
-    alg->setProperty("TopBackgroundRange", "3,4");
+    alg->setProperty("InputWorkspaceIndexSet", "0-2,4-6");
+    alg->setProperty("SubtractionMethod", "Per Detector Average");
     alg->execute();
     MatrixWorkspace_sptr outputWS = alg->getProperty("OutputWorkspace");
 
-    const auto &output_counts = outputWS->counts(0);
-    for (auto itr = output_counts.begin(); itr != output_counts.end(); ++itr) {
-      TS_ASSERT_DELTA(0.0, *itr, 0.0001)
-    }
-  }
-
-  void test_outputPolynomial() {
-    auto alg = setupAlgorithm();
-    alg->setProperty("InputWorkspace", m_multiDetectorWSWithPeak);
-    alg->setProperty("TypeOfBackgroundSubtraction", "Polynomial");
-    alg->setProperty("DegreeOfPolynomial", "0");
-    alg->setProperty("XRanges", "0,1.5,2.5,3");
-    alg->execute();
-    MatrixWorkspace_sptr outputWS = alg->getProperty("OutputWorkspace");
-
-    const auto &output_counts = outputWS->counts(0);
-    for (auto itr = output_counts.begin(); itr != output_counts.end(); ++itr) {
-      TS_ASSERT_DELTA(0.0, *itr, 0.0001)
-    }
-  }
-
-  void test_default_OutputWorkspace() {
-    ReflectometryBackgroundSubtraction alg;
-    auto inputWS = MatrixWorkspace_sptr(m_multiDetectorWSWithPeak->clone());
-    for (size_t i = 0; i < inputWS->getNumberHistograms(); ++i) {
-      auto &y = inputWS->mutableY(i);
-      for (size_t j = 0; j < y.size(); ++j) {
-        y[j] += double(j + 1) * double(i + 1);
+	for (auto i = 0; i != outputWS->getNumberHistograms(); ++i) {
+      const auto &output_counts = outputWS->counts(i);
+      if (i != 3) {
+        for (auto itr = output_counts.begin(); itr != output_counts.end();
+             ++itr) {
+          TS_ASSERT_DELTA(0.0, *itr, 0.0001)
+        }
+      } else {
+        for (auto itr = output_counts.begin(); itr != output_counts.end();
+             ++itr) {
+          TS_ASSERT_DELTA(3.0, *itr, 0.0001)
+        }
       }
     }
 
-    alg.initialize();
-    alg.setRethrows(true);
-    alg.setProperty("InputWorkspace", inputWS);
-    alg.setProperty("BottomBackgroundRange", "2,3");
-    alg.setProperty("TopBackgroundRange", "3,4");
-    alg.execute();
+    TS_ASSERT(alg->execute())
+  }
 
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("_Background"));
-    AnalysisDataService::Instance().clear();
+  void test_PerSpectraAverageSubtractBackgroundFalse(){
+    // test output of perSpectraAverage method when SubtractBackground is set to false
+    // Should output a single spectra workspace containing the background which is equal to 2.0
+    auto alg = setupAlgorithm();
+    alg->setProperty("InputWorkspace", m_multiDetectorWSWithPeak);
+    alg->setProperty("InputWorkspaceIndexSet", "0-2,4-6");
+    alg->setProperty("SubtractionMethod", "Per Detector Average");
+    alg->setProperty("SubtractBackground", false);
+    alg->execute();
+    MatrixWorkspace_sptr outputWS = alg->getProperty("OutputWorkspace");
+
+	const auto &output_counts = outputWS->counts(0);
+    for (auto itr = output_counts.begin(); itr != output_counts.end(); ++itr) {
+      TS_ASSERT_DELTA(2.0, *itr, 0.0001)
+    }
+  }
+
+  void test_PolynomialOutput() {
+    // test output of polynomial method
+    // InputWorkspaceIndexSet set to spectra containing background
+    // output should be 0 for all counts except at peak where values should
+    // be 3.0
+    auto alg = setupAlgorithm();
+    alg->setProperty("InputWorkspace", m_multiDetectorWSWithPeak);
+    alg->setProperty("InputWorkspaceIndexSet", "0-2,4-6");
+    alg->setProperty("SubtractionMethod", "Polynomial");
+    alg->setProperty("DegreeOfPolynomial", "0");
+    alg->execute();
+    MatrixWorkspace_sptr outputWS = alg->getProperty("OutputWorkspace");
+
+	for (auto i = 0; i != outputWS->getNumberHistograms(); ++i) {
+      const auto &output_counts = outputWS->counts(i);
+      if (i != 3) {
+        for (auto itr = output_counts.begin(); itr != output_counts.end();
+             ++itr) {
+          TS_ASSERT_DELTA(0.0, *itr, 0.0001)
+        }
+      } else {
+        for (auto itr = output_counts.begin(); itr != output_counts.end();
+             ++itr) {
+          TS_ASSERT_DELTA(3.0, *itr, 0.0001)
+        }
+      }
+    }
+  }
+
+  void test_PolynomialSubtractBackgroundFalse() {
+    // test output of polynomial method
+    // InputWorkspaceIndexSet set to all spectra containing background
+    // output should be a workspace containing the background 
+	// i.e. 5 histograms all with counts equal to 2.0
+    auto alg = setupAlgorithm();
+    alg->setProperty("InputWorkspace", m_multiDetectorWSWithPeak);
+    alg->setProperty("InputWorkspaceIndexSet", "0-2,4-6");
+    alg->setProperty("SubtractionMethod", "Polynomial");
+    alg->setProperty("DegreeOfPolynomial", "0");
+    alg->setProperty("SubtractBackground", false);
+    alg->execute();
+    MatrixWorkspace_sptr outputWS = alg->getProperty("OutputWorkspace");
+
+    for (auto i = 0; i != outputWS->getNumberHistograms(); ++i) {
+      const auto &output_counts = outputWS->counts(i);
+      for (auto itr = output_counts.begin(); itr != output_counts.end();
+             ++itr) {
+      TS_ASSERT_DELTA(2.0, *itr, 0.0001)
+      }
+    }
+  }
+
+  void test_PolynomialSingleSpectraInputError() {
+    // test output of polynomial method returns an error when one spectra is entered
+    auto alg = setupAlgorithm();
+    alg->setProperty("InputWorkspace", m_multiDetectorWSWithPeak);
+    alg->setProperty("InputWorkspaceIndexSet", "2");
+    alg->setProperty("SubtractionMethod", "Polynomial");
+    alg->setProperty("DegreeOfPolynomial", "0");
+    alg->setProperty("SubtractBackground", false);
+    TS_ASSERT_THROWS_ANYTHING(alg->execute())
   }
 
 private:
