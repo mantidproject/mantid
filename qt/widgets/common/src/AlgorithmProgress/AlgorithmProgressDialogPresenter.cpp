@@ -8,45 +8,40 @@
 #include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressDialogPresenter.h"
 #include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressDialogWidget.h"
 #include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressModel.h"
+#include <boost/detail/compressed_pair.hpp>
 
 namespace MantidQt {
 namespace MantidWidgets {
 
     AlgorithmProgressDialogPresenter::AlgorithmProgressDialogPresenter(QWidget* parent, AlgorithmProgressDialogWidget* view, AlgorithmProgressModel& model)
         : AlgorithmProgressPresenterBase(parent)
-        , view { view }
-        , model { model }
-        , progressBars { std::vector<QProgressBar*>() }
+        , m_view { view }
+        , m_model { model }
+        , m_progressBars { new std::unordered_map<Mantid::API::IAlgorithm*, std::pair<Mantid::API::IAlgorithm_sptr, QProgressBar*>>() }
     {
         model.addPresenter(this);
     }
 
     void AlgorithmProgressDialogPresenter::setCurrentAlgorithm()
     {
-        progressBars.clear();
-        view->updateRunningAlgorithms(model.runningAlgorithms());
+        // clear all held progress bars, this container owns nothing so nothing is leaked
+        m_progressBars->clear();
+        m_view->updateRunningAlgorithms(m_model.runningAlgorithms());
     }
 
-    void AlgorithmProgressDialogPresenter::addProgressBar(QProgressBar* pb)
+    void AlgorithmProgressDialogPresenter::addProgressBar(Mantid::API::IAlgorithm_sptr alg, QProgressBar* pb)
     {
-        progressBars.emplace_back(pb);
-    }
-
-    void AlgorithmProgressDialogPresenter::cancelAlgorithm(Mantid::API::IAlgorithm_sptr algorithm) const
-    {
-        algorithm->cancel();
+        m_progressBars->insert(std::make_pair(alg.get(), std::make_pair(alg, pb)));
     }
 
     void AlgorithmProgressDialogPresenter::removeFromModel()
     {
-        model.removePresenter(this);
+        m_model.removePresenter(this);
     }
 
-    void AlgorithmProgressDialogPresenter::updateProgressBar(Mantid::API::IAlgorithm_sptr, double progress, const std::string& message)
+    void AlgorithmProgressDialogPresenter::updateProgressBar(Mantid::API::IAlgorithm_sptr alg, double progress, const std::string& message)
     {
-        for (const auto pb : progressBars) {
-            emit progressBarNeedsUpdating(pb, progress, message);
-        }
+        emit progressBarNeedsUpdating(m_progressBars->at(alg.get()).second, progress, message);
     }
 }
 }

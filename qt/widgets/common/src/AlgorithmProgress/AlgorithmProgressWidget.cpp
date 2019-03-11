@@ -4,46 +4,63 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include <QProgressBar>
 
+#include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressWidget.h"
 #include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressDialogWidget.h"
 #include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressPresenter.h"
-#include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressWidget.h"
+
+#include <QProgressBar>
 
 namespace MantidQt {
 namespace MantidWidgets {
 
     AlgorithmProgressWidget::AlgorithmProgressWidget(QWidget* parent)
         : QWidget(parent)
-        , pb { new QProgressBar(this) }
-        , layout { new QHBoxLayout(this) }
+        , m_progressBar { new QProgressBar(this) }
+        , m_layout { new QHBoxLayout(this) }
         , m_detailsButton { new QPushButton("Details") }
-        , presenter { std::make_unique<AlgorithmProgressPresenter>(parent, this) }
+        , m_presenter { std::make_unique<AlgorithmProgressPresenter>(parent, this) }
 
     {
         setAttribute(Qt::WA_DeleteOnClose);
-        pb->setAlignment(Qt::AlignHCenter);
-        layout->addWidget(pb);
-        layout->addWidget(m_detailsButton);
-        this->setLayout(layout);
+
+        m_progressBar->setAlignment(Qt::AlignHCenter);
+        m_layout->addWidget(m_progressBar);
+        m_layout->addWidget(m_detailsButton);
+        this->setLayout(m_layout);
 
         connect(m_detailsButton, &QPushButton::clicked, this, &AlgorithmProgressWidget::showDetailsDialog);
     }
 
-    void AlgorithmProgressWidget::deleteDetailsDialog()
+    void AlgorithmProgressWidget::algorithmStarted()
     {
-        // TODO delete the damn details somehow
-        delete details;
+        m_detailsButton->setDisabled(false);
     }
+
+    void AlgorithmProgressWidget::algorithmEnded()
+    {
+        m_progressBar->setValue(0);
+        m_progressBar->setFormat("Idle.");
+        m_detailsButton->setDisabled(true);
+    }
+
     void AlgorithmProgressWidget::showDetailsDialog()
     {
-        if (!details) {
-            details = std::make_unique<AlgorithmProgressDialogWidget>(dynamic_cast<QWidget*>(this->parent()), presenter->model);
-            details->show();
-        } else {
-            details->show();
+        // If the dialog exist but is not visible, then just show it again
+        if (m_details && !m_details->isVisible()) {
+            m_details->show();
+        } else if (!m_details) {
+            // If the dialog does not exist we create it. The dialog has the attribute
+            // DeleteOnClose so it will delete itself when the user closes it
+            const auto parent = dynamic_cast<QWidget*>(this->parent());
+            m_details = new AlgorithmProgressDialogWidget(parent, m_presenter->model());
+            m_details->show();
         }
     }
 
+    constexpr QProgressBar* AlgorithmProgressWidget::progressBar() const
+    {
+        return m_progressBar;
+    }
 } // namespace MantidWidgets
 } // namespace MantidQt

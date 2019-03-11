@@ -8,7 +8,13 @@
 #define ALGORITHMPROGRESSDIALOGPRESENTER_H
 #include "AlgorithmProgressModel.h"
 #include "AlgorithmProgressPresenterBase.h"
+#include "MantidAPI/IAlgorithm.h"
+#include <unordered_map>
 
+/**
+ * The AlgorithmProgressDialogPresenter keeps track of the active progress bars that need updating whenever their
+ * algorithms report any progress.
+ */
 namespace MantidQt {
 namespace MantidWidgets {
     class AlgorithmProgressModel;
@@ -19,21 +25,26 @@ namespace MantidWidgets {
     public:
         AlgorithmProgressDialogPresenter(QWidget* parent, AlgorithmProgressDialogWidget* view, AlgorithmProgressModel& model);
 
+        /// Sets the current algorithms being show in the window
         void setCurrentAlgorithm() override;
 
         /// Add a progress bar that this presenter will update.
         /// The presenter does NOT own the progress bar
-        void addProgressBar(QProgressBar* pb);
-        void cancelAlgorithm(Mantid::API::IAlgorithm_sptr algorithm) const;
+        void addProgressBar(Mantid::API::IAlgorithm_sptr alg, QProgressBar* pb);
+        /// Removes this presenter from the model, so that it can stop getting
+        /// updates for algorithms' progress
         void removeFromModel();
 
         /// Updates the list of progress bar currently managed by the presenter
-        void updateProgressBar(Mantid::API::IAlgorithm_sptr, double progress, const std::string& message) override;
+        void updateProgressBar(Mantid::API::IAlgorithm_sptr alg, double progress, const std::string& message) override;
 
     private:
-        AlgorithmProgressDialogWidget* view;
-        AlgorithmProgressModel& model;
-        std::vector<QProgressBar*> progressBars;
+        AlgorithmProgressDialogWidget* m_view;
+        /// Reference to the model of the visible progress bar
+        AlgorithmProgressModel& m_model;
+        /// Container for all the progress bar that are currently being displayed
+        /// This container does NOT own any of the progress bars
+        std::unordered_map<Mantid::API::IAlgorithm*, std::pair<Mantid::API::IAlgorithm_sptr, QProgressBar*>>* m_progressBars;
     };
 } // namespace MantidWidgets
 } // namespace MantidQt

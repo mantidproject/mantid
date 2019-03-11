@@ -12,8 +12,8 @@ namespace MantidWidgets {
 
     AlgorithmProgressModel::AlgorithmProgressModel()
         : AlgorithmObserver()
-        , presenters { std::vector<AlgorithmProgressPresenterBase*>() }
-        , observers { std::vector<std::unique_ptr<ProgressObserver>>() }
+        , m_presenters { std::vector<AlgorithmProgressPresenterBase*>() }
+        , m_observers { std::vector<std::unique_ptr<ProgressObserver>>() }
     {
         // Start capturing the triggers from ALL algorithms starting
         // this allows us to attach an observer to the algorithm to track the
@@ -23,36 +23,37 @@ namespace MantidWidgets {
     void AlgorithmProgressModel::addPresenter(
         AlgorithmProgressPresenterBase* newPresenter)
     {
-        presenters.emplace_back(newPresenter);
+        m_presenters.emplace_back(newPresenter);
     }
 
     void AlgorithmProgressModel::updatePresenters()
     {
-        for (auto& presenter : presenters) {
+        for (auto& presenter : m_presenters) {
             presenter->updateGui();
         }
     }
     void AlgorithmProgressModel::removePresenter(
         const AlgorithmProgressPresenterBase* presenter)
     {
-        const auto it = std::find(presenters.begin(), presenters.end(), presenter);
-        if (it != presenters.end()) {
-            presenters.erase(it);
+        const auto it = std::find(m_presenters.begin(), m_presenters.end(), presenter);
+        if (it != m_presenters.end()) {
+            m_presenters.erase(it);
         }
     }
     void AlgorithmProgressModel::removeObserver(ProgressObserver* observer)
     {
+        std::lock_guard<std::mutex> guard(*howdoesMutex);
         // find the observer that is being removed in the list of observers,
         // a custom comparison is used to compare the pointer inside the unique ptr
         const auto it = std::find_if(
-            observers.begin(), observers.end(),
+            m_observers.begin(), m_observers.end(),
             [&observer](const std::unique_ptr<ProgressObserver>& currentObserver) {
                 return currentObserver.get() == observer;
             });
-
-        if (it != observers.end()) {
+        // FIXME can't delete without locking because multiple things can delete simultaneously zzz
+        if (it != m_observers.end()) {
             observer->stopObservingCurrentAlgorithm();
-            observers.erase(it);
+            m_observers.erase(it);
             updatePresenters();
         }
     }
@@ -60,42 +61,48 @@ namespace MantidWidgets {
         const double progress,
         const std::string& msg)
     {
-        for (auto& presenter : presenters) {
+        std::lock_guard<std::mutex> guard(*howdoesMutex);
+
+        for (auto& presenter : m_presenters) {
             presenter->updateProgressBar(alg, progress, msg);
         }
     }
 
     void AlgorithmProgressModel::startingHandle(Mantid::API::IAlgorithm_sptr alg)
     {
-        auto po = std::make_unique<ProgressObserver>(this, alg);
-        po->observeProgress(alg);
-        po->observeFinish(alg);
-        po->observeError(alg);
-        std::cout << "Algorithms starting: " << alg->name() << '\n';
+        std::lock_guard<std::mutex> guard(*howdoesMutex);
+
+        auto progressObserver = std::make_unique<ProgressObserver>(this, alg);
+        progressObserver->observeProgress(alg);
+        progressObserver->observeFinish(alg);
+        progressObserver->observeError(alg);
         // give ownership to the vector, when the observer
         // is removed from it, it will be freed
-        observers.emplace_back(std::move(po));
+        m_observers.emplace_back(std::move(progressObserver));
         updatePresenters();
     }
 
     std::vector<Mantid::API::IAlgorithm_sptr>
-    AlgorithmProgressModel::runningAlgorithms() const
+    AlgorithmProgressModel::runningAlgorithms()
     {
-        auto vec { std::vector<Mantid::API::IAlgorithm_sptr>() };
-        vec.reserve(observers.size());
+        std::lock_guard<std::mutex> guard(*howdoesMutex);
 
-        for (const auto& obs : observers) {
-            vec.emplace_back(obs->currentAlgorithm());
+        auto runningAlgs { std::vector<Mantid::API::IAlgorithm_sptr>() };
+        runningAlgs.reserve(m_observers.size());
+
+        for (const auto& obs : m_observers) {
+            runningAlgs.emplace_back(obs->currentAlgorithm());
         }
 
-        return vec;
+        return runningAlgs;
     }
 
-    Mantid::API::IAlgorithm_sptr
-    AlgorithmProgressModel::latestRunningAlgorithm() const
+    Mantid::API::IAlgorithm_sptr AlgorithmProgressModel::latestRunningAlgorithm()
     {
-        if (!observers.empty()) {
-            return observers.back()->currentAlgorithm();
+        std::lock_guard<std::mutex> guard(*howdoesMutex);
+
+        if (!m_observers.empty()) {
+            return m_observers.back()->currentAlgorithm();
         } else {
             return nullptr;
         }

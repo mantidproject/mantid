@@ -19,9 +19,14 @@ namespace API {
 
 class QProgressBar;
 
+/**
+ * The AlgorithmProgressPresenterBase is the base class that presenters showing progress bars use.
+ * It provides common connections for triggers from the model, e.g. when an algorithm has progressed
+ * and the progress bar value needs to be updated.
+ */
+
 namespace MantidQt {
 namespace MantidWidgets {
-
     class ProgressObserverData;
     class AlgorithmProgressPresenterBase : public QWidget {
         Q_OBJECT

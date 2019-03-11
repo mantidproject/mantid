@@ -10,6 +10,12 @@
 #include "AlgorithmProgressPresenterBase.h"
 #include <QWidget>
 
+/**
+ * The AlgorithmProgressPresenter is the presenter for the progress bar always visible on the Workbench.
+ * It will update the progress bar with the latest algorithm that has been run. If there are two or more
+ * running simultaneously, only the latest one's progress will be displayed. More than one progress bar is
+ * handled by the AlgorithmProgressDialogWidget.
+ */
 namespace MantidQt {
 namespace MantidWidgets {
     class AlgorithmProgressWidget;
@@ -26,14 +32,17 @@ namespace MantidWidgets {
         void updateProgressBar(Mantid::API::IAlgorithm_sptr algorithm, double progress,
             const std::string& message) override;
 
-        // TODO model & algorithm are common between all presenters
-        AlgorithmProgressModel model;
+        constexpr AlgorithmProgressModel& model()
+        {
+            return m_model;
+        }
 
     private:
+        AlgorithmProgressModel m_model;
         // The algorithm for which a progress bar is currently being controlled
-        Mantid::API::IAlgorithm_sptr algorithm;
+        Mantid::API::IAlgorithm_sptr m_algorithm;
         // The creator of the view also owns the view (Python), not this presenter.
-        AlgorithmProgressWidget* view;
+        AlgorithmProgressWidget* m_view;
     };
 } // namespace MantidWidgets
 } // namespace MantidQt
