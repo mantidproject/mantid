@@ -337,13 +337,21 @@ operator=(PrivateFittingData &&fittingData) {
 }
 
 IndirectFittingModel::IndirectFittingModel()
-    : m_previousModelSelected(false), m_fittingMode(FittingMode::SEQUENTIAL) {}
+    : m_previousModelSelected(false), m_fittingMode(FittingMode::SEQUENTIAL) {observeReplace(true);}
 
 MatrixWorkspace_sptr
 IndirectFittingModel::getWorkspace(std::size_t index) const {
   if (index < m_fittingData.size())
     return m_fittingData[index]->workspace();
   return nullptr;
+}
+
+std::vector<std::string> IndirectFittingModel::getWorkspaceNames() const {
+  std::vector<std::string> names;
+  for(size_t i = 0;i<m_fittingData.size();i++){
+    names.emplace_back(m_fittingData[i]->workspace()->getName());
+  }
+  return names;
 }
 
 Spectra IndirectFittingModel::getSpectra(std::size_t index) const {
@@ -445,6 +453,17 @@ std::vector<std::string> IndirectFittingModel::getFitParameterNames() const {
 
 Mantid::API::IFunction_sptr IndirectFittingModel::getFittingFunction() const {
   return m_activeFunction;
+}
+
+void IndirectFittingModel::replaceHandle(const std::string &wsName,
+                                         const Workspace_sptr &ws) {
+  const auto names = getWorkspaceNames();
+  const auto location = std::find(names.begin(), names.end(), wsName);
+  if (location != names.end()) {
+    const std::size_t index = std::distance(names.begin(), location);
+    removeWorkspace(index);
+    addWorkspace(wsName);
+  }
 }
 
 void IndirectFittingModel::setFittingData(PrivateFittingData &&fittingData) {
