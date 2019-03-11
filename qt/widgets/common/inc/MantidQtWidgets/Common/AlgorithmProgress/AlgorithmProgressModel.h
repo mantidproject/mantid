@@ -12,40 +12,44 @@
 #include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressPresenterBase.h"
 
 #include <memory>
+#include <mutex>
 #include <string>
 #include <vector>
 
+/**
+ * The AlgorithmProgressModel keeps track of all active presenters that are managing
+ * views with progress bars, and notifies them whenever they need to update due to
+ * an algorithm's event. It tracks the starting of algorithms, and will create
+ * ProgressObservers for each algorithm that starts.
+ */
 namespace MantidQt {
 namespace MantidWidgets {
     class AlgorithmProgressModel : public Mantid::API::AlgorithmObserver {
     public:
-        using RunningAlgorithmData = std::tuple<std::string, Mantid::API::IAlgorithm_sptr,
-            const std::vector<Mantid::Kernel::Property*>&>;
-
         AlgorithmProgressModel();
 
         /// Add a new presenter that is displaying a progress bar
         void addPresenter(AlgorithmProgressPresenterBase* presenter);
+        /// Remove a new presenter to stop it from getting updates for algorithm progress
         void removePresenter(const AlgorithmProgressPresenterBase* presenter);
         /// Update the progress bar in all live presenters
         void updatePresenters();
-
         /// Remove a currently active observer
         void removeObserver(ProgressObserver* observer);
         /// Update the progress using data from the observer
-        void updateProgress(Mantid::API::IAlgorithm_sptr alg, double progress,
+        void updateProgress(Mantid::API::IAlgorithm_sptr, double progress,
             const std::string& msg);
 
         /// Start an observer that tracks the execution of the parameter algorithm
         void startingHandle(Mantid::API::IAlgorithm_sptr alg) override;
 
-        // TODO figure out if this is necessary
-        std::vector<Mantid::API::IAlgorithm_sptr> runningAlgorithms() const;
-        Mantid::API::IAlgorithm_sptr latestRunningAlgorithm() const;
+        std::vector<Mantid::API::IAlgorithm_sptr> runningAlgorithms();
+        Mantid::API::IAlgorithm_sptr latestRunningAlgorithm();
 
     private:
-        std::vector<AlgorithmProgressPresenterBase*> presenters;
-        std::vector<std::unique_ptr<ProgressObserver>> observers;
+        std::unique_ptr<std::mutex> howdoesMutex = std::make_unique<std::mutex>();
+        std::vector<AlgorithmProgressPresenterBase*> m_presenters;
+        std::vector<std::unique_ptr<ProgressObserver>> m_observers;
     };
 
 } // namespace MantidWidgets

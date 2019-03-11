@@ -4,7 +4,6 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-
 #include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressPresenter.h"
 #include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressWidget.h"
 
@@ -14,23 +13,28 @@ namespace MantidWidgets {
         QWidget* parent,
         AlgorithmProgressWidget* view)
         : AlgorithmProgressPresenterBase(parent)
-        , view(view)
-        , model { AlgorithmProgressModel() }
+        , m_model { AlgorithmProgressModel() }
+        , m_view(view)
     {
-        model.addPresenter(this);
+        m_model.addPresenter(this);
     }
 
     void AlgorithmProgressPresenter::setCurrentAlgorithm()
     {
-        algorithm = model.latestRunningAlgorithm();
+        m_algorithm = m_model.latestRunningAlgorithm();
+        if (!m_algorithm) {
+            m_view->algorithmEnded();
+        } else {
+            m_view->algorithmStarted();
+        }
     }
 
     void AlgorithmProgressPresenter::updateProgressBar(
         Mantid::API::IAlgorithm_sptr algorithm, const double progress,
         const std::string& message)
     {
-        if (algorithm == this->algorithm) {
-            emit progressBarNeedsUpdating(view->pb, progress, message);
+        if (algorithm == this->m_algorithm) {
+            emit progressBarNeedsUpdating(m_view->progressBar(), progress, message);
         }
     }
 

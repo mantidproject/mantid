@@ -11,16 +11,19 @@
 #include "MantidAPI/IAlgorithm_fwd.h"
 #include <string>
 
+/*
+* The ProgressObserver keeps track of progress, finish and error events happening
+* to an algorithm, it will push an update to the model, which updates the presenters.
+* 
+* This class does not track the starting of algorithms, and needs to be attached
+* to an already running algorithm.
+*/
 namespace MantidQt {
 namespace MantidWidgets {
 
     class AlgorithmProgressModel;
 
     class ProgressObserver : public Mantid::API::AlgorithmObserver {
-        /*
-   * This progress observer will update the progress bar, but will NOT observe
-   * start events
-   */
     public:
         ProgressObserver(AlgorithmProgressModel* model,
             Mantid::API::IAlgorithm_sptr alg);
@@ -32,7 +35,11 @@ namespace MantidWidgets {
             const std::string& what) override;
 
         void stopObservingCurrentAlgorithm();
-        Mantid::API::IAlgorithm_sptr currentAlgorithm() const;
+
+        auto currentAlgorithm() const
+        {
+            return m_alg;
+        }
 
         const std::string algName;
         const std::vector<Mantid::Kernel::Property*> algProperties;

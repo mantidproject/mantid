@@ -14,19 +14,26 @@
 #include "AlgorithmProgressDialogPresenter.h"
 
 class QProgressBar;
+
+/**
+ * The AlgorithmProgressDialogWidget displays multiple progress bars for algorithms running
+ * simultaneously. This widget shares its model with the main Workbench progress bar (AlgorithmProgressWidget).
+ */
 namespace MantidQt {
 namespace MantidWidgets {
     class AlgorithmProgressDialogWidget : public QDialog {
         Q_OBJECT
     public:
         AlgorithmProgressDialogWidget(QWidget* parent, AlgorithmProgressModel& model);
+
+        /// Displays the list of currently running algorithms. New progress bars are added here
         void updateRunningAlgorithms(std::vector<Mantid::API::IAlgorithm_sptr> algorithmsData);
 
+    private:
         void closeEvent(QCloseEvent* event) override;
 
-    private:
-        std::unique_ptr<AlgorithmProgressDialogPresenter> presenter;
-        QTreeWidget* tree;
+        std::unique_ptr<AlgorithmProgressDialogPresenter> m_presenter;
+        QTreeWidget* m_tree;
     };
 
 } // namespace MantidWidgets

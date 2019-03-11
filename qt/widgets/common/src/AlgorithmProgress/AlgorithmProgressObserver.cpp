@@ -40,10 +40,5 @@ namespace MantidWidgets {
 
     void ProgressObserver::stopObservingCurrentAlgorithm() { this->stopObserving(m_alg); }
 
-    Mantid::API::IAlgorithm_sptr ProgressObserver::currentAlgorithm() const
-    {
-        return m_alg;
-    }
-
 } // namespace MantidWidgets
 } // namespace MantidQt

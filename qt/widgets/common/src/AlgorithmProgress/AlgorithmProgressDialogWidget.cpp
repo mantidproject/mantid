@@ -22,27 +22,28 @@ namespace MantidWidgets {
 
     AlgorithmProgressDialogWidget::AlgorithmProgressDialogWidget(QWidget* parent, AlgorithmProgressModel& model)
         : QDialog(parent)
-        , presenter { std::make_unique<AlgorithmProgressDialogPresenter>(parent, this, model) }
-        , tree { new QTreeWidget(this) }
+        , m_presenter { std::make_unique<AlgorithmProgressDialogPresenter>(parent, this, model) }
+        , m_tree { new QTreeWidget(this) }
     {
         setAttribute(Qt::WA_DeleteOnClose);
 
-        tree->setColumnCount(3);
-        tree->setSelectionMode(QTreeWidget::NoSelection);
-        tree->setColumnWidth(0, 220);
-        tree->setHeaderLabels({ "Algorithm", "Progress", "" });
-        auto header = tree->header();
+        m_tree->setColumnCount(3);
+        m_tree->setSelectionMode(QTreeWidget::NoSelection);
+        m_tree->setColumnWidth(0, 220);
+        m_tree->setHeaderLabels({ "Algorithm", "Progress", "" });
+        auto header = m_tree->header();
         header->setSectionResizeMode(1, QHeaderView::Stretch);
         header->setSectionResizeMode(2, QHeaderView::Fixed);
         header->setStretchLastSection(false);
 
         auto buttonLayout = new QHBoxLayout();
         const auto button = new QPushButton("Close", this);
+        connect(button, &QPushButton::clicked, this, &AlgorithmProgressDialogWidget::close);
         buttonLayout->addStretch();
         buttonLayout->addWidget(button);
 
         auto layout = new QVBoxLayout();
-        layout->addWidget(tree);
+        layout->addWidget(m_tree);
         layout->addLayout(buttonLayout);
 
         setLayout(layout);
@@ -50,33 +51,36 @@ namespace MantidWidgets {
         setWindowIcon(QIcon(":/MantidPlot_Icon_32offset.png"));
         resize(500, 300);
 
-        presenter->updateGui();
+        m_presenter->updateGui();
     }
 
     void AlgorithmProgressDialogWidget::updateRunningAlgorithms(std::vector<Mantid::API::IAlgorithm_sptr> algorithms)
     {
-        tree->clear();
+        // This clear will free the memory of all the widgets that the m_tree owns
+        m_tree->clear();
         for (const auto& alg : algorithms) {
-            const auto item = new QTreeWidgetItem(QStringList { QString::fromStdString(alg->name()) });
+            const auto item = new QTreeWidgetItem(m_tree, QStringList { QString::fromStdString(alg->name()) });
 
-            tree->addTopLevelItem(item);
-            auto pb = new QProgressBar(tree);
-            pb->setAlignment(Qt::AlignHCenter);
-            presenter->addProgressBar(pb);
+            m_tree->addTopLevelItem(item);
+            auto progressBar = new QProgressBar(m_tree);
+            progressBar->setAlignment(Qt::AlignHCenter);
 
-            // OH BOY does this work? inb4 undef behaviour for accessing a deleted variable
-            const auto cancel_btn = new QPushButton("Cancel", tree);
-            connect(cancel_btn, &QPushButton::clicked, [=]() {
-                alg->cancel();
+            m_presenter->addProgressBar(alg, progressBar);
+
+            const auto cancelButton = new QPushButton("Cancel", m_tree);
+            connect(cancelButton, &QPushButton::clicked, [=]() {
+                if (alg) {
+                    alg->cancel();
+                }
             });
 
-            tree->setItemWidget(item, 1, pb);
-            tree->setItemWidget(item, 2, cancel_btn);
+            m_tree->setItemWidget(item, 1, progressBar);
+            m_tree->setItemWidget(item, 2, cancelButton);
 
             for (const auto& prop : alg->getProperties()) {
                 const auto& propAsString = prop->value();
                 if (!propAsString.empty()) {
-                    item->addChild(new QTreeWidgetItem(QStringList(QString::fromStdString(propAsString))));
+                    item->addChild(new QTreeWidgetItem(item, QStringList { QString::fromStdString(propAsString) }));
                 }
             }
         }
@@ -84,7 +88,7 @@ namespace MantidWidgets {
 
     void AlgorithmProgressDialogWidget::closeEvent(QCloseEvent* event)
     {
-        presenter->removeFromModel();
+        m_presenter->removeFromModel();
         QDialog::closeEvent(event);
     }
 }
