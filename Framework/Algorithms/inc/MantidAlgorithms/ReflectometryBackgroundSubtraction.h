@@ -14,7 +14,7 @@
 namespace Mantid {
 namespace Algorithms {
 
-/** ReflectometryBackgroundSubtraction : TODO: DESCRIPTION
+/** ReflectometryBackgroundSubtraction : This is an algorithm that computes the background of a given workspace and removes it from the input workspace.
  */
 class DLLExport ReflectometryBackgroundSubtraction
     : public API::DataProcessorAlgorithm {
@@ -29,8 +29,7 @@ private:
                                           std::vector<specnum_t> spectraList);
   void calculatePolynomialBackground(API::MatrixWorkspace_sptr inputWS,
                                      std::vector<double> spectrumRanges);
-  std::vector<double> findSpectrumRanges(API::MatrixWorkspace_sptr inputWS,
-                                         std::vector<specnum_t> spectraList);
+  std::vector<double> findSpectrumRanges(std::vector<specnum_t> spectraList);
 
   /** Overridden Algorithm methods **/
 

@@ -43,9 +43,11 @@ const std::string ReflectometryBackgroundSubtraction::category() const {
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string ReflectometryBackgroundSubtraction::summary() const {
-  return "";
+  return "Calculates the background of a given workspace.";
 }
 
+// Calculates the background by finding the average of the given spectra.
+// Done using the child algorithm GroupDetectors
 void ReflectometryBackgroundSubtraction::calculateAverageSpectrumBackground(
     API::MatrixWorkspace_sptr inputWS, std::vector<specnum_t> spectraList) {
 
@@ -69,13 +71,14 @@ void ReflectometryBackgroundSubtraction::calculateAverageSpectrumBackground(
   setProperty("OutputWorkspace", outputWS);
 }
 
+// finds the ranges of a given list of spectra.
 std::vector<double> ReflectometryBackgroundSubtraction::findSpectrumRanges(
-    API::MatrixWorkspace_sptr inputWS, std::vector<specnum_t> spectraList) {
+    std::vector<specnum_t> spectraList) {
 
   std::vector<double> spectrumRanges;
   spectrumRanges.push_back(spectraList[0]);
   auto prevSpec = spectrumRanges[0];
-  for (auto index = 1; index < spectraList.size() - 1; ++index) {
+  for (size_t index = 1; index < spectraList.size() - 1; ++index) {
     auto spec = spectraList[index + 1];
     auto range = spec - prevSpec;
     // check if start of new range
@@ -89,21 +92,27 @@ std::vector<double> ReflectometryBackgroundSubtraction::findSpectrumRanges(
   return spectrumRanges;
 }
 
+// Calculates the background using the child algorithm
+// calculatePolynomialBackground
 void ReflectometryBackgroundSubtraction::calculatePolynomialBackground(
     API::MatrixWorkspace_sptr inputWS, std::vector<double> spectrumRanges) {
+
   // if the input workspace is an event workspace it must be converted to a
   // Matrix workspace as cannot transpose a event workspace
-  // if it is already a MatrixWorkspace this does nothing
 
+  DataObjects::EventWorkspace_const_sptr eventW = 
+      boost::dynamic_pointer_cast<const DataObjects::EventWorkspace>(inputWS);
+  MatrixWorkspace_sptr outputWorkspace;
+  if (eventW) {
   auto convert = createChildAlgorithm("ConvertToMatrixWorkspace");
   convert->setProperty("InputWorkspace", inputWS);
   convert->execute();
-  API::MatrixWorkspace_sptr convertedWS =
-      convert->getProperty("OutputWorkspace");
+  inputWS = convert->getProperty("OutputWorkspace");
+  }
 
   // transpose the workspace before the background can be found
   auto transpose = createChildAlgorithm("Transpose");
-  transpose->setProperty("InputWorkspace", convertedWS);
+  transpose->setProperty("InputWorkspace", inputWS);
   transpose->execute();
   API::MatrixWorkspace_sptr transposedWS =
       transpose->getProperty("OutputWorkspace");
@@ -208,7 +217,7 @@ void ReflectometryBackgroundSubtraction::exec() {
   }
 
   if (backgroundType == "Polynomial") {
-    auto spectrumRanges = findSpectrumRanges(inputWS, spectraList);
+    auto spectrumRanges = findSpectrumRanges(spectraList);
     calculatePolynomialBackground(inputWS, spectrumRanges);
   }
 }

@@ -46,7 +46,7 @@ public:
             Mantid::Kernel::V3D(20, (20 - 15), 0), 7, 3, 10);
 
     const std::vector<double> yValues = {5, 5, 5, 5, 5, 5, 5};
-    for (auto i = 0; i < m_multiDetectorWSWithPeak->y(5).size(); ++i) {
+    for (size_t i = 0; i < m_multiDetectorWSWithPeak->y(5).size(); ++i) {
       m_multiDetectorWSWithPeak->mutableY(3)[i] = yValues[i];
     }
   }
@@ -80,7 +80,7 @@ public:
     alg->execute();
     MatrixWorkspace_sptr outputWS = alg->getProperty("OutputWorkspace");
 
-    for (auto i = 0; i != outputWS->getNumberHistograms(); ++i) {
+    for (size_t i = 0; i != outputWS->getNumberHistograms(); ++i) {
       const auto &output_counts = outputWS->counts(i);
       if (i != 3) {
         for (auto itr = output_counts.begin(); itr != output_counts.end();
@@ -129,7 +129,7 @@ public:
     alg->execute();
     MatrixWorkspace_sptr outputWS = alg->getProperty("OutputWorkspace");
 
-    for (auto i = 0; i != outputWS->getNumberHistograms(); ++i) {
+    for (size_t i = 0; i != outputWS->getNumberHistograms(); ++i) {
       const auto &output_counts = outputWS->counts(i);
       if (i != 3) {
         for (auto itr = output_counts.begin(); itr != output_counts.end();
@@ -159,7 +159,7 @@ public:
     alg->execute();
     MatrixWorkspace_sptr outputWS = alg->getProperty("OutputWorkspace");
 
-    for (auto i = 0; i != outputWS->getNumberHistograms(); ++i) {
+    for (size_t i = 0; i != outputWS->getNumberHistograms(); ++i) {
       const auto &output_counts = outputWS->counts(i);
       for (auto itr = output_counts.begin(); itr != output_counts.end();
            ++itr) {
