@@ -14,7 +14,8 @@
 namespace Mantid {
 namespace Algorithms {
 
-/** ReflectometryBackgroundSubtraction : This is an algorithm that computes the background of a given workspace and removes it from the input workspace.
+/** ReflectometryBackgroundSubtraction : This is an algorithm that computes the
+ * background of a given workspace and removes it from the input workspace.
  */
 class DLLExport ReflectometryBackgroundSubtraction
     : public API::DataProcessorAlgorithm {

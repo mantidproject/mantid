@@ -100,14 +100,14 @@ void ReflectometryBackgroundSubtraction::calculatePolynomialBackground(
   // if the input workspace is an event workspace it must be converted to a
   // Matrix workspace as cannot transpose a event workspace
 
-  DataObjects::EventWorkspace_const_sptr eventW = 
+  DataObjects::EventWorkspace_const_sptr eventW =
       boost::dynamic_pointer_cast<const DataObjects::EventWorkspace>(inputWS);
   MatrixWorkspace_sptr outputWorkspace;
   if (eventW) {
-  auto convert = createChildAlgorithm("ConvertToMatrixWorkspace");
-  convert->setProperty("InputWorkspace", inputWS);
-  convert->execute();
-  inputWS = convert->getProperty("OutputWorkspace");
+    auto convert = createChildAlgorithm("ConvertToMatrixWorkspace");
+    convert->setProperty("InputWorkspace", inputWS);
+    convert->execute();
+    inputWS = convert->getProperty("OutputWorkspace");
   }
 
   // transpose the workspace before the background can be found
