@@ -15,6 +15,11 @@ Concepts
 Algorithms
 ----------
 
+Improvements
+############
+
+- :ref:`LoadEventNexus <algm-LoadEventNexus>` has an additional option `LoadNexusInstrumentXML` = `{Default, True}`,  which controls whether or not the embedded instrument definition is read from the NeXus file.
+
 Data Objects
 ------------
 

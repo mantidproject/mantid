@@ -82,6 +82,10 @@ void SetupEQSANSReduction::init() {
       "DetectorTubes", false,
       "If true, the solid angle correction for tube detectors will be applied");
 
+  declareProperty("LoadNexusInstrumentXML", true,
+                  "Reads the embedded Instrument XML from the NeXus file "
+                  "(optional, default True). ");
+
   // -- Define group --
   setPropertyGroup("UseConfigTOFCuts", load_grp);
   setPropertyGroup("LowTOFCut", load_grp);
@@ -102,6 +106,7 @@ void SetupEQSANSReduction::init() {
   setPropertyGroup("DetectorOffset", load_grp);
   setPropertyGroup("SolidAngleCorrection", load_grp);
   setPropertyGroup("DetectorTubes", load_grp);
+  setPropertyGroup("LoadNexusInstrumentXML", load_grp);
 
   // Beam center
   std::string center_grp = "Beam Center";
@@ -693,6 +698,8 @@ void SetupEQSANSReduction::exec() {
   loadAlg->setProperty("UseConfig", useConfig);
   const bool useConfigMask = getProperty("UseConfigMask");
   loadAlg->setProperty("UseConfigMask", useConfigMask);
+  const bool loadNexusInstrumentXML = getProperty("LoadNexusInstrumentXML");
+  loadAlg->setProperty("LoadNexusInstrumentXML", loadNexusInstrumentXML);
   auto loadAlgProp = make_unique<AlgorithmProperty>("LoadAlgorithm");
   loadAlgProp->setValue(loadAlg->toString());
   reductionManager->declareProperty(std::move(loadAlgProp));
