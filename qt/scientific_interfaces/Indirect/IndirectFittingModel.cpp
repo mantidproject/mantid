@@ -337,7 +337,9 @@ operator=(PrivateFittingData &&fittingData) {
 }
 
 IndirectFittingModel::IndirectFittingModel()
-    : m_previousModelSelected(false), m_fittingMode(FittingMode::SEQUENTIAL) {observeReplace(true);}
+    : m_previousModelSelected(false), m_fittingMode(FittingMode::SEQUENTIAL) {
+  observeReplace(true);
+}
 
 MatrixWorkspace_sptr
 IndirectFittingModel::getWorkspace(std::size_t index) const {
@@ -348,7 +350,7 @@ IndirectFittingModel::getWorkspace(std::size_t index) const {
 
 std::vector<std::string> IndirectFittingModel::getWorkspaceNames() const {
   std::vector<std::string> names;
-  for(size_t i = 0;i<m_fittingData.size();i++){
+  for (size_t i = 0; i < m_fittingData.size(); i++) {
     names.emplace_back(m_fittingData[i]->workspace()->getName());
   }
   return names;

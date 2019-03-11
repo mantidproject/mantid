@@ -43,10 +43,11 @@ private:
     IndirectFittingModel - Provides methods for specifying and
     performing a QENS fit, as well as accessing the results of the fit.
 */
-class MANTIDQT_INDIRECT_DLL IndirectFittingModel : public AnalysisDataServiceObserver {
+class MANTIDQT_INDIRECT_DLL IndirectFittingModel
+    : public AnalysisDataServiceObserver {
 public:
   IndirectFittingModel();
-  virtual ~IndirectFittingModel() {observeReplace(false);}
+  virtual ~IndirectFittingModel() { observeReplace(false); }
 
   virtual Mantid::API::MatrixWorkspace_sptr
   getWorkspace(std::size_t index) const;
