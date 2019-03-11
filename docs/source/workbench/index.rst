@@ -10,10 +10,9 @@ Workbench
     :alt: Workbench
     :align: right
 
-TO BE RE-WRITTEN BY NICK OR MARTYN
-Mantid Workbench is the newest major release of Mantid. The big changes in this release is that Workbench will be
-released alongside, MantidPlot. Workbench is a completely new GUI, built from the ground up, it should be more stable
-and allow for future development and changes to be completed much faster than they were in MantidPlot.
+
+Mantid Workbench is the newest user interface for Mantid. The Workbench will be
+included alongside MantidPlot for several releases before replacing it completely. The Workbench has been built from the ground up to be easier to use, more stable, support automatic testing and allow future development and changes to be completed much faster than they were in MantidPlot.  In addition it is built on more up to date toolkits that will allow us to keep developing the workbench long after MantidPlot is no longer available.
 
 ===========================
 What is there in Workbench?
@@ -54,7 +53,7 @@ Algorithm Toolbox
     :alt: Algorithm Toolbox
     :align: center
 
-The :ref:`WorkbenchAlgorithmToolbox` is another key part of the workbench, once again if you are familiat with
+The :ref:`WorkbenchAlgorithmToolbox` is another key part of the workbench, once again if you are familiar with
 MantidPlot it functions very similarly. From here you can access and run all of the algorithms that Mantid Workbench has
 to offer to it's users. To find algorithms there are two options for navigation, if you know the name then doing a
 search in the search bar, the other option is selecting it's category and navigating utilising the menu.
