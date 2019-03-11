@@ -126,6 +126,7 @@ Bugfixes
   in order to avoid these large file sizes.
 - A bug where using a cropped calibration file (from a previous run) on the ISISEnergyTransfer interface would cause an 
   error has been fixed.
+- A bug where specifying a custom detector grouping for OSIRIS was not working has been fixed.
 
 Bayes Interface
 ---------------

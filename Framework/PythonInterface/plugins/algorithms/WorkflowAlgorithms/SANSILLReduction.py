@@ -15,6 +15,9 @@ import numpy as np
 
 class SANSILLReduction(PythonAlgorithm):
 
+    _mode = 'Monochromatic'
+    _instrument = None
+
     def category(self):
         return 'ILL\\SANS'
 
@@ -29,9 +32,27 @@ class SANSILLReduction(PythonAlgorithm):
 
     def validateInputs(self):
         issues = dict()
-        if self.getPropertyValue('ProcessAs') == 'Transmission' and self.getProperty('BeamInputWorkspace').isDefault:
+        process = self.getPropertyValue('ProcessAs')
+        if process == 'Transmission' and self.getProperty('BeamInputWorkspace').isDefault:
             issues['BeamInputWorkspace'] = 'Beam input workspace is mandatory for transmission calculation.'
         return issues
+
+    @staticmethod
+    def _check_distances_match(ws1, ws2):
+        """
+            Checks if the detector distance between two workspaces are close enough
+            @param ws1 : workspace 1
+            @param ws2 : workspace 2
+            @return true if the detector distance difference is less than 1 cm
+        """
+        tolerance = 0.01 #m
+        l2_1 = ws1.getRun().getLogData('L2').value
+        l2_2 = ws2.getRun().getLogData('L2').value
+        return fabs(l2_1 - l2_2) < tolerance
+
+    @staticmethod
+    def _check_processed_flag(ws, value):
+        return ws.getRun().getLogData('ProcessedAs').value == value
 
     def PyInit(self):
 
@@ -148,6 +169,20 @@ class SANSILLReduction(PythonAlgorithm):
 
         self.setPropertySettings('MaskedInputWorkspace', EnabledWhenProperty(sample, reference, LogicOperator.Or))
 
+        self.declareProperty(MatrixWorkspaceProperty('FluxInputWorkspace', '',
+                                                     direction=Direction.Output,
+                                                     optional=PropertyMode.Optional),
+                             doc='The name of the input direct beam flux workspace.')
+
+        self.setPropertySettings('FluxInputWorkspace', sample)
+
+        self.declareProperty(MatrixWorkspaceProperty('FluxOutputWorkspace', '',
+                                                     direction=Direction.Output,
+                                                     optional=PropertyMode.Optional),
+                             doc='The name of the output direct beam flux workspace.')
+
+        self.setPropertySettings('FluxOutputWorkspace', beam)
+
     def _cylinder(self, radius):
         """
             Returns XML for an infinite cylinder with axis of z (beam) and given radius [m]
@@ -156,24 +191,6 @@ class SANSILLReduction(PythonAlgorithm):
         """
         return '<infinite-cylinder id="flux"><centre x="0.0" y="0.0" z="0.0"/><axis x="0.0" y="0.0" z="1.0"/>' \
                '<radius val="{0}"/></infinite-cylinder>'.format(radius)
-
-    def _integrate_in_radius(self, ws, radius):
-        """
-            Sums the detector counts within the given radius around the z axis
-            @param ws : the input workspace
-            @param radius : the radius [m]
-            @returns : the workspace with the summed counts
-        """
-        shapeXML = self._cylinder(radius)
-        det_list = FindDetectorsInShape(Workspace=ws, ShapeXML=shapeXML)
-        grouped = ws + '_group'
-        n_spectra = mtd[ws].getNumberHistograms()
-        integrated = Integration(InputWorkspace=ws, StoreInADS=False)
-        to_group = CreateWorkspace(DataY=integrated.extractY(), DataE=integrated.extractE(),
-                                   DataX=np.tile(integrated.readX(0), n_spectra), NSpec=n_spectra,
-                                   ParentWorkspace=integrated, StoreInADS=False)
-        GroupDetectors(InputWorkspace=to_group, OutputWorkspace=grouped, DetectorList=det_list)
-        return grouped
 
     def _normalise(self, ws):
         """
@@ -235,37 +252,39 @@ class SANSILLReduction(PythonAlgorithm):
         AddSampleLog(Workspace=ws, LogName='BeamCenterX', LogText=str(beam_x), LogType='Number')
         AddSampleLog(Workspace=ws, LogName='BeamCenterY', LogText=str(beam_y), LogType='Number')
         DeleteWorkspace(centers)
-        MoveInstrumentComponent(Workspace=ws, X=-beam_x, Y=-beam_y, ComponentName='detector')
-        integral = self._integrate_in_radius(ws, radius)
+        if self._mode != 'TOF':
+            MoveInstrumentComponent(Workspace=ws, X=-beam_x, Y=-beam_y, ComponentName='detector')
         run = mtd[ws].getRun()
         if run.hasProperty('attenuator.attenuation_coefficient'):
             att_coeff = run.getLogData('attenuator.attenuation_coefficient').value
         elif run.hasProperty('attenuator.attenuation_value'):
-            att_coeff = run.getLogData('attenuator.attenuation_value').value
+            att_value = run.getLogData('attenuator.attenuation_value').value
+            if att_value < 10 and self._instrument == 'D33':
+                instrument = mtd[ws].getInstrument()
+                param = 'att'+str(int(att_value))
+                if instrument.hasParameter(param):
+                    att_coeff = instrument.getNumberParameter(param)[0]
+                else:
+                    raise RuntimeError('Unable to find the attenuation coefficient for D33 attenuator #'+str(int(att_value)))
+            else:
+                att_coeff = att_value
         else:
             raise RuntimeError('Unable to process as beam: could not find attenuation coefficient nor value.')
         self.log().information('Found attenuator coefficient/value: {0}'.format(att_coeff))
-        Scale(InputWorkspace=integral, Factor=att_coeff, OutputWorkspace=integral)
-        AddSampleLog(Workspace=ws, LogName='BeamFluxValue', LogText=str(mtd[integral].readY(0)[0]), LogType='Number')
-        AddSampleLog(Workspace=ws, LogName='BeamFluxError', LogText=str(mtd[integral].readE(0)[0]), LogType='Number')
-        DeleteWorkspace(integral)
-
-    @staticmethod
-    def _check_distances_match(ws1, ws2):
-        """
-            Checks if the detector distance between two workspaces are close enough
-            @param ws1 : workspace 1
-            @param ws2 : workspace 2
-            @return true if the detector distance difference is less than 1 cm
-        """
-        tolerance = 0.01 #m
-        l2_1 = ws1.getRun().getLogData('L2').value
-        l2_2 = ws2.getRun().getLogData('L2').value
-        return fabs(l2_1 - l2_2) < tolerance
-
-    @staticmethod
-    def _check_processed_flag(ws, value):
-        return ws.getRun().getLogData('ProcessedAs').value == value
+        flux_out = self.getPropertyValue('FluxOutputWorkspace')
+        if flux_out:
+            flux = ws + '_flux'
+            CalculateFlux(InputWorkspace=ws, OutputWorkspace=flux, BeamRadius=radius)
+            Scale(InputWorkspace=flux, Factor=att_coeff, OutputWorkspace=flux)
+            nspec = mtd[ws].getNumberHistograms()
+            x = mtd[flux].readX(0)
+            y = mtd[flux].readY(0)
+            e = mtd[flux].readE(0)
+            CreateWorkspace(DataX=x, DataY=np.tile(y, nspec), DataE=np.tile(e, nspec), NSpec=nspec,
+                            ParentWorkspace=flux, UnitX='Wavelength', OutputWorkspace=flux)
+            mtd[flux].getRun().addProperty('ProcessedAs', 'Beam', True)
+            RenameWorkspace(InputWorkspace=flux, OutputWorkspace=flux_out)
+            self.setProperty('FluxOutputWorkspace', mtd[flux_out])
 
     def PyExec(self): # noqa: C901
         process = self.getPropertyValue('ProcessAs')
@@ -273,7 +292,11 @@ class SANSILLReduction(PythonAlgorithm):
         LoadAndMerge(Filename=self.getPropertyValue('Run').replace(',','+'), LoaderName='LoadILLSANS', OutputWorkspace=ws)
         self._normalise(ws)
         ExtractMonitors(InputWorkspace=ws, DetectorWorkspace=ws)
-        instrument = mtd[ws].getInstrument().getName()
+        self._instrument = mtd[ws].getInstrument().getName()
+        run = mtd[ws].getRun()
+        if run.hasProperty('tof_mode'):
+            if run.getLogData('tof_mode').value == 'TOF':
+                self._mode = 'TOF'
         if process in ['Beam', 'Transmission', 'Container', 'Reference', 'Sample']:
             absorber_ws = self.getProperty('AbsorberInputWorkspace').value
             if absorber_ws:
@@ -287,9 +310,12 @@ class SANSILLReduction(PythonAlgorithm):
                 if beam_ws:
                     if not self._check_processed_flag(beam_ws, 'Beam'):
                         self.log().warning('Beam input workspace is not processed as beam.')
-                    beam_x = beam_ws.getRun().getLogData('BeamCenterX').value
-                    beam_y = beam_ws.getRun().getLogData('BeamCenterY').value
-                    MoveInstrumentComponent(Workspace=ws, X=-beam_x, Y=-beam_y, ComponentName='detector')
+                    if self._mode != 'TOF':
+                        beam_x = beam_ws.getRun().getLogData('BeamCenterX').value
+                        beam_y = beam_ws.getRun().getLogData('BeamCenterY').value
+                        AddSampleLog(Workspace=ws, LogName='BeamCenterX', LogText=str(beam_x), LogType='Number')
+                        AddSampleLog(Workspace=ws, LogName='BeamCenterY', LogText=str(beam_y), LogType='Number')
+                        MoveInstrumentComponent(Workspace=ws, X=-beam_x, Y=-beam_y, ComponentName='detector')
                     if not self._check_distances_match(mtd[ws], beam_ws):
                         self.log().warning('Different detector distances found for empty beam and sample runs!')
                 if process == 'Transmission':
@@ -349,9 +375,9 @@ class SANSILLReduction(PythonAlgorithm):
                         thickness = self.getProperty('SampleThickness').value
                         NormaliseByThickness(InputWorkspace=ws, OutputWorkspace=ws, SampleThickness=thickness)
                         # parallax (gondola) effect
-                        if instrument in ['D22', 'D22lr', 'D33']:
+                        if self._instrument in ['D22', 'D22lr', 'D33']:
                             self.log().information('Performing parallax correction')
-                            if instrument == 'D33':
+                            if self._instrument == 'D33':
                                 components = ['back_detector', 'front_detector_top', 'front_detector_bottom',
                                               'front_detector_left', 'front_detector_right']
                             else:
@@ -377,14 +403,17 @@ class SANSILLReduction(PythonAlgorithm):
                                     if not self._check_processed_flag(sensitivity_in, 'Sensitivity'):
                                         self.log().warning('Sensitivity input workspace is not processed as sensitivity.')
                                     Divide(LHSWorkspace=ws, RHSWorkspace=sensitivity_in, OutputWorkspace=ws)
-                                if beam_ws:
+                                flux_in = self.getProperty('FluxInputWorkspace').value
+                                if flux_in:
                                     coll_ws = beam_ws
-                                    flux = beam_ws.getRun().getLogData('BeamFluxValue').value
-                                    ferr = beam_ws.getRun().getLogData('BeamFluxError').value
                                     flux_ws = ws + '_flux'
-                                    CreateSingleValuedWorkspace(DataValue=flux, ErrorValue=ferr, OutputWorkspace=flux_ws)
-                                    Divide(LHSWorkspace=ws, RHSWorkspace=flux_ws, OutputWorkspace=ws)
-                                    DeleteWorkspace(flux_ws)
+                                    if self._mode == 'TOF':
+                                        RebinToWorkspace(WorkspaceToRebin=flux_in, WorkspaceToMatch=ws, OutputWorkspace=flux_ws)
+                                        Divide(LHSWorkspace=ws, RHSWorkspace=flux_ws, OutputWorkspace=ws)
+                                        DeleteWorkspace(flux_ws)
+                                    else:
+                                        Divide(LHSWorkspace=ws, RHSWorkspace=flux_in, OutputWorkspace=ws)
+
                             if coll_ws:
                                 if not self._check_distances_match(mtd[ws], coll_ws):
                                     self.log().warning(
@@ -397,7 +426,7 @@ class SANSILLReduction(PythonAlgorithm):
                                 ReplaceSpecialValues(InputWorkspace=ws, OutputWorkspace=ws,
                                                      NaNValue=0., NaNError=0., InfinityValue=0., InfinityError=0.)
         if process != 'Transmission':
-            if instrument == 'D33':
+            if self._instrument == 'D33':
                 CalculateDynamicRange(Workspace=ws, ComponentNames=['back_detector', 'front_detector'])
             else:
                 CalculateDynamicRange(Workspace=ws)

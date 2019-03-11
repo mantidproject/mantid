@@ -392,9 +392,12 @@ void Projection3D::initRotation(int x, int y) {
  * @param y :: The y screen coord of the mouse pointer.
  */
 void Projection3D::rotate(int x, int y) {
-  m_viewport.generateRotationTo(x, y);
-  m_viewport.initRotationFrom(x, y);
-  updateView(false);
+  try {
+    m_viewport.generateRotationTo(x, y);
+    m_viewport.initRotationFrom(x, y);
+    updateView(false);
+  } catch (std::runtime_error &) {
+  }
 }
 
 /**

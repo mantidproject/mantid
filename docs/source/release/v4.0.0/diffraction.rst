@@ -85,6 +85,7 @@ Improvements
 - Focus on Pearl now has a focused_bin_widths parameter in pearl_advanced_config.py to allow setting default rebin values.
 - Focus on Pearl now saves out xye_tof files.
 - :ref:`PDLoadCharacterizations <algm-PDLoadCharacterizations>` now sets the same run numbers for all rows when using an ``exp.ini`` file.
+- :ref:`PDDetermineCharacterizations <algm-PDDetermineCharacterizations>` will generate an exception if it cannot determine the frequency or wavelength
 - Focus now checks if the vanadium for a run is already loaded before loading it in to prevent reloading the same vanadium multiple times.
 - :ref:`SaveReflections <algm-SaveReflections>` now supports saving indexed modulated peaks in the Jana format.
 - `PyStoG <https://pystog.readthedocs.io/en/latest/>`_ has been added as an external project.
@@ -122,5 +123,10 @@ New
 ###
 
 - Scripts added that produce the same results as the ISIS engineering GUI (supports ENGINX and IMAT), this is to allow use with ISIS autoreduction.
+
+Bugfixes
+########
+
+- Fixed a crash in the gui caused by running a calibration without setting a calibration directory.
 
 :ref:`Release 4.0.0 <v4.0.0>`
