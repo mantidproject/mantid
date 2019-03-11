@@ -434,18 +434,24 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         """Perform detector position correction for direct and reflected beams."""
         detectorMovedWSName = self._names.withSuffix('detectors_moved')
         twoTheta = ws.run().getProperty(common.SampleLogs.TWO_THETA).value
-        logs = ws.run()
         args = {
             'InputWorkspace': ws,
             'OutputWorkspace': detectorMovedWSName,
-            'TwoTheta': twoTheta+common.deflectionAngle(logs),
-            'LinePosition': linePosition,
+            'TwoTheta': twoTheta,
             'EnableLogging': self._subalgLogging,
             'DetectorComponentName': 'detector',
             'PixelSize': common.pixelSize(self._instrumentName),
             'DetectorCorrectionType': 'RotateAroundSample',
             'DetectorFacesSample': True
         }
+        if not self.getProperty(Prop.TWO_THETA).isDefault:
+            # We should use user angle
+            args['TwoTheta'] = self.getProperty(Prop.TWO_THETA).value
+            # We need to subtract an offsetAngle from user given TwoTheta
+            args['LinePosition'] = linePosition
+        else:
+            logs = ws.run()
+            args['TwoTheta'] = twoTheta + common.deflectionAngle(logs)
         detectorMovedWS = SpecularReflectionPositionCorrect(**args)
         self._cleanup.cleanup(ws)
         return detectorMovedWS
