@@ -72,8 +72,8 @@ public:
   virtual Mantid::API::IFunction_sptr getFittingFunction() const;
 
   virtual std::vector<std::string> getSpectrumDependentAttributes() const = 0;
-  void replaceHandle(const std::string &wsName,
-                     const Workspace_sptr &ws) override;
+  void replaceHandle(const std::string &workspaceName,
+                     const Workspace_sptr &workspace) override;
   void setFittingData(PrivateFittingData &&fittingData);
   void setSpectra(const std::string &spectra, std::size_t dataIndex);
   void setSpectra(Spectra &&spectra, std::size_t dataIndex);
