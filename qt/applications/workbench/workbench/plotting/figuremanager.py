@@ -203,6 +203,9 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         self._fig_interation = FigureInteraction(self)
         self._ads_observer = FigureManagerADSObserver(self)
 
+        # Plotted workspace names/spectra in form '{workspace}: spec {spec_num}'
+        self.workspace_labels = []
+
         self.window.raise_()
 
     def full_screen_toggle(self):
@@ -242,6 +245,8 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             action = self.toolbar._actions['toggle_fit']
             action.setEnabled(False)
             action.setVisible(False)
+
+        self._update_workspace_labels()
 
     def destroy(self, *args):
         # check for qApp first, as PySide deletes it in its atexit handler
@@ -320,10 +325,24 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         """
         Gcf.figure_visibility_changed(self.num)
 
+    def get_curve_labels(self):
+        """Get curve labels from Matplotlib figure"""
+        return [line.get_label() for line in self.canvas.figure.axes[0].lines]
+
+    def _update_workspace_labels(self):
+        """Check for new curves and update the workspace labels"""
+        curve_labels = self.get_curve_labels()
+        num_new_curves = len(curve_labels) - len(self.workspace_labels)
+        self.workspace_labels += curve_labels[-num_new_curves:]
+        self._update_fit_browser_workspace_labels()
+
+    def _update_fit_browser_workspace_labels(self):
+        self.fit_browser.workspace_labels = self.workspace_labels
 
 # -----------------------------------------------------------------------------
 # Figure control
 # -----------------------------------------------------------------------------
+
 
 def new_figure_manager(num, *args, **kwargs):
     """
