@@ -5,6 +5,14 @@ Muon Changes
    :align: right
    :height: 600px
 
+.. image::  ../../images/elemental_analysis.png
+   :align: right
+   :height: 300px
+
+.. image::  ../../images/elemental_analysis_multiplot.png
+   :align: right
+   :height: 300px
+
 .. contents:: Table of Contents
    :local:
    
@@ -13,12 +21,11 @@ Interface
 
 New
 ###
-- Elemental Analysis added to Muon Interfaces: Includes a selectable Periodic Table.
-- New Frequency Domain Analysis GUI added, the original one is now marked as old. See the documentation here :ref:`Frequency Domain Analysis <Frequency_Domain_Analysis_2-ref>`
+- Elemental Analysis added to Muon Interfaces: Includes a selectable Periodic Table. There are two versions (Elemental Analysis and Elemental Analysis Old). The old interface is deprected and may not be included in future releases. The difference between the old and new versions of the interface is TODO.
+- New Frequency Domain Analysis GUI added, the original one is now marked as old and is deprecated so may not be included in future releases. See the :ref:`documentation <Frequency_Domain_Analysis_2-ref>` for more details.
 
 Improvements
 ############
-- Elemental Analysis added to Muon Interfaces: Includes a selectable Periodic Table. There are two versions (Elemental Analysis and Elemental Analysis Old) and the difference is the plotting used.
 - TF Asymmetry mode now displays the chi squared value at the top of the browser.
 - ALC interface now sorts the data into ascending order.
 - Muon Analysis now includes number of event per frame and number of events per frame per detector in the run info box on the home tab.
