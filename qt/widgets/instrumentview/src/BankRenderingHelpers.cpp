@@ -167,7 +167,10 @@ void setBankNormal(const V3D &pos1, const V3D &pos2, const V3D &basePos) {
   auto vec1 = pos1 - basePos;
   auto vec2 = pos2 - basePos;
   auto normal = vec1.cross_prod(vec2);
-  normal.normalize();
+  try {
+    normal.normalize();
+  } catch (std::runtime_error &) {
+  }
   glNormal3f(static_cast<GLfloat>(normal.X()), static_cast<GLfloat>(normal.Y()),
              static_cast<GLfloat>(normal.Z()));
 }
