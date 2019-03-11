@@ -139,3 +139,7 @@ def SetDetectorOffset(distance):
 
 def SetSampleOffset(distance):
     ReductionSingleton().reduction_properties["SampleOffset"] = distance
+
+
+def LoadNexusInstrumentXML(value=True):
+    ReductionSingleton().reduction_properties["LoadNexusInstrumentXML"] = value

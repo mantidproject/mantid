@@ -10,6 +10,25 @@ from qtpy import QtWidgets, QtCore
 from copy import deepcopy
 from MultiPlotting.subplot.subplot import subplot
 from MultiPlotting.QuickEdit.quickEdit_widget import QuickEditWidget
+from MultiPlotting.multi_plotting_context import *
+
+
+class MultiPlotWindow(QtWidgets.QMainWindow):
+    windowClosedSignal = QtCore.Signal()
+
+    def __init__(self, window_title="plotting"):
+        super(MultiPlotWindow, self).__init__()
+        self.plot_context = PlottingContext()
+        self.multi_plot = MultiPlotWidget(self.plot_context, self)
+        self.setCentralWidget(self.multi_plot)
+        self.setWindowTitle(window_title)
+
+    def set_window_title(self, window_title):
+        self.setWindowTitle(window_title)
+
+    def closeEvent(self, event):
+        self.multi_plot.removeSubplotDisonnect()
+        self.windowClosedSignal.emit()
 
 
 class MultiPlotWidget(QtWidgets.QWidget):
@@ -47,15 +66,31 @@ class MultiPlotWidget(QtWidgets.QWidget):
     def plot(self, subplotName, ws, specNum=1):
         self.plots.plot(subplotName, ws, specNum=specNum)
 
+    def remove_subplot(self, name):
+        self.plots._remove_subplot(name)
+
+    def get_subplots(self):
+        return list(self._context.subplots.keys())
+
     def add_vline_and_annotate(self, subplotName, xvalue, label):
         self.add_annotate(subplotName, label)
         self.add_vline(subplotName, xvalue, label.text)
+
+    def rm_vline_and_annotate(self, subplotName, name):
+        self.rm_annotate(subplotName, name)
+        self.rm_vline(subplotName, name)
 
     def add_annotate(self, subplotName, label):
         self.plots.add_annotate(subplotName, label)
 
     def add_vline(self, subplotName, xvalue, name):
         self.plots.add_vline(subplotName, xvalue, name)
+
+    def rm_annotate(self, subplotName, name):
+        self.plots.rm_annotate(subplotName, name)
+
+    def rm_vline(self, subplotName, name):
+        self.plots.rm_vline(subplotName, name)
 
     # gets inital values for quickEdit
     def set_all_values(self):
@@ -84,6 +119,15 @@ class MultiPlotWidget(QtWidgets.QWidget):
 
     def connectCloseSignal(self, slot):
         self.closeSignal.connect(slot)
+
+    def removeSubplotConnection(self, slot):
+        self.plots.connect_rm_subplot_signal(slot)
+
+    def disconnectCloseSignal(selft):
+        self.closeSignal.disconnect()
+
+    def removeSubplotDisonnect(self):
+        self.plots.disconnect_rm_subplot_signal()
 
     """ update GUI """
 

@@ -26,9 +26,7 @@ Mantid {version} Release Notes
 
 .. warning:: This release is still under construction. The changes can be found in the nightly builds on the `download page`_.
 
-We are proud to announce version {version} of Mantid. This release
-celebrates 10 years of the Mantid project supporting Neutron and Muon
-research.
+We are proud to announce version {version} of Mantid.
 
 **TODO: Add paragraph summarizing big changes**
 
@@ -51,10 +49,9 @@ access the source code on `GitHub release page`_.
 Citation
 --------
 
-Please cite any usage of Mantid as follows: **TODO update with current version doi**
+Please cite any usage of Mantid as follows:
 
-- *Mantid {version}: Manipulation and Analysis Toolkit for Instrument Data.; Mantid Project*. `doi: 10.5286/SOFTWARE/MANTID{version_maj_min}
-   <http://dx.doi.org/10.5286/SOFTWARE/MANTID{version_maj_min}>`_
+- *Mantid {version}: Manipulation and Analysis Toolkit for Instrument Data.; Mantid Project*. {mantid_doi}
 
 - Arnold, O. et al. *Mantid-Data Analysis and Visualization Package for Neutron Scattering and mu-SR Experiments.* Nuclear Instruments
   and Methods in Physics Research Section A: Accelerators, Spectrometers, Detectors and Associated Equipment 764 (2014): 156-166
@@ -66,14 +63,29 @@ Changes
 -------
 
 .. toctree::
-   :titlesonly:
+   :hidden:
+   :glob:
 
-   Framework <framework>
-   User Interface & Usability <ui>
-   Diffraction <diffraction>
-   LowQ <lowq>
-   Muon Analysis <muon>
-   Spectroscopy <spectroscopy>
+   *
+
+- :doc:`Framework <framework>`
+- :doc:`General UI & Usability <ui>`
+
+  - :doc:`MantidPlot <mantidplot>`
+
+  - :doc:`MantidWorkbench <mantidworkbench>`
+- :doc:`Diffraction <diffraction>`
+- :doc:`Muon Analysis <muon>`
+- Low Q
+
+  - :doc:`Reflectometry <reflectometry>`
+
+  - :doc:`SANS <sans>`
+- Spectroscopy
+
+  - :doc:`Direct Geometry <direct_geometry>`
+
+  - :doc:`Indirect Geometry <indirect_geometry>`
 
 Full Change Listings
 --------------------
@@ -125,15 +137,47 @@ UI & Usability Changes
 Installation
 ------------
 
-Workbench
----------
+MantidPlot
+----------
+
+See :doc:`mantidplot`.
+
+MantidWorkbench
+---------------
+
+See :doc:`mantidworkbench`.
 
 SliceViewer and Vates Simple Interface
 --------------------------------------
 ''',
+    'mantidplot.rst':'''==================
+MantidPlot Changes
+==================
+
+.. contents:: Table of Contents
+   :local:
+
+Improvements
+############
+
+Bugfixes
+########
+''',
+    'mantidworkbench.rst':'''=======================
+MantidWorkbench Changes
+=======================
+
+.. contents:: Table of Contents
+   :local:
+
+Improvements
+############
+
+Bugfixes
+########
+'''
     }
 
-################################################################################
 ################################################################################
 
 TECH_DOCS = {
@@ -154,37 +198,32 @@ Single Crystal Diffraction
 Imaging
 -------
 '''),
-
-    'spectroscopy.rst':('Spectroscopy Changes', '''
+    'direct_geometry.rst':('Direct Geometry Changes', '''
 .. warning:: **Developers:** Sort changes under appropriate heading
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
-
-Direct Geometry
----------------
-
-Indirect Geometry
------------------
 '''),
-
+    'indirect_geometry.rst':('Indirect Geometry Changes', '''
+.. warning:: **Developers:** Sort changes under appropriate heading
+    putting new features at the top of the section, followed by
+    improvements, followed by bug fixes.
+'''),
     'muon.rst':('MuSR Changes', '''
 .. warning:: **Developers:** Sort changes under appropriate heading
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
 
 '''),
-
-    'lowq.rst':('Low-Q Changes', '''
+    'sans.rst':('SANS Changes', '''
 .. warning:: **Developers:** Sort changes under appropriate heading
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
-
-Reflectometry
--------------
-
-Small Angle Scattering
-----------------------
 '''),
+    'reflectometry.rst':('Reflectometry Changes', '''
+.. warning:: **Developers:** Sort changes under appropriate heading
+    putting new features at the top of the section, followed by
+    improvements, followed by bug fixes.
+''')
     }
 
 TECH_HEAD = '''{divider}
@@ -196,6 +235,8 @@ TECH_CONTENTS = '''
 .. contents:: Table of Contents
    :local:
 '''
+
+MANTID_DOI = '`doi: 10.5286/SOFTWARE/MANTID{version_maj_min} <http://dx.doi.org/10.5286/SOFTWARE/MANTID{version_maj_min}>`_'
 
 
 def createTechniquePage(technique, body, components):
@@ -291,7 +332,9 @@ if __name__ == '__main__':
     release_link = '\n:ref:`Release {0} <{1}>`'.format(args.release[1:], args.release)
 
     for filename in DOCS.keys():
-        contents = DOCS[filename].format(milestone=args.milestone, version=args.release[1:], version_maj_min=args.release[1:-2])
+        version_maj_min=args.release[1:-2]
+        contents = DOCS[filename].format(milestone=args.milestone, version=args.release[1:], version_maj_min=version_maj_min ,
+                                         mantid_doi=MANTID_DOI.format(version_maj_min=version_maj_min))
         filename = os.path.join(release_root, filename)
         print('making', filename)
         with open(filename, 'w') as handle:

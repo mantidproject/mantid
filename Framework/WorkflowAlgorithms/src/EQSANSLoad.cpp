@@ -109,6 +109,9 @@ void EQSANSLoad::init() {
       "using the distance found in the meta data), in mm");
   declareProperty("LoadMonitors", true,
                   "If true, the monitor workspace will be loaded");
+  declareProperty("LoadNexusInstrumentXML", true,
+                  "Reads the embedded Instrument XML from the NeXus file "
+                  "(optional, default True). ");
   declareProperty("OutputMessage", "", Direction::Output);
   declareProperty("ReductionProperties", "__sans_reduction_properties",
                   Direction::Input);
@@ -524,9 +527,11 @@ void EQSANSLoad::exec() {
   // Check whether we need to load the data
   if (!inputEventWS) {
     const bool loadMonitors = getProperty("LoadMonitors");
+    const bool loadNexusInstrumentXML = getProperty("LoadNexusInstrumentXML");
     IAlgorithm_sptr loadAlg = createChildAlgorithm("LoadEventNexus", 0, 0.2);
     loadAlg->setProperty("LoadMonitors", loadMonitors);
     loadAlg->setProperty("Filename", fileName);
+    loadAlg->setProperty("LoadNexusInstrumentXML", loadNexusInstrumentXML);
     if (skipTOFCorrection) {
       if (m_low_TOF_cut > 0.0)
         loadAlg->setProperty("FilterByTofMin", m_low_TOF_cut);
