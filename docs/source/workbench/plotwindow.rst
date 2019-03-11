@@ -33,3 +33,5 @@ Fitting
 -------
 
 .. image:: ../images/Workbench/PlotWindow/FitPlotWindow.png
+
+# Remember to link to the fitting concepts page, for the original fitting browser.
