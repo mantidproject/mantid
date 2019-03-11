@@ -81,7 +81,7 @@ class IN4(systemtesting.MantidSystemTest):
 
     def validate(self):
         self.tolerance_is_rel_err = True
-        self.tolerance = 1e-5
+        self.tolerance = 1e-4
         return ['cropped', 'ILL_IN4_SofQW.nxs']
 
 
