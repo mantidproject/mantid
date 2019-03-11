@@ -62,6 +62,7 @@ New Algorithms
 - :ref:`CalculateEfficiencyCorrection <algm-CalculateEfficiencyCorrection>` will calculate a detection efficiency correction with multiple and flexible inputs for calculation.
 - :ref:`LinkedUBs <algm-LinkedUBs>` is an algorithm that ensures continuity of indexing across single crystal runs, as well as indirectly performing a U matrix correction for mis-centered samples or cases where there is error in the gonio angles. Results in a separate UB for each run when used on a whole dataset.
 - :ref:`CopyDataRange <algm-CopyDataRange>` will replace a block of data in a destination workspace with a continuous block of data from an input workspace.
+- :ref:`CalculateFlux <algm-CalculateFlux>` computes the incident flux wavelength profile using an empty beam SANS measurement.
 
 Improvements
 ############
@@ -90,12 +91,16 @@ Improvements
 - :ref:`CylinderAbsorption <algm-CylinderAbsorption>` now will check the workspace's sample object for geometry.
 - Various clarifications and additional links in the geometry and material documentation pages.
 - :ref:`SetSample <algm-SetSample>` and :ref:`SetSampleMaterial <algm-SetSampleMaterial>` now accept materials without ``ChemicalFormula`` or ``AtomicNumber``. In this case, all cross sections and ``SampleNumberDensity`` have to be given.
-- :ref:`Q1DWeighted <algm-Q1DWeighted>` will now discard the masked bins in the input and can optionally account for the gravity drop.
-- :ref:`Q1DWeighted <algm-Q1DWeighted>` is now an order of magnitude faster for TOF SANS data due to reorganization of the code.
 - :ref:`SetSampleMaterial <algm-SetSampleMaterial>` and :ref:`LoadSampleEnvironment <algm-LoadSampleEnvironment>` accept number densities as formula units per cubic Ångström in addition to atoms per cubic Ångström.
 - :ref:`LoadEventNexus <algm-LoadEventNexus>` experimental option `LoadType` = `{Default, Multiprocess}` is added, `Multiprocess` should work faster for big files and it is experimental, available only in Linux.
 - The history generated from a call to :ref:`SetSample <algm-SetSample>` can now be re-executed without error.
 - :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` no more fails with 'Unable to generate point in object' errors if the sample shape is cuboid, cylinder, or sphere.
+- Changes in :ref:`Q1DWeighted <algm-Q1DWeighted>`:
+
+  - Significant speedup for TOF mode due to reorganization of the code.
+  - An option for asymmetric wedges for an anisotropic scatterer
+  - The bins masked in the input will be discarded from the calculation
+  - An option to account for the nominal gravity drop
 
 Bugfixes
 ########
