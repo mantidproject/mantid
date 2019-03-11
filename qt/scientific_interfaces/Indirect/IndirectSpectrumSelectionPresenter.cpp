@@ -252,6 +252,14 @@ void IndirectSpectrumSelectionPresenter::displayBinMask() {
 UserInputValidator &
 IndirectSpectrumSelectionPresenter::validate(UserInputValidator &validator) {
   validator = validateSpectraString(validator);
+
+  const auto hist =
+      m_model->getWorkspace(m_activeIndex)->getNumberHistograms() - 1;
+  const auto expected = m_view->maximumSpectrum() - m_view->minimumSpectrum();
+  if (hist < expected) {
+    validator.addErrorMessage(QString::fromStdString(
+        "Spectra range entered is greater than spectra range of sample workspace"));
+  }
   return m_view->validateMaskBinsString(validator);
 }
 
