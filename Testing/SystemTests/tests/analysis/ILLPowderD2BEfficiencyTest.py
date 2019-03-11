@@ -12,10 +12,10 @@ from mantid import config, mtd
 import numpy as np
 
 
-class ILL_D2B_DetEffCorrTest(systemtesting.MantidSystemTest):
+class ILLPowderD2BEfficiencyTest(systemtesting.MantidSystemTest):
 
     def __init__(self):
-        super(ILL_D2B_DetEffCorrTest, self).__init__()
+        super(ILLPowderD2BEfficiencyTest, self).__init__()
         self.setUp()
 
     def setUp(self):
