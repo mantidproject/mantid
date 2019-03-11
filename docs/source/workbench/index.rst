@@ -51,7 +51,7 @@ Algorithm Toolbox
 .. image:: ../images/Workbench/AlgorithmWidget.png
     :height: 200
     :width: 150
-    :alt: Workspace Toolbox
+    :alt: Algorithm Toolbox
     :align: center
 
 The :ref:`WorkbenchAlgorithmToolbox` is another key part of the workbench, once again if you are familiat with
@@ -78,31 +78,44 @@ detail for you, all this and more is discussed further here: :ref:`WorkbenchMess
 
 Main Window Menu
 ----------------
-The :ref:`WorkbenchWorkspaceToolbox` is a key part of workbench and if a you are familiar with MantidPlot it function
-very similarly. From here you can see all of the :ref:`Workspace` s currently available to the User. Here you can load,
-save, group, delete, sort, plot, and more a breakdown of these features can be found here:
-:ref:`WorkbenchWorkspaceToolbox` .
+
+.. image:: ../images/Workbench/MainWindowMenu/MainWindowMenu.png
+
+In your main window for workbench, you may notice a few options in the upper left hand corner. From here you can access
+drop down menus which will facilitate options, to do things such as change the settings, save scripts, save projects,
+restore defaults for the window and more. Further explanation can be found here: :ref:`WorkbenchMainWindowMenu`
 
 Plot Toolbox
 ------------
-The :ref:`WorkbenchWorkspaceToolbox` is a key part of workbench and if a you are familiar with MantidPlot it function
-very similarly. From here you can see all of the :ref:`Workspace` s currently available to the User. Here you can load,
-save, group, delete, sort, plot, and more a breakdown of these features can be found here:
-:ref:`WorkbenchWorkspaceToolbox` .
+
+.. image:: ../images/Workbench/PlotToolbox/PlotsToolbox.png
+    :height: 200
+    :width: 150
+    :alt: Plots Toolbox
+    :align: center
+
+This is a new concept in Mantid applications, the plots toolbox will encompass and display all currently shown plots
+much like the workspace toolbox. It has the option to hide, remove, and edit the name of each plot individually. All
+this can be done from the buttons on top of the toolbox which will allow you to perform operations on multiple plots
+at once, showing, hiding and more with the click of a button. More here: :ref:`WorkbenchPlotsToolbox`
 
 IPython Console
 ---------------
-The :ref:`WorkbenchWorkspaceToolbox` is a key part of workbench and if a you are familiar with MantidPlot it function
-very similarly. From here you can see all of the :ref:`Workspace` s currently available to the User. Here you can load,
-save, group, delete, sort, plot, and more a breakdown of these features can be found here:
-:ref:`WorkbenchWorkspaceToolbox` .
+
+.. image:: ../images/Workbench/IPythonWidget.png
+
+This is a python interpreter which has access to the Mantid API and can interface with the rest of the workbench.
+Therefore, it is possible to interact with the algorithms, workspaces and plots from the Workbench, it allows you to
+manipulate things much like the script window can but in an interpreter style.
 
 Plot Window
 -----------
-The :ref:`WorkbenchWorkspaceToolbox` is a key part of workbench and if a you are familiar with MantidPlot it function
-very similarly. From here you can see all of the :ref:`Workspace` s currently available to the User. Here you can load,
-save, group, delete, sort, plot, and more a breakdown of these features can be found here:
-:ref:`WorkbenchWorkspaceToolbox` .
+
+.. image:: ../images/Workbench/PlotWindow/PlotWindow.png
+
+This is the window in which all plots will be shown in. There are many things that are possible from this window with
+regards to adjusting the the plot, saving/exporting and fitting. This topic really deserves it's own pages and thus
+further descriptions can be found here: :ref:`WorkbenchPlotWindow`
 
 Overall Workbench Diagram
 --------------------------
