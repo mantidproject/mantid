@@ -141,7 +141,8 @@ class LoadRunWidgetPresenter(object):
     # ------------------------------------------------------------------------------------------------------------------
 
     def handle_increment_run(self):
-        self.run_list = self.get_incremented_run_list()
+        incremented_run_list = self.get_incremented_run_list()
+        self.run_list = [max(incremented_run_list)] if incremented_run_list else []
         if not self.run_list:
             return
         new_run = max(self.run_list)
@@ -154,7 +155,8 @@ class LoadRunWidgetPresenter(object):
         self.load_runs([file_name])
 
     def handle_decrement_run(self):
-        self.run_list = self.get_decremented_run_list()
+        decremented_run_list = self.get_decremented_run_list()
+        self.run_list = [min(decremented_run_list)] if decremented_run_list else []
         if not self.run_list:
             return
         new_run = min(self.run_list)
