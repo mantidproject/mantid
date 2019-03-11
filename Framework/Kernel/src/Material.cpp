@@ -23,7 +23,7 @@ using PhysicalConstants::NeutronAtom;
 using PhysicalConstants::getAtom;
 
 namespace {
-const double INV_FOUR_PI = 1. / (4. * M_PI);
+constexpr double INV_FOUR_PI = 1. / (4. * M_PI);
 
 inline double scatteringLength(const double real, const double imag) {
   double length;
@@ -32,7 +32,7 @@ inline double scatteringLength(const double real, const double imag) {
   } else if (real == 0.) {
     length = std::abs(imag);
   } else {
-    length = std::sqrt(real * real + imag * imag);
+    length = std::hypot(real, imag);
   }
 
   if (!std::isnormal(length)) {
@@ -159,7 +159,7 @@ double Material::cohScatterXSection(const double lambda) const {
   UNUSED_ARG(lambda);
 
   if (m_chemicalFormula.size() == 1)
-    return m_chemicalFormula.begin()->atom->neutron.coh_scatt_xs;
+    return m_chemicalFormula.front().atom->neutron.coh_scatt_xs;
 
   return scatteringXS(cohScatterLengthReal(), cohScatterLengthImg());
 }
@@ -175,7 +175,7 @@ double Material::incohScatterXSection(const double lambda) const {
   UNUSED_ARG(lambda);
 
   if (m_chemicalFormula.size() == 1)
-    return m_chemicalFormula.begin()->atom->neutron.inc_scatt_xs;
+    return m_chemicalFormula.front().atom->neutron.inc_scatt_xs;
 
   return totalScatterXSection() - cohScatterXSection();
 }
@@ -191,7 +191,7 @@ double Material::totalScatterXSection(const double lambda) const {
   UNUSED_ARG(lambda);
 
   if (m_chemicalFormula.size() == 1)
-    return m_chemicalFormula.begin()->atom->neutron.tot_scatt_xs;
+    return m_chemicalFormula.front().atom->neutron.tot_scatt_xs;
 
   const double weightedTotal =
       std::accumulate(std::begin(m_chemicalFormula),
@@ -224,7 +224,7 @@ double Material::absorbXSection(const double lambda) const {
   double weightedTotal;
 
   if (m_chemicalFormula.size() == 1) {
-    weightedTotal = m_chemicalFormula.begin()->atom->neutron.abs_scatt_xs;
+    weightedTotal = m_chemicalFormula.front().atom->neutron.abs_scatt_xs;
   } else {
     weightedTotal =
         std::accumulate(std::begin(m_chemicalFormula),
@@ -248,8 +248,9 @@ double Material::cohScatterLength(const double lambda) const {
   UNUSED_ARG(lambda);
 
   if (m_chemicalFormula.size() == 1)
-    return m_chemicalFormula.begin()->atom->neutron.coh_scatt_length;
+    return m_chemicalFormula.front().atom->neutron.coh_scatt_length;
 
+  // these have already accounted for single atom case
   return scatteringLength(cohScatterLengthReal(), cohScatterLengthImg());
 }
 
@@ -258,7 +259,7 @@ double Material::incohScatterLength(const double lambda) const {
   UNUSED_ARG(lambda);
 
   if (m_chemicalFormula.size() == 1)
-    return m_chemicalFormula.begin()->atom->neutron.inc_scatt_length;
+    return m_chemicalFormula.front().atom->neutron.inc_scatt_length;
 
   return scatteringLength(incohScatterLengthReal(), incohScatterLengthImg());
 }
@@ -267,7 +268,7 @@ double Material::incohScatterLength(const double lambda) const {
 double Material::cohScatterLengthReal(const double lambda) const {
   UNUSED_ARG(lambda);
   if (m_chemicalFormula.size() == 1)
-    return m_chemicalFormula.begin()->atom->neutron.coh_scatt_length_real;
+    return m_chemicalFormula.front().atom->neutron.coh_scatt_length_real;
 
   const double weightedTotal =
       std::accumulate(
@@ -290,7 +291,7 @@ double Material::cohScatterLengthImg(const double lambda) const {
   UNUSED_ARG(lambda);
 
   if (m_chemicalFormula.size() == 1)
-    return m_chemicalFormula.begin()->atom->neutron.coh_scatt_length_img;
+    return m_chemicalFormula.front().atom->neutron.coh_scatt_length_img;
 
   const double weightedTotal =
       std::accumulate(
@@ -313,7 +314,7 @@ double Material::incohScatterLengthReal(const double lambda) const {
   UNUSED_ARG(lambda);
 
   if (m_chemicalFormula.size() == 1)
-    return m_chemicalFormula.begin()->atom->neutron.inc_scatt_length_real;
+    return m_chemicalFormula.front().atom->neutron.inc_scatt_length_real;
 
   const double weightedTotal =
       std::accumulate(
@@ -336,7 +337,7 @@ double Material::incohScatterLengthImg(const double lambda) const {
   UNUSED_ARG(lambda);
 
   if (m_chemicalFormula.size() == 1)
-    return m_chemicalFormula.begin()->atom->neutron.inc_scatt_length_img;
+    return m_chemicalFormula.front().atom->neutron.inc_scatt_length_img;
 
   const double weightedTotal =
       std::accumulate(
@@ -359,7 +360,7 @@ double Material::totalScatterLength(const double lambda) const {
   UNUSED_ARG(lambda);
 
   if (m_chemicalFormula.size() == 1)
-    return m_chemicalFormula.begin()->atom->neutron.tot_scatt_length;
+    return m_chemicalFormula.front().atom->neutron.tot_scatt_length;
 
   const double crossSection = totalScatterXSection();
   return 10. * std::sqrt(crossSection) * INV_FOUR_PI;
@@ -369,10 +370,23 @@ double Material::cohScatterLengthSqrd(const double lambda) const {
   UNUSED_ARG(lambda);
 
   // these have already acconted for single atom case
-  const double cohReal = this->cohScatterLengthReal();
-  const double cohImag = this->cohScatterLengthImg();
+  const double real = this->cohScatterLengthReal();
+  const double imag = this->cohScatterLengthImg();
 
-  return (cohReal * cohReal + cohImag * cohImag);
+  double lengthSqrd;
+  if (imag == 0.) {
+    lengthSqrd = real * real;
+  } else if (real == 0.) {
+    lengthSqrd = imag * imag;
+  } else {
+    lengthSqrd = real * real + imag * imag;
+  }
+
+  if (!std::isnormal(lengthSqrd)) {
+    return 0.;
+  } else {
+    return lengthSqrd;
+  }
 }
 
 double Material::incohScatterLengthSqrd(const double lambda) const {

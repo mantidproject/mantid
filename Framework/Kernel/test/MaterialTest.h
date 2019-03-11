@@ -68,7 +68,6 @@ public:
   void test_Vanadium() {
     const std::string name("Vanadium");
     NeutronAtom atom = getNeutronAtom(23);
-    std::cout << "--->>> " << name << ": " << atom << std::endl;
     Material material(name, atom, 0.072);
 
     TS_ASSERT_EQUALS(material.name(), name);
@@ -93,8 +92,7 @@ public:
   void test_Gadolinium() {
     const std::string name("Gadolinium");
     NeutronAtom atom = getNeutronAtom(64);
-    std::cout << "--->>> " << name << ": " << atom << std::endl;
-    Material material(name, atom, 0.072); // TODO mass density is 7.90 g/cm3
+    Material material(name, atom, 0.0768); // mass density is 7.90 g/cm3
     TS_ASSERT_EQUALS(material.name(), name);
 
     // check everything with (default) reference wavelength
@@ -108,7 +106,6 @@ public:
   void test_TiZr() {
     Material TiZr("TiZr", Material::parseChemicalFormula("Ti2.082605 Zr"),
                   0.542);
-    std::cout << "--->>> TiZr" << std::endl;
 
     TS_ASSERT_EQUALS(TiZr.cohScatterLengthImg(), 0.);
     TS_ASSERT_DELTA(TiZr.cohScatterLengthReal(), 0., 1.e-5);
