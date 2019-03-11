@@ -581,7 +581,8 @@ void IndirectFittingModel::removeFittingData(std::size_t index) {
   if (m_fitOutput)
     m_fitOutput->removeOutput(m_fittingData[index].get());
   m_fittingData.erase(m_fittingData.begin() + index);
-  m_defaultParameters.erase(m_defaultParameters.begin() + index);
+  if (m_defaultParameters.size() > index)
+    m_defaultParameters.erase(m_defaultParameters.begin() + index);
 }
 
 PrivateFittingData IndirectFittingModel::clearWorkspaces() {

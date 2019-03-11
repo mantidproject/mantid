@@ -255,7 +255,8 @@ IndirectSpectrumSelectionPresenter::validate(UserInputValidator &validator) {
 
   const auto numberOfHistograms =
       m_model->getWorkspace(m_activeIndex)->getNumberHistograms();
-  const auto expected = m_view->maximumSpectrum() - m_view->minimumSpectrum()+1;
+  const auto expected =
+      m_view->maximumSpectrum() - m_view->minimumSpectrum() + 1;
   if (hist < expected) {
     validator.addErrorMessage(
         QString::fromStdString("Spectra range entered is greater than spectra "
