@@ -44,14 +44,14 @@ Data reduction
 
 #. Open ``Interfaces`` > ``Indirect`` > ``Data reduction``
 #. Make sure ``Instrument`` is set to ``IRIS``
-#. Check the ``Sum spectra`` box
+#. Check the ``Sum Files`` box
 #. In the ``Run files`` box enter ``26184-26185``
 #. Click ``Run``
 #. Check the ``Use Calib File`` box
 #. Change ``File`` to ``Workspace`` and choose the ``_calib`` workspace previously created (From the previous test)
 #. Click ``Run``
 #. In the main GUI right-click on the ``iris26184_multi_graphite002_red`` workspace
-#. Choose ``Plot spectrum``, note the number of spectra, should be 50
+#. Choose ``Plot spectrum``, note the number of spectra, should be 51
 #. Click ``Cancel``
 #. In the ``Data reduction`` GUI, change the setting ``Mode`` to Groups
 #. Set ``Groups`` to 5
