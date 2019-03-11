@@ -4,6 +4,6 @@
 Algorithm Toolbox
 =================
 
-.. image:: ../images/Workbench/AlgorithmWidgetDiagram
+.. image:: ../images/Workbench/AlgorithmWidgetDiagram.png
     :align: left
 

@@ -14,6 +14,6 @@ Plots Toolbox Options
 Plots List
 ----------
 
-.. image:: ../images/Workbench/PlotToolbox/PlotsToolboxPlotSelections.png
+.. image:: ../images/Workbench/PlotToolbox/PlotsToolboxPlotSection.png
 
 # Make this image a diagram highlighting each button as this is new to all users extra explanation may be needed

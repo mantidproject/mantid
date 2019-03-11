@@ -1,5 +1,17 @@
 .. _workbench:
 
+.. toctree::
+   :hidden:
+   :glob:
+
+   algorithmlistwidget.rst
+   mainwindowmenu.rst
+   messageswindow.rst
+   plotstoolbox.rst
+   plotwindow.rst
+   scriptwindow.rst
+   workspacetreewidget.rst
+
 =========
 Workbench
 =========
@@ -27,8 +39,15 @@ algorithm widgets, and plotting.
 Workbench Windows
 -----------------
 One of the immediate things that is noticeable about workbench, is all the windows integrated into the main window.
-These can be dragged away and out of the main window docks. Examples can be found here:
-:ref:`WorkbenchDraggableWindows`.
+These can be dragged away and out of the main window docks. Any part of the workbench found with the example icon on it
+can be dragged out of the main window, to somewhere else.
+
+Example:
+
+.. image:: ../images/Workbench/WindowDraggableIcon.png
+    :height: 50
+    :width: 50
+    :alt: Workbench draggable icon
 
 Workspace Toolbox
 -----------------
