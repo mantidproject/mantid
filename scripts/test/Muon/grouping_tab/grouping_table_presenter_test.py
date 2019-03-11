@@ -376,7 +376,7 @@ class GroupingTablePresenterTest(unittest.TestCase):
         self.view.group_range_max.editingFinished.emit()
 
         self.assertEqual(self.data.gui_variables['GroupRangeMax'], float(original_max))
-        self.view.warning_popup.assert_called_with('Maximum of group asymmetry range must be less than minimum')
+        self.view.warning_popup.assert_called_with('Maximum of group asymmetry range must be greater than minimum')
         self.assertEqual(self.view.warning_popup.call_count, 2)
 
 
