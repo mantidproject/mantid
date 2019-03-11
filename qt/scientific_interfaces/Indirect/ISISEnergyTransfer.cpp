@@ -41,8 +41,10 @@ std::string createGroupString(std::size_t const &start,
 std::string createGroupingString(std::size_t const &groupSize,
                                  std::size_t const &numberOfGroups,
                                  std::size_t const &spectraMin) {
-  auto groupingString = createRangeString(spectraMin, spectraMin + groupSize - 1);
-  for (auto i = spectraMin + groupSize; i < spectraMin + groupSize * numberOfGroups; i += groupSize)
+  auto groupingString =
+      createRangeString(spectraMin, spectraMin + groupSize - 1);
+  for (auto i = spectraMin + groupSize;
+       i < spectraMin + groupSize * numberOfGroups; i += groupSize)
     groupingString += "," + createGroupString(i, groupSize);
   return groupingString;
 }
@@ -51,7 +53,8 @@ std::string createDetectorGroupingString(std::size_t const &groupSize,
                                          std::size_t const &numberOfGroups,
                                          std::size_t const &numberOfDetectors,
                                          std::size_t const &spectraMin) {
-  const auto groupingString = createGroupingString(groupSize, numberOfGroups, spectraMin);
+  const auto groupingString =
+      createGroupingString(groupSize, numberOfGroups, spectraMin);
   const auto remainder = numberOfDetectors % numberOfGroups;
   if (remainder == 0)
     return groupingString;
@@ -617,8 +620,7 @@ ISISEnergyTransfer::createMapFile(const std::string &groupType) {
 std::string ISISEnergyTransfer::getDetectorGroupingString() const {
   const unsigned int nGroups = m_uiForm.spNumberGroups->value();
   const unsigned int spectraMin = m_uiForm.spSpectraMin->value();
-  const unsigned int nSpectra =
-      1 + m_uiForm.spSpectraMax->value() - spectraMin;
+  const unsigned int nSpectra = 1 + m_uiForm.spSpectraMax->value() - spectraMin;
   return createDetectorGroupingString(static_cast<std::size_t>(nSpectra),
                                       static_cast<std::size_t>(nGroups),
                                       static_cast<std::size_t>(spectraMin));
