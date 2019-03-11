@@ -645,6 +645,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
                     ReflectometryILLPreprocess(
                         Run=run,
                         TwoTheta=twoTheta,
+                        LinePosition=linePosition,
                         OutputWorkspace='__{}'.format(run),
                         DirectLineWorkspace='__direct-{}'.format(runDB),
                         ForegroundHalfWidth=halfWidthsReflected,
