@@ -234,11 +234,11 @@ void LoadILLSANS::initWorkSpaceD33(NeXus::NXEntry &firstEntry,
   NXInt dataRear = dataGroup1.openIntData();
   dataRear.load();
   NXData dataGroup2 = firstEntry.openNXData("data2");
-  NXInt dataRight = dataGroup2.openIntData();
-  dataRight.load();
-  NXData dataGroup3 = firstEntry.openNXData("data3");
-  NXInt dataLeft = dataGroup3.openIntData();
+  NXInt dataLeft = dataGroup2.openIntData();
   dataLeft.load();
+  NXData dataGroup3 = firstEntry.openNXData("data3");
+  NXInt dataRight = dataGroup3.openIntData();
+  dataRight.load();
   NXData dataGroup4 = firstEntry.openNXData("data4");
   NXInt dataDown = dataGroup4.openIntData();
   dataDown.load();
