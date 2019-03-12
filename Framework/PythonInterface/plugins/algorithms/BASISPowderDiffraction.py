@@ -10,6 +10,7 @@ import os
 import numpy as np
 from collections import namedtuple
 from contextlib import contextmanager
+from enum import Enum
 
 from mantid import config as mantid_config
 from mantid.api import (AnalysisDataService, DataProcessorAlgorithm,
@@ -25,6 +26,12 @@ from mantid.simpleapi import (DeleteWorkspace, LoadMask, LoadEventNexus,
                               ScaleX, Plus)
 from mantid.kernel import (FloatArrayProperty, Direction)
 debug_flag = False  # set to True to prevent erasing temporary workspaces
+
+
+class VDAS(Enum):
+    """Specifices the version of the Data Acquisition System (DAS)"""
+    v1900_2018 = 0  # Up to Dec 31 2018
+    v2019_2100 = 1  # From Jan 01 2018
 
 
 @contextmanager
@@ -79,6 +86,7 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
                  'BASIS_Mask_default_diff.xml'
     # Consider only events with these wavelengths
     _wavelength_bands = {'311': [3.07, 3.6], '111': [6.1, 6.6]}
+    _diff_bank_numbers = list(range(5, 14))
 
     def __init__(self):
         DataProcessorAlgorithm.__init__(self)
@@ -93,6 +101,7 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         self._van = None  # workspace for vanadium files
         self._v_mask = None  # mask pixels with low-counts in vanadium runs
         self._t_mask = None  # mask workspace
+        self._das_version = None  # version of the Data Acquisition System
 
     @staticmethod
     def category():
@@ -203,6 +212,10 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
                                     value,
                                     OutputWorkspace='_t_mask')
             #
+            # Find the version of the Data Acquisition System
+            #
+            self._find_das_version()
+            #
             # Calculate the valid range of wavelengths for incoming neutrons
             #
             self._calculate_wavelength_band()
@@ -279,9 +292,7 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         #
         _t_all_w = None
         for run in rl:
-            file_name = "{0}_{1}_event.nxs".format(self._short_inst, str(run))
-            _t_w = LoadEventNexus(Filename=file_name, NXentryName='entry-diff',
-                                  SingleBankPixelsOnly=False)
+            _t_w = self._load_single_run(self, run, '_t_w')
             if _t_all_w is None:
                 _t_all_w = CloneWorkspace(_t_w)
             else:
@@ -331,7 +342,9 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         """
         MaskDetectors(w, MaskedWorkspace=self._t_mask)
         _t_corr = ModeratorTzeroLinear(w)  # delayed emission from moderator
-        _t_corr = self.add_previous_pulse(_t_corr)
+        # Correct old DAS shift of fast neutrons. See GitHub issue 23855
+        if self._das_version == VDAS.v1900_2018:
+            _t_corr = self.add_previous_pulse(_t_corr)
         _t_corr = ConvertUnits(_t_corr, Target='Wavelength', Emode='Elastic')
         l_s, l_e = self._wavelength_band[0], self._wavelength_band[1]
         _t_corr = CropWorkspace(_t_corr, XMin=l_s, XMax=l_e)
@@ -471,7 +484,8 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         _t_w = SumSpectra(_t_w, OutputWorkspace=w.name())
         return _t_w
 
-    def _convert_to_angle(self, w):
+    @staticmethod
+    def _convert_to_angle(w):
         """
         Output the integrated intensity for each elastic detector versus
         detector angle with the neutron beam.
@@ -524,20 +538,54 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         RenameWorkspace(w, OutputWorkspace=w_name)
         self.setProperty(prop, w)
 
+    def _find_das_version(self, runs):
+        boundary_run = 90000  # from VDAS.v1900_2018 to VDAS.v2019_2100
+        runs = self.getProperty('RunNumbers').value
+        first_run = int(self._run_lists(runs)[0])
+        if first_run < boundary_run:
+            self._das_version = VDAS.v1900_2018
+        else:
+            self._das_version = VDAS.v2019_2100
+
     def _calculate_wavelength_band(self):
         """
         Select the wavelength band examining the logs of the first sample
         """
         runs = self.getProperty('RunNumbers').value
         run = self._run_lists(runs)[0]
-        file_name = "{0}_{1}_event.nxs".format(self._short_inst, str(run))
-        _t_w = LoadEventNexus(Filename=file_name, NXentryName='entry-diff',
-                              SingleBankPixelsOnly=False)
+        _t_w = self._load_single_run(run, '_t_w')
         wavelength = np.mean(_t_w.getRun().getProperty('LambdaRequest').value)
         wavs = self._wavelength_bands
         midpoint = (wavs['111'][0] + wavs['311'][0]) / 2.0
         reflection = '111' if wavelength > midpoint else '311'
         self._wavelength_band = self._wavelength_bands[reflection]
+
+    def _load_single_run(self, run, name):
+        """
+        Find and load events from the diffraction tubes.
+
+        Run number 90000 discriminates between the old and new DAS
+
+        Parameters
+        ----------
+        run: str
+            Run number
+        name: str
+            Name of the output EventsWorkspace
+
+        Returns
+        -------
+        EventsWorkspace
+        """
+        banks = ','.join(['bank{}'.format(i) for i in self._diff_bank_numbers])
+        particular = {VDAS.v1900_2018: dict(NXentryName='entry-diff'),
+                      VDAS.v2019_2100: dict(BankName=banks)}
+        file_name = "{0}_{1}_event.nxs".format(self._short_inst, str(run))
+        kwargs = dict(Filename=file_name, SingleBankPixelsOnly=False,
+                      OutputWorkspace=name)
+        kwargs.update(particular[self._das_version])
+        return LoadEventNexus(**kwargs)
+
 
 # Register algorithm with Mantid.
 AlgorithmFactory.subscribe(BASISPowderDiffraction)
