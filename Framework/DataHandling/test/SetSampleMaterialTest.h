@@ -179,7 +179,7 @@ public:
     TS_ASSERT_DELTA(sampleMaterial.absorbXSection(NeutronAtom::ReferenceLambda),
                     1.4381, 0.0001);
     TS_ASSERT_DELTA(
-        sampleMaterial.cohScatterLength(NeutronAtom::ReferenceLambda), 5.1834,
+        sampleMaterial.cohScatterLength(NeutronAtom::ReferenceLambda), 3.8082,
         0.0001);
     TS_ASSERT_DELTA(
         sampleMaterial.totalScatterLengthSqrd(NeutronAtom::ReferenceLambda),

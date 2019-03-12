@@ -7,11 +7,11 @@
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
-from mantid.api import Sample
 from mantid.simpleapi import CreateWorkspace
 from mantid.simpleapi import SetSampleMaterial
 from mantid.geometry import CrystalStructure
 from mantid.geometry import CSGObject
+from numpy import pi
 
 class SampleTest(unittest.TestCase):
 
@@ -71,7 +71,11 @@ class SampleTest(unittest.TestCase):
 
         xs0 = atoms[0].neutron()
         xs1 = atoms[1].neutron()
-        xs = ( xs0['coh_scatt_xs']*2 + xs1['coh_scatt_xs']*3 ) / 5
+        # the correct way to calculate for coherent cross section
+        # is to average the scattering lengths then convert to a cross section
+        b_real = (xs0['coh_scatt_length_real']*2 + xs1['coh_scatt_length_real']*3) / 5
+        b_imag = (xs0['coh_scatt_length_img']*2 + xs1['coh_scatt_length_img']*3) / 5
+        xs = .04 * pi * (b_real * b_real + b_imag * b_imag)
         self.assertAlmostEquals(material.cohScatterXSection(), xs, places=4)
 
     def test_get_shape(self):
