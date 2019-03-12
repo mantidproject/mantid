@@ -54,7 +54,7 @@ namespace MantidWidgets {
         m_presenter->updateGui();
     }
 
-    void AlgorithmProgressDialogWidget::updateRunningAlgorithms(std::vector<Mantid::API::IAlgorithm_sptr> algorithms)
+    void AlgorithmProgressDialogWidget::updateRunningAlgorithms(const std::vector<const Mantid::API::IAlgorithm*>& algorithms)
     {
         // This clear will free the memory of all the widgets that the m_tree owns
         m_tree->clear();
@@ -66,16 +66,16 @@ namespace MantidWidgets {
             progressBar->setAlignment(Qt::AlignHCenter);
 
             m_presenter->addProgressBar(alg, progressBar);
-
-            const auto cancelButton = new QPushButton("Cancel", m_tree);
+            // TODO worry about this later
+            /*   const auto cancelButton = new QPushButton("Cancel", m_tree);
             connect(cancelButton, &QPushButton::clicked, [=]() {
                 if (alg) {
                     alg->cancel();
                 }
-            });
+            });*/
 
             m_tree->setItemWidget(item, 1, progressBar);
-            m_tree->setItemWidget(item, 2, cancelButton);
+            //m_tree->setItemWidget(item, 2, cancelButton);
 
             for (const auto& prop : alg->getProperties()) {
                 const auto& propAsString = prop->value();

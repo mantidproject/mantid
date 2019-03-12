@@ -34,22 +34,19 @@ namespace MantidWidgets {
         void removePresenter(const AlgorithmProgressPresenterBase* presenter);
         /// Update the progress bar in all live presenters
         void updatePresenters();
-        /// Remove a currently active observer
-        void removeObserver(ProgressObserver* observer);
         /// Update the progress using data from the observer
-        void updateProgress(Mantid::API::IAlgorithm_sptr, double progress,
+        void updateProgress(const Mantid::API::IAlgorithm*, double progress,
             const std::string& msg);
 
         /// Start an observer that tracks the execution of the parameter algorithm
         void startingHandle(Mantid::API::IAlgorithm_sptr alg) override;
 
-        std::vector<Mantid::API::IAlgorithm_sptr> runningAlgorithms();
-        Mantid::API::IAlgorithm_sptr latestRunningAlgorithm();
+        const std::vector<const Mantid::API::IAlgorithm*>& runningAlgorithms();
+		const Mantid::API::IAlgorithm* latestRunningAlgorithm();
 
     private:
         std::unique_ptr<std::mutex> howdoesMutex = std::make_unique<std::mutex>();
         std::vector<AlgorithmProgressPresenterBase*> m_presenters;
-        std::vector<std::unique_ptr<ProgressObserver>> m_observers;
         std::unique_ptr<ProgressObserver> progressObserver;
     };
 

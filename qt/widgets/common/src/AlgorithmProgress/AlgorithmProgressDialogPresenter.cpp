@@ -16,7 +16,7 @@ namespace MantidWidgets {
         : AlgorithmProgressPresenterBase(parent)
         , m_view { view }
         , m_model { model }
-        , m_progressBars { std::unordered_map<Mantid::API::IAlgorithm*, QProgressBar*>() }
+        , m_progressBars { std::unordered_map<const Mantid::API::IAlgorithm*, QProgressBar*>() }
     {
         model.addPresenter(this);
     }
@@ -29,11 +29,11 @@ namespace MantidWidgets {
         m_view->updateRunningAlgorithms(m_model.runningAlgorithms());
     }
 
-    void AlgorithmProgressDialogPresenter::addProgressBar(Mantid::API::IAlgorithm_sptr alg, QProgressBar* pb)
+    void AlgorithmProgressDialogPresenter::addProgressBar(const Mantid::API::IAlgorithm* alg, QProgressBar* pb)
     {
         std::lock_guard<std::mutex> guard(*howdoesMutex);
 
-        m_progressBars.insert(std::make_pair(alg.get(), pb));
+        m_progressBars.insert(std::make_pair(alg, pb));
     }
 
     void AlgorithmProgressDialogPresenter::removeFromModel()
@@ -43,12 +43,12 @@ namespace MantidWidgets {
         m_model.removePresenter(this);
     }
 
-    void AlgorithmProgressDialogPresenter::updateProgressBar(Mantid::API::IAlgorithm_sptr alg, double progress, const std::string& message)
+    void AlgorithmProgressDialogPresenter::updateProgressBar(const Mantid::API::IAlgorithm* alg, double progress, const std::string& message)
     {
         std::lock_guard<std::mutex> guard(*howdoesMutex);
 
-        if (m_progressBars.count(alg.get()) > 0) {
-            emit progressBarNeedsUpdating(m_progressBars.at(alg.get()), progress, message);
+        if (m_progressBars.count(alg) > 0) {
+            emit progressBarNeedsUpdating(m_progressBars.at(alg), progress, message);
         }
     }
 }

@@ -29,7 +29,7 @@ namespace MantidWidgets {
         void setCurrentAlgorithm() override;
 
         /// Updates the visible progress bar on the workbench
-        void updateProgressBar(Mantid::API::IAlgorithm_sptr algorithm, double progress,
+        void updateProgressBar(const Mantid::API::IAlgorithm* algorithm, double progress,
             const std::string& message) override;
 
         constexpr AlgorithmProgressModel& model()
@@ -40,7 +40,7 @@ namespace MantidWidgets {
     private:
         AlgorithmProgressModel m_model;
         // The algorithm for which a progress bar is currently being controlled
-        Mantid::API::IAlgorithm_sptr m_algorithm;
+        const Mantid::API::IAlgorithm* m_algorithm;
         // The creator of the view also owns the view (Python), not this presenter.
         AlgorithmProgressWidget* m_view;
     };

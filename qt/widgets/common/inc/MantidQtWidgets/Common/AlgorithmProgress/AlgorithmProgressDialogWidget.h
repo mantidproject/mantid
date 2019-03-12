@@ -27,7 +27,7 @@ namespace MantidWidgets {
         AlgorithmProgressDialogWidget(QWidget* parent, AlgorithmProgressModel& model);
 
         /// Displays the list of currently running algorithms. New progress bars are added here
-        void updateRunningAlgorithms(std::vector<Mantid::API::IAlgorithm_sptr> algorithmsData);
+        void updateRunningAlgorithms(const std::vector<const Mantid::API::IAlgorithm*>& algorithmsData);
 
     private:
         void closeEvent(QCloseEvent* event) override;
