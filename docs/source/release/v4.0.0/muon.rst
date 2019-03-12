@@ -1,6 +1,17 @@
 ============
 Muon Changes
 ============
+.. image::  ../../images/frequency_domain_analysis_2_home.png
+   :align: right
+   :height: 600px
+
+.. image::  ../../images/elemental_analysis.png
+   :align: right
+   :height: 300px
+
+.. image::  ../../images/elemental_analysis_multiplot.png
+   :align: right
+   :height: 300px
 
 .. contents:: Table of Contents
    :local:
@@ -10,12 +21,11 @@ Interface
 
 New
 ###
-- Elemental Analysis added to Muon Interfaces: Includes a selectable Periodic Table.
-- Frequency Domain Analysis 2 added. See the documentation here :ref:`Frequency Domain Analysis <Frequency_Domain_Analysis_2-ref>`
+- Elemental Analysis added to Muon Interfaces: Includes a selectable Periodic Table. There are two versions (Elemental Analysis and Elemental Analysis Old). The old interface is deprected and may not be included in future releases. The difference between the old and new versions of the interface is TODO.
+- New Frequency Domain Analysis GUI added, the original one is now marked as old and is deprecated so may not be included in future releases. See the :ref:`documentation <Frequency_Domain_Analysis_2-ref>` for more details.
 
 Improvements
 ############
-- Elemental Analysis added to Muon Interfaces: Includes a selectable Periodic Table. There are two versions (Elemental Analysis and Elemental Analysis Old) and the difference is the plotting used.
 - TF Asymmetry mode now displays the chi squared value at the top of the browser.
 - ALC interface now sorts the data into ascending order.
 - Muon Analysis now includes number of event per frame and number of events per frame per detector in the run info box on the home tab.
@@ -39,9 +49,10 @@ New
 - :ref:`ApplyMuonDetectorGroupPairing <algm-ApplyMuonDetectorGroupPairing>` added to allow scripting of the Muon Analysis GUI workflow. Applies a group pairing asymmetry calculation to muon data and stores the result in the ADS.
 - :ref:`LoadAndApplyMuonDetectorGrouping <algm-LoadAndApplyMuonDetectorGrouping>` added to allow scripting of the Muon Analysis GUI workflow. The grouping/pairing information is loaded from an XML format file, which can be produced through the muon analysis GUI via the 'Save Grouping' button. Replicates the `Load Grouping` button of the grouping tab, adds workspaces to the ADS.
 - :ref:`LoadPSIMuonBin <algm-LoadPSIMuonBin>` added the ability to load a .bin file from the PSI facility in switzerland, as a workspace.
-
-Improvements
-############
+- :ref:`MuonPreProcess <algm-MuonPreProcess>` added to simplify new GUI backend. Performs a series of common analysis pre-processing steps on Muon data. Sample logs are modified to record the input parameters.
+- :ref:`MuonGroupingCounts <algm-MuonGroupingCounts>` added to simplify new GUI backend. Applies a grouping (summation of counts) across a set of detectors in Muon data.
+- :ref:`MuonPairingAsymmetry <algm-MuonPairingAsymmetry>` added to simplify new GUI backend. Applies a pairing asymmetry calculation between two detector groups from Muon data.
+- :ref:`MuonGroupingAsymmetry <algm-MuonGroupingAsymmetry>` added to simplify new GUI backend. Applies an estimate of the  group asymmetry to a particular detector grouping in Muon data.
 
 Bugfixes
 ########
