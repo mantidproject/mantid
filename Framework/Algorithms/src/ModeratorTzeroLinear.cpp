@@ -102,7 +102,7 @@ void ModeratorTzeroLinear::exec() {
   // gradient, intercept constants
   try {
 
-      // determine which Gradient to use
+    // determine which Gradient to use
     const std::vector<double> gradientParam =
         m_instrument->getNumberParameter("Moderator.TimeZero.gradient");
     const double gradientParamManual = getProperty("Gradient");
@@ -110,10 +110,10 @@ void ModeratorTzeroLinear::exec() {
       throw Exception::InstrumentDefinitionError(
           "Unable to retrieve Moderator Time Zero parameters (gradient)",
           inputWS->getTitle());
-    if (gradientParamManual != EMPTY_DBL()){
-        m_gradient = gradientParamManual;
+    if (gradientParamManual != EMPTY_DBL()) {
+      m_gradient = gradientParamManual;
     } else {
-        m_gradient = gradientParam[0]; //[gradient]=microsecond/Angstrom
+      m_gradient = gradientParam[0]; //[gradient]=microsecond/Angstrom
     }
     // conversion factor for gradient from microsecond/Angstrom to meters
     double convfactor =
@@ -128,10 +128,10 @@ void ModeratorTzeroLinear::exec() {
       throw Exception::InstrumentDefinitionError(
           "Unable to retrieve Moderator Time Zero parameters (intercept)",
           inputWS->getTitle());
-    if (interceptParamManual != EMPTY_DBL()){
-        m_intercept = interceptParamManual;
+    if (interceptParamManual != EMPTY_DBL()) {
+      m_intercept = interceptParamManual;
     } else {
-        m_intercept = interceptParam[0]; //[intercept]=microsecond
+      m_intercept = interceptParam[0]; //[intercept]=microsecond
     }
 
     g_log.debug() << "Moderator Time Zero: gradient=" << m_gradient
