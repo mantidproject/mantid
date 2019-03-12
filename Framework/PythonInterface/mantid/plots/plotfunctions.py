@@ -27,6 +27,8 @@ from mantid.plots.helperfunctions import get_axes_labels, get_bins, get_data_une
     get_matrix_2d_data, get_md_data1d, get_md_data2d_bin_bounds, get_md_data2d_bin_centers, get_normalization, \
     get_sample_log, get_spectrum, get_uneven_data, get_wksp_index_dist_and_label
 
+import mantid.plots.modest_image
+
 # Used for initializing searches of max, min values
 _LARGEST, _SMALLEST = float(sys.maxsize), -sys.maxsize
 
@@ -569,7 +571,7 @@ def imshow(axes, workspace, *args, **kwargs):
         raise Exception('Unevenly spaced bins are not supported by imshow')
     if 'extent' not in kwargs:
         kwargs['extent'] = [x[0, 0], x[0, -1], y[0, 0], y[-1, 0]]
-    return _imshow(axes, z, *args, **kwargs)
+    return mantid.plots.modest_image.imshow(axes, z, *args, **kwargs)
 
 
 def tripcolor(axes, workspace, *args, **kwargs):

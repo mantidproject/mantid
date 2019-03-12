@@ -4,6 +4,8 @@ set ( PY_FILES
   plotfunctions.py
   plotfunctions3D.py
   utility.py
+  modest_image/__init__.py
+  modest_image/modest_image.py
 )
 
 #############################################################################################
