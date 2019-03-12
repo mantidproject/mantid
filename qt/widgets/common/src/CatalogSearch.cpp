@@ -566,15 +566,24 @@ bool CatalogSearch::validateDates() {
   // If startDate > endDate we want to throw an error and inform the user (red
   // star(*)).
   if (ret) {
-    m_icatUiForm.StartDate_err->setToolTip(
-        QString::fromStdString("<span style=\"color: white;\">Start date "
-                               "cannot be greater than end date.</span>"));
+    correctedToolTip("Start date cannot be greater than end date.",
+                     m_icatUiForm.StartDate_err);
     m_icatUiForm.StartDate_err->show();
   } else {
     m_icatUiForm.StartDate_err->hide();
   }
 
   return ret;
+}
+
+void CatalogSearch::correctedToolTip(std::string text, QLabel *label) {
+#ifdef Q_OS_WIN
+  label->setToolTip(QString::fromStdString("<span style=\"color: black;\">" +
+                                           text + "</span>"));
+#else
+  label->setToolTip(QString::fromStdString("<span style=\"color: white;\">" +
+                                           text + "</span>"));
+#endif
 }
 
 /**
@@ -699,8 +708,7 @@ void CatalogSearch::showErrorLabels(
 
     if (label) {
       // Update the tooltip of the element and then show it.
-      label->setToolTip(QString::fromStdString(
-          "<span style=\"color: white;\">" + iter->second + "</span>"));
+      correctedToolTip(iter->second, label);
       label->show();
     }
   }

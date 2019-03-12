@@ -90,5 +90,14 @@ class QuickEditPresenterTest(unittest.TestCase):
         self.pres.set_errors(False)
         self.assertEquals(self.view.set_errors.call_count,0)
 
+
+    def test_rmSubplot(self):
+        self.pres.rm_subplot("test")
+
+        self.assertEquals(self.view.rm_subplot.call_count, 1)
+        self.assertEquals(self.view.find_index.call_count, 2)
+        self.assertEquals(self.view.set_index.call_count, 1)
+
+
 if __name__ == "__main__":
     unittest.main()

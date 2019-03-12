@@ -16,6 +16,7 @@ from mantid.kernel import ConfigServiceImpl
 import Muon.GUI.Common.utilities.muon_file_utils as file_utils
 import Muon.GUI.Common.utilities.algorithm_utils as algorithm_utils
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
+import copy
 
 
 class LoadUtils(object):
@@ -31,6 +32,10 @@ class LoadUtils(object):
             self.setUp(tmpWS)
         else:
             raise RuntimeError("No data loaded. \n Please load data using Muon Analysis")
+
+    @property
+    def version(self):
+        return 1
 
     def setUp(self, tmpWS):
         # get everything from the ADS
@@ -213,7 +218,7 @@ def load_workspace_from_filename(filename,
         load_result = _get_algorithm_properties(alg, output_properties)
         load_result["OutputWorkspace"] = [MuonWorkspaceWrapper(ws) for ws in load_result["OutputWorkspace"]]
         run = get_run_from_multi_period_data(workspace)
-        load_result["DataDeadTimeTable"] = load_result["DeadTimeTable"][0]
+        load_result["DataDeadTimeTable"] = copy.copy(load_result["DeadTimeTable"][0])
         load_result["FirstGoodData"] = round(load_result["FirstGoodData"] - load_result['TimeZero'], 2)
     else:
         # single period data
@@ -273,6 +278,7 @@ def combine_loaded_runs(model, run_list):
             )
 
     return_ws["OutputWorkspace"] = [MuonWorkspaceWrapper(running_total_period) for running_total_period in running_total]
+    model._loaded_data_store.remove_data(run=flatten_run_list(run_list), instrument=model._context.instrument)
     model._loaded_data_store.add_data(run=flatten_run_list(run_list), workspace=return_ws,
                                       filename="Co-added", instrument=model._context.instrument)
 

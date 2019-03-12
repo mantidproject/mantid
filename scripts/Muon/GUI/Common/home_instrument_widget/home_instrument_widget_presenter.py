@@ -38,6 +38,8 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
         self._view.on_dead_time_from_file_selected(self.handle_dead_time_from_table_workspace_selected)
         self._view.on_dead_time_file_option_changed(self.handle_dead_time_table_workspace_selector_changed)
 
+        self._view.on_rebin_type_changed(self.handle_rebin_type_changed)
+
         self._view.on_instrument_changed(self.handle_instrument_changed)
 
         self.handle_loaded_time_zero_checkState_change()
@@ -47,10 +49,21 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
         self._view.show()
 
     def update_view_from_model(self):
-        self.handle_loaded_first_good_data_checkState_change()
-        self.handle_loaded_time_zero_checkState_change()
+        if self._view.first_good_data_state():
+            first_good_data = self._model.get_file_first_good_data()
+            self._view.set_first_good_data(first_good_data)
+        else:
+            first_good_data = self._model.get_user_first_good_data()
+            self._view.set_first_good_data(first_good_data)
+
+        if self._view.time_zero_state():
+            time_zero = self._model.get_file_time_zero()
+            self._view.set_time_zero(time_zero)
+        else:
+            time_zero = self._model.get_user_time_zero()
+            self._view.set_time_zero(time_zero)
+
         self._view.set_instrument(self._model._data.instrument)
-        self._view.on_dead_time_combo_changed(self._view.deadtime_selector.currentIndex())
 
     def clear_view(self):
         self._view.set_time_zero(0.0)
@@ -104,7 +117,16 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
 
     def handle_variable_rebin_changed(self):
         variable_bin_size = self._view.get_variable_bin_text()
-        self._model.add_variable_binning(variable_bin_size)
+        valid, message = self._model.validate_variable_rebin_string(variable_bin_size)
+        if not valid:
+            self._view.rebin_variable_edit.setText(self._model.get_variable_binning())
+            self._view.warning_popup(message)
+        else:
+            self._model.add_variable_binning(variable_bin_size)
+
+    def handle_rebin_type_changed(self):
+        rebin_type = self._view.rebin_selector.currentText()
+        self._model.update_binning_type(rebin_type)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Instrument

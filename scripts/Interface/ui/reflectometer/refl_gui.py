@@ -52,7 +52,7 @@ class ReflGui(QtGui.QMainWindow, Ui_windowRefl):
 
     def show_deprecation_warning(self):
         logger.warning("""
-The ISIS Reflectometry (Old) interface has been deprecated and will be removed from Mantid in March 2019
+The ISIS Reflectometry (Old) interface has been deprecated and will be removed from Mantid in July 2019
 We recommend you use ISIS Reflectometry instead, If this is not possible contact the development team using the "Help->Ask For Help" menu.
 """)
 
@@ -1072,6 +1072,7 @@ We recommend you use ISIS Reflectometry instead, If this is not possible contact
 
                     alg = AlgorithmManager.create("ReflectometryReductionOneAuto")
                     alg.initialize()
+                    alg.setProperty("Debug", True)
                     alg.setProperty("InputWorkspace", ws[i])
                     if group_trans_ws:
                         alg.setProperty("FirstTransmissionRun", group_trans_ws)
@@ -1105,6 +1106,7 @@ We recommend you use ISIS Reflectometry instead, If this is not possible contact
             else:
                 alg = AlgorithmManager.create("ReflectometryReductionOneAuto")
                 alg.initialize()
+                alg.setProperty("Debug", True)
                 alg.setProperty("InputWorkspace", ws)
                 if transmission_ws:
                     alg.setProperty("FirstTransmissionRun", transmission_ws)

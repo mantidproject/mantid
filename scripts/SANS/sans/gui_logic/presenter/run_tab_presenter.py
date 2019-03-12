@@ -25,7 +25,6 @@ from mantid.kernel import Logger, ConfigService
 from sans.command_interface.batch_csv_file_parser import BatchCsvParser
 from sans.common.constants import ALL_PERIODS
 from sans.common.enums import (BatchReductionEntry, RangeStepType, SampleShape, FitType, RowState, SANSInstrument)
-from sans.common.general_functions import get_log_plot
 from sans.gui_logic.gui_common import (get_reduction_mode_strings_for_gui, get_string_for_gui_from_instrument,
                                        add_dir_to_datasearch, remove_dir_from_datasearch)
 from sans.gui_logic.models.batch_process_runner import BatchProcessRunner
@@ -55,6 +54,8 @@ if PYQT4:
         IN_MANTIDPLOT = True
     except ImportError:
         pass
+else:
+    from mantidqt.plotting.functions import get_plot_fig
 
 row_state_to_colour_mapping = {RowState.Unprocessed: '#FFFFFF', RowState.Processed: '#d0f4d0',
                                RowState.Error: '#accbff'}
@@ -233,7 +234,8 @@ class RunTabPresenter(object):
         # Set the q range
         self._view.q_1d_step_type = [RangeStepType.to_string(RangeStepType.Lin),
                                      RangeStepType.to_string(RangeStepType.Log)]
-        self._view.q_xy_step_type = [RangeStepType.to_string(RangeStepType.Lin)]
+        self._view.q_xy_step_type = [RangeStepType.to_string(RangeStepType.Lin),
+                                     RangeStepType.to_string(RangeStepType.Log)]
 
         # Set the fit options
         fit_types = [FitType.to_string(FitType.Linear),
@@ -287,6 +289,8 @@ class RunTabPresenter(object):
             self._view.set_out_file_directory(ConfigService.Instance().getString("defaultsave.directory"))
 
             self._view.set_out_default_user_file()
+            self._view.set_out_default_output_mode()
+            self._view.set_out_default_save_can()
 
             self._view.set_hinting_line_edit_for_column(
                 self._table_model.column_name_converter.index('sample_shape'),
@@ -315,8 +319,7 @@ class RunTabPresenter(object):
                     " has been specified.".format(user_file_path))
         except RuntimeError as path_error:
             # This exception block runs if user file does not exist
-            self._view.on_user_file_load_failure()
-            self.display_errors(path_error, error_msg + " when finding file.")
+            self._on_user_file_load_failure(path_error, error_msg + " when finding file.")
         else:
             try:
                 self._table_model.user_file = user_file_path
@@ -328,8 +331,7 @@ class RunTabPresenter(object):
                 user_file_items = user_file_reader.read_user_file()
             except (RuntimeError, ValueError) as e:
                 # It is in this exception block that loading fails if the file is invalid (e.g. a csv)
-                self._view.on_user_file_load_failure()
-                self.display_errors(e, error_msg + " when reading file.", use_error_name=True)
+                self._on_user_file_load_failure(e, error_msg + " when reading file.", use_error_name=True)
             else:
                 try:
                     # 4. Populate the model
@@ -348,14 +350,19 @@ class RunTabPresenter(object):
 
                 except RuntimeError as instrument_e:
                     # This exception block runs if the user file does not contain an parsable instrument
-                    self._view.on_user_file_load_failure()
-                    self.display_errors(instrument_e, error_msg + " when reading instrument.")
+                    self._on_user_file_load_failure(instrument_e, error_msg + " when reading instrument.")
                 except Exception as other_error:
                     # If we don't catch all exceptions, SANS can fail to open if last loaded
                     # user file contains an error that would not otherwise be caught
                     traceback.print_exc()
-                    self._view.on_user_file_load_failure()
-                    self.display_errors(other_error, "Unknown error in loading user file.", use_error_name=True)
+                    self._on_user_file_load_failure(other_error, "Unknown error in loading user file.",
+                                                    use_error_name=True)
+
+    def _on_user_file_load_failure(self, e, message, use_error_name=False):
+        self._setup_instrument_specific_settings(SANSInstrument.NoInstrument)
+        self._view.instrument = SANSInstrument.NoInstrument
+        self._view.on_user_file_load_failure()
+        self.display_errors(e, message, use_error_name)
 
     def on_batch_file_load(self):
         """
@@ -492,7 +499,9 @@ class RunTabPresenter(object):
                 if not graph(self.output_graph):
                     newGraph(self.output_graph)
             elif not PYQT4:
-                fig = get_log_plot(window_title=self.output_graph, plot_to_close=self.output_fig)
+                ax_properties = {'yscale': 'log',
+                                 'xscale': 'log'}
+                fig, _ = get_plot_fig(ax_properties=ax_properties, window_title=self.output_graph)
                 fig.show()
                 self.output_fig = fig
 
@@ -925,7 +934,6 @@ class RunTabPresenter(object):
         self._set_on_view("transmission_radius")
         self._set_on_view("transmission_monitor")
         self._set_on_view("transmission_mn_shift")
-        self._set_on_view("show_transmission")
 
         self._set_on_view_transmission_fit()
 
@@ -1114,7 +1122,6 @@ class RunTabPresenter(object):
         self._set_on_state_model("transmission_radius", state_model)
         self._set_on_state_model("transmission_monitor", state_model)
         self._set_on_state_model("transmission_mn_shift", state_model)
-        self._set_on_state_model("show_transmission", state_model)
 
         self._set_on_state_model_transmission_fit(state_model)
 

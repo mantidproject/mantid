@@ -36,6 +36,8 @@ class HomeTabPresenter(object):
         self.instrumentObserver = HomeTabPresenter.InstrumentObserver(self)
         self.loadObserver = HomeTabPresenter.LoadObserver(self)
         self.groupingObserver = HomeTabPresenter.GroupingObserver(self)
+        self.enable_observer = HomeTabPresenter.EnableWidgetObserver(self)
+        self.disable_observer = HomeTabPresenter.DisableWidgetObserver(self)
 
         self.update_all_widgets()
 
@@ -55,6 +57,12 @@ class HomeTabPresenter(object):
         """
         for subwidget in self._subwidgets:
             subwidget.update_view_from_model()
+
+    def enable_home_tab(self):
+        self._view.setEnabled(True)
+
+    def disable_home_tab(self):
+        self._view.setEnabled(False)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Observer / Observable
@@ -87,3 +95,19 @@ class HomeTabPresenter(object):
 
         def update(self, observable, arg):
             self.outer.update_all_widgets()
+
+    class EnableWidgetObserver(Observer):
+        def __init__(self, outer):
+            Observer.__init__(self)
+            self.outer = outer
+
+        def update(self, observable, arg):
+            self.outer.enable_home_tab()
+
+    class DisableWidgetObserver(Observer):
+        def __init__(self, outer):
+            Observer.__init__(self)
+            self.outer = outer
+
+        def update(self, observable, arg):
+            self.outer.disable_home_tab()

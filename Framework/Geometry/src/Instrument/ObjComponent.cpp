@@ -115,11 +115,11 @@ int ObjComponent::interceptSurface(Track &track) const {
 
   // TODO: If scaling parameters are ever enabled, would they need need to be
   // used here?
-  V3D trkStart = factorOutComponentPosition(track.startPoint());
-  V3D trkDirection = takeOutRotation(track.direction());
+  const V3D trkStart = factorOutComponentPosition(track.startPoint());
+  const V3D trkDirection = takeOutRotation(track.direction());
 
   Track probeTrack(trkStart, trkDirection);
-  int intercepts = shape()->interceptSurface(probeTrack);
+  const int intercepts = shape()->interceptSurface(probeTrack);
 
   Track::LType::const_iterator it;
   for (it = probeTrack.cbegin(); it != probeTrack.cend(); ++it) {

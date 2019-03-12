@@ -38,11 +38,15 @@ namespace Kernel {
     <LI>number density (nAtoms / Angstrom^3)</LI>
   </UL>
 
+  To understand how the effective scattering information is calculated, see
+  Sears, Varley F. "Neutron scattering lengths and cross sections." Neutron
+  news 3.3 (1992): 26-37. To highlight a point that may be missed, the
+  absorption is the only quantity that is wavelength dependent.
 */
-class MANTID_KERNEL_DLL Material {
+class MANTID_KERNEL_DLL Material final {
 public:
   /// Structure to hold the information for a parsed chemical formula
-  struct FormulaUnit {
+  struct FormulaUnit final {
     boost::shared_ptr<PhysicalConstants::Atom> atom;
     double multiplicity;
     FormulaUnit(const boost::shared_ptr<PhysicalConstants::Atom> &atom,

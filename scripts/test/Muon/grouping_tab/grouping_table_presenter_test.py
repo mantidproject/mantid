@@ -2,12 +2,13 @@ import unittest
 import sys
 import six
 from PyQt4 import QtGui
-from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_model import GroupingTableModel
+from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_model import GroupingTabModel
 from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_view import GroupingTableView
 from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_presenter import GroupingTablePresenter
 from Muon.GUI.Common.muon_group import MuonGroup
 from Muon.GUI.Common.muon_data_context import MuonDataContext
 from Muon.GUI.Common import mock_widget
+from Muon.GUI.Common.observer_pattern import Observer
 
 if sys.version_info.major > 2:
     from unittest import mock
@@ -25,11 +26,15 @@ class GroupingTablePresenterTest(unittest.TestCase):
         self.obj = QtGui.QWidget()
 
         self.data = MuonDataContext()
-        self.model = GroupingTableModel(data=self.data)
+        self.gui_variable_observer = Observer()
+
+        self.data.gui_variables_notifier.add_subscriber(self.gui_variable_observer)
+        self.model = GroupingTabModel(data=self.data)
         self.view = GroupingTableView(parent=self.obj)
         self.presenter = GroupingTablePresenter(self.view, self.model)
 
         self.view.warning_popup = mock.Mock()
+        self.gui_variable_observer.update = mock.MagicMock()
 
     def tearDown(self):
         self.obj = None
@@ -255,7 +260,7 @@ class GroupingTablePresenterTest(unittest.TestCase):
     def test_that_if_not_entering_numbers_into_detector_IDs_the_changes_are_rejected(self):
         self.add_three_groups_to_table()
 
-        invalid_id_lists = ["fwd", "a", "A", "!", "_", "(1)", "11a22"]
+        invalid_id_lists = ["fwd", "a", "A", "!", "_", "(1)", "11a22", '0']
 
         call_count = 0
         for invalid_ids in invalid_id_lists:
@@ -306,6 +311,74 @@ class GroupingTablePresenterTest(unittest.TestCase):
         self.view.grouping_table.item(0, 1).setText("-10-10")
 
         self.view.warning_popup.assert_called_once_with('Invalid detector list.')
+
+    def test_range_boxes_start_out_disabled(self):
+        self.assertFalse(self.view.group_range_min.isEnabled())
+        self.assertFalse(self.view.group_range_max.isEnabled())
+
+    def test_enabling_range_min_editing_creates_context_variable(self):
+        number = '1.12'
+        self.view.group_range_min.setText(number)
+        self.view.group_range_use_first_good_data.setChecked(False)
+
+        self.assertEqual(self.data.gui_variables['GroupRangeMin'], float(number))
+        self.gui_variable_observer.update.assert_called_once_with(self.data.gui_variables_notifier, None)
+
+    def test_disabling_range_min_editing_removes_context_variable(self):
+        number = '1.12'
+        self.view.group_range_min.setText(number)
+        self.view.group_range_use_first_good_data.setChecked(False)
+
+        self.assertEqual(self.data.gui_variables['GroupRangeMin'], float(number))
+        self.gui_variable_observer.update.assert_called_once_with(self.data.gui_variables_notifier, None)
+
+        self.view.group_range_use_first_good_data.setChecked(True)
+
+        self.assertFalse('GroupRangeMin' in self.data.gui_variables)
+        self.assertEqual(self.gui_variable_observer.update.call_count, 2)
+
+    def test_enabling_range_max_editing_creates_context_variable(self):
+        number = '1.12'
+        self.view.group_range_max.setText(number)
+        self.view.group_range_use_last_data.setChecked(False)
+
+        self.assertEqual(self.data.gui_variables['GroupRangeMax'], float(number))
+        self.gui_variable_observer.update.assert_called_once_with(self.data.gui_variables_notifier, None)
+
+    def test_disabling_range_max_editing_removes_context_variable(self):
+        number = '1.12'
+        self.view.group_range_max.setText(number)
+        self.view.group_range_use_last_data.setChecked(False)
+
+        self.assertEqual(self.data.gui_variables['GroupRangeMax'], float(number))
+        self.gui_variable_observer.update.assert_called_once_with(self.data.gui_variables_notifier, None)
+
+        self.view.group_range_use_last_data.setChecked(True)
+
+        self.assertFalse('GroupRangeMax' in self.data.gui_variables)
+        self.assertEqual(self.gui_variable_observer.update.call_count, 2)
+
+    def test_updating_range_min_to_be_greater_than_range_max_displays_warning_and_vice_versa(self):
+        original_max = '1.12'
+        original_min = '0.1'
+        self.view.group_range_max.setText(original_max)
+        self.view.group_range_min.setText(original_min)
+        self.view.group_range_use_last_data.setChecked(False)
+        self.view.group_range_use_first_good_data.setChecked(False)
+
+        self.view.group_range_min.setText('2.0')
+        self.view.group_range_min.editingFinished.emit()
+
+        self.assertEqual(self.data.gui_variables['GroupRangeMin'], float(original_min))
+        self.view.warning_popup.assert_called_once_with('Minimum of group asymmetry range must be less than maximum')
+
+        self.view.group_range_max.setText('0.05')
+        self.view.group_range_max.editingFinished.emit()
+
+        self.assertEqual(self.data.gui_variables['GroupRangeMax'], float(original_max))
+        self.view.warning_popup.assert_called_with('Maximum of group asymmetry range must be greater than minimum')
+        self.assertEqual(self.view.warning_popup.call_count, 2)
+
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)

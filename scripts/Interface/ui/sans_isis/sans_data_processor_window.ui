@@ -156,6 +156,9 @@ QGroupBox::title {
               </item>
               <item row="0" column="6">
                <widget class="QPushButton" name="manage_directories_button">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Add directories to search for data, set your output directory, and manage data archvie searching.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
                 <property name="text">
                  <string>Manage Directories</string>
                 </property>
@@ -271,7 +274,7 @@ QGroupBox::title {
               <item>
                <widget class="QToolButton" name="delete_row_button">
                 <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;delete selected rows&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Delete selected rows&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                 <property name="text">
                  <string>...</string>
@@ -294,7 +297,7 @@ QGroupBox::title {
               <item>
                <widget class="QToolButton" name="copy_button">
                 <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;copy selected rows&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Copy selected rows&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                 <property name="text">
                  <string>...</string>
@@ -310,7 +313,7 @@ QGroupBox::title {
               <item>
                <widget class="QToolButton" name="cut_button">
                 <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;cut selected rows&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Cut selected rows&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                 <property name="text">
                  <string>...</string>
@@ -326,7 +329,7 @@ QGroupBox::title {
               <item>
                <widget class="QToolButton" name="paste_button">
                 <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;paste rows&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Paste rows&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                 <property name="text">
                  <string>...</string>
@@ -342,7 +345,7 @@ QGroupBox::title {
               <item>
                <widget class="QToolButton" name="erase_button">
                 <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;erase contents of selected rows&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Erase contents of selected rows&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                 <property name="text">
                  <string>...</string>
@@ -485,6 +488,9 @@ QGroupBox::title {
                      </item>
                      <item>
                       <widget class="QCheckBox" name="save_can_checkBox">
+                       <property name="toolTip">
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When checked, save the unsubtracted Can and Sam workspaces separately.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       </property>
                        <property name="text">
                         <string>Save Can</string>
                        </property>
@@ -564,7 +570,7 @@ QGroupBox::title {
                         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When enabled it will replace all entries with zero-valued errors with errors of magnitude 1e6. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                        </property>
                        <property name="text">
-                        <string>zero error free</string>
+                        <string>Zero Error Free</string>
                        </property>
                        <property name="checked">
                         <bool>true</bool>
@@ -573,6 +579,9 @@ QGroupBox::title {
                      </item>
                      <item row="2" column="0">
                       <widget class="QCheckBox" name="plot_results_checkbox">
+                       <property name="toolTip">
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When checked, the 0th spectrum of each reduced workspace will be plotted as it is reduced.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       </property>
                        <property name="text">
                         <string>Plot Results</string>
                        </property>
@@ -1037,7 +1046,7 @@ QGroupBox::title {
                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Settings for the monitor normalization.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                     </property>
                     <property name="title">
-                     <string>Monitor Normalization</string>
+                     <string>Scattering</string>
                     </property>
                     <layout class="QGridLayout" name="gridLayout_8">
                      <item row="0" column="0">
@@ -1431,13 +1440,6 @@ QGroupBox::title {
                           </property>
                          </widget>
                         </item>
-                        <item row="2" column="0">
-                         <widget class="QCheckBox" name="show_transmission_view">
-                          <property name="text">
-                           <string>Show Transmission</string>
-                          </property>
-                         </widget>
-                        </item>
                        </layout>
                       </widget>
                      </item>
@@ -1513,7 +1515,7 @@ QGroupBox::title {
                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The wavelength adjustment files.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                     </property>
                     <property name="title">
-                     <string>Wavelength adjustment files</string>
+                     <string>Wavelength efficiency files</string>
                     </property>
                     <layout class="QGridLayout" name="gridLayout_11">
                      <item row="0" column="1">
@@ -1860,28 +1862,28 @@ QGroupBox::title {
                    <string>Q limits</string>
                   </property>
                   <layout class="QGridLayout" name="gridLayout_15">
-                   <item row="1" column="1">
+                   <item row="1" column="2">
                     <widget class="QLineEdit" name="q_1d_min_line_edit">
                      <property name="toolTip">
                       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The lower bound of the momentum transfer for a 1D reduction.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                      </property>
                     </widget>
                    </item>
-                   <item row="0" column="4">
+                   <item row="0" column="5">
                     <widget class="QLabel" name="q_step_type_label">
                      <property name="text">
                       <string>Step type</string>
                      </property>
                     </widget>
                    </item>
-                   <item row="0" column="3">
+                   <item row="0" column="4">
                     <widget class="QLabel" name="q_step_label">
                      <property name="text">
                       <string>Step [Å^-1]</string>
                      </property>
                     </widget>
                    </item>
-                   <item row="3" column="2">
+                   <item row="3" column="3">
                     <widget class="QLineEdit" name="q_xy_max_line_edit">
                      <property name="toolTip">
                       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The upper bound of the momentum transfer for a 2D reduction.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -1908,64 +1910,64 @@ QGroupBox::title {
                      </property>
                     </widget>
                    </item>
-                   <item row="0" column="1">
+                   <item row="0" column="2">
                     <widget class="QLabel" name="q_min_label">
                      <property name="text">
                       <string>Min [Å^-1]</string>
                      </property>
                     </widget>
                    </item>
-                   <item row="3" column="3">
+                   <item row="3" column="4">
                     <widget class="QLineEdit" name="q_xy_step_line_edit">
                      <property name="toolTip">
                       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The step of the momentum transfer for a 2D reduction.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                      </property>
                     </widget>
                    </item>
-                   <item row="1" column="4">
+                   <item row="1" column="5">
                     <widget class="QComboBox" name="q_1d_step_type_combo_box">
                      <property name="toolTip">
                       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The step type of the momentum transfer for a 1D reduction.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                      </property>
                     </widget>
                    </item>
-                   <item row="3" column="4">
+                   <item row="3" column="5">
                     <widget class="QComboBox" name="q_xy_step_type_combo_box">
                      <property name="toolTip">
                       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The step type of the momentum transfer for a 2D reduction.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                      </property>
                     </widget>
                    </item>
-                   <item row="1" column="3">
+                   <item row="1" column="4">
                     <widget class="QLineEdit" name="q_1d_step_line_edit">
                      <property name="toolTip">
                       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The step of the momentum transfer for a 1D reduction.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                      </property>
                     </widget>
                    </item>
-                   <item row="1" column="2">
+                   <item row="1" column="3">
                     <widget class="QLineEdit" name="q_1d_max_line_edit">
                      <property name="toolTip">
                       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The upper bound of the momentum transfer for a 1D reduction.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                      </property>
                     </widget>
                    </item>
-                   <item row="0" column="2">
+                   <item row="0" column="3">
                     <widget class="QLabel" name="q_max_label">
                      <property name="text">
                       <string>Max [Å^-1]</string>
                      </property>
                     </widget>
                    </item>
-                   <item row="2" column="2">
-                    <widget class="QLabel" name="label_8">
+                   <item row="2" column="3">
+                    <widget class="QLabel" name="q_xy_max_label">
                      <property name="text">
                       <string>Max [Å^-1]</string>
                      </property>
                     </widget>
                    </item>
-                   <item row="2" column="3">
-                    <widget class="QLabel" name="label_9">
+                   <item row="2" column="4">
+                    <widget class="QLabel" name="q_xy_step_label">
                      <property name="text">
                       <string>Step [Å^-1]</string>
                      </property>
@@ -2316,7 +2318,6 @@ QGroupBox::title {
   <tabstop>fit_sample_wavelength_combo_box</tabstop>
   <tabstop>fit_sample_wavelength_min_line_edit</tabstop>
   <tabstop>fit_sample_wavelength_max_line_edit</tabstop>
-  <tabstop>show_transmission_view</tabstop>
   <tabstop>fit_can_use_fit_check_box</tabstop>
   <tabstop>fit_can_fit_type_combo_box</tabstop>
   <tabstop>fit_can_polynomial_order_spin_box</tabstop>

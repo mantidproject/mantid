@@ -20,7 +20,7 @@ namespace Geometry {
   Models a Container is used to hold a sample in the beam. It gets most
   of its functionality from wrapped Geometry::IObject but can also hold a
   definition of what the sample geometry itself would be. If the sample shape
-  definition is set then we term this a constriained sample geometry.
+  definition is set then we term this a constrained sample geometry.
 */
 class MANTID_GEOMETRY_DLL Container final : public IObject {
 public:
@@ -100,7 +100,7 @@ public:
   void draw() const override { m_shape->draw(); }
   void initDraw() const override { m_shape->initDraw(); }
 
-  const Kernel::Material material() const override {
+  const Kernel::Material &material() const override {
     return m_shape->material();
   }
   void setID(const std::string &id);

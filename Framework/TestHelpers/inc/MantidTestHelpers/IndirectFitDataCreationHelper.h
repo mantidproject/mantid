@@ -9,6 +9,7 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidHistogramData/BinEdges.h"
@@ -35,6 +36,10 @@ Mantid::API::MatrixWorkspace_sptr
 createWorkspaceWithTextAxis(int const &numberOfSpectra,
                             std::vector<std::string> const &labels,
                             int const &numberOfBins = 10);
+Mantid::API::MatrixWorkspace_sptr
+createWorkspaceWithBinValues(int const &numberOfSpectra,
+                             std::vector<double> const &labels,
+                             int const &numberOfBins = 10);
 Mantid::API::WorkspaceGroup_sptr
 createGroupWorkspace(std::size_t const &numberOfWorkspaces,
                      int const &numberOfSpectra, int const &numberOfBins = 10);
@@ -46,6 +51,8 @@ createGroupWorkspaceWithTextAxes(std::size_t const &numberOfWorkspaces,
 
 Mantid::API::TextAxis *getTextAxis(int const &numberOfSpectra,
                                    std::vector<std::string> const &labels);
+Mantid::API::NumericAxis *getNumericAxis(int const &numberOfLabels,
+                                         std::vector<double> const &values);
 
 Mantid::API::MatrixWorkspace_sptr
 setWorkspaceEFixed(Mantid::API::MatrixWorkspace_sptr workspace,

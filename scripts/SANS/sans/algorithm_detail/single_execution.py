@@ -251,8 +251,7 @@ def run_optimized_for_can(reduction_alg, reduction_setting_bundle):
                                      (output_parts_bundle.output_workspace_count is not None and
                                       output_parts_bundle.output_workspace_norm is None))
     is_invalid_transmission_workspaces = (output_transmission_bundle.calculated_transmission_workspace is None
-                                          or output_transmission_bundle.unfitted_transmission_workspace is None) \
-        and state.adjustment.show_transmission
+                                          or output_transmission_bundle.unfitted_transmission_workspace is None)
     partial_output_require_reload = output_parts and is_invalid_partial_workspaces
 
     must_reload = output_bundle.output_workspace is None or partial_output_require_reload or is_invalid_transmission_workspaces

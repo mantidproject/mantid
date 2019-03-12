@@ -75,7 +75,12 @@ void DetectorSearcher::createDetectorCache() {
     auto pos = m_detInfo.position(pointNo);
     pos.normalize();
     auto E1 = (pos - beam) * -m_crystallography_convention;
-    E1.normalize();
+    const auto norm = E1.norm();
+    if (norm == 0.) {
+      E1 = V3D(up) * -m_crystallography_convention;
+    } else {
+      E1 /= norm;
+    }
 
     Eigen::Vector3d point(E1[0], E1[1], E1[2]);
 
@@ -192,10 +197,12 @@ DetectorSearcher::DetectorSearchResult DetectorSearcher::handleTubeGap(
       gapDir[i] = gap;
 
       auto beam1 = detectorDir + gapDir;
+      beam1.normalize();
       const auto result1 = checkInteceptWithNeighbours(beam1, neighbours);
       const auto hit1 = std::get<0>(result1);
 
       auto beam2 = detectorDir - gapDir;
+      beam2.normalize();
       const auto result2 = checkInteceptWithNeighbours(beam2, neighbours);
       const auto hit2 = std::get<0>(result2);
 

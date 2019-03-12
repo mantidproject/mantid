@@ -11,13 +11,16 @@ from __future__ import (absolute_import, division, print_function)
 import DirectILL_common as common
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, InstrumentValidator,
                         MatrixWorkspaceProperty, Progress, PropertyMode, WorkspaceProperty, WorkspaceUnitValidator)
-from mantid.kernel import (CompositeValidator, Direction, FloatArrayProperty, StringListValidator)
+from mantid.kernel import (CompositeValidator, Direction, FloatArrayProperty, FloatBoundedValidator, Property, RebinParamsValidator,
+                           StringListValidator)
 from mantid.simpleapi import (BinWidthAtX, CloneWorkspace, ConvertSpectrumAxis, ConvertToDistribution, ConvertUnits, CorrectKiKf,
-                              DetectorEfficiencyCorUser, Divide, GroupDetectors, MaskDetectors, Rebin, Scale, SofQWNormalisedPolygon,
-                              Transpose)
+                              DetectorEfficiencyCorUser, Divide, GenerateGroupingPowder, GroupDetectors, MaskDetectors, Rebin, Scale,
+                              SofQWNormalisedPolygon, Transpose)
 import math
 import numpy
+import os
 from scipy import constants
+import tempfile
 
 
 def _absoluteUnits(ws, vanaWS, wsNames, wsCleanup, report, algorithmLogging):
@@ -68,13 +71,6 @@ def _createDetectorGroups(ws):
     return groups
 
 
-def _deltaQ(ws):
-    """Estimate a q bin width for a S(theta, w) workspace."""
-    deltaTheta = _medianDeltaTheta(ws)
-    wavelength = ws.run().getProperty('wavelength').value
-    return 2.0 * constants.pi / wavelength * deltaTheta
-
-
 def _detectorGroupsToXml(groups, instrument):
     """Create grouping pattern XML tree from detector groups."""
     from xml.etree import ElementTree
@@ -89,7 +85,7 @@ def _detectorGroupsToXml(groups, instrument):
     return rootElement
 
 
-def _energyBinning(ws, algorithmLogging):
+def _defaultEnergyBinning(ws, algorithmLogging):
     """Create common (but nonequidistant) binning for a DeltaE workspace."""
     xs = ws.extractX()
     minXIndex = numpy.nanargmin(xs[:, 0])
@@ -114,6 +110,119 @@ def _energyBinning(ws, algorithmLogging):
         i += 1
     borders[-1] = lastX
     return numpy.array(borders)
+
+
+def _deltaQ(ws):
+    """Estimate a q bin width for a S(theta, w) workspace."""
+    deltaTheta = _medianDeltaTheta(ws)
+    wavelength = ws.run().getProperty('wavelength').value
+    return 2.0 * constants.pi / wavelength * deltaTheta
+
+
+def _parseHybridBinningTokens(rebinning):
+    """Return a list of rebinning ranges for given hybrid param string."""
+    tokens = rebinning.split(',')
+    paramGroups = list()
+    currentGroup = list()
+    for tokenIndex in range(len(tokens)):
+        token = tokens[tokenIndex].strip()
+        if token == 'a':
+            if currentGroup:
+                paramGroups.append(currentGroup)
+                currentGroup = list()
+            # Don't add consecutive empty lists into paramGroups.
+            if not paramGroups or (paramGroups and paramGroups[-1]):
+                # Empty list in paramGroups means automatic binning
+                paramGroups.append(list())
+        else:
+            try:
+                value = float(token)
+            except ValueError:
+                raise RuntimeError('Unknown token in ' + common.PROP_REBINNING_W + ": '" + token + "'.")
+            currentGroup.append(value)
+            if tokenIndex == len(tokens) - 1:
+                paramGroups.append(currentGroup)
+    return paramGroups
+
+
+def _paramGroupsToEdges(groups):
+    """Convert param groups to groups of bin edges."""
+    edgeGroups = list()
+    for params in groups:
+        if not params:
+            # Empty list in edgeGroups means automatic binning.
+            edgeGroups.append(list())
+        else:
+            edges = list()
+            beginX = params.pop(0)
+            while params:
+                if len(params) < 2:
+                    raise RuntimeError('Error in ' + common.PROP_REBINNING_W
+                                       + ': not enough numbers to form the binning.')
+                dx = params.pop(0)
+                endX = params.pop(0)
+                x = beginX
+                index = 1
+                while x < endX:
+                    edges.append(x)
+                    x = beginX + index * dx
+                    index += 1
+                beginX = endX
+            edges.append(beginX)
+            edgeGroups.append(edges)
+    return edgeGroups
+
+
+def _mergeEdges(edges, edgeGroups, minX, maxX):
+    """Merge edges and edgeGroups into a single list of bin edges."""
+    mergedEdges = list()
+    for groupIndex in range(len(edgeGroups)):
+        currentGroup = edgeGroups[groupIndex]
+        if not currentGroup:
+            edgeBegin = edgeGroups[groupIndex - 1][-1] if groupIndex > 0 else edges[0]
+            edgeEnd = edgeGroups[groupIndex + 1][0] if groupIndex < len(edgeGroups) - 1 else edges[-1]
+            begin = numpy.searchsorted(edges, edgeBegin) + 1
+            if begin < len(edges):
+                e = edges[begin]
+                index = begin
+                while e < edgeEnd and index < len(edges):
+                    if minX < e and e < maxX:
+                        mergedEdges.append(e)
+                    index += 1
+                    e = edges[index]
+        else:
+            # Pick the edges from the groups.
+            for e in currentGroup:
+                if minX < e and e < maxX:
+                    mergedEdges.append(e)
+    return mergedEdges
+
+
+def _hybridEnergyBinning(ws, rebinning, algorithmLogging):
+    """Parse rebinning parameters retuning an array of bin boundaries."""
+    paramGroups = _parseHybridBinningTokens(rebinning)
+    autoEdges = _defaultEnergyBinning(ws, algorithmLogging)
+    # Check limits for the full X range.
+    globalBeginX = float('-inf')
+    if len(paramGroups[0]) == 1:
+        globalBeginX = paramGroups.pop(0)[0]
+    elif len(paramGroups[0]) == 2:
+        paramGroups[0].insert(0, autoEdges[0])
+    globalEndX = float('inf')
+    if len(paramGroups[-1]) == 1:
+        globalEndX = paramGroups.pop(-1)[0]
+    elif len(paramGroups[-1]) == 2:
+        paramGroups[-1].append(autoEdges[-1])
+    # Build bin edges from user given binning params
+    userEdges = _paramGroupsToEdges(paramGroups)
+    # Merge user and automatic edges
+    mergedEdges = list()
+    if not math.isinf(globalBeginX):
+        mergedEdges.append(globalBeginX)
+    mergedEdges += _mergeEdges(autoEdges, userEdges, globalBeginX, globalEndX)
+    if not math.isinf(globalEndX):
+        mergedEdges.append(globalEndX)
+    return numpy.array(mergedEdges)
 
 
 def _medianDeltaTheta(ws):
@@ -218,32 +327,26 @@ class DirectILLReduction(DataProcessorAlgorithm):
 
         # Convert units from TOF to energy.
         progress.report('Converting to energy')
-        mainWS = self._convertTOFToDeltaE(mainWS, wsNames, wsCleanup,
-                                          subalgLogging)
+        mainWS = self._convertTOFToDeltaE(mainWS, wsNames, wsCleanup, subalgLogging)
 
         # KiKf conversion.
-        mainWS = self._correctByKiKf(mainWS, wsNames,
-                                     wsCleanup, subalgLogging)
+        mainWS = self._correctByKiKf(mainWS, wsNames, wsCleanup, subalgLogging)
 
         # Rebinning.
         progress.report('Rebinning in energy')
-        mainWS = self._rebinInW(mainWS, wsNames, wsCleanup, report,
-                                subalgLogging)
+        mainWS = self._rebinInW(mainWS, wsNames, wsCleanup, subalgLogging)
 
         # Divide the energy transfer workspace by bin widths.
         mainWS = self._convertToDistribution(mainWS, wsNames, wsCleanup, subalgLogging)
 
         # Detector efficiency correction.
         progress.report('Correcting detector efficiency')
-        mainWS = self._correctByDetectorEfficiency(mainWS, wsNames,
-                                                   wsCleanup, subalgLogging)
+        mainWS = self._correctByDetectorEfficiency(mainWS, wsNames, wsCleanup, subalgLogging)
 
         progress.report('Grouping detectors')
-        mainWS = self._groupDetectors(mainWS, wsNames, wsCleanup,
-                                      subalgLogging)
+        mainWS = self._groupDetectors(mainWS, wsNames, wsCleanup, report, subalgLogging)
 
-        self._outputWSConvertedToTheta(mainWS, wsNames, wsCleanup,
-                                       subalgLogging)
+        self._outputWSConvertedToTheta(mainWS, wsNames, wsCleanup, subalgLogging)
 
         progress.report('Converting to q')
         mainWS = self._sOfQW(mainWS, wsNames, wsCleanup, report, subalgLogging)
@@ -257,6 +360,8 @@ class DirectILLReduction(DataProcessorAlgorithm):
         inputWorkspaceValidator = CompositeValidator()
         inputWorkspaceValidator.add(InstrumentValidator())
         inputWorkspaceValidator.add(WorkspaceUnitValidator('TOF'))
+        positiveFloat = FloatBoundedValidator(0., exclusive=True)
+        validRebinParams = RebinParamsValidator(AllowEmpty=True)
 
         # Properties.
         self.declareProperty(MatrixWorkspaceProperty(
@@ -304,10 +409,17 @@ class DirectILLReduction(DataProcessorAlgorithm):
             direction=Direction.Input,
             optional=PropertyMode.Optional),
             doc='Detector diagnostics workspace for masking.')
-        self.declareProperty(FloatArrayProperty(name=common.PROP_REBINNING_PARAMS_W),
+        self.declareProperty(name=common.PROP_GROUPING_ANGLE_STEP,
+                             defaultValue=Property.EMPTY_DBL,
+                             validator=positiveFloat,
+                             doc='A scattering angle step to which to group detectors, in degrees.')
+        self.declareProperty(FloatArrayProperty(name=common.PROP_REBINNING_PARAMS_W, validator=validRebinParams),
                              doc='Manual energy rebinning parameters.')
         self.setPropertyGroup(common.PROP_REBINNING_PARAMS_W, PROPGROUP_REBINNING)
-        self.declareProperty(FloatArrayProperty(name=common.PROP_BINNING_PARAMS_Q),
+        self.declareProperty(name=common.PROP_REBINNING_W,
+                             defaultValue='',
+                             doc='Energy rebinning when mixing manual and automatic binning parameters.')
+        self.declareProperty(FloatArrayProperty(name=common.PROP_BINNING_PARAMS_Q, validator=validRebinParams),
                              doc='Manual q rebinning parameters.')
         self.setPropertyGroup(common.PROP_BINNING_PARAMS_Q, PROPGROUP_REBINNING)
         self.declareProperty(name=common.PROP_TRANSPOSE_SAMPLE_OUTPUT,
@@ -329,16 +441,10 @@ class DirectILLReduction(DataProcessorAlgorithm):
     def validateInputs(self):
         """Check for issues with user input."""
         issues = dict()
-        qBinProp = self.getProperty(common.PROP_BINNING_PARAMS_Q)
-        if not qBinProp.isDefault:
-            qBinning = qBinProp.value
-            if (len(qBinning) - 1) % 2 != 0:
-                issues[common.PROP_BINNING_PARAMS_Q] = 'Invalid Q binning parameters.'
-        eBinProp = self.getProperty(common.PROP_REBINNING_PARAMS_W)
-        if not eBinProp.isDefault:
-            eBinning = eBinProp.value
-            if (len(eBinning) - 1) % 2 != 0:
-                issues[common.PROP_REBINNING_PARAMS_W] = 'Invalid energy rebinning parameters.'
+        eBinParamProp = self.getProperty(common.PROP_REBINNING_PARAMS_W)
+        eBinProp = self.getProperty(common.PROP_REBINNING_W)
+        if not eBinParamProp.isDefault and not eBinProp.isDefault:
+            issues[common.PROP_REBINNING_W] = 'Cannot be specified at the same time with ' + common.PROP_REBINNING_PARAMS_W + '.'
         return issues
 
     def _applyDiagnostics(self, mainWS, wsNames, wsCleanup, subalgLogging):
@@ -407,26 +513,39 @@ class DirectILLReduction(DataProcessorAlgorithm):
         wsCleanup.finalCleanup()
         report.toLog(self.log())
 
-    def _groupDetectors(self, mainWS, wsNames, wsCleanup, subalgLogging):
+    def _groupDetectors(self, mainWS, wsNames, wsCleanup, report, subalgLogging):
         """Group detectors with similar thetas."""
-        import os
-        import tempfile
-        groups = _createDetectorGroups(mainWS)
-        instrumentName = mainWS.getInstrument().getName()
-        groupsXml = _detectorGroupsToXml(groups, instrumentName)
-        fileHandle, path = tempfile.mkstemp(suffix='.xml', prefix='grouping-{}-'.format(instrumentName))
-        _writeXml(groupsXml, path)
+        instrument = mainWS.getInstrument()
+        fileHandle, path = tempfile.mkstemp(suffix='.xml', prefix='grouping-{}-'.format(instrument.getName()))
+        # We don't need the handle, just the path.
         os.close(fileHandle)
-        groupedWSName = wsNames.withSuffix('grouped_detectors')
-        groupedWS = GroupDetectors(InputWorkspace=mainWS,
-                                   OutputWorkspace=groupedWSName,
-                                   MapFile=path,
-                                   KeepUngroupedSpectra=False,
-                                   Behaviour='Average',
-                                   EnableLogging=subalgLogging)
-        wsCleanup.cleanup(mainWS)
-        os.remove(path)
-        return groupedWS
+        angleStepProperty = self.getProperty(common.PROP_GROUPING_ANGLE_STEP)
+        if angleStepProperty.isDefault:
+            if instrument.hasParameter('natural-angle-step'):
+                angleStep = instrument.getNumberParameter('natural-angle-step', recursive=False)[0]
+                report.notice('Using grouping angle step of {} degrees from the IPF.'.format(angleStep))
+            else:
+                angleStep = 0.01
+                report.notice('Using the default grouping angle step of {} degrees.'.format(angleStep))
+        else:
+            angleStep = angleStepProperty.value
+        GenerateGroupingPowder(InputWorkspace=mainWS,
+                               AngleStep=angleStep,
+                               GroupingFilename=path,
+                               GenerateParFile=False,
+                               EnableLogging=subalgLogging)
+        try:
+            groupedWSName = wsNames.withSuffix('grouped_detectors')
+            groupedWS = GroupDetectors(InputWorkspace=mainWS,
+                                       OutputWorkspace=groupedWSName,
+                                       MapFile=path,
+                                       KeepUngroupedSpectra=False,
+                                       Behaviour='Average',
+                                       EnableLogging=subalgLogging)
+            wsCleanup.cleanup(mainWS)
+            return groupedWS
+        finally:
+            os.remove(path)
 
     def _inputWS(self, wsNames, wsCleanup, subalgLogging):
         """Return the raw input workspace."""
@@ -450,8 +569,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                               subalgLogging)
         return vanaNormalizedWS
 
-    def _outputWSConvertedToTheta(self, mainWS, wsNames, wsCleanup,
-                                  subalgLogging):
+    def _outputWSConvertedToTheta(self, mainWS, wsNames, wsCleanup, subalgLogging):
         """
         If requested, convert the spectrum axis to theta and save the result
         into the proper output property.
@@ -466,10 +584,15 @@ class DirectILLReduction(DataProcessorAlgorithm):
             self.setProperty(common.PROP_OUTPUT_THETA_W_WS, thetaWS)
             wsCleanup.cleanup(thetaWS)
 
-    def _rebinInW(self, mainWS, wsNames, wsCleanup, report, subalgLogging):
+    def _rebinInW(self, mainWS, wsNames, wsCleanup, subalgLogging):
         """Rebin the horizontal axis of a workspace."""
-        if self.getProperty(common.PROP_REBINNING_PARAMS_W).isDefault:
-            binBorders = _energyBinning(mainWS, subalgLogging)
+        eRebinParams = self.getProperty(common.PROP_REBINNING_PARAMS_W)
+        eRebin = self.getProperty(common.PROP_REBINNING_W)
+        if eRebinParams.isDefault:
+            if eRebin.isDefault:
+                binBorders = _defaultEnergyBinning(mainWS, subalgLogging)
+            else:
+                binBorders = _hybridEnergyBinning(mainWS, eRebin.value, subalgLogging)
             params = list()
             binWidths = numpy.diff(binBorders)
             for start, width in zip(binBorders[:-1], binWidths):

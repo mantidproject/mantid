@@ -1454,6 +1454,17 @@ const MantidVec &EventList::dataE() const {
   return sharedE()->rawData();
 }
 
+namespace {
+inline double calcNorm(const double errorSquared) {
+  if (errorSquared == 0.)
+    return 0;
+  else if (errorSquared == 1.)
+    return 1.;
+  else
+    return 1. / std::sqrt(errorSquared);
+}
+} // namespace
+
 // --------------------------------------------------------------------------
 /** Compress the event list by grouping events with the same TOF.
  *
@@ -1478,9 +1489,10 @@ EventList::compressEventsHelper(const std::vector<T> &events,
   // For getting an accurate average TOF
   double totalTof = 0;
   int num = 0;
-  // Carrying weight and error
+  // Carrying weight, error, and normalization
   double weight = 0;
   double errorSquared = 0;
+  double normalization = 0.;
 
   for (auto it = events.cbegin(); it != events.cend(); it++) {
     if ((it->m_tof - lastTof) <= tolerance) {
@@ -1489,28 +1501,37 @@ EventList::compressEventsHelper(const std::vector<T> &events,
       errorSquared += it->errorSquared();
       // Track the average tof
       num++;
-      totalTof += it->m_tof;
+      const double norm = calcNorm(it->errorSquared());
+      normalization += norm;
+      totalTof += it->m_tof * norm;
     } else {
       // We exceeded the tolerance
-      if (num > 0) {
-        // Create a new event with the average TOF and summed weights and
-        // squared errors.
-        out.emplace_back(totalTof / num, weight, errorSquared);
+      // Create a new event with the average TOF and summed weights and
+      // squared errors.
+      if (num == 1) {
+        // last time-of-flight is the only one contributing
+        out.emplace_back(lastTof, weight, errorSquared);
+      } else if (num > 1) {
+        out.emplace_back(totalTof / normalization, weight, errorSquared);
       }
       // Start a new combined object
       num = 1;
-      totalTof = it->m_tof;
+      const double norm = calcNorm(it->errorSquared());
+      normalization = norm;
+      totalTof = it->m_tof * norm;
       weight = it->weight();
       errorSquared = it->errorSquared();
       lastTof = it->m_tof;
     }
   }
 
-  // Put the last event in there too.
-  if (num > 0) {
-    // Create a new event with the average TOF and summed weights and squared
-    // errors.
-    out.emplace_back(totalTof / num, weight, errorSquared);
+  // Put the last event in there too with the average TOF and summed weights and
+  // squared errors.
+  if (num == 1) {
+    // last time-of-flight is the only one contributing
+    out.emplace_back(lastTof, weight, errorSquared);
+  } else if (num > 1) {
+    out.emplace_back(totalTof / normalization, weight, errorSquared);
   }
 
   // If you have over-allocated by more than 5%, reduce the size.
@@ -1554,9 +1575,10 @@ void EventList::compressEventsParallelHelper(
     // For getting an accurate average TOF
     double totalTof = 0;
     int num = 0;
-    // Carrying weight and error
+    // Carrying weight, error, and normalization
     double weight = 0;
     double errorSquared = 0;
+    double normalization = 0.;
 
     // Separate the
     typename std::vector<T>::const_iterator it =
@@ -1572,17 +1594,21 @@ void EventList::compressEventsParallelHelper(
         errorSquared += it->errorSquared();
         // Track the average tof
         num++;
-        totalTof += it->m_tof;
+        const double norm = calcNorm(it->errorSquared());
+        normalization += norm;
+        totalTof += it->m_tof * norm;
       } else {
         // We exceeded the tolerance
         if (num > 0) {
           // Create a new event with the average TOF and summed weights and
           // squared errors.
-          localOut.emplace_back(totalTof / num, weight, errorSquared);
+          localOut.emplace_back(totalTof / normalization, weight, errorSquared);
         }
         // Start a new combined object
         num = 1;
-        totalTof = it->m_tof;
+        const double norm = calcNorm(it->errorSquared());
+        normalization = norm;
+        totalTof = it->m_tof * norm;
         weight = it->weight();
         errorSquared = it->errorSquared();
         lastTof = it->m_tof;
@@ -1593,7 +1619,7 @@ void EventList::compressEventsParallelHelper(
     if (num > 0) {
       // Create a new event with the average TOF and summed weights and squared
       // errors.
-      localOut.emplace_back(totalTof / num, weight, errorSquared);
+      localOut.emplace_back(totalTof / normalization, weight, errorSquared);
     }
   }
 
@@ -1631,10 +1657,12 @@ inline void EventList::compressFatEventsHelper(
 
   // pulsetime information
   std::vector<DateAndTime> pulsetimes; // all the times for new event
+  std::vector<double> pulsetimeWeights;
 
   // Carrying weight and error
-  double weight = 0;
-  double errorSquared = 0;
+  double weight = 0.;
+  double errorSquared = 0.;
+  double tofNormalization = 0.;
 
   // Move up to first event that has a large enough pulsetime. This is just in
   // case someone starts from after the starttime of the run. It is expected
@@ -1658,37 +1686,54 @@ inline void EventList::compressFatEventsHelper(
       // Carry the error and weight
       weight += it->weight();
       errorSquared += it->errorSquared();
+      double norm = calcNorm(it->errorSquared());
+      tofNormalization += norm;
       // Track the average tof
-      totalTof += it->m_tof;
+      totalTof += it->m_tof * norm;
       // Accumulate the pulse times
       pulsetimes.push_back(it->m_pulsetime);
+      pulsetimeWeights.push_back(norm);
     } else {
       // We exceeded the tolerance
       if (!pulsetimes.empty()) {
         // Create a new event with the average TOF and summed weights and
-        // squared errors.
-        out.emplace_back(totalTof / static_cast<double>(pulsetimes.size()),
-                         Kernel::DateAndTimeHelpers::averageSorted(pulsetimes),
-                         weight, errorSquared);
+        // squared errors. 1 event used doesn't need to average
+        if (pulsetimes.size() == 1) {
+          out.emplace_back(lastTof, pulsetimes.front(), weight, errorSquared);
+        } else {
+          out.emplace_back(totalTof / tofNormalization,
+                           Kernel::DateAndTimeHelpers::averageSorted(
+                               pulsetimes, pulsetimeWeights),
+                           weight, errorSquared);
+        }
       }
       // Start a new combined object
-      totalTof = it->m_tof;
+      double norm = calcNorm(it->errorSquared());
+      totalTof = it->m_tof * norm;
       weight = it->weight();
       errorSquared = it->errorSquared();
+      tofNormalization = norm;
       lastTof = it->m_tof;
       lastPulseBin = eventPulseBin;
       pulsetimes.clear();
       pulsetimes.push_back(it->m_pulsetime);
+      pulsetimeWeights.clear();
+      pulsetimeWeights.push_back(norm);
     }
   }
 
   // Put the last event in there too.
   if (!pulsetimes.empty()) {
-    // Create a new event with the average TOF and summed weights and squared
-    // errors.
-    out.emplace_back(totalTof / static_cast<double>(pulsetimes.size()),
-                     Kernel::DateAndTimeHelpers::averageSorted(pulsetimes),
-                     weight, errorSquared);
+    // Create a new event with the average TOF and summed weights and
+    // squared errors. 1 event used doesn't need to average
+    if (pulsetimes.size() == 1) {
+      out.emplace_back(lastTof, pulsetimes.front(), weight, errorSquared);
+    } else {
+      out.emplace_back(totalTof / tofNormalization,
+                       Kernel::DateAndTimeHelpers::averageSorted(
+                           pulsetimes, pulsetimeWeights),
+                       weight, errorSquared);
+    }
   }
 
   // If you have over-allocated by more than 5%, reduce the size.
@@ -3429,9 +3474,14 @@ void EventList::multiplyHistogramHelper(std::vector<T> &events,
                                         const MantidVec &X, const MantidVec &Y,
                                         const MantidVec &E) {
   // Validate inputs
-  if ((X.size() < 2) || (Y.size() != E.size()) || (X.size() != 1 + Y.size()))
-    throw std::invalid_argument("EventList::multiply() was given invalid size "
-                                "or inconsistent histogram arrays.");
+  if ((X.size() < 2) || (Y.size() != E.size()) || (X.size() != 1 + Y.size())) {
+    std::stringstream msg;
+    msg << "EventList::multiply() was given invalid size or "
+           "inconsistent histogram arrays: X["
+        << X.size() << "] "
+        << "Y[" << Y.size() << " E[" << E.size() << "]";
+    throw std::invalid_argument(msg.str());
+  }
 
   size_t x_size = X.size();
 
@@ -3552,9 +3602,14 @@ void EventList::divideHistogramHelper(std::vector<T> &events,
                                       const MantidVec &X, const MantidVec &Y,
                                       const MantidVec &E) {
   // Validate inputs
-  if ((X.size() < 2) || (Y.size() != E.size()) || (X.size() != 1 + Y.size()))
-    throw std::invalid_argument("EventList::divide() was given invalid size or "
-                                "inconsistent histogram arrays.");
+  if ((X.size() < 2) || (Y.size() != E.size()) || (X.size() != 1 + Y.size())) {
+    std::stringstream msg;
+    msg << "EventList::divide() was given invalid size or "
+           "inconsistent histogram arrays: X["
+        << X.size() << "] "
+        << "Y[" << Y.size() << " E[" << E.size() << "]";
+    throw std::invalid_argument(msg.str());
+  }
 
   size_t x_size = X.size();
 

@@ -13,6 +13,7 @@ SIMULTANEOUS = 'Simultaneous'
 
 
 class LoadWidgetPresenter(object):
+
     """
     The load widget is responsible for combining data loaded from its two sub-widgets in a systematic way
     (either keeping a single workspace, or allowing multiple to be loaded at once).
@@ -34,16 +35,22 @@ class LoadWidgetPresenter(object):
         self.view.on_subwidget_loading_started(self.disable_loading)
         self.view.on_subwidget_loading_finished(self.enable_loading)
 
-        self.view.on_file_widget_data_changed(self.handle_file_widget_data_changed)
-        self.view.on_run_widget_data_changed(self.handle_run_widget_data_changed)
+        self.view.on_file_widget_data_changed(
+            self.handle_file_widget_data_changed)
+        self.view.on_run_widget_data_changed(
+            self.handle_run_widget_data_changed)
 
         self.view.on_clear_button_clicked(self.clear_data_and_view)
 
-        self._view.on_multiple_load_type_changed(self.handle_multiple_files_option_changed)
+        self._view.on_multiple_load_type_changed(
+            self.handle_multiple_files_option_changed)
         self._use_threading = True
 
         self.instrumentObserver = LoadWidgetPresenter.InstrumentObserver(self)
         self.loadNotifier = LoadWidgetPresenter.LoadNotifier(self)
+
+        self.disable_observer = LoadWidgetPresenter.DisableObserver(self)
+        self.enable_observer = LoadWidgetPresenter.EnableObserver(self)
 
     def set_load_run_widget(self, widget):
         self.load_run_widget = widget
@@ -59,8 +66,10 @@ class LoadWidgetPresenter(object):
             self.load_file_widget.update_multiple_loading_behaviour(CO_ADD)
             self.load_run_widget.update_multiple_loading_behaviour(CO_ADD)
         else:
-            self.load_file_widget.update_multiple_loading_behaviour(SIMULTANEOUS)
-            self.load_run_widget.update_multiple_loading_behaviour(SIMULTANEOUS)
+            self.load_file_widget.update_multiple_loading_behaviour(
+                SIMULTANEOUS)
+            self.load_run_widget.update_multiple_loading_behaviour(
+                SIMULTANEOUS)
         self.load_run_widget.handle_run_changed_by_user()
 
     def enable_multiple_files(self, enabled=True):
@@ -99,7 +108,8 @@ class LoadWidgetPresenter(object):
         self._model.clear_data()
         self.handle_run_widget_data_changed()
         self.handle_run_widget_data_changed()
-        self.load_run_widget.set_current_instrument(self._model._context.instrument)
+        self.load_run_widget.set_current_instrument(
+            self._model._context.instrument)
         self.loadNotifier.notify_subscribers()
 
     @property
@@ -117,6 +127,7 @@ class LoadWidgetPresenter(object):
         self.handle_run_widget_data_changed()
 
     class LoadNotifier(Observable):
+
         """
         Notify when loaded data changes from file widget or run widget, or when clear button is pressed.
         """
@@ -137,3 +148,19 @@ class LoadWidgetPresenter(object):
         def update(self, observable, arg):
             print("update called : ", arg)
             self.outer.update_new_instrument(arg)
+
+    class EnableObserver(Observer):
+        def __init__(self, outer):
+            Observer.__init__(self)
+            self.outer = outer
+
+        def update(self, observable, arg):
+            self.outer.enable_loading()
+
+    class DisableObserver(Observer):
+        def __init__(self, outer):
+            Observer.__init__(self)
+            self.outer = outer
+
+        def update(self, observable, arg):
+            self.outer.disable_loading()

@@ -31,12 +31,12 @@ void calculateScatteringLengths(NeutronAtom &atom) {
   atom.tot_scatt_length = 10. * std::sqrt(atom.tot_scatt_xs * INV_FOUR_PI);
 
   if (atom.coh_scatt_length_img == 0.)
-    atom.coh_scatt_length = fabs(atom.coh_scatt_length_real);
+    atom.coh_scatt_length = std::abs(atom.coh_scatt_length_real);
   else
     atom.coh_scatt_length = 10. * std::sqrt(atom.coh_scatt_xs * INV_FOUR_PI);
 
   if (atom.inc_scatt_length_img == 0.)
-    atom.inc_scatt_length = fabs(atom.inc_scatt_length_real);
+    atom.inc_scatt_length = std::abs(atom.inc_scatt_length_real);
   else
     atom.inc_scatt_length = 10. * std::sqrt(atom.inc_scatt_xs * INV_FOUR_PI);
 }

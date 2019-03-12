@@ -11,11 +11,12 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidGeometry/DllConfig.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidGeometry/Rendering/ShapeInfo.h"
 
-#include "BoundingBox.h"
+#include <boost/optional.hpp>
 #include <map>
 #include <memory>
 
@@ -48,7 +49,7 @@ class vtkGeometryCacheWriter;
 A Constructive Solid Geometry (CSG) object, implemented
 as a collection of Rules and surface objects
 */
-class MANTID_GEOMETRY_DLL CSGObject : public IObject {
+class MANTID_GEOMETRY_DLL CSGObject final : public IObject {
 public:
   /// Default constructor
   CSGObject();
@@ -59,7 +60,7 @@ public:
   /// Assignment operator
   CSGObject &operator=(const CSGObject &);
   /// Destructor
-  virtual ~CSGObject();
+  ~CSGObject() override;
   /// Clone
   IObject *clone() const override { return new CSGObject(*this); }
 
@@ -83,7 +84,7 @@ public:
   int getName() const override { return ObjNum; } ///< Get Name
 
   void setMaterial(const Kernel::Material &material);
-  const Kernel::Material material() const override;
+  const Kernel::Material &material() const override;
 
   /// Return whether this object has a valid shape
   bool hasValidShape() const override;
@@ -228,7 +229,6 @@ private:
   /// Returns the volume.
   double singleShotMonteCarloVolume(const int shotSize,
                                     const size_t seed) const;
-
   /// Top rule [ Geometric scope of object]
   std::unique_ptr<Rule> TopRule;
   /// Object's bounding box
@@ -265,7 +265,7 @@ private:
   /// Optional string identifier
   std::string m_id;
   /// material composition
-  std::unique_ptr<Kernel::Material> m_material;
+  mutable std::unique_ptr<Kernel::Material> m_material;
   /// Whether or not the object geometry is finite
   bool m_isFiniteGeometry = true;
 

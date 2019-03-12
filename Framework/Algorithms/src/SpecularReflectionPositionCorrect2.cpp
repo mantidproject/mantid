@@ -40,14 +40,15 @@ double offsetAngleFromCentre(const MatrixWorkspace &ws, const double l2,
                              const double linePosition,
                              const double pixelSize) {
   const auto &spectrumInfo = ws.spectrumInfo();
-  const size_t nSpec = spectrumInfo.size();
-  if (linePosition + 1. > static_cast<double>(nSpec)) {
+  const size_t maxWorkspaceIndex = spectrumInfo.size() - 1;
+  double const specSize = static_cast<double>(maxWorkspaceIndex);
+  if (linePosition > specSize) {
     std::ostringstream msg;
     msg << "LinePosition is greater than the maximum workspace index "
-        << spectrumInfo.size() - 1;
+        << maxWorkspaceIndex;
     throw std::runtime_error(msg.str());
   }
-  auto const centreIndex = static_cast<double>(nSpec - 1) / 2.;
+  auto const centreIndex = specSize / 2.;
   auto const sign = isAngleIncreasingWithIndex(spectrumInfo) ? -1. : 1.;
   double const offsetWidth = (centreIndex - linePosition) * pixelSize;
   return sign * std::atan2(offsetWidth, l2);
@@ -177,18 +178,19 @@ SpecularReflectionPositionCorrect2::validateInputs() {
  */
 void SpecularReflectionPositionCorrect2::exec() {
 
-  MatrixWorkspace_sptr inWS = this->getProperty("InputWorkspace");
-  MatrixWorkspace_sptr outWS = getProperty("OutputWorkspace");
+  MatrixWorkspace_const_sptr inWS = this->getProperty("InputWorkspace");
+  MatrixWorkspace_sptr outWS = this->getProperty("OutputWorkspace");
   if (outWS != inWS) {
     outWS = inWS->clone();
   }
+
   // Sample
   const V3D samplePosition = declareSamplePosition(*inWS);
 
   // Type of movement (vertical shift or rotation around the sample)
   const std::string correctionType = getProperty("DetectorCorrectionType");
   // Detector
-  auto inst = inWS->getInstrument();
+  const auto inst = inWS->getInstrument();
   const detid_t detectorID = static_cast<int>(getProperty("DetectorID"));
   const std::string detectorName = getProperty("DetectorComponentName");
   const V3D detectorPosition =
@@ -197,7 +199,7 @@ void SpecularReflectionPositionCorrect2::exec() {
   // Sample-to-detector
   const V3D sampleToDetector = detectorPosition - samplePosition;
   const double l2 = sampleToDetector.norm();
-  auto referenceFrame = inst->getReferenceFrame();
+  const auto referenceFrame = inst->getReferenceFrame();
   const auto alongDir = referenceFrame->vecPointingAlongBeam();
   const double beamOffsetOld = sampleToDetector.scalar_prod(alongDir);
 
@@ -340,7 +342,7 @@ V3D SpecularReflectionPositionCorrect2::declareSamplePosition(
     const MatrixWorkspace &ws) {
   V3D position;
   const std::string sampleName = getProperty("SampleComponentName");
-  auto inst = ws.getInstrument();
+  const auto inst = ws.getInstrument();
   IComponent_const_sptr sample = inst->getComponentByName(sampleName);
   if (sample)
     position = sample->getPos();
@@ -384,13 +386,13 @@ double SpecularReflectionPositionCorrect2::twoThetaFromDirectLine(
     const V3D &samplePosition, const double l2, const V3D &alongDir,
     const double beamOffset) {
   double twoThetaInRad;
-  MatrixWorkspace_sptr directWS = getProperty("DirectLineWorkspace");
+  MatrixWorkspace_const_sptr directWS = getProperty("DirectLineWorkspace");
   const double directLinePosition = getProperty("DirectLinePosition");
   const double pixelSize = getProperty("PixelSize");
   const double directOffset =
       offsetAngleFromCentre(*directWS, l2, directLinePosition, pixelSize);
   const auto reflectedDetectorAngle = std::acos(beamOffset / l2);
-  auto directInst = directWS->getInstrument();
+  const auto directInst = directWS->getInstrument();
   const auto directDetPos =
       declareDetectorPosition(*directInst, detectorName, detectorID);
   const auto directSampleToDet = directDetPos - samplePosition;

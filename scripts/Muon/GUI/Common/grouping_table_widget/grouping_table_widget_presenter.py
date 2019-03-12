@@ -22,6 +22,14 @@ class GroupingTablePresenter(object):
 
         self._view.on_table_data_changed(self.handle_data_change)
 
+        self._view.on_user_changes_min_range_source(self.first_good_data_checkbox_changed)
+
+        self._view.on_user_changes_max_range_source(self.from_file_checkbox_changed)
+
+        self._view.on_user_changes_group_range_min_text_edit(self.handle_group_range_min_updated)
+
+        self._view.on_user_changes_group_range_max_text_edit(self.handle_group_range_max_updated)
+
         self._dataChangedNotifier = lambda: 0
 
     def show(self):
@@ -50,7 +58,8 @@ class GroupingTablePresenter(object):
         return True
 
     def validate_detector_ids(self, text):
-        if re.match(run_utils.run_string_regex, text) and max(run_utils.run_string_to_list(text)) <= self._model._data.num_detectors:
+        if re.match(run_utils.run_string_regex, text) and max(run_utils.run_string_to_list(text, False)) <= self._model._data.num_detectors\
+                and min(run_utils.run_string_to_list(text, False)) > 0:
             return True
         self._view.warning_popup("Invalid detector list.")
         return False
@@ -81,7 +90,7 @@ class GroupingTablePresenter(object):
     def add_group_to_view(self, group):
         self._view.disable_updates()
         assert isinstance(group, MuonGroup)
-        entry = [str(group.name), run_utils.run_list_to_string(group.detectors), str(group.n_detectors)]
+        entry = [str(group.name), run_utils.run_list_to_string(group.detectors,False), str(group.n_detectors)]
         self._view.add_entry_to_table(entry)
         self._view.enable_updates()
 
@@ -129,7 +138,7 @@ class GroupingTablePresenter(object):
         table = self._view.get_table_contents()
         self._model.clear_groups()
         for entry in table:
-            detector_list = run_utils.run_string_to_list(str(entry[1]))
+            detector_list = run_utils.run_string_to_list(str(entry[1]),False)
             group = MuonGroup(group_name=str(entry[0]), detector_ids=detector_list)
             self._model.add_group(group)
 
@@ -140,4 +149,53 @@ class GroupingTablePresenter(object):
         for group in self._model.groups:
             self.add_group_to_view(group)
 
+        if self._view.group_range_use_last_data.isChecked():
+            self._view.group_range_max.setText(str(self._model.get_last_data_from_file()))
+
+        if self._view.group_range_use_first_good_data.isChecked():
+            self._view.group_range_min.setText(str(self._model.get_first_good_data_from_file()))
+
         self._view.enable_updates()
+
+    def first_good_data_checkbox_changed(self):
+        if self._view.group_range_use_first_good_data.isChecked():
+            self._view.group_range_min.setText(str(self._model.get_first_good_data_from_file()))
+
+            self._view.group_range_min.setEnabled(False)
+            if 'GroupRangeMin' in self._model._data.gui_variables:
+                # Remove variable from model if value from file is to be used
+                self._model._data.gui_variables.pop('GroupRangeMin')
+                self._model._data.add_or_replace_gui_variables()
+        else:
+            self._view.group_range_min.setEnabled(True)
+            self._model._data.add_or_replace_gui_variables(GroupRangeMin=float(self._view.group_range_min.text()))
+
+    def from_file_checkbox_changed(self):
+        if self._view.group_range_use_last_data.isChecked():
+            self._view.group_range_max.setText(str(self._model.get_last_data_from_file()))
+
+            self._view.group_range_max.setEnabled(False)
+            if 'GroupRangeMax' in self._model._data.gui_variables:
+                # Remove variable from model if value from file is to be used
+                self._model._data.gui_variables.pop('GroupRangeMax')
+                self._model._data.add_or_replace_gui_variables()
+
+        else:
+            self._view.group_range_max.setEnabled(True)
+            self._model._data.add_or_replace_gui_variables(GroupRangeMax=float(self._view.group_range_max.text()))
+
+    def handle_group_range_min_updated(self):
+        range_min_new = float(self._view.group_range_min.text())
+        if range_min_new < self._model._data.gui_variables['GroupRangeMax']:
+            self._model._data.add_or_replace_gui_variables(GroupRangeMin=range_min_new)
+        else:
+            self._view.group_range_min.setText(str(self._model._data.gui_variables['GroupRangeMin']))
+            self._view.warning_popup('Minimum of group asymmetry range must be less than maximum')
+
+    def handle_group_range_max_updated(self):
+        range_max_new = float(self._view.group_range_max.text())
+        if range_max_new > self._model._data.gui_variables['GroupRangeMin']:
+            self._model._data.add_or_replace_gui_variables(GroupRangeMax=float(self._view.group_range_max.text()))
+        else:
+            self._view.group_range_max.setText(str(self._model._data.gui_variables['GroupRangeMax']))
+            self._view.warning_popup('Maximum of group asymmetry range must be greater than minimum')

@@ -55,6 +55,9 @@ class PeakSelectorView(QtGui.QListWidget):
         self.finish_selection()
         event.accept()
 
+    def get_checked(self):
+        return self.new_data
+
     def update_new_data(self, data):
         for el, values in iteritems(data):
             if values is None:

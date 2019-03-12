@@ -29,6 +29,34 @@ public:
     TS_ASSERT_EQUALS(curium.coh_scatt_length_real, 7.7);
   }
 
+  void testVanadium() {
+    NeutronAtom atom = getNeutronAtom(23);
+    TS_ASSERT_EQUALS(atom.z_number, 23);
+    TS_ASSERT_EQUALS(atom.a_number, 0);
+    TS_ASSERT_EQUALS(atom.coh_scatt_length_real, -0.3824);
+    TS_ASSERT_EQUALS(atom.coh_scatt_length_img, 0.);
+    TS_ASSERT_EQUALS(atom.inc_scatt_length_real, 0);
+    TS_ASSERT_EQUALS(atom.inc_scatt_length_img, 0.);
+    TS_ASSERT_EQUALS(atom.coh_scatt_xs, 0.0184);
+    TS_ASSERT_EQUALS(atom.inc_scatt_xs, 5.08);
+    TS_ASSERT_EQUALS(atom.tot_scatt_xs, 5.1);
+    TS_ASSERT_EQUALS(atom.abs_scatt_xs, 5.08);
+  }
+
+  void testGadolinium() {
+    NeutronAtom atom = getNeutronAtom(64);
+    TS_ASSERT_EQUALS(atom.z_number, 64);
+    TS_ASSERT_EQUALS(atom.a_number, 0);
+    TS_ASSERT_EQUALS(atom.coh_scatt_length_real, 6.5);
+    TS_ASSERT_EQUALS(atom.coh_scatt_length_img, -13.82);
+    TS_ASSERT_EQUALS(atom.inc_scatt_length_real, 0);
+    TS_ASSERT_EQUALS(atom.inc_scatt_length_img, 0);
+    TS_ASSERT_EQUALS(atom.coh_scatt_xs, 29.3);
+    TS_ASSERT_EQUALS(atom.inc_scatt_xs, 151.);
+    TS_ASSERT_EQUALS(atom.tot_scatt_xs, 180.);
+    TS_ASSERT_EQUALS(atom.abs_scatt_xs, 49700.);
+  }
+
   void testError() {
     TS_ASSERT_THROWS(getNeutronAtom(1, 15), std::runtime_error);
     TS_ASSERT_THROWS(getNeutronAtom(97), std::runtime_error);

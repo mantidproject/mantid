@@ -191,7 +191,7 @@ void ConventionalCell::SetSidesIncreasing(Kernel::DblMatrix &UB) {
   std::vector<V3D> edges(3, V3D());
   OrientedLattice::GetABC(UB, edges[0], edges[1], edges[2]);
 
-  std::sort(edges.begin(), edges.end(), V3D::CompareMagnitude);
+  std::sort(edges.begin(), edges.end(), V3D::compareMagnitude);
 
   V3D a = edges[0];
   V3D b = edges[1];

@@ -1,0 +1,1 @@
+Various algorithms for operations like cloning, deleting, renaming and comparing workspaces, extracting monitors and generating python from a workspace.

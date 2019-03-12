@@ -7,9 +7,10 @@
 #ifndef ARRAYPROPERTYTEST_H_
 #define ARRAYPROPERTYTEST_H_
 
-#include <cxxtest/TestSuite.h>
-
 #include "MantidKernel/ArrayProperty.h"
+#include <array>
+#include <cxxtest/TestSuite.h>
+#include <json/value.h>
 
 using namespace Mantid::Kernel;
 
@@ -243,6 +244,32 @@ public:
     TS_ASSERT_EQUALS(sProp->setValue(""), "")
     TS_ASSERT(sProp->operator()().empty())
     TS_ASSERT(sProp->isDefault())
+  }
+
+  void test_SetValueFromJson_Accepts_ArrayValues() {
+    const std::array<int, 3> testValues{{1, 2, 3}};
+    Json::Value arrayValue{Json::arrayValue};
+    for (const auto &elem : testValues) {
+      arrayValue.append(elem);
+    }
+
+    ArrayProperty<int> intProp("i");
+    const std::string helpMessage{intProp.setValueFromJson(arrayValue)};
+
+    TS_ASSERT(helpMessage.empty());
+    const auto &propValue = intProp();
+    TS_ASSERT_EQUALS(testValues.size(), propValue.size());
+    for (const auto &elem : testValues) {
+      arrayValue.append(elem);
+    }
+  }
+
+  void test_SetValueFromJson_Returns_Error_StringFor_NonArrayValues() {
+    Json::Value dict;
+    dict["key"] = "value";
+    ArrayProperty<int> intProp("i");
+    const std::string helpMessage{intProp.setValueFromJson(dict)};
+    TS_ASSERT(!helpMessage.empty());
   }
 
   void testAssignmentOperator() {

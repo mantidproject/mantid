@@ -1,5 +1,6 @@
 set ( QT5_SRC_FILES
   src/AlgorithmDialog.cpp
+  src/AlgorithmHistoryWindow.cpp
   src/AlgorithmInputHistory.cpp
   src/AlgorithmPropertiesWidget.cpp
   src/AlgorithmRunner.cpp
@@ -104,6 +105,7 @@ set ( QT5_SRC_FILES
   
 set ( QT5_MOC_FILES
   inc/MantidQtWidgets/Common/AlgorithmDialog.h
+  inc/MantidQtWidgets/Common/AlgorithmHistoryWindow.h
   inc/MantidQtWidgets/Common/AlgorithmPropertiesWidget.h
   inc/MantidQtWidgets/Common/AlgorithmRunner.h
   inc/MantidQtWidgets/Common/AlgorithmSelectorWidget.h
@@ -213,8 +215,8 @@ set ( QT5_INC_FILES
   inc/MantidQtWidgets/Common/Batch/BuildSubtreeItems.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/ADSAdapter.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/IWorkspaceDockView.h
-  inc/MantidQtWidgets/Common/WorkspacePresenter/IWorkspaceDockView.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/ViewNotifiable.h
+  inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceDockMockObjects.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspacePresenter.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceProvider.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceProviderNotifiable.h
@@ -234,6 +236,7 @@ set ( QT5_UI_FILES
 
 set ( SRC_FILES
   src/AlgorithmDialog.cpp
+  src/AlgorithmHistoryWindow.cpp
   src/AlgorithmInputHistory.cpp
   src/AlgorithmPropertiesWidget.cpp
   src/AlgorithmRunner.cpp
@@ -399,6 +402,7 @@ set ( SRC_FILES
 
 set ( MOC_FILES
   inc/MantidQtWidgets/Common/AlgorithmDialog.h
+  inc/MantidQtWidgets/Common/AlgorithmHistoryWindow.h
   inc/MantidQtWidgets/Common/AlgorithmRunner.h
   inc/MantidQtWidgets/Common/AlgorithmPropertiesWidget.h
   inc/MantidQtWidgets/Common/BatchAlgorithmRunner.h
@@ -508,6 +512,7 @@ set ( MOC_FILES
 # Include files aren't required, but this makes them appear in Visual Studio
 set ( INC_FILES
 	${MOC_FILES}
+  inc/MantidQtWidgets/Common/AlgorithmHistoryWindow.h
   inc/MantidQtWidgets/Common/AlgorithmInputHistory.h
   inc/MantidQtWidgets/Common/AlgorithmRunner.h
   inc/MantidQtWidgets/Common/AlternateCSPythonLexer.h
@@ -899,7 +904,7 @@ mtd_add_qt_tests (TARGET_NAME MantidQtWidgetsCommonTest
 # This file is NOT packaged. See installers/WinInstaller for the package
 # version.
 ###########################################################################
-if ( WIN32 )
+if ( WIN32 AND ENABLE_MANTIDPLOT)
   set ( QT_CONF qt.conf )
   configure_file ( qt.conf.template ${CMAKE_CURRENT_BINARY_DIR}/${QT_CONF} @ONLY )
   add_custom_command ( TARGET MantidQtWidgetsCommonQt4 POST_BUILD

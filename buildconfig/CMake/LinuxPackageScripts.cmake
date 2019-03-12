@@ -207,7 +207,8 @@ fi" )
 
 set ( ERROR_CMD "ErrorReporter/error_dialog_app.py --exitcode=\$?" )
 
-# Local dev version
+##### Local dev version
+set ( PYTHON_ARGS "-Wdefault::DeprecationWarning" )
 if ( MAKE_VATES )
   set ( PARAVIEW_PYTHON_PATHS ":${ParaView_DIR}/lib:${ParaView_DIR}/lib/site-packages" )
 else ()
@@ -245,7 +246,8 @@ configure_file ( ${CMAKE_MODULE_PATH}/Packaging/AddPythonPath.py.in
 execute_process ( COMMAND "chmod" "+x" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/AddPythonPath.py"
                   OUTPUT_QUIET ERROR_QUIET )
 
-# Package version
+##### Package version
+unset ( PYTHON_ARGS )
 if ( MAKE_VATES )
   set ( EXTRA_LDPATH "\${INSTALLDIR}/lib/paraview-${ParaView_VERSION_MAJOR}.${ParaView_VERSION_MINOR}" )
   set ( PV_PYTHON_PATH "\${INSTALLDIR}/lib/paraview-${ParaView_VERSION_MAJOR}.${ParaView_VERSION_MINOR}" )
@@ -255,7 +257,7 @@ else ()
 endif ()
 
 # used by mantidplot and mantidworkbench
-set ( LOCAL_PYPATH "\${INSTALLDIR}/lib:\${INSTALLDIR}/plugins" )
+set ( LOCAL_PYPATH "\${INSTALLDIR}/bin:\${INSTALLDIR}/lib:\${INSTALLDIR}/plugins" )
 set ( SCRIPTSDIR "\${INSTALLDIR}/scripts")
 
 if (ENABLE_MANTIDPLOT)
