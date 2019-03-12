@@ -259,7 +259,7 @@ class SANSILLReduction(PythonAlgorithm):
             att_coeff = run.getLogData('attenuator.attenuation_coefficient').value
         elif run.hasProperty('attenuator.attenuation_value'):
             att_value = run.getLogData('attenuator.attenuation_value').value
-            if int(att_value) < 10 and self._instrument == 'D33':
+            if float(att_value) < 10. and self._instrument == 'D33':
                 instrument = mtd[ws].getInstrument()
                 param = 'att'+str(int(att_value))
                 if instrument.hasParameter(param):
