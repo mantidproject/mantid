@@ -8,10 +8,10 @@ from __future__ import (absolute_import, division, print_function)
 
 from mantid.api import mtd, AlgorithmFactory, DistributedDataProcessorAlgorithm, ITableWorkspaceProperty, \
     MatrixWorkspaceProperty, MultipleFileProperty, PropertyMode
-from mantid.kernel import Direction
+from mantid.kernel import Direction, PropertyManagerDataService
 from mantid.simpleapi import AlignAndFocusPowder, CompressEvents, ConvertDiffCal, ConvertUnits, CopyLogs, \
     CreateCacheFilename, DeleteWorkspace, DetermineChunking, Divide, EditInstrumentGeometry, FilterBadPulses, \
-    LoadDiffCal, LoadNexusProcessed, PDDetermineCharacterizations, Plus, RebinToWorkspace, RemoveLogs, \
+    LoadDiffCal, Load, LoadNexusProcessed, PDDetermineCharacterizations, Plus, RebinToWorkspace, RemoveLogs, \
     RenameWorkspace, SaveNexusProcessed
 import os
 import numpy as np
@@ -20,15 +20,17 @@ EXTENSIONS_NXS = ["_event.nxs", ".nxs.h5"]
 PROPS_FOR_INSTR = ["PrimaryFlightPath", "SpectrumIDs", "L2", "Polar", "Azimuthal"]
 CAL_FILE, GROUP_FILE = "CalFileName", "GroupFilename"
 CAL_WKSP, GRP_WKSP, MASK_WKSP = "CalibrationWorkspace", "GroupingWorkspace", "MaskWorkspace"
+# AlignAndFocusPowder only uses the ranges
+PROPS_IN_PD_CHARACTER = ["DMin", "DMax", "TMin", "TMax", "CropWavelengthMin", "CropWavelengthMax"]
 PROPS_FOR_ALIGN = [CAL_FILE, GROUP_FILE,
                    GRP_WKSP, CAL_WKSP, "OffsetsWorkspace",
                    MASK_WKSP, "MaskBinTable",
-                   "Params", "ResampleX", "Dspacing", "DMin", "DMax",
-                   "TMin", "TMax", "PreserveEvents",
+                   "Params", "ResampleX", "Dspacing",
+                   "PreserveEvents",
                    "RemovePromptPulseWidth", "CompressTolerance", "CompressWallClockTolerance",
                    "CompressStartTime", "UnwrapRef", "LowResRef",
-                   "CropWavelengthMin", "CropWavelengthMax",
                    "LowResSpectrumOffset", "ReductionProperties"]
+PROPS_FOR_ALIGN.extend(PROPS_IN_PD_CHARACTER)
 PROPS_FOR_ALIGN.extend(PROPS_FOR_INSTR)
 PROPS_FOR_PD_CHARACTER = ['FrequencyLogNames', 'WaveLengthLogNames']
 
@@ -54,7 +56,7 @@ def determineChunking(filename, chunkSize):
         strategy.append({})
 
     # delete chunks workspace
-    chunks = str(chunks)
+    chunks = str(chunks)  # release the handle to the workspace object
     DeleteWorkspace(Workspace='chunks')
 
     return strategy
@@ -158,7 +160,7 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
                 GRP_WKSP:  self.__grpWksp,
                 MASK_WKSP: self.__mskWksp}
 
-        for name in PROPS_FOR_ALIGN:
+        for name in PROPS_FOR_ALIGN + PROPS_IN_PD_CHARACTER:
             prop = self.getProperty(name)
             name_list = ['PreserveEvents', 'CompressTolerance',
                          'CompressWallClockTolerance', 'CompressStartTime']
@@ -172,10 +174,24 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
                     args[name] = prop.value
         return args
 
+    def __isCharacterizationsNeeded(self):
+        '''Determine if the characterization file is needed by checking if
+        all the properties it would set are already specified'''
+        if not self.charac:
+            return False
+
+        for name in PROPS_IN_PD_CHARACTER:
+            if self.getProperty(name).isDefault:
+                return True
+
+        return False
+
     def __determineCharacterizations(self, filename, wkspname):
-        useCharac = bool(self.charac is not None)
-        loadFile = not mtd.doesExist(wkspname)
-        useCal = (not self.getProperty('CalFileName').isDefault) or (not self.getProperty('CalFileName').isDefault)
+        useCharac = self.__isCharacterizationsNeeded()
+        useCal = (not self.getProperty(CAL_FILE).isDefault) or (not self.getProperty(GROUP_FILE).isDefault)
+        # something needs to use the workspace and it needs to not already be in memory
+        loadFile = (useCharac or useCal) and (not mtd.doesExist(wkspname))
+        self.log().notice('useChara={} useCal={} loadFile={}'.format(useCharac, useCal, loadFile))
 
         # input workspace is only needed to find a row in the characterizations table
         tempname = None
@@ -183,20 +199,24 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
             if useCharac or useCal:
                 tempname = '__%s_temp' % wkspname
                 # set the loader for this file
-                # MetaDataOnly=True is only supported by LoadEventNexus
-                loader = self.__createLoader(filename, tempname, MetaDataOnly=True)
-                loader.execute()
+                try:
+                    # MetaDataOnly=True is only supported by LoadEventNexus
+                    loader = self.__createLoader(filename, tempname, MetaDataOnly=True)
+                    loader.execute()
 
-                # get the underlying loader name if we used the generic one
-                if self.__loaderName == 'Load':
-                    self.__loaderName = loader.getPropertyValue('LoaderName')
+                    # get the underlying loader name if we used the generic one
+                    if self.__loaderName == 'Load':
+                        self.__loaderName = loader.getPropertyValue('LoaderName')
+                except RuntimeError:
+                    # give up and load the whole file - this can be expensive
+                    Load(OutputWorkspace=tempname, Filename=filename)
         else:
             tempname = wkspname  # assume it is already loaded
 
         # some bit of data has been loaded so use it to get the characterizations
         self.__setupCalibration(tempname)
 
-        # put together argument list
+        # put together argument list for determining characterizations
         args = dict(ReductionProperties=self.getProperty('ReductionProperties').valueAsStr)
         for name in PROPS_FOR_PD_CHARACTER:
             prop = self.getProperty(name)
@@ -207,7 +227,8 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
         if useCharac:
             args['Characterizations'] = self.charac
 
-        PDDetermineCharacterizations(**args)
+        if useCharac:
+            PDDetermineCharacterizations(**args)
 
         if loadFile and (useCharac or useCal):
             DeleteWorkspace(Workspace=tempname)
@@ -225,7 +246,7 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
         propman_properties = ['bank', 'd_min', 'd_max', 'tof_min', 'tof_max', 'wavelength_min', 'wavelength_max']
         alignandfocusargs = []
         # calculate general properties
-        for name in PROPS_FOR_ALIGN:
+        for name in PROPS_FOR_ALIGN + PROPS_IN_PD_CHARACTER:
             # skip these because this has been reworked to only worry about information in workspaces
             if name in (CAL_FILE, GROUP_FILE, CAL_WKSP, GRP_WKSP, MASK_WKSP):
                 continue
@@ -247,8 +268,12 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
             alignandfocusargs.append('%s=%s' % (MASK_WKSP, value))
 
         alignandfocusargs += additional_props or []
+        reductionPropertiesName = self.getProperty('ReductionProperties').valueAsStr
+        if not PropertyManagerDataService.doesExist(reductionPropertiesName):
+            reductionPropertiesName = ''  # do not specify non-existant manager
+
         return CreateCacheFilename(Prefix=prefix,
-                                   PropertyManager=self.getProperty('ReductionProperties').valueAsStr,
+                                   PropertyManager=reductionPropertiesName,
                                    Properties=propman_properties,
                                    OtherProperties=alignandfocusargs,
                                    CacheDir=cachedir).OutputFilename
