@@ -10,3 +10,11 @@ Indirect Geometry Changes
     improvements, followed by bug fixes.
 
 :ref:`Release 4.1.0 <v4.1.0>`
+
+Algorithms
+----------
+
+Improvements
+############
+
+- :ref:`ModeratorTzeroLinear <algm-ModeratorTzeroLinear>` permits now passing parameter values as input properties.
