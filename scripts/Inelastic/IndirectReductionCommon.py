@@ -395,25 +395,30 @@ def sum_chopped_runs(workspace_names):
 # -------------------------------------------------------------------------------
 
 
-def get_detectors_to_mask_from_groups(group_names):
+def add_workspace_names(workspace_names, workspace):
+    if isinstance(workspace, WorkspaceGroup):
+        workspace_names.extend(workspace.getNames())
+    else:
+        workspace_names.append(group_name)
+    return workspace_names
+
+
+def get_all_workspace_names(group_names):
     workspace_names = []
     for group_name in group_names:
-        workspace = AnalysisDataService.retrieve(group_name)
-        if isinstance(workspace, WorkspaceGroup):
-            for name in workspace.getNames():
-                workspace_names.append(name)
-        else:
-            workspace_names.append(group_name)
+        workspace_names = add_workspace_names(workspace_names, AnalysisDataService.retrieve(group_name))
+    return workspace_names
 
-    return get_detectors_to_mask(workspace_names)
+
+def get_detectors_to_mask_from_groups(group_names):
+    return get_detectors_to_mask(get_all_workspace_names(group_names))
 
 
 def get_detectors_to_mask(workspace_names):
     masked_detectors = []
     for workspace_name in workspace_names:
-        for bad_detector in identify_bad_detectors(workspace_name):
-            if bad_detector not in masked_detectors:
-                masked_detectors.append(bad_detector)
+        bad_detectors = [detector for detector in identify_bad_detectors(workspace_name) if detector not in masked_detectors]
+        masked_detectors.extend(bad_detectors)
 
     return sorted(masked_detectors)
 
