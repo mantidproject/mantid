@@ -605,7 +605,7 @@ For much more on customising the graph appearance see the `Matplotlib documentat
 A list of some common properties you might want to change and the keywords to set:
 
 +--------------------+-------------------------+------------+
-| Parameter          | Key word                | Default    |
+| Parameter          | Keyword                 | Default    |
 +--------------------+-------------------------+------------+
 | Error bar cap      | ``errorbar.capsize``    | 0          |
 +--------------------+-------------------------+------------+
