@@ -1,7 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 
 from Muon.GUI.Common.observer_pattern import Observer, Observable
-from functools import partial
 import Muon.GUI.Common.utilities.muon_file_utils as file_utils
 import Muon.GUI.Common.utilities.xml_utils as xml_utils
 import Muon.GUI.Common.utilities.algorithm_utils as algorithm_utils
@@ -32,7 +31,6 @@ class GroupingTabPresenter(object):
         self._view.set_description_text(self.text_for_description())
         self._view.on_add_pair_requested(self.add_pair_from_grouping_table)
         self._view.on_clear_grouping_button_clicked(self.on_clear_requested)
-        self._view.on_update_button_clicked(self.handle_update_all_clicked)
         self._view.on_load_grouping_button_clicked(self.handle_load_grouping_from_file)
         self._view.on_save_grouping_button_clicked(self.handle_save_grouping_file)
         self._view.on_default_grouping_button_clicked(self.handle_default_grouping_button_clicked)
@@ -86,16 +84,6 @@ class GroupingTabPresenter(object):
         """
         Calculate alpha for the pair for which "Guess Alpha" button was clicked.
         """
-        self.input_prepopulated_callback = partial(self.handle_guess_alpha_after_update, pair_name, group1_name, group2_name)
-
-        self.update_thread = self.create_update_thread()
-        self.update_thread.threadWrapperSetUp(self.disable_editing,
-                                              self.input_prepopulated_callback,
-                                              self._view.display_warning_box)
-        self.update_thread.start()
-
-    def handle_guess_alpha_after_update(self, pair_name, group1_name, group2_name):
-        self.enable_editing()
         if len(self._model._data.current_runs) > 1:
             run, index, ok_clicked = RunSelectionDialog.get_run(self._model._data.current_runs, self._model._data.instrument, self._view)
             if not ok_clicked:
