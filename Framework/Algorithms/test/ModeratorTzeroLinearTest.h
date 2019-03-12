@@ -7,13 +7,13 @@
 #ifndef MANTID_ALGORITHMS_MODERATORTZEROLINEARTEST_H_
 #define MANTID_ALGORITHMS_MODERATORTZEROLINEARTEST_H_
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAlgorithms/ModeratorTzeroLinear.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidAPI/AlgorithmManager.h"
 
 #include <cxxtest/TestSuite.h>
 
@@ -144,7 +144,6 @@ public:
     AnalysisDataService::Instance().remove("testWS");
     AnalysisDataService::Instance().remove("outWS1");
     AnalysisDataService::Instance().remove("outWS2");
-
   }
 
   /*
