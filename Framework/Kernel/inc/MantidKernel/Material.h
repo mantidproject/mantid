@@ -38,6 +38,10 @@ namespace Kernel {
     <LI>number density (nAtoms / Angstrom^3)</LI>
   </UL>
 
+  To understand how the effective scattering information is calculated, see
+  Sears, Varley F. "Neutron scattering lengths and cross sections." Neutron
+  news 3.3 (1992): 26-37. To highlight a point that may be missed, the
+  absorption is the only quantity that is wavelength dependent.
 */
 class MANTID_KERNEL_DLL Material final {
 public:

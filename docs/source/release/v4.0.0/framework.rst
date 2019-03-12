@@ -5,6 +5,8 @@ Framework Changes
 .. contents:: Table of Contents
    :local:
 
+The calculations for :py:obj:`mantid.kernel.Material` have been changed to match the equations in Sears, Varley F. "Neutron scattering lengths and cross sections." Neutron News 3.3 (1992): 26-37
+
 Logging
 -------
 
