@@ -577,6 +577,7 @@ void FilterEvents::groupOutputWorkspace() {
  * @param int_tsp_name_vector :: output
  * @param dbl_tsp_name_vector :: output
  * @param bool_tsp_name_vector :: output
+ * @param string_tsp_vector :: output
  */
 void FilterEvents::copyNoneSplitLogs(
     std::vector<TimeSeriesProperty<int> *> &int_tsp_name_vector,
@@ -669,9 +670,10 @@ void FilterEvents::copyNoneSplitLogs(
 //----------------------------------------------------------------------------------------------
 /** Split ALL the TimeSeriesProperty sample logs to all the output workspace
  * @brief FilterEvents::splitTimeSeriesLogs
- * @param int_tsp_vector
- * @param dbl_tsp_vector
- * @param bool_tsp_vector
+ * @param int_tsp_vector :: vector of itneger tps
+ * @param dbl_tsp_vector :: vector of double tsp
+ * @param bool_tsp_vector :: vector of boolean tsp
+ * @param string_tsp_vector :: vector of string tsp
  */
 void FilterEvents::splitTimeSeriesLogs(
     const std::vector<TimeSeriesProperty<int> *> &int_tsp_vector,
