@@ -16,8 +16,8 @@ This algorithm is suitable to data reduction of indirect instruments
 featuring a neutron flux with a narrow distribution of wavelengths. A
 empirical formula for the correction, stored in the instrument
 definition file, is taken as linear on the initial neutron wavelength
-:math:`\lambda_i`: :math:`t_0 = a * \lambda_i + b`,
-(:math:`a` is in units of microsec/Angstrom and :math:`a` is in units 
+:math:`\lambda_i`: :math:`t_0 = a * \lambda_i + b`. Gradient :math:`a` is
+in units of microsec/Angstrom and Intercept :math:`b` is in units
 of microsec. Below is the example XML code included in BASIS beamline 
 parameters file.
 
