@@ -45,6 +45,8 @@ else:
     except ImportError:
         WITHOUT_GUI = True
 
+do_plotting = not PYQT4 or IN_MANTIDPLOT
+
 
 class SANSBeamCentreFinder(DataProcessorAlgorithm):
     def category(self):
@@ -198,7 +200,7 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
                 for key in sample_quartiles:
                     sample_quartiles[key] = perform_can_subtraction(sample_quartiles[key], can_quartiles[key], self)
 
-            if not PYQT4 or IN_MANTIDPLOT:
+            if do_plotting:
                 output_workspaces = self._publish_to_ADS(sample_quartiles)
                 if verbose:
                     self._rename_and_group_workspaces(j, output_workspaces)
@@ -211,17 +213,19 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
                 self.logger.notice("Itr {0}: ( {1}, {2} )  SX={3:.5g}  SY={4:.5g}".
                                    format(j, self.scale_1 * centre1,
                                           self.scale_2 * centre2, residueLR[j], residueTB[j]))
-                try:
-                    output_workspaces_matplotlib = self._validate_workspaces(output_workspaces)
-                except ValueError as e:
-                    self.logger.notice("Stopping process: {}. Check radius limits.".format(str(e)))
-                    break
-                else:
-                    if not PYQT4:
-                        self._plot_quartiles_matplotlib(output_workspaces_matplotlib, state.data.sample_scatter)
-                    elif IN_MANTIDPLOT:
-                        self._plot_quartiles(output_workspaces, state.data.sample_scatter)
-
+                if do_plotting:
+                    try:
+                        # Check for NaNs in workspaces
+                        output_workspaces_matplotlib = self._validate_workspaces(output_workspaces)
+                    except ValueError as e:
+                        self.logger.notice("Stopping process: {}. Check radius limits.".format(str(e)))
+                        break
+                    else:
+                        if not PYQT4:
+                            # matplotlib plotting can take a list of workspaces (not names)
+                            self._plot_quartiles_matplotlib(output_workspaces_matplotlib, state.data.sample_scatter)
+                        elif IN_MANTIDPLOT:
+                            self._plot_quartiles(output_workspaces, state.data.sample_scatter)
             else:
                 # have we stepped across the y-axis that goes through the beam center?
                 if residueLR[j] > residueLR[j-1]:
