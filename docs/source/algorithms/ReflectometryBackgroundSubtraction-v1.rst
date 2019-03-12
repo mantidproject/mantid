@@ -15,15 +15,15 @@ The background can be returned as-is, or directly subtracted from the input work
 The background can be calculated using two methods. **Per detector average** groups the background spectrum together and divides it by the total number of spectra. 
 This is done using :ref:`algm-GroupDetectors`. **Polynomial** uses :ref:`algm-Transpose` so that spectrum numbers 
 are in the X (horizontal) axis and TOF channels are the vertical axis. Then the background is found by fitting a polynomial of the given degree to the ranges given in :literal:`InputWorkspaceIndexSet`. 
-This is done using :ref:`algm-CalculatePolynomialBackground`. The value of CostFunction is passed to :ref:`algm-CalculatePolynomialBackground` as-is. The default option is ‘Least squares’ which uses the histogram errors as weights. 
-This might not be desirable, e.g. when there are bins with zero counts and zero errors. An ‘Unweighted least squares’ option is available to deal with such cases. 
+This is done using :ref:`algm-CalculatePolynomialBackground`. The value of CostFunction is passed to :ref:`algm-CalculatePolynomialBackground` as-is. The default option is â€˜Least squaresâ€™ which uses the histogram errors as weights. 
+This might not be desirable, e.g. when there are bins with zero counts and zero errors. An â€˜Unweighted least squaresâ€™ option is available to deal with such cases. 
 Once the background has been fitted it is then transposed again so it is in the same form as the input workspace.
 
 
 Usage
 -----
 
-**Example - Subtracting background using Per detector average (using a distribution):**
+**Example - Subtracting background using Per detector average:**
 
 .. testcode:: ExPerDetAve
 
@@ -50,6 +50,7 @@ Output:
    Peak height with background: 5.0
    Background subtracted peak height: 3.0 
 
+**Example - Subtracting background using Polynomial:**
 .. testcode:: ExPoly
 
    import numpy
