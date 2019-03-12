@@ -233,7 +233,11 @@ void ColorbarWidget::scaleTypeSelectionChanged(int index) {
 /**
  * Called when the power exponent input has been edited
  */
-void ColorbarWidget::powerExponentEdited() { setScaleType(2); }
+void ColorbarWidget::powerExponentEdited() {
+  setScaleType(2);
+  // power edit has double validator so this should always be valid
+  emit nthPowerChanged(m_ui.powerEdit->text().toDouble());
+}
 
 // --------------------------- Private methods --------------------------------
 
