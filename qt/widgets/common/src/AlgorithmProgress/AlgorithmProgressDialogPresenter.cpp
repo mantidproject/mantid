@@ -8,7 +8,6 @@
 #include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressDialogPresenter.h"
 #include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressDialogWidget.h"
 #include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressModel.h"
-#include <boost/detail/compressed_pair.hpp>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -17,31 +16,40 @@ namespace MantidWidgets {
         : AlgorithmProgressPresenterBase(parent)
         , m_view { view }
         , m_model { model }
-        , m_progressBars { new std::unordered_map<Mantid::API::IAlgorithm*, std::pair<Mantid::API::IAlgorithm_sptr, QProgressBar*>>() }
+        , m_progressBars { std::unordered_map<Mantid::API::IAlgorithm*, QProgressBar*>() }
     {
         model.addPresenter(this);
     }
 
     void AlgorithmProgressDialogPresenter::setCurrentAlgorithm()
     {
+        std::lock_guard<std::mutex> guard(*howdoesMutex);
         // clear all held progress bars, this container owns nothing so nothing is leaked
-        m_progressBars->clear();
+        m_progressBars.clear();
         m_view->updateRunningAlgorithms(m_model.runningAlgorithms());
     }
 
     void AlgorithmProgressDialogPresenter::addProgressBar(Mantid::API::IAlgorithm_sptr alg, QProgressBar* pb)
     {
-        m_progressBars->insert(std::make_pair(alg.get(), std::make_pair(alg, pb)));
+        std::lock_guard<std::mutex> guard(*howdoesMutex);
+
+        m_progressBars.insert(std::make_pair(alg.get(), pb));
     }
 
     void AlgorithmProgressDialogPresenter::removeFromModel()
     {
+        std::lock_guard<std::mutex> guard(*howdoesMutex);
+
         m_model.removePresenter(this);
     }
 
     void AlgorithmProgressDialogPresenter::updateProgressBar(Mantid::API::IAlgorithm_sptr alg, double progress, const std::string& message)
     {
-        emit progressBarNeedsUpdating(m_progressBars->at(alg.get()).second, progress, message);
+        std::lock_guard<std::mutex> guard(*howdoesMutex);
+
+        if (m_progressBars.count(alg.get()) > 0) {
+            emit progressBarNeedsUpdating(m_progressBars.at(alg.get()), progress, message);
+        }
     }
 }
 }

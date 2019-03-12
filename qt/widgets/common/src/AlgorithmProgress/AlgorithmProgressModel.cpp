@@ -72,13 +72,13 @@ namespace MantidWidgets {
     {
         std::lock_guard<std::mutex> guard(*howdoesMutex);
 
-        auto progressObserver = std::make_unique<ProgressObserver>(this, alg);
+        progressObserver = std::make_unique<ProgressObserver>(this, alg);
         progressObserver->observeProgress(alg);
         progressObserver->observeFinish(alg);
         progressObserver->observeError(alg);
         // give ownership to the vector, when the observer
         // is removed from it, it will be freed
-        m_observers.emplace_back(std::move(progressObserver));
+        //m_observers.emplace_back(std::move(progressObserver));
         updatePresenters();
     }
 
