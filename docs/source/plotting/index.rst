@@ -602,10 +602,10 @@ editable parameters is available at `the Matplotlib site <https://matplotlib.org
 For much more on customising the graph appearance see the `Matplotlib documentation 
 <https://matplotlib.org/users/dflt_style_changes.html>`_.
 
-A list of some common properties you might want to change and the handles to set:
+A list of some common properties you might want to change and the keywords to set:
 
 +--------------------+-------------------------+------------+
-| Parameter          | Handle                  | Default    |
+| Parameter          | Key word                | Default    |
 +--------------------+-------------------------+------------+
 | Error bar cap      | ``errorbar.capsize``    | 0          |
 +--------------------+-------------------------+------------+
