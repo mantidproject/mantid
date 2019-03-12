@@ -44,7 +44,9 @@ namespace MantidWidgets {
         AlgorithmProgressModel& m_model;
         /// Container for all the progress bar that are currently being displayed
         /// This container does NOT own any of the progress bars
-        std::unordered_map<Mantid::API::IAlgorithm*, std::pair<Mantid::API::IAlgorithm_sptr, QProgressBar*>>* m_progressBars;
+        std::unordered_map<Mantid::API::IAlgorithm*, QProgressBar*> m_progressBars;
+
+        std::unique_ptr<std::mutex> howdoesMutex = std::make_unique<std::mutex>();
     };
 } // namespace MantidWidgets
 } // namespace MantidQt

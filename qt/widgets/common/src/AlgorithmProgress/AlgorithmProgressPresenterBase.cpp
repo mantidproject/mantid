@@ -14,10 +14,10 @@ namespace MantidWidgets {
         : QWidget(parent)
     {
         connect(this, &AlgorithmProgressPresenterBase::updateWatchedAlgorithm, this,
-            &AlgorithmProgressPresenterBase::setCurrentAlgorithm);
+            &AlgorithmProgressPresenterBase::setCurrentAlgorithm, Qt::QueuedConnection);
 
         connect(this, &AlgorithmProgressPresenterBase::progressBarNeedsUpdating, this,
-            &AlgorithmProgressPresenterBase::setProgressBar);
+            &AlgorithmProgressPresenterBase::setProgressBar, Qt::QueuedConnection);
     }
 
     void AlgorithmProgressPresenterBase::updateGui()

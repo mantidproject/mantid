@@ -50,6 +50,7 @@ namespace MantidWidgets {
         std::unique_ptr<std::mutex> howdoesMutex = std::make_unique<std::mutex>();
         std::vector<AlgorithmProgressPresenterBase*> m_presenters;
         std::vector<std::unique_ptr<ProgressObserver>> m_observers;
+        std::unique_ptr<ProgressObserver> progressObserver;
     };
 
 } // namespace MantidWidgets
