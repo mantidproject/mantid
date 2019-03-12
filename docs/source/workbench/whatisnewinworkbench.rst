@@ -29,7 +29,7 @@ New Additions in Workbench:
     * No confusion between direct Mantid functionality and QtiPlot functionality - This is due to removing QtiPlot and building a new GUI from the ground up, this will limit confusion.
     * Moved controls closer to the thing being interacted with, for:
         * :ref:`WorkbenchScriptWindow` - The newly integrated script window comes with an improved UI, allowing easier running, aborting, and access to further options |editoroptionsbuttons|
-        * :ref:`WorkbenchPlotWindow` via Matplotlib - The new plot window, is a self contained, do it all window. It contains all plot controls, customisation, and fitting using this handy toolbar: |plotstoolbar|
+        * :ref:`WorkbenchPlotWindow` via Matplotlib - The new plot window, is a self contained, do it all window. It contains all plot controls, customisation, and fitting using this handy toolbar: |break| |plotstoolbar|
 
     .. image:: ../images/Workbench/PlotWindow/FitPlotWindow.png
         :align: right
