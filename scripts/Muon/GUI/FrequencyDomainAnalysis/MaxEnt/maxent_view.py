@@ -228,8 +228,8 @@ class MaxEntView(QtGui.QWidget):
         inputs["FixPhases"] = self.fix_phase_box.checkState()
         inputs["FitDeadTime"] = self.dead_box.checkState()
         inputs["DoublePulse"] = self.double_pulse_box.checkState()
-        inputs["OuterIterations"] = int(self.inner_loop.text())
-        inputs["InnerIterations"] = int(self.outer_loop.text())
+        inputs["OuterIterations"] = int(self.outer_loop.text())
+        inputs["InnerIterations"] = int(self.inner_loop.text())
         inputs["DefaultLevel"] = float(self.AConst.text())
         inputs["Factor"] = float(self.factor.text())
 
