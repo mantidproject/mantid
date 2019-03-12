@@ -1,7 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 from Muon.GUI.Common.observer_pattern import Observer, Observable
-
+from functools import partial
 import Muon.GUI.Common.utilities.muon_file_utils as file_utils
 import Muon.GUI.Common.utilities.xml_utils as xml_utils
 import Muon.GUI.Common.utilities.algorithm_utils as algorithm_utils
@@ -86,6 +86,16 @@ class GroupingTabPresenter(object):
         """
         Calculate alpha for the pair for which "Guess Alpha" button was clicked.
         """
+        self.input_prepopulated_callback = partial(self.handle_guess_alpha_after_update, pair_name, group1_name, group2_name)
+
+        self.update_thread = self.create_update_thread()
+        self.update_thread.threadWrapperSetUp(self.disable_editing,
+                                              self.input_prepopulated_callback,
+                                              self._view.display_warning_box)
+        self.update_thread.start()
+
+    def handle_guess_alpha_after_update(self, pair_name, group1_name, group2_name):
+        self.enable_editing()
         if len(self._model._data.current_runs) > 1:
             run, index, ok_clicked = RunSelectionDialog.get_run(self._model._data.current_runs, self._model._data.instrument, self._view)
             if not ok_clicked:
@@ -194,10 +204,10 @@ class GroupingTabPresenter(object):
     # ------------------------------------------------------------------------------------------------------------------
 
     def group_table_changed(self):
-        pass
+        self.handle_update_all_clicked()
 
     def pair_table_changed(self):
-        pass
+        self.handle_update_all_clicked()
 
     class LoadObserver(Observer):
 
