@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<parameter-file instrument = "BASIS" valid-from = "2019-01-01 00:00:00">
+<parameter-file instrument = "BASIS" valid-from = "2010-07-15 00:00:00" valid-to = "2018-12-31 23:59:59">
 
 <component-link name = "BASIS">
 
@@ -31,21 +31,21 @@
   <parameter name="back-end">
     <value val="138000" />
   </parameter>
-
+ 
   <parameter name="analyser" type="string">
     <value val="silicon" />
   </parameter>
 
   <parameter name="reflection" type="string">
-    <value val="333" />
+    <value val="311" />
   </parameter>
 
   <!-- Moderator Tzero/LambdaZero Parameters  -->
   <parameter name="Moderator.TimeZero.Gradient">
-    <value val="12.925"/>
+    <value val="11.967"/>
   </parameter>
   <parameter name="Moderator.TimeZero.Intercept">
-    <value val="0.0"/>
+    <value val="-5.0"/>
   </parameter>
 
 </component-link>
@@ -53,11 +53,11 @@
 <component-link name="silicon">
 
   <parameter name="Efixed">
-    <value val="18.7434" />
+    <value val="7.6368" />
   </parameter>
 
   <parameter name="resolution">
-    <value val="0.0315" />
+    <value val="0.015" />
   </parameter>
 
 </component-link>
