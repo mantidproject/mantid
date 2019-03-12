@@ -144,7 +144,7 @@ private:
       std::vector<Kernel::TimeSeriesProperty<int> *> &int_tsp_name_vector,
       std::vector<Kernel::TimeSeriesProperty<double> *> &dbl_tsp_name_vector,
       std::vector<Kernel::TimeSeriesProperty<bool> *> &bool_tsp_name_vector,
-      std::vector<Kernel::TimeSeriesProperty<std::__cxx11::string> *>
+      std::vector<Kernel::TimeSeriesProperty<std::string> *>
           &string_tsp_vector);
 
   template <typename TYPE>
