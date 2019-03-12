@@ -307,11 +307,11 @@ void LoadILLSANS::initWorkSpaceD33(NeXus::NXEntry &firstEntry,
       channelWidthTimes.load();
       std::string distancePrefix(instrumentPath + "/tof/tof_distance_detector");
       binningRear = getVariableTimeBinning(firstEntry, distancePrefix + "1",
+                                           channelWidthSum, channelWidthTimes);      
+      binningLeft = getVariableTimeBinning(firstEntry, distancePrefix + "2",
                                            channelWidthSum, channelWidthTimes);
-      binningRight = getVariableTimeBinning(firstEntry, distancePrefix + "2",
+      binningRight = getVariableTimeBinning(firstEntry, distancePrefix + "3",
                                             channelWidthSum, channelWidthTimes);
-      binningLeft = getVariableTimeBinning(firstEntry, distancePrefix + "3",
-                                           channelWidthSum, channelWidthTimes);
       binningDown = getVariableTimeBinning(firstEntry, distancePrefix + "4",
                                            channelWidthSum, channelWidthTimes);
       binningUp = getVariableTimeBinning(firstEntry, distancePrefix + "5",
@@ -326,10 +326,11 @@ void LoadILLSANS::initWorkSpaceD33(NeXus::NXEntry &firstEntry,
                                   "/tof/tof_wavelength_detector");
         binningRear = m_loader.getTimeBinningFromNexusPath(firstEntry,
                                                            binPathPrefix + "1");
-        binningRight = m_loader.getTimeBinningFromNexusPath(
-            firstEntry, binPathPrefix + "2");
+
         binningLeft = m_loader.getTimeBinningFromNexusPath(firstEntry,
-                                                           binPathPrefix + "3");
+                                                           binPathPrefix + "2");
+        binningRight = m_loader.getTimeBinningFromNexusPath(
+            firstEntry, binPathPrefix + "3");
         binningDown = m_loader.getTimeBinningFromNexusPath(firstEntry,
                                                            binPathPrefix + "4");
         binningUp = m_loader.getTimeBinningFromNexusPath(firstEntry,
