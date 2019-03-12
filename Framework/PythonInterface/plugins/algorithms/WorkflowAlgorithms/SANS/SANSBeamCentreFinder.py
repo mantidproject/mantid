@@ -128,7 +128,7 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
         self.declareProperty('Centre2', 0.0, direction=Direction.Output,
                              doc="The centre position found in the second dimension")
 
-    def PyExec(self):
+    def PyExec(self): # noqa: C901
         state = self._get_state()
         state_serialized = state.property_manager
         self.logger = Logger("CentreFinder")
