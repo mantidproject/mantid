@@ -112,7 +112,13 @@ class WorkspaceWidget(PluginWidget):
         :param names: A list of workspace names
         """
         for ws in self._ads.retrieveWorkspaces(names, unrollGroups=True):
-            SampleLogs(ws=ws, parent=self)
+            try:
+                SampleLogs(ws=ws, parent=self)
+            except Exception as exception:
+                logger.warning("Could not open sample logs for workspace '{}'."
+                               "".format(ws.name()))
+                logger.debug("{}: {}".format(type(exception).__name__,
+                                             exception))
 
     def _do_show_instrument(self, names):
         """

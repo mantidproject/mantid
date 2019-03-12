@@ -106,16 +106,18 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
       menu->addAction(m_showData);
       menu->addAction(m_showAlgorithmHistory);
       menu->addAction(m_showInstrument);
-      menu->addAction(m_sampleLogs);
       m_showInstrument->setEnabled(
           matrixWS->getInstrument() &&
           !matrixWS->getInstrument()->getName().empty());
-      menu->addSeparator();
+      menu->addAction(m_sampleLogs);
     } else if (boost::dynamic_pointer_cast<ITableWorkspace>(workspace)) {
       menu->addAction(m_showData);
       menu->addAction(m_showAlgorithmHistory);
-      menu->addSeparator();
+    } else if (boost::dynamic_pointer_cast<IMDWorkspace>(workspace)) {
+      menu->addAction(m_sampleLogs);
     }
+
+    menu->addSeparator();
     menu->addAction(m_rename);
     menu->addAction(m_saveNexus);
 
