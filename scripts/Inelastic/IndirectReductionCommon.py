@@ -399,7 +399,7 @@ def add_workspace_names(workspace_names, workspace):
     if isinstance(workspace, WorkspaceGroup):
         workspace_names.extend(workspace.getNames())
     else:
-        workspace_names.append(group_name)
+        workspace_names.append(workspace.getName())
     return workspace_names
 
 
