@@ -80,8 +80,8 @@ class EditorIO(object):
             # pretend the user clicked No on the dialog
             return True
 
-    def write(self, save_as=False):
-        if save_as:
+    def write(self, save_as=None):
+        if save_as is not None:
             filename = save_as
         else:
             filename = self.editor.fileName()
