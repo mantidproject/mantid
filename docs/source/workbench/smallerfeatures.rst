@@ -16,7 +16,7 @@ This is a culmination of features in workbench that don't merit having their own
       be done by clicking this icon: |draggablewindowicon|
     * Most parts of the workbench interface can also be hidden by clicking on the |closewindowicon| and it will
       disappear to get it back use the :ref:`WorkbenchMainWindowMenu` to show it again in workbench.
-    * With the workbench comes a lot of set keyboard shortcuts:
+    * With the workbench comes a set of keyboard shortcuts:
 
         =================== =======
         Keyboard Shortcut   Purpose

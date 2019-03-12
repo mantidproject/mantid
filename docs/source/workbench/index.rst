@@ -21,7 +21,6 @@ Workbench
    whatisnewinworkbench.rst
 
 .. image:: ../images/Workbench/Workbench.png
-    :height: 225
     :width: 400
     :alt: Workbench
     :align: right
