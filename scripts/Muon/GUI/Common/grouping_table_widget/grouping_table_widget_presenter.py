@@ -58,7 +58,8 @@ class GroupingTablePresenter(object):
         return True
 
     def validate_detector_ids(self, text):
-        if re.match(run_utils.run_string_regex, text) and max(run_utils.run_string_to_list(text, False)) <= self._model._data.num_detectors:
+        if re.match(run_utils.run_string_regex, text) and max(run_utils.run_string_to_list(text, False)) <= self._model._data.num_detectors\
+                and min(run_utils.run_string_to_list(text, False)) > 0:
             return True
         self._view.warning_popup("Invalid detector list.")
         return False
@@ -184,7 +185,17 @@ class GroupingTablePresenter(object):
             self._model._data.add_or_replace_gui_variables(GroupRangeMax=float(self._view.group_range_max.text()))
 
     def handle_group_range_min_updated(self):
-        self._model._data.add_or_replace_gui_variables(GroupRangeMin=float(self._view.group_range_min.text()))
+        range_min_new = float(self._view.group_range_min.text())
+        if range_min_new < self._model._data.gui_variables['GroupRangeMax']:
+            self._model._data.add_or_replace_gui_variables(GroupRangeMin=range_min_new)
+        else:
+            self._view.group_range_min.setText(str(self._model._data.gui_variables['GroupRangeMin']))
+            self._view.warning_popup('Minimum of group asymmetry range must be less than maximum')
 
     def handle_group_range_max_updated(self):
-        self._model._data.add_or_replace_gui_variables(GroupRangeMax=float(self._view.group_range_max.text()))
+        range_max_new = float(self._view.group_range_max.text())
+        if range_max_new > self._model._data.gui_variables['GroupRangeMin']:
+            self._model._data.add_or_replace_gui_variables(GroupRangeMax=float(self._view.group_range_max.text()))
+        else:
+            self._view.group_range_max.setText(str(self._model._data.gui_variables['GroupRangeMax']))
+            self._view.warning_popup('Maximum of group asymmetry range must be greater than minimum')
