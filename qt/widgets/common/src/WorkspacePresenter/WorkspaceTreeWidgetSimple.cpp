@@ -114,6 +114,7 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
       menu->addAction(m_showData);
       menu->addAction(m_showAlgorithmHistory);
     } else if (boost::dynamic_pointer_cast<IMDWorkspace>(workspace)) {
+      menu->addAction(m_showAlgorithmHistory);
       menu->addAction(m_sampleLogs);
     }
 
