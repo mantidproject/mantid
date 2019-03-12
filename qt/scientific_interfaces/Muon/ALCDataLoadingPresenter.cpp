@@ -325,7 +325,6 @@ void ALCDataLoadingPresenter::setData(MatrixWorkspace_const_sptr data) {
 bool ALCDataLoadingPresenter::checkCustomGrouping() {
   bool groupingOK = true;
   if (m_view->detectorGroupingType() == "Custom") {
-    auto fds = m_view->getForwardGrouping();
     auto detectors = Mantid::Kernel::Strings::parseRange(
         isCustomGroupingValid(m_view->getForwardGrouping(), groupingOK));
     const auto backward = Mantid::Kernel::Strings::parseRange(
