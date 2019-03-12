@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument="PANTHER" valid-from="2012-10-01T00:00:00">
+
+	<component-link name="PANTHER">
+
+		<parameter name="deltaE-mode" type="string">
+			<value val="direct" />
+		</parameter>
+
+		<!-- Distance between sample and equatorial line of the detector. Mandatory
+			if you want to correct the flight paths. -->
+		<parameter name="l2" type="string">
+			<value val="2.5" />
+		</parameter>
+		<parameter name="natural-angle-step" type="float">
+			<value val="0.20075" />
+		</parameter>
+		<!-- formula for Detector efficiency calculation. Algorithm: DetectorEfficiencyCorUser
+			See http://muparser.sourceforge.net/mup_features.html#idDef2 for available
+			operators -->
+		<parameter name="formula_eff" type="string">
+			<value val="0.9653 * exp(-0.05202/sqrt(e)) * (1 - exp(-10.983/sqrt(e)))" />
+		</parameter>
+		<parameter name="components-for-backgrounds" type="string">
+			<value val="tube_1, tube_2, tube_3, tube_4, tube_5, tube_6, tube_7, tube_8, tube_9, tube_10, tube_11, tube_12, tube_13, tube_14, tube_15, tube_16, tube_17, tube_18, tube_19, tube_20, tube_21, tube_22, tube_23, tube_24, tube_25, tube_26, tube_27, tube_28, tube_29, tube_30, tube_31, tube_32, tube_33, tube_34, tube_35, tube_36, tube_37, tube_38, tube_39, tube_40, tube_41, tube_42, tube_43, tube_44, tube_45, tube_46, tube_47, tube_48, tube_49, tube_50, tube_51, tube_52, tube_53, tube_54, tube_55, tube_56, tube_57, tube_58, tube_59, tube_60, tube_61, tube_62, tube_63, tube_64, tube_65, tube_66, tube_67, tube_68, tube_69, tube_70, tube_71, tube_72, tube_73, tube_74, tube_75, tube_76, tube_77, tube_78, tube_79, tube_80, tube_81, tube_82, tube_83, tube_84, tube_85, tube_86, tube_87, tube_88, tube_89, tube_90, tube_91, tube_92, tube_93, tube_94, tube_95, tube_96, tube_97, tube_98, tube_99, tube_100, tube_101, tube_102, tube_103, tube_104, tube_105, tube_106, tube_107, tube_108, tube_109, tube_110, tube_111, tube_112, tube_113, tube_114, tube_115, tube_116, tube_117, tube_118, tube_119, tube_120, tube_121, tube_122, tube_123, tube_124, tube_125, tube_126, tube_127, tube_128, tube_129, tube_130, tube_131, tube_132, tube_133, tube_134, tube_135, tube_136, tube_137, tube_138, tube_139, tube_140, tube_141, tube_142, tube_143, tube_144, tube_145, tube_146, tube_147, tube_148, tube_149, tube_150, tube_151, tube_152, tube_153, tube_154, tube_155, tube_156, tube_157, tube_158, tube_159, tube_160, tube_161, tube_162, tube_163, tube_164, tube_165, tube_166, tube_167, tube_168, tube_169, tube_170, tube_171, tube_172, tube_173, tube_174, tube_175, tube_176, tube_177, tube_178, tube_179, tube_180, tube_181, tube_182, tube_183, tube_184, tube_185, tube_186, tube_187, tube_188, tube_189, tube_190, tube_191, tube_192, tube_193, tube_194, tube_195, tube_196, tube_197, tube_198, tube_199, tube_200, tube_201, tube_202, tube_203, tube_204, tube_205, tube_206, tube_207, tube_208, tube_209, tube_210, tube_211, tube_212, tube_213, tube_214, tube_215, tube_216, tube_217, tube_218, tube_219, tube_220, tube_221, tube_222, tube_223, tube_224, tube_225, tube_226, tube_227, tube_228, tube_229, tube_230, tube_231, tube_232, tube_233, tube_234, tube_235, tube_236, tube_237, tube_238, tube_239, tube_240, tube_241, tube_242, tube_243, tube_244, tube_245, tube_246, tube_247, tube_248, tube_249, tube_250, tube_251, tube_252, tube_253, tube_254, tube_255, tube_256, tube_257, tube_258, tube_259, tube_260, tube_261, tube_262, tube_263, tube_264, tube_265, tube_266, tube_267, tube_268, tube_269, tube_270, tube_271, tube_272, tube_273, tube_274, tube_275, tube_276, tube_277, tube_278, tube_279, tube_280, tube_281, tube_282, tube_283, tube_284, tube_285, tube_286, tube_287, tube_288" />
+		</parameter>
+		<!-- Default monitor spectrum number for monitor normalisation. -->
+		<parameter name="default-incident-monitor-spectrum" type="int">
+			<value val="73729" />
+		</parameter>
+		<!-- Preferred scaling after normalisation to monitor counts. -->
+		<parameter name="scaling_after_monitor_normalisation">
+			<value val="100000" />
+		</parameter>
+		<parameter name="enable_flat_background_subtraction" type="bool">
+			<value val="false" />
+		</parameter>
+		<parameter name="enable_background_diagnostics" type="bool">
+			<value val="false" />
+		</parameter>
+		<parameter name="enable_elastic_peak_diagnostics" type="bool">
+			<value val="false" />
+		</parameter>
+		<parameter name="beam_stop_diagnostics_spectra" type="string">
+			<value val=""/>
+		</parameter>
+		<parameter name="enable_incident_energy_calibration" type="bool">
+			<value val="false" />
+		</parameter>
+		<parameter name="enable_elastic_peak_fitting" type="bool">
+			<value val="false" />
+		</parameter>
+		<parameter name="enable_elastic_channel_fitting" type="bool">
+			<value val="true" />
+		</parameter>
+		<parameter name="Workflow.MaskFile" type="string">
+			<value val="PANTHER_Mask.xml" />
+		</parameter>
+		<!-- MergeRuns behavior when merging sample logs. -->
+		<parameter name="sample_logs_sum" type="string">
+			<value val="Detector.detsum, duration, monitor.monsum" />
+		</parameter>
+		<parameter name="sample_logs_time_series" type="string">
+			<value val="sample.temperature" />
+		</parameter>
+		<parameter name="sample_logs_warn" type="string">
+			<value val="sample.temperature" />
+		</parameter>
+		<parameter name="sample_logs_warn_tolerances" type="string">
+			<value val="1.0" />
+		</parameter>
+		<parameter name="sample_logs_fail" type="string">
+			<value val="monitor.time_of_flight_0, monitor.time_of_flight_1, monitor.time_of_flight_2" />
+		</parameter>
+		<parameter name="sample_logs_fail_tolerances" type="string">
+			<value val="0, 0, 0" />
+		</parameter>
+		<parameter name="temperature_sample_log" type="string">
+			<value val="sample.temperature" />
+		</parameter>
+	</component-link>
+
+</parameter-file>

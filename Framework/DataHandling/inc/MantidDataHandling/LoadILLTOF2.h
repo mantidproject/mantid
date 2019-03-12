@@ -1,6 +1,6 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
@@ -15,7 +15,7 @@
 namespace Mantid {
 namespace DataHandling {
 /**
- Loads an ILL IN4/5/6 nexus file into a Mantid workspace.
+ Loads an ILL IN4/5/6/Panther NeXus file into a Mantid workspace.
  */
 class DLLExport LoadILLTOF2 : public API::IFileLoader<Kernel::NexusDescriptor> {
 public:
@@ -42,8 +42,6 @@ public:
   int confidence(Kernel::NexusDescriptor &descriptor) const override;
 
 private:
-  const static std::vector<std::string> SUPPORTED_INSTRUMENTS;
-
   // Initialisation code
   void init() override;
   // Execution code
