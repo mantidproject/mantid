@@ -35,7 +35,7 @@ namespace MantidWidgets {
 
         /// Called from the ProgressObserver whenever an algorithm emits new progress
         /// This function should update relevant GUI elements to display the algorithm's progress
-        virtual void updateProgressBar(Mantid::API::IAlgorithm_sptr algorithm, double progress,
+        virtual void updateProgressBar(const Mantid::API::IAlgorithm* algorithm, double progress,
             const std::string& message)
             = 0;
 

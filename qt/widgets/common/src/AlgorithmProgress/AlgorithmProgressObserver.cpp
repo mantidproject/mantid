@@ -12,33 +12,42 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
-    ProgressObserver::ProgressObserver(AlgorithmProgressModel* model,
-        Mantid::API::IAlgorithm_sptr alg)
-        : algName(alg->name())
-        , algProperties(alg->getProperties())
+    ProgressObserver::ProgressObserver(AlgorithmProgressModel* model)
+        : managedAlgs { std::vector<const Mantid::API::IAlgorithm*>() }
         , m_model(model)
-        , m_alg(alg)
     {
+    }
+
+    void ProgressObserver::startHandle(const Mantid::API::IAlgorithm* alg)
+    {
+        managedAlgs.push_back(alg);
+        m_model->updatePresenters();
     }
 
     void ProgressObserver::finishHandle(const Mantid::API::IAlgorithm* alg)
     {
-        m_model->removeObserver(this);
-    }
-
-    void ProgressObserver::progressHandle(const Mantid::API::IAlgorithm* alg,
-        const double progress, const std::string& message)
-    {
-        m_model->updateProgress(m_alg, progress, message);
+        this->removeFrom(alg);
     }
 
     void ProgressObserver::errorHandle(const Mantid::API::IAlgorithm* alg,
         const std::string& what)
     {
-        m_model->removeObserver(this);
+        this->removeFrom(alg);
+    }
+    void ProgressObserver::progressHandle(const Mantid::API::IAlgorithm* alg,
+        const double progress, const std::string& message)
+    {
+        m_model->updateProgress(alg, progress, message);
     }
 
-    void ProgressObserver::stopObservingCurrentAlgorithm() { this->stopObserving(m_alg); }
+    void ProgressObserver::removeFrom(const Mantid::API::IAlgorithm* alg)
+    {
+        this->stopObserving(alg);
+        const auto it = std::find(managedAlgs.begin(), managedAlgs.end(), alg);
+        if (it != managedAlgs.end()) {
+            managedAlgs.erase(it);
+        }
+    }
 
 } // namespace MantidWidgets
 } // namespace MantidQt

@@ -30,13 +30,13 @@ namespace MantidWidgets {
 
         /// Add a progress bar that this presenter will update.
         /// The presenter does NOT own the progress bar
-        void addProgressBar(Mantid::API::IAlgorithm_sptr alg, QProgressBar* pb);
+        void addProgressBar(const Mantid::API::IAlgorithm* alg, QProgressBar* pb);
         /// Removes this presenter from the model, so that it can stop getting
         /// updates for algorithms' progress
         void removeFromModel();
 
         /// Updates the list of progress bar currently managed by the presenter
-        void updateProgressBar(Mantid::API::IAlgorithm_sptr alg, double progress, const std::string& message) override;
+        void updateProgressBar(const Mantid::API::IAlgorithm* alg, double progress, const std::string& message) override;
 
     private:
         AlgorithmProgressDialogWidget* m_view;
@@ -44,7 +44,7 @@ namespace MantidWidgets {
         AlgorithmProgressModel& m_model;
         /// Container for all the progress bar that are currently being displayed
         /// This container does NOT own any of the progress bars
-        std::unordered_map<Mantid::API::IAlgorithm*, QProgressBar*> m_progressBars;
+        std::unordered_map<const Mantid::API::IAlgorithm*, QProgressBar*> m_progressBars;
 
         std::unique_ptr<std::mutex> howdoesMutex = std::make_unique<std::mutex>();
     };
