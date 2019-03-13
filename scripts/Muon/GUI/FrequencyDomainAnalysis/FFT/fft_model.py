@@ -122,14 +122,12 @@ class FFTModel(object):
         for name, value in iteritems(FFTInputs):
             self.alg.setProperty(name, value)
         self.alg.execute()
+        ws = self.alg.getProperty("OutputWorkspace").value
         mantid.AnalysisDataService.addOrReplace(
             FFTInputs["OutputWorkspace"],
             self.alg.getProperty("OutputWorkspace").value)
 
-        ws = self.alg.getPropertyValue("OutputWorkspace")
-        # mantid.ScaleX(InputWorkspace=ws, OutputWorkspace=ws, Factor=1.e3/13.55)
-        # ws = self.alg.getProperty("OutputWorkspace").value
-        # ws.getAxis(0).setUnit('Label').setLabel('Field', 'Gauss')
+        ws.getAxis(0).setUnit('Label').setLabel('Frequency', 'Hz')
         group = mantid.AnalysisDataService.retrieve(self.runName)
         group.add(FFTInputs["OutputWorkspace"])
         self.alg = None
