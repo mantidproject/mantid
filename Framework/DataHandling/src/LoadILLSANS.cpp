@@ -307,7 +307,7 @@ void LoadILLSANS::initWorkSpaceD33(NeXus::NXEntry &firstEntry,
       channelWidthTimes.load();
       std::string distancePrefix(instrumentPath + "/tof/tof_distance_detector");
       binningRear = getVariableTimeBinning(firstEntry, distancePrefix + "1",
-                                           channelWidthSum, channelWidthTimes);      
+                                           channelWidthSum, channelWidthTimes);
       binningLeft = getVariableTimeBinning(firstEntry, distancePrefix + "2",
                                            channelWidthSum, channelWidthTimes);
       binningRight = getVariableTimeBinning(firstEntry, distancePrefix + "3",
