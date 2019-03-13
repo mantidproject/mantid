@@ -1,4 +1,4 @@
-.. algorithm::
+﻿.. algorithm::
 
 .. summary::
 
@@ -36,7 +36,7 @@ Usage
    #workspace has a background of 2 and a peak of 5 in the 2nd index
    ws = CreateWorkspace(dataX, dataY, NSpec = 5)
 
-   ws_bkg_subtr = ReflectometryBackgroundSubtraction(ws, InputWorkspaceIndexSet = "0,1,3,4", SubtractionMethod = "Per Detector Average")
+   ws_bkg_subtr = ReflectometryBackgroundSubtraction(ws, InputWorkspaceIndexSet = "0,1,3,4", BackgroundCalculationMethod = "Per Detector Average")
 
    Y = ws.readY(2)[0]
    print('Peak height with background: {}'.format(Y))
@@ -62,7 +62,7 @@ Output:
    #workspace has a background of 2 and a peak of 5 in the 2nd index
    ws = CreateWorkspace(dataX, dataY, NSpec = 5)
 
-   ws_bkg_subtr = ReflectometryBackgroundSubtraction(ws, InputWorkspaceIndexSet = "0,1,3,4", SubtractionMethod = "Polynomial", DegreeOfPolynomial = 0)
+   ws_bkg_subtr = ReflectometryBackgroundSubtraction(ws, InputWorkspaceIndexSet = "0,1,3,4", BackgroundCalculationMethod = "Polynomial", DegreeOfPolynomial = 0)
 
    Y = ws.readY(2)[0]
    print('Peak height with background: {}'.format(Y))
