@@ -3,35 +3,64 @@
 ==================
 Workbench Plotting
 ==================
-This is the window in which all plots will be shown. There are many things that are possible from this window with
-regards to adjusting including the plot, saving/exporting and fitting the curves.
-
-In Mantid Workbench, the old plotting from MantidPlot has been replaced by the Matplotlib python library. It has been
-integrated seamlessly into the interface to work the same way as the previous method alongside some added benefits such
-as the extra customisation and improved plotting window. Matplotlib has very high customisation, via scripting and has
-some functionality exposed via the new plotting window's settings.
 
 .. image:: ../images/Workbench/PlotWindow/PlotWindow.png
+
+This is the window in which all plots will be shown. Within this window you can
+view, save, and edit your plots as well as fit functions to your plots using
+the fitting tool.
+
+Plotting in Workbench is carried out using Python's Matplotlib package.
+Matplotlib provides several advantages: it is a large library containing
+many features, it is also widely used which means there is excellent
+documentation available and plenty of examples to work from. You can create a
+plot either using Matplotlib within your scripts or right-clicking a workspace
+and selecting to plot.
+
+For more help with plotting using Matplotlib with Mantid see :ref:`Introduction to Matplotlib in Mantid <plotting>`.
+
 
 Plot Window Context Menu
 ------------------------
 
 .. image:: ../images/Workbench/PlotWindow/PlotWindowContextMenu.png
 
-Plotting Options
+Right-clicking within your plot will open the plot context menu. From this menu
+you can set the axes' scales to linear or logarithmic.
+
+
+Figure Options
 -------------------
 
-Two tabs:
+Selecting the settings icon in the plot window brings up the figure options
+window. There are two tabs within this window: axes options and curve options.
 
 .. image:: ../images/Workbench/PlotWindow/FigureOptionsPlotWindow.png
 
+In the "Axes" tab you can change the figure's title, the axes limits and scale
+and change the axes labels. There is also the "(Re-)Generate automatic legend"
+tick box at the bottom, make sure this is ticked if you want to update your
+legend.
+
 .. image:: ../images/Workbench/PlotWindow/FigureOptionsCurvesPlotWindow.png
 
-# Mention the rcParams document made by keeto on github and finish PR if necessary.
+In the "Curves" tab you can change the properties of curves within your figure.
+The drop down menu at the top gives a list of the curves present in the figure,
+you can select the curve you want to modify. From here you can change the style
+and colour of the curve, as well as add point markers. You can also change the
+label of the curve. To make sure the legend is updated ensure you have ticked
+the "(Re-)Generate automatic legend" box on the "Axes" tab.
+
+You can set default settings using Matplotlib's rcParams for a guide to this
+see :ref:`Change Matplotlib Defaults <mplDefaults>`.
+
 
 Fitting
 -------
 
 .. image:: ../images/Workbench/PlotWindow/FitPlotWindow.png
 
-# Remember to link to the fitting concepts page, for the original fitting browser.
+The "Fit" option in the plot window toolbar activates the interactive fitting
+tool. From here you can add functions to fit to, choose the bounds to fit
+within and choose your fitting algorithm. For more on fitting see
+:ref:`fitting contents`.
