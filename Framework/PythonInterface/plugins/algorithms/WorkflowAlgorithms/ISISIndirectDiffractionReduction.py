@@ -194,12 +194,12 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
 
         # Load vanadium runs if given
         if self._vanadium_runs:
-            self._vanadium_ws, _ = load_files(self._vanadium_runs,
-                                              self._ipf_filename,
-                                              self._spectra_range[0],
-                                              self._spectra_range[1],
-                                              load_logs=self._load_logs,
-                                              load_opts=load_opts)
+            self._vanadium_ws, _, _ = load_files(self._vanadium_runs,
+                                                 self._ipf_filename,
+                                                 self._spectra_range[0],
+                                                 self._spectra_range[1],
+                                                 load_logs=self._load_logs,
+                                                 load_opts=load_opts)
 
             if len(self._workspace_names) > len(self._vanadium_runs):
                 raise RuntimeError("There cannot be more sample runs than vanadium runs.")
@@ -380,13 +380,13 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
         Applies the scale factor to the container if not 1.
         """
         if self._container_data_files is not None:
-            self._container_workspace, _ = load_files(self._container_data_files,
-                                                      self._ipf_filename,
-                                                      self._spectra_range[0],
-                                                      self._spectra_range[1],
-                                                      sum_files=True,
-                                                      load_logs=self._load_logs,
-                                                      load_opts=load_opts)
+            self._container_workspace, _, _ = load_files(self._container_data_files,
+                                                         self._ipf_filename,
+                                                         self._spectra_range[0],
+                                                         self._spectra_range[1],
+                                                         sum_files=True,
+                                                         load_logs=self._load_logs,
+                                                         load_opts=load_opts)
             self._container_workspace = self._container_workspace[0]
 
             # Scale container if factor is given

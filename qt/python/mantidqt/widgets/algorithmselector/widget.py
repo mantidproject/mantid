@@ -105,7 +105,7 @@ class AlgorithmSelectorWidget(IAlgorithmSelectorView, QWidget):
         """
         for key, sub_tree in sorted(algorithm_data.items()):
             if key == self.algorithm_key:
-                for name, versions in sub_tree.items():
+                for name, versions in sorted(sub_tree.items()):
                     versions = sorted(versions)
                     default_version_item = QTreeWidgetItem(['{0} v.{1}'.format(name, versions[-1])])
                     item_list.append(default_version_item)
