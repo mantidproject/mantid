@@ -595,3 +595,66 @@ Plotting dispersion curves  on multiple panels can also be done using matplotlib
    ax4.set_xticklabels(['$A$'])
    ax4.tick_params(direction='in')
    #fig.show()
+
+==========================
+Change Matplotlib Defaults
+==========================
+
+It is possible to alter the default appearance of Matplotlib plots, e.g. linewidths, label sizes,
+colour cycles etc. This is most readily achieved by setting the ``rcParams`` at the start of a 
+Mantid Workbench session. The example below shows a plot with the default line width, followed be resetting the parameters with ``rcParams``. An example with many of the 
+editable parameters is available at `the Matplotlib site <https://matplotlib.org/users/customizing.html>`_.
+
+.. plot::
+   :include-source:
+
+    import numpy as np
+    import matplotlib.pyplot as plt
+
+    # Set up the data
+    x = np.linspace(0, 2 * np.pi)
+    offsets = np.linspace(0, 2*np.pi, 4, endpoint=False)
+    # Create array with shifted-sine curve along each column
+    yy = np.transpose([np.sin(x + phi) for phi in offsets])
+    # Plot the data
+    fig, ax = plt.subplots()
+    ax.plot(yy)
+
+    ## Reset the parameters
+
+    import matplotlib as mpl
+    mpl.rcParams['lines.linewidth'] = 2.0
+    mpl.rcParams['axes.grid'] = True
+    mpl.rcParams['axes.facecolor'] = (0.95, 0.95, 0.95)
+    mpl.rcParams['grid.linestyle'] = '--'
+    # Plot the data
+    fig, ax = plt.subplots()
+    ax.plot(yy)
+
+For much more on customising the graph appearance see the `Matplotlib documentation 
+<https://matplotlib.org/users/dflt_style_changes.html>`_.
+
+A list of some common properties you might want to change and the keywords to set:
+
++--------------------+-------------------------+------------+
+| Parameter          | Keyword                 | Default    |
++--------------------+-------------------------+------------+
+| Error bar cap      | ``errorbar.capsize``    | 0          |
++--------------------+-------------------------+------------+
+| Line width         | ``lines.linewidth``     | 1.25       |
++--------------------+-------------------------+------------+
+| Grid on/off        | ``axes.grid``           | False      |
++--------------------+-------------------------+------------+
+| Ticklabel size     | ``xtick.labelsize``     | medium     |
+|                    | ``ytick.labelsize``     |            |
++--------------------+-------------------------+------------+
+| Minor ticks on/off | ``xtick.minor.visible`` | False      |
+|                    | ``ytick.minor.visible`` |            |
++--------------------+-------------------------+------------+
+| Face colour        | ``axes.facecolor``      | white      |
++--------------------+-------------------------+------------+
+| Font type          | ``font.family``         | sans-serif |
++--------------------+-------------------------+------------+
+
+A much fuller list of properties is avialble `in the Matplotlib documentation 
+<https://matplotlib.org/users/customizing.html>`_.
