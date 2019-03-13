@@ -21,8 +21,8 @@ AlgorithmProgressModel::AlgorithmProgressModel(
   // start, progress, finish and errors.
   observeStarting();
 }
-inline void
-AlgorithmProgressModel::setDialog(AlgorithmProgressDialogPresenter *presenter) {
+void AlgorithmProgressModel::setDialog(
+    AlgorithmProgressDialogPresenter *presenter) {
   this->m_dialogPresenter = presenter;
 }
 void AlgorithmProgressModel::startingHandle(Mantid::API::IAlgorithm_sptr alg) {

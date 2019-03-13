@@ -55,7 +55,7 @@ public:
                    const std::string &what) override;
   /// Removes itself as an observer from the algorithm
   void removeFrom(const Mantid::API::IAlgorithm *alg);
-  inline void setDialog(AlgorithmProgressDialogPresenter *);
+  void setDialog(AlgorithmProgressDialogPresenter *);
 
 private:
   QPointer<AlgorithmProgressDialogPresenter> m_dialogPresenter;

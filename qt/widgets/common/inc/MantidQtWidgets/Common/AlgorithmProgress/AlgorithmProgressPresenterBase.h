@@ -8,7 +8,9 @@
 #define ALGORITHMPROGRESSPRESENTERBASE_H
 
 #include "MantidAPI/Algorithm.h"
+
 #include <QWidget>
+
 #include <string>
 
 namespace Mantid {
@@ -32,9 +34,6 @@ class ProgressObserverData;
 class AlgorithmProgressPresenterBase : public QWidget {
   Q_OBJECT
 public:
-  using AlgorithmInfo =
-      QList<std::tuple<Mantid::API::AlgorithmID, std::string,
-                       std::vector<Mantid::Kernel::Property *>>>;
   AlgorithmProgressPresenterBase(QWidget *parent);
 
   /// Signals to the presenters that an algorithm has started.
