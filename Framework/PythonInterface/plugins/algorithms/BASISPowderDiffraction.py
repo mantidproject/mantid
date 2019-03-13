@@ -87,6 +87,7 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
     # Consider only events with these wavelengths
     _wavelength_bands = {'311': [3.07, 3.6], '111': [6.1, 6.6]}
     _diff_bank_numbers = list(range(5, 14))
+    _tzero_params = dict(gradient=11.967, intercept=-5.0)
 
     def __init__(self):
         DataProcessorAlgorithm.__init__(self)
@@ -341,7 +342,9 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         Mantid.EventsWorkspace
         """
         MaskDetectors(w, MaskedWorkspace=self._t_mask)
-        _t_corr = ModeratorTzeroLinear(w)  # delayed emission from moderator
+        _t_corr = ModeratorTzeroLinear(w,  # delayed emission from moderator
+                                       Gradient=self._tzero_params['gradient'],
+                                       Intercept=self._tzero_params['intercept'])
         # Correct old DAS shift of fast neutrons. See GitHub issue 23855
         if self._das_version == VDAS.v1900_2018:
             _t_corr = self.add_previous_pulse(_t_corr)
