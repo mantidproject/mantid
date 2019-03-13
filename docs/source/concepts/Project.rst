@@ -5,12 +5,7 @@ Project
 
 In MantidPlot or Workbench, you can save your work into project. Then when you run
 MantidPlot or Workbench at a later time you can recover this work by loading the
-project.
-
-What a Project Consists of
---------------------------
-
-A project consists of a .mantid for MantidPlot, or .mantidproj for
+project. A project consists of a .mantid for MantidPlot, or .mantidproj for
 Workbench, file and a collection of :ref:`Nexus files <Nexus file>` it
 refers to. For this reason, a project is put into its own folder
 when saved.
