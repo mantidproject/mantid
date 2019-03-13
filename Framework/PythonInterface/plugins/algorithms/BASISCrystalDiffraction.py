@@ -90,6 +90,7 @@ class BASISCrystalDiffraction(DataProcessorAlgorithm):
     _solid_angle_ws_ = '/SNS/BSS/shared/autoreduce/solid_angle_diff.nxs'
     _flux_ws_ = '/SNS/BSS/shared/autoreduce/int_flux.nxs'
     _diff_bank_numbers = list(range(5, 14))
+    _tzero_params = dict(gradient=11.967, intercept=-5.0)
 
     def __init__(self):
         DataProcessorAlgorithm.__init__(self)
@@ -460,6 +461,8 @@ class BASISCrystalDiffraction(DataProcessorAlgorithm):
         """
         ws = self._load_single_run(run_number, name)
         ws = ModeratorTzeroLinear(InputWorkspace=ws.name(),
+                                  Gradient=self._tzero_params['gradient'],
+                                  Intercept=self._tzero_params['intercept'],
                                   OutputWorkspace=ws.name())
         # Correct old DAS shift of fast neutrons. See GitHub issue 23855
         if self._das_version == VDAS.v1900_2018:
@@ -482,6 +485,8 @@ class BASISCrystalDiffraction(DataProcessorAlgorithm):
         ws = self._load_single_run(run_number, name)
         MaskDetectors(ws, MaskedWorkspace=self._t_mask)
         ws = ModeratorTzeroLinear(InputWorkspace=ws.name(),
+                                  Gradient=self._tzero_params['gradient'],
+                                  Intercept=self._tzero_params['intercept'],
                                   OutputWorkspace=ws.name())
         # Correct old DAS shift of fast neutrons. See GitHub issue 23855
         if self._das_version == VDAS.v1900_2018:
