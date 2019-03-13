@@ -6,10 +6,10 @@
       <parameter name="tau" type="number">
         <value val="0.00000042" />
       </parameter>
-    </component-link>
-
-    <!-- GroupingPattern for DeadTimeCorrection, groups the entire detector-->
-    <component-link name="D11">
+      <parameter name="sample_logs_sum" type="string">
+  			<value val="timer" />
+  		</parameter>
+      <!-- GroupingPattern for DeadTimeCorrection, groups the entire detector-->
       <parameter name="grouping" type="string">
         <value val="0-65535"/>
       </parameter>

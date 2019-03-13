@@ -12,6 +12,9 @@
     <parameter name="att3" type="number">
       <value val="1911.96" />
     </parameter>
+    <parameter name="sample_logs_sum" type="string">
+			<value val="timer" />
+		</parameter>
   </component-link>
 
   <!-- Tau coefficient for DeadTimeCorrection, to be applied tube by tube -->
