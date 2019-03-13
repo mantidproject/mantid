@@ -157,12 +157,16 @@ void DraggableColorBarWidget::setupColorBarScaling(
 
 /// Send the minValueChanged signal
 void DraggableColorBarWidget::minValueChanged() {
-  emit minValueChanged(m_minValueBox->text().toDouble());
+  const auto value = m_minValueBox->text().toDouble();
+  emit minValueEdited(value);
+  emit minValueChanged(value);
 }
 
 /// Send the maxValueChanged signal
 void DraggableColorBarWidget::maxValueChanged() {
-  emit maxValueChanged(m_maxValueBox->text().toDouble());
+  const auto value = m_maxValueBox->text().toDouble();
+  emit maxValueEdited(value);
+  emit maxValueChanged(value);
 }
 
 /**
