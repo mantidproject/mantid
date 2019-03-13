@@ -532,10 +532,7 @@ class MainWindow(QMainWindow):
 
         # restore window state
         if settings.has('MainWindow/state'):
-            try:
-                self.restoreState(settings.get('MainWindow/state'))
-            except:
-                self.setWindowState(Qt.WindowMaximized)
+            self.restoreState(settings.get('MainWindow/state'))
         else:
             self.setWindowState(Qt.WindowMaximized)
 
