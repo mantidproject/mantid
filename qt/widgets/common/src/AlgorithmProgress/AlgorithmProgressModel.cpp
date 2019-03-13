@@ -57,6 +57,7 @@ void AlgorithmProgressModel::finishHandle(const Mantid::API::IAlgorithm *alg) {
 
 void AlgorithmProgressModel::errorHandle(const Mantid::API::IAlgorithm *alg,
                                          const std::string &what) {
+  UNUSED_ARG(what);
   this->removeFrom(alg);
 }
 

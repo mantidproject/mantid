@@ -52,7 +52,7 @@ void AlgorithmProgressWidget::showDetailsDialog() {
   }
 }
 
-constexpr QProgressBar *const AlgorithmProgressWidget::progressBar() const {
+constexpr QProgressBar *AlgorithmProgressWidget::progressBar() const {
   return m_progressBar;
 }
 } // namespace MantidWidgets

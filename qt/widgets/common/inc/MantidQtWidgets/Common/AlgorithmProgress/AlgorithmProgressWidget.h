@@ -39,7 +39,7 @@ class EXPORT_OPT_MANTIDQT_COMMON AlgorithmProgressWidget : public QWidget {
 public:
   AlgorithmProgressWidget(QWidget *parent = nullptr);
 
-  constexpr QProgressBar *const progressBar() const;
+  constexpr QProgressBar *progressBar() const;
 
   /// Setup the view for whenever an algorithm has started.
   void algorithmStarted();
