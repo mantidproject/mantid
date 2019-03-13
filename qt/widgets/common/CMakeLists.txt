@@ -1,12 +1,4 @@
 set ( QT5_SRC_FILES
-  src/AlgorithmProgress/AlgorithmProgressDialogPresenter.cpp
-  src/AlgorithmProgress/AlgorithmProgressDialogWidget.cpp
-  src/AlgorithmProgress/AlgorithmProgressModel.cpp
-  src/AlgorithmProgress/AlgorithmProgressPresenter.cpp
-  src/AlgorithmProgress/AlgorithmProgressPresenterBase.cpp
-  src/AlgorithmProgress/AlgorithmProgressObserver.cpp
-  src/AlgorithmProgress/AlgorithmProgressWidget.cpp
-
   src/AlgorithmDialog.cpp
   src/AlgorithmHistoryWindow.cpp
   src/AlgorithmInputHistory.cpp
@@ -76,6 +68,13 @@ set ( QT5_SRC_FILES
   src/WorkspacePresenter/WorkspaceTreeWidgetSimple.cpp
   src/WorkspaceSelector.cpp
 
+  src/AlgorithmProgress/AlgorithmProgressDialogPresenter.cpp
+  src/AlgorithmProgress/AlgorithmProgressDialogWidget.cpp
+  src/AlgorithmProgress/AlgorithmProgressModel.cpp
+  src/AlgorithmProgress/AlgorithmProgressPresenter.cpp
+  src/AlgorithmProgress/AlgorithmProgressPresenterBase.cpp
+  src/AlgorithmProgress/AlgorithmProgressWidget.cpp
+
   src/Batch/RowLocation.cpp
   src/Batch/RowLocationAdapter.cpp
   src/Batch/RowPredicate.cpp
@@ -112,14 +111,6 @@ set ( QT5_SRC_FILES
 )
 
 set ( QT5_MOC_FILES
-  inc/MantidQtWidgets/Common/QuickAlgorithmProgress.h
-
-  inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressDialogPresenter.h
-  inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressDialogWidget.h
-  inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressPresenter.h
-  inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressPresenterBase.h
-  inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressWidget.h
-
   inc/MantidQtWidgets/Common/AlgorithmDialog.h
   inc/MantidQtWidgets/Common/AlgorithmHistoryWindow.h
   inc/MantidQtWidgets/Common/AlgorithmPropertiesWidget.h
@@ -171,6 +162,12 @@ set ( QT5_MOC_FILES
   inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidget.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidgetSimple.h
   inc/MantidQtWidgets/Common/WorkspaceSelector.h
+
+  inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressDialogPresenter.h
+  inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressDialogWidget.h
+  inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressPresenter.h
+  inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressPresenterBase.h
+  inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressWidget.h
 
   inc/MantidQtWidgets/Common/Batch/JobTreeView.h
   inc/MantidQtWidgets/Common/Batch/JobTreeViewSignalAdapter.h
@@ -237,7 +234,6 @@ set ( QT5_INC_FILES
   inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceProvider.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceProviderNotifiable.h
 
-  inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressObserver.h
   inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressModel.h
 )
 
