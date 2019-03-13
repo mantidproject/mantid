@@ -146,7 +146,7 @@ class MuonMaxent(PythonAlgorithm):
         first = self.getProperty("FirstGoodTime").value
         last = self.getProperty("LastGoodTime").value
 
-        if first > last:
+        if first >= last:
             issues[
                 "FirstGoodTime"] = "FirstGoodTime must be smaller than LastGoodTime"
         if first < 0:
