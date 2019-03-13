@@ -13,6 +13,8 @@ import tempfile
 import itertools
 from collections import namedtuple
 from contextlib import contextmanager
+from enum import Enum
+
 import numpy as np
 
 from mantid import config as mantid_config
@@ -26,9 +28,15 @@ from mantid.simpleapi import (DeleteWorkspace, LoadEventNexus, SetGoniometer,
                               MultiplyMD, CreateSingleValuedWorkspace,
                               ConvertUnits, CropWorkspace, DivideMD, MinusMD,
                               RenameWorkspace, ConvertToMDMinMaxGlobal,
-                              ClearMaskFlag)
+                              ClearMaskFlag, ScaleX, Plus)
 from mantid.kernel import (Direction, IntArrayProperty, FloatArrayProperty,
                            FloatArrayLengthValidator)
+
+
+class VDAS(Enum):
+    """Specifies the version of the Data Acquisition System (DAS)"""
+    v1900_2018 = 0  # Up to Dec 31 2018
+    v2019_2100 = 1  # From Jan 01 2018
 
 
 @contextmanager
@@ -81,10 +89,11 @@ class BASISCrystalDiffraction(DataProcessorAlgorithm):
                  'BASIS_Mask_default_diff.xml'
     _solid_angle_ws_ = '/SNS/BSS/shared/autoreduce/solid_angle_diff.nxs'
     _flux_ws_ = '/SNS/BSS/shared/autoreduce/int_flux.nxs'
+    _diff_bank_numbers = list(range(5, 14))
 
     def __init__(self):
         DataProcessorAlgorithm.__init__(self)
-        self._lambda_range = [5.86, 6.75]  # units of inverse Angstroms
+        self._lambda_range = [6.1, 6.6]  # units of inverse Angstroms
         self._short_inst = "BSS"
         self._long_inst = "BASIS"
         self._run_list = None
@@ -94,6 +103,7 @@ class BASISCrystalDiffraction(DataProcessorAlgorithm):
         self._vanadium_files = None
         self._momentum_range = None
         self._t_mask = None
+        self._das_version = None  # version of the Data Acquisition System
         self._n_bins = None
 
     @staticmethod
@@ -112,6 +122,25 @@ class BASISCrystalDiffraction(DataProcessorAlgorithm):
     @staticmethod
     def seeAlso():
         return ['AlignDetectors', 'DiffractionFocussing', 'SNSPowderReduction']
+
+    @staticmethod
+    def add_previous_pulse(w):
+        """
+        Duplicate the events but shift them by one pulse, then add to
+        input workspace
+
+        Parameters
+        ----------
+        w: Mantid.EventsWorkspace
+
+        Returns
+        -------
+        Mantid.EventsWorkspace
+        """
+        pulse_width = 1.e6/60  # in micro-seconds
+        _adp_w = ScaleX(w, Factor=-pulse_width, Operation='Add')
+        _adp_w = Plus(w, _adp_w, OutputWorkspace=w.name())
+        return _adp_w
 
     def PyInit(self):
         # Input validators
@@ -232,7 +261,11 @@ class BASISCrystalDiffraction(DataProcessorAlgorithm):
                                     InputFile=self.getProperty('MaskFile').
                                     value,
                                     OutputWorkspace='_t_mask')
-
+            #
+            # Find the version of the Data Acquisition System
+            #
+            self._find_das_version()
+            #
             # Pre-process the background runs
             if self.getProperty('BackgroundRuns').value:
                 bkg_run_numbers = self._getRuns(
@@ -425,11 +458,12 @@ class BASISCrystalDiffraction(DataProcessorAlgorithm):
         :return: file name of event file with events treated with algorithm
         ModeratorTzeroLinear.
         """
-        ws = LoadEventNexus(Filename=self._makeRunFile(run_number),
-                            NXentryName='entry-diff',
-                            OutputWorkspace=name)
+        ws = self._load_single_run(run_number, name)
         ws = ModeratorTzeroLinear(InputWorkspace=ws.name(),
                                   OutputWorkspace=ws.name())
+        # Correct old DAS shift of fast neutrons. See GitHub issue 23855
+        if self._das_version == VDAS.v1900_2018:
+            ws = self.add_previous_pulse(ws)
         file_name = self._spawn_tempnexus()
         SaveNexus(ws, file_name)
         return file_name
@@ -445,13 +479,13 @@ class BASISCrystalDiffraction(DataProcessorAlgorithm):
         :param name: name for the output workspace
         :return: workspace object
         """
-        ws = LoadEventNexus(Filename=self._makeRunFile(run_number),
-                            NXentryName='entry-diff',
-                            SingleBankPixelsOnly=False,
-                            OutputWorkspace=name)
+        ws = self._load_single_run(run_number, name)
         MaskDetectors(ws, MaskedWorkspace=self._t_mask)
         ws = ModeratorTzeroLinear(InputWorkspace=ws.name(),
                                   OutputWorkspace=ws.name())
+        # Correct old DAS shift of fast neutrons. See GitHub issue 23855
+        if self._das_version == VDAS.v1900_2018:
+            ws = self.add_previous_pulse(ws)
         ws = ConvertUnits(ws, Target='Momentum', OutputWorkspace=ws.name())
         ws = CropWorkspace(ws,
                            OutputWorkspace=ws.name(),
@@ -533,6 +567,41 @@ class BASISCrystalDiffraction(DataProcessorAlgorithm):
         ClearMaskFlag(ws)
         MaskDetectors(ws, MaskedWorkspace=self._t_mask)
         return ws
+
+    def _find_das_version(self):
+        boundary_run = 90000  # from VDAS.v1900_2018 to VDAS.v2019_2100
+        runs = self.getProperty('RunNumbers').value
+        first_run = int(self._run_lists(runs)[0])
+        if first_run < boundary_run:
+            self._das_version = VDAS.v1900_2018
+        else:
+            self._das_version = VDAS.v2019_2100
+
+    def _load_single_run(self, run, name):
+        """
+        Find and load events from the diffraction tubes.
+
+        Run number 90000 discriminates between the old and new DAS
+
+        Parameters
+        ----------
+        run: str
+            Run number
+        name: str
+            Name of the output EventsWorkspace
+
+        Returns
+        -------
+        EventsWorkspace
+        """
+        banks = ','.join(['bank{}'.format(i) for i in self._diff_bank_numbers])
+        particular = {VDAS.v1900_2018: dict(NXentryName='entry-diff'),
+                      VDAS.v2019_2100: dict(BankName=banks)}
+        kwargs = dict(Filename=self._makeRunFile(run),
+                      SingleBankPixelsOnly=False,
+                      OutputWorkspace=name)
+        kwargs.update(particular[self._das_version])
+        return LoadEventNexus(**kwargs)
 
 
 # Register algorithm with Mantid.
