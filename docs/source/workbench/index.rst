@@ -52,3 +52,5 @@ allow us to keep developing the Workbench long after MantidPlot is no longer ava
     * :ref:`WorkbenchIPythonConsole` A python interpreter console that when operated has access to the Mantid API
     * :ref:`WorkbenchPlotWindow` The new way that plots are created and manipulated in Workbench, includes plot options
       and fitting.
+    * :ref:`plotting` Plotting in workbench isn't only possible by right clicking on a workspace in the
+      :ref:`WorkbenchWorkspaceToolbox` but possible via scripts!
