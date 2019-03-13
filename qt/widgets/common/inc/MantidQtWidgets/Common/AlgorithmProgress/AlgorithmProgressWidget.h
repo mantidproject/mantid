@@ -45,7 +45,7 @@ namespace MantidWidgets {
     public:
         AlgorithmProgressWidget(QWidget* parent = nullptr);
 
-        constexpr QProgressBar* progressBar() const;
+        constexpr QProgressBar* const progressBar() const;
 
         /// Setup the view for whenever an algorithm has started.
         void algorithmStarted();
