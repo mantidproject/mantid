@@ -55,7 +55,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         alg->setProperty("InputWorkspace", m_multiDetectorWSWithPeak))
     TS_ASSERT_THROWS_NOTHING(
-        alg->setProperty("SubtractionMethod", "Per Detector Average"))
+        alg->setProperty("BackgroundCalculationMethod", "Per Detector Average"))
     TS_ASSERT(alg->execute())
   }
 
@@ -64,7 +64,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         alg->setProperty("InputWorkspace", m_multiDetectorWSWithPeak))
     TS_ASSERT_THROWS_NOTHING(
-        alg->setProperty("SubtractionMethod", "Polynomial"))
+        alg->setProperty("BackgroundCalculationMethod", "Polynomial"))
     TS_ASSERT(alg->execute())
   }
 
@@ -76,7 +76,7 @@ public:
     auto alg = setupAlgorithm();
     alg->setProperty("InputWorkspace", m_multiDetectorWSWithPeak);
     alg->setProperty("InputWorkspaceIndexSet", "0-2,4-6");
-    alg->setProperty("SubtractionMethod", "Per Detector Average");
+    alg->setProperty("BackgroundCalculationMethod", "Per Detector Average");
     alg->execute();
     MatrixWorkspace_sptr outputWS = alg->getProperty("OutputWorkspace");
 
@@ -105,7 +105,7 @@ public:
     auto alg = setupAlgorithm();
     alg->setProperty("InputWorkspace", m_multiDetectorWSWithPeak);
     alg->setProperty("InputWorkspaceIndexSet", "0-2,4-6");
-    alg->setProperty("SubtractionMethod", "Per Detector Average");
+    alg->setProperty("BackgroundCalculationMethod", "Per Detector Average");
     alg->setProperty("SubtractBackground", false);
     alg->execute();
     MatrixWorkspace_sptr outputWS = alg->getProperty("OutputWorkspace");
@@ -124,7 +124,7 @@ public:
     auto alg = setupAlgorithm();
     alg->setProperty("InputWorkspace", m_multiDetectorWSWithPeak);
     alg->setProperty("InputWorkspaceIndexSet", "0-2,4-6");
-    alg->setProperty("SubtractionMethod", "Polynomial");
+    alg->setProperty("BackgroundCalculationMethod", "Polynomial");
     alg->setProperty("DegreeOfPolynomial", "0");
     alg->execute();
     MatrixWorkspace_sptr outputWS = alg->getProperty("OutputWorkspace");
@@ -153,7 +153,7 @@ public:
     auto alg = setupAlgorithm();
     alg->setProperty("InputWorkspace", m_multiDetectorWSWithPeak);
     alg->setProperty("InputWorkspaceIndexSet", "0-2,4-6");
-    alg->setProperty("SubtractionMethod", "Polynomial");
+    alg->setProperty("BackgroundCalculationMethod", "Polynomial");
     alg->setProperty("DegreeOfPolynomial", "0");
     alg->setProperty("SubtractBackground", false);
     alg->execute();
@@ -174,7 +174,7 @@ public:
     auto alg = setupAlgorithm();
     alg->setProperty("InputWorkspace", m_multiDetectorWSWithPeak);
     alg->setProperty("InputWorkspaceIndexSet", "2");
-    alg->setProperty("SubtractionMethod", "Polynomial");
+    alg->setProperty("BackgroundCalculationMethod", "Polynomial");
     alg->setProperty("DegreeOfPolynomial", "0");
     alg->setProperty("SubtractBackground", false);
     TS_ASSERT_THROWS_ANYTHING(alg->execute())
