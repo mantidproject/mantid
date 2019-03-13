@@ -7,7 +7,7 @@
 #ifndef ALGORITHMPROGRESSPRESENTERBASE_H
 #define ALGORITHMPROGRESSPRESENTERBASE_H
 
-#include "MantidAPI/IAlgorithm_fwd.h"
+#include "MantidAPI/Algorithm.h"
 #include <QWidget>
 #include <string>
 
@@ -21,7 +21,7 @@ class QProgressBar;
 
 /**
  * The AlgorithmProgressPresenterBase is the base class that presenters showing progress bars use.
- * It provides common connections for triggers from the model, e.g. when an algorithm has progressed
+ * It sets up the common connections for events from the model, e.g. when an algorithm has progressed
  * and the progress bar value needs to be updated.
  */
 
@@ -31,31 +31,29 @@ namespace MantidWidgets {
     class AlgorithmProgressPresenterBase : public QWidget {
         Q_OBJECT
     public:
+        using AlgorithmInfo = QList<std::tuple<Mantid::API::AlgorithmID, std::string, std::vector<Mantid::Kernel::Property*>>>;
         AlgorithmProgressPresenterBase(QWidget* parent);
 
-        /// Called from the ProgressObserver whenever an algorithm emits new progress
-        /// This function should update relevant GUI elements to display the algorithm's progress
-        virtual void updateProgressBar(const Mantid::API::IAlgorithm* algorithm, double progress,
-            const std::string& message)
-            = 0;
+        /// Signals to the presenters that an algorithm has started.
+        void algorithmStarted(Mantid::API::AlgorithmID);
+        /// Signals to the presenters that an algorithm has ended.
+        void algorithmEnded(Mantid::API::AlgorithmID);
+        /// Signals to the presenters that there has been progress in one of the algorithms
+        void updateProgressBar(Mantid::API::AlgorithmID, double, const std::string&);
+        /// Sets the parameter progress bar to show the progress and message
+        void setProgressBar(QProgressBar*, double, QString);
 
     public slots:
-        /// Update the GUI that the presenter is currently using
-        virtual void setCurrentAlgorithm() = 0;
-
-        /// Sets the parameter progress bar to show the progress and message
-        void setProgressBar(QProgressBar* progressBar, double progress,
-            const std::string& message);
-        /// Emit an update signal to update the GUI in the Qt thread
-        /// as this update is called from the AlgorithmObserver thread
-        void updateGui();
+        virtual void algorithmStartedSlot(Mantid::API::AlgorithmID) = 0;
+        virtual void updateProgressBarSlot(Mantid::API::AlgorithmID, double, QString) = 0;
+        virtual void algorithmEndedSlot(Mantid::API::AlgorithmID) = 0;
 
     signals:
         // When there has been a change in the observers, this signal
         // will trigger an update of the current algorithm being watched
-        void updateWatchedAlgorithm();
-
-        void progressBarNeedsUpdating(QProgressBar*, double, const std::string&);
+        void algorithmStartedSignal(Mantid::API::AlgorithmID);
+        void updateProgressBarSignal(Mantid::API::AlgorithmID, double, QString);
+        void algorithmEndedSignal(Mantid::API::AlgorithmID);
     };
 } // namespace MantidWidgets
 } // namespace MantidQt

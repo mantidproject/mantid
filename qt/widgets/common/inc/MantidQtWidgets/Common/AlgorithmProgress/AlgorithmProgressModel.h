@@ -8,46 +8,57 @@
 #define ALGORITHMPROGRESSMODEL_H
 
 #include "MantidAPI/AlgorithmObserver.h"
-#include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressObserver.h"
 #include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressPresenterBase.h"
 
-#include <memory>
-#include <mutex>
+#include <QPointer>
+
 #include <string>
-#include <vector>
 
 /**
  * The AlgorithmProgressModel keeps track of all active presenters that are managing
  * views with progress bars, and notifies them whenever they need to update due to
- * an algorithm's event. It tracks the starting of algorithms, and will create
- * ProgressObservers for each algorithm that starts.
+ * an algorithm's event. It tracks the starting of all algorithms, and will set
+ * itself as observer on every started algorithm, tracking their 
+ * start, update, finish and error events.
+ * 
+ * When an algorithm event fires it is on a separate thread from the views. An action
+ * in the presenter is triggered, which then emits a signal, bringing back the processing
+ * into the GUI thread, to do actual changes to GUI elements. 
+ * 
+ * Note: this observer does NOT WAIT for the GUI event to finish. It triggers the event,
+ * which is then queued in the Qt event loop. If the algorithm must be used in the event, 
+ * then the AlgorithmID can be used to retrieve a shared pointer to it, 
+ * which keeps the algorithm alive for the duration.
  */
 namespace MantidQt {
 namespace MantidWidgets {
+    class AlgorithmProgressPresenter;
+    class AlgorithmProgressDialogPresenter;
     class AlgorithmProgressModel : public Mantid::API::AlgorithmObserver {
     public:
-        AlgorithmProgressModel();
+        AlgorithmProgressModel(AlgorithmProgressPresenter* presenter);
 
-        /// Add a new presenter that is displaying a progress bar
-        void addPresenter(AlgorithmProgressPresenterBase* presenter);
-        /// Remove a new presenter to stop it from getting updates for algorithm progress
-        void removePresenter(const AlgorithmProgressPresenterBase* presenter);
-        /// Update the progress bar in all live presenters
-        void updatePresenters();
-        /// Update the progress using data from the observer
-        void updateProgress(const Mantid::API::IAlgorithm*, double progress,
-            const std::string& msg);
-
-        /// Start an observer that tracks the execution of the parameter algorithm
+        /// Observes ALL starting algorithms. Triggered when a new algorithm
+        /// is constructed, and will attach itself as an observer
+        /// Note: at this point the algorithm is not fully initialized
         void startingHandle(Mantid::API::IAlgorithm_sptr alg) override;
-
-        const std::vector<const Mantid::API::IAlgorithm*>& runningAlgorithms();
-		const Mantid::API::IAlgorithm* latestRunningAlgorithm();
+        /// Triggered when the algorithm is executed
+        void startHandle(const Mantid::API::IAlgorithm* alg) override;
+        /// Triggered when the algorithm is finished
+        void finishHandle(const Mantid::API::IAlgorithm* alg) override;
+        /// Triggered when the algorithm reports progress
+        void progressHandle(const Mantid::API::IAlgorithm* alg, double progress,
+            const std::string& message) override;
+        /// Triggered when the algorithm encounters an error
+        void errorHandle(const Mantid::API::IAlgorithm* alg,
+            const std::string& what) override;
+        /// Removes itself as an observer from the algorithm
+        void removeFrom(const Mantid::API::IAlgorithm* alg);
+        inline void setDialog(AlgorithmProgressDialogPresenter*);
 
     private:
-        std::unique_ptr<std::mutex> howdoesMutex = std::make_unique<std::mutex>();
-        std::vector<AlgorithmProgressPresenterBase*> m_presenters;
-        std::unique_ptr<ProgressObserver> progressObserver;
+        QPointer<AlgorithmProgressDialogPresenter> m_dialogPresenter;
+        AlgorithmProgressPresenter* m_mainWindowPresenter;
     };
 
 } // namespace MantidWidgets

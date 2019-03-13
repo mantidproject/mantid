@@ -34,14 +34,12 @@ namespace MantidWidgets {
 
     void AlgorithmProgressWidget::algorithmStarted()
     {
-        m_detailsButton->setDisabled(false);
     }
 
     void AlgorithmProgressWidget::algorithmEnded()
     {
         m_progressBar->setValue(0);
         m_progressBar->setFormat("Idle.");
-        m_detailsButton->setDisabled(true);
     }
 
     void AlgorithmProgressWidget::showDetailsDialog()
@@ -58,7 +56,7 @@ namespace MantidWidgets {
         }
     }
 
-    constexpr QProgressBar* AlgorithmProgressWidget::progressBar() const
+    constexpr QProgressBar* const AlgorithmProgressWidget::progressBar() const
     {
         return m_progressBar;
     }

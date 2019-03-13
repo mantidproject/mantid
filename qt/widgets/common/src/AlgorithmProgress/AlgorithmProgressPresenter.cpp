@@ -13,28 +13,32 @@ namespace MantidWidgets {
         QWidget* parent,
         AlgorithmProgressWidget* view)
         : AlgorithmProgressPresenterBase(parent)
-        , m_model { AlgorithmProgressModel() }
+        , m_model { AlgorithmProgressModel(this) }
+        , m_algorithm(nullptr)
         , m_view(view)
     {
-        m_model.addPresenter(this);
     }
 
-    void AlgorithmProgressPresenter::setCurrentAlgorithm()
+    void AlgorithmProgressPresenter::algorithmStartedSlot(Mantid::API::AlgorithmID alg)
     {
-        m_algorithm = m_model.latestRunningAlgorithm();
+        // only allow the tracking of one algorithm at a time
+        // this makes the progress bar stutter less and it looks better overall
         if (!m_algorithm) {
-            m_view->algorithmEnded();
-        } else {
+            m_algorithm = alg;
             m_view->algorithmStarted();
         }
     }
 
-    void AlgorithmProgressPresenter::updateProgressBar(
-        const Mantid::API::IAlgorithm* algorithm, const double progress,
-        const std::string& message)
+    void AlgorithmProgressPresenter::algorithmEndedSlot(Mantid::API::AlgorithmID alg)
+    {
+        m_algorithm = alg;
+        m_view->algorithmEnded();
+    }
+
+    void AlgorithmProgressPresenter::updateProgressBarSlot(Mantid::API::AlgorithmID algorithm, const double progress, QString message)
     {
         if (algorithm == this->m_algorithm) {
-            emit progressBarNeedsUpdating(m_view->progressBar(), progress, message);
+            setProgressBar(m_view->progressBar(), progress, message);
         }
     }
 

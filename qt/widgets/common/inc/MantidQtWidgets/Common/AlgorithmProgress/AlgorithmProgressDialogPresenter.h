@@ -9,11 +9,12 @@
 #include "AlgorithmProgressModel.h"
 #include "AlgorithmProgressPresenterBase.h"
 #include "MantidAPI/IAlgorithm.h"
+#include <QTreeWidgetItem>
 #include <unordered_map>
 
 /**
- * The AlgorithmProgressDialogPresenter keeps track of the active progress bars that need updating whenever their
- * algorithms report any progress.
+ * The AlgorithmProgressDialogPresenter keeps track of the running algorithms
+ * and displays a progress bar for them, and a property list.
  */
 namespace MantidQt {
 namespace MantidWidgets {
@@ -22,21 +23,17 @@ namespace MantidWidgets {
 
     class AlgorithmProgressDialogPresenter : public AlgorithmProgressPresenterBase {
         Q_OBJECT
+        using RunningAlgorithms = std::unordered_map<Mantid::API::AlgorithmID, std::pair<QTreeWidgetItem*, QProgressBar*>>;
+
     public:
         AlgorithmProgressDialogPresenter(QWidget* parent, AlgorithmProgressDialogWidget* view, AlgorithmProgressModel& model);
 
-        /// Sets the current algorithms being show in the window
-        void setCurrentAlgorithm() override;
+        void algorithmStartedSlot(Mantid::API::AlgorithmID) override;
+        void updateProgressBarSlot(Mantid::API::AlgorithmID, double, QString) override;
+        void algorithmEndedSlot(Mantid::API::AlgorithmID) override;
 
-        /// Add a progress bar that this presenter will update.
-        /// The presenter does NOT own the progress bar
-        void addProgressBar(const Mantid::API::IAlgorithm* alg, QProgressBar* pb);
-        /// Removes this presenter from the model, so that it can stop getting
-        /// updates for algorithms' progress
-        void removeFromModel();
-
-        /// Updates the list of progress bar currently managed by the presenter
-        void updateProgressBar(const Mantid::API::IAlgorithm* alg, double progress, const std::string& message) override;
+    protected:
+        void closeEvent(QCloseEvent* event) override;
 
     private:
         AlgorithmProgressDialogWidget* m_view;
@@ -44,9 +41,7 @@ namespace MantidWidgets {
         AlgorithmProgressModel& m_model;
         /// Container for all the progress bar that are currently being displayed
         /// This container does NOT own any of the progress bars
-        std::unordered_map<const Mantid::API::IAlgorithm*, QProgressBar*> m_progressBars;
-
-        std::unique_ptr<std::mutex> howdoesMutex = std::make_unique<std::mutex>();
+        RunningAlgorithms m_progressBars;
     };
 } // namespace MantidWidgets
 } // namespace MantidQt
