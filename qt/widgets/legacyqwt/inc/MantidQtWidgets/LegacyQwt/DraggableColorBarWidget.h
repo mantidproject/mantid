@@ -51,6 +51,11 @@ signals:
   void maxValueChanged(double);
   void nthPowerChanged(double);
 
+  // Edited signals only emitted when manual editing of that field
+  // occurs
+  void minValueEdited(double);
+  void maxValueEdited(double);
+
 protected:
   void mousePressEvent(QMouseEvent *) override;
   void mouseMoveEvent(QMouseEvent *) override;

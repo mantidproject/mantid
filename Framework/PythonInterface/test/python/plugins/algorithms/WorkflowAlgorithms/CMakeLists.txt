@@ -42,8 +42,8 @@ set ( TEST_PY_FILES
   MolDynTest.py
   MSDFitTest.py
   OSIRISDiffractionReductionTest.py
-  PowderDiffILLReductionTest.py
-  PowderDiffILLDetScanReductionTest.py
+  PowderILLDetectorScanTest.py
+  PowderILLParameterScanTest.py
   ReflectometryILLConvertToQTest.py
   ReflectometryILLPolarizationCorTest.py
   ReflectometryILLPreprocessTest.py

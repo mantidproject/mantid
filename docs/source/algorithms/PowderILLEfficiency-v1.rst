@@ -102,7 +102,7 @@ OutputWorkspace
 For **D20**, the output is a single-column workspace containing the calibration factors for each cell.
 For **D2B**, it is a 2D workspace (x axis is the tube index, spectrum axis is the pixel index in the tube).
 The output should be normally saved with
-:ref:`SaveNexusProcessed <algm-SaveNexusProcessed>` to be later used in :ref:`PowderDiffILLReduction <algm-PowderDiffILLReduction>` and :ref:`PowderDiffILLDetScanReduction <algm-PowderDiffILLDetScanReduction>`.
+:ref:`SaveNexusProcessed <algm-SaveNexusProcessed>` to be later used in :ref:`PowderILLParameterScan <algm-PowderILLParameterScan>` and :ref:`PowderILLDetectorScan <algm-PowderILLDetectorScan>`.
 
 OutputResponseWorkspace
 -----------------------
@@ -154,7 +154,7 @@ If some of the input files will have 26 scan points instead of 25, the last scan
 D20 Workflow
 ------------
 
-.. diagram:: PowderDiffILLDetEffCorr-v1_D20_wkflw.dot
+.. diagram:: PowderILLEfficiency-v1_D20_wkflw.dot
 
 .. include:: ../usagedata-note.txt
 
@@ -164,8 +164,8 @@ D20 Workflow
 
    import matplotlib.pyplot as plt
    from mantid import plots
-   from mantid.simpleapi import PowderDiffILLDetEffCorr
-   PowderDiffILLDetEffCorr(CalibrationRun='967076.nxs', DerivationMethod='SequentialSummedReference1D', OutputWorkspace='calib')
+   from mantid.simpleapi import PowderILLEfficiency
+   PowderILLEfficiency(CalibrationRun='967076.nxs', DerivationMethod='SequentialSummedReference1D', OutputWorkspace='calib')
    Transpose(InputWorkspace='calib', OutputWorkspace='calib')
    fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})
    ax.plot(mtd['calib'],'-')
@@ -180,7 +180,7 @@ D20 Workflow
 D2B Workflow
 ------------
 
-.. diagram:: PowderDiffILLDetEffCorr-v1_D2B_wkflw.dot
+.. diagram:: PowderILLEfficiency-v1_D2B_wkflw.dot
 
 **Example - D2B**
 
@@ -188,8 +188,8 @@ D2B Workflow
 
    import matplotlib.pyplot as plt
    from mantid import plots
-   from mantid.simpleapi import PowderDiffILLDetEffCorr
-   PowderDiffILLDetEffCorr(CalibrationRun='532008,532009', DerivationMethod='GlobalSummedReference2D', OutputWorkspace='calib')
+   from mantid.simpleapi import PowderILLEfficiency
+   PowderILLEfficiency(CalibrationRun='532008,532009', DerivationMethod='GlobalSummedReference2D', OutputWorkspace='calib')
    fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})
    c = ax.pcolormesh(mtd['calib'], vmin=0.8, vmax=1.2)
    ax.set_xlabel('Tube #')
@@ -205,8 +205,8 @@ D2B Workflow
 Related Algorithms
 ------------------
 
-:ref:`PowderDiffILLReduction <algm-PowderDiffILLReduction>` performs the data reduction.
-:ref:`PowderDiffILLDetScanReduction <algm-PowderDiffILLDetScanReduction>` performs the data reduction for detector scans.
+:ref:`PowderILLParameterScan <algm-PowderILLParameterScan>` performs the data reduction.
+:ref:`PowderILLDetectorScan <algm-PowderILLDetectorScan>` performs the data reduction for detector scans.
 
 .. categories::
 

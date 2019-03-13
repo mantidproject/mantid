@@ -7,11 +7,11 @@
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
-from mantid.simpleapi import PowderDiffILLReduction
+from mantid.simpleapi import PowderILLParameterScan
 from mantid import config, mtd
 
 
-class PowderDiffILLReductionTest(unittest.TestCase):
+class PowderILLParameterScanTest(unittest.TestCase):
 
     _runs = '967087:967088'
 
@@ -24,7 +24,7 @@ class PowderDiffILLReductionTest(unittest.TestCase):
         mtd.remove('red')
 
     def test_default_options(self):
-        red = PowderDiffILLReduction(Run=self._runs)
+        red = PowderILLParameterScan(Run=self._runs)
         self.assertTrue(red)
         self.assertTrue(not red.isDistribution())
         self.assertTrue(not red.isHistogramData())
@@ -48,49 +48,49 @@ class PowderDiffILLReductionTest(unittest.TestCase):
         self.assertEquals(red.readY(1)[2100],9789)
 
     def test_sort_temperature_axis(self):
-        red = PowderDiffILLReduction(Run=self._runs,SortObservableAxis=True)
+        red = PowderILLParameterScan(Run=self._runs,SortObservableAxis=True)
         self.assertTrue(red)
         spectrumaxis = red.getAxis(1).extractValues()
         self.assertAlmostEqual(spectrumaxis[0],242.82001,5)
         self.assertAlmostEqual(spectrumaxis[1],253.924,5)
 
     def test_momentum_transfer(self):
-        red = PowderDiffILLReduction(Run=self._runs,Unit='MomentumTransfer')
+        red = PowderILLParameterScan(Run=self._runs,Unit='MomentumTransfer')
         self.assertTrue(red)
         xunit = red.getAxis(0).getUnit().unitID()
         self.assertEquals(xunit,'MomentumTransfer')
 
     def test_dspacing(self):
-        red = PowderDiffILLReduction(Run=self._runs,Unit='dSpacing')
+        red = PowderILLParameterScan(Run=self._runs,Unit='dSpacing')
         self.assertTrue(red)
         xunit = red.getAxis(0).getUnit().unitID()
         self.assertEquals(xunit,'dSpacing')
 
     def test_normalise_monitor(self):
-        red = PowderDiffILLReduction(Run=self._runs,NormaliseTo='Monitor')
+        red = PowderILLParameterScan(Run=self._runs,NormaliseTo='Monitor')
         self.assertTrue(red)
         self.assertAlmostEquals(red.readY(0)[1400],0.00348,5)
         self.assertAlmostEquals(red.readY(1)[2100],0.00335,5)
 
     def test_normalise_time(self):
-        red = PowderDiffILLReduction(Run=self._runs,NormaliseTo='Time')
+        red = PowderILLParameterScan(Run=self._runs,NormaliseTo='Time')
         self.assertTrue(red)
         self.assertAlmostEquals(red.readY(0)[1400],9532/300,4)
         self.assertAlmostEquals(red.readY(1)[2100],9789/300,2)
 
     def test_normalise_roi(self):
-        red = PowderDiffILLReduction(Run=self._runs,NormaliseTo='ROI',ROI='0,100')
+        red = PowderILLParameterScan(Run=self._runs,NormaliseTo='ROI',ROI='0,100')
         self.assertTrue(red)
         self.assertAlmostEquals(red.readY(0)[1400],0.00055,5)
         self.assertAlmostEquals(red.readY(1)[2100],0.00053,5)
 
     def test_crop_zero_counting_cells(self):
-        red = PowderDiffILLReduction(Run=self._runs,ZeroCountingCells='Crop')
+        red = PowderILLParameterScan(Run=self._runs,ZeroCountingCells='Crop')
         self.assertTrue(red)
         self.assertEquals(red.blocksize(), 3002)
 
     def test_rebin(self):
-        red = PowderDiffILLReduction(Run=self._runs,ScanAxisBinWidth=12,SortObservableAxis=True)
+        red = PowderILLParameterScan(Run=self._runs,ScanAxisBinWidth=12,SortObservableAxis=True)
         self.assertEquals(red.getNumberHistograms(), 1)
         self.assertAlmostEqual(red.getAxis(1).extractValues()[0], 248.372, 5)
 

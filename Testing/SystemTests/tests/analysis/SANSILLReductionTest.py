@@ -52,7 +52,7 @@ class ILL_D11_Test(systemtesting.MantidSystemTest):
         # Process the dark current Cd/B4C for sample
         SANSILLReduction(Run='010462', ProcessAs='Absorber', OutputWorkspace='Cd')
         # Process the empty beam for sample
-        SANSILLReduction(Run='010413', ProcessAs='Beam', AbsorberInputWorkspace='Cd', OutputWorkspace='Db')
+        SANSILLReduction(Run='010413', ProcessAs='Beam', AbsorberInputWorkspace='Cd', OutputWorkspace='Db', FluxOutputWorkspace='fl')
         # Sample container transmission
         SANSILLReduction(Run='010444', ProcessAs='Transmission', AbsorberInputWorkspace='Cd',
                          BeamInputWorkspace='Dbw', OutputWorkspace='sc_tr')
@@ -65,7 +65,7 @@ class ILL_D11_Test(systemtesting.MantidSystemTest):
         # Sample
         SANSILLReduction(Run='010569', ProcessAs='Sample', AbsorberInputWorkspace='Cd', ContainerInputWorkspace='sc',
                          BeamInputWorkspace='Db', SensitivityInputWorkspace='sens', MaskedInputWorkspace='mask',
-                         TransmissionInputWorkspace='s_tr', OutputWorkspace='sample_flux')
+                         TransmissionInputWorkspace='s_tr', OutputWorkspace='sample_flux', FluxInputWorkspace='fl')
         # Convert to I(Q)
         SANSILLIntegration(InputWorkspace='sample_flux', OutputWorkspace='iq')
 
@@ -97,7 +97,7 @@ class ILL_D22_Test(systemtesting.MantidSystemTest):
         SANSILLReduction(Run='241238', ProcessAs='Absorber', OutputWorkspace='Cd')
 
         # Beam
-        SANSILLReduction(Run='241226', ProcessAs='Beam', AbsorberInputWorkspace='Cd', OutputWorkspace='Db')
+        SANSILLReduction(Run='241226', ProcessAs='Beam', AbsorberInputWorkspace='Cd', OutputWorkspace='Db', FluxOutputWorkspace='fl')
 
         # Container transmission known
         CreateSingleValuedWorkspace(DataValue=0.94638, ErrorValue=0.0010425, OutputWorkspace='ctr')
@@ -125,7 +125,7 @@ class ILL_D22_Test(systemtesting.MantidSystemTest):
         # Sample
         SANSILLReduction(Run='241240', ProcessAs='Sample', AbsorberInputWorkspace='Cd', BeamInputWorkspace='Db',
                          TransmissionInputWorkspace='str', ContainerInputWorkspace='can', MaskedInputWorkspace='mask',
-                         SensitivityInputWorkspace='sens', OutputWorkspace='sample')
+                         SensitivityInputWorkspace='sens', OutputWorkspace='sample', FluxInputWorkspace='fl')
 
         # Integration
         SANSILLIntegration(InputWorkspace='sample', OutputWorkspace='iq', CalculateResolution='None')
@@ -155,7 +155,7 @@ class ILL_D33_VTOF_Test(systemtesting.MantidSystemTest):
         LoadNexusProcessed(Filename='D33_mask.nxs', OutputWorkspace='mask')
 
         # Beam
-        SANSILLReduction(Run='093406', ProcessAs='Beam', OutputWorkspace='beam')
+        SANSILLReduction(Run='093406', ProcessAs='Beam', OutputWorkspace='beam', FluxOutputWorkspace='flux')
 
         # Container Transmission
         SANSILLReduction(Run='093407', ProcessAs='Transmission', BeamInputWorkspace='beam', OutputWorkspace='ctr')
@@ -169,10 +169,10 @@ class ILL_D33_VTOF_Test(systemtesting.MantidSystemTest):
 
         # Sample
         SANSILLReduction(Run='093410', ProcessAs='Sample', BeamInputWorkspace='beam', TransmissionInputWorkspace='str',
-                         ContainerInputWorkspace='can', MaskedInputWorkspace='mask', OutputWorkspace='sample')
+                         ContainerInputWorkspace='can', MaskedInputWorkspace='mask', OutputWorkspace='sample', FluxInputWorkspace='flux')
         # I(Q)
         SANSILLIntegration(InputWorkspace='sample', CalculateResolution='None', OutputBinning='0.005,-0.1,1',
-                           OutputWorkspace='iq')
+                           OutputWorkspace='iq', BinMaskingCriteria='x<1 || x>10')
 
 
 class ILL_D33_LTOF_Test(systemtesting.MantidSystemTest):
@@ -199,7 +199,7 @@ class ILL_D33_LTOF_Test(systemtesting.MantidSystemTest):
         LoadNexusProcessed(Filename='D33_mask.nxs', OutputWorkspace='mask')
 
         # Beam
-        SANSILLReduction(Run='093411', ProcessAs='Beam', OutputWorkspace='beam')
+        SANSILLReduction(Run='093411', ProcessAs='Beam', OutputWorkspace='beam', FluxOutputWorkspace='flux')
 
         # Container Transmission
         SANSILLReduction(Run='093412', ProcessAs='Transmission', BeamInputWorkspace='beam', OutputWorkspace='ctr')
@@ -213,11 +213,11 @@ class ILL_D33_LTOF_Test(systemtesting.MantidSystemTest):
 
         # Sample
         SANSILLReduction(Run='093415', ProcessAs='Sample', BeamInputWorkspace='beam', TransmissionInputWorkspace='str',
-                         ContainerInputWorkspace='can', MaskedInputWorkspace='mask', OutputWorkspace='sample')
+                         ContainerInputWorkspace='can', MaskedInputWorkspace='mask', OutputWorkspace='sample', FluxInputWorkspace='flux')
 
         # I(Q)
         SANSILLIntegration(InputWorkspace='sample', CalculateResolution='None', OutputBinning='0.005,-0.1,1',
-                           OutputWorkspace='iq')
+                           OutputWorkspace='iq', BinMaskingCriteria='x<1 || x>10')
 
 
 class ILL_D33_Test(systemtesting.MantidSystemTest):
@@ -273,7 +273,8 @@ class ILL_D33_Test(systemtesting.MantidSystemTest):
         SANSILLReduction(Run='027885', ProcessAs='Absorber', OutputWorkspace='Cd')
 
         # Process the empty beam for sample
-        SANSILLReduction(Run='027916', ProcessAs='Beam', BeamRadius = 1., AbsorberInputWorkspace='Cd', OutputWorkspace='Db')
+        SANSILLReduction(Run='027916', ProcessAs='Beam', BeamRadius = 1., AbsorberInputWorkspace='Cd',
+                         OutputWorkspace='Db', FluxOutputWorkspace='flux')
 
         # Process the empty beam for sample transmission
         SANSILLReduction(Run='027858', ProcessAs='Beam', AbsorberInputWorkspace='Cd', OutputWorkspace='Dbtr')
@@ -294,7 +295,7 @@ class ILL_D33_Test(systemtesting.MantidSystemTest):
         # Sample with flux
         SANSILLReduction(Run='027925', ProcessAs='Sample',  MaskedInputWorkspace='mask',
                          AbsorberInputWorkspace='Cd', ContainerInputWorkspace='sc', BeamInputWorkspace='Db',
-                         TransmissionInputWorkspace='s_tr', OutputWorkspace='sample_flux')
+                         TransmissionInputWorkspace='s_tr', OutputWorkspace='sample_flux', FluxInputWorkspace='flux')
 
         # I(Q)
         SANSILLIntegration(InputWorkspace='sample_flux', OutputWorkspace='iq', CalculateResolution='None')

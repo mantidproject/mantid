@@ -55,41 +55,41 @@ GSAS format.
 Workflow
 --------
 
-.. diagram:: PowderDiffILLDetScanReduction-v1_wkflw.dot
+.. diagram:: PowderILLDetectorScan-v1_wkflw.dot
 
 Related Algorithms
 ------------------
 
-:ref:`PowderDiffILLReduction <algm-PowderDiffILLReduction>` can be used for D20 where the detector is static, and
+:ref:`PowderILLParameterScan <algm-PowderILLParameterScan>` can be used for D20 where the detector is static, and
 another variable such as temperature is scanned instead.
 
 Usage
 -----
 
-**Example - PowderDiffDetScanILLReduction**
+**Example - PowderILLDetectorScan**
 
-.. testsetup:: ExPowderDiffDetScanILLReduction
+.. testsetup:: ExPowderILLDetectorScan
 
    config['default.facility'] = 'ILL'
    config['default.instrument'] = 'D2B'
    config.appendDataSearchSubDir('ILL/D2B/')
 
-.. testcode:: ExPowderDiffDetScanILLReduction
+.. testcode:: ExPowderILLDetectorScan
 
-   red_ws = PowderDiffILLDetScanReduction(Run='508093:508095', Output2DTubes=True, Output2D=True, Output1D=True)
+   red_ws = PowderILLDetectorScan(Run='508093:508095', Output2DTubes=True, Output2D=True, Output1D=True)
    print("'2DTubes' output workspace has {0} diffractograms having {1} bins each".format(red_ws[0].getNumberHistograms(), red_ws[0].blocksize()))
    print("'2D' output workspace has {0} diffractograms having {1} bins each".format(red_ws[1].getNumberHistograms(), red_ws[1].blocksize()))
    print("'1D' output workspace has {0} diffractograms having {1} bins each".format(red_ws[2].getNumberHistograms(), red_ws[2].blocksize()))
 
 Output:
 
-.. testoutput:: ExPowderDiffDetScanILLReduction
+.. testoutput:: ExPowderILLDetectorScan
 
     '2DTubes' output workspace has 128 diffractograms having 3024 bins each
     '2D' output workspace has 128 diffractograms having 3024 bins each
     '1D' output workspace has 1 diffractograms having 3024 bins each
 
-.. testcleanup:: ExPowderDiffDetScanILLReduction
+.. testcleanup:: ExPowderILLDetectorScan
 
    mtd.remove('red_ws')
 

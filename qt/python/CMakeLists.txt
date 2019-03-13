@@ -4,7 +4,9 @@
 include ( PythonPackageTargetFunctions )
 
 # Legacy wrappers for MantidPlot
-add_subdirectory ( mantidqtpython )
+if ( ENABLE_MANTIDPLOT )
+  add_subdirectory ( mantidqtpython )
+endif()
 
 ###########################################################################
 # mantidqt
@@ -40,10 +42,13 @@ if ( ENABLE_WORKBENCH )
   # Setup dependency chain
   add_dependencies ( mantidqt
     mantidqt_resources
-    mantidqt_commonqt4
     mantidqt_commonqt5
     mantidqt_instrumentviewqt5
   )
+
+  if ( ENABLE_MANTIDPLOT )
+    add_dependencies ( mantidqt mantidqt_commonqt4 )
+  endif()
 
   if ( MSVC )
     # Debug builds need libraries that are linked with MSVC debug runtime

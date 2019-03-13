@@ -57,6 +57,7 @@ void SaveMask::exec() {
         this->createChildAlgorithm("ExtractMask", 0.0, 0.5, false);
     emAlg->setProperty("InputWorkspace", userInputWS);
     emAlg->setPropertyValue("OutputWorkspace", "tmp");
+    emAlg->setLogging(this->isLogging());
     emAlg->execute();
     API::MatrixWorkspace_sptr ws = emAlg->getProperty("OutputWorkspace");
     inpWS = boost::dynamic_pointer_cast<DataObjects::SpecialWorkspace2D>(ws);

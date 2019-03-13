@@ -28,12 +28,12 @@ namespace MantidWidgets {
 WorkspaceTreeWidgetSimple::WorkspaceTreeWidgetSimple(bool viewOnly,
                                                      QWidget *parent)
     : WorkspaceTreeWidget(new MantidTreeModel(), viewOnly, parent),
-      m_plotSpectrum(new QAction("spectrum...", this)),
-      m_overplotSpectrum(new QAction("overplot spectrum...", this)),
-      m_plotSpectrumWithErrs(new QAction("spectrum with errors...", this)),
+      m_plotSpectrum(new QAction("Spectrum...", this)),
+      m_overplotSpectrum(new QAction("Overplot spectrum...", this)),
+      m_plotSpectrumWithErrs(new QAction("Spectrum with errors...", this)),
       m_overplotSpectrumWithErrs(
-          new QAction("overplot spectrum with errors...", this)),
-      m_plotColorfill(new QAction("colorfill", this)),
+          new QAction("Overplot spectrum with errors...", this)),
+      m_plotColorfill(new QAction("Colorfill", this)),
       m_sampleLogs(new QAction("Show Sample Logs", this)),
       m_showInstrument(new QAction("Show Instrument", this)),
       m_showData(new QAction("Show Data", this)),
@@ -106,16 +106,19 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
       menu->addAction(m_showData);
       menu->addAction(m_showAlgorithmHistory);
       menu->addAction(m_showInstrument);
-      menu->addAction(m_sampleLogs);
       m_showInstrument->setEnabled(
           matrixWS->getInstrument() &&
           !matrixWS->getInstrument()->getName().empty());
-      menu->addSeparator();
+      menu->addAction(m_sampleLogs);
     } else if (boost::dynamic_pointer_cast<ITableWorkspace>(workspace)) {
       menu->addAction(m_showData);
       menu->addAction(m_showAlgorithmHistory);
-      menu->addSeparator();
+    } else if (boost::dynamic_pointer_cast<IMDWorkspace>(workspace)) {
+      menu->addAction(m_showAlgorithmHistory);
+      menu->addAction(m_sampleLogs);
     }
+
+    menu->addSeparator();
     menu->addAction(m_rename);
     menu->addAction(m_saveNexus);
 

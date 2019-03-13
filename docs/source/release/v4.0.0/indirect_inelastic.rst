@@ -5,15 +5,12 @@ Indirect Inelastic Changes
 .. contents:: Table of Contents
    :local:
 
-.. warning:: **Developers:** Sort changes under appropriate heading
-    putting new features at the top of the section, followed by
-    improvements, followed by bug fixes.
-
 Algorithms
 ----------
 
 New Algorithms
 ##############
+
 - :ref:`BASISCrystalDiffraction <algm-BASISCrystalDiffraction>` replaces :ref:`BASISDiffraction <algm-BASISDiffraction>`, now deprecated.
 - :ref:`BASISPowderDiffraction <algm-BASISPowderDiffraction>` obtains scattered elastic intensity versus momentum transfer and versus scattering angle.
 - TOF correction for neutrons incorrectly interpreted as slow neutrons in :ref:`BASISPowderDiffraction <algm-BASISPowderDiffraction>`
@@ -29,6 +26,7 @@ Data Analysis Interface
 
 New Features
 ############
+
 - IqtFit and ConvFit have a new option to edit the *_Results* workspace. This option allows the selection of two *_Result* 
   workspaces (one containing the results of a sequential fit for multiple spectra (1), and the other containing the results of a fit 
   for a single spectrum(2)). The algorithm :ref:`IndirectReplaceFitResult <algm-IndirectReplaceFitResult>` will replace the 
@@ -128,12 +126,32 @@ Bugfixes
   in order to avoid these large file sizes.
 - A bug where using a cropped calibration file (from a previous run) on the ISISEnergyTransfer interface would cause an 
   error has been fixed.
+- A bug where specifying a custom detector grouping for OSIRIS was not working has been fixed.
+- A bug caused by incorrect masked detectors during a reduction of an individual runs has been fixed. This could sometimes cause 
+  unexpected peaks in the output plots.
+
+.. figure:: ../../images/TOSCA_Individual_Runs_Bug.png
+  :class: screenshot
+  :align: center
+  :figwidth: 100%
+  :alt: The individual runs TOSCA bug before and after being fixed.
+
+- A bug caused by incorrect masked detectors during a reduction for a summed run has been fixed. This would cause the summed runs 
+  intensity to be higher than that of the individual runs with the same run numbers.
+
+.. figure:: ../../images/TOSCA_Summed_Run_Bug.png
+  :class: screenshot
+  :align: center
+  :figwidth: 100%
+  :alt: The summed run TOSCA bug before and after being fixed.
+
 
 Bayes Interface
 ---------------
 
 New Features
 ############
+
 - It is now possible to produce a contour plot from the output on the Stretch Tab.
 
 Improvements
@@ -161,7 +179,7 @@ Improvements
 ############
 
 - The Run button is now above the output options.
-- The Run, Plot and Save buttons are now disabled while running and plotting is taking place.
+- The Run, Plot, and Save buttons are now disabled while running and plotting is taking place.
 
 
 Diffraction Interface
@@ -171,7 +189,7 @@ Improvements
 ############
 
 - The Run button is now above the output options.
-- The Run, Plot and Save buttons are now disabled while running and plotting is taking place.
+- The Run, Plot, and Save buttons are now disabled while running and plotting is taking place.
 
 
 Tools Interface

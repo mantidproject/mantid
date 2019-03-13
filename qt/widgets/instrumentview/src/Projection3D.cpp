@@ -294,17 +294,19 @@ void Projection3D::componentSelected(size_t componentIndex) {
   }
 
   auto pos = componentInfo.position(componentIndex);
-
   auto compDir = pos - componentInfo.samplePosition();
-  compDir.normalize();
-  V3D up(0, 0, 1);
-  V3D x = up.cross_prod(compDir);
-  up = compDir.cross_prod(x);
   Quat rot;
-  InstrumentActor::BasisRotation(x, up, compDir, V3D(-1, 0, 0), V3D(0, 1, 0),
-                                 V3D(0, 0, -1), rot);
+  try {
+    compDir.normalize();
+    V3D up(0, 0, 1);
+    V3D x = up.cross_prod(compDir);
+    up = compDir.cross_prod(x);
+    InstrumentActor::BasisRotation(x, up, compDir, V3D(-1, 0, 0), V3D(0, 1, 0),
+                                   V3D(0, 0, -1), rot);
 
-  rot.rotate(pos);
+    rot.rotate(pos);
+  } catch (std::runtime_error &) {
+  }
   m_viewport.setTranslation(-pos.X(), -pos.Y());
   m_viewport.setRotation(rot);
 }
@@ -390,9 +392,12 @@ void Projection3D::initRotation(int x, int y) {
  * @param y :: The y screen coord of the mouse pointer.
  */
 void Projection3D::rotate(int x, int y) {
-  m_viewport.generateRotationTo(x, y);
-  m_viewport.initRotationFrom(x, y);
-  updateView(false);
+  try {
+    m_viewport.generateRotationTo(x, y);
+    m_viewport.initRotationFrom(x, y);
+    updateView(false);
+  } catch (std::runtime_error &) {
+  }
 }
 
 /**

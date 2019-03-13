@@ -14,7 +14,7 @@ from __future__ import (absolute_import, unicode_literals)
 # 3rdparty imports
 from mantidqt.plotting.figuretype import FigureType, figure_type
 from mantidqt.utils.qt import load_ui
-from qtpy.QtGui import QDoubleValidator
+from qtpy.QtGui import QDoubleValidator, QIcon
 from qtpy.QtWidgets import QDialog
 
 
@@ -34,6 +34,7 @@ class PropertiesEditorBase(QDialog):
         self.ui = load_ui(__file__, ui_file, baseinstance=self)
         self.ui.buttonBox.accepted.connect(self.on_ok)
         self.ui.buttonBox.rejected.connect(self.reject)
+        self.ui.setWindowIcon(QIcon(':/images/MantidIcon.ico'))
 
     def on_ok(self):
         try:

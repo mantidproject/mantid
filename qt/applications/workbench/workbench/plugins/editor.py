@@ -68,8 +68,19 @@ class MultiFileEditor(PluginWidget):
         self.editors.load_settings_from_config(config)
 
     def execute_current_async(self):
-        '''This is used by MainWindow to execute a file after opening it'''
+        """
+        Executes the selection in the currently active code editor.
+        This is used by MainWindow to execute a file after opening it.
+
+        """
         return self.editors.execute_current_async()
+
+    def execute_async(self):
+        """
+        Executes _everything_ in currently active code editor.
+        :return:
+        """
+        return self.editors.execute_async()
 
     def restore_session_tabs(self, session_tabs):
         self.open_files_in_new_tabs(session_tabs, startup=True)
@@ -115,7 +126,7 @@ class MultiFileEditor(PluginWidget):
         self.restore_session_tabs(prev_session_tabs)
 
     def writeSettings(self, settings):
-        settings.set(TAB_SETTINGS_KEY, self.tabs_open_on_closing)
+        settings.set(TAB_SETTINGS_KEY, set(self.tabs_open_on_closing))
 
     def register_plugin(self):
         self.main.add_dockwidget(self)
@@ -135,3 +146,6 @@ class MultiFileEditor(PluginWidget):
 
     def save_current_file(self):
         self.editors.save_current_file()
+
+    def save_current_file_as(self):
+        self.editors.save_current_file_as()
