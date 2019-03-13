@@ -229,7 +229,7 @@ class ISISIndirectDiffractionReductionTest(unittest.TestCase):
         workspace = output_group[0]
 
         reference = LoadNexus(Filename='OSIRIS_Diffspec_Diffraction_with_Vanadium.nxs')
-        self.assertTrue(CompareWorkspaces(reference, workspace)[0])
+        self.assertTrue(CompareWorkspaces(Workspace1=reference, Workspace2=workspace, Tolerance=0.001)[0])
 
     def test_that_a_reduction_with_a_manual_grouping_for_osiris_diffspec_produces_the_correct_output_workspace(self):
         CreateGroupingWorkspace(FixedGroupCount=2,
@@ -246,7 +246,7 @@ class ISISIndirectDiffractionReductionTest(unittest.TestCase):
         workspace = output_group[0]
 
         reference = LoadNexus(Filename='OSIRIS_Diffspec_Diffraction_with_Manual_Grouping.nxs')
-        self.assertTrue(CompareWorkspaces(reference, workspace)[0])
+        self.assertTrue(CompareWorkspaces(Workspace1=reference, Workspace2=workspace, Tolerance=0.001)[0])
 
     # ------------------------------------------ Vesuvio ----------------------------------------------
 
