@@ -165,6 +165,7 @@ class WidgetTest(GuiTest):
         widget = AlgorithmSelectorWidget()
         model = AlgorithmSelectorModel(None)
         top_level = []
+        
         widget._add_tree_items(top_level, model.get_algorithm_data()[1])
 
         self.assertEquals(top_level[0].text(0), "Data")
@@ -173,11 +174,8 @@ class WidgetTest(GuiTest):
         self.assertEquals(top_level[3].text(0), "Transform")
 
         second_level = top_level[1].takeChildren()
-
         self.assertEquals(second_level[0].text(0), "ComesFirst v.1")
         self.assertEquals(second_level[1].text(0), "GoesSecond v.1")
-
-
 
     def test_refresh(self):
         # Set a mock to return an empty descriptor list
