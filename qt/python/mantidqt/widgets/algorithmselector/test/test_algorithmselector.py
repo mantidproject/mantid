@@ -165,7 +165,7 @@ class WidgetTest(GuiTest):
         widget = AlgorithmSelectorWidget()
         model = AlgorithmSelectorModel(None)
         top_level = []
-        
+
         widget._add_tree_items(top_level, model.get_algorithm_data()[1])
 
         self.assertEquals(top_level[0].text(0), "Data")
