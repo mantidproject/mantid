@@ -1,3 +1,7 @@
+
+
+add_subdirectory(modest_image)
+
 ##
 ## mantid.dataobjects tests
 ##
