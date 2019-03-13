@@ -33,6 +33,7 @@ set(SRC_FILES
     src/ConvertToMDMinMaxLocal.cpp
     src/ConvertToMDParent.cpp
     src/ConvertToReflectometryQ.cpp
+    src/ConvertWANDSCDtoMDE.cpp
     src/CreateMD.cpp
     src/CreateMDHistoWorkspace.cpp
     src/CreateMDWorkspace.cpp
@@ -149,6 +150,7 @@ set(
   inc/MantidMDAlgorithms/ConvertToMDMinMaxLocal.h
   inc/MantidMDAlgorithms/ConvertToMDParent.h
   inc/MantidMDAlgorithms/ConvertToReflectometryQ.h
+  inc/MantidMDAlgorithms/ConvertWANDSCDtoMDE.h
   inc/MantidMDAlgorithms/CreateMD.h
   inc/MantidMDAlgorithms/CreateMDHistoWorkspace.h
   inc/MantidMDAlgorithms/CreateMDWorkspace.h
@@ -267,6 +269,7 @@ set(TEST_FILES
     ConvertToMDTest.h
     ConvertToQ3DdETest.h
     ConvertToReflectometryQTest.h
+    ConvertWANDSCDtoMDETest.h
     CreateMDHistoWorkspaceTest.h
     CreateMDTest.h
     CreateMDWorkspaceTest.h
