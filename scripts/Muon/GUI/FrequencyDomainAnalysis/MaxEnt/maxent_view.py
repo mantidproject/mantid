@@ -225,7 +225,6 @@ class MaxEntView(QtGui.QWidget):
 
         inputs["Npts"] = int(self.N_points.currentText())
         inputs["MaxField"] = float(self.max_field.text())
-        inputs["FixPhases"] = self.fix_phase_box.checkState()
         inputs["FitDeadTime"] = self.dead_box.checkState()
         inputs["DoublePulse"] = self.double_pulse_box.checkState()
         inputs["OuterIterations"] = int(self.inner_loop.text())
@@ -240,6 +239,7 @@ class MaxEntView(QtGui.QWidget):
         return inputs
 
     def addPhaseTable(self, inputs):
+        inputs["FixPhases"] = self.fix_phase_box.checkState()
         if self.usePhases():
             inputs['InputPhaseTable'] = "PhaseTable"
         else:
