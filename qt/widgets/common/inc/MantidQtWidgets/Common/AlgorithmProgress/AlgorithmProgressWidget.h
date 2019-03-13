@@ -13,7 +13,6 @@
 #include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressDialogWidget.h"
 #include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressPresenter.h"
 #include "MantidQtWidgets/Common/DllOption.h"
-#include "MantidQtWidgets/Common/Message.h"
 
 #include <QHBoxLayout>
 #include <QPointer>
@@ -39,7 +38,7 @@ class EXPORT_OPT_MANTIDQT_COMMON AlgorithmProgressWidget : public QWidget {
 public:
   AlgorithmProgressWidget(QWidget *parent = nullptr);
 
-  constexpr QProgressBar *progressBar() const;
+  QProgressBar *progressBar() const;
 
   /// Setup the view for whenever an algorithm has started.
   void algorithmStarted();

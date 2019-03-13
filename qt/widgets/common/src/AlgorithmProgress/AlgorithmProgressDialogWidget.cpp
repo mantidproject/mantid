@@ -25,7 +25,6 @@ AlgorithmProgressDialogWidget::AlgorithmProgressDialogWidget(
       m_presenter{std::make_unique<AlgorithmProgressDialogPresenter>(
           parent, this, model)},
       m_tree{new QTreeWidget(this)} {
-  setAttribute(Qt::WA_DeleteOnClose);
 
   m_tree->setColumnCount(2);
   m_tree->setSelectionMode(QTreeWidget::NoSelection);
@@ -39,9 +38,7 @@ AlgorithmProgressDialogWidget::AlgorithmProgressDialogWidget(
   const auto button = new QPushButton("Close", this);
 
   connect(button, &QPushButton::clicked, this,
-          &AlgorithmProgressDialogPresenter::close);
-  connect(this, &AlgorithmProgressDialogWidget::close, m_presenter.get(),
-          &AlgorithmProgressDialogPresenter::close);
+          &AlgorithmProgressDialogWidget::close);
 
   buttonLayout->addStretch();
   buttonLayout->addWidget(button);
@@ -77,6 +74,13 @@ AlgorithmProgressDialogWidget::addAlgorithm(
   }
 
   return std::make_pair(item, progressBar);
+}
+
+void AlgorithmProgressDialogWidget::closeEvent(QCloseEvent *event) {
+  // stops the any incoming signals for widget making/updating/deleting
+  // the window is closing so we don't care about processing them
+  m_presenter->blockSignals(true);
+  QWidget::closeEvent(event);
 }
 
 } // namespace MantidWidgets

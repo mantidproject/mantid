@@ -62,12 +62,5 @@ void AlgorithmProgressDialogPresenter::algorithmEndedSlot(
   }
 }
 
-void AlgorithmProgressDialogPresenter::closeEvent(QCloseEvent *event) {
-  // stops the any incoming signals for widget making/updating/deleting
-  // the window is closing so we don't care about processing them
-  this->blockSignals(true);
-  AlgorithmProgressPresenterBase::closeEvent(event);
-}
-
 } // namespace MantidWidgets
 } // namespace MantidQt

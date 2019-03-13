@@ -32,6 +32,9 @@ public:
   std::pair<QTreeWidgetItem *, QProgressBar *>
   addAlgorithm(std::string, std::vector<Mantid::Kernel::Property *>);
 
+protected:
+  void closeEvent(QCloseEvent *event) override;
+
 private:
   std::unique_ptr<AlgorithmProgressDialogPresenter> m_presenter;
   /// Owned by this dialog, will be deleted on close

@@ -42,7 +42,7 @@ public:
                              QString) override;
   void algorithmEndedSlot(Mantid::API::AlgorithmID) override;
 
-  constexpr AlgorithmProgressModel &model() { return m_model; }
+  AlgorithmProgressModel &model() { return m_model; }
 
 private:
   /// The model which observes events happening to the algorithms

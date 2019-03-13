@@ -46,13 +46,17 @@ void AlgorithmProgressWidget::showDetailsDialog() {
   } else if (!m_details) {
     // If the dialog does not exist we create it. The dialog has the attribute
     // DeleteOnClose so it will delete itself when the user closes it
-    const auto parent = dynamic_cast<QWidget *>(this->parent());
+    const auto parent = this->parentWidget();
     m_details = new AlgorithmProgressDialogWidget(parent, m_presenter->model());
+    // the widget will be deleted when the closeEvent triggers, the
+    // QPointer that is storing it will automatically set it to nullptr
+    // when the widget deletes itself, so there will be no dangling pointer
+    m_details->setAttribute(Qt::WA_DeleteOnClose);
     m_details->show();
   }
 }
 
-constexpr QProgressBar *AlgorithmProgressWidget::progressBar() const {
+QProgressBar *AlgorithmProgressWidget::progressBar() const {
   return m_progressBar;
 }
 } // namespace MantidWidgets

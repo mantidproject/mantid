@@ -9,7 +9,7 @@
 
 #include "MantidAPI/Algorithm.h"
 
-#include <QWidget>
+#include <QObject>
 
 #include <string>
 
@@ -31,10 +31,10 @@ class QProgressBar;
 namespace MantidQt {
 namespace MantidWidgets {
 class ProgressObserverData;
-class AlgorithmProgressPresenterBase : public QWidget {
+class AlgorithmProgressPresenterBase : public QObject {
   Q_OBJECT
 public:
-  AlgorithmProgressPresenterBase(QWidget *parent);
+  AlgorithmProgressPresenterBase(QObject *parent);
 
   /// Signals to the presenters that an algorithm has started.
   void algorithmStarted(Mantid::API::AlgorithmID);

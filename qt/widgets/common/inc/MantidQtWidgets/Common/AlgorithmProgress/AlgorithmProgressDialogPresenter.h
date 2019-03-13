@@ -39,9 +39,6 @@ public:
                              QString) override;
   void algorithmEndedSlot(Mantid::API::AlgorithmID) override;
 
-protected:
-  void closeEvent(QCloseEvent *event) override;
-
 private:
   AlgorithmProgressDialogWidget *m_view;
   /// Reference to the model of the main window progress bar
