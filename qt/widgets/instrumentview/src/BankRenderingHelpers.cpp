@@ -167,10 +167,7 @@ void setBankNormal(const V3D &pos1, const V3D &pos2, const V3D &basePos) {
   auto vec1 = pos1 - basePos;
   auto vec2 = pos2 - basePos;
   auto normal = vec1.cross_prod(vec2);
-  try {
-    normal.normalize();
-  } catch (std::runtime_error &) {
-  }
+  normal.normalize();
   glNormal3f(static_cast<GLfloat>(normal.X()), static_cast<GLfloat>(normal.Y()),
              static_cast<GLfloat>(normal.Z()));
 }
@@ -219,7 +216,11 @@ void render2DTexture(const Corners &corners, size_t nX, size_t nY,
   glBegin(GL_QUADS);
 
   // Set the bank normal to facilitate lighting effects
-  setBankNormal(corners.bottomRight(), corners.topLeft(), basePos);
+  try {
+    setBankNormal(corners.bottomRight(), corners.topLeft(), basePos);
+  } catch (std::runtime_error &) {
+    g_log.warning("Cannot set the bank normal to facilitate lighting effects.");
+  }
 
   glTexCoord2f(0.0, 0.0);
   addVertex(corners.bottomLeft() - basePos + bottomLeftOffset);
