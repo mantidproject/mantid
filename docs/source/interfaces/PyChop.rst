@@ -163,6 +163,38 @@ and :math:`E_f` are the incident and scattered neutron energies.
 
 The flux is obtained from lookup tables of measured (white-beam) flux on each instrument.
 
+
+Sample contribution
+-------------------
+
+Although the contribution of a sample to the resolution of direct-geometry chopper spectrometers
+is usually negligible,
+it is currently included by calculating of the variance of the time-of-flight due to the size
+of the sample.
+So far only two shapes are supported: plate and thin annulus.
+The broadening caused by a plate sample is calculated as proportional
+to :math:`\frac{1}{12} w^2`, where :math:`w` is the width of the plate.
+The factor :math:`\frac{1}{12}` comes from the variance of a uniform distribution
+
+.. math:: \int^{\frac{1}{2}}_{-\frac{1}{2}} x^2 dx = \frac{1}{12}
+
+.. figure:: /images/Pychop-annulus-shape.png
+   :alt: sample-annulus-variation.png
+   :align: right
+   :width: 300
+
+For a thin annulus, the variation is proportional to its diameter.
+The fractional factor is calculated as the following variance
+
+.. math:: \frac{ \int^{\frac{1}{2}}_{-\frac{1}{2}} x^2 \rho(x) dx } {\int \rho(x) dx} 
+	  
+Here :math:`x= r \cos\theta = \frac{1}{2} \cos\theta`.
+:math:`\rho(x)` is the (unnormalized) distribution function,
+which is proportional :math:`\frac{1}{\sin\theta}`.
+So the integration evaluates to
+
+.. math:: \frac{ \int_{0}^{\pi} x^2 d\theta } {\int d\theta} = \frac{1}{8}
+
 References
 ----------
 
