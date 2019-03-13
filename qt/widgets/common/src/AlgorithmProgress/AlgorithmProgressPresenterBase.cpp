@@ -25,13 +25,11 @@ AlgorithmProgressPresenterBase::AlgorithmProgressPresenterBase(QObject *parent)
 
 void AlgorithmProgressPresenterBase::algorithmStarted(
     Mantid::API::AlgorithmID alg) {
-  // all the parameters are copied into the slot
   emit algorithmStartedSignal(alg);
 }
 
 void AlgorithmProgressPresenterBase::algorithmEnded(
     Mantid::API::AlgorithmID alg) {
-  // all the parameters are copied into the slot
   emit algorithmEndedSignal(alg);
 }
 
