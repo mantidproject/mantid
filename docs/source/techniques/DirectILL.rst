@@ -28,7 +28,7 @@ There are seven workflow algorithms supporting data reduction at ILL's time-of-f
     Applies absorption corrections and subtracts an empty container measurement.
 
 :ref:`algm-DirectILLTubeBackground`
-    Calculates a per-tube backgrounds for position sensitive tubes such as found in IN5.
+    Calculates a per-tube backgrounds for position sensitive tubes such as those found in IN5.
 
 The algorithms can be used as flexible building blocks in Python scripts. Not all of them need to be necessarily used in a reduction: the simplest script could call :ref:`algm-DirectILLCollectData` and :ref:`algm-DirectILLReduction` only.
 
@@ -112,7 +112,7 @@ Output:
 
     S(Q,W): Q range: 0.0...9.18A; W range -96.3...7.62meV
 
-The basic reduction for IN5 differs slightly with regards to the diagnostics step. In this case, the "raw" workspace is not needed, and it is not necessary to pass the EPP workspace to :ref:`algm-DirectILLDiagnostics`:
+The basic reduction for IN5 and PANTHER differs slightly with regards to the diagnostics step. In this case, the "raw" workspace is not needed, and it is not necessary to pass the EPP workspace to :ref:`algm-DirectILLDiagnostics`:
 
 .. code-block:: python
 
@@ -288,9 +288,9 @@ The above workflow would translate to this kind of Python script for IN4 and IN6
         EPPWorkspace='vanadium-epps'
     )
     DirectILLDiagnostics(
-        InputWorkspace='vanadium-raw',  # For IN5, 'vanadium' could be used
+        InputWorkspace='vanadium-raw',  # For IN5/PANTHER, 'vanadium' could be used
         OutputWorkspace='diagnostics',
-        EPPWorkspace='vanadium-epps',  # Can be omitted for IN5
+        EPPWorkspace='vanadium-epps',  # Can be omitted for IN5/PANTHER
     )
     # Sample
     DirectILLCollectData(
@@ -423,7 +423,7 @@ A corresponding Python script follows.
         Run='ILL/IN4/085801-085802.nxs',
         OutputWorkspace='vanadium',
         OutputEPPWorkspace='vanadium-epps',
-        OutputRawWorkspace='vanadium-raw'  # Can be omitted for IN5
+        OutputRawWorkspace='vanadium-raw'  # Can be omitted for IN5/PANTHER
     )
     DirectILLIntegrateVanadium(
         InputWorkspace='vanadium',
@@ -431,9 +431,9 @@ A corresponding Python script follows.
         EPPWorkspace='vanadium-epps'
     )
     DirectILLDiagnostics(
-        InputWorkspace='vanadium-raw',  # IN5 can use 'vanadium'
+        InputWorkspace='vanadium-raw',  # IN5/PANTHER can use 'vanadium'
         OutputWorkspace='diagnostics',
-        EPPWorkspace='vanadium-epps',  # Can be omitted for IN5
+        EPPWorkspace='vanadium-epps',  # Can be omitted for IN5/PANTHER
     )
     # Sample
     DirectILLCollectData(
@@ -550,12 +550,12 @@ Instrument specific defaults and recommendations
 Elastic peak positions
 ----------------------
 
-The intensities of individual pixels on IN5 are very low. This makes the fitting procedure employed by :ref:`algm-FindEPP` to work unreliably or fail altogether. Because of this, :ref:`algm-DirectILLCollectData` will use :ref:`algm-CreateEPP` instead by default for IN5. :ref:`algm-CreateEPP` produces an artificial EPP workspace based on the instrument geometry. This should be accurate enough for vanadium integration and diagnostics.
+The intensities of individual pixels on position sensitive detectors are very low. This makes the fitting procedure employed by :ref:`algm-FindEPP` to work unreliably or fail altogether. Because of this, :ref:`algm-DirectILLCollectData` will use :ref:`algm-CreateEPP` instead by default for IN5 and PANTHER. :ref:`algm-CreateEPP` produces an artificial EPP workspace based on the instrument geometry. This should be accurate enough for vanadium integration and diagnostics.
 
 Diagnostics
 -----------
 
-The elastic peak diagnostics might be usable to mask the beam stop of IN5. The background diagnostics, on the other hand, are turned off by default as it makes no sense to mask individual pixels based on them.
+The elastic peak and background diagnostics are turned off by default for IN5 and PANTHER as it makes no sense to mask individual pixels based on them.
 
 Memory management
 -----------------
@@ -592,7 +592,7 @@ Lets put it all together into a complex Python script. The script below reduces 
         Run='ILL/IN4/085801-085802.nxs',
         OutputWorkspace='vanadium',
         OutputEPPWorkspace='vanadium-epps',
-        OutputRawWorkspace='vanadium-raw'  # Can be omitted for IN5
+        OutputRawWorkspace='vanadium-raw'  # Can be omitted for IN5/PANTHER
     )
     DirectILLIntegrateVanadium(
         InputWorkspace='vanadium',
@@ -600,9 +600,9 @@ Lets put it all together into a complex Python script. The script below reduces 
         EPPWorkspace='vanadium-epps'
     )
     DirectILLDiagnostics(
-        InputWorkspace='vanadium-raw',  # IN5 can use 'vanadium'
+        InputWorkspace='vanadium-raw',  # IN5/PANTHER can use 'vanadium'
         OutputWorkspace='diagnostics',
-        EPPWorkspace='vanadium-epps',  # Can be omitted for IN5
+        EPPWorkspace='vanadium-epps',  # Can be omitted for IN5/PANTHER
     )
     # Samples
     DirectILLCollectData(
