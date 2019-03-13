@@ -1,3 +1,4 @@
+# v0.2 obtained on March 12, 2019
 """
 Modification of Chris Beaumont's mpl-modest-image package to allow the use of
 set_extent.
