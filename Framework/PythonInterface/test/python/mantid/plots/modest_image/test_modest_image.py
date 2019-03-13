@@ -9,6 +9,11 @@ import matplotlib.image as mi
 import numpy as np
 
 from mantid.plots.modest_image import ModestImage
+run_parameterized_tests = True
+try:
+    from parameterized import parameterized
+except:
+    run_parameterized_tests = False
 
 x, y = np.mgrid[0:300, 0:300]
 _data = np.sin(x / 10.) * np.cos(y / 30.)
@@ -45,7 +50,7 @@ def init(img_cls, data, origin='upper', extent=None):
     return artist
 
 
-def check(label, modest, axes, thresh=0):
+def check(label, modest, axes, thresh=2.e-5):
     """ Assert that images are identical, else save and fail """
     assert modest.figure is not axes.figure
     assert modest.figure is not axes.figure
@@ -145,22 +150,22 @@ class ModestImageTest(unittest.TestCase):
                     'bessel', 'mitchell', 'sinc', 'lanczos',
                     'none')
 
+    if run_parameterized_tests:
+        @parameterized.expand(INTRP_METHODS)
+        def test_interpolate(self, method):
+            """ change interpolation """
+            data = default_data()
+            modest = init(ModestImage, data)
+            axim = init(mi.AxesImage, data)
 
-    #@pytest.mark.parametrize(('method'), INTRP_METHODS)
-    #def test_interpolate(method):
-    #    """ change interpolation """
-    #    data = default_data()
-    #    modest = init(ModestImage, data)
-    #    axim = init(mi.AxesImage, data)
-
-    #    lohi = 100, 150
-    #    modest.axes.set_xlim(lohi)
-    #    axim.axes.set_xlim(lohi)
-    #    modest.axes.set_ylim(lohi)
-    #    axim.axes.set_ylim(lohi)
-    #    modest.set_interpolation(method)
-    #    axim.set_interpolation(method)
-    #    check('interp_%s' % method, modest.axes, axim.axes)
+            lohi = 100, 150
+            modest.axes.set_xlim(lohi)
+            axim.axes.set_xlim(lohi)
+            modest.axes.set_ylim(lohi)
+            axim.axes.set_ylim(lohi)
+            modest.set_interpolation(method)
+            axim.set_interpolation(method)
+            check('interp_%s' % method, modest.axes, axim.axes)
 
 
     def test_scale(self):
@@ -237,48 +242,48 @@ class ModestImageTest(unittest.TestCase):
                                        ['', 'x', 'y', 'xy'])
 
 
-    #@pytest.mark.parametrize(('origin', 'extent', 'flip'), EXTENT_OPTIONS)
-    #def test_extent(origin, extent, flip):
+    if run_parameterized_tests:
+        @parameterized.expand(EXTENT_OPTIONS)
+        def test_extent(self, origin, extent, flip):
 
-    #    data = default_data()
+            data = default_data()
 
-        # Use extent= keyword for imshow
+            # Use extent= keyword for imshow
 
-    #    modest = init(ModestImage, data, origin=origin, extent=extent)
-    #    axim = init(mi.AxesImage, data, origin=origin, extent=extent)
+            modest = init(ModestImage, data, origin=origin, extent=extent)
+            axim = init(mi.AxesImage, data, origin=origin, extent=extent)
 
-    #    if 'x' in flip:
-    #        axim.axes.invert_xaxis()
-    #        modest.axes.invert_xaxis()
-    #    if 'y' in flip:
-    #        axim.axes.invert_yaxis()
-    #        modest.axes.invert_yaxis()
+            if 'x' in flip:
+                axim.axes.invert_xaxis()
+                modest.axes.invert_xaxis()
+            if 'y' in flip:
+                axim.axes.invert_yaxis()
+                modest.axes.invert_yaxis()
 
-    #    check('extent1_{0}_{1}_{2}'.format(origin, extent is not None, flip),
-    #          modest.axes, axim.axes, thresh=0.0)
+            check('extent1_{0}_{1}_{2}'.format(origin, extent is not None, flip),
+                  modest.axes, axim.axes, thresh=0.0)
 
-        # Try using set_extent
+            # Try using set_extent
 
-    #    modest = init(ModestImage, data, origin=origin)
-    #    axim = init(mi.AxesImage, data, origin=origin)
+            modest = init(ModestImage, data, origin=origin)
+            axim = init(mi.AxesImage, data, origin=origin)
 
-    #    if extent is not None:
-    #        modest.axes.set_autoscale_on(True)
-    #        axim.axes.set_autoscale_on(True)
+            if extent is not None:
+                modest.axes.set_autoscale_on(True)
+                axim.axes.set_autoscale_on(True)
+            if 'x' in flip:
+                axim.axes.invert_xaxis()
+                modest.axes.invert_xaxis()
+            if 'y' in flip:
+                axim.axes.invert_yaxis()
+                modest.axes.invert_yaxis()
 
-    #    if 'x' in flip:
-    #        axim.axes.invert_xaxis()
-    #        modest.axes.invert_xaxis()
-    #    if 'y' in flip:
-    #        axim.axes.invert_yaxis()
-    #        modest.axes.invert_yaxis()
+            if extent is not None:
+                modest.set_extent(extent)
+                axim.set_extent(extent)
 
-    #    if extent is not None:
-    #        modest.set_extent(extent)
-    #        axim.set_extent(extent)
-
-    #    check('extent2_{0}_{1}_{2}'.format(origin, extent is not None, flip),
-    #          modest.axes, axim.axes, thresh=0.0)
+            check('extent2_{0}_{1}_{2}'.format(origin, extent is not None, flip),
+                  modest.axes, axim.axes, thresh=0.0)
 
 if __name__ == '__main__':
     unittest.main()

@@ -7,10 +7,10 @@ import matplotlib.image as mi
 
 import numpy as np
 
-from ..modest_image import ModestImage
+from mantid.plots.modest_image import ModestImage
 
 
-x, y = np.mgrid[0:1000, 0:1000]
+x, y = np.mgrid[0:40000, 0:1000]
 data = np.sin(x / 10.) * np.cos(y / 30.)
 
 
