@@ -10,7 +10,7 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
-AlgorithmProgressPresenterBase::AlgorithmProgressPresenterBase(QObject*parent)
+AlgorithmProgressPresenterBase::AlgorithmProgressPresenterBase(QObject *parent)
     : QObject(parent) {
   const auto connection = Qt::QueuedConnection;
   connect(this, &AlgorithmProgressPresenterBase::algorithmStartedSignal, this,
