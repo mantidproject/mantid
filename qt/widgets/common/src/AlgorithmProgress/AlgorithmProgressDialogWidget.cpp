@@ -27,7 +27,7 @@ AlgorithmProgressDialogWidget::AlgorithmProgressDialogWidget(
       m_tree{new QTreeWidget(this)} {
   setAttribute(Qt::WA_DeleteOnClose);
 
-  m_tree->setColumnCount(3);
+  m_tree->setColumnCount(2);
   m_tree->setSelectionMode(QTreeWidget::NoSelection);
   m_tree->setColumnWidth(0, 220);
   m_tree->setHeaderLabels({"Algorithm", "Progress"});

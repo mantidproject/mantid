@@ -6,11 +6,12 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #ifndef ALGORITHMPROGRESSDIALOGWIDGET_H
 #define ALGORITHMPROGRESSDIALOGWIDGET_H
-#include <memory>
+
+#include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressDialogPresenter.h"
 
 #include <QDialog>
 
-#include "AlgorithmProgressDialogPresenter.h"
+#include <memory>
 
 class QProgressBar;
 
@@ -33,6 +34,7 @@ public:
 
 private:
   std::unique_ptr<AlgorithmProgressDialogPresenter> m_presenter;
+  /// Owned by this dialog, will be deleted on close
   QTreeWidget *m_tree;
 };
 

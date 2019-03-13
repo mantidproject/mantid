@@ -6,8 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #ifndef ALGORITHMPROGRESSPRESENTER_H
 #define ALGORITHMPROGRESSPRESENTER_H
-#include "AlgorithmProgressModel.h"
-#include "AlgorithmProgressPresenterBase.h"
+
+#include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressModel.h"
+#include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressPresenterBase.h"
+
 #include <QWidget>
 
 /**
