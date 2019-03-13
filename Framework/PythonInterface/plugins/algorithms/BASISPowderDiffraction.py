@@ -538,7 +538,7 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         RenameWorkspace(w, OutputWorkspace=w_name)
         self.setProperty(prop, w)
 
-    def _find_das_version(self, runs):
+    def _find_das_version(self):
         boundary_run = 90000  # from VDAS.v1900_2018 to VDAS.v2019_2100
         runs = self.getProperty('RunNumbers').value
         first_run = int(self._run_lists(runs)[0])
