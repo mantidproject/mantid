@@ -4,17 +4,13 @@
 Workbench Script Window
 =======================
 
-.. image:: ../images/Workbench/Editor/EditorWidget.png
-    :align: right
-    :height: 225
-    :width: 400
-
 The script window is another key part of the Workbench. The script window is
 used to write or load python scripts that integrate with the Mantid framework
 and operate on data loaded within the Workbench. The window contains a status
 bar, multiple tabs for scripts, run and abort buttons and an options menu.
 
 .. image:: ../images/Workbench/Editor/EditorWidgetDiagram.png
+    :scale: 80%
 
 Editor Tabbing
 ---------------
@@ -22,9 +18,9 @@ Editor Tabbing
 .. image:: ../images/Workbench/Editor/EditorWidgetTabOptions.png
 
 Click the **+** button to open a new tab, or if you wish to open an existing
-script in a new tab, go to "File" -> "Open Script" (or use the Ctrl+O keyboard
-shortcut). When opening the Workbench any script window tabs that were open
-last time it was closed will be restored.
+script in a new tab, go to "File" -> "Open Script" (or use the :code:`Ctrl+O`
+keyboard shortcut). When opening the Workbench any script window tabs that were
+open last time it was closed will be restored.
 
 Editor Options
 --------------
@@ -34,7 +30,10 @@ Editor Options
 Run and Abort
 ^^^^^^^^^^^^^
 There are buttons to run and abort the current script, or alternatively you can
-use the shortcut Ctrl+Return to run the script.
+use the shortcut :code:`Ctrl+Return` to run the script. If a section of a
+script is selected then only the selection will be run, if nothing is selected
+the whole script will be run. A shortcut to run the full script, regardless of
+selection, is :code:`Ctrl+Shift+Return`.
 
 Find and Replace
 ^^^^^^^^^^^^^^^^

@@ -5,6 +5,7 @@ Main window menus
 =================
 
 .. image:: ../images/Workbench/MainWindowMenu/MainWindowMenu.png
+    :align: right
 
 In Workbench's main window, you may notice a few options in the upper
 left hand corner. From here you can access drop down menus that give access to
@@ -15,6 +16,7 @@ File Menu
 ---------
 
 .. image:: ../images/Workbench/MainWindowMenu/FileDropDownMenu.png
+    :align: right
 
 From the File menu you have access to standard options such as load (Open) and
 save for your current :ref:`project <Project>` or scripts open in the
@@ -31,6 +33,7 @@ View Menu
 ---------
 
 .. image:: ../images/Workbench/MainWindowMenu/ViewDropDownMenu.png
+    :align: right
 
 From this menu, it is possible to access the various options to change what
 does and doesn't appear on Workbench. It is also possible to restore default

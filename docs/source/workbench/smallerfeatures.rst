@@ -22,14 +22,14 @@ own independent pages.
       again.
     * With the workbench comes a set of keyboard shortcuts:
 
-        =================== =======
-        Keyboard Shortcut   Purpose
-        =================== =======
-        Ctrl+O              Open Script
-        Ctrl+S              Save Script
-        Shift+F10           Reset to default layout
-        Ctrl+Enter          Run Script
-        Ctrl+Shift+Enter    Run All
-        Ctrl+F              Find/Replace
-        Ctrl+/              Comment/Uncomment selection
-        =================== =======
+      =================== =======
+      Keyboard Shortcut   Purpose
+      =================== =======
+      Ctrl+O              Open Script
+      Ctrl+S              Save Script
+      Shift+F10           Reset to default layout
+      Ctrl+Enter          Run Script
+      Ctrl+Shift+Enter    Run All
+      Ctrl+F              Find/Replace
+      Ctrl+/              Comment/Uncomment selection
+      =================== =======

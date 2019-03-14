@@ -4,17 +4,14 @@
 Plots Toolbox
 =============
 
-.. image:: ../images/Workbench/PlotToolbox/PlotsToolbox.png
-    :height: 400
-    :width: 300
-    :align: right
-
 This is a new concept in Mantid applications, the plots toolbox will encompass
 and display all currently open plots much like the workspace toolbox. It has
 options to hide, delete, or edit the name of each plot. All this can be done
 using the options buttons on top of the toolbox.
 
 .. image:: ../images/Workbench/PlotToolbox/PlotsToolboxDiagram.png
+    :align: right
+    :scale: 70%
 
 Plots Toolbox Options
 ---------------------

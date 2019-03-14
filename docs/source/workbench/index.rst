@@ -39,6 +39,7 @@ allow us to keep developing the Workbench long after MantidPlot is no longer ava
     * :ref:`WorkbenchWhatIsNew` Lists the new features in Workbench as opposed to MantidPlot.
 
 **Workbench Features**
+    * :ref:`WorkbenchMainWindowMenu` The new simplified menus in Workbench.
     * :ref:`WorkbenchWorkspaceToolbox` The area in which all workspaces currently loaded into Workbench can be accessed
       and edited from.
     * :ref:`WorkbenchAlgorithmToolbox` Here is all of the Algorithms availible to users to run on workspaces loaded into
@@ -47,7 +48,6 @@ allow us to keep developing the Workbench long after MantidPlot is no longer ava
       script editor.
     * :ref:`WorkbenchMessagesWindow` is effectively the results log from MantidPlot, all output from most sources goes
       here.
-    * :ref:`WorkbenchMainWindowMenu` The new simplified menus in Workbench.
     * :ref:`WorkbenchPlotsToolbox` A way of controlling all plots that are open in a easier and better way.
     * :ref:`WorkbenchIPythonConsole` A python interpreter console that when operated has access to the Mantid API
     * :ref:`WorkbenchPlotWindow` The new way that plots are created and manipulated in Workbench, includes plot options

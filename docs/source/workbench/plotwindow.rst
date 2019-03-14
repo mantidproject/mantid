@@ -5,6 +5,8 @@ Workbench Plotting
 ==================
 
 .. image:: ../images/Workbench/PlotWindow/PlotWindow.png
+    :align: right
+    :scale: 60%
 
 This is the window in which all plots will be shown. Within this window you can
 view, save, and edit your plots as well as fit functions to your plots using
@@ -25,6 +27,7 @@ Plot Window Context Menu
 ------------------------
 
 .. image:: ../images/Workbench/PlotWindow/PlotWindowContextMenu.png
+    :scale: 70%
 
 Right-clicking within your plot will open the plot context menu. From this menu
 you can set the axes' scales to linear or logarithmic.
@@ -36,14 +39,13 @@ Figure Options
 Selecting the settings icon in the plot window brings up the figure options
 window. There are two tabs within this window: axes options and curve options.
 
-.. image:: ../images/Workbench/PlotWindow/FigureOptionsPlotWindow.png
+.. image:: ../images/Workbench/PlotWindow/FigureOptionsPlotWindowJoined.png
+    :scale: 70%
 
 In the "Axes" tab you can change the figure's title, the axes limits and scale
 and change the axes labels. There is also the "(Re-)Generate automatic legend"
 tick box at the bottom, make sure this is ticked if you want to update your
 legend.
-
-.. image:: ../images/Workbench/PlotWindow/FigureOptionsCurvesPlotWindow.png
 
 In the "Curves" tab you can change the properties of curves within your figure.
 The drop down menu at the top gives a list of the curves present in the figure,
@@ -60,6 +62,7 @@ Fitting
 -------
 
 .. image:: ../images/Workbench/PlotWindow/FitPlotWindow.png
+    :scale: 60%
 
 The "Fit" option in the plot window toolbar activates the interactive fitting
 tool. From here you can add functions to fit to, choose the bounds to fit
