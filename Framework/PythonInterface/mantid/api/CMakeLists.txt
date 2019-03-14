@@ -106,6 +106,7 @@ set ( SRC_FILES
 )
 
 set ( INC_FILES
+  ${HEADER_DIR}/api/Algorithms/AlgorithmFactoryObserverAdapter.h
   ${HEADER_DIR}/api/Algorithms/AlgorithmObserverAdapter.h
   ${HEADER_DIR}/api/Algorithms/RunPythonScript.h
   ${HEADER_DIR}/api/FitFunctions/IFunctionAdapter.h
@@ -113,7 +114,6 @@ set ( INC_FILES
   ${HEADER_DIR}/api/FitFunctions/IPeakFunctionAdapter.h
   ${HEADER_DIR}/api/PythonAlgorithm/AlgorithmAdapter.h
   ${HEADER_DIR}/api/PythonAlgorithm/DataProcessorAdapter.h
-  %{HEADER_DIR}/api/AlgorithmFactoryObserverAdapter.h
   ${HEADER_DIR}/api/AnalysisDataServiceObserverAdapter.h
   ${HEADER_DIR}/api/BinaryOperations.h
   ${HEADER_DIR}/api/CloneMatrixWorkspace.h

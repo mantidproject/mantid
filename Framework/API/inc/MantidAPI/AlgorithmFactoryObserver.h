@@ -49,11 +49,11 @@ private:
   bool m_observingUpdate{false};
 
   void _updateHandle(
-      const Poco::AutoPtr<AlgorithmFactoryImpl::UpdateNotification> &pNf);
+      const AlgorithmFactoryUpdateNotification_ptr);
 
   /// Poco::NObserver for SubscribeNotification.
   Poco::NObserver<AlgorithmFactoryObserver,
-                  AlgorithmFactoryImpl::AlgorithmFactoryUpdateNotification>
+                  AlgorithmFactoryUpdateNotification>
       m_updateObserver;
 };
 

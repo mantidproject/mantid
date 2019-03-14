@@ -379,6 +379,7 @@ set ( TEST_FILES
 	#	IkedaCarpenterModeratorTest.h
 	ADSValidatorTest.h
 	AlgorithmFactoryTest.h
+	AlgorithmFactoryObserverTest.h
 	AlgorithmHasPropertyTest.h
 	AlgorithmHistoryTest.h
 	AlgorithmMPITest.h

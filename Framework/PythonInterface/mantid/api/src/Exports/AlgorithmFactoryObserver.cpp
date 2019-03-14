@@ -5,7 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/AlgorithmFactoryObserver.h"
-#include "MantidPythonInterface/api/AlgorithmFactoryObserverAdapter.h"
+#include "MantidPythonInterface/api/Algorithms/AlgorithmFactoryObserverAdapter.h"
 #include "MantidPythonInterface/kernel/GetPointer.h"
 
 #include <boost/python/bases.hpp>
@@ -21,4 +21,5 @@ void export_AlgorithmFactoryObserver() {
       "AlgorithmFactoryObserver",
       "Observes AlgorithmFactory notifications: all only")
       .def("observeUpdate", &AlgorithmFactoryObserverAdapter::observeUpdate,
-           (arg("self"), arg("on"));
+           (arg("self"), arg("on")));
+}
