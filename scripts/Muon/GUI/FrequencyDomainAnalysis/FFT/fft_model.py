@@ -159,7 +159,7 @@ class FFTModel(object):
         groups data into a single set
         """
         cropped_workspace = mantid.CropWorkspace(InputWorkspace=inputs['InputWorkspace'],
-                             XMin=inputs['FirstGoodData'], XMax=inputs['LastGoodData'], StoreInADS=False)
+                                                 XMin=inputs['FirstGoodData'], XMax=inputs['LastGoodData'], StoreInADS=False)
 
         self.alg = mantid.AlgorithmManager.create("PhaseQuad")
         self.alg.initialize()
