@@ -19,6 +19,12 @@ New Algorithms
 - :ref:`IndirectReplaceFitResult <algm-IndirectReplaceFitResult>` will replace the *_Result* fit data found in one workspace with the 
   single fit data provided within a second workspace.
 
+Improvements
+############
+
+- :ref:`BASISReduction <algm-BASISReduction>` user interface contains slightly different naming convention for selection of reflection and works for old and new DAS.
+
+
 :ref:`Release 4.0.0 <v4.0.0>`
 
 Data Analysis Interface
@@ -189,8 +195,14 @@ Improvements
 ############
 
 - The Run button is now above the output options.
-- The Run, Plot, and Save buttons are now disabled while running and plotting is taking place.
+- The Run, Plot and Save buttons are now disabled while running and plotting is taking place.
+- Any zeros within the vanadium file are replaced with a substitute value of 10% the minimum 
+  y value found within that file. This prevents infinity values being produced when dividing the 
+  input file by the vanadium file.
 
+Bugfixes
+########
+- An unexpected error when using manual grouping has been fixed.
 
 Tools Interface
 ---------------

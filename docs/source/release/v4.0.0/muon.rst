@@ -31,6 +31,7 @@ Improvements
 - Muon Analysis now includes number of event per frame and number of events per frame per detector in the run info box on the home tab.
 - Frequency Domain Analysis now lets the user select the phase table in MaxEnt mode.
 - CHRONUS now has a transverse and longitudanal default grouping table, the main field direction is read from the file to determine which to use.
+- MaxEnt now produces better warning messages for invalid properties.
 
 Bugfixes
 ########
@@ -41,6 +42,7 @@ Bugfixes
 - The `load current run` button now works for CHRONUS in muon analysis.
 - ALC interface now removes all of the fitting regions for the baseline modelling when the data changes.
 - ALC interface now produces a warning if the custom grouping is not valid.
+- Frequency Domain Analysis will ignore the fix phases option if phase table is not used.
 
 Algorithms
 ----------
@@ -57,10 +59,13 @@ New
 - :ref:`MuonPairingAsymmetry <algm-MuonPairingAsymmetry>` added to simplify new GUI backend. Applies a pairing asymmetry calculation between two detector groups from Muon data.
 - :ref:`MuonGroupingAsymmetry <algm-MuonGroupingAsymmetry>` added to simplify new GUI backend. Applies an estimate of the  group asymmetry to a particular detector grouping in Muon data.
 
+Improvements
+############
+- :ref:`MuonMaxent <algm-MuonMaxent>` has validation checks on its input.  
+
 Bugfixes
 ########
 
 - :ref:`EstimateMuonAsymmetryFromCounts <algm-EstimateMuonAsymmetryFromCounts>` had a bug that meant the first good bin was excluded from calculating the normalization.
-
 
 :ref:`Release 4.0.0 <v4.0.0>`
