@@ -30,6 +30,14 @@ def contains_non_ascending_range(strings, delimiter):
     return False
 
 
+def find_minimum_non_zero_y(workspace):
+    y_minimum = min(filter(lambda x: x > 0, workspace.readY(0)))
+    for idx in range(1, workspace.getNumberHistograms()):
+        y_spec_min = min(filter(lambda x: x > 0, workspace.readY(idx)))
+        y_minimum = y_spec_min if y_spec_min < y_minimum else y_minimum
+    return y_minimum
+
+
 class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
     _workspace_names = None
     _cal_file = None
@@ -48,6 +56,7 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
     _ipf_filename = None
     _sum_files = None
     _vanadium_ws = None
+    _replace_zeros_name = '_replace_zeros'
 
     # ------------------------------------------------------------------------------
 
@@ -257,10 +266,19 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
                                          WorkspaceToMatch=ws_name,
                                          OutputWorkspace=van_ws_name)
 
+                    replacement_value = 0.1*find_minimum_non_zero_y(van_ws)
+                    logger.information('Replacing zeros in {0} with {1}.'.format(van_ws_name, replacement_value))
+                    ReplaceSpecialValues(InputWorkspace=van_ws_name,
+                                         SmallNumberThreshold=0.0000001,
+                                         SmallNumberValue=replacement_value,
+                                         OutputWorkspace=self._replace_zeros_name)
+
                     Divide(LHSWorkspace=ws_name,
-                           RHSWorkspace=van_ws_name,
+                           RHSWorkspace=self._replace_zeros_name,
                            OutputWorkspace=ws_name,
                            AllowDifferentNumberSpectra=True)
+
+                    DeleteWorkspace(self._replace_zeros_name)
 
                 # Process monitor
                 if not unwrap_monitor(ws_name):

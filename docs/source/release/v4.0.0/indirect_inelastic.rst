@@ -189,8 +189,14 @@ Improvements
 ############
 
 - The Run button is now above the output options.
-- The Run, Plot, and Save buttons are now disabled while running and plotting is taking place.
+- The Run, Plot and Save buttons are now disabled while running and plotting is taking place.
+- Any zeros within the vanadium file are replaced with a substitute value of 10% the minimum 
+  y value found within that file. This prevents infinity values being produced when dividing the 
+  input file by the vanadium file.
 
+Bugfixes
+########
+- An unexpected error when using manual grouping has been fixed.
 
 Tools Interface
 ---------------
