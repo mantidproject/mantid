@@ -42,6 +42,7 @@ Bugfixes
 - The `load current run` button now works for CHRONUS in muon analysis.
 - ALC interface now removes all of the fitting regions for the baseline modelling when the data changes.
 - ALC interface now produces a warning if the custom grouping is not valid.
+- The Frequency Domain Analysis interface now crops the raw data by first and last good times before the calculation of the PhaseQuad workspace.
 
 Algorithms
 ----------
