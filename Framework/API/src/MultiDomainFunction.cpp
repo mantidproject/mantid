@@ -321,9 +321,10 @@ void MultiDomainFunction::setLocalAttribute(size_t i,
   } else {
     // value must be either an int or a list of ints: "a,b,c,..."
     list.toList();
-    for (const auto &k : list) {
-      indx.push_back(boost::lexical_cast<size_t>(k.name()));
-    }
+    std::transform(list.begin(), list.end(), std::back_inserter(indx),
+                   [](const auto &element) {
+                     return boost::lexical_cast<size_t>(element.name());
+                   });
   }
   setDomainIndices(i, indx);
 }

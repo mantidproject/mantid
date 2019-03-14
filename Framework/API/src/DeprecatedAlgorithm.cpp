@@ -56,7 +56,7 @@ void DeprecatedAlgorithm::deprecatedDate(const std::string &date) {
 }
 
 /// This merely prints the deprecation error for people to see.
-const std::string DeprecatedAlgorithm::deprecationMsg(const IAlgorithm *algo) {
+std::string DeprecatedAlgorithm::deprecationMsg(const IAlgorithm *algo) {
   std::stringstream msg;
   if (algo != nullptr)
     msg << algo->name() << " is ";
@@ -72,13 +72,14 @@ const std::string DeprecatedAlgorithm::deprecationMsg(const IAlgorithm *algo) {
     // sanity check
     if (!AlgorithmFactory::Instance().exists(this->m_replacementAlgorithm,
                                              this->m_replacementVersion)) {
-      std::ostringstream msg;
-      msg << "Invalid replacement algorithm '" + this->m_replacementAlgorithm +
-                 "'";
+      std::ostringstream invalidReplacementMsg;
+      invalidReplacementMsg << "Invalid replacement algorithm '" +
+                                   this->m_replacementAlgorithm + "'";
       if (this->m_replacementVersion > 0)
-        msg << " version " << this->m_replacementVersion << "\n";
-      msg << "Replacement algorithm not registered.";
-      g_log.warning(msg.str());
+        invalidReplacementMsg << " version " << this->m_replacementVersion
+                              << "\n";
+      invalidReplacementMsg << "Replacement algorithm not registered.";
+      g_log.warning(invalidReplacementMsg.str());
     }
 
     msg << ". Use " << this->m_replacementAlgorithm;

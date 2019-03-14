@@ -79,10 +79,8 @@ Indexing::SpectrumIndexSet IndexProperty::getIndices() const {
             std::vector<Indexing::GlobalSpectrumIndex>(m_value.begin(),
                                                        m_value.end()));
       case IndexType::SpectrumNum: {
-        std::vector<Indexing::SpectrumNumber> spectrumNumbers;
-        for (const auto index : m_value)
-          spectrumNumbers.push_back(static_cast<Indexing::SpectrumNumber>(
-              static_cast<int32_t>(index)));
+        std::vector<Indexing::SpectrumNumber> spectrumNumbers(m_value.cbegin(),
+                                                              m_value.cend());
         return indexInfo.makeIndexSet(spectrumNumbers);
       }
       }
@@ -109,10 +107,8 @@ Indexing::IndexInfo IndexProperty::getFilteredIndexInfo() const {
                                                        m_value.end()),
             indexInfo};
   case IndexType::SpectrumNum: {
-    std::vector<Indexing::SpectrumNumber> spectrumNumbers;
-    for (const auto index : m_value)
-      spectrumNumbers.push_back(
-          static_cast<Indexing::SpectrumNumber>(static_cast<int32_t>(index)));
+    std::vector<Indexing::SpectrumNumber> spectrumNumbers(m_value.cbegin(),
+                                                          m_value.cend());
     return {spectrumNumbers, indexInfo};
   }
   default:

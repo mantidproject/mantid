@@ -99,12 +99,11 @@ bool ParameterReference::isParameterOf(const IFunction *fun) const {
   if (fun == m_function) {
     return true;
   }
-  auto fLocal = m_function;
   size_t iLocal = m_index;
   auto cf = dynamic_cast<const CompositeFunction *>(m_function);
   while (cf) {
     size_t iFun = cf->functionIndex(iLocal);
-    fLocal = cf->getFunction(iFun).get();
+    const auto fLocal = cf->getFunction(iFun).get();
     if (fLocal == fun) {
       return true;
     }

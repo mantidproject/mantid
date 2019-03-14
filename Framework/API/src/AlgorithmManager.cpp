@@ -156,15 +156,20 @@ void AlgorithmManagerImpl::setMaxAlgorithms(int n) {
 /**
  * Returns a shared pointer by algorithm id
  * @param id :: The ID of the algorithm
- * @returns A shared pointer to the algorithm
+ * @returns A shared pointer to the algorithm or nullptr if not found
  */
 IAlgorithm_sptr AlgorithmManagerImpl::getAlgorithm(AlgorithmID id) const {
   std::lock_guard<std::mutex> _lock(this->m_managedMutex);
-  for (const auto &managed_alg : m_managed_algs) {
-    if ((*managed_alg).getAlgorithmID() == id)
-      return managed_alg;
+  const auto found =
+      std::find_if(m_managed_algs.cbegin(), m_managed_algs.cend(),
+                   [id](const auto &algorithm) {
+                     return algorithm->getAlgorithmID() == id;
+                   });
+  if (found == m_managed_algs.cend()) {
+    return IAlgorithm_sptr();
+  } else {
+    return *found;
   }
-  return IAlgorithm_sptr();
 }
 
 /**
@@ -218,13 +223,12 @@ std::vector<IAlgorithm_const_sptr> AlgorithmManagerImpl::runningInstancesOf(
     const std::string &algorithmName) const {
   std::vector<IAlgorithm_const_sptr> theRunningInstances;
   std::lock_guard<std::mutex> _lock(this->m_managedMutex);
-  for (const auto &currentAlgorithm : m_managed_algs) {
-    if (currentAlgorithm->name() == algorithmName &&
-        currentAlgorithm->isRunning()) {
-      theRunningInstances.push_back(currentAlgorithm);
-    }
-  }
-
+  std::copy_if(m_managed_algs.cbegin(), m_managed_algs.cend(),
+               std::back_inserter(theRunningInstances),
+               [&algorithmName](const auto &algorithm) {
+                 return algorithm->name() == algorithmName &&
+                        algorithm->isRunning();
+               });
   return theRunningInstances;
 }
 

@@ -188,12 +188,9 @@ bool ParameterTie::findParametersOf(const IFunction *fun) const {
   if (getLocalFunction() == fun) {
     return true;
   }
-  for (const auto &varPair : m_varMap) {
-    if (varPair.second.isParameterOf(fun)) {
-      return true;
-    }
-  }
-  return false;
+  return std::any_of(
+      m_varMap.cbegin(), m_varMap.cend(),
+      [fun](const auto &element) { return element.second.isParameterOf(fun); });
 }
 
 /**
@@ -206,9 +203,8 @@ bool ParameterTie::isConstant() const { return m_varMap.empty(); }
 std::vector<ParameterReference> ParameterTie::getRHSParameters() const {
   std::vector<ParameterReference> out;
   out.reserve(m_varMap.size());
-  for (auto &&varPair : m_varMap) {
-    out.emplace_back(varPair.second);
-  }
+  std::transform(m_varMap.cbegin(), m_varMap.cend(), std::back_inserter(out),
+                 [](const auto &element) { return element.second; });
   return out;
 }
 
