@@ -398,7 +398,7 @@ void CalMuonDetectorPhases::getGroupingFromInstrument(
   const auto instrument = ws->getInstrument();
   auto loader = Kernel::make_unique<API::GroupingLoader>(instrument);
 
-  if (instrument->getName() == "MUSR") {
+  if (instrument->getName() == "MUSR" || instrument->getName() == "CHRONUS") {
     // Two possibilities for grouping - use workspace log
     auto fieldDir = ws->run().getLogData("main_field_direction");
     if (fieldDir) {

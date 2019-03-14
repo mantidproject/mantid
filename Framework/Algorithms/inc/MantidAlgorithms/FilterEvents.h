@@ -122,7 +122,9 @@ private:
   void splitTimeSeriesLogs(
       const std::vector<Kernel::TimeSeriesProperty<int> *> &int_tsp_vector,
       const std::vector<Kernel::TimeSeriesProperty<double> *> &dbl_tsp_vector,
-      const std::vector<Kernel::TimeSeriesProperty<bool> *> &bool_tsp_vector);
+      const std::vector<Kernel::TimeSeriesProperty<bool> *> &bool_tsp_vector,
+      const std::vector<Kernel::TimeSeriesProperty<std::string> *>
+          &string_tsp_vector);
 
   /// get the names of all the time series properties in the input workspace's
   /// Run object
@@ -141,7 +143,9 @@ private:
   void copyNoneSplitLogs(
       std::vector<Kernel::TimeSeriesProperty<int> *> &int_tsp_name_vector,
       std::vector<Kernel::TimeSeriesProperty<double> *> &dbl_tsp_name_vector,
-      std::vector<Kernel::TimeSeriesProperty<bool> *> &bool_tsp_name_vector);
+      std::vector<Kernel::TimeSeriesProperty<bool> *> &bool_tsp_name_vector,
+      std::vector<Kernel::TimeSeriesProperty<std::string> *>
+          &string_tsp_vector);
 
   template <typename TYPE>
   void splitTimeSeriesProperty(

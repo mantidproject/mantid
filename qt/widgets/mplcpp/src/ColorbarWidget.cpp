@@ -205,7 +205,9 @@ void ColorbarWidget::setNthPower(double gamma) {
  */
 void ColorbarWidget::scaleMinimumEdited() {
   // The validator ensures the text is a double
-  setClim(m_ui.scaleMinEdit->text().toDouble(), boost::none);
+  const double value = m_ui.scaleMinEdit->text().toDouble();
+  emit minValueEdited(value);
+  setClim(value, boost::none);
 }
 
 /**
@@ -213,7 +215,9 @@ void ColorbarWidget::scaleMinimumEdited() {
  */
 void ColorbarWidget::scaleMaximumEdited() {
   // The validator ensures the text is a double
-  setClim(boost::none, m_ui.scaleMaxEdit->text().toDouble());
+  const double value = m_ui.scaleMaxEdit->text().toDouble();
+  emit maxValueEdited(value);
+  setClim(boost::none, value);
 }
 
 /**
@@ -233,7 +237,11 @@ void ColorbarWidget::scaleTypeSelectionChanged(int index) {
 /**
  * Called when the power exponent input has been edited
  */
-void ColorbarWidget::powerExponentEdited() { setScaleType(2); }
+void ColorbarWidget::powerExponentEdited() {
+  setScaleType(2);
+  // power edit has double validator so this should always be valid
+  emit nthPowerChanged(m_ui.powerEdit->text().toDouble());
+}
 
 // --------------------------- Private methods --------------------------------
 

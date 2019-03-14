@@ -499,4 +499,7 @@ General commands
 ``Resolution(sample_aperture_diameter=10.0)``
     Specifies that we want to q-resolution to be computed.
 
+``LoadNexusInstrumentXML(True)``
+    By default if the instrument definition is present in the NeXus file it is read. However one can pass ``LoadNexusInstrumentXML(False)`` to make sure the local IDF is read.
+
 .. categories:: Concepts

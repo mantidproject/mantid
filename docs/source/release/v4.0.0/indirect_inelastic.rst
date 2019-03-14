@@ -126,6 +126,25 @@ Bugfixes
   in order to avoid these large file sizes.
 - A bug where using a cropped calibration file (from a previous run) on the ISISEnergyTransfer interface would cause an 
   error has been fixed.
+- A bug where specifying a custom detector grouping for OSIRIS was not working has been fixed.
+- A bug caused by incorrect masked detectors during a reduction of an individual runs has been fixed. This could sometimes cause 
+  unexpected peaks in the output plots.
+
+.. figure:: ../../images/TOSCA_Individual_Runs_Bug.png
+  :class: screenshot
+  :align: center
+  :figwidth: 100%
+  :alt: The individual runs TOSCA bug before and after being fixed.
+
+- A bug caused by incorrect masked detectors during a reduction for a summed run has been fixed. This would cause the summed runs 
+  intensity to be higher than that of the individual runs with the same run numbers.
+
+.. figure:: ../../images/TOSCA_Summed_Run_Bug.png
+  :class: screenshot
+  :align: center
+  :figwidth: 100%
+  :alt: The summed run TOSCA bug before and after being fixed.
+
 
 Bayes Interface
 ---------------

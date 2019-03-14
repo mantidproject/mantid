@@ -70,7 +70,30 @@ public:
 private:
   /// Create an output workspace
   API::MatrixWorkspace_sptr
-  createOutputWorkspace(API::MatrixWorkspace_const_sptr, const size_t);
+  createOutputWorkspace(API::MatrixWorkspace_const_sptr, const size_t,
+                        const std::vector<double> &);
+
+  void bootstrap(API::MatrixWorkspace_const_sptr);
+  void calculate(API::MatrixWorkspace_const_sptr);
+  void finalize(API::MatrixWorkspace_const_sptr);
+
+  std::vector<std::vector<std::vector<double>>> m_intensities;
+  std::vector<std::vector<std::vector<double>>> m_errors;
+  std::vector<std::vector<std::vector<double>>> m_normalisation;
+  std::vector<double> m_qBinEdges;
+  size_t m_nQ;
+  size_t m_nLambda;
+  size_t m_nWedges;
+  size_t m_nSpec;
+  int m_nSubPixels;
+  double m_wedgeFullAngle;
+  double m_wedgeOffset;
+  double m_wedgeAngle;
+  double m_pixelSizeY;
+  double m_pixelSizeX;
+  bool m_asymmWedges;
+  bool m_errorWeighting;
+  bool m_correctGravity;
 
   /// Initialisation code
   void init() override;

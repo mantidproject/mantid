@@ -78,6 +78,8 @@ class TransformToIqt(PythonAlgorithm):
     def PyExec(self):
         self._setup()
 
+        self._check_analysers_and_reflection()
+
         self._calculate_parameters()
 
         if not self._dry_run:
@@ -232,18 +234,7 @@ class TransformToIqt(PythonAlgorithm):
         """
         Run TransformToIqt.
         """
-        from IndirectCommon import CheckHistZero, CheckHistSame, CheckAnalysersOrEFixed
-
-        try:
-            CheckAnalysersOrEFixed(self._sample, self._resolution)
-        except ValueError:
-            # A genuine error the shows that the two runs are incompatible
-            raise
-        except BaseException:
-            # Checking could not be performed due to incomplete or no
-            # instrument
-            logger.warning(
-                'Could not check for matching analyser and reflection')
+        from IndirectCommon import CheckHistZero, CheckHistSame
 
         # Process resolution data
         num_res_hist = CheckHistZero(self._resolution)[0]
@@ -271,6 +262,20 @@ class TransformToIqt(PythonAlgorithm):
         iqt.setYUnit('')
         iqt.setYUnitLabel('Intensity')
         return iqt
+
+    def _check_analysers_and_reflection(self):
+        from IndirectCommon import CheckAnalysersOrEFixed
+
+        try:
+            CheckAnalysersOrEFixed(self._sample, self._resolution)
+        except ValueError:
+            # A genuine error the shows that the two runs are incompatible
+            raise
+        except BaseException:
+            # Checking could not be performed due to incomplete or no
+            # instrument
+            logger.warning(
+                'Could not check for matching analyser and reflection')
 
 
 # Register algorithm with Mantid
