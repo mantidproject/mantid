@@ -21,6 +21,7 @@ class QtBoolPropertyManager;
 class QtStringPropertyManager;
 class QtEnumPropertyManager;
 class QtGroupPropertyManager;
+class ParameterPropertyManager;
 class QSettings;
 
 namespace Mantid {
@@ -45,6 +46,10 @@ class MANTIDQT_INDIRECT_DLL FunctionTemplateBrowser : public QWidget {
   Q_OBJECT
 public:
   FunctionTemplateBrowser(QWidget *parent = nullptr);
+  void init();
+
+protected slots:
+  virtual void intChanged(QtProperty *) {}
 
 private:
   void createBrowser();
@@ -57,6 +62,7 @@ protected:
   QtStringPropertyManager *m_stringManager;
   QtEnumPropertyManager *m_enumManager;
   QtGroupPropertyManager *m_groupManager;
+  ParameterPropertyManager *m_parameterManager;
 
   /// Qt property browser which displays properties
   QtTreePropertyBrowser *m_browser;

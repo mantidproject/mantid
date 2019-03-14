@@ -47,8 +47,15 @@ class MANTIDQT_INDIRECT_DLL IqtTemplateBrowser : public FunctionTemplateBrowser 
 public:
   IqtTemplateBrowser(QWidget *parent = nullptr);
 
+ signals:
+   void changedNumberOfExponentials(int n);
+
+protected slots:
+  void intChanged(QtProperty *) override;
+
 private:
   void createProperties() override;
+
 
   QtProperty *m_exponentialsGroup;
   QtProperty *m_numberOfExponentials;

@@ -50,19 +50,31 @@ namespace IDA {
  * Constructor
  * @param parent :: The parent widget.
  */
-  IqtTemplateBrowser::IqtTemplateBrowser(QWidget *parent)
+IqtTemplateBrowser::IqtTemplateBrowser(QWidget *parent)
     : FunctionTemplateBrowser(parent) {
 }
 
 void IqtTemplateBrowser::createProperties()
 {
+  QtProperty *paramProp = m_parameterManager->addProperty("MyParam");
+  m_parameterManager->setDecimals(paramProp, 6);
+
   // Exponentials
   m_numberOfExponentials = m_intManager->addProperty("Exponential");
+  m_intManager->setMinimum(m_numberOfExponentials, 0);
+  m_intManager->setMaximum(m_numberOfExponentials, 2);
   m_hasStretchExponential = m_boolManager->addProperty("Stretch Exponential");
   m_exponentialsGroup = m_groupManager->addProperty("Exponentials");
   m_exponentialsGroup->addSubProperty(m_numberOfExponentials);
   m_exponentialsGroup->addSubProperty(m_hasStretchExponential);
+  m_exponentialsGroup->addSubProperty(paramProp);
   m_browser->addProperty(m_exponentialsGroup);
+}
+
+void IqtTemplateBrowser::intChanged(QtProperty *prop) {
+  if (prop == m_numberOfExponentials) {
+    emit changedNumberOfExponentials(m_intManager->value(prop));
+  }
 }
 
 } // namespace IDA

@@ -45,7 +45,9 @@ IqtFit::IqtFit(QWidget *parent)
   setPlotView(m_uiForm->pvFitPlotView);
   setSpectrumSelectionView(m_uiForm->svSpectrumView);
   setOutputOptionsView(m_uiForm->ovOutputOptionsView);
-  m_uiForm->fitPropertyBrowser->setFunctionTemplateBrowser(new IqtTemplateBrowser);
+  auto templateBrowser = new IqtTemplateBrowser;
+//  templateBrowser->init();
+  m_uiForm->fitPropertyBrowser->setFunctionTemplateBrowser(templateBrowser);
   setFitPropertyBrowser(m_uiForm->fitPropertyBrowser);
 }
 

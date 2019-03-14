@@ -27,6 +27,7 @@
 #endif
 #include "MantidQtWidgets/Common/QtPropertyBrowser/ButtonEditorFactory.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/CompositeEditorFactory.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/DoubleDialogEditor.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/DoubleEditorFactory.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qteditorfactory.h"
 #if defined(__INTEL_COMPILER)
@@ -50,13 +51,8 @@ namespace IDA {
  * Constructor
  * @param parent :: The parent widget.
  */
-  FunctionTemplateBrowser::FunctionTemplateBrowser(QWidget *parent)
+FunctionTemplateBrowser::FunctionTemplateBrowser(QWidget *parent)
     : QWidget(parent), m_decimals(6) {
-  createBrowser();
-  createProperties();
-  QVBoxLayout *layout = new QVBoxLayout(this);
-  layout->addWidget(m_browser);
-  layout->setContentsMargins(0, 0, 0, 0);
 }
 
 void FunctionTemplateBrowser::createBrowser()
@@ -67,6 +63,7 @@ void FunctionTemplateBrowser::createBrowser()
   m_boolManager = new QtBoolPropertyManager(this);
   m_enumManager = new QtEnumPropertyManager(this);
   m_groupManager = new QtGroupPropertyManager(this);
+  m_parameterManager = new ParameterPropertyManager(this, true);
 
   // create editor factories
   QtSpinBoxFactory *spinBoxFactory = new QtSpinBoxFactory(this);
@@ -74,6 +71,7 @@ void FunctionTemplateBrowser::createBrowser()
   QtLineEditFactory *lineEditFactory = new QtLineEditFactory(this);
   QtCheckBoxFactory *checkBoxFactory = new QtCheckBoxFactory(this);
   QtEnumEditorFactory *comboBoxFactory = new QtEnumEditorFactory(this);
+  auto *doubleDialogFactory = new DoubleDialogEditorFactory(this, true);
 
   m_browser = new QtTreePropertyBrowser(nullptr, QStringList(), false);
   // assign factories to property managers
@@ -82,11 +80,20 @@ void FunctionTemplateBrowser::createBrowser()
   m_browser->setFactoryForManager(m_intManager, spinBoxFactory);
   m_browser->setFactoryForManager(m_boolManager, checkBoxFactory);
   m_browser->setFactoryForManager(m_enumManager, comboBoxFactory);
+  m_browser->setFactoryForManager(m_parameterManager, doubleDialogFactory);
 
-  //connect(m_enumManager, SIGNAL(propertyChanged(QtProperty *)), this,
-  //  SLOT(enumChanged(QtProperty *)));
-  //connect(m_doubleManager, SIGNAL(propertyChanged(QtProperty *)), this,
-  //  SLOT(doubleChanged(QtProperty *)));
+  connect(m_intManager, SIGNAL(propertyChanged(QtProperty *)), this,
+    SLOT(intChanged(QtProperty *)));
+
+}
+
+void FunctionTemplateBrowser::init()
+{
+  createBrowser();
+  createProperties();
+  QVBoxLayout *layout = new QVBoxLayout(this);
+  layout->addWidget(m_browser);
+  layout->setContentsMargins(0, 0, 0, 0);
 }
 
 } // namespace IDA

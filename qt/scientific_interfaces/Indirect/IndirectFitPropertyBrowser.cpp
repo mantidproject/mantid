@@ -80,7 +80,6 @@ void IndirectFitPropertyBrowser::init() {
   initFunctionBrowser();
   initFitOptionsBrowser();
 
-
   auto w = new QWidget(this);
   m_mainLayout = new QVBoxLayout(w);
   m_mainLayout->setContentsMargins(0, 0, 0, 0);
@@ -107,6 +106,7 @@ void IndirectFitPropertyBrowser::setFunctionTemplateBrowser(FunctionTemplateBrow
     throw std::logic_error("Template browser already set.");
   }
   m_templateBrowser = templateBrowser;
+  m_templateBrowser->init();
 }
 
 void IndirectFitPropertyBrowser::setFunction(const QString &funStr) {
