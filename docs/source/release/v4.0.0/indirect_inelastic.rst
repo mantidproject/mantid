@@ -19,6 +19,12 @@ New Algorithms
 - :ref:`IndirectReplaceFitResult <algm-IndirectReplaceFitResult>` will replace the *_Result* fit data found in one workspace with the 
   single fit data provided within a second workspace.
 
+Improvements
+############
+
+- :ref:`BASISReduction <algm-BASISReduction>` user interface contains slightly different naming convention for selection of reflection and works for old and new DAS.
+
+
 :ref:`Release 4.0.0 <v4.0.0>`
 
 Data Analysis Interface
