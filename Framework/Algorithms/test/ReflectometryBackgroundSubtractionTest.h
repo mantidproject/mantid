@@ -98,24 +98,6 @@ public:
     TS_ASSERT(alg->execute())
   }
 
-  void test_PerSpectraAverageSubtractBackgroundFalse() {
-    // test output of perSpectraAverage method when SubtractBackground is set to
-    // false Should output a single spectra workspace containing the background
-    // which is equal to 2.0
-    auto alg = setupAlgorithm();
-    alg->setProperty("InputWorkspace", m_multiDetectorWSWithPeak);
-    alg->setProperty("InputWorkspaceIndexSet", "0-2,4-6");
-    alg->setProperty("BackgroundCalculationMethod", "Per Detector Average");
-    alg->setProperty("SubtractBackground", false);
-    alg->execute();
-    MatrixWorkspace_sptr outputWS = alg->getProperty("OutputWorkspace");
-
-    const auto &output_counts = outputWS->counts(0);
-    for (auto itr = output_counts.begin(); itr != output_counts.end(); ++itr) {
-      TS_ASSERT_DELTA(2.0, *itr, 0.0001)
-    }
-  }
-
   void test_PolynomialOutput() {
     // test output of polynomial method
     // InputWorkspaceIndexSet set to spectra containing background
@@ -145,29 +127,6 @@ public:
     }
   }
 
-  void test_PolynomialSubtractBackgroundFalse() {
-    // test output of polynomial method
-    // InputWorkspaceIndexSet set to all spectra containing background
-    // output should be a workspace containing the background
-    // i.e. 5 histograms all with counts equal to 2.0
-    auto alg = setupAlgorithm();
-    alg->setProperty("InputWorkspace", m_multiDetectorWSWithPeak);
-    alg->setProperty("InputWorkspaceIndexSet", "0-2,4-6");
-    alg->setProperty("BackgroundCalculationMethod", "Polynomial");
-    alg->setProperty("DegreeOfPolynomial", "0");
-    alg->setProperty("SubtractBackground", false);
-    alg->execute();
-    MatrixWorkspace_sptr outputWS = alg->getProperty("OutputWorkspace");
-
-    for (size_t i = 0; i != outputWS->getNumberHistograms(); ++i) {
-      const auto &output_counts = outputWS->counts(i);
-      for (auto itr = output_counts.begin(); itr != output_counts.end();
-           ++itr) {
-        TS_ASSERT_DELTA(2.0, *itr, 0.0001)
-      }
-    }
-  }
-
   void test_PolynomialSingleSpectraInputError() {
     // test output of polynomial method returns an error when one spectra is
     // entered
@@ -176,7 +135,6 @@ public:
     alg->setProperty("InputWorkspaceIndexSet", "2");
     alg->setProperty("BackgroundCalculationMethod", "Polynomial");
     alg->setProperty("DegreeOfPolynomial", "0");
-    alg->setProperty("SubtractBackground", false);
     TS_ASSERT_THROWS_ANYTHING(alg->execute())
   }
 

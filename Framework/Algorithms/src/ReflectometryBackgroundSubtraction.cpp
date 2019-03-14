@@ -40,7 +40,7 @@ const std::string ReflectometryBackgroundSubtraction::summary() const {
 }
 
 /** Calculates the background by finding the average of the given spectra using the child algorithm GroupDetectors. 
-* Subtracts the background from the input workspace if SubtractBackground is true.
+*   The background is then subtracted from the input workspace.
 *
 * @param inputWS :: the input workspace
 * @param spectraList :: a vector containing all of the spectra in the background 
@@ -55,20 +55,18 @@ void ReflectometryBackgroundSubtraction::calculateAverageSpectrumBackground(
   alg->execute();
   API::MatrixWorkspace_sptr outputWS = alg->getProperty("OutputWorkspace");
 
-  bool subtract = getProperty("SubtractBackground");
-  if (subtract == true) {
-    auto subtract = createChildAlgorithm("Minus");
-    subtract->setProperty("LHSWorkspace", inputWS);
-    subtract->setProperty("RHSWorkspace", outputWS);
-    subtract->setProperty("AllowDifferentNumberSpectra", true);
-    subtract->execute();
-    outputWS = subtract->getProperty("OutputWorkspace");
-  }
+  auto subtract = createChildAlgorithm("Minus");
+  subtract->setProperty("LHSWorkspace", inputWS);
+  subtract->setProperty("RHSWorkspace", outputWS);
+  subtract->setProperty("AllowDifferentNumberSpectra", true);
+  subtract->execute();
+  outputWS = subtract->getProperty("OutputWorkspace");
+
 
   setProperty("OutputWorkspace", outputWS);
 }
 
-/** Returns the ranges of spectra in the given list 
+/** Returns the ranges of spectra in the given list.  
 *
 * @param spectraList :: a vector containing a list of spectra
 * @return a vector containing a list of ranges of the given spectraList.  
@@ -79,7 +77,7 @@ std::vector<double> ReflectometryBackgroundSubtraction::findSpectrumRanges(
   std::vector<double> spectrumRanges;
   spectrumRanges.push_back(spectraList[0]);
   auto prevSpec = spectrumRanges[0];
-  for (size_t index = 1; index < spectraList.size() - 1; ++index) {
+  for (size_t index = 0; index < spectraList.size() - 1; ++index) {
     auto spec = spectraList[index + 1];
     auto range = spec - prevSpec;
     // check if start of new range
@@ -94,7 +92,7 @@ std::vector<double> ReflectometryBackgroundSubtraction::findSpectrumRanges(
 }
 
 /** Calculates the background by fitting a polynomial to each TOF. This is done using the child algorithm CalculatePolynomialBackground. 
-* Subtracts the background from the input workspace if SubtractBackground is true.
+*   The background is then subtracted from the input workspace.
 *
 * @param inputWS :: the input workspace
 * @param spectrumRanges :: a vector containing the ranges of spectra containing the background
@@ -103,7 +101,7 @@ void ReflectometryBackgroundSubtraction::calculatePolynomialBackground(
     API::MatrixWorkspace_sptr inputWS, std::vector<double> spectrumRanges) {
 
   // if the input workspace is an event workspace it must be converted to a
-  // Matrix workspace as cannot transpose a event workspace
+  // Matrix workspace as cannot transpose an event workspace
 
   DataObjects::EventWorkspace_const_sptr eventW =
       boost::dynamic_pointer_cast<const DataObjects::EventWorkspace>(inputWS);
@@ -115,8 +113,8 @@ void ReflectometryBackgroundSubtraction::calculatePolynomialBackground(
     inputWS = convert->getProperty("OutputWorkspace");
   }
 
-  // CalculatePolynomialBackground requires the spectrum numbers in the x axis so transpose is used giving  
-  // the spectrum numbers in the horizontal axis and TOF channels in the vertical axis. 
+  // To use CalculatePolynomialBackground to fit a polynomial to each TOF we require the spectrum numbers in the x axis.
+  // So transpose is used to give spectrum numbers in the horizontal axis and TOF channels in the vertical axis. 
   auto transpose = createChildAlgorithm("Transpose");
   transpose->setProperty("InputWorkspace", inputWS);
   transpose->execute();
@@ -138,11 +136,8 @@ void ReflectometryBackgroundSubtraction::calculatePolynomialBackground(
   API::MatrixWorkspace_sptr outputWS =
       transpose->getProperty("OutputWorkspace");
 
-  // subtract the background from the input workspace
-  bool subtract = getProperty("SubtractBackground");
-  if (subtract == true) {
-    outputWS = minus(inputWS, outputWS);
-  }
+  outputWS = minus(inputWS, outputWS);
+
 
   setProperty("OutputWorkspace", outputWS);
 }
@@ -182,11 +177,6 @@ void ReflectometryBackgroundSubtraction::init() {
   setPropertySettings("CostFunction",
                       make_unique<EnabledWhenProperty>(
                           "BackgroundCalculationMethod", IS_EQUAL_TO, "Polynomial"));
-
-  declareProperty(make_unique<PropertyWithValue<bool>>("SubtractBackground",
-                                                       true, Direction::Input),
-                  "If true then the background is subtracted from the "
-                  "InputWorkspace before output");
 
   // Output workspace
   declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
