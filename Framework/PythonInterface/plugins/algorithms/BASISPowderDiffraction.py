@@ -24,7 +24,7 @@ from mantid.simpleapi import (DeleteWorkspace, LoadMask, LoadEventNexus,
                               Scale, Divide, Rebin, MedianDetectorTest,
                               SumSpectra, Integration, CreateWorkspace,
                               ScaleX, Plus)
-from mantid.kernel import (FloatArrayProperty, Direction)
+from mantid.kernel import (FloatArrayProperty, Direction, logger)
 debug_flag = False  # set to True to prevent erasing temporary workspaces
 
 
@@ -87,7 +87,7 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
     # Consider only events with these wavelengths
     _wavelength_bands = {'311': [3.07, 3.6], '111': [6.1, 6.6]}
     _diff_bank_numbers = list(range(5, 14))
-    _tzero_params = dict(gradient=11.967, intercept=-5.0)
+    _tzero = dict(gradient=11.967, intercept=-5.0)
 
     def __init__(self):
         DataProcessorAlgorithm.__init__(self)
@@ -293,7 +293,7 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         #
         _t_all_w = None
         for run in rl:
-            _t_w = self._load_single_run(self, run, '_t_w')
+            _t_w = self._load_single_run(run, '_t_w')
             if _t_all_w is None:
                 _t_all_w = CloneWorkspace(_t_w)
             else:
@@ -343,8 +343,8 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         """
         MaskDetectors(w, MaskedWorkspace=self._t_mask)
         _t_corr = ModeratorTzeroLinear(w,  # delayed emission from moderator
-                                       Gradient=self._tzero_params['gradient'],
-                                       Intercept=self._tzero_params['intercept'])
+                                       Gradient=self._tzero['gradient'],
+                                       Intercept=self._tzero['intercept'])
         # Correct old DAS shift of fast neutrons. See GitHub issue 23855
         if self._das_version == VDAS.v1900_2018:
             _t_corr = self.add_previous_pulse(_t_corr)
@@ -549,6 +549,7 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
             self._das_version = VDAS.v1900_2018
         else:
             self._das_version = VDAS.v2019_2100
+        logger.information('DAS version is ' + str(self._das_version))
 
     def _calculate_wavelength_band(self):
         """
