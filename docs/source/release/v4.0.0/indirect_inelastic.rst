@@ -90,7 +90,7 @@ Improvements
   the Load History checkbox.
 - It is now possible to undock the mini-plots on the MSDFit, IqtFit, ConvFit and F(Q)Fit interfaces.
 
-.. figure:: ../../images/Undock_Mini_Plots_Data_Analysis.png
+.. figure:: ../../images/Undock_Mini_Plots_Data_Analysis.PNG
   :class: screenshot
   :align: center
   :figwidth: 80%
@@ -159,7 +159,7 @@ Improvements
 - It is now possible to choose which spectrum to *Plot Output* for in the S(Q, w) tab.
 - An automatic contour plot of *rqw* is now displayed in the S(Q, w) tab when a sample is loaded.
 
-.. figure:: ../../images/Automatic_Contour_Plot_Sqw.png
+.. figure:: ../../images/Automatic_Contour_Plot_Sqw.PNG
   :class: screenshot
   :align: center
   :figwidth: 70%
