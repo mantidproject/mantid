@@ -8,7 +8,7 @@ Workbench
    :hidden:
    :glob:
 
-   algorithmlistwidget.rst
+   algorithmtoolbox.rst
    mainwindowmenu.rst
    messageswindow.rst
    plotstoolbox.rst
