@@ -123,6 +123,9 @@ workspace with TOF as the X axis.
 If the multi-period data with pulse times is captured `Multi-period data` should be used instead
 with the delta in time on every step of the X axis entered. 
 
+For testing purposes with regular time binning testing should be done using a .s0 file such as 299735.s08,
+multi-period data should instead use a run from 285643-285701 which are event workspaces.
+
 Fitting
 ^^^^^^^
 Fitting allows a user to plot the peaks from their focused nexus file obtained from 
