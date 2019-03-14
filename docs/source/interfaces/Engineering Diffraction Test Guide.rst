@@ -69,9 +69,6 @@ Negative Testing Ideas
 
 - Using files which aren't calibration files \- Mantid shouldn't crash
 
-- Using data from non calibration runs (i.e. any other run from that instrument) \- The calibration should stop
-
-
 .. _focus-Engineering_Diffraction_test-ref:
 
 Focus
@@ -108,6 +105,7 @@ Negative Testing Ideas
 - Using Cropped/Texture with bad inputs
 
 - Whilst the data is being focused only `Plot Data Representation` should be changeable 
+
 
 .. _preProcessing-Engineering_Diffraction_test-ref:
 
