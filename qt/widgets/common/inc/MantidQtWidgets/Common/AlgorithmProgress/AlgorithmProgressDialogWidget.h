@@ -7,8 +7,8 @@
 #ifndef ALGORITHMPROGRESSDIALOGWIDGET_H
 #define ALGORITHMPROGRESSDIALOGWIDGET_H
 
-#include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressDialogPresenter.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressDialogPresenter.h"
 
 #include <QDialog>
 #include <QPushButton>
@@ -49,16 +49,14 @@ public:
   AlgorithmProgressDialogWidgetCancelButton(Mantid::API::IAlgorithm_sptr alg,
                                             QWidget *parent = 0)
       : QPushButton(QString::fromStdString("Cancel"), parent), m_alg(alg) {
-        connect(this, SIGNAL(clicked()), this, SLOT(clickedWithAlgSlot()));
-      }
+    connect(this, SIGNAL(clicked()), this, SLOT(clickedWithAlgSlot()));
+  }
 
 signals:
-void clickedWithAlg(Mantid::API::IAlgorithm_sptr alg);
+  void clickedWithAlg(Mantid::API::IAlgorithm_sptr alg);
 
 private slots:
-void clickedWithAlgSlot(){
-  m_alg->cancel();
-}
+  void clickedWithAlgSlot() { m_alg->cancel(); }
 
 private:
   Mantid::API::IAlgorithm_sptr m_alg;
