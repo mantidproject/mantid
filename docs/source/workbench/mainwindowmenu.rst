@@ -6,32 +6,38 @@ Main window menus
 
 .. image:: ../images/Workbench/MainWindowMenu/MainWindowMenu.png
 
-In your main window for workbench, you may notice a few options in the upper left hand corner. From here you can access
-drop down menus which will facilitate options, to do things such as change the settings, save scripts, save projects,
-restore defaults for the window and more.
+In Workbench's main window, you may notice a few options in the upper
+left hand corner. From here you can access drop down menus that give access to
+options to do things such as change settings, save scripts and projects,
+change the layout and more.
 
 File Menu
 ---------
 
 .. image:: ../images/Workbench/MainWindowMenu/FileDropDownMenu.png
 
-From this menu, you will have access to the more standard options, such as save and load (Open) for the scripts in
-:ref:`WorkbenchScriptWindow` and :ref:`Project`. Also it is possible to access further options such as the settings
-and manager user directories dialogues. Alternatively to clicking the close button in the top right, the quit option
-here performs the exact same operation.
+From the File menu you have access to standard options such as load (Open) and
+save for your current :ref:`project <Project>` or scripts open in the
+:ref:`script window <WorkbenchScriptWindow>`. You can also access the Workbench
+settings, from which you can choose your facility and
+:ref:`instrument <Instrument>`. There are also options to manage your user
+directories or close the Workbench.
 
-The manage user directory dialogue, is useful for allowing search of the archive using the load algorithm and other
-parts of mantid that rely on the file finder.
+The manage user directory dialogue, is useful for allowing search of the
+archive using the load algorithm and other parts of mantid that rely on the
+file finder.
 
 View Menu
 ---------
 
 .. image:: ../images/Workbench/MainWindowMenu/ViewDropDownMenu.png
 
-From this menu, it is possible to access the various options to change what does and doesn't appear on Workbench. It is
-also possible to restore default positions of all parts of the workbench GUI back to their defaults.
+From this menu, it is possible to access the various options to change what
+does and doesn't appear on Workbench. It is also possible to restore default
+positions of all parts of the workbench GUI back to their defaults.
 
 Interfaces Menu
 ---------------
 
-From here you can access all of the :ref:`interfaces contents` availible to Mantid Workbench.
+From here you can access all of the :ref:`interfaces contents` available to
+Mantid Workbench.

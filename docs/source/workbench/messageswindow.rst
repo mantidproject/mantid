@@ -4,23 +4,19 @@
 Messages Window
 ===============
 
-All of the output from your scripts and algorithms run from interfaces or
-other places will be output here. This is alongside the ability change the
-logging level. The logging level has 5 different options to display the right
-level of detail to choose the correct amount of detail for your circumstances.
-
 .. image:: ../images/Workbench/MessageWindow/MessagesWidget.png
     :align: right
     :scale: 70%
 
-All output from running your scripts or Mantid algorithms is logged in
-this window. To display only the information most relevant to you, you are
-provided with 5 logging levels (in ascending order of priority):
+Output from all the scripts and algorithms you have run will be logged here,
+alongside any notices outputted by the Workbench. So only the information most
+relevant to you is displayed, you are provided with 5 logging levels (in
+ascending order of priority):
 
     - Debug:
-          Anything that may be useful to understand what the code has been
-          doing for debugging purposes. Mostly used by developer or users
-          reporting problems.
+          For debugging purposes. Anything that may be useful to understand
+          what Mantid's code has been doing. Mostly used by developers or by
+          users reporting issues.
     - Information:
           Useful information. Used by users who want more detail regarding
           Mantid's status.

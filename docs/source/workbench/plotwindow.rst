@@ -8,7 +8,7 @@ Workbench Plotting
 
 This is the window in which all plots will be shown. Within this window you can
 view, save, and edit your plots as well as fit functions to your plots using
-the fitting tool.
+the fitting interactive tool.
 
 Plotting in Workbench is carried out using Python's Matplotlib package.
 Matplotlib provides several advantages: it is a large library containing
@@ -17,7 +17,8 @@ documentation available and plenty of examples to work from. You can create a
 plot either using Matplotlib within your scripts or right-clicking a workspace
 and selecting to plot.
 
-For more help with plotting using Matplotlib with Mantid see :ref:`Introduction to Matplotlib in Mantid <plotting>`.
+For more help using Matplotlib within Mantid you can read the
+:ref:`Introduction to Matplotlib in Mantid <plotting>`.
 
 
 Plot Window Context Menu
@@ -47,12 +48,12 @@ legend.
 In the "Curves" tab you can change the properties of curves within your figure.
 The drop down menu at the top gives a list of the curves present in the figure,
 you can select the curve you want to modify. From here you can change the style
-and colour of the curve, as well as add point markers. You can also change the
-label of the curve. To make sure the legend is updated ensure you have ticked
-the "(Re-)Generate automatic legend" box on the "Axes" tab.
+and colour of the curve, as well as add point markers and change its
+label. To make sure the legend is updated ensure you have ticked the
+"(Re-)Generate automatic legend" box on the "Axes" tab.
 
-You can set default settings using Matplotlib's rcParams for a guide to this
-see :ref:`Change Matplotlib Defaults <mplDefaults>`.
+You can set default settings using Matplotlib's :code:`rcParams` for a guide to
+this see :ref:`Change Matplotlib Defaults <mplDefaults>`.
 
 
 Fitting
@@ -62,5 +63,5 @@ Fitting
 
 The "Fit" option in the plot window toolbar activates the interactive fitting
 tool. From here you can add functions to fit to, choose the bounds to fit
-within and choose your fitting algorithm. For more on fitting see
+within and choose a fitting algorithm. For more on fitting see
 :ref:`fitting contents`.

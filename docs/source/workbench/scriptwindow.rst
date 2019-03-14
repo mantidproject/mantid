@@ -42,14 +42,15 @@ Find and Replace
 
 There is a useful find and replace window that can make navigating your scripts
 much easier. You can search for exact words, make your search case sensitive
-or even use regular expressions (Regex).
+or even use regular expressions
+(`Regex <https://www.petefreitag.com/cheatsheets/regex/>`_).
 
 Comment and Uncomment
 ^^^^^^^^^^^^^^^^^^^^^
 Commenting and uncommenting code is a useful tool for any script writer. To use
 this, select some lines you wish to comment and click the "Comment/Uncomment"
-option (or use the "Ctrl+/" shortcut). To uncomment, select some commented
-lines and click the "Comment/Uncomment" option.
+option (or use the :code:`Ctrl+/` shortcut). To uncomment, select some
+commented lines and click :code:`Ctrl+/`.
 
 Toggle Whitespace Visible
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -62,7 +63,7 @@ option will apply to all tabs.
 
 Toggle Tabs and Spaces
 ^^^^^^^^^^^^^^^^^^^^^^
-Python can be particular about mixing tabs and spaces within your scripts. To
+Python is very particular about mixing tabs and spaces within your scripts. To
 avoid any problems with the Python interpreter an option is provided to convert
 all tabs to spaces or all groups of 4 consecutive spaces to tabs. If some text
 within a script is selected, these options will only apply within the selected
@@ -95,13 +96,13 @@ Finally::
 Workbench's plotting is all done through `Matplotlib <https://matplotlib.org/>`_
 which provides a wide range of plotting tools and a large user community and
 therefore excellent documentation and support. For an overview of using
-Matplotlib with Mantid click
-`here <https://docs.mantidproject.org/nightly/plotting/index.html#plotting>`_.
+Matplotlib with Mantid see
+:ref:`Introduction to Matplotlib in Mantid <plotting>`.
 
 `NumPy <https://docs.scipy.org/doc/numpy/user/quickstart.html>`_ is
 ubiquitous within scientific computing in Python and its data structures can be
-used within Mantid. For a short introduction to NumPy click
-`here <https://www.mantidproject.org/Numpy_Introduction>`__.
+used within Mantid. For a short introduction to NumPy see Mantid's
+`Numpy Introduction <https://www.mantidproject.org/Numpy_Introduction>`__.
 
 Editor Status
 -------------
@@ -111,5 +112,5 @@ Editor Status
 The editor window's status bar gives the current state of the Python
 interpreter. It will tell you if there is a script currently running, or if the
 interpreter is idle. It will also inform you of when the last script was
-executed and whether it was executed successfully.
+executed and whether it was executed successfully or if there were errors.
 
