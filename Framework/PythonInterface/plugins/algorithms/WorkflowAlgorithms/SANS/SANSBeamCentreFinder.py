@@ -213,9 +213,11 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
                 self.logger.notice("Itr {0}: ( {1}, {2} )  SX={3:.5g}  SY={4:.5g}".
                                    format(j, self.scale_1 * centre1,
                                           self.scale_2 * centre2, residueLR[j], residueTB[j]))
-                break_loop = self._plot_workspaces(output_workspaces, state.data.sample_scatter)
-                if break_loop:
-                    break
+                if do_plotting:
+                    break_loop = self._plot_workspaces(output_workspaces, state.data.sample_scatter)
+                    if break_loop:
+                        # If workspaces contain NaN values, stop the process.
+                        break
             else:
                 # have we stepped across the y-axis that goes through the beam center?
                 if residueLR[j] > residueLR[j-1]:
@@ -247,19 +249,18 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
         self.logger.notice("Centre coordinates updated: [{}, {}]".format(centre_1_hold*self.scale_1, centre_2_hold*self.scale_2))
 
     def _plot_workspaces(self, output_workspaces, sample_scatter):
-        if do_plotting:
-            try:
-                # Check for NaNs in workspaces
-                output_workspaces_matplotlib = self._validate_workspaces(output_workspaces)
-            except ValueError as e:
-                self.logger.notice("Stopping process: {}. Check radius limits.".format(str(e)))
-                return True
-            else:
-                if not PYQT4:
-                    # matplotlib plotting can take a list of workspaces (not names)
-                    self._plot_quartiles_matplotlib(output_workspaces_matplotlib, sample_scatter)
-                elif IN_MANTIDPLOT:
-                    self._plot_quartiles(output_workspaces, sample_scatter)
+        try:
+            # Check for NaNs in workspaces
+            output_workspaces_matplotlib = self._validate_workspaces(output_workspaces)
+        except ValueError as e:
+            self.logger.notice("Stopping process: {}. Check radius limits.".format(str(e)))
+            return True
+        else:
+            if not PYQT4:
+                # matplotlib plotting can take a list of workspaces (not names)
+                self._plot_quartiles_matplotlib(output_workspaces_matplotlib, sample_scatter)
+            elif IN_MANTIDPLOT:
+                self._plot_quartiles(output_workspaces, sample_scatter)
         return False
 
     def _rename_and_group_workspaces(self, index, output_workspaces):
