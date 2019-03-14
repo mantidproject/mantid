@@ -8,8 +8,10 @@
 #define ALGORITHMPROGRESSDIALOGWIDGET_H
 
 #include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressDialogPresenter.h"
+#include "MantidAPI/Algorithm.h"
 
 #include <QDialog>
+#include <QPushButton>
 
 #include <memory>
 
@@ -30,7 +32,7 @@ public:
   /// Adds an algorithm to the dialog. Returns the item in the tree widget, and
   /// the progress bar within it
   std::pair<QTreeWidgetItem *, QProgressBar *>
-  addAlgorithm(std::string, std::vector<Mantid::Kernel::Property *>);
+  addAlgorithm(Mantid::API::IAlgorithm_sptr alg);
 
 protected:
   void closeEvent(QCloseEvent *event) override;
@@ -39,6 +41,28 @@ private:
   std::unique_ptr<AlgorithmProgressDialogPresenter> m_presenter;
   /// Owned by this dialog, will be deleted on close
   QTreeWidget *m_tree;
+};
+
+class AlgorithmProgressDialogWidgetCancelButton : public QPushButton {
+  Q_OBJECT
+public:
+  AlgorithmProgressDialogWidgetCancelButton(Mantid::API::IAlgorithm_sptr alg,
+                                            QString text = QString("Cancel"),
+                                            QWidget *parent = 0)
+      : QPushButton(text, parent), m_alg(alg) {
+        connect(this, SIGNAL(clicked()), this, SLOT(clickedWithAlgSlot()));
+      }
+
+signals:
+void clickedWithAlg(Mantid::API::IAlgorithm_sptr alg);
+
+private slots:
+void clickedWithAlgSlot(){
+  m_alg->cancel();
+}
+
+private:
+  Mantid::API::IAlgorithm_sptr m_alg;
 };
 
 } // namespace MantidWidgets

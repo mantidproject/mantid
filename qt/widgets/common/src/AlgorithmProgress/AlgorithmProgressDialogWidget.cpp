@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressDialogWidget.h"
 #include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressModel.h"
-
 #include "MantidQtWidgets/Common/MantidWidget.h"
 #include <QHeaderView>
 #include <QIcon>
@@ -26,10 +25,10 @@ AlgorithmProgressDialogWidget::AlgorithmProgressDialogWidget(
           parent, this, model)},
       m_tree{new QTreeWidget(this)} {
 
-  m_tree->setColumnCount(2);
+  m_tree->setColumnCount(3);
   m_tree->setSelectionMode(QTreeWidget::NoSelection);
   m_tree->setColumnWidth(0, 220);
-  m_tree->setHeaderLabels({"Algorithm", "Progress"});
+  m_tree->setHeaderLabels({"Algorithm", "Progress", ""});
   auto header = m_tree->header();
   header->setSectionResizeMode(1, QHeaderView::Stretch);
   header->setStretchLastSection(false);
@@ -54,8 +53,9 @@ AlgorithmProgressDialogWidget::AlgorithmProgressDialogWidget(
 }
 
 std::pair<QTreeWidgetItem *, QProgressBar *>
-AlgorithmProgressDialogWidget::addAlgorithm(
-    std::string name, std::vector<Mantid::Kernel::Property *> properties) {
+AlgorithmProgressDialogWidget::addAlgorithm(Mantid::API::IAlgorithm_sptr alg) {
+  const auto name = alg->name();
+  const auto properties = alg->getProperties();
   const auto item =
       new QTreeWidgetItem(m_tree, QStringList{QString::fromStdString(name)});
 
@@ -63,7 +63,11 @@ AlgorithmProgressDialogWidget::addAlgorithm(
   auto progressBar = new QProgressBar(m_tree);
   progressBar->setAlignment(Qt::AlignHCenter);
 
+  auto cancelButton = new AlgorithmProgressDialogWidgetCancelButton(
+      alg, QString::fromStdString("Cancel"), m_tree);
+
   m_tree->setItemWidget(item, 1, progressBar);
+  m_tree->setItemWidget(item, 2, cancelButton);
 
   for (const auto &prop : properties) {
     const auto &propAsString = prop->value();

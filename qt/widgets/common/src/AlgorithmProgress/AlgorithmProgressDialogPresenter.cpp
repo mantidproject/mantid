@@ -8,6 +8,9 @@
 #include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressDialogPresenter.h"
 #include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressDialogWidget.h"
 #include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressModel.h"
+#include "MantidAPI/Algorithm.h"
+
+#include <boost/pointer_cast.hpp>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -26,8 +29,7 @@ void AlgorithmProgressDialogPresenter::algorithmStartedSlot(
       Mantid::API::AlgorithmManager::Instance().getAlgorithm(alg);
 
   if (algInstance) {
-    auto treeItem =
-        m_view->addAlgorithm(algInstance->name(), algInstance->getProperties());
+    auto treeItem = m_view->addAlgorithm(algInstance);
     m_progressBars.insert(std::make_pair(alg, treeItem));
   }
 }
