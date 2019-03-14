@@ -5,15 +5,16 @@ Plots Toolbox
 =============
 
 .. image:: ../images/Workbench/PlotToolbox/PlotsToolbox.png
-    :height: 200
-    :width: 150
+    :height: 400
+    :width: 300
     :align: right
 
-This is a new concept in Mantid applications, the plots toolbox will encompass and display all currently shown plots
-much like the workspace toolbox. It has the option to hide, remove, and edit the name of each plot individually. All
-this can be done from the buttons on top of the toolbox which will allow you to perform operations on multiple plots
-at once, showing, hiding and more with the click of a button.
-
+This is a new concept in Mantid applications, the plots toolbox will encompass
+and display all currently open plots much like the workspace toolbox. It has
+the option to hide, remove, and edit the name of each plot individually. All
+this can be done using the options buttons on top of the toolbox. These allow
+you to perform operations like show, hide, export and more on multiple plots at
+once, all with the click of a button.
 
 .. image:: ../images/Workbench/PlotToolbox/PlotsToolboxDiagram.png
 
@@ -22,9 +23,23 @@ Plots Toolbox Options
 
 .. image:: ../images/Workbench/PlotToolbox/PlotsToolboxOptions.png
 
+The toolbox options give you an easy way to interact with your plots in the
+workbench. There are options to show, hide or delete the selected figure and
+you can use the "Export" option to save a figure or figures in several
+different formats. To make navigating the Plots Toolbox easy you can sort your
+plots by name, number or most recently active or use the "Filter Plots" bar to
+to search.
+
+
 Plots List
 ----------
 
-.. image:: ../images/Workbench/PlotToolbox/PlotsToolboxPlotSection.png
+.. image:: ../images/Workbench/PlotToolbox/PlotsToolboxListItem.png
+    :scale: 60%
 
-# Make this image a diagram highlighting each button as this is new to all users extra explanation may be needed
+On each plot list item there are three buttons: "Show/Hide Figure",
+"Edit Figure Name" and "Close Figure". You can toggle the visibility of a plot
+using the "Show/Hide Figure" button. The "Edit Plot Name" option allows you to
+change the name of the figure in the plot list. The "Close Figure" option will
+delete the figure and remove it from the plot list, you cannot recover the
+figure after selecting this.

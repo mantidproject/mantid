@@ -14,8 +14,8 @@ level of detail to choose the correct amount of detail for your circumstances.
     :scale: 70%
 
 All output from running your scripts or Mantid algorithms is logged in
-this window. To minimise the amount of information displayed in this window you
-are provided with 5 logging levels (in ascending order of priority):
+this window. To display only the information most relevant to you, you are
+provided with 5 logging levels (in ascending order of priority):
 
     - Debug:
           Anything that may be useful to understand what the code has been
