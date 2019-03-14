@@ -109,9 +109,9 @@ void SumOverlappingTubes::exec() {
       m_numPoints + 1,
       LinearGenerator(m_startScatteringAngle, m_stepScatteringAngle));
 
-  MatrixWorkspace_sptr outputWS =
-      create<Workspace2D>(*m_workspaceList.front(), m_numHistograms, x);
+  MatrixWorkspace_sptr outputWS = create<Workspace2D>(m_numHistograms, x);
   outputWS->setDistribution(false);
+  outputWS->setSharedRun(m_workspaceList.front()->sharedRun());
 
   const auto newAxis = new NumericAxis(m_heightAxis);
   newAxis->setUnit("Label");

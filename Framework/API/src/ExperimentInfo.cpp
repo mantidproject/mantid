@@ -675,6 +675,9 @@ void ExperimentInfo::setSharedRun(Kernel::cow_ptr<Run> run) {
   m_run = std::move(run);
 }
 
+/// Return the cow ptr of the run
+Kernel::cow_ptr<Run> ExperimentInfo::sharedRun() { return m_run; }
+
 /**
  * Get an experimental log either by log name or by type, e.g.
  *   - temperature_log
