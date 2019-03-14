@@ -39,7 +39,7 @@ The old interface will be removed in a later release.
 New
 ###
 
-- Added an `Export Table` button which exports table as a csv. This can be re-loaded as a batch file.
+- Added an `Export Table` button which exports table as a csv. This can be re-loaded as a batch file. 
 - Added a `Process selected` button which only processes selected rows.
 - Added a `Process all` button which processes all rows regardless of row selection.
 - Added a `Load` button to load selected workspaces without processing.
