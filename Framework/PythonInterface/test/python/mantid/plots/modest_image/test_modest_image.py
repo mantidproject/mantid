@@ -3,6 +3,9 @@ from __future__ import print_function, division
 import itertools
 import unittest
 
+import matplotlib
+matplotlib.use("agg")
+
 from matplotlib import pyplot as plt
 import matplotlib.image as mi
 
