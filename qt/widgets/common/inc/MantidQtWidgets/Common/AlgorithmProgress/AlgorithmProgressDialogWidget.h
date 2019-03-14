@@ -47,9 +47,8 @@ class AlgorithmProgressDialogWidgetCancelButton : public QPushButton {
   Q_OBJECT
 public:
   AlgorithmProgressDialogWidgetCancelButton(Mantid::API::IAlgorithm_sptr alg,
-                                            QString text = QString("Cancel"),
                                             QWidget *parent = 0)
-      : QPushButton(text, parent), m_alg(alg) {
+      : QPushButton(QString::fromStdString("Cancel"), parent), m_alg(alg) {
         connect(this, SIGNAL(clicked()), this, SLOT(clickedWithAlgSlot()));
       }
 
