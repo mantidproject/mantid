@@ -39,7 +39,10 @@ void IndirectSettingsPresenter::setUpPresenter() {
   loadSettings();
 }
 
-void IndirectSettingsPresenter::showDialog() { m_view->show(); }
+void IndirectSettingsPresenter::showDialog() {
+  m_view->show();
+  m_view->setFocus();
+}
 
 void IndirectSettingsPresenter::initLayout() {
   m_view->setInterfaceSettingsVisible(m_model->hasInterfaceSettings());

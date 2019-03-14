@@ -1,4 +1,6 @@
-﻿Indirect Data Analysis
+﻿.. _interface-indirect-data-analysis:
+
+Indirect Data Analysis
 ======================
 
 .. contents:: Table of Contents
@@ -29,7 +31,7 @@ Action Buttons
 ~~~~~~~~~~~~~~
 
 Settings
-  Opens the settings GUI which allows you to change the default facility. It also allows you to turn off 
+  Opens the :ref:`Settings <interface-indirect-settings>` GUI which allows you to change the default facility. It also allows you to turn off 
   the restriction of input data by name and the plotting of error bars.
 
 ?

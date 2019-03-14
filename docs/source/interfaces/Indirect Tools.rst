@@ -17,7 +17,7 @@ Action Buttons
 ~~~~~~~~~~~~~~
 
 Settings
-  Opens the settings GUI which allows you to change the default facility.
+  Opens the :ref:`Settings <interface-indirect-settings>` GUI which allows you to change the default facility.
 
 ?
   Opens this help page.
