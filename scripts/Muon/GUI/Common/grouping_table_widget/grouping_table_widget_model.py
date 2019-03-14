@@ -2,6 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 
 from Muon.GUI.Common.muon_data_context import MuonDataContext, construct_empty_group
 
+
 class GroupingTableModel(object):
     """
     Model used when grouping table is not part of the grouping tab. When the
