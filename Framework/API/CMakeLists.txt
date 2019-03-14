@@ -2,6 +2,7 @@ set ( SRC_FILES
 	src/ADSValidator.cpp
 	src/Algorithm.cpp
 	src/AlgorithmFactory.cpp
+	src/AlgorithmFactoryObserver.cpp
 	src/AlgorithmHasProperty.cpp
 	src/AlgorithmHistory.cpp
 	src/AlgorithmManager.cpp
@@ -169,6 +170,7 @@ set ( INC_FILES
 	inc/MantidAPI/Algorithm.h
 	inc/MantidAPI/Algorithm.tcc
 	inc/MantidAPI/AlgorithmFactory.h
+	inc/MantidAPI/AlgorithmFactoryObserver.h
 	inc/MantidAPI/AlgorithmHasProperty.h
 	inc/MantidAPI/AlgorithmHistory.h
 	inc/MantidAPI/AlgorithmManager.h
