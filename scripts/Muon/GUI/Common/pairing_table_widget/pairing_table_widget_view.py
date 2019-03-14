@@ -138,6 +138,9 @@ class PairingTableView(QtGui.QWidget):
         for i, entry in enumerate(row_entries):
             item = QtGui.QTableWidgetItem(entry)
             if pair_columns[i] == 'pair_name':
+                pair_name_widget = table_utils.ValidatedTableItem(self._validate_pair_name_entry)
+                pair_name_widget.setText(entry)
+                self.pairing_table.setItem(row_position, i, pair_name_widget)
                 item.setFlags(QtCore.Qt.ItemIsEnabled)
                 item.setFlags(QtCore.Qt.ItemIsSelectable)
             if pair_columns[i] == 'group_1':
@@ -288,6 +291,11 @@ class PairingTableView(QtGui.QWidget):
         last_row = self.pairing_table.rowCount() - 1
         if last_row >= 0:
             self.pairing_table.removeRow(last_row)
+
+    def enter_pair_name(self):
+        new_pair_name, ok = QtGui.QInputDialog.getText(None, 'Group Name', 'Enter name of new group:')
+        if ok:
+            return new_pair_name
 
     # ------------------------------------------------------------------------------------------------------------------
     # Enabling / Disabling the table

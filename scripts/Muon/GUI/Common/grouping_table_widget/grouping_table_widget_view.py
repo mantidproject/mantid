@@ -153,6 +153,10 @@ class GroupingTableView(QtGui.QWidget):
             item = QtGui.QTableWidgetItem(entry)
             if group_table_columns[i] == group_table_columns[0]:
                 # column 0 : group name
+                group_name_widget = table_utils.ValidatedTableItem(self._validate_group_name_entry)
+                group_name_widget.setText(entry)
+                self.grouping_table.setItem(row_position, 0, group_name_widget)
+                self.grouping_table.item(row_position, 0).setToolTip(entry)
                 item.setFlags(QtCore.Qt.ItemIsEnabled)
                 item.setFlags(QtCore.Qt.ItemIsSelectable)
             if group_table_columns[i] == group_table_columns[1]:
@@ -183,6 +187,11 @@ class GroupingTableView(QtGui.QWidget):
         last_row = self.grouping_table.rowCount() - 1
         if last_row >= 0:
             self.grouping_table.removeRow(last_row)
+
+    def enter_group_name(self):
+        new_group_name, ok = QtGui.QInputDialog.getText(None, 'Group Name', 'Enter name of new group:')
+        if ok:
+            return new_group_name
 
     # ------------------------------------------------------------------------------------------------------------------
     # Context menu on right-click in the table

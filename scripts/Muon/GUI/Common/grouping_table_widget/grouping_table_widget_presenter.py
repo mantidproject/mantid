@@ -1,9 +1,10 @@
 from __future__ import (absolute_import, division, print_function)
 
 import re
-
+from PyQt4 import QtGui
 from Muon.GUI.Common.utilities import run_string_utils as run_utils
 from Muon.GUI.Common.muon_group import MuonGroup
+
 
 maximum_number_of_groups = 20
 
@@ -95,8 +96,10 @@ class GroupingTablePresenter(object):
         self._view.enable_updates()
 
     def handle_add_group_button_clicked(self):
-        group = self._model.construct_empty_group(self._view.num_rows() + 1)
-        self.add_group(group)
+        new_group_name = self._view.enter_group_name()
+        if self.validate_group_name(new_group_name):
+            group = MuonGroup(group_name=str(new_group_name), detector_ids=[1])
+            self.add_group(group)
 
     def handle_remove_group_button_clicked(self):
         group_names = self._view.get_selected_group_names()
@@ -129,7 +132,6 @@ class GroupingTablePresenter(object):
                 self.update_model_from_view()
             except ValueError as error:
                 self._view.warning_popup(error)
-
         self.update_view_from_model()
         self._view.notify_data_changed()
         self.notify_data_changed()
