@@ -10,8 +10,6 @@
 #include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressDialogWidget.h"
 #include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressModel.h"
 
-#include <boost/pointer_cast.hpp>
-
 namespace MantidQt {
 namespace MantidWidgets {
 
@@ -23,17 +21,32 @@ AlgorithmProgressDialogPresenter::AlgorithmProgressDialogPresenter(
   model.setDialog(this);
 }
 
+/// This slot is triggered whenever an algorithm has started executing
+/// @param alg The ID of the algorithm that has started executing
 void AlgorithmProgressDialogPresenter::algorithmStartedSlot(
     Mantid::API::AlgorithmID alg) {
+
   const auto algInstance =
       Mantid::API::AlgorithmManager::Instance().getAlgorithm(alg);
 
+  // There is a chance that the algorithm has already finished
+  // -> if the updateProgressBarSlot triggers this algorithmStartedSlot, but the
+  // original algorithm has already finished, before we got a shared pointer.
+  // This ensures that the tracking only looks after an algorithm that has not
+  // finished
   if (algInstance) {
     auto treeItem = m_view->addAlgorithm(algInstance);
     m_progressBars.insert(std::make_pair(alg, treeItem));
   }
 }
-
+/// This slot is triggered whenever an algorithm reports progress.
+/// If the algorithm is not being tracked (e.g. the Details window is
+/// opened _AFTER_ the algorithm has started) then the started slot is triggered
+/// to add an active progress bar for it.
+/// @param alg The ID of the algorithm that is reporting progress
+/// @param progress The progress that the algorithm has reported
+/// @param message The message that the algorithm has reported. It can be
+/// emitted from another thread, so a copy of the message is forced
 void AlgorithmProgressDialogPresenter::updateProgressBarSlot(
     Mantid::API::AlgorithmID alg, double progress, QString message) {
   // if the algorithm isn't contained in the progress bar tree, then pretend it
@@ -42,7 +55,7 @@ void AlgorithmProgressDialogPresenter::updateProgressBarSlot(
     algorithmStartedSlot(alg);
 
     // the algorithm did not have an active instance, and was not created,
-    // it has likely already finished, so don't do any work updating
+    // it has already finished, so don't do any work updating
     if (m_progressBars.count(alg) == 0) {
       return;
     }
@@ -50,6 +63,10 @@ void AlgorithmProgressDialogPresenter::updateProgressBarSlot(
   setProgressBar(m_progressBars.at(alg).second, progress, message);
 }
 
+/// This slot is triggered whenever an algorithms ends. If the algorithm is not
+/// being tracked, there will not be an active progress bar for it, in which
+/// case no work is done
+/// @param alg The ID of the algorithm that is ending
 void AlgorithmProgressDialogPresenter::algorithmEndedSlot(
     Mantid::API::AlgorithmID alg) {
   // if the algorithm has an active widget, then delete it

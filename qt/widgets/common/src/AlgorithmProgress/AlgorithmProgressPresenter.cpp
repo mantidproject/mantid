@@ -31,6 +31,16 @@ void AlgorithmProgressPresenter::algorithmEndedSlot(
   m_view->algorithmEnded();
 }
 
+/// This slot is triggered whenever an algorithm reports progress.
+/// If the algorithm is not being tracked, then the progress bar isn't changed.
+/// This can happen whenever there are multiple algorithms running
+/// simultaneously - the progress bar will only show the progress of the first
+/// one that started. If many algorithms are starting, this prevents having a
+/// very jittery progress bar, that never completely fills up
+/// @param algorithm The ID of the algorithm that is reporting progress
+/// @param progress The progress that the algorithm has reported
+/// @param message The message that the algorithm has reported. It can be
+/// emitted from another thread, so a copy of the message is forced
 void AlgorithmProgressPresenter::updateProgressBarSlot(
     Mantid::API::AlgorithmID algorithm, const double progress,
     QString message) {

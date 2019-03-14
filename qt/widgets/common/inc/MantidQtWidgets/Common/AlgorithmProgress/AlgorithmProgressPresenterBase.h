@@ -44,7 +44,7 @@ public:
   /// algorithms
   void updateProgressBar(Mantid::API::AlgorithmID, double, const std::string &);
   /// Sets the parameter progress bar to show the progress and message
-  void setProgressBar(QProgressBar *, double, QString);
+  void setProgressBar(QProgressBar *, double, const QString &);
 
 public slots:
   virtual void algorithmStartedSlot(Mantid::API::AlgorithmID) = 0;

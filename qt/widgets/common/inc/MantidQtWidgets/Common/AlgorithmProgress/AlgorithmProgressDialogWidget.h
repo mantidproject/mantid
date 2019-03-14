@@ -14,6 +14,7 @@
 #include <QPushButton>
 
 #include <memory>
+#include <utility>
 
 class QProgressBar;
 
@@ -43,13 +44,20 @@ private:
   QTreeWidget *m_tree;
 };
 
+/*
+ * The AlgorithmProgressDialogWidgetCancelButton handles the Cancel buttons
+ * displayed in the dialog. It keeps a copy of the shared pointer to the
+ * algorithm to ensure that it can always be closed when the user clicks the
+ * button
+ */
 class AlgorithmProgressDialogWidgetCancelButton : public QPushButton {
   Q_OBJECT
 public:
   AlgorithmProgressDialogWidgetCancelButton(Mantid::API::IAlgorithm_sptr alg,
                                             QWidget *parent = 0)
-      : QPushButton(QString::fromStdString("Cancel"), parent), m_alg(alg) {
-    connect(this, SIGNAL(clicked()), this, SLOT(clickedWithAlgSlot()));
+      : QPushButton("Cancel", parent), m_alg(std::move(alg)) {
+    connect(this, &QPushButton::clicked, this,
+            &AlgorithmProgressDialogWidgetCancelButton::clickedWithAlgSlot);
   }
 
 signals:
