@@ -153,10 +153,8 @@ class GroupingTableView(QtGui.QWidget):
             item = QtGui.QTableWidgetItem(entry)
             if group_table_columns[i] == group_table_columns[0]:
                 # column 0 : group name
-                group_name_widget = table_utils.ValidatedTableItem(self._validate_group_name_entry)
-                group_name_widget.setText(entry)
-                self.grouping_table.setItem(row_position, 0, group_name_widget)
-                self.grouping_table.item(row_position, 0).setToolTip(entry)
+                item.setFlags(QtCore.Qt.ItemIsEnabled)
+                item.setFlags(QtCore.Qt.ItemIsSelectable)
             if group_table_columns[i] == group_table_columns[1]:
                 # column 1 : detector IDs
                 detector_widget = table_utils.ValidatedTableItem(self._validate_detector_ID_entry)
@@ -358,12 +356,12 @@ class GroupingTableView(QtGui.QWidget):
         for row in range(self.num_rows()):
             for col in range(self.num_cols()):
                 item = self.grouping_table.item(row, col)
-                if group_table_columns[col] != 'number_of_detectors':
+                if group_table_columns[col] == 'detector_ids':
                     item.setFlags(QtCore.Qt.ItemIsSelectable |
                                   QtCore.Qt.ItemIsEditable |
                                   QtCore.Qt.ItemIsEnabled)
                 else:
-                    # number of detectors should remain un-editable
+                    # Group name and number of detectors should remain un-editable
                     item.setFlags(QtCore.Qt.ItemIsSelectable)
 
     def get_group_range(self):

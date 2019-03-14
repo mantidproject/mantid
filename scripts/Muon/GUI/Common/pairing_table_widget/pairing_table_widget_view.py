@@ -138,9 +138,8 @@ class PairingTableView(QtGui.QWidget):
         for i, entry in enumerate(row_entries):
             item = QtGui.QTableWidgetItem(entry)
             if pair_columns[i] == 'pair_name':
-                pair_name_widget = table_utils.ValidatedTableItem(self._validate_pair_name_entry)
-                pair_name_widget.setText(entry)
-                self.pairing_table.setItem(row_position, i, pair_name_widget)
+                item.setFlags(QtCore.Qt.ItemIsEnabled)
+                item.setFlags(QtCore.Qt.ItemIsSelectable)
             if pair_columns[i] == 'group_1':
                 group1_selector_widget = self._group_selection_cell_widget()
                 # ensure changing the selection sends an update signal
@@ -332,6 +331,9 @@ class PairingTableView(QtGui.QWidget):
                 if col == 1 or col == 2 or col == 4:
                     item = self.pairing_table.cellWidget(row, col)
                     item.setEnabled(True)
+                elif col == 0:
+                    item = self.pairing_table.item(row, col)
+                    item.setFlags(QtCore.Qt.ItemIsSelectable)
                 else:
                     item = self.pairing_table.item(row, col)
                     item.setFlags(QtCore.Qt.ItemIsSelectable |
