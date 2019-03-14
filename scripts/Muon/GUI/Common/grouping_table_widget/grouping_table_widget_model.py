@@ -1,7 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 
 from Muon.GUI.Common.muon_data_context import MuonDataContext, construct_empty_group
-from PyQt4 import QtGui
 
 class GroupingTableModel(object):
     """

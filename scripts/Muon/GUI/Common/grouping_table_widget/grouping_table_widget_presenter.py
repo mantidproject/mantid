@@ -1,10 +1,9 @@
 from __future__ import (absolute_import, division, print_function)
 
 import re
-from PyQt4 import QtGui
+
 from Muon.GUI.Common.utilities import run_string_utils as run_utils
 from Muon.GUI.Common.muon_group import MuonGroup
-
 
 maximum_number_of_groups = 20
 
@@ -132,6 +131,7 @@ class GroupingTablePresenter(object):
                 self.update_model_from_view()
             except ValueError as error:
                 self._view.warning_popup(error)
+
         self.update_view_from_model()
         self._view.notify_data_changed()
         self.notify_data_changed()
