@@ -226,6 +226,11 @@ class MainWindow(QMainWindow):
         self.create_actions()
         self.populate_menus()
 
+        # turn on algorithm factory notifications
+        from mantid.api import AlgorithmFactory
+        algFactory = AlgorithmFactory.Instance()
+        algFactory.enableNotifications()
+
     def post_mantid_init(self):
         """Run any setup that requires mantid
         to have been initialized

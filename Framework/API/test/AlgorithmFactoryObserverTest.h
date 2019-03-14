@@ -20,14 +20,11 @@ class FakeAlgorithmFactoryObserver
     : public Mantid::API::AlgorithmFactoryObserver {
 
 public:
-  FakeAlgorithmFactoryObserver()
-      : m_updateHandleCalled(false) {}
+  FakeAlgorithmFactoryObserver() : m_updateHandleCalled(false) {}
 
   ~FakeAlgorithmFactoryObserver() { this->observeUpdate(false); }
 
-  void updateHandle() override {
-    m_updateHandleCalled = true;
-  }
+  void updateHandle() override { m_updateHandleCalled = true; }
 
 public:
   bool m_updateHandleCalled;
@@ -51,8 +48,7 @@ public:
   AlgorithmFactoryObserverTest()
       : af(AlgorithmFactory::Instance()),
         m_mockInheritingClass(
-            std::make_unique<FakeAlgorithmFactoryObserver>()) {
-  }
+            std::make_unique<FakeAlgorithmFactoryObserver>()) {}
 
   void setUp() override {
     af.unsubscribe("ToyAlgorithm", 1);
@@ -81,7 +77,6 @@ public:
 
     TS_ASSERT(m_mockInheritingClass->m_updateHandleCalled)
   }
-
 };
 
 #endif /* ALGORITHMFACTORYOBSERVERTEST_H_ */

@@ -4,15 +4,14 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidAPI/AlgorithmFactoryObserver.h"
 #include "MantidPythonInterface/api/Algorithms/AlgorithmFactoryObserverAdapter.h"
+#include "MantidAPI/AlgorithmFactoryObserver.h"
 #include "MantidPythonInterface/core/CallMethod.h"
 
 namespace Mantid {
 namespace PythonInterface {
 
-AlgorithmFactoryObserverAdapter::AlgorithmFactoryObserverAdapter(
-    PyObject *self)
+AlgorithmFactoryObserverAdapter::AlgorithmFactoryObserverAdapter(PyObject *self)
     : API::AlgorithmFactoryObserver(), m_self(self) {}
 
 void AlgorithmFactoryObserverAdapter::updateHandle() {

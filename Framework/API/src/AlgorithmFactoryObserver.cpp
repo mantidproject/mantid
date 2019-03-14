@@ -23,8 +23,7 @@ namespace Mantid {
 namespace API {
 
 AlgorithmFactoryObserver::AlgorithmFactoryObserver()
-    : m_updateObserver(*this, &AlgorithmFactoryObserver::_updateHandle) {
-}
+    : m_updateObserver(*this, &AlgorithmFactoryObserver::_updateHandle) {}
 
 AlgorithmFactoryObserver::~AlgorithmFactoryObserver() {
   // Turn off/remove all observers
@@ -56,8 +55,7 @@ void AlgorithmFactoryObserver::observeUpdate(bool turnOn) {
  * works by overloading this class and overriding this function.
  *
  */
-void AlgorithmFactoryObserver::updateHandle() {
-}
+void AlgorithmFactoryObserver::updateHandle() {}
 
 // ------------------------------------------------------------
 // Private Methods
