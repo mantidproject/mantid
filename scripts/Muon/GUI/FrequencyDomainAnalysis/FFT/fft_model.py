@@ -59,7 +59,7 @@ class FFTWrapper(object):
         if self.phaseTable is not None:
             if self.phaseTable["newTable"]:
                 self.model.makePhaseQuadTable(self.phaseTable)
-            self.model.PhaseQuad(self.phaseTable["InputWorkspace"])
+            self.model.PhaseQuad(self.phaseTable)
 
         if self.preRe is not None:
             self.model.preAlg(self.preRe)
@@ -153,17 +153,20 @@ class FFTModel(object):
             self.alg.getProperty("DetectorTable").value)
         self.alg = None
 
-    def PhaseQuad(self, inputWS):
+    def PhaseQuad(self, inputs):
         """
         do the phaseQuad algorithm
         groups data into a single set
         """
+        cropped_workspace = mantid.CropWorkspace(InputWorkspace=inputs['InputWorkspace'],
+                             XMin=inputs['FirstGoodData'], XMax=inputs['LastGoodData'], StoreInADS=False)
+
         self.alg = mantid.AlgorithmManager.create("PhaseQuad")
         self.alg.initialize()
         self.alg.setChild(False)
         self.alg.setRethrows(True)
 
-        self.alg.setProperty("InputWorkspace", inputWS)
+        self.alg.setProperty("InputWorkspace", cropped_workspace)
         self.alg.setProperty("PhaseTable", "PhaseTable")
         self.alg.setProperty("OutputWorkspace", "__phaseQuad__")
         self.alg.execute()
