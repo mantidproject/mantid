@@ -12,7 +12,7 @@ Overview
 Provides a range of options to change the preferences on an Indirect interface. The following
 image is the settings window as displayed when opened from the Data Analysis interface.
 
-.. figure:: ../images/Data_Analysis_Settings.PNG
+.. figure:: ../images/Data_Analysis_Settings.png
   :class: screenshot
   :align: center
   :figwidth: 70%
