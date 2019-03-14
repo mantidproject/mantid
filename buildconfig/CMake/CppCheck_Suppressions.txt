@@ -10,3 +10,5 @@
 // unusedFunction
 // cppcheck has problems handling the number of pre-processor definitions used in the DLL_EXPORTs
 class_X_Y
+// the exported functions are not used in the cpp land
+unusedFunction:Framework/PythonInterface/mantid/*/src/Exports/*.cpp
