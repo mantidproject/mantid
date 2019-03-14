@@ -335,7 +335,7 @@ def get_matrix_2d_ragged(workspace, distribution, histogram2D=False):
     z = numpy.empty([num_hist, num_edges], dtype=numpy.float64)
     for i in range(num_hist):
         centers, ztmp, _, _ = mantid.plots.helperfunctions.get_spectrum(workspace, i, distribution=distribution, withDy=False, withDx=False)
-        f = interp1d(centers, ztmp, bounds_error=False, fill_value=numpy.nan)
+        f = interp1d(centers, ztmp, kind='nearest', bounds_error=False, fill_value=numpy.nan)
         z[i] = f(x_centers)
     if histogram2D:
         x = mantid.plots.helperfunctions.boundaries_from_points(x_centers)
@@ -504,11 +504,11 @@ def get_axes_labels(workspace):
         axes = ['Intensity']
         dims = workspace.getNonIntegratedDimensions()
         for d in dims:
-            axis_title = d.name.replace('DeltaE', '$\Delta E$')
-            axis_unit = d.getUnits().replace('Angstrom^-1', '$\AA^{-1}$')
+            axis_title = d.name.replace('DeltaE', r'$\Delta E$')
+            axis_unit = d.getUnits().replace('Angstrom^-1', r'$\AA^{-1}$')
             axis_unit = axis_unit.replace('DeltaE', 'meV')
-            axis_unit = axis_unit.replace('Angstrom', '$\AA$')
-            axis_unit = axis_unit.replace('MomentumTransfer', '$\AA^{-1}$')
+            axis_unit = axis_unit.replace('Angstrom', r'$\AA$')
+            axis_unit = axis_unit.replace('MomentumTransfer', r'$\AA^{-1}$')
             axes.append('{0} ({1})'.format(axis_title, axis_unit))
     else:
         '''For matrix workspaces, return a tuple of ``(YUnit, <other units>)``'''
