@@ -543,6 +543,11 @@ def imshow(axes, workspace, *args, **kwargs):
         if 'extent' not in kwargs:
             kwargs['extent'] = [x[0, 0], x[0, -1], y[0, 0], y[-1, 0]]
     else:
+        #get_matrix_2d_ragged guarantees x_spacing_equal
+        diffs = numpy.diff(y)
+        y_spacing_equal = numpy.alltrue(diffs == diffs[0])
+        if not y_spacing_equal:
+            raise Exception('Unevenly spaced bins are not supported by imshow')
         if 'extent' not in kwargs:
             kwargs['extent'] = [x[0],x[-1],y[0],y[-1]]
 
