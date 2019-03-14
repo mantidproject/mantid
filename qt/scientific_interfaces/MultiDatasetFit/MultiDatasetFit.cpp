@@ -381,7 +381,7 @@ void MultiDatasetFit::fit() {
   auto n = getNumberOfSpectra();
   int fitAll = QMessageBox::Yes;
 
-  if (fittingType == MantidWidgets::FitOptionsBrowser::Simultaneous) {
+  if (fittingType == MantidWidgets::FitOptionsBrowser::Simultaneous || n == 1) {
     if (n > 20 && m_fitAllSettings == QMessageBox::No) {
       fitAll = QMessageBox::question(this, "Fit All?",
                                      "Are you sure you would like to fit " +
