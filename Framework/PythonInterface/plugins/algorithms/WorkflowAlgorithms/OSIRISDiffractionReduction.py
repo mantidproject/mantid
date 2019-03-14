@@ -455,7 +455,7 @@ def create_drange_map_generator(runs_loader, combinator, delete_runs=True):
 
     def generator(runs, transform):
         drange_map = DRangeToWorkspaceMap()
-        workspace_names, _ = runs_loader(runs)
+        workspace_names, _, _ = runs_loader(runs)
         drange_map.add_workspaces([transform(workspace_name) for workspace_name in workspace_names], combinator)
         if delete_runs:
             delete_workspaces(workspace_names)

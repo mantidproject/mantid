@@ -15,7 +15,7 @@ import six
 from qtpy.QtCore import Slot, QObject
 
 from mantid.api import AnalysisDataService as ADS
-from mantid.kernel import ConfigService
+from mantid.kernel import ConfigService, logger
 
 
 DEFAULT_NUM_CHECKPOINTS = 5
@@ -100,9 +100,8 @@ class ProjectRecoveryModel(QObject):
         try:
             self._start_recovery_of_checkpoint(checkpoint)
         except Exception as e:
-            if isinstance(e, KeyboardInterrupt):
-                raise
             # Fail "Silently" by setting failed run to true, setting checkpoint to tried and closing the view.
+            logger.debug("Project Recovery: " + str(e))
             self.has_failed_run = True
             self._update_checkpoint_tried(selected)
             self.presenter.close_view()

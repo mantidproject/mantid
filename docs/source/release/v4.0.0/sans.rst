@@ -27,7 +27,7 @@ This release sees the "new" ISIS SANS interface becoming the primary interface, 
 Active development will only be carried out on the new interface and only major bugs will be fixed in the deprecated interface.
 This change does not affect the functionality of either of the interfaces.
 
-To signify this change, the "ISIS SANS" interface has been renamed "ISIS SANS (Deprecated)" and the "ISIS SANS v2 experimental" interface has been renamed "ISIS SANS".
+To signify this change, the "ISIS SANS" interface has been renamed "Old ISIS SANS (Deprecated)" and the "ISIS SANS v2 experimental" interface has been renamed "ISIS SANS".
 The old interface will be removed in a later release.
 
 .. figure:: ../../images/sans_isis_interface_4.0.png
