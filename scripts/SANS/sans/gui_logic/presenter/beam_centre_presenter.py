@@ -51,6 +51,13 @@ class BeamCentrePresenter(object):
             # Set the default gui
             self._view.set_options(self._beam_centre_model)
 
+            # Connect view signals
+            self.connect_signals()
+
+    def connect_signals(self):
+        self._view.r_min_line_edit.textChanged.connect(self._validate_radius_values)
+        self._view.r_max_line_edit.textChanged.connect(self._validate_radius_values)
+
     def on_update_instrument(self, instrument):
         self._beam_centre_model.set_scaling(instrument)
         self._view.on_update_instrument(instrument)
@@ -145,3 +152,23 @@ class BeamCentrePresenter(object):
         attribute = getattr(state_model, attribute_name)
         if attribute or isinstance(attribute, bool):  # We need to be careful here. We don't want to set empty strings, or None, but we want to set boolean values. # noqa
             setattr(self._view, attribute_name, attribute)
+
+    def _validate_radius_values(self):
+        min_value = getattr(self._view, "r_min_line_edit").text()
+        max_value = getattr(self._view, "r_max_line_edit").text()
+
+        try:
+            min_value = float(min_value)
+            max_value = float(max_value)
+        except ValueError:
+            # one of the values is empty
+            pass
+        else:
+            if min_value >= max_value:
+                if self._view.run_button.isEnabled():
+                    # Only post to logger once per disabling
+                    self._logger.notice("Minimum radius is larger than maximum radius. "
+                                        "Cannot find beam centre with current settings.")
+                    self._view.run_button.setEnabled(False)
+            else:
+                self._view.run_button.setEnabled(True)
