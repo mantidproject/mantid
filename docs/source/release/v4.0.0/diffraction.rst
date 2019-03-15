@@ -128,5 +128,6 @@ Bugfixes
 ########
 
 - Fixed a crash in the gui caused by running a calibration without setting a calibration directory.
+- Fixed a crash in the gui caused by having the EnggFitPeaks algorithm fail in the fitting tab.
 
 :ref:`Release 4.0.0 <v4.0.0>`
