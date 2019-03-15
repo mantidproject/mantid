@@ -64,11 +64,20 @@ can be specified manually by setting the :literal:`CorrectionAlgorithm` to eithe
 Note that when using a correction algorithm, monitors will not be integrated, even if
 :literal:`NormalizeByIntegratedMonitors` was set to true.
 
-Finally, properties :literal:`MomentumTransferMin`, :literal:`MomentumTransferStep` and :literal:`MomentumTransferMax` are
-used to rebin the output workspace in Q, and :literal:`ScaleFactor` is used to scale the rebinned workspace. When they
-are not provided the algorithm will attempt to determine the bin width using :ref:`algm-NRCalculateSlitResolution` (note that, for
-the latter to run successfully, a :literal:`slit` component with a :literal:`vertical gap` must be defined in the
-instrument definition file).
+:literal:`OutputWorkspace` is cropped to `MomentumTransferMin` and/or
+:literal:`MomentumTransferMax`, if they are given.
+
+:literal:`OutputWorkspaceBinned` is rebinned to the resolution specified by
+:literal:`MomentumTransferStep`, if it is given; otherwise the algorithm
+attempts to determine the bin width using :ref:`algm-NRCalculateSlitResolution`
+(note that to calculate the resolution this way, a :literal:`slit` component
+with a `vertical gap` must be defined in the instrument definition file - if it
+cannot be found, rebinning will not be done and a warning will be
+logged). `MomentumTransferMin` and `MomentumTransferMax` are used for the rebin
+if provided; otherwise the original min/max in Q is retained.
+
+Finally, `ScaleFactor` is used to scale the rebinned workspace
+:literal:`OutputWorkspaceBinned`.
 
 See :ref:`algm-ReflectometryReductionOne` for more information
 on how the input properties are used by the wrapped algorithm.
