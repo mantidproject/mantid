@@ -48,7 +48,7 @@ AlgorithmProgressDialogWidget::AlgorithmProgressDialogWidget(
 
   setLayout(layout);
   setWindowTitle("Mantid - Algorithm Progress");
-  setWindowIcon(QIcon(":/MantidPlot_Icon_32offset.png"));
+  setWindowIcon(QIcon(":/images/MantidIcon.ico"));
   resize(500, 300);
 }
 
