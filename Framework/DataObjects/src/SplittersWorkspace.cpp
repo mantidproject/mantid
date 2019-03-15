@@ -39,7 +39,6 @@ void SplittersWorkspace::addSplitter(
 }
 
 Kernel::SplittingInterval SplittersWorkspace::getSplitter(size_t index) {
-  API::Column_const_sptr column = this->getColumn("start");
   API::TableRow row = this->getRow(index);
   int64_t start, stop;
   int wsgroup;

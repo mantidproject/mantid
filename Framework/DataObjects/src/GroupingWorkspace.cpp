@@ -76,13 +76,13 @@ void GroupingWorkspace::makeDetectorIDToGroupVector(
   ngroups = 0;
   for (size_t wi = 0; wi < getNumberHistograms(); ++wi) {
     // Convert the Y value to a group number
-    int group = static_cast<int>(this->readY(wi)[0]);
+    int group = static_cast<int>(this->y(wi).front());
     if (group == 0)
       group = -1;
     auto detIDs = this->getDetectorIDs(wi);
     for (auto detID : detIDs) {
-      if (detID <
-          0) // if you need negative detector ids, use the other function
+      // if you need negative detector ids, use the other function
+      if (detID < 0)
         continue;
       if (detIDToGroup.size() < static_cast<size_t>(detID + 1))
         detIDToGroup.resize(detID + 1);
