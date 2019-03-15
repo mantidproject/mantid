@@ -170,6 +170,8 @@ void export_AlgorithmFactory() {
            (arg("self"), arg("name"), arg("version")),
            "Returns the highest version of the named algorithm. Throws "
            "ValueError if no algorithm can be found")
+      .def("enableNotifications", &AlgorithmFactoryImpl::enableNotifications)
+      .def("disableNotifications", &AlgorithmFactoryImpl::disableNotifications)
 
       .def("Instance", &AlgorithmFactory::Instance,
            return_value_policy<reference_existing_object>(),

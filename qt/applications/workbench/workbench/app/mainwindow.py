@@ -233,6 +233,11 @@ class MainWindow(QMainWindow):
         self.populate_interfaces_menu()
         self.algorithm_selector.refresh()
 
+        # turn on algorithm factory notifications
+        from mantid.api import AlgorithmFactory
+        algorithm_factory = AlgorithmFactory.Instance()
+        algorithm_factory.enableNotifications()
+
     def set_splash(self, msg=None):
         if not self.splash:
             return
