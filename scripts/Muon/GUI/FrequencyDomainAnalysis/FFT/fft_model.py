@@ -135,8 +135,8 @@ class FFTModel(object):
         """
         generates a phase table from CalMuonDetectorPhases
         """
-        cloned_workspace = mantid.CloneWorkspace(InputWorkspace=inputs["InputWorkspace"], StoreInADS=False)
-        mantid.MaskDetectors(Workspace=cloned_workspace, DetectorList=inputs['MaskedDetectors'], StoreInADS=False)
+        cloned_workspace_CalMuon = mantid.CloneWorkspace(InputWorkspace=inputs["InputWorkspace"])
+        mantid.MaskDetectors(Workspace=cloned_workspace_CalMuon, DetectorList=inputs['MaskedDetectors'])
 
         self.alg = mantid.AlgorithmManager.create("CalMuonDetectorPhases")
         self.alg.initialize()
@@ -146,7 +146,7 @@ class FFTModel(object):
         self.alg.setProperty("FirstGoodData", inputs["FirstGoodData"])
         self.alg.setProperty("LastGoodData", inputs["LastGoodData"])
 
-        self.alg.setProperty("InputWorkspace", cloned_workspace)
+        self.alg.setProperty("InputWorkspace", cloned_workspace_CalMuon)
         self.alg.setProperty("DetectorTable", "PhaseTable")
         self.alg.setProperty("DataFitted", "fits")
 
@@ -161,17 +161,17 @@ class FFTModel(object):
         do the phaseQuad algorithm
         groups data into a single set
         """
-        cloned_workspace = mantid.CloneWorkspace(InputWorkspace=inputs["InputWorkspace"], StoreInADS=False)
-        mantid.MaskDetectors(Workspace=cloned_workspace, DetectorList=inputs['MaskedDetectors'], StoreInADS=False)
-        cropped_workspace = mantid.CropWorkspace(InputWorkspace=cloned_workspace,
-                                                 XMin=inputs['FirstGoodData'], XMax=inputs['LastGoodData'], StoreInADS=False)
+        cloned_workspace = mantid.CloneWorkspace(InputWorkspace=inputs["InputWorkspace"])
+        mantid.MaskDetectors(Workspace=cloned_workspace, DetectorList=inputs['MaskedDetectors'])
+        cropped_workspace_pre_phasequad = mantid.CropWorkspace(InputWorkspace=cloned_workspace,
+                                                 XMin=inputs['FirstGoodData'], XMax=inputs['LastGoodData'])
 
         self.alg = mantid.AlgorithmManager.create("PhaseQuad")
         self.alg.initialize()
         self.alg.setChild(False)
         self.alg.setRethrows(True)
 
-        self.alg.setProperty("InputWorkspace", cropped_workspace)
+        self.alg.setProperty("InputWorkspace", cropped_workspace_pre_phasequad)
         self.alg.setProperty("PhaseTable", "PhaseTable")
         self.alg.setProperty("OutputWorkspace", "__phaseQuad__")
         self.alg.execute()

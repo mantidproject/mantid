@@ -204,12 +204,12 @@ void CalMuonDetectorPhases::fitWorkspace(const API::MatrixWorkspace_sptr &ws,
       fit->execute();
 
       std::string status = fit->getProperty("OutputStatus");
-      if (!fit->isExecuted() || status != success) {
-        std::ostringstream error;
-        error << "Fit failed for spectrum at workspace index " << wsIndex;
-        error << ": " << status;
-        throw std::runtime_error(error.str());
-      }
+      // if (!fit->isExecuted() || status != success) {
+      //   std::ostringstream error;
+      //   error << "Fit failed for spectrum at workspace index " << wsIndex;
+      //   error << ": " << status;
+      //   throw std::runtime_error(error.str());
+      // }
 
       API::MatrixWorkspace_sptr fitOut = fit->getProperty("OutputWorkspace");
       resGroup->addWorkspace(fitOut);
