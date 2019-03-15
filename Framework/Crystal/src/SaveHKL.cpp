@@ -348,7 +348,7 @@ void SaveHKL::exec() {
           banned.insert(wi);
           continue;
         }
-        int run = p.getRunNumber();
+        const int runNumber = p.getRunNumber();
         int seqNum = p.getPeakNumber();
         int bank = 0;
         std::string bankName = p.getBankName();
@@ -410,7 +410,7 @@ void SaveHKL::exec() {
         bankSequence = static_cast<int>(
             std::distance(uniqueBanks.begin(), uniqueBanks.find(bank)));
         runSequence = static_cast<int>(
-            std::distance(uniqueRuns.begin(), uniqueRuns.find(run)));
+            std::distance(uniqueRuns.begin(), uniqueRuns.find(runNumber)));
         if (correctPeaks) {
           // correct for the slant path throught the scintillator glass
           double mu = (9.614 * lambda) + 0.266; // mu for GS20 glass
@@ -549,7 +549,7 @@ void SaveHKL::exec() {
                 << dir_cos_2[k];
           }
 
-          out << std::setw(6) << run;
+          out << std::setw(6) << runNumber;
 
           out << std::setw(6) << seqNum;
 
@@ -571,7 +571,7 @@ void SaveHKL::exec() {
 
           out << std::setw(7) << std::fixed << std::setprecision(4) << tbar;
 
-          out << std::setw(7) << run;
+          out << std::setw(7) << runNumber;
 
           out << std::setw(7) << wi + 1;
 

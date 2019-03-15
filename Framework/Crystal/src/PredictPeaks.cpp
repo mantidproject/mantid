@@ -117,8 +117,10 @@ void PredictPeaks::init() {
 
   // Build up a list of reflection conditions to use
   std::vector<std::string> propOptions;
-  for (auto &refCond : m_refConds)
-    propOptions.push_back(refCond->getName());
+  propOptions.reserve(m_refConds.size());
+  std::transform(m_refConds.cbegin(), m_refConds.cend(),
+                 std::back_inserter(propOptions),
+                 [](const auto &condition) { return condition->getName(); });
   declareProperty("ReflectionCondition", "Primitive",
                   boost::make_shared<StringListValidator>(propOptions),
                   "Which reflection condition applies to this crystal, "
@@ -454,18 +456,22 @@ void PredictPeaks::checkBeamDirection() const {
 void PredictPeaks::fillPossibleHKLsUsingGenerator(
     const OrientedLattice &orientedLattice,
     std::vector<V3D> &possibleHKLs) const {
-  double dMin = getProperty("MinDSpacing");
-  double dMax = getProperty("MaxDSpacing");
+  const double dMin = getProperty("MinDSpacing");
+  const double dMax = getProperty("MaxDSpacing");
 
   // --- Reflection condition ----
   // Use the primitive by default
   ReflectionCondition_sptr refCond =
       boost::make_shared<ReflectionConditionPrimitive>();
   // Get it from the property
-  std::string refCondName = getPropertyValue("ReflectionCondition");
-  for (const auto &m_refCond : m_refConds)
-    if (m_refCond->getName() == refCondName)
-      refCond = m_refCond;
+  const std::string refCondName = getPropertyValue("ReflectionCondition");
+  const auto found = std::find_if(m_refConds.crbegin(), m_refConds.crend(),
+                                  [&refCondName](const auto &condition) {
+                                    return condition->getName() == refCondName;
+                                  });
+  if (found != m_refConds.crend()) {
+    refCond = *found;
+  }
 
   HKLGenerator gen(orientedLattice, dMin);
   auto filter =

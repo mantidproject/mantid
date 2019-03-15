@@ -146,7 +146,7 @@ void GoniometerAnglesFromPhiRotation::exec() {
     throw std::invalid_argument("Each peaks workspace MUST have only one run");
   }
 
-  Kernel::Matrix<double> UB1, UB2;
+  Kernel::Matrix<double> UB1;
 
   bool Run1HasOrientedLattice = true;
   if (!PeaksRun1->sample().hasOrientedLattice()) {
@@ -195,8 +195,6 @@ void GoniometerAnglesFromPhiRotation::exec() {
   lat2.setUB(UB1);
   PeaksRun2->mutableSample().setOrientedLattice(&lat2);
 
-  PeaksWorkspace_sptr Peakss = getProperty("PeaksWorkspace2");
-
   if (!Run1HasOrientedLattice)
     PeaksRun1->mutableSample().setOrientedLattice(nullptr);
 
@@ -226,11 +224,10 @@ void GoniometerAnglesFromPhiRotation::exec() {
       Q.normalize();
       Kernel::Matrix<double> Rot(Q.getRotation());
 
-      Kernel::Matrix<double> UB2(Rot * UB1);
-
       int Nindexed;
-      double avErrIndx, avErrAll;
-      IndexRaw(PeaksRun2, Rot * UB1, Nindexed, avErrIndx, avErrAll, Tolerance);
+      double dummyAvErrIndx, dummyAvErrAll;
+      IndexRaw(PeaksRun2, Rot * UB1, Nindexed, dummyAvErrIndx, dummyAvErrAll,
+               Tolerance);
 
       if (Nindexed > MinData[0]) {
         MinData[0] = Nindexed;
@@ -246,8 +243,7 @@ void GoniometerAnglesFromPhiRotation::exec() {
                 << (MinData[1] * MinData[2]) << "," << (MinData[1] * MinData[3])
                 << "," << (MinData[1] * MinData[4]) << ")\n";
 
-  //----------------------- Optimize around best
-  //-------------------------------------------
+  //----------------------- Optimize around best----------------------------
 
   auto ws = createWorkspace<Workspace2D>(1, 3 * Npeaks, 3 * Npeaks);
 
@@ -261,7 +257,7 @@ void GoniometerAnglesFromPhiRotation::exec() {
 
   ws->setPoints(0, Xvals);
 
-  //       -------------Set up other Fit function arguments------------------
+  //--------------------Set up other Fit function arguments------------------
   V3D dir(MinData[2], MinData[3], MinData[4]);
   dir.normalize();
   Quat Q(MinData[1] * dphi, dir);
@@ -309,8 +305,6 @@ void GoniometerAnglesFromPhiRotation::exec() {
 
   Fit->executeAsChildAlg();
 
-  // std::string status = Fit->getProperty("OutputStatus");
-
   boost::shared_ptr<API::ITableWorkspace> results =
       Fit->getProperty("OutputParameters");
   double chisq = Fit->getProperty("OutputChi2overDoF");
@@ -354,15 +348,6 @@ void GoniometerAnglesFromPhiRotation::exec() {
   g_log.notice() << "     #indexed =" << Nindexed << '\n';
   g_log.notice()
       << "              ==============================================\n";
-
-  // std::cout << "============================ Results
-  // ============================\n";
-  // std::cout << "     phi,chi, and omega= (" << phi2 << "," << chi2 << "," <<
-  // omega2 << ")"
-  //     << '\n';
-  // std::cout << "     #indexed =" << Nindexed << '\n';
-  // std::cout << "              =============================================="
-  // << '\n';
 
   setProperty("Phi2", phi2);
   setProperty("Chi2", chi2);

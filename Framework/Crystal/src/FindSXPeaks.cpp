@@ -315,9 +315,8 @@ void FindSXPeaks::exec() {
     }
 
     PARALLEL_CRITICAL(entries) {
-      for (const auto &peak : *foundPeaks) {
-        entries.push_back(peak);
-      }
+      std::copy(foundPeaks->cbegin(), foundPeaks->cend(),
+                std::back_inserter(entries));
     }
     progress.report();
     PARALLEL_END_INTERUPT_REGION
