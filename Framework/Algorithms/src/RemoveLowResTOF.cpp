@@ -253,7 +253,6 @@ double RemoveLowResTOF::calcTofMin(const std::size_t workspaceIndex,
   double tmin = 0.;
   if (isEmpty(m_wavelengthMin)) {
     std::map<detid_t, double> offsets; // just an empty offsets map
-    Geometry::Instrument_const_sptr instrument = m_inputWS->getInstrument();
     double dspmap = Conversion::tofToDSpacingFactor(
         l1, spectrumInfo.l2(workspaceIndex),
         spectrumInfo.twoTheta(workspaceIndex), detNumbers, offsets);

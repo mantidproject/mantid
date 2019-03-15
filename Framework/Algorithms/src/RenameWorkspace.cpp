@@ -55,8 +55,6 @@ std::map<std::string, std::string> RenameWorkspace::validateInputs() {
   using namespace std;
   map<string, string> errorList;
 
-  // Get the input workspace
-  Workspace_sptr inputWS = getProperty("InputWorkspace");
   // get the output workspace name
   std::string outputwsName = getPropertyValue("OutputWorkspace");
   // check if we are overriding existing workspaces

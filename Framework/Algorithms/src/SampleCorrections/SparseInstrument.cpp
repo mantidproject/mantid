@@ -93,7 +93,7 @@ extremeAngles(const API::MatrixWorkspace &ws) {
       maxLong = lon;
     }
   }
-  return std::tie(minLat, maxLat, minLong, maxLong);
+  return std::make_tuple(minLat, maxLat, minLong, maxLong);
 }
 
 /** Find the maximum and minimum wavelength points over the entire workpace.
@@ -110,7 +110,7 @@ std::tuple<double, double> extremeWavelengths(const API::MatrixWorkspace &ws) {
     const auto last = std::prev(h.end());
     currentMax = std::max(last->center(), currentMax);
   }
-  return std::tie(currentMin, currentMax);
+  return std::make_tuple(currentMin, currentMax);
 }
 
 /** Create a template histogram for the sparse instrument workspace.
