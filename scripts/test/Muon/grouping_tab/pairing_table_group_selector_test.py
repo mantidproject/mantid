@@ -16,6 +16,11 @@ if sys.version_info.major > 2:
 else:
     import mock
 
+def pair_name():
+    name = []
+    for i in range(21):
+        name.append("pair_" + str(i+1))
+    return name
 
 class GroupSelectorTest(unittest.TestCase):
 
@@ -31,6 +36,7 @@ class GroupSelectorTest(unittest.TestCase):
         self.presenter = PairingTablePresenter(self.view, self.model)
 
         self.view.warning_popup = mock.Mock()
+        self.view.enter_pair_name = mock.Mock(side_effect=pair_name())
 
     def tearDown(self):
         self.obj = None

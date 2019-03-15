@@ -17,6 +17,12 @@ else:
 
 maximum_number_of_groups = 20
 
+def group_name():
+    name = []
+    for i in range(maximum_number_of_groups + 1):
+        name.append("group_" + str(i))
+    return name
+
 
 class GroupingTablePresenterTest(unittest.TestCase):
 
@@ -33,7 +39,7 @@ class GroupingTablePresenterTest(unittest.TestCase):
         self.view = GroupingTableView(parent=self.obj)
         self.presenter = GroupingTablePresenter(self.view, self.model)
 
-        self.view.enter_group_name = mock.Mock(return_value="group")
+        self.view.enter_group_name = mock.Mock(side_effect=group_name())
         self.view.warning_popup = mock.Mock()
         self.gui_variable_observer.update = mock.MagicMock()
 
@@ -114,7 +120,6 @@ class GroupingTablePresenterTest(unittest.TestCase):
 
     def test_that_cannot_add_more_than_20_rows(self):
         for i in range(maximum_number_of_groups + 1):
-            self.view.enter_group_name = mock.Mock(return_value="group_" + str(i))
             self.presenter.handle_add_group_button_clicked()
 
         self.assertEqual(self.view.num_rows(), maximum_number_of_groups)
@@ -122,7 +127,6 @@ class GroupingTablePresenterTest(unittest.TestCase):
 
     def test_that_trying_to_add_a_20th_row_gives_warning_message(self):
         for i in range(maximum_number_of_groups + 1):
-            self.view.enter_group_name = mock.Mock(return_value="group_" + str(i))
             self.presenter.handle_add_group_button_clicked()
 
         self.assertEqual(self.view.warning_popup.call_count, 1)
@@ -137,16 +141,14 @@ class GroupingTablePresenterTest(unittest.TestCase):
     # ------------------------------------------------------------------------------------------------------------------
 
     def test_context_menu_add_grouping_with_no_rows_selected_adds_group_to_end_of_table(self):
-        self.view.enter_group_name = mock.Mock(return_value="group_1")
         self.presenter.handle_add_group_button_clicked()
 
         self.view.contextMenuEvent(0)
-        self.view.enter_group_name = mock.Mock(return_value="group_2")
         self.view.add_group_action.triggered.emit(True)
 
         self.assertEqual(len(self.model.groups), 2)
         self.assertEqual(self.view.num_rows(), 2)
-        self.assertEqual(self.view.get_table_item_text(1, 0), "group_2")
+        self.assertEqual(self.view.get_table_item_text(1, 0), "group_1")
 
     def test_context_menu_add_grouping_with_rows_selected_does_not_add_group(self):
         self.presenter.handle_add_group_button_clicked()
@@ -261,7 +263,8 @@ class GroupingTablePresenterTest(unittest.TestCase):
         self.view.grouping_table.item(0, 1).setText("20-25,10,5,4,3,2,1")
 
         self.assertEqual(self.view.get_table_item_text(0, 1), "1-5,10,20-25")
-        self.assertEqual(self.model._data._groups["group"].detectors, [1, 2, 3, 4, 5, 10, 20, 21, 22, 23, 24, 25])
+        self.assertEqual(self.model._data._groups["group_0"].detectors, [1, 2, 3, 4, 5, 10, 20, 21, 22, 23, 24, 25])
+        self.assertEqual(self.model._data._groups["group_0"].detectors, [1, 2, 3, 4, 5, 10, 20, 21, 22, 23, 24, 25])
 
     def test_that_if_detector_list_changed_that_number_of_detectors_updates(self):
         self.presenter.handle_add_group_button_clicked()
