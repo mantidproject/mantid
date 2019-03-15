@@ -210,7 +210,7 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
 
     def __needToLoadCal(self):
         if (not self.getProperty(CAL_FILE).isDefault) or (not self.getProperty(GROUP_FILE).isDefault):
-            return bool(self.__calWksp and self.__grpWksp and self.__mskWksp)
+            return not bool(self.__calWksp and self.__grpWksp and self.__mskWksp)
         return False
 
     def __determineCharacterizations(self, filename, wkspname):
