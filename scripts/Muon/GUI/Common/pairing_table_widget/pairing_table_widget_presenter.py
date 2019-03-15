@@ -127,7 +127,9 @@ class PairingTablePresenter(object):
 
     def handle_add_pair_button_clicked(self):
         new_pair_name = self._view.enter_pair_name()
-        if self.validate_pair_name(new_pair_name):
+        if new_pair_name in self._model.group_and_pair_names:
+            self._view.warning_popup("Groups and pairs must have unique names")
+        elif self.validate_pair_name(new_pair_name):
             if len(self._model.group_names) == 1:
                 group1 = self._model.group_names[0]
                 group2 = self._model.group_names[0]
@@ -137,7 +139,7 @@ class PairingTablePresenter(object):
             else:
                 group1 = None
                 group2 = None
-            pair = MuonPair(pair_name=new_pair_name,
+            pair = MuonPair(pair_name=str(new_pair_name),
                             forward_group_name=group1, backward_group_name=group2, alpha=1.0)
             self.add_pair(pair)
             self.notify_data_changed()

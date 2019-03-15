@@ -96,7 +96,9 @@ class GroupingTablePresenter(object):
 
     def handle_add_group_button_clicked(self):
         new_group_name = self._view.enter_group_name()
-        if self.validate_group_name(new_group_name):
+        if new_group_name in self._model.group_and_pair_names:
+            self._view.warning_popup("Groups and pairs must have unique names")
+        elif self.validate_group_name(new_group_name):
             group = MuonGroup(group_name=str(new_group_name), detector_ids=[1])
             self.add_group(group)
 

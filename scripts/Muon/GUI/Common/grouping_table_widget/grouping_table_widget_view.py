@@ -189,7 +189,8 @@ class GroupingTableView(QtGui.QWidget):
             self.grouping_table.removeRow(last_row)
 
     def enter_group_name(self):
-        new_group_name, ok = QtGui.QInputDialog.getText(None, 'Group Name', 'Enter name of new group:')
+        new_group_name, ok = QtGui.QInputDialog.getText(self, 'Group Name', 'Enter name of new group:')
+        group_index = 1
         if ok:
             return new_group_name
 

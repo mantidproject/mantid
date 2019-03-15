@@ -293,7 +293,7 @@ class PairingTableView(QtGui.QWidget):
             self.pairing_table.removeRow(last_row)
 
     def enter_pair_name(self):
-        new_pair_name, ok = QtGui.QInputDialog.getText(None, 'Pair Name', 'Enter name of new pair:')
+        new_pair_name, ok = QtGui.QInputDialog.getText(self, 'Pair Name', 'Enter name of new pair:')
         if ok:
             return new_pair_name
 
