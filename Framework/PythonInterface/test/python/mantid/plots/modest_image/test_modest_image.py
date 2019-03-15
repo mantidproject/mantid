@@ -13,14 +13,6 @@ import numpy as np
 
 from mantid.plots.modest_image import ModestImage
 
-#The parameterized module isn't readily available on all platform we support.
-#As of March 2019 these tests are only running on Ubuntu builds.
-run_parameterized_tests = True
-try:
-    from parameterized import parameterized
-except:
-    run_parameterized_tests = False
-
 x, y = np.mgrid[0:300, 0:300]
 _data = np.sin(x / 10.) * np.cos(y / 30.)
 
@@ -149,16 +141,16 @@ class ModestImageTest(unittest.TestCase):
         check('zoom_out', modest.axes, axim.axes, thresh=0.4)
 
 
-    INTRP_METHODS = ('nearest', 'bilinear', 'bicubic',
-                    'spline16', 'spline36', 'hanning',
-                    'hamming', 'hermite', 'kaiser',
-                    'quadric', 'catrom', 'gaussian',
-                    'bessel', 'mitchell', 'sinc', 'lanczos',
-                    'none')
+    def test_interpolate(self):
 
-    if run_parameterized_tests:
-        @parameterized.expand(INTRP_METHODS)
-        def test_interpolate(self, method):
+        INTRP_METHODS = ('nearest', 'bilinear', 'bicubic',
+                        'spline16', 'spline36', 'hanning',
+                        'hamming', 'hermite', 'kaiser',
+                        'quadric', 'catrom', 'gaussian',
+                        'bessel', 'mitchell', 'sinc', 'lanczos',
+                        'none')
+
+        for method in INTRP_METHODS:
             """ change interpolation """
             data = default_data()
             modest = init(ModestImage, data)
@@ -243,15 +235,14 @@ class ModestImageTest(unittest.TestCase):
                                       ax.get_array())
 
 
-    EXTENT_OPTIONS = itertools.product(['upper', 'lower'],
-                                       [None, [1., 7., -1., 5.]],
-                                       ['', 'x', 'y', 'xy'])
 
+    def test_extent(self):
 
-    if run_parameterized_tests:
-        @parameterized.expand(EXTENT_OPTIONS)
-        def test_extent(self, origin, extent, flip):
+        EXTENT_OPTIONS = itertools.product(['upper', 'lower'],
+                                   [None, [1., 7., -1., 5.]],
+                                   ['', 'x', 'y', 'xy'])
 
+        for origin, extent, flip in EXTENT_OPTIONS:
             data = default_data()
 
             # Use extent= keyword for imshow
