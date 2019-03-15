@@ -121,8 +121,8 @@ Engineering Diffraction
 
 New
 ###
-
 - Scripts added that produce the same results as the ISIS engineering gui (supports ENGINX and IMAT), this is to allow use with ISIS autoreduction. The script plots calibration automatically, like the GUI.
+- Changed 'Add Peak' button on fitting tab of gui to read 'Add Peak to List' to clarify use. 
 
 Bugfixes
 ########
