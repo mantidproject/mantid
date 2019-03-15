@@ -12,6 +12,9 @@ import matplotlib.image as mi
 import numpy as np
 
 from mantid.plots.modest_image import ModestImage
+
+#The parameterized module isn't readily available on all platform we support.
+#As of March 2019 these tests are only running on Ubuntu builds.
 run_parameterized_tests = True
 try:
     from parameterized import parameterized
