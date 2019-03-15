@@ -125,9 +125,6 @@ size_t CrystalFieldMultiSpectrum::getNumberDomains() const {
   if (!m_target) {
     buildTargetFunction();
   }
-  if (!m_target) {
-    throw std::runtime_error("Failed to build target function.");
-  }
   return m_target->getNumberDomains();
 }
 

@@ -219,7 +219,7 @@ void ConvertToYSpace::exec() {
         }
       }
     }
-
+    progress->report();
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION

@@ -219,11 +219,9 @@ std::string shortParameterName(const std::string &longName) {
 
 bool containsMultipleData(const std::vector<MatrixWorkspace_sptr> &workspaces) {
   const auto &first = workspaces.front();
-  for (const auto &workspace : workspaces) {
-    if (workspace != first)
-      return true;
-  }
-  return false;
+  return std::any_of(
+      workspaces.cbegin(), workspaces.cend(),
+      [&first](const auto &workspace) { return workspace != first; });
 }
 
 template <typename F, typename Renamer>
