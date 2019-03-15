@@ -157,9 +157,14 @@ getAnalyser(MatrixWorkspace_sptr workspace) {
         "Could not load instrument resolution from parameter file");
 
   auto component = instrument->getComponentByName(analysers[0]);
-  auto resolutionParameters = component->getNumberParameter("resolution");
-  if (nullptr == component || resolutionParameters.empty())
+  if (component) {
+    auto resolutionParameters = component->getNumberParameter("resolution");
+    if (resolutionParameters.empty()) {
+      readAnalyserFromFile(analysers[0], workspace);
+    }
+  } else {
     readAnalyserFromFile(analysers[0], workspace);
+  }
   return workspace->getInstrument()->getComponentByName(analysers[0]);
 }
 
