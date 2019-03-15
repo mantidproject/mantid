@@ -90,6 +90,7 @@ endif ()
     mantidqt/utils/test/test_qt_utils.py
     mantidqt/utils/test/test_writetosignal.py
 
+    mantidqt/widgets/algorithmselector/test/observer_test.py
     mantidqt/widgets/algorithmselector/test/test_algorithmselector.py
     mantidqt/widgets/codeeditor/test/test_codeeditor.py
     mantidqt/widgets/codeeditor/test/test_errorformatter.py
