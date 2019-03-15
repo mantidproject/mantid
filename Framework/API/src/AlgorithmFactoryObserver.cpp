@@ -11,9 +11,11 @@ namespace {
 template <typename Observer>
 void modifyObserver(const bool turnOn, bool &isObserving, Observer &observer) {
   if (turnOn && !isObserving) {
-    Mantid::API::AlgorithmFactory::Instance().notificationCenter.addObserver(observer);
+    Mantid::API::AlgorithmFactory::Instance().notificationCenter.addObserver(
+        observer);
   } else if (!turnOn && isObserving) {
-    Mantid::API::AlgorithmFactory::Instance().notificationCenter.removeObserver(observer);
+    Mantid::API::AlgorithmFactory::Instance().notificationCenter.removeObserver(
+        observer);
   }
   isObserving = turnOn;
 }
