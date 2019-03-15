@@ -20,7 +20,6 @@ from workbench.widgets.plotselector.presenter import PlotSelectorPresenter
 from workbench.widgets.plotselector.view import EXPORT_TYPES, PlotSelectorView, Column
 
 
-
 class PlotSelectorWidgetTest(GuiTest):
 
     def setUp(self):
