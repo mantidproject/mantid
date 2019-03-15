@@ -169,8 +169,7 @@ void DiskBuffer::writeOldObjects() {
       // the value of the argument is
       // NOT GUARANTEED to be incremented or decremented before it is passed to
       // the function.
-      auto it = --couldNotWrite.end();
-      memoryNotWritten += obj->setBufferPosition(it);
+      memoryNotWritten += obj->setBufferPosition(--couldNotWrite.end());
       objectsNotWritten++;
     }
   }

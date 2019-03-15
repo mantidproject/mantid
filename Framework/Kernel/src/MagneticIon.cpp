@@ -1336,9 +1336,8 @@ std::vector<std::string> getMagneticIonList() {
   const IonIndex &ionIndex = ionMap();
   std::vector<std::string> keys;
   keys.reserve(ionIndex.size());
-  for (auto kv : ionIndex) {
-    keys.push_back(kv.first);
-  }
+  std::transform(ionIndex.cbegin(), ionIndex.cend(), std::back_inserter(keys),
+                 [](const auto kv) { return kv.first; });
   return keys;
 }
 

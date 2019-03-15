@@ -162,9 +162,8 @@ std::unique_ptr<Property> loadProperty(::NeXus::File *file,
     // Convert time in seconds to DateAndTime
     Types::Core::DateAndTime start(startStr);
     times.reserve(timeSec.size());
-    for (double time : timeSec) {
-      times.push_back(start + time);
-    }
+    std::transform(timeSec.cbegin(), timeSec.cend(), std::back_inserter(times),
+                   [&start](const auto &time) { return start + time; });
   }
 
   file->openData("value");

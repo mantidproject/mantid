@@ -63,22 +63,26 @@ public:
 
   void testStrLook() {
     // By Default perl regex because using boost directly
-    TS_ASSERT_EQUALS(
-        StrLook("Mantid Geometry Regular Expression", boost::regex("xp")), 1);
-    TS_ASSERT_EQUALS(
-        StrLook("Mantid Geometry Regular Expression", boost::regex("met")), 1);
-    TS_ASSERT_EQUALS(
-        StrLook("Mantid Geometry Regular Expression", boost::regex(" ")), 1);
-    TS_ASSERT_EQUALS(
-        StrLook("Mantid Geometry Regular Expression", boost::regex("rE")), 0);
+    TS_ASSERT_EQUALS(StrLook(std::string("Mantid Geometry Regular Expression"),
+                             boost::regex("xp")),
+                     1);
+    TS_ASSERT_EQUALS(StrLook(std::string("Mantid Geometry Regular Expression"),
+                             boost::regex("met")),
+                     1);
+    TS_ASSERT_EQUALS(StrLook(std::string("Mantid Geometry Regular Expression"),
+                             boost::regex(" ")),
+                     1);
+    TS_ASSERT_EQUALS(StrLook(std::string("Mantid Geometry Regular Expression"),
+                             boost::regex("rE")),
+                     0);
 
     TS_ASSERT_EQUALS(
-        StrLook("1234-5678-1234-456",
+        StrLook(std::string("1234-5678-1234-456"),
                 boost::regex("([[:digit:]]{4}[- ]){3}[[:digit:]]{3,4}")),
         1);
     TS_ASSERT_EQUALS(
         StrLook(
-            "OX11 0QX",
+            std::string("OX11 0QX"),
             boost::regex(
                 "^[a-zA-Z]{1,2}[0-9][0-9A-Za-z]{0,1} {0,1}[0-9][A-Za-z]{2}$")),
         1);

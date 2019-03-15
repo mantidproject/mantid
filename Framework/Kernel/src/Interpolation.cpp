@@ -189,11 +189,9 @@ std::istream &operator>>(std::istream &in, Interpolation &f) {
   f.resetData(); // Reset data, in case the interpolation table is not empty
 
   for (unsigned int i = 3; i < values.count(); i++) {
-    std::stringstream str(values[i]);
+    std::stringstream strstream(values[i]);
     double x, y;
-
-    str >> x >> y;
-
+    strstream >> x >> y;
     f.addPoint(x, y);
   }
 
