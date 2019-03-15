@@ -69,9 +69,6 @@ Negative Testing Ideas
 
 - Using files which aren't calibration files \- Mantid shouldn't crash
 
-- Using data from non calibration runs (i.e. any other run from that instrument) \- The calibration should stop
-
-
 .. _focus-Engineering_Diffraction_test-ref:
 
 Focus
@@ -109,6 +106,7 @@ Negative Testing Ideas
 
 - Whilst the data is being focused only `Plot Data Representation` should be changeable 
 
+
 .. _preProcessing-Engineering_Diffraction_test-ref:
 
 Pre-processing
@@ -122,6 +120,9 @@ workspace with TOF as the X axis.
 
 If the multi-period data with pulse times is captured `Multi-period data` should be used instead
 with the delta in time on every step of the X axis entered. 
+
+For testing purposes with regular time binning testing should be done using a .s0 file such as 299735.s08,
+multi-period data should instead use a run from 285643-285701 which are event workspaces.
 
 Fitting
 ^^^^^^^

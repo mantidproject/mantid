@@ -175,6 +175,7 @@ def read_and_convert_pyqt4_functions(filename):
             handle.write(line)
     return lines
 
+
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(description='Convert old qt4 signals to qt5-style')

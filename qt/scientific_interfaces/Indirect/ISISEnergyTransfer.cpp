@@ -39,32 +39,38 @@ std::string createGroupString(std::size_t const &start,
 }
 
 std::string createGroupingString(std::size_t const &groupSize,
-                                 std::size_t const &numberOfGroups) {
-  auto groupingString = createRangeString(0, groupSize - 1);
-  for (auto i = groupSize; i < groupSize * numberOfGroups; i += groupSize)
+                                 std::size_t const &numberOfGroups,
+                                 std::size_t const &spectraMin) {
+  auto groupingString =
+      createRangeString(spectraMin, spectraMin + groupSize - 1);
+  for (auto i = spectraMin + groupSize;
+       i < spectraMin + groupSize * numberOfGroups; i += groupSize)
     groupingString += "," + createGroupString(i, groupSize);
   return groupingString;
 }
 
 std::string createDetectorGroupingString(std::size_t const &groupSize,
                                          std::size_t const &numberOfGroups,
-                                         std::size_t const &numberOfDetectors) {
-  const auto groupingString = createGroupingString(groupSize, numberOfGroups);
+                                         std::size_t const &numberOfDetectors,
+                                         std::size_t const &spectraMin) {
+  const auto groupingString =
+      createGroupingString(groupSize, numberOfGroups, spectraMin);
   const auto remainder = numberOfDetectors % numberOfGroups;
   if (remainder == 0)
     return groupingString;
   return groupingString + "," +
-         createRangeString(numberOfDetectors - remainder,
-                           numberOfDetectors - 1);
+         createRangeString(spectraMin + numberOfDetectors - remainder,
+                           spectraMin + numberOfDetectors - 1);
 }
 
 std::string createDetectorGroupingString(std::size_t const &numberOfDetectors,
-                                         std::size_t const &numberOfGroups) {
+                                         std::size_t const &numberOfGroups,
+                                         std::size_t const &spectraMin) {
   const auto groupSize = numberOfDetectors / numberOfGroups;
   if (groupSize == 0)
-    return createRangeString(0, numberOfDetectors - 1);
+    return createRangeString(spectraMin, spectraMin + numberOfDetectors - 1);
   return createDetectorGroupingString(groupSize, numberOfGroups,
-                                      numberOfDetectors);
+                                      numberOfDetectors, spectraMin);
 }
 
 std::vector<std::size_t>
@@ -613,10 +619,11 @@ ISISEnergyTransfer::createMapFile(const std::string &groupType) {
 
 std::string ISISEnergyTransfer::getDetectorGroupingString() const {
   const unsigned int nGroups = m_uiForm.spNumberGroups->value();
-  const unsigned int nSpectra =
-      1 + m_uiForm.spSpectraMax->value() - m_uiForm.spSpectraMin->value();
+  const unsigned int spectraMin = m_uiForm.spSpectraMin->value();
+  const unsigned int nSpectra = 1 + m_uiForm.spSpectraMax->value() - spectraMin;
   return createDetectorGroupingString(static_cast<std::size_t>(nSpectra),
-                                      static_cast<std::size_t>(nGroups));
+                                      static_cast<std::size_t>(nGroups),
+                                      static_cast<std::size_t>(spectraMin));
 }
 
 /**
@@ -680,24 +687,18 @@ void ISISEnergyTransfer::plotRaw() {
   auto extension = rawFile.right(rawFile.length() - pos);
   QFileInfo rawFileInfo(rawFile);
   std::string name = rawFileInfo.baseName().toStdString();
+  auto const instName =
+      getInstrumentConfiguration()->getInstrumentName().toStdString();
 
   IAlgorithm_sptr loadAlg = AlgorithmManager::Instance().create("Load");
   loadAlg->initialize();
   loadAlg->setProperty("Filename", rawFile.toStdString());
   loadAlg->setProperty("OutputWorkspace", name);
-  loadAlg->setProperty("LoadLogFiles", false);
-  if (extension.compare(".nxs") == 0) {
-    int64_t detectorMin =
-        static_cast<int64_t>(m_uiForm.spPlotTimeSpecMin->value());
-    int64_t detectorMax =
-        static_cast<int64_t>(m_uiForm.spPlotTimeSpecMax->value());
-    loadAlg->setProperty("SpectrumMin", detectorMin);
-    loadAlg->setProperty("SpectrumMax", detectorMax);
-  } else {
+  if (instName != "TOSCA") {
+    loadAlg->setProperty("LoadLogFiles", false);
     loadAlg->setProperty("SpectrumMin", detectorMin);
     loadAlg->setProperty("SpectrumMax", detectorMax);
   }
-
   loadAlg->execute();
 
   if (m_uiForm.ckBackgroundRemoval->isChecked()) {

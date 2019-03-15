@@ -260,7 +260,7 @@ class GroupingTablePresenterTest(unittest.TestCase):
     def test_that_if_not_entering_numbers_into_detector_IDs_the_changes_are_rejected(self):
         self.add_three_groups_to_table()
 
-        invalid_id_lists = ["fwd", "a", "A", "!", "_", "(1)", "11a22"]
+        invalid_id_lists = ["fwd", "a", "A", "!", "_", "(1)", "11a22", '0']
 
         call_count = 0
         for invalid_ids in invalid_id_lists:
@@ -357,6 +357,27 @@ class GroupingTablePresenterTest(unittest.TestCase):
 
         self.assertFalse('GroupRangeMax' in self.data.gui_variables)
         self.assertEqual(self.gui_variable_observer.update.call_count, 2)
+
+    def test_updating_range_min_to_be_greater_than_range_max_displays_warning_and_vice_versa(self):
+        original_max = '1.12'
+        original_min = '0.1'
+        self.view.group_range_max.setText(original_max)
+        self.view.group_range_min.setText(original_min)
+        self.view.group_range_use_last_data.setChecked(False)
+        self.view.group_range_use_first_good_data.setChecked(False)
+
+        self.view.group_range_min.setText('2.0')
+        self.view.group_range_min.editingFinished.emit()
+
+        self.assertEqual(self.data.gui_variables['GroupRangeMin'], float(original_min))
+        self.view.warning_popup.assert_called_once_with('Minimum of group asymmetry range must be less than maximum')
+
+        self.view.group_range_max.setText('0.05')
+        self.view.group_range_max.editingFinished.emit()
+
+        self.assertEqual(self.data.gui_variables['GroupRangeMax'], float(original_max))
+        self.view.warning_popup.assert_called_with('Maximum of group asymmetry range must be greater than minimum')
+        self.assertEqual(self.view.warning_popup.call_count, 2)
 
 
 if __name__ == '__main__':

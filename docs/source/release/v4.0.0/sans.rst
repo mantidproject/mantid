@@ -10,15 +10,9 @@ Algorithms
 
 New
 ###
-* Added manual saving functionality to the new GUI.
 
 - :ref:`SANSILLReduction <algm-SANSILLReduction>` performs SANS data reduction for ILL instruments D11, D22, D33.
 - :ref:`SANSILLIntegration <algm-SANSILLIntegration>` performs integration of corrected SANS data to produce I(Q), I(Phi,Q) or I(Qx,Qy).
-
-Improvements
-############
-
-- :ref:`Q1DWeighted <algm-Q1DWeighted>` now supports the option of asymmetric wedges for unisotropic scatterer.
 
 Removed
 #######
@@ -27,12 +21,13 @@ Removed
 
 ISIS SANS Interface
 -------------------
+* Added manual saving functionality to the new GUI.
 
 This release sees the "new" ISIS SANS interface becoming the primary interface, and the deprecation of the old interface.
 Active development will only be carried out on the new interface and only major bugs will be fixed in the deprecated interface.
 This change does not affect the functionality of either of the interfaces.
 
-To signify this change, the "ISIS SANS" interface has been renamed "ISIS SANS (Deprecated)" and the "ISIS SANS v2 experimental" interface has been renamed "ISIS SANS".
+To signify this change, the "ISIS SANS" interface has been renamed "Old ISIS SANS (Deprecated)" and the "ISIS SANS v2 experimental" interface has been renamed "ISIS SANS".
 The old interface will be removed in a later release.
 
 .. figure:: ../../images/sans_isis_interface_4.0.png

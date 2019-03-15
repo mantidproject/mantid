@@ -233,6 +233,11 @@ class MainWindow(QMainWindow):
         self.populate_interfaces_menu()
         self.algorithm_selector.refresh()
 
+        # turn on algorithm factory notifications
+        from mantid.api import AlgorithmFactory
+        algorithm_factory = AlgorithmFactory.Instance()
+        algorithm_factory.enableNotifications()
+
     def set_splash(self, msg=None):
         if not self.splash:
             return
@@ -259,6 +264,8 @@ class MainWindow(QMainWindow):
                                            on_triggered=self.save_script,
                                            shortcut="Ctrl+S",
                                            shortcut_context=Qt.ApplicationShortcut)
+        action_save_script_as = create_action(self, "Save Script as...",
+                                              on_triggered=self.save_script_as)
         action_save_project = create_action(self, "Save Project",
                                             on_triggered=self.save_project)
         action_save_project_as = create_action(self, "Save Project as...",
@@ -272,9 +279,11 @@ class MainWindow(QMainWindow):
         action_quit = create_action(self, "&Quit", on_triggered=self.close,
                                     shortcut="Ctrl+Q",
                                     shortcut_context=Qt.ApplicationShortcut)
-        self.file_menu_actions = [action_open, action_load_project, None, action_save_script, action_save_project,
-                                  action_save_project_as, None, action_settings, None, action_manage_directories, None,
-                                  action_quit]
+        self.file_menu_actions = [action_open, action_load_project, None,
+                                  action_save_script, action_save_script_as,
+                                  action_save_project, action_save_project_as,
+                                  None, action_settings, None,
+                                  action_manage_directories, None, action_quit]
         # view menu
         action_restore_default = create_action(self, "Restore Default Layout",
                                                on_triggered=self.prep_window_for_reset,
@@ -312,7 +321,8 @@ class MainWindow(QMainWindow):
         GUI_BLACKLIST = ['ISIS_Reflectometry_Old.py',
                          'Frequency_Domain_Analysis_Old.py',
                          'Frequency_Domain_Analysis.py',
-                         'Elemental_Analysis.py']
+                         'Elemental_Analysis.py',
+                         'Elemental_Analysis_old.py']
 
         # detect the python interfaces
         interfaces = {}
@@ -463,6 +473,9 @@ class MainWindow(QMainWindow):
 
     def save_script(self):
         self.editor.save_current_file()
+
+    def save_script_as(self):
+        self.editor.save_current_file_as()
 
     def save_project(self):
         self.project.save()

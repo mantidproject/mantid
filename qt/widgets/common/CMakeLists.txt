@@ -904,7 +904,7 @@ mtd_add_qt_tests (TARGET_NAME MantidQtWidgetsCommonTest
 # This file is NOT packaged. See installers/WinInstaller for the package
 # version.
 ###########################################################################
-if ( WIN32 )
+if ( WIN32 AND ENABLE_MANTIDPLOT)
   set ( QT_CONF qt.conf )
   configure_file ( qt.conf.template ${CMAKE_CURRENT_BINARY_DIR}/${QT_CONF} @ONLY )
   add_custom_command ( TARGET MantidQtWidgetsCommonQt4 POST_BUILD

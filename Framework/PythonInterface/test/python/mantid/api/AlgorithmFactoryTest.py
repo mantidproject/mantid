@@ -59,6 +59,17 @@ class AlgorithmFactoryTest(unittest.TestCase):
     def test_algorithm_registration_with_invalid_object_throws(self):
         self.assertRaises(ValueError, AlgorithmFactory.subscribe, NotAnAlgorithm)
 
+    def test_can_enable_and_disable_notifications(self):
+        try:
+            AlgorithmFactory.enableNotifications()
+        except Exception:
+            self.assertTrue(False, "Algorithm factory class is expected to have a method 'enableNotifications'")
+
+        try:
+            AlgorithmFactory.disableNotifications()
+        except Exception:
+            self.assertTrue(False, "Algorithm factory class is expected to have a method 'disableNotifications'")
+
 
 if __name__ == '__main__':
     unittest.main()

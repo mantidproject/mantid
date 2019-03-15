@@ -129,7 +129,7 @@ class LoadRunWidgetIncrementDecrementSingleFileModeTest(unittest.TestCase):
         self.assertEqual(self.presenter.runs, [[self._loaded_run], [new_run]])
         self.assertEqual(self.presenter.workspaces, [self._loaded_workspace, {'MainFieldDirection': 'transverse'}])
 
-        self.assertEqual(self.view.get_run_edit_text(), '1233-1234')
+        self.assertEqual(self.view.get_run_edit_text(), '1233')
 
     @run_test_with_and_without_threading
     def test_that_increment_run_loads_the_data_correctly(self):
@@ -144,7 +144,7 @@ class LoadRunWidgetIncrementDecrementSingleFileModeTest(unittest.TestCase):
         self.assertEqual(self.presenter.runs, [[self._loaded_run], [new_run]])
         self.assertEqual(self.presenter.workspaces, [self._loaded_workspace, {'MainFieldDirection': 'transverse'}])
 
-        self.assertEqual(self.view.get_run_edit_text(), '1234-1235')
+        self.assertEqual(self.view.get_run_edit_text(), '1235')
 
     @run_test_with_and_without_threading
     def test_that_if_decrement_run_fails_the_data_are_returned_to_previous_state(self):
@@ -154,8 +154,8 @@ class LoadRunWidgetIncrementDecrementSingleFileModeTest(unittest.TestCase):
         self.wait_for_thread(self.presenter._load_thread)
 
         self.assert_model_has_not_changed()
-        self.assert_view_has_not_changed()
-#
+        self.assertEqual(self.view.get_run_edit_text(), '')
+
     @run_test_with_and_without_threading
     def test_that_if_increment_run_fails_the_data_are_returned_to_previous_state(self):
         self.load_utils_patcher.load_workspace_from_filename = mock.Mock(side_effect=self.load_failure)
@@ -164,7 +164,7 @@ class LoadRunWidgetIncrementDecrementSingleFileModeTest(unittest.TestCase):
         self.wait_for_thread(self.presenter._load_thread)
 
         self.assert_model_has_not_changed()
-        self.assert_view_has_not_changed()
+        self.assertEqual(self.view.get_run_edit_text(), '')
 
     @run_test_with_and_without_threading
     def test_that_if_decrement_run_fails_warning_message_is_displayed(self):

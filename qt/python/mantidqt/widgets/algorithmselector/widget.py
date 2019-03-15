@@ -17,6 +17,7 @@ from mantidqt.interfacemanager import InterfaceManager
 from mantidqt.utils.qt import block_signals
 from mantidqt.widgets.algorithmprogress import AlgorithmProgressWidget
 
+from .algorithm_factory_observer import AlgorithmSelectorFactoryObserver
 from .presenter import IAlgorithmSelectorView, SelectedAlgorithm
 
 
@@ -53,6 +54,15 @@ class AlgorithmSelectorWidget(IAlgorithmSelectorView, QWidget):
         self.tree = None
         QWidget.__init__(self, parent)
         IAlgorithmSelectorView.__init__(self, include_hidden)
+
+        self.afo = AlgorithmSelectorFactoryObserver(self)
+
+    def observeUpdate(self, toggle):
+        """
+        Set whether or not to update AlgorithmSelector if AlgorithmFactory changes
+        :param toggle: A bool. If true, we update AlgorithmSelector
+        """
+        self.afo.observeUpdate(toggle)
 
     def refresh(self):
         """Update the algorithms list"""
@@ -105,7 +115,7 @@ class AlgorithmSelectorWidget(IAlgorithmSelectorView, QWidget):
         """
         for key, sub_tree in sorted(algorithm_data.items()):
             if key == self.algorithm_key:
-                for name, versions in sub_tree.items():
+                for name, versions in sorted(sub_tree.items()):
                     versions = sorted(versions)
                     default_version_item = QTreeWidgetItem(['{0} v.{1}'.format(name, versions[-1])])
                     item_list.append(default_version_item)

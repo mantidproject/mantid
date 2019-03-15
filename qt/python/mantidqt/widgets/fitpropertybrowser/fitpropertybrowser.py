@@ -42,6 +42,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         self.init()
         self.setFeatures(self.DockWidgetMovable)
         self.canvas = canvas
+        self.workspace_labels = []
         # The toolbar state checker to be passed to the peak editing tool
         self.toolbar_state_checker = toolbar_state_checker
         # The peak editing tool
@@ -76,7 +77,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         """
         allowed_spectra = {}
         pattern = re.compile('(.+?): spec (\d+)')
-        for label in [lin.get_label() for lin in self.get_lines()]:
+        for label in self.workspace_labels:
             a_match = re.match(pattern, label)
             name, spec = a_match.group(1), int(a_match.group(2))
             spec_list = allowed_spectra.get(name, [])

@@ -37,6 +37,8 @@ def create_mock_masking_table():
 
 def create_mock_beam_centre_tab():
     view = mock.create_autospec(BeamCentre, spec_set=False)
+    view.r_min_line_edit = mock.Mock()
+    view.r_max_line_edit = mock.Mock()
     return view
 
 

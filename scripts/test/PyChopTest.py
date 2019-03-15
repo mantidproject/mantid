@@ -34,9 +34,10 @@ class PyChop2Tests(unittest.TestCase):
         self.assertTrue(flux[2] > flux[1])
         # Note that MAPS has been upgraded so now should have higher flux than MARI.
         self.assertTrue(flux[0] > flux[1])
-        # Checks that the resolution should be best for MARI, MAPS and MERLIN in that order
+        # Checks that the resolution should be best for MARI, MAPS, and MERLIN in that order
+        # actually MAPS and MARI resolutions are very close
         self.assertTrue(res[1][0] < res[0][0])
-        self.assertTrue(res[0][0] < res[2][0]) 
+        self.assertTrue(res[0][0] < res[2][0])
         # Now tests the standalone function
         for inc, instname in enumerate(instnames):
             rr, ff = PyChop2.calculate(instname, 's', 200, 18, 0)
