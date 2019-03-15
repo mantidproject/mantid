@@ -63,7 +63,6 @@ CustomInstallLib = patch_setuptools_command('install_lib')
     DEPENDS ${_outputs}
   )
 
-
   if ( ${ENABLE_WORKBENCH} )
     # setuptools by default wants to build into a directory called 'build' relative the to the working directory. We have overridden
     # commands in setup.py.in to force the build directory to take place out of source. The install directory is specified here and then
@@ -88,6 +87,16 @@ CustomInstallLib = patch_setuptools_command('install_lib')
     install(DIRECTORY ${_package_source_directory}
             DESTINATION ${_package_install_destination}
             PATTERN "test" EXCLUDE )
+
+    if (APPLE AND "${pkg_name}" STREQUAL "mantidqt")
+      # Horrible hack to get mantidqt into the MantidPlot.app bundle too.
+      # Remove this when MantidPlot is removed!!
+      set ( _package_install_destination ${BIN_DIR} )
+      # Registers the "installed" components with CMake so it will carry them over
+      install(DIRECTORY ${_package_source_directory}
+              DESTINATION ${_package_install_destination}
+              PATTERN "test" EXCLUDE )
+    endif()
 
     # install the generated executable - only tested with "workbench"
     if ( ARGC GREATER 1 AND "${ARGN}" STREQUAL "EXECUTABLE" )

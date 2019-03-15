@@ -12,14 +12,14 @@ from __future__ import absolute_import
 from collections import Counter, namedtuple
 
 import qtpy
-from mock import Mock, patch, call
+from mantid.py3compat.mock import Mock, patch, call
 import unittest
 
 from qtpy.QtCore import Qt
 from qtpy.QtTest import QTest
 
 from mantid.api import AlgorithmFactoryImpl
-from mantidqt.utils.qt.test import select_item_in_combo_box, select_item_in_tree, GuiTest
+from mantidqt.utils.qt.testing import select_item_in_combo_box, select_item_in_tree, GuiTest
 from mantidqt.widgets.algorithmselector.model import AlgorithmSelectorModel
 from mantidqt.widgets.algorithmselector.widget import AlgorithmSelectorWidget
 
@@ -36,6 +36,10 @@ mock_get_algorithm_descriptors.return_value = [
                             category='Stuff', alias=''),
     AlgorithmDescriptorMock(name='DoStuff', version=2,
                             category='Stuff', alias=''),
+    AlgorithmDescriptorMock(name='ComesFirst', version=1,
+                            category="Sorted", alias=''),
+    AlgorithmDescriptorMock(name='GoesSecond', version=1,
+                            category="Sorted", alias='')
 ]
 
 empty_mock_get_algorithm_descriptors = Mock()
@@ -157,6 +161,22 @@ class WidgetTest(GuiTest):
             QTest.keyClick(widget.search_box, Qt.Key_Return)
             createDialog.assert_called_once_with('DoStuff', 2)
 
+    def test_sorting_of_algorithms(self):
+        widget = AlgorithmSelectorWidget()
+        model = AlgorithmSelectorModel(None)
+        top_level = []
+
+        widget._add_tree_items(top_level, model.get_algorithm_data()[1])
+
+        self.assertEquals(top_level[0].text(0), "Data")
+        self.assertEquals(top_level[1].text(0), "Sorted")
+        self.assertEquals(top_level[2].text(0), "Stuff")
+        self.assertEquals(top_level[3].text(0), "Transform")
+
+        second_level = top_level[1].takeChildren()
+        self.assertEquals(second_level[0].text(0), "ComesFirst v.1")
+        self.assertEquals(second_level[1].text(0), "GoesSecond v.1")
+
     def test_refresh(self):
         # Set a mock to return an empty descriptor list
         getDescriptors_orig = AlgorithmFactoryImpl.getDescriptors
@@ -167,7 +187,7 @@ class WidgetTest(GuiTest):
         # put back the original
         AlgorithmFactoryImpl.getDescriptors = getDescriptors_orig
         widget.refresh()
-        self.assertEqual(3, widget.tree.topLevelItemCount())
+        self.assertEqual(4, widget.tree.topLevelItemCount())
 
 
 if __name__ == '__main__':

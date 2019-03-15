@@ -13,14 +13,13 @@ from __future__ import (absolute_import, unicode_literals)
 import os.path as osp
 
 # third-party library imports
-from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QVBoxLayout
 
 # local package imports
 from mantid.kernel import logger
-from mantidqt.utils.qt import add_actions, create_action
 from mantidqt.widgets.codeeditor.multifileinterpreter import MultiPythonFileInterpreter
-from workbench.plugins.base import PluginWidget
+from ..config.fonts import text_font
+from ..plugins.base import PluginWidget
 
 # from mantidqt.utils.qt import toQSettings when readSettings/writeSettings are implemented
 
@@ -44,13 +43,16 @@ TAB_SETTINGS_KEY = "Editors/SessionTabs"
 
 
 class MultiFileEditor(PluginWidget):
-    """Provides a tab widget for editing multiple files"""
+    """
+    Provides the container for the widget containing the CodeEditors in the Workbench
+    """
 
     def __init__(self, parent):
         super(MultiFileEditor, self).__init__(parent)
 
         # layout
-        self.editors = MultiPythonFileInterpreter(default_content=DEFAULT_CONTENT,
+        self.editors = MultiPythonFileInterpreter(font=text_font(),
+                                                  default_content=DEFAULT_CONTENT,
                                                   parent=self)
         layout = QVBoxLayout()
         layout.addWidget(self.editors)
@@ -62,52 +64,23 @@ class MultiFileEditor(PluginWidget):
         # attributes
         self.tabs_open_on_closing = None
 
-        self.run_action = create_action(
-            self, "Run",
-            on_triggered=self.editors.execute_current,
-            shortcut=("Ctrl+Return", "Ctrl+Enter"),
-            shortcut_context=Qt.ApplicationShortcut)
+    def load_settings_from_config(self, config):
+        self.editors.load_settings_from_config(config)
 
-        self.abort_action = create_action(
-            self, "Abort", on_triggered=self.editors.abort_current)
+    def execute_current_async(self):
+        """
+        Executes the selection in the currently active code editor.
+        This is used by MainWindow to execute a file after opening it.
 
-        # menu action to toggle the find/replace dialog
-        self.toggle_find_replace = create_action(self,
-                                                 'Find/Replace...',
-                                                 on_triggered=self.editors.toggle_find_replace_dialog,
-                                                 shortcut='Ctrl+F')
+        """
+        return self.editors.execute_current_async()
 
-        self.toggle_comment_action = create_action(
-            self.editors.current_editor(), "Comment/Uncomment",
-            on_triggered=self.editors.toggle_comment_current,
-            shortcut="Ctrl+/",
-            shortcut_context=Qt.ApplicationShortcut)
-
-        self.tabs_to_spaces_action = create_action(
-            self, 'Tabs to Spaces',
-            on_triggered=self.editors.tabs_to_spaces_current)
-
-        self.spaces_to_tabs_action = create_action(
-            self, 'Spaces to Tabs',
-            on_triggered=self.editors.spaces_to_tabs_current)
-
-        self.toggle_whitespace_action = create_action(
-            self, 'Toggle Whitespace Visible',
-            on_triggered=self.editors.toggle_whitespace_visible_all)
-
-        # Store actions for adding to menu bar; None will add a separator
-        self.editor_actions = [self.run_action,
-                               self.abort_action, None,
-                               self.toggle_find_replace,
-                               None,
-                               self.toggle_comment_action,
-                               self.toggle_whitespace_action, None,
-                               self.tabs_to_spaces_action,
-                               self.spaces_to_tabs_action, None]
-
-    def execute_current(self):
-        '''This is used by MainWindow to execute a file after opening it'''
-        return self.editors.execute_current()
+    def execute_async(self):
+        """
+        Executes _everything_ in currently active code editor.
+        :return:
+        """
+        return self.editors.execute_async()
 
     def restore_session_tabs(self, session_tabs):
         self.open_files_in_new_tabs(session_tabs, startup=True)
@@ -153,12 +126,10 @@ class MultiFileEditor(PluginWidget):
         self.restore_session_tabs(prev_session_tabs)
 
     def writeSettings(self, settings):
-        settings.set(TAB_SETTINGS_KEY, self.tabs_open_on_closing)
+        settings.set(TAB_SETTINGS_KEY, set(self.tabs_open_on_closing))
 
     def register_plugin(self):
         self.main.add_dockwidget(self)
-        # menus
-        add_actions(self.main.editor_menu, self.editor_actions)
 
     # ----------- Plugin Behaviour --------------------
 
@@ -175,3 +146,6 @@ class MultiFileEditor(PluginWidget):
 
     def save_current_file(self):
         self.editors.save_current_file()
+
+    def save_current_file_as(self):
+        self.editors.save_current_file_as()

@@ -7,23 +7,21 @@
 #  This file is part of the mantidqt package
 #
 #
-from __future__ import (absolute_import, unicode_literals)
+from __future__ import absolute_import
 
-import ctypes
 import inspect
-import time
 
 from qtpy.QtCore import QObject, Signal
+from qtpy.QtWidgets import QApplication
 from six import PY2, iteritems
 
-from mantidqt.utils.asynchronous import AsyncTask
+from mantidqt.utils.asynchronous import AsyncTask, BlockingAsyncTaskWithCallback
 from mantidqt.widgets.codeeditor.inputsplitter import InputSplitter
 
 if PY2:
     from inspect import getargspec as getfullargspec
 else:
     from inspect import getfullargspec
-
 
 EMPTY_FILENAME_ID = '<string>'
 FILE_ATTR = '__file__'
@@ -107,6 +105,7 @@ class PythonCodeExecution(QObject):
         super(PythonCodeExecution, self).__init__()
 
         self._globals_ns = None
+
         self._task = None
 
         self.reset_context()
@@ -119,29 +118,32 @@ class PythonCodeExecution(QObject):
         return self._globals_ns
 
     def abort(self):
-        """Cancel an asynchronous execution"""
-        # Implementation is based on
-        # https://stackoverflow.com/questions/5019436/python-how-to-terminate-a-blocking-thread
-        ctypes.pythonapi.PyThreadState_SetAsyncExc(ctypes.c_long(self._task.ident),
-                                                   ctypes.py_object(KeyboardInterrupt))
-        time.sleep(0.1)
+        if self._task is not None:
+            self._task.abort()
 
-    def execute_async(self, code_str, filename=None):
+    def execute_async(self, code_str, filename=None, blocking=False):
         """
         Execute the given code string on a separate thread. This function
         returns as soon as the new thread starts
 
         :param code_str: A string containing code to execute
         :param filename: See PythonCodeExecution.execute()
-        :returns: The created async task
+        :param blocking: If True the call will block until the task is finished
+        :returns: The created async task, only returns task if the blocking is False
         """
         # Stack is chopped on error to avoid the  AsyncTask.run->self.execute calls appearing
         # as these are not useful for the user in this context
-        task = AsyncTask(self.execute, args=(code_str, filename),
-                         success_cb=self._on_success, error_cb=self._on_error)
-        task.start()
-        self._task = task
-        return task
+        if not blocking:
+            task = AsyncTask(self.execute, args=(code_str, filename),
+                             success_cb=self._on_success, error_cb=self._on_error)
+            task.start()
+            self._task = task
+            return task
+        else:
+            self._task = BlockingAsyncTaskWithCallback(self.execute, args=(code_str, filename),
+                                                       success_cb=self._on_success, error_cb=self._on_error,
+                                                       blocking_cb=QApplication.processEvents)
+            return self._task.start()
 
     def execute(self, code_str, filename=None):
         """Execute the given code on the calling thread
@@ -156,15 +158,13 @@ class PythonCodeExecution(QObject):
             self.globals_ns[FILE_ATTR] = filename
         else:
             filename = EMPTY_FILENAME_ID
-        compile(code_str, filename, mode=COMPILE_MODE,
-                dont_inherit=True)
+        compile(code_str, filename, mode=COMPILE_MODE, dont_inherit=True)
 
         sig_progress = self.sig_exec_progress
         for block in code_blocks(code_str):
             sig_progress.emit(block.lineno)
             # compile so we can set the filename
-            code_obj = compile(block.code_str, filename, mode=COMPILE_MODE,
-                               dont_inherit=True)
+            code_obj = compile(block.code_str, filename, mode=COMPILE_MODE, dont_inherit=True)
             exec (code_obj, self.globals_ns, self.globals_ns)
 
     def generate_calltips(self):
@@ -221,6 +221,10 @@ def code_blocks(code_str):
     isp = InputSplitter()
     for line in lines:
         lineno_cur += 1
+        # IPython InputSplitter assumes that indentation is 4 spaces, not tabs.
+        # Accounting for that here, rather than using script-level "tabs to spaces"
+        # allows the user to keep tabs in their script if they wish.
+        line = line.replace("\t", " "*4)
         isp.push(line)
         # If we need more input to form a complete statement
         # or we are not at the end of the code then keep

@@ -13,6 +13,7 @@ set ( TEST_PY_FILES
   ApplyDetectorScanEffCorrTest.py
   BinWidthAtXTest.py
   CalculateEfficiencyCorrectionTest.py
+  CalculateFluxTest.py
   CalculateSampleTransmissionTest.py
   CheckForSampleLogsTest.py
   ConjoinSpectraTest.py

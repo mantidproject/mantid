@@ -390,7 +390,9 @@ public:
     std::vector<Link>
         expectedResults; // left empty as there are no expected results
     auto geom_obj = createCappedCylinder();
-    Track track(V3D(-10, 0, 0), V3D(1, 1, 0));
+    V3D dir(1., 1., 0.);
+    dir.normalize();
+    Track track(V3D(-10, 0, 0), dir);
 
     checkTrackIntercept(geom_obj, track, expectedResults);
   }

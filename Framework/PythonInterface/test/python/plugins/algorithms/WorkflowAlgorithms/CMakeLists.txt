@@ -28,6 +28,7 @@ set ( TEST_PY_FILES
   IndirectILLEnergyTransferTest.py
   IndirectILLReductionFWSTest.py
   IndirectILLReductionQENSTest.py
+  IndirectReplaceFitResultTest.py
   IndirectResolutionTest.py
   IndirectSampleChangerTest.py
   IndirectTransmissionMonitorTest.py
@@ -35,18 +36,20 @@ set ( TEST_PY_FILES
   IqtFitSequentialTest.py
   ISISIndirectDiffractionReductionTest.py
   ISISIndirectEnergyTransferTest.py
+  ISISIndirectEnergyTransferWrapperTest.py
   LoadWANDTest.py
   MDNormSCDPreprocessIncoherentTest.py
   MolDynTest.py
   MSDFitTest.py
   OSIRISDiffractionReductionTest.py
-  PowderDiffILLReductionTest.py
-  PowderDiffILLDetScanReductionTest.py
+  PowderILLDetectorScanTest.py
+  PowderILLParameterScanTest.py
   ReflectometryILLAutoProcessTest.py
   ReflectometryILLConvertToQTest.py
   ReflectometryILLPolarizationCorTest.py
   ReflectometryILLPreprocessTest.py
   ReflectometryILLSumForegroundTest.py
+  ReflectometryISISLoadAndProcessTest.py
   ResNorm2Test.py
   SANSDarkRunBackgroundCorrectionTest.py
   SANSFitShiftScaleTest.py

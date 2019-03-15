@@ -7,13 +7,13 @@
 # pylint: disable=invalid-name,no-init,too-many-lines
 from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import Direction, FloatArrayProperty, IntArrayBoundedValidator, \
-    IntArrayProperty, StringListValidator
+    IntArrayProperty, Property, StringListValidator
 from mantid.api import AlgorithmFactory, DataProcessorAlgorithm, FileAction, FileProperty, \
     MultipleFileProperty, Progress, PropertyMode, WorkspaceProperty
-from mantid.simpleapi import AlignAndFocusPowder, CloneWorkspace, \
+from mantid.simpleapi import AlignAndFocusPowder, AlignAndFocusPowderFromFiles, CloneWorkspace, \
     ConvertUnits, CreateGroupingWorkspace, DeleteWorkspace, Divide, EditInstrumentGeometry, \
     GetIPTS, Load, LoadDiffCal, LoadEventNexus, LoadMask, LoadIsawDetCal, LoadNexusProcessed, \
-    NormaliseByCurrent, PreprocessDetectorsToMD, Rebin, ReplaceSpecialValues, SaveAscii, \
+    Minus, NormaliseByCurrent, PreprocessDetectorsToMD, Rebin, ReplaceSpecialValues, SaveAscii, \
     SaveFocusedXYE, SaveGSS, SaveNexusProcessed, mtd
 import os
 import numpy as np
@@ -100,6 +100,15 @@ class SNAPReduce(DataProcessorAlgorithm):
 
         return output
 
+    def _exportWorkspace(self, propName, wkspName):
+        if wkspName and mtd.doesExist(wkspName):
+            if not self.existsProperty(propName):
+                self.declareProperty(WorkspaceProperty(propName,
+                                                       wkspName,
+                                                       Direction.Output))
+            self.log().debug('Exporting workspace through property "{}"={}'.format(propName, wkspName))
+            self.setProperty(propName, wkspName)
+
     def category(self):
         return "Diffraction\\Reduction"
 
@@ -109,6 +118,8 @@ class SNAPReduce(DataProcessorAlgorithm):
         self.declareProperty(IntArrayProperty("RunNumbers", values=[0], direction=Direction.Input,
                                               validator=validator),
                              "Run numbers to process, comma separated")
+        self.declareProperty('Background', Property.EMPTY_INT,
+                             doc='Background to subtract from each individual run')
 
         self.declareProperty("LiveData", False,
                              "Read live data - requires a saved run in the current IPTS "
@@ -149,7 +160,7 @@ class SNAPReduce(DataProcessorAlgorithm):
 
         nor_corr = ["None", "From Workspace",
                     "From Processed Nexus", "Extracted from Data"]
-        self.declareProperty("Normalization", "None", StringListValidator(nor_corr),
+        self.declareProperty("Normalization", nor_corr[0], StringListValidator(nor_corr),
                              "If needed what type of input to use as normalization, Extracted from "
                              + "Data uses a background determination that is peak independent.This "
                              + "implemantation can be tested in algorithm SNAP Peak Clipping Background")
@@ -172,15 +183,19 @@ class SNAPReduce(DataProcessorAlgorithm):
                              + "current IPTS with the same Instrumnet configuration")
 
         grouping = ["All", "Column", "Banks", "Modules", "2_4 Grouping"]
-        self.declareProperty("GroupDetectorsBy", "All", StringListValidator(grouping),
+        self.declareProperty("GroupDetectorsBy", grouping[0], StringListValidator(grouping),
                              "Detector groups to use for future focussing: "
                              + "All detectors as one group, Groups (East,West for "
                              + "SNAP), Columns for SNAP, detector banks")
 
         mode = ["Set-Up", "Production"]
-        self.declareProperty("ProcessingMode", "Production", StringListValidator(mode),
+        self.declareProperty("ProcessingMode", mode[1], StringListValidator(mode),
                              "Set-Up Mode is used for establishing correct parameters. Production "
                              + "Mode only Normalized workspace is kept for each run.")
+
+        final_units = ['dSpacing', 'MomentumTransfer', 'Wavelength']
+        self.declareProperty("FinalUnits", final_units[0], StringListValidator(final_units),
+                             "Units to convert the data to at the end of processing")
 
         self.declareProperty(name="OptionalPrefix", defaultValue="",
                              direction=Direction.Input,
@@ -196,6 +211,9 @@ class SNAPReduce(DataProcessorAlgorithm):
 
     def validateInputs(self):
         issues = dict()
+
+        if self.getProperty('LiveData').value:
+            issues['LiveData'] = 'Live data is not currently supported'
 
         # cross check masking
         masking = self.getProperty("Masking").value
@@ -251,7 +269,7 @@ class SNAPReduce(DataProcessorAlgorithm):
 
         return issues
 
-    def _getMaskWSname(self):
+    def _getMaskWSname(self, runnumber, metaWS):
         masking = self.getProperty("Masking").value
         maskWSname = None
         maskFile = None
@@ -266,14 +284,15 @@ class SNAPReduce(DataProcessorAlgorithm):
         elif masking == 'Custom - xml masking file':
             maskWSname = 'CustomMask'
             maskFile = self.getProperty('MaskingFilename').value
-        # TODO not reading the correct mask file geometry
         elif masking == 'Horizontal' or masking == 'Vertical':
             maskWSname = masking + 'Mask'  # append the work 'Mask' for the wksp name
             if not mtd.doesExist(maskWSname):  # only load if it isn't already loaded
                 maskFile = '/SNS/SNAP/shared/libs/%s_Mask.xml' % masking
 
         if maskFile is not None:
-            LoadMask(InputFile=maskFile, Instrument='SNAP', OutputWorkspace=maskWSname)
+            if not metaWS:
+                metaWS = self._loadMetaWS(runnumber)
+            LoadMask(InputFile=maskFile, RefWorkspace=metaWS, Instrument='SNAP', OutputWorkspace=maskWSname)
 
         if maskWSname is None:
             maskWSname = ''
@@ -288,7 +307,7 @@ class SNAPReduce(DataProcessorAlgorithm):
             if group == '2_4 Grouping':
                 group = '2_4_Grouping'
 
-            if metaWS is None:
+            if not metaWS :
                 metaWS = self._loadMetaWS(runnumber)
             CreateGroupingWorkspace(InputWorkspace=metaWS, GroupDetectorsBy=real_name,
                                     OutputWorkspace=group)
@@ -347,17 +366,61 @@ class SNAPReduce(DataProcessorAlgorithm):
                        MetaDataOnly=True, LoadLogs=False)
         return wsname
 
+    def _alignAndFocus(self, filename, wkspname, detCalFilename, withUnfocussed, progStart, progDelta):
+        # create the unfocussed name
+        if withUnfocussed:
+            unfocussed = wkspname.replace('_red', '')
+            unfocussed = unfocussed+'_d'
+        else:
+            unfocussed = ''
+
+        # process the data
+        if detCalFilename:
+            progEnd = progStart + .45 * progDelta
+            # have to load and override the instrument here
+            Load(Filename=filename, OutputWorkspace=wkspname,
+                 startProgress=progStart, endProgress=progEnd)
+            progStart = progEnd
+            progEnd += .45 * progDelta
+
+            LoadIsawDetCal(InputWorkspace=wkspname, Filename=detCalFilename)
+
+            AlignAndFocusPowder(InputWorkspace=wkspname, OutputWorkspace=wkspname,
+                                UnfocussedWorkspace=unfocussed,  # can be empty string
+                                startProgress=progStart,
+                                endProgress=progEnd,
+                                **self.alignAndFocusArgs)
+            progStart = progEnd
+        else:
+            progEnd = progStart + .9 * progDelta
+            # pass all of the work to the child algorithm
+            AlignAndFocusPowderFromFiles(Filename=filename, OutputWorkspace=wkspname ,
+                                         MaxChunkSize=16,  # GiB
+                                         UnfocussedWorkspace=unfocussed,  # can be empty string
+                                         startProgress=progStart,
+                                         endProgress=progEnd,
+                                         **self.alignAndFocusArgs)
+            progStart = progEnd
+
+        progEnd = progStart + .1 * progDelta
+        NormaliseByCurrent(InputWorkspace=wkspname, OutputWorkspace=wkspname,
+                           startProgress=progStart,
+                           endProgress=progEnd)
+
+        return wkspname, unfocussed
+
     def PyExec(self):
         in_Runs = self.getProperty("RunNumbers").value
-        maskWSname = self._getMaskWSname()
         progress = Progress(self, 0., .25, 3)
+        finalUnits = self.getPropertyValue("FinalUnits")
 
         # default arguments for AlignAndFocusPowder
-        alignAndFocusArgs = {'TMax': 50000,
-                             'RemovePromptPulseWidth': 1600,
-                             'PreserveEvents': False,
-                             'Dspacing': True,  # binning parameters in d-space
-                             'Params': self.getProperty("Binning").value}
+        self.alignAndFocusArgs = {'TMax': 50000,
+                                  'RemovePromptPulseWidth': 1600,
+                                  'PreserveEvents': False,
+                                  'Dspacing': True,  # binning parameters in d-space
+                                  'Params': self.getProperty("Binning").value,
+                                  }
 
         # workspace for loading metadata only to be used in LoadDiffCal and
         # CreateGroupingWorkspace
@@ -372,7 +435,7 @@ class SNAPReduce(DataProcessorAlgorithm):
                         WorkspaceName='SNAP',
                         InputWorkspace=metaWS,
                         MakeGroupingWorkspace=False, MakeMaskWorkspace=False)
-            alignAndFocusArgs['CalibrationWorkspace'] = 'SNAP_cal'
+            self.alignAndFocusArgs['CalibrationWorkspace'] = 'SNAP_cal'
         elif calib == 'DetCal File':
             detcalFile = ','.join(self.getProperty('DetCalFilename').value)
         progress.report('loaded calibration')
@@ -391,7 +454,8 @@ class SNAPReduce(DataProcessorAlgorithm):
             normalizationWS = None
             progress.report('')
 
-        group = self._generateGrouping(in_Runs[0], metaWS, progress)
+        self.alignAndFocusArgs['GroupingWorkspace'] = self._generateGrouping(in_Runs[0], metaWS, progress)
+        self.alignAndFocusArgs['MaskWorkspace'] = self._getMaskWSname(in_Runs[0], metaWS)  # can be empty string
 
         if metaWS is not None:
             DeleteWorkspace(Workspace=metaWS)
@@ -400,14 +464,27 @@ class SNAPReduce(DataProcessorAlgorithm):
 
         prefix = self.getProperty("OptionalPrefix").value
 
-        # --------------------------- REDUCE DATA -----------------------------
-
         Tag = 'SNAP'
-        if self.getProperty("LiveData").value:
-            Tag = 'Live'
-
         progStart = .25
         progDelta = (1.-progStart)/len(in_Runs)
+
+        # --------------------------- PROCESS BACKGROUND ----------------------
+        if not self.getProperty('Background').isDefault:
+            progDelta = (1. - progStart) / (len(in_Runs) + 1)  # redefine to account for background
+
+            background = 'SNAP_{}'.format(self.getProperty('Background').value)
+            self.log().notice("processing run background {}".format(background))
+            background, unfocussedBkgd = self._alignAndFocus(background,
+                                                             background+'_bkgd_red',
+                                                             detCalFilename=detcalFile,
+                                                             withUnfocussed=(Process_Mode == 'Set-Up'),
+                                                             progStart=progStart, progDelta=progDelta)
+        else:
+            background = None
+            unfocussedBkgd = ''
+
+        # --------------------------- REDUCE DATA -----------------------------
+
         for i, runnumber in enumerate(in_Runs):
             self.log().notice("processing run %s" % runnumber)
             self.log().information(str(self.get_IPTS_Local(runnumber)))
@@ -415,35 +492,21 @@ class SNAPReduce(DataProcessorAlgorithm):
             # put together output names
             new_Tag = Tag
             if len(prefix) > 0:
-                new_Tag += '_' + prefix
-            basename = '%s_%s_%s' % (new_Tag, runnumber, group)
-
-            if self.getProperty("LiveData").value:
-                raise RuntimeError('Live data is not currently supported')
-            else:
-                Load(Filename='SNAP' + str(runnumber), OutputWorkspace=basename + '_red', startProgress=progStart,
-                     endProgress=progStart + .25 * progDelta)
-                progStart += .25 * progDelta
-            redWS = basename + '_red'
-
-            # overwrite geometry with detcal files
-            if calib == 'DetCal File':
-                LoadIsawDetCal(InputWorkspace=redWS, Filename=detcalFile)
-
-            # create unfocussed data if in set-up mode
-            if Process_Mode == "Set-Up":
-                unfocussedWksp = '{}_{}_d'.format(new_Tag, runnumber)
-            else:
-                unfocussedWksp = ''
-
-            AlignAndFocusPowder(InputWorkspace=redWS, OutputWorkspace=redWS,
-                                MaskWorkspace=maskWSname,  # can be empty string
-                                GroupingWorkspace=group,
-                                UnfocussedWorkspace=unfocussedWksp,  # can be empty string
-                                startProgress=progStart,
-                                endProgress=progStart + .5 * progDelta,
-                                **alignAndFocusArgs)
+                new_Tag = prefix + '_' + new_Tag
+            basename = '%s_%s_%s' % (new_Tag, runnumber, self.alignAndFocusArgs['GroupingWorkspace'])
+            self.log().warning('{}:{}:{}'.format(i, new_Tag, basename))
+            redWS, unfocussedWksp = self._alignAndFocus('SNAP_{}'.format(runnumber),
+                                                        basename + '_red',
+                                                        detCalFilename=detcalFile,
+                                                        withUnfocussed=(Process_Mode == 'Set-Up'),
+                                                        progStart=progStart, progDelta=progDelta*.5)
             progStart += .5 * progDelta
+
+            # subtract the background if it was supplied
+            if background:
+                self.log().information('subtracting {} from {}'.format(background, redWS))
+                Minus(LHSWorkspace=redWS, RHSWorkspace=background, OutputWorkspace=redWS)
+                # intentionally don't subtract the unfocussed workspace since it hasn't been normalized by counting time
 
             # the rest takes up .25 percent of the run processing
             progress = Progress(self, progStart, progStart+.25*progDelta, 2)
@@ -463,11 +526,11 @@ class SNAPReduce(DataProcessorAlgorithm):
 
             # AlignAndFocus doesn't necessarily rebin the data correctly
             if Process_Mode == "Set-Up":
-                Rebin(InputWorkspace=unfocussedWksp, Params=alignAndFocusArgs['Params'],
+                Rebin(InputWorkspace=unfocussedWksp, Params=self.alignAndFocusArgs['Params'],
                       Outputworkspace=unfocussedWksp)
-
-            NormaliseByCurrent(InputWorkspace=redWS, OutputWorkspace=redWS)
-
+                if background:
+                    Rebin(InputWorkspace=unfocussedBkgd, Params=self.alignAndFocusArgs['Params'],
+                          Outputworkspace=unfocussedBkgd)
             # normalize the data as requested
             normalizationWS = self._generateNormalization(redWS, norm, normalizationWS)
             normalizedWS = None
@@ -501,24 +564,28 @@ class SNAPReduce(DataProcessorAlgorithm):
             self._save(saveDir, basename, outputWksp)
 
             # set workspace as an output so it gets history
-            propertyName = 'OutputWorkspace_'+str(outputWksp)
-            self.declareProperty(WorkspaceProperty(
-                propertyName, outputWksp, Direction.Output))
-            self.setProperty(propertyName, outputWksp)
+            ConvertUnits(InputWorkspace=str(outputWksp), OutputWorkspace=str(outputWksp), Target=finalUnits,
+                         EMode='Elastic')
+            self._exportWorkspace('OutputWorkspace_' + str(outputWksp), outputWksp)
 
             # declare some things as extra outputs in set-up
             if Process_Mode != "Production":
-                prefix = 'OuputWorkspace_{:d}_'.format(i)
-                propNames = [prefix + it for it in ['d', 'norm', 'normalizer']]
+                propprefix = 'OutputWorkspace_{:d}_'.format(i)
+                propNames = [propprefix + it for it in ['d', 'norm', 'normalizer']]
                 wkspNames = ['%s_%s_d' % (new_Tag, runnumber),
                              basename + '_red',
                              '%s_%s_normalizer' % (new_Tag, runnumber)]
                 for (propName, wkspName) in zip(propNames, wkspNames):
-                    if mtd.doesExist(wkspName):
-                        self.declareProperty(WorkspaceProperty(propName,
-                                                               wkspName,
-                                                               Direction.Output))
-                        self.setProperty(propName, wkspName)
+                    self._exportWorkspace(propName, wkspName)
+
+        if background:
+            ConvertUnits(InputWorkspace=str(background), OutputWorkspace=str(background), Target=finalUnits,
+                         EMode='Elastic')
+            prefix = 'OutputWorkspace_{}'.format(len(in_Runs))
+            propNames = [prefix + it for it in ['', '_d']]
+            wkspNames = [background, unfocussedBkgd]
+            for (propName, wkspName) in zip(propNames, wkspNames):
+                self._exportWorkspace(propName, wkspName)
 
 
 AlgorithmFactory.subscribe(SNAPReduce)

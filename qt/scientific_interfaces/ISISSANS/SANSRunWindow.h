@@ -51,7 +51,7 @@ class SANSRunWindow : public MantidQt::API::UserSubWindow {
 
 public:
   /// Name of the interface
-  static std::string name() { return "ISIS SANS"; }
+  static std::string name() { return "Old ISIS SANS (Deprecated)"; }
   // This interface's categories.
   static QString categoryInfo() { return "SANS"; }
 

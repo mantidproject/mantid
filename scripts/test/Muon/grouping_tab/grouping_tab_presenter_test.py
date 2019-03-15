@@ -157,10 +157,10 @@ class GroupingTabPresenterTest(unittest.TestCase):
 
     def test_update_all_calculates_groups_and_pairs(self):
         self.presenter.create_update_thread = mock.MagicMock(return_value=mock.MagicMock())
-        self.view.update_button.clicked.emit(True)
+        self.presenter.handle_update_all_clicked()
 
         self.presenter.update_thread.threadWrapperSetUp.assert_called_once_with(self.presenter.disable_editing,
-                                                                                self.presenter.enable_editing,
+                                                                                self.presenter.handle_update_finished,
                                                                                 self.view.display_warning_box)
         self.presenter.update_thread.start.assert_called_once_with()
 

@@ -170,6 +170,10 @@ class MaxEntView(QtGui.QWidget):
         self.ws.clear()
         self.ws.addItems(options)
 
+    def clearPhaseTables(self):
+        self.phaseTable_box.clear()
+        self.phaseTable_box.addItems([construct])
+
     def getPhaseTableIndex(self):
         return self.phaseTable_box.currentIndex()
 
@@ -221,9 +225,8 @@ class MaxEntView(QtGui.QWidget):
 
         inputs["Npts"] = int(self.N_points.currentText())
         inputs["MaxField"] = float(self.max_field.text())
-        inputs["FixPhases"] = self.fix_phase_box.checkState()
-        inputs["FitDeadTime"] = self.dead_box.checkState()
-        inputs["DoublePulse"] = self.double_pulse_box.checkState()
+        inputs["FitDeadTime"] = self.dead_box.checkState() == QtCore.Qt.Checked
+        inputs["DoublePulse"] = self.double_pulse_box.checkState() == QtCore.Qt.Checked
         inputs["OuterIterations"] = int(self.inner_loop.text())
         inputs["InnerIterations"] = int(self.outer_loop.text())
         inputs["DefaultLevel"] = float(self.AConst.text())
@@ -236,9 +239,10 @@ class MaxEntView(QtGui.QWidget):
         return inputs
 
     def addPhaseTable(self, inputs):
-        if self.usePhases():
+        inputs["FixPhases"] = self.fix_phase_box.checkState() == QtCore.Qt.Checked
+        if self.usePhases() and self.phaseTable_box.currentText() == construct:
             inputs['InputPhaseTable'] = "PhaseTable"
-        else:
+        elif self.usePhases():
             inputs['InputPhaseTable'] = self.phaseTable_box.currentText()
 
     def outputPhases(self):

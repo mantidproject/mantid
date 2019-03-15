@@ -320,7 +320,9 @@ public:
     std::vector<Link>
         expectedResults; // left empty as there are no expected results
     auto geom_obj = createCube(4.0);
-    Track track(V3D(-10, 0, 0), V3D(1, 1, 0));
+    V3D dir(1., 1., 0.);
+    dir.normalize();
+    Track track(V3D(-10, 0, 0), dir);
 
     checkTrackIntercept(std::move(geom_obj), track, expectedResults);
   }
@@ -361,7 +363,9 @@ public:
   void testInterceptLShapeTwoPass() {
     std::vector<Link> expectedResults;
     auto geom_obj = createLShape();
-    Track track(V3D(0, 2.5, 0.5), V3D(0.707, -0.707, 0));
+    V3D dir(1., -1., 0.);
+    dir.normalize();
+    Track track(V3D(0, 2.5, 0.5), dir);
 
     // format = startPoint, endPoint, total distance so far
     expectedResults.emplace_back(

@@ -64,6 +64,7 @@ set ( SRC_FILES
 	src/ConvertToPointData.cpp
 	src/ConvertUnits.cpp
 	src/ConvertUnitsUsingDetectorTable.cpp
+	src/CopyDataRange.cpp
 	src/CopyDetectorMapping.cpp
 	src/CopyInstrumentParameters.cpp
 	src/CopyLogs.cpp
@@ -158,6 +159,7 @@ set ( SRC_FILES
 	src/GetEi.cpp
 	src/GetEi2.cpp
 	src/GetEiMonDet2.cpp
+	src/GetEiMonDet3.cpp
 	src/GetQsInQENSData.cpp
 	src/GetTimeSeriesLogInformation.cpp
 	src/GravitySANSHelper.cpp
@@ -245,6 +247,7 @@ set ( SRC_FILES
 	src/RebinToWorkspace.cpp
 	src/Rebunch.cpp
 	src/RecordPythonScript.cpp
+	src/ReflectometryBackgroundSubtraction.cpp
 	src/ReflectometryBeamStatistics.cpp
 	src/ReflectometryMomentumTransfer.cpp
 	src/ReflectometryReductionOne2.cpp
@@ -402,6 +405,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ConvertToPointData.h
 	inc/MantidAlgorithms/ConvertUnits.h
 	inc/MantidAlgorithms/ConvertUnitsUsingDetectorTable.h
+	inc/MantidAlgorithms/CopyDataRange.h
 	inc/MantidAlgorithms/CopyDetectorMapping.h
 	inc/MantidAlgorithms/CopyInstrumentParameters.h
 	inc/MantidAlgorithms/CopyLogs.h
@@ -497,6 +501,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/GetEi.h
 	inc/MantidAlgorithms/GetEi2.h
 	inc/MantidAlgorithms/GetEiMonDet2.h
+	inc/MantidAlgorithms/GetEiMonDet3.h
 	inc/MantidAlgorithms/GetQsInQENSData.h
 	inc/MantidAlgorithms/GetTimeSeriesLogInformation.h
 	inc/MantidAlgorithms/GravitySANSHelper.h
@@ -587,6 +592,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/RebinToWorkspace.h
 	inc/MantidAlgorithms/Rebunch.h
 	inc/MantidAlgorithms/RecordPythonScript.h
+	inc/MantidAlgorithms/ReflectometryBackgroundSubtraction.h
 	inc/MantidAlgorithms/ReflectometryBeamStatistics.h
 	inc/MantidAlgorithms/ReflectometryMomentumTransfer.h
 	inc/MantidAlgorithms/ReflectometryReductionOne2.h
@@ -756,6 +762,7 @@ set ( TEST_FILES
 	ConvertToPointDataTest.h
 	ConvertUnitsTest.h
 	ConvertUnitsUsingDetectorTableTest.h
+	CopyDataRangeTest.h
 	CopyDetectorMappingTest.h
 	CopyInstrumentParametersTest.h
 	CopyLogsTest.h
@@ -843,6 +850,7 @@ set ( TEST_FILES
 	GetDetOffsetsMultiPeaksTest.h
 	GetDetectorOffsetsTest.h
 	GetEiMonDet2Test.h
+	GetEiMonDet3Test.h
 	GetEiTest.h
 	GetEiV1Test.h
 	GetQsInQENSDataTest.h
@@ -931,6 +939,7 @@ set ( TEST_FILES
 	RebinToWorkspaceTest.h
 	RebunchTest.h
 	RectangularBeamProfileTest.h
+	ReflectometryBackgroundSubtractionTest.h
 	ReflectometryBeamStatisticsTest.h
 	ReflectometryMomentumTransferTest.h
 	ReflectometryReductionOne2Test.h

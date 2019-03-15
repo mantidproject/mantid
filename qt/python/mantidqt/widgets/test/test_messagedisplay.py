@@ -13,7 +13,7 @@ from __future__ import (absolute_import, division, print_function,
 import unittest
 
 from mantidqt.widgets.messagedisplay import MessageDisplay
-from mantidqt.utils.qt.test import GuiTest
+from mantidqt.utils.qt.testing import GuiTest
 
 
 class MessageDisplayTest(GuiTest):

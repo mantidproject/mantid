@@ -30,6 +30,7 @@ class MuonPair(object):
         self._backward_group_name = backward_group_name
         self._alpha = float(alpha)
         self._workspace = {}
+        self.workspace_rebin = {}
 
     @property
     def workspace(self):

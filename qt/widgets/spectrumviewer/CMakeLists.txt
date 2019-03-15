@@ -76,10 +76,9 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsSpectrumViewer
     MantidQtWidgetsLegacyQwt
   INSTALL_DIR
     ${LIB_DIR}
+  OSX_INSTALL_RPATH
+    @loader_path/../MacOS
+    @loader_path/../Libraries
+  LINUX_INSTALL_RPATH
+    "\$ORIGIN/../${LIB_DIR}"
 )
-
-if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties(MantidQtWidgetsSpectrumViewerQt4 PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
-elseif ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
-  set_target_properties(MantidQtWidgetsSpectrumViewerQt4 PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
-endif ()

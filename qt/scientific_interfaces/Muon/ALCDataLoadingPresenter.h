@@ -72,6 +72,9 @@ private:
   /// Check custom grouping is sensible
   bool checkCustomGrouping();
 
+  /// Check the group is valid
+  std::string isCustomGroupingValid(const std::string &group, bool &isValid);
+
   /// View which the object works with
   IALCDataLoadingView *const m_view;
 

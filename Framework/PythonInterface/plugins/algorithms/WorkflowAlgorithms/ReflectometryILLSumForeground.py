@@ -73,8 +73,6 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
 
         ws = self._inputWS()
 
-        print('LinePosition {}'.format(ws.run().getProperty(common.SampleLogs.LINE_POSITION).value))
-
         processReflected = not self._directOnly()
         if processReflected:
             self._addBeamStatisticsToLogs(ws)
@@ -320,72 +318,55 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
         numpy.sqrt(foregroundEs, out=foregroundEs)
         # Move the detector to the fractional linePosition
         linePosition = ws.run().getProperty(common.SampleLogs.LINE_POSITION).value
-        detectorDistance = foregroundWS.spectrumInfo().l2(0)
         instr = common.instrumentName(ws)
         pixelSize = common.pixelSize(instr)
         dist = pixelSize * numpy.absolute(linePosition-beamPosIndex)
-        #rotationAngle = numpy.math.asin(dist / detectorDistance) + foregroundWS.spectrumInfo().twoTheta(0) / 2.
-        #d = numpy.math.cos(rotationAngle) * detectorDistance
-
-        detPoint1 = ws.spectrumInfo().position(0)
-        detPoint2 = ws.spectrumInfo().position(5)
-        forPos = foregroundWS.spectrumInfo().position(0)
-        beta = numpy.math.atan2((detPoint2[0]-detPoint1[0]), (detPoint2[2]-detPoint1[2]))
-        x = numpy.math.sin(beta) * dist + forPos[0]
-        z = numpy.math.cos(beta) * dist + forPos[2]
-
-        if instr == 'D17':
-            mx = x  #numpy.sin(rotationAngle)
-            my = 0.0
-            mz = z  #numpy.cos(rotationAngle)
-            rotationAxis = [0, 1, 0]
-        else:
-            mx = 0.0
-            my = x  #numpy.sin(rotationAngle)
-            mz = z  #numpy.cos(rotationAngle)
-            rotationAxis = [-1, 0, 0]
-        d= 1.
-        print('dx {}'.format(d*mx))
-        print('dy {}'.format(d*my))
-        print('dz {}'.format(d*mz))
-        #print('Detector position {}'.format(foregroundWS.spectrumInfo().position(0)))
-        #print('SumForeground detector angle linePosition in degree {}'.format(numpy.rad2deg(rotationAngle)))
-        #print('SumForeground detector distance linePosition in m {}'.format(d))
         if dist != 0.:
+            detPoint1 = ws.spectrumInfo().position(0)
+            detPoint2 = ws.spectrumInfo().position(5)
+            beta = numpy.math.atan2((detPoint2[0] - detPoint1[0]), (detPoint2[2] - detPoint1[2]))
+            xvsy = numpy.math.sin(beta) * dist
+            mz = numpy.math.cos(beta) * dist
+            if instr == 'D17':
+                mx = xvsy
+                my = 0.0
+                rotationAxis = [0, 1, 0]
+            else:
+                mx = 0.0
+                my = xvsy
+                rotationAxis = [-1, 0, 0]
             MoveInstrumentComponent(
                 Workspace=foregroundWS,
                 ComponentName='detector',
-                X=d*mx,
-                Y=d*my,
-                Z=d*mz,
+                X=mx,
+                Y=my,
+                Z=mz,
                 RelativePosition=True
             )
-            #RotateInstrumentComponent(
-            #    Workspace=foregroundWS,
-            #    ComponentName='detector',
-            #    X=rotationAxis[0],
-            #    Y=rotationAxis[1],
-            #    Z=rotationAxis[2],
-            #    Angle=rotationAngle,
-            #    RelativeRotation=False
-            #)
-        print('SumForeground DetectorAngle after moving {}'.format(
-            numpy.rad2deg(foregroundWS.spectrumInfo().twoTheta(0) / 2.)))
-        print('SumForeground detector distance after moving {}'.format(foregroundWS.spectrumInfo().l2(0)))
+            rotationAngle=foregroundWS.spectrumInfo().twoTheta(0) / 2.
+            RotateInstrumentComponent(
+                Workspace=foregroundWS,
+                ComponentName='detector',
+                X=rotationAxis[0],
+                Y=rotationAxis[1],
+                Z=rotationAxis[2],
+                Angle=rotationAngle,
+                RelativeRotation=True
+            )
         return foregroundWS
 
     def _sumForegroundInQ(self, ws):
         """Sum the foreground region into a single histogram using the coherent method."""
         foreground = self._foregroundIndices(ws)
         sumIndices = [i for i in range(foreground[0], foreground[2] + 1)]
-        beamPosIndex = foreground[1]
+        linePosition = ws.run().getProperty(common.SampleLogs.LINE_POSITION).value
         isFlatSample = not ws.run().getProperty('beam_stats.bent_sample').value
         sumWSName = self._names.withSuffix('summed_in_Q')
         sumWS = ReflectometrySumInQ(
             InputWorkspace=ws,
             OutputWorkspace=sumWSName,
             InputWorkspaceIndexSet=sumIndices,
-            BeamCentre=beamPosIndex,
+            BeamCentre=linePosition,
             FlatSample=isFlatSample,
             EnableLogging=self._subalgLogging)
         self._cleanup.cleanup(ws)
