@@ -216,11 +216,7 @@ void render2DTexture(const Corners &corners, size_t nX, size_t nY,
   glBegin(GL_QUADS);
 
   // Set the bank normal to facilitate lighting effects
-  try {
-    setBankNormal(corners.bottomRight(), corners.topLeft(), basePos);
-  } catch (std::runtime_error &) {
-    g_log.warning("Cannot set the bank normal to facilitate lighting effects.");
-  }
+  setBankNormal(corners.bottomRight() + bottomRightOffset, corners.topLeft() + topLeftOffset, basePos);
 
   glTexCoord2f(0.0, 0.0);
   addVertex(corners.bottomLeft() - basePos + bottomLeftOffset);
