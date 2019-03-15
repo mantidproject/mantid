@@ -282,9 +282,8 @@ class ReflectometryILLSumForegroundTest(unittest.TestCase):
         self.assertEquals(dirForeground.run().getProperty(common.SampleLogs.TWO_THETA).value, 6.7)
         self.assertEquals(dirForeground.run().getProperty(common.SampleLogs.LINE_POSITION).value, 50.9)
         self.assertEquals(dirForeground.spectrumInfo().size(), 1)
-        self.assertAlmostEqual(dirForeground.spectrumInfo().l2(0), dirWS.spectrumInfo().l2(51), delta=1.e-16)
-        self.assertAlmostEqual(dirForeground.spectrumInfo().twoTheta(0) * 180. / numpy.pi, 8.389135285788196,
-                               delta=1.e-16)
+        self.assertEquals(dirForeground.spectrumInfo().l2(0),  3.101227387358808)
+        self.assertEquals(dirForeground.spectrumInfo().twoTheta(0) * 180. / numpy.pi, 8.386990677272772)
 
         reflWS = illhelpers.create_poor_mans_d17_workspace()
         illhelpers.refl_rotate_detector(reflWS, 1.2)
@@ -309,8 +308,8 @@ class ReflectometryILLSumForegroundTest(unittest.TestCase):
         self.assertEquals(out.run().getProperty(common.SampleLogs.TWO_THETA).value, 40.2)
         self.assertEquals(out.run().getProperty(common.SampleLogs.LINE_POSITION).value, 120.4)
         self.assertEquals(out.spectrumInfo().size(), 1)
-        self.assertAlmostEqual(out.spectrumInfo().l2(0), reflWS.spectrumInfo().l2(120), delta=1.e-7)
-        self.assertAlmostEqual(numpy.rad2deg(out.spectrumInfo().twoTheta(0)), 40.36568536738087, delta=1.e-5)
+        self.assertEquals(out.spectrumInfo().l2(0), 3.0992766423566103)
+        self.assertEquals(numpy.rad2deg(out.spectrumInfo().twoTheta(0)), 8.386990677272772)
         self.assertTrue(alg.isExecuted())
 
 if __name__ == "__main__":
