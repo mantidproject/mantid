@@ -9,19 +9,12 @@
 #
 from __future__ import absolute_import
 
-import sys
 import unittest
 
 from mantid.api import AlgorithmFactory, PythonAlgorithm
+from mantid.py3compat import mock
 from mantidqt.widgets.algorithmselector.widget import AlgorithmSelectorWidget
 from mantidqt.widgets.algorithmselector.algorithm_factory_observer import AlgorithmSelectorFactoryObserver
-
-if sys.version_info.major >= 3:
-    # Python 3 and above
-    from unittest import mock
-else:
-    # Python 2
-    import mock
 
 
 class ToyAlgorithm(PythonAlgorithm):

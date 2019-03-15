@@ -8,12 +8,7 @@
 #define MANTID_KERNEL_ALGORITHMFACTORYOBSERVER_H_
 
 #include "MantidAPI/AlgorithmFactory.h"
-#include "MantidAPI/DllConfig.h"
-#include "MantidKernel/DataService.h"
 #include <Poco/NObserver.h>
-
-using namespace Mantid::Kernel;
-using namespace Mantid::API;
 
 namespace Mantid {
 namespace API {
