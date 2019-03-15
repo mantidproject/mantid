@@ -82,10 +82,10 @@ class FigureManagerADSObserver(AnalysisDataServiceObserver):
         all_axes = self.canvas.figure.axes
         if not all_axes:
             return
-        empty_axes = True
+        empty_axes = False
         for ax in all_axes:
             if isinstance(ax, MantidAxes):
-                empty_axes = empty_axes & ax.remove_workspace_artists(workspace)
+                empty_axes = ax.remove_workspace_artists(workspace)
         if empty_axes:
             self.window.emit_close()
         else:
