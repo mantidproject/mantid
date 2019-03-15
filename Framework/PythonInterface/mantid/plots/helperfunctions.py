@@ -450,6 +450,18 @@ def get_data_uneven_flag(workspace, **kwargs):
     return aligned, kwargs
 
 
+def check_resample_to_regular_grid(ws):
+    if not ws.isCommonBins():
+        return True
+
+    x = ws.dataX(0)
+    difference = numpy.diff(x)
+    if not numpy.all(numpy.isclose(difference[:-1], difference[0])):
+        return True
+
+    return False
+
+
 # ====================================================
 # extract logs
 # ====================================================

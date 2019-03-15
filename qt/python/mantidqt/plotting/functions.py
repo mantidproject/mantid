@@ -235,6 +235,12 @@ def pcolormesh_from_names(names, fig=None):
         return None
 
 
+def use_imshow(ws):
+    y = ws.getAxis(1).extractValues()
+    difference = np.diff(y)
+    return np.all(np.isclose(difference[:-1], difference[0]))
+
+
 def pcolormesh(workspaces, fig=None):
     """
     Create a figure containing pcolor subplots
@@ -257,7 +263,10 @@ def pcolormesh(workspaces, fig=None):
         if subplot_idx < workspaces_len:
             ws = workspaces[subplot_idx]
             ax.set_title(ws.name())
-            pcm = ax.imshow(ws, cmap=DEFAULT_CMAP, aspect='auto', origin='lower')
+            if use_imshow(ws):
+                pcm = ax.imshow(ws, cmap=DEFAULT_CMAP, aspect='auto', origin='lower')
+            else:
+                pcm = ax.pcolormesh(ws, cmap=DEFAULT_CMAP)
             for lbl in ax.get_xticklabels():
                 lbl.set_rotation(45)
             if col_idx < ncols - 1:

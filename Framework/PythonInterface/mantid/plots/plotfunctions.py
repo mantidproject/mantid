@@ -27,7 +27,7 @@ import mantid.kernel
 from mantid.plots.helperfunctions import get_axes_labels, get_bins, get_data_uneven_flag, get_distribution, \
     get_matrix_2d_ragged, get_matrix_2d_data, get_md_data1d, get_md_data2d_bin_bounds, \
     get_md_data2d_bin_centers, get_normalization, get_sample_log, get_spectrum, get_uneven_data, \
-    get_wksp_index_dist_and_label
+    get_wksp_index_dist_and_label, check_resample_to_regular_grid
 
 # Used for initializing searches of max, min values
 _LARGEST, _SMALLEST = float(sys.maxsize), -sys.maxsize
@@ -528,26 +528,15 @@ def imshow(axes, workspace, *args, **kwargs):
     else:
         (uneven_bins, kwargs) = get_data_uneven_flag(workspace, **kwargs)
         (distribution, kwargs) = get_distribution(workspace, **kwargs)
-        if uneven_bins:
+        if check_resample_to_regular_grid(workspace):
             (x, y, z) = get_matrix_2d_ragged(workspace, distribution, histogram2D=True)
         else:
             (x, y, z) = get_matrix_2d_data(workspace, distribution, histogram2D=True)
 
     if x.ndim == 2 and y.ndim == 2:
-        diffs = numpy.diff(x, axis=1)
-        x_spacing_equal = numpy.alltrue(diffs == diffs[0])
-        diffs = numpy.diff(y, axis=0)
-        y_spacing_equal = numpy.alltrue(diffs == diffs[0])
-        if not x_spacing_equal or not y_spacing_equal:
-            raise Exception('Unevenly spaced bins are not supported by imshow')
         if 'extent' not in kwargs:
             kwargs['extent'] = [x[0, 0], x[0, -1], y[0, 0], y[-1, 0]]
     else:
-        #get_matrix_2d_ragged guarantees x_spacing_equal
-        diffs = numpy.diff(y)
-        y_spacing_equal = numpy.alltrue(diffs == diffs[0])
-        if not y_spacing_equal:
-            raise Exception('Unevenly spaced bins are not supported by imshow')
         if 'extent' not in kwargs:
             kwargs['extent'] = [x[0],x[-1],y[0],y[-1]]
 
