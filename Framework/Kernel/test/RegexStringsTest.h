@@ -160,15 +160,6 @@ public:
     TS_ASSERT_EQUALS(input, "103.04 105.06 Remainder of string");
   }
 
-  void testStrRemove() {
-    std::string input("100.01 101.02 103.04 105.06 Remainder of string");
-    std::string output;
-    TS_ASSERT_EQUALS(
-        StrRemove(input, output, boost::regex("([0-9]*.[0-9]* )*")), 1);
-    TS_ASSERT_EQUALS(input, "Remainder of string");
-    TS_ASSERT_EQUALS(output, "100.01 101.02 103.04 105.06 ");
-  }
-
   void testFindComp() {
     std::string output;
     TS_ASSERT_EQUALS(findComp(testStream, boost::regex("BEGIN"), output), 5);
