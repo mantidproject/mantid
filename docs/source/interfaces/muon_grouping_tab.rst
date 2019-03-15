@@ -15,15 +15,12 @@ Grouping Tab
 
 **Default** Loads in the default groups and pairs for the instrument
 
-**Update All** Recalculates all groups and pairs putting the result in the ADS. New or modified groups
-and pairs are not automatically recalculated.
-
 Grouping Table
 ^^^^^^^^^^^^^^
 
 **Plus and Minus** Add or remove groups
 
-**Group Asymmetry Range** Controls the range to use when estimating the group asymmetry. By default this range is the first good data and end time value from the file
+**Group Asymmetry Range** Controls the range to use when estimating the group asymmetry. The values are used as ``StartX`` and ``EndX`` in :ref:`EstimateMuonAsymmetryFromCounts <algm-EstimateMuonAsymmetryFromCounts>`. By default this range is the first good data and end time value from the file
 but may be overridden here if required.
 
 
