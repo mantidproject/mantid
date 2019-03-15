@@ -21,8 +21,6 @@ AlgorithmProgressWidget::AlgorithmProgressWidget(QWidget *parent)
       m_presenter{std::make_unique<AlgorithmProgressPresenter>(parent, this)}
 
 {
-  setAttribute(Qt::WA_DeleteOnClose);
-
   m_progressBar->setAlignment(Qt::AlignHCenter);
   m_layout->addWidget(m_progressBar);
   m_layout->addWidget(m_detailsButton);
