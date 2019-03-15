@@ -58,7 +58,7 @@ AlgorithmProgressDialogWidget::AlgorithmProgressDialogWidget(
 /// displaying the progress of the algorithm
 std::pair<QTreeWidgetItem *, QProgressBar *>
 AlgorithmProgressDialogWidget::addAlgorithm(Mantid::API::IAlgorithm_sptr alg) {
-  const auto &name = alg->name();
+  const auto name = alg->name();
   const auto &properties = alg->getProperties();
   const auto item =
       new QTreeWidgetItem(m_tree, QStringList{QString::fromStdString(name)});
