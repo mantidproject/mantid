@@ -61,7 +61,7 @@ void AlgorithmFactoryObserver::updateHandle() {}
 // Private Methods
 // ------------------------------------------------------------
 void AlgorithmFactoryObserver::_updateHandle(
-    const AlgorithmFactoryUpdateNotification_ptr pNf) {
+    AlgorithmFactoryUpdateNotification_ptr pNf) {
   UNUSED_ARG(pNf)
   this->updateHandle();
 }

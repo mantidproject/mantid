@@ -48,7 +48,7 @@ public:
 private:
   bool m_observingUpdate{false};
 
-  void _updateHandle(const AlgorithmFactoryUpdateNotification_ptr);
+  void _updateHandle(AlgorithmFactoryUpdateNotification_ptr pNf);
 
   /// Poco::NObserver for SubscribeNotification.
   Poco::NObserver<AlgorithmFactoryObserver, AlgorithmFactoryUpdateNotification>
