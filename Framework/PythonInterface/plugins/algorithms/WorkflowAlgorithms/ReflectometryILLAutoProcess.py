@@ -579,6 +579,8 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
             if '__direct-{}-angle-{}'.format(runDB, angle) not in workspaces:
                 self.log().notice('Direct beam __direct-{}-angle-{} not cached in AnalysisDataService.'.format(runDB,
                                                                                                                angle))
+                # The cached value could be used, if the parameters of the angles correspond
+
                 # Direct beam pre-processing
                 ReflectometryILLPreprocess(
                     Run=directBeamInput,
@@ -618,7 +620,6 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
                 ReflectometryILLPreprocess(
                     Run=reflectedBeamInput,
                     OutputWorkspace='__reflected-{}'.format(runRB),
-                    TwoTheta=twoTheta,
                     LinePosition=linePosition,
                     DirectLineWorkspace='__direct-{}-angle-{}'.format(runDB, angle),
                     ForegroundHalfWidth=halfWidthsReflected,

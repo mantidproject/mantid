@@ -13,8 +13,8 @@ from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, MatrixWorkspac
 from mantid.kernel import (CompositeValidator, Direction, FloatArrayBoundedValidator, FloatArrayProperty,
                            IntArrayBoundedValidator, IntArrayLengthValidator, IntArrayProperty, Property,
                            StringListValidator)
-from mantid.simpleapi import (CropWorkspace, Divide, ExtractSingleSpectrum, RebinToWorkspace,
-                              ReflectometryBeamStatistics, ReflectometrySumInQ)
+from mantid.simpleapi import (CropWorkspace, Divide, ExtractSingleSpectrum, MoveInstrumentComponent, RebinToWorkspace,
+                              ReflectometryBeamStatistics, ReflectometrySumInQ, RotateInstrumentComponent)
 import numpy
 import ReflectometryILL_common as common
 
@@ -72,6 +72,9 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
         self._names = common.WSNameSource(wsPrefix, cleanupMode)
 
         ws = self._inputWS()
+
+        print('LinePosition {}'.format(ws.run().getProperty(common.SampleLogs.LINE_POSITION).value))
+
         processReflected = not self._directOnly()
         if processReflected:
             self._addBeamStatisticsToLogs(ws)
@@ -159,6 +162,9 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
     def validateInputs(self):
         """Validate the algorithm's input properties."""
         issues = dict()
+        ws = self.getProperty(Prop.INPUT_WS).value
+        if not ws.run().hasProperty(common.SampleLogs.LINE_POSITION):
+            issues[Prop.INPUT_WS] = 'Must have a sample log entry called {}'.format(common.SampleLogs.LINE_POSITION)
         if self.getProperty(Prop.DIRECT_FOREGROUND_WS).isDefault:
             if self.getProperty(Prop.SUM_TYPE).value == SumType.IN_Q:
                 issues[Prop.DIRECT_FOREGROUND_WS] = 'Direct foreground workspace is needed for summing in Q.'
@@ -312,6 +318,60 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
             self._cleanup.cleanup(addeeWS)
         self._cleanup.cleanup(ws)
         numpy.sqrt(foregroundEs, out=foregroundEs)
+        # Move the detector to the fractional linePosition
+        linePosition = ws.run().getProperty(common.SampleLogs.LINE_POSITION).value
+        detectorDistance = foregroundWS.spectrumInfo().l2(0)
+        instr = common.instrumentName(ws)
+        pixelSize = common.pixelSize(instr)
+        dist = pixelSize * numpy.absolute(linePosition-beamPosIndex)
+        #rotationAngle = numpy.math.asin(dist / detectorDistance) + foregroundWS.spectrumInfo().twoTheta(0) / 2.
+        #d = numpy.math.cos(rotationAngle) * detectorDistance
+
+        detPoint1 = ws.spectrumInfo().position(0)
+        detPoint2 = ws.spectrumInfo().position(5)
+        forPos = foregroundWS.spectrumInfo().position(0)
+        beta = numpy.math.atan2((detPoint2[0]-detPoint1[0]), (detPoint2[2]-detPoint1[2]))
+        x = numpy.math.sin(beta) * dist + forPos[0]
+        z = numpy.math.cos(beta) * dist + forPos[2]
+
+        if instr == 'D17':
+            mx = x  #numpy.sin(rotationAngle)
+            my = 0.0
+            mz = z  #numpy.cos(rotationAngle)
+            rotationAxis = [0, 1, 0]
+        else:
+            mx = 0.0
+            my = x  #numpy.sin(rotationAngle)
+            mz = z  #numpy.cos(rotationAngle)
+            rotationAxis = [-1, 0, 0]
+        d= 1.
+        print('dx {}'.format(d*mx))
+        print('dy {}'.format(d*my))
+        print('dz {}'.format(d*mz))
+        #print('Detector position {}'.format(foregroundWS.spectrumInfo().position(0)))
+        #print('SumForeground detector angle linePosition in degree {}'.format(numpy.rad2deg(rotationAngle)))
+        #print('SumForeground detector distance linePosition in m {}'.format(d))
+        if dist != 0.:
+            MoveInstrumentComponent(
+                Workspace=foregroundWS,
+                ComponentName='detector',
+                X=d*mx,
+                Y=d*my,
+                Z=d*mz,
+                RelativePosition=True
+            )
+            #RotateInstrumentComponent(
+            #    Workspace=foregroundWS,
+            #    ComponentName='detector',
+            #    X=rotationAxis[0],
+            #    Y=rotationAxis[1],
+            #    Z=rotationAxis[2],
+            #    Angle=rotationAngle,
+            #    RelativeRotation=False
+            #)
+        print('SumForeground DetectorAngle after moving {}'.format(
+            numpy.rad2deg(foregroundWS.spectrumInfo().twoTheta(0) / 2.)))
+        print('SumForeground detector distance after moving {}'.format(foregroundWS.spectrumInfo().l2(0)))
         return foregroundWS
 
     def _sumForegroundInQ(self, ws):
