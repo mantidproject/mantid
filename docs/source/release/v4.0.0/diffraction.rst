@@ -100,6 +100,7 @@ Bugfixes
 - The Powder Diffraction GUI now remembers whether linear or logarithmic binning was selected between uses.
 - Fixed a bug in :ref:`GenerateGroupingPowder <algm-GenerateGroupingPowder>` which caused detectors without corresponding spectrum to get included in grouping.
 - :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` now does not use cache file when the grouping has changed.
+- :ref:`PowderILLParameterScan <algm-PowderILLParameterScan>` will now accept also single run, when the time normalisation is enabled.
 
 New Algorithms
 ##############

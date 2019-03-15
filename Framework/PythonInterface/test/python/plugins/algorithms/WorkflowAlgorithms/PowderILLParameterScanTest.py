@@ -94,5 +94,10 @@ class PowderILLParameterScanTest(unittest.TestCase):
         self.assertEquals(red.getNumberHistograms(), 1)
         self.assertAlmostEqual(red.getAxis(1).extractValues()[0], 248.372, 5)
 
+    def test_normalise_time_single(self):
+        red = PowderILLParameterScan(Run='967087',NormaliseTo='Time')
+        self.assertTrue(red)
+        self.assertAlmostEquals(red.readY(0)[1400],9532/300,4)
+
 if __name__ == '__main__':
     unittest.main()
