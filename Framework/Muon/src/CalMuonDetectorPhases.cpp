@@ -418,9 +418,9 @@ void CalMuonDetectorPhases::getGroupingFromInstrument(
   size_t nGroups = grouping->groups.size();
   for (size_t iGroup = 0; iGroup < nGroups; iGroup++) {
     const std::string name = grouping->groupNames[iGroup];
-    if (name == "fwd") {
+    if (name == "fwd" || name == "left") {
       fwdRange = grouping->groups[iGroup];
-    } else if (name == "bwd" || name == "bkwd") {
+    } else if (name == "bwd" || name == "bkwd" || name == "right") {
       bwdRange = grouping->groups[iGroup];
     }
   }

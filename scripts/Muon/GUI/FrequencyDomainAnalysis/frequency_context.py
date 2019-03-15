@@ -8,6 +8,7 @@ from __future__ import (absolute_import, division, print_function)
 
 import mantid.simpleapi as mantid
 from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
+from Muon.GUI.Common.muon_data_context import get_default_grouping
 
 import Muon.GUI.Common.ADSHandler.workspace_naming as wsName
 
@@ -104,3 +105,13 @@ class FrequencyContext(object):
         runs = [wsName.get_raw_data_workspace_name(self.context, run_list_to_string(run_number), period=str(period + 1))
                 for run_number in run_numbers for period in range(self.context.num_periods(run_number))]
         return runs
+
+    def get_detectors_excluded_from_default_grouping_tables(self):
+        groups, _ = get_default_grouping(self.context.loaded_workspace, self.context.instrument, self.context.main_field_direction)
+        detectors_in_group = []
+        for group in groups:
+            detectors_in_group += group.detectors
+        detectors_in_group = set(detectors_in_group)
+
+        return [det for det in range(1,self.context.num_detectors) if det not in detectors_in_group]
+
