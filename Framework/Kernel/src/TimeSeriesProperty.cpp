@@ -13,8 +13,8 @@
 #include <json/value.h>
 #include <nexus/NeXusFile.hpp>
 
-#include <numeric>
 #include <boost/regex.hpp>
+#include <numeric>
 
 namespace Mantid {
 using namespace Types::Core;
