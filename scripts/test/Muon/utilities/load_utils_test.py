@@ -5,17 +5,12 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 import Muon.GUI.Common.utilities.load_utils as utils
-import sys
 import os
+import unittest
+
 from mantid import simpleapi, ConfigService
 from mantid.api import AnalysisDataService, ITableWorkspace
 
-import unittest
-
-if sys.version_info.major > 2:
-    from unittest import mock
-else:
-    import mock
 
 def create_simple_workspace(data_x, data_y, run_number=0):
     alg = simpleapi.AlgorithmManager.create("CreateWorkspace")

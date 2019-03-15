@@ -6,16 +6,10 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
+from mantid.py3compat import mock
 from MultiPlotting.QuickEdit.quickEdit_presenter import QuickEditPresenter
 from MultiPlotting.QuickEdit.quickEdit_widget import QuickEditWidget
-
 from Muon.GUI.Common import mock_widget
-
-
-try:
-    from unittest import mock
-except ImportError:
-    import mock
 
 
 class QuickEditWidgetTest(unittest.TestCase):

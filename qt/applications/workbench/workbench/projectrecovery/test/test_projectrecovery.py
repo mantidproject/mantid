@@ -19,14 +19,12 @@ import unittest
 
 from mantid.api import AnalysisDataService as ADS
 from mantid.kernel import ConfigService
+from mantid.py3compat import mock
 from workbench.projectrecovery.projectrecovery import ProjectRecovery, SAVING_TIME_KEY, NO_OF_CHECKPOINTS_KEY, \
     RECOVERY_ENABLED_KEY
 
 if sys.version_info.major >= 3:
-    from unittest import mock
     unicode = str
-else:
-    import mock
 
 
 def is_macOS():

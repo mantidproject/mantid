@@ -6,9 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package
 #
-
 import matplotlib
-import sys
 import tempfile
 import unittest
 from os.path import isdir
@@ -22,13 +20,8 @@ import tempfile  # noqa
 
 from mantid.api import AnalysisDataService as ADS  # noqa
 from mantid.simpleapi import CreateSampleWorkspace  # noqa
+from mantid.py3compat import mock
 from mantidqt.project import projectloader, projectsaver  # noqa
-
-
-if sys.version_info.major >= 3:
-    from unittest import mock
-else:
-    import mock
 
 
 project_file_ext = ".mtdproj"

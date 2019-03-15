@@ -4,16 +4,11 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-import Muon.GUI.Common.utilities.muon_file_utils as utils
-import sys
 import os
-
 import unittest
 
-if sys.version_info.major == 3:
-    from unittest import mock
-else:
-    import mock
+from mantid.py3compat import mock
+from Muon.GUI.Common.utilities.muon_file_utils as utils
 
 
 class MuonFileUtilsTest(unittest.TestCase):

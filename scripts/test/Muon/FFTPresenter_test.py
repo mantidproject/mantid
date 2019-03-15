@@ -4,20 +4,14 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-import sys
+import unittest
 
+from mantid.py3compat import mock
 from Muon.GUI.Common.utilities import load_utils
 from Muon.GUI.Common import thread_model
 from Muon.GUI.FrequencyDomainAnalysis.FFT import fft_presenter
 from Muon.GUI.FrequencyDomainAnalysis.FFT import fft_view
 from Muon.GUI.FrequencyDomainAnalysis.FFT import fft_model
-
-import unittest
-
-if sys.version_info.major == 3:
-    from unittest import mock
-else:
-    import mock
 
 
 class FFTPresenterTest(unittest.TestCase):
