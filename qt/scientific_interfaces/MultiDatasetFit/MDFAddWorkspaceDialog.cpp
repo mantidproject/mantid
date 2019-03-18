@@ -22,13 +22,15 @@ namespace MDF {
 using namespace Mantid::API;
 
 namespace {
-  MatrixWorkspace_sptr getMatrixWorkspace(const QString &name) {
-    return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name.toStdString());
-  }
-  WorkspaceGroup_sptr getWorkspaceGroup(const QString &name) {
-    return AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(name.toStdString());
-  }
+MatrixWorkspace_sptr getMatrixWorkspace(const QString &name) {
+  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+      name.toStdString());
 }
+WorkspaceGroup_sptr getWorkspaceGroup(const QString &name) {
+  return AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+      name.toStdString());
+}
+} // namespace
 
 /// Constructor.
 /// @param parent :: A parent widget.
@@ -70,12 +72,10 @@ void AddWorkspaceDialog::selectAllSpectra(int state) {
   }
 }
 
-QStringList AddWorkspaceDialog::availableWorkspaces() const
-{
+QStringList AddWorkspaceDialog::availableWorkspaces() const {
   auto &ADS = Mantid::API::AnalysisDataService::Instance();
   QStringList workspaceNames;
-  auto wsNames = ADS.getObjectNames(
-    Mantid::Kernel::DataServiceSort::Sorted);
+  auto wsNames = ADS.getObjectNames(Mantid::Kernel::DataServiceSort::Sorted);
   for (auto name = wsNames.begin(); name != wsNames.end(); ++name) {
     if (ADS.retrieveWS<Mantid::API::MatrixWorkspace>(*name)) {
       workspaceNames << QString::fromStdString(*name);
@@ -85,7 +85,7 @@ QStringList AddWorkspaceDialog::availableWorkspaces() const
     bool hasMatrixWorkspace = false;
     if (grp) {
       for (auto ws : grp->getAllItems()) {
-        if (dynamic_cast<Mantid::API::MatrixWorkspace*>(ws.get())) {
+        if (dynamic_cast<Mantid::API::MatrixWorkspace *>(ws.get())) {
           hasMatrixWorkspace = true;
           break;
         }
@@ -99,8 +99,7 @@ QStringList AddWorkspaceDialog::availableWorkspaces() const
   return workspaceNames;
 }
 
-void AddWorkspaceDialog::findCommonMaxIndex(const QString &wsName)
-{
+void AddWorkspaceDialog::findCommonMaxIndex(const QString &wsName) {
   m_maxIndex = 0;
   auto mws = getMatrixWorkspace(wsName);
   if (mws) {
@@ -147,9 +146,8 @@ void AddWorkspaceDialog::accept() {
     }
   }
   if (m_wsIndices.empty()) {
-    QMessageBox::warning(
-      this, "MantidPlot - Warning",
-      QString("No indices have been selected."));
+    QMessageBox::warning(this, "MantidPlot - Warning",
+                         QString("No indices have been selected."));
     return;
   }
   QDialog::accept();

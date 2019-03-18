@@ -363,23 +363,24 @@ void FunctionFactoryImpl::addTie(IFunction_sptr fun,
   }
 }
 
- std::vector<std::string> FunctionFactoryImpl::getFunctionNamesGUI() const
- {
-   auto &allNames = getFunctionNames<IFunction1D>();
-   std::vector<std::string> names;
-   names.reserve(allNames.size());
-   auto excludes = Kernel::ConfigService::Instance().getString("curvefitting.guiExclude");
-   Kernel::StringTokenizer tokenizer(excludes, ";", Kernel::StringTokenizer::TOK_TRIM);
-   std::set<std::string> excludeList(tokenizer.begin(), tokenizer.end());
-   for (auto &name : allNames) {
-     if (excludeList.count(name) == 0) {
-       names.push_back(name);
-     }
-   }
-   return names;
- }
+std::vector<std::string> FunctionFactoryImpl::getFunctionNamesGUI() const {
+  auto &allNames = getFunctionNames<IFunction1D>();
+  std::vector<std::string> names;
+  names.reserve(allNames.size());
+  auto excludes =
+      Kernel::ConfigService::Instance().getString("curvefitting.guiExclude");
+  Kernel::StringTokenizer tokenizer(excludes, ";",
+                                    Kernel::StringTokenizer::TOK_TRIM);
+  std::set<std::string> excludeList(tokenizer.begin(), tokenizer.end());
+  for (auto &name : allNames) {
+    if (excludeList.count(name) == 0) {
+      names.push_back(name);
+    }
+  }
+  return names;
+}
 
- void FunctionFactoryImpl::subscribe(
+void FunctionFactoryImpl::subscribe(
     const std::string &className, AbstractFactory *pAbstractFactory,
     Kernel::DynamicFactory<IFunction>::SubscribeAction replace) {
   // Clear the cache, then do all the work in the base class method
