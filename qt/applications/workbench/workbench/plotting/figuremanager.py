@@ -242,9 +242,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         # Hack to ensure the canvas is up to date
         self.canvas.draw_idle()
         if figure_type(self.canvas.figure) != FigureType.Line:
-            action = self.toolbar._actions['toggle_fit']
-            action.setEnabled(False)
-            action.setVisible(False)
+            self._set_fit_enabled(False)
 
         self._update_workspace_labels()
 
@@ -335,9 +333,16 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         num_new_curves = len(curve_labels) - len(self.workspace_labels)
         self.workspace_labels += curve_labels[-num_new_curves:]
         self._update_fit_browser_workspace_labels()
+        can_fit = self.fit_browser.can_fit_spectra(self.workspace_labels)
+        self._set_fit_enabled(can_fit)
 
     def _update_fit_browser_workspace_labels(self):
         self.fit_browser.workspace_labels = self.workspace_labels
+
+    def _set_fit_enabled(self, on):
+        action = self.toolbar._actions['toggle_fit']
+        action.setEnabled(on)
+        action.setVisible(on)
 
 # -----------------------------------------------------------------------------
 # Figure control

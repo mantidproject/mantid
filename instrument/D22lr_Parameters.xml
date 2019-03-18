@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <parameter-file instrument = "D22lr">
 
-    <!-- Tau coefficient for DeadTimeCorrection, to be applied tube by tube -->
     <component-link name="D22lr">
+      <!-- Tau coefficient for DeadTimeCorrection, to be applied tube by tube -->
       <parameter name="tau" type="number">
         <value val="0.0000015" />
       </parameter>
-    </component-link>
-
-    <!-- GroupingPattern for DeadTimeCorrection, groups ws indices tube-wise -->
-    <component-link name="D22">
+      <!-- Logs to sum when merging the runs -->
+      <parameter name="sample_logs_sum" type="string">
+        <value val="timer" />
+      </parameter>
+      <!-- GroupingPattern for DeadTimeCorrection, groups ws indices tube-wise -->
       <parameter name="grouping" type="string">
         <value val="0-127,128-255,256-383,384-511,512-639,640-767,768-895,896-1023,1024-1151,1152-1279,1280-1407,1408-1535,1536-1663,1664-1791,1792-1919,1920-2047,2048-2175,2176-2303,2304-2431,2432-2559,2560-2687,2688-2815,2816-2943,2944-3071,3072-3199,3200-3327,3328-3455,3456-3583,3584-3711,3712-3839,3840-3967,3968-4095,4096-4223,4224-4351,4352-4479,4480-4607,4608-4735,4736-4863,4864-4991,4992-5119,5120-5247,5248-5375,5376-5503,5504-5631,5632-5759,5760-5887,5888-6015,6016-6143,6144-6271,6272-6399,6400-6527,6528-6655,6656-6783,6784-6911,6912-7039,7040-7167,7168-7295,7296-7423,7424-7551,7552-7679,7680-7807,7808-7935,7936-8063,8064-8191,8192-8319,8320-8447,8448-8575,8576-8703,8704-8831,8832-8959,8960-9087,9088-9215,9216-9343,9344-9471,9472-9599,9600-9727,9728-9855,9856-9983,9984-10111,10112-10239,10240-10367,10368-10495,10496-10623,10624-10751,10752-10879,10880-11007,11008-11135,11136-11263,11264-11391,11392-11519,11520-11647,11648-11775,11776-11903,11904-12031,12032-12159,12160-12287,12288-12415,12416-12543,12544-12671,12672-12799,12800-12927,12928-13055,13056-13183,13184-13311,13312-13439,13440-13567,13568-13695,13696-13823,13824-13951,13952-14079,14080-14207,14208-14335,14336-14463,14464-14591,14592-14719,14720-14847,14848-14975,14976-15103,15104-15231,15232-15359,15360-15487,15488-15615,15616-15743,15744-15871,15872-15999,16000-16127,16128-16255,16256-16383" />
       </parameter>
@@ -19,13 +20,13 @@
 
     <component-link name="detector">
 
-    <parameter name="parallax" type="string">
-		  <value val="1+0.14*exp(-4*ln(2.)*((abs(t)-0.588)/0.414)^2)"/>
-		</parameter>
+        <parameter name="parallax" type="string">
+            <value val="1+0.14*exp(-4*ln(2.)*((abs(t)-0.588)/0.414)^2)"/>
+        </parameter>
 
-    <parameter name="direction" type="string">
-		  <value val="y"/>
-		</parameter>
+        <parameter name="direction" type="string">
+            <value val="y"/>
+        </parameter>
 
     </component-link>
 </parameter-file>
