@@ -35,7 +35,7 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
     TOO_MANY_TO_SET_AS_Y_ERR_MESSAGE = "Too many selected to set as Y Error"
     CANNOT_PLOT_AGAINST_SELF_MESSAGE = "Cannot plot column against itself."
     NO_ASSOCIATED_YERR_FOR_EACH_Y_MESSAGE = "Column '{}' does not have an associated Y error column." \
-                                            " Please set it by doing: Right click on column ->" \
+                                            "\n\nPlease set it by doing: Right click on column ->" \
                                             " Set error for Y -> The label shown on the Y column"
     PLOT_FUNCTION_ERROR_MESSAGE = "One or more of the columns being plotted contain invalid data for Matplotlib.\n\nError message:\n{}"
     INVALID_DATA_WINDOW_TITLE = "Invalid data - Mantid Workbench"
