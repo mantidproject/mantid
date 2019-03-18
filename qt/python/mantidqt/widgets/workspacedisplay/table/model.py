@@ -69,7 +69,7 @@ class TableWorkspaceDisplayModel:
             elif plot_type == TableWorkspaceColumnTypeMapping.Y:
                 self.marked_columns.add_y(col)
             elif plot_type == TableWorkspaceColumnTypeMapping.YERR:
-                # only mark YErrs only if there are any columns that have been marked as Y
+                # mark YErrs only if there are any columns that have been marked as Y
                 # if there are none then do not mark anything as YErr
                 if len(self.marked_columns.as_y) > len(self.marked_columns.as_y_err):
                     # Assume all the YErrs are associated with the first available (no other YErr has it) Y column.
