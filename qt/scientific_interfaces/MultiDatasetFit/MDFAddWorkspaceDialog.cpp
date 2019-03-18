@@ -82,8 +82,8 @@ QStringList AddWorkspaceDialog::availableWorkspaces() const {
       continue;
     }
     auto grp = ADS.retrieveWS<Mantid::API::WorkspaceGroup>(*name);
-    bool hasMatrixWorkspace = false;
     if (grp) {
+      bool hasMatrixWorkspace = false;
       for (auto ws : grp->getAllItems()) {
         if (dynamic_cast<Mantid::API::MatrixWorkspace *>(ws.get())) {
           hasMatrixWorkspace = true;
