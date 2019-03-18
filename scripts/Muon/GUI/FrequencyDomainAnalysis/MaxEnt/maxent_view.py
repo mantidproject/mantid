@@ -227,7 +227,6 @@ class MaxEntView(QtGui.QWidget):
         inputs["MaxField"] = float(self.max_field.text())
         inputs["FitDeadTime"] = self.dead_box.checkState() == QtCore.Qt.Checked
         inputs["DoublePulse"] = self.double_pulse_box.checkState() == QtCore.Qt.Checked
-        inputs["DoublePulse"] = self.double_pulse_box.checkState()
         inputs["OuterIterations"] = int(self.outer_loop.text())
         inputs["InnerIterations"] = int(self.inner_loop.text())
         inputs["DefaultLevel"] = float(self.AConst.text())
