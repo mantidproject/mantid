@@ -171,10 +171,10 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
             issues['CorrectionsWorkspace'] = error_msg
             issues['CanWorkspace'] = error_msg
 
-        if not isinstance(self._corrections_workspace, WorkspaceGroup):
-            issues['CorrectionsWorkspace'] = "The corrections workspace should be a workspace group."
-
         if self._use_corrections:
+            if not isinstance(self._corrections_workspace, WorkspaceGroup):
+                issues['CorrectionsWorkspace'] = "The corrections workspace should be a workspace group."
+
             if self._corrections_workspace.size() == 0:
                 issues['CorrectionsWorkspace'] = "No corrections found in the supplied corrections workspace group."
             else:
