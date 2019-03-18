@@ -130,15 +130,15 @@ class ConjoinSpectra(PythonAlgorithm):
             return TextAxis.create(len(all_ws_names))
 
     def make_label(self, ws_name, index, label_using, label_value):
-        label = ""
+        label = None
         if label_value != "":
             label = self.get_log_value(mtd[ws_name.strip()], label_using, label_value)
-        if label == "":
+        if label is None:
             label = ws_name + "_" + str(index)
         return label
 
     def get_log_value(self, ws, label_using, label_value):
-        label = 0.0
+        label = None
         run = ws.getRun()
         try:
             prop = run.getProperty(label_using)
@@ -161,7 +161,7 @@ class ConjoinSpectra(PythonAlgorithm):
                 label = prop.value
         except RuntimeError:
             # failed to find the property
-            # log and pass out an empty string
+            # log and pass out a NoneType
             logger.information("Could not find log " + label_using + " in workspace " +
                                str(ws) + " using workspace label instead.")
         return label
