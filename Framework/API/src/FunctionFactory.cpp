@@ -11,8 +11,10 @@
 #include "MantidAPI/Expression.h"
 #include "MantidAPI/IConstraint.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/LibraryManager.h"
 #include <MantidKernel/StringTokenizer.h>
 #include <boost/lexical_cast.hpp>
@@ -361,7 +363,23 @@ void FunctionFactoryImpl::addTie(IFunction_sptr fun,
   }
 }
 
-void FunctionFactoryImpl::subscribe(
+ std::vector<std::string> FunctionFactoryImpl::getFunctionNamesGUI() const
+ {
+   auto &allNames = getFunctionNames<IFunction1D>();
+   std::vector<std::string> names;
+   names.reserve(allNames.size());
+   auto excludes = Kernel::ConfigService::Instance().getString("curvefitting.guiExclude");
+   Kernel::StringTokenizer tokenizer(excludes, ";", Kernel::StringTokenizer::TOK_TRIM);
+   std::set<std::string> excludeList(tokenizer.begin(), tokenizer.end());
+   for (auto &name : allNames) {
+     if (excludeList.count(name) == 0) {
+       names.push_back(name);
+     }
+   }
+   return names;
+ }
+
+ void FunctionFactoryImpl::subscribe(
     const std::string &className, AbstractFactory *pAbstractFactory,
     Kernel::DynamicFactory<IFunction>::SubscribeAction replace) {
   // Clear the cache, then do all the work in the base class method
