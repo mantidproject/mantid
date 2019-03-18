@@ -126,9 +126,8 @@ class FFTModel(object):
             FFTInputs["OutputWorkspace"],
             self.alg.getProperty("OutputWorkspace").value)
 
-        ws = self.alg.getPropertyValue("OutputWorkspace")
         group = mantid.AnalysisDataService.retrieve(self.runName)
-        group.add(ws)
+        group.add(FFTInputs["OutputWorkspace"])
         self.alg = None
 
     def makePhaseQuadTable(self, inputs):
