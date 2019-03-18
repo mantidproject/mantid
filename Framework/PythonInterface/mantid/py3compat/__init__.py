@@ -24,6 +24,7 @@ from __future__ import (absolute_import, print_function, unicode_literals)
 
 import six
 from six import *  # noqa
+import sys
 
 # Enumerations are built in with Python 3
 try:
@@ -36,6 +37,21 @@ except ImportError:
 # Globals and constants
 # -----------------------------------------------------------------------------
 __all__ = dir(six)
+
+VERSION_INFO = sys.version_info
+MAJOR_VER = VERSION_INFO[0]
+MINOR_VER = VERSION_INFO[1]
+
+
+# -----------------------------------------------------------------------------
+# System functions
+# -----------------------------------------------------------------------------
+if MAJOR_VER == 2:
+    setcheckinterval = sys.setcheckinterval
+elif MAJOR_VER == 3 and MINOR_VER < 2:
+    setcheckinterval = sys.setcheckinterval
+else:
+    setcheckinterval = sys.setswitchinterval
 
 
 # -----------------------------------------------------------------------------
