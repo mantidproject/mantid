@@ -432,7 +432,7 @@ Plot Guess
 Fit Spectra
   Choose a range or discontinuous list of spectra to be fitted.
 
-Mask Q Range
+Mask X Range
   Energy ranges may be excluded from a fit by selecting a spectrum next to the ‘Mask X Range of Spectrum’ label
   and then providing a comma-separated list of pairs, where each pair designates a range to exclude from the fit.
 
@@ -516,7 +516,7 @@ Plot Guess
 Fit Spectra
   Choose a range or discontinuous list of spectra to be fitted.
 
-Mask Q Range
+Mask X Range
   Energy ranges may be excluded from a fit by selecting a spectrum next to the ‘Mask X Range of Spectrum’ label
   and then providing a comma-separated list of pairs, where each pair designates a range to exclude from the fit.
 
