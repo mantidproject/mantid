@@ -67,7 +67,7 @@ void IndirectTransmission::run() {
 
 bool IndirectTransmission::validate() {
   // Check if we have an appropriate instrument
-  QString currentInst = getInstrumentConfiguration()->getInstrumentName();
+  QString currentInst = getInstrumentName();
   if (currentInst != "IRIS" && currentInst != "OSIRIS")
     return false;
 
@@ -107,11 +107,11 @@ void IndirectTransmission::transAlgDone(bool error) {
 }
 
 void IndirectTransmission::instrumentSet() {
-  QMap<QString, QString> instDetails = getInstrumentDetails();
+  auto const instrument = getInstrumentDetail("instrument");
 
   // Set the search instrument for runs
-  m_uiForm.dsSampleInput->setInstrumentOverride(instDetails["instrument"]);
-  m_uiForm.dsCanInput->setInstrumentOverride(instDetails["instrument"]);
+  m_uiForm.dsSampleInput->setInstrumentOverride(instrument);
+  m_uiForm.dsCanInput->setInstrumentOverride(instrument);
 }
 
 /**

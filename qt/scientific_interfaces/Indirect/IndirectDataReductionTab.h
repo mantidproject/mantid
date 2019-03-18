@@ -80,13 +80,19 @@ protected:
   loadInstrumentIfNotExist(std::string instrumentName,
                            std::string analyser = "",
                            std::string reflection = "");
-  /// Function to get details about the instrumet from a given workspace
+
   QMap<QString, QString> getInstrumentDetails() const;
+  QString getInstrumentDetail(QString const &key) const;
+  QString getInstrumentDetail(QMap<QString, QString> const &instrumentDetails,
+                              QString const &key) const;
+  MantidWidgets::IndirectInstrumentConfig *getInstrumentConfiguration() const;
+  QString getInstrumentName() const;
+  QString getAnalyserName() const;
+  QString getReflectionName() const;
+
   std::map<std::string, double>
   getRangesFromInstrument(QString instName = "", QString analyser = "",
                           QString reflection = "");
-  /// Get the instrument config widget
-  MantidWidgets::IndirectInstrumentConfig *getInstrumentConfiguration() const;
 
 private slots:
   void tabExecutionComplete(bool error);
