@@ -2,6 +2,8 @@ from __future__ import print_function, division
 
 import unittest
 import numpy as np
+import matplotlib
+matplotlib.use("agg")
 import matplotlib.pyplot as plt
 
 from mantid.plots.modest_image import ModestImage, imshow
