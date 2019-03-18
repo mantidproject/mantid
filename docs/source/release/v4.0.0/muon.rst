@@ -42,7 +42,8 @@ Bugfixes
 - The `load current run` button now works for CHRONUS in muon analysis.
 - ALC interface now removes all of the fitting regions for the baseline modelling when the data changes.
 - ALC interface now produces a warning if the custom grouping is not valid.
-- The Frequency Domain Analysis interface now crops the raw data by first and last good times before the calculation of the PhaseQuad workspace.
+- The new Frequency Domain Analysis interface now crops the raw data by first and last good times before the calculation of the PhaseQuad workspace. This does not affect the raw data in the ADS.
+- The new Frequency Domain Analysis now masks out any detectors not in any of the default grouping tables before calculating the phase table and PhaseQuad workspace.
 - Frequency Domain Analysis will ignore the fix phases option if phase table is not used.
 
 Algorithms
@@ -62,8 +63,9 @@ New
 
 Improvements
 ############
-- :ref:`MuonMaxent <algm-MuonMaxent>` has validation checks on its input.  
-
+- :ref:`MuonMaxent <algm-MuonMaxent>` has validation checks on its input.
+- :ref:`CalMuonDetectorPhases <algm-CalMuonDetectorPhases>` now sends a warning to the dialog window if it fails to fit a spectrum rather than throwing an exception and exiting the process of creating a phase table.
+- :ref:`PhaseQuad <algm-PhaseQuad>` now ignores spectra which do not have a valid phase table entry.
 Bugfixes
 ########
 
