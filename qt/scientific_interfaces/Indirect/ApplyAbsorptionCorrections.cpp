@@ -394,6 +394,7 @@ void ApplyAbsorptionCorrections::addInterpolationStep(
 void ApplyAbsorptionCorrections::absCorComplete(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
              SLOT(absCorComplete(bool)));
+  setRunIsRunning(false);
 
   if (!error) {
     if (m_uiForm.ckUseCan->isChecked()) {
@@ -415,7 +416,6 @@ void ApplyAbsorptionCorrections::absCorComplete(bool error) {
             SLOT(postProcessComplete(bool)));
     m_batchAlgoRunner->executeBatchAsync();
   } else {
-    setRunIsRunning(false);
     setPlotSpectrumEnabled(false);
     setPlotContourEnabled(false);
     setSaveResultEnabled(false);
