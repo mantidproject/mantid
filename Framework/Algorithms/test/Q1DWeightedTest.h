@@ -282,7 +282,6 @@ public:
     }
   }
 
-  // Test with gravity
   void testWithGravity() {
     TS_ASSERT_THROWS_NOTHING(
         radial_average.setPropertyValue("InputWorkspace", m_inputWS))

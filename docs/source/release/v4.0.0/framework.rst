@@ -5,6 +5,8 @@ Framework Changes
 .. contents:: Table of Contents
    :local:
 
+The calculations for :py:obj:`mantid.kernel.Material` have been changed to match the equations in Sears, Varley F. "Neutron scattering lengths and cross sections." Neutron News 3.3 (1992): 26-37
+
 Logging
 -------
 
@@ -24,7 +26,11 @@ Nexus Geometry Loading
 ----------------------
 - :ref:`LoadEmptyInstrument <algm-LoadEmptyInstrument>` will now load instrument geometry from hdf5 `NeXus <https://www.nexusformat.org/>`_ format files. Files consistent with the standard following the introduction of `NXoff_geometry <http://download.nexusformat.org/sphinx/classes/base_classes/NXoff_geometry.html>`_ and `NXcylindrical_geometry <http://download.nexusformat.org/sphinx/classes/base_classes/NXcylindrical_geometry.html>`_ will be used to build the entire in-memory instrument geometry within Mantid. This IDF-free route is primarily envisioned for the ESS. While dependent on the instrument, we are overall seeing significant improvements in instrument load times over loading from equivalent IDF based implementations. :ref:`LoadInstrument <algm-LoadInstrument>` also supports the nexus geometry format in the same was as LoadEmptyInstrument.
 - The changes above have also been incorporated directly into :ref:`LoadEventNexus <algm-LoadEventNexus>`, so it is possible to store data and geometry together for the first time in a NeXus compliant format for Mantid. These changes have made it possible to load experimental ESS event data files directly into Mantid.
+
+Instruments
+-----------
 - New helper function `ExperimentInfo.getResourceFilenames` returns a list of instrument definition files and/or parameter files in accordance to a query time stamp.
+- A bug has been fixed that caused each workspace to hold a separate copy of the instrument. In the case of large instruments such as WISH this added 200MB to each workspace, even in the case of a single spectrum workspace.
 
 Archive Searching
 -----------------
@@ -62,6 +68,7 @@ New Algorithms
 - :ref:`CalculateEfficiencyCorrection <algm-CalculateEfficiencyCorrection>` will calculate a detection efficiency correction with multiple and flexible inputs for calculation.
 - :ref:`LinkedUBs <algm-LinkedUBs>` is an algorithm that ensures continuity of indexing across single crystal runs, as well as indirectly performing a U matrix correction for mis-centered samples or cases where there is error in the gonio angles. Results in a separate UB for each run when used on a whole dataset.
 - :ref:`CopyDataRange <algm-CopyDataRange>` will replace a block of data in a destination workspace with a continuous block of data from an input workspace.
+- :ref:`CalculateFlux <algm-CalculateFlux>` computes the incident flux wavelength profile using an empty beam SANS measurement.
 
 Improvements
 ############
@@ -90,12 +97,16 @@ Improvements
 - :ref:`CylinderAbsorption <algm-CylinderAbsorption>` now will check the workspace's sample object for geometry.
 - Various clarifications and additional links in the geometry and material documentation pages.
 - :ref:`SetSample <algm-SetSample>` and :ref:`SetSampleMaterial <algm-SetSampleMaterial>` now accept materials without ``ChemicalFormula`` or ``AtomicNumber``. In this case, all cross sections and ``SampleNumberDensity`` have to be given.
-- :ref:`Q1DWeighted <algm-Q1DWeighted>` will now discard the masked bins in the input and can optionally account for the gravity drop.
-- :ref:`Q1DWeighted <algm-Q1DWeighted>` is now an order of magnitude faster for TOF SANS data due to reorganization of the code.
 - :ref:`SetSampleMaterial <algm-SetSampleMaterial>` and :ref:`LoadSampleEnvironment <algm-LoadSampleEnvironment>` accept number densities as formula units per cubic Ångström in addition to atoms per cubic Ångström.
 - :ref:`LoadEventNexus <algm-LoadEventNexus>` experimental option `LoadType` = `{Default, Multiprocess}` is added, `Multiprocess` should work faster for big files and it is experimental, available only in Linux.
 - The history generated from a call to :ref:`SetSample <algm-SetSample>` can now be re-executed without error.
 - :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` no more fails with 'Unable to generate point in object' errors if the sample shape is cuboid, cylinder, or sphere.
+- Changes in :ref:`Q1DWeighted <algm-Q1DWeighted>`:
+
+  - Significant speedup for TOF mode due to reorganization of the code.
+  - An option for asymmetric wedges for an anisotropic scatterer
+  - The bins masked in the input will be discarded from the calculation
+  - An option to account for the nominal gravity drop
 
 Bugfixes
 ########

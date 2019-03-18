@@ -49,7 +49,7 @@ ErrorWeighting
 
 Each pixel has a weight of 1 by default, but the weight of
 each pixel can be set to :math:`1/\sigma^2 I` by setting the
-``ErrorWeighting`` parameter to True. This will effectively transmute the average to a weighted average, where the weight is inverse proportional to the absolute statistical uncertainty on the intensity.
+``ErrorWeighting`` parameter to True. This will effectively transmute the average to a weighted average, where the weight is inversely proportional to the absolute statistical uncertainty on the intensity.
 This option will potentially produce very different results, so care must be taken when analysing the data with this option.
 In the reduction workflows this option is deprecated.
 

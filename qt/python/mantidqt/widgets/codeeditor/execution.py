@@ -221,6 +221,10 @@ def code_blocks(code_str):
     isp = InputSplitter()
     for line in lines:
         lineno_cur += 1
+        # IPython InputSplitter assumes that indentation is 4 spaces, not tabs.
+        # Accounting for that here, rather than using script-level "tabs to spaces"
+        # allows the user to keep tabs in their script if they wish.
+        line = line.replace("\t", " "*4)
         isp.push(line)
         # If we need more input to form a complete statement
         # or we are not at the end of the code then keep

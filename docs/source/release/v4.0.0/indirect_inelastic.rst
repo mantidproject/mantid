@@ -19,6 +19,12 @@ New Algorithms
 - :ref:`IndirectReplaceFitResult <algm-IndirectReplaceFitResult>` will replace the *_Result* fit data found in one workspace with the 
   single fit data provided within a second workspace.
 
+Improvements
+############
+
+- :ref:`BASISReduction <algm-BASISReduction>` user interface contains slightly different naming convention for selection of reflection and works for old and new DAS.
+
+
 :ref:`Release 4.0.0 <v4.0.0>`
 
 Data Analysis Interface
@@ -126,6 +132,25 @@ Bugfixes
   in order to avoid these large file sizes.
 - A bug where using a cropped calibration file (from a previous run) on the ISISEnergyTransfer interface would cause an 
   error has been fixed.
+- A bug where specifying a custom detector grouping for OSIRIS was not working has been fixed.
+- A bug caused by incorrect masked detectors during a reduction of an individual runs has been fixed. This could sometimes cause 
+  unexpected peaks in the output plots.
+
+.. figure:: ../../images/TOSCA_Individual_Runs_Bug.png
+  :class: screenshot
+  :align: center
+  :figwidth: 100%
+  :alt: The individual runs TOSCA bug before and after being fixed.
+
+- A bug caused by incorrect masked detectors during a reduction for a summed run has been fixed. This would cause the summed runs 
+  intensity to be higher than that of the individual runs with the same run numbers.
+
+.. figure:: ../../images/TOSCA_Summed_Run_Bug.png
+  :class: screenshot
+  :align: center
+  :figwidth: 100%
+  :alt: The summed run TOSCA bug before and after being fixed.
+
 
 Bayes Interface
 ---------------
@@ -170,8 +195,14 @@ Improvements
 ############
 
 - The Run button is now above the output options.
-- The Run, Plot, and Save buttons are now disabled while running and plotting is taking place.
+- The Run, Plot and Save buttons are now disabled while running and plotting is taking place.
+- Any zeros within the vanadium file are replaced with a substitute value of 10% the minimum 
+  y value found within that file. This prevents infinity values being produced when dividing the 
+  input file by the vanadium file.
 
+Bugfixes
+########
+- An unexpected error when using manual grouping has been fixed.
 
 Tools Interface
 ---------------

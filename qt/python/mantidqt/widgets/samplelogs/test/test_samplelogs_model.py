@@ -55,7 +55,7 @@ class SampleLogsModelTest(unittest.TestCase):
         self.assertEqual(itemModel.rowCount(), 48)
         self.assertEqual(itemModel.item(0,0).text(), "ChopperStatus1")
         self.assertEqual(itemModel.item(0,1).text(), "float series")
-        self.assertEqual(itemModel.item(0,2).text(), "(2 entries)")
+        self.assertEqual(itemModel.item(0,2).text(), "4.0 (2 entries)")
         self.assertEqual(itemModel.item(0,3).text(), "")
 
     def test_model_MD(self):

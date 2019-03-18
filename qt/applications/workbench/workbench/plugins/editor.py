@@ -146,3 +146,6 @@ class MultiFileEditor(PluginWidget):
 
     def save_current_file(self):
         self.editors.save_current_file()
+
+    def save_current_file_as(self):
+        self.editors.save_current_file_as()

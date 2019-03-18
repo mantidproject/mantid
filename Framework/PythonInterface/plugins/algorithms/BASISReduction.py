@@ -7,12 +7,13 @@
 # pylint: disable=no-init
 from __future__ import (absolute_import, division, print_function)
 
+import os
 import numpy as np
 import json
 
 import mantid.simpleapi as sapi
 from mantid.api import (mtd, PythonAlgorithm, AlgorithmFactory, FileProperty,
-                        FileAction, AnalysisDataService)
+                        FileAction, AnalysisDataService, ExperimentInfo)
 from mantid.kernel import (IntArrayProperty, StringListValidator,
                            FloatArrayProperty, EnabledWhenProperty,
                            Direction, PropertyCriterion)
@@ -26,34 +27,30 @@ DEFAULT_CONFIG_DIR = config['instrumentDefinition.directory']
 # BASIS allows two possible reflections, with associated default properties
 # pylint: disable=line-too-long
 REFLECTIONS_DICT = {
-    'silicon111': {'name': 'silicon111',
-                   'energy_bins': [-150, 0.4, 500],  # micro-eV
-                   'q_bins': [0.3, 0.2, 1.9],  # inverse Angst
-                   'banks': 'bank1,bank3,bank4',
-                   'mask_file': 'BASIS_Mask_default_111.xml',
-                   'parameter_file': 'BASIS_silicon_111_Parameters.xml',
-                   'default_energy': 2.0826,  # meV
-                   'vanadium_bins': [-0.0034, 0.068, 0.0034],
-                   'vanadium_wav_range': [6.20, 6.33]},
-    'silicon333': {'name': 'silicon333',
-                   'energy_bins': [-1500, 3.2, 5000],
-                   'q_bins': [0.9, 0.2, 5.7],
-                   'banks': 'bank1,bank3,bank4',
-                   'mask_file': 'BASIS_Mask_default_333.xml',
-                   'parameter_file': 'BASIS_silicon_333_Parameters.xml',
-                   'instrument_definition_file': 'BASIS_Definition_Si333.xml',
-                   'default_energy': 18.7434,
-                   'vanadium_bins': [-0.0333, 0.0666, 0.0333],
-                   'vanadium_wav_range': [2.080, 2.108]},
-    'silicon311': {'name': 'silicon311',
-                   'energy_bins': [-740, 1.6, 740],
-                   'q_bins': [0.5, 0.2, 3.7],
-                   'banks': 'bank2',
-                   'mask_file': 'BASIS_Mask_default_311.xml',
-                   'parameter_file': 'BASIS_silicon_311_Parameters.xml',
-                   'default_energy': 7.6368,  # meV
-                   'vanadium_bins': [-0.015, 0.030, 0.015],
-                   'vanadium_wav_range': [3.263, 3.295]}
+    'silicon_111': {'name': 'silicon_111',
+                    'energy_bins': [-150, 0.4, 500],  # micro-eV
+                    'q_bins': [0.3, 0.2, 1.9],  # inverse Angst
+                    'banks': 'bank1,bank3,bank4',
+                    'mask_file': 'BASIS_Mask_default_111.xml',
+                    'default_energy': 2.0826,  # meV
+                    'vanadium_bins': [-0.0034, 0.068, 0.0034],
+                    'vanadium_wav_range': [6.20, 6.33]},
+    'silicon_333': {'name': 'silicon_333',
+                    'energy_bins': [-1500, 3.2, 5000],
+                    'q_bins': [0.9, 0.2, 5.7],
+                    'banks': 'bank1,bank3,bank4',
+                    'mask_file': 'BASIS_Mask_default_333.xml',
+                    'default_energy': 18.7434,
+                    'vanadium_bins': [-0.0333, 0.0666, 0.0333],
+                    'vanadium_wav_range': [2.080, 2.108]},
+    'silicon_311': {'name': 'silicon_311',
+                    'energy_bins': [-740, 1.6, 740],
+                    'q_bins': [0.5, 0.2, 3.7],
+                    'banks': 'bank2',
+                    'mask_file': 'BASIS_Mask_default_311.xml',
+                    'default_energy': 7.6368,  # meV
+                    'vanadium_bins': [-0.015, 0.030, 0.015],
+                    'vanadium_wav_range': [3.263, 3.295]}
 }
 
 # pylint: disable=too-many-instance-attributes
@@ -139,7 +136,7 @@ class BASISReduction(PythonAlgorithm):
         # Properties affected by the reflection selected
         titleReflection = 'Reflection Selector'
         available_reflections = sorted(REFLECTIONS_DICT.keys())
-        default_reflection = REFLECTIONS_DICT['silicon111']
+        default_reflection = REFLECTIONS_DICT['silicon_111']
         self.declareProperty('ReflectionType', default_reflection['name'],
                              StringListValidator(available_reflections),
                              'Analyzer. Documentation lists typical \
@@ -454,8 +451,8 @@ class BASISReduction(PythonAlgorithm):
     def _calibrate_data(self, sam_ws, mon_ws):
         sapi.MaskDetectors(Workspace=sam_ws,
                            DetectorList=self._dMask)
-        p_f = pjoin(DEFAULT_CONFIG_DIR, self._reflection['parameter_file'])
-        sapi.LoadParameterFile(Workspace=sam_ws, Filename=p_f)
+        rpf = self._elucidate_reflection_parameter_file(sam_ws)
+        sapi.LoadParameterFile(Workspace=sam_ws, Filename=rpf)
         sapi.ModeratorTzeroLinear(InputWorkspace=sam_ws,
                                   OutputWorkspace=sam_ws)
         sapi.ConvertUnits(InputWorkspace=sam_ws,
@@ -464,8 +461,7 @@ class BASISReduction(PythonAlgorithm):
                           EMode='Indirect')
 
         if self._MonNorm:
-            p_f = pjoin(DEFAULT_CONFIG_DIR, self._reflection['parameter_file'])
-            sapi.LoadParameterFile(Workspace=mon_ws, Filename=p_f)
+            sapi.LoadParameterFile(Workspace=mon_ws, Filename=rpf)
             sapi.ModeratorTzeroLinear(InputWorkspace=mon_ws,
                                       OutputWorkspace=mon_ws)
             sapi.Rebin(InputWorkspace=mon_ws,
@@ -659,6 +655,34 @@ class BASISReduction(PythonAlgorithm):
             self._as_json['properties'].update(forced)
         r = mtd[ws_name].mutableRun()
         r.addProperty('asString', json.dumps(self._as_json), True)
+
+    def _elucidate_reflection_parameter_file(self, ws_name):
+        r"""
+        Search a parameter file for the selected reflection and with
+        valid-from, valid-to dates framing the starting date for the run(s)
+
+        Parameters
+        ----------
+        ws_name: str
+            Name of the workspace from which to retrieve the starting date
+
+        Returns
+        -------
+        str
+            Full path to the parameter file
+        """
+        prefix = 'BASIS_{}_Parameters'.format(self._reflection['name'])
+        instr_directories = [DEFAULT_CONFIG_DIR]
+        start_date = str(mtd[ws_name].getRun().startTime()).strip()
+        parm_files = ExperimentInfo.getResourceFilenames(prefix,
+                                                         ['xml'],
+                                                         instr_directories,
+                                                         start_date)
+        parm_file = parm_files[0]  # first in the list is the most appropriate
+        # store selected parameter file in the logs
+        mtd[ws_name].getRun().addProperty('reflParmFile',
+                                          os.path.basename(parm_file), True)
+        return parm_file
 
 
 # Register algorithm with Mantid.

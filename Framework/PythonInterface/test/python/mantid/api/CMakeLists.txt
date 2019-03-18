@@ -5,6 +5,7 @@ set ( TEST_PY_FILES
   ADSValidatorTest.py
   AlgorithmTest.py
   AlgorithmFactoryTest.py
+  AlgorithmFactoryObserverTest.py
   AlgorithmHistoryTest.py
   AlgorithmManagerTest.py
   AlgorithmPropertyTest.py

@@ -15,6 +15,7 @@ import weakref
 
 # 3rdparty imports
 from qtpy.QtCore import QEvent, Qt, Signal, Slot
+from qtpy.QtGui import QIcon
 from qtpy.QtWidgets import QMainWindow
 
 # local imports
@@ -35,6 +36,7 @@ class FigureWindow(QMainWindow, ObservingView):
         # attributes
         self._canvas = weakref.proxy(canvas)
         self.setAttribute(Qt.WA_DeleteOnClose, True)
+        self.setWindowIcon(QIcon(':/images/MantidIcon.ico'))
 
         self.close_signal.connect(self._run_close)
         self.setAcceptDrops(True)

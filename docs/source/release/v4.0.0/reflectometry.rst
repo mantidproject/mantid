@@ -18,6 +18,7 @@ New
 - :ref:`algm-SaveReflectometryAscii` is a general algorithm which saves the first spectrum of a workspace in Ascii format particularly suited for reflectometry data.
 - Some computations from :ref:`algm-ReflectometryMomentumTransfer` were extracted to a new algorithm, :ref:`algm-ReflectometryBeamStatistics`.
 - :ref:`algm-GroupToXResolution` can be used to group the reflectivity data (as point data) to the :math:`Q_z` resolution.
+- Added algorithm :ref:`algm-ReflectometryBackgroundSubtraction` which calculates the background of a given workspace and removes it.
 - Added algorithm :ref:`algm-ReflectometryISISLoadAndProcess` which performs full preparation and processing for a single run or combined set of runs in an ISIS reflectometry reduction.
 
 Improvements
