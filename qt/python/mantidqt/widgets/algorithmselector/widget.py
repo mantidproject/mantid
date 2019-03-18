@@ -199,7 +199,11 @@ class AlgorithmSelectorWidget(IAlgorithmSelectorView, QWidget):
         layout = QVBoxLayout()
         layout.addLayout(top_layout)
         layout.addWidget(self.tree)
-        layout.addWidget(AlgorithmProgressWidget())
+
+        algProgWidget = AlgorithmProgressWidget(self)
+        algProgWidget.setAttribute(Qt.WA_DeleteOnClose)
+
+        layout.addWidget(algProgWidget)
         # todo: Without the sizeHint() call the minimum size is not set correctly
         #       This needs some investigation as to why this is.
         layout.sizeHint()
