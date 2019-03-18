@@ -71,12 +71,13 @@ class TableWorkspaceDisplayModel:
             elif plot_type == TableWorkspaceColumnTypeMapping.YERR:
                 # only mark YErrs only if there are any columns that have been marked as Y
                 # if there are none then do not mark anything as YErr
-                if len(self.marked_columns.as_y) > 0:
-                    # assume all the YErrs are associated with the first Y column. There isn't a way to know
-                    # the correct Y column, as that information is not stored in the table workspace - the
-                    # original table workspace does not associate Y errors columns with specific Y columns
+                if len(self.marked_columns.as_y) > len(self.marked_columns.as_y_err):
+                    # Assume all the YErrs are associated with the first available (no other YErr has it) Y column.
+                    # There isn't a way to know the correct Y column, as that information is not stored
+                    # in the table workspace - the original table workspace does not associate Y errors
+                    # columns with specific Y columns
                     err_for_column = self.marked_columns.as_y[len(self.marked_columns.as_y_err)]
-                    label = str(len(self.marked_columns.as_y) - 1)
+                    label = str(len(self.marked_columns.as_y_err))
                     self.marked_columns.add_y_err(ErrorColumn(col, err_for_column, label))
 
     def _get_v3d_from_str(self, string):
