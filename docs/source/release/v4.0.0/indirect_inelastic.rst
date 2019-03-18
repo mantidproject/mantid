@@ -126,6 +126,8 @@ Improvements
 
 Bugfixes
 ########
+- Symmetrise tab has changed so you can no longer click the run button before preview, and preview will not run even if clicked
+  unless the max or min bars on the top graph have changed from their default.
 - A bug where the output reduced files had large file sizes depending on the size of the batch being reduced from 
   the :ref:`ISISIndirectEnergyTransfer <algm-ISISIndirectEnergyTransfer>` algorithm on the ISISEnergyTransfer interface has been 
   fixed. The :ref:`ISISIndirectEnergyTransferWrapper <algm-ISISIndirectEnergyTransferWrapper>` algorithm should be used instead
