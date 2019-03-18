@@ -93,7 +93,7 @@ public:
   double height() const;
   GeometryShape shape() const;
 
-  void getObjectGeometry(GeometryShape &shape, std::vector<Kernel::V3D> &points, double &radius,
+  void getObjectGeometry(GeometryShape &shape, std::vector<Kernel::V3D> &points,
                          double &innerRadius, double &outerRadius, double &height) const;
   void getObjectGeometry(GeometryShape &shape, std::vector<Kernel::V3D> &points,
                          double &radius, double &height) const;

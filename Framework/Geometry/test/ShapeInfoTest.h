@@ -75,9 +75,9 @@ public:
     ShapeInfo shapeInfo;
     V3D centerBottomBase(0, 0, 0);
     V3D symmetryAxis(1, 1, 1);
-    double innerRadius;
-    double outerRadius;
-    double height;
+    double innerRadius = 5;
+    double outerRadius = 6;
+    double height = 3;
     shapeInfo.setHollowCylinder(centerBottomBase, symmetryAxis, innerRadius, outerRadius, height);
 
     TS_ASSERT_EQUALS(shapeInfo.shape(), ShapeInfo::GeometryShape::HOLLOWCYLINDER);
@@ -132,14 +132,10 @@ public:
     std::vector<V3D> tpoints;
     double theight;
     double tradius;
-    double tinnerRadius;
-    double touterRadius;
 
-    shapeInfo.getObjectGeometry(tshape, tpoints, tradius, tinnerRadius, touterRadius, theight);
+    shapeInfo.getObjectGeometry(tshape, tpoints, tradius, theight);
     TS_ASSERT_EQUALS(tradius, radius);
     TS_ASSERT(theight == 0);
-    TS_ASSERT(tinnerRadius == 0);
-    TS_ASSERT(touterRadius == 0);
     TS_ASSERT(tpoints.size() == 1);
     TS_ASSERT_EQUALS(tpoints[0], center);
     TS_ASSERT_EQUALS(tshape, ShapeInfo::GeometryShape::SPHERE);
@@ -208,17 +204,18 @@ public:
   }
 
   void testHollowCylinderGeometry(){
-    ShapeInfo ShapeInfo;
+    ShapeInfo shapeInfo;
     const V3D centerOfBottomBase(0, 0, 0);
     const V3D symmetryAxis(1, 0, 0);
     constexpr double height = 5;
     constexpr double innerRadius = 5;
     constexpr double outerRadius = 6;
-    ShapeInfo.setHollowCylinder(centerOfBottomBase, symmetryAxis, innerRadius, outerRadius, height);
-    const auto geometry = ShapeInfo.hollowCylinderGeometry();
+    shapeInfo.setHollowCylinder(centerOfBottomBase, symmetryAxis, innerRadius, outerRadius, height);
+    const auto geometry = shapeInfo.hollowCylinderGeometry();
     TS_ASSERT_EQUALS(geometry.centreOfBottomBase, centerOfBottomBase)
     TS_ASSERT_EQUALS(geometry.axis, symmetryAxis)
     TS_ASSERT_EQUALS(geometry.innerRadius, innerRadius)
+    TS_ASSERT_EQUALS(geometry.outerRadius, outerRadius)
     TS_ASSERT_EQUALS(geometry.height, height)
   }
 
