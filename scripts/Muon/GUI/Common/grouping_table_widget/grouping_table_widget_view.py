@@ -190,7 +190,6 @@ class GroupingTableView(QtGui.QWidget):
 
     def enter_group_name(self):
         new_group_name, ok = QtGui.QInputDialog.getText(self, 'Group Name', 'Enter name of new group:')
-        group_index = 1
         if ok:
             return new_group_name
 
