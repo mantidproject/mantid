@@ -100,8 +100,10 @@ namespace pwvjdetail {
 template <typename ValueType> struct JsonType { using Type = ValueType; };
 template <> struct JsonType<int> { using Type = Json::Int; };
 template <> struct JsonType<long> { using Type = Json::Int64; };
+template <> struct JsonType<long long> { using Type = Json::Int64; };
 template <> struct JsonType<unsigned int> { using Type = Json::UInt; };
 template <> struct JsonType<unsigned long> { using Type = Json::UInt64; };
+template <> struct JsonType<unsigned long long> { using Type = Json::UInt64; };
 } // namespace pwvjdetail
 
 /**
