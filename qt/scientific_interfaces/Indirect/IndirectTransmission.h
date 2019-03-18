@@ -35,8 +35,6 @@ public:
   bool validate() override;
 
 private slots:
-  void dataLoaded();
-  void previewPlot();
   void transAlgDone(bool error);
   void instrumentSet();
 
