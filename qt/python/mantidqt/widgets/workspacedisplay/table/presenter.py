@@ -34,7 +34,9 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
     ITEM_CHANGED_UNKNOWN_ERROR_MESSAGE = "Unknown error occurred: {}"
     TOO_MANY_TO_SET_AS_Y_ERR_MESSAGE = "Too many selected to set as Y Error"
     CANNOT_PLOT_AGAINST_SELF_MESSAGE = "Cannot plot column against itself."
-    NO_ASSOCIATED_YERR_FOR_EACH_Y_MESSAGE = "There is no associated YErr for each selected Y column."
+    NO_ASSOCIATED_YERR_FOR_EACH_Y_MESSAGE = "Column '{}' does not have an associated Y error column." \
+                                            " Please set it by doing: Right click on column ->" \
+                                            " Set error for Y -> The label shown on the Y column"
     PLOT_FUNCTION_ERROR_MESSAGE = "One or more of the columns being plotted contain invalid data for Matplotlib.\n\nError message:\n{}"
     INVALID_DATA_WINDOW_TITLE = "Invalid data - Mantid Workbench"
     COLUMN_DISPLAY_LABEL = 'Column {}'
@@ -322,7 +324,9 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
                     # the column is not contained within the selected one
                     pass
             if len(yerr) != len(selected_columns):
-                self.view.show_warning(self.NO_ASSOCIATED_YERR_FOR_EACH_Y_MESSAGE)
+                column_headers = self.model.original_column_headers()
+                self.view.show_warning(self.NO_ASSOCIATED_YERR_FOR_EACH_Y_MESSAGE.format(
+                    ",".join([column_headers[col] for col in selected_columns])))
                 return
         x = self.model.get_column(selected_x)
 
