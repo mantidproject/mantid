@@ -6,3 +6,4 @@ class PlotType(Enum):
     SCATTER = 2
     LINE_AND_SYMBOL = 3
     LINEAR_WITH_ERR = 4
+    SCATTER_WITH_ERR = 5

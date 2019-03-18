@@ -4,11 +4,7 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-#    This file is part of the mantid workbench.
-#
-#
-
-
+#    This file is part of the mantidqt package.
 class MarkedColumns:
     X_LABEL = "[X{}]"
     Y_LABEL = "[Y{}]"
@@ -96,6 +92,8 @@ class MarkedColumns:
         Retrieve the corresponding YErr column for each Y column, so that it can be plotted
         :param selected_columns: Selected Y columns for which their YErr columns will be retrieved
         :return: Dict[Selected Column] = Column with YErr
+        :returns: Dictionary, where the keys are selected columns,
+                  and the values the error associated with the selected columns
         """
         yerr_for_col = {}
 
