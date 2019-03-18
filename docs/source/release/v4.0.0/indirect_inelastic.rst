@@ -152,6 +152,11 @@ Improvements
 - The option to choose which spectrum to *Plot Spectrum* for is now available in the
   ContainerSubtraction tab and ApplyAbsorptionCorrections tab.
 
+Bugfixes
+########
+- Fixed a bug where ApplyAbsorptionCorrections would not apply corrections if the *_Corrections* group workspace
+  did not contain sample attenuation (*_ass*).
+
 
 Data Reduction Interface
 ------------------------
