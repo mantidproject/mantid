@@ -1071,6 +1071,8 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
     g_log.warning("No calibration directory selected. Please select a "
                   "calibration directory in Settings. This will be used to "
                   "cache Vanadium calibration data");
+    // This should be a userWarning once the threading problem has been dealt
+    // with
     m_calibFinishedOK = false;
     return;
   }

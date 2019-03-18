@@ -18,6 +18,7 @@ set ( EXPORT_FILES
   src/Exports/Algorithm.cpp
   src/Exports/DataProcessorAlgorithm.cpp
   src/Exports/AlgorithmFactory.cpp
+  src/Exports/AlgorithmFactoryObserver.cpp
   src/Exports/AlgorithmManager.cpp
   src/Exports/AnalysisDataService.cpp
   src/Exports/FileProperty.cpp
@@ -100,10 +101,12 @@ set ( SRC_FILES
   src/PythonAlgorithm/DataProcessorAdapter.cpp
   src/CloneMatrixWorkspace.cpp
   src/ExtractWorkspace.cpp
+  src/Exports/AlgorithmFactoryObserverAdapter.cpp
   src/Exports/AnalysisDataServiceObserverAdapter.cpp
 )
 
 set ( INC_FILES
+  ${HEADER_DIR}/api/Algorithms/AlgorithmFactoryObserverAdapter.h
   ${HEADER_DIR}/api/Algorithms/AlgorithmObserverAdapter.h
   ${HEADER_DIR}/api/Algorithms/RunPythonScript.h
   ${HEADER_DIR}/api/FitFunctions/IFunctionAdapter.h
