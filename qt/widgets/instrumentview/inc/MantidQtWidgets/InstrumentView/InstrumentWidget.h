@@ -198,6 +198,7 @@ public slots:
   void changeColorMapRange(double minValue, double maxValue); // Deprecated
   void setIntegrationRange(double, double);
   void setBinRange(double, double);
+  void disableColorMapAutoscaling(); // Deprecated
   void setColorMapAutoscaling(bool); // Deprecated
 
   void setViewDirection(const QString &);
