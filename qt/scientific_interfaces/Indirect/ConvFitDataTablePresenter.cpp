@@ -17,7 +17,7 @@ QStringList convFitHeaders() {
           << "WS Index"
           << "StartX"
           << "EndX"
-          << "Mask Energies";
+          << "Mask Q Range";
   return headers;
 }
 } // namespace
