@@ -99,7 +99,7 @@
    <item>
     <widget class="QLabel" name="lbMaskSpectrum">
      <property name="text">
-      <string>Mask Energies of Spectrum</string>
+      <string>Mask X Range of Spectrum</string>
      </property>
     </widget>
    </item>
