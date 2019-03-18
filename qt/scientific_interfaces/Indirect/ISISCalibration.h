@@ -82,6 +82,7 @@ private slots:
   void setPlotIsPlotting(bool plotting);
 
 private:
+  void setDefaultInstDetails(QMap<QString, QString> const &instrumentDetails);
   void createRESfile(const QString &file);
   void addRuntimeSmoothing(const QString &workspaceName);
   void setRangeLimits(MantidWidgets::RangeSelector *rangeSelector,
