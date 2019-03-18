@@ -135,7 +135,8 @@ Bugfixes
 - A bug where specifying a custom detector grouping for OSIRIS was not working has been fixed.
 - A bug caused by incorrect masked detectors during a reduction of an individual runs has been fixed. This could sometimes cause 
   unexpected peaks in the output plots.
-- A crash caused by data being loaded multiple times on the transmission tab has been fixed.
+- A crash caused by data being loaded multiple times on the transmission tab has been fixed, as part of this fix the preview now shows a
+  preview of the plot on run being clicked and not before as this was the cause of the issue.
 
 .. figure:: ../../images/TOSCA_Individual_Runs_Bug.png
   :class: screenshot
