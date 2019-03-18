@@ -69,7 +69,8 @@ class ModelTest(unittest.TestCase):
         self.assertEqual(mock_get_algorithm_descriptors.mock_calls[-1], call(True))
 
 
-createDialog_func = 'mantidqt.interfacemanager.InterfaceManager.createDialogFromName'
+createDialogFromName_func_name = ('mantidqt.interfacemanager.InterfaceManager.'
+                                  'createDialogFromName')
 
 
 @patch.object(AlgorithmFactoryImpl, 'getDescriptors', mock_get_algorithm_descriptors)
@@ -150,22 +151,22 @@ class WidgetTest(GuiTest):
         self.assertTrue(widget.get_selected_algorithm() is None)
         self.assertEqual(widget.search_box.currentText(), 'abc')
 
-    def test_execute_on_click(self):
-        with patch(createDialog_func) as createDialog:
+    def test_run_dialog_opens_on_execute_button_click(self):
+        with patch(createDialogFromName_func_name) as createDialog:
             widget = AlgorithmSelectorWidget()
             self._select_in_tree(widget, 'DoStuff v.2')
             widget.execute_button.click()
             createDialog.assert_called_once_with('DoStuff', 2)
 
-    def test_execute_on_return_press(self):
-        with patch(createDialog_func) as createDialog:
+    def test_run_dialog_opens_on_return_press(self):
+        with patch(createDialogFromName_func_name) as createDialog:
             widget = AlgorithmSelectorWidget()
             self._select_in_tree(widget, 'DoStuff v.2')
             QTest.keyClick(widget.search_box, Qt.Key_Return)
             createDialog.assert_called_once_with('DoStuff', 2)
 
-    def test_execute_on_double_click(self):
-        with patch(createDialog_func) as createDialog:
+    def test_run_dialog_opens_on_double_click(self):
+        with patch(createDialogFromName_func_name) as createDialog:
             widget = AlgorithmSelectorWidget()
             self._select_in_tree(widget, 'Load v.1')
             selected_item = widget.tree.selectedItems()[0]
