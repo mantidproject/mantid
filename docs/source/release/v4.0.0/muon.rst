@@ -64,7 +64,7 @@ New
 Improvements
 ############
 - :ref:`MuonMaxent <algm-MuonMaxent>` has validation checks on its input.
-- :ref:`CalMuonDetectorPhases <algm-CalMuonDetectorPhases>` now sends a warning to the dialog window if it fails to fit a spectrum rather than throwing an exception and exiting the process of creating a phase table.
+- :ref:`CalMuonDetectorPhases <algm-CalMuonDetectorPhases>` now sends a warning to the log window if it fails to fit a spectrum instead of exiting the process of creating a phase table.
 - :ref:`PhaseQuad <algm-PhaseQuad>` now ignores spectra which do not have a valid phase table entry.
 Bugfixes
 ########
