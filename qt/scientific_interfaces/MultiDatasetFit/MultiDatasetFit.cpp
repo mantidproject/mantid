@@ -93,7 +93,7 @@ class FinallyEnable {
   QPushButton *m_button;
 
 public:
-  FinallyEnable(QPushButton *control) : m_button(control) {}
+  explicit FinallyEnable(QPushButton *control) : m_button(control) {}
   ~FinallyEnable() { m_button->setEnabled(true); }
 };
 
