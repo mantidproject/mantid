@@ -158,7 +158,7 @@ IndirectSymmetrise::IndirectSymmetrise(IndirectDataReduction *idrUI,
   m_uiForm.ppRawPlot->setAxisRange(defaultRange, QwtPlot::xBottom);
   m_uiForm.ppPreviewPlot->setAxisRange(defaultRange, QwtPlot::xBottom);
 
-  // Diable run until preview is clicked
+  // Disable run until preview is clicked
   m_uiForm.pbRun->setEnabled(false);
   m_uiForm.pbPreview->setEnabled(false);
 }
