@@ -31,6 +31,8 @@ Improvements
 - Muon Analysis now includes number of event per frame and number of events per frame per detector in the run info box on the home tab.
 - Frequency Domain Analysis now lets the user select the phase table in MaxEnt mode.
 - CHRONUS now has a transverse and longitudanal default grouping table, the main field direction is read from the file to determine which to use.
+- Added x axis labels to Maxent and FFT plots in frequency domain analysis.
+- For FFT in frequency domain analysis. Set default apodization function to Lorenz and associated default decay constant to 4.4.
 - MaxEnt now produces better warning messages for invalid properties.
 
 Bugfixes

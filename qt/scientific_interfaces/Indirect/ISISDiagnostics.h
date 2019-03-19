@@ -78,6 +78,8 @@ private slots:
   void setPlotIsPlotting(bool plotting);
 
 private:
+  void setDefaultInstDetails(QMap<QString, QString> const &instrumentDetails);
+
   Ui::ISISDiagnostics m_uiForm;
 };
 } // namespace CustomInterfaces
