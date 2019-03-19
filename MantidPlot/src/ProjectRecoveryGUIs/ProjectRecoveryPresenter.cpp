@@ -65,8 +65,8 @@ bool ProjectRecoveryPresenter::startRecoveryFailure() {
 QStringList ProjectRecoveryPresenter::getRow(int i) {
   const auto &vec = m_model->getRow(i);
   QStringList returnVal;
-  for (auto i = 0u; i < vec.size(); ++i) {
-    QString newString = QString::fromStdString(vec[i]);
+  for (const auto & i : vec) {
+    QString newString = QString::fromStdString(i);
     returnVal << newString;
   }
   return returnVal;

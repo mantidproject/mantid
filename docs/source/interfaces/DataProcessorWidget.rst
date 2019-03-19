@@ -273,7 +273,7 @@ input properties with their values, as illustrated in the figure above. The widg
 .. code-block:: c
 
     auto optionsMap = parseKeyValueString(options);
-    for (auto kvp = optionsMap.begin(); kvp != optionsMap.end(); ++kvp) {
+    for (auto & kvp : optionsMap) {
       try {
         alg->setProperty(kvp->first, kvp->second);
       } catch (Mantid::Kernel::Exception::NotFoundError &) {

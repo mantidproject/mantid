@@ -421,10 +421,10 @@ void ProjectRecovery::deleteExistingUnusedCheckpoints(
   std::vector<int> possiblePids = orderProcessIDs(possiblePidsPaths);
   // check if pid exists
   std::vector<std::string> folderPaths;
-  for (auto i = 0u; i < possiblePids.size(); ++i) {
-    if (!isPIDused(possiblePids[i])) {
+  for (int possiblePid : possiblePids) {
+    if (!isPIDused(possiblePid)) {
       std::string folder = recoverFolder;
-      folder.append(std::to_string(possiblePids[i]) + "/");
+      folder.append(std::to_string(possiblePid) + "/");
       folderPaths.emplace_back(folder);
     }
   }
@@ -728,9 +728,9 @@ ProjectRecovery::findOlderCheckpoints(const std::string &recoverFolder,
   // Currently set to a month in microseconds
   const Poco::Timestamp::TimeDiff timeToDeleteAfter(2592000000000);
   std::vector<std::string> folderPaths;
-  for (auto i = 0u; i < possiblePids.size(); ++i) {
+  for (int possiblePid : possiblePids) {
     std::string folder = recoverFolder;
-    folder.append(std::to_string(possiblePids[i]) + "/");
+    folder.append(std::to_string(possiblePid) + "/");
     // check if the checkpoint is too old
     if (olderThanAGivenTime(Poco::Path(folder), timeToDeleteAfter)) {
       folderPaths.emplace_back(folder);
@@ -743,9 +743,9 @@ std::vector<std::string>
 ProjectRecovery::findLockedCheckpoints(const std::string &recoverFolder,
                                        const std::vector<int> &possiblePids) {
   std::vector<std::string> files;
-  for (auto i = 0u; i < possiblePids.size(); ++i) {
+  for (int possiblePid : possiblePids) {
     std::string folder = recoverFolder;
-    folder.append(std::to_string(possiblePids[i]) + "/");
+    folder.append(std::to_string(possiblePid) + "/");
     auto checkpointsInsidePIDs = getListOfFoldersInDirectory(folder);
     for (auto c : checkpointsInsidePIDs) {
       if (Poco::File(c.setFileName(LOCK_FILE_NAME)).exists()) {

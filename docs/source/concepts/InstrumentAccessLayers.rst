@@ -108,8 +108,7 @@ Below is an example refactoring.
   auto instrument = ws->getInstrument();
   std::vector<IComponent_const_sptr> children;
   instrument->getChildren(children, true /*Get all sub-children too*/);
-  std::vector<IComponent_const_sptr>::const_iterator it;
-  for (it = children.begin(); it != children.end(); ++it) {
+  for (auto & it : children) {
     if (const ObjComponent* obj = dynamic_cast<const ObjComponent*>(it->get())) {
       // Do something with the obj component
       obj.solidAngle(observer);

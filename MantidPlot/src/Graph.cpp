@@ -997,10 +997,9 @@ void Graph::initScaleLimits() { // We call this function the first time we add
 
   QwtDoubleInterval intv[QwtPlot::axisCnt];
   const QwtPlotItemList &itmList = d_plot->itemList();
-  QwtPlotItemIterator it;
   double maxSymbolSize = 0;
-  for (it = itmList.begin(); it != itmList.end(); ++it) {
-    const QwtPlotItem *item = *it;
+  for (const auto & it : itmList) {
+    const QwtPlotItem *item = it;
     if (item->rtti() != QwtPlotItem::Rtti_PlotCurve)
       continue;
 
