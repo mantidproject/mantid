@@ -21,7 +21,7 @@ Interface
 
 New
 ###
-- Elemental Analysis added to Muon Interfaces: Includes a selectable Periodic Table. There are two versions (Elemental Analysis and Elemental Analysis Old). The old interface is deprected and may not be included in future releases. The difference between the old and new versions of the interface is TODO.
+- `Elemental Analysis` has been added to Muon Interfaces: Includes a selectable Periodic Table and can plot elemental lines against the currently loaded data.
 - New Frequency Domain Analysis GUI added, the original one is now marked as old and is deprecated so may not be included in future releases. See the :ref:`documentation <Frequency_Domain_Analysis_2-ref>` for more details.
 
 Improvements
