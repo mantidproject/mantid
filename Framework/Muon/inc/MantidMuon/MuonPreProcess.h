@@ -30,8 +30,14 @@ public:
            "data. Sample logs are modified to record the input parameters.";
   }
   const std::vector<std::string> seeAlso() const override {
-    return {"MuonProcess", "ApplyDeadTimeCorr", "ChangeBinOffset",
-            "CropWorkspace", "Rebin"};
+    return {"MuonProcess",
+            "ApplyDeadTimeCorr",
+            "ChangeBinOffset",
+            "CropWorkspace",
+            "Rebin",
+            "MuonGroupingAsymmetry",
+            "MuonGroupingCounts",
+            "MuonPairingAsymmetry"};
   }
 
 private:
