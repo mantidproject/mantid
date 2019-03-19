@@ -126,15 +126,14 @@ class PairingTablePresenter(object):
         self._view.enable_updates()
 
     def handle_add_pair_button_clicked(self):
-        if len(self._model.group_names) == 1:
-            self._view.warning_popup("Two groups are required to create a pair")
+        if len(self._model.group_names) == 0 or len(self._model.group_names) == 1:
+            self._view.warning_popup("At least two groups are required to create a pair")
         else:
             new_pair_name = self._view.enter_pair_name()
             if new_pair_name is None:
                 return
-            if new_pair_name in self._model.group_and_pair_names:
+            elif new_pair_name in self._model.group_and_pair_names:
                 self._view.warning_popup("Groups and pairs must have unique names")
-
             elif self.validate_pair_name(new_pair_name):
                 if len(self._model.group_names) >= 2:
                     group1 = self._model.group_names[0]
