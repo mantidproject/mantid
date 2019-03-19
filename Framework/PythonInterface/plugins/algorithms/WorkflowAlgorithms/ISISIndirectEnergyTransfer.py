@@ -27,6 +27,13 @@ def _elems_or_none(l):
     return l if len(l) != 0 else None
 
 
+def add_missing_elements(from_list, to_list):
+    for element in from_list:
+        if element not in to_list:
+            to_list.append(element)
+    return sorted(to_list)
+
+
 class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
 
     _chopped_data = None
@@ -169,8 +176,14 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
             rebin_string_2, num_bins = get_multi_frame_rebin(c_ws_name,
                                                              self._rebin_string)
 
+            if self._sum_files:
+                logger.warning('current {0}'.format(str(masked_detectors)))
+
             if not self._sum_files:
                 masked_detectors = get_detectors_to_mask(workspaces)
+            else:
+                summed_file_masked_detectors = get_detectors_to_mask(workspaces)
+                masked_detectors = add_missing_elements(summed_file_masked_detectors, masked_detectors)
 
             # Process workspaces
             for ws_name in workspaces:
