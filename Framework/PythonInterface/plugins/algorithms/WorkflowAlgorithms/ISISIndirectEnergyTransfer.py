@@ -176,9 +176,6 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
             rebin_string_2, num_bins = get_multi_frame_rebin(c_ws_name,
                                                              self._rebin_string)
 
-            if self._sum_files:
-                logger.warning('current {0}'.format(str(masked_detectors)))
-
             if not self._sum_files:
                 masked_detectors = get_detectors_to_mask(workspaces)
             else:
