@@ -23,7 +23,7 @@ import matplotlib
 from matplotlib._pylab_helpers import Gcf
 from matplotlib.backend_bases import FigureManagerBase
 from matplotlib.backends.backend_qt5agg import (FigureCanvasQTAgg)  # noqa
-from matplotlib.pyplot import Axes
+from matplotlib.axes import Axes
 from qtpy.QtCore import QObject, Qt
 from qtpy.QtWidgets import QApplication, QLabel
 
@@ -84,10 +84,10 @@ class FigureManagerADSObserver(AnalysisDataServiceObserver):
         if not all_axes:
             return
 
-        # Here we wish to remove any artists from a workspace that has been
-        # deleted and close the figure if it is now empty. We must avoid
-        # closing any figures that were created via the script window that are
-        # not managed via a workspace.
+        # Here we wish to delete any curves linked to the workspace being
+        # deleted and if a figure is now empty, close it. We must avoid closing
+        # any figures that were created via the script window that are not
+        # managed via a workspace.
         # See https://github.com/mantidproject/mantid/issues/25135.
         empty_axes = []
         for ax in all_axes:
