@@ -61,8 +61,8 @@ void JumpFit::setupFitTab() {
   m_uiForm->svSpectrumView->hideSpectrumSelector();
   m_uiForm->svSpectrumView->hideMaskSpectrumSelector();
 
-  setSampleWSSuffices({"_Result", "_Results"});
-  setSampleFBSuffices({"_Result.nxs", "_Results.nxs"});
+  setSampleWSSuffices({"_Result"});
+  setSampleFBSuffices({"_Result.nxs"});
 
   addFunctions(getWidthFunctions());
   addFunctions(getEISFFunctions());
