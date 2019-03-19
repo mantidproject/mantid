@@ -104,7 +104,6 @@ class GroupingTablePresenter(object):
             group = MuonGroup(group_name=str(new_group_name), detector_ids=[1])
             self.add_group(group)
 
-
     def handle_remove_group_button_clicked(self):
         group_names = self._view.get_selected_group_names()
         if not group_names:
