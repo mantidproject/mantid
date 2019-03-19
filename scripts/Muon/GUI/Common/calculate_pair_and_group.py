@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import Muon.GUI.Common.utilities.algorithm_utils as algorithm_utils
 
-
 def calculate_group_data(context, group_name, run, rebin):
     processed_data = _run_pre_processing(context, run, rebin)
 
@@ -129,6 +128,8 @@ def _get_MuonGroupingAsymmetry_parameters(context, group_name, run):
 
     if 'GroupRangeMax' in context.gui_variables:
         params['AsymmetryTimeMax'] = context.gui_variables['GroupRangeMax']
+    else:
+        params['AsymmetryTimeMax'] = max(context.loaded_data(run)['OutputWorkspace'][0].workspace.dataX(0))
 
     if context.is_multi_period() and 'SummedPeriods' in context.gui_variables:
         summed_periods = context.gui_variables["SummedPeriods"]
