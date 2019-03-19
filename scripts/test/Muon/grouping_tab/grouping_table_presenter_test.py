@@ -264,7 +264,6 @@ class GroupingTablePresenterTest(unittest.TestCase):
 
         self.assertEqual(self.view.get_table_item_text(0, 1), "1-5,10,20-25")
         self.assertEqual(self.model._data._groups["group_0"].detectors, [1, 2, 3, 4, 5, 10, 20, 21, 22, 23, 24, 25])
-        self.assertEqual(self.model._data._groups["group_0"].detectors, [1, 2, 3, 4, 5, 10, 20, 21, 22, 23, 24, 25])
 
     def test_that_if_detector_list_changed_that_number_of_detectors_updates(self):
         self.presenter.handle_add_group_button_clicked()
