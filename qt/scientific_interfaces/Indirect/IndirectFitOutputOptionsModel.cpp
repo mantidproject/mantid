@@ -86,11 +86,16 @@ IAlgorithm_sptr saveNexusProcessedAlgorithm(Workspace_sptr workspace,
   return saveAlg;
 }
 
-void saveWorkspace(WorkspaceGroup_sptr resultWorkspace) {
+void saveWorkspace(Workspace_sptr resultWorkspace) {
   auto const filename = Mantid::Kernel::ConfigService::Instance().getString(
                             "defaultsave.directory") +
                         resultWorkspace->getName() + ".nxs";
   saveNexusProcessedAlgorithm(resultWorkspace, filename)->execute();
+}
+
+void saveWorkspace(WorkspaceGroup_sptr resultGroup) {
+  for (auto const workspace : *resultGroup)
+    saveWorkspace(workspace);
 }
 
 bool workspaceIsPlottable(MatrixWorkspace_const_sptr workspace) {
