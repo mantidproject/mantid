@@ -705,11 +705,10 @@ void GroupDetectors2::processMatrixWorkspace(
       // not found - create an empty set
       group2WSIndexSetmap.emplace(groupid, std::set<size_t>());
     }
-    // get a reference to the set
-    std::set<size_t> &targetWSIndexSet = group2WSIndexSetmap[groupid];
 
     // If the detector was not found or was not in a group, then ignore it.
     if (spectrumInfo.spectrumDefinition(i).size() > 1) {
+      std::set<size_t> &targetWSIndexSet = group2WSIndexSetmap[groupid];
       for (const auto &spectrumDefinition :
            spectrumInfo.spectrumDefinition(i)) {
         // translate detectors to target det ws indexes
@@ -987,21 +986,21 @@ size_t GroupDetectors2::formGroups(API::MatrixWorkspace_const_sptr inputWS,
           spectrumInfo.isMasked(originalWI)) {
         continue;
       }
-      const auto &Ys = inputWS->y(originalWI);
-      const auto &Es = inputWS->e(originalWI);
+      const auto &inYs = inputWS->y(originalWI);
+      const auto &inEs = inputWS->e(originalWI);
       if (inputWS->hasMaskedBins(originalWI)) {
         const auto &maskedBins = inputWS->maskedBins(originalWI);
-        for (size_t binIndex = 0; binIndex < Ys.size(); ++binIndex) {
+        for (size_t binIndex = 0; binIndex < inYs.size(); ++binIndex) {
           if (maskedBins.count(binIndex) == 0) {
-            sum[binIndex] += Ys[binIndex];
-            errorSum[binIndex] += Es[binIndex] * Es[binIndex];
+            sum[binIndex] += inYs[binIndex];
+            errorSum[binIndex] += inEs[binIndex] * inEs[binIndex];
             count[binIndex] += 1;
           }
         }
       } else {
-        for (size_t binIndex = 0; binIndex < Ys.size(); ++binIndex) {
-          sum[binIndex] += Ys[binIndex];
-          errorSum[binIndex] += Es[binIndex] * Es[binIndex];
+        for (size_t binIndex = 0; binIndex < inYs.size(); ++binIndex) {
+          sum[binIndex] += inYs[binIndex];
+          errorSum[binIndex] += inEs[binIndex] * inEs[binIndex];
           count[binIndex] += 1;
         }
       }

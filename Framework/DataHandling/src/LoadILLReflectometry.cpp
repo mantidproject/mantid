@@ -597,10 +597,10 @@ void LoadILLReflectometry::loadData(
       progress.report();
       for (size_t im = 0; im < nb_monitors; ++im) {
         const int *monitor_p = monitorsData[im].data();
-        const HistogramData::Counts counts(monitor_p,
-                                           monitor_p + m_numberOfChannels);
+        const HistogramData::Counts monitorCounts(
+            monitor_p, monitor_p + m_numberOfChannels);
         m_localWorkspace->setHistogram(im + m_numberOfHistograms, binEdges,
-                                       std::move(counts));
+                                       std::move(monitorCounts));
         progress.report();
       }
       ++spectrumNumber;
@@ -622,7 +622,7 @@ void LoadILLReflectometry::loadNexusEntriesIntoProperties() {
   if (stat == NX_ERROR)
     throw Kernel::Exception::FileError("Unable to open File:", filename);
   m_loader.addNexusFieldsToWsRun(nxfileID, m_localWorkspace->mutableRun());
-  stat = NXclose(&nxfileID);
+  NXclose(&nxfileID);
 }
 
 /**

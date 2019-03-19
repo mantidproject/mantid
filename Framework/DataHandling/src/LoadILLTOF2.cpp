@@ -272,7 +272,7 @@ void LoadILLTOF2::addAllNexusFieldsAsProperties(const std::string &filename) {
     throw Kernel::Exception::FileError("Unable to open File:", filename);
   }
   m_loader.addNexusFieldsToWsRun(nxfileID, runDetails);
-  stat = NXclose(&nxfileID);
+  NXclose(&nxfileID);
   g_log.debug() << "End parsing properties from : " << filename << '\n';
 }
 

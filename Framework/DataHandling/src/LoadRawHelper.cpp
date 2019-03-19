@@ -1048,8 +1048,7 @@ void LoadRawHelper::calculateWorkspacesizes(
     }
     if (m_bmspeclist) {
       if (m_interval) {
-        std::vector<specnum_t>::iterator itr;
-        for (itr = m_spec_list.begin();
+        for (auto itr = m_spec_list.begin();
              itr != m_spec_list.end();) { // if  the m_spec_list elements are in
                                           // the range between m_spec_min &
                                           // m_spec_max
@@ -1064,11 +1063,11 @@ void LoadRawHelper::calculateWorkspacesizes(
         } else { // at this point there are monitors in the list which are not
                  // in the min& max range
           // so find those  monitors  count and calculate the workspace specs
-          std::vector<specnum_t>::const_iterator itr;
-          std::vector<specnum_t>::const_iterator monitr;
           specnum_t monCounter = 0;
-          for (itr = m_spec_list.begin(); itr != m_spec_list.end(); ++itr) {
-            monitr = find(monitorSpecList.begin(), monitorSpecList.end(), *itr);
+          for (auto itr = m_spec_list.begin(); itr != m_spec_list.end();
+               ++itr) {
+            const auto monitr =
+                find(monitorSpecList.begin(), monitorSpecList.end(), *itr);
             if (monitr != monitorSpecList.end())
               ++monCounter;
           }
@@ -1157,7 +1156,7 @@ int LoadRawHelper::confidence(Kernel::FileDescriptor &descriptor) const {
   int confidence(0);
   if (c == 32) {
     stream.seekg(3, std::ios::cur);
-    int c = stream.get();
+    c = stream.get();
     if (c == 126)
       confidence = 80;
   }

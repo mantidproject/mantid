@@ -289,9 +289,9 @@ void LoadILLPolarizationFactors::exec() {
   }
   const auto fittingData = [&in, &filename]() {
     try {
-      const auto fittingData = parse(in);
-      definition_map_sanity_check(fittingData);
-      return fittingData;
+      const auto data = parse(in);
+      definition_map_sanity_check(data);
+      return data;
     } catch (std::exception &e) {
       throw std::runtime_error("Error while reading " + filename + ": " +
                                e.what());

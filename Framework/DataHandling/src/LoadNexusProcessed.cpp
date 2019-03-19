@@ -467,8 +467,7 @@ void LoadNexusProcessed::exec() {
     }
 
     for (int p = 1; p <= nWorkspaceEntries; ++p) {
-      std::ostringstream os;
-      os << p;
+      const auto indexStr = std::to_string(p);
 
       // decide what the workspace should be called
       std::string wsName = buildWorkspaceName(names[p], base_name, p);
@@ -483,23 +482,23 @@ void LoadNexusProcessed::exec() {
       */
       if (bAccelleratedMultiPeriodLoading) {
         local_workspace = doAccelleratedMultiPeriodLoading(
-            root, basename + os.str(), tempMatrixWorkspace, nWorkspaceEntries,
+            root, basename + indexStr, tempMatrixWorkspace, nWorkspaceEntries,
             p);
       } else // Fall-back for generic loading
       {
         const double nWorkspaceEntries_d =
             static_cast<double>(nWorkspaceEntries);
         local_workspace =
-            loadEntry(root, basename + os.str(),
+            loadEntry(root, basename + indexStr,
                       static_cast<double>(p - 1) / nWorkspaceEntries_d,
                       1. / nWorkspaceEntries_d);
       }
 
       declareProperty(Kernel::make_unique<WorkspaceProperty<API::Workspace>>(
-          prop_name + os.str(), wsName, Direction::Output));
+          prop_name + indexStr, wsName, Direction::Output));
 
       wksp_group->addWorkspace(local_workspace);
-      setProperty(prop_name + os.str(), local_workspace);
+      setProperty(prop_name + indexStr, local_workspace);
     }
 
     // The group is the root property value
@@ -513,7 +512,7 @@ void LoadNexusProcessed::exec() {
 /**
  * Decides what to call a child of a group workspace.
  *
- * This function builds the workspace name bsed on either a workspace name
+ * This function builds the workspace name based on either a workspace name
  * which was stored in the file or the base name.
  *
  * @param name :: The name loaded from the file (possibly the empty string if
@@ -542,8 +541,6 @@ std::string LoadNexusProcessed::buildWorkspaceName(const std::string &name,
       // if the name property wasn't defined just use <OutputWorkspaceName>_n
       wsName = baseName + index;
     }
-
-    wsName = baseName + index;
   }
 
   correctForWorkspaceNameClash(wsName);
