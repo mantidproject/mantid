@@ -3,8 +3,6 @@
 ##
 
 set ( TEST_PY_FILES
-   AxisChangerPresenter_test.py
-   AxisChangerView_test.py
    FFTModel_test.py
    FFTPresenter_test.py
    home_grouping_widget_test.py
@@ -37,9 +35,6 @@ set ( TEST_PY_FILES
    muon_data_context_test.py
    PeriodicTableModel_test.py
    PeriodicTablePresenter_test.py
-   PlottingPresenter_test.py
-   PlottingUtils_test.py
-   PlottingView_test.py
    transformWidget_test.py
    utilities/muon_group_test.py
    utilities/muon_pair_test.py
@@ -51,7 +46,6 @@ set ( TEST_PY_FILES
    utilities/muon_file_utils_test.py
    utilities/run_string_utils_operator_test.py
    utilities/run_string_utils_conversion_test.py
-   subplotObject_test.py
    help_widget_presenter_test.py
 )
 
