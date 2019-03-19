@@ -36,12 +36,12 @@ template <typename T> struct ToCpp {
 template <> struct ToCpp<int> {
   int operator()(const Json::Value &value) { return value.asInt(); }
 };
+/// Specialization of ToCpp for long long
+template <> struct ToCpp<long long> {
+  long operator()(const Json::Value &value) { return value.asInt64(); }
+};
 /// Specialization of ToCpp for long
 template <> struct ToCpp<long> {
-  long operator()(const Json::Value &value) { return value.asInt(); }
-};
-/// Specialization of ToCpp for int
-template <> struct ToCpp<Json::Int64> {
   Json::Int64 operator()(const Json::Value &value) { return value.asInt64(); }
 };
 /// Specialization of ToCpp for unsigned int
