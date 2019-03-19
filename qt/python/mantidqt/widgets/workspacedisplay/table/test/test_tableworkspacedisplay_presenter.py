@@ -621,6 +621,8 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
         :param extra_errorbar_assert_kwargs: Extra arguments expanded in the assertion for the errorbar call
         :return:
         """
+        if extra_errorbar_assert_kwargs is None:
+            extra_errorbar_assert_kwargs = dict()
         col_as_x = 0
         col_as_y1 = 1
         col_as_y1_err = 2
