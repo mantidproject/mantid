@@ -372,11 +372,9 @@ std::vector<std::string> FunctionFactoryImpl::getFunctionNamesGUI() const {
   Kernel::StringTokenizer tokenizer(excludes, ";",
                                     Kernel::StringTokenizer::TOK_TRIM);
   std::set<std::string> excludeList(tokenizer.begin(), tokenizer.end());
-  for (auto &name : allNames) {
-    if (excludeList.count(name) == 0) {
-      names.push_back(name);
-    }
-  }
+  std::copy_if(allNames.cbegin(), allNames.cend(), std::back_inserter(names), [&excludeList](const auto &name) {
+    return excludeList.count(name) == 0;
+  });
   return names;
 }
 

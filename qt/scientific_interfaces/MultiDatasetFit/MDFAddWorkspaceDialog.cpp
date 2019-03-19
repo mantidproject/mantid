@@ -95,7 +95,6 @@ QStringList AddWorkspaceDialog::availableWorkspaces() const {
       }
     }
   }
-  workspaceNames.sort();
   return workspaceNames;
 }
 
@@ -111,10 +110,7 @@ void AddWorkspaceDialog::findCommonMaxIndex(const QString &wsName) {
       for (auto ws : grp->getAllItems()) {
         auto mws = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
         if (mws) {
-          auto n = static_cast<int>(mws->getNumberHistograms()) - 1;
-          if (n < maxIndex) {
-            maxIndex = n;
-          }
+          maxIndex = std::min(maxIndex, static_cast<int>(mws->getNumberHistograms()) - 1);
         }
       }
       m_maxIndex = maxIndex < std::numeric_limits<int>::max() ? maxIndex : 0;
