@@ -249,9 +249,12 @@ class LoadRunWidgetPresenter(object):
 
             self.update_view_from_model(run_list)
             self._view.notify_loading_finished()
-        finally:
-            self.enable_loading()
-            self.enable_notifier.notify_subscribers()
+        except IndexError as error:
+            self._view.warning_popup(error)
+        self.enable_loading()
+        self.enable_notifier.notify_subscribers()
+
+
 
     class DisableEditingNotifier(Observable):
 
