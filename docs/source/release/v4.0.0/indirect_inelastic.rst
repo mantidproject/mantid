@@ -135,6 +135,7 @@ Bugfixes
   fixed.
 - A bug causing the preview plot in Elwin not to update when changing the selected workspace has been
   fixed.
+- Fixed an issue on FQFit where a workspace with only one data point could be loaded.
 
 
 Data Corrections Interface
