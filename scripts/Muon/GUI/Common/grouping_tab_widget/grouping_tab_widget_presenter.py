@@ -151,8 +151,12 @@ class GroupingTabPresenter(object):
         self.update_thread = self.create_update_thread()
         self.update_thread.threadWrapperSetUp(self.disable_editing,
                                               self.handle_update_finished,
-                                              self._view.display_warning_box)
+                                              self.error_callback)
         self.update_thread.start()
+
+    def error_callback(self, error_message):
+        self.enable_editing_notifier.notify_subscribers()
+        self._view.display_warning_box(error_message)
 
     def handle_update_finished(self):
         self.enable_editing()

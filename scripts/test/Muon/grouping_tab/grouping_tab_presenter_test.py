@@ -161,7 +161,7 @@ class GroupingTabPresenterTest(unittest.TestCase):
 
         self.presenter.update_thread.threadWrapperSetUp.assert_called_once_with(self.presenter.disable_editing,
                                                                                 self.presenter.handle_update_finished,
-                                                                                self.view.display_warning_box)
+                                                                                self.presenter.error_callback)
         self.presenter.update_thread.start.assert_called_once_with()
 
     def test_removing_group_removes_linked_pairs(self):
