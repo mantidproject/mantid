@@ -87,6 +87,15 @@ void formatParametersForPlotting(const Mantid::API::IFunction &function,
   Mantid::API::AnalysisDataService::Instance().addOrReplace(
       parametersPropertyName + "_vs_dataset", table);
 }
+
+// Class to implement a scoped "enabler"
+class FinallyEnable {
+  QPushButton *m_button;
+public:
+  FinallyEnable(QPushButton *control) : m_button(control) {}
+  ~FinallyEnable() { m_button->setEnabled(true); }
+};
+
 } // namespace
 
 namespace MantidQt {
@@ -498,6 +507,7 @@ void MultiDatasetFit::clearFitStatusInfo() {
 /// Slot called on completion of the Fit algorithm.
 /// @param error :: Set to true if Fit finishes with an error.
 void MultiDatasetFit::finishFit(bool error) {
+  FinallyEnable ensureEnabled(m_uiForm.btnFit);
   if (!error) {
     m_plotController->clear();
     m_plotController->update();
@@ -546,7 +556,6 @@ void MultiDatasetFit::finishFit(bool error) {
       clearFitStatusInfo();
     }
   }
-  m_uiForm.btnFit->setEnabled(true);
 }
 
 /// Update the interface to have the same parameter values as in a function.
