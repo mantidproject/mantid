@@ -9,7 +9,6 @@ from __future__ import (absolute_import, print_function)
 import os
 
 import requests
-
 from ErrorReporter.retrieve_recovery_files import zip_recovery_directory
 from mantid.kernel import ConfigService, ErrorReporter, Logger, UsageService
 
@@ -104,7 +103,7 @@ class ErrorReporterPresenter(object):
         status = errorReporter.sendErrorReport()
 
         if status != 201:
-            self._view.display_message_box('Error contacting server', 'There was an error when sending the report.'
+            self._view.display_message_box('Error contacting server', 'There was an error when sending the report.\n'
                                                                       'Please contact mantid-help@mantidproject.org directly',
                                            'http request returned with status {}'.format(status))
             self.error_log.error("Failed to send error report http request returned status {}".format(status))
