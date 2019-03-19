@@ -21,7 +21,7 @@ using Mantid::Kernel::V3D;
 using MantidQt::MantidWidgets::detail::GridTextureFace;
 namespace {
 
-class RectangularDetectorShapeError: public std::runtime_error {
+class RectangularDetectorShapeError : public std::runtime_error {
 public:
   RectangularDetectorShapeError() : std::runtime_error("") {}
 };
@@ -222,7 +222,8 @@ void render2DTexture(const Corners &corners, size_t nX, size_t nY,
 
   // Set the bank normal to facilitate lighting effects
   try {
-    setBankNormal(corners.bottomRight() + bottomRightOffset, corners.topLeft() + topLeftOffset, basePos);
+    setBankNormal(corners.bottomRight() + bottomRightOffset,
+                  corners.topLeft() + topLeftOffset, basePos);
   } catch (std::runtime_error &) {
     glEnd();
     throw RectangularDetectorShapeError();
@@ -461,12 +462,14 @@ void renderRectangularBank(const Mantid::Geometry::ComponentInfo &compInfo,
   auto ystep = shapeInfo.points()[1].Y() - shapeInfo.points()[2].Y();
 
   try {
-    render2DTexture(c, bank.nX, bank.nY, V3D((xstep * -0.5), (ystep * -0.5), 0.0),
-                  V3D((xstep * 0.5), (ystep * -0.5), 0.0),
-                  V3D((xstep * 0.5), (ystep * 0.5), 0.0),
-                  V3D((xstep * -0.5), (ystep * 0.5), 0.0), c.bottomLeft());
+    render2DTexture(c, bank.nX, bank.nY,
+                    V3D((xstep * -0.5), (ystep * -0.5), 0.0),
+                    V3D((xstep * 0.5), (ystep * -0.5), 0.0),
+                    V3D((xstep * 0.5), (ystep * 0.5), 0.0),
+                    V3D((xstep * -0.5), (ystep * 0.5), 0.0), c.bottomLeft());
   } catch (RectangularDetectorShapeError &) {
-    g_log.warning() << "Cannot display rectangular detector bank " << compInfo.name(index) << '\n';
+    g_log.warning() << "Cannot display rectangular detector bank "
+                    << compInfo.name(index) << '\n';
     if (xstep == 0.0)
       g_log.warning() << "Detector step in x direction is zero.\n";
     if (ystep == 0.0)
