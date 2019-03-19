@@ -150,8 +150,7 @@ ISISDiagnostics::~ISISDiagnostics() {}
 void ISISDiagnostics::setup() {}
 
 void ISISDiagnostics::run() {
-  QString suffix = "_" + getInstrumentConfiguration()->getAnalyserName() +
-                   getInstrumentConfiguration()->getReflectionName() + "_slice";
+  QString suffix = "_" + getAnalyserName() + getReflectionName() + "_slice";
   QString filenames = m_uiForm.dsInputFiles->getFilenames().join(",");
 
   std::vector<long> spectraRange;
@@ -269,14 +268,23 @@ void ISISDiagnostics::algorithmComplete(bool error) {
  * Sets default spectra, peak and background ranges.
  */
 void ISISDiagnostics::setDefaultInstDetails() {
-  // Get spectra, peak and background details
-  QMap<QString, QString> instDetails = getInstrumentDetails();
+  try {
+    setDefaultInstDetails(getInstrumentDetails());
+  } catch (std::exception const &ex) {
+    g_log.warning(ex.what());
+  }
+}
 
+void ISISDiagnostics::setDefaultInstDetails(
+    QMap<QString, QString> const &instrumentDetails) {
   // Set the search instrument for runs
-  m_uiForm.dsInputFiles->setInstrumentOverride(instDetails["instrument"]);
+  m_uiForm.dsInputFiles->setInstrumentOverride(
+      getInstrumentDetail(instrumentDetails, "instrument"));
 
-  double specMin = instDetails["spectra-min"].toDouble();
-  double specMax = instDetails["spectra-max"].toDouble();
+  auto const specMin =
+      getInstrumentDetail(instrumentDetails, "spectra-min").toDouble();
+  auto const specMax =
+      getInstrumentDetail(instrumentDetails, "spectra-max").toDouble();
 
   // Set spectra range
   m_dblManager->setMaximum(m_properties["SpecMin"], specMax);
@@ -287,17 +295,20 @@ void ISISDiagnostics::setDefaultInstDetails() {
   m_dblManager->setValue(m_properties["PreviewSpec"], specMin);
 
   // Set peak and background ranges
-  if (instDetails.size() >= 8) {
+  if (instrumentDetails.size() >= 8) {
+    auto const peakStart = getInstrumentDetail(instrumentDetails, "peak-start");
+    auto const peakEnd = getInstrumentDetail(instrumentDetails, "peak-end");
+    auto const backStart = getInstrumentDetail(instrumentDetails, "back-start");
+    auto const backEnd = getInstrumentDetail(instrumentDetails, "back-end");
+
     setRangeSelector(m_uiForm.ppRawPlot->getRangeSelector("SlicePeak"),
                      m_properties["PeakStart"], m_properties["PeakEnd"],
-                     qMakePair(instDetails["peak-start"].toDouble(),
-                               instDetails["peak-end"].toDouble()));
+                     qMakePair(peakStart.toDouble(), peakEnd.toDouble()));
 
     setRangeSelector(m_uiForm.ppRawPlot->getRangeSelector("SliceBackground"),
                      m_properties["BackgroundStart"],
                      m_properties["BackgroundEnd"],
-                     qMakePair(instDetails["back-start"].toDouble(),
-                               instDetails["back-end"].toDouble()));
+                     qMakePair(backStart.toDouble(), backEnd.toDouble()));
   }
 }
 
