@@ -38,8 +38,9 @@ using namespace Mantid::DataObjects;
 AbsorptionCorrection::AbsorptionCorrection()
     : API::Algorithm(), m_inputWS(), m_sampleObject(nullptr), m_L1s(),
       m_elementVolumes(), m_elementPositions(), m_numVolumeElements(0),
-      m_sampleVolume(0.0), m_refAtten(0.0), m_scattering(0), n_lambda(0),
-      m_xStep(0), m_emode(0), m_lambdaFixed(0.), EXPONENTIAL() {}
+      m_sampleVolume(0.0), m_refAtten(0.0), m_linearCoefTotScatt(0),
+      m_num_lambda(0), m_xStep(0), m_emode(0), m_lambdaFixed(0.),
+      EXPONENTIAL() {}
 
 void AbsorptionCorrection::init() {
 
@@ -124,9 +125,9 @@ void AbsorptionCorrection::exec() {
   const int64_t specSize = static_cast<int64_t>(m_inputWS->blocksize());
 
   // If the number of wavelength points has not been given, use them all
-  if (isEmpty(n_lambda))
-    n_lambda = specSize;
-  m_xStep = specSize / n_lambda; // Bin step between points to calculate
+  if (isEmpty(m_num_lambda))
+    m_num_lambda = specSize;
+  m_xStep = specSize / m_num_lambda; // Bin step between points to calculate
 
   if (m_xStep == 0) // Number of wavelength points >number of histogram points
     m_xStep = 1;
@@ -163,7 +164,7 @@ void AbsorptionCorrection::exec() {
     calculateDistances(det, L2s);
 
     // If an indirect instrument, see if there's an efixed in the parameter map
-    double lambda_f = m_lambdaFixed;
+    double lambdaFixed = m_lambdaFixed;
     if (m_emode == 2) {
       try {
         Parameter_sptr par = pmap.get(&det, "Efixed");
@@ -172,12 +173,15 @@ void AbsorptionCorrection::exec() {
           double factor, power;
           energy->quickConversion(*UnitFactory::Instance().create("Wavelength"),
                                   factor, power);
-          lambda_f = factor * std::pow(par->value<double>(), power);
+          lambdaFixed = factor * std::pow(par->value<double>(), power);
         }
       } catch (std::runtime_error &) { /* Throws if a DetectorGroup, use single
                                           provided value */
       }
     }
+
+    // calculate the absorption coefficient for fixed wavelength
+    double linearCoefAbsFixed = m_refAtten * lambdaFixed;
 
     const auto lambdas = m_inputWS->points(i);
     // Get a reference to the Y's in the output WS for storing the factors
@@ -185,20 +189,20 @@ void AbsorptionCorrection::exec() {
 
     // Loop through the bins in the current spectrum every m_xStep
     for (int64_t j = 0; j < specSize; j = j + m_xStep) {
-      const double lambda = lambdas[j];
+      const double linearCoefAbs = m_refAtten * lambdas[j];
       if (m_emode == 0) // Elastic
       {
-        Y[j] = this->doIntegration(lambda, L2s);
+        Y[j] = this->doIntegration(linearCoefAbs, L2s);
       } else if (m_emode == 1) // Direct
       {
-        Y[j] = this->doIntegration(m_lambdaFixed, lambda, L2s);
+        Y[j] = this->doIntegration(linearCoefAbsFixed, linearCoefAbs, L2s);
       } else if (m_emode == 2) // Indirect
       {
-        Y[j] = this->doIntegration(lambda, lambda_f, L2s);
+        Y[j] = this->doIntegration(linearCoefAbs, linearCoefAbsFixed, L2s);
       }
       Y[j] /= m_sampleVolume; // Divide by total volume of the cylinder
 
-      // Make certain that last point is calculates
+      // Make certain that last point is calculated
       if (m_xStep > 1 && j + m_xStep >= specSize && j + 1 != specSize) {
         j = specSize - m_xStep - 1;
       }
@@ -233,34 +237,43 @@ void AbsorptionCorrection::retrieveBaseProperties() {
   double sigma_atten = getProperty("AttenuationXSection"); // in barns
   double sigma_s = getProperty("ScatteringXSection");      // in barns
   double rho = getProperty("SampleNumberDensity");         // in Angstroms-3
-  const Material &sampleMaterial = m_inputWS->sample().getShape().material();
-  if (sampleMaterial.totalScatterXSection(NeutronAtom::ReferenceLambda) !=
-      0.0) {
-    if (rho == EMPTY_DBL())
-      rho = sampleMaterial.numberDensity();
-    if (sigma_s == EMPTY_DBL())
-      sigma_s =
-          sampleMaterial.totalScatterXSection(NeutronAtom::ReferenceLambda);
-    if (sigma_atten == EMPTY_DBL())
-      sigma_atten = sampleMaterial.absorbXSection(NeutronAtom::ReferenceLambda);
-  } else // Save input in Sample with wrong atomic number and name
-  {
+
+  bool createMaterial =
+      !(isEmpty(rho) && isEmpty(sigma_s) && isEmpty(sigma_atten));
+  m_material = m_inputWS->sample().getShape().material();
+
+  if (createMaterial) {
+    // get values from the existing material
+    if (isEmpty(rho))
+      rho = m_material.numberDensity();
+    if (isEmpty(sigma_s))
+      sigma_s = m_material.totalScatterXSection(NeutronAtom::ReferenceLambda);
+    if (isEmpty(sigma_atten))
+      sigma_atten = m_material.absorbXSection(NeutronAtom::ReferenceLambda);
+
+    // create the new material
     NeutronAtom neutron(0, 0, 0.0, 0.0, sigma_s, 0.0, sigma_s, sigma_atten);
 
+    // Save input in Sample with wrong atomic number and name
     auto shape = boost::shared_ptr<IObject>(
         m_inputWS->sample().getShape().cloneWithMaterial(
             Material("SetInAbsorptionCorrection", neutron, rho)));
     m_inputWS->mutableSample().setShape(shape);
+
+    // get the material back
+    m_material = m_inputWS->sample().getShape().material();
   }
-  rho *= 100; // Will give right units in going from
+
+  rho = m_material.numberDensity() * 100; // Will give right units in going from
               // mu in cm^-1 to m^-1 for mu*total flight path( in m )
 
   // NOTE: the angstrom^-2 to barns and the angstrom^-1 to cm^-1
   // will cancel for mu to give units: cm^-1
-  m_refAtten = -sigma_atten * rho / NeutronAtom::ReferenceLambda;
-  m_scattering = -sigma_s * rho;
+  m_refAtten = -m_material.absorbXSection(NeutronAtom::ReferenceLambda) * rho /
+               NeutronAtom::ReferenceLambda;
+  m_linearCoefTotScatt = -m_material.totalScatterXSection() * rho;
 
-  n_lambda = getProperty("NumberOfWavelengthPoints");
+  m_num_lambda = getProperty("NumberOfWavelengthPoints");
 
   std::string exp_string = getProperty("ExpMethod");
   if (exp_string == "Normal") // Use the system exp function
@@ -373,7 +386,7 @@ void AbsorptionCorrection::calculateDistances(const IDetector &detector,
 /// Carries out the numerical integration over the sample for elastic
 /// instruments
 double
-AbsorptionCorrection::doIntegration(const double &lambda,
+AbsorptionCorrection::doIntegration(const double &linearCoefAbs,
                                     const std::vector<double> &L2s) const {
   double integral = 0.0;
 
@@ -383,7 +396,7 @@ AbsorptionCorrection::doIntegration(const double &lambda,
     // Equation is exponent * element volume
     // where exponent is e^(-mu * wavelength/1.8 * (L1+L2) )
     const double exponent =
-        ((m_refAtten * lambda) + m_scattering) * (m_L1s[i] + L2s[i]);
+        (linearCoefAbs + m_linearCoefTotScatt) * (m_L1s[i] + L2s[i]);
     integral += (EXPONENTIAL(exponent) * (m_elementVolumes[i]));
   }
 
@@ -393,8 +406,8 @@ AbsorptionCorrection::doIntegration(const double &lambda,
 /// Carries out the numerical integration over the sample for inelastic
 /// instruments
 double
-AbsorptionCorrection::doIntegration(const double &lambda_i,
-                                    const double &lambda_f,
+AbsorptionCorrection::doIntegration(const double &linearCoefAbsL1,
+                                    const double &linearCoefAbsL2,
                                     const std::vector<double> &L2s) const {
   double integral = 0.0;
 
@@ -403,8 +416,8 @@ AbsorptionCorrection::doIntegration(const double &lambda_i,
   for (size_t i = 0; i < el; ++i) {
     // Equation is exponent * element volume
     // where exponent is e^(-mu * wavelength/1.8 * (L1+L2) )
-    double exponent = ((m_refAtten * lambda_i) + m_scattering) * m_L1s[i];
-    exponent += ((m_refAtten * lambda_f) + m_scattering) * L2s[i];
+    double exponent = (linearCoefAbsL1 + m_linearCoefTotScatt) * m_L1s[i];
+    exponent += (linearCoefAbsL2 + m_linearCoefTotScatt) * L2s[i];
     integral += (EXPONENTIAL(exponent) * (m_elementVolumes[i]));
   }
 

@@ -11,6 +11,7 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidGeometry/Objects/IObject.h"
+#include "MantidKernel/Material.h"
 #include "MantidKernel/V3D.h"
 
 namespace Mantid {
@@ -118,14 +119,16 @@ private:
   void constructSample(API::Sample &sample);
   void calculateDistances(const Geometry::IDetector &detector,
                           std::vector<double> &L2s) const;
-  inline double doIntegration(const double &lambda,
+  inline double doIntegration(const double &linearCoefAbs,
                               const std::vector<double> &L2s) const;
-  inline double doIntegration(const double &lambda_i, const double &lambda_f,
+  inline double doIntegration(const double &linearCoefAbsL1,
+                              const double &linearCoefAbsL2,
                               const std::vector<double> &L2s) const;
 
+  Kernel::Material m_material;
   double m_refAtten;   ///< The attenuation cross-section in 1/m at 1.8A
-  double m_scattering; ///< The scattering cross-section in 1/m
-  int64_t n_lambda;    ///< The number of points in wavelength, the rest is
+  double m_linearCoefTotScatt; ///< The total scattering cross-section in 1/m
+  int64_t m_num_lambda; ///< The number of points in wavelength, the rest is
   /// interpolated linearly
   int64_t m_xStep; ///< The step in bin number between adjacent points
   int64_t m_emode; ///< The energy mode: 0 - elastic, 1 - direct, 2 - indirect
