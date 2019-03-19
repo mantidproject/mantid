@@ -15,8 +15,7 @@ using Kernel::V3D;
 namespace Geometry {
 namespace detail {
 ShapeInfo::ShapeInfo()
-    : m_points(), m_radius(0), m_height(0),
-      m_innerRadius(0), m_outerRadius(0),
+    : m_points(), m_radius(0), m_height(0), m_innerRadius(0), m_outerRadius(0),
       m_shape(ShapeInfo::GeometryShape::NOSHAPE) {}
 
 const std::vector<Kernel::V3D> &ShapeInfo::points() const { return m_points; }
@@ -41,8 +40,9 @@ void ShapeInfo::getObjectGeometry(ShapeInfo::GeometryShape &shape,
 }
 
 void ShapeInfo::getObjectGeometry(ShapeInfo::GeometryShape &shape,
-                                  std::vector<Kernel::V3D> &points, double &innerRadius,
-                                  double &outerRadius, double &height) const {
+                                  std::vector<Kernel::V3D> &points,
+                                  double &innerRadius, double &outerRadius,
+                                  double &height) const {
   shape = m_shape;
   points = m_points;
   innerRadius = m_innerRadius;
@@ -73,7 +73,8 @@ ShapeInfo::CylinderGeometry ShapeInfo::cylinderGeometry() const {
 
 ShapeInfo::HollowCylinderGeometry ShapeInfo::hollowCylinderGeometry() const {
   assert(m_shape == GeometryShape::HOLLOWCYLINDER);
-  return {m_points.front(), m_points.back(), m_innerRadius, m_outerRadius, m_height};
+  return {m_points.front(), m_points.back(), m_innerRadius, m_outerRadius,
+          m_height};
 }
 
 ShapeInfo::ConeGeometry ShapeInfo::coneGeometry() const {
@@ -132,15 +133,17 @@ void ShapeInfo::setCone(const V3D &center, const V3D &symmetryAxis,
   m_outerRadius = 0;
 }
 
-void ShapeInfo::setHollowCylinder(const Kernel::V3D &centreBottomBase, const Kernel::V3D &symmetryAxis,
-                                  double innerRadius, double outerRadius, double height) {
+void ShapeInfo::setHollowCylinder(const Kernel::V3D &centreBottomBase,
+                                  const Kernel::V3D &symmetryAxis,
+                                  double innerRadius, double outerRadius,
+                                  double height) {
   m_shape = GeometryShape::HOLLOWCYLINDER;
   m_points.assign({centreBottomBase, symmetryAxis});
   m_radius = 0;
   m_innerRadius = innerRadius;
   m_outerRadius = outerRadius;
   m_height = height;
-  }
+}
 
 bool ShapeInfo::operator==(const ShapeInfo &other) {
   return m_shape == other.m_shape &&

@@ -66,14 +66,13 @@ public:
     double radius;
     double height;
   };
-  struct HollowCylinderGeometry{
+  struct HollowCylinderGeometry {
     const Kernel::V3D &centreOfBottomBase;
     const Kernel::V3D &axis;
     double innerRadius;
     double outerRadius;
     double height;
   };
-  
 
 private:
   std::vector<Kernel::V3D> m_points;
@@ -94,7 +93,8 @@ public:
   GeometryShape shape() const;
 
   void getObjectGeometry(GeometryShape &shape, std::vector<Kernel::V3D> &points,
-                         double &innerRadius, double &outerRadius, double &height) const;
+                         double &innerRadius, double &outerRadius,
+                         double &height) const;
   void getObjectGeometry(GeometryShape &shape, std::vector<Kernel::V3D> &points,
                          double &radius, double &height) const;
 
@@ -122,8 +122,9 @@ public:
   void setCone(const Kernel::V3D &center, const Kernel::V3D &symmetryAxis,
                double radius, double height);
   /// sets the geometry handler for a hollow cylinder
-  void setHollowCylinder(const Kernel::V3D &centreBottomBase, const Kernel::V3D &symmetryAxis, 
-                         double innerRadius, double outerRadius, double height);
+  void setHollowCylinder(const Kernel::V3D &centreBottomBase,
+                         const Kernel::V3D &symmetryAxis, double innerRadius,
+                         double outerRadius, double height);
   bool operator==(const ShapeInfo &other);
 };
 } // namespace detail
