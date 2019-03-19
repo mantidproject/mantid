@@ -135,6 +135,7 @@ Bugfixes
   fixed.
 - A bug causing the preview plot in Elwin not to update when changing the selected workspace has been
   fixed.
+- Fixed an issue on FQFit where a workspace with only one data point could be loaded.
 
 
 Data Corrections Interface
@@ -178,6 +179,10 @@ Improvements
 
 Bugfixes
 ########
+
+- Symmetrise tab has changed so you can no longer click the run button before preview, and 
+  preview will not run even if clicked unless the max or min bars on the top graph have changed
+  from their default.
 - A bug where the output reduced files had large file sizes depending on the size of the batch
   being reduced from the :ref:`ISISIndirectEnergyTransfer <algm-ISISIndirectEnergyTransfer>`
   algorithm on the ISISEnergyTransfer interface has been fixed. The
@@ -186,8 +191,9 @@ Bugfixes
 - A bug where using a cropped calibration file (from a previous run) on the ISISEnergyTransfer
   interface would cause an error has been fixed.
 - A bug where specifying a custom detector grouping for OSIRIS was not working has been fixed.
-- A crash caused by data being loaded multiple times on the transmission tab has been fixed, as part of this fix the preview now shows a
-  preview of the plot on run being clicked and not before as this was the cause of the issue.
+- A crash caused by data being loaded multiple times on the transmission tab has been fixed, as
+  part of this fix the preview now shows a preview of the plot on run being clicked and not 
+  before as this was the cause of the issue.
 - A bug caused by incorrect masked detectors during a reduction of an individual runs has been
   fixed. This could sometimes cause unexpected peaks in the output plots.
 
