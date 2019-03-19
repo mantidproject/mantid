@@ -77,12 +77,25 @@ class ErrorReporterPresenter(object):
     def _upload_recovery_file(self, recovery_archive):
         url = ConfigService['errorreports.rooturl']
         url = '{}/api/recovery'.format(url)
+        self.error_log.notice("Sending recovery file to address: {}".format(url))
         files = {'file': open('{}'.format(recovery_archive), 'rb')}
-        response = requests.post(url, files=files)
+        try:
+            # timeout after 20 seconds to match the C++ error reporter timeout
+            response = requests.post(url, files=files, timeout=20)
+        except Exception as e:
+            self.error_log.error(
+                "Failed to send recovery data. Could not establish connection to URL: {}.\n\nFull trace:\n\n{}".format(
+                    url, e))
+            return
+
+        # if this is reached, the connection was successful and some response was received
         if response.status_code == 201:
             self.error_log.notice("Uploaded recovery file to server. HTTP response {}".format(response.status_code))
+        elif response.status_code == 413:
+            self.error_log.notice(
+                "Data was too large, and was not accepted by the server. HTTP response {}".format(response.status_code))
         else:
-            self.error_log.error("Failed to send recovery data HTTP response {}".format(response.status_code))
+            self.error_log.error("Failed to send recovery data. HTTP response {}".format(response.status_code))
 
     def _send_report_to_server(self, share_identifiable=False, name='', email='', file_hash='', uptime='', text_box=''):
         errorReporter = ErrorReporter(
