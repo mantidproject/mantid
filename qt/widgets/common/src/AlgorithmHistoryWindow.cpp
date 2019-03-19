@@ -202,13 +202,8 @@ AlgorithmHistoryWindow::AlgorithmHistoryWindow(
       m_envHistGrpBox(nullptr), m_wsName(wsptr->getName().c_str()),
       m_view(wsptr->getHistory().createView()) {
 
-  // create a tree widget to display history properties
-  if (!m_histPropWindow)
-    m_histPropWindow = createAlgHistoryPropWindow();
-
-  if (!m_histPropWindow) {
-    throw std::runtime_error(
-        "No history could be found on the given workspace");
+  if (m_algHist.empty()) {
+    throw std::invalid_argument("No history found on the given workspace");
   }
 
   setWindowTitle(tr("Algorithm History"));
@@ -244,6 +239,10 @@ AlgorithmHistoryWindow::AlgorithmHistoryWindow(
     // Populate the History Tree widget
     m_Historytree->populateAlgHistoryTreeWidget(m_algHist);
   }
+
+  // create a tree widget to display history properties
+  if (!m_histPropWindow)
+    m_histPropWindow = createAlgHistoryPropWindow();
 
   // connect history tree with window
   connect(m_Historytree,
@@ -372,16 +371,10 @@ AlgorithmHistoryWindow::createEnvHistGrpBox(const EnvironmentHistory &envHist) {
 }
 AlgHistoryProperties *AlgorithmHistoryWindow::createAlgHistoryPropWindow() {
   std::vector<PropertyHistory_sptr> histProp;
-  const Mantid::API::AlgorithmHistories entries =
+  const Mantid::API::AlgorithmHistories &entries =
       m_algHist.getAlgorithmHistories();
-
-  if (entries.size() != 0) {
-    auto rIter = entries.rbegin();
-    histProp = (*rIter)->getProperties();
-  } else {
-    window_log.warning("No history found for the workspace");
-    return nullptr;
-  }
+  auto rIter = entries.rbegin();
+  histProp = (*rIter)->getProperties();
 
   // AlgHistoryProperties * phistPropWindow=new
   // AlgHistoryProperties(this,m_algHist);

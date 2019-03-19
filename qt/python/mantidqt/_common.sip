@@ -298,7 +298,7 @@ class AlgorithmHistoryWindow : public QDialog {
 #include "MantidQtWidgets/Common/AlgorithmHistoryWindow.h"
 %End
 public:
-	AlgorithmHistoryWindow(QWidget *parent /TransferThis/, const QString &workspaceName);
+	AlgorithmHistoryWindow(QWidget *parent /TransferThis/, const QString &workspaceName) throw(std::invalid_argument);
 };
 
 // ---------------------------------
