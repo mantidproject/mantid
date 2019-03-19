@@ -164,7 +164,9 @@ class FFTModel(object):
         cloned_workspace = mantid.CloneWorkspace(InputWorkspace=inputs["InputWorkspace"], StoreInADS=False)
         mantid.MaskDetectors(Workspace=cloned_workspace, DetectorList=inputs['MaskedDetectors'], StoreInADS=False)
         cropped_workspace_pre_phasequad = mantid.CropWorkspace(InputWorkspace=cloned_workspace,
-                                                 XMin=inputs['FirstGoodData'], XMax=inputs['LastGoodData'], StoreInADS=False)
+                                                               XMin=inputs['FirstGoodData'],
+                                                               XMax=inputs['LastGoodData'],
+                                                               StoreInADS=False)
 
         self.alg = mantid.AlgorithmManager.create("PhaseQuad")
         self.alg.initialize()
