@@ -93,7 +93,7 @@ void saveWorkspace(Workspace_sptr resultWorkspace) {
   saveNexusProcessedAlgorithm(resultWorkspace, filename)->execute();
 }
 
-void saveWorkspace(WorkspaceGroup_sptr resultGroup) {
+void saveWorkspace(WorkspaceGroup_const_sptr resultGroup) {
   for (auto const workspace : *resultGroup)
     saveWorkspace(workspace);
 }
