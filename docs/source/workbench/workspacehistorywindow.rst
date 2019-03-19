@@ -43,7 +43,7 @@ When generating the script there are several options undre "Algorithm Versions" 
 look in the generated script:
 
 - *Only specify Old Versions*: will cause a ``Version=`` argument to be given when calling an algorithm in the cases where the
-  ersion of the algorithm executed is older than the current highest version
+  version of the algorithm executed is older than the current highest version
 - *Never Specify Versions*: will not append any ``Version=`` arguments in any algorithm calls in the script
 - *Always Specify Versions*: will specify a ``Version=`` argument for each algorithm call in the generated script with the version
   to match the version that was executed in the history.
