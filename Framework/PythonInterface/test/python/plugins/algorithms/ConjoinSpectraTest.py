@@ -8,46 +8,47 @@ from __future__ import (absolute_import, division, print_function)
 
 import unittest
 
-from mantid.kernel import *
-from mantid.api import *
+from mantid.simpleapi import AnalysisDataService as ads, ConjoinSpectra
 from testhelpers import run_algorithm
 
+
+single_spec_ws = "single_spectra_ws"
+multi_spec_ws = "conjoined"
+
+
 class ConjoinSpectraTest(unittest.TestCase):
-
-    _aWS= None
-
     def setUp(self):
-            dataX = range(0,6)
-            dataY = range(0,5)
-            dataE = [1] * 5
+        data_x = range(0, 6)
+        data_y = range(0, 5)
+        data_e = [1] * 5
 
-            createWSAlg = run_algorithm( "CreateWorkspace", DataX=dataX, DataY=dataY, DataE=dataE, NSpec=1,UnitX="Wavelength", OutputWorkspace="single_spectra_ws")
-            self._aWS = createWSAlg.getPropertyValue("OutputWorkspace")
+        create_ws_alg = run_algorithm("CreateWorkspace", DataX=data_x, DataY=data_y, DataE=data_e, NSpec=1,
+                                      UnitX="Wavelength", OutputWorkspace=single_spec_ws)
+        self._aWS = create_ws_alg.getPropertyValue("OutputWorkspace")
 
+    def test_basic_run(self):
+        ConjoinSpectra(InputWorkspaces=single_spec_ws + "," + single_spec_ws, OutputWorkspace=multi_spec_ws)
+        conjoined_ws = ads.retrieve(multi_spec_ws)
 
-    def test_basicRun(self):
-        conjoinAlg = run_algorithm( "ConjoinSpectra", InputWorkspaces="%s,%s" % (self._aWS, self._aWS), OutputWorkspace="conjoined" )
-        conjoinedWS = mtd.retrieve('conjoined')
-
-        wsIndex = 0
-        inDataY = mtd[self._aWS].readY(wsIndex)
-        inDataE = mtd[self._aWS].readE(wsIndex)
-        outDataY1 = conjoinedWS.readY(0)
-        outDataY2 = conjoinedWS.readY(1)
-        outDataE1 = conjoinedWS.readE(0)
-        outDataE2 = conjoinedWS.readE(1)
+        ws_index = 0
+        in_data_y = ads.retrieve(single_spec_ws).readY(ws_index)
+        in_data_e = ads.retrieve(single_spec_ws).readE(ws_index)
+        out_data_y1 = conjoined_ws.readY(0)
+        out_data_y2 = conjoined_ws.readY(1)
+        out_data_e1 = conjoined_ws.readE(0)
+        out_data_e2 = conjoined_ws.readE(1)
 
         # Check output shape
-        self.assertEqual(len(inDataY), len(outDataY1))
-        self.assertEqual(len(inDataY), len(outDataY2))
-        self.assertEqual(len(inDataE), len(outDataE1))
-        self.assertEqual(len(inDataE), len(outDataE2))
-        self.assertEqual(2, conjoinedWS.getNumberHistograms()) # Should always have 2 histograms
+        self.assertEqual(len(in_data_y), len(out_data_y1))
+        self.assertEqual(len(in_data_y), len(out_data_y2))
+        self.assertEqual(len(in_data_e), len(out_data_e1))
+        self.assertEqual(len(in_data_e), len(out_data_e2))
+        self.assertEqual(2, conjoined_ws.getNumberHistograms())  # Should always have 2 histograms
 
-        self.assertEquals(set(inDataY), set(outDataY1))
-        self.assertEquals(set(inDataY), set(outDataY2))
-        self.assertEquals(set(inDataE), set(outDataE1))
-        self.assertEquals(set(inDataE), set(outDataE2))
+        self.assertEquals(set(in_data_y), set(out_data_y1))
+        self.assertEquals(set(in_data_y), set(out_data_y2))
+        self.assertEquals(set(in_data_e), set(out_data_e1))
+        self.assertEquals(set(in_data_e), set(out_data_e2))
 
 
 if __name__ == '__main__':

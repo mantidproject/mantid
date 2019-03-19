@@ -56,27 +56,23 @@ class ConjoinSpectra(PythonAlgorithm):
         ws_string = self.getPropertyValue("InputWorkspaces").strip()
         label_using = self.getPropertyValue("LabelUsing").strip()
         label_value = self.getPropertyValue("LabelValue")
-        # import sys
-        # sys.path.append("c:\\users\\qbr77747\\apps\\miniconda3\\lib\\site-packages")
-        # import pydevd
-        # pydevd.settrace('localhost', port=44444, stdoutToServer=True, stderrToServer=True)
 
         # internal values
         ws_temp = "__ConjoinSpectra_temp"
         loop_index = 0
 
         # get the workspace list
-        all_ws_names = self.make_workspace_list(ws_string)
+        all_ws_names = self._make_workspace_list(ws_string)
         if mtd.doesExist(ws_output):
             DeleteWorkspace(Workspace=ws_output)
 
-        axis = self.make_output_axis(all_ws_names, label_using, label_value)
+        axis = self._make_output_axis(all_ws_names, label_using, label_value)
         for ws_name in all_ws_names:
             # extract the spectrum
             ExtractSingleSpectrum(InputWorkspace=ws_name, OutputWorkspace=ws_temp,
                                   WorkspaceIndex=ws_index)
 
-            label = self.make_label(ws_name, ws_index, label_using, label_value)
+            label = self._make_label(ws_name, ws_index, label_using, label_value)
             axis.setValue(loop_index, label)
             loop_index += 1
             if mtd.doesExist(ws_output):
@@ -94,9 +90,10 @@ class ConjoinSpectra(PythonAlgorithm):
 
         self.setProperty("OutputWorkspace", ws_out)
 
-    def make_workspace_list(self, wsString):
+    @staticmethod
+    def _make_workspace_list(ws_string):
         all_ws_names = []
-        for ws_name in wsString.split(","):
+        for ws_name in ws_string.split(","):
             ws = mtd[ws_name.strip()]
             # if we cannot find the ws then stop the algorithm execution
             if ws is None:
@@ -107,7 +104,7 @@ class ConjoinSpectra(PythonAlgorithm):
                 all_ws_names.append(ws_name)
         return all_ws_names
 
-    def make_output_axis(self, all_ws_names, label_using, label_value):
+    def _make_output_axis(self, all_ws_names, label_using, label_value):
         """
         Gets the log value from the first workspace to check if it can be parsed as a number.
 
@@ -118,41 +115,42 @@ class ConjoinSpectra(PythonAlgorithm):
                             whose value from each workspace will be used as the label.
         :param label_value: The value of the LabelValue property
         """
-        label = self.make_label(all_ws_names[0], 0, label_using, label_value)
+        label = self._make_label(all_ws_names[0], 0, label_using, label_value)
 
         if isinstance(label, numbers.Number):
             # if the label successfully parses as a number, then we create a NumericAxis to hold the labels
-            na= NumericAxis.create(len(all_ws_names))
+            na = NumericAxis.create(len(all_ws_names))
             # na.setUnit("TOF") # FIXME this TOF seems to make ALL the difference
             return na
         else:
             # if the label fails parsing, then it is something that isn't a number, so we default to TextAxis
             return TextAxis.create(len(all_ws_names))
 
-    def make_label(self, ws_name, index, label_using, label_value):
+    def _make_label(self, ws_name, index, label_using, label_value):
         label = None
         if label_value != "":
-            label = self.get_log_value(mtd[ws_name.strip()], label_using, label_value)
+            label = self._get_log_value(mtd[ws_name.strip()], label_using, label_value)
         if label is None:
             label = ws_name + "_" + str(index)
         return label
 
-    def get_log_value(self, ws, label_using, label_value):
+    @staticmethod
+    def _get_log_value(ws, label_using, label_value):
         label = None
         run = ws.getRun()
         try:
             prop = run.getProperty(label_using)
             try:
                 stats = prop.getStatistics()
-                if (label_value == "Mean"):
+                if label_value == "Mean":
                     label = stats.mean
-                elif (label_value == "Median"):
+                elif label_value == "Median":
                     label = stats.median
-                elif (label_value == "Maximum"):
+                elif label_value == "Maximum":
                     label = stats.maximum
-                elif (label_value == "Minimum"):
+                elif label_value == "Minimum":
                     label = stats.minimum
-                elif (label_value == "Last Value"):
+                elif label_value == "Last Value":
                     label = prop.value[-1] + 0.0
                 else:
                     label = prop.value[0] + 0.0
