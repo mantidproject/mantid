@@ -5,6 +5,9 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 #    This file is part of the mantidqt package.
+from __future__ import absolute_import
+
+
 class ErrorColumn:
     CANNOT_SET_Y_TO_BE_OWN_YERR_MESSAGE = "Cannot set Y column to be its own YErr"
     UNHANDLED_COMPARISON_LOGIC_MESSAGE = "Unhandled comparison logic with type {}"

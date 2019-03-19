@@ -588,7 +588,7 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
         self.do_test_action_plot_multiple_y_error_plot(view, twd, PlotType.LINEAR_WITH_ERR)
 
     @with_mock_presenter(add_selection_model=True, add_plot=True)
-    def test_do_action_plot_multiple_y_linear_error_plot(self, ws, view, twd):
+    def test_do_action_plot_multiple_y_scatter_error_plot(self, ws, view, twd):
         """
         Test for _Scatter_ plotting (with errors) multiple Y columns in selection,
         each of which has an associated Y error column
@@ -607,7 +607,7 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
                                                        append_yerr_to_selection=True)
 
     @with_mock_presenter(add_selection_model=True, add_plot=True)
-    def test_do_action_plot_multiple_y_linear_error_plot_append_yerrs(self, ws, view, twd):
+    def test_do_action_plot_multiple_y_scatter_error_plot_append_yerrs(self, ws, view, twd):
         self.do_test_action_plot_multiple_y_error_plot(view, twd, PlotType.SCATTER_WITH_ERR, {'fmt': 'o'},
                                                        append_yerr_to_selection=True)
 
