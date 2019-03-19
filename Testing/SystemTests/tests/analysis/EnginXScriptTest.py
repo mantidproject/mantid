@@ -11,6 +11,8 @@ import platform
 import shutil
 import systemtesting
 
+import matplotlib
+matplotlib.use('agg')
 import mantid.simpleapi as simple
 
 from mantid import config
