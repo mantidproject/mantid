@@ -7,6 +7,7 @@
 from __future__ import (absolute_import, print_function)
 
 import qtpy  # noqa
+
 if qtpy.PYQT5:
     from ErrorReporter import resources_qt5  # noqa
 elif qtpy.PYQT4:
@@ -14,12 +15,10 @@ elif qtpy.PYQT4:
 else:
     raise RuntimeError("Unknown QT version: {}".format(qtpy.QT_VERSION))
 
-from qtpy import QtCore, QtGui, QtWidgets
-from qtpy.QtCore import Signal
-from qtpy.QtWidgets import QMessageBox
-
-
-from mantidqt.utils.qt import load_ui
+from qtpy import QtCore, QtGui, QtWidgets # noqa: E402
+from qtpy.QtCore import Signal # noqa: E402
+from qtpy.QtWidgets import QMessageBox # noqa: E402
+from mantidqt.utils.qt import load_ui # noqa: E402
 
 ErrorReportUIBase, ErrorReportUI = load_ui(__file__, 'errorreport.ui')
 
