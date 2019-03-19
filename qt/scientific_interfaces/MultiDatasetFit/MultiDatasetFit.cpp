@@ -91,6 +91,7 @@ void formatParametersForPlotting(const Mantid::API::IFunction &function,
 // Class to implement a scoped "enabler"
 class FinallyEnable {
   QPushButton *m_button;
+
 public:
   FinallyEnable(QPushButton *control) : m_button(control) {}
   ~FinallyEnable() { m_button->setEnabled(true); }
