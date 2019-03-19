@@ -17,6 +17,8 @@
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/Text.h>
 
+#include <numeric>
+
 namespace Mantid {
 namespace Geometry {
 
@@ -47,10 +49,11 @@ std::string CompositeImplicitFunction::toXMLString() const {
   AutoPtr<Element> parameterListElement = pDoc->createElement("ParameterList");
   functionElement->appendChild(parameterListElement);
 
-  std::string functionXML;
-  for (const auto &Function : m_Functions) {
-    functionXML += Function->toXMLString();
-  }
+  const std::string functionXML =
+      std::accumulate(m_Functions.cbegin(), m_Functions.cend(), std::string(),
+                      [](const auto &sumString, const auto &function) {
+                        return sumString + function->toXMLString();
+                      });
   AutoPtr<Text> functionFormatText = pDoc->createTextNode("%s");
   functionElement->appendChild(functionFormatText);
 

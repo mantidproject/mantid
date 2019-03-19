@@ -114,6 +114,11 @@ public:
    */
   std::size_t count() const { return m_tokens.size(); }
 
+  /** Get the total number of tokens.
+   * @return the total number of tokens.
+   */
+  std::size_t size() const noexcept { return m_tokens.size(); }
+
 private:
   std::vector<std::string> m_tokens;
 };

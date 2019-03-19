@@ -136,7 +136,7 @@ public:
   std::vector<uint32_t> getTriangles() const;
 
   void rotate(const Kernel::Matrix<double> &);
-  void translate(Kernel::V3D);
+  void translate(const Kernel::V3D &);
   void updateGeometryHandler();
 
 private:

@@ -126,7 +126,6 @@ boost::shared_ptr<Detector> GridDetector::getAtXYZ(const int x, const int y,
   if (!xCol)
     throw std::runtime_error(
         "GridDetector::getAtXYZ: x specified is out of range.");
-  auto detector = xCol->getChild(y);
   return boost::dynamic_pointer_cast<Detector>(xCol->getChild(y));
 }
 
