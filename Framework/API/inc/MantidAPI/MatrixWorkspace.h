@@ -414,8 +414,12 @@ public:
   virtual Axis *getAxis(const std::size_t &axisIndex) const;
   void replaceAxis(const std::size_t &axisIndex, Axis *const newAxis);
 
-  /// Returns true if the workspace contains data in histogram form (as opposed
-  /// to point-like)
+  /// Will return the number of Axis currently stored in the workspace it is not
+  /// always safe to assume it is just 2
+  size_t numberOfAxis() const;
+
+  /// Returns true if the workspace contains data in histogram form (as
+  /// opposed to point-like)
   virtual bool isHistogramData() const;
 
   /// Returns true if the workspace contains common X bins

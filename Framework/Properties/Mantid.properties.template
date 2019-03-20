@@ -124,6 +124,8 @@ MultiThreaded.MaxCores = 0
 curvefitting.defaultPeak=Gaussian
 curvefitting.findPeaksFWHM=7
 curvefitting.findPeaksTolerance=4
+# Functions excluded from use by the guis
+curvefitting.guiExclude=CrystalFieldFunction;CrystalFieldHeatCapacity;CrystalFieldMagnetisation;CrystalFieldMoment;CrystalFieldMultiSpectrum;CrystalFieldPeaks;CrystalFieldSpectrum;CrystalFieldSusceptibility
 
 #Defines whether or not the sliceViewer will show NonOrthogonal view as a default
 sliceviewer.nonorthogonal=false
