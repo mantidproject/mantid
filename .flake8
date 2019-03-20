@@ -25,6 +25,14 @@ exclude =
     Testing/SystemTests/scripts,
     Testing/SystemTests/tests/analysis/reference,
     Testing/Tools,
+include-in-doctest=
+    docs/source/,
+exclude-from-doctest=
+    docs/source/conf.py,
+    docs/source/conf-html.py,
+    docs/source/conf-qthelp.py,
+    docs/source/mantid.bib,
+    docs/source/usagedata-note.txt,
 max-complexity = 20
 max-line-length = 140
 doctests=True
