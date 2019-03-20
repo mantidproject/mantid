@@ -94,7 +94,7 @@ bool MantidApplication::notify(QObject *receiver, QEvent *event) {
                        "ErrorReporterPresenter"
                        "\nfrom ErrorReporter.errorreport import CrashReportPage"
                        "\npage = CrashReportPage(show_continue_terminate=True)"
-                       "\npresenter = ErrorReporterPresenter(page, '')"
+                       "\npresenter = ErrorReporterPresenter(page, '', 'mantidplot')"
                        "\npresenter.show_view()");
 
     emit runAsPythonScript(pythonCode);

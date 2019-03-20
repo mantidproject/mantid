@@ -205,7 +205,8 @@ if [ -n \"\$1\" ] && [ \"\$1\" = \"--debug\" ]; then
     GDB=\"gdb --args\"
 fi" )
 
-set ( ERROR_CMD "ErrorReporter/error_dialog_app.py --exitcode=\$?" )
+set ( ERROR_CMD_MANTIDPLOT "ErrorReporter/error_dialog_app.py --exitcode=\$? --executable=mantidplot" )
+set ( ERROR_CMD_WORKBENCH "ErrorReporter/error_dialog_app.py --exitcode=\$? --executable=workbench" )
 
 ##### Local dev version
 set ( PYTHON_ARGS "-Wdefault::DeprecationWarning" )
