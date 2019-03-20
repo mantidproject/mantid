@@ -67,12 +67,10 @@ void SortXAxis::exec() {
       getProperty("IgnoreHistogramValidation");
 
   // Check if it is a valid histogram here
-  bool isAProperHistogram;
-  if (!ignoreHistogramValidation) {
-    isAProperHistogram = determineIfHistogramIsValid(*inputWorkspace);
-  } else {
-    isAProperHistogram = false;
-  }
+  const bool isAProperHistogram =
+      (!ignoreHistogramValidation)
+          ? determineIfHistogramIsValid(*inputWorkspace)
+          : false;
 
   // Define everything you can outside of the for loop
   // Assume that all spec are the same size
