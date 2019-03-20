@@ -9,8 +9,10 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidCrystal/CalibrationHelpers.h"
+#include "MantidCrystal/FindUBUsingIndexedPeaks.h"
 #include "MantidCrystal/SCDCalibratePanels.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
@@ -160,6 +162,8 @@ std::string LoadIsawPeaks::readHeader(PeaksWorkspace_sptr outWS,
     date = Types::Core::DateAndTime::getCurrentTime().toISO8601String();
   else if (tag == "Date:")
     date = getWord(in, false);
+  tag = getWord(in, false);
+  m_isModulatedStructure = tag == "MOD";
   readToEndOfLine(in, true);
 
   // Now we load the instrument using the name and date
@@ -296,14 +300,24 @@ DataObjects::Peak LoadIsawPeaks::readPeak(PeaksWorkspace_sptr outWS,
   if (s.length() < 1)
     throw std::runtime_error("Empty peak line encountered.");
 
-  if (s != "3")
+  /// If line starts with 3, it contains Bragg peaks
+  /// If line starts with 9, it contains Bragg peaks and satellites
+  /// with extra columns for mnp
+  if (s != "3" && s != "9")
     throw std::runtime_error("Empty peak line encountered.");
 
   seqNum = std::stoi(getWord(in, false));
 
-  h = std::stod(getWord(in, false), nullptr);
-  k = std::stod(getWord(in, false), nullptr);
-  l = std::stod(getWord(in, false), nullptr);
+  h = qSign * std::stod(getWord(in, false), nullptr);
+  k = qSign * std::stod(getWord(in, false), nullptr);
+  l = qSign * std::stod(getWord(in, false), nullptr);
+  V3D mod = V3D(0, 0, 0);
+  V3D intHKL = V3D(h, k, l);
+  if (m_isModulatedStructure) {
+    mod[0] = qSign * std::stoi(getWord(in, false), nullptr);
+    mod[1] = qSign * std::stoi(getWord(in, false), nullptr);
+    mod[2] = qSign * std::stoi(getWord(in, false), nullptr);
+  }
 
   col = std::stod(getWord(in, false), nullptr);
   row = std::stod(getWord(in, false), nullptr);
@@ -334,7 +348,9 @@ DataObjects::Peak LoadIsawPeaks::readPeak(PeaksWorkspace_sptr outWS,
 
   // Create the peak object
   Peak peak(outWS->getInstrument(), pixelID, wl);
-  peak.setHKL(qSign * h, qSign * k, qSign * l);
+  peak.setHKL(h, k, l);
+  peak.setIntHKL(intHKL);
+  peak.setIntMNP(mod);
   peak.setIntensity(Inti);
   peak.setSigmaIntensity(SigI);
   peak.setBinCount(IPK);
@@ -451,7 +467,7 @@ void LoadIsawPeaks::appendFile(PeaksWorkspace_sptr outWS,
 
   // Read the header, load the instrument
   double T0;
-  std::string s = readHeader(outWS, in, T0);
+  auto s = readHeader(outWS, in, T0);
   // set T0 in the run parameters
   API::Run &m_run = outWS->mutableRun();
   m_run.addProperty<double>("T0", T0, true);
@@ -526,6 +542,26 @@ void LoadIsawPeaks::appendFile(PeaksWorkspace_sptr outWS,
 
     prog.report(in.tellg());
   }
+  if (m_isModulatedStructure) {
+    FindUBUsingIndexedPeaks alg2;
+    alg2.initialize();
+    alg2.setPropertyValue("ToleranceForSatellite", "0.05");
+    alg2.setProperty("PeaksWorkspace", outWS);
+    alg2.execute();
+
+    if (outWS->mutableSample().hasOrientedLattice()) {
+      OrientedLattice o_lattice = outWS->mutableSample().getOrientedLattice();
+      auto &peaks = outWS->getPeaks();
+      for (auto &peak : peaks) {
+
+        V3D hkl = peak.getHKL();
+        V3D mnp = peak.getIntMNP();
+        for (int i = 0; i <= 2; i++)
+          hkl += o_lattice.getModVec(i) * mnp[i];
+        peak.setHKL(hkl);
+      }
+    }
+  }
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -541,7 +577,7 @@ void LoadIsawPeaks::checkNumberPeaks(PeaksWorkspace_sptr outWS,
   std::string first;
   int NumberPeaks = 0;
   while (getline(in, first)) {
-    if (first[0] == '3')
+    if (first[0] == '3' || first[0] == '9')
       NumberPeaks++;
   }
   if (NumberPeaks != outWS->getNumberPeaks()) {

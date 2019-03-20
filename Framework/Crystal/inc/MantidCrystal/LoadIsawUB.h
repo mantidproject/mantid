@@ -8,6 +8,7 @@
 #define MANTID_CRYSTAL_LOADISAWUB_H_
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/Matrix.h"
 #include "MantidKernel/System.h"
 
 namespace Mantid {
@@ -45,6 +46,8 @@ private:
   void init() override;
   /// Run the algorithm
   void exec() override;
+  /// load the modulation UB
+  void readModulatedUB(std::ifstream &in, Kernel::DblMatrix &ub);
 };
 
 } // namespace Crystal

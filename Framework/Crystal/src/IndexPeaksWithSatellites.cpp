@@ -4,17 +4,18 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidCrystal/IndexPeaks.h"
+#include "MantidCrystal/IndexPeaksWithSatellites.h"
 #include "MantidAPI/Sample.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid {
 namespace Crystal {
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(IndexPeaks)
+DECLARE_ALGORITHM(IndexPeaksWithSatellites)
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -23,7 +24,7 @@ using namespace Mantid::Geometry;
 
 /** Initialize the algorithm's properties.
  */
-void IndexPeaks::init() {
+void IndexPeaksWithSatellites::init() {
   this->declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
                             "PeaksWorkspace", "", Direction::InOut),
                         "Input Peaks Workspace");
@@ -46,6 +47,28 @@ void IndexPeaks::init() {
 
   this->declareProperty("CommonUBForAll", false,
                         "Index all orientations with a common UB");
+  this->declareProperty(Kernel::make_unique<Kernel::ArrayProperty<double>>(
+                            std::string("ModVector1"), "0.0,0.0,0.0"),
+                        "Modulation Vector 1: dh, dk, dl");
+
+  this->declareProperty(Kernel::make_unique<Kernel::ArrayProperty<double>>(
+                            std::string("ModVector2"), "0.0,0.0,0.0"),
+                        "Modulation Vector 2: dh, dk, dl");
+
+  this->declareProperty(Kernel::make_unique<Kernel::ArrayProperty<double>>(
+                            std::string("ModVector3"), "0.0,0.0,0.0"),
+                        "Modulation Vector 3: dh, dk, dl");
+
+  this->declareProperty(
+      make_unique<PropertyWithValue<int>>("MaxOrder", 0, Direction::Input),
+      "Maximum order to apply Modulation Vectors. Default = 0");
+
+  this->declareProperty("GetModVectorsFromUB", false,
+                        "If false Modulation Vectors will be read from input");
+
+  this->declareProperty(make_unique<PropertyWithValue<bool>>(
+                            "CrossTerms", false, Direction::Input),
+                        "Include cross terms (false)");
 
   this->declareProperty(
       make_unique<PropertyWithValue<int>>("NumIndexed", 0, Direction::Output),
@@ -80,13 +103,42 @@ void IndexPeaks::init() {
 
 /** Execute the algorithm.
  */
-void IndexPeaks::exec() {
+void IndexPeaksWithSatellites::exec() {
   PeaksWorkspace_sptr ws = this->getProperty("PeaksWorkspace");
   if (!ws) {
     throw std::runtime_error("Could not read the peaks workspace");
   }
 
-  OrientedLattice o_lattice = ws->mutableSample().getOrientedLattice();
+  V3D offsets1 = getOffsetVector("ModVector1");
+  V3D offsets2 = getOffsetVector("ModVector2");
+  V3D offsets3 = getOffsetVector("ModVector3");
+  int maxOrder = getProperty("MaxOrder");
+  bool CT = getProperty("CrossTerms");
+
+  if (ws->getNumberPeaks() <= 0) {
+    g_log.error() << "There are No peaks in the input wsWorkspace\n";
+    return;
+  }
+
+  API::Sample sample = ws->mutableSample();
+
+  OrientedLattice o_lattice = sample.getOrientedLattice();
+
+  if (getProperty("GetModVectorsFromUB")) {
+    offsets1 = o_lattice.getModVec(0);
+    offsets2 = o_lattice.getModVec(1);
+    offsets3 = o_lattice.getModVec(2);
+    if (maxOrder == 0)
+      maxOrder = o_lattice.getMaxOrder();
+    CT = o_lattice.getCrossTerm();
+  } else {
+    o_lattice.setModVec1(offsets1);
+    o_lattice.setModVec2(offsets2);
+    o_lattice.setModVec3(offsets3);
+    o_lattice.setMaxOrder(maxOrder);
+    o_lattice.setCrossTerm(CT);
+  }
+
   const Matrix<double> &UB = o_lattice.getUB();
 
   if (!IndexingUtils::CheckUB(UB)) {
@@ -112,8 +164,8 @@ void IndexPeaks::exec() {
     std::vector<V3D> q_vectors;
 
     q_vectors.reserve(n_peaks);
-    for (auto &peak : peaks) {
-      q_vectors.push_back(peak.getQSampleFrame());
+    for (size_t i = 0; i < n_peaks; i++) {
+      q_vectors.push_back(peaks[i].getQSampleFrame());
     }
 
     total_indexed = IndexingUtils::CalculateMillerIndices(
@@ -131,32 +183,21 @@ void IndexPeaks::exec() {
     double satetolerance = this->getProperty("ToleranceForSatellite");
 
     // get list of run numbers in this peaks workspace
-    std::vector<int> run_numbers;
-    for (auto &peak : peaks) {
-      int run = peak.getRunNumber();
-      bool found = false;
-      size_t k = 0;
-      while (k < run_numbers.size() && !found) {
-        if (run == run_numbers[k])
-          found = true;
-        else
-          k++;
-      }
-      if (!found)
-        run_numbers.push_back(run);
-    }
+    std::unordered_set<int> run_numbers;
+    transform(peaks.begin(), peaks.end(),
+              std::inserter(run_numbers, run_numbers.begin()),
+              [](const auto &peak) { return peak.getRunNumber(); });
 
     // index the peaks for each run separately, using a UB matrix optimized for
     // that run
 
-    for (size_t run_index = 0; run_index < run_numbers.size(); run_index++) {
+    for (int run : run_numbers) {
       std::vector<V3D> miller_indices;
       std::vector<V3D> q_vectors;
 
-      int run = run_numbers[run_index];
-      for (auto &peak : peaks) {
-        if (peak.getRunNumber() == run)
-          q_vectors.push_back(peak.getQSampleFrame());
+      for (size_t i = 0; i < n_peaks; i++) {
+        if (peaks[i].getRunNumber() == run)
+          q_vectors.push_back(peaks[i].getQSampleFrame());
       }
 
       Matrix<double> tempUB(UB);
@@ -207,8 +248,8 @@ void IndexPeaks::exec() {
 
       g_log.notice() << "Maximum Order: " << o_lattice.getMaxOrder() << '\n';
 
-      if (o_lattice.getMaxOrder() ==
-          0) // If data not modulated, recalculate fractional HKL
+      if (o_lattice.getMaxOrder() == 0 &&
+          maxOrder == 0) // If data not modulated, recalculate fractional HKL
       {
         if (!round_hkls) // If user wants fractional hkls, recalculate them
         {
@@ -228,11 +269,11 @@ void IndexPeaks::exec() {
         }
 
         size_t miller_index_counter = 0;
-        for (auto &peak : peaks) {
-          if (peak.getRunNumber() == run) {
-            peak.setHKL(miller_indices[miller_index_counter]);
-            peak.setIntHKL(miller_indices[miller_index_counter]);
-            peak.setIntMNP(V3D(0, 0, 0));
+        for (size_t i = 0; i < n_peaks; i++) {
+          if (peaks[i].getRunNumber() == run) {
+            peaks[i].setHKL(miller_indices[miller_index_counter]);
+            peaks[i].setIntHKL(miller_indices[miller_index_counter]);
+            peaks[i].setIntMNP(V3D(0, 0, 0));
             miller_index_counter++;
           }
         }
@@ -242,11 +283,6 @@ void IndexPeaks::exec() {
         int sate_indexed = 0;
         double main_error = 0;
         double sate_error = 0;
-        int maxOrder = o_lattice.getMaxOrder();
-        bool crossTerm = o_lattice.getCrossTerm();
-        V3D offsets1 = o_lattice.getModVec(0);
-        V3D offsets2 = o_lattice.getModVec(1);
-        V3D offsets3 = o_lattice.getModVec(2);
 
         if (offsets1 == V3D(0, 0, 0))
           throw std::runtime_error("Invalid Modulation Vector");
@@ -262,30 +298,38 @@ void IndexPeaks::exec() {
 
         // Index satellite peaks
         size_t miller_index_counter = 0;
-        for (auto &peak : peaks) {
-          if (peak.getRunNumber() == run) {
-            peak.setHKL(miller_indices[miller_index_counter]);
+        for (size_t i = 0; i < n_peaks; i++) {
+          if (peaks[i].getRunNumber() == run) {
+            peaks[i].setHKL(miller_indices[miller_index_counter]);
             miller_index_counter++;
 
-            auto hkl = peak.getHKL();
+            V3D hkl;
+            hkl[0] = peaks[i].getH();
+            hkl[1] = peaks[i].getK();
+            hkl[2] = peaks[i].getL();
             bool suc_indexed = false;
 
             if (IndexingUtils::ValidIndex(hkl, tolerance)) {
-              peak.setIntHKL(hkl);
-              peak.setIntMNP(V3D(0, 0, 0));
+              peaks[i].setIntHKL(hkl);
+              peaks[i].setIntMNP(V3D(0, 0, 0));
               suc_indexed = true;
               main_indexed++;
-              main_error += hkl.hklError();
-            } else if (!crossTerm) {
+              double h_error = fabs(round(hkl[0]) - hkl[0]);
+              double k_error = fabs(round(hkl[1]) - hkl[1]);
+              double l_error = fabs(round(hkl[2]) - hkl[2]);
+              main_error += h_error + k_error + l_error;
+            } else if (!CT) {
               if (ModDim > 0) {
                 for (int order = -maxOrder; order <= maxOrder; order++) {
                   if (order == 0)
                     continue; // exclude order 0
                   V3D hkl1(hkl);
-                  hkl1 -= offsets1 * order;
+                  hkl1[0] -= order * offsets1[0];
+                  hkl1[1] -= order * offsets1[1];
+                  hkl1[2] -= order * offsets1[2];
                   if (IndexingUtils::ValidIndex(hkl1, satetolerance)) {
-                    peak.setIntHKL(hkl1);
-                    peak.setIntMNP(V3D(order, 0, 0));
+                    peaks[i].setIntHKL(hkl1);
+                    peaks[i].setIntMNP(V3D(order, 0, 0));
                     suc_indexed = true;
                     sate_indexed++;
                     sate_error += hkl1.hklError();
@@ -297,10 +341,12 @@ void IndexPeaks::exec() {
                   if (order == 0)
                     continue; // exclude order 0
                   V3D hkl1(hkl);
-                  hkl1 -= offsets2 * order;
+                  hkl1[0] -= order * offsets2[0];
+                  hkl1[1] -= order * offsets2[1];
+                  hkl1[2] -= order * offsets2[2];
                   if (IndexingUtils::ValidIndex(hkl1, satetolerance)) {
-                    peak.setIntHKL(hkl1);
-                    peak.setIntMNP(V3D(0, order, 0));
+                    peaks[i].setIntHKL(hkl1);
+                    peaks[i].setIntMNP(V3D(0, order, 0));
                     suc_indexed = true;
                     sate_indexed++;
                     sate_error += hkl1.hklError();
@@ -312,10 +358,12 @@ void IndexPeaks::exec() {
                   if (order == 0)
                     continue; // exclude order 0
                   V3D hkl1(hkl);
-                  hkl1 -= offsets3 * order;
+                  hkl1[0] -= order * offsets3[0];
+                  hkl1[1] -= order * offsets3[1];
+                  hkl1[2] -= order * offsets3[2];
                   if (IndexingUtils::ValidIndex(hkl1, satetolerance)) {
-                    peak.setIntHKL(hkl1);
-                    peak.setIntMNP(V3D(0, 0, order));
+                    peaks[i].setIntHKL(hkl1);
+                    peaks[i].setIntMNP(V3D(0, 0, order));
                     suc_indexed = true;
                     sate_indexed++;
                     sate_error += hkl1.hklError();
@@ -328,10 +376,12 @@ void IndexPeaks::exec() {
                   if (order == 0)
                     continue; // exclude order 0
                   V3D hkl1(hkl);
-                  hkl1 -= offsets1 * order;
+                  hkl1[0] -= order * offsets1[0];
+                  hkl1[1] -= order * offsets1[1];
+                  hkl1[2] -= order * offsets1[2];
                   if (IndexingUtils::ValidIndex(hkl1, satetolerance)) {
-                    peak.setIntHKL(hkl1);
-                    peak.setIntMNP(V3D(order, 0, 0));
+                    peaks[i].setIntHKL(hkl1);
+                    peaks[i].setIntMNP(V3D(order, 0, 0));
                     suc_indexed = true;
                     sate_indexed++;
                     sate_error += hkl1.hklError();
@@ -344,10 +394,12 @@ void IndexPeaks::exec() {
                     if (m == 0 && n == 0)
                       continue; // exclude 0,0
                     V3D hkl1(hkl);
-                    hkl1 -= offsets1 * m + offsets2 * n;
+                    hkl1[0] -= m * offsets1[0] + n * offsets2[0];
+                    hkl1[1] -= m * offsets1[1] + n * offsets2[1];
+                    hkl1[2] -= m * offsets1[2] + n * offsets2[2];
                     if (IndexingUtils::ValidIndex(hkl1, satetolerance)) {
-                      peak.setIntHKL(hkl1);
-                      peak.setIntMNP(V3D(m, n, 0));
+                      peaks[i].setIntHKL(hkl1);
+                      peaks[i].setIntMNP(V3D(m, n, 0));
                       suc_indexed = true;
                       sate_indexed++;
                       sate_error += hkl1.hklError();
@@ -361,10 +413,15 @@ void IndexPeaks::exec() {
                       if (m == 0 && n == 0 && p == 0)
                         continue; // exclude 0,0,0
                       V3D hkl1(hkl);
-                      hkl1 -= offsets1 * m + offsets2 * n + offsets3 * p;
+                      hkl1[0] -=
+                          m * offsets1[0] + n * offsets2[0] + p * offsets3[0];
+                      hkl1[1] -=
+                          m * offsets1[1] + n * offsets2[1] + p * offsets3[1];
+                      hkl1[2] -=
+                          m * offsets1[2] + n * offsets2[2] + p * offsets3[2];
                       if (IndexingUtils::ValidIndex(hkl1, satetolerance)) {
-                        peak.setIntHKL(hkl1);
-                        peak.setIntMNP(V3D(m, n, p));
+                        peaks[i].setIntHKL(hkl1);
+                        peaks[i].setIntMNP(V3D(m, n, p));
                         suc_indexed = true;
                         sate_indexed++;
                         sate_error += hkl1.hklError();
@@ -373,8 +430,8 @@ void IndexPeaks::exec() {
               }
             }
             if (!suc_indexed) {
-              peak.setIntHKL(V3D(0, 0, 0));
-              peak.setIntMNP(V3D(0, 0, 0));
+              peaks[i].setIntHKL(V3D(0, 0, 0));
+              peaks[i].setIntMNP(V3D(0, 0, 0));
             }
           }
         }
@@ -450,6 +507,17 @@ void IndexPeaks::exec() {
     // Show the lattice parameters
     g_log.notice() << o_lattice << "\n";
   }
+}
+
+V3D IndexPeaksWithSatellites::getOffsetVector(const std::string &label) {
+  std::vector<double> offsets = getProperty(label);
+  if (offsets.empty()) {
+    offsets.push_back(0.0);
+    offsets.push_back(0.0);
+    offsets.push_back(0.0);
+  }
+  V3D offsets1 = V3D(offsets[0], offsets[1], offsets[2]);
+  return offsets1;
 }
 
 } // namespace Crystal

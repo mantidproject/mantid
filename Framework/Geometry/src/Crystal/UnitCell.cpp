@@ -5,6 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Crystal/UnitCell.h"
+#include "MantidKernel/Matrix.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
@@ -21,20 +22,25 @@ using Mantid::Kernel::DblMatrix;
 using Mantid::Kernel::V3D;
 
 /** Default constructor.
-\f$ a = b = c =  1 \mbox{\AA, } \alpha = \beta = \gamma = 90^\circ \f$ */
-UnitCell::UnitCell() : da(6), ra(6), errorda(6), G(3, 3), Gstar(3, 3), B(3, 3) {
+ \f$ a = b = c =  1 \mbox{\AA, } \alpha = \beta = \gamma = 90^\circ \f$ */
+UnitCell::UnitCell()
+    : da(6), ra(6), errorda(6), G(3, 3), Gstar(3, 3), B(3, 3), ModHKL(3, 3),
+      errorModHKL(3, 3) {
   da[0] = da[1] = da[2] = 1.;
   da[3] = da[4] = da[5] = deg2rad * 90.0;
   errorda[0] = errorda[1] = errorda[2] = errorda[3] = errorda[4] = errorda[5] =
       0.0;
+  MaxOrder = 0;
+  CrossTerm = false;
   recalculate();
 }
 
 /** Constructor
-@param _a, _b, _c :: lattice parameters \f$ a, b, c \f$ \n
-with \f$\alpha = \beta = \gamma = 90^\circ \f$*/
+ @param _a, _b, _c :: lattice parameters \f$ a, b, c \f$ \n
+ with \f$\alpha = \beta = \gamma = 90^\circ \f$*/
 UnitCell::UnitCell(double _a, double _b, double _c)
-    : da(6), ra(6), errorda(6), G(3, 3), Gstar(3, 3), B(3, 3) {
+    : da(6), ra(6), errorda(6), G(3, 3), Gstar(3, 3), B(3, 3), ModHKL(3, 3),
+      errorModHKL(3, 3) {
   da[0] = _a;
   da[1] = _b;
   da[2] = _c;
@@ -42,16 +48,19 @@ UnitCell::UnitCell(double _a, double _b, double _c)
   da[3] = da[4] = da[5] = 0.5 * M_PI;
   errorda[0] = errorda[1] = errorda[2] = errorda[3] = errorda[4] = errorda[5] =
       0.0;
+  MaxOrder = 0;
+  CrossTerm = false;
   recalculate();
 }
 
 /** Constructor
-@param _a, _b, _c, _alpha, _beta, _gamma :: lattice parameters\n
-@param angleunit :: units for angle, of type #AngleUnits. Default is degrees.
-*/
+ @param _a, _b, _c, _alpha, _beta, _gamma :: lattice parameters\n
+ @param angleunit :: units for angle, of type #AngleUnits. Default is degrees.
+ */
 UnitCell::UnitCell(double _a, double _b, double _c, double _alpha, double _beta,
                    double _gamma, const int angleunit)
-    : da(6), ra(6), errorda(6), G(3, 3), Gstar(3, 3), B(3, 3) {
+    : da(6), ra(6), errorda(6), G(3, 3), Gstar(3, 3), B(3, 3), ModHKL(3, 3),
+      errorModHKL(3, 3) {
   da[0] = _a;
   da[1] = _b;
   da[2] = _c;
@@ -67,27 +76,29 @@ UnitCell::UnitCell(double _a, double _b, double _c, double _alpha, double _beta,
   }
   errorda[0] = errorda[1] = errorda[2] = errorda[3] = errorda[4] = errorda[5] =
       0.0;
+  MaxOrder = 0;
+  CrossTerm = false;
   recalculate();
 }
 
 /** Get lattice parameter
-@return a1 :: lattice parameter \f$ a \f$ (in \f$ \mbox{\AA} \f$ )
-@see a()*/
+ @return a1 :: lattice parameter \f$ a \f$ (in \f$ \mbox{\AA} \f$ )
+ @see a()*/
 double UnitCell::a1() const { return da[0]; }
 
 /** Get lattice parameter
-@return a2 :: lattice parameter \f$ b \f$ (in \f$ \mbox{\AA} \f$ )
-@see b()*/
+ @return a2 :: lattice parameter \f$ b \f$ (in \f$ \mbox{\AA} \f$ )
+ @see b()*/
 double UnitCell::a2() const { return da[1]; }
 
 /** Get lattice parameter
-@return a3 :: lattice parameter \f$ c \f$ (in \f$ \mbox{\AA} \f$ )
-@see c()*/
+ @return a3 :: lattice parameter \f$ c \f$ (in \f$ \mbox{\AA} \f$ )
+ @see c()*/
 
 double UnitCell::a3() const { return da[2]; }
 /** Get lattice parameter a1-a3 as function of index (0-2)
-  @return a_n :: lattice parameter \f$ a,b or c \f$ (in \f$ \mbox{\AA} \f$ )
-  */
+ @return a_n :: lattice parameter \f$ a,b or c \f$ (in \f$ \mbox{\AA} \f$ )
+ */
 double UnitCell::a(int nd) const {
   if (nd < 0 || nd > 2)
     throw(std::invalid_argument(
@@ -96,130 +107,130 @@ double UnitCell::a(int nd) const {
 }
 
 /** Get lattice parameter
-@return alpha1 :: lattice parameter \f$ \alpha \f$ (in radians)
-  @see alpha()*/
+ @return alpha1 :: lattice parameter \f$ \alpha \f$ (in radians)
+ @see alpha()*/
 double UnitCell::alpha1() const { return da[3]; }
 
 /** Get lattice parameter
-@return alpha2 :: lattice parameter \f$ \beta \f$ (in radians)
-  @see beta()*/
+ @return alpha2 :: lattice parameter \f$ \beta \f$ (in radians)
+ @see beta()*/
 double UnitCell::alpha2() const { return da[4]; }
 
 /** Get lattice parameter
-@return alpha3 :: lattice parameter \f$ \gamma \f$ (in radians)
-@see gamma()*/
+ @return alpha3 :: lattice parameter \f$ \gamma \f$ (in radians)
+ @see gamma()*/
 double UnitCell::alpha3() const { return da[5]; }
 
 /** Get lattice parameter
-@return a :: lattice parameter \f$ a \f$ (in \f$ \mbox{\AA} \f$ )
-@see a1()*/
+ @return a :: lattice parameter \f$ a \f$ (in \f$ \mbox{\AA} \f$ )
+ @see a1()*/
 double UnitCell::a() const { return da[0]; }
 
 /** Get lattice parameter
-@return b :: lattice parameter \f$ b \f$ (in \f$ \mbox{\AA} \f$ )
-@see a2()*/
+ @return b :: lattice parameter \f$ b \f$ (in \f$ \mbox{\AA} \f$ )
+ @see a2()*/
 double UnitCell::b() const { return da[1]; }
 
 /** Get lattice parameter
-@return c :: lattice parameter \f$ c \f$ (in \f$ \mbox{\AA} \f$ )
-@see a3()*/
+ @return c :: lattice parameter \f$ c \f$ (in \f$ \mbox{\AA} \f$ )
+ @see a3()*/
 double UnitCell::c() const { return da[2]; }
 
 /** Get lattice parameter
-@return alpha :: lattice parameter \f$ \alpha \f$ (in degrees)
-@see alpha1()*/
+ @return alpha :: lattice parameter \f$ \alpha \f$ (in degrees)
+ @see alpha1()*/
 double UnitCell::alpha() const { return da[3] * rad2deg; }
 
 /** Get lattice parameter
-@return beta :: lattice parameter \f$ \beta \f$ (in degrees)
-@see alpha2()*/
+ @return beta :: lattice parameter \f$ \beta \f$ (in degrees)
+ @see alpha2()*/
 double UnitCell::beta() const { return da[4] * rad2deg; }
 
 /** Get lattice parameter
-@return gamma :: lattice parameter \f$ \gamma \f$ (in degrees)
-@see alpha3()*/
+ @return gamma :: lattice parameter \f$ \gamma \f$ (in degrees)
+ @see alpha3()*/
 double UnitCell::gamma() const { return da[5] * rad2deg; }
 
 /** Get reciprocal lattice parameter
-@return b1 :: lattice parameter \f$ a^{*} \f$ (in \f$ \mbox{\AA}^{-1} \f$ )
-@see astar()*/
+ @return b1 :: lattice parameter \f$ a^{*} \f$ (in \f$ \mbox{\AA}^{-1} \f$ )
+ @see astar()*/
 double UnitCell::b1() const { return ra[0]; }
 
 /** Get reciprocal lattice parameter
-@return b2 :: lattice parameter \f$ b^{*} \f$ (in \f$ \mbox{\AA}^{-1} \f$ )
-@see bstar()*/
+ @return b2 :: lattice parameter \f$ b^{*} \f$ (in \f$ \mbox{\AA}^{-1} \f$ )
+ @see bstar()*/
 double UnitCell::b2() const { return ra[1]; }
 
 /** Get reciprocal lattice parameter
-@return b3 :: lattice parameter \f$ c^{*} \f$ (in \f$ \mbox{\AA}^{-1} \f$ )
-@see cstar()*/
+ @return b3 :: lattice parameter \f$ c^{*} \f$ (in \f$ \mbox{\AA}^{-1} \f$ )
+ @see cstar()*/
 double UnitCell::b3() const { return ra[2]; }
 
 /** Get reciprocal lattice parameter
-  @return beta1 :: lattice parameter \f$ \alpha^{*} \f$ (in radians)
-  @see alphastar()*/
+ @return beta1 :: lattice parameter \f$ \alpha^{*} \f$ (in radians)
+ @see alphastar()*/
 double UnitCell::beta1() const { return ra[3]; }
 
 /** Get reciprocal lattice parameter
-  @return beta2 :: lattice parameter \f$ \beta^{*} \f$ (in radians)
-  @see betastar()*/
+ @return beta2 :: lattice parameter \f$ \beta^{*} \f$ (in radians)
+ @see betastar()*/
 double UnitCell::beta2() const { return ra[4]; }
 
 /** Get reciprocal lattice parameter
-  @return beta3 :: lattice parameter \f$ \gamma^{*} \f$ (in radians)
-  @see gammastar()*/
+ @return beta3 :: lattice parameter \f$ \gamma^{*} \f$ (in radians)
+ @see gammastar()*/
 double UnitCell::beta3() const { return ra[5]; }
 
 /** Get reciprocal lattice parameter
-@return astar :: lattice parameter \f$ a^{*} \f$ (in \f$ \mbox{\AA}^{-1} \f$ )
-@see b1()*/
+ @return astar :: lattice parameter \f$ a^{*} \f$ (in \f$ \mbox{\AA}^{-1} \f$ )
+ @see b1()*/
 double UnitCell::astar() const { return ra[0]; }
 
 /** Get reciprocal lattice parameter
-  @return bstar :: lattice parameter \f$ b^{*} \f$ (in \f$ \mbox{\AA}^{-1} \f$ )
-  @see b2()*/
+ @return bstar :: lattice parameter \f$ b^{*} \f$ (in \f$ \mbox{\AA}^{-1} \f$ )
+ @see b2()*/
 double UnitCell::bstar() const { return ra[1]; }
 
 /** Get reciprocal lattice parameter
-@return cstar :: lattice parameter \f$ c^{*} \f$ (in \f$ \mbox{\AA}^{-1} \f$ )
-@see b3()*/
+ @return cstar :: lattice parameter \f$ c^{*} \f$ (in \f$ \mbox{\AA}^{-1} \f$ )
+ @see b3()*/
 double UnitCell::cstar() const { return ra[2]; }
 
 /** Get reciprocal lattice parameter
-@return alphastar :: lattice parameter \f$ \alpha^{*} \f$ (in degrees)
-@see beta1()*/
+ @return alphastar :: lattice parameter \f$ \alpha^{*} \f$ (in degrees)
+ @see beta1()*/
 double UnitCell::alphastar() const { return ra[3] * rad2deg; }
 
 /** Get reciprocal lattice parameter
-@return  betastar:: lattice parameter \f$ \beta^{*} \f$ (in degrees)
-@see beta2()*/
+ @return  betastar:: lattice parameter \f$ \beta^{*} \f$ (in degrees)
+ @see beta2()*/
 double UnitCell::betastar() const { return ra[4] * rad2deg; }
 
 /** Get reciprocal lattice parameter
-@return  gammastar:: lattice parameter \f$ \gamma^{*} \f$ (in degrees)
-@see beta3()*/
+ @return  gammastar:: lattice parameter \f$ \gamma^{*} \f$ (in degrees)
+ @see beta3()*/
 double UnitCell::gammastar() const { return ra[5] * rad2deg; }
 
 /** Get lattice parameter error
-@return errora :: errorlattice parameter \f$ a \f$ (in \f$ \mbox{\AA} \f$ )
-*/
+ @return errora :: errorlattice parameter \f$ a \f$ (in \f$ \mbox{\AA} \f$ )
+ */
 double UnitCell::errora() const { return errorda[0]; }
 
 /** Get lattice parameter error
-@return errorb :: errorlattice parameter \f$ b \f$ (in \f$ \mbox{\AA} \f$ )
-*/
+ @return errorb :: errorlattice parameter \f$ b \f$ (in \f$ \mbox{\AA} \f$ )
+ */
 double UnitCell::errorb() const { return errorda[1]; }
 
 /** Get lattice parameter error
-@return errorc :: errorlattice parameter \f$ c \f$ (in \f$ \mbox{\AA} \f$ )
-*/
+ @return errorc :: errorlattice parameter \f$ c \f$ (in \f$ \mbox{\AA} \f$ )
+ */
 double UnitCell::errorc() const { return errorda[2]; }
 
 /** Get lattice parameter error
-@param angleunit :: units for angle, of type #AngleUnits . Default is degrees.
-@return erroralpha :: errorlattice parameter \f$ alpha \f$ (in degrees or
-radians )
-*/
+ @param angleunit :: units for angle, of type #AngleUnits . Default is degrees.
+ @return erroralpha :: errorlattice parameter \f$ alpha \f$ (in degrees or
+ radians )
+ */
 double UnitCell::erroralpha(const int angleunit) const {
   if (angleunit == angDegrees) {
     return errorda[3] * rad2deg;
@@ -229,10 +240,11 @@ double UnitCell::erroralpha(const int angleunit) const {
 }
 
 /** Get lattice parameter error
-@param angleunit :: units for angle, of type #AngleUnits . Default is degrees.
-@return erroralpha :: errorlattice parameter \f$ beta \f$ (in degrees or radians
-)
-*/
+ @param angleunit :: units for angle, of type #AngleUnits . Default is degrees.
+ @return erroralpha :: errorlattice parameter \f$ beta \f$ (in degrees or
+ radians
+ )
+ */
 double UnitCell::errorbeta(const int angleunit) const {
   if (angleunit == angDegrees) {
     return errorda[4] * rad2deg;
@@ -242,10 +254,10 @@ double UnitCell::errorbeta(const int angleunit) const {
 }
 
 /** Get lattice parameter error
-@param angleunit :: units for angle, of type #AngleUnits . Default is degrees.
-@return erroralpha :: errorlattice parameter \f$ gamma \f$ (in degrees or
-radians )
-*/
+ @param angleunit :: units for angle, of type #AngleUnits . Default is degrees.
+ @return erroralpha :: errorlattice parameter \f$ gamma \f$ (in degrees or
+ radians )
+ */
 double UnitCell::errorgamma(const int angleunit) const {
   if (angleunit == angDegrees) {
     return errorda[5] * rad2deg;
@@ -255,8 +267,9 @@ double UnitCell::errorgamma(const int angleunit) const {
 }
 
 /** Get lattice parameter error
-@return errorc :: errorlattice parameter \f$ volume \f$ (in \f$ \mbox{\AA} \f$ )
-*/
+ @return errorc :: errorlattice parameter \f$ volume \f$ (in \f$ \mbox{\AA} \f$
+ )
+ */
 double UnitCell::errorvolume() const {
   // From latcon.py by Art Schultz
   double V = volume();
@@ -293,9 +306,10 @@ double UnitCell::errorvolume() const {
 }
 
 /** Set lattice parameters
-  @param _a, _b, _c, _alpha, _beta, _gamma :: lattice parameters\n
-@param angleunit :: units for angle, of type #AngleUnits . Default is degrees.
-  */
+ @param _a, _b, _c, _alpha, _beta, _gamma :: lattice parameters\n
+ @param angleunit :: units for angle, of type #AngleUnits . Default is degrees.
+ */
+
 void UnitCell::set(double _a, double _b, double _c, double _alpha, double _beta,
                    double _gamma, const int angleunit) {
   da[0] = _a;
@@ -314,10 +328,10 @@ void UnitCell::set(double _a, double _b, double _c, double _alpha, double _beta,
 }
 
 /** Set lattice parameter errors
-  @param _aerr, _berr, _cerr, _alphaerr, _betaerr, _gammaerr :: lattice
-parameter errors\n
-@param angleunit :: units for angle, of type #AngleUnits . Default is degrees.
-  */
+ @param _aerr, _berr, _cerr, _alphaerr, _betaerr, _gammaerr :: lattice
+ parameter errors\n
+ @param angleunit :: units for angle, of type #AngleUnits . Default is degrees.
+ */
 
 void UnitCell::setError(double _aerr, double _berr, double _cerr,
                         double _alphaerr, double _betaerr, double _gammaerr,
@@ -336,38 +350,309 @@ void UnitCell::setError(double _aerr, double _berr, double _cerr,
   }
 }
 
+/** Set modulation vectors for satellites
+ @param _dh1	offset for H for first vector
+ @param _dk1	offset for K for first vector
+ @param _dl1	offset for l for first vector
+ @param _dh2	offset for H for second vector
+ @param _dk2	offset for K for second vector
+ @param _dl2	offset for l for second vector
+ @param _dh3	offset for H for third vector
+ @param _dk3	offset for K for third vector
+ @param _dl3	offset for l for third vector
+ */
+
+void UnitCell::setModHKL(double _dh1, double _dk1, double _dl1, double _dh2,
+                         double _dk2, double _dl2, double _dh3, double _dk3,
+                         double _dl3) {
+  ModHKL[0][0] = _dh1;
+  ModHKL[1][0] = _dk1;
+  ModHKL[2][0] = _dl1;
+  ModHKL[0][1] = _dh2;
+  ModHKL[1][1] = _dk2;
+  ModHKL[2][1] = _dl2;
+  ModHKL[0][2] = _dh3;
+  ModHKL[1][2] = _dk3;
+  ModHKL[2][2] = _dl3;
+}
+
+/** Set modulation vectors for satellites
+ @param newModHKL modulation vectors for HKL for three vectors
+ */
+
+void UnitCell::setModHKL(const DblMatrix &newModHKL) { ModHKL = newModHKL; }
+
+/** Set modulation vectors for satellites
+ @param newErrorModHKL errors for modulation vectors for HKL for three vectors
+ */
+
+void UnitCell::setErrorModHKL(const DblMatrix &newErrorModHKL) {
+  errorModHKL = newErrorModHKL;
+}
+
+/** Set modulation vectors for satellites
+ @param _dh1err	error for offset for H for first vector
+ @param _dk1err	error for offset for K for first vector
+ @param _dl1err	error for offset for l for first vector
+ @param _dh2err	error for offset for H for second vector
+ @param _dk2err	error for offset for K for second vector
+ @param _dl2err	error for offset for l for second vector
+ @param _dh3err	error for offset for H for third vector
+ @param _dk3err	error for offset for K for third vector
+ @param _dl3err	error for offset for l for third vector
+ */
+
+void UnitCell::setErrorModHKL(double _dh1err, double _dk1err, double _dl1err,
+                              double _dh2err, double _dk2err, double _dl2err,
+                              double _dh3err, double _dk3err, double _dl3err) {
+  errorModHKL[0][0] = _dh1err;
+  errorModHKL[1][0] = _dk1err;
+  errorModHKL[2][0] = _dl1err;
+  errorModHKL[0][1] = _dh2err;
+  errorModHKL[1][1] = _dk2err;
+  errorModHKL[2][1] = _dl2err;
+  errorModHKL[0][2] = _dh3err;
+  errorModHKL[1][2] = _dk3err;
+  errorModHKL[2][2] = _dl3err;
+}
+
+/** Set modulation vectors for satellites
+ @param _dh1	offset for H for first vector
+ @param _dk1	offset for K for first vector
+ @param _dl1	offset for l for first vector
+ */
+
+void UnitCell::setModVec1(double _dh1, double _dk1, double _dl1) {
+  ModHKL[0][0] = _dh1;
+  ModHKL[1][0] = _dk1;
+  ModHKL[2][0] = _dl1;
+}
+
+/** Set modulation vectors for satellites
+ @param _dh2	offset for H for second vector
+ @param _dk2	offset for K for second vector
+ @param _dl2	offset for l for second vector
+ */
+
+void UnitCell::setModVec2(double _dh2, double _dk2, double _dl2) {
+  ModHKL[0][1] = _dh2;
+  ModHKL[1][1] = _dk2;
+  ModHKL[2][1] = _dl2;
+}
+
+/** Set modulation vectors for satellites
+ @param _dh3	offset for H for third vector
+ @param _dk3	offset for K for third vector
+ @param _dl3	offset for l for third vector
+ */
+
+void UnitCell::setModVec3(double _dh3, double _dk3, double _dl3) {
+  ModHKL[0][2] = _dh3;
+  ModHKL[1][2] = _dk3;
+  ModHKL[2][2] = _dl3;
+}
+
+/** Set modulation vectors for satellites
+ @param newModVec modulation vectors for HKL for first vector
+ */
+
+void UnitCell::setModVec1(const V3D &newModVec) {
+  ModHKL[0][0] = newModVec[0];
+  ModHKL[1][0] = newModVec[1];
+  ModHKL[2][0] = newModVec[2];
+}
+
+/** Set modulation vectors for satellites
+ @param newModVec modulation vectors for HKL for second vector
+ */
+
+void UnitCell::setModVec2(const V3D &newModVec) {
+  ModHKL[0][1] = newModVec[0];
+  ModHKL[1][1] = newModVec[1];
+  ModHKL[2][1] = newModVec[2];
+}
+
+/** Set modulation vectors for satellites
+ @param newModVec modulation vectors for HKL for third vector
+ */
+
+void UnitCell::setModVec3(const V3D &newModVec) {
+  ModHKL[0][2] = newModVec[0];
+  ModHKL[1][2] = newModVec[1];
+  ModHKL[2][2] = newModVec[2];
+}
+
+/** Set modulation vectors for satellites
+ @param i       index of vector to set
+ @param _dherr	error for offset for H for ith vector
+ @param _dkerr	error for offset for K for ith vector
+ @param _dlerr	error for offset for l for ith vector
+ */
+
+void UnitCell::setModerr(int i, double _dherr, double _dkerr, double _dlerr) {
+  errorModHKL[0][i] = _dherr;
+  errorModHKL[1][i] = _dkerr;
+  errorModHKL[2][i] = _dlerr;
+}
+
+/** Set modulation vectors for satellites
+ @param _dh1err	error for offset for H for first vector
+ @param _dk1err	error for offset for K for first vector
+ @param _dl1err	error for offset for l for first vector
+ */
+
+void UnitCell::setModerr1(double _dh1err, double _dk1err, double _dl1err) {
+  errorModHKL[0][0] = _dh1err;
+  errorModHKL[1][0] = _dk1err;
+  errorModHKL[2][0] = _dl1err;
+}
+
+/** Set modulation vectors for satellites
+ @param _dh2err	error for offset for H for second vector
+ @param _dk2err	error for offset for K for second vector
+ @param _dl2err	error for offset for l for second vector
+ */
+
+void UnitCell::setModerr2(double _dh2err, double _dk2err, double _dl2err) {
+  errorModHKL[0][1] = _dh2err;
+  errorModHKL[1][1] = _dk2err;
+  errorModHKL[2][1] = _dl2err;
+}
+
+/** Set modulation vectors for satellites
+ @param _dh3err	error for offset for H for third vector
+ @param _dk3err	error for offset for K for third vector
+ @param _dl3err	error for offset for l for third vector
+ */
+
+void UnitCell::setModerr3(double _dh3err, double _dk3err, double _dl3err) {
+  errorModHKL[0][2] = _dh3err;
+  errorModHKL[1][2] = _dk3err;
+  errorModHKL[2][2] = _dl3err;
+}
+
+/** Set modulation vectors for satellites
+ @param MaxO    maximum order of modulation vectors
+ */
+
+void UnitCell::setMaxOrder(int MaxO) { MaxOrder = MaxO; }
+
+/** Set modulation vectors for satellites
+ @param CT      if true, use cross terms
+ */
+
+void UnitCell::setCrossTerm(bool CT) { CrossTerm = CT; }
+
+/** Get modulation vectors for satellites
+ @param j       index of vector to get
+ @return ModVec :: modulation vector
+ */
+
+const Kernel::V3D UnitCell::getModVec(int j) const {
+  return V3D(getdh(j), getdk(j), getdl(j));
+}
+
+/** Get errors for modulation vectors for satellites
+ @param j       index of vector to get
+ @return VecErr :: error of modulation vector
+ */
+
+const Kernel::V3D UnitCell::getVecErr(int j) const {
+  return V3D(getdherr(j), getdkerr(j), getdlerr(j));
+}
+
+/** Get modulation vectors for satellites
+ @return ModHKL :: modulation vectors
+ */
+
+const Kernel::DblMatrix &UnitCell::getModHKL() const { return ModHKL; }
+
+/** Get modulation vectors for satellites
+ @param j       index of vector to get
+ @return dh :: dh of modulation vector
+ */
+
+double UnitCell::getdh(int j) const { return ModHKL[0][j]; }
+
+/** Get modulation vectors for satellites
+ @param j       index of vector to get
+ @return ModVec :: modulation vector
+ */
+
+double UnitCell::getdk(int j) const { return ModHKL[1][j]; }
+
+/** Get modulation vectors for satellites
+ @param j       index of vector to get
+ @return ModVec :: modulation vector
+ */
+
+double UnitCell::getdl(int j) const { return ModHKL[2][j]; }
+
+/** Get error of modulation vectors for satellites
+ @param j       index of vector to get
+ @return ModVecErr :: error of modulation vector
+ */
+
+double UnitCell::getdherr(int j) const { return errorModHKL[0][j]; }
+
+/** Get error of modulation vectors for satellites
+ @param j       index of vector to get
+ @return ModVecErr :: error of modulation vector
+ */
+
+double UnitCell::getdkerr(int j) const { return errorModHKL[1][j]; }
+
+/** Get error  of modulation vectors for satellites
+ @param j       index of vector to get
+ @return ModVecErr :: error of modulation vector
+ */
+
+double UnitCell::getdlerr(int j) const { return errorModHKL[2][j]; }
+
+/** Get max order
+ @return MaxOrder :: maximum order
+ */
+
+int UnitCell::getMaxOrder() const { return MaxOrder; }
+
+/** Get cross term boolean
+ @return CrossTerm :: if true, use cross terms
+ */
+
+bool UnitCell::getCrossTerm() const { return CrossTerm; }
+
 /** Set lattice parameter
-@param _a :: lattice parameter \f$ a \f$ (in \f$ \mbox{\AA} \f$ )*/
+ @param _a :: lattice parameter \f$ a \f$ (in \f$ \mbox{\AA} \f$ )*/
 void UnitCell::seta(double _a) {
   da[0] = _a;
   recalculate();
 }
 /** Set lattice parameter error
-@param _aerr :: lattice parameter \f$ a \f$ error (in \f$ \mbox{\AA} \f$ )*/
+ @param _aerr :: lattice parameter \f$ a \f$ error (in \f$ \mbox{\AA} \f$ )*/
 void UnitCell::setErrora(double _aerr) { errorda[0] = _aerr; }
 
 /** Set lattice parameter
-@param _b :: lattice parameter \f$ b \f$ (in \f$ \mbox{\AA} \f$ )*/
+ @param _b :: lattice parameter \f$ b \f$ (in \f$ \mbox{\AA} \f$ )*/
 void UnitCell::setb(double _b) {
   da[1] = _b;
   recalculate();
 }
 /** Set lattice parameter error
-@param _berr :: lattice parameter \f$ b \f$ error (in \f$ \mbox{\AA} \f$ )*/
+ @param _berr :: lattice parameter \f$ b \f$ error (in \f$ \mbox{\AA} \f$ )*/
 void UnitCell::setErrorb(double _berr) { errorda[1] = _berr; }
 /** Set lattice parameter
-@param _c :: lattice parameter \f$ c \f$ (in \f$ \mbox{\AA} \f$ )*/
+ @param _c :: lattice parameter \f$ c \f$ (in \f$ \mbox{\AA} \f$ )*/
 void UnitCell::setc(double _c) {
   da[2] = _c;
   recalculate();
 }
 /** Set lattice parameter error
-@param _cerr :: lattice parameter \f$ c \f$ error (in \f$ \mbox{\AA} \f$ )*/
+ @param _cerr :: lattice parameter \f$ c \f$ error (in \f$ \mbox{\AA} \f$ )*/
 void UnitCell::setErrorc(double _cerr) { errorda[2] = _cerr; }
 /** Set lattice parameter
-@param _alpha :: lattice parameter \f$ \alpha \f$
-@param angleunit :: units for angle, of type #AngleUnits. Default is degrees.
-*/
+ @param _alpha :: lattice parameter \f$ \alpha \f$
+ @param angleunit :: units for angle, of type #AngleUnits. Default is degrees.
+ */
 void UnitCell::setalpha(double _alpha, const int angleunit) {
   if (angleunit == angDegrees)
     da[3] = deg2rad * _alpha;
@@ -376,9 +661,9 @@ void UnitCell::setalpha(double _alpha, const int angleunit) {
   recalculate();
 }
 /** Set lattice parameter error
-@param _alphaerr :: lattice parameter \f$ \alpha \f$ error
-@param angleunit :: units for angle, of type #AngleUnits. Default is degrees.
-*/
+ @param _alphaerr :: lattice parameter \f$ \alpha \f$ error
+ @param angleunit :: units for angle, of type #AngleUnits. Default is degrees.
+ */
 void UnitCell::setErroralpha(double _alphaerr, const int angleunit) {
   if (angleunit == angDegrees)
     errorda[3] = deg2rad * _alphaerr;
@@ -386,9 +671,9 @@ void UnitCell::setErroralpha(double _alphaerr, const int angleunit) {
     errorda[3] = _alphaerr;
 }
 /** Set lattice parameter
-@param _beta :: lattice parameter \f$ \beta \f$
-@param angleunit :: units for angle, of type #AngleUnits. Default is degrees.
-*/
+ @param _beta :: lattice parameter \f$ \beta \f$
+ @param angleunit :: units for angle, of type #AngleUnits. Default is degrees.
+ */
 void UnitCell::setbeta(double _beta, const int angleunit) {
   if (angleunit == angDegrees)
     da[4] = deg2rad * _beta;
@@ -398,9 +683,9 @@ void UnitCell::setbeta(double _beta, const int angleunit) {
 }
 
 /** Set lattice parameter error
-@param _betaerr :: lattice parameter \f$ \beta \f$ error
-@param angleunit :: units for angle, of type #AngleUnits. Default is degrees.
-*/
+ @param _betaerr :: lattice parameter \f$ \beta \f$ error
+ @param angleunit :: units for angle, of type #AngleUnits. Default is degrees.
+ */
 void UnitCell::setErrorbeta(double _betaerr, const int angleunit) {
   if (angleunit == angDegrees)
     errorda[4] = deg2rad * _betaerr;
@@ -409,9 +694,9 @@ void UnitCell::setErrorbeta(double _betaerr, const int angleunit) {
 }
 
 /** Set lattice parameter
-@param _gamma :: lattice parameter \f$ \gamma \f$
-@param angleunit :: units for angle, of type #AngleUnits. Default is degrees.
-*/
+ @param _gamma :: lattice parameter \f$ \gamma \f$
+ @param angleunit :: units for angle, of type #AngleUnits. Default is degrees.
+ */
 void UnitCell::setgamma(double _gamma, const int angleunit) {
   if (angleunit == angDegrees)
     da[5] = deg2rad * _gamma;
@@ -421,9 +706,9 @@ void UnitCell::setgamma(double _gamma, const int angleunit) {
 }
 
 /** Set lattice parameter error
-@param _gammaerr :: lattice parameter \f$ \gamma \f$ error
-@param angleunit :: units for angle, of type #AngleUnits. Default is degrees.
-*/
+ @param _gammaerr :: lattice parameter \f$ \gamma \f$ error
+ @param angleunit :: units for angle, of type #AngleUnits. Default is degrees.
+ */
 void UnitCell::setErrorgamma(double _gammaerr, const int angleunit) {
   if (angleunit == angDegrees)
     errorda[5] = deg2rad * _gammaerr;
@@ -512,7 +797,6 @@ void UnitCell::recalculate() {
   calculateB();
 }
 
-/// Private function to calculate #G matrix
 void UnitCell::calculateG() {
   G[0][0] = da[0] * da[0];
   G[1][1] = da[1] * da[1];

@@ -1208,6 +1208,12 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
         peakWS->getPeak(i).setPeakShape(peakShape);
       }
     }
+    // After all columns read set IntHKL
+    for (int r = 0; r < numberPeaks; r++) {
+      V3D intHKL = V3D(peakWS->getPeak(r).getH(), peakWS->getPeak(r).getK(),
+                       peakWS->getPeak(r).getL());
+      peakWS->getPeak(r).setIntHKL(intHKL);
+    }
   }
 
   return boost::static_pointer_cast<API::Workspace>(peakWS);
