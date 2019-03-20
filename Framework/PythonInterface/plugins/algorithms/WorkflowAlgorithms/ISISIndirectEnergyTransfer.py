@@ -28,9 +28,7 @@ def _elems_or_none(l):
 
 
 def add_missing_elements(from_list, to_list):
-    for element in from_list:
-        if element not in to_list:
-            to_list.append(element)
+    to_list.extend([element for element in from_list if element not in to_list])
     return sorted(to_list)
 
 
