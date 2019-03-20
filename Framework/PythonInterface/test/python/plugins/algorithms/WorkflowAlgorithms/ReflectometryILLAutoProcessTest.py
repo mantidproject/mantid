@@ -32,6 +32,32 @@ class ReflectometryILLAutoProcessTest(unittest.TestCase):
         self.assertEquals(mtd.getObjectNames(), ['outWS'])
         mtd.clear()
 
+    def testSampleAngle(self):
+        args = {
+            'Run': 'ILL/D17/317370.nxs',
+            'DirectRun': 'ILL/D17/317369.nxs',
+            'AngleOption': 'Sample angle',
+            'OutputWorkspace': 'outWS',
+            'rethrow': True,
+            'child': True
+        }
+        alg = create_algorithm('ReflectometryILLAutoProcess', **args)
+        assertRaisesNothing(self, alg.execute)
+        self.assertEquals(mtd.getObjectNames(), ['outWS'])
+        mtd.clear()
+
+    def testUndefinedAngleOption(self):
+        args = {
+            'Run': 'ILL/D17/317370.nxs',
+            'DirectRun': 'ILL/D17/317369.nxs',
+            'AngleOption': '?',
+            'OutputWorkspace': 'outWS',
+            'rethrow': True,
+            'child': True
+        }
+        alg = create_algorithm('ReflectometryILLAutoProcess', **args)
+        self.assertRaises(RuntimeError, alg.execute)
+
     def testSingleAngleMergeTwoRunsAndTwoDirectRuns(self):
         args = {
             'Run': 'ILL/D17/317370+ILL/D17/317369',
@@ -99,19 +125,6 @@ class ReflectometryILLAutoProcessTest(unittest.TestCase):
         assertRaisesNothing(self, alg.execute)
         #out = mtd['outWS']
         #self.assertEquals(out.spectrumInfo().signedTwoTheta(0), 2.*30.2*numpy.pi/180.)
-        mtd.clear()
-
-    def testSampleAngle(self):
-        args = {
-            'Run': 'ILL/D17/317370.nxs',
-            'DirectRun': 'ILL/D17/317369.nxs',
-            'OutputWorkspace': 'outWS',
-            'AngleOption': 'Sample angle',
-            'rethrow': True,
-            'child': True
-        }
-        alg = create_algorithm('ReflectometryILLAutoProcess', **args)
-        assertRaisesNothing(self, alg.execute)
         mtd.clear()
 
     def testDefaultValues(self):

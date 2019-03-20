@@ -455,6 +455,8 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
             twoTheta = twoTheta + common.deflectionAngle(run)
             args['TwoTheta'] = twoTheta
         detectorMovedWS = SpecularReflectionPositionCorrect(**args)
+        # Write twoTheta to the sample logs
+        run.addProperty(common.SampleLogs.REDUCTION_TWO_THETA, float(twoTheta), 'Degree', True)
         self._cleanup.cleanup(ws)
         return detectorMovedWS
 

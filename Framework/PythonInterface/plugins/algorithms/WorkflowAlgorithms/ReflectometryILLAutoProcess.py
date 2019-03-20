@@ -168,7 +168,9 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         self.declareProperty(
             StringArrayProperty(
                 PropAutoProcess.ANGLE_OPTION,
-                values=[Angle.DAN]
+                values=[Angle.DAN],
+                validator=stringArrayValidator,
+                direction=Direction.Input,
             ),
             doc='Angle option used for detector positioning{}'.format(listOrSingleNumber)
         )
@@ -179,7 +181,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
                 PropAutoProcess.BRAGG_ANGLE,
                 values=[Property.EMPTY_DBL]
             ),
-            doc='A user-defined Bragg angle{}'.format(listOrSingleNumber)
+            doc='A user-defined Bragg angle in degree{}'.format(listOrSingleNumber)
         )
         self.setPropertyGroup(PropAutoProcess.BRAGG_ANGLE, preProcessGen)
         self.copyProperties(
@@ -222,7 +224,9 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
             PropAutoProcess.BKG_METHOD_DIRECT,
             defaultValue=BkgMethod.CONSTANT,
             validator=StringListValidator(
-                [BkgMethod.CONSTANT, BkgMethod.LINEAR, BkgMethod.OFF]
+                [BkgMethod.CONSTANT,
+                 BkgMethod.LINEAR,
+                 BkgMethod.OFF]
             ),
             doc='Flat background calculation method for background subtraction.'
         )
@@ -423,7 +427,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
                 validator=stringArrayValidator,
                 direction=Direction.Input,
             ),
-            doc='Type of summation to perform.'
+            doc='Type of summation to perform{}'.format(listOrSingleNumber)
         )
         # For ReflectometryILLPolarizationCorr -> action is now OptionalLoad
         self.declareProperty(
@@ -515,13 +519,16 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
 
     def twoTheta(self, run, angle):
         """Return the TwoTheta scattering angle depending on user input options."""
-        if self.getProperty(PropAutoProcess.BRAGG_ANGLE).isDefault:
-            if self.getValue(PropAutoProcess.ANGLE_OPTION, angle) == Angle.SAN:
+        if numpy.isclose(self.getValue(PropAutoProcess.BRAGG_ANGLE, angle), Property.EMPTY_DBL):
+            if self.getValue(PropAutoProcess.ANGLE_OPTION, angle) == Angle.DAN:
+                self.log().notice('Using DAN angle')
+                return Property.EMPTY_DBL
+            elif self.getValue(PropAutoProcess.ANGLE_OPTION, angle) == Angle.SAN:
                 twoT = self.twoThetaFromSampleAngle(run)
                 self.log().notice('Using SAN angle: {} degree'.format(twoT / 2.))
                 return twoT
             else:
-                return Property.EMPTY_DBL
+                raise RuntimeError('{} must be {} or {}.'.format(PropAutoProcess.ANGLE_OPTION, Angle.SAN, Angle.DAN))
         else:
             twoT = 2. * self.getValue(PropAutoProcess.BRAGG_ANGLE, angle)
             self.log().notice('Using Bragg angle : {} degree'.format(twoT / 2.))
@@ -563,7 +570,6 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
             runDB = self.mtdName(db[angle])
             runRB = self.mtdName(rb[angle])
 
-            sumType = self.getValue(PropAutoProcess.SUM_TYPE, angle)
             halfWidthsReflected = [int(self.getValue(PropAutoProcess.LOW_FOREGROUND_HALF_WIDTH, angle)),
                                    int(self.getValue(PropAutoProcess.HIGH_FOREGROUND_HALF_WIDTH, angle))]
             halfWidthsDirect = [int(self.getValue(PropAutoProcess.LOW_FOREGROUND_HALF_WIDTH_DIRECT, angle)),
@@ -620,6 +626,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
                 ReflectometryILLPreprocess(
                     Run=reflectedBeamInput,
                     OutputWorkspace='__reflected-{}'.format(runRB),
+                    TwoTheta=twoTheta,
                     LinePosition=linePosition,
                     DirectLineWorkspace='__direct-{}-angle-{}'.format(runDB, angle),
                     ForegroundHalfWidth=halfWidthsReflected,
@@ -639,7 +646,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
                 ReflectometryILLSumForeground(
                     InputWorkspace='__reflected-{}'.format(runRB),
                     OutputWorkspace=workspaceNamesForQConversion,
-                    SummationType=sumType,
+                    SummationType=self.getValue(PropAutoProcess.SUM_TYPE, angle),
                     DirectForegroundWorkspace='__direct-{}-angle-{}-foreground'.format(runDB, angle),
                     DirectLineWorkspace='__direct-{}-angle-{}'.format(runDB, angle),
                     WavelengthRange=wavelengthRange,
@@ -669,7 +676,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
                     ReflectometryILLSumForeground(
                         InputWorkspace='__{}'.format(run),
                         OutputWorkspace='__reflected-{}-foreground'.format(run),
-                        SummationType=sumType,
+                        SummationType=self.getValue(PropAutoProcess.SUM_TYPE, angle),
                         DirectForegroundWorkspace='__direct-{}-angle-{}-foreground'.format(runDB, angle),
                         DirectLineWorkspace='__direct-{}-angle-{}'.format(runDB, angle),
                         WavelengthRange=wavelengthRange,
@@ -705,7 +712,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
             workflowProgress.report()
 
         wsPrefix = self.getPropertyValue(Prop.OUTPUT_WS)
-        if len(rb) > 1:
+        if len(rb) > 100:
             ','.join(toStitch)
             Stitch1DMany(
                 InputWorkspaces=toStitch,

@@ -137,6 +137,7 @@ class SampleLogs:
     LINE_POSITION = 'reduction.line_position'
     SUM_TYPE = 'reduction.foreground.summation_type'
     TWO_THETA = 'loader.two_theta'
+    REDUCTION_TWO_THETA = 'reduction.two_theta'
 
 
 class WSCleanup:

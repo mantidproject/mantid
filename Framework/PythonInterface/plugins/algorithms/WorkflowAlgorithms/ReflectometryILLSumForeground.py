@@ -320,13 +320,26 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
         linePosition = ws.run().getProperty(common.SampleLogs.LINE_POSITION).value
         instr = common.instrumentName(ws)
         pixelSize = common.pixelSize(instr)
-        dist = pixelSize * numpy.absolute(linePosition-beamPosIndex)
+        dist = pixelSize * (linePosition-beamPosIndex)
+
         if dist != 0.:
+            # With the sinus law
+            theta = foregroundWS.run().getProperty(common.SampleLogs.REDUCTION_TWO_THETA).value / 2.
+            #eq1 = dist / numpy.math.sin(numpy.radians([theta]))
+            #alpha = numpy.math.asin(foregroundWS.spectrumInfo().l2(0) / eq1)
+            #gamma = 180 - numpy.degrees([alpha]) - theta
+            #detectorDistance = numpy.math.sin(gamma) * eq1
             detPoint1 = ws.spectrumInfo().position(0)
-            detPoint2 = ws.spectrumInfo().position(5)
+            detPoint2 = ws.spectrumInfo().position(20)
             beta = numpy.math.atan2((detPoint2[0] - detPoint1[0]), (detPoint2[2] - detPoint1[2]))
             xvsy = numpy.math.sin(beta) * dist
             mz = numpy.math.cos(beta) * dist
+
+            #xvsy = numpy.math.sin(theta) * detectorDistance
+            #mz = numpy.math.cos(theta) * detectorDistance
+            #print('BP {} LP {}'.format(beamPosIndex, linePosition))
+            #print('beta {}  dist {}'.format(beta, dist))
+            #print('x {} z {}'.format(xvsy, mz))
             if instr == 'D17':
                 mx = xvsy
                 my = 0.0
@@ -343,14 +356,14 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
                 Z=mz,
                 RelativePosition=True
             )
-            rotationAngle=foregroundWS.spectrumInfo().twoTheta(0) / 2.
+            #rotationAngle=foregroundWS.spectrumInfo().twoTheta(0) / 2.
             RotateInstrumentComponent(
                 Workspace=foregroundWS,
                 ComponentName='detector',
                 X=rotationAxis[0],
                 Y=rotationAxis[1],
                 Z=rotationAxis[2],
-                Angle=rotationAngle,
+                Angle=theta,
                 RelativeRotation=True
             )
         return foregroundWS
