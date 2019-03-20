@@ -141,7 +141,7 @@ void interpolateYLinearInplace(const Histogram &input, const size_t stepSize,
   const auto xold = input.points();
   const auto &yold = input.y();
   const auto nypts = yold.size();
-  size_t step(stepSize), index2(0);
+  size_t step(stepSize);
   double x1(0.), x2(0.), y1(0.), y2(0.), overgap(0.);
   // Copy over end value skipped by loop
   ynew.back() = yold.back();
@@ -150,7 +150,8 @@ void interpolateYLinearInplace(const Histogram &input, const size_t stepSize,
     const double xp = xold[i];
     if (step == stepSize) {
       x1 = xp;
-      index2 = ((i + stepSize) >= nypts ? nypts - 1 : (i + stepSize));
+      const auto index2 =
+          ((i + stepSize) >= nypts ? nypts - 1 : (i + stepSize));
       x2 = xold[index2];
       overgap = 1.0 / (x2 - x1);
       y1 = yold[i];
