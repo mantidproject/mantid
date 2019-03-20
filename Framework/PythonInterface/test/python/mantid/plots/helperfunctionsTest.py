@@ -268,6 +268,26 @@ class HelperFunctionsTest(unittest.TestCase):
         # check that fails for uneven data
         self.assertRaises(ValueError, funcs.get_matrix_2d_data, self.ws2d_point_uneven, True)
 
+    def test_get_matrix_2d_data_ragged(self):
+        # contour from ragged point data
+        x, y, z = funcs.get_matrix_2d_ragged(self.ws2d_point_rag, True, histogram2D=False)
+        np.testing.assert_allclose(x, np.array([1., 2., 3., 4., 5., 6., 7., 8.]))
+        np.testing.assert_allclose(y, np.array([0.5, 1.5, 2.5]))
+        # contour from ragged histo data
+        x, y, z = funcs.get_matrix_2d_ragged(self.ws2d_histo_rag, True, histogram2D=False)
+        np.testing.assert_allclose(x, np.array([1.5, 2.4375, 3.375, 4.3125, 5.25, 6.1875, 7.125, 8.0625, 9.]))
+        np.testing.assert_allclose(y, np.array([4., 6., 8., 10.]))
+        # mesh from ragged point data
+        x, y, z = funcs.get_matrix_2d_ragged(self.ws2d_point_rag, True, histogram2D=True)
+        np.testing.assert_allclose(x, np.array([0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5]))
+        np.testing.assert_allclose(y, np.array([0.5, 1.5, 2.5]))
+        # mesh from ragged histo data
+        x, y, z = funcs.get_matrix_2d_ragged(self.ws2d_histo_rag, True, histogram2D=True)
+        np.testing.assert_allclose(x, np.array([1.03125, 1.96875, 2.90625, 3.84375, 4.78125, 5.71875, 6.65625, 7.59375, 8.53125, 9.46875]))
+        np.testing.assert_allclose(y, np.array([4., 6, 8., 10.]))
+        # check that fails for uneven data
+        self.assertRaises(ValueError, funcs.get_matrix_2d_data, self.ws2d_point_uneven, True)
+
     def test_get_uneven_data(self):
         # even points
         x, y, z = funcs.get_uneven_data(self.ws2d_point_rag, True)
