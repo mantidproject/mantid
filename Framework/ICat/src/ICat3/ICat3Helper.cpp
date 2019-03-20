@@ -312,9 +312,9 @@ void CICatHelper::listInstruments(std::vector<std::string> &instruments) {
   int result = icat.listInstruments(&request, &response);
 
   if (result == 0) {
-    for (const auto &instrument : response.return_) {
-      instruments.push_back(instrument);
-    }
+    instruments.reserve(instruments.size() + response.return_.size());
+    std::move(response.return_.begin(), response.return_.end(),
+              std::back_inserter(instruments));
   } else {
     CErrorHandling::throwErrorMessages(icat);
   }
@@ -338,9 +338,9 @@ void CICatHelper::listInvestigationTypes(
   int result = icat.listInvestigationTypes(&request, &response);
 
   if (result == 0) {
-    for (const auto &type : response.return_) {
-      investTypes.push_back(type);
-    }
+    investTypes.reserve(investTypes.size() + response.return_.size());
+    std::move(response.return_.begin(), response.return_.end(),
+              std::back_inserter(investTypes));
   } else {
     CErrorHandling::throwErrorMessages(icat);
   }
