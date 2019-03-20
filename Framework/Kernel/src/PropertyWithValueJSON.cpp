@@ -58,14 +58,14 @@ private:
   template <typename T> struct ModelT : ConceptT {
     std::unique_ptr<Property>
     singleValueProperty(const std::string &name,
-                        const Json::Value &value) const final {
+                        const Json::Value &value) const override final {
       using ToCppT = pwvjdetail::ToCpp<T>;
       return std::make_unique<PropertyWithValue<T>>(name, ToCppT()(value));
     }
 
     std::unique_ptr<Property>
     arrayValueProperty(const std::string &name,
-                       const Json::Value &value) const final {
+                       const Json::Value &value) const override final {
       using ToCppVectorT = pwvjdetail::ToCpp<std::vector<T>>;
       return std::make_unique<ArrayProperty<T>>(name, ToCppVectorT()(value));
     }
