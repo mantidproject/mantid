@@ -27,3 +27,4 @@ exclude =
     Testing/Tools,
 max-complexity = 20
 max-line-length = 140
+doctests=True
