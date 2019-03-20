@@ -122,7 +122,7 @@ MantidMDCurve::~MantidMDCurve() {
 /**
  * Clone the curve for the use by a particular Graph
  */
-MantidMDCurve *MantidMDCurve::clone(const Graph *) const {
+MantidMDCurve *MantidMDCurve::clone(const Graph * /*g*/) const {
   MantidMDCurve *mc = new MantidMDCurve(*this); /*
    if (g)
    {

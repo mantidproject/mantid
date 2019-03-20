@@ -108,7 +108,7 @@ void LayerButton::mousePressEvent(QMouseEvent *event) {
     emit clicked(this);
 }
 
-void LayerButton::mouseDoubleClickEvent(QMouseEvent *) {
+void LayerButton::mouseDoubleClickEvent(QMouseEvent * /*unused*/) {
   emit showCurvesDialog();
 }
 

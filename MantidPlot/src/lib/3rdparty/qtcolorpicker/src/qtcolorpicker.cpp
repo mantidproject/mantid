@@ -175,7 +175,7 @@ public:
   QColor color() const;
   QString text() const;
 
-  void setSelected(bool);
+  void setSelected(bool /*selected*/);
   bool isSelected() const;
 signals:
   void clicked();
@@ -217,7 +217,7 @@ public:
   QColor color(int index) const;
 
 signals:
-  void selected(const QColor &);
+  void selected(const QColor & /*_t1*/);
   void hid();
 
 public slots:
@@ -795,7 +795,7 @@ QColor ColorPickerPopup::lastSelected() const { return lastSel; }
     Sets focus on the popup to enable keyboard navigation. Draws
     focusRect and selection rect.
 */
-void ColorPickerPopup::showEvent(QShowEvent *) {
+void ColorPickerPopup::showEvent(QShowEvent * /*unused*/) {
   bool foundSelected = false;
   for (int i = 0; i < grid->columnCount(); ++i) {
     for (int j = 0; j < grid->rowCount(); ++j) {
@@ -930,7 +930,7 @@ void ColorPickerItem::setColor(const QColor &color, const QString &text) {
 /*!
 
 */
-void ColorPickerItem::mouseMoveEvent(QMouseEvent *) {
+void ColorPickerItem::mouseMoveEvent(QMouseEvent * /*unused*/) {
   setFocus();
   update();
 }
@@ -938,7 +938,7 @@ void ColorPickerItem::mouseMoveEvent(QMouseEvent *) {
 /*!
 
 */
-void ColorPickerItem::mouseReleaseEvent(QMouseEvent *) {
+void ColorPickerItem::mouseReleaseEvent(QMouseEvent * /*unused*/) {
   sel = true;
   emit selected();
 }
@@ -946,7 +946,7 @@ void ColorPickerItem::mouseReleaseEvent(QMouseEvent *) {
 /*!
 
 */
-void ColorPickerItem::mousePressEvent(QMouseEvent *) {
+void ColorPickerItem::mousePressEvent(QMouseEvent * /*unused*/) {
   setFocus();
   update();
 }
@@ -954,7 +954,7 @@ void ColorPickerItem::mousePressEvent(QMouseEvent *) {
 /*!
 
 */
-void ColorPickerItem::paintEvent(QPaintEvent *) {
+void ColorPickerItem::paintEvent(QPaintEvent * /*unused*/) {
   QPainter p(this);
   int w = width();  // width of cell in pixels
   int h = height(); // height of cell in pixels
@@ -982,7 +982,7 @@ ColorPickerButton::ColorPickerButton(QWidget *parent) : QFrame(parent) {
 /*!
 
 */
-void ColorPickerButton::mousePressEvent(QMouseEvent *) {
+void ColorPickerButton::mousePressEvent(QMouseEvent * /*unused*/) {
   setFrameShadow(Sunken);
   update();
 }
@@ -990,7 +990,7 @@ void ColorPickerButton::mousePressEvent(QMouseEvent *) {
 /*!
 
 */
-void ColorPickerButton::mouseMoveEvent(QMouseEvent *) {
+void ColorPickerButton::mouseMoveEvent(QMouseEvent * /*unused*/) {
   setFocus();
   update();
 }
@@ -998,7 +998,7 @@ void ColorPickerButton::mouseMoveEvent(QMouseEvent *) {
 /*!
 
 */
-void ColorPickerButton::mouseReleaseEvent(QMouseEvent *) {
+void ColorPickerButton::mouseReleaseEvent(QMouseEvent * /*unused*/) {
   setFrameShadow(Raised);
   repaint();
   emit clicked();

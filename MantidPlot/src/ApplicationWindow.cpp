@@ -6264,7 +6264,7 @@ void ApplicationWindow::renameWindow() {
   rwd->exec();
 }
 
-void ApplicationWindow::renameWindow(QTreeWidgetItem *item, int,
+void ApplicationWindow::renameWindow(QTreeWidgetItem *item, int /*unused*/,
                                      const QString &text) {
   if (!item)
     return;
@@ -9756,7 +9756,7 @@ void ApplicationWindow::modifiedProject() {
   saved = false;
 }
 
-void ApplicationWindow::modifiedProject(MdiSubWindow *) { modifiedProject(); }
+void ApplicationWindow::modifiedProject(MdiSubWindow * /*unused*/) { modifiedProject(); }
 
 void ApplicationWindow::timerEvent(QTimerEvent *e) {
   if (e->timerId() == savingTimerId)
@@ -14519,7 +14519,7 @@ void ApplicationWindow::folderItemDoubleClicked(QTreeWidgetItem *it) {
 }
 
 void ApplicationWindow::folderItemChanged(QTreeWidgetItem *it,
-                                          QTreeWidgetItem *) {
+                                          QTreeWidgetItem * /*unused*/) {
   if (!it)
     return;
 
@@ -14755,8 +14755,8 @@ void ApplicationWindow::addFolderListViewItem(Folder *f) {
 }
 
 void ApplicationWindow::find(const QString &s, bool windowNames, bool labels,
-                             bool, bool caseSensitive, bool partialMatch,
-                             bool) {
+                             bool /*unused*/, bool caseSensitive, bool partialMatch,
+                             bool /*unused*/) {
   if (windowNames || labels) {
     MdiSubWindow *w = currentFolder()->findWindow(s, windowNames, labels,
                                                   caseSensitive, partialMatch);

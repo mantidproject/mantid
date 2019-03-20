@@ -309,7 +309,7 @@ void PlotDialog::showCustomPenColumn(bool on) {
     defaultPenBox->hide();
 }
 
-void PlotDialog::showPlotAssociations(QTreeWidgetItem *item, int) {
+void PlotDialog::showPlotAssociations(QTreeWidgetItem *item, int /*unused*/) {
   if (!item)
     return;
 
@@ -1131,7 +1131,7 @@ void PlotDialog::initPercentilePage() {
  * Hides the "Custom color map" button when the user has not selected that
  * specific button.
  */
-void PlotDialog::showColorMapEditor(bool) {
+void PlotDialog::showColorMapEditor(bool /*unused*/) {
   if (grayScaleBox->isChecked() || defaultScaleBox->isChecked()) {
     mSelectColormap->hide();
     boxSetCMapAsDefault->hide();
@@ -2852,7 +2852,7 @@ void PlotDialog::changeColormap(const QString &filename) {
   setColorMapName();
 }
 
-void PlotDialog::showDefaultContourLinesBox(bool) {
+void PlotDialog::showDefaultContourLinesBox(bool /*unused*/) {
   if (autoContourBox->isChecked())
     defaultPenBox->hide();
   else

@@ -349,7 +349,7 @@ bool muParserScript::setInt(int val, const char *name) {
   return setDouble((double)val, name);
 }
 
-bool muParserScript::setQObject(QObject *, const char *) { return false; }
+bool muParserScript::setQObject(QObject * /*unused*/, const char * /*unused*/) { return false; }
 
 QString muParserScript::compileColArg(const QString &in) {
   QString out = "\"";

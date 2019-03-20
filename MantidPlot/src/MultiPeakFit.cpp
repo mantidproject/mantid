@@ -46,8 +46,8 @@ MultiPeakFit::MultiPeakFit(ApplicationWindow *parent, Graph *g,
   init(peaks);
 }
 
-MultiPeakFit::MultiPeakFit(ApplicationWindow *parent, Table *t, const QString &,
-                           const QString &, int, int, PeakProfile profile,
+MultiPeakFit::MultiPeakFit(ApplicationWindow *parent, Table *t, const QString & /*unused*/,
+                           const QString & /*unused*/, int /*unused*/, int /*unused*/, PeakProfile profile,
                            int peaks)
     : Fit(parent, t), d_profile(profile) {
   init(peaks);

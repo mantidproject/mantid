@@ -549,7 +549,7 @@ void FitDialog::showCovarianceMatrix() {
   d_current_fit->covarianceMatrix(matrixName);
 }
 
-void FitDialog::showPointsBox(bool) {
+void FitDialog::showPointsBox(bool /*unused*/) {
   if (generatePointsBtn->isChecked()) {
     lblPoints->show();
     generatePointsBox->show();
@@ -1265,7 +1265,7 @@ void FitDialog::closeEvent(QCloseEvent *e) {
   e->accept();
 }
 
-void FitDialog::enableApplyChanges(int) { btnApply->setEnabled(true); }
+void FitDialog::enableApplyChanges(int /*unused*/) { btnApply->setEnabled(true); }
 
 void FitDialog::deleteFitCurves() {
   d_graph->deleteFitCurves();

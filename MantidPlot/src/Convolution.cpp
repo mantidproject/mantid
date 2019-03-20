@@ -45,7 +45,7 @@ Convolution::Convolution(ApplicationWindow *parent, Table *t,
 }
 
 bool Convolution::setDataFromTable(Table *t, const QString &signalColName,
-                                   const QString &responseColName, int, int) {
+                                   const QString &responseColName, int /*unused*/, int /*unused*/) {
   if (t && d_table != t)
     d_table = t;
 

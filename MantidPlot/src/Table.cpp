@@ -146,7 +146,7 @@ void Table::setAutoUpdateValues(bool on) {
   }
 }
 
-void Table::colWidthModified(int, int, int) {
+void Table::colWidthModified(int /*unused*/, int /*unused*/, int /*unused*/) {
   emit modifiedWindow(this);
   setHeaderColType();
 }
@@ -2915,7 +2915,7 @@ void Table::setReadOnlyAllColumns(bool on) {
   }
 }
 
-void Table::moveColumn(int, int fromIndex, int toIndex) {
+void Table::moveColumn(int /*unused*/, int fromIndex, int toIndex) {
   int to = toIndex;
   if (fromIndex < toIndex)
     to = toIndex - 1;
@@ -3327,7 +3327,7 @@ void MyTable::setText(int row, int col, const QString &txt) {
 
 void MyTable::blockResizing(bool yes) { m_blockResizing = yes; }
 
-void MyTable::resizeData(int) {
+void MyTable::resizeData(int /*unused*/) {
   if (m_blockResizing) {
     emit unwantedResize();
   }

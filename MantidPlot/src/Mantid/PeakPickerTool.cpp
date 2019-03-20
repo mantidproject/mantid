@@ -322,7 +322,7 @@ bool PeakPickerTool::eventFilter(QObject *obj, QEvent *event) {
   return QwtPlotPicker::eventFilter(obj, event);
 }
 
-void PeakPickerTool::windowStateChanged(Qt::WindowStates,
+void PeakPickerTool::windowStateChanged(Qt::WindowStates /*unused*/,
                                         Qt::WindowStates newState) {
   (void)newState;
 }
@@ -330,7 +330,7 @@ void PeakPickerTool::windowStateChanged(Qt::WindowStates,
 void PeakPickerTool::functionCleared() { d_graph->plotWidget()->replot(); }
 
 void PeakPickerTool::draw(QPainter *p, const QwtScaleMap &xMap,
-                          const QwtScaleMap &yMap, const QRect &) const {
+                          const QwtScaleMap &yMap, const QRect & /*canvasRect*/) const {
   try {
     MantidQt::MantidWidgets::PropertyHandler *h =
         m_fitPropertyBrowser->getHandler();

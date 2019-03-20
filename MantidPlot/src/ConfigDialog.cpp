@@ -3153,7 +3153,7 @@ void ConfigDialog::insertLanguagesList() {
   boxLanguage->setCurrentIndex(lang);
 }
 
-void ConfigDialog::showPointsBox(bool) {
+void ConfigDialog::showPointsBox(bool /*unused*/) {
   if (generatePointsBtn->isChecked()) {
     lblPoints->show();
     generatePointsBox->show();

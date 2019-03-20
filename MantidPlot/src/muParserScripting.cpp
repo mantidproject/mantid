@@ -156,7 +156,7 @@ const muParserScripting::mathFunction muParserScripting::math_functions[] = {
      "function computes the one where W<-1 for x<0. (also see w0(x))."},
     {nullptr, 0, nullptr, nullptr, nullptr, nullptr}};
 
-void muParserScripting::setSysArgs(const QStringList &) {
+void muParserScripting::setSysArgs(const QStringList & /*args*/) {
   throw std::runtime_error(
       "muParserScripting does not support command line arguments");
 }

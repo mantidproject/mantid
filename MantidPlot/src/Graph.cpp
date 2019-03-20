@@ -1491,7 +1491,7 @@ void Graph::exportImage(const QString &fileName, int quality,
   pic.save(fileName, nullptr, quality);
 }
 
-void Graph::exportVector(const QString &fileName, int, bool color,
+void Graph::exportVector(const QString &fileName, int /*unused*/, bool color,
                          bool keepAspect, QPrinter::PageSize pageSize) {
   if (fileName.isEmpty()) {
     QMessageBox::critical(this, tr("MantidPlot - Error"),
@@ -3356,7 +3356,7 @@ bool Graph::zoomOn() {
   return (d_zoomer[0]->isEnabled() || d_zoomer[1]->isEnabled());
 }
 
-void Graph::zoomed(const QwtDoubleRect &) {
+void Graph::zoomed(const QwtDoubleRect & /*unused*/) {
   updateSecondaryAxis(QwtPlot::xTop);
   updateSecondaryAxis(QwtPlot::yRight);
   d_plot->replot();
@@ -4876,7 +4876,7 @@ void Graph::setAntialiasing(bool on, bool update) {
   }
 }
 
-bool Graph::focusNextPrevChild(bool) {
+bool Graph::focusNextPrevChild(bool /*next*/) {
   QList<int> mrkKeys = d_plot->markerKeys();
   int n = mrkKeys.size();
   if (n < 2)

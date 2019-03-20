@@ -82,7 +82,7 @@ void DockedWindow::dragMousePress(QPoint pos) {
   }
 }
 
-void DockedWindow::dragMouseRelease(QPoint) {
+void DockedWindow::dragMouseRelease(QPoint /*unused*/) {
   if (m_dragMouseDown) {
     m_dragMouseDown = false;
   }

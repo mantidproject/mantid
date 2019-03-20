@@ -75,7 +75,7 @@ vector(long nl,
 }
 
 void free_vector(double *v, long nl,
-                 long) { // free a double vector allocated with vector()
+                 long /*unused*/) { // free a double vector allocated with vector()
   free((FREE_ARG)(v + nl - NR_END));
 }
 
@@ -87,7 +87,7 @@ size_t *ivector(long nl, long nh) {
   return v - nl + NR_END;
 }
 
-void free_ivector(size_t *v, long nl, long) {
+void free_ivector(size_t *v, long nl, long /*unused*/) {
   free((FREE_ARG)(v + nl - NR_END));
 }
 
@@ -99,7 +99,7 @@ int *intvector(long nl, long nh) {
   return v - nl + NR_END;
 }
 
-void free_intvector(int *v, long nl, long) {
+void free_intvector(int *v, long nl, long /*unused*/) {
   free((FREE_ARG)(v + nl - NR_END));
 }
 

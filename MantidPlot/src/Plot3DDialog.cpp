@@ -677,7 +677,7 @@ void Plot3DDialog::accept() {
     close();
 }
 
-void Plot3DDialog::changeZoom(int) {
+void Plot3DDialog::changeZoom(int /*unused*/) {
   if (generalDialog->currentWidget() != static_cast<QWidget *>(general))
     return;
 

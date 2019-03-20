@@ -1055,7 +1055,7 @@ void MantidUI::showAlgorithmHistory() {
 @param transpose :: Transpose the table
 @return A pointer to the new Table.
 */
-Table *MantidUI::importTableWorkspace(const QString &wsName, bool,
+Table *MantidUI::importTableWorkspace(const QString &wsName, bool /*unused*/,
                                       bool makeVisible, bool transpose) {
   ITableWorkspace_sptr ws;
   if (AnalysisDataService::Instance().doesExist(wsName.toStdString())) {
@@ -2319,7 +2319,7 @@ MultiLayer *MantidUI::plotInstrumentSpectrumList(const QString &wsName,
  * Sets the flag that tells the scripting environment that
  * a script is currently running
  */
-void MantidUI::setIsRunning(bool) {
+void MantidUI::setIsRunning(bool /*unused*/) {
   // deprecated
 }
 

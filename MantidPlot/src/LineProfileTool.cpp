@@ -187,7 +187,7 @@ void LineProfileTool::addLineMarker(const QPoint &start, const QPoint &end) {
   d_graph->replot();
 }
 
-void LineProfileTool::paintEvent(QPaintEvent *) {
+void LineProfileTool::paintEvent(QPaintEvent * /*unused*/) {
   QPainter p(this);
   p.setPen(QPen(Qt::red, 1, Qt::SolidLine));
   p.drawLine(d_op_start, d_op_start + d_op_dp);

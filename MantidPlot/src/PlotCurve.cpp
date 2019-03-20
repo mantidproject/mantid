@@ -1033,7 +1033,7 @@ void DataCurve::moveLabels(const QPoint &pos) {
   d_click_pos_y = d_plot->invTransform(yAxis(), pos.y());
 }
 
-PlotCurve *DataCurve::clone(const Graph *) const {
+PlotCurve *DataCurve::clone(const Graph * /*unused*/) const {
   return new DataCurve(*this);
 }
 
@@ -1042,7 +1042,7 @@ PlotMarker::PlotMarker(int index, double angle)
       d_label_y_offset(0.0) {}
 
 void PlotMarker::draw(QPainter *p, const QwtScaleMap &xMap,
-                      const QwtScaleMap &yMap, const QRect &) const {
+                      const QwtScaleMap &yMap, const QRect & /*unused*/) const {
   p->save();
   int x = xMap.transform(xValue());
   int y = yMap.transform(yValue());

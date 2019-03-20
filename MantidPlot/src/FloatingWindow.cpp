@@ -221,7 +221,7 @@ void FloatingWindow::dragMousePress(QPoint pos) {
   }
 }
 
-void FloatingWindow::dragMouseRelease(QPoint) {
+void FloatingWindow::dragMouseRelease(QPoint /*unused*/) {
   if (m_dragMouseDown) {
     m_dragMouseDown = false;
   }

@@ -180,7 +180,7 @@ public:
 
 protected:
   /// Paint event handler
-  void paintEvent(QPaintEvent *) override {
+  void paintEvent(QPaintEvent * /*unused*/) override {
     QPainter painter(this);
     painter.fillRect(this->rect().adjusted(0, 0, -1, -1), QColor("white"));
     if (m_draw) {
@@ -274,7 +274,7 @@ void TiledWindow::init(int nrows, int ncols) {
  * Save the window info to a string.
  * TODO: not implemented.
  */
-QString TiledWindow::saveToString(const QString &info, bool) {
+QString TiledWindow::saveToString(const QString &info, bool /*unused*/) {
   UNUSED_ARG(info);
   QString s = "<tiled_widget>\n";
   s += "</tiled_widget>\n";
@@ -687,7 +687,7 @@ void TiledWindow::mousePressEvent(QMouseEvent *ev) {
 /**
  * Mouse release event handler.
  */
-void TiledWindow::mouseReleaseEvent(QMouseEvent *) { m_buttonPressed = false; }
+void TiledWindow::mouseReleaseEvent(QMouseEvent * /*unused*/) { m_buttonPressed = false; }
 
 /**
  * Mouse move event handler.
@@ -1123,7 +1123,7 @@ void TiledWindow::dragEnterEvent(QDragEnterEvent *ev) {
 /**
  * The drag leave event handler.
  */
-void TiledWindow::dragLeaveEvent(QDragLeaveEvent *) { clearDrops(); }
+void TiledWindow::dragLeaveEvent(QDragLeaveEvent * /*unused*/) { clearDrops(); }
 
 /**
  * The drag move event handler.

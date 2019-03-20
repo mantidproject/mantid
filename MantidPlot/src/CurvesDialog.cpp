@@ -194,7 +194,7 @@ CurvesDialog::~CurvesDialog() {
   }
 }
 
-void CurvesDialog::showCurveBtn(int) {
+void CurvesDialog::showCurveBtn(int /*unused*/) {
   QwtPlotItem *it = d_graph->plotItem(contents->currentRow());
   if (!it)
     return;

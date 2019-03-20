@@ -898,13 +898,13 @@ void Graph3D::setAxisTickLength(int axis, double majorLength,
   sp->updateGL();
 }
 
-void Graph3D::rotationChanged(double, double, double) { emit modified(); }
+void Graph3D::rotationChanged(double /*unused*/, double /*unused*/, double /*unused*/) { emit modified(); }
 
-void Graph3D::scaleChanged(double, double, double) { emit modified(); }
+void Graph3D::scaleChanged(double /*unused*/, double /*unused*/, double /*unused*/) { emit modified(); }
 
-void Graph3D::shiftChanged(double, double, double) { emit modified(); }
+void Graph3D::shiftChanged(double /*unused*/, double /*unused*/, double /*unused*/) { emit modified(); }
 
-void Graph3D::zoomChanged(double) { emit modified(); }
+void Graph3D::zoomChanged(double /*unused*/) { emit modified(); }
 
 void Graph3D::resetAxesLabels() {
   sp->coordinates()->axes[X1].setLabelString(labels[0]);

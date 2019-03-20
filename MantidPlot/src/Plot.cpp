@@ -54,7 +54,7 @@ Detacher::Detacher(QwtPlotItem *plotItem) : m_plotItem(plotItem) {}
 
 Detacher::~Detacher() { delete m_plotItem; }
 
-Plot::Plot(int width, int height, QWidget *parent, const char *)
+Plot::Plot(int width, int height, QWidget *parent, const char * /*unused*/)
     : QwtPlot(parent) {
   setAutoReplot(false);
 
@@ -150,7 +150,7 @@ void Plot::printFrame(QPainter *painter, const QRect &rect) const {
   painter->restore();
 }
 
-void Plot::printCanvas(QPainter *painter, const QRect &,
+void Plot::printCanvas(QPainter *painter, const QRect & /*boundingRect*/,
                        const QRect &canvasRect, const QwtScaleMap map[axisCnt],
                        const QwtPlotPrintFilter &pfilter) const {
   painter->save();
