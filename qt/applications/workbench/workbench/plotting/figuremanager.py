@@ -23,6 +23,7 @@ import matplotlib
 from matplotlib._pylab_helpers import Gcf
 from matplotlib.backend_bases import FigureManagerBase
 from matplotlib.backends.backend_qt5agg import (FigureCanvasQTAgg)  # noqa
+from matplotlib.axes import Axes
 from qtpy.QtCore import QObject, Qt
 from qtpy.QtWidgets import QApplication, QLabel
 
@@ -82,11 +83,27 @@ class FigureManagerADSObserver(AnalysisDataServiceObserver):
         all_axes = self.canvas.figure.axes
         if not all_axes:
             return
-        empty_axes = False
+
+        # Here we wish to delete any curves linked to the workspace being
+        # deleted and if a figure is now empty, close it. We must avoid closing
+        # any figures that were created via the script window that are not
+        # managed via a workspace.
+        # See https://github.com/mantidproject/mantid/issues/25135.
+        empty_axes = []
         for ax in all_axes:
             if isinstance(ax, MantidAxes):
-                empty_axes = ax.remove_workspace_artists(workspace)
-        if empty_axes:
+                ax.remove_workspace_artists(workspace)
+            # We check for axes type below as a pseudo check for an axes being
+            # a colorbar. Creating a colorfill plot creates 2 axes: one linked
+            # to a workspace, the other a colorbar. Deleting the workspace
+            # deletes the colorfill, but the plot remains open due to the
+            # non-empty colorbar. This solution seems to work for the majority
+            # of cases but could lead to unmanaged figures only containing an
+            # Axes object being closed.
+            if type(ax) is not Axes:
+                empty_axes.append(MantidAxes.is_empty(ax))
+
+        if all(empty_axes):
             self.window.emit_close()
         else:
             self.canvas.draw_idle()
