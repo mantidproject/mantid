@@ -67,7 +67,7 @@ class _WorkspaceArtists(object):
     from a workspace. It allows for removal and replacement of said artists
 
     """
-    def __init__(self, artists, data_replace_cb):
+    def __init__(self, artists, data_replace_cb, ws_name=None, spec_num=None):
         """
         Initialize an instance
         :param artists: A reference to a list of artists "attached" to a workspace
@@ -75,6 +75,8 @@ class _WorkspaceArtists(object):
         """
         self._set_artists(artists)
         self._data_replace_cb = data_replace_cb
+        self.workspace_name = ws_name
+        self.spec_num = spec_num
 
     def remove(self, axes):
         """
@@ -141,7 +143,8 @@ class MantidAxes(Axes):
         self.tracked_workspaces = dict()
         self.creation_args = []
 
-    def track_workspace_artist(self, workspace, artists, data_replace_cb=None):
+    def track_workspace_artist(self, workspace, artists, data_replace_cb=None,
+                               spec_num=None):
         """
         Add the given workspace's name to the list of workspaces
         displayed on this Axes instance
@@ -149,6 +152,8 @@ class MantidAxes(Axes):
         :param artists: A single artist or iterable of artists containing the data for the workspace
         :param data_replace_cb: A function to call when the data is replaced to update
         the artist (optional)
+        :param spec_num: The spectrum number associated with the artist (optional)
+
         :returns: The artists variable as it was passed in.
         """
         name = workspace.name()
@@ -157,7 +162,8 @@ class MantidAxes(Axes):
                 def data_replace_cb(_, __):
                     logger.warning("Updating data on this plot type is not yet supported")
             artist_info = self.tracked_workspaces.setdefault(name, [])
-            artist_info.append(_WorkspaceArtists(artists, data_replace_cb))
+            artist_info.append(_WorkspaceArtists(artists, data_replace_cb,
+                                                 name, spec_num))
 
         return artists
 
@@ -295,7 +301,18 @@ class MantidAxes(Axes):
                 self.autoscale()
                 return artists
 
-            return self.track_workspace_artist(args[0], plotfunctions.plot(self, *args, **kwargs), _data_update)
+            try:
+                spec_num = kwargs['specNum']
+            except KeyError:
+                try:
+                    spec_num = args[0].getSpectrum(
+                        kwargs['wkspIndex']).getSpectrumNo()
+                except KeyError:
+                    spec_num = None
+
+            return self.track_workspace_artist(
+                args[0], plotfunctions.plot(self, *args, **kwargs),
+                _data_update, spec_num)
         else:
             return Axes.plot(self, *args, **kwargs)
 

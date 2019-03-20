@@ -261,8 +261,6 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         if figure_type(self.canvas.figure) != FigureType.Line:
             self._set_fit_enabled(False)
 
-        self._update_workspace_labels()
-
     def destroy(self, *args):
         # check for qApp first, as PySide deletes it in its atexit handler
         if QApplication.instance() is None:
@@ -340,31 +338,15 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         """
         Gcf.figure_visibility_changed(self.num)
 
-    def get_curve_labels(self):
-        """Get curve labels from Matplotlib figure"""
-        return [line.get_label() for line in self.canvas.figure.axes[0].lines]
-
-    def _update_workspace_labels(self):
-        """Check for new curves and update the workspace labels"""
-        curve_labels = self.get_curve_labels()
-        num_new_curves = len(curve_labels) - len(self.workspace_labels)
-        self.workspace_labels += curve_labels[-num_new_curves:]
-        self._update_fit_browser_workspace_labels()
-        can_fit = self.fit_browser.can_fit_spectra(self.workspace_labels)
-        self._set_fit_enabled(can_fit)
-
-    def _update_fit_browser_workspace_labels(self):
-        self.fit_browser.workspace_labels = self.workspace_labels
-
     def _set_fit_enabled(self, on):
         action = self.toolbar._actions['toggle_fit']
         action.setEnabled(on)
         action.setVisible(on)
 
+
 # -----------------------------------------------------------------------------
 # Figure control
 # -----------------------------------------------------------------------------
-
 
 def new_figure_manager(num, *args, **kwargs):
     """
