@@ -18,6 +18,8 @@ public:
     TS_ASSERT(shapeInfo.points().size() == 0);
     TS_ASSERT(shapeInfo.height() == 0);
     TS_ASSERT(shapeInfo.radius() == 0);
+    TS_ASSERT_EQUALS(shapeInfo.innerRadius(), 0);
+    TS_ASSERT_EQUALS(shapeInfo.outerRadius(), 0);
     TS_ASSERT(shapeInfo.shape() == ShapeInfo::GeometryShape::NOSHAPE);
   }
 
@@ -30,6 +32,8 @@ public:
     TS_ASSERT_EQUALS(shapeInfo.shape(), ShapeInfo::GeometryShape::SPHERE);
     TS_ASSERT_EQUALS(shapeInfo.radius(), radius);
     TS_ASSERT_EQUALS(shapeInfo.height(), 0);
+    TS_ASSERT_EQUALS(shapeInfo.innerRadius(), 0);
+    TS_ASSERT_EQUALS(shapeInfo.outerRadius(), 0);
     TS_ASSERT_EQUALS(shapeInfo.points().size(), 1);
     TS_ASSERT_EQUALS(shapeInfo.points()[0], center);
   }
@@ -46,6 +50,8 @@ public:
     TS_ASSERT_EQUALS(shapeInfo.shape(), ShapeInfo::GeometryShape::CUBOID);
     TS_ASSERT_EQUALS(shapeInfo.radius(), 0);
     TS_ASSERT_EQUALS(shapeInfo.height(), 0);
+    TS_ASSERT_EQUALS(shapeInfo.innerRadius(), 0);
+    TS_ASSERT_EQUALS(shapeInfo.outerRadius(), 0);
     TS_ASSERT_EQUALS(shapeInfo.points().size(), 4);
     TS_ASSERT_EQUALS(shapeInfo.points(), (std::vector<V3D>{p1, p2, p3, p4}));
   }
@@ -66,6 +72,8 @@ public:
     TS_ASSERT_EQUALS(shapeInfo.shape(), ShapeInfo::GeometryShape::HEXAHEDRON);
     TS_ASSERT_EQUALS(shapeInfo.radius(), 0);
     TS_ASSERT_EQUALS(shapeInfo.height(), 0);
+    TS_ASSERT_EQUALS(shapeInfo.innerRadius(), 0);
+    TS_ASSERT_EQUALS(shapeInfo.outerRadius(), 0);
     TS_ASSERT_EQUALS(shapeInfo.points().size(), 8);
     TS_ASSERT_EQUALS(shapeInfo.points(),
                      (std::vector<V3D>{p1, p2, p3, p4, p5, p6, p7, p8}));
@@ -102,6 +110,8 @@ public:
 
     TS_ASSERT_EQUALS(shapeInfo.shape(), ShapeInfo::GeometryShape::CONE);
     TS_ASSERT_EQUALS(shapeInfo.radius(), radius);
+    TS_ASSERT_EQUALS(shapeInfo.innerRadius(), 0);
+    TS_ASSERT_EQUALS(shapeInfo.outerRadius(), 0);
     TS_ASSERT_EQUALS(shapeInfo.height(), height);
     TS_ASSERT_EQUALS(shapeInfo.points().size(), 2);
     TS_ASSERT_EQUALS(shapeInfo.points()[0], center);
@@ -119,6 +129,8 @@ public:
     TS_ASSERT_EQUALS(shapeInfo.shape(), ShapeInfo::GeometryShape::CYLINDER);
     TS_ASSERT_EQUALS(shapeInfo.radius(), radius);
     TS_ASSERT_EQUALS(shapeInfo.height(), height);
+    TS_ASSERT_EQUALS(shapeInfo.innerRadius(), 0);
+    TS_ASSERT_EQUALS(shapeInfo.outerRadius(), 0);
     TS_ASSERT_EQUALS(shapeInfo.points().size(), 2);
     TS_ASSERT_EQUALS(shapeInfo.points()[0], center);
     TS_ASSERT_EQUALS(shapeInfo.points()[1], axis);
@@ -143,6 +155,33 @@ public:
     TS_ASSERT_EQUALS(tshape, ShapeInfo::GeometryShape::SPHERE);
   }
 
+  void testGetObjectGeometryForCylinders() {
+    ShapeInfo shapeInfo;
+    V3D centreBottomBase(0, 0, 0);
+    V3D symmetryAxis(0, 1, 1);
+    double innerRadius = 1;
+    double outerRadius = 2;
+    double height = 5;
+    shapeInfo.setHollowCylinder(centreBottomBase, symmetryAxis, innerRadius,
+                                outerRadius, height);
+
+    ShapeInfo::GeometryShape tshape;
+    std::vector<V3D> tpoints;
+    double theight;
+    double tinnerRadius;
+    double touterRadius;
+
+    shapeInfo.getObjectGeometry(tshape, tpoints, tinnerRadius, touterRadius,
+                                theight);
+    TS_ASSERT_EQUALS(tinnerRadius, innerRadius);
+    TS_ASSERT_EQUALS(touterRadius, outerRadius);
+    TS_ASSERT_EQUALS(theight, height);
+    TS_ASSERT(tpoints.size() == 2);
+    TS_ASSERT_EQUALS(tpoints[0], centreBottomBase);
+    TS_ASSERT_EQUALS(tpoints[1], symmetryAxis);
+    TS_ASSERT_EQUALS(tshape, ShapeInfo::GeometryShape::HOLLOWCYLINDER);
+  }
+
   void testCuboidGeometry() {
     ShapeInfo shapeInfo;
     const V3D p1(0, 0, 0);
@@ -152,10 +191,10 @@ public:
 
     shapeInfo.setCuboid(p1, p2, p3, p4);
     const auto geometry = shapeInfo.cuboidGeometry();
-    TS_ASSERT_EQUALS(geometry.leftFrontBottom, p1)
-    TS_ASSERT_EQUALS(geometry.leftFrontTop, p2)
-    TS_ASSERT_EQUALS(geometry.leftBackBottom, p3)
-    TS_ASSERT_EQUALS(geometry.rightFrontBottom, p4)
+    TS_ASSERT_EQUALS(geometry.leftFrontBottom, p1);
+    TS_ASSERT_EQUALS(geometry.leftFrontTop, p2);
+    TS_ASSERT_EQUALS(geometry.leftBackBottom, p3);
+    TS_ASSERT_EQUALS(geometry.rightFrontBottom, p4);
   }
 
   void testHexahedronGeometry() {
@@ -171,14 +210,14 @@ public:
 
     shapeInfo.setHexahedron(p1, p2, p3, p4, p5, p6, p7, p8);
     const auto geometry = shapeInfo.hexahedronGeometry();
-    TS_ASSERT_EQUALS(geometry.leftBackBottom, p1)
-    TS_ASSERT_EQUALS(geometry.leftFrontBottom, p2)
-    TS_ASSERT_EQUALS(geometry.rightFrontBottom, p3)
-    TS_ASSERT_EQUALS(geometry.rightBackBottom, p4)
-    TS_ASSERT_EQUALS(geometry.leftBackTop, p5)
-    TS_ASSERT_EQUALS(geometry.leftFrontTop, p6)
-    TS_ASSERT_EQUALS(geometry.rightFrontTop, p7)
-    TS_ASSERT_EQUALS(geometry.rightBackTop, p8)
+    TS_ASSERT_EQUALS(geometry.leftBackBottom, p1);
+    TS_ASSERT_EQUALS(geometry.leftFrontBottom, p2);
+    TS_ASSERT_EQUALS(geometry.rightFrontBottom, p3);
+    TS_ASSERT_EQUALS(geometry.rightBackBottom, p4);
+    TS_ASSERT_EQUALS(geometry.leftBackTop, p5);
+    TS_ASSERT_EQUALS(geometry.leftFrontTop, p6);
+    TS_ASSERT_EQUALS(geometry.rightFrontTop, p7);
+    TS_ASSERT_EQUALS(geometry.rightBackTop, p8);
   }
 
   void testSphereGeometry() {
@@ -187,8 +226,8 @@ public:
     constexpr double radius = 10;
     shapeInfo.setSphere(center, radius);
     const auto geometry = shapeInfo.sphereGeometry();
-    TS_ASSERT_EQUALS(geometry.centre, center)
-    TS_ASSERT_EQUALS(geometry.radius, radius)
+    TS_ASSERT_EQUALS(geometry.centre, center);
+    TS_ASSERT_EQUALS(geometry.radius, radius);
   }
 
   void testCylinderGeometry() {
@@ -199,10 +238,10 @@ public:
     constexpr double height = 5;
     shapeInfo.setCylinder(center, axis, radius, height);
     const auto geometry = shapeInfo.cylinderGeometry();
-    TS_ASSERT_EQUALS(geometry.centreOfBottomBase, center)
-    TS_ASSERT_EQUALS(geometry.axis, axis)
-    TS_ASSERT_EQUALS(geometry.radius, radius)
-    TS_ASSERT_EQUALS(geometry.height, height)
+    TS_ASSERT_EQUALS(geometry.centreOfBottomBase, center);
+    TS_ASSERT_EQUALS(geometry.axis, axis);
+    TS_ASSERT_EQUALS(geometry.radius, radius);
+    TS_ASSERT_EQUALS(geometry.height, height);
   }
 
   void testHollowCylinderGeometry() {
@@ -216,10 +255,10 @@ public:
                                 outerRadius, height);
     const auto geometry = shapeInfo.hollowCylinderGeometry();
     TS_ASSERT_EQUALS(geometry.centreOfBottomBase, centerOfBottomBase)
-    TS_ASSERT_EQUALS(geometry.axis, symmetryAxis)
-    TS_ASSERT_EQUALS(geometry.innerRadius, innerRadius)
-    TS_ASSERT_EQUALS(geometry.outerRadius, outerRadius)
-    TS_ASSERT_EQUALS(geometry.height, height)
+    TS_ASSERT_EQUALS(geometry.axis, symmetryAxis);
+    TS_ASSERT_EQUALS(geometry.innerRadius, innerRadius);
+    TS_ASSERT_EQUALS(geometry.outerRadius, outerRadius);
+    TS_ASSERT_EQUALS(geometry.height, height);
   }
 
   void testConeGeometry() {
@@ -230,10 +269,10 @@ public:
     constexpr double height = 5;
     shapeInfo.setCone(center, axis, radius, height);
     const auto geometry = shapeInfo.coneGeometry();
-    TS_ASSERT_EQUALS(geometry.centre, center)
-    TS_ASSERT_EQUALS(geometry.axis, axis)
-    TS_ASSERT_EQUALS(geometry.radius, radius)
-    TS_ASSERT_EQUALS(geometry.height, height)
+    TS_ASSERT_EQUALS(geometry.centre, center);
+    TS_ASSERT_EQUALS(geometry.axis, axis);
+    TS_ASSERT_EQUALS(geometry.radius, radius);
+    TS_ASSERT_EQUALS(geometry.height, height);
   }
 
   void testCopyConstructor() {
