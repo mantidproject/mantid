@@ -4,13 +4,12 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-#  This file is part of the mantid workbench.
-
-from mantidqt.widgets.workspacedisplay.status_bar_view import StatusBarView
-from mantidqt.widgets.workspacedisplay.table.presenter import TableWorkspaceDisplay
-from mantidqt.widgets.workspacedisplay.table.io import TableWorkspaceDisplayDecoder, TableWorkspaceDisplayEncoder
+#  This file is part of the mantidqt package.
 from mantidqt.project.decoderfactory import DecoderFactory
 from mantidqt.project.encoderfactory import EncoderFactory
+from mantidqt.widgets.workspacedisplay.status_bar_view import StatusBarView
+from mantidqt.widgets.workspacedisplay.table.io import TableWorkspaceDisplayDecoder, TableWorkspaceDisplayEncoder
+from mantidqt.widgets.workspacedisplay.table.presenter import TableWorkspaceDisplay
 
 
 def compatible_check_for_encoder(obj, _):

@@ -1,10 +1,13 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-import sys
+
 from ErrorReporter.error_report_presenter import ErrorReporterPresenter
-if sys.version_info.major > 2:
-    from unittest import mock
-else:
-    import mock
+from mantid.py3compat import mock
 
 
 class ErrorReportPresenterTest(unittest.TestCase):
@@ -80,8 +83,7 @@ class ErrorReportPresenterTest(unittest.TestCase):
                                                       email, text_box, file_hash)
         self.errorreport_mock_instance.sendErrorReport.assert_called_once_with()
         self.view.display_message_box.assert_called_once_with('Error contacting server',
-                                                              'There was an error when sending the report.'
-                                                              'Please contact mantid-help@mantidproject.org directly',
+                                                              ErrorReporterPresenter.SENDING_ERROR_MESSAGE,
                                                               'http request returned with status 500')
 
     def test_error_handler_share_all_sunny_day_case(self):
@@ -96,7 +98,8 @@ class ErrorReportPresenterTest(unittest.TestCase):
 
         self.error_report_presenter.error_handler(continue_working, share, name, email, text_box)
 
-        self.error_report_presenter._send_report_to_server.called_once_with(share_identifiable=True, name=name, email=email,
+        self.error_report_presenter._send_report_to_server.called_once_with(share_identifiable=True, name=name,
+                                                                            email=email,
                                                                             file_hash=mock.ANY, uptime=mock.ANY,
                                                                             text_box=text_box)
         self.assertEqual(self.error_report_presenter._upload_recovery_file.call_count, 1)

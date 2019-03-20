@@ -530,7 +530,8 @@ def doctest_to_xunit(app, exception):
                               It is simply re-raised if an error occurred
     """
     if exception:
-        raise exception
+        import traceback
+        traceback.print_exc()
     if app.builder.name != "doctest":
         app.debug("Skipping xunit parsing for builder '%s'" % app.builder.name)
         return

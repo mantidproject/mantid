@@ -316,6 +316,12 @@ public:
   double angle(const V3D &) const;
   /// Direction angles
   V3D directionAngles(bool inDegrees = true) const;
+  /// Maximum absolute integer value
+  int maxCoeff();
+  /// Absolute value
+  V3D absoluteValue() const;
+  /// Calculates the error in hkl
+  double hklError() const;
 
   // Make 2 vectors into 3 orthogonal vectors
   static std::vector<V3D>

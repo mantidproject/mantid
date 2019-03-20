@@ -14,6 +14,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCrystal/FindUBUsingIndexedPeaks.h"
+#include "MantidCrystal/LoadIsawPeaks.h"
 #include "MantidCrystal/LoadIsawUB.h"
 #include "MantidDataHandling/LoadNexusProcessed.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
@@ -77,6 +78,64 @@ public:
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(WSName);
+  }
+  void test_mod() {
+    LoadIsawPeaks alg1;
+    TS_ASSERT_THROWS_NOTHING(alg1.initialize())
+    TS_ASSERT(alg1.isInitialized())
+    alg1.setPropertyValue("Filename", "Modulated.peaks");
+    alg1.setPropertyValue("OutputWorkspace", "peaks");
+
+    TS_ASSERT(alg1.execute());
+    TS_ASSERT(alg1.isExecuted());
+
+    PeaksWorkspace_sptr ws;
+    TS_ASSERT_THROWS_NOTHING(
+        ws = boost::dynamic_pointer_cast<PeaksWorkspace>(
+            AnalysisDataService::Instance().retrieve("peaks")));
+    TS_ASSERT(ws);
+    if (!ws)
+      return;
+
+    // Add vector so cross terms will be true for test
+    for (auto &peak : ws->getPeaks()) {
+      const V3D mnp = peak.getIntMNP();
+      V3D mnpNew = mnp;
+      if (std::abs(mnp[0]) == 1)
+        mnpNew[1] = 1;
+      peak.setIntMNP(mnpNew);
+    }
+    FindUBUsingIndexedPeaks alg2;
+    TS_ASSERT_THROWS_NOTHING(alg2.initialize())
+    TS_ASSERT(alg2.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(
+        alg2.setPropertyValue("ToleranceForSatellite", "0.05"));
+    TS_ASSERT_THROWS_NOTHING(alg2.setPropertyValue("PeaksWorkspace", "peaks"));
+    TS_ASSERT_THROWS_NOTHING(alg2.execute(););
+    TS_ASSERT(alg2.isExecuted());
+
+    PeaksWorkspace_sptr Modulated;
+    TS_ASSERT_THROWS_NOTHING(
+        Modulated = boost::dynamic_pointer_cast<PeaksWorkspace>(
+            AnalysisDataService::Instance().retrieve("peaks")));
+    // Check that we set an oriented lattice
+    TS_ASSERT(ws->mutableSample().hasOrientedLattice());
+    // Check that the UB matrix is the same as in TOPAZ_3007.mat
+    OrientedLattice latt = ws->mutableSample().getOrientedLattice();
+
+    V3D correct_err1 = V3D(0.003723, 0.002231, 0.002820);
+    V3D correct_err2 = V3D(0.000796, 0.002043, 0.002671);
+
+    V3D err_calculated1 = latt.getVecErr(0);
+    V3D err_calculated2 = latt.getVecErr(1);
+
+    for (size_t i = 0; i < 3; i++) {
+      TS_ASSERT_DELTA(correct_err1[i], err_calculated1[i], 5e-4);
+      TS_ASSERT_DELTA(correct_err2[i], err_calculated2[i], 5e-4);
+    }
+
+    // Remove workspace from the data service.
+    AnalysisDataService::Instance().remove("peaks");
   }
 };
 

@@ -48,6 +48,12 @@ public:
   int confidence(Kernel::FileDescriptor &descriptor) const override;
 
 private:
+  /// Flag for reading modulated structures
+  bool m_isModulatedStructure;
+  std::vector<double> m_offset1 = {0.0, 0.0, 0.0};
+  std::vector<double> m_offset2 = {0.0, 0.0, 0.0};
+  std::vector<double> m_offset3 = {0.0, 0.0, 0.0};
+
   /// Initialise the properties
   void init() override;
 

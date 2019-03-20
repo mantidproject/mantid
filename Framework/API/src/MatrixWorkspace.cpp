@@ -877,6 +877,12 @@ void MatrixWorkspace::replaceAxis(const std::size_t &axisIndex,
   m_axes[axisIndex] = newAxis;
 }
 
+/**
+ * Return the number of Axis stored by this workspace
+ * @return int
+ */
+size_t MatrixWorkspace::numberOfAxis() const { return m_axes.size(); }
+
 /// Returns the units of the data in the workspace
 std::string MatrixWorkspace::YUnit() const { return m_YUnit; }
 

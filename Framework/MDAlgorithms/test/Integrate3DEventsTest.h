@@ -130,6 +130,127 @@ public:
     }
   }
 
+  void test_satellites() {
+    double inti_all[] = {161, 368.28, 273.28};
+    double sigi_all[] = {12.6885, 21.558, 19.2287};
+
+    double inti_some[] = {150, 241, 186};
+    double sigi_some[] = {12.4900, 20.0749, 17.5499};
+
+    // synthesize three peaks
+
+    V3D peak_1(6, 0, 0);
+    V3D peak_2(0, 5, 0);
+    V3D peak_3(0, 0, 4);
+    std::vector<std::pair<double, V3D>> peak_q_list{
+        {1., peak_1}, {1., peak_2}, {1., peak_3}};
+
+    // synthesize a UB-inverse to map
+    DblMatrix UBinv(3, 3, false); // Q to h,k,l
+    UBinv.setRow(0, V3D(.1, 0, 0));
+    UBinv.setRow(1, V3D(0, .2, 0));
+    UBinv.setRow(2, V3D(0, 0, .25));
+
+    std::vector<V3D> hkl_list{UBinv * peak_1, UBinv * peak_2, UBinv * peak_3};
+
+    // synthesize a ModHKL
+    DblMatrix ModHKL(3, 3, false); // Q to h,k,l
+    ModHKL.setRow(0, V3D(0.4, 0, 0));
+    ModHKL.setRow(1, V3D(0, 0, 0));
+    ModHKL.setRow(2, V3D(0, 0, 0));
+
+    std::vector<V3D> mnp_list{V3D(-1, 0, 0), V3D(0, 0, 0), V3D(0, 0, 0)};
+
+    // synthesize events around the
+    // peaks.  All events with in one
+    // unit of the peak.  755 events
+    // around peak 1, 704 events around
+    // peak 2, and 603 events around
+    // peak 3.
+    std::vector<std::pair<double, V3D>> event_Qs;
+    for (int i = -100; i <= 100; i++) {
+      event_Qs.push_back(
+          std::make_pair(1., V3D(peak_1 + V3D((double)i / 100.0, 0, 0))));
+      event_Qs.push_back(
+          std::make_pair(1., V3D(peak_2 + V3D((double)i / 100.0, 0, 0))));
+      event_Qs.push_back(
+          std::make_pair(1., V3D(peak_3 + V3D((double)i / 100.0, 0, 0))));
+
+      event_Qs.push_back(
+          std::make_pair(1., V3D(peak_1 + V3D(0, (double)i / 200.0, 0))));
+      event_Qs.push_back(
+          std::make_pair(1., V3D(peak_2 + V3D(0, (double)i / 200.0, 0))));
+      event_Qs.push_back(
+          std::make_pair(1., V3D(peak_3 + V3D(0, (double)i / 200.0, 0))));
+
+      event_Qs.push_back(
+          std::make_pair(1., V3D(peak_1 + V3D(0, 0, (double)i / 300.0))));
+      event_Qs.push_back(
+          std::make_pair(1., V3D(peak_2 + V3D(0, 0, (double)i / 300.0))));
+      event_Qs.push_back(
+          std::make_pair(1., V3D(peak_3 + V3D(0, 0, (double)i / 300.0))));
+    }
+
+    for (int i = -50; i <= 50; i++) {
+      event_Qs.push_back(
+          std::make_pair(1., V3D(peak_1 + V3D(0, (double)i / 147.0, 0))));
+      event_Qs.push_back(
+          std::make_pair(1., V3D(peak_2 + V3D(0, (double)i / 147.0, 0))));
+    }
+
+    for (int i = -25; i <= 25; i++) {
+      event_Qs.push_back(
+          std::make_pair(1., V3D(peak_1 + V3D(0, 0, (double)i / 61.0))));
+    }
+
+    double radius = 0.3;
+    double radius_s = 0.1;
+    int maxOrder = 1;
+    bool crossTerm = false;
+    Integrate3DEvents integrator(peak_q_list, hkl_list, mnp_list, UBinv, ModHKL,
+                                 radius, radius_s, maxOrder, crossTerm);
+
+    integrator.addEvents(event_Qs, false);
+
+    // With fixed size ellipsoids, all the
+    // events are counted.
+    bool specify_size = true;
+    double peak_radius = 0.3;
+    double back_inner_radius = 0.3;
+    double back_outer_radius = 0.35;
+    std::vector<double> new_sigma;
+    std::vector<Kernel::V3D> E1Vec;
+    double inti;
+    double sigi;
+    for (size_t i = 0; i < peak_q_list.size(); i++) {
+      V3D hkl = hkl_list[i];
+      V3D mnp = mnp_list[i];
+      auto shape = integrator.ellipseIntegrateModEvents(
+          E1Vec, peak_q_list[i].second, hkl, mnp, specify_size, peak_radius,
+          back_inner_radius, back_outer_radius, new_sigma, inti, sigi);
+      TS_ASSERT_DELTA(inti, inti_all[i], 0.1);
+      TS_ASSERT_DELTA(sigi, sigi_all[i], 0.01);
+
+      auto ellipsoid_shape = boost::dynamic_pointer_cast<
+          const Mantid::DataObjects::PeakShapeEllipsoid>(shape);
+      TSM_ASSERT("Expect to get back an ellipsoid shape", ellipsoid_shape);
+    }
+
+    // The test data is not normally distributed,
+    // so with 3 sigma half-axis sizes, we miss
+    // some counts
+    specify_size = false;
+    for (size_t i = 0; i < peak_q_list.size(); i++) {
+      V3D hkl = hkl_list[i];
+      V3D mnp = mnp_list[i];
+      integrator.ellipseIntegrateModEvents(
+          E1Vec, peak_q_list[i].second, hkl, mnp, specify_size, peak_radius,
+          back_inner_radius, back_outer_radius, new_sigma, inti, sigi);
+      TS_ASSERT_DELTA(inti, inti_some[i], 0.1);
+      TS_ASSERT_DELTA(sigi, sigi_some[i], 0.01);
+    }
+  }
+
   void test_integrateWeakPeakInPerfectCase() {
     /* Check that we can integrate a weak peak using a strong peak in the
      * perfect case when there is absolutely no background

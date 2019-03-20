@@ -6,15 +6,19 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, print_function)
 
-from qtpy import QtCore, QtGui, QtWidgets
-from qtpy.QtCore import Signal
+import qtpy  # noqa
 
-try:
+if qtpy.PYQT5:
     from ErrorReporter import resources_qt5  # noqa
-except (ImportError, RuntimeError):
+elif qtpy.PYQT4:
     from ErrorReporter import resources_qt4  # noqa
+else:
+    raise RuntimeError("Unknown QT version: {}".format(qtpy.QT_VERSION))
 
-from mantidqt.utils.qt import load_ui
+from qtpy import QtCore, QtGui, QtWidgets # noqa: E402
+from qtpy.QtCore import Signal # noqa: E402
+from qtpy.QtWidgets import QMessageBox # noqa: E402
+from mantidqt.utils.qt import load_ui # noqa: E402
 
 ErrorReportUIBase, ErrorReportUI = load_ui(__file__, 'errorreport.ui')
 
@@ -90,18 +94,14 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
             self.nonIDShareButton.setEnabled(False)
 
     def display_message_box(self, title, message, details):
-        msg = QtGui.QMessageBox(self)
-        msg.setIcon(QtGui.QMessageBox.Warning)
-
-        message_length = len(message)
-
-        # This is to ensure that the QMessage box is wide enough to display nicely.
-        msg.setText(10 * ' ' + message + ' ' * (30 - message_length))
+        msg = QMessageBox(self)
+        msg.setIcon(QMessageBox.Warning)
+        msg.setText(message)
         msg.setWindowTitle(title)
         msg.setDetailedText(details)
-        msg.setStandardButtons(QtGui.QMessageBox.Ok)
-        msg.setDefaultButton(QtGui.QMessageBox.Ok)
-        msg.setEscapeButton(QtGui.QMessageBox.Ok)
+        msg.setStandardButtons(QMessageBox.Ok)
+        msg.setDefaultButton(QMessageBox.Ok)
+        msg.setEscapeButton(QMessageBox.Ok)
         msg.exec_()
 
     def set_report_callback(self, callback):

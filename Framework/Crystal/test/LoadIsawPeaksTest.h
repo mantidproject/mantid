@@ -180,6 +180,45 @@ public:
     TS_ASSERT_DELTA(ws->getPeaks()[1].getDSpacing(), 2.3261, 0.001);
     TS_ASSERT_DELTA(ws->getPeaks()[2].getDSpacing(), 2.3329, 0.001);
   }
+  void test_mod() {
+    LoadIsawPeaks alg1;
+    TS_ASSERT_THROWS_NOTHING(alg1.initialize())
+    TS_ASSERT(alg1.isInitialized())
+    alg1.setPropertyValue("Filename", "Modulated.peaks");
+    alg1.setPropertyValue("OutputWorkspace", "peaks");
+
+    TS_ASSERT(alg1.execute());
+    TS_ASSERT(alg1.isExecuted());
+
+    PeaksWorkspace_sptr ws;
+    TS_ASSERT_THROWS_NOTHING(
+        ws = boost::dynamic_pointer_cast<PeaksWorkspace>(
+            AnalysisDataService::Instance().retrieve("peaks")));
+    TS_ASSERT(ws);
+    if (!ws)
+      return;
+    TS_ASSERT_EQUALS(ws->getNumberPeaks(), 18);
+
+    Peak p = ws->getPeaks()[0];
+    TS_ASSERT_EQUALS(p.getRunNumber(), 24281)
+    TS_ASSERT_DELTA(p.getH(), 1, 1e-4);
+    TS_ASSERT_DELTA(p.getK(), -1, 1e-4);
+    TS_ASSERT_DELTA(p.getL(), 2, 1e-4);
+    TS_ASSERT_EQUALS(p.getBankName(), "bank19");
+    TS_ASSERT_DELTA(p.getCol(), 45, 1e-4);
+    TS_ASSERT_DELTA(p.getRow(), 56, 1e-4);
+    TS_ASSERT_DELTA(p.getIntensity(), 0, 0.01);
+    TS_ASSERT_DELTA(p.getSigmaIntensity(), 0, 0.01);
+    TS_ASSERT_DELTA(p.getBinCount(), 4859, 1);
+    TS_ASSERT_DELTA(p.getWavelength(), 2.534970, 0.001);
+    TS_ASSERT_DELTA(p.getL1(), 18.04795, 1e-3);
+    TS_ASSERT_DELTA(p.getL2(), 0.4626, 1e-3);
+    TS_ASSERT_DELTA(p.getTOF(), 11861.32, 0.1); // channel number is about TOF
+
+    TS_ASSERT_DELTA(p.getDSpacing(), 2.9288, 0.001);
+    TS_ASSERT_DELTA(ws->getPeaks()[1].getDSpacing(), 2.4928, 0.001);
+    TS_ASSERT_DELTA(ws->getPeaks()[2].getDSpacing(), 2.9677, 0.001);
+  }
 };
 
 #endif /* MANTID_CRYSTAL_LOADPEAKSFILETEST_H_ */

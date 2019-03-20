@@ -224,6 +224,20 @@ public:
                       m_peaksWS->getNumberPeaks());
 
     do_test_n_peaks(integratedPeaksWS, 3 /*check first 3 peaks*/);
+
+    const auto &peak1 = integratedPeaksWS->getPeak(0);
+    const auto &peak2 = integratedPeaksWS->getPeak(1);
+    const auto &peak3 = integratedPeaksWS->getPeak(2);
+    const auto &peak4 = integratedPeaksWS->getPeak(3);
+    const auto &peak5 = integratedPeaksWS->getPeak(4);
+    const auto &peak6 = integratedPeaksWS->getPeak(5);
+
+    TS_ASSERT_DELTA(peak1.getIntensity(), 1., 1e-6);
+    TS_ASSERT_DELTA(peak2.getIntensity(), 3., 1e-6);
+    TS_ASSERT_DELTA(peak3.getIntensity(), 1., 1e-6);
+    TS_ASSERT_DELTA(peak4.getIntensity(), 14., 1e-6);
+    TS_ASSERT_DELTA(peak5.getIntensity(), 0., 1e-6);
+    TS_ASSERT_DELTA(peak6.getIntensity(), 11., 1e-6);
   }
 
   void test_execution_histograms() {

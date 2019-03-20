@@ -8,6 +8,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 from mantid.py3compat.mock import Mock
+from mantidqt.utils.testing.strict_mock import StrictMock
 
 AXIS_INDEX_FOR_HORIZONTAL = 0
 AXIS_INDEX_FOR_VERTICAL = 1
@@ -72,41 +73,43 @@ class MockWorkspace:
         # This is assigned to a function, as the original implementation is a function that returns
         # the spectrumInfo object
         self.spectrumInfo = self._return_MockSpectrumInfo
-        self.getNumberHistograms = Mock(return_value=1)
-        self.isHistogramData = Mock(return_value=isHistogramData)
-        self.blocksize = Mock(return_value=len(read_return))
-        self.readX = Mock(return_value=read_return)
-        self.readY = Mock(return_value=read_return)
-        self.readE = Mock(return_value=read_return)
-        self.axes = Mock(return_value=axes)
+        self.getNumberHistograms = StrictMock(return_value=1)
+        self.isHistogramData = StrictMock(return_value=isHistogramData)
+        self.blocksize = StrictMock(return_value=len(read_return))
+        self.readX = StrictMock(return_value=read_return)
+        self.readY = StrictMock(return_value=read_return)
+        self.readE = StrictMock(return_value=read_return)
+        self.axes = StrictMock(return_value=axes)
         self.hasMaskedBins = None
         self.maskedBinsIndices = None
-        self.isCommonBins = Mock(return_value=True)
+        self.isCommonBins = StrictMock(return_value=True)
 
         self.column_types = ["int", "float", "string", "v3d", "bool"]
-        self.columnTypes = Mock(return_value=self.column_types)
+        self.columnTypes = StrictMock(return_value=self.column_types)
 
         self.mock_spectrum = MockSpectrum()
-        self.getSpectrum = Mock(return_value=self.mock_spectrum)
+        self.getSpectrum = StrictMock(return_value=self.mock_spectrum)
 
         self.mock_axis = MockMantidAxis()
-        self.getAxis = Mock(return_value=self.mock_axis)
+        self.getAxis = StrictMock(return_value=self.mock_axis)
 
-        self.setCell = Mock()
+        self.setCell = StrictMock()
 
-        self.name = Mock(return_value=self.TEST_NAME)
+        self.name = StrictMock(return_value=self.TEST_NAME)
 
         self._column_names = []
         for i in range(self.COLS):
             self._column_names.append("col{0}".format(i))
 
-        self.getColumnNames = Mock(return_value=self._column_names)
+        self.getColumnNames = StrictMock(return_value=self._column_names)
         self.column_count = self.COLS
-        self.columnCount = Mock(return_value=self.column_count)
+        self.columnCount = StrictMock(return_value=self.column_count)
 
         self.row_count = self.ROWS
-        self.rowCount = Mock(return_value=self.row_count)
+        self.rowCount = StrictMock(return_value=self.row_count)
 
-        self.column = Mock(return_value=[1] * self.row_count)
+        self.column = StrictMock(return_value=[1] * self.row_count)
 
-        self.emit_repaint = Mock()
+        self.emit_repaint = StrictMock()
+
+        self.getPlotType = StrictMock()

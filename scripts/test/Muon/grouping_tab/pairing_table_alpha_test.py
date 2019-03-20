@@ -17,6 +17,11 @@ from Muon.GUI.Common.muon_pair import MuonPair
 from Muon.GUI.Common.muon_data_context import MuonDataContext
 from Muon.GUI.Common import mock_widget
 
+def pair_name():
+    name = []
+    for i in range(21):
+        name.append("pair_" + str(i+1))
+    return name
 
 class AlphaTest(unittest.TestCase):
 
@@ -31,7 +36,10 @@ class AlphaTest(unittest.TestCase):
         self.view = PairingTableView(parent=self.obj)
         self.presenter = PairingTablePresenter(self.view, self.model)
 
+        self.add_three_groups_to_model()
+
         self.view.warning_popup = mock.Mock()
+        self.view.enter_pair_name = mock.Mock(side_effect=pair_name())
 
     def tearDown(self):
         self.obj = None
@@ -148,7 +156,7 @@ class AlphaTest(unittest.TestCase):
 
         self.assertEqual(self.presenter.guessAlphaNotifier.notify_subscribers.call_count, 1)
         self.assertEqual(self.presenter.guessAlphaNotifier.notify_subscribers.call_args_list[0][0][0],
-                         ["pair_2", "", ""])
+                         ["pair_2", "my_group_0", "my_group_1"])
 
 
 if __name__ == '__main__':

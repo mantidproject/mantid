@@ -187,6 +187,16 @@ class IPeakTest(unittest.TestCase):
         self._peak.setDetectorID(det_id)
         self.assertEqual(self._peak.getL2(), expected_l2)
 
+    def test_set_modulation_vector(self):
+        testVector = V3D(0.5,0,0.2)
+        testVectorOut = V3D(1, 0, 0)
+        self._peak.setIntMNP(testVector)
+        self.assertEqual(self._peak.getIntMNP(), testVectorOut)
+
+    def test_set_get_inthkl(self):
+        testVector = V3D(0.5,0,0.2)
+        self._peak.setIntHKL(testVector)
+        self.assertEqual(self._peak.getIntHKL(), V3D(1,0,0))
 
 if __name__ == '__main__':
     unittest.main()

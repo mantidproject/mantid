@@ -527,6 +527,7 @@ Peak *PeaksWorkspace::createPeakHKL(const V3D &HKL) const {
 
   // We need to set HKL separately to keep things consistent.
   peak->setHKL(HKL[0], HKL[1], HKL[2]);
+  peak->setIntHKL(peak->getHKL());
 
   // Set the goniometer
   peak->setGoniometerMatrix(goniometer.getR());

@@ -14,10 +14,6 @@
 
 namespace Mantid {
 
-namespace Kernel {
-class V3D;
-}
-
 namespace Crystal {
 
 /** Save a PeaksWorkspace to a ISAW-style ASCII .peaks file.
@@ -45,6 +41,9 @@ public:
   }
 
 private:
+  /// Flag for writing modulated structures
+  bool m_isModulatedStructure = false;
+
   /// Initialise the properties
   void init() override;
   /// Run the algorithm
@@ -55,6 +54,8 @@ private:
                  double &ysize);
   bool bankMasked(Geometry::IComponent_const_sptr parent,
                   const Geometry::DetectorInfo &detectorInfo);
+  void writeOffsets(std::ofstream &out, double qSign,
+                    std::vector<double> offset);
   Geometry::Instrument_const_sptr inst;
 };
 
