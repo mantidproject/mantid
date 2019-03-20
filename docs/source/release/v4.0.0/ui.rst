@@ -88,6 +88,7 @@ BugFixes
 - Fixed an issue where MantidPlot would crash when renaming workspaces.
 - Fixed issue with filenames containing spaces that are passed to Mantid when launched from the command line.
 - The catalog search error tooltips now display properly on windows.
+- The general fitting interfaces do not display fit functions that are not supposed to be used with those interfaces.
 - Stop MantidPlot from attempting to contour plot/colorfill plot when a workspace has a TextAxis.
 
 MantidWorkbench
