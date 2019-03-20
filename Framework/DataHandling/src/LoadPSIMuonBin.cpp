@@ -324,10 +324,10 @@ void LoadPSIMuonBin::generateUnknownAxis() {
   }
 
   // Create Errors
-  for (auto &m_histogram : m_histograms) {
+  for (auto &histogram : m_histograms) {
     std::vector<double> newEAxis;
     for (auto eIndex = 0u; eIndex < m_histograms[0].size(); ++eIndex) {
-      newEAxis.push_back(sqrt(m_histogram[eIndex]));
+      newEAxis.push_back(sqrt(histogram[eIndex]));
     }
     m_eAxis.push_back(newEAxis);
   }
@@ -527,7 +527,7 @@ void LoadPSIMuonBin::assignOutputWorkspaceParticulars(
   logAlg->executeAsChildAlg();
 
   if (m_header.realT0[0] != 0) {
-    for (float i : m_header.realT0) {
+    for (const float &i : m_header.realT0) {
       if (i == 0)
         break;
       logAlg->setProperty("LogType", "String");

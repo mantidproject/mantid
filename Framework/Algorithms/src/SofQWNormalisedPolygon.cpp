@@ -130,7 +130,7 @@ std::pair<double, double> cylinderTwoThetaRange(
                                       1.75 * M_PI}};
   double minTwoTheta{std::numeric_limits<double>::max()};
   double maxTwoTheta{std::numeric_limits<double>::lowest()};
-  for (double angle : angles) {
+  for (const double &angle : angles) {
     const auto basePoint =
         geometry.centreOfBottomBase +
         (basis1 * std::cos(angle) + basis2 * std::sin(angle)) * geometry.radius;
