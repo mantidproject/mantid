@@ -149,17 +149,24 @@ void readAnalyserFromFile(const std::string &analyser,
 
 Mantid::Geometry::IComponent_const_sptr
 getAnalyser(MatrixWorkspace_sptr workspace) {
-  auto instrument = workspace->getInstrument();
-  auto analysers = instrument->getStringParameter("analyser");
+  auto const instrument = workspace->getInstrument();
+  auto const analysers = instrument->getStringParameter("analyser");
 
   if (analysers.empty())
     throw std::invalid_argument(
         "Could not load instrument resolution from parameter file");
 
-  auto component = instrument->getComponentByName(analysers[0]);
-  auto resolutionParameters = component->getNumberParameter("resolution");
-  if (nullptr == component || resolutionParameters.empty())
+  auto const component = instrument->getComponentByName(analysers[0]);
+  if (component) {
+    if (component->hasParameter("resolution")) {
+      auto const resolutionParameters =
+          component->getNumberParameter("resolution");
+      if (resolutionParameters.empty())
+        readAnalyserFromFile(analysers[0], workspace);
+    }
+  } else {
     readAnalyserFromFile(analysers[0], workspace);
+  }
   return workspace->getInstrument()->getComponentByName(analysers[0]);
 }
 

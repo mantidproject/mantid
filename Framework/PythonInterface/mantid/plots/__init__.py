@@ -91,7 +91,7 @@ class _WorkspaceArtists(object):
                 except ValueError:
                     pass
 
-        if (not axes.is_empty()) and axes.legend_ is not None:
+        if (not axes.is_empty(axes)) and axes.legend_ is not None:
             axes.legend()
 
     def replace_data(self, workspace):
@@ -176,7 +176,7 @@ class MantidAxes(Axes):
 
         for workspace_artist in artist_info:
             workspace_artist.remove(self)
-        return self.is_empty()
+        return self.is_empty(self)
 
     def replace_workspace_artists(self, workspace):
         """
@@ -194,15 +194,16 @@ class MantidAxes(Axes):
             workspace_artist.replace_data(workspace)
         return True
 
-    def is_empty(self):
+    @staticmethod
+    def is_empty(axes):
         """
         Checks the known artist containers to see if anything exists within them
         :return: True if no artists exist, false otherwise
         """
         def _empty(container):
             return len(container) == 0
-        return _empty(self.lines) and _empty(self.images) and _empty(self.collections)\
-               and _empty(self.containers)
+        return (_empty(axes.lines) and _empty(axes.images) and
+                _empty(axes.collections) and _empty(axes.containers))
 
     def twinx(self):
         """
@@ -262,7 +263,6 @@ class MantidAxes(Axes):
         ax2.yaxis.set_visible(False)
         ax2.patch.set_visible(False)
         return ax2
-    
 
     @plot_decorator
     def plot(self, *args, **kwargs):
@@ -367,7 +367,7 @@ class MantidAxes(Axes):
                 # update line properties to match original
                 orig_flat, new_flat = cbook.flatten(container_orig), cbook.flatten(container_new)
                 for artist_orig, artist_new in zip(orig_flat, new_flat):
-                     artist_new.update_from(artist_orig)
+                    artist_new.update_from(artist_orig)
                 # ax.relim does not support collections...
                 self._update_line_limits(container_new[0])
                 self.autoscale()

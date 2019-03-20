@@ -167,7 +167,7 @@ def errorbar(axes, workspace, *args, **kwargs):
     dimension
     """
     x, y, dy, dx, kwargs = _get_data_for_plot(axes, workspace, kwargs,
-                                              with_dy=True, with_dx=True)
+                                              with_dy=True, with_dx=False)
     _setLabels1D(axes, workspace)
     return axes.errorbar(x, y, dy, dx, *args, **kwargs)
 

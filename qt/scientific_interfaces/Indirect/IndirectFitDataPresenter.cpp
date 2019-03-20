@@ -147,7 +147,8 @@ IndirectFitDataPresenter::validate(UserInputValidator &validator) {
 }
 
 void IndirectFitDataPresenter::showAddWorkspaceDialog() {
-  m_addWorkspaceDialog = getAddWorkspaceDialog(m_view->parentWidget());
+  if (!m_addWorkspaceDialog)
+    m_addWorkspaceDialog = getAddWorkspaceDialog(m_view->parentWidget());
   m_addWorkspaceDialog->setWSSuffices(m_view->getSampleWSSuffices());
   m_addWorkspaceDialog->setFBSuffices(m_view->getSampleFBSuffices());
   m_addWorkspaceDialog->show();

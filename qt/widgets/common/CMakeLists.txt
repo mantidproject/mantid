@@ -68,6 +68,13 @@ set ( QT5_SRC_FILES
   src/WorkspacePresenter/WorkspaceTreeWidgetSimple.cpp
   src/WorkspaceSelector.cpp
 
+  src/AlgorithmProgress/AlgorithmProgressDialogPresenter.cpp
+  src/AlgorithmProgress/AlgorithmProgressDialogWidget.cpp
+  src/AlgorithmProgress/AlgorithmProgressModel.cpp
+  src/AlgorithmProgress/AlgorithmProgressPresenter.cpp
+  src/AlgorithmProgress/AlgorithmProgressPresenterBase.cpp
+  src/AlgorithmProgress/AlgorithmProgressWidget.cpp
+
   src/Batch/RowLocation.cpp
   src/Batch/RowLocationAdapter.cpp
   src/Batch/RowPredicate.cpp
@@ -102,7 +109,7 @@ set ( QT5_SRC_FILES
   src/QtPropertyBrowser/StringEditorFactory.cpp
   src/QtPropertyBrowser/WorkspaceEditorFactory.cpp
 )
-  
+
 set ( QT5_MOC_FILES
   inc/MantidQtWidgets/Common/AlgorithmDialog.h
   inc/MantidQtWidgets/Common/AlgorithmHistoryWindow.h
@@ -156,9 +163,15 @@ set ( QT5_MOC_FILES
   inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidgetSimple.h
   inc/MantidQtWidgets/Common/WorkspaceSelector.h
 
+  inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressDialogPresenter.h
+  inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressDialogWidget.h
+  inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressPresenter.h
+  inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressPresenterBase.h
+  inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressWidget.h
+
   inc/MantidQtWidgets/Common/Batch/JobTreeView.h
   inc/MantidQtWidgets/Common/Batch/JobTreeViewSignalAdapter.h
-  
+
   inc/MantidQtWidgets/Common/QtPropertyBrowser/ButtonEditorFactory.h
   inc/MantidQtWidgets/Common/QtPropertyBrowser/DoubleDialogEditor.h
   inc/MantidQtWidgets/Common/QtPropertyBrowser/DoubleEditorFactory.h
@@ -220,6 +233,8 @@ set ( QT5_INC_FILES
   inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspacePresenter.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceProvider.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceProviderNotifiable.h
+
+  inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressModel.h
 )
 
 set ( QT5_UI_FILES

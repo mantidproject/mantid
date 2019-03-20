@@ -98,7 +98,7 @@ class FFTView(QtGui.QWidget):
             ("Advanced Property;Value").split(";"))
 
         table_utils.setRowName(self.FFTTableA, 0, "Apodization Function")
-        options = ["None", "Lorentz", "Gaussian"]
+        options = ["Lorentz", "Gaussian", "None"]
         self.apodization = table_utils.addComboToTable(
             self.FFTTableA, 0, options)
 
@@ -106,7 +106,7 @@ class FFTView(QtGui.QWidget):
             self.FFTTableA,
             1,
             "Decay Constant (micro seconds)")
-        self.decay = table_utils.addDoubleToTable(self.FFTTableA, 1.4, 1)
+        self.decay = table_utils.addDoubleToTable(self.FFTTableA, 4.4, 1)
 
         table_utils.setRowName(self.FFTTableA, 2, "Negative Padding")
         self.negativePadding = table_utils.addCheckBoxToTable(

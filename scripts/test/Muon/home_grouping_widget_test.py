@@ -51,8 +51,6 @@ class HomeTabGroupingPresenterTest(unittest.TestCase):
         self.context.update_current_data()
         test_pair = MuonPair('test_pair', 'top', 'bottom', alpha=0.75)
         self.context.add_pair(pair=test_pair)
-        self.context.show_all_groups()
-        self.context.show_all_pairs()
         self.presenter.update_group_pair_list()
 
     def tearDown(self):

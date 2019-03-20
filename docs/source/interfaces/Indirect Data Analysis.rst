@@ -178,8 +178,8 @@ Plot Guess
 Fit Spectra
   Choose a range or discontinuous list of spectra to be fitted.
 
-Mask Energies
-  Energy ranges may be excluded from a fit by selecting a spectrum next to the ‘Mask Energies of Spectrum’ label 
+Mask X Range
+  Energy ranges may be excluded from a fit by selecting a spectrum next to the ‘Mask X Range of Spectrum’ label
   and then providing a comma-separated list of pairs, where each pair designates a range to exclude from the fit.
 
 Run
@@ -189,7 +189,7 @@ Plot
   Plots the selected parameter stored in the result workspace.
 
 Save Result
-  Saves the result workspace in the default save directory.
+  Saves the workspaces from the *_Results* group workspace in the default save directory.
 
 .. seealso:: Common options are detailed in the :ref:`qens-fitting-features` section.
 
@@ -329,8 +329,8 @@ Plot Guess
 Fit Spectra
   Choose a range or discontinuous list of spectra to be fitted.
 
-Mask Energies
-  Energy ranges may be excluded from a fit by selecting a spectrum next to the ‘Mask Energies of Spectrum’ label 
+Mask X Range
+  Energy ranges may be excluded from a fit by selecting a spectrum next to the ‘Mask X Range of Spectrum’ label
   and then providing a comma-separated list of pairs, where each pair designates a range to exclude from the fit.
 
 Run
@@ -344,7 +344,7 @@ Edit Result
   algorithm. See below for more detail.
 
 Save Result
-  Saves the result workspace in the default save directory.
+  Saves the workspaces from the *_Results* group workspace in the default save directory.
 
 .. seealso:: Common options are detailed in the :ref:`qens-fitting-features` section.
 
@@ -432,8 +432,8 @@ Plot Guess
 Fit Spectra
   Choose a range or discontinuous list of spectra to be fitted.
 
-Mask Energies
-  Energy ranges may be excluded from a fit by selecting a spectrum next to the ‘Mask Energies of Spectrum’ label 
+Mask X Range
+  Energy ranges may be excluded from a fit by selecting a spectrum next to the ‘Mask X Range of Spectrum’ label
   and then providing a comma-separated list of pairs, where each pair designates a range to exclude from the fit.
 
 Run
@@ -447,7 +447,7 @@ Edit Result
   algorithm. See below for more detail.
 
 Save Result
-  Saves the result workspace in the default save directory.
+  Saves the workspaces from the *_Results* group workspace in the default save directory.
 
 Theory
 ~~~~~~
@@ -516,8 +516,8 @@ Plot Guess
 Fit Spectra
   Choose a range or discontinuous list of spectra to be fitted.
 
-Mask Energies
-  Energy ranges may be excluded from a fit by selecting a spectrum next to the ‘Mask Energies of Spectrum’ label 
+Mask X Range
+  Energy ranges may be excluded from a fit by selecting a spectrum next to the ‘Mask X Range of Spectrum’ label
   and then providing a comma-separated list of pairs, where each pair designates a range to exclude from the fit.
 
 Run
@@ -527,7 +527,7 @@ Plot
   Plots the selected parameter stored in the result workspace.
 
 Save Result
-  Saves the result workspace in the default save directory.
+  Saves the workspaces from the *_Results* group workspace in the default save directory.
   
 .. seealso:: Common options are detailed in the :ref:`qens-fitting-features` section.
 

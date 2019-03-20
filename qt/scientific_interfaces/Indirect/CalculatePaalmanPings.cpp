@@ -305,6 +305,7 @@ bool CalculatePaalmanPings::doValidation(bool silent) {
 void CalculatePaalmanPings::absCorComplete(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
              SLOT(absCorComplete(bool)));
+  setRunIsRunning(false);
 
   if (!error) {
     // Convert the spectrum axis of correction factors to Q
@@ -345,9 +346,12 @@ void CalculatePaalmanPings::absCorComplete(bool error) {
     connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
             SLOT(postProcessComplete(bool)));
     m_batchAlgoRunner->executeBatchAsync();
-  } else
+  } else {
+    setPlotResultEnabled(false);
+    setSaveResultEnabled(false);
     emit showMessageBox("Absorption correction calculation failed.\nSee "
                         "Results Log for more details.");
+  }
 }
 
 /**

@@ -27,7 +27,12 @@ public:
            "in Muon data.";
   }
   const std::vector<std::string> seeAlso() const override {
-    return {"MuonProcess", "Minus", "Plus"};
+    return {"MuonProcess",
+            "Minus",
+            "Plus",
+            "MuonGroupingAsymmetry",
+            "MuonPairingAsymmetry",
+            "MuonPreProcess"};
   }
 
   /// Perform validation of inputs to the algorithm

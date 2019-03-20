@@ -25,6 +25,7 @@
    api/index
    plotting/index
    release/index
+   workbench/index
 
 
 ======
@@ -55,6 +56,7 @@ This is the documentation for Mantid |release|.
     
 **Reference Documentation:**
   * :ref:`Algorithms List`, specific details for all of our algorithms including descriptions of all inputs and parameters .
+  * :ref:`workbench`, details on what's on Mantid Workbench and how to use some of the features.
   * :ref:`concepts contents`, deeper background information on the fundamental concepts within Mantid.
   * :ref:`interfaces contents`, descriptions of the bespoke technique interfaces available.
   * :ref:`fitting contents`, details of all the supported fitting functions and minimization approaches.
