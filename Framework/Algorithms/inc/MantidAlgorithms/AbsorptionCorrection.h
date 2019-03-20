@@ -119,10 +119,10 @@ private:
   void constructSample(API::Sample &sample);
   void calculateDistances(const Geometry::IDetector &detector,
                           std::vector<double> &L2s) const;
-  inline double doIntegration(const double &linearCoefAbs,
+  inline double doIntegration(const double linearCoefAbs,
                               const std::vector<double> &L2s) const;
-  inline double doIntegration(const double &linearCoefAbsL1,
-                              const double &linearCoefAbsL2,
+  inline double doIntegration(const double linearCoefAbsL1,
+                              const double linearCoefAbsL2,
                               const std::vector<double> &L2s) const;
 
   Kernel::Material m_material;

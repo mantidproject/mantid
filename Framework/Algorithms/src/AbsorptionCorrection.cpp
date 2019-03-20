@@ -155,13 +155,6 @@ void AbsorptionCorrection::exec() {
         "Failed to define any initial scattering gauge volume for geometry");
   }
 
-  // NOTE: the angstrom^-2 to barns and the angstrom^-1 to cm^-1
-  // will cancel for mu to give units: cm^-1
-  double linearCoefAbsScattByWavelength =
-      -100. * m_material.numberDensity() *
-      m_material.absorbXSection(NeutronAtom::ReferenceLambda) /
-      NeutronAtom::ReferenceLambda;
-
   const auto &spectrumInfo = m_inputWS->spectrumInfo();
   Progress prog(this, 0.0, 1.0, numHists);
   // Loop over the spectra
@@ -194,23 +187,23 @@ void AbsorptionCorrection::exec() {
     }
 
     // calculate the absorption coefficient for fixed wavelength
-    double linearCoefAbsFixed = linearCoefAbsScattByWavelength * lambdaFixed;
-
-    const auto lambdas = m_inputWS->points(i);
-    // TODO convert wavelengths to absorption cross sections
+    const double linearCoefAbsFixed = -m_material.linearAbsorpCoef(lambdaFixed);
+    const auto wavelengths = m_inputWS->points(i);
+    // these need to have the minus sign applied still
+    const auto linearCoefAbs =
+        m_material.linearAbsorpCoef(wavelengths.cbegin(), wavelengths.cend());
 
     // Get a reference to the Y's in the output WS for storing the factors
     auto &Y = correctionFactors->mutableY(i);
 
     // Loop through the bins in the current spectrum every m_xStep
     for (int64_t j = 0; j < specSize; j = j + m_xStep) {
-      const double linearCoefAbs = linearCoefAbsScattByWavelength * lambdas[j];
       if (m_emode == 0) { // Elastic
-        Y[j] = this->doIntegration(linearCoefAbs, L2s);
+        Y[j] = this->doIntegration(-linearCoefAbs[j], L2s);
       } else if (m_emode == 1) { // Direct
-        Y[j] = this->doIntegration(linearCoefAbsFixed, linearCoefAbs, L2s);
+        Y[j] = this->doIntegration(linearCoefAbsFixed, -linearCoefAbs[j], L2s);
       } else if (m_emode == 2) { // Indirect
-        Y[j] = this->doIntegration(linearCoefAbs, linearCoefAbsFixed, L2s);
+        Y[j] = this->doIntegration(-linearCoefAbs[j], linearCoefAbsFixed, L2s);
       }
       Y[j] /= m_sampleVolume; // Divide by total volume of the cylinder
 
@@ -391,15 +384,13 @@ void AbsorptionCorrection::calculateDistances(const IDetector &detector,
 /// Carries out the numerical integration over the sample for elastic
 /// instruments
 double
-AbsorptionCorrection::doIntegration(const double &linearCoefAbs,
+AbsorptionCorrection::doIntegration(const double linearCoefAbs,
                                     const std::vector<double> &L2s) const {
   double integral = 0.0;
 
   size_t el = L2s.size();
   // Iterate over all the elements, summing up the integral
   for (size_t i = 0; i < el; ++i) {
-    // Equation is exponent * element volume
-    // where exponent is e^(-mu * wavelength/1.8 * (L1+L2) )
     const double exponent =
         (linearCoefAbs + m_linearCoefTotScatt) * (m_L1s[i] + L2s[i]);
     integral += (EXPONENTIAL(exponent) * (m_elementVolumes[i]));
@@ -411,16 +402,14 @@ AbsorptionCorrection::doIntegration(const double &linearCoefAbs,
 /// Carries out the numerical integration over the sample for inelastic
 /// instruments
 double
-AbsorptionCorrection::doIntegration(const double &linearCoefAbsL1,
-                                    const double &linearCoefAbsL2,
+AbsorptionCorrection::doIntegration(const double linearCoefAbsL1,
+                                    const double linearCoefAbsL2,
                                     const std::vector<double> &L2s) const {
   double integral = 0.0;
 
   size_t el = L2s.size();
   // Iterate over all the elements, summing up the integral
   for (size_t i = 0; i < el; ++i) {
-    // Equation is exponent * element volume
-    // where exponent is e^(-mu * wavelength/1.8 * (L1+L2) )
     double exponent = (linearCoefAbsL1 + m_linearCoefTotScatt) * m_L1s[i];
     exponent += (linearCoefAbsL2 + m_linearCoefTotScatt) * L2s[i];
     integral += (EXPONENTIAL(exponent) * (m_elementVolumes[i]));
