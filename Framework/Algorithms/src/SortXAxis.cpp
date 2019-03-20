@@ -60,7 +60,7 @@ void SortXAxis::exec() {
 
   MatrixWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");
   MatrixWorkspace_sptr outputWorkspace = inputWorkspace->clone();
-  bool ignoreHistogramValidation = getProperty("IgnoreHistogramValidation");
+  const bool ignoreHistogramValidation = getProperty("IgnoreHistogramValidation");
 
   // Check if it is a valid histogram here
   bool isAProperHistogram;
