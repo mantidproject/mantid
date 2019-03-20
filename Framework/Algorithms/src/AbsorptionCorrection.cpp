@@ -38,9 +38,8 @@ using namespace Mantid::DataObjects;
 AbsorptionCorrection::AbsorptionCorrection()
     : API::Algorithm(), m_inputWS(), m_sampleObject(nullptr), m_L1s(),
       m_elementVolumes(), m_elementPositions(), m_numVolumeElements(0),
-      m_sampleVolume(0.0), m_refAtten(0.0), m_linearCoefTotScatt(0),
-      m_num_lambda(0), m_xStep(0), m_emode(0), m_lambdaFixed(0.),
-      EXPONENTIAL() {}
+      m_sampleVolume(0.0), m_linearCoefTotScatt(0), m_num_lambda(0), m_xStep(0),
+      m_emode(0), m_lambdaFixed(0.), EXPONENTIAL() {}
 
 void AbsorptionCorrection::init() {
 
@@ -145,6 +144,13 @@ void AbsorptionCorrection::exec() {
         "Failed to define any initial scattering gauge volume for geometry");
   }
 
+  // NOTE: the angstrom^-2 to barns and the angstrom^-1 to cm^-1
+  // will cancel for mu to give units: cm^-1
+  double linearCoefAbsScattByWavelength =
+      -100. * m_material.numberDensity() *
+      m_material.absorbXSection(NeutronAtom::ReferenceLambda) /
+      NeutronAtom::ReferenceLambda;
+
   const auto &spectrumInfo = m_inputWS->spectrumInfo();
   Progress prog(this, 0.0, 1.0, numHists);
   // Loop over the spectra
@@ -181,15 +187,17 @@ void AbsorptionCorrection::exec() {
     }
 
     // calculate the absorption coefficient for fixed wavelength
-    double linearCoefAbsFixed = m_refAtten * lambdaFixed;
+    double linearCoefAbsFixed = linearCoefAbsScattByWavelength * lambdaFixed;
 
     const auto lambdas = m_inputWS->points(i);
+    // TODO convert wavelengths to absorption cross sections
+
     // Get a reference to the Y's in the output WS for storing the factors
     auto &Y = correctionFactors->mutableY(i);
 
     // Loop through the bins in the current spectrum every m_xStep
     for (int64_t j = 0; j < specSize; j = j + m_xStep) {
-      const double linearCoefAbs = m_refAtten * lambdas[j];
+      const double linearCoefAbs = linearCoefAbsScattByWavelength * lambdas[j];
       if (m_emode == 0) // Elastic
       {
         Y[j] = this->doIntegration(linearCoefAbs, L2s);
@@ -264,14 +272,11 @@ void AbsorptionCorrection::retrieveBaseProperties() {
     m_material = m_inputWS->sample().getShape().material();
   }
 
-  rho = m_material.numberDensity() * 100; // Will give right units in going from
-              // mu in cm^-1 to m^-1 for mu*total flight path( in m )
 
   // NOTE: the angstrom^-2 to barns and the angstrom^-1 to cm^-1
   // will cancel for mu to give units: cm^-1
-  m_refAtten = -m_material.absorbXSection(NeutronAtom::ReferenceLambda) * rho /
-               NeutronAtom::ReferenceLambda;
-  m_linearCoefTotScatt = -m_material.totalScatterXSection() * rho;
+  m_linearCoefTotScatt =
+      -m_material.totalScatterXSection() * m_material.numberDensity() * 100;
 
   m_num_lambda = getProperty("NumberOfWavelengthPoints");
 

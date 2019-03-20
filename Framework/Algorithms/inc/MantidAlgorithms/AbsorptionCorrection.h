@@ -126,7 +126,6 @@ private:
                               const std::vector<double> &L2s) const;
 
   Kernel::Material m_material;
-  double m_refAtten;   ///< The attenuation cross-section in 1/m at 1.8A
   double m_linearCoefTotScatt; ///< The total scattering cross-section in 1/m
   int64_t m_num_lambda; ///< The number of points in wavelength, the rest is
   /// interpolated linearly
