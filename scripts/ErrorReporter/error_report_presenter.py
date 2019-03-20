@@ -17,11 +17,11 @@ from mantid.kernel import ConfigService, ErrorReporter, Logger, UsageService
 class ErrorReporterPresenter(object):
     SENDING_ERROR_MESSAGE = 'There was an error when sending the report.\nPlease contact mantid-help@mantidproject.org directly'
 
-    def __init__(self, view, exit_code, executable_name='mantidplot'):
+    def __init__(self, view, exit_code, application='mantidplot'):
         self.error_log = Logger("error")
         self._view = view
         self._exit_code = exit_code
-        self._executable_name = executable_name
+        self._application = application
         self._view.set_report_callback(self.error_handler)
 
     def do_not_share(self, continue_working=True):
@@ -102,7 +102,7 @@ class ErrorReporterPresenter(object):
 
     def _send_report_to_server(self, share_identifiable=False, name='', email='', file_hash='', uptime='', text_box=''):
         errorReporter = ErrorReporter(
-            self._executable_name, uptime, self._exit_code, share_identifiable, str(name), str(email), str(text_box),
+            self._application, uptime, self._exit_code, share_identifiable, str(name), str(email), str(text_box),
             str(file_hash))
         status = errorReporter.sendErrorReport()
 

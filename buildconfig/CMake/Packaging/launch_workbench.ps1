@@ -49,5 +49,5 @@ $p = Start-Process -NoNewWindow -PassThru -FilePath "$scriptRootDirectory/$pytho
 $handle = $p.Handle
 $p.WaitForExit();
 if ($p.ExitCode -ne 0) {
-  Start-Process -NoNewWindow -FilePath "$scriptRootDirectory/$python_executable" "$scriptRootDirectory/../scripts/ErrorReporter/error_dialog_app.py --exitcode=${process.ExitCode} --directory=$scriptRootDirectory"
+  Start-Process -NoNewWindow -FilePath "$scriptRootDirectory/$python_executable" "$scriptRootDirectory/../scripts/ErrorReporter/error_dialog_app.py --exitcode=${process.ExitCode} --directory=$scriptRootDirectory --application=workbench"
 }
