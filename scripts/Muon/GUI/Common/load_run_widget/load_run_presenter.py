@@ -251,8 +251,9 @@ class LoadRunWidgetPresenter(object):
             self._view.notify_loading_finished()
         except IndexError as error:
             self._view.warning_popup(error)
-        self.enable_loading()
-        self.enable_notifier.notify_subscribers()
+        finally:
+            self.enable_loading()
+            self.enable_notifier.notify_subscribers()
 
     class DisableEditingNotifier(Observable):
 
