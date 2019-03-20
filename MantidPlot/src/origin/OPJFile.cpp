@@ -152,20 +152,20 @@ int OPJFile::compareFunctionnames(const char *sname) const {
 
 vector<string> OPJFile::findDataByIndex(int index) const {
   vector<string> str;
-  for (const auto & spread : SPREADSHEET)
+  for (const auto &spread : SPREADSHEET)
     for (unsigned int i = 0; i < spread.column.size(); i++)
       if (spread.column[i].index == index) {
         str.push_back(spread.column[i].name);
         str.emplace_back("T_" + spread.name);
         return str;
       }
-  for (const auto & i : MATRIX)
+  for (const auto &i : MATRIX)
     if (i.index == index) {
       str.push_back(i.name);
       str.emplace_back("M_" + i.name);
       return str;
     }
-  for (const auto & i : EXCEL)
+  for (const auto &i : EXCEL)
     for (unsigned int j = 0; j < i.sheet.size(); j++)
       for (unsigned int k = 0; k < i.sheet[j].column.size(); k++)
         if (i.sheet[j].column[k].index == index) {
@@ -173,7 +173,7 @@ vector<string> OPJFile::findDataByIndex(int index) const {
           str.emplace_back("E_" + i.name);
           return str;
         }
-  for (const auto & i : FUNCTION)
+  for (const auto &i : FUNCTION)
     if (i.index == index) {
       str.push_back(i.name);
       str.emplace_back("F_" + i.name);
@@ -183,22 +183,22 @@ vector<string> OPJFile::findDataByIndex(int index) const {
 }
 
 string OPJFile::findObjectByIndex(int index) {
-  for (auto & i : SPREADSHEET)
+  for (auto &i : SPREADSHEET)
     if (i.objectID == index) {
       return i.name;
     }
 
-  for (auto & i : MATRIX)
+  for (auto &i : MATRIX)
     if (i.objectID == index) {
       return i.name;
     }
 
-  for (auto & i : EXCEL)
+  for (auto &i : EXCEL)
     if (i.objectID == index) {
       return i.name;
     }
 
-  for (auto & i : GRAPH)
+  for (auto &i : GRAPH)
     if (i.objectID == index) {
       return i.name;
     }

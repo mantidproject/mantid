@@ -120,7 +120,7 @@ QString FitParameterTie::exprRHS() const {
  *   from i (inclusive) must be incremented.
  */
 void FitParameterTie::functionInserted(int i) {
-  for (int & m_iFunction : m_iFunctions) {
+  for (int &m_iFunction : m_iFunctions) {
     if (m_iFunction >= i) {
       m_iFunction++;
     }
@@ -136,7 +136,7 @@ void FitParameterTie::functionInserted(int i) {
  * @return true if the tie remains valid and false otherwise.
  */
 bool FitParameterTie::functionDeleted(int i) {
-  for (int & m_iFunction : m_iFunctions) {
+  for (int &m_iFunction : m_iFunctions) {
     if (m_iFunction == i) {
       return false;
     }

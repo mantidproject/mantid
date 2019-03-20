@@ -439,7 +439,7 @@ class OPJFile {
 public:
   OPJFile(const char *filename);
   ~OPJFile() {
-    for (auto & g : GRAPH)
+    for (auto &g : GRAPH)
       for (unsigned int l = 0; l < g.layer.size(); ++l)
         for (unsigned int b = 0; b < g.layer[l].bitmaps.size(); ++b)
           if (g.layer[l].bitmaps[b].size > 0)

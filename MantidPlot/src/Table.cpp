@@ -3150,7 +3150,7 @@ Table::loadFromProject(const std::string &lines, ApplicationWindow *app,
     tsv >> dataStr;
     QStringList dataLines = dataStr.split("\n");
 
-    for (auto & dataLine : dataLines) {
+    for (auto &dataLine : dataLines) {
       QStringList fields = dataLine.split("\t");
       int row = fields[0].toInt();
       for (int col = 0; col < table->numCols(); ++col) {

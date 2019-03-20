@@ -413,7 +413,7 @@ std::string TableStatistics::saveToProject(ApplicationWindow *app) {
   tsv << birthDate();
 
   tsv.writeLine("Targets");
-  for (int & d_target : d_targets)
+  for (int &d_target : d_targets)
     tsv << d_target;
 
   tsv.writeRaw(app->windowGeometryInfo(this));

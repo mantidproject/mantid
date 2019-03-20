@@ -129,7 +129,7 @@ QList<QColor> ColorBox::colorList() {
   //    for (int i = 0; i < lst.size(); i++)
   //      indexedColors << QColor(lst[i]);
   //  } else {
-  for (const auto & color : colors)
+  for (const auto &color : colors)
     indexedColors << color;
   //  }
   //  settings.endGroup();
@@ -181,7 +181,7 @@ QStringList ColorBox::defaultColorNames() {
 
 QList<QColor> ColorBox::defaultColors() {
   QList<QColor> lst;
-  for (const auto & color : colors)
+  for (const auto &color : colors)
     lst << color;
 
   return lst;

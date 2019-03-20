@@ -659,7 +659,7 @@ QString ProjectSerialiser::saveWorkspaces() {
       wsNames += "\t";
       wsNames += wsName;
       std::vector<std::string> secondLevelItems = group->getNames();
-      for (const auto & secondLevelItem : secondLevelItems) {
+      for (const auto &secondLevelItem : secondLevelItems) {
 
         // check whether the user wants to save this workspace
         if (!m_saveAll && !contains(m_workspaceNames, secondLevelItem))
@@ -672,8 +672,7 @@ QString ProjectSerialiser::saveWorkspaces() {
         if (!m_projectRecovery) {
           const std::string fileName(workingDir + "//" + secondLevelItem +
                                      ".nxs");
-          window->mantidUI->savedatainNexusFormat(fileName,
-                                                  secondLevelItem);
+          window->mantidUI->savedatainNexusFormat(fileName, secondLevelItem);
         }
       }
     } else {

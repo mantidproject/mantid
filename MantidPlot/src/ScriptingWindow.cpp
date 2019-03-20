@@ -487,7 +487,7 @@ void ScriptingWindow::loadFromProject(const std::string &lines,
  * @param files :: List of file names to oepn
  */
 void ScriptingWindow::loadFromFileList(const QStringList &files) {
-  for (const auto & file : files) {
+  for (const auto &file : files) {
     if (file.isEmpty())
       continue;
     openUnique(file);

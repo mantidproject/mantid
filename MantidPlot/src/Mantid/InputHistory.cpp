@@ -53,7 +53,7 @@ void InputHistoryImpl::save() {
     alg.next();
     const QList<PropertyData> &prop_hist = alg.value();
     settings.beginGroup(alg.key());
-    for (const auto & prop : prop_hist)
+    for (const auto &prop : prop_hist)
       settings.setValue(prop.name, prop.value);
     settings.endGroup();
   }
@@ -84,7 +84,7 @@ void InputHistoryImpl::printAll() {
     alg.next();
     std::cerr << alg.key().toStdString() << '\n';
     const QList<PropertyData> &prop_list = alg.value();
-    for (const auto & prop : prop_list)
+    for (const auto &prop : prop_list)
       std::cerr << prop.name.toStdString() << ": " << prop.value.toStdString()
                 << '\n';
   }
@@ -100,7 +100,7 @@ InputHistoryImpl::algorithmProperties(const QString &algName) {
   if (a != m_history.end()) {
     QMap<QString, QString> m;
     const QList<PropertyData> &prop_list = a.value();
-    for (const auto & prop : prop_list)
+    for (const auto &prop : prop_list)
       m[prop.name] = prop.value;
     return m;
   }

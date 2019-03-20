@@ -1614,7 +1614,7 @@ Matrix::loadFromProject(const std::string &lines, ApplicationWindow *app,
     if (!dataLines.empty())
       boost::split(dataVec, dataLines, boost::is_any_of("\n"));
 
-    for (auto & lineIt : dataVec) {
+    for (auto &lineIt : dataVec) {
       boost::split(valVec, lineIt, boost::is_any_of("\t"));
 
       // Take the row number from the front

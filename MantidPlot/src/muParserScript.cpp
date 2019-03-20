@@ -488,7 +488,7 @@ QVariant muParserScript::evaluateImpl() {
   double val = 0.0;
   try {
     current = this;
-    for (auto & i : muCode) {
+    for (auto &i : muCode) {
       parser.SetExpr(i.toAscii().constData());
       val = parser.Eval();
     }
@@ -506,7 +506,7 @@ bool muParserScript::executeImpl() {
     return false;
   try {
     current = this;
-    for (auto & i : muCode) {
+    for (auto &i : muCode) {
       parser.SetExpr(i.toAscii().constData());
       parser.Eval();
     }

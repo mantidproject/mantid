@@ -329,7 +329,7 @@ void ContourLinesEditor::updatePen() {
   d_pen_list[d_pen_index] = pen;
 
   if (applyAllColorBox->isChecked()) {
-    for (auto & i : d_pen_list) {
+    for (auto &i : d_pen_list) {
       QPen p = i;
       p.setColor(penColorBox->color());
       i = p;
@@ -337,7 +337,7 @@ void ContourLinesEditor::updatePen() {
   }
 
   if (applyAllStyleBox->isChecked()) {
-    for (auto & i : d_pen_list) {
+    for (auto &i : d_pen_list) {
       QPen p = i;
       p.setStyle(penStyleBox->style());
       i = p;
@@ -345,7 +345,7 @@ void ContourLinesEditor::updatePen() {
   }
 
   if (applyAllWidthBox->isChecked()) {
-    for (auto & i : d_pen_list) {
+    for (auto &i : d_pen_list) {
       QPen p = i;
       p.setWidthF(penWidthBox->value());
       i = p;

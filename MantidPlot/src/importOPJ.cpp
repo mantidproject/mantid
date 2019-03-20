@@ -1175,9 +1175,9 @@ bool ImportOPJ::importGraphs(const OPJFile &opj) {
       // add texts
       vector<text> texts = opj.layerTexts(g, l);
       if (style != GraphOptions::Pie) {
-        for (const auto & text : texts) {
-          addText(text, graph, nullptr, layerRect, fFontScaleFactor,
-                  fXScale, fYScale);
+        for (const auto &text : texts) {
+          addText(text, graph, nullptr, layerRect, fFontScaleFactor, fXScale,
+                  fYScale);
         }
       }
 
@@ -1186,7 +1186,7 @@ bool ImportOPJ::importGraphs(const OPJFile &opj) {
                 fFontScaleFactor, fXScale, fYScale);
 
       vector<line> lines = opj.layerLines(g, l);
-      for (auto & line : lines) {
+      for (auto &line : lines) {
         ArrowMarker mrk;
         mrk.setStartPoint(line.begin.x, line.begin.y);
         mrk.setEndPoint(line.end.x, line.end.y);
@@ -1226,7 +1226,7 @@ bool ImportOPJ::importGraphs(const OPJFile &opj) {
       }
 
       vector<bitmap> bitmaps = opj.layerBitmaps(g, l);
-      for (auto & bitmap : bitmaps) {
+      for (auto &bitmap : bitmaps) {
         QPixmap bmp;
         bmp.loadFromData(bitmap.data, uint(bitmap.size), "BMP");
         QTemporaryFile file;
@@ -1430,7 +1430,7 @@ QString ImportOPJ::parseOriginTags(const QString &str) {
       }
     }
     flag = false;
-    for (const auto & rxtag : rxtags) {
+    for (const auto &rxtag : rxtags) {
       if (rxtag.indexIn(line) > -1) {
         flag = true;
         break;

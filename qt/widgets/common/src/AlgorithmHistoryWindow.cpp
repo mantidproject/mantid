@@ -744,7 +744,7 @@ void AlgHistoryTreeWidget::populateNestedHistory(
     parentWidget->setCheckState(1, Qt::Unchecked);
   }
 
-  for (const auto & entrie : entries) {
+  for (const auto &entrie : entries) {
     int nAlgVersion = entrie->version();
     algName = concatVersionwithName(entrie->name(), nAlgVersion);
 

@@ -998,7 +998,7 @@ void Graph::initScaleLimits() { // We call this function the first time we add
   QwtDoubleInterval intv[QwtPlot::axisCnt];
   const QwtPlotItemList &itmList = d_plot->itemList();
   double maxSymbolSize = 0;
-  for (const auto & it : itmList) {
+  for (const auto &it : itmList) {
     const QwtPlotItem *item = it;
     if (item->rtti() != QwtPlotItem::Rtti_PlotCurve)
       continue;
@@ -5860,7 +5860,7 @@ void Graph::loadFromProject(const std::string &lines, ApplicationWindow *app,
   }
 
   std::vector<std::string> imageSections = tsv.sections("image");
-  for (auto & imageSection : imageSections) {
+  for (auto &imageSection : imageSections) {
     QStringList sl = QString::fromUtf8(imageSection.c_str()).split("\t");
     insertImageMarker(sl, fileVersion);
   }
@@ -5881,11 +5881,11 @@ void Graph::loadFromProject(const std::string &lines, ApplicationWindow *app,
   }
 
   std::vector<std::string> legendSections = tsv.sections("legend");
-  for (auto & legendSection : legendSections)
+  for (auto &legendSection : legendSections)
     insertText("legend", legendSection);
 
   std::vector<std::string> lineSections = tsv.sections("line");
-  for (auto & lineSection : lineSections) {
+  for (auto &lineSection : lineSections) {
     QStringList sl = QString::fromUtf8(lineSection.c_str()).split("\t");
     addArrow(sl, fileVersion);
   }
@@ -5953,7 +5953,7 @@ void Graph::loadFromProject(const std::string &lines, ApplicationWindow *app,
   }
 
   std::vector<std::string> pieLabelSections = tsv.sections("PieLabel");
-  for (auto & pieLabelSection : pieLabelSections)
+  for (auto &pieLabelSection : pieLabelSections)
     insertText("PieLabel", pieLabelSection);
 
   if (tsv.selectLine("PlotTitle")) {
@@ -5987,7 +5987,7 @@ void Graph::loadFromProject(const std::string &lines, ApplicationWindow *app,
   }
 
   std::vector<std::string> textSections = tsv.sections("text");
-  for (auto & textSection : textSections)
+  for (auto &textSection : textSections)
     insertText("text", textSection);
 
   if (tsv.selectLine("TitleFont")) {
@@ -6126,7 +6126,7 @@ void Graph::loadFromProject(const std::string &lines, ApplicationWindow *app,
     }
 
     std::vector<std::string> functionSections = tsv.sections("Function");
-    for (auto & functionSection : functionSections) {
+    for (auto &functionSection : functionSections) {
       curveID++;
       QStringList sl = QString::fromUtf8(functionSection.c_str()).split("\n");
       restoreFunction(sl);
@@ -6212,7 +6212,7 @@ void Graph::loadFromProject(const std::string &lines, ApplicationWindow *app,
     }
 
     std::vector<std::string> specSections = tsv.sections("spectrogram");
-    for (auto & specSection : specSections) {
+    for (auto &specSection : specSections) {
       MantidQt::API::TSVSerialiser specTSV(specSection);
       Spectrogram *s = nullptr;
 

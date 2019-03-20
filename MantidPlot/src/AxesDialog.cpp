@@ -1955,7 +1955,7 @@ void AxesDialog::updateGrid() {
   bool antiAlias = m_chkAntialiseGrid->isChecked();
   switch (m_cmbApplyGridFormat->currentIndex()) {
   case 0: {
-    for (auto & gridItr : m_Grid_list) {
+    for (auto &gridItr : m_Grid_list) {
       if (gridItr->modified()) {
         gridItr->apply(m_graph->plotWidget()->grid(), antiAlias);
         m_graph->replot();
@@ -1969,7 +1969,7 @@ void AxesDialog::updateGrid() {
     if (!plot) {
       return;
     }
-    for (auto & gridItr : m_Grid_list) {
+    for (auto &gridItr : m_Grid_list) {
       QList<Graph *> layers = plot->layersList();
       foreach (Graph *g, layers) {
         if (g->isPiePlot()) {
@@ -1994,7 +1994,7 @@ void AxesDialog::updateGrid() {
           if (g->isPiePlot()) {
             continue;
           }
-          for (auto & gridItr : m_Grid_list) {
+          for (auto &gridItr : m_Grid_list) {
             gridItr->apply(g->plotWidget()->grid(), antiAlias, true);
             g->replot();
           }
@@ -2012,14 +2012,14 @@ void AxesDialog::updateGrid() {
  */
 bool AxesDialog::pressToGraph() {
   // Check if all tabs and axes are valid first
-  for (auto & axisItr : m_Axis_list) {
+  for (auto &axisItr : m_Axis_list) {
     if (!(axisItr->valid())) {
       g_log.warning("Axis options are invalid!");
       return false;
     }
   }
 
-  for (auto & scaleItr : m_Scale_list) {
+  for (auto &scaleItr : m_Scale_list) {
     if (!(scaleItr->valid())) {
       g_log.warning("Scale options are invalid!");
       return false;
@@ -2028,11 +2028,11 @@ bool AxesDialog::pressToGraph() {
 
   updateGrid();
 
-  for (auto & axisItr : m_Axis_list) {
+  for (auto &axisItr : m_Axis_list) {
     axisItr->apply();
   }
 
-  for (auto & scaleItr : m_Scale_list) {
+  for (auto &scaleItr : m_Scale_list) {
     scaleItr->apply();
   }
 

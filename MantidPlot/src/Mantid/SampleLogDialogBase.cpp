@@ -57,7 +57,7 @@ SampleLogDialogBase::SampleLogDialogBase(const QString &wsname,
       m_experimentInfoIndex(experimentInfoIndex), buttonPlot(nullptr),
       buttonClose(nullptr), m_spinNumber(nullptr) {
 
-  for (auto & statValue : statValues) {
+  for (auto &statValue : statValues) {
     statValue = nullptr;
   }
 
@@ -115,7 +115,7 @@ void SampleLogDialogBase::showLogStatistics() {
 void SampleLogDialogBase::showLogStatisticsOfItem(
     QTreeWidgetItem *item, const LogFilterGenerator::FilterType filter) {
   // Assume that you can't show the stats
-  for (auto & statValue : statValues) {
+  for (auto &statValue : statValues) {
     statValue->setText(QString(""));
   }
 

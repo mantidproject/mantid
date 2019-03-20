@@ -1324,7 +1324,7 @@ void MultiLayer::dropOntoMDCurve(Graph *g, MantidMDCurve *originalCurve,
 
   // Loop through all selected workspaces create curves and put them onto the
   // graph
-  for (auto & allWsName : allWsNames) {
+  for (auto &allWsName : allWsNames) {
     // Capability query the candidate workspaces
     Workspace_sptr ws =
         AnalysisDataService::Instance().retrieve(allWsName.toStdString());

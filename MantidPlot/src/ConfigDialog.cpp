@@ -1210,7 +1210,7 @@ void ConfigDialog::deleteDialog() {
     if (status == QMessageBox::Yes) {
       // For each program selected, remove all details from the user.properties
       // file;
-      for (auto & selectedItem : selectedItems) {
+      for (auto &selectedItem : selectedItems) {
         m_sendToSettings.erase(selectedItem->text(0).toStdString());
       }
       // clear the tree and repopulate it without the programs that have just
@@ -1226,7 +1226,7 @@ void ConfigDialog::populateProgramTree() {
       Mantid::Kernel::ConfigService::Instance().getKeys(
           "workspace.sendto.name");
 
-  for (auto & programName : programNames) {
+  for (auto &programName : programNames) {
     // Create a map for the keys and details to go into
     std::map<std::string, std::string> programKeysAndDetails;
 
@@ -1236,7 +1236,7 @@ void ConfigDialog::populateProgramTree() {
         (Mantid::Kernel::ConfigService::Instance().getKeys("workspace.sendto." +
                                                            programName));
 
-    for (const auto & programKey : programKeys) {
+    for (const auto &programKey : programKeys) {
       // Assign a key to its value using the map
       programKeysAndDetails[programKey] =
           (Mantid::Kernel::ConfigService::Instance().getString(
@@ -1296,7 +1296,7 @@ void ConfigDialog::updateSendToTab() {
       cfgSvc.getKeys("workspace.sendto.name");
 
   for (const auto &itr : m_sendToSettings) {
-    for (auto & programName : programNames) {
+    for (auto &programName : programNames) {
       if (programName == itr.first) {
         // The selected program hasn't been deleted so set to blank string (all
         // those left without blank strings are to be deleted
@@ -1317,14 +1317,13 @@ void ConfigDialog::updateSendToTab() {
 
   // Delete the keys that are in the config but not in the temporary
   // m_sendToSettings map
-  for (const auto & programName : programNames) {
+  for (const auto &programName : programNames) {
     if (programName != "") {
       cfgSvc.remove("workspace.sendto.name." + programName);
       std::vector<std::string> programKeys =
           cfgSvc.getKeys("workspace.sendto." + programName);
-      for (const auto & programKey : programKeys) {
-        cfgSvc.remove("workspace.sendto." + programName + "." +
-                      programKey);
+      for (const auto &programKey : programKeys) {
+        cfgSvc.remove("workspace.sendto." + programName + "." + programKey);
       }
     }
   }

@@ -468,7 +468,7 @@ QStringList MantidUI::getAlgorithmNames() {
   QStringList sl;
   std::vector<std::string> sv;
   sv = Mantid::API::AlgorithmFactory::Instance().getKeys();
-  for (const auto & i : sv)
+  for (const auto &i : sv)
     sl << QString::fromStdString(i);
   return sl;
 }
@@ -3178,15 +3178,15 @@ MultiLayer *MantidUI::plot1D(const QMultiMap<QString, int> &toPlot,
       (spectrumPlot) ? MantidMatrixCurve::Spectrum : MantidMatrixCurve::Bin;
   MantidMatrixCurve *firstCurve(nullptr);
   QString logValue("");
-  for (auto & i : curveSpecList) {
+  for (auto &i : curveSpecList) {
 
     if (!log.isEmpty()) { // Get log value from workspace
       logValue = logValue.number(i.logVal, 'g', 6);
     }
 
-    auto *wsCurve = new MantidMatrixCurve(
-        logValue, i.wsName, g, i.index, indexType,
-        errs, plotAsDistribution, style, multipleSpectra);
+    auto *wsCurve =
+        new MantidMatrixCurve(logValue, i.wsName, g, i.index, indexType, errs,
+                              plotAsDistribution, style, multipleSpectra);
     if (!firstCurve) {
       firstCurve = wsCurve;
       g->setNormalizable(firstCurve->isNormalizable());
@@ -3328,7 +3328,7 @@ void MantidUI::drawColorFillPlots(const QStringList &wsNames,
   int nPlots = wsNames.size();
   if (nPlots > 1) {
     QList<MultiLayer *> plots;
-    for (const auto & wsName : wsNames) {
+    for (const auto &wsName : wsNames) {
       const bool hidden = true;
       MultiLayer *plot =
           this->drawSingleColorFillPlot(wsName, curveType, nullptr, hidden);
@@ -3359,7 +3359,7 @@ void MantidUI::drawColorFillPlots(const QStringList &wsNames,
 
       int row = 0;
       int col = 0;
-      for (auto & plot : plots) {
+      for (auto &plot : plots) {
         tiledWindow->addWidget(plot, row, col);
         ++col;
         if (col == nCols) {
