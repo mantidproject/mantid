@@ -62,6 +62,10 @@ class TableWorkspaceDisplayView(QTableWidget):
     def resizeEvent(self, event):
         QTableWidget.resizeEvent(self, event)
         header = self.horizontalHeader()
+        # resizes the column headers to fit the contents,
+        # currently this overwrites any manual changes to the widths of the columns
+        header.resizeSections(QHeaderView.ResizeToContents)
+        # then allows the users to resize the headers manually
         header.setSectionResizeMode(QHeaderView.Interactive)
 
     def emit_repaint(self):
