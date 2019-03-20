@@ -254,8 +254,6 @@ class LoadRunWidgetPresenter(object):
         self.enable_loading()
         self.enable_notifier.notify_subscribers()
 
-
-
     class DisableEditingNotifier(Observable):
 
         def __init__(self, outer):
