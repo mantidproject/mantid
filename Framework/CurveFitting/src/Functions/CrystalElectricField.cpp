@@ -165,10 +165,10 @@ double jm6(double nj, double j) {
 double f20(double nj, double j) { return 3 * pow(nj, 2) - j * (j + 1); }
 
 //------------------------------
-double f21(double nj, double) { return nj; }
+double f21(double nj, double /*unused*/) { return nj; }
 
 //------------------------------
-double f22(double, double) { return 1.0; }
+double f22(double /*unused*/, double /*unused*/) { return 1.0; }
 
 //------------------------------
 double f40(double nj, double j) {
@@ -185,10 +185,10 @@ double f41(double nj, double j) {
 double f42(double nj, double j) { return 7 * pow(nj, 2) - j * (j + 1) - 5; }
 
 //------------------------------
-double f43(double nj, double) { return nj; }
+double f43(double nj, double /*unused*/) { return nj; }
 
 //------------------------------
-double f44(double, double) { return 1.0; }
+double f44(double /*unused*/, double /*unused*/) { return 1.0; }
 
 //------------------------------
 double f60(double nj, double j) {
@@ -220,10 +220,10 @@ double f63(double nj, double j) {
 double f64(double nj, double j) { return 11 * pow(nj, 2) - j * (j + 1) - 38; }
 
 //------------------------------
-double f65(double nj, double) { return nj; }
+double f65(double nj, double /*unused*/) { return nj; }
 
 //------------------------------
-double f66(double, double) { return 1.0; }
+double f66(double /*unused*/, double /*unused*/) { return 1.0; }
 
 //-------------------------------
 // ff(k,q,nj,j) := fkq(nj,j)

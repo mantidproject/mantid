@@ -90,7 +90,7 @@ size_t CompositeCluster::size() const {
 }
 
 /// Add an index. This method does not apply to composite clusters.
-void CompositeCluster::addIndex(const size_t &) {
+void CompositeCluster::addIndex(const size_t & /*index*/) {
   throw std::runtime_error("addIndex not implemented on CompositeCluster");
 }
 

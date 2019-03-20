@@ -252,7 +252,7 @@ int LoadFlexiNexus::calculateCAddress(int *pos, int *dim, int rank) {
   }
   return result;
 }
-int LoadFlexiNexus::calculateF77Address(int *, int) {
+int LoadFlexiNexus::calculateF77Address(int * /*unused*/, int /*unused*/) {
   // --- Unused code ---
   // int result = 0;
 

@@ -608,7 +608,7 @@ std::string QENSFitSequential::getOutputBaseName() const {
 
 bool QENSFitSequential::throwIfElasticQConversionFails() const { return false; }
 
-bool QENSFitSequential::isFitParameter(const std::string &) const {
+bool QENSFitSequential::isFitParameter(const std::string & /*unused*/) const {
   return true;
 }
 

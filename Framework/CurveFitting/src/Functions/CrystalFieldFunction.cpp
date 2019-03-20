@@ -76,8 +76,8 @@ public:
     throw Exception::NotImplementedError(
         "This method is intentionally not implemented.");
   }
-  void functionGeneral(const API::FunctionDomainGeneral &,
-                       API::FunctionValues &) const override {
+  void functionGeneral(const API::FunctionDomainGeneral & /*domain*/,
+                       API::FunctionValues & /*values*/) const override {
     throw Exception::NotImplementedError(
         "This method is intentionally not implemented.");
   }
@@ -385,8 +385,9 @@ void CrystalFieldFunction::setUpForFit() {
 }
 
 /// Declare a new parameter
-void CrystalFieldFunction::declareParameter(const std::string &, double,
-                                            const std::string &) {
+void CrystalFieldFunction::declareParameter(
+    const std::string & /*name*/, double /*initValue*/,
+    const std::string & /*description*/) {
   throw Kernel::Exception::NotImplementedError(
       "CrystalFieldFunction cannot have its own parameters.");
 }
