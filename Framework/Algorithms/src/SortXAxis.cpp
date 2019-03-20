@@ -53,7 +53,10 @@ void SortXAxis::init() {
                   "Ascending or descending sorting", Direction::Input);
   declareProperty("IgnoreHistogramValidation", false,
                   "This will stop SortXAxis from throwing if the workspace is "
-                  "not a valid histogram for this algorithm to work on.");
+                  "not a valid histogram for this algorithm to work on. THIS "
+                  "IS TEMPORARY, this item will be removed for 4.1 and thus "
+                  "should only be used internally for the TOSCA legacy data "
+                  "in indirect .");
 }
 
 void SortXAxis::exec() {
