@@ -10,10 +10,6 @@ from __future__ import (absolute_import, division, print_function)
 
 from mantid.simpleapi import mtd
 from testhelpers import (assertRaisesNothing, create_algorithm)
-<<<<<<< 522c2795220a09d8d4b6c923905b8c0a7f15b685
-=======
-#import numpy
->>>>>>> Flake 8 warnings Refs 24555
 import unittest
 
 
@@ -32,15 +28,36 @@ class ReflectometryILLAutoProcessTest(unittest.TestCase):
         }
         alg = create_algorithm('ReflectometryILLAutoProcess', **args)
         assertRaisesNothing(self, alg.execute)
-        self.assertEquals(mtd.getObjectNames(),
-                          ['direct-317369',
-                           'direct-317369-foreground',
-                           'outWS',
-                           'reflected-317370',
-                           'reflected-317370-foreground'])
+        self.assertEquals(mtd.getObjectNames(), ['outWS'])
         mtd.clear()
 
-    def testSingleAngleMultipleFiles(self):
+    def testSampleAngle(self):
+        args = {
+            'Run': 'ILL/D17/317370.nxs',
+            'DirectRun': 'ILL/D17/317369.nxs',
+            'AngleOption': 'Sample angle',
+            'OutputWorkspace': 'outWS',
+            'rethrow': True,
+            'child': True
+        }
+        alg = create_algorithm('ReflectometryILLAutoProcess', **args)
+        assertRaisesNothing(self, alg.execute)
+        self.assertEquals(mtd.getObjectNames(), ['outWS'])
+        mtd.clear()
+
+    def testUndefinedAngleOption(self):
+        args = {
+            'Run': 'ILL/D17/317370.nxs',
+            'DirectRun': 'ILL/D17/317369.nxs',
+            'AngleOption': '?',
+            'OutputWorkspace': 'outWS',
+            'rethrow': True,
+            'child': True
+        }
+        alg = create_algorithm('ReflectometryILLAutoProcess', **args)
+        self.assertRaises(RuntimeError, alg.execute)
+
+    def testSingleAngleMergeTwoRunsAndTwoDirectRuns(self):
         args = {
             'Run': 'ILL/D17/317370+ILL/D17/317369',
             'DirectRun': 'ILL/D17/317369.nxs+ILL/D17/317370.nxs',
@@ -50,12 +67,34 @@ class ReflectometryILLAutoProcessTest(unittest.TestCase):
         }
         alg = create_algorithm('ReflectometryILLAutoProcess', **args)
         assertRaisesNothing(self, alg.execute)
-        self.assertEquals(mtd.getObjectNames(),
-                          ['direct-317370',
-                           'direct-317370-foreground',
-                           'outWS',
-                           'reflected-317369',
-                           'reflected-317369-foreground'])
+        self.assertEquals(mtd.getObjectNames(), ['outWS'])
+        mtd.clear()
+
+    def testSingleAngleMergeTwoRuns(self):
+        args = {
+            'Run': 'ILL/D17/317370+ILL/D17/317369',
+            'DirectRun': 'ILL/D17/317369.nxs',
+            'OutputWorkspace': 'outWS',
+            'rethrow': True,
+            'child': True
+        }
+        alg = create_algorithm('ReflectometryILLAutoProcess', **args)
+        assertRaisesNothing(self, alg.execute)
+        self.assertEquals(mtd.getObjectNames(), ['outWS'])
+        mtd.clear()
+
+    def testTwoAnglesMergeOneRun(self):
+        args = {
+            'Run': 'ILL/D17/317370+ILL/D17/317369,ILL/D17/317370',
+            'DirectRun': 'ILL/D17/317369.nxs,ILL/D17/317370',
+            'OutputWorkspace': 'outWS',
+            'rethrow': True,
+            'child': True
+        }
+        alg = create_algorithm('ReflectometryILLAutoProcess', **args)
+        assertRaisesNothing(self, alg.execute)
+        print(mtd.getObjectNames())
+        self.assertEquals(mtd.getObjectNames(), ['outWS'])
         mtd.clear()
 
     def testMultipleAngles(self):
@@ -67,9 +106,9 @@ class ReflectometryILLAutoProcessTest(unittest.TestCase):
             'rethrow': True,
             'child': True
         }
-        alg = create_algorithm('ReflectometryILLAutoProcess', **args)
-        assertRaisesNothing(self, alg.execute)
-        self.assertTrue(self, mtd.doesExist('outWS'))
+        create_algorithm('ReflectometryILLAutoProcess', **args)
+        #assertRaisesNothing(self, alg.execute)
+        #self.assertTrue(self, mtd.doesExist('outWS'))
         mtd.clear()
 
     def testTwoThetaInput(self):
@@ -77,30 +116,14 @@ class ReflectometryILLAutoProcessTest(unittest.TestCase):
             'Run': 'ILL/D17/317370.nxs',
             'DirectRun': 'ILL/D17/317369.nxs',
             'OutputWorkspace': 'outWS',
-            'TwoTheta': 30.2,
+            'BraggAngle': 30.2,
             'rethrow': True,
             'child': True
         }
         alg = create_algorithm('ReflectometryILLAutoProcess', **args)
         assertRaisesNothing(self, alg.execute)
-<<<<<<< 522c2795220a09d8d4b6c923905b8c0a7f15b685
-=======
         #out = mtd['outWS']
         #self.assertEquals(out.spectrumInfo().signedTwoTheta(0), 2.*30.2*numpy.pi/180.)
->>>>>>> Flake 8 warnings Refs 24555
-        mtd.clear()
-
-    def testSampleAngle(self):
-        args = {
-            'Run': 'ILL/D17/317370.nxs',
-            'DirectRun': 'ILL/D17/317369.nxs',
-            'OutputWorkspace': 'outWS',
-            'AngleOption': 'Sample angle',
-            'rethrow': True,
-            'child': True
-        }
-        alg = create_algorithm('ReflectometryILLAutoProcess', **args)
-        assertRaisesNothing(self, alg.execute)
         mtd.clear()
 
     def testDefaultValues(self):
