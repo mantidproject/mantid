@@ -35,6 +35,17 @@ using namespace Kernel;
 using namespace Mantid::PhysicalConstants;
 using namespace Mantid::DataObjects;
 
+namespace {
+double energyToWavelength(const double energyFixed) {
+  Unit_const_sptr energy = UnitFactory::Instance().create("Energy");
+  double factor, power;
+  energy->quickConversion(*UnitFactory::Instance().create("Wavelength"), factor,
+                          power);
+  return factor * std::pow(energyFixed, power);
+}
+
+} // anonymous
+
 AbsorptionCorrection::AbsorptionCorrection()
     : API::Algorithm(), m_inputWS(), m_sampleObject(nullptr), m_L1s(),
       m_elementVolumes(), m_elementPositions(), m_numVolumeElements(0),
@@ -175,11 +186,7 @@ void AbsorptionCorrection::exec() {
       try {
         Parameter_sptr par = pmap.get(&det, "Efixed");
         if (par) {
-          Unit_const_sptr energy = UnitFactory::Instance().create("Energy");
-          double factor, power;
-          energy->quickConversion(*UnitFactory::Instance().create("Wavelength"),
-                                  factor, power);
-          lambdaFixed = factor * std::pow(par->value<double>(), power);
+          lambdaFixed = energyToWavelength(par->value<double>());
         }
       } catch (std::runtime_error &) { /* Throws if a DetectorGroup, use single
                                           provided value */
@@ -198,14 +205,11 @@ void AbsorptionCorrection::exec() {
     // Loop through the bins in the current spectrum every m_xStep
     for (int64_t j = 0; j < specSize; j = j + m_xStep) {
       const double linearCoefAbs = linearCoefAbsScattByWavelength * lambdas[j];
-      if (m_emode == 0) // Elastic
-      {
+      if (m_emode == 0) { // Elastic
         Y[j] = this->doIntegration(linearCoefAbs, L2s);
-      } else if (m_emode == 1) // Direct
-      {
+      } else if (m_emode == 1) { // Direct
         Y[j] = this->doIntegration(linearCoefAbsFixed, linearCoefAbs, L2s);
-      } else if (m_emode == 2) // Indirect
-      {
+      } else if (m_emode == 2) { // Indirect
         Y[j] = this->doIntegration(linearCoefAbs, linearCoefAbsFixed, L2s);
       }
       Y[j] /= m_sampleVolume; // Divide by total volume of the cylinder
@@ -297,11 +301,7 @@ void AbsorptionCorrection::retrieveBaseProperties() {
   // If inelastic, get the fixed energy and convert it to a wavelength
   if (m_emode) {
     const double efixed = getProperty("Efixed");
-    Unit_const_sptr energy = UnitFactory::Instance().create("Energy");
-    double factor, power;
-    energy->quickConversion(*UnitFactory::Instance().create("Wavelength"),
-                            factor, power);
-    m_lambdaFixed = factor * std::pow(efixed, power);
+    m_lambdaFixed = energyToWavelength(efixed);
   }
 
   // Call the virtual function for any further properties
