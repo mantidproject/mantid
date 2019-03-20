@@ -4,9 +4,7 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-#  This file is part of the mantid workbench.
-#
-#
+#  This file is part of mantidqt package.
 from __future__ import absolute_import, division, print_function
 
 from functools import partial
@@ -36,7 +34,9 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
     ITEM_CHANGED_UNKNOWN_ERROR_MESSAGE = "Unknown error occurred: {}"
     TOO_MANY_TO_SET_AS_Y_ERR_MESSAGE = "Too many selected to set as Y Error"
     CANNOT_PLOT_AGAINST_SELF_MESSAGE = "Cannot plot column against itself."
-    NO_ASSOCIATED_YERR_FOR_EACH_Y_MESSAGE = "There is no associated YErr for each selected Y column."
+    NO_ASSOCIATED_YERR_FOR_EACH_Y_MESSAGE = "Column '{}' does not have an associated Y error column." \
+                                            "\n\nPlease set it by doing: Right click on column ->" \
+                                            " Set error for Y -> The label shown on the Y column"
     PLOT_FUNCTION_ERROR_MESSAGE = "One or more of the columns being plotted contain invalid data for Matplotlib.\n\nError message:\n{}"
     INVALID_DATA_WINDOW_TITLE = "Invalid data - Mantid Workbench"
     COLUMN_DISPLAY_LABEL = 'Column {}'
@@ -309,22 +309,36 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
 
         self._do_plot(selected_columns, selected_x, plot_type)
 
+    def _is_error_plot(self, plot_type):
+        return plot_type == PlotType.LINEAR_WITH_ERR or plot_type == PlotType.SCATTER_WITH_ERR
+
     def _do_plot(self, selected_columns, selected_x, plot_type):
-        if plot_type == PlotType.LINEAR_WITH_ERR:
+        if self._is_error_plot(plot_type):
             yerr = self.model.marked_columns.find_yerr(selected_columns)
+            # remove the Y error columns if they are in the selection for plotting
+            # this prevents them from being treated as Y columns
+            for err_col in yerr.values():
+                try:
+                    selected_columns.remove(err_col)
+                except ValueError:
+                    # the column is not contained within the selected one
+                    pass
             if len(yerr) != len(selected_columns):
-                self.view.show_warning(self.NO_ASSOCIATED_YERR_FOR_EACH_Y_MESSAGE)
+                column_headers = self.model.original_column_headers()
+                self.view.show_warning(self.NO_ASSOCIATED_YERR_FOR_EACH_Y_MESSAGE.format(
+                    ",".join([column_headers[col] for col in selected_columns])))
                 return
         x = self.model.get_column(selected_x)
 
-        fig, ax = self.plot.subplots(subplot_kw={'projection': 'mantid'})
+        fig, ax = self.plot.subplots()
         fig.canvas.set_window_title(self.model.get_name())
         ax.set_xlabel(self.model.get_column_header(selected_x))
 
         plot_func = self._get_plot_function_from_type(ax, plot_type)
         kwargs = {}
         for column in selected_columns:
-            if plot_type == PlotType.LINEAR_WITH_ERR:
+            # if the errors are being plotted, retrieve the data for the column
+            if self._is_error_plot(plot_type):
                 yerr_column = yerr[column]
                 yerr_column_data = self.model.get_column(yerr_column)
                 kwargs["yerr"] = yerr_column_data
@@ -352,6 +366,8 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
             plot_func = partial(ax.plot, marker='o')
         elif type == PlotType.LINEAR_WITH_ERR:
             plot_func = ax.errorbar
+        elif type == PlotType.SCATTER_WITH_ERR:
+            plot_func = partial(ax.errorbar, fmt='o')
         else:
             raise ValueError("Plot Type: {} not currently supported!".format(type))
         return plot_func

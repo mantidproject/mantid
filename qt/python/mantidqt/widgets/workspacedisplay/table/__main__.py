@@ -4,16 +4,13 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-#  This file is part of the mantid workbench.
-#
-#
+#  This file is part of the mantidqt package.
 
 # To Run - target this package with PyCharm, and __main__ will be executed
 
 import matplotlib
 
 matplotlib.use('Qt5Agg')
-
 
 from qtpy.QtWidgets import QApplication  # noqa: F402
 
