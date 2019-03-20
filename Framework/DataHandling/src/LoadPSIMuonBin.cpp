@@ -324,7 +324,7 @@ void LoadPSIMuonBin::generateUnknownAxis() {
   }
 
   // Create Errors
-  for (auto & m_histogram : m_histograms) {
+  for (auto &m_histogram : m_histograms) {
     std::vector<double> newEAxis;
     for (auto eIndex = 0u; eIndex < m_histograms[0].size(); ++eIndex) {
       newEAxis.push_back(sqrt(m_histogram[eIndex]));

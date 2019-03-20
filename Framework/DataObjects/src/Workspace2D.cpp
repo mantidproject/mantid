@@ -52,7 +52,7 @@ Workspace2D::~Workspace2D() {
   PARALLEL_FOR_IF(Kernel::threadSafe(*this))
   for (int64_t i = 0; i < static_cast<int64_t>(data.size()); i++) {
 #else
-  for (auto & i : data) {
+  for (auto &i : data) {
 #endif
     // Clear out the memory
     delete i;

@@ -133,8 +133,7 @@ std::pair<double, double> cylinderTwoThetaRange(
   for (double angle : angles) {
     const auto basePoint =
         geometry.centreOfBottomBase +
-        (basis1 * std::cos(angle) + basis2 * std::sin(angle)) *
-            geometry.radius;
+        (basis1 * std::cos(angle) + basis2 * std::sin(angle)) * geometry.radius;
     for (int i = 0; i < 3; ++i) {
       const auto point = basePoint + geometry.axis * (0.5 * geometry.height *
                                                       static_cast<double>(i));

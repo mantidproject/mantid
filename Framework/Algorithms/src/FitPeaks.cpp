@@ -1930,7 +1930,7 @@ void FitPeaks::setupParameterTableWorkspace(
   // add columns
   table_ws->addColumn("int", "wsindex");
   table_ws->addColumn("int", "peakindex");
-  for (const auto & param_name : param_names)
+  for (const auto &param_name : param_names)
     table_ws->addColumn("double", param_name);
   if (with_chi2)
     table_ws->addColumn("double", "chi2");
@@ -1966,7 +1966,7 @@ void FitPeaks::generateFittedParametersValueWorkspaces() {
   std::vector<std::string> param_vec;
   if (m_rawPeaksTable) {
     std::vector<std::string> peak_params = m_peakFunction->getParameterNames();
-    for (const auto & peak_param : peak_params)
+    for (const auto &peak_param : peak_params)
       param_vec.push_back(peak_param);
   } else {
     param_vec.emplace_back("centre");

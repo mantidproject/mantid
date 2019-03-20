@@ -211,7 +211,7 @@ void groupWorkspaces(const std::string &groupName,
 
   if (group) {
     // Exists and is a group -> add missing workspaces to it
-    for (const auto & inputWorkspace : inputWorkspaces) {
+    for (const auto &inputWorkspace : inputWorkspaces) {
       if (!group->contains(inputWorkspace)) {
         group->add(inputWorkspace);
       }
@@ -320,7 +320,7 @@ getAllDetectorIDsFromGroupWorkspace(Mantid::API::WorkspaceGroup_sptr ws) {
   MatrixWorkspace_sptr matrixWS;
 
   std::vector<Workspace_sptr> workspaces = ws->getAllItems();
-  for (const auto & workspace : workspaces) {
+  for (const auto &workspace : workspaces) {
     matrixWS = boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
     detectorIDsSingleWorkspace = getAllDetectorIDsFromMatrixWorkspace(matrixWS);
     detectorIDs.insert(detectorIDsSingleWorkspace.begin(),
