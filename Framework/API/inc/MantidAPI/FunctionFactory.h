@@ -57,6 +57,8 @@ public:
   /// Query available functions based on the template type
   template <typename FunctionType>
   const std::vector<std::string> &getFunctionNames() const;
+  /// Get function names that can be used by generic fitting GUIs
+  std::vector<std::string> getFunctionNamesGUI() const;
   // Unhide the base class version (to satisfy the intel compiler)
   using Kernel::DynamicFactory<IFunction>::subscribe;
   void subscribe(const std::string &className,

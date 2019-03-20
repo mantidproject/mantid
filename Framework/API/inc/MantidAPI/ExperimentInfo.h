@@ -111,6 +111,7 @@ public:
   /// Writable version of the run object
   Run &mutableRun();
   void setSharedRun(Kernel::cow_ptr<Run> run);
+  Kernel::cow_ptr<Run> sharedRun();
 
   /// Access a log for this experiment.
   Kernel::Property *getLog(const std::string &log) const;

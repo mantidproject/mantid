@@ -11,8 +11,10 @@
 #include "MantidAPI/Expression.h"
 #include "MantidAPI/IConstraint.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/LibraryManager.h"
 #include <MantidKernel/StringTokenizer.h>
 #include <boost/lexical_cast.hpp>
@@ -359,6 +361,22 @@ void FunctionFactoryImpl::addTie(IFunction_sptr fun,
       fun->tie(expr[i].name(), value);
     }
   }
+}
+
+std::vector<std::string> FunctionFactoryImpl::getFunctionNamesGUI() const {
+  auto &allNames = getFunctionNames<IFunction1D>();
+  std::vector<std::string> names;
+  names.reserve(allNames.size());
+  auto excludes =
+      Kernel::ConfigService::Instance().getString("curvefitting.guiExclude");
+  Kernel::StringTokenizer tokenizer(excludes, ";",
+                                    Kernel::StringTokenizer::TOK_TRIM);
+  std::set<std::string> excludeList(tokenizer.begin(), tokenizer.end());
+  std::copy_if(allNames.cbegin(), allNames.cend(), std::back_inserter(names),
+               [&excludeList](const auto &name) {
+                 return excludeList.count(name) == 0;
+               });
+  return names;
 }
 
 void FunctionFactoryImpl::subscribe(

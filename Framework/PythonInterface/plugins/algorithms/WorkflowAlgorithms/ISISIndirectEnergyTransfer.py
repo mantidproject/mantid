@@ -27,6 +27,11 @@ def _elems_or_none(l):
     return l if len(l) != 0 else None
 
 
+def add_missing_elements(from_list, to_list):
+    to_list.extend([element for element in from_list if element not in to_list])
+    return sorted(to_list)
+
+
 class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
 
     _chopped_data = None
@@ -171,6 +176,9 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
 
             if not self._sum_files:
                 masked_detectors = get_detectors_to_mask(workspaces)
+            else:
+                summed_file_masked_detectors = get_detectors_to_mask(workspaces)
+                masked_detectors = add_missing_elements(summed_file_masked_detectors, masked_detectors)
 
             # Process workspaces
             for ws_name in workspaces:

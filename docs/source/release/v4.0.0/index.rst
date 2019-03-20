@@ -26,18 +26,32 @@ Changes
 -------
 
 .. toctree::
-   :titlesonly:
+   :hidden:
+   :glob:
 
-   Framework <framework>
-   User Interface & Usability <ui>
-   Diffraction <diffraction>
-   Muon Analysis <muon>
-   Reflectometry <reflectometry>
-   SANS <sans>
-   Direct Inelastic <direct_inelastic>
-   Indirect Inelastic <indirect_inelastic>
-   Error Reporter <error_reporter>
-   Kafka Live Streaming <kafka>
+   *
+
+- :doc:`Framework <framework>`
+- :doc:`General UI & Usability <ui>`
+
+  - :doc:`MantidPlot <mantidplot>`
+
+  - :doc:`MantidWorkbench <mantidworkbench>`
+- :doc:`Diffraction <diffraction>`
+- :doc:`Muon Analysis <muon>`
+- Low Q
+
+  - :doc:`Reflectometry <reflectometry>`
+
+  - :doc:`SANS <sans>`
+- Spectroscopy
+
+  - :doc:`Direct Geometry <direct_inelastic>`
+
+  - :doc:`Indirect Geometry <indirect_inelastic>`
+
+- :doc:`Error Reporter <error_reporter>`
+- :doc:`Kafka Live Streaming <kafka>`
 
 Full Change Listings
 --------------------
