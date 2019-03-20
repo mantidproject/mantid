@@ -140,10 +140,10 @@ void GPUAlgorithm::buildKernelFromCode(const std::string &code,
 
   g_log.debug() << "Found " << devices.size() << " devices\n";
 
-  for (size_t i = 0; i < devices.size(); i++) {
-    cl::Device &dev = devices[i];
+  for (size_t devIndex = 0; devIndex < devices.size(); devIndex++) {
+    cl::Device &dev = devices[devIndex];
     std::cout << "----------" << std::endl;
-    std::cout << "Device " << i << std::endl;
+    std::cout << "Device " << devIndex << std::endl;
     std::cout << "----------" << std::endl;
 
     char deviceName[100];
