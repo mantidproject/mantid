@@ -70,6 +70,7 @@ Bugfixes
 - If an empty group workspace is present in the ADS it will no longer crash the save thread of project recovery and instead will delete it from the ADS and ignore it.
 - A bug has been fixed in Indirect I(Q,t) interface when analyzing IN16B reduced data.
 - :ref:`SavePlot1D <algm-SavePlot1D>` has been updated to follow changes to the plotly api.
+- Project Recovery in some cases would be unable to run algorithms in the correct order due to Operating System time precision, this is has been fixed by adding the execCount to the comment part of the scripts being built for recovery.
 
 MantidPlot
 ----------
