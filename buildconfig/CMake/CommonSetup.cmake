@@ -258,20 +258,33 @@ endif ()
 ###########################################################################
 
 if ( CMAKE_VERSION VERSION_GREATER "3.5" )
+  set(DEFAULT_CLANG_TIDY_CHECKS "-*,performance-for-range-copy,performance-unnecessary-copy-initialization,modernize-use-override,modernize-use-nullptr,modernize-loop-convert,modernize-use-bool-literals,modernize-deprecated-headers,misc-*,-misc-unused-parameters")
   set(ENABLE_CLANG_TIDY OFF CACHE BOOL "Add clang-tidy automatically to builds")
   if (ENABLE_CLANG_TIDY)
     find_program (CLANG_TIDY_EXE NAMES "clang-tidy" PATHS /usr/local/opt/llvm/bin )
     if (CLANG_TIDY_EXE)
+      set(APPLY_CLANG_TIDY_FIX OFF CACHE BOOL "Apply fixes found through clang-tidy checks")
       message(STATUS "clang-tidy found: ${CLANG_TIDY_EXE}")
-      set(CLANG_TIDY_CHECKS "-*,performance-for-range-copy,performance-unnecessary-copy-initialization,modernize-use-override,modernize-use-nullptr,modernize-loop-convert,modernize-use-bool-literals,modernize-deprecated-headers,misc-*,-misc-unused-parameters")
-      set(CMAKE_CXX_CLANG_TIDY "${CLANG_TIDY_EXE};-checks=${CLANG_TIDY_CHECKS};-header-filter='${CMAKE_SOURCE_DIR}/*'"
-        CACHE STRING "" FORCE)
+      set(CLANG_TIDY_CHECKS "${DEFAULT_CLANG_TIDY_CHECKS}" CACHE STR "Select checks to perform")
+      if(CLANG_TIDY_CHECKS STREQUAL "")
+        # use default checks if empty to avoid errors
+        set(CLANG_TIDY_CHECKS "${DEFAULT_CLANG_TIDY_CHECKS}" CACHE STR "Select checks to perform" FORCE)
+      endif()
+      if(APPLY_CLANG_TIDY_FIX)
+        set(CMAKE_CXX_CLANG_TIDY "${CLANG_TIDY_EXE};-checks=${CLANG_TIDY_CHECKS};-header-filter='${CMAKE_SOURCE_DIR}/*';-fix"
+          CACHE STRING "" FORCE)
+      else()
+        set(CMAKE_CXX_CLANG_TIDY "${CLANG_TIDY_EXE};-checks=${CLANG_TIDY_CHECKS};-header-filter='${CMAKE_SOURCE_DIR}/*'"
+          CACHE STRING "" FORCE)
+      endif()
     else()
       message(AUTHOR_WARNING "clang-tidy not found!")
       set(CMAKE_CXX_CLANG_TIDY "" CACHE STRING "" FORCE) # delete it
     endif()
   else()
     set(CMAKE_CXX_CLANG_TIDY "" CACHE STRING "" FORCE) # delete it
+    set(APPLY_CLANG_TIDY_FIX OFF CACHE BOOL "Apply fixes found through clang-tidy checks" FORCE)
+    set(CLANG_TIDY_CHECKS "" CACHE STR "Select checks to perform" FORCE)
   endif()
 endif()
 
