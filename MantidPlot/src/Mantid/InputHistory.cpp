@@ -66,7 +66,7 @@ void InputHistoryImpl::save() {
 void InputHistoryImpl::updateAlgorithm(Mantid::API::IAlgorithm_sptr alg) {
   const std::vector<Property *> &props = alg->getProperties();
   QList<PropertyData> prop_hist_list;
-  for (auto prop : props)
+  for (auto &prop : props)
     if (!prop->isDefault()) {
       PropertyData prop_hist(QString::fromStdString(prop->name()),
                              QString::fromStdString(prop->value()));

@@ -206,13 +206,9 @@ void MonitorDlg::update() {
     return;
 
   m_algMonitor->lock();
-  QVector<Mantid::API::AlgorithmID>::const_iterator iend =
-      m_algMonitor->algorithms().end();
-  for (QVector<Mantid::API::AlgorithmID>::const_iterator itr =
-           m_algMonitor->algorithms().begin();
-       itr != iend; ++itr) {
+  for (const auto &item : m_algMonitor->algorithms()) {
     IAlgorithm_sptr alg =
-        Mantid::API::AlgorithmManager::Instance().getAlgorithm(*itr);
+        Mantid::API::AlgorithmManager::Instance().getAlgorithm(item);
     if (!alg) {
       continue;
     }
@@ -226,9 +222,7 @@ void MonitorDlg::update() {
     AlgButton *cancelButton = new AlgButton("Cancel", alg);
     m_tree->setItemWidget(algItem, 1, algProgress);
     m_tree->setItemWidget(algItem, 2, cancelButton);
-    const std::vector<Mantid::Kernel::Property *> &prop_list =
-        alg->getProperties();
-    for (auto prop : prop_list) {
+    for (auto &prop : alg->getProperties()) {
       QStringList lstr;
       Mantid::Kernel::MaskedProperty<std::string> *maskedProp =
           dynamic_cast<Mantid::Kernel::MaskedProperty<std::string> *>(prop);
@@ -236,10 +230,10 @@ void MonitorDlg::update() {
         lstr << QString::fromStdString(maskedProp->name()) + ": "
              << QString::fromStdString(maskedProp->getMaskedValue());
       } else {
-        lstr << QString::fromStdString((*prop).name()) + ": "
-             << QString::fromStdString((*prop).value());
+        lstr << QString::fromStdString(prop->name()) + ": "
+             << QString::fromStdString(prop->value());
       }
-      if ((*prop).isDefault())
+      if (prop->isDefault())
         lstr << " Default";
       algItem->addChild(new QTreeWidgetItem(lstr));
     }

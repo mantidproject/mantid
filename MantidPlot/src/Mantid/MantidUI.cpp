@@ -466,10 +466,11 @@ QStringList MantidUI::getWorkspaceNames() {
 
 QStringList MantidUI::getAlgorithmNames() {
   QStringList sl;
-  std::vector<std::string> sv;
-  sv = Mantid::API::AlgorithmFactory::Instance().getKeys();
-  for (const auto &i : sv)
-    sl << QString::fromStdString(i);
+  std::vector<std::string> algorithmKeys =
+      Mantid::API::AlgorithmFactory::Instance().getKeys();
+  sl.reserve(algorithmKeys.size());
+  for (const auto &algorithmKey : algorithmKeys)
+    sl << QString::fromStdString(algorithmKey);
   return sl;
 }
 
@@ -3178,15 +3179,15 @@ MultiLayer *MantidUI::plot1D(const QMultiMap<QString, int> &toPlot,
       (spectrumPlot) ? MantidMatrixCurve::Spectrum : MantidMatrixCurve::Bin;
   MantidMatrixCurve *firstCurve(nullptr);
   QString logValue("");
-  for (auto &i : curveSpecList) {
+  for (const auto &curveSpec : curveSpecList) {
 
     if (!log.isEmpty()) { // Get log value from workspace
-      logValue = logValue.number(i.logVal, 'g', 6);
+      logValue = logValue.number(curveSpec.logVal, 'g', 6);
     }
 
-    auto *wsCurve =
-        new MantidMatrixCurve(logValue, i.wsName, g, i.index, indexType, errs,
-                              plotAsDistribution, style, multipleSpectra);
+    auto *wsCurve = new MantidMatrixCurve(
+        logValue, curveSpec.wsName, g, curveSpec.index, indexType, errs,
+        plotAsDistribution, style, multipleSpectra);
     if (!firstCurve) {
       firstCurve = wsCurve;
       g->setNormalizable(firstCurve->isNormalizable());

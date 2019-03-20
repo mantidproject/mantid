@@ -3069,7 +3069,7 @@ Table::loadFromProject(const std::string &lines, ApplicationWindow *app,
 
   if (tsv.hasSection("com")) {
     std::vector<std::string> sections = tsv.sections("com");
-    for (auto lines : sections) {
+    for (const auto &lines : sections) {
       /* This is another special case because of legacy.
        * Format: `<col nr="X">\nYYY\n</col>`
        * where X is the row index (0..n), and YYY is the formula.
@@ -3150,7 +3150,7 @@ Table::loadFromProject(const std::string &lines, ApplicationWindow *app,
     tsv >> dataStr;
     QStringList dataLines = dataStr.split("\n");
 
-    for (auto &dataLine : dataLines) {
+    for (const auto &dataLine : dataLines) {
       QStringList fields = dataLine.split("\t");
       int row = fields[0].toInt();
       for (int col = 0; col < table->numCols(); ++col) {

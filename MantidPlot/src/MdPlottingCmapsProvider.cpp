@@ -96,9 +96,9 @@ void MdPlottingCmapsProvider::appendAllFileNamesForFileType(
 
   QFileInfoList info = directory.entryInfoList(filter, QDir::Files);
 
-  for (auto &it : info) {
-    colorMapNames.append(it.baseName());
-    colorMapFiles.append(it.absoluteFilePath());
+  for (const auto &fileInfo : info) {
+    colorMapNames.append(fileInfo.baseName());
+    colorMapFiles.append(fileInfo.absoluteFilePath());
   }
 }
 
@@ -109,8 +109,8 @@ MdPlottingCmapsProvider::getSliceViewerIndicesForCommonColorMaps(
 
   std::vector<int> indexVector;
 
-  for (auto &it : colorMapNamesSliceViewer) {
-    if (colorMapNamesVsi.indexOf(it) != -1) {
+  for (const auto &colorMapName : colorMapNamesSliceViewer) {
+    if (colorMapNamesVsi.indexOf(colorMapName) != -1) {
       indexVector.push_back(index);
     }
 

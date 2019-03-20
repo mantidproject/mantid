@@ -352,8 +352,8 @@ void CurvesDialog::setGraph(Graph *graph) {
 void CurvesDialog::addCurves() {
   QStringList emptyColumns;
   QList<QListWidgetItem *> lst = available->selectedItems();
-  for (auto i : lst) {
-    QString text = i->text();
+  for (auto &item : lst) {
+    QString text = item->text();
     if (contents->findItems(text, Qt::MatchExactly).isEmpty()) {
       if (!addCurve(text))
         emptyColumns << text;
