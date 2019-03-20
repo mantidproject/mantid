@@ -71,7 +71,7 @@ Output:
 
 .. testcode:: AbinsCrystalSimple
 
-    wrk=Abins(AbInitioProgram="CRYSTAL", VibrationalOrPhononFile="b3lyp.out", QuantumOrderEventsNumber="1")
+    wrk=Abins(AbInitioProgram="CRYSTAL",VibrationalOrPhononFile="b3lyp.out", QuantumOrderEventsNumber="1")
 
     for name in wrk.getNames():
         print(name)
