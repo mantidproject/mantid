@@ -1019,7 +1019,8 @@ def rebin_reduction(workspace_name, rebin_string, multi_frame_rebin_string, num_
         else:
             # Regular data
             SortXAxis(InputWorkspace=workspace_name,
-                      OutputWorkspace=workspace_name)
+                      OutputWorkspace=workspace_name,
+                      IgnoreHistogramValidation=True)
             Rebin(InputWorkspace=workspace_name,
                   OutputWorkspace=workspace_name,
                   Params=rebin_string)
