@@ -77,9 +77,6 @@ void ModifyData::exec() {
   // Assign it to the output workspace property
   setProperty("OutputWorkspace", outputW);
 
-  // Get the newly set workspace
-  MatrixWorkspace_const_sptr newW = getProperty("OutputWorkspace");
-
   // Check the new workspace
   g_log.information() << "New values:" << std::endl;
   int count = 0;
