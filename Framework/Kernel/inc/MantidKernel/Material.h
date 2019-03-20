@@ -104,6 +104,37 @@ public:
   absorbXSection(const double lambda =
                      PhysicalConstants::NeutronAtom::ReferenceLambda) const;
 
+  /**
+    * Returns the linear coefficient of absorption for the material in units of
+   * cm^-1
+    * this should match the implementation of the iterator version
+    */
+  double
+  linearAbsorpCoef(const double lambda =
+                       PhysicalConstants::NeutronAtom::ReferenceLambda) const;
+
+  /**
+    * Returns the linear coefficient of absorption for the material in units of
+   * cm^-1
+    * this should match the implementation of the scalar version
+    */
+  template <typename InputIterator>
+  std::vector<double> linearAbsorpCoef(InputIterator lambdaBegin,
+                                       InputIterator lambdaEnd) const {
+    const double linearCoefByWL =
+        absorbXSection(PhysicalConstants::NeutronAtom::ReferenceLambda) * 100. *
+        numberDensity() / PhysicalConstants::NeutronAtom::ReferenceLambda;
+
+    std::vector<double> linearCoef(std::distance(lambdaBegin, lambdaEnd));
+
+    std::transform(lambdaBegin, lambdaEnd, linearCoef.begin(),
+                   [linearCoefByWL](const double lambda) {
+      return linearCoefByWL * lambda;
+    });
+
+    return linearCoef;
+  }
+
   /// Get the coherent scattering length for a given wavelength in fm
   double
   cohScatterLength(const double lambda =
