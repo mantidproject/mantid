@@ -1,3 +1,5 @@
+.. _workbench_v4_release_notes:
+
 ===============
 MantidWorkbench
 ===============
