@@ -8,6 +8,11 @@ Diffraction Changes
 Single Crystal Diffraction
 --------------------------
 
+New Algorithms
+##############
+
+- The new algorithm :ref:`MDNorm <algm-MDNorm>` can be used to calculate cross section for single crystal diffraction measurements.
+
 Improvements
 ############
 
@@ -22,16 +27,6 @@ Improvements
   (see :ref:`ConvertToMD <algm-ConvertToMD>` Notes).
 - New TOPAZ instrument geometry for 2019 run cycle
 - :ref:`LoadDiffCal <algm-LoadDiffCal>` has an additional parameter to allow for a second file specifying a grouping to override the one in the calibration file
-
-
-New Algorithms
-##############
-
-- The new algorithm :ref:`MDNorm <algm-MDNorm>` can be used to calculate cross section for single crystal diffraction measurements.
-
-Improvements
-############
-
 - :ref:`IntegratePeaksProfileFitting <algm-IntegratePeaksProfileFitting>` now supports MaNDi, TOPAZ, and CORELLI. Other instruments can easily be added as well.  In addition, the algorithm can now automatically generate a strong peaks library is one is not provided.  Peakshapes will be learned to improve initial guesses as the strong peak library is generated.
 - :ref:`MDNormSCD <algm-MDNormSCD>` now can handle merged MD workspaces.
 - :ref:`StartLiveData <algm-StartLiveData>` will load "live"
