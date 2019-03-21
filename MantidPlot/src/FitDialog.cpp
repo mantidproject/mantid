@@ -1265,7 +1265,9 @@ void FitDialog::closeEvent(QCloseEvent *e) {
   e->accept();
 }
 
-void FitDialog::enableApplyChanges(int /*unused*/) { btnApply->setEnabled(true); }
+void FitDialog::enableApplyChanges(int /*unused*/) {
+  btnApply->setEnabled(true);
+}
 
 void FitDialog::deleteFitCurves() {
   d_graph->deleteFitCurves();

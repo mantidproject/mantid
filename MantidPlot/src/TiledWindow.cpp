@@ -687,7 +687,9 @@ void TiledWindow::mousePressEvent(QMouseEvent *ev) {
 /**
  * Mouse release event handler.
  */
-void TiledWindow::mouseReleaseEvent(QMouseEvent * /*unused*/) { m_buttonPressed = false; }
+void TiledWindow::mouseReleaseEvent(QMouseEvent * /*unused*/) {
+  m_buttonPressed = false;
+}
 
 /**
  * Mouse move event handler.

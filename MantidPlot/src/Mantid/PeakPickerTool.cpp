@@ -330,7 +330,8 @@ void PeakPickerTool::windowStateChanged(Qt::WindowStates /*unused*/,
 void PeakPickerTool::functionCleared() { d_graph->plotWidget()->replot(); }
 
 void PeakPickerTool::draw(QPainter *p, const QwtScaleMap &xMap,
-                          const QwtScaleMap &yMap, const QRect & /*canvasRect*/) const {
+                          const QwtScaleMap &yMap,
+                          const QRect & /*canvasRect*/) const {
   try {
     MantidQt::MantidWidgets::PropertyHandler *h =
         m_fitPropertyBrowser->getHandler();

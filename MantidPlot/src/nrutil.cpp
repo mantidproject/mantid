@@ -74,8 +74,9 @@ vector(long nl,
   return v - nl + NR_END;
 }
 
-void free_vector(double *v, long nl,
-                 long /*unused*/) { // free a double vector allocated with vector()
+void free_vector(
+    double *v, long nl,
+    long /*unused*/) { // free a double vector allocated with vector()
   free((FREE_ARG)(v + nl - NR_END));
 }
 
