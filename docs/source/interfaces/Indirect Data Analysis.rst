@@ -113,6 +113,8 @@ Plot Spectrum
 Save Result
   Saves the result in the default save directory.
 
+.. _elwin-example-workflow:
+
 Elwin Example Workflow
 ~~~~~~~~~~~~~~~~~~~~~~
 The Elwin tab operates on ``_red`` and ``_sqw`` files. The files used in this workflow can
@@ -137,19 +139,19 @@ and the reflection is 002.
    demonstration, use the default x range.
 
 5. Tick **Normalise to Lowest Temp**. This option will produce an extra workspace with end suffix
-   ``_elt``. However, for this to work the input workspaces must have a temperature. See the
+   _elt. However, for this to work the input workspaces must have a temperature. See the
    description above for more information.
 
 6. Click **Plot Current Preview** if you want a larger plot of the mini-plot.
 
 7. Click **Run** and wait for the interface to finish processing. This should generate four
-   workspaces ending in ``_eq``, ``_eq2``, ``_elf`` and ``_elt``.
+   workspaces ending in _eq, _eq2, _elf and _elt.
 
-8. In the **Output** section, select the ``_eq`` workspace and then choose a workspace index.
-   Click **Plot Spectrum** to plot the spectrum from the selected workspace.
+8. In the **Output** section, select the workspace ending with _eq and then choose a workspace
+   index. Click **Plot Spectrum** to plot the spectrum from the selected workspace.
 
 9. Choose a default save directory and then click **Save Result** to save the output workspaces.
-   The workspace ending in ``_eq`` will be used in the MSD Fit Example Workflow.
+   The workspace ending in _eq will be used in the :ref:`msdfit-example-workflow`.
 
 
 MSD Fit
@@ -234,10 +236,12 @@ Save Result
 
 .. seealso:: Sequential fitting is available, options are detailed in the :ref:`sequential-fitting-section` section.
 
+.. _msdfit-example-workflow:
+
 MSD Fit Example Workflow
 ~~~~~~~~~~~~~~~~~~~~~~~~
 The MSD Fit tab operates on ``_eq`` files. The files used in this workflow are produced on the Elwin
-tab as seen in the Elwin Example Workflow.
+tab as seen in the :ref:`elwin-example-workflow`.
 
 1. Click **Browse** and select the file ``osi104371-104375_graphite002_red_elwin_eq``. Load this
    file and it will be automatically plotted in the upper mini-plot.
@@ -254,8 +258,8 @@ tab as seen in the Elwin Example Workflow.
    **Constrain**.
 
 5. Click **Run** and wait for the interface to finish processing. This should generate a
-   ``_Parameters`` table workspace and two group workspaces with end suffixes ``_Results`` and
-   ``_Workspaces``. The mini-plots should also update, with the upper plot displaying the
+   _Parameters table workspace and two group workspaces with end suffixes _Results and
+   _Workspaces. The mini-plots should also update, with the upper plot displaying the
    calculated fit and the lower mini-plot displaying the difference between the input data and the
    fit.
 
@@ -264,7 +268,9 @@ tab as seen in the Elwin Example Workflow.
    demonstration.
 
 7. In the **Output** section, select the **Msd** parameter and then click **Plot**. This plots the
-   Msd parameter which can be found within the ``_Results`` group workspace.
+   Msd parameter which can be found within the _Results group workspace.
+
+Go to the :ref:`iqt-example-workflow`.
 
 
 I(Q, t)
@@ -318,6 +324,8 @@ Tiled Plot
 Save Result
   Saves the result workspace in the default save directory.
 
+.. _iqt-example-workflow:
+
 I(Q, t) Example Workflow
 ~~~~~~~~~~~~~~~~~~~~~~~~
 The I(Q, t) tab allows ``_red`` and ``_sqw`` for it's sample file, and allows ``_red``, ``_sqw`` and
@@ -333,16 +341,16 @@ and the reflection is 002.
 2. Change the **SampleBinning** variable to be 5. A description of this option can be found in the section
    called 'A note on Binning'
 
-3. Untick **Calculate Errors** if you do not want to calculate the errors for the output ``_iqt`` workspace.
+3. Untick **Calculate Errors** if you do not want to calculate the errors for the output _iqt workspace.
 
 4. Click **Run** and wait for the interface to finish processing. This should generate a workspace ending
-   with a suffix ``_iqt``.
+   with a suffix _iqt.
 
 5. In the **Output** section, select a workspace index **Range** for a tiled plot and then click
    **Tiled Plot**. Note that there is a maximum of 18 plots allowed for the tiled plot.
 
-6. Choose a default save directory and then click **Save Result** to save the ``_iqt`` workspace.
-   This workspace will be used in the I(Q, t) Fit Example Workflow.
+6. Choose a default save directory and then click **Save Result** to save the _iqt workspace.
+   This workspace will be used in the :ref:`iqtfit-example-workflow`.
 
 A note on Binning
 ~~~~~~~~~~~~~~~~~
@@ -447,10 +455,12 @@ Save Result
 
 .. seealso:: Sequential fitting is available, options are detailed in the :ref:`sequential-fitting-section` section.
 
+.. _iqtfit-example-workflow:
+
 I(Q, t) Fit Example Workflow
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 The I(Q, t) Fit tab operates on ``_iqt`` files. The files used in this workflow are produced on the
-I(Q, t) tab as seen in the I(Q, t) Example Workflow.
+I(Q, t) tab as seen in the :ref:`iqt-example-workflow`.
 
 1. Click **Browse** and select the file ``irs26176_graphite002_iqt``. 
 
@@ -464,8 +474,8 @@ I(Q, t) tab as seen in the I(Q, t) Example Workflow.
    workspace with workspace indices between 0 and 7 are fitted.
 
 5. Click **Run** and wait for the interface to finish processing. This should generate a
-   ``_Parameters`` table workspace and two group workspaces with end suffixes ``_Results`` and
-   ``_Workspaces``. The mini-plots should also update, with the upper plot displaying the
+   _Parameters table workspace and two group workspaces with end suffixes _Results and
+   _Workspaces. The mini-plots should also update, with the upper plot displaying the
    calculated fit and the lower mini-plot displaying the difference between the input data and the
    fit.
 
@@ -473,13 +483,14 @@ I(Q, t) tab as seen in the I(Q, t) Example Workflow.
 
 7. Click `Fit Single Spectrum` to produce a fit result for the first spectrum.
 
-8. In the **Output** section, click **Edit Result** and then select the ``_Result`` workspace containing 
-   multiple fits (1), and in the second combobox select the ``_Result`` workspace containing the single fit
+8. In the **Output** section, click **Edit Result** and then select the _Result workspace containing 
+   multiple fits (1), and in the second combobox select the _Result workspace containing the single fit
    (2). Choose an output name and click **Replace Fit Result**. This will replace the corresponding fit result
    in (1) with the fit result found in (2). See the :ref:`IndirectReplaceFitResult <algm-IndirectReplaceFitResult>`
    algorithm for more details. Note that the output workspace is inserted into the group workspace in which
    (1) is found.
 
+Go to the :ref:`convfit-example-workflow`.
 
 Conv Fit
 --------
@@ -579,6 +590,8 @@ Edit Result
 Save Result
   Saves the workspaces from the *_Results* group workspace in the default save directory.
 
+.. _convfit-example-workflow:
+
 ConvFit Example Workflow
 ~~~~~~~~~~~~~~~~~~~~~~~~
 The Conv Fit tab allows ``_red`` and ``_sqw`` for it's sample file, and allows ``_red``, ``_sqw`` and
@@ -596,18 +609,19 @@ and the reflection is 002.
 
 3. Expand the variables called **f0-Lorentzian** and **f1-DeltaFunction**. To tie the delta functions Centre
    to the PeakCentre of the Lorentzian, right click on the Centre parameter and go to Tie->Custom Tie and then
-   enter ``f0.PeakCentre``.
+   enter f0.PeakCentre.
 
 3. Tick **Plot Guess** to get a prediction of what your fit will look like.
 
 4. Click **Run** and wait for the interface to finish processing. This should generate a
-   ``_Parameters`` table workspace and two group workspaces with end suffixes ``_Results`` and
-   ``_Workspaces``. The mini-plots should also update, with the upper plot displaying the
+   _Parameters table workspace and two group workspaces with end suffixes _Results and
+   _Workspaces. The mini-plots should also update, with the upper plot displaying the
    calculated fit and the lower mini-plot displaying the difference between the input data and the
    fit.
 
-5. Choose a default save directory and then click **Save Result** to save the ``_result`` workspaces 
-   found inside of the group workspace ending with ``_Results``.
+5. Choose a default save directory and then click **Save Result** to save the _result workspaces 
+   found inside of the group workspace ending with _Results. The saved workspace will be used in
+   the :ref:`fqfit-example-workflow`.
 
 Theory
 ~~~~~~
@@ -691,11 +705,13 @@ Save Result
   
 .. seealso:: Common options are detailed in the :ref:`qens-fitting-features` section.
 
+.. _fqfit-example-workflow:
+
 F(Q) Fit Example Workflow
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 The F(Q) Fit tab operates on ``_result`` files which can be produced on the MSD Fit, Iqt Fit or ConvFit
-tabs.  The sample file used in this workflow are produced on the Conv Fit tab as seen in the Conv Fit
-Example Workflow.
+tabs.  The sample file used in this workflow are produced on the Conv Fit tab as seen in the
+:ref:`convfit-example-workflow`.
 
 1. Click **Browse** and select the file ``irs26176_graphite002_conv_Delta1LFitF_s0_to_9_Result``.
 
@@ -708,16 +724,16 @@ Example Workflow.
 4. Choose the **Fit Type** to be ChudleyElliot.
 
 5. Click **Run** and wait for the interface to finish processing. This should generate a
-   ``_Parameters`` table workspace and two group workspaces with end suffixes ``_Results`` and
-   ``_Workspaces``. The mini-plots should also update, with the upper plot displaying the
+   _Parameters table workspace and two group workspaces with end suffixes _Results and
+   _Workspaces. The mini-plots should also update, with the upper plot displaying the
    calculated fit and the lower mini-plot displaying the difference between the input data and the
    fit.
 
 6. In the **Output** section, you can choose which parameter you want to plot. In this case the plotting
-   option is disabled as the output workspace ending in ``_Result`` only has one data point to plot.
+   option is disabled as the output workspace ending in _Result only has one data point to plot.
 
 
- .. _qens-fitting-features:
+.. _qens-fitting-features:
   
 QENS Fitting Interfaces Features
 --------------------------------
