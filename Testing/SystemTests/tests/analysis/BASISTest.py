@@ -170,7 +170,7 @@ class PowderSampleTest(systemtesting.MantidSystemTest, PreppingMixin):
     def __init__(self):
         super(PowderSampleTest, self).__init__()
         self.config = None
-        self.prepset('BASISPowderDiffraction')
+        self.prepset('BASISDiffraction')
 
     def requiredFiles(self):
         return ['BASIS_Mask_default_diff.xml',
@@ -207,7 +207,7 @@ class PowderSampleNewDASTest(systemtesting.MantidSystemTest, PreppingMixin):
     def __init__(self):
         super(PowderSampleNewDASTest, self).__init__()
         self.config = None
-        self.prepset('BASISPowderDiffraction')
+        self.prepset('BASISDiffraction')
 
     def requiredFiles(self):
         return ['BASIS_Mask_default_diff.xml',
