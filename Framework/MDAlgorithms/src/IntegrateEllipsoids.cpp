@@ -483,14 +483,13 @@ void IntegrateEllipsoids::exec() {
   std::vector<double> principalaxis1, principalaxis2, principalaxis3;
   std::vector<double> sateprincipalaxis1, sateprincipalaxis2,
       sateprincipalaxis3;
-  V3D peak_q;
   for (size_t i = 0; i < n_peaks; i++) {
     V3D hkl(peaks[i].getIntHKL());
     V3D mnp(peaks[i].getIntMNP());
 
     if (Geometry::IndexingUtils::ValidIndex(hkl, 1.0) ||
         Geometry::IndexingUtils::ValidIndex(mnp, 1.0)) {
-      peak_q = peaks[i].getQLabFrame();
+      V3D peak_q = peaks[i].getQLabFrame();
       std::vector<double> axes_radii;
       // modulus of Q
       double lenQpeak = 0.0;
@@ -596,7 +595,7 @@ void IntegrateEllipsoids::exec() {
                      << " median " << satestats3.median << "\n";
     }
 
-    size_t histogramNumber = 3;
+    constexpr size_t histogramNumber = 3;
     Workspace_sptr wsProfile = WorkspaceFactory::Instance().create(
         "Workspace2D", histogramNumber, principalaxis1.size(),
         principalaxis1.size());
@@ -626,13 +625,12 @@ void IntegrateEllipsoids::exec() {
       back_outer_radius = peak_radius * 1.25992105; // A factor of 2 ^ (1/3)
       // will make the background
       // shell volume equal to the peak region volume.
-      V3D peak_q;
       for (size_t i = 0; i < n_peaks; i++) {
         V3D hkl(peaks[i].getIntHKL());
         V3D mnp(peaks[i].getIntMNP());
         if (Geometry::IndexingUtils::ValidIndex(hkl, 1.0) ||
             Geometry::IndexingUtils::ValidIndex(mnp, 1.0)) {
-          peak_q = peaks[i].getQLabFrame();
+          const V3D peak_q = peaks[i].getQLabFrame();
           std::vector<double> axes_radii;
           integrator.ellipseIntegrateModEvents(
               E1Vec, peak_q, hkl, mnp, specify_size, peak_radius,
@@ -656,7 +654,6 @@ void IntegrateEllipsoids::exec() {
         }
       }
       if (principalaxis1.size() > 1) {
-        size_t histogramNumber = 3;
         Workspace_sptr wsProfile2 = WorkspaceFactory::Instance().create(
             "Workspace2D", histogramNumber, principalaxis1.size(),
             principalaxis1.size());
@@ -665,11 +662,13 @@ void IntegrateEllipsoids::exec() {
         AnalysisDataService::Instance().addOrReplace("EllipsoidAxes_2ndPass",
                                                      wsProfile2D2);
 
-        // set output workspace
-        Points points(principalaxis1.size(), LinearGenerator(0, 1));
-        wsProfile2D->setHistogram(0, points, Counts(std::move(principalaxis1)));
-        wsProfile2D->setHistogram(1, points, Counts(std::move(principalaxis2)));
-        wsProfile2D->setHistogram(2, points, Counts(std::move(principalaxis3)));
+        Points profilePoints(principalaxis1.size(), LinearGenerator(0, 1));
+        wsProfile2D->setHistogram(0, profilePoints,
+                                  Counts(std::move(principalaxis1)));
+        wsProfile2D->setHistogram(1, profilePoints,
+                                  Counts(std::move(principalaxis2)));
+        wsProfile2D->setHistogram(2, profilePoints,
+                                  Counts(std::move(principalaxis3)));
       }
     }
   }

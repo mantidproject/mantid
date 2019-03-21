@@ -390,11 +390,11 @@ void CutMD::exec() {
     for (size_t i = 3; i < numDims; ++i) {
       const size_t nArgs = pbins[i].size();
       const MinMax extentLimit = getDimensionExtents(eventInWS, i);
-      const double dimRange = extentLimit.second - extentLimit.first;
+      const double extentRange = extentLimit.second - extentLimit.first;
 
       if (nArgs == 1) {
         steppedExtents.push_back(extentLimit);
-        steppedBins.push_back(static_cast<int>(dimRange / pbins[i][0]));
+        steppedBins.push_back(static_cast<int>(extentRange / pbins[i][0]));
       } else if (nArgs == 2) {
         steppedExtents.emplace_back(pbins[i][0], pbins[i][1]);
         steppedBins.push_back(1);
@@ -406,10 +406,10 @@ void CutMD::exec() {
       }
 
       // and double targetUnits' length by appending itself to itself
-      size_t preSize = targetUnits.size();
+      const size_t preSize = targetUnits.size();
       targetUnits.resize(preSize * 2);
-      for (size_t i = 0; i < preSize; ++i)
-        targetUnits[preSize + i] = targetUnits[i];
+      auto halfEnd = targetUnits.begin() + preSize;
+      std::copy(targetUnits.begin(), halfEnd, halfEnd);
     }
 
     // Make labels

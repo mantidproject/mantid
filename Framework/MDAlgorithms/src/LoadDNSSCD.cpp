@@ -254,8 +254,9 @@ void LoadDNSSCD::loadHuber(ITableWorkspace_sptr tws) {
  */
 Mantid::API::ITableWorkspace_sptr LoadDNSSCD::saveHuber() {
   std::vector<double> huber;
-  for (auto ds : m_data)
-    huber.push_back(ds.huber);
+  huber.reserve(m_data.size());
+  std::transform(m_data.cbegin(), m_data.cend(), std::back_inserter(huber),
+                 [](const auto &ds) { return ds.huber; });
   // remove dublicates
   std::sort(huber.begin(), huber.end());
   huber.erase(unique(huber.begin(), huber.end()), huber.end());

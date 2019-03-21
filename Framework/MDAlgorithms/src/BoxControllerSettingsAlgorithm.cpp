@@ -37,8 +37,9 @@ void BoxControllerSettingsAlgorithm::initBoxControllerProps(
                    tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
   std::vector<int> valueVec;
   valueVec.reserve(values.count());
-  for (const auto &value : values)
-    valueVec.push_back(boost::lexical_cast<int>(value));
+  std::transform(
+      values.cbegin(), values.cend(), std::back_inserter(valueVec),
+      [](const auto &value) { return boost::lexical_cast<int>(value); });
 
   declareProperty(
       Kernel::make_unique<ArrayProperty<int>>("SplitInto", std::move(valueVec)),
