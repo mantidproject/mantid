@@ -468,7 +468,7 @@ QStringList MantidUI::getAlgorithmNames() {
   QStringList sl;
   std::vector<std::string> algorithmKeys =
       Mantid::API::AlgorithmFactory::Instance().getKeys();
-  sl.reserve(static_cast<size_t>(algorithmKeys.size()));
+  sl.reserve(static_cast<int>(algorithmKeys.size()));
   for (const auto &algorithmKey : algorithmKeys)
     sl << QString::fromStdString(algorithmKey);
   return sl;
