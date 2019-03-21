@@ -230,7 +230,8 @@ void InterfaceManager::registerHelpWindowFactory(
 
 MantidHelpInterface *InterfaceManager::createHelpWindow() const {
   if (m_helpViewer == nullptr) {
-    g_log.error("InterfaceManager::createHelpWindow is null.");
+    g_log.warning("Offline help is not available available in this version of "
+                  "Workbench.");
     return nullptr;
   } else {
     MantidHelpInterface *interface =
