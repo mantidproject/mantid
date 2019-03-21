@@ -52,10 +52,10 @@ Workspace2D::~Workspace2D() {
   PARALLEL_FOR_IF(Kernel::threadSafe(*this))
   for (int64_t i = 0; i < static_cast<int64_t>(data.size()); i++) {
 #else
-  for (auto &i : data) {
+  for (size_t i = 0; i < data.size(); ++i) { // NOLINT (modernize-loop-convert)
 #endif
     // Clear out the memory
-    delete i;
+    delete data[i];
   }
 }
 
