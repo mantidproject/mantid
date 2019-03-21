@@ -40,7 +40,8 @@ namespace {
 constexpr size_t MAX_INTEGRATION_LENGTH{1000};
 
 inline size_t findMiddle(const size_t start, const size_t stop) {
-  size_t half = static_cast<size_t>(floor(.5 * (static_cast<double>(stop - start))));
+  size_t half =
+      static_cast<size_t>(floor(.5 * (static_cast<double>(stop - start))));
   return start + half;
 }
 
@@ -52,7 +53,7 @@ double energyToWavelength(const double energyFixed) {
   return factor * std::pow(energyFixed, power);
 }
 
-} // anonymous
+} // namespace
 
 AbsorptionCorrection::AbsorptionCorrection()
     : API::Algorithm(), m_inputWS(), m_sampleObject(nullptr), m_L1s(),
@@ -209,9 +210,11 @@ void AbsorptionCorrection::exec() {
       if (m_emode == 0) { // Elastic
         Y[j] = this->doIntegration(-linearCoefAbs[j], L2s, 0, L2s.size());
       } else if (m_emode == 1) { // Direct
-        Y[j] = this->doIntegration(linearCoefAbsFixed, -linearCoefAbs[j], L2s, 0, L2s.size());
+        Y[j] = this->doIntegration(linearCoefAbsFixed, -linearCoefAbs[j], L2s,
+                                   0, L2s.size());
       } else if (m_emode == 2) { // Indirect
-        Y[j] = this->doIntegration(-linearCoefAbs[j], linearCoefAbsFixed, L2s, 0, L2s.size());
+        Y[j] = this->doIntegration(-linearCoefAbs[j], linearCoefAbsFixed, L2s,
+                                   0, L2s.size());
       }
       Y[j] /= m_sampleVolume; // Divide by total volume of the cylinder
 
@@ -276,7 +279,6 @@ void AbsorptionCorrection::retrieveBaseProperties() {
     // get the material back
     m_material = m_inputWS->sample().getShape().material();
   }
-
 
   // NOTE: the angstrom^-2 to barns and the angstrom^-1 to cm^-1
   // will cancel for mu to give units: cm^-1
@@ -395,14 +397,15 @@ void AbsorptionCorrection::calculateDistances(const IDetector &detector,
 
 /// Carries out the numerical integration over the sample for elastic
 /// instruments
-double
-AbsorptionCorrection::doIntegration(const double linearCoefAbs,
-                                    const std::vector<double> &L2s, const size_t startIndex, const size_t endIndex) const {
+double AbsorptionCorrection::doIntegration(const double linearCoefAbs,
+                                           const std::vector<double> &L2s,
+                                           const size_t startIndex,
+                                           const size_t endIndex) const {
   if (endIndex - startIndex > MAX_INTEGRATION_LENGTH) {
     size_t middle = findMiddle(startIndex, endIndex);
 
-    return doIntegration(linearCoefAbs, L2s, startIndex, middle)
-        + doIntegration(linearCoefAbs, L2s, middle, endIndex);
+    return doIntegration(linearCoefAbs, L2s, startIndex, middle) +
+           doIntegration(linearCoefAbs, L2s, middle, endIndex);
   } else {
     double integral = 0.0;
 
@@ -419,16 +422,18 @@ AbsorptionCorrection::doIntegration(const double linearCoefAbs,
 
 /// Carries out the numerical integration over the sample for inelastic
 /// instruments
-double
-AbsorptionCorrection::doIntegration(const double linearCoefAbsL1,
-                                    const double linearCoefAbsL2,
-                                    const std::vector<double> &L2s,
-                                    const size_t startIndex, const size_t endIndex) const {
+double AbsorptionCorrection::doIntegration(const double linearCoefAbsL1,
+                                           const double linearCoefAbsL2,
+                                           const std::vector<double> &L2s,
+                                           const size_t startIndex,
+                                           const size_t endIndex) const {
   if (endIndex - startIndex > MAX_INTEGRATION_LENGTH) {
     size_t middle = findMiddle(startIndex, endIndex);
 
-    return doIntegration(linearCoefAbsL1, linearCoefAbsL2, L2s, startIndex, middle)
-        + doIntegration(linearCoefAbsL1, linearCoefAbsL2, L2s, middle, endIndex);
+    return doIntegration(linearCoefAbsL1, linearCoefAbsL2, L2s, startIndex,
+                         middle) +
+           doIntegration(linearCoefAbsL1, linearCoefAbsL2, L2s, middle,
+                         endIndex);
   } else {
     double integral = 0.0;
 

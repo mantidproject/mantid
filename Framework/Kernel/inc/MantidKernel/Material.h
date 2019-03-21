@@ -105,19 +105,19 @@ public:
                      PhysicalConstants::NeutronAtom::ReferenceLambda) const;
 
   /**
-    * Returns the linear coefficient of absorption for the material in units of
+   * Returns the linear coefficient of absorption for the material in units of
    * cm^-1
-    * this should match the implementation of the iterator version
-    */
+   * this should match the implementation of the iterator version
+   */
   double
   linearAbsorpCoef(const double lambda =
                        PhysicalConstants::NeutronAtom::ReferenceLambda) const;
 
   /**
-    * Returns the linear coefficient of absorption for the material in units of
+   * Returns the linear coefficient of absorption for the material in units of
    * cm^-1
-    * this should match the implementation of the scalar version
-    */
+   * this should match the implementation of the scalar version
+   */
   template <typename InputIterator>
   std::vector<double> linearAbsorpCoef(InputIterator lambdaBegin,
                                        InputIterator lambdaEnd) const {
@@ -129,8 +129,8 @@ public:
 
     std::transform(lambdaBegin, lambdaEnd, linearCoef.begin(),
                    [linearCoefByWL](const double lambda) {
-      return linearCoefByWL * lambda;
-    });
+                     return linearCoefByWL * lambda;
+                   });
 
     return linearCoef;
   }

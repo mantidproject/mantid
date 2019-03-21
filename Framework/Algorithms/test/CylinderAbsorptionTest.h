@@ -128,7 +128,9 @@ public:
     Mantid::API::AnalysisDataService::Instance().remove(outputWS);
   }
 
-  // This is identical to testWithSetSample except the number of segments to split into is larger. The number of segments are taken from the WISH system test.
+  // This is identical to testWithSetSample except the number of segments to
+  // split into is larger. The number of segments are taken from the WISH system
+  // test.
   void testWithSetSampleLotsOfSegments() {
     // Create a small test workspace
     MatrixWorkspace_sptr testWS = createTestWorkspace();
@@ -173,12 +175,10 @@ public:
     Mantid::Algorithms::CylinderAbsorption atten;
     configureAbsCommon(atten, testWS, outputWS);
     // set the number of segments to be really small like WISH system test
-    TS_ASSERT_THROWS_NOTHING(atten.setPropertyValue("NumberOfSlices",
-                                                    "10"));
-    TS_ASSERT_THROWS_NOTHING(atten.setPropertyValue("NumberOfAnnuli",
-                                                    "10"));
-    TS_ASSERT_THROWS_NOTHING(atten.setPropertyValue("NumberOfWavelengthPoints",
-                                                    "25"));
+    TS_ASSERT_THROWS_NOTHING(atten.setPropertyValue("NumberOfSlices", "10"));
+    TS_ASSERT_THROWS_NOTHING(atten.setPropertyValue("NumberOfAnnuli", "10"));
+    TS_ASSERT_THROWS_NOTHING(
+        atten.setPropertyValue("NumberOfWavelengthPoints", "25"));
     // the geometry was set on the input workspace
     TS_ASSERT_THROWS_NOTHING(atten.execute());
     TS_ASSERT(atten.isExecuted());
@@ -188,14 +188,14 @@ public:
         result = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)));
 
-    // these values are different than testWithSetSample because of the smaller segment sizes
+    // these values are different than testWithSetSample because of the smaller
+    // segment sizes
     TS_ASSERT_DELTA(result->readY(0).front(), 0.7286, 0.0001);
     TS_ASSERT_DELTA(result->readY(0).back(), 0.2213, 0.0001);
     TS_ASSERT_DELTA(result->readY(0)[8], 0.2517, 0.0001);
 
     Mantid::API::AnalysisDataService::Instance().remove(outputWS);
   }
-
 
   void testInelastic() {
     // Create a small test workspace
