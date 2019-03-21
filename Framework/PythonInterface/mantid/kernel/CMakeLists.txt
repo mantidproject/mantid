@@ -136,8 +136,8 @@ if(CMAKE_GENERATOR STREQUAL Xcode)
   set ( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PYTHON_PKG_ROOT}/kernel )
 endif()
 
-copy_files_to_dir ( "${PY_FILES}" ${CMAKE_CURRENT_SOURCE_DIR} ${OUTPUT_DIR}
-                     PYTHON_INSTALL_FILES )
+# copy_files_to_dir ( "${PY_FILES}" ${CMAKE_CURRENT_SOURCE_DIR} ${OUTPUT_DIR}
+#                      PYTHON_INSTALL_FILES )
 
 #############################################################################################
 # Generate the packagesetup module for the build & install package
@@ -156,13 +156,16 @@ else()
 endif()
 
 # Build version
-configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/${PACKAGESETUP_PY}.py.in ${CMAKE_CURRENT_BINARY_DIR}/${PACKAGESETUP_PY}.py )
-configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/${MPISETUP_PY}.py.in ${CMAKE_CURRENT_BINARY_DIR}/${MPISETUP_PY}.py )
+configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/${PACKAGESETUP_PY}.py.in ${CMAKE_CURRENT_SOURCE_DIR}/${PACKAGESETUP_PY}.py )
+message("Configuring file at ${CMAKE_CURRENT_SOURCE_DIR}/${PACKAGESETUP_PY}.py")
+
+configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/${MPISETUP_PY}.py.in ${CMAKE_CURRENT_SOURCE_DIR}/${MPISETUP_PY}.py )
+message("Configuring file at ${CMAKE_CURRENT_SOURCE_DIR}/${MPISETUP_PY}.py")
 # Copy py to build directory, taking care of multi-config (MSVC) builds
-copy_files_to_dir ( ${PACKAGESETUP_PY}.py ${CMAKE_CURRENT_BINARY_DIR} ${OUTPUT_DIR}
-                    PYTHON_INSTALL_FILES )
-copy_files_to_dir ( ${MPISETUP_PY}.py ${CMAKE_CURRENT_BINARY_DIR} ${OUTPUT_DIR}
-                    PYTHON_INSTALL_FILES )
+# copy_files_to_dir ( ${PACKAGESETUP_PY}.py ${CMAKE_CURRENT_BINARY_DIR} ${OUTPUT_DIR}
+#                     PYTHON_INSTALL_FILES )
+# copy_files_to_dir ( ${MPISETUP_PY}.py ${CMAKE_CURRENT_BINARY_DIR} ${OUTPUT_DIR}
+#                     PYTHON_INSTALL_FILES )
 
 # Package version
 if ( WIN32 OR (APPLE AND ENABLE_MANTIDPLOT) )
@@ -179,7 +182,7 @@ configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/${MPISETUP_PY}.py.in ${CMAKE_CURREN
 add_library ( PythonKernelModule ${EXPORT_FILES} ${MODULE_DEFINITION} ${SRC_FILES} ${INC_FILES}
               ${PYTHON_INSTALL_FILES} )
 set_python_properties( PythonKernelModule _kernel )
-set_target_output_directory ( PythonKernelModule ${OUTPUT_DIR} .pyd )
+# set_target_output_directory ( PythonKernelModule ${OUTPUT_DIR} .pyd )
 # Add the required dependencies
 target_link_libraries ( PythonKernelModule PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} PythonInterfaceCore
                         Types Kernel ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} ${PYTHON_DEPS} ${POCO_LIBRARIES}
@@ -200,7 +203,7 @@ mtd_install_targets( TARGETS PythonKernelModule INSTALL_DIRS ${BIN_DIR}/mantid/k
 mtd_install_files( FILES ${PY_FILES} INSTALL_DIRS ${BIN_DIR}/mantid/kernel ${WORKBENCH_BIN_DIR}/mantid/kernel)
 
 # packagesetup.py that will overwrite the ones from the built target
-mtd_install_files( FILES ${CMAKE_CURRENT_BINARY_DIR}/${PACKAGESETUP_PY}.install.py 
+mtd_install_files( FILES ${CMAKE_CURRENT_BINARY_DIR}/${PACKAGESETUP_PY}.install.py
                    INSTALL_DIRS ${BIN_DIR}/mantid/kernel ${WORKBENCH_BIN_DIR}/mantid/kernel
                    RENAME ${PACKAGESETUP_PY}.py )
 

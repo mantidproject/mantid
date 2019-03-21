@@ -51,7 +51,7 @@ from . import mpisetup
 # Load the C++ library
 ###############################################################################
 with _shared_cextension():
-    from ._kernel import *
+    from _kernel import *
 
 ###############################################################################
 # Make modules available in this namespace

@@ -95,12 +95,21 @@ endfunction()
 ###########################################################################
 # mantid package
 ###########################################################################
+include ( PythonPackageTargetFunctions )
+
+add_python_package ( PythonInterface )
+set_property ( TARGET PythonInterface PROPERTY FOLDER "MantidFramework/Python" )
+
 # All targets can see these includes
 include_directories ( core/inc )
 # TODO: Move all common code to the core library to
 # remove the need for linking submodules together
 include_directories ( inc )
 add_subdirectory ( mantid )
+
+add_dependencies ( PythonInterface PythonInterfaceCore PythonKernelModule
+  PythonGeometryModule PythonAPIModule PythonDataObjectsModule
+  PythonCurveFittingModule PythonPlotsModule PythonPy3CompatModule )
 
 ###########################################################################
 # Python algorithms

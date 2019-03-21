@@ -10,7 +10,7 @@
 from __future__ import (absolute_import, division,
                         print_function)
 
-from ._api import (FrameworkManagerImpl, AnalysisDataServiceImpl,
+from _api import (FrameworkManagerImpl, AnalysisDataServiceImpl,
                    AlgorithmFactoryImpl, AlgorithmManagerImpl,
                    FileFinderImpl, FileLoaderRegistryImpl, FunctionFactoryImpl,
                    WorkspaceFactoryImpl, CatalogManagerImpl)

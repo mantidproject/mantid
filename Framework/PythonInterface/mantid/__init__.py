@@ -45,10 +45,12 @@ def _bin_dirs():
     Generate a list of possible paths that contain the Mantid.properties file
     """
     _moduledir = os.path.dirname(os.path.abspath(os.path.dirname(__file__)))
-    # std install
+    # standard packaged install
     yield _moduledir
     # conda layout
     yield os.path.dirname(sys.executable)
+    # The working directory
+    yield sys.path[0]
 
 
 # Bail out early if a Mantid.properties files is not found in the

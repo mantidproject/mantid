@@ -6,8 +6,14 @@
 function ( add_python_package pkg_name )
   # Create a setup.py file if necessary
   set ( _setup_py ${CMAKE_CURRENT_SOURCE_DIR}/setup.py )
+  message("Setup.py at ${_setup_py}")
   set ( _setup_py_build_root ${CMAKE_CURRENT_BINARY_DIR} )
+  message("Setup.py build root at ${_setup_py_build_root}")
+  # if ( custom_install_directory )
+  #   set ( _setup_py_build_root ${custom_install_directory} )
+  # endif ()
   if ( EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/setup.py.in" )
+  message("Found setup.py.in at ${CMAKE_CURRENT_SOURCE_DIR}/setup.py.in")
     set ( SETUPTOOLS_BUILD_COMMANDS_DEF
 "def patch_setuptools_command(cmd_cls_name):
     import importlib
@@ -34,6 +40,7 @@ CustomInstallLib = patch_setuptools_command('install_lib')
 
   set ( _egg_link_dir ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR} )
   set ( _egg_link ${_egg_link_dir}/${pkg_name}.egg-link )
+  message("Egg link supposed to be at ${_egg_link}")
 
   if ( ARGC GREATER 1 AND "${ARGN}" STREQUAL "EXECUTABLE" )
     if ( WIN32 )

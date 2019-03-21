@@ -18,15 +18,17 @@ set ( PY_FILES
   fitfunctions.py
 )
 
-copy_files_to_dir ( "${PY_FILES}" ${CMAKE_CURRENT_SOURCE_DIR} ${OUTPUT_DIR}
-                     PYTHON_PKGROOT_INSTALL_FILES )
+# copy_files_to_dir ( "${PY_FILES}" ${CMAKE_CURRENT_SOURCE_DIR} ${OUTPUT_DIR}
+#                      PYTHON_PKGROOT_INSTALL_FILES )
 # Generate the version module
 set ( VERSION_PY pyversion )
+set ( BUILDDIR_FILE mantidbuild )
 # Build version
-configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/${VERSION_PY}.py.in ${CMAKE_CURRENT_BINARY_DIR}/${VERSION_PY}.py )
+configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/${VERSION_PY}.py.in ${CMAKE_CURRENT_SOURCE_DIR}/${VERSION_PY}.py )
+message("Configuring file at ${CMAKE_CURRENT_SOURCE_DIR}/${VERSION_PY}.py")
 # Copy py to build directory, taking care of multi-config (MSVC) builds
-copy_files_to_dir ( ${VERSION_PY}.py ${CMAKE_CURRENT_BINARY_DIR} ${OUTPUT_DIR}
-                    PYTHON_PKGROOT_INSTALL_FILES )
+# copy_files_to_dir ( ${VERSION_PY}.py ${CMAKE_CURRENT_BINARY_DIR} ${OUTPUT_DIR}
+#                     PYTHON_PKGROOT_INSTALL_FILES )
 # Package version
 configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/${VERSION_PY}.py.in ${CMAKE_CURRENT_BINARY_DIR}/${VERSION_PY}.install.py )
 
@@ -46,19 +48,12 @@ add_subdirectory ( _plugins )
 add_subdirectory ( plots )
 add_subdirectory ( py3compat )
 
-# Create an overall target
-add_custom_target ( PythonInterface DEPENDS PythonInterfaceCore PythonKernelModule
-  PythonGeometryModule PythonAPIModule PythonDataObjectsModule
-  PythonCurveFittingModule PythonPlotsModule PythonPy3CompatModule )
-set_property ( TARGET PythonInterface PROPERTY FOLDER "MantidFramework/Python" )
-
 ###########################################################################
 # Bundle Python DLL (where appropriate)
 ###########################################################################
 # Defines the target the will cause the Python bundle to be copied
 set ( PYBUNDLE_POST_TARGET PythonModule )
 include ( ${CMAKE_CURRENT_SOURCE_DIR}/BundlePython.cmake )
-
 
 ###########################################################################
 # Installation settings
