@@ -1000,7 +1000,7 @@ We recommend you use ISIS Reflectometry instead, If this is not possible contact
                 name += '_' + str(t)
         return name
 
-    def _do_run(self, runno, row, which):  # noqa: C901
+    def _do_run(self, runno, row, which):
         """
         Run quick on the given run and row
         """
@@ -1008,16 +1008,7 @@ We recommend you use ISIS Reflectometry instead, If this is not possible contact
         # Formulate a WS Name for the processed transmission run.
         transrun_named = self.__name_trans(transrun)
         # Look for existing transmission workspaces that match the name
-        transmission_ws = None
-        if mtd.doesExist(transrun_named):
-            if isinstance(mtd[transrun_named], WorkspaceGroup):
-                unit = mtd[transrun_named][0].getAxis(0).getUnit().unitID()
-            else:
-                unit = mtd[transrun_named].getAxis(0).getUnit().unitID()
-
-            if unit == "Wavelength":
-                logger.notice('Reusing transmission workspace ' + transrun_named)
-                transmission_ws = mtd[transrun_named]
+        transmission_ws = self.check_existing_transmission(transrun_named)
 
         angle_str = str(self.tableMain.item(row, which * 5 + 1).text())
 
@@ -1032,27 +1023,7 @@ We recommend you use ISIS Reflectometry instead, If this is not possible contact
                                          accumulation=self.live_method)
         wlam, wq, th, wqBinned = None, None, None, None
 
-        # Only make a transmission workspace if we need one.
-        if transrun and not transmission_ws:
-            converter = ConvertToWavelength(transrun)
-            size = converter.get_ws_list_size()
-            out_ws_name = transrun_named
-            if size == 1:
-                trans1 = converter.get_workspace_from_list(0)
-
-                transmission_ws = CreateTransmissionWorkspaceAuto(FirstTransmissionRun=trans1,
-                                                                  OutputWorkspace=out_ws_name,
-                                                                  Params=0.02, StartOverlap=10.0, EndOverlap=12.0,
-                                                                  Version=1)
-            elif size == 2:
-                trans1 = converter.get_workspace_from_list(0)
-                trans2 = converter.get_workspace_from_list(1)
-                transmission_ws = CreateTransmissionWorkspaceAuto(FirstTransmissionRun=trans1,
-                                                                  OutputWorkspace=out_ws_name,
-                                                                  SecondTransmissionRun=trans2, Params=0.02,
-                                                                  StartOverlap=10.0, EndOverlap=12.0, Version=1)
-            else:
-                raise RuntimeError("Up to 2 transmission runs can be specified. No more than that.")
+        transmission_ws = self._make_transmission_workspace(transmission_ws, transrun, transrun_named)
 
         # Load the runs required ConvertToWavelength will deal with the transmission runs, while .to_workspace will deal with the run itself
         ws = ConvertToWavelength.to_workspace(loadedRun, ws_prefix="")
@@ -1077,73 +1048,11 @@ We recommend you use ISIS Reflectometry instead, If this is not possible contact
             # If we're dealing with a workspace group, we'll manually map execution over each group member
             # We do this so we can get ThetaOut correctly (see ticket #10597 for why we can't at the moment)
             if isinstance(ws, WorkspaceGroup):
-                wqGroupBinned = []
-                wqGroup = []
-                wlamGroup = []
-                thetaGroup = []
-                group_trans_ws = transmission_ws
-                for i in range(0, ws.size()):
-                    # If the transmission workspace is a group, we'll use it pair-wise with the tof workspace group
-                    if isinstance(transmission_ws, WorkspaceGroup):
-                        group_trans_ws = transmission_ws[i]
-
-                    alg = AlgorithmManager.create("ReflectometryReductionOneAuto")
-                    alg.initialize()
-                    alg.setProperty("Debug", True)
-                    alg.setProperty("InputWorkspace", ws[i])
-                    if group_trans_ws:
-                        alg.setProperty("FirstTransmissionRun", group_trans_ws)
-                    if angle is not None:
-                        alg.setProperty("ThetaIn", angle)
-                    alg.setProperty("OutputWorkspaceBinned", runno + '_IvsQ_binned_' + str(i + 1))
-                    alg.setProperty("OutputWorkspace", runno + '_IvsQ_' + str(i + 1))
-                    alg.setProperty("OutputWorkspaceWavelength", runno + '_IvsLam_' + str(i + 1))
-                    alg.setProperty("ScaleFactor", factor)
-                    if Qstep is not None:
-                        alg.setProperty("MomentumTransferStep", Qstep)
-                    if Qmin is not None:
-                        alg.setProperty("MomentumTransferMin", Qmin)
-                    if Qmax is not None:
-                        alg.setProperty("MomentumTransferMax", Qmax)
-                    alg.execute()
-                    wqBinned = mtd[runno + '_IvsQ_binned_' + str(i + 1)]
-                    wq = mtd[runno + '_IvsQ_' + str(i + 1)]
-                    wlam = mtd[runno + '_IvsLam_' + str(i + 1)]
-                    th = alg.getProperty("ThetaIn").value
-
-                    wqGroupBinned.append(wqBinned)
-                    wqGroup.append(wq)
-                    wlamGroup.append(wlam)
-                    thetaGroup.append(th)
-
-                wqBinned = GroupWorkspaces(InputWorkspaces=wqGroupBinned, OutputWorkspace=runno + '_IvsQ_binned')
-                wq = GroupWorkspaces(InputWorkspaces=wqGroup, OutputWorkspace=runno + '_IvsQ')
-                wlam = GroupWorkspaces(InputWorkspaces=wlamGroup, OutputWorkspace=runno + '_IvsLam')
-                th = thetaGroup[0]
+                th, wlam, wq, wqBinned = self._process_workspace_group(Qmax, Qmin, Qstep, angle, factor, runno, th, transmission_ws, wlam,
+                                                                       wq, wqBinned, ws)
             else:
-                alg = AlgorithmManager.create("ReflectometryReductionOneAuto")
-                alg.initialize()
-                alg.setProperty("Debug", True)
-                alg.setProperty("InputWorkspace", ws)
-                if transmission_ws:
-                    alg.setProperty("FirstTransmissionRun", transmission_ws)
-                if angle is not None:
-                    alg.setProperty("ThetaIn", angle)
-                alg.setProperty("OutputWorkspaceBinned", runno + '_IvsQ_binned')
-                alg.setProperty("OutputWorkspace", runno + '_IvsQ')
-                alg.setProperty("OutputWorkspaceWavelength", runno + '_IvsLam')
-                alg.setProperty("ScaleFactor", factor)
-                if Qstep is not None:
-                    alg.setProperty("MomentumTransferStep", Qstep)
-                if Qmin is not None:
-                    alg.setProperty("MomentumTransferMin", Qmin)
-                if Qmax is not None:
-                    alg.setProperty("MomentumTransferMax", Qmax)
-                alg.execute()
-                wqBinned = mtd[runno + '_IvsQ_binned']
-                wq = mtd[runno + '_IvsQ']
-                wlam = mtd[runno + '_IvsLam']
-                th = alg.getProperty("ThetaIn").value
+                th, wlam, wq, wqBinned = self._process_workspace(Qmax, Qmin, Qstep, angle, factor, runno, th, transmission_ws, wlam, wq,
+                                                                 wqBinned, ws)
 
             cleanup()
         else:
@@ -1172,6 +1081,114 @@ We recommend you use ISIS Reflectometry instead, If this is not possible contact
         qmax = 4 * math.pi / lmin * math.sin(th * math.pi / 180)
 
         return th, qmin, qmax, wlam, wqBinned, wq
+
+    def _make_transmission_workspace(self, transmission_ws, transrun, transrun_named):
+        # Only make a transmission workspace if we need one.
+        if transrun and not transmission_ws:
+            converter = ConvertToWavelength(transrun)
+            size = converter.get_ws_list_size()
+            out_ws_name = transrun_named
+            if size == 1:
+                trans1 = converter.get_workspace_from_list(0)
+
+                transmission_ws = CreateTransmissionWorkspaceAuto(FirstTransmissionRun=trans1,
+                                                                  OutputWorkspace=out_ws_name,
+                                                                  Params=0.02, StartOverlap=10.0, EndOverlap=12.0,
+                                                                  Version=1)
+            elif size == 2:
+                trans1 = converter.get_workspace_from_list(0)
+                trans2 = converter.get_workspace_from_list(1)
+                transmission_ws = CreateTransmissionWorkspaceAuto(FirstTransmissionRun=trans1,
+                                                                  OutputWorkspace=out_ws_name,
+                                                                  SecondTransmissionRun=trans2, Params=0.02,
+                                                                  StartOverlap=10.0, EndOverlap=12.0, Version=1)
+            else:
+                raise RuntimeError("Up to 2 transmission runs can be specified. No more than that.")
+        return transmission_ws
+
+    def _process_workspace(self, Qmax, Qmin, Qstep, angle, factor, runno, th, transmission_ws, wlam, wq, wqBinned, ws):
+        alg = AlgorithmManager.create("ReflectometryReductionOneAuto")
+        alg.initialize()
+        alg.setProperty("Debug", True)
+        alg.setProperty("InputWorkspace", ws)
+        if transmission_ws:
+            alg.setProperty("FirstTransmissionRun", transmission_ws)
+        if angle is not None:
+            alg.setProperty("ThetaIn", angle)
+        alg.setProperty("OutputWorkspaceBinned", runno + '_IvsQ_binned')
+        alg.setProperty("OutputWorkspace", runno + '_IvsQ')
+        alg.setProperty("OutputWorkspaceWavelength", runno + '_IvsLam')
+        alg.setProperty("ScaleFactor", factor)
+        if Qstep is not None:
+            alg.setProperty("MomentumTransferStep", Qstep)
+        if Qmin is not None:
+            alg.setProperty("MomentumTransferMin", Qmin)
+        if Qmax is not None:
+            alg.setProperty("MomentumTransferMax", Qmax)
+        alg.execute()
+        wqBinned = mtd[runno + '_IvsQ_binned']
+        wq = mtd[runno + '_IvsQ']
+        wlam = mtd[runno + '_IvsLam']
+        th = alg.getProperty("ThetaIn").value
+        return th, wlam, wq, wqBinned
+
+    def _process_workspace_group(self, Qmax, Qmin, Qstep, angle, factor, runno, th, transmission_ws, wlam, wq, wqBinned, ws):
+        wqGroupBinned = []
+        wqGroup = []
+        wlamGroup = []
+        thetaGroup = []
+        group_trans_ws = transmission_ws
+        for i in range(0, ws.size()):
+            # If the transmission workspace is a group, we'll use it pair-wise with the tof workspace group
+            if isinstance(transmission_ws, WorkspaceGroup):
+                group_trans_ws = transmission_ws[i]
+
+            alg = AlgorithmManager.create("ReflectometryReductionOneAuto")
+            alg.initialize()
+            alg.setProperty("Debug", True)
+            alg.setProperty("InputWorkspace", ws[i])
+            if group_trans_ws:
+                alg.setProperty("FirstTransmissionRun", group_trans_ws)
+            if angle is not None:
+                alg.setProperty("ThetaIn", angle)
+            alg.setProperty("OutputWorkspaceBinned", runno + '_IvsQ_binned_' + str(i + 1))
+            alg.setProperty("OutputWorkspace", runno + '_IvsQ_' + str(i + 1))
+            alg.setProperty("OutputWorkspaceWavelength", runno + '_IvsLam_' + str(i + 1))
+            alg.setProperty("ScaleFactor", factor)
+            if Qstep is not None:
+                alg.setProperty("MomentumTransferStep", Qstep)
+            if Qmin is not None:
+                alg.setProperty("MomentumTransferMin", Qmin)
+            if Qmax is not None:
+                alg.setProperty("MomentumTransferMax", Qmax)
+            alg.execute()
+            wqBinned = mtd[runno + '_IvsQ_binned_' + str(i + 1)]
+            wq = mtd[runno + '_IvsQ_' + str(i + 1)]
+            wlam = mtd[runno + '_IvsLam_' + str(i + 1)]
+            th = alg.getProperty("ThetaIn").value
+
+            wqGroupBinned.append(wqBinned)
+            wqGroup.append(wq)
+            wlamGroup.append(wlam)
+            thetaGroup.append(th)
+        wqBinned = GroupWorkspaces(InputWorkspaces=wqGroupBinned, OutputWorkspace=runno + '_IvsQ_binned')
+        wq = GroupWorkspaces(InputWorkspaces=wqGroup, OutputWorkspace=runno + '_IvsQ')
+        wlam = GroupWorkspaces(InputWorkspaces=wlamGroup, OutputWorkspace=runno + '_IvsLam')
+        th = thetaGroup[0]
+        return th, wlam, wq, wqBinned
+
+    def check_existing_transmission(self, transrun_named):
+        transmission_ws = None
+        if mtd.doesExist(transrun_named):
+            if isinstance(mtd[transrun_named], WorkspaceGroup):
+                unit = mtd[transrun_named][0].getAxis(0).getUnit().unitID()
+            else:
+                unit = mtd[transrun_named].getAxis(0).getUnit().unitID()
+
+            if unit == "Wavelength":
+                logger.notice('Reusing transmission workspace ' + transrun_named)
+                transmission_ws = mtd[transrun_named]
+        return transmission_ws
 
     def _save_table_contents(self, filename):
         """
