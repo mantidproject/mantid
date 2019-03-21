@@ -422,11 +422,9 @@ void IntegratePeakTimeSlices::exec() {
           if (m_R0 > 0)
             Radius = m_R0;
 
-          const int NN = m_NeighborIDs[1];
-
           MatrixWorkspace_sptr Data = WorkspaceFactory::Instance().create(
-              std::string("Workspace2D"), 3, NN,
-              NN); // neighbors.size(), neighbors.size());
+              std::string("Workspace2D"), 3, m_NeighborIDs[1],
+              m_NeighborIDs[1]);
 
           g_log.debug() << " A:chan=" << xchan << "  time=" << time
                         << "   Radius=" << Radius << "row= " << lastRow
@@ -523,9 +521,9 @@ void IntegratePeakTimeSlices::exec() {
                                 neighborRadius))
               Cent = m_AttributeValues->getCurrentCenter();
 
-            const int neighbourId = m_NeighborIDs[1];
             Data = WorkspaceFactory::Instance().create(
-                std::string("Workspace2D"), 3, neighbourId, neighbourId);
+                std::string("Workspace2D"), 3, m_NeighborIDs[1],
+                m_NeighborIDs[1]);
 
             SetUpData1(Data, inpWkSpace, chanMin, chanMax,
                        m_AttributeValues->getCurrentRadius(),
