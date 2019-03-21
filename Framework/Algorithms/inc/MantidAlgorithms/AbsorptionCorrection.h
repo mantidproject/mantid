@@ -120,10 +120,10 @@ private:
   void calculateDistances(const Geometry::IDetector &detector,
                           std::vector<double> &L2s) const;
   inline double doIntegration(const double linearCoefAbs,
-                              const std::vector<double> &L2s) const;
+                              const std::vector<double> &L2s, const size_t startIndex, const size_t endIndex) const;
   inline double doIntegration(const double linearCoefAbsL1,
                               const double linearCoefAbsL2,
-                              const std::vector<double> &L2s) const;
+                              const std::vector<double> &L2s, const size_t startIndex, const size_t endIndex) const;
 
   Kernel::Material m_material;
   double m_linearCoefTotScatt; ///< The total scattering cross-section in 1/m

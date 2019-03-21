@@ -36,6 +36,14 @@ using namespace Mantid::PhysicalConstants;
 using namespace Mantid::DataObjects;
 
 namespace {
+// the maximum number of elements to combine at once in the pairwise summation
+constexpr size_t MAX_INTEGRATION_LENGTH{1000};
+
+inline size_t findMiddle(const size_t start, const size_t stop) {
+  size_t half = static_cast<size_t>(floor(.5 * (static_cast<double>(stop - start))));
+  return start + half;
+}
+
 double energyToWavelength(const double energyFixed) {
   Unit_const_sptr energy = UnitFactory::Instance().create("Energy");
   double factor, power;
@@ -199,11 +207,11 @@ void AbsorptionCorrection::exec() {
     // Loop through the bins in the current spectrum every m_xStep
     for (int64_t j = 0; j < specSize; j = j + m_xStep) {
       if (m_emode == 0) { // Elastic
-        Y[j] = this->doIntegration(-linearCoefAbs[j], L2s);
+        Y[j] = this->doIntegration(-linearCoefAbs[j], L2s, 0, L2s.size());
       } else if (m_emode == 1) { // Direct
-        Y[j] = this->doIntegration(linearCoefAbsFixed, -linearCoefAbs[j], L2s);
+        Y[j] = this->doIntegration(linearCoefAbsFixed, -linearCoefAbs[j], L2s, 0, L2s.size());
       } else if (m_emode == 2) { // Indirect
-        Y[j] = this->doIntegration(-linearCoefAbs[j], linearCoefAbsFixed, L2s);
+        Y[j] = this->doIntegration(-linearCoefAbs[j], linearCoefAbsFixed, L2s, 0, L2s.size());
       }
       Y[j] /= m_sampleVolume; // Divide by total volume of the cylinder
 
@@ -381,22 +389,32 @@ void AbsorptionCorrection::calculateDistances(const IDetector &detector,
   }
 }
 
+// the integrations are done using pairwise summation to reduce
+// issues from adding lots of little numbers together
+// https://en.wikipedia.org/wiki/Pairwise_summation
+
 /// Carries out the numerical integration over the sample for elastic
 /// instruments
 double
 AbsorptionCorrection::doIntegration(const double linearCoefAbs,
-                                    const std::vector<double> &L2s) const {
-  double integral = 0.0;
+                                    const std::vector<double> &L2s, const size_t startIndex, const size_t endIndex) const {
+  if (endIndex - startIndex > MAX_INTEGRATION_LENGTH) {
+    size_t middle = findMiddle(startIndex, endIndex);
 
-  size_t el = L2s.size();
-  // Iterate over all the elements, summing up the integral
-  for (size_t i = 0; i < el; ++i) {
-    const double exponent =
-        (linearCoefAbs + m_linearCoefTotScatt) * (m_L1s[i] + L2s[i]);
-    integral += (EXPONENTIAL(exponent) * (m_elementVolumes[i]));
+    return doIntegration(linearCoefAbs, L2s, startIndex, middle)
+        + doIntegration(linearCoefAbs, L2s, middle, endIndex);
+  } else {
+    double integral = 0.0;
+
+    // Iterate over all the elements, summing up the integral
+    for (size_t i = startIndex; i < endIndex; ++i) {
+      const double exponent =
+          (linearCoefAbs + m_linearCoefTotScatt) * (m_L1s[i] + L2s[i]);
+      integral += (EXPONENTIAL(exponent) * (m_elementVolumes[i]));
+    }
+
+    return integral;
   }
-
-  return integral;
 }
 
 /// Carries out the numerical integration over the sample for inelastic
@@ -404,18 +422,25 @@ AbsorptionCorrection::doIntegration(const double linearCoefAbs,
 double
 AbsorptionCorrection::doIntegration(const double linearCoefAbsL1,
                                     const double linearCoefAbsL2,
-                                    const std::vector<double> &L2s) const {
-  double integral = 0.0;
+                                    const std::vector<double> &L2s,
+                                    const size_t startIndex, const size_t endIndex) const {
+  if (endIndex - startIndex > MAX_INTEGRATION_LENGTH) {
+    size_t middle = findMiddle(startIndex, endIndex);
 
-  size_t el = L2s.size();
-  // Iterate over all the elements, summing up the integral
-  for (size_t i = 0; i < el; ++i) {
-    double exponent = (linearCoefAbsL1 + m_linearCoefTotScatt) * m_L1s[i];
-    exponent += (linearCoefAbsL2 + m_linearCoefTotScatt) * L2s[i];
-    integral += (EXPONENTIAL(exponent) * (m_elementVolumes[i]));
+    return doIntegration(linearCoefAbsL1, linearCoefAbsL2, L2s, startIndex, middle)
+        + doIntegration(linearCoefAbsL1, linearCoefAbsL2, L2s, middle, endIndex);
+  } else {
+    double integral = 0.0;
+
+    // Iterate over all the elements, summing up the integral
+    for (size_t i = startIndex; i < endIndex; ++i) {
+      double exponent = (linearCoefAbsL1 + m_linearCoefTotScatt) * m_L1s[i];
+      exponent += (linearCoefAbsL2 + m_linearCoefTotScatt) * L2s[i];
+      integral += (EXPONENTIAL(exponent) * (m_elementVolumes[i]));
+    }
+
+    return integral;
   }
-
-  return integral;
 }
 
 } // namespace Algorithms
