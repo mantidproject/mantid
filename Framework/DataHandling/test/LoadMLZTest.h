@@ -9,8 +9,8 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidDataHandling/LoadMLZ.h"
+#include "MantidGeometry/Instrument.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;

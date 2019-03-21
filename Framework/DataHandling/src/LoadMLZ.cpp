@@ -88,7 +88,7 @@ void LoadMLZ::exec() {
   initInstrumentSpecific();
 
   loadDataIntoTheWorkSpace(dataFirstEntry);
-  loadRunDetails(dataFirstEntry);    // must run after runLoadInstrument
+  loadRunDetails(dataFirstEntry); // must run after runLoadInstrument
   loadExperimentDetails(dataFirstEntry);
   maskDetectors(dataFirstEntry);
 
@@ -336,12 +336,12 @@ void LoadMLZ::loadRunDetails(NXEntry &entry) {
 
   // set instrument parameter Efixed, catch error, but don't stop
   try {
-        IAlgorithm_sptr setPar = createChildAlgorithm("SetInstrumentParameter");
-        setPar->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
-        setPar->setProperty("ParameterName", "Efixed");
-        setPar->setProperty("ParameterType", "Number");
-        setPar->setProperty("Value", std::to_string(ei));
-        setPar->execute();
+    IAlgorithm_sptr setPar = createChildAlgorithm("SetInstrumentParameter");
+    setPar->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
+    setPar->setProperty("ParameterName", "Efixed");
+    setPar->setProperty("ParameterType", "Number");
+    setPar->setProperty("Value", std::to_string(ei));
+    setPar->execute();
   } catch (...) {
     g_log.warning("Cannot set the instrument parameter Efixed.");
   }
