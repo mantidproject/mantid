@@ -581,7 +581,7 @@ Save Result
 
 ConvFit Example Workflow
 ~~~~~~~~~~~~~~~~~~~~~~~~
-The ConvFit tab allows ``_red`` and ``_sqw`` for it's sample file, and allows ``_red``, ``_sqw`` and
+The Conv Fit tab allows ``_red`` and ``_sqw`` for it's sample file, and allows ``_red``, ``_sqw`` and
 ``_res`` for the resolution file. The sample file used in this workflow can be produced using the run
 number 26176 on the :doc:`Indirect Data Reduction <Indirect Data Reduction>` interface in the ISIS
 Energy Transfer tab. The resolution file is created in the ISIS Calibration tab using the run number
@@ -591,8 +591,12 @@ and the reflection is 002.
 1. Click **Browse** for the sample and select the file ``iris26176_graphite002_red``. Then click **Browse**
    for the resolution and select the file ``iris26173_graphite002_res``.
 
-2. Choose the **Fit Type** to be Teixeira Water. Tick the **Delta Function** checkbox. Set the background
+2. Choose the **Fit Type** to be One Lorentzian. Tick the **Delta Function** checkbox. Set the background
    to be a **Flat Background**.
+
+3. Expand the variables called **f0-Lorentzian** and **f1-DeltaFunction**. To tie the delta functions Centre
+   to the PeakCentre of the Lorentzian, right click on the Centre parameter and go to Tie->Custom Tie and then
+   enter ``f0.PeakCentre``.
 
 3. Tick **Plot Guess** to get a prediction of what your fit will look like.
 
@@ -686,6 +690,32 @@ Save Result
   Saves the workspaces from the *_Results* group workspace in the default save directory.
   
 .. seealso:: Common options are detailed in the :ref:`qens-fitting-features` section.
+
+F(Q) Fit Example Workflow
+~~~~~~~~~~~~~~~~~~~~~~~~~
+The F(Q) Fit tab operates on ``_result`` files which can be produced on the MSD Fit, Iqt Fit or ConvFit
+tabs.  The sample file used in this workflow are produced on the Conv Fit tab as seen in the Conv Fit
+Example Workflow.
+
+1. Click **Browse** and select the file ``irs26176_graphite002_conv_Delta1LFitF_s0_to_9_Result``.
+
+2. Change the mini-plot data by choosing the type of **Fit Parameter** you want to display. For the
+   purposes of this demonstration select **EISF**. The combobox immediately to the right can be used to
+   choose which EISF you want to see in the mini-plot. In this example there is only one available.
+
+3. Change the **Fit Parameter** back to **Width**.
+
+4. Choose the **Fit Type** to be ChudleyElliot.
+
+5. Click **Run** and wait for the interface to finish processing. This should generate a
+   ``_Parameters`` table workspace and two group workspaces with end suffixes ``_Results`` and
+   ``_Workspaces``. The mini-plots should also update, with the upper plot displaying the
+   calculated fit and the lower mini-plot displaying the difference between the input data and the
+   fit.
+
+6. In the **Output** section, you can choose which parameter you want to plot. In this case the plotting
+   option is disabled as the output workspace ending in ``_Result`` only has one data point to plot.
+
 
  .. _qens-fitting-features:
   
